@@ -1,0 +1,14 @@
+summary: Create an email connector.
+value:
+  name: email-connector-1
+  connector_type_id: .email
+  config:
+    from: tester@example.com
+    hasAuth: true
+    host: https://example.com
+    port: 1025
+    secure: false
+    service: other
+  secrets:
+    user: username
+    password: password

@@ -7,6 +7,7 @@
 
 import { filter, isEmpty, map, omit, reduce } from 'lodash';
 import type { EuiAccordionProps } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,7 +23,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
 import { FormProvider, useForm as useHookForm } from 'react-hook-form';
 
-import styled from 'styled-components';
 import { PackShardsField } from './shards/pack_shards_field';
 import { useRouterNavigate } from '../../common/lib/kibana';
 import { PolicyIdComboBoxField } from './policy_id_combobox_field';
@@ -37,15 +37,15 @@ import { NameField } from './name_field';
 import { DescriptionField } from './description_field';
 import type { PackQueryFormData } from '../queries/use_pack_query_form';
 import { PackTypeSelectable } from './shards/pack_type_selectable';
+import { overflowCss } from '../utils';
 
 type PackFormData = Omit<PackItem, 'id' | 'queries'> & { queries: PackQueryFormData[] };
 
-const StyledEuiAccordion = styled(EuiAccordion)`
-  ${({ isDisabled }: { isDisabled?: boolean }) => isDisabled && 'display: none;'}
-  .euiAccordion__button {
-    color: ${({ theme }) => theme.eui.euiColorPrimary};
-  }
-`;
+const euiAccordionCss = ({ euiTheme }: UseEuiTheme) => ({
+  '.euiAccordion__button': {
+    color: euiTheme.colors.primary,
+  },
+});
 
 interface PackFormProps {
   defaultValue?: PackItem;
@@ -80,7 +80,10 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   });
 
   const deserializer = (payload: PackItem) => {
-    const defaultPolicyIds = filter(payload.policy_ids, (policyId) => !payload.shards?.[policyId]);
+    const defaultPolicyIds = filter(
+      payload.policy_ids,
+      (policyId) => payload.shards?.[policyId] == null
+    );
 
     return {
       ...payload,
@@ -141,7 +144,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     async (values: PackFormData) => {
       const serializer = ({
         shards: _,
-        policy_ids: payloadPolicyIds,
+        policy_ids: payloadAgentPolicyIds,
         queries,
         ...restPayload
       }: PackFormData) => {
@@ -154,7 +157,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
               })
             ) as string[])
           : [];
-        const policies = [...payloadPolicyIds, ...mappedShards];
+        const policies = [...payloadAgentPolicyIds, ...mappedShards];
 
         return {
           ...restPayload,
@@ -165,15 +168,15 @@ const PackFormComponent: React.FC<PackFormProps> = ({
       };
 
       try {
-        if (editMode && defaultValue?.id) {
-          await updateAsync({ id: defaultValue?.id, ...serializer(values) });
+        if (editMode && defaultValue?.saved_object_id) {
+          await updateAsync({ id: defaultValue?.saved_object_id, ...serializer(values) });
         } else {
           await createAsync(serializer(values));
         }
         // eslint-disable-next-line no-empty
       } catch (e) {}
     },
-    [createAsync, defaultValue?.id, editMode, getShards, shards, updateAsync]
+    [createAsync, defaultValue?.saved_object_id, editMode, getShards, shards, updateAsync]
   );
 
   const handleSubmitForm = useMemo(() => handleSubmit(onSubmit), [handleSubmit, onSubmit]);
@@ -242,28 +245,33 @@ const PackFormComponent: React.FC<PackFormProps> = ({
             <NameField euiFieldProps={euiFieldProps} />
           </EuiFlexItem>
         </EuiFlexGroup>
+        <EuiSpacer size="m" />
 
         <EuiFlexGroup>
           <EuiFlexItem>
             <DescriptionField euiFieldProps={euiFieldProps} />
           </EuiFlexItem>
         </EuiFlexGroup>
+        <EuiSpacer size="m" />
 
         <EuiFlexGroup>
           <PackTypeSelectable packType={packType} setPackType={changePackType} />
         </EuiFlexGroup>
+        <EuiSpacer size="m" />
 
         {packType === 'policy' && (
           <>
             <EuiFlexGroup>
-              <EuiFlexItem>
+              <EuiFlexItem css={overflowCss}>
                 <PolicyIdComboBoxField options={availableOptions} />
               </EuiFlexItem>
             </EuiFlexGroup>
+            <EuiSpacer size="m" />
 
             <EuiFlexGroup>
-              <EuiFlexItem>
-                <StyledEuiAccordion
+              <EuiFlexItem css={overflowCss}>
+                <EuiAccordion
+                  css={euiAccordionCss}
                   id="shardsToggle"
                   forceState={shardsToggleState}
                   onToggle={handleToggle}
@@ -271,9 +279,10 @@ const PackFormComponent: React.FC<PackFormProps> = ({
                 >
                   <EuiSpacer size="xs" />
                   <PackShardsField options={availableOptions} />
-                </StyledEuiAccordion>
+                </EuiAccordion>
               </EuiFlexItem>
             </EuiFlexGroup>
+            <EuiSpacer size="m" />
           </>
         )}
 
@@ -291,7 +300,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="m">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty color="ghost" {...cancelButtonProps}>
+                <EuiButtonEmpty color="text" {...cancelButtonProps}>
                   <FormattedMessage
                     id="xpack.osquery.pack.form.cancelButtonLabel"
                     defaultMessage="Cancel"
@@ -306,6 +315,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
                   size="m"
                   iconType="save"
                   onClick={handleSaveClick}
+                  data-test-subj={`${editMode ? 'update' : 'save'}-pack-button`}
                 >
                   {editMode ? (
                     <FormattedMessage

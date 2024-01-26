@@ -1,6 +1,10 @@
 {
   "security.put_role": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "refresh": [
         "true",
         "false",
@@ -14,6 +18,10 @@
     "patterns": [
       "_security/role/{name}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-put-role.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-put-role.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

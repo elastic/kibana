@@ -12,7 +12,9 @@ export const BARCHART_AGGREGATION_NAME = 'barchartAggregation';
 /**
  * Used inside custom search strategy
  */
-export const enum FactoryQueryType {
+export enum FactoryQueryType {
   IndicatorGrid = 'indicatorGrid',
   Barchart = 'barchart',
 }
+
+export const CASE_ATTACHMENT_TYPE_ID = 'indicator';

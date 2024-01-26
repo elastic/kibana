@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-export type {
-  CreateAPIKeyResult,
-  InvalidateAPIKeyResult,
-  CreateAPIKeyParams,
-  InvalidateAPIKeysParams,
-  GrantAPIKeyResult,
-} from './api_keys';
 export { APIKeys, CreateApiKeyValidationError } from './api_keys';

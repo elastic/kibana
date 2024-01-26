@@ -14,17 +14,17 @@ import type { FieldsEqlOptions } from '../../../../../../common/search_strategy'
 import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
-import { EqlQueryBar } from '../../../../../detections/components/rules/eql_query_bar';
+import { EqlQueryBar } from '../../../../../detection_engine/rule_creation_ui/components/eql_query_bar';
 
 import {
   debounceAsync,
   eqlValidator,
-} from '../../../../../detections/components/rules/eql_query_bar/validators';
-import type { FieldValueQueryBar } from '../../../../../detections/components/rules/query_bar';
+} from '../../../../../detection_engine/rule_creation_ui/components/eql_query_bar/validators';
+import type { FieldValueQueryBar } from '../../../../../detection_engine/rule_creation_ui/components/query_bar';
 
 import type { FormSchema } from '../../../../../shared_imports';
 import { Form, UseField, useForm, useFormData } from '../../../../../shared_imports';
-import { timelineActions } from '../../../../store/timeline';
+import { timelineActions } from '../../../../store';
 import * as i18n from '../translations';
 import { getEqlOptions } from './selectors';
 
@@ -60,6 +60,7 @@ const HiddenUseField = styled(UseField)`
   display: none;
 `;
 
+// eslint-disable-next-line react/display-name
 export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string }) => {
   const dispatch = useDispatch();
   const isInit = useRef(true);
@@ -106,6 +107,8 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
     form,
     watch: ['eqlQueryBar'],
   });
+
+  const prevEqlQuery = useRef<TimelineEqlQueryBar['eqlQueryBar']['query']['query']>('');
 
   const optionsData = useMemo(
     () =>
@@ -156,10 +159,11 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
   useEffect(() => {
     if (
       formEqlQueryBar != null &&
-      !isEmpty(formEqlQueryBar.query.query) &&
+      prevEqlQuery.current !== formEqlQueryBar.query.query &&
       isQueryBarValid &&
       !isQueryBarValidating
     ) {
+      prevEqlQuery.current = formEqlQueryBar.query.query;
       dispatch(
         timelineActions.updateEqlOptions({
           id: timelineId,

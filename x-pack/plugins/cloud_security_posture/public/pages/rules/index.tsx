@@ -5,107 +5,27 @@
  * 2.0.
  */
 
-import React, { useContext, useMemo } from 'react';
+import React from 'react';
 import { generatePath, Link, type RouteComponentProps } from 'react-router-dom';
-import {
-  EuiButtonEmpty,
-  type EuiDescriptionListProps,
-  EuiFlexGroup,
-  EuiPageHeader,
-  EuiSpacer,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiPageHeader, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { PackagePolicy } from '@kbn/fleet-plugin/common';
-import { CspInlineDescriptionList } from '../../components/csp_inline_description_list';
 import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
-import type { BreadcrumbEntry } from '../../common/navigation/types';
-import { RulesContainer, type PageUrlParams } from './rules_container';
+import { RulesContainer } from './rules_container';
 import { cloudPosturePages } from '../../common/navigation/constants';
-import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
-import { useCspIntegrationInfo } from './use_csp_integration';
-import { useKibana } from '../../common/hooks/use_kibana';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
-import { SecuritySolutionContext } from '../../application/security_solution_context';
-import * as TEST_SUBJECTS from './test_subjects';
-import { getEnabledCspIntegrationDetails } from '../../common/utils/get_enabled_csp_integration_details';
-
-const getRulesBreadcrumbs = (
-  name?: string,
-  manageBreadcrumb?: BreadcrumbEntry
-): BreadcrumbEntry[] => {
-  const breadCrumbs: BreadcrumbEntry[] = [];
-  if (manageBreadcrumb) {
-    breadCrumbs.push(manageBreadcrumb);
-  }
-
-  breadCrumbs.push(cloudPosturePages.benchmarks);
-
-  if (name) {
-    breadCrumbs.push({ ...cloudPosturePages.rules, name });
-  } else {
-    breadCrumbs.push(cloudPosturePages.rules);
-  }
-
-  return breadCrumbs;
-};
-
-const getRulesSharedValues = (
-  packageInfo?: PackagePolicy
-): NonNullable<EuiDescriptionListProps['listItems']> => {
-  const enabledIntegration = getEnabledCspIntegrationDetails(packageInfo);
-  const values = [];
-
-  if (enabledIntegration?.integration?.shortName) {
-    values.push({
-      title: i18n.translate('xpack.csp.rules.rulesPageSharedValues.integrationTitle', {
-        defaultMessage: 'Integration',
-      }),
-      description: enabledIntegration?.integration.shortName,
-    });
-  }
-
-  if (!enabledIntegration?.enabledIntegrationOption) return values;
-
-  values.push(
-    {
-      title: i18n.translate('xpack.csp.rules.rulesPageSharedValues.deploymentTypeTitle', {
-        defaultMessage: 'Deployment Type',
-      }),
-      description: enabledIntegration?.enabledIntegrationOption.name,
-    },
-    {
-      title: i18n.translate('xpack.csp.rules.rulesPageSharedValues.benchmarkTitle', {
-        defaultMessage: 'Benchmark',
-      }),
-      description: enabledIntegration?.enabledIntegrationOption.benchmark,
-    }
-  );
-
-  return values;
-};
+import { useSecuritySolutionContext } from '../../application/security_solution_context';
+import { useCspBenchmarkIntegrationsV2 } from '../benchmarks/use_csp_benchmark_integrations';
+import { CISBenchmarkIcon } from '../../components/cis_benchmark_icon';
+import { getBenchmarkCisName } from '../../../common/utils/helpers';
+import { PageUrlParams } from '../../../common/types/latest';
 
 export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>) => {
-  const { http } = useKibana().services;
-  const integrationInfo = useCspIntegrationInfo(params);
-  const securitySolutionContext = useContext(SecuritySolutionContext);
-
-  const [packageInfo] = integrationInfo.data || [];
-
-  const breadcrumbs = useMemo(
-    () =>
-      getRulesBreadcrumbs(packageInfo?.name, securitySolutionContext?.getManageBreadcrumbEntry()),
-    [packageInfo?.name, securitySolutionContext]
-  );
-
-  useCspBreadcrumbs(breadcrumbs);
-
-  const sharedValues = getRulesSharedValues(packageInfo);
+  const benchmarksInfo = useCspBenchmarkIntegrationsV2();
+  const SpyRoute = useSecuritySolutionContext()?.getSpyRouteComponent();
 
   return (
-    <CloudPosturePage query={integrationInfo}>
+    <CloudPosturePage query={benchmarksInfo}>
       <EuiPageHeader
         alignItems={'bottom'}
         bottomBorder
@@ -115,46 +35,41 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
               <Link to={generatePath(cloudPosturePages.benchmarks.path)}>
                 <EuiButtonEmpty iconType="arrowLeft" contentProps={{ style: { padding: 0 } }}>
                   <FormattedMessage
-                    id="xpack.csp.rules.rulesPageHeader.benchmarkIntegrationsButtonLabel"
-                    defaultMessage="Benchmark Integrations"
+                    id="xpack.csp.rules.rulesPageHeader.benchmarkRulesButtonLabel"
+                    defaultMessage="Benchmarks"
                   />
                 </EuiButtonEmpty>
               </Link>
             </EuiFlexItem>
             <EuiFlexItem>
-              <CloudPosturePageTitle
-                title={i18n.translate('xpack.csp.rules.rulePageHeader.pageHeaderTitle', {
-                  defaultMessage: 'Rules - {integrationName}',
-                  values: {
-                    integrationName: packageInfo?.name,
-                  },
-                })}
-              />
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem grow={false} style={{ marginBottom: 6 }}>
+                  <CISBenchmarkIcon type={params.benchmarkId} size={'l'} />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <CloudPosturePageTitle
+                    title={i18n.translate('xpack.csp.rules.rulePageHeader.pageHeaderTitle', {
+                      defaultMessage: '{benchmarkName} {benchmarkVersion} - Rules',
+                      values: {
+                        benchmarkName: getBenchmarkCisName(params.benchmarkId),
+                        benchmarkVersion: params.benchmarkVersion,
+                      },
+                    })}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         }
-        description={
-          sharedValues.length && (
-            <div data-test-subj={TEST_SUBJECTS.CSP_RULES_SHARED_VALUES}>
-              <CspInlineDescriptionList listItems={sharedValues} />
-            </div>
-          )
-        }
-        rightSideItems={[
-          <EuiButtonEmpty
-            iconType="gear"
-            size="xs"
-            href={http.basePath.prepend(pagePathGetters.edit_integration(params).join(''))}
-          >
-            <FormattedMessage
-              id="xpack.csp.rules.manageIntegrationButtonLabel"
-              defaultMessage="Manage Integration"
-            />
-          </EuiButtonEmpty>,
-        ]}
       />
       <EuiSpacer />
       <RulesContainer />
+      {SpyRoute && (
+        <SpyRoute
+          pageName={cloudPosturePages.benchmarks.id}
+          state={{ ruleName: getBenchmarkCisName(params.benchmarkId) }}
+        />
+      )}
     </CloudPosturePage>
   );
 };

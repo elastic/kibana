@@ -7,17 +7,17 @@
 
 import { Ast } from '@kbn/interpreter';
 import { Position, ScaleType } from '@elastic/charts';
-import type { PaletteRegistry } from '@kbn/coloring';
+import { PaletteRegistry } from '@kbn/coloring';
 import {
   buildExpression,
   buildExpressionFunction,
   ExpressionFunctionTheme,
 } from '@kbn/expressions-plugin/common';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import {
-  EventAnnotationServiceType,
   isManualPointAnnotationConfig,
   isRangeAnnotationConfig,
-} from '@kbn/event-annotation-plugin/public';
+} from '@kbn/event-annotation-common';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import {
   AvailableReferenceLineIcon,
@@ -35,21 +35,21 @@ import {
   XYCurveType,
   YAxisConfigFn,
 } from '@kbn/expression-xy-plugin/common';
-import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
+import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
 import type {
-  State,
+  State as XYState,
   YConfig,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
   XYAnnotationLayerConfig,
   AxisConfig,
   ValidXYDataLayerConfig,
+  XYLayerConfig,
 } from './types';
 import type { OperationMetadata, DatasourcePublicAPI, DatasourceLayers } from '../../types';
 import { getColumnToLabelMap } from './state_helpers';
-import { hasIcon } from './xy_config_panel/shared/icon_select';
 import { defaultReferenceLineColor } from './color_assignment';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 import {
@@ -59,8 +59,16 @@ import {
   getAnnotationsLayers,
 } from './visualization_helpers';
 import { getUniqueLabels } from './annotations/helpers';
-import { axisExtentConfigToExpression } from '../../shared_components';
+import {
+  axisExtentConfigToExpression,
+  hasNumericHistogramDimension,
+} from '../../shared_components';
 import type { CollapseExpressionFunction } from '../../../common/expressions';
+import { hasIcon } from './xy_config_panel/shared/marker_decoration_settings';
+
+type XYLayerConfigWithSimpleView = XYLayerConfig & { simpleView?: boolean };
+type XYAnnotationLayerConfigWithSimpleView = XYAnnotationLayerConfig & { simpleView?: boolean };
+type State = Omit<XYState, 'layers'> & { layers: XYLayerConfigWithSimpleView[] };
 
 export const getSortedAccessors = (
   datasource: DatasourcePublicAPI | undefined,
@@ -80,7 +88,6 @@ export const toExpression = (
   state: State,
   datasourceLayers: DatasourceLayers,
   paletteService: PaletteRegistry,
-  attributes: Partial<{ title: string; description: string }> = {},
   datasourceExpressionsByLayers: Record<string, Ast>,
   eventAnnotationService: EventAnnotationServiceType
 ): Ast | null => {
@@ -149,7 +156,6 @@ export function toPreviewExpression(
     },
     datasourceLayers,
     paletteService,
-    {},
     datasourceExpressionsByLayers,
     eventAnnotationService
   );
@@ -209,13 +215,10 @@ export const buildXYExpression = (
     .map((layer) => {
       return {
         ...layer,
+        ignoreGlobalFilters: layer.ignoreGlobalFilters,
         annotations: layer.annotations.map((c) => ({
           ...c,
           label: uniqueLabels[c.id],
-          ...(c.type === 'query'
-            ? // Move the ignore flag at the event level
-              { ignoreGlobalFilters: layer.ignoreGlobalFilters }
-            : {}),
         })),
       };
     });
@@ -317,19 +320,26 @@ export const buildXYExpression = (
     showLabels: state?.tickLabelsVisibilitySettings?.x ?? true,
     showGridLines: state?.gridlinesVisibilitySettings?.x ?? true,
     labelsOrientation: state?.labelsOrientation?.x ?? 0,
-    extent: state.xExtent ? [axisExtentConfigToExpression(state.xExtent)] : [],
+    extent:
+      state.xExtent ||
+      validDataLayers.some((layer) =>
+        hasNumericHistogramDimension(datasourceLayers[layer.layerId], layer.xAccessor)
+      )
+        ? [axisExtentConfigToExpression(state.xExtent ?? { mode: 'dataBounds', niceValues: true })]
+        : undefined,
   });
 
   const layeredXyVisFn = buildExpressionFunction<LayeredXyVisFn>('layeredXyVis', {
     legend: buildExpression([legendConfigFn]).toAst(),
-    fittingFunction: state.fittingFunction || 'None',
-    endValue: state.endValue || 'None',
-    emphasizeFitting: state.emphasizeFitting || false,
-    fillOpacity: state.fillOpacity || 0.3,
-    valueLabels: state?.valueLabels || 'hide',
-    hideEndzones: state?.hideEndzones || false,
-    addTimeMarker: state?.showCurrentTimeMarker || false,
-    valuesInLegend: state?.valuesInLegend || false,
+    fittingFunction: state.fittingFunction ?? 'None',
+    endValue: state.endValue ?? 'None',
+    emphasizeFitting: state.emphasizeFitting ?? false,
+    minBarHeight: state.minBarHeight ?? 1,
+    fillOpacity: state.fillOpacity ?? 0.3,
+    valueLabels: state.valueLabels ?? 'hide',
+    hideEndzones: state.hideEndzones ?? false,
+    addTimeMarker: state.showCurrentTimeMarker ?? false,
+    valuesInLegend: state.valuesInLegend ?? false,
     yAxisConfigs: [...yAxisConfigsToExpression(yAxisConfigs)],
     xAxisConfig: buildExpression([xAxisConfigFn]).toAst(),
     showTooltip: [],
@@ -369,6 +379,7 @@ export const buildXYExpression = (
                         ?.interval) ||
                     'auto',
                   groups: validAnnotationsLayers.map((layer) => ({
+                    ignoreGlobalFilters: layer.ignoreGlobalFilters,
                     indexPatternId: layer.indexPatternId,
                     annotations: layer.annotations.filter(isValidAnnotation),
                   })),
@@ -387,7 +398,7 @@ const yAxisConfigsToExpression = (yAxisConfigs: AxisConfig[]): Ast[] => {
       buildExpressionFunction<YAxisConfigFn>('yAxisConfig', {
         id: axis.id,
         position: axis.position,
-        extent: axis.extent ? axisExtentConfigToExpression(axis.extent) : undefined,
+        extent: axisExtentConfigToExpression(axis.extent ?? { mode: 'full', niceValues: true }),
         showTitle: axis.showTitle ?? true,
         title: axis.title,
         showLabels: axis.showLabels ?? true,
@@ -422,7 +433,7 @@ const referenceLineLayerToExpression = (
 };
 
 const annotationLayerToExpression = (
-  layer: XYAnnotationLayerConfig,
+  layer: XYAnnotationLayerConfigWithSimpleView,
   eventAnnotationService: EventAnnotationServiceType
 ): Ast => {
   const extendedAnnotationLayerFn = buildExpressionFunction<ExtendedAnnotationLayerFn>(
@@ -501,6 +512,7 @@ const dataLayerToExpression = (
             name: 'default',
           }),
     ]).toAst(),
+    colorMapping: layer.colorMapping ? JSON.stringify(layer.colorMapping) : undefined,
   });
 
   return {

@@ -11,46 +11,54 @@ import type { Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RISK_SCORE_CREATE_INDEX } from '../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../types';
-import { createEsIndexBodySchema, createIndex } from './lib/create_index';
+import { createIndex } from './lib/create_index';
+import { createEsIndexRequestBody } from '../../../../common/api/entity_analytics/risk_score';
 
 export const createEsIndexRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
-  router.put(
-    {
+  router.versioned
+    .put({
+      access: 'internal',
       path: RISK_SCORE_CREATE_INDEX,
-      validate: { body: createEsIndexBodySchema },
       options: {
         tags: ['access:securitySolution'],
       },
-    },
-    async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
-      const { client } = (await context.core).elasticsearch;
-      const esClient = client.asCurrentUser;
-      const options = request.body;
+    })
+    .addVersion(
+      {
+        validate: {
+          request: { body: createEsIndexRequestBody },
+        },
+        version: '1',
+      },
+      async (context, request, response) => {
+        const siemResponse = buildSiemResponse(response);
+        const { client } = (await context.core).elasticsearch;
+        const esClient = client.asCurrentUser;
+        const options = request.body;
 
-      try {
-        const result = await createIndex({
-          esClient,
-          logger,
-          options,
-        });
-        const error = result[options.index].error;
+        try {
+          const result = await createIndex({
+            esClient,
+            logger,
+            options,
+          });
+          const error = result[options.index].error;
 
-        if (error != null) {
+          if (error != null) {
+            return siemResponse.error({
+              body: error.message,
+              statusCode: error.statusCode,
+            });
+          } else {
+            return response.ok({ body: options });
+          }
+        } catch (e) {
+          const error = transformError(e);
           return siemResponse.error({
             body: error.message,
             statusCode: error.statusCode,
           });
-        } else {
-          return response.ok({ body: options });
         }
-      } catch (e) {
-        const error = transformError(e);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
       }
-    }
-  );
+    );
 };

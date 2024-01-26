@@ -17,8 +17,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { MonitoringStartServices } from '../types';
 import { useAlertsModal } from '../application/hooks/use_alerts_modal';
+import { WatcherMigrationStep } from './enable_alerts_modal';
 
 export const AlertsDropdown: React.FC<{}> = () => {
+  const [shouldShowModal, setShouldShowModal] = useState(false);
   const alertsEnableModalProvider = useAlertsModal();
   const { navigateToApp } = useKibana<MonitoringStartServices>().services.application;
 
@@ -33,7 +35,16 @@ export const AlertsDropdown: React.FC<{}> = () => {
   };
 
   const createDefaultRules = () => {
+    setShouldShowModal(true);
+  };
+
+  const createButtonClick = () => {
     alertsEnableModalProvider.enableAlerts();
+    closeModal();
+  };
+
+  const closeModal = () => {
+    setShouldShowModal(false);
     closePopover();
   };
 
@@ -74,14 +85,19 @@ export const AlertsDropdown: React.FC<{}> = () => {
   ];
 
   return (
-    <EuiPopover
-      panelPaddingSize="none"
-      anchorPosition="downLeft"
-      button={button}
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-    >
-      <EuiContextMenu initialPanelId={0} panels={panels} />
-    </EuiPopover>
+    <>
+      <EuiPopover
+        panelPaddingSize="none"
+        anchorPosition="downLeft"
+        button={button}
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+      >
+        <EuiContextMenu initialPanelId={0} panels={panels} />
+      </EuiPopover>
+      {shouldShowModal ? (
+        <WatcherMigrationStep closeModal={closeModal} createButtonClick={createButtonClick} />
+      ) : null}
+    </>
   );
 };

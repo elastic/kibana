@@ -6,18 +6,23 @@
  */
 
 import React, { useEffect } from 'react';
+import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
+import { logEntryCategoriesJobType } from '../../../../../../common/log_analysis';
 import { useLogEntryCategoryExamples } from '../../use_log_entry_category_examples';
 import { LogEntryExampleMessages } from '../../../../../components/logging/log_entry_examples/log_entry_examples';
 import { TimeRange } from '../../../../../../common/time/time_range';
 import { CategoryExampleMessage } from './category_example_message';
+import { useLogMlJobIdFormatsShimContext } from '../../../shared/use_log_ml_job_id_formats_shim';
 
 const exampleCount = 5;
 
 export const CategoryDetailsRow: React.FunctionComponent<{
   categoryId: number;
   timeRange: TimeRange;
-  sourceId: string;
-}> = ({ categoryId, timeRange, sourceId }) => {
+  logViewReference: PersistedLogViewReference;
+}> = ({ categoryId, timeRange, logViewReference }) => {
+  const { idFormats } = useLogMlJobIdFormatsShimContext();
+
   const {
     getLogEntryCategoryExamples,
     hasFailedLoadingLogEntryCategoryExamples,
@@ -27,7 +32,8 @@ export const CategoryDetailsRow: React.FunctionComponent<{
     categoryId,
     endTime: timeRange.endTime,
     exampleCount,
-    sourceId,
+    logViewReference,
+    idFormat: idFormats?.[logEntryCategoriesJobType],
     startTime: timeRange.startTime,
   });
 

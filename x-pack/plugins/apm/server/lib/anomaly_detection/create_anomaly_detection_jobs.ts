@@ -6,34 +6,39 @@
  */
 
 import Boom from '@hapi/boom';
-import { Logger } from '@kbn/core/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { snakeCase } from 'lodash';
 import moment from 'moment';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { waitForIndexStatus } from '@kbn/core-saved-objects-migration-server-internal';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import { ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
-import {
-  METRICSET_NAME,
-  PROCESSOR_EVENT,
-} from '../../../common/elasticsearch_fieldnames';
+import { METRICSET_NAME, PROCESSOR_EVENT } from '../../../common/es_fields/apm';
 import { Environment } from '../../../common/environment_rt';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { MlClient } from '../helpers/get_ml_client';
 import { APM_ML_JOB_GROUP, ML_MODULE_ID_APM_TRANSACTION } from './constants';
 import { getAnomalyDetectionJobs } from './get_anomaly_detection_jobs';
-import { ApmIndicesConfig } from '../../routes/settings/apm_indices/get_apm_indices';
+
+const DEFAULT_TIMEOUT = '60s';
 
 export async function createAnomalyDetectionJobs({
   mlClient,
+  esClient,
   indices,
   environments,
   logger,
+  esCapabilities,
 }: {
   mlClient?: MlClient;
-  indices: ApmIndicesConfig;
+  esClient: ElasticsearchClient;
+  indices: APMIndices;
   environments: Environment[];
   logger: Logger;
+  esCapabilities: ElasticsearchCapabilities;
 }) {
   if (!mlClient) {
     throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);
@@ -54,19 +59,36 @@ export async function createAnomalyDetectionJobs({
     );
 
     const apmMetricIndex = indices.metric;
-    const responses = await Promise.all(
-      uniqueMlJobEnvs.map((environment) =>
-        createAnomalyDetectionJob({ mlClient, environment, apmMetricIndex })
-      )
-    );
+    const responses = [];
+    const failedJobs = [];
+    // Avoid the creation of multiple ml jobs in parallel
+    // https://github.com/elastic/elasticsearch/issues/36271
+    for (const environment of uniqueMlJobEnvs) {
+      try {
+        responses.push(
+          await createAnomalyDetectionJob({
+            mlClient,
+            esClient,
+            environment,
+            apmMetricIndex,
+            esCapabilities,
+          })
+        );
+      } catch (e) {
+        if (!e.id || !e.error) {
+          throw e;
+        }
+        failedJobs.push({ id: e.id, error: e.error });
+      }
+    }
 
     const jobResponses = responses.flatMap((response) => response.jobs);
-    const failedJobs = jobResponses.filter(({ success }) => !success);
 
     if (failedJobs.length > 0) {
-      const errors = failedJobs.map(({ id, error }) => ({ id, error }));
       throw new Error(
-        `An error occurred while creating ML jobs: ${JSON.stringify(errors)}`
+        `An error occurred while creating ML jobs: ${JSON.stringify(
+          failedJobs
+        )}`
       );
     }
 
@@ -76,17 +98,23 @@ export async function createAnomalyDetectionJobs({
 
 async function createAnomalyDetectionJob({
   mlClient,
+  esClient,
   environment,
   apmMetricIndex,
+  esCapabilities,
 }: {
   mlClient: Required<MlClient>;
+  esClient: ElasticsearchClient;
   environment: string;
   apmMetricIndex: string;
+  esCapabilities: ElasticsearchCapabilities;
 }) {
-  return withApmSpan('create_anomaly_detection_job', async () => {
-    const randomToken = uuid().substr(-4);
+  const { serverless } = esCapabilities;
 
-    return mlClient.modules.setup({
+  return withApmSpan('create_anomaly_detection_job', async () => {
+    const randomToken = uuidv4().substr(-4);
+
+    const anomalyDetectionJob = mlClient.modules.setup({
       moduleId: ML_MODULE_ID_APM_TRANSACTION,
       prefix: `${APM_ML_JOB_GROUP}-${snakeCase(environment)}-${randomToken}-`,
       groups: [APM_ML_JOB_GROUP],
@@ -115,6 +143,19 @@ async function createAnomalyDetectionJob({
         },
       ],
     });
+
+    // Waiting for the index is not enabled in serverless, this could potentially cause
+    // problems when creating jobs in parallels
+    if (!serverless) {
+      await waitForIndexStatus({
+        client: esClient,
+        index: '.ml-*',
+        timeout: DEFAULT_TIMEOUT,
+        status: 'yellow',
+      })();
+    }
+
+    return anomalyDetectionJob;
   });
 }
 

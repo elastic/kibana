@@ -12,25 +12,30 @@ import type { ExceptionListSchema, OsType } from '@kbn/securitysolution-io-ts-li
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
 
+import type { HorizontalAlignment } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
+import type { Moment } from 'moment';
+import {
+  HeaderMenu,
+  generateLinkedRulesMenuItems,
+} from '@kbn/securitysolution-exception-list-components';
+import { PopoverItems } from '../../../../common/components/popover_items';
 import {
   enrichExceptionItemsWithOS,
   enrichNewExceptionItemsWithComments,
+  enrichNewExceptionItemsWithExpireTime,
   enrichNewExceptionItemsWithName,
   enrichRuleExceptions,
   enrichSharedExceptions,
   lowercaseHashValues,
 } from '../../utils/helpers';
-import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
-import { getRuleDetailsTabUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
-import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details';
-import { SecurityPageName } from '../../../../../common/constants';
-import { PopoverItems } from '../../../../common/components/popover_items';
 import type {
   ExceptionListRuleReferencesInfoSchema,
   ExceptionListRuleReferencesSchema,
-} from '../../../../../common/detection_engine/rule_exceptions';
-import type { Rule } from '../../../rule_management/logic/types';
+} from '../../../../../common/api/detection_engine/rule_exceptions';
+import { LinkToRuleDetails, LinkToListDetails } from '../../../../exceptions/components';
 import * as i18n from './translations';
+import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
 
 /**
  * Adds user defined name to all new exceptionItems
@@ -52,6 +57,15 @@ export const enrichItemWithName =
   (itemName: string) => (items: ExceptionsBuilderReturnExceptionItem[]) => {
     return itemName.trim() !== '' ? enrichNewExceptionItemsWithName(items, itemName) : items;
   };
+
+/**
+ * Adds expiration datetime to all new exceptionItems
+ * @param expireTimeToAdd new expireTime to add to item
+ */
+export const enrichItemWithExpireTime =
+  (expireTimeToAdd: Moment | undefined) =>
+  (items: ExceptionsBuilderReturnExceptionItem[]): ExceptionsBuilderReturnExceptionItem[] =>
+    enrichNewExceptionItemsWithExpireTime(items, expireTimeToAdd);
 
 /**
  * Modifies item entries to be in correct format and adds os selection to items
@@ -109,6 +123,7 @@ export const enrichItemsForSharedLists =
  * @param sharedLists shared exception lists that were selected to add items to
  * @param selectedOs os selection
  * @param listType exception list type
+ * @param expireTime exception item expire time
  * @param items exception items to be modified
  */
 export const enrichNewExceptionItems = ({
@@ -119,6 +134,7 @@ export const enrichNewExceptionItems = ({
   sharedLists,
   selectedOs,
   listType,
+  expireTime,
   items,
 }: {
   itemName: string;
@@ -128,10 +144,12 @@ export const enrichNewExceptionItems = ({
   addToSharedLists: boolean;
   sharedLists: ExceptionListSchema[];
   listType: ExceptionListTypeEnum;
+  expireTime: Moment | undefined;
   items: ExceptionsBuilderReturnExceptionItem[];
 }): ExceptionsBuilderReturnExceptionItem[] => {
   const enriched: ExceptionsBuilderReturnExceptionItem[] = pipe(
     enrichItemWithComment(commentToAdd),
+    enrichItemWithExpireTime(expireTime),
     enrichItemWithName(itemName),
     enrichEndpointItems(listType, selectedOs),
     enrichItemsForDefaultRuleList(listType, addToRules),
@@ -150,6 +168,7 @@ export const enrichNewExceptionItems = ({
  * @param sharedLists shared exception lists that were selected to add items to
  * @param selectedOs os selection
  * @param listType exception list type
+ * @param expireTime exception item expire time
  * @param items exception items to be modified
  */
 export const enrichExceptionItemsForUpdate = ({
@@ -157,16 +176,19 @@ export const enrichExceptionItemsForUpdate = ({
   commentToAdd,
   selectedOs,
   listType,
+  expireTime,
   items,
 }: {
   itemName: string;
   commentToAdd: string;
   selectedOs: OsType[];
   listType: ExceptionListTypeEnum;
+  expireTime: Moment | undefined;
   items: ExceptionsBuilderReturnExceptionItem[];
 }): ExceptionsBuilderReturnExceptionItem[] => {
   const enriched: ExceptionsBuilderReturnExceptionItem[] = pipe(
     enrichItemWithComment(commentToAdd),
+    enrichItemWithExpireTime(expireTime),
     enrichItemWithName(itemName),
     enrichEndpointItems(listType, selectedOs)
   )(items);
@@ -180,59 +202,45 @@ export const enrichExceptionItemsForUpdate = ({
 export const getSharedListsTableColumns = () => [
   {
     field: 'name',
-    name: 'Name',
+    name: i18n.NAME_COLUMN,
     sortable: true,
     'data-test-subj': 'exceptionListNameCell',
   },
   {
     field: 'referenced_rules',
-    name: '# of rules linked to',
+    name: 'Number of rules linked to',
     sortable: false,
     'data-test-subj': 'exceptionListRulesLinkedToIdCell',
-    render: (references: ExceptionListRuleReferencesInfoSchema[]) => {
-      if (references.length === 0) return '0';
+    render: (references: ExceptionListRuleReferencesInfoSchema[]) => (
+      <HeaderMenu
+        emptyButton
+        useCustomActions
+        actions={generateLinkedRulesMenuItems({
+          dataTestSubj: 'addToSharedListsLinkedRulesMenu',
+          linkedRules: references,
+          securityLinkAnchorComponent: LinkToRuleDetails,
+        })}
+        panelPaddingSize="none"
+        disableActions={false}
+        text={references.length.toString()}
+        dataTestSubj="addToSharedListsLinkedRulesMenuAction"
+      />
+    ),
+  },
+  {
+    name: i18n.ACTION_COLUMN,
 
-      const renderItem = (reference: ExceptionListRuleReferencesInfoSchema, i: number) => (
-        <SecuritySolutionLinkAnchor
-          data-test-subj="referencedRuleLink"
-          deepLinkId={SecurityPageName.rules}
-          path={getRuleDetailsTabUrl(reference.id, RuleDetailTabs.alerts)}
-          external
-        >
-          {reference.name}
-        </SecuritySolutionLinkAnchor>
-      );
-
+    'data-test-subj': 'exceptionListRulesActionCell',
+    render: (list: ExceptionListRuleReferencesSchema) => {
       return (
-        <PopoverItems
-          items={references}
-          popoverButtonTitle={references.length.toString()}
-          dataTestPrefix="ruleReferences"
-          renderItem={renderItem}
+        <LinkToListDetails
+          dataTestSubj="exceptionListActionCell-link"
+          linkTitle={i18n.VIEW_LIST_DETAIL_ACTION}
+          listId={list.list_id}
+          external
         />
       );
     },
-  },
-  // TODO: This will need to be updated once PR goes in with list details page
-  {
-    name: 'Actions',
-    actions: [
-      {
-        'data-test-subj': 'exceptionListRulesActionCell',
-        render: (list: ExceptionListRuleReferencesSchema) => {
-          return (
-            <SecuritySolutionLinkAnchor
-              data-test-subj="exceptionListActionCell-link"
-              deepLinkId={SecurityPageName.exceptions}
-              path={''}
-              external
-            >
-              {i18n.VIEW_LIST_DETAIL_ACTION}
-            </SecuritySolutionLinkAnchor>
-          );
-        },
-      },
-    ],
   },
 ];
 
@@ -242,28 +250,50 @@ export const getSharedListsTableColumns = () => [
 export const getRulesTableColumn = () => [
   {
     field: 'name',
-    name: 'Name',
+    align: 'left' as HorizontalAlignment,
+    name: i18n.NAME_COLUMN,
     sortable: true,
     'data-test-subj': 'ruleNameCell',
+    truncateText: false,
   },
   {
-    name: 'Actions',
-    actions: [
-      {
-        'data-test-subj': 'ruleAction-view',
-        render: (rule: Rule) => {
-          return (
-            <SecuritySolutionLinkAnchor
-              data-test-subj="ruleAction-viewDetails"
-              deepLinkId={SecurityPageName.rules}
-              path={getRuleDetailsTabUrl(rule.id, RuleDetailTabs.alerts)}
-              external
-            >
-              {i18n.VIEW_RULE_DETAIL_ACTION}
-            </SecuritySolutionLinkAnchor>
-          );
-        },
-      },
-    ],
+    field: 'tags',
+    align: 'left' as HorizontalAlignment,
+    name: i18n.TAGS_COLUMN,
+    'data-test-subj': 'ruleNameCell',
+    render: (tags: RuleResponse['tags']) => {
+      if (tags.length === 0) {
+        return null;
+      }
+
+      const renderItem = (tag: string, i: number) => (
+        <EuiBadge color="hollow" key={`${tag}-${i}`} data-test-subj="tag">
+          {tag}
+        </EuiBadge>
+      );
+      return (
+        <PopoverItems
+          items={tags}
+          popoverTitle={i18n.TAGS_COLUMN}
+          popoverButtonTitle={tags.length.toString()}
+          popoverButtonIcon="tag"
+          dataTestPrefix="tags"
+          renderItem={renderItem}
+        />
+      );
+    },
+  },
+  {
+    name: i18n.ACTION_COLUMN,
+    'data-test-subj': 'ruleAction-view',
+    render: (rule: RuleResponse) => {
+      return (
+        <LinkToRuleDetails
+          external
+          referenceId={rule.id}
+          referenceName={i18n.VIEW_RULE_DETAIL_ACTION}
+        />
+      );
+    },
   },
 ];

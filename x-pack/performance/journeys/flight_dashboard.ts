@@ -7,19 +7,18 @@
 
 import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
-import { waitForVisualizations } from '../utils';
 
 export const journey = new Journey({
   esArchives: ['x-pack/performance/es_archives/sample_data_flights'],
   kbnArchives: ['x-pack/performance/kbn_archives/flights_no_map_dashboard'],
 })
 
-  .step('Go to Dashboards Page', async ({ page, kbnUrl }) => {
+  .step('Go to Dashboards Page', async ({ page, kbnUrl, kibanaPage }) => {
     await page.goto(kbnUrl.get(`/app/dashboards`));
-    await page.waitForSelector('#dashboardListingHeading');
+    await kibanaPage.waitForListViewTable();
   })
 
-  .step('Go to Flights Dashboard', async ({ page, log }) => {
+  .step('Go to Flights Dashboard', async ({ page, kibanaPage }) => {
     await page.click(subj('dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard'));
-    await waitForVisualizations(page, log, 14);
+    await kibanaPage.waitForVisualizations({ count: 14 });
   });

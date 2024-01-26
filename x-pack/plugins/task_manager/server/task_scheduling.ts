@@ -7,14 +7,13 @@
 
 import { filter, take } from 'rxjs/operators';
 import pMap from 'p-map';
+import { SavedObjectError } from '@kbn/core-saved-objects-common';
 
-import uuid from 'uuid';
-import { chunk, pick } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
+import { chunk, flatten, pick } from 'lodash';
 import { Subject } from 'rxjs';
 import agent from 'elastic-apm-node';
 import { Logger } from '@kbn/core/server';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { mustBeAllOf } from './queries/query_clauses';
 import { either, isErr, mapErr } from './lib/result_type';
 import {
   ErroredTask,
@@ -40,6 +39,7 @@ import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fie
 import { TaskLifecycleEvent } from './polling_lifecycle';
 import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 import { EphemeralTaskRejectedDueToCapacityError } from './task_running';
+import { retryableBulkUpdate } from './lib/retryable_bulk_update';
 
 const VERSION_CONFLICT_STATUS = 409;
 const BULK_ACTION_SIZE = 100;
@@ -63,7 +63,7 @@ export interface BulkUpdateTaskResult {
   /**
    * list of failed tasks and errors caused failure
    */
-  errors: Array<{ task: ConcreteTaskInstance; error: Error }>;
+  errors: Array<{ type: string; id: string; error: SavedObjectError }>;
 }
 export interface RunSoonResult {
   id: ConcreteTaskInstance['id'];
@@ -152,53 +152,61 @@ export class TaskScheduling {
     return await this.store.bulkSchedule(modifiedTasks);
   }
 
-  public async bulkDisable(taskIds: string[]) {
-    const enabledTasks = await this.bulkGetTasksHelper(taskIds, {
-      term: {
-        'task.enabled': true,
-      },
+  public async bulkDisable(taskIds: string[], clearStateIdsOrBoolean?: string[] | boolean) {
+    return await retryableBulkUpdate({
+      taskIds,
+      store: this.store,
+      getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
+      filter: (task) => !!task.enabled,
+      map: (task) => ({
+        ...task,
+        enabled: false,
+        ...((Array.isArray(clearStateIdsOrBoolean) && clearStateIdsOrBoolean.includes(task.id)) ||
+        clearStateIdsOrBoolean === true
+          ? { state: {} }
+          : {}),
+      }),
+      validate: false,
     });
-
-    const updatedTasks = enabledTasks
-      .flatMap(({ docs }) => docs)
-      .reduce<ConcreteTaskInstance[]>((acc, task) => {
-        // if task is not enabled, no need to update it
-        if (!task.enabled) {
-          return acc;
-        }
-
-        acc.push({ ...task, enabled: false });
-        return acc;
-      }, []);
-
-    return await this.bulkUpdateTasksHelper(updatedTasks);
   }
 
   public async bulkEnable(taskIds: string[], runSoon: boolean = true) {
-    const disabledTasks = await this.bulkGetTasksHelper(taskIds, {
-      term: {
-        'task.enabled': false,
-      },
-    });
-
-    const updatedTasks = disabledTasks
-      .flatMap(({ docs }) => docs)
-      .reduce<ConcreteTaskInstance[]>((acc, task) => {
-        // if task is enabled, no need to update it
-        if (task.enabled) {
-          return acc;
-        }
-
+    return await retryableBulkUpdate({
+      taskIds,
+      store: this.store,
+      getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
+      filter: (task) => !task.enabled,
+      map: (task, i) => {
         if (runSoon) {
-          acc.push({ ...task, enabled: true, scheduledAt: new Date(), runAt: new Date() });
-        } else {
-          acc.push({ ...task, enabled: true });
+          // Run the first task now. Run all other tasks a random number of ms in the future,
+          // with a maximum of 5 minutes or the task interval, whichever is smaller.
+          const taskToRun =
+            i === 0
+              ? { ...task, runAt: new Date(), scheduledAt: new Date() }
+              : randomlyOffsetRunTimestamp(task);
+          return { ...taskToRun, enabled: true };
         }
+        return { ...task, enabled: true };
+      },
+      validate: false,
+    });
+  }
 
-        return acc;
-      }, []);
-
-    return await this.bulkUpdateTasksHelper(updatedTasks);
+  public async bulkUpdateState(
+    taskIds: string[],
+    stateMapFn: (s: ConcreteTaskInstance['state'], id: string) => ConcreteTaskInstance['state']
+  ) {
+    return await retryableBulkUpdate({
+      taskIds,
+      store: this.store,
+      getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
+      filter: () => true,
+      map: (task) => ({
+        ...task,
+        state: stateMapFn(task.state, task.id),
+      }),
+      validate: false,
+    });
   }
 
   /**
@@ -214,20 +222,13 @@ export class TaskScheduling {
     taskIds: string[],
     schedule: IntervalSchedule
   ): Promise<BulkUpdateTaskResult> {
-    const tasks = await this.bulkGetTasksHelper(taskIds, {
-      term: {
-        'task.status': 'idle',
-      },
-    });
-
-    const updatedTasks = tasks
-      .flatMap(({ docs }) => docs)
-      .reduce<ConcreteTaskInstance[]>((acc, task) => {
-        // if task schedule interval is the same, no need to update it
-        if (task.schedule?.interval === schedule.interval) {
-          return acc;
-        }
-
+    return retryableBulkUpdate({
+      taskIds,
+      store: this.store,
+      getTasks: async (ids) => await this.bulkGetTasksHelper(ids),
+      filter: (task) =>
+        task.status === TaskStatus.Idle && task.schedule?.interval !== schedule.interval,
+      map: (task) => {
         const oldIntervalInMs = parseIntervalAsMillisecond(task.schedule?.interval ?? '0s');
 
         // computing new runAt using formula:
@@ -237,45 +238,19 @@ export class TaskScheduling {
           task.runAt.getTime() - oldIntervalInMs + parseIntervalAsMillisecond(schedule.interval)
         );
 
-        acc.push({ ...task, schedule, runAt: new Date(newRunAtInMs) });
-        return acc;
-      }, []);
-
-    return await this.bulkUpdateTasksHelper(updatedTasks);
+        return { ...task, schedule, runAt: new Date(newRunAtInMs) };
+      },
+      validate: false,
+    });
   }
 
-  private async bulkGetTasksHelper(taskIds: string[], ...must: QueryDslQueryContainer[]) {
-    return await pMap(
+  private async bulkGetTasksHelper(taskIds: string[]) {
+    const batches = await pMap(
       chunk(taskIds, BULK_ACTION_SIZE),
-      async (taskIdsChunk) =>
-        this.store.fetch({
-          query: mustBeAllOf(
-            {
-              terms: {
-                _id: taskIdsChunk.map((taskId) => `task:${taskId}`),
-              },
-            },
-            ...must
-          ),
-          size: BULK_ACTION_SIZE,
-        }),
+      async (taskIdsChunk) => this.store.bulkGet(taskIdsChunk),
       { concurrency: 10 }
     );
-  }
-
-  private async bulkUpdateTasksHelper(updatedTasks: ConcreteTaskInstance[]) {
-    return (await this.store.bulkUpdate(updatedTasks)).reduce<BulkUpdateTaskResult>(
-      (acc, task) => {
-        if (task.tag === 'ok') {
-          acc.tasks.push(task.value);
-        } else {
-          acc.errors.push({ error: task.error.error, task: task.error.entity });
-        }
-
-        return acc;
-      },
-      { tasks: [], errors: [] }
-    );
+    return flatten(batches);
   }
 
   /**
@@ -287,12 +262,15 @@ export class TaskScheduling {
   public async runSoon(taskId: string): Promise<RunSoonResult> {
     const task = await this.getNonRunningTask(taskId);
     try {
-      await this.store.update({
-        ...task,
-        status: TaskStatus.Idle,
-        scheduledAt: new Date(),
-        runAt: new Date(),
-      });
+      await this.store.update(
+        {
+          ...task,
+          status: TaskStatus.Idle,
+          scheduledAt: new Date(),
+          runAt: new Date(),
+        },
+        { validate: false }
+      );
     } catch (e) {
       if (e.statusCode === 409) {
         this.logger.debug(
@@ -322,7 +300,7 @@ export class TaskScheduling {
         task
       );
     }
-    const id = uuid.v4();
+    const id = uuidv4();
     const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
       ...options,
       taskInstance: task,
@@ -466,5 +444,20 @@ const cancellablePromise = () => {
       .pipe(take(1))
       .toPromise()
       .then(() => {}),
+  };
+};
+
+const randomlyOffsetRunTimestamp: (task: ConcreteTaskInstance) => ConcreteTaskInstance = (task) => {
+  const now = Date.now();
+  const maximumOffsetTimestamp = now + 1000 * 60 * 5; // now + 5 minutes
+  const taskIntervalInMs = parseIntervalAsMillisecond(task.schedule?.interval ?? '0s');
+  const maximumRunAt = Math.min(now + taskIntervalInMs, maximumOffsetTimestamp);
+
+  // Offset between 1 and maximumRunAt ms
+  const runAt = new Date(now + Math.floor(Math.random() * (maximumRunAt - now) + 1));
+  return {
+    ...task,
+    runAt,
+    scheduledAt: runAt,
   };
 };

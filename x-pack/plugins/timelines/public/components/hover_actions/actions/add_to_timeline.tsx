@@ -7,12 +7,12 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { EuiContextMenuItem, EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { DraggableId } from 'react-beautiful-dnd';
+import { DraggableId } from '@hello-pangea/dnd';
 import { isEmpty } from 'lodash';
 
 import { useDispatch } from 'react-redux';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { TimelineId } from '../../../types';
+import { TimelineId } from '../../../store/timeline';
 import { addProviderToTimeline } from '../../../store/timeline/actions';
 import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';
 import { DataProvider } from '../../../../common/types';

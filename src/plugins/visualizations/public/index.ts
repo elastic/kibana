@@ -17,19 +17,30 @@ export function plugin(initializerContext: PluginInitializerContext) {
 
 /** @public static code */
 export { TypesService } from './vis_types/types_service';
-export { VISUALIZE_EMBEDDABLE_TYPE, VIS_EVENT_TO_TRIGGER } from './embeddable';
+export {
+  apiHasVisualizeConfig,
+  VISUALIZE_EMBEDDABLE_TYPE,
+  VIS_EVENT_TO_TRIGGER,
+} from './embeddable';
 export { VisualizationContainer } from './components';
 export { getVisSchemas } from './vis_schemas';
 
 /** @public types */
 export type { VisualizationsSetup, VisualizationsStart };
 export { VisGroups } from './vis_types/vis_groups_enum';
-export type { BaseVisType, VisTypeAlias, VisTypeDefinition, Schema, ISchemas } from './vis_types';
+export type {
+  BaseVisType,
+  VisTypeAlias,
+  VisTypeDefinition,
+  Schema,
+  ISchemas,
+  VisualizationClient,
+  SerializableAttributes,
+} from './vis_types';
 export type { Vis, SerializedVis, SerializedVisData, VisData } from './vis';
 export type VisualizeEmbeddableFactoryContract = PublicContract<VisualizeEmbeddableFactory>;
 export type VisualizeEmbeddableContract = PublicContract<VisualizeEmbeddable>;
-export type { VisualizeInput } from './embeddable';
-export type { VisualizeEmbeddable } from './embeddable';
+export type { VisualizeInput, VisualizeEmbeddable, HasVisualizeConfig } from './embeddable';
 export type { SchemaConfig } from '../common/types';
 export { updateOldState } from './legacy/vis_update_state';
 export type { PersistedState } from './persisted_state';
@@ -46,7 +57,6 @@ export type {
   VisualizationStage,
 } from './vis_types/vis_type_alias_registry';
 export {
-  VISUALIZE_ENABLE_LABS_SETTING,
   SAVED_OBJECTS_LIMIT_SETTING,
   SAVED_OBJECTS_PER_PAGE_SETTING,
   LegendSize,
@@ -54,7 +64,7 @@ export {
   DEFAULT_LEGEND_SIZE,
 } from '../common/constants';
 export type { SavedVisState, VisParams, Dimension } from '../common';
-export { prepareLogTable } from '../common';
+export { prepareLogTable, XYCurveTypes } from '../common';
 export type { ExpressionValueVisDimension } from '../common/expression_functions/vis_dimension';
 export type {
   ExpressionValueXYDimension,
@@ -69,8 +79,10 @@ export type { IEditorController, EditorRenderProps } from './visualize_app/types
 export {
   VISUALIZE_EDITOR_TRIGGER,
   AGG_BASED_VISUALIZATION_TRIGGER,
+  DASHBOARD_VISUALIZATION_PANEL_TRIGGER,
   ACTION_CONVERT_TO_LENS,
   ACTION_CONVERT_AGG_BASED_TO_LENS,
+  ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS,
 } from './triggers';
 
 export const convertToLensModule = import('./convert_to_lens');

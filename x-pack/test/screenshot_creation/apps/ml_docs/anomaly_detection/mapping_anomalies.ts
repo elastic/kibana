@@ -60,17 +60,12 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('open index in data visualizer');
       await ml.navigation.navigateToMl();
       await ml.navigation.navigateToDataVisualizer();
-      await ml.dataVisualizer.navigateToIndexPatternSelection();
+      await ml.dataVisualizer.navigateToDataViewSelection();
       await ml.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(LOGS_INDEX_PATTERN);
 
       await ml.testExecution.logTestStep('set data visualizer options');
       await ml.dataVisualizerIndexBased.assertTimeRangeSelectorSectionExists();
       await ml.dataVisualizerIndexBased.clickUseFullDataButton('14,074');
-      await ml.dataVisualizerTable.setSampleSizeInputValue(
-        'all',
-        'geo.coordinates',
-        '14074 (100%)'
-      );
       await ml.dataVisualizerTable.setFieldNameFilter(['geo.dest']);
 
       await ml.testExecution.logTestStep('set maps options and take screenshot');

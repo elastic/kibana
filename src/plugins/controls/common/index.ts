@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export type { ControlWidth } from './types';
+export type { ControlWidth, ControlInputTransform } from './types';
 
 // Control Group exports
 export {
@@ -26,6 +26,7 @@ export {
   serializableToRawControlGroupAttributes,
   persistableControlGroupInputIsEqual,
   getDefaultControlGroupInput,
+  generateNewControlIds,
 } from './control_group/control_group_persistence';
 
 export {

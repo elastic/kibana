@@ -13,7 +13,7 @@ import { EuiSwitch } from '@elastic/eui';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
+import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { dataPluginMock, getCalculateAutoTimeExpression } from '@kbn/data-plugin/public/mocks';
@@ -98,7 +98,6 @@ const defaultOptions = {
   layerId: '1',
   storage: {} as IStorageWrapper,
   uiSettings: uiSettingsMock,
-  savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: {
     fromDate: 'now-1y',
     toDate: 'now',
@@ -777,7 +776,6 @@ describe('date_histogram', () => {
             sourceField: 'missing',
             params: { interval: 'auto' },
           },
-          indexPattern1,
           {
             col1: {
               label: '',
@@ -787,7 +785,8 @@ describe('date_histogram', () => {
               sourceField: 'missing',
               params: { interval: 'auto' },
             } as DateHistogramIndexPatternColumn,
-          }
+          },
+          indexPattern1
         )
       ).toEqual('Missing field');
     });

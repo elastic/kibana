@@ -13,7 +13,7 @@ import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
   SERVICE_LANGUAGE_NAME,
-} from './elasticsearch_fieldnames';
+} from './es_fields/apm';
 
 const LABELS = 'labels'; // implies labels.* wildcard
 

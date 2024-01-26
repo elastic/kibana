@@ -31,7 +31,8 @@ describe('Get list of serverside expression functions', () => {
 
     initializeGetFunctionsRoute(routerDeps);
 
-    routeHandler = routerDeps.router.get.mock.calls[0][1];
+    routeHandler =
+      routerDeps.router.versioned.get.mock.results[0].value.addVersion.mock.calls[0][1];
   });
 
   afterAll(() => {

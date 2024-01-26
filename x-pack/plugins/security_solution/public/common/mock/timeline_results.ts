@@ -7,21 +7,18 @@
 
 import { FilterStateStore } from '@kbn/es-query';
 
-import type { TimelineResult } from '../../../common/types/timeline';
-import {
-  TimelineId,
-  TimelineType,
-  TimelineStatus,
-  TimelineTabs,
-} from '../../../common/types/timeline';
+import type { DataTableModel } from '@kbn/securitysolution-data-table';
+import { VIEW_SELECTION } from '../../../common/constants';
+import type { TimelineResult } from '../../../common/api/timeline';
+import { TimelineId, TimelineTabs } from '../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../common/api/timeline';
 
 import type { OpenTimelineResult } from '../../timelines/components/open_timeline/types';
 import type { TimelineEventsDetailsItem } from '../../../common/search_strategy';
 import { Direction } from '../../../common/search_strategy';
 import type { CreateTimelineProps } from '../../detections/components/alerts_table/types';
-import type { TimelineModel } from '../../timelines/store/timeline/model';
-import { timelineDefaults } from '../../timelines/store/timeline/defaults';
-import type { TGridModel } from '../store/data_table/model';
+import type { TimelineModel } from '../../timelines/store/model';
+import { timelineDefaults } from '../../timelines/store/defaults';
 
 export const mockOpenTimelineQueryResults = {
   totalCount: 11,
@@ -1950,6 +1947,11 @@ const mockTimelineModelColumns: TimelineModel['columns'] = [
     id: 'user.name',
     initialWidth: 180,
   },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'kibana.alert.workflow_assignee_ids',
+    initialWidth: 180,
+  },
 ];
 export const mockTimelineModel: TimelineModel = {
   activeTab: TimelineTabs.query,
@@ -1993,6 +1995,7 @@ export const mockTimelineModel: TimelineModel = {
   highlightedDropAndProviderId: '',
   historyIds: [],
   id: 'ef579e40-jibber-jabber',
+  selectAll: false,
   indexNames: [],
   isFavorite: false,
   isLive: false,
@@ -2028,9 +2031,12 @@ export const mockTimelineModel: TimelineModel = {
   templateTimelineId: null,
   templateTimelineVersion: null,
   version: '1',
+  savedSearchId: null,
+  savedSearch: null,
+  isDataProviderVisible: false,
 };
 
-export const mockTGridModel: TGridModel = {
+export const mockDataTableModel: DataTableModel = {
   columns: mockTimelineModelColumns,
   defaultColumns: mockTimelineModelColumns,
   dataViewId: null,
@@ -2074,6 +2080,11 @@ export const mockTGridModel: TGridModel = {
   showCheckboxes: false,
   selectAll: false,
   totalCount: 0,
+  viewMode: VIEW_SELECTION.gridView,
+  additionalFilters: {
+    showOnlyThreatIndicatorAlerts: false,
+    showBuildingBlockAlerts: false,
+  },
 };
 
 export const mockGetOneTimelineResult: TimelineResult = {
@@ -2184,6 +2195,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
     pinnedEventsSaveObject: {},
     queryFields: [],
     savedObjectId: null,
+    selectAll: false,
     selectedEventIds: {},
     sessionViewConfig: null,
     show: false,
@@ -2201,10 +2213,15 @@ export const defaultTimelineProps: CreateTimelineProps = {
     templateTimelineVersion: null,
     templateTimelineId: null,
     version: null,
+    savedSearchId: null,
+    isDiscoverSavedSearchLoaded: false,
+    savedSearch: null,
+    isDataProviderVisible: false,
   },
   to: '2018-11-05T19:03:25.937Z',
   notes: null,
   ruleNote: '# this is some markdown documentation',
+  ruleAuthor: ['elastic'],
 };
 
 export const mockTimelineDetails: TimelineEventsDetailsItem[] = [

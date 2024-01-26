@@ -10,7 +10,7 @@ import { Rule, RuleReference } from '../types';
 
 export const rules: Rule[] = [
   {
-    exception_list: [
+    exceptions_list: [
       {
         id: '123',
         list_id: 'i_exist',

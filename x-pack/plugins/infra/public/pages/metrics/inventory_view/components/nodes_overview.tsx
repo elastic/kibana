@@ -8,9 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import { useCurrentEuiBreakpoint } from '@elastic/eui';
-
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { InventoryItemType } from '../../../../../common/inventory_models/types';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { InfraWaffleMapBounds, InfraWaffleMapOptions, InfraFormatter } from '../../../../lib/lib';
 import { NoData } from '../../../../components/empty_states';
 import { InfraLoadingPanel } from '../../../../components/loading';
@@ -19,6 +18,8 @@ import { TableView } from './table_view';
 import { SnapshotNode } from '../../../../../common/http_api/snapshot_api';
 import { calculateBoundsFromNodes } from '../lib/calculate_bounds_from_nodes';
 import { Legend } from './waffle/legend';
+import { useAssetDetailsFlyoutState } from '../hooks/use_asset_details_flyout_url_state';
+import { AssetDetailsFlyout } from './waffle/asset_details_flyout';
 
 export interface KueryFilterQuery {
   kind: 'kuery';
@@ -38,8 +39,9 @@ interface Props {
   autoBounds: boolean;
   formatter: InfraFormatter;
   bottomMargin: number;
-  topMargin: number;
   showLoading: boolean;
+  isAutoReloading?: boolean;
+  refreshInterval?: number;
 }
 
 export const NodesOverview = ({
@@ -55,10 +57,17 @@ export const NodesOverview = ({
   formatter,
   onDrilldown,
   bottomMargin,
-  topMargin,
   showLoading,
+  refreshInterval,
+  isAutoReloading,
 }: Props) => {
   const currentBreakpoint = useCurrentEuiBreakpoint();
+  const [{ detailsItemId }, setFlyoutUrlState] = useAssetDetailsFlyoutState();
+
+  const closeFlyout = useCallback(
+    () => setFlyoutUrlState({ detailsItemId: null }),
+    [setFlyoutUrlState]
+  );
 
   const handleDrilldown = useCallback(
     (filter: string) => {
@@ -121,19 +130,30 @@ export const NodesOverview = ({
     );
   }
   return (
-    <MapContainer top={topMargin} positionStatic={isStatic}>
+    <MapContainer positionStatic={isStatic}>
       <Map
         nodeType={nodeType}
         nodes={nodes}
+        detailsItemId={detailsItemId}
         options={options}
         formatter={formatter}
         currentTime={currentTime}
         onFilter={handleDrilldown}
         bounds={bounds}
-        dataBounds={dataBounds}
         bottomMargin={bottomMargin}
         staticHeight={isStatic}
       />
+      {nodeType === 'host' && detailsItemId && (
+        <AssetDetailsFlyout
+          assetName={detailsItemId}
+          assetType={nodeType}
+          closeFlyout={closeFlyout}
+          currentTime={currentTime}
+          isAutoReloading={isAutoReloading}
+          options={options}
+          refreshInterval={refreshInterval}
+        />
+      )}
       <Legend
         formatter={formatter}
         bounds={bounds}
@@ -148,10 +168,10 @@ const TableContainer = euiStyled.div`
   padding: ${(props) => props.theme.eui.euiSizeL};
 `;
 
-const MapContainer = euiStyled.div<{ top: number; positionStatic: boolean }>`
+const MapContainer = euiStyled.div<{ positionStatic: boolean }>`
   position: ${(props) => (props.positionStatic ? 'static' : 'absolute')};
   display: flex;
-  top: ${(props) => props.top}px;
+  top: 0;
   right: 0;
   bottom: 0;
   left: 0;

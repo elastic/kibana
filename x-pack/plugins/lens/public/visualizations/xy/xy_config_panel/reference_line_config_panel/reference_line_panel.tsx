@@ -10,21 +10,21 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { FillStyle } from '@kbn/expression-xy-plugin/common';
+import {
+  useDebouncedValue,
+  IconSelectSetting,
+  ColorPicker,
+  LineStyleSettings,
+  TextDecorationSetting,
+} from '@kbn/visualization-ui-components';
 import type { VisualizationDimensionEditorProps } from '../../../../types';
 import { State, XYState, XYReferenceLineLayerConfig, YConfig } from '../../types';
-import { FormatFactory } from '../../../../../common';
+import { FormatFactory } from '../../../../../common/types';
 
-import { ColorPicker } from '../color_picker';
 import { updateLayer } from '..';
-import { useDebouncedValue } from '../../../../shared_components';
 import { idPrefix } from '../dimension_editor';
 import { isHorizontalChart } from '../../state_helpers';
-import {
-  IconSelectSetting,
-  MarkerDecorationPosition,
-  TextDecorationSetting,
-} from '../shared/marker_decoration_settings';
-import { LineStyleSettings } from '../shared/line_style_settings';
+import { MarkerDecorationPosition } from '../shared/marker_decoration_settings';
 import { referenceLineIconsSet } from './icon_set';
 import { defaultReferenceLineColor } from '../../color_assignment';
 
@@ -75,10 +75,14 @@ export const ReferenceLinePanel = (
 
   return (
     <>
-      <TextDecorationSetting setConfig={setConfig} currentConfig={localConfig} />
-      <IconSelectSetting
+      <TextDecorationSetting
+        idPrefix={idPrefix}
         setConfig={setConfig}
         currentConfig={localConfig}
+      />
+      <IconSelectSetting
+        setIcon={(icon) => setConfig({ icon })}
+        currentIcon={localConfig?.icon}
         customIconSet={referenceLineIconsSet}
       />
       <MarkerDecorationPosition
@@ -86,11 +90,7 @@ export const ReferenceLinePanel = (
         setConfig={setConfig}
         currentConfig={localConfig}
       />
-      <LineStyleSettings
-        isHorizontal={isHorizontal}
-        setConfig={setConfig}
-        currentConfig={localConfig}
-      />
+      <LineStyleSettings idPrefix={idPrefix} setConfig={setConfig} currentConfig={localConfig} />
       <FillSetting isHorizontal={isHorizontal} setConfig={setConfig} currentConfig={localConfig} />
       <ColorPicker
         {...props}

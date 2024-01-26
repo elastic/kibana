@@ -7,6 +7,7 @@
 import React, { lazy, Suspense } from 'react';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { CspLoadingState } from './components/csp_loading_state';
 import type { CspRouterProps } from './application/csp_router';
@@ -19,10 +20,10 @@ import type {
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 import { SetupContext } from './application/setup_context';
 
-const LazyCspEditPolicy = lazy(() => import('./components/fleet_extensions/policy_extension_edit'));
-const LazyCspCreatePolicy = lazy(
-  () => import('./components/fleet_extensions/policy_extension_create')
+const LazyCspPolicyTemplateForm = lazy(
+  () => import('./components/fleet_extensions/policy_template_form')
 );
+
 const LazyCspCustomAssets = lazy(
   () => import('./components/fleet_extensions/custom_assets_extension')
 );
@@ -57,14 +58,8 @@ export class CspPlugin
   public start(core: CoreStart, plugins: CspClientPluginStartDeps): CspClientPluginStart {
     plugins.fleet.registerExtension({
       package: CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-      view: 'package-policy-create',
-      Component: LazyCspCreatePolicy,
-    });
-
-    plugins.fleet.registerExtension({
-      package: CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-      view: 'package-policy-edit',
-      Component: LazyCspEditPolicy,
+      view: 'package-policy-replace-define-step',
+      Component: LazyCspPolicyTemplateForm,
     });
 
     plugins.fleet.registerExtension({
@@ -73,19 +68,23 @@ export class CspPlugin
       Component: LazyCspCustomAssets,
     });
 
+    const storage = new Storage(localStorage);
+
+    // Keep as constant to prevent remounts https://github.com/elastic/kibana/issues/146773
+    const App = (props: CspRouterProps) => (
+      <KibanaContextProvider services={{ ...core, ...plugins, storage }}>
+        <RedirectAppLinks coreStart={core}>
+          <div style={{ width: '100%', height: '100%' }}>
+            <SetupContext.Provider value={{ isCloudEnabled: this.isCloudEnabled }}>
+              <CspRouter {...props} />
+            </SetupContext.Provider>
+          </div>
+        </RedirectAppLinks>
+      </KibanaContextProvider>
+    );
+
     return {
-      getCloudSecurityPostureRouter: () => (props: CspRouterProps) =>
-        (
-          <KibanaContextProvider services={{ ...core, ...plugins }}>
-            <RedirectAppLinks coreStart={core}>
-              <div style={{ width: '100%', height: '100%' }}>
-                <SetupContext.Provider value={{ isCloudEnabled: this.isCloudEnabled }}>
-                  <CspRouter {...props} />
-                </SetupContext.Provider>
-              </div>
-            </RedirectAppLinks>
-          </KibanaContextProvider>
-        ),
+      getCloudSecurityPostureRouter: () => App,
     };
   }
 

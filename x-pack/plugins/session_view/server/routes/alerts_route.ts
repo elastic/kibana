@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '@kbn/core/server';
+import { transformError } from '@kbn/securitysolution-es-utils';
+import { IRouter, Logger } from '@kbn/core/server';
 import type {
   AlertsClient,
   RuleRegistryPluginStartContract,
@@ -17,46 +18,61 @@ import {
   ALERT_UUID_PROPERTY,
   ALERT_ORIGINAL_TIME_PROPERTY,
   PREVIEW_ALERTS_INDEX,
+  ALERT_FIELDS,
 } from '../../common/constants';
 
 import { expandDottedObject } from '../../common/utils/expand_dotted_object';
 
 export const registerAlertsRoute = (
   router: IRouter,
+  logger: Logger,
   ruleRegistry: RuleRegistryPluginStartContract
 ) => {
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'internal',
       path: ALERTS_ROUTE,
-      validate: {
-        query: schema.object({
-          sessionEntityId: schema.string(),
-          investigatedAlertId: schema.maybe(schema.string()),
-          cursor: schema.maybe(schema.string()),
-          range: schema.maybe(schema.arrayOf(schema.string())),
-        }),
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            query: schema.object({
+              sessionEntityId: schema.string(),
+              sessionStartTime: schema.string(),
+              investigatedAlertId: schema.maybe(schema.string()),
+              cursor: schema.maybe(schema.string()),
+            }),
+          },
+        },
       },
-    },
-    async (_context, request, response) => {
-      const client = await ruleRegistry.getRacClientWithRequest(request);
-      const { sessionEntityId, investigatedAlertId, range, cursor } = request.query;
+      async (_context, request, response) => {
+        const client = await ruleRegistry.getRacClientWithRequest(request);
+        const { sessionEntityId, sessionStartTime, investigatedAlertId, cursor } = request.query;
 
-      try {
-        const body = await searchAlerts(
-          client,
-          sessionEntityId,
-          ALERTS_PER_PAGE,
-          investigatedAlertId,
-          range,
-          cursor
-        );
+        try {
+          const body = await searchAlerts(
+            client,
+            sessionEntityId,
+            ALERTS_PER_PAGE,
+            investigatedAlertId,
+            [sessionStartTime],
+            cursor
+          );
 
-        return response.ok({ body });
-      } catch (err) {
-        return response.badRequest(err.message);
+          return response.ok({ body });
+        } catch (err) {
+          const error = transformError(err);
+          logger.error(`Failed to fetch alerts: ${err}`);
+
+          return response.customError({
+            body: { message: error.message },
+            statusCode: error.statusCode,
+          });
+        }
       }
-    }
-  );
+    );
 };
 
 export const searchAlerts = async (
@@ -101,12 +117,14 @@ export const searchAlerts = async (
       index: indices.join(','),
       sort: [{ '@timestamp': 'asc' }],
       search_after: cursor ? [cursor] : undefined,
+      _source: ALERT_FIELDS,
     });
 
     // if an alert is being investigated, fetch it on it's own, as it's not guaranteed to come back in the above request.
     // we only need to do this for the first page of alerts.
     if (!cursor && investigatedAlertId) {
       const investigatedAlertSearch = await client.find({
+        _source: ALERT_FIELDS,
         query: {
           match: {
             [ALERT_UUID_PROPERTY]: investigatedAlertId,

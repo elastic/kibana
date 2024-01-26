@@ -7,8 +7,10 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { IngestPipelineParams } from '@kbn/search-connectors';
+
+import { DEFAULT_PIPELINE_VALUES } from '../../../../../common/constants';
 import { Status } from '../../../../../common/types/api';
-import { flashAPIErrors } from '../../../shared/flash_messages';
 import { KibanaLogic } from '../../../shared/kibana';
 
 import { GenerateApiKeyLogic } from '../../api/generate_api_key/generate_api_key_logic';
@@ -16,6 +18,10 @@ import {
   CachedFetchIndexApiLogic,
   CachedFetchIndexApiLogicActions,
 } from '../../api/index/cached_fetch_index_api_logic';
+import {
+  FetchIndexPipelineParametersApiLogic,
+  FetchIndexPipelineParametersApiLogicActions,
+} from '../../api/pipelines/fetch_index_pipeline_parameters';
 
 import { SEARCH_INDICES_PATH } from '../../routes';
 
@@ -23,6 +29,7 @@ interface OverviewLogicActions {
   apiError: CachedFetchIndexApiLogicActions['apiError'];
   apiReset: typeof GenerateApiKeyLogic.actions.apiReset;
   closeGenerateModal: void;
+  fetchIndexPipelineParameters: FetchIndexPipelineParametersApiLogicActions['makeRequest'];
   openGenerateModal: void;
   toggleClientsPopover: void;
   toggleManageApiKeyPopover: void;
@@ -33,6 +40,8 @@ interface OverviewLogicValues {
   apiKeyData: typeof GenerateApiKeyLogic.values.data;
   apiKeyStatus: typeof GenerateApiKeyLogic.values.status;
   indexData: typeof CachedFetchIndexApiLogic.values.indexData;
+  indexPipelineData: typeof FetchIndexPipelineParametersApiLogic.values.data;
+  indexPipelineParameters: IngestPipelineParams;
   isClientsPopoverOpen: boolean;
   isError: boolean;
   isGenerateModalOpen: boolean;
@@ -49,17 +58,25 @@ export const OverviewLogic = kea<MakeLogicType<OverviewLogicValues, OverviewLogi
     toggleManageApiKeyPopover: true,
   },
   connect: {
-    actions: [CachedFetchIndexApiLogic, ['apiError'], GenerateApiKeyLogic, ['apiReset']],
+    actions: [
+      CachedFetchIndexApiLogic,
+      ['apiError'],
+      GenerateApiKeyLogic,
+      ['apiReset'],
+      FetchIndexPipelineParametersApiLogic,
+      ['makeRequest as fetchIndexPipelineParameters'],
+    ],
     values: [
       CachedFetchIndexApiLogic,
       ['indexData', 'status'],
       GenerateApiKeyLogic,
       ['data as apiKeyData', 'status as apiKeyStatus'],
+      FetchIndexPipelineParametersApiLogic,
+      ['data as indexPipelineData'],
     ],
   },
   listeners: ({ actions }) => ({
-    apiError: async (error, breakpoint) => {
-      flashAPIErrors(error);
+    apiError: async (_, breakpoint) => {
       // show error for a second before navigating away
       await breakpoint(1000);
       KibanaLogic.values.navigateToUrl(SEARCH_INDICES_PATH);
@@ -96,6 +113,11 @@ export const OverviewLogic = kea<MakeLogicType<OverviewLogicValues, OverviewLogi
       () => [selectors.apiKeyStatus, selectors.apiKeyData],
       (apiKeyStatus, apiKeyData) =>
         apiKeyStatus === Status.SUCCESS ? apiKeyData.apiKey.encoded : '',
+    ],
+    indexPipelineParameters: [
+      () => [selectors.indexPipelineData],
+      (indexPipelineData: typeof FetchIndexPipelineParametersApiLogic.values.data) =>
+        indexPipelineData ?? DEFAULT_PIPELINE_VALUES,
     ],
     isError: [() => [selectors.status], (status) => status === Status.ERROR],
     isLoading: [

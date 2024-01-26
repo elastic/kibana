@@ -17,6 +17,7 @@ import React, { Component } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiText } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { usePageUrlState } from '@kbn/ml-url-state';
 
 import { getColumns } from './anomalies_table_columns';
 
@@ -26,7 +27,6 @@ import { mlTableService } from '../../services/table_service';
 import { RuleEditorFlyout } from '../rule_editor';
 import { ml } from '../../services/ml_api_service';
 import { INFLUENCERS_LIMIT, ANOMALIES_TABLE_TABS, MAX_CHARS } from './anomalies_table_constants';
-import { usePageUrlState } from '../../util/url_state';
 
 export class AnomaliesTableInternal extends Component {
   constructor(props) {
@@ -205,6 +205,10 @@ export class AnomaliesTableInternal extends Component {
       this.props.sourceIndicesWithGeoFields
     );
 
+    // Use auto table layout, unless any columns (categorization examples) have truncateText
+    // set to true which only works with a fixed layout.
+    const tableLayout = columns.some((column) => column.truncateText === true) ? 'fixed' : 'auto';
+
     const sorting = {
       sort: {
         field: tableState.sortField,
@@ -237,6 +241,7 @@ export class AnomaliesTableInternal extends Component {
           className="ml-anomalies-table eui-textBreakWord"
           items={tableData.anomalies}
           columns={columns}
+          tableLayout={tableLayout}
           pagination={pagination}
           sorting={sorting}
           itemId="rowId"

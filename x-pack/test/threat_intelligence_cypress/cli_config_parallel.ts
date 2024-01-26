@@ -8,10 +8,7 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 import { FtrProviderContext } from './ftr_provider_context';
 
-import { ThreatIntelligenceCypressCliTestRunnerCI } from './runner';
-
-const cliNumber = parseInt(process.env.CLI_NUMBER ?? '1', 10);
-const cliCount = parseInt(process.env.CLI_COUNT ?? '1', 10);
+import { ThreatIntelligenceConfigurableCypressTestRunner } from './runner';
 
 // eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -20,6 +17,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...securitySolutionCypressConfig.getAll(),
 
     testRunner: (context: FtrProviderContext) =>
-      ThreatIntelligenceCypressCliTestRunnerCI(context, cliCount, cliNumber),
+      ThreatIntelligenceConfigurableCypressTestRunner(context),
   };
 }

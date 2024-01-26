@@ -14,6 +14,7 @@ import type {
   CurrentUpgrade,
   NewAgentAction,
   AgentDiagnostics,
+  AgentStatus,
 } from '../models';
 
 import type { ListResult, ListWithKuery } from './common';
@@ -22,13 +23,14 @@ export interface GetAgentsRequest {
   query: ListWithKuery & {
     showInactive: boolean;
     showUpgradeable?: boolean;
+    withMetrics?: boolean;
   };
 }
 
 export interface GetAgentsResponse extends ListResult<Agent> {
-  totalInactive: number;
   // deprecated in 8.x
   list?: Agent[];
+  statusSummary?: Record<AgentStatus, number>;
 }
 
 export interface GetAgentTagsResponse {
@@ -38,6 +40,9 @@ export interface GetAgentTagsResponse {
 export interface GetOneAgentRequest {
   params: {
     agentId: string;
+  };
+  query: {
+    withMetrics?: boolean;
   };
 }
 
@@ -80,6 +85,7 @@ export interface PostBulkAgentUnenrollRequest {
     agents: string[] | string;
     force?: boolean;
     revoke?: boolean;
+    includeInactive?: boolean;
   };
 }
 
@@ -96,6 +102,7 @@ export interface PostAgentUpgradeRequest {
   body: {
     source_uri?: string;
     version: string;
+    force?: boolean;
   };
 }
 
@@ -106,6 +113,7 @@ export interface PostBulkAgentUpgradeRequest {
     version: string;
     rollout_duration_seconds?: number;
     start_time?: string;
+    force?: boolean;
   };
 }
 
@@ -114,7 +122,17 @@ export type PostBulkAgentUpgradeResponse = BulkAgentAction;
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PostAgentUpgradeResponse {}
 
+// deprecated
 export interface PutAgentReassignRequest {
+  params: {
+    agentId: string;
+  };
+  body: { policy_id: string };
+}
+// deprecated
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PutAgentReassignResponse {}
+export interface PostAgentReassignRequest {
   params: {
     agentId: string;
   };
@@ -122,7 +140,7 @@ export interface PutAgentReassignRequest {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PutAgentReassignResponse {}
+export interface PostAgentReassignResponse {}
 
 export interface PostBulkAgentReassignRequest {
   body: {
@@ -180,12 +198,17 @@ export interface GetAgentStatusRequest {
 export interface GetAgentStatusResponse {
   results: {
     events: number;
+    // deprecated
     total: number;
     online: number;
     error: number;
     offline: number;
     other: number;
     updating: number;
+    inactive: number;
+    unenrolled: number;
+    all: number;
+    active: number;
   };
 }
 
@@ -211,5 +234,15 @@ export interface GetActionStatusResponse {
   items: ActionStatus[];
 }
 export interface GetAvailableVersionsResponse {
+  items: string[];
+}
+
+export interface PostRetrieveAgentsByActionsRequest {
+  body: {
+    actionIds: string[];
+  };
+}
+
+export interface PostRetrieveAgentsByActionsResponse {
   items: string[];
 }

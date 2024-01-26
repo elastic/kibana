@@ -15,7 +15,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useState, useMemo } from 'react';
 import styled from 'styled-components';
-import { MLJobsAwaitingNodeWarning } from '@kbn/ml-plugin/public';
+import { MLJobsAwaitingNodeWarning, MlNodeAvailableWarningShared } from '@kbn/ml-plugin/public';
 import { useKibana } from '../../lib/kibana';
 import { filterJobs } from './helpers';
 import { JobsTableFilters } from './jobs_table/filters/jobs_table_filters';
@@ -48,6 +48,8 @@ const defaultFilterProps: JobsFilters = {
 export const MlPopover = React.memo(() => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [filterProperties, setFilterProperties] = useState(defaultFilterProps);
+  const [mlNodesAvailable, setMlNodesAvailable] = useState(false);
+
   const {
     isMlAdmin,
     isLicensed,
@@ -57,14 +59,22 @@ export const MlPopover = React.memo(() => {
   } = useSecurityJobs();
 
   const docLinks = useKibana().services.docLinks;
-  const { enableDatafeed, isLoading: isLoadingEnableDataFeed } = useEnableDataFeed();
+  const {
+    enableDatafeed,
+    disableDatafeed,
+    isLoading: isLoadingEnableDataFeed,
+  } = useEnableDataFeed();
   const handleJobStateChange = useCallback(
     async (job: SecurityJob, latestTimestampMs: number, enable: boolean) => {
-      const result = await enableDatafeed(job, latestTimestampMs, enable);
+      if (enable) {
+        await enableDatafeed(job, latestTimestampMs);
+      } else {
+        await disableDatafeed(job);
+      }
+
       refreshJobs();
-      return result;
     },
-    [refreshJobs, enableDatafeed]
+    [refreshJobs, enableDatafeed, disableDatafeed]
   );
 
   const filteredJobs = filterJobs({
@@ -151,7 +161,7 @@ export const MlPopover = React.memo(() => {
               <EuiCallOut
                 title={i18n.MODULE_NOT_COMPATIBLE_TITLE(incompatibleJobCount)}
                 color="warning"
-                iconType="alert"
+                iconType="warning"
                 size="s"
               >
                 <p>
@@ -178,10 +188,12 @@ export const MlPopover = React.memo(() => {
           )}
 
           <MLJobsAwaitingNodeWarning jobIds={installedJobsIds} />
+          <MlNodeAvailableWarningShared size="s" nodeAvailableCallback={setMlNodesAvailable} />
           <JobsTable
             isLoading={isLoadingSecurityJobs || isLoadingEnableDataFeed}
             jobs={filteredJobs}
             onJobStateChange={handleJobStateChange}
+            mlNodesAvailable={mlNodesAvailable}
           />
         </PopoverContentsDiv>
       </EuiPopover>

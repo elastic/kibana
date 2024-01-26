@@ -6,10 +6,9 @@
  */
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
-import { assertLogContains } from '../test_utils';
+import { readLogFile, assertLogContains } from '../test_utils';
 
 export default function ({ getService }: FtrProviderContext) {
-  const retry = getService('retry');
   const supertest = getService('supertest');
 
   describe('Log Correlation', () => {
@@ -24,12 +23,14 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(response2.body.traceId).not.to.be(response1.body.traceId);
 
+      const logs = await readLogFile();
+
       let responseTraceId: string | undefined;
       await assertLogContains({
         description: 'traceId included in the http logs',
         predicate: (record) => {
           // we don't check trace.id value since trace.id in the test plugin and Kibana are different on CI.
-          // because different 'elastic-apm-node' instaces are imported
+          // because different 'elastic-apm-node' instances are imported
           if (
             record.log?.logger === 'http.server.response' &&
             record.url?.path === '/emit_log_with_trace_id'
@@ -39,7 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
           }
           return false;
         },
-        retry,
+        logs,
       });
 
       expect(responseTraceId).to.be.a('string');
@@ -54,7 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
               record.message?.includes('HEAD /')
           ),
 
-        retry,
+        logs,
       });
     });
   });

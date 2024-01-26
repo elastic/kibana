@@ -7,7 +7,10 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { AdvancedSettingsServerPlugin } from './plugin';
 
-export const plugin = (initContext: PluginInitializerContext) =>
-  new AdvancedSettingsServerPlugin(initContext);
+export { config } from './config';
+
+export const plugin = async (initContext: PluginInitializerContext) => {
+  const { AdvancedSettingsServerPlugin } = await import('./plugin');
+  return new AdvancedSettingsServerPlugin(initContext);
+};

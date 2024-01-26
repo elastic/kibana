@@ -41,6 +41,11 @@ export class TimedItemBuffer<Item> extends ItemBuffer<Item> {
     super.flush();
   }
 
+  public async flushAsync() {
+    clearTimeout(this.timer);
+    await super.flushAsync();
+  }
+
   private onTimeout = () => {
     this.flush();
   };

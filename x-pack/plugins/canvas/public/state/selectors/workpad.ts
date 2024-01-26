@@ -68,10 +68,10 @@ export function getWorkpadVariablesAsObject(state: State) {
     return {};
   }
 
-  return (variables as CanvasVariable[]).reduce(
-    (vars: Record<string, any>, v: CanvasVariable) => ({ ...vars, [v.name]: v.value }),
-    {}
-  );
+  return (variables as CanvasVariable[]).reduce<Record<string, any>>((vars, v: CanvasVariable) => {
+    vars[v.name] = v.value;
+    return vars;
+  }, {});
 }
 
 export function getWorkpadInfo(state: State): WorkpadInfo {

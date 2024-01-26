@@ -6,7 +6,9 @@
  */
 
 import React, { useMemo, useState, useCallback } from 'react';
-import { Redirect, useRouteMatch, Switch, Route, useLocation } from 'react-router-dom';
+import { Redirect, useRouteMatch, useLocation } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPortal } from '@elastic/eui';
@@ -198,7 +200,7 @@ const AgentPolicyDetailsContent: React.FunctionComponent<{ agentPolicy: AgentPol
 }) => {
   useBreadcrumbs('policy_details', { policyName: agentPolicy.name });
   return (
-    <Switch>
+    <Routes>
       <Route
         path={FLEET_ROUTING_PATHS.policy_details_settings}
         render={() => {
@@ -211,6 +213,6 @@ const AgentPolicyDetailsContent: React.FunctionComponent<{ agentPolicy: AgentPol
           return <PackagePoliciesView agentPolicy={agentPolicy} />;
         }}
       />
-    </Switch>
+    </Routes>
   );
 };

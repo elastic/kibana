@@ -8,5 +8,5 @@
 export { templateActionVariable } from './template_action_variable';
 export { hasMustacheTokens } from './has_mustache_tokens';
 export { AlertProvidedActionVariables } from './action_variables';
-export { updateActionConnector } from './action_connector_api';
+export { updateActionConnector, executeAction } from './action_connector_api';
 export { isRuleSnoozed } from './is_rule_snoozed';

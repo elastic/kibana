@@ -10,7 +10,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';

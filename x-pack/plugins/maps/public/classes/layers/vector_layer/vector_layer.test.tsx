@@ -11,11 +11,9 @@ jest.mock('../../styles/vector/vector_style', () => ({
   VectorStyle: class MockVectorStyle {},
 }));
 
-jest.mock('uuid/v4', () => {
-  return function () {
-    return '12345';
-  };
-});
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('12345'),
+}));
 
 import {
   AGG_TYPE,
@@ -27,7 +25,9 @@ import {
 import { ESTermSourceDescriptor, VectorStyleDescriptor } from '../../../../common/descriptor_types';
 import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
 import { IVectorSource } from '../../sources/vector_source';
-import { AbstractVectorLayer } from './vector_layer';
+import { mockVectorLayer } from '../__fixtures__/mock_vector_layer';
+import { AbstractVectorLayer, isVectorLayer, hasVectorLayerMethod } from './vector_layer';
+import type { ILayer } from '../layer';
 
 class MockSource {
   cloneDescriptor() {
@@ -38,6 +38,30 @@ class MockSource {
     return 'mySource';
   }
 }
+
+describe('isVectorLayer', () => {
+  test('Should return true when Layer instance implements IVectorLayer interface', async () => {
+    expect(isVectorLayer(mockVectorLayer)).toBe(true);
+  });
+
+  test('Should return false when Layer instance does not implement IVectorLayer interface', async () => {
+    expect(isVectorLayer({} as unknown as ILayer)).toBe(false);
+  });
+});
+
+describe('hasVectorLayerMethod', () => {
+  test('Should return true when Layer instance implements specific method', async () => {
+    const mockLayer = {
+      getJoins: () => {},
+    } as unknown as ILayer;
+    expect(hasVectorLayerMethod(mockLayer, 'getJoins')).toBe(true);
+  });
+
+  test('Should return false when Layer instance does not implement specific method', async () => {
+    const mockLayer = {} as unknown as ILayer;
+    expect(hasVectorLayerMethod(mockLayer, 'getJoins')).toBe(false);
+  });
+});
 
 describe('cloneDescriptor', () => {
   describe('with joins', () => {

@@ -6,7 +6,7 @@
  */
 
 import { addItemsToArray, deleteItemsFromArray, ruleParamsModifier } from './rule_params_modifier';
-import { BulkActionEditType } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import type { RuleAlertType } from '../../../rule_schema';
 
 describe('addItemsToArray', () => {
@@ -45,23 +45,23 @@ describe('ruleParamsModifier', () => {
   } as RuleAlertType['params'];
 
   test('should increment version if rule is custom (immutable === false)', () => {
-    const editedRuleParams = ruleParamsModifier(ruleParamsMock, [
+    const { modifiedParams } = ruleParamsModifier(ruleParamsMock, [
       {
-        type: BulkActionEditType.add_index_patterns,
+        type: BulkActionEditTypeEnum.add_index_patterns,
         value: ['my-index-*'],
       },
     ]);
-    expect(editedRuleParams).toHaveProperty('version', ruleParamsMock.version + 1);
+    expect(modifiedParams).toHaveProperty('version', ruleParamsMock.version + 1);
   });
 
   test('should not increment version if rule is prebuilt (immutable === true)', () => {
-    const editedRuleParams = ruleParamsModifier({ ...ruleParamsMock, immutable: true }, [
+    const { modifiedParams } = ruleParamsModifier({ ...ruleParamsMock, immutable: true }, [
       {
-        type: BulkActionEditType.add_index_patterns,
+        type: BulkActionEditTypeEnum.add_index_patterns,
         value: ['my-index-*'],
       },
     ]);
-    expect(editedRuleParams).toHaveProperty('version', ruleParamsMock.version);
+    expect(modifiedParams).toHaveProperty('version', ruleParamsMock.version);
   });
 
   describe('index_patterns', () => {
@@ -73,6 +73,7 @@ describe('ruleParamsModifier', () => {
             existingIndexPatterns: ['index-1-*', 'index-2-*', 'index-3-*'],
             indexPatternsToAdd: ['index-2-*', 'index-3-*'],
             resultingIndexPatterns: ['index-1-*', 'index-2-*', 'index-3-*'],
+            isParamsUpdateSkipped: true,
           },
         ],
         [
@@ -87,6 +88,7 @@ describe('ruleParamsModifier', () => {
               'index-4-*',
               'index-5-*',
             ],
+            isParamsUpdateSkipped: false,
           },
         ],
         [
@@ -101,6 +103,7 @@ describe('ruleParamsModifier', () => {
               'index-4-*',
               'index-5-*',
             ],
+            isParamsUpdateSkipped: false,
           },
         ],
         [
@@ -109,21 +112,31 @@ describe('ruleParamsModifier', () => {
             existingIndexPatterns: ['index-1-*', 'index-2-*', 'index-3-*'],
             indexPatternsToAdd: [],
             resultingIndexPatterns: ['index-1-*', 'index-2-*', 'index-3-*'],
+            isParamsUpdateSkipped: true,
           },
         ],
       ])(
         'should add index patterns to rule, case:"%s"',
-        (caseName, { existingIndexPatterns, indexPatternsToAdd, resultingIndexPatterns }) => {
-          const editedRuleParams = ruleParamsModifier(
+        (
+          caseName,
+          {
+            existingIndexPatterns,
+            indexPatternsToAdd,
+            resultingIndexPatterns,
+            isParamsUpdateSkipped,
+          }
+        ) => {
+          const { modifiedParams, isParamsUpdateSkipped: isUpdateSkipped } = ruleParamsModifier(
             { ...ruleParamsMock, index: existingIndexPatterns } as RuleAlertType['params'],
             [
               {
-                type: BulkActionEditType.add_index_patterns,
+                type: BulkActionEditTypeEnum.add_index_patterns,
                 value: indexPatternsToAdd,
               },
             ]
           );
-          expect(editedRuleParams).toHaveProperty('index', resultingIndexPatterns);
+          expect(modifiedParams).toHaveProperty('index', resultingIndexPatterns);
+          expect(isParamsUpdateSkipped).toBe(isUpdateSkipped);
         }
       );
     });
@@ -136,6 +149,7 @@ describe('ruleParamsModifier', () => {
             existingIndexPatterns: ['index-1-*', 'index-2-*', 'index-3-*'],
             indexPatternsToDelete: ['index-2-*', 'index-3-*'],
             resultingIndexPatterns: ['index-1-*'],
+            isParamsUpdateSkipped: false,
           },
         ],
         [
@@ -144,6 +158,7 @@ describe('ruleParamsModifier', () => {
             existingIndexPatterns: ['index-1-*', 'index-2-*', 'index-3-*'],
             indexPatternsToDelete: ['index-4-*', 'index-5-*'],
             resultingIndexPatterns: ['index-1-*', 'index-2-*', 'index-3-*'],
+            isParamsUpdateSkipped: true,
           },
         ],
         [
@@ -152,6 +167,7 @@ describe('ruleParamsModifier', () => {
             existingIndexPatterns: ['index-1-*', 'index-2-*', 'index-3-*'],
             indexPatternsToDelete: ['index-3-*', 'index-4-*', 'index-5-*'],
             resultingIndexPatterns: ['index-1-*', 'index-2-*'],
+            isParamsUpdateSkipped: false,
           },
         ],
         [
@@ -160,21 +176,31 @@ describe('ruleParamsModifier', () => {
             existingIndexPatterns: ['index-1-*', 'index-2-*', 'index-3-*'],
             indexPatternsToDelete: [],
             resultingIndexPatterns: ['index-1-*', 'index-2-*', 'index-3-*'],
+            isParamsUpdateSkipped: true,
           },
         ],
       ])(
         'should delete index patterns from rule, case:"%s"',
-        (caseName, { existingIndexPatterns, indexPatternsToDelete, resultingIndexPatterns }) => {
-          const editedRuleParams = ruleParamsModifier(
+        (
+          caseName,
+          {
+            existingIndexPatterns,
+            indexPatternsToDelete,
+            resultingIndexPatterns,
+            isParamsUpdateSkipped,
+          }
+        ) => {
+          const { modifiedParams, isParamsUpdateSkipped: isUpdateSkipped } = ruleParamsModifier(
             { ...ruleParamsMock, index: existingIndexPatterns } as RuleAlertType['params'],
             [
               {
-                type: BulkActionEditType.delete_index_patterns,
+                type: BulkActionEditTypeEnum.delete_index_patterns,
                 value: indexPatternsToDelete,
               },
             ]
           );
-          expect(editedRuleParams).toHaveProperty('index', resultingIndexPatterns);
+          expect(modifiedParams).toHaveProperty('index', resultingIndexPatterns);
+          expect(isParamsUpdateSkipped).toBe(isUpdateSkipped);
         }
       );
     });
@@ -187,6 +213,7 @@ describe('ruleParamsModifier', () => {
             existingIndexPatterns: ['index-1-*', 'index-2-*', 'index-3-*'],
             indexPatternsToOverwrite: ['index-2-*', 'index-3-*'],
             resultingIndexPatterns: ['index-2-*', 'index-3-*'],
+            isParamsUpdateSkipped: false,
           },
         ],
         [
@@ -195,6 +222,7 @@ describe('ruleParamsModifier', () => {
             existingIndexPatterns: ['index-1-*', 'index-2-*', 'index-3-*'],
             indexPatternsToOverwrite: ['index-4-*', 'index-5-*'],
             resultingIndexPatterns: ['index-4-*', 'index-5-*'],
+            isParamsUpdateSkipped: false,
           },
         ],
         [
@@ -203,103 +231,118 @@ describe('ruleParamsModifier', () => {
             existingIndexPatterns: ['index-1-*', 'index-2-*', 'index-3-*'],
             indexPatternsToOverwrite: ['index-3-*', 'index-4-*', 'index-5-*'],
             resultingIndexPatterns: ['index-3-*', 'index-4-*', 'index-5-*'],
+            isParamsUpdateSkipped: false,
           },
         ],
       ])(
         'should overwrite index patterns in rule, case:"%s"',
-        (caseName, { existingIndexPatterns, indexPatternsToOverwrite, resultingIndexPatterns }) => {
-          const editedRuleParams = ruleParamsModifier(
+        (
+          caseName,
+          {
+            existingIndexPatterns,
+            indexPatternsToOverwrite,
+            resultingIndexPatterns,
+            isParamsUpdateSkipped,
+          }
+        ) => {
+          const { modifiedParams, isParamsUpdateSkipped: isUpdateSkipped } = ruleParamsModifier(
             { ...ruleParamsMock, index: existingIndexPatterns } as RuleAlertType['params'],
             [
               {
-                type: BulkActionEditType.set_index_patterns,
+                type: BulkActionEditTypeEnum.set_index_patterns,
                 value: indexPatternsToOverwrite,
               },
             ]
           );
-          expect(editedRuleParams).toHaveProperty('index', resultingIndexPatterns);
+          expect(modifiedParams).toHaveProperty('index', resultingIndexPatterns);
+          expect(isParamsUpdateSkipped).toBe(isUpdateSkipped);
         }
       );
     });
 
     test('should return undefined index patterns on remove action if rule has dataViewId only', () => {
       const testDataViewId = 'test-data-view-id';
-      const editedRuleParams = ruleParamsModifier(
+
+      const { modifiedParams, isParamsUpdateSkipped } = ruleParamsModifier(
         { dataViewId: testDataViewId } as RuleAlertType['params'],
         [
           {
-            type: BulkActionEditType.delete_index_patterns,
+            type: BulkActionEditTypeEnum.delete_index_patterns,
             value: ['index-2-*'],
           },
         ]
       );
-      expect(editedRuleParams).toHaveProperty('index', undefined);
-      expect(editedRuleParams).toHaveProperty('dataViewId', testDataViewId);
+      expect(modifiedParams).not.toHaveProperty('index');
+      expect(isParamsUpdateSkipped).toBe(true);
     });
 
     test('should set dataViewId to undefined if overwrite_data_views=true on set_index_patterns action', () => {
-      const editedRuleParams = ruleParamsModifier(
+      const { modifiedParams, isParamsUpdateSkipped } = ruleParamsModifier(
         { dataViewId: 'test-data-view', index: ['test-*'] } as RuleAlertType['params'],
         [
           {
-            type: BulkActionEditType.set_index_patterns,
+            type: BulkActionEditTypeEnum.set_index_patterns,
             value: ['index'],
             overwrite_data_views: true,
           },
         ]
       );
-      expect(editedRuleParams).toHaveProperty('dataViewId', undefined);
+      expect(modifiedParams).toHaveProperty('dataViewId', undefined);
+      expect(isParamsUpdateSkipped).toBe(false);
     });
 
     test('should set dataViewId to undefined if overwrite_data_views=true on add_index_patterns action', () => {
-      const editedRuleParams = ruleParamsModifier(
+      const { modifiedParams, isParamsUpdateSkipped } = ruleParamsModifier(
         { dataViewId: 'test-data-view', index: ['test-*'] } as RuleAlertType['params'],
         [
           {
-            type: BulkActionEditType.add_index_patterns,
+            type: BulkActionEditTypeEnum.add_index_patterns,
             value: ['index'],
             overwrite_data_views: true,
           },
         ]
       );
-      expect(editedRuleParams).toHaveProperty('dataViewId', undefined);
+      expect(modifiedParams).toHaveProperty('dataViewId', undefined);
+      expect(isParamsUpdateSkipped).toBe(false);
     });
 
     test('should set dataViewId to undefined if overwrite_data_views=true on delete_index_patterns action', () => {
-      const editedRuleParams = ruleParamsModifier(
+      const { modifiedParams, isParamsUpdateSkipped } = ruleParamsModifier(
         { dataViewId: 'test-data-view', index: ['test-*', 'index'] } as RuleAlertType['params'],
         [
           {
-            type: BulkActionEditType.delete_index_patterns,
+            type: BulkActionEditTypeEnum.delete_index_patterns,
             value: ['index'],
             overwrite_data_views: true,
           },
         ]
       );
-      expect(editedRuleParams).toHaveProperty('dataViewId', undefined);
-      expect(editedRuleParams).toHaveProperty('index', ['test-*']);
+      expect(modifiedParams).toHaveProperty('dataViewId', undefined);
+      expect(modifiedParams).toHaveProperty('index', ['test-*']);
+      expect(isParamsUpdateSkipped).toBe(false);
     });
 
     test('should set dataViewId to undefined and index to undefined if overwrite_data_views=true on delete_index_patterns action and rule had no index patterns to begin with', () => {
-      const editedRuleParams = ruleParamsModifier(
+      const { modifiedParams, isParamsUpdateSkipped } = ruleParamsModifier(
         { dataViewId: 'test-data-view', index: undefined } as RuleAlertType['params'],
         [
           {
-            type: BulkActionEditType.delete_index_patterns,
+            type: BulkActionEditTypeEnum.delete_index_patterns,
             value: ['index'],
             overwrite_data_views: true,
           },
         ]
       );
-      expect(editedRuleParams).toHaveProperty('dataViewId', undefined);
-      expect(editedRuleParams).toHaveProperty('index', undefined);
+      expect(modifiedParams).toHaveProperty('dataViewId', undefined);
+      expect(modifiedParams).toHaveProperty('index', undefined);
+      expect(isParamsUpdateSkipped).toBe(false);
     });
 
     test('should throw error on adding index pattern if rule is of machine learning type', () => {
       expect(() =>
         ruleParamsModifier({ type: 'machine_learning' } as RuleAlertType['params'], [
           {
-            type: BulkActionEditType.add_index_patterns,
+            type: BulkActionEditTypeEnum.add_index_patterns,
             value: ['my-index-*'],
           },
         ])
@@ -312,7 +355,7 @@ describe('ruleParamsModifier', () => {
       expect(() =>
         ruleParamsModifier({ type: 'machine_learning' } as RuleAlertType['params'], [
           {
-            type: BulkActionEditType.delete_index_patterns,
+            type: BulkActionEditTypeEnum.delete_index_patterns,
             value: ['my-index-*'],
           },
         ])
@@ -325,7 +368,7 @@ describe('ruleParamsModifier', () => {
       expect(() =>
         ruleParamsModifier({ type: 'machine_learning' } as RuleAlertType['params'], [
           {
-            type: BulkActionEditType.set_index_patterns,
+            type: BulkActionEditTypeEnum.set_index_patterns,
             value: ['my-index-*'],
           },
         ])
@@ -333,13 +376,48 @@ describe('ruleParamsModifier', () => {
         "Index patterns can't be overwritten. Machine learning rule doesn't have index patterns property"
       );
     });
+
+    test('should throw error on adding index pattern if rule is of ES|QL type', () => {
+      expect(() =>
+        ruleParamsModifier({ type: 'esql' } as RuleAlertType['params'], [
+          {
+            type: BulkActionEditTypeEnum.add_index_patterns,
+            value: ['my-index-*'],
+          },
+        ])
+      ).toThrow("Index patterns can't be added. ES|QL rule doesn't have index patterns property");
+    });
+
+    test('should throw error on deleting index pattern if rule is of ES|QL type', () => {
+      expect(() =>
+        ruleParamsModifier({ type: 'esql' } as RuleAlertType['params'], [
+          {
+            type: BulkActionEditTypeEnum.delete_index_patterns,
+            value: ['my-index-*'],
+          },
+        ])
+      ).toThrow("Index patterns can't be deleted. ES|QL rule doesn't have index patterns property");
+    });
+
+    test('should throw error on overwriting index pattern if rule is of ES|QL type', () => {
+      expect(() =>
+        ruleParamsModifier({ type: 'esql' } as RuleAlertType['params'], [
+          {
+            type: BulkActionEditTypeEnum.set_index_patterns,
+            value: ['my-index-*'],
+          },
+        ])
+      ).toThrow(
+        "Index patterns can't be overwritten. ES|QL rule doesn't have index patterns property"
+      );
+    });
   });
 
   describe('timeline', () => {
     test('should set timeline', () => {
-      const editedRuleParams = ruleParamsModifier(ruleParamsMock, [
+      const { modifiedParams, isParamsUpdateSkipped } = ruleParamsModifier(ruleParamsMock, [
         {
-          type: BulkActionEditType.set_timeline,
+          type: BulkActionEditTypeEnum.set_timeline,
           value: {
             timeline_id: '91832785-286d-4ebe-b884-1a208d111a70',
             timeline_title: 'Test timeline',
@@ -347,8 +425,9 @@ describe('ruleParamsModifier', () => {
         },
       ]);
 
-      expect(editedRuleParams.timelineId).toBe('91832785-286d-4ebe-b884-1a208d111a70');
-      expect(editedRuleParams.timelineTitle).toBe('Test timeline');
+      expect(modifiedParams.timelineId).toBe('91832785-286d-4ebe-b884-1a208d111a70');
+      expect(modifiedParams.timelineTitle).toBe('Test timeline');
+      expect(isParamsUpdateSkipped).toBe(false);
     });
   });
 
@@ -357,9 +436,9 @@ describe('ruleParamsModifier', () => {
       const INTERVAL_IN_MINUTES = 5;
       const LOOKBACK_IN_MINUTES = 1;
       const FROM_IN_SECONDS = (INTERVAL_IN_MINUTES + LOOKBACK_IN_MINUTES) * 60;
-      const editedRuleParams = ruleParamsModifier(ruleParamsMock, [
+      const { modifiedParams, isParamsUpdateSkipped } = ruleParamsModifier(ruleParamsMock, [
         {
-          type: BulkActionEditType.set_schedule,
+          type: BulkActionEditTypeEnum.set_schedule,
           value: {
             interval: `${INTERVAL_IN_MINUTES}m`,
             lookback: `${LOOKBACK_IN_MINUTES}m`,
@@ -368,11 +447,12 @@ describe('ruleParamsModifier', () => {
       ]);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      expect((editedRuleParams as any).interval).toBeUndefined();
-      expect(editedRuleParams.meta).toStrictEqual({
+      expect((modifiedParams as any).interval).toBeUndefined();
+      expect(modifiedParams.meta).toStrictEqual({
         from: '1m',
       });
-      expect(editedRuleParams.from).toBe(`now-${FROM_IN_SECONDS}s`);
+      expect(modifiedParams.from).toBe(`now-${FROM_IN_SECONDS}s`);
+      expect(isParamsUpdateSkipped).toBe(false);
     });
   });
 });

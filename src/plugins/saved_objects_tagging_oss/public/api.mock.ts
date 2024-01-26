@@ -16,6 +16,7 @@ const createClientMock = () => {
     getAll: jest.fn(),
     delete: jest.fn(),
     update: jest.fn(),
+    findByName: jest.fn(),
   };
 
   return mock;
@@ -63,6 +64,7 @@ const createApiUiMock = () => {
     getTagIdFromName: jest.fn(),
     updateTagsReferences: jest.fn(),
     getTag: jest.fn(),
+    getTagList: jest.fn(),
   };
 
   return mock;

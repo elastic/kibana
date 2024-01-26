@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ScopedHistory } from '@kbn/core/public';
 import { getCoreOverlays, getNavigateToApp } from '../../../kibana_services';
-import { goToSpecifiedPath } from '../../../render_app';
-import { getAppTitle } from '../../../../common/i18n_getters';
+import { APP_NAME } from '../../../../common/constants';
 
 export const unsavedChangesWarning = i18n.translate(
   'xpack.maps.breadCrumbs.unsavedChangesWarning',
@@ -27,12 +27,14 @@ export function getBreadcrumbs({
   getHasUnsavedChanges,
   originatingApp,
   getAppNameFromId,
+  history,
 }: {
   pageTitle: string;
   isByValue: boolean;
   getHasUnsavedChanges: () => boolean;
   originatingApp?: string;
   getAppNameFromId?: (id: string) => string | undefined;
+  history: ScopedHistory;
 }) {
   const breadcrumbs = [];
 
@@ -47,7 +49,7 @@ export function getBreadcrumbs({
 
   if (!isByValue) {
     breadcrumbs.push({
-      text: getAppTitle(),
+      text: APP_NAME,
       onClick: async () => {
         if (getHasUnsavedChanges()) {
           const confirmed = await getCoreOverlays().openConfirm(unsavedChangesWarning, {
@@ -55,10 +57,10 @@ export function getBreadcrumbs({
             'data-test-subj': 'appLeaveConfirmModal',
           });
           if (confirmed) {
-            goToSpecifiedPath('/');
+            history.push('/');
           }
         } else {
-          goToSpecifiedPath('/');
+          history.push('/');
         }
       },
     });

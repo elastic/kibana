@@ -9,3 +9,6 @@ import { OWNER_INFO } from '../constants';
 
 export const isValidOwner = (owner: string): owner is keyof typeof OWNER_INFO =>
   Object.keys(OWNER_INFO).includes(owner);
+
+export const getCaseOwnerByAppId = (currentAppId?: string) =>
+  Object.values(OWNER_INFO).find((info) => info.appId === currentAppId)?.id;

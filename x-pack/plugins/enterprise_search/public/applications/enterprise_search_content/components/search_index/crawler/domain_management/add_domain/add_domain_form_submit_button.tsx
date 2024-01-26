@@ -21,7 +21,13 @@ export const AddDomainFormSubmitButton: React.FC = () => {
   const { allowSubmit } = useValues(AddDomainLogic);
 
   return (
-    <EuiButton fill type="button" disabled={!allowSubmit} onClick={submitNewDomain}>
+    <EuiButton
+      fill
+      type="button"
+      disabled={!allowSubmit}
+      onClick={submitNewDomain}
+      data-test-subj="entSearchContent-crawler-addDomain-submitButton"
+    >
       {i18n.translate('xpack.enterpriseSearch.crawler.addDomainForm.submitButtonLabel', {
         defaultMessage: 'Add domain',
       })}

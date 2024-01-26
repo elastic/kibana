@@ -9,12 +9,14 @@ import {
   ALERT_BUILDING_BLOCK_TYPE,
   ALERT_WORKFLOW_STATUS,
   ALERT_RULE_RULE_ID,
+  ALERT_WORKFLOW_ASSIGNEE_IDS,
 } from '@kbn/rule-data-utils';
 
 import type { Filter } from '@kbn/es-query';
-import type { SubsetTGridModel } from '@kbn/timelines-plugin/public';
-import { tableDefaults } from '../../../common/store/data_table/defaults';
-import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
+import { tableDefaults } from '@kbn/securitysolution-data-table';
+import type { SubsetDataTableModel } from '@kbn/securitysolution-data-table';
+import type { AssigneesIdsSelection } from '../../../common/components/assignees/types';
+import type { Status } from '../../../../common/api/detection_engine';
 import {
   getColumns,
   getRulePreviewColumns,
@@ -152,15 +154,45 @@ export const buildThreatMatchFilter = (showOnlyThreatIndicatorAlerts: boolean): 
       ]
     : [];
 
-export const getAlertsDefaultModel = (license?: LicenseService): SubsetTGridModel => ({
+export const buildAlertAssigneesFilter = (assigneesIds: AssigneesIdsSelection[]): Filter[] => {
+  if (!assigneesIds.length) {
+    return [];
+  }
+  const combinedQuery = {
+    bool: {
+      should: assigneesIds.map((id) =>
+        id
+          ? {
+              term: {
+                [ALERT_WORKFLOW_ASSIGNEE_IDS]: id,
+              },
+            }
+          : { bool: { must_not: { exists: { field: ALERT_WORKFLOW_ASSIGNEE_IDS } } } }
+      ),
+    },
+  };
+
+  return [
+    {
+      meta: {
+        alias: null,
+        negate: false,
+        disabled: false,
+      },
+      query: combinedQuery,
+    },
+  ];
+};
+
+export const getAlertsDefaultModel = (license?: LicenseService): SubsetDataTableModel => ({
   ...tableDefaults,
   columns: getColumns(license),
   showCheckboxes: true,
 });
 
-export const getAlertsPreviewDefaultModel = (license?: LicenseService): SubsetTGridModel => ({
+export const getAlertsPreviewDefaultModel = (license?: LicenseService): SubsetDataTableModel => ({
   ...getAlertsDefaultModel(license),
-  columns: getColumns(license),
+  columns: getRulePreviewColumns(license),
   defaultColumns: getRulePreviewColumns(license),
   sort: [
     {
@@ -170,11 +202,14 @@ export const getAlertsPreviewDefaultModel = (license?: LicenseService): SubsetTG
       sortDirection: 'desc',
     },
   ],
+  showCheckboxes: false,
 });
 
 export const requiredFieldsForActions = [
   '@timestamp',
   'kibana.alert.workflow_status',
+  'kibana.alert.workflow_tags',
+  'kibana.alert.workflow_assignee_ids',
   'kibana.alert.group.id',
   'kibana.alert.original_time',
   'kibana.alert.building_block_type',
@@ -182,7 +217,9 @@ export const requiredFieldsForActions = [
   'kibana.alert.rule.name',
   'kibana.alert.rule.to',
   'kibana.alert.rule.uuid',
+  'kibana.alert.rule.rule_id',
   'kibana.alert.rule.type',
+  'kibana.alert.suppression.docs_count',
   'kibana.alert.original_event.kind',
   'kibana.alert.original_event.module',
   // Endpoint exception fields

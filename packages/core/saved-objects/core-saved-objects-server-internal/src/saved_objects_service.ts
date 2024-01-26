@@ -6,15 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { Subject, Observable, firstValueFrom } from 'rxjs';
-import { filter, take, switchMap } from 'rxjs/operators';
+import { Subject, Observable, firstValueFrom, of } from 'rxjs';
+import { filter, switchMap } from 'rxjs/operators';
 import type { Logger } from '@kbn/logging';
+import { stripVersionQualifier } from '@kbn/std';
 import type { ServiceStatus } from '@kbn/core-status-common';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type {
+  ElasticsearchClient,
+  ElasticsearchCapabilities,
+} from '@kbn/core-elasticsearch-server';
 import type {
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
@@ -25,8 +29,11 @@ import type {
   SavedObjectsRepositoryFactory,
   SavedObjectStatusMeta,
   SavedObjectsClientFactoryProvider,
-  SavedObjectsClientWrapperFactory,
   ISavedObjectTypeRegistry,
+  SavedObjectsEncryptionExtensionFactory,
+  SavedObjectsSecurityExtensionFactory,
+  SavedObjectsSpacesExtensionFactory,
+  SavedObjectsExtensions,
 } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectConfig,
@@ -35,6 +42,7 @@ import {
   type SavedObjectsConfigType,
   type SavedObjectsMigrationConfigType,
   type IKibanaMigrator,
+  DEFAULT_INDEX_TYPES_MAP,
 } from '@kbn/core-saved-objects-base-server-internal';
 import {
   SavedObjectsClient,
@@ -49,12 +57,13 @@ import {
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { DeprecationRegistryProvider } from '@kbn/core-deprecations-server';
 import type { NodeInfo } from '@kbn/core-node-server';
+import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { registerRoutes } from './routes';
 import { calculateStatus$ } from './status';
 import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
-
-const kibanaIndex = '.kibana';
+import { applyTypeDefaults } from './apply_type_defaults';
+import { getAllIndices } from './utils';
 
 /**
  * @internal
@@ -75,12 +84,6 @@ export interface SavedObjectsSetupDeps {
   deprecations: DeprecationRegistryProvider;
 }
 
-interface WrappedClientFactoryWrapper {
-  priority: number;
-  id: string;
-  factory: SavedObjectsClientWrapperFactory;
-}
-
 /** @internal */
 export interface SavedObjectsStartDeps {
   elasticsearch: InternalElasticsearchServiceStart;
@@ -98,7 +101,9 @@ export class SavedObjectsService
   private setupDeps?: SavedObjectsSetupDeps;
   private config?: SavedObjectConfig;
   private clientFactoryProvider?: SavedObjectsClientFactoryProvider;
-  private clientFactoryWrappers: WrappedClientFactoryWrapper[] = [];
+  private encryptionExtensionFactory?: SavedObjectsEncryptionExtensionFactory;
+  private securityExtensionFactory?: SavedObjectsSecurityExtensionFactory;
+  private spacesExtensionFactory?: SavedObjectsSpacesExtensionFactory;
 
   private migrator$ = new Subject<IKibanaMigrator>();
   private typeRegistry = new SavedObjectTypeRegistry();
@@ -106,9 +111,7 @@ export class SavedObjectsService
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('savedobjects-service');
-    this.kibanaVersion = SavedObjectsService.stripVersionQualifier(
-      this.coreContext.env.packageInfo.version
-    );
+    this.kibanaVersion = stripVersionQualifier(this.coreContext.env.packageInfo.version);
   }
 
   public async setup(setupDeps: SavedObjectsSetupDeps): Promise<InternalSavedObjectsServiceSetup> {
@@ -124,10 +127,9 @@ export class SavedObjectsService
       this.coreContext.configService.atPath<SavedObjectsMigrationConfigType>('migrations')
     );
     this.config = new SavedObjectConfig(savedObjectsConfig, savedObjectsMigrationConfig);
-
     deprecations.getRegistry('savedObjects').registerDeprecations(
       getSavedObjectsDeprecationsProvider({
-        kibanaIndex,
+        kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
         savedObjectsConfig: this.config,
         kibanaVersion: this.kibanaVersion,
         typeRegistry: this.typeRegistry,
@@ -142,15 +144,19 @@ export class SavedObjectsService
       logger: this.logger,
       config: this.config,
       migratorPromise: firstValueFrom(this.migrator$),
-      kibanaIndex,
+      kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
       kibanaVersion: this.kibanaVersion,
     });
 
     registerCoreObjectTypes(this.typeRegistry);
 
+    const skipMigration = this.config.migration.skip;
+
     return {
       status$: calculateStatus$(
-        this.migrator$.pipe(switchMap((migrator) => migrator.getStatus$())),
+        skipMigration
+          ? of({ status: 'completed' })
+          : this.migrator$.pipe(switchMap((migrator) => migrator.getStatus$())),
         elasticsearch.status$
       ),
       setClientFactoryProvider: (provider) => {
@@ -162,24 +168,41 @@ export class SavedObjectsService
         }
         this.clientFactoryProvider = provider;
       },
-      addClientWrapper: (priority, id, factory) => {
+      setEncryptionExtension: (factory) => {
         if (this.started) {
-          throw new Error('cannot call `addClientWrapper` after service startup.');
+          throw new Error('cannot call `setEncryptionExtension` after service startup.');
         }
-        this.clientFactoryWrappers.push({
-          priority,
-          id,
-          factory,
-        });
+        if (this.encryptionExtensionFactory) {
+          throw new Error('encryption extension is already set, and can only be set once');
+        }
+        this.encryptionExtensionFactory = factory;
+      },
+      setSecurityExtension: (factory) => {
+        if (this.started) {
+          throw new Error('cannot call `setSecurityExtension` after service startup.');
+        }
+        if (this.securityExtensionFactory) {
+          throw new Error('security extension is already set, and can only be set once');
+        }
+        this.securityExtensionFactory = factory;
+      },
+      setSpacesExtension: (factory) => {
+        if (this.started) {
+          throw new Error('cannot call `setSpacesExtension` after service startup.');
+        }
+        if (this.spacesExtensionFactory) {
+          throw new Error('spaces extension is already set, and can only be set once');
+        }
+        this.spacesExtensionFactory = factory;
       },
       registerType: (type) => {
         if (this.started) {
           throw new Error('cannot call `registerType` after service startup.');
         }
-        this.typeRegistry.registerType(type);
+        this.typeRegistry.registerType(applyTypeDefaults(type));
       },
       getTypeRegistry: () => this.typeRegistry,
-      getKibanaIndex: () => kibanaIndex,
+      getDefaultIndex: () => MAIN_SAVED_OBJECT_INDEX,
     };
   }
 
@@ -202,7 +225,9 @@ export class SavedObjectsService
       this.config.migration,
       elasticsearch.client.asInternalUser,
       docLinks,
-      waitForMigrationCompletion
+      waitForMigrationCompletion,
+      node,
+      elasticsearch.getCapabilities()
     );
 
     this.migrator$.next(migrator);
@@ -237,57 +262,76 @@ export class SavedObjectsService
         'Waiting until all Elasticsearch nodes are compatible with Kibana before starting saved objects migrations...'
       );
 
-      // The Elasticsearch service should already ensure that, but let's double check just in case.
-      // Should it be replaced with elasticsearch.status$ API instead?
-      const compatibleNodes = await this.setupDeps!.elasticsearch.esNodesCompatibility$.pipe(
-        filter((nodes) => nodes.isCompatible),
-        take(1)
-      ).toPromise();
-
-      // Running migrations only if we got compatible nodes.
-      // It may happen that the observable completes due to Kibana shutting down
-      // and the promise above fulfils as undefined. We shouldn't trigger migrations at that point.
-      if (compatibleNodes) {
-        this.logger.info('Starting saved objects migrations');
-        await migrator.runMigrations();
+      try {
+        // The Elasticsearch service should already ensure that, but let's double check just in case.
+        // Should it be replaced with elasticsearch.status$ API instead?
+        await firstValueFrom(
+          this.setupDeps!.elasticsearch.esNodesCompatibility$.pipe(
+            filter((nodes) => nodes.isCompatible)
+          )
+        );
+      } catch (e) {
+        // EmptyError means esNodesCompatibility$ was closed before emitting
+        // which should only occur if the server is shutdown before being fully started.
+        if (e.name === 'EmptyError') {
+          throw new Error('esNodesCompatibility$ was closed before emitting');
+        }
+        throw e;
       }
+
+      this.logger.info('Starting saved objects migrations');
+      await migrator.runMigrations();
     }
 
     const createRepository = (
       esClient: ElasticsearchClient,
-      includedHiddenTypes: string[] = []
+      includedHiddenTypes: string[] = [],
+      extensions?: SavedObjectsExtensions
     ) => {
       return SavedObjectsRepository.createRepository(
         migrator,
         this.typeRegistry,
-        kibanaIndex,
+        MAIN_SAVED_OBJECT_INDEX,
         esClient,
         this.logger.get('repository'),
-        includedHiddenTypes
+        includedHiddenTypes,
+        extensions
       );
     };
 
     const repositoryFactory: SavedObjectsRepositoryFactory = {
-      createInternalRepository: (includedHiddenTypes?: string[]) =>
-        createRepository(client.asInternalUser, includedHiddenTypes),
-      createScopedRepository: (req: KibanaRequest, includedHiddenTypes?: string[]) =>
-        createRepository(client.asScoped(req).asCurrentUser, includedHiddenTypes),
+      createInternalRepository: (
+        includedHiddenTypes?: string[],
+        extensions?: SavedObjectsExtensions | undefined
+      ) => createRepository(client.asInternalUser, includedHiddenTypes, extensions),
+      createScopedRepository: (
+        req: KibanaRequest,
+        includedHiddenTypes?: string[],
+        extensions?: SavedObjectsExtensions
+      ) => createRepository(client.asScoped(req).asCurrentUser, includedHiddenTypes, extensions),
     };
 
     const clientProvider = new SavedObjectsClientProvider({
-      defaultClientFactory({ request, includedHiddenTypes }) {
-        const repository = repositoryFactory.createScopedRepository(request, includedHiddenTypes);
+      defaultClientFactory({ request, includedHiddenTypes, extensions }): SavedObjectsClient {
+        const repository = repositoryFactory.createScopedRepository(
+          request,
+          includedHiddenTypes,
+          extensions
+        );
         return new SavedObjectsClient(repository);
       },
       typeRegistry: this.typeRegistry,
+      encryptionExtensionFactory: this.encryptionExtensionFactory,
+      securityExtensionFactory: this.securityExtensionFactory,
+      spacesExtensionFactory: this.spacesExtensionFactory,
     });
+
     if (this.clientFactoryProvider) {
       const clientFactory = this.clientFactoryProvider(repositoryFactory);
       clientProvider.setClientFactory(clientFactory);
     }
-    this.clientFactoryWrappers.forEach(({ id, factory, priority }) => {
-      clientProvider.addClientWrapperFactory(priority, id, factory);
-    });
+
+    const allIndices = getAllIndices({ registry: this.typeRegistry });
 
     this.started = true;
 
@@ -303,13 +347,28 @@ export class SavedObjectsService
           exportSizeLimit: this.config!.maxImportExportSize,
           logger: this.logger.get('exporter'),
         }),
-      createImporter: (savedObjectsClient) =>
+      createImporter: (savedObjectsClient, options) =>
         new SavedObjectsImporter({
           savedObjectsClient,
           typeRegistry: this.typeRegistry,
-          importSizeLimit: this.config!.maxImportExportSize,
+          importSizeLimit: options?.importSizeLimit ?? this.config!.maxImportExportSize,
         }),
       getTypeRegistry: () => this.typeRegistry,
+      getDefaultIndex: () => MAIN_SAVED_OBJECT_INDEX,
+      getIndexForType: (type: string) => {
+        const definition = this.typeRegistry.getType(type);
+        return definition?.indexPattern ?? MAIN_SAVED_OBJECT_INDEX;
+      },
+      getIndicesForTypes: (types: string[]) => {
+        const indices = new Set<string>();
+        types.forEach((type) => {
+          const definition = this.typeRegistry.getType(type);
+          const index = definition?.indexPattern ?? MAIN_SAVED_OBJECT_INDEX;
+          indices.add(index);
+        });
+        return [...indices];
+      },
+      getAllIndices: () => [...allIndices],
     };
   }
 
@@ -319,25 +378,22 @@ export class SavedObjectsService
     soMigrationsConfig: SavedObjectsMigrationConfigType,
     client: ElasticsearchClient,
     docLinks: DocLinksServiceStart,
-    waitForMigrationCompletion: boolean
+    waitForMigrationCompletion: boolean,
+    nodeInfo: NodeInfo,
+    esCapabilities: ElasticsearchCapabilities
   ): IKibanaMigrator {
     return new KibanaMigrator({
       typeRegistry: this.typeRegistry,
       logger: this.logger,
       kibanaVersion: this.kibanaVersion,
       soMigrationsConfig,
-      kibanaIndex,
+      kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
+      defaultIndexTypesMap: DEFAULT_INDEX_TYPES_MAP,
       client,
       docLinks,
       waitForMigrationCompletion,
+      nodeRoles: nodeInfo.roles,
+      esCapabilities,
     });
-  }
-
-  /**
-   * Coerce a semver-like string (x.y.z-SNAPSHOT) or prerelease version (x.y.z-alpha)
-   * to regular semver (x.y.z).
-   */
-  private static stripVersionQualifier(version: string) {
-    return version.split('-')[0];
   }
 }

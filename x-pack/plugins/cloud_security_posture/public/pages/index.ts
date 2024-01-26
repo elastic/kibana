@@ -6,6 +6,8 @@
  */
 
 export { Findings } from './findings';
-export * from './compliance_dashboard';
+export { Configurations } from './configurations';
+export { ComplianceDashboard } from './compliance_dashboard';
 export { Benchmarks } from './benchmarks';
 export { Rules } from './rules';
+export { VulnerabilityDashboard } from './vulnerability_dashboard/vulnerability_dashboard';

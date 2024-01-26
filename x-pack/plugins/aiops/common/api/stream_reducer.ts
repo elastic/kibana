@@ -5,43 +5,45 @@
  * 2.0.
  */
 
-import type { ChangePoint, ChangePointGroup } from '@kbn/ml-agg-utils';
+import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
 
-import { API_ACTION_NAME, AiopsExplainLogRateSpikesApiAction } from './explain_log_rate_spikes';
+import { API_ACTION_NAME, AiopsLogRateAnalysisApiAction } from './log_rate_analysis/actions';
 
 interface StreamState {
   ccsWarning: boolean;
-  changePoints: ChangePoint[];
-  changePointsGroups: ChangePointGroup[];
+  significantItems: SignificantItem[];
+  significantItemsGroups: SignificantItemGroup[];
   errors: string[];
   loaded: number;
   loadingState: string;
   remainingFieldCandidates?: string[];
   groupsMissing?: boolean;
+  zeroDocsFallback: boolean;
 }
 
 export const initialState: StreamState = {
   ccsWarning: false,
-  changePoints: [],
-  changePointsGroups: [],
+  significantItems: [],
+  significantItemsGroups: [],
   errors: [],
   loaded: 0,
   loadingState: '',
+  zeroDocsFallback: false,
 };
 
 export function streamReducer(
   state: StreamState,
-  action: AiopsExplainLogRateSpikesApiAction | AiopsExplainLogRateSpikesApiAction[]
+  action: AiopsLogRateAnalysisApiAction<'2'> | Array<AiopsLogRateAnalysisApiAction<'2'>>
 ): StreamState {
   if (Array.isArray(action)) {
     return action.reduce(streamReducer, state);
   }
 
   switch (action.type) {
-    case API_ACTION_NAME.ADD_CHANGE_POINTS:
-      return { ...state, changePoints: [...state.changePoints, ...action.payload] };
-    case API_ACTION_NAME.ADD_CHANGE_POINTS_HISTOGRAM:
-      const changePoints = state.changePoints.map((cp) => {
+    case API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS:
+      return { ...state, significantItems: [...state.significantItems, ...action.payload] };
+    case API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS_HISTOGRAM:
+      const significantItems = state.significantItems.map((cp) => {
         const cpHistogram = action.payload.find(
           (h) => h.fieldName === cp.fieldName && h.fieldValue === cp.fieldValue
         );
@@ -50,26 +52,30 @@ export function streamReducer(
         }
         return cp;
       });
-      return { ...state, changePoints };
-    case API_ACTION_NAME.ADD_CHANGE_POINTS_GROUP:
-      return { ...state, changePointsGroups: action.payload };
-    case API_ACTION_NAME.ADD_CHANGE_POINTS_GROUP_HISTOGRAM:
-      const changePointsGroups = state.changePointsGroups.map((cpg) => {
+      return { ...state, significantItems };
+    case API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS_GROUP:
+      return { ...state, significantItemsGroups: action.payload };
+    case API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS_GROUP_HISTOGRAM:
+      const significantItemsGroups = state.significantItemsGroups.map((cpg) => {
         const cpHistogram = action.payload.find((h) => h.id === cpg.id);
         if (cpHistogram) {
           cpg.histogram = cpHistogram.histogram;
         }
         return cpg;
       });
-      return { ...state, changePointsGroups };
+      return { ...state, significantItemsGroups };
     case API_ACTION_NAME.ADD_ERROR:
       return { ...state, errors: [...state.errors, action.payload] };
     case API_ACTION_NAME.RESET_ERRORS:
       return { ...state, errors: [] };
+    case API_ACTION_NAME.RESET_GROUPS:
+      return { ...state, significantItemsGroups: [] };
     case API_ACTION_NAME.RESET_ALL:
       return initialState;
     case API_ACTION_NAME.UPDATE_LOADING_STATE:
       return { ...state, ...action.payload };
+    case API_ACTION_NAME.SET_ZERO_DOCS_FALLBACK:
+      return { ...state, zeroDocsFallback: action.payload };
     default:
       return state;
   }

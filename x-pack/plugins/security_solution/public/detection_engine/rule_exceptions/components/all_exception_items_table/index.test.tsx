@@ -10,6 +10,8 @@ import { mount, shallow } from 'enzyme';
 
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
+import { fetchExceptionListsItemsByListIds } from '@kbn/securitysolution-list-api';
+
 import { ExceptionsViewer } from '.';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TestProviders } from '../../../../common/mock';
@@ -17,14 +19,19 @@ import type { Rule } from '../../../rule_management/logic/types';
 import { mockRule } from '../../../rule_management_ui/components/rules_table/__mocks__/mock';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
 import * as i18n from './translations';
+import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
 
+jest.mock('../../../../exceptions/hooks/use_endpoint_exceptions_capability');
 jest.mock('../../../../common/lib/kibana');
 jest.mock('@kbn/securitysolution-list-hooks');
+jest.mock('@kbn/securitysolution-list-api');
 jest.mock('../../logic/use_find_references');
 jest.mock('react', () => {
   const r = jest.requireActual('react');
   return { ...r, useReducer: jest.fn() };
 });
+
+const mockUseEndpointExceptionsCapability = useEndpointExceptionsCapability as jest.Mock;
 
 const sampleExceptionItem = {
   _version: 'WzEwMjM4MSwxXQ==',
@@ -78,6 +85,10 @@ describe('ExceptionsViewer', () => {
       },
     });
 
+    mockUseEndpointExceptionsCapability.mockReturnValue(true);
+
+    (fetchExceptionListsItemsByListIds as jest.Mock).mockReturnValue({ total: 0 });
+
     (useFindExceptionListReferences as jest.Mock).mockReturnValue([
       false,
       false,
@@ -130,6 +141,7 @@ describe('ExceptionsViewer', () => {
         exceptionToEdit: null,
         viewerState: 'loading',
         exceptionLists: [],
+        exceptionsToShow: { active: true },
       },
       jest.fn(),
     ]);
@@ -168,6 +180,7 @@ describe('ExceptionsViewer', () => {
         exceptionToEdit: null,
         viewerState: 'empty_search',
         exceptionLists: [],
+        exceptionsToShow: { active: true },
       },
       jest.fn(),
     ]);
@@ -206,6 +219,7 @@ describe('ExceptionsViewer', () => {
         exceptionToEdit: null,
         viewerState: 'empty',
         exceptionLists: [],
+        exceptionsToShow: { active: true },
       },
       jest.fn(),
     ]);
@@ -250,6 +264,7 @@ describe('ExceptionsViewer', () => {
         exceptionToEdit: null,
         viewerState: 'empty',
         exceptionLists: [],
+        exceptionsToShow: { active: true },
       },
       jest.fn(),
     ]);
@@ -294,6 +309,7 @@ describe('ExceptionsViewer', () => {
         exceptionToEdit: null,
         viewerState: null,
         exceptionLists: [],
+        exceptionsToShow: { active: true },
       },
       jest.fn(),
     ]);
@@ -328,6 +344,7 @@ describe('ExceptionsViewer', () => {
         exceptionToEdit: sampleExceptionItem,
         viewerState: null,
         exceptionLists: [],
+        exceptionsToShow: { active: true },
       },
       jest.fn(),
     ]);

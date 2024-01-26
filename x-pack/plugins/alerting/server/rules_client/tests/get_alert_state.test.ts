@@ -6,7 +6,12 @@
  */
 
 import { RulesClient, ConstructorOptions } from '../rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  loggingSystemMock,
+  savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
+} from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
@@ -16,6 +21,7 @@ import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { AlertingAuthorization } from '../../authorization/alerting_authorization';
 import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { getBeforeSetup } from './lib';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -24,6 +30,7 @@ const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
+const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
@@ -34,14 +41,21 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
+  maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
+  internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
+  isAuthenticationTypeAPIKey: jest.fn(),
+  getAuthenticationAPIKey: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
+  uiSettings: uiSettingsServiceMock.createStartContract(),
 };
 
 beforeEach(() => {
@@ -53,7 +67,7 @@ describe('getAlertState()', () => {
     const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         alertTypeId: '123',
         schedule: { interval: '10s' },
@@ -110,7 +124,7 @@ describe('getAlertState()', () => {
 
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         alertTypeId: '123',
         schedule: { interval: '10s' },
@@ -165,7 +179,7 @@ describe('getAlertState()', () => {
     beforeEach(() => {
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         id: '1',
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         attributes: {
           alertTypeId: 'myType',
           consumer: 'myApp',

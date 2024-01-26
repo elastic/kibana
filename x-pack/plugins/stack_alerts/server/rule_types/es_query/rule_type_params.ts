@@ -7,12 +7,22 @@
 
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { validateTimeWindowUnits } from '@kbn/triggers-actions-ui-plugin/server';
+import {
+  validateTimeWindowUnits,
+  validateAggType,
+  validateGroupBy,
+  MAX_GROUPS,
+} from '@kbn/triggers-actions-ui-plugin/server';
 import { RuleTypeState } from '@kbn/alerting-plugin/server';
 import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import {
+  MAX_SELECTABLE_SOURCE_FIELDS,
+  MAX_SELECTABLE_GROUP_BY_TERMS,
+} from '../../../common/constants';
+import { ComparatorFnNames } from '../../../common';
 import { Comparator } from '../../../common/comparator_types';
-import { ComparatorFnNames } from '../lib';
 import { getComparatorSchemaType } from '../lib/comparator';
+import { isEsqlQueryRule, isSearchSourceRule } from './util';
 
 export const ES_QUERY_MAX_HITS_PER_EXECUTION = 10000;
 
@@ -35,9 +45,33 @@ const EsQueryRuleParamsSchemaProperties = {
   timeWindowUnit: schema.string({ validate: validateTimeWindowUnits }),
   threshold: schema.arrayOf(schema.number(), { minSize: 1, maxSize: 2 }),
   thresholdComparator: getComparatorSchemaType(validateComparator),
-  searchType: schema.oneOf([schema.literal('searchSource'), schema.literal('esQuery')], {
-    defaultValue: 'esQuery',
-  }),
+  // aggregation type
+  aggType: schema.string({ validate: validateAggType, defaultValue: 'count' }),
+  // aggregation field
+  aggField: schema.maybe(schema.string({ minLength: 1 })),
+  // how to group
+  groupBy: schema.string({ validate: validateGroupBy, defaultValue: 'all' }),
+  // field to group on (for groupBy: top)
+  termField: schema.maybe(
+    schema.oneOf([
+      schema.string({ minLength: 1 }),
+      schema.arrayOf(schema.string(), { minSize: 2, maxSize: MAX_SELECTABLE_GROUP_BY_TERMS }),
+    ])
+  ),
+  // limit on number of groups returned
+  termSize: schema.maybe(schema.number({ min: 1 })),
+  searchType: schema.oneOf(
+    [schema.literal('searchSource'), schema.literal('esQuery'), schema.literal('esqlQuery')],
+    {
+      defaultValue: 'esQuery',
+    }
+  ),
+  timeField: schema.conditional(
+    schema.siblingRef('searchType'),
+    schema.literal('esQuery'),
+    schema.string({ minLength: 1 }),
+    schema.maybe(schema.string({ minLength: 1 }))
+  ),
   // searchSource rule param only
   searchConfiguration: schema.conditional(
     schema.siblingRef('searchType'),
@@ -58,11 +92,23 @@ const EsQueryRuleParamsSchemaProperties = {
     schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
     schema.never()
   ),
-  timeField: schema.conditional(
+  // esqlQuery rule params only
+  esqlQuery: schema.conditional(
     schema.siblingRef('searchType'),
-    schema.literal('esQuery'),
-    schema.string({ minLength: 1 }),
+    schema.literal('esqlQuery'),
+    schema.object({ esql: schema.string({ minLength: 1 }) }),
     schema.never()
+  ),
+  sourceFields: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        label: schema.string(),
+        searchPath: schema.string(),
+      }),
+      {
+        maxSize: MAX_SELECTABLE_SOURCE_FIELDS,
+      }
+    )
   ),
 };
 
@@ -74,7 +120,17 @@ const betweenComparators = new Set(['between', 'notBetween']);
 
 // using direct type not allowed, circular reference, so body is typed to any
 function validateParams(anyParams: unknown): string | undefined {
-  const { esQuery, thresholdComparator, threshold, searchType } = anyParams as EsQueryRuleParams;
+  const {
+    esQuery,
+    thresholdComparator,
+    threshold,
+    searchType,
+    aggType,
+    aggField,
+    groupBy,
+    termField,
+    termSize,
+  } = anyParams as EsQueryRuleParams;
 
   if (betweenComparators.has(thresholdComparator) && threshold.length === 1) {
     return i18n.translate('xpack.stackAlerts.esQuery.invalidThreshold2ErrorMessage', {
@@ -86,7 +142,59 @@ function validateParams(anyParams: unknown): string | undefined {
     });
   }
 
-  if (searchType === 'searchSource') {
+  if (aggType !== 'count' && !aggField) {
+    return i18n.translate('xpack.stackAlerts.esQuery.aggTypeRequiredErrorMessage', {
+      defaultMessage: '[aggField]: must have a value when [aggType] is "{aggType}"',
+      values: {
+        aggType,
+      },
+    });
+  }
+
+  // check grouping
+  if (groupBy === 'top') {
+    if (termField == null) {
+      return i18n.translate('xpack.stackAlerts.esQuery.termFieldRequiredErrorMessage', {
+        defaultMessage: '[termField]: termField required when [groupBy] is top',
+      });
+    }
+    if (termSize == null) {
+      return i18n.translate('xpack.stackAlerts.esQuery.termSizeRequiredErrorMessage', {
+        defaultMessage: '[termSize]: termSize required when [groupBy] is top',
+      });
+    }
+    if (termSize > MAX_GROUPS) {
+      return i18n.translate('xpack.stackAlerts.esQuery.invalidTermSizeMaximumErrorMessage', {
+        defaultMessage: '[termSize]: must be less than or equal to {maxGroups}',
+        values: {
+          maxGroups: MAX_GROUPS,
+        },
+      });
+    }
+  }
+
+  if (isSearchSourceRule(searchType)) {
+    return;
+  }
+
+  if (isEsqlQueryRule(searchType)) {
+    const { timeField } = anyParams as EsQueryRuleParams;
+
+    if (!timeField) {
+      return i18n.translate('xpack.stackAlerts.esQuery.esqlTimeFieldErrorMessage', {
+        defaultMessage: '[timeField]: is required',
+      });
+    }
+    if (thresholdComparator !== Comparator.GT) {
+      return i18n.translate('xpack.stackAlerts.esQuery.esqlThresholdComparatorErrorMessage', {
+        defaultMessage: '[thresholdComparator]: is required to be greater than',
+      });
+    }
+    if (threshold && threshold[0] !== 0) {
+      return i18n.translate('xpack.stackAlerts.esQuery.esqlThresholdErrorMessage', {
+        defaultMessage: '[threshold]: is required to be 0',
+      });
+    }
     return;
   }
 

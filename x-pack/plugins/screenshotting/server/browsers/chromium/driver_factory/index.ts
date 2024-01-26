@@ -26,17 +26,18 @@ import {
   takeUntil,
   tap,
 } from 'rxjs/operators';
+import { PerformanceMetrics } from '../../../../common/types';
 import { getChromiumDisconnectedError } from '..';
 import { errors } from '../../../../common';
 import { ConfigType } from '../../../config';
 import { safeChildProcess } from '../../safe_child_process';
 import { HeadlessChromiumDriver } from '../driver';
 import { args } from './args';
-import { getMetrics, PerformanceMetrics } from './metrics';
+import { getMetrics } from './metrics';
 
 interface CreatePageOptions {
   browserTimezone?: string;
-  defaultViewport: { width?: number };
+  defaultViewport: { width?: number; deviceScaleFactor?: number };
   openUrlTimeout: number;
 }
 
@@ -145,6 +146,7 @@ export class HeadlessChromiumDriverFactory {
       const viewport = {
         ...DEFAULT_VIEWPORT,
         width: defaultViewport.width ?? DEFAULT_VIEWPORT.width,
+        deviceScaleFactor: defaultViewport.deviceScaleFactor ?? DEFAULT_VIEWPORT.deviceScaleFactor,
       };
 
       logger.debug(
@@ -165,6 +167,8 @@ export class HeadlessChromiumDriverFactory {
             env: {
               TZ: browserTimezone,
             },
+            headless: 'new',
+            protocolTimeout: 0,
           });
         } catch (err) {
           observer.error(
@@ -452,5 +456,3 @@ export class HeadlessChromiumDriverFactory {
     );
   }
 }
-
-export type { PerformanceMetrics };

@@ -27,6 +27,7 @@ const rewriteBodyRes: RewriteRequestCase<
   is_preconfigured: isPreconfigured,
   is_deprecated: isDeprecated,
   is_missing_secrets: isMissingSecrets,
+  is_system_action: isSystemAction,
   ...res
 }) => ({
   ...res,
@@ -34,6 +35,7 @@ const rewriteBodyRes: RewriteRequestCase<
   isPreconfigured,
   isDeprecated,
   isMissingSecrets,
+  isSystemAction,
 });
 
 export async function createActionConnector({
@@ -47,5 +49,5 @@ export async function createActionConnector({
     `${BASE_ACTION_API_PATH}/connector`,
     { body: JSON.stringify(rewriteBodyRequest(connector)) }
   );
-  return rewriteBodyRes(res);
+  return rewriteBodyRes(res) as ActionConnector;
 }

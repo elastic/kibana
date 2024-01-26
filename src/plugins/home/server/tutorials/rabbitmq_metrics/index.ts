@@ -58,10 +58,10 @@ export function rabbitmqMetricsSpecProvider(context: TutorialContext): TutorialS
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/rabbitmq_metrics/screenshot.webp',
+    previewImagePath: context.staticAssets.getPluginAssetHref('/rabbitmq_metrics/screenshot.webp'),
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['message_queue'],
+    integrationBrowserCategories: ['message_queue', 'observability'],
   };
 }

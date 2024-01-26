@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { TRANSFORM_FUNCTION, TransformFunction } from '../../../../../../common/constants';
@@ -23,7 +24,7 @@ export const TransformFunctionSelector: FC<TransformFunctionSelectorProps> = ({
     {
       name: TRANSFORM_FUNCTION.PIVOT,
       helpText: i18n.translate('xpack.transform.stepDefineForm.pivotHelperText', {
-        defaultMessage: 'Aggregate and group your data',
+        defaultMessage: 'Aggregate and group your data.',
       }),
       icon: 'aggregate',
       title: i18n.translate('xpack.transform.stepDefineForm.pivotLabel', {
@@ -33,7 +34,7 @@ export const TransformFunctionSelector: FC<TransformFunctionSelectorProps> = ({
     {
       name: TRANSFORM_FUNCTION.LATEST,
       helpText: i18n.translate('xpack.transform.stepDefineForm.latestHelperText', {
-        defaultMessage: 'Keep track of your most recent data',
+        defaultMessage: 'Keep track of your most recent data.',
       }),
       icon: 'clock',
       title: i18n.translate('xpack.transform.stepDefineForm.latestLabel', {

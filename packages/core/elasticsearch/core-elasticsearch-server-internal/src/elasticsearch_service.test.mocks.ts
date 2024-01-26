@@ -10,7 +10,7 @@ import type { AgentManager } from '@kbn/core-elasticsearch-client-server-interna
 
 export const MockClusterClient = jest.fn();
 export const MockAgentManager: jest.MockedClass<typeof AgentManager> = jest.fn().mockReturnValue({
-  getAgents: jest.fn(),
+  getAgentsStats: jest.fn(),
   getAgentFactory: jest.fn(),
 });
 
@@ -22,4 +22,9 @@ jest.mock('@kbn/core-elasticsearch-client-server-internal', () => ({
 export const isScriptingEnabledMock = jest.fn();
 jest.doMock('./is_scripting_enabled', () => ({
   isInlineScriptingEnabled: isScriptingEnabledMock,
+}));
+
+export const getClusterInfoMock = jest.fn();
+jest.doMock('./get_cluster_info', () => ({
+  getClusterInfo$: getClusterInfoMock,
 }));

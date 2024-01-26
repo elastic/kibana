@@ -18,7 +18,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['reporting', 'common', 'discover', 'timePicker', 'share']);
+  const PageObjects = getPageObjects([
+    'reporting',
+    'common',
+    'discover',
+    'timePicker',
+    'share',
+    'header',
+  ]);
+  const monacoEditor = getService('monacoEditor');
   const filterBar = getService('filterBar');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
@@ -29,6 +37,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const getReport = async () => {
+    // close any open notification toasts
+    await PageObjects.reporting.clearToastNotifications();
+
     await PageObjects.reporting.openCsvReportingPanel();
     await PageObjects.reporting.clickGenerateReportButton();
 
@@ -51,6 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       after(async () => {
         await reportingAPI.teardownEcommerce();
+        await esArchiver.emptyKibanaIndex();
       });
 
       it('is available if new', async () => {
@@ -68,10 +80,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('Generate CSV: new search', () => {
       before(async () => {
         await reportingAPI.initEcommerce();
+        /**
+         *  Important: `esArchiver.emptyKibanaIndex()` above also resets the
+         * Kibana time zone setting, so we're re-applying it here.
+         * The serverless version of the test uses
+         * `kibanaServer.savedObjects.cleanStandardList` instead,
+         * which does not reset the time zone setting,
+         * so we don't need to re-apply it in these tests.
+         */
+        await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'UTC' });
       });
 
       after(async () => {
         await reportingAPI.teardownEcommerce();
+        await esArchiver.emptyKibanaIndex();
       });
 
       beforeEach(async () => {
@@ -85,8 +107,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.saveSearch('single-timefilter-search');
 
         // get shared URL value
-        await PageObjects.share.clickShareTopNavButton();
-        const sharedURL = await PageObjects.share.getSharedUrl();
+        const sharedURL = await browser.getCurrentUrl();
 
         // click 'Copy POST URL'
         await PageObjects.share.clickShareTopNavButton();
@@ -98,7 +119,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // get clipboard value using field search input, since
         // 'browser.getClipboardValue()' doesn't work, due to permissions
-        const textInput = await testSubjects.find('fieldFilterSearchInput');
+        const textInput = await testSubjects.find('fieldListFiltersFieldSearch');
         await textInput.click();
         await browser.getActions().keyDown(Key.CONTROL).perform();
         await browser.getActions().keyDown('v').perform();
@@ -165,6 +186,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(csvFile.length).to.be(4826973);
         expectSnapshot(csvFile.slice(0, 5000)).toMatch();
         expectSnapshot(csvFile.slice(-5000)).toMatch();
+      });
+
+      it('generate a report using ES|QL', async () => {
+        await PageObjects.discover.selectTextBaseLang();
+        const testQuery = `from ecommerce | STATS total_sales = SUM(taxful_total_price) BY day_of_week |  SORT total_sales DESC`;
+
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        const res = await getReport();
+        expect(res.status).to.equal(200);
+        expect(res.get('content-type')).to.equal('text/csv; charset=utf-8');
+
+        const csvFile = res.text;
+        expectSnapshot(csvFile).toMatch();
       });
     });
 
@@ -291,7 +328,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         // filter
-        await filterBar.addFilter('category', 'is', `Men's Shoes`);
+        await filterBar.addFilter({ field: 'category', operation: 'is', value: `Men's Shoes` });
         await retry.try(async () => {
           expect(await PageObjects.discover.getHitCount()).to.equal('154');
         });

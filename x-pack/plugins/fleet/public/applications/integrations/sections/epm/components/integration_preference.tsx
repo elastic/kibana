@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 import { i18n } from '@kbn/i18n';
@@ -23,7 +23,7 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 
-import { sendPutSettings, useGetSettings, useStartServices } from '../../../hooks';
+import { usePutSettingsMutation, useStartServices } from '../../../hooks';
 
 export type IntegrationPreferenceType = 'recommended' | 'beats' | 'agent';
 
@@ -35,7 +35,7 @@ interface Option {
 export interface Props {
   initialType: IntegrationPreferenceType;
   onChange: (type: IntegrationPreferenceType) => void;
-  onPrereleaseEnabledChange: (prerelease: boolean) => void;
+  prereleaseIntegrationsEnabled: boolean;
 }
 
 const recommendedTooltip = (
@@ -86,42 +86,39 @@ const options: Option[] = [
 export const IntegrationPreference = ({
   initialType,
   onChange,
-  onPrereleaseEnabledChange,
+  prereleaseIntegrationsEnabled,
 }: Props) => {
   const [idSelected, setIdSelected] = React.useState<IntegrationPreferenceType>(initialType);
-
-  const { docLinks } = useStartServices();
-
-  const [prereleaseIntegrationsEnabled, setPrereleaseIntegrationsEnabled] = React.useState<
+  const [prereleaseIntegrationsChecked, setPrereleaseIntegrationsChecked] = React.useState<
     boolean | undefined
   >(undefined);
 
-  const { data: settings, error: settingsError } = useGetSettings();
+  const { docLinks, notifications } = useStartServices();
 
-  useEffect(() => {
-    const isEnabled = Boolean(settings?.item.prerelease_integrations_enabled);
-    if (settings?.item) {
-      setPrereleaseIntegrationsEnabled(isEnabled);
-    } else if (settingsError) {
-      setPrereleaseIntegrationsEnabled(false);
-    }
-  }, [settings?.item, settingsError]);
+  const { mutateAsync: mutateSettingsAsync } = usePutSettingsMutation();
 
-  useEffect(() => {
-    if (prereleaseIntegrationsEnabled !== undefined) {
-      onPrereleaseEnabledChange(prereleaseIntegrationsEnabled);
-    }
-  }, [onPrereleaseEnabledChange, prereleaseIntegrationsEnabled]);
+  const updateSettings = useCallback(
+    async (prerelease: boolean) => {
+      try {
+        setPrereleaseIntegrationsChecked(prerelease);
+        const res = await mutateSettingsAsync({
+          prerelease_integrations_enabled: prerelease,
+        });
 
-  const updateSettings = useCallback(async (prerelease: boolean) => {
-    const res = await sendPutSettings({
-      prerelease_integrations_enabled: prerelease,
-    });
-
-    if (res.error) {
-      throw res.error;
-    }
-  }, []);
+        if (res.error) {
+          throw res.error;
+        }
+      } catch (error) {
+        setPrereleaseIntegrationsChecked(!prerelease);
+        notifications.toasts.addError(error, {
+          title: i18n.translate('xpack.fleet.errorUpdatingSettings', {
+            defaultMessage: 'Error updating settings',
+          }),
+        });
+      }
+    },
+    [mutateSettingsAsync, notifications.toasts]
+  );
 
   const link = (
     <EuiLink href={docLinks.links.fleet.beatsAgentComparison}>
@@ -153,20 +150,20 @@ export const IntegrationPreference = ({
       EventTarget & { checked: boolean }
     >
   ) => {
-    const isChecked = event.target.checked;
-    setPrereleaseIntegrationsEnabled(isChecked);
-    updateSettings(isChecked);
+    updateSettings(event.target.checked);
   };
 
   return (
     <EuiPanel hasShadow={false} paddingSize="none">
-      {prereleaseIntegrationsEnabled !== undefined && (
-        <EuiSwitchNoWrap
-          label="Display beta integrations"
-          checked={prereleaseIntegrationsEnabled}
-          onChange={onPrereleaseSwitchChange}
-        />
-      )}
+      <EuiSwitchNoWrap
+        label="Display beta integrations"
+        checked={
+          typeof prereleaseIntegrationsChecked !== 'undefined'
+            ? prereleaseIntegrationsChecked
+            : prereleaseIntegrationsEnabled
+        }
+        onChange={onPrereleaseSwitchChange}
+      />
       <EuiSpacer size="l" />
       <EuiText size="s">{title}</EuiText>
       <EuiSpacer size="m" />

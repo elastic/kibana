@@ -6,17 +6,12 @@
  */
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import { CONTAINER_ID, CONTAINER_IMAGE } from '../../../common/es_fields/apm';
 import {
-  CONTAINER_ID,
-  CONTAINER_IMAGE,
-  KUBERNETES,
-  KUBERNETES_CONTAINER_NAME,
-  KUBERNETES_NAMESPACE,
-  KUBERNETES_POD_NAME,
-  KUBERNETES_POD_UID,
-  KUBERNETES_REPLICASET_NAME,
   KUBERNETES_DEPLOYMENT_NAME,
-} from '../../../common/elasticsearch_fieldnames';
+  KUBERNETES_NAMESPACE,
+  KUBERNETES_REPLICASET_NAME,
+} from '../../../common/es_fields/infra_metrics';
 import { InfraMetricsClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
 
 export const getServiceOverviewContainerMetadata = async ({
@@ -30,17 +25,6 @@ export const getServiceOverviewContainerMetadata = async ({
   start: number;
   end: number;
 }) => {
-  const should = [
-    { exists: { field: KUBERNETES } },
-    { exists: { field: CONTAINER_IMAGE } },
-    { exists: { field: KUBERNETES_CONTAINER_NAME } },
-    { exists: { field: KUBERNETES_NAMESPACE } },
-    { exists: { field: KUBERNETES_POD_NAME } },
-    { exists: { field: KUBERNETES_POD_UID } },
-    { exists: { field: KUBERNETES_REPLICASET_NAME } },
-    { exists: { field: KUBERNETES_DEPLOYMENT_NAME } },
-  ];
-
   const response = await infraMetricsClient.search({
     size: 0,
     track_total_hits: false,
@@ -54,7 +38,6 @@ export const getServiceOverviewContainerMetadata = async ({
           },
           ...rangeQuery(start, end),
         ],
-        should,
       },
     },
     aggs: {

@@ -5,26 +5,19 @@
  * 2.0.
  */
 
-import { Actions } from '../../../common/api';
+import { UserActionActions } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
-import { basicCase, basicPush, getUserAction } from '../../containers/mock';
+import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
+import { basicCase, getUserAction } from '../../containers/mock';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 import type { UserActionBuilderArgs } from './types';
+import { casesConfigurationsMock } from '../../containers/configure/mock';
 
 export const getMockBuilderArgs = (): UserActionBuilderArgs => {
-  const userAction = getUserAction('title', Actions.update);
+  const userAction = getUserAction('title', UserActionActions.update);
   const commentRefs = { current: {} };
-  const caseServices = {
-    '123': {
-      ...basicPush,
-      firstPushIndex: 0,
-      lastPushIndex: 0,
-      commentsToUpdate: [],
-      hasDataToPush: true,
-    },
-  };
 
   const alertData = {
     'alert-id-1': {
@@ -51,6 +44,8 @@ export const getMockBuilderArgs = (): UserActionBuilderArgs => {
     },
   };
 
+  const caseConnectors = getCaseConnectorsMockResponse();
+
   const getRuleDetailsHref = jest.fn().mockReturnValue('https://example.com');
   const onRuleDetailsClick = jest.fn();
   const onShowAlertDetails = jest.fn();
@@ -69,8 +64,8 @@ export const getMockBuilderArgs = (): UserActionBuilderArgs => {
     externalReferenceAttachmentTypeRegistry,
     persistableStateAttachmentTypeRegistry,
     caseData: basicCase,
+    casesConfiguration: casesConfigurationsMock,
     comments: basicCase.comments,
-    caseServices,
     index: 0,
     alertData,
     commentRefs,
@@ -78,6 +73,7 @@ export const getMockBuilderArgs = (): UserActionBuilderArgs => {
     selectedOutlineCommentId: '',
     loadingCommentIds: [],
     loadingAlertData: false,
+    caseConnectors,
     getRuleDetailsHref,
     onRuleDetailsClick,
     onShowAlertDetails,

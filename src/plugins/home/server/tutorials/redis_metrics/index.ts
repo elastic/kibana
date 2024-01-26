@@ -54,10 +54,10 @@ export function redisMetricsSpecProvider(context: TutorialContext): TutorialSche
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/redis_metrics/screenshot.webp',
+    previewImagePath: context.staticAssets.getPluginAssetHref('/redis_metrics/screenshot.webp'),
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['datastore', 'message_queue'],
+    integrationBrowserCategories: ['datastore', 'observability'],
   };
 }

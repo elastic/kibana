@@ -22,6 +22,7 @@ describe('config schema', () => {
           },
           "enabled": true,
         },
+        "enabled": true,
         "kibana": Object {
           "collection": Object {
             "enabled": true,
@@ -55,6 +56,7 @@ describe('config schema', () => {
           "debug_mode": false,
           "elasticsearch": Object {
             "apiVersion": "master",
+            "apisToRedactInLogs": Array [],
             "compression": false,
             "customHeaders": Object {},
             "healthCheck": Object {
@@ -65,10 +67,11 @@ describe('config schema', () => {
             "logFetchCount": 10,
             "logQueries": false,
             "maxIdleSockets": 256,
-            "maxSockets": Infinity,
+            "maxSockets": 800,
             "pingTimeout": "PT30S",
             "requestHeadersWhitelist": Array [
               "authorization",
+              "es-client-authentication",
             ],
             "requestTimeout": "PT30S",
             "shardTimeout": "PT30S",

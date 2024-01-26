@@ -23,12 +23,14 @@ import {
   QueryDescriptionField,
   VersionField,
   ResultsTypeField,
+  TimeoutField,
 } from '../../form';
 import { PlatformCheckBoxGroupField } from '../../packs/queries/platform_checkbox_group_field';
 import { ALL_OSQUERY_VERSIONS_OPTIONS } from '../../packs/queries/constants';
 import { ECSMappingEditorField } from '../../packs/queries/lazy_ecs_mapping_editor_field';
 import { PlaygroundFlyout } from './playground_flyout';
 import { CodeEditorField } from './code_editor_field';
+import { overflowCss } from '../../packs/utils';
 
 interface SavedQueryFormProps {
   viewMode?: boolean;
@@ -88,12 +90,20 @@ const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({
       <QueryDescriptionField euiFieldProps={euiFieldProps} />
       <EuiSpacer />
       <CodeEditorField euiFieldProps={euiFieldProps} />
+      <EuiSpacer size="m" />
+      <EuiFlexGroup justifyContent={'spaceBetween'}>
+        <EuiFlexItem>
+          <TimeoutField euiFieldProps={euiFieldProps} />
+        </EuiFlexItem>
+        <EuiFlexItem />
+      </EuiFlexGroup>
       <EuiSpacer size="xl" />
       <EuiFlexGroup>
-        <EuiFlexItem>
+        <EuiFlexItem css={overflowCss}>
           <ECSMappingEditorField euiFieldProps={euiFieldProps} />
         </EuiFlexItem>
       </EuiFlexGroup>
+
       {!viewMode && hasPlayground && (
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>

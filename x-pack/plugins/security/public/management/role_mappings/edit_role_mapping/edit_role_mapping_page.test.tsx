@@ -8,24 +8,25 @@
 // brace/ace uses the Worker class, which is not currently provided by JSDOM.
 // This is not required for the tests to pass, but it rather suppresses lengthy
 // warnings in the console which adds unnecessary noise to the test output.
-import '@kbn/test-jest-helpers/target_node/src/stub_web_worker';
+import '@kbn/web-worker-stub';
 
 import React from 'react';
 
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import '@kbn/code-editor-mock/jest_helper';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import type { Role } from '../../../../common/model';
+import { EditRoleMappingPage } from './edit_role_mapping_page';
+import { JSONRuleEditor } from './rule_editor_panel/json_rule_editor';
+import { VisualRuleEditor } from './rule_editor_panel/visual_rule_editor';
+import type { Role } from '../../../../common';
 import { RoleComboBox } from '../../role_combo_box';
 import type { RolesAPIClient } from '../../roles';
 import { rolesAPIClientMock } from '../../roles/roles_api_client.mock';
 import { NoCompatibleRealms, PermissionDenied, SectionLoading } from '../components';
 import { roleMappingsAPIClientMock } from '../role_mappings_api_client.mock';
-import { EditRoleMappingPage } from './edit_role_mapping_page';
-import { JSONRuleEditor } from './rule_editor_panel/json_rule_editor';
-import { VisualRuleEditor } from './rule_editor_panel/visual_rule_editor';
 
 describe('EditRoleMappingPage', () => {
   const history = scopedHistoryMock.create();
@@ -33,9 +34,17 @@ describe('EditRoleMappingPage', () => {
 
   const renderView = (
     roleMappingsAPI: ReturnType<typeof roleMappingsAPIClientMock.create>,
-    name?: string
+    name?: string,
+    readOnly: boolean = false
   ) => {
     const coreStart = coreMock.createStart();
+    coreStart.application.capabilities = {
+      ...coreStart.application.capabilities,
+      role_mappings: {
+        save: !readOnly,
+      },
+    };
+
     return mountWithIntl(
       <KibanaContextProvider services={coreStart}>
         <EditRoleMappingPage
@@ -46,6 +55,7 @@ describe('EditRoleMappingPage', () => {
           notifications={coreStart.notifications}
           docLinks={coreStart.docLinks}
           history={history}
+          readOnly={!coreStart.application.capabilities.role_mappings.save}
         />
       </KibanaContextProvider>
     );
@@ -364,5 +374,58 @@ describe('EditRoleMappingPage', () => {
 
     expect(wrapper.find(VisualRuleEditor)).toHaveLength(0);
     expect(wrapper.find(JSONRuleEditor)).toHaveLength(1);
+  });
+
+  it('renders a readonly view when not enough privileges', async () => {
+    const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    roleMappingsAPI.saveRoleMapping.mockResolvedValue(null);
+    roleMappingsAPI.getRoleMapping.mockResolvedValue({
+      name: 'foo',
+      role_templates: [
+        {
+          template: { id: 'foo' },
+        },
+      ],
+      enabled: true,
+      rules: {
+        any: [{ field: { 'metadata.someCustomOption': [false, true, 'asdf'] } }],
+      },
+      metadata: {
+        foo: 'bar',
+        bar: 'baz',
+      },
+    });
+    roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
+      canManageRoleMappings: true,
+      hasCompatibleRealms: true,
+      canUseInlineScripts: true,
+      canUseStoredScripts: true,
+    });
+
+    const wrapper = renderView(roleMappingsAPI, 'foo', true);
+    await nextTick();
+    wrapper.update();
+
+    // back button
+    const backButton = wrapper.find('button[data-test-subj="roleMappingFormReturnButton"]');
+    expect(backButton).toHaveLength(1);
+
+    // no save button
+    const saveButton = wrapper.find('button[data-test-subj="saveRoleMappingButton"]');
+    expect(saveButton).toHaveLength(0);
+
+    // no delete button
+    const deleteButton = wrapper.find('emptyButton[data-test-subj="deleteRoleMappingButton"]');
+    expect(deleteButton).toHaveLength(0);
+
+    // Info panel is read-only (view mode)
+    const infoPanels = wrapper.find('MappingInfoPanel[data-test-subj="roleMappingInfoPanel"]');
+    expect(infoPanels).toHaveLength(1);
+    expect(infoPanels.at(0).props().mode).toEqual('view');
+
+    // Rule panel is read-only
+    const rulePanels = wrapper.find('RuleEditorPanel[data-test-subj="roleMappingRulePanel"]');
+    expect(rulePanels).toHaveLength(1);
+    expect(rulePanels.at(0).props().readOnly).toBeTruthy();
   });
 });

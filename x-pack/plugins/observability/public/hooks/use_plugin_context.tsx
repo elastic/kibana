@@ -6,7 +6,7 @@
  */
 
 import { useContext } from 'react';
-import { PluginContext } from '../context/plugin_context';
+import { PluginContext } from '../context/plugin_context/plugin_context';
 
 export function usePluginContext() {
   return useContext(PluginContext);

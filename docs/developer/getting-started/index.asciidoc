@@ -72,10 +72,7 @@ you can use:
 yarn kbn bootstrap --force-install
 ----
 
-(You can also run `yarn kbn` to see the other available commands. For
-more info about this tool, see
-{kib-repo}tree/{branch}/packages/kbn-pm[{kib-repo}tree/{branch}/packages/kbn-pm]. If you want more 
-information about how to actively develop over packages please read <<monorepo-packages>>)
+You can also run `yarn kbn` to see the other available commands.
 
 When switching branches which use different versions of npm packages you
 may need to run:

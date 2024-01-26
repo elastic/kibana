@@ -13,8 +13,8 @@ import {
   createMapStream,
   createPromiseFromStreams,
 } from '@kbn/utils';
-
-import type { SavedObject, SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
+import type { SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import { SavedObjectsImportError } from '../errors';
 import { getNonUniqueEntries } from './get_non_unique_entries';
 import { createLimitStream } from './create_limit_stream';
@@ -25,6 +25,7 @@ interface CollectSavedObjectsOptions {
   objectLimit: number;
   filter?: (obj: SavedObject) => boolean;
   supportedTypes: string[];
+  managed?: boolean;
 }
 
 export async function collectSavedObjects({
@@ -32,6 +33,7 @@ export async function collectSavedObjects({
   objectLimit,
   filter,
   supportedTypes,
+  managed,
 }: CollectSavedObjectsOptions) {
   const errors: SavedObjectsImportFailure[] = [];
   const entries: Array<{ type: string; id: string }> = [];
@@ -65,7 +67,13 @@ export async function collectSavedObjects({
         }
       }
       // Ensure migrations execute on every saved object
-      return Object.assign({ migrationVersion: {} }, obj);
+      return {
+        ...obj,
+        ...(!obj.migrationVersion && !obj.typeMigrationVersion ? { typeMigrationVersion: '' } : {}),
+        // override any managed flag on an object with that given as an option otherwise set the default to avoid having to do that with a core migration transform
+        // this is a bulk operation, applied to all objects being imported
+        ...{ managed: managed ?? obj.managed ?? false },
+      };
     }),
     createConcatStream([]),
   ]);

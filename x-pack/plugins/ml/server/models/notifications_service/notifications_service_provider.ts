@@ -7,6 +7,7 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MlFeatures } from '../../../common/constants/app';
 import type { MLSavedObjectService } from '../../saved_objects';
 import type { NotificationItem, NotificationSource } from '../../../common/types/notifications';
 import { ML_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_patterns';
@@ -22,10 +23,16 @@ import type {
 
 const MAX_NOTIFICATIONS_SIZE = 10000;
 
+interface EntityIdsPerType {
+  type: 'anomaly_detector' | 'data_frame_analytics' | 'inference' | 'system';
+  ids?: Array<string | null>;
+}
+
 export class NotificationsService {
   constructor(
     private readonly scopedClusterClient: IScopedClusterClient,
-    private readonly mlSavedObjectService: MLSavedObjectService
+    private readonly mlSavedObjectService: MLSavedObjectService,
+    private readonly enabledFeatures: MlFeatures
   ) {}
 
   private getDefaultCountResponse() {
@@ -42,17 +49,23 @@ export class NotificationsService {
    */
   private async _getEntityIdsPerType() {
     const [adJobIds, dfaJobIds, modelIds] = await Promise.all([
-      this.mlSavedObjectService.getAnomalyDetectionJobIds(),
-      this.mlSavedObjectService.getDataFrameAnalyticsJobIds(),
-      this.mlSavedObjectService.getTrainedModelsIds(),
+      this.enabledFeatures.ad ? this.mlSavedObjectService.getAnomalyDetectionJobIds() : [],
+      this.enabledFeatures.dfa ? this.mlSavedObjectService.getDataFrameAnalyticsJobIds() : [],
+      this.enabledFeatures.nlp ? this.mlSavedObjectService.getTrainedModelsIds() : [],
     ]);
+    const idsPerType: EntityIdsPerType[] = [{ type: 'system' }];
 
-    return [
-      { type: 'anomaly_detector', ids: adJobIds },
-      { type: 'data_frame_analytics', ids: dfaJobIds },
-      { type: 'inference', ids: modelIds },
-      { type: 'system' },
-    ].filter((v) => v.ids === undefined || v.ids.length > 0);
+    if (this.enabledFeatures.ad) {
+      idsPerType.push({ type: 'anomaly_detector', ids: adJobIds });
+    }
+    if (this.enabledFeatures.dfa) {
+      idsPerType.push({ type: 'data_frame_analytics', ids: dfaJobIds });
+    }
+    if (this.enabledFeatures.nlp) {
+      idsPerType.push({ type: 'inference', ids: modelIds as string[] });
+    }
+
+    return idsPerType.filter((v) => v.ids === undefined || v.ids.length > 0);
   }
 
   /**
@@ -154,18 +167,35 @@ export class NotificationsService {
       sortField: keyof NotificationItem,
       sortDirection: 'asc' | 'desc'
     ): (a: NotificationItem, b: NotificationItem) => number {
-      if (sortField === 'timestamp') {
-        if (sortDirection === 'asc') {
-          return (a, b) => a.timestamp - b.timestamp;
-        } else {
-          return (a, b) => b.timestamp - a.timestamp;
-        }
-      } else {
-        if (sortDirection === 'asc') {
-          return (a, b) => (a[sortField] ?? '').localeCompare(b[sortField]);
-        } else {
-          return (a, b) => (b[sortField] ?? '').localeCompare(a[sortField]);
-        }
+      switch (sortField) {
+        case 'timestamp':
+          if (sortDirection === 'asc') {
+            return (a, b) => a.timestamp - b.timestamp;
+          } else {
+            return (a, b) => b.timestamp - a.timestamp;
+          }
+        case 'level':
+          if (sortDirection === 'asc') {
+            const levelOrder: Record<NotificationSource['level'], number> = {
+              error: 0,
+              warning: 1,
+              info: 2,
+            };
+            return (a, b) => levelOrder[b.level] - levelOrder[a.level];
+          } else {
+            const levelOrder: Record<NotificationSource['level'], number> = {
+              error: 2,
+              warning: 1,
+              info: 0,
+            };
+            return (a, b) => levelOrder[b.level] - levelOrder[a.level];
+          }
+        default:
+          if (sortDirection === 'asc') {
+            return (a, b) => (a[sortField] ?? '').localeCompare(b[sortField]);
+          } else {
+            return (a, b) => (b[sortField] ?? '').localeCompare(a[sortField]);
+          }
       }
     }
 

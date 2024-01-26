@@ -70,7 +70,7 @@ const tooltipContent = {
     'xpack.ml.dataframe.analytics.regressionExploration.msleTooltipContent',
     {
       defaultMessage:
-        'Average squared difference between the logarithm of the predicted values and the logarithm of the actual (ground truth) value',
+        'Average squared difference between the logarithm of the predicted values and the logarithm of the actual (ground truth) value.',
     }
   ),
   [REGRESSION_STATS.R_SQUARED]: i18n.translate(

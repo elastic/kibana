@@ -36,7 +36,6 @@ interface Props {
   updateSysMonitoring: (newValue: boolean) => void;
   validation: ValidationResults;
   isEditing?: boolean;
-  onDelete?: () => void;
 }
 
 export const AgentPolicyForm: React.FunctionComponent<Props> = ({
@@ -46,7 +45,6 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
   updateSysMonitoring,
   validation,
   isEditing = false,
-  onDelete = () => {},
 }) => {
   const generalSettingsWrapper = (children: JSX.Element[]) => (
     <EuiDescribedFormGroup
@@ -112,7 +110,6 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
               updateAgentPolicy={updateAgentPolicy}
               validation={validation}
               isEditing={isEditing}
-              onDelete={onDelete}
             />
           </StyledEuiAccordion>
         </>
@@ -122,7 +119,6 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
           updateAgentPolicy={updateAgentPolicy}
           validation={validation}
           isEditing={isEditing}
-          onDelete={onDelete}
         />
       )}
     </EuiForm>

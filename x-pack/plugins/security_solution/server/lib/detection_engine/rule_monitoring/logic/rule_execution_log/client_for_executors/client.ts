@@ -5,49 +5,54 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import { sum } from 'lodash';
 import type { Duration } from 'moment';
-import type { Logger } from '@kbn/core/server';
 
 import type {
-  RuleExecutionMetrics,
+  PublicRuleMonitoringService,
+  PublicRuleResultService,
+} from '@kbn/alerting-plugin/server/types';
+import type {
   RuleExecutionSettings,
   RuleExecutionStatus,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
-import {
   LogLevel,
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
+import {
   logLevelFromExecutionStatus,
   LogLevelSetting,
   logLevelToNumber,
-  ruleExecutionStatusToNumber,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
+  RuleExecutionStatusEnum,
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
 
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { withSecuritySpan } from '../../../../../../utils/with_security_span';
-import { truncateValue } from '../utils/normalization';
-import type { ExtMeta } from '../utils/console_logging';
+import type { ExtMeta } from '../../utils/console_logging';
+import { truncateValue } from '../../utils/normalization';
 import { getCorrelationIds } from './correlation_ids';
 
 import type { IEventLogWriter } from '../event_log/event_log_writer';
-import type { IRuleExecutionSavedObjectsClient } from '../execution_saved_object/saved_objects_client';
 import type {
   IRuleExecutionLogForExecutors,
   RuleExecutionContext,
   StatusChangeArgs,
 } from './client_interface';
+import type { RuleExecutionMetrics } from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
+import { LogLevelEnum } from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
 
-export const createClientForExecutors = (
+export const createRuleExecutionLogClientForExecutors = (
   settings: RuleExecutionSettings,
-  soClient: IRuleExecutionSavedObjectsClient,
   eventLog: IEventLogWriter,
   logger: Logger,
-  context: RuleExecutionContext
+  context: RuleExecutionContext,
+  ruleMonitoringService: PublicRuleMonitoringService,
+  ruleResultService: PublicRuleResultService
 ): IRuleExecutionLogForExecutors => {
   const baseCorrelationIds = getCorrelationIds(context);
   const baseLogSuffix = baseCorrelationIds.getLogSuffix();
   const baseLogMeta = baseCorrelationIds.getLogMeta();
 
-  const { executionId, ruleId, ruleUuid, ruleName, ruleType, spaceId } = context;
+  const { executionId, ruleId, ruleUuid, ruleName, ruleRevision, ruleType, spaceId } = context;
 
   const client: IRuleExecutionLogForExecutors = {
     get context() {
@@ -55,23 +60,23 @@ export const createClientForExecutors = (
     },
 
     trace(...messages: string[]): void {
-      writeMessage(messages, LogLevel.trace);
+      writeMessage(messages, LogLevelEnum.trace);
     },
 
     debug(...messages: string[]): void {
-      writeMessage(messages, LogLevel.debug);
+      writeMessage(messages, LogLevelEnum.debug);
     },
 
     info(...messages: string[]): void {
-      writeMessage(messages, LogLevel.info);
+      writeMessage(messages, LogLevelEnum.info);
     },
 
     warn(...messages: string[]): void {
-      writeMessage(messages, LogLevel.warn);
+      writeMessage(messages, LogLevelEnum.warn);
     },
 
     error(...messages: string[]): void {
-      writeMessage(messages, LogLevel.error);
+      writeMessage(messages, LogLevelEnum.error);
     },
 
     async logStatusChange(args: StatusChangeArgs): Promise<void> {
@@ -84,7 +89,7 @@ export const createClientForExecutors = (
 
           await Promise.all([
             writeStatusChangeToConsole(normalizedArgs, logMeta),
-            writeStatusChangeToSavedObjects(normalizedArgs),
+            writeStatusChangeToRuleObject(normalizedArgs),
             writeStatusChangeToEventLog(normalizedArgs),
           ]);
         } catch (e) {
@@ -103,19 +108,19 @@ export const createClientForExecutors = (
 
   const writeMessageToConsole = (message: string, logLevel: LogLevel, logMeta: ExtMeta): void => {
     switch (logLevel) {
-      case LogLevel.trace:
+      case LogLevelEnum.trace:
         logger.trace(`${message} ${baseLogSuffix}`, logMeta);
         break;
-      case LogLevel.debug:
+      case LogLevelEnum.debug:
         logger.debug(`${message} ${baseLogSuffix}`, logMeta);
         break;
-      case LogLevel.info:
+      case LogLevelEnum.info:
         logger.info(`${message} ${baseLogSuffix}`, logMeta);
         break;
-      case LogLevel.warn:
+      case LogLevelEnum.warn:
         logger.warn(`${message} ${baseLogSuffix}`, logMeta);
         break;
-      case LogLevel.error:
+      case LogLevelEnum.error:
         logger.error(`${message} ${baseLogSuffix}`, logMeta);
         break;
       default:
@@ -137,6 +142,7 @@ export const createClientForExecutors = (
       ruleId,
       ruleUuid,
       ruleName,
+      ruleRevision,
       ruleType,
       spaceId,
       executionId,
@@ -147,7 +153,7 @@ export const createClientForExecutors = (
 
   const writeExceptionToConsole = (e: unknown, message: string, logMeta: ExtMeta): void => {
     const logReason = e instanceof Error ? e.stack ?? e.message : String(e);
-    writeMessageToConsole(`${message}. Reason: ${logReason}`, LogLevel.error, logMeta);
+    writeMessageToConsole(`${message}. Reason: ${logReason}`, LogLevelEnum.error, logMeta);
   };
 
   const writeStatusChangeToConsole = (args: NormalizedStatusChangeArgs, logMeta: ExtMeta): void => {
@@ -157,21 +163,38 @@ export const createClientForExecutors = (
     writeMessageToConsole(logMessage, logLevel, logMeta);
   };
 
-  // TODO: Add executionId to new status SO?
-  const writeStatusChangeToSavedObjects = async (
-    args: NormalizedStatusChangeArgs
-  ): Promise<void> => {
+  const writeStatusChangeToRuleObject = async (args: NormalizedStatusChangeArgs): Promise<void> => {
     const { newStatus, message, metrics } = args;
 
-    await soClient.createOrUpdate(ruleId, {
-      last_execution: {
-        date: nowISO(),
-        status: newStatus,
-        status_order: ruleExecutionStatusToNumber(newStatus),
-        message,
-        metrics: metrics ?? {},
-      },
-    });
+    if (newStatus === RuleExecutionStatusEnum.running) {
+      return;
+    }
+
+    const {
+      total_search_duration_ms: totalSearchDurationMs,
+      total_indexing_duration_ms: totalIndexingDurationMs,
+      execution_gap_duration_s: executionGapDurationS,
+    } = metrics ?? {};
+
+    if (totalSearchDurationMs) {
+      ruleMonitoringService.setLastRunMetricsTotalSearchDurationMs(totalSearchDurationMs);
+    }
+
+    if (totalIndexingDurationMs) {
+      ruleMonitoringService.setLastRunMetricsTotalIndexingDurationMs(totalIndexingDurationMs);
+    }
+
+    if (executionGapDurationS) {
+      ruleMonitoringService.setLastRunMetricsGapDurationS(executionGapDurationS);
+    }
+
+    if (newStatus === RuleExecutionStatusEnum.failed) {
+      ruleResultService.addLastRunError(message);
+    } else if (newStatus === RuleExecutionStatusEnum['partial failure']) {
+      ruleResultService.addLastRunWarning(message);
+    }
+
+    ruleResultService.setLastRunOutcomeMessage(message);
   };
 
   const writeStatusChangeToEventLog = (args: NormalizedStatusChangeArgs): void => {
@@ -182,6 +205,7 @@ export const createClientForExecutors = (
         ruleId,
         ruleUuid,
         ruleName,
+        ruleRevision,
         ruleType,
         spaceId,
         executionId,
@@ -193,6 +217,7 @@ export const createClientForExecutors = (
       ruleId,
       ruleUuid,
       ruleName,
+      ruleRevision,
       ruleType,
       spaceId,
       executionId,
@@ -204,8 +229,6 @@ export const createClientForExecutors = (
   return client;
 };
 
-const nowISO = () => new Date().toISOString();
-
 interface NormalizedStatusChangeArgs {
   newStatus: RuleExecutionStatus;
   message: string;
@@ -213,6 +236,12 @@ interface NormalizedStatusChangeArgs {
 }
 
 const normalizeStatusChangeArgs = (args: StatusChangeArgs): NormalizedStatusChangeArgs => {
+  if (args.newStatus === RuleExecutionStatusEnum.running) {
+    return {
+      newStatus: args.newStatus,
+      message: '',
+    };
+  }
   const { newStatus, message, metrics } = args;
 
   return {

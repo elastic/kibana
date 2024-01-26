@@ -5,18 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Filter } from '@kbn/es-query';
-import { ExpressionValueBoxed, ExpressionValueFilter } from '@kbn/expressions-plugin/common';
-import { Query, TimeRange } from '../../query';
-import { adaptToExpressionValueFilter, DataViewField } from '../..';
-
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type ExecutionContextSearch = {
-  filters?: Filter[];
-  query?: Query | Query[];
-  timeRange?: TimeRange;
-  disableShardWarnings?: boolean;
-};
+import { Filter, ExecutionContextSearch } from '@kbn/es-query';
+import { ExpressionValueBoxed } from '@kbn/expressions-plugin/common';
+import { Query } from '../../query';
+import { DataViewField } from '../..';
 
 export type ExpressionValueSearchContext = ExpressionValueBoxed<
   'kibana_context',
@@ -30,29 +22,3 @@ export type KibanaField = ExpressionValueBoxed<'kibana_field', DataViewField>;
 // TODO: These two are exported for legacy reasons - remove them eventually.
 export type KIBANA_CONTEXT_NAME = 'kibana_context';
 export type KibanaContext = ExpressionValueSearchContext;
-
-export const kibanaContext = {
-  name: 'kibana_context',
-  from: {
-    null: () => {
-      return {
-        type: 'kibana_context',
-      };
-    },
-  },
-  to: {
-    null: () => {
-      return {
-        type: 'null',
-      };
-    },
-    filter: (input: KibanaContext): ExpressionValueFilter => {
-      const { filters = [] } = input;
-      return {
-        type: 'filter',
-        filterType: 'filter',
-        and: filters.map(adaptToExpressionValueFilter),
-      };
-    },
-  },
-};

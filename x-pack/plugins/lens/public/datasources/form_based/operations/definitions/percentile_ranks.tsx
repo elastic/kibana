@@ -10,6 +10,8 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import { PERCENTILE_RANK_ID, PERCENTILE_RANK_NAME } from '@kbn/lens-formula-docs';
 import { OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
@@ -22,13 +24,11 @@ import {
 } from './helpers';
 import { FieldBasedIndexPatternColumn } from './column_types';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
-import { useDebouncedValue } from '../../../../shared_components';
-import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 import { FormRow } from './shared_components';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 
 export interface PercentileRanksIndexPatternColumn extends FieldBasedIndexPatternColumn {
-  operationType: 'percentile_rank';
+  operationType: typeof PERCENTILE_RANK_ID;
   params: {
     value: number;
   };
@@ -64,11 +64,9 @@ export const percentileRanksOperation: OperationDefinition<
   { value: number },
   true
 > = {
-  type: 'percentile_rank',
+  type: PERCENTILE_RANK_ID,
   allowAsReference: true,
-  displayName: i18n.translate('xpack.lens.indexPattern.percentileRank', {
-    defaultMessage: 'Percentile rank',
-  }),
+  displayName: PERCENTILE_RANK_NAME,
   input: 'field',
   operationParams: [
     {
@@ -81,10 +79,16 @@ export const percentileRanksOperation: OperationDefinition<
   filterable: true,
   shiftable: true,
   canReduceTimeRange: true,
-  getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
+  getPossibleOperationForField: ({
+    aggregationRestrictions,
+    aggregatable,
+    type: fieldType,
+    timeSeriesMetric,
+  }) => {
     if (
       supportedFieldTypes.includes(fieldType) &&
       aggregatable &&
+      timeSeriesMetric !== 'counter' &&
       (!aggregationRestrictions || !aggregationRestrictions.percentile_ranks)
     ) {
       return {
@@ -104,7 +108,7 @@ export const percentileRanksOperation: OperationDefinition<
         (!newField.aggregationRestrictions || !newField.aggregationRestrictions.percentile_ranks)
     );
   },
-  getDefaultLabel: (column, indexPattern, columns) =>
+  getDefaultLabel: (column, columns, indexPattern) =>
     ofName(
       getSafeName(column.sourceField, indexPattern),
       column.params.value,
@@ -167,8 +171,7 @@ export const percentileRanksOperation: OperationDefinition<
   },
   getErrorMessage: (layer, columnId, indexPattern) =>
     combineErrorMessages([
-      getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
-      getDisallowedPreviousShiftMessage(layer, columnId),
+      getInvalidFieldMessage(layer, columnId, indexPattern),
       getColumnReducedTimeRangeError(layer, columnId, indexPattern),
     ]),
   paramEditor: function PercentileParamEditor({
@@ -185,7 +188,7 @@ export const percentileRanksOperation: OperationDefinition<
       });
     const onChange = useCallback(
       (value) => {
-        if (!isValidNumber(value) || Number(value) === currentColumn.params.value) {
+        if (!isValidNumber(value, isInline) || Number(value) === currentColumn.params.value) {
           return;
         }
         paramEditorUpdater({
@@ -205,7 +208,7 @@ export const percentileRanksOperation: OperationDefinition<
           },
         } as PercentileRanksIndexPatternColumn);
       },
-      [paramEditorUpdater, currentColumn, indexPattern]
+      [isInline, currentColumn, paramEditorUpdater, indexPattern]
     );
     const { inputValue, handleInputChange: handleInputChangeWithoutValidation } = useDebouncedValue<
       string | undefined
@@ -216,7 +219,7 @@ export const percentileRanksOperation: OperationDefinition<
       },
       { allowFalsyValue: true }
     );
-    const inputValueIsValid = isValidNumber(inputValue);
+    const inputValueIsValid = isValidNumber(inputValue, isInline);
 
     const handleInputChange: EuiFieldNumberProps['onChange'] = useCallback(
       (e) => {
@@ -246,25 +249,11 @@ export const percentileRanksOperation: OperationDefinition<
           compressed
           value={inputValue ?? ''}
           onChange={handleInputChange}
-          step="any"
+          step={isInline ? 1 : 'any'}
           aria-label={percentileRanksLabel}
         />
       </FormRow>
     );
-  },
-  documentation: {
-    section: 'elasticsearch',
-    signature: i18n.translate('xpack.lens.indexPattern.percentileRanks.signature', {
-      defaultMessage: 'field: string, [value]: number',
-    }),
-    description: i18n.translate('xpack.lens.indexPattern.percentileRanks.documentation.markdown', {
-      defaultMessage: `
-Returns the percentage of values which are below a certain value. For example, if a value is greater than or equal to 95% of the observed values it is said to be at the 95th percentile rank
-
-Example: Get the percentage of values which are below of 100:
-\`percentile_rank(bytes, value=100)\`
-      `,
-    }),
   },
   quickFunctionDocumentation: i18n.translate(
     'xpack.lens.indexPattern.percentileRanks.documentation.quick',

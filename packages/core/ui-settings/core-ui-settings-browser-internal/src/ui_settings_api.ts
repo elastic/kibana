@@ -7,12 +7,18 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import type { HttpSetup } from '@kbn/core-http-browser';
+import type { InternalHttpSetup } from '@kbn/core-http-browser-internal';
 
 import type { UiSettingsState } from '@kbn/core-ui-settings-browser';
+import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 
 export interface UiSettingsApiResponse {
   settings: UiSettingsState;
+}
+
+export interface ValidationApiResponse {
+  valid: boolean;
+  errorMessage?: string;
 }
 
 interface Changes {
@@ -36,7 +42,7 @@ export class UiSettingsApi {
 
   private readonly loadingCount$ = new BehaviorSubject(0);
 
-  constructor(private readonly http: HttpSetup) {}
+  constructor(private readonly http: InternalHttpSetup) {}
 
   /**
    * Adds a key+value that will be sent to the server ASAP. If a request is
@@ -64,7 +70,41 @@ export class UiSettingsApi {
         },
       };
 
-      this.flushPendingChanges();
+      this.flushPendingChanges('namespace');
+    });
+  }
+
+  public batchSetGlobal(key: string, value: any) {
+    return new Promise<UiSettingsApiResponse>((resolve, reject) => {
+      const prev = this.pendingChanges || NOOP_CHANGES;
+
+      this.pendingChanges = {
+        values: {
+          ...prev.values,
+          [key]: value,
+        },
+
+        callback(error, resp) {
+          prev.callback(error, resp);
+
+          if (error) {
+            reject(error);
+          } else {
+            resolve(resp!);
+          }
+        },
+      };
+
+      this.flushPendingChanges('global');
+    });
+  }
+
+  /**
+   * Sends a validation request to the server for the provided key+value pair.
+   */
+  public async validate(key: string, value: any): Promise<ValidationApiResponse> {
+    return await this.sendRequest('POST', `/internal/kibana/settings/${key}/validate`, {
+      value,
     });
   }
 
@@ -97,7 +137,7 @@ export class UiSettingsApi {
    * progress) then another request will be started until all pending changes have been
    * sent to the server.
    */
-  private async flushPendingChanges() {
+  private async flushPendingChanges(scope: UiSettingsScope) {
     if (!this.pendingChanges) {
       return;
     }
@@ -111,10 +151,11 @@ export class UiSettingsApi {
 
     try {
       this.sendInProgress = true;
-
+      const path =
+        scope === 'namespace' ? '/internal/kibana/settings' : '/internal/kibana/global_settings';
       changes.callback(
         undefined,
-        await this.sendRequest('POST', '/api/kibana/settings', {
+        await this.sendRequest('POST', path, {
           changes: changes.values,
         })
       );
@@ -122,7 +163,7 @@ export class UiSettingsApi {
       changes.callback(error);
     } finally {
       this.sendInProgress = false;
-      this.flushPendingChanges();
+      this.flushPendingChanges(scope);
     }
   }
 

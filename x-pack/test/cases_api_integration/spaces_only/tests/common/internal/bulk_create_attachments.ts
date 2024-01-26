@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { AttributesTypeUser } from '@kbn/cases-plugin/common/api';
+import { UserCommentAttachmentAttributes } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { nullUser, postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
@@ -16,7 +16,7 @@ import {
   getAuthWithSuperUser,
   bulkCreateAttachments,
   deleteAllCaseItems,
-} from '../../../../common/lib/utils';
+} from '../../../../common/lib/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -39,7 +39,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const comment = removeServerGeneratedPropertiesFromSavedObject(
-        patchedCase.comments![0] as AttributesTypeUser
+        patchedCase.comments![0] as UserCommentAttachmentAttributes
       );
 
       expect(comment).to.eql({

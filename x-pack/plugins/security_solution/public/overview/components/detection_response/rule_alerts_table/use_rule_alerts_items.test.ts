@@ -17,6 +17,7 @@ import {
 } from './mock_data';
 import type { UseRuleAlertsItems, UseRuleAlertsItemsProps } from './use_rule_alerts_items';
 import { useRuleAlertsItems } from './use_rule_alerts_items';
+import type { ESBoolQuery } from '../../../../../common/typed_json';
 
 const dateNow = new Date('2022-04-08T12:00:00.000Z').valueOf();
 const mockDateNow = jest.fn().mockReturnValue(dateNow);
@@ -128,5 +129,20 @@ describe('useRuleAlertsItems', () => {
       isLoading: false,
       updatedAt: dateNow,
     });
+  });
+
+  it('should add filterQuery to query', () => {
+    const filterQuery: ESBoolQuery = {
+      bool: {
+        filter: [{ match_phrase: { test: '123' } }],
+        must: [],
+        must_not: [],
+        should: [],
+      },
+    };
+
+    renderUseRuleAlertsItems({ filterQuery });
+
+    expect(mockUseQueryAlerts.mock.calls[0][0].query.query.bool.filter).toContain(filterQuery);
   });
 });

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CaseSeverity } from '../../../../common/api';
+import { CaseSeverity } from '../../../../common/types/domain';
 import { severities } from '../../severity/config';
 
 const SET_SEVERITY = ({

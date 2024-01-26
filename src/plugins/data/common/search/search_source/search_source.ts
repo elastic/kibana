@@ -59,7 +59,7 @@
  */
 
 import { setWith } from '@kbn/safer-lodash-set';
-import { difference, isEqual, isFunction, isObject, keyBy, pick, uniqueId, uniqWith } from 'lodash';
+import { difference, isEqual, isFunction, isObject, keyBy, pick, uniqueId, concat } from 'lodash';
 import {
   catchError,
   finalize,
@@ -72,7 +72,13 @@ import {
 } from 'rxjs/operators';
 import { defer, EMPTY, from, lastValueFrom, Observable } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { buildEsQuery, Filter, isOfQueryType } from '@kbn/es-query';
+import {
+  buildEsQuery,
+  Filter,
+  isOfQueryType,
+  isPhraseFilter,
+  isPhrasesFilter,
+} from '@kbn/es-query';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
 import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -81,7 +87,6 @@ import {
   buildExpression,
   buildExpressionFunction,
 } from '@kbn/expressions-plugin/common';
-import _ from 'lodash';
 import { normalizeSortRequest } from './normalize_sort_request';
 
 import { AggConfigSerialized, DataViewField, SerializedSearchSourceFields } from '../..';
@@ -98,14 +103,7 @@ import { getSearchParamsFromRequest, RequestFailure } from './fetch';
 import type { FetchHandlers, SearchRequest } from './fetch';
 import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
 
-import {
-  getEsQueryConfig,
-  IKibanaSearchResponse,
-  isErrorResponse,
-  isPartialResponse,
-  isCompleteResponse,
-  UI_SETTINGS,
-} from '../..';
+import { getEsQueryConfig, IKibanaSearchResponse, isRunningResponse, UI_SETTINGS } from '../..';
 import { AggsStart } from '../aggs';
 import { extractReferences } from './extract_references';
 import {
@@ -133,6 +131,7 @@ export const searchSourceRequiredUiSettings = [
 export interface SearchSourceDependencies extends FetchHandlers {
   aggs: AggsStart;
   search: ISearchGeneric;
+  scriptedFieldsEnabled: boolean;
 }
 
 interface ExpressionAstOptions {
@@ -251,7 +250,6 @@ export class SearchSource {
 
   getActiveIndexFilter() {
     const { filter: originalFilters, query } = this.getFields();
-
     let filters: Filter[] = [];
     if (originalFilters) {
       filters = this.getFilters(originalFilters);
@@ -270,16 +268,20 @@ export class SearchSource {
             return acc.concat(this.parseActiveIndexPatternFromQueryString(currStr));
           }, []) ?? [];
 
-    const activeIndexPattern: string[] = filters?.reduce<string[]>((acc, f) => {
-      if (f.meta.key === '_index' && f.meta.disabled === false) {
-        if (f.meta.negate === false) {
-          return _.concat(acc, f.meta.params.query ?? f.meta.params);
-        } else {
-          if (Array.isArray(f.meta.params)) {
-            return _.difference(acc, f.meta.params);
+    const activeIndexPattern = filters?.reduce((acc, f) => {
+      const isPhraseFilterType = isPhraseFilter(f);
+      const isPhrasesFilterType = isPhrasesFilter(f);
+      const filtersToChange = isPhraseFilterType ? f.meta.params?.query : f.meta.params;
+      const filtersArray = Array.isArray(filtersToChange) ? filtersToChange : [filtersToChange];
+      if (isPhraseFilterType || isPhrasesFilterType) {
+        if (f.meta.key === '_index' && f.meta.disabled === false) {
+          if (f.meta.negate === false) {
+            return concat(acc, filtersArray);
           } else {
-            return _.difference(acc, [f.meta.params.query]);
+            return difference(acc, filtersArray);
           }
+        } else {
+          return acc;
         }
       } else {
         return acc;
@@ -456,7 +458,9 @@ export class SearchSource {
     const last$ = s$
       .pipe(
         catchError((e) => {
-          requestResponder?.error({ json: e });
+          requestResponder?.error({
+            json: 'attributes' in e ? e.attributes : { message: e.message },
+          });
           return EMPTY;
         }),
         last(undefined, null),
@@ -512,7 +516,7 @@ export class SearchSource {
             options.inspector?.adapter,
             options.abortSignal,
             options.sessionId,
-            options.disableShardFailureWarning
+            options.disableWarningToasts
           );
         }
       }
@@ -535,10 +539,10 @@ export class SearchSource {
 
     return search({ params, indexType: searchRequest.indexType }, options).pipe(
       switchMap((response) => {
+        // For testing timeout messages in UI, uncomment the next line
+        // response.rawResponse.timed_out = true;
         return new Observable<IKibanaSearchResponse<unknown>>((obs) => {
-          if (isErrorResponse(response)) {
-            obs.error(response);
-          } else if (isPartialResponse(response)) {
+          if (isRunningResponse(response)) {
             obs.next(this.postFlightTransform(response));
           } else {
             if (!this.hasPostFlightRequests()) {
@@ -574,7 +578,7 @@ export class SearchSource {
         });
       }),
       map((response) => {
-        if (!isCompleteResponse(response)) {
+        if (isRunningResponse(response)) {
           return response;
         }
         return onResponse(searchRequest, response, options);
@@ -775,12 +779,11 @@ export class SearchSource {
     const metaFields = getConfig(UI_SETTINGS.META_FIELDS) ?? [];
 
     // get some special field types from the index pattern
-    const { docvalueFields, scriptFields, storedFields, runtimeFields } = index
+    const { docvalueFields, scriptFields, runtimeFields } = index
       ? index.getComputedFields()
       : {
           docvalueFields: [],
           scriptFields: {},
-          storedFields: ['*'],
           runtimeFields: {},
         };
     const fieldListProvided = !!body.fields;
@@ -788,11 +791,13 @@ export class SearchSource {
     // set defaults
     let fieldsFromSource = searchRequest.fieldsFromSource || [];
     body.fields = body.fields || [];
-    body.script_fields = {
-      ...body.script_fields,
-      ...scriptFields,
-    };
-    body.stored_fields = storedFields;
+    body.script_fields = this.dependencies.scriptedFieldsEnabled
+      ? {
+          ...body.script_fields,
+          ...scriptFields,
+        }
+      : {};
+    body.stored_fields = ['*'];
     body.runtime_mappings = runtimeFields || {};
 
     // apply source filters from index pattern if specified by the user
@@ -871,28 +876,28 @@ export class SearchSource {
         // inject the format from the computed fields if one isn't given
         const docvaluesIndex = keyBy(filteredDocvalueFields, 'field');
         const bodyFields = this.getFieldsWithoutSourceFilters(index, body.fields);
-        body.fields = uniqWith(
-          bodyFields.concat(filteredDocvalueFields),
-          (fld1: SearchFieldValue, fld2: SearchFieldValue) => {
-            const field1Name = this.getFieldName(fld1);
-            const field2Name = this.getFieldName(fld2);
-            return field1Name === field2Name;
+
+        const uniqueFieldNames = new Set();
+        const uniqueFields = [];
+        for (const field of bodyFields.concat(filteredDocvalueFields)) {
+          const fieldName = this.getFieldName(field);
+          if (metaFields.includes(fieldName) || uniqueFieldNames.has(fieldName)) {
+            continue;
           }
-        )
-          .filter((fld: SearchFieldValue) => {
-            return !metaFields.includes(this.getFieldName(fld));
-          })
-          .map((fld: SearchFieldValue) => {
-            const fieldName = this.getFieldName(fld);
-            if (Object.keys(docvaluesIndex).includes(fieldName)) {
-              // either provide the field object from computed docvalues,
-              // or merge the user-provided field with the one in docvalues
-              return typeof fld === 'string'
-                ? docvaluesIndex[fld]
-                : this.getFieldFromDocValueFieldsOrIndexPattern(docvaluesIndex, fld, index);
-            }
-            return fld;
-          });
+          uniqueFieldNames.add(fieldName);
+          if (Object.keys(docvaluesIndex).includes(fieldName)) {
+            // either provide the field object from computed docvalues,
+            // or merge the user-provided field with the one in docvalues
+            uniqueFields.push(
+              typeof field === 'string'
+                ? docvaluesIndex[field]
+                : this.getFieldFromDocValueFieldsOrIndexPattern(docvaluesIndex, field, index)
+            );
+          } else {
+            uniqueFields.push(field);
+          }
+        }
+        body.fields = uniqueFields;
       }
     } else {
       body.fields = filteredDocvalueFields;
@@ -907,6 +912,25 @@ export class SearchSource {
       filtersInMustClause,
     };
     body.query = buildEsQuery(index, query, filters, esQueryConfigs);
+
+    // For testing shard failure messages in the UI, follow these steps:
+    // 1. Add all three sample data sets (flights, ecommerce, logs) to Kibana.
+    // 2. Create a data view using the index pattern `kibana*` and don't use a timestamp field.
+    // 3. Uncomment the lines below, navigate to Discover,
+    //    and switch to the data view created in step 2.
+    // body.query.bool.must.push({
+    //   error_query: {
+    //     indices: [
+    //       {
+    //         name: 'kibana_sample_data_logs',
+    //         shard_ids: [0, 1],
+    //         error_type: 'exception',
+    //         message: 'Testing shard failures!',
+    //       },
+    //     ],
+    //   },
+    // });
+    // Alternatively you could also add this query via "Edit as Query DSL", then it needs no code to be changed
 
     if (highlightAll && body.query) {
       body.highlight = getHighlightRequest(getConfig(UI_SETTINGS.DOC_HIGHLIGHT));
@@ -923,7 +947,7 @@ export class SearchSource {
   /**
    * serializes search source fields (which can later be passed to {@link ISearchStartSearchSource})
    */
-  public getSerializedFields(recurse = false, includeFields = true): SerializedSearchSourceFields {
+  public getSerializedFields(recurse = false): SerializedSearchSourceFields {
     const {
       filter: originalFilters,
       aggs: searchSourceAggs,
@@ -938,9 +962,7 @@ export class SearchSource {
       ...searchSourceFields,
     };
     if (index) {
-      serializedSearchSourceFields.index = index.isPersisted()
-        ? index.id
-        : index.toSpec(includeFields);
+      serializedSearchSourceFields.index = index.isPersisted() ? index.id : index.toMinimalSpec();
     }
     if (sort) {
       serializedSearchSourceFields.sort = !Array.isArray(sort) ? [sort] : sort;
@@ -1013,6 +1035,7 @@ export class SearchSource {
     const filters = (
       typeof searchRequest.filters === 'function' ? searchRequest.filters() : searchRequest.filters
     ) as Filter[] | Filter | undefined;
+
     const ast = buildExpression([
       buildExpressionFunction<ExpressionFunctionKibanaContext>('kibana_context', {
         q: query?.map(queryToAst),

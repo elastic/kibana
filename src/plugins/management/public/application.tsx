@@ -16,15 +16,6 @@ export const renderApp = async (
   { history, appBasePath, element, theme$ }: AppMountParameters,
   dependencies: ManagementAppDependencies
 ) => {
-  ReactDOM.render(
-    <ManagementApp
-      dependencies={dependencies}
-      appBasePath={appBasePath}
-      history={history}
-      theme$={theme$}
-    />,
-    element
-  );
-
+  ReactDOM.render(<ManagementApp {...{ history, appBasePath, theme$, dependencies }} />, element);
   return () => ReactDOM.unmountComponentAtNode(element);
 };

@@ -1,0 +1,34 @@
+.resultField:nth-child(odd) {
+  background-color: $euiColorLightestShade;
+}
+
+.resultField {
+  padding: $euiSizeXS $euiSizeS;
+
+  > .euiTableRowCell {
+    border-top: none;
+    border-bottom: none;
+
+    > .euiTableCellContent {
+      padding: $euiSizeXS;
+    }
+  }
+}
+
+.resultExpandColumn {
+  border-left: $euiBorderThin;
+  align-items: flex-start;
+  justify-content: center;
+  height: 100%;
+  padding: 0 0 0 $euiSizeS;
+}
+
+.resultHeader {
+  padding: 0 $euiSizeS $euiSizeXS 0;
+}
+
+.euiToken.resultField__token {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}

@@ -10,7 +10,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import type { RoleTemplate } from '../../../../../common/model';
+import type { RoleTemplate } from '../../../../../common';
 import { isInlineRoleTemplate, isStoredRoleTemplate } from '../services/role_template_type';
 
 const templateTypeOptions = [
@@ -35,9 +35,12 @@ interface Props {
   onChange: (roleTempplate: RoleTemplate) => void;
   canUseStoredScripts: boolean;
   canUseInlineScripts: boolean;
+  readOnly?: boolean;
 }
 
 export const RoleTemplateTypeSelect = (props: Props) => {
+  if (props.readOnly === undefined) props.readOnly = false;
+
   const availableOptions = templateTypeOptions.filter(
     ({ id }) =>
       (id === 'inline' && props.canUseInlineScripts) ||
@@ -75,6 +78,7 @@ export const RoleTemplateTypeSelect = (props: Props) => {
         }
       }}
       isClearable={false}
+      isDisabled={props.readOnly}
     />
   );
 };

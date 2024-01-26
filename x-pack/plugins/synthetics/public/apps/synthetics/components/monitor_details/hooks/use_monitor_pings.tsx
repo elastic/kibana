@@ -10,9 +10,14 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { useSelectedMonitor } from './use_selected_monitor';
 import { useSelectedLocation } from './use_selected_location';
-import { getMonitorRecentPingsAction, selectMonitorPingsMetadata } from '../../../state';
+import {
+  getMonitorRecentPingsAction,
+  selectMonitorPingsMetadata,
+  selectStatusFilter,
+} from '../../../state';
 
 interface UseMonitorPingsProps {
+  lastRefresh?: number;
   pageSize?: number;
   pageIndex?: number;
   from?: string;
@@ -28,6 +33,8 @@ export const useMonitorPings = (props?: UseMonitorPingsProps) => {
   const monitorId = monitor?.id;
   const locationLabel = location?.label;
 
+  const statusFilter = useSelector(selectStatusFilter);
+
   useEffect(() => {
     if (monitorId && locationLabel) {
       dispatch(
@@ -38,6 +45,7 @@ export const useMonitorPings = (props?: UseMonitorPingsProps) => {
           pageIndex: props?.pageIndex,
           from: props?.from,
           to: props?.to,
+          statusFilter,
         })
       );
     }
@@ -45,10 +53,12 @@ export const useMonitorPings = (props?: UseMonitorPingsProps) => {
     dispatch,
     monitorId,
     locationLabel,
+    props?.lastRefresh,
     props?.pageSize,
     props?.pageIndex,
     props?.from,
     props?.to,
+    statusFilter,
   ]);
 
   const { total, data: pings, loading } = useSelector(selectMonitorPingsMetadata);

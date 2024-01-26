@@ -13,5 +13,6 @@ export type Section =
   | 'agents'
   | 'agent_policies'
   | 'enrollment_tokens'
+  | 'uninstall_tokens'
   | 'data_streams'
   | 'settings';

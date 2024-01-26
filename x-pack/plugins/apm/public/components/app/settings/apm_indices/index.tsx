@@ -34,13 +34,6 @@ import {
 
 const APM_INDEX_LABELS = [
   {
-    configurationName: 'sourcemap',
-    label: i18n.translate(
-      'xpack.apm.settings.apmIndices.sourcemapIndicesLabel',
-      { defaultMessage: 'Sourcemap Indices' }
-    ),
-  },
-  {
     configurationName: 'error',
     label: i18n.translate('xpack.apm.settings.apmIndices.errorIndicesLabel', {
       defaultMessage: 'Error Indices',
@@ -105,14 +98,9 @@ export function ApmIndices() {
   const [apmIndices, setApmIndices] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
 
-  const { data = INITIAL_STATE, refetch } = useFetcher(
-    (_callApmApi) => {
-      if (canSave) {
-        return _callApmApi(`GET /internal/apm/settings/apm-index-settings`);
-      }
-    },
-    [canSave]
-  );
+  const { data = INITIAL_STATE, refetch } = useFetcher((_callApmApi) => {
+    return _callApmApi(`GET /internal/apm/settings/apm-index-settings`);
+  }, []);
 
   const { data: space } = useFetcher(() => {
     return services.spaces?.getActiveSpace();
@@ -183,14 +171,6 @@ export function ApmIndices() {
 
   return (
     <>
-      <EuiText color="subdued">
-        {i18n.translate('xpack.apm.settings.apmIndices.description', {
-          defaultMessage: `The APM UI uses data views to query your APM indices. If you've customized the index names that APM Server writes events to, you may need to update these patterns for the APM UI to work. Settings here take precedence over those set in kibana.yml.`,
-        })}
-      </EuiText>
-
-      <EuiSpacer size="m" />
-
       <EuiTitle size="s">
         <h2>
           {i18n.translate('xpack.apm.settings.apmIndices.title', {
@@ -198,6 +178,14 @@ export function ApmIndices() {
           })}
         </h2>
       </EuiTitle>
+
+      <EuiSpacer size="m" />
+
+      <EuiText color="subdued">
+        {i18n.translate('xpack.apm.settings.apmIndices.description', {
+          defaultMessage: `The APM UI uses data views to query your APM indices. If you've customized the index names that APM Server writes events to, you may need to update these patterns for the APM UI to work. Settings here take precedence over those set in kibana.yml.`,
+        })}
+      </EuiText>
 
       <EuiSpacer size="m" />
 
@@ -254,6 +242,7 @@ export function ApmIndices() {
                   fullWidth
                 >
                   <EuiFieldText
+                    data-test-subj="apmApmIndicesFieldText"
                     disabled={!canSave}
                     fullWidth
                     name={configurationName}
@@ -267,7 +256,10 @@ export function ApmIndices() {
             <EuiSpacer />
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={refetch}>
+                <EuiButtonEmpty
+                  data-test-subj="apmApmIndicesCancelButton"
+                  onClick={refetch}
+                >
                   {i18n.translate(
                     'xpack.apm.settings.apmIndices.cancelButton',
                     { defaultMessage: 'Cancel' }
@@ -288,6 +280,7 @@ export function ApmIndices() {
                   }
                 >
                   <EuiButton
+                    data-test-subj="apmApmIndicesApplyChangesButton"
                     fill
                     onClick={handleApplyChangesEvent}
                     isLoading={isSaving}

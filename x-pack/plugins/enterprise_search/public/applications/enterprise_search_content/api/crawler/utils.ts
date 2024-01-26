@@ -6,6 +6,13 @@
  */
 
 import {
+  CrawlerCustomScheduleMappingClient,
+  CrawlerCustomSchedulesServer,
+  CrawlerCustomScheduleClient,
+  CrawlerCustomScheduleConfigOverridesClient,
+} from '../../../../../common/types/crawler';
+
+import {
   CrawlerDomain,
   CrawlerDomainFromServer,
   CrawlerData,
@@ -29,6 +36,9 @@ import {
   BasicCrawlerAuth,
   CrawlerAuth,
   RawCrawlerAuth,
+  CrawlScheduleFromServer,
+  CrawlSchedule,
+  CrawlerCustomSchedule,
 } from './types';
 
 export function crawlerDomainServerToClient(payload: CrawlerDomainFromServer): CrawlerDomain {
@@ -42,6 +52,7 @@ export function crawlerDomainServerToClient(payload: CrawlerDomainFromServer): C
     default_crawl_rule: defaultCrawlRule,
     document_count: documentCount,
     entry_points: entryPoints,
+    extraction_rules: extractionRules,
     id,
     last_visited_at: lastCrawl,
     name,
@@ -57,6 +68,7 @@ export function crawlerDomainServerToClient(payload: CrawlerDomainFromServer): C
     deduplicationFields,
     documentCount,
     entryPoints,
+    extractionRules,
     id,
     sitemaps,
     url: name,
@@ -233,12 +245,94 @@ export const domainConfigServerToClient = (
   sitemapUrls: domainConfigFromServer.sitemap_urls,
 });
 
+export const crawlerCustomSchedulingServerToClient = (
+  customSchedulingFromServer: CrawlerCustomSchedulesServer
+): CrawlerCustomSchedule[] =>
+  Object.entries(customSchedulingFromServer.custom_scheduling).map(
+    ([scheduleKey, scheduleMapping]) => {
+      const {
+        name,
+        interval,
+        configuration_overrides: configurationOverrides,
+        enabled,
+      } = scheduleMapping;
+      const {
+        max_crawl_depth: maxCrawlDepth = 2,
+        sitemap_discovery_disabled: notIncludeSitemapsInRobotsTxt = false,
+        domain_allowlist: selectedDomainUrls = [],
+        sitemap_urls: customSitemapUrls = [],
+        seed_urls: customEntryPointUrls = [],
+      } = configurationOverrides;
+
+      return {
+        scheduleKey,
+        name,
+        interval,
+        enabled,
+        maxCrawlDepth,
+        includeSitemapsInRobotsTxt: !notIncludeSitemapsInRobotsTxt,
+        selectedDomainUrls,
+        selectedEntryPointUrls: [],
+        selectedSitemapUrls: [],
+        customEntryPointUrls,
+        customSitemapUrls,
+        entryPointUrls: [],
+        sitemapUrls: [],
+      };
+    }
+  );
+
+export const crawlerCustomSchedulingClientToServer = (
+  crawlerCustomSchedules: CrawlerCustomSchedule[]
+): CrawlerCustomScheduleMappingClient => {
+  const mapToServerFormat = (
+    crawlerSchedule: CrawlerCustomSchedule
+  ): CrawlerCustomScheduleClient => {
+    const configurationOverrides: CrawlerCustomScheduleConfigOverridesClient = {
+      maxCrawlDepth: crawlerSchedule.maxCrawlDepth,
+      sitemapDiscoveryDisabled: !crawlerSchedule.includeSitemapsInRobotsTxt,
+      domainAllowlist: crawlerSchedule.selectedDomainUrls,
+      sitemapUrls: [...crawlerSchedule.selectedSitemapUrls, ...crawlerSchedule.customSitemapUrls],
+      seedUrls: [
+        ...crawlerSchedule.selectedEntryPointUrls,
+        ...crawlerSchedule.customEntryPointUrls,
+      ],
+    };
+
+    return {
+      name: crawlerSchedule.name,
+      interval: crawlerSchedule.interval,
+      configurationOverrides,
+      enabled: crawlerSchedule.enabled,
+    };
+  };
+
+  const customSchedules: CrawlerCustomScheduleMappingClient = crawlerCustomSchedules.reduce(
+    (map, schedule) => {
+      map.set(schedule.scheduleKey, mapToServerFormat(schedule));
+      return map;
+    },
+    new Map()
+  );
+  return customSchedules;
+};
+
 export const crawlerDomainsWithMetaServerToClient = ({
   results,
   meta,
 }: CrawlerDomainsWithMetaFromServer): CrawlerDomainsWithMeta => ({
   domains: results.map(crawlerDomainServerToClient),
   meta,
+});
+
+export const crawlScheduleServerToClient = ({
+  frequency,
+  unit,
+  use_connector_schedule: useConnectorSchedule,
+}: CrawlScheduleFromServer): CrawlSchedule => ({
+  frequency,
+  unit,
+  useConnectorSchedule,
 });
 
 export function isBasicCrawlerAuth(auth: CrawlerAuth): auth is BasicCrawlerAuth {

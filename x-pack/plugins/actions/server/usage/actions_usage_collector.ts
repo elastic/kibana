@@ -8,7 +8,12 @@
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { get } from 'lodash';
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { ActionsUsage, byServiceProviderTypeSchema, byTypeSchema } from './types';
+import {
+  ActionsUsage,
+  byGenAiProviderTypeSchema,
+  byServiceProviderTypeSchema,
+  byTypeSchema,
+} from './types';
 import { ActionsConfig } from '../config';
 
 export function createActionsUsageCollector(
@@ -31,6 +36,7 @@ export function createActionsUsageCollector(
       },
       count_total: { type: 'long' },
       count_by_type: byTypeSchema,
+      count_gen_ai_provider_types: byGenAiProviderTypeSchema,
       count_active_total: { type: 'long' },
       count_active_alert_history_connectors: {
         type: 'long',
@@ -73,6 +79,7 @@ export function createActionsUsageCollector(
           alert_history_connector_enabled: false,
           count_total: 0,
           count_by_type: {},
+          count_gen_ai_provider_types: {},
           count_active_total: 0,
           count_active_alert_history_connectors: 0,
           count_active_by_type: {},

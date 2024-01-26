@@ -36,17 +36,22 @@ import type {
   ExecutionContextStart,
 } from '@kbn/core-execution-context-server';
 import type {
-  IRouter,
   RequestHandler,
   KibanaResponseFactory,
   RouteMethod,
   HttpServiceSetup,
+  IRouter,
 } from '@kbn/core-http-server';
 import { configSchema as elasticsearchConfigSchema } from '@kbn/core-elasticsearch-server-internal';
 import type { CapabilitiesSetup, CapabilitiesStart } from '@kbn/core-capabilities-server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { HttpResources } from '@kbn/core-http-resources-server';
-import type { PluginsServiceSetup, PluginsServiceStart } from '@kbn/core-plugins-server-internal';
+import type {
+  InternalPluginsServiceSetup,
+  InternalPluginsServiceStart,
+} from '@kbn/core-plugins-server-internal';
+
+export { bootstrap } from '@kbn/core-root-server-internal';
 
 export type { PluginOpaqueId } from '@kbn/core-base-common';
 export type {
@@ -65,8 +70,6 @@ export type {
 
 export type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 export type { IExecutionContextContainer } from '@kbn/core-execution-context-server';
-
-export { bootstrap } from './bootstrap';
 export type { Capabilities } from '@kbn/core-capabilities-common';
 export type {
   CapabilitiesProvider,
@@ -181,6 +184,7 @@ export type {
   ICspConfig,
   IExternalUrlConfig,
   IBasePath,
+  IStaticAssets,
   SessionStorage,
   SessionStorageCookieOptions,
   SessionCookieValidationResult,
@@ -194,6 +198,8 @@ export type {
   HttpServerInfo,
   HttpServicePreboot,
   HttpServiceStart,
+  RawRequest,
+  FakeRawRequest,
 } from '@kbn/core-http-server';
 export type { IExternalUrlPolicy } from '@kbn/core-http-common';
 
@@ -212,18 +218,8 @@ export type {
   LoggerConfigType,
   AppenderConfigType,
 } from '@kbn/core-logging-server';
-export type {
-  Logger,
-  LoggerFactory,
-  Ecs,
-  EcsEventCategory,
-  EcsEventKind,
-  EcsEventOutcome,
-  EcsEventType,
-  LogMeta,
-  LogRecord,
-  LogLevel,
-} from '@kbn/logging';
+export type { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from '@kbn/logging';
+export type { Ecs, EcsEvent } from '@kbn/ecs';
 
 export type { NodeInfo, NodeRoles } from '@kbn/core-node-server';
 
@@ -242,15 +238,21 @@ export type {
   MakeUsageFromSchema,
   ExposedToBrowserDescriptor,
 } from '@kbn/core-plugins-server';
+export type {
+  PluginsServiceSetup,
+  PluginsServiceStart,
+  NotFoundPluginContractResolverResponseItem,
+  FoundPluginContractResolverResponseItem,
+  PluginContractResolverResponseItem,
+  PluginContractMap,
+  PluginContractResolverResponse,
+  PluginContractResolver,
+} from '@kbn/core-plugins-contracts-server';
 
 export type { PluginName, DiscoveredPlugin } from '@kbn/core-base-common';
 
+export type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
 export type {
-  SavedObject,
-  SavedObjectAttribute,
-  SavedObjectAttributes,
-  SavedObjectAttributeSingle,
-  SavedObjectReference,
   SavedObjectsMigrationVersion,
   SavedObjectsImportConflictError,
   SavedObjectsImportAmbiguousConflictError,
@@ -265,7 +267,9 @@ export type {
   SavedObjectsImportSimpleWarning,
   SavedObjectsImportActionRequiredWarning,
   SavedObjectsImportWarning,
+  SavedObjectTypeIdTuple,
 } from '@kbn/core-saved-objects-common';
+
 export type {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
@@ -314,15 +318,24 @@ export type {
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteResponse,
+  SavedObjectsPointInTimeFinderClient,
+  SavedObjectsBulkDeleteStatus,
 } from '@kbn/core-saved-objects-api-server';
 export type {
+  SavedObject,
+  SavedObjectAttribute,
+  SavedObjectAttributes,
+  SavedObjectAttributeSingle,
+  SavedObjectReference,
   SavedObjectsServiceSetup,
   SavedObjectsServiceStart,
   SavedObjectsClientProviderOptions,
-  SavedObjectsClientWrapperFactory,
-  SavedObjectsClientWrapperOptions,
   SavedObjectsClientFactory,
   SavedObjectsClientFactoryProvider,
+  SavedObjectsEncryptionExtensionFactory,
+  SavedObjectsSecurityExtensionFactory,
+  SavedObjectsSpacesExtensionFactory,
+  SavedObjectsExtensionFactory,
   SavedObjectTypeExcludeFromUpgradeFilterHook,
   SavedObjectsExportResultDetails,
   SavedObjectsExportExcludedObject,
@@ -358,9 +371,23 @@ export type {
   SavedObjectsValidationSpec,
   ISavedObjectsSerializer,
   SavedObjectsRequestHandlerContext,
+  EncryptedObjectDescriptor,
+  ISavedObjectsEncryptionExtension,
+  AuthorizationTypeEntry,
+  AuthorizationTypeMap,
+  CheckAuthorizationResult,
+  RedactNamespacesParams,
+  ISavedObjectsSecurityExtension,
+  ISavedObjectsSpacesExtension,
+  SavedObjectsExtensions,
 } from '@kbn/core-saved-objects-server';
 export {
+  ENCRYPTION_EXTENSION_ID,
+  SECURITY_EXTENSION_ID,
+  SPACES_EXTENSION_ID,
   SavedObjectsErrorHelpers,
+} from '@kbn/core-saved-objects-server';
+export {
   SavedObjectsUtils,
   mergeSavedObjectMigrationMaps,
 } from '@kbn/core-saved-objects-utils-server';
@@ -374,7 +401,6 @@ export type {
 
 export type {
   UiSettingsParams,
-  PublicUiSettingsParams,
   UiSettingsType,
   UserProvidedValues,
   DeprecationSettings,
@@ -406,7 +432,11 @@ export type {
   DeprecationsClient,
   DeprecationsRequestHandlerContext,
 } from '@kbn/core-deprecations-server';
-export type { DeprecationsDetails } from '@kbn/core-deprecations-common';
+export type {
+  DeprecationsDetails,
+  DomainDeprecationDetails,
+  DeprecationsGetResponse,
+} from '@kbn/core-deprecations-common';
 
 export type { AppCategory } from '@kbn/core-application-common';
 export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '@kbn/core-application-common';
@@ -456,8 +486,8 @@ export type {
   ExecutionContextSetup,
   ExecutionContextStart,
   HttpResources,
-  PluginsServiceSetup,
-  PluginsServiceStart,
+  InternalPluginsServiceSetup,
+  InternalPluginsServiceStart,
 };
 
 /**
@@ -512,3 +542,5 @@ export type {
   PublicHttpServiceSetup as HttpServiceSetup,
   HttpServiceSetup as BaseHttpServiceSetup,
 };
+
+export type { CustomBrandingSetup } from '@kbn/core-custom-branding-server';

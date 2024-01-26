@@ -6,27 +6,28 @@
  */
 
 import { lazy } from 'react';
-import type { CoreStart } from '@kbn/core/public';
 import type {
   PackagePolicyEditExtensionComponent,
   PackagePolicyEditExtensionComponentProps,
 } from '@kbn/fleet-plugin/public';
-import type { StartPlugins } from '../../../../../types';
+import type { FleetUiExtensionGetterOptions } from './types';
 
-export const getLazyEndpointPolicyEditExtension = (
-  coreStart: CoreStart,
-  depsStart: Pick<StartPlugins, 'data' | 'fleet'>
-) => {
+export const getLazyEndpointPolicyEditExtension = ({
+  coreStart,
+  depsStart,
+  services,
+}: FleetUiExtensionGetterOptions) => {
   return lazy<PackagePolicyEditExtensionComponent>(async () => {
     const [{ withSecurityContext }, { EndpointPolicyEditExtension }] = await Promise.all([
-      import('./with_security_context/with_security_context'),
-      import('./endpoint_policy_edit_extension'),
+      import('./components/with_security_context/with_security_context'),
+      import('./endpoint_policy_edit_extension/endpoint_policy_edit_extension'),
     ]);
 
     return {
       default: withSecurityContext<PackagePolicyEditExtensionComponentProps>({
         coreStart,
         depsStart,
+        services,
         WrappedComponent: EndpointPolicyEditExtension,
       }),
     };

@@ -7,16 +7,40 @@
 
 import { defaultsDeep, isNil } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ValidationResult, builtInComparators } from '@kbn/triggers-actions-ui-plugin/public';
-import { EsQueryRuleParams, ExpressionErrors } from './types';
-import { isSearchSourceRule } from './util';
-import { EXPRESSION_ERRORS } from './constants';
+import {
+  ValidationResult,
+  builtInComparators,
+  builtInAggregationTypes,
+  builtInGroupByTypes,
+  COMPARATORS,
+} from '@kbn/triggers-actions-ui-plugin/public';
+import {
+  MAX_SELECTABLE_SOURCE_FIELDS,
+  MAX_SELECTABLE_GROUP_BY_TERMS,
+} from '../../../common/constants';
+import { EsQueryRuleParams, SearchType } from './types';
+import { isEsqlQueryRule, isSearchSourceRule } from './util';
+import {
+  COMMON_EXPRESSION_ERRORS,
+  ONLY_ESQL_QUERY_EXPRESSION_ERRORS,
+  ONLY_ES_QUERY_EXPRESSION_ERRORS,
+  SEARCH_SOURCE_ONLY_EXPRESSION_ERRORS,
+} from './constants';
 
-export const validateExpression = (ruleParams: EsQueryRuleParams): ValidationResult => {
-  const { size, threshold, timeWindowSize, thresholdComparator } = ruleParams;
-  const validationResult = { errors: {} };
-  const errors: ExpressionErrors = defaultsDeep({}, EXPRESSION_ERRORS);
-  validationResult.errors = errors;
+const validateCommonParams = (ruleParams: EsQueryRuleParams) => {
+  const {
+    size,
+    threshold,
+    timeWindowSize,
+    thresholdComparator,
+    aggType,
+    aggField,
+    groupBy,
+    termSize,
+    termField,
+    sourceFields,
+  } = ruleParams;
+  const errors: typeof COMMON_EXPRESSION_ERRORS = defaultsDeep({}, COMMON_EXPRESSION_ERRORS);
 
   if (!('index' in ruleParams) && !ruleParams.searchType) {
     errors.searchType.push(
@@ -25,7 +49,57 @@ export const validateExpression = (ruleParams: EsQueryRuleParams): ValidationRes
       })
     );
 
-    return validationResult;
+    return errors;
+  }
+
+  if (aggType && builtInAggregationTypes[aggType].fieldRequired && !aggField) {
+    errors.aggField.push(
+      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredAggFieldText', {
+        defaultMessage: 'Aggregation field is required.',
+      })
+    );
+  }
+
+  if (
+    groupBy &&
+    builtInGroupByTypes[groupBy] &&
+    builtInGroupByTypes[groupBy].sizeRequired &&
+    !termSize
+  ) {
+    errors.termSize.push(
+      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredTermSizedText', {
+        defaultMessage: 'Term size is required.',
+      })
+    );
+  }
+
+  if (
+    groupBy &&
+    builtInGroupByTypes[groupBy].validNormalizedTypes &&
+    builtInGroupByTypes[groupBy].validNormalizedTypes.length > 0 &&
+    (!termField || termField.length <= 0)
+  ) {
+    errors.termField.push(
+      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredTermFieldText', {
+        defaultMessage: 'Term field is required.',
+      })
+    );
+  }
+
+  if (
+    groupBy &&
+    builtInGroupByTypes[groupBy].validNormalizedTypes &&
+    builtInGroupByTypes[groupBy].validNormalizedTypes.length > 0 &&
+    termField &&
+    Array.isArray(termField) &&
+    termField.length > MAX_SELECTABLE_GROUP_BY_TERMS
+  ) {
+    errors.termField.push(
+      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.overNumberedTermFieldText', {
+        defaultMessage: `Cannot select more than {max} terms`,
+        values: { max: MAX_SELECTABLE_GROUP_BY_TERMS },
+      })
+    );
   }
 
   if (!threshold || threshold.length === 0 || threshold[0] === undefined) {
@@ -79,42 +153,66 @@ export const validateExpression = (ruleParams: EsQueryRuleParams): ValidationRes
     );
   }
 
-  /**
-   * Skip esQuery and index params check if it is search source rule,
-   * since it should contain searchConfiguration instead of esQuery and index.
-   */
-  const isSearchSource = isSearchSourceRule(ruleParams);
-  if (isSearchSource) {
-    if (!ruleParams.searchConfiguration) {
-      errors.searchConfiguration.push(
-        i18n.translate(
-          'xpack.stackAlerts.esQuery.ui.validation.error.requiredSearchConfiguration',
-          {
-            defaultMessage: 'Search source configuration is required.',
-          }
-        )
-      );
-    } else if (!ruleParams.searchConfiguration.index) {
-      errors.index.push(
-        i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredDataViewText', {
-          defaultMessage: 'Data view is required.',
-        })
-      );
-    } else if (
-      typeof ruleParams.searchConfiguration.index === 'object' &&
-      !Object.hasOwn(ruleParams.searchConfiguration.index, 'timeFieldName')
-    ) {
-      errors.index.push(
-        i18n.translate(
-          'xpack.stackAlerts.esQuery.ui.validation.error.requiredDataViewTimeFieldText',
-          {
-            defaultMessage: 'Data view should have a time field.',
-          }
-        )
-      );
-    }
-    return validationResult;
+  if (
+    sourceFields &&
+    Array.isArray(sourceFields) &&
+    sourceFields.length > MAX_SELECTABLE_SOURCE_FIELDS
+  ) {
+    errors.sourceFields.push(
+      i18n.translate('xpack.stackAlerts.esqlQuery.ui.validation.error.sourceFields', {
+        defaultMessage: `Cannot select more than {max} fields`,
+        values: { max: MAX_SELECTABLE_SOURCE_FIELDS },
+      })
+    );
   }
+
+  return errors;
+};
+
+const validateSearchSourceParams = (ruleParams: EsQueryRuleParams<SearchType.searchSource>) => {
+  const errors: typeof SEARCH_SOURCE_ONLY_EXPRESSION_ERRORS = defaultsDeep(
+    {},
+    SEARCH_SOURCE_ONLY_EXPRESSION_ERRORS
+  );
+
+  if (!ruleParams.searchConfiguration) {
+    errors.searchConfiguration.push(
+      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredSearchConfiguration', {
+        defaultMessage: 'Search source configuration is required.',
+      })
+    );
+    return errors;
+  }
+
+  if (!ruleParams.searchConfiguration.index) {
+    errors.searchConfiguration.push(
+      i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredDataViewText', {
+        defaultMessage: 'Data view is required.',
+      })
+    );
+    return errors;
+  }
+
+  if (!ruleParams.timeField) {
+    errors.timeField.push(
+      i18n.translate(
+        'xpack.stackAlerts.esQuery.ui.validation.error.requiredDataViewTimeFieldText',
+        {
+          defaultMessage: 'Data view should have a time field.',
+        }
+      )
+    );
+    return errors;
+  }
+
+  return errors;
+};
+
+const validateEsQueryParams = (ruleParams: EsQueryRuleParams<SearchType.esQuery>) => {
+  const errors: typeof ONLY_ES_QUERY_EXPRESSION_ERRORS = defaultsDeep(
+    {},
+    ONLY_ES_QUERY_EXPRESSION_ERRORS
+  );
 
   if (!ruleParams.index || ruleParams.index.length === 0) {
     errors.index.push(
@@ -156,7 +254,80 @@ export const validateExpression = (ruleParams: EsQueryRuleParams): ValidationRes
       );
     }
   }
+  return errors;
+};
 
+const validateEsqlQueryParams = (ruleParams: EsQueryRuleParams<SearchType.esqlQuery>) => {
+  const errors: typeof ONLY_ESQL_QUERY_EXPRESSION_ERRORS = defaultsDeep(
+    {},
+    ONLY_ESQL_QUERY_EXPRESSION_ERRORS
+  );
+  if (!ruleParams.esqlQuery) {
+    errors.esqlQuery.push(
+      i18n.translate('xpack.stackAlerts.esqlQuery.ui.validation.error.requiredQueryText', {
+        defaultMessage: 'ES|QL query is required.',
+      })
+    );
+  }
+  if (!ruleParams.timeField) {
+    errors.timeField.push(
+      i18n.translate('xpack.stackAlerts.esqlQuery.ui.validation.error.requiredTimeFieldText', {
+        defaultMessage: 'Time field is required.',
+      })
+    );
+  }
+  if (ruleParams.thresholdComparator !== COMPARATORS.GREATER_THAN) {
+    errors.thresholdComparator.push(
+      i18n.translate(
+        'xpack.stackAlerts.esqlQuery.ui.validation.error.requiredThresholdComparatorText',
+        {
+          defaultMessage: 'Threshold comparator is required to be greater than.',
+        }
+      )
+    );
+  }
+  if (ruleParams.threshold && ruleParams.threshold[0] !== 0) {
+    errors.threshold0.push(
+      i18n.translate('xpack.stackAlerts.esqlQuery.ui.validation.error.requiredThreshold0Text', {
+        defaultMessage: 'Threshold is required to be 0.',
+      })
+    );
+  }
+
+  return errors;
+};
+
+export const validateExpression = (ruleParams: EsQueryRuleParams): ValidationResult => {
+  const validationResult = { errors: {} };
+
+  const commonErrors = validateCommonParams(ruleParams);
+  validationResult.errors = commonErrors;
+
+  /**
+   * Skip esQuery and index params check if it is search source rule,
+   * since it should contain searchConfiguration instead of esQuery and index.
+   *
+   * It's important to report searchSource rule related errors only into errors.searchConfiguration prop.
+   * For example errors.index is a mistake to report searchSource rule related errors. It will lead to issues.
+   */
+  if (isSearchSourceRule(ruleParams)) {
+    validationResult.errors = {
+      ...validationResult.errors,
+      ...validateSearchSourceParams(ruleParams),
+    };
+    return validationResult;
+  }
+
+  if (isEsqlQueryRule(ruleParams)) {
+    validationResult.errors = {
+      ...validationResult.errors,
+      ...validateEsqlQueryParams(ruleParams),
+    };
+    return validationResult;
+  }
+
+  const esQueryErrors = validateEsQueryParams(ruleParams as EsQueryRuleParams<SearchType.esQuery>);
+  validationResult.errors = { ...validationResult.errors, ...esQueryErrors };
   return validationResult;
 };
 

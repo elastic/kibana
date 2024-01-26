@@ -11,10 +11,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import {
   EuiPage,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
-  EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
+  EuiPageSection,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiTitle,
@@ -32,16 +29,14 @@ const AppStatusApp = ({ appId }: { appId: string }) => (
           </EuiTitle>
         </EuiPageHeaderSection>
       </EuiPageHeader>
-      <EuiPageContent>
-        <EuiPageContentHeader>
-          <EuiPageContentHeaderSection>
-            <EuiTitle>
-              <h2>{appId} Test App home page section title</h2>
-            </EuiTitle>
-          </EuiPageContentHeaderSection>
-        </EuiPageContentHeader>
-        <EuiPageContentBody>{appId} Test App content</EuiPageContentBody>
-      </EuiPageContent>
+      <EuiPageSection>
+        <EuiPageHeader>
+          <EuiTitle>
+            <h2>{appId} Test App home page section title</h2>
+          </EuiTitle>
+        </EuiPageHeader>
+        <EuiPageSection>{appId} Test App content</EuiPageSection>
+      </EuiPageSection>
     </EuiPageBody>
   </EuiPage>
 );

@@ -7,22 +7,25 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { MlCommonUI } from './common_ui';
-import { MlCustomUrls } from './custom_urls';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { MlCommonUI } from './common_ui';
+import type { MlCustomUrls } from './custom_urls';
+import type { MlCommonFieldStatsFlyout } from './field_stats_flyout';
 
 export interface SectionOptions {
   withAdvancedSection: boolean;
 }
 
 export function MachineLearningJobWizardCommonProvider(
-  { getService }: FtrProviderContext,
+  { getPageObject, getService }: FtrProviderContext,
   mlCommonUI: MlCommonUI,
-  customUrls: MlCustomUrls
+  customUrls: MlCustomUrls,
+  mlCommonFieldStatsFlyout: MlCommonFieldStatsFlyout
 ) {
   const comboBox = getService('comboBox');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const headerPage = getPageObject('header');
 
   function advancedSectionSelector(subSelector?: string) {
     const subj = 'mlJobWizardAdvancedSection';
@@ -97,6 +100,19 @@ export function MachineLearningJobWizardCommonProvider(
 
     async assertAggAndFieldInputExists() {
       await testSubjects.existOrFail('mlJobWizardAggSelection > comboBoxInput');
+    },
+
+    async assertFieldStatFlyoutContentFromAggSelectionInputTrigger(
+      fieldName: string,
+      fieldType: 'keyword' | 'date' | 'number',
+      expectedTopValuesContent: string[]
+    ) {
+      await mlCommonFieldStatsFlyout.assertFieldStatFlyoutContentFromComboBoxTrigger(
+        'mlJobWizardAggSelection',
+        fieldName,
+        fieldType,
+        expectedTopValuesContent
+      );
     },
 
     async assertAggAndFieldSelection(expectedIdentifier: string[]) {
@@ -416,6 +432,19 @@ export function MachineLearningJobWizardCommonProvider(
       await testSubjects.existOrFail('mlInfluencerSelect > comboBoxInput');
     },
 
+    async assertFieldStatFlyoutContentFromInfluencerInputTrigger(
+      fieldName: string,
+      fieldType: 'keyword' | 'date' | 'number',
+      expectedTopValuesContent?: string[]
+    ) {
+      await mlCommonFieldStatsFlyout.assertFieldStatFlyoutContentFromComboBoxTrigger(
+        'mlInfluencerSelect',
+        fieldName,
+        fieldType,
+        expectedTopValuesContent
+      );
+    },
+
     async getSelectedInfluencers(): Promise<string[]> {
       return await comboBox.getComboBoxSelectedOptions('mlInfluencerSelect > comboBoxInput');
     },
@@ -464,6 +493,20 @@ export function MachineLearningJobWizardCommonProvider(
       await testSubjects.existOrFail('mlJobWizardButtonCreateJob');
     },
 
+    async assertConvertToAdvancedJobExists() {
+      await testSubjects.existOrFail('mlJobWizardButtonConvertToAdvancedJob');
+    },
+
+    async convertToAdvancedJobWizard() {
+      await this.assertConvertToAdvancedJobExists();
+
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.click('mlJobWizardButtonConvertToAdvancedJob');
+        await headerPage.waitUntilLoadingHasFinished();
+        await testSubjects.existOrFail('mlPageJobWizardHeader-advanced');
+      });
+    },
+
     async assertDateRangeSelectionExists() {
       await testSubjects.existOrFail('mlJobWizardDateRange');
     },
@@ -492,7 +535,7 @@ export function MachineLearningJobWizardCommonProvider(
     },
 
     async clickUseFullDataButton(expectedStartDate: string, expectedEndDate: string) {
-      await testSubjects.clickWhenNotDisabledWithoutRetry('mlButtonUseFullData');
+      await testSubjects.clickWhenNotDisabledWithoutRetry('mlDatePickerButtonUseFullData');
       await this.assertDateRangeSelection(expectedStartDate, expectedEndDate);
     },
 
@@ -530,6 +573,12 @@ export function MachineLearningJobWizardCommonProvider(
       await customUrls.assertCustomUrlLabel(expectedIndex, customUrl.label);
     },
 
+    async assertCustomUrlLabel(expectedIndex: number, customUrl: { label: string }) {
+      await this.ensureAdditionalSettingsSectionOpen();
+
+      await customUrls.assertCustomUrlLabel(expectedIndex, customUrl.label);
+    },
+
     async ensureAdvancedSectionOpen() {
       await retry.tryForTime(5000, async () => {
         if ((await testSubjects.exists(advancedSectionSelector())) === false) {
@@ -547,6 +596,28 @@ export function MachineLearningJobWizardCommonProvider(
     async createJobWithoutDatafeedStart() {
       await testSubjects.clickWhenNotDisabledWithoutRetry('mlJobWizardButtonCreateJob');
       await testSubjects.existOrFail('mlPageJobManagement');
+    },
+
+    async assertConvertToMultiMetricButtonExist(bucketSpan: string) {
+      await testSubjects.existOrFail('mlJobWizardButtonConvertToMultiMetric');
+    },
+
+    async convertToMultiMetricJobWizard() {
+      await retry.tryForTime(5 * 1000, async () => {
+        await testSubjects.click('mlJobWizardButtonConvertToMultiMetric');
+        await headerPage.waitUntilLoadingHasFinished();
+
+        await testSubjects.existOrFail('mlPageJobWizardHeader-multi_metric');
+      });
+    },
+
+    async navigateToPreviousJobWizardPage(expectedSelector: string) {
+      await retry.tryForTime(5 * 1000, async () => {
+        await testSubjects.click('mlJobWizardNavButtonPrevious');
+        await headerPage.waitUntilLoadingHasFinished();
+
+        await testSubjects.existOrFail(expectedSelector);
+      });
     },
   };
 }

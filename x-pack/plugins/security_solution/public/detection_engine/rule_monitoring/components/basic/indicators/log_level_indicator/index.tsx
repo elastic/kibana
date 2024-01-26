@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiBadge } from '@elastic/eui';
-import type { LogLevel } from '../../../../../../../common/detection_engine/rule_monitoring';
+import type { LogLevel } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import { getBadgeColor, getBadgeText } from './utils';
 
 interface LogLevelIndicatorProps {

@@ -26,15 +26,16 @@ import type { AgentPolicy } from '../../../types';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
   useAuthz,
-  useGetAgentPolicies,
   usePagination,
   useSorting,
   useLink,
   useConfig,
   useUrlParams,
   useBreadcrumbs,
+  useGetAgentPoliciesQuery,
 } from '../../../hooks';
-import { AgentPolicySummaryLine, SearchBar } from '../../../components';
+import { SearchBar } from '../../../components';
+import { AgentPolicySummaryLine } from '../../../../../components';
 import { LinkedAgentCount, AgentPolicyActionMenu } from '../components';
 
 import { CreateAgentPolicyFlyout } from './components';
@@ -82,8 +83,8 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
   const {
     isLoading,
     data: agentPolicyData,
-    resendRequest,
-  } = useGetAgentPolicies({
+    refetch: resendRequest,
+  } = useGetAgentPoliciesQuery({
     page: pagination.currentPage,
     perPage: pagination.pageSize,
     sortField: sorting?.field,
@@ -103,7 +104,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         name: i18n.translate('xpack.fleet.agentPolicyList.nameColumnTitle', {
           defaultMessage: 'Name',
         }),
-        width: '20%',
+        width: '25%',
         render: (name: string, agentPolicy: AgentPolicy) => (
           <AgentPolicySummaryLine policy={agentPolicy} />
         ),
@@ -259,7 +260,9 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
               });
               setSearch(newSearch);
             }}
+            indexPattern={`.${AGENT_POLICY_SAVED_OBJECT_TYPE}`}
             fieldPrefix={AGENT_POLICY_SAVED_OBJECT_TYPE}
+            dataTestSubj="agentPolicyList.queryInput"
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

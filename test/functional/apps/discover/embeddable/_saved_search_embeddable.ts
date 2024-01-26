@@ -12,9 +12,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const dataGrid = getService('dataGrid');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const dashboardPanelActions = getService('dashboardPanelActions');
+  const dashboardReplacePanel = getService('dashboardReplacePanel');
   const filterBar = getService('filterBar');
+  const queryBar = getService('queryBar');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'timePicker', 'discover']);
 
   describe('discover saved search embeddable', () => {
@@ -28,18 +32,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await PageObjects.common.navigateToApp('dashboard');
-      await filterBar.ensureFieldEditorModalIsClosed();
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.timePicker.setAbsoluteRange(
-        'Sep 22, 2015 @ 00:00:00.000',
-        'Sep 23, 2015 @ 00:00:00.000'
-      );
+      await PageObjects.common.setTime({
+        from: 'Sep 22, 2015 @ 00:00:00.000',
+        to: 'Sep 23, 2015 @ 00:00:00.000',
+      });
     });
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
+      await PageObjects.common.unsetTime();
+    });
+
+    beforeEach(async () => {
+      await PageObjects.dashboard.navigateToApp();
+      await filterBar.ensureFieldEditorModalIsClosed();
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.dashboard.clickNewDashboard();
     });
 
     const addSearchEmbeddableToDashboard = async () => {
@@ -79,6 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should control columns correctly', async () => {
+      await addSearchEmbeddableToDashboard();
       await PageObjects.dashboard.switchToEditMode();
 
       const cell = await dataGrid.getCellElement(0, 2);
@@ -96,11 +105,50 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should render duplicate saved search embeddables', async () => {
       await addSearchEmbeddableToDashboard();
+      await addSearchEmbeddableToDashboard();
       const [firstGridCell, secondGridCell] = await dataGrid.getAllCellElements();
       const firstGridCellContent = await firstGridCell.getVisibleText();
       const secondGridCellContent = await secondGridCell.getVisibleText();
 
       expect(firstGridCellContent).to.be.equal(secondGridCellContent);
+    });
+
+    it('should display an error', async () => {
+      await addSearchEmbeddableToDashboard();
+      await queryBar.setQuery('bytes > 5000');
+      await queryBar.submitQuery();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      expect(await PageObjects.discover.getSavedSearchDocumentCount()).to.be('2,572 documents');
+      await queryBar.setQuery('this < is not : a valid > query');
+      await queryBar.submitQuery();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const embeddableError = await testSubjects.find('embeddableError');
+      const errorMessage = await embeddableError.findByTestSubject('errorMessageMarkdown');
+      expect(await errorMessage.getVisibleText()).to.equal(
+        'Expected AND, OR, end of input, whitespace but "n" found. this < is not : a valid > query ----------^'
+      );
+    });
+
+    it('should replace a panel with a saved search', async () => {
+      await dashboardAddPanel.addVisualization('Rendering Test: datatable');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.dashboard.waitForRenderComplete();
+      await dashboardPanelActions.replacePanelByTitle('Rendering Test: datatable');
+      await dashboardReplacePanel.replaceEmbeddable('Rendering-Test:-saved-search');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.dashboard.waitForRenderComplete();
+      await testSubjects.missingOrFail('embeddableError');
+      expect(await PageObjects.discover.getSavedSearchDocumentCount()).to.be('4,633 documents');
+    });
+
+    it('should not show the full screen button', async () => {
+      await addSearchEmbeddableToDashboard();
+      await testSubjects.missingOrFail('dataGridFullScreenButton');
+    });
+
+    it('should show the the grid toolbar', async () => {
+      await addSearchEmbeddableToDashboard();
+      await testSubjects.existOrFail('dscGridToolbar');
     });
   });
 }

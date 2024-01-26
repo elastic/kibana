@@ -9,6 +9,8 @@ import supertest from 'supertest';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { format as formatUrl } from 'url';
 
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
 export function getSupertestWithoutAuth({ getService }: FtrProviderContext) {
@@ -45,12 +47,14 @@ export function setupFleetAndAgents(providerContext: FtrProviderContext) {
 
     await supetestWithoutAuth
       .post(`/api/fleet/setup`)
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set('kbn-xsrf', 'xxx')
       .set('Authorization', `Bearer ${token.value}`)
       .send()
       .expect(200);
     await supetestWithoutAuth
       .post(`/api/fleet/agents/setup`)
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set('kbn-xsrf', 'xxx')
       .set('Authorization', `Bearer ${token.value}`)
       .send({ forceRecreate: true })

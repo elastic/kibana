@@ -39,7 +39,7 @@ export function netscoutLogsSpecProvider(context: TutorialContext): TutorialSche
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-netscout.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/netscout.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/netscout.svg'),
     artifacts: {
       dashboards: [],
       application: {
@@ -56,6 +56,6 @@ export function netscoutLogsSpecProvider(context: TutorialContext): TutorialSche
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
-    integrationBrowserCategories: ['security'],
+    integrationBrowserCategories: ['security', 'network'],
   };
 }

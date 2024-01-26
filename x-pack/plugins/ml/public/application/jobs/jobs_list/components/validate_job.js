@@ -13,7 +13,6 @@ import {
   validateGroupNames as validateGroupNamesUtils,
   validateModelMemoryLimitUnits as validateModelMemoryLimitUnitsUtils,
 } from '../../../../../common/util/job_utils';
-import { isValidLabel, isValidTimeRange } from '../../../util/custom_url_utils';
 
 export function validateModelMemoryLimit(mml) {
   const limits = getNewJobLimits();
@@ -57,28 +56,4 @@ export function validateGroupNames(groups) {
   populateValidationMessages(validationResults, { groupIds });
 
   return groupIds;
-}
-
-export function isValidCustomUrls(customUrls) {
-  if (customUrls === undefined || customUrls.length === 0) {
-    return true;
-  }
-
-  // Check all the custom URLs have unique labels and the time range is valid.
-  const isInvalidItem = customUrls.some((customUrl, index) => {
-    // Validate the label.
-    const label = customUrl.url_name;
-    const otherUrls = [...customUrls];
-    otherUrls.splice(index, 1); // Don't compare label with itself.
-    let itemValid = isValidLabel(label, otherUrls);
-    if (itemValid === true) {
-      // Validate the time range.
-      const timeRange = customUrl.time_range;
-      itemValid = isValidTimeRange(timeRange);
-    }
-
-    return !itemValid;
-  });
-
-  return !isInvalidItem;
 }

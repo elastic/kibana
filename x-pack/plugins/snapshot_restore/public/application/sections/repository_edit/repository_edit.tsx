@@ -9,12 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import {
-  EuiCallOut,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageHeader,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiCallOut, EuiPageSection, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { Repository, EmptyRepository } from '../../../../common/types';
 
 import { PageError, SectionError, Error } from '../../../shared_imports';
@@ -152,7 +147,7 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
   };
 
   return (
-    <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
+    <EuiPageSection restrictWidth style={{ width: '100%' }}>
       <EuiPageHeader
         pageTitle={
           <span data-test-subj="pageTitle">
@@ -192,6 +187,6 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
         clearSaveError={clearSaveError}
         onSave={onSave}
       />
-    </EuiPageContentBody>
+    </EuiPageSection>
   );
 };

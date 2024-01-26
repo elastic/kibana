@@ -9,34 +9,38 @@
  * React component for rendering a select element with threshold levels.
  */
 import React, { Fragment, FC, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiText, EuiSuperSelectProps } from '@elastic/eui';
 
-import { getSeverityColor } from '../../../../../common/util/anomaly_utils';
-import { usePageUrlState } from '../../../util/url_state';
-import { ANOMALY_THRESHOLD } from '../../../../../common';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { usePageUrlState } from '@kbn/ml-url-state';
+import { getSeverityColor, ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
 
-const warningLabel = i18n.translate('xpack.ml.controls.selectSeverity.warningLabel', {
+const warningLabel: string = i18n.translate('xpack.ml.controls.selectSeverity.warningLabel', {
   defaultMessage: 'warning',
 });
-const minorLabel = i18n.translate('xpack.ml.controls.selectSeverity.minorLabel', {
+const minorLabel: string = i18n.translate('xpack.ml.controls.selectSeverity.minorLabel', {
   defaultMessage: 'minor',
 });
-const majorLabel = i18n.translate('xpack.ml.controls.selectSeverity.majorLabel', {
+const majorLabel: string = i18n.translate('xpack.ml.controls.selectSeverity.majorLabel', {
   defaultMessage: 'major',
 });
-const criticalLabel = i18n.translate('xpack.ml.controls.selectSeverity.criticalLabel', {
+const criticalLabel: string = i18n.translate('xpack.ml.controls.selectSeverity.criticalLabel', {
   defaultMessage: 'critical',
 });
 
 const optionsMap = {
-  [warningLabel]: ANOMALY_THRESHOLD.LOW,
-  [minorLabel]: ANOMALY_THRESHOLD.MINOR,
-  [majorLabel]: ANOMALY_THRESHOLD.MAJOR,
-  [criticalLabel]: ANOMALY_THRESHOLD.CRITICAL,
+  [warningLabel]: ML_ANOMALY_THRESHOLD.LOW,
+  [minorLabel]: ML_ANOMALY_THRESHOLD.MINOR,
+  [majorLabel]: ML_ANOMALY_THRESHOLD.MAJOR,
+  [criticalLabel]: ML_ANOMALY_THRESHOLD.CRITICAL,
 };
+
+export interface TableSeverityPageUrlState {
+  pageKey: 'mlSelectSeverity';
+  pageUrlState: TableSeverity;
+}
 
 export interface TableSeverity {
   val: number;
@@ -46,24 +50,24 @@ export interface TableSeverity {
 
 export const SEVERITY_OPTIONS: TableSeverity[] = [
   {
-    val: ANOMALY_THRESHOLD.LOW,
+    val: ML_ANOMALY_THRESHOLD.LOW,
     display: warningLabel,
-    color: getSeverityColor(ANOMALY_THRESHOLD.LOW),
+    color: getSeverityColor(ML_ANOMALY_THRESHOLD.LOW),
   },
   {
-    val: ANOMALY_THRESHOLD.MINOR,
+    val: ML_ANOMALY_THRESHOLD.MINOR,
     display: minorLabel,
-    color: getSeverityColor(ANOMALY_THRESHOLD.MINOR),
+    color: getSeverityColor(ML_ANOMALY_THRESHOLD.MINOR),
   },
   {
-    val: ANOMALY_THRESHOLD.MAJOR,
+    val: ML_ANOMALY_THRESHOLD.MAJOR,
     display: majorLabel,
-    color: getSeverityColor(ANOMALY_THRESHOLD.MAJOR),
+    color: getSeverityColor(ML_ANOMALY_THRESHOLD.MAJOR),
   },
   {
-    val: ANOMALY_THRESHOLD.CRITICAL,
+    val: ML_ANOMALY_THRESHOLD.CRITICAL,
     display: criticalLabel,
-    color: getSeverityColor(ANOMALY_THRESHOLD.CRITICAL),
+    color: getSeverityColor(ML_ANOMALY_THRESHOLD.CRITICAL),
   },
 ];
 
@@ -82,7 +86,7 @@ export function optionValueToThreshold(value: number) {
 const TABLE_SEVERITY_DEFAULT = SEVERITY_OPTIONS[0];
 
 export const useTableSeverity = () => {
-  return usePageUrlState<TableSeverity>('mlSelectSeverity', TABLE_SEVERITY_DEFAULT);
+  return usePageUrlState<TableSeverityPageUrlState>('mlSelectSeverity', TABLE_SEVERITY_DEFAULT);
 };
 
 export const getSeverityOptions = () =>
@@ -144,7 +148,6 @@ export const SelectSeverityUI: FC<
       prepend={i18n.translate('xpack.ml.explorer.severityThresholdLabel', {
         defaultMessage: 'Severity',
       })}
-      id="severityThreshold"
       data-test-subj={'mlAnomalySeverityThresholdControls'}
       className={classNames}
       hasDividers

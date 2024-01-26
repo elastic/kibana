@@ -7,10 +7,12 @@
 
 import {
   EuiCallOut,
+  EuiEmptyPrompt,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  EuiLoadingLogo,
   EuiPanel,
   EuiSpacer,
   EuiStat,
@@ -18,19 +20,21 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import React from 'react';
+import { ApmDocumentType } from '../../../../../common/document_type';
 import {
   getServiceNodeName,
   SERVICE_NODE_NAME_MISSING,
 } from '../../../../../common/service_nodes';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useBreadcrumb } from '../../../../context/breadcrumbs/use_breadcrumb';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { useServiceMetricChartsFetcher } from '../../../../hooks/use_service_metric_charts_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { truncate, unit } from '../../../../utils/style';
@@ -81,9 +85,17 @@ export function ServiceNodeMetrics({ serviceNodeName }: Props) {
     environment,
   });
 
+  const preferred = usePreferredDataSourceAndBucketSize({
+    start,
+    end,
+    kuery,
+    type: ApmDocumentType.ServiceTransactionMetric,
+    numBuckets: 100,
+  });
+
   const { data: { host, containerId } = INITIAL_DATA, status } = useFetcher(
     (callApmApi) => {
-      if (start && end) {
+      if (start && end && preferred) {
         return callApmApi(
           'GET /internal/apm/services/{serviceName}/node/{serviceNodeName}/metadata',
           {
@@ -94,13 +106,15 @@ export function ServiceNodeMetrics({ serviceNodeName }: Props) {
                 start,
                 end,
                 environment,
+                documentType: preferred.source.documentType,
+                rollupInterval: preferred.source.rollupInterval,
               },
             },
           }
         );
       }
     },
-    [kuery, serviceName, serviceNodeName, start, end, environment]
+    [kuery, serviceName, serviceNodeName, start, end, environment, preferred]
   );
 
   const { docLinks } = useApmPluginContext().core;
@@ -125,7 +139,10 @@ export function ServiceNodeMetrics({ serviceNodeName }: Props) {
             defaultMessage="We could not identify which JVMs these metrics belong to. This is likely caused by running a version of APM Server that is older than 7.5. Upgrading to APM Server 7.5 or higher should resolve this issue. For more information on upgrading, see the {link}. As an alternative, you can use the Kibana Query bar to filter by hostname, container ID or other fields."
             values={{
               link: (
-                <EuiLink href={docLinks.links.apm.upgrading}>
+                <EuiLink
+                  data-test-subj="apmServiceNodeMetricsDocumentationOfApmServerLink"
+                  href={docLinks.links.apm.upgrading}
+                >
                   {i18n.translate(
                     'xpack.apm.serviceNodeMetrics.unidentifiedServiceNodesWarningDocumentationLink',
                     { defaultMessage: 'documentation of APM Server' }
@@ -192,6 +209,19 @@ export function ServiceNodeMetrics({ serviceNodeName }: Props) {
           </EuiFlexGroup>
           <EuiSpacer size={'s'} />
         </EuiPanel>
+      )}
+
+      {isLoading && (
+        <EuiEmptyPrompt
+          icon={<EuiLoadingLogo logo="logoObservability" size="xl" />}
+          title={
+            <h2>
+              {i18n.translate('xpack.apm.serviceMetrics.loading', {
+                defaultMessage: 'Loading metrics',
+              })}
+            </h2>
+          }
+        />
       )}
 
       {agentName && (

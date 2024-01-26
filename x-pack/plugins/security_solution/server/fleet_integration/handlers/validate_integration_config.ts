@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import {
+  ENDPOINT_CONFIG_PRESET_DATA_COLLECTION,
   ENDPOINT_CONFIG_PRESET_EDR_COMPLETE,
   ENDPOINT_CONFIG_PRESET_EDR_ESSENTIAL,
   ENDPOINT_CONFIG_PRESET_NGAV,
@@ -31,18 +32,19 @@ const validateEndpointIntegrationConfig = (
   logger: Logger
 ): void => {
   if (!config?.endpointConfig?.preset) {
-    logger.warn('missing endpointConfig preset');
-    throwError('invalid endpointConfig preset');
+    logger.warn('Missing endpointConfig preset');
+    throwError('Invalid endpointConfig preset');
   }
   if (
     ![
       ENDPOINT_CONFIG_PRESET_NGAV,
       ENDPOINT_CONFIG_PRESET_EDR_COMPLETE,
       ENDPOINT_CONFIG_PRESET_EDR_ESSENTIAL,
+      ENDPOINT_CONFIG_PRESET_DATA_COLLECTION,
     ].includes(config.endpointConfig.preset)
   ) {
-    logger.warn(`invalid endpointConfig preset: ${config.endpointConfig.preset}`);
-    throwError('invalid endpointConfig preset');
+    logger.warn(`Invalid endpointConfig preset: ${config.endpointConfig.preset}`);
+    throwError('Invalid endpointConfig preset');
   }
 };
 const validateCloudIntegrationConfig = (config: PolicyCreateCloudConfig, logger: Logger): void => {
@@ -54,7 +56,7 @@ const validateCloudIntegrationConfig = (config: PolicyCreateCloudConfig, logger:
   }
   if (typeof config.eventFilters?.nonInteractiveSession !== 'boolean') {
     logger.warn(
-      `missing or invalid value for eventFilters nonInteractiveSession: ${config.eventFilters?.nonInteractiveSession}`
+      `Missing or invalid value for eventFilters nonInteractiveSession: ${config.eventFilters?.nonInteractiveSession}`
     );
     throwError('invalid value for eventFilters nonInteractiveSession');
   }

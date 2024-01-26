@@ -20,7 +20,7 @@ import { columnRenderers } from '.';
 import { getColumnRenderer } from './get_column_renderer';
 import { getValues, findItem, deleteItemIdx } from './helpers';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
-import { TimelineId } from '../../../../../../common/types';
+import { TimelineId } from '../../../../../../common/types/timeline';
 
 jest.mock('../../../../../common/lib/kibana');
 

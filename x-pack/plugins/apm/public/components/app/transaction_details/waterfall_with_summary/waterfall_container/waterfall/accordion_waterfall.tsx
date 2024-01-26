@@ -12,19 +12,21 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { groupBy } from 'lodash';
 import { transparentize } from 'polished';
+import React, { useState } from 'react';
+import { asBigNumber } from '../../../../../../../common/utils/formatters';
+import { getCriticalPath } from '../../../../../../../common/critical_path/get_critical_path';
+import { useTheme } from '../../../../../../hooks/use_theme';
 import { Margins } from '../../../../../shared/charts/timeline';
 import {
   IWaterfall,
   IWaterfallSpanOrTransaction,
 } from './waterfall_helpers/waterfall_helpers';
 import { WaterfallItem } from './waterfall_item';
-import { getCriticalPath } from '../../../../../../../common/critical_path/get_critical_path';
-import { useTheme } from '../../../../../../hooks/use_theme';
 
 interface AccordionWaterfallProps {
   isOpen: boolean;
@@ -32,11 +34,14 @@ interface AccordionWaterfallProps {
   level: number;
   duration: IWaterfall['duration'];
   waterfallItemId?: string;
-  setMaxLevel: Dispatch<SetStateAction<number>>;
   waterfall: IWaterfall;
   timelineMargins: Margins;
-  onClickWaterfallItem: (item: IWaterfallSpanOrTransaction) => void;
+  onClickWaterfallItem: (
+    item: IWaterfallSpanOrTransaction,
+    flyoutDetailTab: string
+  ) => void;
   showCriticalPath: boolean;
+  maxLevelOpen: number;
 }
 
 const ACCORDION_HEIGHT = '48px';
@@ -87,20 +92,14 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
     duration,
     waterfall,
     waterfallItemId,
-    setMaxLevel,
     timelineMargins,
     onClickWaterfallItem,
     showCriticalPath,
+    maxLevelOpen,
   } = props;
-
   const theme = useTheme();
 
   const [isOpen, setIsOpen] = useState(props.isOpen);
-  const [nextLevel] = useState(level + 1);
-
-  useEffect(() => {
-    setMaxLevel(nextLevel);
-  }, [nextLevel, setMaxLevel]);
 
   let children = waterfall.childrenByParentId[item.id] || [];
 
@@ -135,6 +134,7 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
 
   return (
     <StyledAccordion
+      data-test-subj="waterfallItem"
       className="waterfall_accordion"
       style={{ position: 'relative' }}
       buttonClassName={`button_${item.id}`}
@@ -150,7 +150,7 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
             <ToggleAccordionButton
               show={hasToggle}
               isOpen={isOpen}
-              childrenAmount={children.length}
+              childrenCount={children.length}
               onClick={toggleAccordion}
             />
           </EuiFlexItem>
@@ -165,8 +165,8 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
               isSelected={item.id === waterfallItemId}
               errorCount={errorCount}
               marginLeftLevel={marginLeftLevel}
-              onClick={() => {
-                onClickWaterfallItem(item);
+              onClick={(flyoutDetailTab: string) => {
+                onClickWaterfallItem(item, flyoutDetailTab);
               }}
               segments={criticalPathSegmentsById[item.id]
                 ?.filter((segment) => segment.self)
@@ -185,15 +185,16 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
       forceState={isOpen ? 'open' : 'closed'}
       onToggle={toggleAccordion}
     >
-      {children.map((child) => (
-        <AccordionWaterfall
-          {...props}
-          key={child.id}
-          isOpen={isOpen}
-          level={nextLevel}
-          item={child}
-        />
-      ))}
+      {isOpen &&
+        children.map((child) => (
+          <AccordionWaterfall
+            {...props}
+            key={child.id}
+            isOpen={maxLevelOpen > level}
+            level={level + 1}
+            item={child}
+          />
+        ))}
     </StyledAccordion>
   );
 }
@@ -201,12 +202,12 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
 function ToggleAccordionButton({
   show,
   isOpen,
-  childrenAmount,
+  childrenCount,
   onClick,
 }: {
   show: boolean;
   isOpen: boolean;
-  childrenAmount: number;
+  childrenCount: number;
   onClick: () => void;
 }) {
   if (!show) {
@@ -214,7 +215,12 @@ function ToggleAccordionButton({
   }
 
   return (
-    <div style={{ height: ACCORDION_HEIGHT, display: 'flex' }}>
+    <div
+      style={{
+        height: ACCORDION_HEIGHT,
+        display: 'flex',
+      }}
+    >
       <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="center">
         <EuiFlexItem grow={false}>
           {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
@@ -227,8 +233,18 @@ function ToggleAccordionButton({
             <EuiIcon type={isOpen ? 'arrowDown' : 'arrowRight'} />
           </div>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs">{childrenAmount}</EuiText>
+        <EuiFlexItem grow={false} style={{ position: 'relative' }}>
+          <div
+            style={{
+              position: 'absolute',
+              top: '50%',
+              transform: 'translate(0, -50%)',
+            }}
+          >
+            <EuiToolTip content={childrenCount} delay="long">
+              <EuiText size="xs">{asBigNumber(childrenCount)}</EuiText>
+            </EuiToolTip>
+          </div>
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>

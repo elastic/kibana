@@ -23,6 +23,7 @@ import {
   reorder,
   sourceAndDestinationAreSameDroppable,
   unFlattenGroups,
+  getDisplayValue,
 } from './helpers';
 import {
   providerA,
@@ -180,8 +181,8 @@ describe('helpers', () => {
   });
 
   describe('isValidDestination', () => {
-    test('it returns false when destination is undefined', () => {
-      expect(isValidDestination(undefined)).toBe(false);
+    test('it returns false when destination is null', () => {
+      expect(isValidDestination(null)).toBe(false);
     });
 
     test('it returns true when the type guard matches as DraggableLocation ', () => {
@@ -860,7 +861,7 @@ describe('helpers', () => {
 
       addProviderToGroup({
         dataProviders,
-        destination: undefined,
+        destination: null,
         dispatch,
         onAddedToTimeline,
         providerToAdd,
@@ -876,7 +877,7 @@ describe('helpers', () => {
 
       addProviderToGroup({
         dataProviders,
-        destination: undefined,
+        destination: null,
         dispatch,
         onAddedToTimeline,
         providerToAdd,
@@ -1101,6 +1102,20 @@ describe('helpers', () => {
 
         expect(onAddedToTimeline).toBeCalledWith(providerToAdd.name);
       });
+    });
+  });
+
+  describe('getDisplayValue', () => {
+    it('converts an array (is one of query) to correct format for a string array', () => {
+      expect(getDisplayValue(['a', 'b', 'c'])).toBe('( a OR b OR c )');
+      expect(getDisplayValue([1, 2, 3])).toBe('( 1 OR 2 OR 3 )');
+    });
+    it('handles an empty array', () => {
+      expect(getDisplayValue([])).toBe('');
+    });
+    it('returns a provided value if not an array', () => {
+      expect(getDisplayValue(1)).toBe(1);
+      expect(getDisplayValue('text')).toBe('text');
     });
   });
 });

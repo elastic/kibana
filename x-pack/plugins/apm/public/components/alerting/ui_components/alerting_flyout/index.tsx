@@ -7,10 +7,8 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  ApmRuleType,
-  APM_SERVER_FEATURE_ID,
-} from '../../../../../common/rules/apm_rule_types';
+import { ApmRuleType } from '@kbn/rule-data-utils';
+import { APM_SERVER_FEATURE_ID } from '../../../../../common/rules/apm_rule_types';
 import { getInitialAlertValues } from '../../utils/get_initial_alert_values';
 import { ApmPluginStartDeps } from '../../../../plugin';
 import { useServiceName } from '../../../../hooks/use_service_name';
@@ -29,7 +27,7 @@ export function AlertingFlyout(props: Props) {
   const { addFlyoutVisible, setAddFlyoutVisibility, ruleType } = props;
 
   const serviceName = useServiceName();
-  const { query } = useApmParams('/*');
+  const { query, path } = useApmParams('/*');
 
   const rangeFrom = 'rangeFrom' in query ? query.rangeFrom : undefined;
   const rangeTo = 'rangeTo' in query ? query.rangeTo : undefined;
@@ -40,6 +38,9 @@ export function AlertingFlyout(props: Props) {
     'environment' in query ? query.environment : ENVIRONMENT_ALL.value;
   const transactionType =
     'transactionType' in query ? query.transactionType : undefined;
+  const transactionName =
+    'transactionName' in query ? query.transactionName : undefined;
+  const errorGroupingKey = 'groupId' in path ? path.groupId : undefined;
 
   const { services } = useKibana<ApmPluginStartDeps>();
   const initialValues = getInitialAlertValues(ruleType, serviceName);
@@ -52,7 +53,7 @@ export function AlertingFlyout(props: Props) {
   const addAlertFlyout = useMemo(
     () =>
       ruleType &&
-      services.triggersActionsUi.getAddAlertFlyout({
+      services.triggersActionsUi.getAddRuleFlyout({
         consumer: APM_SERVER_FEATURE_ID,
         onClose: onCloseAddFlyout,
         ruleTypeId: ruleType,
@@ -62,9 +63,12 @@ export function AlertingFlyout(props: Props) {
           environment,
           serviceName,
           ...(ruleType === ApmRuleType.ErrorCount ? {} : { transactionType }),
+          transactionName,
+          errorGroupingKey,
           start,
           end,
         } as AlertMetadata,
+        useRuleProducer: true,
       }),
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [
@@ -73,6 +77,8 @@ export function AlertingFlyout(props: Props) {
       onCloseAddFlyout,
       services.triggersActionsUi,
       serviceName,
+      transactionName,
+      errorGroupingKey,
       transactionType,
       environment,
       start,

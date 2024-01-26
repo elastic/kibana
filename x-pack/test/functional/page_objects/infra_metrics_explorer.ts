@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function InfraMetricsExplorerProvider({ getService }: FtrProviderContext) {
@@ -55,6 +55,11 @@ export function InfraMetricsExplorerProvider({ getService }: FtrProviderContext)
       const chartRadio = await testSubjects.find(`metricsExplorer-chartRadio-${type}`);
       const radioInput = await chartRadio.findByCssSelector(`label[for="${type}"]`);
       return await radioInput.click();
+    },
+
+    async ensureMetricsExplorerFeedbackLinkIsVisible() {
+      await testSubjects.missingOrFail('loadingMessage', { timeout: 20000 });
+      await testSubjects.existOrFail('infraMetricsExplorerFeedbackLink');
     },
   };
 }

@@ -8,18 +8,24 @@
 import { SavedObjectsUtils } from '@kbn/core/server';
 import type { IEventLogService } from '@kbn/event-log-plugin/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
+import type { LogLevel } from '../../../../../../../common/api/detection_engine/rule_monitoring';
+import {
+  logLevelFromExecutionStatus,
+  logLevelToNumber,
+  ruleExecutionStatusToNumber,
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import type {
   RuleExecutionMetrics,
   RuleExecutionStatus,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
 import {
-  LogLevel,
-  logLevelFromExecutionStatus,
-  logLevelToNumber,
-  RuleExecutionEventType,
-  ruleExecutionStatusToNumber,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
-import { RULE_SAVED_OBJECT_TYPE, RULE_EXECUTION_LOG_PROVIDER } from './constants';
+  LogLevelEnum,
+  RuleExecutionEventTypeEnum,
+} from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
+import {
+  RULE_SAVED_OBJECT_TYPE,
+  RULE_EXECUTION_LOG_PROVIDER,
+} from '../../event_log/event_log_constants';
 
 export interface IEventLogWriter {
   logMessage(args: MessageArgs): void;
@@ -31,6 +37,7 @@ export interface BaseArgs {
   ruleId: string;
   ruleUuid: string;
   ruleName: string;
+  ruleRevision: number;
   ruleType: string;
   spaceId: string;
   executionId: string;
@@ -70,7 +77,7 @@ export const createEventLogWriter = (eventLogService: IEventLogService): IEventL
         },
         event: {
           kind: 'event',
-          action: RuleExecutionEventType.message,
+          action: RuleExecutionEventTypeEnum.message,
           sequence: sequence++,
           severity: logLevelToNumber(args.logLevel),
         },
@@ -83,6 +90,7 @@ export const createEventLogWriter = (eventLogService: IEventLogService): IEventL
               execution: {
                 uuid: args.executionId,
               },
+              revision: args.ruleRevision,
             },
           },
           space_ids: [args.spaceId],
@@ -111,7 +119,7 @@ export const createEventLogWriter = (eventLogService: IEventLogService): IEventL
         },
         event: {
           kind: 'event',
-          action: RuleExecutionEventType['status-change'],
+          action: RuleExecutionEventTypeEnum['status-change'],
           sequence: sequence++,
           severity: logLevelToNumber(logLevel),
         },
@@ -126,6 +134,7 @@ export const createEventLogWriter = (eventLogService: IEventLogService): IEventL
                 status: args.newStatus,
                 status_order: ruleExecutionStatusToNumber(args.newStatus),
               },
+              revision: args.ruleRevision,
             },
           },
           space_ids: [args.spaceId],
@@ -142,7 +151,7 @@ export const createEventLogWriter = (eventLogService: IEventLogService): IEventL
     },
 
     logExecutionMetrics: (args: ExecutionMetricsArgs): void => {
-      const logLevel = LogLevel.debug;
+      const logLevel = LogLevelEnum.debug;
       eventLogger.logEvent({
         '@timestamp': nowISO(),
         rule: {
@@ -153,7 +162,7 @@ export const createEventLogWriter = (eventLogService: IEventLogService): IEventL
         },
         event: {
           kind: 'metric',
-          action: RuleExecutionEventType['execution-metrics'],
+          action: RuleExecutionEventTypeEnum['execution-metrics'],
           sequence: sequence++,
           severity: logLevelToNumber(logLevel),
         },
@@ -167,6 +176,7 @@ export const createEventLogWriter = (eventLogService: IEventLogService): IEventL
                 uuid: args.executionId,
                 metrics: args.metrics,
               },
+              revision: args.ruleRevision,
             },
           },
           space_ids: [args.spaceId],

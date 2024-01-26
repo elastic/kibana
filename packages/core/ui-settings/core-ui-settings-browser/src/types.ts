@@ -7,11 +7,19 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { PublicUiSettingsParams, UserProvidedValues } from '@kbn/core-ui-settings-common';
+import type { UiSettingsParams, UserProvidedValues } from '@kbn/core-ui-settings-common';
+
+export type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;
 
 /** @public */
 export interface UiSettingsState {
   [key: string]: PublicUiSettingsParams & UserProvidedValues;
+}
+
+export interface ValueValidation {
+  successfulValidation: boolean;
+  valid?: boolean;
+  errorMessage?: string;
 }
 
 /**
@@ -98,4 +106,18 @@ export interface IUiSettingsClient {
    * the settings, containing the actual Error class.
    */
   getUpdateErrors$: () => Observable<Error>;
+
+  /**
+   * Validates a uiSettings value and returns a ValueValidation object.
+   */
+  validateValue: (key: string, value: any) => Promise<ValueValidation>;
 }
+
+/** @public */
+export interface SettingsStart {
+  client: IUiSettingsClient;
+  globalClient: IUiSettingsClient;
+}
+
+/** @public */
+export type SettingsSetup = SettingsStart;

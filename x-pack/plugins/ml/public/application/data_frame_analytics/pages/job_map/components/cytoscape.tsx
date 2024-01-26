@@ -13,12 +13,14 @@ import React, {
   ReactNode,
   createContext,
   useCallback,
+  useMemo,
 } from 'react';
-import cytoscape from 'cytoscape';
+import { css } from '@emotion/react';
+import cytoscape, { type Stylesheet } from 'cytoscape';
 // @ts-ignore no declaration file
 import dagre from 'cytoscape-dagre';
-import { EuiThemeType } from '../../../../components/color_range_legend';
 import { getCytoscapeOptions } from './cytoscape_options';
+import { EuiThemeType } from '../../../../components/color_range_legend';
 
 cytoscape.use(dagre);
 
@@ -42,17 +44,23 @@ function useCytoscape(options: cytoscape.CytoscapeOptions) {
   useEffect(() => {
     if (!cy) {
       setCy(cytoscape({ ...options, container: ref.current }));
+    } else {
+      // update styles for existing instance
+      cy.style(options.style as unknown as Stylesheet);
     }
   }, [options, cy]);
 
   // Destroy the cytoscape instance on unmount
-  useEffect(() => {
-    return () => {
-      if (cy) {
-        cy.destroy();
-      }
-    };
-  }, [cy]);
+  useEffect(
+    function destroyOnUnmount() {
+      return () => {
+        if (cy) {
+          cy.destroy();
+        }
+      };
+    },
+    [cy]
+  );
 
   return [ref, cy] as [React.MutableRefObject<any>, cytoscape.Core | undefined];
 }
@@ -78,14 +86,20 @@ export function Cytoscape({
   style,
   width,
 }: CytoscapeProps) {
-  const [ref, cy] = useCytoscape({
-    ...getCytoscapeOptions(theme),
-    elements,
-  });
+  const cytoscapeOptions = useMemo(() => {
+    return {
+      ...getCytoscapeOptions(theme),
+      elements,
+    };
+  }, [theme, elements]);
+
+  const [ref, cy] = useCytoscape(cytoscapeOptions);
 
   // Add the height to the div style. The height is a separate prop because it
   // is required and can trigger rendering when changed.
-  const divStyle = { ...style, height };
+  const divStyle = useMemo(() => {
+    return { ...style, height, width };
+  }, [style, height, width]);
 
   const dataHandler = useCallback<cytoscape.EventHandler>(
     (event) => {
@@ -130,12 +144,20 @@ export function Cytoscape({
   useEffect(() => {
     if (cy) {
       cy.reset();
+      // Refitting because it's possible the the width/height have changed
+      cy.fit();
     }
-  }, [cy, resetCy]);
+  }, [cy, resetCy, width, height]);
 
   return (
     <CytoscapeContext.Provider value={cy}>
-      <div ref={ref} style={divStyle} data-test-subj="mlPageDataFrameAnalyticsMapCytoscape">
+      <div
+        ref={ref}
+        css={css`
+          ${divStyle}
+        `}
+        data-test-subj="mlPageDataFrameAnalyticsMapCytoscape"
+      >
         {children}
       </div>
     </CytoscapeContext.Provider>

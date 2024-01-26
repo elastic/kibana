@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  SavedObjectAttribute,
-  SavedObjectAttributes,
-  SavedObjectReference,
-} from '@kbn/core/public';
+import { SavedObjectAttribute, SavedObjectReference } from '@kbn/core/public';
 import {
   extractSearchSourceReferences,
   injectSearchSourceReferences,
@@ -20,12 +16,13 @@ import { SavedVisState, VisSavedObject } from '../../types';
 
 import { extractTimeSeriesReferences, injectTimeSeriesReferences } from './timeseries_references';
 import { extractControlsReferences, injectControlsReferences } from './controls_references';
+import type { SerializableAttributes } from '../../vis_types/vis_type_alias_registry';
 
 export function extractReferences({
   attributes,
   references = [],
 }: {
-  attributes: SavedObjectAttributes;
+  attributes: SerializableAttributes;
   references: SavedObjectReference[];
 }) {
   const updatedAttributes = { ...attributes };

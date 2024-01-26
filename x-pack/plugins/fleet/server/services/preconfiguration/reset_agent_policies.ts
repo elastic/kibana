@@ -22,6 +22,7 @@ import { packagePolicyService } from '../package_policy';
 import { getAgentsByKuery, forceUnenrollAgent } from '../agents';
 import { listEnrollmentApiKeys, deleteEnrollmentApiKey } from '../api_keys';
 import type { AgentPolicy } from '../../types';
+import { AgentPolicyInvalidError } from '../../errors';
 
 export async function resetPreconfiguredAgentPolicies(
   soClient: SavedObjectsClientContract,
@@ -135,7 +136,7 @@ async function _deleteExistingData(
       throw err;
     });
     if (policy && !policy.is_preconfigured) {
-      throw new Error('Invalid policy');
+      throw new AgentPolicyInvalidError(`Invalid policy ${agentPolicyId}`);
     }
     if (policy) {
       existingPolicies = [policy];
@@ -154,7 +155,7 @@ async function _deleteExistingData(
   }
 
   // unenroll all the agents enroled in this policies
-  const { agents } = await getAgentsByKuery(esClient, {
+  const { agents } = await getAgentsByKuery(esClient, soClient, {
     showInactive: false,
     perPage: SO_SEARCH_LIMIT,
     kuery: existingPolicies.map((policy) => `policy_id:"${policy.id}"`).join(' or '),
@@ -163,7 +164,7 @@ async function _deleteExistingData(
   // Delete
   if (agents.length > 0) {
     logger.info(`Force unenrolling ${agents.length} agents`);
-    await pMap(agents, (agent) => forceUnenrollAgent(esClient, agent.id), {
+    await pMap(agents, (agent) => forceUnenrollAgent(esClient, soClient, agent.id), {
       concurrency: 20,
     });
   }

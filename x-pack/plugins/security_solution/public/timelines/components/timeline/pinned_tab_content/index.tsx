@@ -14,8 +14,8 @@ import type { ConnectedProps } from 'react-redux';
 import { connect } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
-import { timelineActions, timelineSelectors } from '../../../store/timeline';
-import { HeaderActions } from '../body/actions/header_actions';
+import type { ControlColumnProps } from '../../../../../common/types';
+import { timelineActions, timelineSelectors } from '../../../store';
 import type { CellValueElementProps } from '../cell_rendering';
 import type { Direction } from '../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../containers';
@@ -25,22 +25,19 @@ import { Footer, footerHeight } from '../footer';
 import { requiredFieldsForActions } from '../../../../detections/components/alerts_table/default_config';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { timelineDefaults } from '../../../store/timeline/defaults';
+import { timelineDefaults } from '../../../store/defaults';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useTimelineFullScreen } from '../../../../common/containers/use_full_screen';
-import type { TimelineModel } from '../../../store/timeline/model';
+import type { TimelineModel } from '../../../store/model';
 import type { State } from '../../../../common/store';
 import { calculateTotalPages } from '../helpers';
-import type {
-  ControlColumnProps,
-  RowRenderer,
-  ToggleDetailPanel,
-} from '../../../../../common/types/timeline';
+import type { RowRenderer, ToggleDetailPanel } from '../../../../../common/types/timeline';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { DetailsPanel } from '../../side_panel';
 import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
 import { getDefaultControlColumn } from '../body/control_columns';
 import { useLicense } from '../../../../common/hooks/use_license';
+import { HeaderActions } from '../../../../common/components/header_actions/header_actions';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   overflow-y: hidden;
@@ -185,7 +182,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     [sort]
   );
 
-  const [isQueryLoading, { events, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
+  const [isQueryLoading, { events, totalCount, pageInfo, loadPage, refreshedAt, refetch }] =
     useTimelineEvents({
       endDate: '',
       id: `pinned-${timelineId}`,
@@ -256,7 +253,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
               <Footer
                 activePage={pageInfo.activePage}
                 data-test-subj="timeline-footer"
-                updatedAt={updatedAt}
+                updatedAt={refreshedAt}
                 height={footerHeight}
                 id={timelineId}
                 isLive={false}

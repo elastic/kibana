@@ -6,9 +6,9 @@
  */
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
-import { useLastXChecks } from './use_last_x_checks';
+import { getTimeRangeFilter, useLastXChecks } from './use_last_x_checks';
 import { WrappedHelper } from '../utils/testing';
-import * as searchHooks from '@kbn/observability-plugin/public/hooks/use_es_search';
+import * as searchHooks from './use_redux_es_search';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../common/constants';
 
 describe('useLastXChecks', () => {
@@ -29,12 +29,9 @@ describe('useLastXChecks', () => {
   });
 
   it('returns expected results', () => {
-    jest.spyOn(searchHooks, 'useEsSearch').mockReturnValue({
-      data: { hits: { hits: getMockHits() } } as unknown as ReturnType<
-        typeof searchHooks.useEsSearch
-      >['data'],
-      loading: false,
-    });
+    jest.spyOn(searchHooks, 'useReduxEsSearch').mockReturnValue({
+      data: { hits: { hits: getMockHits() } },
+    } as any);
 
     const { result } = renderHook(
       () =>
@@ -43,6 +40,7 @@ describe('useLastXChecks', () => {
           locationId: 'loc',
           size: 30,
           fields: ['monitor.duration.us'],
+          schedule: '10',
         }),
       { wrapper: WrappedHelper }
     );
@@ -84,13 +82,9 @@ describe('useLastXChecks', () => {
   });
 
   it('passes proper params', () => {
-    const loading = true;
-    const spy = jest.spyOn(searchHooks, 'useEsSearch').mockReturnValue({
-      data: { hits: { hits: getMockHits() } } as unknown as ReturnType<
-        typeof searchHooks.useEsSearch
-      >['data'],
-      loading,
-    });
+    const spy = jest.spyOn(searchHooks, 'useReduxEsSearch').mockReturnValue({
+      data: { hits: { hits: getMockHits() } },
+    } as any);
 
     const fields = ['monitor.summary'];
     const size = 30;
@@ -102,6 +96,7 @@ describe('useLastXChecks', () => {
           locationId: 'loc',
           size,
           fields,
+          schedule: '120',
         }),
       { wrapper: WrappedHelper }
     );
@@ -114,12 +109,9 @@ describe('useLastXChecks', () => {
   });
 
   it('returns loading properly', () => {
-    jest.spyOn(searchHooks, 'useEsSearch').mockReturnValue({
-      data: { hits: { hits: getMockHits() } } as unknown as ReturnType<
-        typeof searchHooks.useEsSearch
-      >['data'],
-      loading: false,
-    });
+    jest.spyOn(searchHooks, 'useReduxEsSearch').mockReturnValue({
+      data: { hits: { hits: getMockHits() } },
+    } as any);
 
     const { result } = renderHook(
       () =>
@@ -128,6 +120,7 @@ describe('useLastXChecks', () => {
           locationId: 'loc',
           size: 30,
           fields: ['monitor.duration.us'],
+          schedule: '240',
         }),
       { wrapper: WrappedHelper }
     );
@@ -135,10 +128,9 @@ describe('useLastXChecks', () => {
   });
 
   it('returns loading true when there is no data', () => {
-    jest.spyOn(searchHooks, 'useEsSearch').mockReturnValue({
-      data: undefined as unknown as ReturnType<typeof searchHooks.useEsSearch>['data'],
-      loading: false,
-    });
+    jest.spyOn(searchHooks, 'useReduxEsSearch').mockReturnValue({
+      data: undefined,
+    } as any);
 
     const { result } = renderHook(
       () =>
@@ -147,57 +139,17 @@ describe('useLastXChecks', () => {
           locationId: 'loc',
           size: 30,
           fields: ['monitor.duration.us'],
+          schedule: '1',
         }),
       { wrapper: WrappedHelper }
     );
     expect(result.current.loading).toEqual(true);
   });
 
-  it('calls useEsSearch with empty index when locations have not loaded, to prevent calling twice', () => {
-    const loading = true;
-    const spy = jest.spyOn(searchHooks, 'useEsSearch').mockReturnValue({
-      data: { hits: { hits: getMockHits() } } as unknown as ReturnType<
-        typeof searchHooks.useEsSearch
-      >['data'],
-      loading,
-    });
-
-    const WrapperWithState = ({ children }: { children: React.ReactElement }) => {
-      return (
-        <WrappedHelper
-          state={{ serviceLocations: { locationsLoaded: false, loading: false, locations: [] } }}
-        >
-          {children}
-        </WrappedHelper>
-      );
-    };
-
-    renderHook(
-      () =>
-        useLastXChecks({
-          monitorId: 'mock-id',
-          locationId: 'loc',
-          size: 30,
-          fields: ['monitor.duration.us'],
-        }),
-      { wrapper: WrapperWithState }
-    );
-    expect(spy).toBeCalledTimes(1);
-    expect(spy).toBeCalledWith(
-      expect.objectContaining({ index: '' }),
-      expect.anything(),
-      expect.anything()
-    );
-  });
-
   it('calls useEsSearch with correct index', () => {
-    const loading = true;
-    const spy = jest.spyOn(searchHooks, 'useEsSearch').mockReturnValue({
-      data: { hits: { hits: getMockHits() } } as unknown as ReturnType<
-        typeof searchHooks.useEsSearch
-      >['data'],
-      loading,
-    });
+    const spy = jest.spyOn(searchHooks, 'useReduxEsSearch').mockReturnValue({
+      data: { hits: { hits: getMockHits() } },
+    } as any);
 
     const WrapperWithState = ({ children }: { children: React.ReactElement }) => {
       return (
@@ -216,6 +168,7 @@ describe('useLastXChecks', () => {
           locationId: 'loc',
           size: 30,
           fields: ['monitor.duration.us'],
+          schedule: '3',
         }),
       { wrapper: WrapperWithState }
     );
@@ -224,5 +177,27 @@ describe('useLastXChecks', () => {
       expect.anything(),
       expect.anything()
     );
+  });
+});
+
+describe('getTimeRangeFilter', () => {
+  it.each([
+    [1, 'now-1h'],
+    [3, 'now-3h'],
+    [5, 'now-5h'],
+    [10, 'now-9h'],
+    [60, 'now-50h'],
+    [120, 'now-100h'],
+    [240, 'now-200h'],
+  ])('returns expected filter', (val, res) => {
+    const filter = getTimeRangeFilter(String(val));
+    expect(filter).toEqual({
+      range: {
+        '@timestamp': {
+          gte: res,
+          lte: 'now',
+        },
+      },
+    });
   });
 });

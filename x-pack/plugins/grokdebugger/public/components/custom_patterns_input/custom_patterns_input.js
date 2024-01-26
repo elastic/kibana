@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiAccordion, EuiCallOut, EuiCodeBlock, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EDITOR } from '../../../common/constants';
-import { EuiCodeEditor } from '../../shared_imports';
+import { CodeEditor } from '@kbn/code-editor';
 
 export function CustomPatternsInput({ value, onChange }) {
   const sampleCustomPatterns = `POSTFIX_QUEUEID [0-9A-F]{10,11}
@@ -43,18 +43,18 @@ MSG message-id=<%{GREEDYDATA}>`;
       <EuiSpacer size="m" />
 
       <EuiFormRow fullWidth data-test-subj="aceCustomPatternsInput">
-        <EuiCodeEditor
-          width="100%"
-          theme="textmate"
-          mode="text"
+        <CodeEditor
+          languageId="plaintext"
           value={value}
-          onChange={onChange}
-          setOptions={{
-            highlightActiveLine: false,
-            highlightGutterLine: false,
-            minLines: EDITOR.PATTERN_MIN_LINES,
-            maxLines: EDITOR.PATTERN_MAX_LINES,
+          height={200}
+          options={{
+            tabSize: 2,
+            automaticLayout: true,
           }}
+          aria-label={i18n.translate('xpack.grokDebugger.customPatternsInput', {
+            defaultMessage: 'Code editor for inputting custom patterns',
+          })}
+          onChange={onChange}
         />
       </EuiFormRow>
     </EuiAccordion>

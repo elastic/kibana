@@ -71,8 +71,9 @@ export class EmsVectorTileLayer extends AbstractLayer {
     }
   }
 
-  isInitialDataLoadComplete(): boolean {
-    return !!this._descriptor.__areTilesLoaded;
+  _isTiled(): boolean {
+    // Uses tiled maplibre source 'vector'
+    return true;
   }
 
   getSource(): EMSTMSSource {
@@ -136,7 +137,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
       };
       stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, data);
     } catch (error) {
-      onLoadError(SOURCE_DATA_REQUEST_ID, requestToken, error.message);
+      onLoadError(SOURCE_DATA_REQUEST_ID, requestToken, error);
     }
   }
 

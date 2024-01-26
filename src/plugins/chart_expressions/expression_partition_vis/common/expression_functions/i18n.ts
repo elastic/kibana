@@ -17,6 +17,10 @@ export const strings = {
     i18n.translate('expressionPartitionVis.reusable.function.args.metricHelpText', {
       defaultMessage: 'Metric dimensions config',
     }),
+  getMetricToLabelHelp: () =>
+    i18n.translate('expressionPartitionVis.metricToLabel.help', {
+      defaultMessage: 'JSON key-value pairs of column ID to label',
+    }),
   getBucketsArgHelp: () =>
     i18n.translate('expressionPartitionVis.reusable.function.args.bucketsHelpText', {
       defaultMessage: 'Buckets dimensions config',
@@ -117,6 +121,10 @@ export const strings = {
   getRowSplitHelp: () =>
     i18n.translate('expressionPartitionVis.reusable.function.dimension.splitrow', {
       defaultMessage: 'Row split',
+    }),
+  getColorMappingHelp: () =>
+    i18n.translate('expressionPartitionVis.layer.colorMapping.help', {
+      defaultMessage: 'JSON key-value pairs of the color mapping model',
     }),
 };
 

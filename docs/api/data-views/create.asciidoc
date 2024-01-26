@@ -6,6 +6,11 @@
 
 experimental[] Create data views.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/src/plugins/data_views/docs/openapi[open API specification].
+====
 
 [[data-views-api-create-request]]
 ==== Request
@@ -122,6 +127,8 @@ $ curl -X POST api/data_views/data_view
 // KIBANA
 
 To create {data-sources} based on {ref}/xpack-rollup.html[rollup indices], use the `data_view.type` and `data_view.typeMeta` properties :
+
+deprecated::[8.11.0,'Rollups are deprecated and will be removed in a future version. Use {ref}/downsampling.html[downsampling] instead.']
 
 [source,sh]
 --------------------------------------------------

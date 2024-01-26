@@ -9,9 +9,13 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { isString } from 'lodash/fp';
-import { StatefulEventContext } from '@kbn/timelines-plugin/public';
-import { getScopedActions } from '../../../../../helpers';
-import type { TimelineExpandedDetailType } from '../../../../../../common/types/timeline';
+import { TableId } from '@kbn/securitysolution-data-table';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { UserPanelKey } from '../../../../../flyout/entity_details/user_right';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
+import type { ExpandedDetailType } from '../../../../../../common/types';
+import { getScopedActions, isTimelineScope } from '../../../../../helpers';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
@@ -48,9 +52,11 @@ const UserNameComponent: React.FC<Props> = ({
 }) => {
   const dispatch = useDispatch();
   const eventContext = useContext(StatefulEventContext);
+  const isNewUserDetailsFlyoutEnable = useIsExperimentalFeatureEnabled('newUserDetailsFlyout');
   const userName = `${value}`;
-
   const isInTimelineContext = userName && eventContext?.timelineID;
+  const { openRightPanel } = useExpandableFlyoutApi();
+
   const openUserDetailsSidePanel = useCallback(
     (e) => {
       e.preventDefault();
@@ -58,31 +64,55 @@ const UserNameComponent: React.FC<Props> = ({
       if (onClick) {
         onClick();
       }
+
       if (eventContext && isInTimelineContext) {
         const { timelineID, tabType } = eventContext;
-        const updatedExpandedDetail: TimelineExpandedDetailType = {
-          panelView: 'userDetail',
-          params: {
-            userName,
-          },
-        };
-        const scopedActions = getScopedActions(timelineID);
-        if (scopedActions) {
-          dispatch(
-            scopedActions.toggleDetailPanel({
-              ...updatedExpandedDetail,
-              id: timelineID,
-              tabType: tabType as TimelineTabs,
-            })
-          );
-        }
 
-        if (timelineID === TimelineId.active && tabType === TimelineTabs.query) {
-          activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
+        if (isNewUserDetailsFlyoutEnable && !isTimelineScope(timelineID)) {
+          openRightPanel({
+            id: UserPanelKey,
+            params: {
+              userName,
+              contextID: contextId,
+              scopeId: TableId.alertsOnAlertsPage,
+              isDraggable,
+            },
+          });
+        } else {
+          const updatedExpandedDetail: ExpandedDetailType = {
+            panelView: 'userDetail',
+            params: {
+              userName,
+            },
+          };
+          const scopedActions = getScopedActions(timelineID);
+          if (scopedActions) {
+            dispatch(
+              scopedActions.toggleDetailPanel({
+                ...updatedExpandedDetail,
+                id: timelineID,
+                tabType: tabType as TimelineTabs,
+              })
+            );
+          }
+
+          if (timelineID === TimelineId.active && tabType === TimelineTabs.query) {
+            activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
+          }
         }
       }
     },
-    [onClick, eventContext, isInTimelineContext, userName, dispatch]
+    [
+      onClick,
+      eventContext,
+      isNewUserDetailsFlyoutEnable,
+      isInTimelineContext,
+      openRightPanel,
+      userName,
+      contextId,
+      isDraggable,
+      dispatch,
+    ]
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined

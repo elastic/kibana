@@ -7,15 +7,18 @@
 
 import expect from '@kbn/expect';
 import { Cookie } from 'tough-cookie';
-import { User } from '@kbn/cases-plugin/common/api';
 import { UserProfile } from '@kbn/security-plugin/common';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { findCasesResp, getPostCaseRequest } from '../../../../common/lib/mock';
-import { findCases, createCase, deleteAllCaseItems } from '../../../../common/lib/utils';
+import {
+  findCases,
+  createCase,
+  deleteAllCaseItems,
+  suggestUserProfiles,
+  loginUsers,
+} from '../../../../common/lib/api';
 import { secOnlySpacesAll, superUser } from '../../../../common/lib/authentication/users';
-import { suggestUserProfiles, loginUsers } from '../../../../common/lib/user_profiles';
-import { getUserInfo } from '../../../../common/lib/authentication';
 import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../common/lib/authentication';
 import { securitySolutionOnlyAllSpacesRole } from '../../../../common/lib/authentication/roles';
 
@@ -26,7 +29,6 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('find_cases', () => {
-    const secOnlyInfo: User = getUserInfo(secOnlySpacesAll);
     let cookies: Cookie[];
     let suggestedSecUsers: UserProfile[];
     let superUserHeaders: { Cookie: string };
@@ -57,7 +59,7 @@ export default ({ getService }: FtrProviderContext): void => {
       suggestedSecUsers = await suggestUserProfiles({
         supertest: supertestWithoutAuth,
         req: {
-          name: secOnlyInfo.username!,
+          name: 'all_spaces',
           owners: ['securitySolutionFixture'],
           size: 1,
         },

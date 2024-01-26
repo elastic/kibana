@@ -38,6 +38,7 @@ export interface AgentPolicyServiceInterface {
 // Agent services
 export { AgentServiceImpl } from './agents';
 export type { AgentClient, AgentService } from './agents';
+export { getAvailableVersions, getLatestAvailableVersion } from './agents';
 
 // Saved object services
 export { agentPolicyService } from './agent_policy';
@@ -45,10 +46,12 @@ export { packagePolicyService } from './package_policy';
 export { outputService } from './output';
 export { downloadSourceService } from './download_source';
 export { settingsService };
+export { dataStreamService } from './data_streams';
 
 // Plugin services
 export { appContextService } from './app_context';
 export { licenseService } from './license';
+export { auditLoggingService } from './audit_logging';
 
 // Artifacts services
 export * from './artifacts';
@@ -63,4 +66,8 @@ export type { PackageService, PackageClient } from './epm';
 // Fleet server policy config
 export { migrateSettingsToFleetServerHost } from './fleet_server_host';
 
-export { FleetUsageSender } from './fleet_usage_sender';
+export { FleetUsageSender } from './telemetry/fleet_usage_sender';
+
+export { checkAllowedPackages } from './check_allowed_packages';
+
+export type { MessageSigningServiceInterface } from './security';

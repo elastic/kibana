@@ -4,6 +4,7 @@ exports[`Initializing the store should initialize all datasources with state fro
 Object {
   "lens": Object {
     "activeDatasourceId": "testDatasource",
+    "annotationGroups": Object {},
     "dataViews": Object {
       "indexPatternRefs": Array [],
       "indexPatterns": Object {},
@@ -23,6 +24,7 @@ Object {
     "isLinkedToOriginatingApp": false,
     "isLoading": false,
     "isSaveable": true,
+    "managed": false,
     "persistedDoc": Object {
       "exactMatchDoc": Object {
         "attributes": Object {
@@ -98,7 +100,9 @@ Object {
     },
     "visualization": Object {
       "activeId": "testVis",
-      "state": Object {},
+      "state": Object {
+        "newState": "newState",
+      },
     },
   },
 }

@@ -17,14 +17,14 @@ import {
   mlFunctionToESAggregation,
   isJobIdValid,
   prefixDatafeedId,
-  getSafeAggregationName,
   getLatestDataOrBucketTimestamp,
   getEarliestDatafeedStartTime,
   resolveMaxTimeInterval,
   getFiltersForDSLQuery,
   isKnownEmptyQuery,
+  removeNodeInfo,
 } from './job_utils';
-import { CombinedJob, Job } from '../types/anomaly_detection_jobs';
+import type { CombinedJob, CombinedJobWithStats, Job } from '../types/anomaly_detection_jobs';
 import { FilterStateStore } from '@kbn/es-query';
 
 import moment from 'moment';
@@ -566,18 +566,6 @@ describe('ML - job utils', () => {
     });
   });
 
-  describe('getSafeAggregationName', () => {
-    test('"foo" should be "foo"', () => {
-      expect(getSafeAggregationName('foo', 0)).toBe('foo');
-    });
-    test('"foo.bar" should be "foo.bar"', () => {
-      expect(getSafeAggregationName('foo.bar', 0)).toBe('foo.bar');
-    });
-    test('"foo&bar" should be "field_0"', () => {
-      expect(getSafeAggregationName('foo&bar', 0)).toBe('field_0');
-    });
-  });
-
   describe('getLatestDataOrBucketTimestamp', () => {
     test('returns expected value when no gap in data at end of bucket processing', () => {
       expect(getLatestDataOrBucketTimestamp(1549929594000, 1549928700000)).toBe(1549929594000);
@@ -790,5 +778,40 @@ describe('getFiltersForDSLQuery', () => {
       });
       expect(result).toBe(false);
     });
+  });
+
+  test('removes node info and returns a copy of the job', () => {
+    const job = {
+      job_id: 'test',
+      datafeed_config: {
+        datafeed_id: 'datafeed-test',
+        job_id: 'test',
+        indices: ['index1'],
+        query: {
+          match_all: {},
+        },
+        node: {
+          name: 'node-1',
+          ephemeral_id: '1234',
+          transport_address: 'localhost:9200',
+          attributes: {},
+        },
+      },
+      node: {
+        name: 'node-1',
+        ephemeral_id: '1234',
+        transport_address: 'localhost:9200',
+        attributes: {},
+      },
+    } as never as CombinedJobWithStats;
+
+    const result = removeNodeInfo(job);
+    expect(result.job_id).toBe('test');
+    expect(result.node).toBe(undefined);
+    expect(result.datafeed_config.node).toBe(undefined);
+
+    expect(job.job_id).toBe('test');
+    expect(job.node).not.toBe(undefined);
+    expect(job.datafeed_config.node).not.toBe(undefined);
   });
 });

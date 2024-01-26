@@ -35,7 +35,7 @@ export function traefikMetricsSpecProvider(context: TutorialContext): TutorialSc
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-traefik.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/traefik.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/traefik.svg'),
     artifacts: {
       dashboards: [],
       exportedFields: {
@@ -46,6 +46,6 @@ export function traefikMetricsSpecProvider(context: TutorialContext): TutorialSc
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['web', 'security'],
+    integrationBrowserCategories: ['observability'],
   };
 }

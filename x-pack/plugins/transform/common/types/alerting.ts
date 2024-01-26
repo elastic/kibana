@@ -14,7 +14,13 @@ export type TransformHealthRuleParams = {
     notStarted?: {
       enabled: boolean;
     } | null;
+    /**
+     * @deprecated replaced in favor of healthCheck in 8.8
+     */
     errorMessages?: {
+      enabled: boolean;
+    } | null;
+    healthCheck?: {
       enabled: boolean;
     } | null;
   } | null;

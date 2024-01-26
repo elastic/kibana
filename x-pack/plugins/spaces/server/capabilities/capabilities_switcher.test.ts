@@ -10,10 +10,10 @@ import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mo
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
+import { setupCapabilitiesSwitcher } from './capabilities_switcher';
 import type { Space } from '../../common';
 import type { PluginsStart } from '../plugin';
 import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
-import { setupCapabilitiesSwitcher } from './capabilities_switcher';
 
 const features = [
   {
@@ -173,7 +173,7 @@ describe('capabilitiesSwitcher', () => {
 
     const result = await switcher(request, capabilities, false);
 
-    expect(result).toEqual(buildCapabilities());
+    expect(result).toEqual({});
     expect(spacesService.getActiveSpace).not.toHaveBeenCalled();
   });
 
@@ -191,7 +191,7 @@ describe('capabilitiesSwitcher', () => {
 
     const result = await switcher(request, capabilities, true);
 
-    expect(result).toEqual(buildCapabilities());
+    expect(result).toEqual({});
     expect(spacesService.getActiveSpace).not.toHaveBeenCalled();
   });
 

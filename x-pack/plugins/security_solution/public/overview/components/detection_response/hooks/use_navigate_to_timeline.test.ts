@@ -8,11 +8,11 @@
 import { renderHook } from '@testing-library/react-hooks';
 
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { updateProviders } from '../../../../timelines/store/timeline/actions';
+import { updateProviders } from '../../../../timelines/store/actions';
 import { useNavigateToTimeline } from './use_navigate_to_timeline';
 import * as mock from './mock_data';
 
-jest.mock('../../../../timelines/components/timeline/properties/use_create_timeline', () => ({
+jest.mock('../../../../timelines/hooks/use_create_timeline', () => ({
   useCreateTimeline: () => jest.fn(),
 }));
 
@@ -32,6 +32,10 @@ jest.mock('react-redux', () => {
     useSelector: () => jest.fn(),
   };
 });
+
+jest.mock('uuid', () => ({
+  v4: () => 'mock-id',
+}));
 
 const id = 'timeline-1';
 const renderUseNavigatgeToTimeline = () => renderHook(() => useNavigateToTimeline());

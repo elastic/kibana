@@ -8,8 +8,9 @@
 import React, { FC, useCallback, useContext, useMemo } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
+import type { Field } from '@kbn/ml-anomaly-utils';
+import { useFieldStatsTrigger } from '../../../../../../../components/field_stats_flyout/use_field_stats_trigger';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { Field } from '../../../../../../../../../common/types/fields';
 import { createFieldOptions } from '../../../../../common/job_creator/util/general';
 
 interface Props {
@@ -24,8 +25,14 @@ export const CategorizationPerPartitionFieldSelect: FC<Props> = ({
   selectedField,
 }) => {
   const { jobCreator, jobCreatorUpdated } = useContext(JobCreatorContext);
+  const { renderOption, optionCss } = useFieldStatsTrigger();
+
   const options: EuiComboBoxOptionOption[] = useMemo(
-    () => [...createFieldOptions(fields, jobCreator.additionalFields)],
+    () =>
+      [...createFieldOptions(fields, jobCreator.additionalFields)].map((o) => ({
+        ...o,
+        css: optionCss,
+      })),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [fields, jobCreatorUpdated]
   );
@@ -52,6 +59,7 @@ export const CategorizationPerPartitionFieldSelect: FC<Props> = ({
       onChange={onChange}
       isClearable={true}
       data-test-subj="mlJobWizardCategorizationPerPartitionFieldNameSelect"
+      renderOption={renderOption}
     />
   );
 };

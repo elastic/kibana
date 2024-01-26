@@ -17,30 +17,18 @@ import {
   getBulkActionEditRequest,
   getFindResultWithSingleHit,
   getFindResultWithMultiHits,
-  getRuleMock,
 } from '../../../../routes/__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
 import { performBulkActionRoute } from './route';
 import {
   getPerformBulkActionEditSchemaMock,
   getPerformBulkActionSchemaMock,
-} from '../../../../../../../common/detection_engine/rule_management/mocks';
+} from '../../../../../../../common/api/detection_engine/rule_management/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { readRules } from '../../../logic/crud/read_rules';
-// eslint-disable-next-line no-restricted-imports
-import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migration';
-import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 
 jest.mock('../../../../../machine_learning/authz');
 jest.mock('../../../logic/crud/read_rules', () => ({ readRules: jest.fn() }));
-
-jest.mock('../../../logic/rule_actions/legacy_action_migration', () => {
-  const actual = jest.requireActual('../../../logic/rule_actions/legacy_action_migration');
-  return {
-    ...actual,
-    legacyMigrate: jest.fn(),
-  };
-});
 
 describe('Perform bulk action route', () => {
   const readRulesMock = readRules as jest.Mock;
@@ -55,7 +43,6 @@ describe('Perform bulk action route', () => {
     logger = loggingSystemMock.createLogger();
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
-    (legacyMigrate as jest.Mock).mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
     performBulkActionRoute(server.router, ml, logger);
@@ -75,6 +62,7 @@ describe('Perform bulk action route', () => {
           results: someBulkActionResults(),
           summary: {
             failed: 0,
+            skipped: 0,
             succeeded: 1,
             total: 1,
           },
@@ -96,6 +84,7 @@ describe('Perform bulk action route', () => {
           results: someBulkActionResults(),
           summary: {
             failed: 0,
+            skipped: 0,
             succeeded: 0,
             total: 0,
           },
@@ -148,6 +137,7 @@ describe('Perform bulk action route', () => {
           results: someBulkActionResults(),
           summary: {
             failed: 1,
+            skipped: 0,
             succeeded: 0,
             total: 1,
           },
@@ -185,6 +175,7 @@ describe('Perform bulk action route', () => {
           results: someBulkActionResults(),
           summary: {
             failed: 1,
+            skipped: 0,
             succeeded: 0,
             total: 1,
           },
@@ -224,6 +215,7 @@ describe('Perform bulk action route', () => {
           results: someBulkActionResults(),
           summary: {
             failed: 1,
+            skipped: 0,
             succeeded: 0,
             total: 1,
           },
@@ -236,6 +228,7 @@ describe('Perform bulk action route', () => {
     it('returns partial failure error if update of few rules fail', async () => {
       clients.rulesClient.bulkEdit.mockResolvedValue({
         rules: [mockRule, mockRule],
+        skipped: [],
         errors: [
           {
             message: 'mocked validation message',
@@ -264,6 +257,7 @@ describe('Perform bulk action route', () => {
           summary: {
             failed: 3,
             succeeded: 2,
+            skipped: 0,
             total: 5,
           },
           errors: [
@@ -333,6 +327,7 @@ describe('Perform bulk action route', () => {
         attributes: {
           summary: {
             failed: 1,
+            skipped: 0,
             succeeded: 1,
             total: 2,
           },
@@ -355,6 +350,133 @@ describe('Perform bulk action route', () => {
     });
   });
 
+  describe('rule skipping', () => {
+    it('returns partial failure error with skipped rules if some rule updates fail and others are skipped', async () => {
+      clients.rulesClient.bulkEdit.mockResolvedValue({
+        rules: [mockRule, mockRule],
+        skipped: [
+          { id: 'skipped-rule-id-1', name: 'Skipped Rule 1', skip_reason: 'RULE_NOT_MODIFIED' },
+          { id: 'skipped-rule-id-2', name: 'Skipped Rule 2', skip_reason: 'RULE_NOT_MODIFIED' },
+        ],
+        errors: [
+          {
+            message: 'test failure',
+            rule: { id: 'failed-rule-id-3', name: 'Detect Root/Admin Users' },
+          },
+        ],
+        total: 5,
+      });
+
+      const response = await server.inject(
+        getBulkActionEditRequest(),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        attributes: {
+          summary: {
+            failed: 1,
+            skipped: 2,
+            succeeded: 2,
+            total: 5,
+          },
+          errors: [
+            {
+              message: 'test failure',
+              rules: [
+                {
+                  id: 'failed-rule-id-3',
+                  name: 'Detect Root/Admin Users',
+                },
+              ],
+              status_code: 500,
+            },
+          ],
+          results: someBulkActionResults(),
+        },
+        message: 'Bulk edit partially failed',
+        status_code: 500,
+      });
+    });
+
+    it('returns success with skipped rules if some rules are skipped, but no errors are reported', async () => {
+      clients.rulesClient.bulkEdit.mockResolvedValue({
+        rules: [mockRule, mockRule],
+        skipped: [
+          { id: 'skipped-rule-id-1', name: 'Skipped Rule 1', skip_reason: 'RULE_NOT_MODIFIED' },
+          { id: 'skipped-rule-id-2', name: 'Skipped Rule 2', skip_reason: 'RULE_NOT_MODIFIED' },
+        ],
+        errors: [],
+        total: 4,
+      });
+
+      const response = await server.inject(
+        getBulkActionEditRequest(),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
+        attributes: {
+          summary: {
+            failed: 0,
+            skipped: 2,
+            succeeded: 2,
+            total: 4,
+          },
+          results: someBulkActionResults(),
+        },
+        rules_count: 4,
+        success: true,
+      });
+    });
+
+    it('returns 500 with skipped rules if some rules are skipped, but some errors are reported', async () => {
+      clients.rulesClient.bulkEdit.mockResolvedValue({
+        rules: [mockRule, mockRule],
+        skipped: [
+          { id: 'skipped-rule-id-1', name: 'Skipped Rule 1', skip_reason: 'RULE_NOT_MODIFIED' },
+          { id: 'skipped-rule-id-2', name: 'Skipped Rule 2', skip_reason: 'RULE_NOT_MODIFIED' },
+        ],
+        errors: [
+          {
+            message: 'test failure',
+            rule: { id: 'failed-rule-id-3', name: 'Detect Root/Admin Users' },
+          },
+        ],
+        total: 5,
+      });
+
+      const response = await server.inject(
+        getBulkActionEditRequest(),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        attributes: {
+          summary: {
+            failed: 1,
+            skipped: 2,
+            succeeded: 2,
+            total: 5,
+          },
+          results: someBulkActionResults(),
+          errors: [
+            {
+              message: 'test failure',
+              rules: [{ id: 'failed-rule-id-3', name: 'Detect Root/Admin Users' }],
+              status_code: 500,
+            },
+          ],
+        },
+        message: 'Bulk edit partially failed',
+        status_code: 500,
+      });
+    });
+  });
+
   describe('request validation', () => {
     it('rejects payloads with no action', async () => {
       const request = requestMock.create({
@@ -364,7 +486,7 @@ describe('Perform bulk action route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "undefined" supplied to "action",Invalid value "undefined" supplied to "edit"'
+        'action: Invalid literal value, expected "delete", action: Invalid literal value, expected "disable", action: Invalid literal value, expected "enable", action: Invalid literal value, expected "export", action: Invalid literal value, expected "duplicate", and 2 more'
       );
     });
 
@@ -376,7 +498,7 @@ describe('Perform bulk action route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "unknown" supplied to "action",Invalid value "undefined" supplied to "edit"'
+        'action: Invalid literal value, expected "delete", action: Invalid literal value, expected "disable", action: Invalid literal value, expected "enable", action: Invalid literal value, expected "export", action: Invalid literal value, expected "duplicate", and 2 more'
       );
     });
 
@@ -409,7 +531,9 @@ describe('Perform bulk action route', () => {
         body: { ...getPerformBulkActionSchemaMock(), ids: 'test fake' },
       });
       const result = server.validate(request);
-      expect(result.badRequest).toHaveBeenCalledWith('Invalid value "test fake" supplied to "ids"');
+      expect(result.badRequest).toHaveBeenCalledWith(
+        'ids: Expected array, received string, action: Invalid literal value, expected "delete", ids: Expected array, received string, ids: Expected array, received string, action: Invalid literal value, expected "enable", and 7 more'
+      );
     });
 
     it('rejects payload if there is more than 100 ids in payload', async () => {
@@ -455,7 +579,9 @@ describe('Perform bulk action route', () => {
         body: { ...getPerformBulkActionSchemaMock(), ids: [] },
       });
       const result = server.validate(request);
-      expect(result.badRequest).toHaveBeenCalledWith('Invalid value "[]" supplied to "ids"');
+      expect(result.badRequest).toHaveBeenCalledWith(
+        'ids: Array must contain at least 1 element(s)'
+      );
     });
 
     it('rejects payloads if property "edit" actions is empty', async () => {
@@ -466,7 +592,7 @@ describe('Perform bulk action route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        expect.stringContaining('Invalid value "[]" supplied to "edit"')
+        expect.stringContaining('edit: Array must contain at least 1 element(s)')
       );
     });
 
@@ -479,7 +605,9 @@ describe('Perform bulk action route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        expect.stringContaining('Invalid value "invalid" supplied to "dry_run"')
+        expect.stringContaining(
+          "dry_run: Invalid enum value. Expected 'true' | 'false', received 'invalid', dry_run: Expected boolean, received string"
+        )
       );
     });
   });
@@ -504,7 +632,7 @@ describe('Perform bulk action route', () => {
         success: true,
         rules_count: rulesNumber,
         attributes: {
-          summary: { failed: 0, succeeded: rulesNumber, total: rulesNumber },
+          summary: { failed: 0, skipped: 0, succeeded: rulesNumber, total: rulesNumber },
           results: someBulkActionResults(),
         },
       })
@@ -517,5 +645,6 @@ function someBulkActionResults() {
     created: expect.any(Array),
     deleted: expect.any(Array),
     updated: expect.any(Array),
+    skipped: expect.any(Array),
   };
 }

@@ -5,28 +5,44 @@
  * 2.0.
  */
 
-import { Meta } from '../../../../../common/types';
 import { ElasticsearchIndexWithIngestion } from '../../../../../common/types/indices';
+import { Meta } from '../../../../../common/types/pagination';
 
-import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
+import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
-export const fetchIndices = async ({
-  meta,
-  returnHiddenIndices,
-  searchQuery,
-}: {
-  meta: Meta;
+export interface FetchIndicesParams {
+  from: number;
+  onlyShowSearchOptimizedIndices: boolean;
   returnHiddenIndices: boolean;
   searchQuery?: string;
-}) => {
+  size?: number;
+}
+
+export interface FetchIndicesResponse {
+  indices: ElasticsearchIndexWithIngestion[];
+  isInitialRequest: boolean;
+  meta: Meta;
+  onlyShowSearchOptimizedIndices: boolean;
+  returnHiddenIndices: boolean;
+  searchQuery?: string;
+}
+
+export const fetchIndices = async ({
+  from,
+  onlyShowSearchOptimizedIndices,
+  returnHiddenIndices,
+  searchQuery,
+  size,
+}: FetchIndicesParams): Promise<FetchIndicesResponse> => {
   const { http } = HttpLogic.values;
   const route = '/internal/enterprise_search/indices';
   const query = {
-    page: meta.page.current,
+    from,
+    only_show_search_optimized_indices: onlyShowSearchOptimizedIndices,
     return_hidden_indices: returnHiddenIndices,
     search_query: searchQuery || null,
-    size: 20,
+    size: size ?? 20,
   };
   const response = await http.get<{ indices: ElasticsearchIndexWithIngestion[]; meta: Meta }>(
     route,
@@ -36,9 +52,17 @@ export const fetchIndices = async ({
   );
 
   // We need this to determine whether to show the empty state on the indices page
-  const isInitialRequest = meta.page.current === 1 && !searchQuery;
+  const isInitialRequest = from === 0 && !searchQuery && !onlyShowSearchOptimizedIndices;
 
-  return { ...response, isInitialRequest, returnHiddenIndices, searchQuery };
+  return {
+    ...response,
+    isInitialRequest,
+    onlyShowSearchOptimizedIndices,
+    returnHiddenIndices,
+    searchQuery,
+  };
 };
 
 export const FetchIndicesAPILogic = createApiLogic(['content', 'indices_api_logic'], fetchIndices);
+
+export type FetchIndicesApiActions = Actions<FetchIndicesParams, FetchIndicesResponse>;

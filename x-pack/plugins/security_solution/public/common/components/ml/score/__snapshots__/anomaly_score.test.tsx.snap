@@ -3,10 +3,10 @@
 exports[`anomaly_scores renders correctly against snapshot 1`] = `
 <Fragment>
   <EuiFlexItem
+    data-test-subj="anomaly-score"
     grow={false}
   >
-    <DraggableScore
-      id="anomaly-scores-job-key-1"
+    <Score
       index={0}
       score={
         Object {
@@ -96,6 +96,7 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
       ownFocus={true}
       panelPaddingSize="m"
       repositionOnScroll={true}
+      repositionToCrossAxis={true}
     >
       <EuiDescriptionList
         data-test-subj="anomaly-description-list"

@@ -7,6 +7,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
+import { ExpandWildcard } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { QueryDslQueryContainer } from '../../../common/types';
 import { convertEsError } from './errors';
 
@@ -42,8 +43,10 @@ export async function callIndexAliasApi(
 interface FieldCapsApiParams {
   callCluster: ElasticsearchClient;
   indices: string[] | string;
-  fieldCapsOptions?: { allow_no_indices: boolean };
-  filter?: QueryDslQueryContainer;
+  fieldCapsOptions?: { allow_no_indices: boolean; include_unmapped?: boolean };
+  indexFilter?: QueryDslQueryContainer;
+  fields?: string[];
+  expandWildcards?: ExpandWildcard;
 }
 
 /**
@@ -62,18 +65,22 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
   const {
     callCluster,
     indices,
-    filter,
+    indexFilter,
     fieldCapsOptions = {
       allow_no_indices: false,
+      include_unmapped: false,
     },
+    fields = ['*'],
+    expandWildcards,
   } = params;
   try {
     return await callCluster.fieldCaps(
       {
         index: indices,
-        fields: '*',
+        fields,
         ignore_unavailable: true,
-        index_filter: filter,
+        index_filter: indexFilter,
+        expand_wildcards: expandWildcards,
         ...fieldCapsOptions,
       },
       { meta: true }

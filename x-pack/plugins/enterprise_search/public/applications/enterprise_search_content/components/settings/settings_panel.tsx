@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 interface SettingsPanelProps {
   description: string;
   label: string;
-  link: React.ReactNode;
+  link?: React.ReactNode;
   onChange: (event: EuiSwitchEvent) => void;
   title: string;
   value: boolean;
@@ -61,7 +61,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
         <EuiFlexItem>
           <EuiSwitch checked={value} label={label} onChange={onChange} />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>{link}</EuiFlexItem>
+        {link && <EuiFlexItem grow={false}>{link}</EuiFlexItem>}
       </EuiFlexGroup>
     </EuiSplitPanel.Inner>
   </EuiSplitPanel.Outer>

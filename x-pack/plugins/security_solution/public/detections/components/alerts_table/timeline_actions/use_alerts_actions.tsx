@@ -8,9 +8,10 @@
 import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { useBulkActionItems } from '@kbn/timelines-plugin/public';
+import type { AlertWorkflowStatus } from '../../../../common/types';
+import { useBulkActionItems } from '../../../../common/components/toolbar/bulk_actions/use_bulk_action_items';
 import { getScopedActions } from '../../../../helpers';
-import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { Status } from '../../../../../common/api/detection_engine';
 import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts/use_alerts_privileges';
 import type { SetEventsDeletedProps, SetEventsLoadingProps } from '../types';
 interface Props {
@@ -18,7 +19,6 @@ interface Props {
   closePopover: () => void;
   eventId: string;
   scopeId: string;
-  indexName: string;
   refetch?: () => void;
 }
 
@@ -27,7 +27,6 @@ export const useAlertsActions = ({
   closePopover,
   eventId,
   scopeId,
-  indexName,
   refetch,
 }: Props) => {
   const dispatch = useDispatch();
@@ -41,7 +40,7 @@ export const useAlertsActions = ({
   }, [closePopover, refetch]);
 
   const scopedActions = getScopedActions(scopeId);
-  const setEventsLoading = useCallback(
+  const localSetEventsLoading = useCallback(
     ({ eventIds, isLoading }: SetEventsLoadingProps) => {
       if (scopedActions) {
         dispatch(scopedActions.setEventsLoading({ id: scopeId, eventIds, isLoading }));
@@ -61,9 +60,8 @@ export const useAlertsActions = ({
 
   const actionItems = useBulkActionItems({
     eventIds: [eventId],
-    currentStatus: alertStatus,
-    indexName,
-    setEventsLoading,
+    currentStatus: alertStatus as AlertWorkflowStatus,
+    setEventsLoading: localSetEventsLoading,
     setEventsDeleted,
     onUpdateSuccess: onStatusUpdate,
     onUpdateFailure: onStatusUpdate,

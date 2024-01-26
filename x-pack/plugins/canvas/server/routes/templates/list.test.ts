@@ -27,7 +27,8 @@ describe('Find workpad', () => {
     const routerDeps = getMockedRouterDeps();
     initializeListTemplates(routerDeps);
 
-    routeHandler = routerDeps.router.get.mock.calls[0][1];
+    routeHandler =
+      routerDeps.router.versioned.get.mock.results[0].value.addVersion.mock.calls[0][1];
   });
 
   it(`returns 200 with the found templates`, async () => {

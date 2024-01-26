@@ -1,0 +1,8 @@
+description: >
+  The threshold value that is used with the `thresholdComparator`.
+  If the `thresholdComparator` is `between` or `notBetween`, you must specify the boundary values.
+type: array
+items:
+  type: integer
+  examples:
+    - 4000

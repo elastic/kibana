@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.loadSavedDashboard('few panels');
     });
@@ -85,7 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('shows filter bar in fullscreen mode', async () => {
-      await filterBar.addFilter('bytes', 'is', '12345678');
+      await filterBar.addFilter({ field: 'bytes', operation: 'is', value: '12345678' });
       await PageObjects.dashboard.waitForRenderComplete();
       await PageObjects.dashboard.clickFullScreenMode();
       await retry.try(async () => {

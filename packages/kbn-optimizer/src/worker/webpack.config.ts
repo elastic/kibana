@@ -15,30 +15,23 @@ import webpack from 'webpack';
 import TerserPlugin from 'terser-webpack-plugin';
 import webpackMerge from 'webpack-merge';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
-import CompressionPlugin from 'compression-webpack-plugin';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 
-import { Bundle, BundleRefs, WorkerConfig, parseDllManifest } from '../common';
-import { BundleRefsPlugin } from './bundle_refs_plugin';
+import { Bundle, BundleRemotes, WorkerConfig, parseDllManifest } from '../common';
+import { BundleRemotesPlugin } from './bundle_remotes_plugin';
 import { BundleMetricsPlugin } from './bundle_metrics_plugin';
 import { EmitStatsPlugin } from './emit_stats_plugin';
 import { PopulateBundleCachePlugin } from './populate_bundle_cache_plugin';
 
-const IS_CODE_COVERAGE = !!process.env.CODE_COVERAGE;
-const ISTANBUL_PRESET_PATH = require.resolve('@kbn/babel-preset/istanbul_preset');
-const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
+const BABEL_PRESET = require.resolve('@kbn/babel-preset/webpack_preset');
 const DLL_MANIFEST = JSON.parse(Fs.readFileSync(UiSharedDepsNpm.dllManifestPath, 'utf8'));
 
-const nodeModulesButNotKbnPackages = (path: string) => {
-  if (!path.includes('node_modules')) {
-    return false;
-  }
-
-  return !path.includes(`node_modules${Path.sep}@kbn${Path.sep}`);
-};
-
-export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker: WorkerConfig) {
+export function getWebpackConfig(
+  bundle: Bundle,
+  bundleRemotes: BundleRemotes,
+  worker: WorkerConfig
+) {
   const ENTRY_CREATOR = require.resolve('./entry_point_creator');
 
   const commonConfig: webpack.Configuration = {
@@ -76,11 +69,11 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       },
     },
 
-    externals: [UiSharedDepsSrc.externals],
+    externals: UiSharedDepsSrc.externals,
 
     plugins: [
       new CleanWebpackPlugin(),
-      new BundleRefsPlugin(bundle, bundleRefs),
+      new BundleRemotesPlugin(bundle, bundleRemotes),
       new PopulateBundleCachePlugin(worker, bundle, parseDllManifest(DLL_MANIFEST)),
       new BundleMetricsPlugin(bundle),
       new webpack.DllReferencePlugin({
@@ -97,7 +90,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       // already bundled with all its necessary dependencies
       noParse: [
         /[\/\\]node_modules[\/\\]lodash[\/\\]index\.js$/,
-        /[\/\\]node_modules[\/\\]vega[\/\\]build[\/\\]vega\.js$/,
+        /[\/\\]node_modules[\/\\]vega[\/\\]build-es5[\/\\]vega\.js$/,
       ],
 
       rules: [
@@ -113,10 +106,10 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
             {
               loader: require.resolve('val-loader'),
               options: {
-                entries: bundle.publicDirNames.map((name) => {
-                  const absolute = Path.resolve(bundle.contextDir, name);
+                entries: bundle.remoteInfo.targets.map((target) => {
+                  const absolute = Path.resolve(bundle.contextDir, target);
                   const newContext = Path.dirname(ENTRY_CREATOR);
-                  const importId = `${bundle.type}/${bundle.id}/${name}`;
+                  const importId = `${bundle.type}/${bundle.id}/${target}`;
 
                   // relative path from context of the ENTRY_CREATOR, with linux path separators
                   let requirePath = Path.relative(newContext, absolute).split('\\').join('/');
@@ -149,7 +142,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
               options: {
                 sourceMap: !worker.dist,
                 postcssOptions: {
-                  config: require.resolve('@kbn/optimizer/postcss.config.js'),
+                  config: require.resolve('../../postcss.config.js'),
                 },
               },
             },
@@ -157,7 +150,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         },
         {
           test: /\.scss$/,
-          exclude: nodeModulesButNotKbnPackages,
+          exclude: /node_modules/,
           oneOf: [
             ...worker.themeTags.map((theme) => ({
               resourceQuery: `?${theme}`,
@@ -176,7 +169,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                   options: {
                     sourceMap: !worker.dist,
                     postcssOptions: {
-                      config: require.resolve('@kbn/optimizer/postcss.config.js'),
+                      config: require.resolve('../../postcss.config.js'),
                     },
                   },
                 },
@@ -192,12 +185,12 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                         )
                       )};\n${content}`;
                     },
-                    webpackImporter: false,
-                    implementation: require('node-sass'),
+                    implementation: require('sass-embedded'),
                     sassOptions: {
-                      outputStyle: worker.dist ? 'compressed' : 'nested',
+                      outputStyle: worker.dist ? 'compressed' : 'expanded',
                       includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],
-                      sourceMapRoot: `/${bundle.type}:${bundle.id}`,
+                      sourceMap: true,
+                      quietDeps: true,
                     },
                   },
                 },
@@ -227,9 +220,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
             options: {
               babelrc: false,
               envName: worker.dist ? 'production' : 'development',
-              presets: IS_CODE_COVERAGE
-                ? [ISTANBUL_PRESET_PATH, BABEL_PRESET_PATH]
-                : [BABEL_PRESET_PATH],
+              presets: [BABEL_PRESET],
             },
           },
         },
@@ -238,6 +229,10 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
           use: {
             loader: 'raw-loader',
           },
+        },
+        {
+          test: /\.peggy$/,
+          loader: require.resolve('@kbn/peggy-loader'),
         },
       ],
     },
@@ -252,7 +247,6 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         ),
         vega: Path.resolve(worker.repoRoot, 'node_modules/vega/build-es5/vega.js'),
       },
-      symlinks: false,
     },
 
     performance: {
@@ -274,15 +268,6 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       new webpack.DefinePlugin({
         'process.env': {
           IS_KIBANA_DISTRIBUTABLE: `"true"`,
-        },
-      }),
-      new CompressionPlugin({
-        algorithm: 'brotliCompress',
-        filename: '[path].br',
-        test: /\.(js|css)$/,
-        cache: false,
-        compressionOptions: {
-          level: 11,
         },
       }),
     ],

@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionXyPlugin } from './plugin';
-
-export function plugin() {
+export async function plugin() {
+  const { ExpressionXyPlugin } = await import('./plugin');
   return new ExpressionXyPlugin();
 }
 

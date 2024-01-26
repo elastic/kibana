@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-require('../src/setup_node_env/no_transpilation');
+require('../src/setup_node_env');
 
 var resolve = require('path').resolve;
 var pkg = require('../package.json');
@@ -20,6 +20,7 @@ kbnEs
     'source-path': resolve(__dirname, '../../elasticsearch'),
     'base-path': resolve(__dirname, '../.es'),
     ssl: false,
+    kibanaUrl: 'https://localhost:5601/',
   })
   .catch(function (e) {
     console.error(e);

@@ -12,7 +12,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { DiscoverServices } from '../../../build_services';
 import { stubbedSavedObjectIndexPattern } from '@kbn/data-plugin/common/stubs';
-import { buildDataTableRecord } from '../../../utils/build_data_record';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 
 describe('Row formatter', () => {
   let services: DiscoverServices;
@@ -47,7 +47,8 @@ describe('Row formatter', () => {
   };
   const hit = buildDataTableRecord(rawHit, dataView);
 
-  const fieldsToShow = dataView.fields.getAll().map((fld) => fld.name);
+  const shouldShowField = (fieldName: string) =>
+    dataView.fields.getAll().some((fld) => fld.name === fieldName);
 
   beforeEach(() => {
     services = {
@@ -59,7 +60,7 @@ describe('Row formatter', () => {
   });
 
   it('formats document properly', () => {
-    expect(formatRow(hit, dataView, fieldsToShow, 100, services.fieldFormats))
+    expect(formatRow(hit, dataView, shouldShowField, 100, services.fieldFormats))
       .toMatchInlineSnapshot(`
       <TemplateComponent
         defPairs={
@@ -67,26 +68,32 @@ describe('Row formatter', () => {
             Array [
               "also",
               "with \\"quotes\\" or 'single quotes'",
+              "also",
             ],
             Array [
               "foo",
               "bar",
+              "foo",
             ],
             Array [
               "hello",
               "<h1>World</h1>",
+              "hello",
             ],
             Array [
               "number",
               42,
+              "number",
             ],
             Array [
               "_id",
               "a",
+              "_id",
             ],
             Array [
               "_score",
               1,
+              "_score",
             ],
           ]
         }
@@ -104,33 +111,19 @@ describe('Row formatter', () => {
         getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
       },
     } as unknown as DiscoverServices;
-    expect(formatRow(hit, dataView, [], 1, services.fieldFormats)).toMatchInlineSnapshot(`
+    expect(formatRow(hit, dataView, () => false, 1, services.fieldFormats)).toMatchInlineSnapshot(`
       <TemplateComponent
         defPairs={
           Array [
             Array [
               "also",
               "with \\"quotes\\" or 'single quotes'",
+              "also",
             ],
             Array [
-              "foo",
-              "bar",
-            ],
-            Array [
-              "hello",
-              "<h1>World</h1>",
-            ],
-            Array [
-              "number",
-              42,
-            ],
-            Array [
-              "_id",
-              "a",
-            ],
-            Array [
-              "_score",
-              1,
+              "and 4 more fields",
+              "",
+              null,
             ],
           ]
         }
@@ -144,7 +137,7 @@ describe('Row formatter', () => {
       dataView
     );
 
-    expect(formatRow(highLightHit, dataView, fieldsToShow, 100, services.fieldFormats))
+    expect(formatRow(highLightHit, dataView, shouldShowField, 100, services.fieldFormats))
       .toMatchInlineSnapshot(`
       <TemplateComponent
         defPairs={
@@ -152,26 +145,32 @@ describe('Row formatter', () => {
             Array [
               "number",
               42,
+              "number",
             ],
             Array [
               "also",
               "with \\"quotes\\" or 'single quotes'",
+              "also",
             ],
             Array [
               "foo",
               "bar",
+              "foo",
             ],
             Array [
               "hello",
               "<h1>World</h1>",
+              "hello",
             ],
             Array [
               "_id",
               "a",
+              "_id",
             ],
             Array [
               "_score",
               1,
+              "_score",
             ],
           ]
         }
@@ -207,6 +206,7 @@ describe('Row formatter', () => {
             Array [
               "object.value",
               "formatted, formatted",
+              "object.value",
             ],
           ]
         }
@@ -265,10 +265,12 @@ describe('Row formatter', () => {
             Array [
               "object.keys",
               "formatted, formatted",
+              "object.keys",
             ],
             Array [
               "object.value",
               "formatted, formatted",
+              "object.value",
             ],
           ]
         }
@@ -300,6 +302,7 @@ describe('Row formatter', () => {
             Array [
               "object.value",
               "5, 10",
+              "object.value",
             ],
           ]
         }

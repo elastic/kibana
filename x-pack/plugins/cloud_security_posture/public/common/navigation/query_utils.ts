@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { encode, decode, type RisonObject } from 'rison-node';
+import { encode, decode } from '@kbn/rison';
 import type { LocationDescriptorObject } from 'history';
 
-const encodeRison = (v: RisonObject): string | undefined => {
+const encodeRison = (v: any): string | undefined => {
   try {
     return encode(v);
   } catch (e) {
@@ -27,7 +27,7 @@ const decodeRison = <T extends unknown>(query: string): T | undefined => {
 
 const QUERY_PARAM_KEY = 'cspq';
 
-export const encodeQuery = (query: RisonObject): LocationDescriptorObject['search'] => {
+export const encodeQuery = (query: any): LocationDescriptorObject['search'] => {
   const risonQuery = encodeRison(query);
   if (!risonQuery) return;
   return `${QUERY_PARAM_KEY}=${risonQuery}`;

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-module.exports = (_, options = {}) => ({
+module.exports = () => ({
   presets: [
     // plugins always run before presets, but in this case we need the
     // @babel/preset-typescript preset to run first so we have to move
@@ -21,7 +21,7 @@ module.exports = (_, options = {}) => ({
         // TECHNICALLY stage 2, but for all intents and purposes it's stage 3
         //
         // See https://github.com/babel/proposals/issues/12 for progress
-        require.resolve('@babel/plugin-proposal-class-properties'),
+        require.resolve('@babel/plugin-transform-class-properties'),
 
         // Optional Chaining proposal is stage 4 (https://github.com/tc39/proposal-optional-chaining)
         // Need this since we are using TypeScript 3.7+
@@ -46,8 +46,6 @@ module.exports = (_, options = {}) => ({
             version: '^7.12.5',
           },
         ],
-
-        [require.resolve('@kbn/babel-plugin-synthetic-packages'), options],
       ],
     },
 

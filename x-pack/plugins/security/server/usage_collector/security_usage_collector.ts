@@ -7,7 +7,7 @@
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
-import type { SecurityLicense } from '../../common/licensing';
+import type { SecurityLicense } from '../../common';
 import type { ConfigType } from '../config';
 
 interface Usage {
@@ -20,6 +20,7 @@ interface Usage {
   sessionIdleTimeoutInMinutes: number;
   sessionLifespanInMinutes: number;
   sessionCleanupInMinutes: number;
+  sessionConcurrentSessionsMaxSessions: number;
   anonymousCredentialType: string | undefined;
 }
 
@@ -123,6 +124,12 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
             'The session cleanup interval that is configured, in minutes (0 if disabled).',
         },
       },
+      sessionConcurrentSessionsMaxSessions: {
+        type: 'long',
+        _meta: {
+          description: 'The maximum number of the concurrent user sessions (0 if not configured).',
+        },
+      },
       anonymousCredentialType: {
         type: 'keyword',
         _meta: {
@@ -144,6 +151,7 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
           sessionIdleTimeoutInMinutes: 0,
           sessionLifespanInMinutes: 0,
           sessionCleanupInMinutes: 0,
+          sessionConcurrentSessionsMaxSessions: 0,
           anonymousCredentialType: undefined,
         };
       }
@@ -152,12 +160,7 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
       const loginSelectorEnabled = config.authc.selector.enabled;
       const authProviderCount = config.authc.sortedProviders.length;
       const enabledAuthProviders = [
-        ...new Set(
-          config.authc.sortedProviders.reduce(
-            (acc, provider) => [...acc, provider.type],
-            [] as string[]
-          )
-        ),
+        ...new Set(config.authc.sortedProviders.map((provider) => provider.type)),
       ];
       const accessAgreementEnabled =
         allowAccessAgreement &&
@@ -172,6 +175,8 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
       const sessionIdleTimeoutInMinutes = sessionExpirations.idleTimeout?.asMinutes() ?? 0;
       const sessionLifespanInMinutes = sessionExpirations.lifespan?.asMinutes() ?? 0;
       const sessionCleanupInMinutes = config.session.cleanupInterval?.asMinutes() ?? 0;
+      const sessionConcurrentSessionsMaxSessions =
+        config.session.concurrentSessions?.maxSessions ?? 0;
 
       const anonProviders = config.authc.providers.anonymous ?? ({} as Record<string, any>);
       const foundProvider = Object.entries(anonProviders).find(
@@ -201,6 +206,7 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
         sessionIdleTimeoutInMinutes,
         sessionLifespanInMinutes,
         sessionCleanupInMinutes,
+        sessionConcurrentSessionsMaxSessions,
         anonymousCredentialType,
       };
     },

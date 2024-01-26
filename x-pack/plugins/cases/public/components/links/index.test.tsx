@@ -23,7 +23,6 @@ jest.mock('../../common/navigation/hooks');
 describe('Configuration button', () => {
   let wrapper: ReactWrapper;
   const props: ConfigureCaseButtonProps = {
-    isDisabled: false,
     label: 'My label',
     msgTooltip: <></>,
     showToolTip: false,
@@ -74,7 +73,7 @@ describe('Configuration button', () => {
 
   test('it shows the tooltip when hovering the button', () => {
     // Use fake timers so we don't have to wait for the EuiToolTip timeout
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     const msgTooltip = 'My message tooltip';
     const titleTooltip = 'My title';

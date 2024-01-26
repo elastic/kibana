@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mockedSearchService } from '../../../common/mocks/test_providers';
+import { mockedSearchService } from '../../../mocks/test_providers';
 import { BehaviorSubject, throwError } from 'rxjs';
 import { createFetchIndicators } from './fetch_indicators';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';

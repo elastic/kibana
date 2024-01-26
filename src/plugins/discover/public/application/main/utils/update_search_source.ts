@@ -8,59 +8,60 @@
 
 import { ISearchSource } from '@kbn/data-plugin/public';
 import { DataViewType, DataView } from '@kbn/data-views-plugin/public';
+import { Filter } from '@kbn/es-query';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import { SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
+import { SEARCH_FIELDS_FROM_SOURCE, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import { DiscoverServices } from '../../../build_services';
 import { getSortForSearchSource } from '../../../utils/sorting';
 
 /**
  * Helper function to update the given searchSource before fetching/sharing/persisting
  */
-export function updateSearchSource(
+export function updateVolatileSearchSource(
   searchSource: ISearchSource,
-  persist = true,
   {
     dataView,
     services,
     sort,
-    useNewFieldsApi,
+    customFilters,
   }: {
     dataView: DataView;
     services: DiscoverServices;
-    sort: SortOrder[];
-    useNewFieldsApi: boolean;
+    sort?: SortOrder[];
+    customFilters: Filter[];
   }
 ) {
   const { uiSettings, data } = services;
-  const parentSearchSource = persist ? searchSource : searchSource.getParent()!;
+  const useNewFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
 
-  parentSearchSource
-    .setField('index', dataView)
-    .setField('query', data.query.queryString.getQuery() || null)
-    .setField('filter', data.query.filterManager.getFilters());
+  const usedSort = getSortForSearchSource({
+    sort,
+    dataView,
+    defaultSortDir: uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
+    includeTieBreaker: true,
+  });
+  searchSource.setField('sort', usedSort);
 
-  if (!persist) {
-    const usedSort = getSortForSearchSource(
-      sort,
-      dataView,
-      uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
-    );
-    searchSource.setField('trackTotalHits', true).setField('sort', usedSort);
+  searchSource.setField('trackTotalHits', true);
 
-    if (dataView.type !== DataViewType.ROLLUP) {
-      // Set the date range filter fields from timeFilter using the absolute format. Search sessions requires that it be converted from a relative range
-      searchSource.setField('filter', data.query.timefilter.timefilter.createFilter(dataView));
-    }
+  let filters = [...customFilters];
 
-    if (useNewFieldsApi) {
-      searchSource.removeField('fieldsFromSource');
-      const fields: Record<string, string> = { field: '*' };
+  if (dataView.type !== DataViewType.ROLLUP) {
+    // Set the date range filter fields from timeFilter using the absolute format. Search sessions requires that it be converted from a relative range
+    const timeFilter = data.query.timefilter.timefilter.createFilter(dataView);
+    filters = timeFilter ? [...filters, timeFilter] : filters;
+  }
 
-      fields.include_unmapped = 'true';
+  searchSource.setField('filter', filters);
 
-      searchSource.setField('fields', [fields]);
-    } else {
-      searchSource.removeField('fields');
-    }
+  if (useNewFieldsApi) {
+    searchSource.removeField('fieldsFromSource');
+    const fields: Record<string, string> = { field: '*' };
+
+    fields.include_unmapped = 'true';
+
+    searchSource.setField('fields', [fields]);
+  } else {
+    searchSource.removeField('fields');
   }
 }

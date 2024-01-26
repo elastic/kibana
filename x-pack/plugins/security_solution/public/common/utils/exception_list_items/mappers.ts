@@ -81,7 +81,10 @@ function groupHashEntry(prefix: 'process' | 'file', conditionEntry: ConditionEnt
       return;
     }
 
-    const entry = createEntryMatchAny(`${prefix}${EntryFieldType.HASH}${type}`, values);
+    const entry = createEntryMatchAny(
+      `${prefix}${EntryFieldType.HASH}${type}`,
+      values.map((value) => value.toLowerCase())
+    );
     entriesArray.push(entry);
   });
 

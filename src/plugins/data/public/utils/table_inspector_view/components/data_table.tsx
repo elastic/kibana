@@ -8,7 +8,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-
+import { css } from '@emotion/react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -192,12 +192,25 @@ export class DataTableFormat extends Component<DataTableFormatProps, DataTableFo
 
     return (
       <EuiInMemoryTable
-        className="insDataTableFormat__table"
+        tableLayout="auto"
+        className="insDataTableFormat__table eui-xScroll"
         data-test-subj="inspectorTable"
         columns={columns}
         items={rows}
         sorting={true}
         pagination={pagination}
+        css={css`
+          // Set a min width on each column - you can use [data-test-subj] to target specific columns
+          .euiTableHeaderCell {
+            min-width: 100px;
+          }
+
+          // Make sure the pagination follows the scroll
+          > div:last-child {
+            position: sticky;
+            left: 0;
+          }
+        `}
       />
     );
   }

@@ -57,6 +57,7 @@ const config: TagcloudRendererConfig = {
       format: { id: 'string', params: {} },
     },
     palette: { type: 'palette', name: 'default' },
+    isPreview: false,
   },
   syncColors: false,
 };

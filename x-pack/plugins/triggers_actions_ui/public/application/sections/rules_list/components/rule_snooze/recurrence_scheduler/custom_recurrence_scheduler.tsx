@@ -53,7 +53,7 @@ export const CustomRecurrenceScheduler: React.FC<CustomRecurrenceSchedulerProps>
     getInitialByweekday(initialState.byweekday, startDate)
   );
   const [monthlyRecurDay, setMonthlyRecurDay] = useState(
-    initialState.freq === RRuleFrequency.MONTHLY && initialState.byweekday.length > 0
+    initialState.freq === RRuleFrequency.MONTHLY && (initialState.byweekday?.length ?? 0) > 0
       ? 'weekday'
       : 'day'
   );

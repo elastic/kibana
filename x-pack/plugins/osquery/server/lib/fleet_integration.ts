@@ -7,13 +7,13 @@
 
 import type { SavedObjectReference, SavedObjectsClient } from '@kbn/core/server';
 import { filter, map } from 'lodash';
-import type { PostPackagePolicyDeleteCallback } from '@kbn/fleet-plugin/server';
+import type { PostPackagePolicyPostDeleteCallback } from '@kbn/fleet-plugin/server';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { packSavedObjectType } from '../../common/types';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 
 export const getPackagePolicyDeleteCallback =
-  (packsClient: SavedObjectsClient): PostPackagePolicyDeleteCallback =>
+  (packsClient: SavedObjectsClient): PostPackagePolicyPostDeleteCallback =>
   async (deletedPackagePolicy) => {
     const deletedOsqueryManagerPolicies = filter(deletedPackagePolicy, [
       'package.name',
@@ -34,11 +34,20 @@ export const getPackagePolicyDeleteCallback =
           await Promise.all(
             map(
               foundPacks.saved_objects,
-              (pack: { id: string; references: SavedObjectReference[] }) =>
+              (pack: {
+                id: string;
+                references: SavedObjectReference[];
+                attributes: { shards: Array<{ key: string; value: string }> };
+              }) =>
                 packsClient.update(
                   packSavedObjectType,
                   pack.id,
-                  {},
+                  {
+                    shards: filter(
+                      pack.attributes.shards,
+                      (shard) => shard.key !== deletedOsqueryManagerPolicy.policy_id
+                    ),
+                  },
                   {
                     references: filter(
                       pack.references,

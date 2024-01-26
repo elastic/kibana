@@ -12,6 +12,7 @@ import { EuiBottomBar, EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty } fr
 
 import { useLink } from '../../../../../../../hooks';
 import { useGetDiscoverLogsLinkForAgents } from '../hooks';
+import { FLEET_KUBERNETES_PACKAGE } from '../../../../../../../../common';
 
 const CenteredRoundedBottomBar = styled(EuiBottomBar)`
   max-width: 820px;
@@ -49,12 +50,12 @@ export const CreatePackagePolicyBottomBar: React.FC<{
 }) => {
   const Bar = noAnimation ? NoAnimationCenteredRoundedBottomBar : CenteredRoundedBottomBar;
   return (
-    <Bar>
+    <Bar position="sticky">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiFlexItem grow={false}>
             {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-            <EuiButtonEmpty color="ghost" size="s" href={cancelUrl} onClick={cancelClickHandler}>
+            <EuiButtonEmpty color="text" size="s" href={cancelUrl} onClick={cancelClickHandler}>
               {cancelMessage || (
                 <FormattedMessage
                   id="xpack.fleet.createPackagePolicyBottomBar.backButton"
@@ -101,7 +102,7 @@ export const AgentStandaloneBottomBar: React.FC<{
         <EuiFlexItem grow={false}>
           <EuiFlexItem grow={false}>
             {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-            <EuiButtonEmpty color="ghost" size="s" href={cancelUrl} onClick={cancelClickHandler}>
+            <EuiButtonEmpty color="text" size="s" href={cancelUrl} onClick={cancelClickHandler}>
               <FormattedMessage
                 id="xpack.fleet.agentStandaloneBottomBar.backButton"
                 defaultMessage="Go back"
@@ -125,13 +126,15 @@ export const AgentStandaloneBottomBar: React.FC<{
 export const CreatePackagePolicyFinalBottomBar: React.FC<{
   pkgkey: string;
 }> = ({ pkgkey }) => {
+  const isK8s = pkgkey.includes(FLEET_KUBERNETES_PACKAGE);
   const { getHref } = useLink();
+  const { getAbsolutePath } = useLink();
   return (
     <CenteredRoundedBottomBar>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty color="ghost" size="s" href={getHref('integrations_all')}>
+            <EuiButtonEmpty color="text" size="s" href={getHref('integrations_all')}>
               <FormattedMessage
                 id="xpack.fleet.createPackagePolicyBottomBar.addAnotherIntegration"
                 defaultMessage="Add another integration"
@@ -139,21 +142,40 @@ export const CreatePackagePolicyFinalBottomBar: React.FC<{
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            color="success"
-            fill
-            size="m"
-            href={getHref('integration_details_assets', {
-              pkgkey,
-            })}
-          >
-            <FormattedMessage
-              id="xpack.fleet.confirmIncomingData.viewDataAssetsButtonText'"
-              defaultMessage="View assets"
-            />
-          </EuiButton>
-        </EuiFlexItem>
+        {!isK8s && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              color="success"
+              fill
+              size="m"
+              href={getHref('integration_details_assets', {
+                pkgkey,
+              })}
+            >
+              <FormattedMessage
+                id="xpack.fleet.confirmIncomingData.viewDataAssetsButtonText'"
+                defaultMessage="View assets"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        )}
+        {isK8s && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              color="success"
+              fill
+              size="m"
+              href={getAbsolutePath(
+                '/app/dashboards#/view/kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c'
+              )}
+            >
+              <FormattedMessage
+                id="xpack.fleet.confirmIncomingData. '"
+                defaultMessage="View Kubernetes metrics dashboards"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </CenteredRoundedBottomBar>
   );
@@ -171,7 +193,7 @@ export const AgentDataTimedOutBottomBar: React.FC<{
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            color="ghost"
+            color="text"
             size="s"
             href={troubleshootLink}
             iconType="popout"

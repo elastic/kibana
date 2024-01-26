@@ -6,20 +6,29 @@
  * Side Public License, v 1.
  */
 
-export type GuideId = 'observability' | 'security' | 'search' | 'testGuide';
+export type GuideId =
+  | 'kubernetes'
+  | 'siem'
+  | 'appSearch'
+  | 'websiteSearch'
+  | 'databaseSearch'
+  | 'testGuide';
 
-type ObservabilityStepIds = 'add_data' | 'view_dashboard' | 'tour_observability';
-type SecurityStepIds = 'add_data' | 'rules' | 'alertsCases';
+type KubernetesStepIds = 'add_data' | 'view_dashboard' | 'tour_observability';
+type SiemStepIds = 'add_data' | 'rules' | 'alertsCases';
 type SearchStepIds = 'add_data' | 'search_experience';
-type TestGuideIds = 'step1' | 'step2' | 'step3';
+type TestGuideIds = 'step1' | 'step2' | 'step3' | 'step4';
 
-export type GuideStepIds = ObservabilityStepIds | SecurityStepIds | SearchStepIds | TestGuideIds;
+export type GuideStepIds = KubernetesStepIds | SiemStepIds | SearchStepIds | TestGuideIds;
+
+export type GuideParams = Record<string, string>;
 
 export interface GuideState {
   guideId: GuideId;
   status: GuideStatus;
   isActive?: boolean; // Drives the current guide shown in the dropdown panel
   steps: GuideStep[];
+  params?: GuideParams;
 }
 
 /**
@@ -44,4 +53,67 @@ export type StepStatus = 'inactive' | 'active' | 'in_progress' | 'ready_to_compl
 export interface GuideStep {
   id: GuideStepIds;
   status: StepStatus;
+}
+
+export interface GuideConfig {
+  title: string;
+  description: string;
+  guideName: string;
+  telemetryId: string;
+  docs?: {
+    text: string;
+    url: string;
+  };
+  completedGuideRedirectLocation?: {
+    appID: string;
+    path: string;
+  };
+  steps: StepConfig[];
+}
+
+/* To append a link to the description, specify its text and url in the properties.
+ * An example:
+ * {
+ *   description: 'This is a description with a link'.
+ *   linkText: 'My link',
+ *   linkUrl: 'example.com',
+ *   isLinkExternal: true,
+ * }
+ *
+ */
+export interface StepDescriptionWithLink {
+  descriptionText: string;
+  linkText: string;
+  linkUrl: string;
+  isLinkExternal?: boolean;
+}
+
+export interface StepConfig {
+  id: GuideStepIds;
+  title: string;
+  // description is displayed as a single paragraph, can be combined with description list
+  description?: string | StepDescriptionWithLink;
+  // description list is displayed as an unordered list, can be combined with description
+  descriptionList?: Array<string | StepDescriptionWithLink>;
+  /*
+   * Kibana location where the user will be redirected when starting or continuing a guide step.
+   * The property `path` can use dynamic parameters, for example `testPath/{indexID}/{pageID}.
+   * For the dynamic path to be configured correctly, the values of the parameters need to be passed to
+   * the api service when completing one of the previous steps.
+   * For example, if step 2 has a dynamic parameter `indexID` in its location path
+   * { appID: 'test', path: 'testPath/{indexID}', params: ['indexID'] },
+   * its value needs to be passed to the api service when completing step 1. For example,
+   * `guidedOnboardingAPI.completeGuideStep('testGuide', 'step1', { indexID: 'testIndex' })
+   */
+  location?: {
+    appID: string;
+    path: string;
+  };
+  status?: StepStatus;
+  integration?: string;
+  manualCompletion?: {
+    title: string;
+    description: string;
+    readyToCompleteOnNavigation?: boolean;
+  };
 }

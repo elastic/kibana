@@ -4,6 +4,7 @@
     "index": "without-timefield",
     "settings": {
       "index": {
+        "auto_expand_replicas": "0-1",
         "number_of_replicas": "0",
         "number_of_shards": "1"
       }
@@ -24,6 +25,28 @@
     },
     "settings": {
       "index": {
+        "auto_expand_replicas": "0-1",
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": "with-different-timefield",
+    "mappings": {
+      "properties": {
+        "different-timefield": {
+          "type": "date"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "auto_expand_replicas": "0-1",
         "number_of_replicas": "0",
         "number_of_shards": "1"
       }

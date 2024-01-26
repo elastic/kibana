@@ -14,6 +14,7 @@ import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { flattenHit, KBN_FIELD_TYPES } from '../../..';
 import { BaseAggParams } from '../types';
+import { createTopHitFilter } from './lib/create_filter';
 
 export interface BaseAggParamsTopHit extends BaseAggParams {
   field: string;
@@ -47,6 +48,9 @@ export const getTopHitMetricAgg = () => {
     title: i18n.translate('data.search.aggs.metrics.topHitTitle', {
       defaultMessage: 'Top Hit',
     }),
+    getValueType: (aggConfig) => {
+      return aggConfig.getParam('field')?.type;
+    },
     makeLabel(aggConfig) {
       const lastPrefixLabel = i18n.translate('data.search.aggs.metrics.topHit.lastPrefixLabel', {
         defaultMessage: 'Last',
@@ -256,5 +260,6 @@ export const getTopHitMetricAgg = () => {
       }
       return values;
     },
+    createFilter: createTopHitFilter,
   });
 };

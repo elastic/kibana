@@ -6,7 +6,10 @@
  */
 
 import type { Duration } from 'moment';
-import type { RuleExecutionStatus } from '../../../../../../../common/detection_engine/rule_monitoring';
+import type {
+  RuleExecutionStatus,
+  RuleExecutionStatusEnum,
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
 
 /**
  * Used from rule executors to log various information about the rule execution:
@@ -93,6 +96,11 @@ export interface RuleExecutionContext {
   ruleName: string;
 
   /**
+   * Current revision of the rule being execution (rule.revision)
+   */
+  ruleRevision: number;
+
+  /**
    * Alerting Framework's rule type id of the rule being executed.
    */
   ruleType: string;
@@ -101,6 +109,10 @@ export interface RuleExecutionContext {
    * Kibana space id of the rule being executed.
    */
   spaceId: string;
+}
+
+export interface RunningStatusChangeArgs {
+  newStatus: RuleExecutionStatusEnum['running'];
 }
 
 /**

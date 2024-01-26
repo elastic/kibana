@@ -18,7 +18,7 @@ import {
   TRACE_ID,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
@@ -128,7 +128,7 @@ export async function getAggregatedCriticalPath({
                   "agent.name": doc['agent.name'].value
                 ];
 
-                def isSpan = !doc['span.id'].empty;
+                def isSpan = !doc['span.id'].empty && !doc['span.name'].empty;
                 
                 if (isSpan) {
                   id = doc['span.id'].value;

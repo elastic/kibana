@@ -8,21 +8,20 @@ exports[`PageLoading should show a simple page loading component 1`] = `
   <div
     class="euiPageBody emotion-euiPageBody"
   >
-    <div
-      class="euiPanel euiPanel--plain euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter monNoData__content emotion-euiPanel-grow-m-l-plain-hasShadow"
-      role="main"
+    <section
+      class="emotion-euiPageSection-grow-l-center-transparent"
     >
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
+        class="emotion-euiPageSection__content-l-center"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero"
+          class="euiPanel euiPanel--plain euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge emotion-euiPanel-m-plain-hasShadow"
         >
           <div
-            class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+            class="euiEmptyPrompt__main"
           >
             <div
-              class="euiFlexItem euiFlexItem--flexGrowZero"
+              class="euiEmptyPrompt__icon"
             >
               <span
                 aria-label="Loading"
@@ -31,14 +30,22 @@ exports[`PageLoading should show a simple page loading component 1`] = `
               />
             </div>
             <div
-              class="euiFlexItem euiFlexItem--flexGrowZero"
+              class="euiEmptyPrompt__content"
             >
-              Loading…
+              <div
+                class="euiEmptyPrompt__contentInner"
+              >
+                <div
+                  class="euiText emotion-euiText-m-euiTextColor-subdued"
+                >
+                  Loading…
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   </div>
 </div>
 `;

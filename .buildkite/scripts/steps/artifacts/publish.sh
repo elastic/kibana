@@ -20,7 +20,7 @@ download "kibana-$FULL_VERSION-docker-image.tar.gz"
 download "kibana-$FULL_VERSION-docker-image-aarch64.tar.gz"
 download "kibana-cloud-$FULL_VERSION-docker-image.tar.gz"
 download "kibana-cloud-$FULL_VERSION-docker-image-aarch64.tar.gz"
-download "kibana-ubi8-$FULL_VERSION-docker-image.tar.gz"
+download "kibana-ubi-$FULL_VERSION-docker-image.tar.gz"
 
 download "kibana-$FULL_VERSION-arm64.deb"
 download "kibana-$FULL_VERSION-amd64.deb"
@@ -30,7 +30,7 @@ download "kibana-$FULL_VERSION-aarch64.rpm"
 download "kibana-$FULL_VERSION-docker-build-context.tar.gz"
 download "kibana-cloud-$FULL_VERSION-docker-build-context.tar.gz"
 download "kibana-ironbank-$FULL_VERSION-docker-build-context.tar.gz"
-download "kibana-ubi8-$FULL_VERSION-docker-build-context.tar.gz"
+download "kibana-ubi-$FULL_VERSION-docker-build-context.tar.gz"
 
 download "kibana-$FULL_VERSION-linux-aarch64.tar.gz"
 download "kibana-$FULL_VERSION-linux-x86_64.tar.gz"
@@ -79,13 +79,12 @@ if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]]; then
         --dependency "beats:$BEATS_MANIFEST_URL" \
         --artifact-set main
 
-  ARTIFACTS_SUBDOMAIN="artifacts-$WORKFLOW"
-  ARTIFACTS_SUMMARY=$(curl -s "https://$ARTIFACTS_SUBDOMAIN.elastic.co/kibana/latest/$FULL_VERSION.json" | jq -re '.summary_url')
+  KIBANA_SUMMARY=$(curl -s "$KIBANA_MANIFEST_LATEST" | jq -re '.summary_url')
 
   cat << EOF | buildkite-agent annotate --style "info" --context artifacts-summary
   ### Artifacts Summary
 
-  $ARTIFACTS_SUMMARY
+  $KIBANA_SUMMARY
 EOF
 
 else

@@ -40,7 +40,7 @@ WARNING: You are unable to update a prebuilt saved query (`prebuilt = true`).
 
 `version`:: (Optional, string) Runs on Osquery versions greater than or equal to the specified version string.
 
-`internal`:: (Optional, string) The interval, in seconds, to run the query.
+`interval`:: (Optional, integer) The interval, in seconds, to run the query.
 
 `ecs_mapping`:: (Optional, object) Maps Osquery result columns or static values to ECS fields.
 

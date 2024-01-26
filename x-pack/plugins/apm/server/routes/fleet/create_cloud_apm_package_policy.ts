@@ -12,6 +12,7 @@ import {
   KibanaRequest,
 } from '@kbn/core/server';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import {
   APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
   APM_SERVER_SCHEMA_SAVED_OBJECT_ID,
@@ -21,7 +22,7 @@ import {
   APMPluginStartDependencies,
 } from '../../types';
 import { getApmPackagePolicyDefinition } from './get_apm_package_policy_definition';
-import { mergePackagePolicyWithApm } from './merge_package_policy_with_apm';
+import { decoratePackagePolicyWithAgentConfigAndSourceMap } from './merge_package_policy_with_apm';
 import { ELASTIC_CLOUD_APM_AGENT_POLICY_ID } from '../../../common/fleet';
 import { APMInternalESClient } from '../../lib/helpers/create_es_client/create_internal_es_client';
 
@@ -33,6 +34,7 @@ export async function createCloudApmPackgePolicy({
   logger,
   internalESClient,
   request,
+  apmIndices,
 }: {
   cloudPluginSetup: APMPluginSetupDependencies['cloud'];
   fleetPluginStart: NonNullable<APMPluginStartDependencies['fleet']>;
@@ -41,6 +43,7 @@ export async function createCloudApmPackgePolicy({
   logger: Logger;
   internalESClient: APMInternalESClient;
   request: KibanaRequest;
+  apmIndices: APMIndices;
 }): Promise<PackagePolicy> {
   const { attributes } = await savedObjectsClient.get(
     APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
@@ -56,11 +59,13 @@ export async function createCloudApmPackgePolicy({
     fleetPluginStart,
     request,
   });
-  const mergedAPMPackagePolicy = await mergePackagePolicyWithApm({
-    internalESClient,
-    packagePolicy: apmPackagePolicyDefinition,
-    fleetPluginStart,
-  });
+  const mergedAPMPackagePolicy =
+    await decoratePackagePolicyWithAgentConfigAndSourceMap({
+      internalESClient,
+      packagePolicy: apmPackagePolicyDefinition,
+      fleetPluginStart,
+      apmIndices,
+    });
   logger.info(`Fleet migration on Cloud - apmPackagePolicy create start`);
   const apmPackagePolicy = await fleetPluginStart.packagePolicyService.create(
     savedObjectsClient,

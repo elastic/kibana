@@ -1,0 +1,37 @@
+---
+id: management/settings/components/fieldRow
+slug: /management/settings/components/field-row
+title: Management Settings Field Row Component
+description: A package containing a component for rendering and manipulating a UiSetting in the Advanced Settings UI.
+tags: ['management', 'settings']
+date: 2023-08-31
+---
+
+## Description
+
+This package contains a component for rendering and manipulating a single UiSetting in the Advanced Settings UI.
+
+For reference, this is an example of the current Advanced Settings UI:
+
+<div><img src="./assets/page.png" alt="Advanced Settings as a form." width="1000"/></div>
+
+*Advanced Settings as a form.*
+
+## Implementation
+
+A `FormRow` represents a single UiSetting, and is responsible for rendering the UiSetting's label, description, and equivalent value input. It displays the state of any unsaved change, (e.g. error).  It also handles the logic for updating the UiSetting's value in a consuming component through the `onFieldChange` handler.
+
+<div><img src="./assets/form_row.png" alt="Anatomy of a `FormRow`" width="1200"/></div>
+
+*Anatomy of a `FormRow`*
+
+## Notes
+
+- This implementation was extracted from the `advancedSettings` plugin.
+- The type for a `UiSettingMetadata` is limited due to the permissive nature of the [`UiSettingsParam` type](packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts).
+- The source includes notations of several bugs which will surface if the assumptions about default settings from Kibana change.
+
+## Testing 
+
+- Code coverage stands at 95%.
+- Storybook stories are included.  Run `yarn storybook management` to view them.

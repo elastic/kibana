@@ -14,16 +14,21 @@ import type {
 } from '@kbn/observability-plugin/common';
 import type { ActionGroup } from '@kbn/alerting-plugin/common';
 import { formatDurationFromTimeUnitChar } from '@kbn/observability-plugin/common';
-import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD } from '../ml_constants';
+import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
+import { ApmRuleType } from '@kbn/rule-data-utils';
+import {
+  ERROR_GROUP_ID,
+  ERROR_GROUP_NAME,
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
+} from '../es_fields/apm';
+import { getEnvironmentLabel } from '../environment_filter_values';
+import { AnomalyDetectorType } from '../anomaly_detection/apm_ml_detectors';
 
 export const APM_SERVER_FEATURE_ID = 'apm';
-
-export enum ApmRuleType {
-  ErrorCount = 'apm.error_rate', // ErrorRate was renamed to ErrorCount but the key is kept as `error_rate` for backwards-compat.
-  TransactionErrorRate = 'apm.transaction_error_rate',
-  TransactionDuration = 'apm.transaction_duration',
-  Anomaly = 'apm.anomaly',
-}
 
 export enum AggregationType {
   Avg = 'avg',
@@ -40,29 +45,68 @@ const THRESHOLD_MET_GROUP: ActionGroup<ThresholdMetActionGroupId> = {
   }),
 };
 
+const getFieldNameLabel = (field: string): string => {
+  switch (field) {
+    case SERVICE_NAME:
+      return 'service';
+    case SERVICE_ENVIRONMENT:
+      return 'env';
+    case TRANSACTION_TYPE:
+      return 'type';
+    case TRANSACTION_NAME:
+      return 'name';
+    case ERROR_GROUP_ID:
+      return 'error key';
+    case ERROR_GROUP_NAME:
+      return 'error name';
+    default:
+      return field;
+  }
+};
+
+export const getFieldValueLabel = (
+  field: string,
+  fieldValue: string
+): string => {
+  return field === SERVICE_ENVIRONMENT
+    ? getEnvironmentLabel(fieldValue)
+    : fieldValue;
+};
+
+const formatGroupByFields = (groupByFields: Record<string, string>): string => {
+  const groupByFieldLabels = Object.keys(groupByFields).map(
+    (field) =>
+      `${getFieldNameLabel(field)}: ${getFieldValueLabel(
+        field,
+        groupByFields[field]
+      )}`
+  );
+  return groupByFieldLabels.join(', ');
+};
+
 export function formatErrorCountReason({
   threshold,
   measured,
-  serviceName,
   windowSize,
   windowUnit,
+  groupByFields,
 }: {
   threshold: number;
   measured: number;
-  serviceName: string;
   windowSize: number;
   windowUnit: string;
+  groupByFields: Record<string, string>;
 }) {
   return i18n.translate('xpack.apm.alertTypes.errorCount.reason', {
-    defaultMessage: `Error count is {measured} in the last {interval} for {serviceName}. Alert when > {threshold}.`,
+    defaultMessage: `Error count is {measured} in the last {interval} for {group}. Alert when > {threshold}.`,
     values: {
       threshold,
       measured,
-      serviceName,
       interval: formatDurationFromTimeUnitChar(
         windowSize,
         windowUnit as TimeUnitChar
       ),
+      group: formatGroupByFields(groupByFields),
     },
   });
 }
@@ -70,19 +114,19 @@ export function formatErrorCountReason({
 export function formatTransactionDurationReason({
   threshold,
   measured,
-  serviceName,
   asDuration,
   aggregationType,
   windowSize,
   windowUnit,
+  groupByFields,
 }: {
   threshold: number;
   measured: number;
-  serviceName: string;
   asDuration: AsDuration;
   aggregationType: string;
   windowSize: number;
   windowUnit: string;
+  groupByFields: Record<string, string>;
 }) {
   let aggregationTypeFormatted =
     aggregationType.charAt(0).toUpperCase() + aggregationType.slice(1);
@@ -90,16 +134,16 @@ export function formatTransactionDurationReason({
     aggregationTypeFormatted = aggregationTypeFormatted + '.';
 
   return i18n.translate('xpack.apm.alertTypes.transactionDuration.reason', {
-    defaultMessage: `{aggregationType} latency is {measured} in the last {interval} for {serviceName}. Alert when > {threshold}.`,
+    defaultMessage: `{aggregationType} latency is {measured} in the last {interval} for {group}. Alert when > {threshold}.`,
     values: {
       threshold: asDuration(threshold),
       measured: asDuration(measured),
-      serviceName,
       aggregationType: aggregationTypeFormatted,
       interval: formatDurationFromTimeUnitChar(
         windowSize,
         windowUnit as TimeUnitChar
       ),
+      group: formatGroupByFields(groupByFields),
     },
   });
 }
@@ -107,28 +151,28 @@ export function formatTransactionDurationReason({
 export function formatTransactionErrorRateReason({
   threshold,
   measured,
-  serviceName,
   asPercent,
   windowSize,
   windowUnit,
+  groupByFields,
 }: {
   threshold: number;
   measured: number;
-  serviceName: string;
   asPercent: AsPercent;
   windowSize: number;
   windowUnit: string;
+  groupByFields: Record<string, string>;
 }) {
   return i18n.translate('xpack.apm.alertTypes.transactionErrorRate.reason', {
-    defaultMessage: `Failed transactions is {measured} in the last {interval} for {serviceName}. Alert when > {threshold}.`,
+    defaultMessage: `Failed transactions is {measured} in the last {interval} for {group}. Alert when > {threshold}.`,
     values: {
       threshold: asPercent(threshold, 100),
       measured: asPercent(measured, 100),
-      serviceName,
       interval: formatDurationFromTimeUnitChar(
         windowSize,
         windowUnit as TimeUnitChar
       ),
+      group: formatGroupByFields(groupByFields),
     },
   });
 }
@@ -136,24 +180,27 @@ export function formatTransactionErrorRateReason({
 export function formatAnomalyReason({
   serviceName,
   severityLevel,
-  measured,
+  anomalyScore,
   windowSize,
   windowUnit,
+  detectorType,
 }: {
   serviceName: string;
   severityLevel: string;
-  measured: number;
+  anomalyScore: number;
   windowSize: number;
   windowUnit: string;
+  detectorType: AnomalyDetectorType;
 }) {
   return i18n.translate(
     'xpack.apm.alertTypes.transactionDurationAnomaly.reason',
     {
-      defaultMessage: `{severityLevel} anomaly with a score of {measured} was detected in the last {interval} for {serviceName}.`,
+      defaultMessage: `{severityLevel} {detectorTypeLabel} anomaly with a score of {anomalyScore}, was detected in the last {interval} for {serviceName}.`,
       values: {
         serviceName,
         severityLevel,
-        measured,
+        detectorTypeLabel: getApmMlDetectorLabel(detectorType),
+        anomalyScore,
         interval: formatDurationFromTimeUnitChar(
           windowSize,
           windowUnit as TimeUnitChar
@@ -196,7 +243,7 @@ export const RULE_TYPES_CONFIG: Record<
   },
   [ApmRuleType.Anomaly]: {
     name: i18n.translate('xpack.apm.anomalyAlert.name', {
-      defaultMessage: 'Anomaly',
+      defaultMessage: 'APM Anomaly',
     }),
     actionGroups: [THRESHOLD_MET_GROUP],
     defaultActionGroupId: THRESHOLD_MET_GROUP_ID,
@@ -218,38 +265,67 @@ export const RULE_TYPES_CONFIG: Record<
 
 export const ANOMALY_ALERT_SEVERITY_TYPES = [
   {
-    type: ANOMALY_SEVERITY.CRITICAL,
+    type: ML_ANOMALY_SEVERITY.CRITICAL,
     label: i18n.translate('xpack.apm.alerts.anomalySeverity.criticalLabel', {
       defaultMessage: 'critical',
     }),
-    threshold: ANOMALY_THRESHOLD.CRITICAL,
+    threshold: ML_ANOMALY_THRESHOLD.CRITICAL,
   },
   {
-    type: ANOMALY_SEVERITY.MAJOR,
+    type: ML_ANOMALY_SEVERITY.MAJOR,
     label: i18n.translate('xpack.apm.alerts.anomalySeverity.majorLabel', {
       defaultMessage: 'major',
     }),
-    threshold: ANOMALY_THRESHOLD.MAJOR,
+    threshold: ML_ANOMALY_THRESHOLD.MAJOR,
   },
   {
-    type: ANOMALY_SEVERITY.MINOR,
+    type: ML_ANOMALY_SEVERITY.MINOR,
     label: i18n.translate('xpack.apm.alerts.anomalySeverity.minor', {
       defaultMessage: 'minor',
     }),
-    threshold: ANOMALY_THRESHOLD.MINOR,
+    threshold: ML_ANOMALY_THRESHOLD.MINOR,
   },
   {
-    type: ANOMALY_SEVERITY.WARNING,
+    type: ML_ANOMALY_SEVERITY.WARNING,
     label: i18n.translate('xpack.apm.alerts.anomalySeverity.warningLabel', {
       defaultMessage: 'warning',
     }),
-    threshold: ANOMALY_THRESHOLD.WARNING,
+    threshold: ML_ANOMALY_THRESHOLD.WARNING,
   },
 ] as const;
 
 export type AnomalyAlertSeverityType = ValuesType<
   typeof ANOMALY_ALERT_SEVERITY_TYPES
 >['type'];
+
+export function getApmMlDetectorLabel(type: AnomalyDetectorType) {
+  switch (type) {
+    case AnomalyDetectorType.txLatency:
+      return i18n.translate('xpack.apm.alerts.anomalyDetector.latencyLabel', {
+        defaultMessage: 'latency',
+      });
+    case AnomalyDetectorType.txThroughput:
+      return i18n.translate(
+        'xpack.apm.alerts.anomalyDetector.throughputLabel',
+        {
+          defaultMessage: 'throughput',
+        }
+      );
+    case AnomalyDetectorType.txFailureRate:
+      return i18n.translate(
+        'xpack.apm.alerts.anomalyDetector.failedTransactionRateLabel',
+        {
+          defaultMessage: 'failed transaction rate',
+        }
+      );
+  }
+}
+
+export const ANOMALY_DETECTOR_SELECTOR_OPTIONS = [
+  AnomalyDetectorType.txLatency,
+  AnomalyDetectorType.txThroughput,
+  AnomalyDetectorType.txFailureRate,
+].map((type) => ({ type, label: getApmMlDetectorLabel(type) }));
 
 // Server side registrations
 // x-pack/plugins/apm/server/lib/alerts/<alert>.ts

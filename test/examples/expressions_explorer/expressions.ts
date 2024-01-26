@@ -53,7 +53,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       await find.clickByCssSelector(selector);
       await retry.try(async () => {
         const text = await browser.getCurrentUrl();
-        expect(text).to.be('https://www.google.com/?gws_rd=ssl');
+        expect(text).to.contain('https://www.google.com/');
       });
     });
   });

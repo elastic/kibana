@@ -14,9 +14,9 @@ import { RefreshInterval } from '@kbn/data-plugin/public';
 import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import { flatten } from 'lodash';
+import { isDefined } from '@kbn/ml-is-defined';
 import { LinkCardProps } from '../link_card/link_card';
 import { useDataVisualizerKibana } from '../../../kibana_context';
-import { isDefined } from '../../util/is_defined';
 
 type LinkType = 'file' | 'index';
 
@@ -112,6 +112,7 @@ export const ResultsLinks: FC<Props> = ({
         getAdditionalLinks.map(async (asyncCardGetter) => {
           const results = await asyncCardGetter({
             dataViewId,
+            globalState,
           });
           if (Array.isArray(results)) {
             return await Promise.all(
@@ -208,6 +209,7 @@ export const ResultsLinks: FC<Props> = ({
       {createDataView && discoverLink && (
         <EuiFlexItem>
           <EuiCard
+            hasBorder
             icon={<EuiIcon size="xxl" type={`discoverApp`} />}
             title={
               <FormattedMessage
@@ -224,6 +226,7 @@ export const ResultsLinks: FC<Props> = ({
       {indexManagementLink && (
         <EuiFlexItem>
           <EuiCard
+            hasBorder
             icon={<EuiIcon size="xxl" type={`managementApp`} />}
             title={
               <FormattedMessage
@@ -240,6 +243,7 @@ export const ResultsLinks: FC<Props> = ({
       {dataViewsManagementLink && (
         <EuiFlexItem>
           <EuiCard
+            hasBorder
             icon={<EuiIcon size="xxl" type={`managementApp`} />}
             title={
               <FormattedMessage
@@ -254,6 +258,7 @@ export const ResultsLinks: FC<Props> = ({
       )}
       <EuiFlexItem>
         <EuiCard
+          hasBorder
           icon={<EuiIcon size="xxl" type={`filebeatApp`} />}
           data-test-subj="fileDataVisFilebeatConfigLink"
           title={
@@ -268,8 +273,9 @@ export const ResultsLinks: FC<Props> = ({
       </EuiFlexItem>
       {Array.isArray(asyncHrefCards) &&
         asyncHrefCards.map((link) => (
-          <EuiFlexItem>
+          <EuiFlexItem key={link.title}>
             <EuiCard
+              hasBorder
               icon={<EuiIcon size="xxl" type={link.icon} />}
               data-test-subj="fileDataVisLink"
               title={link.title}

@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { Response as SupertestResponse } from 'supertest';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import {
   checkAAD,
@@ -14,8 +15,7 @@ import {
   getTestRuleData,
   ObjectRemover,
   ensureDatetimeIsWithinRange,
-  getConsumerUnauthorizedErrorMessage,
-  getProducerUnauthorizedErrorMessage,
+  getUnauthorizedErrorMessage,
 } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -89,11 +89,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'update',
-                  'test.noop',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('update', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               break;
@@ -113,11 +109,13 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 ...updatedData,
                 id: createdAlert.id,
                 rule_type_id: 'test.noop',
+                running: false,
                 consumer: 'alertsFixture',
                 created_by: 'elastic',
                 enabled: true,
                 updated_by: user.username,
                 api_key_owner: user.username,
+                api_key_created_by_user: false,
                 mute_all: false,
                 muted_alert_ids: [],
                 actions: [
@@ -126,23 +124,30 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                     connector_type_id: 'test.noop',
                     group: 'default',
                     params: {},
+                    uuid: response.body.actions[0].uuid,
                   },
                 ],
                 scheduled_task_id: createdAlert.scheduled_task_id,
                 created_at: response.body.created_at,
                 updated_at: response.body.updated_at,
                 execution_status: response.body.execution_status,
+                revision: 1,
+                ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
+                ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
               });
               expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(
                 Date.parse(response.body.created_at)
               );
+              if (response.body.next_run) {
+                expect(Date.parse(response.body.next_run)).to.be.greaterThan(0);
+              }
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
                 spaceId: space.id,
-                type: 'alert',
+                type: RULE_SAVED_OBJECT_TYPE,
                 id: createdAlert.id,
               });
               break;
@@ -190,7 +195,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'update',
                   'test.restricted-noop',
                   'alertsRestrictedFixture'
@@ -205,28 +210,36 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 ...updatedData,
                 id: createdAlert.id,
                 rule_type_id: 'test.restricted-noop',
+                running: false,
                 consumer: 'alertsRestrictedFixture',
                 created_by: 'elastic',
                 enabled: true,
                 updated_by: user.username,
                 api_key_owner: user.username,
+                api_key_created_by_user: false,
                 mute_all: false,
                 muted_alert_ids: [],
                 scheduled_task_id: createdAlert.scheduled_task_id,
                 created_at: response.body.created_at,
                 updated_at: response.body.updated_at,
                 execution_status: response.body.execution_status,
+                revision: 1,
+                ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
+                ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
               });
               expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(
                 Date.parse(response.body.created_at)
               );
+              if (response.body.next_run) {
+                expect(Date.parse(response.body.next_run)).to.be.greaterThan(0);
+              }
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
                 spaceId: space.id,
-                type: 'alert',
+                type: RULE_SAVED_OBJECT_TYPE,
                 id: createdAlert.id,
               });
               break;
@@ -272,7 +285,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'update',
                   'test.unrestricted-noop',
                   'alertsFixture'
@@ -282,17 +295,6 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               break;
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
-              expect(response.statusCode).to.eql(403);
-              expect(response.body).to.eql({
-                error: 'Forbidden',
-                message: getProducerUnauthorizedErrorMessage(
-                  'update',
-                  'test.unrestricted-noop',
-                  'alertsRestrictedFixture'
-                ),
-                statusCode: 403,
-              });
-              break;
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
@@ -300,28 +302,36 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 ...updatedData,
                 id: createdAlert.id,
                 rule_type_id: 'test.unrestricted-noop',
+                running: false,
                 consumer: 'alertsFixture',
                 created_by: 'elastic',
                 enabled: true,
                 updated_by: user.username,
                 api_key_owner: user.username,
+                api_key_created_by_user: false,
                 mute_all: false,
                 muted_alert_ids: [],
                 scheduled_task_id: createdAlert.scheduled_task_id,
                 created_at: response.body.created_at,
                 updated_at: response.body.updated_at,
                 execution_status: response.body.execution_status,
+                revision: 1,
+                ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
+                ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
               });
               expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(
                 Date.parse(response.body.created_at)
               );
+              if (response.body.next_run) {
+                expect(Date.parse(response.body.next_run)).to.be.greaterThan(0);
+              }
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
                 spaceId: space.id,
-                type: 'alert',
+                type: RULE_SAVED_OBJECT_TYPE,
                 id: createdAlert.id,
               });
               break;
@@ -366,11 +376,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'update',
-                  'test.restricted-noop',
-                  'alerts'
-                ),
+                message: getUnauthorizedErrorMessage('update', 'test.restricted-noop', 'alerts'),
                 statusCode: 403,
               });
               break;
@@ -380,7 +386,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getProducerUnauthorizedErrorMessage(
+                message: getUnauthorizedErrorMessage(
                   'update',
                   'test.restricted-noop',
                   'alertsRestrictedFixture'
@@ -395,28 +401,36 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 ...updatedData,
                 id: createdAlert.id,
                 rule_type_id: 'test.restricted-noop',
+                running: false,
                 consumer: 'alerts',
                 created_by: 'elastic',
                 enabled: true,
                 updated_by: user.username,
                 api_key_owner: user.username,
+                api_key_created_by_user: false,
                 mute_all: false,
                 muted_alert_ids: [],
                 scheduled_task_id: createdAlert.scheduled_task_id,
                 created_at: response.body.created_at,
                 updated_at: response.body.updated_at,
                 execution_status: response.body.execution_status,
+                revision: 1,
+                ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
+                ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
               });
               expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(
                 Date.parse(response.body.created_at)
               );
+              if (response.body.next_run) {
+                expect(Date.parse(response.body.next_run)).to.be.greaterThan(0);
+              }
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
                 spaceId: space.id,
-                type: 'alert',
+                type: RULE_SAVED_OBJECT_TYPE,
                 id: createdAlert.id,
               });
               break;
@@ -471,11 +485,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'update',
-                  'test.noop',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('update', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               break;
@@ -488,28 +498,36 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 ...updatedData,
                 id: createdAlert.id,
                 rule_type_id: 'test.noop',
+                running: false,
                 consumer: 'alertsFixture',
                 created_by: 'elastic',
                 enabled: true,
                 updated_by: user.username,
                 api_key_owner: user.username,
+                api_key_created_by_user: false,
                 mute_all: false,
                 muted_alert_ids: [],
                 scheduled_task_id: createdAlert.scheduled_task_id,
                 created_at: response.body.created_at,
                 updated_at: response.body.updated_at,
                 execution_status: response.body.execution_status,
+                revision: 1,
+                ...(response.body.next_run ? { next_run: response.body.next_run } : {}),
+                ...(response.body.last_run ? { last_run: response.body.last_run } : {}),
               });
               expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(
                 Date.parse(response.body.created_at)
               );
+              if (response.body.next_run) {
+                expect(Date.parse(response.body.next_run)).to.be.greaterThan(0);
+              }
               // Ensure AAD isn't broken
               await checkAAD({
                 supertest,
                 spaceId: space.id,
-                type: 'alert',
+                type: RULE_SAVED_OBJECT_TYPE,
                 id: createdAlert.id,
               });
               break;
@@ -550,11 +568,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'update',
-                  'test.noop',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('update', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               break;
@@ -722,11 +736,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'update',
-                  'test.validation',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('update', 'test.validation', 'alertsFixture'),
                 statusCode: 403,
               });
               break;
@@ -823,11 +833,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'update',
-                  'test.noop',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('update', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               break;
@@ -900,11 +906,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'update',
-                  'test.longRunning',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('update', 'test.longRunning', 'alertsFixture'),
                 statusCode: 403,
               });
               break;
@@ -968,11 +970,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: getConsumerUnauthorizedErrorMessage(
-                  'update',
-                  'test.noop',
-                  'alertsFixture'
-                ),
+                message: getUnauthorizedErrorMessage('update', 'test.noop', 'alertsFixture'),
                 statusCode: 403,
               });
               break;

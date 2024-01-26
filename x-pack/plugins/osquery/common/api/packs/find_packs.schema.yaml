@@ -1,0 +1,29 @@
+openapi: 3.0.0
+info:
+  title: Find Saved Queries Schema
+  version: '2023-10-31'
+paths: { }
+components:
+  parameters:
+    FindPacksRequestQueryParameter:
+      name: query
+      in: query
+      required: true
+      schema:
+        $ref: '#/components/schemas/FindPacksRequestQuery'
+  schemas:
+    FindPacksRequestQuery:
+      type: object
+      properties:
+        page:
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageOrUndefined'
+        pageSize:
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageSizeOrUndefined'
+        sort:
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrUndefined'
+        sortOrder:
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrderOrUndefined'
+    SuccessResponse:
+      type: object
+      properties: {}
+      # Define properties for the success response if needed

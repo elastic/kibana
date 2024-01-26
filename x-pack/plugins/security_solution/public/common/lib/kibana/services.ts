@@ -8,23 +8,49 @@
 import type { CoreStart } from '@kbn/core/public';
 import type { StartPlugins } from '../../../types';
 
-type GlobalServices = Pick<CoreStart, 'http' | 'uiSettings' | 'notifications'> &
-  Pick<StartPlugins, 'data' | 'unifiedSearch'>;
+type GlobalServices = Pick<CoreStart, 'application' | 'http' | 'uiSettings' | 'notifications'> &
+  Pick<StartPlugins, 'data' | 'unifiedSearch' | 'expressions' | 'savedSearch'>;
 
 export class KibanaServices {
+  private static buildFlavor?: string;
+  private static kibanaBranch?: string;
   private static kibanaVersion?: string;
+  private static prebuiltRulesPackageVersion?: string;
   private static services?: GlobalServices;
 
   public static init({
     http,
+    application,
     data,
     unifiedSearch,
+    kibanaBranch,
     kibanaVersion,
+    buildFlavor,
+    prebuiltRulesPackageVersion,
     uiSettings,
     notifications,
-  }: GlobalServices & { kibanaVersion: string }) {
-    this.services = { data, http, uiSettings, unifiedSearch, notifications };
+    expressions,
+    savedSearch,
+  }: GlobalServices & {
+    kibanaBranch: string;
+    kibanaVersion: string;
+    buildFlavor: string;
+    prebuiltRulesPackageVersion?: string;
+  }) {
+    this.services = {
+      application,
+      data,
+      http,
+      uiSettings,
+      unifiedSearch,
+      notifications,
+      expressions,
+      savedSearch,
+    };
+    this.kibanaBranch = kibanaBranch;
     this.kibanaVersion = kibanaVersion;
+    this.buildFlavor = buildFlavor;
+    this.prebuiltRulesPackageVersion = prebuiltRulesPackageVersion;
   }
 
   public static get(): GlobalServices {
@@ -35,12 +61,31 @@ export class KibanaServices {
     return this.services;
   }
 
+  public static getKibanaBranch(): string {
+    if (!this.kibanaBranch) {
+      this.throwUninitializedError();
+    }
+
+    return this.kibanaBranch;
+  }
+
   public static getKibanaVersion(): string {
     if (!this.kibanaVersion) {
       this.throwUninitializedError();
     }
 
     return this.kibanaVersion;
+  }
+
+  public static getPrebuiltRulesPackageVersion(): string | undefined {
+    return this.prebuiltRulesPackageVersion;
+  }
+
+  public static getBuildFlavor(): string {
+    if (!this.buildFlavor) {
+      this.throwUninitializedError();
+    }
+    return this.buildFlavor;
   }
 
   private static throwUninitializedError(): never {

@@ -10,7 +10,7 @@ import SimpleGit from 'simple-git';
 
 import { run } from '@kbn/dev-cli-runner';
 import { createFlagError, combineErrors } from '@kbn/dev-cli-errors';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import * as Eslint from './eslint';
 import * as Stylelint from './stylelint';
 import { getFilesForCommit, checkFileCasing } from './precommit_hook';
@@ -43,7 +43,7 @@ run(
     }
 
     for (const Linter of [Eslint, Stylelint]) {
-      const filesToLint = Linter.pickFilesToLint(log, files);
+      const filesToLint = await Linter.pickFilesToLint(log, files);
       if (filesToLint.length > 0) {
         try {
           await Linter.lintFiles(log, filesToLint, {

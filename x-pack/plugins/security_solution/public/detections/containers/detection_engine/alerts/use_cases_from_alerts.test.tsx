@@ -18,12 +18,9 @@ jest.mock('../../../../common/hooks/use_app_toasts');
 describe('useCasesFromAlerts hook', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
     appToastsMock = useAppToastsMock.create();
     (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
-  });
-  afterEach(() => {
-    jest.restoreAllMocks();
   });
 
   it('returns an array of caseIds', async () => {

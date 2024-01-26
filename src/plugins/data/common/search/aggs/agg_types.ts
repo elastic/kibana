@@ -9,9 +9,8 @@
 import { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 
 import * as buckets from './buckets';
-import * as metrics from './metrics';
-
 import { BUCKET_TYPES, CalculateBoundsFn } from './buckets';
+import * as metrics from './metrics';
 import { METRIC_TYPES } from './metrics';
 
 export interface AggTypesDependencies {
@@ -39,6 +38,7 @@ export const getAggTypes = () => ({
     { name: METRIC_TYPES.VALUE_COUNT, fn: metrics.getValueCountMetricAgg },
     { name: METRIC_TYPES.PERCENTILES, fn: metrics.getPercentilesMetricAgg },
     { name: METRIC_TYPES.PERCENTILE_RANKS, fn: metrics.getPercentileRanksMetricAgg },
+    { name: METRIC_TYPES.RATE, fn: metrics.getRateMetricAgg },
     { name: METRIC_TYPES.TOP_HITS, fn: metrics.getTopHitMetricAgg },
     { name: METRIC_TYPES.TOP_METRICS, fn: metrics.getTopMetricsMetricAgg },
     { name: METRIC_TYPES.DERIVATIVE, fn: metrics.getDerivativeMetricAgg },
@@ -58,6 +58,7 @@ export const getAggTypes = () => ({
     { name: BUCKET_TYPES.HISTOGRAM, fn: buckets.getHistogramBucketAgg },
     { name: BUCKET_TYPES.RANGE, fn: buckets.getRangeBucketAgg },
     { name: BUCKET_TYPES.DATE_RANGE, fn: buckets.getDateRangeBucketAgg },
+    { name: BUCKET_TYPES.IP_PREFIX, fn: buckets.getIpPrefixBucketAgg },
     { name: BUCKET_TYPES.IP_RANGE, fn: buckets.getIpRangeBucketAgg },
     { name: BUCKET_TYPES.TERMS, fn: buckets.getTermsBucketAgg },
     { name: BUCKET_TYPES.MULTI_TERMS, fn: buckets.getMultiTermsBucketAgg },
@@ -66,10 +67,10 @@ export const getAggTypes = () => ({
     { name: BUCKET_TYPES.FILTERS, fn: buckets.getFiltersBucketAgg },
     { name: BUCKET_TYPES.SIGNIFICANT_TERMS, fn: buckets.getSignificantTermsBucketAgg },
     { name: BUCKET_TYPES.SIGNIFICANT_TEXT, fn: buckets.getSignificantTextBucketAgg },
-    { name: BUCKET_TYPES.GEOHASH_GRID, fn: buckets.getGeoHashBucketAgg },
     { name: BUCKET_TYPES.GEOTILE_GRID, fn: buckets.getGeoTitleBucketAgg },
     { name: BUCKET_TYPES.SAMPLER, fn: buckets.getSamplerBucketAgg },
     { name: BUCKET_TYPES.DIVERSIFIED_SAMPLER, fn: buckets.getDiversifiedSamplerBucketAgg },
+    { name: BUCKET_TYPES.TIME_SERIES, fn: buckets.getTimeSeriesBucketAgg },
   ],
 });
 
@@ -79,14 +80,15 @@ export const getAggTypesFunctions = () => [
   buckets.aggFilters,
   buckets.aggSignificantTerms,
   buckets.aggSignificantText,
+  buckets.aggIpPrefix,
   buckets.aggIpRange,
   buckets.aggDateRange,
   buckets.aggRange,
   buckets.aggGeoTile,
-  buckets.aggGeoHash,
   buckets.aggHistogram,
   buckets.aggDateHistogram,
   buckets.aggTerms,
+  buckets.aggTimeSeries,
   buckets.aggMultiTerms,
   buckets.aggRareTerms,
   buckets.aggSampler,
@@ -112,6 +114,7 @@ export const getAggTypesFunctions = () => [
   metrics.aggMovingAvg,
   metrics.aggPercentileRanks,
   metrics.aggPercentiles,
+  metrics.aggRate,
   metrics.aggSerialDiff,
   metrics.aggStdDeviation,
   metrics.aggSum,

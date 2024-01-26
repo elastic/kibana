@@ -18,8 +18,11 @@ import {
 } from '@elastic/eui';
 
 import type { SyncSavedObjectResponse, SyncResult } from '../../../../common/types/saved_objects';
+import { useEnabledFeatures } from '../../contexts/ml';
 
 export const SyncList: FC<{ syncItems: SyncSavedObjectResponse | null }> = ({ syncItems }) => {
+  const { isADEnabled } = useEnabledFeatures();
+
   if (syncItems === null) {
     return null;
   }
@@ -34,13 +37,17 @@ export const SyncList: FC<{ syncItems: SyncSavedObjectResponse | null }> = ({ sy
 
       <EuiHorizontalRule margin="l" />
 
-      <DatafeedsAdded syncItems={syncItems} />
+      {isADEnabled ? (
+        <>
+          <DatafeedsAdded syncItems={syncItems} />
 
-      <EuiHorizontalRule margin="l" />
+          <EuiHorizontalRule margin="l" />
 
-      <DatafeedsRemoved syncItems={syncItems} />
+          <DatafeedsRemoved syncItems={syncItems} />
 
-      <EuiHorizontalRule margin="l" />
+          <EuiHorizontalRule margin="l" />
+        </>
+      ) : null}
     </>
   );
 };

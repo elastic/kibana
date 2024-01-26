@@ -19,7 +19,6 @@ describe('useActionTypes', () => {
   let appMockRenderer: AppMockRenderer;
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
     appMockRenderer = createAppMockRenderer();
   });
 

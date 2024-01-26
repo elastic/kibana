@@ -7,8 +7,9 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
+import { firstNonNullValue } from '../../../../common/endpoint/models/ecs_safety_helpers';
 import type { ESBoolQuery } from '../../../../common/typed_json';
-import type { Status } from '../../../../common/detection_engine/schemas/common';
+import type { Status } from '../../../../common/api/detection_engine';
 import type { GenericBuckets } from '../../../../common/search_strategy';
 import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
@@ -116,6 +117,8 @@ export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
   return { items, isLoading, updatedAt };
 };
 
+export const KIBANA_RULE_ID = 'kibana.alert.rule.uuid';
+
 export const buildRuleAlertsByEntityQuery = ({
   additionalFilters = [],
   from,
@@ -132,6 +135,8 @@ export const buildRuleAlertsByEntityQuery = ({
   value: string;
 }) => ({
   size: 0,
+  _source: false,
+  fields: [KIBANA_RULE_ID],
   query: {
     bool: {
       filter: [
@@ -144,11 +149,15 @@ export const buildRuleAlertsByEntityQuery = ({
             },
           },
         },
-        {
-          terms: {
-            'kibana.alert.workflow_status': statuses,
-          },
-        },
+        ...(statuses?.length > 0
+          ? [
+              {
+                terms: {
+                  'kibana.alert.workflow_status': statuses,
+                },
+              },
+            ]
+          : []),
         {
           term: {
             [field]: value,
@@ -166,7 +175,8 @@ export const buildRuleAlertsByEntityQuery = ({
       aggs: {
         ruleUuid: {
           top_hits: {
-            _source: ['kibana.alert.rule.uuid'],
+            _source: false,
+            fields: [KIBANA_RULE_ID],
             size: 1,
           },
         },
@@ -180,8 +190,8 @@ interface RuleUuidData extends GenericBuckets {
     hits: {
       hits: [
         {
-          _source: {
-            'kibana.alert.rule.uuid': string;
+          fields: {
+            'kibana.alert.rule.uuid': string[];
           };
         }
       ];
@@ -200,9 +210,10 @@ const parseAlertCountByRuleItems = (
 ): AlertCountByRuleByStatusItem[] => {
   const buckets = aggregations?.[ALERTS_BY_RULE_AGG].buckets ?? [];
   return buckets.map<AlertCountByRuleByStatusItem>((bucket) => {
-    const uuid = bucket.ruleUuid.hits?.hits[0]?._source['kibana.alert.rule.uuid'] || '';
+    const uuid =
+      firstNonNullValue(bucket.ruleUuid.hits?.hits[0]?.fields['kibana.alert.rule.uuid']) ?? '';
     return {
-      ruleName: bucket.key,
+      ruleName: firstNonNullValue(bucket.key) ?? '-',
       count: bucket.doc_count,
       uuid,
     };

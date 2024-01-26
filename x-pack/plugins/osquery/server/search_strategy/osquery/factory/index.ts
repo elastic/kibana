@@ -9,7 +9,6 @@ import type { FactoryQueryTypes } from '../../../../common/search_strategy/osque
 import { OsqueryQueries } from '../../../../common/search_strategy/osquery';
 
 import { allActions, actionDetails, actionResults } from './actions';
-import { allAgents } from './agents';
 import { allResults } from './results';
 
 import type { OsqueryFactory } from './types';
@@ -18,6 +17,5 @@ export const osqueryFactory: Record<FactoryQueryTypes, OsqueryFactory<FactoryQue
   [OsqueryQueries.actions]: allActions,
   [OsqueryQueries.actionDetails]: actionDetails,
   [OsqueryQueries.actionResults]: actionResults,
-  [OsqueryQueries.agents]: allAgents,
   [OsqueryQueries.results]: allResults,
 };

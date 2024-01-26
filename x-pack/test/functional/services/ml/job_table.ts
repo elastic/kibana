@@ -12,7 +12,7 @@ import {
   TimeRangeType,
   TIME_RANGE_TYPE,
   URL_TYPE,
-} from '@kbn/ml-plugin/public/application/jobs/components/custom_url_editor/constants';
+} from '@kbn/ml-plugin/public/application/components/custom_urls/custom_url_editor/constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlCommonUI } from './common_ui';
 import { MlCustomUrls } from './custom_urls';
@@ -230,7 +230,7 @@ export function MachineLearningJobTableProvider(
     ) {
       const testSubjStr =
         tableEnvironment === 'mlAnomalyDetection'
-          ? 'mlRefreshPageButton'
+          ? 'mlDatePickerRefreshPageButton'
           : 'mlRefreshJobListButton';
 
       await this.waitForRefreshButtonLoaded(testSubjStr);
@@ -465,6 +465,18 @@ export function MachineLearningJobTableProvider(
     public async confirmDeleteJobModal() {
       await testSubjects.click('mlDeleteJobConfirmModal > mlDeleteJobConfirmModalButton');
       await testSubjects.missingOrFail('mlDeleteJobConfirmModal', { timeout: 30 * 1000 });
+    }
+
+    public async clickDeleteAnnotationsInDeleteJobModal(checked: boolean) {
+      await testSubjects.setEuiSwitch(
+        'mlDeleteJobConfirmModal > mlDeleteJobConfirmModalDeleteAnnotationsSwitch',
+        checked ? 'check' : 'uncheck'
+      );
+      const isChecked = await testSubjects.isEuiSwitchChecked(
+        'mlDeleteJobConfirmModal > mlDeleteJobConfirmModalDeleteAnnotationsSwitch'
+      );
+
+      expect(isChecked).to.eql(checked, `Expected delete annotations switch to be ${checked}`);
     }
 
     public async clickOpenJobInSingleMetricViewerButton(jobId: string) {

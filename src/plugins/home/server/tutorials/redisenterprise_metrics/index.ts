@@ -53,10 +53,12 @@ export function redisenterpriseMetricsSpecProvider(context: TutorialContext): Tu
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/redisenterprise_metrics/screenshot.webp',
+    previewImagePath: context.staticAssets.getPluginAssetHref(
+      '/redisenterprise_metrics/screenshot.webp'
+    ),
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['datastore', 'message_queue'],
+    integrationBrowserCategories: ['datastore', 'observability'],
   };
 }

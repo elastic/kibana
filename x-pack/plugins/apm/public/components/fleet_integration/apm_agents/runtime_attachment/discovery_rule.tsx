@@ -24,7 +24,7 @@ interface Props {
   operation: string;
   type: string;
   probe: string;
-  providedDragHandleProps?: DraggableProvidedDragHandleProps;
+  providedDragHandleProps?: DraggableProvidedDragHandleProps | null;
   onDelete: (discoveryItemId: string) => void;
   onEdit: (discoveryItemId: string) => void;
   operationTypes: Operation[];
@@ -99,6 +99,7 @@ export function DiscoveryRule({
               <EuiFlexGroup>
                 <EuiFlexItem grow={false}>
                   <EuiButtonIcon
+                    data-test-subj="apmDiscoveryRuleButton"
                     iconType="pencil"
                     color="primary"
                     onClick={() => {
@@ -108,6 +109,7 @@ export function DiscoveryRule({
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButtonIcon
+                    data-test-subj="apmDiscoveryRuleButton"
                     iconType="trash"
                     color="danger"
                     onClick={() => {

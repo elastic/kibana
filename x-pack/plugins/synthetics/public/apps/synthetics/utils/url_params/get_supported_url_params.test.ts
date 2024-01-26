@@ -8,6 +8,7 @@
 import DateMath from '@kbn/datemath';
 import { getSupportedUrlParams } from './get_supported_url_params';
 import { CLIENT_DEFAULTS } from '../../../../../common/constants';
+import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../../common/constants/synthetics/client_defaults';
 
 describe('getSupportedUrlParams', () => {
   let dateMathSpy: any;
@@ -39,8 +40,6 @@ describe('getSupportedUrlParams', () => {
     const expected = {
       absoluteDateRangeEnd: 20,
       absoluteDateRangeStart: 20,
-      autorefreshInterval: 23,
-      autorefreshIsPaused: false,
       dateRangeEnd: 'now',
       dateRangeStart: 'now-15m',
       search: 'monitor.status: down',
@@ -51,21 +50,17 @@ describe('getSupportedUrlParams', () => {
   });
 
   it('returns default values', () => {
+    const { FILTERS, SEARCH, STATUS_FILTER } = CLIENT_DEFAULTS;
     const {
-      AUTOREFRESH_INTERVAL,
-      AUTOREFRESH_IS_PAUSED,
       DATE_RANGE_START,
       DATE_RANGE_END,
-      FILTERS,
-      SEARCH,
-      STATUS_FILTER,
-    } = CLIENT_DEFAULTS;
+      AUTOREFRESH_INTERVAL_SECONDS,
+      AUTOREFRESH_IS_PAUSED,
+    } = CLIENT_DEFAULTS_SYNTHETICS;
     const result = getSupportedUrlParams({});
     expect(result).toEqual({
       absoluteDateRangeStart: MOCK_DATE_VALUE,
       absoluteDateRangeEnd: MOCK_DATE_VALUE,
-      autorefreshInterval: AUTOREFRESH_INTERVAL,
-      autorefreshIsPaused: AUTOREFRESH_IS_PAUSED,
       dateRangeStart: DATE_RANGE_START,
       dateRangeEnd: DATE_RANGE_END,
       excludedFilters: '',
@@ -76,8 +71,12 @@ describe('getSupportedUrlParams', () => {
       statusFilter: STATUS_FILTER,
       query: '',
       locations: [],
-      monitorType: [],
+      monitorTypes: [],
+      projects: [],
+      schedules: [],
       tags: [],
+      refreshInterval: AUTOREFRESH_INTERVAL_SECONDS,
+      refreshPaused: AUTOREFRESH_IS_PAUSED,
     });
   });
 
@@ -89,7 +88,6 @@ describe('getSupportedUrlParams', () => {
     const expected = {
       absoluteDateRangeEnd: 20,
       absoluteDateRangeStart: 20,
-      autorefreshInterval: 60000,
     };
 
     expect(result).toMatchObject(expected);

@@ -8,8 +8,9 @@
 import React, { FC, useContext } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
+import type { Field } from '@kbn/ml-anomaly-utils';
+import { useFieldStatsTrigger } from '../../../../../../../components/field_stats_flyout/use_field_stats_trigger';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { Field } from '../../../../../../../../../common/types/fields';
 import {
   createFieldOptions,
   createDocCountFieldOption,
@@ -23,10 +24,12 @@ interface Props {
 
 export const SummaryCountFieldSelect: FC<Props> = ({ fields, changeHandler, selectedField }) => {
   const { jobCreator } = useContext(JobCreatorContext);
+  const { renderOption, optionCss } = useFieldStatsTrigger();
+
   const options: EuiComboBoxOptionOption[] = [
     ...createDocCountFieldOption(jobCreator.aggregationFields.length > 0),
     ...createFieldOptions(fields, jobCreator.additionalFields),
-  ];
+  ].map((o) => ({ ...o, css: optionCss }));
 
   const selection: EuiComboBoxOptionOption[] = [];
   if (selectedField !== null) {
@@ -50,6 +53,7 @@ export const SummaryCountFieldSelect: FC<Props> = ({ fields, changeHandler, sele
       onChange={onChange}
       isClearable={true}
       data-test-subj="mlSummaryCountFieldNameSelect"
+      renderOption={renderOption}
     />
   );
 };

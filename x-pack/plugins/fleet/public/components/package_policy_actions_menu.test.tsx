@@ -55,6 +55,7 @@ function createMockAgentPolicy(props: Partial<AgentPolicy> = {}): AgentPolicy {
     updated_at: '',
     updated_by: 'elastic',
     package_policies: [],
+    is_protected: false,
     ...props,
   };
 }

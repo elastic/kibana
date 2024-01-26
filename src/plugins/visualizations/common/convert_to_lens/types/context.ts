@@ -14,6 +14,7 @@ export interface Layer {
   layerId: string;
   columns: Column[];
   columnOrder: string[];
+  ignoreGlobalFilters: boolean;
 }
 
 export interface NavigateToLensContext<T extends Configuration = Configuration> {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react';
 
 import { PIVOT_SUPPORTED_AGGS } from '../../../../../../common/types/pivot_aggs';
 
@@ -29,8 +29,8 @@ describe('Transform: <AggListForm />', () => {
       onChange() {},
     };
 
-    const wrapper = shallow(<AggListForm {...props} />);
+    const { container } = render(<AggListForm {...props} />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(container.textContent).toBe('the-group-by-agg-name');
   });
 });

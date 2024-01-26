@@ -118,7 +118,7 @@ export const TestConnectorForm = ({
         <>
           {executeEnabled ? null : (
             <>
-              <EuiCallOut iconType="alert" color="warning">
+              <EuiCallOut iconType="warning" color="warning">
                 <p>
                   <FormattedMessage
                     defaultMessage="Save your changes before testing the connector."
@@ -247,7 +247,7 @@ const FailedExecussion = ({
       )}
       data-test-subj="executionFailureResult"
       color="danger"
-      iconType="alert"
+      iconType="warning"
     >
       <EuiDescriptionList textStyle="reverse" listItems={items} />
     </EuiCallOut>

@@ -9,7 +9,7 @@ import { Transform } from 'stream';
 import { has, isString } from 'lodash/fp';
 import { createMapStream, createFilterStream } from '@kbn/utils';
 
-import type { RuleToImport } from '../../../common/detection_engine/rule_management';
+import type { RuleToImport } from '../../../common/api/detection_engine/rule_management';
 
 export interface RulesObjectsExportResultDetails {
   /** number of successfully exported objects */

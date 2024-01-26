@@ -82,6 +82,7 @@ const casesSchemaObject = schema.maybe(
     update: schema.maybe(casesSchema),
     delete: schema.maybe(casesSchema),
     push: schema.maybe(casesSchema),
+    settings: schema.maybe(casesSchema),
   })
 );
 
@@ -165,6 +166,7 @@ const kibanaSubFeatureSchema = schema.object({
   name: schema.string(),
   requireAllSpaces: schema.maybe(schema.boolean()),
   privilegesTooltip: schema.maybe(schema.string()),
+  description: schema.maybe(schema.string()),
   privilegeGroups: schema.maybe(
     schema.arrayOf(
       schema.oneOf([
@@ -198,6 +200,7 @@ const kibanaFeatureSchema = schema.object({
   }),
   name: schema.string(),
   category: appCategorySchema,
+  description: schema.maybe(schema.string()),
   order: schema.maybe(schema.number()),
   excludeFromBasePrivileges: schema.maybe(schema.boolean()),
   minimumLicense: schema.maybe(validLicenseSchema),
@@ -450,7 +453,8 @@ export function validateKibanaFeature(feature: KibanaFeatureConfig) {
       const values = Array.from(entry[1].values()).map(
         (managementPage) => `${entry[0]}.${managementPage}`
       );
-      return [...acc, ...values];
+      acc.push(...values);
+      return acc;
     }, [] as string[]);
 
     throw new Error(

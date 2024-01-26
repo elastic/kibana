@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiCommentList } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 
-import { Actions } from '../../../common/api';
+import { UserActionActions } from '../../../common/types/domain';
 import { getUserAction } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
 import { createTagsUserActionBuilder } from './tags';
@@ -26,7 +26,7 @@ describe('createTagsUserActionBuilder ', () => {
   });
 
   it('renders correctly when adding a tag', async () => {
-    const userAction = getUserAction('tags', Actions.add);
+    const userAction = getUserAction('tags', UserActionActions.add);
     const builder = createTagsUserActionBuilder({
       ...builderArgs,
       userAction,
@@ -44,7 +44,7 @@ describe('createTagsUserActionBuilder ', () => {
   });
 
   it('renders correctly when deleting a tag', async () => {
-    const userAction = getUserAction('tags', Actions.delete);
+    const userAction = getUserAction('tags', UserActionActions.delete);
     const builder = createTagsUserActionBuilder({
       ...builderArgs,
       userAction,

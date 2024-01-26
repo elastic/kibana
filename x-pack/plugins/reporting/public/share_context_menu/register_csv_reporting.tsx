@@ -7,11 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+
+import { CSV_JOB_TYPE, CSV_JOB_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
+
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
-import { CSV_JOB_TYPE } from '../../common/constants';
 import { checkLicense } from '../lib/license_check';
-import { ExportPanelShareOpts } from '.';
+import type { ExportPanelShareOpts } from '.';
 import { ReportingPanelContent } from './reporting_panel_content_lazy';
 
 export const reportingCsvShareProvider = ({
@@ -28,21 +30,40 @@ export const reportingCsvShareProvider = ({
       return [];
     }
 
-    const getSearchSource = sharingData.getSearchSource as (
-      absoluteTime?: boolean
-    ) => SearchSourceFields;
+    // only csv v2 supports esql (isTextBased) reports
+    // TODO: whole csv reporting should move to v2 https://github.com/elastic/kibana/issues/151190
+    const reportType = sharingData.isTextBased ? CSV_JOB_TYPE_V2 : CSV_JOB_TYPE;
+
+    const getSearchSource = sharingData.getSearchSource as ({
+      addGlobalTimeFilter,
+      absoluteTime,
+    }: {
+      addGlobalTimeFilter?: boolean;
+      absoluteTime?: boolean;
+    }) => SearchSourceFields;
 
     const jobParams = {
       title: sharingData.title as string,
       objectType,
-      columns: sharingData.columns as string[] | undefined,
     };
 
     const getJobParams = (forShareUrl?: boolean) => {
-      const absoluteTime = !forShareUrl;
+      if (reportType === CSV_JOB_TYPE_V2) {
+        // csv v2 uses locator params
+        return {
+          ...jobParams,
+          locatorParams: sharingData.locatorParams as [Record<string, unknown>],
+        };
+      }
+
+      // csv v1 uses search source and columns
       return {
         ...jobParams,
-        searchSource: getSearchSource(absoluteTime),
+        columns: sharingData.columns as string[] | undefined,
+        searchSource: getSearchSource({
+          addGlobalTimeFilter: true,
+          absoluteTime: !forShareUrl,
+        }),
       };
     };
 
@@ -72,7 +93,7 @@ export const reportingCsvShareProvider = ({
           icon: 'document',
           toolTipContent: licenseToolTipContent,
           disabled: licenseDisabled,
-          ['data-test-subj']: 'csvReportMenuItem',
+          ['data-test-subj']: 'CSVReports',
           sortOrder: 1,
         },
         panel: {
@@ -84,7 +105,7 @@ export const reportingCsvShareProvider = ({
               apiClient={apiClient}
               toasts={toasts}
               uiSettings={uiSettings}
-              reportType={CSV_JOB_TYPE}
+              reportType={reportType}
               layoutId={undefined}
               objectId={objectId}
               getJobParams={getJobParams}

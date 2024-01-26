@@ -7,7 +7,6 @@
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import {
   EuiIcon,
   EuiIconTip,
@@ -18,18 +17,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Request, RequestStatistic } from '../../../../../common/adapters/request/types';
-import { RequestDetailsProps } from '../types';
+import { DetailViewProps } from './types';
 
 // TODO: Replace by property once available
 interface RequestDetailsStatRow extends RequestStatistic {
   id: string;
 }
 
-export class RequestDetailsStats extends Component<RequestDetailsProps> {
-  static propTypes = {
-    request: PropTypes.object.isRequired,
-  };
-
+export class RequestDetailsStats extends Component<DetailViewProps> {
   static shouldShow = (request: Request) =>
     Boolean(request.stats && Object.keys(request.stats).length);
 
@@ -37,6 +32,8 @@ export class RequestDetailsStats extends Component<RequestDetailsProps> {
     return [
       <EuiTableRow key={stat.id}>
         <EuiTableRowCell>
+          {stat.label}
+
           <span className="insRequestDetailsStats__icon">
             {stat.description ? (
               <EuiIconTip
@@ -51,7 +48,6 @@ export class RequestDetailsStats extends Component<RequestDetailsProps> {
               <EuiIcon type="empty" />
             )}
           </span>
-          {stat.label}
         </EuiTableRowCell>
         <EuiTableRowCell>{stat.value}</EuiTableRowCell>
       </EuiTableRow>,

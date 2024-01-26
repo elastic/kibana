@@ -18,6 +18,7 @@ export default ({ getService, getPageObjects }) => {
       await browser.setWindowSize(1200, 1200);
       await PageObjects.common.navigateToApp('monitoring', { insertTimestamp: false });
       await clusterOverview.acceptAlertsModal();
+      await clusterOverview.confirmWatcherMigrationDone();
     });
     beforeEach(async () => {
       await PageObjects.common.navigateToApp('monitoring', { insertTimestamp: false });

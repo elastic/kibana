@@ -23,5 +23,6 @@
       "file": "datafeed_high_latency_by_geo.json",
       "job_id": "high_latency_by_geo"
     }
-  ]
+  ],
+  "tags": ["observability"]
 }

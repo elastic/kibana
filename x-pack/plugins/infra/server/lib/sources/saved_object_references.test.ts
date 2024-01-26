@@ -100,9 +100,6 @@ describe('resolveSavedObjectReferences function', () => {
 const sourceConfigurationWithIndexPatternReference: InfraSourceConfiguration = {
   name: 'NAME',
   description: 'DESCRIPTION',
-  fields: {
-    message: ['MESSAGE_FIELD'],
-  },
   logColumns: [],
   logIndices: {
     type: 'index_pattern',

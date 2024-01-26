@@ -14,7 +14,11 @@ import { FormValidationError } from './validation_errors';
 export const LogSourceConfigurationFormErrors: React.FC<{ errors: FormValidationError[] }> = ({
   errors,
 }) => (
-  <EuiCallOut color="danger" iconType="alert" title={logSourceConfigurationFormErrorsCalloutTitle}>
+  <EuiCallOut
+    color="danger"
+    iconType="warning"
+    title={logSourceConfigurationFormErrorsCalloutTitle}
+  >
     <ul>
       {errors.map((error, errorIndex) => (
         <li key={errorIndex}>

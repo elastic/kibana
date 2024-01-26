@@ -9,10 +9,9 @@ import { schema } from '@kbn/config-schema';
 
 import { isValidNamespace } from '../../../common/services';
 
-export const NamespaceSchema = schema.string({
-  minLength: 1,
+export const PackagePolicyNamespaceSchema = schema.string({
   validate: (value) => {
-    const namespaceValidation = isValidNamespace(value || '');
+    const namespaceValidation = isValidNamespace(value || '', true);
     if (!namespaceValidation.valid && namespaceValidation.error) {
       return namespaceValidation.error;
     }
@@ -45,6 +44,8 @@ const PackagePolicyStreamsSchema = {
             indices: schema.maybe(schema.arrayOf(schema.string())),
           })
         ),
+        dynamic_dataset: schema.maybe(schema.boolean()),
+        dynamic_namespace: schema.maybe(schema.boolean()),
       })
     ),
   }),
@@ -83,7 +84,10 @@ const ExperimentalDataStreamFeatures = schema.arrayOf(
   schema.object({
     data_stream: schema.string(),
     features: schema.object({
-      synthetic_source: schema.boolean(),
+      synthetic_source: schema.maybe(schema.boolean({ defaultValue: false })),
+      tsdb: schema.maybe(schema.boolean({ defaultValue: false })),
+      doc_value_only_numeric: schema.maybe(schema.boolean({ defaultValue: false })),
+      doc_value_only_other: schema.maybe(schema.boolean({ defaultValue: false })),
     }),
   })
 );
@@ -91,9 +95,10 @@ const ExperimentalDataStreamFeatures = schema.arrayOf(
 const PackagePolicyBaseSchema = {
   name: schema.string(),
   description: schema.maybe(schema.string()),
-  namespace: NamespaceSchema,
+  namespace: schema.maybe(PackagePolicyNamespaceSchema),
   policy_id: schema.string(),
   enabled: schema.boolean(),
+  is_managed: schema.maybe(schema.boolean()),
   package: schema.maybe(
     schema.object({
       name: schema.string(),
@@ -116,7 +121,6 @@ export const NewPackagePolicySchema = schema.object({
 
 const CreatePackagePolicyProps = {
   ...PackagePolicyBaseSchema,
-  namespace: schema.maybe(NamespaceSchema),
   policy_id: schema.maybe(schema.string()),
   enabled: schema.maybe(schema.boolean()),
   package: schema.maybe(
@@ -124,14 +128,7 @@ const CreatePackagePolicyProps = {
       name: schema.string(),
       title: schema.maybe(schema.string()),
       version: schema.string(),
-      experimental_data_stream_features: schema.maybe(
-        schema.arrayOf(
-          schema.object({
-            data_stream: schema.string(),
-            features: schema.object({ synthetic_source: schema.boolean() }),
-          })
-        )
-      ),
+      experimental_data_stream_features: schema.maybe(ExperimentalDataStreamFeatures),
     })
   ),
   // Deprecated TODO create remove issue
@@ -168,7 +165,7 @@ export const SimplifiedCreatePackagePolicyRequestBodySchema = schema.object({
   name: schema.string(),
   description: schema.maybe(schema.string()),
   policy_id: schema.string(),
-  namespace: schema.string({ defaultValue: 'default' }),
+  namespace: schema.maybe(schema.string()),
   package: schema.object({
     name: schema.string(),
     version: schema.string(),
@@ -239,5 +236,12 @@ export const PackagePolicySchema = schema.object({
       ...PackagePolicyInputsSchema,
       compiled_input: schema.maybe(schema.any()),
     })
+  ),
+  secret_references: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        id: schema.string(),
+      })
+    )
   ),
 });

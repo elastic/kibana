@@ -14,7 +14,6 @@ export type DashboardEmbeddableService = Pick<
   | 'getEmbeddableFactory'
   | 'getAllMigrations'
   | 'getStateTransfer'
-  | 'EmbeddablePanel'
   | 'telemetry'
   | 'extract'
   | 'inject'

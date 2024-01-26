@@ -16,20 +16,31 @@ import {
   migratorInstanceMock,
   registerRoutesMock,
   typeRegistryInstanceMock,
+  applyTypeDefaultsMock,
 } from './saved_objects_service.test.mocks';
-import { BehaviorSubject } from 'rxjs';
-import { RawPackageInfo, Env } from '@kbn/config';
+import { BehaviorSubject, firstValueFrom, EMPTY } from 'rxjs';
+import { skip } from 'rxjs/operators';
+import { type RawPackageInfo, Env } from '@kbn/config';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { getEnvOptions } from '@kbn/config-mocks';
+import { SavedObjectsType, MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { nodeServiceMock } from '@kbn/core-node-server-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
-import type { SavedObjectsClientFactoryProvider } from '@kbn/core-saved-objects-server';
+import {
+  SavedObjectsClientFactoryProvider,
+  SavedObjectsEncryptionExtensionFactory,
+  SavedObjectsSecurityExtensionFactory,
+  SavedObjectsSpacesExtensionFactory,
+} from '@kbn/core-saved-objects-server';
 import { configServiceMock } from '@kbn/config-mocks';
 import type { NodesVersionCompatibility } from '@kbn/core-elasticsearch-server-internal';
-import { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-internal';
+import {
+  SavedObjectsClientProvider,
+  SavedObjectsRepository,
+} from '@kbn/core-saved-objects-api-server-internal';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 import { SavedObjectsService } from './saved_objects_service';
@@ -46,11 +57,20 @@ import { getSavedObjectsDeprecationsProvider } from './deprecations';
 jest.mock('./object_types');
 jest.mock('./deprecations');
 
+const createType = (parts: Partial<SavedObjectsType>): SavedObjectsType => ({
+  name: 'test-type',
+  hidden: false,
+  namespaceType: 'single',
+  mappings: { properties: {} },
+  ...parts,
+});
+
 describe('SavedObjectsService', () => {
   let deprecationsSetup: ReturnType<typeof createDeprecationRegistryProviderMock>;
 
   beforeEach(() => {
     deprecationsSetup = createDeprecationRegistryProviderMock();
+    applyTypeDefaultsMock.mockReset().mockImplementation((type: unknown) => type);
   });
 
   const createCoreContext = ({
@@ -192,51 +212,170 @@ describe('SavedObjectsService', () => {
       });
     });
 
-    describe('#addClientWrapper', () => {
-      it('registers the wrapper to the clientProvider', async () => {
+    describe('#extensions', () => {
+      it('registers the encryption extension to the clientProvider', async () => {
         const coreContext = createCoreContext();
         const soService = new SavedObjectsService(coreContext);
         const setup = await soService.setup(createSetupDeps());
-
-        const wrapperA = jest.fn();
-        const wrapperB = jest.fn();
-
-        setup.addClientWrapper(1, 'A', wrapperA);
-        setup.addClientWrapper(2, 'B', wrapperB);
+        const encryptionExtension: jest.Mocked<SavedObjectsEncryptionExtensionFactory> = jest.fn();
+        setup.setEncryptionExtension(encryptionExtension);
 
         await soService.start(createStartDeps());
 
-        expect(clientProviderInstanceMock.addClientWrapperFactory).toHaveBeenCalledTimes(2);
-        expect(clientProviderInstanceMock.addClientWrapperFactory).toHaveBeenCalledWith(
-          1,
-          'A',
-          wrapperA
+        expect(SavedObjectsClientProvider).toHaveBeenCalledTimes(1);
+        expect(SavedObjectsClientProvider).toHaveBeenCalledWith(
+          expect.objectContaining({
+            encryptionExtensionFactory: encryptionExtension,
+            securityExtensionFactory: undefined,
+            spacesExtensionFactory: undefined,
+          })
         );
-        expect(clientProviderInstanceMock.addClientWrapperFactory).toHaveBeenCalledWith(
-          2,
-          'B',
-          wrapperB
+      });
+
+      it('registers the security extension to the clientProvider', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+        const securityExtension: jest.Mocked<SavedObjectsSecurityExtensionFactory> = jest.fn();
+        setup.setSecurityExtension(securityExtension);
+
+        await soService.start(createStartDeps());
+
+        expect(SavedObjectsClientProvider).toHaveBeenCalledTimes(1);
+        expect(SavedObjectsClientProvider).toHaveBeenCalledWith(
+          expect.objectContaining({
+            encryptionExtensionFactory: undefined,
+            securityExtensionFactory: securityExtension,
+            spacesExtensionFactory: undefined,
+          })
+        );
+      });
+
+      it('registers the spaces extension to the clientProvider', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+        const spacesExtension: jest.Mocked<SavedObjectsSpacesExtensionFactory> = jest.fn();
+        setup.setSpacesExtension(spacesExtension);
+
+        await soService.start(createStartDeps());
+
+        expect(SavedObjectsClientProvider).toHaveBeenCalledTimes(1);
+        expect(SavedObjectsClientProvider).toHaveBeenCalledWith(
+          expect.objectContaining({
+            encryptionExtensionFactory: undefined,
+            securityExtensionFactory: undefined,
+            spacesExtensionFactory: spacesExtension,
+          })
+        );
+      });
+
+      it('registers a combination of extensions to the clientProvider', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+        const encryptionExtension: jest.Mocked<SavedObjectsEncryptionExtensionFactory> = jest.fn();
+        const spacesExtension: jest.Mocked<SavedObjectsSpacesExtensionFactory> = jest.fn();
+        setup.setEncryptionExtension(encryptionExtension);
+        setup.setSpacesExtension(spacesExtension);
+
+        await soService.start(createStartDeps());
+
+        expect(SavedObjectsClientProvider).toHaveBeenCalledTimes(1);
+        expect(SavedObjectsClientProvider).toHaveBeenCalledWith(
+          expect.objectContaining({
+            encryptionExtensionFactory: encryptionExtension,
+            securityExtensionFactory: undefined,
+            spacesExtensionFactory: spacesExtension,
+          })
+        );
+      });
+
+      it('registers all three extensions to the clientProvider', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+        const encryptionExtension: jest.Mocked<SavedObjectsEncryptionExtensionFactory> = jest.fn();
+        const securityExtension: jest.Mocked<SavedObjectsSecurityExtensionFactory> = jest.fn();
+        const spacesExtension: jest.Mocked<SavedObjectsSpacesExtensionFactory> = jest.fn();
+        setup.setEncryptionExtension(encryptionExtension);
+        setup.setSecurityExtension(securityExtension);
+        setup.setSpacesExtension(spacesExtension);
+
+        await soService.start(createStartDeps());
+
+        expect(SavedObjectsClientProvider).toHaveBeenCalledTimes(1);
+        expect(SavedObjectsClientProvider).toHaveBeenCalledWith(
+          expect.objectContaining({
+            encryptionExtensionFactory: encryptionExtension,
+            securityExtensionFactory: securityExtension,
+            spacesExtensionFactory: spacesExtension,
+          })
+        );
+      });
+
+      it('registers no extensions to the clientProvider', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        await soService.setup(createSetupDeps());
+        await soService.start(createStartDeps());
+
+        expect(SavedObjectsClientProvider).toHaveBeenCalledTimes(1);
+        expect(SavedObjectsClientProvider).toHaveBeenCalledWith(
+          expect.objectContaining({
+            encryptionExtensionFactory: undefined,
+            securityExtensionFactory: undefined,
+            spacesExtensionFactory: undefined,
+          })
         );
       });
     });
 
     describe('#registerType', () => {
-      it('registers the type to the internal typeRegistry', async () => {
+      it('calls `applyTypeDefaults` with the correct parameters', async () => {
         // we mocked registerCoreObjectTypes above, so this test case only reflects direct calls to the registerType method
         const coreContext = createCoreContext();
         const soService = new SavedObjectsService(coreContext);
         const setup = await soService.setup(createSetupDeps());
 
-        const type = {
+        const inputType = {
           name: 'someType',
           hidden: false,
           namespaceType: 'single' as 'single',
           mappings: { properties: {} },
         };
-        setup.registerType(type);
+
+        applyTypeDefaultsMock.mockReturnValue(inputType);
+
+        setup.registerType(inputType);
+
+        expect(applyTypeDefaultsMock).toHaveBeenCalledTimes(1);
+        expect(applyTypeDefaultsMock).toHaveBeenCalledWith(inputType);
+      });
+
+      it('registers the type returned by `applyTypeDefaults` to the internal typeRegistry', async () => {
+        // we mocked registerCoreObjectTypes above, so this test case only reflects direct calls to the registerType method
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+
+        const inputType = {
+          name: 'someType',
+          hidden: false,
+          namespaceType: 'single' as 'single',
+          mappings: { properties: {} },
+        };
+        const returnedType = {
+          ...inputType,
+          switchToModelVersionAt: '9.9.9',
+        };
+
+        applyTypeDefaultsMock.mockReturnValue(returnedType);
+
+        setup.registerType(inputType);
 
         expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledTimes(1);
-        expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledWith(type);
+        expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledWith(returnedType);
       });
     });
 
@@ -247,6 +386,21 @@ describe('SavedObjectsService', () => {
         const { getTypeRegistry } = await soService.setup(createSetupDeps());
 
         expect(getTypeRegistry()).toBe(typeRegistryInstanceMock);
+      });
+    });
+
+    describe('status$', () => {
+      it('return correct value when migration is skipped', async () => {
+        const coreContext = createCoreContext({ skipMigration: true });
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+        await soService.start(createStartDeps(false));
+
+        const serviceStatus = await firstValueFrom(setup.status$.pipe(skip(1)));
+        expect(serviceStatus.level.toString()).toEqual('available');
+        expect(serviceStatus.summary).toEqual(
+          'SavedObjects service has completed migrations and is available'
+        );
       });
     });
   });
@@ -304,6 +458,7 @@ describe('SavedObjectsService', () => {
       startDeps.node = nodeServiceMock.createInternalStartContract({
         ui: true,
         backgroundTasks: true,
+        migrator: false,
       });
       await soService.start(startDeps);
 
@@ -329,6 +484,7 @@ describe('SavedObjectsService', () => {
       startDeps.node = nodeServiceMock.createInternalStartContract({
         ui: true,
         backgroundTasks: false,
+        migrator: false,
       });
       await soService.start(startDeps);
 
@@ -354,6 +510,7 @@ describe('SavedObjectsService', () => {
       startDeps.node = nodeServiceMock.createInternalStartContract({
         ui: false,
         backgroundTasks: true,
+        migrator: false,
       });
       await soService.start(startDeps);
 
@@ -392,6 +549,24 @@ describe('SavedObjectsService', () => {
       expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(1);
     });
 
+    it('does not start the migration if esNodesCompatibility$ is closed before calling `start`', async () => {
+      expect.assertions(2);
+      const coreContext = createCoreContext({ skipMigration: false });
+      const soService = new SavedObjectsService(coreContext);
+      const setupDeps = createSetupDeps();
+      // Create an new subject so that we can control when isCompatible=true
+      // is emitted.
+      setupDeps.elasticsearch.esNodesCompatibility$ = EMPTY;
+      await soService.setup(setupDeps);
+      await expect(() =>
+        soService.start(createStartDeps())
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"esNodesCompatibility$ was closed before emitting"`
+      );
+
+      expect(migratorInstanceMock.runMigrations).not.toHaveBeenCalled();
+    });
+
     it('resolves with KibanaMigrator after waiting for migrations to complete', async () => {
       const coreContext = createCoreContext({ skipMigration: false });
       const soService = new SavedObjectsService(coreContext);
@@ -412,12 +587,6 @@ describe('SavedObjectsService', () => {
         setup.setClientFactoryProvider(jest.fn());
       }).toThrowErrorMatchingInlineSnapshot(
         `"cannot call \`setClientFactoryProvider\` after service startup."`
-      );
-
-      expect(() => {
-        setup.addClientWrapper(0, 'dummy', jest.fn());
-      }).toThrowErrorMatchingInlineSnapshot(
-        `"cannot call \`addClientWrapper\` after service startup."`
       );
 
       expect(() => {
@@ -516,6 +685,86 @@ describe('SavedObjectsService', () => {
         ).mock.calls;
 
         expect(includedHiddenTypes).toEqual(['someHiddenType']);
+      });
+    });
+
+    describe('index retrieval APIs', () => {
+      let soService: SavedObjectsService;
+
+      beforeEach(async () => {
+        const coreContext = createCoreContext({ skipMigration: false });
+        soService = new SavedObjectsService(coreContext);
+
+        typeRegistryInstanceMock.getType.mockImplementation((type: string) => {
+          if (type === 'dashboard') {
+            return createType({
+              name: 'dashboard',
+            });
+          } else if (type === 'foo') {
+            return createType({
+              name: 'foo',
+              indexPattern: '.kibana_foo',
+            });
+          } else if (type === 'bar') {
+            return createType({
+              name: 'bar',
+              indexPattern: '.kibana_bar',
+            });
+          } else if (type === 'bar_too') {
+            return createType({
+              name: 'bar_too',
+              indexPattern: '.kibana_bar',
+            });
+          } else {
+            return undefined;
+          }
+        });
+
+        await soService.setup(createSetupDeps());
+      });
+
+      describe('#getDefaultIndex', () => {
+        it('return the default index', async () => {
+          const { getDefaultIndex } = await soService.start(createStartDeps());
+          expect(getDefaultIndex()).toEqual(MAIN_SAVED_OBJECT_INDEX);
+        });
+      });
+
+      describe('#getIndexForType', () => {
+        it('return the correct index for type specifying its indexPattern', async () => {
+          const { getIndexForType } = await soService.start(createStartDeps());
+          expect(getIndexForType('bar')).toEqual('.kibana_bar');
+        });
+        it('return the correct index for type not specifying its indexPattern', async () => {
+          const { getIndexForType } = await soService.start(createStartDeps());
+          expect(getIndexForType('dashboard')).toEqual(MAIN_SAVED_OBJECT_INDEX);
+        });
+        it('return the default index for unknown type', async () => {
+          const { getIndexForType } = await soService.start(createStartDeps());
+          expect(getIndexForType('unknown_type')).toEqual(MAIN_SAVED_OBJECT_INDEX);
+        });
+      });
+
+      describe('#getIndicesForTypes', () => {
+        it('return the correct indices for specified types', async () => {
+          const { getIndicesForTypes } = await soService.start(createStartDeps());
+          expect(getIndicesForTypes(['dashboard', 'foo', 'bar'])).toEqual([
+            MAIN_SAVED_OBJECT_INDEX,
+            '.kibana_foo',
+            '.kibana_bar',
+          ]);
+        });
+        it('ignore duplicate indices', async () => {
+          const { getIndicesForTypes } = await soService.start(createStartDeps());
+          expect(getIndicesForTypes(['bar', 'bar_too'])).toEqual(['.kibana_bar']);
+        });
+        it('return the default index for unknown type', async () => {
+          const { getIndicesForTypes } = await soService.start(createStartDeps());
+          expect(getIndicesForTypes(['unknown', 'foo'])).toEqual([
+            MAIN_SAVED_OBJECT_INDEX,
+            '.kibana_foo',
+          ]);
+        });
       });
     });
   });

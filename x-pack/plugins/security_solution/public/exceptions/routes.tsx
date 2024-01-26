@@ -5,18 +5,22 @@
  * 2.0.
  */
 import React from 'react';
-import { Switch } from 'react-router-dom';
-import { Route } from '@kbn/kibana-react-plugin/public';
+import { Route, Routes } from '@kbn/shared-ux-router';
 
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import * as i18n from './translations';
-import { EXCEPTIONS_PATH, SecurityPageName } from '../../common/constants';
-import { ExceptionListsDetailView } from './pages/shared_lists/detail_view';
-import { SharedLists } from './pages/shared_lists';
+import {
+  EXCEPTION_LIST_DETAIL_PATH,
+  EXCEPTIONS_PATH,
+  SecurityPageName,
+} from '../../common/constants';
+
+import { ListsDetailView, SharedLists } from './pages';
 import { SpyRoute } from '../common/utils/route/spy_routes';
 import { NotFoundPage } from '../app/404';
 import { useReadonlyHeader } from '../use_readonly_header';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
+import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 
 const ExceptionsRoutes = () => (
   <PluginTemplateWrapper>
@@ -29,10 +33,9 @@ const ExceptionsRoutes = () => (
 
 const ExceptionsListDetailRoute = () => (
   <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.sharedExceptionListDetails}>
-      <ExceptionListsDetailView />
-      <SpyRoute pageName={SecurityPageName.sharedExceptionListDetails} />
-    </TrackApplicationView>
+    <SecurityRoutePageWrapper pageName={SecurityPageName.exceptions}>
+      <ListsDetailView />
+    </SecurityRoutePageWrapper>
   </PluginTemplateWrapper>
 );
 
@@ -40,11 +43,11 @@ const ExceptionsContainerComponent: React.FC = () => {
   useReadonlyHeader(i18n.READ_ONLY_BADGE_TOOLTIP);
 
   return (
-    <Switch>
+    <Routes>
       <Route path={EXCEPTIONS_PATH} exact component={ExceptionsRoutes} />
-      <Route path={'/exceptions/shared/:exceptionListId'} component={ExceptionsListDetailRoute} />
+      <Route path={EXCEPTION_LIST_DETAIL_PATH} component={ExceptionsListDetailRoute} />
       <Route component={NotFoundPage} />
-    </Switch>
+    </Routes>
   );
 };
 

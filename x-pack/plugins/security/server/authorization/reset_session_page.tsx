@@ -5,24 +5,31 @@
  * 2.0.
  */
 
-// @ts-expect-error no definitions in component folder
-import { EuiButton, EuiButtonEmpty } from '@elastic/eui/lib/components/button';
+import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import React from 'react';
 
 import type { IBasePath } from '@kbn/core/server';
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { PromptPage } from '../prompt_page';
 
+/**
+ * Static error page (rendered server-side) when user does not have permission to access the requested page.
+ *
+ * To trigger this error create a user without any roles and try to login.
+ */
 export function ResetSessionPage({
   logoutUrl,
   buildNumber,
   basePath,
+  customBranding,
 }: {
   logoutUrl: string;
   buildNumber: number;
   basePath: IBasePath;
+  customBranding: CustomBranding;
 }) {
   return (
     <PromptPage
@@ -54,6 +61,7 @@ export function ResetSessionPage({
           />
         </EuiButtonEmpty>,
       ]}
+      customBranding={customBranding}
     />
   );
 }

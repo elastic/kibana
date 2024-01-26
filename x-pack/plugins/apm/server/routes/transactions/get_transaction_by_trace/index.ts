@@ -6,16 +6,21 @@
  */
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
-  TRACE_ID,
-  PARENT_ID,
-} from '../../../../common/elasticsearch_fieldnames';
+import { rangeQuery } from '@kbn/observability-plugin/server';
+import { TRACE_ID, PARENT_ID } from '../../../../common/es_fields/apm';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
-export async function getRootTransactionByTraceId(
-  traceId: string,
-  apmEventClient: APMEventClient
-) {
+export async function getRootTransactionByTraceId({
+  traceId,
+  apmEventClient,
+  start,
+  end,
+}: {
+  traceId: string;
+  apmEventClient: APMEventClient;
+  start: number;
+  end: number;
+}) {
   const params = {
     apm: {
       events: [ProcessorEvent.transaction as const],
@@ -23,6 +28,7 @@ export async function getRootTransactionByTraceId(
     body: {
       track_total_hits: false,
       size: 1,
+      terminate_after: 1,
       query: {
         bool: {
           should: [
@@ -36,7 +42,10 @@ export async function getRootTransactionByTraceId(
               },
             },
           ],
-          filter: [{ term: { [TRACE_ID]: traceId } }],
+          filter: [
+            { term: { [TRACE_ID]: traceId } },
+            ...rangeQuery(start, end),
+          ],
         },
       },
     },

@@ -3,8 +3,5 @@
   "version": "1.0.0",
   "description": "security solution rule utilities to use across plugins",
   "license": "SSPL-1.0 OR Elastic License 2.0",
-  "browser": "./target_web/index.js",
-  "main": "./target_node/index.js",
-  "private": true,
-  "types": "./target_types/index.d.ts"
+  "private": true
 }

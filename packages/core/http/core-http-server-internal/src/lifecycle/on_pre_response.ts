@@ -91,7 +91,6 @@ export function adoptToHapiOnPreResponseFormat(fn: OnPreResponseHandler, log: Lo
           }
         } else if (preResponseResult.isRender(result)) {
           const overriddenResponse = responseToolkit.response(result.body).code(statusCode);
-
           const originalHeaders = isBoom(response) ? response.output.headers : response.headers;
           setHeaders(overriddenResponse, originalHeaders as { [key: string]: string });
           if (result.headers) {

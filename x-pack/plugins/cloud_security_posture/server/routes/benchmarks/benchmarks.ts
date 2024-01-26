@@ -4,170 +4,96 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
+
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
-import {
-  BENCHMARKS_ROUTE_PATH,
-  CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-  CSP_RULE_SAVED_OBJECT_TYPE,
-} from '../../../common/constants';
-import { benchmarksQueryParamsSchema } from '../../../common/schemas/benchmark';
-import type { Benchmark, CspRulesStatus } from '../../../common/types';
-import type { CspRule } from '../../../common/schemas';
-import {
-  createCspRuleSearchFilterByPackagePolicy,
-  isNonNullable,
-} from '../../../common/utils/helpers';
+import { BENCHMARKS_ROUTE_PATH } from '../../../common/constants';
+import { benchmarksQueryParamsSchema } from '../../../common/types/benchmarks/v1';
 import { CspRouter } from '../../types';
-import {
-  getAgentStatusesByAgentPolicies,
-  type AgentStatusByAgentPolicyMap,
-  getCspAgentPolicies,
-  getCspPackagePolicies,
-} from '../../lib/fleet_util';
+import { getBenchmarks as getBenchmarksV1 } from './v1';
+import { getBenchmarks as getBenchmarksV2 } from './v2';
+import { benchmarkResponseSchema } from '../../../common/types/latest';
 
 export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
 
-export interface RulesStatusAggregation {
-  enabled_status: {
-    doc_count: number;
-  };
-}
-
-export const getCspRulesStatus = (
-  soClient: SavedObjectsClientContract,
-  packagePolicy: PackagePolicy
-): Promise<SavedObjectsFindResponse<CspRule, RulesStatusAggregation>> => {
-  const cspRules = soClient.find<CspRule, RulesStatusAggregation>({
-    type: CSP_RULE_SAVED_OBJECT_TYPE,
-    filter: createCspRuleSearchFilterByPackagePolicy({
-      packagePolicyId: packagePolicy.id,
-      policyId: packagePolicy.policy_id,
-    }),
-    aggs: {
-      enabled_status: {
-        filter: {
-          term: {
-            [`${CSP_RULE_SAVED_OBJECT_TYPE}.attributes.enabled`]: true,
-          },
-        },
-      },
-    },
-    perPage: 0,
-  });
-
-  return cspRules;
-};
-
-export const addPackagePolicyCspRules = async (
-  soClient: SavedObjectsClientContract,
-  packagePolicy: PackagePolicy
-): Promise<CspRulesStatus> => {
-  const rules = await getCspRulesStatus(soClient, packagePolicy);
-  const packagePolicyRules = {
-    all: rules.total,
-    enabled: rules.aggregations?.enabled_status.doc_count || 0,
-    disabled: rules.total - (rules.aggregations?.enabled_status.doc_count || 0),
-  };
-
-  return packagePolicyRules;
-};
-
-const createBenchmarks = (
-  soClient: SavedObjectsClientContract,
-  agentPolicies: AgentPolicy[],
-  agentStatusByAgentPolicyId: AgentStatusByAgentPolicyMap,
-  cspPackagePolicies: PackagePolicy[]
-): Promise<Benchmark[]> => {
-  const cspPackagePoliciesMap = new Map(
-    cspPackagePolicies.map((packagePolicy) => [packagePolicy.id, packagePolicy])
-  );
-
-  return Promise.all(
-    agentPolicies.flatMap((agentPolicy) => {
-      const cspPackagesOnAgent =
-        agentPolicy.package_policies
-          ?.map(({ id: pckPolicyId }) => {
-            return cspPackagePoliciesMap.get(pckPolicyId);
-          })
-          .filter(isNonNullable) ?? [];
-
-      const benchmarks = cspPackagesOnAgent.map(async (cspPackage) => {
-        const cspRulesStatus = await addPackagePolicyCspRules(soClient, cspPackage);
-        const agentPolicyStatus = {
-          id: agentPolicy.id,
-          name: agentPolicy.name,
-          agents: agentStatusByAgentPolicyId[agentPolicy.id].total,
-        };
-
-        return {
-          package_policy: cspPackage,
-          agent_policy: agentPolicyStatus,
-          rules: cspRulesStatus,
-        };
-      });
-
-      return benchmarks;
-    })
-  );
-};
-
-export const defineGetBenchmarksRoute = (router: CspRouter): void =>
-  router.get(
-    {
+export const defineGetBenchmarksRoute = (router: CspRouter) =>
+  router.versioned
+    .get({
+      access: 'internal',
       path: BENCHMARKS_ROUTE_PATH,
-      validate: { query: benchmarksQueryParamsSchema },
       options: {
         tags: ['access:cloud-security-posture-read'],
       },
-    },
-    async (context, request, response) => {
-      if (!(await context.fleet).authz.fleet.all) {
-        return response.forbidden();
-      }
-
-      const cspContext = await context.csp;
-
-      try {
-        const cspPackagePolicies = await getCspPackagePolicies(
-          cspContext.soClient,
-          cspContext.packagePolicyService,
-          CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-          request.query
-        );
-
-        const agentPolicies = await getCspAgentPolicies(
-          cspContext.soClient,
-          cspPackagePolicies.items,
-          cspContext.agentPolicyService
-        );
-
-        const agentStatusesByAgentPolicyId = await getAgentStatusesByAgentPolicies(
-          cspContext.agentService,
-          agentPolicies
-        );
-
-        const benchmarks = await createBenchmarks(
-          cspContext.soClient,
-          agentPolicies,
-          agentStatusesByAgentPolicyId,
-          cspPackagePolicies.items
-        );
-
-        return response.ok({
-          body: {
-            ...cspPackagePolicies,
-            items: benchmarks,
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            query: benchmarksQueryParamsSchema,
           },
-        });
-      } catch (err) {
-        const error = transformError(err);
-        cspContext.logger.error(`Failed to fetch benchmarks ${err}`);
-        return response.customError({
-          body: { message: error.message },
-          statusCode: error.statusCode,
-        });
+        },
+      },
+      async (context, request, response) => {
+        if (!(await context.fleet).authz.fleet.all) {
+          return response.forbidden();
+        }
+        const cspContext = await context.csp;
+        try {
+          const cspBenchmarks = await getBenchmarksV1(
+            cspContext.soClient,
+            cspContext.packagePolicyService,
+            request.query,
+            cspContext.agentPolicyService,
+            cspContext.agentService,
+            cspContext.logger
+          );
+          return response.ok({
+            body: cspBenchmarks,
+          });
+        } catch (err) {
+          const error = transformError(err);
+          cspContext.logger.error(`Failed to fetch benchmarks ${err}`);
+          return response.customError({
+            body: { message: error.message },
+            statusCode: error.statusCode,
+          });
+        }
       }
-    }
-  );
+    )
+    .addVersion(
+      {
+        version: '2',
+        validate: {
+          response: {
+            200: {
+              body: benchmarkResponseSchema,
+            },
+          },
+        },
+      },
+      async (context, request, response) => {
+        if (!(await context.fleet).authz.fleet.all) {
+          return response.forbidden();
+        }
+        const cspContext = await context.csp;
+        const esClient = cspContext.esClient.asCurrentUser;
+        try {
+          const cspBenchmarks = await getBenchmarksV2(
+            esClient,
+            cspContext.soClient,
+            cspContext.encryptedSavedObjects,
+            cspContext.logger
+          );
+          return response.ok({
+            body: cspBenchmarks,
+          });
+        } catch (err) {
+          const error = transformError(err);
+          cspContext.logger.error(`Failed to fetch benchmarks ${err}`);
+          return response.customError({
+            body: { message: error.message },
+            statusCode: error.statusCode,
+          });
+        }
+      }
+    );

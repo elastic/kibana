@@ -9,10 +9,18 @@
     "objects": []
   },
   "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/ftr-common-functional-services",
-        "id": "def-server.RetryService",
+        "id": "def-common.RetryService",
         "type": "Class",
         "tags": [],
         "label": "RetryService",
@@ -20,9 +28,9 @@
         "signature": [
           {
             "pluginId": "@kbn/ftr-common-functional-services",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-            "section": "def-server.RetryService",
+            "section": "def-common.RetryService",
             "text": "RetryService"
           },
           " extends ",
@@ -34,13 +42,13 @@
         "children": [
           {
             "parentPluginId": "@kbn/ftr-common-functional-services",
-            "id": "def-server.RetryService.tryForTime",
+            "id": "def-common.RetryService.tryForTime",
             "type": "Function",
             "tags": [],
             "label": "tryForTime",
             "description": [],
             "signature": [
-              "<T>(timeout: number, block: () => Promise<T>, onFailureBlock?: (() => Promise<T>) | undefined) => Promise<T>"
+              "<T>(timeout: number, block: () => Promise<T>, onFailureBlock?: (() => Promise<T>) | undefined, retryDelay?: number | undefined) => Promise<T>"
             ],
             "path": "packages/kbn-ftr-common-functional-services/services/retry/retry.ts",
             "deprecated": false,
@@ -48,7 +56,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/ftr-common-functional-services",
-                "id": "def-server.RetryService.tryForTime.$1",
+                "id": "def-common.RetryService.tryForTime.$1",
                 "type": "number",
                 "tags": [],
                 "label": "timeout",
@@ -63,7 +71,7 @@
               },
               {
                 "parentPluginId": "@kbn/ftr-common-functional-services",
-                "id": "def-server.RetryService.tryForTime.$2",
+                "id": "def-common.RetryService.tryForTime.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "block",
@@ -78,7 +86,7 @@
               },
               {
                 "parentPluginId": "@kbn/ftr-common-functional-services",
-                "id": "def-server.RetryService.tryForTime.$3",
+                "id": "def-common.RetryService.tryForTime.$3",
                 "type": "Function",
                 "tags": [],
                 "label": "onFailureBlock",
@@ -90,19 +98,34 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-services",
+                "id": "def-common.RetryService.tryForTime.$4",
+                "type": "number",
+                "tags": [],
+                "label": "retryDelay",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "packages/kbn-ftr-common-functional-services/services/retry/retry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
           },
           {
             "parentPluginId": "@kbn/ftr-common-functional-services",
-            "id": "def-server.RetryService.try",
+            "id": "def-common.RetryService.try",
             "type": "Function",
             "tags": [],
             "label": "try",
             "description": [],
             "signature": [
-              "<T>(block: () => Promise<T>, onFailureBlock?: (() => Promise<T>) | undefined) => Promise<T>"
+              "<T>(block: () => Promise<T>, onFailureBlock?: (() => Promise<T>) | undefined, retryDelay?: number | undefined) => Promise<T>"
             ],
             "path": "packages/kbn-ftr-common-functional-services/services/retry/retry.ts",
             "deprecated": false,
@@ -110,7 +133,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/ftr-common-functional-services",
-                "id": "def-server.RetryService.try.$1",
+                "id": "def-common.RetryService.try.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "block",
@@ -125,7 +148,7 @@
               },
               {
                 "parentPluginId": "@kbn/ftr-common-functional-services",
-                "id": "def-server.RetryService.try.$2",
+                "id": "def-common.RetryService.try.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "onFailureBlock",
@@ -137,13 +160,28 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-services",
+                "id": "def-common.RetryService.try.$3",
+                "type": "number",
+                "tags": [],
+                "label": "retryDelay",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "packages/kbn-ftr-common-functional-services/services/retry/retry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
           },
           {
             "parentPluginId": "@kbn/ftr-common-functional-services",
-            "id": "def-server.RetryService.waitForWithTimeout",
+            "id": "def-common.RetryService.waitForWithTimeout",
             "type": "Function",
             "tags": [],
             "label": "waitForWithTimeout",
@@ -157,7 +195,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/ftr-common-functional-services",
-                "id": "def-server.RetryService.waitForWithTimeout.$1",
+                "id": "def-common.RetryService.waitForWithTimeout.$1",
                 "type": "string",
                 "tags": [],
                 "label": "description",
@@ -172,7 +210,7 @@
               },
               {
                 "parentPluginId": "@kbn/ftr-common-functional-services",
-                "id": "def-server.RetryService.waitForWithTimeout.$2",
+                "id": "def-common.RetryService.waitForWithTimeout.$2",
                 "type": "number",
                 "tags": [],
                 "label": "timeout",
@@ -187,7 +225,7 @@
               },
               {
                 "parentPluginId": "@kbn/ftr-common-functional-services",
-                "id": "def-server.RetryService.waitForWithTimeout.$3",
+                "id": "def-common.RetryService.waitForWithTimeout.$3",
                 "type": "Function",
                 "tags": [],
                 "label": "block",
@@ -202,7 +240,7 @@
               },
               {
                 "parentPluginId": "@kbn/ftr-common-functional-services",
-                "id": "def-server.RetryService.waitForWithTimeout.$4",
+                "id": "def-common.RetryService.waitForWithTimeout.$4",
                 "type": "Function",
                 "tags": [],
                 "label": "onFailureBlock",
@@ -220,7 +258,7 @@
           },
           {
             "parentPluginId": "@kbn/ftr-common-functional-services",
-            "id": "def-server.RetryService.waitFor",
+            "id": "def-common.RetryService.waitFor",
             "type": "Function",
             "tags": [],
             "label": "waitFor",
@@ -234,7 +272,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/ftr-common-functional-services",
-                "id": "def-server.RetryService.waitFor.$1",
+                "id": "def-common.RetryService.waitFor.$1",
                 "type": "string",
                 "tags": [],
                 "label": "description",
@@ -249,7 +287,7 @@
               },
               {
                 "parentPluginId": "@kbn/ftr-common-functional-services",
-                "id": "def-server.RetryService.waitFor.$2",
+                "id": "def-common.RetryService.waitFor.$2",
                 "type": "Function",
                 "tags": [],
                 "label": "block",
@@ -264,7 +302,7 @@
               },
               {
                 "parentPluginId": "@kbn/ftr-common-functional-services",
-                "id": "def-server.RetryService.waitFor.$3",
+                "id": "def-common.RetryService.waitFor.$3",
                 "type": "Function",
                 "tags": [],
                 "label": "onFailureBlock",
@@ -290,7 +328,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/ftr-common-functional-services",
-        "id": "def-server.Es",
+        "id": "def-common.Es",
         "type": "Type",
         "tags": [],
         "label": "Es",
@@ -305,7 +343,7 @@
       },
       {
         "parentPluginId": "@kbn/ftr-common-functional-services",
-        "id": "def-server.EsArchiver",
+        "id": "def-common.EsArchiver",
         "type": "Type",
         "tags": [],
         "label": "EsArchiver",
@@ -317,7 +355,7 @@
       },
       {
         "parentPluginId": "@kbn/ftr-common-functional-services",
-        "id": "def-server.FtrProviderContext",
+        "id": "def-common.FtrProviderContext",
         "type": "Type",
         "tags": [],
         "label": "FtrProviderContext",
@@ -325,17 +363,17 @@
         "signature": [
           {
             "pluginId": "@kbn/test",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestPluginApi",
-            "section": "def-server.GenericFtrProviderContext",
+            "section": "def-common.GenericFtrProviderContext",
             "text": "GenericFtrProviderContext"
           },
           "<{ es: ({ getService }: ",
           {
             "pluginId": "@kbn/ftr-common-functional-services",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-            "section": "def-server.FtrProviderContext",
+            "section": "def-common.FtrProviderContext",
             "text": "FtrProviderContext"
           },
           ") => ",
@@ -343,49 +381,49 @@
           "; kibanaServer: ({ getService }: ",
           {
             "pluginId": "@kbn/ftr-common-functional-services",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-            "section": "def-server.FtrProviderContext",
+            "section": "def-common.FtrProviderContext",
             "text": "FtrProviderContext"
           },
           ") => ",
           {
             "pluginId": "@kbn/test",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestPluginApi",
-            "section": "def-server.KbnClient",
+            "section": "def-common.KbnClient",
             "text": "KbnClient"
           },
           "; esArchiver: ({ getService }: ",
           {
             "pluginId": "@kbn/ftr-common-functional-services",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-            "section": "def-server.FtrProviderContext",
+            "section": "def-common.FtrProviderContext",
             "text": "FtrProviderContext"
           },
           ") => ",
           {
             "pluginId": "@kbn/es-archiver",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnEsArchiverPluginApi",
-            "section": "def-server.EsArchiver",
+            "section": "def-common.EsArchiver",
             "text": "EsArchiver"
           },
           "; retry: typeof ",
           {
             "pluginId": "@kbn/ftr-common-functional-services",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-            "section": "def-server.RetryService",
+            "section": "def-common.RetryService",
             "text": "RetryService"
           },
           "; }, {}, ProvidedTypeMap<{ es: ({ getService }: ",
           {
             "pluginId": "@kbn/ftr-common-functional-services",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-            "section": "def-server.FtrProviderContext",
+            "section": "def-common.FtrProviderContext",
             "text": "FtrProviderContext"
           },
           ") => ",
@@ -393,41 +431,41 @@
           "; kibanaServer: ({ getService }: ",
           {
             "pluginId": "@kbn/ftr-common-functional-services",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-            "section": "def-server.FtrProviderContext",
+            "section": "def-common.FtrProviderContext",
             "text": "FtrProviderContext"
           },
           ") => ",
           {
             "pluginId": "@kbn/test",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestPluginApi",
-            "section": "def-server.KbnClient",
+            "section": "def-common.KbnClient",
             "text": "KbnClient"
           },
           "; esArchiver: ({ getService }: ",
           {
             "pluginId": "@kbn/ftr-common-functional-services",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-            "section": "def-server.FtrProviderContext",
+            "section": "def-common.FtrProviderContext",
             "text": "FtrProviderContext"
           },
           ") => ",
           {
             "pluginId": "@kbn/es-archiver",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnEsArchiverPluginApi",
-            "section": "def-server.EsArchiver",
+            "section": "def-common.EsArchiver",
             "text": "EsArchiver"
           },
           "; retry: typeof ",
           {
             "pluginId": "@kbn/ftr-common-functional-services",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-            "section": "def-server.RetryService",
+            "section": "def-common.RetryService",
             "text": "RetryService"
           },
           "; }>, ProvidedTypeMap<{}>>"
@@ -439,7 +477,7 @@
       },
       {
         "parentPluginId": "@kbn/ftr-common-functional-services",
-        "id": "def-server.KibanaServer",
+        "id": "def-common.KibanaServer",
         "type": "Type",
         "tags": [],
         "label": "KibanaServer",
@@ -447,9 +485,9 @@
         "signature": [
           {
             "pluginId": "@kbn/test",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnTestPluginApi",
-            "section": "def-server.KbnClient",
+            "section": "def-common.KbnClient",
             "text": "KbnClient"
           }
         ],
@@ -462,7 +500,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/ftr-common-functional-services",
-        "id": "def-server.services",
+        "id": "def-common.services",
         "type": "Object",
         "tags": [],
         "label": "services",
@@ -473,7 +511,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ftr-common-functional-services",
-            "id": "def-server.services.es",
+            "id": "def-common.services.es",
             "type": "Function",
             "tags": [],
             "label": "es",
@@ -482,9 +520,9 @@
               "({ getService }: ",
               {
                 "pluginId": "@kbn/ftr-common-functional-services",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-                "section": "def-server.FtrProviderContext",
+                "section": "def-common.FtrProviderContext",
                 "text": "FtrProviderContext"
               },
               ") => ",
@@ -497,7 +535,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/ftr-common-functional-services",
-                "id": "def-server.services.es.$1",
+                "id": "def-common.services.es.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "__0",
@@ -505,17 +543,17 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/test",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnTestPluginApi",
-                    "section": "def-server.GenericFtrProviderContext",
+                    "section": "def-common.GenericFtrProviderContext",
                     "text": "GenericFtrProviderContext"
                   },
                   "<{ es: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-                    "section": "def-server.FtrProviderContext",
+                    "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
                   ") => ",
@@ -523,49 +561,49 @@
                   "; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-                    "section": "def-server.FtrProviderContext",
+                    "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
                   ") => ",
                   {
                     "pluginId": "@kbn/test",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnTestPluginApi",
-                    "section": "def-server.KbnClient",
+                    "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
                   "; esArchiver: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-                    "section": "def-server.FtrProviderContext",
+                    "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
                   ") => ",
                   {
                     "pluginId": "@kbn/es-archiver",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnEsArchiverPluginApi",
-                    "section": "def-server.EsArchiver",
+                    "section": "def-common.EsArchiver",
                     "text": "EsArchiver"
                   },
                   "; retry: typeof ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-                    "section": "def-server.RetryService",
+                    "section": "def-common.RetryService",
                     "text": "RetryService"
                   },
                   "; }, {}, ProvidedTypeMap<{ es: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-                    "section": "def-server.FtrProviderContext",
+                    "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
                   ") => ",
@@ -573,41 +611,41 @@
                   "; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-                    "section": "def-server.FtrProviderContext",
+                    "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
                   ") => ",
                   {
                     "pluginId": "@kbn/test",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnTestPluginApi",
-                    "section": "def-server.KbnClient",
+                    "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
                   "; esArchiver: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-                    "section": "def-server.FtrProviderContext",
+                    "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
                   ") => ",
                   {
                     "pluginId": "@kbn/es-archiver",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnEsArchiverPluginApi",
-                    "section": "def-server.EsArchiver",
+                    "section": "def-common.EsArchiver",
                     "text": "EsArchiver"
                   },
                   "; retry: typeof ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-                    "section": "def-server.RetryService",
+                    "section": "def-common.RetryService",
                     "text": "RetryService"
                   },
                   "; }>, ProvidedTypeMap<{}>>"
@@ -620,7 +658,7 @@
           },
           {
             "parentPluginId": "@kbn/ftr-common-functional-services",
-            "id": "def-server.services.kibanaServer",
+            "id": "def-common.services.kibanaServer",
             "type": "Function",
             "tags": [],
             "label": "kibanaServer",
@@ -629,17 +667,17 @@
               "({ getService }: ",
               {
                 "pluginId": "@kbn/ftr-common-functional-services",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-                "section": "def-server.FtrProviderContext",
+                "section": "def-common.FtrProviderContext",
                 "text": "FtrProviderContext"
               },
               ") => ",
               {
                 "pluginId": "@kbn/test",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnTestPluginApi",
-                "section": "def-server.KbnClient",
+                "section": "def-common.KbnClient",
                 "text": "KbnClient"
               }
             ],
@@ -650,7 +688,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/ftr-common-functional-services",
-                "id": "def-server.services.kibanaServer.$1",
+                "id": "def-common.services.kibanaServer.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "__0",
@@ -658,17 +696,17 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/test",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnTestPluginApi",
-                    "section": "def-server.GenericFtrProviderContext",
+                    "section": "def-common.GenericFtrProviderContext",
                     "text": "GenericFtrProviderContext"
                   },
                   "<{ es: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-                    "section": "def-server.FtrProviderContext",
+                    "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
                   ") => ",
@@ -676,49 +714,49 @@
                   "; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-                    "section": "def-server.FtrProviderContext",
+                    "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
                   ") => ",
                   {
                     "pluginId": "@kbn/test",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnTestPluginApi",
-                    "section": "def-server.KbnClient",
+                    "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
                   "; esArchiver: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-                    "section": "def-server.FtrProviderContext",
+                    "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
                   ") => ",
                   {
                     "pluginId": "@kbn/es-archiver",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnEsArchiverPluginApi",
-                    "section": "def-server.EsArchiver",
+                    "section": "def-common.EsArchiver",
                     "text": "EsArchiver"
                   },
                   "; retry: typeof ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-                    "section": "def-server.RetryService",
+                    "section": "def-common.RetryService",
                     "text": "RetryService"
                   },
                   "; }, {}, ProvidedTypeMap<{ es: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-                    "section": "def-server.FtrProviderContext",
+                    "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
                   ") => ",
@@ -726,41 +764,41 @@
                   "; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-                    "section": "def-server.FtrProviderContext",
+                    "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
                   ") => ",
                   {
                     "pluginId": "@kbn/test",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnTestPluginApi",
-                    "section": "def-server.KbnClient",
+                    "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
                   "; esArchiver: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-                    "section": "def-server.FtrProviderContext",
+                    "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
                   ") => ",
                   {
                     "pluginId": "@kbn/es-archiver",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnEsArchiverPluginApi",
-                    "section": "def-server.EsArchiver",
+                    "section": "def-common.EsArchiver",
                     "text": "EsArchiver"
                   },
                   "; retry: typeof ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-                    "section": "def-server.RetryService",
+                    "section": "def-common.RetryService",
                     "text": "RetryService"
                   },
                   "; }>, ProvidedTypeMap<{}>>"
@@ -773,7 +811,7 @@
           },
           {
             "parentPluginId": "@kbn/ftr-common-functional-services",
-            "id": "def-server.services.esArchiver",
+            "id": "def-common.services.esArchiver",
             "type": "Function",
             "tags": [],
             "label": "esArchiver",
@@ -782,17 +820,17 @@
               "({ getService }: ",
               {
                 "pluginId": "@kbn/ftr-common-functional-services",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-                "section": "def-server.FtrProviderContext",
+                "section": "def-common.FtrProviderContext",
                 "text": "FtrProviderContext"
               },
               ") => ",
               {
                 "pluginId": "@kbn/es-archiver",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnEsArchiverPluginApi",
-                "section": "def-server.EsArchiver",
+                "section": "def-common.EsArchiver",
                 "text": "EsArchiver"
               }
             ],
@@ -803,7 +841,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/ftr-common-functional-services",
-                "id": "def-server.services.esArchiver.$1",
+                "id": "def-common.services.esArchiver.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "__0",
@@ -811,17 +849,17 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/test",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnTestPluginApi",
-                    "section": "def-server.GenericFtrProviderContext",
+                    "section": "def-common.GenericFtrProviderContext",
                     "text": "GenericFtrProviderContext"
                   },
                   "<{ es: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-                    "section": "def-server.FtrProviderContext",
+                    "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
                   ") => ",
@@ -829,49 +867,49 @@
                   "; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-                    "section": "def-server.FtrProviderContext",
+                    "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
                   ") => ",
                   {
                     "pluginId": "@kbn/test",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnTestPluginApi",
-                    "section": "def-server.KbnClient",
+                    "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
                   "; esArchiver: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-                    "section": "def-server.FtrProviderContext",
+                    "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
                   ") => ",
                   {
                     "pluginId": "@kbn/es-archiver",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnEsArchiverPluginApi",
-                    "section": "def-server.EsArchiver",
+                    "section": "def-common.EsArchiver",
                     "text": "EsArchiver"
                   },
                   "; retry: typeof ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-                    "section": "def-server.RetryService",
+                    "section": "def-common.RetryService",
                     "text": "RetryService"
                   },
                   "; }, {}, ProvidedTypeMap<{ es: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-                    "section": "def-server.FtrProviderContext",
+                    "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
                   ") => ",
@@ -879,41 +917,41 @@
                   "; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-                    "section": "def-server.FtrProviderContext",
+                    "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
                   ") => ",
                   {
                     "pluginId": "@kbn/test",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnTestPluginApi",
-                    "section": "def-server.KbnClient",
+                    "section": "def-common.KbnClient",
                     "text": "KbnClient"
                   },
                   "; esArchiver: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-                    "section": "def-server.FtrProviderContext",
+                    "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
                   ") => ",
                   {
                     "pluginId": "@kbn/es-archiver",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnEsArchiverPluginApi",
-                    "section": "def-server.EsArchiver",
+                    "section": "def-common.EsArchiver",
                     "text": "EsArchiver"
                   },
                   "; retry: typeof ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-                    "section": "def-server.RetryService",
+                    "section": "def-common.RetryService",
                     "text": "RetryService"
                   },
                   "; }>, ProvidedTypeMap<{}>>"
@@ -926,7 +964,7 @@
           },
           {
             "parentPluginId": "@kbn/ftr-common-functional-services",
-            "id": "def-server.services.retry",
+            "id": "def-common.services.retry",
             "type": "Object",
             "tags": [],
             "label": "retry",
@@ -935,9 +973,9 @@
               "typeof ",
               {
                 "pluginId": "@kbn/ftr-common-functional-services",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-                "section": "def-server.RetryService",
+                "section": "def-common.RetryService",
                 "text": "RetryService"
               }
             ],
@@ -949,13 +987,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

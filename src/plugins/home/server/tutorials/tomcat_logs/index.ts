@@ -39,7 +39,7 @@ export function tomcatLogsSpecProvider(context: TutorialContext): TutorialSchema
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-tomcat.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/tomcat.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/tomcat.svg'),
     artifacts: {
       dashboards: [],
       application: {
@@ -56,6 +56,6 @@ export function tomcatLogsSpecProvider(context: TutorialContext): TutorialSchema
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
-    integrationBrowserCategories: ['web', 'security'],
+    integrationBrowserCategories: ['web', 'observability'],
   };
 }

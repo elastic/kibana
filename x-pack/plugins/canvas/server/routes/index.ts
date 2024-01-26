@@ -9,7 +9,6 @@ import { IRouter, Logger } from '@kbn/core/server';
 import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import { initCustomElementsRoutes } from './custom_elements';
-import { initESFieldsRoutes } from './es_fields';
 import { initShareablesRoutes } from './shareables';
 import { initWorkpadRoutes } from './workpad';
 import { initTemplateRoutes } from './templates';
@@ -25,7 +24,6 @@ export interface RouteInitializerDeps {
 
 export function initRoutes(deps: RouteInitializerDeps) {
   initCustomElementsRoutes(deps);
-  initESFieldsRoutes(deps);
   initShareablesRoutes(deps);
   initWorkpadRoutes(deps);
   initTemplateRoutes(deps);

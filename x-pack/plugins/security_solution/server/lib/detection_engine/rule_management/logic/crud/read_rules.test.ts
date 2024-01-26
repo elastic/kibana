@@ -28,7 +28,6 @@ export class TestError extends Error {
 describe('read_rules', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    jest.restoreAllMocks();
     jest.clearAllMocks();
   });
   describe('readRules', () => {

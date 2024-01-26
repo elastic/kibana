@@ -10,8 +10,8 @@ import React from 'react';
 
 import {
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageTemplate,
+  EuiPageSection,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiTitle,
@@ -32,9 +32,9 @@ export function Page({ title, children }: PageProps) {
           </EuiTitle>
         </EuiPageHeaderSection>
       </EuiPageHeader>
-      <EuiPageContent>
-        <EuiPageContentBody>{children}</EuiPageContentBody>
-      </EuiPageContent>
+      <EuiPageTemplate.Section>
+        <EuiPageSection>{children}</EuiPageSection>
+      </EuiPageTemplate.Section>
     </EuiPageBody>
   );
 }

@@ -18,10 +18,11 @@ import { useColors } from './use_colors';
  * Provides colors and HTML IDs used to render the 'cube' graphic that accompanies nodes.
  */
 export function useCubeAssets(
+  id: string,
   cubeType: NodeDataStatus,
   isProcessTrigger: boolean
 ): NodeStyleConfig {
-  const SymbolIds = useSymbolIDs();
+  const SymbolIds = useSymbolIDs({ id });
   const colorMap = useColors();
 
   const nodeAssets: NodeStyleMap = useMemo(

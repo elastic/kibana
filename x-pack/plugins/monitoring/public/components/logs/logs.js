@@ -6,6 +6,7 @@
  */
 
 import React, { PureComponent } from 'react';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { upperFirst } from 'lodash';
 import { Legacy } from '../../legacy_shims';
 import { EuiBasicTable, EuiTitle, EuiSpacer, EuiText, EuiCallOut, EuiLink } from '@elastic/eui';
@@ -110,8 +111,6 @@ const clusterColumns = [
 ];
 
 function getLogsUiLink(clusterUuid, nodeId, indexUuid) {
-  const base = `${Legacy.shims.getBasePath()}/app/logs/link-to/${INFRA_SOURCE_ID}/logs`;
-
   const params = [];
   if (clusterUuid) {
     params.push(`elasticsearch.cluster.uuid:${clusterUuid}`);
@@ -123,11 +122,12 @@ function getLogsUiLink(clusterUuid, nodeId, indexUuid) {
     params.push(`elasticsearch.index.name:${indexUuid}`);
   }
 
-  if (params.length === 0) {
-    return base;
-  }
+  const base = Legacy.shims.infra.locators.logsLocator.getRedirectUrl({
+    logView: { logViewId: INFRA_SOURCE_ID, type: 'log-view-reference' },
+    ...(params.length ? { filter: params.join(' and ') } : {}),
+  });
 
-  return `${base}?filter=${params.join(' and ')}`;
+  return base;
 }
 
 export class Logs extends PureComponent {
@@ -158,7 +158,7 @@ export class Logs extends PureComponent {
   }
 
   renderCallout() {
-    const uiCapabilities = Legacy.shims.capabilities;
+    const { capabilities: uiCapabilities, infra, kibanaServices } = Legacy.shims;
     const show = uiCapabilities.logs && uiCapabilities.logs.show;
     const {
       logs: { enabled },
@@ -170,7 +170,7 @@ export class Logs extends PureComponent {
       return null;
     }
 
-    return (
+    return infra ? (
       <EuiCallOut
         size="m"
         title={i18n.translate('xpack.monitoring.logs.listing.calloutTitle', {
@@ -178,7 +178,7 @@ export class Logs extends PureComponent {
         })}
         iconType="logsApp"
       >
-        <p>
+        <RedirectAppLinks coreStart={kibanaServices}>
           <FormattedMessage
             id="xpack.monitoring.logs.listing.linkText"
             defaultMessage="Visit {link} to dive deeper."
@@ -192,9 +192,9 @@ export class Logs extends PureComponent {
               ),
             }}
           />
-        </p>
+        </RedirectAppLinks>
       </EuiCallOut>
-    );
+    ) : null;
   }
 
   render() {

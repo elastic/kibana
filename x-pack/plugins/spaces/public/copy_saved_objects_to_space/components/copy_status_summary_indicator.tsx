@@ -12,10 +12,10 @@ import React, { Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { ResolveAllConflicts } from './resolve_all_conflicts';
 import type { SpacesDataEntry } from '../../types';
 import type { SummarizedCopyToSpaceResult } from '../lib';
 import type { ImportRetry } from '../types';
-import { ResolveAllConflicts } from './resolve_all_conflicts';
 
 interface Props {
   space: SpacesDataEntry;

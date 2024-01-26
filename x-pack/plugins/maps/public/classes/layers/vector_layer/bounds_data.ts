@@ -32,7 +32,7 @@ export async function syncBoundsData({
 
   const requestToken = Symbol(`${SOURCE_BOUNDS_DATA_REQUEST_ID}-${layerId}`);
 
-  // Do not pass all searchFilters to source.getBoundsForFilters().
+  // Do not pass all requestMeta to source.getBoundsForFilters().
   // For example, do not want to filter bounds request by extent and buffer.
   const boundsFilters = {
     sourceQuery: sourceQuery ? sourceQuery : undefined,
@@ -45,6 +45,7 @@ export async function syncBoundsData({
     applyGlobalQuery: source.getApplyGlobalQuery(),
     applyGlobalTime: source.getApplyGlobalTime(),
     isFeatureEditorOpenForLayer,
+    executionContext: dataFilters.executionContext,
   };
 
   let bounds = null;

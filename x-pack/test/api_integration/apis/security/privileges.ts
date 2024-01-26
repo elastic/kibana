@@ -22,8 +22,24 @@ export default function ({ getService }: FtrProviderContext) {
       savedObjectsTagging: ['all', 'read', 'minimal_all', 'minimal_read'],
       canvas: ['all', 'read', 'minimal_all', 'minimal_read'],
       maps: ['all', 'read', 'minimal_all', 'minimal_read'],
-      generalCases: ['all', 'read', 'minimal_all', 'minimal_read', 'cases_delete'],
-      observabilityCases: ['all', 'read', 'minimal_all', 'minimal_read', 'cases_delete'],
+      generalCases: [
+        'all',
+        'read',
+        'minimal_all',
+        'minimal_read',
+        'cases_delete',
+        'cases_settings',
+      ],
+      observabilityCases: [
+        'all',
+        'read',
+        'minimal_all',
+        'minimal_read',
+        'cases_delete',
+        'cases_settings',
+      ],
+      observabilityAIAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
+      slo: ['all', 'read', 'minimal_all', 'minimal_read'],
       fleetv2: ['all', 'read', 'minimal_all', 'minimal_read'],
       fleet: ['all', 'read', 'minimal_all', 'minimal_read'],
       actions: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -34,14 +50,35 @@ export default function ({ getService }: FtrProviderContext) {
         'read',
         'minimal_all',
         'minimal_read',
+        'endpoint_list_all',
+        'endpoint_list_read',
+        'trusted_applications_all',
+        'trusted_applications_read',
+        'host_isolation_exceptions_all',
+        'host_isolation_exceptions_read',
+        'blocklist_all',
+        'blocklist_read',
+        'event_filters_all',
+        'event_filters_read',
+        'policy_management_all',
+        'policy_management_read',
         'actions_log_management_all',
         'actions_log_management_read',
         'host_isolation_all',
         'process_operations_all',
         'file_operations_all',
+        'execute_operations_all',
       ],
-      uptime: ['all', 'read', 'minimal_all', 'minimal_read'],
-      securitySolutionCases: ['all', 'read', 'minimal_all', 'minimal_read', 'cases_delete'],
+      uptime: ['all', 'read', 'minimal_all', 'minimal_read', 'elastic_managed_locations_enabled'],
+      securitySolutionAssistant: ['all', 'read', 'minimal_all', 'minimal_read'],
+      securitySolutionCases: [
+        'all',
+        'read',
+        'minimal_all',
+        'minimal_read',
+        'cases_delete',
+        'cases_settings',
+      ],
       infrastructure: ['all', 'read', 'minimal_all', 'minimal_read'],
       logs: ['all', 'read', 'minimal_all', 'minimal_read'],
       apm: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -66,6 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
       advancedSettings: ['all', 'read', 'minimal_all', 'minimal_read'],
       indexPatterns: ['all', 'read', 'minimal_all', 'minimal_read'],
       savedObjectsManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
+      savedQueryManagement: ['all', 'minimal_all'],
       osquery: [
         'all',
         'read',
@@ -79,13 +117,24 @@ export default function ({ getService }: FtrProviderContext) {
         'packs_all',
         'packs_read',
       ],
+      filesManagement: ['all', 'read', 'minimal_all', 'minimal_read'],
+      filesSharedImage: ['all', 'read', 'minimal_all', 'minimal_read'],
+      rulesSettings: [
+        'all',
+        'read',
+        'minimal_all',
+        'minimal_read',
+        'allFlappingSettings',
+        'readFlappingSettings',
+      ],
+      maintenanceWindow: ['all', 'read', 'minimal_all', 'minimal_read'],
+      guidedOnboardingFeature: ['all', 'read', 'minimal_all', 'minimal_read'],
     },
     reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
   };
 
   describe('Privileges', () => {
-    // FLAKY: https://github.com/elastic/kibana/issues/145135
-    describe.skip('GET /api/security/privileges', () => {
+    describe('GET /api/security/privileges', () => {
       it('should return a privilege map with all known privileges, without actions', async () => {
         // If you're adding a privilege to the following, that's great!
         // If you're removing a privilege, this breaks backwards compatibility
@@ -194,8 +243,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     // In this non-Basic case, results should be exactly the same as not supplying the respectLicenseLevel flag
-    // FLAKY: https://github.com/elastic/kibana/issues/145136
-    describe.skip('GET /api/security/privileges?respectLicenseLevel=false', () => {
+    describe('GET /api/security/privileges?respectLicenseLevel=false', () => {
       it('should return a privilege map with all known privileges, without actions', async () => {
         // If you're adding a privilege to the following, that's great!
         // If you're removing a privilege, this breaks backwards compatibility

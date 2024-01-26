@@ -6,11 +6,14 @@
  */
 
 export {
-  SetEnterpriseSearchChrome,
+  SetSearchChrome,
   SetAnalyticsChrome,
   SetEnterpriseSearchContentChrome,
   SetElasticsearchChrome,
+  SetAiSearchChrome,
   SetAppSearchChrome,
   SetWorkplaceSearchChrome,
   SetSearchExperiencesChrome,
+  SetEnterpriseSearchApplicationsChrome,
+  SetVectorSearchChrome,
 } from './set_chrome';

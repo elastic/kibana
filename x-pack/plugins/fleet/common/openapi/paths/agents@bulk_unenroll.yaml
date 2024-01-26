@@ -1,16 +1,19 @@
 post:
-  summary: Agents - Bulk unenroll
-  tags: []
+  summary: Bulk unenroll agents
+  tags:
+    - Agents
   responses:
     '200':
-        description: OK
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                actionId: 
-                  type: string
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              actionId:
+                type: string
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: bulk-unenroll-agents
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
@@ -20,12 +23,6 @@ post:
         schema:
           type: object
           properties:
-            revoke:
-              type: boolean
-              description: Revokes API keys of agents
-            force:
-              type: boolean
-              description: Unenroll hosted agents too
             agents:
               oneOf:
                 - type: string
@@ -34,6 +31,15 @@ post:
                   items:
                     type: string
                   description: list of agent IDs
+            revoke:
+              type: boolean
+              description: Revokes API keys of agents
+            force:
+              type: boolean
+              description: Unenrolls hosted agents too
+            includeInactive:
+              type: boolean
+              description: When passing agents by KQL query, unenrolls inactive agents too
           required:
             - agents
         example:

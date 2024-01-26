@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { DATASET_VAR_NAME } from '../../../../../../../../common/constants';
+
 import type { AgentLogsState } from './agent_logs';
 
 export const AGENT_LOG_INDEX_PATTERN = 'logs-elastic_agent-*,logs-elastic_agent.*-*';
@@ -21,14 +23,16 @@ export const AGENT_ID_FIELD = {
   type: 'string',
 };
 export const DATASET_FIELD = {
-  name: 'data_stream.dataset',
+  name: DATASET_VAR_NAME,
   type: 'string',
   aggregatable: true,
+  searchable: true,
 };
 export const LOG_LEVEL_FIELD = {
   name: 'log.level',
   type: 'string',
   aggregatable: true,
+  searchable: true,
 };
 export const DEFAULT_DATE_RANGE = {
   start: 'now-1d',
@@ -51,7 +55,5 @@ export const AGENT_LOG_LEVELS = {
   INFO: 'info',
   DEBUG: 'debug',
 };
-
-export const ORDERED_FILTER_LOG_LEVELS = ['error', 'warning', 'warn', 'notice', 'info', 'debug'];
 
 export const DEFAULT_LOG_LEVEL = AGENT_LOG_LEVELS.INFO;

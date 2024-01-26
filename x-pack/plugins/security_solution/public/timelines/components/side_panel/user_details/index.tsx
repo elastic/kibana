@@ -12,19 +12,21 @@ import type { UserDetailsProps } from './types';
 
 const UserDetailsPanelComponent = ({
   contextID,
+  scopeId,
   userName,
   handleOnClose,
   isFlyoutView,
   isDraggable,
 }: UserDetailsProps) => {
   return isFlyoutView ? (
-    <UserDetailsFlyout userName={userName} contextID={contextID} />
+    <UserDetailsFlyout userName={userName} contextID={contextID} scopeId={scopeId} />
   ) : (
     <UserDetailsSidePanel
       userName={userName}
       contextID={contextID}
       isDraggable={isDraggable}
       handleOnClose={handleOnClose}
+      scopeId={scopeId}
     />
   );
 };

@@ -1,0 +1,3 @@
+test:
+  hello:
+    '__proto__.dolly': "Well hello there"

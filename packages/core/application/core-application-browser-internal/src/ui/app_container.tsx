@@ -10,7 +10,7 @@ import './app_container.scss';
 
 import { Observable } from 'rxjs';
 import React, { Fragment, FC, useLayoutEffect, useRef, useState, MutableRefObject } from 'react';
-import { EuiLoadingElastic } from '@elastic/eui';
+import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import type { CoreTheme } from '@kbn/core-theme-browser';
@@ -22,6 +22,7 @@ import {
   type AppUnmount,
   type ScopedHistory,
 } from '@kbn/core-application-browser';
+import { ThrowIfError } from '@kbn/shared-ux-error-boundary';
 import type { Mounter } from '../types';
 import { AppNotFound } from './app_not_found_screen';
 
@@ -36,6 +37,7 @@ interface Props {
   setAppActionMenu: (appId: string, mount: MountPoint | undefined) => void;
   createScopedHistory: (appUrl: string) => ScopedHistory;
   setIsMounting: (isMounting: boolean) => void;
+  showPlainSpinner?: boolean;
 }
 
 export const AppContainer: FC<Props> = ({
@@ -48,7 +50,9 @@ export const AppContainer: FC<Props> = ({
   appStatus,
   setIsMounting,
   theme$,
+  showPlainSpinner,
 }: Props) => {
+  const [error, setError] = useState<Error | null>(null);
   const [showSpinner, setShowSpinner] = useState(true);
   const [appNotFound, setAppNotFound] = useState(false);
   const elementRef = useRef<HTMLDivElement>(null);
@@ -85,14 +89,14 @@ export const AppContainer: FC<Props> = ({
             setHeaderActionMenu: (menuMount) => setAppActionMenu(appId, menuMount),
           })) || null;
       } catch (e) {
-        // TODO: add error UI
+        setError(e);
         // eslint-disable-next-line no-console
         console.error(e);
       } finally {
         if (elementRef.current) {
           setShowSpinner(false);
-          setIsMounting(false);
         }
+        setIsMounting(false);
       }
     };
 
@@ -113,14 +117,29 @@ export const AppContainer: FC<Props> = ({
 
   return (
     <Fragment>
+      <ThrowIfError error={error} />
       {appNotFound && <AppNotFound />}
-      {showSpinner && !appNotFound && <AppLoadingPlaceholder />}
+      {showSpinner && !appNotFound && (
+        <AppLoadingPlaceholder showPlainSpinner={Boolean(showPlainSpinner)} />
+      )}
       <div className={APP_WRAPPER_CLASS} key={appId} ref={elementRef} aria-busy={showSpinner} />
     </Fragment>
   );
 };
 
-const AppLoadingPlaceholder: FC = () => {
+const AppLoadingPlaceholder: FC<{ showPlainSpinner: boolean }> = ({ showPlainSpinner }) => {
+  if (showPlainSpinner) {
+    return (
+      <EuiLoadingSpinner
+        size={'xxl'}
+        className="appContainer__loading"
+        data-test-subj="appContainer-loadingSpinner"
+        aria-label={i18n.translate('core.application.appContainer.loadingAriaLabel', {
+          defaultMessage: 'Loading application',
+        })}
+      />
+    );
+  }
   return (
     <EuiLoadingElastic
       className="appContainer__loading"

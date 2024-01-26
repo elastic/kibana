@@ -40,16 +40,20 @@ describe('delete_list_item', () => {
     expect(deletedListItem).toEqual(listItem);
   });
 
-  test('Delete calls "delete" if a list item is returned from "getListItem"', async () => {
+  test('Delete calls "deleteByQuery" if a list item is returned from "getListItem"', async () => {
     const listItem = getListItemResponseMock();
     (getListItem as unknown as jest.Mock).mockResolvedValueOnce(listItem);
     const options = getDeleteListItemOptionsMock();
     await deleteListItem(options);
-    const deleteQuery = {
-      id: LIST_ITEM_ID,
+    const deleteByQuery = {
       index: LIST_ITEM_INDEX,
-      refresh: 'wait_for',
+      query: {
+        ids: {
+          values: [LIST_ITEM_ID],
+        },
+      },
+      refresh: false,
     };
-    expect(options.esClient.delete).toBeCalledWith(deleteQuery);
+    expect(options.esClient.deleteByQuery).toBeCalledWith(deleteByQuery);
   });
 });

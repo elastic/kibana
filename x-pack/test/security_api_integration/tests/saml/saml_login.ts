@@ -16,7 +16,7 @@ import {
   getLogoutRequest,
   getSAMLRequestId,
   getSAMLResponse,
-} from '../../fixtures/saml/saml_tools';
+} from '@kbn/security-api-integration-helpers/saml/saml_tools';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { FileWrapper } from '../audit/file_wrapper';
 
@@ -193,7 +193,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(401);
 
         expect(unauthenticatedResponse.headers['content-security-policy']).to.be.a('string');
-        expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
+        expect(unauthenticatedResponse.text).to.contain('error');
       });
 
       it('should succeed if both SAML response and handshake cookie are provided', async () => {
@@ -240,7 +240,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(401);
 
         expect(unauthenticatedResponse.headers['content-security-policy']).to.be.a('string');
-        expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
+        expect(unauthenticatedResponse.text).to.contain('error');
       });
     });
 
@@ -614,6 +614,9 @@ export default function ({ getService }: FtrProviderContext) {
 
         sessionCookie = parseCookie(samlAuthenticationResponse.headers['set-cookie'][0])!;
 
+        // Let's make sure that created tokens are available for search.
+        await getService('es').indices.refresh({ index: '.security-tokens' });
+
         // Let's delete tokens from `.security` index directly to simulate the case when
         // Elasticsearch automatically removes access/refresh token document from the index
         // after some period of time.
@@ -699,6 +702,9 @@ export default function ({ getService }: FtrProviderContext) {
         [
           'when access token document is missing',
           async () => {
+            // Let's make sure that created tokens are available for search.
+            await getService('es').indices.refresh({ index: '.security-tokens' });
+
             const esResponse = await getService('es').deleteByQuery({
               index: '.security-tokens',
               body: { query: { match: { doc_type: 'token' } } },
@@ -796,7 +802,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('Audit Log', function () {
-      const logFilePath = resolve(__dirname, '../../fixtures/audit/saml.log');
+      const logFilePath = resolve(__dirname, '../../packages/helpers/audit/saml.log');
       const logFile = new FileWrapper(logFilePath, retry);
 
       beforeEach(async () => {

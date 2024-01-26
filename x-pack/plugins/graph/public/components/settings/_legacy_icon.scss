@@ -1,7 +1,20 @@
 .gphLegacyIcon {
   width: $euiSizeS * 2;
-}
 
-.gphLegacyIcon--list {
-  margin-right: $euiSizeM;
+  &--list {
+    margin-right: $euiSizeM;
+  }
+
+  &--pickable {
+    margin: $euiSizeXS;
+    cursor: pointer;
+    opacity: .7;
+  }
+
+  &--pickable:hover,
+  &--pickable:focus,
+  &--selected {
+    transform: scale(1.4);
+    opacity: 1;
+  }
 }

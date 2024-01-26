@@ -24,7 +24,7 @@ import {
   TRANSACTION_SAMPLED,
   AGENT_NAME,
   INDEX,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import {
@@ -172,6 +172,14 @@ async function getMainServiceStatistics({
   return serviceStats ?? [];
 }
 
+export type StorageExplorerServiceStatisticsResponse = Array<{
+  serviceName: string;
+  sampling: number;
+  environments: string[];
+  size: number;
+  agentName: AgentName;
+}>;
+
 export async function getServiceStatistics({
   apmEventClient,
   context,
@@ -192,7 +200,7 @@ export async function getServiceStatistics({
   environment: string;
   kuery: string;
   searchAggregatedTransactions: boolean;
-}) {
+}): Promise<StorageExplorerServiceStatisticsResponse> {
   const [docCountPerProcessorEvent, totalTransactionsPerService] =
     await Promise.all([
       getMainServiceStatistics({

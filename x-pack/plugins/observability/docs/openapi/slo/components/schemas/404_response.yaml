@@ -1,0 +1,16 @@
+title: Not found
+type: object
+required:
+  - statusCode
+  - error
+  - message
+properties:
+  statusCode:
+    type: number
+    example: 404
+  error:
+    type: string
+    example: Not Found
+  message:
+    type: string
+    example: "SLO [3749f390-03a3-11ee-8139-c7ff60a1692d] not found"

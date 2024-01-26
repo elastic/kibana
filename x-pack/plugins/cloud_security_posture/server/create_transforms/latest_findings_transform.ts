@@ -9,10 +9,11 @@ import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   FINDINGS_INDEX_PATTERN,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  LATEST_FINDINGS_RETENTION_POLICY,
 } from '../../common/constants';
 
 export const latestFindingsTransform: TransformPutTransformRequest = {
-  transform_id: 'cloud_security_posture.findings_latest-default-8.4.0',
+  transform_id: 'cloud_security_posture.findings_latest-default-8.8.0',
   description: 'Defines findings transformation to view only the latest finding per resource',
   source: {
     index: FINDINGS_INDEX_PATTERN,
@@ -30,13 +31,14 @@ export const latestFindingsTransform: TransformPutTransformRequest = {
   retention_policy: {
     time: {
       field: '@timestamp',
-      max_age: '5h',
+      max_age: LATEST_FINDINGS_RETENTION_POLICY,
     },
   },
   latest: {
     sort: '@timestamp',
     unique_key: ['resource.id', 'rule.id'],
   },
+  settings: { unattended: true },
   _meta: {
     package: {
       name: CLOUD_SECURITY_POSTURE_PACKAGE_NAME,

@@ -1,11 +1,11 @@
-[role="xpack"]
 [[kibana-authentication]]
 === Authentication in {kib}
 ++++
 <titleabbrev>Authentication</titleabbrev>
 ++++
-:keywords: administrator, concept, security, authentication
-:description: A list of the supported authentication mechanisms in {kib}.
+
+:frontmatter-description: A list of the supported authentication mechanisms in {kib}.
+:frontmatter-tags-products: [kibana]
 
 {kib} supports the following authentication mechanisms:
 

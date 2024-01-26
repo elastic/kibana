@@ -1,8 +1,12 @@
 {
   "license.get": {
     "url_params": {
-      "local": "__flag__",
-      "accept_enterprise": "__flag__"
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "accept_enterprise": "__flag__",
+      "local": "__flag__"
     },
     "methods": [
       "GET"
@@ -10,6 +14,10 @@
     "patterns": [
       "_license"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/get-license.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/get-license.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

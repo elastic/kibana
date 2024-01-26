@@ -7,7 +7,9 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiIcon } from '@elastic/eui';
 import { UrlTemplate } from '../../types';
+import { IconRenderer } from '../icon_renderer';
 
 interface DrillDownsProps {
   urlTemplates: UrlTemplate[];
@@ -18,7 +20,7 @@ export const DrillDowns = ({ urlTemplates, openUrlTemplate }: DrillDownsProps) =
   return (
     <div>
       <div className="gphSidebar__header">
-        <span className="kuiIcon fa-info" />
+        <EuiIcon type="iInCircle" />{' '}
         {i18n.translate('xpack.graph.sidebar.drillDownsTitle', {
           defaultMessage: 'Drill-downs',
         })}
@@ -41,7 +43,7 @@ export const DrillDowns = ({ urlTemplates, openUrlTemplate }: DrillDownsProps) =
               <li className="list-group-item">
                 {urlTemplate.icon && (
                   <>
-                    <span className="kuiIcon gphNoUserSelect">{urlTemplate.icon?.code}</span>{' '}
+                    <IconRenderer icon={urlTemplate.icon} className="gphNoUserSelect" />{' '}
                   </>
                 )}
                 <a aria-hidden="true" onClick={onOpenUrlTemplate}>

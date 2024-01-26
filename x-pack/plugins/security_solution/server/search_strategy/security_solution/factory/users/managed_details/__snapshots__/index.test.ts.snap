@@ -1,0 +1,520 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`userDetails search strategy parse should parse data correctly 1`] = `
+Object {
+  "inspect": Object {
+    "dsl": Array [
+      "{
+  \\"allow_no_indices\\": true,
+  \\"index\\": [
+    \\"logs-*\\"
+  ],
+  \\"ignore_unavailable\\": true,
+  \\"track_total_hits\\": false,
+  \\"body\\": {
+    \\"query\\": {
+      \\"bool\\": {
+        \\"filter\\": [
+          {
+            \\"terms\\": {
+              \\"event.dataset\\": [
+                \\"entityanalytics_okta.user\\",
+                \\"entityanalytics_entra_id.user\\"
+              ]
+            }
+          },
+          {
+            \\"term\\": {
+              \\"event.kind\\": \\"asset\\"
+            }
+          }
+        ],
+        \\"should\\": [
+          {
+            \\"term\\": {
+              \\"user.name\\": \\"test-user-name\\"
+            }
+          },
+          {
+            \\"terms\\": {
+              \\"user.email\\": [
+                \\"test-user-name@mail.com\\"
+              ]
+            }
+          }
+        ],
+        \\"minimum_should_match\\": 1
+      }
+    },
+    \\"size\\": 0,
+    \\"aggs\\": {
+      \\"datasets\\": {
+        \\"terms\\": {
+          \\"field\\": \\"event.dataset\\"
+        },
+        \\"aggs\\": {
+          \\"latest_hit\\": {
+            \\"top_hits\\": {
+              \\"fields\\": [
+                \\"*\\",
+                \\"_index\\",
+                \\"_id\\"
+              ],
+              \\"_source\\": false,
+              \\"size\\": 1,
+              \\"sort\\": [
+                {
+                  \\"@timestamp\\": {
+                    \\"order\\": \\"desc\\"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  \\"sort\\": [
+    {
+      \\"@timestamp\\": \\"desc\\"
+    }
+  ]
+}",
+    ],
+  },
+  "isPartial": false,
+  "isRunning": false,
+  "loaded": 21,
+  "rawResponse": Object {
+    "_shards": Object {
+      "failed": 0,
+      "skipped": 0,
+      "successful": 2,
+      "total": 2,
+    },
+    "aggregations": Object {
+      "datasets": Object {
+        "buckets": Array [
+          Object {
+            "doc_count": 122,
+            "key": "entityanalytics_okta.user",
+            "latest_hit": Object {
+              "hits": Object {
+                "hits": Array [
+                  Object {
+                    "_id": "Bnwi8osBcjOsowlA78aM",
+                    "_index": ".ds-logs-entityanalytics_okta.user-default-2023.11.15-000001",
+                    "_score": null,
+                    "fields": Object {
+                      "@timestamp": Array [
+                        "2023-11-28T13:32:54.446Z",
+                      ],
+                      "_id": Array [
+                        "XoEiFowBcjOsowlAIN1T",
+                      ],
+                      "_index": Array [
+                        ".ds-logs-entityanalytics_okta.user-default-2023.11.15-000001",
+                      ],
+                      "agent.ephemeral_id": Array [
+                        "7ddc108f-026a-4a20-afc1-ebc983145df4",
+                      ],
+                      "agent.id": Array [
+                        "ced095f0-df97-4bdc-86a9-25cc11238317",
+                      ],
+                      "agent.name": Array [
+                        "docker-fleet-agent",
+                      ],
+                      "agent.type": Array [
+                        "filebeat",
+                      ],
+                      "agent.version": Array [
+                        "8.12.0",
+                      ],
+                      "asset.category": Array [
+                        "entity",
+                      ],
+                      "asset.create_date": Array [
+                        "2023-11-14T16:33:53.000Z",
+                      ],
+                      "asset.id": Array [
+                        "00ud9ohoh9ww644Px5d7",
+                      ],
+                      "asset.last_seen": Array [
+                        "2023-11-21T08:08:46.000Z",
+                      ],
+                      "asset.last_status_change_date": Array [
+                        "2023-11-15T07:09:05.000Z",
+                      ],
+                      "asset.last_updated": Array [
+                        "2023-11-21T08:14:56.000Z",
+                      ],
+                      "asset.status": Array [
+                        "ACTIVE",
+                      ],
+                      "asset.type": Array [
+                        "okta_user",
+                      ],
+                      "data_stream.dataset": Array [
+                        "entityanalytics_okta.user",
+                      ],
+                      "data_stream.namespace": Array [
+                        "default",
+                      ],
+                      "data_stream.type": Array [
+                        "logs",
+                      ],
+                      "ecs.version": Array [
+                        "8.11.0",
+                      ],
+                      "elastic_agent.id": Array [
+                        "ced095f0-df97-4bdc-86a9-25cc11238317",
+                      ],
+                      "elastic_agent.snapshot": Array [
+                        true,
+                      ],
+                      "elastic_agent.version": Array [
+                        "8.12.0",
+                      ],
+                      "entityanalytics_okta.user._links": Array [
+                        Object {
+                          "self": Object {
+                            "href": "https://dev-36006609.okta.com/api/v1/users/00ud9ohoh9ww644Px5d7",
+                          },
+                        },
+                      ],
+                      "entityanalytics_okta.user.type": Array [
+                        Object {
+                          "id": "otyf1r6hlGf9AXhZ95d6",
+                        },
+                      ],
+                      "event.action": Array [
+                        "user-modified",
+                      ],
+                      "event.agent_id_status": Array [
+                        "verified",
+                      ],
+                      "event.category": Array [
+                        "iam",
+                      ],
+                      "event.dataset": Array [
+                        "entityanalytics_okta.user",
+                      ],
+                      "event.ingested": Array [
+                        "2023-11-28T13:33:04Z",
+                      ],
+                      "event.kind": Array [
+                        "asset",
+                      ],
+                      "event.module": Array [
+                        "entityanalytics_okta",
+                      ],
+                      "event.type": Array [
+                        "user",
+                        "info",
+                      ],
+                      "input.type": Array [
+                        "entity-analytics",
+                      ],
+                      "labels.identity_source": Array [
+                        "entity-analytics-entityanalytics_okta.user-be940503-bec8-4849-8ec7-2b526d6f2609",
+                      ],
+                      "related.user": Array [
+                        "00ud9ohoh9ww644Px5d7",
+                        "test@elastic.co",
+                        "Test",
+                        "User",
+                      ],
+                      "tags": Array [
+                        "forwarded",
+                        "entityanalytics_okta-user",
+                      ],
+                      "user.account.activated_date": Array [
+                        "2023-11-14T16:33:54.000Z",
+                      ],
+                      "user.account.change_date": Array [
+                        "2023-11-15T07:09:05.000Z",
+                      ],
+                      "user.account.create_date": Array [
+                        "2023-11-14T16:33:53.000Z",
+                      ],
+                      "user.account.password_change_date": Array [
+                        "2023-11-15T07:09:05.000Z",
+                      ],
+                      "user.account.status.deprovisioned": Array [
+                        false,
+                      ],
+                      "user.account.status.locked_out": Array [
+                        false,
+                      ],
+                      "user.account.status.password_expired": Array [
+                        false,
+                      ],
+                      "user.account.status.recovery": Array [
+                        false,
+                      ],
+                      "user.account.status.suspended": Array [
+                        false,
+                      ],
+                      "user.email": Array [
+                        "test@elastic.co",
+                      ],
+                      "user.geo.city_name": Array [
+                        "Adam",
+                      ],
+                      "user.geo.country_iso_code": Array [
+                        "NL",
+                      ],
+                      "user.id": Array [
+                        "00ud9ohoh9ww644Px5d7",
+                      ],
+                      "user.name": Array [
+                        "test@elastic.co",
+                      ],
+                      "user.name.text": Array [
+                        "test@elastic.co",
+                      ],
+                      "user.profile.first_name": Array [
+                        "User First Name",
+                      ],
+                      "user.profile.job_title": Array [
+                        "Unit Test Writer",
+                      ],
+                      "user.profile.last_name": Array [
+                        "Test Last Name",
+                      ],
+                      "user.profile.mobile_phone": Array [
+                        "99999999",
+                      ],
+                      "user.profile.primaryPhone": Array [
+                        "99999999",
+                      ],
+                      "user.profile.status": Array [
+                        "ACTIVE",
+                      ],
+                    },
+                    "sort": Array [
+                      1700574447551,
+                    ],
+                  },
+                ],
+                "max_score": null,
+                "total": Object {
+                  "relation": "eq",
+                  "value": 122,
+                },
+              },
+            },
+          },
+        ],
+        "doc_count_error_upper_bound": 0,
+        "sum_other_doc_count": 0,
+      },
+    },
+    "hits": Object {
+      "hits": Array [],
+      "max_score": null,
+    },
+    "timed_out": false,
+    "took": 5,
+  },
+  "total": 21,
+  "users": Object {
+    "entityanalytics_okta.user": Object {
+      "_id": "Bnwi8osBcjOsowlA78aM",
+      "_index": ".ds-logs-entityanalytics_okta.user-default-2023.11.15-000001",
+      "_score": null,
+      "fields": Object {
+        "@timestamp": Array [
+          "2023-11-28T13:32:54.446Z",
+        ],
+        "_id": Array [
+          "XoEiFowBcjOsowlAIN1T",
+        ],
+        "_index": Array [
+          ".ds-logs-entityanalytics_okta.user-default-2023.11.15-000001",
+        ],
+        "agent.ephemeral_id": Array [
+          "7ddc108f-026a-4a20-afc1-ebc983145df4",
+        ],
+        "agent.id": Array [
+          "ced095f0-df97-4bdc-86a9-25cc11238317",
+        ],
+        "agent.name": Array [
+          "docker-fleet-agent",
+        ],
+        "agent.type": Array [
+          "filebeat",
+        ],
+        "agent.version": Array [
+          "8.12.0",
+        ],
+        "asset.category": Array [
+          "entity",
+        ],
+        "asset.create_date": Array [
+          "2023-11-14T16:33:53.000Z",
+        ],
+        "asset.id": Array [
+          "00ud9ohoh9ww644Px5d7",
+        ],
+        "asset.last_seen": Array [
+          "2023-11-21T08:08:46.000Z",
+        ],
+        "asset.last_status_change_date": Array [
+          "2023-11-15T07:09:05.000Z",
+        ],
+        "asset.last_updated": Array [
+          "2023-11-21T08:14:56.000Z",
+        ],
+        "asset.status": Array [
+          "ACTIVE",
+        ],
+        "asset.type": Array [
+          "okta_user",
+        ],
+        "data_stream.dataset": Array [
+          "entityanalytics_okta.user",
+        ],
+        "data_stream.namespace": Array [
+          "default",
+        ],
+        "data_stream.type": Array [
+          "logs",
+        ],
+        "ecs.version": Array [
+          "8.11.0",
+        ],
+        "elastic_agent.id": Array [
+          "ced095f0-df97-4bdc-86a9-25cc11238317",
+        ],
+        "elastic_agent.snapshot": Array [
+          true,
+        ],
+        "elastic_agent.version": Array [
+          "8.12.0",
+        ],
+        "entityanalytics_okta.user._links": Array [
+          Object {
+            "self": Object {
+              "href": "https://dev-36006609.okta.com/api/v1/users/00ud9ohoh9ww644Px5d7",
+            },
+          },
+        ],
+        "entityanalytics_okta.user.type": Array [
+          Object {
+            "id": "otyf1r6hlGf9AXhZ95d6",
+          },
+        ],
+        "event.action": Array [
+          "user-modified",
+        ],
+        "event.agent_id_status": Array [
+          "verified",
+        ],
+        "event.category": Array [
+          "iam",
+        ],
+        "event.dataset": Array [
+          "entityanalytics_okta.user",
+        ],
+        "event.ingested": Array [
+          "2023-11-28T13:33:04Z",
+        ],
+        "event.kind": Array [
+          "asset",
+        ],
+        "event.module": Array [
+          "entityanalytics_okta",
+        ],
+        "event.type": Array [
+          "user",
+          "info",
+        ],
+        "input.type": Array [
+          "entity-analytics",
+        ],
+        "labels.identity_source": Array [
+          "entity-analytics-entityanalytics_okta.user-be940503-bec8-4849-8ec7-2b526d6f2609",
+        ],
+        "related.user": Array [
+          "00ud9ohoh9ww644Px5d7",
+          "test@elastic.co",
+          "Test",
+          "User",
+        ],
+        "tags": Array [
+          "forwarded",
+          "entityanalytics_okta-user",
+        ],
+        "user.account.activated_date": Array [
+          "2023-11-14T16:33:54.000Z",
+        ],
+        "user.account.change_date": Array [
+          "2023-11-15T07:09:05.000Z",
+        ],
+        "user.account.create_date": Array [
+          "2023-11-14T16:33:53.000Z",
+        ],
+        "user.account.password_change_date": Array [
+          "2023-11-15T07:09:05.000Z",
+        ],
+        "user.account.status.deprovisioned": Array [
+          false,
+        ],
+        "user.account.status.locked_out": Array [
+          false,
+        ],
+        "user.account.status.password_expired": Array [
+          false,
+        ],
+        "user.account.status.recovery": Array [
+          false,
+        ],
+        "user.account.status.suspended": Array [
+          false,
+        ],
+        "user.email": Array [
+          "test@elastic.co",
+        ],
+        "user.geo.city_name": Array [
+          "Adam",
+        ],
+        "user.geo.country_iso_code": Array [
+          "NL",
+        ],
+        "user.id": Array [
+          "00ud9ohoh9ww644Px5d7",
+        ],
+        "user.name": Array [
+          "test@elastic.co",
+        ],
+        "user.name.text": Array [
+          "test@elastic.co",
+        ],
+        "user.profile.first_name": Array [
+          "User First Name",
+        ],
+        "user.profile.job_title": Array [
+          "Unit Test Writer",
+        ],
+        "user.profile.last_name": Array [
+          "Test Last Name",
+        ],
+        "user.profile.mobile_phone": Array [
+          "99999999",
+        ],
+        "user.profile.primaryPhone": Array [
+          "99999999",
+        ],
+        "user.profile.status": Array [
+          "ACTIVE",
+        ],
+      },
+      "sort": Array [
+        1700574447551,
+      ],
+    },
+  },
+}
+`;

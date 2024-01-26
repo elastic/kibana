@@ -1,14 +1,23 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types",
   },
-  "include": ["public/**/*"],
+  "include": ["public/**/*", "server/**/*"],
   "kbn_references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../url_forwarding/tsconfig.json" },
-    { "path": "../../../src/plugins/management/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/url-forwarding-plugin",
+    "@kbn/management-plugin",
+    "@kbn/i18n-react",
+    "@kbn/i18n",
+    "@kbn/ui-theme",
+    "@kbn/kibana-react-plugin",
+    "@kbn/shared-ux-router",
+    "@kbn/deeplinks-devtools",
+    "@kbn/config-schema",
+    "@kbn/core-plugins-server",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

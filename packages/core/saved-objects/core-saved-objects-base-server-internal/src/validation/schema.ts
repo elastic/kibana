@@ -19,31 +19,40 @@ type SavedObjectSanitizedDocSchema = {
   [K in keyof Required<SavedObjectSanitizedDoc>]: Type<SavedObjectSanitizedDoc[K]>;
 };
 
+const baseSchema = schema.object<SavedObjectSanitizedDocSchema>({
+  id: schema.string(),
+  type: schema.string(),
+  references: schema.arrayOf(
+    schema.object({
+      name: schema.string(),
+      type: schema.string(),
+      id: schema.string(),
+    }),
+    { defaultValue: [] }
+  ),
+  namespace: schema.maybe(schema.string()),
+  namespaces: schema.maybe(schema.arrayOf(schema.string())),
+  migrationVersion: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+  coreMigrationVersion: schema.maybe(schema.string()),
+  typeMigrationVersion: schema.maybe(schema.string()),
+  updated_at: schema.maybe(schema.string()),
+  created_at: schema.maybe(schema.string()),
+  version: schema.maybe(schema.string()),
+  originId: schema.maybe(schema.string()),
+  managed: schema.maybe(schema.boolean()),
+  attributes: schema.maybe(schema.any()),
+});
+
 /**
  * Takes a {@link SavedObjectsValidationSpec} and returns a full schema representing
  * a {@link SavedObjectSanitizedDoc}, with the spec applied to the object's `attributes`.
  *
  * @internal
  */
-export const createSavedObjectSanitizedDocSchema = (attributesSchema: SavedObjectsValidationSpec) =>
-  schema.object<SavedObjectSanitizedDocSchema>({
+export const createSavedObjectSanitizedDocSchema = (
+  attributesSchema: SavedObjectsValidationSpec
+) => {
+  return baseSchema.extends({
     attributes: attributesSchema,
-    id: schema.string(),
-    type: schema.string(),
-    references: schema.arrayOf(
-      schema.object({
-        name: schema.string(),
-        type: schema.string(),
-        id: schema.string(),
-      }),
-      { defaultValue: [] }
-    ),
-    namespace: schema.maybe(schema.string()),
-    namespaces: schema.maybe(schema.arrayOf(schema.string())),
-    migrationVersion: schema.maybe(schema.recordOf(schema.string(), schema.string())),
-    coreMigrationVersion: schema.maybe(schema.string()),
-    updated_at: schema.maybe(schema.string()),
-    created_at: schema.maybe(schema.string()),
-    version: schema.maybe(schema.string()),
-    originId: schema.maybe(schema.string()),
   });
+};

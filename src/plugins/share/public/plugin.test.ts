@@ -54,6 +54,7 @@ describe('SharePlugin', () => {
           expect.objectContaining({
             getShareMenuItems: expect.any(Function),
           }),
+          true, // disableEmbed - true because buildFlavor === 'serverless'
           undefined
         );
         expect(start.toggleShareContextMenu).toBeDefined();
@@ -73,6 +74,7 @@ describe('SharePlugin', () => {
           expect.objectContaining({
             getShareMenuItems: expect.any(Function),
           }),
+          true, // disableEmbed - true because buildFlavor === 'serverless'
           anonymousAccessServiceProvider
         );
         expect(start.toggleShareContextMenu).toBeDefined();

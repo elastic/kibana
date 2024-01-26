@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { Filter } from '@kbn/es-query';
 import { DataViewField, DataView, ISearchSource } from '@kbn/data-plugin/common';
@@ -15,12 +15,15 @@ import type { KibanaExecutionContext } from '@kbn/core/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
 import { lastValueFrom } from 'rxjs';
 import type { TimeRange } from '@kbn/es-query';
+import { extractWarnings, type SearchResponseWarning } from '@kbn/search-response-warnings';
+import type { IESAggSource } from '../es_agg_source';
 import { AbstractVectorSource, BoundsRequestMeta } from '../vector_source';
 import {
   getAutocompleteService,
   getIndexPatternService,
-  getTimeFilter,
+  getInspector,
   getSearchService,
+  getTimeFilter,
 } from '../../../kibana_services';
 import { getDataViewNotFoundMessage } from '../../../../common/i18n_getters';
 import { createExtentFilter } from '../../../../common/elasticsearch_util';
@@ -33,7 +36,7 @@ import {
   AbstractSourceDescriptor,
   DynamicStylePropertyOptions,
   MapExtent,
-  VectorJoinSourceRequestMeta,
+  StyleMetaData,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { IVectorStyle } from '../../styles/vector/vector_style';
@@ -41,7 +44,7 @@ import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_st
 import { IField } from '../../fields/field';
 import { FieldFormatter } from '../../../../common/constants';
 import { isValidStringConfig } from '../../util/valid_string_config';
-import { makePublicExecutionContext } from '../../../util';
+import { mergeExecutionContext } from '../execution_context_utils';
 
 export function isSearchSourceAbortError(error: Error) {
   return error.name === 'AbortError';
@@ -49,10 +52,15 @@ export function isSearchSourceAbortError(error: Error) {
 
 export interface IESSource extends IVectorSource {
   isESSource(): true;
+
   getId(): string;
+
   getIndexPattern(): Promise<DataView>;
+
   getIndexPatternId(): string;
+
   getGeoFieldName(): string;
+
   loadStylePropsMeta({
     layerName,
     style,
@@ -62,6 +70,7 @@ export interface IESSource extends IVectorSource {
     timeFilters,
     searchSessionId,
     inspectorAdapters,
+    executionContext,
   }: {
     layerName: string;
     style: IVectorStyle;
@@ -71,7 +80,8 @@ export interface IESSource extends IVectorSource {
     timeFilters: TimeRange;
     searchSessionId?: string;
     inspectorAdapters: Adapters;
-  }): Promise<object>;
+    executionContext: KibanaExecutionContext;
+  }): Promise<{ styleMeta: StyleMetaData; warnings: SearchResponseWarning[] }>;
 }
 
 export class AbstractESSource extends AbstractVectorSource implements IESSource {
@@ -89,7 +99,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     }
     return {
       ...descriptor,
-      id: isValidStringConfig(descriptor.id) ? descriptor.id! : uuid(),
+      id: isValidStringConfig(descriptor.id) ? descriptor.id! : uuidv4(),
       type: isValidStringConfig(descriptor.type) ? descriptor.type! : '',
       indexPatternId: descriptor.indexPatternId!,
       applyGlobalQuery:
@@ -110,6 +120,10 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     return this._descriptor.id;
   }
 
+  getInspectorRequestIds(): string[] {
+    return [this.getId()];
+  }
+
   getApplyGlobalQuery(): boolean {
     return this._descriptor.applyGlobalQuery;
   }
@@ -120,10 +134,6 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
 
   getApplyForceRefresh(): boolean {
     return this._descriptor.applyForceRefresh;
-  }
-
-  isFieldAware(): boolean {
-    return true;
   }
 
   isQueryAware(): boolean {
@@ -148,31 +158,33 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   cloneDescriptor(): AbstractSourceDescriptor {
     const clonedDescriptor = copyPersistentState(this._descriptor);
     // id used as uuid to track requests in inspector
-    clonedDescriptor.id = uuid();
+    clonedDescriptor.id = uuidv4();
     return clonedDescriptor;
   }
 
   async _runEsQuery({
     registerCancelCallback,
-    requestDescription,
     requestId,
     requestName,
     searchSessionId,
     searchSource,
     executionContext,
     requestsAdapter,
+    onWarning,
   }: {
     registerCancelCallback: (callback: () => void) => void;
-    requestDescription: string;
     requestId: string;
     requestName: string;
     searchSessionId?: string;
     searchSource: ISearchSource;
     executionContext: KibanaExecutionContext;
     requestsAdapter: RequestAdapter | undefined;
+    onWarning?: (warning: SearchResponseWarning) => void;
   }): Promise<any> {
     const abortController = new AbortController();
     registerCancelCallback(() => abortController.abort());
+
+    const disableWarningToasts = onWarning !== undefined && requestsAdapter !== undefined;
 
     try {
       const { rawResponse: resp } = await lastValueFrom(
@@ -184,68 +196,69 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
             adapter: requestsAdapter,
             id: requestId,
             title: requestName,
-            description: requestDescription,
           },
           executionContext,
+          disableWarningToasts,
         })
       );
+
+      if (disableWarningToasts) {
+        extractWarnings(resp, getInspector(), requestsAdapter, requestName, requestId).forEach(
+          onWarning
+        );
+      }
+
       return resp;
     } catch (error) {
       if (isSearchSourceAbortError(error)) {
         throw new DataRequestAbortError();
       }
 
-      throw new Error(
-        i18n.translate('xpack.maps.source.esSource.requestFailedErrorMessage', {
-          defaultMessage: `Elasticsearch search request failed, error: {message}`,
-          values: { message: error.message },
-        })
-      );
+      throw error;
     }
   }
 
   async makeSearchSource(
-    searchFilters: VectorSourceRequestMeta | VectorJoinSourceRequestMeta | BoundsRequestMeta,
+    requestMeta: VectorSourceRequestMeta | BoundsRequestMeta,
     limit: number,
     initialSearchContext?: object
   ): Promise<ISearchSource> {
     const indexPattern = await this.getIndexPattern();
-    const globalFilters: Filter[] = searchFilters.applyGlobalQuery ? searchFilters.filters : [];
+    const globalFilters: Filter[] = requestMeta.applyGlobalQuery ? requestMeta.filters : [];
     const allFilters: Filter[] = [...globalFilters];
-    if (searchFilters.joinKeyFilter) {
-      allFilters.push(searchFilters.joinKeyFilter);
+    if (requestMeta.joinKeyFilter) {
+      allFilters.push(requestMeta.joinKeyFilter);
     }
-    if (this.isFilterByMapBounds() && 'buffer' in searchFilters && searchFilters.buffer) {
+    if (this.isFilterByMapBounds() && 'buffer' in requestMeta && requestMeta.buffer) {
       // buffer can be empty
       const geoField = await this._getGeoField();
       const buffer: MapExtent =
-        this.isGeoGridPrecisionAware() &&
-        'geogridPrecision' in searchFilters &&
-        typeof searchFilters.geogridPrecision === 'number'
-          ? expandToTileBoundaries(searchFilters.buffer, searchFilters.geogridPrecision)
-          : searchFilters.buffer;
+        'isGeoGridPrecisionAware' in this &&
+        'getGeoGridPrecision' in this &&
+        (this as IESAggSource).isGeoGridPrecisionAware()
+          ? expandToTileBoundaries(
+              requestMeta.buffer,
+              (this as IESAggSource).getGeoGridPrecision(requestMeta.zoom)
+            )
+          : requestMeta.buffer;
       const extentFilter = createExtentFilter(buffer, [geoField.name]);
 
       allFilters.push(extentFilter);
     }
 
     let isFeatureEditorOpenForLayer = false;
-    if ('isFeatureEditorOpenForLayer' in searchFilters) {
-      isFeatureEditorOpenForLayer = searchFilters.isFeatureEditorOpenForLayer;
+    if ('isFeatureEditorOpenForLayer' in requestMeta) {
+      isFeatureEditorOpenForLayer = requestMeta.isFeatureEditorOpenForLayer;
     }
 
-    if (
-      searchFilters.applyGlobalTime &&
-      (await this.isTimeAware()) &&
-      !isFeatureEditorOpenForLayer
-    ) {
-      const timeRange = searchFilters.timeslice
+    if (requestMeta.applyGlobalTime && (await this.isTimeAware()) && !isFeatureEditorOpenForLayer) {
+      const timeRange = requestMeta.timeslice
         ? {
-            from: new Date(searchFilters.timeslice.from).toISOString(),
-            to: new Date(searchFilters.timeslice.to).toISOString(),
+            from: new Date(requestMeta.timeslice.from).toISOString(),
+            to: new Date(requestMeta.timeslice.to).toISOString(),
             mode: 'absolute' as 'absolute',
           }
-        : searchFilters.timeFilters;
+        : requestMeta.timeFilters;
       const filter = getTimeFilter().createFilter(indexPattern, timeRange);
       if (filter) {
         allFilters.push(filter);
@@ -258,23 +271,23 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', limit);
     searchSource.setField('filter', allFilters);
-    if (searchFilters.applyGlobalQuery && !isFeatureEditorOpenForLayer) {
-      searchSource.setField('query', searchFilters.query);
+    if (requestMeta.applyGlobalQuery && !isFeatureEditorOpenForLayer) {
+      searchSource.setField('query', requestMeta.query);
     }
 
     const parents = [];
-    if (searchFilters.sourceQuery && !isFeatureEditorOpenForLayer) {
+    if (requestMeta.sourceQuery && !isFeatureEditorOpenForLayer) {
       const layerSearchSource = searchService.searchSource.createEmpty();
       layerSearchSource.setField('index', indexPattern);
-      layerSearchSource.setField('query', searchFilters.sourceQuery);
+      layerSearchSource.setField('query', requestMeta.sourceQuery);
       parents.push(layerSearchSource);
     }
 
-    if (searchFilters.embeddableSearchContext && !isFeatureEditorOpenForLayer) {
+    if (requestMeta.embeddableSearchContext && !isFeatureEditorOpenForLayer) {
       const embeddableSearchSource = searchService.searchSource.createEmpty();
       embeddableSearchSource.setField('index', indexPattern);
-      embeddableSearchSource.setField('query', searchFilters.embeddableSearchContext.query);
-      embeddableSearchSource.setField('filter', searchFilters.embeddableSearchContext.filters);
+      embeddableSearchSource.setField('query', requestMeta.embeddableSearchContext.query);
+      embeddableSearchSource.setField('filter', requestMeta.embeddableSearchContext.filters);
       parents.push(embeddableSearchSource);
     }
 
@@ -310,7 +323,10 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
         searchSource.fetch$({
           abortSignal: abortController.signal,
           legacyHitsTotal: false,
-          executionContext: makePublicExecutionContext('es_source:bounds'),
+          executionContext: mergeExecutionContext(
+            { description: 'es_source:bounds' },
+            boundsFilters.executionContext
+          ),
         })
       );
 
@@ -404,7 +420,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     if (!geoField) {
       throw new Error(
         i18n.translate('xpack.maps.source.esSource.noGeoFieldErrorMessage', {
-          defaultMessage: `Data view "{indexPatternLabel}"" no longer contains the geo field "{geoField}"`,
+          defaultMessage: `Data view "{indexPatternLabel}" no longer contains the geo field "{geoField}"`,
           values: { indexPatternLabel: indexPattern.getName(), geoField: this.getGeoFieldName() },
         })
       );
@@ -451,6 +467,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     timeFilters,
     searchSessionId,
     inspectorAdapters,
+    executionContext,
   }: {
     layerName: string;
     style: IVectorStyle;
@@ -460,15 +477,19 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     timeFilters: TimeRange;
     searchSessionId?: string;
     inspectorAdapters: Adapters;
-  }): Promise<object> {
+    executionContext: KibanaExecutionContext;
+  }) {
     const promises = dynamicStyleProps.map((dynamicStyleProp) => {
       return dynamicStyleProp.getFieldMetaRequest();
     });
 
     const fieldAggRequests = await Promise.all(promises);
-    const allAggs: Record<string, any> = fieldAggRequests.reduce(
+    const allAggs = fieldAggRequests.reduce<Record<string, any>>(
       (aggs: Record<string, any>, fieldAggRequest: unknown | null) => {
-        return fieldAggRequest ? { ...aggs, ...(fieldAggRequest as Record<string, any>) } : aggs;
+        if (fieldAggRequest) {
+          Object.assign(aggs, fieldAggRequest);
+        }
+        return aggs;
       },
       {}
     );
@@ -490,27 +511,30 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       }
     }
 
+    const warnings: SearchResponseWarning[] = [];
     const resp = await this._runEsQuery({
       requestId: `${this.getId()}_styleMeta`,
       requestName: i18n.translate('xpack.maps.source.esSource.stylePropsMetaRequestName', {
-        defaultMessage: '{layerName} - metadata',
+        defaultMessage: 'load symbolization ranges ({layerName})',
         values: { layerName },
       }),
       searchSource,
       registerCancelCallback,
-      requestDescription: i18n.translate(
-        'xpack.maps.source.esSource.stylePropsMetaRequestDescription',
-        {
-          defaultMessage:
-            'Elasticsearch request retrieving field metadata used for calculating symbolization bands.',
-        }
-      ),
       searchSessionId,
-      executionContext: makePublicExecutionContext('es_source:style_meta'),
+      executionContext: mergeExecutionContext(
+        { description: 'es_source:style_meta' },
+        executionContext
+      ),
       requestsAdapter: inspectorAdapters.requests,
+      onWarning: (warning: SearchResponseWarning) => {
+        warnings.push(warning);
+      },
     });
 
-    return resp.aggregations;
+    return {
+      styleMeta: resp.aggregations,
+      warnings,
+    };
   }
 
   getValueSuggestions = async (field: IField, query: string): Promise<string[]> => {

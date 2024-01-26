@@ -12,6 +12,9 @@ import buildStandalone from '@storybook/react/standalone';
 import { Flags, run } from '@kbn/dev-cli-runner';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
+
+// @ts-expect-error internal dep of storybook
+import interpret from 'interpret'; // eslint-disable-line import/no-extraneous-dependencies
 import * as constants from './constants';
 
 // Convert the flags to a Storybook loglevel
@@ -52,6 +55,12 @@ export function runStorybookCli({ configDir, name }: { configDir: string; name: 
       }
 
       logger.setLevel(getLogLevelFromFlags(flags));
+
+      // force storybook to use our transpilation rather than ts-node or anything else
+      interpret.extensions['.ts'] = [require.resolve('@kbn/babel-register/install')];
+      interpret.extensions['.tsx'] = [require.resolve('@kbn/babel-register/install')];
+      interpret.extensions['.jsx'] = [require.resolve('@kbn/babel-register/install')];
+
       await buildStandalone(config);
 
       // Line is only reached when building the static version

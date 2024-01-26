@@ -1,0 +1,2 @@
+type: string
+description: When set to `rollup`, identifies the rollup data views.

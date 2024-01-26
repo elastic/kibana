@@ -44,7 +44,7 @@ export const TransformAlertFlyout: FC<TransformAlertFlyoutProps> = ({
     };
 
     if (initialAlert) {
-      return triggersActionsUi.getEditAlertFlyout({
+      return triggersActionsUi.getEditRuleFlyout({
         ...commonProps,
         initialRule: {
           ...initialAlert,
@@ -53,7 +53,7 @@ export const TransformAlertFlyout: FC<TransformAlertFlyoutProps> = ({
       });
     }
 
-    return triggersActionsUi.getAddAlertFlyout({
+    return triggersActionsUi.getAddRuleFlyout({
       ...commonProps,
       consumer: 'stackAlerts',
       canChangeTrigger: false,

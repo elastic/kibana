@@ -1,0 +1,38 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`group editor flyout renders controls 1`] = `
+Object {
+  "TagSelector": [MockFunction],
+  "dataViews": Array [
+    Object {
+      "id": "some-id",
+      "title": "My Data View",
+    },
+  ],
+  "group": Object {
+    "annotations": Array [
+      Object {
+        "icon": "triangle",
+        "id": "my-id",
+        "key": Object {
+          "timestamp": "some-timestamp",
+          "type": "point_in_time",
+        },
+        "label": "Event",
+        "type": "manual",
+      },
+    ],
+    "description": "",
+    "ignoreGlobalFilters": false,
+    "indexPatternId": "some-id",
+    "tags": Array [],
+    "title": "My group",
+  },
+  "isAdHocDataView": [Function],
+  "queryInputServices": Object {},
+  "selectedAnnotation": undefined,
+  "setSelectedAnnotation": [Function],
+  "showValidation": false,
+  "update": [MockFunction],
+}
+`;

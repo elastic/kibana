@@ -27,6 +27,7 @@ export const RowExpansionButton = <Item extends any>({
 
   return (
     <EuiButtonIcon
+      data-test-subj="infraRowExpansionButtonButton"
       onClick={handleClick}
       aria-label={isExpanded ? collapseAriaLabel : expandAriaLabel}
       iconType={isExpanded ? 'arrowUp' : 'arrowDown'}

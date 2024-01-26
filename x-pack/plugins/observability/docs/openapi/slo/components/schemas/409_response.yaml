@@ -1,0 +1,16 @@
+title: Conflict
+type: object
+required:
+  - statusCode
+  - error
+  - message
+properties:
+  statusCode:
+    type: number
+    example: 409
+  error:
+    type: string
+    example: Conflict
+  message:
+    type: string
+    example: "SLO [d077e940-1515-11ee-9c50-9d096392f520] already exists"

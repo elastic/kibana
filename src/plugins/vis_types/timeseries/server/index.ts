@@ -7,16 +7,21 @@
  */
 
 import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
-import { VisTypeTimeseriesConfig, config as configSchema } from './config';
-import { VisTypeTimeseriesPlugin } from './plugin';
+import { VisTypeTimeseriesConfig, config as configSchema } from '../config';
 
 export type { VisTypeTimeseriesSetup } from './plugin';
 
 export const config: PluginConfigDescriptor<VisTypeTimeseriesConfig> = {
+  // exposeToBrowser specifies kibana.yml settings to expose to the browser
+  // the value `true` in this context signals configuration is exposed to browser
+  exposeToBrowser: {
+    readOnly: true,
+  },
   schema: configSchema,
 };
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { VisTypeTimeseriesPlugin } = await import('./plugin');
   return new VisTypeTimeseriesPlugin(initializerContext);
 }
 

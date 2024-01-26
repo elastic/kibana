@@ -13,6 +13,7 @@ import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_PROTECTION_UPDATES_PATH,
 } from '../../../../../common/constants';
 import type { PolicyDetailsSelector, PolicyDetailsState } from '../../../types';
 
@@ -85,6 +86,18 @@ export const isOnBlocklistsView: PolicyDetailsSelector<boolean> = createSelector
     return (
       matchPath(pathname ?? '', {
         path: MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
+        exact: true,
+      }) !== null
+    );
+  }
+);
+
+export const isOnProtectionUpdatesView: PolicyDetailsSelector<boolean> = createSelector(
+  getUrlLocationPathname,
+  (pathname) => {
+    return (
+      matchPath(pathname ?? '', {
+        path: MANAGEMENT_ROUTING_POLICY_DETAILS_PROTECTION_UPDATES_PATH,
         exact: true,
       }) !== null
     );

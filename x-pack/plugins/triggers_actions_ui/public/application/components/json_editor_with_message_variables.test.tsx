@@ -7,16 +7,14 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { JsonEditorWithMessageVariables } from './json_editor_with_message_variables';
-import { MockCodeEditor } from '../code_editor.mock';
+import { MockedCodeEditor } from '@kbn/code-editor-mock';
 
-const kibanaReactPath = '../../../../../../src/plugins/kibana_react/public';
-
-jest.mock(kibanaReactPath, () => {
-  const original = jest.requireActual(kibanaReactPath);
+jest.mock('@kbn/code-editor', () => {
+  const original = jest.requireActual('@kbn/code-editor');
   return {
     ...original,
     CodeEditor: (props: any) => {
-      return <MockCodeEditor {...props} />;
+      return <MockedCodeEditor {...props} />;
     },
   };
 });
@@ -41,7 +39,7 @@ describe('JsonEditorWithMessageVariables', () => {
     const wrapper = mountWithIntl(<JsonEditorWithMessageVariables {...props} />);
 
     wrapper.find('[data-test-subj="fooAddVariableButton"]').first().simulate('click');
-    wrapper.find('[data-test-subj="variableMenuButton-0-templated-name"]').last().simulate('click');
+    wrapper.find('[data-test-subj="variableMenuButton-myVar"]').last().simulate('click');
 
     expect(wrapper.find('[data-test-subj="fooJsonEditor"]').first().prop('value')).toEqual(
       '{{myVar}}'
@@ -63,10 +61,24 @@ describe('JsonEditorWithMessageVariables', () => {
     );
 
     wrapper.find('[data-test-subj="fooAddVariableButton"]').first().simulate('click');
-    wrapper.find('[data-test-subj="variableMenuButton-0-templated-name"]').last().simulate('click');
+    wrapper.find('[data-test-subj="variableMenuButton-myVar"]').last().simulate('click');
 
     expect(wrapper.find('[data-test-subj="fooJsonEditor"]').first().prop('value')).toEqual(
       '{{{myVar}}}'
+    );
+  });
+
+  test('renders correct value when the input value prop updates', () => {
+    const wrapper = mountWithIntl(<JsonEditorWithMessageVariables {...props} />);
+
+    expect(wrapper.find('[data-test-subj="fooJsonEditor"]').first().prop('value')).toEqual('');
+
+    const inputTargetValue = '{"new": "value"}';
+    wrapper.setProps({ inputTargetValue });
+    wrapper.update();
+
+    expect(wrapper.find('[data-test-subj="fooJsonEditor"]').first().prop('value')).toEqual(
+      inputTargetValue
     );
   });
 });

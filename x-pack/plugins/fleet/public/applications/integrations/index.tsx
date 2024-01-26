@@ -6,7 +6,9 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Redirect, Route } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
+
 import type { RouteProps } from 'react-router-dom';
 
 import type { CoreStart, AppMountParameters } from '@kbn/core/public';

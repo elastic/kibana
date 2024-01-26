@@ -9,15 +9,23 @@ import nodeCrypto from '@elastic/node-crypto';
 import crypto from 'crypto';
 
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
-import { ConfigSchema, createConfig } from '../config';
 import { sessionCookieMock, sessionIndexMock, sessionMock } from './index.mock';
 import { getPrintableSessionId, Session, type SessionValueContentToEncrypt } from './session';
 import type { SessionCookie } from './session_cookie';
-import { SessionExpiredError, SessionMissingError, SessionUnexpectedError } from './session_errors';
+import {
+  SessionConcurrencyLimitError,
+  SessionExpiredError,
+  SessionMissingError,
+  SessionUnexpectedError,
+} from './session_errors';
 import type { SessionIndex } from './session_index';
+import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
+import { userSessionConcurrentLimitLogoutEvent } from '../audit';
+import { auditLoggerMock, auditServiceMock } from '../audit/mocks';
+import { ConfigSchema, createConfig } from '../config';
 
 describe('Session', () => {
   const now = 123456;
@@ -27,6 +35,7 @@ describe('Session', () => {
 
   let mockSessionIndex: jest.Mocked<PublicMethodsOf<SessionIndex>>;
   let mockSessionCookie: jest.Mocked<PublicMethodsOf<SessionCookie>>;
+  let mockScopedAuditLogger: jest.Mocked<AuditLogger>;
   let session: Session;
   beforeEach(() => {
     jest.spyOn(Date, 'now').mockImplementation(() => now);
@@ -43,6 +52,10 @@ describe('Session', () => {
 
     mockSessionCookie = sessionCookieMock.create();
     mockSessionIndex = sessionIndexMock.create();
+    mockScopedAuditLogger = auditLoggerMock.create();
+
+    const mockAuditServiceSetup = auditServiceMock.create();
+    mockAuditServiceSetup.asScoped.mockReturnValue(mockScopedAuditLogger);
 
     session = new Session({
       logger: loggingSystemMock.createLogger(),
@@ -56,6 +69,7 @@ describe('Session', () => {
       ),
       sessionCookie: mockSessionCookie,
       sessionIndex: mockSessionIndex,
+      audit: mockAuditServiceSetup,
     });
   });
 
@@ -205,6 +219,40 @@ describe('Session', () => {
       expect(mockSessionIndex.invalidate).toHaveBeenCalledTimes(1);
     });
 
+    it('clears session value if the session is outside the concurrent session limit', async () => {
+      mockSessionCookie.get.mockResolvedValue(
+        sessionCookieMock.createValue({
+          aad: mockAAD,
+          idleTimeoutExpiration: now + 1,
+          lifespanExpiration: now + 1,
+        })
+      );
+      mockSessionIndex.get.mockResolvedValue(
+        sessionIndexMock.createValue({
+          content: await encryptContent(
+            { username: 'some-user', state: 'some-state', userProfileId: 'uid' },
+            mockAAD
+          ),
+        })
+      );
+      mockSessionIndex.isWithinConcurrentSessionLimit.mockResolvedValue(false);
+
+      await expect(session.get(httpServerMock.createKibanaRequest())).resolves.toEqual({
+        error: expect.any(SessionConcurrencyLimitError),
+        value: null,
+      });
+      expect(mockSessionCookie.clear).toHaveBeenCalledTimes(1);
+      expect(mockSessionIndex.invalidate).toHaveBeenCalledTimes(1);
+      expect(mockScopedAuditLogger.log).toHaveBeenCalledTimes(1);
+      expect(mockScopedAuditLogger.log).toHaveBeenCalledWith(
+        userSessionConcurrentLimitLogoutEvent({
+          username: 'some-user',
+          userProfileId: 'uid',
+          provider: { name: 'basic1', type: 'basic' },
+        })
+      );
+    });
+
     it('returns session value with decrypted content', async () => {
       mockSessionCookie.get.mockResolvedValue(
         sessionCookieMock.createValue({
@@ -229,6 +277,7 @@ describe('Session', () => {
         value: {
           idleTimeoutExpiration: now + 1,
           lifespanExpiration: now + 1,
+          createdAt: 1234567890,
           metadata: { index: mockSessionIndexValue },
           provider: { name: 'basic1', type: 'basic' },
           sid: 'some-long-sid',
@@ -262,10 +311,49 @@ describe('Session', () => {
         value: {
           idleTimeoutExpiration: now + 1,
           lifespanExpiration: now + 1,
+          createdAt: 1234567890,
           metadata: { index: mockSessionIndexValue },
           provider: { name: 'basic1', type: 'basic' },
           sid: 'some-long-sid',
           state: 'some-state',
+        },
+      });
+      expect(mockSessionCookie.clear).not.toHaveBeenCalled();
+      expect(mockSessionIndex.invalidate).not.toHaveBeenCalled();
+    });
+
+    it('returns session value with 0 as `createdAt` if it is not set', async () => {
+      mockSessionCookie.get.mockResolvedValue(
+        sessionCookieMock.createValue({
+          aad: mockAAD,
+          idleTimeoutExpiration: now + 1,
+          lifespanExpiration: now + 1,
+        })
+      );
+
+      const mockSessionIndexValue = sessionIndexMock.createValue({
+        idleTimeoutExpiration: now - 1,
+        lifespanExpiration: now + 1,
+        createdAt: undefined,
+        content: await encryptContent(
+          { username: 'some-user', state: 'some-state', userProfileId: 'uid' },
+          mockAAD
+        ),
+      });
+      mockSessionIndex.get.mockResolvedValue(mockSessionIndexValue);
+
+      await expect(session.get(httpServerMock.createKibanaRequest())).resolves.toEqual({
+        error: null,
+        value: {
+          idleTimeoutExpiration: now + 1,
+          lifespanExpiration: now + 1,
+          createdAt: 0,
+          metadata: { index: mockSessionIndexValue },
+          provider: { name: 'basic1', type: 'basic' },
+          sid: 'some-long-sid',
+          state: 'some-state',
+          username: 'some-user',
+          userProfileId: 'uid',
         },
       });
       expect(mockSessionCookie.clear).not.toHaveBeenCalled();
@@ -282,6 +370,7 @@ describe('Session', () => {
         sid: mockSID,
         idleTimeoutExpiration: now + 123,
         lifespanExpiration: now + 456,
+        createdAt: 123456,
       });
       mockSessionIndex.create.mockResolvedValue(mockSessionIndexValue);
 
@@ -301,6 +390,7 @@ describe('Session', () => {
         provider: { name: 'basic1', type: 'basic' },
         idleTimeoutExpiration: now + 123,
         lifespanExpiration: now + 456,
+        createdAt: 123456,
         metadata: { index: mockSessionIndexValue },
       });
 
@@ -314,6 +404,7 @@ describe('Session', () => {
         usernameHash: '8ac76453d769d4fd14b3f41ad4933f9bd64321972cd002de9b847e117435b08b',
         idleTimeoutExpiration: now + 123,
         lifespanExpiration: now + 456,
+        createdAt: 123456,
       });
 
       // Properly creates session cookie value.
@@ -334,6 +425,7 @@ describe('Session', () => {
         sid: mockSID,
         idleTimeoutExpiration: now + 123,
         lifespanExpiration: now + 456,
+        createdAt: 123456,
       });
       mockSessionIndex.create.mockResolvedValue(mockSessionIndexValue);
 
@@ -349,6 +441,7 @@ describe('Session', () => {
         provider: { name: 'basic1', type: 'basic' },
         idleTimeoutExpiration: now + 123,
         lifespanExpiration: now + 456,
+        createdAt: 123456,
         metadata: { index: mockSessionIndexValue },
       });
 
@@ -361,6 +454,7 @@ describe('Session', () => {
         provider: { name: 'basic1', type: 'basic' },
         idleTimeoutExpiration: now + 123,
         lifespanExpiration: now + 456,
+        createdAt: 123456,
       });
 
       // Properly creates session cookie value.
@@ -442,6 +536,7 @@ describe('Session', () => {
         provider: { name: 'basic1', type: 'basic' },
         idleTimeoutExpiration: now + 123,
         lifespanExpiration: now + 1,
+        createdAt: 1234567890,
         metadata: { index: mockSessionIndexValue },
       });
 
@@ -455,6 +550,7 @@ describe('Session', () => {
         usernameHash: '35133597af273830c3f139c72501e676338f28a39dca8ff62d5c2b8bfba75f69',
         idleTimeoutExpiration: now + 123,
         lifespanExpiration: now + 1,
+        createdAt: 1234567890,
         metadata: { primaryTerm: 1, sequenceNumber: 1 },
       });
 
@@ -501,6 +597,7 @@ describe('Session', () => {
         provider: { name: 'basic1', type: 'basic' },
         idleTimeoutExpiration: now + 123,
         lifespanExpiration: now + 1,
+        createdAt: 1234567890,
         metadata: { index: mockSessionIndexValue },
       });
 
@@ -513,6 +610,7 @@ describe('Session', () => {
         provider: { name: 'basic1', type: 'basic' },
         idleTimeoutExpiration: now + 123,
         lifespanExpiration: now + 1,
+        createdAt: 1234567890,
         metadata: { primaryTerm: 1, sequenceNumber: 1 },
       });
 
@@ -546,6 +644,7 @@ describe('Session', () => {
         ),
         sessionCookie: mockSessionCookie,
         sessionIndex: mockSessionIndex,
+        audit: auditServiceMock.create(),
       });
 
       const mockRequest = httpServerMock.createKibanaRequest();
@@ -586,6 +685,7 @@ describe('Session', () => {
           ),
           sessionCookie: mockSessionCookie,
           sessionIndex: mockSessionIndex,
+          audit: auditServiceMock.create(),
         });
 
         const mockRequest = httpServerMock.createKibanaRequest();
@@ -661,6 +761,7 @@ describe('Session', () => {
         ),
         sessionCookie: mockSessionCookie,
         sessionIndex: mockSessionIndex,
+        audit: auditServiceMock.create(),
       });
 
       const mockRequest = httpServerMock.createKibanaRequest();
@@ -717,6 +818,7 @@ describe('Session', () => {
           ),
           sessionCookie: mockSessionCookie,
           sessionIndex: mockSessionIndex,
+          audit: auditServiceMock.create(),
         });
       });
 
@@ -862,6 +964,7 @@ describe('Session', () => {
           ),
           sessionCookie: mockSessionCookie,
           sessionIndex: mockSessionIndex,
+          audit: auditServiceMock.create(),
         });
 
         const mockRequest = httpServerMock.createKibanaRequest();
@@ -908,6 +1011,7 @@ describe('Session', () => {
           ),
           sessionCookie: mockSessionCookie,
           sessionIndex: mockSessionIndex,
+          audit: auditServiceMock.create(),
         });
 
         const mockRequest = httpServerMock.createKibanaRequest();

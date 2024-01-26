@@ -18,6 +18,7 @@ import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
 import { AppDeps } from '../../../public/application/app';
 import { LicenseStatus } from '../../../common/types/license_status';
+import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
 class MockTimeBuckets {
   setBounds(_domain: any) {
@@ -41,9 +42,10 @@ export const mockContextValue: AppDeps = {
   setBreadcrumbs: jest.fn(),
   createTimeBuckets: () => new MockTimeBuckets(),
   uiSettings: uiSettingsServiceMock.createSetupContract(),
+  settings: settingsServiceMock.createStartContract(),
   toasts: notificationServiceMock.createSetupContract().toasts,
   theme: {
-    useChartsTheme: jest.fn(),
+    useChartsBaseTheme: jest.fn(),
   } as any,
   // For our test harness, we don't use this mocked out http service
   http: httpServiceMock.createSetupContract(),

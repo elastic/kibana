@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { type FC } from 'react';
 
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { AuditMessageBase } from '../../../common/types/messages';
@@ -23,7 +23,7 @@ export const JobIcon: FC<Props> = ({ message, showTooltip = false }) => {
   }
 
   let color = 'primary';
-  const icon = 'alert';
+  const icon = 'warning';
 
   if (message.level === INFO) {
     color = 'primary';

@@ -6,14 +6,22 @@
  */
 
 import type { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
-import type { CollectorDependencies } from './types';
+
+import type { CollectorDependencies, DashboardMetrics } from './types';
 import { getDetectionsMetrics } from './detections/get_metrics';
 import { getInternalSavedObjectsClient } from './get_internal_saved_objects_client';
+import { getEndpointMetrics } from './endpoint/get_metrics';
+import { getDashboardMetrics } from './dashboards/get_dashboards_metrics';
+import { riskEngineMetricsSchema } from './risk_engine/schema';
+import { getRiskEngineMetrics } from './risk_engine/get_risk_engine_metrics';
 
 export type RegisterCollector = (deps: CollectorDependencies) => void;
 
 export interface UsageData {
   detectionMetrics: {};
+  endpointMetrics: {};
+  dashboardMetrics: DashboardMetrics;
+  riskEngineMetrics: {};
 }
 
 export const registerCollector: RegisterCollector = ({
@@ -23,6 +31,7 @@ export const registerCollector: RegisterCollector = ({
   ml,
   usageCollection,
   logger,
+  riskEngineIndexPatterns,
 }) => {
   if (!usageCollection) {
     logger.debug('Usage collection is undefined, therefore returning early without registering it');
@@ -62,6 +71,13 @@ export const registerCollector: RegisterCollector = ({
                 type: 'long',
                 _meta: { description: 'Number of notifications enabled' },
               },
+              legacy_investigation_fields: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'Number of rules using the legacy investigation fields type introduced only in 8.10 ESS',
+                },
+              },
             },
             threshold: {
               enabled: {
@@ -98,6 +114,13 @@ export const registerCollector: RegisterCollector = ({
                 type: 'long',
                 _meta: { description: 'Number of notifications enabled' },
               },
+              legacy_investigation_fields: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'Number of rules using the legacy investigation fields type introduced only in 8.10 ESS',
+                },
+              },
             },
             eql: {
               enabled: { type: 'long', _meta: { description: 'Number of eql rules enabled' } },
@@ -125,6 +148,13 @@ export const registerCollector: RegisterCollector = ({
               notifications_disabled: {
                 type: 'long',
                 _meta: { description: 'Number of notifications enabled' },
+              },
+              legacy_investigation_fields: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'Number of rules using the legacy investigation fields type introduced only in 8.10 ESS',
+                },
               },
             },
             machine_learning: {
@@ -162,6 +192,13 @@ export const registerCollector: RegisterCollector = ({
                 type: 'long',
                 _meta: { description: 'Number of notifications enabled' },
               },
+              legacy_investigation_fields: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'Number of rules using the legacy investigation fields type introduced only in 8.10 ESS',
+                },
+              },
             },
             threat_match: {
               enabled: {
@@ -197,6 +234,13 @@ export const registerCollector: RegisterCollector = ({
               notifications_disabled: {
                 type: 'long',
                 _meta: { description: 'Number of notifications enabled' },
+              },
+              legacy_investigation_fields: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'Number of rules using the legacy investigation fields type introduced only in 8.10 ESS',
+                },
               },
             },
             new_terms: {
@@ -234,6 +278,13 @@ export const registerCollector: RegisterCollector = ({
                 type: 'long',
                 _meta: { description: 'Number of notifications enabled' },
               },
+              legacy_investigation_fields: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'Number of rules using the legacy investigation fields type introduced only in 8.10 ESS',
+                },
+              },
             },
             elastic_total: {
               enabled: { type: 'long', _meta: { description: 'Number of elastic rules enabled' } },
@@ -265,6 +316,13 @@ export const registerCollector: RegisterCollector = ({
                 type: 'long',
                 _meta: { description: 'Number of notifications enabled' },
               },
+              legacy_investigation_fields: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'Number of rules using the legacy investigation fields type introduced only in 8.10 ESS',
+                },
+              },
             },
             custom_total: {
               enabled: { type: 'long', _meta: { description: 'Number of custom rules enabled' } },
@@ -292,6 +350,13 @@ export const registerCollector: RegisterCollector = ({
               notifications_disabled: {
                 type: 'long',
                 _meta: { description: 'Number of notifications enabled' },
+              },
+              legacy_investigation_fields: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'Number of rules using the legacy investigation fields type introduced only in 8.10 ESS',
+                },
               },
             },
           },
@@ -2397,20 +2462,72 @@ export const registerCollector: RegisterCollector = ({
           },
         },
       },
+      endpointMetrics: {
+        unique_endpoint_count: {
+          type: 'long',
+          _meta: { description: 'Number of active unique endpoints in last 24 hours' },
+        },
+      },
+      dashboardMetrics: {
+        dashboard_tag: {
+          created_at: {
+            type: 'keyword',
+            _meta: { description: 'The time the tab was created' },
+          },
+          linked_dashboards_count: {
+            type: 'long',
+            _meta: { description: 'Number of associated dashboards' },
+          },
+        },
+        dashboards: {
+          type: 'array',
+          items: {
+            created_at: {
+              type: 'keyword',
+              _meta: { description: 'The time the dashboard was created' },
+            },
+            dashboard_id: {
+              type: 'keyword',
+              _meta: { description: 'The dashboard saved object id' },
+            },
+            error_message: {
+              type: 'keyword',
+              _meta: { description: 'The relevant error message' },
+            },
+            error_status_code: {
+              type: 'long',
+              _meta: { description: 'The relevant error status code' },
+            },
+          },
+        },
+      },
+      riskEngineMetrics: riskEngineMetricsSchema,
     },
     isReady: () => true,
     fetch: async ({ esClient }: CollectorFetchContext): Promise<UsageData> => {
       const savedObjectsClient = await getInternalSavedObjectsClient(core);
-      const detectionMetrics = await getDetectionsMetrics({
-        eventLogIndex,
-        signalsIndex,
-        esClient,
-        savedObjectsClient,
-        logger,
-        mlClient: ml,
-      });
+      const [detectionMetrics, endpointMetrics, dashboardMetrics, riskEngineMetrics] =
+        await Promise.allSettled([
+          getDetectionsMetrics({
+            eventLogIndex,
+            signalsIndex,
+            esClient,
+            savedObjectsClient,
+            logger,
+            mlClient: ml,
+          }),
+          getEndpointMetrics({ esClient, logger }),
+          getDashboardMetrics({
+            savedObjectsClient,
+            logger,
+          }),
+          getRiskEngineMetrics({ esClient, logger, riskEngineIndexPatterns }),
+        ]);
       return {
-        detectionMetrics: detectionMetrics || {},
+        detectionMetrics: detectionMetrics.status === 'fulfilled' ? detectionMetrics.value : {},
+        endpointMetrics: endpointMetrics.status === 'fulfilled' ? endpointMetrics.value : {},
+        dashboardMetrics: dashboardMetrics.status === 'fulfilled' ? dashboardMetrics.value : {},
+        riskEngineMetrics: riskEngineMetrics.status === 'fulfilled' ? riskEngineMetrics.value : {},
       };
     },
   });

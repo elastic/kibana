@@ -7,19 +7,15 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { NavigateToPath, useTimefilter } from '../../../contexts/kibana';
-import { MlRoute, PageLoader, PageProps } from '../../router';
-import { useResolver } from '../../use_resolver';
-import { checkFullLicense } from '../../../license';
-import {
-  checkGetJobsCapabilitiesResolver,
-  checkPermission,
-} from '../../../capabilities/check_capabilities';
-import { checkMlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
+import { useTimefilter } from '@kbn/ml-date-picker';
+import { NavigateToPath } from '../../../contexts/kibana';
+import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
+import { useRouteResolver } from '../../use_resolver';
+import { usePermissionCheck } from '../../../capabilities/check_capabilities';
 import { NewCalendar } from '../../../settings/calendars';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
-import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
 import { ML_PAGES } from '../../../../../common/constants/locator';
+import { getMlNodeCount } from '../../../ml_nodes_check';
 
 enum MODE {
   NEW,
@@ -34,7 +30,7 @@ export const newCalendarRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  path: '/settings/calendars_list/new_calendar',
+  path: createPath(ML_PAGES.CALENDARS_NEW),
   title: i18n.translate('xpack.ml.settings.createCalendar.docTitle', {
     defaultMessage: 'Create Calendar',
   }),
@@ -56,7 +52,7 @@ export const editCalendarRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  path: '/settings/calendars_list/edit_calendar/:calendarId',
+  path: createPath(ML_PAGES.CALENDARS_EDIT, '/:calendarId'),
   title: i18n.translate('xpack.ml.settings.editCalendar.docTitle', {
     defaultMessage: 'Edit Calendar',
   }),
@@ -73,27 +69,21 @@ export const editCalendarRouteFactory = (
   ],
 });
 
-const PageWrapper: FC<NewCalendarPageProps> = ({ location, mode, deps }) => {
+const PageWrapper: FC<NewCalendarPageProps> = ({ location, mode }) => {
   let calendarId: string | undefined;
   if (mode === MODE.EDIT) {
     const pathMatch: string[] | null = location.pathname.match(/.+\/(.+)$/);
     calendarId = pathMatch && pathMatch.length > 1 ? pathMatch[1] : undefined;
   }
-  const { redirectToMlAccessDeniedPage } = deps;
-  const redirectToJobsManagementPage = useCreateAndNavigateToMlLink(
-    ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE
-  );
 
-  const { context } = useResolver(undefined, undefined, deps.config, deps.dataViewsContract, {
-    checkFullLicense,
-    checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
-    checkMlNodesAvailable: () => checkMlNodesAvailable(redirectToJobsManagementPage),
-  });
+  const { context } = useRouteResolver('full', ['canGetJobs'], { getMlNodeCount });
 
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
 
-  const canCreateCalendar = checkPermission('canCreateCalendar');
-  const canDeleteCalendar = checkPermission('canDeleteCalendar');
+  const [canCreateCalendar, canDeleteCalendar] = usePermissionCheck([
+    'canCreateCalendar',
+    'canDeleteCalendar',
+  ]);
 
   return (
     <PageLoader context={context}>

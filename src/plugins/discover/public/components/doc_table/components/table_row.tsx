@@ -12,15 +12,19 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiIcon } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { Filter } from '@kbn/es-query';
-import { formatFieldValue } from '../../../utils/format_value';
-import { DocViewer } from '../../../services/doc_views/components/doc_viewer';
+import type {
+  DataTableRecord,
+  EsHitRecord,
+  ShouldShowFieldInTableHandler,
+} from '@kbn/discover-utils/types';
+import { formatFieldValue } from '@kbn/discover-utils';
+import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '@kbn/discover-utils';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { UnifiedDocViewer } from '@kbn/unified-doc-viewer-plugin/public';
 import { TableCell } from './table_row/table_cell';
 import { formatRow, formatTopLevelObject } from '../utils/row_formatter';
-import { DocViewFilterFn } from '../../../services/doc_views/doc_views_types';
-import { DataTableRecord, EsHitRecord } from '../../../types';
 import { TableRowDetails } from './table_row_details';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
-import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
 
 export type DocTableRow = EsHitRecord & {
   isAnchor?: boolean;
@@ -30,24 +34,28 @@ export interface TableRowProps {
   columns: string[];
   filter: DocViewFilterFn;
   filters?: Filter[];
+  isPlainRecord?: boolean;
   savedSearchId?: string;
   row: DataTableRecord;
+  rows: DataTableRecord[];
   dataView: DataView;
   useNewFieldsApi: boolean;
-  fieldsToShow: string[];
+  shouldShowFieldHandler: ShouldShowFieldInTableHandler;
   onAddColumn?: (column: string) => void;
   onRemoveColumn?: (column: string) => void;
 }
 
 export const TableRow = ({
   filters,
+  isPlainRecord,
   columns,
   filter,
   savedSearchId,
   row,
+  rows,
   dataView,
   useNewFieldsApi,
-  fieldsToShow,
+  shouldShowFieldHandler,
   onAddColumn,
   onRemoveColumn,
 }: TableRowProps) => {
@@ -77,7 +85,7 @@ export const TableRow = ({
     // If we're formatting the _source column, don't use the regular field formatter,
     // but our Discover mechanism to format a hit in a better human-readable way.
     if (fieldName === '_source') {
-      return formatRow(row, dataView, fieldsToShow, maxEntries, fieldFormats);
+      return formatRow(row, dataView, shouldShowFieldHandler, maxEntries, fieldFormats);
     }
 
     const formattedField = formatFieldValue(
@@ -136,7 +144,7 @@ export const TableRow = ({
   }
 
   if (columns.length === 0 && useNewFieldsApi) {
-    const formatted = formatRow(row, dataView, fieldsToShow, maxEntries, fieldFormats);
+    const formatted = formatRow(row, dataView, shouldShowFieldHandler, maxEntries, fieldFormats);
 
     rowCells.push(
       <TableCell
@@ -150,7 +158,8 @@ export const TableRow = ({
       />
     );
   } else {
-    columns.forEach(function (column: string) {
+    columns.forEach(function (column: string, index) {
+      const cellKey = `${column}-${index}`;
       if (useNewFieldsApi && !mapping(column) && row.raw.fields && !row.raw.fields[column]) {
         const innerColumns = Object.fromEntries(
           Object.entries(row.raw.fields).filter(([key]) => {
@@ -160,7 +169,7 @@ export const TableRow = ({
 
         rowCells.push(
           <TableCell
-            key={column}
+            key={cellKey}
             timefield={false}
             sourcefield={true}
             formatted={formatTopLevelObject(row, innerColumns, dataView, maxEntries)}
@@ -175,11 +184,13 @@ export const TableRow = ({
         // We should improve this and show a helpful tooltip why the filter buttons are not
         // there/disabled when there are ignored values.
         const isFilterable = Boolean(
-          mapping(column)?.filterable && filter && !row.raw._ignored?.includes(column)
+          mapping(column)?.filterable &&
+            typeof filter === 'function' &&
+            !row.raw._ignored?.includes(column)
         );
         rowCells.push(
           <TableCell
-            key={column}
+            key={cellKey}
             timefield={false}
             sourcefield={column === '_source'}
             formatted={displayField(column)}
@@ -208,14 +219,16 @@ export const TableRow = ({
             columns={columns}
             filters={filters}
             savedSearchId={savedSearchId}
+            isPlainRecord={isPlainRecord}
           >
-            <DocViewer
+            <UnifiedDocViewer
               columns={columns}
               filter={filter}
               hit={row}
               dataView={dataView}
               onAddColumn={onAddColumn}
               onRemoveColumn={onRemoveColumn}
+              textBasedHits={isPlainRecord ? rows : undefined}
             />
           </TableRowDetails>
         )}

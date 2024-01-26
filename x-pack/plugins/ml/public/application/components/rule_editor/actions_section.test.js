@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import { ML_DETECTOR_RULE_ACTION } from '@kbn/ml-anomaly-utils';
+
 import { ActionsSection } from './actions_section';
-import { ACTION } from '../../../../common/constants/detector_rule';
 
 describe('ActionsSection', () => {
   const onSkipResultChange = jest.fn(() => {});
@@ -34,7 +35,7 @@ describe('ActionsSection', () => {
   test('renders with skip_result selected', () => {
     const props = {
       ...requiredProps,
-      actions: [ACTION.SKIP_RESULT],
+      actions: [ML_DETECTOR_RULE_ACTION.SKIP_RESULT],
     };
 
     const component = shallowWithIntl(<ActionsSection {...props} />);
@@ -45,7 +46,7 @@ describe('ActionsSection', () => {
   test('renders with skip_result and skip_model_update selected', () => {
     const component = shallowWithIntl(
       <ActionsSection
-        actions={[ACTION.SKIP_RESULT, ACTION.SKIP_MODEL_UPDATE]}
+        actions={[ML_DETECTOR_RULE_ACTION.SKIP_RESULT, ML_DETECTOR_RULE_ACTION.SKIP_MODEL_UPDATE]}
         onSkipResultChange={() => {}}
         onSkipModelUpdateChange={() => {}}
       />

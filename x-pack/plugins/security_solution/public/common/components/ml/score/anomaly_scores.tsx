@@ -19,6 +19,7 @@ interface Args {
   isLoading: boolean;
   narrowDateRange: NarrowDateRange;
   limit?: number;
+  jobNameById: Record<string, string | undefined>;
 }
 
 export const createJobKey = (score: Anomaly): string =>
@@ -31,6 +32,7 @@ export const AnomalyScoresComponent = ({
   isLoading,
   narrowDateRange,
   limit,
+  jobNameById,
 }: Args): JSX.Element => {
   if (isLoading) {
     return <EuiLoadingSpinner data-test-subj="anomaly-score-spinner" size="m" />;
@@ -39,17 +41,17 @@ export const AnomalyScoresComponent = ({
   } else {
     return (
       <>
-        <EuiFlexGroup gutterSize="none" responsive={false}>
+        <EuiFlexGroup gutterSize="none" responsive={false} data-test-subj="anomaly-scores">
           {getTopSeverityJobs(anomalies.anomalies, limit).map((score, index) => {
             const jobKey = createJobKey(score);
             return (
               <AnomalyScore
                 key={jobKey}
-                jobKey={jobKey}
                 startDate={startDate}
                 endDate={endDate}
                 index={index}
                 score={score}
+                jobName={jobNameById[score.jobId] ?? score.jobId}
                 interval={anomalies.interval}
                 narrowDateRange={narrowDateRange}
               />

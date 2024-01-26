@@ -7,10 +7,10 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import type { Session, SessionValue } from './session';
 import { SessionMissingError } from './session_errors';
 import { sessionIndexMock } from './session_index.mock';
+import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 
 export const sessionMock = {
   create: (): jest.Mocked<PublicMethodsOf<Session>> => ({
@@ -29,6 +29,7 @@ export const sessionMock = {
     provider: { type: 'basic', name: 'basic1' },
     idleTimeoutExpiration: null,
     lifespanExpiration: null,
+    createdAt: 1234567890,
     state: undefined,
     metadata: { index: sessionIndexMock.createValue(sessionValue.metadata?.index) },
     ...sessionValue,

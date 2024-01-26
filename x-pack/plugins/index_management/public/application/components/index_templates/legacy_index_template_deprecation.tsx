@@ -29,7 +29,7 @@ export const LegacyIndexTemplatesDeprecation: React.FunctionComponent<Props> = (
           'Legacy index templates are deprecated in favor of composable index templates',
       })}
       color="warning"
-      iconType="alert"
+      iconType="warning"
       data-test-subj="legacyIndexTemplateDeprecationWarning"
     >
       {showCta && history && (

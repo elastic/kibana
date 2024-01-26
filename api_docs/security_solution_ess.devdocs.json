@@ -1,0 +1,114 @@
+{
+  "id": "securitySolutionEss",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "securitySolutionEss",
+      "id": "def-public.SecuritySolutionEssPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "SecuritySolutionEssPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/security_solution_ess/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "securitySolutionEss",
+      "id": "def-public.SecuritySolutionEssPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "SecuritySolutionEssPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/security_solution_ess/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "securitySolutionEss",
+      "id": "def-server.SecuritySolutionEssPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "SecuritySolutionEssPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/security_solution_ess/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "securitySolutionEss",
+      "id": "def-server.SecuritySolutionEssPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "SecuritySolutionEssPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/security_solution_ess/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "securitySolutionEss",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"securitySolutionEss\""
+        ],
+        "path": "x-pack/plugins/security_solution_ess/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolutionEss",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "signature": [
+          "\"securitySolutionEss\""
+        ],
+        "path": "x-pack/plugins/security_solution_ess/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

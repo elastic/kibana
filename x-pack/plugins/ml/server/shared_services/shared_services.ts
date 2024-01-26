@@ -10,25 +10,36 @@ import type {
   IScopedClusterClient,
   SavedObjectsClientContract,
   UiSettingsServiceStart,
+  KibanaRequest,
 } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { CoreKibanaRequest, KibanaRequest } from '@kbn/core/server';
+import { CoreKibanaRequest } from '@kbn/core/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import type { CompatibleModule } from '../../common/constants/app';
 import { MlLicense } from '../../common/license';
 
 import { licenseChecks } from './license_checks';
-import { MlSystemProvider, getMlSystemProvider } from './providers/system';
-import { JobServiceProvider, getJobServiceProvider } from './providers/job_service';
-import { ModulesProvider, getModulesProvider } from './providers/modules';
-import { ResultsServiceProvider, getResultsServiceProvider } from './providers/results_service';
-import { TrainedModelsProvider, getTrainedModelsProvider } from './providers/trained_models';
-import {
+import type {
+  MlSystemProvider,
+  JobServiceProvider,
+  ResultsServiceProvider,
+  TrainedModelsProvider,
   AnomalyDetectorsProvider,
+  ModulesProvider,
+} from './providers';
+
+import {
+  getMlSystemProvider,
+  getJobServiceProvider,
+  getModulesProvider,
+  getResultsServiceProvider,
+  getTrainedModelsProvider,
   getAnomalyDetectorsProvider,
-} from './providers/anomaly_detectors';
+} from './providers';
+
 import type { ResolveMlCapabilities, MlCapabilitiesKey } from '../../common/types/capabilities';
 import { hasMlCapabilitiesProvider, HasMlCapabilities } from '../lib/capabilities';
 import {
@@ -99,7 +110,8 @@ export function createSharedServices(
   getUiSettings: () => UiSettingsServiceStart | null,
   getFieldsFormat: () => FieldFormatsStart | null,
   getDataViews: () => DataViewsPluginStart,
-  isMlReady: () => Promise<void>
+  isMlReady: () => Promise<void>,
+  compatibleModuleType: CompatibleModule | null
 ): {
   sharedServicesProviders: SharedServices;
   internalServicesProviders: MlServicesProviders;
@@ -172,11 +184,11 @@ export function createSharedServices(
     sharedServicesProviders: {
       ...getJobServiceProvider(getGuards),
       ...getAnomalyDetectorsProvider(getGuards),
-      ...getModulesProvider(getGuards, getDataViews),
+      ...getModulesProvider(getGuards, getDataViews, compatibleModuleType),
       ...getResultsServiceProvider(getGuards),
       ...getMlSystemProvider(getGuards, mlLicense, getSpaces, cloud, resolveMlCapabilities),
       ...getAlertingServiceProvider(getGuards),
-      ...getTrainedModelsProvider(getGuards),
+      ...getTrainedModelsProvider(getGuards, cloud),
     },
     /**
      * Services providers for ML internal usage
@@ -200,8 +212,10 @@ function getRequestItemsProvider(
   getDataViews: () => DataViewsPluginStart
 ) {
   return (request: KibanaRequest) => {
-    const getHasMlCapabilities = hasMlCapabilitiesProvider(resolveMlCapabilities);
-    let hasMlCapabilities: HasMlCapabilities;
+    let hasMlCapabilities: HasMlCapabilities = hasMlCapabilitiesProvider(
+      resolveMlCapabilities,
+      request
+    );
     let scopedClient: IScopedClusterClient;
     let mlClient: MlClient;
     // While https://github.com/elastic/kibana/issues/64588 exists we
@@ -247,7 +261,6 @@ function getRequestItemsProvider(
 
     let mlSavedObjectService;
     if (request instanceof CoreKibanaRequest) {
-      hasMlCapabilities = getHasMlCapabilities(request);
       scopedClient = clusterClient.asScoped(request);
       mlSavedObjectService = getSobSavedObjectService(scopedClient);
       mlClient = getMlClient(scopedClient, mlSavedObjectService);

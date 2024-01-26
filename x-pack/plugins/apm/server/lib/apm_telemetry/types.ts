@@ -6,10 +6,8 @@
  */
 
 import { DeepPartial } from 'utility-types';
-import {
-  AgentName,
-  ElasticAgentName,
-} from '../../../typings/es_schemas/ui/fields/agent';
+import { AgentName, ElasticAgentName } from '@kbn/elastic-agent-utils';
+import { RollupInterval } from '../../../common/rollup';
 
 export interface TimeframeMap {
   '1d': number;
@@ -27,6 +25,8 @@ export interface AggregatedTransactionsCounts {
 export interface APMPerService {
   service_id: string;
   timed_out: boolean;
+  num_service_nodes: number;
+  num_transaction_types: number;
   cloud: {
     availability_zones: string[];
     regions: string[];
@@ -40,6 +40,7 @@ export interface APMPerService {
   agent: {
     name: string;
     version: string;
+    activation_method: string;
   };
   service: {
     language: {
@@ -66,6 +67,7 @@ export interface APMPerService {
 }
 
 export interface APMUsage {
+  has_any_services_per_official_agent: boolean;
   has_any_services: boolean;
   services_per_agent: Record<AgentName, number>;
   version: {
@@ -99,13 +101,15 @@ export interface APMUsage {
     span: TimeframeMap;
     error: TimeframeMap;
     metric: TimeframeMap;
-    sourcemap: TimeframeMap;
     onboarding: TimeframeMap;
     agent_configuration: TimeframeMapAll;
-    max_transaction_groups_per_service: TimeframeMap;
-    max_error_groups_per_service: TimeframeMap;
+    max_transaction_groups_per_service: TimeframeMap1d;
+    max_error_groups_per_service: TimeframeMap1d;
     traces: TimeframeMap;
-    services: TimeframeMap;
+    services: TimeframeMap1d;
+    environments: TimeframeMap1d;
+    span_destination_service_resource: TimeframeMap1d;
+    global_labels: TimeframeMap1d;
   };
   cardinality: {
     client: { geo: { country_iso_code: { rum: TimeframeMap1d } } };
@@ -123,7 +127,7 @@ export interface APMUsage {
     };
   };
   retainment: Record<
-    'span' | 'transaction' | 'error' | 'metric' | 'sourcemap' | 'onboarding',
+    'span' | 'transaction' | 'error' | 'metric' | 'onboarding',
     { ms: number }
   >;
   integrations: {
@@ -136,6 +140,7 @@ export interface APMUsage {
     {
       agent: {
         version: string[];
+        activation_method: string[];
       };
       service: {
         framework: {
@@ -157,6 +162,37 @@ export interface APMUsage {
     }
   >;
   indices: {
+    traces: {
+      shards: {
+        total: number;
+      };
+      all: {
+        total: {
+          docs: {
+            count: number;
+          };
+          store: {
+            size_in_bytes: number;
+          };
+        };
+      };
+    };
+    metric: {
+      shards: {
+        total: number;
+      };
+      all: {
+        total: {
+          docs: {
+            count: number;
+          };
+          store: {
+            size_in_bytes: number;
+          };
+        };
+      };
+      metricset: DataStreamStats;
+    };
     shards: {
       total: number;
     };
@@ -175,13 +211,22 @@ export interface APMUsage {
     kuery_fields: string[];
     total: number;
   };
+  custom_dashboards: {
+    kuery_fields: string[];
+    total: number;
+  };
   per_service: APMPerService[];
+  top_traces: {
+    max: number;
+    median: number;
+  };
   tasks: Record<
     | 'aggregated_transactions'
     | 'cloud'
     | 'host'
     | 'processor_events'
     | 'agent_configuration'
+    | 'global_labels'
     | 'services'
     | 'versions'
     | 'groupings'
@@ -191,10 +236,51 @@ export interface APMUsage {
     | 'cardinality'
     | 'environments'
     | 'service_groups'
-    | 'per_service',
+    | 'custom_dashboards'
+    | 'per_service'
+    | 'top_traces',
     { took: { ms: number } }
   >;
 }
+
+export type MetricRollupIntervals =
+  | RollupInterval.OneMinute
+  | RollupInterval.TenMinutes
+  | RollupInterval.SixtyMinutes;
+
+export type MetricSupportingRollUp =
+  | 'service_destination'
+  | 'transaction'
+  | 'service_summary'
+  | 'service_transaction'
+  | 'span_breakdown';
+
+export type MetricNotSupportingRollup = 'app';
+
+export type MetricTypes = MetricSupportingRollUp | MetricNotSupportingRollup;
+
+export interface CapturedMetricStats {
+  total: {
+    shards: number;
+    docs: {
+      count: number;
+    };
+    store: {
+      size_in_bytes: number;
+    };
+  };
+}
+
+export interface LastDayCount {
+  doc_count: number;
+}
+
+export interface DataStreamCombined {
+  all: CapturedMetricStats;
+  '1d': LastDayCount;
+}
+
+export type DataStreamStats = Record<string, DataStreamCombined>;
 
 export type APMDataTelemetry = DeepPartial<APMUsage>;
 

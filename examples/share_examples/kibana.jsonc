@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/share-examples-plugin",
+  "owner": "@elastic/appex-sharedux",
+  "description": "Small demos of share plugin usage",
+  "plugin": {
+    "id": "shareExamples",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "share"
+    ]
+  }
+}

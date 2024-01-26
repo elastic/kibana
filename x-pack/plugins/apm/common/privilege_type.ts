@@ -7,9 +7,13 @@
 
 import * as t from 'io-ts';
 
-export const enum PrivilegeType {
+export enum PrivilegeType {
   EVENT = 'event:write',
   AGENT_CONFIG = 'config_agent:read',
+}
+
+export enum ClusterPrivilegeType {
+  MANAGE_OWN_API_KEY = 'manage_own_api_key',
 }
 
 export const privilegesTypeRt = t.array(

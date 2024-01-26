@@ -7,23 +7,13 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPanel,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPanel, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { KibanaTemplate } from './kibana_template';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ComponentProps } from '../../route_init';
-// @ts-ignore
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
-// @ts-ignore
 import { ClusterStatus } from '../../../components/kibana/cluster_status';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 import { useCharts } from '../../hooks/use_charts';
@@ -45,7 +35,7 @@ const KibanaOverview = ({ data }: { data: any }) => {
           <ClusterStatus stats={data.clusterStatus} />
         </EuiPanel>
         <EuiSpacer size="m" />
-        <EuiPageContent>
+        <EuiPanel>
           <EuiFlexGroup>
             <EuiFlexItem grow={true}>
               <MonitoringTimeseriesContainer
@@ -98,7 +88,7 @@ const KibanaOverview = ({ data }: { data: any }) => {
               </EuiFlexGroup>
             </>
           )}
-        </EuiPageContent>
+        </EuiPanel>
       </EuiPageBody>
     </EuiPage>
   );

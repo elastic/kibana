@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { LayerAction } from '../../../../types';
 import type { Visualization } from '../../../..';
+import { FIRST_ACTION_ORDER } from './order_bounds';
 
 interface CloneLayerAction {
   execute: () => void;
@@ -27,5 +28,6 @@ export const getCloneLayerAction = (props: CloneLayerAction): LayerAction => {
     isCompatible: Boolean(props.activeVisualization.cloneLayer && !props.isTextBasedLanguage),
     icon: 'copy',
     'data-test-subj': `lnsLayerClone--${props.layerIndex}`,
+    order: FIRST_ACTION_ORDER + 1,
   };
 };

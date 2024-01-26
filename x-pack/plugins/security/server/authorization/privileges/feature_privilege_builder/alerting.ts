@@ -22,10 +22,12 @@ const readOperations: Record<AlertingEntity, string[]> = {
     'getRuleState',
     'getAlertSummary',
     'getExecutionLog',
+    'getActionErrorLog',
     'find',
     'getRuleExecutionKPI',
+    'runSoon',
   ],
-  alert: ['get', 'find', 'getAuthorizedAlertsIndices'],
+  alert: ['get', 'find', 'getAuthorizedAlertsIndices', 'getAlertSummary'],
 };
 
 const writeOperations: Record<AlertingEntity, string[]> = {
@@ -43,6 +45,8 @@ const writeOperations: Record<AlertingEntity, string[]> = {
     'snooze',
     'bulkEdit',
     'bulkDelete',
+    'bulkEnable',
+    'bulkDisable',
     'unsnooze',
   ],
   alert: ['update'],

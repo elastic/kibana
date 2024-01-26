@@ -22,9 +22,7 @@ import {
   EuiCheckbox,
 } from '@elastic/eui';
 
-import DashboardPicker, { DashboardPickerProps } from './dashboard_picker';
-
-import './saved_object_save_modal_dashboard.scss';
+import DashboardPicker, { DashboardPickerProps } from './dashboard_picker/dashboard_picker';
 
 export interface SaveModalDashboardSelectorProps {
   copyOnSave: boolean;
@@ -35,6 +33,8 @@ export interface SaveModalDashboardSelectorProps {
   isAddToLibrarySelected: boolean;
   dashboardOption: 'new' | 'existing' | null;
   onChange: (dashboardOption: 'new' | 'existing' | null) => void;
+  hasAttemptedSubmit: boolean;
+  hasSelectedDashboard: boolean;
 }
 
 export function SaveModalDashboardSelector(props: SaveModalDashboardSelectorProps) {
@@ -47,6 +47,8 @@ export function SaveModalDashboardSelector(props: SaveModalDashboardSelectorProp
     dashboardOption,
     onChange,
     copyOnSave,
+    hasAttemptedSubmit,
+    hasSelectedDashboard,
   } = props;
   const isDisabled = !copyOnSave && !!documentId;
 
@@ -83,6 +85,16 @@ export function SaveModalDashboardSelector(props: SaveModalDashboardSelectorProp
                     isDisabled={dashboardOption !== 'existing'}
                     onChange={onSelectDashboard}
                   />
+                  {hasAttemptedSubmit && dashboardOption === 'existing' && !hasSelectedDashboard ? (
+                    <div className="euiFormErrorText euiFormRow__text">
+                      {i18n.translate(
+                        'presentationUtil.saveModalDashboard.existingDashboardRequiredMessage',
+                        {
+                          defaultMessage: 'Dashboard is required',
+                        }
+                      )}
+                    </div>
+                  ) : null}
                 </div>
                 <EuiSpacer size="s" />
               </>
@@ -139,7 +151,7 @@ export function SaveModalDashboardSelector(props: SaveModalDashboardSelectorProp
                 content={
                   <FormattedMessage
                     id="presentationUtil.saveModalDashboard.dashboardInfoTooltip"
-                    defaultMessage="items added to the Visualize Library are available to all dashboards. Edits to a library item appear everywhere it is used."
+                    defaultMessage="Items added to the Visualize Library are available to all dashboards. Edits to a library item appear everywhere it is used."
                   />
                 }
               />

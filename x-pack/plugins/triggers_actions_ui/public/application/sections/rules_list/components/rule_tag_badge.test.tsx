@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { render, fireEvent } from '@testing-library/react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { RuleTagBadge } from './rule_tag_badge';
 
@@ -32,28 +33,26 @@ describe('RuleTagBadge', () => {
   });
 
   it('can open and close the popover', () => {
-    const wrapper = mountWithIntl(
+    const { rerender, baseElement } = render(
       <RuleTagBadge isOpen={false} tags={tags} onClick={onClickMock} onClose={onCloseMock} />
     );
 
-    expect(wrapper.find('[data-test-subj="ruleTagBadgeItem-a"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="ruleTagBadgeItem-b"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="ruleTagBadgeItem-c"]').exists()).toBeFalsy();
+    expect(baseElement.querySelector('[data-test-subj="ruleTagBadgeItem-a"]')).toBe(null);
+    expect(baseElement.querySelector('[data-test-subj="ruleTagBadgeItem-b"]')).toBe(null);
+    expect(baseElement.querySelector('[data-test-subj="ruleTagBadgeItem-c"]')).toBe(null);
 
-    wrapper.find('[data-test-subj="ruleTagBadge"]').at(1).simulate('click');
-
+    fireEvent.click(baseElement.querySelector('[data-test-subj="ruleTagBadge"]')!);
     expect(onClickMock).toHaveBeenCalledTimes(1);
 
-    wrapper.setProps({
-      isOpen: true,
-    });
+    rerender(
+      <RuleTagBadge isOpen={true} tags={tags} onClick={onClickMock} onClose={onCloseMock} />
+    );
 
-    expect(wrapper.find('[data-test-subj="ruleTagBadgeItem-a"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="ruleTagBadgeItem-b"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="ruleTagBadgeItem-c"]').exists()).toBeTruthy();
+    expect(baseElement.querySelector('[data-test-subj="ruleTagBadgeItem-a"]')).toBeTruthy();
+    expect(baseElement.querySelector('[data-test-subj="ruleTagBadgeItem-b"]')).toBeTruthy();
+    expect(baseElement.querySelector('[data-test-subj="ruleTagBadgeItem-c"]')).toBeTruthy();
 
-    wrapper.find('[data-test-subj="ruleTagBadge"]').at(1).simulate('click');
-
+    fireEvent.click(baseElement.querySelector('[data-test-subj="ruleTagBadge"]')!);
     expect(onClickMock).toHaveBeenCalledTimes(2);
   });
 

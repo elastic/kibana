@@ -24,7 +24,7 @@ import {
   AgentUpgradeAgentModal,
 } from '../../components';
 import { useLicense } from '../../../../hooks';
-import { LICENSE_FOR_SCHEDULE_UPGRADE } from '../../../../../../../common/constants';
+import { LICENSE_FOR_SCHEDULE_UPGRADE, AGENTS_PREFIX } from '../../../../../../../common/constants';
 import { ExperimentalFeaturesService } from '../../../../services';
 
 import { getCommonTags } from '../utils';
@@ -35,8 +35,10 @@ import type { SelectionMode } from './types';
 import { TagsAddRemove } from './tags_add_remove';
 
 export interface Props {
-  totalAgents: number;
-  totalInactiveAgents: number;
+  shownAgents: number;
+  inactiveShownAgents: number;
+  totalManagedAgentIds: string[];
+  inactiveManagedAgentIds: string[];
   selectionMode: SelectionMode;
   currentQuery: string;
   selectedAgents: Agent[];
@@ -47,8 +49,10 @@ export interface Props {
 }
 
 export const AgentBulkActions: React.FunctionComponent<Props> = ({
-  totalAgents,
-  totalInactiveAgents,
+  shownAgents,
+  inactiveShownAgents,
+  totalManagedAgentIds,
+  inactiveManagedAgentIds,
   selectionMode,
   currentQuery,
   selectedAgents,
@@ -68,21 +72,44 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   // Actions states
   const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState<boolean>(false);
   const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState<boolean>(false);
-  const [updateModalState, setUpgradeModalState] = useState({ isOpen: false, isScheduled: false });
+  const [updateModalState, setUpgradeModalState] = useState({
+    isOpen: false,
+    isScheduled: false,
+    isUpdating: false,
+  });
   const [isTagAddVisible, setIsTagAddVisible] = useState<boolean>(false);
   const [isRequestDiagnosticsModalOpen, setIsRequestDiagnosticsModalOpen] =
     useState<boolean>(false);
+
+  // update the query removing the "managed" agents
+  const selectionQuery = useMemo(() => {
+    if (totalManagedAgentIds.length) {
+      const excludedKuery = `${AGENTS_PREFIX}.agent.id : (${totalManagedAgentIds
+        .map((id) => `"${id}"`)
+        .join(' or ')})`;
+      return `${currentQuery} AND NOT (${excludedKuery})`;
+    } else {
+      return currentQuery;
+    }
+  }, [currentQuery, totalManagedAgentIds]);
+
+  const totalActiveAgents = shownAgents - inactiveShownAgents;
+
+  // exclude inactive agents from the count
+  const agentCount =
+    selectionMode === 'manual'
+      ? selectedAgents.length
+      : totalActiveAgents - (totalManagedAgentIds?.length - inactiveManagedAgentIds?.length);
 
   // Check if user is working with only inactive agents
   const atLeastOneActiveAgentSelected =
     selectionMode === 'manual'
       ? !!selectedAgents.find((agent) => agent.active)
-      : totalAgents > totalInactiveAgents;
-  const totalActiveAgents = totalAgents - totalInactiveAgents;
-  const agentCount = selectionMode === 'manual' ? selectedAgents.length : totalActiveAgents;
-  const agents = selectionMode === 'manual' ? selectedAgents : currentQuery;
+      : agentCount > 0 && shownAgents > inactiveShownAgents;
+  const agents = selectionMode === 'manual' ? selectedAgents : selectionQuery;
+
   const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();
-  const { showRequestDiagnostics } = ExperimentalFeaturesService.get();
+  const { diagnosticFileUploadEnabled } = ExperimentalFeaturesService.get();
 
   const menuItems = [
     {
@@ -148,7 +175,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
       disabled: !atLeastOneActiveAgentSelected,
       onClick: () => {
         closeMenu();
-        setUpgradeModalState({ isOpen: true, isScheduled: false });
+        setUpgradeModalState({ isOpen: true, isScheduled: false, isUpdating: false });
       },
     },
     {
@@ -166,12 +193,31 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
       disabled: !atLeastOneActiveAgentSelected || !isLicenceAllowingScheduleUpgrade,
       onClick: () => {
         closeMenu();
-        setUpgradeModalState({ isOpen: true, isScheduled: true });
+        setUpgradeModalState({ isOpen: true, isScheduled: true, isUpdating: false });
       },
     },
   ];
 
-  if (showRequestDiagnostics) {
+  menuItems.push({
+    name: (
+      <FormattedMessage
+        id="xpack.fleet.agentBulkActions.restartUpgradeAgents"
+        data-test-subj="agentBulkActionsRestartUpgrade"
+        defaultMessage="Restart upgrade {agentCount, plural, one {# agent} other {# agents}}"
+        values={{
+          agentCount,
+        }}
+      />
+    ),
+    icon: <EuiIcon type="refresh" size="m" />,
+    disabled: !atLeastOneActiveAgentSelected,
+    onClick: () => {
+      closeMenu();
+      setUpgradeModalState({ isOpen: true, isScheduled: false, isUpdating: true });
+    },
+  });
+
+  if (diagnosticFileUploadEnabled) {
     menuItems.push({
       name: (
         <FormattedMessage
@@ -183,7 +229,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
           }}
         />
       ),
-      icon: <EuiIcon type="trash" size="m" />,
+      icon: <EuiIcon type="download" size="m" />,
       disabled: !atLeastOneActiveAgentSelected,
       onClick: () => {
         closeMenu();
@@ -235,8 +281,9 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
             agents={agents}
             agentCount={agentCount}
             isScheduled={updateModalState.isScheduled}
+            isUpdating={updateModalState.isUpdating}
             onClose={() => {
-              setUpgradeModalState({ isOpen: false, isScheduled: false });
+              setUpgradeModalState({ isOpen: false, isScheduled: false, isUpdating: false });
               refreshAgents();
             }}
           />

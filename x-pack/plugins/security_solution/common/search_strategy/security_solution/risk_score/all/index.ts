@@ -5,25 +5,11 @@
  * 2.0.
  */
 
-import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/data-plugin/common';
-import type { ESQuery } from '../../../../typed_json';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
-import type { Inspect, Maybe, SortField, TimerangeInput } from '../../../common';
-import type { RiskScoreEntity } from '../common';
-
-export interface RiskScoreRequestOptions extends IEsSearchRequest {
-  defaultIndex: string[];
-  riskScoreEntity: RiskScoreEntity;
-  timerange?: TimerangeInput;
-  includeAlertsCount?: boolean;
-  onlyLatest?: boolean;
-  pagination?: {
-    cursorStart: number;
-    querySize: number;
-  };
-  sort?: RiskScoreSortField;
-  filterQuery?: ESQuery | string | undefined;
-}
+import type { Inspect, Maybe, SortField } from '../../../common';
+import type { RiskScore } from '../../../../entity_analytics/risk_engine';
+import { RiskLevels as RiskSeverity } from '../../../../entity_analytics/risk_engine';
 
 export interface HostsRiskScoreStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;
@@ -37,12 +23,12 @@ export interface UsersRiskScoreStrategyResponse extends IEsSearchResponse {
   data: UserRiskScore[] | undefined;
 }
 
-export interface RiskStats {
+export interface RiskStats extends RiskScore {
   rule_risks: RuleRisk[];
-  calculated_score_norm: number;
   multipliers: string[];
-  calculated_level: RiskSeverity;
 }
+
+export { RiskSeverity };
 
 export interface HostRiskScore {
   '@timestamp': string;
@@ -72,7 +58,7 @@ export interface RuleRisk {
 
 export type RiskScoreSortField = SortField<RiskScoreFields>;
 
-export const enum RiskScoreFields {
+export enum RiskScoreFields {
   timestamp = '@timestamp',
   hostName = 'host.name',
   hostRiskScore = 'host.risk.calculated_score_norm',
@@ -88,6 +74,8 @@ export interface RiskScoreItem {
   [RiskScoreFields.hostName]: Maybe<string>;
   [RiskScoreFields.userName]: Maybe<string>;
 
+  [RiskScoreFields.timestamp]: Maybe<string>;
+
   [RiskScoreFields.hostRisk]: Maybe<RiskSeverity>;
   [RiskScoreFields.userRisk]: Maybe<RiskSeverity>;
 
@@ -95,14 +83,6 @@ export interface RiskScoreItem {
   [RiskScoreFields.userRiskScore]: Maybe<number>;
 
   [RiskScoreFields.alertsCount]: Maybe<number>;
-}
-
-export const enum RiskSeverity {
-  unknown = 'Unknown',
-  low = 'Low',
-  moderate = 'Moderate',
-  high = 'High',
-  critical = 'Critical',
 }
 
 export const isUserRiskScore = (risk: HostRiskScore | UserRiskScore): risk is UserRiskScore =>
@@ -115,11 +95,3 @@ export const EMPTY_SEVERITY_COUNT = {
   [RiskSeverity.moderate]: 0,
   [RiskSeverity.unknown]: 0,
 };
-
-export const SEVERITY_UI_SORT_ORDER = [
-  RiskSeverity.unknown,
-  RiskSeverity.low,
-  RiskSeverity.moderate,
-  RiskSeverity.high,
-  RiskSeverity.critical,
-];

@@ -22,6 +22,8 @@ export function isMetricValid(aggDescriptor: AggDescriptor) {
 
 interface Props {
   allowMultipleMetrics: boolean;
+  bucketsName?: string;
+  isJoin: boolean;
   metrics: AggDescriptor[];
   fields: DataViewField[];
   onChange: (metrics: AggDescriptor[]) => void;
@@ -81,6 +83,8 @@ export class MetricsEditor extends Component<Props, State> {
       return (
         <div key={index} className="mapMetricEditorPanel__metricEditor">
           <MetricEditor
+            bucketsName={this.props.bucketsName}
+            isJoin={this.props.isJoin}
             onChange={onMetricChange}
             metric={metric}
             fields={this.props.fields}

@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, Type } from '@kbn/config-schema';
 import { ReplaySubject } from 'rxjs';
 import { Readable } from 'stream';
+import type { FilesClient } from '../../../common/files_client';
 import type { FileKind } from '../../../common/types';
 import type { CreateRouteDefinition } from '../../../common/api_routes';
+import { MaxByteSizeExceededError } from '../../file_client/stream_transforms/max_byte_size_transform/errors';
 import { FILES_API_ROUTES } from '../api_routes';
 import { fileErrors } from '../../file';
 import { getById } from './helpers';
@@ -23,7 +25,7 @@ const rt = {
   params: schema.object({
     id: schema.string(),
   }),
-  body: schema.stream(),
+  body: schema.stream() as Type<unknown>,
   query: schema.object({
     selfDestructOnAbort: schema.maybe(schema.boolean()),
   }),
@@ -34,7 +36,8 @@ export type Endpoint = CreateRouteDefinition<
   {
     ok: true;
     size: number;
-  }
+  },
+  FilesClient['upload']
 >;
 
 export const handler: CreateHandler<Endpoint> = async ({ files, fileKind }, req, res) => {
@@ -55,6 +58,12 @@ export const handler: CreateHandler<Endpoint> = async ({ files, fileKind }, req,
   try {
     await file.uploadContent(stream as Readable, abort$);
   } catch (e) {
+    if (e instanceof MaxByteSizeExceededError) {
+      return res.customError({
+        statusCode: 413,
+      });
+    }
+
     if (
       e instanceof fileErrors.ContentAlreadyUploadedError ||
       e instanceof fileErrors.UploadInProgressError
@@ -79,8 +88,6 @@ export const handler: CreateHandler<Endpoint> = async ({ files, fileKind }, req,
   return res.ok({ body });
 };
 
-const fourMiB = 4 * 1024 * 1024;
-
 export function register(fileKindRouter: FileKindRouter, fileKind: FileKind) {
   if (fileKind.http.create) {
     fileKindRouter[method](
@@ -95,7 +102,12 @@ export function register(fileKindRouter: FileKindRouter, fileKind: FileKind) {
             output: 'stream',
             parse: false,
             accepts: fileKind.allowedMimeTypes ?? 'application/octet-stream',
-            maxBytes: fileKind.maxSizeBytes ?? fourMiB,
+
+            // This is set to 10 GiB because the actual file size limit is
+            // enforced by the file service. This is just a limit on the
+            // size of the HTTP request body, but the file service will throw
+            // 413 errors if the file size is larger than expected.
+            maxBytes: 10 * 1024 * 1024 * 1024,
           },
         },
       },

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Position, RecursivePartial, AxisStyle } from '@elastic/charts';
+import { Position, type RecursivePartial, type AxisStyle } from '@elastic/charts';
 
 export const MULTILAYER_TIME_AXIS_STYLE: RecursivePartial<AxisStyle> = {
   tickLabel: {
@@ -20,7 +20,7 @@ export const MULTILAYER_TIME_AXIS_STYLE: RecursivePartial<AxisStyle> = {
   },
   tickLine: {
     visible: true,
-    size: 0.0001,
+    size: 0,
     padding: 4,
   },
 };

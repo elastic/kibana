@@ -51,7 +51,11 @@ describe('CoreUsageStatsClient', () => {
     );
     return { usageStatsClient, debugLoggerMock, basePathMock, repositoryMock };
   };
-  const firstPartyRequestHeaders = { 'kbn-version': 'a', referer: 'b' }; // as long as these two header fields are truthy, this will be treated like a first-party request
+  const firstPartyRequestHeaders = {
+    'kbn-version': 'a',
+    referer: 'b',
+    'x-elastic-internal-origin': 'c',
+  }; // as long as these header fields are truthy, this will be treated like a first-party request
   const incrementOptions = { refresh: false };
 
   describe('#getUsageStats', () => {
@@ -934,6 +938,7 @@ describe('CoreUsageStatsClient', () => {
           `${IMPORT_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
           `${IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`,
           `${IMPORT_STATS_PREFIX}.overwriteEnabled.no`,
+          `${IMPORT_STATS_PREFIX}.compatibilityModeEnabled.no`,
         ],
         incrementOptions
       );
@@ -947,11 +952,13 @@ describe('CoreUsageStatsClient', () => {
         request,
         createNewCopies: true,
         overwrite: true,
+        compatibilityMode: true,
       } as IncrementSavedObjectsImportOptions);
       await usageStatsClient.incrementSavedObjectsImport({
         request,
         createNewCopies: false,
         overwrite: true,
+        compatibilityMode: true,
       } as IncrementSavedObjectsImportOptions);
       expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(2);
       expect(repositoryMock.incrementCounter).toHaveBeenNthCalledWith(
@@ -963,7 +970,8 @@ describe('CoreUsageStatsClient', () => {
           `${IMPORT_STATS_PREFIX}.namespace.default.total`,
           `${IMPORT_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
           `${IMPORT_STATS_PREFIX}.createNewCopiesEnabled.yes`,
-          // excludes 'overwriteEnabled.yes' and 'overwriteEnabled.no' when createNewCopies is true
+          // excludes 'overwriteEnabled.yes', 'overwriteEnabled.no', 'compatibilityModeEnabled.yes`, and
+          // `compatibilityModeEnabled.no` when createNewCopies is true
         ],
         incrementOptions
       );
@@ -977,6 +985,7 @@ describe('CoreUsageStatsClient', () => {
           `${IMPORT_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
           `${IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`,
           `${IMPORT_STATS_PREFIX}.overwriteEnabled.yes`,
+          `${IMPORT_STATS_PREFIX}.compatibilityModeEnabled.yes`,
         ],
         incrementOptions
       );
@@ -999,6 +1008,7 @@ describe('CoreUsageStatsClient', () => {
           `${IMPORT_STATS_PREFIX}.namespace.custom.kibanaRequest.no`,
           `${IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`,
           `${IMPORT_STATS_PREFIX}.overwriteEnabled.no`,
+          `${IMPORT_STATS_PREFIX}.compatibilityModeEnabled.no`,
         ],
         incrementOptions
       );
@@ -1035,6 +1045,7 @@ describe('CoreUsageStatsClient', () => {
           `${RESOLVE_IMPORT_STATS_PREFIX}.namespace.default.total`,
           `${RESOLVE_IMPORT_STATS_PREFIX}.namespace.default.kibanaRequest.no`,
           `${RESOLVE_IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`,
+          `${RESOLVE_IMPORT_STATS_PREFIX}.compatibilityModeEnabled.no`,
         ],
         incrementOptions
       );
@@ -1047,9 +1058,16 @@ describe('CoreUsageStatsClient', () => {
       await usageStatsClient.incrementSavedObjectsResolveImportErrors({
         request,
         createNewCopies: true,
+        compatibilityMode: true,
       } as IncrementSavedObjectsResolveImportErrorsOptions);
-      expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(1);
-      expect(repositoryMock.incrementCounter).toHaveBeenCalledWith(
+      await usageStatsClient.incrementSavedObjectsResolveImportErrors({
+        request,
+        createNewCopies: false,
+        compatibilityMode: true,
+      } as IncrementSavedObjectsResolveImportErrorsOptions);
+      expect(repositoryMock.incrementCounter).toHaveBeenCalledTimes(2);
+      expect(repositoryMock.incrementCounter).toHaveBeenNthCalledWith(
+        1,
         CORE_USAGE_STATS_TYPE,
         CORE_USAGE_STATS_ID,
         [
@@ -1057,6 +1075,20 @@ describe('CoreUsageStatsClient', () => {
           `${RESOLVE_IMPORT_STATS_PREFIX}.namespace.default.total`,
           `${RESOLVE_IMPORT_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
           `${RESOLVE_IMPORT_STATS_PREFIX}.createNewCopiesEnabled.yes`,
+          // excludes 'compatibilityModeEnabled.yes` and `compatibilityModeEnabled.no` when createNewCopies is true
+        ],
+        incrementOptions
+      );
+      expect(repositoryMock.incrementCounter).toHaveBeenNthCalledWith(
+        2,
+        CORE_USAGE_STATS_TYPE,
+        CORE_USAGE_STATS_ID,
+        [
+          `${RESOLVE_IMPORT_STATS_PREFIX}.total`,
+          `${RESOLVE_IMPORT_STATS_PREFIX}.namespace.default.total`,
+          `${RESOLVE_IMPORT_STATS_PREFIX}.namespace.default.kibanaRequest.yes`,
+          `${RESOLVE_IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`,
+          `${RESOLVE_IMPORT_STATS_PREFIX}.compatibilityModeEnabled.yes`,
         ],
         incrementOptions
       );
@@ -1078,6 +1110,7 @@ describe('CoreUsageStatsClient', () => {
           `${RESOLVE_IMPORT_STATS_PREFIX}.namespace.custom.total`,
           `${RESOLVE_IMPORT_STATS_PREFIX}.namespace.custom.kibanaRequest.no`,
           `${RESOLVE_IMPORT_STATS_PREFIX}.createNewCopiesEnabled.no`,
+          `${RESOLVE_IMPORT_STATS_PREFIX}.compatibilityModeEnabled.no`,
         ],
         incrementOptions
       );

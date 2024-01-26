@@ -5,41 +5,23 @@
  * 2.0.
  */
 
-import { ErrorBudget, SLO } from '../../domain/models';
-import { GetSLOResponse, getSLOResponseSchema } from '../../types/rest_specs';
+import { ALL_VALUE, GetSLOParams, GetSLOResponse, getSLOResponseSchema } from '@kbn/slo-schema';
+import { SLO, Summary } from '../../domain/models';
 import { SLORepository } from './slo_repository';
-import { SLIClient } from './sli_client';
-import { computeSLI, computeErrorBudget } from '../../domain/services';
+import { SummaryClient } from './summary_client';
 
 export class GetSLO {
-  constructor(private repository: SLORepository, private sliClient: SLIClient) {}
+  constructor(private repository: SLORepository, private summaryClient: SummaryClient) {}
 
-  public async execute(sloId: string): Promise<GetSLOResponse> {
+  public async execute(sloId: string, params: GetSLOParams = {}): Promise<GetSLOResponse> {
     const slo = await this.repository.findById(sloId);
-    const sliData = await this.sliClient.fetchCurrentSLIData(slo);
-    const sliValue = computeSLI(sliData);
-    const errorBudget = computeErrorBudget(slo, sliData);
-    return this.toResponse(slo, sliValue, errorBudget);
-  }
+    const instanceId = params.instanceId ?? ALL_VALUE;
+    const summary = await this.summaryClient.computeSummary(slo, instanceId);
 
-  private toResponse(slo: SLO, sliValue: number, errorBudget: ErrorBudget): GetSLOResponse {
-    return getSLOResponseSchema.encode({
-      id: slo.id,
-      name: slo.name,
-      description: slo.description,
-      indicator: slo.indicator,
-      time_window: slo.time_window,
-      budgeting_method: slo.budgeting_method,
-      objective: slo.objective,
-      summary: {
-        sli_value: sliValue,
-        error_budget: {
-          ...errorBudget,
-        },
-      },
-      revision: slo.revision,
-      created_at: slo.created_at,
-      updated_at: slo.updated_at,
-    });
+    return getSLOResponseSchema.encode(mergeSloWithSummary(slo, summary, instanceId));
   }
+}
+
+function mergeSloWithSummary(slo: SLO, summary: Summary, instanceId: string) {
+  return { ...slo, instanceId, summary };
 }

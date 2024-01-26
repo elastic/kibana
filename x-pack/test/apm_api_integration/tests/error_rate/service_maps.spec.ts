@@ -4,9 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { meanBy } from 'lodash';
+import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
+import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -32,6 +35,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ...commonQuery,
             kuery: `service.name : "${serviceName}" and processor.event : "${processorEvent}"`,
             probability: 1,
+            ...(processorEvent === ProcessorEvent.metric
+              ? {
+                  documentType: ApmDocumentType.TransactionMetric,
+                  rollupInterval: RollupInterval.OneMinute,
+                  useDurationSummary: true,
+                }
+              : {
+                  documentType: ApmDocumentType.TransactionEvent,
+                  rollupInterval: RollupInterval.None,
+                  useDurationSummary: false,
+                }),
           },
         },
       }),
@@ -60,13 +74,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   let errorRateMetricValues: Awaited<ReturnType<typeof getErrorRateValues>>;
   let errorTransactionValues: Awaited<ReturnType<typeof getErrorRateValues>>;
-  registry.when('Service maps APIs', { config: 'trial', archives: [] }, () => {
+  registry.when('Service Maps APIs', { config: 'trial', archives: [] }, () => {
     describe('when data is loaded ', () => {
       const GO_PROD_LIST_RATE = 75;
       const GO_PROD_LIST_ERROR_RATE = 25;
       const GO_PROD_ID_RATE = 50;
       const GO_PROD_ID_ERROR_RATE = 50;
-      before(async () => {
+      before(() => {
         const serviceGoProdInstance = apm
           .service({ name: serviceName, environment: 'production', agentName: 'go' })
           .instance('instance-a');
@@ -74,7 +88,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const transactionNameProductList = 'GET /api/product/list';
         const transactionNameProductId = 'GET /api/product/:id';
 
-        await synthtraceEsClient.index([
+        return synthtraceEsClient.index([
           timerange(start, end)
             .interval('1m')
             .rate(GO_PROD_LIST_RATE)

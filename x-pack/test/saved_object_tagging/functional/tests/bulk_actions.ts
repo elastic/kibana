@@ -29,6 +29,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('bulk delete', () => {
       it('deletes multiple tags', async () => {
+        const initialDisplayedTags = await tagManagementPage.getDisplayedTagNames();
         await tagManagementPage.selectTagByName('tag-1');
         await tagManagementPage.selectTagByName('tag-3');
 
@@ -38,7 +39,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await tagManagementPage.waitUntilTableIsLoaded();
 
         const displayedTags = await tagManagementPage.getDisplayedTagNames();
-        expect(displayedTags.length).to.be(3);
+        expect(displayedTags.length).to.be(initialDisplayedTags.length - 2);
         expect(displayedTags).to.eql(['my-favorite-tag', 'tag with whitespace', 'tag-2']);
       });
     });

@@ -1,26 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`dnsTopDomainsLensAttributes should render 1`] = `
+exports[`getDnsTopDomainsLensAttributes should render 1`] = `
 Object {
-  "description": "Security Solution Network DNS",
   "references": Array [
-    Object {
-      "id": "security-solution-my-test",
-      "name": "indexpattern-datasource-current-indexpattern",
-      "type": "index-pattern",
-    },
     Object {
       "id": "security-solution-my-test",
       "name": "indexpattern-datasource-layer-b1c3efc6-c886-4fba-978f-3b6bb5e7948a",
       "type": "index-pattern",
     },
-    Object {
-      "id": "security-solution-my-test",
-      "name": "filter-index-pattern-0",
-      "type": "index-pattern",
-    },
   ],
   "state": Object {
+    "adHocDataViews": Object {},
     "datasourceStates": Object {
       "formBased": Object {
         "layers": Object {
@@ -34,10 +24,10 @@ Object {
               "2a4d5e20-f570-48e4-b9ab-ff3068919377": Object {
                 "dataType": "number",
                 "isBucketed": false,
-                "label": "Unique count of dns.question.registered_domain",
+                "label": "Unique count of dns.question.name",
                 "operationType": "unique_count",
                 "scale": "ratio",
-                "sourceField": "dns.question.registered_domain",
+                "sourceField": "dns.question.name",
               },
               "d1452b87-0e9e-4fc0-a725-3727a18e0b37": Object {
                 "dataType": "date",
@@ -53,9 +43,10 @@ Object {
               "e8842815-2a45-4c74-86de-c19a391e2424": Object {
                 "dataType": "string",
                 "isBucketed": true,
-                "label": "Top values of dns.question.name",
+                "label": "Top values of event.dataset",
                 "operationType": "terms",
                 "params": Object {
+                  "accuracyMode": true,
                   "missingBucket": false,
                   "orderBy": Object {
                     "columnId": "2a4d5e20-f570-48e4-b9ab-ff3068919377",
@@ -63,10 +54,14 @@ Object {
                   },
                   "orderDirection": "desc",
                   "otherBucket": true,
-                  "size": 6,
+                  "parentFormat": Object {
+                    "id": "terms",
+                  },
+                  "secondaryFields": Array [],
+                  "size": 10,
                 },
                 "scale": "ordinal",
-                "sourceField": "dns.question.name",
+                "sourceField": "event.dataset",
               },
             },
             "incompleteColumns": Object {},
@@ -100,16 +95,28 @@ Object {
         "meta": Object {
           "alias": null,
           "disabled": false,
-          "key": "host.id",
+          "key": "source.ip",
           "negate": false,
           "params": Object {
-            "query": "123",
+            "query": "192.168.1.1",
           },
           "type": "phrase",
         },
         "query": Object {
-          "match_phrase": Object {
-            "host.id": "123",
+          "bool": Object {
+            "minimum_should_match": 1,
+            "should": Array [
+              Object {
+                "match_phrase": Object {
+                  "source.ip": "192.168.1.1",
+                },
+              },
+              Object {
+                "match_phrase": Object {
+                  "destination.ip": "192.168.1.1",
+                },
+              },
+            ],
           },
         },
       },
@@ -164,16 +171,34 @@ Object {
           },
         },
       },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.id",
+          "negate": false,
+          "params": Object {
+            "query": "123",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.id": "123",
+          },
+        },
+      },
     ],
+    "internalReferences": Array [],
     "query": Object {
       "language": "kql",
       "query": "host.name: *",
     },
     "visualization": Object {
       "axisTitlesVisibilitySettings": Object {
-        "x": true,
-        "yLeft": true,
-        "yRight": true,
+        "x": false,
+        "yLeft": false,
+        "yRight": false,
       },
       "fittingFunction": "None",
       "gridlinesVisibilitySettings": Object {
@@ -194,7 +219,7 @@ Object {
           "layerId": "b1c3efc6-c886-4fba-978f-3b6bb5e7948a",
           "layerType": "data",
           "position": "top",
-          "seriesType": "bar",
+          "seriesType": "bar_stacked",
           "showGridlines": false,
           "splitAccessor": "e8842815-2a45-4c74-86de-c19a391e2424",
           "xAccessor": "d1452b87-0e9e-4fc0-a725-3727a18e0b37",
@@ -202,15 +227,17 @@ Object {
       ],
       "legend": Object {
         "isVisible": true,
+        "legendSize": "xlarge",
         "position": "right",
       },
-      "preferredSeriesType": "bar",
+      "preferredSeriesType": "bar_stacked",
       "tickLabelsVisibilitySettings": Object {
         "x": true,
         "yLeft": true,
         "yRight": true,
       },
       "valueLabels": "hide",
+      "valuesInLegend": true,
       "yLeftExtent": Object {
         "mode": "full",
       },

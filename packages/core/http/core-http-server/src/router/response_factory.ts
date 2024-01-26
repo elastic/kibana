@@ -13,6 +13,7 @@ import type {
   HttpResponsePayload,
   IKibanaResponse,
   RedirectResponseOptions,
+  FileHttpResponseOptions,
   ResponseError,
   ErrorHttpResponseOptions,
 } from './response';
@@ -26,14 +27,18 @@ export interface KibanaSuccessResponseFactory {
    * Status code: `200`.
    * @param options - {@link HttpResponseOptions} configures HTTP response body & headers.
    */
-  ok(options?: HttpResponseOptions): IKibanaResponse;
+  ok<T extends HttpResponsePayload | ResponseError = any>(
+    options?: HttpResponseOptions<T>
+  ): IKibanaResponse<T>;
 
   /**
    * The request has been accepted for processing.
    * Status code: `202`.
    * @param options - {@link HttpResponseOptions} configures HTTP response body & headers.
    */
-  accepted(options?: HttpResponseOptions): IKibanaResponse;
+  accepted<T extends HttpResponsePayload | ResponseError = any>(
+    options?: HttpResponseOptions<T>
+  ): IKibanaResponse<T>;
 
   /**
    * The server has successfully fulfilled the request and that there is no additional content to send in the response payload body.
@@ -54,6 +59,18 @@ export interface KibanaRedirectionResponseFactory {
    * Expects `location` header to be set.
    */
   redirected(options: RedirectResponseOptions): IKibanaResponse;
+}
+
+/**
+ * @public
+ */
+export interface KibanaNotModifiedResponseFactory {
+  /**
+   * Content not modified.
+   * Status code: `304`.
+   * @param options - {@link HttpResponseOptions} configures HTTP response body & headers.
+   */
+  notModified(options: HttpResponseOptions): IKibanaResponse;
 }
 
 /**
@@ -195,7 +212,15 @@ export interface KibanaErrorResponseFactory {
  */
 export type KibanaResponseFactory = KibanaSuccessResponseFactory &
   KibanaRedirectionResponseFactory &
+  KibanaNotModifiedResponseFactory &
   KibanaErrorResponseFactory & {
+    /**
+     * Creates a response with defined status code and payload.
+     * @param options - {@link FileHttpResponseOptions} configures HTTP response parameters.
+     */
+    file<T extends HttpResponsePayload | ResponseError>(
+      options: FileHttpResponseOptions<T>
+    ): IKibanaResponse;
     /**
      * Creates a response with defined status code and payload.
      * @param options - {@link CustomHttpResponseOptions} configures HTTP response parameters.

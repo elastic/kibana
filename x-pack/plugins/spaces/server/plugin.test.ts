@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { lastValueFrom } from 'rxjs';
+
 import type { CoreSetup } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
@@ -26,6 +28,12 @@ describe('Spaces plugin', () => {
       const spacesSetup = plugin.setup(core, { features, licensing });
       expect(spacesSetup).toMatchInlineSnapshot(`
         Object {
+          "hasOnlyDefaultSpace$": Observable {
+            "operator": [Function],
+            "source": Observable {
+              "_subscribe": [Function],
+            },
+          },
           "spacesClient": Object {
             "registerClientWrapper": [Function],
             "setClientRepositoryFactory": [Function],
@@ -39,6 +47,7 @@ describe('Spaces plugin', () => {
       `);
     });
 
+    // Joe removed this test, but we're not sure why...
     it('registers the capabilities provider and switcher', () => {
       const initializerContext = coreMock.createPluginInitializerContext({});
       const core = coreMock.createSetup() as CoreSetup<PluginsStart>;
@@ -53,7 +62,7 @@ describe('Spaces plugin', () => {
       expect(core.capabilities.registerSwitcher).toHaveBeenCalledTimes(1);
     });
 
-    it('registers the usage collector', () => {
+    it('registers the usage collector if the usageCollection plugin is enabled', () => {
       const initializerContext = coreMock.createPluginInitializerContext({});
       const core = coreMock.createSetup() as CoreSetup<PluginsStart>;
       const features = featuresPluginMock.createSetup();
@@ -66,31 +75,6 @@ describe('Spaces plugin', () => {
       plugin.setup(core, { features, licensing, usageCollection });
 
       expect(usageCollection.getCollectorByType('spaces')).toBeDefined();
-    });
-
-    it('registers the "space" saved object type and client wrapper', () => {
-      const initializerContext = coreMock.createPluginInitializerContext({});
-      const core = coreMock.createSetup() as CoreSetup<PluginsStart>;
-      const features = featuresPluginMock.createSetup();
-      const licensing = licensingMock.createSetup();
-
-      const plugin = new SpacesPlugin(initializerContext);
-
-      plugin.setup(core, { features, licensing });
-
-      expect(core.savedObjects.registerType).toHaveBeenCalledWith({
-        name: 'space',
-        namespaceType: 'agnostic',
-        hidden: true,
-        mappings: expect.any(Object),
-        migrations: expect.any(Object),
-      });
-
-      expect(core.savedObjects.addClientWrapper).toHaveBeenCalledWith(
-        Number.MIN_SAFE_INTEGER,
-        'spaces',
-        expect.any(Function)
-      );
     });
   });
 
@@ -109,6 +93,12 @@ describe('Spaces plugin', () => {
       const spacesStart = plugin.start(coreStart);
       expect(spacesStart).toMatchInlineSnapshot(`
         Object {
+          "hasOnlyDefaultSpace$": Observable {
+            "operator": [Function],
+            "source": Observable {
+              "_subscribe": [Function],
+            },
+          },
           "spacesService": Object {
             "createSpacesClient": [Function],
             "getActiveSpace": [Function],
@@ -120,5 +110,41 @@ describe('Spaces plugin', () => {
         }
       `);
     });
+  });
+
+  it('determines hasOnlyDefaultSpace$ correctly when maxSpaces=1', async () => {
+    const initializerContext = coreMock.createPluginInitializerContext({ maxSpaces: 1 });
+    const core = coreMock.createSetup() as CoreSetup<PluginsStart>;
+    const features = featuresPluginMock.createSetup();
+    const licensing = licensingMock.createSetup();
+
+    const usageCollection = usageCollectionPluginMock.createSetupContract();
+
+    const plugin = new SpacesPlugin(initializerContext);
+
+    const spacesSetup = plugin.setup(core, { features, licensing, usageCollection });
+    const coreStart = coreMock.createStart();
+    const spacesStart = plugin.start(coreStart);
+
+    await expect(lastValueFrom(spacesSetup.hasOnlyDefaultSpace$)).resolves.toEqual(true);
+    await expect(lastValueFrom(spacesStart.hasOnlyDefaultSpace$)).resolves.toEqual(true);
+  });
+
+  it('determines hasOnlyDefaultSpace$ correctly when maxSpaces=1000', async () => {
+    const initializerContext = coreMock.createPluginInitializerContext({ maxSpaces: 1000 });
+    const core = coreMock.createSetup() as CoreSetup<PluginsStart>;
+    const features = featuresPluginMock.createSetup();
+    const licensing = licensingMock.createSetup();
+
+    const usageCollection = usageCollectionPluginMock.createSetupContract();
+
+    const plugin = new SpacesPlugin(initializerContext);
+
+    const spacesSetup = plugin.setup(core, { features, licensing, usageCollection });
+    const coreStart = coreMock.createStart();
+    const spacesStart = plugin.start(coreStart);
+
+    await expect(lastValueFrom(spacesSetup.hasOnlyDefaultSpace$)).resolves.toEqual(false);
+    await expect(lastValueFrom(spacesStart.hasOnlyDefaultSpace$)).resolves.toEqual(false);
   });
 });

@@ -19,9 +19,9 @@ import { ProcRunner } from './proc_runner';
  *  @param  {async Function} fn
  *  @return {Promise<undefined>}
  */
-export async function withProcRunner(
+export async function withProcRunner<T = void>(
   log: ToolingLog,
-  fn: (procs: ProcRunner) => Promise<void>
+  fn: (procs: ProcRunner) => Promise<T>
 ): Promise<void> {
   const procs = new ProcRunner(log);
 

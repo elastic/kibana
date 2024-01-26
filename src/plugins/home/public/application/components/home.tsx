@@ -129,7 +129,7 @@ export class Home extends Component<HomeProps, State> {
   private renderNormal() {
     const { addBasePath, solutions, isCloudEnabled } = this.props;
     const { application, trackUiMetric } = getServices();
-    const isDarkMode = getServices().uiSettings?.get('theme:darkMode') || false;
+    const isDarkMode = getServices().theme?.getTheme().darkMode ?? false;
     const devTools = this.findDirectoryById('console');
     const manageDataFeatures = this.getFeaturesByCategory('admin');
 
@@ -188,17 +188,16 @@ export class Home extends Component<HomeProps, State> {
 
   public render() {
     const { isLoading, isWelcomeEnabled, isNewKibanaInstance } = this.state;
-    const { isCloudEnabled } = this.props;
-    const { application } = getServices();
+    const { application, guidedOnboardingService } = getServices();
 
     if (isWelcomeEnabled) {
       if (isLoading) {
         return this.renderLoading();
       }
       if (isNewKibanaInstance) {
-        if (isCloudEnabled) {
+        if (guidedOnboardingService?.isEnabled) {
           application.navigateToUrl('./home#/getting_started');
-          return;
+          return null;
         }
         return this.renderWelcome();
       }

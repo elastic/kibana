@@ -84,6 +84,7 @@ export interface IInterpreterRenderHandlers {
   update(params: IInterpreterRenderUpdateParams): void;
   event(event: IInterpreterRenderEvent): void;
   hasCompatibleActions?(event: IInterpreterRenderEvent): Promise<boolean>;
+  getCompatibleCellValueActions?(data: object[]): Promise<unknown[]>;
   getRenderMode(): RenderMode;
 
   /**
@@ -96,6 +97,9 @@ export interface IInterpreterRenderHandlers {
   isSyncCursorEnabled(): boolean;
 
   isSyncTooltipsEnabled(): boolean;
+
+  shouldUseSizeTransitionVeil(): boolean;
+
   /**
    * This uiState interface is actually `PersistedState` from the visualizations plugin,
    * but expressions cannot know about vis or it creates a mess of circular dependencies.

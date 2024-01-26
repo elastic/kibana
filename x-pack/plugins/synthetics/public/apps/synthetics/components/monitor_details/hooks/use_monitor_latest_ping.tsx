@@ -8,25 +8,26 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { ConfigKey } from '../../../../../../common/runtime_types';
+import { useSyntheticsRefreshContext } from '../../../contexts';
 import { getMonitorLastRunAction, selectLastRunMetadata } from '../../../state';
 import { useSelectedLocation } from './use_selected_location';
 import { useSelectedMonitor } from './use_selected_monitor';
 
 interface UseMonitorLatestPingParams {
   monitorId?: string;
-  locationLabel?: string;
 }
 
 export const useMonitorLatestPing = (params?: UseMonitorLatestPingParams) => {
   const dispatch = useDispatch();
+  const { lastRefresh } = useSyntheticsRefreshContext();
 
   const { monitor } = useSelectedMonitor();
   const location = useSelectedLocation();
 
   const monitorId = params?.monitorId ?? monitor?.id;
-  const locationLabel = params?.locationLabel ?? location?.label;
+  const locationLabel = location?.label;
 
-  const { data: latestPing, loading } = useSelector(selectLastRunMetadata);
+  const { data: latestPing, loading, loaded } = useSelector(selectLastRunMetadata);
 
   const latestPingId = latestPing?.monitor.id;
 
@@ -38,22 +39,22 @@ export const useMonitorLatestPing = (params?: UseMonitorLatestPingParams) => {
   const isUpToDate = isIdSame && isLocationSame;
 
   useEffect(() => {
-    if (monitorId && locationLabel && !isUpToDate) {
+    if (monitorId && locationLabel) {
       dispatch(getMonitorLastRunAction.get({ monitorId, locationId: locationLabel }));
     }
-  }, [dispatch, monitorId, locationLabel, isUpToDate]);
+  }, [dispatch, monitorId, locationLabel, isUpToDate, lastRefresh]);
 
   if (!monitorId || !locationLabel) {
-    return { loading, latestPing: undefined };
+    return { loading, latestPing: undefined, loaded };
   }
 
   if (!latestPing) {
-    return { loading, latestPing: undefined };
+    return { loading, latestPing: undefined, loaded };
   }
 
   if (!isIdSame || !isLocationSame) {
-    return { loading, latestPing: undefined };
+    return { loading, latestPing: undefined, loaded };
   }
 
-  return { loading, latestPing };
+  return { loading, latestPing, loaded };
 };

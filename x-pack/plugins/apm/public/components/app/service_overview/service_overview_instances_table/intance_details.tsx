@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
+import {
+  CloudProvider,
+  getAgentIcon,
+  getCloudProviderIcon,
+} from '@kbn/custom-icons';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import React from 'react';
@@ -18,25 +23,27 @@ import {
   CLOUD_PROVIDER,
   CONTAINER_ID,
   HOST_NAME,
+  SERVICE_VERSION,
   SERVICE_NODE_NAME,
   SERVICE_RUNTIME_NAME,
   SERVICE_RUNTIME_VERSION,
-  SERVICE_VERSION,
-  KUBERNETES_CONTAINER_NAME,
-  KUBERNETES_NAMESPACE,
   KUBERNETES_POD_NAME,
   KUBERNETES_POD_UID,
+} from '../../../../../common/es_fields/apm';
+
+import {
+  KUBERNETES_CONTAINER_NAME,
+  KUBERNETES_NAMESPACE,
   KUBERNETES_REPLICASET_NAME,
   KUBERNETES_DEPLOYMENT_NAME,
-} from '../../../../../common/elasticsearch_fieldnames';
+} from '../../../../../common/es_fields/infra_metrics';
 
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { isPending } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import { getAgentIcon } from '../../../shared/agent_icon/get_agent_icon';
 import { KeyValueFilterList } from '../../../shared/key_value_filter_list';
 import { pushNewItemToKueryBar } from '../../../shared/kuery_bar/utils';
-import { getCloudIcon, getContainerIcon } from '../../../shared/service_icons';
+import { getContainerIcon } from '../../../shared/service_icons';
 import { useInstanceDetailsFetcher } from './use_instance_details_fetcher';
 
 type ServiceInstanceDetails =
@@ -103,13 +110,10 @@ export function InstanceDetails({
     serviceNodeName,
   });
 
-  if (
-    status === FETCH_STATUS.LOADING ||
-    status === FETCH_STATUS.NOT_INITIATED
-  ) {
+  if (isPending(status)) {
     return (
       <div style={{ width: '50%' }}>
-        <EuiLoadingContent data-test-subj="loadingSpinner" />
+        <EuiSkeletonText data-test-subj="loadingSpinner" />
       </div>
     );
   }
@@ -175,7 +179,7 @@ export function InstanceDetails({
             'xpack.apm.serviceOverview.instanceTable.details.cloudTitle',
             { defaultMessage: 'Cloud' }
           )}
-          icon={getCloudIcon(data.cloud?.provider)}
+          icon={getCloudProviderIcon(data.cloud?.provider as CloudProvider)}
           keyValueList={cloudDetailsKeyValuePairs}
           onClickFilter={addKueryBarFilter}
         />

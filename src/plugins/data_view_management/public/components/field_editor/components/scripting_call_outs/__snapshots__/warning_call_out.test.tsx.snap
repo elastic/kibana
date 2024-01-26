@@ -42,14 +42,17 @@ Array [
         aria-hidden="true"
         class="emotion-euiCallOut__icon"
         color="inherit"
-        data-euiicon-type="alert"
+        data-euiicon-type="warning"
       />
       <span>
         Scripted fields are deprecated
       </span>
     </p>
     <div
-      class="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
+      class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+    />
+    <div
+      class="euiText emotion-euiText-s-euiTextColor-default"
     >
       <div
         class="euiText emotion-euiText-s"

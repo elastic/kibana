@@ -8,7 +8,10 @@
 import React, { FC, Fragment } from 'react';
 import { EuiFieldNumber, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { OUTLIER_ANALYSIS_METHOD, ANALYSIS_ADVANCED_FIELDS } from '../../../../common/analytics';
+import {
+  OUTLIER_ANALYSIS_METHOD,
+  ANALYSIS_ADVANCED_FIELDS,
+} from '@kbn/ml-data-frame-analytics-utils';
 import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { AdvancedParamErrors, getNumberValue } from './advanced_step_form';
 
@@ -30,7 +33,7 @@ export const OutlierHyperParameters: FC<Props> = ({ actions, state, advancedPara
           })}
           helpText={i18n.translate('xpack.ml.dataframe.analytics.create.methodHelpText', {
             defaultMessage:
-              'Sets the method that outlier detection uses. If not set, uses an ensemble of different methods, normalizes and combines their individual outlier scores to obtain the overall outlier score. It is recommended to use the ensemble method.',
+              'Set the method that outlier detection uses. If not set, uses an ensemble of different methods, normalizes and combines their individual outlier scores to obtain the overall outlier score. It is recommended to use the ensemble method.',
           })}
           isInvalid={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.METHOD] !== undefined}
           error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.METHOD]}
@@ -86,7 +89,7 @@ export const OutlierHyperParameters: FC<Props> = ({ actions, state, advancedPara
           })}
           helpText={i18n.translate('xpack.ml.dataframe.analytics.create.outlierFractionHelpText', {
             defaultMessage:
-              'Sets the proportion of the data set that is assumed to be outlying prior to outlier detection.',
+              'Set the proportion of the data set that is assumed to be outlying prior to outlier detection.',
           })}
           isInvalid={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.OUTLIER_FRACTION] !== undefined}
           error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.OUTLIER_FRACTION]}

@@ -5,8 +5,9 @@ parameters:
     in: path
     required: true
 get:
-  summary: Enrollment API Key - Info
-  tags: []
+  summary: Get enrollment API key by ID
+  tags:
+    - Enrollment API keys
   responses:
     '200':
       description: OK
@@ -19,10 +20,13 @@ get:
                 $ref: ../components/schemas/enrollment_api_key.yaml
             required:
               - item
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: get-enrollment-api-key
 delete:
-  summary: Enrollment API Key - Delete
-  tags: []
+  summary: Delete enrollment API key by ID
+  tags:
+    - Enrollment API keys
   responses:
     '200':
       description: OK
@@ -37,6 +41,8 @@ delete:
                   - deleted
             required:
               - action
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: delete-enrollment-api-key
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml

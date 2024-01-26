@@ -56,15 +56,18 @@ interface GetExecutionsPerDayCountResults {
   alertsPercentilesByType: Record<string, Record<string, number>>;
   countRulesByExecutionStatus: Record<string, number>;
 }
+
 interface GetExecutionTimeoutsPerDayCountResults {
   hasErrors: boolean;
   errorMessage?: string;
   countExecutionTimeouts: number;
   countExecutionTimeoutsByType: Record<string, number>;
 }
+
 interface GetExecutionCountsExecutionFailures extends AggregationsSingleBucketAggregateBase {
   by_reason: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
 }
+
 interface GetExecutionCountsAggregationBucket extends AggregationsStringTermsBucketKeys {
   avg_execution_time: AggregationsSingleMetricAggregateBase;
   avg_es_search_duration: AggregationsSingleMetricAggregateBase;
@@ -484,10 +487,7 @@ export function parsePercentileAggs(
         };
       }
     }
-    return {
-      ...acc,
-      ...result,
-    };
+    return Object.assign(acc, result);
   }, {});
 }
 
@@ -562,13 +562,11 @@ export function parseExecutionCountAggregationResults(results: {
 
   return {
     countTotalFailedExecutions: results?.execution_failures?.doc_count ?? 0,
-    countFailedExecutionsByReason: executionFailuresByReasonBuckets.reduce(
-      (acc: Record<string, number>, bucket: AggregationsStringTermsBucketKeys) => {
+    countFailedExecutionsByReason: executionFailuresByReasonBuckets.reduce<Record<string, number>>(
+      (acc, bucket: AggregationsStringTermsBucketKeys) => {
         const reason: string = bucket.key;
-        return {
-          ...acc,
-          [reason]: bucket.doc_count ?? 0,
-        };
+        acc[reason] = bucket.doc_count ?? 0;
+        return acc;
       },
       {}
     ),

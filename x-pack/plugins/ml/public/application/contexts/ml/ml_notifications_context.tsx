@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import React, { FC, useContext, useState } from 'react';
+import React, { FC, useContext, useState, useEffect } from 'react';
 import { combineLatest, timer } from 'rxjs';
 import { switchMap, map, tap, retry } from 'rxjs/operators';
 import moment from 'moment';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import useMount from 'react-use/lib/useMount';
+import { useStorage } from '@kbn/ml-local-storage';
 import { useMlKibana } from '../kibana';
-import { useStorage } from '../storage';
-import { ML_NOTIFICATIONS_LAST_CHECKED_AT } from '../../../../common/types/storage';
+import {
+  ML_NOTIFICATIONS_LAST_CHECKED_AT,
+  type MlStorageKey,
+  type TMlStorageMapped,
+} from '../../../../common/types/storage';
 import { useAsObservable } from '../../hooks';
 import type { NotificationsCountResponse } from '../../../../common/types/notifications';
 
@@ -48,7 +51,10 @@ export const MlNotificationsContextProvider: FC = ({ children }) => {
 
   const canGetNotifications = canGetJobs && canGetDataFrameAnalytics && canGetTrainedModels;
 
-  const [lastCheckedAt, setLastCheckedAt] = useStorage(ML_NOTIFICATIONS_LAST_CHECKED_AT);
+  const [lastCheckedAt, setLastCheckedAt] = useStorage<
+    MlStorageKey,
+    TMlStorageMapped<typeof ML_NOTIFICATIONS_LAST_CHECKED_AT>
+  >(ML_NOTIFICATIONS_LAST_CHECKED_AT);
   const lastCheckedAt$ = useAsObservable(lastCheckedAt);
 
   /** Holds the value used for the actual request */
@@ -56,31 +62,34 @@ export const MlNotificationsContextProvider: FC = ({ children }) => {
   const [notificationsCounts, setNotificationsCounts] =
     useState<NotificationsCountResponse>(defaultCounts);
 
-  useMount(function startPollingNotifications() {
-    if (!canGetNotifications) return;
+  useEffect(
+    function startPollingNotifications() {
+      if (!canGetNotifications) return;
 
-    const subscription = combineLatest([lastCheckedAt$, timer(0, NOTIFICATIONS_CHECK_INTERVAL)])
-      .pipe(
-        // Use the latest check time or 7 days ago by default.
-        map(([lastChecked]) => lastChecked ?? moment().subtract(7, 'd').valueOf()),
-        tap((lastCheckedAtQuery) => {
-          setLatestRequestedAt(lastCheckedAtQuery);
-        }),
-        switchMap((lastCheckedAtQuery) =>
-          mlApiServices.notifications.countMessages$({
-            lastCheckedAt: lastCheckedAtQuery,
-          })
-        ),
-        retry({ delay: NOTIFICATIONS_CHECK_INTERVAL })
-      )
-      .subscribe((response) => {
-        setNotificationsCounts(isPopulatedObject(response) ? response : defaultCounts);
-      });
+      const subscription = combineLatest([lastCheckedAt$, timer(0, NOTIFICATIONS_CHECK_INTERVAL)])
+        .pipe(
+          // Use the latest check time or 7 days ago by default.
+          map(([lastChecked]) => lastChecked ?? moment().subtract(7, 'd').valueOf()),
+          tap((lastCheckedAtQuery) => {
+            setLatestRequestedAt(lastCheckedAtQuery);
+          }),
+          switchMap((lastCheckedAtQuery) =>
+            mlApiServices.notifications.countMessages$({
+              lastCheckedAt: lastCheckedAtQuery,
+            })
+          ),
+          retry({ delay: NOTIFICATIONS_CHECK_INTERVAL })
+        )
+        .subscribe((response) => {
+          setNotificationsCounts(isPopulatedObject(response) ? response : defaultCounts);
+        });
 
-    return () => {
-      subscription.unsubscribe();
-    };
-  });
+      return () => {
+        subscription.unsubscribe();
+      };
+    },
+    [canGetNotifications, lastCheckedAt$, mlApiServices.notifications]
+  );
 
   return (
     <MlNotificationsContext.Provider

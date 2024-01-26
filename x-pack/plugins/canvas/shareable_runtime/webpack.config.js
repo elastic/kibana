@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-require('../../../../src/setup_node_env');
+require('@kbn/babel-register').install();
 
 const path = require('path');
 const webpack = require('webpack');
@@ -20,14 +20,6 @@ const {
 } = require('./constants');
 
 const isProd = process.env.NODE_ENV === 'production';
-
-const nodeModulesButNotKbnPackages = (_path) => {
-  if (!_path.includes('node_modules')) {
-    return false;
-  }
-
-  return !_path.includes(`node_modules${path.sep}@kbn${path.sep}`);
-};
 
 module.exports = {
   context: KIBANA_ROOT,
@@ -45,7 +37,6 @@ module.exports = {
       core_app_image_assets: path.resolve(KIBANA_ROOT, 'src/core/public/styles/core_app/images'),
     },
     extensions: ['.js', '.json', '.ts', '.tsx', '.scss'],
-    symlinks: false,
   },
   module: {
     rules: [
@@ -68,6 +59,23 @@ module.exports = {
           },
         ],
         sideEffects: false,
+      },
+      {
+        /**
+         * further process the modules exported by both monaco-editor and monaco-yaml, because;
+         * 1). they both use non-standard language APIs
+         * 2). monaco-yaml exports it's src as is see, https://www.npmjs.com/package/monaco-yaml#does-it-work-without-a-bundler
+         */
+        test: /(monaco-editor\/esm\/vs\/|monaco-languageserver-types|monaco-marker-data-provider|monaco-worker-manager).*(t|j)sx?$/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            babelrc: false,
+            envName: isProd ? 'production' : 'development',
+            presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+            plugins: [require.resolve('@babel/plugin-transform-numeric-separator')],
+          },
+        },
       },
       {
         test: /\.css$/,
@@ -112,14 +120,14 @@ module.exports = {
             loader: 'postcss-loader',
             options: {
               postcssOptions: {
-                config: require.resolve('@kbn/optimizer/postcss.config.js'),
+                config: require.resolve('@kbn/optimizer/postcss.config'),
               },
             },
           },
           {
             loader: 'sass-loader',
             options: {
-              implementation: require('node-sass'),
+              implementation: require('sass-embedded'),
               sourceMap: !isProd,
             },
           },
@@ -127,7 +135,7 @@ module.exports = {
       },
       {
         test: /\.scss$/,
-        exclude: [nodeModulesButNotKbnPackages, /\.module\.s(a|c)ss$/],
+        exclude: [/node_modules/, /\.module\.s(a|c)ss$/],
         use: [
           {
             loader: 'style-loader',
@@ -156,10 +164,9 @@ module.exports = {
                   path.resolve(KIBANA_ROOT, 'src/core/public/styles/core_app/_globals_v8light.scss')
                 )};\n${content}`;
               },
-              implementation: require('node-sass'),
-              webpackImporter: false,
+              implementation: require('sass-embedded'),
               sassOptions: {
-                outputStyle: 'nested',
+                outputStyle: 'expanded',
                 includePaths: [path.resolve(KIBANA_ROOT, 'node_modules')],
               },
             },
@@ -171,7 +178,7 @@ module.exports = {
         loader: 'expose-loader?jQuery!expose-loader?$',
       },
       {
-        test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/,
+        test: /\.(woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg)(\?|$)/,
         loader: 'url-loader',
         sideEffects: false,
       },
@@ -186,6 +193,10 @@ module.exports = {
           require.resolve('highlight.js'),
         ],
         use: require.resolve('null-loader'),
+      },
+      {
+        test: /\.peggy$/,
+        use: require.resolve('@kbn/peggy-loader'),
       },
     ],
   },

@@ -7,7 +7,8 @@
 
 import React, { Component } from 'react';
 import classNames from 'classnames';
-import type { DraggableProvidedDragHandleProps } from 'react-beautiful-dnd';
+import type { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiIcon, EuiButtonIcon, EuiConfirmModal, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -18,13 +19,16 @@ import {
   EDIT_LAYER_SETTINGS_LABEL,
   FIT_TO_DATA_LABEL,
 } from './action_labels';
+import { LegendDetails } from './legend_details';
 import { ILayer } from '../../../../../classes/layers/layer';
+import { isLayerGroup } from '../../../../../classes/layers/layer_group';
 
 function escapeLayerName(name: string) {
   return name.split(' ').join('_');
 }
 
 export interface ReduxStateProps {
+  inspectorAdapters: Adapters;
   isReadOnly: boolean;
   zoom: number;
   selectedLayer: ILayer | undefined;
@@ -46,7 +50,7 @@ export interface ReduxDispatchProps {
 export interface OwnProps {
   depth: number;
   layer: ILayer;
-  dragHandleProps?: DraggableProvidedDragHandleProps;
+  dragHandleProps?: DraggableProvidedDragHandleProps | null;
   isDragging?: boolean;
   isDraggingOver?: boolean;
   isCombineLayer?: boolean;
@@ -103,7 +107,9 @@ export class TOCEntry extends Component<Props, State> {
 
   async _loadHasLegendDetails() {
     const hasLegendDetails =
-      (await this.props.layer.hasLegendDetails()) &&
+      ((await this.props.layer.hasLegendDetails()) ||
+        this.props.layer.hasErrors() ||
+        this.props.layer.hasWarnings()) &&
       this.props.layer.isVisible() &&
       this.props.layer.showAtZoomLevel(this.props.zoom);
     if (this._isMounted && hasLegendDetails !== this.state.hasLegendDetails) {
@@ -272,7 +278,7 @@ export class TOCEntry extends Component<Props, State> {
     return (
       <div
         className={
-          layer.isVisible() && layer.showAtZoomLevel(zoom) && !layer.hasErrors()
+          layer.isVisible() && layer.showAtZoomLevel(zoom)
             ? 'mapTocEntry-visible'
             : 'mapTocEntry-notVisible'
         }
@@ -290,26 +296,6 @@ export class TOCEntry extends Component<Props, State> {
       </div>
     );
   }
-
-  _renderLegendDetails = () => {
-    if (!this.props.isLegendDetailsOpen || !this.state.hasLegendDetails) {
-      return null;
-    }
-
-    const tocDetails = this.props.layer.renderLegendDetails();
-    if (!tocDetails) {
-      return null;
-    }
-
-    return (
-      <div
-        className="mapTocEntry__layerDetails"
-        data-test-subj={`mapLayerTOCDetails${escapeLayerName(this.state.displayName)}`}
-      >
-        {tocDetails}
-      </div>
-    );
-  };
 
   _hightlightAsSelectedLayer() {
     if (this.props.isCombineLayer) {
@@ -346,7 +332,19 @@ export class TOCEntry extends Component<Props, State> {
       >
         {this._renderLayerHeader()}
 
-        {this._renderLegendDetails()}
+        {this.props.isLegendDetailsOpen &&
+        this.state.hasLegendDetails &&
+        !isLayerGroup(this.props.layer) ? (
+          <div
+            className="mapTocEntry__layerDetails"
+            data-test-subj={`mapLayerTOCDetails${escapeLayerName(this.state.displayName)}`}
+          >
+            <LegendDetails
+              inspectorAdapters={this.props.inspectorAdapters}
+              layer={this.props.layer}
+            />
+          </div>
+        ) : null}
 
         {this._renderDetailsToggle()}
 

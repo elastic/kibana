@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { TOAST_CLOSE_BTN } from '../screens/navigation';
+import { login } from '../tasks/login';
 
 describe('Edit package policy', () => {
   const policyConfig = {
@@ -32,6 +32,8 @@ describe('Edit package policy', () => {
     ],
   };
   beforeEach(() => {
+    login();
+
     cy.intercept('/api/fleet/package_policies/policy-1', {
       item: policyConfig,
     });
@@ -110,7 +112,6 @@ describe('Edit package policy', () => {
 
   it('should edit package policy', () => {
     cy.visit('/app/fleet/policies/fleet-server-policy/edit-integration/policy-1');
-    cy.getBySel(TOAST_CLOSE_BTN).click();
     cy.getBySel('packagePolicyDescriptionInput').clear().type('desc');
 
     cy.intercept('PUT', '/api/fleet/package_policies/policy-1', {

@@ -7,9 +7,12 @@
 
 import { ValidatedEmail } from '@kbn/actions-plugin/common';
 import { RegistrationServices } from './connector_types';
+import { allowedExperimentalValues, ExperimentalFeatures } from '../common/experimental_features';
 
 function validateEmailAddresses(addresses: string[]): ValidatedEmail[] {
   return addresses.map((address) => ({ address, valid: true }));
 }
 
 export const registrationServicesMock: RegistrationServices = { validateEmailAddresses };
+
+export const experimentalFeaturesMock: ExperimentalFeatures = allowedExperimentalValues;

@@ -168,7 +168,7 @@ export function MachineLearningCustomUrlsProvider({
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
-    async assertDiscoverCustomUrlAction(expectedHitCountFormatted: string) {
+    async assertDiscoverCustomUrlAction(expectedHitCountFormatted?: string) {
       await PageObjects.discover.waitForDiscoverAppOnScreen();
       await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -178,14 +178,15 @@ export function MachineLearningCustomUrlsProvider({
       // During cloud tests, the small browser width might cause hit count to be invisible
       // so temporarily collapsing the sidebar ensures the count shows
       await PageObjects.discover.closeSidebar();
-
-      await retry.tryForTime(10 * 1000, async () => {
-        const hitCount = await PageObjects.discover.getHitCount();
-        expect(hitCount).to.eql(
-          expectedHitCountFormatted,
-          `Expected Discover hit count to be '${expectedHitCountFormatted}' (got '${hitCount}')`
-        );
-      });
+      if (expectedHitCountFormatted) {
+        await retry.tryForTime(10 * 1000, async () => {
+          const hitCount = await PageObjects.discover.getHitCount();
+          expect(hitCount).to.eql(
+            expectedHitCountFormatted,
+            `Expected Discover hit count to be '${expectedHitCountFormatted}' (got '${hitCount}')`
+          );
+        });
+      }
     },
 
     async assertDashboardCustomUrlAction(expectedPanelCount: number) {

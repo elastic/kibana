@@ -12,6 +12,8 @@ import { KibanaLogic } from '../kibana';
 export interface CloudDetails {
   cloudId: string | undefined;
   deploymentUrl: string | undefined;
+  elasticsearchUrl: string | undefined;
+  kibanaUrl: string | undefined;
 }
 
 export const useCloudDetails = (): CloudDetails => {
@@ -19,5 +21,7 @@ export const useCloudDetails = (): CloudDetails => {
   return {
     cloudId: cloud?.cloudId,
     deploymentUrl: cloud?.deploymentUrl,
+    elasticsearchUrl: cloud?.elasticsearchUrl,
+    kibanaUrl: cloud?.kibanaUrl,
   };
 };

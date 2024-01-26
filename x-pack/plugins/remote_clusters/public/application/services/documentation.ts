@@ -12,6 +12,9 @@ export let remoteClustersUrl: string;
 export let transportPortUrl: string;
 export let proxyModeUrl: string;
 export let proxySettingsUrl: string;
+export let onPremSetupTrustWithCertUrl: string;
+export let onPremSetupTrustWithApiKeyUrl: string;
+export let cloudSetupTrustUrl: string;
 
 export function init({ links }: DocLinksStart): void {
   skippingDisconnectedClustersUrl = links.ccs.skippingDisconnectedClusters;
@@ -19,4 +22,7 @@ export function init({ links }: DocLinksStart): void {
   transportPortUrl = links.elasticsearch.transportSettings;
   proxyModeUrl = links.elasticsearch.remoteClustersProxy;
   proxySettingsUrl = links.elasticsearch.remoteClusersProxySettings;
+  onPremSetupTrustWithCertUrl = links.elasticsearch.remoteClustersOnPremSetupTrustWithCert;
+  onPremSetupTrustWithApiKeyUrl = links.elasticsearch.remoteClustersOnPremSetupTrustWithApiKey;
+  cloudSetupTrustUrl = links.elasticsearch.remoteClustersCloudSetupTrust;
 }

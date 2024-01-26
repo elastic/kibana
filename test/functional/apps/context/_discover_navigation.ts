@@ -27,6 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'dashboard',
     'context',
     'header',
+    'unifiedFieldList',
   ]);
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -43,11 +44,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       for (const columnName of TEST_COLUMN_NAMES) {
-        await PageObjects.discover.clickFieldListItemAdd(columnName);
+        await PageObjects.unifiedFieldList.clickFieldListItemAdd(columnName);
       }
 
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
-        await filterBar.addFilter(columnName, 'is', value);
+        await filterBar.addFilter({ field: columnName, operation: 'is', value });
+        await PageObjects.header.waitUntilLoadingHasFinished();
       }
     });
 
@@ -82,7 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.waitFor('next anchor timestamp matches previous anchor timestamp', async () => {
         // get the timestamp of the first row
         const firstContextTimestamp = await getTimestamp(false);
-        await dataGrid.clickRowToggle({ isAnchorRow: true });
+        await dataGrid.clickRowToggle({ rowIndex: 0 });
 
         const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
         await rowActions[1].click();
@@ -122,7 +124,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const hasDocHit = await testSubjects.exists('doc-hit');
       expect(hasDocHit).to.be(true);
 
-      await testSubjects.click('breadcrumb first');
+      await testSubjects.click('~breadcrumb & ~first');
       await PageObjects.discover.waitForDiscoverAppOnScreen();
       await PageObjects.discover.waitUntilSearchingHasFinished();
     });
@@ -132,7 +134,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.saveSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
 

@@ -9,31 +9,34 @@ import { useEffect, useMemo, useState } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EuiDataGridColumn } from '@elastic/eui';
+
 import { CoreSetup } from '@kbn/core/public';
-
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { isRuntimeMappings } from '../../../../../../common/util/runtime_field_utils';
-import { RuntimeMappings } from '../../../../../../common/types/fields';
-import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../../../common/constants/field_histograms';
-import { newJobCapsServiceAnalytics } from '../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
-
-import { DataLoader } from '../../../../datavisualizer/index_based/data_loader';
-
+import { DEFAULT_SAMPLER_SHARD_SIZE } from '@kbn/ml-agg-utils';
+import {
+  getCombinedRuntimeMappings,
+  isRuntimeMappings,
+  type RuntimeMappings,
+} from '@kbn/ml-runtime-field-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 import {
   getFieldType,
   getDataGridSchemaFromKibanaFieldType,
   getDataGridSchemaFromESFieldType,
-  getFieldsFromKibanaIndexPattern,
+  getFieldsFromKibanaDataView,
   showDataGridColumnChartErrorMessageToast,
   useDataGrid,
   useRenderCellValue,
   EsSorting,
   UseIndexDataReturnType,
   getProcessedFields,
-  getCombinedRuntimeMappings,
-} from '../../../../components/data_grid';
-import { extractErrorMessage } from '../../../../../../common/util/errors';
-import { INDEX_STATUS } from '../../../common/analytics';
+  INDEX_STATUS,
+} from '@kbn/ml-data-grid';
+
+import { DataLoader } from '../../../../datavisualizer/index_based/data_loader';
+
 import { ml } from '../../../../services/ml_api_service';
 
 type IndexSearchResponse = estypes.SearchResponse;
@@ -55,8 +58,8 @@ function getRuntimeFieldColumns(runtimeMappings: RuntimeMappings) {
   });
 }
 
-function getIndexPatternColumns(indexPattern: DataView, fieldsFilter: string[]) {
-  const { fields } = newJobCapsServiceAnalytics;
+function getDataViewColumns(dataView: DataView, fieldsFilter: string[]) {
+  const { fields } = dataView;
 
   return fields
     .filter((field) => fieldsFilter.includes(field.name))
@@ -75,7 +78,7 @@ function getIndexPatternColumns(indexPattern: DataView, fieldsFilter: string[]) 
 }
 
 export const useIndexData = (
-  indexPattern: DataView,
+  dataView: DataView,
   query: Record<string, any> | undefined,
   toastNotifications: CoreSetup['notifications']['toasts'],
   runtimeMappings?: RuntimeMappings
@@ -84,14 +87,16 @@ export const useIndexData = (
   // This is a workaround to avoid passing potentially thousands of unpopulated fields
   // (for example, as part of filebeat/metricbeat/ECS based indices)
   // to the data grid component which would significantly slow down the page.
-  const [indexPatternFields, setIndexPatternFields] = useState<string[]>();
+  const [dataViewFields, setDataViewFields] = useState<string[]>();
+  const [timeRangeMs, setTimeRangeMs] = useState<TimeRangeMs | undefined>();
+
   useEffect(() => {
     async function fetchDataGridSampleDocuments() {
       setErrorMessage('');
       setStatus(INDEX_STATUS.LOADING);
 
       const esSearchRequest = {
-        index: indexPattern.title,
+        index: dataView.title,
         body: {
           fields: ['*'],
           _source: false,
@@ -111,13 +116,13 @@ export const useIndexData = (
 
         // Get all field names for each returned doc and flatten it
         // to a list of unique field names used across all docs.
-        const allKibanaIndexPatternFields = getFieldsFromKibanaIndexPattern(indexPattern);
+        const allDataViewFields = getFieldsFromKibanaDataView(dataView);
         const populatedFields = [...new Set(docs.map(Object.keys).flat(1))]
-          .filter((d) => allKibanaIndexPatternFields.includes(d))
+          .filter((d) => allDataViewFields.includes(d))
           .sort();
 
         setStatus(INDEX_STATUS.LOADED);
-        setIndexPatternFields(populatedFields);
+        setDataViewFields(populatedFields);
       } catch (e) {
         setErrorMessage(extractErrorMessage(e));
         setStatus(INDEX_STATUS.ERROR);
@@ -131,20 +136,20 @@ export const useIndexData = (
   // To be used for data grid column selection
   // and will be applied to doc and chart queries.
   const combinedRuntimeMappings = useMemo(
-    () => getCombinedRuntimeMappings(indexPattern, runtimeMappings),
-    [indexPattern, runtimeMappings]
+    () => getCombinedRuntimeMappings(dataView, runtimeMappings),
+    [dataView, runtimeMappings]
   );
 
   // Available data grid columns, will be a combination of index pattern and runtime fields.
   const [columns, setColumns] = useState<MLEuiDataGridColumn[]>([]);
   useEffect(() => {
-    if (Array.isArray(indexPatternFields)) {
+    if (Array.isArray(dataViewFields)) {
       setColumns([
-        ...getIndexPatternColumns(indexPattern, indexPatternFields),
+        ...getDataViewColumns(dataView, dataViewFields),
         ...(combinedRuntimeMappings ? getRuntimeFieldColumns(combinedRuntimeMappings) : []),
       ]);
     }
-  }, [indexPattern, indexPatternFields, combinedRuntimeMappings]);
+  }, [dataView, dataViewFields, combinedRuntimeMappings]);
 
   const dataGrid = useDataGrid(columns);
 
@@ -152,8 +157,7 @@ export const useIndexData = (
     pagination,
     resetPagination,
     setErrorMessage,
-    setRowCount,
-    setRowCountRelation,
+    setRowCountInfo,
     setStatus,
     setTableItems,
     sortingColumns,
@@ -171,18 +175,19 @@ export const useIndexData = (
       setErrorMessage('');
       setStatus(INDEX_STATUS.LOADING);
 
+      const timeFieldName = dataView.getTimeField()?.name;
       const sort: EsSorting = sortingColumns.reduce((s, column) => {
         s[column.id] = { order: column.direction };
         return s;
       }, {} as EsSorting);
       const esSearchRequest = {
-        index: indexPattern.title,
+        index: dataView.title,
         body: {
           query,
           from: pagination.pageIndex * pagination.pageSize,
           size: pagination.pageSize,
           fields: [
-            ...(indexPatternFields ?? []),
+            ...(dataViewFields ?? []),
             ...(isRuntimeMappings(combinedRuntimeMappings)
               ? Object.keys(combinedRuntimeMappings)
               : []),
@@ -192,19 +197,47 @@ export const useIndexData = (
           ...(isRuntimeMappings(combinedRuntimeMappings)
             ? { runtime_mappings: combinedRuntimeMappings }
             : {}),
+          ...(timeFieldName
+            ? {
+                aggs: {
+                  earliest: {
+                    min: {
+                      field: timeFieldName,
+                    },
+                  },
+                  latest: {
+                    max: {
+                      field: timeFieldName,
+                    },
+                  },
+                },
+              }
+            : {}),
         },
       };
 
       try {
         const resp: IndexSearchResponse = await ml.esSearch(esSearchRequest);
+
+        if (
+          resp.aggregations &&
+          isPopulatedObject(resp.aggregations.earliest, ['value']) &&
+          isPopulatedObject(resp.aggregations.latest, ['value'])
+        ) {
+          setTimeRangeMs({
+            from: resp.aggregations.earliest.value as number,
+            to: resp.aggregations.latest.value as number,
+          } as TimeRangeMs);
+        }
         const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
 
-        setRowCount(typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total!.value);
-        setRowCountRelation(
-          typeof resp.hits.total === 'number'
-            ? ('eq' as estypes.SearchTotalHitsRelation)
-            : resp.hits.total!.relation
-        );
+        setRowCountInfo({
+          rowCount: typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total!.value,
+          rowCountRelation:
+            typeof resp.hits.total === 'number'
+              ? ('eq' as estypes.SearchTotalHitsRelation)
+              : resp.hits.total!.relation,
+        });
         setTableItems(docs);
         setStatus(INDEX_STATUS.LOADED);
       } catch (e) {
@@ -213,22 +246,22 @@ export const useIndexData = (
       }
     }
 
-    if (indexPatternFields !== undefined && query !== undefined) {
+    if (dataViewFields !== undefined && query !== undefined) {
       fetchIndexData();
     }
     // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    indexPattern.title,
-    indexPatternFields,
+    dataView.title,
+    dataViewFields,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify([query, pagination, sortingColumns, combinedRuntimeMappings]),
   ]);
 
   const dataLoader = useMemo(
-    () => new DataLoader(indexPattern, toastNotifications),
+    () => new DataLoader(dataView, toastNotifications),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [indexPattern]
+    [dataView]
   );
 
   useEffect(() => {
@@ -258,16 +291,17 @@ export const useIndexData = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     dataGrid.chartsVisible,
-    indexPattern.title,
+    dataView.title,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify([query, dataGrid.visibleColumns, runtimeMappings]),
   ]);
 
-  const renderCellValue = useRenderCellValue(indexPattern, pagination, tableItems);
+  const renderCellValue = useRenderCellValue(dataView, pagination, tableItems);
 
   return {
     ...dataGrid,
-    indexPatternFields,
+    dataViewFields,
     renderCellValue,
+    timeRangeMs,
   };
 };

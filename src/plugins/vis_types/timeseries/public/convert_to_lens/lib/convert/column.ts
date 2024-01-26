@@ -14,7 +14,13 @@ import {
   GenericColumnWithMeta,
   FormatParams,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
+import {
+  getDurationParams,
+  inputFormats,
+  isDuration,
+  outputFormats,
+} from '../../../application/components/lib/durations';
 import type { Metric, Series } from '../../../../common/types';
 import { DATA_FORMATTERS } from '../../../../common/enums';
 import { getTimeScale } from '../metrics';
@@ -30,7 +36,8 @@ interface ExtraColumnFields {
   isAssignTimeScale?: boolean;
 }
 
-const isSupportedFormat = (format: string) => ['bytes', 'number', 'percent'].includes(format);
+const isSupportedFormat = (format: string) =>
+  ['bytes', 'number', 'percent'].includes(format) || isDuration(format);
 
 export const getFormat = (series: Pick<Series, 'formatter' | 'value_template'>): FormatParams => {
   let suffix;
@@ -50,6 +57,21 @@ export const getFormat = (series: Pick<Series, 'formatter' | 'value_template'>):
     };
   }
 
+  if (isDuration(series.formatter)) {
+    const { from, to, decimals } = getDurationParams(series.formatter);
+    return {
+      format: {
+        id: DATA_FORMATTERS.DURATION,
+        params: {
+          fromUnit: inputFormats[from] || from,
+          toUnit: outputFormats[to] || to,
+          decimals: decimals ? parseInt(decimals, 10) : 2,
+          suffix,
+        },
+      },
+    };
+  }
+
   return { format: { id: series.formatter, ...(suffix && { params: { suffix, decimals: 2 } }) } };
 };
 
@@ -65,7 +87,7 @@ export const createColumn = (
     isAssignTimeScale = true,
   }: ExtraColumnFields = {}
 ): GeneralColumnWithMeta => ({
-  columnId: uuid(),
+  columnId: uuidv4(),
   dataType: (field?.type as DataType) ?? undefined,
   label: series.label,
   isBucketed,

@@ -13,10 +13,12 @@ import {
   TRANSFORM_FUNCTION,
   TRANSFORM_MODE,
   TRANSFORM_STATE,
+  TRANSFORM_HEALTH,
 } from '../../../../../../common/constants';
 import { isLatestTransform, isPivotTransform } from '../../../../../../common/types/transform';
 import { TransformListRow } from '../../../../common';
-import { getTaskStateBadge } from './use_columns';
+import { TransformTaskStateBadge } from './transform_task_state_badge';
+import { TransformHealthColoredDot } from './transform_health_colored_dot';
 
 export const transformFilters: SearchFilterConfig[] = [
   {
@@ -27,7 +29,7 @@ export const transformFilters: SearchFilterConfig[] = [
     options: Object.values(TRANSFORM_STATE).map((val) => ({
       value: val,
       name: val,
-      view: getTaskStateBadge(val),
+      view: <TransformTaskStateBadge state={val} />,
     })),
   },
   {
@@ -43,6 +45,17 @@ export const transformFilters: SearchFilterConfig[] = [
           {val}
         </EuiBadge>
       ),
+    })),
+  },
+  {
+    type: 'field_value_selection',
+    field: 'health',
+    name: i18n.translate('xpack.transform.healthFilter', { defaultMessage: 'Health' }),
+    multiSelect: false,
+    options: Object.values(TRANSFORM_HEALTH).map((val) => ({
+      value: val,
+      name: val,
+      view: <TransformHealthColoredDot compact={true} showToolTip={false} healthStatus={val} />,
     })),
   },
 ];
@@ -93,9 +106,15 @@ export const filterTransforms = (transforms: TransformListRow[], clauses: Clause
       // filter other clauses, i.e. the mode and status filters
       if (c.type !== 'is' && Array.isArray(c.value)) {
         // the status value is an array of string(s) e.g. ['failed', 'stopped']
-        ts = transforms.filter((transform) => (c.value as Value[]).includes(transform.stats.state));
+        ts = transforms.filter(
+          (transform) => transform.stats && (c.value as Value[]).includes(transform.stats.state)
+        );
       } else {
         ts = transforms.filter((transform) => {
+          if (!transform.stats) return false;
+          if (c.type === 'field' && c.field === 'health') {
+            return transform.stats.health?.status === c.value;
+          }
           if (c.type === 'field' && c.field === 'mode') {
             return transform.mode === c.value;
           }

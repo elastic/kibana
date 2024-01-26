@@ -1,0 +1,177 @@
+# @kbn-doc-linker partial
+
+properties:
+  criteria:
+    type: array
+    items:
+      oneOf:
+        - title: non count criterion
+          type: object
+          properties:
+            threshold:
+              type: array
+              items:
+                type: number
+            comparator:
+              type: string
+              enum:
+                - "<"
+                - "<="
+                - ">"
+                - ">="
+                - "between"
+                - "outside"
+            timeUnit:
+              type: string
+            timeSize:
+              type: number
+            warningThreshold:
+              type: array
+              items:
+                type: number
+            warningComparator:
+              type: string
+              enum:
+                - "<"
+                - "<="
+                - ">"
+                - ">="
+                - "between"
+                - "outside"
+            metric:
+              type: string
+            aggType:
+              type: string
+              enum:
+                - "avg"
+                - "max"
+                - "min"
+                - "cardinality"
+                - "rate"
+                - "count"
+                - "sum"
+                - "p95"
+                - "p99"
+                - "custom"
+
+        - title: count criterion
+          type: object
+          properties:
+            threshold:
+              type: array
+              items:
+                type: number
+            comparator:
+              type: string
+              enum:
+                - "<"
+                - "<="
+                - ">"
+                - ">="
+                - "between"
+                - "outside"
+            timeUnit:
+              type: string
+            timeSize:
+              type: number
+            warningThreshold:
+              type: array
+              items:
+                type: number
+            warningComparator:
+              type: string
+              enum:
+                - "<"
+                - "<="
+                - ">"
+                - ">="
+                - "between"
+                - "outside"
+            aggType:
+              type: string
+              enum:
+                - "count"
+
+        - title: custom criterion
+          type: object
+          properties:
+            threshold:
+              type: array
+              items:
+                type: number
+            comparator:
+              type: string
+              enum:
+                - "<"
+                - "<="
+                - ">"
+                - ">="
+                - "between"
+                - "outside"
+            timeUnit:
+              type: string
+            timeSize:
+              type: number
+            warningThreshold:
+              type: array
+              items:
+                type: number
+            warningComparator:
+              type: string
+              enum:
+                - "<"
+                - "<="
+                - ">"
+                - ">="
+                - "between"
+                - "outside"
+            aggType:
+              type: string
+              enum:
+                - "custom"
+            customMetric:
+              type: array
+              items:
+                oneOf:
+                  - type: object
+                    properties:
+                      name:
+                        type: string
+                      aggType:
+                        type: string
+                        enum:
+                          - "avg"
+                          - "sum"
+                          - "max"
+                          - "min"
+                          - "cardinality"
+                      field:
+                        type: string
+                  - type: object
+                    properties:
+                      name:
+                        type: string
+                      aggType:
+                        type: string
+                        enum:
+                          - "count"
+                      filter:
+                        type: string
+            equation:
+              type: string
+            label:
+              type: string
+  groupBy:
+    oneOf:
+      - type: string
+      - type: array
+        items:
+          type: string
+  filterQuery:
+    type: string
+  sourceId:
+    type: string
+  alertOnNoData:
+    type: boolean
+  alertOnGroupDisappear:
+    type: boolean

@@ -7,4 +7,3 @@
  */
 
 export { getClasses } from './presentation';
-export * from './constants';

@@ -13,8 +13,7 @@ import {
   ColorStaticStylePropertyDescriptor,
 } from '../../../../../../common/descriptor_types';
 import { COLOR_MAP_TYPE, FIELD_ORIGIN, STYLE_TYPE } from '../../../../../../common/constants';
-// @ts-ignore
-import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
+import { euiPaletteColorBlind } from '@elastic/eui';
 
 const blue = '#0000ff';
 const yellow = '#ffff00';

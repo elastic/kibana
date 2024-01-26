@@ -39,6 +39,7 @@ export interface ParameterDefinition {
 
 export type MainType =
   | 'text'
+  | 'match_only_text'
   | 'keyword'
   | 'numeric'
   | 'binary'
@@ -57,6 +58,7 @@ export type MainType =
   | 'rank_features'
   | 'shape'
   | 'search_as_you_type'
+  | 'sparse_vector'
   | 'date'
   | 'date_nanos'
   | 'geo_point'

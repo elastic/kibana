@@ -10,15 +10,17 @@ import {
   EuiFilterButton,
   EuiFilterGroup,
   EuiFilterSelectItem,
+  EuiSelectableMessage,
   EuiIcon,
   EuiPopover,
   EuiPopoverTitle,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { FC, ReactNode, useEffect, useMemo, useState } from 'react';
+import React, { FC, ReactNode, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { euiDarkVars as euiThemeDark, euiLightVars as euiThemeLight } from '@kbn/ui-theme';
-import { useDataVisualizerKibana } from '../../../kibana_context';
+import type { SerializedStyles } from '@emotion/react';
+import { css } from '@emotion/react';
+import { useCurrentEuiTheme } from '../../hooks/use_current_eui_theme';
 
 export interface Option {
   name?: string | ReactNode;
@@ -27,32 +29,27 @@ export interface Option {
   disabled?: boolean;
 }
 
+const SELECT_PICKER_HEIGHT = '250px';
+
 const NoFilterItems = () => {
   return (
-    <div className="euiFilterSelect__note">
-      <div className="euiFilterSelect__noteContent">
-        <EuiIcon type="minusInCircle" />
-        <EuiSpacer size="xs" />
-        <p>
-          <FormattedMessage
-            id="xpack.dataVisualizer.multiSelectPicker.NoFiltersFoundMessage"
-            defaultMessage="No filters found"
-          />
-        </p>
-      </div>
-    </div>
+    <EuiSelectableMessage>
+      <EuiIcon type="minusInCircle" />
+      <EuiSpacer size="xs" />
+      <p>
+        <FormattedMessage
+          id="xpack.dataVisualizer.multiSelectPicker.NoFiltersFoundMessage"
+          defaultMessage="No filters found"
+        />
+      </p>
+    </EuiSelectableMessage>
   );
 };
 
-export function useCurrentEuiTheme() {
-  const { services } = useDataVisualizerKibana();
-  const uiSettings = services.uiSettings;
-  return useMemo(
-    () => (uiSettings.get('theme:darkMode') ? euiThemeDark : euiThemeLight),
-    [uiSettings]
-  );
+interface MultiSelectPickerStyles {
+  filterGroup?: SerializedStyles;
+  filterItemContainer?: SerializedStyles;
 }
-
 export const MultiSelectPicker: FC<{
   options: Option[];
   onChange?: (items: string[]) => void;
@@ -60,7 +57,8 @@ export const MultiSelectPicker: FC<{
   checkedOptions: string[];
   dataTestSubj: string;
   postfix?: React.ReactElement;
-}> = ({ options, onChange, title, checkedOptions, dataTestSubj, postfix }) => {
+  cssStyles?: MultiSelectPickerStyles;
+}> = ({ options, onChange, title, checkedOptions, dataTestSubj, postfix, cssStyles }) => {
   const euiTheme = useCurrentEuiTheme();
 
   const [items, setItems] = useState<Option[]>(options);
@@ -114,7 +112,7 @@ export const MultiSelectPicker: FC<{
   );
 
   return (
-    <EuiFilterGroup data-test-subj={dataTestSubj} style={{ marginLeft: 8 }}>
+    <EuiFilterGroup data-test-subj={dataTestSubj} css={cssStyles?.filterGroup}>
       <EuiPopover
         ownFocus
         data-test-subj={`${dataTestSubj}-popover`}
@@ -130,7 +128,15 @@ export const MultiSelectPicker: FC<{
             data-test-subj={`${dataTestSubj}-searchInput`}
           />
         </EuiPopoverTitle>
-        <div style={{ maxHeight: 250, overflow: 'auto' }}>
+        <div
+          css={
+            cssStyles?.filterItemContainer ??
+            css`
+              max-height: ${SELECT_PICKER_HEIGHT};
+              overflow: auto;
+            `
+          }
+        >
           {Array.isArray(items) && items.length > 0 ? (
             items.map((item, index) => {
               const checked =

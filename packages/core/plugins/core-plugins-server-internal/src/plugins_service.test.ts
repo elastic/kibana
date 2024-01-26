@@ -11,7 +11,7 @@ import { mockDiscover, mockPackage } from './plugins_service.test.mocks';
 import { resolve, join } from 'path';
 import { BehaviorSubject, from } from 'rxjs';
 import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { schema } from '@kbn/config-schema';
 import { ConfigPath, ConfigService, Env } from '@kbn/config';
 
@@ -24,7 +24,7 @@ import { PluginDiscoveryError } from './discovery';
 import { PluginWrapper } from './plugin';
 import { PluginsService } from './plugins_service';
 import { PluginsSystem } from './plugins_system';
-import { config } from './plugins_config';
+import { config, PluginsConfigType } from './plugins_config';
 import { take } from 'rxjs/operators';
 import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 import { DiscoveredPlugin, PluginType } from '@kbn/core-base-common';
@@ -32,6 +32,7 @@ import { DiscoveredPlugin, PluginType } from '@kbn/core-base-common';
 const MockPluginsSystem: jest.Mock<PluginsSystem<PluginType>> = PluginsSystem as any;
 
 let pluginsService: PluginsService;
+let pluginsConfig: PluginsConfigType;
 let config$: BehaviorSubject<Record<string, any>>;
 let configService: ConfigService;
 let coreId: symbol;
@@ -75,6 +76,7 @@ const createPlugin = (
     requiredPlugins = [],
     requiredBundles = [],
     optionalPlugins = [],
+    runtimePluginDependencies = [],
     kibanaVersion = '7.0.0',
     configPath = [path],
     server = true,
@@ -87,6 +89,7 @@ const createPlugin = (
     requiredPlugins?: string[];
     requiredBundles?: string[];
     optionalPlugins?: string[];
+    runtimePluginDependencies?: string[];
     kibanaVersion?: string;
     configPath?: ConfigPath;
     server?: boolean;
@@ -104,6 +107,7 @@ const createPlugin = (
       requiredPlugins,
       requiredBundles,
       optionalPlugins,
+      runtimePluginDependencies,
       server,
       owner: {
         name: 'Core',
@@ -130,7 +134,8 @@ async function testSetup() {
   coreId = Symbol('core');
   env = Env.createDefault(REPO_ROOT, getEnvOptions());
 
-  config$ = new BehaviorSubject<Record<string, any>>({ plugins: { initialize: true } });
+  pluginsConfig = { initialize: true, paths: [] };
+  config$ = new BehaviorSubject<Record<string, any>>({ plugins: pluginsConfig });
   const rawConfigService = rawConfigServiceMock.create({ rawConfig$: config$ });
   configService = new ConfigService(rawConfigService, env, logger);
   await configService.setSchema(config.path, config.schema);
@@ -457,43 +462,59 @@ describe('PluginsService', () => {
       expect(loggingSystemMock.collect(logger).info).toMatchInlineSnapshot(`
         Array [
           Array [
-            "Plugin \\"explicitly-disabled-plugin-preboot\\" is disabled.",
+            "The following plugins are disabled: \\"explicitly-disabled-plugin-preboot,explicitly-disabled-plugin-standard,another-explicitly-disabled-plugin-preboot,another-explicitly-disabled-plugin-standard\\".",
           ],
           Array [
-            "Plugin \\"explicitly-disabled-plugin-standard\\" is disabled.",
-          ],
-          Array [
-            "Plugin \\"plugin-with-missing-required-deps-preboot\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [missing-plugin-preboot]",
-          ],
-          Array [
-            "Plugin \\"plugin-with-missing-required-deps-standard\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [missing-plugin-standard]",
-          ],
-          Array [
-            "Plugin \\"plugin-with-disabled-transitive-dep-preboot\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [another-explicitly-disabled-plugin-preboot]",
-          ],
-          Array [
-            "Plugin \\"plugin-with-disabled-transitive-dep-standard\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [another-explicitly-disabled-plugin-standard]",
-          ],
-          Array [
-            "Plugin \\"another-explicitly-disabled-plugin-preboot\\" is disabled.",
-          ],
-          Array [
-            "Plugin \\"another-explicitly-disabled-plugin-standard\\" is disabled.",
-          ],
-          Array [
-            "Plugin \\"plugin-with-disabled-nested-transitive-dep-preboot\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [plugin-with-disabled-transitive-dep-preboot]",
-          ],
-          Array [
-            "Plugin \\"plugin-with-disabled-nested-transitive-dep-standard\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [plugin-with-disabled-transitive-dep-standard]",
-          ],
-          Array [
-            "Plugin \\"plugin-with-missing-nested-dep-preboot\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [plugin-with-missing-required-deps-preboot]",
-          ],
-          Array [
-            "Plugin \\"plugin-with-missing-nested-dep-standard\\" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [plugin-with-missing-required-deps-standard]",
+            "Plugins \\"plugin-with-missing-required-deps-preboot,plugin-with-missing-required-deps-standard,plugin-with-disabled-transitive-dep-preboot,plugin-with-disabled-transitive-dep-standard,plugin-with-disabled-nested-transitive-dep-preboot,plugin-with-disabled-nested-transitive-dep-standard,plugin-with-missing-nested-dep-preboot,plugin-with-missing-nested-dep-standard\\" have been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [missing-plugin-preboot,missing-plugin-standard,another-explicitly-disabled-plugin-preboot,another-explicitly-disabled-plugin-standard,plugin-with-disabled-transitive-dep-preboot,plugin-with-disabled-transitive-dep-standard,plugin-with-missing-required-deps-preboot,plugin-with-missing-required-deps-standard].",
           ],
         ]
       `);
+    });
+
+    describe('forceEnableAllPlugins', () => {
+      it('enables all plugins when "true"', async () => {
+        (pluginsConfig as any).forceEnableAllPlugins = true;
+        jest
+          .spyOn(configService, 'isEnabledAtPath')
+          .mockImplementation((path) => Promise.resolve(!path.includes('disabled')));
+        prebootMockPluginSystem.setupPlugins.mockResolvedValue(new Map());
+        standardMockPluginSystem.setupPlugins.mockResolvedValue(new Map());
+        await pluginsService.setup(setupDeps);
+
+        mockDiscover.mockReturnValue({
+          error$: from([]),
+          plugin$: from([
+            createPlugin('explicitly-disabled-plugin-preboot', {
+              type: PluginType.preboot,
+              disabled: true,
+              path: 'path-1-preboot',
+              configPath: 'path-1-preboot',
+            }),
+            createPlugin('explicitly-disabled-plugin-standard', {
+              disabled: true,
+              path: 'path-1-standard',
+              configPath: 'path-1-standard',
+            }),
+            createPlugin('plugin-with-missing-required-deps-preboot', {
+              type: PluginType.preboot,
+              path: 'path-2-preboot',
+              configPath: 'path-2-preboot',
+              requiredPlugins: ['missing-plugin-preboot'],
+            }),
+          ]),
+        });
+
+        await pluginsService.discover({ environment: environmentPreboot, node: nodePreboot });
+        await pluginsService.preboot(prebootDeps);
+
+        expect(loggingSystemMock.collect(logger).info).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              "Plugins \\"plugin-with-missing-required-deps-preboot\\" have been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [missing-plugin-preboot].",
+            ],
+          ]
+        `);
+      });
     });
 
     it('does not throw in case of mutual plugin dependencies', async () => {
@@ -722,15 +743,14 @@ describe('PluginsService', () => {
           additionalPluginPaths: [],
           initialize: true,
           pluginSearchPaths: [
-            resolve(process.cwd(), 'src', 'plugins'),
-            resolve(process.cwd(), 'x-pack', 'plugins'),
-            resolve(process.cwd(), 'plugins'),
-            resolve(process.cwd(), '..', 'kibana-extra'),
+            resolve(REPO_ROOT, '..', 'kibana-extra'),
+            resolve(REPO_ROOT, 'plugins'),
           ],
+          shouldEnableAllPlugins: false,
         },
         coreContext: { coreId, env, logger, configService },
         instanceInfo: { uuid: 'uuid' },
-        nodeInfo: { roles: { backgroundTasks: true, ui: true } },
+        nodeInfo: { roles: { backgroundTasks: true, ui: true, migrator: false } },
       });
 
       const logs = loggingSystemMock.collect(logger);
@@ -971,6 +991,7 @@ describe('PluginsService', () => {
         requiredPlugins: [],
         requiredBundles: [],
         optionalPlugins: [],
+        runtimePluginDependencies: [],
       },
     ];
 

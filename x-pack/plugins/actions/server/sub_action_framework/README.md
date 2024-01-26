@@ -350,12 +350,12 @@ plugins.actions.registerSubActionConnectorType({
   name: 'Test: Sub action connector',
   minimumLicenseRequired: 'platinum' as const,
   schema: { config: TestConfigSchema, secrets: TestSecretsSchema },
-  Service: TestSubActionConnector,
+  getService: (params) => new TestSubActionConnector(params),
   renderParameterTemplates: renderTestTemplate
 });
 ```
 
-You can see a full example in [x-pack/test/alerting_api_integration/common/fixtures/plugins/alerts/server/sub_action_connector.ts](../../../../test/alerting_api_integration/common/fixtures/plugins/alerts/server/sub_action_connector.ts)
+You can see a full example in [x-pack/test/alerting_api_integration/common/plugins/alerts/server/sub_action_connector.ts](../../../../test/alerting_api_integration/common/plugins/alerts/server/sub_action_connector.ts)
 
 ### Example: Register sub action connector with custom validators
 
@@ -368,6 +368,6 @@ plugins.actions.registerSubActionConnectorType({
   minimumLicenseRequired: 'platinum' as const,
   schema: { config: TestConfigSchema, secrets: TestSecretsSchema },
   validators: [{type: ValidatorType.CONFIG, validate: urlAllowListValidator('url')}]
-  Service: TestSubActionConnector,
+  getService: (params) => new TestSubActionConnector(params),
 });
 ```

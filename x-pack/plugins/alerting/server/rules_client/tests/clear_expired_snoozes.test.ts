@@ -8,7 +8,12 @@
 import moment from 'moment';
 import sinon from 'sinon';
 import { RulesClient, ConstructorOptions } from '../rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  loggingSystemMock,
+  savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
+} from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
@@ -21,6 +26,7 @@ import { getBeforeSetup, mockedDateString } from './lib';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { RuleSnooze } from '../../types';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -40,6 +46,7 @@ const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
 const eventLogger = eventLoggerMock.create();
+const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
@@ -50,16 +57,23 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
+  maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
+  internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
   auditLogger,
   eventLogger,
+  isAuthenticationTypeAPIKey: jest.fn(),
+  getAuthenticationAPIKey: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
+  uiSettings: uiSettingsServiceMock.createStartContract(),
 };
 
 describe('clearExpiredSnoozes()', () => {
@@ -81,7 +95,7 @@ describe('clearExpiredSnoozes()', () => {
   });
 
   test('clears expired unscheduled snoozes and leaves unexpired scheduled snoozes', async () => {
-    setupTestWithSnoozeSchedule([
+    const { attributes, id } = setupTestWithSnoozeSchedule([
       {
         duration: 1000,
         rRule: {
@@ -100,9 +114,9 @@ describe('clearExpiredSnoozes()', () => {
         },
       },
     ]);
-    await rulesClient.clearExpiredSnoozes({ id: '1' });
+    await rulesClient.clearExpiredSnoozes({ rule: { ...attributes, id } });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       '1',
       {
         updatedAt: '2019-02-12T21:01:22.479Z',
@@ -120,12 +134,12 @@ describe('clearExpiredSnoozes()', () => {
         ],
       },
       {
-        version: '123',
+        refresh: false,
       }
     );
   });
   test('clears expired scheduled snoozes and leaves unexpired ones', async () => {
-    setupTestWithSnoozeSchedule([
+    const { attributes, id } = setupTestWithSnoozeSchedule([
       {
         id: '1',
         duration: 1000,
@@ -145,9 +159,9 @@ describe('clearExpiredSnoozes()', () => {
         },
       },
     ]);
-    await rulesClient.clearExpiredSnoozes({ id: '1' });
+    await rulesClient.clearExpiredSnoozes({ rule: { ...attributes, id } });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       '1',
       {
         updatedAt: '2019-02-12T21:01:22.479Z',
@@ -165,12 +179,12 @@ describe('clearExpiredSnoozes()', () => {
         ],
       },
       {
-        version: '123',
+        refresh: false,
       }
     );
   });
   test('does nothing when no snoozes are expired', async () => {
-    setupTestWithSnoozeSchedule([
+    const { attributes, id } = setupTestWithSnoozeSchedule([
       {
         duration: 1000 * 24 * 60 * 60 * 3, // 3 days
         rRule: {
@@ -189,7 +203,7 @@ describe('clearExpiredSnoozes()', () => {
         },
       },
     ]);
-    await rulesClient.clearExpiredSnoozes({ id: '1' });
+    await rulesClient.clearExpiredSnoozes({ rule: { ...attributes, id } });
     expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
   });
 });
@@ -197,7 +211,7 @@ describe('clearExpiredSnoozes()', () => {
 function setupTestWithSnoozeSchedule(snoozeSchedule: RuleSnooze) {
   const rule = {
     id: '1',
-    type: 'alert',
+    type: RULE_SAVED_OBJECT_TYPE,
     attributes: {
       name: 'name',
       consumer: 'myApp',
@@ -238,4 +252,5 @@ function setupTestWithSnoozeSchedule(snoozeSchedule: RuleSnooze) {
     retryAt: null,
     ownerId: null,
   });
+  return rule;
 }

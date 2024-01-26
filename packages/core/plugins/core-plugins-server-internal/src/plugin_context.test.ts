@@ -8,7 +8,7 @@
 
 import { duration } from 'moment';
 import { first } from 'rxjs/operators';
-import { REPO_ROOT, fromRoot } from '@kbn/utils';
+import { REPO_ROOT, fromRoot } from '@kbn/repo-info';
 import { rawConfigServiceMock, getEnvOptions, configServiceMock } from '@kbn/config-mocks';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -40,6 +40,7 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
     requiredPlugins: ['some-required-dep'],
     requiredBundles: [],
     optionalPlugins: ['some-optional-dep'],
+    runtimePluginDependencies: [],
     server: true,
     ui: true,
     owner: {
@@ -195,7 +196,7 @@ describe('createPluginInitializerContext', () => {
         opaqueId,
         manifest: createPluginManifest(),
         instanceInfo,
-        nodeInfo: { roles: { backgroundTasks: false, ui: true } },
+        nodeInfo: { roles: { backgroundTasks: false, ui: true, migrator: false } },
       });
       expect(pluginInitializerContext.node.roles.backgroundTasks).toBe(false);
       expect(pluginInitializerContext.node.roles.ui).toBe(true);
@@ -237,7 +238,7 @@ describe('createPluginPrebootSetupContext', () => {
     });
 
     const corePreboot = coreInternalLifecycleMock.createInternalPreboot();
-    const prebootSetupContext = createPluginPrebootSetupContext(coreContext, corePreboot, plugin);
+    const prebootSetupContext = createPluginPrebootSetupContext({ deps: corePreboot, plugin });
 
     const holdSetupPromise = Promise.resolve(undefined);
     prebootSetupContext.preboot.holdSetupUntilResolved('some-reason', holdSetupPromise);

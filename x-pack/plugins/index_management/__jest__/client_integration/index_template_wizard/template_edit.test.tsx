@@ -8,7 +8,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import '../../../test/global_mocks';
 import * as fixtures from '../../../test/fixtures';
 import { API_BASE_PATH } from '../../../common/constants';
 import { setupEnvironment, kibanaVersion } from '../helpers';
@@ -27,6 +26,23 @@ const MAPPING = {
     },
   },
 };
+
+jest.mock('@kbn/code-editor', () => {
+  const original = jest.requireActual('@kbn/code-editor');
+  return {
+    ...original,
+    // Mocking CodeEditor, which uses React Monaco under the hood
+    CodeEditor: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
+        data-currentvalue={props.value}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+          props.onChange(e.currentTarget.getAttribute('data-currentvalue'));
+        }}
+      />
+    ),
+  };
+});
 
 jest.mock('@elastic/eui', () => {
   const origial = jest.requireActual('@elastic/eui');
@@ -52,7 +68,7 @@ describe('<TemplateEdit />', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
     httpRequestsMockHelpers.setLoadComponentTemplatesResponse([]);
   });
 
@@ -103,6 +119,11 @@ describe('<TemplateEdit />', () => {
         name: 'test',
         indexPatterns: ['myPattern*'],
         version: 1,
+        lifecycle: {
+          enabled: true,
+          value: 1,
+          unit: 'd',
+        },
       });
       // Component templates
       await actions.completeStepTwo();
@@ -124,6 +145,7 @@ describe('<TemplateEdit />', () => {
             name: 'test',
             indexPatterns: ['myPattern*'],
             version: 1,
+            allowAutoCreate: false,
             dataStream: {
               hidden: true,
               anyUnknownKey: 'should_be_kept',
@@ -132,6 +154,12 @@ describe('<TemplateEdit />', () => {
               type: 'default',
               hasDatastream: true,
               isLegacy: false,
+            },
+            template: {
+              lifecycle: {
+                enabled: true,
+                data_retention: '1d',
+              },
             },
           }),
         })
@@ -182,6 +210,7 @@ describe('<TemplateEdit />', () => {
         await actions.completeStepOne({
           indexPatterns: UPDATED_INDEX_PATTERN,
           priority: 3,
+          allowAutoCreate: true,
         });
         // Component templates
         await actions.completeStepTwo();
@@ -195,6 +224,7 @@ describe('<TemplateEdit />', () => {
         // Make some changes to the mappings
         await act(async () => {
           actions.clickEditButtonAtField(0); // Select the first field to edit
+          jest.advanceTimersByTime(0); // advance timers to allow the form to validate
         });
         component.update();
 
@@ -204,6 +234,7 @@ describe('<TemplateEdit />', () => {
         // Change the field name
         await act(async () => {
           form.setInputValue('nameParameterInput', UPDATED_MAPPING_TEXT_FIELD_NAME);
+          jest.advanceTimersByTime(0); // advance timers to allow the form to validate
         });
 
         // Save changes on the field
@@ -234,6 +265,7 @@ describe('<TemplateEdit />', () => {
               indexPatterns: UPDATED_INDEX_PATTERN,
               priority: 3,
               version: templateToEdit.version,
+              allowAutoCreate: true,
               _kbnMeta: {
                 type: 'default',
                 hasDatastream: false,

@@ -145,9 +145,9 @@
             "signature": [
               "() => Readonly<Record<string, ",
               {
-                "pluginId": "@kbn/core-ui-settings-common",
+                "pluginId": "@kbn/core-ui-settings-browser",
                 "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
                 "section": "def-common.PublicUiSettingsParams",
                 "text": "PublicUiSettingsParams"
               },
@@ -425,6 +425,111 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-ui-settings-browser",
+            "id": "def-common.IUiSettingsClient.validateValue",
+            "type": "Function",
+            "tags": [],
+            "label": "validateValue",
+            "description": [
+              "\nValidates a uiSettings value and returns a ValueValidation object."
+            ],
+            "signature": [
+              "(key: string, value: any) => Promise<",
+              "ValueValidation",
+              ">"
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-ui-settings-browser",
+                "id": "def-common.IUiSettingsClient.validateValue.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-ui-settings-browser",
+                "id": "def-common.IUiSettingsClient.validateValue.$2",
+                "type": "Any",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-ui-settings-browser",
+        "id": "def-common.SettingsStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "SettingsStart",
+        "description": [],
+        "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-ui-settings-browser",
+            "id": "def-common.SettingsStart.client",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-common.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              }
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-ui-settings-browser",
+            "id": "def-common.SettingsStart.globalClient",
+            "type": "Object",
+            "tags": [],
+            "label": "globalClient",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-ui-settings-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+                "section": "def-common.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              }
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -450,9 +555,9 @@
             "signature": [
               "[key: string]:  ",
               {
-                "pluginId": "@kbn/core-ui-settings-common",
+                "pluginId": "@kbn/core-ui-settings-browser",
                 "scope": "common",
-                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
                 "section": "def-common.PublicUiSettingsParams",
                 "text": "PublicUiSettingsParams"
               },
@@ -475,7 +580,76 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-ui-settings-browser",
+        "id": "def-common.PublicUiSettingsParams",
+        "type": "Type",
+        "tags": [],
+        "label": "PublicUiSettingsParams",
+        "description": [],
+        "signature": [
+          "{ type?: ",
+          {
+            "pluginId": "@kbn/core-ui-settings-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+            "section": "def-common.UiSettingsType",
+            "text": "UiSettingsType"
+          },
+          " | undefined; options?: string[] | number[] | undefined; value?: unknown; scope?: ",
+          {
+            "pluginId": "@kbn/core-ui-settings-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+            "section": "def-common.UiSettingsScope",
+            "text": "UiSettingsScope"
+          },
+          " | undefined; order?: number | undefined; name?: string | undefined; description?: string | undefined; category?: string[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; readonlyMode?: ",
+          {
+            "pluginId": "@kbn/core-ui-settings-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+            "section": "def-common.ReadonlyModeType",
+            "text": "ReadonlyModeType"
+          },
+          " | undefined; sensitive?: boolean | undefined; deprecation?: ",
+          {
+            "pluginId": "@kbn/core-ui-settings-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+            "section": "def-common.DeprecationSettings",
+            "text": "DeprecationSettings"
+          },
+          " | undefined; metric?: { type: string; name: string; } | undefined; }"
+        ],
+        "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-ui-settings-browser",
+        "id": "def-common.SettingsSetup",
+        "type": "Type",
+        "tags": [],
+        "label": "SettingsSetup",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-ui-settings-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
+            "section": "def-common.SettingsStart",
+            "text": "SettingsStart"
+          }
+        ],
+        "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

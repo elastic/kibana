@@ -11,19 +11,20 @@ import {
   CriteriaWithPagination,
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiInMemoryTable,
   EuiIcon,
   EuiLink,
-  EuiPageContent_Deprecated as EuiPageContent,
   EuiSpacer,
   EuiText,
   EuiToolTip,
-  EuiEmptyPrompt,
   EuiButtonIcon,
   EuiPopover,
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiPageHeader,
+  EuiPageTemplate,
+  EuiSearchBarOnChangeArgs,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -46,6 +47,80 @@ import { goToCreateThresholdAlert, goToCreateAdvancedWatch } from '../../lib/nav
 import { useAppContext } from '../../app_context';
 import { PageError as GenericPageError } from '../../shared_imports';
 
+/*
+ * EuiMemoryTable relies on referential equality of a column's name field when sorting by that column.
+ * Therefore, we want the JSX elements preserved through renders.
+ */
+const stateColumnHeader = (
+  <EuiToolTip
+    content={i18n.translate('xpack.watcher.sections.watchList.watchTable.stateHeader.tooltipText', {
+      defaultMessage: 'Active, inactive, or error.',
+    })}
+  >
+    <span>
+      {i18n.translate('xpack.watcher.sections.watchList.watchTable.stateHeader', {
+        defaultMessage: 'State',
+      })}{' '}
+      <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+    </span>
+  </EuiToolTip>
+);
+
+const conditionLastMetHeader = (
+  <EuiToolTip
+    content={i18n.translate(
+      'xpack.watcher.sections.watchList.watchTable.lastFiredHeader.tooltipText',
+      {
+        defaultMessage: `The last time the condition was met and action taken.`,
+      }
+    )}
+  >
+    <span>
+      {i18n.translate('xpack.watcher.sections.watchList.watchTable.lastFiredHeader', {
+        defaultMessage: 'Condition last met',
+      })}{' '}
+      <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+    </span>
+  </EuiToolTip>
+);
+
+const lastCheckedHeader = (
+  <EuiToolTip
+    content={i18n.translate(
+      'xpack.watcher.sections.watchList.watchTable.lastTriggeredHeader.tooltipText',
+      {
+        defaultMessage: `The last time the condition was checked.`,
+      }
+    )}
+  >
+    <span>
+      {i18n.translate('xpack.watcher.sections.watchList.watchTable.lastTriggeredHeader', {
+        defaultMessage: 'Last checked',
+      })}{' '}
+      <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+    </span>
+  </EuiToolTip>
+);
+
+const commentHeader = (
+  <EuiToolTip
+    content={i18n.translate(
+      'xpack.watcher.sections.watchList.watchTable.commentHeader.tooltipText',
+      {
+        defaultMessage:
+          'Whether any actions have been acknowledged, throttled, or failed to execute.',
+      }
+    )}
+  >
+    <span>
+      {i18n.translate('xpack.watcher.sections.watchList.watchTable.commentHeader', {
+        defaultMessage: 'Comment',
+      })}{' '}
+      <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+    </span>
+  </EuiToolTip>
+);
+
 export const WatchListPage = () => {
   // hooks
   const {
@@ -53,6 +128,9 @@ export const WatchListPage = () => {
     history,
     links: { watcherGettingStartedUrl },
   } = useAppContext();
+  const [query, setQuery] = useState('');
+  const [queryError, setQueryError] = useState<string | null>(null);
+
   const [selection, setSelection] = useState([]);
   const [watchesToDelete, setWatchesToDelete] = useState<string[]>([]);
   // Filter out deleted watches on the client, because the API will return 200 even though some watches
@@ -62,7 +140,6 @@ export const WatchListPage = () => {
     pageIndex: 0,
     pageSize: PAGINATION.initialPageSize,
   });
-  const [query, setQuery] = useState('');
 
   useEffect(() => {
     setBreadcrumbs([listBreadcrumb]);
@@ -174,24 +251,20 @@ export const WatchListPage = () => {
 
   if (isWatchesLoading) {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+      <EuiPageTemplate.EmptyPrompt>
         <SectionLoading>
           <FormattedMessage
             id="xpack.watcher.sections.watchList.loadingWatchesDescription"
             defaultMessage="Loading watches…"
           />
         </SectionLoading>
-      </EuiPageContent>
+      </EuiPageTemplate.EmptyPrompt>
     );
   }
 
   const errorCode = getPageErrorCode(error);
   if (errorCode) {
-    return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
-        <PageError errorCode={errorCode} />
-      </EuiPageContent>
-    );
+    return <PageError errorCode={errorCode} />;
   } else if (error) {
     return (
       <GenericPageError
@@ -222,22 +295,20 @@ export const WatchListPage = () => {
     );
 
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
-        <EuiEmptyPrompt
-          iconType="managementApp"
-          title={
-            <h1>
-              <FormattedMessage
-                id="xpack.watcher.sections.watchList.emptyPromptTitle"
-                defaultMessage="You don’t have any watches yet"
-              />
-            </h1>
-          }
-          body={emptyPromptBody}
-          actions={createWatchContextMenu}
-          data-test-subj="emptyPrompt"
-        />
-      </EuiPageContent>
+      <EuiPageTemplate.EmptyPrompt
+        iconType="managementApp"
+        title={
+          <h1>
+            <FormattedMessage
+              id="xpack.watcher.sections.watchList.emptyPromptTitle"
+              defaultMessage="You don’t have any watches yet"
+            />
+          </h1>
+        }
+        body={emptyPromptBody}
+        actions={createWatchContextMenu}
+        data-test-subj="emptyPrompt"
+      />
     );
   }
 
@@ -276,46 +347,14 @@ export const WatchListPage = () => {
       },
       {
         field: 'watchStatus.state',
-        name: (
-          <EuiToolTip
-            content={i18n.translate(
-              'xpack.watcher.sections.watchList.watchTable.stateHeader.tooltipText',
-              {
-                defaultMessage: 'Active, inactive, or error.',
-              }
-            )}
-          >
-            <span>
-              {i18n.translate('xpack.watcher.sections.watchList.watchTable.stateHeader', {
-                defaultMessage: 'State',
-              })}{' '}
-              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-            </span>
-          </EuiToolTip>
-        ),
+        name: stateColumnHeader,
         sortable: true,
         width: '130px',
         render: (state: string) => <WatchStateBadge state={state} />,
       },
       {
         field: 'watchStatus.lastMetCondition',
-        name: (
-          <EuiToolTip
-            content={i18n.translate(
-              'xpack.watcher.sections.watchList.watchTable.lastFiredHeader.tooltipText',
-              {
-                defaultMessage: `The last time the condition was met and action taken.`,
-              }
-            )}
-          >
-            <span>
-              {i18n.translate('xpack.watcher.sections.watchList.watchTable.lastFiredHeader', {
-                defaultMessage: 'Condition last met',
-              })}{' '}
-              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-            </span>
-          </EuiToolTip>
-        ),
+        name: conditionLastMetHeader,
         sortable: true,
         truncateText: true,
         width: '160px',
@@ -325,23 +364,7 @@ export const WatchListPage = () => {
       },
       {
         field: 'watchStatus.lastChecked',
-        name: (
-          <EuiToolTip
-            content={i18n.translate(
-              'xpack.watcher.sections.watchList.watchTable.lastTriggeredHeader.tooltipText',
-              {
-                defaultMessage: `The last time the condition was checked.`,
-              }
-            )}
-          >
-            <span>
-              {i18n.translate('xpack.watcher.sections.watchList.watchTable.lastTriggeredHeader', {
-                defaultMessage: 'Last checked',
-              })}{' '}
-              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-            </span>
-          </EuiToolTip>
-        ),
+        name: lastCheckedHeader,
         sortable: true,
         truncateText: true,
         width: '160px',
@@ -351,24 +374,7 @@ export const WatchListPage = () => {
       },
       {
         field: 'watchStatus.comment',
-        name: (
-          <EuiToolTip
-            content={i18n.translate(
-              'xpack.watcher.sections.watchList.watchTable.commentHeader.tooltipText',
-              {
-                defaultMessage:
-                  'Whether any actions have been acknowledged, throttled, or failed to execute.',
-              }
-            )}
-          >
-            <span>
-              {i18n.translate('xpack.watcher.sections.watchList.watchTable.commentHeader', {
-                defaultMessage: 'Comment',
-              })}{' '}
-              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-            </span>
-          </EuiToolTip>
-        ),
+        name: commentHeader,
         sortable: true,
         truncateText: true,
       },
@@ -447,14 +453,18 @@ export const WatchListPage = () => {
           : '',
     };
 
-    const handleOnChange = (search: { queryText: string }) => {
-      setQuery(search.queryText);
-      return true;
+    const handleOnChange = ({ queryText, error: searchError }: EuiSearchBarOnChangeArgs) => {
+      if (!searchError) {
+        setQuery(queryText);
+        setQueryError(null);
+      } else {
+        setQueryError(searchError.message);
+      }
     };
 
     const searchConfig = {
-      query,
       onChange: handleOnChange,
+      query,
       box: {
         incremental: true,
       },
@@ -506,6 +516,25 @@ export const WatchListPage = () => {
           }}
           selection={selectionConfig}
           isSelectable={true}
+          childrenBetween={
+            queryError && (
+              <>
+                <EuiCallOut
+                  data-test-subj="watcherListSearchError"
+                  iconType="warning"
+                  color="danger"
+                  title={
+                    <FormattedMessage
+                      id="xpack.watcher.sections.watchList.watchTable.errorOnSearch"
+                      defaultMessage="Invalid search: {queryError}"
+                      values={{ queryError }}
+                    />
+                  }
+                />
+                <EuiSpacer />
+              </>
+            )
+          }
           message={
             <FormattedMessage
               id="xpack.watcher.sections.watchList.watchTable.noWatchesMessage"

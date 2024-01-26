@@ -12,6 +12,8 @@ PARENT_DIR="$(cd "$KIBANA_DIR/.."; pwd)"
 export PARENT_DIR
 export WORKSPACE="${WORKSPACE:-$PARENT_DIR}"
 
+export DOCS_REPO_CACHE_DIR="$HOME/.docs-repos"
+
 # A few things, such as Chrome, respect this variable
 # For many agent types, the workspace is mounted on a local ssd, so will be faster than the default tmp dir location
 if [[ -d /opt/local-ssd/buildkite ]]; then
@@ -25,6 +27,24 @@ export KIBANA_BASE_BRANCH="$KIBANA_PKG_BRANCH"
 
 KIBANA_PKG_VERSION="$(jq -r .version "$KIBANA_DIR/package.json")"
 export KIBANA_PKG_VERSION
+
+# Detects and exports the final target branch when using a merge queue
+if [[ "${BUILDKITE_BRANCH:-}" == "gh-readonly-queue"* ]]; then
+  # removes gh-readonly-queue/
+  BKBRANCH_WITHOUT_GH_MQ_PREFIX="${BUILDKITE_BRANCH#gh-readonly-queue/}"
+
+  # extracts target mqueue branch
+  MERGE_QUEUE_TARGET_BRANCH=${BKBRANCH_WITHOUT_GH_MQ_PREFIX%/*}
+else
+  MERGE_QUEUE_TARGET_BRANCH=""
+fi
+export MERGE_QUEUE_TARGET_BRANCH
+
+# Exports BUILDKITE_BRANCH_MERGE_QUEUE which will use the value from MERGE_QUEUE_TARGET_BRANCH if defined otherwise
+# will fallback to BUILDKITE_BRANCH.
+BUILDKITE_BRANCH_MERGE_QUEUE="${MERGE_QUEUE_TARGET_BRANCH:-${BUILDKITE_BRANCH:-}}"
+export BUILDKITE_BRANCH_MERGE_QUEUE
+
 
 BUILDKITE_AGENT_GCP_REGION=""
 if [[ "$(curl -is metadata.google.internal || true)" ]]; then
@@ -108,3 +128,6 @@ export BROWSERSLIST_IGNORE_OLD_DATA=true
 export TEST_GROUP_TYPE_UNIT="Jest Unit Tests"
 export TEST_GROUP_TYPE_INTEGRATION="Jest Integration Tests"
 export TEST_GROUP_TYPE_FUNCTIONAL="Functional Tests"
+
+# tells the gh command what our default repo is
+export GH_REPO=github.com/elastic/kibana

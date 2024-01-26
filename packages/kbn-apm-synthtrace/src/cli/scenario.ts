@@ -6,11 +6,24 @@
  * Side Public License, v 1.
  */
 
+import { Timerange } from '@kbn/apm-synthtrace-client';
+import { Logger } from '../lib/utils/create_logger';
 import { RunOptions } from './utils/parse_run_cli_flags';
-import { EntityIterable } from '../lib/entity_iterable';
+import { ApmSynthtraceEsClient, LogsSynthtraceEsClient } from '../..';
+import { ScenarioReturnType } from '../lib/utils/with_client';
 
-type Generate<TFields> = (range: { from: Date; to: Date }) => EntityIterable<TFields>;
-export type Scenario<TFields> = (options: RunOptions) => Promise<{
+type Generate<TFields> = (options: {
+  range: Timerange;
+  clients: {
+    apmEsClient: ApmSynthtraceEsClient;
+    logsEsClient: LogsSynthtraceEsClient;
+  };
+}) => ScenarioReturnType<TFields> | Array<ScenarioReturnType<TFields>>;
+
+export type Scenario<TFields> = (options: RunOptions & { logger: Logger }) => Promise<{
+  bootstrap?: (options: {
+    apmEsClient: ApmSynthtraceEsClient;
+    logsEsClient: LogsSynthtraceEsClient;
+  }) => Promise<void>;
   generate: Generate<TFields>;
-  mapToIndex?: (data: Record<string, any>) => string;
 }>;

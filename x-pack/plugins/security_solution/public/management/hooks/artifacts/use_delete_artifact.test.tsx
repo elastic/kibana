@@ -54,6 +54,7 @@ describe('Delete artifact hook', () => {
       expect(onSuccessMock).toHaveBeenCalledTimes(1);
       expect(fakeHttpServices.delete).toHaveBeenCalledTimes(1);
       expect(fakeHttpServices.delete).toHaveBeenCalledWith('/api/exception_lists/items', {
+        version: '2023-10-31',
         query: {
           id: 'fakeId',
           namespace_type: 'agnostic',

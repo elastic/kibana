@@ -8,6 +8,8 @@
 
 import { schema } from '@kbn/config-schema';
 import type { FileJSON, FileKind } from '../../../common/types';
+import type { FilesClient } from '../../../common/files_client';
+import * as commonSchemas from '../common_schemas';
 import { CreateRouteDefinition, FILES_API_ROUTES } from '../api_routes';
 import * as cs from '../common_schemas';
 import type { CreateHandler, FileKindRouter } from './types';
@@ -23,8 +25,9 @@ const rt = {
   body: schema.object({
     status: schema.maybe(stringOrArrayOfStrings),
     extension: schema.maybe(stringOrArrayOfStrings),
+    mimeType: schema.maybe(stringOrArrayOfStrings),
     name: schema.maybe(nameStringOrArrayOfNameStrings),
-    meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+    meta: commonSchemas.fileMeta,
   }),
   query: schema.object({
     page: schema.maybe(cs.page),
@@ -34,12 +37,13 @@ const rt = {
 
 export type Endpoint<M = unknown> = CreateRouteDefinition<
   typeof rt,
-  { files: Array<FileJSON<M>>; total: number }
+  { files: Array<FileJSON<M>>; total: number },
+  FilesClient['find']
 >;
 
 export const handler: CreateHandler<Endpoint> = async ({ files, fileKind }, req, res) => {
   const {
-    body: { name, status, extension, meta },
+    body: { name, status, extension, mimeType, meta },
     query: { page, perPage },
   } = req;
   const { fileService } = await files;
@@ -48,9 +52,10 @@ export const handler: CreateHandler<Endpoint> = async ({ files, fileKind }, req,
     name: toArrayOrUndefined(name),
     status: toArrayOrUndefined(status),
     extension: toArrayOrUndefined(extension),
+    mimeType: toArrayOrUndefined(mimeType),
     page,
     perPage,
-    meta,
+    meta: meta as Record<string, string>,
   });
   return res.ok({ body });
 };

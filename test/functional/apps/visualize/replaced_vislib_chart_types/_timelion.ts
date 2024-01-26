@@ -167,7 +167,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(firstAxesLabels).to.eql(['12.2GB', '12.21GB']);
       expect(secondAxesLabels).to.eql(['5.59KB', '5.6KB']);
       expect(thirdAxesLabels.toString()).to.be(
-        'BYTES_5722,BYTES_5723,BYTES_5724,BYTES_5725,BYTES_5726,BYTES_5727,BYTES_5728,BYTES_5729,BYTES_5730,BYTES_5731,BYTES_5732,BYTES_5733'
+        'BYTES_5722,BYTES_5724,BYTES_5726,BYTES_5728,BYTES_5730,BYTES_5732'
       );
     });
 
@@ -245,9 +245,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(value).to.eql('.e');
         const suggestions = await timelion.getSuggestionItemsText();
         expect(suggestions.length).to.eql(2);
-        expect(suggestions[0].includes('es')).to.eql(true);
-        expect(suggestions[1].includes('elasticsearch')).to.eql(true);
-        await timelion.clickSuggestion(0);
+        expect(suggestions[0].includes('elasticsearch')).to.eql(true);
+        expect(suggestions[1].includes('es')).to.eql(true);
+        await timelion.clickSuggestion(1);
         // wait for monaco editor model will be updated with new value
         await common.sleep(300);
         value = await monacoEditor.getCodeEditorValue(0);

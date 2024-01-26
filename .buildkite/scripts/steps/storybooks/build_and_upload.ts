@@ -14,15 +14,18 @@ import path from 'path';
 const STORYBOOKS = [
   'apm',
   'canvas',
-  'ci_composite',
+  'cases',
+  'cell_actions',
   'cloud_chat',
   'coloring',
   'chart_icons',
+  'content_management_examples',
   'controls',
   'custom_integrations',
   'dashboard_enhanced',
   'dashboard',
   'data',
+  'log_explorer',
   'embeddable',
   'expression_error',
   'expression_image',
@@ -31,20 +34,26 @@ const STORYBOOKS = [
   'expression_reveal_image',
   'expression_shape',
   'expression_tagcloud',
-  'files',
+  'management',
   'fleet',
+  'grouping',
   'home',
   'infra',
   'kibana_react',
   'lists',
   'observability',
+  'observability_ai_assistant',
   'presentation',
   'security_solution',
+  'security_solution_packages',
+  'serverless',
   'shared_ux',
   'triggers_actions_ui',
   'ui_actions_enhanced',
   'language_documentation_popover',
   'unified_search',
+  'random_sampling',
+  'text_based_editor',
 ];
 
 const GITHUB_CONTEXT = 'Build and Publish Storybooks';
@@ -83,14 +92,12 @@ const upload = () => {
     console.log('--- Generating Storybooks HTML');
 
     process.chdir(path.join('.', 'built_assets', 'storybook'));
-    fs.renameSync('ci_composite', 'composite');
 
     const storybooks = execSync(`ls -1d */`)
       .toString()
       .trim()
       .split('\n')
-      .map((filePath) => filePath.replace('/', ''))
-      .filter((filePath) => filePath !== 'composite');
+      .map((filePath) => filePath.replace('/', ''));
 
     const listHtml = storybooks
       .map((storybook) => `<li><a href="${STORYBOOK_BASE_URL}/${storybook}">${storybook}</a></li>`)
@@ -100,8 +107,6 @@ const upload = () => {
       <html>
         <body>
           <h1>Storybooks</h1>
-          <p><a href="${STORYBOOK_BASE_URL}/composite">Composite Storybook</a></p>
-          <h2>All</h2>
           <ul>
             ${listHtml}
           </ul>

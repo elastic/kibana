@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { PluginInitializer } from '@kbn/core/public';
+import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import { UxPlugin, UxPluginSetup, UxPluginStart } from './plugin';
 
-export const plugin: PluginInitializer<UxPluginSetup, UxPluginStart> = () =>
-  new UxPlugin();
+export const plugin: PluginInitializer<UxPluginSetup, UxPluginStart> = (
+  initializerContext: PluginInitializerContext
+) => new UxPlugin(initializerContext);
 
 export type { UxPluginSetup, UxPluginStart };

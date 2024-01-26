@@ -16,9 +16,9 @@ import {
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 
+import { registerKibanaUserRoleDeprecation } from './kibana_user_role';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { securityMock } from '../mocks';
-import { registerKibanaUserRoleDeprecation } from './kibana_user_role';
 
 function getDepsMock() {
   return {

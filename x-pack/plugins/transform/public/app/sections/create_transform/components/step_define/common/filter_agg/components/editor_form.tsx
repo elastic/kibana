@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FilterAggConfigEditor } from '../types';
 
@@ -41,7 +41,7 @@ export const FilterEditorForm: FilterAggConfigEditor['aggTypeConfig']['FilterAgg
       {isValid === false ? (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut color="danger" iconType="alert" size="s">
+          <EuiCallOut color="danger" iconType="warning" size="s">
             <FormattedMessage
               id="xpack.transform.agg.filterEditorForm.jsonInvalidErrorMessage"
               defaultMessage="JSON is invalid."

@@ -5,6 +5,30 @@
  * 2.0.
  */
 
-import { ENTRY_SESSION_ENTITY_ID_PROPERTY } from './constants';
-import { EventAction } from './types/process_tree';
-export { ENTRY_SESSION_ENTITY_ID_PROPERTY, EventAction };
+export { ENTRY_SESSION_ENTITY_ID_PROPERTY } from './constants';
+export type {
+  Aggregate,
+  AlertStatusEventEntityIdMap,
+  AlertTypeCount,
+  EventAction,
+  EventKind,
+  IOLine,
+  Process,
+  ProcessEvent,
+  ProcessEventAlert,
+  ProcessEventAlertCategory,
+  ProcessEventIPAddress,
+  ProcessEventResults,
+  ProcessEventsPage,
+  ProcessFields,
+  ProcessEventHost,
+  ProcessEventContainer,
+  ProcessEventOrchestrator,
+  ProcessEventCloud,
+  ProcessMap,
+  ProcessStartMarker,
+  Teletype,
+} from './types/latest';
+
+import type * as v1 from './types/v1';
+export type { v1 };

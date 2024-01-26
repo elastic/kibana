@@ -8,11 +8,9 @@
 import { omit } from 'lodash';
 
 import { agentPolicyRouteService, packagePolicyRouteService } from '../../../services';
-import { generateInputId } from '../../../../../../common/services/simplified_package_policy_helper';
-import type {
-  SimplifiedPackagePolicy,
-  SimplifiedVars,
-  SimplifiedPackagePolicyStreams,
+import {
+  formatInputs,
+  formatVars,
 } from '../../../../../../common/services/simplified_package_policy_helper';
 import type {
   NewAgentPolicy,
@@ -75,7 +73,7 @@ export function generateUpdatePackagePolicyDevToolsRequest(
     packagePolicyRouteService.getUpdatePath(packagePolicyId),
     {
       package: formatPackage(packagePolicy.package),
-      ...omit(packagePolicy, 'version', 'package', 'enabled'),
+      ...omit(packagePolicy, 'version', 'package', 'enabled', 'secret_references'),
       inputs: formatInputs(packagePolicy.inputs),
       vars: formatVars(packagePolicy.vars),
     }
@@ -97,48 +95,6 @@ export function generateUpdateAgentPolicyDevToolsRequest(
     agentPolicyRouteService.getUpdatePath(agentPolicyId),
     omit(agentPolicy, 'version')
   );
-}
-
-function formatVars(vars: NewPackagePolicy['inputs'][number]['vars']) {
-  if (!vars) {
-    return;
-  }
-
-  return Object.entries(vars).reduce((acc, [varKey, varRecord]) => {
-    acc[varKey] = varRecord?.value;
-
-    return acc;
-  }, {} as SimplifiedVars);
-}
-
-function formatInputs(inputs: NewPackagePolicy['inputs']) {
-  return inputs.reduce((acc, input) => {
-    const inputId = generateInputId(input);
-    if (!acc) {
-      acc = {};
-    }
-    acc[inputId] = {
-      enabled: input.enabled,
-      vars: formatVars(input.vars),
-      streams: formatStreams(input.streams),
-    };
-
-    return acc;
-  }, {} as SimplifiedPackagePolicy['inputs']);
-}
-
-function formatStreams(streams: NewPackagePolicy['inputs'][number]['streams']) {
-  return streams.reduce((acc, stream) => {
-    if (!acc) {
-      acc = {};
-    }
-    acc[stream.data_stream.dataset] = {
-      enabled: stream.enabled,
-      vars: formatVars(stream.vars),
-    };
-
-    return acc;
-  }, {} as SimplifiedPackagePolicyStreams);
 }
 
 function formatPackage(pkg: NewPackagePolicy['package']) {

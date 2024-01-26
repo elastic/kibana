@@ -6,17 +6,20 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { PersistedLogViewReference, ResolvedLogView } from '@kbn/logs-shared-plugin/common';
+import { IdFormat, IdFormatByJobType } from '../../../common/http_api/latest';
 import {
   AnomaliesSort,
   getJobId,
   isCategoryAnomaly,
   jobCustomSettingsRT,
   LogEntryAnomalyDatasets,
+  logEntryCategoriesJobType,
   logEntryCategoriesJobTypes,
+  logEntryRateJobType,
   logEntryRateJobTypes,
   Pagination,
 } from '../../../common/log_analysis';
-import { ResolvedLogView } from '../../../common/log_views';
 import { startTracingSpan, TracingSpan } from '../../../common/performance_tracing';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import type {
@@ -54,11 +57,22 @@ interface MappedAnomalyHit {
 
 async function getCompatibleAnomaliesJobIds(
   spaceId: string,
-  sourceId: string,
+  logViewId: string,
+  idFormats: IdFormatByJobType,
   mlAnomalyDetectors: MlAnomalyDetectors
 ) {
-  const logRateJobId = getJobId(spaceId, sourceId, logEntryRateJobTypes[0]);
-  const logCategoriesJobId = getJobId(spaceId, sourceId, logEntryCategoriesJobTypes[0]);
+  const logRateJobId = getJobId(
+    spaceId,
+    logViewId,
+    idFormats[logEntryRateJobType],
+    logEntryRateJobType
+  );
+  const logCategoriesJobId = getJobId(
+    spaceId,
+    logViewId,
+    idFormats[logEntryCategoriesJobType],
+    logEntryCategoriesJobType
+  );
 
   const jobIds: string[] = [];
   let jobSpans: TracingSpan[] = [];
@@ -99,7 +113,8 @@ export async function getLogEntryAnomalies(
   context: InfraPluginRequestHandlerContext & {
     infra: Promise<Required<InfraRequestHandlerContext>>;
   },
-  sourceId: string,
+  logView: PersistedLogViewReference,
+  idFormats: IdFormatByJobType,
   startTime: number,
   endTime: number,
   sort: AnomaliesSort,
@@ -114,7 +129,8 @@ export async function getLogEntryAnomalies(
     timing: { spans: jobSpans },
   } = await getCompatibleAnomaliesJobIds(
     infraContext.spaceId,
-    sourceId,
+    logView.logViewId,
+    idFormats,
     infraContext.mlAnomalyDetectors
   );
 
@@ -155,8 +171,9 @@ export async function getLogEntryAnomalies(
 
   const logEntryCategoriesCountJobId = getJobId(
     infraContext.spaceId,
-    sourceId,
-    logEntryCategoriesJobTypes[0]
+    logView.logViewId,
+    idFormats[logEntryCategoriesJobType],
+    logEntryCategoriesJobType
   );
 
   const { logEntryCategoriesById } = await fetchLogEntryCategories(
@@ -331,7 +348,8 @@ export async function getLogEntryExamples(
   context: InfraPluginRequestHandlerContext & {
     infra: Promise<Required<InfraRequestHandlerContext>>;
   },
-  sourceId: string,
+  logView: PersistedLogViewReference,
+  idFormat: IdFormat,
   startTime: number,
   endTime: number,
   dataset: string,
@@ -345,7 +363,8 @@ export async function getLogEntryExamples(
 
   const jobId = getJobId(
     infraContext.spaceId,
-    sourceId,
+    logView.logViewId,
+    idFormat,
     categoryId != null ? logEntryCategoriesJobTypes[0] : logEntryRateJobTypes[0]
   );
 
@@ -370,7 +389,8 @@ export async function getLogEntryExamples(
     timing: { spans: fetchLogEntryExamplesSpans },
   } = await fetchLogEntryExamples(
     context,
-    sourceId,
+    logView,
+    idFormat,
     indices,
     runtimeMappings,
     timestampField,
@@ -397,7 +417,8 @@ export async function fetchLogEntryExamples(
   context: InfraPluginRequestHandlerContext & {
     infra: Promise<Required<InfraRequestHandlerContext>>;
   },
-  sourceId: string,
+  logView: PersistedLogViewReference,
+  idFormat: IdFormat,
   indices: string,
   runtimeMappings: estypes.MappingRuntimeFields,
   timestampField: string,
@@ -420,7 +441,8 @@ export async function fetchLogEntryExamples(
 
     const logEntryCategoriesCountJobId = getJobId(
       infraContext.spaceId,
-      sourceId,
+      logView.logViewId,
+      idFormat,
       logEntryCategoriesJobTypes[0]
     );
 
@@ -483,7 +505,8 @@ export async function getLogEntryAnomaliesDatasets(
       spaceId: string;
     };
   },
-  sourceId: string,
+  logView: PersistedLogViewReference,
+  idFormats: IdFormatByJobType,
   startTime: number,
   endTime: number
 ) {
@@ -492,7 +515,8 @@ export async function getLogEntryAnomaliesDatasets(
     timing: { spans: jobSpans },
   } = await getCompatibleAnomaliesJobIds(
     context.infra.spaceId,
-    sourceId,
+    logView.logViewId,
+    idFormats,
     context.infra.mlAnomalyDetectors
   );
 

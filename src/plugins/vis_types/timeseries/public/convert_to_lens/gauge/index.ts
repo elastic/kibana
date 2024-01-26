@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { parseTimeShift } from '@kbn/data-plugin/common';
 import {
   FormulaColumn,
@@ -101,7 +101,8 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
 
     const extendedLayer: ExtendedLayer = {
       indexPatternId,
-      layerId: uuid(),
+      ignoreGlobalFilters: Boolean(model.ignore_global_filter || series.ignore_global_filter),
+      layerId: uuidv4(),
       columns: [...metricsColumns, ...(bucket ? [bucket] : [])],
       columnOrder: [],
     };

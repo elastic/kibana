@@ -9,6 +9,7 @@
 import { PluginInitializerContext } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
+import { noDataPagePublicMock } from '@kbn/no-data-page-plugin/public/mocks';
 import { urlForwardingPluginMock } from '@kbn/url-forwarding-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
@@ -34,6 +35,7 @@ const createInstance = async () => {
   const setup = plugin.setup(coreMock.createSetup(), {
     management: managementPluginMock.createSetupContract(),
     urlForwarding: urlForwardingPluginMock.createSetupContract(),
+    noDataPage: noDataPagePublicMock.createSetup(),
   });
   const doStart = () => plugin.start();
 
@@ -57,7 +59,7 @@ const docLinks = {
 const createIndexPatternManagmentContext = (): {
   [key in keyof IndexPatternManagmentContext]: any;
 } => {
-  const { application, chrome, uiSettings, notifications, overlays, theme } =
+  const { application, chrome, uiSettings, notifications, overlays, theme, settings } =
     coreMock.createStart();
   const { http } = coreMock.createSetup();
   const data = dataPluginMock.createStartContract();
@@ -70,12 +72,14 @@ const createIndexPatternManagmentContext = (): {
     application,
     chrome,
     uiSettings,
+    settings,
     notifications,
     overlays,
     http,
     docLinks,
     data,
     dataViews,
+    noDataPage: noDataPagePublicMock.createStart(),
     unifiedSearch,
     dataViewFieldEditor,
     indexPatternManagementStart: createStartContract(),

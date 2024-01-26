@@ -7,14 +7,10 @@
 
 import expect from '@kbn/expect';
 import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
-import { UserAtSpaceScenarios } from '../../../scenarios';
-import {
-  ESTestIndexTool,
-  ES_TEST_INDEX_NAME,
-  getUrlPrefix,
-  ObjectRemover,
-  getEventLog,
-} from '../../../../common/lib';
+import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/lib/action_execution_source';
+import { systemActionScenario, UserAtSpaceScenarios } from '../../../scenarios';
+import { getUrlPrefix, ObjectRemover, getEventLog } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -41,16 +37,17 @@ export default function ({ getService }: FtrProviderContext) {
       await objectRemover.removeAll();
     });
 
-    for (const scenario of UserAtSpaceScenarios) {
+    for (const scenario of [...UserAtSpaceScenarios, systemActionScenario]) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
         it('should handle execute request appropriately', async () => {
+          const connectorTypeId = 'test.index-record';
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
-              connector_type_id: 'test.index-record',
+              connector_type_id: connectorTypeId,
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
               },
@@ -82,13 +79,14 @@ export default function ({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 statusCode: 403,
                 error: 'Forbidden',
-                message: 'Unauthorized to execute actions',
+                message: `Unauthorized to execute a "${connectorTypeId}" action`,
               });
               break;
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.be.an('object');
               const searchResult = await esTestIndexTool.search(
@@ -120,6 +118,7 @@ export default function ({ getService }: FtrProviderContext) {
                 outcome: 'success',
                 actionTypeId: 'test.index-record',
                 message: `action executed: test.index-record:${createdAction.id}: My action`,
+                source: ActionExecutionSourceType.HTTP_REQUEST,
               });
               break;
             default:
@@ -163,7 +162,7 @@ export default function ({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.statusCode).to.eql(403);
+              expect(response.statusCode).to.eql(403, response.text);
               expect(response.body).to.eql({
                 statusCode: 403,
                 error: 'Forbidden',
@@ -172,6 +171,7 @@ export default function ({ getService }: FtrProviderContext) {
               break;
             case 'global_read at space1':
             case 'superuser at space1':
+            case 'system_actions at space1':
               expect(response.statusCode).to.eql(404);
               expect(response.body).to.eql({
                 statusCode: 404,
@@ -185,12 +185,13 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('should handle execute request appropriately after action is updated', async () => {
+          const connectorTypeId = 'test.index-record';
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
-              connector_type_id: 'test.index-record',
+              connector_type_id: connectorTypeId,
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
               },
@@ -236,13 +237,14 @@ export default function ({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 statusCode: 403,
                 error: 'Forbidden',
-                message: 'Unauthorized to execute actions',
+                message: `Unauthorized to execute a "${connectorTypeId}" action`,
               });
               break;
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.be.an('object');
               const searchResult = await esTestIndexTool.search(
@@ -286,7 +288,7 @@ export default function ({ getService }: FtrProviderContext) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(403);
+              expect(response.statusCode).to.eql(403, response.text);
               expect(response.body).to.eql({
                 statusCode: 403,
                 error: 'Forbidden',
@@ -297,6 +299,7 @@ export default function ({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.statusCode).to.eql(404);
               expect(response.body).to.eql({
                 statusCode: 404,
@@ -324,6 +327,7 @@ export default function ({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
                 statusCode: 400,
@@ -338,12 +342,13 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('should handle execute request appropriately after changing config properties', async () => {
+          const connectorTypeId = '.email';
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'test email action',
-              connector_type_id: '.email',
+              connector_type_id: connectorTypeId,
               config: {
                 from: 'email-from-1@example.com',
                 // this host is specifically added to allowedHosts in:
@@ -395,13 +400,14 @@ export default function ({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 statusCode: 403,
                 error: 'Forbidden',
-                message: 'Unauthorized to execute actions',
+                message: `Unauthorized to execute a "${connectorTypeId}" action`,
               });
               break;
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.statusCode).to.eql(200);
               break;
             default:
@@ -413,12 +419,13 @@ export default function ({ getService }: FtrProviderContext) {
           let indexedRecord: any;
           let searchResult: any;
           const reference = `actions-execute-3:${user.username}`;
+          const connectorTypeId = 'test.authorization';
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
-              connector_type_id: 'test.authorization',
+              connector_type_id: connectorTypeId,
             })
             .expect(200);
           objectRemover.add(space.id, createdAction.id, 'action', 'actions');
@@ -445,12 +452,13 @@ export default function ({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 statusCode: 403,
                 error: 'Forbidden',
-                message: 'Unauthorized to execute actions',
+                message: `Unauthorized to execute a "${connectorTypeId}" action`,
               });
               break;
             case 'global_read at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
+            case 'system_actions at space1':
               expect(response.statusCode).to.eql(200);
               searchResult = await esTestIndexTool.search('action:test.authorization', reference);
               expect(searchResult.body.hits.total.value).to.eql(1);
@@ -496,6 +504,69 @@ export default function ({ getService }: FtrProviderContext) {
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
           }
         });
+
+        it('should authorize system actions correctly', async () => {
+          const startDate = new Date().toISOString();
+          const connectorId = 'system-connector-test.system-action-kibana-privileges';
+          const name = 'System action: test.system-action-kibana-privileges';
+          const reference = `actions-enqueue-${scenario.id}:${space.id}:${connectorId}`;
+
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector/${connectorId}/_execute`)
+            .auth(user.username, user.password)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: { index: ES_TEST_INDEX_NAME, reference },
+            });
+
+          switch (scenario.id) {
+            /**
+             * The users in these scenarios may have access
+             * to Actions but do not have access to
+             * the system action. They should not be able to
+             * to execute even if they have access to Actions.
+             */
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+            case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(403, response.text);
+              expect(response.body).to.eql({
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unauthorized to execute actions',
+              });
+              break;
+            /**
+             * The users in these scenarios have access
+             * to Actions and to the system action. They should be able to
+             * execute.
+             */
+            case 'superuser at space1':
+            case 'system_actions at space1':
+              expect(response.statusCode).to.eql(200, response.text);
+
+              await validateSystemEventLog({
+                spaceId: space.id,
+                connectorId,
+                startDate,
+                outcome: 'success',
+                message: `action executed: test.system-action-kibana-privileges:${connectorId}: ${name}`,
+                source: ActionExecutionSourceType.HTTP_REQUEST,
+              });
+
+              await esTestIndexTool.waitForDocs(
+                'action:test.system-action-kibana-privileges',
+                reference,
+                1
+              );
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
       });
     }
   });
@@ -507,10 +578,21 @@ export default function ({ getService }: FtrProviderContext) {
     outcome: string;
     message: string;
     errorMessage?: string;
+    source?: string;
+    spaceAgnostic?: boolean;
   }
 
   async function validateEventLog(params: ValidateEventLogParams): Promise<void> {
-    const { spaceId, connectorId, actionTypeId, outcome, message, errorMessage } = params;
+    const {
+      spaceId,
+      connectorId,
+      actionTypeId,
+      outcome,
+      message,
+      errorMessage,
+      source,
+      spaceAgnostic,
+    } = params;
 
     const events: IValidatedEvent[] = await retry.try(async () => {
       return await getEventLog({
@@ -523,7 +605,6 @@ export default function ({ getService }: FtrProviderContext) {
           ['execute-start', { equal: 1 }],
           ['execute', { equal: 1 }],
         ]),
-        // filter: 'event.action:(execute)',
       });
     });
 
@@ -557,6 +638,7 @@ export default function ({ getService }: FtrProviderContext) {
         id: connectorId,
         namespace: 'space1',
         type_id: actionTypeId,
+        ...(spaceAgnostic ? { space_agnostic: true } : {}),
       },
     ]);
     expect(startExecuteEvent?.kibana?.saved_objects).to.eql(executeEvent?.kibana?.saved_objects);
@@ -564,46 +646,49 @@ export default function ({ getService }: FtrProviderContext) {
     expect(executeEvent?.message).to.eql(message);
     expect(startExecuteEvent?.message).to.eql(message.replace('executed', 'started'));
 
+    if (source) {
+      expect(executeEvent?.kibana?.action?.execution?.source).to.eql(source.toLowerCase());
+    }
+
     if (errorMessage) {
       expect(executeEvent?.error?.message).to.eql(errorMessage);
     }
-
-    // const event = events[0];
-
-    // const duration = event?.event?.duration;
-    // const eventStart = Date.parse(event?.event?.start || 'undefined');
-    // const eventEnd = Date.parse(event?.event?.end || 'undefined');
-    // const dateNow = Date.now();
-
-    // expect(typeof duration).to.be('number');
-    // expect(eventStart).to.be.ok();
-    // expect(eventEnd).to.be.ok();
-
-    // const durationDiff = Math.abs(
-    //   Math.round(duration! / NANOS_IN_MILLIS) - (eventEnd - eventStart)
-    // );
-
-    // // account for rounding errors
-    // expect(durationDiff < 1).to.equal(true);
-    // expect(eventStart <= eventEnd).to.equal(true);
-    // expect(eventEnd <= dateNow).to.equal(true);
-
-    // expect(event?.event?.outcome).to.equal(outcome);
-
-    // expect(event?.kibana?.saved_objects).to.eql([
-    //   {
-    //     rel: 'primary',
-    //     type: 'action',
-    //     id: connectorId,
-    //     type_id: actionTypeId,
-    //     namespace: spaceId,
-    //   },
-    // ]);
-
-    // expect(event?.message).to.eql(message);
-
-    // if (errorMessage) {
-    //   expect(event?.error?.message).to.eql(errorMessage);
-    // }
   }
+
+  const validateSystemEventLog = async (
+    params: Omit<ValidateEventLogParams, 'actionTypeId' | 'spaceAgnostic'> & { startDate: string }
+  ): Promise<void> => {
+    const { spaceId, connectorId, outcome, message, startDate, errorMessage, source } = params;
+
+    const events: IValidatedEvent[] = await retry.try(async () => {
+      const events_ = await getEventLog({
+        getService,
+        spaceId,
+        type: 'action',
+        id: connectorId,
+        provider: 'actions',
+        actions: new Map([['execute', { gte: 1 }]]),
+      });
+
+      const filteredEvents = events_.filter((event) => event!['@timestamp']! >= startDate);
+      if (filteredEvents.length < 1) throw new Error('no recent events found yet');
+
+      return filteredEvents;
+    });
+
+    expect(events.length).to.be(1);
+
+    const event = events[0];
+
+    expect(event?.message).to.eql(message);
+    expect(event?.event?.outcome).to.eql(outcome);
+
+    if (errorMessage) {
+      expect(event?.error?.message).to.eql(errorMessage);
+    }
+
+    if (source) {
+      expect(event?.kibana?.action?.execution?.source).to.eql(source.toLowerCase());
+    }
+  };
 }

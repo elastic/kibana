@@ -17,6 +17,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
 
+  // more tests are in x-pack/test/functional/apps/saved_query_management/feature_controls/security.ts
+
   describe('maps security feature controls', () => {
     after(async () => {
       // logout, so the other tests don't accidentally run as the custom users we're testing below

@@ -6,18 +6,15 @@
  */
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
-import {
-  CreateExceptionListSchemaDecoded,
-  exceptionListSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
 import { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 
+import { CreateExceptionListRequestDecoded, createExceptionListResponse } from '../../common/api';
 import { SiemResponseFactory, getExceptionListClient } from '../routes';
 import { ListsRequestHandlerContext } from '../types';
 
 export const createExceptionListHandler = async (
   context: ListsRequestHandlerContext,
-  request: KibanaRequest<unknown, unknown, CreateExceptionListSchemaDecoded, 'post'>,
+  request: KibanaRequest<unknown, unknown, CreateExceptionListRequestDecoded, 'post'>,
   response: KibanaResponseFactory,
   siemResponse: SiemResponseFactory,
   options: { ignoreExisting: boolean } = { ignoreExisting: false }
@@ -59,7 +56,7 @@ export const createExceptionListHandler = async (
       type,
       version,
     });
-    const [validated, errors] = validate(createdList, exceptionListSchema);
+    const [validated, errors] = validate(createdList, createExceptionListResponse);
     if (errors != null) {
       return siemResponse.error({ body: errors, statusCode: 500 });
     } else {

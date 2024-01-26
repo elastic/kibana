@@ -57,8 +57,23 @@ describe('HttpResources service', () => {
       describe(`${name} register`, () => {
         const routeConfig: RouteConfig<any, any, any, 'get'> = { path: '/', validate: false };
         let register: HttpResources['register'];
+
         beforeEach(async () => {
           register = await initializer();
+        });
+
+        it('registration defaults to "public" access', () => {
+          register(routeConfig, async (ctx, req, res) => res.ok());
+          const [[registeredRouteConfig]] = router.get.mock.calls;
+          expect(registeredRouteConfig.options?.access).toBe('public');
+        });
+
+        it('registration can set access to "internal"', () => {
+          register({ ...routeConfig, options: { access: 'internal' } }, async (ctx, req, res) =>
+            res.ok()
+          );
+          const [[registeredRouteConfig]] = router.get.mock.calls;
+          expect(registeredRouteConfig.options?.access).toBe('internal');
         });
 
         describe('renderCoreApp', () => {
@@ -72,7 +87,10 @@ describe('HttpResources service', () => {
             await routeHandler(context, kibanaRequest, responseFactory);
             expect(getDeps().rendering.render).toHaveBeenCalledWith(
               kibanaRequest,
-              (await context.core).uiSettings.client,
+              {
+                client: (await context.core).uiSettings.client,
+                globalClient: (await context.core).uiSettings.globalClient,
+              },
               {
                 isAnonymousPage: false,
                 vars: {
@@ -81,32 +99,8 @@ describe('HttpResources service', () => {
               }
             );
           });
-
-          it('can attach headers, except the CSP header', async () => {
-            register(routeConfig, async (ctx, req, res) => {
-              return res.renderCoreApp({
-                headers: {
-                  'content-security-policy': "script-src 'unsafe-eval'",
-                  'x-kibana': '42',
-                },
-              });
-            });
-
-            const [[, routeHandler]] = router.get.mock.calls;
-
-            const responseFactory = createHttpResourcesResponseFactory();
-            await routeHandler(context, kibanaRequest, responseFactory);
-
-            expect(responseFactory.ok).toHaveBeenCalledWith({
-              body: '<body />',
-              headers: {
-                'x-kibana': '42',
-                'content-security-policy':
-                  "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
-              },
-            });
-          });
         });
+
         describe('renderAnonymousCoreApp', () => {
           it('formats successful response', async () => {
             register(routeConfig, async (ctx, req, res) => {
@@ -118,7 +112,10 @@ describe('HttpResources service', () => {
             await routeHandler(context, kibanaRequest, responseFactory);
             expect(getDeps().rendering.render).toHaveBeenCalledWith(
               kibanaRequest,
-              (await context.core).uiSettings.client,
+              {
+                client: (await context.core).uiSettings.client,
+                globalClient: (await context.core).uiSettings.globalClient,
+              },
               {
                 isAnonymousPage: true,
                 vars: {
@@ -127,32 +124,8 @@ describe('HttpResources service', () => {
               }
             );
           });
-
-          it('can attach headers, except the CSP header', async () => {
-            register(routeConfig, async (ctx, req, res) => {
-              return res.renderAnonymousCoreApp({
-                headers: {
-                  'content-security-policy': "script-src 'unsafe-eval'",
-                  'x-kibana': '42',
-                },
-              });
-            });
-
-            const [[, routeHandler]] = router.get.mock.calls;
-
-            const responseFactory = createHttpResourcesResponseFactory();
-            await routeHandler(context, kibanaRequest, responseFactory);
-
-            expect(responseFactory.ok).toHaveBeenCalledWith({
-              body: '<body />',
-              headers: {
-                'x-kibana': '42',
-                'content-security-policy':
-                  "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
-              },
-            });
-          });
         });
+
         describe('renderHtml', () => {
           it('formats successful response', async () => {
             const htmlBody = '<html><body /></html>';
@@ -167,20 +140,17 @@ describe('HttpResources service', () => {
               body: htmlBody,
               headers: {
                 'content-type': 'text/html',
-                'content-security-policy':
-                  "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
               },
             });
           });
 
-          it('can attach headers, except the CSP & "content-type" headers', async () => {
+          it('can attach headers, except the "content-type" header', async () => {
             const htmlBody = '<html><body /></html>';
             register(routeConfig, async (ctx, req, res) => {
               return res.renderHtml({
                 body: htmlBody,
                 headers: {
                   'content-type': 'text/html5',
-                  'content-security-policy': "script-src 'unsafe-eval'",
                   'x-kibana': '42',
                 },
               });
@@ -196,12 +166,11 @@ describe('HttpResources service', () => {
               headers: {
                 'content-type': 'text/html',
                 'x-kibana': '42',
-                'content-security-policy':
-                  "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
               },
             });
           });
         });
+
         describe('renderJs', () => {
           it('formats successful response', async () => {
             const jsBody = 'alert(1);';
@@ -216,20 +185,17 @@ describe('HttpResources service', () => {
               body: jsBody,
               headers: {
                 'content-type': 'text/javascript',
-                'content-security-policy':
-                  "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
               },
             });
           });
 
-          it('can attach headers, except the CSP & "content-type" headers', async () => {
+          it('can attach headers, except the "content-type" header', async () => {
             const jsBody = 'alert(1);';
             register(routeConfig, async (ctx, req, res) => {
               return res.renderJs({
                 body: jsBody,
                 headers: {
                   'content-type': 'text/html',
-                  'content-security-policy': "script-src 'unsafe-eval'",
                   'x-kibana': '42',
                 },
               });
@@ -245,12 +211,11 @@ describe('HttpResources service', () => {
               headers: {
                 'content-type': 'text/javascript',
                 'x-kibana': '42',
-                'content-security-policy':
-                  "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
               },
             });
           });
         });
+
         describe('renderCss', () => {
           it('formats successful response', async () => {
             const cssBody = `body {border: 1px solid red;}`;
@@ -265,20 +230,17 @@ describe('HttpResources service', () => {
               body: cssBody,
               headers: {
                 'content-type': 'text/css',
-                'content-security-policy':
-                  "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
               },
             });
           });
 
-          it('can attach headers, except the CSP & "content-type" headers', async () => {
+          it('can attach headers, except the "content-type" header', async () => {
             const cssBody = `body {border: 1px solid red;}`;
             register(routeConfig, async (ctx, req, res) => {
               return res.renderCss({
                 body: cssBody,
                 headers: {
                   'content-type': 'text/css5',
-                  'content-security-policy': "script-src 'unsafe-eval'",
                   'x-kibana': '42',
                 },
               });
@@ -294,8 +256,6 @@ describe('HttpResources service', () => {
               headers: {
                 'content-type': 'text/css',
                 'x-kibana': '42',
-                'content-security-policy':
-                  "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
               },
             });
           });

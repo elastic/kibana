@@ -11,9 +11,9 @@ import {
   generateMockUrlIndicator,
   Indicator,
 } from '../../../../common/types/indicator';
-import { TestProvidersComponent } from '../../../common/mocks/test_providers';
-import { useFilterInOut, UseFilterInValue } from '.';
-import { FilterIn } from '../utils';
+import { TestProvidersComponent } from '../../../mocks/test_providers';
+import { useFilterInOut, UseFilterInValue } from './use_filter_in_out';
+import { FilterIn } from '../utils/filter';
 
 describe('useFilterInOut()', () => {
   let hookResult: RenderHookResult<{}, UseFilterInValue, Renderer<unknown>>;

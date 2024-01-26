@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-// Returns the path of aggregations in the elasticsearch response, as an array,
-// depending on whether sampling is being used.
-// A supplied samplerShardSize (the shard_size parameter of the sampler aggregation)
-// of less than 1 indicates no sampling, and an empty array is returned.
+/**
+ * Returns the path of aggregations in the Elasticsearch response as an array,
+ * depending on whether sampling is being used.
+ *
+ * @param samplerShardSize - The shard size parameter of the sampler aggregation.
+ *                           A value less than 1 indicates no sampling.
+ * @returns An array representing the path of aggregations in the response.
+ */
 export function getSamplerAggregationsResponsePath(samplerShardSize: number): string[] {
   return samplerShardSize > 0 ? ['sample'] : [];
 }

@@ -7,12 +7,8 @@
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
-import type { HostEcs } from '../../../../ecs/host';
-import type { UserEcs } from '../../../../ecs/user';
-import type { ProcessEcs } from '../../../../ecs/process';
+import type { HostEcs, ProcessEcs, UserEcs } from '@kbn/securitysolution-ecs';
 import type {
-  RequestOptionsPaginated,
-  SortField,
   CursorType,
   Inspect,
   Maybe,
@@ -23,11 +19,6 @@ import type {
   Hits,
   CommonFields,
 } from '../../..';
-
-export interface HostsUncommonProcessesRequestOptions extends RequestOptionsPaginated {
-  sort: SortField;
-  defaultIndex: string[];
-}
 
 export interface HostsUncommonProcessesStrategyResponse extends IEsSearchResponse {
   edges: HostsUncommonProcessesEdges[];

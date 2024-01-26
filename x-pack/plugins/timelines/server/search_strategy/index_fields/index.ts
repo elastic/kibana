@@ -8,8 +8,10 @@
 import { from } from 'rxjs';
 import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
+import deepmerge from 'deepmerge';
 import { ElasticsearchClient, StartServicesAccessor } from '@kbn/core/server';
 import {
+  DataViewsServerPluginStart,
   IndexPatternsFetcher,
   ISearchStrategy,
   SearchStrategyDependencies,
@@ -24,10 +26,16 @@ import {
   IndexFieldsStrategyResponse,
 } from '../../../common/search_strategy';
 import { StartPlugins } from '../../types';
+import { parseOptions } from './parse_options';
 
 const apmIndexPattern = 'apm-*-transaction*';
 const apmDataStreamsPattern = 'traces-apm*';
 
+/**
+ * @deprecated use kibana data view api or EcsFlat for index fields
+ * @param getStartServices
+ * @returns
+ */
 export const indexFieldsProvider = (
   getStartServices: StartServicesAccessor<StartPlugins>
 ): ISearchStrategy<
@@ -37,11 +45,11 @@ export const indexFieldsProvider = (
   // require the fields once we actually need them, rather than ahead of time, and pass
   // them to createFieldItem to reduce the amount of work done as much as possible
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const beatFields: BeatFields = require('../../utils/beat_schema/fields').fieldsBeat;
+  const beatFields: BeatFields = require('../../utils/beat_schema/fields.json').fieldsBeat;
 
   return {
     search: (request, options, deps) =>
-      from(requestIndexFieldSearch(request, deps, beatFields, getStartServices)),
+      from(requestIndexFieldSearchHandler(request, deps, beatFields, getStartServices)),
   };
 };
 
@@ -70,27 +78,42 @@ export const findExistingIndices = async (
       .map((p) => p.catch((e) => false))
   );
 
-export const requestIndexFieldSearch = async (
+export const requestIndexFieldSearchHandler = async (
   request: IndexFieldsStrategyRequest<'indices' | 'dataView'>,
-  { savedObjectsClient, esClient, request: kRequest }: SearchStrategyDependencies,
+  deps: SearchStrategyDependencies,
   beatFields: BeatFields,
-  getStartServices: StartServicesAccessor<StartPlugins>
+  getStartServices: StartServicesAccessor<StartPlugins>,
+  useInternalUser?: boolean
 ): Promise<IndexFieldsStrategyResponse> => {
-  const indexPatternsFetcherAsCurrentUser = new IndexPatternsFetcher(esClient.asCurrentUser);
-  const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(esClient.asInternalUser);
-  if ('dataViewId' in request && 'indices' in request) {
-    throw new Error('Provide index field search with either `dataViewId` or `indices`, not both');
-  }
   const [
     ,
     {
       data: { indexPatterns },
     },
   ] = await getStartServices();
+  return requestIndexFieldSearch(request, deps, beatFields, indexPatterns, useInternalUser);
+};
+
+export const requestIndexFieldSearch = async (
+  request: IndexFieldsStrategyRequest<'indices' | 'dataView'>,
+  { savedObjectsClient, esClient, request: kRequest }: SearchStrategyDependencies,
+  beatFields: BeatFields,
+  indexPatterns: DataViewsServerPluginStart,
+  useInternalUser?: boolean
+): Promise<IndexFieldsStrategyResponse> => {
+  const options = parseOptions(request);
+
+  const indexPatternsFetcherAsCurrentUser = new IndexPatternsFetcher(esClient.asCurrentUser);
+  const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(esClient.asInternalUser);
+  if ('dataViewId' in options && 'indices' in options) {
+    throw new Error('Provide index field search with either `dataViewId` or `indices`, not both');
+  }
+
+  const esUser = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
 
   const dataViewService = await indexPatterns.dataViewsServiceFactory(
     savedObjectsClient,
-    esClient.asCurrentUser,
+    esUser,
     kRequest,
     true
   );
@@ -100,10 +123,10 @@ export const requestIndexFieldSearch = async (
   let runtimeMappings = {};
 
   // if dataViewId is provided, get fields and indices from the Kibana Data View
-  if ('dataViewId' in request) {
+  if ('dataViewId' in options) {
     let dataView;
     try {
-      dataView = await dataViewService.get(request.dataViewId);
+      dataView = await dataViewService.get(options.dataViewId);
     } catch (r) {
       if (
         r.output.payload.statusCode === 404 &&
@@ -118,34 +141,49 @@ export const requestIndexFieldSearch = async (
     }
 
     const patternList = dataView.title.split(',');
-    indicesExist = (await findExistingIndices(patternList, esClient.asCurrentUser)).reduce(
-      (acc: string[], doesIndexExist, i) => (doesIndexExist ? [...acc, patternList[i]] : acc),
+    indicesExist = (await findExistingIndices(patternList, esUser)).reduce(
+      (acc: string[], doesIndexExist, i) => {
+        if (doesIndexExist) {
+          acc.push(patternList[i]);
+        }
+        return acc;
+      },
       []
     );
 
-    if (!request.onlyCheckIfIndicesExist) {
+    if (!options.onlyCheckIfIndicesExist) {
       const dataViewSpec = dataView.toSpec();
       const fieldDescriptor = [Object.values(dataViewSpec.fields ?? {})];
       runtimeMappings = dataViewSpec.runtimeFieldMap ?? {};
       indexFields = await formatIndexFields(beatFields, fieldDescriptor, patternList);
     }
-  } else if ('indices' in request) {
-    const patternList = dedupeIndexName(request.indices);
-    indicesExist = (await findExistingIndices(patternList, esClient.asCurrentUser)).reduce(
-      (acc: string[], doesIndexExist, i) => (doesIndexExist ? [...acc, patternList[i]] : acc),
+  } else if ('indices' in options) {
+    const patternList = dedupeIndexName(options.indices);
+    indicesExist = (await findExistingIndices(patternList, esUser)).reduce(
+      (acc: string[], doesIndexExist, i) => {
+        if (doesIndexExist) {
+          acc.push(patternList[i]);
+        }
+        return acc;
+      },
       []
     );
-    if (!request.onlyCheckIfIndicesExist) {
+    if (!options.onlyCheckIfIndicesExist) {
       const fieldDescriptor = (
         await Promise.all(
           indicesExist.map(async (index, n) => {
-            if (index.startsWith('.alerts-observability')) {
+            const fieldCapsOptions = options.includeUnmapped
+              ? { includeUnmapped: true, allow_no_indices: true }
+              : undefined;
+            if (index.startsWith('.alerts-observability') || useInternalUser) {
               return indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
                 pattern: index,
+                fieldCapsOptions,
               });
             }
             return indexPatternsFetcherAsCurrentUser.getFieldsForWildcard({
               pattern: index,
+              fieldCapsOptions,
             });
           })
         )
@@ -250,7 +288,7 @@ export const createFieldItem = (
 };
 
 /**
- * Iterates over each field, adds description, category, and indexes (index alias)
+ * Iterates over each field, adds description, category, conflictDescriptions, and indexes (index alias)
  *
  * This is a mutatious HOT CODE PATH function that will have array sizes up to 4.7 megs
  * in size at a time when being called. This function should be as optimized as possible
@@ -284,6 +322,12 @@ export const formatIndexFields = async (
                 const existingIndexField = accumulator[alreadyExistingIndexField];
                 if (isEmpty(accumulator[alreadyExistingIndexField].description)) {
                   accumulator[alreadyExistingIndexField].description = item.description;
+                }
+                if (item.conflictDescriptions) {
+                  accumulator[alreadyExistingIndexField].conflictDescriptions = deepmerge(
+                    existingIndexField.conflictDescriptions ?? {},
+                    item.conflictDescriptions
+                  );
                 }
                 accumulator[alreadyExistingIndexField].indexes = Array.from(
                   new Set(existingIndexField.indexes.concat(item.indexes))

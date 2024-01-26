@@ -6,28 +6,29 @@
  */
 
 import React, { memo } from 'react';
-import {
-  EuiEmptyPrompt,
-  EuiButton,
-  EuiPageTemplate_Deprecated as EuiPageTemplate,
-} from '@elastic/eui';
+import { EuiButton, EuiPageTemplate } from '@elastic/eui';
 import { useGetLinkTo } from './use_policy_artifacts_empty_hooks';
 import type { POLICY_ARTIFACT_EMPTY_UNEXISTING_LABELS } from './translations';
-import type { EventFiltersPageLocation } from '../../../../event_filters/types';
 import type { ArtifactListPageUrlParams } from '../../../../../components/artifact_list_page';
 
 interface CommonProps {
   policyId: string;
   policyName: string;
   labels: typeof POLICY_ARTIFACT_EMPTY_UNEXISTING_LABELS;
+  canWriteArtifact?: boolean;
   getPolicyArtifactsPath: (policyId: string) => string;
-  getArtifactPath: (
-    location?: Partial<EventFiltersPageLocation> | Partial<ArtifactListPageUrlParams>
-  ) => string;
+  getArtifactPath: (location?: Partial<ArtifactListPageUrlParams>) => string;
 }
 
 export const PolicyArtifactsEmptyUnexisting = memo<CommonProps>(
-  ({ policyId, policyName, labels, getPolicyArtifactsPath, getArtifactPath }) => {
+  ({
+    policyId,
+    policyName,
+    labels,
+    canWriteArtifact = false,
+    getPolicyArtifactsPath,
+    getArtifactPath,
+  }) => {
     const { onClickHandler, toRouteUrl } = useGetLinkTo(
       policyId,
       policyName,
@@ -38,20 +39,27 @@ export const PolicyArtifactsEmptyUnexisting = memo<CommonProps>(
       }
     );
     return (
-      <EuiPageTemplate template="centeredContent">
-        <EuiEmptyPrompt
-          iconType="plusInCircle"
-          data-test-subj="policy-artifacts-empty-unexisting"
-          title={<h2>{labels.emptyUnexistingTitle}</h2>}
-          body={labels.emptyUnexistingMessage}
-          actions={
+      <EuiPageTemplate.EmptyPrompt
+        color="subdued"
+        iconType="plusInCircle"
+        data-test-subj="policy-artifacts-empty-unexisting"
+        title={<h2>{labels.emptyUnexistingTitle}</h2>}
+        body={labels.emptyUnexistingMessage}
+        actions={
+          canWriteArtifact ? (
             // eslint-disable-next-line @elastic/eui/href-or-on-click
-            <EuiButton color="primary" fill onClick={onClickHandler} href={toRouteUrl}>
+            <EuiButton
+              color="primary"
+              fill
+              onClick={onClickHandler}
+              href={toRouteUrl}
+              data-test-subj="unexisting-manage-artifacts-button"
+            >
               {labels.emptyUnexistingPrimaryActionButtonTitle}
             </EuiButton>
-          }
-        />
-      </EuiPageTemplate>
+          ) : null
+        }
+      />
     );
   }
 );

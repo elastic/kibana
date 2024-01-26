@@ -14,10 +14,10 @@ import type { CoreStart, ScopedHistory } from '@kbn/core/public';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 
-import type { User } from '../../../../common/model';
+import { UsersGridPage } from './users_grid_page';
+import type { User } from '../../../../common';
 import { rolesAPIClientMock } from '../../roles/index.mock';
 import { userAPIClientMock } from '../index.mock';
-import { UsersGridPage } from './users_grid_page';
 
 describe('UsersGridPage', () => {
   let history: ScopedHistory;

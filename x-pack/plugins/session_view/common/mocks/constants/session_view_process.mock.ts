@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import {
+import type {
   Process,
   ProcessEvent,
   ProcessEventsPage,
   ProcessFields,
-  EventAction,
-  EventKind,
   ProcessMap,
   AlertTypeCount,
-  ProcessEventAlertCategory,
-} from '../../types/process_tree';
+} from '../..';
+
+export const TEST_PROCESS_INDEX = 'logs-endpoint.events.process*';
+export const TEST_SESSION_START_TIME = '2021-10-14T08:05:34.853Z';
 
 export const mockEvents: ProcessEvent[] = [
   {
@@ -159,9 +159,9 @@ export const mockEvents: ProcessEvent[] = [
       start: '2021-11-23T15:25:04.210Z',
     },
     event: {
-      action: EventAction.fork,
+      action: 'fork',
       category: ['process'],
-      kind: EventKind.event,
+      kind: 'event',
       id: '1',
     },
     host: {
@@ -211,6 +211,7 @@ export const mockEvents: ProcessEvent[] = [
           minor: 1,
         },
       },
+      previous: [{ args: ['bash'], args_count: 1, executable: '/usr/bin/bash' }],
       parent: {
         pid: 2442,
         user: {
@@ -317,9 +318,9 @@ export const mockEvents: ProcessEvent[] = [
       start: '2021-11-23T15:25:04.218Z',
     },
     event: {
-      action: EventAction.exec,
+      action: 'exec',
       category: ['process'],
-      kind: EventKind.event,
+      kind: 'event',
       id: '2',
     },
   },
@@ -354,6 +355,7 @@ export const mockEvents: ProcessEvent[] = [
           minor: 1,
         },
       },
+      previous: [{ args: ['bash'], args_count: 1, executable: '/usr/bin/bash' }],
       parent: {
         pid: 2442,
         user: {
@@ -460,9 +462,9 @@ export const mockEvents: ProcessEvent[] = [
       working_directory: '/home/vagrant',
     },
     event: {
-      action: EventAction.end,
+      action: 'end',
       category: ['process'],
-      kind: EventKind.event,
+      kind: 'event',
       id: '3',
     },
     host: {
@@ -513,6 +515,7 @@ export const mockEvents: ProcessEvent[] = [
           minor: 1,
         },
       },
+      previous: [{ args: ['bash'], args_count: 1, executable: '/usr/bin/bash' }],
       parent: {
         pid: 2442,
         user: {
@@ -623,9 +626,9 @@ export const mockEvents: ProcessEvent[] = [
       working_directory: '/home/vagrant',
     },
     event: {
-      action: EventAction.end,
+      action: 'end',
       category: ['process'],
-      kind: EventKind.event,
+      kind: 'event',
       id: '4',
     },
     host: {
@@ -648,9 +651,9 @@ export const mockEvents: ProcessEvent[] = [
 ] as ProcessEvent[];
 
 export const mockAlertTypeCounts: AlertTypeCount[] = [
-  { category: ProcessEventAlertCategory.file, count: 0 },
-  { category: ProcessEventAlertCategory.network, count: 2 },
-  { category: ProcessEventAlertCategory.process, count: 1 },
+  { category: 'file', count: 0 },
+  { category: 'network', count: 2 },
+  { category: 'process', count: 1 },
 ];
 
 export const mockAlerts: ProcessEvent[] = [
@@ -818,9 +821,9 @@ export const mockAlerts: ProcessEvent[] = [
       },
     },
     event: {
-      action: EventAction.exec,
+      action: 'exec',
       category: ['process'],
-      kind: EventKind.signal,
+      kind: 'signal',
       id: '5',
     },
     host: {
@@ -859,7 +862,7 @@ export const mockAlerts: ProcessEvent[] = [
         reason: 'process event created low alert cmd test alert.',
         original_time: '2021-11-23T15:25:05.202Z',
         original_event: {
-          action: 'exit',
+          action: 'end',
         },
         uuid: '2873463965b70d37ab9b2b3a90ac5a03b88e76e94ad33568285cadcefc38ed75',
       },
@@ -1005,9 +1008,9 @@ export const mockAlerts: ProcessEvent[] = [
       },
     },
     event: {
-      action: EventAction.end,
+      action: 'end',
       category: ['process'],
-      kind: EventKind.signal,
+      kind: 'signal',
       id: '6',
     },
     host: {
@@ -1029,7 +1032,7 @@ export const mockAlerts: ProcessEvent[] = [
   },
 ];
 
-export const mockFileAlert = {
+export const mockFileAlert: ProcessEvent = {
   kibana: {
     alert: {
       rule: {
@@ -1048,7 +1051,7 @@ export const mockFileAlert = {
       reason: 'process event created low alert File telemetry.',
       original_time: '2021-11-23T15:25:05.202Z',
       original_event: {
-        action: 'exit',
+        action: 'end',
       },
       uuid: '2873463965b70d37ab9b2b3a90ac5a03b88e76e94ad33568285cadcefc38ed75',
     },
@@ -1199,9 +1202,9 @@ export const mockFileAlert = {
     name: 'new_file.txt',
   },
   event: {
-    action: EventAction.exec,
+    action: 'exec',
     category: ['file'],
-    kind: EventKind.signal,
+    kind: 'signal',
     id: '6',
   },
   host: {
@@ -1222,7 +1225,7 @@ export const mockFileAlert = {
   },
 };
 
-export const mockNetworkAlert = {
+export const mockNetworkAlert: ProcessEvent = {
   kibana: {
     alert: {
       rule: {
@@ -1241,7 +1244,7 @@ export const mockNetworkAlert = {
       reason: 'process event created low alert File telemetry.',
       original_time: '2021-11-23T15:25:05.202Z',
       original_event: {
-        action: 'exit',
+        action: 'end',
       },
       uuid: '2873463965b70d37ab9b2b3a90ac5a03b88e76e94ad33568285cadcefc38ed75',
     },
@@ -1402,9 +1405,9 @@ export const mockNetworkAlert = {
     port: 1111,
   },
   event: {
-    action: EventAction.exec,
+    action: 'exec',
     category: ['network'],
-    kind: EventKind.signal,
+    kind: 'signal',
     id: '6',
   },
   host: {
@@ -1681,9 +1684,9 @@ export const childProcessMock: Process = {
     ({
       '@timestamp': '2021-11-23T15:25:05.210Z',
       event: {
-        kind: EventKind.event,
+        kind: 'event',
         category: ['process'],
-        action: EventAction.exec,
+        action: 'exec',
         id: '1',
       },
       host: {
@@ -1737,7 +1740,6 @@ export const childProcessMock: Process = {
       },
     } as ProcessEvent),
   isUserEntered: () => false,
-  getMaxAlertLevel: () => null,
   getEndTime: () => '',
   isDescendantOf: () => false,
 };
@@ -1767,9 +1769,9 @@ export const processMock: Process = {
     ({
       '@timestamp': '2021-11-23T15:25:04.210Z',
       event: {
-        kind: EventKind.event,
+        kind: 'event',
         category: ['process'],
-        action: EventAction.exec,
+        action: 'exec',
         id: '2',
       },
       host: {
@@ -1796,6 +1798,7 @@ export const processMock: Process = {
         id: '1000',
         name: 'vagrant',
       },
+      previous: [{ args: ['bash'], args_count: 1, executable: '/usr/bin/bash' }],
       process: {
         args: ['bash'],
         args_count: 1,
@@ -1840,7 +1843,7 @@ export const processMock: Process = {
               minor: 1,
             },
           },
-        } as ProcessFields,
+        },
         session_leader: {
           pid: 2442,
           user: {
@@ -1866,7 +1869,7 @@ export const processMock: Process = {
               minor: 1,
             },
           },
-        } as ProcessFields,
+        },
         entry_leader: {
           pid: 2442,
           user: {
@@ -1892,7 +1895,7 @@ export const processMock: Process = {
               minor: 1,
             },
           },
-        } as ProcessFields,
+        },
         group_leader: {
           pid: 2442,
           user: {
@@ -1918,11 +1921,10 @@ export const processMock: Process = {
               minor: 1,
             },
           },
-        } as ProcessFields,
+        },
       },
     } as ProcessEvent),
   isUserEntered: () => false,
-  getMaxAlertLevel: () => null,
   getEndTime: () => '',
   isDescendantOf: () => false,
 };
@@ -1957,20 +1959,19 @@ export const mockProcessMap = mockEvents.reduce(
       autoExpand: false,
       searchMatched: null,
       orphans: [],
-      addEvent: (_) => undefined,
-      addAlert: (_) => undefined,
-      addChild: (_) => undefined,
+      addEvent: () => undefined,
+      addAlert: () => undefined,
+      addChild: () => undefined,
       clearSearch: () => undefined,
       getChildren: () => [],
       hasOutput: () => false,
       hasAlerts: () => false,
       getAlerts: () => [],
-      updateAlertsStatus: (_) => undefined,
+      updateAlertsStatus: () => undefined,
       hasExec: () => false,
       getOutput: () => '',
       getDetails: () => event,
       isUserEntered: () => false,
-      getMaxAlertLevel: () => null,
       isVerbose: () => true,
       getEndTime: () => '',
       isDescendantOf: () => false,

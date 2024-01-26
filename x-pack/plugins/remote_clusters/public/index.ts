@@ -8,6 +8,9 @@
 import { PluginInitializerContext } from '@kbn/core/public';
 import { RemoteClustersUIPlugin } from './plugin';
 
+export type { Cluster } from '../common/lib';
+export { API_BASE_PATH as REMOTE_CLUSTERS_PATH } from '../common/constants';
+
 export type { RemoteClustersPluginSetup } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>

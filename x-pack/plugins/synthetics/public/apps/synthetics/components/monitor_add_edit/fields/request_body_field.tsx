@@ -9,17 +9,18 @@ import { stringify, parse } from 'query-string';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiTabbedContent } from '@elastic/eui';
-import { Mode, MonacoEditorLangId } from '../types';
+import { CodeEditorMode, MonacoEditorLangId } from '../types';
 import { KeyValuePairsField, Pair } from './key_value_field';
 import { CodeEditor } from './code_editor';
 
-interface Props {
-  onChange: (requestBody: { type: Mode; value: string }) => void;
+export interface RequestBodyFieldProps {
+  onChange: (requestBody: { type: CodeEditorMode; value: string }) => void;
   onBlur?: () => void;
   value: {
-    type: Mode;
+    type: CodeEditorMode;
     value: string;
   };
+  readOnly?: boolean;
 }
 
 enum ResponseBodyType {
@@ -28,24 +29,34 @@ enum ResponseBodyType {
 }
 
 // TO DO: Look into whether or not code editor reports errors, in order to prevent form submission on an error
-export const RequestBodyField = ({ onChange, onBlur, value: { type, value } }: Props) => {
+export const RequestBodyField = ({
+  onChange,
+  onBlur,
+  value: { type, value },
+  readOnly,
+}: RequestBodyFieldProps) => {
   const [values, setValues] = useState<Record<ResponseBodyType, string>>({
-    [ResponseBodyType.FORM]: type === Mode.FORM ? value : '',
-    [ResponseBodyType.CODE]: type !== Mode.FORM ? value : '',
+    [ResponseBodyType.FORM]: type === CodeEditorMode.FORM ? value : '',
+    [ResponseBodyType.CODE]: type !== CodeEditorMode.FORM ? value : '',
   });
   useEffect(() => {
     onChange({
       type,
-      value: type === Mode.FORM ? values[ResponseBodyType.FORM] : values[ResponseBodyType.CODE],
+      value:
+        type === CodeEditorMode.FORM
+          ? values[ResponseBodyType.FORM]
+          : values[ResponseBodyType.CODE],
     });
   }, [onChange, type, values]);
 
   const handleSetMode = useCallback(
-    (currentMode: Mode) => {
+    (currentMode: CodeEditorMode) => {
       onChange({
         type: currentMode,
         value:
-          currentMode === Mode.FORM ? values[ResponseBodyType.FORM] : values[ResponseBodyType.CODE],
+          currentMode === CodeEditorMode.FORM
+            ? values[ResponseBodyType.FORM]
+            : values[ResponseBodyType.CODE],
       });
     },
     [onChange, values]
@@ -65,14 +76,14 @@ export const RequestBodyField = ({ onChange, onBlur, value: { type, value } }: P
       }, {});
       return setValues((prevValues) => ({
         ...prevValues,
-        [Mode.FORM]: stringify(formattedPairs),
+        [CodeEditorMode.FORM]: stringify(formattedPairs),
       }));
     },
     [setValues]
   );
 
   const defaultFormPairs: Pair[] = useMemo(() => {
-    const pairs = parse(values[Mode.FORM]);
+    const pairs = parse(values[CodeEditorMode.FORM]);
     const keys = Object.keys(pairs);
     const formattedPairs: Pair[] = keys.map((key: string) => {
       // key, value, checked;
@@ -83,9 +94,9 @@ export const RequestBodyField = ({ onChange, onBlur, value: { type, value } }: P
 
   const tabs = [
     {
-      id: Mode.PLAINTEXT,
-      name: modeLabels[Mode.PLAINTEXT],
-      'data-test-subj': `syntheticsRequestBodyTab__${Mode.PLAINTEXT}`,
+      id: CodeEditorMode.PLAINTEXT,
+      name: modeLabels[CodeEditorMode.PLAINTEXT],
+      'data-test-subj': `syntheticsRequestBodyTab__${CodeEditorMode.PLAINTEXT}`,
       content: (
         <CodeEditor
           ariaLabel={i18n.translate(
@@ -94,20 +105,21 @@ export const RequestBodyField = ({ onChange, onBlur, value: { type, value } }: P
               defaultMessage: 'Text code editor',
             }
           )}
-          id={Mode.PLAINTEXT}
+          id={CodeEditorMode.PLAINTEXT}
           languageId={MonacoEditorLangId.PLAINTEXT}
           onChange={(code) => {
             setValues((prevValues) => ({ ...prevValues, [ResponseBodyType.CODE]: code }));
             onBlur?.();
           }}
           value={values[ResponseBodyType.CODE]}
+          readOnly={readOnly}
         />
       ),
     },
     {
-      id: Mode.JSON,
-      name: modeLabels[Mode.JSON],
-      'data-test-subj': `syntheticsRequestBodyTab__${Mode.JSON}`,
+      id: CodeEditorMode.JSON,
+      name: modeLabels[CodeEditorMode.JSON],
+      'data-test-subj': `syntheticsRequestBodyTab__${CodeEditorMode.JSON}`,
       content: (
         <CodeEditor
           ariaLabel={i18n.translate(
@@ -116,20 +128,21 @@ export const RequestBodyField = ({ onChange, onBlur, value: { type, value } }: P
               defaultMessage: 'JSON code editor',
             }
           )}
-          id={Mode.JSON}
+          id={CodeEditorMode.JSON}
           languageId={MonacoEditorLangId.JSON}
           onChange={(code) => {
             setValues((prevValues) => ({ ...prevValues, [ResponseBodyType.CODE]: code }));
             onBlur?.();
           }}
           value={values[ResponseBodyType.CODE]}
+          readOnly={readOnly}
         />
       ),
     },
     {
-      id: Mode.XML,
-      name: modeLabels[Mode.XML],
-      'data-test-subj': `syntheticsRequestBodyTab__${Mode.XML}`,
+      id: CodeEditorMode.XML,
+      name: modeLabels[CodeEditorMode.XML],
+      'data-test-subj': `syntheticsRequestBodyTab__${CodeEditorMode.XML}`,
       content: (
         <CodeEditor
           ariaLabel={i18n.translate(
@@ -138,20 +151,21 @@ export const RequestBodyField = ({ onChange, onBlur, value: { type, value } }: P
               defaultMessage: 'XML code editor',
             }
           )}
-          id={Mode.XML}
+          id={CodeEditorMode.XML}
           languageId={MonacoEditorLangId.XML}
           onChange={(code) => {
             setValues((prevValues) => ({ ...prevValues, [ResponseBodyType.CODE]: code }));
             onBlur?.();
           }}
           value={values[ResponseBodyType.CODE]}
+          readOnly={readOnly}
         />
       ),
     },
     {
-      id: Mode.FORM,
-      name: modeLabels[Mode.FORM],
-      'data-test-subj': `syntheticsRequestBodyTab__${Mode.FORM}`,
+      id: CodeEditorMode.FORM,
+      name: modeLabels[CodeEditorMode.FORM],
+      'data-test-subj': `syntheticsRequestBodyTab__${CodeEditorMode.FORM}`,
       content: (
         <KeyValuePairsField
           addPairControlLabel={
@@ -160,46 +174,51 @@ export const RequestBodyField = ({ onChange, onBlur, value: { type, value } }: P
               defaultMessage="Add form field"
             />
           }
+          data-test-subj={'syntheticsFormField'}
           defaultPairs={defaultFormPairs}
           onChange={onChangeFormFields}
           onBlur={() => onBlur?.()}
+          readOnly={readOnly}
         />
       ),
     },
   ];
 
   return (
-    <EuiTabbedContent
-      tabs={tabs}
-      initialSelectedTab={tabs.find((tab) => tab.id === type)}
-      autoFocus="selected"
-      onTabClick={(tab) => {
-        handleSetMode(tab.id as Mode);
-      }}
-    />
+    <div css={readOnly ? { cursor: 'not-allowed' } : undefined}>
+      <EuiTabbedContent
+        tabs={tabs}
+        css={readOnly ? { pointerEvents: 'none' } : undefined}
+        initialSelectedTab={tabs.find((tab) => tab.id === type)}
+        autoFocus="selected"
+        onTabClick={(tab) => {
+          handleSetMode(tab.id as CodeEditorMode);
+        }}
+      />
+    </div>
   );
 };
 
 const modeLabels = {
-  [Mode.FORM]: i18n.translate(
+  [CodeEditorMode.FORM]: i18n.translate(
     'xpack.synthetics.createPackagePolicy.stepConfigure.requestBodyType.form',
     {
       defaultMessage: 'Form',
     }
   ),
-  [Mode.PLAINTEXT]: i18n.translate(
+  [CodeEditorMode.PLAINTEXT]: i18n.translate(
     'xpack.synthetics.createPackagePolicy.stepConfigure.requestBodyType.text',
     {
       defaultMessage: 'Text',
     }
   ),
-  [Mode.JSON]: i18n.translate(
+  [CodeEditorMode.JSON]: i18n.translate(
     'xpack.synthetics.createPackagePolicy.stepConfigure.requestBodyType.JSON',
     {
       defaultMessage: 'JSON',
     }
   ),
-  [Mode.XML]: i18n.translate(
+  [CodeEditorMode.XML]: i18n.translate(
     'xpack.synthetics.createPackagePolicy.stepConfigure.requestBodyType.XML',
     {
       defaultMessage: 'XML',

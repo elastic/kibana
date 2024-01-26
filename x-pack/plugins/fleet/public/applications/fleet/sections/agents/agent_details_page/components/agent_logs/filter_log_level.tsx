@@ -5,91 +5,41 @@
  * 2.0.
  */
 
-import React, { memo, useState, useEffect, useCallback } from 'react';
-import { EuiPopover, EuiFilterButton, EuiFilterSelectItem, EuiIcon, EuiSpacer } from '@elastic/eui';
+import React, { memo, useState, useCallback } from 'react';
+import type { EuiSelectableOption } from '@elastic/eui';
+import { EuiPopover, EuiFilterButton, EuiSelectable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 
-import { useStartServices } from '../../../../../hooks';
+import { AGENT_LOG_LEVELS } from './constants';
 
-import { ORDERED_FILTER_LOG_LEVELS, AGENT_LOG_INDEX_PATTERN, LOG_LEVEL_FIELD } from './constants';
-
-function sortLogLevels(levels: string[]): string[] {
-  return [
-    ...new Set([
-      // order by severity for known level
-      ...ORDERED_FILTER_LOG_LEVELS.filter((level) => levels.includes(level)),
-      // Add unknown log level
-      ...levels.sort(),
-    ]),
-  ];
-}
+const LEVEL_VALUES = Object.values(AGENT_LOG_LEVELS);
 
 export const LogLevelFilter: React.FunctionComponent<{
   selectedLevels: string[];
   onToggleLevel: (level: string) => void;
 }> = memo(({ selectedLevels, onToggleLevel }) => {
-  const { unifiedSearch } = useStartServices();
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [levelValues, setLevelValues] = useState<string[]>([]);
 
   const togglePopover = useCallback(() => setIsOpen((prevIsOpen) => !prevIsOpen), []);
   const closePopover = useCallback(() => setIsOpen(false), []);
 
-  useEffect(() => {
-    const fetchValues = async () => {
-      setIsLoading(true);
-      try {
-        const values: string[] = await unifiedSearch.autocomplete.getValueSuggestions({
-          indexPattern: {
-            title: AGENT_LOG_INDEX_PATTERN,
-            fields: [LOG_LEVEL_FIELD],
-          } as DataView,
-          field: LOG_LEVEL_FIELD as DataViewField,
-          query: '',
-        });
-        setLevelValues(sortLogLevels(values));
-      } catch (e) {
-        setLevelValues([]);
-      }
-      setIsLoading(false);
-    };
-    fetchValues();
-  }, [unifiedSearch.autocomplete]);
-
-  const noLogsFound = (
-    <div className="euiFilterSelect__note">
-      <div className="euiFilterSelect__noteContent">
-        <EuiIcon type="minusInCircle" />
-        <EuiSpacer size="xs" />
-        <p>
-          {i18n.translate('xpack.fleet.agentLogs.logLevelEmpty', {
-            defaultMessage: 'No Logs Found',
-          })}
-        </p>
-      </div>
-    </div>
+  const [options, setOptions] = useState<EuiSelectableOption[]>(
+    LEVEL_VALUES.map((level) => ({
+      label: level,
+      checked: selectedLevels.includes(level) ? 'on' : undefined,
+      key: level,
+    }))
   );
-  const filterSelect = levelValues.map((level) => (
-    <EuiFilterSelectItem
-      checked={selectedLevels.includes(level) ? 'on' : undefined}
-      key={level}
-      onClick={() => onToggleLevel(level)}
-    >
-      {level}
-    </EuiFilterSelectItem>
-  ));
 
   return (
     <EuiPopover
       button={
         <EuiFilterButton
+          data-test-subj="agentList.logLevelFilterBtn"
           iconType="arrowDown"
           onClick={togglePopover}
           isSelected={isOpen}
-          isLoading={isLoading}
-          numFilters={levelValues.length}
+          numFilters={LEVEL_VALUES.length}
           hasActiveFilters={selectedLevels.length > 0}
           numActiveFilters={selectedLevels.length}
         >
@@ -102,7 +52,24 @@ export const LogLevelFilter: React.FunctionComponent<{
       closePopover={closePopover}
       panelPaddingSize="none"
     >
-      {levelValues.length === 0 ? noLogsFound : filterSelect}
+      <EuiSelectable
+        options={options}
+        onChange={(newOptions) => {
+          setOptions(newOptions);
+          newOptions.forEach((option, index) => {
+            if (option.checked !== options[index].checked) {
+              onToggleLevel(option.label);
+              return;
+            }
+          });
+        }}
+        data-test-subj="agentList.logLevelFilterOptions"
+        listProps={{
+          paddingSize: 's',
+        }}
+      >
+        {(list) => list}
+      </EuiSelectable>
     </EuiPopover>
   );
 });

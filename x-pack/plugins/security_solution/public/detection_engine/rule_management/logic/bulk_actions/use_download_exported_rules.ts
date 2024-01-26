@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { downloadBlob } from '../../../../common/utils/download_blob';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import { getExportedRulesCounts } from '../../../rule_management_ui/components/rules_table/helpers';
@@ -27,11 +27,11 @@ export function useDownloadExportedRules() {
       try {
         downloadBlob(response, DEFAULT_EXPORT_FILENAME);
         showBulkSuccessToast({
-          actionType: BulkActionType.export,
+          actionType: BulkActionTypeEnum.export,
           summary: await getExportedRulesCounts(response),
         });
       } catch (error) {
-        showBulkErrorToast({ actionType: BulkActionType.export, error });
+        showBulkErrorToast({ actionType: BulkActionTypeEnum.export, error });
       }
     },
     [showBulkSuccessToast, showBulkErrorToast]

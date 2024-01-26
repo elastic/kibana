@@ -7,6 +7,8 @@
 import React, { useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton } from '@elastic/eui';
+import { useCanEditSynthetics } from '../../../../hooks/use_capabilities';
+import { NoPermissionsTooltip } from '../common/components/permissions';
 import { useEnablement } from '../../hooks';
 import { MONITOR_ADD_ROUTE } from '../../../../../common/constants';
 
@@ -19,20 +21,24 @@ export const CreateMonitorButton: React.FC = () => {
     enablement: { isEnabled },
   } = useEnablement();
 
+  const canEditSynthetics = useCanEditSynthetics();
+
   return (
-    <EuiButton
-      color="primary"
-      fill
-      iconSide="left"
-      iconType="plusInCircleFilled"
-      href={`${basePath}/app/synthetics${MONITOR_ADD_ROUTE}`}
-      isDisabled={!isEnabled}
-      data-test-subj="syntheticsAddMonitorBtn"
-    >
-      <FormattedMessage
-        id="xpack.synthetics.monitors.pageHeader.createButton.label"
-        defaultMessage="Create Monitor"
-      />
-    </EuiButton>
+    <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
+      <EuiButton
+        color="primary"
+        fill
+        iconSide="left"
+        iconType="plusInCircleFilled"
+        href={`${basePath}/app/synthetics${MONITOR_ADD_ROUTE}`}
+        isDisabled={!isEnabled || !canEditSynthetics}
+        data-test-subj="syntheticsAddMonitorBtn"
+      >
+        <FormattedMessage
+          id="xpack.synthetics.monitors.pageHeader.createButton.label"
+          defaultMessage="Create Monitor"
+        />
+      </EuiButton>
+    </NoPermissionsTooltip>
   );
 };

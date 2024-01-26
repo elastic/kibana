@@ -7,52 +7,39 @@
 
 import './datapanel.scss';
 import { uniq } from 'lodash';
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  EuiCallOut,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiFilterButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormControlLayout,
-  EuiIcon,
-  EuiPopover,
-  EuiProgress,
-  htmlIdGenerator,
-} from '@elastic/eui';
+import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { type DataView } from '@kbn/data-plugin/common';
+import { type DataView, DataViewField, FieldSpec } from '@kbn/data-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import {
-  FieldsGroupNames,
+  FieldList,
+  FieldListFilters,
   FieldListGrouped,
   type FieldListGroupedProps,
+  FieldsGroupNames,
   useExistingFieldsFetcher,
   useGroupedFields,
-  useExistingFieldsReader,
-} from '@kbn/unified-field-list-plugin/public';
+} from '@kbn/unified-field-list';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import useLatest from 'react-use/lib/useLatest';
+import { isFieldLensCompatible } from '@kbn/visualization-ui-components';
+import { buildIndexPatternField } from '../../data_views_service/loader';
 import type {
   DatasourceDataPanelProps,
-  DataType,
   FramePublicAPI,
   IndexPattern,
   IndexPatternField,
 } from '../../types';
-import { ChildDragDropProvider, DragContextState } from '../../drag_drop';
 import type { FormBasedPrivateState } from './types';
-import { LensFieldIcon } from '../../shared_components/field_picker/lens_field_icon';
-import { getFieldType } from './pure_utils';
-import { fieldContainsData } from '../../shared_components';
 import { IndexPatternServiceAPI } from '../../data_views_service/service';
-import { FieldItem } from './field_item';
+import { FieldItem } from '../common/field_item';
 
 export type Props = Omit<
   DatasourceDataPanelProps<FormBasedPrivateState>,
@@ -86,32 +73,12 @@ const supportedFieldTypes = new Set([
   'murmur3',
 ]);
 
-const fieldTypeNames: Record<DataType, string> = {
-  document: i18n.translate('xpack.lens.datatypes.record', { defaultMessage: 'Record' }),
-  string: i18n.translate('xpack.lens.datatypes.string', { defaultMessage: 'Text string' }),
-  number: i18n.translate('xpack.lens.datatypes.number', { defaultMessage: 'Number' }),
-  gauge: i18n.translate('xpack.lens.datatypes.gauge', { defaultMessage: 'Gauge metric' }),
-  counter: i18n.translate('xpack.lens.datatypes.counter', { defaultMessage: 'Counter metric' }),
-  boolean: i18n.translate('xpack.lens.datatypes.boolean', { defaultMessage: 'Boolean' }),
-  date: i18n.translate('xpack.lens.datatypes.date', { defaultMessage: 'Date' }),
-  ip: i18n.translate('xpack.lens.datatypes.ipAddress', { defaultMessage: 'IP address' }),
-  histogram: i18n.translate('xpack.lens.datatypes.histogram', { defaultMessage: 'Histogram' }),
-  geo_point: i18n.translate('xpack.lens.datatypes.geoPoint', {
-    defaultMessage: 'Geographic point',
-  }),
-  geo_shape: i18n.translate('xpack.lens.datatypes.geoShape', {
-    defaultMessage: 'Geographic shape',
-  }),
-  murmur3: i18n.translate('xpack.lens.datatypes.murmur3', { defaultMessage: 'murmur3' }),
-};
-
 function onSupportedFieldFilter(field: IndexPatternField): boolean {
   return supportedFieldTypes.has(field.type);
 }
 
 export function FormBasedDataPanel({
   state,
-  dragDropContext,
   core,
   data,
   dataViews,
@@ -161,7 +128,7 @@ export function FormBasedDataPanel({
                 defaultMessage: 'No data views',
               })}
               color="warning"
-              iconType="alert"
+              iconType="warning"
             >
               <p>
                 <FormattedMessage
@@ -178,7 +145,6 @@ export function FormBasedDataPanel({
           query={query}
           dateRange={dateRange}
           filters={filters}
-          dragDropContext={dragDropContext}
           core={core}
           data={data}
           dataViews={dataViews}
@@ -200,30 +166,15 @@ export function FormBasedDataPanel({
   );
 }
 
-interface DataPanelState {
-  nameFilter: string;
-  typeFilter: DataType[];
-  isTypeFilterOpen: boolean;
-  isAvailableAccordionOpen: boolean;
-  isEmptyAccordionOpen: boolean;
-  isMetaAccordionOpen: boolean;
-}
-
-const htmlId = htmlIdGenerator('datapanel');
-const fieldSearchDescriptionId = htmlId();
-
 export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
   currentIndexPatternId,
   query,
   dateRange,
   filters,
-  dragDropContext,
   core,
   data,
   dataViews,
-  fieldFormats,
   indexPatternFieldEditor,
-  charts,
   dropOntoWorkspace,
   hasSuggestionForField,
   uiActions,
@@ -242,7 +193,6 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
   fieldFormats: FieldFormatsStart;
   core: CoreStart;
   currentIndexPatternId: string;
-  dragDropContext: DragContextState;
   charts: ChartsPluginSetup;
   frame: FramePublicAPI;
   indexPatternFieldEditor: IndexPatternFieldEditorStart;
@@ -250,14 +200,6 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
   layerFields?: string[];
   activeIndexPatterns: IndexPattern[];
 }) {
-  const [localState, setLocalState] = useState<DataPanelState>({
-    nameFilter: '',
-    typeFilter: [],
-    isTypeFilterOpen: false,
-    isAvailableAccordionOpen: true,
-    isEmptyAccordionOpen: false,
-    isMetaAccordionOpen: false,
-  });
   const { indexPatterns } = frame.dataViews;
   const currentIndexPattern = indexPatterns[currentIndexPatternId];
 
@@ -278,9 +220,6 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
       }
     },
   });
-  const fieldsExistenceReader = useExistingFieldsReader();
-  const fieldsExistenceStatus =
-    fieldsExistenceReader.getFieldsExistenceStatus(currentIndexPatternId);
 
   const visualizeGeoFieldTrigger = uiActions.getTrigger(VISUALIZE_GEO_FIELD_TRIGGER);
   const allFields = useMemo(() => {
@@ -292,13 +231,6 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
         );
   }, [currentIndexPattern, visualizeGeoFieldTrigger]);
 
-  const clearLocalState = () => setLocalState((s) => ({ ...s, nameFilter: '', typeFilter: [] }));
-  const availableFieldTypes = uniq([
-    ...uniq(allFields.map(getFieldType)).filter((type) => type in fieldTypeNames),
-    // always include current field type filters - there may not be any fields of the type of an existing type filter on data view switch, but we still need to include the existing filter in the list so that the user can remove it
-    ...localState.typeFilter,
-  ]);
-
   const editPermission =
     indexPatternFieldEditor.userPermissions.editIndexPattern() || !currentIndexPattern.isPersisted;
 
@@ -309,63 +241,31 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     [layerFields]
   );
 
-  const onFilterField = useCallback(
-    (field: IndexPatternField) => {
-      if (
-        localState.nameFilter.length &&
-        !field.name.toLowerCase().includes(localState.nameFilter.toLowerCase()) &&
-        !field.displayName.toLowerCase().includes(localState.nameFilter.toLowerCase())
-      ) {
-        return false;
-      }
-      if (localState.typeFilter.length > 0) {
-        return localState.typeFilter.includes(getFieldType(field) as DataType);
-      }
-      return true;
-    },
-    [localState]
-  );
+  const onOverrideFieldGroupDetails = useCallback((groupName) => {
+    if (groupName === FieldsGroupNames.AvailableFields) {
+      return {
+        helpText: i18n.translate('xpack.lens.indexPattern.allFieldsLabelHelp', {
+          defaultMessage:
+            'Drag and drop available fields to the workspace and create visualizations. To change the available fields, select a different data view, edit your queries, or use a different time range. Some field types cannot be visualized in Lens, including full text and geographic fields.',
+        }),
+      };
+    }
+  }, []);
 
-  const hasFilters = Boolean(filters.length);
-  const onOverrideFieldGroupDetails = useCallback(
-    (groupName) => {
-      if (groupName === FieldsGroupNames.AvailableFields) {
-        const isUsingSampling = core.uiSettings.get('lens:useFieldExistenceSampling');
-
-        return {
-          helpText: isUsingSampling
-            ? i18n.translate('xpack.lens.indexPattern.allFieldsSamplingLabelHelp', {
-                defaultMessage:
-                  'Available fields contain the data in the first 500 documents that match your filters. To view all fields, expand Empty fields. You are unable to create visualizations with full text, geographic, flattened, and object fields.',
-              })
-            : i18n.translate('xpack.lens.indexPattern.allFieldsLabelHelp', {
-                defaultMessage:
-                  'Drag and drop available fields to the workspace and create visualizations. To change the available fields, select a different data view, edit your queries, or use a different time range. Some field types cannot be visualized in Lens, including full text and geographic fields.',
-              }),
-          isAffectedByGlobalFilter: hasFilters,
-        };
-      }
-      if (groupName === FieldsGroupNames.SelectedFields) {
-        return {
-          isAffectedByGlobalFilter: hasFilters,
-        };
-      }
-    },
-    [core.uiSettings, hasFilters]
-  );
-
-  const { fieldGroups } = useGroupedFields<IndexPatternField>({
-    dataViewId: currentIndexPatternId,
-    allFields,
-    services: {
-      dataViews,
-    },
-    fieldsExistenceReader,
-    onFilterField,
-    onSupportedFieldFilter,
-    onSelectedFieldFilter,
-    onOverrideFieldGroupDetails,
-  });
+  const { fieldListFiltersProps, fieldListGroupedProps, hasNewFields } =
+    useGroupedFields<IndexPatternField>({
+      dataViewId: currentIndexPatternId,
+      allFields,
+      services: {
+        dataViews,
+        core,
+      },
+      isAffectedByGlobalFilter: Boolean(filters.length),
+      onSupportedFieldFilter,
+      onSelectedFieldFilter,
+      onOverrideFieldGroupDetails,
+      getNewFieldsBySpec,
+    });
 
   const closeFieldEditor = useRef<() => void | undefined>();
 
@@ -378,7 +278,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     };
   }, []);
 
-  const refreshFieldList = useCallback(async () => {
+  const refreshFieldList = useLatest(async () => {
     if (currentIndexPattern) {
       const newlyMappedIndexPattern = await indexPatternService.loadIndexPatterns({
         patterns: [currentIndexPattern.id],
@@ -394,13 +294,13 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     }
     // start a new session so all charts are refreshed
     data.search.session.start();
-  }, [
-    indexPatternService,
-    currentIndexPattern,
-    onIndexPatternRefresh,
-    frame.dataViews.indexPatterns,
-    data.search.session,
-  ]);
+  });
+
+  useEffect(() => {
+    if (hasNewFields) {
+      refreshFieldList.current();
+    }
+  }, [hasNewFields, refreshFieldList]);
 
   const editField = useMemo(
     () =>
@@ -414,7 +314,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
               fieldName,
               onSave: () => {
                 if (indexPatternInstance.isPersisted()) {
-                  refreshFieldList();
+                  refreshFieldList.current();
                   refetchFieldsExistenceInfo(indexPatternInstance.id);
                 } else {
                   indexPatternService.replaceDataViewId(indexPatternInstance);
@@ -446,7 +346,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
               fieldName,
               onDelete: () => {
                 if (indexPatternInstance.isPersisted()) {
-                  refreshFieldList();
+                  refreshFieldList.current();
                   refetchFieldsExistenceInfo(indexPatternInstance.id);
                 } else {
                   indexPatternService.replaceDataViewId(indexPatternInstance);
@@ -467,14 +367,10 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
   );
 
   const renderFieldItem: FieldListGroupedProps<IndexPatternField>['renderFieldItem'] = useCallback(
-    ({ field, itemIndex, groupIndex, hideDetails }) => (
+    ({ field, itemIndex, groupIndex, groupName, hideDetails, fieldSearchHighlight }) => (
       <FieldItem
         field={field}
-        exists={fieldContainsData(
-          field.name,
-          currentIndexPattern,
-          fieldsExistenceReader.hasFieldData
-        )}
+        exists={groupName !== FieldsGroupNames.EmptyFields}
         hideDetails={hideDetails || field.type === 'document'}
         itemIndex={itemIndex}
         groupIndex={groupIndex}
@@ -482,151 +378,51 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
         hasSuggestionForField={hasSuggestionForField}
         editField={editField}
         removeField={removeField}
-        uiActions={uiActions}
-        core={core}
-        fieldFormats={fieldFormats}
         indexPattern={currentIndexPattern}
-        highlight={localState.nameFilter.toLowerCase()}
+        highlight={fieldSearchHighlight}
         dateRange={dateRange}
         query={query}
         filters={filters}
-        chartsThemeService={charts.theme}
       />
     ),
     [
-      core,
-      fieldFormats,
       currentIndexPattern,
       dateRange,
       query,
       filters,
-      localState.nameFilter,
-      charts.theme,
-      fieldsExistenceReader.hasFieldData,
       dropOntoWorkspace,
       hasSuggestionForField,
       editField,
       removeField,
-      uiActions,
     ]
   );
 
   return (
-    <ChildDragDropProvider {...dragDropContext}>
-      <EuiFlexGroup
-        gutterSize="none"
-        className="lnsInnerIndexPatternDataPanel"
-        direction="column"
-        responsive={false}
-      >
-        {isProcessing && <EuiProgress size="xs" color="accent" position="absolute" />}
-        <EuiFlexItem grow={false}>
-          <EuiFormControlLayout
-            icon="search"
-            fullWidth
-            clear={{
-              title: i18n.translate('xpack.lens.indexPatterns.clearFiltersLabel', {
-                defaultMessage: 'Clear name and type filters',
-              }),
-              'aria-label': i18n.translate('xpack.lens.indexPatterns.clearFiltersLabel', {
-                defaultMessage: 'Clear name and type filters',
-              }),
-              onClick: () => {
-                clearLocalState();
-              },
-            }}
-            append={
-              <EuiPopover
-                id="dataPanelTypeFilter"
-                panelClassName="euiFilterGroup__popoverPanel"
-                panelPaddingSize="none"
-                anchorPosition="rightUp"
-                display="block"
-                isOpen={localState.isTypeFilterOpen}
-                closePopover={() =>
-                  setLocalState(() => ({ ...localState, isTypeFilterOpen: false }))
-                }
-                button={
-                  <EuiFilterButton
-                    aria-label={i18n.translate('xpack.lens.indexPatterns.filterByTypeAriaLabel', {
-                      defaultMessage: 'Filter by type',
-                    })}
-                    color="primary"
-                    isSelected={localState.isTypeFilterOpen}
-                    numFilters={localState.typeFilter.length}
-                    hasActiveFilters={!!localState.typeFilter.length}
-                    numActiveFilters={localState.typeFilter.length}
-                    data-test-subj="lnsIndexPatternFiltersToggle"
-                    className="lnsFilterButton"
-                    onClick={() => {
-                      setLocalState((s) => ({
-                        ...s,
-                        isTypeFilterOpen: !localState.isTypeFilterOpen,
-                      }));
-                    }}
-                  >
-                    <EuiIcon type="filter" />
-                  </EuiFilterButton>
-                }
-              >
-                <EuiContextMenuPanel
-                  data-test-subj="lnsIndexPatternTypeFilterOptions"
-                  items={(availableFieldTypes as DataType[]).map((type) => (
-                    <EuiContextMenuItem
-                      className="lnsInnerIndexPatternDataPanel__filterType"
-                      key={type}
-                      icon={localState.typeFilter.includes(type) ? 'check' : 'empty'}
-                      data-test-subj={`typeFilter-${type}`}
-                      onClick={() => {
-                        setLocalState((s) => ({
-                          ...s,
-                          typeFilter: localState.typeFilter.includes(type)
-                            ? localState.typeFilter.filter((t) => t !== type)
-                            : [...localState.typeFilter, type],
-                        }));
-                      }}
-                    >
-                      <span className="lnsInnerIndexPatternDataPanel__filterTypeInner">
-                        <LensFieldIcon type={type} /> {fieldTypeNames[type]}
-                      </span>
-                    </EuiContextMenuItem>
-                  ))}
-                />
-              </EuiPopover>
-            }
-          >
-            <input
-              className="euiFieldText euiFieldText--fullWidth lnsInnerIndexPatternDataPanel__textField"
-              data-test-subj="lnsIndexPatternFieldSearch"
-              placeholder={i18n.translate('xpack.lens.indexPatterns.filterByNameLabel', {
-                defaultMessage: 'Search field names',
-                description: 'Search the list of fields in the data view for the provided text',
-              })}
-              value={localState.nameFilter}
-              onChange={(e) => {
-                setLocalState({ ...localState, nameFilter: e.target.value });
-              }}
-              aria-label={i18n.translate('xpack.lens.indexPatterns.filterByNameLabel', {
-                defaultMessage: 'Search field names',
-                description: 'Search the list of fields in the data view for the provided text',
-              })}
-              aria-describedby={fieldSearchDescriptionId}
-            />
-          </EuiFormControlLayout>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <FieldListGrouped<IndexPatternField>
-            fieldGroups={fieldGroups}
-            fieldsExistenceStatus={fieldsExistenceStatus}
-            fieldsExistInIndex={!!allFields.length}
-            renderFieldItem={renderFieldItem}
-            screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
-            data-test-subj="lnsIndexPattern"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </ChildDragDropProvider>
+    <FieldList
+      className="lnsInnerIndexPatternDataPanel"
+      isProcessing={isProcessing}
+      prepend={<FieldListFilters {...fieldListFiltersProps} data-test-subj="lnsIndexPattern" />}
+    >
+      <FieldListGrouped<IndexPatternField>
+        {...fieldListGroupedProps}
+        renderFieldItem={renderFieldItem}
+        data-test-subj="lnsIndexPattern"
+        localStorageKeyPrefix="lens"
+      />
+    </FieldList>
   );
 };
+
+function getNewFieldsBySpec(spec: FieldSpec[], dataView: DataView | null) {
+  const metaKeys = dataView ? new Set(dataView.metaFields) : undefined;
+
+  return spec.reduce((result: IndexPatternField[], fieldSpec: FieldSpec) => {
+    const field = new DataViewField(fieldSpec);
+    if (isFieldLensCompatible(field)) {
+      result.push(buildIndexPatternField(field, metaKeys));
+    }
+    return result;
+  }, []);
+}
 
 export const MemoizedDataPanel = memo(InnerFormBasedDataPanel);

@@ -8,10 +8,10 @@
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 
+import { initGetActiveSpaceApi } from './get_active_space';
 import { spacesClientServiceMock } from '../../../spaces_client/spaces_client_service.mock';
 import { SpacesService } from '../../../spaces_service';
 import { mockRouteContextWithInvalidLicense } from '../__fixtures__';
-import { initGetActiveSpaceApi } from './get_active_space';
 
 describe('GET /internal/spaces/_active_space', () => {
   const setup = async () => {
@@ -26,7 +26,7 @@ describe('GET /internal/spaces/_active_space', () => {
     });
 
     initGetActiveSpaceApi({
-      internalRouter: router,
+      router,
       getSpacesService: () =>
         service.start({
           basePath: coreStart.http.basePath,

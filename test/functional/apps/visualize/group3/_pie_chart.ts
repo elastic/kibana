@@ -35,10 +35,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       log.debug('clickPieChart');
       await PageObjects.visualize.clickPieChart();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
       log.debug('select bucket Split slices');
       await PageObjects.visEditor.clickBucket('Split slices');
       log.debug('Click aggregation Histogram');
@@ -51,6 +51,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.setInterval('40000', { type: 'numeric' });
       log.debug('clickGo');
       await PageObjects.visEditor.clickGo(isNewChartsLibraryEnabled);
+    });
+
+    after(async () => {
+      await PageObjects.common.unsetTime();
     });
 
     it('should save and load', async function () {
@@ -95,7 +99,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug('clickPieChart');
         await PageObjects.visualize.clickPieChart();
         await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
         log.debug('select bucket Split slices');
         await PageObjects.visEditor.clickBucket('Split slices');
         log.debug('Click aggregation Terms');
@@ -293,7 +296,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug('clickPieChart');
         await PageObjects.visualize.clickPieChart();
         await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
         log.debug('select bucket Split slices');
         await PageObjects.visEditor.clickBucket('Split slices');
         log.debug('Click aggregation Filters');
@@ -322,14 +324,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug('clickPieChart');
         await PageObjects.visualize.clickPieChart();
         await PageObjects.visualize.clickNewSearch();
-        log.debug(
-          'Set absolute time range from "' +
-            PageObjects.timePicker.defaultStartTime +
-            '" to "' +
-            PageObjects.timePicker.defaultEndTime +
-            '"'
-        );
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
         log.debug('select bucket Split slices');
         await PageObjects.visEditor.clickBucket('Split slices');
         log.debug('Click aggregation Histogram');
@@ -459,7 +453,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug('clickPieChart');
         await PageObjects.visualize.clickPieChart();
         await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
         log.debug('select bucket Split slices');
         await PageObjects.visEditor.clickBucket('Split slices');
         log.debug('Click aggregation Filters');
@@ -486,7 +479,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.navigateToNewAggBasedVisualization();
         await PageObjects.visualize.clickPieChart();
         await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
         log.debug('select bucket Split chart');
         await PageObjects.visEditor.clickBucket('Split chart');
         await PageObjects.visEditor.selectAggregation('Terms');

@@ -8,11 +8,12 @@
 import React from 'react';
 import { EuiErrorBoundary } from '@elastic/eui';
 import { mount } from 'enzyme';
+import { createObservabilityRuleTypeRegistryMock } from '@kbn/observability-plugin/public';
+import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 
 import { UXAppRoot } from './ux_app';
 import { RumHome } from '../components/app/rum_dashboard/rum_home';
 import { coreMock } from '@kbn/core/public/mocks';
-import { createObservabilityRuleTypeRegistryMock } from '@kbn/observability-plugin/public';
 import { merge } from 'lodash';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
@@ -25,6 +26,20 @@ jest.mock('../components/app/rum_dashboard/rum_home', () => ({
   RumHome: () => <p>Home Mock</p>,
 }));
 
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const actual = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...actual,
+    useUiSetting: () => ({
+      from: new Date(),
+      to: new Date(),
+    }),
+  };
+});
+
+const mockAIAssistantPlugin =
+  observabilityAIAssistantPluginMock.createStartContract();
+
 const mockPlugin = {
   data: {
     query: {
@@ -32,6 +47,7 @@ const mockPlugin = {
     },
   },
   observability: {},
+  observabilityAIAssistant: mockAIAssistantPlugin,
 };
 
 const mockEmbeddable = embeddablePluginMock.createStartContract();
@@ -48,7 +64,7 @@ const mockCorePlugins = {
   embeddable: mockEmbeddable,
   inspector: {},
   maps: {},
-  observability: {
+  observabilityShared: {
     navigation: {
       registerSections: () => jest.fn(),
       PageTemplate: ({ children }: { children: React.ReactNode }) => (
@@ -56,6 +72,7 @@ const mockCorePlugins = {
       ),
     },
   },
+  observabilityAIAssistant: mockAIAssistantPlugin,
   data: {
     query: {
       timefilter: {
@@ -113,6 +130,7 @@ export const mockApmPluginContextValue = {
   core: mockCore,
   plugins: mockPlugin,
   observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
+  observabilityAIAssistant: mockAIAssistantPlugin,
   corePlugins: mockCorePlugins,
   deps: {},
 };

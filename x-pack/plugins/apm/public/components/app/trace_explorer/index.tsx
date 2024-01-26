@@ -78,7 +78,7 @@ export function TraceExplorer({ children }: { children: React.ReactElement }) {
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiFlexGroup direction="row">
-            <EuiFlexItem grow>
+            <EuiFlexItem grow={2}>
               <TraceSearchBox
                 query={searchQuery}
                 error={false}
@@ -96,7 +96,7 @@ export function TraceExplorer({ children }: { children: React.ReactElement }) {
                 }}
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={2}>
               <ApmDatePicker />
             </EuiFlexItem>
           </EuiFlexGroup>

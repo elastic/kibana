@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AgentName } from '../typings/es_schemas/ui/fields/agent';
+import { AgentName } from '@kbn/elastic-agent-utils';
 import { ServiceHealthStatus } from './service_health_status';
 
 export interface ServiceListItem {
@@ -17,6 +17,8 @@ export interface ServiceListItem {
   latency?: number | null;
   transactionErrorRate?: number | null;
   environments?: string[];
+  alertsCount?: number;
+  overflowCount?: number | null;
 }
 
 export enum ServiceInventoryFieldName {
@@ -27,4 +29,5 @@ export enum ServiceInventoryFieldName {
   Throughput = 'throughput',
   Latency = 'latency',
   TransactionErrorRate = 'transactionErrorRate',
+  AlertsCount = 'alertsCount',
 }

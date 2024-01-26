@@ -1,11 +1,31 @@
 {
   "ilm.delete_lifecycle": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
+    },
     "methods": [
       "DELETE"
     ],
     "patterns": [
       "_ilm/policy/{policy}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ilm-delete-lifecycle.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ilm-delete-lifecycle.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

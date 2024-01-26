@@ -5,104 +5,38 @@
  * 2.0.
  */
 
-import { useReducer, useCallback, useRef, useEffect } from 'react';
-
+import { useMutation } from '@tanstack/react-query';
 import { createAttachments } from './api';
 import * as i18n from './translations';
-import type { Case } from './types';
-import { useToasts } from '../common/lib/kibana';
-import type { CaseAttachmentsWithoutOwner } from '../types';
-
-interface NewCommentState {
-  isLoading: boolean;
-  isError: boolean;
-}
-type Action = { type: 'FETCH_INIT' } | { type: 'FETCH_SUCCESS' } | { type: 'FETCH_FAILURE' };
-
-const dataFetchReducer = (state: NewCommentState, action: Action): NewCommentState => {
-  switch (action.type) {
-    case 'FETCH_INIT':
-      return {
-        isLoading: true,
-        isError: false,
-      };
-    case 'FETCH_SUCCESS':
-      return {
-        isLoading: false,
-        isError: false,
-      };
-    case 'FETCH_FAILURE':
-      return {
-        isLoading: false,
-        isError: true,
-      };
-    default:
-      return state;
-  }
-};
+import type { CaseAttachmentsWithoutOwner, ServerError } from '../types';
+import { useCasesToast } from '../common/use_cases_toast';
+import { casesMutationsKeys } from './constants';
 
 export interface PostComment {
   caseId: string;
   caseOwner: string;
-  data: CaseAttachmentsWithoutOwner;
-  updateCase?: (newCase: Case) => void;
-  throwOnError?: boolean;
-}
-export interface UseCreateAttachments extends NewCommentState {
-  createAttachments: (args: PostComment) => Promise<void>;
+  attachments: CaseAttachmentsWithoutOwner;
 }
 
-export const useCreateAttachments = (): UseCreateAttachments => {
-  const [state, dispatch] = useReducer(dataFetchReducer, {
-    isLoading: false,
-    isError: false,
-  });
-  const toasts = useToasts();
-  const isCancelledRef = useRef(false);
-  const abortCtrlRef = useRef(new AbortController());
+export const useCreateAttachments = () => {
+  const { showErrorToast } = useCasesToast();
 
-  const fetch = useCallback(
-    async ({ caseId, caseOwner, data, updateCase, throwOnError }: PostComment) => {
-      try {
-        isCancelledRef.current = false;
-        abortCtrlRef.current.abort();
-        abortCtrlRef.current = new AbortController();
-        dispatch({ type: 'FETCH_INIT' });
+  return useMutation(
+    (request: PostComment) => {
+      const attachments = request.attachments.map((attachment) => ({
+        ...attachment,
+        owner: request.caseOwner,
+      }));
 
-        const attachments = data.map((attachment) => ({ ...attachment, owner: caseOwner }));
-        const response = await createAttachments(attachments, caseId, abortCtrlRef.current.signal);
-
-        if (!isCancelledRef.current) {
-          dispatch({ type: 'FETCH_SUCCESS' });
-          if (updateCase) {
-            updateCase(response);
-          }
-        }
-      } catch (error) {
-        if (!isCancelledRef.current) {
-          if (error.name !== 'AbortError') {
-            toasts.addError(
-              error.body && error.body.message ? new Error(error.body.message) : error,
-              { title: i18n.ERROR_TITLE }
-            );
-          }
-          dispatch({ type: 'FETCH_FAILURE' });
-          if (throwOnError) {
-            throw error;
-          }
-        }
-      }
+      return createAttachments({ attachments, caseId: request.caseId });
     },
-    [toasts]
+    {
+      mutationKey: casesMutationsKeys.bulkCreateAttachments,
+      onError: (error: ServerError) => {
+        showErrorToast(error, { title: i18n.ERROR_TITLE });
+      },
+    }
   );
-
-  useEffect(
-    () => () => {
-      isCancelledRef.current = true;
-      abortCtrlRef.current.abort();
-    },
-    []
-  );
-
-  return { ...state, createAttachments: fetch };
 };
+
+export type UseCreateAttachments = ReturnType<typeof useCreateAttachments>;

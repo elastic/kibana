@@ -6,7 +6,17 @@
  */
 import { omit } from 'lodash';
 
-import { RuleTypeParams, SanitizedRule } from '../../types';
+import { RuleTypeParams, SanitizedRule, RuleLastRun } from '../../types';
+
+export const rewriteRuleLastRun = (lastRun: RuleLastRun) => {
+  const { outcomeMsg, outcomeOrder, alertsCount, ...rest } = lastRun;
+  return {
+    alerts_count: alertsCount,
+    outcome_msg: outcomeMsg,
+    outcome_order: outcomeOrder,
+    ...rest,
+  };
+};
 
 export const rewriteRule = ({
   alertTypeId,
@@ -15,6 +25,7 @@ export const rewriteRule = ({
   createdAt,
   updatedAt,
   apiKeyOwner,
+  apiKeyCreatedByUser,
   notifyWhen,
   muteAll,
   mutedInstanceIds,
@@ -24,6 +35,8 @@ export const rewriteRule = ({
   snoozeSchedule,
   isSnoozedUntil,
   activeSnoozes,
+  lastRun,
+  nextRun,
   ...rest
 }: SanitizedRule<RuleTypeParams> & { activeSnoozes?: string[] }) => ({
   ...rest,
@@ -45,10 +58,24 @@ export const rewriteRule = ({
     last_execution_date: executionStatus.lastExecutionDate,
     last_duration: executionStatus.lastDuration,
   },
-  actions: actions.map(({ group, id, actionTypeId, params }) => ({
+  actions: actions.map(({ group, id, actionTypeId, params, frequency, uuid, alertsFilter }) => ({
     group,
     id,
     params,
     connector_type_id: actionTypeId,
+    ...(frequency
+      ? {
+          frequency: {
+            summary: frequency.summary,
+            notify_when: frequency.notifyWhen,
+            throttle: frequency.throttle,
+          },
+        }
+      : {}),
+    ...(uuid && { uuid }),
+    ...(alertsFilter && { alerts_filter: alertsFilter }),
   })),
+  ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
+  ...(nextRun ? { next_run: nextRun } : {}),
+  ...(apiKeyCreatedByUser !== undefined ? { api_key_created_by_user: apiKeyCreatedByUser } : {}),
 });

@@ -35,10 +35,13 @@ start with:
 Notice something awry? Select a service or trace and dive deeper with:
 
 * <<service-overview>>
+* <<mobile-service-overview>>
 * <<transactions>>
 * <<spans>>
 * <<errors>>
 * <<metrics>>
+* <<infrastructure>>
+* <<logs>>
 
 TIP: Want to learn more about the Elastic APM ecosystem?
 See the {apm-guide-ref}/apm-overview.html[APM Overview].
@@ -53,6 +56,8 @@ include::service-maps.asciidoc[]
 
 include::service-overview.asciidoc[]
 
+include::mobile-service.asciidoc[]
+
 include::transactions.asciidoc[]
 
 include::spans.asciidoc[]
@@ -60,3 +65,7 @@ include::spans.asciidoc[]
 include::errors.asciidoc[]
 
 include::metrics.asciidoc[]
+
+include::infrastructure.asciidoc[]
+
+include::logs.asciidoc[]

@@ -5,13 +5,16 @@
  * 2.0.
  */
 import { Ast, fromExpression } from '@kbn/interpreter';
+import type { DateRange } from '../../../common/types';
 import { DatasourceStates } from '../../state_management';
-import { Visualization, DatasourceMap, DatasourceLayers, IndexPatternMap } from '../../types';
+import type { Visualization, DatasourceMap, DatasourceLayers, IndexPatternMap } from '../../types';
 
 export function getDatasourceExpressionsByLayers(
   datasourceMap: DatasourceMap,
   datasourceStates: DatasourceStates,
   indexPatterns: IndexPatternMap,
+  dateRange: DateRange,
+  nowInstant: Date,
   searchSessionId?: string
 ): null | Record<string, Ast> {
   const datasourceExpressions: Array<[string, Ast | string]> = [];
@@ -25,7 +28,14 @@ export function getDatasourceExpressionsByLayers(
     const layers = datasource.getLayers(state);
 
     layers.forEach((layerId) => {
-      const result = datasource.toExpression(state, layerId, indexPatterns, searchSessionId);
+      const result = datasource.toExpression(
+        state,
+        layerId,
+        indexPatterns,
+        dateRange,
+        nowInstant,
+        searchSessionId
+      );
       if (result) {
         datasourceExpressions.push([layerId, result]);
       }
@@ -54,6 +64,8 @@ export function buildExpression({
   title,
   description,
   indexPatterns,
+  dateRange,
+  nowInstant,
   searchSessionId,
 }: {
   title?: string;
@@ -65,8 +77,12 @@ export function buildExpression({
   datasourceLayers: DatasourceLayers;
   indexPatterns: IndexPatternMap;
   searchSessionId?: string;
+  dateRange: DateRange;
+  nowInstant: Date;
 }): Ast | null {
-  if (visualization === null) {
+  // if an unregistered visualization is passed in the SO
+  // then this will be set as "undefined". Relax the check to catch both
+  if (visualization == null) {
     return null;
   }
 
@@ -74,6 +90,8 @@ export function buildExpression({
     datasourceMap,
     datasourceStates,
     indexPatterns,
+    dateRange,
+    nowInstant,
     searchSessionId
   );
 

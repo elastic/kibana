@@ -71,7 +71,12 @@ export class EmailServiceProvider
       try {
         const unsecuredActionsClient = actions.getUnsecuredActionsClient();
         email = new LicensedEmailService(
-          new ConnectorsEmailService(PLUGIN_ID, emailConnector, unsecuredActionsClient),
+          new ConnectorsEmailService(
+            PLUGIN_ID,
+            emailConnector,
+            unsecuredActionsClient,
+            this.logger
+          ),
           licensing.license$,
           MINIMUM_LICENSE,
           this.logger

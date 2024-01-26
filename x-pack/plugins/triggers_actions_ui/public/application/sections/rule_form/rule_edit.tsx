@@ -7,6 +7,7 @@
 
 import React, { useReducer, useState, useEffect, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import {
   EuiTitle,
   EuiFlyoutHeader,
@@ -23,8 +24,10 @@ import {
   EuiLoadingSpinner,
   EuiIconTip,
 } from '@elastic/eui';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
 import {
   Rule,
   RuleFlyoutCloseReason,
@@ -32,11 +35,13 @@ import {
   IErrorObject,
   RuleType,
   TriggersActionsUiConfig,
+  RuleNotifyWhenType,
 } from '../../../types';
 import { RuleForm } from './rule_form';
 import { getRuleActionErrors, getRuleErrors, isValidRule } from './rule_errors';
 import { ruleReducer, ConcreteRuleReducer } from './rule_reducer';
-import { updateRule, loadRuleTypes } from '../../lib/rule_api';
+import { updateRule } from '../../lib/rule_api/update';
+import { loadRuleTypes } from '../../lib/rule_api/rule_types';
 import { HealthCheck } from '../../components/health_check';
 import { HealthContextProvider } from '../../context/health_context';
 import { useKibana } from '../../../common/lib/kibana';
@@ -44,12 +49,44 @@ import { ConfirmRuleClose } from './confirm_rule_close';
 import { hasRuleChanged } from './has_rule_changed';
 import { getRuleWithInvalidatedFields } from '../../lib/value_validators';
 import { triggersActionsUiConfig } from '../../../common/lib/config_api';
+import { ToastWithCircuitBreakerContent } from '../../components/toast_with_circuit_breaker_content';
+
+const defaultUpdateRuleErrorMessage = i18n.translate(
+  'xpack.triggersActionsUI.sections.ruleEdit.saveErrorNotificationText',
+  {
+    defaultMessage: 'Cannot update rule.',
+  }
+);
+
+const cloneAndMigrateRule = (initialRule: Rule) => {
+  const clonedRule = cloneDeep(omit(initialRule, 'notifyWhen', 'throttle'));
+
+  const hasRuleLevelNotifyWhen = Boolean(initialRule.notifyWhen);
+  const hasRuleLevelThrottle = Boolean(initialRule.throttle);
+
+  if (hasRuleLevelNotifyWhen || hasRuleLevelThrottle) {
+    const frequency = hasRuleLevelNotifyWhen
+      ? {
+          summary: false,
+          notifyWhen: initialRule.notifyWhen as RuleNotifyWhenType,
+          throttle:
+            initialRule.notifyWhen === RuleNotifyWhen.THROTTLE ? initialRule.throttle! : null,
+        }
+      : { summary: false, notifyWhen: RuleNotifyWhen.THROTTLE, throttle: initialRule.throttle! };
+    clonedRule.actions = clonedRule.actions.map((action) => ({
+      ...action,
+      frequency,
+    }));
+  }
+  return clonedRule;
+};
 
 export const RuleEdit = ({
   initialRule,
   onClose,
   reloadRules,
   onSave,
+  hideInterval,
   ruleTypeRegistry,
   actionTypeRegistry,
   metadata: initialMetadata,
@@ -57,7 +94,7 @@ export const RuleEdit = ({
 }: RuleEditProps) => {
   const onSaveHandler = onSave ?? reloadRules;
   const [{ rule }, dispatch] = useReducer(ruleReducer as ConcreteRuleReducer, {
-    rule: cloneDeep(initialRule),
+    rule: cloneAndMigrateRule(initialRule),
   });
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [hasActionsDisabled, setHasActionsDisabled] = useState<boolean>(false);
@@ -78,6 +115,7 @@ export const RuleEdit = ({
     http,
     notifications: { toasts },
   } = useKibana().services;
+
   const setRule = (value: Rule) => {
     dispatch({ command: { type: 'setRule' }, payload: { key: 'rule', value } });
   };
@@ -93,11 +131,11 @@ export const RuleEdit = ({
   useEffect(() => {
     (async () => {
       setIsLoading(true);
-      const res = await getRuleActionErrors(rule as Rule, actionTypeRegistry);
+      const res = await getRuleActionErrors(rule.actions, actionTypeRegistry);
       setRuleActionsErrors([...res]);
       setIsLoading(false);
     })();
-  }, [rule, actionTypeRegistry]);
+  }, [rule.actions, actionTypeRegistry]);
 
   useEffect(() => {
     if (!props.ruleType && !serverRuleType) {
@@ -153,12 +191,17 @@ export const RuleEdit = ({
         );
       }
     } catch (errorRes) {
-      toasts.addDanger(
-        errorRes.body?.message ??
-          i18n.translate('xpack.triggersActionsUI.sections.ruleEdit.saveErrorNotificationText', {
-            defaultMessage: 'Cannot update rule.',
-          })
+      const message = parseRuleCircuitBreakerErrorMessage(
+        errorRes.body?.message || defaultUpdateRuleErrorMessage
       );
+      toasts.addDanger({
+        title: message.summary,
+        ...(message.details && {
+          text: toMountPoint(
+            <ToastWithCircuitBreakerContent>{message.details}</ToastWithCircuitBreakerContent>
+          ),
+        }),
+      });
     }
     setIsSaving(false);
   }
@@ -170,7 +213,7 @@ export const RuleEdit = ({
         aria-labelledby="flyoutRuleEditTitle"
         size="m"
         maxWidth={620}
-        ownFocus={false}
+        ownFocus
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s" data-test-subj="editRuleFlyoutTitle">
@@ -206,6 +249,7 @@ export const RuleEdit = ({
                 dispatch={dispatch}
                 errors={ruleErrors}
                 actionTypeRegistry={actionTypeRegistry}
+                hideInterval={hideInterval}
                 ruleTypeRegistry={ruleTypeRegistry}
                 canChangeTrigger={false}
                 setHasActionsDisabled={setHasActionsDisabled}
@@ -245,7 +289,7 @@ export const RuleEdit = ({
                     {config.isUsingSecurity && (
                       <EuiFlexItem grow={false}>
                         <EuiIconTip
-                          type="alert"
+                          type="warning"
                           position="top"
                           data-test-subj="changeInPrivilegesTip"
                           content={i18n.translate(

@@ -13,7 +13,7 @@ import { EuiButton, EuiButtonEmpty, EuiInMemoryTable, EuiSpacer } from '@elastic
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { TIME_FORMAT } from '../../../../../../common/constants/time_format';
+import { TIME_FORMAT } from '@kbn/ml-date-utils';
 
 function DeleteButton({ onClick, testSubj, disabled }) {
   return (

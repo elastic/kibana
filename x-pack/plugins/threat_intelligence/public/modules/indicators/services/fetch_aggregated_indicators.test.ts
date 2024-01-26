@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import { mockedQueryService, mockedSearchService } from '../../../common/mocks/test_providers';
+import { mockedQueryService, mockedSearchService } from '../../../mocks/test_providers';
 import { BehaviorSubject, throwError } from 'rxjs';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { Aggregation, convertAggregationToChartSeries, createFetchAggregatedIndicators } from '.';
+import {
+  Aggregation,
+  convertAggregationToChartSeries,
+  createFetchAggregatedIndicators,
+} from './fetch_aggregated_indicators';
 import { BARCHART_AGGREGATION_NAME, FactoryQueryType } from '../../../../common/constants';
+import { mockUiSetting } from '../../../mocks/mock_kibana_ui_settings_service';
 
 const aggregationResponse = {
   rawResponse: { aggregations: { [BARCHART_AGGREGATION_NAME]: { buckets: [] } } },
@@ -52,6 +57,10 @@ const aggregation2: Aggregation = {
   key: '[Filebeat] AbuseCH MalwareBazaar',
 };
 
+const mockUserDateFormat = mockUiSetting('dateFormat') as string;
+const mockUserTimeZone = mockUiSetting('dateFormat:tz') as string;
+const mockField = { label: 'myField', value: 'string' };
+
 describe('FetchAggregatedIndicatorsService', () => {
   beforeEach(jest.clearAllMocks);
 
@@ -66,13 +75,15 @@ describe('FetchAggregatedIndicatorsService', () => {
           searchService: mockedSearchService,
           queryService: mockedQueryService as any,
           inspectorAdapter: new RequestAdapter(),
+          userTimeZone: mockUserTimeZone,
+          userFormat: mockUserDateFormat,
         });
 
         const result = await aggregatedIndicatorsQuery({
           selectedPatterns: [],
           filterQuery: { language: 'kuery', query: '' },
           filters: [],
-          field: 'myField',
+          field: mockField,
           timeRange: {
             from: '',
             to: '',
@@ -111,6 +122,8 @@ describe('FetchAggregatedIndicatorsService', () => {
           searchService: mockedSearchService,
           queryService: mockedQueryService as any,
           inspectorAdapter: new RequestAdapter(),
+          userTimeZone: mockUserTimeZone,
+          userFormat: mockUserDateFormat,
         });
 
         try {
@@ -118,7 +131,7 @@ describe('FetchAggregatedIndicatorsService', () => {
             selectedPatterns: [],
             filterQuery: { language: 'kuery', query: '' },
             filters: [],
-            field: 'myField',
+            field: mockField,
             timeRange: {
               from: '',
               to: '',
@@ -136,7 +149,14 @@ describe('FetchAggregatedIndicatorsService', () => {
 
 describe('convertAggregationToChartSeries', () => {
   it('should convert Aggregation[] to ChartSeries[]', () => {
-    expect(convertAggregationToChartSeries([aggregation1, aggregation2])).toEqual([
+    expect(
+      convertAggregationToChartSeries(
+        [aggregation1, aggregation2],
+        mockUserTimeZone,
+        mockUserDateFormat,
+        mockField
+      )
+    ).toEqual([
       {
         x: '1 Jan 2022 06:00:00 GMT',
         y: 0,

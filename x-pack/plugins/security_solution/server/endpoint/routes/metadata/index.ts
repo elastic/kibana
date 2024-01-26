@@ -7,6 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 
+import {
+  GetMetadataListRequestSchema,
+  GetMetadataRequestSchema,
+} from '../../../../common/api/endpoint';
 import { HostStatus } from '../../../../common/endpoint/types';
 import type { EndpointAppContext } from '../../types';
 import {
@@ -21,7 +25,6 @@ import {
   HOST_METADATA_LIST_ROUTE,
   METADATA_TRANSFORMS_STATUS_ROUTE,
 } from '../../../../common/endpoint/constants';
-import { GetMetadataListRequestSchema } from '../../../../common/endpoint/schema/metadata';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 
 /* Filters that can be applied to the endpoint fetch route */
@@ -40,52 +43,67 @@ export const endpointFilters = schema.object({
   ),
 });
 
-export const GetMetadataRequestSchema = {
-  params: schema.object({ id: schema.string() }),
-};
-
 export function registerEndpointRoutes(
   router: SecuritySolutionPluginRouter,
   endpointAppContext: EndpointAppContext
 ) {
   const logger = getLogger(endpointAppContext);
 
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
       path: HOST_METADATA_LIST_ROUTE,
-      validate: GetMetadataListRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      { all: ['canReadSecuritySolution'] },
-      logger,
-      getMetadataListRequestHandler(endpointAppContext, logger)
-    )
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: GetMetadataListRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canReadSecuritySolution'] },
+        logger,
+        getMetadataListRequestHandler(endpointAppContext, logger)
+      )
+    );
 
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
       path: HOST_METADATA_GET_ROUTE,
-      validate: GetMetadataRequestSchema,
       options: { authRequired: true },
-    },
-    withEndpointAuthz(
-      { any: ['canReadSecuritySolution', 'canAccessFleet'] },
-      logger,
-      getMetadataRequestHandler(endpointAppContext, logger)
-    )
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: GetMetadataRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { any: ['canReadSecuritySolution', 'canAccessFleet'] },
+        logger,
+        getMetadataRequestHandler(endpointAppContext, logger)
+      )
+    );
 
-  router.get(
-    {
+  router.versioned
+    .get({
+      access: 'public',
       path: METADATA_TRANSFORMS_STATUS_ROUTE,
-      validate: false,
       options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    withEndpointAuthz(
-      { all: ['canReadSecuritySolution'] },
-      logger,
-      getMetadataTransformStatsHandler(logger)
-    )
-  );
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: false,
+      },
+      withEndpointAuthz(
+        { all: ['canReadSecuritySolution'] },
+        logger,
+        getMetadataTransformStatsHandler(endpointAppContext, logger)
+      )
+    );
 }

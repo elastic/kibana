@@ -19,6 +19,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.common.navigateToUrl('integrations', 'browse', {
         useActualUrl: true,
       });
+      const searchInput = await find.byCssSelector('[data-test-subj="epmList.searchBar"]');
+      await searchInput.type('GeoJSON');
       const geoFileCard = await find.byCssSelector(
         '[data-test-subj="integration-card:ui_link:ingest_geojson"]'
       );

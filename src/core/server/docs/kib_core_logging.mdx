@@ -61,15 +61,60 @@ ancestor chain including `root`.
 
 ## Log level
 
-Currently we support the following log levels: _all_, _fatal_, _error_, _warn_, _info_, _debug_, _trace_, _off_.
+There are two general categories of log levels: failures and informational. Within each category, there are 3 ranked log
+levels which should be used in different situations. A log record is being logged by the logger if its level is higher than 
+or equal to the level of its logger. Otherwise, the log record is ignored. Generally, the lower the log level, the more frequently 
+it should be used, and the higher the log level, the less frequently it should be used.
 
-Levels are ordered, so _all_ > _fatal_ > _error_ > _warn_ > _info_ > _debug_ > _trace_ > _off_.
+By default, Kibana's server logs will include messages at the following levels: `fatal`, `error`, `warn` and `info`. In Kibana, we
+expect the majority of logging statements to be at the debug level and developers are encouraged to turn on debug logging 
+for the subsystems that they are responsible for and working on.
 
-A log record is being logged by the logger if its level is higher than or equal to the level of its logger. Otherwise,
-the log record is ignored.
-
-The _all_ and _off_ levels can be used only in configuration and are just handy shortcuts that allow developer to log every
+The `all` and `off` levels can be used only in configuration and are just handy shortcuts that allow developer to log every
 log record or disable logging entirely for the specific context name.
+
+### Categories
+
+#### Failures
+
+**fatal:** Catastrophic failures that will cause the Kibana process to exit immediately.  
+**error:** Important operation failed unexpectedly, unable to recover.  
+**warn:** Something failed unexpectedly; however, the important operation was able to complete, was retried, or was actually
+unimportant.
+
+#### Informational
+
+**info:** A major event happened that an operator (someone running our software in a production environment, not a Kibana developer)
+should be aware of and act on.  
+**debug:** Information necessary for debugging.  
+**trace:** Very low-level information that is needed for debugging exceptional situations.
+
+### Examples
+
+#### Your plugin successfully completed a very important operation on startup  
+**Level:** `debug`  
+**Justification:** It's very tempting to use the `info` level here, but it's wrong. It's great that the very important operation was
+completed, and all successes are worth celebrating; however, it does not require operators to "act", so it should be logged at the 
+`debug` level. If seeing that this operation completed successfully during development is important, turn on debug logging for the plugin.
+
+#### An Elasticsearch HTTP request failed because another Kibana node already did the same thing  
+**Level:** `debug`  
+**Justification:** It is expected that multiple Kibana nodes are running at the same time and it is expected that some Elasticsearch operations
+will fail if multiple Kibana nodes try to do the same thing. Therefore, nothing unexpected happened and neither the `error` or the `warn` levels
+should be used. Additionally, the `info` level should not be used because there is nothing that the operator should "act on". This information
+is only pertinent when debugging, so the `debug` level should be used.
+
+#### An Elasticsearch HTTP request timed out  
+**Level**: `error` or `warn`  
+**Justification**: If the Elasticsearch HTTP request included no user input and can't be retried, then the `error` level should be used. However,
+if the Elasticsearch HTTP request included user input in such a way that timeouts are possible (for example, by searching a very large amount of data)
+or a retry will be performed, then the `warn` level should be used. Both of these failures can result in the "operator" needing to scale up/out Elasticsearch
+or adjust the network configuration.
+
+#### Kibana reloaded configuration from kibana.yml file
+**Level:** `info`  
+**Justification:** It's important for the operator to know that Kibana successfully reloaded configuration from the kibana.yml file. This lets them know it 
+is safe to proceed with verifying that the change in configuration had the desired effect.
 
 ## Layouts
 

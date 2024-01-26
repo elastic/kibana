@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
@@ -101,7 +101,7 @@ describe('Transform: Group By <PopoverForm />', () => {
       appName: 'the-test-app',
     };
 
-    const wrapper = shallow(
+    const { getByDisplayValue } = render(
       <KibanaContextProvider services={services}>
         <PopoverForm
           defaultData={defaultData}
@@ -112,6 +112,7 @@ describe('Transform: Group By <PopoverForm />', () => {
       </KibanaContextProvider>
     );
 
-    expect(wrapper.find(PopoverForm)).toMatchSnapshot();
+    expect(getByDisplayValue('the-agg-name')).toBeInTheDocument();
+    expect(getByDisplayValue('1m')).toBeInTheDocument();
   });
 });

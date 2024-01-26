@@ -8,8 +8,12 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { QUERY_KEY_CONTAINER_NAME_WIDGET, AGGREGATE_ROUTE } from '../../../common/constants';
-import { AggregateResult } from '../../../common/types/aggregate';
+import {
+  QUERY_KEY_CONTAINER_NAME_WIDGET,
+  AGGREGATE_ROUTE,
+  CURRENT_API_VERSION,
+} from '../../../common/constants';
+import { AggregateResult } from '../../../common/types';
 
 export const useFetchContainerNameData = (
   filterQuery: string,
@@ -34,6 +38,7 @@ export const useFetchContainerNameData = (
     cachingKeys,
     async ({ pageParam = 0 }) => {
       const res = await http.get<AggregateResult>(AGGREGATE_ROUTE, {
+        version: CURRENT_API_VERSION,
         query: {
           query: filterQuery,
           groupBy,

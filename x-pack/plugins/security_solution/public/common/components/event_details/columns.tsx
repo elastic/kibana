@@ -10,15 +10,15 @@ import { get } from 'lodash';
 import memoizeOne from 'memoize-one';
 import React from 'react';
 import styled from 'styled-components';
+import { SecurityCellActions, CellActionsMode, SecurityCellActionsTrigger } from '../cell_actions';
 import type { BrowserFields } from '../../containers/source';
-import type { OnUpdateColumns } from '../../../timelines/components/timeline/events';
 import * as i18n from './translations';
 import type { EventFieldsData } from './types';
-import type { ColumnHeaderOptions } from '../../../../common/types';
 import type { BrowserField } from '../../../../common/search_strategy';
 import { FieldValueCell } from './table/field_value_cell';
 import { FieldNameCell } from './table/field_name_cell';
-import { ActionCell } from './table/action_cell';
+import { getSourcererScopeId } from '../../../helpers';
+import type { ColumnsProvider } from './event_fields_browser';
 
 const HoverActionsContainer = styled(EuiPanel)`
   align-items: center;
@@ -35,34 +35,22 @@ const HoverActionsContainer = styled(EuiPanel)`
 HoverActionsContainer.displayName = 'HoverActionsContainer';
 
 export const getFieldFromBrowserField = memoizeOne(
-  (keys: string[], browserFields: BrowserFields): BrowserField => get(browserFields, keys),
+  (keys: string[], browserFields: BrowserFields): BrowserField | undefined =>
+    get(browserFields, keys),
   (newArgs, lastArgs) => newArgs[0].join() === lastArgs[0].join()
 );
-export const getColumns = ({
+
+export const getColumns: ColumnsProvider = ({
   browserFields,
-  columnHeaders,
   eventId,
-  onUpdateColumns,
   contextId,
   scopeId,
-  toggleColumn,
   getLinkValue,
   isDraggable,
   isReadOnly,
-}: {
-  browserFields: BrowserFields;
-  columnHeaders: ColumnHeaderOptions[];
-  eventId: string;
-  onUpdateColumns: OnUpdateColumns;
-  contextId: string;
-  scopeId: string;
-  toggleColumn: (column: ColumnHeaderOptions) => void;
-  getLinkValue: (field: string) => string | null;
-  isDraggable?: boolean;
-  isReadOnly?: boolean;
 }) => [
   ...(!isReadOnly
-    ? [
+    ? ([
         {
           field: 'values',
           name: (
@@ -73,30 +61,23 @@ export const getColumns = ({
           sortable: false,
           truncateText: false,
           width: '132px',
-          render: (values: string[] | null | undefined, data: EventFieldsData) => {
-            const label = data.isObjectArray
-              ? i18n.NESTED_COLUMN(data.field)
-              : i18n.VIEW_COLUMN(data.field);
-            const fieldFromBrowserField = getFieldFromBrowserField(
-              [data.category, 'fields', data.field],
-              browserFields
-            );
+          render: (values, data) => {
             return (
-              <ActionCell
-                aria-label={label}
-                contextId={contextId}
-                data={data}
-                eventId={eventId}
-                fieldFromBrowserField={fieldFromBrowserField}
-                getLinkValue={getLinkValue}
-                toggleColumn={toggleColumn}
-                scopeId={scopeId}
-                values={values}
+              <SecurityCellActions
+                data={{
+                  field: data.field,
+                  value: values,
+                }}
+                triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
+                mode={CellActionsMode.INLINE}
+                visibleCellActions={3}
+                sourcererScopeId={getSourcererScopeId(scopeId)}
+                metadata={{ scopeId, isObjectArray: data.isObjectArray }}
               />
             );
           },
         },
-      ]
+      ] as ReturnType<ColumnsProvider>)
     : []),
   {
     field: 'field',
@@ -108,18 +89,9 @@ export const getColumns = ({
     ),
     sortable: true,
     truncateText: false,
-    render: (field: string, data: EventFieldsData) => {
-      const fieldFromBrowserField = getFieldFromBrowserField(
-        [data.category, 'fields', field],
-        browserFields
-      );
+    render: (field, data) => {
       return (
-        <FieldNameCell
-          data={data}
-          field={field}
-          fieldMapping={undefined}
-          fieldFromBrowserField={fieldFromBrowserField}
-        />
+        <FieldNameCell data={data as EventFieldsData} field={field} fieldMapping={undefined} />
       );
     },
   },
@@ -133,15 +105,15 @@ export const getColumns = ({
     ),
     sortable: true,
     truncateText: false,
-    render: (values: string[] | null | undefined, data: EventFieldsData) => {
+    render: (values, data) => {
       const fieldFromBrowserField = getFieldFromBrowserField(
-        [data.category, 'fields', data.field],
+        [data.category as string, 'fields', data.field],
         browserFields
       );
       return (
         <FieldValueCell
           contextId={contextId}
-          data={data}
+          data={data as EventFieldsData}
           eventId={eventId}
           fieldFromBrowserField={fieldFromBrowserField}
           getLinkValue={getLinkValue}

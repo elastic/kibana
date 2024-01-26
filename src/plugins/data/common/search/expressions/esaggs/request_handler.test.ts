@@ -53,7 +53,7 @@ describe('esaggs expression function - public', () => {
       query: undefined,
       searchSessionId: 'abc123',
       searchSourceService: searchSourceCommonMock,
-      disableShardWarnings: false,
+      disableWarningToasts: false,
       timeFields: ['@timestamp', 'utc_time'],
       timeRange: undefined,
     };
@@ -139,7 +139,27 @@ describe('esaggs expression function - public', () => {
         description: 'This request queries Elasticsearch to fetch the data for the visualization.',
         adapter: undefined,
       },
-      disableShardFailureWarning: false,
+      disableWarningToasts: false,
+    });
+  });
+
+  test('calls searchSource.fetch with custom inspector params', async () => {
+    await handleRequest({
+      ...mockParams,
+      title: 'MyTitle',
+      description: 'MyDescription',
+    }).toPromise();
+    const searchSource = await mockParams.searchSourceService.create();
+
+    expect(searchSource.fetch$).toHaveBeenCalledWith({
+      abortSignal: mockParams.abortSignal,
+      sessionId: mockParams.searchSessionId,
+      inspector: {
+        title: 'MyTitle',
+        description: 'MyDescription',
+        adapter: undefined,
+      },
+      disableWarningToasts: false,
     });
   });
 

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { RoleMapping } from '../../../../../common/model';
 import {
   validateRoleMappingForSave,
   validateRoleMappingName,
@@ -13,6 +12,7 @@ import {
   validateRoleMappingRoleTemplates,
   validateRoleMappingRules,
 } from './role_mapping_validation';
+import type { RoleMapping } from '../../../../../common';
 
 describe('validateRoleMappingName', () => {
   it('requires a value', () => {

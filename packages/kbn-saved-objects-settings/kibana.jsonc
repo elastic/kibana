@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/saved-objects-settings",
+  "owner": "@elastic/appex-sharedux"
+}

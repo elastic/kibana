@@ -7,6 +7,7 @@
  */
 
 import type { Duration } from 'moment';
+import type { ElasticsearchApiToRedactInLogs } from './client';
 
 /**
  * @public
@@ -139,6 +140,11 @@ export interface IElasticsearchConfig {
    * either `certificate` or `full`.
    */
   readonly ssl: ElasticsearchSslConfig;
+
+  /**
+   * Extends the list of APIs that should be redacted in logs.
+   */
+  readonly apisToRedactInLogs: ElasticsearchApiToRedactInLogs[];
 }
 
 /**

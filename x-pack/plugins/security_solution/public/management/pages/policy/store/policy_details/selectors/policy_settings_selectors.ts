@@ -24,6 +24,7 @@ import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_PROTECTION_UPDATES_PATH,
 } from '../../../../../common/constants';
 import type { ManagementRoutePolicyDetailsParams } from '../../../../../types';
 import { getPolicyDataForUpdate } from '../../../../../../../common/endpoint/service/policy';
@@ -33,6 +34,7 @@ import {
   isOnHostIsolationExceptionsView,
   isOnPolicyFormView,
   isOnBlocklistsView,
+  isOnProtectionUpdatesView,
 } from './policy_common_selectors';
 
 /** Returns the policy details */
@@ -96,7 +98,8 @@ export const isOnPolicyDetailsPage = (state: Immutable<PolicyDetailsState>) =>
   isOnPolicyTrustedAppsView(state) ||
   isOnPolicyEventFiltersView(state) ||
   isOnHostIsolationExceptionsView(state) ||
-  isOnBlocklistsView(state);
+  isOnBlocklistsView(state) ||
+  isOnProtectionUpdatesView(state);
 
 /** Returns the license info fetched from the license service */
 export const license = (state: Immutable<PolicyDetailsState>) => {
@@ -115,6 +118,7 @@ export const policyIdFromParams: (state: Immutable<PolicyDetailsState>) => strin
           MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
           MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH,
           MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
+          MANAGEMENT_ROUTING_POLICY_DETAILS_PROTECTION_UPDATES_PATH,
         ],
         exact: true,
       })?.params?.policyId ?? ''
@@ -185,14 +189,6 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
     };
   }
 );
-
-export const isAntivirusRegistrationEnabled = createSelector(policyConfig, (uiPolicyConfig) => {
-  return uiPolicyConfig.windows.antivirus_registration.enabled;
-});
-
-export const isCredentialHardeningEnabled = createSelector(policyConfig, (uiPolicyConfig) => {
-  return uiPolicyConfig.windows.attack_surface_reduction.credential_hardening.enabled;
-});
 
 /** is there an api call in flight */
 export const isLoading = (state: PolicyDetailsState) => state.isLoading;

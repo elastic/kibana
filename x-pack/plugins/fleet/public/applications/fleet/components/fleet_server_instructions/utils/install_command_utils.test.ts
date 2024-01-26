@@ -22,7 +22,8 @@ describe('getInstallCommandForPlatform', () => {
         cd elastic-agent--linux-x86_64
         sudo ./elastic-agent install \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
-          --fleet-server-service-token=service-token-1"
+          --fleet-server-service-token=service-token-1 \\\\
+          --fleet-server-port=8220"
       `);
     });
 
@@ -39,7 +40,8 @@ describe('getInstallCommandForPlatform', () => {
         cd elastic-agent--darwin-x86_64
         sudo ./elastic-agent install \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
-          --fleet-server-service-token=service-token-1"
+          --fleet-server-service-token=service-token-1 \\\\
+          --fleet-server-port=8220"
       `);
     });
 
@@ -57,7 +59,8 @@ describe('getInstallCommandForPlatform', () => {
         cd elastic-agent--windows-x86_64
         .\\\\elastic-agent.exe install \`
           --fleet-server-es=http://elasticsearch:9200 \`
-          --fleet-server-service-token=service-token-1"
+          --fleet-server-service-token=service-token-1 \`
+          --fleet-server-port=8220"
       `);
     });
 
@@ -73,7 +76,8 @@ describe('getInstallCommandForPlatform', () => {
         sudo rpm -vi elastic-agent--x86_64.rpm
         sudo elastic-agent enroll \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
-          --fleet-server-service-token=service-token-1
+          --fleet-server-service-token=service-token-1 \\\\
+          --fleet-server-port=8220
         sudo systemctl enable elastic-agent
         sudo systemctl start elastic-agent"
       `);
@@ -91,7 +95,8 @@ describe('getInstallCommandForPlatform', () => {
         sudo dpkg -i elastic-agent--amd64.deb
         sudo elastic-agent enroll \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
-          --fleet-server-service-token=service-token-1
+          --fleet-server-service-token=service-token-1 \\\\
+          --fleet-server-port=8220
         sudo systemctl enable elastic-agent
         sudo systemctl start elastic-agent"
       `);
@@ -115,7 +120,8 @@ describe('getInstallCommandForPlatform', () => {
         sudo ./elastic-agent install \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
-          --fleet-server-es-ca-trusted-fingerprint=fingerprint123456"
+          --fleet-server-es-ca-trusted-fingerprint=fingerprint123456 \\\\
+          --fleet-server-port=8220"
       `);
     });
   });
@@ -136,7 +142,8 @@ describe('getInstallCommandForPlatform', () => {
         sudo ./elastic-agent install \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
-          --fleet-server-policy=policy-1"
+          --fleet-server-policy=policy-1 \\\\
+          --fleet-server-port=8220"
       `);
     });
 
@@ -155,7 +162,8 @@ describe('getInstallCommandForPlatform', () => {
         sudo ./elastic-agent install \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
-          --fleet-server-policy=policy-1"
+          --fleet-server-policy=policy-1 \\\\
+          --fleet-server-port=8220"
       `);
     });
 
@@ -175,7 +183,8 @@ describe('getInstallCommandForPlatform', () => {
         .\\\\elastic-agent.exe install \`
           --fleet-server-es=http://elasticsearch:9200 \`
           --fleet-server-service-token=service-token-1 \`
-          --fleet-server-policy=policy-1"
+          --fleet-server-policy=policy-1 \`
+          --fleet-server-port=8220"
       `);
     });
 
@@ -193,7 +202,8 @@ describe('getInstallCommandForPlatform', () => {
         sudo elastic-agent enroll \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
-          --fleet-server-policy=policy-1
+          --fleet-server-policy=policy-1 \\\\
+          --fleet-server-port=8220
         sudo systemctl enable elastic-agent
         sudo systemctl start elastic-agent"
       `);
@@ -213,7 +223,8 @@ describe('getInstallCommandForPlatform', () => {
         sudo elastic-agent enroll \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
-          --fleet-server-policy=policy-1
+          --fleet-server-policy=policy-1 \\\\
+          --fleet-server-port=8220
         sudo systemctl enable elastic-agent
         sudo systemctl start elastic-agent"
       `);
@@ -242,7 +253,8 @@ describe('getInstallCommandForPlatform', () => {
           --certificate-authorities=<PATH_TO_CA> \\\\
           --fleet-server-es-ca=<PATH_TO_ES_CERT> \\\\
           --fleet-server-cert=<PATH_TO_FLEET_SERVER_CERT> \\\\
-          --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY>"
+          --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY> \\\\
+          --fleet-server-port=8220"
       `);
     });
 
@@ -267,7 +279,8 @@ describe('getInstallCommandForPlatform', () => {
           --certificate-authorities=<PATH_TO_CA> \\\\
           --fleet-server-es-ca=<PATH_TO_ES_CERT> \\\\
           --fleet-server-cert=<PATH_TO_FLEET_SERVER_CERT> \\\\
-          --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY>"
+          --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY> \\\\
+          --fleet-server-port=8220"
       `);
     });
 
@@ -293,7 +306,8 @@ describe('getInstallCommandForPlatform', () => {
           --certificate-authorities=<PATH_TO_CA> \`
           --fleet-server-es-ca=<PATH_TO_ES_CERT> \`
           --fleet-server-cert=<PATH_TO_FLEET_SERVER_CERT> \`
-          --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY>"
+          --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY> \`
+          --fleet-server-port=8220"
       `);
     });
 
@@ -317,7 +331,8 @@ describe('getInstallCommandForPlatform', () => {
           --certificate-authorities=<PATH_TO_CA> \\\\
           --fleet-server-es-ca=<PATH_TO_ES_CERT> \\\\
           --fleet-server-cert=<PATH_TO_FLEET_SERVER_CERT> \\\\
-          --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY>
+          --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY> \\\\
+          --fleet-server-port=8220
         sudo systemctl enable elastic-agent
         sudo systemctl start elastic-agent"
       `);
@@ -343,7 +358,8 @@ describe('getInstallCommandForPlatform', () => {
           --certificate-authorities=<PATH_TO_CA> \\\\
           --fleet-server-es-ca=<PATH_TO_ES_CERT> \\\\
           --fleet-server-cert=<PATH_TO_FLEET_SERVER_CERT> \\\\
-          --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY>
+          --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY> \\\\
+          --fleet-server-port=8220
         sudo systemctl enable elastic-agent
         sudo systemctl start elastic-agent"
       `);

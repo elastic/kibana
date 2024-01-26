@@ -21,7 +21,7 @@ import { LogQueryFields } from '../../lib/metrics/types';
 const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
 export const initSnapshotRoute = (libs: InfraBackendLibs) => {
-  const { framework, handleEsError } = libs;
+  const { framework } = libs;
 
   framework.registerRoute(
     {
@@ -40,17 +40,20 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
       const soClient = (await requestContext.core).savedObjects.client;
       const source = await libs.sources.getSourceConfiguration(soClient, snapshotRequest.sourceId);
       const compositeSize = libs.configuration.inventory.compositeSize;
-      const [, , { logViews }] = await libs.getStartServices();
-      const logQueryFields: LogQueryFields | undefined = await logViews
+      const [, { logsShared }] = await libs.getStartServices();
+      const logQueryFields: LogQueryFields | undefined = await logsShared.logViews
         .getScopedClient(request)
-        .getResolvedLogView(snapshotRequest.sourceId)
+        .getResolvedLogView({
+          type: 'log-view-reference',
+          logViewId: snapshotRequest.sourceId,
+        })
         .then(
           ({ indices }) => ({ indexPattern: indices }),
           () => undefined
         );
 
       UsageCollector.countNode(snapshotRequest.nodeType);
-      const client = createSearchClient(requestContext, framework);
+      const client = createSearchClient(requestContext, framework, request);
 
       try {
         const snapshotResponse = await getNodes(
@@ -64,7 +67,19 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
           body: SnapshotNodeResponseRT.encode(snapshotResponse),
         });
       } catch (err) {
-        return handleEsError({ error: err, response });
+        if (Boom.isBoom(err)) {
+          return response.customError({
+            statusCode: err.output.statusCode,
+            body: { message: err.output.payload.message },
+          });
+        }
+
+        return response.customError({
+          statusCode: err.statusCode ?? err,
+          body: {
+            message: err.message ?? 'An unexpected error occurred',
+          },
+        });
       }
     }
   );

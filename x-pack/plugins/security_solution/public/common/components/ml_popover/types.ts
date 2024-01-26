@@ -16,7 +16,7 @@ export interface Group {
 
 export interface CheckRecognizerProps {
   indexPatternName: string[];
-  signal: AbortSignal;
+  signal?: AbortSignal;
 }
 
 export interface RecognizerModule {
@@ -31,7 +31,7 @@ export interface RecognizerModule {
 
 export interface GetModulesProps {
   moduleId?: string;
-  signal: AbortSignal;
+  signal?: AbortSignal;
 }
 
 export interface Module {
@@ -74,6 +74,7 @@ export interface ModuleJob {
     custom_settings: {
       created_by: string;
       custom_urls: CustomURL[];
+      security_app_display_name?: string;
     };
     job_type: string;
   };
@@ -121,6 +122,9 @@ export interface SecurityJob extends MlSummaryJob {
   isCompatible: boolean;
   isInstalled: boolean;
   isElasticJob: boolean;
+  customSettings?: {
+    security_app_display_name?: string;
+  };
 }
 
 export interface AugmentedSecurityJobFields {

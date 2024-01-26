@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { BfetchRequestError } from '@kbn/bfetch-error';
 import { ErrorLike } from '../batch';
 
 export const normalizeError = <E extends ErrorLike = ErrorLike>(err: any): E => {
@@ -13,6 +14,11 @@ export const normalizeError = <E extends ErrorLike = ErrorLike>(err: any): E => 
     return {
       message: 'Unknown error.',
     } as E;
+  }
+  if (err instanceof BfetchRequestError) {
+    // ignoring so we can return the error as is
+    // @ts-expect-error
+    return err;
   }
   if (err instanceof Error) {
     return { message: err.message } as E;

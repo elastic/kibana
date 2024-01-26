@@ -18,8 +18,13 @@ interface Props {
 
 export function TimeSliderPopoverButton(props: Props) {
   return (
-    <button className="timeSlider__anchor eui-textTruncate" color="text" onClick={props.onClick}>
-      <EuiText className="eui-textTruncate" size="s">
+    <button
+      className="timeSlider__anchor eui-textTruncate"
+      color="text"
+      onClick={props.onClick}
+      data-test-subj="timeSlider-popoverToggleButton"
+    >
+      <EuiText className="timeSlider__anchorText eui-textTruncate" size="s">
         <span>{props.formatDate(props.from)}</span>
         &nbsp;&nbsp;→&nbsp;&nbsp;
         <span>{props.formatDate(props.to)}</span>

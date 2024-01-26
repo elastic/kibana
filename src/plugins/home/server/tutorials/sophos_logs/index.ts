@@ -39,7 +39,7 @@ export function sophosLogsSpecProvider(context: TutorialContext): TutorialSchema
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-sophos.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/sophos.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/sophos.svg'),
     artifacts: {
       dashboards: [],
       application: {
@@ -56,6 +56,6 @@ export function sophosLogsSpecProvider(context: TutorialContext): TutorialSchema
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
-    integrationBrowserCategories: ['security'],
+    integrationBrowserCategories: ['security', 'network', 'firewall_security'],
   };
 }

@@ -21,7 +21,7 @@ function getSearchParams(url: string): URLSearchParams {
 
 export function getTileRequest(tileRequest: TileRequest): { path?: string; body?: object } {
   const searchParams = getSearchParams(tileRequest.tileUrl);
-  const encodedRequestBody = searchParams.has('requestBody')
+  const risonRequestBody = searchParams.has('requestBody')
     ? (searchParams.get('requestBody') as string)
     : '()';
 
@@ -39,9 +39,15 @@ export function getTileRequest(tileRequest: TileRequest): { path?: string; body?
     ? searchParams.get('hasLabels') === 'true'
     : false;
 
+  if (!searchParams.has('buffer')) {
+    throw new Error(`Required query parameter 'buffer' not provided.`);
+  }
+  const buffer = parseInt(searchParams.get('buffer') as string, 10);
+
   if (tileRequest.tileUrl.includes(MVT_GETGRIDTILE_API_PATH)) {
     return getAggsTileRequest({
-      encodedRequestBody,
+      buffer,
+      risonRequestBody,
       geometryFieldName,
       gridPrecision: parseInt(searchParams.get('gridPrecision') as string, 10),
       hasLabels,
@@ -55,7 +61,8 @@ export function getTileRequest(tileRequest: TileRequest): { path?: string; body?
 
   if (tileRequest.tileUrl.includes(MVT_GETTILE_API_PATH)) {
     return getHitsTileRequest({
-      encodedRequestBody,
+      buffer,
+      risonRequestBody,
       geometryFieldName,
       hasLabels,
       index,

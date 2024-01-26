@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { lazy, useEffect } from 'react';
-import { Route, RouteComponentProps, Switch, Redirect } from 'react-router-dom';
+import React, { useState, lazy, useEffect, useCallback } from 'react';
+import { RouteComponentProps, Redirect } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
+
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer, EuiButtonEmpty, EuiPageHeader } from '@elastic/eui';
+import { EuiSpacer, EuiPageTemplate } from '@elastic/eui';
 
 import { getIsExperimentalFeatureEnabled } from '../common/get_experimental_features';
 import { Section, routeToRules, routeToInternalAlerts, routeToLogs } from './constants';
@@ -19,9 +21,12 @@ import { HealthCheck } from './components/health_check';
 import { HealthContextProvider } from './context/health_context';
 import { useKibana } from '../common/lib/kibana';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
+import { useLoadRuleTypesQuery } from './hooks/use_load_rule_types_query';
 
 const RulesList = lazy(() => import('./sections/rules_list/components/rules_list'));
-const LogsList = lazy(() => import('./sections/logs_list/components/logs_list'));
+const LogsList = lazy(
+  () => import('./sections/rule_details/components/global_rule_event_log_list')
+);
 const AlertsPage = lazy(() => import('./sections/alerts_table/alerts_page'));
 
 export interface MatchParams {
@@ -34,8 +39,10 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   },
   history,
 }) => {
-  const { chrome, setBreadcrumbs, docLinks } = useKibana().services;
+  const [headerActions, setHeaderActions] = useState<React.ReactNode[] | undefined>();
+  const { chrome, setBreadcrumbs } = useKibana().services;
   const isInternalAlertsTableEnabled = getIsExperimentalFeatureEnabled('internalAlertsTable');
+  const { authorizedToReadAnyRules } = useLoadRuleTypesQuery({ filteredRuleTypes: [] });
 
   const tabs: Array<{
     id: Section;
@@ -49,10 +56,14 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
     ),
   });
 
-  tabs.push({
-    id: 'logs',
-    name: <FormattedMessage id="xpack.triggersActionsUI.home.logsTabTitle" defaultMessage="Logs" />,
-  });
+  if (authorizedToReadAnyRules) {
+    tabs.push({
+      id: 'logs',
+      name: (
+        <FormattedMessage id="xpack.triggersActionsUI.home.logsTabTitle" defaultMessage="Logs" />
+      ),
+    });
+  }
 
   if (isInternalAlertsTableEnabled) {
     tabs.push({
@@ -70,6 +81,29 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
     history.push(`/${newSection}`);
   };
 
+  const renderRulesList = useCallback(() => {
+    return suspendedComponentWithProps(
+      RulesList,
+      'xl'
+    )({
+      showCreateRuleButtonInPrompt: true,
+      setHeaderActions,
+    });
+  }, []);
+
+  const renderLogsList = useCallback(() => {
+    return (
+      <EuiPageTemplate.Section grow={false} paddingSize="none">
+        {suspendedComponentWithProps(
+          LogsList,
+          'xl'
+        )({
+          setHeaderActions,
+        })}
+      </EuiPageTemplate.Section>
+    );
+  }, []);
+
   // Set breadcrumb and page title
   useEffect(() => {
     setBreadcrumbs([getAlertingSectionBreadcrumb(section || 'home')]);
@@ -78,26 +112,15 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
 
   return (
     <>
-      <EuiPageHeader
+      <EuiPageTemplate.Header
+        paddingSize="none"
         bottomBorder
         pageTitle={
           <span data-test-subj="appTitle">
             <FormattedMessage id="xpack.triggersActionsUI.home.appTitle" defaultMessage="Rules" />
           </span>
         }
-        rightSideItems={[
-          <EuiButtonEmpty
-            href={docLinks.links.alerting.guide}
-            target="_blank"
-            iconType="help"
-            data-test-subj="documentationLink"
-          >
-            <FormattedMessage
-              id="xpack.triggersActionsUI.home.docsLinkText"
-              defaultMessage="Documentation"
-            />
-          </EuiButtonEmpty>,
-        ]}
+        rightSideItems={headerActions}
         description={
           <FormattedMessage
             id="xpack.triggersActionsUI.home.sectionDescription"
@@ -112,32 +135,26 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
           'data-test-subj': `${tab.id}Tab`,
         }))}
       />
-
       <EuiSpacer size="l" />
-
       <HealthContextProvider>
         <HealthCheck waitForCheck={true}>
-          <Switch>
-            <Route
-              exact
-              path={routeToLogs}
-              component={suspendedComponentWithProps(LogsList, 'xl')}
-            />
-            <Route
-              exact
-              path={routeToRules}
-              component={suspendedComponentWithProps(RulesList, 'xl')}
-            />
+          <Routes>
+            <Route exact path={routeToLogs} component={renderLogsList} />
+            <Route exact path={routeToRules} component={renderRulesList} />
             {isInternalAlertsTableEnabled ? (
               <Route
                 exact
                 path={routeToInternalAlerts}
-                component={suspendedComponentWithProps(AlertsPage, 'xl')}
+                component={() => (
+                  <EuiPageTemplate.Section grow={false} paddingSize="none">
+                    {suspendedComponentWithProps(AlertsPage, 'xl')({})}
+                  </EuiPageTemplate.Section>
+                )}
               />
             ) : (
               <Redirect to={routeToRules} />
             )}
-          </Switch>
+          </Routes>
         </HealthCheck>
       </HealthContextProvider>
     </>

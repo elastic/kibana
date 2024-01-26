@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiBadge,
   EuiCallOut,
-  EuiInMemoryTable,
+  EuiBasicTable,
   EuiSearchBar,
   EuiSpacer,
   IconColor,
@@ -22,29 +22,36 @@ import {
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import useDebounce from 'react-use/lib/useDebounce';
+import useMount from 'react-use/lib/useMount';
+import { usePageUrlState } from '@kbn/ml-url-state';
+import { useTimefilter, useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import { EntityFilter } from './entity_filter';
 import { useMlNotifications } from '../../contexts/ml/ml_notifications_context';
 import { ML_NOTIFICATIONS_MESSAGE_LEVEL } from '../../../../common/constants/notifications';
 import { SavedObjectsWarning } from '../../components/saved_objects_warning';
-import { useTimefilter, useTimeRangeUpdates } from '../../contexts/kibana/use_timefilter';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { useRefresh } from '../../routing/use_refresh';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
 import { ListingPageUrlState } from '../../../../common/types/common';
-import { usePageUrlState, useUrlState } from '../../util/url_state';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import type {
   MlNotificationMessageLevel,
   NotificationItem,
 } from '../../../../common/types/notifications';
 import { useMlKibana } from '../../contexts/kibana';
+import { useEnabledFeatures } from '../../contexts/ml';
 
 const levelBadgeMap: Record<MlNotificationMessageLevel, IconColor> = {
   [ML_NOTIFICATIONS_MESSAGE_LEVEL.ERROR]: 'danger',
   [ML_NOTIFICATIONS_MESSAGE_LEVEL.WARNING]: 'warning',
   [ML_NOTIFICATIONS_MESSAGE_LEVEL.INFO]: 'default',
 };
+
+interface PageUrlState {
+  pageKey: typeof ML_PAGES.NOTIFICATIONS;
+  pageUrlState: ListingPageUrlState;
+}
 
 export const getDefaultNotificationsListState = (): ListingPageUrlState => ({
   pageIndex: 0,
@@ -59,6 +66,9 @@ export const NotificationsList: FC = () => {
       mlServices: { mlApiServices },
     },
   } = useMlKibana();
+
+  const { isADEnabled, isDFAEnabled, isNLPEnabled } = useEnabledFeatures();
+
   const { displayErrorToast } = useToastNotificationService();
 
   const { lastCheckedAt, setLastCheckedAt, notificationsCounts, latestRequestedAt } =
@@ -66,17 +76,14 @@ export const NotificationsList: FC = () => {
   const timeFilter = useTimefilter();
   const timeRange = useTimeRangeUpdates();
 
-  const [globalState] = useUrlState('_g');
-
-  useEffect(function setTimeRangeOnMount() {
-    if (globalState?.time || !lastCheckedAt) return;
-
-    timeFilter.setTime({
-      from: moment(lastCheckedAt).toISOString(),
-      to: 'now',
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useMount(function setTimeRangeOnMount() {
+    if (latestRequestedAt !== null) {
+      timeFilter.setTime({
+        from: moment(latestRequestedAt).toISOString(),
+        to: 'now',
+      });
+    }
+  });
 
   const [isLoading, setIsLoading] = useState(true);
   const [items, setItems] = useState<NotificationItem[]>([]);
@@ -85,7 +92,7 @@ export const NotificationsList: FC = () => {
 
   const dateFormatter = useFieldFormatter(FIELD_FORMAT_IDS.DATE);
 
-  const [pageState, updatePageState] = usePageUrlState(
+  const [pageState, updatePageState] = usePageUrlState<PageUrlState>(
     ML_PAGES.NOTIFICATIONS,
     getDefaultNotificationsListState()
   );
@@ -129,7 +136,7 @@ export const NotificationsList: FC = () => {
       displayErrorToast(
         error,
         i18n.translate('xpack.ml.notifications.fetchFailedError', {
-          defaultMessage: 'Fetch notifications failed',
+          defaultMessage: 'Error loading list of notifications',
         })
       );
     }
@@ -161,57 +168,96 @@ export const NotificationsList: FC = () => {
     [sorting, queryInstance, refresh]
   );
 
-  const columns: Array<EuiBasicTableColumn<NotificationItem>> = [
-    {
-      id: 'timestamp',
-      field: 'timestamp',
-      name: <FormattedMessage id="xpack.ml.notifications.timeLabel" defaultMessage="Time" />,
-      sortable: true,
-      truncateText: false,
-      'data-test-subj': 'mlNotificationTime',
-      width: '250px',
-      render: (v: number) => dateFormatter(v),
-    },
-    {
-      field: 'level',
-      name: <FormattedMessage id="xpack.ml.notifications.levelLabel" defaultMessage="Level" />,
-      sortable: true,
-      truncateText: false,
-      'data-test-subj': 'mlNotificationLevel',
-      render: (value: MlNotificationMessageLevel) => {
-        return <EuiBadge color={levelBadgeMap[value]}>{value}</EuiBadge>;
+  const columns = useMemo<Array<EuiBasicTableColumn<NotificationItem>>>(() => {
+    return [
+      {
+        id: 'timestamp',
+        field: 'timestamp',
+        name: <FormattedMessage id="xpack.ml.notifications.timeLabel" defaultMessage="Time" />,
+        sortable: true,
+        truncateText: false,
+        'data-test-subj': 'mlNotificationTime',
+        width: '250px',
+        render: (v: number) => dateFormatter(v),
       },
-      width: '100px',
-    },
-    {
-      field: 'job_type',
-      name: <FormattedMessage id="xpack.ml.notifications.typeLabel" defaultMessage="Type" />,
-      sortable: true,
-      truncateText: false,
-      'data-test-subj': 'mlNotificationType',
-      render: (value: string) => {
-        return <EuiBadge color={'hollow'}>{value}</EuiBadge>;
+      {
+        field: 'level',
+        name: <FormattedMessage id="xpack.ml.notifications.levelLabel" defaultMessage="Level" />,
+        sortable: true,
+        truncateText: false,
+        'data-test-subj': 'mlNotificationLevel',
+        render: (value: MlNotificationMessageLevel) => {
+          return <EuiBadge color={levelBadgeMap[value]}>{value}</EuiBadge>;
+        },
+        width: '100px',
       },
-      width: '200px',
-    },
-    {
-      field: 'job_id',
-      name: <FormattedMessage id="xpack.ml.notifications.entityLabel" defaultMessage="Entity ID" />,
-      sortable: true,
-      truncateText: false,
-      'data-test-subj': 'mlNotificationEntity',
-      width: '200px',
-    },
-    {
-      field: 'message',
-      name: <FormattedMessage id="xpack.ml.notifications.messageLabel" defaultMessage="Message" />,
-      sortable: false,
-      truncateText: false,
-      'data-test-subj': 'mlNotificationMessage',
-    },
-  ];
+      {
+        field: 'job_type',
+        name: <FormattedMessage id="xpack.ml.notifications.typeLabel" defaultMessage="Type" />,
+        sortable: true,
+        truncateText: false,
+        'data-test-subj': 'mlNotificationType',
+        render: (value: string) => {
+          return <EuiBadge color={'hollow'}>{value}</EuiBadge>;
+        },
+        width: '200px',
+      },
+      {
+        field: 'job_id',
+        name: (
+          <FormattedMessage id="xpack.ml.notifications.entityLabel" defaultMessage="Entity ID" />
+        ),
+        sortable: true,
+        truncateText: false,
+        'data-test-subj': 'mlNotificationEntity',
+        width: '200px',
+      },
+      {
+        field: 'message',
+        name: (
+          <FormattedMessage id="xpack.ml.notifications.messageLabel" defaultMessage="Message" />
+        ),
+        sortable: false,
+        truncateText: false,
+        'data-test-subj': 'mlNotificationMessage',
+      },
+    ];
+  }, [dateFormatter]);
 
   const filters: SearchFilterConfig[] = useMemo<SearchFilterConfig[]>(() => {
+    const jobTypeOptions = [];
+    if (isADEnabled === true) {
+      jobTypeOptions.push({
+        value: 'anomaly_detector',
+        name: i18n.translate('xpack.ml.notifications.filters.type.anomalyDetector', {
+          defaultMessage: 'Anomaly Detection',
+        }),
+      });
+    }
+    if (isDFAEnabled === true) {
+      jobTypeOptions.push({
+        value: 'data_frame_analytics',
+        name: i18n.translate('xpack.ml.notifications.filters.type.dfa', {
+          defaultMessage: 'Data Frame Analytics',
+        }),
+      });
+    }
+    if (isNLPEnabled === true || isDFAEnabled === true) {
+      jobTypeOptions.push({
+        value: 'inference',
+        name: i18n.translate('xpack.ml.notifications.filters.type.inference', {
+          defaultMessage: 'Inference',
+        }),
+      });
+    }
+
+    jobTypeOptions.push({
+      value: 'system',
+      name: i18n.translate('xpack.ml.notifications.filters.type.system', {
+        defaultMessage: 'System',
+      }),
+    });
+
     return [
       {
         type: 'field_value_selection',
@@ -251,41 +297,22 @@ export const NotificationsList: FC = () => {
           defaultMessage: 'Type',
         }),
         multiSelect: 'or',
-        options: [
-          {
-            value: 'anomaly_detector',
-            name: i18n.translate('xpack.ml.notifications.filters.type.anomalyDetector', {
-              defaultMessage: 'Anomaly Detection',
-            }),
-          },
-          {
-            value: 'data_frame_analytics',
-            name: i18n.translate('xpack.ml.notifications.filters.type.dfa', {
-              defaultMessage: 'Data Frame Analytics',
-            }),
-          },
-          {
-            value: 'inference',
-            name: i18n.translate('xpack.ml.notifications.filters.type.inference', {
-              defaultMessage: 'Inference',
-            }),
-          },
-          {
-            value: 'system',
-            name: i18n.translate('xpack.ml.notifications.filters.type.system', {
-              defaultMessage: 'System',
-            }),
-          },
-        ],
+        options: jobTypeOptions,
       },
       {
         type: 'custom_component',
         component: EntityFilter,
       },
     ];
-  }, []);
+  }, [isADEnabled, isDFAEnabled, isNLPEnabled]);
 
   const newNotificationsCount = Object.values(notificationsCounts).reduce((a, b) => a + b);
+
+  const itemsPerPage = useMemo(() => {
+    const fromIndex = pagination.pageIndex * pagination.pageSize;
+    const toIndex = fromIndex + pagination.pageSize;
+    return items.slice(fromIndex, toIndex);
+  }, [items, pagination]);
 
   return (
     <>
@@ -367,7 +394,7 @@ export const NotificationsList: FC = () => {
               />
             }
             color="danger"
-            iconType="alert"
+            iconType="warning"
           >
             <p>{queryError}</p>
           </EuiCallOut>
@@ -375,12 +402,12 @@ export const NotificationsList: FC = () => {
         </>
       ) : null}
 
-      <EuiInMemoryTable<NotificationItem>
+      <EuiBasicTable<NotificationItem>
         columns={columns}
         hasActions={false}
         isExpandable={false}
         isSelectable={false}
-        items={items}
+        items={itemsPerPage}
         itemId={'id'}
         loading={isLoading}
         rowProps={(item) => ({
@@ -390,7 +417,7 @@ export const NotificationsList: FC = () => {
         onChange={onTableChange}
         sorting={sorting}
         data-test-subj={isLoading ? 'mlNotificationsTable loading' : 'mlNotificationsTable loaded'}
-        message={
+        noItemsMessage={
           <FormattedMessage
             id="xpack.ml.notifications.noItemsFoundMessage"
             defaultMessage="No notifications found"

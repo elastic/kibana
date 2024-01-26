@@ -13,7 +13,7 @@ import {
   getCloudAgentPolicy,
   getApmPackagePolicy,
 } from '../routes/fleet/get_cloud_apm_package_policy';
-import { APMRouteHandlerResources } from '..';
+import { APMRouteHandlerResources } from '../routes/apm_routes/register_apm_server_routes';
 
 export function getDeprecations({
   cloudSetup,

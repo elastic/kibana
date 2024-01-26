@@ -1,15 +1,33 @@
 {
   "ilm.explain_lifecycle": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "only_errors": "__flag__",
       "only_managed": "__flag__",
-      "only_errors": "__flag__"
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "GET"
     ],
     "patterns": [
-      "{indices}/_ilm/explain"
+      "{index}/_ilm/explain"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ilm-explain-lifecycle.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ilm-explain-lifecycle.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

@@ -12,9 +12,9 @@ import { promisify } from 'util';
 
 import del from 'del';
 
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { comparePngs } from '../lib/compare_pngs';
 import { FtrProviderContext, FtrService } from '../../ftr_provider_context';
-import { WebElementWrapper } from '../lib/web_element_wrapper';
 
 const mkdirAsync = promisify(mkdir);
 const writeFileAsync = promisify(writeFile);
@@ -84,14 +84,9 @@ export class ScreenshotsService extends FtrService {
   }
 
   private async capture(path: string, el?: WebElementWrapper) {
-    try {
-      this.log.info(`Taking screenshot "${path}"`);
-      const screenshot = await (el ? el.takeScreenshot() : this.browser.takeScreenshot());
-      await mkdirAsync(dirname(path), { recursive: true });
-      await writeFileAsync(path, screenshot, 'base64');
-    } catch (err) {
-      this.log.error('SCREENSHOT FAILED');
-      this.log.error(err);
-    }
+    this.log.info(`Taking ${el ? 'element' : 'window'} screenshot "${path}"`);
+    const screenshot = await (el ? el.takeScreenshot() : this.browser.takeScreenshot());
+    await mkdirAsync(dirname(path), { recursive: true });
+    await writeFileAsync(path, screenshot, 'base64');
   }
 }

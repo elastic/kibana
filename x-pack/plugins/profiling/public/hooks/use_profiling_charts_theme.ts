@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { RecursivePartial, Theme } from '@elastic/charts';
-import { merge } from 'lodash';
+import { PartialTheme } from '@elastic/charts';
 import { useProfilingDependencies } from '../components/contexts/profiling_dependencies/use_profiling_dependencies';
 
-const profilingTheme: RecursivePartial<Theme> = {
+const profilingThemeOverrides: PartialTheme = {
   barSeriesStyle: {
     rectBorder: {
       strokeOpacity: 1,
@@ -23,6 +22,13 @@ const profilingTheme: RecursivePartial<Theme> = {
     barsPadding: 0,
     histogramPadding: 0,
   },
+  partition: {
+    fillLabel: {
+      textColor: 'white',
+    },
+    emptySizeRatio: 0.3,
+    sectorLineWidth: 0,
+  },
 };
 
 export function useProfilingChartsTheme() {
@@ -31,10 +37,9 @@ export function useProfilingChartsTheme() {
   } = useProfilingDependencies();
 
   const chartsBaseTheme = charts.theme.useChartsBaseTheme();
-  const chartsTheme = charts.theme.useChartsTheme();
 
   return {
     chartsBaseTheme,
-    chartsTheme: merge({}, chartsTheme, profilingTheme),
+    chartsTheme: profilingThemeOverrides,
   };
 }

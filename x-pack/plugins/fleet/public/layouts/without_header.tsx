@@ -12,12 +12,8 @@ import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 export const Wrapper = styled.div`
   background-color: ${(props) => props.theme.eui.euiColorEmptyShade};
 
-  // HACK: Kibana introduces a div element around the app component that results in us
-  // being unable to stretch this Wrapper to full height via flex: 1. This calc sets
-  // the min height to the viewport size minus the height of the two global Kibana headers.
-  min-height: calc(
-    100vh - ${(props) => parseFloat(props.theme.eui.euiHeaderHeightCompensation) * 2}px
-  );
+  // Set the min height to the viewport size minus the height of any global Kibana headers
+  min-height: calc(100vh - var(--euiFixedHeadersOffset, 0));
 `;
 
 export const Page = styled(EuiPage)`
@@ -30,6 +26,8 @@ export const Page = styled(EuiPage)`
 
 export const ContentWrapper = styled.div`
   height: 100%;
+  padding-left: ${(props) => props.theme.eui.euiSizeM};
+  padding-right: ${(props) => props.theme.eui.euiSizeM};
 `;
 
 interface Props {

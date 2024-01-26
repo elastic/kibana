@@ -6,7 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
+import {
+  ES_QUERY_ID,
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
+} from '@kbn/rule-data-utils';
 export {
   BASE_ALERTING_API_PATH,
   INTERNAL_BASE_ALERTING_API_PATH,
@@ -19,7 +23,6 @@ export const routeToHome = `/`;
 export const routeToConnectors = `/connectors`;
 export const routeToRules = `/rules`;
 export const routeToLogs = `/logs`;
-export const routeToRuleDetails = `/rule/:ruleId`;
 export const routeToInternalAlerts = `/alerts`;
 export const legacyRouteToRules = `/alerts`;
 export const legacyRouteToRuleDetails = `/alert/:alertId`;
@@ -28,6 +31,14 @@ export const recoveredActionGroupMessage = i18n.translate(
   'xpack.triggersActionsUI.sections.actionForm.RecoveredMessage',
   {
     defaultMessage: 'Recovered',
+  }
+);
+
+export const summaryMessage = i18n.translate(
+  'xpack.triggersActionsUI.sections.actionForm.SummaryMessage',
+  {
+    defaultMessage:
+      'The system has detected \\{\\{alerts.new.count\\}\\} new, \\{\\{alerts.ongoing.count\\}\\} ongoing, and \\{\\{alerts.recovered.count\\}\\} recovered alerts.',
   }
 );
 
@@ -61,6 +72,7 @@ export const RULE_EXECUTION_LOG_COLUMN_IDS = [
   'es_search_duration',
   'schedule_delay',
   'timed_out',
+  'maintenance_window_ids',
 ] as const;
 
 export const RULE_EXECUTION_LOG_DURATION_COLUMNS = [
@@ -87,5 +99,33 @@ export const LOCKED_COLUMNS = [
 ];
 
 export const RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS = [...LOCKED_COLUMNS.slice(1)];
-export const GLOBAL_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS = ['rule_name', ...LOCKED_COLUMNS];
+export const GLOBAL_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS = [
+  'rule_name',
+  ...LOCKED_COLUMNS.slice(1),
+];
 export const DEFAULT_NUMBER_FORMAT = 'format:number:defaultPattern';
+
+export const CONNECTOR_EXECUTION_LOG_COLUMN_IDS = [
+  'connector_id',
+  'space_ids',
+  'id',
+  'timestamp',
+  'status',
+  'connector_name',
+  'message',
+  'execution_duration',
+  'schedule_delay',
+  'timed_out',
+] as const;
+
+export const CONNECTOR_LOCKED_COLUMNS = ['timestamp', 'status', 'connector_name', 'message'];
+
+export const GLOBAL_CONNECTOR_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS = [
+  ...CONNECTOR_LOCKED_COLUMNS,
+];
+
+export const MULTI_CONSUMER_RULE_TYPE_IDS = [
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+  ES_QUERY_ID,
+  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
+];

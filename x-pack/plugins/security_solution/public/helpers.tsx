@@ -9,33 +9,36 @@ import { ALERT_RULE_NAME, ALERT_RULE_PARAMETERS, ALERT_RULE_UUID } from '@kbn/ru
 import { get, has, isEmpty } from 'lodash/fp';
 import React from 'react';
 import type { RouteProps } from 'react-router-dom';
-import { matchPath, Redirect } from 'react-router-dom';
+import { matchPath } from 'react-router-dom';
 
 import type { Capabilities, CoreStart } from '@kbn/core/public';
+import type { DocLinks } from '@kbn/doc-links';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
+import { isObject } from 'lodash';
 import {
   ALERTS_PATH,
   APP_UI_ID,
   CASES_FEATURE_ID,
   CASES_PATH,
+  DASHBOARDS_PATH,
   EXCEPTIONS_PATH,
-  LANDING_PATH,
   RULES_PATH,
   SERVER_APP_ID,
   THREAT_INTELLIGENCE_PATH,
 } from '../common/constants';
-import type { Ecs } from '../common/ecs';
 import type {
   FactoryQueryTypes,
   StrategyResponseType,
 } from '../common/search_strategy/security_solution';
 import type { TimelineEqlResponse } from '../common/search_strategy/timeline';
-import { NoPrivilegesPage } from './app/no_privileges';
+import { NoPrivilegesPage } from './common/components/no_privileges';
 import { SecurityPageName } from './app/types';
-import type { InspectResponse, StartedSubPlugins } from './types';
+import type { InspectResponse, StartedSubPlugins, StartServices } from './types';
 import { CASES_SUB_PLUGIN_KEY } from './types';
-import { timelineActions } from './timelines/store/timeline';
-import { dataTableActions } from './common/store/data_table';
-import { TableId, TimelineId } from '../common/types';
+import { timelineActions } from './timelines/store';
+import { TimelineId } from '../common/types';
+import { SourcererScopeName } from './common/store/sourcerer/model';
 
 export const parseRoute = (location: Pick<Location, 'hash' | 'pathname' | 'search'>) => {
   if (!isEmpty(location.hash)) {
@@ -156,7 +159,10 @@ export const getInspectResponse = <T extends FactoryQueryTypes>(
   response: StrategyResponseType<T> | TimelineEqlResponse | undefined,
   prevResponse: InspectResponse
 ): InspectResponse => ({
-  dsl: response?.inspect?.dsl ?? prevResponse?.dsl ?? [],
+  dsl:
+    isObject(response?.inspect) && response?.inspect.dsl
+      ? response.inspect.dsl
+      : prevResponse?.dsl || [],
   response:
     response != null ? [JSON.stringify(response.rawResponse, null, 2)] : prevResponse?.response,
 });
@@ -167,6 +173,13 @@ export const isDetectionsPath = (pathname: string): boolean => {
     strict: false,
   });
 };
+
+export const isDashboardViewPath = (pathname: string): boolean =>
+  matchPath(pathname, {
+    path: `${DASHBOARDS_PATH}/:detailName`,
+    exact: false,
+    strict: false,
+  }) != null;
 
 const isAlertsPath = (pathname: string): boolean => {
   return !!matchPath(pathname, {
@@ -193,26 +206,29 @@ export const isThreatIntelligencePath = (pathname: string): boolean => {
 
 export const getSubPluginRoutesByCapabilities = (
   subPlugins: StartedSubPlugins,
-  capabilities: Capabilities
+  capabilities: Capabilities,
+  services: StartServices
 ): RouteProps[] => {
-  return [
-    ...Object.entries(subPlugins).reduce<RouteProps[]>((acc, [key, value]) => {
-      if (isSubPluginAvailable(key, capabilities)) {
-        return [...acc, ...value.routes];
-      }
-      return [
-        ...acc,
+  return Object.entries(subPlugins).reduce<RouteProps[]>((acc, [key, value]) => {
+    if (isSubPluginAvailable(key, capabilities)) {
+      acc.push(...value.routes);
+    } else {
+      const docLinkSelector = (docLinks: DocLinks) => docLinks.siem.privileges;
+      acc.push(
         ...value.routes.map((route: RouteProps) => ({
           path: route.path,
-          component: () => <NoPrivilegesPage subPluginKey={key} />,
-        })),
-      ];
-    }, []),
-    {
-      path: '',
-      component: () => <RedirectRoute capabilities={capabilities} />,
-    },
-  ];
+          component: () => {
+            const Upsell = services.upselling.getPageUpselling(key as SecurityPageName);
+            if (Upsell) {
+              return <Upsell />;
+            }
+            return <NoPrivilegesPage pageName={key} docLinkSelector={docLinkSelector} />;
+          },
+        }))
+      );
+    }
+    return acc;
+  }, []);
 };
 
 export const isSubPluginAvailable = (pluginKey: string, capabilities: Capabilities): boolean => {
@@ -221,19 +237,6 @@ export const isSubPluginAvailable = (pluginKey: string, capabilities: Capabiliti
   }
   return capabilities[SERVER_APP_ID].show === true;
 };
-
-export const RedirectRoute = React.memo<{ capabilities: Capabilities }>(({ capabilities }) => {
-  const overviewAvailable = isSubPluginAvailable('overview', capabilities);
-  const casesAvailable = isSubPluginAvailable(CASES_SUB_PLUGIN_KEY, capabilities);
-  if (overviewAvailable) {
-    return <Redirect to={LANDING_PATH} />;
-  }
-  if (casesAvailable) {
-    return <Redirect to={CASES_PATH} />;
-  }
-  return <Redirect to={LANDING_PATH} />;
-});
-RedirectRoute.displayName = 'RedirectRoute';
 
 const siemSignalsFieldMappings: Record<string, string> = {
   [ALERT_RULE_UUID]: 'signal.rule.id',
@@ -298,6 +301,11 @@ export const isTimelineScope = (scopeId: string) =>
 export const isInTableScope = (scopeId: string) =>
   Object.values(TableId).includes(scopeId as unknown as TableId);
 
+export const isAlertsPageScope = (scopeId: string) =>
+  [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage, TableId.alertsOnCasePage].includes(
+    scopeId as TableId
+  );
+
 export const getScopedActions = (scopeId: string) => {
   if (isTimelineScope(scopeId)) {
     return timelineActions;
@@ -315,3 +323,13 @@ export const getScopedSelectors = (scopeId: string) => {
 };
 
 export const isActiveTimeline = (timelineId: string) => timelineId === TimelineId.active;
+
+export const getSourcererScopeId = (scopeId: string): SourcererScopeName => {
+  if (isTimelineScope(scopeId)) {
+    return SourcererScopeName.timeline;
+  } else if (isAlertsPageScope(scopeId)) {
+    return SourcererScopeName.detections;
+  } else {
+    return SourcererScopeName.default;
+  }
+};

@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { Redirect, Route, Switch } from 'react-router-dom';
-import { EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
+import { Redirect } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
@@ -18,7 +18,6 @@ import {
   PageError,
   WithPrivileges,
   NotAuthorizedSection,
-  useExecutionContext,
 } from '../shared_imports';
 import { PageLoading } from './components';
 import { DEFAULT_SECTION, Section } from './constants';
@@ -30,12 +29,11 @@ import {
   PolicyAdd,
   PolicyEdit,
 } from './sections';
-import { useAppContext, useConfig } from './app_context';
+import { useConfig } from './app_context';
 
 export const App: React.FunctionComponent = () => {
   const { slm_ui: slmUi } = useConfig();
   const { apiError } = useAuthorizationContext();
-  const { core } = useAppContext();
 
   const sections: Section[] = ['repositories', 'snapshots', 'restore_status'];
 
@@ -44,11 +42,6 @@ export const App: React.FunctionComponent = () => {
   }
 
   const sectionsRegex = sections.join('|');
-
-  useExecutionContext(core.executionContext, {
-    type: 'application',
-    page: 'snapshotRestore',
-  });
 
   return apiError ? (
     <PageError
@@ -72,7 +65,7 @@ export const App: React.FunctionComponent = () => {
           </PageLoading>
         ) : hasPrivileges ? (
           <div data-test-subj="snapshotRestoreApp" className={APP_WRAPPER_CLASS}>
-            <Switch>
+            <Routes>
               <Route exact path="/add_repository" component={RepositoryAdd} />
               <Route exact path="/edit_repository/:name*" component={RepositoryEdit} />
               <Route
@@ -90,30 +83,28 @@ export const App: React.FunctionComponent = () => {
               {slmUi.enabled && <Route exact path="/edit_policy/:name*" component={PolicyEdit} />}
               <Redirect from="/" to={`/${DEFAULT_SECTION}`} />
               <Redirect from="" to={`/${DEFAULT_SECTION}`} />
-            </Switch>
+            </Routes>
           </div>
         ) : (
-          <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
-            <NotAuthorizedSection
-              title={
-                <FormattedMessage
-                  id="xpack.snapshotRestore.app.deniedPrivilegeTitle"
-                  defaultMessage="You're missing cluster privileges"
-                />
-              }
-              message={
-                <FormattedMessage
-                  id="xpack.snapshotRestore.app.deniedPrivilegeDescription"
-                  defaultMessage="To use Snapshot and Restore, you must have {privilegesCount,
-                    plural, one {this cluster privilege} other {these cluster privileges}}: {missingPrivileges}."
-                  values={{
-                    missingPrivileges: privilegesMissing.cluster!.join(', '),
-                    privilegesCount: privilegesMissing.cluster!.length,
-                  }}
-                />
-              }
-            />
-          </EuiPageContent>
+          <NotAuthorizedSection
+            title={
+              <FormattedMessage
+                id="xpack.snapshotRestore.app.deniedPrivilegeTitle"
+                defaultMessage="You're missing cluster privileges"
+              />
+            }
+            message={
+              <FormattedMessage
+                id="xpack.snapshotRestore.app.deniedPrivilegeDescription"
+                defaultMessage="To use Snapshot and Restore, you must have {privilegesCount,
+                  plural, one {this cluster privilege} other {these cluster privileges}}: {missingPrivileges}."
+                values={{
+                  missingPrivileges: privilegesMissing.cluster!.join(', '),
+                  privilegesCount: privilegesMissing.cluster!.length,
+                }}
+              />
+            }
+          />
         )
       }
     </WithPrivileges>

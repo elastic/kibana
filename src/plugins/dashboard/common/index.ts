@@ -6,21 +6,26 @@
  * Side Public License, v 1.
  */
 
+export type { DashboardOptions, DashboardCapabilities, SharedDashboardState } from './types';
+
 export type {
-  GridData,
   DashboardPanelMap,
-  SavedDashboardPanel,
-  DashboardAttributes,
   DashboardPanelState,
-  DashboardContainerStateWithType,
-} from './types';
+  DashboardContainerInput,
+  DashboardContainerByReferenceInput,
+} from './dashboard_container/types';
+
+export type { DashboardAttributes } from './content_management';
 
 export {
   injectReferences,
   extractReferences,
-} from './persistable_state/dashboard_saved_object_references';
+} from './dashboard_saved_object/persistable_state/dashboard_saved_object_references';
 
-export { createInject, createExtract } from './persistable_state/dashboard_container_references';
+export {
+  createInject,
+  createExtract,
+} from './dashboard_container/persistable_state/dashboard_container_references';
 
 export {
   convertPanelStateToSavedDashboardPanel,

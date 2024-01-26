@@ -8,7 +8,6 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import {
   Chart,
@@ -20,61 +19,73 @@ import {
   Settings,
   MetricWTrend,
   MetricWNumber,
+  SettingsProps,
+  MetricWText,
 } from '@elastic/charts';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import type {
   Datatable,
   DatatableColumn,
+  DatatableRow,
   IInterpreterRenderHandlers,
-  RenderMode,
 } from '@kbn/expressions-plugin/common';
 import { CustomPaletteState } from '@kbn/charts-plugin/public';
-import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
-import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
+import {
+  FieldFormatConvertFunction,
+  SerializedFieldFormat,
+} from '@kbn/field-formats-plugin/common';
 import { CUSTOM_PALETTE } from '@kbn/coloring';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { useResizeObserver } from '@elastic/eui';
+import { useResizeObserver, useEuiScrollBar, EuiIcon } from '@elastic/eui';
+import { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
+import { type ChartSizeEvent, getOverridesFor } from '@kbn/chart-expressions-common';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import { VisParams } from '../../common';
-import {
-  getPaletteService,
-  getThemeService,
-  getFormatService,
-  getUiSettingsService,
-} from '../services';
-import { getCurrencyCode } from './currency_codes';
+import { getPaletteService, getThemeService, getFormatService } from '../services';
 import { getDataBoundsForPalette } from '../utils';
 
-export const defaultColor = euiThemeVars.euiColorLightestShade;
-const getBytesUnit = (value: number) => {
-  const units = ['byte', 'kilobyte', 'megabyte', 'gigabyte', 'terabyte', 'petabyte'];
-  const abs = Math.abs(value);
+export const defaultColor = euiThemeVars.euiColorEmptyShade;
 
-  const base = 1024;
-  let unit = units[0];
-  let matched = abs < base;
-  let power;
-
-  if (!matched) {
-    for (power = 1; power < units.length; power++) {
-      const [min, max] = [Math.pow(base, power), Math.pow(base, power + 1)];
-      if (abs >= min && abs < max) {
-        unit = units[power];
-        matched = true;
-        value = value / min;
-        break;
-      }
-    }
+function enhanceFieldFormat(serializedFieldFormat: SerializedFieldFormat | undefined) {
+  const formatId = serializedFieldFormat?.id || 'number';
+  if (formatId === 'duration' && !serializedFieldFormat?.params?.formatOverride) {
+    return {
+      ...serializedFieldFormat,
+      params: {
+        // by default use the compact precise format
+        outputFormat: 'humanizePrecise',
+        outputPrecision: 1,
+        useShortSuffix: true,
+        // but if user configured something else, use it
+        ...serializedFieldFormat!.params,
+      },
+    };
   }
+  return serializedFieldFormat ?? { id: formatId };
+}
 
-  if (!matched) {
-    value = value / Math.pow(base, units.length - 1);
-    unit = units[units.length - 1];
+const renderSecondaryMetric = (
+  columns: DatatableColumn[],
+  row: DatatableRow,
+  config: Pick<VisParams, 'metric' | 'dimensions'>
+) => {
+  let secondaryMetricColumn: DatatableColumn | undefined;
+  let formatSecondaryMetric: ReturnType<typeof getMetricFormatter>;
+  if (config.dimensions.secondaryMetric) {
+    secondaryMetricColumn = getColumnByAccessor(config.dimensions.secondaryMetric, columns);
+    formatSecondaryMetric = getMetricFormatter(config.dimensions.secondaryMetric, columns);
   }
-
-  return { value, unit };
+  const secondaryPrefix = config.metric.secondaryPrefix ?? secondaryMetricColumn?.name;
+  return (
+    <span>
+      {secondaryPrefix}
+      {secondaryMetricColumn
+        ? `${secondaryPrefix ? ' ' : ''}${formatSecondaryMetric!(row[secondaryMetricColumn.id])}`
+        : undefined}
+    </span>
+  );
 };
 
 const getMetricFormatter = (
@@ -82,80 +93,8 @@ const getMetricFormatter = (
   columns: Datatable['columns']
 ) => {
   const serializedFieldFormat = getFormatByAccessor(accessor, columns);
-  const formatId =
-    (serializedFieldFormat?.id === 'suffix'
-      ? serializedFieldFormat.params?.id
-      : serializedFieldFormat?.id) ?? 'number';
-
-  if (
-    !['number', 'currency', 'percent', 'bytes', 'duration', 'string', 'null'].includes(formatId)
-  ) {
-    throw new Error(
-      i18n.translate('expressionMetricVis.errors.unsupportedColumnFormat', {
-        defaultMessage: 'Metric visualization expression - Unsupported column format: "{id}"',
-        values: {
-          id: formatId,
-        },
-      })
-    );
-  }
-
-  // this formats are coming when formula is empty
-  if (formatId === 'string') {
-    return getFormatService().deserialize(serializedFieldFormat).getConverterFor('text');
-  }
-
-  if (formatId === 'duration') {
-    const formatter = getFormatService().deserialize({
-      ...serializedFieldFormat,
-      params: {
-        ...serializedFieldFormat!.params,
-        outputFormat: 'humanizePrecise',
-        outputPrecision: 1,
-        useShortSuffix: true,
-      },
-    });
-    return formatter.getConverterFor('text');
-  }
-
-  const uiSettings = getUiSettingsService();
-
-  const locale = uiSettings.get(FORMATS_UI_SETTINGS.FORMAT_NUMBER_DEFAULT_LOCALE) || 'en';
-
-  const intlOptions: Intl.NumberFormatOptions = {
-    maximumFractionDigits: 2,
-  };
-
-  if (['number', 'currency', 'percent'].includes(formatId)) {
-    intlOptions.notation = 'compact';
-  }
-
-  if (formatId === 'currency') {
-    const currentNumeralLang = numeral.language();
-    numeral.language(locale);
-
-    const {
-      currency: { symbol: currencySymbol },
-      // @ts-expect-error
-    } = numeral.languageData();
-
-    // restore previous value
-    numeral.language(currentNumeralLang);
-
-    intlOptions.currency = getCurrencyCode(locale, currencySymbol);
-    intlOptions.style = 'currency';
-  }
-
-  if (formatId === 'percent') {
-    intlOptions.style = 'percent';
-  }
-
-  return formatId === 'bytes'
-    ? (rawValue: number) => {
-        const { value, unit } = getBytesUnit(rawValue);
-        return new Intl.NumberFormat(locale, { ...intlOptions, style: 'unit', unit }).format(value);
-      }
-    : new Intl.NumberFormat(locale, intlOptions).format;
+  const enhancedFieldFormat = enhanceFieldFormat(serializedFieldFormat);
+  return getFormatService().deserialize(enhancedFieldFormat).getConverterFor('text');
 };
 
 const getColor = (
@@ -174,6 +113,7 @@ const getColor = (
 };
 
 const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) => {
+  const column = table.columns[columnIdx];
   return {
     name: 'filter',
     data: {
@@ -182,19 +122,25 @@ const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) =
           table,
           column: columnIdx,
           row: rowIdx,
+          value: table.rows[rowIdx][column.id],
         },
       ],
     },
   };
 };
 
+const getIcon =
+  (type: string) =>
+  ({ width, height, color }: { width: number; height: number; color: string }) =>
+    <EuiIcon type={type} width={width} height={height} fill={color} style={{ width, height }} />;
+
 export interface MetricVisComponentProps {
   data: Datatable;
   config: Pick<VisParams, 'metric' | 'dimensions'>;
   renderComplete: IInterpreterRenderHandlers['done'];
   fireEvent: IInterpreterRenderHandlers['event'];
-  renderMode: RenderMode;
   filterable: boolean;
+  overrides?: AllowedSettingsOverrides & AllowedChartOverrides;
 }
 
 export const MetricVis = ({
@@ -202,18 +148,41 @@ export const MetricVis = ({
   config,
   renderComplete,
   fireEvent,
-  renderMode,
   filterable,
+  overrides,
 }: MetricVisComponentProps) => {
+  const grid = useRef<MetricSpec['data']>([[]]);
+
+  const onRenderChange = useCallback<RenderChangeListener>(
+    (isRendered) => {
+      if (isRendered) {
+        renderComplete();
+      }
+    },
+    [renderComplete]
+  );
+
+  const onWillRender = useCallback(() => {
+    const maxTileSideLength = grid.current.length * grid.current[0].length > 1 ? 200 : 300;
+    const event: ChartSizeEvent = {
+      name: 'chartSize',
+      data: {
+        maxDimensions: {
+          y: { value: grid.current.length * maxTileSideLength, unit: 'pixels' },
+          x: { value: grid.current[0]?.length * maxTileSideLength, unit: 'pixels' },
+        },
+      },
+    };
+    fireEvent(event);
+  }, [fireEvent, grid]);
+
+  const [scrollChildHeight, setScrollChildHeight] = useState<string>('100%');
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const scrollDimensions = useResizeObserver(scrollContainerRef.current);
+  const chartBaseTheme = getThemeService().useChartsBaseTheme();
+
   const primaryMetricColumn = getColumnByAccessor(config.dimensions.metric, data.columns)!;
   const formatPrimaryMetric = getMetricFormatter(config.dimensions.metric, data.columns);
-
-  let secondaryMetricColumn: DatatableColumn | undefined;
-  let formatSecondaryMetric: ReturnType<typeof getMetricFormatter>;
-  if (config.dimensions.secondaryMetric) {
-    secondaryMetricColumn = getColumnByAccessor(config.dimensions.secondaryMetric, data.columns);
-    formatSecondaryMetric = getMetricFormatter(config.dimensions.secondaryMetric, data.columns);
-  }
 
   let breakdownByColumn: DatatableColumn | undefined;
   let formatBreakdownValue: FieldFormatConvertFunction;
@@ -231,27 +200,32 @@ export const MetricVis = ({
   const metricConfigs: MetricSpec['data'][number] = (
     breakdownByColumn ? data.rows : data.rows.slice(0, 1)
   ).map((row, rowIdx) => {
-    const value: number = row[primaryMetricColumn.id] !== null ? row[primaryMetricColumn.id] : NaN;
+    const value: number | string =
+      row[primaryMetricColumn.id] !== null ? row[primaryMetricColumn.id] : NaN;
     const title = breakdownByColumn
       ? formatBreakdownValue(row[breakdownByColumn.id])
       : primaryMetricColumn.name;
     const subtitle = breakdownByColumn ? primaryMetricColumn.name : config.metric.subtitle;
-    const secondaryPrefix = config.metric.secondaryPrefix ?? secondaryMetricColumn?.name;
+
+    if (typeof value !== 'number') {
+      const nonNumericMetric: MetricWText = {
+        value: formatPrimaryMetric(value),
+        title: String(title),
+        subtitle,
+        icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
+        extra: renderSecondaryMetric(data.columns, row, config),
+        color: config.metric.color ?? defaultColor,
+      };
+      return nonNumericMetric;
+    }
+
     const baseMetric: MetricWNumber = {
       value,
       valueFormatter: formatPrimaryMetric,
-      title,
+      title: String(title),
       subtitle,
-      extra: (
-        <span>
-          {secondaryPrefix}
-          {secondaryMetricColumn
-            ? `${secondaryPrefix ? ' ' : ''}${formatSecondaryMetric!(
-                row[secondaryMetricColumn.id]
-              )}`
-            : undefined}
-        </span>
-      ),
+      icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
+      extra: renderSecondaryMetric(data.columns, row, config),
       color:
         config.metric.palette && value != null
           ? getColor(
@@ -302,62 +276,47 @@ export const MetricVis = ({
   });
 
   if (config.metric.minTiles) {
-    while (metricConfigs.length < config.metric.minTiles) metricConfigs.push(undefined);
+    while (metricConfigs.length < config.metric.minTiles) {
+      metricConfigs.push(undefined);
+    }
   }
 
-  const grid: MetricSpec['data'] = [];
   const {
     metric: { maxCols },
   } = config;
-  for (let i = 0; i < metricConfigs.length; i += maxCols) {
-    grid.push(metricConfigs.slice(i, i + maxCols));
-  }
+  const numRows = metricConfigs.length / maxCols;
 
-  const chartTheme = getThemeService().useChartsTheme();
-  const onRenderChange = useCallback<RenderChangeListener>(
-    (isRendered) => {
-      if (isRendered) {
-        renderComplete();
-      }
-    },
-    [renderComplete]
-  );
-
-  let pixelHeight;
-  let pixelWidth;
-  if (renderMode === 'edit') {
-    // In the editor, we constrain the maximum size of the tiles for aesthetic reasons
-    const maxTileSideLength = metricConfigs.flat().length > 1 ? 200 : 300;
-    pixelHeight = grid.length * maxTileSideLength;
-    pixelWidth = grid[0]?.length * maxTileSideLength;
-  }
-
-  const [scrollChildHeight, setScrollChildHeight] = useState<string>('100%');
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const scrollDimensions = useResizeObserver(scrollContainerRef.current);
-
-  const {
-    metric: { minHeight },
-  } = getThemeService().useChartsBaseTheme();
+  const minHeight = chartBaseTheme.metric.minHeight;
 
   useEffect(() => {
-    const minimumRequiredVerticalSpace = minHeight * grid.length;
+    const minimumRequiredVerticalSpace = minHeight * numRows;
     setScrollChildHeight(
       (scrollDimensions.height ?? -Infinity) > minimumRequiredVerticalSpace
         ? '100%'
         : `${minimumRequiredVerticalSpace}px`
     );
-  }, [grid.length, minHeight, scrollDimensions.height]);
+  }, [numRows, minHeight, scrollDimensions.height]);
+
+  const { theme: settingsThemeOverrides = {}, ...settingsOverrides } = getOverridesFor(
+    overrides,
+    'settings'
+  ) as Partial<SettingsProps>;
+
+  const newGrid: MetricSpec['data'] = [];
+  for (let i = 0; i < metricConfigs.length; i += maxCols) {
+    newGrid.push(metricConfigs.slice(i, i + maxCols));
+  }
+
+  grid.current = newGrid;
 
   return (
     <div
       ref={scrollContainerRef}
       css={css`
-        height: ${pixelHeight ? `${pixelHeight}px` : '100%'};
-        width: ${pixelWidth ? `${pixelWidth}px` : '100%'};
-        max-height: 100%;
-        max-width: 100%;
+        height: 100%;
+        width: 100%;
         overflow-y: auto;
+        ${useEuiScrollBar()}
       `}
     >
       <div
@@ -365,37 +324,48 @@ export const MetricVis = ({
           height: ${scrollChildHeight};
         `}
       >
-        <Chart>
+        <Chart {...getOverridesFor(overrides, 'chart')}>
           <Settings
+            onWillRender={onWillRender}
+            locale={i18n.getLocale()}
             theme={[
               {
-                background: { color: 'transparent' },
+                background: { color: defaultColor },
                 metric: {
-                  background: defaultColor,
                   barBackground: euiThemeVars.euiColorLightShade,
+                  emptyBackground: euiThemeVars.euiColorEmptyShade,
+                  blendingBackground: euiThemeVars.euiColorEmptyShade,
                 },
               },
-              chartTheme,
+              ...(Array.isArray(settingsThemeOverrides)
+                ? settingsThemeOverrides
+                : [settingsThemeOverrides]),
             ]}
+            baseTheme={chartBaseTheme}
             onRenderChange={onRenderChange}
-            onElementClick={(events) => {
-              if (!filterable) {
-                return;
-              }
-              events.forEach((event) => {
-                if (isMetricElementEvent(event)) {
-                  const colIdx = breakdownByColumn
-                    ? data.columns.findIndex((col) => col === breakdownByColumn)
-                    : data.columns.findIndex((col) => col === primaryMetricColumn);
-                  const rowLength = grid[0].length;
-                  fireEvent(
-                    buildFilterEvent(event.rowIndex * rowLength + event.columnIndex, colIdx, data)
-                  );
-                }
-              });
-            }}
+            onElementClick={
+              filterable
+                ? (events) => {
+                    const colRef = breakdownByColumn ?? primaryMetricColumn;
+                    const rowLength = grid.current[0].length;
+                    events.forEach((event) => {
+                      if (isMetricElementEvent(event)) {
+                        const colIdx = data.columns.findIndex((col) => col === colRef);
+                        fireEvent(
+                          buildFilterEvent(
+                            event.rowIndex * rowLength + event.columnIndex,
+                            colIdx,
+                            data
+                          )
+                        );
+                      }
+                    });
+                  }
+                : undefined
+            }
+            {...settingsOverrides}
           />
-          <Metric id="metric" data={grid} />
+          <Metric id="metric" data={grid.current} />
         </Chart>
       </div>
     </div>

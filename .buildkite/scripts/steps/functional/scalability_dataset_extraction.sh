@@ -4,8 +4,8 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-USER_FROM_VAULT="$(retry 5 5 vault read -field=username secret/kibana-issues/dev/apm_parser_performance)"
-PASS_FROM_VAULT="$(retry 5 5 vault read -field=password secret/kibana-issues/dev/apm_parser_performance)"
+USER_FROM_VAULT="$(vault_get apm_parser_performance username)"
+PASS_FROM_VAULT="$(vault_get apm_parser_performance password)"
 ES_SERVER_URL="https://kibana-ops-e2e-perf.es.us-central1.gcp.cloud.es.io:9243"
 BUILD_ID="${BUILDKITE_BUILD_ID}"
 GCS_BUCKET="gs://kibana-performance/scalability-tests"
@@ -46,7 +46,7 @@ cd "${OUTPUT_DIR}/.."
 gsutil -m cp -r "${BUILD_ID}" "${GCS_BUCKET}"
 cd -
 
-if [ "$BUILDKITE_PIPELINE_SLUG" == "kibana-single-user-performance" ]; then
+if [ "$BUILDKITE_PIPELINE_SLUG" == "kibana-performance-data-set-extraction" ]; then
   echo "--- Promoting '${BUILD_ID}' dataset to LATEST"
   cd "${OUTPUT_DIR}/.."
   echo "${BUILD_ID}" > latest

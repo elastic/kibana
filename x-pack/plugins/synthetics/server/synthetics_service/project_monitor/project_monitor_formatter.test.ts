@@ -5,22 +5,28 @@
  * 2.0.
  */
 import { loggerMock } from '@kbn/logging-mocks';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
+import { ProjectMonitorFormatter } from './project_monitor_formatter';
 import {
-  INSUFFICIENT_FLEET_PERMISSIONS,
-  ProjectMonitorFormatter,
-} from './project_monitor_formatter';
-import { ConfigKey, DataStream, LocationStatus } from '../../../common/runtime_types';
+  ConfigKey,
+  MonitorTypeEnum,
+  Locations,
+  LocationStatus,
+  PrivateLocation,
+} from '../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 import { times } from 'lodash';
 import { SyntheticsService } from '../synthetics_service';
-import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { SyntheticsMonitorClient } from '../synthetics_monitor/synthetics_monitor_client';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { formatSecrets } from '../utils';
 
 import * as telemetryHooks from '../../routes/telemetry/monitor_upgrade_sender';
+import { formatLocation } from '../../../common/utils/location_formatter';
+import * as locationsUtil from '../get_all_locations';
+import { mockEncryptedSO } from '../utils/mocks';
+import { SyntheticsServerSetup } from '../../types';
 
 const testMonitors = [
   {
@@ -83,9 +89,8 @@ const privateLocations = times(1).map((n) => {
     },
     isServiceManaged: false,
     agentPolicyId: `loc-${n}`,
-    concurrentMonitors: 1,
   };
-});
+}) as PrivateLocation[];
 
 describe('ProjectMonitorFormatter', () => {
   const mockEsClient = {
@@ -97,7 +102,7 @@ describe('ProjectMonitorFormatter', () => {
 
   const soClient = savedObjectsClientMock.create();
 
-  const serverMock: UptimeServerSetup = {
+  const serverMock: SyntheticsServerSetup = {
     logger,
     uptimeEsClient: mockEsClient,
     authSavedObjectsClient: soClient,
@@ -113,17 +118,21 @@ describe('ProjectMonitorFormatter', () => {
         getSpaceId: jest.fn().mockReturnValue('test-space'),
       },
     },
-  } as unknown as UptimeServerSetup;
+    encryptedSavedObjects: mockEncryptedSO(),
+    coreStart: {
+      savedObjects: savedObjectsServiceMock.createStartContract(),
+    },
+  } as unknown as SyntheticsServerSetup;
 
   const syntheticsService = new SyntheticsService(serverMock);
 
-  syntheticsService.addConfig = jest.fn();
+  syntheticsService.addConfigs = jest.fn();
   syntheticsService.editConfig = jest.fn();
   syntheticsService.deleteConfigs = jest.fn();
 
   const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createStart().getClient();
 
-  const locations = times(3).map((n) => {
+  const publicLocations = times(3).map((n) => {
     return {
       id: `loc-${n}`,
       label: `Location ${n}`,
@@ -135,22 +144,33 @@ describe('ProjectMonitorFormatter', () => {
       isServiceManaged: true,
       status: LocationStatus.GA,
     };
-  });
+  }) as Locations;
 
   const monitorClient = new SyntheticsMonitorClient(syntheticsService, serverMock);
 
-  it('should return errors', async () => {
+  const routeContext = {
+    savedObjectsClient: soClient,
+    server: serverMock,
+    syntheticsMonitorClient: monitorClient,
+    request: kibanaRequest,
+  } as any;
+
+  jest.spyOn(locationsUtil, 'getAllLocations').mockImplementation(
+    async () =>
+      ({
+        publicLocations,
+        privateLocations,
+      } as any)
+  );
+
+  it('should return validation errors errors', async () => {
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
-      spaceId: 'default-space',
-      locations,
-      privateLocations,
+      // @ts-ignore
+      spaceId: 5,
+      routeContext,
       encryptedSavedObjectsClient,
-      savedObjectsClient: soClient,
-      monitors: testMonitors,
-      server: serverMock,
-      syntheticsMonitorClient: monitorClient,
-      request: kibanaRequest,
+      monitors: [testMonitors[0]],
     });
 
     pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
@@ -165,65 +185,9 @@ describe('ProjectMonitorFormatter', () => {
       createdMonitors: [],
       failedMonitors: [
         {
-          details: "Cannot read properties of undefined (reading 'authz')",
+          details: 'spaceId.replace is not a function',
           id: 'check if title is present 10 0',
           payload: testMonitors[0],
-          reason: 'Failed to create or update monitor',
-        },
-        {
-          details: "Cannot read properties of undefined (reading 'authz')",
-          id: 'check if title is present 10 1',
-          payload: testMonitors[1],
-          reason: 'Failed to create or update monitor',
-        },
-      ],
-      updatedMonitors: [],
-    });
-  });
-
-  it('throws fleet permission error', async () => {
-    serverMock.fleet = {
-      authz: {
-        fromRequest: jest
-          .fn()
-          .mockResolvedValue({ integrations: { writeIntegrationPolicies: false } }),
-      },
-    } as any;
-
-    const pushMonitorFormatter = new ProjectMonitorFormatter({
-      projectId: 'test-project',
-      spaceId: 'default-space',
-      locations,
-      privateLocations,
-      encryptedSavedObjectsClient,
-      savedObjectsClient: soClient,
-      monitors: testMonitors,
-      server: serverMock,
-      syntheticsMonitorClient: monitorClient,
-      request: kibanaRequest,
-    });
-
-    pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
-
-    await pushMonitorFormatter.configureAllProjectMonitors();
-
-    expect({
-      createdMonitors: pushMonitorFormatter.createdMonitors,
-      updatedMonitors: pushMonitorFormatter.updatedMonitors,
-      failedMonitors: pushMonitorFormatter.failedMonitors,
-    }).toStrictEqual({
-      createdMonitors: [],
-      failedMonitors: [
-        {
-          details: INSUFFICIENT_FLEET_PERMISSIONS,
-          id: 'check if title is present 10 0',
-          payload: testMonitors[0],
-          reason: 'Failed to create or update monitor',
-        },
-        {
-          details: INSUFFICIENT_FLEET_PERMISSIONS,
-          id: 'check if title is present 10 1',
-          payload: testMonitors[1],
           reason: 'Failed to create or update monitor',
         },
       ],
@@ -232,25 +196,18 @@ describe('ProjectMonitorFormatter', () => {
   });
 
   it('catches errors from bulk edit method', async () => {
-    serverMock.fleet = {
-      authz: {
-        fromRequest: jest
-          .fn()
-          .mockResolvedValue({ integrations: { writeIntegrationPolicies: true } }),
-      },
-    } as any;
+    soClient.bulkCreate.mockImplementation(async () => {
+      return {
+        saved_objects: [],
+      };
+    });
 
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
       spaceId: 'default-space',
-      locations,
-      privateLocations,
       encryptedSavedObjectsClient,
-      savedObjectsClient: soClient,
       monitors: testMonitors,
-      server: serverMock,
-      syntheticsMonitorClient: monitorClient,
-      request: kibanaRequest,
+      routeContext,
     });
 
     pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
@@ -266,7 +223,7 @@ describe('ProjectMonitorFormatter', () => {
       updatedMonitors: [],
       failedMonitors: [
         {
-          details: "Cannot read properties of undefined (reading 'buildPackagePolicyFromPackage')",
+          details: "Cannot read properties of undefined (reading 'packagePolicyService')",
           payload: payloadData,
           reason: 'Failed to create 2 monitors',
         },
@@ -275,27 +232,14 @@ describe('ProjectMonitorFormatter', () => {
   });
 
   it('configures project monitors when there are errors', async () => {
-    serverMock.fleet = {
-      authz: {
-        fromRequest: jest
-          .fn()
-          .mockResolvedValue({ integrations: { writeIntegrationPolicies: true } }),
-      },
-    } as any;
-
     soClient.bulkCreate = jest.fn().mockResolvedValue({ saved_objects: [] });
 
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
       spaceId: 'default-space',
-      locations,
-      privateLocations,
       encryptedSavedObjectsClient,
-      savedObjectsClient: soClient,
       monitors: testMonitors,
-      server: serverMock,
-      syntheticsMonitorClient: monitorClient,
-      request: kibanaRequest,
+      routeContext,
     });
 
     pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
@@ -311,7 +255,7 @@ describe('ProjectMonitorFormatter', () => {
       updatedMonitors: [],
       failedMonitors: [
         {
-          details: "Cannot read properties of undefined (reading 'buildPackagePolicyFromPackage')",
+          details: "Cannot read properties of undefined (reading 'packagePolicyService')",
           payload: payloadData,
           reason: 'Failed to create 2 monitors',
         },
@@ -320,28 +264,14 @@ describe('ProjectMonitorFormatter', () => {
   });
 
   it('shows errors thrown by fleet api', async () => {
-    serverMock.fleet = {
-      authz: {
-        fromRequest: jest
-          .fn()
-          .mockResolvedValue({ integrations: { writeIntegrationPolicies: true } }),
-      },
-      packagePolicyService: {},
-    } as any;
-
     soClient.bulkCreate = jest.fn().mockResolvedValue({ saved_objects: soResult });
 
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
       spaceId: 'default-space',
-      locations,
-      privateLocations,
       encryptedSavedObjectsClient,
-      savedObjectsClient: soClient,
       monitors: testMonitors,
-      server: serverMock,
-      syntheticsMonitorClient: monitorClient,
-      request: kibanaRequest,
+      routeContext,
     });
 
     pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
@@ -357,8 +287,7 @@ describe('ProjectMonitorFormatter', () => {
       updatedMonitors: [],
       failedMonitors: [
         {
-          details:
-            'this.server.fleet.packagePolicyService.buildPackagePolicyFromPackage is not a function',
+          details: "Cannot read properties of undefined (reading 'packagePolicyService')",
           reason: 'Failed to create 2 monitors',
           payload: payloadData,
         },
@@ -367,17 +296,9 @@ describe('ProjectMonitorFormatter', () => {
   });
 
   it('creates project monitors when no errors', async () => {
-    serverMock.fleet = {
-      authz: {
-        fromRequest: jest
-          .fn()
-          .mockResolvedValue({ integrations: { writeIntegrationPolicies: true } }),
-      },
-    } as any;
-
     soClient.bulkCreate = jest.fn().mockResolvedValue({ saved_objects: soResult });
 
-    monitorClient.addMonitors = jest.fn().mockReturnValue({});
+    monitorClient.addMonitors = jest.fn().mockReturnValue([]);
 
     const telemetrySpy = jest
       .spyOn(telemetryHooks, 'sendTelemetryEvents')
@@ -386,14 +307,9 @@ describe('ProjectMonitorFormatter', () => {
     const pushMonitorFormatter = new ProjectMonitorFormatter({
       projectId: 'test-project',
       spaceId: 'default-space',
-      locations,
-      privateLocations,
       encryptedSavedObjectsClient,
-      savedObjectsClient: soClient,
       monitors: testMonitors,
-      server: serverMock,
-      syntheticsMonitorClient: monitorClient,
-      request: kibanaRequest,
+      routeContext,
     });
 
     pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
@@ -437,9 +353,8 @@ describe('ProjectMonitorFormatter', () => {
 
 const payloadData = [
   {
-    ...DEFAULT_FIELDS[DataStream.BROWSER],
+    ...DEFAULT_FIELDS[MonitorTypeEnum.BROWSER],
     __ui: {
-      is_zip_url_tls_enabled: false,
       script_source: {
         file_name: '',
         is_generated_script: false,
@@ -453,7 +368,7 @@ const payloadData = [
     form_monitor_type: 'multistep',
     ignore_https_errors: false,
     journey_id: 'check if title is present 10 0',
-    locations: privateLocations,
+    locations: privateLocations.map((l) => formatLocation(l)),
     name: 'check if title is present 10 0',
     namespace: 'default_space',
     origin: 'project',
@@ -472,12 +387,6 @@ const payloadData = [
     'source.inline.script': '',
     'source.project.content':
       'UEsDBBQACAAIAAAAIQAAAAAAAAAAAAAAAAAQAAAAYmFzaWMuam91cm5leS50c2WQQU7DQAxF9znFV8QiUUOmXcCCUMQl2NdMnWbKJDMaO6Ilyt0JASQkNv9Z1teTZWNAIqwP5kU4iZGOug863u7uDXsSddbIddCOl0kMX6iPnsVoOAYxryTO1ucwpoGvtUrm+hiSYsLProIoxwp8iWwVM9oUeuTP/9V5k7UhofCscNhj2yx4xN2CzabElOHXWRxsx/YNroU69QwniImFB8Vui5vJzYcKxYRIJ66WTNQL5hL7p1WD9aYi9zQOtgPFGPNqecJ1sCj+tAB6J6erpj4FDcW3qh6TL5u1Mq/8yjn7BFBLBwhGDIWc4QAAAEkBAABQSwECLQMUAAgACAAAACEARgyFnOEAAABJAQAAEAAAAAAAAAAAACAApIEAAAAAYmFzaWMuam91cm5leS50c1BLBQYAAAAAAQABAD4AAAAfAQAAAAA=',
-    'source.zip_url.folder': '',
-    'source.zip_url.password': '',
-    'source.zip_url.proxy_url': '',
-    'source.zip_url.url': '',
-    'source.zip_url.ssl.certificate': undefined,
-    'source.zip_url.username': '',
     'ssl.certificate': '',
     'ssl.certificate_authorities': '',
     'ssl.key': '',
@@ -486,11 +395,6 @@ const payloadData = [
     'ssl.verification_mode': 'full',
     synthetics_args: [],
     tags: [],
-    'throttling.config': '5d/3u/20l',
-    'throttling.download_speed': '5',
-    'throttling.is_enabled': true,
-    'throttling.latency': '20',
-    'throttling.upload_speed': '3',
     timeout: null,
     type: 'browser',
     'url.port': null,
@@ -499,9 +403,8 @@ const payloadData = [
     hash: 'lleklrkelkj',
   },
   {
-    ...DEFAULT_FIELDS[DataStream.BROWSER],
+    ...DEFAULT_FIELDS[MonitorTypeEnum.BROWSER],
     __ui: {
-      is_zip_url_tls_enabled: false,
       script_source: {
         file_name: '',
         is_generated_script: false,
@@ -515,7 +418,7 @@ const payloadData = [
     form_monitor_type: 'multistep',
     ignore_https_errors: false,
     journey_id: 'check if title is present 10 1',
-    locations: privateLocations,
+    locations: privateLocations.map((l) => formatLocation(l)),
     name: 'check if title is present 10 1',
     namespace: 'default_space',
     origin: 'project',
@@ -534,11 +437,6 @@ const payloadData = [
     'source.inline.script': '',
     'source.project.content':
       'UEsDBBQACAAIAAAAIQAAAAAAAAAAAAAAAAAQAAAAYmFzaWMuam91cm5leS50c2WQQU7DQAxF9znFV8QiUUOmXcCCUMQl2NdMnWbKJDMaO6Ilyt0JASQkNv9Z1teTZWNAIqwP5kU4iZGOug863u7uDXsSddbIddCOl0kMX6iPnsVoOAYxryTO1ucwpoGvtUrm+hiSYsLProIoxwp8iWwVM9oUeuTP/9V5k7UhofCscNhj2yx4xN2CzabElOHXWRxsx/YNroU69QwniImFB8Vui5vJzYcKxYRIJ66WTNQL5hL7p1WD9aYi9zQOtgPFGPNqecJ1sCj+tAB6J6erpj4FDcW3qh6TL5u1Mq/8yjn7BFBLBwhGDIWc4QAAAEkBAABQSwECLQMUAAgACAAAACEARgyFnOEAAABJAQAAEAAAAAAAAAAAACAApIEAAAAAYmFzaWMuam91cm5leS50c1BLBQYAAAAAAQABAD4AAAAfAQAAAAA=',
-    'source.zip_url.folder': '',
-    'source.zip_url.password': '',
-    'source.zip_url.proxy_url': '',
-    'source.zip_url.url': '',
-    'source.zip_url.username': '',
     'ssl.certificate': '',
     'ssl.certificate_authorities': '',
     'ssl.key': '',
@@ -547,11 +445,6 @@ const payloadData = [
     'ssl.verification_mode': 'full',
     synthetics_args: [],
     tags: [],
-    'throttling.config': '5d/3u/20l',
-    'throttling.download_speed': '5',
-    'throttling.is_enabled': true,
-    'throttling.latency': '20',
-    'throttling.upload_speed': '3',
     timeout: null,
     type: 'browser',
     'url.port': null,

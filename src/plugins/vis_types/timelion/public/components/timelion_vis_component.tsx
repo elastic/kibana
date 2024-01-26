@@ -17,6 +17,7 @@ import {
   LegendPositionConfig,
   LayoutDirection,
   Placement,
+  Tooltip,
 } from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
 import { RangeFilterParams } from '@kbn/es-query';
@@ -25,6 +26,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 
 import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { AreaSeriesComponent, BarSeriesComponent } from './series';
 
 import {
@@ -111,8 +113,6 @@ export const TimelionVisComponent = ({
   const chartRef = useRef<Chart>(null);
   const chart = seriesList.list;
   const chartsService = getCharts();
-
-  const chartTheme = chartsService.theme.useChartsTheme();
   const chartBaseTheme = chartsService.theme.useChartsBaseTheme();
 
   const handleCursorUpdate = useActiveCursor(chartsService.activeCursor, chartRef, {
@@ -198,6 +198,11 @@ export const TimelionVisComponent = ({
         </EuiTitle>
       )}
       <Chart ref={chartRef} renderer="canvas" size={{ width: '100%' }}>
+        <Tooltip
+          snap={true}
+          headerFormatter={({ value }) => tickFormat(value)}
+          type={TooltipType.VerticalCursor}
+        />
         <Settings
           debugState={window._echDebugStateFlag ?? false}
           onBrushEnd={brushEndListener}
@@ -209,15 +214,10 @@ export const TimelionVisComponent = ({
           externalPointerEvents={{
             tooltip: { visible: syncTooltips, placement: Placement.Right },
           }}
-          theme={chartTheme}
           baseTheme={chartBaseTheme}
-          tooltip={{
-            snap: true,
-            headerFormatter: ({ value }) => tickFormat(value),
-            type: TooltipType.VerticalCursor,
-          }}
           ariaLabel={ariaLabel}
           ariaUseDefaultSummary={!ariaLabel}
+          locale={i18n.getLocale()}
         />
 
         <Axis

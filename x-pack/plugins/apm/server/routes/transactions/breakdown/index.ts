@@ -16,13 +16,24 @@ import {
   SPAN_SELF_TIME_SUM,
   TRANSACTION_TYPE,
   TRANSACTION_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getMetricsDateHistogramParams } from '../../../lib/helpers/metrics';
 import { MAX_KPIS } from './constants';
 import { getVizColorForIndex } from '../../../../common/viz_colors';
 import { APMConfig } from '../../..';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+
+export interface TransactionBreakdownResponse {
+  timeseries: Array<{
+    title: string;
+    color: string;
+    type: string;
+    data: Array<{ x: number; y: number | null }>;
+    hideLegend: boolean;
+    legendValue: any;
+  }>;
+}
 
 export async function getTransactionBreakdown({
   environment,
@@ -44,7 +55,7 @@ export async function getTransactionBreakdown({
   transactionType: string;
   start: number;
   end: number;
-}) {
+}): Promise<TransactionBreakdownResponse> {
   const subAggs = {
     sum_all_self_times: {
       sum: {

@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingContent,
+  EuiSkeletonText,
+  EuiSkeletonRectangle,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -22,39 +23,72 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { useParams } from 'react-router-dom';
+import { getTestRunDetailLink } from '../../common/links/test_details_link';
+import { useSelectedLocation } from '../hooks/use_selected_location';
+import { getErrorDetailsUrl } from '../monitor_errors/errors_list';
 import {
   ConfigKey,
-  DataStream,
+  MonitorTypeEnum,
   EncryptedSyntheticsSavedMonitor,
   Ping,
+  SyntheticsJourneyApiResponse,
 } from '../../../../../../common/runtime_types';
-import { formatTestRunAt } from '../../../utils/monitor_test_result/test_time_formats';
 
-import { useSyntheticsSettingsContext } from '../../../contexts';
+import { useSyntheticsRefreshContext, useSyntheticsSettingsContext } from '../../../contexts';
 import { BrowserStepsList } from '../../common/monitor_test_result/browser_steps_list';
 import { SinglePingResult } from '../../common/monitor_test_result/single_ping_result';
 import { parseBadgeStatus, StatusBadge } from '../../common/monitor_test_result/status_badge';
 
-import { useKibanaDateFormat } from '../../../../../hooks/use_kibana_date_format';
 import { useJourneySteps } from '../hooks/use_journey_steps';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import { useMonitorLatestPing } from '../hooks/use_monitor_latest_ping';
+import { useDateFormat } from '../../../../../hooks/use_date_format';
 
 export const LastTestRun = () => {
-  const { euiTheme } = useEuiTheme();
   const { latestPing, loading: pingsLoading } = useMonitorLatestPing();
-  const { monitor } = useSelectedMonitor();
+  const { lastRefresh } = useSyntheticsRefreshContext();
 
   const { data: stepsData, loading: stepsLoading } = useJourneySteps(
-    latestPing?.monitor?.check_group
+    latestPing?.monitor?.check_group,
+    lastRefresh
   );
 
   const loading = stepsLoading || pingsLoading;
 
   return (
+    <LastTestRunComponent
+      stepsData={stepsData}
+      latestPing={latestPing}
+      loading={loading}
+      stepsLoading={stepsLoading}
+      isErrorDetails={false}
+    />
+  );
+};
+
+export const LastTestRunComponent = ({
+  latestPing,
+  loading,
+  stepsData,
+  stepsLoading,
+  isErrorDetails = false,
+}: {
+  stepsLoading: boolean;
+  latestPing?: Ping;
+  loading: boolean;
+  stepsData?: SyntheticsJourneyApiResponse;
+  isErrorDetails?: boolean;
+}) => {
+  const { monitor } = useSelectedMonitor();
+  const { euiTheme } = useEuiTheme();
+
+  const selectedLocation = useSelectedLocation();
+  const { basePath } = useSyntheticsSettingsContext();
+
+  return (
     <EuiPanel hasShadow={false} hasBorder css={{ minHeight: 356 }}>
       <PanelHeader monitor={monitor} latestPing={latestPing} loading={loading} />
-      {!loading && latestPing?.error ? (
+      {!(loading && !latestPing) && latestPing?.error ? (
         <EuiCallOut
           data-test-subj="monitorTestRunErrorCallout"
           style={{
@@ -65,23 +99,35 @@ export const LastTestRun = () => {
           title={latestPing?.error.message}
           size="s"
           color="danger"
-          iconType="alert"
+          iconType="warning"
         >
-          <EuiButton data-test-subj="monitorTestRunViewErrorDetails" color="danger">
-            {i18n.translate('xpack.synthetics.monitorDetails.summary.viewErrorDetails', {
-              defaultMessage: 'View error details',
-            })}
-          </EuiButton>
+          {isErrorDetails ? null : (
+            <EuiButton
+              data-test-subj="monitorTestRunViewErrorDetails"
+              color="danger"
+              href={getErrorDetailsUrl({
+                basePath,
+                configId: monitor?.[ConfigKey.CONFIG_ID]!,
+                locationId: selectedLocation!.id,
+                stateId: latestPing.state?.id!,
+              })}
+            >
+              {i18n.translate('xpack.synthetics.monitorDetails.summary.viewErrorDetails', {
+                defaultMessage: 'View error details',
+              })}
+            </EuiButton>
+          )}
         </EuiCallOut>
       ) : null}
 
       <EuiSpacer size="m" />
 
-      {monitor?.type === DataStream.BROWSER ? (
+      {monitor?.type === MonitorTypeEnum.BROWSER ? (
         <BrowserStepsList
           steps={stepsData?.steps ?? []}
           loading={stepsLoading}
           showStepNumber={true}
+          showExpand={isErrorDetails}
         />
       ) : (
         <SinglePingResult ping={latestPing} loading={loading} />
@@ -103,16 +149,14 @@ const PanelHeader = ({
 
   const { basePath } = useSyntheticsSettingsContext();
 
+  const selectedLocation = useSelectedLocation();
+
   const { monitorId } = useParams<{ monitorId: string }>();
 
-  const format = useKibanaDateFormat();
+  const formatter = useDateFormat();
+  const lastRunTimestamp = formatter(latestPing?.timestamp);
 
-  const lastRunTimestamp = useMemo(
-    () => (latestPing?.timestamp ? formatTestRunAt(latestPing?.timestamp, format) : ''),
-    [latestPing?.timestamp, format]
-  );
-
-  const isBrowserMonitor = monitor?.[ConfigKey.MONITOR_TYPE] === DataStream.BROWSER;
+  const isBrowserMonitor = monitor?.[ConfigKey.MONITOR_TYPE] === MonitorTypeEnum.BROWSER;
 
   const TitleNode = (
     <EuiTitle size="xs">
@@ -120,18 +164,18 @@ const PanelHeader = ({
     </EuiTitle>
   );
 
-  if (loading) {
+  if (loading && !latestPing) {
     return (
       <>
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>{TitleNode}</EuiFlexItem>
           <EuiFlexItem>
-            <EuiLoadingContent css={{ width: 52 }} lines={1} />
+            <EuiSkeletonRectangle width="52px" height="20px" />
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
-            <EuiLoadingContent lines={1} />
+            <EuiSkeletonText lines={1} />
           </EuiFlexItem>
-          <EuiFlexItem>{isBrowserMonitor ? <EuiLoadingContent lines={1} /> : null}</EuiFlexItem>
+          <EuiFlexItem>{isBrowserMonitor ? <EuiSkeletonText lines={1} /> : null}</EuiFlexItem>
         </EuiFlexGroup>
       </>
     );
@@ -143,27 +187,32 @@ const PanelHeader = ({
 
   return (
     <>
-      <EuiFlexGroup alignItems="center" gutterSize="s">
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
         <EuiFlexItem grow={false}>{TitleNode}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} css={{ flexBasis: 'fit-content' }}>
           <StatusBadge
             status={parseBadgeStatus(latestPing?.summary?.down! > 0 ? 'fail' : 'success')}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
-          <EuiText size="xs" color={euiTheme.colors.darkShade}>
+          <EuiText css={{ whiteSpace: 'nowrap' }} size="xs" color={euiTheme.colors.darkShade}>
             {lastRunTimestamp}
           </EuiText>
         </EuiFlexItem>
 
         {isBrowserMonitor ? (
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem css={{ marginLeft: 'auto' }} grow={false}>
             <EuiButtonEmpty
               data-test-subj="monitorSummaryViewLastTestRun"
               size="xs"
               iconType="inspect"
               iconSide="left"
-              href={`${basePath}/app/synthetics/monitor/${monitorId}/test-run/${latestPing?.monitor.check_group}`}
+              href={getTestRunDetailLink({
+                basePath,
+                monitorId,
+                checkGroup: latestPing?.monitor.check_group,
+                locationId: selectedLocation?.id,
+              })}
             >
               {i18n.translate('xpack.synthetics.monitorDetails.summary.viewTestRun', {
                 defaultMessage: 'View test run',

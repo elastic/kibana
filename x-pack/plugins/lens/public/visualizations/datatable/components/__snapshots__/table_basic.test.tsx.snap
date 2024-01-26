@@ -125,7 +125,7 @@ exports[`DatatableComponent it renders actions column when there are row actions
                 "label": "Sort descending",
               },
             },
-            "cellActions": undefined,
+            "cellActions": Array [],
             "display": <div
               css={
                 Object {
@@ -141,6 +141,8 @@ exports[`DatatableComponent it renders actions column when there are row actions
             </div>,
             "displayAsText": "a",
             "id": "a",
+            "schema": "a",
+            "visibleCellActions": 5,
           },
           Object {
             "actions": Object {
@@ -174,7 +176,7 @@ exports[`DatatableComponent it renders actions column when there are row actions
                 "label": "Sort descending",
               },
             },
-            "cellActions": undefined,
+            "cellActions": Array [],
             "display": <div
               css={
                 Object {
@@ -190,6 +192,8 @@ exports[`DatatableComponent it renders actions column when there are row actions
             </div>,
             "displayAsText": "b",
             "id": "b",
+            "schema": "b",
+            "visibleCellActions": 5,
           },
           Object {
             "actions": Object {
@@ -223,7 +227,7 @@ exports[`DatatableComponent it renders actions column when there are row actions
                 "label": "Sort descending",
               },
             },
-            "cellActions": undefined,
+            "cellActions": Array [],
             "display": <div
               css={
                 Object {
@@ -239,6 +243,8 @@ exports[`DatatableComponent it renders actions column when there are row actions
             </div>,
             "displayAsText": "c",
             "id": "c",
+            "schema": "c",
+            "visibleCellActions": 5,
           },
         ]
       }
@@ -249,6 +255,11 @@ exports[`DatatableComponent it renders actions column when there are row actions
           "header": "underline",
         }
       }
+      inMemory={
+        Object {
+          "level": "sorting",
+        }
+      }
       onColumnResize={[Function]}
       renderCellValue={[Function]}
       rowCount={1}
@@ -256,6 +267,37 @@ exports[`DatatableComponent it renders actions column when there are row actions
         Object {
           "defaultHeight": undefined,
         }
+      }
+      schemaDetectors={
+        Array [
+          Object {
+            "comparator": [Function],
+            "defaultSortDirection": undefined,
+            "detector": [Function],
+            "icon": "",
+            "sortTextAsc": "Sort Ascending",
+            "sortTextDesc": "Sort Descending",
+            "type": "a",
+          },
+          Object {
+            "comparator": [Function],
+            "defaultSortDirection": undefined,
+            "detector": [Function],
+            "icon": "",
+            "sortTextAsc": "Sort Ascending",
+            "sortTextDesc": "Sort Descending",
+            "type": "b",
+          },
+          Object {
+            "comparator": [Function],
+            "defaultSortDirection": undefined,
+            "detector": [Function],
+            "icon": "",
+            "sortTextAsc": "Sort Ascending",
+            "sortTextDesc": "Sort Descending",
+            "type": "c",
+          },
+        ]
       }
       sorting={
         Object {
@@ -400,7 +442,7 @@ exports[`DatatableComponent it renders custom row height if set to another value
                 "label": "Sort descending",
               },
             },
-            "cellActions": undefined,
+            "cellActions": Array [],
             "display": <div
               css={
                 Object {
@@ -416,6 +458,8 @@ exports[`DatatableComponent it renders custom row height if set to another value
             </div>,
             "displayAsText": "a",
             "id": "a",
+            "schema": "a",
+            "visibleCellActions": 5,
           },
           Object {
             "actions": Object {
@@ -449,7 +493,7 @@ exports[`DatatableComponent it renders custom row height if set to another value
                 "label": "Sort descending",
               },
             },
-            "cellActions": undefined,
+            "cellActions": Array [],
             "display": <div
               css={
                 Object {
@@ -465,6 +509,8 @@ exports[`DatatableComponent it renders custom row height if set to another value
             </div>,
             "displayAsText": "b",
             "id": "b",
+            "schema": "b",
+            "visibleCellActions": 5,
           },
           Object {
             "actions": Object {
@@ -498,7 +544,7 @@ exports[`DatatableComponent it renders custom row height if set to another value
                 "label": "Sort descending",
               },
             },
-            "cellActions": undefined,
+            "cellActions": Array [],
             "display": <div
               css={
                 Object {
@@ -514,6 +560,8 @@ exports[`DatatableComponent it renders custom row height if set to another value
             </div>,
             "displayAsText": "c",
             "id": "c",
+            "schema": "c",
+            "visibleCellActions": 5,
           },
         ]
       }
@@ -522,6 +570,11 @@ exports[`DatatableComponent it renders custom row height if set to another value
         Object {
           "border": "horizontal",
           "header": "underline",
+        }
+      }
+      inMemory={
+        Object {
+          "level": "sorting",
         }
       }
       onColumnResize={[Function]}
@@ -533,6 +586,37 @@ exports[`DatatableComponent it renders custom row height if set to another value
             "lineCount": 5,
           },
         }
+      }
+      schemaDetectors={
+        Array [
+          Object {
+            "comparator": [Function],
+            "defaultSortDirection": undefined,
+            "detector": [Function],
+            "icon": "",
+            "sortTextAsc": "Sort Ascending",
+            "sortTextDesc": "Sort Descending",
+            "type": "a",
+          },
+          Object {
+            "comparator": [Function],
+            "defaultSortDirection": undefined,
+            "detector": [Function],
+            "icon": "",
+            "sortTextAsc": "Sort Ascending",
+            "sortTextDesc": "Sort Descending",
+            "type": "b",
+          },
+          Object {
+            "comparator": [Function],
+            "defaultSortDirection": undefined,
+            "detector": [Function],
+            "icon": "",
+            "sortTextAsc": "Sort Ascending",
+            "sortTextDesc": "Sort Descending",
+            "type": "c",
+          },
+        ]
       }
       sorting={
         Object {
@@ -668,7 +752,7 @@ exports[`DatatableComponent it renders the title and value 1`] = `
                 "label": "Sort descending",
               },
             },
-            "cellActions": undefined,
+            "cellActions": Array [],
             "display": <div
               css={
                 Object {
@@ -684,6 +768,8 @@ exports[`DatatableComponent it renders the title and value 1`] = `
             </div>,
             "displayAsText": "a",
             "id": "a",
+            "schema": "a",
+            "visibleCellActions": 5,
           },
           Object {
             "actions": Object {
@@ -717,7 +803,7 @@ exports[`DatatableComponent it renders the title and value 1`] = `
                 "label": "Sort descending",
               },
             },
-            "cellActions": undefined,
+            "cellActions": Array [],
             "display": <div
               css={
                 Object {
@@ -733,6 +819,8 @@ exports[`DatatableComponent it renders the title and value 1`] = `
             </div>,
             "displayAsText": "b",
             "id": "b",
+            "schema": "b",
+            "visibleCellActions": 5,
           },
           Object {
             "actions": Object {
@@ -766,7 +854,7 @@ exports[`DatatableComponent it renders the title and value 1`] = `
                 "label": "Sort descending",
               },
             },
-            "cellActions": undefined,
+            "cellActions": Array [],
             "display": <div
               css={
                 Object {
@@ -782,6 +870,8 @@ exports[`DatatableComponent it renders the title and value 1`] = `
             </div>,
             "displayAsText": "c",
             "id": "c",
+            "schema": "c",
+            "visibleCellActions": 5,
           },
         ]
       }
@@ -792,6 +882,11 @@ exports[`DatatableComponent it renders the title and value 1`] = `
           "header": "underline",
         }
       }
+      inMemory={
+        Object {
+          "level": "sorting",
+        }
+      }
       onColumnResize={[Function]}
       renderCellValue={[Function]}
       rowCount={1}
@@ -799,6 +894,37 @@ exports[`DatatableComponent it renders the title and value 1`] = `
         Object {
           "defaultHeight": undefined,
         }
+      }
+      schemaDetectors={
+        Array [
+          Object {
+            "comparator": [Function],
+            "defaultSortDirection": undefined,
+            "detector": [Function],
+            "icon": "",
+            "sortTextAsc": "Sort Ascending",
+            "sortTextDesc": "Sort Descending",
+            "type": "a",
+          },
+          Object {
+            "comparator": [Function],
+            "defaultSortDirection": undefined,
+            "detector": [Function],
+            "icon": "",
+            "sortTextAsc": "Sort Ascending",
+            "sortTextDesc": "Sort Descending",
+            "type": "b",
+          },
+          Object {
+            "comparator": [Function],
+            "defaultSortDirection": undefined,
+            "detector": [Function],
+            "icon": "",
+            "sortTextAsc": "Sort Ascending",
+            "sortTextDesc": "Sort Descending",
+            "type": "c",
+          },
+        ]
       }
       sorting={
         Object {
@@ -938,7 +1064,7 @@ exports[`DatatableComponent it should render hide, reset, and sort actions on he
                 "label": "Sort descending",
               },
             },
-            "cellActions": undefined,
+            "cellActions": Array [],
             "display": <div
               css={
                 Object {
@@ -954,6 +1080,8 @@ exports[`DatatableComponent it should render hide, reset, and sort actions on he
             </div>,
             "displayAsText": "a",
             "id": "a",
+            "schema": "a",
+            "visibleCellActions": 5,
           },
           Object {
             "actions": Object {
@@ -987,7 +1115,7 @@ exports[`DatatableComponent it should render hide, reset, and sort actions on he
                 "label": "Sort descending",
               },
             },
-            "cellActions": undefined,
+            "cellActions": Array [],
             "display": <div
               css={
                 Object {
@@ -1003,6 +1131,8 @@ exports[`DatatableComponent it should render hide, reset, and sort actions on he
             </div>,
             "displayAsText": "b",
             "id": "b",
+            "schema": "b",
+            "visibleCellActions": 5,
           },
           Object {
             "actions": Object {
@@ -1036,7 +1166,7 @@ exports[`DatatableComponent it should render hide, reset, and sort actions on he
                 "label": "Sort descending",
               },
             },
-            "cellActions": undefined,
+            "cellActions": Array [],
             "display": <div
               css={
                 Object {
@@ -1052,6 +1182,8 @@ exports[`DatatableComponent it should render hide, reset, and sort actions on he
             </div>,
             "displayAsText": "c",
             "id": "c",
+            "schema": "c",
+            "visibleCellActions": 5,
           },
         ]
       }
@@ -1062,6 +1194,11 @@ exports[`DatatableComponent it should render hide, reset, and sort actions on he
           "header": "underline",
         }
       }
+      inMemory={
+        Object {
+          "level": "sorting",
+        }
+      }
       onColumnResize={[Function]}
       renderCellValue={[Function]}
       rowCount={1}
@@ -1069,6 +1206,37 @@ exports[`DatatableComponent it should render hide, reset, and sort actions on he
         Object {
           "defaultHeight": undefined,
         }
+      }
+      schemaDetectors={
+        Array [
+          Object {
+            "comparator": [Function],
+            "defaultSortDirection": undefined,
+            "detector": [Function],
+            "icon": "",
+            "sortTextAsc": "Sort Ascending",
+            "sortTextDesc": "Sort Descending",
+            "type": "a",
+          },
+          Object {
+            "comparator": [Function],
+            "defaultSortDirection": undefined,
+            "detector": [Function],
+            "icon": "",
+            "sortTextAsc": "Sort Ascending",
+            "sortTextDesc": "Sort Descending",
+            "type": "b",
+          },
+          Object {
+            "comparator": [Function],
+            "defaultSortDirection": undefined,
+            "detector": [Function],
+            "icon": "",
+            "sortTextAsc": "Sort Ascending",
+            "sortTextDesc": "Sort Descending",
+            "type": "c",
+          },
+        ]
       }
       sorting={
         Object {

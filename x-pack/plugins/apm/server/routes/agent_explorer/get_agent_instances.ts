@@ -18,11 +18,18 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 const MAX_NUMBER_OF_SERVICE_NODES = 500;
+
+export type AgentExplorerAgentInstancesResponse = Array<{
+  serviceNode: string;
+  environments: string[];
+  agentVersion: string;
+  lastReport: string;
+}>;
 
 export async function getAgentInstances({
   environment,
@@ -38,7 +45,7 @@ export async function getAgentInstances({
   apmEventClient: APMEventClient;
   start: number;
   end: number;
-}) {
+}): Promise<AgentExplorerAgentInstancesResponse> {
   const response = await apmEventClient.search('get_agent_instances', {
     apm: {
       events: [ProcessorEvent.metric],

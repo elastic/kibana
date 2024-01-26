@@ -33,6 +33,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     shouldLoginIfPrompted: false,
   };
 
+  // more tests are in x-pack/test/functional/apps/saved_query_management/feature_controls/security.ts
+
   describe('dashboard feature controls security', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
@@ -94,7 +96,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('only shows the dashboard navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((link) => link.text)).to.eql(['Dashboard', 'Stack Management']);
+        expect(navLinks.map((link) => link.text)).to.eql(['Dashboards', 'Stack Management']);
       });
 
       it(`landing page shows "Create new Dashboard" button`, async () => {
@@ -130,7 +132,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`does not allow a visualization to be edited`, async () => {
         await PageObjects.dashboard.gotoDashboardEditMode('A Dashboard');
-        await panelActions.openContextMenu();
         await panelActions.expectMissingEditPanelAction();
       });
 
@@ -141,7 +142,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`does not allow a map to be edited`, async () => {
         await PageObjects.dashboard.gotoDashboardEditMode('dashboard with map');
-        await panelActions.openContextMenu();
         await panelActions.expectMissingEditPanelAction();
       });
     });
@@ -185,16 +185,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`allows a visualization to be edited`, async () => {
-        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.gotoDashboardEditMode('A Dashboard');
-        await panelActions.openContextMenu();
         await panelActions.expectExistsEditPanelAction();
       });
 
       it(`allows a map to be edited`, async () => {
-        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.gotoDashboardEditMode('dashboard with map');
-        await panelActions.openContextMenu();
         await panelActions.expectExistsEditPanelAction();
       });
 
@@ -288,7 +286,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows dashboard navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Dashboard']);
+        expect(navLinks).to.eql(['Dashboards']);
       });
 
       it(`landing page doesn't show "Create new Dashboard" button`, async () => {
@@ -400,7 +398,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows dashboard navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Dashboard']);
+        expect(navLinks).to.eql(['Dashboards']);
       });
 
       it(`landing page doesn't show "Create new Dashboard" button`, async () => {
@@ -458,8 +456,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/116881
-    describe.skip('no dashboard privileges', () => {
+    describe('no dashboard privileges', () => {
       before(async () => {
         await security.role.create('no_dashboard_privileges_role', {
           elasticsearch: {

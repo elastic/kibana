@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { Meta } from '../../../../../common/types';
 import { CrawlerStatus } from '../../../../../common/types/crawler';
+import { ExtractionRule } from '../../../../../common/types/extraction_rules';
 
 // TODO remove this proxy export, which will affect a lot of files
 export { CrawlerStatus };
@@ -88,6 +90,7 @@ export interface CrawlerDomainFromServer {
   default_crawl_rule?: CrawlRule;
   document_count: number;
   entry_points: EntryPoint[];
+  extraction_rules: ExtractionRule[];
   id: string;
   last_visited_at?: string;
   name: string;
@@ -161,7 +164,34 @@ export interface DomainConfigFromServer {
   sitemap_urls: string[];
 }
 
+export interface CrawlScheduleFromServer {
+  frequency: number;
+  unit: CrawlUnits;
+  use_connector_schedule: boolean;
+}
+
 // Client
+
+export interface CrawlerCustomSchedule {
+  scheduleKey: string;
+  name: string;
+  customEntryPointUrls: string[];
+  customSitemapUrls: string[];
+  includeSitemapsInRobotsTxt: boolean;
+  maxCrawlDepth: number;
+  selectedDomainUrls: string[];
+  selectedEntryPointUrls: string[];
+  selectedSitemapUrls: string[];
+  interval: string; // interval has crontab syntax
+  enabled: boolean;
+  entryPointUrls: string[];
+  sitemapUrls: string[];
+}
+
+export enum CustomCrawlType {
+  ONE_TIME = 'one-time',
+  MULTIPLE = 'multiple',
+}
 
 export interface CrawlerDomain {
   auth: CrawlerAuth;
@@ -173,6 +203,7 @@ export interface CrawlerDomain {
   defaultCrawlRule?: CrawlRule;
   documentCount: number;
   entryPoints: EntryPoint[];
+  extractionRules: ExtractionRule[];
   id: string;
   lastCrawl?: string;
   sitemaps: Sitemap[];
@@ -252,6 +283,7 @@ export type CrawlEvent = CrawlRequest & {
 export interface CrawlSchedule {
   frequency: number;
   unit: CrawlUnits;
+  useConnectorSchedule: boolean;
 }
 
 export interface DomainConfig {

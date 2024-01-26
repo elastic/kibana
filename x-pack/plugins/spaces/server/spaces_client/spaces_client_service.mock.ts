@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { spacesClientMock } from '../mocks';
 import type { SpacesClientServiceSetup, SpacesClientServiceStart } from './spaces_client_service';
+import { spacesClientMock } from '../mocks';
 
 const createSpacesClientServiceSetupMock = () =>
   ({

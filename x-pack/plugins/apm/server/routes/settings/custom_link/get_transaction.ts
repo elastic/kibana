@@ -7,7 +7,8 @@
 
 import * as t from 'io-ts';
 import { compact } from 'lodash';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ApmDocumentType } from '../../../../common/document_type';
+import { RollupInterval } from '../../../../common/rollup';
 import { filterOptionsRt } from './custom_link_types';
 import { splitFilterValueByComma } from './helper';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
@@ -29,10 +30,15 @@ export async function getTransaction({
       })
   );
 
-  const params = {
+  const resp = await apmEventClient.search('get_transaction_for_custom_link', {
     terminate_after: 1,
     apm: {
-      events: [ProcessorEvent.transaction as const],
+      sources: [
+        {
+          documentType: ApmDocumentType.TransactionEvent,
+          rollupInterval: RollupInterval.None,
+        },
+      ],
     },
     body: {
       track_total_hits: false,
@@ -43,10 +49,6 @@ export async function getTransaction({
         },
       },
     },
-  };
-  const resp = await apmEventClient.search(
-    'get_transaction_for_custom_link',
-    params
-  );
+  });
   return resp.hits.hits[0]?._source;
 }

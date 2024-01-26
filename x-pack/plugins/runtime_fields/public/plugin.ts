@@ -22,8 +22,4 @@ export class RuntimeFieldsPlugin
   public start(core: CoreStart, plugins: StartPlugins) {
     return {};
   }
-
-  public stop() {
-    return {};
-  }
 }

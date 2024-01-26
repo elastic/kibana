@@ -44,7 +44,6 @@ exports[`should enable sort order select when sort field provided 1`] = `
     <EuiFormRow
       describedByIds={Array []}
       display="columnCompressed"
-      fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label="Field"
@@ -60,7 +59,6 @@ exports[`should enable sort order select when sort field provided 1`] = `
     <EuiFormRow
       describedByIds={Array []}
       display="columnCompressed"
-      fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label="Order"
@@ -150,7 +148,6 @@ exports[`should render update source editor 1`] = `
     <EuiFormRow
       describedByIds={Array []}
       display="columnCompressed"
-      fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label="Field"
@@ -165,7 +162,6 @@ exports[`should render update source editor 1`] = `
     <EuiFormRow
       describedByIds={Array []}
       display="columnCompressed"
-      fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
       label="Order"

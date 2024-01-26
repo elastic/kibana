@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { Component, Fragment } from 'react';
-import { EuiTitle, EuiPanel, EuiSpacer } from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
+import { EuiTitle, EuiPanel, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TooltipSelector } from '../../../components/tooltip_selector';
-import { getEmsFileLayers } from '../../../util';
 import { IEmsFileSource } from './ems_file_source';
 import { IField } from '../../fields/field';
 import { OnSourceChangeArgs } from '../source';
@@ -21,74 +20,62 @@ interface Props {
   tooltipFields: IField[];
 }
 
-interface State {
-  fields: IField[] | null;
-}
+export function UpdateSourceEditor(props: Props) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [fields, setFields] = useState<IField[]>([]);
 
-export class UpdateSourceEditor extends Component<Props, State> {
-  private _isMounted: boolean = false;
+  useEffect(() => {
+    let ignore = false;
+    setIsLoading(true);
+    props.source
+      .getFields()
+      .then((nextFields) => {
+        if (!ignore) {
+          setFields(nextFields);
+          setIsLoading(false);
+        }
+      })
+      .catch((err) => {
+        if (!ignore) {
+          // When a matching EMS-config cannot be found, the source already will have thrown errors during the data request.
+          // This will propagate to the vector-layer and be displayed in the UX
+          setIsLoading(false);
+        }
+      });
 
-  state = {
-    fields: null,
-  };
+    return () => {
+      ignore = true;
+    };
+    // only run onMount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  componentDidMount() {
-    this._isMounted = true;
-    this.loadFields();
-  }
+  return (
+    <>
+      <EuiPanel>
+        <EuiTitle size="xs">
+          <h5>
+            <FormattedMessage
+              id="xpack.maps.emsSource.tooltipsTitle"
+              defaultMessage="Tooltip fields"
+            />
+          </h5>
+        </EuiTitle>
 
-  componentWillUnmount() {
-    this._isMounted = false;
-  }
+        <EuiSpacer size="m" />
 
-  async loadFields() {
-    let fields: IField[] = [];
-    try {
-      const emsFiles = await getEmsFileLayers();
-      const targetEmsFile = emsFiles.find((emsFile) => emsFile.getId() === this.props.layerId);
-      if (targetEmsFile) {
-        fields = targetEmsFile
-          .getFieldsInLanguage()
-          .map((field) => this.props.source.createField({ fieldName: field.name }));
-      }
-    } catch (e) {
-      // When a matching EMS-config cannot be found, the source already will have thrown errors during the data request.
-      // This will propagate to the vector-layer and be displayed in the UX
-    }
-
-    if (this._isMounted) {
-      this.setState({ fields });
-    }
-  }
-
-  _onTooltipPropertiesSelect = (selectedFieldNames: string[]) => {
-    this.props.onChange({ propName: 'tooltipProperties', value: selectedFieldNames });
-  };
-
-  render() {
-    return (
-      <Fragment>
-        <EuiPanel>
-          <EuiTitle size="xs">
-            <h5>
-              <FormattedMessage
-                id="xpack.maps.emsSource.tooltipsTitle"
-                defaultMessage="Tooltip fields"
-              />
-            </h5>
-          </EuiTitle>
-
-          <EuiSpacer size="m" />
-
+        <EuiSkeletonText isLoading={isLoading}>
           <TooltipSelector
-            tooltipFields={this.props.tooltipFields}
-            onChange={this._onTooltipPropertiesSelect}
-            fields={this.state.fields}
+            tooltipFields={props.tooltipFields}
+            onChange={(selectedFieldNames: string[]) => {
+              props.onChange({ propName: 'tooltipProperties', value: selectedFieldNames });
+            }}
+            fields={fields}
           />
-        </EuiPanel>
+        </EuiSkeletonText>
+      </EuiPanel>
 
-        <EuiSpacer size="s" />
-      </Fragment>
-    );
-  }
+      <EuiSpacer size="s" />
+    </>
+  );
 }

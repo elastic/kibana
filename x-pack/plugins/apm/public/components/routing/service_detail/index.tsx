@@ -6,6 +6,10 @@
  */
 import { i18n } from '@kbn/i18n';
 import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
+import {
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
+} from '@kbn/rule-data-utils';
 import { Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import qs from 'query-string';
@@ -15,12 +19,13 @@ import { offsetRt } from '../../../../common/comparison_rt';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../common/environment_rt';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
-import { TimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
+import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { AlertsOverview } from '../../app/alerts_overview';
+import { AlertsOverview, ALERT_STATUS_ALL } from '../../app/alerts_overview';
 import { ErrorGroupDetails } from '../../app/error_group_details';
 import { ErrorGroupOverview } from '../../app/error_group_overview';
 import { InfraOverview } from '../../app/infra_overview';
+import { InfraTab } from '../../app/infra_overview/infra_tabs/use_tabs';
 import { Metrics } from '../../app/metrics';
 import { MetricsDetails } from '../../app/metrics_details';
 import { ServiceDependencies } from '../../app/service_dependencies';
@@ -32,6 +37,9 @@ import { TransactionOverview } from '../../app/transaction_overview';
 import { ApmServiceTemplate } from '../templates/apm_service_template';
 import { ApmServiceWrapper } from './apm_service_wrapper';
 import { RedirectToDefaultServiceRouteView } from './redirect_to_default_service_route_view';
+import { ProfilingOverview } from '../../app/profiling_overview';
+import { SearchBar } from '../../shared/search_bar/search_bar';
+import { ServiceDashboards } from '../../app/service_dashboards';
 
 function page({
   title,
@@ -42,12 +50,7 @@ function page({
   title: string;
   tab: React.ComponentProps<typeof ApmServiceTemplate>['selectedTab'];
   element: React.ReactElement<any, any>;
-  searchBarOptions?: {
-    showKueryBar?: boolean;
-    showTransactionTypeSelector?: boolean;
-    showTimeComparison?: boolean;
-    hidden?: boolean;
-  };
+  searchBarOptions?: React.ComponentProps<typeof SearchBar>;
 }): {
   element: React.ReactElement<any, any>;
 } {
@@ -89,12 +92,12 @@ function RedirectNodeMetricsToMetricsDetails() {
   );
 }
 
-export const serviceDetail = {
+export const serviceDetailRoute = {
   '/services/{serviceName}': {
     element: (
-      <TimeRangeMetadataContextProvider>
+      <ApmTimeRangeMetadataContextProvider>
         <ApmServiceWrapper />
-      </TimeRangeMetadataContextProvider>
+      </ApmTimeRangeMetadataContextProvider>
     ),
     params: t.intersection([
       t.type({
@@ -149,10 +152,6 @@ export const serviceDetail = {
             pageSize: toNumberRt,
             sortField: t.string,
             sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
-            device: t.string,
-            osVersion: t.string,
-            appVersion: t.string,
-            netConnectionType: t.string,
           }),
         }),
       },
@@ -189,6 +188,7 @@ export const serviceDetail = {
                 t.partial({
                   traceId: t.string,
                   transactionId: t.string,
+                  flyoutDetailTab: t.string,
                 }),
                 offsetRt,
               ]),
@@ -240,6 +240,7 @@ export const serviceDetail = {
               path: t.type({
                 groupId: t.string,
               }),
+              query: t.partial({ errorId: t.string }),
             }),
           },
           '/services/{serviceName}/errors': {
@@ -317,31 +318,77 @@ export const serviceDetail = {
         }),
         element: <ServiceLogs />,
         searchBarOptions: {
-          showKueryBar: false,
+          showUnifiedSearchBar: false,
         },
       }),
-      '/services/{serviceName}/infrastructure': page({
-        tab: 'infrastructure',
-        title: i18n.translate('xpack.apm.views.infra.title', {
-          defaultMessage: 'Infrastructure',
+      '/services/{serviceName}/infrastructure': {
+        ...page({
+          tab: 'infrastructure',
+          title: i18n.translate('xpack.apm.views.infra.title', {
+            defaultMessage: 'Infrastructure',
+          }),
+          element: <InfraOverview />,
+          searchBarOptions: {
+            showUnifiedSearchBar: false,
+          },
         }),
-        element: <InfraOverview />,
-        searchBarOptions: {
-          showKueryBar: false,
-          showTimeComparison: false,
-          showTransactionTypeSelector: false,
-        },
-      }),
-      '/services/{serviceName}/alerts': page({
-        tab: 'alerts',
-        title: i18n.translate('xpack.apm.views.alerts.title', {
-          defaultMessage: 'Alerts',
+        params: t.partial({
+          query: t.partial({
+            detailTab: t.union([
+              t.literal(InfraTab.containers),
+              t.literal(InfraTab.pods),
+              t.literal(InfraTab.hosts),
+            ]),
+          }),
         }),
-        element: <AlertsOverview />,
-        searchBarOptions: {
-          hidden: true,
-        },
-      }),
+      },
+      '/services/{serviceName}/alerts': {
+        ...page({
+          tab: 'alerts',
+          title: i18n.translate('xpack.apm.views.alerts.title', {
+            defaultMessage: 'Alerts',
+          }),
+          element: <AlertsOverview />,
+          searchBarOptions: {
+            hidden: true,
+          },
+        }),
+        params: t.partial({
+          query: t.partial({
+            alertStatus: t.union([
+              t.literal(ALERT_STATUS_ACTIVE),
+              t.literal(ALERT_STATUS_RECOVERED),
+              t.literal(ALERT_STATUS_ALL),
+            ]),
+          }),
+        }),
+      },
+      '/services/{serviceName}/profiling': {
+        ...page({
+          tab: 'profiling',
+          title: i18n.translate('xpack.apm.views.profiling.title', {
+            defaultMessage: 'Universal Profiling',
+          }),
+          element: <ProfilingOverview />,
+          searchBarOptions: {
+            hidden: true,
+          },
+        }),
+      },
+      '/services/{serviceName}/dashboards': {
+        ...page({
+          tab: 'dashboards',
+          title: i18n.translate('xpack.apm.views.dashboard.title', {
+            defaultMessage: 'Dashboards',
+          }),
+          element: <ServiceDashboards />,
+        }),
+        params: t.partial({
+          query: t.partial({
+            dashboardId: t.string,
+          }),
+        }),
+      },
       '/services/{serviceName}/': {
         element: <RedirectToDefaultServiceRouteView />,
       },

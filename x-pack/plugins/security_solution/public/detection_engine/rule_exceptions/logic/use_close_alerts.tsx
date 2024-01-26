@@ -8,19 +8,17 @@
 import { useEffect, useRef, useState } from 'react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-
-import { updateAlertStatus } from '../../../detections/containers/detection_engine/alerts/api';
-import { getUpdateAlertsQuery } from '../../../detections/components/alerts_table/actions';
 import {
   buildAlertStatusesFilter,
   buildAlertsFilter,
 } from '../../../detections/components/alerts_table/default_config';
 import { getEsQueryFilter } from '../../../detections/containers/detection_engine/exceptions/get_es_query_filter';
-import type { IndexPatternArray } from '../../../../common/detection_engine/rule_schema';
+import type { IndexPatternArray } from '../../../../common/api/detection_engine/model/rule_schema';
 import { prepareExceptionItemsForBulkClose } from '../utils/helpers';
 import * as i18nCommon from '../../../common/translations';
 import * as i18n from './translations';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import { updateAlertStatus } from '../../../common/components/toolbar/bulk_actions/update_alerts';
 
 /**
  * Closes alerts.
@@ -65,7 +63,7 @@ export const useCloseAlertsFromExceptions = (): ReturnUseCloseAlertsFromExceptio
         let bulkResponse: estypes.UpdateByQueryResponse | undefined;
         if (alertIdToClose != null) {
           alertIdResponse = await updateAlertStatus({
-            query: getUpdateAlertsQuery([alertIdToClose]),
+            signalIds: [alertIdToClose],
             status: 'closed',
             signal: abortCtrl.signal,
           });
@@ -88,9 +86,7 @@ export const useCloseAlertsFromExceptions = (): ReturnUseCloseAlertsFromExceptio
           );
 
           bulkResponse = await updateAlertStatus({
-            query: {
-              query: filter,
-            },
+            query: filter,
             status: 'closed',
             signal: abortCtrl.signal,
           });

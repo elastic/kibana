@@ -7,42 +7,60 @@
 
 import expect from '@kbn/expect';
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
+import { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import {
-  createUserAndRole,
-  deleteUserAndRole,
-  ROLES,
-} from '../../../common/services/security_solution';
+import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
+import { targetTags } from '../../target_tags';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['security', 'endpoint', 'detections', 'hosts']);
   const testSubjects = getService('testSubjects');
   const endpointTestResources = getService('endpointTestResources');
-  const policyTestResources = getService('policyTestResources');
 
-  describe('Endpoint permissions:', () => {
+  describe('Endpoint permissions:', function () {
+    targetTags(this, ['@ess']);
+
     let indexedData: IndexedHostsAndAlertsResponse;
 
     before(async () => {
       // todo: way to force an endpoint to be created in isolated mode so we can check that state in the UI
-      const endpointPackage = await policyTestResources.getEndpointPackage();
-      await endpointTestResources.setMetadataTransformFrequency('1s', endpointPackage.version);
       indexedData = await endpointTestResources.loadEndpointData();
 
       // Force a logout so that we start from the login page
       await PageObjects.security.forceLogout();
+
+      // ensure Security Solution is properly initialized
+      await PageObjects.security.login('system_indices_superuser', 'changeme');
+      await PageObjects.detections.navigateToAlerts();
+      await testSubjects.existOrFail('manage-alert-detection-rules');
+
+      // logout again
+      await PageObjects.security.forceLogout();
     });
 
     after(async () => {
-      await endpointTestResources.unloadEndpointData(indexedData);
+      if (indexedData) {
+        await endpointTestResources.unloadEndpointData(indexedData);
+      }
     });
 
     // Run the same set of tests against all of the Security Solution roles
-    for (const role of Object.keys(ROLES) as Array<keyof typeof ROLES>) {
+    const ROLES: SecurityRoleName[] = [
+      't1_analyst',
+      't2_analyst',
+      'rule_author',
+      'soc_manager',
+      'detections_admin',
+      'platform_engineer',
+      'hunter',
+      'hunter_no_actions',
+    ];
+
+    for (const role of ROLES) {
       describe(`when running with user/role [${role}]`, () => {
         before(async () => {
           // create role/user
-          await createUserAndRole(getService, ROLES[role]);
+          await createUserAndRole(getService, role);
 
           // log back in with new uer
           await PageObjects.security.login(role, 'changeme');
@@ -54,12 +72,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await PageObjects.security.forceLogout();
 
           // delete role/user
-          await deleteUserAndRole(getService, ROLES[role]);
+          await deleteUserAndRole(getService, role);
         });
 
         it('should NOT allow access to endpoint management pages', async () => {
           await PageObjects.endpoint.navigateToEndpointList();
-          await testSubjects.existOrFail('noIngestPermissions');
+          await testSubjects.existOrFail('noPrivilegesPage');
         });
 
         it('should display endpoint data on Host Details', async () => {

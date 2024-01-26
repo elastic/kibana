@@ -5,97 +5,55 @@
  * 2.0.
  */
 
-import { ChildProcess, spawn } from 'child_process';
 import { ToolingLog } from '@kbn/tooling-log';
-import axios, { AxiosRequestConfig } from 'axios';
+import { KbnClient } from '@kbn/test';
+import {
+  StartedFleetServer,
+  startFleetServer,
+} from '@kbn/security-solution-plugin/scripts/endpoint/common/fleet_server/fleet_server_services';
 import { Manager } from './resource_manager';
-import { getLatestVersion } from './artifact_manager';
-import { AgentManagerParams } from './agent';
+import { getLatestAvailableAgentVersion } from './utils';
 
 export class FleetManager extends Manager {
-  private fleetProcess?: ChildProcess;
-  private config: AgentManagerParams;
-  private log: ToolingLog;
-  private requestOptions: AxiosRequestConfig;
-  constructor(config: AgentManagerParams, log: ToolingLog, requestOptions: AxiosRequestConfig) {
+  private fleetServer: StartedFleetServer | undefined = undefined;
+
+  constructor(
+    private readonly kbnClient: KbnClient,
+    private readonly log: ToolingLog,
+    private readonly port: number
+  ) {
     super();
-    this.config = config;
-    this.log = log;
-    this.requestOptions = requestOptions;
   }
+
   public async setup(): Promise<void> {
-    this.log.info('Setting fleet up');
-    return new Promise(async (res, rej) => {
-      try {
-        // default fleet server policy no longer created by default
-        const {
-          data: {
-            item: { id: policyId },
-          },
-        } = await axios.post(
-          `${this.config.kibanaUrl}/api/fleet/agent_policies`,
-          {
-            name: 'Default Fleet Server policy',
-            description: '',
-            namespace: 'default',
-            monitoring_enabled: ['logs', 'metrics'],
-            has_fleet_server: true,
-          },
-          this.requestOptions
-        );
-
-        const response = await axios.post(
-          `${this.config.kibanaUrl}/api/fleet/service_tokens`,
-          {},
-          this.requestOptions
-        );
-        const serviceToken = response.data.value;
-        const artifact = `docker.elastic.co/beats/elastic-agent:${await getLatestVersion()}`;
-        this.log.info(artifact);
-
-        const host = 'host.docker.internal';
-
-        const args = [
-          'run',
-          '-p',
-          `8220:8220`,
-          '--add-host',
-          'host.docker.internal:host-gateway',
-          '--env',
-          'FLEET_SERVER_ENABLE=true',
-          '--env',
-          `FLEET_SERVER_ELASTICSEARCH_HOST=http://${host}:${this.config.esPort}`,
-          '--env',
-          `FLEET_SERVER_SERVICE_TOKEN=${serviceToken}`,
-          '--env',
-          `FLEET_SERVER_POLICY=${policyId}`,
-          '--rm',
-          artifact,
-        ];
-        this.log.info('docker ' + args.join(' '));
-        this.fleetProcess = spawn('docker', args, {
-          stdio: 'inherit',
-        });
-        this.fleetProcess.on('error', rej);
-        setTimeout(res, 15000);
-      } catch (error) {
-        rej(error);
-      }
+    const version = await getLatestAvailableAgentVersion(this.kbnClient);
+    this.fleetServer = await startFleetServer({
+      kbnClient: this.kbnClient,
+      logger: this.log,
+      port: this.port,
+      force: true,
+      version,
     });
+
+    if (!this.fleetServer) {
+      throw new Error('Fleet server was not started');
+    }
   }
 
-  protected _cleanup() {
-    this.log.info('Removing old fleet config');
-    if (this.fleetProcess) {
-      this.log.info('Closing fleet process');
-      if (!this.fleetProcess.kill(9)) {
-        this.log.warning('Unable to kill fleet server process');
-      }
+  public cleanup() {
+    super.cleanup();
 
-      this.fleetProcess.on('close', () => {
-        this.log.info('Fleet server process closed');
-      });
-      delete this.fleetProcess;
+    this.log.info('Removing old fleet config');
+    if (this.fleetServer) {
+      this.log.info('Closing fleet process');
+
+      try {
+        this.fleetServer.stopNow();
+      } catch (err) {
+        this.log.error('Error closing fleet server process');
+        this.log.verbose(err);
+      }
+      this.log.info('Fleet server process closed');
     }
   }
 }

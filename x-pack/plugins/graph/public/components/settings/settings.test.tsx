@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiTab, EuiListGroupItem, EuiAccordion, EuiFieldText } from '@elastic/eui';
+import { EuiListGroupItem, EuiAccordion, EuiFieldText } from '@elastic/eui';
 import * as Rx from 'rxjs';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { Settings, SettingsWorkspaceProps } from './settings';
@@ -51,8 +51,9 @@ describe('settings', () => {
     },
     url: 'http://example.org',
     icon: {
-      class: 'test',
-      code: '1',
+      id: 'test',
+      package: 'eui',
+      prevName: '',
       label: 'test',
     },
     isDefault: false,
@@ -72,8 +73,9 @@ describe('settings', () => {
         },
         label: 'blocklisted node 1',
         icon: {
-          class: 'test',
-          code: '1',
+          id: 'test',
+          package: 'eui',
+          prevName: '',
           label: 'test',
         },
       },
@@ -89,8 +91,9 @@ describe('settings', () => {
         },
         label: 'blocklisted node 2',
         icon: {
-          class: 'test',
-          code: '1',
+          id: 'test',
+          package: 'eui',
+          prevName: '',
           label: 'test',
         },
       },
@@ -122,8 +125,9 @@ describe('settings', () => {
           name: 'B',
           type: 'string',
           icon: {
-            class: 'test',
-            code: '1',
+            id: 'test',
+            package: 'eui',
+            prevName: '',
             label: 'test',
           },
           aggregatable: true,
@@ -134,8 +138,9 @@ describe('settings', () => {
           name: 'C',
           type: 'string',
           icon: {
-            class: 'test',
-            code: '1',
+            id: 'test',
+            package: 'eui',
+            prevName: '',
             label: 'test',
           },
           aggregatable: true,
@@ -158,12 +163,9 @@ describe('settings', () => {
     );
   });
 
-  function toTab(tab: string) {
+  function toTab(testSubj: string) {
     act(() => {
-      instance
-        .find(EuiTab)
-        .findWhere((node) => node.key() === tab)
-        .prop('onClick')!({});
+      instance.find(`EuiTab[data-test-subj="${testSubj}"]`).prop('onClick')!({} as any);
     });
     instance.update();
   }
@@ -217,7 +219,7 @@ describe('settings', () => {
 
   describe('blocklist', () => {
     beforeEach(() => {
-      toTab('Block list');
+      toTab('blocklist');
     });
 
     it('should switch tab to blocklist', () => {
@@ -244,9 +246,10 @@ describe('settings', () => {
               },
               label: 'blocklisted node 3',
               icon: {
-                class: 'test',
-                code: '1',
+                id: 'test',
+                package: 'eui',
                 label: 'test',
+                prevName: '',
               },
             },
           ],
@@ -288,7 +291,7 @@ describe('settings', () => {
     }
 
     beforeEach(() => {
-      toTab('Drilldowns');
+      toTab('drillDowns');
     });
 
     it('should switch tab to url templates', () => {

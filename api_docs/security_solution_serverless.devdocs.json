@@ -1,0 +1,129 @@
+{
+  "id": "securitySolutionServerless",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "securitySolutionServerless",
+      "id": "def-public.SecuritySolutionServerlessPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "SecuritySolutionServerlessPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/security_solution_serverless/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "securitySolutionServerless",
+      "id": "def-public.SecuritySolutionServerlessPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "SecuritySolutionServerlessPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/security_solution_serverless/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "securitySolutionServerless",
+      "id": "def-server.SecuritySolutionServerlessPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "SecuritySolutionServerlessPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/security_solution_serverless/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "securitySolutionServerless",
+      "id": "def-server.SecuritySolutionServerlessPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "SecuritySolutionServerlessPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/security_solution_serverless/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "securitySolutionServerless",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"securitySolutionServerless\""
+        ],
+        "path": "x-pack/plugins/security_solution_serverless/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolutionServerless",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "signature": [
+          "\"securitySolutionServerless\""
+        ],
+        "path": "x-pack/plugins/security_solution_serverless/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolutionServerless",
+        "id": "def-common.SECURITY_PROJECT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_PROJECT_TYPE",
+        "description": [],
+        "signature": [
+          "\"security\""
+        ],
+        "path": "x-pack/plugins/security_solution_serverless/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

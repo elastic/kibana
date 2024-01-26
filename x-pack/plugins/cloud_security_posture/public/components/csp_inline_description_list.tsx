@@ -17,8 +17,10 @@ const getModifiedTitlesListItems = (listItems: EuiDescriptionListProps['listItem
 const fontSize = '1rem';
 
 export const CspInlineDescriptionList = ({
+  testId,
   listItems,
 }: {
+  testId?: string;
   listItems: EuiDescriptionListProps['listItems'];
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -26,6 +28,7 @@ export const CspInlineDescriptionList = ({
 
   return (
     <EuiDescriptionList
+      data-test-subj={testId}
       type="inline"
       titleProps={{
         style: {
@@ -33,6 +36,7 @@ export const CspInlineDescriptionList = ({
           color: euiTheme.colors.subduedText,
           fontSize,
           paddingRight: 0,
+          paddingInline: 0,
         },
       }}
       descriptionProps={{

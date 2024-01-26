@@ -11,8 +11,6 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiButton,
@@ -31,6 +29,14 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
+import {
+  ML_DETECTOR_RULE_ACTION,
+  ML_DETECTOR_RULE_CONDITIONS_NOT_SUPPORTED_FUNCTIONS,
+} from '@kbn/ml-anomaly-utils';
+
 import { DetectorDescriptionList } from './components/detector_description_list';
 import { ActionsSection } from './actions_section';
 import { checkPermission } from '../../capabilities/check_capabilities';
@@ -46,15 +52,10 @@ import {
   addItemToFilter,
 } from './utils';
 
-import {
-  ACTION,
-  CONDITIONS_NOT_SUPPORTED_FUNCTIONS,
-} from '../../../../common/constants/detector_rule';
 import { getPartitioningFieldNames } from '../../../../common/util/job_utils';
-import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { mlJobService } from '../../services/job_service';
+import { toastNotificationServiceProvider } from '../../services/toast_notification_service';
 import { ml } from '../../services/ml_api_service';
-import { extractErrorMessage } from '../../../../common/util/errors';
 
 class RuleEditorFlyoutUI extends Component {
   static propTypes = {
@@ -82,6 +83,9 @@ class RuleEditorFlyoutUI extends Component {
   }
 
   componentDidMount() {
+    this.toastNotificationService = toastNotificationServiceProvider(
+      this.props.kibana.services.notifications.toasts
+    );
     if (typeof this.props.setShowFunction === 'function') {
       this.props.setShowFunction(this.showFlyout);
     }
@@ -104,8 +108,7 @@ class RuleEditorFlyoutUI extends Component {
         i18n.translate(
           'xpack.ml.ruleEditor.ruleEditorFlyout.unableToConfigureRulesNotificationMesssage',
           {
-            defaultMessage:
-              'Unable to configure job rules as an error occurred obtaining details for job ID {jobId}',
+            defaultMessage: 'Unable to configure job rules as no job found with ID {jobId}',
             values: { jobId: anomaly.jobId },
           }
         )
@@ -152,10 +155,9 @@ class RuleEditorFlyoutUI extends Component {
             filterListIds,
           });
         })
-        .catch((resp) => {
-          console.log('Error loading list of filters:', resp);
-          const { toasts } = this.props.kibana.services.notifications;
-          toasts.addDanger(
+        .catch((error) => {
+          this.toastNotificationService.displayErrorToast(
+            error,
             i18n.translate(
               'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithLoadingFilterListsNotificationMesssage',
               {
@@ -201,9 +203,9 @@ class RuleEditorFlyoutUI extends Component {
     const checked = e.target.checked;
     this.setState((prevState) => {
       const actions = [...prevState.rule.actions];
-      const idx = actions.indexOf(ACTION.SKIP_RESULT);
+      const idx = actions.indexOf(ML_DETECTOR_RULE_ACTION.SKIP_RESULT);
       if (idx === -1 && checked) {
-        actions.push(ACTION.SKIP_RESULT);
+        actions.push(ML_DETECTOR_RULE_ACTION.SKIP_RESULT);
       } else if (idx > -1 && !checked) {
         actions.splice(idx, 1);
       }
@@ -218,9 +220,9 @@ class RuleEditorFlyoutUI extends Component {
     const checked = e.target.checked;
     this.setState((prevState) => {
       const actions = [...prevState.rule.actions];
-      const idx = actions.indexOf(ACTION.SKIP_MODEL_UPDATE);
+      const idx = actions.indexOf(ML_DETECTOR_RULE_ACTION.SKIP_MODEL_UPDATE);
       if (idx === -1 && checked) {
-        actions.push(ACTION.SKIP_MODEL_UPDATE);
+        actions.push(ML_DETECTOR_RULE_ACTION.SKIP_MODEL_UPDATE);
       } else if (idx > -1 && !checked) {
         actions.splice(idx, 1);
       }
@@ -373,8 +375,8 @@ class RuleEditorFlyoutUI extends Component {
         }
       })
       .catch((error) => {
-        console.error(error);
-        toasts.addDanger(
+        this.toastNotificationService.displayErrorToast(
+          error,
           i18n.translate(
             'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithSavingChangesToJobDetectorRulesNotificationMessage',
             {
@@ -425,18 +427,16 @@ class RuleEditorFlyoutUI extends Component {
         }
       })
       .catch((error) => {
-        console.error(error);
-        let errorMessage = i18n.translate(
-          'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithDeletingRuleFromJobDetectorNotificationMessage',
-          {
-            defaultMessage: 'Error deleting rule from {jobId} detector',
-            values: { jobId },
-          }
+        this.toastNotificationService.displayErrorToast(
+          error,
+          i18n.translate(
+            'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithDeletingRuleFromJobDetectorNotificationMessage',
+            {
+              defaultMessage: 'Error deleting rule from {jobId} detector',
+              values: { jobId },
+            }
+          )
         );
-        if (error.error) {
-          errorMessage += ` : ${extractErrorMessage(error.error)}`;
-        }
-        toasts.addDanger(errorMessage);
       });
   };
 
@@ -466,8 +466,8 @@ class RuleEditorFlyoutUI extends Component {
         }
       })
       .catch((error) => {
-        console.log(`Error adding ${item} to filter ${filterId}:`, error);
-        toasts.addDanger(
+        this.toastNotificationService.displayErrorToast(
+          error,
           i18n.translate(
             'xpack.ml.ruleEditor.ruleEditorFlyout.errorWithAddingItemToFilterListNotificationMessage',
             {
@@ -550,7 +550,7 @@ class RuleEditorFlyoutUI extends Component {
       const hasPartitioningFields =
         this.partitioningFieldNames && this.partitioningFieldNames.length > 0;
       const conditionSupported =
-        CONDITIONS_NOT_SUPPORTED_FUNCTIONS.indexOf(anomaly.source.function) === -1;
+        ML_DETECTOR_RULE_CONDITIONS_NOT_SUPPORTED_FUNCTIONS.indexOf(anomaly.source.function) === -1;
       const conditionsText = i18n.translate(
         'xpack.ml.ruleEditor.ruleEditorFlyout.conditionsDescription',
         {

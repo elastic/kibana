@@ -13,6 +13,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import type { CoreSetup, CoreStart } from '@kbn/core/public';
 import type { FileLayer } from '@elastic/ems-client';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import { ChartSizeEvent } from '@kbn/chart-expressions-common';
 import type { MapsPluginStartDependencies } from '../../plugin';
 import type { ChoroplethChartProps } from './types';
 import type { MapEmbeddableInput, MapEmbeddableOutput } from '../../embeddable';
@@ -92,6 +93,18 @@ export function getExpressionRenderer(coreSetup: CoreSetup<MapsPluginStartDepend
         handlers.done();
       };
 
+      const chartSizeEvent: ChartSizeEvent = {
+        name: 'chartSize',
+        data: {
+          maxDimensions: {
+            x: { value: 100, unit: 'percentage' },
+            y: { value: 100, unit: 'percentage' },
+          },
+        },
+      };
+
+      handlers.event(chartSizeEvent);
+
       ReactDOM.render(
         <ChoroplethChart
           {...config}
@@ -99,9 +112,9 @@ export function getExpressionRenderer(coreSetup: CoreSetup<MapsPluginStartDepend
           uiSettings={coreStart.uiSettings}
           emsFileLayers={emsFileLayers}
           mapEmbeddableFactory={mapEmbeddableFactory}
+          onRenderComplete={renderComplete}
         />,
-        domNode,
-        renderComplete
+        domNode
       );
       handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
     },

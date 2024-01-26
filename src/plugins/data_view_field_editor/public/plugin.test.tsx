@@ -67,15 +67,15 @@ describe('DataViewFieldEditorPlugin', () => {
 
     expect(openFlyout).toHaveBeenCalled();
 
-    const [[arg]] = openFlyout.mock.calls;
-    expect(arg.props.children.type).toBe(FieldEditorLoader);
+    const [[{ __reactMount__ }]] = openFlyout.mock.calls;
+    expect(__reactMount__.props.children.type).toBe(FieldEditorLoader);
 
     // We force call the "onSave" prop from the <RuntimeFieldEditorFlyoutContent /> component
     // and make sure that the the spy is being called.
     // Note: we are testing implementation details, if we change or rename the "onSave" prop on
     // the component, we will need to update this test accordingly.
-    expect(arg.props.children.props.onSave).toBeDefined();
-    arg.props.children.props.onSave();
+    expect(__reactMount__.props.children.props.onSave).toBeDefined();
+    __reactMount__.props.children.props.onSave();
     expect(onSaveSpy).toHaveBeenCalled();
   });
 

@@ -6,8 +6,10 @@
  */
 
 import React from 'react';
-import '@kbn/es-ui-shared-plugin/public/components/code_editor/jest_mock';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { ModalProvider, OnDoneLoadJsonHandler } from './modal_provider';
+
+import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');
@@ -18,20 +20,39 @@ jest.mock('lodash', () => {
   };
 });
 
+jest.mock('@kbn/code-editor', () => {
+  const original = jest.requireActual('@kbn/code-editor');
+  return {
+    ...original,
+    // Mocking CodeEditor, which uses React Monaco under the hood
+    CodeEditor: (props: any) => (
+      <input
+        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
+        data-currentvalue={props.value}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+          props.onChange(e.currentTarget.getAttribute('data-currentvalue'));
+        }}
+      />
+    ),
+  };
+});
+
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 
 const setup = ({ onDone }: { onDone: OnDoneLoadJsonHandler }) => {
   return registerTestBed(
     () => (
-      <ModalProvider onDone={onDone}>
-        {(openModal) => {
-          return (
-            <button onClick={openModal} data-test-subj="button">
-              Load JSON
-            </button>
-          );
-        }}
-      </ModalProvider>
+      <KibanaContextProvider services={{ uiSettings: uiSettingsServiceMock.createSetupContract() }}>
+        <ModalProvider onDone={onDone}>
+          {(openModal) => {
+            return (
+              <button onClick={openModal} data-test-subj="button">
+                Load JSON
+              </button>
+            );
+          }}
+        </ModalProvider>
+      </KibanaContextProvider>
     ),
     {
       memoryRouter: {
@@ -78,7 +99,10 @@ describe('Load from JSON ModalProvider', () => {
         },
       ],
     });
-    find('mockCodeEditor').simulate('change', { jsonString: validPipeline });
+    // Set the value of the mock code editor
+    find('mockCodeEditor').getDOMNode().setAttribute('data-currentvalue', validPipeline);
+    find('mockCodeEditor').simulate('change');
+
     find('confirmModalConfirmButton').simulate('click');
     expect(!exists('loadJsonConfirmationModal'));
     expect(onDone).toHaveBeenCalledTimes(1);

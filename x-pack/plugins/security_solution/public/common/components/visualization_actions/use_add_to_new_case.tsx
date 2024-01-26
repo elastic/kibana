@@ -5,10 +5,11 @@
  * 2.0.
  */
 import { useCallback, useMemo } from 'react';
+import { AttachmentType, LENS_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 
-import { CommentType } from '@kbn/cases-plugin/common';
-
-import { useKibana, useGetUserCasesPermissions } from '../../lib/kibana';
+import { APP_ID } from '../../../../common';
+import { useKibana } from '../../lib/kibana';
 import { ADD_TO_CASE_SUCCESS } from './translations';
 
 import type { LensAttributes } from './types';
@@ -20,21 +21,20 @@ export interface UseAddToNewCaseProps {
 }
 
 export const useAddToNewCase = ({ onClick, timeRange, lensAttributes }: UseAddToNewCaseProps) => {
-  const userCasesPermissions = useGetUserCasesPermissions();
   const { cases } = useKibana().services;
+  const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
+
   const attachments = useMemo(() => {
     return [
       {
-        comment: `!{lens${JSON.stringify({
-          timeRange,
-          attributes: lensAttributes,
-        })}}`,
-        type: CommentType.user as const,
+        persistableStateAttachmentState: { attributes: lensAttributes, timeRange },
+        persistableStateAttachmentTypeId: LENS_ATTACHMENT_TYPE,
+        type: AttachmentType.persistableState as const,
       },
-    ];
+    ] as CaseAttachmentsWithoutOwner;
   }, [lensAttributes, timeRange]);
 
-  const createCaseFlyout = cases.hooks.getUseCasesAddToNewCaseFlyout({
+  const createCaseFlyout = cases.hooks.useCasesAddToNewCaseFlyout({
     toastContent: ADD_TO_CASE_SUCCESS,
   });
 

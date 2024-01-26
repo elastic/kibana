@@ -107,7 +107,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
     });
 
     beforeEach(async () => {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
     });
 
     let tabsCount = 1;
@@ -131,7 +131,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
       await ml.lensVisualizations.clickCreateMLJobMenuAction();
 
-      await ml.lensVisualizations.assertLensLayerSelectorExists();
+      await ml.lensVisualizations.assertLayerSelectorExists();
 
       await ml.lensVisualizations.assertNumberOfCompatibleLensLayers(numberOfCompatibleLayers);
 
@@ -156,7 +156,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
       await ml.lensVisualizations.clickCreateMLJobMenuAction();
 
-      await ml.lensVisualizations.assertLensLayerSelectorExists();
+      await ml.lensVisualizations.assertLayerSelectorExists();
 
       await ml.lensVisualizations.assertNumberOfCompatibleLensLayers(numberOfCompatibleLayers);
 
@@ -181,7 +181,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
       await ml.lensVisualizations.clickCreateMLJobMenuAction();
 
-      await ml.lensVisualizations.assertLensLayerSelectorExists();
+      await ml.lensVisualizations.assertLayerSelectorExists();
 
       await ml.lensVisualizations.assertNumberOfCompatibleLensLayers(numberOfCompatibleLayers);
 
@@ -204,7 +204,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
       await ml.lensVisualizations.clickCreateMLJobMenuAction();
 
-      await ml.lensVisualizations.assertLensLayerSelectorExists();
+      await ml.lensVisualizations.assertLayerSelectorExists();
 
       await ml.lensVisualizations.assertNumberOfCompatibleLensLayers(numberOfCompatibleLayers);
 

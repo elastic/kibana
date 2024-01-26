@@ -1,0 +1,155 @@
+{
+  "attributes": {
+    "fieldFormatMap": "{\"hour_of_day\":{}}",
+    "name": "Kibana Sample Data Logs",
+    "runtimeFieldMap": "{\"hour_of_day\":{\"type\":\"long\",\"script\":{\"source\":\"emit(doc['timestamp'].value.getHour());\"}}}",
+    "timeFieldName": "timestamp",
+    "title": "kibana_sample_data_logs"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-09-07T17:23:20.906Z",
+  "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+  "managed": false,
+  "references": [],
+  "type": "index-pattern",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2023-09-07T17:23:20.906Z",
+  "version": "WzEwMiwxXQ=="
+}
+
+{
+  "attributes": {
+    "annotations": [
+      {
+        "filter": {
+          "language": "kuery",
+          "query": "agent.keyword : \"Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)\" ",
+          "type": "kibana_query"
+        },
+        "icon": "triangle",
+        "id": "fdede168-eff1-400f-b106-0f62061f5099",
+        "key": {
+          "type": "point_in_time"
+        },
+        "label": "Event",
+        "timeField": "timestamp",
+        "type": "query"
+      }
+    ],
+    "dataViewSpec": null,
+    "description": "",
+    "ignoreGlobalFilters": true,
+    "title": "group3"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-09-08T18:41:09.030Z",
+  "id": "46c2a460-4e77-11ee-bb97-116581699678",
+  "managed": false,
+  "references": [
+    {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "event-annotation-group_dataView-ref-90943e30-9a47-11e8-b64d-95841ca0b247",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "event-annotation-group",
+  "updated_at": "2023-09-08T18:42:48.080Z",
+  "version": "WzE2OCwxXQ=="
+}
+
+{
+  "attributes": {
+    "color": "#dac7c4",
+    "description": "a tag to filter by",
+    "name": "tag"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-09-08T18:40:42.018Z",
+  "id": "36a8f020-4e77-11ee-bb97-116581699678",
+  "managed": false,
+  "references": [],
+  "type": "tag",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2023-09-08T18:40:42.018Z",
+  "version": "WzI3NDUsMV0="
+}
+
+{
+  "attributes": {
+    "annotations": [
+      {
+        "icon": "triangle",
+        "id": "3d9f03ca-36aa-4ebb-aab8-efef1591c6d5",
+        "key": {
+          "timestamp": "2023-09-08T18:32:00.000Z",
+          "type": "point_in_time"
+        },
+        "label": "Event",
+        "type": "manual"
+      }
+    ],
+    "dataViewSpec": null,
+    "description": "i am a description you can search for!",
+    "ignoreGlobalFilters": true,
+    "title": "group2"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-09-08T18:41:01.654Z",
+  "id": "425d2760-4e77-11ee-bb97-116581699678",
+  "managed": false,
+  "references": [
+    {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "event-annotation-group_dataView-ref-90943e30-9a47-11e8-b64d-95841ca0b247",
+      "type": "index-pattern"
+    },
+    {
+      "id": "36a8f020-4e77-11ee-bb97-116581699678",
+      "name": "36a8f020-4e77-11ee-bb97-116581699678",
+      "type": "tag"
+    }
+  ],
+  "type": "event-annotation-group",
+  "updated_at": "2023-09-08T18:41:01.654Z",
+  "version": "WzE2NCwxXQ=="
+}
+
+{
+  "attributes": {
+    "annotations": [
+      {
+        "icon": "triangle",
+        "id": "f7be288b-8adf-48b9-89d4-267db4863a3d",
+        "key": {
+          "timestamp": "2023-09-08T18:32:00.000Z",
+          "type": "point_in_time"
+        },
+        "label": "Event",
+        "type": "manual"
+      }
+    ],
+    "dataViewSpec": null,
+    "description": "",
+    "ignoreGlobalFilters": true,
+    "title": "group1"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-09-08T18:40:45.981Z",
+  "id": "3905a4d0-4e77-11ee-bb97-116581699678",
+  "managed": false,
+  "references": [
+    {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "event-annotation-group_dataView-ref-90943e30-9a47-11e8-b64d-95841ca0b247",
+      "type": "index-pattern"
+    },
+    {
+      "id": "36a8f020-4e77-11ee-bb97-116581699678",
+      "name": "36a8f020-4e77-11ee-bb97-116581699678",
+      "type": "tag"
+    }
+  ],
+  "type": "event-annotation-group",
+  "updated_at": "2023-09-08T18:40:45.981Z",
+  "version": "WzE2MiwxXQ=="
+}

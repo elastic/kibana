@@ -50,9 +50,9 @@ export const languageIntegrations: LanguageIntegration[] = [
     description: i18n.translate('customIntegrations.languageclients.RubyDescription', {
       defaultMessage: 'Index data to Elasticsearch with the Ruby client.',
     }),
-    docUrlTemplate: `${ELASTICSEARCH_CLIENT_URL}/ruby-api/{branch}/ruby_client.html`,
+    docUrlTemplate: '',
     integrationsAppUrl: `/app/integrations/language_clients/ruby/overview`,
-    exportLanguageUiComponent: false,
+    exportLanguageUiComponent: true,
   },
   {
     id: 'go',
@@ -63,9 +63,9 @@ export const languageIntegrations: LanguageIntegration[] = [
     description: i18n.translate('customIntegrations.languageclients.GoDescription', {
       defaultMessage: 'Index data to Elasticsearch with the Go client.',
     }),
+    docUrlTemplate: '',
     integrationsAppUrl: `/app/integrations/language_clients/go/overview`,
-    docUrlTemplate: `${ELASTICSEARCH_CLIENT_URL}/go-api/{branch}/overview.html`,
-    exportLanguageUiComponent: false,
+    exportLanguageUiComponent: true,
   },
   {
     id: 'dotnet',
@@ -76,9 +76,9 @@ export const languageIntegrations: LanguageIntegration[] = [
     description: i18n.translate('customIntegrations.languageclients.DotNetDescription', {
       defaultMessage: 'Index data to Elasticsearch with the .NET client.',
     }),
-    docUrlTemplate: `${ELASTICSEARCH_CLIENT_URL}/net-api/{branch}/index.html`,
+    docUrlTemplate: '',
     integrationsAppUrl: `/app/integrations/language_clients/dotnet/overview`,
-    exportLanguageUiComponent: false,
+    exportLanguageUiComponent: true,
   },
   {
     id: 'php',
@@ -89,9 +89,9 @@ export const languageIntegrations: LanguageIntegration[] = [
     description: i18n.translate('customIntegrations.languageclients.PhpDescription', {
       defaultMessage: 'Index data to Elasticsearch with the PHP client.',
     }),
-    docUrlTemplate: `${ELASTICSEARCH_CLIENT_URL}/php-api/{branch}/index.html`,
+    docUrlTemplate: '',
     integrationsAppUrl: `/app/integrations/language_clients/php/overview`,
-    exportLanguageUiComponent: false,
+    exportLanguageUiComponent: true,
   },
   {
     id: 'perl',
@@ -141,9 +141,9 @@ export const languageIntegrations: LanguageIntegration[] = [
     description: i18n.translate('customIntegrations.languageclients.JavaDescription', {
       defaultMessage: 'Index data to Elasticsearch with the Java client.',
     }),
-    docUrlTemplate: `${ELASTICSEARCH_CLIENT_URL}/java-api-client/{branch}/index.html`,
+    docUrlTemplate: '',
     integrationsAppUrl: `/app/integrations/language_clients/java/overview`,
-    exportLanguageUiComponent: false,
+    exportLanguageUiComponent: true,
   },
   // Uncomment to show the sample language client card + README UI
   // {

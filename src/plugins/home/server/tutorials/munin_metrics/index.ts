@@ -26,7 +26,7 @@ export function muninMetricsSpecProvider(context: TutorialContext): TutorialSche
       defaultMessage: 'Munin Metrics',
     }),
     moduleName,
-    euiIconType: '/plugins/home/assets/logos/munin.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/munin.svg'),
     isBeta: true,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.muninMetrics.shortDescription', {
@@ -56,6 +56,6 @@ export function muninMetricsSpecProvider(context: TutorialContext): TutorialSche
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['datastore'],
+    integrationBrowserCategories: ['observability', 'monitoring'],
   };
 }

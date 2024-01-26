@@ -12,6 +12,16 @@ import { promisify } from 'util';
 import type { IKibanaSocket } from '@kbn/core-http-server';
 
 export class KibanaSocket implements IKibanaSocket {
+  public static getFakeSocket(): IKibanaSocket {
+    return {
+      getPeerCertificate: () => null,
+      getProtocol: () => null,
+      renegotiate: () => Promise.resolve(),
+    };
+  }
+
+  constructor(private readonly socket: Socket) {}
+
   public get authorized() {
     return this.socket instanceof TLSSocket ? this.socket.authorized : undefined;
   }
@@ -20,12 +30,13 @@ export class KibanaSocket implements IKibanaSocket {
     return this.socket instanceof TLSSocket ? this.socket.authorizationError : undefined;
   }
 
-  constructor(private readonly socket: Socket) {}
+  public get remoteAddress() {
+    return this.socket.remoteAddress;
+  }
 
   getPeerCertificate(detailed: true): DetailedPeerCertificate | null;
   getPeerCertificate(detailed: false): PeerCertificate | null;
   getPeerCertificate(detailed?: boolean): PeerCertificate | DetailedPeerCertificate | null;
-
   public getPeerCertificate(detailed?: boolean) {
     if (this.socket instanceof TLSSocket) {
       const peerCertificate = this.socket.getPeerCertificate(detailed);

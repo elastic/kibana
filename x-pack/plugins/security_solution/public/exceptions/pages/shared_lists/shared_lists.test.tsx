@@ -90,6 +90,110 @@ describe('SharedLists', () => {
     ]);
   });
 
+  it('renders empty view if no lists exist', async () => {
+    (useExceptionLists as jest.Mock).mockReturnValue([
+      false,
+      [],
+      {
+        page: 1,
+        perPage: 20,
+        total: 0,
+      },
+      jest.fn(),
+    ]);
+
+    (useAllExceptionLists as jest.Mock).mockReturnValue([false, [], {}]);
+    const wrapper = render(
+      <TestProviders>
+        <SharedLists />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      const emptyViewerState = wrapper.getByTestId('emptyViewerState');
+      expect(emptyViewerState).toBeInTheDocument();
+    });
+  });
+
+  it('renders loading state when fetching lists', async () => {
+    (useExceptionLists as jest.Mock).mockReturnValue([
+      true,
+      [],
+      {
+        page: 1,
+        perPage: 20,
+        total: 0,
+      },
+      jest.fn(),
+    ]);
+
+    (useAllExceptionLists as jest.Mock).mockReturnValue([false, [], {}]);
+    const wrapper = render(
+      <TestProviders>
+        <SharedLists />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      const loadingViewerState = wrapper.getByTestId('loadingViewerState');
+      expect(loadingViewerState).toBeInTheDocument();
+    });
+  });
+
+  it('renders loading state when fetching refs', async () => {
+    (useExceptionLists as jest.Mock).mockReturnValue([
+      false,
+      [exceptionList1, exceptionList2],
+      {
+        page: 1,
+        perPage: 20,
+        total: 2,
+      },
+      jest.fn(),
+    ]);
+
+    (useAllExceptionLists as jest.Mock).mockReturnValue([true, [], {}]);
+    const wrapper = render(
+      <TestProviders>
+        <SharedLists />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      const loadingViewerState = wrapper.getByTestId('loadingViewerState');
+      expect(loadingViewerState).toBeInTheDocument();
+    });
+  });
+
+  it('renders empty search state when no search results are found', async () => {
+    const wrapper = render(
+      <TestProviders>
+        <SharedLists />
+      </TestProviders>
+    );
+
+    (useExceptionLists as jest.Mock).mockReturnValue([
+      false,
+      [],
+      {
+        page: 1,
+        perPage: 20,
+        total: 0,
+      },
+      jest.fn(),
+    ]);
+
+    (useAllExceptionLists as jest.Mock).mockReturnValue([false, [], {}]);
+
+    const searchBar = wrapper.getByTestId('exceptionsHeaderSearchInput');
+    fireEvent.change(searchBar, { target: { value: 'foo' } });
+
+    await waitFor(() => {
+      const emptySearchViewerState = wrapper.getByTestId('emptySearchViewerState');
+      expect(emptySearchViewerState).toBeInTheDocument();
+    });
+  });
+
   it('renders delete option as disabled if list is "endpoint_list"', async () => {
     const wrapper = render(
       <TestProviders>

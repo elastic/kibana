@@ -1,0 +1,23 @@
+.dshDashboardViewportWrapper {
+  flex: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.dshDashboardViewport {
+  width: 100%;
+}
+
+.dshDashboardViewport--panelExpanded {
+  flex: 1;
+}
+
+.dshDashboardViewport-controls {
+  margin: 0 $euiSizeS 0 $euiSizeS;
+  padding-top: $euiSizeS;
+  padding-bottom: $euiSizeXS;
+}
+
+.dashboardViewport--screenshotMode  .controlsWrapper--empty {
+  display:none
+}

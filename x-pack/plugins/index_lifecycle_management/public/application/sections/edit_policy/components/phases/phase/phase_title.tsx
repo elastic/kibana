@@ -96,7 +96,7 @@ export const PhaseTitle: FunctionComponent<Props> = ({ phase }) => {
           {hasErrors && (
             <EuiFlexItem grow={false} data-test-subj={`phaseErrorIndicator-${phase}`}>
               <EuiIconTip
-                type="alert"
+                type="warning"
                 color="danger"
                 content={
                   <FormattedMessage

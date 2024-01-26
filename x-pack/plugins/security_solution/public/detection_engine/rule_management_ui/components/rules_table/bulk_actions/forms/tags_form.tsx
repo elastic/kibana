@@ -9,8 +9,9 @@ import { EuiCallOut, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 
-import type { BulkActionEditPayload } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import { BulkActionEditType } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { useRuleManagementFilters } from '../../../../../rule_management/logic/use_rule_management_filters';
+import type { BulkActionEditPayload } from '../../../../../../../common/api/detection_engine/rule_management';
+import { BulkActionEditTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
 import * as i18n from '../../../../../../detections/pages/detection_engine/rules/translations';
 import { caseInsensitiveSort } from '../../helpers';
 
@@ -25,12 +26,11 @@ import {
 } from '../../../../../../shared_imports';
 
 import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';
-import { useTags } from '../../../../../rule_management/logic/use_tags';
 
 type TagsEditActions =
-  | BulkActionEditType.add_tags
-  | BulkActionEditType.delete_tags
-  | BulkActionEditType.set_tags;
+  | BulkActionEditTypeEnum['add_tags']
+  | BulkActionEditTypeEnum['delete_tags']
+  | BulkActionEditTypeEnum['set_tags'];
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -58,7 +58,7 @@ const schema: FormSchema<TagsFormData> = {
 const initialFormData: TagsFormData = { tags: [], overwrite: false };
 
 const getFormConfig = (editAction: TagsEditActions) =>
-  editAction === BulkActionEditType.add_tags
+  editAction === BulkActionEditTypeEnum.add_tags
     ? {
         tagsLabel: i18n.BULK_EDIT_FLYOUT_FORM_ADD_TAGS_LABEL,
         tagsHelpText: i18n.BULK_EDIT_FLYOUT_FORM_ADD_TAGS_HELP_TEXT,
@@ -78,13 +78,16 @@ interface TagsFormProps {
 }
 
 const TagsFormComponent = ({ editAction, rulesCount, onClose, onConfirm }: TagsFormProps) => {
-  const { data: tags = [] } = useTags();
+  const { data: ruleManagementFilters } = useRuleManagementFilters();
   const { form } = useForm({
     defaultValue: initialFormData,
     schema,
   });
   const [{ overwrite }] = useFormData({ form, watch: ['overwrite'] });
-  const sortedTags = useMemo(() => caseInsensitiveSort(tags), [tags]);
+  const sortedTags = useMemo(
+    () => caseInsensitiveSort(ruleManagementFilters?.aggregated_fields.tags ?? []),
+    [ruleManagementFilters]
+  );
 
   const { tagsLabel, tagsHelpText, formTitle } = getFormConfig(editAction);
 
@@ -94,12 +97,10 @@ const TagsFormComponent = ({ editAction, rulesCount, onClose, onConfirm }: TagsF
       return;
     }
 
-    const payload = {
+    onConfirm({
       value: data.tags,
-      type: data.overwrite ? BulkActionEditType.set_tags : editAction,
-    };
-
-    onConfirm(payload);
+      type: data.overwrite ? BulkActionEditTypeEnum.set_tags : editAction,
+    });
   };
 
   return (
@@ -118,7 +119,7 @@ const TagsFormComponent = ({ editAction, rulesCount, onClose, onConfirm }: TagsF
           },
         }}
       />
-      {editAction === BulkActionEditType.add_tags ? (
+      {editAction === BulkActionEditTypeEnum.add_tags ? (
         <CommonUseField
           path="overwrite"
           componentProps={{

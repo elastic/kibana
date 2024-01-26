@@ -10,7 +10,6 @@ import { getOr } from 'lodash/fp';
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type {
   FactoryQueryTypes,
-  MatrixHistogramRequestOptions,
   MatrixHistogramStrategyResponse,
   MatrixHistogramDataConfig,
 } from '../../../../../common/search_strategy/security_solution';
@@ -38,7 +37,7 @@ const matrixHistogramConfig: MatrixHistogramDataConfig = {
 };
 
 export const matrixHistogram: SecuritySolutionFactory<typeof MatrixHistogramQuery> = {
-  buildDsl: (options: MatrixHistogramRequestOptions) => {
+  buildDsl: (options) => {
     const myConfig = getOr(null, options.histogramType, matrixHistogramConfig);
     if (myConfig == null) {
       throw new Error(`This histogram type ${options.histogramType} is unknown to the server side`);
@@ -46,7 +45,7 @@ export const matrixHistogram: SecuritySolutionFactory<typeof MatrixHistogramQuer
     return myConfig.buildDsl(options);
   },
   parse: async (
-    options: MatrixHistogramRequestOptions,
+    options,
     response: IEsSearchResponse<unknown>
   ): Promise<MatrixHistogramStrategyResponse> => {
     const myConfig = getOr(null, options.histogramType, matrixHistogramConfig);

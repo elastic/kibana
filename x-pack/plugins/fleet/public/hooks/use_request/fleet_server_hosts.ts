@@ -6,6 +6,9 @@
  */
 
 import { fleetServerHostsRoutesService } from '../../../common/services';
+
+import { API_VERSIONS } from '../../../common/constants';
+
 import type {
   GetFleetServerHostsResponse,
   PostFleetServerHostsRequest,
@@ -19,6 +22,7 @@ export function useGetFleetServerHosts() {
   return useRequest<GetFleetServerHostsResponse>({
     method: 'get',
     path: fleetServerHostsRoutesService.getListPath(),
+    version: API_VERSIONS.public.v1,
   });
 }
 
@@ -26,6 +30,7 @@ export function sendDeleteFleetServerHost(itemId: string) {
   return sendRequest({
     method: 'delete',
     path: fleetServerHostsRoutesService.getDeletePath(itemId),
+    version: API_VERSIONS.public.v1,
   });
 }
 
@@ -33,6 +38,7 @@ export function sendPutFleetServerHost(itemId: string, body: PutFleetServerHosts
   return sendRequest({
     method: 'put',
     path: fleetServerHostsRoutesService.getUpdatePath(itemId),
+    version: API_VERSIONS.public.v1,
     body,
   });
 }
@@ -41,6 +47,7 @@ export function sendPostFleetServerHost(body: PostFleetServerHostsRequest['body'
   return sendRequest<PostFleetServerHostsResponse>({
     method: 'post',
     path: fleetServerHostsRoutesService.getCreatePath(),
+    version: API_VERSIONS.public.v1,
     body,
   });
 }

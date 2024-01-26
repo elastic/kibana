@@ -17,6 +17,7 @@ export interface ElasticsearchResponse {
 }
 
 export interface ElasticsearchResponseHit {
+  _id: string;
   _index: string;
   _source: ElasticsearchSource;
   inner_hits?: {
@@ -412,10 +413,23 @@ export interface ElasticsearchIndexRecoveryShard {
   };
 }
 
+export interface ElasticsearchMetricbeatIndexRecoveryShard {
+  start_time?: {
+    ms: number;
+  };
+  stop_time?: {
+    ms: number;
+  };
+  total_time?: {
+    ms: number;
+  };
+}
+
 export interface ElasticsearchMetricbeatNode {
   name?: string;
   stats?: ElasticsearchNodeStats;
   master: boolean;
+  roles?: string[];
 }
 
 export interface ElasticsearchMetricbeatSource {
@@ -428,7 +442,7 @@ export interface ElasticsearchMetricbeatSource {
   elasticsearch?: {
     node?: ElasticsearchLegacySource['source_node'] & ElasticsearchMetricbeatNode;
     index?: ElasticsearchIndexStats & {
-      recovery?: ElasticsearchIndexRecoveryShard;
+      recovery?: ElasticsearchMetricbeatIndexRecoveryShard;
     };
     version?: string;
     shard?: ElasticsearchLegacySource['shard'] & {

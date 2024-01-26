@@ -6,31 +6,32 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import {
-  EuiButton,
-  EuiEmptyPrompt,
-  EuiPageTemplate_Deprecated as EuiPageTemplate,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiButton, EuiLink, EuiPageTemplate } from '@elastic/eui';
 import { usePolicyDetailsArtifactsNavigateCallback } from '../../policy_hooks';
 import { useGetLinkTo } from './use_policy_artifacts_empty_hooks';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import type { POLICY_ARTIFACT_EMPTY_UNASSIGNED_LABELS } from './translations';
-import type { EventFiltersPageLocation } from '../../../../event_filters/types';
 import type { ArtifactListPageUrlParams } from '../../../../../components/artifact_list_page';
 interface CommonProps {
   policyId: string;
   policyName: string;
   listId: string;
   labels: typeof POLICY_ARTIFACT_EMPTY_UNASSIGNED_LABELS;
+  canWriteArtifact?: boolean;
   getPolicyArtifactsPath: (policyId: string) => string;
-  getArtifactPath: (
-    location?: Partial<EventFiltersPageLocation> | Partial<ArtifactListPageUrlParams>
-  ) => string;
+  getArtifactPath: (location?: Partial<ArtifactListPageUrlParams>) => string;
 }
 
 export const PolicyArtifactsEmptyUnassigned = memo<CommonProps>(
-  ({ policyId, policyName, listId, labels, getPolicyArtifactsPath, getArtifactPath }) => {
+  ({
+    policyId,
+    policyName,
+    listId,
+    labels,
+    canWriteArtifact = false,
+    getPolicyArtifactsPath,
+    getArtifactPath,
+  }) => {
     const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
     const { onClickHandler, toRouteUrl } = useGetLinkTo(
       policyId,
@@ -48,32 +49,41 @@ export const PolicyArtifactsEmptyUnassigned = memo<CommonProps>(
       [navigateCallback]
     );
     return (
-      <EuiPageTemplate template="centeredContent">
-        <EuiEmptyPrompt
-          iconType="plusInCircle"
-          data-test-subj="policy-artifacts-empty-unassigned"
-          title={<h2>{labels.emptyUnassignedTitle}</h2>}
-          body={labels.emptyUnassignedMessage(policyName)}
-          actions={[
-            ...(canCreateArtifactsByPolicy
-              ? [
-                  <EuiButton
-                    color="primary"
-                    fill
-                    onClick={onClickPrimaryButtonHandler}
-                    data-test-subj="assign-artifacts-button"
-                  >
-                    {labels.emptyUnassignedPrimaryActionButtonTitle}
-                  </EuiButton>,
-                ]
-              : []),
+      <EuiPageTemplate.EmptyPrompt
+        iconType="plusInCircle"
+        data-test-subj="policy-artifacts-empty-unassigned"
+        color="subdued"
+        title={<h2>{labels.emptyUnassignedTitle}</h2>}
+        body={
+          canWriteArtifact
+            ? labels.emptyUnassignedMessage(policyName)
+            : labels.emptyUnassignedNoPrivilegesMessage(policyName)
+        }
+        actions={[
+          ...(canCreateArtifactsByPolicy && canWriteArtifact
+            ? [
+                <EuiButton
+                  color="primary"
+                  fill
+                  onClick={onClickPrimaryButtonHandler}
+                  data-test-subj="unassigned-assign-artifacts-button"
+                >
+                  {labels.emptyUnassignedPrimaryActionButtonTitle}
+                </EuiButton>,
+              ]
+            : []),
+          canWriteArtifact ? (
             // eslint-disable-next-line @elastic/eui/href-or-on-click
-            <EuiLink onClick={onClickHandler} href={toRouteUrl}>
+            <EuiLink
+              onClick={onClickHandler}
+              href={toRouteUrl}
+              data-test-subj="unassigned-manage-artifacts-button"
+            >
               {labels.emptyUnassignedSecondaryActionButtonTitle}
-            </EuiLink>,
-          ]}
-        />
-      </EuiPageTemplate>
+            </EuiLink>
+          ) : null,
+        ]}
+      />
     );
   }
 );

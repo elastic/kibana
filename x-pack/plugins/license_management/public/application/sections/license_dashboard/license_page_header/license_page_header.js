@@ -89,7 +89,7 @@ export const LicensePageHeader = () => {
         <ExpiredLicensePageHeader
           license={license}
           bottomBorder
-          iconType="alert"
+          iconType="warning"
           iconProps={{ color: 'danger' }}
         />
       ) : (

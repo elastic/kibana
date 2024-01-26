@@ -11,12 +11,6 @@ export type {
   UseRequestConfig,
 } from '@kbn/es-ui-shared-plugin/public';
 
-export {
-  sendRequest,
-  useRequest,
-  XJson,
-  PageError,
-  EuiCodeEditor,
-} from '@kbn/es-ui-shared-plugin/public';
+export { sendRequest, useRequest, XJson, PageError } from '@kbn/es-ui-shared-plugin/public';
 
 export { KibanaThemeProvider, useExecutionContext } from '@kbn/kibana-react-plugin/public';

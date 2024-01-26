@@ -8,7 +8,6 @@
 
 import { CspConfig } from './csp_config';
 import { cspConfig, CspConfigType } from './config';
-import { mockConfig } from './csp_config.test.mocks';
 
 // CSP rules aren't strictly additive, so any change can potentially expand or
 // restrict the policy in a way we consider a breaking change. For that reason,
@@ -34,7 +33,8 @@ describe('CspConfig', () => {
     expect(CspConfig.DEFAULT).toMatchInlineSnapshot(`
       CspConfig {
         "disableEmbedding": false,
-        "header": "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+        "disableUnsafeEval": true,
+        "header": "script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'",
         "strict": true,
         "warnLegacyBrowsers": true,
       }
@@ -65,7 +65,7 @@ describe('CspConfig', () => {
         worker_src: ['foo', 'bar'],
       });
       expect(config.header).toEqual(
-        `script-src 'self'; worker-src blob: 'self' foo bar; style-src 'unsafe-inline' 'self'`
+        `script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob: foo bar; style-src 'report-sample' 'self' 'unsafe-inline'`
       );
     });
 
@@ -76,7 +76,7 @@ describe('CspConfig', () => {
       });
 
       expect(config.header).toEqual(
-        `script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self' foo bar`
+        `script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline' foo bar`
       );
     });
 
@@ -87,7 +87,7 @@ describe('CspConfig', () => {
       });
 
       expect(config.header).toEqual(
-        `script-src 'self' foo bar; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+        `script-src 'report-sample' 'self' foo bar; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'`
       );
     });
 
@@ -99,7 +99,7 @@ describe('CspConfig', () => {
         style_src: ['style', 'dolly'],
       });
       expect(config.header).toEqual(
-        `script-src 'self' script foo; worker-src blob: 'self' worker bar; style-src 'unsafe-inline' 'self' style dolly`
+        `script-src 'report-sample' 'self' script foo; worker-src 'report-sample' 'self' blob: worker bar; style-src 'report-sample' 'self' 'unsafe-inline' style dolly`
       );
     });
 
@@ -111,7 +111,7 @@ describe('CspConfig', () => {
         style_src: ['style'],
       });
       expect(config.header).toEqual(
-        `script-src 'self' script; worker-src blob: 'self' worker; style-src 'unsafe-inline' 'self' style`
+        `script-src 'report-sample' 'self' script; worker-src 'report-sample' 'self' blob: worker; style-src 'report-sample' 'self' 'unsafe-inline' style`
       );
     });
 
@@ -124,7 +124,7 @@ describe('CspConfig', () => {
         });
 
         expect(config.header).toEqual(
-          `script-src 'self' foo bar; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+          `script-src 'report-sample' 'self' foo bar; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'`
         );
       });
 
@@ -136,40 +136,19 @@ describe('CspConfig', () => {
         });
 
         expect(config.header).toEqual(
-          `script-src 'self' 'unsafe-eval' foo bar; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+          `script-src 'report-sample' 'self' 'unsafe-eval' foo bar; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'`
         );
       });
 
-      test('when "disableUnsafeEval" is not set, and the default value is "false", the `unsafe-eval` CSP should be set', () => {
-        // The default value for `disableUnsafeEval` depends on whether Kibana is a distributable or not. To test both scenarios, we mock the config.
-        const mockedConfig = mockConfig.create(false).schema.validate({});
-
+      test('when "disableUnsafeEval" is not set, the `unsafe-eval` CSP should not be set', () => {
         const config = new CspConfig({
-          ...mockedConfig,
+          ...defaultConfig,
           script_src: ['foo', 'bar'],
         });
 
         expect(config.header).toEqual(
-          `script-src 'self' 'unsafe-eval' foo bar; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
+          `script-src 'report-sample' 'self' foo bar; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'`
         );
-
-        mockConfig.reset();
-      });
-
-      test('when "disableUnsafeEval" is not set, and the default value is "true", the `unsafe-eval` CSP should not be set', () => {
-        // The default value for `disableUnsafeEval` depends on whether Kibana is a distributable or not. To test both scenarios, we mock the config.
-        const mockedConfig = mockConfig.create(true).schema.validate({});
-
-        const config = new CspConfig({
-          ...mockedConfig,
-          script_src: ['foo', 'bar'],
-        });
-
-        expect(config.header).toEqual(
-          `script-src 'self' foo bar; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
-        );
-
-        mockConfig.reset();
       });
     });
 
@@ -181,7 +160,7 @@ describe('CspConfig', () => {
         expect(config.disableEmbedding).toEqual(disableEmbedding);
         expect(config.disableEmbedding).not.toEqual(CspConfig.DEFAULT.disableEmbedding);
         expect(config.header).toMatchInlineSnapshot(
-          `"script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'; frame-ancestors 'self'"`
+          `"script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; frame-ancestors 'self'"`
         );
       });
 
@@ -194,9 +173,36 @@ describe('CspConfig', () => {
         expect(config.disableEmbedding).toEqual(disableEmbedding);
         expect(config.disableEmbedding).not.toEqual(CspConfig.DEFAULT.disableEmbedding);
         expect(config.header).toMatchInlineSnapshot(
-          `"script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'; frame-ancestors 'self'"`
+          `"script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; frame-ancestors 'self'"`
         );
       });
+    });
+  });
+
+  describe('with additional config', () => {
+    test(`adds, for example, CDN host name to directives along with 'self'`, () => {
+      const config = new CspConfig(defaultConfig, { default_src: ['foo.bar'] });
+      expect(config.header).toEqual(
+        "script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; default-src 'self' foo.bar"
+      );
+    });
+
+    test('Empty additional config does not affect existing config', () => {
+      const config = new CspConfig(defaultConfig, {
+        /* empty */
+      });
+      expect(config.header).toEqual(
+        "script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'"
+      );
+    });
+    test('Passing an empty array in additional config does not affect existing config', () => {
+      const config = new CspConfig(defaultConfig, {
+        default_src: [],
+        worker_src: ['foo.bar'],
+      });
+      expect(config.header).toEqual(
+        "script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob: foo.bar; style-src 'report-sample' 'self' 'unsafe-inline'"
+      );
     });
   });
 });

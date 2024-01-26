@@ -11,16 +11,7 @@ import { i18n } from '@kbn/i18n';
 // eslint-disable-next-line no-restricted-imports
 import isEmpty from 'lodash/isEmpty';
 
-import './brace_imports';
-import {
-  EuiForm,
-  EuiButton,
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiForm, EuiButton, EuiPage, EuiPageBody, EuiPageSection, EuiSpacer } from '@elastic/eui';
 import { EventInput } from '../event_input';
 import { PatternInput } from '../pattern_input';
 import { CustomPatternsInput } from '../custom_patterns_input';
@@ -127,33 +118,31 @@ export class GrokDebuggerComponent extends React.Component {
     return (
       <EuiPage>
         <EuiPageBody>
-          <EuiPageContent>
-            <EuiPageContentBody>
-              <EuiForm className="grokdebugger-container" data-test-subj="grokDebuggerContainer">
-                <EventInput value={this.state.rawEvent} onChange={this.onRawEventChange} />
-                <PatternInput value={this.state.pattern} onChange={this.onPatternChange} />
-                <EuiSpacer />
-                <CustomPatternsInput
-                  value={this.state.customPatterns}
-                  onChange={this.onCustomPatternsChange}
+          <EuiPageSection grow={true} color="plain">
+            <EuiForm className="grokdebugger-container" data-test-subj="grokDebuggerContainer">
+              <EventInput value={this.state.rawEvent} onChange={this.onRawEventChange} />
+              <PatternInput value={this.state.pattern} onChange={this.onPatternChange} />
+              <EuiSpacer />
+              <CustomPatternsInput
+                value={this.state.customPatterns}
+                onChange={this.onCustomPatternsChange}
+              />
+              <EuiSpacer />
+              <EuiButton
+                fill
+                onClick={this.onSimulateClick}
+                isDisabled={this.isSimulateDisabled()}
+                data-test-subj="btnSimulate"
+              >
+                <FormattedMessage
+                  id="xpack.grokDebugger.simulateButtonLabel"
+                  defaultMessage="Simulate"
                 />
-                <EuiSpacer />
-                <EuiButton
-                  fill
-                  onClick={this.onSimulateClick}
-                  isDisabled={this.isSimulateDisabled()}
-                  data-test-subj="btnSimulate"
-                >
-                  <FormattedMessage
-                    id="xpack.grokDebugger.simulateButtonLabel"
-                    defaultMessage="Simulate"
-                  />
-                </EuiButton>
-                <EuiSpacer />
-                <EventOutput value={this.state.structuredEvent} />
-              </EuiForm>
-            </EuiPageContentBody>
-          </EuiPageContent>
+              </EuiButton>
+              <EuiSpacer />
+              <EventOutput value={this.state.structuredEvent} />
+            </EuiForm>
+          </EuiPageSection>
         </EuiPageBody>
       </EuiPage>
     );

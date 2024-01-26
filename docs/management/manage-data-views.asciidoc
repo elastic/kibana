@@ -1,7 +1,8 @@
 [[managing-data-views]]
 == Manage data views
-:keywords: administrator, data view, data views, management, runtime fields, runtime fields in Kibana, scripted fields, field formatters, data fields, index pattern, index patterns
-:description: Conceptual and step-by-step procedures for using runtime fields, scripted fields, and field formatters.
+
+:frontmatter-description: Conceptual and step-by-step procedures for using runtime fields, scripted fields, and field formatters.
+:frontmatter-tags-products: [kibana]
 
 To customize the data fields in your data view,
 you can add runtime fields to the existing documents,

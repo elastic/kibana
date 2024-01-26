@@ -12,6 +12,7 @@ exports[`it renders without crashing 1`] = `
   }
   editable={true}
   indexPatterns={Array []}
+  indexType="indices"
   indicesAPIClient={
     Object {
       "getFields": [MockFunction],

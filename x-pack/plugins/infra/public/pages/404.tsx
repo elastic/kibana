@@ -5,18 +5,23 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
+import { MetricsPageTemplate } from './metrics/page_template';
 
-export class NotFoundPage extends React.PureComponent {
-  public render() {
-    return (
-      <div data-test-subj="infraNotFoundPage">
-        <FormattedMessage
-          id="xpack.infra.notFoundPage.noContentFoundErrorTitle"
-          defaultMessage="No content found"
-        />
-      </div>
-    );
-  }
+interface NotFoundPageProps {
+  title: string;
 }
+
+export const NotFoundPage = ({ title }: NotFoundPageProps) => {
+  return (
+    <MetricsPageTemplate
+      pageHeader={{
+        pageTitle: title,
+      }}
+      data-test-subj="infraNotFoundPage"
+    >
+      <NotFoundPrompt />
+    </MetricsPageTemplate>
+  );
+};

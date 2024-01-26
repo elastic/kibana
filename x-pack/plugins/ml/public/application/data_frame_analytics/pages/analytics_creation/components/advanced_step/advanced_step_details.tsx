@@ -15,11 +15,11 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { ANALYSIS_CONFIG_TYPE } from '@kbn/ml-data-frame-analytics-utils';
 import {
   UNSET_CONFIG_ITEM,
   State,
 } from '../../../analytics_management/hooks/use_create_analytics_form/state';
-import { ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
 import { ANALYTICS_STEPS } from '../../page';
 
 function getStringValue(value: number | undefined) {

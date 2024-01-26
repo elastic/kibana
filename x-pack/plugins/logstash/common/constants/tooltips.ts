@@ -38,7 +38,7 @@ export const TOOLTIPS = {
     'queue.type': i18n.translate('xpack.logstash.queueTypeTooltip', {
       defaultMessage:
         'The internal queuing model to use for event buffering. Specify memory for ' +
-        'legacy in-memory based queuing, or persisted for disk-based ACKed queueing\n\n' +
+        'in-memory based queuing, or persisted for disk-based ACKed queueing\n\n' +
         'Default value: memory',
     }),
 

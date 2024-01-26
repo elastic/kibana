@@ -27,11 +27,15 @@ export function TransactionMetadata({ transaction }: Props) {
               processorEvent: ProcessorEvent.transaction,
               id: transaction.transaction.id,
             },
+            query: {
+              start: transaction['@timestamp'],
+              end: transaction['@timestamp'],
+            },
           },
         }
       );
     },
-    [transaction.transaction.id]
+    [transaction]
   );
 
   const sections = useMemo(

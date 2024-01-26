@@ -22,6 +22,15 @@ export class CoreHttpPlugin implements Plugin {
         return res.ok();
       }
     );
+    router.get(
+      {
+        path: '/api/core_http/headers',
+        validate: false,
+      },
+      async (ctx, req, res) => {
+        return res.ok({ body: req.headers });
+      }
+    );
   }
 
   public start() {}

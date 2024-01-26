@@ -312,6 +312,7 @@ function createNewLayerWithMetricAggregationFromVizEditor(
 ) {
   const columns = convertToColumnChange(layer.columns, indexPattern);
   let newLayer: FormBasedLayer = {
+    ignoreGlobalFilters: layer.ignoreGlobalFilters,
     indexPatternId: indexPattern.id,
     columns: {},
     columnOrder: [],

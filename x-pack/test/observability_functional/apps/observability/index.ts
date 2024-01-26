@@ -12,6 +12,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./pages/alerts'));
     loadTestFile(require.resolve('./pages/alerts/add_to_case'));
     loadTestFile(require.resolve('./pages/alerts/alert_status'));
+    loadTestFile(require.resolve('./pages/alerts/alert_summary_widget'));
     loadTestFile(require.resolve('./pages/alerts/pagination'));
     loadTestFile(require.resolve('./pages/alerts/rule_stats'));
     loadTestFile(require.resolve('./pages/alerts/state_synchronization'));

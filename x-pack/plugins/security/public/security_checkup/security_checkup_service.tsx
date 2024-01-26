@@ -16,9 +16,9 @@ import type {
   Toast,
 } from '@kbn/core/public';
 
+import { insecureClusterAlertText, insecureClusterAlertTitle } from './components';
 import type { SecurityCheckupState } from '../../common/types';
 import type { ConfigType } from '../config';
-import { insecureClusterAlertText, insecureClusterAlertTitle } from './components';
 
 interface SetupDeps {
   http: HttpSetup;
@@ -85,7 +85,7 @@ export class SecurityCheckupService {
               text: insecureClusterAlertText(docLinks, (persist: boolean) =>
                 this.setAlertVisibility(false, persist)
               ),
-              iconType: 'alert',
+              iconType: 'warning',
             },
             {
               toastLifeTimeMs: tenDays,

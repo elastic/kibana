@@ -5,82 +5,90 @@
  * 2.0.
  */
 
-import { login } from '../../tasks/login';
+import {
+  activeStateSwitchComponentSelector,
+  customActionEditSavedQuerySelector,
+  customActionRunSavedQuerySelector,
+  formFieldInputSelector,
+} from '../../screens/packs';
 import { navigateTo } from '../../tasks/navigation';
-import { ROLES } from '../../test';
-import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
+import {
+  cleanupPack,
+  cleanupSavedQuery,
+  loadLiveQuery,
+  loadPack,
+  loadSavedQuery,
+} from '../../tasks/api_fixtures';
+import { ServerlessRoleName } from '../../support/roles';
 
-describe('Reader - only READ', () => {
-  const SAVED_QUERY_ID = 'Saved-Query-Id';
+describe('Reader - only READ', { tags: ['@ess'] }, () => {
+  let savedQueryName: string;
+  let savedQueryId: string;
+  let packName: string;
+  let packId: string;
+  let liveQueryQuery: string;
+
+  before(() => {
+    loadPack().then((data) => {
+      packId = data.saved_object_id;
+      packName = data.name;
+    });
+    loadSavedQuery().then((data) => {
+      savedQueryId = data.saved_object_id;
+      savedQueryName = data.id;
+    });
+    loadLiveQuery().then((data) => {
+      liveQueryQuery = data.queries?.[0].query;
+    });
+  });
 
   beforeEach(() => {
-    login(ROLES.reader);
-  });
-  before(() => {
-    runKbnArchiverScript(ArchiverMethod.LOAD, 'saved_query');
+    cy.login(ServerlessRoleName.READER);
   });
 
   after(() => {
-    runKbnArchiverScript(ArchiverMethod.UNLOAD, 'saved_query');
+    cleanupSavedQuery(savedQueryId);
+    cleanupPack(packId);
   });
 
   it('should not be able to add nor run saved queries', () => {
     navigateTo('/app/osquery/saved_queries');
-    cy.waitForReact(1000);
-    cy.getBySel('pagination-button-next').click();
-    cy.contains(SAVED_QUERY_ID);
+    cy.contains(savedQueryName);
     cy.contains('Add saved query').should('be.disabled');
-    cy.react('PlayButtonComponent', {
-      props: { savedQuery: { attributes: { id: SAVED_QUERY_ID } } },
-      options: { timeout: 3000 },
-    }).should('not.exist');
-    cy.react('CustomItemAction', {
-      props: { index: 1, item: { attributes: { id: SAVED_QUERY_ID } } },
-    }).click();
-    cy.react('EuiFormRow', { props: { label: 'ID' } })
-      .getBySel('input')
-      .should('be.disabled');
-    cy.react('EuiFormRow', { props: { label: 'Description (optional)' } })
-      .getBySel('input')
-      .should('be.disabled');
+    cy.get(customActionRunSavedQuerySelector(savedQueryName)).should('not.exist');
+    cy.get(customActionEditSavedQuerySelector(savedQueryName)).click();
+    cy.get(formFieldInputSelector('id')).should('be.disabled');
+    cy.get(formFieldInputSelector('description')).should('be.disabled');
 
     cy.contains('Update query').should('not.exist');
     cy.contains(`Delete query`).should('not.exist');
   });
+
   it('should not be able to enter live queries with just read and no run saved queries', () => {
     navigateTo('/app/osquery/live_queries/new');
-    cy.waitForReact(1000);
     cy.contains('Permission denied');
   });
+
   it('should not be able to play in live queries history', () => {
     navigateTo('/app/osquery/live_queries');
-    cy.waitForReact(1000);
     cy.contains('New live query').should('be.disabled');
-    cy.contains('select * from uptime');
-    cy.react('EuiIconPlay', { options: { timeout: 3000 } }).should('not.exist');
-    cy.react('ActionTableResultsButton').should('exist');
+    cy.contains(liveQueryQuery);
+    cy.get(customActionRunSavedQuerySelector(savedQueryName)).should('not.exist');
+    cy.get(`[aria-label="Details"]`).should('exist');
   });
-  it('should not be able to add nor edit packs', () => {
-    const PACK_NAME = 'removing-pack';
 
+  it('should not be able to add nor edit packs', () => {
     navigateTo('/app/osquery/packs');
-    cy.waitForReact(1000);
     cy.contains('Add pack').should('be.disabled');
-    cy.react('ActiveStateSwitchComponent', {
-      props: { item: { attributes: { name: PACK_NAME } } },
-    })
-      .find('button')
-      .should('be.disabled');
-    cy.contains(PACK_NAME).click();
-    cy.contains(`${PACK_NAME} details`);
+    cy.getBySel('tablePaginationPopoverButton').click();
+    cy.getBySel('tablePagination-50-rows').click();
+
+    cy.get(activeStateSwitchComponentSelector(packName)).should('be.disabled');
+
+    cy.contains(packName).click();
+    cy.contains(`${packName} details`);
     cy.contains('Edit').should('be.disabled');
-    cy.react('CustomItemAction', {
-      props: { index: 0, item: { id: SAVED_QUERY_ID } },
-      options: { timeout: 3000 },
-    }).should('not.exist');
-    cy.react('CustomItemAction', {
-      props: { index: 1, item: { id: SAVED_QUERY_ID } },
-      options: { timeout: 3000 },
-    }).should('not.exist');
+    cy.get(customActionRunSavedQuerySelector(savedQueryName)).should('not.exist');
+    cy.get(customActionEditSavedQuerySelector(savedQueryName)).should('not.exist');
   });
 });

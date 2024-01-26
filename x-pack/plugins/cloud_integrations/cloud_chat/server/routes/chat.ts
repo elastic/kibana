@@ -8,8 +8,9 @@
 import { IRouter } from '@kbn/core/server';
 import type { SecurityPluginSetup, AuthenticatedUser } from '@kbn/security-plugin/server';
 import { GET_CHAT_USER_DATA_ROUTE_PATH } from '../../common/constants';
-import type { GetChatUserDataResponseBody } from '../../common/types';
+import type { GetChatUserDataResponseBody, ChatVariant } from '../../common/types';
 import { generateSignedJwt } from '../util/generate_jwt';
+import { isTodayInDateWindow } from '../../common/util';
 
 type MetaWithSaml = AuthenticatedUser['metadata'] & {
   saml_name: [string];
@@ -21,13 +22,25 @@ type MetaWithSaml = AuthenticatedUser['metadata'] & {
 export const registerChatRoute = ({
   router,
   chatIdentitySecret,
+  trialEndDate,
+  trialBuffer,
   security,
   isDev,
+  getChatVariant,
+  getChatDisabledThroughExperiments,
 }: {
   router: IRouter;
   chatIdentitySecret: string;
+  trialEndDate?: Date;
+  trialBuffer: number;
   security?: SecurityPluginSetup;
   isDev: boolean;
+  getChatVariant: () => Promise<ChatVariant>;
+  /**
+   * Returns true if chat is disabled in LaunchDarkly
+   * Meant to be used as a runtime kill switch
+   */
+  getChatDisabledThroughExperiments: () => Promise<boolean>;
 }) => {
   if (!security) {
     return;
@@ -61,11 +74,30 @@ export const registerChatRoute = ({
         });
       }
 
+      if (!trialEndDate) {
+        return response.badRequest({
+          body: 'Chat can only be started if a trial end date is specified',
+        });
+      }
+
+      if (!trialEndDate || !isTodayInDateWindow(trialEndDate, trialBuffer)) {
+        return response.badRequest({
+          body: 'Chat can only be started during trial and trial chat buffer',
+        });
+      }
+
+      if (await getChatDisabledThroughExperiments()) {
+        return response.badRequest({
+          body: 'Chat is disabled through experiments',
+        });
+      }
+
       const token = generateSignedJwt(userId, chatIdentitySecret);
       const body: GetChatUserDataResponseBody = {
         token,
         email: userEmail,
         id: userId,
+        chatVariant: await getChatVariant(),
       };
       return response.ok({ body });
     }

@@ -17,6 +17,8 @@ import {
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { act } from '@testing-library/react-hooks';
 
+const apiVersion = '2023-10-31';
+
 describe('Bulk update artifact hook', () => {
   let result: ReturnType<typeof useBulkUpdateArtifact>;
 
@@ -57,9 +59,11 @@ describe('Bulk update artifact hook', () => {
       expect(fakeHttpServices.put).toHaveBeenCalledTimes(2);
       expect(fakeHttpServices.put).toHaveBeenNthCalledWith(1, '/api/exception_lists/items', {
         body: JSON.stringify(ExceptionsListApiClient.cleanExceptionsBeforeUpdate(exceptionItem1)),
+        version: apiVersion,
       });
       expect(fakeHttpServices.put).toHaveBeenNthCalledWith(2, '/api/exception_lists/items', {
         body: JSON.stringify(ExceptionsListApiClient.cleanExceptionsBeforeUpdate(exceptionItem2)),
+        version: apiVersion,
       });
     });
   });

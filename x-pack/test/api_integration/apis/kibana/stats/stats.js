@@ -30,8 +30,9 @@ export default function ({ getService }) {
           expect(isUUID(body.kibana.uuid)).to.be.ok();
         });
 
-        it('should return 401 for extended', async () => {
-          await supertestNoAuth.get('/api/stats?extended').auth(null, null).expect(401);
+        it('should return 200 for extended', async () => {
+          const { body } = await supertestNoAuth.get('/api/stats').expect(200);
+          expect(isUUID(body.kibana.uuid)).to.be.ok();
         });
       });
 

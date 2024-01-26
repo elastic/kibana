@@ -6,8 +6,8 @@
  */
 
 import React, { memo } from 'react';
-import { Switch, Redirect } from 'react-router-dom';
-import { Route } from '@kbn/kibana-react-plugin/public';
+import { Redirect } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import {
@@ -31,7 +31,6 @@ import { useUserPrivileges } from '../../common/components/user_privileges';
 import { HostIsolationExceptionsContainer } from './host_isolation_exceptions';
 import { BlocklistContainer } from './blocklist';
 import { ResponseActionsContainer } from './response_actions';
-import { useCanSeeHostIsolationExceptionsMenu } from './host_isolation_exceptions/view/hooks';
 import { PrivilegedRoute } from '../components/privileged_route';
 
 const EndpointTelemetry = () => (
@@ -85,9 +84,8 @@ export const ManagementContainer = memo(() => {
     canReadEventFilters,
     canReadActionsLogManagement,
     canReadEndpointList,
+    canReadHostIsolationExceptions,
   } = useUserPrivileges().endpointPrivileges;
-
-  const canSeeHostIsolationExceptionsPage = useCanSeeHostIsolationExceptionsMenu();
 
   // Lets wait until we can verify permissions
   if (loading) {
@@ -95,7 +93,7 @@ export const ManagementContainer = memo(() => {
   }
 
   return (
-    <Switch>
+    <Routes>
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_ENDPOINTS_PATH}
         component={EndpointTelemetry}
@@ -119,7 +117,7 @@ export const ManagementContainer = memo(() => {
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH}
         component={HostIsolationExceptionsTelemetry}
-        hasPrivilege={canSeeHostIsolationExceptionsPage}
+        hasPrivilege={canReadHostIsolationExceptions}
       />
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_BLOCKLIST_PATH}
@@ -138,7 +136,7 @@ export const ManagementContainer = memo(() => {
         </Route>
       )}
       <Route path="*" component={NotFoundPage} />
-    </Switch>
+    </Routes>
   );
 });
 

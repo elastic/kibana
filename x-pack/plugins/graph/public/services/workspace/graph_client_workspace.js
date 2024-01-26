@@ -9,6 +9,7 @@ import $ from 'jquery';
 
 // Kibana wrapper
 import d3 from 'd3';
+import { getIcon } from '../../helpers/style_choices';
 
 // Pluggable function to handle the comms with a server. Default impl here is
 // for use outside of Kibana server with direct access to elasticsearch
@@ -391,7 +392,9 @@ function GraphWorkspace(options) {
   };
 
   // ======= Miscellaneous functions
-
+  /**
+   * @type void
+   */
   this.clearGraph = function () {
     this.stopLayout();
     this.nodes = [];
@@ -487,13 +490,18 @@ function GraphWorkspace(options) {
 
   //====== Layout functions ========
 
+  /**
+   * @type void
+   */
   this.stopLayout = function () {
     if (this.force) {
       this.force.stop();
     }
     this.force = null;
   };
-
+  /**
+   * @type void
+   */
   this.runLayout = function () {
     this.stopLayout();
     // The set of nodes and edges we present to the d3 layout algorithms
@@ -842,7 +850,7 @@ function GraphWorkspace(options) {
         id: dedupedNode.id,
         label: label,
         color: dedupedNode.color,
-        icon: dedupedNode.icon,
+        icon: getIcon(dedupedNode.icon),
         data: dedupedNode,
       };
       //        node.scaledSize = sizeScale(node.data.weight);
@@ -1040,7 +1048,7 @@ function GraphWorkspace(options) {
         targetFields.some((fieldDef) => {
           if (node.field === fieldDef.name) {
             node.color = fieldDef.color;
-            node.icon = fieldDef.icon;
+            node.icon = getIcon(fieldDef.icon);
             node.fieldDef = fieldDef;
             return true;
           }
@@ -1556,7 +1564,7 @@ function GraphWorkspace(options) {
         self.options.vertex_fields.some((fieldDef) => {
           if (node.field === fieldDef.name) {
             node.color = fieldDef.color;
-            node.icon = fieldDef.icon;
+            node.icon = getIcon(fieldDef.icon);
             node.fieldDef = fieldDef;
             return true;
           }

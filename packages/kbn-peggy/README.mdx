@@ -1,0 +1,19 @@
+---
+id: kibDevDocsOpsPeggy
+slug: /kibana-dev-docs/ops/peggy
+title: "@kbn/peggy"
+description: A package which wraps the peggy library for use in Kibana
+date: 2022-05-18
+tags: ['kibana', 'dev', 'contributor', 'operations', 'peggy']
+---
+
+This package wraps the peggy package, exposing a synchronous and async version of the generator which includes two modifications:
+
+ 1. When a `path` is provided a `${basename}.config.json` file will be loaded if it exists and is expected to include peggy config options as defined in [the peggy docs](https://peggyjs.org/documentation.html#generating-a-parser-javascript-api). This config will be used when compiling this file
+
+## Plugins
+These types will automatically be included for plugins.
+
+## Packages
+
+To include these types in a package add `"@kbn/ambient-ui-types"` to the `types` portion of the `tsconfig.json` file.

@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { apm } from '../../lib/apm';
-import { timerange } from '../../lib/timerange';
-import { getTransactionMetrics } from '../../lib/apm/processors/get_transaction_metrics';
-import { StreamProcessor } from '../../lib/stream_processor';
-import { ApmFields } from '../../lib/apm/apm_fields';
+import { apm, timerange, ApmFields } from '@kbn/apm-synthtrace-client';
+import { sortBy } from 'lodash';
+import { Readable } from 'stream';
+import { createTransactionMetricsAggregator } from '../../lib/apm/aggregators/create_transaction_metrics_aggregator';
+import { awaitStream } from '../../lib/utils/wait_until_stream_finished';
 
 describe('transaction metrics', () => {
   let events: Array<Record<string, any>>;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     const javaService = apm.service({
       name: 'opbeans-java',
       environment: 'production',
@@ -34,22 +34,28 @@ describe('transaction metrics', () => {
         .duration(1000)
         .timestamp(timestamp);
 
-    const processor = new StreamProcessor<ApmFields>({
-      processors: [getTransactionMetrics],
-      flushInterval: '15m',
-    });
-    events = processor
-      .streamToArray(
+    const serialized = [
+      ...Array.from(
         range
           .interval('1m')
           .rate(25)
-          .generator((timestamp) => span(timestamp).success()),
+          .generator((timestamp) => span(timestamp).success())
+      ),
+      ...Array.from(
         range
           .interval('1m')
           .rate(50)
           .generator((timestamp) => span(timestamp).failure())
+      ),
+    ].flatMap((event) => event.serialize());
+
+    events = (
+      await awaitStream<ApmFields>(
+        Readable.from(sortBy(serialized, '@timestamp')).pipe(
+          createTransactionMetricsAggregator('1m')
+        )
       )
-      .filter((fields) => fields['metricset.name'] === 'transaction');
+    ).filter((field) => field['metricset.name'] === 'transaction');
   });
 
   it('generates the right amount of transaction metrics', () => {

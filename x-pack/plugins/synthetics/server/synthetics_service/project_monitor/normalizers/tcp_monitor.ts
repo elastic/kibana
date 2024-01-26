@@ -8,7 +8,7 @@ import { get } from 'lodash';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import {
   ConfigKey,
-  DataStream,
+  MonitorTypeEnum,
   FormMonitorType,
   TCPFields,
   TLSVersion,
@@ -20,8 +20,9 @@ import {
   getNormalizeCommonFields,
   getOptionalArrayField,
   getOptionalListField,
-  getMultipleUrlsOrHostsError,
+  getInvalidUrlsOrHostsError,
   getUnsupportedKeysError,
+  getHasTLSFields,
 } from './common_fields';
 
 export const getNormalizeTCPFields = ({
@@ -32,11 +33,11 @@ export const getNormalizeTCPFields = ({
   namespace,
   version,
 }: NormalizedProjectProps): NormalizerResult<TCPFields> => {
-  const defaultFields = DEFAULT_FIELDS[DataStream.TCP];
+  const defaultFields = DEFAULT_FIELDS[MonitorTypeEnum.TCP];
   const errors = [];
   const { yamlConfig, unsupportedKeys } = normalizeYamlConfig(monitor);
 
-  const commonFields = getNormalizeCommonFields({
+  const { errors: commonErrors, normalizedFields: commonFields } = getNormalizeCommonFields({
     locations,
     privateLocations,
     monitor,
@@ -45,10 +46,13 @@ export const getNormalizeTCPFields = ({
     version,
   });
 
+  // Add common erros to errors arary
+  errors.push(...commonErrors);
+
   /* Check if monitor has multiple hosts */
   const hosts = getOptionalListField(monitor.hosts);
-  if (hosts.length > 1) {
-    errors.push(getMultipleUrlsOrHostsError(monitor, 'hosts', version));
+  if (hosts.length !== 1) {
+    errors.push(getInvalidUrlsOrHostsError(monitor, 'hosts', version));
   }
 
   if (unsupportedKeys.length) {
@@ -58,13 +62,17 @@ export const getNormalizeTCPFields = ({
   const normalizedFields = {
     ...yamlConfig,
     ...commonFields,
-    [ConfigKey.MONITOR_TYPE]: DataStream.TCP,
+    [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.TCP,
     [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.TCP,
     [ConfigKey.HOSTS]:
       getOptionalArrayField(monitor[ConfigKey.HOSTS]) || defaultFields[ConfigKey.HOSTS],
     [ConfigKey.TLS_VERSION]: get(monitor, ConfigKey.TLS_VERSION)
       ? (getOptionalListField(get(monitor, ConfigKey.TLS_VERSION)) as TLSVersion[])
       : defaultFields[ConfigKey.TLS_VERSION],
+    [ConfigKey.METADATA]: {
+      ...DEFAULT_FIELDS[MonitorTypeEnum.TCP][ConfigKey.METADATA],
+      is_tls_enabled: getHasTLSFields(monitor),
+    },
   };
   return {
     normalizedFields: {

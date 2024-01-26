@@ -13,7 +13,6 @@ import {
   EuiCallOut,
   EuiEmptyPrompt,
   EuiText,
-  EuiTitle,
   EuiFieldSearch,
   EuiFormRow,
 } from '@elastic/eui';
@@ -163,54 +162,66 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
           <EuiSpacer />
         </Fragment>
       ) : null}
-      <EuiTitle size="xs">
-        <h5>
+      <EuiFormRow
+        fullWidth
+        label={
           <FormattedMessage
             id="xpack.stackAlerts.threshold.ui.selectIndex"
-            defaultMessage="Select an index"
+            defaultMessage="Select indices"
           />
-        </h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <IndexSelectPopover
-        index={indexArray}
-        data-test-subj="indexSelectPopover"
-        esFields={esFields}
-        timeField={timeField}
-        errors={errors}
-        onIndexChange={async (indices: string[]) => {
-          setRuleParams('index', indices);
+        }
+      >
+        <IndexSelectPopover
+          index={indexArray}
+          data-test-subj="indexSelectPopover"
+          esFields={esFields}
+          timeField={timeField}
+          errors={errors}
+          onIndexChange={async (indices: string[]) => {
+            setRuleParams('index', indices);
 
-          // reset expression fields if indices are deleted
-          if (indices.length === 0) {
-            setRuleProperty('params', {
-              ...ruleParams,
-              index: indices,
-              aggType: DEFAULT_VALUES.AGGREGATION_TYPE,
-              termSize: DEFAULT_VALUES.TERM_SIZE,
-              thresholdComparator: DEFAULT_VALUES.THRESHOLD_COMPARATOR,
-              timeWindowSize: DEFAULT_VALUES.TIME_WINDOW_SIZE,
-              timeWindowUnit: DEFAULT_VALUES.TIME_WINDOW_UNIT,
-              groupBy: DEFAULT_VALUES.GROUP_BY,
-              threshold: DEFAULT_VALUES.THRESHOLD,
-              timeField: '',
-            });
-          } else {
-            await refreshEsFields(indices);
+            // reset expression fields if indices are deleted
+            if (indices.length === 0) {
+              setRuleProperty('params', {
+                ...ruleParams,
+                index: indices,
+                aggType: DEFAULT_VALUES.AGGREGATION_TYPE,
+                termSize: DEFAULT_VALUES.TERM_SIZE,
+                thresholdComparator: DEFAULT_VALUES.THRESHOLD_COMPARATOR,
+                timeWindowSize: DEFAULT_VALUES.TIME_WINDOW_SIZE,
+                timeWindowUnit: DEFAULT_VALUES.TIME_WINDOW_UNIT,
+                groupBy: DEFAULT_VALUES.GROUP_BY,
+                threshold: DEFAULT_VALUES.THRESHOLD,
+                timeField: '',
+              });
+            } else {
+              await refreshEsFields(indices);
+            }
+          }}
+          onTimeFieldChange={(updatedTimeField: string) =>
+            setRuleParams('timeField', updatedTimeField)
           }
-        }}
-        onTimeFieldChange={(updatedTimeField: string) =>
-          setRuleParams('timeField', updatedTimeField)
+        />
+      </EuiFormRow>
+      <EuiSpacer />
+      <EuiFormRow
+        fullWidth
+        label={
+          <FormattedMessage
+            id="xpack.stackAlerts.threshold.ui.conditionPrompt"
+            defaultMessage="Define the condition"
+          />
         }
-      />
-      <WhenExpression
-        display="fullWidth"
-        data-test-subj="whenExpression"
-        aggType={aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE}
-        onChangeSelectedAggType={(selectedAggType: string) =>
-          setRuleParams('aggType', selectedAggType)
-        }
-      />
+      >
+        <WhenExpression
+          display="fullWidth"
+          data-test-subj="whenExpression"
+          aggType={aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE}
+          onChangeSelectedAggType={(selectedAggType: string) =>
+            setRuleParams('aggType', selectedAggType)
+          }
+        />
+      </EuiFormRow>
       {aggType && builtInAggregationTypes[aggType].fieldRequired ? (
         <OfExpression
           aggField={aggField}
@@ -238,16 +249,6 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
         }
         onChangeSelectedTermSize={(selectedTermSize) => setRuleParams('termSize', selectedTermSize)}
       />
-      <EuiSpacer />
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.stackAlerts.threshold.ui.conditionPrompt"
-            defaultMessage="Define the condition"
-          />
-        </h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
       <ThresholdExpression
         thresholdComparator={thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR}
         threshold={threshold}
@@ -276,19 +277,21 @@ export const IndexThresholdRuleTypeExpression: React.FunctionComponent<
           setRuleParams('timeWindowUnit', selectedWindowUnit)
         }
       />
-      <EuiSpacer />
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.stackAlerts.threshold.ui.filterTitle"
-            defaultMessage="Filter (Optional)"
-          />
-        </h5>
-      </EuiTitle>
       <EuiSpacer size="s" />
       <EuiFormRow
+        label={i18n.translate('xpack.stackAlerts.threshold.ui.filterTitle', {
+          defaultMessage: 'Filter',
+        })}
+        labelAppend={
+          <EuiText color="subdued" size="xs">
+            <FormattedMessage
+              id="xpack.stackAlerts.threshold.ui.filter.optional"
+              defaultMessage="Optional"
+            />
+          </EuiText>
+        }
         helpText={i18n.translate('xpack.stackAlerts.threshold.ui.filterKQLHelpText', {
-          defaultMessage: 'Use a KQL expression to limit the scope of your alert trigger.',
+          defaultMessage: 'Use a KQL expression to limit the scope of your alerts.',
         })}
         fullWidth
         display="rowCompressed"

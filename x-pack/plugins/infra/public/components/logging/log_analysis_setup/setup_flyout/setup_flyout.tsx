@@ -34,7 +34,12 @@ export const LogAnalysisSetupFlyout: React.FC<{
   }
 
   return (
-    <EuiFlyout aria-labelledby={FLYOUT_HEADING_ID} maxWidth={800} onClose={closeFlyout}>
+    <EuiFlyout
+      aria-labelledby={FLYOUT_HEADING_ID}
+      maxWidth={800}
+      onClose={closeFlyout}
+      data-test-subj="infraLogAnalysisSetupFlyout"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
           <h2 id={FLYOUT_HEADING_ID}>
@@ -88,6 +93,7 @@ const LogAnalysisSetupFlyoutSubPage: React.FC<{
     {onViewModuleList ? (
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
+          data-test-subj="infraLogAnalysisSetupFlyoutSubPageAllMachineLearningJobsButton"
           flush="left"
           iconSide="left"
           iconType="arrowLeft"

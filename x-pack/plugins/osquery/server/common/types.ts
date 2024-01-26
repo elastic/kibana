@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import type { SavedObject } from '@kbn/core/server';
-
 export interface IQueryPayload {
-  attributes?: {
-    name: string;
-    id: string;
-  };
+  name: string;
+  id: string;
 }
 
 export type SOShard = Array<{ key: string; value: number }>;
 
-export interface PackSavedObjectAttributes {
+export interface PackSavedObject {
+  saved_object_id: string;
   name: string;
   description: string | undefined;
   queries: Array<{
@@ -24,6 +21,7 @@ export interface PackSavedObjectAttributes {
     name: string;
     query: string;
     interval: number;
+    timeout?: number;
     snapshot?: boolean;
     removed?: boolean;
     ecs_mapping?: Record<string, unknown>;
@@ -36,23 +34,27 @@ export interface PackSavedObjectAttributes {
   updated_by: string | undefined;
   policy_ids?: string[];
   shards: SOShard;
+  references: Array<{ name: string; type: string; id: string }>;
 }
 
-export type PackSavedObject = SavedObject<PackSavedObjectAttributes>;
-
-export interface SavedQuerySavedObjectAttributes {
+export interface SavedQuerySavedObject {
   id: string;
   description: string | undefined;
   query: string;
   interval: number | string;
+  timeout?: number;
   snapshot?: boolean;
   removed?: boolean;
   platform: string;
-  ecs_mapping?: Array<Record<string, unknown>>;
+  ecs_mapping?: Array<{ key: string; value: Record<string, object> }>;
   created_at: string;
   created_by: string | undefined;
   updated_at: string;
   updated_by: string | undefined;
+  prebuilt?: boolean;
+  version: number;
 }
 
-export type SavedQuerySavedObject = SavedObject<PackSavedObjectAttributes>;
+export interface HTTPError extends Error {
+  statusCode: number;
+}

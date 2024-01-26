@@ -28,7 +28,9 @@ const mockRouteContext = {
 const workpad = workpads[0];
 const now = new Date();
 
-jest.mock('uuid/v4', () => jest.fn().mockReturnValue('123abc'));
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('123abc'),
+}));
 
 describe('PUT workpad', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -40,7 +42,8 @@ describe('PUT workpad', () => {
     const routerDeps = getMockedRouterDeps();
     initializeUpdateWorkpadRoute(routerDeps);
 
-    routeHandler = routerDeps.router.put.mock.calls[0][1];
+    routeHandler =
+      routerDeps.router.versioned.put.mock.results[0].value.addVersion.mock.calls[0][1];
   });
 
   afterEach(() => {
@@ -131,7 +134,8 @@ describe('update assets', () => {
     const routerDeps = getMockedRouterDeps();
     initializeUpdateWorkpadAssetsRoute(routerDeps);
 
-    routeHandler = routerDeps.router.put.mock.calls[0][1];
+    routeHandler =
+      routerDeps.router.versioned.put.mock.results[0].value.addVersion.mock.calls[0][1];
   });
 
   afterEach(() => {

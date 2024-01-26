@@ -1,7 +1,16 @@
-summary: A list of three users that opened cases
+summary: A list of two users that opened cases
 value: 
   [
-    {"username":"elastic","full_name":null,"email":null},
-    {"username":"user1","full_name":"User 1","email":"user1@elastic.co"},
-    {"username":"user2","full_name":"User 2","email":"user2@elastic.co"}
+    {
+      "username":"elastic",
+      "full_name":null,
+      "email":null,
+      "profile_uid": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0"
+    },
+    {
+      "username":"jdoe",
+      "full_name":"Jane Doe",
+      "email":"jdoe@example.com",
+      "profile_uid": "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
+    }
   ]

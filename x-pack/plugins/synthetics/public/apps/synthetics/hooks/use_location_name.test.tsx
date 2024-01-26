@@ -8,8 +8,9 @@ import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { useLocationName } from './use_location_name';
 import { WrappedHelper } from '../utils/testing';
+import { MonitorOverviewItem } from '../../../../common/runtime_types';
 
-describe('useMonitorListFilters', () => {
+describe('useLocationName', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -47,8 +48,8 @@ describe('useMonitorListFilters', () => {
     const { result } = renderHook(
       () =>
         useLocationName({
-          locationId: 'us_central',
-        }),
+          location: { id: 'us_central' },
+        } as MonitorOverviewItem),
       { wrapper: WrapperWithState }
     );
     expect(result.current).toEqual('US Central');
@@ -87,8 +88,8 @@ describe('useMonitorListFilters', () => {
     const { result } = renderHook(
       () =>
         useLocationName({
-          locationId: 'us_west',
-        }),
+          location: { id: 'us_west' },
+        } as MonitorOverviewItem),
       { wrapper: WrapperWithState }
     );
     expect(result.current).toEqual('us_west');

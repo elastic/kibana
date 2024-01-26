@@ -10,6 +10,8 @@ To help surface potential issues, services are sorted by their health status:
 Health status is powered by <<machine-learning-integration,machine learning>>
 and requires anomaly detection to be enabled.
 
+In addition to health status, active alerts for each service are prominently displayed in the service inventory table. Selecting an active alert badge brings you to the <<apm-alerts,Alerts>> tab where you can learn more about the active alert and take action.
+
 [role="screenshot"]
 image::apm/images/apm-services-overview.png[Example view of services table the APM app in Kibana]
 
@@ -17,11 +19,14 @@ image::apm/images/apm-services-overview.png[Example view of services table the A
 [[service-groups]]
 ==== Service groups
 
-preview::[]
+beta::[]
 
-Group services together to build meaningful views that remove noise and simplify investigations across services.
+Group services together to build meaningful views that remove noise, simplify investigations across services,
+and <<apm-alert-view-group,combine related alerts>>.
 Service groups are {kib} space-specific and available for any users with appropriate access.
 
+// This screenshot is reused in the alerts docs
+// Ensure it has an active alert showing
 [role="screenshot"]
 image::apm/images/apm-service-group.png[Example view of service group in the APM app in Kibana]
 

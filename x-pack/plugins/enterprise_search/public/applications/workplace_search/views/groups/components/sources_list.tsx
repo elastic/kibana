@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiFilterSelectItem } from '@elastic/eui';
+import { EuiFilterSelectItem, useEuiTheme } from '@elastic/eui';
 
 import { ContentSource } from '../../../types';
 
@@ -26,6 +26,8 @@ export const SourcesList: React.FC<SourcesListProps> = ({
   addFilteredSource,
   removeFilteredSource,
 }) => {
+  const { euiTheme } = useEuiTheme();
+
   const sourceIds = contentSources.map(({ id }) => id);
   const sources = sourceIds.map((sourceId, index) => {
     const checked = filteredSources.indexOf(sourceId) > -1 ? 'on' : undefined;
@@ -38,5 +40,12 @@ export const SourcesList: React.FC<SourcesListProps> = ({
     );
   });
 
-  return <div className="euiFilterSelect__items">{sources}</div>;
+  return (
+    // EUI NOTE: Please use EuiSelectable (which already has height/scrolling built in)
+    // instead of EuiFilterSelectItem (which is pending deprecation).
+    // @see https://elastic.github.io/eui/#/forms/filter-group#multi-select
+    <div className="eui-yScroll" css={{ maxHeight: euiTheme.base * 30 }}>
+      {sources}
+    </div>
+  );
 };

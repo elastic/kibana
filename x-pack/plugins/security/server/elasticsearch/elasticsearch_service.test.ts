@@ -12,9 +12,9 @@ import { ServiceStatusLevels } from '@kbn/core/server';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import type { SecurityLicense, SecurityLicenseFeatures } from '../../common/licensing';
-import { licenseMock } from '../../common/licensing/index.mock';
 import { ElasticsearchService } from './elasticsearch_service';
+import type { SecurityLicense, SecurityLicenseFeatures } from '../../common';
+import { licenseMock } from '../../common/licensing/index.mock';
 
 describe('ElasticsearchService', () => {
   let service: ElasticsearchService;
@@ -88,7 +88,7 @@ describe('ElasticsearchService', () => {
     });
 
     it('`watchOnlineStatus$` allows to schedule retry', async () => {
-      jest.useFakeTimers('legacy');
+      jest.useFakeTimers({ legacyFakeTimers: true });
 
       // Both ES and license are available.
       mockLicense.isEnabled.mockReturnValue(true);
@@ -146,7 +146,7 @@ describe('ElasticsearchService', () => {
     });
 
     it('`watchOnlineStatus$` cancels scheduled retry if status changes before retry timeout fires', async () => {
-      jest.useFakeTimers('legacy');
+      jest.useFakeTimers({ legacyFakeTimers: true });
 
       // Both ES and license are available.
       mockLicense.isEnabled.mockReturnValue(true);

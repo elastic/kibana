@@ -5,10 +5,17 @@
  * 2.0.
  */
 
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import type { Capabilities } from '@kbn/core-capabilities-common';
 
-import { ENDPOINT_PRIVILEGES } from './constants';
+import { TRANSFORM_PLUGIN_ID } from './constants/plugin';
+
+import { ENDPOINT_EXCEPTIONS_PRIVILEGES, ENDPOINT_PRIVILEGES } from './constants';
+
+export type TransformPrivilege =
+  | 'canGetTransform'
+  | 'canCreateTransform'
+  | 'canDeleteTransform'
+  | 'canStartStopTransform';
 
 export interface FleetAuthz {
   fleet: {
@@ -42,6 +49,13 @@ export interface FleetAuthz {
       };
     };
   };
+
+  endpointExceptionsPrivileges?: {
+    actions: {
+      crudEndpointExceptions: boolean;
+      showEndpointExceptions: boolean;
+    };
+  };
 }
 
 interface CalculateParams {
@@ -57,6 +71,8 @@ interface CalculateParams {
 
   isSuperuser: boolean;
 }
+
+type PrivilegeMap = Record<string, { executePackageAction: boolean }>;
 
 export const calculateAuthz = ({
   fleet,
@@ -95,34 +111,81 @@ export function calculatePackagePrivilegesFromCapabilities(
     return {};
   }
 
-  const endpointActions = ENDPOINT_PRIVILEGES.reduce((acc, privilege) => {
-    return {
-      ...acc,
-      [privilege]: {
-        executePackageAction: capabilities.siem[privilege] || false,
-      },
-    };
-  }, {});
+  const endpointActions = Object.entries(ENDPOINT_PRIVILEGES).reduce<PrivilegeMap>(
+    (acc, [privilege, { privilegeName }]) => {
+      acc[privilege] = {
+        executePackageAction:
+          (capabilities.siem && (capabilities.siem[privilegeName] as boolean)) || false,
+      };
+      return acc;
+    },
+    {}
+  );
+
+  const transformActions = Object.keys(capabilities.transform).reduce<PrivilegeMap>(
+    (acc, privilegeName) => {
+      acc[privilegeName] = {
+        executePackageAction: (capabilities.transform[privilegeName] as boolean) || false,
+      };
+      return acc;
+    },
+    {}
+  );
 
   return {
     endpoint: {
       actions: endpointActions,
     },
+    transform: {
+      actions: transformActions,
+    },
   };
 }
 
-function getAuthorizationFromPrivileges(
+export function calculateEndpointExceptionsPrivilegesFromCapabilities(
+  capabilities: Capabilities | undefined
+): FleetAuthz['endpointExceptionsPrivileges'] {
+  if (!capabilities || !capabilities.siem) {
+    return;
+  }
+
+  const endpointExceptionsActions = Object.keys(ENDPOINT_EXCEPTIONS_PRIVILEGES).reduce<
+    Record<string, boolean>
+  >((acc, privilegeName) => {
+    acc[privilegeName] = (capabilities.siem[privilegeName] as boolean) || false;
+    return acc;
+  }, {});
+
+  return {
+    actions: endpointExceptionsActions,
+  } as FleetAuthz['endpointExceptionsPrivileges'];
+}
+
+export function getAuthorizationFromPrivileges({
+  kibanaPrivileges,
+  searchPrivilege = '',
+  prefix = '',
+}: {
   kibanaPrivileges: Array<{
     resource?: string;
     privilege: string;
     authorized: boolean;
-  }>,
-  searchPrivilege: string
-): boolean {
-  const privilege = kibanaPrivileges.find((p) =>
-    p.privilege.endsWith(`${DEFAULT_APP_CATEGORIES.security.id}-${searchPrivilege}`)
-  );
-  return privilege?.authorized || false;
+  }>;
+  prefix?: string;
+  searchPrivilege?: string;
+}): boolean {
+  const privilege = kibanaPrivileges.find((p) => {
+    if (prefix.length && searchPrivilege.length) {
+      return p.privilege.endsWith(`${prefix}${searchPrivilege}`);
+    } else if (prefix.length) {
+      return p.privilege.endsWith(`${prefix}`);
+    } else if (searchPrivilege.length) {
+      return p.privilege.endsWith(`${searchPrivilege}`);
+    }
+    return false;
+  });
+
+  return !!privilege?.authorized;
 }
 
 export function calculatePackagePrivilegesFromKibanaPrivileges(
@@ -138,19 +201,80 @@ export function calculatePackagePrivilegesFromKibanaPrivileges(
     return {};
   }
 
-  const endpointActions = ENDPOINT_PRIVILEGES.reduce((acc, privilege: string) => {
-    const kibanaPrivilege = getAuthorizationFromPrivileges(kibanaPrivileges, privilege);
-    return {
-      ...acc,
-      [privilege]: {
+  const endpointActions = Object.entries(ENDPOINT_PRIVILEGES).reduce<PrivilegeMap>(
+    (acc, [privilege, { appId, privilegeSplit, privilegeName }]) => {
+      const kibanaPrivilege = getAuthorizationFromPrivileges({
+        kibanaPrivileges,
+        prefix: `${appId}${privilegeSplit}`,
+        searchPrivilege: privilegeName,
+      });
+      acc[privilege] = {
         executePackageAction: kibanaPrivilege,
-      },
+      };
+      return acc;
+    },
+    {}
+  );
+
+  const hasTransformAdmin = getAuthorizationFromPrivileges({
+    kibanaPrivileges,
+    prefix: `${TRANSFORM_PLUGIN_ID}-`,
+    searchPrivilege: `admin`,
+  });
+  const transformActions: {
+    [key in TransformPrivilege]: {
+      executePackageAction: boolean;
     };
-  }, {});
+  } = {
+    canCreateTransform: {
+      executePackageAction: hasTransformAdmin,
+    },
+    canDeleteTransform: {
+      executePackageAction: hasTransformAdmin,
+    },
+    canStartStopTransform: {
+      executePackageAction: hasTransformAdmin,
+    },
+    canGetTransform: {
+      executePackageAction: getAuthorizationFromPrivileges({
+        kibanaPrivileges,
+        prefix: `${TRANSFORM_PLUGIN_ID}-`,
+        searchPrivilege: `read`,
+      }),
+    },
+  };
 
   return {
     endpoint: {
       actions: endpointActions,
     },
+    transform: {
+      actions: transformActions,
+    },
   };
+}
+
+export function calculateEndpointExceptionsPrivilegesFromKibanaPrivileges(
+  kibanaPrivileges:
+    | Array<{
+        resource?: string;
+        privilege: string;
+        authorized: boolean;
+      }>
+    | undefined
+): FleetAuthz['endpointExceptionsPrivileges'] {
+  if (!kibanaPrivileges || !kibanaPrivileges.length) {
+    return;
+  }
+  const endpointExceptionsActions = Object.entries(ENDPOINT_EXCEPTIONS_PRIVILEGES).reduce<
+    Record<string, boolean>
+  >((acc, [privilege, { appId, privilegeSplit, privilegeName }]) => {
+    acc[privilege] = getAuthorizationFromPrivileges({
+      kibanaPrivileges,
+      searchPrivilege: privilegeName,
+    });
+    return acc;
+  }, {});
+
+  return { actions: endpointExceptionsActions } as FleetAuthz['endpointExceptionsPrivileges'];
 }

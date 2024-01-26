@@ -1,0 +1,32 @@
+{
+  "type": "plugin",
+  "id": "@kbn/license-management-plugin",
+  "owner": "@elastic/platform-deployment-management",
+  "plugin": {
+    "id": "licenseManagement",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "license_management"
+    ],
+    "requiredPlugins": [
+      "home",
+      "licensing",
+      "management",
+      "features",
+      "share"
+    ],
+    "optionalPlugins": [
+      "telemetry"
+    ],
+    "requiredBundles": [
+      "telemetryManagementSection",
+      "esUiShared",
+      "kibanaReact"
+    ],
+    "extraPublicDirs": [
+      "common/constants"
+    ]
+  }
+}

@@ -32,7 +32,8 @@ const requestPreferenceOptionLabels = {
 };
 
 export function getUiSettings(
-  docLinks: DocLinksServiceSetup
+  docLinks: DocLinksServiceSetup,
+  enableValidations: boolean
 ): Record<string, UiSettingsParams<unknown>> {
   return {
     [UI_SETTINGS.META_FIELDS]: {
@@ -115,7 +116,6 @@ export function getUiSettings(
       description: i18n.translate('data.advancedSettings.query.allowWildcardsText', {
         defaultMessage:
           'When set, * is allowed as the first character in a query clause. ' +
-          'Currently only applies when experimental query features are enabled in the query bar. ' +
           'To disallow leading wildcards in basic lucene queries, use {queryStringOptionsPattern}.',
         values: {
           queryStringOptionsPattern: UI_SETTINGS.QUERY_STRING_OPTIONS,
@@ -166,14 +166,14 @@ export function getUiSettings(
     },
     defaultIndex: {
       name: i18n.translate('data.advancedSettings.defaultIndexTitle', {
-        defaultMessage: 'Default index',
+        defaultMessage: 'Default data view',
       }),
-      value: null,
+      value: '',
       type: 'string',
       description: i18n.translate('data.advancedSettings.defaultIndexText', {
-        defaultMessage: 'The index to access if no index is set',
+        defaultMessage: 'Used by discover and visualizations when a data view is not set.',
       }),
-      schema: schema.nullable(schema.string()),
+      schema: schema.string(),
     },
     [UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX]: {
       name: i18n.translate('data.advancedSettings.courier.ignoreFilterTitle', {
@@ -324,8 +324,8 @@ export function getUiSettings(
         defaultMessage: 'Time filter refresh interval',
       }),
       value: `{
-  "pause": false,
-  "value": 0
+  "pause": true,
+  "value": 60000
 }`,
       type: 'json',
       description: i18n.translate('data.advancedSettings.timepicker.refreshIntervalDefaultsText', {
@@ -383,6 +383,13 @@ export function getUiSettings(
             to: 'now/w',
             display: i18n.translate('data.advancedSettings.timepicker.thisWeek', {
               defaultMessage: 'This week',
+            }),
+          },
+          {
+            from: 'now-1m',
+            to: 'now',
+            display: i18n.translate('data.advancedSettings.timepicker.last1Minute', {
+              defaultMessage: 'Last 1 minute',
             }),
           },
           {
@@ -464,13 +471,23 @@ export function getUiSettings(
             '</a>',
         },
       }),
-      schema: schema.arrayOf(
-        schema.object({
-          from: schema.string(),
-          to: schema.string(),
-          display: schema.string(),
-        })
-      ),
+      requiresPageReload: true,
+      schema: enableValidations
+        ? schema.arrayOf(
+            schema.object({
+              from: schema.string(),
+              to: schema.string(),
+              display: schema.string(),
+            }),
+            { maxSize: 12 }
+          )
+        : schema.arrayOf(
+            schema.object({
+              from: schema.string(),
+              to: schema.string(),
+              display: schema.string(),
+            })
+          ),
     },
     [UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT]: {
       name: i18n.translate('data.advancedSettings.pinFiltersTitle', {
@@ -505,7 +522,7 @@ export function getUiSettings(
           'The method used for querying suggestions for values in KQL autocomplete. Select terms_enum to use the ' +
           'Elasticsearch terms enum API for improved autocomplete suggestion performance. (Note that terms_enum is ' +
           'incompatible with Document Level Security.) Select terms_agg to use an Elasticsearch terms aggregation. ' +
-          '{learnMoreLink}',
+          '(Note that terms_agg is incompatible with IP-type fields.) {learnMoreLink}',
         values: {
           learnMoreLink:
             `<a href=${docLinks.links.kibana.autocompleteSuggestions} target="_blank" rel="noopener">` +

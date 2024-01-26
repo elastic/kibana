@@ -7,6 +7,7 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import type { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
 import type { Query } from '@kbn/es-query';
 import { Feature } from 'geojson';
 import {
@@ -16,7 +17,7 @@ import {
   VectorStyleDescriptor,
 } from './style_property_descriptor_types';
 import { DataRequestDescriptor } from './data_request_descriptor_types';
-import { AbstractSourceDescriptor, TermJoinSourceDescriptor } from './source_descriptor_types';
+import { AbstractSourceDescriptor, JoinSourceDescriptor } from './source_descriptor_types';
 import { LAYER_TYPE } from '../constants';
 
 export type Attribution = {
@@ -26,7 +27,8 @@ export type Attribution = {
 
 export type JoinDescriptor = {
   leftField?: string;
-  right: TermJoinSourceDescriptor;
+  right: Partial<JoinSourceDescriptor>;
+  error?: string;
 };
 
 export type TileMetaFeature = Feature & {
@@ -49,14 +51,19 @@ export type TileMetaFeature = Feature & {
   };
 };
 
+export type TileError = {
+  message: string;
+  tileKey: string; // format zoom/x/y
+  error?: ErrorCause;
+};
+
 export type LayerDescriptor = {
   __dataRequests?: DataRequestDescriptor[];
-  __isInErrorState?: boolean;
   __isPreviewLayer?: boolean;
-  __errorMessage?: string;
   __trackedLayerDescriptor?: LayerDescriptor;
   __areTilesLoaded?: boolean;
-  __metaFromTiles?: TileMetaFeature[];
+  __tileMetaFeatures?: TileMetaFeature[];
+  __tileErrors?: TileError[];
   alpha?: number;
   attribution?: Attribution;
   id: string;
@@ -76,7 +83,7 @@ export type LayerDescriptor = {
 
 export type VectorLayerDescriptor = LayerDescriptor & {
   type: LAYER_TYPE.GEOJSON_VECTOR | LAYER_TYPE.MVT_VECTOR | LAYER_TYPE.BLENDED_VECTOR;
-  joins?: JoinDescriptor[];
+  joins?: Array<Partial<JoinDescriptor>>;
   style: VectorStyleDescriptor;
   disableTooltips?: boolean;
 };

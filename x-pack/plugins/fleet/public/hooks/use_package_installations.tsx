@@ -11,8 +11,8 @@ import semverLt from 'semver/functions/lt';
 import { installationStatuses } from '../../common/constants';
 import type { PackagePolicy } from '../types';
 
-import { useGetPackages } from './use_request/epm';
-import { useGetAgentPolicies } from './use_request/agent_policy';
+import { useGetPackagesQuery } from './use_request/epm';
+import { useGetAgentPoliciesQuery } from './use_request/agent_policy';
 
 interface UpdatableIntegration {
   currentVersion: string;
@@ -26,12 +26,12 @@ interface UpdatableIntegration {
   }>;
 }
 
-export const usePackageInstallations = () => {
-  const { data: allPackages, isLoading: isLoadingPackages } = useGetPackages({
+export const usePackageInstallationsQuery = () => {
+  const { data: allPackages, isLoading: isLoadingPackages } = useGetPackagesQuery({
     prerelease: true,
   });
 
-  const { data: agentPolicyData, isLoading: isLoadingPolicies } = useGetAgentPolicies({
+  const { data: agentPolicyData, isLoading: isLoadingPolicies } = useGetAgentPoliciesQuery({
     full: true,
   });
 
@@ -44,7 +44,9 @@ export const usePackageInstallations = () => {
     () =>
       allInstalledPackages.filter(
         (item) =>
-          'savedObject' in item && semverLt(item.savedObject.attributes.version, item.version)
+          'installationInfo' in item &&
+          item.installationInfo?.version &&
+          semverLt(item.installationInfo.version, item.version)
       ),
     [allInstalledPackages]
   );
@@ -57,15 +59,16 @@ export const usePackageInstallations = () => {
           const { name, version } = pkgPolicy.package;
           const installedPackage = allInstalledPackages.find(
             (installedPkg) =>
-              'savedObject' in installedPkg && installedPkg.savedObject.attributes.name === name
+              'installationInfo' in installedPkg && installedPkg?.installationInfo?.name === name
           );
           if (
             installedPackage &&
-            'savedObject' in installedPackage &&
-            semverLt(version, installedPackage.savedObject.attributes.version)
+            'installationInfo' in installedPackage &&
+            installedPackage?.installationInfo?.version &&
+            semverLt(version, installedPackage.installationInfo.version)
           ) {
             const packageData = result.get(name) ?? {
-              currentVersion: installedPackage.savedObject.attributes.version,
+              currentVersion: installedPackage.installationInfo.version,
               policiesToUpgrade: [],
             };
             packageData.policiesToUpgrade.push({

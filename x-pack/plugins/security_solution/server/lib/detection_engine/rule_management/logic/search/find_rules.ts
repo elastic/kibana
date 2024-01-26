@@ -6,27 +6,28 @@
  */
 
 import type { FindResult, RulesClient } from '@kbn/alerting-plugin/server';
+import type { FindRulesSortField } from '../../../../../../common/api/detection_engine/rule_management';
 
-import type {
-  FieldsOrUndefined,
-  PageOrUndefined,
-  PerPageOrUndefined,
-  QueryFilterOrUndefined,
-  SortFieldOrUndefined,
-  SortOrderOrUndefined,
-} from '../../../../../../common/detection_engine/schemas/common';
+import type { Page, PerPage, SortOrder } from '../../../../../../common/api/detection_engine';
 
 import type { RuleParams } from '../../../rule_schema';
 import { enrichFilterWithRuleTypeMapping } from './enrich_filter_with_rule_type_mappings';
+import { transformSortField } from './transform_sort_field';
+
+interface HasReferences {
+  type: string;
+  id: string;
+}
 
 export interface FindRuleOptions {
   rulesClient: RulesClient;
-  filter: QueryFilterOrUndefined;
-  fields: FieldsOrUndefined;
-  sortField: SortFieldOrUndefined;
-  sortOrder: SortOrderOrUndefined;
-  page: PageOrUndefined;
-  perPage: PerPageOrUndefined;
+  filter: string | undefined;
+  fields: string[] | undefined;
+  sortField: FindRulesSortField | undefined;
+  sortOrder: SortOrder | undefined;
+  page: Page | undefined;
+  perPage: PerPage | undefined;
+  hasReference?: HasReferences | undefined;
 }
 
 export const findRules = ({
@@ -37,6 +38,7 @@ export const findRules = ({
   filter,
   sortField,
   sortOrder,
+  hasReference,
 }: FindRuleOptions): Promise<FindResult<RuleParams>> => {
   return rulesClient.find({
     options: {
@@ -45,7 +47,8 @@ export const findRules = ({
       perPage,
       filter: enrichFilterWithRuleTypeMapping(filter),
       sortOrder,
-      sortField,
+      sortField: transformSortField(sortField),
+      hasReference,
     },
   });
 };

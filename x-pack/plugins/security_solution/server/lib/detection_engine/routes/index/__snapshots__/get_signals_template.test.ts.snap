@@ -3,9 +3,10 @@
 exports[`get_signals_template backwards compatibility mappings for version 45 should match snapshot 1`] = `
 Object {
   "_meta": Object {
-    "aliases_version": 3,
+    "aliases_version": 4,
     "version": 45,
   },
+  "dynamic": false,
   "properties": Object {
     "kibana.alert.ancestors.depth": Object {
       "path": "signal.ancestors.depth",
@@ -310,6 +311,10 @@ Object {
     "kibana.alert.workflow_status": Object {
       "path": "signal.status",
       "type": "alias",
+    },
+    "kibana.space_ids": Object {
+      "type": "constant_keyword",
+      "value": "default",
     },
     "signal": Object {
       "properties": Object {
@@ -533,9 +538,10 @@ Object {
 exports[`get_signals_template backwards compatibility mappings for version 57 should match snapshot 1`] = `
 Object {
   "_meta": Object {
-    "aliases_version": 3,
+    "aliases_version": 4,
     "version": 57,
   },
+  "dynamic": false,
   "properties": Object {
     "kibana.alert.ancestors.depth": Object {
       "path": "signal.ancestors.depth",
@@ -840,6 +846,10 @@ Object {
     "kibana.alert.workflow_status": Object {
       "path": "signal.status",
       "type": "alias",
+    },
+    "kibana.space_ids": Object {
+      "type": "constant_keyword",
+      "value": "default",
     },
     "signal": Object {
       "properties": Object {
@@ -1065,8 +1075,8 @@ Object {
     },
     "mappings": Object {
       "_meta": Object {
-        "aliases_version": 3,
-        "version": 67,
+        "aliases_version": 4,
+        "version": 77,
       },
       "dynamic": false,
       "properties": Object {
@@ -3046,6 +3056,10 @@ Object {
         "kibana.alert.workflow_status": Object {
           "path": "signal.status",
           "type": "alias",
+        },
+        "kibana.space_ids": Object {
+          "type": "constant_keyword",
+          "value": "default",
         },
         "labels": Object {
           "type": "object",
@@ -6740,6 +6754,6 @@ Object {
       },
     },
   },
-  "version": 67,
+  "version": 77,
 }
 `;

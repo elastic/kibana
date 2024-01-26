@@ -5,47 +5,45 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { EuiBadge, EuiBadgeGroup } from '@elastic/eui';
-import { ServiceLocations, ServiceLocation } from '../../../../../../../common/runtime_types';
-import { useLocations } from '../../../../hooks';
-import { EXPAND_LOCATIONS_LABEL } from './labels';
+import React from 'react';
+import { useTheme } from '@kbn/observability-shared-plugin/public';
+import { LocationStatusBadges } from '../../../common/components/location_status_badges';
+import { ServiceLocations, OverviewStatusState } from '../../../../../../../common/runtime_types';
 
 interface Props {
   locations: ServiceLocations;
+  monitorId: string;
+  overviewStatus: OverviewStatusState | null;
 }
 
-const INITIAL_LIMIT = 3;
+export const MonitorLocations = ({ locations, monitorId, overviewStatus }: Props) => {
+  const {
+    eui: { euiColorVis9, euiColorVis0, euiColorDisabled },
+  } = useTheme();
 
-export const MonitorLocations = ({ locations }: Props) => {
-  const { locations: allLocations } = useLocations();
-  const [toDisplay, setToDisplay] = useState(INITIAL_LIMIT);
+  const locationsToDisplay = locations.map((loc) => {
+    const locById = `${monitorId}-${loc.id}`;
 
-  const locationsToDisplay = locations.slice(0, toDisplay);
+    let status: string = 'unknown';
+    let color = euiColorDisabled;
+
+    if (overviewStatus?.downConfigs[locById]) {
+      status = 'down';
+      color = euiColorVis9;
+    } else if (overviewStatus?.upConfigs[locById]) {
+      status = 'up';
+      color = euiColorVis0;
+    }
+
+    return {
+      id: loc.id,
+      label: loc.label ?? loc.id,
+      status,
+      color,
+    };
+  });
 
   return (
-    <EuiBadgeGroup css={{ width: '100%' }}>
-      {locationsToDisplay.map((location: ServiceLocation) => (
-        <EuiBadge
-          key={location.id}
-          color="hollow"
-          className="eui-textTruncate"
-          css={{ display: 'flex', maxWidth: 120 }}
-        >
-          {`${allLocations.find((loc) => loc.id === location.id)?.label}`}
-        </EuiBadge>
-      ))}
-      {locations.length > toDisplay && (
-        <EuiBadge
-          color="hollow"
-          onClick={() => {
-            setToDisplay(locations.length);
-          }}
-          onClickAriaLabel={EXPAND_LOCATIONS_LABEL}
-        >
-          +{locations.length - INITIAL_LIMIT}
-        </EuiBadge>
-      )}
-    </EuiBadgeGroup>
+    <LocationStatusBadges configId={monitorId} locations={locationsToDisplay} loading={false} />
   );
 };

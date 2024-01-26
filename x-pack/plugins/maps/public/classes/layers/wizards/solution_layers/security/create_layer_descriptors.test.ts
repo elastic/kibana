@@ -22,11 +22,9 @@ jest.mock('../../../../../kibana_services', () => {
   };
 });
 
-jest.mock('uuid/v4', () => {
-  return function () {
-    return '12345';
-  };
-});
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValue('12345'),
+}));
 
 import { createSecurityLayerDescriptors } from './create_layer_descriptors';
 
@@ -62,6 +60,7 @@ describe('createLayerDescriptor', () => {
             'client.geo.country_iso_code',
             'client.as.organization.name',
           ],
+          topHitsGroupByTimeseries: false,
           topHitsSize: 1,
           topHitsSplitField: 'client.ip',
           type: 'ES_SEARCH',
@@ -140,6 +139,7 @@ describe('createLayerDescriptor', () => {
             'server.geo.country_iso_code',
             'server.as.organization.name',
           ],
+          topHitsGroupByTimeseries: false,
           topHitsSize: 1,
           topHitsSplitField: 'server.ip',
           type: 'ES_SEARCH',
@@ -292,6 +292,7 @@ describe('createLayerDescriptor', () => {
             'source.geo.country_iso_code',
             'source.as.organization.name',
           ],
+          topHitsGroupByTimeseries: false,
           topHitsSize: 1,
           topHitsSplitField: 'source.ip',
           type: 'ES_SEARCH',
@@ -370,6 +371,7 @@ describe('createLayerDescriptor', () => {
             'destination.geo.country_iso_code',
             'destination.as.organization.name',
           ],
+          topHitsGroupByTimeseries: false,
           topHitsSize: 1,
           topHitsSplitField: 'destination.ip',
           type: 'ES_SEARCH',
@@ -516,6 +518,7 @@ describe('createLayerDescriptor', () => {
             'client.geo.country_iso_code',
             'client.as.organization.name',
           ],
+          topHitsGroupByTimeseries: false,
           topHitsSize: 1,
           topHitsSplitField: 'client.ip',
           type: 'ES_SEARCH',
@@ -594,6 +597,7 @@ describe('createLayerDescriptor', () => {
             'server.geo.country_iso_code',
             'server.as.organization.name',
           ],
+          topHitsGroupByTimeseries: false,
           topHitsSize: 1,
           topHitsSplitField: 'server.ip',
           type: 'ES_SEARCH',

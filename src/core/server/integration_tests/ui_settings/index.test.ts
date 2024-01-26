@@ -7,7 +7,7 @@
  */
 
 import { Env } from '@kbn/config';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { startServers, stopServers } from './lib';
 import { docExistsSuite } from './doc_exists';
@@ -20,9 +20,9 @@ describe('uiSettings/routes', function () {
   jest.setTimeout(120_000);
 
   beforeAll(startServers);
-  // eslint-disable-next-line jest/valid-describe
+  // eslint-disable-next-line jest/valid-describe-callback
   describe('doc missing', docMissingSuite(savedObjectIndex));
-  // eslint-disable-next-line jest/valid-describe
+  // eslint-disable-next-line jest/valid-describe-callback
   describe('doc exists', docExistsSuite(savedObjectIndex));
   afterAll(stopServers);
 });

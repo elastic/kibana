@@ -91,6 +91,23 @@ describe('getEcsResponseLog', () => {
       `);
     });
 
+    test('redacts es-client-authentication headers by default', () => {
+      const event = createResponseEvent({
+        requestParams: {
+          headers: { 'es-client-authentication': 'ae3fda37-xxx', 'user-agent': 'world' },
+        },
+        response: { headers: { 'content-length': '123' } },
+      });
+      const log = getEcsResponseLog(event);
+      // @ts-expect-error ECS custom field
+      expect(log.http.request.headers).toMatchInlineSnapshot(`
+        Object {
+          "es-client-authentication": "[REDACTED]",
+          "user-agent": "world",
+        }
+      `);
+    });
+
     test('does not mutate original headers', () => {
       const reqHeaders = { a: 'foo', b: ['hello', 'world'] };
       const resHeaders = { c: 'bar' };

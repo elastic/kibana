@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../functional/services/ml/common_api';
 import { USER } from '../../../functional/services/transform/security_common';
 
 import { generateTransformConfig } from './common';
@@ -57,7 +57,7 @@ export default ({ getService }: FtrProviderContext) => {
     };
   }
 
-  describe('/api/transform/transforms/{transformId}/_update', function () {
+  describe('/internal/transform/transforms/{transformId}/_update', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await transform.testResources.setKibanaTimeZoneToUTC();
@@ -71,12 +71,12 @@ export default ({ getService }: FtrProviderContext) => {
     it('should update a transform', async () => {
       // assert the original transform for comparison
       const { body: transformOriginalBody, status: transformOriginalStatus } = await supertest
-        .get('/api/transform/transforms/transform-test-update-1')
+        .get('/internal/transform/transforms/transform-test-update-1')
         .auth(
           USER.TRANSFORM_POWERUSER,
           transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
         )
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send();
       transform.api.assertResponseStatusCode(200, transformOriginalStatus, transformOriginalBody);
 
@@ -94,12 +94,12 @@ export default ({ getService }: FtrProviderContext) => {
       // update the transform and assert the response
       const { body: transformUpdateResponseBody, status: transformUpdatedResponseStatus } =
         await supertest
-          .post('/api/transform/transforms/transform-test-update-1/_update')
+          .post('/internal/transform/transforms/transform-test-update-1/_update')
           .auth(
             USER.TRANSFORM_POWERUSER,
             transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
           )
-          .set(COMMON_REQUEST_HEADERS)
+          .set(getCommonRequestHeader('1'))
           .send(getTransformUpdateConfig());
       transform.api.assertResponseStatusCode(
         200,
@@ -118,12 +118,12 @@ export default ({ getService }: FtrProviderContext) => {
 
       // assert the updated transform for comparison
       const { body: transformUpdatedBody, status: transformUpdatedStatus } = await supertest
-        .get('/api/transform/transforms/transform-test-update-1')
+        .get('/internal/transform/transforms/transform-test-update-1')
         .auth(
           USER.TRANSFORM_POWERUSER,
           transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
         )
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send();
       transform.api.assertResponseStatusCode(200, transformUpdatedStatus, transformUpdatedBody);
 
@@ -144,12 +144,12 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should return 403 for transform view-only user', async () => {
       const { body, status } = await supertest
-        .post('/api/transform/transforms/transform-test-update-1/_update')
+        .post('/internal/transform/transforms/transform-test-update-1/_update')
         .auth(
           USER.TRANSFORM_VIEWER,
           transform.securityCommon.getPasswordForUser(USER.TRANSFORM_VIEWER)
         )
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send(getTransformUpdateConfig());
       transform.api.assertResponseStatusCode(403, status, body);
     });

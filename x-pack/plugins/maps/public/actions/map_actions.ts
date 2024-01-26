@@ -11,6 +11,7 @@ import { AnyAction, Dispatch } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import turfBboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import { Filter } from '@kbn/es-query';
 import type { Query, TimeRange } from '@kbn/es-query';
 import { Geometry, Position } from 'geojson';
@@ -44,6 +45,7 @@ import {
   MAP_READY,
   ROLLBACK_MAP_SETTINGS,
   SET_EMBEDDABLE_SEARCH_CONTEXT,
+  SET_EXECUTION_CONTEXT,
   SET_GOTO,
   SET_MAP_INIT_ERROR,
   SET_MAP_SETTINGS,
@@ -71,7 +73,7 @@ import {
   Timeslice,
 } from '../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../common/constants';
-import { isVectorLayer, IVectorLayer } from '../classes/layers/vector_layer';
+import { hasVectorLayerMethod } from '../classes/layers/vector_layer';
 import { SET_DRAW_MODE, pushDeletedFeatureId, clearDeletedFeatureIds } from './ui_actions';
 import { expandToTileBoundaries, getTilesForExtent } from '../classes/util/geo_tile_utils';
 import { getToasts } from '../kibana_services';
@@ -169,9 +171,6 @@ export function mapReady() {
     });
 
     const waitingForMapReadyLayerList = getWaitingForMapReadyLayerListRaw(getState());
-    dispatch({
-      type: CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
-    });
 
     if (getMapSettings(getState()).initialLocation === INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS) {
       waitingForMapReadyLayerList.forEach((layerDescriptor) => {
@@ -183,6 +182,12 @@ export function mapReady() {
         dispatch(addLayer(layerDescriptor));
       });
     }
+
+    // clear waiting list after transfer to avoid state condition
+    // where waiting list is empty and layers have not been added to layerList
+    dispatch({
+      type: CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
+    });
   };
 }
 
@@ -354,6 +359,13 @@ export function setEmbeddableSearchContext({
   };
 }
 
+export function setExecutionContext(executionContext: KibanaExecutionContext) {
+  return {
+    type: SET_EXECUTION_CONTEXT,
+    executionContext,
+  };
+}
+
 export function updateDrawState(drawState: DrawState | null) {
   return (dispatch: Dispatch) => {
     if (drawState !== null) {
@@ -427,14 +439,14 @@ export function addNewFeatureToIndex(geometries: Array<Geometry | Position[]>) {
       return;
     }
     const layer = getLayerById(layerId, getState());
-    if (!layer || !isVectorLayer(layer)) {
+    if (!layer || !hasVectorLayerMethod(layer, 'addFeature')) {
       return;
     }
 
     try {
       dispatch(updateEditShape(DRAW_SHAPE.WAIT));
       await asyncForEach(geometries, async (geometry) => {
-        await (layer as IVectorLayer).addFeature(geometry);
+        await layer.addFeature(geometry);
       });
       await dispatch(syncDataForLayerDueToDrawing(layer));
     } catch (e) {
@@ -465,13 +477,13 @@ export function deleteFeatureFromIndex(featureId: string) {
       return;
     }
     const layer = getLayerById(layerId, getState());
-    if (!layer || !isVectorLayer(layer)) {
+    if (!layer || !hasVectorLayerMethod(layer, 'deleteFeature')) {
       return;
     }
 
     try {
       dispatch(updateEditShape(DRAW_SHAPE.WAIT));
-      await (layer as IVectorLayer).deleteFeature(featureId);
+      await layer.deleteFeature(featureId);
       dispatch(pushDeletedFeatureId(featureId));
       await dispatch(syncDataForLayerDueToDrawing(layer));
     } catch (e) {

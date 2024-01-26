@@ -24,6 +24,7 @@ describe('parseTechnicalFields', () => {
       'kibana.alert.rule.rule_type_id': ['metrics.alert.threshold'],
       'event.action': ['active'],
       'kibana.alert.rule.name': ['Uptime'],
+      'kibana.alert.rule.revision': 0,
       'kibana.alert.uuid': ['f31f5726-3c47-4c88-bc42-4e1fbde17e34'],
       'kibana.space_ids': ['default'],
       'kibana.version': ['8.1.0'],
@@ -60,6 +61,37 @@ describe('parseTechnicalFields', () => {
     expect(() => parseTechnicalFields(ALERT_WITH_MISSING_REQUIRED_FIELDS, true)).not.toThrow();
   });
 
+  it('parses a partial alert with flapping field', () => {
+    const ALERT_WITH_MISSING_REQUIRED_FIELDS = {
+      '@timestamp': ['2021-12-06T12:30:59.411Z'],
+      'kibana.alert.duration.us': ['488935266000'],
+      'kibana.alert.reason': ['host.uptime has reported no data over the past 1m for *'],
+      'kibana.alert.workflow_status': ['open'],
+      'kibana.alert.start': ['2021-11-30T20:42:04.145Z'],
+      'event.action': ['active'],
+      'kibana.version': ['8.1.0'],
+      'event.kind': ['signal'],
+    };
+    expect(() =>
+      parseTechnicalFields(
+        { ...ALERT_WITH_MISSING_REQUIRED_FIELDS, 'kibana.alert.flapping': [false] },
+        true
+      )
+    ).not.toThrow();
+    expect(() =>
+      parseTechnicalFields(
+        { ...ALERT_WITH_MISSING_REQUIRED_FIELDS, 'kibana.alert.flapping': ['true'] },
+        true
+      )
+    ).not.toThrow();
+    expect(() =>
+      parseTechnicalFields(
+        { ...ALERT_WITH_MISSING_REQUIRED_FIELDS, 'kibana.alert.flapping': ['super'] },
+        true
+      )
+    ).toThrow();
+  });
+
   it('parses an alert with missing optional fields without error', () => {
     const ALERT_WITH_MISSING_OPTIONAL_FIELDS = {
       '@timestamp': ['2021-12-06T12:30:59.411Z'],
@@ -71,6 +103,7 @@ describe('parseTechnicalFields', () => {
       'kibana.alert.rule.category': ['Metric threshold'],
       'kibana.alert.rule.rule_type_id': ['metrics.alert.threshold'],
       'kibana.alert.rule.name': ['Uptime'],
+      'kibana.alert.rule.revision': 0,
       'kibana.alert.uuid': ['f31f5726-3c47-4c88-bc42-4e1fbde17e34'],
       'kibana.space_ids': ['default'],
     };

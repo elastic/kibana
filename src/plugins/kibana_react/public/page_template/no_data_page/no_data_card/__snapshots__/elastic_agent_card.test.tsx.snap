@@ -2,11 +2,13 @@
 
 exports[`ElasticAgentCard props button 1`] = `
 <RedirectAppLinks
-  application={
+  coreStart={
     Object {
-      "capabilities": Object {
-        "navLinks": Object {
-          "integrations": true,
+      "application": Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
         },
       },
     }
@@ -16,9 +18,7 @@ exports[`ElasticAgentCard props button 1`] = `
     description="Use Elastic Agent for a simple, unified way to collect data from your machines."
     footer={
       <EuiButton
-        color="primary"
         fill={true}
-        size="m"
       >
         Button
       </EuiButton>
@@ -53,11 +53,13 @@ exports[`ElasticAgentCard props button 1`] = `
 
 exports[`ElasticAgentCard props category 1`] = `
 <RedirectAppLinks
-  application={
+  coreStart={
     Object {
-      "capabilities": Object {
-        "navLinks": Object {
-          "integrations": true,
+      "application": Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
         },
       },
     }
@@ -67,9 +69,7 @@ exports[`ElasticAgentCard props category 1`] = `
     description="Use Elastic Agent for a simple, unified way to collect data from your machines."
     footer={
       <EuiButton
-        color="primary"
         fill={true}
-        size="m"
       >
         Add Elastic Agent
       </EuiButton>
@@ -104,11 +104,13 @@ exports[`ElasticAgentCard props category 1`] = `
 
 exports[`ElasticAgentCard props href 1`] = `
 <RedirectAppLinks
-  application={
+  coreStart={
     Object {
-      "capabilities": Object {
-        "navLinks": Object {
-          "integrations": true,
+      "application": Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
         },
       },
     }
@@ -118,9 +120,7 @@ exports[`ElasticAgentCard props href 1`] = `
     description="Use Elastic Agent for a simple, unified way to collect data from your machines."
     footer={
       <EuiButton
-        color="primary"
         fill={true}
-        size="m"
       >
         Button
       </EuiButton>
@@ -155,11 +155,13 @@ exports[`ElasticAgentCard props href 1`] = `
 
 exports[`ElasticAgentCard props recommended 1`] = `
 <RedirectAppLinks
-  application={
+  coreStart={
     Object {
-      "capabilities": Object {
-        "navLinks": Object {
-          "integrations": true,
+      "application": Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
         },
       },
     }
@@ -174,9 +176,7 @@ exports[`ElasticAgentCard props recommended 1`] = `
     description="Use Elastic Agent for a simple, unified way to collect data from your machines."
     footer={
       <EuiButton
-        color="primary"
         fill={true}
-        size="m"
       >
         Add Elastic Agent
       </EuiButton>
@@ -211,11 +211,13 @@ exports[`ElasticAgentCard props recommended 1`] = `
 
 exports[`ElasticAgentCard renders 1`] = `
 <RedirectAppLinks
-  application={
+  coreStart={
     Object {
-      "capabilities": Object {
-        "navLinks": Object {
-          "integrations": true,
+      "application": Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
         },
       },
     }
@@ -225,9 +227,7 @@ exports[`ElasticAgentCard renders 1`] = `
     description="Use Elastic Agent for a simple, unified way to collect data from your machines."
     footer={
       <EuiButton
-        color="primary"
         fill={true}
-        size="m"
       >
         Add Elastic Agent
       </EuiButton>

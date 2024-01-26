@@ -46,6 +46,7 @@ describe('useGetEndpointPendingActionsSummary hook', () => {
     expect(apiMocks.responseProvider.agentPendingActionsSummary).toHaveBeenCalledWith({
       path: `${ACTION_STATUS_ROUTE}`,
       query: { agent_ids: ['123', '456'] },
+      version: '2023-10-31',
     });
   });
 

@@ -10,36 +10,51 @@ import ReactDOM from 'react-dom';
 import React from 'react';
 import * as Rx from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
-import { CoreSetup, CoreStart, Plugin, CoreTheme, ApplicationStart } from '@kbn/core/public';
+import {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  CoreTheme,
+  ApplicationStart,
+  NotificationsStart,
+} from '@kbn/core/public';
 
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+
+import { PLUGIN_FEATURE } from '../common/constants';
 import type {
   AppPluginStartDependencies,
   GuidedOnboardingPluginSetup,
   GuidedOnboardingPluginStart,
 } from './types';
 import { GuidePanel } from './components';
-import { ApiService, apiService } from './services/api';
+import { ApiService, apiService } from './services/api.service';
 
 export class GuidedOnboardingPlugin
   implements Plugin<GuidedOnboardingPluginSetup, GuidedOnboardingPluginStart>
 {
   constructor() {}
-  public setup(core: CoreSetup): GuidedOnboardingPluginSetup {
-    return {};
+  public setup(
+    core: CoreSetup,
+    { cloud }: GuidedOnboardingPluginSetup
+  ): GuidedOnboardingPluginSetup {
+    return {
+      cloud,
+    };
   }
 
   public start(
     core: CoreStart,
     { cloud }: AppPluginStartDependencies
   ): GuidedOnboardingPluginStart {
-    const { chrome, http, theme, application } = core;
+    const { chrome, http, theme, application, notifications } = core;
 
+    // Guided onboarding UI is only available on cloud and if the access to the Kibana feature is granted
+    const isEnabled = !!(cloud?.isCloudEnabled && application.capabilities[PLUGIN_FEATURE].enabled);
     // Initialize services
-    apiService.setup(http);
+    apiService.setup(http, isEnabled);
 
-    // Guided onboarding UI is only available on cloud
-    if (cloud?.isCloudEnabled) {
+    if (isEnabled) {
       chrome.navControls.registerExtension({
         order: 1000,
         mount: (target) =>
@@ -48,6 +63,7 @@ export class GuidedOnboardingPlugin
             theme$: theme.theme$,
             api: apiService,
             application,
+            notifications,
           }),
       });
     }
@@ -65,16 +81,23 @@ export class GuidedOnboardingPlugin
     theme$,
     api,
     application,
+    notifications,
   }: {
     targetDomElement: HTMLElement;
     theme$: Rx.Observable<CoreTheme>;
     api: ApiService;
     application: ApplicationStart;
+    notifications: NotificationsStart;
   }) {
     ReactDOM.render(
       <KibanaThemeProvider theme$={theme$}>
         <I18nProvider>
-          <GuidePanel api={api} application={application} />
+          <GuidePanel
+            api={api}
+            application={application}
+            notifications={notifications}
+            theme$={theme$}
+          />
         </I18nProvider>
       </KibanaThemeProvider>,
       targetDomElement

@@ -6,14 +6,17 @@
  */
 
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import { AADAlert } from '@kbn/alerts-as-data-utils';
+import { mapKeys, snakeCase } from 'lodash/fp';
 import {
   RuleActionParams,
   AlertInstanceState,
   AlertInstanceContext,
   RuleTypeParams,
+  SanitizedRule,
 } from '../types';
 
-interface TransformActionParamsOptions {
+export interface TransformActionParamsOptions {
   actionsPlugin: ActionsPluginStartContract;
   alertId: string;
   alertType: string;
@@ -23,6 +26,7 @@ interface TransformActionParamsOptions {
   spaceId: string;
   tags?: string[];
   alertInstanceId: string;
+  alertUuid: string;
   alertActionGroup: string;
   alertActionGroupName: string;
   actionParams: RuleActionParams;
@@ -30,6 +34,28 @@ interface TransformActionParamsOptions {
   state: AlertInstanceState;
   kibanaBaseUrl?: string;
   context: AlertInstanceContext;
+  ruleUrl?: string;
+  flapping: boolean;
+  aadAlert?: AADAlert;
+}
+
+interface SummarizedAlertsWithAll {
+  new: {
+    count: number;
+    data: unknown[];
+  };
+  ongoing: {
+    count: number;
+    data: unknown[];
+  };
+  recovered: {
+    count: number;
+    data: unknown[];
+  };
+  all: {
+    count: number;
+    data: unknown[];
+  };
 }
 
 export function transformActionParams({
@@ -42,6 +68,7 @@ export function transformActionParams({
   spaceId,
   tags,
   alertInstanceId,
+  alertUuid,
   alertActionGroup,
   alertActionGroupName,
   context,
@@ -49,35 +76,119 @@ export function transformActionParams({
   state,
   kibanaBaseUrl,
   alertParams,
+  ruleUrl,
+  flapping,
+  aadAlert,
 }: TransformActionParamsOptions): RuleActionParams {
   // when the list of variables we pass in here changes,
   // the UI will need to be updated as well; see:
   // x-pack/plugins/triggers_actions_ui/public/application/lib/action_variables.ts
+  const variables =
+    aadAlert !== undefined
+      ? aadAlert
+      : {
+          alertId,
+          alertName,
+          spaceId,
+          tags,
+          alertInstanceId,
+          alertActionGroup,
+          alertActionGroupName,
+          context,
+          date: new Date().toISOString(),
+          state,
+          kibanaBaseUrl,
+          params: alertParams,
+          rule: {
+            params: alertParams,
+            id: alertId,
+            name: alertName,
+            type: alertType,
+            spaceId,
+            tags,
+            url: ruleUrl,
+          },
+          alert: {
+            id: alertInstanceId,
+            uuid: alertUuid,
+            actionGroup: alertActionGroup,
+            actionGroupName: alertActionGroupName,
+            flapping,
+          },
+        };
+
+  return actionsPlugin.renderActionParameterTemplates(
+    actionTypeId,
+    actionId,
+    actionParams,
+    variables
+  );
+}
+
+export function transformSummaryActionParams({
+  alerts,
+  rule,
+  ruleTypeId,
+  actionsPlugin,
+  actionId,
+  actionTypeId,
+  spaceId,
+  actionParams,
+  ruleUrl,
+  kibanaBaseUrl,
+}: {
+  alerts: SummarizedAlertsWithAll;
+  rule: SanitizedRule<RuleTypeParams>;
+  ruleTypeId: string;
+  actionsPlugin: ActionsPluginStartContract;
+  actionId: string;
+  actionTypeId: string;
+  spaceId: string;
+  actionParams: RuleActionParams;
+  kibanaBaseUrl?: string;
+  ruleUrl?: string;
+}): RuleActionParams {
   const variables = {
-    alertId,
-    alertName,
+    alertId: rule.id,
+    alertName: rule.name,
     spaceId,
-    tags,
-    alertInstanceId,
-    alertActionGroup,
-    alertActionGroupName,
-    context,
-    date: new Date().toISOString(),
-    state,
-    kibanaBaseUrl,
-    params: alertParams,
-    rule: {
-      id: alertId,
-      name: alertName,
-      type: alertType,
-      spaceId,
-      tags,
-    },
+    tags: rule.tags,
+    params: rule.params,
+    alertInstanceId: rule.id,
+    alertActionGroup: 'default',
+    alertActionGroupName: 'Default',
     alert: {
-      id: alertInstanceId,
-      actionGroup: alertActionGroup,
-      actionGroupName: alertActionGroupName,
+      id: rule.id,
+      uuid: rule.id,
+      actionGroup: 'default',
+      actionGroupName: 'Default',
+      flapping: false,
     },
+    kibanaBaseUrl,
+    date: new Date().toISOString(),
+    // For backwards compatibility with security solutions rules
+    context: {
+      alerts: alerts.all.data ?? [],
+      results_link: ruleUrl,
+      rule: mapKeys(snakeCase, {
+        ...rule.params,
+        name: rule.name,
+        id: rule.id,
+      }),
+    },
+    state: {
+      signals_count: alerts.all.count ?? 0,
+    },
+    rule: {
+      params: rule.params,
+      id: rule.id,
+      name: rule.name,
+      type: ruleTypeId,
+      url: ruleUrl,
+      tags: rule.tags,
+      spaceId,
+    },
+    alerts,
   };
   return actionsPlugin.renderActionParameterTemplates(
     actionTypeId,

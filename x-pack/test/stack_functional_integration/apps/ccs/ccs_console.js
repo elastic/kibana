@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }) {
     before(async () => {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
+      await PageObjects.common.dismissBanner();
       await retry.try(async () => {
         await PageObjects.console.collapseHelp();
       });
@@ -28,12 +29,12 @@ export default function ({ getService, getPageObjects }) {
       });
       it('it should be able to access remote data', async () => {
         await PageObjects.console.enterRequest(
-          '\nGET data:makelogs工程-*/_search\n {\n "query": {\n "bool": {\n "must": [\n {"match": {"extension" : "jpg"'
+          '\nGET ftr-remote:makelogs工程-*/_search\n {\n "query": {\n "bool": {\n "must": [\n {"match": {"extension" : "jpg"'
         );
         await PageObjects.console.clickPlay();
         await retry.try(async () => {
           const actualResponse = await PageObjects.console.getResponse();
-          expect(actualResponse).to.contain('"_index": "data:makelogs工程-0"');
+          expect(actualResponse).to.contain('"_index": "ftr-remote:makelogs工程-0"');
         });
       });
     });

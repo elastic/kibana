@@ -13,11 +13,13 @@ import fetch from 'node-fetch';
 
 const { Response } = jest.requireActual('node-fetch');
 
-jest.mock('@kbn/utils', () => ({
+jest.mock('@kbn/repo-info', () => ({
   kibanaPackageJson: { version: '1.0.0' },
 }));
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+
+import { GlobalConfigService } from '../services/global_config_service';
 
 import {
   callEnterpriseSearchConfigAPI,
@@ -29,12 +31,15 @@ describe('callEnterpriseSearchConfigAPI', () => {
     host: 'http://localhost:3002',
     accessCheckTimeout: 200,
     accessCheckTimeoutWarning: 100,
+    hasNativeConnectors: true,
+    hasWebCrawler: true,
   };
   const mockRequest = {
     headers: { authorization: '==someAuth' },
   };
   const mockDependencies = {
     config: mockConfig,
+    globalConfigService: new GlobalConfigService(),
     request: mockRequest,
     log: loggingSystemMock.create().get(),
   } as any;
@@ -94,6 +99,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
         organization: {
           name: 'ACME Donuts',
           default_org_name: 'My Organization',
+          kibanaUIsEnabled: false,
         },
         account: {
           id: 'some-id-string',
@@ -125,6 +131,10 @@ describe('callEnterpriseSearchConfigAPI', () => {
         hasAppSearchAccess: true,
         hasWorkplaceSearchAccess: false,
       },
+      features: {
+        hasNativeConnectors: true,
+        hasWebCrawler: true,
+      },
       publicUrl: 'http://some.vanity.url',
     });
   });
@@ -137,6 +147,10 @@ describe('callEnterpriseSearchConfigAPI', () => {
       access: {
         hasAppSearchAccess: false,
         hasWorkplaceSearchAccess: false,
+      },
+      features: {
+        hasNativeConnectors: true,
+        hasWebCrawler: true,
       },
       publicUrl: undefined,
       readOnlyMode: false,
@@ -178,6 +192,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
         organization: {
           name: undefined,
           defaultOrgName: undefined,
+          kibanaUIsEnabled: false,
         },
         account: {
           id: undefined,
@@ -190,10 +205,28 @@ describe('callEnterpriseSearchConfigAPI', () => {
     });
   });
 
-  it('returns early if config.host is not set', async () => {
-    const config = { host: '' };
+  it('returns access & features if config.host is not set', async () => {
+    const config = {
+      hasConnectors: false,
+      hasDefaultIngestPipeline: false,
+      hasNativeConnectors: false,
+      hasWebCrawler: false,
+      host: '',
+    };
 
-    expect(await callEnterpriseSearchConfigAPI({ ...mockDependencies, config })).toEqual({});
+    expect(await callEnterpriseSearchConfigAPI({ ...mockDependencies, config })).toEqual({
+      access: {
+        hasAppSearchAccess: false,
+        hasWorkplaceSearchAccess: false,
+      },
+      features: {
+        hasConnectors: false,
+        hasDefaultIngestPipeline: false,
+        hasNativeConnectors: false,
+        hasWebCrawler: false,
+      },
+      kibanaVersion: '1.0.0',
+    });
     expect(fetch).not.toHaveBeenCalled();
   });
 
@@ -223,7 +256,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
   });
 
   it('handles timeouts', async () => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     // Warning
     callEnterpriseSearchConfigAPI(mockDependencies);

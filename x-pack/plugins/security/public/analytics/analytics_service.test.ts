@@ -10,10 +10,10 @@ import { BehaviorSubject } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { nextTick } from '@kbn/test-jest-helpers';
 
+import { AnalyticsService } from './analytics_service';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { authenticationMock } from '../authentication/index.mock';
 import { securityMock } from '../mocks';
-import { AnalyticsService } from './analytics_service';
 
 describe('AnalyticsService', () => {
   let analyticsService: AnalyticsService;
@@ -57,7 +57,7 @@ describe('AnalyticsService', () => {
   });
 
   it('throttle reporting of the authentication type events', async () => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     const mockCore = coreMock.createStart();
     mockCore.http.post.mockResolvedValue({ signature: 'some-signature', timestamp: 1234 });

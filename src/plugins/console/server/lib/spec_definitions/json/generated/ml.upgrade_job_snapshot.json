@@ -1,8 +1,16 @@
 {
   "ml.upgrade_job_snapshot": {
     "url_params": {
-      "timeout": "",
-      "wait_for_completion": "__flag__"
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "wait_for_completion": "__flag__",
+      "timeout": [
+        "30m",
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "POST"
@@ -10,6 +18,10 @@
     "patterns": [
       "_ml/anomaly_detectors/{job_id}/model_snapshots/{snapshot_id}/_upgrade"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-upgrade-job-model-snapshot.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-upgrade-job-model-snapshot.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

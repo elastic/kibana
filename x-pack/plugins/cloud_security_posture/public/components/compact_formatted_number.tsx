@@ -6,15 +6,26 @@
  */
 import React from 'react';
 import { EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 export const CompactFormattedNumber = ({
-  number = 0,
+  number,
   abbreviateAbove = 999999,
 }: {
-  number: number;
+  number?: number;
   /** numbers higher than the value of this field will be abbreviated using compact notation and have a tooltip displaying the full value */
   abbreviateAbove?: number;
 }) => {
+  if (!number && number !== 0) {
+    return (
+      <span>
+        {i18n.translate('xpack.csp.compactFormattedNumber.naTitle', {
+          defaultMessage: 'N/A',
+        })}
+      </span>
+    );
+  }
+
   if (number <= abbreviateAbove) {
     return <span>{number.toLocaleString()}</span>;
   }

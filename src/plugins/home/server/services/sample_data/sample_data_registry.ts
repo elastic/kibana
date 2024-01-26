@@ -15,10 +15,16 @@ import {
   SampleDatasetSchema,
   SampleDatasetDashboardPanel,
   AppLinkData,
+  SampleDatasetProviderContext,
 } from './lib/sample_dataset_registry_types';
 import { sampleDataSchema } from './lib/sample_dataset_schema';
 
-import { flightsSpecProvider, logsSpecProvider, ecommerceSpecProvider } from './data_sets';
+import {
+  flightsSpecProvider,
+  logsSpecProvider,
+  ecommerceSpecProvider,
+  logsTSDBSpecProvider,
+} from './data_sets';
 import { createListRoute, createInstallRoute } from './routes';
 import { makeSampleDataUsageCollector, usage } from './usage';
 import { createUninstallRoute } from './routes/uninstall';
@@ -26,13 +32,18 @@ import { registerSampleDatasetWithIntegration } from './lib/register_with_integr
 
 export class SampleDataRegistry {
   constructor(private readonly initContext: PluginInitializerContext) {}
+
   private readonly sampleDatasets: SampleDatasetSchema[] = [];
   private readonly appLinksMap = new Map<string, AppLinkData[]>();
+  private sampleDataProviderContext?: SampleDatasetProviderContext;
 
   private registerSampleDataSet(specProvider: SampleDatasetProvider) {
+    if (!this.sampleDataProviderContext) {
+      throw new Error('#registerSampleDataSet called before #setup');
+    }
     let value: SampleDatasetSchema;
     try {
-      value = sampleDataSchema.validate(specProvider());
+      value = sampleDataSchema.validate(specProvider(this.sampleDataProviderContext));
     } catch (error) {
       throw new Error(`Unable to register sample dataset spec because it's invalid. ${error}`);
     }
@@ -59,11 +70,13 @@ export class SampleDataRegistry {
   public setup(
     core: CoreSetup,
     usageCollections: UsageCollectionSetup | undefined,
-    customIntegrations?: CustomIntegrationsPluginSetup
+    customIntegrations?: CustomIntegrationsPluginSetup,
+    isDevMode?: boolean
   ) {
     if (usageCollections) {
-      const kibanaIndex = core.savedObjects.getKibanaIndex();
-      makeSampleDataUsageCollector(usageCollections, kibanaIndex);
+      const getIndexForType = (type: string) =>
+        core.getStartServices().then(([coreStart]) => coreStart.savedObjects.getIndexForType(type));
+      makeSampleDataUsageCollector(usageCollections, getIndexForType);
     }
     const usageTracker = usage(
       core.getStartServices().then(([coreStart]) => coreStart.savedObjects),
@@ -75,9 +88,16 @@ export class SampleDataRegistry {
     createInstallRoute(router, this.sampleDatasets, logger, usageTracker, core.analytics);
     createUninstallRoute(router, this.sampleDatasets, logger, usageTracker, core.analytics);
 
+    this.sampleDataProviderContext = {
+      staticAssets: core.http.staticAssets,
+    };
+
     this.registerSampleDataSet(flightsSpecProvider);
     this.registerSampleDataSet(logsSpecProvider);
     this.registerSampleDataSet(ecommerceSpecProvider);
+    if (isDevMode) {
+      this.registerSampleDataSet(logsTSDBSpecProvider);
+    }
     if (customIntegrations && core) {
       registerSampleDatasetWithIntegration(customIntegrations, core);
     }
@@ -167,6 +187,7 @@ export class SampleDataRegistry {
     return {};
   }
 }
+
 /** @public */
 export type SampleDataRegistrySetup = ReturnType<SampleDataRegistry['setup']>;
 

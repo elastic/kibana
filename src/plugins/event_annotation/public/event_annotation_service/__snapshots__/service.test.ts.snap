@@ -1,0 +1,88 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Event Annotation Service findAnnotationGroupContent should retrieve saved objects and format them 1`] = `
+Object {
+  "hits": Array [
+    Object {
+      "attributes": Object {
+        "dataViewSpec": undefined,
+        "description": undefined,
+        "indexPatternId": undefined,
+        "title": undefined,
+      },
+      "id": "nonExistingGroup",
+      "references": Array [],
+      "type": undefined,
+      "updatedAt": "",
+    },
+    Object {
+      "attributes": Object {
+        "dataViewSpec": undefined,
+        "description": "",
+        "indexPatternId": "ipid",
+        "title": "groupTitle",
+      },
+      "id": undefined,
+      "references": Array [
+        Object {
+          "id": "ipid",
+          "name": "ipid",
+          "type": "index-pattern",
+        },
+        Object {
+          "id": "some-tag",
+          "name": "some-tag",
+          "type": "tag",
+        },
+      ],
+      "type": "event-annotation-group",
+      "updatedAt": "",
+    },
+    Object {
+      "attributes": Object {
+        "dataViewSpec": undefined,
+        "description": undefined,
+        "indexPatternId": "ipid",
+        "title": "groupTitle",
+      },
+      "id": "multiAnnotations",
+      "references": Array [
+        Object {
+          "id": "ipid",
+          "name": "ipid",
+          "type": "index-pattern",
+        },
+      ],
+      "type": "event-annotation-group",
+      "updatedAt": "",
+    },
+    Object {
+      "attributes": Object {
+        "dataViewSpec": Object {
+          "id": "my-id",
+        },
+        "description": undefined,
+        "indexPatternId": "my-id",
+        "title": "groupTitle",
+      },
+      "id": "multiAnnotations",
+      "references": Array [],
+      "type": "event-annotation-group",
+      "updatedAt": "",
+    },
+  ],
+  "total": 10,
+}
+`;
+
+exports[`Event Annotation Service loadAnnotationGroup should properly load an annotation group with a multiple annotation 1`] = `
+Object {
+  "annotations": undefined,
+  "dataViewSpec": undefined,
+  "description": undefined,
+  "ignoreGlobalFilters": undefined,
+  "indexPatternId": "ipid",
+  "tags": Array [],
+  "title": "groupTitle",
+}
+`;

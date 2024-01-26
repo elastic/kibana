@@ -31,7 +31,7 @@ export const getGlobalQueries = (
 ): GlobalQuery[] => {
   const inputsRange = state.inputs[id];
   return !isEmpty(inputsRange.linkTo)
-    ? inputsRange.linkTo.reduce<GlobalQuery[]>((acc, linkToId) => {
+    ? inputsRange.linkTo.reduce<GlobalQuery[]>((acc, linkToId: InputsModelId) => {
         if (linkToId === InputsModelId.socTrends) {
           return acc;
         }

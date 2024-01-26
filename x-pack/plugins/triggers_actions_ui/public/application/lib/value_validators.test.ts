@@ -12,7 +12,7 @@ import {
   getConnectorWithInvalidatedFields,
   getRuleWithInvalidatedFields,
 } from './value_validators';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { Rule, IErrorObject, UserConfiguredActionConnector } from '../../types';
 
 describe('throwIfAbsent', () => {
@@ -38,32 +38,32 @@ describe('throwIfAbsent', () => {
 describe('throwIfIsntContained', () => {
   test('throws if value is absent', () => {
     expect(() => {
-      throwIfIsntContained<string>(new Set([uuid.v4()]), 'OMG no value', (val) => val)([uuid.v4()]);
+      throwIfIsntContained<string>(new Set([uuidv4()]), 'OMG no value', (val) => val)([uuidv4()]);
     }).toThrowErrorMatchingInlineSnapshot(`"OMG no value"`);
   });
 
   test('throws if value is absent using custom message', () => {
-    const id = uuid.v4();
+    const id = uuidv4();
     expect(() => {
       throwIfIsntContained<string>(
         new Set([id]),
         (value: string) => `OMG no ${value}`,
         (val) => val
-      )([uuid.v4()]);
+      )([uuidv4()]);
     }).toThrow(`OMG no ${id}`);
   });
 
   test('returns values if value is present', () => {
-    const id = uuid.v4();
-    const values = [uuid.v4(), uuid.v4(), id, uuid.v4()];
+    const id = uuidv4();
+    const values = [uuidv4(), uuidv4(), id, uuidv4()];
     expect(
       throwIfIsntContained<string>(new Set([id]), 'OMG no value', (val) => val)(values)
     ).toEqual(values);
   });
 
   test('returns values if multiple values is present', () => {
-    const [firstId, secondId] = [uuid.v4(), uuid.v4()];
-    const values = [uuid.v4(), uuid.v4(), secondId, uuid.v4(), firstId];
+    const [firstId, secondId] = [uuidv4(), uuidv4()];
+    const values = [uuidv4(), uuidv4(), secondId, uuidv4(), firstId];
     expect(
       throwIfIsntContained<string>(
         new Set([firstId, secondId]),
@@ -74,7 +74,7 @@ describe('throwIfIsntContained', () => {
   });
 
   test('allows a custom value extractor', () => {
-    const [firstId, secondId] = [uuid.v4(), uuid.v4()];
+    const [firstId, secondId] = [uuidv4(), uuidv4()];
     const values = [
       { id: firstId, some: 'prop' },
       { id: secondId, someOther: 'prop' },
@@ -113,6 +113,7 @@ describe('getConnectorWithInvalidatedFields', () => {
       config: {},
       isPreconfigured: false,
       isDeprecated: false,
+      isSystemAction: false,
     };
     const secretsErrors = { webhookUrl: ['Webhook URL is required.'] };
     const configErrors = {};
@@ -130,6 +131,7 @@ describe('getConnectorWithInvalidatedFields', () => {
       config: {} as any,
       isPreconfigured: false,
       isDeprecated: false,
+      isSystemAction: false,
     };
     const secretsErrors = {};
     const configErrors = { apiUrl: ['apiUrl is required'] };
@@ -149,6 +151,7 @@ describe('getConnectorWithInvalidatedFields', () => {
       config: {},
       isPreconfigured: false,
       isDeprecated: false,
+      isSystemAction: false,
     };
     const secretsErrors = { webhookUrl: ['Webhook URL must start with https://.'] };
     const configErrors = {};
@@ -275,6 +278,7 @@ describe('getRuleWithInvalidatedFields', () => {
       throttle: '',
       updatedAt: new Date(),
       updatedBy: '',
+      revision: 0,
     };
     const baseAlertErrors = {};
     const actionsErrors: IErrorObject[] = [];
@@ -313,6 +317,7 @@ describe('getRuleWithInvalidatedFields', () => {
       throttle: '',
       updatedAt: new Date(),
       updatedBy: '',
+      revision: 0,
     };
     const baseAlertErrors = {};
     const actionsErrors: IErrorObject[] = [];
@@ -345,6 +350,7 @@ describe('getRuleWithInvalidatedFields', () => {
               field: {},
             },
           },
+          uuid: '123-456',
         },
       ],
       tags: [],
@@ -362,6 +368,7 @@ describe('getRuleWithInvalidatedFields', () => {
       throttle: '',
       updatedAt: new Date(),
       updatedBy: '',
+      revision: 0,
     };
     const baseAlertErrors = {};
     const actionsErrors = [{ 'incident.field.name': ['Name is required.'] }];
@@ -390,6 +397,7 @@ describe('getRuleWithInvalidatedFields', () => {
               field: {},
             },
           },
+          uuid: '111-111',
         },
         {
           actionTypeId: 'test',
@@ -402,6 +410,7 @@ describe('getRuleWithInvalidatedFields', () => {
               },
             },
           },
+          uuid: '222-222',
         },
       ],
       tags: [],
@@ -419,6 +428,7 @@ describe('getRuleWithInvalidatedFields', () => {
       throttle: '',
       updatedAt: new Date(),
       updatedBy: '',
+      revision: 0,
     };
     const baseAlertErrors = {};
     const actionsErrors = [

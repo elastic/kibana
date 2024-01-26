@@ -6,11 +6,11 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPageContent_Deprecated as EuiPageContent, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiPageTemplate } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
-import { Router, Switch, Route } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
-import { useKibana, useExecutionContext } from '../shared_imports';
+import { useKibana } from '../shared_imports';
 
 import { APP_CLUSTER_REQUIRED_PRIVILEGES } from '../../common/constants';
 
@@ -31,7 +31,7 @@ import {
 import { ROUTES } from './services/navigation';
 
 export const AppWithoutRouter = () => (
-  <Switch>
+  <Routes>
     <Route exact path={ROUTES.list} component={PipelinesList} />
     <Route exact path={ROUTES.clone} component={PipelinesClone} />
     <Route exact path={ROUTES.create} component={PipelinesCreate} />
@@ -39,17 +39,12 @@ export const AppWithoutRouter = () => (
     <Route exact path={ROUTES.createFromCsv} component={PipelinesCreateFromCsv} />
     {/* Catch all */}
     <Route component={PipelinesList} />
-  </Switch>
+  </Routes>
 );
 
 export const App: FunctionComponent = () => {
   const { apiError } = useAuthorizationContext();
-  const { history, executionContext } = useKibana().services;
-
-  useExecutionContext(executionContext!, {
-    type: 'application',
-    page: 'ingestPipelines',
-  });
+  const { history } = useKibana().services;
 
   if (apiError) {
     return (
@@ -72,45 +67,41 @@ export const App: FunctionComponent = () => {
       {({ isLoading, hasPrivileges, privilegesMissing }) => {
         if (isLoading) {
           return (
-            <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
-              <SectionLoading>
-                <FormattedMessage
-                  id="xpack.ingestPipelines.app.checkingPrivilegesDescription"
-                  defaultMessage="Checking privileges…"
-                />
-              </SectionLoading>
-            </EuiPageContent>
+            <SectionLoading>
+              <FormattedMessage
+                id="xpack.ingestPipelines.app.checkingPrivilegesDescription"
+                defaultMessage="Checking privileges…"
+              />
+            </SectionLoading>
           );
         }
 
         if (!hasPrivileges) {
           return (
-            <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
-              <EuiEmptyPrompt
-                iconType="securityApp"
-                title={
-                  <h2>
-                    <FormattedMessage
-                      id="xpack.ingestPipelines.app.deniedPrivilegeTitle"
-                      defaultMessage="Cluster privileges required"
-                    />
-                  </h2>
-                }
-                body={
-                  <p>
-                    <FormattedMessage
-                      id="xpack.ingestPipelines.app.deniedPrivilegeDescription"
-                      defaultMessage="To use Ingest Pipelines, you must have {privilegesCount,
+            <EuiPageTemplate.EmptyPrompt
+              iconType="securityApp"
+              title={
+                <h2>
+                  <FormattedMessage
+                    id="xpack.ingestPipelines.app.deniedPrivilegeTitle"
+                    defaultMessage="Cluster privileges required"
+                  />
+                </h2>
+              }
+              body={
+                <p>
+                  <FormattedMessage
+                    id="xpack.ingestPipelines.app.deniedPrivilegeDescription"
+                    defaultMessage="To use Ingest Pipelines, you must have {privilegesCount,
                       plural, one {this cluster privilege} other {these cluster privileges}}: {missingPrivileges}."
-                      values={{
-                        missingPrivileges: privilegesMissing.cluster!.join(', '),
-                        privilegesCount: privilegesMissing.cluster!.length,
-                      }}
-                    />
-                  </p>
-                }
-              />
-            </EuiPageContent>
+                    values={{
+                      missingPrivileges: privilegesMissing.cluster!.join(', '),
+                      privilegesCount: privilegesMissing.cluster!.length,
+                    }}
+                  />
+                </p>
+              }
+            />
           );
         }
 

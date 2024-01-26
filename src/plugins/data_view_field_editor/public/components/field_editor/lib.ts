@@ -88,13 +88,16 @@ export const getNameFieldConfig = (
 export const valueToComboBoxOption = (value: string) =>
   RUNTIME_FIELD_OPTIONS_PRIMITIVE.find(({ value: optionValue }) => optionValue === value);
 
-export const getFieldPreviewChanges = (subject: BehaviorSubject<FieldPreview[] | undefined>) =>
+export const getFieldPreviewChanges = (
+  subject: BehaviorSubject<FieldPreview[] | undefined>,
+  parentName: string
+) =>
   subject.pipe(
     filter((preview) => preview !== undefined),
     map((items) =>
       // reduce the fields to make diffing easier
       items!.map((item) => {
-        const key = item.key.slice(item.key.search('\\.') + 1);
+        const key = item.key.substring(`${parentName}.`.length);
         return { name: key, type: item.type! };
       })
     ),

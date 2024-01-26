@@ -8,27 +8,47 @@
 import React from 'react';
 import {
   isJavaAgentName,
-  isJRubyAgent,
-  isServerlessAgent,
+  isJRubyAgentName,
+  isAWSLambdaAgentName,
 } from '../../../../common/agent_name';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { ServerlessMetrics } from './serverless_metrics';
 import { ServiceMetrics } from './service_metrics';
 import { JvmMetricsOverview } from './jvm_metrics_overview';
+import { JsonMetricsDashboard } from './static_dashboard';
+import { hasDashboardFile } from './static_dashboard/helper';
+import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
 
 export function Metrics() {
-  const { agentName, runtimeName } = useApmServiceContext();
-  const isServerless = isServerlessAgent(runtimeName);
-
-  if (
-    !isServerless &&
-    (isJavaAgentName(agentName) || isJRubyAgent(agentName, runtimeName))
-  ) {
-    return <JvmMetricsOverview />;
+  const { agentName, runtimeName, serverlessType } = useApmServiceContext();
+  const isAWSLambda = isAWSLambdaAgentName(serverlessType);
+  const { dataView } = useAdHocApmDataView();
+  if (isAWSLambda) {
+    return <ServerlessMetrics />;
   }
 
-  if (isServerless) {
-    return <ServerlessMetrics />;
+  const hasStaticDashboard = hasDashboardFile({
+    agentName,
+    runtimeName,
+    serverlessType,
+  });
+
+  if (hasStaticDashboard && dataView) {
+    return (
+      <JsonMetricsDashboard
+        agentName={agentName}
+        runtimeName={runtimeName}
+        serverlessType={serverlessType}
+        dataView={dataView}
+      />
+    );
+  }
+
+  if (
+    !isAWSLambda &&
+    (isJavaAgentName(agentName) || isJRubyAgentName(agentName, runtimeName))
+  ) {
+    return <JvmMetricsOverview />;
   }
 
   return <ServiceMetrics />;

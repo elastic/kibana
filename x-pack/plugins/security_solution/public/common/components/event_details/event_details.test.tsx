@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 import { mount } from 'enzyme';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
@@ -26,9 +26,11 @@ import { mockAlertDetailsData } from './__mocks__';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { TimelineTabs } from '../../../../common/types/timeline';
 import { useInvestigationTimeEnrichment } from '../../containers/cti/event_enrichment';
-import { useGetUserCasesPermissions } from '../../lib/kibana';
+import { useKibana } from '../../lib/kibana';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
+jest.mock('../../hooks/use_experimental_features');
 jest.mock('../../../timelines/components/timeline/body/renderers', () => {
   return {
     defaultRowRenderers: [
@@ -42,12 +44,7 @@ jest.mock('../../../timelines/components/timeline/body/renderers', () => {
 });
 
 jest.mock('../../lib/kibana');
-const originalKibanaLib = jest.requireActual('../../lib/kibana');
-
-// Restore the useGetUserCasesPermissions so the calling functions can receive a valid permissions object
-// The returned permissions object will indicate that the user does not have permissions by default
-const mockUseGetUserCasesPermissions = useGetUserCasesPermissions as jest.Mock;
-mockUseGetUserCasesPermissions.mockImplementation(originalKibanaLib.useGetUserCasesPermissions);
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 jest.mock('../../containers/cti/event_enrichment');
 
@@ -197,11 +194,47 @@ describe('EventDetails', () => {
   });
 
   describe('osquery tab', () => {
+    let featureFlags: { endpointResponseActionsEnabled: boolean; responseActionsEnabled: boolean };
+
+    beforeEach(() => {
+      featureFlags = { endpointResponseActionsEnabled: false, responseActionsEnabled: true };
+
+      const useIsExperimentalFeatureEnabledMock = (feature: keyof typeof featureFlags) =>
+        featureFlags[feature];
+
+      (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
+        useIsExperimentalFeatureEnabledMock
+      );
+    });
     it('should not be rendered if not provided with specific raw data', () => {
       expect(alertsWrapper.find('[data-test-subj="osqueryViewTab"]').exists()).toEqual(false);
     });
 
     it('render osquery tab', async () => {
+      const {
+        services: { osquery },
+      } = useKibanaMock();
+      if (osquery) {
+        jest.spyOn(osquery, 'fetchAllLiveQueries').mockReturnValue({
+          data: {
+            // @ts-expect-error - we don't need all the response details to test the functionality
+            data: {
+              items: [
+                {
+                  _id: 'testId',
+                  _index: 'testIndex',
+                  fields: {
+                    action_id: ['testActionId'],
+                    'queries.action_id': ['testQueryActionId'],
+                    'queries.query': ['select * from users'],
+                    '@timestamp': ['2022-09-08T18:16:30.256Z'],
+                  },
+                },
+              ],
+            },
+          },
+        });
+      }
       const newProps = {
         ...defaultProps,
         rawEventData: {

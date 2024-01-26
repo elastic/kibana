@@ -3,7 +3,21 @@
 exports[`#start() renders the GlobalToastList into the targetDomElement param 1`] = `
 Array [
   Array [
-    <CoreContextProvider
+    <KibanaRenderContextProvider
+      analytics={
+        Object {
+          "optIn": [MockFunction],
+          "reportEvent": [MockFunction],
+          "telemetryCounter$": Subject {
+            "closed": false,
+            "currentObservers": null,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+        }
+      }
       i18n={
         Object {
           "Context": [Function],
@@ -11,6 +25,7 @@ Array [
       }
       theme={
         Object {
+          "getTheme": [MockFunction],
           "theme$": Observable {
             "_subscribe": [Function],
           },
@@ -19,6 +34,11 @@ Array [
     >
       <GlobalToastList
         dismissToast={[Function]}
+        reportEvent={
+          EventReporter {
+            "reportEvent": [MockFunction],
+          }
+        }
         toasts$={
           Observable {
             "source": BehaviorSubject {
@@ -33,7 +53,7 @@ Array [
           }
         }
       />
-    </CoreContextProvider>,
+    </KibanaRenderContextProvider>,
     <div
       test="target-dom-element"
     />,

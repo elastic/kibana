@@ -21,9 +21,9 @@ import type {
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import type { EncryptedSavedObjectsService } from '../crypto';
-import { EncryptedSavedObjectsClientWrapper } from './encrypted_saved_objects_client_wrapper';
 import { getDescriptorNamespace, normalizeNamespace } from './get_descriptor_namespace';
+import { SavedObjectsEncryptionExtension } from './saved_objects_encryption_extension';
+import type { EncryptedSavedObjectsService } from '../crypto';
 
 export { normalizeNamespace };
 
@@ -81,22 +81,15 @@ export function setupSavedObjects({
   security,
   getStartServices,
 }: SetupSavedObjectsParams): ClientInstanciator {
-  // Register custom saved object client that will encrypt, decrypt and strip saved object
-  // attributes where appropriate for any saved object repository request. We choose max possible
-  // priority for this wrapper to allow all other wrappers to set proper `namespace` for the Saved
-  // Object (e.g. wrapper registered by the Spaces plugin) before we encrypt attributes since
-  // `namespace` is included into AAD.
-  savedObjects.addClientWrapper(
-    Number.MAX_SAFE_INTEGER,
-    'encryptedSavedObjects',
-    ({ client: baseClient, typeRegistry: baseTypeRegistry, request }) =>
-      new EncryptedSavedObjectsClientWrapper({
-        baseClient,
-        baseTypeRegistry,
-        service,
-        getCurrentUser: () => security?.authc.getCurrentUser(request) ?? undefined,
-      })
-  );
+  // Register custom saved object extension that will encrypt, decrypt and strip saved object
+  // attributes where appropriate for any saved object repository request.
+  savedObjects.setEncryptionExtension(({ typeRegistry: baseTypeRegistry, request }) => {
+    return new SavedObjectsEncryptionExtension({
+      baseTypeRegistry,
+      service,
+      getCurrentUser: () => security?.authc.getCurrentUser(request) ?? undefined,
+    });
+  });
 
   return (clientOpts) => {
     const internalRepositoryAndTypeRegistryPromise = getStartServices().then(
@@ -125,7 +118,7 @@ export function setupSavedObjects({
             {
               type,
               id,
-              namespace: getDescriptorNamespace(typeRegistry, type, options?.namespace),
+              namespace: getDescriptorNamespace(typeRegistry, type, savedObject.namespaces),
             },
             savedObject.attributes as Record<string, unknown>
           )) as T,
@@ -155,7 +148,7 @@ export function setupSavedObjects({
                   namespace: getDescriptorNamespace(
                     typeRegistry,
                     savedObject.type,
-                    findOptions.namespaces
+                    savedObject.namespaces
                   ),
                 };
 
@@ -184,7 +177,7 @@ export function setupSavedObjects({
           }
         }
 
-        return { ...finder, find: () => encryptedFinder() };
+        return { find: () => encryptedFinder(), close: finder.close.bind(finder) };
       },
     };
   };

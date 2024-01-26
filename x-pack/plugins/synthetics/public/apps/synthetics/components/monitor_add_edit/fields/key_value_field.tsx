@@ -46,12 +46,15 @@ export type Pair = [
   string // value
 ];
 
-interface Props {
+export interface KeyValuePairsFieldProps {
   addPairControlLabel: string | React.ReactElement;
   defaultPairs: Pair[];
   onChange: (pairs: Pair[]) => void;
   onBlur?: () => void;
   'data-test-subj'?: string;
+  readOnly?: boolean;
+  keyLabel?: string | React.ReactElement;
+  valueLabel?: string | React.ReactElement;
 }
 
 export const KeyValuePairsField = ({
@@ -60,7 +63,10 @@ export const KeyValuePairsField = ({
   onChange,
   onBlur,
   'data-test-subj': dataTestSubj,
-}: Props) => {
+  readOnly,
+  keyLabel,
+  valueLabel,
+}: KeyValuePairsFieldProps) => {
   const [pairs, setPairs] = useState<Pair[]>(defaultPairs);
 
   const handleOnChange = useCallback(
@@ -105,6 +111,7 @@ export const KeyValuePairsField = ({
             iconType="plus"
             onClick={handleAddPair}
             data-test-subj={`${dataTestSubj}__button`}
+            isDisabled={readOnly}
           >
             {addPairControlLabel}
           </EuiButton>
@@ -118,20 +125,20 @@ export const KeyValuePairsField = ({
                 children: (
                   <EuiFlexGroup responsive={false}>
                     <EuiFlexItem>
-                      {
+                      {keyLabel || (
                         <FormattedMessage
                           id="xpack.synthetics.keyValuePairsField.key.label"
                           defaultMessage="Key"
                         />
-                      }
+                      )}
                     </EuiFlexItem>
                     <EuiFlexItem>
-                      {
+                      {valueLabel || (
                         <FormattedMessage
                           id="xpack.synthetics.keyValuePairsField.value.label"
                           defaultMessage="Value"
                         />
-                      }
+                      )}
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 ),
@@ -149,6 +156,7 @@ export const KeyValuePairsField = ({
                 append={
                   <EuiFormLabel>
                     <EuiButtonIcon
+                      data-test-subj="syntheticsKeyValuePairsFieldButton"
                       iconType="trash"
                       aria-label={i18n.translate(
                         'xpack.synthetics.keyValuePairsField.deleteItem.label',
@@ -158,6 +166,7 @@ export const KeyValuePairsField = ({
                         }
                       )}
                       onClick={() => handleDeletePair(index)}
+                      isDisabled={readOnly}
                     />
                   </EuiFormLabel>
                 }
@@ -173,6 +182,7 @@ export const KeyValuePairsField = ({
                     value={key}
                     onChange={(event) => handleOnChange(event, index, true)}
                     onBlur={() => onBlur?.()}
+                    readOnly={readOnly}
                   />
                 }
                 endControl={
@@ -187,6 +197,7 @@ export const KeyValuePairsField = ({
                     value={value}
                     onChange={(event) => handleOnChange(event, index, false)}
                     onBlur={() => onBlur?.()}
+                    readOnly={readOnly}
                   />
                 }
                 delimiter=":"

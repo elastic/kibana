@@ -18,10 +18,13 @@ import {
   ScaleType,
   Settings,
   TooltipType,
-  TooltipProps,
   ESFixedIntervalUnit,
   ESCalendarIntervalUnit,
   PartialTheme,
+  SettingsProps,
+  Tooltip,
+  SeriesIdentifier,
+  TooltipValue,
 } from '@elastic/charts';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { search } from '@kbn/data-plugin/public';
@@ -34,8 +37,10 @@ import {
   DEFAULT_LEGEND_SIZE,
   LegendSizeToPixels,
 } from '@kbn/visualizations-plugin/common/constants';
+import { i18n } from '@kbn/i18n';
 import { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { IconChartHeatmap } from '@kbn/chart-icons';
+import { getOverridesFor } from '@kbn/chart-expressions-common';
 import type { HeatmapRenderProps, FilterEvent, BrushEvent } from '../../common';
 import {
   applyPaletteParams,
@@ -48,6 +53,8 @@ import {
   LegendColorPickerWrapper,
 } from '../utils/get_color_picker';
 import { defaultPaletteParams } from '../constants';
+import { ChartSplit } from './chart_split';
+import { getSplitDimensionAccessor, createSplitPoint } from '../utils/get_split_dimension_utils';
 import './index.scss';
 
 declare global {
@@ -90,11 +97,7 @@ function shiftAndNormalizeStops(
       if (params.range === 'percent') {
         result = min + ((max - min) * value) / 100;
       }
-      // for a range of 1 value the formulas above will divide by 0, so here's a safety guard
-      if (Number.isNaN(result)) {
-        return 1;
-      }
-      return Number(result.toFixed(2));
+      return result;
     }
   );
 }
@@ -133,7 +136,7 @@ function computeColorRanges(
 
 export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
   ({
-    data,
+    data: table,
     args,
     timeZone,
     formatFactory,
@@ -142,21 +145,24 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     datatableUtilities,
     onClickValue,
     onSelectRange,
+    onClickMultiValue,
     paletteService,
     uiState,
     interactive,
     syncTooltips,
     syncCursor,
     renderComplete,
+    overrides,
   }) => {
     const chartRef = useRef<Chart>(null);
-    const chartTheme = chartsThemeService.useChartsTheme();
     const isDarkTheme = chartsThemeService.useDarkMode();
     // legacy heatmap legend is handled by the uiState
     const [showLegend, setShowLegend] = useState<boolean>(() => {
       const bwcLegendStateDefault = args.legend.isVisible ?? true;
       return uiState?.get('vis.legendOpen', bwcLegendStateDefault);
     });
+
+    const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
 
     const toggleLegend = useCallback(() => {
       if (!interactive) {
@@ -193,8 +199,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       },
       [renderComplete]
     );
-
-    const table = data;
     const valueAccessor = args.valueAccessor
       ? getAccessorByDimension(args.valueAccessor, table.columns)
       : undefined;
@@ -202,13 +206,18 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       () => findMinMaxByColumnId([valueAccessor!], table),
       [valueAccessor, table]
     );
-
     const paletteParams = args.palette?.params;
     const xAccessor = args.xAccessor
       ? getAccessorByDimension(args.xAccessor, table.columns)
       : undefined;
     const yAccessor = args.yAccessor
       ? getAccessorByDimension(args.yAccessor, table.columns)
+      : undefined;
+    const splitChartRowAccessor = args.splitRowAccessor
+      ? getSplitDimensionAccessor(table.columns, args.splitRowAccessor, formatFactory)
+      : undefined;
+    const splitChartColumnAccessor = args.splitColumnAccessor
+      ? getSplitDimensionAccessor(table.columns, args.splitColumnAccessor, formatFactory)
       : undefined;
 
     const xAxisColumnIndex = table.columns.findIndex((v) => v.id === xAccessor);
@@ -240,10 +249,16 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       (v) => v[valueAccessor!] === null || typeof v[valueAccessor!] === 'number'
     );
 
+    const handleCursorUpdate = useActiveCursor(chartsActiveCursorService, chartRef, {
+      datatables: [formattedTable.table],
+    });
+
+    const hasTooltipActions = interactive;
+
     const onElementClick = useCallback(
       (e: HeatmapElementEvent[]) => {
         const cell = e[0][0];
-        const { x, y } = cell.datum;
+        const { x, y, smVerticalAccessorValue, smHorizontalAccessorValue } = cell.datum;
 
         const points = [
           {
@@ -257,6 +272,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
             }),
             column: xAxisColumnIndex,
             value: x,
+            table,
           },
           ...(yAxisColumn
             ? [
@@ -270,22 +286,43 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                   }),
                   column: yAxisColumnIndex,
                   value: y,
+                  table,
                 },
               ]
             : []),
         ];
 
-        const context: FilterEvent['data'] = {
-          data: points.map((point) => ({
-            row: point.row,
-            column: point.column,
-            value: point.value,
-            table,
-          })),
-        };
-        onClickValue(context);
+        if (smHorizontalAccessorValue && args.splitColumnAccessor) {
+          const point = createSplitPoint(
+            args.splitColumnAccessor,
+            smHorizontalAccessorValue,
+            formatFactory,
+            table
+          );
+          if (point) {
+            points.push(point);
+          }
+        }
+        if (smVerticalAccessorValue && args.splitRowAccessor) {
+          const point = createSplitPoint(
+            args.splitRowAccessor,
+            smVerticalAccessorValue,
+            formatFactory,
+            table
+          );
+          if (point) {
+            points.push(point);
+          }
+        }
+
+        onClickValue({
+          data: points,
+        });
       },
       [
+        args.splitColumnAccessor,
+        args.splitRowAccessor,
+        formatFactory,
         formattedTable.formattedColumns,
         onClickValue,
         table,
@@ -427,10 +464,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       }
     }
 
-    const tooltip: TooltipProps = {
-      type: args.showTooltip ? TooltipType.Follow : TooltipType.None,
-    };
-
     const valueFormatter = (d: number) => {
       let value = d;
 
@@ -440,9 +473,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       }
       return `${metricFormatter.convert(value) ?? ''}`;
     };
-    const handleCursorUpdate = useActiveCursor(chartsActiveCursorService, chartRef, {
-      datatables: [formattedTable.table],
-    });
 
     const { colors, ranges } = computeColorRanges(
       paletteService,
@@ -464,25 +494,25 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     const overwriteColors = uiState?.get('vis.colors') ?? null;
     const hasSingleValue = max === min;
     const bands = ranges.map((start, index, array) => {
-      const isPenultimate = index === array.length - 1;
+      const isLastValue = index === array.length - 1;
       const nextValue = array[index + 1];
       // by default the last range is right-open
-      let endValue = isPenultimate ? Number.POSITIVE_INFINITY : nextValue;
-      const startValue = isPenultimate && hasSingleValue ? min : start;
+      let endValue = isLastValue ? Number.POSITIVE_INFINITY : nextValue;
+      const startValue =
+        isLastValue && hasSingleValue && paletteParams?.range !== 'number' ? min : start;
+
       // if the lastRangeIsRightOpen is set to false, we need to set the last range to the max value
       if (args.lastRangeIsRightOpen === false) {
         const lastBand = hasSingleValue ? Number.POSITIVE_INFINITY : endValueDistinctBounds;
-        endValue = isPenultimate ? lastBand : nextValue;
+        endValue = isLastValue ? lastBand : nextValue;
       }
 
       let overwriteArrayIdx;
 
       if (endValue === Number.POSITIVE_INFINITY) {
-        overwriteArrayIdx = `≥ ${metricFormatter.convert(startValue)}`;
+        overwriteArrayIdx = `≥ ${valueFormatter(startValue)}`;
       } else {
-        overwriteArrayIdx = `${metricFormatter.convert(start)} - ${metricFormatter.convert(
-          endValue
-        )}`;
+        overwriteArrayIdx = `${valueFormatter(start)} - ${valueFormatter(endValue)}`;
       }
 
       const overwriteColor = overwriteColors?.[overwriteArrayIdx];
@@ -495,6 +525,11 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       };
     });
 
+    const { theme: settingsThemeOverrides = {}, ...settingsOverrides } = getOverridesFor(
+      overrides,
+      'settings'
+    ) as Partial<SettingsProps>;
+
     const themeOverrides: PartialTheme = {
       legend: {
         labelOptions: {
@@ -505,17 +540,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
         grid: {
           stroke: {
             width:
-              args.gridConfig.strokeWidth ??
-              chartTheme.axes?.gridLine?.horizontal?.strokeWidth ??
-              1,
-            color:
-              args.gridConfig.strokeColor ??
-              chartTheme.axes?.gridLine?.horizontal?.stroke ??
-              '#D3DAE6',
-          },
-          cellHeight: {
-            max: 'fill',
-            min: 1,
+              args.gridConfig.strokeWidth ?? chartBaseTheme.axes.gridLine.horizontal.strokeWidth,
+            color: args.gridConfig.strokeColor ?? chartBaseTheme.axes.gridLine.horizontal.stroke,
           },
         },
         cell: {
@@ -534,13 +560,13 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
         yAxisLabel: {
           visible: !!yAxisColumn && args.gridConfig.isYAxisLabelVisible,
           // eui color subdued
-          textColor: chartTheme.axes?.tickLabel?.fill ?? '#6a717d',
+          textColor: chartBaseTheme.axes.tickLabel.fill,
           padding: yAxisColumn?.name ? 8 : 0,
         },
         xAxisLabel: {
           visible: Boolean(args.gridConfig.isXAxisLabelVisible && xAxisColumn),
           // eui color subdued
-          textColor: chartTheme.axes?.tickLabel?.fill ?? `#6a717d`,
+          textColor: chartBaseTheme.axes.tickLabel.fill,
           padding: xAxisColumn?.name ? 8 : 0,
         },
         brushMask: {
@@ -554,6 +580,69 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
 
     const xAxisTitle = args.gridConfig.xTitle ?? xAxisColumn?.name;
     const yAxisTitle = args.gridConfig.yTitle ?? yAxisColumn?.name;
+
+    const filterSelectedTooltipValues = (
+      tooltipSelectedValues: Array<
+        TooltipValue<Record<'x' | 'y', string | number>, SeriesIdentifier>
+      >
+    ) => {
+      const { datum } = tooltipSelectedValues[0];
+      if (!datum) {
+        return;
+      }
+      const { x, y } = datum;
+
+      const shouldFilterByX = tooltipSelectedValues.some(
+        ({ label }) => label === xAxisColumn?.name
+      );
+
+      const shouldFilterByY = tooltipSelectedValues.some(
+        ({ label }) => label === yAxisColumn?.name
+      );
+
+      const cells = [
+        ...(xAxisColumn && shouldFilterByX
+          ? [
+              {
+                column: xAxisColumnIndex,
+                row: table.rows.findIndex((r) => {
+                  if (!xAxisColumn) return false;
+                  if (formattedTable.formattedColumns[xAxisColumn.id]) {
+                    // stringify the value to compare with the chart value
+                    return xValuesFormatter.convert(r[xAxisColumn.id]) === x;
+                  }
+                  return r[xAxisColumn.id] === x;
+                }),
+              },
+            ]
+          : []),
+        ...(yAxisColumn && shouldFilterByY
+          ? [
+              {
+                column: yAxisColumnIndex,
+                row: table.rows.findIndex((r) => {
+                  if (formattedTable.formattedColumns[yAxisColumn.id]) {
+                    // stringify the value to compare with the chart value
+                    return yValuesFormatter.convert(r[yAxisColumn.id]) === y;
+                  }
+                  return r[yAxisColumn.id] === y;
+                }),
+              },
+            ]
+          : []),
+      ];
+
+      if (cells.length) {
+        onClickMultiValue({
+          data: [
+            {
+              table,
+              cells,
+            },
+          ],
+        });
+      }
+    };
 
     return (
       <>
@@ -571,7 +660,36 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
             legendPosition: args.legend.position,
           }}
         >
-          <Chart ref={chartRef}>
+          <Chart ref={chartRef} {...getOverridesFor(overrides, 'chart')}>
+            <ChartSplit
+              splitColumnAccessor={splitChartColumnAccessor}
+              splitRowAccessor={splitChartRowAccessor}
+            />
+            <Tooltip<Record<string, string | number>, SeriesIdentifier>
+              actions={
+                hasTooltipActions
+                  ? [
+                      {
+                        disabled: (selected) => selected.length < 1,
+                        label: (selected) =>
+                          selected.length === 0
+                            ? i18n.translate(
+                                'expressionHeatmap.tooltipActions.emptyFilterSelection',
+                                {
+                                  defaultMessage: 'Select at least one series to filter',
+                                }
+                              )
+                            : i18n.translate('expressionHeatmap.tooltipActions.filterValues', {
+                                defaultMessage: 'Filter {seriesNumber} series',
+                                values: { seriesNumber: selected.length },
+                              }),
+                        onSelect: filterSelectedTooltipValues,
+                      },
+                    ]
+                  : undefined
+              }
+              type={args.showTooltip ? TooltipType.Follow : TooltipType.None}
+            />
             <Settings
               onRenderChange={onRenderChange}
               noResults={
@@ -587,8 +705,13 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               legendSize={LegendSizeToPixels[args.legend.legendSize ?? DEFAULT_LEGEND_SIZE]}
               legendColorPicker={uiState ? LegendColorPickerWrapper : undefined}
               debugState={window._echDebugStateFlag ?? false}
-              tooltip={tooltip}
-              theme={[themeOverrides, chartTheme]}
+              theme={[
+                themeOverrides,
+                ...(Array.isArray(settingsThemeOverrides)
+                  ? settingsThemeOverrides
+                  : [settingsThemeOverrides]),
+              ]}
+              baseTheme={chartBaseTheme}
               xDomain={{
                 min:
                   dateHistogramMeta && dateHistogramMeta.timeRange
@@ -602,6 +725,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               onBrushEnd={interactive ? (onBrushEnd as BrushEndListener) : undefined}
               ariaLabel={args.ariaLabel}
               ariaUseDefaultSummary={!args.ariaLabel}
+              locale={i18n.getLocale()}
+              {...settingsOverrides}
             />
             <Heatmap
               id="heatmap"
@@ -624,24 +749,20 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               xAxisTitle={args.gridConfig.isXAxisTitleVisible ? xAxisTitle : undefined}
               yAxisTitle={args.gridConfig.isYAxisTitleVisible ? yAxisTitle : undefined}
               xAxisLabelFormatter={(v) =>
-                args.gridConfig.isXAxisLabelVisible
-                  ? `${
-                      xAccessor && formattedTable.formattedColumns[xAccessor]
-                        ? v
-                        : xValuesFormatter.convert(v)
-                    }`
-                  : ''
+                `${
+                  xAccessor && formattedTable.formattedColumns[xAccessor]
+                    ? v
+                    : xValuesFormatter.convert(v)
+                }`
               }
               yAxisLabelFormatter={
                 yAxisColumn
                   ? (v) =>
-                      args.gridConfig.isYAxisLabelVisible
-                        ? `${
-                            yAccessor && formattedTable.formattedColumns[yAccessor]
-                              ? v
-                              : yValuesFormatter.convert(v) ?? ''
-                          }`
-                        : ''
+                      `${
+                        yAccessor && formattedTable.formattedColumns[yAccessor]
+                          ? v
+                          : yValuesFormatter.convert(v) ?? ''
+                      }`
                   : undefined
               }
             />

@@ -6,7 +6,8 @@
  */
 
 import { useCallback } from 'react';
-import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import type { BulkActionType } from '../../../../../common/api/detection_engine/rule_management';
+import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { useRulesTableContextOptional } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 
 export function useGuessRuleIdsForBulkAction(): (bulkActionType: BulkActionType) => string[] {
@@ -16,9 +17,9 @@ export function useGuessRuleIdsForBulkAction(): (bulkActionType: BulkActionType)
     (bulkActionType: BulkActionType) => {
       const allRules = rulesTableContext?.state.isAllSelected ? rulesTableContext.state.rules : [];
       const processingRules =
-        bulkActionType === BulkActionType.enable
+        bulkActionType === BulkActionTypeEnum.enable
           ? allRules.filter((x) => !x.enabled)
-          : bulkActionType === BulkActionType.disable
+          : bulkActionType === BulkActionTypeEnum.disable
           ? allRules.filter((x) => x.enabled)
           : allRules;
 

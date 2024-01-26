@@ -163,6 +163,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     });
 
     const policiesRequest = useGetEndpointSpecificPolicies({
+      perPage: 1000,
       onError: (err) => {
         toasts.addWarning(getLoadPoliciesError(err));
       },
@@ -315,12 +316,14 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
         {!doesDataExist ? (
           <NoDataEmptyState
             onAdd={handleOpenCreateFlyoutClick}
+            titleNoEntriesLabel={labels.emptyStateTitleNoEntries}
             titleLabel={labels.emptyStateTitle}
             aboutInfo={labels.emptyStateInfo}
             primaryButtonLabel={labels.emptyStatePrimaryButtonLabel}
             backComponent={backButtonEmptyComponent}
             data-test-subj={getTestId('emptyState')}
             secondaryAboutInfo={secondaryPageInfo}
+            canCreateItems={allowCardCreateAction}
           />
         ) : (
           <>

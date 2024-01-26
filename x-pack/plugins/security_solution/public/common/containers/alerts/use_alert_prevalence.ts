@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
 import { useGlobalTime } from '../use_global_time';
@@ -44,7 +44,7 @@ export const useAlertPrevalence = ({
   const timelineTime = useDeepEqualSelector((state) =>
     inputsSelectors.timelineTimeRangeSelector(state)
   );
-  const globalTime = useGlobalTime(false);
+  const globalTime = useGlobalTime();
   let to: string | undefined;
   let from: string | undefined;
   if (ignoreTimerange === false) {
@@ -68,25 +68,21 @@ export const useAlertPrevalence = ({
   if (data) {
     const buckets = data.aggregations?.[ALERT_PREVALENCE_AGG]?.buckets;
     if (buckets && buckets.length > 0) {
-      /**
-       * Currently for array fields like `process.args` or potentially any `ip` fields
-       * We show the combined count of all occurences of the value, even though those values
-       * could be shared across multiple documents. To make this clearer, we should separate
-       * these values into separate table rows
-       */
-      count = buckets?.reduce((sum, bucket) => sum + (bucket?.doc_count ?? 0), 0);
+      count = buckets[0].doc_count;
     }
   }
 
   const error = !loading && count === undefined;
-  const alertIds = data?.hits.hits.map(({ _id }) => _id);
 
-  return {
-    loading,
-    count,
-    error,
-    alertIds,
-  };
+  return useMemo(
+    () => ({
+      loading,
+      count,
+      error,
+      alertIds: data?.hits.hits.map(({ _id }) => _id),
+    }),
+    [count, data, error, loading]
+  );
 };
 
 const generateAlertPrevalenceQuery = (
@@ -132,31 +128,23 @@ const generateAlertPrevalenceQuery = (
     };
   }
 
+  // If we search for the prevalence of a field that has multiple values (e.g. process.args),
+  // we want to find alerts with the exact same values.
   if (Array.isArray(value) && value.length > 1) {
-    const shouldValues = value.map((val) => ({ match: { [field]: val } }));
     query = {
       bool: {
-        minimum_should_match: 1,
-        should: shouldValues,
+        must: value.map((term) => ({ term: { [field]: term } })) as object[],
       },
     };
     if (from !== undefined && to !== undefined) {
-      query = {
-        ...query,
-        bool: {
-          ...query.bool,
-          must: [
-            {
-              range: {
-                '@timestamp': {
-                  gte: from,
-                  lte: to,
-                },
-              },
-            },
-          ],
+      query.bool.must.push({
+        range: {
+          '@timestamp': {
+            gte: from,
+            lte: to,
+          },
         },
-      };
+      });
     }
   }
 

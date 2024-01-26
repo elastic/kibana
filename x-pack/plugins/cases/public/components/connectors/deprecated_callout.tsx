@@ -32,7 +32,7 @@ const DeprecatedCalloutComponent: React.FC<Props> = ({ type = 'warning' }) => (
   <EuiCallOut
     title={DEPRECATED_CONNECTOR_WARNING_TITLE}
     color={type}
-    iconType="alert"
+    iconType="warning"
     data-test-subj="deprecated-connector-warning-callout"
   >
     {DEPRECATED_CONNECTOR_WARNING_DESC}

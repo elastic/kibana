@@ -7,32 +7,55 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import { RewriteRequestCase } from '@kbn/actions-plugin/common';
-import { RuleAggregations, RuleStatus } from '../../../types';
+import { AggregateRulesResponseBody } from '@kbn/alerting-plugin/common/routes/rule/apis/aggregate';
+import { RuleStatus } from '../../../types';
 
-export interface RuleTagsAggregations {
+export interface AggregateRulesResponse {
+  ruleExecutionStatus: Record<string, number>;
+  ruleLastRunOutcome: Record<string, number>;
+  ruleEnabledStatus: {
+    enabled: number;
+    disabled: number;
+  };
+  ruleMutedStatus: {
+    muted: number;
+    unmuted: number;
+  };
+  ruleSnoozedStatus: {
+    snoozed: number;
+  };
   ruleTags: string[];
 }
 
-export const rewriteBodyRes: RewriteRequestCase<RuleAggregations> = ({
+export const rewriteBodyRes = ({
   rule_execution_status: ruleExecutionStatus,
+  rule_last_run_outcome: ruleLastRunOutcome,
   rule_enabled_status: ruleEnabledStatus,
   rule_muted_status: ruleMutedStatus,
   rule_snoozed_status: ruleSnoozedStatus,
   rule_tags: ruleTags,
-  ...rest
-}: any) => ({
-  ...rest,
+}: AggregateRulesResponseBody): AggregateRulesResponse => ({
   ruleExecutionStatus,
   ruleEnabledStatus,
   ruleMutedStatus,
   ruleSnoozedStatus,
+  ruleLastRunOutcome,
   ruleTags,
 });
 
-export const rewriteTagsBodyRes: RewriteRequestCase<RuleTagsAggregations> = ({
-  rule_tags: ruleTags,
-}: any) => ({
-  ruleTags,
+export interface GetRuleTagsResponse {
+  total: number;
+  page: number;
+  perPage: number;
+  data: string[];
+}
+
+export const rewriteTagsBodyRes: RewriteRequestCase<GetRuleTagsResponse> = ({
+  per_page: perPage,
+  ...rest
+}) => ({
+  perPage,
+  ...rest,
 });
 
 export interface LoadRuleAggregationsProps {
@@ -41,6 +64,15 @@ export interface LoadRuleAggregationsProps {
   typesFilter?: string[];
   actionTypesFilter?: string[];
   ruleExecutionStatusesFilter?: string[];
+  ruleLastRunOutcomesFilter?: string[];
   ruleStatusesFilter?: RuleStatus[];
   tagsFilter?: string[];
+  filterConsumers?: string[];
+}
+
+export interface LoadRuleTagsProps {
+  http: HttpSetup;
+  search?: string;
+  perPage?: number;
+  page: number;
 }

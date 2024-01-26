@@ -4,33 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Observable, firstValueFrom } from 'rxjs';
+
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { CoreSetup, Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { unwrapEsResponse } from '@kbn/observability-plugin/server';
+import {
+  CoreSetup,
+  Logger,
+  SavedObjectsClientContract,
+  SavedObjectsErrorHelpers,
+} from '@kbn/core/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { APMConfig } from '../..';
+import { APMDataAccessConfig } from '@kbn/apm-data-access-plugin/server';
 import {
   APM_TELEMETRY_SAVED_OBJECT_ID,
   APM_TELEMETRY_SAVED_OBJECT_TYPE,
 } from '../../../common/apm_saved_object_constants';
 import { getInternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client';
-import { getApmIndices } from '../../routes/settings/apm_indices/get_apm_indices';
-import {
-  collectDataTelemetry,
-  CollectTelemetryParams,
-} from './collect_data_telemetry';
+import { collectDataTelemetry } from './collect_data_telemetry';
 import { APMUsage } from './types';
 import { apmSchema } from './schema';
+import { getTelemetryClient } from './telemetry_client';
 
 export const APM_TELEMETRY_TASK_NAME = 'apm-telemetry-task';
 
 export async function createApmTelemetry({
   core,
-  config$,
+  getApmIndices,
   usageCollector,
   taskManager,
   logger,
@@ -38,7 +39,9 @@ export async function createApmTelemetry({
   isProd,
 }: {
   core: CoreSetup;
-  config$: Observable<APMConfig>;
+  getApmIndices: (
+    soClient: SavedObjectsClientContract
+  ) => Promise<APMDataAccessConfig['indices']>;
   usageCollector: UsageCollectionSetup;
   taskManager: TaskManagerSetupContract;
   logger: Logger;
@@ -59,41 +62,16 @@ export async function createApmTelemetry({
     },
   });
 
-  const savedObjectsClient = await getInternalSavedObjectsClient(core);
+  const telemetryClient = await getTelemetryClient({ core });
+  const [coreStart] = await core.getStartServices();
+  const savedObjectsClient = await getInternalSavedObjectsClient(coreStart);
+  const apmIndices = await getApmIndices(savedObjectsClient);
 
   const collectAndStore = async () => {
-    const config = await firstValueFrom(config$);
-    const [{ elasticsearch }] = await core.getStartServices();
-    const esClient = elasticsearch.client;
-
-    const indices = await getApmIndices({
-      config,
-      savedObjectsClient,
-    });
-
-    const search: CollectTelemetryParams['search'] = (params) =>
-      unwrapEsResponse(
-        esClient.asInternalUser.search(params, { meta: true })
-      ) as any;
-
-    const indicesStats: CollectTelemetryParams['indicesStats'] = (params) =>
-      unwrapEsResponse(
-        esClient.asInternalUser.indices.stats(params, { meta: true })
-      );
-
-    const transportRequest: CollectTelemetryParams['transportRequest'] = (
-      params
-    ) =>
-      unwrapEsResponse(
-        esClient.asInternalUser.transport.request(params, { meta: true })
-      );
-
     const dataTelemetry = await collectDataTelemetry({
-      search,
-      indices,
+      indices: apmIndices,
+      telemetryClient,
       logger,
-      indicesStats,
-      transportRequest,
       savedObjectsClient,
       isProd,
     });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AuthenticationProvider } from './model';
+import type { AuthenticationProvider } from '@kbn/security-plugin-types-common';
 
 export interface SessionInfo {
   expiresInMs: number | null;
@@ -15,6 +15,7 @@ export interface SessionInfo {
 
 export enum LogoutReason {
   'SESSION_EXPIRED' = 'SESSION_EXPIRED',
+  'CONCURRENCY_LIMIT' = 'CONCURRENCY_LIMIT',
   'AUTHENTICATION_ERROR' = 'AUTHENTICATION_ERROR',
   'LOGGED_OUT' = 'LOGGED_OUT',
   'UNAUTHENTICATED' = 'UNAUTHENTICATED',

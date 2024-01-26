@@ -6,7 +6,7 @@
  */
 
 import { queryByLabelText } from '@testing-library/react';
-import { createMemoryHistory } from 'history';
+import { createMemoryHistory, MemoryHistory } from 'history';
 import { CoreStart } from '@kbn/core/public';
 import React from 'react';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
@@ -23,15 +23,16 @@ import {
 } from '../../../utils/test_helpers';
 import { fromQuery } from '../../shared/links/url_helpers';
 import { TransactionOverview } from '.';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
+import { MockTimeRangeContextProvider } from '../../../context/time_range_metadata/mock_time_range_metadata_context_provider';
 
 const KibanaReactContext = createKibanaReactContext({
   uiSettings: { get: () => true },
   usageCollection: { reportUiCounter: () => {} },
 } as unknown as Partial<CoreStart>);
 
-const history = createMemoryHistory();
-jest.spyOn(history, 'push');
-jest.spyOn(history, 'replace');
+let history: MemoryHistory<unknown>;
 
 function setup({
   urlParams,
@@ -40,6 +41,10 @@ function setup({
   urlParams: ApmUrlParams;
   serviceTransactionTypes: string[];
 }) {
+  history = createMemoryHistory();
+  jest.spyOn(history, 'push');
+  jest.spyOn(history, 'replace');
+
   history.replace({
     pathname: '/services/foo/transactions',
     search: fromQuery(urlParams),
@@ -48,7 +53,10 @@ function setup({
   // mock transaction types
   jest
     .spyOn(useServiceTransactionTypesHook, 'useServiceTransactionTypesFetcher')
-    .mockReturnValue(serviceTransactionTypes);
+    .mockReturnValue({
+      transactionTypes: serviceTransactionTypes,
+      status: useFetcherHook.FETCH_STATUS.SUCCESS,
+    });
 
   // mock agent
   jest
@@ -56,6 +64,7 @@ function setup({
     .mockReturnValue({
       agentName: 'nodejs',
       runtimeName: 'node',
+      serverlessType: undefined,
       error: undefined,
       status: useFetcherHook.FETCH_STATUS.SUCCESS,
     });
@@ -63,15 +72,21 @@ function setup({
   jest.spyOn(useFetcherHook, 'useFetcher').mockReturnValue({} as any);
 
   return renderWithTheme(
-    <KibanaReactContext.Provider>
-      <MockApmPluginContextWrapper history={history}>
-        <UrlParamsProvider>
-          <ApmServiceContextProvider>
-            <TransactionOverview />
-          </ApmServiceContextProvider>
-        </UrlParamsProvider>
-      </MockApmPluginContextWrapper>
-    </KibanaReactContext.Provider>
+    <IntlProvider locale="en">
+      <KibanaReactContext.Provider>
+        <MockApmPluginContextWrapper history={history}>
+          <UrlParamsProvider>
+            <MockTimeRangeContextProvider>
+              <ApmTimeRangeMetadataContextProvider>
+                <ApmServiceContextProvider>
+                  <TransactionOverview />
+                </ApmServiceContextProvider>
+              </ApmTimeRangeMetadataContextProvider>
+            </MockTimeRangeContextProvider>
+          </UrlParamsProvider>
+        </MockApmPluginContextWrapper>
+      </KibanaReactContext.Provider>
+    </IntlProvider>
   );
 }
 

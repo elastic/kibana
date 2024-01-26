@@ -8,6 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import createContainer from 'constate';
 import { useMemo } from 'react';
+import { IdFormat } from '../../../../../../common/http_api/latest';
 import { ModuleSourceConfiguration } from '../../log_analysis_module_types';
 import { useLogAnalysisModule } from '../../log_analysis_module';
 import { useLogAnalysisModuleConfiguration } from '../../log_analysis_module_configuration';
@@ -16,30 +17,33 @@ import { logEntryRateModule } from './module_descriptor';
 
 export const useLogEntryRateModule = ({
   indexPattern,
-  sourceId,
+  logViewId,
   spaceId,
+  idFormat,
   timestampField,
   runtimeMappings,
 }: {
   indexPattern: string;
-  sourceId: string;
+  logViewId: string;
   spaceId: string;
+  idFormat: IdFormat;
   timestampField: string;
   runtimeMappings: estypes.MappingRuntimeFields;
 }) => {
   const sourceConfiguration: ModuleSourceConfiguration = useMemo(
     () => ({
       indices: indexPattern.split(','),
-      sourceId,
+      sourceId: logViewId,
       spaceId,
       timestampField,
       runtimeMappings,
     }),
-    [indexPattern, sourceId, spaceId, timestampField, runtimeMappings]
+    [indexPattern, logViewId, spaceId, timestampField, runtimeMappings]
   );
 
   const logAnalysisModule = useLogAnalysisModule({
     moduleDescriptor: logEntryRateModule,
+    idFormat,
     sourceConfiguration,
   });
 
@@ -50,6 +54,7 @@ export const useLogEntryRateModule = ({
 
   const { fetchModuleDefinition, getIsJobDefinitionOutdated } = useLogAnalysisModuleDefinition({
     sourceConfiguration,
+    idFormat,
     moduleDescriptor: logEntryRateModule,
   });
 

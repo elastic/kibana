@@ -5,70 +5,76 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState, useRef } from 'react';
-import type { ValidFeatureId } from '@kbn/rule-data-utils';
-
+import { useQuery } from '@tanstack/react-query';
+import { isValidFeatureId } from '@kbn/rule-data-utils';
+import { useMemo } from 'react';
+import type { ServerError } from '../types';
+import { useCasesToast } from '../common/use_cases_toast';
 import * as i18n from './translations';
-import { useToasts } from '../common/lib/kibana';
 import { getFeatureIds } from './api';
+import { casesQueriesKeys } from './constants';
+import type { FeatureIdsResponse } from './types';
 
-const initialStatus = {
-  isLoading: true,
-  alertFeatureIds: [] as ValidFeatureId[],
-  isError: false,
+interface UseGetFeatureIdsResponse {
+  featureIds: string[];
+  ruleTypeIds: string[];
+}
+
+const transformResponseToFeatureIds = (data: FeatureIdsResponse): UseGetFeatureIdsResponse => {
+  const localFeatureIds = new Set<string>();
+  data?.aggregations?.consumer?.buckets?.forEach(
+    ({ key, doc_count: docCount }: { key: string; doc_count: number }) => {
+      if (docCount > 0 && isValidFeatureId(key)) {
+        localFeatureIds.add(key);
+      }
+    }
+  );
+  data?.aggregations?.producer?.buckets?.forEach(
+    ({ key, doc_count: docCount }: { key: string; doc_count: number }) => {
+      if (docCount > 0 && isValidFeatureId(key)) {
+        localFeatureIds.add(key);
+      }
+    }
+  );
+  const ruleTypeIds =
+    data?.aggregations?.ruleTypeIds?.buckets
+      ?.filter(({ doc_count: docCount }: { doc_count: number }) => docCount > 0)
+      .map(({ key }: { key: string }) => key) ?? [];
+
+  return { featureIds: [...localFeatureIds], ruleTypeIds };
 };
 
-export const useGetFeatureIds = (
-  alertRegistrationContexts: string[]
-): {
-  isLoading: boolean;
-  isError: boolean;
-  alertFeatureIds: ValidFeatureId[];
-} => {
-  const toasts = useToasts();
-  const isCancelledRef = useRef(false);
-  const abortCtrlRef = useRef(new AbortController());
-  const [status, setStatus] = useState(initialStatus);
-
-  const fetchFeatureIds = useCallback(
-    async (registrationContext: string[]) => {
-      setStatus({ isLoading: true, alertFeatureIds: [], isError: false });
-      try {
-        isCancelledRef.current = false;
-        abortCtrlRef.current.abort();
-        abortCtrlRef.current = new AbortController();
-
-        const query = { registrationContext };
-        const response = await getFeatureIds(query, abortCtrlRef.current.signal);
-
-        if (!isCancelledRef.current) {
-          setStatus({ isLoading: false, alertFeatureIds: response, isError: false });
-        }
-      } catch (error) {
-        if (!isCancelledRef.current) {
-          setStatus({ isLoading: false, alertFeatureIds: [], isError: true });
-          if (error.name !== 'AbortError') {
-            toasts.addError(
-              error.body && error.body.message ? new Error(error.body.message) : error,
-              { title: i18n.ERROR_TITLE }
-            );
-          }
-        }
-      }
+export const useGetFeatureIds = (alertIds: string[], enabled: boolean) => {
+  const { showErrorToast } = useCasesToast();
+  const { data, isInitialLoading, isLoading } = useQuery<
+    FeatureIdsResponse,
+    ServerError,
+    UseGetFeatureIdsResponse
+  >(
+    casesQueriesKeys.alertFeatureIds(alertIds),
+    ({ signal }) => {
+      return getFeatureIds({
+        query: {
+          ids: {
+            values: alertIds,
+          },
+        },
+        signal,
+      });
     },
-    [toasts]
+    {
+      select: transformResponseToFeatureIds,
+      enabled,
+      onError: (error: ServerError) => {
+        showErrorToast(error, { title: i18n.ERROR_TITLE });
+      },
+    }
   );
 
-  useEffect(() => {
-    fetchFeatureIds(alertRegistrationContexts);
-    return () => {
-      isCancelledRef.current = true;
-      abortCtrlRef.current.abort();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, alertRegistrationContexts);
-
-  return status;
+  return useMemo(
+    () => ({ data, isLoading: (isInitialLoading || isLoading) && enabled }),
+    [data, enabled, isInitialLoading, isLoading]
+  );
 };
 
 export type UseGetFeatureIds = typeof useGetFeatureIds;

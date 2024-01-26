@@ -145,21 +145,6 @@ export const jobIdSchema = schema.object({
   jobId: schema.string(),
 });
 
-export const getRecordsSchema = schema.object({
-  desc: schema.maybe(schema.boolean()),
-  end: schema.maybe(schema.string()),
-  exclude_interim: schema.maybe(schema.boolean()),
-  page: schema.maybe(
-    schema.object({
-      from: schema.number(),
-      size: schema.number(),
-    })
-  ),
-  record_score: schema.maybe(schema.number()),
-  sort: schema.maybe(schema.string()),
-  start: schema.maybe(schema.string()),
-});
-
 export const getBucketsSchema = schema.object({
   anomaly_score: schema.maybe(schema.number()),
   desc: schema.maybe(schema.boolean()),
@@ -222,12 +207,14 @@ export const updateModelSnapshotBodySchema = schema.object({
 
 export const forecastAnomalyDetector = schema.object({ duration: schema.any() });
 
-export const jobResetQuerySchema = schema.object({
-  /** wait for completion */
-  wait_for_completion: schema.maybe(schema.boolean()),
-});
-
 export const forceQuerySchema = schema.object({
   /** force close */
   force: schema.maybe(schema.boolean()),
+});
+
+export const jobForCloningSchema = schema.object({
+  /** Whether to retain the created_by custom setting. */
+  retainCreatedBy: schema.maybe(schema.boolean()),
+  /** Job ID */
+  jobId: schema.string(),
 });

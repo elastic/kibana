@@ -12,47 +12,54 @@ import { CANVAS_TYPE, API_ROUTE_WORKPAD } from '../../../common/lib/constants';
 
 export function initializeFindWorkpadsRoute(deps: RouteInitializerDeps) {
   const { router } = deps;
-  router.get(
-    {
+  router.versioned
+    .get({
       path: `${API_ROUTE_WORKPAD}/find`,
-      validate: {
-        query: schema.object({
-          name: schema.string(),
-          page: schema.maybe(schema.number()),
-          perPage: schema.number(),
-        }),
+      access: 'internal',
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            query: schema.object({
+              name: schema.string(),
+              page: schema.maybe(schema.number()),
+              perPage: schema.number(),
+            }),
+          },
+        },
       },
-    },
-    async (context, request, response) => {
-      const savedObjectsClient = (await context.core).savedObjects.client;
-      const { name, page, perPage } = request.query;
+      async (context, request, response) => {
+        const savedObjectsClient = (await context.core).savedObjects.client;
+        const { name, page, perPage } = request.query;
 
-      try {
-        const workpads = await savedObjectsClient.find<SavedObjectAttributes>({
-          type: CANVAS_TYPE,
-          sortField: '@timestamp',
-          sortOrder: 'desc',
-          search: name ? `${name}* | ${name}` : '*',
-          searchFields: ['name'],
-          fields: ['id', 'name', '@created', '@timestamp'],
-          page,
-          perPage,
-        });
+        try {
+          const workpads = await savedObjectsClient.find<SavedObjectAttributes>({
+            type: CANVAS_TYPE,
+            sortField: '@timestamp',
+            sortOrder: 'desc',
+            search: name ? `${name}* | ${name}` : '*',
+            searchFields: ['name'],
+            fields: ['id', 'name', '@created', '@timestamp'],
+            page,
+            perPage,
+          });
 
-        return response.ok({
-          body: {
-            total: workpads.total,
-            workpads: workpads.saved_objects.map((hit) => ({ id: hit.id, ...hit.attributes })),
-          },
-        });
-      } catch (error) {
-        return response.ok({
-          body: {
-            total: 0,
-            workpads: [],
-          },
-        });
+          return response.ok({
+            body: {
+              total: workpads.total,
+              workpads: workpads.saved_objects.map((hit) => ({ id: hit.id, ...hit.attributes })),
+            },
+          });
+        } catch (error) {
+          return response.ok({
+            body: {
+              total: 0,
+              workpads: [],
+            },
+          });
+        }
       }
-    }
-  );
+    );
 }

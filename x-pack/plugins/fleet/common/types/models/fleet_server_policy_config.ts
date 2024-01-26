@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+// SO definition for this type is declared in server/types/interfaces
 export interface NewFleetServerHost {
   name: string;
   host_urls: string[];
   is_default: boolean;
   is_preconfigured: boolean;
+  proxy_id?: string | null;
 }
 
 export interface FleetServerHost extends NewFleetServerHost {
   id: string;
 }
-
-export type FleetServerHostSOAttributes = NewFleetServerHost;

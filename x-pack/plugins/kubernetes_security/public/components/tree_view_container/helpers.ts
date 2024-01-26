@@ -8,7 +8,7 @@
 import {
   CLOUD_INSTANCE_NAME,
   CONTAINER_IMAGE_NAME,
-  DEFAULT_QUERY,
+  DEFAULT_FILTER_QUERY,
   ORCHESTRATOR_CLUSTER_ID,
   ORCHESTRATOR_CLUSTER_NAME,
   ORCHESTRATOR_NAMESPACE,
@@ -43,7 +43,7 @@ export const addTreeNavSelectionToFilterQuery = (
   filterQuery: string | undefined,
   treeNavSelection: Partial<KubernetesCollectionMap>
 ) => {
-  let validFilterQuery = DEFAULT_QUERY;
+  let validFilterQuery = DEFAULT_FILTER_QUERY;
 
   try {
     const parsedFilterQuery: QueryDslQueryContainerBool = JSON.parse(filterQuery || '{}');
@@ -73,7 +73,7 @@ export const addTreeNavSelectionToFilterQuery = (
 
     validFilterQuery = JSON.stringify(parsedFilterQuery);
   } catch {
-    // no-op since validFilterQuery is initialized to be DEFAULT_QUERY
+    // no-op since validFilterQuery is initialized to be DEFAULT_FILTER_QUERY
   }
 
   return validFilterQuery;

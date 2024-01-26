@@ -13,5 +13,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./get_model_stats'));
     loadTestFile(require.resolve('./get_model_pipelines'));
     loadTestFile(require.resolve('./delete_model'));
+    loadTestFile(require.resolve('./start_stop_deployment'));
   });
 }

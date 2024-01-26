@@ -20,12 +20,12 @@ import {
   isOperator,
   matchesOperator,
 } from '@kbn/securitysolution-list-utils';
-import { validateFilePathInput } from '@kbn/securitysolution-utils';
+import { validatePotentialWildcardInput } from '@kbn/securitysolution-utils';
 import { useFindListsBySize } from '@kbn/securitysolution-list-hooks';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { fields, getField } from '@kbn/data-plugin/common/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 import { ReactWrapper, mount } from 'enzyme';
 
 import { getFoundListsBySizeSchemaMock } from '../../../../common/schemas/response/found_lists_by_size_schema.mock';
@@ -122,6 +122,9 @@ describe('BuilderEntryItem', () => {
     expect(wrapper.find('.euiFormHelpText.euiFormRow__text').at(0).text()).toEqual(
       i18n.CUSTOM_COMBOBOX_OPTION_TEXT
     );
+    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').at(0).props()).toEqual(
+      expect.objectContaining({ acceptsCustomOptions: true })
+    );
   });
 
   test('it does not render custom option text when "allowCustomOptions" is "true" and it is a nested entry', () => {
@@ -154,6 +157,83 @@ describe('BuilderEntryItem', () => {
     );
 
     expect(wrapper.find('.euiFormHelpText.euiFormRow__text').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').at(0).props()).toEqual(
+      expect.objectContaining({ acceptsCustomOptions: false })
+    );
+  });
+
+  test('it does not render custom option text when "allowCustomOptions" is "false"', () => {
+    wrapper = mount(
+      <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
+        entry={{
+          correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: getField('ip'),
+          id: '123',
+          nested: undefined,
+          operator: isOperator,
+          parent: undefined,
+          value: '1234',
+        }}
+        httpService={mockKibanaHttpService}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logstash-*',
+        }}
+        listType="detection"
+        onChange={jest.fn()}
+        setErrorsExist={jest.fn()}
+        setWarningsExist={jest.fn()}
+        showLabel
+        allowCustomOptions={false}
+      />
+    );
+
+    expect(wrapper.find('.euiFormHelpText.euiFormRow__text').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').at(0).props()).toEqual(
+      expect.objectContaining({ acceptsCustomOptions: false })
+    );
+  });
+
+  test('it render mapping issues warning text when field has mapping conflicts', async () => {
+    const field = getField('mapping issues');
+    wrapper = mount(
+      <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
+        entry={{
+          correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field,
+          id: '123',
+          nested: undefined,
+          operator: isOperator,
+          parent: undefined,
+          value: '1234',
+        }}
+        httpService={mockKibanaHttpService}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logstash-*',
+        }}
+        listType="detection"
+        onChange={jest.fn()}
+        setErrorsExist={jest.fn()}
+        setWarningsExist={jest.fn()}
+        showLabel
+        allowCustomOptions
+        getExtendedFields={(): Promise<FieldSpec[]> => Promise.resolve([field])}
+      />
+    );
+
+    await waitFor(() => {
+      wrapper.update();
+      expect(wrapper.find('.euiFormHelpText.euiFormRow__text').text()).toMatch(
+        /This field is defined as different types across the following indices or is unmapped. This can cause unexpected query results./
+      );
+    });
   });
 
   test('it renders field values correctly when operator is "isOperator"', () => {
@@ -184,11 +264,15 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').text()).toEqual('ip');
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"]').text()).toEqual('is');
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryFieldMatch"]').text()).toEqual(
-      '1234'
-    );
+    expect(
+      wrapper.find('[data-test-subj="exceptionBuilderEntryField"] input').props().value
+    ).toEqual('ip');
+    expect(
+      wrapper.find('[data-test-subj="operatorAutocompleteComboBox"] input').props().value
+    ).toEqual('is');
+    expect(
+      wrapper.find('[data-test-subj="valuesAutocompleteMatchLabel"] input').props().value
+    ).toEqual('1234');
   });
 
   test('it renders field values correctly when operator is "isNotOperator"', () => {
@@ -219,13 +303,15 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').text()).toEqual('ip');
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"]').text()).toEqual(
-      'is not'
-    );
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryFieldMatch"]').text()).toEqual(
-      '1234'
-    );
+    expect(
+      wrapper.find('[data-test-subj="exceptionBuilderEntryField"] input').props().value
+    ).toEqual('ip');
+    expect(
+      wrapper.find('[data-test-subj="operatorAutocompleteComboBox"] input').props().value
+    ).toEqual('is not');
+    expect(
+      wrapper.find('[data-test-subj="valuesAutocompleteMatchLabel"] input').props().value
+    ).toEqual('1234');
   });
 
   test('it renders field values correctly when operator is "isOneOfOperator"', () => {
@@ -256,11 +342,13 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').text()).toEqual('ip');
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"]').text()).toEqual(
-      'is one of'
-    );
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryFieldMatchAny"]').text()).toEqual(
+    expect(
+      wrapper.find('[data-test-subj="exceptionBuilderEntryField"] input').props().value
+    ).toEqual('ip');
+    expect(
+      wrapper.find('[data-test-subj="operatorAutocompleteComboBox"] input').props().value
+    ).toEqual('is one of');
+    expect(wrapper.find('[data-test-subj="valuesAutocompleteMatchAny"]').first().text()).toEqual(
       '1234'
     );
   });
@@ -293,10 +381,12 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').text()).toEqual('ip');
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"]').text()).toEqual(
-      'is not one of'
-    );
+    expect(
+      wrapper.find('[data-test-subj="exceptionBuilderEntryField"] input').props().value
+    ).toEqual('ip');
+    expect(
+      wrapper.find('[data-test-subj="operatorAutocompleteComboBox"] input').props().value
+    ).toEqual('is not one of');
     expect(wrapper.find('[data-test-subj="exceptionBuilderEntryFieldMatchAny"]').text()).toEqual(
       '1234'
     );
@@ -331,12 +421,15 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').text()).toEqual('ip');
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"]').text()).toEqual(
-      'is in list'
-    );
     expect(
-      wrapper.find('[data-test-subj="valuesAutocompleteComboBox listsComboxBox"]').at(1).text()
+      wrapper.find('[data-test-subj="exceptionBuilderEntryField"] input').props().value
+    ).toEqual('ip');
+    expect(
+      wrapper.find('[data-test-subj="operatorAutocompleteComboBox"] input').props().value
+    ).toEqual('is in list');
+    expect(
+      wrapper.find('[data-test-subj="valuesAutocompleteComboBox listsComboxBox"] input').props()
+        .value
     ).toEqual('some name');
   });
 
@@ -369,12 +462,15 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').text()).toEqual('ip');
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"]').text()).toEqual(
-      'is not in list'
-    );
     expect(
-      wrapper.find('[data-test-subj="valuesAutocompleteComboBox listsComboxBox"]').at(1).text()
+      wrapper.find('[data-test-subj="exceptionBuilderEntryField"] input').props().value
+    ).toEqual('ip');
+    expect(
+      wrapper.find('[data-test-subj="operatorAutocompleteComboBox"] input').props().value
+    ).toEqual('is not in list');
+    expect(
+      wrapper.find('[data-test-subj="valuesAutocompleteComboBox listsComboxBox"] input').props()
+        .value
     ).toEqual('some name');
   });
 
@@ -406,11 +502,16 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').text()).toEqual('ip');
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"]').text()).toEqual(
-      'exists'
-    );
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryFieldExists"]').text()).toEqual('—');
+    expect(
+      wrapper.find('[data-test-subj="exceptionBuilderEntryField"] input').props().value
+    ).toEqual('ip');
+    expect(
+      wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"] input').props().value
+    ).toEqual('exists');
+    expect(
+      wrapper.find('[data-test-subj="valuesAutocompleteComboBox existsComboxBox"] input').props()
+        .placeholder
+    ).toEqual('—');
     expect(
       wrapper.find('[data-test-subj="exceptionBuilderEntryFieldExists"] input').props().disabled
     ).toBeTruthy();
@@ -444,11 +545,16 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').text()).toEqual('ip');
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"]').text()).toEqual(
-      'does not exist'
-    );
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryFieldExists"]').text()).toEqual('—');
+    expect(
+      wrapper.find('[data-test-subj="exceptionBuilderEntryField"] input').props().value
+    ).toEqual('ip');
+    expect(
+      wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"] input').props().value
+    ).toEqual('does not exist');
+    expect(
+      wrapper.find('[data-test-subj="valuesAutocompleteComboBox existsComboxBox"] input').props()
+        .placeholder
+    ).toEqual('—');
     expect(
       wrapper.find('[data-test-subj="exceptionBuilderEntryFieldExists"] input').props().disabled
     ).toBeTruthy();
@@ -482,13 +588,53 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').text()).toEqual('@tags');
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"]').text()).toEqual(
-      'matches'
+    expect(
+      wrapper.find('[data-test-subj="exceptionBuilderEntryField"] input').props().value
+    ).toEqual('@tags');
+    expect(
+      wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"] input').props().value
+    ).toEqual('matches');
+    expect(
+      wrapper.find('[data-test-subj="valuesAutocompleteWildcard"] input').props().value
+    ).toEqual('1234*');
+    // doesnt show warning label for non endpoint exception items
+    expect(
+      wrapper.find('[data-test-subj="valuesAutocompleteWildcardLabel"] .euiFormHelpText')
+    ).toHaveLength(0);
+  });
+
+  test('it does not render matches filepath warning message for rule default list item', () => {
+    wrapper = mount(
+      <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
+        entry={{
+          correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: getField('@tags'),
+          id: '123',
+          nested: undefined,
+          operator: matchesOperator,
+          parent: undefined,
+          value: '1234*',
+        }}
+        httpService={mockKibanaHttpService}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logstash-*',
+        }}
+        listType="rule_default"
+        onChange={jest.fn()}
+        setErrorsExist={jest.fn()}
+        setWarningsExist={jest.fn()}
+        showLabel={false}
+      />
     );
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryFieldWildcard"]').text()).toEqual(
-      '1234*'
-    );
+
+    // doesnt show warning label for non endpoint exception items
+    expect(
+      wrapper.find('[data-test-subj="valuesAutocompleteWildcardLabel"] .euiFormHelpText')
+    ).toHaveLength(0);
   });
 
   test('it renders field values correctly when operator is "doesNotMatchOperator"', () => {
@@ -519,13 +665,15 @@ describe('BuilderEntryItem', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"]').text()).toEqual('@tags');
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"]').text()).toEqual(
-      'does not match'
-    );
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryFieldWildcard"]').text()).toEqual(
-      '1234*'
-    );
+    expect(
+      wrapper.find('[data-test-subj="exceptionBuilderEntryField"] input').props().value
+    ).toEqual('@tags');
+    expect(
+      wrapper.find('[data-test-subj="exceptionBuilderEntryOperator"] input').props().value
+    ).toEqual('does not match');
+    expect(
+      wrapper.find('[data-test-subj="valuesAutocompleteWildcard"] input').props().value
+    ).toEqual('1234*');
   });
 
   test('it uses "correspondingKeywordField" if it exists', () => {
@@ -879,7 +1027,7 @@ describe('BuilderEntryItem', () => {
       ).onBlur();
     });
 
-    expect(mockSetErrorExists).toHaveBeenCalledWith(true);
+    expect(mockSetErrorExists).toHaveBeenCalledWith({ '123': true });
   });
 
   test('it invokes "setErrorsExist" when invalid value inputted for field value input', async () => {
@@ -926,13 +1074,13 @@ describe('BuilderEntryItem', () => {
       ).onSearchChange('hellooo');
     });
 
-    expect(mockSetErrorExists).toHaveBeenCalledWith(true);
+    expect(mockSetErrorExists).toHaveBeenCalledWith({ '123': true });
   });
 
   test('it invokes "setWarningsExist" when invalid value in field value input', async () => {
     const mockSetWarningsExists = jest.fn();
 
-    (validateFilePathInput as jest.Mock).mockReturnValue('some warning message');
+    (validatePotentialWildcardInput as jest.Mock).mockReturnValue('some warning message');
     wrapper = mount(
       <BuilderEntryItem
         autocompleteService={autocompleteStartMock}
@@ -981,7 +1129,7 @@ describe('BuilderEntryItem', () => {
   test('it does not invoke "setWarningsExist" when valid value in field value input', async () => {
     const mockSetWarningsExists = jest.fn();
 
-    (validateFilePathInput as jest.Mock).mockReturnValue(undefined);
+    (validatePotentialWildcardInput as jest.Mock).mockReturnValue(undefined);
     wrapper = mount(
       <BuilderEntryItem
         autocompleteService={autocompleteStartMock}

@@ -8,6 +8,8 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
 
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+
 import { appContextService } from '../../../app_context';
 
 import { buildDefaultSettings } from './default_settings';
@@ -15,6 +17,10 @@ import { buildDefaultSettings } from './default_settings';
 jest.mock('../../../app_context');
 
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
+mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
+  ...securityMock.createSetup(),
+}));
+
 let mockedLogger: jest.Mocked<Logger>;
 describe('buildDefaultSettings', () => {
   beforeEach(() => {
@@ -59,7 +65,6 @@ describe('buildDefaultSettings', () => {
     expect(settings).toMatchInlineSnapshot(`
       Object {
         "index": Object {
-          "codec": "best_compression",
           "lifecycle": Object {
             "name": "logs",
           },
@@ -91,5 +96,37 @@ describe('buildDefaultSettings', () => {
     expect(mockedLogger.warn).toBeCalledWith(
       'large amount of default fields detected for index template test_template in package test_package, applying the first 1024 fields'
     );
+  });
+
+  it('should not add field with index:false or doc_values:false to default fields', () => {
+    const fields = [
+      {
+        name: 'field_valid',
+        type: 'keyword',
+      },
+      {
+        name: 'field_invalid_index_false',
+        type: 'keyword',
+        index: false,
+      },
+      {
+        name: 'field_invalid_docvalues_false',
+        type: 'keyword',
+        doc_values: false,
+      },
+      {
+        name: 'field_invalid_default_field_false',
+        type: 'keyword',
+        default_field: false,
+      },
+    ];
+    const settings = buildDefaultSettings({
+      type: 'logs',
+      templateName: 'test_template',
+      packageName: 'test_package',
+      fields,
+    });
+
+    expect(settings.index.query?.default_field).toEqual(['field_valid']);
   });
 });

@@ -6,19 +6,17 @@
  */
 
 import { createAction } from '@reduxjs/toolkit';
+import { MostRecentPingsRequest } from './api';
 import {
   Ping,
   PingsResponse,
   EncryptedSyntheticsSavedMonitor,
 } from '../../../../../common/runtime_types';
-import { QueryParams } from './api';
 import { createAsyncAction } from '../utils/actions';
 
 export const setMonitorDetailsLocationAction = createAction<string>(
   '[MONITOR SUMMARY] SET LOCATION'
 );
-
-export const getMonitorStatusAction = createAsyncAction<QueryParams, Ping>('[MONITOR DETAILS] GET');
 
 export const getMonitorAction = createAsyncAction<
   { monitorId: string },
@@ -30,14 +28,14 @@ export const getMonitorLastRunAction = createAsyncAction<
   PingsResponse
 >('[MONITOR DETAILS] GET LAST RUN');
 
-export const getMonitorRecentPingsAction = createAsyncAction<
-  {
-    monitorId: string;
-    locationId: string;
-    size?: number;
-    pageIndex?: number;
-    from?: string;
-    to?: string;
-  },
-  PingsResponse
->('[MONITOR DETAILS] GET RECENT PINGS');
+export const resetMonitorLastRunAction = createAction('[MONITOR DETAILS] LAST RUN RESET');
+
+export const updateMonitorLastRunAction = createAction<{ data: Ping }>(
+  '[MONITOR DETAILS] UPdATE LAST RUN'
+);
+
+export const getMonitorRecentPingsAction = createAsyncAction<MostRecentPingsRequest, PingsResponse>(
+  '[MONITOR DETAILS] GET RECENT PINGS'
+);
+
+export const setStatusFilter = createAction<'up' | 'down' | undefined>('SET STATUS FILTER');

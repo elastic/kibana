@@ -5,22 +5,18 @@
  * 2.0.
  */
 
-import React, { FC, Suspense } from 'react';
 import { i18n } from '@kbn/i18n';
-
+import { useTimefilter } from '@kbn/ml-date-picker';
+import React, { FC, Suspense } from 'react';
 import { Redirect } from 'react-router-dom';
-
+import { ML_PAGES } from '../../../locator';
 import type { NavigateToPath } from '../../contexts/kibana';
-
-import { MlRoute, PageLoader, PageProps } from '../router';
-import { useResolver } from '../use_resolver';
-
-import { checkFullLicense } from '../../license';
-import { checkGetJobsCapabilitiesResolver } from '../../capabilities/check_capabilities';
+import { useEnabledFeatures } from '../../contexts/ml/serverless_context';
 import { getMlNodeCount } from '../../ml_nodes_check';
 import { loadMlServerInfo } from '../../services/ml_server_info';
-import { useTimefilter } from '../../contexts/kibana';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
+import { createPath, MlRoute, PageLoader, PageProps } from '../router';
+import { useRouteResolver } from '../use_resolver';
 
 const OverviewPage = React.lazy(() => import('../../overview/overview_page'));
 
@@ -29,7 +25,7 @@ export const overviewRouteFactory = (
   basePath: string
 ): MlRoute => ({
   id: 'overview',
-  path: '/overview',
+  path: createPath(ML_PAGES.OVERVIEW),
   title: i18n.translate('xpack.ml.overview.overviewLabel', {
     defaultMessage: 'Overview',
   }),
@@ -46,15 +42,12 @@ export const overviewRouteFactory = (
   'data-test-subj': 'mlPageOverview',
 });
 
-const PageWrapper: FC<PageProps> = ({ deps }) => {
-  const { redirectToMlAccessDeniedPage } = deps;
-
-  const { context } = useResolver(undefined, undefined, deps.config, deps.dataViewsContract, {
-    checkFullLicense,
-    checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
+const PageWrapper: FC<PageProps> = () => {
+  const { context } = useRouteResolver('full', ['canGetMlInfo'], {
     getMlNodeCount,
     loadMlServerInfo,
   });
+
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
 
   return (
@@ -75,5 +68,13 @@ export const appRootRouteFactory = (navigateToPath: NavigateToPath, basePath: st
 });
 
 const Page: FC = () => {
-  return <Redirect to="/overview" />;
+  const { isADEnabled, isDFAEnabled, isNLPEnabled } = useEnabledFeatures();
+  if (isADEnabled === false && isDFAEnabled === false && isNLPEnabled === true) {
+    // if only NLP is enabled, redirect to the trained models page.
+    // in the search serverless project, the overview page is blank, so we
+    // need to redirect to the trained models page instead
+    return <Redirect to={createPath(ML_PAGES.TRAINED_MODELS_MANAGE)} />;
+  }
+
+  return <Redirect to={createPath(ML_PAGES.OVERVIEW)} />;
 };

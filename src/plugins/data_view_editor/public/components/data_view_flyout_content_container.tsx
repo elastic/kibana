@@ -6,18 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 import { DataViewSpec, useKibana } from '../shared_imports';
 import { IndexPatternEditorFlyoutContent } from './data_view_editor_flyout_content';
 import { DataViewEditorContext, DataViewEditorProps } from '../types';
 import { DataViewEditorService } from '../data_view_editor_service';
-
-// @ts-ignore
-export const DataViewEditorServiceContext = React.createContext<{
-  dataViewEditorService: DataViewEditorService;
-}>();
 
 const DataViewFlyoutContentContainer = ({
   onSave,
@@ -32,14 +28,33 @@ const DataViewFlyoutContentContainer = ({
     services: { dataViews, notifications, http },
   } = useKibana<DataViewEditorContext>();
 
+  const [dataViewEditorService] = useState(
+    () =>
+      new DataViewEditorService({
+        services: { http, dataViews },
+        initialValues: {
+          name: editData?.name,
+          type: editData?.type as INDEX_PATTERN_TYPE,
+          indexPattern: editData?.getIndexPattern(),
+        },
+        requireTimestampField,
+      })
+  );
+
+  useEffect(() => {
+    const service = dataViewEditorService;
+    return service.destroy;
+  }, [dataViewEditorService]);
+
   const onSaveClick = async (dataViewSpec: DataViewSpec, persist: boolean = true) => {
     try {
       let saveResponse;
       if (editData) {
-        const { name = '', timeFieldName, title = '' } = dataViewSpec;
+        const { name = '', timeFieldName, title = '', allowHidden = false } = dataViewSpec;
         editData.setIndexPattern(title);
         editData.name = name;
         editData.timeFieldName = timeFieldName;
+        editData.setAllowHidden(allowHidden);
         saveResponse = editData.isPersisted()
           ? await dataViews.updateSavedObject(editData)
           : editData;
@@ -50,12 +65,17 @@ const DataViewFlyoutContentContainer = ({
       }
 
       if (saveResponse && !(saveResponse instanceof Error)) {
+        await dataViews.refreshFields(saveResponse);
+
         if (persist) {
-          const message = i18n.translate('indexPatternEditor.saved', {
-            defaultMessage: "Saved '{indexPatternName}'",
-            values: { indexPatternName: saveResponse.getName() },
+          const title = i18n.translate('indexPatternEditor.saved', {
+            defaultMessage: 'Saved',
           });
-          notifications.toasts.addSuccess(message);
+          const text = `'${saveResponse.getName()}'`;
+          notifications.toasts.addSuccess({
+            title,
+            text,
+          });
         }
         await onSave(saveResponse);
       }
@@ -69,19 +89,15 @@ const DataViewFlyoutContentContainer = ({
   };
 
   return (
-    <DataViewEditorServiceContext.Provider
-      value={{ dataViewEditorService: new DataViewEditorService(http, dataViews) }}
-    >
-      <IndexPatternEditorFlyoutContent
-        onSave={onSaveClick}
-        onCancel={onCancel}
-        defaultTypeIsRollup={defaultTypeIsRollup}
-        requireTimestampField={requireTimestampField}
-        editData={editData}
-        showManagementLink={showManagementLink}
-        allowAdHoc={allowAdHocDataView || false}
-      />
-    </DataViewEditorServiceContext.Provider>
+    <IndexPatternEditorFlyoutContent
+      onSave={onSaveClick}
+      onCancel={onCancel}
+      defaultTypeIsRollup={defaultTypeIsRollup}
+      editData={editData}
+      showManagementLink={showManagementLink}
+      allowAdHoc={allowAdHocDataView || false}
+      dataViewEditorService={dataViewEditorService}
+    />
   );
 };
 

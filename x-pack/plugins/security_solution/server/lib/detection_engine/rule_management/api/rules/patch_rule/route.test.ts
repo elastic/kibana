@@ -6,7 +6,7 @@
  */
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
-import { getPatchRulesSchemaMock } from '../../../../../../../common/detection_engine/rule_management/mocks';
+import { getPatchRulesSchemaMock } from '../../../../../../../common/api/detection_engine/rule_management/mocks';
 
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import { mlServicesMock } from '../../../../../machine_learning/mocks';
@@ -22,20 +22,10 @@ import {
 } from '../../../../routes/__mocks__/request_responses';
 
 import { getMlRuleParams, getQueryRuleParams } from '../../../../rule_schema/mocks';
-// eslint-disable-next-line no-restricted-imports
-import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migration';
 
 import { patchRuleRoute } from './route';
 
 jest.mock('../../../../../machine_learning/authz');
-
-jest.mock('../../../logic/rule_actions/legacy_action_migration', () => {
-  const actual = jest.requireActual('../../../logic/rule_actions/legacy_action_migration');
-  return {
-    ...actual,
-    legacyMigrate: jest.fn(),
-  };
-});
 
 describe('Patch rule route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -51,8 +41,6 @@ describe('Patch rule route', () => {
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // existing rule
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams())); // successful update
 
-    (legacyMigrate as jest.Mock).mockResolvedValue(getRuleMock(getQueryRuleParams()));
-
     patchRuleRoute(server.router, ml);
   });
 
@@ -67,7 +55,6 @@ describe('Patch rule route', () => {
 
     test('returns 404 when updating a single rule that does not exist', async () => {
       clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
-      (legacyMigrate as jest.Mock).mockResolvedValue(null);
       const response = await server.inject(
         getPatchRequest(),
         requestContextMock.convertContext(context)
@@ -80,7 +67,6 @@ describe('Patch rule route', () => {
     });
 
     test('returns error if requesting a non-rule', async () => {
-      (legacyMigrate as jest.Mock).mockResolvedValue(null);
       clients.rulesClient.find.mockResolvedValue(nonRuleFindResult());
       const response = await server.inject(
         getPatchRequest(),
@@ -114,7 +100,6 @@ describe('Patch rule route', () => {
         ...getFindResultWithSingleHit(),
         data: [getRuleMock(getMlRuleParams())],
       });
-      (legacyMigrate as jest.Mock).mockResolvedValueOnce(getRuleMock(getMlRuleParams()));
       const request = requestMock.create({
         method: 'patch',
         path: DETECTION_ENGINE_RULES_URL,
@@ -215,7 +200,7 @@ describe('Patch rule route', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "unknown_type" supplied to "type",Invalid value "kuery" supplied to "language"'
+        'type: Invalid literal value, expected "eql", language: Invalid literal value, expected "eql", type: Invalid literal value, expected "query", type: Invalid literal value, expected "saved_query", type: Invalid literal value, expected "threshold", and 5 more'
       );
     });
 
@@ -241,7 +226,7 @@ describe('Patch rule route', () => {
         },
       });
       const result = server.validate(request);
-      expect(result.badRequest).toHaveBeenCalledWith('Failed to parse "from" on rule param');
+      expect(result.badRequest).toHaveBeenCalledWith('from: Failed to parse date-math expression');
     });
   });
 });

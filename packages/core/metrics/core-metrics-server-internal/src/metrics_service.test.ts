@@ -30,7 +30,7 @@ describe('MetricsService', () => {
   let metricsService: MetricsService;
 
   beforeEach(() => {
-    jest.useFakeTimers('legacy');
+    jest.useFakeTimers({ legacyFakeTimers: true });
 
     const configService = configServiceMock.create({
       atPath: { interval: moment.duration(testInterval) },
@@ -52,7 +52,7 @@ describe('MetricsService', () => {
       expect(OpsMetricsCollector).toHaveBeenCalledTimes(1);
       expect(OpsMetricsCollector).toHaveBeenCalledWith(
         httpMock.server,
-        esServiceMock.agentStore,
+        esServiceMock.agentStatsProvider,
         expect.objectContaining({ logger: logger.get('metrics') })
       );
 
@@ -214,10 +214,16 @@ describe('MetricsService', () => {
             "process": Object {
               "eventLoopDelay": undefined,
               "eventLoopDelayHistogram": undefined,
+              "eventLoopUtilization": undefined,
               "memory": Object {
+                "arrayBuffersInBytes": undefined,
+                "externalInBytes": undefined,
                 "heap": Object {
+                  "sizeLimit": undefined,
+                  "totalInBytes": undefined,
                   "usedInBytes": undefined,
                 },
+                "residentSetSizeInBytes": undefined,
               },
               "uptime": undefined,
             },

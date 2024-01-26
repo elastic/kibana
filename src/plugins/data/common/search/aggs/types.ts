@@ -8,6 +8,7 @@
 
 import { Assign } from '@kbn/utility-types';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { aggTimeSeries } from './buckets/time_series_fn';
 import {
   aggAvg,
   aggBucketAvg,
@@ -27,14 +28,15 @@ import {
   aggFilters,
   aggGeoBounds,
   aggGeoCentroid,
-  aggGeoHash,
   aggGeoTile,
   aggHistogram,
+  aggIpPrefix,
   aggIpRange,
   aggMax,
   aggMedian,
   aggMin,
   aggMovingAvg,
+  aggRate,
   AggParamsAvg,
   AggParamsBucketAvg,
   AggParamsBucketAvgSerialized,
@@ -56,9 +58,9 @@ import {
   AggParamsFilters,
   AggParamsGeoBounds,
   AggParamsGeoCentroid,
-  AggParamsGeoHash,
   AggParamsGeoTile,
   AggParamsHistogram,
+  AggParamsIpPrefix,
   AggParamsIpRange,
   AggParamsMax,
   AggParamsMedian,
@@ -69,6 +71,7 @@ import {
   AggParamsPercentileRanks,
   AggParamsPercentiles,
   AggParamsRange,
+  AggParamsRate,
   AggParamsSerialDiff,
   AggParamsSignificantTerms,
   AggParamsStdDeviation,
@@ -109,6 +112,7 @@ import {
   AggParamsMovingAvgSerialized,
   AggParamsSerialDiffSerialized,
   AggParamsTopHitSerialized,
+  AggParamsTimeSeries,
 } from '.';
 import { AggParamsSampler } from './buckets/sampler';
 import { AggParamsDiversifiedSampler } from './buckets/diversified_sampler';
@@ -121,6 +125,7 @@ export type { IAggType } from './agg_type';
 export type { AggParam, AggParamOption } from './agg_params';
 export type { IFieldParamType } from './param_types';
 export type { IMetricAggType } from './metrics/metric_agg_type';
+export type { IpPrefixKey } from './buckets/lib/ip_prefix';
 export type { IpRangeKey } from './buckets/lib/ip_range';
 export type { OptionedValueProp } from './param_types/optioned';
 
@@ -171,6 +176,7 @@ export type AggExpressionFunctionArgs<Name extends keyof SerializedAggParamsMapp
  */
 interface SerializedAggParamsMapping {
   [BUCKET_TYPES.RANGE]: AggParamsRange;
+  [BUCKET_TYPES.IP_PREFIX]: AggParamsIpPrefix;
   [BUCKET_TYPES.IP_RANGE]: AggParamsIpRange;
   [BUCKET_TYPES.DATE_RANGE]: AggParamsDateRange;
   [BUCKET_TYPES.FILTER]: AggParamsFilter;
@@ -178,10 +184,10 @@ interface SerializedAggParamsMapping {
   [BUCKET_TYPES.SIGNIFICANT_TERMS]: AggParamsSignificantTerms;
   [BUCKET_TYPES.SIGNIFICANT_TEXT]: AggParamsSignificantText;
   [BUCKET_TYPES.GEOTILE_GRID]: AggParamsGeoTile;
-  [BUCKET_TYPES.GEOHASH_GRID]: AggParamsGeoHash;
   [BUCKET_TYPES.HISTOGRAM]: AggParamsHistogram;
   [BUCKET_TYPES.DATE_HISTOGRAM]: AggParamsDateHistogram;
   [BUCKET_TYPES.TERMS]: AggParamsTermsSerialized;
+  [BUCKET_TYPES.TIME_SERIES]: AggParamsTimeSeries;
   [BUCKET_TYPES.MULTI_TERMS]: AggParamsMultiTermsSerialized;
   [BUCKET_TYPES.RARE_TERMS]: AggParamsRareTerms;
   [BUCKET_TYPES.SAMPLER]: AggParamsSampler;
@@ -209,6 +215,7 @@ interface SerializedAggParamsMapping {
   [METRIC_TYPES.MOVING_FN]: AggParamsMovingAvgSerialized;
   [METRIC_TYPES.PERCENTILE_RANKS]: AggParamsPercentileRanks;
   [METRIC_TYPES.PERCENTILES]: AggParamsPercentiles;
+  [METRIC_TYPES.RATE]: AggParamsRate;
   [METRIC_TYPES.SERIAL_DIFF]: AggParamsSerialDiffSerialized;
   [METRIC_TYPES.TOP_HITS]: AggParamsTopHitSerialized;
   [METRIC_TYPES.TOP_METRICS]: AggParamsTopMetricsSerialized;
@@ -216,6 +223,7 @@ interface SerializedAggParamsMapping {
 
 export interface AggParamsMapping {
   [BUCKET_TYPES.RANGE]: AggParamsRange;
+  [BUCKET_TYPES.IP_PREFIX]: AggParamsIpPrefix;
   [BUCKET_TYPES.IP_RANGE]: AggParamsIpRange;
   [BUCKET_TYPES.DATE_RANGE]: AggParamsDateRange;
   [BUCKET_TYPES.FILTER]: AggParamsFilter;
@@ -223,10 +231,10 @@ export interface AggParamsMapping {
   [BUCKET_TYPES.SIGNIFICANT_TERMS]: AggParamsSignificantTerms;
   [BUCKET_TYPES.SIGNIFICANT_TEXT]: AggParamsSignificantText;
   [BUCKET_TYPES.GEOTILE_GRID]: AggParamsGeoTile;
-  [BUCKET_TYPES.GEOHASH_GRID]: AggParamsGeoHash;
   [BUCKET_TYPES.HISTOGRAM]: AggParamsHistogram;
   [BUCKET_TYPES.DATE_HISTOGRAM]: AggParamsDateHistogram;
   [BUCKET_TYPES.TERMS]: AggParamsTerms;
+  [BUCKET_TYPES.TIME_SERIES]: AggParamsTimeSeries;
   [BUCKET_TYPES.MULTI_TERMS]: AggParamsMultiTerms;
   [BUCKET_TYPES.RARE_TERMS]: AggParamsRareTerms;
   [BUCKET_TYPES.SAMPLER]: AggParamsSampler;
@@ -254,6 +262,7 @@ export interface AggParamsMapping {
   [METRIC_TYPES.MOVING_FN]: AggParamsMovingAvg;
   [METRIC_TYPES.PERCENTILE_RANKS]: AggParamsPercentileRanks;
   [METRIC_TYPES.PERCENTILES]: AggParamsPercentiles;
+  [METRIC_TYPES.RATE]: AggParamsRate;
   [METRIC_TYPES.SERIAL_DIFF]: AggParamsSerialDiff;
   [METRIC_TYPES.TOP_HITS]: AggParamsTopHit;
   [METRIC_TYPES.TOP_METRICS]: AggParamsTopMetrics;
@@ -265,14 +274,15 @@ export interface AggFunctionsMapping {
   aggFilter: ReturnType<typeof aggFilter>;
   aggFilters: ReturnType<typeof aggFilters>;
   aggSignificantTerms: ReturnType<typeof aggSignificantTerms>;
+  aggIpPrefix: ReturnType<typeof aggIpPrefix>;
   aggIpRange: ReturnType<typeof aggIpRange>;
   aggDateRange: ReturnType<typeof aggDateRange>;
   aggRange: ReturnType<typeof aggRange>;
   aggGeoTile: ReturnType<typeof aggGeoTile>;
-  aggGeoHash: ReturnType<typeof aggGeoHash>;
   aggHistogram: ReturnType<typeof aggHistogram>;
   aggDateHistogram: ReturnType<typeof aggDateHistogram>;
   aggTerms: ReturnType<typeof aggTerms>;
+  aggTimeSeries: ReturnType<typeof aggTimeSeries>;
   aggMultiTerms: ReturnType<typeof aggMultiTerms>;
   aggRareTerms: ReturnType<typeof aggRareTerms>;
   aggAvg: ReturnType<typeof aggAvg>;
@@ -301,4 +311,5 @@ export interface AggFunctionsMapping {
   aggSum: ReturnType<typeof aggSum>;
   aggTopHit: ReturnType<typeof aggTopHit>;
   aggTopMetrics: ReturnType<typeof aggTopMetrics>;
+  aggRate: ReturnType<typeof aggRate>;
 }

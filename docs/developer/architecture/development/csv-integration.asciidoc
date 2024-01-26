@@ -21,7 +21,7 @@ interface jobParameters {
 }
 ----
 
-The `searchRequest.body` should abide by the {ref}/search-request-body.html[Elasticsearch Search Request Body] syntax
+The `searchRequest.body` should abide by the {ref}/search-search.html[Elasticsearch Search Request Body] syntax
 
 [float]
 ==== `export-config` Directive
@@ -48,4 +48,4 @@ function getSharingTitle() string;
 
 ----
 
-The `sharingData.searchRequest.body` should abide by the {ref}/search-request-body.html[Elasticsearch Search Request Body] syntax
+The `sharingData.searchRequest.body` should abide by the {ref}/search-search.html[{es} Search Request Body] syntax

@@ -4,17 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getStatusConfiguration } from '@kbn/cases-components';
-import { StatusAll } from '../../../common/ui/types';
-import { CaseStatuses } from '../../../common/api';
+import { getStatusConfiguration } from '@kbn/cases-components/src/status/config';
+import { CaseStatuses } from '../../../common/types/domain';
 import * as i18n from './translations';
-import type { AllCaseStatus, Statuses } from './types';
+import type { Statuses } from './types';
 
 const statusConfiguration = getStatusConfiguration();
-
-export const allCaseStatus: AllCaseStatus = {
-  [StatusAll]: { color: 'hollow', label: i18n.ALL },
-};
 
 export const statuses: Statuses = {
   [CaseStatuses.open]: {

@@ -8,8 +8,8 @@
 import { EuiFlexGroup, EuiFlexItem, EuiFormHelpText, EuiSpacer } from '@elastic/eui';
 import { rgba } from 'polished';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import type { DraggingStyle, NotDraggingStyle } from 'react-beautiful-dnd';
-import { Draggable, Droppable } from 'react-beautiful-dnd';
+import type { DraggingStyle, NotDraggingStyle } from '@hello-pangea/dnd';
+import { Draggable, Droppable } from '@hello-pangea/dnd';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
@@ -17,7 +17,8 @@ import {
   DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME,
   IS_DRAGGING_CLASS_NAME,
 } from '@kbn/securitysolution-t-grid';
-import { timelineActions } from '../../../store/timeline';
+import { useDraggableKeyboardWrapper } from '../../../../common/components/drag_and_drop/draggable_keyboard_wrapper_hook';
+import { timelineActions } from '../../../store';
 
 import { AndOrBadge } from '../../../../common/components/and_or_badge';
 import { AddDataProviderPopover } from './add_data_provider_popover';
@@ -32,7 +33,6 @@ import { EMPTY_GROUP, flattenIntoAndGroups } from './helpers';
 import { ProviderItemBadge } from './provider_item_badge';
 
 import * as i18n from './translations';
-import { useKibana } from '../../../../common/lib/kibana';
 
 export const EMPTY_PROVIDERS_GROUP_CLASS_NAME = 'empty-providers-group';
 
@@ -66,8 +66,10 @@ const getItemStyle = (
 const DroppableContainer = styled.div`
   min-height: ${ROW_OF_DATA_PROVIDERS_HEIGHT}px;
   height: auto !important;
+  display: none;
 
   .${IS_DRAGGING_CLASS_NAME} &:hover {
+    display: flex;
     background-color: ${({ theme }) => rgba(theme.eui.euiColorSuccess, 0.2)} !important;
   }
 `;
@@ -109,9 +111,6 @@ TimelineEuiFormHelpText.displayName = 'TimelineEuiFormHelpText';
 const ParensContainer = styled(EuiFlexItem)`
   align-self: center;
 `;
-
-const getDataProviderValue = (dataProvider: DataProvidersAnd) =>
-  dataProvider.queryMatch.displayValue ?? dataProvider.queryMatch.value;
 
 /**
  * Renders an interactive card representation of the data providers. It also
@@ -161,7 +160,6 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [, setClosePopOverTrigger] = useState(false);
     const dispatch = useDispatch();
-    const { timelines } = useKibana().services;
 
     const handleClosePopOverTrigger = useCallback(() => {
       setClosePopOverTrigger((prevClosePopOverTrigger) => !prevClosePopOverTrigger);
@@ -247,7 +245,7 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
       setIsPopoverOpen(true);
     }, []);
 
-    const { onBlur, onKeyDown } = timelines.getUseDraggableKeyboardWrapper()({
+    const { onBlur, onKeyDown } = useDraggableKeyboardWrapper({
       closePopover: handleClosePopOverTrigger,
       draggableId,
       fieldName: dataProvider.queryMatch.field,
@@ -262,6 +260,10 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
         }
       },
       [onKeyDown]
+    );
+
+    const displayValue = String(
+      dataProvider.queryMatch.displayValue ?? dataProvider.queryMatch.value
     );
 
     const DraggableContent = useCallback(
@@ -302,7 +304,8 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
                 toggleEnabledProvider={handleToggleEnabledProvider}
                 toggleExcludedProvider={handleToggleExcludedProvider}
                 toggleTypeProvider={handleToggleTypeProvider}
-                val={getDataProviderValue(dataProvider)}
+                displayValue={displayValue}
+                val={dataProvider.queryMatch.value}
                 type={dataProvider.type}
                 wrapperRef={keyboardHandlerRef}
               />
@@ -323,6 +326,7 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
       [
         browserFields,
         dataProvider,
+        displayValue,
         group,
         handleDataProviderEdited,
         handleDeleteProvider,

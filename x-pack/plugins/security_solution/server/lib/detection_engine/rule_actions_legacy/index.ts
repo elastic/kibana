@@ -8,21 +8,19 @@
 export * from './api/register_routes';
 
 // eslint-disable-next-line no-restricted-imports
-export { legacyRulesNotificationAlertType } from './logic/notifications/legacy_rules_notification_alert_type';
+export { legacyRulesNotificationRuleType } from './logic/notifications/legacy_rules_notification_rule_type';
 // eslint-disable-next-line no-restricted-imports
-export { legacyIsNotificationAlertExecutor } from './logic/notifications/legacy_types';
+export { isLegacyNotificationRuleExecutor } from './logic/notifications/legacy_types';
 // eslint-disable-next-line no-restricted-imports
 export type {
-  LegacyRuleNotificationAlertType,
-  LegacyRuleNotificationAlertTypeParams,
+  LegacyRuleNotificationRuleType,
+  LegacyRuleNotificationRuleTypeParams,
 } from './logic/notifications/legacy_types';
 export type { NotificationRuleTypeParams } from './logic/notifications/schedule_notification_actions';
 export { scheduleNotificationActions } from './logic/notifications/schedule_notification_actions';
 export { scheduleThrottledNotificationActions } from './logic/notifications/schedule_throttle_notification_actions';
 export { getNotificationResultsLink } from './logic/notifications/utils';
 
-// eslint-disable-next-line no-restricted-imports
-export { legacyGetBulkRuleActionsSavedObject } from './logic/rule_actions/legacy_get_bulk_rule_actions_saved_object';
 // eslint-disable-next-line no-restricted-imports
 export type { LegacyRulesActionsSavedObject } from './logic/rule_actions/legacy_get_rule_actions_saved_object';
 // eslint-disable-next-line no-restricted-imports

@@ -11,7 +11,9 @@ import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { type AppMountParameters, AppStatus } from '@kbn/core-application-browser';
+import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import { AppContainer } from './app_container';
 import type { Mounter } from '../types';
 import { createMemoryHistory } from 'history';
@@ -184,18 +186,9 @@ describe('AppContainer', () => {
     expect(setIsMounting).toHaveBeenLastCalledWith(false);
   });
 
-  it('should call setIsMounting(false) if mounting throws', async () => {
-    const [waitPromise, resolvePromise] = createResolver();
-    const mounter = {
-      appBasePath: '/base-path/some-route',
-      appRoute: '/some-route',
-      unmountBeforeMounting: false,
-      exactRoute: false,
-      mount: async ({ element }: AppMountParameters) => {
-        await waitPromise;
-        throw new Error(`Mounting failed!`);
-      },
-    };
+  it('should show plain spinner', async () => {
+    const [waitPromise] = createResolver();
+    const mounter = createMounter(waitPromise);
 
     const wrapper = mountWithIntl(
       <AppContainer
@@ -211,7 +204,45 @@ describe('AppContainer', () => {
           new ScopedHistory(createMemoryHistory({ initialEntries: [appPath] }), appPath)
         }
         theme$={theme$}
+        showPlainSpinner={true}
       />
+    );
+    expect(wrapper.find('[data-test-subj="appContainer-loadingSpinner"]').exists()).toBeTruthy();
+  });
+
+  it('should call setIsMounting(false) if mounting throws', async () => {
+    const [waitPromise, resolvePromise] = createResolver();
+    const analytics = analyticsServiceMock.createAnalyticsServiceStart();
+    const mounter = {
+      appBasePath: '/base-path/some-route',
+      appRoute: '/some-route',
+      unmountBeforeMounting: false,
+      exactRoute: false,
+      mount: async () => {
+        await waitPromise;
+        throw new Error(`Mounting failed!`);
+      },
+    };
+
+    const wrapper = mountWithIntl(
+      <KibanaErrorBoundaryProvider analytics={analytics}>
+        <KibanaErrorBoundary>
+          <AppContainer
+            appPath={`/app/${appId}`}
+            appId={appId}
+            appStatus={AppStatus.accessible}
+            mounter={mounter}
+            setAppLeaveHandler={setAppLeaveHandler}
+            setAppActionMenu={setAppActionMenu}
+            setIsMounting={setIsMounting}
+            createScopedHistory={(appPath: string) =>
+              // Create a history using the appPath as the current location
+              new ScopedHistory(createMemoryHistory({ initialEntries: [appPath] }), appPath)
+            }
+            theme$={theme$}
+          />
+        </KibanaErrorBoundary>
+      </KibanaErrorBoundaryProvider>
     );
 
     expect(setIsMounting).toHaveBeenCalledTimes(1);

@@ -108,7 +108,7 @@ export const IndexSelectPopover: React.FunctionComponent<Props> = ({
             index && index.length > 0
               ? renderIndices(index)
               : i18n.translate('xpack.stackAlerts.components.ui.alertParams.indexPlaceholder', {
-                  defaultMessage: 'Select an index',
+                  defaultMessage: 'Select indices and a time field',
                 })
           }
           isActive={indexPopoverOpen}

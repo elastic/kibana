@@ -14,9 +14,10 @@ const TEST_INDEX = 'logs-log.log-test';
 
 const FINAL_PIPELINE_ID = '.fleet_final_pipeline-1';
 
-const FINAL_PIPELINE_VERSION = 1;
+// TODO: Use test package or move to input package version github.com/elastic/kibana/issues/154243
+const LOG_INTEGRATION_VERSION = '1.1.2';
 
-let pkgVersion: string;
+const FINAL_PIPELINE_VERSION = 1;
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -42,25 +43,15 @@ export default function (providerContext: FtrProviderContext) {
 
     // Use the custom log package to test the fleet final pipeline
     before(async () => {
-      const { body: getPackagesRes } = await supertest.get(
-        `/api/fleet/epm/packages?prerelease=true`
-      );
-      const logPackage = getPackagesRes.items.find((p: any) => p.name === 'log');
-      if (!logPackage) {
-        throw new Error('No log package');
-      }
-
-      pkgVersion = logPackage.version;
-
       await supertest
-        .post(`/api/fleet/epm/packages/log/${pkgVersion}`)
+        .post(`/api/fleet/epm/packages/log/${LOG_INTEGRATION_VERSION}`)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
     });
     after(async () => {
       await supertest
-        .delete(`/api/fleet/epm/packages/log/${pkgVersion}`)
+        .delete(`/api/fleet/epm/packages/log/${LOG_INTEGRATION_VERSION}`)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
@@ -101,7 +92,7 @@ export default function (providerContext: FtrProviderContext) {
       await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx');
       const pipelineRes = await es.ingest.getPipeline({ id: FINAL_PIPELINE_ID });
       expect(pipelineRes).to.have.property(FINAL_PIPELINE_ID);
-      expect(pipelineRes[FINAL_PIPELINE_ID].version).to.be(3);
+      expect(pipelineRes[FINAL_PIPELINE_ID].version).to.be(4);
     });
 
     it('should correctly setup the final pipeline and apply to fleet managed index template', async () => {
@@ -156,6 +147,62 @@ export default function (providerContext: FtrProviderContext) {
 
       expect(event.agent_id_status).to.be('auth_metadata_missing');
       expect(event).to.have.property('ingested');
+    });
+
+    it('removes event.original if preserve_original_event is not set', async () => {
+      const res = await es.index({
+        index: 'logs-log.log-test',
+        body: {
+          message: 'message-test-1',
+          event: {
+            original: {
+              foo: 'bar',
+            },
+          },
+          '@timestamp': '2023-01-01T09:00:00',
+          tags: [],
+          agent: {
+            id: 'agent1',
+          },
+        },
+      });
+
+      const doc: any = await es.get({
+        id: res._id,
+        index: res._index,
+      });
+
+      const event = doc._source.event;
+
+      expect(event.original).to.be(undefined);
+    });
+
+    it('preserves event.original if preserve_original_event is set', async () => {
+      const res = await es.index({
+        index: 'logs-log.log-test',
+        body: {
+          message: 'message-test-1',
+          event: {
+            original: {
+              foo: 'bar',
+            },
+          },
+          '@timestamp': '2023-01-01T09:00:00',
+          tags: ['preserve_original_event'],
+          agent: {
+            id: 'agent1',
+          },
+        },
+      });
+
+      const doc: any = await es.get({
+        id: res._id,
+        index: res._index,
+      });
+
+      const event = doc._source.event;
+
+      expect(event.original).to.eql({ foo: 'bar' });
     });
 
     const scenarios = [

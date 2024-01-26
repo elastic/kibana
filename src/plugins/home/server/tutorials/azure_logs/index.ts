@@ -56,10 +56,10 @@ export function azureLogsSpecProvider(context: TutorialContext): TutorialSchema 
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/azure_logs/screenshot.webp',
+    previewImagePath: context.staticAssets.getPluginAssetHref('/azure_logs/screenshot.webp'),
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
-    integrationBrowserCategories: ['azure', 'cloud', 'network', 'security'],
+    integrationBrowserCategories: ['azure', 'observability'],
   };
 }

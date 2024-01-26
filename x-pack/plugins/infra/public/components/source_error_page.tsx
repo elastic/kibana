@@ -26,7 +26,11 @@ export const SourceErrorPage: React.FunctionComponent<SourceErrorPageProps> = ({
         defaultMessage="Failed to load data sources."
       />
     }
-    detailedMessage={<code>{errorMessage}</code>}
+    detailedMessage={
+      <pre>
+        <code>{errorMessage}</code>
+      </pre>
+    }
     retry={retry}
   />
 );

@@ -11,11 +11,7 @@ import {
   termQuery,
 } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
-  TIER,
-  SERVICE_NAME,
-  INDEX,
-} from '../../../common/elasticsearch_fieldnames';
+import { TIER, SERVICE_NAME, INDEX } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getBucketSizeForAggregatedTransactions } from '../../lib/helpers/get_bucket_size_for_aggregated_transactions';
 import {
@@ -29,6 +25,11 @@ import {
   getEstimatedSizeForDocumentsInIndex,
 } from './indices_stats_helpers';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+
+export type SizeTimeseriesResponse = Array<{
+  serviceName: string;
+  timeseries: Array<{ x: number; y: number }>;
+}>;
 
 export async function getSizeTimeseries({
   environment,
@@ -50,7 +51,7 @@ export async function getSizeTimeseries({
   indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
   randomSampler: RandomSampler;
   context: ApmPluginRequestHandlerContext;
-}) {
+}): Promise<SizeTimeseriesResponse> {
   const { intervalString } = getBucketSizeForAggregatedTransactions({
     start,
     end,

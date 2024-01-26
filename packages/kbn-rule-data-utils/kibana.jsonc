@@ -3,9 +3,7 @@
   "id": "@kbn/rule-data-utils",
   "owner": [
     "@elastic/security-detections-response",
-    "@elastic/actionable-observability",
-    "@elastic/response-ops"
-  ],
-  "runtimeDeps": [],
-  "typeDeps": []
+    "@elastic/response-ops",
+    "@elastic/obs-ux-management-team"
+  ]
 }

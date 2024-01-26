@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/ml-runtime-field-utils",
+  "owner": "@elastic/ml-ui"
+}

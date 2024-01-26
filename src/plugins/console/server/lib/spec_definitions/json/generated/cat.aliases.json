@@ -1,18 +1,29 @@
 {
   "cat.aliases": {
     "url_params": {
-      "format": "",
-      "local": "__flag__",
+      "format": [
+        "text"
+      ],
       "h": [],
       "help": "__flag__",
+      "local": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
       "s": [],
       "v": "__flag__",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "expand_wildcards": [
+        "all",
         "open",
         "closed",
         "hidden",
-        "none",
-        "all"
+        "none"
       ]
     },
     "methods": [
@@ -22,6 +33,10 @@
       "_cat/aliases",
       "_cat/aliases/{name}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/cat-alias.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cat-alias.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

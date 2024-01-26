@@ -6,6 +6,7 @@
  */
 
 import { createSelector } from 'reselect';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { State } from '../types';
 import type {
   SourcererDataView,
@@ -13,7 +14,6 @@ import type {
   SourcererScope,
   SourcererScopeName,
 } from './model';
-
 export const sourcererKibanaDataViewsSelector = ({
   sourcerer,
 }: State): SourcererModel['kibanaDataViews'] => sourcerer.kibanaDataViews;
@@ -95,5 +95,17 @@ export const getSourcererScopeSelector = () => {
       selectedDataView,
       sourcererScope: scope,
     };
+  };
+};
+
+export const getSelectedDataviewSelector = () => {
+  const getSourcererDataViewSelector = sourcererDataViewSelector();
+  const getScopeSelector = scopeIdSelector();
+
+  return (state: State, scopeId: SourcererScopeName): DataViewSpec | undefined => {
+    const scope = getScopeSelector(state, scopeId);
+    const selectedDataView = getSourcererDataViewSelector(state, scope.selectedDataViewId);
+
+    return selectedDataView?.dataView;
   };
 };

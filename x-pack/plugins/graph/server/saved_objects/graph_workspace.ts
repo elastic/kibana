@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { SavedObjectsType } from '@kbn/core/server';
 import { graphMigrations } from './migrations';
 
 export const graphWorkspace: SavedObjectsType = {
   name: 'graph-workspace',
+  indexPattern: ANALYTICS_SAVED_OBJECT_INDEX,
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',
   hidden: false,

@@ -7,12 +7,14 @@
 
 import {
   AreaSeries,
+  BarSeries,
   Chart,
   CurveType,
   LineSeries,
   PartialTheme,
   ScaleType,
   Settings,
+  Tooltip,
 } from '@elastic/charts';
 import {
   EuiFlexGroup,
@@ -21,7 +23,8 @@ import {
   EuiLoadingChart,
 } from '@elastic/eui';
 import React from 'react';
-import { useChartTheme } from '@kbn/observability-plugin/public';
+import { useChartThemes } from '@kbn/observability-shared-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { useTheme } from '../../../../hooks/use_theme';
 import { unit } from '../../../../utils/style';
@@ -35,7 +38,10 @@ function hasValidTimeseries(
 
 const flexGroupStyle = { overflow: 'hidden' };
 
+type SparkPlotType = 'line' | 'bar';
+
 export function SparkPlot({
+  type = 'line',
   color,
   isLoading,
   series,
@@ -44,6 +50,7 @@ export function SparkPlot({
   compact,
   comparisonSeriesColor,
 }: {
+  type?: SparkPlotType;
   color: string;
   isLoading: boolean;
   series?: Coordinate[] | null;
@@ -60,11 +67,10 @@ export function SparkPlot({
       alignItems="flexEnd"
       style={flexGroupStyle}
     >
-      <EuiFlexItem grow={false} style={{ whiteSpace: 'nowrap' }}>
-        {valueLabel}
-      </EuiFlexItem>
+      <EuiFlexItem>{valueLabel}</EuiFlexItem>
       <EuiFlexItem grow={false}>
         <SparkPlotItem
+          type={type}
           color={color}
           isLoading={isLoading}
           series={series}
@@ -78,6 +84,7 @@ export function SparkPlot({
 }
 
 function SparkPlotItem({
+  type,
   color,
   isLoading,
   series,
@@ -85,6 +92,7 @@ function SparkPlotItem({
   comparisonSeriesColor,
   compact,
 }: {
+  type?: SparkPlotType;
   color: string;
   isLoading: boolean;
   series?: Coordinate[] | null;
@@ -93,7 +101,7 @@ function SparkPlotItem({
   comparisonSeriesColor?: string;
 }) {
   const theme = useTheme();
-  const defaultChartTheme = useChartTheme();
+  const defaultChartThemes = useChartThemes();
   const comparisonChartTheme = getComparisonChartTheme();
   const hasComparisonSeries = !!comparisonSeries?.length;
 
@@ -132,31 +140,60 @@ function SparkPlotItem({
     return (
       <Chart size={chartSize}>
         <Settings
-          theme={[sparkplotChartTheme, ...defaultChartTheme]}
+          theme={[sparkplotChartTheme, ...defaultChartThemes.theme]}
+          baseTheme={defaultChartThemes.baseTheme}
           showLegend={false}
-          tooltip="none"
+          locale={i18n.getLocale()}
         />
-        <LineSeries
-          id="Sparkline"
-          xScaleType={ScaleType.Time}
-          yScaleType={ScaleType.Linear}
-          xAccessor={'x'}
-          yAccessors={['y']}
-          data={series}
-          color={color}
-          curve={CurveType.CURVE_MONOTONE_X}
-        />
-        {hasComparisonSeries && (
-          <AreaSeries
-            id="comparisonSeries"
-            xScaleType={ScaleType.Time}
-            yScaleType={ScaleType.Linear}
-            xAccessor={'x'}
-            yAccessors={['y']}
-            data={comparisonSeries}
-            color={comparisonSeriesColor}
-            curve={CurveType.CURVE_MONOTONE_X}
-          />
+        <Tooltip type="none" />
+        {type && type === 'bar' ? (
+          <>
+            <BarSeries
+              id="barSeries"
+              xScaleType={ScaleType.Linear}
+              yScaleType={ScaleType.Linear}
+              xAccessor="x"
+              yAccessors={['y']}
+              data={series}
+              color={color}
+            />
+            {hasComparisonSeries && (
+              <BarSeries
+                id="comparisonBarSeries"
+                xScaleType={ScaleType.Linear}
+                yScaleType={ScaleType.Linear}
+                xAccessor={'x'}
+                yAccessors={['y']}
+                data={comparisonSeries}
+                color={comparisonSeriesColor}
+              />
+            )}
+          </>
+        ) : (
+          <>
+            <LineSeries
+              id="Sparkline"
+              xScaleType={ScaleType.Time}
+              yScaleType={ScaleType.Linear}
+              xAccessor={'x'}
+              yAccessors={['y']}
+              data={series}
+              color={color}
+              curve={CurveType.CURVE_MONOTONE_X}
+            />
+            {hasComparisonSeries && (
+              <AreaSeries
+                id="comparisonSeries"
+                xScaleType={ScaleType.Time}
+                yScaleType={ScaleType.Linear}
+                xAccessor={'x'}
+                yAccessors={['y']}
+                data={comparisonSeries}
+                color={comparisonSeriesColor}
+                curve={CurveType.CURVE_MONOTONE_X}
+              />
+            )}
+          </>
         )}
       </Chart>
     );

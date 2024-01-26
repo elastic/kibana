@@ -26,15 +26,6 @@
       ]
     },
     {
-      "label": "Operations",
-      "items": [
-        {
-          "id": "kibDevDocsOpsOverview",
-          "label": "Overview"
-        }
-      ]
-    },
-    {
       "label": "Contributing",
       "items": [
         {
@@ -79,6 +70,13 @@
           "id": "kibBuildingBlocks"
         },
         {
+          "id": "kibDevDocsSecurityIntro"
+        },
+        {
+          "id": "kibDevFeaturePrivileges",
+          "label": "Feature Privileges"
+        },
+        {
           "id": "kibDevDocsSavedObjectsIntro",
           "label": "Saved objects"
         },
@@ -117,7 +115,7 @@
       "label": "Tutorials",
       "items": [
         {
-          "id": "kibDevTutorialAddingPerformanceMetrics"
+          "id": "kibDevTutorialAddingCustomPerformanceMetrics"
         },
         {
           "id": "kibDevTutorialSetupWindowsDevWSL"
@@ -129,13 +127,18 @@
           "id": "kibDevTutorialSavedObject"
         },
         {
+          "id": "kibDevTutorialVersioningHTTPAPIs",
+          "label": "Versioning HTTP APIs"
+        },
+        {
+          "id": "kibDevTutorialVersioningInterfaces",
+          "label": "Versioning interfaces"
+        },
+        {
           "id": "kibDevTutorialSubmitPullRequest"
         },
         {
           "id": "kibDevTutorialExpressions"
-        },
-        {
-          "id": "kibDevDocsKPTTutorial"
         },
         {
           "id": "kibDevTutorialDataSearchAndSessions",
@@ -163,18 +166,100 @@
         },
         {
           "id": "kibDevTutorialAdvancedSettings"
+        }
+      ]
+    },
+    {
+      "label": "Serverless",
+      "pageId": "ktServerlessReleaseOverview",
+      "items": [
+        {
+          "id": "ktServerlessReleaseOverview"
         },
         {
-          "id": "kibDevSharePluginReadme"
+          "id": "ktServerlessEmergencyReleases"
         },
         {
-          "id": "kibDevTutorialScreenshotting"
+          "id": "ktCustomServerlessImage"
+        },
+        {
+          "id": "kibDevTutorialsServerlessProjectNavigation"
+        }
+      ]
+    },
+    {
+      "label": "Operations",
+      "items": [
+        {
+          "id": "kibDevDocsOpsOverview",
+          "label": "Overview"
+        }
+      ]
+    },
+    {
+      "label": "Shared UX",
+      "pageId": "kibDevDocsSharedUxOverview",
+      "items": [
+        {
+          "label": "Serverless Project Navigation",
+          "id": "kibDevTutorialsServerlessProjectNavigation"
+        },
+        {
+          "id": "kibDevTutorialFileService",
+          "label": "File service"
+        },
+        {
+          "id": "kibDevSharePluginReadme",
+          "label": "Sharing"
+        },
+        {
+          "label": "Content Management",
+          "id": "kibContentManagement",
+          "items": [
+            {
+              "id": "kibDevTutorialsContentManagementOnboarding"
+            }
+          ]
+        },
+        {
+          "id": "kibDevTutorialScreenshotting",
+          "label": "Screenshotting"
+        },
+        {
+          "id": "kibDevTutorialAdvancedSettings",
+          "label": "Advanced Settings"
+        },
+        {
+          "id": "kibDevDocsKPTTutorial",
+          "label": "Kibana Page Template"
+        },
+        {
+          "id": "kibDevReactKibanaContext",
+          "label": "Kibana React Contexts"
         }
       ]
     },
     {
       "label": "Contributors Newsletters",
       "items": [
+        {
+          "id": "kibSeptember2023ContributorNewsletter"
+        },
+        {
+          "id": "kibJuly2023ContributorNewsletter"
+        },
+        {
+          "id": "kibMay2023ContributorNewsletter"
+        },
+        {
+          "id": "kibMarch2023ContributorNewsletter"
+        },
+        {
+          "id": "kibJanuary2023ContributorNewsletter"
+        },
+        {
+          "id": "kibNovember2022ContributorNewsletter"
+        },
         {
           "id": "kibOctober2022ContributorNewsletter"
         },
@@ -256,9 +341,6 @@
           "id": "kibDevDocsDeprecationsByApi"
         },
         {
-          "id": "kibCorePluginApi"
-        },
-        {
           "id": "kibFieldFormatsPluginApi"
         },
         {
@@ -328,6 +410,9 @@
           "id": "kibFileUploadPluginApi"
         },
         {
+          "id": "kibFilesPluginApi"
+        },
+        {
           "id": "kibFleetPluginApi"
         },
         {
@@ -374,6 +459,9 @@
         },
         {
           "id": "kibNewsfeedPluginApi"
+        },
+        {
+          "id": "kibNotificationsPluginApi"
         },
         {
           "id": "kibObservabilityPluginApi"

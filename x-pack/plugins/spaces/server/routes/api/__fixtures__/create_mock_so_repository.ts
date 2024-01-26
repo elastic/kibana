@@ -27,13 +27,14 @@ export const createMockSavedObjectsRepository = (spaces: any[] = []) => {
       if (spaces.find((s) => s.id === id)) {
         throw SavedObjectsErrorHelpers.decorateConflictError(new Error(), 'space conflict');
       }
-      return {};
+      return { id, attributes };
     }),
     update: jest.fn((type, id) => {
-      if (!spaces.find((s) => s.id === id)) {
+      const result = spaces.find((s) => s.id === id);
+      if (!result) {
         throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
       }
-      return {};
+      return result[0];
     }),
     bulkUpdate: jest.fn(),
     delete: jest.fn((type: string, id: string) => {

@@ -68,8 +68,9 @@ export async function createSystemIndicesUser(ctx: FtrProviderContext) {
   const enabled = !config
     .get('esTestCluster.serverArgs')
     .some((arg: string) => arg === 'xpack.security.enabled=false');
+  const isServerless = !!config.get('serverless');
 
-  if (!enabled) {
+  if (!enabled || isServerless) {
     return;
   }
 

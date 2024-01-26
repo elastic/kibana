@@ -7,6 +7,7 @@
  */
 
 import * as t from 'io-ts';
+import { inRangeRt } from '@kbn/io-ts-utils';
 
 export const id = t.string;
 export type Id = t.TypeOf<typeof id>;
@@ -48,6 +49,11 @@ export const interval = t.string;
 export type Interval = t.TypeOf<typeof interval>;
 export const intervalOrUndefined = t.union([interval, t.undefined]);
 export type IntervalOrUndefined = t.TypeOf<typeof intervalOrUndefined>;
+
+export const timeout = inRangeRt(60, 60 * 15);
+export type Timeout = t.TypeOf<typeof timeout>;
+export const timeoutOrUndefined = t.union([timeout, t.undefined]);
+export type TimeoutOrUndefined = t.TypeOf<typeof timeoutOrUndefined>;
 
 export const snapshot = t.boolean;
 export type Snapshot = t.TypeOf<typeof snapshot>;
@@ -99,6 +105,8 @@ export const arrayQueries = t.array(
     ecs_mapping: ecsMappingOrUndefined,
     version: versionOrUndefined,
     platform: platformOrUndefined,
+    removed: removedOrUndefined,
+    snapshot: snapshotOrUndefined,
   })
 );
 export type ArrayQueries = t.TypeOf<typeof arrayQueries>;
@@ -111,10 +119,12 @@ export const objectQueries = t.record(
     version: versionOrUndefined,
     platform: platformOrUndefined,
     saved_query_id: savedQueryIdOrUndefined,
+    removed: removedOrUndefined,
+    snapshot: snapshotOrUndefined,
   })
 );
 export type ObjectQueries = t.TypeOf<typeof objectQueries>;
 export const queries = t.union([arrayQueries, objectQueries]);
 export type Queries = t.TypeOf<typeof queries>;
-export const queriesOrUndefined = t.union([queries, t.undefined]);
+export const queriesOrUndefined = t.union([arrayQueries, t.undefined]); // in the future we might need to support `objectQueries` so use `queries` instead of `arrayQueries` - now removing this because of strange type issue where query is a number
 export type QueriesOrUndefined = t.TypeOf<typeof queriesOrUndefined>;

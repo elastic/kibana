@@ -40,6 +40,7 @@ export type {
   RedirectResponseOptions,
   ResponseErrorAttributes,
   ErrorHttpResponseOptions,
+  FileHttpResponseOptions,
 } from './response';
 export type {
   RouteConfigOptions,
@@ -65,7 +66,9 @@ export type { IKibanaSocket } from './socket';
 export type {
   KibanaErrorResponseFactory,
   KibanaRedirectionResponseFactory,
+  KibanaNotModifiedResponseFactory,
   KibanaSuccessResponseFactory,
   KibanaResponseFactory,
   LifecycleResponseFactory,
 } from './response_factory';
+export type { RawRequest, FakeRawRequest } from './raw_request';

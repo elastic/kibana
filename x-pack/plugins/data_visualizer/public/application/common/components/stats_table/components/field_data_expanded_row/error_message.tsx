@@ -8,14 +8,14 @@
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { DVErrorObject } from '../../../../../index_data_visualizer/utils/error_utils';
+import { MLErrorObject } from '@kbn/ml-error-utils';
 
 export const ErrorMessageContent = ({
   fieldName,
   error,
 }: {
   fieldName: string;
-  error: DVErrorObject;
+  error: MLErrorObject;
 }) => {
   return (
     <EuiCallOut heading="p" color="danger" size="s">

@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { CaseConnector, CasePostRequest } from '@kbn/cases-plugin/common/api';
-import uuid from 'uuid';
+import { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
+import { CaseConnector } from '@kbn/cases-plugin/common/types/domain';
+import { v4 as uuidv4 } from 'uuid';
 
-export function generateRandomCaseWithoutConnector(): CasePostRequest {
+export function generateRandomCaseWithoutConnector(owner = 'cases'): CasePostRequest {
   return {
-    title: 'random-' + uuid.v4(),
-    tags: ['test', uuid.v4()],
-    description: 'This is a description with id: ' + uuid.v4(),
+    title: 'random-' + uuidv4(),
+    tags: ['test', uuidv4()],
+    description: 'This is a description with id: ' + uuidv4(),
     connector: {
       id: 'none',
       name: 'none',
@@ -22,6 +23,6 @@ export function generateRandomCaseWithoutConnector(): CasePostRequest {
     settings: {
       syncAlerts: false,
     },
-    owner: 'cases',
+    owner,
   };
 }

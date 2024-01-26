@@ -21,8 +21,8 @@ import { ExecutionContext } from '@kbn/expressions-plugin/common';
 import moment from 'moment';
 import { ESCalendarInterval, ESFixedInterval, roundDateToESInterval } from '@elastic/charts';
 import { Adapters } from '@kbn/inspector-plugin/common';
-import { SerializableRecord } from '@kbn/utility-types';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { i18n } from '@kbn/i18n';
 import { handleRequest } from './handle_request';
 import {
   ANNOTATIONS_PER_BUCKET,
@@ -70,7 +70,7 @@ export const requestEventAnnotations = (
     abortSignal,
     getSearchSessionId,
     getExecutionContext,
-  }: ExecutionContext<Adapters, SerializableRecord>,
+  }: ExecutionContext<Adapters>,
   getStartDependencies: () => Promise<FetchEventAnnotationsStartDependencies>
 ) => {
   return defer(async () => {
@@ -134,6 +134,19 @@ export const requestEventAnnotations = (
           searchSourceService: searchSource,
           getNow,
           executionContext: getExecutionContext(),
+          title: i18n.translate(
+            'eventAnnotation.fetchEventAnnotations.inspector.dataRequest.title',
+            {
+              defaultMessage: 'Annotations',
+            }
+          ),
+          description: i18n.translate(
+            'eventAnnotation.fetchEventAnnotations.inspector.dataRequest.description',
+            {
+              defaultMessage:
+                'This request queries Elasticsearch to fetch the data for the annotations.',
+            }
+          ),
         })
       );
 
@@ -314,7 +327,7 @@ function regroupForRequestOptimization(
             (dataView.timeFieldName ||
               dataView.fields.find((field) => field.type === 'date' && field.displayName)?.name);
 
-          const key = `${g.dataView.value.id}-${timeField}-${Boolean(current.ignoreGlobalFilters)}`;
+          const key = `${g.dataView.value.id}-${timeField}-${Boolean(g.ignoreGlobalFilters)}`;
           const subGroup = acc[key] as QueryGroup;
           if (subGroup) {
             let allFields = [...(subGroup.allFields || []), ...(current.extraFields || [])];
@@ -342,7 +355,7 @@ function regroupForRequestOptimization(
               timeField: timeField!,
               allFields,
               annotations: [current],
-              ignoreGlobalFilters: Boolean(current.ignoreGlobalFilters),
+              ignoreGlobalFilters: Boolean(g.ignoreGlobalFilters),
             },
           };
         }

@@ -1,0 +1,1414 @@
+{
+  "id": "@kbn/reporting-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.AuthenticationExpiredError",
+        "type": "Class",
+        "tags": [],
+        "label": "AuthenticationExpiredError",
+        "description": [
+          "\nWhile performing some reporting action, like fetching data from ES, our\naccess token expired."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/reporting-common",
+            "scope": "common",
+            "docId": "kibKbnReportingCommonPluginApi",
+            "section": "def-common.AuthenticationExpiredError",
+            "text": "AuthenticationExpiredError"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/reporting-common",
+            "scope": "common",
+            "docId": "kibKbnReportingCommonPluginApi",
+            "section": "def-common.ReportingError",
+            "text": "ReportingError"
+          }
+        ],
+        "path": "packages/kbn-reporting/common/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.AuthenticationExpiredError.code",
+            "type": "string",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "signature": [
+              "\"authentication_expired_error\""
+            ],
+            "path": "packages/kbn-reporting/common/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.AuthenticationExpiredError.code",
+            "type": "string",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "path": "packages/kbn-reporting/common/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.BrowserCouldNotLaunchError",
+        "type": "Class",
+        "tags": [],
+        "label": "BrowserCouldNotLaunchError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/reporting-common",
+            "scope": "common",
+            "docId": "kibKbnReportingCommonPluginApi",
+            "section": "def-common.BrowserCouldNotLaunchError",
+            "text": "BrowserCouldNotLaunchError"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/reporting-common",
+            "scope": "common",
+            "docId": "kibKbnReportingCommonPluginApi",
+            "section": "def-common.ReportingError",
+            "text": "ReportingError"
+          }
+        ],
+        "path": "packages/kbn-reporting/common/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.BrowserCouldNotLaunchError.code",
+            "type": "string",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "signature": [
+              "\"browser_could_not_launch_error\""
+            ],
+            "path": "packages/kbn-reporting/common/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.BrowserCouldNotLaunchError.code",
+            "type": "string",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "path": "packages/kbn-reporting/common/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.BrowserCouldNotLaunchError.humanFriendlyMessage",
+            "type": "Function",
+            "tags": [],
+            "label": "humanFriendlyMessage",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "packages/kbn-reporting/common/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.BrowserScreenshotError",
+        "type": "Class",
+        "tags": [],
+        "label": "BrowserScreenshotError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/reporting-common",
+            "scope": "common",
+            "docId": "kibKbnReportingCommonPluginApi",
+            "section": "def-common.BrowserScreenshotError",
+            "text": "BrowserScreenshotError"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/reporting-common",
+            "scope": "common",
+            "docId": "kibKbnReportingCommonPluginApi",
+            "section": "def-common.ReportingError",
+            "text": "ReportingError"
+          }
+        ],
+        "path": "packages/kbn-reporting/common/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.BrowserScreenshotError.code",
+            "type": "string",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "signature": [
+              "\"browser_screenshot_error\""
+            ],
+            "path": "packages/kbn-reporting/common/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.BrowserScreenshotError.code",
+            "type": "string",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "path": "packages/kbn-reporting/common/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.BrowserUnexpectedlyClosedError",
+        "type": "Class",
+        "tags": [],
+        "label": "BrowserUnexpectedlyClosedError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/reporting-common",
+            "scope": "common",
+            "docId": "kibKbnReportingCommonPluginApi",
+            "section": "def-common.BrowserUnexpectedlyClosedError",
+            "text": "BrowserUnexpectedlyClosedError"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/reporting-common",
+            "scope": "common",
+            "docId": "kibKbnReportingCommonPluginApi",
+            "section": "def-common.ReportingError",
+            "text": "ReportingError"
+          }
+        ],
+        "path": "packages/kbn-reporting/common/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.BrowserUnexpectedlyClosedError.code",
+            "type": "string",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "signature": [
+              "\"browser_unexpectedly_closed_error\""
+            ],
+            "path": "packages/kbn-reporting/common/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.BrowserUnexpectedlyClosedError.code",
+            "type": "string",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "path": "packages/kbn-reporting/common/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.CancellationToken",
+        "type": "Class",
+        "tags": [],
+        "label": "CancellationToken",
+        "description": [],
+        "path": "packages/kbn-reporting/common/cancellation_token.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.CancellationToken.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-reporting/common/cancellation_token.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.CancellationToken.on",
+            "type": "Function",
+            "tags": [],
+            "label": "on",
+            "description": [],
+            "signature": [
+              "(callback: Function) => void"
+            ],
+            "path": "packages/kbn-reporting/common/cancellation_token.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-common",
+                "id": "def-common.CancellationToken.on.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "callback",
+                "description": [],
+                "signature": [
+                  "Function"
+                ],
+                "path": "packages/kbn-reporting/common/cancellation_token.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.CancellationToken.cancel",
+            "type": "Function",
+            "tags": [],
+            "label": "cancel",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/kbn-reporting/common/cancellation_token.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.CancellationToken.isCancelled",
+            "type": "Function",
+            "tags": [],
+            "label": "isCancelled",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "packages/kbn-reporting/common/cancellation_token.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.DisallowedOutgoingUrl",
+        "type": "Class",
+        "tags": [],
+        "label": "DisallowedOutgoingUrl",
+        "description": [
+          "\nWhile loading requests in the Kibana app, a URL was encountered that the network policy did not allow."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/reporting-common",
+            "scope": "common",
+            "docId": "kibKbnReportingCommonPluginApi",
+            "section": "def-common.DisallowedOutgoingUrl",
+            "text": "DisallowedOutgoingUrl"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/reporting-common",
+            "scope": "common",
+            "docId": "kibKbnReportingCommonPluginApi",
+            "section": "def-common.ReportingError",
+            "text": "ReportingError"
+          }
+        ],
+        "path": "packages/kbn-reporting/common/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.DisallowedOutgoingUrl.code",
+            "type": "string",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "signature": [
+              "\"disallowed_outgoing_url_error\""
+            ],
+            "path": "packages/kbn-reporting/common/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.DisallowedOutgoingUrl.code",
+            "type": "string",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "signature": [
+              "\"disallowed_outgoing_url_error\""
+            ],
+            "path": "packages/kbn-reporting/common/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.InvalidLayoutParametersError",
+        "type": "Class",
+        "tags": [],
+        "label": "InvalidLayoutParametersError",
+        "description": [
+          "\nWhile validating the page layout parameters for a screenshot type report job"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/reporting-common",
+            "scope": "common",
+            "docId": "kibKbnReportingCommonPluginApi",
+            "section": "def-common.InvalidLayoutParametersError",
+            "text": "InvalidLayoutParametersError"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/reporting-common",
+            "scope": "common",
+            "docId": "kibKbnReportingCommonPluginApi",
+            "section": "def-common.ReportingError",
+            "text": "ReportingError"
+          }
+        ],
+        "path": "packages/kbn-reporting/common/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.InvalidLayoutParametersError.code",
+            "type": "string",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "signature": [
+              "\"invalid_layout_parameters_error\""
+            ],
+            "path": "packages/kbn-reporting/common/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.InvalidLayoutParametersError.code",
+            "type": "string",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "signature": [
+              "\"invalid_layout_parameters_error\""
+            ],
+            "path": "packages/kbn-reporting/common/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.KibanaShuttingDownError",
+        "type": "Class",
+        "tags": [],
+        "label": "KibanaShuttingDownError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/reporting-common",
+            "scope": "common",
+            "docId": "kibKbnReportingCommonPluginApi",
+            "section": "def-common.KibanaShuttingDownError",
+            "text": "KibanaShuttingDownError"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/reporting-common",
+            "scope": "common",
+            "docId": "kibKbnReportingCommonPluginApi",
+            "section": "def-common.ReportingError",
+            "text": "ReportingError"
+          }
+        ],
+        "path": "packages/kbn-reporting/common/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.KibanaShuttingDownError.code",
+            "type": "string",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "signature": [
+              "\"kibana_shutting_down_error\""
+            ],
+            "path": "packages/kbn-reporting/common/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.KibanaShuttingDownError.code",
+            "type": "string",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "path": "packages/kbn-reporting/common/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.PdfWorkerOutOfMemoryError",
+        "type": "Class",
+        "tags": [],
+        "label": "PdfWorkerOutOfMemoryError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/reporting-common",
+            "scope": "common",
+            "docId": "kibKbnReportingCommonPluginApi",
+            "section": "def-common.PdfWorkerOutOfMemoryError",
+            "text": "PdfWorkerOutOfMemoryError"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/reporting-common",
+            "scope": "common",
+            "docId": "kibKbnReportingCommonPluginApi",
+            "section": "def-common.ReportingError",
+            "text": "ReportingError"
+          }
+        ],
+        "path": "packages/kbn-reporting/common/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.PdfWorkerOutOfMemoryError.code",
+            "type": "string",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "signature": [
+              "\"pdf_worker_out_of_memory_error\""
+            ],
+            "path": "packages/kbn-reporting/common/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.PdfWorkerOutOfMemoryError.code",
+            "type": "string",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "path": "packages/kbn-reporting/common/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.PdfWorkerOutOfMemoryError.humanFriendlyMessage",
+            "type": "Function",
+            "tags": [],
+            "label": "humanFriendlyMessage",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "packages/kbn-reporting/common/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.QueueTimeoutError",
+        "type": "Class",
+        "tags": [],
+        "label": "QueueTimeoutError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/reporting-common",
+            "scope": "common",
+            "docId": "kibKbnReportingCommonPluginApi",
+            "section": "def-common.QueueTimeoutError",
+            "text": "QueueTimeoutError"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/reporting-common",
+            "scope": "common",
+            "docId": "kibKbnReportingCommonPluginApi",
+            "section": "def-common.ReportingError",
+            "text": "ReportingError"
+          }
+        ],
+        "path": "packages/kbn-reporting/common/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.QueueTimeoutError.code",
+            "type": "string",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "signature": [
+              "\"queue_timeout_error\""
+            ],
+            "path": "packages/kbn-reporting/common/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.QueueTimeoutError.code",
+            "type": "string",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "path": "packages/kbn-reporting/common/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.ReportingError",
+        "type": "Class",
+        "tags": [],
+        "label": "ReportingError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/reporting-common",
+            "scope": "common",
+            "docId": "kibKbnReportingCommonPluginApi",
+            "section": "def-common.ReportingError",
+            "text": "ReportingError"
+          },
+          " extends Error"
+        ],
+        "path": "packages/kbn-reporting/common/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.ReportingError.code",
+            "type": "string",
+            "tags": [
+              "note"
+            ],
+            "label": "code",
+            "description": [
+              "\nA string that uniquely brands an error type. This is used to power telemetry\nabout reporting failures.\n"
+            ],
+            "path": "packages/kbn-reporting/common/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.ReportingError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-reporting/common/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/reporting-common",
+                "id": "def-common.ReportingError.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "details",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/kbn-reporting/common/errors.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.ReportingError.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "path": "packages/kbn-reporting/common/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.ReportingError.toString",
+            "type": "Function",
+            "tags": [],
+            "label": "toString",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "packages/kbn-reporting/common/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.UnknownError",
+        "type": "Class",
+        "tags": [],
+        "label": "UnknownError",
+        "description": [
+          "\nAn unknown error has occurred. See details."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/reporting-common",
+            "scope": "common",
+            "docId": "kibKbnReportingCommonPluginApi",
+            "section": "def-common.UnknownError",
+            "text": "UnknownError"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/reporting-common",
+            "scope": "common",
+            "docId": "kibKbnReportingCommonPluginApi",
+            "section": "def-common.ReportingError",
+            "text": "ReportingError"
+          }
+        ],
+        "path": "packages/kbn-reporting/common/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.UnknownError.code",
+            "type": "string",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "signature": [
+              "\"unknown_error\""
+            ],
+            "path": "packages/kbn-reporting/common/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.UnknownError.code",
+            "type": "string",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "path": "packages/kbn-reporting/common/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.VisualReportingSoftDisabledError",
+        "type": "Class",
+        "tags": [],
+        "label": "VisualReportingSoftDisabledError",
+        "description": [
+          "\nSpecial error case that should only occur on Cloud when trying to generate\na report on a Kibana instance that is too small to be running Chromium."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/reporting-common",
+            "scope": "common",
+            "docId": "kibKbnReportingCommonPluginApi",
+            "section": "def-common.VisualReportingSoftDisabledError",
+            "text": "VisualReportingSoftDisabledError"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/reporting-common",
+            "scope": "common",
+            "docId": "kibKbnReportingCommonPluginApi",
+            "section": "def-common.ReportingError",
+            "text": "ReportingError"
+          }
+        ],
+        "path": "packages/kbn-reporting/common/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.VisualReportingSoftDisabledError.code",
+            "type": "string",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "signature": [
+              "\"visual_reporting_soft_disabled_error\""
+            ],
+            "path": "packages/kbn-reporting/common/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.VisualReportingSoftDisabledError.code",
+            "type": "string",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "path": "packages/kbn-reporting/common/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.VisualReportingSoftDisabledError.humanFriendlyMessage",
+            "type": "Function",
+            "tags": [],
+            "label": "humanFriendlyMessage",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "packages/kbn-reporting/common/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.buildKibanaPath",
+        "type": "Function",
+        "tags": [],
+        "label": "buildKibanaPath",
+        "description": [],
+        "signature": [
+          "({ basePath, appPath, spaceId }: Args) => string"
+        ],
+        "path": "packages/kbn-reporting/common/build_kibana_path.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.buildKibanaPath.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ basePath, appPath, spaceId }",
+            "description": [],
+            "signature": [
+              "Args"
+            ],
+            "path": "packages/kbn-reporting/common/build_kibana_path.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.byteSizeValueToNumber",
+        "type": "Function",
+        "tags": [],
+        "label": "byteSizeValueToNumber",
+        "description": [],
+        "signature": [
+          "(value: number | ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ByteSizeValue",
+            "text": "ByteSizeValue"
+          },
+          ") => number"
+        ],
+        "path": "packages/kbn-reporting/common/schema_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.byteSizeValueToNumber.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "number | ",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.ByteSizeValue",
+                "text": "ByteSizeValue"
+              }
+            ],
+            "path": "packages/kbn-reporting/common/schema_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.durationToNumber",
+        "type": "Function",
+        "tags": [],
+        "label": "durationToNumber",
+        "description": [],
+        "signature": [
+          "(value: number | moment.Duration) => number"
+        ],
+        "path": "packages/kbn-reporting/common/schema_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.durationToNumber.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "number | moment.Duration"
+            ],
+            "path": "packages/kbn-reporting/common/schema_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.getRedirectAppPath",
+        "type": "Function",
+        "tags": [],
+        "label": "getRedirectAppPath",
+        "description": [
+          "\nA way to get the client side route for the reporting redirect app.\n\nTODO: Add a job ID and a locator to use so that we can redirect without expecting state to\nbe injected to the page"
+        ],
+        "signature": [
+          "() => string"
+        ],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.numberToDuration",
+        "type": "Function",
+        "tags": [],
+        "label": "numberToDuration",
+        "description": [],
+        "signature": [
+          "(value: number | moment.Duration) => moment.Duration"
+        ],
+        "path": "packages/kbn-reporting/common/schema_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.numberToDuration.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "number | moment.Duration"
+            ],
+            "path": "packages/kbn-reporting/common/schema_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.ReportingError",
+        "type": "Interface",
+        "tags": [],
+        "label": "ReportingError",
+        "description": [],
+        "path": "packages/kbn-reporting/common/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.ReportingError.humanFriendlyMessage",
+            "type": "Function",
+            "tags": [],
+            "label": "humanFriendlyMessage",
+            "description": [
+              "\nReturn a message describing the error that is human friendly"
+            ],
+            "signature": [
+              "(() => string) | undefined"
+            ],
+            "path": "packages/kbn-reporting/common/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.JOB_STATUS",
+        "type": "Enum",
+        "tags": [],
+        "label": "JOB_STATUS",
+        "description": [],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.ALLOWED_JOB_CONTENT_TYPES",
+        "type": "Array",
+        "tags": [],
+        "label": "ALLOWED_JOB_CONTENT_TYPES",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.API_USAGE_COUNTER_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "API_USAGE_COUNTER_TYPE",
+        "description": [],
+        "signature": [
+          "\"reportingApi\""
+        ],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.API_USAGE_ERROR_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "API_USAGE_ERROR_TYPE",
+        "description": [],
+        "signature": [
+          "\"reportingApiError\""
+        ],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.ILM_POLICY_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "ILM_POLICY_NAME",
+        "description": [],
+        "signature": [
+          "\"kibana-reporting\""
+        ],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY",
+        "description": [],
+        "signature": [
+          "\"xpack.reporting.jobCompletionNotifications\""
+        ],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.LICENSE_TYPE_BASIC",
+        "type": "string",
+        "tags": [],
+        "label": "LICENSE_TYPE_BASIC",
+        "description": [],
+        "signature": [
+          "\"basic\""
+        ],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.LICENSE_TYPE_CLOUD_STANDARD",
+        "type": "string",
+        "tags": [],
+        "label": "LICENSE_TYPE_CLOUD_STANDARD",
+        "description": [],
+        "signature": [
+          "\"standard\""
+        ],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.LICENSE_TYPE_ENTERPRISE",
+        "type": "string",
+        "tags": [],
+        "label": "LICENSE_TYPE_ENTERPRISE",
+        "description": [],
+        "signature": [
+          "\"enterprise\""
+        ],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.LICENSE_TYPE_GOLD",
+        "type": "string",
+        "tags": [],
+        "label": "LICENSE_TYPE_GOLD",
+        "description": [],
+        "signature": [
+          "\"gold\""
+        ],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.LICENSE_TYPE_PLATINUM",
+        "type": "string",
+        "tags": [],
+        "label": "LICENSE_TYPE_PLATINUM",
+        "description": [],
+        "signature": [
+          "\"platinum\""
+        ],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.LICENSE_TYPE_TRIAL",
+        "type": "string",
+        "tags": [],
+        "label": "LICENSE_TYPE_TRIAL",
+        "description": [],
+        "signature": [
+          "\"trial\""
+        ],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"reporting\""
+        ],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.REPORTING_MANAGEMENT_HOME",
+        "type": "string",
+        "tags": [],
+        "label": "REPORTING_MANAGEMENT_HOME",
+        "description": [],
+        "signature": [
+          "\"/app/management/insightsAndAlerting/reporting\""
+        ],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.REPORTING_REDIRECT_LOCATOR_STORE_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "REPORTING_REDIRECT_LOCATOR_STORE_KEY",
+        "description": [],
+        "signature": [
+          "\"__REPORTING_REDIRECT_LOCATOR_STORE_KEY__\""
+        ],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.REPORTING_SYSTEM_INDEX",
+        "type": "string",
+        "tags": [],
+        "label": "REPORTING_SYSTEM_INDEX",
+        "description": [],
+        "signature": [
+          "\".reporting\""
+        ],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.REPORTING_TRANSACTION_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "REPORTING_TRANSACTION_TYPE",
+        "description": [],
+        "signature": [
+          "\"reporting\""
+        ],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.UI_SETTINGS_CUSTOM_PDF_LOGO",
+        "type": "string",
+        "tags": [],
+        "label": "UI_SETTINGS_CUSTOM_PDF_LOGO",
+        "description": [],
+        "signature": [
+          "\"xpackReporting:customPdfLogo\""
+        ],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.UI_SETTINGS_DATEFORMAT_TZ",
+        "type": "string",
+        "tags": [],
+        "label": "UI_SETTINGS_DATEFORMAT_TZ",
+        "description": [],
+        "signature": [
+          "\"dateFormat:tz\""
+        ],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.UI_SETTINGS_SEARCH_INCLUDE_FROZEN",
+        "type": "string",
+        "tags": [],
+        "label": "UI_SETTINGS_SEARCH_INCLUDE_FROZEN",
+        "description": [],
+        "signature": [
+          "\"search:includeFrozen\""
+        ],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-common",
+        "id": "def-common.UNVERSIONED_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "UNVERSIONED_VERSION",
+        "description": [],
+        "signature": [
+          "\"7.14.0\""
+        ],
+        "path": "packages/kbn-reporting/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

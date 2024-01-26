@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import type {
-  CoreSetup,
-  CustomRequestHandlerContext,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import type { CoreSetup, CustomRequestHandlerContext } from '@kbn/core/server';
 import type { SearchRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
-import type { InfraStaticSourceConfiguration } from '../common/source_configuration/source_configuration';
 import { InfraServerPluginStartDeps } from './lib/adapters/framework';
-import { LogViewsServiceSetup, LogViewsServiceStart } from './services/log_views/types';
+import { InventoryViewsServiceSetup, InventoryViewsServiceStart } from './services/inventory_views';
+import {
+  MetricsExplorerViewsServiceSetup,
+  MetricsExplorerViewsServiceStart,
+} from './services/metrics_explorer_views';
 
 export type { InfraConfig } from '../common/plugin_config_types';
 
@@ -22,19 +21,13 @@ export type InfraPluginCoreSetup = CoreSetup<InfraServerPluginStartDeps, InfraPl
 export type InfraPluginStartServicesAccessor = InfraPluginCoreSetup['getStartServices'];
 
 export interface InfraPluginSetup {
-  defineInternalSourceConfiguration: (
-    sourceId: string,
-    sourceProperties: InfraStaticSourceConfiguration
-  ) => void;
-  logViews: LogViewsServiceSetup;
+  inventoryViews: InventoryViewsServiceSetup;
+  metricsExplorerViews?: MetricsExplorerViewsServiceSetup;
 }
 
 export interface InfraPluginStart {
-  logViews: LogViewsServiceStart;
-  getMetricIndices: (
-    savedObjectsClient: SavedObjectsClientContract,
-    sourceId?: string
-  ) => Promise<string>;
+  inventoryViews: InventoryViewsServiceStart;
+  metricsExplorerViews?: MetricsExplorerViewsServiceStart;
 }
 
 export type MlSystem = ReturnType<MlPluginSetup['mlSystemProvider']>;

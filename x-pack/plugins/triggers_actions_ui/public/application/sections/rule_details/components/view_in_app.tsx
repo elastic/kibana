@@ -12,11 +12,6 @@ import { CoreStart } from '@kbn/core/public';
 import { fromNullable, fold } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import {
-  RuleNavigation,
-  RuleStateNavigation,
-  RuleUrlNavigation,
-} from '@kbn/alerting-plugin/common';
 import { Rule } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 
@@ -26,11 +21,12 @@ export interface ViewInAppProps {
 
 const NO_NAVIGATION = false;
 
-type RuleNavigationLoadingState = RuleNavigation | false | null;
+type RuleNavigationLoadingState = string | false | null;
 
 export const ViewInApp: React.FunctionComponent<ViewInAppProps> = ({ rule }) => {
   const {
-    application: { navigateToApp },
+    application: { navigateToUrl },
+    http: { basePath },
     alerting: maybeAlerting,
   } = useKibana().services;
 
@@ -62,7 +58,7 @@ export const ViewInApp: React.FunctionComponent<ViewInAppProps> = ({ rule }) => 
       isLoading={ruleNavigation === null}
       disabled={!hasNavigation(ruleNavigation)}
       iconType="popout"
-      {...getNavigationHandler(ruleNavigation, rule, navigateToApp)}
+      {...getNavigationHandler(ruleNavigation, rule, navigateToUrl, basePath)}
     >
       <FormattedMessage
         id="xpack.triggersActionsUI.sections.ruleDetails.viewRuleInAppButtonLabel"
@@ -72,23 +68,20 @@ export const ViewInApp: React.FunctionComponent<ViewInAppProps> = ({ rule }) => 
   );
 };
 
-function hasNavigation(
-  ruleNavigation: RuleNavigationLoadingState
-): ruleNavigation is RuleStateNavigation | RuleUrlNavigation {
-  return ruleNavigation
-    ? ruleNavigation.hasOwnProperty('state') || ruleNavigation.hasOwnProperty('path')
-    : NO_NAVIGATION;
+function hasNavigation(ruleNavigation: RuleNavigationLoadingState): ruleNavigation is string {
+  return typeof ruleNavigation === 'string';
 }
 
 function getNavigationHandler(
   ruleNavigation: RuleNavigationLoadingState,
   rule: Rule,
-  navigateToApp: CoreStart['application']['navigateToApp']
+  navigateToUrl: CoreStart['application']['navigateToUrl'],
+  basePath: CoreStart['http']['basePath']
 ): object {
   return hasNavigation(ruleNavigation)
     ? {
         onClick: () => {
-          navigateToApp(rule.consumer, ruleNavigation);
+          navigateToUrl(basePath.prepend(ruleNavigation));
         },
       }
     : {};

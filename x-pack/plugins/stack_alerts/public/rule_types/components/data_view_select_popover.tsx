@@ -20,34 +20,44 @@ import {
   EuiText,
   useEuiPaddingCSS,
 } from '@elastic/eui';
-import type { DataViewListItem, DataView } from '@kbn/data-views-plugin/public';
+import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type {
+  DataView,
+  DataViewSpec,
+  DataViewsPublicPluginStart,
+} from '@kbn/data-views-plugin/public';
 import { DataViewSelector } from '@kbn/unified-search-plugin/public';
-import { useTriggerUiActionServices } from '../es_query/util';
+import type { DataViewListItemEnhanced } from '@kbn/unified-search-plugin/public/dataview_picker/dataview_list';
 import { EsQueryRuleMetaData } from '../es_query/types';
 
 export interface DataViewSelectPopoverProps {
-  dataView: DataView;
+  dependencies: {
+    dataViews: DataViewsPublicPluginStart;
+    dataViewEditor: DataViewEditorStart;
+  };
+  dataView?: DataView;
   metadata?: EsQueryRuleMetaData;
   onSelectDataView: (selectedDataView: DataView) => void;
   onChangeMetaData: (metadata: EsQueryRuleMetaData) => void;
 }
 
-const toDataViewListItem = (dataView: DataView): DataViewListItem => {
+const toDataViewListItem = (dataView: DataView): DataViewListItemEnhanced => {
   return {
     id: dataView.id!,
     title: dataView.title,
     name: dataView.name,
+    isAdhoc: !dataView.isPersisted(),
   };
 };
 
 export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopoverProps> = ({
+  dependencies: { dataViews, dataViewEditor },
   metadata = { adHocDataViewList: [], isManagementPage: true },
   dataView,
   onSelectDataView,
   onChangeMetaData,
 }) => {
-  const { dataViews, dataViewEditor } = useTriggerUiActionServices();
-  const [dataViewItems, setDataViewsItems] = useState<DataViewListItem[]>([]);
+  const [dataViewItems, setDataViewsItems] = useState<DataViewListItemEnhanced[]>([]);
   const [dataViewPopoverOpen, setDataViewPopoverOpen] = useState(false);
 
   const closeDataViewEditor = useRef<() => void | undefined>();
@@ -123,8 +133,8 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
   const createDataViewButtonPadding = useEuiPaddingCSS('left');
 
   const onCreateDefaultAdHocDataView = useCallback(
-    async (pattern: string) => {
-      const newDataView = await dataViews.create({ title: pattern });
+    async (dataViewSpec: DataViewSpec) => {
+      const newDataView = await dataViews.create(dataViewSpec);
       if (newDataView.fields.getByName('@timestamp')?.type === 'date') {
         newDataView.timeFieldName = '@timestamp';
       }
@@ -150,7 +160,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
             defaultMessage: 'data view',
           })}
           value={
-            dataView.getName() ??
+            dataView?.getName() ??
             i18n.translate('xpack.stackAlerts.components.ui.alertParams.dataViewPlaceholder', {
               defaultMessage: 'Select a data view',
             })
@@ -159,7 +169,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
           onClick={() => {
             setDataViewPopoverOpen(true);
           }}
-          isInvalid={!dataView.id}
+          isInvalid={!dataView?.id}
         />
       }
       isOpen={dataViewPopoverOpen}
@@ -191,7 +201,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
           </EuiFlexGroup>
         </EuiPopoverTitle>
         <DataViewSelector
-          currentDataViewId={dataView.id}
+          currentDataViewId={dataView?.id}
           dataViewsList={allDataViewItems}
           setPopoverIsOpen={setDataViewPopoverOpen}
           onChangeDataView={onChangeDataView}

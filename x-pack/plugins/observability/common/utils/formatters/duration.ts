@@ -109,7 +109,7 @@ function getUnitLabelAndConvertedValue(unitKey: DurationTimeUnit, value: number)
 /**
  * Converts a microseconds value into the unit defined.
  */
-function convertTo({
+export function convertTo({
   unit,
   microseconds,
   defaultValue = NOT_AVAILABLE_LABEL,
@@ -148,7 +148,7 @@ function getDurationUnitKey(max: number): DurationTimeUnit {
   if (max > toMicroseconds(10, 'minutes')) {
     return 'minutes';
   }
-  if (max > toMicroseconds(10, 'seconds')) {
+  if (max > toMicroseconds(1, 'seconds')) {
     return 'seconds';
   }
   if (max > toMicroseconds(1, 'milliseconds')) {

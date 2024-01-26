@@ -6,55 +6,52 @@
  */
 
 import React from 'react';
-import { CoreStart } from '@kbn/core/public';
-import { lastValueFrom } from 'rxjs';
-import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { extractInfluencers } from '../../../common/util/job_utils';
 import { VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
 import { AnomalySwimlaneInitializer } from './anomaly_swimlane_initializer';
-import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
 import { getDefaultSwimlanePanelTitle } from './anomaly_swimlane_embeddable';
 import { HttpService } from '../../application/services/http_service';
-import { AnomalySwimlaneEmbeddableInput } from '..';
+import type { AnomalySwimlaneEmbeddableInput } from '..';
 import { resolveJobSelection } from '../common/resolve_job_selection';
+import { mlApiServicesProvider } from '../../application/services/ml_api_service';
 
 export async function resolveAnomalySwimlaneUserInput(
   coreStart: CoreStart,
   input?: AnomalySwimlaneEmbeddableInput
 ): Promise<Partial<AnomalySwimlaneEmbeddableInput>> {
-  const { http, overlays } = coreStart;
+  const { http, overlays, theme, i18n } = coreStart;
 
-  const anomalyDetectorService = new AnomalyDetectorService(new HttpService(http));
+  const { getJobs } = mlApiServicesProvider(new HttpService(http));
 
   return new Promise(async (resolve, reject) => {
     try {
       const { jobIds } = await resolveJobSelection(coreStart, input?.jobIds);
       const title = input?.title ?? getDefaultSwimlanePanelTitle(jobIds);
-      const jobs = await lastValueFrom(anomalyDetectorService.getJobs$(jobIds));
-      const influencers = anomalyDetectorService.extractInfluencers(jobs);
+      const { jobs } = await getJobs({ jobId: jobIds.join(',') });
+      const influencers = extractInfluencers(jobs);
       influencers.push(VIEW_BY_JOB_LABEL);
-      const { theme$ } = coreStart.theme;
       const modalSession = overlays.openModal(
         toMountPoint(
-          wrapWithTheme(
-            <AnomalySwimlaneInitializer
-              defaultTitle={title}
-              influencers={influencers}
-              initialInput={input}
-              onCreate={(explicitInput) => {
-                modalSession.close();
-                resolve({
-                  jobIds,
-                  title: explicitInput.panelTitle,
-                  ...explicitInput,
-                });
-              }}
-              onCancel={() => {
-                modalSession.close();
-                reject();
-              }}
-            />,
-            theme$
-          )
+          <AnomalySwimlaneInitializer
+            defaultTitle={title}
+            influencers={influencers}
+            initialInput={input}
+            onCreate={(explicitInput) => {
+              modalSession.close();
+              resolve({
+                jobIds,
+                title: explicitInput.panelTitle,
+                ...explicitInput,
+              });
+            }}
+            onCancel={() => {
+              modalSession.close();
+              reject();
+            }}
+          />,
+          { theme, i18n }
         )
       );
     } catch (error) {

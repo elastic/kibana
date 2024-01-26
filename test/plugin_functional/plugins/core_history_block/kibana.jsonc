@@ -1,0 +1,10 @@
+{
+  "type": "plugin",
+  "id": "@kbn/core-history-block-plugin",
+  "owner": "@elastic/kibana-core",
+  "plugin": {
+    "id": "coreHistoryBlock",
+    "server": false,
+    "browser": true
+  }
+}

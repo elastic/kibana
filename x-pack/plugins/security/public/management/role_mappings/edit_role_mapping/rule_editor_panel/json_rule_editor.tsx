@@ -12,9 +12,10 @@ import 'brace/theme/github';
 import { EuiButton, EuiFormRow, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { Fragment, useState } from 'react';
 
+import { CodeEditorField } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CodeEditorField, useKibana } from '@kbn/kibana-react-plugin/public';
+import { useDarkMode, useKibana } from '@kbn/kibana-react-plugin/public';
 import { XJsonLang } from '@kbn/monaco';
 
 import type { Rule } from '../../model';
@@ -24,10 +25,12 @@ interface Props {
   rules: Rule | null;
   onChange: (updatedRules: Rule | null) => void;
   onValidityChange: (isValid: boolean) => void;
+  readOnly?: boolean;
 }
 
 export const JSONRuleEditor = (props: Props) => {
   const docLinks = useKibana().services.docLinks!;
+  const isDarkMode = useDarkMode();
   const [rawRules, setRawRules] = useState(
     JSON.stringify(props.rules ? props.rules.toRaw() : {}, null, 2)
   );
@@ -61,6 +64,24 @@ export const JSONRuleEditor = (props: Props) => {
     }
   }
 
+  function conditionallyRenderReformatButton() {
+    if (!props.readOnly) {
+      return (
+        <EuiButton
+          data-test-subj="roleMappingsJSONReformatButton"
+          iconType="broom"
+          onClick={reformatRules}
+          size="s"
+        >
+          <FormattedMessage
+            id="xpack.security.management.editRoleMapping.autoFormatRuleText"
+            defaultMessage="Reformat"
+          />
+        </EuiButton>
+      );
+    }
+  }
+
   return (
     <EuiFormRow
       isInvalid={Boolean(ruleBuilderError)}
@@ -85,6 +106,7 @@ export const JSONRuleEditor = (props: Props) => {
           onChange={onRulesChange}
           fullWidth={true}
           height="300px"
+          useDarkTheme={isDarkMode}
           options={{
             accessibilitySupport: 'off',
             lineNumbers: 'on',
@@ -97,15 +119,14 @@ export const JSONRuleEditor = (props: Props) => {
             scrollBeyondLastLine: false,
             wordWrap: 'on',
             wrappingIndent: 'indent',
+            readOnly: props.readOnly,
+            domReadOnly: props.readOnly,
+            // ToDo: there does not appear to be a way to disable the read-only tooltip
+            // Fortunately this only gets displayed when the 'delete' key is pressed.
           }}
         />
         <EuiSpacer size="s" />
-        <EuiButton iconType="broom" onClick={reformatRules} size="s">
-          <FormattedMessage
-            id="xpack.security.management.editRoleMapping.autoFormatRuleText"
-            defaultMessage="Reformat"
-          />
-        </EuiButton>
+        {conditionallyRenderReformatButton()}
         <EuiSpacer size="s" />
         <EuiText size="s">
           <p>

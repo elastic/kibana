@@ -6,81 +6,109 @@
  * Side Public License, v 1.
  */
 
-import { partition } from 'lodash';
+import { timerange } from '@kbn/apm-synthtrace-client';
+import { castArray } from 'lodash';
+import { PassThrough, Readable, Writable } from 'stream';
+import { isGeneratorObject } from 'util/types';
+import { awaitStream } from '../../lib/utils/wait_until_stream_finished';
+import { bootstrap } from './bootstrap';
 import { getScenario } from './get_scenario';
 import { RunOptions } from './parse_run_cli_flags';
-import { ApmFields } from '../../lib/apm/apm_fields';
-import { ApmSynthtraceEsClient } from '../../lib/apm';
-import { Logger } from '../../lib/utils/create_logger';
-import { EntityArrayIterable } from '../../lib/entity_iterable';
-import { StreamProcessor } from '../../lib/stream_processor';
-import { ApmSynthtraceApmClient } from '../../lib/apm/client/apm_synthtrace_apm_client';
+import { SynthtraceEsClient } from '../../lib/utils/with_client';
 
-export async function startLiveDataUpload(
-  esClient: ApmSynthtraceEsClient,
-  apmIntakeClient: ApmSynthtraceApmClient | null,
-  logger: Logger,
-  runOptions: RunOptions,
-  start: Date,
-  version: string
-) {
+export async function startLiveDataUpload({
+  runOptions,
+  start,
+}: {
+  runOptions: RunOptions;
+  start: Date;
+}) {
   const file = runOptions.file;
 
-  const scenario = await getScenario({ file, logger });
-  const { generate, mapToIndex } = await scenario(runOptions);
+  const { logger, apmEsClient, logsEsClient } = await bootstrap(runOptions);
 
-  let queuedEvents: ApmFields[] = [];
-  let requestedUntil: Date = start;
+  const scenario = await getScenario({ file, logger });
+  const { generate } = await scenario({ ...runOptions, logger });
+
   const bucketSizeInMs = 1000 * 60;
+  let requestedUntil = start;
+
+  let currentStreams: PassThrough[] = [];
+  const cachedStreams: WeakMap<SynthtraceEsClient, PassThrough> = new WeakMap();
+
+  process.on('SIGINT', () => closeStreams());
+  process.on('SIGTERM', () => closeStreams());
+  process.on('SIGQUIT', () => closeStreams());
+
+  function closeStreams() {
+    currentStreams.forEach((stream) => {
+      stream.end(() => {
+        process.exit(0);
+      });
+    });
+    currentStreams = []; // Reset the stream array
+  }
 
   async function uploadNextBatch() {
-    const end = new Date();
-    if (end > requestedUntil) {
+    const now = Date.now();
+
+    if (now > requestedUntil.getTime()) {
       const bucketFrom = requestedUntil;
       const bucketTo = new Date(requestedUntil.getTime() + bucketSizeInMs);
-      // TODO this materializes into an array, assumption is that the live buffer will fit in memory
-      const nextEvents = logger.perf('execute_scenario', () =>
-        generate({ from: bucketFrom, to: bucketTo }).toArray()
-      );
 
       logger.info(
-        `Requesting ${new Date(bucketFrom).toISOString()} to ${new Date(
-          bucketTo
-        ).toISOString()}, events: ${nextEvents.length}`
+        `Requesting ${new Date(bucketFrom).toISOString()} to ${new Date(bucketTo).toISOString()}`
       );
-      queuedEvents.push(...nextEvents);
+
+      const generatorsAndClients = generate({
+        range: timerange(bucketFrom.getTime(), bucketTo.getTime()),
+        clients: { logsEsClient, apmEsClient },
+      });
+
+      const generatorsAndClientsArray = castArray(generatorsAndClients);
+
+      const streams = generatorsAndClientsArray.map(({ client }) => {
+        let stream: PassThrough;
+
+        if (cachedStreams.has(client)) {
+          stream = cachedStreams.get(client)!;
+        } else {
+          stream = new PassThrough({ objectMode: true });
+          cachedStreams.set(client, stream);
+          client.index(stream);
+        }
+
+        return stream;
+      });
+
+      currentStreams = streams;
+
+      const promises = generatorsAndClientsArray.map(({ generator }, i) => {
+        const concatenatedStream = castArray(generator)
+          .reverse()
+          .reduce<Writable>((prev, current) => {
+            const currentStream = isGeneratorObject(current) ? Readable.from(current) : current;
+            return currentStream.pipe(prev);
+          }, new PassThrough({ objectMode: true }));
+
+        concatenatedStream.pipe(streams[i], { end: false });
+
+        return awaitStream(concatenatedStream);
+      });
+
+      await Promise.all(promises);
+
+      logger.info('Indexing completed');
+
+      const refreshPromise = generatorsAndClientsArray.map(async ({ client }) => {
+        await client.refresh();
+      });
+
+      await Promise.all(refreshPromise);
+      logger.info('Refreshing completed');
+
       requestedUntil = bucketTo;
     }
-
-    const [eventsToUpload, eventsToRemainInQueue] = partition(
-      queuedEvents,
-      (event) => event['@timestamp'] !== undefined && event['@timestamp'] <= end.getTime()
-    );
-
-    logger.info(`Uploading until ${new Date(end).toISOString()}, events: ${eventsToUpload.length}`);
-
-    queuedEvents = eventsToRemainInQueue;
-    const streamProcessor = new StreamProcessor({
-      version,
-      logger,
-      processors: StreamProcessor.apmProcessors,
-      maxSourceEvents: runOptions.maxDocs,
-      name: `Live index`,
-    });
-    await logger.perf('index_live_scenario', async () => {
-      const events = new EntityArrayIterable(eventsToUpload);
-      const streamToBulkOptions = {
-        concurrency: runOptions.workers,
-        maxDocs: runOptions.maxDocs,
-        mapToIndex,
-        dryRun: false,
-      };
-      if (apmIntakeClient) {
-        await apmIntakeClient.index(events, streamToBulkOptions, streamProcessor);
-      } else {
-        await esClient.index(events, streamToBulkOptions, streamProcessor);
-      }
-    });
   }
 
   do {
@@ -88,6 +116,7 @@ export async function startLiveDataUpload(
     await delay(bucketSizeInMs);
   } while (true);
 }
+
 async function delay(ms: number) {
   return await new Promise((resolve) => setTimeout(resolve, ms));
 }

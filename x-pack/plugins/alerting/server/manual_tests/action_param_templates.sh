@@ -70,7 +70,7 @@ ACTION_ID_WEBHOOK=`curl -X POST --insecure --silent \
   }" | jq -r '.id'`
 echo "webhook action id: $ACTION_ID_WEBHOOK"
 
-WEBHOOK_BODY="{ \\\"text\\\": \\\"text from webhook {{alertName}}\\\" }"
+WEBHOOK_BODY="{ \\\"text\\\": \\\"text from webhook {{rule.name}}\\\" }"
 
 # create alert
 ALERT_ID=`curl -X POST --insecure --silent \
@@ -88,15 +88,15 @@ ALERT_ID=`curl -X POST --insecure --silent \
         \"id\": \"$ACTION_ID_EMAIL\",
         \"params\":{
           \"to\": [\"team-alerting@example.com\"],
-          \"subject\": \"subject {{alertName}}\",
-          \"message\": \"message {{alertName}}\"
+          \"subject\": \"subject {{rule.name}}\",
+          \"message\": \"message {{rule.name}}\"
         }
       },
       {
         \"group\": \"threshold met\",
         \"id\": \"$ACTION_ID_SLACK\",
         \"params\":{
-          \"message\": \"message from slack {{alertName}}\"
+          \"message\": \"message from slack {{rule.name}}\"
         }
       },
       {

@@ -94,6 +94,7 @@ export function FormWizard<T extends object = { [key: string]: any }, S extends 
                 ? 'complete'
                 : 'incomplete') as EuiStepStatus,
               disabled: getIsStepDisabled(index),
+              'data-test-subj': `formWizardStep-${index}`,
               onClick: () => navigateToStep(index),
             };
           });

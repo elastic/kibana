@@ -7,25 +7,29 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import { fetchActionResponses } from './fetch_action_responses';
 import { ENDPOINT_DEFAULT_PAGE_SIZE } from '../../../../common/endpoint/constants';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
-import type { ActionDetails, ActionListApiResponse } from '../../../../common/endpoint/types';
-import type { ResponseActionStatus } from '../../../../common/endpoint/service/response_actions/constants';
+import type { ActionListApiResponse } from '../../../../common/endpoint/types';
+import type {
+  ResponseActionAgentType,
+  ResponseActionStatus,
+} from '../../../../common/endpoint/service/response_actions/constants';
 
-import { getActions, getActionResponses } from '../../utils/action_list_helpers';
+import { getActions } from '../../utils/action_list_helpers';
 
 import {
-  formatEndpointActionResults,
   categorizeResponseResults,
-  getActionCompletionInfo,
-  mapToNormalizedActionRequest,
+  createActionDetailsRecord,
+  formatEndpointActionResults,
   getAgentHostNamesWithIds,
-  getActionStatus,
+  mapToNormalizedActionRequest,
 } from './utils';
 import type { EndpointMetadataService } from '../metadata';
 import { ACTIONS_SEARCH_PAGE_SIZE } from './constants';
 
 interface OptionalFilterParams {
+  agentTypes?: ResponseActionAgentType[];
   commands?: string[];
   elasticAgentIds?: string[];
   endDate?: string;
@@ -35,6 +39,10 @@ interface OptionalFilterParams {
   userIds?: string[];
   /** Will filter out the action requests so that only those show `expiration` date is greater than now */
   unExpiredOnly?: boolean;
+  /** list of action Ids that should have outputs */
+  withOutputs?: string[];
+  /** Include automated response actions */
+  types?: string[];
 }
 
 /**
@@ -43,6 +51,7 @@ interface OptionalFilterParams {
  * filter out action details based on statuses filter options
  */
 export const getActionListByStatus = async ({
+  agentTypes,
   commands,
   elasticAgentIds,
   esClient,
@@ -55,6 +64,8 @@ export const getActionListByStatus = async ({
   statuses,
   userIds,
   unExpiredOnly = false,
+  types,
+  withOutputs,
 }: OptionalFilterParams & {
   statuses: ResponseActionStatus[];
   esClient: ElasticsearchClient;
@@ -65,6 +76,7 @@ export const getActionListByStatus = async ({
   const page = _page ?? 1;
 
   const { actionDetails: allActionDetails } = await getActionDetailsList({
+    agentTypes,
     commands,
     elasticAgentIds,
     esClient,
@@ -76,6 +88,8 @@ export const getActionListByStatus = async ({
     startDate,
     userIds,
     unExpiredOnly,
+    types,
+    withOutputs,
   });
 
   // filter out search results based on status filter options
@@ -88,6 +102,7 @@ export const getActionListByStatus = async ({
     pageSize: size,
     startDate,
     endDate,
+    agentTypes,
     elasticAgentIds,
     userIds,
     commands,
@@ -102,6 +117,7 @@ export const getActionListByStatus = async ({
  * Retrieve a list of Actions (`ActionDetails`)
  */
 export const getActionList = async ({
+  agentTypes,
   commands,
   elasticAgentIds,
   esClient,
@@ -113,6 +129,8 @@ export const getActionList = async ({
   startDate,
   userIds,
   unExpiredOnly = false,
+  withOutputs,
+  types,
 }: OptionalFilterParams & {
   esClient: ElasticsearchClient;
   logger: Logger;
@@ -124,6 +142,7 @@ export const getActionList = async ({
   const from = (page - 1) * size;
 
   const { actionDetails, totalRecords } = await getActionDetailsList({
+    agentTypes,
     commands,
     elasticAgentIds,
     esClient,
@@ -135,6 +154,8 @@ export const getActionList = async ({
     startDate,
     userIds,
     unExpiredOnly,
+    withOutputs,
+    types,
   });
 
   return {
@@ -142,6 +163,7 @@ export const getActionList = async ({
     pageSize: size,
     startDate,
     endDate,
+    agentTypes,
     elasticAgentIds,
     userIds,
     commands,
@@ -158,6 +180,7 @@ export type GetActionDetailsListParam = OptionalFilterParams & {
   size: number;
 };
 const getActionDetailsList = async ({
+  agentTypes,
   commands,
   elasticAgentIds,
   esClient,
@@ -169,7 +192,11 @@ const getActionDetailsList = async ({
   startDate,
   userIds,
   unExpiredOnly,
-}: GetActionDetailsListParam & { metadataService: EndpointMetadataService }): Promise<{
+  withOutputs,
+  types,
+}: GetActionDetailsListParam & {
+  metadataService: EndpointMetadataService;
+}): Promise<{
   actionDetails: ActionListApiResponse['data'];
   totalRecords: number;
 }> => {
@@ -181,6 +208,7 @@ const getActionDetailsList = async ({
   try {
     // fetch actions with matching agent_ids if any
     const { actionIds, actionRequests: _actionRequests } = await getActions({
+      agentTypes,
       commands,
       esClient,
       elasticAgentIds,
@@ -190,6 +218,7 @@ const getActionDetailsList = async ({
       size,
       userIds,
       unExpiredOnly,
+      types,
     });
     actionRequests = _actionRequests;
     actionReqIds = actionIds;
@@ -222,11 +251,8 @@ const getActionDetailsList = async ({
     // get all responses for given action Ids and agent Ids
     // and get host metadata info with queried agents
     [actionResponses, agentsHostInfo] = await Promise.all([
-      getActionResponses({
-        actionIds: actionReqIds,
-        elasticAgentIds,
-        esClient,
-      }),
+      fetchActionResponses({ esClient, agentIds: elasticAgentIds, actionIds: actionReqIds }),
+
       await getAgentHostNamesWithIds({
         esClient,
         metadataService,
@@ -247,7 +273,7 @@ const getActionDetailsList = async ({
 
   // categorize responses as fleet and endpoint responses
   const categorizedResponses = categorizeResponseResults({
-    results: actionResponses?.body?.hits?.hits,
+    results: actionResponses.data,
   });
 
   // compute action details list for each action id
@@ -259,41 +285,11 @@ const getActionDetailsList = async ({
         : categorizedResponse.item.data.action_id === action.id
     );
 
-    // find the specific response's details using that set of matching responses
-    const { isCompleted, completedAt, wasSuccessful, errors, agentState } = getActionCompletionInfo(
-      action.agents,
-      matchedResponses
-    );
+    const actionRecord = createActionDetailsRecord(action, matchedResponses, agentsHostInfo);
 
-    const { isExpired, status } = getActionStatus({
-      expirationDate: action.expiration,
-      isCompleted,
-      wasSuccessful,
-    });
-
-    // NOTE: `outputs` is not returned in this service because including it on a list of data
-    // could result in a very large response unnecessarily. In the future, we might include
-    // an option to optionally include it.
-    const actionRecord: ActionListApiResponse['data'][number] = {
-      id: action.id,
-      agents: action.agents,
-      hosts: action.agents.reduce<ActionDetails['hosts']>((acc, id) => {
-        acc[id] = { name: agentsHostInfo[id] ?? '' };
-        return acc;
-      }, {}),
-      command: action.command,
-      startedAt: action.createdAt,
-      isCompleted,
-      completedAt,
-      wasSuccessful,
-      errors,
-      agentState,
-      isExpired,
-      status,
-      createdBy: action.createdBy,
-      comment: action.comment,
-      parameters: action.parameters,
-    };
+    if (withOutputs && !withOutputs.includes(action.id)) {
+      delete actionRecord.outputs;
+    }
 
     return actionRecord;
   });

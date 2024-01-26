@@ -3,7 +3,6 @@
 exports[`TOCEntryActionsPopover is rendered 1`] = `
 <Fragment>
   <EuiPopover
-    anchorClassName="mapLayTocActions__popoverAnchor"
     anchorPosition="leftUp"
     button={
       <Memo(Connect(TOCEntryButton))
@@ -44,8 +43,9 @@ exports[`TOCEntryActionsPopover is rendered 1`] = `
     isOpen={false}
     ownFocus={true}
     panelPaddingSize="none"
+    repositionToCrossAxis={true}
   >
-    <EuiContextMenu
+    <EuiContextMenuClass
       data-test-subj="layerTocActionsPanellayer1"
       initialPanelId={0}
       panels={
@@ -110,7 +110,6 @@ exports[`TOCEntryActionsPopover is rendered 1`] = `
           },
         ]
       }
-      size="m"
     />
   </EuiPopover>
 </Fragment>
@@ -119,7 +118,6 @@ exports[`TOCEntryActionsPopover is rendered 1`] = `
 exports[`TOCEntryActionsPopover should disable Edit features when edit mode active for layer 1`] = `
 <Fragment>
   <EuiPopover
-    anchorClassName="mapLayTocActions__popoverAnchor"
     anchorPosition="leftUp"
     button={
       <Memo(Connect(TOCEntryButton))
@@ -160,8 +158,9 @@ exports[`TOCEntryActionsPopover should disable Edit features when edit mode acti
     isOpen={false}
     ownFocus={true}
     panelPaddingSize="none"
+    repositionToCrossAxis={true}
   >
-    <EuiContextMenu
+    <EuiContextMenuClass
       data-test-subj="layerTocActionsPanellayer1"
       initialPanelId={0}
       panels={
@@ -226,7 +225,6 @@ exports[`TOCEntryActionsPopover should disable Edit features when edit mode acti
           },
         ]
       }
-      size="m"
     />
   </EuiPopover>
 </Fragment>
@@ -235,7 +233,6 @@ exports[`TOCEntryActionsPopover should disable Edit features when edit mode acti
 exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBounds is false 1`] = `
 <Fragment>
   <EuiPopover
-    anchorClassName="mapLayTocActions__popoverAnchor"
     anchorPosition="leftUp"
     button={
       <Memo(Connect(TOCEntryButton))
@@ -276,8 +273,9 @@ exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBou
     isOpen={false}
     ownFocus={true}
     panelPaddingSize="none"
+    repositionToCrossAxis={true}
   >
-    <EuiContextMenu
+    <EuiContextMenuClass
       data-test-subj="layerTocActionsPanellayer1"
       initialPanelId={0}
       panels={
@@ -342,7 +340,6 @@ exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBou
           },
         ]
       }
-      size="m"
     />
   </EuiPopover>
 </Fragment>
@@ -351,7 +348,6 @@ exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBou
 exports[`TOCEntryActionsPopover should have "show layer" action when layer is not visible 1`] = `
 <Fragment>
   <EuiPopover
-    anchorClassName="mapLayTocActions__popoverAnchor"
     anchorPosition="leftUp"
     button={
       <Memo(Connect(TOCEntryButton))
@@ -393,8 +389,9 @@ exports[`TOCEntryActionsPopover should have "show layer" action when layer is no
     isOpen={false}
     ownFocus={true}
     panelPaddingSize="none"
+    repositionToCrossAxis={true}
   >
-    <EuiContextMenu
+    <EuiContextMenuClass
       data-test-subj="layerTocActionsPanellayer1"
       initialPanelId={0}
       panels={
@@ -459,7 +456,6 @@ exports[`TOCEntryActionsPopover should have "show layer" action when layer is no
           },
         ]
       }
-      size="m"
     />
   </EuiPopover>
 </Fragment>
@@ -468,7 +464,6 @@ exports[`TOCEntryActionsPopover should have "show layer" action when layer is no
 exports[`TOCEntryActionsPopover should not show edit actions in read only mode 1`] = `
 <Fragment>
   <EuiPopover
-    anchorClassName="mapLayTocActions__popoverAnchor"
     anchorPosition="leftUp"
     button={
       <Memo(Connect(TOCEntryButton))
@@ -509,8 +504,9 @@ exports[`TOCEntryActionsPopover should not show edit actions in read only mode 1
     isOpen={false}
     ownFocus={true}
     panelPaddingSize="none"
+    repositionToCrossAxis={true}
   >
-    <EuiContextMenu
+    <EuiContextMenuClass
       data-test-subj="layerTocActionsPanellayer1"
       initialPanelId={0}
       panels={
@@ -544,7 +540,6 @@ exports[`TOCEntryActionsPopover should not show edit actions in read only mode 1
           },
         ]
       }
-      size="m"
     />
   </EuiPopover>
 </Fragment>
@@ -553,7 +548,6 @@ exports[`TOCEntryActionsPopover should not show edit actions in read only mode 1
 exports[`TOCEntryActionsPopover should show "show this layer only" action when there are more then 2 layers 1`] = `
 <Fragment>
   <EuiPopover
-    anchorClassName="mapLayTocActions__popoverAnchor"
     anchorPosition="leftUp"
     button={
       <Memo(Connect(TOCEntryButton))
@@ -594,8 +588,9 @@ exports[`TOCEntryActionsPopover should show "show this layer only" action when t
     isOpen={false}
     ownFocus={true}
     panelPaddingSize="none"
+    repositionToCrossAxis={true}
   >
-    <EuiContextMenu
+    <EuiContextMenuClass
       data-test-subj="layerTocActionsPanellayer1"
       initialPanelId={0}
       panels={
@@ -670,7 +665,6 @@ exports[`TOCEntryActionsPopover should show "show this layer only" action when t
           },
         ]
       }
-      size="m"
     />
   </EuiPopover>
 </Fragment>

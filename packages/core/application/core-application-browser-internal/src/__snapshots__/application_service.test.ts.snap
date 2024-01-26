@@ -2,6 +2,20 @@
 
 exports[`#start() getComponent returns renderable JSX tree 1`] = `
 <AppRouter
+  analytics={
+    Object {
+      "optIn": [MockFunction],
+      "reportEvent": [MockFunction],
+      "telemetryCounter$": Subject {
+        "closed": false,
+        "currentObservers": null,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+    }
+  }
   appStatuses$={
     AnonymousSubject {
       "closed": false,
@@ -65,6 +79,14 @@ exports[`#start() getComponent returns renderable JSX tree 1`] = `
         "thrownError": null,
       },
       "thrownError": null,
+    }
+  }
+  hasCustomBranding$={
+    Observable {
+      "operator": [Function],
+      "source": Observable {
+        "_subscribe": [Function],
+      },
     }
   }
   history={

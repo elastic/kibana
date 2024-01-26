@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { ObjectRemover } from '../../../lib/object_remover';
 import { generateUniqueKey } from '../../../lib/get_test_data';
-import { createConnector, createSlackConnectorAndObjectRemover, getConnectorByName } from './utils';
+import { createSlackConnectorAndObjectRemover, getConnectorByName } from './utils';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
@@ -138,7 +138,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await find.clickByCssSelector('[data-test-subj="testConnectorTab"]');
 
-        expect(await (await testSubjects.find('executeActionButton')).isEnabled()).to.be(false);
+        expect(await testSubjects.isEnabled('executeActionButton')).to.be(false);
       });
 
       describe('test page', () => {
@@ -356,22 +356,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await retry.try(async () => {
         await rules.common.defineIndexThresholdAlert(alertName);
       });
-
-      await rules.common.setNotifyThrottleInput();
     };
 
     const selectOpsgenieConnectorInRuleAction = async (name: string) => {
       await testSubjects.click('.opsgenie-alerting-ActionTypeSelectOption');
       await testSubjects.selectValue('comboBoxInput', name);
+      await rules.common.setNotifyThrottleInput();
     };
 
     const createOpsgenieConnector = async (name: string) => {
-      return createConnector({
+      return actions.api.createConnector({
         name,
         config: { apiUrl: 'https//test.com' },
         secrets: { apiKey: '1234' },
         connectorTypeId: '.opsgenie',
-        supertest,
       });
     };
   });

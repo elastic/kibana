@@ -10,11 +10,11 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import type { ApplicationStart, DocLinksStart, NotificationsStart } from '@kbn/core/public';
 
+import { createSpacesReactContext } from './context';
+import type { InternalProps, SpacesContextProps, SpacesReactContext } from './types';
 import type { GetAllSpacesPurpose } from '../../common';
 import type { SpacesManager } from '../spaces_manager';
 import type { SpacesData, SpacesDataEntry } from '../types';
-import { createSpacesReactContext } from './context';
-import type { InternalProps, SpacesContextProps, SpacesReactContext } from './types';
 
 interface Services {
   application: ApplicationStart;

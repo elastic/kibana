@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { useExpandedRowCss } from './use_expanded_row_css';
 import {
   BooleanContent,
   DateContent,
@@ -22,6 +23,7 @@ import type { FileBasedFieldVisConfig } from '../../../../../common/types/field_
 export const FileBasedDataVisualizerExpandedRow = ({ item }: { item: FileBasedFieldVisConfig }) => {
   const config = item;
   const { type, fieldName } = config;
+  const dvExpandedRow = useExpandedRowCss();
 
   function getCardContent() {
     switch (type) {
@@ -53,7 +55,7 @@ export const FileBasedDataVisualizerExpandedRow = ({ item }: { item: FileBasedFi
   }
 
   return (
-    <div className="dvExpandedRow" data-test-subj={`dataVisualizerFieldExpandedRow-${fieldName}`}>
+    <div css={dvExpandedRow} data-test-subj={`dataVisualizerFieldExpandedRow-${fieldName}`}>
       {getCardContent()}
     </div>
   );

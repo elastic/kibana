@@ -13,6 +13,14 @@ export * from './mappings';
 
 export * from './templates';
 
-export type { DataStreamFromEs, Health, DataStream, DataStreamIndex } from './data_streams';
+export type {
+  EnhancedDataStreamFromEs,
+  Health,
+  DataStream,
+  DataStreamIndex,
+  DataRetention,
+} from './data_streams';
 
 export * from './component_templates';
+
+export * from './enrich_policies';

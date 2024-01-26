@@ -19,6 +19,7 @@ import {
   EuiIcon,
   EuiToolTip,
   EuiLink,
+  EuiIconTip,
 } from '@elastic/eui';
 
 import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../../../common';
@@ -32,7 +33,7 @@ import {
 import {
   useAuthz,
   useLink,
-  usePackageInstallations,
+  useIsPackagePolicyUpgradable,
   usePermissionCheck,
   useStartServices,
 } from '../../../../../hooks';
@@ -62,7 +63,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
   const { application } = useStartServices();
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
   const canReadIntegrationPolicies = useAuthz().integrations.readIntegrationPolicies;
-  const { updatableIntegrations } = usePackageInstallations();
+  const { isPackagePolicyUpgradable } = useIsPackagePolicyUpgradable();
   const { getHref } = useLink();
 
   const permissionCheck = usePermissionCheck();
@@ -79,16 +80,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         if (packagePolicy.namespace) {
           namespacesValues.add(packagePolicy.namespace);
         }
-
-        const updatableIntegrationRecord = updatableIntegrations.get(
-          packagePolicy.package?.name ?? ''
-        );
-
-        const hasUpgrade =
-          !!updatableIntegrationRecord &&
-          updatableIntegrationRecord.policiesToUpgrade.some(
-            ({ pkgPolicyId }) => pkgPolicyId === packagePolicy.id
-          );
+        const hasUpgrade = isPackagePolicyUpgradable(packagePolicy);
 
         return {
           ...packagePolicy,
@@ -103,9 +95,8 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
     const namespaceFilterOptions = [...namespacesValues]
       .sort(stringSortAscending)
       .map(toFilterOption);
-
     return [mappedPackagePolicies, namespaceFilterOptions];
-  }, [originalPackagePolicies, updatableIntegrations]);
+  }, [originalPackagePolicies, isPackagePolicyUpgradable]);
 
   const columns = useMemo(
     (): EuiInMemoryTableProps<InMemoryPackagePolicy>['columns'] => [
@@ -198,7 +189,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                         { defaultMessage: 'Upgrade Available' }
                       )}
                     >
-                      <EuiIcon type="alert" color="warning" />
+                      <EuiIcon type="warning" color="warning" />
                     </EuiToolTip>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
@@ -233,7 +224,19 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
           }
         ),
         render: (namespace: InMemoryPackagePolicy['namespace']) => {
-          return namespace ? <EuiBadge color="hollow">{namespace}</EuiBadge> : '';
+          return namespace ? (
+            <EuiBadge color="hollow">{namespace}</EuiBadge>
+          ) : (
+            <>
+              <EuiBadge color="default">{agentPolicy.namespace}</EuiBadge>
+              <EuiIconTip
+                content="Namespace defined in parent agent policy"
+                position="right"
+                type="iInCircle"
+                color="subdued"
+              />
+            </>
+          );
         },
       },
       {
@@ -246,6 +249,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
               return canWriteIntegrationPolicies ? (
                 <PackagePolicyActionsMenu
                   agentPolicy={agentPolicy}
+                  from={'fleet-policy-list'}
                   packagePolicy={packagePolicy}
                   upgradePackagePolicyHref={`${getHref('upgrade_package_policy', {
                     policyId: agentPolicy.id,

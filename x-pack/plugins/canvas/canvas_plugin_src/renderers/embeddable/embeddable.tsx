@@ -9,20 +9,21 @@ import React, { FC } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import ReactDOM from 'react-dom';
 import { CoreStart } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import {
   IEmbeddable,
   EmbeddableFactory,
   EmbeddableFactoryNotFoundError,
   isErrorEmbeddable,
+  EmbeddablePanel,
 } from '@kbn/embeddable-plugin/public';
-import type { EmbeddableContainerContext } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableAppContext } from '@kbn/embeddable-plugin/public';
 import { StartDeps } from '../../plugin';
 import { EmbeddableExpression } from '../../expression_types/embeddable';
 import { RendererStrings } from '../../../i18n';
 import { embeddableInputToExpression } from './embeddable_input_to_expression';
 import { RendererFactory, EmbeddableInput } from '../../../types';
-import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
+import { CANVAS_APP, CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
 
 const { embeddable: strings } = RendererStrings;
 
@@ -40,21 +41,19 @@ const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
       return null;
     }
 
-    const embeddableContainerContext: EmbeddableContainerContext = {
+    const canvasAppContext: EmbeddableAppContext = {
       getCurrentPath: () => {
         const urlToApp = core.application.getUrlForApp(currentAppId);
         const inAppPath = window.location.pathname.replace(urlToApp, '');
 
         return inAppPath + window.location.search + window.location.hash;
       },
+      currentAppId: CANVAS_APP,
     };
 
-    return (
-      <plugins.embeddable.EmbeddablePanel
-        embeddable={embeddable}
-        containerContext={embeddableContainerContext}
-      />
-    );
+    embeddable.getAppContext = () => canvasAppContext;
+
+    return <EmbeddablePanel embeddable={embeddable} />;
   };
 
   return (embeddableObject: IEmbeddable) => {
@@ -64,7 +63,7 @@ const renderEmbeddableFactory = (core: CoreStart, plugins: StartDeps) => {
         style={{ width: '100%', height: '100%', cursor: 'auto' }}
       >
         <I18nContext>
-          <KibanaThemeProvider theme$={core.theme.theme$}>
+          <KibanaThemeProvider theme={{ theme$: core.theme.theme$ }}>
             <EmbeddableRenderer embeddable={embeddableObject} />
           </KibanaThemeProvider>
         </I18nContext>

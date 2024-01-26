@@ -54,7 +54,38 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "kubernetesSecurity",
+        "id": "def-public.KUBERNETES_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "KUBERNETES_PATH",
+        "description": [],
+        "signature": [
+          "\"/kubernetes\""
+        ],
+        "path": "x-pack/plugins/kubernetes_security/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kubernetesSecurity",
+        "id": "def-public.KUBERNETES_TITLE",
+        "type": "string",
+        "tags": [],
+        "label": "KUBERNETES_TITLE",
+        "description": [],
+        "signature": [
+          "\"Kubernetes\""
+        ],
+        "path": "x-pack/plugins/kubernetes_security/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   },
   "server": {

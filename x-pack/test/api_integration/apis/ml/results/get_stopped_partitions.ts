@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -96,17 +96,17 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await ml.testResources.deleteIndexPatternByTitle('ft_module_sample_logs');
+      await ml.testResources.deleteDataViewByTitle('ft_module_sample_logs');
       await ml.api.cleanMlIndices();
     });
 
     it('should fetch all the stopped partitions correctly', async () => {
       const { jobId } = testSetUps[0];
       const { body, status } = await supertest
-        .post(`/api/ml/results/category_stopped_partitions`)
+        .post(`/internal/ml/results/category_stopped_partitions`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .send({ jobIds: [jobId] })
-        .set(COMMON_REQUEST_HEADERS);
+        .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body.jobs).to.not.be(undefined);
@@ -117,10 +117,10 @@ export default ({ getService }: FtrProviderContext) => {
     it('should not return jobId in response if stopped_on_warn is false', async () => {
       const { jobId } = testSetUps[1];
       const { body, status } = await supertest
-        .post(`/api/ml/results/category_stopped_partitions`)
+        .post(`/internal/ml/results/category_stopped_partitions`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .send({ jobIds: [jobId] })
-        .set(COMMON_REQUEST_HEADERS);
+        .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body.jobs).to.not.be(undefined);
@@ -130,10 +130,10 @@ export default ({ getService }: FtrProviderContext) => {
     it('should fetch stopped partitions for user with view permission', async () => {
       const { jobId } = testSetUps[2];
       const { body, status } = await supertest
-        .post(`/api/ml/results/category_stopped_partitions`)
+        .post(`/internal/ml/results/category_stopped_partitions`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .send({ jobIds: [jobId] })
-        .set(COMMON_REQUEST_HEADERS);
+        .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body.jobs).to.not.be(undefined);
@@ -145,10 +145,10 @@ export default ({ getService }: FtrProviderContext) => {
       const { jobId } = testSetUps[3];
 
       const { body, status } = await supertest
-        .post(`/api/ml/results/category_stopped_partitions`)
+        .post(`/internal/ml/results/category_stopped_partitions`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .send({ jobIds: [jobId] })
-        .set(COMMON_REQUEST_HEADERS);
+        .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(403, status, body);
 
       expect(body.error).to.be('Forbidden');
@@ -157,10 +157,10 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should fetch stopped partitions for multiple job ids', async () => {
       const { body, status } = await supertest
-        .post(`/api/ml/results/category_stopped_partitions`)
+        .post(`/internal/ml/results/category_stopped_partitions`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .send({ jobIds: testJobIds })
-        .set(COMMON_REQUEST_HEADERS);
+        .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body.jobs).to.not.be(undefined);
@@ -175,10 +175,10 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should return array of jobIds with stopped_partitions for multiple job ids when bucketed by job_id', async () => {
       const { body, status } = await supertest
-        .post(`/api/ml/results/category_stopped_partitions`)
+        .post(`/internal/ml/results/category_stopped_partitions`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .send({ jobIds: testJobIds, fieldToBucket: 'job_id' })
-        .set(COMMON_REQUEST_HEADERS);
+        .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body.jobs).to.not.be(undefined);

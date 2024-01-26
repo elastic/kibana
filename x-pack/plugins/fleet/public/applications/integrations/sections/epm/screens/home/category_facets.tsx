@@ -17,9 +17,14 @@ export interface CategoryFacet {
   count: number;
   id: string;
   title: string;
+  parent_id?: string;
+  parent_title?: string;
 }
 
 export const UPDATES_AVAILABLE = 'updates_available';
+export const INSTALL_FAILED = 'install_failed';
+export const UPDATE_FAILED = 'update_failed';
+
 export type ExtendedIntegrationCategory = IntegrationCategory | typeof UPDATES_AVAILABLE | '';
 
 export const ALL_CATEGORY = {
@@ -40,6 +45,20 @@ export const UPDATES_AVAILABLE_CATEGORY = {
   id: UPDATES_AVAILABLE,
   title: i18n.translate('xpack.fleet.epmList.updatesAvailableFilterLinkText', {
     defaultMessage: 'Updates available',
+  }),
+};
+
+export const INSTALL_FAILED_CATEGORY = {
+  id: INSTALL_FAILED,
+  title: i18n.translate('xpack.fleet.epmList.installFailedFilterLinkText', {
+    defaultMessage: 'Install failed',
+  }),
+};
+
+export const UPDATE_FAILED_CATEGORY = {
+  id: UPDATE_FAILED,
+  title: i18n.translate('xpack.fleet.epmList.updateFailedFilterLinkText', {
+    defaultMessage: 'Update failed',
   }),
 };
 

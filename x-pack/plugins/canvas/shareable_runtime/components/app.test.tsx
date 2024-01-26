@@ -59,8 +59,7 @@ const getWrapper: (name?: WorkpadNames) => ReactWrapper = (name = 'hello') => {
   return mount(<App {...{ stage, workpad }} />);
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/95899
-describe.skip('<App />', () => {
+describe('<App />', () => {
   test('App renders properly', () => {
     expect(getWrapper().html()).toMatchSnapshot();
   });
@@ -104,7 +103,7 @@ describe.skip('<App />', () => {
   test('autohide footer functions on mouseEnter + Leave', async () => {
     const wrapper = getWrapper();
     await openSettings(wrapper);
-    await selectMenuItem(wrapper, 1);
+    await selectMenuItem(wrapper, 2);
 
     expect(footer(wrapper).prop('isHidden')).toEqual(false);
     expect(footer(wrapper).prop('isAutohide')).toEqual(false);
@@ -123,7 +122,7 @@ describe.skip('<App />', () => {
 
     // Open the menu and activate toolbar hiding.
     await openSettings(wrapper);
-    await selectMenuItem(wrapper, 1);
+    await selectMenuItem(wrapper, 2);
 
     toolbarCheck(wrapper).simulate('click');
     await tick(20);

@@ -16,31 +16,38 @@ import {
   defaultApmServiceEnvironment,
   apmProgressiveLoading,
   apmServiceInventoryOptimizedSorting,
-  enableNewSyntheticsView,
   apmServiceGroupMaxNumberOfServices,
   apmTraceExplorerTab,
-  apmOperationsTab,
   apmLabsButton,
   enableAgentExplorerView,
+  apmEnableTableSearchBar,
   enableAwsLambdaMetrics,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
+  apmEnableServiceMetrics,
+  apmEnableContinuousRollups,
   enableCriticalPath,
   enableInfrastructureHostsView,
-  enableServiceMetrics,
+  syntheticsThrottlingEnabled,
+  enableLegacyUptimeApp,
+  apmEnableProfilingIntegration,
+  profilingCo2PerKWH,
+  profilingDatacenterPUE,
+  profilingPervCPUWattX86,
+  profilingPervCPUWattArm64,
+  profilingAWSCostDiscountRate,
+  profilingCostPervCPUPerHour,
+  enableInfrastructureProfilingIntegration,
 } from '../common/ui_settings_keys';
+
+const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
+  defaultMessage: 'beta',
+});
 
 const technicalPreviewLabel = i18n.translate(
   'xpack.observability.uiSettings.technicalPreviewLabel',
   { defaultMessage: 'technical preview' }
 );
-
-function feedbackLink({ href }: { href: string }) {
-  return `<a href="${href}" target="_blank" rel="noopener noreferrer">${i18n.translate(
-    'xpack.observability.uiSettings.giveFeedBackLabel',
-    { defaultMessage: 'Give feedback' }
-  )}</a>`;
-}
 
 type UiSettings = UiSettingsParams<boolean | number | string | object> & { showInLabs?: boolean };
 
@@ -48,23 +55,6 @@ type UiSettings = UiSettingsParams<boolean | number | string | object> & { showI
  * uiSettings definitions for Observability.
  */
 export const uiSettings: Record<string, UiSettings> = {
-  [enableNewSyntheticsView]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableNewSyntheticsViewExperimentName', {
-      defaultMessage: 'Enable new synthetic monitoring application',
-    }),
-    value: false,
-    description: i18n.translate(
-      'xpack.observability.enableNewSyntheticsViewExperimentDescriptionBeta',
-      {
-        defaultMessage:
-          '{technicalPreviewLabel} Enable new synthetic monitoring application in observability. Refresh the page to apply the setting.',
-        values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
-      }
-    ),
-    schema: schema.boolean(),
-    requiresPageReload: true,
-  },
   [enableInspectEsQueries]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.enableInspectEsQueriesExperimentName', {
@@ -95,7 +85,8 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     value: true,
     description: i18n.translate('xpack.observability.enableComparisonByDefaultDescription', {
-      defaultMessage: 'Enable the comparison feature in APM app',
+      defaultMessage:
+        'Determines whether the comparison feature is enabled or disabled by default in the APM app.',
     }),
     schema: schema.boolean(),
   },
@@ -165,21 +156,6 @@ export const uiSettings: Record<string, UiSettings> = {
     },
     showInLabs: true,
   },
-  [enableServiceMetrics]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmEnableServiceMetrics', {
-      defaultMessage: 'Service metrics',
-    }),
-    value: false,
-    description: i18n.translate('xpack.observability.apmEnableServiceMetricsGroupsDescription', {
-      defaultMessage:
-        '{technicalPreviewLabel} Enables Service metrics. When is enabled, additional configuration in APM Server is required.',
-      values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
-    }),
-    schema: schema.boolean(),
-    requiresPageReload: true,
-    showInLabs: true,
-  },
   [apmServiceInventoryOptimizedSorting]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.apmServiceInventoryOptimizedSorting', {
@@ -189,10 +165,9 @@ export const uiSettings: Record<string, UiSettings> = {
       'xpack.observability.apmServiceInventoryOptimizedSortingDescription',
       {
         defaultMessage:
-          '{technicalPreviewLabel} Default APM Service Inventory and Storage Explorer pages sort (for Services without Machine Learning applied) to sort by Service Name. {feedbackLink}.',
+          '{technicalPreviewLabel} Default APM Service Inventory and Storage Explorer pages sort (for Services without Machine Learning applied) to sort by Service Name.',
         values: {
           technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-          feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-apm-page-performance' }),
         },
       }
     ),
@@ -220,33 +195,16 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     description: i18n.translate('xpack.observability.apmTraceExplorerTabDescription', {
       defaultMessage:
-        '{technicalPreviewLabel} Enable the APM Trace Explorer feature, that allows you to search and inspect traces with KQL or EQL. {feedbackLink}.',
+        '{technicalPreviewLabel} Enable the APM Trace Explorer feature, that allows you to search and inspect traces with KQL or EQL. {link}',
       values: {
         technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-        feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-trace-explorer' }),
+        link: traceExplorerDocsLink({
+          href: 'https://www.elastic.co/guide/en/kibana/master/traces.html#trace-explorer',
+        }),
       },
     }),
     schema: schema.boolean(),
-    value: false,
-    requiresPageReload: true,
-    type: 'boolean',
-    showInLabs: true,
-  },
-  [apmOperationsTab]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmOperationsBreakdown', {
-      defaultMessage: 'APM Operations Breakdown',
-    }),
-    description: i18n.translate('xpack.observability.apmOperationsBreakdownDescription', {
-      defaultMessage:
-        '{technicalPreviewLabel} Enable the APM Operations Breakdown feature, that displays aggregates for backend operations. {feedbackLink}.',
-      values: {
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-        feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-operations-breakdown' }),
-      },
-    }),
-    schema: schema.boolean(),
-    value: false,
+    value: true,
     requiresPageReload: true,
     type: 'boolean',
     showInLabs: true,
@@ -270,10 +228,27 @@ export const uiSettings: Record<string, UiSettings> = {
     name: i18n.translate('xpack.observability.enableInfrastructureHostsView', {
       defaultMessage: 'Infrastructure Hosts view',
     }),
-    value: false,
+    value: true,
     description: i18n.translate('xpack.observability.enableInfrastructureHostsViewDescription', {
-      defaultMessage: 'Enable the Hosts view in the Infrastructure app',
+      defaultMessage: '{betaLabel} Enable the Hosts view in the Infrastructure app.',
+      values: {
+        betaLabel: `<em>[${betaLabel}]</em>`,
+      },
     }),
+    schema: schema.boolean(),
+  },
+  [enableInfrastructureProfilingIntegration]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableInfrastructureProfilingIntegration', {
+      defaultMessage: 'Universal Profiling integration in Infrastructure',
+    }),
+    value: true,
+    description: i18n.translate(
+      'xpack.observability.enableInfrastructureProfilingIntegrationDescription',
+      {
+        defaultMessage: 'Enable Universal Profiling integration in the Infrastructure app.',
+      }
+    ),
     schema: schema.boolean(),
   },
   [enableAwsLambdaMetrics]: {
@@ -283,10 +258,9 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     description: i18n.translate('xpack.observability.enableAwsLambdaMetricsDescription', {
       defaultMessage:
-        '{technicalPreviewLabel} Display Amazon Lambda metrics in the service metrics tab. {feedbackLink}',
+        '{technicalPreviewLabel} Display Amazon Lambda metrics in the service metrics tab.',
       values: {
         technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-        feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-aws-lambda' }),
       },
     }),
     schema: schema.boolean(),
@@ -301,16 +275,32 @@ export const uiSettings: Record<string, UiSettings> = {
       defaultMessage: 'Agent explorer',
     }),
     description: i18n.translate('xpack.observability.enableAgentExplorerDescription', {
-      defaultMessage: '{technicalPreviewLabel} Enables Agent explorer view.',
+      defaultMessage: '{betaLabel} Enables Agent explorer view.',
       values: {
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+        betaLabel: `<em>[${betaLabel}]</em>`,
+      },
+    }),
+    schema: schema.boolean(),
+    value: true,
+    requiresPageReload: true,
+    type: 'boolean',
+  },
+  [apmEnableTableSearchBar]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmEnableTableSearchBar', {
+      defaultMessage: 'Instant table search',
+    }),
+    description: i18n.translate('xpack.observability.apmEnableTableSearchBarDescription', {
+      defaultMessage:
+        '{betaLabel} Enables faster searching in APM tables by adding a handy search bar with live filtering. Available for the following tables: Services, Transactions and Errors',
+      values: {
+        betaLabel: `<em>[${betaLabel}]</em>`,
       },
     }),
     schema: schema.boolean(),
     value: false,
-    requiresPageReload: true,
+    requiresPageReload: false,
     type: 'boolean',
-    showInLabs: true,
   },
   [apmAWSLambdaPriceFactor]: {
     category: [observabilityFeatureId],
@@ -335,6 +325,34 @@ export const uiSettings: Record<string, UiSettings> = {
     value: 0.2,
     schema: schema.number({ min: 0 }),
   },
+  [apmEnableServiceMetrics]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmEnableServiceMetrics', {
+      defaultMessage: 'Service transaction metrics',
+    }),
+    value: true,
+    description: i18n.translate('xpack.observability.apmEnableServiceMetricsDescription', {
+      defaultMessage:
+        '{betaLabel} Enables the usage of service transaction metrics, which are low cardinality metrics that can be used by certain views like the service inventory for faster loading times.',
+      values: { betaLabel: `<em>[${betaLabel}]</em>` },
+    }),
+    schema: schema.boolean(),
+    requiresPageReload: true,
+  },
+  [apmEnableContinuousRollups]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmEnableContinuousRollups', {
+      defaultMessage: 'Continuous rollups',
+    }),
+    value: true,
+    description: i18n.translate('xpack.observability.apmEnableContinuousRollupsDescription', {
+      defaultMessage:
+        '{betaLabel} When continuous rollups is enabled, the UI will select metrics with the appropriate resolution. On larger time ranges, lower resolution metrics will be used, which will improve loading times.',
+      values: { betaLabel: `<em>[${betaLabel}]</em>` },
+    }),
+    schema: schema.boolean(),
+    requiresPageReload: true,
+  },
   [enableCriticalPath]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.enableCriticalPath', {
@@ -352,4 +370,171 @@ export const uiSettings: Record<string, UiSettings> = {
     type: 'boolean',
     showInLabs: true,
   },
+  [syntheticsThrottlingEnabled]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.syntheticsThrottlingEnabledExperimentName', {
+      defaultMessage: 'Enable Synthetics throttling (Experimental)',
+    }),
+    value: false,
+    description: i18n.translate(
+      'xpack.observability.syntheticsThrottlingEnabledExperimentDescription',
+      {
+        defaultMessage:
+          'Enable the throttling setting in Synthetics monitor configurations. Note that throttling may still not be available for your monitors even if the setting is active. Intended for internal use only. {link}',
+        values: {
+          link: throttlingDocsLink({
+            href: 'https://github.com/elastic/synthetics/blob/main/docs/throttling.md',
+          }),
+        },
+      }
+    ),
+    schema: schema.boolean(),
+    requiresPageReload: true,
+  },
+  [enableLegacyUptimeApp]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableLegacyUptimeApp', {
+      defaultMessage: 'Always show legacy Uptime app',
+    }),
+    value: false,
+    description: i18n.translate('xpack.observability.enableLegacyUptimeAppDescription', {
+      defaultMessage:
+        "By default, the legacy Uptime app is hidden from the interface when it doesn't have any data for more than a week. Enable this option to always show it.",
+    }),
+    schema: schema.boolean(),
+    requiresPageReload: true,
+  },
+  [apmEnableProfilingIntegration]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmEnableProfilingIntegration', {
+      defaultMessage: 'Enable Universal Profiling integration in APM',
+    }),
+    value: true,
+    schema: schema.boolean(),
+    requiresPageReload: false,
+  },
+  [profilingPervCPUWattX86]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.profilingPervCPUWattX86UiSettingName', {
+      defaultMessage: 'Per vCPU Watts - x86',
+    }),
+    value: 7,
+    description: i18n.translate('xpack.observability.profilingPervCPUWattX86UiSettingDescription', {
+      defaultMessage: `The average amortized per-core power consumption (based on 100% CPU utilization) for x86 architecture.`,
+    }),
+    schema: schema.number({ min: 0 }),
+    requiresPageReload: true,
+  },
+  [profilingPervCPUWattArm64]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.profilingPervCPUWattArm64UiSettingName', {
+      defaultMessage: 'Per vCPU Watts - arm64',
+    }),
+    value: 2.8,
+    description: i18n.translate(
+      'xpack.observability.profilingPervCPUWattArm64UiSettingDescription',
+      {
+        defaultMessage: `The average amortized per-core power consumption (based on 100% CPU utilization) for arm64 architecture.`,
+      }
+    ),
+    schema: schema.number({ min: 0 }),
+    requiresPageReload: true,
+  },
+  [profilingDatacenterPUE]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.profilingDatacenterPUEUiSettingName', {
+      defaultMessage: 'Data Center PUE',
+    }),
+    value: 1.7,
+    description: i18n.translate('xpack.observability.profilingDatacenterPUEUiSettingDescription', {
+      defaultMessage: `Data center power usage effectiveness (PUE) measures how efficiently a data center uses energy. Defaults to 1.7, the average on-premise data center PUE according to the {uptimeLink} survey
+      </br></br>
+      You can also use the PUE that corresponds with your cloud provider:
+      <ul style="list-style-type: none;margin-left: 4px;">
+        <li><strong>AWS:</strong> 1.135</li>
+        <li><strong>GCP:</strong> 1.1</li>
+        <li><strong>Azure:</strong> 1.185</li>
+      </ul>
+      `,
+      values: {
+        uptimeLink:
+          '<a href="https://ela.st/uptimeinstitute" target="_blank" rel="noopener noreferrer">' +
+          i18n.translate(
+            'xpack.observability.profilingDatacenterPUEUiSettingDescription.uptimeLink',
+            { defaultMessage: 'Uptime Institute' }
+          ) +
+          '</a>',
+      },
+    }),
+    schema: schema.number({ min: 0 }),
+    requiresPageReload: true,
+  },
+  [profilingCo2PerKWH]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.profilingCo2PerKWHUiSettingName', {
+      defaultMessage: 'Regional Carbon Intensity (ton/kWh)',
+    }),
+    value: 0.000379069,
+    description: i18n.translate('xpack.observability.profilingCo2PerKWHUiSettingDescription', {
+      defaultMessage: `Carbon intensity measures how clean your data center electricity is.
+      Specifically, it measures the average amount of CO2 emitted per kilowatt-hour (kWh) of electricity consumed in a particular region.
+      Use the cloud carbon footprint {datasheetLink} to update this value according to your region. Defaults to US East (N. Virginia).`,
+      values: {
+        datasheetLink:
+          '<a href="https://ela.st/grid-datasheet" target="_blank" rel="noopener noreferrer">' +
+          i18n.translate(
+            'xpack.observability.profilingCo2PerKWHUiSettingDescription.datasheetLink',
+            { defaultMessage: 'datasheet' }
+          ) +
+          '</a>',
+      },
+    }),
+    schema: schema.number({ min: 0 }),
+    requiresPageReload: true,
+  },
+  [profilingAWSCostDiscountRate]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.profilingAWSCostDiscountRateUiSettingName', {
+      defaultMessage: 'AWS EDP discount rate (%)',
+    }),
+    value: 6,
+    schema: schema.number({ min: 0, max: 100 }),
+    requiresPageReload: true,
+    description: i18n.translate(
+      'xpack.observability.profilingAWSCostDiscountRateUiSettingDescription',
+      {
+        defaultMessage:
+          "If you're enrolled in the AWS Enterprise Discount Program (EDP), enter your discount rate to update the profiling cost calculation.",
+      }
+    ),
+  },
+  [profilingCostPervCPUPerHour]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.profilingCostPervCPUPerHourUiSettingName', {
+      defaultMessage: 'Cost per vCPU per hour ($)',
+    }),
+    value: 0.0425,
+    description: i18n.translate(
+      'xpack.observability.profilingCostPervCPUPerHourUiSettingNameDescription',
+      {
+        defaultMessage: `Default average cost per CPU core per hour (Non-AWS instances only)`,
+      }
+    ),
+    schema: schema.number({ min: 0, max: 100 }),
+    requiresPageReload: true,
+  },
 };
+
+function throttlingDocsLink({ href }: { href: string }) {
+  return `<a href="${href}" target="_blank" rel="noopener noreferrer">${i18n.translate(
+    'xpack.observability.uiSettings.throttlingDocsLinkText',
+    { defaultMessage: 'read notice here.' }
+  )}</a>`;
+}
+
+function traceExplorerDocsLink({ href }: { href: string }) {
+  return `<a href="${href}" target="_blank">${i18n.translate(
+    'xpack.observability.uiSettings.traceExplorerDocsLinkText',
+    { defaultMessage: 'Learn more.' }
+  )}</a>`;
+}

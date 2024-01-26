@@ -20,11 +20,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import { UrlTemplate } from '../../types';
-import { LegacyIcon } from '../legacy_icon';
 import { outlinkEncoders } from '../../helpers/outlink_encoders';
 import { urlTemplateIconChoices } from '../../helpers/style_choices';
 import { isUrlTemplateValid, isKibanaUrl, replaceKibanaUrlParam } from '../../helpers/url_template';
 import { isEqual } from '../helpers';
+import { IconRenderer } from '../icon_renderer';
 
 export interface NewFormProps {
   onSubmit: (template: UrlTemplate) => void;
@@ -126,7 +126,12 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
       }
       extraAction={
         isUpdateForm(props) &&
-        props.initialTemplate.icon && <LegacyIcon asListIcon icon={props.initialTemplate.icon} />
+        props.initialTemplate.icon && (
+          <IconRenderer
+            icon={props.initialTemplate.icon}
+            className="gphLegacyIcon gphLegacyIcon--list"
+          />
+        )
       }
       className={classNames('gphUrlTemplateList__accordion', {
         'gphUrlTemplateList__accordion--isOpen': open,
@@ -271,10 +276,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
             )}
           >
             {urlTemplateIconChoices.map((icon) => (
-              <LegacyIcon
-                aria-label={icon.label}
-                key={icon.class}
-                selected={icon === currentTemplate.icon}
+              <IconRenderer
                 icon={icon}
                 onClick={() => {
                   if (currentTemplate.icon === icon) {
@@ -283,6 +285,9 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
                     setValue('icon', icon);
                   }
                 }}
+                className={classNames('gphLegacyIcon gphLegacyIcon--pickable', {
+                  'gphLegacyIcon--selected': icon === currentTemplate.icon,
+                })}
               />
             ))}
           </div>

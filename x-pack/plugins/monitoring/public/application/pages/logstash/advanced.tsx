@@ -12,7 +12,7 @@ import {
   EuiPageBody,
   EuiPanel,
   EuiSpacer,
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageSection,
   EuiFlexGrid,
   EuiFlexItem,
 } from '@elastic/eui';
@@ -21,9 +21,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ComponentProps } from '../../route_init';
 import { LogstashTemplate } from './logstash_template';
-// @ts-ignore
 import { DetailStatus } from '../../../components/logstash/detail_status';
-// @ts-ignore
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
 import { AlertsCallout } from '../../../alerts/callout';
 import { useCharts } from '../../hooks/use_charts';
@@ -132,7 +130,7 @@ export const LogStashNodeAdvancedPage: React.FC<ComponentProps> = ({ clusters })
           <EuiPanel>{data.nodeSummary && <DetailStatus stats={data.nodeSummary} />}</EuiPanel>
           <EuiSpacer size="m" />
           <AlertsCallout alerts={alerts} />
-          <EuiPageContent>
+          <EuiPageSection>
             <EuiFlexGrid columns={2} gutterSize="s">
               {metricsToShow.map((metric, index) => (
                 <EuiFlexItem key={index}>
@@ -146,7 +144,7 @@ export const LogStashNodeAdvancedPage: React.FC<ComponentProps> = ({ clusters })
                 </EuiFlexItem>
               ))}
             </EuiFlexGrid>
-          </EuiPageContent>
+          </EuiPageSection>
         </EuiPageBody>
       </EuiPage>
     </LogstashTemplate>

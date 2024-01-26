@@ -1,0 +1,19 @@
+{
+  "type": "plugin",
+  "id": "@kbn/expressions-explorer-plugin",
+  "owner": "@elastic/kibana-visualizations",
+  "plugin": {
+    "id": "expressionsExplorer",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "expressions",
+      "inspector",
+      "uiActions",
+      "developerExamples"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
+  }
+}

@@ -27,19 +27,9 @@ export const AXE_CONFIG = {
       selector: '[data-test-subj="comboBoxSearchInput"] *',
     },
     {
-      // EUI bug: https://github.com/elastic/eui/issues/4474
-      id: 'aria-required-parent',
-      selector: '[class=*"euiDataGridRowCell"][role="gridcell"]',
-    },
-    {
       // 3rd-party library; button has aria-describedby
       id: 'button-name',
       selector: '[data-rbd-drag-handle-draggable-id]',
-    },
-    {
-      // EUI bug: https://github.com/elastic/eui/issues/4536
-      id: 'duplicate-id',
-      selector: '.euiSuperDatePicker *',
     },
   ],
 };
@@ -53,6 +43,9 @@ export const AXE_OPTIONS = {
     },
     bypass: {
       enabled: false, // disabled because it's too flaky
+    },
+    'nested-interactive': {
+      enabled: false, // tracker here - https://github.com/elastic/kibana/issues/152494 disabled because we have too many failures on interactive controls
     },
   },
 };

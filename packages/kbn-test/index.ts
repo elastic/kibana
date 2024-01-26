@@ -13,7 +13,13 @@ export { startServersCli, startServers } from './src/functional_tests/start_serv
 
 // @internal
 export { runTestsCli, runTests } from './src/functional_tests/run_tests';
-
+export {
+  SamlSessionManager,
+  type SamlSessionManagerOptions,
+  type HostOptions,
+  readRolesFromResource,
+} from './src/auth';
+export { runElasticsearch, runKibanaServer } from './src/functional_tests/lib';
 export { getKibanaCliArg, getKibanaCliLoggers } from './src/functional_tests/lib/kibana_cli_args';
 
 export type {
@@ -30,12 +36,14 @@ export {
   createRemoteEsClientForFtrConfig,
 } from './src/es';
 
+export { kbnTestConfig } from './kbn_test_config';
+
 export {
-  kbnTestConfig,
   kibanaServerTestUser,
   kibanaTestUser,
   adminTestUser,
   systemIndicesSuperuser,
+  kibanaTestSuperuserServerless,
 } from './src/kbn';
 
 // @internal
@@ -49,8 +57,14 @@ export { getUrl } from './src/jest/get_url';
 
 export { runCheckJestConfigsCli } from './src/jest/run_check_jest_configs_cli';
 
+export { runCheckFtrCodeOwnersCli } from './src/functional_test_runner/run_check_ftr_code_owners';
+
 export { runJest } from './src/jest/run';
 
 export * from './src/kbn_archiver_cli';
 
 export * from './src/kbn_client';
+
+export * from './src/find_test_plugin_paths';
+
+export { getDockerFileMountPath } from '@kbn/es';

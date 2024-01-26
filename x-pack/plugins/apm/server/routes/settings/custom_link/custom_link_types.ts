@@ -16,7 +16,7 @@ import * as t from 'io-ts';
 //   SERVICE_ENVIRONMENT,
 //   TRANSACTION_NAME,
 //   TRANSACTION_TYPE,
-// } from '../../../../common/elasticsearch_fieldnames';
+// } from '../../../../common/es_fields/apm';
 
 export interface CustomLinkES {
   id?: string;

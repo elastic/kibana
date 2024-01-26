@@ -15,7 +15,9 @@ export const MonitorDetailsPageTitle = () => {
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}> {monitor?.name}</EuiFlexItem>
+      <EuiFlexItem grow={false} data-test-subj="monitorNameTitle">
+        {monitor?.name}
+      </EuiFlexItem>
       <EuiFlexItem>
         <MonitorSelector />
       </EuiFlexItem>

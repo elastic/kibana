@@ -13,11 +13,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageHeader,
+  EuiPageTemplate,
+  EuiSpacer,
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -86,6 +83,7 @@ const DataViewFieldEditorExample = ({ dataView, dataViewFieldEditor }: Props) =>
   const content = dataView ? (
     <>
       <EuiText data-test-subj="dataViewTitle">Data view: {dataView.title}</EuiText>
+      <EuiSpacer />
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiButton
@@ -118,6 +116,7 @@ const DataViewFieldEditorExample = ({ dataView, dataViewFieldEditor }: Props) =>
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="s" />
       <EuiInMemoryTable<DataViewField>
         items={fields}
         columns={columns}
@@ -136,14 +135,10 @@ const DataViewFieldEditorExample = ({ dataView, dataViewFieldEditor }: Props) =>
   );
 
   return (
-    <EuiPage>
-      <EuiPageBody>
-        <EuiPageHeader>Data view field editor demo</EuiPageHeader>
-        <EuiPageContent>
-          <EuiPageContentBody>{content}</EuiPageContentBody>
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+    <EuiPageTemplate offset={0}>
+      <EuiPageTemplate.Header pageTitle="Data view field editor demo" />
+      <EuiPageTemplate.Section>{content}</EuiPageTemplate.Section>
+    </EuiPageTemplate>
   );
 };
 

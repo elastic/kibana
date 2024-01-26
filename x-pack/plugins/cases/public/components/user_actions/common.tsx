@@ -9,26 +9,29 @@ import React from 'react';
 import type { EuiCommentProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import type { ConnectorUserAction, UserAction } from '../../../common/api';
-import { Actions } from '../../../common/api';
+import type { SnakeToCamelCase } from '../../../common/types';
+import type { UserActionAction, ConnectorUserAction } from '../../../common/types/domain';
+import { UserActionActions } from '../../../common/types/domain';
 import { UserActionTimestamp } from './timestamp';
-import type { UserActionBuilder, UserActionBuilderArgs, UserActionResponse } from './types';
+import type { UserActionBuilder, UserActionBuilderArgs } from './types';
 import { UserActionCopyLink } from './copy_link';
 import { UserActionMoveToReference } from './move_to_reference';
 import { HoverableUserWithAvatarResolver } from '../user_profiles/hoverable_user_with_avatar_resolver';
 
 interface Props {
-  userAction: UserActionResponse<ConnectorUserAction>;
+  userAction: SnakeToCamelCase<ConnectorUserAction>;
   handleOutlineComment: (id: string) => void;
 }
 
-const showMoveToReference = (action: UserAction, commentId: string | null): commentId is string =>
-  action === Actions.update && commentId != null;
+const showMoveToReference = (
+  action: UserActionAction,
+  commentId: string | null
+): commentId is string => action === UserActionActions.update && commentId != null;
 
 const CommentListActions: React.FC<Props> = React.memo(({ userAction, handleOutlineComment }) => (
   <EuiFlexGroup responsive={false}>
     <EuiFlexItem grow={false}>
-      <UserActionCopyLink id={userAction.actionId} />
+      <UserActionCopyLink id={userAction.id} />
     </EuiFlexItem>
     {showMoveToReference(userAction.action, userAction.commentId) && (
       <EuiFlexItem grow={false}>
@@ -59,7 +62,6 @@ export const createCommonUpdateUserActionBuilder = ({
   handleOutlineComment,
 }: BuilderArgs): ReturnType<UserActionBuilder> => {
   return {
-    // eslint-disable-next-line react/display-name
     build: () => [
       {
         username: (
@@ -69,13 +71,13 @@ export const createCommonUpdateUserActionBuilder = ({
           />
         ),
         event: label,
-        'data-test-subj': `${userAction.type}-${userAction.action}-action-${userAction.actionId}`,
+        'data-test-subj': `${userAction.type}-${userAction.action}-action-${userAction.id}`,
         timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
         timelineAvatar: icon,
         actions: (
           <EuiFlexGroup responsive={false}>
             <EuiFlexItem grow={false}>
-              <UserActionCopyLink id={userAction.actionId} />
+              <UserActionCopyLink id={userAction.id} />
             </EuiFlexItem>
             {showMoveToReference(userAction.action, userAction.commentId) && (
               <EuiFlexItem grow={false}>

@@ -76,16 +76,13 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
       },
       kibanaVersion,
     });
-
-    return {
-      ...this.specDefinitionsService.setup(),
-    };
   }
 
   start() {
-    return {
-      ...this.specDefinitionsService.start(),
-    };
+    const {
+      autocompleteDefinitions: { endpointsAvailability: endpointsAvailability },
+    } = this.ctx.config.get<ConsoleConfig>();
+    this.specDefinitionsService.start({ endpointsAvailability });
   }
 
   stop() {

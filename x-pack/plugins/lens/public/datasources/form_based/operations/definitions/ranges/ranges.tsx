@@ -83,7 +83,7 @@ export const rangeOperation: OperationDefinition<
   priority: 4, // Higher than terms, so numbers get histogram
   input: 'field',
   getErrorMessage: (layer, columnId, indexPattern) =>
-    getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
+    getInvalidFieldMessage(layer, columnId, indexPattern),
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
       type === 'number' &&
@@ -97,8 +97,8 @@ export const rangeOperation: OperationDefinition<
       };
     }
   },
-  getDefaultLabel: (column, indexPattern) =>
-    indexPattern.getFieldByName(column.sourceField)?.displayName ??
+  getDefaultLabel: (column, columns, indexPattern) =>
+    indexPattern?.getFieldByName(column.sourceField)?.displayName ??
     i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
       defaultMessage: 'Missing field',
     }),

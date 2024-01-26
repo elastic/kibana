@@ -38,7 +38,7 @@ export function mssqlMetricsSpecProvider(context: TutorialContext): TutorialSche
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-mssql.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/mssql.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/mssql.svg'),
     isBeta: false,
     artifacts: {
       dashboards: [
@@ -55,10 +55,10 @@ export function mssqlMetricsSpecProvider(context: TutorialContext): TutorialSche
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/mssql_metrics/screenshot.webp',
+    previewImagePath: context.staticAssets.getPluginAssetHref('/mssql_metrics/screenshot.webp'),
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['datastore'],
+    integrationBrowserCategories: ['datastore', 'observability'],
   };
 }

@@ -16,6 +16,7 @@ import {
   expectTextsInDocument,
   expectTextsNotInDocument,
 } from '../../../../utils/test_helpers';
+import { noop } from 'lodash';
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
@@ -45,7 +46,10 @@ describe('Custom links', () => {
     });
 
     const component = render(
-      <CustomLinkMenuSection transaction={transaction} />,
+      <CustomLinkMenuSection
+        transaction={transaction}
+        openCreateCustomLinkFlyout={noop}
+      />,
       { wrapper: Wrapper }
     );
 
@@ -63,7 +67,10 @@ describe('Custom links', () => {
     });
 
     const { getByTestId } = render(
-      <CustomLinkMenuSection transaction={transaction} />,
+      <CustomLinkMenuSection
+        transaction={transaction}
+        openCreateCustomLinkFlyout={noop}
+      />,
       { wrapper: Wrapper }
     );
     expect(getByTestId('loading-spinner')).toBeInTheDocument();
@@ -86,7 +93,10 @@ describe('Custom links', () => {
     });
 
     const component = render(
-      <CustomLinkMenuSection transaction={transaction} />,
+      <CustomLinkMenuSection
+        transaction={transaction}
+        openCreateCustomLinkFlyout={noop}
+      />,
       { wrapper: Wrapper }
     );
     expectTextsInDocument(component, ['foo', 'bar', 'baz']);
@@ -110,7 +120,10 @@ describe('Custom links', () => {
     });
 
     const component = render(
-      <CustomLinkMenuSection transaction={transaction} />,
+      <CustomLinkMenuSection
+        transaction={transaction}
+        openCreateCustomLinkFlyout={noop}
+      />,
       { wrapper: Wrapper }
     );
 
@@ -134,7 +147,10 @@ describe('Custom links', () => {
       });
 
       const component = render(
-        <CustomLinkMenuSection transaction={transaction} />,
+        <CustomLinkMenuSection
+          transaction={transaction}
+          openCreateCustomLinkFlyout={noop}
+        />,
         { wrapper: Wrapper }
       );
 
@@ -159,7 +175,10 @@ describe('Custom links', () => {
       });
 
       const component = render(
-        <CustomLinkMenuSection transaction={transaction} />,
+        <CustomLinkMenuSection
+          transaction={transaction}
+          openCreateCustomLinkFlyout={noop}
+        />,
         { wrapper: Wrapper }
       );
       expectTextsInDocument(component, ['Create']);

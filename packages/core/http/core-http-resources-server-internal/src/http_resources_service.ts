@@ -85,12 +85,21 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
         route: RouteConfig<P, Q, B, 'get'>,
         handler: HttpResourcesRequestHandler<P, Q, B, Context>
       ) => {
-        return router.get<P, Q, B>(route, (context, request, response) => {
-          return handler(context as Context, request, {
-            ...response,
-            ...this.createResponseToolkit(deps, context, request, response),
-          });
-        });
+        return router.get<P, Q, B>(
+          {
+            ...route,
+            options: {
+              access: 'public',
+              ...route.options,
+            },
+          },
+          (context, request, response) => {
+            return handler(context as Context, request, {
+              ...response,
+              ...this.createResponseToolkit(deps, context, request, response),
+            });
+          }
+        );
       },
     };
   }
@@ -101,12 +110,11 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
     request: KibanaRequest,
     response: KibanaResponseFactory
   ): HttpResourcesServiceToolkit {
-    const cspHeader = deps.http.csp.header;
     return {
       async renderCoreApp(options: HttpResourcesRenderOptions = {}) {
         const apmConfig = getApmConfig(request.url.pathname);
         const { uiSettings } = await context.core;
-        const body = await deps.rendering.render(request, uiSettings.client, {
+        const body = await deps.rendering.render(request, uiSettings, {
           isAnonymousPage: false,
           vars: {
             apmConfig,
@@ -116,13 +124,13 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
 
         return response.ok({
           body,
-          headers: { ...options.headers, 'content-security-policy': cspHeader },
+          headers: options.headers,
         });
       },
       async renderAnonymousCoreApp(options: HttpResourcesRenderOptions = {}) {
         const apmConfig = getApmConfig(request.url.pathname);
         const { uiSettings } = await context.core;
-        const body = await deps.rendering.render(request, uiSettings.client, {
+        const body = await deps.rendering.render(request, uiSettings, {
           isAnonymousPage: true,
           vars: {
             apmConfig,
@@ -132,7 +140,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
 
         return response.ok({
           body,
-          headers: { ...options.headers, 'content-security-policy': cspHeader },
+          headers: options.headers,
         });
       },
       renderHtml(options: HttpResourcesResponseOptions) {
@@ -141,7 +149,6 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
           headers: {
             ...options.headers,
             'content-type': 'text/html',
-            'content-security-policy': cspHeader,
           },
         });
       },
@@ -151,7 +158,6 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
           headers: {
             ...options.headers,
             'content-type': 'text/javascript',
-            'content-security-policy': cspHeader,
           },
         });
       },
@@ -161,7 +167,6 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
           headers: {
             ...options.headers,
             'content-type': 'text/css',
-            'content-security-policy': cspHeader,
           },
         });
       },

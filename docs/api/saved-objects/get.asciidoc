@@ -4,7 +4,15 @@
 <titleabbrev>Get object</titleabbrev>
 ++++
 
-experimental[] Retrieve a single {kib} saved object by ID.
+deprecated::[8.7.0, To be removed in an upcoming version]
+
+Retrieve a single {kib} saved object by ID.
+
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/packages/core/saved-objects/docs/openapi[open API specification].
+====
 
 [[saved-objects-api-get-request]]
 ==== Request

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
-import { AlertingPlugin } from '@kbn/alerting-plugin/server';
+import type { Logger } from '@kbn/core/server';
+import type { AlertingPlugin } from '@kbn/alerting-plugin/server';
+import type { MlFeatures } from '../../../common/constants/app';
 import { registerAnomalyDetectionAlertType } from './register_anomaly_detection_alert_type';
-import { SharedServices } from '../../shared_services';
+import type { SharedServices } from '../../shared_services';
 import { registerJobsMonitoringRuleType } from './register_jobs_monitoring_rule_type';
-import { MlServicesProviders } from '../../shared_services/shared_services';
+import type { MlServicesProviders } from '../../shared_services/shared_services';
 
 export interface RegisterAlertParams {
   alerting: AlertingPlugin['setup'];
@@ -19,7 +20,9 @@ export interface RegisterAlertParams {
   mlServicesProviders: MlServicesProviders;
 }
 
-export function registerMlAlerts(params: RegisterAlertParams) {
-  registerAnomalyDetectionAlertType(params);
-  registerJobsMonitoringRuleType(params);
+export function registerMlAlerts(alertParams: RegisterAlertParams, enabledFeatures: MlFeatures) {
+  if (enabledFeatures.ad === true) {
+    registerAnomalyDetectionAlertType(alertParams);
+    registerJobsMonitoringRuleType(alertParams);
+  }
 }

@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+/* eslint-disable max-classes-per-file */
+
 import type seedrandom from 'seedrandom';
 import { assertNever } from '@kbn/std';
 import type {
   GetAgentPoliciesResponseItem,
   GetPackagesResponse,
+  GetInfoResponse,
   EsAssetReference,
   KibanaAssetReference,
+  AssetsGroupedByServiceByType,
 } from '@kbn/fleet-plugin/common';
 import { agentPolicyStatuses } from '@kbn/fleet-plugin/common';
+import { clone } from 'lodash';
 import { EndpointMetadataGenerator } from './data_generators/endpoint_metadata_generator';
 import type {
   AlertEvent,
@@ -286,17 +291,17 @@ export function getTreeOptionsWithDef(options?: TreeOptions): TreeOptionDefaults
   };
 }
 
-const metadataDefaultDataStream = {
+const metadataDefaultDataStream = () => ({
   type: 'metrics',
   dataset: 'endpoint.metadata',
   namespace: 'default',
-};
+});
 
-const policyDefaultDataStream = {
+const policyDefaultDataStream = () => ({
   type: 'metrics',
   dataset: 'endpoint.policy',
   namespace: 'default',
-};
+});
 
 const eventsDefaultDataStream = {
   type: 'logs',
@@ -326,7 +331,14 @@ const alertsDefaultDataStream = {
  *        contain shared data structures.
  */
 export class EndpointDocGenerator extends BaseDataGenerator {
-  commonInfo: CommonHostInfo;
+  /**
+   * DO NOT ACCESS THIS PROPERTY DIRECTORY.
+   * Should only be accessed from the `getter/setter` property for `commonInfo` defined further
+   * below.
+   * @deprecated (just to ensure that its obvious not to access it directory)
+   */
+  _commonInfo: CommonHostInfo;
+
   sequence: number = 0;
 
   private readonly metadataGenerator: EndpointMetadataGenerator;
@@ -343,14 +355,43 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   ) {
     super(seed);
     this.metadataGenerator = new MetadataGenerator(seed);
-    this.commonInfo = this.createHostData();
+    this._commonInfo = this.createHostData();
+  }
+
+  /**
+   * Get a custom `EndpointDocGenerator` subclass that customizes certain fields based on input arguments
+   */
+  public static custom({
+    CustomMetadataGenerator,
+  }: Partial<{
+    CustomMetadataGenerator: typeof EndpointMetadataGenerator;
+  }> = {}): typeof EndpointDocGenerator {
+    return class extends EndpointDocGenerator {
+      constructor(...options: ConstructorParameters<typeof EndpointDocGenerator>) {
+        if (CustomMetadataGenerator) {
+          options[1] = CustomMetadataGenerator;
+        }
+
+        super(...options);
+      }
+    };
+  }
+
+  // Ensure that `this.commonInfo` is returned cloned data
+  protected get commonInfo() {
+    return clone(this._commonInfo);
+  }
+  protected set commonInfo(newInfo) {
+    this._commonInfo = newInfo;
   }
 
   /**
    * Creates new random IP addresses for the host to simulate new DHCP assignment
    */
   public updateHostData() {
-    this.commonInfo.host.ip = this.randomArray(3, () => this.randomIP());
+    const newInfo = this.commonInfo;
+    newInfo.host.ip = this.randomArray(3, () => this.randomIP());
+    this.commonInfo = newInfo;
   }
 
   /**
@@ -358,8 +399,10 @@ export class EndpointDocGenerator extends BaseDataGenerator {
    * of random choices and gives it a random policy response status.
    */
   public updateHostPolicyData() {
-    this.commonInfo.Endpoint.policy.applied = this.randomChoice(APPLIED_POLICIES);
-    this.commonInfo.Endpoint.policy.applied.status = this.randomChoice(POLICY_RESPONSE_STATUSES);
+    const newInfo = this.commonInfo;
+    newInfo.Endpoint.policy.applied = this.randomChoice(APPLIED_POLICIES);
+    newInfo.Endpoint.policy.applied.status = this.randomChoice(POLICY_RESPONSE_STATUSES);
+    this.commonInfo = newInfo;
   }
 
   /**
@@ -387,7 +430,9 @@ export class EndpointDocGenerator extends BaseDataGenerator {
 
   private createHostData(): CommonHostInfo {
     const { agent, elastic, host, Endpoint } = this.metadataGenerator.generate({
-      Endpoint: { policy: { applied: this.randomChoice(APPLIED_POLICIES) } },
+      Endpoint: {
+        policy: { applied: this.randomChoice(APPLIED_POLICIES) },
+      },
     });
 
     return { agent, elastic, host, Endpoint };
@@ -400,13 +445,15 @@ export class EndpointDocGenerator extends BaseDataGenerator {
    */
   public generateHostMetadata(
     ts = new Date().getTime(),
-    metadataDataStream = metadataDefaultDataStream
+    metadataDataStream = metadataDefaultDataStream()
   ): HostMetadata {
-    return this.metadataGenerator.generate({
-      '@timestamp': ts,
-      data_stream: metadataDataStream,
-      ...this.commonInfo,
-    });
+    return clone(
+      this.metadataGenerator.generate({
+        '@timestamp': ts,
+        data_stream: metadataDataStream,
+        ...this.commonInfo,
+      })
+    );
   }
 
   /**
@@ -498,6 +545,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
           entity_id: sessionEntryLeader,
           name: 'fake entry',
           pid: Math.floor(Math.random() * 1000),
+          start: [new Date(0).toISOString()],
         },
         session_leader: {
           entity_id: sessionEntryLeader,
@@ -536,6 +584,10 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         },
       },
       dll: this.getAlertsDefaultDll(),
+      user: {
+        domain: this.randomString(10),
+        name: this.randomString(10),
+      },
     };
   }
 
@@ -638,6 +690,10 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         },
       },
       dll: this.getAlertsDefaultDll(),
+      user: {
+        domain: this.randomString(10),
+        name: this.randomString(10),
+      },
     };
 
     // shellcode_thread memory alert have an additional process field
@@ -840,6 +896,10 @@ export class EndpointDocGenerator extends BaseDataGenerator {
         },
       },
       dll: this.getAlertsDefaultDll(),
+      user: {
+        domain: this.randomString(10),
+        name: this.randomString(10),
+      },
     };
     return newAlert;
   }
@@ -926,6 +986,9 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       ...detailRecordForEventType,
       event: {
         category: options.eventCategory ? options.eventCategory : ['process'],
+        outcome: options.eventCategory?.includes('authentication')
+          ? this.randomChoice(['success', 'failure'])
+          : '',
         kind: 'event',
         type: options.eventType ? options.eventType : ['start'],
         id: this.seededUUIDv4(),
@@ -948,6 +1011,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
           entity_id: sessionEntryLeader,
           name: 'fake entry',
           pid: Math.floor(Math.random() * 1000),
+          start: [new Date(0).toISOString()],
         },
         session_leader: {
           entity_id: sessionEntryLeader,
@@ -1573,6 +1637,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
       updated_at: '2020-07-22T16:36:49.196Z',
       updated_by: 'elastic',
       agents: 0,
+      is_protected: false,
     };
   }
 
@@ -1658,12 +1723,96 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   }
 
   /**
+   * Generate a Fleet EPM Package for Endpoint
+   */
+  public generateEpmPackageInfo(): GetInfoResponse['item'] {
+    return {
+      name: 'endpoint',
+      title: 'Elastic Endpoint',
+      version: '0.5.0',
+      description: 'This is the Elastic Endpoint package.',
+      type: 'integration',
+      download: '/epr/endpoint/endpoint-0.5.0.tar.gz',
+      path: '/package/endpoint/0.5.0',
+      format_version: '',
+      owner: { github: '' },
+      latestVersion: '',
+      assets: {} as AssetsGroupedByServiceByType,
+      icons: [
+        {
+          path: '/package/endpoint/0.5.0/img/logo-endpoint-64-color.svg',
+          src: '/img/logo-endpoint-64-color.svg',
+          size: '16x16',
+          type: 'image/svg+xml',
+        },
+      ],
+      status: 'installed',
+      release: 'ga',
+      savedObject: {
+        type: 'epm-packages',
+        id: 'endpoint',
+        attributes: {
+          installed_kibana: [
+            { id: '826759f0-7074-11ea-9bc8-6b38f4d29a16', type: 'dashboard' },
+            { id: '1cfceda0-728b-11ea-9bc8-6b38f4d29a16', type: 'visualization' },
+            { id: '1e525190-7074-11ea-9bc8-6b38f4d29a16', type: 'visualization' },
+            { id: '55387750-729c-11ea-9bc8-6b38f4d29a16', type: 'visualization' },
+            { id: '92b1edc0-706a-11ea-9bc8-6b38f4d29a16', type: 'visualization' },
+            { id: 'a3a3bd10-706b-11ea-9bc8-6b38f4d29a16', type: 'map' },
+          ] as KibanaAssetReference[],
+          installed_es: [
+            { id: 'logs-endpoint.alerts', type: 'index_template' },
+            { id: 'events-endpoint', type: 'index_template' },
+            { id: 'logs-endpoint.events.file', type: 'index_template' },
+            { id: 'logs-endpoint.events.library', type: 'index_template' },
+            { id: 'metrics-endpoint.metadata', type: 'index_template' },
+            { id: 'metrics-endpoint.metadata_mirror', type: 'index_template' },
+            { id: 'logs-endpoint.events.network', type: 'index_template' },
+            { id: 'metrics-endpoint.policy', type: 'index_template' },
+            { id: 'logs-endpoint.events.process', type: 'index_template' },
+            { id: 'logs-endpoint.events.registry', type: 'index_template' },
+            { id: 'logs-endpoint.events.security', type: 'index_template' },
+            { id: 'metrics-endpoint.telemetry', type: 'index_template' },
+          ] as EsAssetReference[],
+          package_assets: [],
+          es_index_patterns: {
+            alerts: 'logs-endpoint.alerts-*',
+            events: 'events-endpoint-*',
+            file: 'logs-endpoint.events.file-*',
+            library: 'logs-endpoint.events.library-*',
+            metadata: 'metrics-endpoint.metadata-*',
+            metadata_mirror: 'metrics-endpoint.metadata_mirror-*',
+            network: 'logs-endpoint.events.network-*',
+            policy: 'metrics-endpoint.policy-*',
+            process: 'logs-endpoint.events.process-*',
+            registry: 'logs-endpoint.events.registry-*',
+            security: 'logs-endpoint.events.security-*',
+            telemetry: 'metrics-endpoint.telemetry-*',
+          },
+          name: 'endpoint',
+          version: '0.5.0',
+          internal: false,
+          install_version: '0.5.0',
+          install_status: 'installed',
+          install_started_at: '2020-06-24T14:41:23.098Z',
+          install_source: 'registry',
+          keep_policies_up_to_date: false,
+          verification_status: 'unknown',
+        },
+        references: [],
+        updated_at: '2020-06-24T14:41:23.098Z',
+        version: 'Wzc0LDFd',
+      },
+    };
+  }
+
+  /**
    * Generates a Host Policy response message
    */
   public generatePolicyResponse({
     ts = new Date().getTime(),
     allStatus,
-    policyDataStream = policyDefaultDataStream,
+    policyDataStream = policyDefaultDataStream(),
   }: {
     ts?: number;
     allStatus?: HostPolicyResponseActionStatus;
@@ -1814,7 +1963,8 @@ export class EndpointDocGenerator extends BaseDataGenerator {
                   status: status(),
                 },
               },
-            },
+              // TODO:PT refactor to use EndpointPolicyResponse Generator
+            } as HostPolicyResponse['Endpoint']['policy']['applied']['response'],
             artifacts: {
               global: {
                 version: '1.4.0',

@@ -6,40 +6,66 @@
  */
 
 import React, { FC, useState } from 'react';
-import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { checkPermission } from '../capabilities/check_capabilities';
+import { EuiLink, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
+import { useStorage } from '@kbn/ml-local-storage';
+import { OverviewStatsBar } from '../components/collapsible_panel/collapsible_panel';
+import { ML_PAGES } from '../../../common/constants/locator';
+import { ML_OVERVIEW_PANELS, MlStorageKey, TMlStorageMapped } from '../../../common/types/storage';
+import { CollapsiblePanel } from '../components/collapsible_panel';
+import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../ml_nodes_check';
-import { GettingStartedCallout } from './components/getting_started_callout';
 import { OverviewContent } from './components/content';
 import { NodeAvailableWarning } from '../components/node_available_warning';
 import { JobsAwaitingNodeWarning } from '../components/jobs_awaiting_node_warning';
 import { SavedObjectsWarning } from '../components/saved_objects_warning';
 import { UpgradeWarning } from '../components/upgrade';
 import { HelpMenu } from '../components/help_menu';
-import { useMlKibana, useTimefilter } from '../contexts/kibana';
-import { NodesList } from '../trained_models/nodes_overview';
-import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
+import { useMlKibana, useMlLink } from '../contexts/kibana';
+import { NodesList } from '../memory_usage/nodes_overview';
 import { MlPageHeader } from '../components/page_header';
+import { PageTitle } from '../components/page_title';
+import { getMlNodesCount } from '../ml_nodes_check/check_ml_nodes';
+
+export const overviewPanelDefaultState = Object.freeze({
+  nodes: true,
+  adJobs: true,
+  dfaJobs: true,
+});
 
 export const OverviewPage: FC = () => {
-  const canViewMlNodes = checkPermission('canViewMlNodes');
+  const [canViewMlNodes, canCreateJob] = usePermissionCheck(['canViewMlNodes', 'canCreateJob']);
 
-  const disableCreateAnomalyDetectionJob = !checkPermission('canCreateJob') || !mlNodesAvailable();
+  const disableCreateAnomalyDetectionJob = !canCreateJob || !mlNodesAvailable();
   const {
     services: { docLinks },
   } = useMlKibana();
   const helpLink = docLinks.links.ml.guide;
+
+  const viewNodesLink = useMlLink({
+    page: ML_PAGES.MEMORY_USAGE,
+  });
 
   const timefilter = useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true });
 
   const [adLazyJobCount, setAdLazyJobCount] = useState(0);
   const [dfaLazyJobCount, setDfaLazyJobCount] = useState(0);
 
+  const [panelsState, setPanelsState] = useStorage<
+    MlStorageKey,
+    TMlStorageMapped<typeof ML_OVERVIEW_PANELS>
+  >(ML_OVERVIEW_PANELS, overviewPanelDefaultState);
+
   return (
     <div>
       <MlPageHeader>
-        <FormattedMessage id="xpack.ml.overview.overviewLabel" defaultMessage="Overview" />
+        <PageTitle
+          title={i18n.translate('xpack.ml.overview.overviewLabel', {
+            defaultMessage: 'Overview',
+          })}
+        />
       </MlPageHeader>
       <NodeAvailableWarning />
       <JobsAwaitingNodeWarning jobCount={adLazyJobCount + dfaLazyJobCount} />
@@ -55,13 +81,38 @@ export const OverviewPage: FC = () => {
       />
       <UpgradeWarning />
 
-      <GettingStartedCallout />
-
       {canViewMlNodes ? (
         <>
-          <EuiPanel hasShadow={false} hasBorder>
+          <CollapsiblePanel
+            isOpen={panelsState.nodes}
+            onToggle={(update) => {
+              setPanelsState({ ...panelsState, nodes: update });
+            }}
+            header={
+              <FormattedMessage id="xpack.ml.overview.nodesPanel.header" defaultMessage="Nodes" />
+            }
+            headerItems={[
+              <OverviewStatsBar
+                inputStats={[
+                  {
+                    label: i18n.translate('xpack.ml.overview.nodesPanel.totalNodesLabel', {
+                      defaultMessage: 'Total',
+                    }),
+                    value: getMlNodesCount(),
+                    'data-test-subj': 'mlTotalNodesCount',
+                  },
+                ]}
+                dataTestSub={'mlOverviewAnalyticsStatsBar'}
+              />,
+              <EuiLink href={viewNodesLink}>
+                {i18n.translate('xpack.ml.overview.nodesPanel.viewNodeLink', {
+                  defaultMessage: 'View nodes',
+                })}
+              </EuiLink>,
+            ]}
+          >
             <NodesList compactView />
-          </EuiPanel>
+          </CollapsiblePanel>
           <EuiSpacer size="m" />
         </>
       ) : null}

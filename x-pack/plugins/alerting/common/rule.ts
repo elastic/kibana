@@ -10,11 +10,18 @@ import type {
   SavedObjectAttributes,
   SavedObjectsResolveResponse,
 } from '@kbn/core/server';
+import type { Filter } from '@kbn/es-query';
+import { IsoWeekday } from './iso_weekdays';
 import { RuleNotifyWhenType } from './rule_notify_when_type';
 import { RuleSnooze } from './rule_snooze_type';
 
+export type { ActionVariable } from '@kbn/alerting-types';
+
 export type RuleTypeState = Record<string, unknown>;
 export type RuleTypeParams = Record<string, unknown>;
+
+// rule type defined alert fields to persist in alerts index
+export type RuleAlertData = Record<string, unknown>;
 
 export interface IntervalSchedule extends SavedObjectAttributes {
   interval: string;
@@ -32,6 +39,15 @@ export const RuleExecutionStatusValues = [
 ] as const;
 export type RuleExecutionStatuses = typeof RuleExecutionStatusValues[number];
 
+export const RuleLastRunOutcomeValues = ['succeeded', 'warning', 'failed'] as const;
+export type RuleLastRunOutcomes = typeof RuleLastRunOutcomeValues[number];
+
+export const RuleLastRunOutcomeOrderMap: Record<RuleLastRunOutcomes, number> = {
+  succeeded: 0,
+  warning: 10,
+  failed: 20,
+};
+
 export enum RuleExecutionStatusErrorReasons {
   Read = 'read',
   Decrypt = 'decrypt',
@@ -46,6 +62,7 @@ export enum RuleExecutionStatusErrorReasons {
 export enum RuleExecutionStatusWarningReasons {
   MAX_EXECUTABLE_ACTIONS = 'maxExecutableActions',
   MAX_ALERTS = 'maxAlerts',
+  MAX_QUEUED_ACTIONS = 'maxQueuedActions',
 }
 
 export type RuleAlertingOutcome = 'failure' | 'success' | 'unknown' | 'warning';
@@ -67,19 +84,54 @@ export interface RuleExecutionStatus {
 export type RuleActionParams = SavedObjectAttributes;
 export type RuleActionParam = SavedObjectAttribute;
 
+export interface RuleActionFrequency extends SavedObjectAttributes {
+  summary: boolean;
+  notifyWhen: RuleNotifyWhenType;
+  throttle: string | null;
+}
+
+export interface AlertsFilterTimeframe extends SavedObjectAttributes {
+  days: IsoWeekday[];
+  timezone: string;
+  hours: {
+    start: string;
+    end: string;
+  };
+}
+
+export interface AlertsFilter extends SavedObjectAttributes {
+  query?: {
+    kql: string;
+    filters: Filter[];
+    dsl?: string; // This fields is generated in the code by using "kql", therefore it's not optional but defined as optional to avoid modifying a lot of files in different plugins
+  };
+  timeframe?: AlertsFilterTimeframe;
+}
+
+export type RuleActionAlertsFilterProperty = AlertsFilterTimeframe | RuleActionParam;
+
 export interface RuleAction {
+  uuid?: string;
   group: string;
   id: string;
   actionTypeId: string;
   params: RuleActionParams;
+  frequency?: RuleActionFrequency;
+  alertsFilter?: AlertsFilter;
+  useAlertDataForTemplate?: boolean;
 }
 
-export interface RuleAggregations {
-  alertExecutionStatus: { [status: string]: number };
-  ruleEnabledStatus: { enabled: number; disabled: number };
-  ruleMutedStatus: { muted: number; unmuted: number };
-  ruleSnoozedStatus: { snoozed: number };
-  ruleTags: string[];
+export interface RuleLastRun {
+  outcome: RuleLastRunOutcomes;
+  outcomeOrder?: number;
+  warning?: RuleExecutionStatusErrorReasons | RuleExecutionStatusWarningReasons | null;
+  outcomeMsg?: string[] | null;
+  alertsCount: {
+    active?: number | null;
+    new?: number | null;
+    recovered?: number | null;
+    ignored?: number | null;
+  };
 }
 
 export interface MappedParamsProperties {
@@ -88,6 +140,10 @@ export interface MappedParamsProperties {
 }
 
 export type MappedParams = SavedObjectAttributes & MappedParamsProperties;
+
+export interface NotificationDelay {
+  active: number;
+}
 
 export interface Rule<Params extends RuleTypeParams = never> {
   id: string;
@@ -100,27 +156,53 @@ export interface Rule<Params extends RuleTypeParams = never> {
   actions: RuleAction[];
   params: Params;
   mapped_params?: MappedParams;
-  scheduledTaskId?: string;
+  scheduledTaskId?: string | null;
   createdBy: string | null;
   updatedBy: string | null;
   createdAt: Date;
   updatedAt: Date;
   apiKey: string | null;
   apiKeyOwner: string | null;
-  throttle: string | null;
+  apiKeyCreatedByUser?: boolean | null;
+  throttle?: string | null;
   muteAll: boolean;
-  notifyWhen: RuleNotifyWhenType | null;
+  notifyWhen?: RuleNotifyWhenType | null;
   mutedInstanceIds: string[];
   executionStatus: RuleExecutionStatus;
   monitoring?: RuleMonitoring;
   snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API
   activeSnoozes?: string[];
   isSnoozedUntil?: Date | null;
+  lastRun?: RuleLastRun | null;
+  nextRun?: Date | null;
+  revision: number;
+  running?: boolean | null;
+  viewInAppRelativeUrl?: string;
+  notificationDelay?: NotificationDelay;
 }
 
-export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<Rule<Params>, 'apiKey'>;
+export interface SanitizedAlertsFilter extends AlertsFilter {
+  query?: {
+    kql: string;
+    filters: Filter[];
+  };
+  timeframe?: AlertsFilterTimeframe;
+}
+
+export type SanitizedRuleAction = Omit<RuleAction, 'alertsFilter'> & {
+  alertsFilter?: SanitizedAlertsFilter;
+};
+
+export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
+  Rule<Params>,
+  'apiKey' | 'actions'
+> & { actions: SanitizedRuleAction[] };
+
 export type ResolvedSanitizedRule<Params extends RuleTypeParams = never> = SanitizedRule<Params> &
-  Omit<SavedObjectsResolveResponse, 'saved_object'>;
+  Omit<SavedObjectsResolveResponse, 'saved_object'> & {
+    outcome: string;
+    alias_target_id?: string;
+  };
 
 export type SanitizedRuleConfig = Pick<
   SanitizedRule,
@@ -137,6 +219,9 @@ export type SanitizedRuleConfig = Pick<
   | 'updatedAt'
   | 'throttle'
   | 'notifyWhen'
+  | 'muteAll'
+  | 'revision'
+  | 'snoozeSchedule'
 > & {
   producer: string;
   ruleTypeId: string;
@@ -164,27 +249,38 @@ export interface AlertsHealth {
   };
 }
 
-export interface ActionVariable {
-  name: string;
-  description: string;
-  deprecated?: boolean;
-  useWithTripleBracesInTemplates?: boolean;
-}
-
 export interface RuleMonitoringHistory extends SavedObjectAttributes {
   success: boolean;
   timestamp: number;
   duration?: number;
+  outcome?: RuleLastRunOutcomes;
 }
 
-export interface RuleMonitoring extends SavedObjectAttributes {
-  execution: {
+export interface RuleMonitoringCalculatedMetrics extends SavedObjectAttributes {
+  p50?: number;
+  p95?: number;
+  p99?: number;
+  success_ratio: number;
+}
+
+export interface RuleMonitoringLastRunMetrics extends SavedObjectAttributes {
+  duration?: number;
+  total_search_duration_ms?: number | null;
+  total_indexing_duration_ms?: number | null;
+  total_alerts_detected?: number | null;
+  total_alerts_created?: number | null;
+  gap_duration_s?: number | null;
+}
+
+export interface RuleMonitoringLastRun extends SavedObjectAttributes {
+  timestamp: string;
+  metrics: RuleMonitoringLastRunMetrics;
+}
+
+export interface RuleMonitoring {
+  run: {
     history: RuleMonitoringHistory[];
-    calculated_metrics: {
-      p50?: number;
-      p95?: number;
-      p99?: number;
-      success_ratio: number;
-    };
+    calculated_metrics: RuleMonitoringCalculatedMetrics;
+    last_run: RuleMonitoringLastRun;
   };
 }

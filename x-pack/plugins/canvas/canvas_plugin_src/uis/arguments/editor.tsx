@@ -8,7 +8,7 @@
 import React, { useState, useEffect, useCallback, FC } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { LangModuleType } from '@kbn/monaco';
-import { CodeEditorField } from '@kbn/kibana-react-plugin/public';
+import { CodeEditorField } from '@kbn/code-editor';
 import usePrevious from 'react-use/lib/usePrevious';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 import { ArgumentStrings } from '../../../i18n';
@@ -52,7 +52,7 @@ const EditorArg: FC<EditorArgProps> = ({ argValue, typeInstance, onValueChange, 
   const { language } = typeInstance?.options ?? {};
 
   return (
-    <EuiFormRow display="rowCompressed">
+    <EuiFormRow display="rowCompressed" data-test-subj="canvasCodeEditorField">
       <CodeEditorField
         languageId={language ?? ''}
         value={value}

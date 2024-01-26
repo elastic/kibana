@@ -1,22 +1,36 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types"
   },
-  "include": [
-    ".storybook/**/*",
-    "common/**/*",
-    "public/**/*",
-    "server/**/*"
-  ],
+  "include": ["*.ts", ".storybook/**/*", "common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../inspector/tsconfig.json" },
-    { "path": "../saved_objects/tsconfig.json" },
-    { "path": "../kibana_utils/tsconfig.json" },
-    { "path": "../kibana_react/tsconfig.json" },
-    { "path": "../ui_actions/tsconfig.json" },
-  ]
+    "@kbn/core",
+    "@kbn/inspector-plugin",
+    "@kbn/saved-objects-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/i18n-react",
+    "@kbn/storybook",
+    "@kbn/utility-types",
+    "@kbn/es-query",
+    "@kbn/core-theme-browser",
+    "@kbn/i18n",
+    "@kbn/test-jest-helpers",
+    "@kbn/std",
+    "@kbn/expressions-plugin",
+    "@kbn/saved-objects-management-plugin",
+    "@kbn/saved-objects-tagging-oss-plugin",
+    "@kbn/saved-objects-finder-plugin",
+    "@kbn/analytics",
+    "@kbn/usage-collection-plugin",
+    "@kbn/content-management-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/presentation-panel-plugin",
+    "@kbn/presentation-publishing",
+    "@kbn/presentation-containers",
+    "@kbn/presentation-library",
+  ],
+  "exclude": ["target/**/*"]
 }

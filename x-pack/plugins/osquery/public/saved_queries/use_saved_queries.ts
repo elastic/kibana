@@ -7,7 +7,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 
-import type { SavedObjectsFindResponse } from '@kbn/core/public';
+import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { SAVED_QUERIES_ID } from './constants';
@@ -24,7 +24,10 @@ export const useSavedQueries = ({
   const setErrorToast = useErrorToast();
 
   return useQuery<
-    Omit<SavedObjectsFindResponse, 'savedObjects'> & {
+    {
+      total: number;
+      perPage: number;
+      page: number;
       data: SavedQuerySO[];
     },
     { body: { error: string; message: string } }
@@ -32,6 +35,7 @@ export const useSavedQueries = ({
     [SAVED_QUERIES_ID, { pageIndex, pageSize, sortField, sortOrder }],
     () =>
       http.get('/api/osquery/saved_queries', {
+        version: API_VERSIONS.public.v1,
         query: { page: pageIndex + 1, pageSize, sort: sortField, sortOrder },
       }),
     {

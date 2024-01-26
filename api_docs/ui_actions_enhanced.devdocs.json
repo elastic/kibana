@@ -265,10 +265,10 @@
           },
           "<Config, ExecutionContext, FactoryContext> implements Omit<",
           {
-            "pluginId": "uiActions",
-            "scope": "public",
-            "docId": "kibUiActionsPluginApi",
-            "section": "def-public.Presentable",
+            "pluginId": "@kbn/ui-actions-browser",
+            "scope": "common",
+            "docId": "kibKbnUiActionsBrowserPluginApi",
+            "section": "def-common.Presentable",
             "text": "Presentable"
           },
           "<FactoryContext>, \"getHref\">,",
@@ -370,35 +370,6 @@
             "label": "MenuItem",
             "description": [],
             "signature": [
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.UiComponent",
-                "text": "UiComponent"
-              },
-              "<",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionMenuItemProps",
-                "text": "ActionMenuItemProps"
-              },
-              "<FactoryContext>> | undefined"
-            ],
-            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "uiActionsEnhanced",
-            "id": "def-public.ActionFactory.ReactMenuItem",
-            "type": "Function",
-            "tags": [],
-            "label": "ReactMenuItem",
-            "description": [],
-            "signature": [
               "React.FC<",
               {
                 "pluginId": "uiActions",
@@ -407,7 +378,7 @@
                 "section": "def-public.ActionMenuItemProps",
                 "text": "ActionMenuItemProps"
               },
-              "<FactoryContext>> | undefined"
+              "<any>> | undefined"
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false,
@@ -419,38 +390,6 @@
             "type": "Function",
             "tags": [],
             "label": "CollectConfig",
-            "description": [],
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.UiComponentInstance",
-                "text": "UiComponentInstance"
-              },
-              "<",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "public",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-public.CollectConfigProps",
-                "text": "CollectConfigProps"
-              },
-              "<Config, FactoryContext>>"
-            ],
-            "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": []
-          },
-          {
-            "parentPluginId": "uiActionsEnhanced",
-            "id": "def-public.ActionFactory.ReactCollectConfig",
-            "type": "Function",
-            "tags": [],
-            "label": "ReactCollectConfig",
             "description": [],
             "signature": [
               "React.FunctionComponent<",
@@ -470,7 +409,7 @@
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
-                "id": "def-public.ActionFactory.ReactCollectConfig.$1",
+                "id": "def-public.ActionFactory.CollectConfig.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "props",
@@ -484,7 +423,7 @@
               },
               {
                 "parentPluginId": "uiActionsEnhanced",
-                "id": "def-public.ActionFactory.ReactCollectConfig.$2",
+                "id": "def-public.ActionFactory.CollectConfig.$2",
                 "type": "Any",
                 "tags": [],
                 "label": "context",
@@ -1684,9 +1623,9 @@
               "<",
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
+                "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
               ">, triggers: string[]) => Promise<void>"
@@ -1715,9 +1654,9 @@
                   "<",
                   {
                     "pluginId": "@kbn/utility-types",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnUtilityTypesPluginApi",
-                    "section": "def-server.SerializableRecord",
+                    "section": "def-common.SerializableRecord",
                     "text": "SerializableRecord"
                   },
                   ">"
@@ -1768,9 +1707,9 @@
               "<",
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
+                "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
               ">, triggers: string[]) => Promise<void>"
@@ -1816,9 +1755,9 @@
                   "<",
                   {
                     "pluginId": "@kbn/utility-types",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnUtilityTypesPluginApi",
-                    "section": "def-server.SerializableRecord",
+                    "section": "def-common.SerializableRecord",
                     "text": "SerializableRecord"
                   },
                   ">"
@@ -2012,9 +1951,9 @@
               "<",
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
+                "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
               ">; }[]>"
@@ -2296,6 +2235,43 @@
       },
       {
         "parentPluginId": "uiActionsEnhanced",
+        "id": "def-public.UrlDrilldownOptionsComponent",
+        "type": "Function",
+        "tags": [],
+        "label": "UrlDrilldownOptionsComponent",
+        "description": [],
+        "signature": [
+          "(props: React.PropsWithChildren<",
+          "UrlDrilldownOptionsProps",
+          ">) => JSX.Element"
+        ],
+        "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/components/url_drilldown_collect_config/lazy.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "uiActionsEnhanced",
+            "id": "def-public.UrlDrilldownOptionsComponent.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              "UrlDrilldownOptionsProps",
+              ">"
+            ],
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/components/url_drilldown_collect_config/lazy.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "uiActionsEnhanced",
         "id": "def-public.validateUrl",
         "type": "Function",
         "tags": [],
@@ -2411,10 +2387,10 @@
           },
           "<Config, ExecutionContext, FactoryContext> extends Partial<Omit<",
           {
-            "pluginId": "uiActions",
-            "scope": "public",
-            "docId": "kibUiActionsPluginApi",
-            "section": "def-public.Presentable",
+            "pluginId": "@kbn/ui-actions-browser",
+            "scope": "common",
+            "docId": "kibKbnUiActionsBrowserPluginApi",
+            "section": "def-common.Presentable",
             "text": "Presentable"
           },
           "<FactoryContext>, \"getHref\">>,",
@@ -2771,18 +2747,10 @@
             "tags": [],
             "label": "CollectConfig",
             "description": [
-              "\n`UiComponent` that collects config for this drilldown. You can create\na React component and transform it `UiComponent` using `uiToReactComponent`\nhelper from `kibana_utils` plugin.\n\n```tsx\nimport React from 'react';\nimport { uiToReactComponent } from 'src/plugins/kibana_utils';\nimport { CollectConfigProps } from 'src/plugins/kibana_utils/public';\n\ntype Props = CollectConfigProps<Config>;\n\nconst ReactCollectConfig: React.FC<Props> = () => {\n  return <div>Collecting config...'</div>;\n};\n\nexport const CollectConfig = uiToReactComponent(ReactCollectConfig);\n```"
+              "\nComponent that collects config for this drilldown.\n\n```tsx\nimport React from 'react';\nimport { CollectConfigProps } from 'src/plugins/kibana_utils/public';\n\ntype Props = CollectConfigProps<Config>;\n\nexport const CollectConfig: React.FC<Props> = () => {\n  return <div>Collecting config...'</div>;\n};\n```"
             ],
             "signature": [
-              "() => ",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.UiComponentInstance",
-                "text": "UiComponentInstance"
-              },
-              "<",
+              "React.FunctionComponent<",
               {
                 "pluginId": "kibanaUtils",
                 "scope": "public",
@@ -2796,7 +2764,36 @@
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
-            "children": []
+            "children": [
+              {
+                "parentPluginId": "uiActionsEnhanced",
+                "id": "def-public.DrilldownDefinition.CollectConfig.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "P & { children?: React.ReactNode; }"
+                ],
+                "path": "node_modules/@types/react/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "uiActionsEnhanced",
+                "id": "def-public.DrilldownDefinition.CollectConfig.$2",
+                "type": "Any",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "node_modules/@types/react/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2923,14 +2920,7 @@
               "\nName of the drilldown instance displayed to the user at the moment of\ndrilldown execution. Should be internationalized."
             ],
             "signature": [
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "common",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-common.UiComponent",
-                "text": "UiComponent"
-              },
-              "<{ config: Omit<",
+              "React.FC<{ config: Omit<",
               {
                 "pluginId": "uiActionsEnhanced",
                 "scope": "common",
@@ -3321,7 +3311,7 @@
             "label": "uiActions",
             "description": [],
             "signature": [
-              "{ readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <A extends ",
+              "{ readonly registerAction: <Context extends object>(definition: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -3329,7 +3319,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<object>>(definition: A) => ",
+              "<Context>) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -3337,9 +3327,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<",
-              "ActionContext",
-              "<A>>; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly getActionFactory: (actionFactoryId: string) => ",
+              "<Context>; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly getActionFactory: (actionFactoryId: string) => ",
               {
                 "pluginId": "uiActionsEnhanced",
                 "scope": "public",
@@ -3350,9 +3338,9 @@
               "<",
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
+                "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
               ", object, ",
@@ -3509,9 +3497,9 @@
         "signature": [
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           }
         ],
@@ -3594,9 +3582,9 @@
           "<",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           ">; }"
@@ -3614,7 +3602,31 @@
         "label": "UrlDrilldownConfig",
         "description": [],
         "signature": [
-          "{ url: { format?: \"handlebars_v1\" | undefined; template: string; }; openInNewTab: boolean; encodeUrl?: boolean | undefined; }"
+          "{ url: { format?: \"handlebars_v1\" | undefined; template: string; }; } & ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "public",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-public.UrlDrilldownOptions",
+            "text": "UrlDrilldownOptions"
+          }
+        ],
+        "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "uiActionsEnhanced",
+        "id": "def-public.UrlDrilldownOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "UrlDrilldownOptions",
+        "description": [
+          "\nUser-configurable options for URL drilldowns"
+        ],
+        "signature": [
+          "{ openInNewTab: boolean; encodeUrl: boolean; }"
         ],
         "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts",
         "deprecated": false,
@@ -3622,7 +3634,50 @@
         "initialIsOpen": false
       }
     ],
-    "objects": [],
+    "objects": [
+      {
+        "parentPluginId": "uiActionsEnhanced",
+        "id": "def-public.DEFAULT_URL_DRILLDOWN_OPTIONS",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_URL_DRILLDOWN_OPTIONS",
+        "description": [],
+        "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "uiActionsEnhanced",
+            "id": "def-public.DEFAULT_URL_DRILLDOWN_OPTIONS.encodeUrl",
+            "type": "boolean",
+            "tags": [],
+            "label": "encodeUrl",
+            "description": [],
+            "signature": [
+              "true"
+            ],
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "uiActionsEnhanced",
+            "id": "def-public.DEFAULT_URL_DRILLDOWN_OPTIONS.openInNewTab",
+            "type": "boolean",
+            "tags": [],
+            "label": "openInNewTab",
+            "description": [],
+            "signature": [
+              "true"
+            ],
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "setup": {
       "parentPluginId": "uiActionsEnhanced",
       "id": "def-public.SetupContract",
@@ -3643,8 +3698,8 @@
           "pluginId": "uiActions",
           "scope": "public",
           "docId": "kibUiActionsPluginApi",
-          "section": "def-public.UiActionsSetup",
-          "text": "UiActionsSetup"
+          "section": "def-public.UiActionsPublicSetup",
+          "text": "UiActionsPublicSetup"
         },
         ",Pick<",
         "UiActionsServiceEnhancements",
@@ -3677,8 +3732,8 @@
           "pluginId": "uiActions",
           "scope": "public",
           "docId": "kibUiActionsPluginApi",
-          "section": "def-public.UiActionsStart",
-          "text": "UiActionsStart"
+          "section": "def-public.UiActionsPublicStart",
+          "text": "UiActionsPublicStart"
         },
         ",Pick<",
         "UiActionsServiceEnhancements",
@@ -3760,9 +3815,9 @@
           " implements ",
           {
             "pluginId": "@kbn/core-plugins-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCorePluginsServerPluginApi",
-            "section": "def-server.Plugin",
+            "section": "def-common.Plugin",
             "text": "Plugin"
           },
           "<",
@@ -3770,10 +3825,12 @@
             "pluginId": "uiActionsEnhanced",
             "scope": "server",
             "docId": "kibUiActionsEnhancedPluginApi",
-            "section": "def-server.SetupContract",
-            "text": "SetupContract"
+            "section": "def-server.UiActionsEnhancedServerSetup",
+            "text": "UiActionsEnhancedServerSetup"
           },
-          ", void, SetupDependencies, object>"
+          ", void, UiActionsEnhancedServerSetupDependencies, ",
+          "UiActionsEnhancedServerStartDependencies",
+          ">"
         ],
         "path": "src/plugins/ui_actions_enhanced/server/plugin.ts",
         "deprecated": false,
@@ -3833,15 +3890,15 @@
             "label": "setup",
             "description": [],
             "signature": [
-              "(core: ",
+              "(_core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-server.CoreSetup",
+                "section": "def-common.CoreSetup",
                 "text": "CoreSetup"
               },
-              "<object, unknown>, { embeddable }: SetupDependencies) => { registerActionFactory: (definition: ",
+              "<object, unknown>, { embeddable }: UiActionsEnhancedServerSetupDependencies) => { registerActionFactory: (definition: ",
               {
                 "pluginId": "uiActionsEnhanced",
                 "scope": "server",
@@ -3868,14 +3925,14 @@
                 "id": "def-server.AdvancedUiActionsServerPlugin.setup.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "core",
+                "label": "_core",
                 "description": [],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-server.CoreSetup",
+                    "section": "def-common.CoreSetup",
                     "text": "CoreSetup"
                   },
                   "<object, unknown>"
@@ -3893,7 +3950,7 @@
                 "label": "{ embeddable }",
                 "description": [],
                 "signature": [
-                  "SetupDependencies"
+                  "UiActionsEnhancedServerSetupDependencies"
                 ],
                 "path": "src/plugins/ui_actions_enhanced/server/plugin.ts",
                 "deprecated": false,
@@ -4105,9 +4162,9 @@
         "signature": [
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           }
         ],
@@ -4175,9 +4232,9 @@
           "<",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           ">; }"
@@ -4191,10 +4248,10 @@
     "objects": [],
     "setup": {
       "parentPluginId": "uiActionsEnhanced",
-      "id": "def-server.SetupContract",
+      "id": "def-server.UiActionsEnhancedServerSetup",
       "type": "Interface",
       "tags": [],
-      "label": "SetupContract",
+      "label": "UiActionsEnhancedServerSetup",
       "description": [],
       "path": "src/plugins/ui_actions_enhanced/server/plugin.ts",
       "deprecated": false,
@@ -4202,7 +4259,7 @@
       "children": [
         {
           "parentPluginId": "uiActionsEnhanced",
-          "id": "def-server.SetupContract.registerActionFactory",
+          "id": "def-server.UiActionsEnhancedServerSetup.registerActionFactory",
           "type": "Function",
           "tags": [],
           "label": "registerActionFactory",
@@ -4232,7 +4289,7 @@
           "children": [
             {
               "parentPluginId": "uiActionsEnhanced",
-              "id": "def-server.SetupContract.registerActionFactory.$1",
+              "id": "def-server.UiActionsEnhancedServerSetup.registerActionFactory.$1",
               "type": "Object",
               "tags": [],
               "label": "definition",
@@ -4269,10 +4326,10 @@
     },
     "start": {
       "parentPluginId": "uiActionsEnhanced",
-      "id": "def-server.StartContract",
+      "id": "def-server.UiActionsEnhancedServerStart",
       "type": "Type",
       "tags": [],
-      "label": "StartContract",
+      "label": "UiActionsEnhancedServerStart",
       "description": [],
       "signature": [
         "void"
@@ -4300,9 +4357,9 @@
         "signature": [
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           }
         ],
@@ -4370,9 +4427,9 @@
           "<",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           ">; }"

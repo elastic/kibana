@@ -6,3 +6,5 @@
  */
 
 export const API_BASE_PATH = '/api/index_management';
+
+export const INTERNAL_API_BASE_PATH = '/internal/index_management';

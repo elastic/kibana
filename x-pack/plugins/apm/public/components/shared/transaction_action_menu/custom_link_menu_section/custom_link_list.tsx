@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import Mustache from 'mustache';
 import React from 'react';
-import { SectionLink, SectionLinks } from '@kbn/observability-plugin/public';
+import {
+  SectionLink,
+  SectionLinks,
+} from '@kbn/observability-shared-plugin/public';
 import { CustomLink } from '../../../../../common/custom_link/custom_link_types';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { unit } from '../../../../utils/style';
+import { getEncodedCustomLinkUrl } from '../../../../../common/custom_link';
 
 export function CustomLinkList({
   customLinks,
@@ -22,7 +25,7 @@ export function CustomLinkList({
   return (
     <SectionLinks style={{ maxHeight: unit * 10, overflowY: 'auto' }}>
       {customLinks.map((link) => {
-        const href = getHref(link, transaction);
+        const href = getEncodedCustomLinkUrl(link.url, transaction);
         return (
           <SectionLink
             key={link.id}
@@ -34,12 +37,4 @@ export function CustomLinkList({
       })}
     </SectionLinks>
   );
-}
-
-function getHref(link: CustomLink, transaction?: Transaction) {
-  try {
-    return Mustache.render(link.url, transaction);
-  } catch (e) {
-    return link.url;
-  }
 }

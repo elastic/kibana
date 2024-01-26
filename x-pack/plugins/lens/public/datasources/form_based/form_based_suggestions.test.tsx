@@ -1577,6 +1577,7 @@ describe('IndexPattern Data Source suggestions', () => {
           },
         ],
         indexPatternId: '1',
+        ignoreGlobalFilters: false,
       },
     ] as Layer[];
     function stateWithoutLayer() {
@@ -2081,6 +2082,27 @@ describe('IndexPattern Data Source suggestions', () => {
             ],
             layerId: 'test',
           },
+        })
+      );
+    });
+
+    it('should repserve the ignoreGlobalFilter flag if set', () => {
+      const updatedContext = [{ ...context[0], ignoreGlobalFilters: true }];
+      const suggestions = getDatasourceSuggestionsForVisualizeCharts(
+        stateWithoutLayer(),
+        updatedContext,
+        expectedIndexPatterns
+      );
+
+      expect(suggestions).toContainEqual(
+        expect.objectContaining({
+          state: expect.objectContaining({
+            layers: {
+              test: expect.objectContaining({
+                ignoreGlobalFilters: true,
+              }),
+            },
+          }),
         })
       );
     });

@@ -12,8 +12,6 @@ import type {
 } from '@kbn/core/server';
 import {
   coreMock,
-  httpServerMock,
-  savedObjectsClientMock,
   savedObjectsRepositoryMock,
   savedObjectsTypeRegistryMock,
 } from '@kbn/core/server/mocks';
@@ -23,7 +21,6 @@ import type { ClientInstanciator } from '.';
 import { setupSavedObjects } from '.';
 import type { EncryptedSavedObjectsService } from '../crypto';
 import { encryptedSavedObjectsServiceMock } from '../crypto/index.mock';
-import { EncryptedSavedObjectsClientWrapper } from './encrypted_saved_objects_client_wrapper';
 
 describe('#setupSavedObjects', () => {
   let setupContract: ClientInstanciator;
@@ -55,42 +52,6 @@ describe('#setupSavedObjects', () => {
     });
   });
 
-  it('properly registers client wrapper factory', () => {
-    expect(coreSetupMock.savedObjects.addClientWrapper).toHaveBeenCalledTimes(1);
-    expect(coreSetupMock.savedObjects.addClientWrapper).toHaveBeenCalledWith(
-      Number.MAX_SAFE_INTEGER,
-      'encryptedSavedObjects',
-      expect.any(Function)
-    );
-
-    const [[, , clientFactory]] = coreSetupMock.savedObjects.addClientWrapper.mock.calls;
-    expect(
-      clientFactory({
-        client: savedObjectsClientMock.create(),
-        typeRegistry: savedObjectsTypeRegistryMock.create(),
-        request: httpServerMock.createKibanaRequest(),
-      })
-    ).toBeInstanceOf(EncryptedSavedObjectsClientWrapper);
-  });
-
-  it('properly registers client wrapper factory with', () => {
-    expect(coreSetupMock.savedObjects.addClientWrapper).toHaveBeenCalledTimes(1);
-    expect(coreSetupMock.savedObjects.addClientWrapper).toHaveBeenCalledWith(
-      Number.MAX_SAFE_INTEGER,
-      'encryptedSavedObjects',
-      expect.any(Function)
-    );
-
-    const [[, , clientFactory]] = coreSetupMock.savedObjects.addClientWrapper.mock.calls;
-    expect(
-      clientFactory({
-        client: savedObjectsClientMock.create(),
-        typeRegistry: savedObjectsTypeRegistryMock.create(),
-        request: httpServerMock.createKibanaRequest(),
-      })
-    ).toBeInstanceOf(EncryptedSavedObjectsClientWrapper);
-  });
-
   describe('#setupContract', () => {
     it('includes hiddenTypes when specified', async () => {
       await setupContract({ includedHiddenTypes: ['hiddenType'] });
@@ -107,6 +68,7 @@ describe('#setupSavedObjects', () => {
         type: 'known-type',
         attributes: { attrOne: 'one', attrSecret: '*secret*' },
         references: [],
+        namespaces: ['some-ns'],
       };
       mockSavedObjectsRepository.get.mockResolvedValue(mockSavedObject);
       mockSavedObjectTypeRegistry.isSingleNamespace.mockReturnValue(true);
@@ -140,6 +102,7 @@ describe('#setupSavedObjects', () => {
         type: 'known-type',
         attributes: { attrOne: 'one', attrSecret: '*secret*' },
         references: [],
+        namespaces: ['some-ns2', 'some-ns'],
       };
       mockSavedObjectsRepository.get.mockResolvedValue(mockSavedObject);
       mockSavedObjectTypeRegistry.isSingleNamespace.mockReturnValue(false);
@@ -193,6 +156,7 @@ describe('#setupSavedObjects', () => {
         type: 'known-type',
         attributes: { attrOne: 'one', attrSecret: '*secret*' },
         references: [],
+        namespaces: ['some-ns'],
       };
       mockSavedObjectsRepository.createPointInTimeFinder = jest.fn().mockReturnValue({
         close: jest.fn(),
@@ -331,6 +295,79 @@ describe('#setupSavedObjects', () => {
       for await (const res of finder.find()) {
         expect(res.saved_objects[0].error).toHaveProperty('message', 'Test failure');
       }
+    });
+
+    it('properly re-exposes `close` method of the underlying point in time finder ', async () => {
+      // The finder that underlying repository returns is an instance of a `PointInTimeFinder` class that cannot, and
+      // unlike object literal it cannot be "copied" with the spread operator. We should make sure we properly re-expose
+      // `close` function.
+      const mockClose = jest.fn();
+      mockSavedObjectsRepository.createPointInTimeFinder = jest.fn().mockImplementation(() => {
+        class MockPointInTimeFinder {
+          async close() {
+            mockClose();
+          }
+          async *find() {}
+        }
+
+        return new MockPointInTimeFinder();
+      });
+
+      const finder = await setupContract().createPointInTimeFinderDecryptedAsInternalUser({
+        type: 'known-type',
+      });
+
+      expect(finder.find).toBeInstanceOf(Function);
+      expect(finder.close).toBeInstanceOf(Function);
+
+      await finder.close();
+      expect(mockClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('includes `namespace` for * find option', async () => {
+      const mockSavedObject: SavedObject = {
+        id: 'some-id',
+        type: 'known-type',
+        attributes: { attrOne: 'one', attrSecret: '*secret*' },
+        references: [],
+        namespaces: ['some-ns'],
+      };
+      mockSavedObjectsRepository.createPointInTimeFinder = jest.fn().mockReturnValue({
+        close: jest.fn(),
+        find: function* asyncGenerator() {
+          yield { saved_objects: [mockSavedObject] };
+        },
+      });
+
+      mockSavedObjectTypeRegistry.isSingleNamespace.mockReturnValue(true);
+
+      const finder = await setupContract().createPointInTimeFinderDecryptedAsInternalUser({
+        type: 'known-type',
+        namespaces: ['*'],
+      });
+
+      for await (const res of finder.find()) {
+        expect(res).toEqual({
+          saved_objects: [
+            {
+              ...mockSavedObject,
+              attributes: { attrOne: 'one', attrSecret: 'secret' },
+            },
+          ],
+        });
+      }
+
+      expect(mockEncryptedSavedObjectsService.decryptAttributes).toHaveBeenCalledTimes(1);
+      expect(mockEncryptedSavedObjectsService.decryptAttributes).toHaveBeenCalledWith(
+        { type: mockSavedObject.type, id: mockSavedObject.id, namespace: 'some-ns' },
+        mockSavedObject.attributes
+      );
+
+      expect(mockSavedObjectsRepository.createPointInTimeFinder).toHaveBeenCalledTimes(1);
+      expect(mockSavedObjectsRepository.createPointInTimeFinder).toHaveBeenCalledWith(
+        { type: 'known-type', namespaces: ['*'] },
+        undefined
+      );
     });
   });
 });

@@ -12,6 +12,7 @@ const mockSettings = [
   'abc.def=1',
   'xpack.security.authc.realms.oidc.oidc1.rp.client_secret=secret',
   'xpack.security.authc.realms.oidc.oidc1.rp.client_id=client id',
+  'xpack.security.authc.realms.jwt.jwt1.client_authentication.shared_secret=jwt_secret',
   'discovery.type=single-node',
 ];
 
@@ -20,6 +21,7 @@ test('`parseSettings` parses and returns all settings by default', () => {
     ['abc.def', '1'],
     ['xpack.security.authc.realms.oidc.oidc1.rp.client_secret', 'secret'],
     ['xpack.security.authc.realms.oidc.oidc1.rp.client_id', 'client id'],
+    ['xpack.security.authc.realms.jwt.jwt1.client_authentication.shared_secret', 'jwt_secret'],
     ['discovery.type', 'single-node'],
   ]);
 });
@@ -29,6 +31,7 @@ test('`parseSettings` parses and returns all settings with `SettingsFilter.All` 
     ['abc.def', '1'],
     ['xpack.security.authc.realms.oidc.oidc1.rp.client_secret', 'secret'],
     ['xpack.security.authc.realms.oidc.oidc1.rp.client_id', 'client id'],
+    ['xpack.security.authc.realms.jwt.jwt1.client_authentication.shared_secret', 'jwt_secret'],
     ['discovery.type', 'single-node'],
   ]);
 });
@@ -36,6 +39,7 @@ test('`parseSettings` parses and returns all settings with `SettingsFilter.All` 
 test('`parseSettings` parses and returns only secure settings with `SettingsFilter.SecureOnly` filter', () => {
   expect(parseSettings(mockSettings, { filter: SettingsFilter.SecureOnly })).toEqual([
     ['xpack.security.authc.realms.oidc.oidc1.rp.client_secret', 'secret'],
+    ['xpack.security.authc.realms.jwt.jwt1.client_authentication.shared_secret', 'jwt_secret'],
   ]);
 });
 

@@ -9,12 +9,13 @@ import { kea, MakeLogicType } from 'kea';
 
 import moment from 'moment';
 
+import { Pagination } from '@elastic/eui';
+import { ConnectorSyncJob, pageToPagination } from '@kbn/search-connectors';
+
 import { Status } from '../../../../../../common/types/api';
 
-import { ConnectorSyncJob } from '../../../../../../common/types/connectors';
 import { Paginate } from '../../../../../../common/types/pagination';
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
-import { clearFlashMessages, flashAPIErrors } from '../../../../shared/flash_messages';
 import {
   FetchSyncJobsApiLogic,
   FetchSyncJobsArgs,
@@ -38,7 +39,7 @@ export interface IndexViewValues {
   syncJobs: SyncJobView[];
   syncJobsData: Paginate<ConnectorSyncJob> | null;
   syncJobsLoading: boolean;
-  syncJobsPagination: Paginate<undefined>;
+  syncJobsPagination: Pagination;
   syncJobsStatus: Status;
 }
 
@@ -61,10 +62,6 @@ export const SyncJobsViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAct
       ['data as syncJobsData', 'status as syncJobsStatus'],
     ],
   },
-  listeners: () => ({
-    fetchSyncJobs: () => clearFlashMessages(),
-    fetchSyncJobsError: (e) => flashAPIErrors(e),
-  }),
   path: ['enterprise_search', 'content', 'sync_jobs_view_logic'],
   selectors: ({ selectors }) => ({
     syncJobs: [
@@ -73,12 +70,12 @@ export const SyncJobsViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAct
         data?.data.map((syncJob) => {
           return {
             ...syncJob,
-            duration: syncJob.completed_at
-              ? moment.duration(moment(syncJob.completed_at).diff(moment(syncJob.created_at)))
-              : syncJob.started_at
-              ? moment.duration(moment(new Date()).diff(moment(syncJob.started_at)))
+            duration: syncJob.started_at
+              ? moment.duration(
+                  moment(syncJob.completed_at || new Date()).diff(moment(syncJob.started_at))
+                )
               : undefined,
-            lastSync: syncJob.completed_at ?? syncJob.created_at,
+            lastSync: syncJob.completed_at,
           };
         }) ?? [],
     ],
@@ -88,16 +85,13 @@ export const SyncJobsViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAct
     ],
     syncJobsPagination: [
       () => [selectors.syncJobsData],
-      (data?: Paginate<ConnectorSyncJob>) =>
+      (data?: Paginate<ConnectorSyncJob>): Pagination =>
         data
-          ? { ...data, data: undefined }
+          ? pageToPagination(data._meta.page)
           : {
-              data: [],
-              has_more_hits_than_total: false,
               pageIndex: 0,
               pageSize: 10,
-              size: 0,
-              total: 0,
+              totalItemCount: 0,
             },
     ],
   }),

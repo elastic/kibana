@@ -40,7 +40,7 @@ export function barracudaLogsSpecProvider(context: TutorialContext): TutorialSch
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-barracuda.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/barracuda.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/barracuda.svg'),
     artifacts: {
       dashboards: [],
       application: {
@@ -57,6 +57,6 @@ export function barracudaLogsSpecProvider(context: TutorialContext): TutorialSch
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
-    integrationBrowserCategories: ['network', 'security'],
+    integrationBrowserCategories: ['network', 'security', 'firewall_security'],
   };
 }

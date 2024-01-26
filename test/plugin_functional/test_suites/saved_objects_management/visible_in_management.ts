@@ -9,7 +9,7 @@
 import { join } from 'path';
 import expect from '@kbn/expect';
 import type { Response } from 'supertest';
-import { SavedObject } from '@kbn/core/types';
+import { SavedObject } from '@kbn/core/server';
 import type { SavedObjectManagementTypeInfo } from '@kbn/saved-objects-management-plugin/common/types';
 import type { PluginFunctionalProviderContext } from '../../services';
 
@@ -89,6 +89,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
                     title: 'Saved object type that is not visible in management',
                   },
                   type: 'test-not-visible-in-management',
+                  managed: false,
                 },
               ],
               warnings: [],

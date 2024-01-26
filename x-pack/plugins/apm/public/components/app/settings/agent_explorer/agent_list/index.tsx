@@ -9,22 +9,25 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiToolTip,
 } from '@elastic/eui';
+import { AgentIcon } from '@kbn/custom-icons';
 import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { ValuesType } from 'utility-types';
 import { AgentExplorerFieldName } from '../../../../../../common/agent_explorer';
 import { AgentName } from '../../../../../../typings/es_schemas/ui/fields/agent';
+import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
-import { unit } from '../../../../../utils/style';
-import { AgentIcon } from '../../../../shared/agent_icon';
 import { EnvironmentBadge } from '../../../../shared/environment_badge';
 import { ItemsBadge } from '../../../../shared/item_badge';
 import { ITableColumn, ManagedTable } from '../../../../shared/managed_table';
 import { TruncateWithTooltip } from '../../../../shared/truncate_with_tooltip';
 import { AgentExplorerDocsLink } from '../agent_explorer_docs_link';
 import { AgentInstances } from '../agent_instances';
+import { AgentLatestVersion } from '../agent_latest_version';
 
 export type AgentExplorerItem = ValuesType<
   APIReturnType<'GET /internal/apm/get_agents_per_service'>['items']
@@ -32,16 +35,22 @@ export type AgentExplorerItem = ValuesType<
 
 export function getAgentsColumns({
   selectedAgent,
+  isLatestVersionsLoading,
+  latestAgentVersionEnabled,
+  latestVersionsFailed,
   onAgentSelected,
 }: {
   selectedAgent?: AgentExplorerItem;
+  isLatestVersionsLoading: boolean;
+  latestAgentVersionEnabled: boolean;
+  latestVersionsFailed: boolean;
   onAgentSelected: (agent: AgentExplorerItem) => void;
 }): Array<ITableColumn<AgentExplorerItem>> {
   return [
     {
       field: AgentExplorerFieldName.ServiceName,
       name: '',
-      width: `${unit * 3}px`,
+      width: '5%',
       render: (_, agent) => {
         const isSelected = selectedAgent === agent;
 
@@ -58,7 +67,10 @@ export function getAgentsColumns({
             <EuiButtonIcon
               size="xs"
               iconSize="s"
-              aria-label="Toggle agent instances view"
+              aria-label={i18n.translate(
+                'xpack.apm.getAgentsColumns.euiButtonIcon.toggleAgentInstancesViewLabel',
+                { defaultMessage: 'Toggle agent instances view' }
+              )}
               data-test-subj="apmAgentExplorerListToggle"
               onClick={() => onAgentSelected(agent)}
               display={isSelected ? 'base' : 'empty'}
@@ -78,6 +90,8 @@ export function getAgentsColumns({
         }
       ),
       sortable: true,
+      width: '35%',
+      truncateText: true,
       render: (_, { serviceName, agentName }) => (
         <TruncateWithTooltip
           data-test-subj="apmAgentExplorerListServiceLink"
@@ -85,7 +99,7 @@ export function getAgentsColumns({
           content={
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
-                <AgentIcon agentName={agentName} />
+                <AgentIcon agentName={agentName} size="l" />
               </EuiFlexItem>
               <EuiFlexItem className="eui-textTruncate">
                 <span className="eui-textTruncate">{serviceName}</span>
@@ -103,7 +117,8 @@ export function getAgentsColumns({
           defaultMessage: 'Environment',
         }
       ),
-      width: `${unit * 16}px`,
+      width: '15%',
+      truncateText: true,
       sortable: true,
       render: (_, { environments }) => (
         <EnvironmentBadge environments={environments} />
@@ -117,12 +132,12 @@ export function getAgentsColumns({
           defaultMessage: 'Instances',
         }
       ),
-      width: `${unit * 8}px`,
+      width: '10%',
       sortable: true,
     },
     {
       field: AgentExplorerFieldName.AgentName,
-      width: `${unit * 12}px`,
+      width: '15%',
       name: i18n.translate(
         'xpack.apm.agentExplorerTable.agentNameColumnLabel',
         { defaultMessage: 'Agent Name' }
@@ -135,7 +150,8 @@ export function getAgentsColumns({
         'xpack.apm.agentExplorerTable.agentVersionColumnLabel',
         { defaultMessage: 'Agent Version' }
       ),
-      width: `${unit * 8}px`,
+      width: '10%',
+      truncateText: true,
       render: (_, { agentVersion }) => (
         <ItemsBadge
           items={agentVersion}
@@ -150,13 +166,59 @@ export function getAgentsColumns({
         />
       ),
     },
+    ...(latestAgentVersionEnabled
+      ? [
+          {
+            field: AgentExplorerFieldName.AgentLastVersion,
+            name: (
+              <EuiToolTip
+                content={i18n.translate(
+                  'xpack.apm.agentExplorerTable.agentLatestVersionColumnTooltip',
+                  {
+                    defaultMessage: 'The latest released version of the agent.',
+                  }
+                )}
+              >
+                <>
+                  {i18n.translate(
+                    'xpack.apm.agentExplorerTable.agentLatestVersionColumnLabel',
+                    { defaultMessage: 'Latest Agent Version' }
+                  )}
+                  &nbsp;
+                  <EuiIcon
+                    size="s"
+                    color="subdued"
+                    type="questionInCircle"
+                    className="eui-alignCenter"
+                  />
+                </>
+              </EuiToolTip>
+            ),
+            width: '10%',
+            align: 'center',
+            truncateText: true,
+            render: (
+              _: any,
+              { agentName, latestVersion }: AgentExplorerItem
+            ) => (
+              <AgentLatestVersion
+                agentName={agentName}
+                isLoading={isLatestVersionsLoading}
+                latestVersion={latestVersion}
+                failed={latestVersionsFailed}
+              />
+            ),
+          },
+        ]
+      : []),
     {
       field: AgentExplorerFieldName.AgentDocsPageUrl,
       name: i18n.translate(
         'xpack.apm.agentExplorerTable.agentDocsColumnLabel',
         { defaultMessage: 'Agent Docs' }
       ),
-      width: `${unit * 8}px`,
+      width: '10%',
+      truncateText: true,
       render: (_, { agentName, agentDocsPageUrl }) => (
         <EuiToolTip content={`${agentName} agent docs`}>
           <AgentExplorerDocsLink
@@ -173,9 +235,20 @@ interface Props {
   items: AgentExplorerItem[];
   noItemsMessage: React.ReactNode;
   isLoading: boolean;
+  isLatestVersionsLoading: boolean;
+  latestVersionsFailed: boolean;
 }
 
-export function AgentList({ items, noItemsMessage, isLoading }: Props) {
+export function AgentList({
+  items,
+  noItemsMessage,
+  isLoading,
+  isLatestVersionsLoading,
+  latestVersionsFailed,
+}: Props) {
+  const { config } = useApmPluginContext();
+  const latestAgentVersionEnabled = !isEmpty(config.latestAgentVersionsUrl);
+
   const [selectedAgent, setSelectedAgent] = useState<AgentExplorerItem>();
 
   const onAgentSelected = (agent: AgentExplorerItem) => {
@@ -187,14 +260,31 @@ export function AgentList({ items, noItemsMessage, isLoading }: Props) {
   };
 
   const agentColumns = useMemo(
-    () => getAgentsColumns({ selectedAgent, onAgentSelected }),
-    [selectedAgent]
+    () =>
+      getAgentsColumns({
+        selectedAgent,
+        isLatestVersionsLoading,
+        latestAgentVersionEnabled,
+        latestVersionsFailed,
+        onAgentSelected,
+      }),
+    [
+      selectedAgent,
+      latestAgentVersionEnabled,
+      isLatestVersionsLoading,
+      latestVersionsFailed,
+    ]
   );
 
   return (
     <>
       {selectedAgent && (
-        <AgentInstances agent={selectedAgent} onClose={onCloseFlyout} />
+        <AgentInstances
+          agent={selectedAgent}
+          isLatestVersionsLoading={isLatestVersionsLoading}
+          latestVersionsFailed={latestVersionsFailed}
+          onClose={onCloseFlyout}
+        />
       )}
       <ManagedTable
         columns={agentColumns}

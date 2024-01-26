@@ -11,7 +11,7 @@ import { INVALID_NAME_CHARS } from '../../public/application/services/validation
 import { API_BASE_PATH } from '../../common';
 import { getRepository } from '../../test/fixtures';
 import { RepositoryType } from '../../common/types';
-import { setupEnvironment, pageHelpers, nextTick, delay } from './helpers';
+import { setupEnvironment, pageHelpers } from './helpers';
 import { RepositoryAddTestBed } from './helpers/repository_add.helpers';
 
 const { setup } = pageHelpers.repositoryAdd;
@@ -37,7 +37,7 @@ describe('<RepositoryAdd />', () => {
     /**
      * TODO: investigate why we need to skip this test.
      * My guess is a change in the useRequest() hook and maybe a setTimout() that hasn't been
-     * mocked with jest.useFakeTimers('legacy');
+     * mocked with jest.useFakeTimers({ legacyFakeTimers: true });
      * I tested locally and the loading spinner is present in the UI so skipping this test for now.
      */
     test.skip('should indicate that the repository types are loading', () => {
@@ -61,8 +61,9 @@ describe('<RepositoryAdd />', () => {
   describe('when no repository types are not found', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadRepositoryTypesResponse([]);
-      testBed = await setup(httpSetup);
-      await nextTick();
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
       testBed.component.update();
     });
 
@@ -77,8 +78,9 @@ describe('<RepositoryAdd />', () => {
   describe('when repository types are found', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadRepositoryTypesResponse(repositoryTypes);
-      testBed = await setup(httpSetup);
-      await nextTick();
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
       testBed.component.update();
     });
 
@@ -100,8 +102,9 @@ describe('<RepositoryAdd />', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadRepositoryTypesResponse(repositoryTypes);
 
-      testBed = await setup(httpSetup);
-      await nextTick();
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
       testBed.component.update();
     });
 
@@ -155,9 +158,8 @@ describe('<RepositoryAdd />', () => {
 
           await act(async () => {
             actions.clickSubmitButton();
-            await nextTick();
-            component.update();
           });
+          component.update();
 
           const expectedErrors = typeToErrorMessagesMap[type];
           const errorsFound = form.getErrorsMessages();
@@ -174,9 +176,8 @@ describe('<RepositoryAdd />', () => {
 
           await act(async () => {
             actions.clickBackButton();
-            await delay(100);
-            component.update();
           });
+          component.update();
         };
 
         await selectRepoTypeAndExpectErrors('fs');
@@ -543,6 +544,96 @@ describe('<RepositoryAdd />', () => {
           })
         );
       });
+    });
+  });
+
+  describe('settings for s3 repository', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadRepositoryTypesResponse(repositoryTypes);
+
+      testBed = await setup(httpSetup);
+    });
+
+    test('should correctly set the intelligent_tiering storage class', async () => {
+      const { form, actions, component } = testBed;
+
+      const s3Repository = getRepository({
+        type: 's3',
+        settings: {
+          bucket: 'test_bucket',
+          storageClass: 'intelligent_tiering',
+        },
+      });
+
+      // Fill step 1 required fields and go to step 2
+      form.setInputValue('nameInput', s3Repository.name);
+      actions.selectRepositoryType(s3Repository.type);
+      actions.clickNextButton();
+
+      // Fill step 2
+      form.setInputValue('bucketInput', s3Repository.settings.bucket);
+      form.setSelectValue('storageClassSelect', s3Repository.settings.storageClass);
+
+      await act(async () => {
+        actions.clickSubmitButton();
+      });
+
+      component.update();
+
+      expect(httpSetup.put).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}repositories`,
+        expect.objectContaining({
+          body: JSON.stringify({
+            name: s3Repository.name,
+            type: s3Repository.type,
+            settings: {
+              bucket: s3Repository.settings.bucket,
+              storageClass: s3Repository.settings.storageClass,
+            },
+          }),
+        })
+      );
+    });
+
+    test('should correctly set the onezone_ia storage class', async () => {
+      const { form, actions, component } = testBed;
+
+      const s3Repository = getRepository({
+        type: 's3',
+        settings: {
+          bucket: 'test_bucket',
+          storageClass: 'onezone_ia',
+        },
+      });
+
+      // Fill step 1 required fields and go to step 2
+      form.setInputValue('nameInput', s3Repository.name);
+      actions.selectRepositoryType(s3Repository.type);
+      actions.clickNextButton();
+
+      // Fill step 2
+      form.setInputValue('bucketInput', s3Repository.settings.bucket);
+      form.setSelectValue('storageClassSelect', s3Repository.settings.storageClass);
+
+      await act(async () => {
+        actions.clickSubmitButton();
+      });
+
+      component.update();
+
+      expect(httpSetup.put).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}repositories`,
+        expect.objectContaining({
+          body: JSON.stringify({
+            name: s3Repository.name,
+            type: s3Repository.type,
+            settings: {
+              bucket: s3Repository.settings.bucket,
+              storageClass: s3Repository.settings.storageClass,
+            },
+          }),
+        })
+      );
     });
   });
 });

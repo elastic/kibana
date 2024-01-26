@@ -6,15 +6,19 @@
  * Side Public License, v 1.
  */
 
-export { createIndexDocRecordsStream, createGenerateDocRecordsStream } from './docs';
+export {
+  createIndexDocRecordsStream,
+  createGenerateDocRecordsStream,
+  type LoadActionPerfOptions,
+} from './docs';
 
 export {
   createCreateIndexStream,
   createDeleteIndexStream,
   createGenerateIndexRecordsStream,
-  deleteKibanaIndices,
-  migrateKibanaIndex,
-  cleanKibanaIndices,
+  deleteSavedObjectIndices,
+  migrateSavedObjectIndices,
+  cleanSavedObjectIndices,
   createDefaultSpace,
 } from './indices';
 

@@ -91,15 +91,19 @@ exports[`graph_visualization should render to svg elements 1`] = `
           }
         }
       />
-      <text
-        className="fa gphNode__text gphNode__text--inverse"
-        textAnchor="middle"
-        transform="translate(0,5)"
-        x={5}
-        y={5}
-      >
-        a
-      </text>
+      <IconRenderer
+        color="black"
+        icon={
+          Object {
+            "id": "a",
+            "label": "",
+            "package": "eui",
+            "prevName": "",
+          }
+        }
+        x={-2.5}
+        y={-3.5}
+      />
       <text
         className="gphNode__label"
         textAnchor="middle"
@@ -145,15 +149,19 @@ exports[`graph_visualization should render to svg elements 1`] = `
           }
         }
       />
-      <text
-        className="fa gphNode__text gphNode__text--inverse"
-        textAnchor="middle"
-        transform="translate(0,5)"
-        x={7}
-        y={9}
-      >
-        b
-      </text>
+      <IconRenderer
+        color="red"
+        icon={
+          Object {
+            "id": "b",
+            "label": "",
+            "package": "eui",
+            "prevName": "",
+          }
+        }
+        x={-0.5}
+        y={0.5}
+      />
       <text
         className="gphNode__label"
         textAnchor="middle"
@@ -181,15 +189,19 @@ exports[`graph_visualization should render to svg elements 1`] = `
           }
         }
       />
-      <text
-        className="fa gphNode__text gphNode__text--inverse"
-        textAnchor="middle"
-        transform="translate(0,5)"
-        x={12}
-        y={2}
-      >
-        c
-      </text>
+      <IconRenderer
+        color="yellow"
+        icon={
+          Object {
+            "id": "c",
+            "label": "",
+            "package": "eui",
+            "prevName": "",
+          }
+        }
+        x={4.5}
+        y={-6.5}
+      />
       <text
         className="gphNode__label"
         textAnchor="middle"

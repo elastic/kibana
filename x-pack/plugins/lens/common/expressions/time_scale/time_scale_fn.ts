@@ -24,31 +24,31 @@ const unitInMs: Record<TimeScaleUnit, number> = {
   d: 1000 * 60 * 60 * 24,
 };
 
-// the datemath plugin always parses dates by using the current default moment time zone.
-// to use the configured time zone, we are temporary switching it just for the calculation.
+function safelySetTimeZone(timeZone: string) {
+  const zone = moment.tz.zone(timeZone);
+  if (zone) moment.tz.setDefault(zone.name);
+}
 
-// The code between this call and the reset in the finally block is not allowed to get async,
-// otherwise the timezone setting can leak out of this function.
-const withChangedTimeZone = <TReturnedValue = unknown>(
-  timeZone: string | undefined,
-  action: () => TReturnedValue
-): TReturnedValue => {
+/**
+ * This function can be called both from server side and from the client side. Each of them could have
+ * a different configured timezone. To be sure the time bounds are computed relative to the same passed timezone,
+ * temporarily switch the default moment timezone to the one passed, and switch it back after the calculation is done.
+ */
+export function getTimeBounds(timeRange: TimeRange, timeZone?: string, getForceNow?: () => Date) {
   if (timeZone) {
-    const defaultTimezone = moment().zoneName();
-    try {
-      moment.tz.setDefault(timeZone);
-      return action();
-    } finally {
-      // reset default moment timezone
-      moment.tz.setDefault(defaultTimezone);
-    }
+    // the `defaultZone` property is injected by moment.timezone.
+    // If is not available is it fine to keep undefined because calling setDefault() will automatically reset to default
+    // https://github.com/moment/moment-timezone/blob/2448cdcbe15875bc22ddfbc184794d0a6b568b90/moment-timezone.js#L603
+    // @ts-expect-error because is not part of the exposed types unfortunately
+    const currentDefaultTimeZone = moment.defaultZone?.name;
+    safelySetTimeZone(timeZone);
+    const timeBounds = calculateBounds(timeRange, { forceNow: getForceNow?.() });
+    safelySetTimeZone(currentDefaultTimeZone);
+    return timeBounds;
   } else {
-    return action();
+    return calculateBounds(timeRange, { forceNow: getForceNow?.() });
   }
-};
-
-const getTimeBounds = (timeRange: TimeRange, timeZone?: string, getForceNow?: () => Date) =>
-  withChangedTimeZone(timeZone, () => calculateBounds(timeRange, { forceNow: getForceNow?.() }));
+}
 
 export const timeScaleFn =
   (

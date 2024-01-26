@@ -1,0 +1,596 @@
+{
+  "id": "@kbn/chart-expressions-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.extractContainerType",
+        "type": "Function",
+        "tags": [],
+        "label": "extractContainerType",
+        "description": [],
+        "signature": [
+          "(context?: ",
+          {
+            "pluginId": "@kbn/core-execution-context-common",
+            "scope": "common",
+            "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+            "section": "def-common.KibanaExecutionContext",
+            "text": "KibanaExecutionContext"
+          },
+          " | undefined) => string | undefined"
+        ],
+        "path": "src/plugins/chart_expressions/common/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.extractContainerType.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/common/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.extractVisualizationType",
+        "type": "Function",
+        "tags": [],
+        "label": "extractVisualizationType",
+        "description": [],
+        "signature": [
+          "(context?: ",
+          {
+            "pluginId": "@kbn/core-execution-context-common",
+            "scope": "common",
+            "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+            "section": "def-common.KibanaExecutionContext",
+            "text": "KibanaExecutionContext"
+          },
+          " | undefined) => string | undefined"
+        ],
+        "path": "src/plugins/chart_expressions/common/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.extractVisualizationType.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/common/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.getColorCategories",
+        "type": "Function",
+        "tags": [],
+        "label": "getColorCategories",
+        "description": [
+          "\nGet the stringified version of all the categories that needs to be colored in the chart.\nMultifield keys will return as array of string and simple fields (numeric, string) will be returned as a plain unformatted string."
+        ],
+        "signature": [
+          "(rows: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableRow",
+            "text": "DatatableRow"
+          },
+          "[], accessor: string | undefined) => (string | string[])[]"
+        ],
+        "path": "src/plugins/chart_expressions/common/color_categories.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.getColorCategories.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "rows",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DatatableRow",
+                "text": "DatatableRow"
+              },
+              "[]"
+            ],
+            "path": "src/plugins/chart_expressions/common/color_categories.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.getColorCategories.$2",
+            "type": "string",
+            "tags": [],
+            "label": "accessor",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/common/color_categories.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.getOverridesFor",
+        "type": "Function",
+        "tags": [],
+        "label": "getOverridesFor",
+        "description": [
+          "\nGet an override specification and returns a props object to use directly with the Component"
+        ],
+        "signature": [
+          "(overrides: O | undefined, componentName: K) => { [k: string]: unknown; }"
+        ],
+        "path": "src/plugins/chart_expressions/common/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.getOverridesFor.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "overrides",
+            "description": [
+              "Overrides object"
+            ],
+            "signature": [
+              "O | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/common/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.getOverridesFor.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "componentName",
+            "description": [
+              "name of the Component to look for (i.e. \"settings\", \"axisX\")"
+            ],
+            "signature": [
+              "K"
+            ],
+            "path": "src/plugins/chart_expressions/common/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "an props object to use directly with the component"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.isChartSizeEvent",
+        "type": "Function",
+        "tags": [],
+        "label": "isChartSizeEvent",
+        "description": [],
+        "signature": [
+          "(event: ",
+          {
+            "pluginId": "expressions",
+            "scope": "public",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-public.ExpressionRendererEvent",
+            "text": "ExpressionRendererEvent"
+          },
+          ") => boolean"
+        ],
+        "path": "src/plugins/chart_expressions/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.isChartSizeEvent.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "event",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "public",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-public.ExpressionRendererEvent",
+                "text": "ExpressionRendererEvent"
+              }
+            ],
+            "path": "src/plugins/chart_expressions/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.isOnAggBasedEditor",
+        "type": "Function",
+        "tags": [],
+        "label": "isOnAggBasedEditor",
+        "description": [],
+        "signature": [
+          "(context?: ",
+          {
+            "pluginId": "@kbn/core-execution-context-common",
+            "scope": "common",
+            "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+            "section": "def-common.KibanaExecutionContext",
+            "text": "KibanaExecutionContext"
+          },
+          " | undefined) => boolean"
+        ],
+        "path": "src/plugins/chart_expressions/common/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.isOnAggBasedEditor.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-execution-context-common",
+                "scope": "common",
+                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
+                "section": "def-common.KibanaExecutionContext",
+                "text": "KibanaExecutionContext"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/common/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.useSizeTransitionVeil",
+        "type": "Function",
+        "tags": [],
+        "label": "useSizeTransitionVeil",
+        "description": [
+          "\nThis hook is used to show a veil over the chart while it is being resized\nin response to a change in the container dimensions.\n\nIt is only relevant if client dimensions are being requested based on chart configuration.\n\nThis whole feature is a nice-to-have. If it proves to be a source of bugs,\nwe can consider removing it and accepting the aesthetic drawback."
+        ],
+        "signature": [
+          "(chartSizeSpec: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.ChartSizeSpec",
+            "text": "ChartSizeSpec"
+          },
+          ", setChartSize: (d: ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.ChartSizeSpec",
+            "text": "ChartSizeSpec"
+          },
+          ") => void, shouldUseVeil: boolean) => { veil: JSX.Element; onResize: () => void; containerRef: React.RefObject<HTMLDivElement>; }"
+        ],
+        "path": "src/plugins/chart_expressions/common/chart_size_transition_veil.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.useSizeTransitionVeil.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "chartSizeSpec",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/chart-expressions-common",
+                "scope": "common",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
+                "section": "def-common.ChartSizeSpec",
+                "text": "ChartSizeSpec"
+              }
+            ],
+            "path": "src/plugins/chart_expressions/common/chart_size_transition_veil.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.useSizeTransitionVeil.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "setChartSize",
+            "description": [],
+            "signature": [
+              "(d: ",
+              {
+                "pluginId": "@kbn/chart-expressions-common",
+                "scope": "common",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
+                "section": "def-common.ChartSizeSpec",
+                "text": "ChartSizeSpec"
+              },
+              ") => void"
+            ],
+            "path": "src/plugins/chart_expressions/common/chart_size_transition_veil.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.useSizeTransitionVeil.$3",
+            "type": "boolean",
+            "tags": [],
+            "label": "shouldUseVeil",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "src/plugins/chart_expressions/common/chart_size_transition_veil.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.ChartSizeEvent",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChartSizeEvent",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.ChartSizeEvent",
+            "text": "ChartSizeEvent"
+          },
+          " extends ",
+          {
+            "pluginId": "expressions",
+            "scope": "public",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-public.ExpressionRendererEvent",
+            "text": "ExpressionRendererEvent"
+          }
+        ],
+        "path": "src/plugins/chart_expressions/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.ChartSizeEvent.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "\"chartSize\""
+            ],
+            "path": "src/plugins/chart_expressions/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.ChartSizeEvent.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/chart-expressions-common",
+                "scope": "common",
+                "docId": "kibKbnChartExpressionsCommonPluginApi",
+                "section": "def-common.ChartSizeSpec",
+                "text": "ChartSizeSpec"
+              }
+            ],
+            "path": "src/plugins/chart_expressions/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.ChartSizeSpec",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChartSizeSpec",
+        "description": [],
+        "path": "src/plugins/chart_expressions/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.ChartSizeSpec.maxDimensions",
+            "type": "Object",
+            "tags": [],
+            "label": "maxDimensions",
+            "description": [],
+            "signature": [
+              "ChartSizeDimensions | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.ChartSizeSpec.minDimensions",
+            "type": "Object",
+            "tags": [],
+            "label": "minDimensions",
+            "description": [],
+            "signature": [
+              "ChartSizeDimensions | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.ChartSizeSpec.aspectRatio",
+            "type": "Object",
+            "tags": [],
+            "label": "aspectRatio",
+            "description": [],
+            "signature": [
+              "{ x: number; y: number; } | undefined"
+            ],
+            "path": "src/plugins/chart_expressions/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.MakeOverridesSerializable",
+        "type": "Type",
+        "tags": [],
+        "label": "MakeOverridesSerializable",
+        "description": [],
+        "signature": [
+          "{ [KeyType in keyof T]: NonNullable<T[KeyType]> extends Function ? \"ignore\" : NonNullable<T[KeyType]> extends React.ReactElement<any, string | React.JSXElementConstructor<any>> | React.ReactChildren ? never : NonNullable<T[KeyType]> extends object ? ",
+          {
+            "pluginId": "@kbn/chart-expressions-common",
+            "scope": "common",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
+            "section": "def-common.MakeOverridesSerializable",
+            "text": "MakeOverridesSerializable"
+          },
+          "<T[KeyType]> : NonNullable<T[KeyType]>; }"
+        ],
+        "path": "src/plugins/chart_expressions/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-expressions-common",
+        "id": "def-common.Simplify",
+        "type": "Type",
+        "tags": [],
+        "label": "Simplify",
+        "description": [],
+        "signature": [
+          "{ [KeyType in keyof T]: T[KeyType]; }"
+        ],
+        "path": "src/plugins/chart_expressions/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

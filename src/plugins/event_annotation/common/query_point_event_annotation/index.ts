@@ -8,7 +8,7 @@
 
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { AvailableAnnotationIcons } from '../constants';
+import { AvailableAnnotationIcons } from '@kbn/event-annotation-common';
 
 import type { QueryPointEventAnnotationArgs, QueryPointEventAnnotationOutput } from './types';
 
@@ -102,13 +102,6 @@ export const queryPointEventAnnotation: ExpressionFunctionDefinition<
       help: i18n.translate('eventAnnotation.queryAnnotation.args.isHidden', {
         defaultMessage: `Switch to hide annotation`,
       }),
-    },
-    ignoreGlobalFilters: {
-      types: ['boolean'],
-      help: i18n.translate('eventAnnotation.queryAnnotation.args.ignoreGlobalFilters', {
-        defaultMessage: `Switch to ignore global filters for the annotation`,
-      }),
-      default: true,
     },
   },
   fn: function fn(input: unknown, args: QueryPointEventAnnotationArgs) {

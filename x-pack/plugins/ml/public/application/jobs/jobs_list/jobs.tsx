@@ -7,9 +7,8 @@
 
 import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-// @ts-ignore
+import { usePageUrlState } from '@kbn/ml-url-state';
 import { JobsListView } from './components/jobs_list_view';
-import { usePageUrlState } from '../../util/url_state';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import { ListingPageUrlState } from '../../../../common/types/common';
 import { HelpMenu } from '../../components/help_menu';
@@ -17,9 +16,14 @@ import { useMlKibana } from '../../contexts/kibana';
 import { MlPageHeader } from '../../components/page_header';
 import { HeaderMenuPortal } from '../../components/header_menu_portal';
 import { JobsActionMenu } from '../components/jobs_action_menu';
+import { useEnabledFeatures } from '../../contexts/ml';
+
+interface PageUrlState {
+  pageKey: typeof ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE;
+  pageUrlState: ListingPageUrlState;
+}
 
 interface JobsPageProps {
-  blockRefresh?: boolean;
   isMlEnabledInSpace?: boolean;
   lastRefresh?: number;
 }
@@ -31,14 +35,16 @@ export const getDefaultAnomalyDetectionJobsListState = (): ListingPageUrlState =
   sortDirection: 'asc',
 });
 
-export const JobsPage: FC<JobsPageProps> = (props) => {
-  const [pageState, setPageState] = usePageUrlState(
+export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh }) => {
+  const [pageState, setPageState] = usePageUrlState<PageUrlState>(
     ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
     getDefaultAnomalyDetectionJobsListState()
   );
   const {
     services: { docLinks },
   } = useMlKibana();
+
+  const { showNodeInfo } = useEnabledFeatures();
   const helpLink = docLinks.links.ml.anomalyDetection;
   return (
     <>
@@ -48,7 +54,13 @@ export const JobsPage: FC<JobsPageProps> = (props) => {
       <HeaderMenuPortal>
         <JobsActionMenu />
       </HeaderMenuPortal>
-      <JobsListView {...props} jobsViewState={pageState} onJobsViewStateUpdate={setPageState} />
+      <JobsListView
+        isMlEnabledInSpace={isMlEnabledInSpace}
+        lastRefresh={lastRefresh}
+        jobsViewState={pageState}
+        onJobsViewStateUpdate={setPageState}
+        showNodeInfo={showNodeInfo}
+      />
       <HelpMenu docLink={helpLink} />
     </>
   );

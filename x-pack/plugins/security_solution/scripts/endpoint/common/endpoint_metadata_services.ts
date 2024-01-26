@@ -10,7 +10,12 @@ import type { KbnClient } from '@kbn/test';
 import type { WriteResponseBase } from '@elastic/elasticsearch/lib/api/types';
 import { clone, merge } from 'lodash';
 import type { DeepPartial } from 'utility-types';
-import type { GetMetadataListRequestQuery } from '../../../common/endpoint/schema/metadata';
+import {
+  RETRYABLE_TRANSIENT_ERRORS,
+  retryOnError,
+} from '../../../common/endpoint/data_loaders/utils';
+import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
+import type { GetMetadataListRequestQuery } from '../../../common/api/endpoint';
 import { resolvePathVariables } from '../../../public/common/utils/resolve_path_variables';
 import {
   HOST_METADATA_GET_ROUTE,
@@ -18,6 +23,7 @@ import {
   METADATA_DATASTREAM,
 } from '../../../common/endpoint/constants';
 import type { HostInfo, HostMetadata, MetadataListResponse } from '../../../common/endpoint/types';
+import { HostStatus } from '../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../common/endpoint/generate_data';
 
 const endpointGenerator = new EndpointDocGenerator();
@@ -27,10 +33,15 @@ export const fetchEndpointMetadata = async (
   agentId: string
 ): Promise<HostInfo> => {
   return (
-    await kbnClient.request<HostInfo>({
-      method: 'GET',
-      path: resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: agentId }),
-    })
+    await kbnClient
+      .request<HostInfo>({
+        method: 'GET',
+        path: resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: agentId }),
+        headers: {
+          'Elastic-Api-Version': '2023-10-31',
+        },
+      })
+      .catch(catchAxiosErrorFormatAndThrow)
   ).data;
 };
 
@@ -39,15 +50,20 @@ export const fetchEndpointMetadataList = async (
   { page = 0, pageSize = 100, ...otherOptions }: Partial<GetMetadataListRequestQuery> = {}
 ): Promise<MetadataListResponse> => {
   return (
-    await kbnClient.request<MetadataListResponse>({
-      method: 'GET',
-      path: HOST_METADATA_LIST_ROUTE,
-      query: {
-        page,
-        pageSize,
-        ...otherOptions,
-      },
-    })
+    await kbnClient
+      .request<MetadataListResponse>({
+        method: 'GET',
+        path: HOST_METADATA_LIST_ROUTE,
+        headers: {
+          'Elastic-Api-Version': '2023-10-31',
+        },
+        query: {
+          page,
+          pageSize,
+          ...otherOptions,
+        },
+      })
+      .catch(catchAxiosErrorFormatAndThrow)
   ).data;
 };
 
@@ -130,4 +146,47 @@ const fetchLastStreamedEndpointUpdate = async (
   );
 
   return queryResult.hits?.hits[0]?._source;
+};
+
+/**
+ * Waits for an endpoint to have streamed data to ES and for that data to have made it to the
+ * Endpoint Details API (transform destination index)
+ * @param kbnClient
+ * @param endpointAgentId
+ * @param timeoutMs
+ */
+export const waitForEndpointToStreamData = async (
+  kbnClient: KbnClient,
+  endpointAgentId: string,
+  timeoutMs: number = 60000
+): Promise<HostInfo> => {
+  const started = new Date();
+  const hasTimedOut = (): boolean => {
+    const elapsedTime = Date.now() - started.getTime();
+    return elapsedTime > timeoutMs;
+  };
+  let found: HostInfo | undefined;
+
+  while (!found && !hasTimedOut()) {
+    found = await retryOnError(
+      async () =>
+        fetchEndpointMetadataList(kbnClient, {
+          kuery: `united.endpoint.agent.id: "${endpointAgentId}"`,
+        }).then((response) => {
+          return response.data.filter((record) => record.host_status === HostStatus.HEALTHY)[0];
+        }),
+      RETRYABLE_TRANSIENT_ERRORS
+    );
+
+    if (!found) {
+      // sleep and check again
+      await new Promise((r) => setTimeout(r, 2000));
+    }
+  }
+
+  if (!found) {
+    throw new Error(`Timed out waiting for Endpoint id [${endpointAgentId}] to stream data to ES`);
+  }
+
+  return found;
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEsSearch } from '@kbn/observability-plugin/public';
+import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { useMemo } from 'react';
 import { useDataView } from '../components/app/rum_dashboard/local_uifilters/use_data_view';
 import { callDateMath } from '../services/data/call_date_math';

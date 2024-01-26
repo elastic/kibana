@@ -15,7 +15,7 @@ import {
   EuiRange,
   EuiRangeProps,
 } from '@elastic/eui';
-import { ANOMALY_THRESHOLD } from '../../../../common';
+import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
 
 export interface SeveritySelectorProps {
   value: number | undefined;
@@ -27,22 +27,22 @@ const MAX_ANOMALY_SCORE = 100;
 export const SeverityControl: FC<SeveritySelectorProps> = React.memo(({ value, onChange }) => {
   const levels: EuiRangeProps['levels'] = [
     {
-      min: ANOMALY_THRESHOLD.LOW,
-      max: ANOMALY_THRESHOLD.MINOR,
+      min: ML_ANOMALY_THRESHOLD.LOW,
+      max: ML_ANOMALY_THRESHOLD.MINOR,
       color: '#8BC8FB',
     },
     {
-      min: ANOMALY_THRESHOLD.MINOR,
-      max: ANOMALY_THRESHOLD.MAJOR,
+      min: ML_ANOMALY_THRESHOLD.MINOR,
+      max: ML_ANOMALY_THRESHOLD.MAJOR,
       color: '#FDEC25',
     },
     {
-      min: ANOMALY_THRESHOLD.MAJOR,
-      max: ANOMALY_THRESHOLD.CRITICAL,
+      min: ML_ANOMALY_THRESHOLD.MAJOR,
+      max: ML_ANOMALY_THRESHOLD.CRITICAL,
       color: '#FBA740',
     },
     {
-      min: ANOMALY_THRESHOLD.CRITICAL,
+      min: ML_ANOMALY_THRESHOLD.CRITICAL,
       max: MAX_ANOMALY_SCORE,
       color: '#FE5050',
     },
@@ -52,14 +52,7 @@ export const SeverityControl: FC<SeveritySelectorProps> = React.memo(({ value, o
     defaultMessage: 'Severity',
   });
 
-  const resultValue = value ?? ANOMALY_THRESHOLD.LOW;
-
-  const onChangeCallback = (
-    e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>
-  ) => {
-    // @ts-ignore Property 'value' does not exist on type 'EventTarget' | (EventTarget & HTMLInputElement)
-    onChange(Number(e.target.value));
-  };
+  const resultValue = value ?? ML_ANOMALY_THRESHOLD.LOW;
 
   const ticks = new Array(5).fill(null).map((x, i) => {
     const v = i * 25;
@@ -76,8 +69,8 @@ export const SeverityControl: FC<SeveritySelectorProps> = React.memo(({ value, o
             compressed
             prepend={label}
             value={resultValue}
-            onChange={onChangeCallback}
-            min={ANOMALY_THRESHOLD.LOW}
+            onChange={(e) => onChange(Number(e.target.value))}
+            min={ML_ANOMALY_THRESHOLD.LOW}
             max={MAX_ANOMALY_SCORE}
           />
         </EuiFlexItem>
@@ -85,10 +78,10 @@ export const SeverityControl: FC<SeveritySelectorProps> = React.memo(({ value, o
           <EuiRange
             className={'mlSeverityControl'}
             fullWidth
-            min={ANOMALY_THRESHOLD.LOW}
+            min={ML_ANOMALY_THRESHOLD.LOW}
             max={MAX_ANOMALY_SCORE}
             value={resultValue}
-            onChange={onChangeCallback}
+            onChange={(e) => onChange(Number(e.currentTarget.value))}
             aria-label={i18n.translate('xpack.ml.severitySelector.formControlAriaLabel', {
               defaultMessage: 'Select severity threshold',
             })}

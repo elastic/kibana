@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { createCaseSavedObjectType } from './cases';
+export { createCaseSavedObjectType } from './cases/cases';
 export { caseConfigureSavedObjectType } from './configure';
 export { createCaseCommentSavedObjectType } from './comments';
 export { createCaseUserActionSavedObjectType } from './user_actions';

@@ -44,6 +44,7 @@ export const getOldestIdleActionTask = async (
                         'actions:.jira',
                         'actions:.resilient',
                         'actions:.teams',
+                        'actions:.sentinelone',
                       ],
                     },
                   },

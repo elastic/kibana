@@ -1,0 +1,404 @@
+{
+  "id": "@kbn/custom-integrations",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/custom-integrations",
+        "id": "def-common.ConnectedCustomIntegrationsButton",
+        "type": "Function",
+        "tags": [],
+        "label": "ConnectedCustomIntegrationsButton",
+        "description": [],
+        "signature": [
+          "({ isDisabled, onClick, testSubj, }: ConnectedCustomIntegrationsButtonProps) => JSX.Element | null"
+        ],
+        "path": "packages/kbn-custom-integrations/src/components/custom_integrations_button.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/custom-integrations",
+            "id": "def-common.ConnectedCustomIntegrationsButton.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  isDisabled,\n  onClick,\n  testSubj = 'customIntegrationsPackageConnectedButton',\n}",
+            "description": [],
+            "signature": [
+              "ConnectedCustomIntegrationsButtonProps"
+            ],
+            "path": "packages/kbn-custom-integrations/src/components/custom_integrations_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/custom-integrations",
+        "id": "def-common.ConnectedCustomIntegrationsForm",
+        "type": "Function",
+        "tags": [],
+        "label": "ConnectedCustomIntegrationsForm",
+        "description": [],
+        "signature": [
+          "({ testSubjects }: Props) => JSX.Element | null"
+        ],
+        "path": "packages/kbn-custom-integrations/src/components/custom_integrations_form.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/custom-integrations",
+            "id": "def-common.ConnectedCustomIntegrationsForm.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ testSubjects }",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "packages/kbn-custom-integrations/src/components/custom_integrations_form.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/custom-integrations",
+        "id": "def-common.CustomIntegrationsProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "CustomIntegrationsProvider",
+        "description": [],
+        "signature": [
+          "React.FunctionComponent<React.PropsWithChildren<ProviderProps>>"
+        ],
+        "path": "packages/kbn-custom-integrations/src/state_machines/custom_integrations/provider.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/custom-integrations",
+            "id": "def-common.CustomIntegrationsProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P & { children?: React.ReactNode; }"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/custom-integrations",
+            "id": "def-common.CustomIntegrationsProvider.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/custom-integrations",
+        "id": "def-common.useConsumerCustomIntegrations",
+        "type": "Function",
+        "tags": [],
+        "label": "useConsumerCustomIntegrations",
+        "description": [],
+        "signature": [
+          "() => { mode: ",
+          "Mode",
+          "; dispatchableEvents: { saveCreateFields: (() => void) | undefined; updateCreateFields: ((fields: Partial<{ integrationName: string; datasets: { name: string; type: \"metrics\" | \"logs\"; }[]; }>) => void) | undefined; }; }"
+        ],
+        "path": "packages/kbn-custom-integrations/src/hooks/use_consumer_custom_integrations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/custom-integrations",
+        "id": "def-common.useCustomIntegrations",
+        "type": "Function",
+        "tags": [],
+        "label": "useCustomIntegrations",
+        "description": [],
+        "signature": [
+          "() => { customIntegrationsState: ",
+          "State",
+          "<",
+          "WithSelectedMode",
+          ", ",
+          "CreateCustomIntegrationNotificationEvent",
+          ", any, ",
+          "CustomIntegrationsTypestate",
+          ", ",
+          "ResolveTypegenMeta",
+          "<",
+          "TypegenDisabled",
+          ", ",
+          "CreateCustomIntegrationNotificationEvent",
+          ", ",
+          "BaseActionObject",
+          ", ",
+          "ServiceMap",
+          ">>; customIntegrationsPageSend: (event: ",
+          "SingleOrArray",
+          "<",
+          "Event",
+          "<",
+          "CreateCustomIntegrationNotificationEvent",
+          ">> | ",
+          "SCXML",
+          ".Event<",
+          "CreateCustomIntegrationNotificationEvent",
+          ">, payload?: ",
+          "EventData",
+          " | undefined) => ",
+          "State",
+          "<",
+          "WithSelectedMode",
+          ", ",
+          "CreateCustomIntegrationNotificationEvent",
+          ", any, ",
+          "CustomIntegrationsTypestate",
+          ", ",
+          "ResolveTypegenMeta",
+          "<",
+          "TypegenDisabled",
+          ", ",
+          "CreateCustomIntegrationNotificationEvent",
+          ", ",
+          "BaseActionObject",
+          ", ",
+          "ServiceMap",
+          ">>; customIntegrationsStateService: ",
+          "Interpreter",
+          "<",
+          "WithSelectedMode",
+          ", any, ",
+          "CreateCustomIntegrationNotificationEvent",
+          ", ",
+          "CustomIntegrationsTypestate",
+          ", ",
+          "ResolveTypegenMeta",
+          "<",
+          "TypegenDisabled",
+          ", ",
+          "CreateCustomIntegrationNotificationEvent",
+          ", ",
+          "BaseActionObject",
+          ", ",
+          "ServiceMap",
+          ">>; }"
+        ],
+        "path": "packages/kbn-custom-integrations/src/hooks/use_custom_integrations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/custom-integrations",
+        "id": "def-common.Callbacks",
+        "type": "Interface",
+        "tags": [],
+        "label": "Callbacks",
+        "description": [],
+        "path": "packages/kbn-custom-integrations/src/state_machines/custom_integrations/provider.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/custom-integrations",
+            "id": "def-common.Callbacks.onIntegrationCreation",
+            "type": "Function",
+            "tags": [],
+            "label": "onIntegrationCreation",
+            "description": [],
+            "signature": [
+              "((integrationOptions: { integrationName: string; datasets: { name: string; type: \"metrics\" | \"logs\"; }[]; }) => void) | undefined"
+            ],
+            "path": "packages/kbn-custom-integrations/src/state_machines/custom_integrations/provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/custom-integrations",
+                "id": "def-common.Callbacks.onIntegrationCreation.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "integrationOptions",
+                "description": [],
+                "signature": [
+                  "{ integrationName: string; datasets: { name: string; type: \"metrics\" | \"logs\"; }[]; }"
+                ],
+                "path": "packages/kbn-custom-integrations/src/state_machines/custom_integrations/provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/custom-integrations",
+            "id": "def-common.Callbacks.onIntegrationCleanup",
+            "type": "Function",
+            "tags": [],
+            "label": "onIntegrationCleanup",
+            "description": [],
+            "signature": [
+              "((integrationName: string) => void) | undefined"
+            ],
+            "path": "packages/kbn-custom-integrations/src/state_machines/custom_integrations/provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/custom-integrations",
+                "id": "def-common.Callbacks.onIntegrationCleanup.$1",
+                "type": "string",
+                "tags": [],
+                "label": "integrationName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-custom-integrations/src/state_machines/custom_integrations/provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/custom-integrations",
+            "id": "def-common.Callbacks.onIntegrationCleanupFailed",
+            "type": "Function",
+            "tags": [],
+            "label": "onIntegrationCleanupFailed",
+            "description": [],
+            "signature": [
+              "((error: ",
+              "IntegrationError",
+              ") => void) | undefined"
+            ],
+            "path": "packages/kbn-custom-integrations/src/state_machines/custom_integrations/provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/custom-integrations",
+                "id": "def-common.Callbacks.onIntegrationCleanupFailed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "IntegrationError"
+                ],
+                "path": "packages/kbn-custom-integrations/src/state_machines/custom_integrations/provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/custom-integrations",
+        "id": "def-common.CustomIntegrationOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "CustomIntegrationOptions",
+        "description": [],
+        "signature": [
+          "{ integrationName: string; datasets: { name: string; type: \"metrics\" | \"logs\"; }[]; }"
+        ],
+        "path": "packages/kbn-custom-integrations/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/custom-integrations",
+        "id": "def-common.DispatchableEvents",
+        "type": "Type",
+        "tags": [],
+        "label": "DispatchableEvents",
+        "description": [],
+        "signature": [
+          "{ saveCreateFields: (() => void) | undefined; updateCreateFields: ((fields: Partial<{ integrationName: string; datasets: { name: string; type: \"metrics\" | \"logs\"; }[]; }>) => void) | undefined; }"
+        ],
+        "path": "packages/kbn-custom-integrations/src/hooks/use_consumer_custom_integrations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/custom-integrations",
+        "id": "def-common.InitialState",
+        "type": "Type",
+        "tags": [],
+        "label": "InitialState",
+        "description": [],
+        "signature": [
+          "{ context?: Partial<",
+          "CreateInitialState",
+          "> | undefined; } & ",
+          "WithSelectedMode"
+        ],
+        "path": "packages/kbn-custom-integrations/src/state_machines/custom_integrations/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

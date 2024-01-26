@@ -6,20 +6,22 @@
  */
 
 import type { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type {
+  CheckPrivilegesResponse,
+  CheckSavedObjectsPrivileges,
+} from '@kbn/security-plugin-types-server';
 
-import type { CheckSavedObjectsPrivileges } from '../authorization';
-import { Actions } from '../authorization';
-import type { CheckPrivilegesResponse } from '../authorization/types';
 import type { EnsureAuthorizedResult } from './ensure_authorized';
 import {
   ensureAuthorized,
   getEnsureAuthorizedActionResult,
   isAuthorizedForObjectInAllSpaces,
 } from './ensure_authorized';
+import { Actions } from '../authorization';
 
 describe('ensureAuthorized', () => {
   function setupDependencies() {
-    const actions = new Actions('some-version');
+    const actions = new Actions();
     jest
       .spyOn(actions.savedObject, 'get')
       .mockImplementation((type: string, action: string) => `mock-saved_object:${type}/${action}`);

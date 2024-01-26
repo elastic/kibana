@@ -20,7 +20,7 @@ interface Props {
 export const SchemaErrorsCallout: React.FC<Props> = ({ viewErrorsPath }) => (
   <EuiCallOut
     color="danger"
-    iconType="alert"
+    iconType="warning"
     title={SCHEMA_ERRORS_TITLE}
     data-test-subj="schemaErrorsCallout"
   >

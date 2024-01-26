@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { Index as IndexInterface } from '@kbn/index-management-plugin/common/types';
-
 export type Phase = keyof Phases;
 
 export type PhaseWithAllocation = 'warm' | 'cold';
@@ -20,6 +18,7 @@ export type PhaseWithDownsample = 'hot' | 'warm' | 'cold';
 export interface SerializedPolicy {
   name: string;
   phases: Phases;
+  deprecated?: boolean;
   _meta?: Record<string, any>;
 }
 
@@ -243,8 +242,4 @@ export interface IndexLifecyclePolicy {
     message?: string;
   };
   step_time_millis?: number;
-}
-
-export interface Index extends IndexInterface {
-  ilm: IndexLifecyclePolicy;
 }

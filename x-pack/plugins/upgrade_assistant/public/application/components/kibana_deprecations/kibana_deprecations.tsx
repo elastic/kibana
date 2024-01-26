@@ -6,14 +6,9 @@
  */
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
-import {
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageHeader,
-  EuiSpacer,
-  EuiCallOut,
-} from '@elastic/eui';
+import { EuiPageHeader, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 
@@ -140,7 +135,7 @@ export const KibanaDeprecations = withRouter(({ history }: RouteComponentProps) 
         // Only show deprecations in the table that fetched successfully
         filteredDeprecations.push({
           ...deprecation,
-          id: uuid.v4(), // Associate an unique ID with each deprecation to track resolution state
+          id: uuidv4(), // Associate an unique ID with each deprecation to track resolution state
           filterType: deprecation.deprecationType ?? 'uncategorized', // deprecationType is currently optional, in order to correctly handle sort/filter, we default any undefined types to "uncategorized"
         });
       });
@@ -234,21 +229,15 @@ export const KibanaDeprecations = withRouter(({ history }: RouteComponentProps) 
   }
 
   if (isLoading) {
-    return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
-        <SectionLoading>{i18nTexts.isLoading}</SectionLoading>
-      </EuiPageContent>
-    );
+    return <SectionLoading>{i18nTexts.isLoading}</SectionLoading>;
   }
 
   if (kibanaDeprecations?.length === 0) {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
-        <NoDeprecationsPrompt
-          deprecationType={i18nTexts.deprecationLabel}
-          navigateToOverviewPage={() => history.push('/overview')}
-        />
-      </EuiPageContent>
+      <NoDeprecationsPrompt
+        deprecationType={i18nTexts.deprecationLabel}
+        navigateToOverviewPage={() => history.push('/overview')}
+      />
     );
   }
 
@@ -272,7 +261,7 @@ export const KibanaDeprecations = withRouter(({ history }: RouteComponentProps) 
           <EuiCallOut
             title={i18nTexts.kibanaDeprecationErrorTitle}
             color="warning"
-            iconType="alert"
+            iconType="warning"
             data-test-subj="kibanaDeprecationErrors"
           >
             <p>{i18nTexts.getKibanaDeprecationErrorDescription(kibanaDeprecationErrors)}</p>

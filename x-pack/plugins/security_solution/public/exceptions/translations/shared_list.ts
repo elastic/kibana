@@ -88,9 +88,22 @@ export const EXCEPTIONS_LISTS_SEARCH_PLACEHOLDER = i18n.translate(
 export const ALL_EXCEPTIONS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allExceptions.tableTitle',
   {
-    defaultMessage: 'Rule Exceptions',
+    defaultMessage: 'Shared Exception Lists',
   }
 );
+
+export const ALL_EXCEPTIONS_SUBTITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allExceptions.tableSubtitle',
+  {
+    defaultMessage: "To view rule specific exceptions navigate to that rule's details page.",
+  }
+);
+
+export const allExceptionsRowPerPage = (rowSize: number) =>
+  i18n.translate('xpack.securitySolution.exceptions.allExceptionsRowPerPage', {
+    defaultMessage: 'Rows per page: {rowSize}',
+    values: { rowSize },
+  });
 
 export const NO_LISTS_BODY = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allExceptions.filters.noListsBody',
@@ -99,17 +112,29 @@ export const NO_LISTS_BODY = i18n.translate(
   }
 );
 
-export const EXCEPTION_EXPORT_SUCCESS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.all.exceptions.exportSuccess',
-  {
-    defaultMessage: 'Exception list export success',
-  }
-);
+export const EXCEPTION_LIST_EXPORTED_SUCCESSFULLY = (listName: string) =>
+  i18n.translate('xpack.securitySolution.exceptions.list.export_success', {
+    values: { listName },
+    defaultMessage: 'Exception list "{listName}" exported successfully',
+  });
 
 export const EXCEPTION_EXPORT_ERROR = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.all.exceptions.exportError',
   {
     defaultMessage: 'Exception list export error',
+  }
+);
+
+export const EXCEPTION_LIST_DUPLICATED_SUCCESSFULLY = (listName: string) =>
+  i18n.translate('xpack.securitySolution.exceptions.list.duplicate_success', {
+    values: { listName },
+    defaultMessage: 'Exception list "{listName}" duplicated successfully',
+  });
+
+export const EXCEPTION_DUPLICATE_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.all.exceptions.duplicateError',
+  {
+    defaultMessage: 'Exception list duplication error',
   }
 );
 
@@ -163,7 +188,7 @@ export const referenceErrorMessage = (referenceCount: number) =>
 export const EXCEPTION_LIST_SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.all.exceptions.searchPlaceholder',
   {
-    defaultMessage: 'Search by name or list id',
+    defaultMessage: 'Search by name or list_id:id',
   }
 );
 
@@ -183,7 +208,7 @@ export const UPLOAD_BUTTON = i18n.translate(
 
 export const uploadSuccessMessage = (fileName: string) =>
   i18n.translate('xpack.securitySolution.lists.exceptionListImportSuccess', {
-    defaultMessage: "Exception list '{fileName}' was imported",
+    defaultMessage: 'Exception list {fileName} was imported',
     values: { fileName },
   });
 
@@ -282,14 +307,14 @@ export const EXCEPTIONS = i18n.translate(
 export const CREATE_SHARED_LIST_BUTTON = i18n.translate(
   'xpack.securitySolution.exceptions.manageExceptions.createSharedListButton',
   {
-    defaultMessage: 'create shared list',
+    defaultMessage: 'Create shared list',
   }
 );
 
 export const CREATE_BUTTON_ITEM_BUTTON = i18n.translate(
   'xpack.securitySolution.exceptions.manageExceptions.createItemButton',
   {
-    defaultMessage: 'create exception item',
+    defaultMessage: 'Create exception item',
   }
 );
 
@@ -324,7 +349,7 @@ export const CREATE_SHARED_LIST_DESCRIPTION = i18n.translate(
 export const CREATE_SHARED_LIST_DESCRIPTION_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.exceptions.createSharedExceptionListFlyoutDescriptionPlaceholder',
   {
-    defaultMessage: 'New exception list',
+    defaultMessage: 'New exception list description',
   }
 );
 
@@ -337,13 +362,82 @@ export const CREATE_BUTTON = i18n.translate(
 
 export const getSuccessText = (listName: string) =>
   i18n.translate('xpack.securitySolution.exceptions.createSharedExceptionListSuccessDescription', {
-    defaultMessage: 'list with name ${listName} was created!',
+    defaultMessage: 'List with name {listName} was created!',
     values: { listName },
   });
 
 export const SUCCESS_TITLE = i18n.translate(
   'xpack.securitySolution.exceptions.createSharedExceptionListSuccessTitle',
   {
-    defaultMessage: 'created list',
+    defaultMessage: 'Created list',
+  }
+);
+
+export const SORT_BY = i18n.translate('xpack.securitySolution.exceptions.sortBy', {
+  defaultMessage: 'Sort by:',
+});
+
+export const SORT_BY_CREATE_AT = i18n.translate(
+  'xpack.securitySolution.exceptions.sortByCreateAt',
+  {
+    defaultMessage: 'Created At',
+  }
+);
+
+export const EXPIRED_EXCEPTIONS_MODAL_CANCEL_BUTTON = i18n.translate(
+  'xpack.securitySolution.exceptions.expiredExceptionModalCancelButton',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const EXPIRED_EXCEPTIONS_MODAL_EXPORT_TITLE = i18n.translate(
+  'xpack.securitySolution.exceptions.expiredExceptionModalExportTitle',
+  {
+    defaultMessage: 'Export exception list?',
+  }
+);
+
+export const EXPIRED_EXCEPTIONS_MODAL_DUPLICATE_TITLE = i18n.translate(
+  'xpack.securitySolution.exceptions.expiredExceptionModalDuplicateTitle',
+  {
+    defaultMessage: 'Duplicate exception list?',
+  }
+);
+
+export const EXPIRED_EXCEPTIONS_MODAL_DUPLICATE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.exceptions.expiredExceptionModalIncludeDuplicateDescription',
+  {
+    defaultMessage:
+      'You’re duplicating an exception list. Switch the toggle off to exclude expired exceptions.',
+  }
+);
+
+export const EXPIRED_EXCEPTIONS_MODAL_EXPORT_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.exceptions.expiredExceptionModalIncludeExportDescription',
+  {
+    defaultMessage:
+      'You’re exporting an exception list. Switch the toggle off to exclude expired exceptions.',
+  }
+);
+
+export const EXPIRED_EXCEPTIONS_MODAL_INCLUDE_SWITCH_LABEL = i18n.translate(
+  'xpack.securitySolution.exceptions.expiredExceptionModalIncludeSwitchLabel',
+  {
+    defaultMessage: 'Include expired exceptions',
+  }
+);
+
+export const EXPIRED_EXCEPTIONS_MODAL_CONFIRM_DUPLICATE_BUTTON = i18n.translate(
+  'xpack.securitySolution.exceptions.expiredExceptionModalConfirmDuplicateButton',
+  {
+    defaultMessage: 'Duplicate',
+  }
+);
+
+export const EXPIRED_EXCEPTIONS_MODAL_CONFIRM_EXPORT_BUTTON = i18n.translate(
+  'xpack.securitySolution.exceptions.expiredExceptionModalConfirmExportButton',
+  {
+    defaultMessage: 'Export',
   }
 );

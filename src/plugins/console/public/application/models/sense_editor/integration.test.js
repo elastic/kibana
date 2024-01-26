@@ -13,6 +13,9 @@ import $ from 'jquery';
 
 import * as kb from '../../../lib/kb/kb';
 import { AutocompleteInfo, setAutocompleteInfo } from '../../../services';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { StorageMock } from '../../../services/storage.mock';
+import { SettingsMock } from '../../../services/settings.mock';
 
 describe('Integration', () => {
   let senseEditor;
@@ -27,6 +30,15 @@ describe('Integration', () => {
     $(senseEditor.getCoreEditor().getContainer()).show();
     senseEditor.autocomplete._test.removeChangeListener();
     autocompleteInfo = new AutocompleteInfo();
+
+    const httpMock = httpServiceMock.createSetupContract();
+    const storage = new StorageMock({}, 'test');
+    const settingsMock = new SettingsMock(storage);
+
+    settingsMock.getAutocomplete.mockReturnValue({ fields: true });
+
+    autocompleteInfo.mapping.setup(httpMock, settingsMock);
+
     setAutocompleteInfo(autocompleteInfo);
   });
   afterEach(() => {
@@ -37,7 +49,7 @@ describe('Integration', () => {
   });
 
   function processContextTest(data, mapping, kbSchemes, requestLine, testToRun) {
-    test(testToRun.name, async function (done) {
+    test(testToRun.name, function (done) {
       let lineOffset = 0; // add one for the extra method line
       let editorValue = data;
       if (requestLine != null) {
@@ -68,105 +80,106 @@ describe('Integration', () => {
           });
         }
       }
-      kb.setActiveApi(testApi);
+      kb._test.setActiveApi(testApi);
       const { cursor } = testToRun;
-      await senseEditor.update(editorValue, true);
-      senseEditor.getCoreEditor().moveCursorToPosition(cursor);
+      senseEditor.update(editorValue, true).then(() => {
+        senseEditor.getCoreEditor().moveCursorToPosition(cursor);
+        // allow ace rendering to move cursor so it will be seen during test - handy for debugging.
+        //setTimeout(function () {
+        senseEditor.completer = {
+          base: {},
+          changeListener: function () {},
+        }; // mimic auto complete
 
-      // allow ace rendering to move cursor so it will be seen during test - handy for debugging.
-      //setTimeout(function () {
-      senseEditor.completer = {
-        base: {},
-        changeListener: function () {},
-      }; // mimic auto complete
+        senseEditor.autocomplete._test.getCompletions(
+          senseEditor,
+          null,
+          cursor,
+          '',
+          function (err, terms) {
+            if (testToRun.assertThrows) {
+              done();
+              return;
+            }
 
-      senseEditor.autocomplete._test.getCompletions(
-        senseEditor,
-        null,
-        cursor,
-        '',
-        function (err, terms) {
-          if (testToRun.assertThrows) {
-            done();
-            return;
-          }
+            if (err) {
+              throw err;
+            }
 
-          if (err) {
-            throw err;
-          }
-
-          if (testToRun.no_context) {
-            expect(!terms || terms.length === 0).toBeTruthy();
-          } else {
-            expect(terms).not.toBeNull();
-            expect(terms.length).toBeGreaterThan(0);
-          }
-
-          if (!terms || terms.length === 0) {
-            done();
-            return;
-          }
-
-          if (testToRun.autoCompleteSet) {
-            const expectedTerms = _.map(testToRun.autoCompleteSet, function (t) {
-              if (typeof t !== 'object') {
-                t = { name: t };
-              }
-              return t;
-            });
-            if (terms.length !== expectedTerms.length) {
-              expect(_.map(terms, 'name')).toEqual(_.map(expectedTerms, 'name'));
+            if (testToRun.no_context) {
+              expect(!terms || terms.length === 0).toBeTruthy();
             } else {
-              const filteredActualTerms = _.map(terms, function (actualTerm, i) {
-                const expectedTerm = expectedTerms[i];
-                const filteredTerm = {};
-                _.each(expectedTerm, function (v, p) {
-                  filteredTerm[p] = actualTerm[p];
-                });
-                return filteredTerm;
-              });
-              expect(filteredActualTerms).toEqual(expectedTerms);
+              expect(terms).not.toBeNull();
+              expect(terms.length).toBeGreaterThan(0);
             }
-          }
 
-          const context = terms[0].context;
-          const {
-            cursor: { lineNumber, column },
-          } = testToRun;
-          senseEditor.autocomplete._test.addReplacementInfoToContext(
-            context,
-            { lineNumber, column },
-            terms[0].value
-          );
+            if (!terms || terms.length === 0) {
+              done();
+              return;
+            }
 
-          function ac(prop, propTest) {
-            if (typeof testToRun[prop] !== 'undefined') {
-              if (propTest) {
-                propTest(context[prop], testToRun[prop], prop);
+            if (testToRun.autoCompleteSet) {
+              const expectedTerms = _.map(testToRun.autoCompleteSet, function (t) {
+                if (typeof t !== 'object') {
+                  t = { name: t };
+                }
+                return t;
+              });
+              if (terms.length !== expectedTerms.length) {
+                expect(_.map(terms, 'name')).toEqual(_.map(expectedTerms, 'name'));
               } else {
-                expect(context[prop]).toEqual(testToRun[prop]);
+                const filteredActualTerms = _.map(terms, function (actualTerm, i) {
+                  const expectedTerm = expectedTerms[i];
+                  const filteredTerm = {};
+                  _.each(expectedTerm, function (v, p) {
+                    filteredTerm[p] = actualTerm[p];
+                  });
+                  return filteredTerm;
+                });
+                expect(filteredActualTerms).toEqual(expectedTerms);
               }
             }
-          }
 
-          function posCompare(actual, expected) {
-            expect(actual.lineNumber).toEqual(expected.lineNumber + lineOffset);
-            expect(actual.column).toEqual(expected.column);
-          }
+            const context = terms[0].context;
+            const {
+              cursor: { lineNumber, column },
+            } = testToRun;
+            senseEditor.autocomplete._test.addReplacementInfoToContext(
+              context,
+              { lineNumber, column },
+              terms[0].value
+            );
 
-          function rangeCompare(actual, expected, name) {
-            posCompare(actual.start, expected.start, name + '.start');
-            posCompare(actual.end, expected.end, name + '.end');
-          }
+            function ac(prop, propTest) {
+              if (typeof testToRun[prop] !== 'undefined') {
+                if (propTest) {
+                  propTest(context[prop], testToRun[prop], prop);
+                } else {
+                  expect(context[prop]).toEqual(testToRun[prop]);
+                }
+              }
+            }
 
-          ac('prefixToAdd');
-          ac('suffixToAdd');
-          ac('addTemplate');
-          ac('textBoxPosition', posCompare);
-          ac('rangeToReplace', rangeCompare);
-          done();
-        }
-      );
+            function posCompare(actual, expected) {
+              expect(actual.lineNumber).toEqual(expected.lineNumber + lineOffset);
+              expect(actual.column).toEqual(expected.column);
+            }
+
+            function rangeCompare(actual, expected, name) {
+              posCompare(actual.start, expected.start, name + '.start');
+              posCompare(actual.end, expected.end, name + '.end');
+            }
+
+            ac('prefixToAdd');
+            ac('suffixToAdd');
+            ac('addTemplate');
+            ac('textBoxPosition', posCompare);
+            ac('rangeToReplace', rangeCompare);
+            done();
+          },
+          { setAnnotation: () => {}, removeAnnotation: () => {} }
+        );
+      });
     });
   }
 
@@ -183,7 +196,7 @@ describe('Integration', () => {
     endpoints: {
       _search: {
         methods: ['GET', 'POST'],
-        patterns: ['{indices}/_search', '_search'],
+        patterns: ['{index}/_search', '_search'],
         data_autocomplete_rules: {
           query: {
             match_all: {},
@@ -935,6 +948,8 @@ describe('Integration', () => {
         autoCompleteSet: [
           tt('field1.1.1', { f: 1 }, 'string'),
           tt('field1.1.2', { f: 1 }, 'string'),
+          tt('field2.1.1', { f: 1 }, 'string'),
+          tt('field2.1.2', { f: 1 }, 'string'),
         ],
       },
       {
@@ -943,6 +958,8 @@ describe('Integration', () => {
         autoCompleteSet: [
           { name: 'field1.1.1', meta: 'string' },
           { name: 'field1.1.2', meta: 'string' },
+          { name: 'field2.1.1', meta: 'string' },
+          { name: 'field2.1.2', meta: 'string' },
         ],
       },
     ]
@@ -968,7 +985,7 @@ describe('Integration', () => {
       {
         name: 'Cursor rows after request end',
         cursor: { lineNumber: 5, column: 1 },
-        autoCompleteSet: ['GET', 'PUT', 'POST', 'DELETE', 'HEAD'],
+        autoCompleteSet: ['GET', 'PUT', 'POST', 'DELETE', 'HEAD', 'PATCH'],
         prefixToAdd: '',
         suffixToAdd: ' ',
       },
@@ -983,7 +1000,7 @@ describe('Integration', () => {
   const CLUSTER_KB = {
     endpoints: {
       _search: {
-        patterns: ['_search', '{indices}/_search'],
+        patterns: ['_search', '{index}/_search'],
         url_params: {
           search_type: ['count', 'query_then_fetch'],
           scroll: '10m',

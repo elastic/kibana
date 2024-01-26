@@ -5,20 +5,23 @@
  * 2.0.
  */
 
-import { mapValues, trimEnd, cloneDeep, unset } from 'lodash';
+import { trimEnd, cloneDeep, unset } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import type { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
 import type {
   SavedObjectUnsanitizedDoc,
   SavedObjectSanitizedDoc,
-  SavedObjectMigrationFn,
   SavedObjectMigrationMap,
   SavedObjectMigrationContext,
 } from '@kbn/core/server';
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
-import type { CommentAttributes } from '../../../common/api';
-import { CommentType } from '../../../common/api';
+import type { SavedObjectMigrationParams } from '@kbn/core-saved-objects-server';
+import type {
+  PersistableStateAttachmentAttributes,
+  UserCommentAttachmentAttributes,
+} from '../../../common/types/domain';
+import { AttachmentType } from '../../../common/types/domain';
 import type { LensMarkdownNode, MarkdownNode } from '../../../common/utils/markdown_plugins/utils';
 import {
   isLensMarkdownNode,
@@ -27,20 +30,29 @@ import {
 } from '../../../common/utils/markdown_plugins/utils';
 import type { SanitizedCaseOwner } from '.';
 import { addOwnerToSO } from '.';
-import { logError } from './utils';
-import { GENERATED_ALERT, SUB_CASE_SAVED_OBJECT } from './constants';
+import {
+  getLensMigrations,
+  isDeferredMigration,
+  isPersistableStateAttachmentSO,
+  isUserCommentSO,
+  logError,
+} from './utils';
+import {
+  GENERATED_ALERT,
+  MIN_COMMENTS_DEFERRED_KIBANA_VERSION,
+  SUB_CASE_SAVED_OBJECT,
+} from './constants';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
-import { getAllPersistableAttachmentMigrations } from './get_all_persistable_attachment_migrations';
-import type { PersistableStateAttachmentState } from '../../attachment_framework/types';
+import type { AttachmentPersistedAttributes } from '../../common/types/attachments';
 
 interface UnsanitizedComment {
   comment: string;
-  type?: CommentType;
+  type?: AttachmentType;
 }
 
 interface SanitizedComment {
   comment: string;
-  type: CommentType;
+  type: AttachmentType;
 }
 
 enum AssociationType {
@@ -60,22 +72,10 @@ export interface CreateCommentsMigrationsDeps {
 export const createCommentsMigrations = (
   migrationDeps: CreateCommentsMigrationsDeps
 ): SavedObjectMigrationMap => {
-  const lensMigrations = migrationDeps.lensEmbeddableFactory().migrations;
-  const lensMigrationObject =
-    typeof lensMigrations === 'function' ? lensMigrations() : lensMigrations || {};
-
-  const embeddableMigrations = mapValues<
-    MigrateFunctionsObject,
-    SavedObjectMigrationFn<{ comment?: string }>
-  >(lensMigrationObject, migrateByValueLensVisualizations) as MigrateFunctionsObject;
-
-  const persistableStateAttachmentMigrations = mapValues<
-    MigrateFunctionsObject,
-    SavedObjectMigrationFn<CommentAttributes>
-  >(
-    getAllPersistableAttachmentMigrations(migrationDeps.persistableStateAttachmentTypeRegistry),
-    migratePersistableStateAttachments
-  ) as MigrateFunctionsObject;
+  const embeddableMigrations = getLensMigrations({
+    lensEmbeddableFactory: migrationDeps.lensEmbeddableFactory,
+    migratorFactory: migrateByValueLensVisualizations,
+  });
 
   const commentsMigrations = {
     '7.11.0': (
@@ -85,7 +85,7 @@ export const createCommentsMigrations = (
         ...doc,
         attributes: {
           ...doc.attributes,
-          type: CommentType.user,
+          type: AttachmentType.user,
         },
         references: doc.references || [],
       };
@@ -98,9 +98,9 @@ export const createCommentsMigrations = (
         associationType: AssociationType.case,
       };
 
-      // only add the rule object for alert comments. Prior to 7.12 we only had CommentType.alert, generated alerts are
+      // only add the rule object for alert comments. Prior to 7.12 we only had AttachmentType.alert, generated alerts are
       // introduced in 7.12.
-      if (doc.attributes.type === CommentType.alert) {
+      if (doc.attributes.type === AttachmentType.alert) {
         attributes = { ...attributes, rule: { id: null, name: null } };
       }
 
@@ -127,69 +127,105 @@ export const createCommentsMigrations = (
     '8.1.0': removeAssociationType,
   };
 
-  return mergeSavedObjectMigrationMaps(
-    persistableStateAttachmentMigrations,
-    mergeSavedObjectMigrationMaps(commentsMigrations, embeddableMigrations)
-  );
+  return mergeSavedObjectMigrationMaps(commentsMigrations, embeddableMigrations);
 };
 
-export const migratePersistableStateAttachments =
-  (migrate: MigrateFunction): SavedObjectMigrationFn<CommentAttributes, CommentAttributes> =>
-  (doc: SavedObjectUnsanitizedDoc<CommentAttributes>) => {
-    if (doc.attributes.type !== CommentType.persistableState) {
-      return doc;
-    }
+export const migrateByValueLensVisualizations = (
+  migrate: MigrateFunction,
+  migrationVersion: string
+): SavedObjectMigrationParams<AttachmentPersistedAttributes, AttachmentPersistedAttributes> => {
+  const deferred = isDeferredMigration(MIN_COMMENTS_DEFERRED_KIBANA_VERSION, migrationVersion);
 
-    const { persistableStateAttachmentState, persistableStateAttachmentTypeId } = doc.attributes;
+  return {
+    // @ts-expect-error: remove when core changes the types
+    deferred,
+    transform: (
+      doc: SavedObjectUnsanitizedDoc<AttachmentPersistedAttributes>,
+      context: SavedObjectMigrationContext
+    ): SavedObjectSanitizedDoc<AttachmentPersistedAttributes> => {
+      if (isUserCommentSO(doc)) {
+        return migrateLensComment({ migrate, doc, context });
+      }
 
-    const migratedState = migrate({
-      persistableStateAttachmentState,
-      persistableStateAttachmentTypeId,
-    }) as PersistableStateAttachmentState;
+      if (isPersistableStateAttachmentSO(doc)) {
+        return migratePersistableLensAttachment({ migrate, doc, context });
+      }
+
+      return Object.assign(doc, { references: doc.references ?? [] });
+    },
+  };
+};
+
+const migrateLensComment = ({
+  migrate,
+  doc,
+  context,
+}: {
+  migrate: MigrateFunction;
+  doc: SavedObjectUnsanitizedDoc<UserCommentAttachmentAttributes>;
+  context: SavedObjectMigrationContext;
+}): SavedObjectSanitizedDoc<AttachmentPersistedAttributes> => {
+  try {
+    const parsedComment = parseCommentString(doc.attributes.comment);
+    const migratedComment = parsedComment.children.map((comment) => {
+      if (isLensMarkdownNode(comment)) {
+        // casting here because ts complains that comment isn't serializable because LensMarkdownNode
+        // extends Node which has fields that conflict with SerializableRecord even though it is serializable
+        return migrate(comment as SerializableRecord) as LensMarkdownNode;
+      }
+
+      return comment;
+    });
+
+    const migratedMarkdown = { ...parsedComment, children: migratedComment };
 
     return {
       ...doc,
       attributes: {
         ...doc.attributes,
-        persistableStateAttachmentState: migratedState.persistableStateAttachmentState,
+        comment: stringifyCommentWithoutTrailingNewline(doc.attributes.comment, migratedMarkdown),
       },
       references: doc.references ?? [],
     };
-  };
+  } catch (error) {
+    logError({ id: doc.id, context, error, docType: 'lens comment', docKey: 'comment' });
+    return Object.assign(doc, { references: doc.references ?? [] });
+  }
+};
 
-export const migrateByValueLensVisualizations =
-  (migrate: MigrateFunction): SavedObjectMigrationFn<{ comment?: string }, { comment?: string }> =>
-  (doc: SavedObjectUnsanitizedDoc<{ comment?: string }>, context: SavedObjectMigrationContext) => {
-    if (doc.attributes.comment == null) {
-      return doc;
-    }
+const migratePersistableLensAttachment = ({
+  migrate,
+  doc,
+  context,
+}: {
+  migrate: MigrateFunction;
+  doc: SavedObjectUnsanitizedDoc<PersistableStateAttachmentAttributes>;
+  context: SavedObjectMigrationContext;
+}): SavedObjectSanitizedDoc<AttachmentPersistedAttributes> => {
+  try {
+    const { persistableStateAttachmentState } = doc.attributes;
 
-    try {
-      const parsedComment = parseCommentString(doc.attributes.comment);
-      const migratedComment = parsedComment.children.map((comment) => {
-        if (isLensMarkdownNode(comment)) {
-          // casting here because ts complains that comment isn't serializable because LensMarkdownNode
-          // extends Node which has fields that conflict with SerializableRecord even though it is serializable
-          return migrate(comment as SerializableRecord) as LensMarkdownNode;
-        }
+    const migratedLensAttachment = migrate(persistableStateAttachmentState);
 
-        return comment;
-      });
-
-      const migratedMarkdown = { ...parsedComment, children: migratedComment };
-
-      return {
-        ...doc,
-        attributes: {
-          ...doc.attributes,
-          comment: stringifyCommentWithoutTrailingNewline(doc.attributes.comment, migratedMarkdown),
-        },
-      };
-    } catch (error) {
-      logError({ id: doc.id, context, error, docType: 'comment', docKey: 'comment' });
-      return doc;
-    }
-  };
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        persistableStateAttachmentState: migratedLensAttachment,
+      } as AttachmentPersistedAttributes,
+      references: doc.references ?? [],
+    };
+  } catch (error) {
+    logError({
+      id: doc.id,
+      context,
+      error,
+      docType: 'comment persistable lens attachment',
+      docKey: 'comment',
+    });
+    return Object.assign(doc, { references: doc.references ?? [] });
+  }
+};
 
 export const stringifyCommentWithoutTrailingNewline = (
   originalComment: string,
@@ -210,7 +246,7 @@ export const stringifyCommentWithoutTrailingNewline = (
 export const removeRuleInformation = (
   doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
 ): SavedObjectSanitizedDoc<unknown> => {
-  if (doc.attributes.type === CommentType.alert || doc.attributes.type === GENERATED_ALERT) {
+  if (doc.attributes.type === AttachmentType.alert || doc.attributes.type === GENERATED_ALERT) {
     return {
       ...doc,
       attributes: {

@@ -16,14 +16,6 @@ interface Props {
 
 type CustomComponentProps = Omit<Props, 'filter'> & { value: string };
 
-const titleStyle = {
-  width: '30%',
-};
-
-const descriptionStyle = {
-  width: '70%',
-};
-
 const renderElement = (
   Component: FC<
     Omit<CustomComponentProps, 'updateFilter'> & { onChange?: CustomComponentProps['updateFilter'] }
@@ -53,11 +45,12 @@ export const Filter: FC<Props> = ({ filter, ...restProps }) => {
     <EuiPanel grow={false} hasShadow={false} paddingSize="m">
       <EuiDescriptionList
         type="column"
+        columnWidths={[3, 7]}
         className="workpadFilter"
         compressed
         listItems={filterView}
-        titleProps={{ style: titleStyle, className: 'eui-textBreakWord' }}
-        descriptionProps={{ style: descriptionStyle, className: 'eui-textBreakWord' }}
+        titleProps={{ className: 'eui-textBreakWord' }}
+        descriptionProps={{ className: 'eui-textBreakWord' }}
       />
     </EuiPanel>
   );

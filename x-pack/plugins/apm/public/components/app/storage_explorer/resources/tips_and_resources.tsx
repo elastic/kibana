@@ -134,7 +134,7 @@ export function TipsAndResources() {
       label: i18n.translate(
         'xpack.apm.storageExplorer.resources.sendFeedback',
         {
-          defaultMessage: 'Send feedback',
+          defaultMessage: 'Give feedback',
         }
       ),
       href: getStorageExplorerFeedbackHref(),
@@ -164,13 +164,17 @@ export function TipsAndResources() {
       >
         <EuiFlexGroup justifyContent="spaceAround">
           {cards.map(({ icon, title, description, href }) => (
-            <EuiFlexItem>
+            <EuiFlexItem key={icon}>
               <EuiCard
                 icon={<EuiIcon size="xl" type={icon} />}
                 title={title}
                 description={description}
                 footer={
-                  <EuiButton href={href} target="_blank">
+                  <EuiButton
+                    data-test-subj="apmTipsAndResourcesLearnMoreButton"
+                    href={href}
+                    target="_blank"
+                  >
                     {i18n.translate(
                       'xpack.apm.storageExplorer.resources.learnMoreButton',
                       {

@@ -98,7 +98,7 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
 
   public setup(core: CoreSetup): UsageCollectionSetup {
     const config = this.initializerContext.config.get<ConfigType>();
-    const kibanaIndex = core.savedObjects.getKibanaIndex();
+    const kibanaIndex = core.savedObjects.getDefaultIndex();
 
     const collectorSet = new CollectorSet({
       logger: this.logger.get('usage-collection', 'collector-set'),

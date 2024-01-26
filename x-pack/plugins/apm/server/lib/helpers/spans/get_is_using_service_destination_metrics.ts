@@ -14,11 +14,12 @@ import {
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   METRICSET_NAME,
+  METRICSET_INTERVAL,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
   SPAN_DURATION,
   SPAN_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { APMEventClient } from '../create_es_client/create_apm_event_client';
 
 export function getProcessorEventForServiceDestinationStatistics(
@@ -33,7 +34,18 @@ export function getDocumentTypeFilterForServiceDestinationStatistics(
   searchServiceDestinationMetrics: boolean
 ) {
   return searchServiceDestinationMetrics
-    ? termQuery(METRICSET_NAME, 'service_destination')
+    ? [
+        {
+          bool: {
+            filter: termQuery(METRICSET_NAME, 'service_destination'),
+            must_not: {
+              terms: {
+                [METRICSET_INTERVAL]: ['10m', '60m'],
+              },
+            },
+          },
+        },
+      ]
     : [];
 }
 

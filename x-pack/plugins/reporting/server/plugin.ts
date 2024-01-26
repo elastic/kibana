@@ -12,20 +12,21 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import { PLUGIN_ID } from '@kbn/reporting-common';
+import type { ReportingConfigType } from '@kbn/reporting-server';
+import { setFieldFormats } from '@kbn/reporting-server';
 import { ReportingCore } from '.';
-import { PLUGIN_ID } from '../common/constants';
-import { buildConfig, registerUiSettings, ReportingConfigType } from './config';
+import { registerUiSettings } from './config';
 import { registerDeprecations } from './deprecations';
 import { ReportingStore } from './lib';
 import { registerRoutes } from './routes';
-import { setFieldFormats } from './services';
 import type {
-  ReportingRequestHandlerContext,
   ReportingSetup,
   ReportingSetupDeps,
   ReportingStart,
   ReportingStartDeps,
 } from './types';
+import { ReportingRequestHandlerContext } from './types';
 import { registerReportingUsageCollector } from './usage';
 
 /*
@@ -43,7 +44,8 @@ export class ReportingPlugin
 
   public setup(core: CoreSetup, plugins: ReportingSetupDeps) {
     const { http, status } = core;
-    const reportingCore = new ReportingCore(this.logger, this.initContext);
+    const reportingCore = new ReportingCore(core, this.logger, this.initContext);
+    this.reportingCore = reportingCore;
 
     // prevent throwing errors in route handlers about async deps not being initialized
     // @ts-expect-error null is not assignable to object. use a boolean property to ensure reporting API is enabled.
@@ -78,8 +80,6 @@ export class ReportingPlugin
 
     // async background setup
     (async () => {
-      const config = await buildConfig(this.initContext, core, this.logger);
-      reportingCore.setConfig(config);
       // Feature registration relies on config, so it cannot be setup before here.
       reportingCore.registerFeature();
       this.logger.debug('Setup complete');
@@ -88,7 +88,6 @@ export class ReportingPlugin
       this.logger.error(e);
     });
 
-    this.reportingCore = reportingCore;
     return reportingCore.getContract();
   }
 

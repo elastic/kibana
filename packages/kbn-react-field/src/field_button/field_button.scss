@@ -2,8 +2,9 @@
   @include euiFontSizeS;
   border-radius: $euiBorderRadius;
   margin-bottom: $euiSizeXS;
+  padding: 0 $euiSizeS;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   transition: box-shadow $euiAnimSpeedFast $euiAnimSlightResistance,
     background-color $euiAnimSpeedFast $euiAnimSlightResistance; // sass-lint:disable-line indentation
 
@@ -13,29 +14,10 @@
   }
 }
 
-.kbnFieldButton--isDraggable {
-  background: lightOrDarkTheme($euiColorEmptyShade, $euiColorLightestShade);
-
-  &:hover,
-  &:focus,
-  &:focus-within {
-    @include euiBottomShadowMedium;
-    border-radius: $euiBorderRadius;
-    z-index: 2;
-  }
-
-  .kbnFieldButton__button {
-    &:hover,
-    &:focus {
-      cursor: grab;
-    }
-  }
-}
-
 .kbnFieldButton__button {
   flex-grow: 1;
   text-align: left;
-  padding: $euiSizeS;
+  padding: $euiSizeS 0;
   display: flex;
   align-items: flex-start;
   line-height: normal;
@@ -44,33 +26,54 @@
 .kbnFieldButton__fieldIcon {
   flex-shrink: 0;
   line-height: 0;
-  margin-right: $euiSizeS;
 }
 
 .kbnFieldButton__name {
   flex-grow: 1;
-  word-break: break-word;
+  padding: 0 $euiSizeS;
 }
 
 .kbnFieldButton__infoIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: $euiSize;
   flex-shrink: 0;
-  margin-left: $euiSizeXS;
+  line-height: 0;
 }
 
 .kbnFieldButton__fieldAction {
+  margin-left: $euiSizeS;
+}
+
+.kbnFieldButton__dragHandle {
   margin-right: $euiSizeS;
 }
 
+.kbnFieldButton__fieldAction,
+.kbnFieldButton__dragHandle {
+  line-height: $euiSizeXL;
+}
+
 // Reduce text size and spacing for the small size
-.kbnFieldButton--small {
+.kbnFieldButton--xs {
   font-size: $euiFontSizeXS;
 
   .kbnFieldButton__button {
-    padding: $euiSizeXS;
+    padding: $euiSizeXS 0;
   }
 
-  .kbnFieldButton__fieldIcon,
   .kbnFieldButton__fieldAction {
-    margin-right: $euiSizeXS;
+    margin-left: $euiSizeXS;
   }
+
+  .kbnFieldButton__fieldAction,
+  .kbnFieldButton__dragHandle {
+    line-height: $euiSizeL;
+  }
+}
+
+.kbnFieldButton--flushBoth {
+  padding-left: 0;
+  padding-right: 0;
 }

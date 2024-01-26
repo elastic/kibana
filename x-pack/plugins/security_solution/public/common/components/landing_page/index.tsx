@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-import { LandingCards } from '../landing_cards';
-import { SecuritySolutionPageWrapper } from '../page_wrapper';
+import React, { memo, useMemo } from 'react';
+import { useSourcererDataView } from '../../containers/sourcerer';
+import { getOnboardingComponent } from './onboarding';
 
 export const LandingPageComponent = memo(() => {
-  return (
-    <SecuritySolutionPageWrapper>
-      <LandingCards />
-    </SecuritySolutionPageWrapper>
-  );
+  const { indicesExist } = useSourcererDataView();
+  const OnBoarding = useMemo(() => getOnboardingComponent(), []);
+  return <OnBoarding indicesExist={indicesExist} />;
 });
 
 LandingPageComponent.displayName = 'LandingPageComponent';

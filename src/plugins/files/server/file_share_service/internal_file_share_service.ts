@@ -13,7 +13,7 @@ import {
   ISavedObjectsRepository,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
-import { nodeBuilder, escapeKuery } from '@kbn/es-query';
+import { nodeBuilder } from '@kbn/es-query';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type {
   Pagination,
@@ -232,7 +232,7 @@ export class InternalFileShareService implements FileShareServiceStart {
       saved_objects: [share],
     } = await this.savedObjects.find<FileShare>({
       type: this.savedObjectsType,
-      filter: nodeBuilder.is(`${this.savedObjectsType}.attributes.token`, escapeKuery(token)),
+      filter: nodeBuilder.is(`${this.savedObjectsType}.attributes.token`, token),
     });
 
     if (!share) {

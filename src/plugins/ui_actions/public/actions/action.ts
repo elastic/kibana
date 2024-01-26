@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { UiComponent } from '@kbn/kibana-utils-plugin/public';
-import { Presentable } from '../util/presentable';
-import { Trigger } from '../triggers';
+import type { Presentable } from '@kbn/ui-actions-browser/src/types';
+import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
+import { Subscription } from 'rxjs';
 
 /**
  * During action execution we can provide additional information,
@@ -38,6 +38,9 @@ export type ActionDefinitionContext<Context extends object = object> =
 export interface ActionMenuItemProps<Context extends object> {
   context: ActionExecutionContext<Context>;
 }
+
+export type FrequentCompatibilityChangeAction<Context extends object = object> = Action<Context> &
+  Required<Pick<Action<Context>, 'subscribeToCompatibilityChanges' | 'couldBecomeCompatible'>>;
 
 export interface Action<Context extends object = object>
   extends Partial<Presentable<ActionExecutionContext<Context>>> {
@@ -69,12 +72,6 @@ export interface Action<Context extends object = object>
   getDisplayName(context: ActionExecutionContext<Context>): string;
 
   /**
-   * `UiComponent` to render when displaying this action as a context menu item.
-   * If not provided, `getDisplayName` will be used instead.
-   */
-  MenuItem?: UiComponent<ActionMenuItemProps<Context>>;
-
-  /**
    * Returns a promise that resolves to true if this action is compatible given the context,
    * otherwise resolves to false.
    */
@@ -100,10 +97,32 @@ export interface Action<Context extends object = object>
   shouldAutoExecute?(context: ActionExecutionContext<Context>): Promise<boolean>;
 
   /**
+   * Allows this action to call a method when its compatibility changes.
+   * @returns a subscription that can be used to unsubscribe from the changes.
+   */
+  subscribeToCompatibilityChanges?: (
+    context: Context,
+    onChange: (isCompatible: boolean, action: Action<Context>) => void
+  ) => Subscription | undefined;
+
+  /**
+   * Determines if action could become compatible given the context. If present,
+   * it should be much more lenient than `isCompatible` and return true if there
+   * is any chance that `isCompatible` could return true in the future.
+   */
+  couldBecomeCompatible?: (context: Context) => boolean;
+
+  /**
    * action is disabled or not
    *
    */
   disabled?: boolean;
+
+  /**
+   * Determines if notification should be shown in menu for that action
+   *
+   */
+  showNotification?: boolean;
 }
 
 /**
@@ -151,6 +170,28 @@ export interface ActionDefinition<Context extends object = object>
    *
    */
   disabled?: boolean;
+
+  /**
+   * Determines if notification should be shown in menu for that action
+   *
+   */
+  showNotification?: boolean;
+
+  /**
+   * Allows this action to call a method when its compatibility changes.
+   * @returns a subscription that can be used to unsubscribe from the changes.
+   */
+  subscribeToCompatibilityChanges?: (
+    context: Context,
+    onChange: (isCompatible: boolean, action: Action<Context>) => void
+  ) => Subscription | undefined;
+
+  /**
+   * Determines if action could become compatible given the context. If present,
+   * it should be much more lenient than `isCompatible` and return true if there
+   * is any chance that `isCompatible` could return true in the future.
+   */
+  couldBecomeCompatible?: (context: Context) => boolean;
 }
 
 export type ActionContext<A> = A extends ActionDefinition<infer Context> ? Context : never;

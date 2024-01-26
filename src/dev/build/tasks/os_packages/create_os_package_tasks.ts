@@ -80,19 +80,36 @@ export const CreateDockerUbuntu: Task = {
   },
 };
 
+export const CreateDockerServerless: Task = {
+  description: 'Creating Docker Serverless image',
+
+  async run(config, log, build) {
+    await runDockerGenerator(config, log, build, {
+      architecture: 'x64',
+      baseImage: 'ubuntu',
+      context: false,
+      serverless: true,
+      image: true,
+      dockerBuildDate,
+    });
+    await runDockerGenerator(config, log, build, {
+      architecture: 'aarch64',
+      baseImage: 'ubuntu',
+      context: false,
+      serverless: true,
+      image: true,
+      dockerBuildDate,
+    });
+  },
+};
+
 export const CreateDockerUBI: Task = {
   description: 'Creating Docker UBI image',
 
   async run(config, log, build) {
     await runDockerGenerator(config, log, build, {
       architecture: 'x64',
-      baseImage: 'ubi8',
-      context: false,
-      image: true,
-    });
-    await runDockerGenerator(config, log, build, {
-      architecture: 'x64',
-      baseImage: 'ubi9',
+      baseImage: 'ubi',
       context: false,
       image: true,
     });
@@ -131,12 +148,7 @@ export const CreateDockerContexts: Task = {
       dockerBuildDate,
     });
     await runDockerGenerator(config, log, build, {
-      baseImage: 'ubi8',
-      context: true,
-      image: false,
-    });
-    await runDockerGenerator(config, log, build, {
-      baseImage: 'ubi9',
+      baseImage: 'ubi',
       context: true,
       image: false,
     });
@@ -149,6 +161,12 @@ export const CreateDockerContexts: Task = {
     await runDockerGenerator(config, log, build, {
       baseImage: 'ubuntu',
       cloud: true,
+      context: true,
+      image: false,
+    });
+    await runDockerGenerator(config, log, build, {
+      baseImage: 'ubuntu',
+      serverless: true,
       context: true,
       image: false,
     });

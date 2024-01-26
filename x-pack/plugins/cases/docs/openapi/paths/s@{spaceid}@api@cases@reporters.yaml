@@ -23,12 +23,18 @@ get:
             type: array
             items:
               type: object
+              required:
+                - email
+                - full_name
+                - username
               properties:
                 $ref: '../components/schemas/user_properties.yaml'
           examples:
             getReportersResponse:
               $ref: '../components/examples/get_reporters_response.yaml'
-  servers:
-    - url: https://localhost:5601
-servers:
-  - url: https://localhost:5601
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/4xx_response.yaml'

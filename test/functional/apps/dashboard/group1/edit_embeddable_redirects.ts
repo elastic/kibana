@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.loadSavedDashboard('few panels');
       await PageObjects.dashboard.switchToEditMode();
@@ -43,8 +43,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('redirects via save as button after edit, renaming itself', async () => {
       const newTitle = 'wowee, looks like I have a new title';
-      const originalPanelCount = await PageObjects.dashboard.getPanelCount();
       await PageObjects.header.waitUntilLoadingHasFinished();
+      const originalPanelCount = await PageObjects.dashboard.getPanelCount();
       await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickEdit();
       await PageObjects.visualize.saveVisualizationExpectSuccess(newTitle, {
@@ -60,8 +60,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('redirects via save as button after edit, adding a new panel', async () => {
       const newTitle = 'wowee, my title just got cooler';
-      const originalPanelCount = await PageObjects.dashboard.getPanelCount();
       await PageObjects.header.waitUntilLoadingHasFinished();
+      const originalPanelCount = await PageObjects.dashboard.getPanelCount();
       await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickEdit();
       await PageObjects.visualize.saveVisualizationExpectSuccess(newTitle, {
@@ -86,7 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         redirectToOrigin: false,
       });
       await PageObjects.visualize.notLinkedToOriginatingApp();
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
     });
 
     it('loses originatingApp connection after first save when redirectToOrigin is false', async () => {

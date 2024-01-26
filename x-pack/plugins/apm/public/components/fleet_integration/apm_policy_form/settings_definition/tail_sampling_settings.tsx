@@ -77,7 +77,11 @@ export function getTailSamplingSettings(docsLinks?: string): SettingsRow[] {
               defaultMessage="Learn more about tail sampling policies in our {link}."
               values={{
                 link: (
-                  <EuiLink href={docsLinks} target="_blank">
+                  <EuiLink
+                    data-test-subj="apmGetTailSamplingSettingsDocsLink"
+                    href={docsLinks}
+                    target="_blank"
+                  >
                     {i18n.translate(
                       'xpack.apm.fleet_integration.settings.tailSamplingDocsHelpTextLink',
                       {

@@ -16,6 +16,7 @@ const createSetupContractMock = () => {
   const setupContract: jest.Mocked<InternalInjectedMetadataSetup> = {
     getBasePath: jest.fn(),
     getServerBasePath: jest.fn(),
+    getAssetsHrefBase: jest.fn(),
     getPublicBaseUrl: jest.fn(),
     getKibanaVersion: jest.fn(),
     getKibanaBranch: jest.fn(),
@@ -29,7 +30,11 @@ const createSetupContractMock = () => {
     getInjectedVar: jest.fn(),
     getInjectedVars: jest.fn(),
     getKibanaBuildNumber: jest.fn(),
+    getCustomBranding: jest.fn(),
   };
+  setupContract.getBasePath.mockReturnValue('/base-path');
+  setupContract.getServerBasePath.mockReturnValue('/server-base-path');
+  setupContract.getAssetsHrefBase.mockReturnValue('/assets-base-path');
   setupContract.getCspConfig.mockReturnValue({ warnLegacyBrowsers: true });
   setupContract.getExternalUrlConfig.mockReturnValue({ policy: [] });
   setupContract.getKibanaVersion.mockReturnValue('kibanaVersion');
@@ -41,6 +46,10 @@ const createSetupContractMock = () => {
     },
     nav: [],
     uiSettings: {
+      defaults: { legacyInjectedUiSettingDefaults: true },
+      user: { legacyInjectedUiSettingUserValues: true },
+    },
+    globalSettings: {
       defaults: { legacyInjectedUiSettingDefaults: true },
       user: { legacyInjectedUiSettingUserValues: true },
     },

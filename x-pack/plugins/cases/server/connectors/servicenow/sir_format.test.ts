@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CaseResponse } from '../../../common/api';
+import type { Case } from '../../../common/types/domain';
 import { format } from './sir_format';
 
 describe('SIR formatter', () => {
@@ -22,7 +22,7 @@ describe('SIR formatter', () => {
         priority: '2 - High',
       },
     },
-  } as CaseResponse;
+  } as Case;
 
   it('it formats correctly without alerts', async () => {
     const res = await format(theCase, []);
@@ -40,7 +40,7 @@ describe('SIR formatter', () => {
   });
 
   it('it formats correctly when fields do not exist ', async () => {
-    const invalidFields = { connector: { fields: null } } as CaseResponse;
+    const invalidFields = { connector: { fields: null } } as Case;
     const res = await format(invalidFields, []);
     expect(res).toEqual({
       dest_ip: [],
@@ -159,7 +159,7 @@ describe('SIR formatter', () => {
     const newCase = {
       ...theCase,
       connector: { fields: { ...theCase.connector.fields, destIp: false, malwareHash: false } },
-    } as CaseResponse;
+    } as Case;
 
     const res = await format(newCase, alerts);
     expect(res).toEqual({

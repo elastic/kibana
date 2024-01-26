@@ -19,11 +19,13 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { InvalidateAPIKeyResult } from '../rules_client';
 import { AlertingConfig } from '../config';
 import { timePeriodBeforeDate } from '../lib/get_cadence';
 import { AlertingPluginsStart } from '../plugin';
 import { InvalidatePendingApiKey } from '../types';
+import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
 
 const TASK_TYPE = 'alerts_invalidate_api_keys';
 export const TASK_ID = `Alerts-${TASK_TYPE}`;
@@ -70,11 +72,11 @@ export async function scheduleApiKeyInvalidatorTask(
       schedule: {
         interval,
       },
-      state: {},
+      state: emptyState,
       params: {},
     });
   } catch (e) {
-    logger.debug(`Error scheduling task, received ${e.message}`);
+    logger.error(`Error scheduling ${TASK_ID} task, received ${e.message}`);
   }
 }
 
@@ -87,6 +89,7 @@ function registerApiKeyInvalidatorTaskDefinition(
   taskManager.registerTaskDefinitions({
     [TASK_TYPE]: {
       title: 'Invalidate alert API Keys',
+      stateSchemaByVersion,
       createTaskRunner: taskRunner(logger, coreStartServices, config),
     },
   });
@@ -116,7 +119,7 @@ function taskRunner(
   config: AlertingConfig
 ) {
   return ({ taskInstance }: RunContext) => {
-    const { state } = taskInstance;
+    const state = taskInstance.state as LatestTaskStateSchema;
     return {
       async run() {
         let totalInvalidated = 0;
@@ -127,7 +130,7 @@ function taskRunner(
             getFakeKibanaRequest(http.basePath.serverBasePath),
             {
               includedHiddenTypes: ['api_key_pending_invalidation'],
-              excludedWrappers: ['security'],
+              excludedExtensions: [SECURITY_EXTENSION_ID],
             }
           );
           const encryptedSavedObjectsClient = encryptedSavedObjects.getClient({
@@ -158,22 +161,24 @@ function taskRunner(
             hasApiKeysPendingInvalidation = apiKeysToInvalidate.total > PAGE_SIZE;
           } while (hasApiKeysPendingInvalidation);
 
+          const updatedState: LatestTaskStateSchema = {
+            runs: (state.runs || 0) + 1,
+            total_invalidated: totalInvalidated,
+          };
           return {
-            state: {
-              runs: (state.runs || 0) + 1,
-              total_invalidated: totalInvalidated,
-            },
+            state: updatedState,
             schedule: {
               interval: config.invalidateApiKeysTask.interval,
             },
           };
         } catch (e) {
           logger.warn(`Error executing alerting apiKey invalidation task: ${e.message}`);
+          const updatedState: LatestTaskStateSchema = {
+            runs: state.runs + 1,
+            total_invalidated: totalInvalidated,
+          };
           return {
-            state: {
-              runs: (state.runs || 0) + 1,
-              total_invalidated: totalInvalidated,
-            },
+            state: updatedState,
             schedule: {
               interval: config.invalidateApiKeysTask.interval,
             },

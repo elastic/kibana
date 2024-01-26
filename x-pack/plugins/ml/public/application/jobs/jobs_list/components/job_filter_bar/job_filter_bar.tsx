@@ -155,7 +155,6 @@ export const JobFilterBar: FC<JobFilterBarProps> = ({ queryText, setFilters }) =
           query={queryInstance}
           filters={filters}
           onChange={onChange}
-          className="mlJobFilterBar"
         />
         <EuiFormRow fullWidth isInvalid={error !== null} error={errorText} style={{ maxHeight: 0 }}>
           <Fragment />

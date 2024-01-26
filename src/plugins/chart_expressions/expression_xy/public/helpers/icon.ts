@@ -57,7 +57,6 @@ export const iconSet = [
       defaultMessage: 'Circle',
     }),
     icon: IconCircle,
-    canFill: true,
   },
 
   {
@@ -113,6 +112,5 @@ export const iconSet = [
     }),
     icon: IconTriangle,
     shouldRotate: true,
-    canFill: true,
   },
 ];

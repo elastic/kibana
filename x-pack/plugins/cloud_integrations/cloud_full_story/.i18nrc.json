@@ -3,5 +3,5 @@
   "paths": {
     "cloudFullStory": "."
   },
-  "translations": ["translations/ja-JP.json"]
+  "translations": []
 }

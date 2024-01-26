@@ -6,7 +6,12 @@
  */
 
 import { RulesClient, ConstructorOptions } from '../rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  loggingSystemMock,
+  savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
+} from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
@@ -16,6 +21,7 @@ import { AlertingAuthorization } from '../../authorization/alerting_authorizatio
 import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -24,6 +30,7 @@ const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
+const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v7.10.0';
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
@@ -34,14 +41,21 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
   spaceId: 'default',
   namespace: 'default',
+  maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
+  internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
+  isAuthenticationTypeAPIKey: jest.fn(),
+  getAuthenticationAPIKey: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
+  uiSettings: uiSettingsServiceMock.createStartContract(),
 };
 
 beforeEach(() => {
@@ -56,7 +70,7 @@ describe('muteAll()', () => {
     const rulesClient = new RulesClient(rulesClientParams);
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         actions: [
           {
@@ -77,7 +91,7 @@ describe('muteAll()', () => {
 
     await rulesClient.muteAll({ id: '1' });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       '1',
       {
         muteAll: true,
@@ -96,7 +110,7 @@ describe('muteAll()', () => {
     beforeEach(() => {
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         id: '1',
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         attributes: {
           actions: [
             {
@@ -133,7 +147,7 @@ describe('muteAll()', () => {
         operation: 'muteAll',
         ruleTypeId: 'myType',
       });
-      expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith('execute');
+      expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'execute' });
     });
 
     test('throws when user is not authorised to muteAll this type of alert', async () => {
@@ -160,7 +174,7 @@ describe('muteAll()', () => {
       const rulesClient = new RulesClient({ ...rulesClientParams, auditLogger });
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         id: '1',
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         attributes: {
           actions: [
             {
@@ -185,7 +199,7 @@ describe('muteAll()', () => {
             action: 'rule_mute',
             outcome: 'unknown',
           }),
-          kibana: { saved_object: { id: '1', type: 'alert' } },
+          kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE } },
         })
       );
     });
@@ -194,7 +208,7 @@ describe('muteAll()', () => {
       const rulesClient = new RulesClient({ ...rulesClientParams, auditLogger });
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
         id: '1',
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         attributes: {
           actions: [
             {
@@ -224,7 +238,7 @@ describe('muteAll()', () => {
           kibana: {
             saved_object: {
               id: '1',
-              type: 'alert',
+              type: RULE_SAVED_OBJECT_TYPE,
             },
           },
           error: {

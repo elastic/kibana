@@ -12,9 +12,9 @@ import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { SubFeatureForm } from './sub_feature_form';
 import type { SecuredFeature } from '../../../../model';
 import type { PrivilegeFormCalculator } from '../privilege_form_calculator';
-import { SubFeatureForm } from './sub_feature_form';
 
 interface Props {
   feature: SecuredFeature;
@@ -70,7 +70,7 @@ export const FeatureTableExpandedRow = ({
   };
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
         <div>
           <EuiSwitch

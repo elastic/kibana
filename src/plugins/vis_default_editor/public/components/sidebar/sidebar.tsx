@@ -26,7 +26,7 @@ import {
 } from '@kbn/visualizations-plugin/public';
 import type { Schema } from '@kbn/visualizations-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
-import { SavedSearch } from '@kbn/discover-plugin/public';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { DefaultEditorNavBar } from './navbar';
 import { DefaultEditorControls } from './controls';
 import { setStateParamValue, useEditorReducer, useEditorFormState, discardChanges } from './state';

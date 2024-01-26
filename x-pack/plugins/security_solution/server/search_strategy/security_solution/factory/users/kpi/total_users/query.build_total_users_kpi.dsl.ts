@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { HostsKpiHostsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/hosts';
+import type { TotalUsersKpiRequestOptions } from '../../../../../../../common/api/search_strategy';
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 
 export const buildTotalUsersKpiQuery = ({
   filterQuery,
   timerange: { from, to },
   defaultIndex,
-}: HostsKpiHostsRequestOptions) => {
+}: TotalUsersKpiRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     {

@@ -5,11 +5,30 @@
  * 2.0.
  */
 import { HttpFetchQuery } from '@kbn/core/public';
+import {
+  createFlameGraph,
+  TopNFunctions,
+  type BaseFlameGraph,
+  type ElasticFlameGraph,
+} from '@kbn/profiling-utils';
 import { getRoutePaths } from '../common';
-import { BaseFlameGraph, createFlameGraph, ElasticFlameGraph } from '../common/flamegraph';
-import { TopNFunctions } from '../common/functions';
+import type {
+  IndexLifecyclePhaseSelectOption,
+  IndicesStorageDetailsAPIResponse,
+  StorageExplorerSummaryAPIResponse,
+  StorageHostDetailsAPIResponse,
+} from '../common/storage_explorer';
 import { TopNResponse } from '../common/topn';
-import { AutoAbortedHttpService } from './hooks/use_async';
+import type { SetupDataCollectionInstructions } from '../server/routes/setup/get_cloud_setup_instructions';
+import { AutoAbortedHttpService } from './hooks/use_auto_aborted_http_client';
+
+export interface ProfilingSetupStatus {
+  has_setup: boolean;
+  has_data: boolean;
+  pre_8_9_1_data: boolean;
+  has_required_role: boolean;
+  unauthorized?: boolean;
+}
 
 export interface Services {
   fetchTopN: (params: {
@@ -33,6 +52,29 @@ export interface Services {
     timeTo: number;
     kuery: string;
   }) => Promise<ElasticFlameGraph>;
+  fetchHasSetup: (params: { http: AutoAbortedHttpService }) => Promise<ProfilingSetupStatus>;
+  postSetupResources: (params: { http: AutoAbortedHttpService }) => Promise<void>;
+  setupDataCollectionInstructions: (params: {
+    http: AutoAbortedHttpService;
+  }) => Promise<SetupDataCollectionInstructions>;
+  fetchStorageExplorerSummary: (params: {
+    http: AutoAbortedHttpService;
+    timeFrom: number;
+    timeTo: number;
+    kuery: string;
+    indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
+  }) => Promise<StorageExplorerSummaryAPIResponse>;
+  fetchStorageExplorerHostStorageDetails: (params: {
+    http: AutoAbortedHttpService;
+    timeFrom: number;
+    timeTo: number;
+    kuery: string;
+    indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
+  }) => Promise<StorageHostDetailsAPIResponse>;
+  fetchStorageExplorerIndicesStorageDetails: (params: {
+    http: AutoAbortedHttpService;
+    indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
+  }) => Promise<IndicesStorageDetailsAPIResponse>;
 }
 
 export function getServices(): Services {
@@ -40,45 +82,88 @@ export function getServices(): Services {
 
   return {
     fetchTopN: async ({ http, type, timeFrom, timeTo, kuery }) => {
-      try {
-        const query: HttpFetchQuery = {
-          timeFrom,
-          timeTo,
-          kuery,
-        };
-        return await http.get(`${paths.TopN}/${type}`, { query });
-      } catch (e) {
-        return e;
-      }
+      const query: HttpFetchQuery = {
+        timeFrom,
+        timeTo,
+        kuery,
+      };
+      return (await http.get(`${paths.TopN}/${type}`, { query })) as Promise<TopNResponse>;
     },
 
     fetchTopNFunctions: async ({ http, timeFrom, timeTo, startIndex, endIndex, kuery }) => {
-      try {
-        const query: HttpFetchQuery = {
-          timeFrom,
-          timeTo,
-          startIndex,
-          endIndex,
-          kuery,
-        };
-        return await http.get(paths.TopNFunctions, { query });
-      } catch (e) {
-        return e;
-      }
+      const query: HttpFetchQuery = {
+        timeFrom,
+        timeTo,
+        startIndex,
+        endIndex,
+        kuery,
+      };
+      return (await http.get(paths.TopNFunctions, { query })) as Promise<TopNFunctions>;
     },
 
     fetchElasticFlamechart: async ({ http, timeFrom, timeTo, kuery }) => {
-      try {
-        const query: HttpFetchQuery = {
-          timeFrom,
-          timeTo,
-          kuery,
-        };
-        const baseFlamegraph = (await http.get(paths.Flamechart, { query })) as BaseFlameGraph;
-        return createFlameGraph(baseFlamegraph);
-      } catch (e) {
-        return e;
-      }
+      const query: HttpFetchQuery = {
+        timeFrom,
+        timeTo,
+        kuery,
+      };
+
+      const baseFlamegraph = (await http.get(paths.Flamechart, { query })) as BaseFlameGraph;
+      return createFlameGraph(baseFlamegraph);
+    },
+    fetchHasSetup: async ({ http }) => {
+      const hasSetup = (await http.get(paths.HasSetupESResources, {})) as ProfilingSetupStatus;
+      return hasSetup;
+    },
+    postSetupResources: async ({ http }) => {
+      await http.post(paths.HasSetupESResources, {});
+    },
+    setupDataCollectionInstructions: async ({ http }) => {
+      const instructions = (await http.get(
+        paths.SetupDataCollectionInstructions,
+        {}
+      )) as SetupDataCollectionInstructions;
+      return instructions;
+    },
+    fetchStorageExplorerSummary: async ({ http, timeFrom, timeTo, kuery, indexLifecyclePhase }) => {
+      const query: HttpFetchQuery = {
+        timeFrom,
+        timeTo,
+        kuery,
+        indexLifecyclePhase,
+      };
+      const summary = (await http.get(paths.StorageExplorerSummary, {
+        query,
+      })) as StorageExplorerSummaryAPIResponse;
+      return summary;
+    },
+    fetchStorageExplorerHostStorageDetails: async ({
+      http,
+      timeFrom,
+      timeTo,
+      kuery,
+      indexLifecyclePhase,
+    }) => {
+      const query: HttpFetchQuery = {
+        timeFrom,
+        timeTo,
+        kuery,
+        indexLifecyclePhase,
+      };
+      const eventsMetricsSizeTimeseries = (await http.get(paths.StorageExplorerHostStorageDetails, {
+        query,
+      })) as StorageHostDetailsAPIResponse;
+      return eventsMetricsSizeTimeseries;
+    },
+    fetchStorageExplorerIndicesStorageDetails: async ({ http, indexLifecyclePhase }) => {
+      const query: HttpFetchQuery = {
+        indexLifecyclePhase,
+      };
+      const eventsMetricsSizeTimeseries = (await http.get(
+        paths.StorageExplorerIndicesStorageDetails,
+        { query }
+      )) as IndicesStorageDetailsAPIResponse;
+      return eventsMetricsSizeTimeseries;
     },
   };
 }

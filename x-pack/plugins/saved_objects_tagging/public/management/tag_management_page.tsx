@@ -75,8 +75,8 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
   });
 
   const createModalOpener = useMemo(
-    () => getCreateModalOpener({ overlays, theme, tagClient }),
-    [overlays, theme, tagClient]
+    () => getCreateModalOpener({ overlays, theme, tagClient, notifications }),
+    [overlays, theme, tagClient, notifications]
   );
 
   const tableActions = useMemo(() => {

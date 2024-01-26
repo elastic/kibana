@@ -11,10 +11,11 @@ import type { SpacesPluginStart } from './plugin';
 import type { SpacesApi } from './types';
 import type { SpacesApiUi, SpacesApiUiComponent } from './ui_api';
 
-const createApiMock = (): jest.Mocked<SpacesApi> => ({
+const createApiMock = (hasOnlyDefaultSpace: boolean): jest.Mocked<SpacesApi> => ({
   getActiveSpace$: jest.fn().mockReturnValue(of()),
   getActiveSpace: jest.fn(),
   ui: createApiUiMock(),
+  hasOnlyDefaultSpace,
 });
 
 type SpacesApiUiMock = Omit<jest.Mocked<SpacesApiUi>, 'components'> & {
@@ -47,7 +48,9 @@ const createApiUiComponentsMock = () => {
   return mock;
 };
 
-const createStartContract = (): jest.Mocked<SpacesPluginStart> => createApiMock();
+const createStartContract = (
+  hasOnlyDefaultSpace: boolean = false
+): jest.Mocked<SpacesPluginStart> => createApiMock(hasOnlyDefaultSpace);
 
 export const spacesPluginMock = {
   createStartContract,

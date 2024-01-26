@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { FilterQuery, MetricExpressionParams } from '../../../common/alerting/metrics';
+import {
+  CustomMetricExpressionParams,
+  FilterQuery,
+  MetricExpressionParams,
+  NonCountMetricExpressionParams,
+} from '../../../common/alerting/metrics';
 import { MetricsExplorerSeries } from '../../../common/http_api/metrics_explorer';
 import { MetricsExplorerOptions } from '../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 
@@ -14,8 +19,14 @@ export interface AlertContextMeta {
   series?: MetricsExplorerSeries;
 }
 
-export type MetricExpression = Omit<MetricExpressionParams, 'metric' | 'timeSize' | 'timeUnit'> & {
-  metric?: MetricExpressionParams['metric'];
+export type MetricExpression = Omit<
+  MetricExpressionParams,
+  'metric' | 'timeSize' | 'timeUnit' | 'metrics' | 'equation' | 'customMetrics'
+> & {
+  metric?: NonCountMetricExpressionParams['metric'];
+  customMetrics?: CustomMetricExpressionParams['customMetrics'];
+  label?: CustomMetricExpressionParams['label'];
+  equation?: CustomMetricExpressionParams['equation'];
   timeSize?: MetricExpressionParams['timeSize'];
   timeUnit?: MetricExpressionParams['timeUnit'];
 };
@@ -30,6 +41,7 @@ export enum AGGREGATION_TYPES {
   CARDINALITY = 'cardinality',
   P95 = 'p95',
   P99 = 'p99',
+  CUSTOM = 'custom',
 }
 
 export interface MetricThresholdAlertParams {
@@ -46,9 +58,9 @@ export interface ExpressionChartRow {
 
 export type ExpressionChartSeries = ExpressionChartRow[][];
 
-export interface ExpressionChartData {
-  id: string;
-  series: ExpressionChartSeries;
+export interface TimeRange {
+  from?: string;
+  to?: string;
 }
 
 export interface AlertParams {

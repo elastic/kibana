@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/unified-data-table",
+  "description": "Contains functionality for the unified data table which can be integrated into apps",
+  "owner": "@elastic/kibana-data-discovery"
+}

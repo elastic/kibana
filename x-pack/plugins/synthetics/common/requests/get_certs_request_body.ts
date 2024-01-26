@@ -4,11 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import DateMath from '@kbn/datemath';
+import { EXCLUDE_RUN_ONCE_FILTER, FINAL_SUMMARY_FILTER } from '../constants/client_defaults';
+import type { CertificatesResults } from '../../server/queries/get_certs';
 import { CertResult, GetCertsParams, Ping } from '../runtime_types';
 import { createEsQuery } from '../utils/es_search';
 
-import type { CertificatesResults } from '../../server/legacy_uptime/lib/requests/get_certs';
 import { asMutableArray } from '../utils/as_mutable_array';
 
 enum SortFields {
@@ -21,10 +24,15 @@ enum SortFields {
 export const DEFAULT_SORT = 'not_after';
 export const DEFAULT_DIRECTION = 'asc';
 export const DEFAULT_SIZE = 20;
-export const DEFAULT_FROM = 'now-5m';
+export const DEFAULT_FROM = 'now-20m';
 export const DEFAULT_TO = 'now';
 
+function absoluteDate(relativeDate: string) {
+  return DateMath.parse(relativeDate)?.valueOf() ?? relativeDate;
+}
+
 export const getCertsRequestBody = ({
+  monitorIds,
   pageIndex,
   search,
   notValidBefore,
@@ -34,12 +42,13 @@ export const getCertsRequestBody = ({
   from = DEFAULT_FROM,
   sortBy = DEFAULT_SORT,
   direction = DEFAULT_DIRECTION,
+  filters,
 }: GetCertsParams) => {
   const sort = SortFields[sortBy as keyof typeof SortFields];
 
   const searchRequest = createEsQuery({
     body: {
-      from: pageIndex * size,
+      from: (pageIndex ?? 0) * size,
       size,
       sort: asMutableArray([
         {
@@ -71,6 +80,12 @@ export const getCertsRequestBody = ({
               }
             : {}),
           filter: [
+            FINAL_SUMMARY_FILTER,
+            EXCLUDE_RUN_ONCE_FILTER,
+            ...(filters ? [filters] : []),
+            ...(monitorIds && monitorIds.length > 0
+              ? [{ terms: { 'monitor.id': monitorIds } }]
+              : []),
             {
               exists: {
                 field: 'tls.server.hash.sha256',
@@ -79,8 +94,8 @@ export const getCertsRequestBody = ({
             {
               range: {
                 'monitor.timespan': {
-                  gte: from,
-                  lte: to,
+                  gte: absoluteDate(from),
+                  lte: absoluteDate(to),
                 },
               },
             },
@@ -95,7 +110,7 @@ export const getCertsRequestBody = ({
                         {
                           range: {
                             'tls.certificate_not_valid_before': {
-                              lte: notValidBefore,
+                              lte: absoluteDate(notValidBefore),
                             },
                           },
                         },
@@ -106,7 +121,7 @@ export const getCertsRequestBody = ({
                         {
                           range: {
                             'tls.certificate_not_valid_after': {
-                              lte: notValidAfter,
+                              lte: absoluteDate(notValidAfter),
                             },
                           },
                         },
@@ -119,8 +134,13 @@ export const getCertsRequestBody = ({
         },
       },
       _source: [
+        '@timestamp',
+        'config_id',
         'monitor.id',
         'monitor.name',
+        'monitor.type',
+        'url.full',
+        'observer.geo.name',
         'tls.server.x509.issuer.common_name',
         'tls.server.x509.subject.common_name',
         'tls.server.hash.sha1',
@@ -132,7 +152,7 @@ export const getCertsRequestBody = ({
         field: 'tls.server.hash.sha256',
         inner_hits: {
           _source: {
-            includes: ['monitor.id', 'monitor.name', 'url.full'],
+            includes: ['monitor.id', 'monitor.name', 'url.full', 'config_id'],
           },
           collapse: {
             field: 'monitor.id',
@@ -172,6 +192,7 @@ export const processCertsResult = (result: CertificatesResults): CertResult => {
       return {
         name: monitorPing?.monitor.name,
         id: monitorPing?.monitor.id,
+        configId: monitorPing?.config_id,
         url: monitorPing?.url?.full,
       };
     });
@@ -184,6 +205,12 @@ export const processCertsResult = (result: CertificatesResults): CertResult => {
       not_after: notAfter,
       not_before: notBefore,
       common_name: commonName,
+      monitorName: ping?.monitor?.name,
+      configId: ping.config_id!,
+      monitorUrl: ping?.url?.full,
+      '@timestamp': ping['@timestamp'],
+      monitorType: ping?.monitor?.type,
+      locationName: ping?.observer?.geo?.name,
     };
   });
   const total = result.aggregations?.total?.value ?? 0;

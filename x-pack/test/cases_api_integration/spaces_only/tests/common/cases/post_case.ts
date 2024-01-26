@@ -7,14 +7,14 @@
 
 import expect from '@kbn/expect';
 
-import { ConnectorTypes } from '@kbn/cases-plugin/common/api';
+import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import { getPostCaseRequest, nullUser, postCaseResp } from '../../../../common/lib/mock';
 import {
   deleteCasesByESQuery,
   createCase,
   removeServerGeneratedPropertiesFromCase,
   getAuthWithSuperUser,
-} from '../../../../common/lib/utils';
+} from '../../../../common/lib/api';
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 

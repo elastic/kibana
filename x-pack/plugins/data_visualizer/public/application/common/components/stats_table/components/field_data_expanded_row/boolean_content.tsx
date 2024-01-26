@@ -7,15 +7,15 @@
 
 import React, { FC, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { Axis, BarSeries, Chart, Settings, ScaleType } from '@elastic/charts';
+import { Axis, BarSeries, Chart, Settings, ScaleType, LEGACY_LIGHT_THEME } from '@elastic/charts';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { roundToDecimalPlace } from '@kbn/ml-number-utils';
 import { i18n } from '@kbn/i18n';
 import { TopValues } from '../../../top_values';
 import type { FieldDataRowProps } from '../../types/field_data_row';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
 import { getTFPercentage } from '../../utils';
-import { roundToDecimalPlace } from '../../../utils';
 import { useDataVizChartTheme } from '../../hooks';
 import { DocumentStatsTable } from './document_stats';
 import { ExpandedRowContent } from './expanded_row_content';
@@ -45,32 +45,13 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) =
   const theme = useDataVizChartTheme();
   if (!formattedPercentages) return null;
 
-  const { trueCount, falseCount, count } = formattedPercentages;
-  const stats = {
-    ...config.stats,
-    topValues: [
-      {
-        key: i18n.translate(
-          'xpack.dataVisualizer.dataGrid.fieldExpandedRow.booleanContent.trueCountLabel',
-          { defaultMessage: 'true' }
-        ),
-        doc_count: trueCount ?? 0,
-      },
-      {
-        key: i18n.translate(
-          'xpack.dataVisualizer.dataGrid.fieldExpandedRow.booleanContent.falseCountLabel',
-          { defaultMessage: 'false' }
-        ),
-        doc_count: falseCount ?? 0,
-      },
-    ],
-  };
+  const { count } = formattedPercentages;
   return (
     <ExpandedRowContent dataTestSubj={'dataVisualizerBooleanContent'}>
       <DocumentStatsTable config={config} />
 
       <TopValues
-        stats={stats}
+        stats={config.stats}
         fieldFormat={fieldFormat}
         barColor="success"
         onAddFilter={onAddFilter}
@@ -93,7 +74,13 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) =
             tickFormat={(d: any) => getFormattedValue(d, count)}
           />
 
-          <Settings showLegend={false} theme={theme} />
+          <Settings
+            // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+            baseTheme={LEGACY_LIGHT_THEME}
+            showLegend={false}
+            theme={theme}
+            locale={i18n.getLocale()}
+          />
           <BarSeries
             id={config.fieldName || fieldFormat}
             data={[

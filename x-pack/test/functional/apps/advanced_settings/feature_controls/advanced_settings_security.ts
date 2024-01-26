@@ -27,6 +27,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             {
               feature: {
                 advancedSettings: ['all'],
+                globalSettings: ['all'],
               },
               spaces: ['*'],
             },
@@ -87,6 +88,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             {
               feature: {
                 advancedSettings: ['read'],
+                globalSettings: ['show'],
               },
               spaces: ['*'],
             },

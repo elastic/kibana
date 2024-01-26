@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, Type } from '@kbn/config-schema';
 
 const ALPHA_NUMERIC_WITH_SPACES_REGEX = /^[a-z0-9\s_]+$/i;
 const ALPHA_NUMERIC_WITH_SPACES_EXT_REGEX = /^[a-z0-9\s\._]+$/i;
@@ -46,4 +46,6 @@ export const fileAlt = schema.maybe(
 export const page = schema.number({ min: 1, defaultValue: 1 });
 export const pageSize = schema.number({ min: 1, defaultValue: 100 });
 
-export const fileMeta = schema.maybe(schema.object({}, { unknowns: 'allow' }));
+export const fileMeta = schema.maybe(
+  schema.object({}, { unknowns: 'allow' })
+) as unknown as Type<unknown>;

@@ -15,11 +15,12 @@ import {
   EuiSpacer,
   EuiText,
   EuiCallOut,
+  EuiIcon,
 } from '@elastic/eui';
 
 import { SettingsWorkspaceProps } from './settings';
-import { LegacyIcon } from '../legacy_icon';
 import { useListKeys } from './use_list_keys';
+import { IconRenderer } from '../icon_renderer';
 
 export function BlocklistForm({
   blocklistedNodes,
@@ -41,7 +42,9 @@ export function BlocklistForm({
             <FormattedMessage
               id="xpack.graph.blocklist.noEntriesDescription"
               defaultMessage="You don't have any blocked terms. Select vertices and click {stopSign} in the control panel on the right to block them. Documents that match blocked terms are no longer explored and relationships to them are hidden."
-              values={{ stopSign: <span className="kuiIcon fa-ban" /> }}
+              values={{
+                stopSign: <EuiIcon type="eyeClosed" />,
+              }}
             />
           }
         />
@@ -52,7 +55,9 @@ export function BlocklistForm({
           <EuiListGroup bordered maxWidth={false}>
             {blocklistedNodes.map((node) => (
               <EuiListGroupItem
-                icon={<LegacyIcon icon={node.icon} asListIcon />}
+                icon={
+                  <IconRenderer icon={node.icon} className="gphLegacyIcon gphLegacyIcon--list" />
+                }
                 key={getListKey(node)}
                 label={node.label}
                 extraAction={{

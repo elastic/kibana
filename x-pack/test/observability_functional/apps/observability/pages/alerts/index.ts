@@ -10,8 +10,8 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { asyncForEach } from '../../helpers';
 
 const ACTIVE_ALERTS_CELL_COUNT = 78;
-const RECOVERED_ALERTS_CELL_COUNT = 180;
-const TOTAL_ALERTS_CELL_COUNT = 240;
+const RECOVERED_ALERTS_CELL_COUNT = 330;
+const TOTAL_ALERTS_CELL_COUNT = 440;
 
 const DISABLED_ALERTS_CHECKBOX = 6;
 const ENABLED_ALERTS_CHECKBOX = 4;
@@ -20,7 +20,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const find = getService('find');
 
-  describe('Observability alerts', function () {
+  describe('Observability alerts >', function () {
     this.tags('includeFirefox');
 
     const testSubjects = getService('testSubjects');
@@ -41,20 +41,14 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
     });
 
-    describe('With no data', () => {
-      it('Shows the no data screen', async () => {
-        await observability.alerts.common.getNoDataPageOrFail();
-      });
-    });
-
     describe('Alerts table', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/simple_logs');
         await observability.alerts.common.navigateToTimeWithData();
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await esArchiver.unload('x-pack/test/functional/es_archives/infra/simple_logs');
       });
 
       it('Renders the table', async () => {
@@ -83,6 +77,13 @@ export default ({ getService }: FtrProviderContext) => {
           await observability.alerts.common.typeInQueryBar('kibana.alert.s');
           await testSubjects.existOrFail('autocompleteSuggestion-field-kibana.alert.start-');
           await testSubjects.existOrFail('autocompleteSuggestion-field-kibana.alert.status-');
+        });
+
+        it('Invalid input should not break the page', async () => {
+          await observability.alerts.common.submitQuery('""""');
+          await testSubjects.existOrFail('errorToastMessage');
+          // Page should not go blank with invalid input
+          await testSubjects.existOrFail('alertsPageWithData');
         });
 
         it('Applies filters correctly', async () => {
@@ -127,7 +128,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         describe('When open', async () => {
           before(async () => {
-            await observability.alerts.common.openAlertsFlyout();
+            await observability.alerts.common.openAlertsFlyout(20);
           });
 
           after(async () => {
@@ -163,8 +164,8 @@ export default ({ getService }: FtrProviderContext) => {
               'Oct 19, 2021 @ 15:00:41.555',
               'Oct 19, 2021 @ 15:20:38.749',
               '20 minutes',
-              '5',
-              '30.73',
+              '5.0%',
+              '31%',
               'Failed transaction rate threshold',
             ];
 

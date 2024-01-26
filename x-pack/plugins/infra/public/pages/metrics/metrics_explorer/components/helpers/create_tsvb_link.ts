@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { encode } from 'rison-node';
-import uuid from 'uuid';
+import { encode } from '@kbn/rison';
+import { v4 as uuidv4 } from 'uuid';
 import { set } from '@kbn/safer-lodash-set';
-import { LinkDescriptor } from '@kbn/observability-plugin/public';
+import { LinkDescriptor } from '@kbn/observability-shared-plugin/public';
 import { TIMESTAMP_FIELD } from '../../../../../../common/constants';
 import { MetricsSourceConfigurationProperties } from '../../../../../../common/metrics_sources';
 import { colorTransformer, Color } from '../../../../../../common/color_palette';
@@ -35,9 +35,9 @@ const TSVB_WORKAROUND_INDEX_PATTERN = 'metric*';
 
 export const metricsExplorerMetricToTSVBMetric = (metric: MetricsExplorerOptionsMetric) => {
   if (metric.aggregation === 'rate') {
-    const metricId = uuid.v1();
-    const positiveOnlyId = uuid.v1();
-    const derivativeId = uuid.v1();
+    const metricId = uuidv4();
+    const positiveOnlyId = uuidv4();
+    const derivativeId = uuidv4();
     return [
       {
         id: metricId,
@@ -60,12 +60,12 @@ export const metricsExplorerMetricToTSVBMetric = (metric: MetricsExplorerOptions
     const percentileValue = metric.aggregation === 'p95' ? '95' : '99';
     return [
       {
-        id: uuid.v1(),
+        id: uuidv4(),
         type: 'percentile',
         field: metric.field,
         percentiles: [
           {
-            id: uuid.v1(),
+            id: uuidv4(),
             value: percentileValue,
             mode: 'line',
             percentile: '',
@@ -77,7 +77,7 @@ export const metricsExplorerMetricToTSVBMetric = (metric: MetricsExplorerOptions
   } else {
     return [
       {
-        id: uuid.v1(),
+        id: uuidv4(),
         type: metric.aggregation,
         field: metric.field || void 0,
       },
@@ -96,7 +96,7 @@ const mapMetricToSeries =
       fill: chartOptions.type === MetricsExplorerChartType.area ? 0.5 : 0,
       formatter: format === InfraFormatterType.bits ? InfraFormatterType.bytes : format,
       value_template: 'rate' === metric.aggregation ? '{{value}}/s' : '{{value}}',
-      id: uuid.v1(),
+      id: uuidv4(),
       line_width: 2,
       metrics: metricsExplorerMetricToTSVBMetric(metric),
       point_size: 0,
@@ -163,7 +163,7 @@ export const createTSVBLink = (
         axis_formatter: 'number',
         axis_position: 'left',
         axis_scale: 'normal',
-        id: uuid.v1(),
+        id: uuidv4(),
         default_index_pattern: tsvbIndexPattern,
         index_pattern: tsvbIndexPattern,
         interval: 'auto',

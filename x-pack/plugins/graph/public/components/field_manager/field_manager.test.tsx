@@ -111,7 +111,8 @@ describe('field_manager', () => {
     act(() => {
       getInstance().find(FieldPicker).dive().find(EuiSelectable).prop('onChange')!(
         [{ checked: 'on', label: 'field3' }],
-        event
+        event,
+        { checked: 'on', label: 'field3' }
       );
     });
 

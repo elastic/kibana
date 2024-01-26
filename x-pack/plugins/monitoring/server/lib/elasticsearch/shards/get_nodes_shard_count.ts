@@ -6,9 +6,7 @@
  */
 
 import { get } from 'lodash';
-// @ts-ignore
 import { createQuery } from '../../create_query';
-// @ts-ignore
 import { ElasticsearchMetric } from '../../metrics';
 import { LegacyRequest } from '../../../types';
 import { ElasticsearchModifiedSource } from '../../../../common/types/es';

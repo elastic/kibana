@@ -21,6 +21,10 @@ export class FeatureRegistry {
   private kibanaFeatures: Record<string, KibanaFeatureConfig> = {};
   private esFeatures: Record<string, ElasticsearchFeatureConfig> = {};
 
+  public lockRegistration() {
+    this.locked = true;
+  }
+
   public registerKibanaFeature(feature: KibanaFeatureConfig) {
     if (this.locked) {
       throw new Error(
@@ -58,7 +62,10 @@ export class FeatureRegistry {
   }
 
   public getAllKibanaFeatures(license?: ILicense, ignoreLicense = false): KibanaFeature[] {
-    this.locked = true;
+    if (!this.locked) {
+      throw new Error('Cannot retrieve Kibana features while registration is still open');
+    }
+
     let features = Object.values(this.kibanaFeatures);
 
     const performLicenseCheck = license && !ignoreLicense;
@@ -84,7 +91,10 @@ export class FeatureRegistry {
   }
 
   public getAllElasticsearchFeatures(): ElasticsearchFeature[] {
-    this.locked = true;
+    if (!this.locked) {
+      throw new Error('Cannot retrieve elasticsearch features while registration is still open');
+    }
+
     return Object.values(this.esFeatures).map(
       (featureConfig) => new ElasticsearchFeature(featureConfig)
     );
@@ -108,7 +118,12 @@ function applyAutomaticAllPrivilegeGrants(
   allPrivileges.forEach((allPrivilege) => {
     if (allPrivilege) {
       allPrivilege.savedObject.all = uniq([...allPrivilege.savedObject.all, 'telemetry']);
-      allPrivilege.savedObject.read = uniq([...allPrivilege.savedObject.read, 'config', 'url']);
+      allPrivilege.savedObject.read = uniq([
+        ...allPrivilege.savedObject.read,
+        'config',
+        'config-global',
+        'url',
+      ]);
     }
   });
 }
@@ -121,6 +136,7 @@ function applyAutomaticReadPrivilegeGrants(
       readPrivilege.savedObject.read = uniq([
         ...readPrivilege.savedObject.read,
         'config',
+        'config-global',
         'telemetry',
         'url',
       ]);

@@ -5,36 +5,59 @@
  * 2.0.
  */
 
-import { SLO } from '../../domain/models';
-import { FindSLOParams, FindSLOResponse, findSLOResponseSchema } from '../../types/rest_specs';
-import { Criteria, Paginated, Pagination, SLORepository } from './slo_repository';
+import { FindSLOParams, FindSLOResponse, findSLOResponseSchema, Pagination } from '@kbn/slo-schema';
+import { SLO, SLOWithSummary } from '../../domain/models';
+import { IllegalArgumentError } from '../../errors';
+import { SLORepository } from './slo_repository';
+import { SLOSummary, Sort, SummarySearchClient } from './summary_search_client';
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = 25;
+const MAX_PER_PAGE = 5000;
 
 export class FindSLO {
-  constructor(private repository: SLORepository) {}
+  constructor(
+    private repository: SLORepository,
+    private summarySearchClient: SummarySearchClient
+  ) {}
 
   public async execute(params: FindSLOParams): Promise<FindSLOResponse> {
-    const pagination: Pagination = toPagination(params);
-    const criteria: Criteria = toCriteria(params);
-    const result = await this.repository.find(criteria, pagination);
-    return this.toResponse(result);
-  }
+    const sloSummaryList = await this.summarySearchClient.search(
+      params.kqlQuery ?? '',
+      params.filters ?? '',
+      toSort(params),
+      toPagination(params)
+    );
 
-  private toResponse(result: Paginated<SLO>): FindSLOResponse {
+    const sloList = await this.repository.findAllByIds(sloSummaryList.results.map((slo) => slo.id));
+    const sloListWithSummary = mergeSloWithSummary(sloList, sloSummaryList.results);
+
     return findSLOResponseSchema.encode({
-      page: result.page,
-      per_page: result.perPage,
-      total: result.total,
-      results: result.results,
+      page: sloSummaryList.page,
+      perPage: sloSummaryList.perPage,
+      total: sloSummaryList.total,
+      results: sloListWithSummary,
     });
   }
 }
 
+function mergeSloWithSummary(sloList: SLO[], sloSummaryList: SLOSummary[]): SLOWithSummary[] {
+  return sloSummaryList
+    .filter((sloSummary) => sloList.some((s) => s.id === sloSummary.id))
+    .map((sloSummary) => ({
+      ...sloList.find((s) => s.id === sloSummary.id)!,
+      instanceId: sloSummary.instanceId,
+      summary: sloSummary.summary,
+    }));
+}
+
 function toPagination(params: FindSLOParams): Pagination {
   const page = Number(params.page);
-  const perPage = Number(params.per_page);
+  const perPage = Number(params.perPage);
+
+  if (!isNaN(perPage) && perPage > MAX_PER_PAGE) {
+    throw new IllegalArgumentError(`perPage limit set to ${MAX_PER_PAGE}`);
+  }
 
   return {
     page: !isNaN(page) && page >= 1 ? page : DEFAULT_PAGE,
@@ -42,6 +65,9 @@ function toPagination(params: FindSLOParams): Pagination {
   };
 }
 
-function toCriteria(params: FindSLOParams): Criteria {
-  return { name: params.name };
+function toSort(params: FindSLOParams): Sort {
+  return {
+    field: params.sortBy ?? 'status',
+    direction: params.sortDirection ?? 'asc',
+  };
 }

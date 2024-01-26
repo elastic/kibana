@@ -23,8 +23,8 @@ export const ActionsEuiTableFormatting = React.memo<ActionsEuiTableFormattingPro
   ({ children }) => (
     <div
       css={css`
-        .euiTableRowCell--hasActions .euiButtonEmpty .euiButtonContent {
-          padding: 0px 0px;
+        .euiTableRowCell--hasActions .euiButtonEmpty {
+          padding: 0;
           .euiButtonEmpty__text {
             display: none;
           }

@@ -9,17 +9,18 @@ import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { identity } from 'lodash';
 import type { MethodKeysOf } from '@kbn/utility-types';
 import { httpServerMock } from '@kbn/core/server/mocks';
-import { ActionType } from '../../../common';
-import { ActionsClientMock, actionsClientMock } from '../../actions_client.mock';
 import { ActionsRequestHandlerContext } from '../../types';
+import { actionsClientMock } from '../../mocks';
+import { ActionsClientMock } from '../../actions_client/actions_client.mock';
+import { ConnectorType } from '../../application/connector/types';
 
 export function mockHandlerArguments(
   {
     actionsClient = actionsClientMock.create(),
     listTypes: listTypesRes = [],
-  }: { actionsClient?: ActionsClientMock; listTypes?: ActionType[] },
-  req: unknown,
-  res?: Array<MethodKeysOf<KibanaResponseFactory>>
+  }: { actionsClient?: ActionsClientMock; listTypes?: ConnectorType[] },
+  request: unknown,
+  response?: Array<MethodKeysOf<KibanaResponseFactory>>
 ): [ActionsRequestHandlerContext, KibanaRequest<unknown, unknown, unknown>, KibanaResponseFactory] {
   const listTypes = jest.fn(() => listTypesRes);
   return [
@@ -39,8 +40,8 @@ export function mockHandlerArguments(
         },
       },
     } as unknown as ActionsRequestHandlerContext,
-    req as KibanaRequest<unknown, unknown, unknown>,
-    mockResponseFactory(res),
+    request as KibanaRequest<unknown, unknown, unknown>,
+    mockResponseFactory(response),
   ];
 }
 

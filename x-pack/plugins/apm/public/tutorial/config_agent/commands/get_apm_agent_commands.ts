@@ -5,16 +5,57 @@
  * 2.0.
  */
 import Mustache from 'mustache';
-import { java, javaVariables } from './java';
-import { node, nodeVariables } from './node';
-import { django, djangoVariables } from './django';
-import { flask, flaskVariables } from './flask';
-import { rails, railsVariables } from './rails';
-import { rack, rackVariables } from './rack';
-import { go, goVariables } from './go';
-import { dotnet, dotnetVariables } from './dotnet';
-import { php, phpVariables } from './php';
-import { rum, rumScript, rumVariables } from './rum';
+import {
+  java,
+  javaVariables,
+  javaLineNumbers,
+  javaHighlightLang,
+} from './java';
+import {
+  node,
+  nodeVariables,
+  nodeLineNumbers,
+  nodeHighlightLang,
+} from './node';
+import {
+  django,
+  djangoVariables,
+  djangoLineNumbers,
+  djangoHighlightLang,
+} from './django';
+import {
+  flask,
+  flaskVariables,
+  flaskLineNumbers,
+  flaskHighlightLang,
+} from './flask';
+import {
+  rails,
+  railsVariables,
+  railsLineNumbers,
+  railsHighlightLang,
+} from './rails';
+import {
+  rack,
+  rackVariables,
+  rackLineNumbers,
+  rackHighlightLang,
+} from './rack';
+import { go, goVariables, goLineNumbers, goHighlightLang } from './go';
+import {
+  dotnet,
+  dotnetVariables,
+  dotnetLineNumbers,
+  dotnetHighlightLang,
+} from './dotnet';
+import { php, phpVariables, phpLineNumbers, phpHighlightLang } from './php';
+import {
+  rum,
+  rumScript,
+  rumVariables,
+  rumLineNumbers,
+  rumHighlightLang,
+} from './rum';
 
 const apmAgentCommandsMap: Record<string, string> = {
   java,
@@ -47,6 +88,36 @@ const apmAgentVariablesMap: Record<string, Variables> = {
   js: rumVariables,
 };
 
+interface LineNumbers {
+  [key: string]: string | number | object;
+}
+
+const apmAgentLineNumbersMap: Record<string, LineNumbers> = {
+  java: javaLineNumbers,
+  node: nodeLineNumbers,
+  django: djangoLineNumbers,
+  flask: flaskLineNumbers,
+  rails: railsLineNumbers,
+  rack: rackLineNumbers,
+  go: goLineNumbers,
+  dotnet: dotnetLineNumbers,
+  php: phpLineNumbers,
+  js: rumLineNumbers,
+};
+
+const apmAgentHighlightLangMap: Record<string, string> = {
+  java: javaHighlightLang,
+  node: nodeHighlightLang,
+  django: djangoHighlightLang,
+  flask: flaskHighlightLang,
+  rails: railsHighlightLang,
+  rack: rackHighlightLang,
+  go: goHighlightLang,
+  dotnet: dotnetHighlightLang,
+  php: phpHighlightLang,
+  js: rumHighlightLang,
+};
+
 export function getApmAgentCommands({
   variantId,
   policyDetails,
@@ -72,4 +143,12 @@ export function getApmAgentCommands({
 
 export function getApmAgentVariables(variantId: string) {
   return apmAgentVariablesMap[variantId];
+}
+
+export function getApmAgentLineNumbers(variantId: string) {
+  return apmAgentLineNumbersMap[variantId];
+}
+
+export function getApmAgentHighlightLang(variantId: string) {
+  return apmAgentHighlightLangMap[variantId];
 }

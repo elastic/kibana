@@ -7,10 +7,14 @@
 
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 
+import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
-import uuid from 'uuid';
 
-import { isAgentUpgradeable } from '../../../common/services';
+import {
+  getRecentUpgradeInfoForAgent,
+  getNotUpgradeableMessage,
+  isAgentUpgradeableToVersion,
+} from '../../../common/services';
 
 import type { Agent } from '../../types';
 
@@ -24,7 +28,9 @@ import type { GetAgentsOptions } from './crud';
 import { bulkUpdateAgents } from './crud';
 import { createErrorActionResults, createAgentAction } from './actions';
 import { getHostedPolicies, isHostedAgent } from './hosted_agent';
-import { BulkActionTaskType } from './bulk_actions_resolver';
+import { BulkActionTaskType } from './bulk_action_types';
+import { getCancelledActions } from './action_status';
+import { getLatestAvailableVersion } from './versions';
 
 export class UpgradeActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
@@ -39,6 +45,11 @@ export class UpgradeActionRunner extends ActionRunner {
     return 'UPGRADE';
   }
 }
+
+const isActionIdCancelled = async (esClient: ElasticsearchClient, actionId: string) => {
+  const cancelledActions = await getCancelledActions(esClient);
+  return cancelledActions.filter((action) => action.actionId === actionId).length > 0;
+};
 
 export async function upgradeBatch(
   soClient: SavedObjectsClientContract,
@@ -66,14 +77,26 @@ export async function upgradeBatch(
       ? givenAgents.filter((agent: Agent) => !isHostedAgent(hostedPolicies, agent))
       : givenAgents;
 
-  const kibanaVersion = appContextService.getKibanaVersion();
+  const latestAgentVersion = await getLatestAvailableVersion();
   const upgradeableResults = await Promise.allSettled(
     agentsToCheckUpgradeable.map(async (agent) => {
-      // Filter out agents currently unenrolling, unenrolled, or not upgradeable b/c of version check
+      // Filter out agents that are:
+      //  - currently unenrolling
+      //  - unenrolled
+      //  - recently upgraded
+      //  - currently upgrading
+      //  - upgradeable b/c of version check
       const isNotAllowed =
-        !options.force && !isAgentUpgradeable(agent, kibanaVersion, options.version);
+        getRecentUpgradeInfoForAgent(agent).hasBeenUpgradedRecently ||
+        (!options.force && !isAgentUpgradeableToVersion(agent, options.version));
       if (isNotAllowed) {
-        throw new FleetError(`Agent ${agent.id} is not upgradeable`);
+        throw new FleetError(
+          `Agent ${agent.id} is not upgradeable: ${getNotUpgradeableMessage(
+            agent,
+            latestAgentVersion,
+            options.version
+          )}`
+        );
       }
 
       if (!options.force && isHostedAgent(hostedPolicies, agent)) {
@@ -100,13 +123,31 @@ export async function upgradeBatch(
   const now = new Date().toISOString();
   const data = {
     version: options.version,
-    source_uri: options.sourceUri,
+    sourceURI: options.sourceUri,
   };
 
   const rollingUpgradeOptions = getRollingUpgradeOptions(
     options?.startTime,
     options.upgradeDurationSeconds
   );
+
+  if (options.actionId && (await isActionIdCancelled(esClient, options.actionId))) {
+    appContextService
+      .getLogger()
+      .info(
+        `Skipping batch of actionId:${options.actionId} of ${givenAgents.length} agents as the upgrade was cancelled`
+      );
+    return {
+      actionId: options.actionId,
+    };
+  }
+  if (options.actionId) {
+    appContextService
+      .getLogger()
+      .info(
+        `Continuing batch of actionId:${options.actionId} of ${givenAgents.length} agents of upgrade`
+      );
+  }
 
   await bulkUpdateAgents(
     esClient,
@@ -120,7 +161,7 @@ export async function upgradeBatch(
     errors
   );
 
-  const actionId = options.actionId ?? uuid();
+  const actionId = options.actionId ?? uuidv4();
   const total = options.total ?? givenAgents.length;
 
   await createAgentAction(esClient, {
@@ -146,31 +187,40 @@ export async function upgradeBatch(
   };
 }
 
-const MINIMUM_EXECUTION_DURATION_SECONDS = 60 * 60 * 2; // 2h
+export const MINIMUM_EXECUTION_DURATION_SECONDS = 60 * 60 * 2; // 2h
+export const EXPIRATION_DURATION_SECONDS = 60 * 60 * 24 * 30; // 1 month
 
-const getRollingUpgradeOptions = (startTime?: string, upgradeDurationSeconds?: number) => {
+export const getRollingUpgradeOptions = (startTime?: string, upgradeDurationSeconds?: number) => {
   const now = new Date().toISOString();
   // Perform a rolling upgrade
   if (upgradeDurationSeconds) {
+    const minExecutionDuration = Math.min(
+      MINIMUM_EXECUTION_DURATION_SECONDS,
+      upgradeDurationSeconds
+    );
     return {
       start_time: startTime ?? now,
-      minimum_execution_duration: Math.min(
-        MINIMUM_EXECUTION_DURATION_SECONDS,
-        upgradeDurationSeconds
-      ),
+      rollout_duration_seconds: upgradeDurationSeconds,
+      minimum_execution_duration: minExecutionDuration,
+      // expiration will not be taken into account with Fleet Server version >=8.7, it is kept for BWC
+      // in the next major, expiration and minimum_execution_duration should be removed
       expiration: moment(startTime ?? now)
-        .add(upgradeDurationSeconds, 'seconds')
+        .add(
+          upgradeDurationSeconds <= MINIMUM_EXECUTION_DURATION_SECONDS
+            ? minExecutionDuration * 2
+            : upgradeDurationSeconds,
+          'seconds'
+        )
         .toISOString(),
     };
   }
   // Schedule without rolling upgrade (Immediately after start_time)
+  // Expiration time is set to a very long value (1 month) to allow upgrading agents staying offline for long time
   if (startTime && !upgradeDurationSeconds) {
     return {
       start_time: startTime ?? now,
       minimum_execution_duration: MINIMUM_EXECUTION_DURATION_SECONDS,
-      expiration: moment(startTime)
-        .add(MINIMUM_EXECUTION_DURATION_SECONDS, 'seconds')
-        .toISOString(),
+      expiration: moment(startTime).add(EXPIRATION_DURATION_SECONDS, 'seconds').toISOString(),
     };
   } else {
     // Regular bulk upgrade (non scheduled, non rolling)

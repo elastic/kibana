@@ -17,22 +17,16 @@ import {
   EuiButtonGroup,
 } from '@elastic/eui';
 import type { Position } from '@elastic/charts';
-import type { PaletteRegistry } from '@kbn/coloring';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
+import { useDebouncedValue } from '@kbn/visualization-ui-components';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PartitionChartsMeta } from './partition_charts_meta';
-import { LegendDisplay, PieVisualizationState, SharedPieLayerState } from '../../../common';
-import { VisualizationDimensionEditorProps, VisualizationToolbarProps } from '../../types';
-import {
-  ToolbarPopover,
-  LegendSettingsPopover,
-  useDebouncedValue,
-  PalettePicker,
-} from '../../shared_components';
+import { PieVisualizationState, SharedPieLayerState } from '../../../common/types';
+import { LegendDisplay } from '../../../common/constants';
+import { VisualizationToolbarProps } from '../../types';
+import { ToolbarPopover, LegendSettingsPopover } from '../../shared_components';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 import { shouldShowValuesInLegend } from './render_helpers';
-import { CollapseSetting } from '../../shared_components/collapse_setting';
-import { isCollapsed } from './visualization';
 
 const legendOptions: Array<{
   value: SharedPieLayerState['legendDisplay'];
@@ -259,7 +253,10 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
         onValueInLegendChange={onValueInLegendChange}
         position={layer.legendPosition}
         onPositionChange={onLegendPositionChange}
-        renderNestedLegendSwitch={!PartitionChartsMeta[state.shape]?.legend.hideNestedLegendSwitch}
+        renderNestedLegendSwitch={
+          !PartitionChartsMeta[state.shape]?.legend.hideNestedLegendSwitch &&
+          layer.primaryGroups.length + (layer.secondaryGroups?.length ?? 0) > 1
+        }
         nestedLegend={Boolean(layer.nestedLegend)}
         onNestedLegendChange={onNestedLegendChange}
         shouldTruncate={layer.truncateLegend ?? defaultTruncationValue}
@@ -302,69 +299,3 @@ const DecimalPlaceSlider = ({
     />
   );
 };
-
-export function DimensionEditor(
-  props: VisualizationDimensionEditorProps<PieVisualizationState> & {
-    paletteService: PaletteRegistry;
-  }
-) {
-  const currentLayer = props.state.layers.find((layer) => layer.layerId === props.layerId);
-
-  if (!currentLayer) {
-    return null;
-  }
-
-  const firstNonCollapsedColumnId = currentLayer.primaryGroups.find(
-    (columnId) => !isCollapsed(columnId, currentLayer)
-  );
-
-  return (
-    <>
-      {props.accessor === firstNonCollapsedColumnId && (
-        <PalettePicker
-          palettes={props.paletteService}
-          activePalette={props.state.palette}
-          setPalette={(newPalette) => {
-            props.setState({ ...props.state, palette: newPalette });
-          }}
-        />
-      )}
-    </>
-  );
-}
-
-export function DimensionDataExtraEditor(
-  props: VisualizationDimensionEditorProps<PieVisualizationState> & {
-    paletteService: PaletteRegistry;
-  }
-) {
-  const currentLayer = props.state.layers.find((layer) => layer.layerId === props.layerId);
-
-  if (!currentLayer) {
-    return null;
-  }
-
-  return (
-    <>
-      <CollapseSetting
-        value={currentLayer?.collapseFns?.[props.accessor] || ''}
-        onChange={(collapseFn) => {
-          props.setState({
-            ...props.state,
-            layers: props.state.layers.map((layer) =>
-              layer.layerId !== props.layerId
-                ? layer
-                : {
-                    ...layer,
-                    collapseFns: {
-                      ...layer.collapseFns,
-                      [props.accessor]: collapseFn,
-                    },
-                  }
-            ),
-          });
-        }}
-      />
-    </>
-  );
-}

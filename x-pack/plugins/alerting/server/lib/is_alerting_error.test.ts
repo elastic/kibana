@@ -8,12 +8,13 @@
 import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from './is_alerting_error';
 import { ErrorWithReason } from './error_with_reason';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { RuleExecutionStatusErrorReasons } from '../types';
+import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 
 describe('isAlertSavedObjectNotFoundError', () => {
-  const id = uuid.v4();
-  const errorSONF = SavedObjectsErrorHelpers.createGenericNotFoundError('alert', id);
+  const id = uuidv4();
+  const errorSONF = SavedObjectsErrorHelpers.createGenericNotFoundError(RULE_SAVED_OBJECT_TYPE, id);
 
   test('identifies SavedObjects Not Found errors', () => {
     // ensure the error created by SO parses as a string with the format we expect
@@ -33,8 +34,11 @@ describe('isAlertSavedObjectNotFoundError', () => {
 });
 
 describe('isEsUnavailableError', () => {
-  const id = uuid.v4();
-  const errorSONF = SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError('alert', id);
+  const id = uuidv4();
+  const errorSONF = SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(
+    RULE_SAVED_OBJECT_TYPE,
+    id
+  );
 
   test('identifies es unavailable errors', () => {
     // ensure the error created by SO parses as a string with the format we expect

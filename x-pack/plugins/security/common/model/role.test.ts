@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { Role } from '.';
+import type { Role } from '@kbn/security-plugin-types-common';
+
 import {
   copyRole,
   getExtendedRoleDeprecationNotice,

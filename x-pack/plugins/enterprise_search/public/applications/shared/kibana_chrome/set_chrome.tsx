@@ -9,26 +9,34 @@ import React, { useEffect } from 'react';
 
 import { useValues } from 'kea';
 
+import { APPLICATIONS_PLUGIN } from '../../../../common/constants';
+
 import { KibanaLogic } from '../kibana';
 
 import {
   useGenerateBreadcrumbs,
-  useEnterpriseSearchBreadcrumbs,
+  useSearchBreadcrumbs,
+  useEnterpriseSearchApplicationsBreadcrumbs,
   useAnalyticsBreadcrumbs,
   useEnterpriseSearchContentBreadcrumbs,
+  useAiSearchBreadcrumbs,
   useElasticsearchBreadcrumbs,
   useAppSearchBreadcrumbs,
   useWorkplaceSearchBreadcrumbs,
   BreadcrumbTrail,
   useSearchExperiencesBreadcrumbs,
+  useVectorSearchBreadcrumbs,
 } from './generate_breadcrumbs';
 import {
-  enterpriseSearchTitle,
+  aiSearchTitle,
   analyticsTitle,
-  elasticsearchTitle,
   appSearchTitle,
-  workplaceSearchTitle,
+  elasticsearchTitle,
+  enterpriseSearchContentTitle,
   searchExperiencesTitle,
+  searchTitle,
+  vectorSearchTitle,
+  workplaceSearchTitle,
 } from './generate_title';
 
 /**
@@ -50,19 +58,19 @@ interface SetChromeProps {
   trail?: BreadcrumbTrail;
 }
 
-export const SetEnterpriseSearchChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
+export const SetSearchChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
   const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
 
   const title = reverseArray(trail);
-  const docTitle = enterpriseSearchTitle(title);
+  const docTitle = searchTitle(title);
 
   const crumbs = useGenerateBreadcrumbs(trail);
-  const breadcrumbs = useEnterpriseSearchBreadcrumbs(crumbs);
+  const breadcrumbs = useSearchBreadcrumbs(crumbs);
 
   useEffect(() => {
     setBreadcrumbs(breadcrumbs);
     setDocTitle(docTitle);
-  }, [trail]);
+  }, [trail.join('|')]);
 
   return null;
 };
@@ -118,6 +126,23 @@ export const SetAppSearchChrome: React.FC<SetChromeProps> = ({ trail = [] }) => 
   return null;
 };
 
+export const SetAiSearchChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
+  const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
+
+  const title = reverseArray(trail);
+  const docTitle = aiSearchTitle(title);
+
+  const crumbs = useGenerateBreadcrumbs(trail);
+  const breadcrumbs = useAiSearchBreadcrumbs(crumbs);
+
+  useEffect(() => {
+    setBreadcrumbs(breadcrumbs);
+    setDocTitle(docTitle);
+  }, [trail]);
+
+  return null;
+};
+
 export const SetWorkplaceSearchChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
   const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
 
@@ -139,7 +164,7 @@ export const SetEnterpriseSearchContentChrome: React.FC<SetChromeProps> = ({ tra
   const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
 
   const title = reverseArray(trail);
-  const docTitle = appSearchTitle(title);
+  const docTitle = enterpriseSearchContentTitle(title);
 
   const crumbs = useGenerateBreadcrumbs(trail);
   const breadcrumbs = useEnterpriseSearchContentBreadcrumbs(crumbs);
@@ -160,6 +185,40 @@ export const SetSearchExperiencesChrome: React.FC<SetChromeProps> = ({ trail = [
 
   const crumbs = useGenerateBreadcrumbs(trail);
   const breadcrumbs = useSearchExperiencesBreadcrumbs(crumbs);
+
+  useEffect(() => {
+    setBreadcrumbs(breadcrumbs);
+    setDocTitle(docTitle);
+  }, [trail]);
+
+  return null;
+};
+
+export const SetEnterpriseSearchApplicationsChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
+  const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
+
+  const title = reverseArray(trail);
+  const docTitle = appSearchTitle(title);
+
+  const breadcrumbs = useEnterpriseSearchApplicationsBreadcrumbs(
+    useGenerateBreadcrumbs([APPLICATIONS_PLUGIN.NAV_TITLE, ...trail])
+  );
+
+  useEffect(() => {
+    setBreadcrumbs(breadcrumbs);
+    setDocTitle(docTitle);
+  }, [trail]);
+
+  return null;
+};
+
+export const SetVectorSearchChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
+  const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
+
+  const title = reverseArray(trail);
+  const docTitle = vectorSearchTitle(title);
+
+  const breadcrumbs = useVectorSearchBreadcrumbs(useGenerateBreadcrumbs(trail));
 
   useEffect(() => {
     setBreadcrumbs(breadcrumbs);

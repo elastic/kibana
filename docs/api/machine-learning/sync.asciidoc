@@ -9,7 +9,7 @@ Synchronizes {kib} saved objects for {ml} jobs and trained models.
 [NOTE]
 ====
 For the most up-to-date API details, refer to the
-{kib-repo}/tree/{branch}/x-pack/plugins/ml/common/openapi[open API specification]. For a preview, check out <<machine-learning-apis>>.
+{kib-repo}/tree/{branch}/x-pack/plugins/ml/common/openapi[open API specification].
 ====
 
 [[machine-learning-api-sync-request]]

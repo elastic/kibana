@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { withRouter, RouteComponentProps, useLocation } from 'react-router-dom';
 import {
   EuiFlexGroup,
@@ -17,6 +17,7 @@ import {
   EuiCallOut,
   EuiCode,
   EuiText,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -28,14 +29,18 @@ import {
   SavedObjectManagementTypeInfo,
 } from '@kbn/saved-objects-management-plugin/public';
 import { pickBy } from 'lodash';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import type * as CSS from 'csstype';
 import { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
 import { getTags } from '../utils';
 import { removeDataView, RemoveDataViewProps } from './remove_data_view';
+import { APP_STATE_STORAGE_KEY } from './edit_index_pattern_state_container';
 
-const codeStyle = {
+const codeStyle: CSS.Properties = {
   marginLeft: '8px',
+  overflowWrap: 'anywhere',
 };
 
 export interface EditIndexPatternProps extends RouteComponentProps {
@@ -67,8 +72,15 @@ const getCompositeRuntimeFields = (dataView: DataView) =>
 
 export const EditIndexPattern = withRouter(
   ({ indexPattern, history, location }: EditIndexPatternProps) => {
-    const { uiSettings, overlays, chrome, dataViews, IndexPatternEditor, savedObjectsManagement } =
-      useKibana<IndexPatternManagmentContext>().services;
+    const {
+      uiSettings,
+      overlays,
+      chrome,
+      dataViews,
+      IndexPatternEditor,
+      savedObjectsManagement,
+      application,
+    } = useKibana<IndexPatternManagmentContext>().services;
     const [fields, setFields] = useState<DataViewField[]>(indexPattern.getNonScriptedFields());
     const [compositeRuntimeFields, setCompositeRuntimeFields] = useState<
       Record<string, RuntimeField>
@@ -77,10 +89,40 @@ export const EditIndexPattern = withRouter(
       indexPattern.fields.getAll().filter((field) => field.type === 'conflict')
     );
     const [defaultIndex, setDefaultIndex] = useState<string>(uiSettings.get('defaultIndex'));
-    const [tags, setTags] = useState<Array<{ key: string; name: string }>>([]);
+    const [tags, setTags] = useState<
+      Array<{ key: string; 'data-test-subj': string; name: string }>
+    >([]);
     const [showEditDialog, setShowEditDialog] = useState<boolean>(false);
     const [relationships, setRelationships] = useState<SavedObjectRelationWithTitle[]>([]);
     const [allowedTypes, setAllowedTypes] = useState<SavedObjectManagementTypeInfo[]>([]);
+    const [refreshCount, setRefreshCount] = useState<number>(0); // used for forcing rerender of field list
+    const [isRefreshing, setIsRefreshing] = React.useState(false);
+
+    const conflictFieldsUrl = useMemo(() => {
+      return setStateToKbnUrl(
+        APP_STATE_STORAGE_KEY,
+        {
+          fieldTypes: ['conflict'],
+          tab: 'indexedFields',
+        },
+        { useHash: uiSettings.get('state:storeInSessionStorage') },
+        application.getUrlForApp('management', {
+          path: `/kibana/dataViews/dataView/${encodeURIComponent(indexPattern.id!)}`,
+        })
+      );
+    }, [application, indexPattern.id, uiSettings]);
+
+    useEffect(() => {
+      // dispatch synthetic hash change event to update hash history objects
+      // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
+      const unlistenParentHistory = history.listen(() => {
+        window.dispatchEvent(new HashChangeEvent('hashchange'));
+      });
+
+      return () => {
+        unlistenParentHistory();
+      };
+    }, [history]);
 
     useEffect(() => {
       savedObjectsManagement.getAllowedTypes().then((resp) => {
@@ -105,11 +147,13 @@ export const EditIndexPattern = withRouter(
       setConflictedFields(
         indexPattern.fields.getAll().filter((field) => field.type === 'conflict')
       );
-    }, [indexPattern]);
+    }, [indexPattern, refreshCount]);
 
     useEffect(() => {
-      setTags(getTags(indexPattern, indexPattern.id === defaultIndex));
-    }, [defaultIndex, indexPattern]);
+      setTags(
+        getTags(indexPattern, indexPattern.id === defaultIndex, dataViews.getRollupsEnabled())
+      );
+    }, [defaultIndex, indexPattern, dataViews]);
 
     const setDefaultPattern = useCallback(() => {
       uiSettings.set('defaultIndex', indexPattern.id);
@@ -125,10 +169,15 @@ export const EditIndexPattern = withRouter(
       },
     });
 
-    const isRollup = new URLSearchParams(useLocation().search).get('type') === 'rollup';
+    const isRollup =
+      new URLSearchParams(useLocation().search).get('type') === 'rollup' &&
+      dataViews.getRollupsEnabled();
     const displayIndexPatternEditor = showEditDialog ? (
       <IndexPatternEditor
-        onSave={() => setShowEditDialog(false)}
+        onSave={() => {
+          setFields(indexPattern.getNonScriptedFields());
+          setShowEditDialog(false);
+        }}
         onCancel={() => setShowEditDialog(false)}
         defaultTypeIsRollup={isRollup}
         editData={indexPattern}
@@ -210,7 +259,9 @@ export const EditIndexPattern = withRouter(
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize="none" alignItems="center">
                   <EuiText size="s">{indexPatternHeading}</EuiText>
-                  <EuiCode style={codeStyle}>{indexPattern.title}</EuiCode>
+                  <EuiCode data-test-subj="currentIndexPatternTitle" style={codeStyle}>
+                    {indexPattern.title}
+                  </EuiCode>
                 </EuiFlexGroup>
               </EuiFlexItem>
             )}
@@ -218,7 +269,9 @@ export const EditIndexPattern = withRouter(
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize="none" alignItems="center">
                   <EuiText size="s">{timeFilterHeading}</EuiText>
-                  <EuiCode style={codeStyle}>{indexPattern.timeFieldName}</EuiCode>
+                  <EuiCode data-test-subj="currentIndexPatternTimeField" style={codeStyle}>
+                    {indexPattern.timeFieldName}
+                  </EuiCode>
                 </EuiFlexGroup>
               </EuiFlexItem>
             )}
@@ -230,7 +283,11 @@ export const EditIndexPattern = withRouter(
             {tags.map((tag) => (
               <EuiFlexItem grow={false} key={tag.key}>
                 {tag.key === 'default' ? (
-                  <EuiBadge iconType="starFilled" color="default">
+                  <EuiBadge
+                    iconType="starFilled"
+                    color="default"
+                    data-test-subj={tag['data-test-subj']}
+                  >
                     {tag.name}
                   </EuiBadge>
                 ) : (
@@ -242,8 +299,24 @@ export const EditIndexPattern = withRouter(
           {conflictedFields.length > 0 && (
             <>
               <EuiSpacer />
-              <EuiCallOut title={mappingConflictHeader} color="warning" iconType="alert">
+              <EuiCallOut
+                title={mappingConflictHeader}
+                color="warning"
+                iconType="warning"
+                data-test-subj="dataViewMappingConflict"
+              >
                 <p>{mappingConflictLabel}</p>
+                <EuiLink
+                  data-test-subj="viewDataViewMappingConflictsButton"
+                  href={conflictFieldsUrl}
+                >
+                  {i18n.translate(
+                    'indexPatternManagement.editIndexPattern.viewMappingConflictButton',
+                    {
+                      defaultMessage: 'View conflicts',
+                    }
+                  )}
+                </EuiLink>
               </EuiCallOut>
             </>
           )}
@@ -262,6 +335,13 @@ export const EditIndexPattern = withRouter(
             setFields(indexPattern.getNonScriptedFields());
             setCompositeRuntimeFields(getCompositeRuntimeFields(indexPattern));
           }}
+          refreshIndexPatternClick={async () => {
+            setIsRefreshing(true);
+            await dataViews.refreshFields(indexPattern, false, true);
+            setRefreshCount(refreshCount + 1); // rerender field list
+            setIsRefreshing(false);
+          }}
+          isRefreshing={isRefreshing}
         />
         {displayIndexPatternEditor}
       </div>

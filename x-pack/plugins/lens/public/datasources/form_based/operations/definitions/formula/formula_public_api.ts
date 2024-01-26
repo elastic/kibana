@@ -7,6 +7,7 @@
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { Query } from '@kbn/es-query';
+import type { DateRange } from '../../../../../../common/types';
 import { convertDataViewIntoLensIndexPattern } from '../../../../../data_views_service/loader';
 import type { IndexPattern } from '../../../../../types';
 import type { PersistedIndexPatternLayer } from '../../../types';
@@ -40,11 +41,13 @@ export interface FormulaPublicApi {
         id: string;
         params?: {
           decimals: number;
+          compact?: boolean;
         };
       };
     },
     layer: PersistedIndexPatternLayer,
-    dataView: DataView
+    dataView: DataView,
+    dateRange?: DateRange
   ) => PersistedIndexPatternLayer | undefined;
 }
 
@@ -67,7 +70,8 @@ export const createFormulaPublicApi = (): FormulaPublicApi => {
       id,
       { formula, label, format, filter, reducedTimeRange, timeScale },
       layer,
-      dataView
+      dataView,
+      dateRange
     ) => {
       const indexPattern = getCachedLensIndexPattern(dataView);
 
@@ -89,7 +93,7 @@ export const createFormulaPublicApi = (): FormulaPublicApi => {
           },
         },
         { ...layer, indexPatternId: indexPattern.id },
-        { indexPattern }
+        { indexPattern, dateRange }
       ).layer;
     },
   };

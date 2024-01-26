@@ -10,15 +10,18 @@ import { createMemoryHistory } from 'history';
 import React, { memo } from 'react';
 import type { RenderOptions, RenderResult } from '@testing-library/react';
 import { render as reactRender, act } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, type WrapperComponent } from '@testing-library/react-hooks';
 import type { RenderHookResult } from '@testing-library/react-hooks';
-import { Router } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { themeServiceMock } from '@kbn/core/public/mocks';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ScopedHistory } from '@kbn/core/public';
 import { CoreScopedHistory } from '@kbn/core/public';
+
+import { allowedExperimentalValues } from '../../common/experimental_features';
 
 import { FleetAppContext } from '../applications/fleet/app';
 import { IntegrationsAppContext } from '../applications/integrations/app';
@@ -52,10 +55,13 @@ export interface TestRenderer {
   HookWrapper: React.FC<any>;
   render: UiRender;
   renderHook: <TProps, TResult>(
-    callback: (props: TProps) => TResult
+    callback: (props: TProps) => TResult,
+    wrapper?: WrapperComponent<any>
   ) => RenderHookResult<TProps, TResult>;
   setHeaderActionMenu: Function;
 }
+
+const queryClient = new QueryClient();
 
 export const createFleetTestRendererMock = (): TestRenderer => {
   const basePath = '/mock';
@@ -64,18 +70,17 @@ export const createFleetTestRendererMock = (): TestRenderer => {
   const history = createMemoryHistory({ initialEntries: [basePath] });
   const mountHistory = new CoreScopedHistory(history, basePath);
 
-  ExperimentalFeaturesService.init({
-    createPackagePolicyMultiPageLayout: true,
-    packageVerification: true,
-    showDevtoolsRequest: false,
-    showRequestDiagnostics: false,
-  });
+  ExperimentalFeaturesService.init(allowedExperimentalValues);
 
   const HookWrapper = memo(({ children }) => {
     return (
       <startServices.i18n.Context>
         <Router history={mountHistory}>
-          <KibanaContextProvider services={{ ...startServices }}>{children}</KibanaContextProvider>
+          <QueryClientProvider client={queryClient}>
+            <KibanaContextProvider services={{ ...startServices }}>
+              {children}
+            </KibanaContextProvider>
+          </QueryClientProvider>
         </Router>
       </startServices.i18n.Context>
     );
@@ -99,6 +104,11 @@ export const createFleetTestRendererMock = (): TestRenderer => {
           extensions={extensions}
           routerHistory={testRendererMocks.history}
           theme$={themeServiceMock.createTheme$()}
+          fleetStatus={{
+            enabled: true,
+            isLoading: false,
+            isReady: true,
+          }}
         >
           {children}
         </FleetAppContext>
@@ -159,6 +169,11 @@ export const createIntegrationsTestRendererMock = (): TestRenderer => {
           routerHistory={testRendererMocks.history}
           theme$={themeServiceMock.createTheme$()}
           setHeaderActionMenu={() => {}}
+          fleetStatus={{
+            enabled: true,
+            isLoading: false,
+            isReady: true,
+          }}
         >
           {children}
         </IntegrationsAppContext>
@@ -175,9 +190,17 @@ export const createIntegrationsTestRendererMock = (): TestRenderer => {
       });
       return renderResponse!;
     },
-    renderHook: (callback) => {
+    renderHook: (
+      callback,
+      ExtraWrapper: WrapperComponent<any> = memo(({ children }) => <>{children}</>)
+    ) => {
+      const wrapper: WrapperComponent<any> = ({ children }) => (
+        <testRendererMocks.HookWrapper>
+          <ExtraWrapper>{children}</ExtraWrapper>
+        </testRendererMocks.HookWrapper>
+      );
       return renderHook(callback, {
-        wrapper: testRendererMocks.HookWrapper,
+        wrapper,
       });
     },
   };

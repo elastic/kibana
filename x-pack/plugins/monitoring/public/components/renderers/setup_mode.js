@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBottomBar,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiSpacer,
-  EuiTextColor,
-} from '@elastic/eui';
+import { EuiBottomBar, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Fragment } from 'react';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
@@ -144,15 +137,13 @@ export class WrappedSetupModeRenderer extends React.Component {
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem grow={false}>
-                  <EuiTextColor color="ghost">
-                    <FormattedMessage
-                      id="xpack.monitoring.setupMode.description"
-                      defaultMessage="You are in setup mode. The ({flagIcon}) icon indicates configuration options."
-                      values={{
-                        flagIcon: <EuiIcon type="flag" />,
-                      }}
-                    />
-                  </EuiTextColor>
+                  <FormattedMessage
+                    id="xpack.monitoring.setupMode.description"
+                    defaultMessage="You are in setup mode. The ({flagIcon}) icon indicates configuration options."
+                    values={{
+                      flagIcon: <EuiIcon type="flag" />,
+                    }}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>

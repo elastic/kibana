@@ -25,11 +25,13 @@ import {
   EuiSwitch,
   EuiSwitchEvent,
   EuiTextArea,
+  EuiIconTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 export interface OnSaveProps {
   newTitle: string;
@@ -44,6 +46,7 @@ interface Props {
   onClose: () => void;
   title: string;
   showCopyOnSave: boolean;
+  mustCopyOnSaveMessage?: string;
   onCopyOnSaveChange?: (copyOnChange: boolean) => void;
   initialCopyOnSave?: boolean;
   objectType: string;
@@ -53,6 +56,7 @@ interface Props {
   description?: string;
   showDescription: boolean;
   isValid?: boolean;
+  customModalTitle?: string;
 }
 
 export interface SaveModalState {
@@ -62,6 +66,7 @@ export interface SaveModalState {
   hasTitleDuplicate: boolean;
   isLoading: boolean;
   visualizationDescription: string;
+  hasAttemptedSubmit: boolean;
 }
 
 const generateId = htmlIdGenerator();
@@ -81,19 +86,28 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
     hasTitleDuplicate: false,
     isLoading: false,
     visualizationDescription: this.props.description ? this.props.description : '',
+    hasAttemptedSubmit: false,
   };
 
   public render() {
-    const { isTitleDuplicateConfirmed, hasTitleDuplicate, title } = this.state;
+    const { isTitleDuplicateConfirmed, hasTitleDuplicate, title, hasAttemptedSubmit } = this.state;
     const duplicateWarningId = generateId();
 
     const hasColumns = !!this.props.rightOptions;
+
+    const titleInputValid =
+      hasAttemptedSubmit &&
+      ((!isTitleDuplicateConfirmed && hasTitleDuplicate) || title.length === 0);
 
     const formBodyContent = (
       <>
         <EuiFormRow
           fullWidth
           label={<FormattedMessage id="savedObjects.saveModal.titleLabel" defaultMessage="Title" />}
+          isInvalid={titleInputValid}
+          error={i18n.translate('savedObjects.saveModal.titleRequired', {
+            defaultMessage: 'A title is required',
+          })}
         >
           <EuiFieldText
             fullWidth
@@ -101,7 +115,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
             data-test-subj="savedObjectTitle"
             value={title}
             onChange={this.onTitleChange}
-            isInvalid={(!isTitleDuplicateConfirmed && hasTitleDuplicate) || title.length === 0}
+            isInvalid={titleInputValid}
             aria-describedby={this.state.hasTitleDuplicate ? duplicateWarningId : undefined}
           />
         </EuiFormRow>
@@ -135,11 +149,15 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
       >
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-            <FormattedMessage
-              id="savedObjects.saveModal.saveTitle"
-              defaultMessage="Save {objectType}"
-              values={{ objectType: this.props.objectType }}
-            />
+            {this.props.customModalTitle ? (
+              this.props.customModalTitle
+            ) : (
+              <FormattedMessage
+                id="savedObjects.saveModal.saveTitle"
+                defaultMessage="Save {objectType}"
+                values={{ objectType: this.props.objectType }}
+              />
+            )}
           </EuiModalHeaderTitle>
         </EuiModalHeader>
 
@@ -153,19 +171,22 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
               </EuiText>
             )}
             {formBody}
-            {this.renderCopyOnSave()}
           </EuiForm>
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty data-test-subj="saveCancelButton" onClick={this.props.onClose}>
-            <FormattedMessage
-              id="savedObjects.saveModal.cancelButtonLabel"
-              defaultMessage="Cancel"
-            />
-          </EuiButtonEmpty>
-
-          {this.renderConfirmButton()}
+          <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+            {this.props.showCopyOnSave && this.renderCopyOnSave()}
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty data-test-subj="saveCancelButton" onClick={this.props.onClose}>
+                <FormattedMessage
+                  id="savedObjects.saveModal.cancelButtonLabel"
+                  defaultMessage="Cancel"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{this.renderConfirmButton()}</EuiFlexItem>
+          </EuiFlexGroup>
         </EuiModalFooter>
       </EuiModal>
     );
@@ -179,6 +200,11 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
     return (
       <EuiFormRow
         fullWidth
+        labelAppend={
+          <EuiText size="xs" color="subdued">
+            <FormattedMessage id="savedObjects.saveModal.optional" defaultMessage="Optional" />
+          </EuiText>
+        }
         label={
           <FormattedMessage
             id="savedObjects.saveModal.descriptionLabel"
@@ -187,6 +213,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
         }
       >
         <EuiTextArea
+          fullWidth
           data-test-subj="viewDescription"
           value={this.state.visualizationDescription}
           onChange={this.onDescriptionChange}
@@ -225,7 +252,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
 
     await this.props.onSave({
       newTitle: this.state.title,
-      newCopyOnSave: this.state.copyOnSave,
+      newCopyOnSave: Boolean(this.props.mustCopyOnSaveMessage) || this.state.copyOnSave,
       isTitleDuplicateConfirmed: this.state.isTitleDuplicateConfirmed,
       onTitleDuplicate: this.onTitleDuplicate,
       newDescription: this.state.visualizationDescription,
@@ -252,11 +279,22 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
 
   private onFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    this.saveSavedObject();
+
+    const { hasAttemptedSubmit, title } = this.state;
+
+    if (!hasAttemptedSubmit) {
+      this.setState({ hasAttemptedSubmit: true });
+    }
+
+    const isValid = this.props.isValid !== undefined ? this.props.isValid : true;
+
+    if (title.length !== 0 && isValid) {
+      this.saveSavedObject();
+    }
   };
 
   private renderConfirmButton = () => {
-    const { isLoading, title } = this.state;
+    const { isLoading } = this.state;
 
     let confirmLabel: string | React.ReactNode = i18n.translate(
       'savedObjects.saveModal.saveButtonLabel',
@@ -269,14 +307,11 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
       confirmLabel = this.props.confirmButtonLabel;
     }
 
-    const isValid = this.props.isValid !== undefined ? this.props.isValid : true;
-
     return (
       <EuiButton
         fill
         data-test-subj="confirmSaveSavedObjectButton"
         isLoading={isLoading}
-        isDisabled={title.length === 0 || !isValid}
         type="submit"
         form={this.formId}
       >
@@ -322,25 +357,29 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
   };
 
   private renderCopyOnSave = () => {
-    if (!this.props.showCopyOnSave) {
-      return;
-    }
-
     return (
       <>
-        <EuiSpacer />
-        <EuiSwitch
-          data-test-subj="saveAsNewCheckbox"
-          checked={this.state.copyOnSave}
-          onChange={this.onCopyOnSaveChange}
-          label={
-            <FormattedMessage
-              id="savedObjects.saveModal.saveAsNewLabel"
-              defaultMessage="Save as new {objectType}"
-              values={{ objectType: this.props.objectType }}
-            />
-          }
-        />
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            data-test-subj="saveAsNewCheckbox"
+            checked={Boolean(this.props.mustCopyOnSaveMessage) || this.state.copyOnSave}
+            disabled={Boolean(this.props.mustCopyOnSaveMessage)}
+            onChange={this.onCopyOnSaveChange}
+            label={
+              <FormattedMessage
+                id="savedObjects.saveModal.saveAsNewLabel"
+                defaultMessage="Save as new {objectType}"
+                values={{ objectType: this.props.objectType }}
+              />
+            }
+          />
+        </EuiFlexItem>
+        {this.props.mustCopyOnSaveMessage && (
+          <EuiFlexItem css={{ marginLeft: `-${euiThemeVars.euiSize}` }} grow={false}>
+            <EuiIconTip type="iInCircle" content={this.props.mustCopyOnSaveMessage} />
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={true} />
       </>
     );
   };

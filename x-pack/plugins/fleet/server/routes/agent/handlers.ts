@@ -5,20 +5,9 @@
  * 2.0.
  */
 
-import { readFile } from 'fs/promises';
-import Path from 'path';
-
-import { REPO_ROOT } from '@kbn/utils';
 import { uniq } from 'lodash';
-import semverGte from 'semver/functions/gte';
-import semverGt from 'semver/functions/gt';
-import semverCoerce from 'semver/functions/coerce';
 import { type RequestHandler, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
-
-import { appContextService } from '../../services';
-
-const MINIMUM_SUPPORTED_VERSION = '7.17.0';
 
 import type {
   GetAgentsResponse,
@@ -29,6 +18,8 @@ import type {
   GetAvailableVersionsResponse,
   GetActionStatusResponse,
   GetAgentUploadsResponse,
+  PostAgentReassignResponse,
+  PostRetrieveAgentsByActionsResponse,
 } from '../../../common/types';
 import type {
   GetAgentsRequestSchema,
@@ -38,24 +29,36 @@ import type {
   DeleteAgentRequestSchema,
   GetAgentStatusRequestSchema,
   GetAgentDataRequestSchema,
-  PutAgentReassignRequestSchema,
+  PutAgentReassignRequestSchemaDeprecated,
+  PostAgentReassignRequestSchema,
   PostBulkAgentReassignRequestSchema,
   PostBulkUpdateAgentTagsRequestSchema,
   GetActionStatusRequestSchema,
   GetAgentUploadFileRequestSchema,
+  PostRetrieveAgentsByActionsRequestSchema,
 } from '../../types';
 import { defaultFleetErrorHandler } from '../../errors';
 import * as AgentService from '../../services/agents';
+import { fetchAndAssignAgentMetrics } from '../../services/agents/agent_metrics';
 
 export const getAgentHandler: RequestHandler<
-  TypeOf<typeof GetOneAgentRequestSchema.params>
+  TypeOf<typeof GetOneAgentRequestSchema.params>,
+  TypeOf<typeof GetOneAgentRequestSchema.query>
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const esClientCurrentUser = coreContext.elasticsearch.client.asCurrentUser;
+  const soClient = coreContext.savedObjects.client;
 
   try {
+    let agent = await AgentService.getAgentById(esClient, soClient, request.params.agentId);
+
+    if (request.query.withMetrics) {
+      agent = (await fetchAndAssignAgentMetrics(esClientCurrentUser, [agent]))[0];
+    }
+
     const body: GetOneAgentResponse = {
-      item: await AgentService.getAgentById(esClient, request.params.agentId),
+      item: agent,
     };
 
     return response.ok({ body });
@@ -103,6 +106,7 @@ export const updateAgentHandler: RequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const soClient = coreContext.savedObjects.client;
 
   const partialAgent: any = {};
   if (request.body.user_provided_metadata) {
@@ -115,7 +119,7 @@ export const updateAgentHandler: RequestHandler<
   try {
     await AgentService.updateAgent(esClient, request.params.agentId, partialAgent);
     const body = {
-      item: await AgentService.getAgentById(esClient, request.params.agentId),
+      item: await AgentService.getAgentById(esClient, soClient, request.params.agentId),
     };
 
     return response.ok({ body });
@@ -163,9 +167,11 @@ export const getAgentsHandler: RequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const esClientCurrentUser = coreContext.elasticsearch.client.asCurrentUser;
+  const soClient = coreContext.savedObjects.client;
 
   try {
-    const { agents, total, page, perPage } = await AgentService.getAgentsByKuery(esClient, {
+    const agentRes = await AgentService.getAgentsByKuery(esClient, soClient, {
       page: request.query.page,
       perPage: request.query.perPage,
       showInactive: request.query.showInactive,
@@ -173,20 +179,24 @@ export const getAgentsHandler: RequestHandler<
       kuery: request.query.kuery,
       sortField: request.query.sortField,
       sortOrder: request.query.sortOrder,
+      getStatusSummary: request.query.getStatusSummary,
     });
-    const totalInactive = request.query.showInactive
-      ? await AgentService.countInactiveAgents(esClient, {
-          kuery: request.query.kuery,
-        })
-      : 0;
+
+    const { total, page, perPage, statusSummary } = agentRes;
+    let { agents } = agentRes;
+
+    // Assign metrics
+    if (request.query.withMetrics) {
+      agents = await fetchAndAssignAgentMetrics(esClientCurrentUser, agents);
+    }
 
     const body: GetAgentsResponse = {
       list: agents, // deprecated
       items: agents,
       total,
-      totalInactive,
       page,
       perPage,
+      ...(statusSummary ? { statusSummary } : {}),
     };
     return response.ok({ body });
   } catch (error) {
@@ -200,9 +210,10 @@ export const getAgentTagsHandler: RequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const soClient = coreContext.savedObjects.client;
 
   try {
-    const tags = await AgentService.getAgentTags(esClient, {
+    const tags = await AgentService.getAgentTags(soClient, esClient, {
       showInactive: request.query.showInactive,
       kuery: request.query.kuery,
     });
@@ -216,10 +227,10 @@ export const getAgentTagsHandler: RequestHandler<
   }
 };
 
-export const putAgentsReassignHandler: RequestHandler<
-  TypeOf<typeof PutAgentReassignRequestSchema.params>,
+export const putAgentsReassignHandlerDeprecated: RequestHandler<
+  TypeOf<typeof PutAgentReassignRequestSchemaDeprecated.params>,
   undefined,
-  TypeOf<typeof PutAgentReassignRequestSchema.body>
+  TypeOf<typeof PutAgentReassignRequestSchemaDeprecated.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
@@ -233,6 +244,29 @@ export const putAgentsReassignHandler: RequestHandler<
     );
 
     const body: PutAgentReassignResponse = {};
+    return response.ok({ body });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+export const postAgentsReassignHandler: RequestHandler<
+  TypeOf<typeof PostAgentReassignRequestSchema.params>,
+  undefined,
+  TypeOf<typeof PostAgentReassignRequestSchema.body>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const soClient = coreContext.savedObjects.client;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  try {
+    await AgentService.reassignAgent(
+      soClient,
+      esClient,
+      request.params.agentId,
+      request.body.policy_id
+    );
+
+    const body: PostAgentReassignResponse = {};
     return response.ok({ body });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
@@ -271,9 +305,11 @@ export const getAgentStatusForAgentPolicyHandler: RequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const soClient = coreContext.savedObjects.client;
   try {
     const results = await AgentService.getAgentStatusForAgentPolicy(
       esClient,
+      soClient,
       request.query.policyId,
       request.query.kuery
     );
@@ -316,33 +352,11 @@ function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
 }
 
-// Read a static file generated at build time
 export const getAvailableVersionsHandler: RequestHandler = async (context, request, response) => {
-  const AGENT_VERSION_BUILD_FILE = 'x-pack/plugins/fleet/target/agent_versions_list.json';
-  let versionsToDisplay: string[] = [];
-
-  const kibanaVersion = appContextService.getKibanaVersion();
-  const kibanaVersionCoerced = semverCoerce(kibanaVersion)?.version ?? kibanaVersion;
-
   try {
-    const file = await readFile(Path.join(REPO_ROOT, AGENT_VERSION_BUILD_FILE), 'utf-8');
+    const availableVersions = await AgentService.getAvailableVersions();
+    const body: GetAvailableVersionsResponse = { items: availableVersions };
 
-    // Exclude versions older than MINIMUM_SUPPORTED_VERSION and pre-release versions (SNAPSHOT, rc..)
-    // De-dup and sort in descending order
-    const data: string[] = JSON.parse(file);
-
-    const versions = data
-      .map((item: any) => semverCoerce(item)?.version || '')
-      .filter((v: any) => semverGte(v, MINIMUM_SUPPORTED_VERSION))
-      .sort((a: any, b: any) => (semverGt(a, b) ? -1 : 1));
-    const parsedVersions = uniq(versions) as string[];
-
-    // Add current version if not already present
-    const hasCurrentVersion = parsedVersions.some((v) => v === kibanaVersionCoerced);
-    versionsToDisplay = !hasCurrentVersion
-      ? [kibanaVersionCoerced].concat(parsedVersions)
-      : parsedVersions;
-    const body: GetAvailableVersionsResponse = { items: versionsToDisplay };
     return response.ok({ body });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
@@ -359,6 +373,23 @@ export const getActionStatusHandler: RequestHandler<
   try {
     const actionStatuses = await AgentService.getActionStatuses(esClient, request.query);
     const body: GetActionStatusResponse = { items: actionStatuses };
+    return response.ok({ body });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+export const postRetrieveAgentsByActionsHandler: RequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof PostRetrieveAgentsByActionsRequestSchema.body>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+
+  try {
+    const agents = await AgentService.getAgentsByActionsIds(esClient, request.body.actionIds);
+    const body: PostRetrieveAgentsByActionsResponse = { items: agents };
     return response.ok({ body });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });

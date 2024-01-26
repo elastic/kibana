@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { reIdSeries } from './re_id_series';
 
 describe('reIdSeries()', () => {
   test('reassign ids for series with just basic metrics', () => {
     const series = {
-      id: uuid.v1(),
-      metrics: [{ id: uuid.v1() }, { id: uuid.v1() }],
+      id: uuidv4(),
+      metrics: [{ id: uuidv4() }, { id: uuidv4() }],
     };
     const newSeries = reIdSeries(series);
     expect(newSeries).not.toEqual(series);
@@ -25,10 +25,10 @@ describe('reIdSeries()', () => {
   });
 
   test('reassign ids for series with just basic metrics and group by', () => {
-    const firstMetricId = uuid.v1();
+    const firstMetricId = uuidv4();
     const series = {
-      id: uuid.v1(),
-      metrics: [{ id: firstMetricId }, { id: uuid.v1() }],
+      id: uuidv4(),
+      metrics: [{ id: firstMetricId }, { id: uuidv4() }],
       terms_order_by: firstMetricId,
     };
     const newSeries = reIdSeries(series);
@@ -41,10 +41,10 @@ describe('reIdSeries()', () => {
   });
 
   test('reassign ids for series with pipeline metrics', () => {
-    const firstMetricId = uuid.v1();
+    const firstMetricId = uuidv4();
     const series = {
-      id: uuid.v1(),
-      metrics: [{ id: firstMetricId }, { id: uuid.v1(), field: firstMetricId }],
+      id: uuidv4(),
+      metrics: [{ id: firstMetricId }, { id: uuidv4(), field: firstMetricId }],
     };
     const newSeries = reIdSeries(series);
     expect(newSeries).not.toEqual(series);
@@ -53,15 +53,15 @@ describe('reIdSeries()', () => {
   });
 
   test('reassign ids for series with calculation vars', () => {
-    const firstMetricId = uuid.v1();
+    const firstMetricId = uuidv4();
     const series = {
-      id: uuid.v1(),
+      id: uuidv4(),
       metrics: [
         { id: firstMetricId },
         {
-          id: uuid.v1(),
+          id: uuidv4(),
           type: 'calculation',
-          variables: [{ id: uuid.v1(), field: firstMetricId }],
+          variables: [{ id: uuidv4(), field: firstMetricId }],
         },
       ],
     };

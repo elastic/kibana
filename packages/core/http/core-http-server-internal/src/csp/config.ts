@@ -39,13 +39,7 @@ const getDirectiveValueValidator = ({ allowNone, allowNonce }: DirectiveValidati
 
 const configSchema = schema.object(
   {
-    disableUnsafeEval: schema.conditional(
-      // Default disableUnsafeEval to false if it's not a distributable release
-      schema.contextRef('dist'),
-      true,
-      schema.boolean({ defaultValue: false }),
-      schema.boolean({ defaultValue: true })
-    ),
+    disableUnsafeEval: schema.boolean({ defaultValue: true }),
     script_src: schema.arrayOf(schema.string(), {
       defaultValue: [],
       validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),
@@ -113,6 +107,21 @@ const configSchema = schema.object(
  * @internal
  */
 export type CspConfigType = TypeOf<typeof configSchema>;
+
+/**
+ * @internal
+ */
+export type CspAdditionalConfig = Pick<
+  Partial<CspConfigType>,
+  | 'connect_src'
+  | 'default_src'
+  | 'font_src'
+  | 'frame_src'
+  | 'img_src'
+  | 'script_src'
+  | 'style_src'
+  | 'worker_src'
+>;
 
 export const cspConfig: ServiceConfigDescriptor<CspConfigType> = {
   // TODO: Move this to server.csp using config deprecations

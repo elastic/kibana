@@ -11,26 +11,44 @@ import type {
   QueryDslQueryContainer,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { ComplianceDashboardData } from '../../../common/types';
+import type { Logger } from '@kbn/core/server';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import { calculatePostureScore } from '../../../common/utils/helpers';
+import type { ComplianceDashboardData } from '../../../common/types_old';
 import { KeyDocCount } from './compliance_dashboard';
 
 export interface FailedFindingsQueryResult {
-  aggs_by_resource_type: Aggregation<FailedFindingsBucket>;
+  aggs_by_resource_type: Aggregation<PostureStatsBucket>;
 }
 
-export interface FailedFindingsBucket extends KeyDocCount {
+export interface BenchmarkVersionQueryResult extends KeyDocCount, FailedFindingsQueryResult {
   failed_findings: {
     doc_count: number;
   };
   passed_findings: {
     doc_count: number;
   };
+  asset_count: {
+    value: number;
+  };
+  aggs_by_benchmark_name: Aggregation<KeyDocCount>;
+}
+
+export interface PostureStatsBucket extends KeyDocCount {
+  failed_findings: {
+    doc_count: number;
+  };
+  passed_findings: {
+    doc_count: number;
+  };
+  score: { value: number };
 }
 
 export const failedFindingsAggQuery = {
   aggs_by_resource_type: {
     terms: {
       field: 'rule.section',
+      size: 5,
     },
     aggs: {
       failed_findings: {
@@ -39,12 +57,35 @@ export const failedFindingsAggQuery = {
       passed_findings: {
         filter: { term: { 'result.evaluation': 'passed' } },
       },
+      score: {
+        bucket_script: {
+          buckets_path: {
+            passed: 'passed_findings>_count',
+            failed: 'failed_findings>_count',
+          },
+          script: 'params.passed / (params.passed + params.failed)',
+        },
+      },
+      sort_by_score: {
+        bucket_sort: {
+          sort: {
+            score: 'asc' as 'asc',
+          },
+        },
+      },
     },
   },
 };
 
-export const getRisksEsQuery = (query: QueryDslQueryContainer, pitId: string): SearchRequest => ({
+export const getRisksEsQuery = (
+  query: QueryDslQueryContainer,
+  pitId: string,
+  runtimeMappings: MappingRuntimeFields
+): SearchRequest => ({
   size: 0,
+  // creates the `safe_posture_type` runtime fields,
+  // `safe_posture_type` is used by the `query` to filter by posture type for older findings without this field
+  runtime_mappings: runtimeMappings,
   query,
   aggs: failedFindingsAggQuery,
   pit: {
@@ -52,29 +93,43 @@ export const getRisksEsQuery = (query: QueryDslQueryContainer, pitId: string): S
   },
 });
 
-export const getFailedFindingsFromAggs = (
-  queryResult: FailedFindingsBucket[]
+export const getPostureStatsFromAggs = (
+  queryResult: PostureStatsBucket[]
 ): ComplianceDashboardData['groupedFindingsEvaluation'] =>
-  queryResult.map((bucket) => ({
-    name: bucket.key,
-    totalFindings: bucket.doc_count,
-    totalFailed: bucket.failed_findings.doc_count || 0,
-    totalPassed: bucket.passed_findings.doc_count || 0,
-  }));
+  queryResult.map((bucket) => {
+    const totalPassed = bucket.passed_findings.doc_count || 0;
+    const totalFailed = bucket.failed_findings.doc_count || 0;
+
+    return {
+      name: bucket.key,
+      totalFindings: bucket.doc_count,
+      totalFailed,
+      totalPassed,
+      postureScore: calculatePostureScore(totalPassed, totalFailed),
+    };
+  });
 
 export const getGroupedFindingsEvaluation = async (
   esClient: ElasticsearchClient,
   query: QueryDslQueryContainer,
-  pitId: string
+  pitId: string,
+  runtimeMappings: MappingRuntimeFields,
+  logger: Logger
 ): Promise<ComplianceDashboardData['groupedFindingsEvaluation']> => {
-  const resourceTypesQueryResult = await esClient.search<unknown, FailedFindingsQueryResult>(
-    getRisksEsQuery(query, pitId)
-  );
+  try {
+    const resourceTypesQueryResult = await esClient.search<unknown, FailedFindingsQueryResult>(
+      getRisksEsQuery(query, pitId, runtimeMappings)
+    );
 
-  const ruleSections = resourceTypesQueryResult.aggregations?.aggs_by_resource_type.buckets;
-  if (!Array.isArray(ruleSections)) {
-    return [];
+    const ruleSections = resourceTypesQueryResult.aggregations?.aggs_by_resource_type.buckets;
+    if (!Array.isArray(ruleSections)) {
+      return [];
+    }
+
+    return getPostureStatsFromAggs(ruleSections);
+  } catch (err) {
+    logger.error(`Failed to fetch findings stats ${err.message}`);
+    logger.error(err);
+    throw err;
   }
-
-  return getFailedFindingsFromAggs(ruleSections);
 };

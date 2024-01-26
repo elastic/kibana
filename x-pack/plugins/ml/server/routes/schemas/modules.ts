@@ -91,11 +91,15 @@ export const moduleIdParamSchema = schema.object({
   moduleId: schema.string(),
 });
 
-export const modulesIndexPatternTitleSchema = schema.object({
+export const recognizeModulesSchema = schema.object({
   /**
    * Index pattern to recognize. Note that this does not need to be a Kibana
    * index pattern, and can be the name of a single Elasticsearch index,
    * or include a wildcard (*) to match multiple indices.
    */
   indexPatternTitle: schema.string(),
+});
+
+export const moduleFilterSchema = schema.object({
+  filter: schema.maybe(schema.string()),
 });

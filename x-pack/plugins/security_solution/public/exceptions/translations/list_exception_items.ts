@@ -12,10 +12,24 @@ export const EXCEPTION_ITEM_CARD_EDIT_LABEL = i18n.translate(
   }
 );
 
+export const EXCEPTION_ITEM_CARD_EDIT_ENDPOINT_LABEL = i18n.translate(
+  'xpack.securitySolution.exceptions.list.exception.endpoint.item.card.edit.label',
+  {
+    defaultMessage: 'Edit endpoint exception',
+  }
+);
+
 export const EXCEPTION_ITEM_CARD_DELETE_LABEL = i18n.translate(
   'xpack.securitySolution.exceptions.list.exception.item.card.delete.label',
   {
     defaultMessage: 'Delete rule exception',
+  }
+);
+
+export const EXCEPTION_ITEM_CARD_DELETE_ENDPOINT_LABEL = i18n.translate(
+  'xpack.securitySolution.exceptions.list.exception.endpoint.item.card.delete.label',
+  {
+    defaultMessage: 'Delete endpoint exception',
   }
 );
 

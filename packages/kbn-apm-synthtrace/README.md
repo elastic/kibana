@@ -21,13 +21,16 @@ This library can currently be used in two ways:
 - `Instance`: a single instance of a monitored service. E.g., the workload for a monitored service might be spread across multiple containers. An `Instance` object contains fields like `service.node.name` and `container.id`.
 - `Timerange`: an object that will return an array of timestamps based on an interval and a rate. These timestamps can be used to generate events/metricsets.
 - `Transaction`, `Span`, `APMError` and `Metricset`: events/metricsets that occur on an instance. For more background, see the [explanation of the APM data model](https://www.elastic.co/guide/en/apm/get-started/7.15/apm-data-model.html)
+- `Log`: An instance of Log generating Service which supports additional helpers to customise fields like `messages`, `logLevel`
 
 #### Example
 
 ```ts
 import { service, timerange, toElasticsearchOutput } from '@kbn/apm-synthtrace';
 
-const instance = service({name: 'synth-go', environment: 'production', agentName: 'go'}).instance('instance-a');
+const instance = service({ name: 'synth-go', environment: 'production', agentName: 'go' }).instance(
+  'instance-a'
+);
 
 const from = new Date('2021-01-01T12:00:00.000Z').getTime();
 const to = new Date('2021-01-01T12:00:00.000Z').getTime();
@@ -37,7 +40,7 @@ const traceEvents = timerange(from, to)
   .rate(10)
   .flatMap((timestamp) =>
     instance
-      .transaction({transactionName: 'GET /api/product/list'})
+      .transaction({ transactionName: 'GET /api/product/list' })
       .timestamp(timestamp)
       .duration(1000)
       .success()
@@ -107,54 +110,55 @@ node scripts/synthtrace simple_trace.ts --target=http://admin:changeme@localhost
 
 The script will try to automatically find bootstrapped APM indices. **If these indices do not exist, the script will exit with an error. It will not bootstrap the indices itself.**
 
+### Understanding Scenario Files
+
+Scenario files accept 3 arguments, 2 of them optional and 1 mandatory
+
+| Arguments   | Type      | Description                                                                                                                                          |
+|-------------|:----------|------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `generate`  | mandatory | This is the main function responsible for returning the events which will be indexed                                                                 |
+| `bootstrap`  | optional  | In case some setup needs to be done, before the data is generated, this function provides access to all available ES Clients to play with            |
+| `setClient` | optional  | By default the apmEsClient used to generate data. If anyother client like logsEsClient needs to be used instead, this is where it should be returned |
+
 The following options are supported:
 
 ### Connection options
 
-| Option       | Type      | Default    | Description                                                                                             |
-| ------------ | --------- | :--------- | ------------------------------------------------------------------------------------------------------- |
-| `--target`   | [string]  |            | Elasticsearch target                                                                                    |
-| `--kibana`   | [string]  |            | Kibana target, used to bootstrap datastreams/mappings/templates/settings                                |
-| `--cloudId`  | [string]  |            | Provide connection information and will force APM on the cloud to migrate to run as a Fleet integration |
-| `--local`    | [boolean] |            | Shortcut during development, assumes `yarn es snapshot` and `yarn start` are running                    |
-| `--username` | [string]  | `elastic`  | Basic authentication username                                                                           |
-| `--password` | [string]  | `changeme` | Basic authentication password                                                                           |
+| Option              | Type     | Default | Description                                                                                |
+|---------------------|----------|:--------|--------------------------------------------------------------------------------------------|
+| `--target`          | [string] |         | Elasticsearch target                                                                       |
+| `--kibana`          | [string] |         | Kibana target, used to bootstrap datastreams/mappings/templates/settings                   |
+| `--versionOverride` | [string] |         | String to be used for `observer.version`. Defauls to the version of the installed package. |
 
 Note:
 
-- If you only specify `--target` Synthtrace can not automatically setup APM.
-- If you specify both `--target` and `--kibana` the tool will automatically attempt to install the appropriate APM package
-- For Cloud its easiest to specify `--cloudId` as it will unpack the ES/Kibana targets and migrate cloud over to managed APM automatically.
-- If you only specify `--kibana` and it's using a cloud hostname a very naive `--target` to Elasticsearch will be inferred.
+- If `--target` is not set, Synthtrace will try to detect a locally running Elasticsearch and Kibana.
+- For Elastic Cloud urls, `--target` will be used to infer the location of the Cloud instance of Kibana.
+- The latest version of the APM integration will automatically be installed and used for `observer.version` when ingesting APM data. In some cases,
+  you'll want to use `--versionOverride` to set `observer.version` explicitly.
 
 ### Scenario options
 
-| Option                 | Type      | Default | Description                                                                                                                                |
-| ---------------------- | --------- | :------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `--from`               | [date]    | `now()` | The start of the time window                                                                                                               |
-| `--to`                 | [date]    |         | The end of the time window                                                                                                                 |
-| `--maxDocs`            | [number]  |         | The maximum number of documents we are allowed to generate                                                                                 |
-| `--maxDocsConfidence`  | [number]  | `1`     | Expert setting: --maxDocs relies on accurate tpm reporting of generators setting this to >1 will widen the estimated data generation range |
-| `--live`               | [boolean] |         | Generate and index data continuously                                                                                                       |
-| `--dryRun`             | [boolean] |         | Enumerates the stream without sending events to Elasticsearch                                                                              |
-| `--scenarioOpts`       |           |         | Raw options specific to the scenario                                                                                                       |
-| `--forceLegacyIndices` | [boolean] | `false` | Force writing to legacy indices                                                                                                            |
-
+| Option           | Type      | Default | Description                          |
+|------------------|-----------|:--------|--------------------------------------|
+| `--from`         | [date]    | `now()` | The start of the time window         |
+| `--to`           | [date]    |         | The end of the time window           |
+| `--live`         | [boolean] |         | Generate and index data continuously |
+| `--scenarioOpts` |           |         | Raw options specific to the scenario |
 Note:
 
-- The default `--to` is `15m` unless `--maxDocs` is specified in which case `--to` is calculated based on the scenario's TPM.
-- You can combine `--from` `--maxDocs` and `--to` with `--live` to back-fill some data.
+- The default `--to` is `15m`.
+- You can combine `--from` and `--to` with `--live` to back-fill some data.
+- To specify `--scenarioOpts` you need to use [yargs Objects syntax](https://github.com/yargs/yargs/blob/HEAD/docs/tricks.md#objects). (e.g. --scenarioOpts.myOption=myValue)
 
 ### Setup options
 
-| Option            | Type      | Default | Description                                                                                             |
-| ----------------- | --------- | :------ | ------------------------------------------------------------------------------------------------------- |
-| `--numShards`     | [number]  |         | Updates the component templates to update the number of primary shards, requires cloudId to be provided |
-| `--clean`         | [boolean] | `false` | Clean APM data before indexing new data                                                                 |
-| `--workers`       | [number]  |         | Amount of Node.js worker threads                                                                        |
-| `--logLevel`      | [enum]    | `info`  | Log level                                                                                               |
-| `--gcpRepository` | [string]  |         | Allows you to register a GCP repository in <client_name>:<bucket>[:base_path] format                    |
-| `-p`              | [string]  |         | Specify multiple sets of streamaggregators to be included in the StreamProcessor                        |
+| Option       | Type      | Default | Description                                                             |
+|--------------|-----------|:--------|-------------------------------------------------------------------------|
+| `--clean`    | [boolean] | `false` | Clean APM data before indexing new data                                 |
+| `--workers`  | [number]  |         | Amount of Node.js worker threads                                        |
+| `--logLevel` | [enum]    | `info`  | Log level                                                               |
+| `--type`     | [string]  | `apm`   | Type of data to be generated, `log` must be passed when generating logs |
 
 ## Testing
 

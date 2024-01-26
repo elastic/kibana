@@ -6,32 +6,36 @@
  */
 
 import React from 'react';
+import { EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { act, renderHook } from '@testing-library/react-hooks';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { useAddToCaseActions } from './use_add_to_case_actions';
 import { TestProviders } from '../../../../common/mock';
-import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
 import {
   AlertsCasesTourSteps,
   sampleCase,
 } from '../../../../common/components/guided_onboarding_tour/tour_config';
 import { CasesTourSteps } from '../../../../common/components/guided_onboarding_tour/cases_tour_steps';
+import type { AlertTableContextMenuItem } from '../types';
+import { allCasesPermissions } from '../../../../cases_test_utils';
 
 jest.mock('../../../../common/components/guided_onboarding_tour');
 jest.mock('../../../../common/lib/kibana');
-const mockTourStep = jest
-  .fn()
-  .mockImplementation(({ children }: { children: React.ReactNode }) => (
-    <span data-test-subj="contextMenuMock">{children}</span>
-  ));
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
-  return {
-    ...original,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    EuiContextMenuItem: (props: any) => mockTourStep(props),
-  };
+
+const refetch = jest.fn();
+const submit = jest.fn();
+const open = jest.fn().mockImplementation(() => {
+  refetch();
 });
+
+const caseHooksReturnedValue = {
+  open,
+  close: jest.fn(),
+  submit,
+};
 
 const defaultProps = {
   onMenuItemClick: () => null,
@@ -43,56 +47,66 @@ const defaultProps = {
       kind: ['signal'],
     },
   },
+  refetch,
+};
+
+const addToNewCase = jest.fn().mockReturnValue(caseHooksReturnedValue);
+const addToExistingCase = jest.fn().mockReturnValue(caseHooksReturnedValue);
+const useKibanaMock = useKibana as jest.Mock;
+
+const renderContextMenu = (items: AlertTableContextMenuItem[]) => {
+  const panels = [{ id: 0, items }];
+  render(
+    <EuiPopover
+      isOpen={true}
+      panelPaddingSize="none"
+      anchorPosition="downLeft"
+      closePopover={() => {}}
+      button={<></>}
+    >
+      <EuiContextMenu size="s" initialPanelId={0} panels={panels} />
+    </EuiPopover>
+  );
 };
 
 describe('useAddToCaseActions', () => {
-  const open = jest.fn();
-  const submit = jest.fn();
-  const addToNewCase = jest.fn().mockReturnValue({
-    open,
-    submit,
-  });
   beforeEach(() => {
     (useTourContext as jest.Mock).mockReturnValue({
       activeStep: 1,
       incrementStep: () => null,
       isTourShown: () => false,
     });
-    (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
-      all: true,
-      create: true,
-      read: true,
-      update: true,
-      delete: true,
-      push: true,
-    });
-    (useKibana as jest.Mock).mockReturnValue({
+
+    useKibanaMock.mockReturnValue({
       services: {
         cases: {
           hooks: {
-            getUseCasesAddToNewCaseFlyout: addToNewCase,
-            getUseCasesAddToExistingCaseModal: () => null,
+            useCasesAddToNewCaseFlyout: addToNewCase,
+            useCasesAddToExistingCaseModal: addToExistingCase,
           },
           helpers: {
             getRuleIdFromEvent: () => null,
+            canUseCases: jest.fn().mockReturnValue(allCasesPermissions()),
           },
         },
       },
     });
     jest.clearAllMocks();
   });
+
   it('should render case options when event is alert ', () => {
     const { result } = renderHook(() => useAddToCaseActions(defaultProps), {
       wrapper: TestProviders,
     });
     expect(result.current.addToCaseActionItems.length).toEqual(2);
-    expect(result.current.addToCaseActionItems[0].props['data-test-subj']).toEqual(
+    expect(result.current.addToCaseActionItems[0]['data-test-subj']).toEqual(
       'add-to-existing-case-action'
     );
-    expect(result.current.addToCaseActionItems[1].props['data-test-subj']).toEqual(
+    expect(result.current.addToCaseActionItems[1]['data-test-subj']).toEqual(
       'add-to-new-case-action'
     );
   });
+
   it('should not render case options when event is not alert ', () => {
     const { result } = renderHook(
       () => useAddToCaseActions({ ...defaultProps, ecsData: { _id: '123' } }),
@@ -102,7 +116,8 @@ describe('useAddToCaseActions', () => {
     );
     expect(result.current.addToCaseActionItems.length).toEqual(0);
   });
-  it('should call getUseCasesAddToNewCaseFlyout with attachments only when step is not active', () => {
+
+  it('should call useCasesAddToNewCaseFlyout with attachments only when step is not active', () => {
     const { result } = renderHook(() => useAddToCaseActions(defaultProps), {
       wrapper: TestProviders,
     });
@@ -113,7 +128,8 @@ describe('useAddToCaseActions', () => {
       attachments: [{ alertId: '123', index: '', rule: null, type: 'alert' }],
     });
   });
-  it('should call getUseCasesAddToNewCaseFlyout with tour step with step is active and increment step', () => {
+
+  it('should call useCasesAddToNewCaseFlyout with tour step with step is active and increment step', () => {
     const incrementStep = jest.fn();
     (useTourContext as jest.Mock).mockReturnValue({
       activeStep: AlertsCasesTourSteps.addAlertToCase,
@@ -132,7 +148,8 @@ describe('useAddToCaseActions', () => {
     });
     expect(incrementStep).toHaveBeenCalled();
   });
-  it('should prefill getUseCasesAddToNewCaseFlyout with tour step when step is active', () => {
+
+  it('should prefill useCasesAddToNewCaseFlyout with tour step when step is active', () => {
     (useTourContext as jest.Mock).mockReturnValue({
       activeStep: AlertsCasesTourSteps.addAlertToCase,
       incrementStep: () => null,
@@ -143,10 +160,65 @@ describe('useAddToCaseActions', () => {
     });
     expect(addToNewCase.mock.calls[0][0].initialValue).toEqual(sampleCase);
   });
-  it('should not prefill getUseCasesAddToNewCaseFlyout with tour step when step is not active', () => {
+
+  it('should not prefill useCasesAddToNewCaseFlyout with tour step when step is not active', () => {
     renderHook(() => useAddToCaseActions(defaultProps), {
       wrapper: TestProviders,
     });
     expect(addToNewCase.mock.calls[0][0]).not.toHaveProperty('initialValue');
+  });
+
+  it('should refetch when adding an alert to a new case', () => {
+    const { result } = renderHook(() => useAddToCaseActions(defaultProps), {
+      wrapper: TestProviders,
+    });
+
+    expect(result.current.addToCaseActionItems.length).toEqual(2);
+
+    renderContextMenu(result.current.addToCaseActionItems);
+
+    expect(screen.getByTestId('add-to-new-case-action')).toBeInTheDocument();
+    userEvent.click(screen.getByTestId('add-to-new-case-action'));
+
+    expect(refetch).toHaveBeenCalled();
+  });
+
+  it('should refetch when calling onSuccess of useCasesAddToNewCaseFlyout', () => {
+    const { result } = renderHook(() => useAddToCaseActions(defaultProps), {
+      wrapper: TestProviders,
+    });
+
+    expect(result.current.addToCaseActionItems.length).toEqual(2);
+
+    addToNewCase.mock.calls[0][0].onSuccess();
+
+    expect(refetch).toHaveBeenCalled();
+  });
+
+  it('should refetch when adding an alert to an existing case', () => {
+    const { result } = renderHook(() => useAddToCaseActions(defaultProps), {
+      wrapper: TestProviders,
+    });
+
+    expect(result.current.addToCaseActionItems.length).toEqual(2);
+
+    renderContextMenu(result.current.addToCaseActionItems);
+
+    expect(screen.getByTestId('add-to-existing-case-action')).toBeInTheDocument();
+    userEvent.click(screen.getByTestId('add-to-existing-case-action'));
+
+    expect(refetch).toHaveBeenCalled();
+  });
+
+  it('should refetch when calling onSuccess of useCasesAddToExistingCaseModal', () => {
+    const { result } = renderHook(() => useAddToCaseActions(defaultProps), {
+      wrapper: TestProviders,
+    });
+
+    expect(result.current.addToCaseActionItems.length).toEqual(2);
+
+    addToExistingCase.mock.calls[0][0].onSuccess();
+
+    expect(refetch).toHaveBeenCalled();
   });
 });

@@ -14,7 +14,11 @@ import {
   TooltipType,
   BrushEndListener,
   PartialTheme,
+  Tooltip,
+  LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { Axes } from '../common/axes';
 import { LineChartPoint } from '../../../../common/chart_loader';
 import { Anomaly } from '../../../../common/results_loader';
@@ -58,19 +62,26 @@ export const EventRateChart: FC<Props> = ({
     scales: { histogramPadding: 0.2 },
   };
 
+  const cssOverride = css({
+    // fix for the annotation label being hidden inside the bounds of the chart container
+    '.echContainer': { overflow: 'visible' },
+  });
+
   return (
     <div
       style={{ width, height }}
       data-test-subj={`mlEventRateChart ${eventRateChartData.length ? 'withData' : 'empty'}`}
     >
       <LoadingWrapper height={height} hasData={eventRateChartData.length > 0} loading={loading}>
-        <Chart>
+        <Chart css={overlayRanges !== undefined ? cssOverride : undefined}>
           {showAxis === true && <Axes />}
+          <Tooltip type={TooltipType.None} />
           <Settings
-            tooltip={TooltipType.None}
             onBrushEnd={onBrushEnd}
-            // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
             theme={theme}
+            // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+            baseTheme={LEGACY_LIGHT_THEME}
+            locale={i18n.getLocale()}
           />
 
           {overlayRanges &&

@@ -13,12 +13,12 @@ import { Logger } from '@kbn/core/server';
 import { asOk } from './lib/result_type';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import moment from 'moment';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { TaskRunningStage } from './task_running';
 
 describe('TaskPool', () => {
   beforeEach(() => {
-    jest.useFakeTimers('modern');
+    jest.useFakeTimers();
     jest.setSystemTime(new Date(2021, 12, 30));
   });
 
@@ -375,7 +375,7 @@ describe('TaskPool', () => {
     const shouldRun = mockRun();
     const shouldNotRun = mockRun();
 
-    const taskId = uuid.v4();
+    const taskId = uuidv4();
     const task1 = mockTask({ id: taskId, run: shouldRun });
     const task2 = mockTask({
       id: taskId,
@@ -392,6 +392,43 @@ describe('TaskPool', () => {
     expect(shouldNotRun).not.toHaveBeenCalled();
   });
 
+  // This test is from https://github.com/elastic/kibana/issues/172116
+  // It's not clear how to reproduce the actual error, but it is easy to
+  // reproduce with the wacky test below.  It does log the exact error
+  // from that issue, without the corresponding fix in task_pool.ts
+  test('works when available workers is 0 but there are tasks to run', async () => {
+    const logger = loggingSystemMock.create().get();
+    const pool = new TaskPool({
+      maxWorkers$: of(2),
+      logger,
+    });
+
+    const shouldRun = mockRun();
+
+    const taskId = uuidv4();
+    const task1 = mockTask({ id: taskId, run: shouldRun });
+
+    // we need to alternate the values of `availableWorkers`.  First it
+    // should be 0, then 1, then 0, then 1, etc.  This will cause task_pool.run
+    // to partition tasks (0 to run, everything as leftover), then at the
+    // end of run(), to check if it should recurse, it should be > 0.
+    let awValue = 1;
+    Object.defineProperty(pool, 'availableWorkers', {
+      get() {
+        return ++awValue % 2;
+      },
+    });
+
+    const result = await pool.run([task1]);
+    expect(result).toBe(TaskPoolRunResult.RanOutOfCapacity);
+
+    expect((logger as jest.Mocked<Logger>).warn.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "task pool run attempts exceeded 3; assuming ran out of capacity; availableWorkers: 0, tasksToRun: 0, leftOverTasks: 1, maxWorkers: 2, occupiedWorkers: 0, workerLoad: 0",
+      ]
+    `);
+  });
+
   function mockRun() {
     return jest.fn(async () => {
       await sleep(0);
@@ -402,13 +439,15 @@ describe('TaskPool', () => {
   function mockTask(overrides = {}) {
     return {
       isExpired: false,
-      taskExecutionId: uuid.v4(),
-      id: uuid.v4(),
+      taskExecutionId: uuidv4(),
+      id: uuidv4(),
       cancel: async () => undefined,
       markTaskAsRunning: jest.fn(async () => true),
       run: mockRun(),
       stage: TaskRunningStage.PENDING,
       toString: () => `TaskType "shooooo"`,
+      isAdHocTaskAndOutOfAttempts: false,
+      removeTask: jest.fn(),
       get expiration() {
         return new Date();
       },

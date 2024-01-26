@@ -21,11 +21,9 @@ import {
   EuiFormRow,
   EuiLink,
   EuiLoadingLogo,
-  EuiLoadingSpinner,
   EuiOverlayMask,
   EuiSpacer,
   EuiSwitch,
-  EuiText,
   EuiTitle,
   EuiDelayRender,
   EuiScreenReaderOnly,
@@ -33,7 +31,7 @@ import {
   EuiSwitchEvent,
 } from '@elastic/eui';
 
-import { Cluster } from '../../../../../common/lib';
+import { Cluster, ClusterPayload } from '../../../../../common/lib';
 import { SNIFF_MODE, PROXY_MODE } from '../../../../../common/constants';
 
 import { AppContext, Context } from '../../../app_context';
@@ -50,7 +48,7 @@ import {
   isCloudUrlEnabled,
 } from './validators';
 
-const defaultClusterValues: Cluster = {
+const defaultClusterValues: ClusterPayload = {
   name: '',
   seeds: [],
   skipUnavailable: false,
@@ -64,14 +62,14 @@ const ERROR_TITLE_ID = 'removeClustersErrorTitle';
 const ERROR_LIST_ID = 'removeClustersErrorList';
 
 interface Props {
-  save: (cluster: Cluster) => void;
+  save: (cluster: ClusterPayload) => void;
   cancel?: () => void;
   isSaving?: boolean;
   saveError?: any;
   cluster?: Cluster;
 }
 
-export type FormFields = Cluster & { cloudUrl: string; cloudUrlEnabled: boolean };
+export type FormFields = ClusterPayload & { cloudUrl: string; cloudUrlEnabled: boolean };
 
 interface State {
   fields: FormFields;
@@ -148,7 +146,7 @@ export class RemoteClusterForm extends Component<Props, State> {
     });
   };
 
-  getCluster(): Cluster {
+  getCluster(): ClusterPayload {
     const {
       fields: {
         name,
@@ -206,7 +204,7 @@ export class RemoteClusterForm extends Component<Props, State> {
     this.onFieldsChange({ skipUnavailable });
   };
 
-  resetToDefault = (fieldName: keyof Cluster) => {
+  resetToDefault = (fieldName: keyof ClusterPayload) => {
     this.onFieldsChange({
       [fieldName]: defaultClusterValues[fieldName],
     });
@@ -302,86 +300,66 @@ export class RemoteClusterForm extends Component<Props, State> {
   }
 
   renderActions() {
-    const { isSaving, cancel } = this.props;
+    const { isSaving, cancel, cluster: isEditMode } = this.props;
     const { areErrorsVisible, isRequestVisible } = this.state;
-
-    if (isSaving) {
-      return (
-        <EuiFlexGroup justifyContent="flexStart" gutterSize="m">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="l" />
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiText>
-              <FormattedMessage
-                id="xpack.remoteClusters.remoteClusterForm.actions.savingText"
-                defaultMessage="Saving"
-              />
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    }
-
-    let cancelButton;
-
-    if (cancel) {
-      cancelButton = (
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty color="primary" onClick={cancel}>
-            <FormattedMessage
-              id="xpack.remoteClusters.remoteClusterForm.cancelButtonLabel"
-              defaultMessage="Cancel"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      );
-    }
-
-    const isSaveDisabled = areErrorsVisible && this.hasErrors();
+    const isSaveDisabled = (areErrorsVisible && this.hasErrors()) || isSaving;
 
     return (
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        {cancel && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty color="primary" onClick={cancel}>
+              <FormattedMessage
+                id="xpack.remoteClusters.remoteClusterForm.cancelButtonLabel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
+
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="m">
             <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                onClick={this.toggleRequest}
+                data-test-subj="remoteClustersRequestButton"
+              >
+                {isRequestVisible ? (
+                  <FormattedMessage
+                    id="xpack.remoteClusters.remoteClusterForm.hideRequestButtonLabel"
+                    defaultMessage="Hide request"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.remoteClusters.remoteClusterForm.showRequestButtonLabel"
+                    defaultMessage="Show request"
+                  />
+                )}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
               <EuiButton
                 data-test-subj="remoteClusterFormSaveButton"
-                color="success"
-                iconType="check"
+                color="primary"
                 onClick={this.save}
                 fill
                 isDisabled={isSaveDisabled}
+                isLoading={isSaving}
                 aria-describedby={`${this.generateId(ERROR_TITLE_ID)} ${this.generateId(
                   ERROR_LIST_ID
                 )}`}
               >
                 <FormattedMessage
-                  id="xpack.remoteClusters.remoteClusterForm.saveButtonLabel"
-                  defaultMessage="Save"
+                  id="xpack.remoteClusters.remoteClusterForm.nextButtonLabel"
+                  defaultMessage="{isEditMode, select, true{Save} other{Next}}"
+                  values={{
+                    isEditMode: Boolean(isEditMode),
+                  }}
                 />
               </EuiButton>
             </EuiFlexItem>
-
-            {cancelButton}
           </EuiFlexGroup>
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={this.toggleRequest} data-test-subj="remoteClustersRequestButton">
-            {isRequestVisible ? (
-              <FormattedMessage
-                id="xpack.remoteClusters.remoteClusterForm.hideRequestButtonLabel"
-                defaultMessage="Hide request"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.remoteClusters.remoteClusterForm.showRequestButtonLabel"
-                defaultMessage="Show request"
-              />
-            )}
-          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -523,20 +501,20 @@ export class RemoteClusterForm extends Component<Props, State> {
 
     return (
       <Fragment>
-        <EuiSpacer size="m" data-test-subj="remoteClusterFormGlobalError" />
         <EuiCallOut
           title={
-            <h3 id={this.generateId(ERROR_TITLE_ID)}>
+            <span id={this.generateId(ERROR_TITLE_ID)}>
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.errorTitle"
-                defaultMessage="Fix errors before continuing."
+                defaultMessage="Some fields require your attention."
               />
-            </h3>
+            </span>
           }
           color="danger"
-          iconType="cross"
+          iconType="error"
         />
         <EuiDelayRender>{messagesToBeRendered}</EuiDelayRender>
+        <EuiSpacer size="m" data-test-subj="remoteClusterFormGlobalError" />
       </Fragment>
     );
   };
@@ -549,6 +527,7 @@ export class RemoteClusterForm extends Component<Props, State> {
     return (
       <Fragment>
         {this.renderSaveErrorFeedback()}
+        {this.renderErrors()}
 
         <EuiForm data-test-subj="remoteClusterForm">
           <EuiDescribedFormGroup
@@ -608,8 +587,6 @@ export class RemoteClusterForm extends Component<Props, State> {
 
           {this.renderSkipUnavailable()}
         </EuiForm>
-
-        {this.renderErrors()}
 
         <EuiSpacer size="l" />
 

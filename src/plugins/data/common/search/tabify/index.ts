@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { tabifyDocs, flattenHit } from './tabify_docs';
+export { tabifyDocs, flattenHit } from '@kbn/data-service/src/search/tabify';
 export { tabifyAggResponse } from './tabify';
 export { tabifyGetColumns } from './get_columns';

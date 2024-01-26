@@ -1,11 +1,21 @@
 {
   "security.get_builtin_privileges": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "GET"
     ],
     "patterns": [
       "_security/privilege/_builtin"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-get-builtin-privileges.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-get-builtin-privileges.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

@@ -23,6 +23,7 @@ describe('createSearchSource', () => {
       getConfig: jest.fn(),
       search: jest.fn(),
       onResponse: (req, res) => res,
+      scriptedFieldsEnabled: true,
     };
 
     indexPatternContractMock = {

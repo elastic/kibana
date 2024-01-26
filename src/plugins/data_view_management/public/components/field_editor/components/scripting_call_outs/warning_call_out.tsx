@@ -54,7 +54,7 @@ export const ScriptingWarningCallOut = ({ isVisible = false }: ScriptingWarningC
       <EuiSpacer size="m" />
       <EuiCallOut
         color="warning"
-        iconType="alert"
+        iconType="warning"
         title={
           <FormattedMessage
             id="indexPatternManagement.scriptedFieldsDeprecatedTitle"

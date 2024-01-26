@@ -2,13 +2,13 @@
 
 exports[`<Toolbar /> is rendered 1`] = `
 <div
-  class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-stretch-row"
 >
   <div
-    class="euiFlexItem euiFlexItem--flexGrowZero"
+    class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <button
-      class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
+      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-EuiButton"
       type="button"
     >
       <span
@@ -19,14 +19,18 @@ exports[`<Toolbar /> is rendered 1`] = `
         >
           Create chart
         </span>
+        <span
+          color="inherit"
+          data-euiicon-type="arrowDown"
+        />
       </span>
     </button>
   </div>
   <div
-    class="euiFlexItem euiFlexItem--flexGrowZero"
+    class="euiFlexItem emotion-euiFlexItem-growZero"
   >
     <div
-      class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--wrap"
+      class="euiFlexGroup emotion-euiFlexGroup-wrap-s-flexStart-center-row"
     />
   </div>
 </div>

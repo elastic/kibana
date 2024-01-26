@@ -7,12 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { cloneDeep } from 'lodash';
-import uuid from 'uuid/v4';
-import type {
-  FindFileStructureResponse,
-  IngestPipeline,
-  Mappings,
-} from '@kbn/file-upload-plugin/common';
+import { v4 as uuidv4 } from 'uuid';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { FindFileStructureResponse, IngestPipeline } from '@kbn/file-upload-plugin/common';
 import { CombinedField } from './types';
 
 const COMMON_LAT_NAMES = ['latitude', 'lat'];
@@ -28,23 +25,23 @@ export function getDefaultCombinedFields(results: FindFileStructureResponse) {
 }
 
 export function addCombinedFieldsToMappings(
-  mappings: Mappings,
+  mappings: MappingTypeMapping,
   combinedFields: CombinedField[]
-): Mappings {
-  const updatedMappings = { ...mappings };
+): MappingTypeMapping {
+  const updatedMappings = { properties: {}, ...mappings };
   combinedFields.forEach((combinedField) => {
     updatedMappings.properties[combinedField.combinedFieldName] = {
-      type: combinedField.mappingType,
+      type: combinedField.mappingType as any,
     };
   });
   return updatedMappings;
 }
 
 export function removeCombinedFieldsFromMappings(
-  mappings: Mappings,
+  mappings: MappingTypeMapping,
   combinedFields: CombinedField[]
 ) {
-  const updatedMappings = { ...mappings };
+  const updatedMappings = { properties: {}, ...mappings };
   combinedFields.forEach((combinedField) => {
     delete updatedMappings.properties[combinedField.combinedFieldName];
   });
@@ -164,7 +161,7 @@ function getGeoPointField(results: FindFileStructureResponse) {
     'location',
     'point_location',
     `${latField}_${lonField}`,
-    `location_${uuid()}`,
+    `location_${uuidv4()}`,
   ];
   // Use first combinedFieldNames that does not have a naming collision
   const geoPointField = combinedFieldNames.find((name) => {

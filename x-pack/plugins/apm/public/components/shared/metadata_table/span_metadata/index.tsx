@@ -27,11 +27,15 @@ export function SpanMetadata({ span }: Props) {
               processorEvent: ProcessorEvent.span,
               id: span.span.id,
             },
+            query: {
+              start: span['@timestamp'],
+              end: span['@timestamp'],
+            },
           },
         }
       );
     },
-    [span.span.id]
+    [span]
   );
 
   const sections = useMemo(

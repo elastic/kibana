@@ -13,6 +13,7 @@ import { DataViewBase } from '../../..';
 import * as range from './range';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { KQL_NODE_TYPE_LITERAL } from '../node_types/literal';
+import { KqlRangeFunctionNode } from './range';
 
 jest.mock('../grammar');
 
@@ -65,7 +66,12 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode('range', 'bytes', 'gt', 1000);
+        const node = nodeTypes.function.buildNode(
+          'range',
+          'bytes',
+          'gt',
+          1000
+        ) as KqlRangeFunctionNode;
         const result = range.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);
@@ -87,7 +93,12 @@ describe('kuery functions', () => {
           },
         };
 
-        const node = nodeTypes.function.buildNode('range', 'bytes', 'gt', 1000);
+        const node = nodeTypes.function.buildNode(
+          'range',
+          'bytes',
+          'gt',
+          1000
+        ) as KqlRangeFunctionNode;
         const result = range.toElasticsearchQuery(node);
 
         expect(result).toEqual(expected);
@@ -109,14 +120,24 @@ describe('kuery functions', () => {
           },
         };
 
-        const node = nodeTypes.function.buildNode('range', 'byt*', 'gt', 1000);
+        const node = nodeTypes.function.buildNode(
+          'range',
+          'byt*',
+          'gt',
+          1000
+        ) as KqlRangeFunctionNode;
         const result = range.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);
       });
 
       test('should support scripted fields', () => {
-        const node = nodeTypes.function.buildNode('range', 'script number', 'gt', 1000);
+        const node = nodeTypes.function.buildNode(
+          'range',
+          'script number',
+          'gt',
+          1000
+        ) as KqlRangeFunctionNode;
         const result = range.toElasticsearchQuery(node, indexPattern);
 
         expect((result.bool!.should as estypes.QueryDslQueryContainer[])[0]).toHaveProperty(
@@ -144,7 +165,7 @@ describe('kuery functions', () => {
           '@timestamp',
           'gt',
           '2018-01-03T19:04:17'
-        );
+        ) as KqlRangeFunctionNode;
         const result = range.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);
@@ -172,7 +193,7 @@ describe('kuery functions', () => {
           '@timestamp',
           'gt',
           '2018-01-03T19:04:17'
-        );
+        ) as KqlRangeFunctionNode;
         const result = range.toElasticsearchQuery(node, indexPattern, config);
 
         expect(result).toEqual(expected);
@@ -193,7 +214,12 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode('range', 'bytes', 'gt', 1000);
+        const node = nodeTypes.function.buildNode(
+          'range',
+          'bytes',
+          'gt',
+          1000
+        ) as KqlRangeFunctionNode;
         const result = range.toElasticsearchQuery(
           node,
           indexPattern,
@@ -225,7 +251,12 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode('range', '*doublyNested*', 'lt', 8000);
+        const node = nodeTypes.function.buildNode(
+          'range',
+          '*doublyNested*',
+          'lt',
+          8000
+        ) as KqlRangeFunctionNode;
         const result = range.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toEqual(expected);
@@ -253,12 +284,87 @@ describe('kuery functions', () => {
             minimum_should_match: 1,
           },
         };
-        const node = nodeTypes.function.buildNode('range', '*doublyNested*', 'lt', 8000);
+        const node = nodeTypes.function.buildNode(
+          'range',
+          '*doublyNested*',
+          'lt',
+          8000
+        ) as KqlRangeFunctionNode;
         const result = range.toElasticsearchQuery(node, indexPattern, {
           nestedIgnoreUnmapped: true,
         });
 
         expect(result).toEqual(expected);
+      });
+    });
+
+    describe('toKqlExpression', () => {
+      describe('operators', () => {
+        test('gt', () => {
+          const node = nodeTypes.function.buildNode(
+            'range',
+            'bytes',
+            'gt',
+            1000
+          ) as KqlRangeFunctionNode;
+          const result = range.toKqlExpression(node);
+          expect(result).toMatchInlineSnapshot(`"bytes > 1000"`);
+        });
+
+        test('gte', () => {
+          const node = nodeTypes.function.buildNode(
+            'range',
+            'bytes',
+            'gte',
+            1000
+          ) as KqlRangeFunctionNode;
+          const result = range.toKqlExpression(node);
+          expect(result).toMatchInlineSnapshot(`"bytes >= 1000"`);
+        });
+
+        test('lt', () => {
+          const node = nodeTypes.function.buildNode(
+            'range',
+            'bytes',
+            'lt',
+            1000
+          ) as KqlRangeFunctionNode;
+          const result = range.toKqlExpression(node);
+          expect(result).toMatchInlineSnapshot(`"bytes < 1000"`);
+        });
+
+        test('lte', () => {
+          const node = nodeTypes.function.buildNode(
+            'range',
+            'bytes',
+            'lte',
+            1000
+          ) as KqlRangeFunctionNode;
+          const result = range.toKqlExpression(node);
+          expect(result).toMatchInlineSnapshot(`"bytes <= 1000"`);
+        });
+      });
+
+      test('with wildcard field & literal value', () => {
+        const node = nodeTypes.function.buildNode(
+          'range',
+          'byt*',
+          'gt',
+          1000
+        ) as KqlRangeFunctionNode;
+        const result = range.toKqlExpression(node);
+        expect(result).toMatchInlineSnapshot(`"byt* > 1000"`);
+      });
+
+      test('with wildcard field & value', () => {
+        const node = nodeTypes.function.buildNode(
+          'range',
+          'byt*',
+          'gt',
+          '100*'
+        ) as KqlRangeFunctionNode;
+        const result = range.toKqlExpression(node);
+        expect(result).toMatchInlineSnapshot(`"byt* > 100\\\\*"`);
       });
     });
   });

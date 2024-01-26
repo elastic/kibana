@@ -6,4 +6,13 @@
  * Side Public License, v 1.
  */
 
-export { extractContainerType, extractVisualizationType } from './utils';
+export {
+  extractContainerType,
+  extractVisualizationType,
+  getOverridesFor,
+  isOnAggBasedEditor,
+} from './utils';
+export type { Simplify, MakeOverridesSerializable, ChartSizeSpec, ChartSizeEvent } from './types';
+export { isChartSizeEvent } from './types';
+export { getColorCategories } from './color_categories';
+export { useSizeTransitionVeil } from './chart_size_transition_veil';

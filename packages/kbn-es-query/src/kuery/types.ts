@@ -8,11 +8,15 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SerializableRecord } from '@kbn/utility-types';
+import { KQL_NODE_TYPE_FUNCTION } from './node_types/function';
 import { KQL_NODE_TYPE_LITERAL } from './node_types/literal';
 import { KQL_NODE_TYPE_WILDCARD } from './node_types/wildcard';
 
 /** @public */
-export type KqlNodeType = typeof KQL_NODE_TYPE_LITERAL | 'function' | typeof KQL_NODE_TYPE_WILDCARD;
+export type KqlNodeType =
+  | typeof KQL_NODE_TYPE_LITERAL
+  | typeof KQL_NODE_TYPE_FUNCTION
+  | typeof KQL_NODE_TYPE_WILDCARD;
 
 /** @public */
 export interface KueryNode {
@@ -47,6 +51,12 @@ export interface KueryQueryOptions {
    * The `nestedIgnoreUnmapped` param allows creating queries with "ignore_unmapped": true
    */
   nestedIgnoreUnmapped?: boolean;
+  /**
+   * Whether term-level queries should be treated as case-insensitive or not. For example, `agent.keyword: foobar` won't
+   * match a value of "FooBar" unless this parameter is `true`.
+   * (See https://www.elastic.co/guide/en/elasticsearch/reference/8.6/query-dsl-term-query.html#term-field-params)
+   */
+  caseInsensitive?: boolean;
 }
 
 /** @public */

@@ -29,13 +29,17 @@ const customIndexPatternIdLabel = i18n.translate(
 interface AdvancedParamsContentProps {
   disableAllowHidden: boolean;
   disableId: boolean;
+  onAllowHiddenChange?: (value: boolean) => void;
+  defaultVisible?: boolean;
 }
 
 export const AdvancedParamsContent = ({
   disableAllowHidden,
   disableId,
+  onAllowHiddenChange,
+  defaultVisible = false,
 }: AdvancedParamsContentProps) => (
-  <AdvancedParamsSection>
+  <AdvancedParamsSection defaultVisible={defaultVisible}>
     <EuiFlexGroup>
       <EuiFlexItem>
         <UseField<boolean, IndexPatternConfig>
@@ -48,6 +52,7 @@ export const AdvancedParamsContent = ({
               disabled: disableAllowHidden,
             },
           }}
+          onChange={onAllowHiddenChange}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

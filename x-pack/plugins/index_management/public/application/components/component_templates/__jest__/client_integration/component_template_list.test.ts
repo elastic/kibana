@@ -7,6 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 
+import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 import { ComponentTemplateListItem } from '../../shared_imports';
 
 import { setupEnvironment, pageHelpers } from './helpers';
@@ -18,6 +19,7 @@ const { setup } = pageHelpers.componentTemplateList;
 describe('<ComponentTemplateList />', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: ComponentTemplateListTestBed;
+  jest.spyOn(breadcrumbService, 'setBreadcrumbs');
 
   beforeEach(async () => {
     await act(async () => {
@@ -25,6 +27,12 @@ describe('<ComponentTemplateList />', () => {
     });
 
     testBed.component.update();
+  });
+
+  test('updates the breadcrumbs to component templates', () => {
+    expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
+      IndexManagementBreadcrumb.componentTemplates
+    );
   });
 
   describe('With component templates', () => {
@@ -46,7 +54,16 @@ describe('<ComponentTemplateList />', () => {
       isManaged: false,
     };
 
-    const componentTemplates = [componentTemplate1, componentTemplate2];
+    const componentTemplate3: ComponentTemplateListItem = {
+      name: 'test_component_template_3',
+      hasMappings: true,
+      hasAliases: true,
+      hasSettings: true,
+      usedBy: ['test_index_template_1', 'test_index_template_2'],
+      isManaged: false,
+    };
+
+    const componentTemplates = [componentTemplate1, componentTemplate2, componentTemplate3];
 
     httpRequestsMockHelpers.setLoadComponentTemplatesResponse(componentTemplates);
 
@@ -61,6 +78,26 @@ describe('<ComponentTemplateList />', () => {
 
         expect(row).toEqual(['', name, usedByText, '', '', '', 'EditDelete']);
       });
+    });
+
+    test('should sort "Usage count" column by number', async () => {
+      const { actions, table } = testBed;
+
+      // Sort ascending
+      await actions.clickTableColumnSortButton(1);
+
+      const { tableCellsValues: ascTableCellsValues } =
+        table.getMetaData('componentTemplatesTable');
+      const ascUsageCountValues = ascTableCellsValues.map((row) => row[2]);
+      expect(ascUsageCountValues).toEqual(['Not in use', '1', '2']);
+
+      // Sort descending
+      await actions.clickTableColumnSortButton(1);
+
+      const { tableCellsValues: descTableCellsValues } =
+        table.getMetaData('componentTemplatesTable');
+      const descUsageCountValues = descTableCellsValues.map((row) => row[2]);
+      expect(descUsageCountValues).toEqual(['2', '1', 'Not in use']);
     });
 
     test('should reload the component templates data', async () => {

@@ -14,12 +14,12 @@ import {
   findCases,
   updateCase,
   deleteAllCaseItems,
-} from '../../../../common/lib/utils';
-
-import { generateFakeAssignees, suggestUserProfiles } from '../../../../common/lib/user_profiles';
+  generateFakeAssignees,
+  suggestUserProfiles,
+  bulkGetUserProfiles,
+} from '../../../../common/lib/api';
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { bulkGetUserProfiles } from '../../../../common/lib/user_profiles';
 import { superUser } from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
@@ -186,6 +186,30 @@ export default ({ getService }: FtrProviderContext): void => {
           total: 2,
           cases: [caseWithDeleteAssignee1, caseWithDeleteAssignee2],
           count_open_cases: 2,
+        });
+      });
+
+      it('filters cases using an assignee uid with a colon in it', async () => {
+        await createCase(supertest, postCaseReq);
+
+        const assigneeUid = 'abc:uid:123';
+        const caseWithColonAssignee = await createCase(
+          supertest,
+          getPostCaseRequest({
+            assignees: [{ uid: 'abc:uid:123' }],
+          })
+        );
+
+        const cases = await findCases({
+          supertest,
+          query: { assignees: [assigneeUid] },
+        });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 1,
+          cases: [caseWithColonAssignee],
+          count_open_cases: 1,
         });
       });
 

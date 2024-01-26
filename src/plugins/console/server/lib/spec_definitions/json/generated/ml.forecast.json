@@ -1,9 +1,23 @@
 {
   "ml.forecast": {
     "url_params": {
-      "duration": "",
-      "expires_in": "",
-      "max_model_memory": ""
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "duration": [
+        "1d",
+        "-1",
+        "0"
+      ],
+      "expires_in": [
+        "14d",
+        "-1",
+        "0"
+      ],
+      "max_model_memory": [
+        "20mb"
+      ]
     },
     "methods": [
       "POST"
@@ -11,6 +25,10 @@
     "patterns": [
       "_ml/anomaly_detectors/{job_id}/_forecast"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-forecast.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-forecast.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

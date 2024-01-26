@@ -5,14 +5,11 @@
  * 2.0.
  */
 
+import type { InfluencersFilterQuery, EntityField } from '@kbn/ml-anomaly-utils';
+import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { IndicesOptions } from '../../../../common/types/anomaly_detection_jobs';
 import { MlApiServices } from '../ml_api_service';
-import type { AnomalyRecordDoc } from '../../../../common/types/anomalies';
-import { InfluencersFilterQuery } from '../../../../common/types/es_client';
-import { EntityField } from '../../../../common/util/anomaly_utils';
-import { RuntimeMappings } from '../../../../common/types/fields';
 
-export type RecordForInfluencer = AnomalyRecordDoc;
 export function resultsServiceProvider(mlApiServices: MlApiServices): {
   getScoresByBucket(
     jobIds: string[],

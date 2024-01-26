@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -22,60 +22,49 @@ import {
   EuiToolTip,
   RIGHT_ALIGNMENT,
   EuiIcon,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 
+import { useTransformCapabilities } from '../../../../hooks';
+import { needsReauthorization } from '../../../../common/reauthorization_utils';
 import {
   isLatestTransform,
   isPivotTransform,
   TransformId,
 } from '../../../../../../common/types/transform';
-import { TransformStats } from '../../../../../../common/types/transform_stats';
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
 import { getTransformProgress, TransformListRow, TRANSFORM_LIST_COLUMN } from '../../../../common';
 import { useActions } from './use_actions';
 import { isManagedTransform } from '../../../../common/managed_transforms_utils';
 
-// reflects https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/transform/transforms/TransformStats.java#L250
-const STATE_COLOR = {
-  aborting: 'warning',
-  failed: 'danger',
-  indexing: 'primary',
-  started: 'primary',
-  stopped: 'hollow',
-  stopping: 'hollow',
-  waiting: 'hollow',
-} as const;
+import { TransformHealthColoredDot } from './transform_health_colored_dot';
+import { TransformTaskStateBadge } from './transform_task_state_badge';
 
-export const getTaskStateBadge = (
-  state: TransformStats['state'],
-  reason?: TransformStats['reason']
-) => {
-  const color = STATE_COLOR[state];
+const TRUNCATE_TEXT_LINES = 3;
 
-  if (state === TRANSFORM_STATE.FAILED && reason !== undefined) {
-    return (
-      <EuiToolTip content={reason}>
-        <EuiBadge className="transform__TaskStateBadge" color={color}>
-          {state}
-        </EuiBadge>
-      </EuiToolTip>
-    );
+const TRANSFORM_INSUFFICIENT_PERMISSIONS_MSG = i18n.translate(
+  'xpack.transform.transformList.needsReauthorizationBadge.insufficientPermissions',
+  {
+    defaultMessage: 'This transform was created with insufficient permissions.',
   }
+);
 
-  return (
-    <EuiBadge className="transform__TaskStateBadge" color={color}>
-      {state}
-    </EuiBadge>
-  );
-};
-
+const StatsUnknown = () => (
+  <EuiText textAlign="center" color="subdued" size="s">
+    <FormattedMessage id="xpack.transform.transformList.statsUnknown" defaultMessage="Unknown" />
+  </EuiText>
+);
 export const useColumns = (
   expandedRowItemIds: TransformId[],
   setExpandedRowItemIds: React.Dispatch<React.SetStateAction<TransformId[]>>,
   transformNodes: number,
-  transformSelection: TransformListRow[]
+  transformSelection: TransformListRow[],
+  transformsStatsLoading: boolean
 ) => {
+  const NoStatsFallbackComponent = transformsStatsLoading ? EuiLoadingSpinner : StatsUnknown;
+  const { canStartStopTransform } = useTransformCapabilities();
+
   const { actions, modals } = useActions({
     forceDisable: transformSelection.length > 0,
     transformNodes,
@@ -99,6 +88,7 @@ export const useColumns = (
     EuiTableFieldDataColumnType<TransformListRow>,
     EuiTableComputedColumnType<TransformListRow>,
     EuiTableFieldDataColumnType<TransformListRow>,
+    EuiTableComputedColumnType<TransformListRow>,
     EuiTableComputedColumnType<TransformListRow>,
     EuiTableComputedColumnType<TransformListRow>,
     EuiTableComputedColumnType<TransformListRow>,
@@ -133,7 +123,7 @@ export const useColumns = (
                   values: { transformId: item.config.id },
                 })
           }
-          iconType={expandedRowItemIds.includes(item.config.id) ? 'arrowUp' : 'arrowDown'}
+          iconType={expandedRowItemIds.includes(item.config.id) ? 'arrowDown' : 'arrowRight'}
           data-test-subj="transformListRowDetailsToggle"
         />
       ),
@@ -143,13 +133,22 @@ export const useColumns = (
       'data-test-subj': 'transformListColumnId',
       name: 'ID',
       sortable: true,
-      truncateText: true,
+      truncateText: { lines: TRUNCATE_TEXT_LINES },
       scope: 'row',
       render: (transformId, item) => {
-        if (!isManagedTransform(item)) return transformId;
+        if (!isManagedTransform(item)) return <span title={transformId}>{transformId}</span>;
         return (
           <>
-            {transformId}
+            <span
+              title={`${transformId} (${i18n.translate(
+                'xpack.transform.transformList.managedBadgeLabel',
+                {
+                  defaultMessage: 'Managed',
+                }
+              )})`}
+            >
+              {transformId}
+            </span>
             &nbsp;
             <EuiToolTip
               content={i18n.translate('xpack.transform.transformList.managedBadgeTooltip', {
@@ -181,7 +180,31 @@ export const useColumns = (
       ),
       width: '30px',
       render: (item) => {
-        return Array.isArray(item.alerting_rules) ? (
+        const needsReauth = needsReauthorization(item);
+
+        const actionMsg = canStartStopTransform
+          ? i18n.translate(
+              'xpack.transform.transformList.needsReauthorizationBadge.reauthorizeTooltip',
+              {
+                defaultMessage: 'Reauthorize to start transforms.',
+              }
+            )
+          : i18n.translate(
+              'xpack.transform.transformList.needsReauthorizationBadge.contactAdminTooltip',
+              {
+                defaultMessage: 'Contact your administrator to request the required permissions.',
+              }
+            );
+        const needsReauthTooltipIcon = needsReauth ? (
+          <>
+            <EuiToolTip content={`${TRANSFORM_INSUFFICIENT_PERMISSIONS_MSG} ${actionMsg}`}>
+              <EuiIcon size="s" color="warning" type={'alert'} />
+            </EuiToolTip>
+            &nbsp;
+          </>
+        ) : null;
+
+        const alertingRulesTooltipIcon = Array.isArray(item.alerting_rules) ? (
           <EuiToolTip
             position="bottom"
             content={
@@ -197,6 +220,12 @@ export const useColumns = (
         ) : (
           <span />
         );
+        return (
+          <>
+            {needsReauthTooltipIcon}
+            {alertingRulesTooltipIcon}
+          </>
+        );
       },
     },
     {
@@ -204,7 +233,10 @@ export const useColumns = (
       'data-test-subj': 'transformListColumnDescription',
       name: i18n.translate('xpack.transform.description', { defaultMessage: 'Description' }),
       sortable: true,
-      truncateText: true,
+      truncateText: { lines: TRUNCATE_TEXT_LINES },
+      render(text: string) {
+        return <span title={text}>{text}</span>;
+      },
     },
     {
       name: i18n.translate('xpack.transform.type', { defaultMessage: 'Type' }),
@@ -230,10 +262,14 @@ export const useColumns = (
     {
       name: i18n.translate('xpack.transform.status', { defaultMessage: 'Status' }),
       'data-test-subj': 'transformListColumnStatus',
-      sortable: (item: TransformListRow) => item.stats.state,
+      sortable: (item: TransformListRow) => item.stats?.state,
       truncateText: true,
       render(item: TransformListRow) {
-        return getTaskStateBadge(item.stats.state, item.stats.reason);
+        return item.stats ? (
+          <TransformTaskStateBadge state={item.stats.state} reason={item.stats.reason} />
+        ) : (
+          <NoStatsFallbackComponent />
+        );
       },
       width: '100px',
     },
@@ -262,11 +298,12 @@ export const useColumns = (
         if (progress === undefined && isBatchTransform === true) {
           return null;
         }
+        if (!item.stats) return <NoStatsFallbackComponent />;
 
         return (
           <EuiFlexGroup alignItems="center" gutterSize="xs">
             {isBatchTransform && (
-              <Fragment>
+              <>
                 <EuiFlexItem style={{ width: '40px' }} grow={false}>
                   <EuiProgress
                     value={progress}
@@ -281,10 +318,10 @@ export const useColumns = (
                 <EuiFlexItem style={{ width: '35px' }} grow={false}>
                   <EuiText size="xs">{`${progress}%`}</EuiText>
                 </EuiFlexItem>
-              </Fragment>
+              </>
             )}
-            {!isBatchTransform && (
-              <Fragment>
+            {!isBatchTransform && item.stats && (
+              <>
                 <EuiFlexItem style={{ width: '40px' }} grow={false}>
                   {/* If not stopped, failed or waiting show the animated progress bar */}
                   {item.stats.state !== TRANSFORM_STATE.STOPPED &&
@@ -302,9 +339,23 @@ export const useColumns = (
                 <EuiFlexItem style={{ width: '35px' }} grow={false}>
                   &nbsp;
                 </EuiFlexItem>
-              </Fragment>
+              </>
             )}
           </EuiFlexGroup>
+        );
+      },
+      width: '100px',
+    },
+    {
+      name: i18n.translate('xpack.transform.health', { defaultMessage: 'Health' }),
+      'data-test-subj': 'transformListColumnHealth',
+      sortable: (item: TransformListRow) => item.stats?.health.status,
+      truncateText: true,
+      render(item: TransformListRow) {
+        return item.stats ? (
+          <TransformHealthColoredDot healthStatus={item.stats.health.status} />
+        ) : (
+          <NoStatsFallbackComponent />
         );
       },
       width: '100px',

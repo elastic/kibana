@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { StartServicesAccessor } from '@kbn/core/public';
 
 import type { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
+import type { IAnomalySwimlaneEmbeddable } from './anomaly_swimlane_embeddable';
 import { PLUGIN_ID, PLUGIN_ICON, ML_APP_NAME } from '../../../common/constants/app';
 import { HttpService } from '../../application/services/http_service';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
@@ -94,7 +95,7 @@ export class AnomalySwimlaneEmbeddableFactory
   public async create(
     initialInput: AnomalySwimlaneEmbeddableInput,
     parent?: IContainer
-  ): Promise<any> {
+  ): Promise<InstanceType<IAnomalySwimlaneEmbeddable>> {
     const services = await this.getServices();
     const { AnomalySwimlaneEmbeddable } = await import('./anomaly_swimlane_embeddable');
     return new AnomalySwimlaneEmbeddable(initialInput, services, parent);

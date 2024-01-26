@@ -12,11 +12,20 @@ import {
   stubLogstashDataView,
 } from '@kbn/data-views-plugin/common/data_view.stub';
 import { stubLogstashFieldSpecMap } from '@kbn/data-views-plugin/common/field.stub';
+import {
+  durationInputOptions,
+  durationOutputOptions,
+  InputFormat,
+  inputFormats,
+  OutputFormat,
+  outputFormats,
+} from '../../../application/components/lib/durations';
 import { MaxColumn as BaseMaxColumn } from '@kbn/visualizations-plugin/common';
 import { Metric } from '../../../../common/types';
 import { createSeries } from '../__mocks__';
 import { createColumn, excludeMetaFromColumn, getFormat, isColumnWithMeta } from './column';
 import { MaxColumn } from './types';
+import { DATA_FORMATTERS } from '../../../../common/enums';
 
 describe('getFormat', () => {
   const dataViewWithoutSupportedFormatsFields = createStubDataView({
@@ -69,6 +78,43 @@ describe('getFormat', () => {
         params: {
           suffix: 'd',
           decimals: 2,
+        },
+      },
+    });
+  });
+
+  test.each(
+    durationInputOptions.flatMap(({ value: fromValue }) =>
+      durationOutputOptions.flatMap(({ value: toValue }) =>
+        ['1', '2', '3', ''].map((decimal) => ({ fromValue, toValue, decimal }))
+      )
+    )
+  )(
+    'should return a duration formatter for the format "$fromValue,$toValue,$decimal"',
+    ({ fromValue, toValue, decimal }) => {
+      expect(getFormat(createSeries({ formatter: `${fromValue},${toValue},${decimal}` }))).toEqual({
+        format: {
+          id: DATA_FORMATTERS.DURATION,
+          params: {
+            fromUnit: inputFormats[fromValue as InputFormat],
+            toUnit: outputFormats[toValue as OutputFormat],
+            decimals: decimal ? parseInt(decimal, 10) : 2,
+            suffix: '',
+          },
+        },
+      });
+    }
+  );
+
+  test('should return a duration formatter with the suffix if detected', () => {
+    expect(getFormat(createSeries({ formatter: `Y,M,1`, value_template: '{{value}}/d' }))).toEqual({
+      format: {
+        id: DATA_FORMATTERS.DURATION,
+        params: {
+          fromUnit: 'years',
+          toUnit: 'asMonths',
+          decimals: 1,
+          suffix: '/d',
         },
       },
     });

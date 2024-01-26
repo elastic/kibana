@@ -6,11 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { Subscription } from 'rxjs';
 import { identity } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { getSavedObjectFinder, showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import {
@@ -21,7 +19,11 @@ import {
   PublicAppInfo,
 } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { migrateToLatest, PersistableStateService } from '@kbn/kibana-utils-plugin/common';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import {
   EmbeddableFactoryRegistry,
   EmbeddableFactoryProvider,
@@ -36,9 +38,7 @@ import {
   EmbeddableOutput,
   defaultEmbeddableFactoryProvider,
   IEmbeddable,
-  EmbeddablePanel,
   SavedObjectEmbeddableInput,
-  EmbeddableContainerContext,
 } from './lib';
 import { EmbeddableFactoryDefinition } from './lib/embeddables/embeddable_factory_definition';
 import { EmbeddableStateTransfer } from './lib/state_transfer';
@@ -52,7 +52,7 @@ import {
   getTelemetryFunction,
 } from '../common/lib';
 import { getAllMigrations } from '../common/lib/get_all_migrations';
-import { setTheme } from './services';
+import { setKibanaServices } from './kibana_services';
 
 export interface EmbeddableSetupDependencies {
   uiActions: UiActionsSetup;
@@ -61,6 +61,10 @@ export interface EmbeddableSetupDependencies {
 export interface EmbeddableStartDependencies {
   uiActions: UiActionsStart;
   inspector: InspectorStart;
+  usageCollection: UsageCollectionStart;
+  contentManagement: ContentManagementPublicStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
+  savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
 }
 
 export interface EmbeddableSetup {
@@ -85,11 +89,12 @@ export interface EmbeddableStart extends PersistableStateService<EmbeddableState
     embeddableFactoryId: string
   ) => EmbeddableFactory<I, O, E> | undefined;
   getEmbeddableFactories: () => IterableIterator<EmbeddableFactory>;
-  EmbeddablePanel: EmbeddablePanelHOC;
   getStateTransfer: (storage?: Storage) => EmbeddableStateTransfer;
   getAttributeService: <
     A extends { title: string },
-    V extends EmbeddableInput & { [ATTRIBUTE_SERVICE_KEY]: A } = EmbeddableInput & {
+    V extends EmbeddableInput & {
+      [ATTRIBUTE_SERVICE_KEY]: A;
+    } = EmbeddableInput & {
       [ATTRIBUTE_SERVICE_KEY]: A;
     },
     R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput,
@@ -99,14 +104,6 @@ export interface EmbeddableStart extends PersistableStateService<EmbeddableState
     options: AttributeServiceOptions<A, M>
   ) => AttributeService<A, V, R, M>;
 }
-
-export type EmbeddablePanelHOC = React.FC<{
-  embeddable: IEmbeddable;
-  hideHeader?: boolean;
-  containerContext?: EmbeddableContainerContext;
-  index?: number;
-}>;
-
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private readonly embeddableFactoryDefinitions: Map<string, EmbeddableFactoryDefinition> =
     new Map();
@@ -121,7 +118,6 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, { uiActions }: EmbeddableSetupDependencies) {
-    setTheme(core.theme);
     bootstrap(uiActions);
 
     return {
@@ -138,10 +134,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     };
   }
 
-  public start(
-    core: CoreStart,
-    { uiActions, inspector }: EmbeddableStartDependencies
-  ): EmbeddableStart {
+  public start(core: CoreStart, deps: EmbeddableStartDependencies): EmbeddableStart {
     this.embeddableFactoryDefinitions.forEach((def) => {
       this.embeddableFactories.set(
         def.type,
@@ -162,38 +155,6 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     );
     this.isRegistryReady = true;
 
-    const getEmbeddablePanelHoc =
-      () =>
-      ({
-        embeddable,
-        hideHeader,
-        containerContext,
-        index,
-      }: {
-        embeddable: IEmbeddable;
-        hideHeader?: boolean;
-        containerContext?: EmbeddableContainerContext;
-        index?: number;
-      }) =>
-        (
-          <EmbeddablePanel
-            hideHeader={hideHeader}
-            embeddable={embeddable}
-            index={index}
-            stateTransfer={this.stateTransferService}
-            getActions={uiActions.getTriggerCompatibleActions}
-            getEmbeddableFactory={this.getEmbeddableFactory}
-            getAllEmbeddableFactories={this.getEmbeddableFactories}
-            overlays={core.overlays}
-            notifications={core.notifications}
-            application={core.application}
-            inspector={inspector}
-            SavedObjectFinder={getSavedObjectFinder(core.savedObjects, core.uiSettings)}
-            containerContext={containerContext}
-            theme={core.theme}
-          />
-        );
-
     const commonContract: CommonEmbeddableStartContract = {
       getEmbeddableFactory: this
         .getEmbeddableFactory as unknown as CommonEmbeddableStartContract['getEmbeddableFactory'],
@@ -207,18 +168,11 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
         getMigrateFunction(commonContract)
       );
 
-    return {
+    const embeddableStart: EmbeddableStart = {
       getEmbeddableFactory: this.getEmbeddableFactory,
       getEmbeddableFactories: this.getEmbeddableFactories,
       getAttributeService: (type: string, options) =>
-        new AttributeService(
-          type,
-          showSaveModal,
-          core.i18n.Context,
-          core.notifications.toasts,
-          options,
-          this.getEmbeddableFactory
-        ),
+        new AttributeService(type, core.notifications.toasts, options, this.getEmbeddableFactory),
       getStateTransfer: (storage?: Storage) =>
         storage
           ? new EmbeddableStateTransfer(
@@ -228,7 +182,6 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
               storage
             )
           : this.stateTransferService,
-      EmbeddablePanel: getEmbeddablePanelHoc(),
       telemetry: getTelemetryFunction(commonContract),
       extract: getExtractFunction(commonContract),
       inject: getInjectFunction(commonContract),
@@ -237,6 +190,9 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
         return migrateToLatest(getAllMigrationsFn(), state) as EmbeddableStateWithType;
       },
     };
+
+    setKibanaServices(core, embeddableStart, deps);
+    return embeddableStart;
   }
 
   public stop() {

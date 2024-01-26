@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { useLocation } from 'react-router-dom';
 import { useVariationMock } from '../../../common/components/utils.mocks';
 import { GlobalHeader } from '.';
@@ -26,23 +26,13 @@ import { TimelineId } from '../../../../common/types/timeline';
 import { createStore } from '../../../common/store';
 import { kibanaObservable } from '@kbn/timelines-plugin/public/mock';
 import { sourcererPaths } from '../../../common/containers/sourcerer';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
 });
 
-jest.mock('../../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../../common/lib/kibana');
-  return {
-    ...originalModule,
-    useKibana: jest.fn().mockReturnValue({
-      services: { theme: { theme$: {} }, http: { basePath: { prepend: jest.fn((href) => href) } } },
-    }),
-    useUiSetting$: jest.fn().mockReturnValue([]),
-  };
-});
+jest.mock('../../../common/lib/kibana');
 
 jest.mock('../../../common/containers/source', () => ({
   useFetchIndex: () => [false, { indicesExist: true, indexPatterns: mockIndexPattern }],
@@ -59,7 +49,6 @@ jest.mock('react-reverse-portal', () => ({
 }));
 
 describe('global header', () => {
-  const mockSetHeaderActionMenu = jest.fn();
   const state = {
     ...mockGlobalState,
     timeline: {
@@ -73,13 +62,7 @@ describe('global header', () => {
     },
   };
   const { storage } = createSecuritySolutionStorageMock();
-  const store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    { dataTable: tGridReducer },
-    kibanaObservable,
-    storage
-  );
+  const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
   beforeEach(() => {
     useVariationMock.mockReset();
@@ -91,7 +74,7 @@ describe('global header', () => {
     ]);
     const { getByText } = render(
       <TestProviders store={store}>
-        <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
+        <GlobalHeader />
       </TestProviders>
     );
     expect(getByText('Add integrations')).toBeInTheDocument();
@@ -103,7 +86,7 @@ describe('global header', () => {
     ]);
     const { queryByTestId } = render(
       <TestProviders store={store}>
-        <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
+        <GlobalHeader />
       </TestProviders>
     );
     const link = queryByTestId('add-data');
@@ -114,7 +97,7 @@ describe('global header', () => {
     (useLocation as jest.Mock).mockReturnValue({ pathname: THREAT_INTELLIGENCE_PATH });
     const { queryByTestId } = render(
       <TestProviders store={store}>
-        <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
+        <GlobalHeader />
       </TestProviders>
     );
     const link = queryByTestId('add-data');
@@ -134,7 +117,7 @@ describe('global header', () => {
     );
     const { queryByTestId } = render(
       <TestProviders store={store}>
-        <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
+        <GlobalHeader />
       </TestProviders>
     );
     const link = queryByTestId('add-data');
@@ -146,7 +129,7 @@ describe('global header', () => {
 
     const { getByTestId } = render(
       <TestProviders store={store}>
-        <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
+        <GlobalHeader />
       </TestProviders>
     );
     expect(getByTestId('sourcerer-trigger')).toBeInTheDocument();
@@ -157,7 +140,7 @@ describe('global header', () => {
 
     const { getByTestId } = render(
       <TestProviders store={store}>
-        <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
+        <GlobalHeader />
       </TestProviders>
     );
     expect(getByTestId('sourcerer-trigger')).toBeInTheDocument();
@@ -176,22 +159,30 @@ describe('global header', () => {
         },
       },
     };
-    const mockStore = createStore(
-      mockstate,
-      SUB_PLUGINS_REDUCER,
-      { dataTable: tGridReducer },
-      kibanaObservable,
-      storage
-    );
+    const mockStore = createStore(mockstate, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
     (useLocation as jest.Mock).mockReturnValue({ pathname: sourcererPaths[2] });
 
     const { queryByTestId } = render(
       <TestProviders store={mockStore}>
-        <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
+        <GlobalHeader />
       </TestProviders>
     );
 
     expect(queryByTestId('sourcerer-trigger')).not.toBeInTheDocument();
+  });
+
+  it('shows AI Assistant header link', () => {
+    (useLocation as jest.Mock).mockReturnValue([
+      { pageName: SecurityPageName.overview, detailName: undefined },
+    ]);
+
+    const { findByTestId } = render(
+      <TestProviders store={store}>
+        <GlobalHeader />
+      </TestProviders>
+    );
+
+    waitFor(() => expect(findByTestId('assistantHeaderLink')).toBeInTheDocument());
   });
 });

@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './csp_rule';
-export * from './csp_rule_template';
+export * from './csp_benchmark_rule';

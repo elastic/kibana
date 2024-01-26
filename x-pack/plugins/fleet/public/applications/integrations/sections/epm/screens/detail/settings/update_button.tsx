@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -24,26 +24,25 @@ import type { CoreTheme } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 import type {
-  GetAgentPoliciesResponse,
   PackageInfo,
   UpgradePackagePolicyDryRunResponse,
   PackagePolicy,
 } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../../constants';
 import {
-  sendGetAgentPolicies,
   useInstallPackage,
   useGetPackageInstallStatus,
-  sendUpgradePackagePolicy,
   useStartServices,
   useAuthz,
   useLink,
+  useUpgradePackagePoliciesMutation,
+  useBulkGetAgentPoliciesQuery,
 } from '../../../../../hooks';
 
 interface UpdateButtonProps extends Pick<PackageInfo, 'name' | 'title' | 'version'> {
   dryRunData?: UpgradePackagePolicyDryRunResponse | null;
   packagePolicyIds?: string[];
+  agentPolicyIds: string[];
   isUpgradingPackagePolicies?: boolean;
   setIsUpgradingPackagePolicies?: React.Dispatch<React.SetStateAction<boolean>>;
   theme$: Observable<CoreTheme>;
@@ -74,6 +73,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
   isUpgradingPackagePolicies = false,
   name,
   packagePolicyIds = [],
+  agentPolicyIds = [],
   setIsUpgradingPackagePolicies = () => {},
   title,
   version,
@@ -92,26 +92,8 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
 
   const [isUpdateModalVisible, setIsUpdateModalVisible] = useState<boolean>(false);
   const [upgradePackagePolicies, setUpgradePackagePolicies] = useState<boolean>(true);
-  const [agentPolicyData, setAgentPolicyData] = useState<GetAgentPoliciesResponse | null>();
 
-  useEffect(() => {
-    const fetchAgentPolicyData = async () => {
-      if (packagePolicyIds && packagePolicyIds.length > 0) {
-        const { data } = await sendGetAgentPolicies({
-          perPage: SO_SEARCH_LIMIT,
-          page: 1,
-          // Fetch all agent policies that include one of the eligible package policies
-          kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies:${packagePolicyIds
-            .map((id) => `"${id}"`)
-            .join(' or ')}`,
-        });
-
-        setAgentPolicyData(data);
-      }
-    };
-
-    fetchAgentPolicyData();
-  }, [packagePolicyIds]);
+  const { data: agentPolicyData } = useBulkGetAgentPoliciesQuery(agentPolicyIds, { full: true });
 
   const packagePolicyCount = useMemo(() => packagePolicyIds.length, [packagePolicyIds]);
 
@@ -161,8 +143,11 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
   }, [history, getPath, name, version]);
 
   const handleClickUpdate = useCallback(async () => {
-    await installPackage({ name, version, title, fromUpdate: true });
-  }, [installPackage, name, title, version]);
+    await installPackage({ name, version, title, isUpgrade: true });
+    navigateToNewSettingsPage();
+  }, [installPackage, name, title, version, navigateToNewSettingsPage]);
+
+  const upgradePackagePoliciesMutation = useUpgradePackagePoliciesMutation();
 
   const handleClickUpgradePolicies = useCallback(async () => {
     if (isUpgradingPackagePolicies) {
@@ -172,49 +157,81 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
     setIsUpdateModalVisible(false);
     setIsUpgradingPackagePolicies(true);
 
-    await installPackage({ name, version, title });
+    const hasUpgraded = await installPackage({ name, version, title, isUpgrade: true });
+    //  If install package failed do not upgrade package policies
+    if (!hasUpgraded) {
+      setIsUpgradingPackagePolicies(false);
+      return;
+    }
 
-    await sendUpgradePackagePolicy(
-      // Only upgrade policies that don't have conflicts
-      packagePolicyIds.filter(
-        (id) => !dryRunData?.find((dryRunRecord) => dryRunRecord.diff?.[0].id === id)?.hasErrors
-      )
+    // Only upgrade policies that don't have conflicts
+    const packagePolicyIdsToUpdate = packagePolicyIds.filter(
+      (id) => !dryRunData?.find((dryRunRecord) => dryRunRecord.diff?.[0].id === id)?.hasErrors
     );
 
-    setIsUpgradingPackagePolicies(false);
+    if (!packagePolicyIdsToUpdate.length) {
+      setIsUpgradingPackagePolicies(false);
+      navigateToNewSettingsPage();
+    }
 
-    notifications.toasts.addSuccess({
-      title: toMountPoint(
-        <FormattedMessage
-          id="xpack.fleet.integrations.packageUpdateSuccessTitle"
-          defaultMessage="Updated {title} and upgraded policies"
-          values={{ title }}
-        />,
-        { theme$ }
-      ),
-      text: toMountPoint(
-        <FormattedMessage
-          id="xpack.fleet.integrations.packageUpdateSuccessDescription"
-          defaultMessage="Successfully updated {title} and upgraded policies"
-          values={{ title }}
-        />,
-        { theme$ }
-      ),
-    });
+    try {
+      await upgradePackagePoliciesMutation.mutateAsync({
+        packagePolicyIds: packagePolicyIdsToUpdate,
+      });
+      notifications.toasts.addSuccess({
+        title: toMountPoint(
+          <FormattedMessage
+            id="xpack.fleet.integrations.packageUpdateSuccessTitle"
+            defaultMessage="Updated {title} and upgraded policies"
+            values={{ title }}
+          />,
+          { theme$ }
+        ),
+        text: toMountPoint(
+          <FormattedMessage
+            id="xpack.fleet.integrations.packageUpdateSuccessDescription"
+            defaultMessage="Successfully updated {title} and upgraded policies"
+            values={{ title }}
+          />,
+          { theme$ }
+        ),
+      });
 
-    navigateToNewSettingsPage();
+      navigateToNewSettingsPage();
+    } catch (error) {
+      notifications.toasts.addError(error, {
+        title: i18n.translate(
+          'xpack.fleet.integrations.settings.errorUpdatingPoliciesToast.title',
+          {
+            defaultMessage: 'Error updating policies',
+          }
+        ),
+        toastMessage: i18n.translate(
+          'xpack.fleet.integrations.settings.errorUpdatingPoliciesToast.message',
+          {
+            defaultMessage: 'Integrations policies, need to be manually updated. \n Error: {error}',
+            values: {
+              error: error.message,
+            },
+          }
+        ),
+      });
+      setIsUpgradingPackagePolicies(false);
+      navigateToNewSettingsPage();
+    }
   }, [
-    dryRunData,
-    installPackage,
     isUpgradingPackagePolicies,
-    name,
-    navigateToNewSettingsPage,
-    notifications.toasts,
-    packagePolicyIds,
     setIsUpgradingPackagePolicies,
-    title,
+    installPackage,
+    name,
     version,
+    title,
+    upgradePackagePoliciesMutation,
+    packagePolicyIds,
+    dryRunData,
+    notifications.toasts,
     theme$,
+    navigateToNewSettingsPage,
   ]);
 
   const updateModal = (
@@ -243,7 +260,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
           <>
             <EuiCallOut
               color="warning"
-              iconType="alert"
+              iconType="warning"
               title={i18n.translate(
                 'xpack.fleet.integrations.settings.confirmUpdateModal.conflictCallOut.title',
                 { defaultMessage: 'Some integration policies have conflicts' }

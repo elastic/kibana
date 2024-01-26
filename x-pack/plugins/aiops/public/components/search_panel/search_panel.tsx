@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { Query, Filter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { SearchQueryLanguage } from '../../application/utils/search_utils';
+import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { createMergedEsQuery } from '../../application/utils/search_utils';
 interface Props {
@@ -93,13 +93,8 @@ export const SearchPanel: FC<Props> = ({
   };
 
   return (
-    <EuiFlexGroup
-      gutterSize="s"
-      data-test-subj="aiopsSearchPanel"
-      className={'aiopsSearchPanel__container'}
-      responsive={false}
-    >
-      <EuiFlexItem grow={9} className={'aiopsSearchBar'}>
+    <EuiFlexGroup gutterSize="s" data-test-subj="aiopsSearchPanel" responsive={false}>
+      <EuiFlexItem grow={9}>
         <SearchBar
           dataTestSubj="aiopsQueryInput"
           appName={'aiops'}
@@ -116,7 +111,7 @@ export const SearchPanel: FC<Props> = ({
           })}
           displayStyle={'inPage'}
           isClearable={true}
-          customSubmitButton={<div />}
+          showSubmitButton={false}
           onFiltersUpdated={(filters: Filter[]) => searchHandler({ filters })}
         />
       </EuiFlexItem>

@@ -8,14 +8,14 @@
 import React, { useCallback, useMemo } from 'react';
 import { htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IndexPattern } from '../../../../../types';
 import {
+  useDebouncedValue,
   DragDropBuckets,
   FieldsBucketContainer,
   NewBucketButton,
-  useDebouncedValue,
   DraggableBucketContainer,
-} from '../../../../../shared_components';
+} from '@kbn/visualization-ui-components';
+import { IndexPattern } from '../../../../../types';
 import { FieldSelect } from '../../../dimension_panel/field_select';
 import type { TermsIndexPatternColumn } from './types';
 import type { OperationSupportMatrix } from '../../../dimension_panel';
@@ -30,6 +30,7 @@ export interface FieldInputsProps {
   invalidFields?: string[];
   operationSupportMatrix: Pick<OperationSupportMatrix, 'operationByField'>;
   onChange: (newValues: string[]) => void;
+  showTimeSeriesDimensions: boolean;
 }
 
 interface WrappedValue {
@@ -50,6 +51,7 @@ export function FieldInputs({
   indexPattern,
   operationSupportMatrix,
   invalidFields,
+  showTimeSeriesDimensions,
 }: FieldInputsProps) {
   const onChangeWrapped = useCallback(
     (values: WrappedValue[]) =>
@@ -102,7 +104,7 @@ export function FieldInputs({
           // * a field of unsupported type should be removed
           // * a field that has been used
           // * a scripted field was used in a singular term, should be marked as invalid for multi-terms
-          const filteredOperationByField = Object.keys(operationSupportMatrix.operationByField)
+          const filteredOperationByField = [...operationSupportMatrix.operationByField.keys()]
             .filter((key) => {
               if (key === value) {
                 return true;
@@ -120,9 +122,12 @@ export function FieldInputs({
               }
             })
             .reduce<OperationSupportMatrix['operationByField']>((memo, key) => {
-              memo[key] = operationSupportMatrix.operationByField[key];
+              const fieldOps = operationSupportMatrix.operationByField.get(key);
+              if (fieldOps) {
+                memo.set(key, fieldOps);
+              }
               return memo;
-            }, {});
+            }, new Map());
 
           const shouldShowError = Boolean(
             value &&
@@ -162,6 +167,7 @@ export function FieldInputs({
                 data-test-subj={
                   localValues.length !== 1 ? `indexPattern-dimension-field-${index}` : undefined
                 }
+                showTimeSeriesDimensions={localValues.length < 2 && showTimeSeriesDimensions}
               />
             </DraggableBucketContainer>
           );
@@ -176,7 +182,9 @@ export function FieldInputs({
           defaultMessage: 'Add field',
         })}
         isDisabled={
-          column.params.orderBy.type === 'rare' || localValues.length > MAX_MULTI_FIELDS_SIZE
+          column.params.orderBy.type === 'rare' ||
+          column.params.orderBy.type === 'significant' ||
+          localValues.length > MAX_MULTI_FIELDS_SIZE
         }
       />
     </>

@@ -7,30 +7,61 @@
 
 import React from 'react';
 
-import { EuiSpacer, EuiLink, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { useActions, useValues } from 'kea';
+
+import { EuiSpacer, EuiLink, EuiText, EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { docLinks } from '../../../../../shared/doc_links';
+import { Connector, ConnectorStatus } from '@kbn/search-connectors';
 
-import { ConnectorConfigurationConfig } from '../connector_configuration_config';
-import { NativeConnector } from '../types';
+import { ConnectorConfigurationComponent } from '@kbn/search-connectors/components/configuration/connector_configuration';
+
+import { Status } from '../../../../../../../common/types/api';
+
+import { docLinks } from '../../../../../shared/doc_links';
+import { HttpLogic } from '../../../../../shared/http';
+import { LicensingLogic } from '../../../../../shared/licensing';
+
+import { ConnectorConfigurationApiLogic } from '../../../../api/connector/update_connector_configuration_api_logic';
+import { IndexNameLogic } from '../../index_name_logic';
+import { ConnectorDefinition } from '../types';
 
 interface NativeConnectorConfigurationConfigProps {
-  nativeConnector: NativeConnector;
+  connector: Connector;
+  nativeConnector: ConnectorDefinition;
+  status: ConnectorStatus;
 }
 
 export const NativeConnectorConfigurationConfig: React.FC<
   NativeConnectorConfigurationConfigProps
-> = ({ nativeConnector }) => {
+> = ({ connector, nativeConnector, status }) => {
+  const { hasPlatinumLicense } = useValues(LicensingLogic);
+  const { indexName } = useValues(IndexNameLogic);
+  const { status: updateStatus } = useValues(ConnectorConfigurationApiLogic);
+  const { makeRequest } = useActions(ConnectorConfigurationApiLogic);
+  const { http } = useValues(HttpLogic);
   return (
-    <ConnectorConfigurationConfig>
+    <ConnectorConfigurationComponent
+      connector={connector}
+      hasPlatinumLicense={hasPlatinumLicense}
+      isLoading={updateStatus === Status.LOADING}
+      saveConfig={(configuration) =>
+        makeRequest({
+          configuration,
+          connectorId: connector.id,
+          indexName,
+        })
+      }
+      subscriptionLink={docLinks.licenseManagement}
+      stackManagementLink={http.basePath.prepend('/app/management/stack/license_management')}
+    >
       <EuiText size="s">
         {i18n.translate(
           'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.config.encryptionWarningMessage',
           {
             defaultMessage:
-              'Encryption for data source credentials is unavailable in this technical preview. Your data source credentials will be stored, unencrypted, in Elasticsearch.',
+              'Encryption for data source credentials is unavailable in this version. Your data source credentials will be stored, unencrypted, in Elasticsearch.',
           }
         )}
       </EuiText>
@@ -62,6 +93,23 @@ export const NativeConnectorConfigurationConfig: React.FC<
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-    </ConnectorConfigurationConfig>
+
+      {status === ConnectorStatus.CONNECTED && (
+        <>
+          <EuiSpacer />
+          <EuiCallOut
+            iconType="check"
+            color="success"
+            title={i18n.translate(
+              'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.connectorConnected',
+              {
+                defaultMessage: 'Your connector {name} has connected to Search successfully.',
+                values: { name: nativeConnector.name },
+              }
+            )}
+          />
+        </>
+      )}
+    </ConnectorConfigurationComponent>
   );
 };

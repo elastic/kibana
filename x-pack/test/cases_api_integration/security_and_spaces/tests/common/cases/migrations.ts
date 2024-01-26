@@ -7,14 +7,19 @@
 
 import expect from '@kbn/expect';
 import { CASES_URL, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
-import { AttributesTypeUser } from '@kbn/cases-plugin/common/api';
+import { UserCommentAttachmentAttributes } from '@kbn/cases-plugin/common/types/domain';
+import {
+  CasePersistedSeverity,
+  CasePersistedStatus,
+} from '@kbn/cases-plugin/server/common/types/case';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
   deleteAllCaseItems,
   getCase,
   getCaseSavedObjectsFromES,
   resolveCase,
-} from '../../../../common/lib/utils';
+  findCases,
+} from '../../../../common/lib/api';
 import { superUser } from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
@@ -28,11 +33,16 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     // tests upgrading a 7.10.0 saved object to the latest version
     describe('7.10.0 -> latest stack version', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/cases/migrations/7.10.0');
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.10.0/data.json'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/cases/migrations/7.10.0');
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/7.10.0/data.json'
+        );
+        await deleteAllCaseItems(es);
       });
 
       it('migrates cases connector', async () => {
@@ -62,6 +72,62 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         expect(body).key('settings');
         expect(body.settings).to.eql({
           syncAlerts: true,
+        });
+      });
+
+      it('should return the cases correctly', async () => {
+        const cases = await findCases({ supertest });
+        const theCase = cases.cases[0];
+
+        const { version, ...caseWithoutVersion } = theCase;
+        const { cases: _, ...caseStats } = cases;
+
+        expect(cases.cases.length).to.eql(1);
+
+        expect(caseStats).to.eql({
+          count_closed_cases: 0,
+          count_in_progress_cases: 0,
+          count_open_cases: 1,
+          page: 1,
+          per_page: 20,
+          total: 1,
+        });
+
+        expect(caseWithoutVersion).to.eql({
+          assignees: [],
+          category: null,
+          closed_at: null,
+          closed_by: null,
+          comments: [],
+          connector: {
+            fields: null,
+            id: 'connector-1',
+            name: 'none',
+            type: '.none',
+          },
+          created_at: '2020-09-28T11:43:52.158Z',
+          created_by: {
+            email: null,
+            full_name: null,
+            username: 'elastic',
+          },
+          customFields: [],
+          description: 'This is a brand new case of a bad meanie defacing data',
+          duration: null,
+          external_service: null,
+          id: 'e1900ac0-017f-11eb-93f8-d161651bf509',
+          owner: 'securitySolution',
+          settings: {
+            syncAlerts: true,
+          },
+          severity: 'low',
+          status: 'open',
+          tags: ['defacement'],
+          title: 'Super Bad Security Issue',
+          totalAlerts: 0,
+          totalComment: 1,
+          updated_at: null,
+          updated_by: null,
         });
       });
     });
@@ -328,7 +394,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               includeComments: true,
             });
 
-            const comment = theCase.comments![0] as AttributesTypeUser;
+            const comment = theCase.comments![0] as UserCommentAttachmentAttributes;
             expect(comment.comment).to.be('a comment');
             expect(comment.owner).to.be(SECURITY_SOLUTION_OWNER);
           });
@@ -473,6 +539,77 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               uid: 'abc',
             },
           ]);
+        });
+      });
+    });
+
+    describe('8.7.0', () => {
+      before(async () => {
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.5.0/cases_severity_and_status.json'
+        );
+      });
+
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.5.0/cases_severity_and_status.json'
+        );
+        await deleteAllCaseItems(es);
+      });
+
+      describe('severity', () => {
+        it('severity keyword values are converted to matching short', async () => {
+          const expectedSeverityValues: Record<string, CasePersistedSeverity> = {
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf6': CasePersistedSeverity.LOW,
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf7': CasePersistedSeverity.MEDIUM,
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf8': CasePersistedSeverity.HIGH,
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf9': CasePersistedSeverity.CRITICAL,
+          };
+
+          const casesFromES = await getCaseSavedObjectsFromES({ es });
+
+          for (const hit of casesFromES.body.hits.hits) {
+            const caseID = hit._id;
+            expect(expectedSeverityValues[caseID]).not.to.be(undefined);
+            expect(hit._source?.cases.severity).to.eql(expectedSeverityValues[caseID]);
+          }
+        });
+      });
+
+      describe('status', () => {
+        it('status keyword values are converted to matching short', async () => {
+          const expectedStatusValues: Record<string, CasePersistedStatus> = {
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf6': CasePersistedStatus.OPEN,
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf7': CasePersistedStatus.OPEN,
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf8': CasePersistedStatus.IN_PROGRESS,
+            'cases:063d5820-1284-11ed-81af-63a2bdfb2bf9': CasePersistedStatus.CLOSED,
+          };
+
+          const casesFromES = await getCaseSavedObjectsFromES({ es });
+
+          for (const hit of casesFromES.body.hits.hits) {
+            const caseID = hit._id;
+            expect(expectedStatusValues[caseID]).not.to.be(undefined);
+            expect(hit._source?.cases.status).to.eql(expectedStatusValues[caseID]);
+          }
+        });
+      });
+
+      describe('total_alerts', () => {
+        it('total_alerts field has default value -1', async () => {
+          const casesFromES = await getCaseSavedObjectsFromES({ es });
+          for (const hit of casesFromES.body.hits.hits) {
+            expect(hit._source?.cases.total_alerts).to.eql(-1);
+          }
+        });
+      });
+
+      describe('total_comments', () => {
+        it('total_comments field has default value -1', async () => {
+          const casesFromES = await getCaseSavedObjectsFromES({ es });
+          for (const hit of casesFromES.body.hits.hits) {
+            expect(hit._source?.cases.total_comments).to.eql(-1);
+          }
         });
       });
     });

@@ -18,16 +18,18 @@ export interface IRuleDataClient {
   indexNameWithNamespace(namespace: string): string;
   kibanaVersion: string;
   isWriteEnabled(): boolean;
+  isUsingDataStreams(): boolean;
   getReader(options?: { namespace?: string }): IRuleDataReader;
   getWriter(options?: { namespace?: string }): Promise<IRuleDataWriter>;
 }
 
 export interface IRuleDataReader {
-  search<TSearchRequest extends ESSearchRequest>(
+  search<
+    TSearchRequest extends ESSearchRequest,
+    TAlertDoc = Partial<ParsedTechnicalFields & ParsedExperimentalFields>
+  >(
     request: TSearchRequest
-  ): Promise<
-    ESSearchResponse<Partial<ParsedTechnicalFields & ParsedExperimentalFields>, TSearchRequest>
-  >;
+  ): Promise<ESSearchResponse<TAlertDoc, TSearchRequest>>;
 
   getDynamicIndexPattern(target?: string): Promise<{
     title: string;

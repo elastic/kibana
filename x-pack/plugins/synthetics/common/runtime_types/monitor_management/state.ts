@@ -16,7 +16,10 @@ export const FetchMonitorManagementListQueryArgsCodec = t.partial({
   searchFields: t.array(t.string),
   tags: t.array(t.string),
   locations: t.array(t.string),
-  monitorType: t.array(t.string),
+  monitorTypes: t.array(t.string),
+  projects: t.array(t.string),
+  schedules: t.array(t.string),
+  monitorQueryIds: t.array(t.string),
 });
 
 export type FetchMonitorManagementListQueryArgs = t.TypeOf<
@@ -28,7 +31,9 @@ export const FetchMonitorOverviewQueryArgsCodec = t.partial({
   searchFields: t.array(t.string),
   tags: t.array(t.string),
   locations: t.array(t.string),
-  monitorType: t.array(t.string),
+  projects: t.array(t.string),
+  schedules: t.array(t.string),
+  monitorTypes: t.array(t.string),
   sortField: t.string,
   sortOrder: t.string,
 });
@@ -40,6 +45,7 @@ export const MonitorManagementEnablementResultCodec = t.type({
   canEnable: t.boolean,
   canManageApiKeys: t.boolean,
   areApiKeysEnabled: t.boolean,
+  isValidApiKey: t.boolean,
 });
 
 export type MonitorManagementEnablementResult = t.TypeOf<

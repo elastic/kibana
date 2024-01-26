@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiBadge, EuiBadgeGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataStream } from '../../../../../common';
-import { isFleetManaged } from '../../../lib/data_streams';
+import { isManaged } from '../../../lib/data_streams';
 
 interface Props {
   dataStream: DataStream;
@@ -17,12 +17,12 @@ interface Props {
 
 export const DataStreamsBadges: React.FunctionComponent<Props> = ({ dataStream }) => {
   const badges = [];
-  if (isFleetManaged(dataStream)) {
+  if (isManaged(dataStream)) {
     badges.push(
       <EuiBadge color="hollow" key={'managed'}>
         <FormattedMessage
           id="xpack.idxMgmt.dataStreamList.table.managedDataStreamBadge"
-          defaultMessage="Fleet-managed"
+          defaultMessage="Managed"
         />
       </EuiBadge>
     );

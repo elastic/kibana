@@ -20,6 +20,10 @@ describe('getIsExperimentalFeatureEnabled', () => {
         rulesDetailLogs: true,
         ruleTagFilter: true,
         ruleStatusFilter: true,
+        ruleUseExecutionStatus: false,
+        ruleKqlBar: true,
+        isMustacheAutocompleteOn: false,
+        showMustacheAutocompleteSwitch: false,
       },
     });
 
@@ -42,6 +46,22 @@ describe('getIsExperimentalFeatureEnabled', () => {
     result = getIsExperimentalFeatureEnabled('ruleStatusFilter');
 
     expect(result).toEqual(true);
+
+    result = getIsExperimentalFeatureEnabled('ruleUseExecutionStatus');
+
+    expect(result).toEqual(false);
+
+    result = getIsExperimentalFeatureEnabled('ruleKqlBar');
+
+    expect(result).toEqual(true);
+
+    result = getIsExperimentalFeatureEnabled('isMustacheAutocompleteOn');
+
+    expect(result).toEqual(false);
+
+    result = getIsExperimentalFeatureEnabled('showMustacheAutocompleteSwitch');
+
+    expect(result).toEqual(false);
 
     expect(() => getIsExperimentalFeatureEnabled('doesNotExist' as any)).toThrowError(
       `Invalid enable value doesNotExist. Allowed values are: ${allowedExperimentalValueKeys.join(

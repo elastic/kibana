@@ -20,8 +20,12 @@ export const AlertConsumers = {
   LOGS: 'logs',
   INFRASTRUCTURE: 'infrastructure',
   OBSERVABILITY: 'observability',
+  SLO: 'slo',
   SIEM: 'siem',
   UPTIME: 'uptime',
+  ML: 'ml',
+  STACK_ALERTS: 'stackAlerts',
+  EXAMPLE: 'AlertingExample',
 } as const;
 export type AlertConsumers = typeof AlertConsumers[keyof typeof AlertConsumers];
 export type STATUS_VALUES = 'open' | 'acknowledged' | 'closed' | 'in-progress'; // TODO: remove 'in-progress' after migration to 'acknowledged'

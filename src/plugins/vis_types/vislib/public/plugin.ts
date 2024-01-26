@@ -14,15 +14,13 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
-import { LEGACY_PIE_CHARTS_LIBRARY } from '@kbn/vis-type-pie-plugin/common';
 import { LEGACY_HEATMAP_CHARTS_LIBRARY } from '@kbn/vis-type-heatmap-plugin/common';
 import { LEGACY_GAUGE_CHARTS_LIBRARY } from '@kbn/vis-type-gauge-plugin/common';
+import { VislibPublicConfig } from '../config';
 import { setUsageCollectionStart } from './services';
 import { heatmapVisTypeDefinition } from './heatmap';
 
 import { createVisTypeVislibVisFn } from './vis_type_vislib_vis_fn';
-import { createPieVisFn } from './pie_fn';
-import { pieVisTypeDefinition } from './pie';
 import { setFormatService, setDataActions, setTheme } from './services';
 import { getVislibVisRenderer } from './vis_renderer';
 import { gaugeVisTypeDefinition } from './gauge';
@@ -55,26 +53,32 @@ export class VisTypeVislibPlugin
     core: VisTypeVislibCoreSetup,
     { expressions, visualizations, charts }: VisTypeVislibPluginSetupDependencies
   ) {
-    // register vislib XY axis charts
-
     expressions.registerRenderer(getVislibVisRenderer(core, charts));
     expressions.registerFunction(createVisTypeVislibVisFn());
 
-    if (core.uiSettings.get(LEGACY_PIE_CHARTS_LIBRARY, false)) {
-      // register vislib pie chart
-      visualizations.createBaseVisualization(pieVisTypeDefinition);
-      expressions.registerFunction(createPieVisFn());
-    }
+    const { readOnly } = this.initializerContext.config.get<VislibPublicConfig>();
 
     if (core.uiSettings.get(LEGACY_HEATMAP_CHARTS_LIBRARY)) {
       // register vislib heatmap chart
-      visualizations.createBaseVisualization(heatmapVisTypeDefinition);
+      visualizations.createBaseVisualization({
+        ...heatmapVisTypeDefinition,
+        disableCreate: Boolean(readOnly),
+        disableEdit: Boolean(readOnly),
+      });
     }
 
     if (core.uiSettings.get(LEGACY_GAUGE_CHARTS_LIBRARY)) {
       // register vislib gauge and goal charts
-      visualizations.createBaseVisualization(gaugeVisTypeDefinition);
-      visualizations.createBaseVisualization(goalVisTypeDefinition);
+      visualizations.createBaseVisualization({
+        ...gaugeVisTypeDefinition,
+        disableCreate: Boolean(readOnly),
+        disableEdit: Boolean(readOnly),
+      });
+      visualizations.createBaseVisualization({
+        ...goalVisTypeDefinition,
+        disableCreate: Boolean(readOnly),
+        disableEdit: Boolean(readOnly),
+      });
     }
   }
 

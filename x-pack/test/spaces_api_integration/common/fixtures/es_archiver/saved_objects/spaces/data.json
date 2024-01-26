@@ -1,25 +1,6 @@
 {
   "type": "_doc",
   "value": {
-    "id": "space:default",
-    "index": ".kibana",
-    "source": {
-      "space": {
-        "_reserved": true,
-        "description": "This is the default space",
-        "disabledFeatures": [],
-        "name": "Default Space"
-      },
-      "type": "space",
-      "updated_at": "2017-09-21T18:49:16.270Z"
-    },
-    "type": "_doc"
-  }
-}
-
-{
-  "type": "_doc",
-  "value": {
     "id": "space:space_1",
     "index": ".kibana",
     "source": {
@@ -29,7 +10,11 @@
         "name": "Space 1"
       },
       "type": "space",
-      "updated_at": "2017-09-21T18:49:16.270Z"
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "6.6.0",
+      "managed": false,
+      "references": []
     },
     "type": "_doc"
   }
@@ -47,7 +32,11 @@
         "name": "Space 2"
       },
       "type": "space",
-      "updated_at": "2017-09-21T18:49:16.270Z"
+      "updated_at": "2017-09-21T18:49:16.270Z",
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "6.6.0",
+      "managed": false,
+      "references": []
     },
     "type": "_doc"
   }
@@ -98,7 +87,7 @@
   "type": "_doc",
   "value": {
     "id": "dashboard:cts_dashboard_default",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "originId": "cts_dashboard",
       "dashboard": {
@@ -120,7 +109,9 @@
       }],
       "type": "dashboard",
       "updated_at": "2017-09-21T18:49:16.270Z",
-      "namespaces": ["default"]
+      "namespaces": ["default"],
+      "typeMigrationVersion": "8.7.0",
+      "coreMigrationVersion": "8.8.0"
     },
     "type": "_doc"
   }
@@ -130,7 +121,7 @@
   "type": "_doc",
   "value": {
     "id": "visualization:cts_vis_1_default",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "visualization": {
         "title": "CTS vis 1 from default space",
@@ -149,7 +140,9 @@
       ],
       "type": "visualization",
       "updated_at": "2017-09-21T18:49:16.270Z",
-      "namespaces": ["default"]
+      "namespaces": ["default"],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.5.0"
     },
     "type": "_doc"
   }
@@ -159,7 +152,7 @@
   "type": "_doc",
   "value": {
     "id": "visualization:cts_vis_2_default",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "visualization": {
         "title": "CTS vis 2 from default space",
@@ -178,7 +171,9 @@
       ],
       "type": "visualization",
       "updated_at": "2017-09-21T18:49:16.270Z",
-      "namespaces": ["default"]
+      "namespaces": ["default"],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.5.0"
     },
     "type": "_doc"
   }
@@ -188,7 +183,7 @@
   "type": "_doc",
   "value": {
     "id": "visualization:cts_vis_3_default",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "originId": "cts_vis_3",
       "visualization": {
@@ -208,7 +203,9 @@
       ],
       "type": "visualization",
       "updated_at": "2017-09-21T18:49:16.270Z",
-      "namespaces": ["default"]
+      "namespaces": ["default"],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.5.0"
     },
     "type": "_doc"
   }
@@ -218,7 +215,7 @@
   "type": "_doc",
   "value": {
     "id": "dashboard:cts_dashboard_space_1",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "originId": "cts_dashboard",
       "dashboard": {
@@ -244,7 +241,9 @@
       ],
       "type": "dashboard",
       "updated_at": "2017-09-21T18:49:16.270Z",
-      "namespaces": ["space_1"]
+      "namespaces": ["space_1"],
+      "typeMigrationVersion": "8.7.0",
+      "coreMigrationVersion": "8.8.0"
     },
     "type": "_doc"
   }
@@ -254,7 +253,7 @@
   "type": "_doc",
   "value": {
     "id": "visualization:cts_vis_1_space_1",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "visualization": {
         "title": "CTS vis 1 from space_1 space",
@@ -273,7 +272,9 @@
       ],
       "type": "visualization",
       "updated_at": "2017-09-21T18:49:16.270Z",
-      "namespaces": ["space_1"]
+      "namespaces": ["space_1"],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.5.0"
     },
     "type": "_doc"
   }
@@ -283,7 +284,7 @@
   "type": "_doc",
   "value": {
     "id": "visualization:cts_vis_2_space_1",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "visualization": {
         "title": "CTS vis 2 from space_1 space",
@@ -302,7 +303,9 @@
       ],
       "type": "visualization",
       "updated_at": "2017-09-21T18:49:16.270Z",
-      "namespaces": ["space_1"]
+      "namespaces": ["space_1"],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.5.0"
     },
     "type": "_doc"
   }
@@ -312,7 +315,7 @@
   "type": "_doc",
   "value": {
     "id": "visualization:cts_vis_3_space_1",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "originId": "cts_vis_3",
       "visualization": {
@@ -332,7 +335,9 @@
       ],
       "type": "visualization",
       "updated_at": "2017-09-21T18:49:16.270Z",
-      "namespaces": ["space_1"]
+      "namespaces": ["space_1"],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.5.0"
     },
     "type": "_doc"
   }
@@ -342,7 +347,7 @@
   "type": "_doc",
   "value": {
     "id": "index-pattern:cts_ip_1_default",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "originId": "cts_ip_1",
       "index-pattern": {
@@ -351,7 +356,9 @@
       "references": [],
       "type": "index-pattern",
       "updated_at": "2017-09-21T18:49:16.270Z",
-      "namespaces": ["default"]
+      "namespaces": ["default"],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.0.0"
     },
     "type": "_doc"
   }
@@ -361,7 +368,7 @@
   "type": "_doc",
   "value": {
     "id": "index-pattern:cts_ip_1_space_1",
-    "index": ".kibana",
+    "index": ".kibana_analytics",
     "source": {
       "originId": "cts_ip_1",
       "index-pattern": {
@@ -370,7 +377,9 @@
       "references": [],
       "type": "index-pattern",
       "updated_at": "2017-09-21T18:49:16.270Z",
-      "namespaces": ["space_1"]
+      "namespaces": ["space_1"],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.0.0"
     },
     "type": "_doc"
   }
@@ -409,7 +418,9 @@
         "targetNamespace": "default",
         "targetType": "sharedtype",
         "targetId": "default_only"
-      }
+      },
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.2.0"
     }
   }
 }
@@ -505,7 +516,9 @@
         "targetNamespace": "space_2",
         "targetType": "sharedtype",
         "targetId": "space_2_only"
-      }
+      },
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.2.0"
     }
   }
 }

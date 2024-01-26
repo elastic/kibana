@@ -8,13 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import { ToastInput, ToastOptions, ToastsStart } from '@kbn/core/public';
 import { useMemo } from 'react';
+import { extractErrorProperties, type ErrorType, MLRequestFailure } from '@kbn/ml-error-utils';
 import { getToastNotifications } from '../../util/dependency_cache';
 import { useNotifications } from '../../contexts/kibana';
-import {
-  ErrorType,
-  extractErrorProperties,
-  MLRequestFailure,
-} from '../../../../common/util/errors';
 
 export type ToastNotificationService = ReturnType<typeof toastNotificationServiceProvider>;
 

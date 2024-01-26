@@ -1,0 +1,39 @@
+- name: bar
+  type: boolean
+- name: uppercase
+  type: keyword
+- name: runtime_boolean
+  type: boolean
+  runtime: true
+- name: to_be_long
+  type: long
+  runtime: true
+- name: runtime.day
+  type: keyword
+  runtime: >-
+    emit(doc['@timestamp'].value.dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.ROOT))
+- name: lowercase
+  type: keyword
+  runtime: >-
+    emit(doc['uppercase'].value.toLowerCase())
+- name: runtime.date
+  type: date
+  date_format: 'yyyy-MM-dd'
+  runtime: >-
+    emit(doc['@timestamp'].value.toEpochMilli())
+- name: runtime.epoch_milli
+  type: long
+  runtime: >-
+    emit(doc['@timestamp'].value.toEpochMilli())
+- name: labels.*
+  type: long
+  object_type_mapping_type: double
+  runtime: true
+- name: responses
+  type: group
+  fields:
+    - name: runtime_group_boolean
+      type: boolean
+      runtime: true
+    - name: foo
+      type: boolean

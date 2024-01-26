@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiCommentList } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 
-import { Actions, CaseStatuses } from '../../../common/api';
+import { CaseStatuses, UserActionActions } from '../../../common/types/domain';
 import { getUserAction } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
 import { createStatusUserActionBuilder } from './status';
@@ -31,7 +31,7 @@ describe('createStatusUserActionBuilder ', () => {
   });
 
   it.each(tests)('renders correctly when changed to %s status', async (status, label) => {
-    const userAction = getUserAction('status', Actions.update, { payload: { status } });
+    const userAction = getUserAction('status', UserActionActions.update, { payload: { status } });
     const builder = createStatusUserActionBuilder({
       ...builderArgs,
       userAction,
@@ -44,6 +44,7 @@ describe('createStatusUserActionBuilder ', () => {
       </TestProviders>
     );
 
+    expect(screen.getByTestId('status-update-user-action-status-title')).toBeInTheDocument();
     expect(screen.getByText('marked case as')).toBeInTheDocument();
     expect(screen.getByText(label)).toBeInTheDocument();
   });

@@ -45,7 +45,7 @@ export function UptimeCommonProvider({ getService, getPageObjects }: FtrProvider
       await this.setKueryBarText('queryInput', filterQuery);
     },
     async goToNextPage() {
-      await testSubjects.click('xpack.synthetics.monitorList.nextButton', 5000);
+      await testSubjects.click('xpack.uptime.monitorList.nextButton', 5000);
     },
     async goToPreviousPage() {
       await testSubjects.click('xpack.synthetics.monitorList.prevButton', 5000);
@@ -97,11 +97,11 @@ export function UptimeCommonProvider({ getService, getPageObjects }: FtrProvider
       };
     },
     async openPageSizeSelectPopover(): Promise<void> {
-      return testSubjects.click('xpack.synthetics.monitorList.pageSizeSelect.popoverOpen', 5000);
+      return testSubjects.click('xpack.uptime.monitorList.pageSizeSelect.popoverOpen', 5000);
     },
     async clickPageSizeSelectPopoverItem(size: number = 10): Promise<void> {
       return testSubjects.click(
-        `xpack.synthetics.monitorList.pageSizeSelect.sizeSelectItem${size.toString()}`,
+        `xpack.uptime.monitorList.pageSizeSelect.sizeSelectItem${size.toString()}`,
         5000
       );
     },

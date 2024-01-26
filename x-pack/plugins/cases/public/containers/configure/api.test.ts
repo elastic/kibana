@@ -6,18 +6,18 @@
  */
 
 import {
-  fetchConnectors,
+  getSupportedActionConnectors,
   getCaseConfigure,
   postCaseConfigure,
   patchCaseConfigure,
   fetchActionTypes,
 } from './api';
 import {
-  caseConfigurationMock,
-  caseConfigurationResposeMock,
-  caseConfigurationCamelCaseResponseMock,
+  caseConfigurationRequest,
+  caseConfigurationResponseMock,
+  casesConfigurationsMock,
 } from './mock';
-import { ConnectorTypes } from '../../../common/api';
+import { ConnectorTypes } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { KibanaServices } from '../../common/lib/kibana';
 import { actionTypesMock, connectorsMock } from '../../common/mock/connectors';
@@ -37,7 +37,7 @@ describe('Case Configuration API', () => {
     });
 
     test('check url, method, signal', async () => {
-      await fetchConnectors({ signal: abortCtrl.signal });
+      await getSupportedActionConnectors({ signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith('/api/cases/configure/connectors/_find', {
         method: 'GET',
         signal: abortCtrl.signal,
@@ -45,7 +45,7 @@ describe('Case Configuration API', () => {
     });
 
     test('happy path', async () => {
-      const resp = await fetchConnectors({ signal: abortCtrl.signal });
+      const resp = await getSupportedActionConnectors({ signal: abortCtrl.signal });
       expect(resp).toEqual(connectorsMock);
     });
   });
@@ -53,7 +53,7 @@ describe('Case Configuration API', () => {
   describe('fetch configuration', () => {
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue([caseConfigurationResposeMock]);
+      fetchMock.mockResolvedValue([caseConfigurationResponseMock]);
     });
 
     test('check url, method, signal', async () => {
@@ -72,7 +72,7 @@ describe('Case Configuration API', () => {
         signal: abortCtrl.signal,
         owner: [SECURITY_SOLUTION_OWNER],
       });
-      expect(resp).toEqual(caseConfigurationCamelCaseResponseMock);
+      expect(resp).toEqual(casesConfigurationsMock);
     });
 
     test('return null on empty response', async () => {
@@ -88,56 +88,46 @@ describe('Case Configuration API', () => {
   describe('create configuration', () => {
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue(caseConfigurationResposeMock);
+      fetchMock.mockResolvedValue(caseConfigurationResponseMock);
     });
 
     test('check url, body, method, signal', async () => {
-      await postCaseConfigure(caseConfigurationMock, abortCtrl.signal);
+      await postCaseConfigure(caseConfigurationRequest);
       expect(fetchMock).toHaveBeenCalledWith('/api/cases/configure', {
         body: '{"connector":{"id":"123","name":"My connector","type":".jira","fields":null},"owner":"securitySolution","closure_type":"close-by-user"}',
         method: 'POST',
-        signal: abortCtrl.signal,
       });
     });
 
     test('happy path', async () => {
-      const resp = await postCaseConfigure(caseConfigurationMock, abortCtrl.signal);
-      expect(resp).toEqual(caseConfigurationCamelCaseResponseMock);
+      const resp = await postCaseConfigure(caseConfigurationRequest);
+      expect(resp).toEqual(casesConfigurationsMock);
     });
   });
 
   describe('update configuration', () => {
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue(caseConfigurationResposeMock);
+      fetchMock.mockResolvedValue(caseConfigurationResponseMock);
     });
 
     test('check url, body, method, signal', async () => {
-      await patchCaseConfigure(
-        '123',
-        {
-          connector: { id: '456', name: 'My Connector 2', type: ConnectorTypes.none, fields: null },
-          version: 'WzHJ12',
-        },
-        abortCtrl.signal
-      );
+      await patchCaseConfigure('123', {
+        connector: { id: '456', name: 'My Connector 2', type: ConnectorTypes.none, fields: null },
+        version: 'WzHJ12',
+      });
       expect(fetchMock).toHaveBeenCalledWith('/api/cases/configure/123', {
         body: '{"connector":{"id":"456","name":"My Connector 2","type":".none","fields":null},"version":"WzHJ12"}',
         method: 'PATCH',
-        signal: abortCtrl.signal,
       });
     });
 
     test('happy path', async () => {
-      const resp = await patchCaseConfigure(
-        '123',
-        {
-          connector: { id: '456', name: 'My Connector 2', type: ConnectorTypes.none, fields: null },
-          version: 'WzHJ12',
-        },
-        abortCtrl.signal
-      );
-      expect(resp).toEqual(caseConfigurationCamelCaseResponseMock);
+      const resp = await patchCaseConfigure('123', {
+        connector: { id: '456', name: 'My Connector 2', type: ConnectorTypes.none, fields: null },
+        version: 'WzHJ12',
+      });
+      expect(resp).toEqual(casesConfigurationsMock);
     });
   });
 

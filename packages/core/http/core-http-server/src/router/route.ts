@@ -64,6 +64,11 @@ export interface RouteConfigOptionsBody {
   accepts?: RouteContentType | RouteContentType[] | string | string[];
 
   /**
+   * A mime type string overriding the 'Content-Type' header value received.
+   */
+  override?: string;
+
+  /**
    * Limits the size of incoming payloads to the specified byte count. Allowing very large payloads may cause the server to run out of memory.
    *
    * Default value: The one set in the kibana.yml config file under the parameter `server.maxPayload`.
@@ -119,6 +124,16 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    * Set to true by default
    */
   xsrfRequired?: Method extends 'get' ? never : boolean;
+
+  /**
+   * Defines intended request origin of the route:
+   * - public. The route is public, declared stable and intended for external access.
+   *           In the future, may require an incomming request to contain a specified header.
+   * - internal. The route is internal and intended for internal access only.
+   *
+   * Defaults to 'internal' If not declared,
+   */
+  access?: 'public' | 'internal';
 
   /**
    * Additional metadata tag strings to attach to the route.

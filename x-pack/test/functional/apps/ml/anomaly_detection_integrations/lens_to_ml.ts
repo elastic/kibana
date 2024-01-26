@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
     });
 
     afterEach(async () => {
@@ -72,7 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await ml.lensVisualizations.clickCreateMLJobMenuAction();
 
-      await ml.lensVisualizations.assertLensLayerSelectorExists();
+      await ml.lensVisualizations.assertLayerSelectorExists();
 
       await ml.lensVisualizations.assertNumberOfCompatibleLensLayers(numberOfCompatibleLayers);
 
@@ -104,7 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await ml.lensVisualizations.clickCreateMLJobMenuAction();
 
-      await ml.lensVisualizations.assertLensLayerSelectorExists();
+      await ml.lensVisualizations.assertLayerSelectorExists();
 
       await ml.lensVisualizations.assertNumberOfCompatibleLensLayers(numberOfCompatibleLayers);
 

@@ -18,6 +18,12 @@ import { indent } from './indent.mjs';
 
 const BAZEL_RUNNER_SRC = '../../../packages/kbn-bazel-runner/index.js';
 
+const BAZEL_TARGETS = [
+  '//packages/kbn-ui-shared-deps-npm:shared_built_assets',
+  '//packages/kbn-ui-shared-deps-src:shared_built_assets',
+  '//packages/kbn-monaco:target_workers',
+];
+
 async function getBazelRunner() {
   /* eslint-disable no-unsanitized/method */
   /** @type {import('@kbn/bazel-runner')} */
@@ -83,7 +89,7 @@ export async function watch(log, opts = undefined) {
     // `.bazel_fix_commands.json` but its not needed at the moment
     '--run_output=false',
     'build',
-    '//packages:build',
+    ...BAZEL_TARGETS,
     '--show_result=1',
     ...(opts?.offline ? ['--config=offline'] : []),
   ];
@@ -144,8 +150,6 @@ export async function installYarnDeps(log, opts = undefined) {
     offline: opts?.offline,
     quiet: opts?.quiet,
     env: {
-      SASS_BINARY_SITE:
-        'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-sass',
       RE2_DOWNLOAD_MIRROR:
         'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2',
     },
@@ -158,13 +162,13 @@ export async function installYarnDeps(log, opts = undefined) {
  * @param {import('./log.mjs').Log} log
  * @param {{ offline?: boolean, quiet?: boolean } | undefined} opts
  */
-export async function buildPackages(log, opts = undefined) {
-  await runBazel(log, ['build', '//packages:build', '--show_result=1'], {
+export async function buildWebpackBundles(log, opts = undefined) {
+  await runBazel(log, ['build', ...BAZEL_TARGETS, '--show_result=1'], {
     offline: opts?.offline,
     quiet: opts?.quiet,
   });
 
-  log.success('packages built');
+  log.success('shared bundles built');
 }
 
 /**

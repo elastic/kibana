@@ -5,25 +5,35 @@
  * 2.0.
  */
 
-import type { CameraAction } from './action';
 import { cameraReducer } from './reducer';
-import type { Store } from 'redux';
+import type { Store, AnyAction, Reducer } from 'redux';
 import { createStore } from 'redux';
-import type { CameraState, AABB } from '../../types';
+import type { AnalyzerById, CameraState, AABB } from '../../types';
 import { viewableBoundingBox, inverseProjectionMatrix, scalingFactor } from './selectors';
 import { expectVectorsToBeClose } from './test_helpers';
 import { scaleToZoom } from './scale_to_zoom';
 import { applyMatrix3 } from '../../models/vector2';
+import { EMPTY_RESOLVER } from '../helpers';
+import {
+  userSetZoomLevel,
+  userClickedZoomOut,
+  userClickedZoomIn,
+  userZoomed,
+  userSetPositionOfCamera,
+  userSetRasterSize,
+  userMovedPointer,
+} from './action';
 
 describe('zooming', () => {
-  let store: Store<CameraState, CameraAction>;
+  let store: Store<AnalyzerById, AnyAction>;
   let time: number;
+  const id = 'test-id';
 
   const cameraShouldBeBoundBy = (expectedViewableBoundingBox: AABB): [string, () => void] => {
     return [
       `the camera view should be bound by an AABB with a minimum point of ${expectedViewableBoundingBox.minimum} and a maximum point of ${expectedViewableBoundingBox.maximum}`,
       () => {
-        const actual = viewableBoundingBox(store.getState())(time);
+        const actual = viewableBoundingBox(store.getState()[id].camera)(time);
         expect(actual.minimum[0]).toBeCloseTo(expectedViewableBoundingBox.minimum[0]);
         expect(actual.minimum[1]).toBeCloseTo(expectedViewableBoundingBox.minimum[1]);
         expect(actual.maximum[0]).toBeCloseTo(expectedViewableBoundingBox.maximum[0]);
@@ -34,12 +44,17 @@ describe('zooming', () => {
   beforeEach(() => {
     // Time isn't relevant as we aren't testing animation
     time = 0;
-    store = createStore(cameraReducer, undefined);
+    const testReducer: Reducer<AnalyzerById, AnyAction> = (
+      state = {
+        [id]: EMPTY_RESOLVER,
+      },
+      action
+    ): AnalyzerById => cameraReducer(state, action);
+    store = createStore(testReducer, undefined);
   });
   describe('when the raster size is 300 x 200 pixels', () => {
     beforeEach(() => {
-      const action: CameraAction = { type: 'userSetRasterSize', payload: [300, 200] };
-      store.dispatch(action);
+      store.dispatch(userSetRasterSize({ id, dimensions: [300, 200] }));
     });
     it(
       ...cameraShouldBeBoundBy({
@@ -49,8 +64,7 @@ describe('zooming', () => {
     );
     describe('when the user has scaled in to 2x', () => {
       beforeEach(() => {
-        const action: CameraAction = { type: 'userSetZoomLevel', payload: scaleToZoom(2) };
-        store.dispatch(action);
+        store.dispatch(userSetZoomLevel({ id, zoomLevel: scaleToZoom(2) }));
       });
       it(
         ...cameraShouldBeBoundBy({
@@ -61,14 +75,10 @@ describe('zooming', () => {
     });
     describe('when the user zooms in all the way', () => {
       beforeEach(() => {
-        const action: CameraAction = {
-          type: 'userZoomed',
-          payload: { zoomChange: 1, time },
-        };
-        store.dispatch(action);
+        store.dispatch(userZoomed({ id, zoomChange: 1, time }));
       });
       it('should zoom to maximum scale factor', () => {
-        const actual = viewableBoundingBox(store.getState())(time);
+        const actual = viewableBoundingBox(store.getState()[id].camera)(time);
         expect(actual).toMatchInlineSnapshot(`
           Object {
             "maximum": Array [
@@ -85,20 +95,16 @@ describe('zooming', () => {
     });
     it('the raster position 200, 50 should map to the world position 50, 50', () => {
       expectVectorsToBeClose(
-        applyMatrix3([200, 50], inverseProjectionMatrix(store.getState())(time)),
+        applyMatrix3([200, 50], inverseProjectionMatrix(store.getState()[id].camera)(time)),
         [50, 50]
       );
     });
     describe('when the user has moved their mouse to the raster position 200, 50', () => {
       beforeEach(() => {
-        const action: CameraAction = {
-          type: 'userMovedPointer',
-          payload: { screenCoordinates: [200, 50], time },
-        };
-        store.dispatch(action);
+        store.dispatch(userMovedPointer({ id, screenCoordinates: [200, 50], time }));
       });
       it('should have focused the world position 50, 50', () => {
-        const coords = store.getState().latestFocusedWorldCoordinates;
+        const coords = store.getState()[id].camera.latestFocusedWorldCoordinates;
         if (coords !== null) {
           expectVectorsToBeClose(coords, [50, 50]);
         } else {
@@ -107,15 +113,11 @@ describe('zooming', () => {
       });
       describe('when the user zooms in by 0.5 zoom units', () => {
         beforeEach(() => {
-          const action: CameraAction = {
-            type: 'userZoomed',
-            payload: { zoomChange: 0.5, time },
-          };
-          store.dispatch(action);
+          store.dispatch(userZoomed({ id, zoomChange: 0.5, time }));
         });
         it('the raster position 200, 50 should map to the world position 50, 50', () => {
           expectVectorsToBeClose(
-            applyMatrix3([200, 50], inverseProjectionMatrix(store.getState())(time)),
+            applyMatrix3([200, 50], inverseProjectionMatrix(store.getState()[id].camera)(time)),
             [50, 50]
           );
         });
@@ -123,8 +125,7 @@ describe('zooming', () => {
     });
     describe('when the user pans right by 100 pixels', () => {
       beforeEach(() => {
-        const action: CameraAction = { type: 'userSetPositionOfCamera', payload: [100, 0] };
-        store.dispatch(action);
+        store.dispatch(userSetPositionOfCamera({ id, cameraView: [100, 0] }));
       });
       it(
         ...cameraShouldBeBoundBy({
@@ -135,20 +136,19 @@ describe('zooming', () => {
       it('should be centered on 100, 0', () => {
         const worldCenterPoint = applyMatrix3(
           [150, 100],
-          inverseProjectionMatrix(store.getState())(time)
+          inverseProjectionMatrix(store.getState()[id].camera)(time)
         );
         expect(worldCenterPoint[0]).toBeCloseTo(100);
         expect(worldCenterPoint[1]).toBeCloseTo(0);
       });
       describe('when the user scales to 2x', () => {
         beforeEach(() => {
-          const action: CameraAction = { type: 'userSetZoomLevel', payload: scaleToZoom(2) };
-          store.dispatch(action);
+          store.dispatch(userSetZoomLevel({ id, zoomLevel: scaleToZoom(2) }));
         });
         it('should be centered on 100, 0', () => {
           const worldCenterPoint = applyMatrix3(
             [150, 100],
-            inverseProjectionMatrix(store.getState())(time)
+            inverseProjectionMatrix(store.getState()[id].camera)(time)
           );
           expect(worldCenterPoint[0]).toBeCloseTo(100);
           expect(worldCenterPoint[1]).toBeCloseTo(0);
@@ -160,23 +160,21 @@ describe('zooming', () => {
     let previousScalingFactor: CameraState['scalingFactor'];
     describe('when user clicks on zoom in button', () => {
       beforeEach(() => {
-        previousScalingFactor = scalingFactor(store.getState());
-        const action: CameraAction = { type: 'userClickedZoomIn' };
-        store.dispatch(action);
+        previousScalingFactor = scalingFactor(store.getState()[id].camera);
+        store.dispatch(userClickedZoomIn({ id }));
       });
       it('the scaling factor should increase by 0.1 units', () => {
-        const actual = scalingFactor(store.getState());
+        const actual = scalingFactor(store.getState()[id].camera);
         expect(actual).toEqual(previousScalingFactor + 0.1);
       });
     });
     describe('when user clicks on zoom out button', () => {
       beforeEach(() => {
-        previousScalingFactor = scalingFactor(store.getState());
-        const action: CameraAction = { type: 'userClickedZoomOut' };
-        store.dispatch(action);
+        previousScalingFactor = scalingFactor(store.getState()[id].camera);
+        store.dispatch(userClickedZoomOut({ id }));
       });
       it('the scaling factor should decrease by 0.1 units', () => {
-        const actual = scalingFactor(store.getState());
+        const actual = scalingFactor(store.getState()[id].camera);
         expect(actual).toEqual(previousScalingFactor - 0.1);
       });
     });

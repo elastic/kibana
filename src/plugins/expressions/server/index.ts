@@ -7,13 +7,14 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { ExpressionsServerPlugin } from './plugin';
+import type { ExpressionsServerPlugin } from './plugin';
 
 export type { ExpressionsServerSetup, ExpressionsServerStart } from './plugin';
 
 // Kibana Platform.
 export { ExpressionsServerPlugin as Plugin };
-export function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { ExpressionsServerPlugin } = await import('./plugin');
   return new ExpressionsServerPlugin(initializerContext);
 }
 
@@ -75,23 +76,23 @@ export type {
 export {
   buildExpression,
   buildExpressionFunction,
-  Execution,
-  Executor,
+  type Execution,
+  type Executor,
   ExpressionFunction,
-  ExpressionFunctionParameter,
+  type ExpressionFunctionParameter,
   ExpressionRenderer,
-  ExpressionRendererRegistry,
+  type ExpressionRendererRegistry,
   ExpressionType,
   FontStyle,
   FontWeight,
   format,
   formatExpression,
-  FunctionsRegistry,
+  type FunctionsRegistry,
   isExpressionAstBuilder,
   Overflow,
   parse,
   parseExpression,
   TextAlignment,
   TextDecoration,
-  TypesRegistry,
+  type TypesRegistry,
 } from '../common';

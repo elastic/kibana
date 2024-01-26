@@ -22,6 +22,9 @@ import { SavedObjectsServiceSetup } from '@kbn/core-saved-objects-server';
 import { StatusServiceSetup } from '@kbn/core-status-server';
 import { UiSettingsServiceSetup } from '@kbn/core-ui-settings-server';
 import { CoreUsageDataSetup } from '@kbn/core-usage-data-server';
+import { CustomBrandingSetup } from '@kbn/core-custom-branding-server';
+import { UserSettingsServiceSetup } from '@kbn/core-user-settings-server';
+import { PluginsServiceSetup } from '@kbn/core-plugins-contracts-server';
 import { CoreStart } from './core_start';
 
 /**
@@ -38,6 +41,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   analytics: AnalyticsServiceSetup;
   /** {@link CapabilitiesSetup} */
   capabilities: CapabilitiesSetup;
+  /** {@link CustomBrandingSetup} */
+  customBranding: CustomBrandingSetup;
   /** {@link DocLinksServiceSetup} */
   docLinks: DocLinksServiceSetup;
   /** {@link ElasticsearchServiceSetup} */
@@ -61,12 +66,16 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   status: StatusServiceSetup;
   /** {@link UiSettingsServiceSetup} */
   uiSettings: UiSettingsServiceSetup;
+  /** {@link UserSettingsServiceSetup} */
+  userSettings: UserSettingsServiceSetup;
   /** {@link DeprecationsServiceSetup} */
   deprecations: DeprecationsServiceSetup;
   /** {@link StartServicesAccessor} */
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
   /** @internal {@link CoreUsageDataSetup} */
   coreUsageData: CoreUsageDataSetup;
+  /** {@link PluginsServiceSetup} */
+  plugins: PluginsServiceSetup;
 }
 
 /**

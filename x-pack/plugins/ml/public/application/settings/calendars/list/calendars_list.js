@@ -13,10 +13,10 @@ import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
 import { CalendarsListHeader } from './header';
 import { CalendarsListTable } from './table';
 import { ml } from '../../../services/ml_api_service';
+import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
 import { mlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
 import { deleteCalendars } from './delete_calendars';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { getDocLinks } from '../../../util/dependency_cache';
 import { HelpMenu } from '../../../components/help_menu';
@@ -55,6 +55,13 @@ export class CalendarsListUI extends Component {
       this.setState({ loading: false });
       const { toasts } = this.props.kibana.services.notifications;
       toasts.addDanger(
+        i18n.translate('xpack.ml.calendarsList.errorWithLoadingListOfCalendarsErrorMessage', {
+          defaultMessage: 'An error occurred loading the list of calendars.',
+        })
+      );
+      const toastNotificationService = toastNotificationServiceProvider(toasts);
+      toastNotificationService.displayErrorToast(
+        error,
         i18n.translate('xpack.ml.calendarsList.errorWithLoadingListOfCalendarsErrorMessage', {
           defaultMessage: 'An error occurred loading the list of calendars.',
         })
@@ -105,30 +112,27 @@ export class CalendarsListUI extends Component {
       destroyModal = (
         <EuiConfirmModal
           data-test-subj={'mlCalendarDeleteConfirmation'}
-          title={
-            <FormattedMessage
-              id="xpack.ml.calendarsList.deleteCalendarsModal.deleteMultipleCalendarsTitle"
-              defaultMessage="Delete {calendarsCount, plural, one {{calendarsList}} other {# calendars}}?"
-              values={{
+          title={i18n.translate(
+            'xpack.ml.calendarsList.deleteCalendarsModal.deleteMultipleCalendarsTitle',
+            {
+              defaultMessage:
+                'Delete {calendarsCount, plural, one {{calendarsList}} other {# calendars}}?',
+              values: {
                 calendarsCount: selectedForDeletion.length,
                 calendarsList: selectedForDeletion.map((c) => c.calendar_id).join(', '),
-              }}
-            />
-          }
+              },
+            }
+          )}
           onCancel={this.closeDestroyModal}
           onConfirm={this.deleteCalendars}
-          cancelButtonText={
-            <FormattedMessage
-              id="xpack.ml.calendarsList.deleteCalendarsModal.cancelButtonLabel"
-              defaultMessage="Cancel"
-            />
-          }
-          confirmButtonText={
-            <FormattedMessage
-              id="xpack.ml.calendarsList.deleteCalendarsModal.deleteButtonLabel"
-              defaultMessage="Delete"
-            />
-          }
+          cancelButtonText={i18n.translate(
+            'xpack.ml.calendarsList.deleteCalendarsModal.cancelButtonLabel',
+            { defaultMessage: 'Cancel' }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.ml.calendarsList.deleteCalendarsModal.deleteButtonLabel',
+            { defaultMessage: 'Delete' }
+          )}
           buttonColor="danger"
           defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
         />

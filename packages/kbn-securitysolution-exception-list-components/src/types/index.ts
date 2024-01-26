@@ -12,7 +12,7 @@ import type { Pagination } from '@elastic/eui';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 
 export interface GetExceptionItemProps {
-  pagination?: Pagination;
+  pagination?: PaginationProps['pagination'];
   search?: string;
   filters?: string;
 }
@@ -20,7 +20,7 @@ export interface GetExceptionItemProps {
 export interface PaginationProps {
   dataTestSubj?: string;
   ariaLabel?: string;
-  pagination: Pagination;
+  pagination: Pagination & { pageSize: number };
   onPaginationChange: (arg: GetExceptionItemProps) => void;
 }
 
@@ -60,7 +60,7 @@ export interface Rule {
   name: string;
   id: string;
   rule_id: string;
-  exception_list?: ListArray;
+  exceptions_list?: ListArray;
 }
 
 export interface RuleReference {

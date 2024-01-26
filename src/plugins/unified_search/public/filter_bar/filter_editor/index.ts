@@ -28,7 +28,7 @@ export {
 
 export type { GenericComboBoxProps } from './generic_combo_box';
 export type { PhraseSuggestorProps } from './phrase_suggestor';
-export type { PhrasesSuggestorProps } from './phrases_values_input';
+export type { PhrasesValuesInputProps } from './phrases_values_input';
 
 export { GenericComboBox } from './generic_combo_box';
 export { PhraseSuggestor } from './phrase_suggestor';
@@ -39,3 +39,6 @@ export { ValueInputType } from './value_input_type';
 
 export { FilterEditor } from './filter_editor';
 export type { FilterEditorProps } from './filter_editor';
+
+export { withCloseFilterEditorConfirmModal } from './with_close_confirm_modal';
+export type { WithCloseFilterEditorConfirmModalProps } from './with_close_confirm_modal';

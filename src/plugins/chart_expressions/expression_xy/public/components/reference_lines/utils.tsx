@@ -9,7 +9,7 @@
 import React from 'react';
 import { Position } from '@elastic/charts';
 import { euiLightVars } from '@kbn/ui-theme';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
 import { groupBy, orderBy } from 'lodash';
 import {
   IconPosition,
@@ -17,19 +17,20 @@ import {
   FillStyle,
   ExtendedReferenceLineDecorationConfig,
   ReferenceLineDecorationConfig,
+  CommonXYReferenceLineLayerConfig,
 } from '../../../common/types';
 import { FillStyles } from '../../../common/constants';
 import {
   GroupsConfiguration,
-  LINES_MARKER_SIZE,
   mapVerticalToHorizontalPlacement,
   Marker,
   MarkerBody,
   getAxisPosition,
   getOriginalAxisPosition,
   AxesMap,
+  isReferenceLine,
 } from '../../helpers';
-import { ReferenceLineAnnotationConfig } from './reference_line_annotations';
+import type { ReferenceLineAnnotationConfig } from './reference_line_annotations';
 
 // if there's just one axis, put it on the other one
 // otherwise use the same axis
@@ -84,10 +85,10 @@ export const getSharedStyle = (config: ReferenceLineAnnotationConfig) => ({
 
 export const getLineAnnotationProps = (
   config: ReferenceLineAnnotationConfig,
-  labels: { markerLabel?: string; markerBodyLabel?: string },
+  label: string | undefined,
   axesMap: AxesMap,
-  paddingMap: Partial<Record<Position, number>>,
-  isHorizontal: boolean
+  isHorizontal: boolean,
+  isTextOnlyMarker: boolean
 ) => {
   // get the position for vertical chart
   const markerPositionVertical = getBaseIconPlacement(
@@ -96,27 +97,27 @@ export const getLineAnnotationProps = (
     getOriginalAxisPosition(config.axisGroup?.position ?? Position.Bottom, isHorizontal)
   );
 
-  // the padding map is built for vertical chart
-  const hasReducedPadding = paddingMap[markerPositionVertical] === LINES_MARKER_SIZE;
-
   const markerPosition = isHorizontal
     ? mapVerticalToHorizontalPlacement(markerPositionVertical)
     : markerPositionVertical;
+
+  const isMarkerLabelHorizontal =
+    markerPosition === Position.Bottom || markerPosition === Position.Top;
 
   return {
     groupId: config.axisGroup?.groupId || 'bottom',
     marker: (
       <Marker
         config={config}
-        label={labels.markerLabel}
-        isHorizontal={isHorizontal}
-        hasReducedPadding={hasReducedPadding}
+        label={label}
+        isHorizontal={isMarkerLabelHorizontal}
+        hasReducedPadding={isTextOnlyMarker}
       />
     ),
     markerBody: (
       <MarkerBody
-        label={labels.markerBodyLabel}
-        isHorizontal={markerPosition === Position.Bottom || markerPosition === Position.Top}
+        label={config.textVisibility && !isTextOnlyMarker ? label : undefined}
+        isHorizontal={isMarkerLabelHorizontal}
       />
     ),
     // rotate the position if required
@@ -210,7 +211,7 @@ export const computeChartMargins = (
   }
   if (
     referenceLinePaddings.left &&
-    (isHorizontal || (!labelVisibility?.yLeft && !titleVisibility?.yLeft))
+    (isHorizontal || !axesMap.left || (!labelVisibility?.yLeft && !titleVisibility?.yLeft))
   ) {
     const placement = isHorizontal ? mapVerticalToHorizontalPlacement('left') : 'left';
     result[placement] = referenceLinePaddings.left;
@@ -241,4 +242,30 @@ export function getAxisGroupForReferenceLine(
       (decorationConfig.axisId && axis.groupId.includes(decorationConfig.axisId)) ||
       getAxisPosition(decorationConfig.position ?? Position.Left, shouldRotate) === axis.position
   );
+}
+
+export type FormattersMap = Record<string, FieldFormat>;
+
+export function getReferenceLinesFormattersMap(
+  referenceLinesLayers: CommonXYReferenceLineLayerConfig[],
+  formatFactory: FormatFactory
+): FormattersMap {
+  const formattersMap: Record<string, FieldFormat> = {};
+  for (const layer of referenceLinesLayers) {
+    if (isReferenceLine(layer)) {
+      for (const { valueMeta, forAccessor } of layer.decorations) {
+        if (valueMeta?.params?.params?.formatOverride) {
+          formattersMap[forAccessor] = formatFactory(valueMeta.params);
+        }
+      }
+    } else {
+      for (const { forAccessor } of layer.decorations || []) {
+        const columnFormat = layer.table.columns.find(({ id }) => id === forAccessor)?.meta.params;
+        if (columnFormat?.params?.formatOverride) {
+          formattersMap[forAccessor] = formatFactory(columnFormat);
+        }
+      }
+    }
+  }
+  return formattersMap;
 }

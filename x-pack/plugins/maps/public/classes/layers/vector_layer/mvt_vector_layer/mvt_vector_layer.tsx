@@ -17,8 +17,10 @@ import { Feature } from 'geojson';
 import { i18n } from '@kbn/i18n';
 import { buildPhrasesFilter } from '@kbn/es-query';
 import { VectorStyle } from '../../../styles/vector/vector_style';
+import type { DynamicSizeProperty } from '../../../styles/vector/properties/dynamic_size_property';
+import type { StaticSizeProperty } from '../../../styles/vector/properties/static_size_property';
 import { getField } from '../../../../../common/elasticsearch_util';
-import { LAYER_TYPE, SOURCE_TYPES } from '../../../../../common/constants';
+import { LAYER_TYPE, SOURCE_TYPES, VECTOR_STYLES } from '../../../../../common/constants';
 import {
   NO_RESULTS_ICON_AND_TOOLTIPCONTENT,
   AbstractVectorLayer,
@@ -72,10 +74,18 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     this._source = args.source as IMvtVectorSource;
   }
 
-  isInitialDataLoadComplete(): boolean {
-    return this._descriptor.__areTilesLoaded === undefined || !this._descriptor.__areTilesLoaded
-      ? false
-      : super.isInitialDataLoadComplete();
+  isLayerLoading(zoom: number) {
+    if (!this.isVisible() || !this.showAtZoomLevel(zoom)) {
+      return false;
+    }
+
+    const isSourceLoading = super.isLayerLoading(zoom);
+    return isSourceLoading ? true : this._isLoadingJoins();
+  }
+
+  _isTiled(): boolean {
+    // Uses tiled maplibre source 'vector'
+    return true;
   }
 
   async getBounds(getDataRequestContext: (layerId: string) => DataRequestContext) {
@@ -133,7 +143,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     // TODO ES MVT specific - move to es_tiled_vector_layer implementation
     //
     if (this.getSource().getType() === SOURCE_TYPES.ES_GEO_GRID) {
-      const { docCount } = getAggsMeta(this._getMetaFromTiles());
+      const { docCount } = getAggsMeta(this._getTileMetaFeatures());
       return docCount === 0
         ? NO_RESULTS_ICON_AND_TOOLTIPCONTENT
         : {
@@ -153,7 +163,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     }
 
     const { totalFeaturesCount, tilesWithFeatures, tilesWithTrimmedResults } = getHitsMeta(
-      this._getMetaFromTiles(),
+      this._getTileMetaFeatures(),
       maxResultWindow
     );
 
@@ -218,31 +228,51 @@ export class MvtVectorLayer extends AbstractVectorLayer {
   }
 
   async syncData(syncContext: DataRequestContext) {
-    if (this.getSource().getType() === SOURCE_TYPES.ES_SEARCH) {
-      await this._syncMaxResultWindow(syncContext);
-    }
-    await this._syncSourceStyleMeta(syncContext, this.getSource(), this.getCurrentStyle());
-    await this._syncSourceFormatters(syncContext, this.getSource(), this.getCurrentStyle());
-    await this._syncSupportsFeatureEditing({ syncContext, source: this.getSource() });
+    try {
+      if (this.getSource().getType() === SOURCE_TYPES.ES_SEARCH) {
+        await this._syncMaxResultWindow(syncContext);
+      }
+      await this._syncSourceStyleMeta(syncContext, this.getSource(), this.getCurrentStyle());
+      await this._syncSourceFormatters(syncContext, this.getSource(), this.getCurrentStyle());
+      await this._syncSupportsFeatureEditing({ syncContext, source: this.getSource() });
 
-    await syncMvtSourceData({
-      hasLabels: this.getCurrentStyle().hasLabels(),
-      layerId: this.getId(),
-      layerName: await this.getDisplayName(),
-      prevDataRequest: this.getSourceDataRequest(),
-      requestMeta: await this._getVectorSourceRequestMeta(
-        syncContext.isForceRefresh,
-        syncContext.dataFilters,
-        this.getSource(),
-        this.getCurrentStyle(),
-        syncContext.isFeatureEditorOpenForLayer
-      ),
-      source: this.getSource() as IMvtVectorSource,
-      syncContext,
-    });
+      let maxLineWidth = 0;
+      const lineWidth = this.getCurrentStyle()
+        .getAllStyleProperties()
+        .find((styleProperty) => {
+          return styleProperty.getStyleName() === VECTOR_STYLES.LINE_WIDTH;
+        });
+      if (lineWidth) {
+        if (!lineWidth.isDynamic() && lineWidth.isComplete()) {
+          maxLineWidth = (lineWidth as StaticSizeProperty).getOptions().size;
+        } else if (lineWidth.isDynamic() && lineWidth.isComplete()) {
+          maxLineWidth = (lineWidth as DynamicSizeProperty).getOptions().maxSize;
+        }
+      }
+      const buffer = Math.ceil(3.5 * maxLineWidth);
 
-    if (this.hasJoins()) {
-      await this._syncJoins(syncContext, this.getCurrentStyle());
+      await syncMvtSourceData({
+        buffer,
+        hasLabels: this.getCurrentStyle().hasLabels(),
+        layerId: this.getId(),
+        layerName: await this.getDisplayName(),
+        prevDataRequest: this.getSourceDataRequest(),
+        requestMeta: await this._getVectorSourceRequestMeta(
+          syncContext.isForceRefresh,
+          syncContext.dataFilters,
+          this.getSource(),
+          this.getCurrentStyle(),
+          syncContext.isFeatureEditorOpenForLayer
+        ),
+        source: this.getSource() as IMvtVectorSource,
+        syncContext,
+      });
+
+      if (this.hasJoins()) {
+        await this._syncJoins(syncContext, this.getCurrentStyle());
+      }
+    } catch (error) {
+      // Error used to stop execution flow. Error state stored in data request and displayed to user in layer legend.
     }
   }
 
@@ -314,7 +344,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     // When there are no join results, return a filter that hides all features
     // work around for 'match' with empty array not filtering out features
     // This filter always returns false because features will never have `__kbn_never_prop__` property
-    const hideAllFilter = ['has', '__kbn_never_prop__'];
+    const hideAllFilter = ['has', '__kbn_never_prop__'] as FilterSpecification;
 
     if (!joinPropertiesMap) {
       return hideAllFilter;
@@ -518,7 +548,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
   async getStyleMetaDescriptorFromLocalFeatures(): Promise<StyleMetaDescriptor | null> {
     const { joinPropertiesMap } = this._getJoinResults();
     return await pluckStyleMeta(
-      this._getMetaFromTiles(),
+      this._getTileMetaFeatures(),
       joinPropertiesMap,
       await this.getSource().getSupportedShapeTypes(),
       this.getCurrentStyle().getDynamicPropertiesArray()

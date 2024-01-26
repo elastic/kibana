@@ -14,12 +14,16 @@ import { capabilitiesProvider } from './capabilities_provider';
 import { getIndexPatternLoad } from './expressions';
 import { registerIndexPatternsUsageCollector } from './register_index_pattern_usage_collection';
 import { createScriptedFieldsDeprecationsConfig } from './deprecations';
+import { DATA_VIEW_SAVED_OBJECT_TYPE, LATEST_VERSION } from '../common';
+import type { ClientConfigType } from '../common/types';
 import {
   DataViewsServerPluginSetup,
   DataViewsServerPluginStart,
   DataViewsServerPluginSetupDependencies,
   DataViewsServerPluginStartDependencies,
 } from './types';
+import { DataViewsStorage } from './content_management';
+import { cacheMaxAge } from './ui_settings';
 
 export class DataViewsServerPlugin
   implements
@@ -31,41 +35,73 @@ export class DataViewsServerPlugin
     >
 {
   private readonly logger: Logger;
+  private rollupsEnabled: boolean = false;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('dataView');
   }
 
   public setup(
     core: CoreSetup<DataViewsServerPluginStartDependencies, DataViewsServerPluginStart>,
-    { expressions, usageCollection }: DataViewsServerPluginSetupDependencies
+    { expressions, usageCollection, contentManagement }: DataViewsServerPluginSetupDependencies
   ) {
     core.savedObjects.registerType(dataViewSavedObjectType);
     core.capabilities.registerProvider(capabilitiesProvider);
+
+    const config = this.initializerContext.config.get<ClientConfigType>();
+
+    if (config.fieldListCachingEnabled) {
+      core.uiSettings.register(cacheMaxAge);
+    }
+
     const dataViewRestCounter = usageCollection?.createUsageCounter('dataViewsRestApi');
 
-    registerRoutes(core.http, core.getStartServices, dataViewRestCounter);
+    registerRoutes({
+      http: core.http,
+      getStartServices: core.getStartServices,
+      isRollupsEnabled: () => this.rollupsEnabled,
+      dataViewRestCounter,
+    });
 
     expressions.registerFunction(getIndexPatternLoad({ getStartServices: core.getStartServices }));
     registerIndexPatternsUsageCollector(core.getStartServices, usageCollection);
     core.deprecations.registerDeprecations(createScriptedFieldsDeprecationsConfig(core));
 
-    return {};
+    contentManagement.register({
+      id: DATA_VIEW_SAVED_OBJECT_TYPE,
+      storage: new DataViewsStorage({
+        throwOnResultValidationError: this.initializerContext.env.mode.dev,
+        logger: this.logger.get('storage'),
+      }),
+      version: {
+        latest: LATEST_VERSION,
+      },
+    });
+
+    return {
+      enableRollups: () => (this.rollupsEnabled = true),
+    };
   }
 
   public start(
     { uiSettings, capabilities }: CoreStart,
     { fieldFormats }: DataViewsServerPluginStartDependencies
   ) {
+    const config = this.initializerContext.config.get<ClientConfigType>();
+    const scriptedFieldsEnabled = config.scriptedFieldsEnabled === false ? false : true; // accounting for null value
+
     const serviceFactory = dataViewsServiceFactory({
       logger: this.logger.get('indexPatterns'),
       uiSettings,
       fieldFormats,
       capabilities,
+      scriptedFieldsEnabled,
+      rollupsEnabled: this.rollupsEnabled,
     });
 
     return {
       dataViewsServiceFactory: serviceFactory,
+      getScriptedFieldsEnabled: () => scriptedFieldsEnabled,
     };
   }
 

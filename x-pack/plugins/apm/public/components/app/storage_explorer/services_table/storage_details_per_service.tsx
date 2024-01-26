@@ -7,7 +7,7 @@
 
 import React from 'react';
 import {
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,7 +17,7 @@ import {
   EuiFlexGrid,
   EuiSpacer,
 } from '@elastic/eui';
-import { useChartTheme } from '@kbn/observability-plugin/public';
+import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import {
   Chart,
   Partition,
@@ -32,7 +32,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { IndexLifecyclePhaseSelectOption } from '../../../../../common/storage_explorer_types';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { isPending } from '../../../../hooks/use_fetcher';
 import { useProgressiveFetcher } from '../../../../hooks/use_progressive_fetcher';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { asInteger } from '../../../../../common/utils/formatters/formatters';
@@ -80,7 +80,7 @@ export function StorageDetailsPerService({
   indexLifecyclePhase,
 }: Props) {
   const { core } = useApmPluginContext();
-  const chartTheme = useChartTheme();
+  const chartThemes = useChartThemes();
   const router = useApmRouter();
   const { euiTheme } = useEuiTheme();
 
@@ -131,13 +131,10 @@ export function StorageDetailsPerService({
     [indexLifecyclePhase, start, end, environment, kuery, serviceName]
   );
 
-  if (
-    status === FETCH_STATUS.LOADING ||
-    status === FETCH_STATUS.NOT_INITIATED
-  ) {
+  if (isPending(status)) {
     return (
       <div style={{ width: '50%' }}>
-        <EuiLoadingContent data-test-subj="loadingSpinner" />
+        <EuiSkeletonText data-test-subj="loadingSpinner" />
       </div>
     );
   }
@@ -172,7 +169,10 @@ export function StorageDetailsPerService({
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiLink href={serviceOverviewLink}>
+              <EuiLink
+                data-test-subj="apmStorageDetailsPerServiceGoToServiceOverviewLink"
+                href={serviceOverviewLink}
+              >
                 {i18n.translate(
                   'xpack.apm.storageExplorer.serviceDetails.serviceOverviewLink',
                   {
@@ -202,8 +202,10 @@ export function StorageDetailsPerService({
                           emptySizeRatio: 0.3,
                         },
                       },
-                      ...chartTheme,
+                      ...chartThemes.theme,
                     ]}
+                    baseTheme={chartThemes.baseTheme}
+                    locale={i18n.getLocale()}
                     showLegend
                   />
                   <Partition
@@ -219,7 +221,8 @@ export function StorageDetailsPerService({
                       {
                         groupByRollup: (d: Datum) => d.processorEventLabel,
                         shape: {
-                          fillColor: (d) => groupedPalette[d.sortIndex],
+                          fillColor: (dataName, sortIndex) =>
+                            groupedPalette[sortIndex],
                         },
                       },
                     ]}

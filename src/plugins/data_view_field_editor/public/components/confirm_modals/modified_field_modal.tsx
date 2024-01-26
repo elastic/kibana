@@ -33,6 +33,7 @@ export const ModifiedFieldModal: React.FC<Props> = ({ onCancel, onConfirm }) => 
   return (
     <EuiConfirmModal
       title={i18nTexts.title}
+      buttonColor="danger"
       data-test-subj="runtimeFieldModifiedFieldConfirmModal"
       cancelButtonText={i18nTexts.cancelButton}
       confirmButtonText={i18nTexts.title}

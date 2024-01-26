@@ -20,8 +20,14 @@ import { BaseResolverQuery } from './base';
 export class DescendantsQuery extends BaseResolverQuery {
   declare readonly resolverFields: JsonValue[];
 
-  constructor({ schema, indexPatterns, timeRange, isInternalRequest }: ResolverQueryParams) {
-    super({ schema, indexPatterns, timeRange, isInternalRequest });
+  constructor({
+    schema,
+    indexPatterns,
+    timeRange,
+    isInternalRequest,
+    shouldExcludeColdAndFrozenTiers,
+  }: ResolverQueryParams) {
+    super({ schema, indexPatterns, timeRange, isInternalRequest, shouldExcludeColdAndFrozenTiers });
   }
 
   private query(nodes: NodeID[], size: number): JsonObject {
@@ -37,6 +43,7 @@ export class DescendantsQuery extends BaseResolverQuery {
         bool: {
           filter: [
             ...this.getRangeFilter(),
+            ...this.getColdAndFrozenTierFilter(),
             {
               terms: { [this.schema.parent]: nodes },
             },

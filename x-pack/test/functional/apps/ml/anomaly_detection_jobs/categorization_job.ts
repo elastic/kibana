@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '@kbn/ml-plugin/common/constants/categorization_job';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '@kbn/ml-category-validator';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FieldStatsType } from '../common/types';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -74,11 +75,18 @@ export default function ({ getService }: FtrProviderContext) {
 
   const calendarId = `wizard-test-calendar_${Date.now()}`;
 
+  const fieldStatsEntries = [
+    {
+      fieldName: 'field1',
+      type: 'keyword' as FieldStatsType,
+    },
+  ];
+
   describe('categorization', function () {
     this.tags(['ml']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/categorization_small');
-      await ml.testResources.createIndexPatternIfNeeded('ft_categorization_small', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_categorization_small', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.api.createCalendar(calendarId);
@@ -87,7 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
-      await ml.testResources.deleteIndexPatternByTitle('ft_categorization_small');
+      await ml.testResources.deleteDataViewByTitle('ft_categorization_small');
     });
 
     it('job creation loads the categorization wizard for the source data', async () => {
@@ -129,8 +137,18 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobWizardCategorization.assertCategorizationDetectorTypeSelectionExists();
       await ml.jobWizardCategorization.selectCategorizationDetectorType(detectorTypeIdentifier);
 
-      await ml.testExecution.logTestStep(`job creation selects the categorization field`);
+      await ml.testExecution.logTestStep(
+        'job creation opens field stats flyout from categorization field input'
+      );
       await ml.jobWizardCategorization.assertCategorizationFieldInputExists();
+      for (const { fieldName, type: fieldType } of fieldStatsEntries) {
+        await ml.jobWizardCategorization.assertFieldStatFlyoutContentFromCategorizationFieldInputTrigger(
+          fieldName,
+          fieldType
+        );
+      }
+
+      await ml.testExecution.logTestStep(`job creation selects the categorization field`);
       await ml.jobWizardCategorization.selectCategorizationField(categorizationFieldIdentifier);
       await ml.jobWizardCategorization.assertCategorizationExamplesCallout(
         CATEGORY_EXAMPLES_VALIDATION_STATUS.VALID

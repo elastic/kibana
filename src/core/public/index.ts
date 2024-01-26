@@ -34,7 +34,11 @@ export type {
   FatalErrorsStart,
   FatalErrorInfo,
 } from '@kbn/core-fatal-errors-browser';
-export type { UiSettingsState, IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+export type {
+  UiSettingsState,
+  IUiSettingsClient,
+  PublicUiSettingsParams,
+} from '@kbn/core-ui-settings-browser';
 export type { Capabilities } from '@kbn/core-capabilities-common';
 export type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
 export type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
@@ -64,6 +68,16 @@ export type {
   PluginInitializer,
   PluginInitializerContext,
 } from '@kbn/core-plugins-browser';
+export type {
+  PluginsServiceSetup,
+  PluginsServiceStart,
+  PluginContractResolver,
+  PluginContractMap,
+  PluginContractResolverResponse,
+  PluginContractResolverResponseItem,
+  FoundPluginContractResolverResponseItem,
+  NotFoundPluginContractResolverResponseItem,
+} from '@kbn/core-plugins-contracts-browser';
 export type { PluginOpaqueId } from '@kbn/core-base-common';
 
 export type { PackageInfo, EnvironmentMode } from '@kbn/config';
@@ -76,7 +90,6 @@ export {
 } from '@kbn/core-application-common';
 export type {
   UiSettingsParams,
-  PublicUiSettingsParams,
   UserProvidedValues,
   UiSettingsType,
 } from '@kbn/core-ui-settings-common';
@@ -174,6 +187,7 @@ export type {
   HttpResponse,
   HttpHandler,
   IBasePath,
+  IStaticAssets,
   IAnonymousPaths,
   IExternalUrl,
   IHttpInterceptController,
@@ -205,6 +219,8 @@ export type {
 } from '@kbn/core-notifications-browser';
 
 export type { ToastsApi } from '@kbn/core-notifications-browser-internal';
+
+export type { CustomBrandingStart, CustomBrandingSetup } from '@kbn/core-custom-branding-browser';
 
 export type { ThemeServiceSetup, ThemeServiceStart, CoreTheme } from '@kbn/core-theme-browser';
 

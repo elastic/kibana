@@ -5,7 +5,6 @@ exports[`render 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="rowCompressed"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label="Geometry label"
@@ -20,7 +19,6 @@ exports[`render 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="rowCompressed"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label="Spatial relation"
@@ -33,19 +31,19 @@ exports[`render 1`] = `
         Array [
           Object {
             "text": "intersects",
-            "value": "INTERSECTS",
+            "value": "intersects",
           },
           Object {
             "text": "disjoint",
-            "value": "DISJOINT",
+            "value": "disjoint",
           },
           Object {
             "text": "within",
-            "value": "WITHIN",
+            "value": "within",
           },
         ]
       }
-      value="INTERSECTS"
+      value="intersects"
     />
   </EuiFormRow>
   <ActionSelect
@@ -59,7 +57,6 @@ exports[`render 1`] = `
     textAlign="right"
   >
     <EuiButton
-      color="primary"
       fill={true}
       isDisabled={false}
       onClick={[Function]}
@@ -76,7 +73,6 @@ exports[`should render error message 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="rowCompressed"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label="Geometry label"
@@ -91,7 +87,6 @@ exports[`should render error message 1`] = `
   <EuiFormRow
     describedByIds={Array []}
     display="rowCompressed"
-    fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
     label="Spatial relation"
@@ -104,19 +99,19 @@ exports[`should render error message 1`] = `
         Array [
           Object {
             "text": "intersects",
-            "value": "INTERSECTS",
+            "value": "intersects",
           },
           Object {
             "text": "disjoint",
-            "value": "DISJOINT",
+            "value": "disjoint",
           },
           Object {
             "text": "within",
-            "value": "WITHIN",
+            "value": "within",
           },
         ]
       }
-      value="INTERSECTS"
+      value="intersects"
     />
   </EuiFormRow>
   <ActionSelect
@@ -133,7 +128,6 @@ exports[`should render error message 1`] = `
     textAlign="right"
   >
     <EuiButton
-      color="primary"
       fill={true}
       isDisabled={false}
       onClick={[Function]}

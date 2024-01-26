@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { registerEsHelpers } from './elasticsearch';
+export { IngestPipelinesAPIProvider } from './api';
+export { IngestPipelinesFixturesProvider } from './fixtures';

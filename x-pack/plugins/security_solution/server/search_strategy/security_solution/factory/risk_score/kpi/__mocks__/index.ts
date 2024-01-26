@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { KpiRiskScoreRequestOptions } from '../../../../../../../common/search_strategy';
+import type { RiskScoreKpiRequestOptionsInput } from '../../../../../../../common/api/search_strategy';
 import { RiskScoreEntity, RiskQueries } from '../../../../../../../common/search_strategy';
 
-export const mockOptions: KpiRiskScoreRequestOptions = {
+export const mockOptions: RiskScoreKpiRequestOptionsInput = {
   defaultIndex: [
     'apm-*-transaction*',
     'traces-apm*',

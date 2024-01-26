@@ -6,6 +6,12 @@
 
 experimental[] Retrieve a list of all data views.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/src/plugins/data_views/docs/openapi[open API specification].
+====
+
 
 [[data-views-api-get-all-request]]
 ==== Request

@@ -49,6 +49,7 @@ export const useGetEndpointsList = ({
     ...options,
     queryFn: async () => {
       const metadataListResponse = await http.get<MetadataListResponse>(HOST_METADATA_LIST_ROUTE, {
+        version: '2023-10-31',
         query: {
           page: 0,
           pageSize:

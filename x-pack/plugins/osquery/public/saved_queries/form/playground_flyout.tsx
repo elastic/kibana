@@ -7,18 +7,18 @@
 
 import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useFormContext } from 'react-hook-form';
+import { QUERY_TIMEOUT } from '../../../common/constants';
 import { LiveQuery } from '../../live_queries';
 
-const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
-  &.euiFlyoutHeader {
-    padding-top: 21px;
-    padding-bottom: 20px;
-  }
-`;
+const euiFlyoutHeaderCss = {
+  '&.euiFlyoutHeader': {
+    paddingTop: '21px',
+    paddingBottom: '20px',
+  },
+};
 
 interface PlaygroundFlyoutProps {
   enabled?: boolean;
@@ -29,14 +29,14 @@ const PlaygroundFlyoutComponent: React.FC<PlaygroundFlyoutProps> = ({ enabled, o
   // @ts-expect-error update types
   const { serializer, watch } = useFormContext();
   const watchedValues = watch();
-  const { query, ecs_mapping: ecsMapping, id } = watchedValues;
+  const { query, ecs_mapping: ecsMapping, id, timeout } = watchedValues;
   /* recalculate the form data when ecs_mapping changes */
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const serializedFormData = useMemo(() => serializer(watchedValues), [ecsMapping]);
 
   return (
-    <EuiFlyout type="push" size="m" onClose={onClose}>
-      <StyledEuiFlyoutHeader hasBorder>
+    <EuiFlyout type="push" size="m" onClose={onClose} data-test-subj={'osquery-save-query-flyout'}>
+      <EuiFlyoutHeader css={euiFlyoutHeaderCss} hasBorder>
         <EuiTitle size="s">
           <h5>
             <FormattedMessage
@@ -45,7 +45,7 @@ const PlaygroundFlyoutComponent: React.FC<PlaygroundFlyoutProps> = ({ enabled, o
             />
           </h5>
         </EuiTitle>
-      </StyledEuiFlyoutHeader>
+      </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <LiveQuery
           enabled={enabled && query !== ''}
@@ -53,6 +53,7 @@ const PlaygroundFlyoutComponent: React.FC<PlaygroundFlyoutProps> = ({ enabled, o
           query={query}
           ecs_mapping={serializedFormData.ecs_mapping}
           savedQueryId={id}
+          timeout={timeout || QUERY_TIMEOUT.DEFAULT}
           queryField={false}
           ecsMappingField={false}
         />

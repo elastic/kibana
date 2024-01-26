@@ -355,4 +355,53 @@ describe('xyVis', () => {
       },
     });
   });
+
+  test('should pass over overrides from variables', async () => {
+    const { data, args } = sampleArgs();
+    const { layers, ...rest } = args;
+    const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
+    const overrides = {
+      settings: {
+        onBrushEnd: 'ignore',
+      },
+      axisX: {
+        showOverlappingTicks: true,
+      },
+    };
+    const context = {
+      ...createMockExecutionContext(),
+      variables: {
+        overrides,
+      },
+    };
+    const result = await xyVisFunction.fn(
+      data,
+      { ...rest, ...restLayerArgs, referenceLines: [] },
+      context
+    );
+
+    expect(result).toEqual({
+      type: 'render',
+      as: XY_VIS,
+      value: {
+        args: {
+          ...rest,
+          layers: [
+            {
+              layerType,
+              table: data,
+              layerId: 'dataLayers-0',
+              type,
+              ...restLayerArgs,
+            },
+          ],
+        },
+        canNavigateToLens: false,
+        syncColors: false,
+        syncTooltips: false,
+        syncCursor: true,
+        overrides,
+      },
+    });
+  });
 });

@@ -105,4 +105,8 @@ export class TopTermPercentageField implements IESAggField {
   pluckRangeFromTileMetaFeature(metaFeature: TileMetaFeature) {
     return null;
   }
+
+  getMask() {
+    return undefined;
+  }
 }

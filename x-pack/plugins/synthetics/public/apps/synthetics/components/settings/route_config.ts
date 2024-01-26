@@ -17,32 +17,27 @@ export const getSettingsRouteConfig = (
   syntheticsPath: string,
   baseTitle: string
 ) => {
+  const sharedProps = {
+    title: i18n.translate('xpack.synthetics.settingsRoute.title', {
+      defaultMessage: 'Settings | {baseTitle}',
+      values: { baseTitle },
+    }),
+    component: SettingsPage,
+    pageHeader: getSettingsPageHeader(history, syntheticsPath),
+    dataTestSubj: 'syntheticsSettingsPage',
+    pageSectionProps: {
+      paddingSize: 'm',
+    },
+  };
+
   return [
     {
-      title: i18n.translate('xpack.synthetics.settingsRoute.title', {
-        defaultMessage: 'Settings | {baseTitle}',
-        values: { baseTitle },
-      }),
+      ...sharedProps,
       path: SETTINGS_ROUTE,
-      component: SettingsPage,
-      dataTestSubj: 'syntheticsSettingsPage',
-      pageSectionProps: {
-        paddingSize: 'm',
-      },
-      pageHeader: getSettingsPageHeader(history, syntheticsPath),
     },
     {
-      title: i18n.translate('xpack.synthetics.settingsRoute.title', {
-        defaultMessage: 'Settings | {baseTitle}',
-        values: { baseTitle },
-      }),
+      ...sharedProps,
       path: SYNTHETICS_SETTINGS_ROUTE,
-      component: SettingsPage,
-      dataTestSubj: 'syntheticsSettingsPage',
-      pageSectionProps: {
-        paddingSize: 'm',
-      },
-      pageHeader: getSettingsPageHeader(history, syntheticsPath),
     },
   ] as RouteProps[];
 };

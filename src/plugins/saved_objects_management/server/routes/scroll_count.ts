@@ -7,9 +7,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter, SavedObjectsCreatePointInTimeFinderOptions } from '@kbn/core/server';
+import type { IRouter, SavedObjectsCreatePointInTimeFinderOptions } from '@kbn/core/server';
 import { chain } from 'lodash';
-import { findAll } from '../lib';
+import type { v1 } from '../../common';
+import { getSavedObjectCounts } from '../lib';
 
 export const registerScrollForCountRoute = (router: IRouter) => {
   router.post(
@@ -44,34 +45,25 @@ export const registerScrollForCountRoute = (router: IRouter) => {
       const client = getClient({ includedHiddenTypes });
       const findOptions: SavedObjectsCreatePointInTimeFinderOptions = {
         type: typesToInclude,
-        perPage: 1000,
+        ...(searchString ? { search: `${searchString}*`, searchFields: ['title'] } : {}),
+        ...(references ? { hasReference: references, hasReferenceOperator: 'OR' } : {}),
       };
-      if (searchString) {
-        findOptions.search = `${searchString}*`;
-        findOptions.searchFields = ['title'];
-      }
-      if (references) {
-        findOptions.hasReference = references;
-        findOptions.hasReferenceOperator = 'OR';
-      }
 
-      const objects = await findAll(client, findOptions);
+      const rawCounts = await getSavedObjectCounts({
+        types: typesToInclude,
+        client,
+        options: findOptions,
+      });
 
-      const counts = objects.reduce((accum, result) => {
-        const type = result.type;
-        accum[type] = accum[type] || 0;
-        accum[type]++;
-        return accum;
-      }, {} as Record<string, number>);
-
+      const counts: Record<string, number> = {};
       for (const type of typesToInclude) {
-        if (!counts[type]) {
-          counts[type] = 0;
-        }
+        counts[type] = rawCounts[type] ?? 0;
       }
+
+      const body: v1.ScrollCountResponseHTTP = counts;
 
       return res.ok({
-        body: counts,
+        body,
       });
     })
   );

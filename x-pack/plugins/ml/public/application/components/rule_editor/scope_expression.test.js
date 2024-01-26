@@ -8,11 +8,12 @@
 // Mock the mlJobService that is imported for saving rules.
 jest.mock('../../services/job_service', () => 'mlJobService');
 
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import { ML_DETECTOR_RULE_FILTER_TYPE } from '@kbn/ml-anomaly-utils';
+
 import { ScopeExpression } from './scope_expression';
-import { FILTER_TYPE } from '../../../../common/constants/detector_rule';
 
 describe('ScopeExpression', () => {
   const testFilterListIds = ['web_domains', 'safe_domains', 'uk_domains'];
@@ -52,7 +53,7 @@ describe('ScopeExpression', () => {
       ...requiredProps,
       filterListIds: testFilterListIds,
       filterId: 'safe_domains',
-      filterType: FILTER_TYPE.INCLUDE,
+      filterType: ML_DETECTOR_RULE_FILTER_TYPE.INCLUDE,
       enabled: true,
     };
 
@@ -66,7 +67,7 @@ describe('ScopeExpression', () => {
       ...requiredProps,
       filterListIds: testFilterListIds,
       filterId: 'safe_domains',
-      filterType: FILTER_TYPE.INCLUDE,
+      filterType: ML_DETECTOR_RULE_FILTER_TYPE.INCLUDE,
       enabled: false,
     };
 

@@ -215,6 +215,29 @@
           },
           {
             "parentPluginId": "@kbn/core-ui-settings-common",
+            "id": "def-common.UiSettingsParams.readonlyMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "readonlyMode",
+            "description": [
+              "a flag indicating the level of restriction of the readonly settings {@link ReadonlyModeType}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.ReadonlyModeType",
+                "text": "ReadonlyModeType"
+              },
+              " | undefined"
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-ui-settings-common",
             "id": "def-common.UiSettingsParams.sensitive",
             "type": "CompoundType",
             "tags": [],
@@ -301,9 +324,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<T>"
@@ -331,6 +354,10 @@
             "trackAdoption": false,
             "references": [
               {
+                "plugin": "@kbn/management-settings-field-definition",
+                "path": "packages/kbn-management/settings/field_definition/get_definition.ts"
+              },
+              {
                 "plugin": "advancedSettings",
                 "path": "src/plugins/advanced_settings/public/management_app/lib/to_editable_config.ts"
               },
@@ -347,6 +374,29 @@
                 "path": "src/plugins/discover/server/ui_settings.ts"
               }
             ]
+          },
+          {
+            "parentPluginId": "@kbn/core-ui-settings-common",
+            "id": "def-common.UiSettingsParams.scope",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "scope",
+            "description": [
+              "\nScope of the setting. `Global` denotes a setting globally available across namespaces. `Namespace` denotes a setting\nscoped to a namespace. The default value is 'namespace'"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.UiSettingsScope",
+                "text": "UiSettingsScope"
+              },
+              " | undefined"
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -410,31 +460,47 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-ui-settings-common",
-        "id": "def-common.PublicUiSettingsParams",
+        "id": "def-common.ReadonlyModeType",
         "type": "Type",
         "tags": [],
-        "label": "PublicUiSettingsParams",
+        "label": "ReadonlyModeType",
         "description": [
-          "\nA sub-set of {@link UiSettingsParams} exposed to the client-side."
+          "\nType for the readonly mode of the readonly settings.\n'strict' indicates that the value cannot be changed through API and is not displayed in the UI\n'ui' indicates that the value is just not displayed in the UI"
         ],
         "signature": [
-          "{ name?: string | undefined; value?: unknown; description?: string | undefined; category?: string[] | undefined; options?: string[] | number[] | undefined; optionLabels?: Record<string, string> | undefined; requiresPageReload?: boolean | undefined; readonly?: boolean | undefined; sensitive?: boolean | undefined; type?: ",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.UiSettingsType",
-            "text": "UiSettingsType"
-          },
-          " | undefined; deprecation?: ",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.DeprecationSettings",
-            "text": "DeprecationSettings"
-          },
-          " | undefined; order?: number | undefined; metric?: { type: string; name: string; } | undefined; }"
+          "\"strict\" | \"ui\""
+        ],
+        "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-ui-settings-common",
+        "id": "def-common.TIMEZONE_OPTIONS",
+        "type": "Array",
+        "tags": [],
+        "label": "TIMEZONE_OPTIONS",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "packages/core/ui-settings/core-ui-settings-common/src/timezones.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-ui-settings-common",
+        "id": "def-common.UiSettingsScope",
+        "type": "Type",
+        "tags": [],
+        "label": "UiSettingsScope",
+        "description": [
+          "\nDenotes the scope of the setting"
+        ],
+        "signature": [
+          "\"global\" | \"namespace\""
         ],
         "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
         "deprecated": false,
@@ -451,7 +517,7 @@
           "\nUI element type to represent the settings."
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"image\" | \"json\" | \"markdown\" | \"select\" | \"array\""
+          "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"select\" | \"image\" | \"color\" | \"json\" | \"array\" | \"markdown\""
         ],
         "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
         "deprecated": false,

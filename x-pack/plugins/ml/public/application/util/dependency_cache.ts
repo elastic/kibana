@@ -9,7 +9,6 @@ import type { DataPublicPluginSetup } from '@kbn/data-plugin/public';
 import type {
   IUiSettingsClient,
   ChromeStart,
-  SavedObjectsClientContract,
   ApplicationStart,
   HttpStart,
   I18nStart,
@@ -28,6 +27,8 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 
 export interface DependencyCache {
   timefilter: DataPublicPluginSetup['query']['timefilter'] | null;
@@ -41,7 +42,7 @@ export interface DependencyCache {
   fieldFormats: FieldFormatsStart | null;
   autocomplete: UnifiedSearchPublicPluginStart['autocomplete'] | null;
   basePath: IBasePath | null;
-  savedObjectsClient: SavedObjectsClientContract | null;
+  savedSearch: SavedSearchPublicPluginStart | null;
   application: ApplicationStart | null;
   http: HttpStart | null;
   security: SecurityPluginStart | undefined | null;
@@ -51,6 +52,7 @@ export interface DependencyCache {
   dataVisualizer: DataVisualizerPluginStart | null;
   dataViews: DataViewsContract | null;
   share: SharePluginStart | null;
+  lens: LensPublicStart | null;
 }
 
 const cache: DependencyCache = {
@@ -65,7 +67,7 @@ const cache: DependencyCache = {
   fieldFormats: null,
   autocomplete: null,
   basePath: null,
-  savedObjectsClient: null,
+  savedSearch: null,
   application: null,
   http: null,
   security: null,
@@ -75,6 +77,7 @@ const cache: DependencyCache = {
   dataVisualizer: null,
   dataViews: null,
   share: null,
+  lens: null,
 };
 
 export function setDependencyCache(deps: Partial<DependencyCache>) {
@@ -89,7 +92,7 @@ export function setDependencyCache(deps: Partial<DependencyCache>) {
   cache.fieldFormats = deps.fieldFormats || null;
   cache.autocomplete = deps.autocomplete || null;
   cache.basePath = deps.basePath || null;
-  cache.savedObjectsClient = deps.savedObjectsClient || null;
+  cache.savedSearch = deps.savedSearch || null;
   cache.application = deps.application || null;
   cache.http = deps.http || null;
   cache.security = deps.security || null;
@@ -98,6 +101,7 @@ export function setDependencyCache(deps: Partial<DependencyCache>) {
   cache.dataVisualizer = deps.dataVisualizer || null;
   cache.dataViews = deps.dataViews || null;
   cache.share = deps.share || null;
+  cache.lens = deps.lens || null;
 }
 
 export function getTimefilter() {
@@ -183,13 +187,6 @@ export function getBasePath() {
   return cache.basePath;
 }
 
-export function getSavedObjectsClient() {
-  if (cache.savedObjectsClient === null) {
-    throw new Error("savedObjectsClient hasn't been initialized");
-  }
-  return cache.savedObjectsClient;
-}
-
 export function getApplication() {
   if (cache.application === null) {
     throw new Error("application hasn't been initialized");
@@ -244,6 +241,13 @@ export function getShare() {
     throw new Error("share hasn't been initialized");
   }
   return cache.share;
+}
+
+export function getLens() {
+  if (cache.lens === null) {
+    throw new Error("lens hasn't been initialized");
+  }
+  return cache.lens;
 }
 
 export function clearCache() {

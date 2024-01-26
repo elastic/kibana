@@ -1,12 +1,100 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`APM Transaction Error Rate Transform Generator does not include the query filter when params are '*' 1`] = `
+exports[`APM Transaction Error Rate Transform Generator adds the custom kql filter to the query 1`] = `
 Object {
   "bool": Object {
     "filter": Array [
       Object {
+        "term": Object {
+          "metricset.name": "transaction",
+        },
+      },
+      Object {
+        "terms": Object {
+          "event.outcome": Array [
+            "success",
+            "failure",
+          ],
+        },
+      },
+      Object {
+        "range": Object {
+          "@timestamp": Object {
+            "gte": "now-7d/d",
+          },
+        },
+      },
+      Object {
         "match": Object {
-          "transaction.root": true,
+          "service.name": "irrelevant",
+        },
+      },
+      Object {
+        "match": Object {
+          "service.environment": "irrelevant",
+        },
+      },
+      Object {
+        "match": Object {
+          "transaction.name": "irrelevant",
+        },
+      },
+      Object {
+        "match": Object {
+          "transaction.type": "irrelevant",
+        },
+      },
+      Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "match_phrase": Object {
+                      "my.field": "value",
+                    },
+                  },
+                ],
+              },
+            },
+            Object {
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "bool": Object {
+                      "minimum_should_match": 1,
+                      "should": Array [
+                        Object {
+                          "range": Object {
+                            "foo": Object {
+                              "gte": "12",
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "minimum_should_match": 1,
+                      "should": Array [
+                        Object {
+                          "range": Object {
+                            "bar": Object {
+                              "lte": "100",
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
         },
       },
     ],
@@ -14,43 +102,333 @@ Object {
 }
 `;
 
-exports[`APM Transaction Error Rate Transform Generator returns the correct transform params with every specified indicator params 1`] = `
+exports[`APM Transaction Error Rate Transform Generator does not include the query filter when params are '*' 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "term": Object {
+          "metricset.name": "transaction",
+        },
+      },
+      Object {
+        "terms": Object {
+          "event.outcome": Array [
+            "success",
+            "failure",
+          ],
+        },
+      },
+      Object {
+        "range": Object {
+          "@timestamp": Object {
+            "gte": "now-7d/d",
+          },
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`APM Transaction Error Rate Transform Generator groups by the 'service.environment' 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "term": Object {
+          "metricset.name": "transaction",
+        },
+      },
+      Object {
+        "terms": Object {
+          "event.outcome": Array [
+            "success",
+            "failure",
+          ],
+        },
+      },
+      Object {
+        "range": Object {
+          "@timestamp": Object {
+            "gte": "now-7d/d",
+          },
+        },
+      },
+      Object {
+        "match": Object {
+          "service.environment": "production",
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`APM Transaction Error Rate Transform Generator groups by the 'service.environment' 2`] = `
+Object {
+  "@timestamp": Object {
+    "date_histogram": Object {
+      "field": "@timestamp",
+      "fixed_interval": "1m",
+    },
+  },
+  "service.environment": Object {
+    "terms": Object {
+      "field": "service.environment",
+    },
+  },
+  "slo.id": Object {
+    "terms": Object {
+      "field": "slo.id",
+    },
+  },
+  "slo.instanceId": Object {
+    "terms": Object {
+      "field": "slo.instanceId",
+    },
+  },
+  "slo.revision": Object {
+    "terms": Object {
+      "field": "slo.revision",
+    },
+  },
+}
+`;
+
+exports[`APM Transaction Error Rate Transform Generator groups by the 'service.name' 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "term": Object {
+          "metricset.name": "transaction",
+        },
+      },
+      Object {
+        "terms": Object {
+          "event.outcome": Array [
+            "success",
+            "failure",
+          ],
+        },
+      },
+      Object {
+        "range": Object {
+          "@timestamp": Object {
+            "gte": "now-7d/d",
+          },
+        },
+      },
+      Object {
+        "match": Object {
+          "service.name": "my-service",
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`APM Transaction Error Rate Transform Generator groups by the 'service.name' 2`] = `
+Object {
+  "@timestamp": Object {
+    "date_histogram": Object {
+      "field": "@timestamp",
+      "fixed_interval": "1m",
+    },
+  },
+  "service.name": Object {
+    "terms": Object {
+      "field": "service.name",
+    },
+  },
+  "slo.id": Object {
+    "terms": Object {
+      "field": "slo.id",
+    },
+  },
+  "slo.instanceId": Object {
+    "terms": Object {
+      "field": "slo.instanceId",
+    },
+  },
+  "slo.revision": Object {
+    "terms": Object {
+      "field": "slo.revision",
+    },
+  },
+}
+`;
+
+exports[`APM Transaction Error Rate Transform Generator groups by the 'transaction.name' 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "term": Object {
+          "metricset.name": "transaction",
+        },
+      },
+      Object {
+        "terms": Object {
+          "event.outcome": Array [
+            "success",
+            "failure",
+          ],
+        },
+      },
+      Object {
+        "range": Object {
+          "@timestamp": Object {
+            "gte": "now-7d/d",
+          },
+        },
+      },
+      Object {
+        "match": Object {
+          "transaction.name": "GET /foo",
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`APM Transaction Error Rate Transform Generator groups by the 'transaction.name' 2`] = `
+Object {
+  "@timestamp": Object {
+    "date_histogram": Object {
+      "field": "@timestamp",
+      "fixed_interval": "1m",
+    },
+  },
+  "slo.id": Object {
+    "terms": Object {
+      "field": "slo.id",
+    },
+  },
+  "slo.instanceId": Object {
+    "terms": Object {
+      "field": "slo.instanceId",
+    },
+  },
+  "slo.revision": Object {
+    "terms": Object {
+      "field": "slo.revision",
+    },
+  },
+  "transaction.name": Object {
+    "terms": Object {
+      "field": "transaction.name",
+    },
+  },
+}
+`;
+
+exports[`APM Transaction Error Rate Transform Generator groups by the 'transaction.type' 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "term": Object {
+          "metricset.name": "transaction",
+        },
+      },
+      Object {
+        "terms": Object {
+          "event.outcome": Array [
+            "success",
+            "failure",
+          ],
+        },
+      },
+      Object {
+        "range": Object {
+          "@timestamp": Object {
+            "gte": "now-7d/d",
+          },
+        },
+      },
+      Object {
+        "match": Object {
+          "transaction.type": "request",
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`APM Transaction Error Rate Transform Generator groups by the 'transaction.type' 2`] = `
+Object {
+  "@timestamp": Object {
+    "date_histogram": Object {
+      "field": "@timestamp",
+      "fixed_interval": "1m",
+    },
+  },
+  "slo.id": Object {
+    "terms": Object {
+      "field": "slo.id",
+    },
+  },
+  "slo.instanceId": Object {
+    "terms": Object {
+      "field": "slo.instanceId",
+    },
+  },
+  "slo.revision": Object {
+    "terms": Object {
+      "field": "slo.revision",
+    },
+  },
+  "transaction.type": Object {
+    "terms": Object {
+      "field": "transaction.type",
+    },
+  },
+}
+`;
+
+exports[`APM Transaction Error Rate Transform Generator returns the expected transform params for timeslices slo 1`] = `
 Object {
   "_meta": Object {
-    "version": 1,
+    "managed": true,
+    "managed_by": "observability",
+    "version": 3,
   },
+  "defer_validation": true,
+  "description": "Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]",
   "dest": Object {
-    "index": "slo-observability.sli-v1",
-    "pipeline": "slo-observability.sli.monthly",
+    "index": ".slo-observability.sli-v3",
+    "pipeline": ".slo-observability.sli.pipeline-v3",
   },
   "frequency": "1m",
   "pivot": Object {
     "aggregations": Object {
       "slo.denominator": Object {
-        "value_count": Object {
-          "field": "transaction.duration.histogram",
+        "filter": Object {
+          "match_all": Object {},
+        },
+      },
+      "slo.isGoodSlice": Object {
+        "bucket_script": Object {
+          "buckets_path": Object {
+            "goodEvents": "slo.numerator>_count",
+            "totalEvents": "slo.denominator>_count",
+          },
+          "script": "params.goodEvents / params.totalEvents >= 0.95 ? 1 : 0",
         },
       },
       "slo.numerator": Object {
         "filter": Object {
           "bool": Object {
-            "should": Array [
-              Object {
-                "match": Object {
-                  "transaction.result": "HTTP 2xx",
-                },
+            "should": Object {
+              "match": Object {
+                "event.outcome": "success",
               },
-              Object {
-                "match": Object {
-                  "transaction.result": "HTTP 3xx",
-                },
-              },
-              Object {
-                "match": Object {
-                  "transaction.result": "HTTP 4xx",
-                },
-              },
-            ],
+            },
           },
         },
       },
@@ -58,33 +436,18 @@ Object {
     "group_by": Object {
       "@timestamp": Object {
         "date_histogram": Object {
-          "calendar_interval": "1m",
           "field": "@timestamp",
+          "fixed_interval": "2m",
         },
       },
-      "slo._internal.budgeting_method": Object {
+      "service.environment": Object {
         "terms": Object {
-          "field": "slo._internal.budgeting_method",
+          "field": "service.environment",
         },
       },
-      "slo._internal.name": Object {
+      "service.name": Object {
         "terms": Object {
-          "field": "slo._internal.name",
-        },
-      },
-      "slo._internal.objective.target": Object {
-        "terms": Object {
-          "field": "slo._internal.objective.target",
-        },
-      },
-      "slo._internal.time_window.duration": Object {
-        "terms": Object {
-          "field": "slo._internal.time_window.duration",
-        },
-      },
-      "slo._internal.time_window.is_rolling": Object {
-        "terms": Object {
-          "field": "slo._internal.time_window.is_rolling",
+          "field": "service.name",
         },
       },
       "slo.id": Object {
@@ -92,15 +455,31 @@ Object {
           "field": "slo.id",
         },
       },
+      "slo.instanceId": Object {
+        "terms": Object {
+          "field": "slo.instanceId",
+        },
+      },
       "slo.revision": Object {
         "terms": Object {
           "field": "slo.revision",
+        },
+      },
+      "transaction.name": Object {
+        "terms": Object {
+          "field": "transaction.name",
+        },
+      },
+      "transaction.type": Object {
+        "terms": Object {
+          "field": "transaction.type",
         },
       },
     },
   },
   "settings": Object {
     "deduce_mappings": false,
+    "unattended": true,
   },
   "source": Object {
     "index": "metrics-apm*",
@@ -108,8 +487,23 @@ Object {
       "bool": Object {
         "filter": Array [
           Object {
-            "match": Object {
-              "transaction.root": true,
+            "term": Object {
+              "metricset.name": "transaction",
+            },
+          },
+          Object {
+            "terms": Object {
+              "event.outcome": Array [
+                "success",
+                "failure",
+              ],
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "now-7d/d",
+              },
             },
           },
           Object {
@@ -136,39 +530,15 @@ Object {
       },
     },
     "runtime_mappings": Object {
-      "slo._internal.budgeting_method": Object {
-        "script": Object {
-          "source": "emit('occurrences')",
-        },
-        "type": "keyword",
-      },
-      "slo._internal.name": Object {
+      "slo.id": Object {
         "script": Object {
           "source": "emit('irrelevant')",
         },
         "type": "keyword",
       },
-      "slo._internal.objective.target": Object {
+      "slo.instanceId": Object {
         "script": Object {
-          "source": "emit(0.999)",
-        },
-        "type": "double",
-      },
-      "slo._internal.time_window.duration": Object {
-        "script": Object {
-          "source": "emit('7d')",
-        },
-        "type": "keyword",
-      },
-      "slo._internal.time_window.is_rolling": Object {
-        "script": Object {
-          "source": "emit(true)",
-        },
-        "type": "boolean",
-      },
-      "slo.id": Object {
-        "script": Object {
-          "source": Any<String>,
+          "source": "emit('*')",
         },
         "type": "keyword",
       },
@@ -182,43 +552,170 @@ Object {
   },
   "sync": Object {
     "time": Object {
-      "delay": "60s",
+      "delay": "1m",
       "field": "@timestamp",
     },
   },
-  "transform_id": Any<String>,
+  "transform_id": "slo-irrelevant-1",
 }
 `;
 
-exports[`APM Transaction Error Rate Transform Generator uses default values when 'good_status_codes' is not specified 1`] = `
+exports[`APM Transaction Error Rate Transform Generator returns the expected transform params with every specified indicator params 1`] = `
 Object {
-  "slo.denominator": Object {
-    "value_count": Object {
-      "field": "transaction.duration.histogram",
+  "_meta": Object {
+    "managed": true,
+    "managed_by": "observability",
+    "version": 3,
+  },
+  "defer_validation": true,
+  "description": "Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]",
+  "dest": Object {
+    "index": ".slo-observability.sli-v3",
+    "pipeline": ".slo-observability.sli.pipeline-v3",
+  },
+  "frequency": "1m",
+  "pivot": Object {
+    "aggregations": Object {
+      "slo.denominator": Object {
+        "filter": Object {
+          "match_all": Object {},
+        },
+      },
+      "slo.numerator": Object {
+        "filter": Object {
+          "bool": Object {
+            "should": Object {
+              "match": Object {
+                "event.outcome": "success",
+              },
+            },
+          },
+        },
+      },
+    },
+    "group_by": Object {
+      "@timestamp": Object {
+        "date_histogram": Object {
+          "field": "@timestamp",
+          "fixed_interval": "1m",
+        },
+      },
+      "service.environment": Object {
+        "terms": Object {
+          "field": "service.environment",
+        },
+      },
+      "service.name": Object {
+        "terms": Object {
+          "field": "service.name",
+        },
+      },
+      "slo.id": Object {
+        "terms": Object {
+          "field": "slo.id",
+        },
+      },
+      "slo.instanceId": Object {
+        "terms": Object {
+          "field": "slo.instanceId",
+        },
+      },
+      "slo.revision": Object {
+        "terms": Object {
+          "field": "slo.revision",
+        },
+      },
+      "transaction.name": Object {
+        "terms": Object {
+          "field": "transaction.name",
+        },
+      },
+      "transaction.type": Object {
+        "terms": Object {
+          "field": "transaction.type",
+        },
+      },
     },
   },
-  "slo.numerator": Object {
-    "filter": Object {
+  "settings": Object {
+    "deduce_mappings": false,
+    "unattended": true,
+  },
+  "source": Object {
+    "index": "metrics-apm*",
+    "query": Object {
       "bool": Object {
-        "should": Array [
+        "filter": Array [
           Object {
-            "match": Object {
-              "transaction.result": "HTTP 2xx",
+            "term": Object {
+              "metricset.name": "transaction",
+            },
+          },
+          Object {
+            "terms": Object {
+              "event.outcome": Array [
+                "success",
+                "failure",
+              ],
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "gte": "now-7d/d",
+              },
             },
           },
           Object {
             "match": Object {
-              "transaction.result": "HTTP 3xx",
+              "service.name": "irrelevant",
             },
           },
           Object {
             "match": Object {
-              "transaction.result": "HTTP 4xx",
+              "service.environment": "irrelevant",
+            },
+          },
+          Object {
+            "match": Object {
+              "transaction.name": "irrelevant",
+            },
+          },
+          Object {
+            "match": Object {
+              "transaction.type": "irrelevant",
             },
           },
         ],
       },
     },
+    "runtime_mappings": Object {
+      "slo.id": Object {
+        "script": Object {
+          "source": "emit('irrelevant')",
+        },
+        "type": "keyword",
+      },
+      "slo.instanceId": Object {
+        "script": Object {
+          "source": "emit('*')",
+        },
+        "type": "keyword",
+      },
+      "slo.revision": Object {
+        "script": Object {
+          "source": "emit(1)",
+        },
+        "type": "long",
+      },
+    },
   },
+  "sync": Object {
+    "time": Object {
+      "delay": "1m",
+      "field": "@timestamp",
+    },
+  },
+  "transform_id": "slo-irrelevant-1",
 }
 `;

@@ -50,7 +50,7 @@ because you can put data in different resource tiers.
 have backups of your cluster in case something goes wrong.
 
 | <<data-rollups, Rollup Jobs>>
-|Create a job that periodically aggregates data from one or more indices, and then
+| deprecated:[8.11.0,'Rollups are deprecated and will be removed in a future version. Use downsampling instead.'] Create a job that periodically aggregates data from one or more indices, and then
 rolls it into a new, compact index. Rollup indices are a good way to store months or
 years of historical data in combination with your raw data.
 
@@ -74,12 +74,14 @@ You can add and remove remote clusters, and check their connectivity.
 [cols="50, 50"]
 |===
 
-| <<alerting-getting-started, Rules&nbsp;and Connectors>>
-| Centrally <<create-and-manage-rules, manage your rules>> across {kib}. Create and <<connector-management, manage reusable
-connectors>> for triggering actions.
+| <<alerting-getting-started,{rules-ui}>>
+| Centrally <<create-and-manage-rules,manage your rules>> across {kib}.
 
 | <<cases,Cases>>
 | Create and manage cases to investigate issues.
+
+| <<action-types,{connectors-ui}>>
+| Create and <<connector-management,manage reusable connectors>> for triggering actions.
 
 | <<reporting-getting-started, Reporting>>
 | Monitor the generation of reports&mdash;PDF, PNG, and CSV&mdash;and download reports that you previously generated.
@@ -94,6 +96,9 @@ Viewer or Anomaly Explorer to see your {anomaly-detect} results.
 | Detect changes in your data by creating, managing, and monitoring alerts.
 For example, you might create an alert when the maximum total CPU usage on a machine goes
 above a certain percentage.
+
+| <<maintenance-windows,Maintenance windows>>
+| Suppress rule notifications for scheduled periods of time.
 
 |===
 
@@ -182,6 +187,8 @@ include::{kib-repo-dir}/management/action-types.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-licenses.asciidoc[]
 
+include::{kib-repo-dir}/management/maintenance-windows/maintenance-windows.asciidoc[]
+
 include::{kib-repo-dir}/management/manage-data-views.asciidoc[]
 
 include::{kib-repo-dir}/management/numeral.asciidoc[]
@@ -197,6 +204,8 @@ include::{kib-repo-dir}/spaces/index.asciidoc[]
 include::{kib-repo-dir}/management/advanced-options.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-tags.asciidoc[]
+
+include::{kib-repo-dir}/management/upgrade-assistant.asciidoc[]
 
 include::{kib-repo-dir}/management/watcher-ui/index.asciidoc[]
 

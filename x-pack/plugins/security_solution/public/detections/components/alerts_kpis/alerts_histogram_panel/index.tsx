@@ -6,20 +6,20 @@
  */
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 import type { Position } from '@elastic/charts';
 import type { EuiComboBox, EuiTitleSize } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
-import numeral from '@elastic/numeral';
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { isEmpty, noop } from 'lodash/fp';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import type { Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../../common/constants';
+import { APP_UI_ID } from '../../../../../common/constants';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import type { LegendItem } from '../../../../common/components/charts/draggable_legend_item';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
@@ -30,7 +30,7 @@ import { getDetectionEngineUrl, useFormatUrl } from '../../../../common/componen
 import { defaultLegendColors } from '../../../../common/components/matrix_histogram/utils';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
 import { MatrixLoader } from '../../../../common/components/matrix_histogram/matrix_loader';
-import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import {
   parseCombinedQueries,
   buildCombinedQueries,
@@ -50,6 +50,11 @@ import { KpiPanel, StackByComboBox } from '../common/components';
 import { useInspectButton } from '../common/hooks';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { GROUP_BY_TOP_LABEL } from '../common/translations';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { getAlertsHistogramLensAttributes as getLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_histogram';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
+import { useAlertHistogramCount } from '../../../hooks/alerts_visualization/use_alert_histogram_count';
 
 const defaultTotalAlertsObj: AlertsTotal = {
   value: 0,
@@ -68,6 +73,8 @@ const OptionsFlexItem = styled(EuiFlexItem)`
 
 export const LEGEND_WITH_COUNTS_WIDTH = 300; // px
 
+const CHART_HEIGHT = 155; // px
+
 interface AlertsHistogramPanelProps {
   alignHeader?: 'center' | 'baseline' | 'stretch' | 'flexStart' | 'flexEnd';
   chartHeight?: number;
@@ -75,31 +82,35 @@ interface AlertsHistogramPanelProps {
   combinedQueries?: string;
   comboboxRef?: React.RefObject<EuiComboBox<string | number | string[] | undefined>>;
   defaultStackByOption?: string;
+  extraActions?: Action[];
   filters?: Filter[];
   headerChildren?: React.ReactNode;
-  inspectTitle?: string;
+  inspectTitle?: React.ReactNode;
+  legendPosition?: Position;
   onFieldSelected?: (field: string) => void;
   /** Override all defaults, and only display this field */
   onlyField?: AlertsStackByField;
   paddingSize?: 's' | 'm' | 'l' | 'none';
   panelHeight?: number;
-  titleSize?: EuiTitleSize;
   query?: Query;
-  legendPosition?: Position;
+  runtimeMappings?: MappingRuntimeFields;
   setComboboxInputRef?: (inputRef: HTMLInputElement | null) => void;
-  signalIndexName: string | null;
   showCountsInLegend?: boolean;
   showGroupByPlaceholder?: boolean;
   showLegend?: boolean;
   showLinkToAlerts?: boolean;
-  showTotalAlertsCount?: boolean;
   showStackBy?: boolean;
+  showTotalAlertsCount?: boolean;
+  signalIndexName: string | null;
   stackByLabel?: string;
   stackByWidth?: number;
   timelineId?: string;
   title?: React.ReactNode;
+  titleSize?: EuiTitleSize;
   updateDateRange: UpdateDateRange;
-  runtimeMappings?: MappingRuntimeFields;
+  hideQueryToggle?: boolean;
+  isExpanded?: boolean;
+  setIsExpanded?: (status: boolean) => void;
 }
 
 const NO_LEGEND_DATA: LegendItem[] = [];
@@ -107,47 +118,54 @@ const NO_LEGEND_DATA: LegendItem[] = [];
 export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
   ({
     alignHeader,
-    chartHeight,
+    chartHeight = CHART_HEIGHT,
     chartOptionsContextMenu,
     combinedQueries,
     comboboxRef,
     defaultStackByOption = DEFAULT_STACK_BY_FIELD,
+    extraActions,
     filters,
     headerChildren,
     inspectTitle,
+    legendPosition = 'right',
     onFieldSelected,
     onlyField,
     paddingSize = 'm',
     panelHeight = PANEL_HEIGHT,
     query,
-    legendPosition = 'right',
+    runtimeMappings,
     setComboboxInputRef,
-    signalIndexName,
     showCountsInLegend = false,
     showGroupByPlaceholder = false,
     showLegend = true,
     showLinkToAlerts = false,
-    showTotalAlertsCount = false,
     showStackBy = true,
+    showTotalAlertsCount = false,
+    signalIndexName,
     stackByLabel,
     stackByWidth,
     timelineId,
     title = i18n.HISTOGRAM_HEADER,
-    updateDateRange,
     titleSize = 'm',
-    runtimeMappings,
+    updateDateRange,
+    hideQueryToggle = false,
+    isExpanded,
+    setIsExpanded,
   }) => {
-    const { to, from, deleteQuery, setQuery } = useGlobalTime(false);
+    const { to, from, deleteQuery, setQuery } = useGlobalTime();
 
     // create a unique, but stable (across re-renders) query id
-    const uniqueQueryId = useMemo(() => `${DETECTIONS_HISTOGRAM_ID}-${uuid.v4()}`, []);
+    const uniqueQueryId = useMemo(() => `${DETECTIONS_HISTOGRAM_ID}-${uuidv4()}`, []);
+    const visualizationId = `alerts-trend-embeddable-${uniqueQueryId}`;
     const [isInitialLoading, setIsInitialLoading] = useState(true);
     const [isInspectDisabled, setIsInspectDisabled] = useState(false);
-    const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
     const [totalAlertsObj, setTotalAlertsObj] = useState<AlertsTotal>(defaultTotalAlertsObj);
     const [selectedStackByOption, setSelectedStackByOption] = useState<string>(
       onlyField == null ? defaultStackByOption : onlyField
     );
+    const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
+    const isAlertsPageChartsEnabled = useIsExperimentalFeatureEnabled('alertsPageChartsEnabled');
+
     const onSelect = useCallback(
       (field: string) => {
         setSelectedStackByOption(field);
@@ -163,18 +181,26 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     }, [defaultStackByOption, onlyField]);
 
     const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTIONS_HISTOGRAM_ID);
-    const [querySkip, setQuerySkip] = useState(!toggleStatus);
-    useEffect(() => {
-      setQuerySkip(!toggleStatus);
-    }, [toggleStatus]);
+
     const toggleQuery = useCallback(
-      (status: boolean) => {
-        setToggleStatus(status);
-        // toggle on = skipQuery false
-        setQuerySkip(!status);
+      (newToggleStatus: boolean) => {
+        if (isAlertsPageChartsEnabled && setIsExpanded !== undefined) {
+          setIsExpanded(newToggleStatus);
+        } else {
+          setToggleStatus(newToggleStatus);
+        }
       },
-      [setQuerySkip, setToggleStatus]
+      [setToggleStatus, setIsExpanded, isAlertsPageChartsEnabled]
     );
+
+    const querySkip = useMemo(
+      () =>
+        isAlertsPageChartsEnabled && setIsExpanded !== undefined ? !isExpanded : !toggleStatus,
+      [isAlertsPageChartsEnabled, setIsExpanded, isExpanded, toggleStatus]
+    );
+
+    const timerange = useMemo(() => ({ from, to }), [from, to]);
+
     const {
       loading: isLoadingAlerts,
       data: alertsData,
@@ -191,7 +217,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
         runtimeMappings
       ),
       indexName: signalIndexName,
-      skip: querySkip,
+      skip: querySkip || isChartEmbeddablesEnabled,
       queryName: ALERTS_QUERY_NAMES.HISTOGRAM,
     });
 
@@ -199,16 +225,11 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     const { navigateToApp } = kibana.services.application;
     const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.alerts);
 
-    const totalAlerts = useMemo(
-      () =>
-        i18n.SHOWING_ALERTS(
-          numeral(totalAlertsObj.value).format(defaultNumberFormat),
-          totalAlertsObj.value,
-          totalAlertsObj.relation === 'gte' ? '>' : totalAlertsObj.relation === 'lte' ? '<' : ''
-        ),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [totalAlertsObj]
-    );
+    const totalAlerts = useAlertHistogramCount({
+      totalAlertsObj,
+      visualizationId,
+      isChartEmbeddablesEnabled,
+    });
 
     const goToDetectionEngine = useCallback(
       (ev) => {
@@ -229,7 +250,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
               color: i < defaultLegendColors.length ? defaultLegendColors[i] : undefined,
               count: showCountsInLegend ? bucket.doc_count : undefined,
               dataProviderId: escapeDataProviderId(
-                `draggable-legend-item-${uuid.v4()}-${selectedStackByOption}-${bucket.key}`
+                `draggable-legend-item-${uuidv4()}-${selectedStackByOption}-${bucket.key}`
               ),
               field: selectedStackByOption,
               timelineId,
@@ -247,7 +268,6 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
 
     useEffect(() => {
       let canceled = false;
-
       if (!canceled && !showInitialLoadingSpinner({ isInitialLoading, isLoadingAlerts })) {
         setIsInitialLoading(false);
       }
@@ -258,13 +278,13 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     }, [isInitialLoading, isLoadingAlerts, setIsInitialLoading]);
 
     useInspectButton({
-      setQuery,
-      response,
-      request,
-      refetch,
-      uniqueQueryId,
       deleteQuery,
       loading: isLoadingAlerts,
+      refetch,
+      request,
+      response,
+      setQuery,
+      uniqueQueryId,
     });
 
     useEffect(() => {
@@ -332,40 +352,54 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
       [onlyField, title]
     );
 
+    const showHistogram = useMemo(() => {
+      if (isAlertsPageChartsEnabled) {
+        if (isExpanded !== undefined) {
+          // alerts page
+          return isExpanded;
+        } else {
+          // rule details page and overview page
+          return toggleStatus;
+        }
+      } else {
+        return toggleStatus;
+      }
+    }, [isAlertsPageChartsEnabled, isExpanded, toggleStatus]);
+
     return (
-      <InspectButtonContainer show={!isInitialLoading && toggleStatus}>
+      <InspectButtonContainer show={!isInitialLoading && showHistogram}>
         <KpiPanel
           height={panelHeight}
           hasBorder
           paddingSize={paddingSize}
           data-test-subj="alerts-histogram-panel"
-          $toggleStatus={toggleStatus}
+          $toggleStatus={showHistogram}
         >
           <HeaderSection
             alignHeader={alignHeader}
             id={uniqueQueryId}
             inspectTitle={inspectTitle}
-            outerDirection="row"
+            outerDirection="column"
             title={titleText}
             titleSize={titleSize}
-            toggleStatus={toggleStatus}
-            toggleQuery={toggleQuery}
-            showInspectButton={chartOptionsContextMenu == null}
+            toggleStatus={showHistogram}
+            toggleQuery={hideQueryToggle ? undefined : toggleQuery}
+            showInspectButton={isChartEmbeddablesEnabled ? false : chartOptionsContextMenu == null}
             subtitle={!isInitialLoading && showTotalAlertsCount && totalAlerts}
             isInspectDisabled={isInspectDisabled}
-            hideSubtitle
           >
             <EuiFlexGroup alignItems="flexStart" data-test-subj="panelFlexGroup" gutterSize="none">
               <EuiFlexItem grow={false}>
                 {showStackBy && (
                   <>
                     <StackByComboBox
-                      ref={comboboxRef}
                       data-test-subj="stackByComboBox"
-                      selected={selectedStackByOption}
+                      inputRef={setComboboxInputRef}
                       onSelect={onSelect}
                       prepend={stackByLabel}
-                      inputRef={setComboboxInputRef}
+                      ref={comboboxRef}
+                      selected={selectedStackByOption}
+                      useLensCompatibleFields={isChartEmbeddablesEnabled}
                       width={stackByWidth}
                     />
                     {showGroupByPlaceholder && (
@@ -376,11 +410,12 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
                           content={i18n.NOT_AVAILABLE_TOOLTIP}
                         >
                           <StackByComboBox
-                            isDisabled={true}
                             data-test-subj="stackByPlaceholder"
+                            isDisabled={true}
                             onSelect={noop}
                             prepend={GROUP_BY_TOP_LABEL}
                             selected=""
+                            useLensCompatibleFields={isChartEmbeddablesEnabled}
                             width={stackByWidth}
                           />
                         </EuiToolTip>
@@ -390,18 +425,31 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
                 )}
                 {headerChildren != null && headerChildren}
               </EuiFlexItem>
-              {chartOptionsContextMenu != null && (
+              {chartOptionsContextMenu != null && !isChartEmbeddablesEnabled && (
                 <OptionsFlexItem grow={false}>
                   {chartOptionsContextMenu(uniqueQueryId)}
                 </OptionsFlexItem>
               )}
-
               {linkButton}
             </EuiFlexGroup>
           </HeaderSection>
-
-          {toggleStatus ? (
-            isInitialLoading ? (
+          {showHistogram ? (
+            isChartEmbeddablesEnabled ? (
+              <VisualizationEmbeddable
+                data-test-subj="embeddable-matrix-histogram"
+                extraActions={extraActions}
+                extraOptions={{
+                  filters,
+                }}
+                getLensAttributes={getLensAttributes}
+                height={chartHeight ?? CHART_HEIGHT}
+                id={visualizationId}
+                inspectTitle={inspectTitle ?? title}
+                scopeId={SourcererScopeName.detections}
+                stackByField={selectedStackByOption}
+                timerange={timerange}
+              />
+            ) : isInitialLoading ? (
               <MatrixLoader />
             ) : (
               <AlertsHistogram

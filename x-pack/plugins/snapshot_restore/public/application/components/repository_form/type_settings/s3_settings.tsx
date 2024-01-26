@@ -23,6 +23,7 @@ import { ChunkSizeField, MaxSnapshotsField, MaxRestoreField } from './common';
 
 interface Props {
   repository: S3Repository;
+  isManagedRepository?: boolean;
   updateRepositorySettings: (
     updatedSettings: Partial<Repository['settings']>,
     replaceSettings?: boolean
@@ -32,6 +33,7 @@ interface Props {
 
 export const S3Settings: React.FunctionComponent<Props> = ({
   repository,
+  isManagedRepository,
   updateRepositorySettings,
   settingErrors,
 }) => {
@@ -71,7 +73,13 @@ export const S3Settings: React.FunctionComponent<Props> = ({
     });
   };
 
-  const storageClassOptions = ['standard', 'reduced_redundancy', 'standard_ia'].map((option) => ({
+  const storageClassOptions = [
+    'standard',
+    'reduced_redundancy',
+    'standard_ia',
+    'intelligent_tiering',
+    'onezone_ia',
+  ].map((option) => ({
     value: option,
     text: option,
   }));
@@ -118,6 +126,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
               });
             }}
             data-test-subj="clientInput"
+            disabled={isManagedRepository}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -162,6 +171,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
               });
             }}
             data-test-subj="bucketInput"
+            disabled={isManagedRepository}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -206,6 +216,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
               });
             }}
             data-test-subj="basePathInput"
+            disabled={isManagedRepository}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>

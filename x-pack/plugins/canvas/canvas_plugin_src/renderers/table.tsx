@@ -9,8 +9,8 @@ import ReactDOM from 'react-dom';
 import React from 'react';
 import { CoreTheme } from '@kbn/core/public';
 import { Observable } from 'rxjs';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { defaultTheme$ } from '@kbn/presentation-util-plugin/common/lib';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
 import { StartInitializer } from '../plugin';
 import { Datatable as DatatableComponent } from '../../public/components/datatable';
 import { RendererStrings } from '../../i18n';
@@ -35,7 +35,7 @@ export const getTableRenderer =
     render(domNode, config, handlers) {
       const { datatable, paginate, perPage, font = { spec: {} }, showHeader } = config;
       ReactDOM.render(
-        <KibanaThemeProvider theme$={theme$}>
+        <KibanaThemeProvider theme={{ theme$ }}>
           <div style={{ ...(font.spec as React.CSSProperties), height: '100%' }}>
             <DatatableComponent
               datatable={datatable}

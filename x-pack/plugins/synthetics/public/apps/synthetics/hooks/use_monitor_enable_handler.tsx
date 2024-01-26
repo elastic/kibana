@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FETCH_STATUS } from '@kbn/observability-plugin/public';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { ConfigKey } from '../components/monitors_page/overview/types';
@@ -18,18 +18,18 @@ export interface EnableStateMonitorLabels {
 }
 
 export function useMonitorEnableHandler({
-  id,
+  configId,
   reloadPage,
   labels,
 }: {
-  id: string;
+  configId: string;
   isEnabled: boolean;
   reloadPage?: () => void;
   labels: EnableStateMonitorLabels;
 }) {
   const dispatch = useDispatch();
   const upsertStatuses = useSelector(selectMonitorUpsertStatuses);
-  const status: FETCH_STATUS | undefined = upsertStatuses[id]?.status;
+  const status: FETCH_STATUS | undefined = upsertStatuses[configId]?.status;
   const [nextEnabled, setNextEnabled] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -42,7 +42,7 @@ export function useMonitorEnableHandler({
     (enabled: boolean) => {
       dispatch(
         fetchUpsertMonitorAction({
-          id,
+          configId,
           monitor: { [ConfigKey.ENABLED]: enabled },
           success: {
             message: enabled ? labels.enabledSuccessLabel : labels.disabledSuccessLabel,
@@ -63,7 +63,7 @@ export function useMonitorEnableHandler({
     },
     [
       dispatch,
-      id,
+      configId,
       labels.disabledSuccessLabel,
       labels.enabledSuccessLabel,
       labels.failureLabel,

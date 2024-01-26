@@ -12,4 +12,12 @@
 
 .actAccordionActionForm__button {
   padding: $euiSizeM;
+  padding-left: $euiSizeL;
+}
+
+.actAccordionActionForm .euiAccordion__arrow {
+  transform: translateX($euiSizeM) rotate(0deg) !important;
+}
+.actAccordionActionForm .euiAccordion__arrow[aria-expanded='true'] {
+  transform: translateX($euiSizeM) rotate(90deg) !important;
 }

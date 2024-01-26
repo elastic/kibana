@@ -7,12 +7,12 @@
  */
 
 import type { LoggerContextConfigInput } from '@kbn/core-logging-server';
-import * as kbnTestServer from '../../../test_helpers/kbn_server';
+import { createRoot as createkbnTestServerRoot } from '@kbn/core-test-helpers-kbn-server';
 import { InternalCoreSetup } from '@kbn/core-lifecycle-server-internal';
 import { Subject } from 'rxjs';
 
 function createRoot() {
-  return kbnTestServer.createRoot({
+  return createkbnTestServerRoot({
     logging: {
       appenders: {
         'test-console': {
@@ -149,7 +149,7 @@ describe('logging service', () => {
 
     beforeAll(async () => {
       mockConsoleLog = jest.spyOn(global.console, 'log');
-      root = kbnTestServer.createRoot();
+      root = createRoot();
 
       await root.preboot();
       setup = await root.setup();

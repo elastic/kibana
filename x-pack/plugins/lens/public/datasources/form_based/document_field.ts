@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DOCUMENT_FIELD_NAME } from '../../../common';
+import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
 import type { IndexPatternField } from '../../types';
 
 const customLabel = i18n.translate('xpack.lens.indexPattern.records', {

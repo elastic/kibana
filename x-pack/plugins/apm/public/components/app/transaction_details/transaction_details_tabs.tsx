@@ -9,11 +9,18 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 import { omit } from 'lodash';
 import { useHistory } from 'react-router-dom';
-import { EuiPanel, EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiSpacer,
+  EuiTabs,
+  EuiTab,
+  EuiFlexItem,
+  EuiFlexGroup,
+} from '@elastic/eui';
 
 import { XYBrushEvent } from '@elastic/charts';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
-import { useApmParams } from '../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import {
   TraceSamplesFetchResult,
   useTransactionTraceSamplesFetcher,
@@ -46,7 +53,10 @@ const tabs = [
 ];
 
 export function TransactionDetailsTabs() {
-  const { query } = useApmParams('/services/{serviceName}/transactions/view');
+  const { query } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view'
+  );
 
   const isCriticalPathFeatureEnabled = useCriticalPathFeatureEnabledSetting();
 
@@ -130,16 +140,20 @@ export function TransactionDetailsTabs() {
       </EuiTabs>
       <EuiSpacer size="m" />
       <EuiPanel hasBorder={true}>
-        <TabContent
-          {...{
-            clearChartSelection,
-            onFilter,
-            sampleRangeFrom,
-            sampleRangeTo,
-            selectSampleFromChartSelection,
-            traceSamplesFetchResult,
-          }}
-        />
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <TabContent
+              {...{
+                clearChartSelection,
+                onFilter,
+                sampleRangeFrom,
+                sampleRangeTo,
+                selectSampleFromChartSelection,
+                traceSamplesFetchResult,
+              }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPanel>
     </>
   );

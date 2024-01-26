@@ -1,9 +1,7 @@
 {
-  "extends": "../../tsconfig.bazel.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
+    "outDir": "target/types",
     "types": [
       "node",
     ]
@@ -13,6 +11,11 @@
     "**/*.js",
   ],
   "exclude": [
+    "src/entry.js",
     "**/*.config.js",
+    "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/repo-info",
   ]
 }

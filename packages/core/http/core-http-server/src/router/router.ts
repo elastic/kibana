@@ -8,6 +8,7 @@
 
 import type { Request, ResponseObject, ResponseToolkit } from '@hapi/hapi';
 import type Boom from '@hapi/boom';
+import type { VersionedRouter } from '../versioning';
 import type { RouteConfig, RouteMethod } from './route';
 import type { RequestHandler, RequestHandlerWrapper } from './request_handler';
 import type { RequestHandlerContextBase } from './request_handler_context';
@@ -42,6 +43,8 @@ export interface IRouter<Context extends RequestHandlerContextBase = RequestHand
    * Register a route handler for `GET` request.
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
+   *
+   * @track-adoption
    */
   get: RouteRegistrar<'get', Context>;
 
@@ -49,6 +52,8 @@ export interface IRouter<Context extends RequestHandlerContextBase = RequestHand
    * Register a route handler for `POST` request.
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
+   *
+   * @track-adoption
    */
   post: RouteRegistrar<'post', Context>;
 
@@ -56,6 +61,8 @@ export interface IRouter<Context extends RequestHandlerContextBase = RequestHand
    * Register a route handler for `PUT` request.
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
+   *
+   * @track-adoption
    */
   put: RouteRegistrar<'put', Context>;
 
@@ -63,6 +70,8 @@ export interface IRouter<Context extends RequestHandlerContextBase = RequestHand
    * Register a route handler for `PATCH` request.
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
+   *
+   * @track-adoption
    */
   patch: RouteRegistrar<'patch', Context>;
 
@@ -70,6 +79,8 @@ export interface IRouter<Context extends RequestHandlerContextBase = RequestHand
    * Register a route handler for `DELETE` request.
    * @param route {@link RouteConfig} - a route configuration.
    * @param handler {@link RequestHandler} - a function to call to respond to an incoming request
+   *
+   * @track-adoption
    */
   delete: RouteRegistrar<'delete', Context>;
 
@@ -85,6 +96,26 @@ export interface IRouter<Context extends RequestHandlerContextBase = RequestHand
    * @internal
    */
   getRoutes: () => RouterRoute[];
+
+  /**
+   * An instance very similar to {@link IRouter} that can be used for versioning HTTP routes
+   * following the Elastic versioning specification.
+   *
+   * @example
+   * const router = core.http.createRouter();
+   * router.versioned.get({ path: '/api/my-path', access: 'public' }).addVersion(
+   *   {
+   *     version: '1',
+   *     validate: false,
+   *   },
+   *   async (ctx, req, res) => {
+   *     return res.ok();
+   *   }
+   * );
+   *
+   * @experimental
+   */
+  versioned: VersionedRouter<Context>;
 }
 
 /** @public */

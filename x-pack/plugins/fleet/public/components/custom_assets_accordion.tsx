@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import type { FunctionComponent } from 'react';
 import {
   EuiAccordion,
@@ -19,7 +19,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import { AssetTitleMap } from '../applications/integrations/sections/epm/constants';
 import { useStartServices } from '../hooks';
@@ -31,11 +31,13 @@ export interface CustomAssetsAccordionProps {
     description: string;
   }>;
   initialIsOpen?: boolean;
+  title?: string;
 }
 
 export const CustomAssetsAccordion: FunctionComponent<CustomAssetsAccordionProps> = ({
   views,
   initialIsOpen = false,
+  title,
 }) => {
   const { application } = useStartServices();
 
@@ -46,7 +48,7 @@ export const CustomAssetsAccordion: FunctionComponent<CustomAssetsAccordionProps
         <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiText size="m">
-              <h3>{AssetTitleMap.view}</h3>
+              <h3>{title ?? AssetTitleMap.view}</h3>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -62,11 +64,15 @@ export const CustomAssetsAccordion: FunctionComponent<CustomAssetsAccordionProps
         <EuiSpacer size="m" />
         <EuiSplitPanel.Outer hasBorder hasShadow={false}>
           {views.map((view, index) => (
-            <>
+            <Fragment key={index}>
               <EuiSplitPanel.Inner grow={false} key={index}>
                 <EuiText size="m">
                   <p>
-                    <RedirectAppLinks application={application}>
+                    <RedirectAppLinks
+                      coreStart={{
+                        application,
+                      }}
+                    >
                       <EuiLink href={view.url}>{view.name}</EuiLink>
                     </RedirectAppLinks>
                   </p>
@@ -78,7 +84,7 @@ export const CustomAssetsAccordion: FunctionComponent<CustomAssetsAccordionProps
                 </EuiText>
               </EuiSplitPanel.Inner>
               {index + 1 < views.length && <EuiHorizontalRule margin="none" />}
-            </>
+            </Fragment>
           ))}
         </EuiSplitPanel.Outer>
       </>

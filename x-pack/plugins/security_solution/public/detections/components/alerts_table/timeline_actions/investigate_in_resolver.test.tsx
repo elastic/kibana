@@ -5,27 +5,41 @@
  * 2.0.
  */
 
-import type { Ecs } from '../../../../../common/ecs';
-import { isInvestigateInResolverActionEnabled } from './investigate_in_resolver';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { useIsInvestigateInResolverActionEnabled } from './investigate_in_resolver';
+import { renderHook } from '@testing-library/react-hooks';
+import { TestProviders } from '../../../../common/mock';
 
 describe('InvestigateInResolverAction', () => {
-  describe('isInvestigateInResolverActionEnabled', () => {
+  describe('useIsInvestigateInResolverActionEnabled', () => {
     it('returns false if agent.type does not equal endpoint', () => {
       const data: Ecs = { _id: '1', agent: { type: ['blah'] } };
 
-      expect(isInvestigateInResolverActionEnabled(data)).toBeFalsy();
+      const { result } = renderHook(() => useIsInvestigateInResolverActionEnabled(data), {
+        wrapper: TestProviders,
+      });
+
+      expect(result.current).toBeFalsy();
     });
 
     it('returns false if agent.type does not have endpoint in first array index', () => {
       const data: Ecs = { _id: '1', agent: { type: ['blah', 'endpoint'] } };
 
-      expect(isInvestigateInResolverActionEnabled(data)).toBeFalsy();
+      const { result } = renderHook(() => useIsInvestigateInResolverActionEnabled(data), {
+        wrapper: TestProviders,
+      });
+
+      expect(result.current).toBeFalsy();
     });
 
     it('returns false if process.entity_id is not defined', () => {
       const data: Ecs = { _id: '1', agent: { type: ['endpoint'] } };
 
-      expect(isInvestigateInResolverActionEnabled(data)).toBeFalsy();
+      const { result } = renderHook(() => useIsInvestigateInResolverActionEnabled(data), {
+        wrapper: TestProviders,
+      });
+
+      expect(result.current).toBeFalsy();
     });
 
     it('returns true if agent.type has endpoint in first array index', () => {
@@ -35,7 +49,11 @@ describe('InvestigateInResolverAction', () => {
         process: { entity_id: ['5'] },
       };
 
-      expect(isInvestigateInResolverActionEnabled(data)).toBeTruthy();
+      const { result } = renderHook(() => useIsInvestigateInResolverActionEnabled(data), {
+        wrapper: TestProviders,
+      });
+
+      expect(result.current).toBeTruthy();
     });
 
     it('returns false if multiple entity_ids', () => {
@@ -45,7 +63,11 @@ describe('InvestigateInResolverAction', () => {
         process: { entity_id: ['5', '10'] },
       };
 
-      expect(isInvestigateInResolverActionEnabled(data)).toBeFalsy();
+      const { result } = renderHook(() => useIsInvestigateInResolverActionEnabled(data), {
+        wrapper: TestProviders,
+      });
+
+      expect(result.current).toBeFalsy();
     });
 
     it('returns false if entity_id is an empty string', () => {
@@ -55,7 +77,41 @@ describe('InvestigateInResolverAction', () => {
         process: { entity_id: [''] },
       };
 
-      expect(isInvestigateInResolverActionEnabled(data)).toBeFalsy();
+      const { result } = renderHook(() => useIsInvestigateInResolverActionEnabled(data), {
+        wrapper: TestProviders,
+      });
+
+      expect(result.current).toBeFalsy();
+    });
+
+    it('returns true for process event from sysmon via filebeat', () => {
+      const data: Ecs = {
+        _id: '1',
+        agent: { type: ['filebeat'] },
+        event: { dataset: ['windows.sysmon_operational'] },
+        process: { entity_id: ['always_unique'] },
+      };
+
+      const { result } = renderHook(() => useIsInvestigateInResolverActionEnabled(data), {
+        wrapper: TestProviders,
+      });
+
+      expect(result.current).toBeTruthy();
+    });
+
+    it('returns false for process event from filebeat but not from sysmon', () => {
+      const data: Ecs = {
+        _id: '1',
+        agent: { type: ['filebeat'] },
+        event: { dataset: ['windows.not_sysmon'] },
+        process: { entity_id: ['always_unique'] },
+      };
+
+      const { result } = renderHook(() => useIsInvestigateInResolverActionEnabled(data), {
+        wrapper: TestProviders,
+      });
+
+      expect(result.current).toBeFalsy();
     });
   });
 });

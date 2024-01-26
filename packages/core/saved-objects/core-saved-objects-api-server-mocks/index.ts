@@ -10,4 +10,5 @@ export {
   savedObjectsClientMock,
   savedObjectsRepositoryMock,
   savedObjectsClientProviderMock,
+  savedObjectsExtensionsMock,
 } from './src';

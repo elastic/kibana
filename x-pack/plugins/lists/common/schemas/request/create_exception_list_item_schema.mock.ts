@@ -11,6 +11,7 @@ import {
   COMMENTS,
   DESCRIPTION,
   ENTRIES,
+  EXPIRE_TIME,
   ITEM_ID,
   ITEM_TYPE,
   LIST_ID,
@@ -55,6 +56,21 @@ export const getCreateExceptionListItemMinimalSchemaMockWithoutId =
   (): CreateExceptionListItemSchema => ({
     description: DESCRIPTION,
     entries: ENTRIES,
+    list_id: LIST_ID,
+    name: NAME,
+    os_types: OS_TYPES,
+    type: ITEM_TYPE,
+  });
+
+/**
+ * Useful for testing newer exception list item versions, as the previous
+ * versions can be used to test migration cases
+ */
+export const getCreateExceptionListItemNewerVersionSchemaMock =
+  (): CreateExceptionListItemSchema => ({
+    description: DESCRIPTION,
+    entries: ENTRIES,
+    expire_time: EXPIRE_TIME,
     list_id: LIST_ID,
     name: NAME,
     os_types: OS_TYPES,

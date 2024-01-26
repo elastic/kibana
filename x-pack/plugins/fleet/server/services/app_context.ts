@@ -7,14 +7,16 @@
 
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import { kibanaPackageJson } from '@kbn/utils';
-import type { KibanaRequest } from '@kbn/core/server';
+import { kibanaPackageJson } from '@kbn/repo-info';
 import type {
   ElasticsearchClient,
   SavedObjectsServiceStart,
   HttpServiceSetup,
   Logger,
+  KibanaRequest,
 } from '@kbn/core/server';
+
+import { CoreKibanaRequest } from '@kbn/core/server';
 
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type {
@@ -25,23 +27,28 @@ import type {
 import type { SecurityPluginStart, SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
+
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
 import type { FleetConfigType } from '../../common/types';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
 import type {
   ExternalCallback,
   ExternalCallbacksStorage,
-  PostPackagePolicyCreateCallback,
   PostPackagePolicyDeleteCallback,
+  PostPackagePolicyCreateCallback,
+  PostPackagePolicyPostDeleteCallback,
   PostPackagePolicyPostCreateCallback,
   PutPackagePolicyUpdateCallback,
 } from '../types';
 import type { FleetAppContext } from '../plugin';
 import type { TelemetryEventsSender } from '../telemetry/sender';
+import type { MessageSigningServiceInterface } from '..';
 
 import type { BulkActionsResolver } from './agents';
+import type { UninstallTokenServiceInterface } from './security/uninstall_token_service';
 
 class AppContextService {
   private encryptedSavedObjects: EncryptedSavedObjectsClient | undefined;
@@ -57,6 +64,7 @@ class AppContextService {
   private isProductionMode: FleetAppContext['isProductionMode'] = false;
   private kibanaVersion: FleetAppContext['kibanaVersion'] = kibanaPackageJson.version;
   private kibanaBranch: FleetAppContext['kibanaBranch'] = kibanaPackageJson.branch;
+  private kibanaInstanceId: FleetAppContext['kibanaInstanceId'] = '';
   private cloud?: CloudSetup;
   private logger: Logger | undefined;
   private httpSetup?: HttpServiceSetup;
@@ -64,6 +72,8 @@ class AppContextService {
   private telemetryEventsSender: TelemetryEventsSender | undefined;
   private savedObjectsTagging: SavedObjectTaggingStart | undefined;
   private bulkActionsResolver: BulkActionsResolver | undefined;
+  private messageSigningService: MessageSigningServiceInterface | undefined;
+  private uninstallTokenService: UninstallTokenServiceInterface | undefined;
 
   public start(appContext: FleetAppContext) {
     this.data = appContext.data;
@@ -79,10 +89,13 @@ class AppContextService {
     this.logger = appContext.logger;
     this.kibanaVersion = appContext.kibanaVersion;
     this.kibanaBranch = appContext.kibanaBranch;
+    this.kibanaInstanceId = appContext.kibanaInstanceId;
     this.httpSetup = appContext.httpSetup;
     this.telemetryEventsSender = appContext.telemetryEventsSender;
     this.savedObjectsTagging = appContext.savedObjectsTagging;
     this.bulkActionsResolver = appContext.bulkActionsResolver;
+    this.messageSigningService = appContext.messageSigningService;
+    this.uninstallTokenService = appContext.uninstallTokenService;
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
@@ -112,6 +125,10 @@ class AppContextService {
 
   public getSecurity() {
     return this.securityStart!;
+  }
+
+  public getSecuritySetup() {
+    return this.securitySetup!;
   }
 
   public getSecurityLicense() {
@@ -157,11 +174,28 @@ class AppContextService {
     }
     return this.savedObjectsTagging;
   }
+  public getInternalUserSOClientForSpaceId(spaceId?: string) {
+    const request = CoreKibanaRequest.from({
+      headers: {},
+      path: '/',
+      route: { settings: {} },
+      url: { href: '', hash: '' } as URL,
+      raw: { req: { url: '/' } } as any,
+    });
+    if (this.httpSetup && spaceId && spaceId !== DEFAULT_SPACE_ID) {
+      this.httpSetup?.basePath.set(request, `/s/${spaceId}`);
+    }
+
+    // soClient as kibana internal users, be careful on how you use it, security is not enabled
+    return appContextService.getSavedObjects().getScopedClient(request, {
+      excludedExtensions: [SECURITY_EXTENSION_ID],
+    });
+  }
 
   public getInternalUserSOClient(request: KibanaRequest) {
     // soClient as kibana internal users, be careful on how you use it, security is not enabled
     return appContextService.getSavedObjects().getScopedClient(request, {
-      excludedWrappers: ['security'],
+      excludedExtensions: [SECURITY_EXTENSION_ID],
     });
   }
 
@@ -196,6 +230,10 @@ class AppContextService {
     return this.kibanaBranch;
   }
 
+  public getKibanaInstanceId() {
+    return this.kibanaInstanceId;
+  }
+
   public addExternalCallback(type: ExternalCallback[0], callback: ExternalCallback[1]) {
     if (!this.externalCallbacks.has(type)) {
       this.externalCallbacks.set(type, new Set());
@@ -209,8 +247,10 @@ class AppContextService {
     | Set<
         T extends 'packagePolicyCreate'
           ? PostPackagePolicyCreateCallback
-          : T extends 'postPackagePolicyDelete'
+          : T extends 'packagePolicyDelete'
           ? PostPackagePolicyDeleteCallback
+          : T extends 'packagePolicyPostDelete'
+          ? PostPackagePolicyPostDeleteCallback
           : T extends 'packagePolicyPostCreate'
           ? PostPackagePolicyPostCreateCallback
           : PutPackagePolicyUpdateCallback
@@ -220,8 +260,10 @@ class AppContextService {
       return this.externalCallbacks.get(type) as Set<
         T extends 'packagePolicyCreate'
           ? PostPackagePolicyCreateCallback
-          : T extends 'postPackagePolicyDelete'
+          : T extends 'packagePolicyDelete'
           ? PostPackagePolicyDeleteCallback
+          : T extends 'packagePolicyPostDelete'
+          ? PostPackagePolicyPostDeleteCallback
           : T extends 'packagePolicyPostCreate'
           ? PostPackagePolicyPostCreateCallback
           : PutPackagePolicyUpdateCallback
@@ -235,6 +277,14 @@ class AppContextService {
 
   public getBulkActionsResolver() {
     return this.bulkActionsResolver;
+  }
+
+  public getMessageSigningService() {
+    return this.messageSigningService;
+  }
+
+  public getUninstallTokenService() {
+    return this.uninstallTokenService;
   }
 }
 

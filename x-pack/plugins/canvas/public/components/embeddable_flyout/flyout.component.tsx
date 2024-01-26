@@ -9,7 +9,7 @@ import React, { FC, useCallback } from 'react';
 import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { SavedObjectFinderUi, SavedObjectMetaData } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectFinder, SavedObjectMetaData } from '@kbn/saved-objects-finder-plugin/public';
 import { useEmbeddablesService, usePlatformService } from '../../services';
 
 const strings = {
@@ -38,7 +38,7 @@ export const AddEmbeddableFlyout: FC<Props> = ({
   const embeddablesService = useEmbeddablesService();
   const platformService = usePlatformService();
   const { getEmbeddableFactories } = embeddablesService;
-  const { getSavedObjects, getUISettings } = platformService;
+  const { getContentManagement, getUISettings } = platformService;
 
   const onAddPanel = useCallback(
     (id: string, savedObjectType: string) => {
@@ -61,7 +61,11 @@ export const AddEmbeddableFlyout: FC<Props> = ({
   const embeddableFactories = getEmbeddableFactories();
 
   const availableSavedObjects = Array.from(embeddableFactories)
-    .filter((factory) => isByValueEnabled || availableEmbeddables.includes(factory.type))
+    .filter(
+      (factory) =>
+        factory.type !== 'links' && // Links panels only exist on Dashboards
+        (isByValueEnabled || availableEmbeddables.includes(factory.type))
+    )
     .map((factory) => factory.savedObjectMetaData)
     .filter<SavedObjectMetaData<{}>>(function (
       maybeSavedObjectMetaData
@@ -77,13 +81,15 @@ export const AddEmbeddableFlyout: FC<Props> = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <SavedObjectFinderUi
+        <SavedObjectFinder
           onChoose={onAddPanel}
           savedObjectMetaData={availableSavedObjects}
           showFilter={true}
           noItemsMessage={strings.getNoItemsText()}
-          savedObjects={getSavedObjects()}
-          uiSettings={getUISettings()}
+          services={{
+            contentClient: getContentManagement().client,
+            uiSettings: getUISettings(),
+          }}
         />
       </EuiFlyoutBody>
     </EuiFlyout>

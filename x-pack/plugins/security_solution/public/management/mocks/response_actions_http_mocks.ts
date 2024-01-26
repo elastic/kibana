@@ -8,29 +8,35 @@
 import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
 import {
+  ACTION_AGENT_FILE_INFO_ROUTE,
   ACTION_DETAILS_ROUTE,
   ACTION_STATUS_ROUTE,
+  BASE_ENDPOINT_ACTION_ROUTE,
+  EXECUTE_ROUTE,
+  GET_FILE_ROUTE,
   GET_PROCESSES_ROUTE,
-  ENDPOINTS_ACTION_LIST_ROUTE,
-  ISOLATE_HOST_ROUTE,
-  UNISOLATE_HOST_ROUTE,
+  ISOLATE_HOST_ROUTE_V2,
   KILL_PROCESS_ROUTE,
   SUSPEND_PROCESS_ROUTE,
-  GET_FILE_ROUTE,
-  ACTION_AGENT_FILE_INFO_ROUTE,
+  UNISOLATE_HOST_ROUTE_V2,
+  UPLOAD_ROUTE,
 } from '../../../common/endpoint/constants';
 import type { ResponseProvidersInterface } from '../../common/mock/endpoint/http_handler_mock_factory';
 import { httpHandlerMockFactory } from '../../common/mock/endpoint/http_handler_mock_factory';
 import type {
-  ActionDetailsApiResponse,
-  ActionListApiResponse,
-  ResponseActionApiResponse,
-  PendingActionsResponse,
   ActionDetails,
+  ActionDetailsApiResponse,
+  ActionFileInfoApiResponse,
+  ActionListApiResponse,
   GetProcessesActionOutputContent,
+  PendingActionsResponse,
+  ResponseActionApiResponse,
+  ResponseActionExecuteOutputContent,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
-  ActionFileInfoApiResponse,
+  ResponseActionsExecuteParameters,
+  ResponseActionUploadOutputContent,
+  ResponseActionUploadParameters,
 } from '../../../common/endpoint/types';
 
 export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
@@ -53,12 +59,19 @@ export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
   getFile: () => ActionDetailsApiResponse<ResponseActionGetFileOutputContent>;
 
   fileInfo: () => ActionFileInfoApiResponse;
+
+  execute: () => ActionDetailsApiResponse<ResponseActionExecuteOutputContent>;
+
+  upload: () => ActionDetailsApiResponse<
+    ResponseActionUploadOutputContent,
+    ResponseActionUploadParameters
+  >;
 }>;
 
 export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHttpMocksInterface>([
   {
     id: 'isolateHost',
-    path: ISOLATE_HOST_ROUTE,
+    path: ISOLATE_HOST_ROUTE_V2,
     method: 'post',
     handler: (): ResponseActionApiResponse => {
       return { action: '1-2-3', data: { id: '1-2-3' } as ResponseActionApiResponse['data'] };
@@ -66,7 +79,7 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
   },
   {
     id: 'releaseHost',
-    path: UNISOLATE_HOST_ROUTE,
+    path: UNISOLATE_HOST_ROUTE_V2,
     method: 'post',
     handler: (): ResponseActionApiResponse => {
       return { action: '3-2-1', data: { id: '3-2-1' } as ResponseActionApiResponse['data'] };
@@ -107,12 +120,13 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
   },
   {
     id: 'actionList',
-    path: ENDPOINTS_ACTION_LIST_ROUTE,
+    path: BASE_ENDPOINT_ACTION_ROUTE,
     method: 'get',
     handler: (): ActionListApiResponse => {
       const response = new EndpointActionGenerator('seed').generateActionDetails();
 
       return {
+        agentTypes: ['endpoint'],
         elasticAgentIds: ['agent-a'],
         commands: ['isolate'],
         page: 0,
@@ -187,6 +201,8 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
       return {
         data: {
           created: '2022-10-10T14:57:30.682Z',
+          actionId: 'abc',
+          agentId: '123',
           id: '123',
           mimeType: 'text/plain',
           name: 'test.txt',
@@ -194,6 +210,43 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
           status: 'READY',
         },
       };
+    },
+  },
+  {
+    id: 'execute',
+    path: EXECUTE_ROUTE,
+    method: 'post',
+    handler: (): ActionDetailsApiResponse<ResponseActionExecuteOutputContent> => {
+      const generator = new EndpointActionGenerator('seed');
+      const response = generator.generateActionDetails<
+        ResponseActionExecuteOutputContent,
+        ResponseActionsExecuteParameters
+      >({
+        outputs: {
+          'a.b.c': generator.generateExecuteActionResponseOutput(),
+        },
+      });
+
+      return { data: response };
+    },
+  },
+  {
+    id: 'upload',
+    path: UPLOAD_ROUTE,
+    method: 'post',
+    handler: (): ActionDetailsApiResponse<
+      ResponseActionUploadOutputContent,
+      ResponseActionUploadParameters
+    > => {
+      const generator = new EndpointActionGenerator('seed');
+      const response = generator.generateActionDetails<
+        ResponseActionUploadOutputContent,
+        ResponseActionUploadParameters
+      >({
+        command: 'upload',
+      });
+
+      return { data: response };
     },
   },
 ]);

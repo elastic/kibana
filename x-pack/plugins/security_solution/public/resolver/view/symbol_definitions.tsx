@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import React, { memo } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { useDarkMode } from '@kbn/kibana-react-plugin/public';
 import { useSymbolIDs } from './use_symbol_ids';
 import { usePaintServerIDs } from './use_paint_server_ids';
 
@@ -66,8 +64,9 @@ const hoveredProcessBackgroundTitle = i18n.translate(
  * PaintServers: Where color palettes, gradients, patterns and other similar concerns
  * are exposed to the component
  */
-const PaintServers = memo(({ isDarkMode }: { isDarkMode: boolean }) => {
-  const paintServerIDs = usePaintServerIDs();
+// eslint-disable-next-line react/display-name
+const PaintServers = memo(({ id, isDarkMode }: { id: string; isDarkMode: boolean }) => {
+  const paintServerIDs = usePaintServerIDs({ id });
   return (
     <>
       <linearGradient
@@ -165,9 +164,10 @@ const PaintServers = memo(({ isDarkMode }: { isDarkMode: boolean }) => {
 /**
  * Defs entries that define shapes, masks and other spatial elements
  */
-const SymbolsAndShapes = memo(({ isDarkMode }: { isDarkMode: boolean }) => {
-  const symbolIDs = useSymbolIDs();
-  const paintServerIDs = usePaintServerIDs();
+// eslint-disable-next-line react/display-name
+const SymbolsAndShapes = memo(({ id, isDarkMode }: { id: string; isDarkMode: boolean }) => {
+  const symbolIDs = useSymbolIDs({ id });
+  const paintServerIDs = usePaintServerIDs({ id });
   return (
     <>
       <symbol
@@ -433,13 +433,14 @@ const SymbolsAndShapes = memo(({ isDarkMode }: { isDarkMode: boolean }) => {
  *  2. Separation of concerns between creative assets and more functional areas of the app
  *  3. `<use>` elements can be handled by compositor (faster)
  */
-export const SymbolDefinitions = memo(() => {
-  const isDarkMode = useUiSetting<boolean>('theme:darkMode');
+// eslint-disable-next-line react/display-name
+export const SymbolDefinitions = memo(({ id }: { id: string }) => {
+  const isDarkMode = useDarkMode();
   return (
     <HiddenSVG>
       <defs>
-        <PaintServers isDarkMode={isDarkMode} />
-        <SymbolsAndShapes isDarkMode={isDarkMode} />
+        <PaintServers id={id} isDarkMode={isDarkMode} />
+        <SymbolsAndShapes id={id} isDarkMode={isDarkMode} />
       </defs>
     </HiddenSVG>
   );

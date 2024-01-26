@@ -12,7 +12,7 @@ import { Role } from '../../../../cases_api_integration/common/lib/authenticatio
  */
 
 export const secAllCasesOnlyDelete: Role = {
-  name: 'sec_all_cases_only_delete',
+  name: 'sec_all_cases_only_delete_api_int',
   privileges: {
     elasticsearch: {
       indices: [
@@ -36,8 +36,33 @@ export const secAllCasesOnlyDelete: Role = {
   },
 };
 
+export const secAllCasesOnlyReadDelete: Role = {
+  name: 'sec_all_cases_only_read_delete_api_int',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          siem: ['all'],
+          securitySolutionCases: ['read', 'cases_delete'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
 export const secAllCasesNoDelete: Role = {
-  name: 'sec_all_cases_no_delete',
+  name: 'sec_all_cases_no_delete_api_int',
   privileges: {
     elasticsearch: {
       indices: [
@@ -62,7 +87,7 @@ export const secAllCasesNoDelete: Role = {
 };
 
 export const secAll: Role = {
-  name: 'sec_all_role',
+  name: 'sec_all_role_api_int',
   privileges: {
     elasticsearch: {
       indices: [
@@ -86,8 +111,33 @@ export const secAll: Role = {
   },
 };
 
+export const secAllSpace1: Role = {
+  name: 'sec_all_role_space1_api_int',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          siem: ['all'],
+          securitySolutionCases: ['all'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['space1'],
+      },
+    ],
+  },
+};
+
 export const secAllCasesRead: Role = {
-  name: 'sec_all_cases_read_role',
+  name: 'sec_all_cases_read_role_api_int',
   privileges: {
     elasticsearch: {
       indices: [
@@ -112,7 +162,7 @@ export const secAllCasesRead: Role = {
 };
 
 export const secAllCasesNone: Role = {
-  name: 'sec_all_cases_none_role',
+  name: 'sec_all_cases_none_role_api_int',
   privileges: {
     elasticsearch: {
       indices: [
@@ -136,7 +186,7 @@ export const secAllCasesNone: Role = {
 };
 
 export const secReadCasesAll: Role = {
-  name: 'sec_read_cases_all_role',
+  name: 'sec_read_cases_all_role_api_int',
   privileges: {
     elasticsearch: {
       indices: [
@@ -161,7 +211,7 @@ export const secReadCasesAll: Role = {
 };
 
 export const secReadCasesRead: Role = {
-  name: 'sec_read_cases_read_role',
+  name: 'sec_read_cases_read_role_api_int',
   privileges: {
     elasticsearch: {
       indices: [
@@ -186,7 +236,7 @@ export const secReadCasesRead: Role = {
 };
 
 export const secRead: Role = {
-  name: 'sec_read_role',
+  name: 'sec_read_role_api_int',
   privileges: {
     elasticsearch: {
       indices: [
@@ -211,7 +261,7 @@ export const secRead: Role = {
 };
 
 export const secReadCasesNone: Role = {
-  name: 'sec_read_cases_none_role',
+  name: 'sec_read_cases_none_role_api_int',
   privileges: {
     elasticsearch: {
       indices: [
@@ -239,7 +289,7 @@ export const secReadCasesNone: Role = {
  */
 
 export const casesOnlyDelete: Role = {
-  name: 'cases_only_delete',
+  name: 'cases_only_delete_api_int',
   privileges: {
     elasticsearch: {
       indices: [
@@ -262,8 +312,32 @@ export const casesOnlyDelete: Role = {
   },
 };
 
+export const casesOnlyReadDelete: Role = {
+  name: 'cases_only_read_delete_api_int',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          generalCases: ['read', 'cases_delete'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
 export const casesNoDelete: Role = {
-  name: 'cases_no_delete',
+  name: 'cases_no_delete_api_int',
   privileges: {
     elasticsearch: {
       indices: [
@@ -287,7 +361,7 @@ export const casesNoDelete: Role = {
 };
 
 export const casesAll: Role = {
-  name: 'cases_all_role',
+  name: 'cases_all_role_api_int',
   privileges: {
     elasticsearch: {
       indices: [
@@ -311,7 +385,7 @@ export const casesAll: Role = {
 };
 
 export const casesRead: Role = {
-  name: 'cases_read_role',
+  name: 'cases_read_role_api_int',
   privileges: {
     elasticsearch: {
       indices: [
@@ -339,7 +413,7 @@ export const casesRead: Role = {
  */
 
 export const obsCasesOnlyDelete: Role = {
-  name: 'obs_cases_only_delete',
+  name: 'obs_cases_only_delete_api_int',
   privileges: {
     elasticsearch: {
       indices: [
@@ -362,8 +436,32 @@ export const obsCasesOnlyDelete: Role = {
   },
 };
 
+export const obsCasesOnlyReadDelete: Role = {
+  name: 'obs_cases_only_read_delete_api_int',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          observabilityCases: ['read', 'cases_delete'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
 export const obsCasesNoDelete: Role = {
-  name: 'obs_cases_no_delete',
+  name: 'obs_cases_no_delete_api_int',
   privileges: {
     elasticsearch: {
       indices: [
@@ -387,7 +485,7 @@ export const obsCasesNoDelete: Role = {
 };
 
 export const obsCasesAll: Role = {
-  name: 'obs_cases_all_role',
+  name: 'obs_cases_all_role_api_int',
   privileges: {
     elasticsearch: {
       indices: [
@@ -411,7 +509,7 @@ export const obsCasesAll: Role = {
 };
 
 export const obsCasesRead: Role = {
-  name: 'obs_cases_read_role',
+  name: 'obs_cases_read_role_api_int',
   privileges: {
     elasticsearch: {
       indices: [
@@ -436,8 +534,10 @@ export const obsCasesRead: Role = {
 
 export const roles = [
   secAllCasesOnlyDelete,
+  secAllCasesOnlyReadDelete,
   secAllCasesNoDelete,
   secAll,
+  secAllSpace1,
   secAllCasesRead,
   secAllCasesNone,
   secReadCasesAll,
@@ -445,10 +545,12 @@ export const roles = [
   secReadCasesNone,
   secRead,
   casesOnlyDelete,
+  casesOnlyReadDelete,
   casesNoDelete,
   casesAll,
   casesRead,
   obsCasesOnlyDelete,
+  obsCasesOnlyReadDelete,
   obsCasesNoDelete,
   obsCasesAll,
   obsCasesRead,

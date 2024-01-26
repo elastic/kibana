@@ -11,12 +11,13 @@ import type { AppLeaveHandler } from '@kbn/core-application-browser';
 import { useHistory } from 'react-router-dom';
 import { useShowTimelineForGivenPath } from '../../utils/timeline/use_show_timeline_for_path';
 import type { TimelineId } from '../../../../common/types';
-import { TimelineStatus, TimelineTabs } from '../../../../common/types';
+import { TimelineTabs } from '../../../../common/types';
+import { TimelineStatus } from '../../../../common/api/timeline';
 import { useKibana } from '../../lib/kibana';
 import { useDeepEqualSelector } from '../use_selector';
 import { APP_ID, APP_PATH } from '../../../../common/constants';
-import { getTimelineShowStatusByIdSelector } from '../../../timelines/components/flyout/selectors';
-import { timelineActions } from '../../../timelines/store/timeline';
+import { getTimelineShowStatusByIdSelector } from '../../../timelines/store/selectors';
+import { timelineActions } from '../../../timelines/store';
 import {
   UNSAVED_TIMELINE_SAVE_PROMPT,
   UNSAVED_TIMELINE_SAVE_PROMPT_TITLE,
@@ -30,14 +31,16 @@ export const useTimelineSavePrompt = (
   onAppLeave: (handler: AppLeaveHandler) => void
 ) => {
   const dispatch = useDispatch();
-  const { overlays, application } = useKibana().services;
+  const { overlays, application, http } = useKibana().services;
   const getIsTimelineVisible = useShowTimelineForGivenPath();
   const history = useHistory();
 
   const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
-  const { status: timelineStatus, updated } = useDeepEqualSelector((state) =>
-    getTimelineShowStatus(state, timelineId)
-  );
+  const {
+    status: timelineStatus,
+    updated,
+    changed,
+  } = useDeepEqualSelector((state) => getTimelineShowStatus(state, timelineId));
 
   const showSaveTimelineModal = useCallback(() => {
     dispatch(timelineActions.showTimeline({ id: timelineId, show: true }));
@@ -66,10 +69,12 @@ export const useTimelineSavePrompt = (
 
         if (confirmRes) {
           unblock();
-
-          application.navigateToUrl(location.pathname + location.hash + location.search, {
-            state: location.state,
-          });
+          application.navigateToUrl(
+            http.basePath.get() + location.pathname + location.hash + location.search,
+            {
+              state: location.state,
+            }
+          );
         } else {
           showSaveTimelineModal();
         }
@@ -77,8 +82,7 @@ export const useTimelineSavePrompt = (
 
       if (
         !getIsTimelineVisible(relativePath) &&
-        timelineStatus === TimelineStatus.draft &&
-        updated != null
+        (changed || (timelineStatus === TimelineStatus.draft && updated != null))
       ) {
         confirmSaveTimeline();
       } else {
@@ -92,12 +96,14 @@ export const useTimelineSavePrompt = (
     };
   }, [
     history,
+    http.basePath,
     application,
     overlays,
     showSaveTimelineModal,
     getIsTimelineVisible,
     timelineStatus,
     updated,
+    changed,
   ]);
 
   useEffect(() => {
@@ -105,8 +111,7 @@ export const useTimelineSavePrompt = (
       // Confirm when the user has made any changes to a timeline
       if (
         !(nextAppId ?? '').includes(APP_ID) &&
-        timelineStatus === TimelineStatus.draft &&
-        updated != null
+        (changed || (timelineStatus === TimelineStatus.draft && updated != null))
       ) {
         return actions.confirm(
           UNSAVED_TIMELINE_SAVE_PROMPT,

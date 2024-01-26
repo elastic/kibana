@@ -108,5 +108,5 @@ const DatasetWarningMarker: React.FC<{ warnings: QualityWarning[] }> = ({ warnin
       : []
   );
 
-  return <EuiIconTip content={warningDescriptions} type="alert" color="warning" />;
+  return <EuiIconTip content={warningDescriptions} type="warning" color="warning" />;
 };

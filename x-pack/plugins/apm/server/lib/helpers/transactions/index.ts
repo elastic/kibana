@@ -7,15 +7,20 @@
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SearchAggregatedTransactionSetting } from '../../../../common/aggregated_transactions';
 import {
   TRANSACTION_DURATION,
   TRANSACTION_DURATION_HISTOGRAM,
   TRANSACTION_ROOT,
   PARENT_ID,
-} from '../../../../common/elasticsearch_fieldnames';
+  METRICSET_INTERVAL,
+  METRICSET_NAME,
+  TRANSACTION_DURATION_SUMMARY,
+} from '../../../../common/es_fields/apm';
 import { APMConfig } from '../../..';
 import { APMEventClient } from '../create_es_client/create_apm_event_client';
+import { ApmDocumentType } from '../../../../common/document_type';
 
 export async function getHasTransactionsEvents({
   start,
@@ -26,7 +31,7 @@ export async function getHasTransactionsEvents({
   start?: number;
   end?: number;
   apmEventClient: APMEventClient;
-  kuery: string;
+  kuery?: string;
 }) {
   const response = await apmEventClient.search(
     'get_has_aggregated_transactions',
@@ -65,7 +70,7 @@ export async function getSearchTransactionsEvents({
   start?: number;
   end?: number;
   apmEventClient: APMEventClient;
-  kuery: string;
+  kuery?: string;
 }): Promise<boolean> {
   switch (config.searchAggregatedTransactions) {
     case SearchAggregatedTransactionSetting.always:
@@ -86,19 +91,62 @@ export async function getSearchTransactionsEvents({
   }
 }
 
-export function getDurationFieldForTransactions(
-  searchAggregatedTransactions: boolean
+export function isSummaryFieldSupportedByDocType(
+  typeOrSearchAgggregatedTransactions:
+    | ApmDocumentType.ServiceTransactionMetric
+    | ApmDocumentType.TransactionMetric
+    | ApmDocumentType.TransactionEvent
+    | boolean
 ) {
-  return searchAggregatedTransactions
-    ? TRANSACTION_DURATION_HISTOGRAM
-    : TRANSACTION_DURATION;
+  let type: ApmDocumentType;
+
+  if (typeOrSearchAgggregatedTransactions === true) {
+    type = ApmDocumentType.TransactionMetric;
+  } else if (typeOrSearchAgggregatedTransactions === false) {
+    type = ApmDocumentType.TransactionEvent;
+  } else {
+    type = typeOrSearchAgggregatedTransactions;
+  }
+
+  return (
+    type === ApmDocumentType.ServiceTransactionMetric ||
+    type === ApmDocumentType.TransactionMetric
+  );
+}
+export function getDurationFieldForTransactions(
+  typeOrSearchAgggregatedTransactions:
+    | ApmDocumentType.ServiceTransactionMetric
+    | ApmDocumentType.TransactionMetric
+    | ApmDocumentType.TransactionEvent
+    | boolean,
+  useDurationSummaryField?: boolean
+) {
+  if (isSummaryFieldSupportedByDocType(typeOrSearchAgggregatedTransactions)) {
+    if (useDurationSummaryField) {
+      return TRANSACTION_DURATION_SUMMARY;
+    }
+    return TRANSACTION_DURATION_HISTOGRAM;
+  }
+
+  return TRANSACTION_DURATION;
 }
 
-export function getDocumentTypeFilterForTransactions(
+// The function returns Document type filter for 1m Transaction Metrics
+export function getBackwardCompatibleDocumentTypeFilter(
   searchAggregatedTransactions: boolean
 ) {
   return searchAggregatedTransactions
-    ? [{ exists: { field: TRANSACTION_DURATION_HISTOGRAM } }]
+    ? [
+        {
+          bool: {
+            filter: [{ exists: { field: TRANSACTION_DURATION_HISTOGRAM } }],
+            must_not: [
+              { terms: { [METRICSET_INTERVAL]: ['10m', '60m'] } },
+              { term: { [METRICSET_NAME]: 'service_transaction' } },
+            ],
+          },
+        },
+      ]
     : [];
 }
 
@@ -124,4 +172,19 @@ export function isRootTransaction(searchAggregatedTransactions: boolean) {
           },
         },
       };
+}
+
+export function getDurationLegacyFilter(): QueryDslQueryContainer {
+  return {
+    bool: {
+      must: [
+        {
+          bool: {
+            filter: [{ exists: { field: TRANSACTION_DURATION_HISTOGRAM } }],
+            must_not: [{ exists: { field: TRANSACTION_DURATION_SUMMARY } }],
+          },
+        },
+      ],
+    },
+  };
 }

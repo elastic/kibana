@@ -30,7 +30,8 @@ export function getLensAttributeService(
   core: CoreStart,
   startDependencies: LensPluginStartDependencies
 ): LensAttributeService {
-  const savedObjectStore = new SavedObjectIndexStore(core.savedObjects.client);
+  const savedObjectStore = new SavedObjectIndexStore(startDependencies.contentManagement);
+
   return startDependencies.embeddable.getAttributeService<
     LensSavedObjectAttributes,
     LensByValueInput,
@@ -47,10 +48,8 @@ export function getLensAttributeService(
     },
     unwrapMethod: async (savedObjectId: string): Promise<LensUnwrapResult> => {
       const {
-        saved_object: savedObject,
-        outcome,
-        alias_target_id: aliasTargetId,
-        alias_purpose: aliasPurpose,
+        item: savedObject,
+        meta: { outcome, aliasTargetId, aliasPurpose },
       } = await savedObjectStore.load(savedObjectId);
       const { attributes, references, id } = savedObject;
       const document = {
@@ -68,14 +67,15 @@ export function getLensAttributeService(
       return {
         attributes: {
           ...document,
+          state: document.state as LensSavedObjectAttributes['state'],
         },
         metaInfo: {
           sharingSavedObjectProps,
+          managed: savedObject.managed,
         },
       };
     },
     checkForDuplicateTitle: (props: OnSaveProps) => {
-      const savedObjectsClient = core.savedObjects.client;
       const overlays = core.overlays;
       return checkForDuplicateTitle(
         {
@@ -87,7 +87,7 @@ export function getLensAttributeService(
         },
         props.onTitleDuplicate,
         {
-          savedObjectsClient,
+          client: savedObjectStore,
           overlays,
         }
       );

@@ -6,7 +6,7 @@
  */
 
 import { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
-import { TIME_RANGE_TYPE } from '@kbn/ml-plugin/public/application/jobs/components/custom_url_editor/constants';
+import { TIME_RANGE_TYPE } from '@kbn/ml-plugin/public/application/components/custom_urls/custom_url_editor/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 import { ECOMMERCE_INDEX_PATTERN } from '..';
@@ -94,7 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.anomaliesTable.scrollTableIntoView();
       await ml.anomaliesTable.ensureAnomalyActionsMenuOpen(0);
 
-      await commonScreenshots.takeScreenshot('ml-population-results', screenshotDirectories);
+      await commonScreenshots.takeScreenshot('ml-customurl', screenshotDirectories);
     });
   });
 }

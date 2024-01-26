@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { UptimeEsClient } from '../../../lib';
 import { ScreenshotBlockDoc } from '../../../../common/runtime_types';
-import { UMElasticsearchQueryFn } from '../adapters/framework';
 
 interface ScreenshotBlockResultType {
   _id: string;
@@ -18,10 +18,14 @@ interface ScreenshotBlockResultType {
   };
 }
 
-export const getJourneyScreenshotBlocks: UMElasticsearchQueryFn<
-  { blockIds: string[] },
-  ScreenshotBlockDoc[]
-> = async ({ blockIds, uptimeEsClient }) => {
+export const getJourneyScreenshotBlocks = async ({
+  blockIds,
+  uptimeEsClient,
+}: {
+  blockIds: string[];
+} & {
+  uptimeEsClient: UptimeEsClient;
+}): Promise<ScreenshotBlockDoc[]> => {
   const body = {
     query: {
       bool: {

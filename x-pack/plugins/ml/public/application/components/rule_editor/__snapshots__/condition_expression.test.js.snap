@@ -30,6 +30,7 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
       isOpen={false}
       ownFocus={true}
       panelPaddingSize="s"
+      repositionToCrossAxis={true}
     >
       <div>
         <EuiPopoverTitle>
@@ -101,6 +102,7 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
       isOpen={false}
       ownFocus={true}
       panelPaddingSize="s"
+      repositionToCrossAxis={true}
       withTitle={true}
     >
       <div>
@@ -216,6 +218,7 @@ exports[`ConditionExpression renders with only value supplied 1`] = `
       isOpen={false}
       ownFocus={true}
       panelPaddingSize="s"
+      repositionToCrossAxis={true}
     >
       <div>
         <EuiPopoverTitle>
@@ -286,6 +289,7 @@ exports[`ConditionExpression renders with only value supplied 1`] = `
       isOpen={false}
       ownFocus={true}
       panelPaddingSize="s"
+      repositionToCrossAxis={true}
       withTitle={true}
     >
       <div>

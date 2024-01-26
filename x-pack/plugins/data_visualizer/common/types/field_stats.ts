@@ -6,10 +6,30 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Query } from '@kbn/es-query';
-import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
+import type { Query } from '@kbn/es-query';
+import type { IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { TimeBucketsInterval } from '../services/time_buckets';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import type { TimeBucketsInterval } from '../services/time_buckets';
+
+export interface RandomSamplingOption {
+  mode: 'random_sampling';
+  seed: string;
+  probability: number;
+}
+
+export interface NormalSamplingOption {
+  mode: 'normal_sampling';
+  seed: string;
+  shardSize: number;
+}
+
+export interface NoSamplingOption {
+  mode: 'no_sampling';
+  seed: string;
+}
+
+export type SamplingOption = RandomSamplingOption | NormalSamplingOption | NoSamplingOption;
 
 export interface FieldData {
   fieldName: string;
@@ -54,10 +74,10 @@ export const isIKibanaSearchResponse = (arg: unknown): arg is IKibanaSearchRespo
 
 export interface NumericFieldStats {
   fieldName: string;
-  count: number;
-  min: number;
-  max: number;
-  avg: number;
+  count?: number;
+  min?: number;
+  max?: number;
+  avg?: number;
   isTopValuesSampled: boolean;
   topValues: Bucket[];
   topValuesSampleSize: number;
@@ -86,7 +106,8 @@ export interface BooleanFieldStats {
   count: number;
   trueCount: number;
   falseCount: number;
-  [key: string]: number | string;
+  topValues: Bucket[];
+  topValuesSampleSize: number;
 }
 
 export interface DocumentCountStats {
@@ -186,7 +207,13 @@ export interface FieldStatsCommonRequestParams {
   intervalMs?: number;
   query: estypes.QueryDslQueryContainer;
   maxExamples?: number;
+  samplingProbability: number | null;
+  browserSessionSeed: number;
+  samplingOption: SamplingOption;
+  embeddableExecutionContext?: KibanaExecutionContext;
 }
+
+export type SupportedAggs = Set<string>;
 
 export interface OverallStatsSearchStrategyParams {
   sessionId?: string;
@@ -199,9 +226,15 @@ export interface OverallStatsSearchStrategyParams {
   index: string;
   timeFieldName?: string;
   runtimeFieldMap?: estypes.MappingRuntimeFields;
-  aggregatableFields: string[];
+  aggregatableFields: Array<{
+    name: string;
+    supportedAggs: SupportedAggs;
+  }>;
   nonAggregatableFields: string[];
   fieldsToFetch?: string[];
+  browserSessionSeed: number;
+  samplingOption: SamplingOption;
+  embeddableExecutionContext?: KibanaExecutionContext;
 }
 
 export interface FieldStatsSearchStrategyReturnBase {
@@ -233,8 +266,26 @@ export interface Field {
   type: string;
   cardinality: number;
   safeFieldName: string;
+  supportedAggs?: Set<string>;
 }
 
 export interface Aggs {
   [key: string]: estypes.AggregationsAggregationContainer;
+}
+
+export const EMBEDDABLE_SAMPLER_OPTION = {
+  RANDOM: 'random_sampling',
+  NORMAL: 'normal_sampling',
+};
+export type FieldStatsEmbeddableSamplerOption =
+  typeof EMBEDDABLE_SAMPLER_OPTION[keyof typeof EMBEDDABLE_SAMPLER_OPTION];
+
+export function isRandomSamplingOption(arg: SamplingOption): arg is RandomSamplingOption {
+  return arg.mode === 'random_sampling';
+}
+export function isNormalSamplingOption(arg: SamplingOption): arg is NormalSamplingOption {
+  return arg.mode === 'normal_sampling';
+}
+export function isNoSamplingOption(arg: SamplingOption): arg is NoSamplingOption {
+  return arg.mode === 'no_sampling' || (arg.mode === 'random_sampling' && arg.probability === 1);
 }

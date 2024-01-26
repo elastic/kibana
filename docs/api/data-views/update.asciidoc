@@ -7,6 +7,11 @@
 experimental[] Update part of an data view. Only the specified fields are updated in the
 data view. Unspecified fields stay as they are persisted.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/src/plugins/data_views/docs/openapi[open API specification].
+====
 
 [[data-views-api-update-request]]
 ==== Request
@@ -62,7 +67,7 @@ Update a title of the `<my-view>` data view:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/data_views/data-view/my-view
+$ curl -X POST api/data_views/data_view/my-view
 {
   "data_view": {
     "title": "some-other-view-*"
@@ -75,7 +80,7 @@ Customize the update behavior:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/data_views/data-view/my-view
+$ curl -X POST api/data_views/data_view/my-view
 {
   "refresh_fields": true,
   "data_view": {
@@ -90,7 +95,7 @@ All update fields are optional, but you can specify the following fields:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/data_views/data-view/my-view
+$ curl -X POST api/data_views/data_view/my-view
 {
   "data_view": {
     "title": "...",

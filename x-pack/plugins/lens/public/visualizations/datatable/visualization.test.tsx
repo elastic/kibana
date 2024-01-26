@@ -138,6 +138,26 @@ describe('Datatable Visualization', () => {
       expect(suggestions.length).toBeGreaterThan(0);
     });
 
+    it('should force table as suggestion when there are no number fields', () => {
+      const suggestions = datatableVisualization.getSuggestions({
+        state: {
+          layerId: 'first',
+          layerType: LayerTypes.DATA,
+          columns: [{ columnId: 'col1' }],
+        },
+        table: {
+          isMultiRow: true,
+          layerId: 'first',
+          changeType: 'initial',
+          columns: [strCol('col1'), strCol('col2')],
+          notAssignedMetrics: true,
+        },
+        keptLayerIds: [],
+      });
+
+      expect(suggestions.length).toBeGreaterThan(0);
+    });
+
     it('should reject suggestion with static value', () => {
       function staticValueCol(columnId: string): TableSuggestionColumn {
         return {
@@ -387,6 +407,48 @@ describe('Datatable Visualization', () => {
         }).groups[2].accessors
       ).toEqual([{ columnId: 'c' }, { columnId: 'b' }]);
     });
+
+    it('should compute the groups correctly for text based languages', () => {
+      const datasource = createMockDatasource('textBased', {
+        isTextBasedLanguage: jest.fn(() => true),
+      });
+      datasource.publicAPIMock.getTableSpec.mockReturnValue([
+        { columnId: 'c', fields: [] },
+        { columnId: 'b', fields: [] },
+      ]);
+      const frame = mockFrame();
+      frame.datasourceLayers = { first: datasource.publicAPIMock };
+
+      const groups = datatableVisualization.getConfiguration({
+        layerId: 'first',
+        state: {
+          layerId: 'first',
+          layerType: LayerTypes.DATA,
+          columns: [{ columnId: 'b', isMetric: true }, { columnId: 'c' }],
+        },
+        frame,
+      }).groups;
+
+      // rows
+      expect(groups[0].accessors).toEqual([
+        {
+          columnId: 'c',
+          triggerIconType: undefined,
+        },
+      ]);
+
+      // columns
+      expect(groups[1].accessors).toEqual([]);
+
+      // metrics
+      expect(groups[2].accessors).toEqual([
+        {
+          columnId: 'b',
+          triggerIconType: undefined,
+          palette: undefined,
+        },
+      ]);
+    });
   });
 
   describe('#removeDimension', () => {
@@ -462,7 +524,11 @@ describe('Datatable Visualization', () => {
       ).toEqual({
         layerId: 'layer1',
         layerType: LayerTypes.DATA,
-        columns: [{ columnId: 'b' }, { columnId: 'c' }, { columnId: 'd', isTransposed: false }],
+        columns: [
+          { columnId: 'b' },
+          { columnId: 'c' },
+          { columnId: 'd', isTransposed: false, isMetric: false },
+        ],
       });
     });
 
@@ -482,7 +548,7 @@ describe('Datatable Visualization', () => {
       ).toEqual({
         layerId: 'layer1',
         layerType: LayerTypes.DATA,
-        columns: [{ columnId: 'b', isTransposed: false }, { columnId: 'c' }],
+        columns: [{ columnId: 'b', isTransposed: false, isMetric: false }, { columnId: 'c' }],
       });
     });
   });
@@ -693,59 +759,46 @@ describe('Datatable Visualization', () => {
         }).headerRowHeightLines
       ).toEqual([2]);
     });
-  });
 
-  describe('#getErrorMessages', () => {
-    it('returns undefined if the datasource is missing a metric dimension', () => {
-      const datasource = createMockDatasource('test');
-      const frame = mockFrame();
-      frame.datasourceLayers = { a: datasource.publicAPIMock };
-      datasource.publicAPIMock.getTableSpec.mockReturnValue([
-        { columnId: 'c', fields: [] },
-        { columnId: 'b', fields: [] },
-      ]);
+    it('sets alignment correctly', () => {
       datasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
-        isBucketed: true, // move it from the metric to the break down by side
+        isBucketed: false, // <= make them metrics
         label: 'label',
         isStaticValue: false,
         hasTimeShift: false,
         hasReducedTimeRange: false,
       });
+      const expression = datatableVisualization.toExpression(
+        {
+          ...defaultExpressionTableState,
+          columns: [
+            { columnId: 'b', alignment: 'center' },
+            { columnId: 'c', alignment: 'left' },
+            { columnId: 'a' },
+          ],
+        },
+        frame.datasourceLayers,
+        {},
+        { '1': { type: 'expression', chain: [] } }
+      ) as Ast;
 
-      const error = datatableVisualization.getErrorMessages({
-        layerId: 'a',
-        layerType: LayerTypes.DATA,
-        columns: [{ columnId: 'b' }, { columnId: 'c' }],
-      });
-
-      expect(error).toBeUndefined();
-    });
-
-    it('returns undefined if the metric dimension is defined', () => {
-      const datasource = createMockDatasource('test');
-      const frame = mockFrame();
-      frame.datasourceLayers = { a: datasource.publicAPIMock };
-      datasource.publicAPIMock.getTableSpec.mockReturnValue([
-        { columnId: 'c', fields: [] },
-        { columnId: 'b', fields: [] },
-      ]);
-      datasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
-        dataType: 'string',
-        isBucketed: false, // keep it a metric
-        label: 'label',
-        isStaticValue: false,
-        hasTimeShift: false,
-        hasReducedTimeRange: false,
-      });
-
-      const error = datatableVisualization.getErrorMessages({
-        layerId: 'a',
-        layerType: LayerTypes.DATA,
-        columns: [{ columnId: 'b' }, { columnId: 'c' }],
-      });
-
-      expect(error).toBeUndefined();
+      const columnArgs = buildExpression(expression).findFunction('lens_datatable_column');
+      expect(columnArgs[0].arguments).toEqual(
+        expect.objectContaining({
+          alignment: ['left'],
+        })
+      );
+      expect(columnArgs[1].arguments).toEqual(
+        expect.objectContaining({
+          alignment: ['center'],
+        })
+      );
+      expect(columnArgs[2].arguments).toEqual(
+        expect.not.objectContaining({
+          alignment: [],
+        })
+      );
     });
   });
 

@@ -6,9 +6,13 @@
  */
 
 import { ReactNode, useCallback, useMemo, useState } from 'react';
+
 import {
+  aggregateValidationErrors,
   createInputFieldProps,
   createInputRangeFieldProps,
+  validateInputFieldHasNotEmptyEntries,
+  validateInputFieldHasNotEmptySpaces,
   validateInputFieldNotEmpty,
 } from './input_fields';
 
@@ -41,7 +45,7 @@ export const useIndicesConfigurationFormState = ({
   const nameFieldProps = useMemo(
     () =>
       createInputFieldProps({
-        errors: validateInputFieldNotEmpty(formState.name),
+        errors: aggregateValidationErrors<string>(validateInputFieldNotEmpty)(formState.name),
         name: 'name',
         onChange: (name) => setFormStateChanges((changes) => ({ ...changes, name })),
         value: formState.name,
@@ -51,7 +55,11 @@ export const useIndicesConfigurationFormState = ({
   const metricAliasFieldProps = useMemo(
     () =>
       createInputFieldProps({
-        errors: validateInputFieldNotEmpty(formState.metricAlias),
+        errors: aggregateValidationErrors<string>(
+          validateInputFieldNotEmpty,
+          validateInputFieldHasNotEmptyEntries,
+          validateInputFieldHasNotEmptySpaces
+        )(formState.metricAlias),
         name: 'metricAlias',
         onChange: (metricAlias) => setFormStateChanges((changes) => ({ ...changes, metricAlias })),
         value: formState.metricAlias,
@@ -62,7 +70,7 @@ export const useIndicesConfigurationFormState = ({
   const anomalyThresholdFieldProps = useMemo(
     () =>
       createInputRangeFieldProps({
-        errors: validateInputFieldNotEmpty(formState.anomalyThreshold),
+        errors: aggregateValidationErrors(validateInputFieldNotEmpty)(formState.anomalyThreshold),
         name: 'anomalyThreshold',
         onChange: (anomalyThreshold) =>
           setFormStateChanges((changes) => ({ ...changes, anomalyThreshold })),
@@ -91,16 +99,34 @@ export const useIndicesConfigurationFormState = ({
 
   const isFormValid = useMemo(() => errors.length <= 0, [errors]);
 
-  const isFormDirty = useMemo(() => Object.keys(formStateChanges).length > 0, [formStateChanges]);
+  const getUnsavedChanges = ({
+    changedConfig,
+    existingConfig,
+  }: {
+    changedConfig: FormStateChanges;
+    existingConfig?: FormState;
+  }) => {
+    return Object.fromEntries(
+      Object.entries(changedConfig).filter(([key, value]) => {
+        const existingValue = existingConfig?.[key as keyof FormState];
+        // don't highlight changes that were added and removed
+        if (value === '' && existingValue == null) {
+          return false;
+        }
+
+        return existingValue !== value;
+      })
+    );
+  };
 
   return {
     errors,
     fieldProps,
     formState,
     formStateChanges,
-    isFormDirty,
     isFormValid,
     resetForm,
+    getUnsavedChanges,
   };
 };
 

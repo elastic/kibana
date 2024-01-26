@@ -23,7 +23,8 @@ const isPolicyEnabled = (packagePolicy: PackagePolicy) => {
 export const storedPackagePolicyToAgentInputs = (
   packagePolicy: PackagePolicy,
   packageInfo?: PackageInfo,
-  outputId: string = DEFAULT_OUTPUT.name
+  outputId: string = DEFAULT_OUTPUT.name,
+  agentPolicyNamespace?: string
 ): FullAgentPolicyInput[] => {
   const fullInputs: FullAgentPolicyInput[] = [];
 
@@ -52,7 +53,7 @@ export const storedPackagePolicyToAgentInputs = (
       name: packagePolicy.name,
       type: input.type,
       data_stream: {
-        namespace: packagePolicy.namespace || 'default',
+        namespace: packagePolicy?.namespace || agentPolicyNamespace || 'default', // custom namespace has precedence on agent policy's one
       },
       use_output: outputId,
       package_policy_id: packagePolicy.id,
@@ -80,10 +81,10 @@ export const storedPackagePolicyToAgentInputs = (
     // deeply merge the input.config values with the full policy input
     merge(
       fullInput,
-      Object.entries(input.config || {}).reduce(
-        (acc, [key, { value }]) => ({ ...acc, [key]: value }),
-        {}
-      )
+      Object.entries(input.config || {}).reduce((acc, [key, { value }]) => {
+        acc[key] = value;
+        return acc;
+      }, {} as Record<string, unknown>)
     );
 
     if (packagePolicy.package) {
@@ -97,14 +98,14 @@ export const storedPackagePolicyToAgentInputs = (
 
     fullInputs.push(fullInput);
   });
-
   return fullInputs;
 };
 
 export const storedPackagePoliciesToAgentInputs = async (
   packagePolicies: PackagePolicy[],
   packageInfoCache: Map<string, PackageInfo>,
-  outputId: string = DEFAULT_OUTPUT.name
+  outputId: string = DEFAULT_OUTPUT.name,
+  agentPolicyNamespace?: string
 ): Promise<FullAgentPolicyInput[]> => {
   const fullInputs: FullAgentPolicyInput[] = [];
 
@@ -117,7 +118,14 @@ export const storedPackagePoliciesToAgentInputs = async (
       ? packageInfoCache.get(pkgToPkgKey(packagePolicy.package))
       : undefined;
 
-    fullInputs.push(...storedPackagePolicyToAgentInputs(packagePolicy, packageInfo, outputId));
+    fullInputs.push(
+      ...storedPackagePolicyToAgentInputs(
+        packagePolicy,
+        packageInfo,
+        outputId,
+        agentPolicyNamespace
+      )
+    );
   }
 
   return fullInputs;

@@ -18,19 +18,25 @@ import type {
   SavedObjectsServiceStart,
   UiSettingsServiceStart,
 } from '@kbn/core/server';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
-import { notificationsRoutes } from './routes/notifications';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import type { CasesSetup } from '@kbn/cases-plugin/server';
 import type { PluginsSetup, PluginsStart, RouteInitialization } from './types';
-import { PLUGIN_ID } from '../common/constants/app';
 import type { MlCapabilities } from '../common/types/capabilities';
-
+import { jsonSchemaRoutes } from './routes/json_schema';
+import { notificationsRoutes } from './routes/notifications';
+import {
+  type MlFeatures,
+  PLUGIN_ID,
+  type ConfigSchema,
+  initEnabledFeatures,
+  type CompatibleModule,
+} from '../common/constants/app';
 import { initMlServerLog } from './lib/log';
-import { initSampleDataSets } from './lib/sample_data_sets';
-
 import { annotationRoutes } from './routes/annotations';
 import { calendars } from './routes/calendars';
 import { dataFeedRoutes } from './routes/datafeeds';
@@ -46,6 +52,7 @@ import { jobServiceRoutes } from './routes/job_service';
 import { savedObjectsRoutes } from './routes/saved_objects';
 import { jobValidationRoutes } from './routes/job_validation';
 import { resultsServiceRoutes } from './routes/results_service';
+import { modelManagementRoutes } from './routes/model_management';
 import { systemRoutes } from './routes/system';
 import { MlLicense } from '../common/license';
 import { createSharedServices, SharedServices } from './shared_services';
@@ -65,6 +72,8 @@ import { ML_ALERT_TYPES } from '../common/constants/alerts';
 import { alertingRoutes } from './routes/alerting';
 import { registerCollector } from './usage';
 import { SavedObjectsSyncService } from './saved_objects/sync_task';
+import { registerCasesPersistableState } from './lib/register_cases';
+import { registerSampleDataSetLinks } from './lib/register_sample_data_set_links';
 
 export type MlPluginSetup = SharedServices;
 export type MlPluginStart = void;
@@ -81,21 +90,36 @@ export class MlServerPlugin
   private savedObjectsStart: SavedObjectsServiceStart | null = null;
   private spacesPlugin: SpacesPluginSetup | undefined;
   private security: SecurityPluginSetup | undefined;
+  private home: HomeServerPluginSetup | null = null;
+  private cases: CasesSetup | null | undefined = null;
   private dataViews: DataViewsPluginStart | null = null;
   private isMlReady: Promise<void>;
   private setMlReady: () => void = () => {};
   private savedObjectsSyncService: SavedObjectsSyncService;
+  private enabledFeatures: MlFeatures = {
+    ad: true,
+    dfa: true,
+    nlp: true,
+  };
+  private compatibleModuleType: CompatibleModule | null = null;
 
-  constructor(ctx: PluginInitializerContext) {
+  constructor(ctx: PluginInitializerContext<ConfigSchema>) {
     this.log = ctx.logger.get();
     this.mlLicense = new MlLicense();
     this.isMlReady = new Promise((resolve) => (this.setMlReady = resolve));
     this.savedObjectsSyncService = new SavedObjectsSyncService(this.log);
+
+    const config = ctx.config.get();
+    initEnabledFeatures(this.enabledFeatures, config);
+    this.compatibleModuleType = config.compatibleModuleType ?? null;
+    this.enabledFeatures = Object.freeze(this.enabledFeatures);
   }
 
   public setup(coreSetup: CoreSetup<PluginsStart>, plugins: PluginsSetup): MlPluginSetup {
     this.spacesPlugin = plugins.spaces;
     this.security = plugins.security;
+    this.home = plugins.home;
+    this.cases = plugins.cases;
     const { admin, user, apmUser } = getPluginPrivileges();
 
     plugins.features.registerKibanaFeature({
@@ -108,7 +132,7 @@ export class MlServerPlugin
       app: [PLUGIN_ID, 'kibana'],
       catalogue: [PLUGIN_ID, `${PLUGIN_ID}_file_data_visualizer`],
       management: {
-        insightsAndAlerting: ['jobsListLink'],
+        insightsAndAlerting: ['jobsListLink', 'triggersActions'],
       },
       alerting: Object.values(ML_ALERT_TYPES),
       privileges: {
@@ -137,14 +161,13 @@ export class MlServerPlugin
       },
     });
 
-    registerKibanaSettings(coreSetup);
-
-    this.mlLicense.setup(plugins.licensing.license$, [
-      (mlLicense: MlLicense) => initSampleDataSets(mlLicense, plugins),
-    ]);
-
     // initialize capabilities switcher to add license filter to ml capabilities
-    setupCapabilitiesSwitcher(coreSetup, plugins.licensing.license$, this.log);
+    setupCapabilitiesSwitcher(
+      coreSetup,
+      plugins.licensing.license$,
+      this.enabledFeatures,
+      this.log
+    );
     setupSavedObjects(coreSetup.savedObjects);
     this.savedObjectsSyncService.registerSyncTask(
       plugins.taskManager,
@@ -172,7 +195,9 @@ export class MlServerPlugin
       if (this.capabilities === null) {
         return null;
       }
-      const capabilities = await this.capabilities.resolveCapabilities(request);
+      const capabilities = await this.capabilities.resolveCapabilities(request, {
+        capabilityPath: 'ml.*',
+      });
       return capabilities.ml as MlCapabilities;
     };
 
@@ -187,7 +212,8 @@ export class MlServerPlugin
       () => this.uiSettings,
       () => this.fieldsFormat,
       getDataViews,
-      () => this.isMlReady
+      () => this.isMlReady,
+      this.compatibleModuleType
     );
 
     const routeInit: RouteInitialization = {
@@ -199,26 +225,43 @@ export class MlServerPlugin
         plugins.spaces,
         plugins.security?.authz,
         () => this.isMlReady,
-        () => this.dataViews
+        () => this.dataViews,
+        coreSetup.getStartServices
       ),
       mlLicense: this.mlLicense,
+      getEnabledFeatures: () => this.enabledFeatures,
     };
 
-    annotationRoutes(routeInit, plugins.security);
-    calendars(routeInit);
-    dataFeedRoutes(routeInit);
-    dataFrameAnalyticsRoutes(routeInit);
-    dataRecognizer(routeInit);
+    // Register Anomaly Detection routes
+    if (this.enabledFeatures.ad) {
+      annotationRoutes(routeInit, plugins.security);
+      calendars(routeInit);
+      dataFeedRoutes(routeInit);
+      dataRecognizer(routeInit, this.compatibleModuleType);
+      filtersRoutes(routeInit);
+      jobAuditMessagesRoutes(routeInit);
+      jobRoutes(routeInit);
+      jobServiceRoutes(routeInit);
+      resultsServiceRoutes(routeInit);
+      jobValidationRoutes(routeInit);
+    }
+
+    // Register Data Frame Analytics routes
+    if (this.enabledFeatures.dfa) {
+      dataFrameAnalyticsRoutes(routeInit, plugins.cloud);
+    }
+
+    // Register Trained Model Management routes
+    if (this.enabledFeatures.dfa || this.enabledFeatures.nlp) {
+      trainedModelsRoutes(routeInit, plugins.cloud);
+    }
+
+    // Register Miscellaneous routes
+    modelManagementRoutes(routeInit);
     dataVisualizerRoutes(routeInit);
     fieldsService(routeInit);
-    filtersRoutes(routeInit);
     indicesRoutes(routeInit);
-    jobAuditMessagesRoutes(routeInit);
-    jobRoutes(routeInit);
-    jobServiceRoutes(routeInit);
     managementRoutes(routeInit);
-    resultsServiceRoutes(routeInit);
-    jobValidationRoutes(routeInit);
     savedObjectsRoutes(routeInit, {
       getSpaces,
       resolveMlCapabilities,
@@ -228,26 +271,35 @@ export class MlServerPlugin
       cloud: plugins.cloud,
       resolveMlCapabilities,
     });
-    trainedModelsRoutes(routeInit);
     notificationsRoutes(routeInit);
+    jsonSchemaRoutes(routeInit);
     alertingRoutes(routeInit, sharedServicesProviders);
 
     initMlServerLog({ log: this.log });
 
     if (plugins.alerting) {
-      registerMlAlerts({
-        alerting: plugins.alerting,
-        logger: this.log,
-        mlSharedServices: sharedServicesProviders,
-        mlServicesProviders: internalServicesProviders,
-      });
+      registerMlAlerts(
+        {
+          alerting: plugins.alerting,
+          logger: this.log,
+          mlSharedServices: sharedServicesProviders,
+          mlServicesProviders: internalServicesProviders,
+        },
+        this.enabledFeatures
+      );
     }
+
+    registerKibanaSettings(coreSetup);
 
     if (plugins.usageCollection) {
-      registerCollector(plugins.usageCollection, coreSetup.savedObjects.getKibanaIndex());
+      const getIndexForType = (type: string) =>
+        coreSetup
+          .getStartServices()
+          .then(([coreStart]) => coreStart.savedObjects.getIndexForType(type));
+      registerCollector(plugins.usageCollection, getIndexForType);
     }
 
-    return sharedServicesProviders;
+    return { ...sharedServicesProviders };
   }
 
   public start(coreStart: CoreStart, plugins: PluginsStart): MlPluginStart {
@@ -258,17 +310,36 @@ export class MlServerPlugin
     this.savedObjectsStart = coreStart.savedObjects;
     this.dataViews = plugins.dataViews;
 
-    // check whether the job saved objects exist
-    // and create them if needed.
-    const { initializeJobs } = jobSavedObjectsInitializationFactory(
-      coreStart,
-      this.security,
-      this.spacesPlugin !== undefined
-    );
-    initializeJobs().finally(() => {
-      this.setMlReady();
+    this.mlLicense.setup(plugins.licensing.license$, async (mlLicense: MlLicense) => {
+      if (mlLicense.isMlEnabled() === false || mlLicense.isFullLicense() === false) {
+        try {
+          await this.savedObjectsSyncService.unscheduleSyncTask(plugins.taskManager);
+        } catch (e) {
+          this.log.debug(`Error unscheduling saved objects sync task`, e);
+        }
+        return;
+      }
+
+      if (mlLicense.isMlEnabled() && mlLicense.isFullLicense()) {
+        if (this.cases) {
+          registerCasesPersistableState(this.cases, this.enabledFeatures, this.log);
+        }
+        if (this.home) {
+          registerSampleDataSetLinks(this.home, this.enabledFeatures, this.log);
+        }
+      }
+      // check whether the job saved objects exist
+      // and create them if needed.
+      const { initializeJobs } = jobSavedObjectsInitializationFactory(
+        coreStart,
+        this.security,
+        this.spacesPlugin !== undefined
+      );
+      initializeJobs().finally(() => {
+        this.setMlReady();
+      });
+      this.savedObjectsSyncService.scheduleSyncTask(plugins.taskManager, coreStart);
     });
-    this.savedObjectsSyncService.scheduleSyncTask(plugins.taskManager, coreStart);
   }
 
   public stop() {

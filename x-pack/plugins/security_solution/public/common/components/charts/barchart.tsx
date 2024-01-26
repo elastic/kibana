@@ -7,10 +7,12 @@
 
 import { EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import type { SettingsProps } from '@elastic/charts';
 import { Chart, BarSeries, Axis, Position, ScaleType, Settings } from '@elastic/charts';
 import { getOr, get, isNumber } from 'lodash/fp';
 import deepmerge from 'deepmerge';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
@@ -28,16 +30,17 @@ import {
   getChartHeight,
   getChartWidth,
   WrappedByAutoSizer,
-  useTheme,
+  useThemes,
   Wrapper,
-  ChartWrapper,
+  BarChartWrapper,
 } from './common';
 import { DraggableLegend } from './draggable_legend';
 import type { LegendItem } from './draggable_legend_item';
 import type { ChartData, ChartSeriesConfigs, ChartSeriesData } from './common';
-import { VisualizationActions, HISTOGRAM_ACTIONS_BUTTON_CLASS } from '../visualization_actions';
+import { VisualizationActions } from '../visualization_actions/actions';
 import type { VisualizationActionsProps } from '../visualization_actions/types';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
+import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from '../visualization_actions/utils';
 
 const LegendFlexItem = styled(EuiFlexItem)`
   overview: hidden;
@@ -74,16 +77,16 @@ export const BarChartBaseComponent = ({
   configs?: ChartSeriesConfigs | undefined;
   forceHiddenLegend?: boolean;
 }) => {
-  const theme = useTheme();
+  const themes = useThemes();
   const timeZone = useTimeZone();
   const xTickFormatter = get('configs.axis.xTickFormatter', chartConfigs);
   const yTickFormatter = get('configs.axis.yTickFormatter', chartConfigs);
   const tickSize = getOr(0, 'configs.axis.tickSize', chartConfigs);
   const xAxisId = `stat-items-barchart-${data[0].key}-x`;
   const yAxisId = `stat-items-barchart-${data[0].key}-y`;
-  const settings = {
+  const settings: SettingsProps = {
     ...chartDefaultSettings,
-    ...deepmerge(get('configs.settings', chartConfigs), { theme }),
+    ...deepmerge(get('configs.settings', chartConfigs), themes),
   };
 
   const xAxisStyle = useMemo(
@@ -116,7 +119,11 @@ export const BarChartBaseComponent = ({
 
   return chartConfigs.width && chartConfigs.height ? (
     <Chart>
-      <Settings {...settings} showLegend={settings.showLegend && !forceHiddenLegend} />
+      <Settings
+        {...settings}
+        showLegend={settings.showLegend && !forceHiddenLegend}
+        locale={i18n.getLocale()}
+      />
       {data.map((series) => {
         const barSeriesKey = series.key;
         return checkIfAllTheDataInTheSeriesAreValid(series) ? (
@@ -188,7 +195,7 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
         ? barChart.map((d, i) => ({
             color: d.color ?? (i < defaultLegendColors.length ? defaultLegendColors[i] : undefined),
             dataProviderId: escapeDataProviderId(
-              `draggable-legend-item-${uuid.v4()}-${stackByField}-${d.key}`
+              `draggable-legend-item-${uuidv4()}-${stackByField}-${d.key}`
             ),
             scopeId,
             field: stackByField,
@@ -207,9 +214,9 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
 
   return (
     <Wrapper>
-      <HoverVisibilityContainer targetClassNames={[HISTOGRAM_ACTIONS_BUTTON_CLASS]}>
+      <HoverVisibilityContainer targetClassNames={[VISUALIZATION_ACTIONS_BUTTON_CLASS]}>
         {isValidSeriesExist && barChart && (
-          <ChartWrapper gutterSize="none">
+          <BarChartWrapper gutterSize="none">
             <EuiFlexItem grow={true}>
               <WrappedByAutoSizer ref={measureRef} height={chartHeight}>
                 <BarChartBase
@@ -226,7 +233,7 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
             <LegendFlexItem grow={false}>
               <DraggableLegend legendItems={legendItems} height={height} />
             </LegendFlexItem>
-          </ChartWrapper>
+          </BarChartWrapper>
         )}
         {!isValidSeriesExist && (
           <ChartPlaceHolder height={chartHeight} width={chartWidth} data={barChart} />

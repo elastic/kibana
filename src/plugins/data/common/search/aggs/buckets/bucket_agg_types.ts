@@ -10,6 +10,7 @@ export enum BUCKET_TYPES {
   FILTER = 'filter',
   FILTERS = 'filters',
   HISTOGRAM = 'histogram',
+  IP_PREFIX = 'ip_prefix',
   IP_RANGE = 'ip_range',
   DATE_RANGE = 'date_range',
   RANGE = 'range',
@@ -18,9 +19,9 @@ export enum BUCKET_TYPES {
   RARE_TERMS = 'rare_terms',
   SIGNIFICANT_TERMS = 'significant_terms',
   SIGNIFICANT_TEXT = 'significant_text',
-  GEOHASH_GRID = 'geohash_grid',
   GEOTILE_GRID = 'geotile_grid',
   DATE_HISTOGRAM = 'date_histogram',
   SAMPLER = 'sampler',
   DIVERSIFIED_SAMPLER = 'diversified_sampler',
+  TIME_SERIES = 'time_series',
 }

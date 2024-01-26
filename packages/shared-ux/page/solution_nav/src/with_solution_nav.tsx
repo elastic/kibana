@@ -8,8 +8,12 @@
 
 import React, { ComponentType, ReactNode, useState } from 'react';
 import classNames from 'classnames';
-import { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template-types';
-import { useIsWithinBreakpoints, useEuiTheme, useIsWithinMinBreakpoint } from '@elastic/eui';
+import {
+  useIsWithinBreakpoints,
+  useEuiTheme,
+  useIsWithinMinBreakpoint,
+  EuiPageSidebarProps,
+} from '@elastic/eui';
 import { SolutionNav, SolutionNavProps } from './solution_nav';
 import { WithSolutionNavStyles } from './with_solution_nav.styles';
 
@@ -18,9 +22,11 @@ function getDisplayName(Component: ComponentType<any>) {
   return Component.displayName || Component.name || 'UnnamedComponent';
 }
 
-type TemplateProps = Pick<KibanaPageTemplateProps, 'pageSideBar' | 'pageSideBarProps'> & {
+export interface TemplateProps {
   children?: ReactNode;
-};
+  pageSideBar?: ReactNode;
+  pageSideBarProps?: EuiPageSidebarProps;
+}
 
 type Props<P> = P &
   TemplateProps & {
@@ -51,9 +57,8 @@ export const withSolutionNav = <P extends TemplateProps>(WrappedComponent: Compo
       isMediumBreakpoint || (canBeCollapsed && isLargerBreakpoint && !isSideNavOpenOnDesktop);
     const withSolutionNavStyles = WithSolutionNavStyles(euiTheme);
     const sideBarClasses = classNames(
-      {
-        'kbnSolutionNav__sidebar--shrink': isSidebarShrunk,
-      },
+      'kbnSolutionNav__sidebar',
+      { 'kbnSolutionNav__sidebar--shrink': isSidebarShrunk },
       props.pageSideBarProps?.className,
       withSolutionNavStyles
     );

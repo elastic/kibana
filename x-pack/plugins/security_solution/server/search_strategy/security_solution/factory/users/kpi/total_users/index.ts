@@ -15,20 +15,17 @@ import { getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type { UsersQueries } from '../../../../../../../common/search_strategy/security_solution/users';
-import type {
-  TotalUsersKpiRequestOptions,
-  TotalUsersKpiStrategyResponse,
-} from '../../../../../../../common/search_strategy/security_solution/users/kpi/total_users';
+import type { TotalUsersKpiStrategyResponse } from '../../../../../../../common/search_strategy/security_solution/users/kpi/total_users';
 
 import { inspectStringifyObject } from '../../../../../../utils/build_query';
-import { formatGeneralHistogramData } from '../../../hosts/kpi';
 import type { SecuritySolutionFactory } from '../../../types';
 import { buildTotalUsersKpiQuery } from './query.build_total_users_kpi.dsl';
+import { formatGeneralHistogramData } from '../../../common/format_general_histogram_data';
 
 export const totalUsersKpi: SecuritySolutionFactory<UsersQueries.kpiTotalUsers> = {
-  buildDsl: (options: TotalUsersKpiRequestOptions) => buildTotalUsersKpiQuery(options),
+  buildDsl: (options) => buildTotalUsersKpiQuery(options),
   parse: async (
-    options: TotalUsersKpiRequestOptions,
+    options,
     response: IEsSearchResponse<unknown>
   ): Promise<TotalUsersKpiStrategyResponse> => {
     const inspect = {

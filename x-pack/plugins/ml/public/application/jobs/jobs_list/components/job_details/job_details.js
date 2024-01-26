@@ -83,22 +83,24 @@ export class JobDetailsUI extends Component {
         alertRules,
       } = extractJobDetails(job, basePath, refreshJobList);
 
-      datafeed.titleAction = (
-        <EuiButtonEmpty
-          onClick={() =>
-            this.setState({
-              datafeedChartFlyoutVisible: true,
-            })
-          }
-          iconType="visAreaStacked"
-          size="s"
-        >
-          <FormattedMessage
-            id="xpack.ml.jobDetails.tabs.datafeed.viewCountsButtonText"
-            defaultMessage="View datafeed counts"
-          />
-        </EuiButtonEmpty>
-      );
+      if (job.blocked === undefined) {
+        datafeed.titleAction = (
+          <EuiButtonEmpty
+            onClick={() =>
+              this.setState({
+                datafeedChartFlyoutVisible: true,
+              })
+            }
+            iconType="visAreaStacked"
+            size="s"
+          >
+            <FormattedMessage
+              id="xpack.ml.jobDetails.tabs.datafeed.viewCountsButtonText"
+              defaultMessage="View datafeed counts"
+            />
+          </EuiButtonEmpty>
+        );
+      }
 
       const tabs = [
         {
@@ -216,6 +218,7 @@ export class JobDetailsUI extends Component {
         tabs.push(
           {
             id: 'datafeed-preview',
+            disabled: job.blocked !== undefined,
             'data-test-subj': 'mlJobListTab-datafeed-preview',
             name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.datafeedPreviewLabel', {
               defaultMessage: 'Datafeed preview',
@@ -224,6 +227,7 @@ export class JobDetailsUI extends Component {
           },
           {
             id: 'forecasts',
+            disabled: job.blocked !== undefined,
             'data-test-subj': 'mlJobListTab-forecasts',
             name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.forecastsLabel', {
               defaultMessage: 'Forecasts',
@@ -235,6 +239,7 @@ export class JobDetailsUI extends Component {
 
       tabs.push({
         id: 'annotations',
+        disabled: job.blocked !== undefined,
         'data-test-subj': 'mlJobListTab-annotations',
         name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.annotationsLabel', {
           defaultMessage: 'Annotations',
@@ -249,6 +254,7 @@ export class JobDetailsUI extends Component {
 
       tabs.push({
         id: 'modelSnapshots',
+        disabled: job.blocked !== undefined,
         'data-test-subj': 'mlJobListTab-modelSnapshots',
         name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.modelSnapshotsLabel', {
           defaultMessage: 'Model snapshots',

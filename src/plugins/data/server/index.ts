@@ -8,7 +8,7 @@
 
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { ConfigSchema, configSchema } from '../config';
-import { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
+import type { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
 
 export { getEsQueryConfig, DEFAULT_QUERY_LANGUAGE } from '../common';
 
@@ -71,7 +71,12 @@ export type {
   DataRequestHandlerContext,
   AsyncSearchStatusResponse,
 } from './search';
-export { shimHitsTotal, SearchSessionService, NoSearchIdInSessionError } from './search';
+export {
+  shimHitsTotal,
+  SearchSessionService,
+  NoSearchIdInSessionError,
+  INITIAL_SEARCH_SESSION_REST_VERSION,
+} from './search';
 
 // Search namespace
 export const search = {
@@ -96,12 +101,13 @@ export { getTime, parseInterval } from '../common';
  * @public
  */
 
-export function plugin(initializerContext: PluginInitializerContext<ConfigSchema>) {
+export async function plugin(initializerContext: PluginInitializerContext<ConfigSchema>) {
+  const { DataServerPlugin } = await import('./plugin');
   return new DataServerPlugin(initializerContext);
 }
 
 export type { DataPluginSetup as PluginSetup, DataPluginStart as PluginStart };
-export { DataServerPlugin as Plugin };
+export type { DataServerPlugin as Plugin };
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   deprecations: configDeprecationProvider,

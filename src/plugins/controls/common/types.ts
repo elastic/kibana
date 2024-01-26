@@ -30,7 +30,10 @@ export type ControlInput = EmbeddableInput & {
 
 export type DataControlInput = ControlInput & {
   fieldName: string;
-  parentFieldName?: string;
-  childFieldName?: string;
   dataViewId: string;
 };
+
+export type ControlInputTransform = (
+  newState: Partial<ControlInput>,
+  controlType: string
+) => Partial<ControlInput>;

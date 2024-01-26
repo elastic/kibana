@@ -13,11 +13,12 @@ interface SearchTelemetry {
   'search-telemetry': CollectedUsage;
 }
 
-export function fetchProvider(kibanaIndex: string) {
+export function fetchProvider(getIndexForType: (type: string) => Promise<string>) {
   return async ({ esClient }: CollectorFetchContext): Promise<ReportedUsage> => {
+    const searchIndex = await getIndexForType('search-telemetry');
     const esResponse = await esClient.search<SearchTelemetry>(
       {
-        index: kibanaIndex,
+        index: searchIndex,
         body: {
           query: { term: { type: { value: 'search-telemetry' } } },
         },

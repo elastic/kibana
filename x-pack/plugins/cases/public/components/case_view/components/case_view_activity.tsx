@@ -7,17 +7,18 @@
 
 /* eslint-disable complexity */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent, EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
-import { isEqual, uniq } from 'lodash';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import { isEqual } from 'lodash';
+import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
+import { useGetCaseUsers } from '../../../containers/use_get_case_users';
+import { useGetCaseConnectors } from '../../../containers/use_get_case_connectors';
 import { useCasesFeatures } from '../../../common/use_cases_features';
 import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
-import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bulk_get_user_profiles';
-import { useGetConnectors } from '../../../containers/configure/use_connectors';
-import type { CaseSeverity } from '../../../../common/api';
-import { useCaseViewNavigation } from '../../../common/navigation';
-import type { UseFetchAlertData } from '../../../../common/ui/types';
-import type { Case, CaseStatuses } from '../../../../common';
+import { useGetSupportedActionConnectors } from '../../../containers/configure/use_get_supported_action_connectors';
+import type { CaseSeverity, CaseStatuses } from '../../../../common/types/domain';
+import type { CaseUICustomField, UseFetchAlertData } from '../../../../common/ui/types';
+import type { CaseUI } from '../../../../common';
 import { EditConnector } from '../../edit_connector';
 import type { CasesNavigation } from '../../links';
 import { StatusActionButton } from '../../status/button';
@@ -27,12 +28,18 @@ import { UserList } from './user_list';
 import { useOnUpdateField } from '../use_on_update_field';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import * as i18n from '../translations';
-import { getNoneConnector, normalizeActionConnector } from '../../configure_cases/utils';
-import { getConnectorById } from '../../utils';
 import { SeveritySidebarSelector } from '../../severity/sidebar_selector';
-import { useGetCaseUserActions } from '../../../containers/use_get_case_user_actions';
+import { useGetCaseUserActionsStats } from '../../../containers/use_get_case_user_actions_stats';
 import { AssignUsers } from './assign_users';
+import { UserActionsActivityBar } from '../../user_actions_activity_bar';
 import type { Assignee } from '../../user_profiles/types';
+import type { UserActivityParams } from '../../user_actions_activity_bar/types';
+import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
+import { CaseViewTabs } from '../case_view_tabs';
+import { Description } from '../../description';
+import { EditCategory } from './edit_category';
+import { parseCaseUsers } from '../../utils';
+import { CustomFields } from './custom_fields';
 
 export const CaseViewActivity = ({
   ruleDetailsNavigation,
@@ -42,53 +49,52 @@ export const CaseViewActivity = ({
   useFetchAlertData,
 }: {
   ruleDetailsNavigation?: CasesNavigation<string | null | undefined, 'configurable'>;
-  caseData: Case;
+  caseData: CaseUI;
   actionsNavigation?: CasesNavigation<string, 'configurable'>;
   showAlertDetails?: (alertId: string, index: string) => void;
   useFetchAlertData: UseFetchAlertData;
 }) => {
+  const [userActivityQueryParams, setUserActivityQueryParams] = useState<UserActivityParams>({
+    type: 'all',
+    sortOrder: 'asc',
+    page: 1,
+    perPage: 10,
+  });
+
   const { permissions } = useCasesContext();
-  const { getCaseViewUrl } = useCaseViewNavigation();
+
   const { caseAssignmentAuthorized, pushToServiceAuthorized } = useCasesFeatures();
 
-  const { data: userActionsData, isLoading: isLoadingUserActions } = useGetCaseUserActions(
-    caseData.id,
-    caseData.connector.id
+  const { data: caseConnectors, isLoading: isLoadingCaseConnectors } = useGetCaseConnectors(
+    caseData.id
   );
+
+  const { data: userActionsStats, isLoading: isLoadingUserActionsStats } =
+    useGetCaseUserActionsStats(caseData.id);
+
+  const { data: caseUsers, isLoading: isLoadingCaseUsers } = useGetCaseUsers(caseData.id);
+
+  const { data: casesConfiguration } = useGetCaseConfiguration();
+
+  const { userProfiles, reporterAsArray } = parseCaseUsers({
+    caseUsers,
+    createdBy: caseData.createdBy,
+  });
 
   const assignees = useMemo(
     () => caseData.assignees.map((assignee) => assignee.uid),
     [caseData.assignees]
   );
 
-  const userActionProfileUids = Array.from(userActionsData?.profileUids?.values() ?? []);
-  const uidsToRetrieve = uniq([...userActionProfileUids, ...assignees]);
-
-  const { data: userProfiles, isFetching: isLoadingUserProfiles } = useBulkGetUserProfiles({
-    uids: uidsToRetrieve,
-  });
-
   const { data: currentUserProfile, isFetching: isLoadingCurrentUserProfile } =
     useGetCurrentUserProfile();
 
-  const onShowAlertDetails = useCallback(
-    (alertId: string, index: string) => {
-      if (showAlertDetails) {
-        showAlertDetails(alertId, index);
-      }
-    },
-    [showAlertDetails]
-  );
-
   const { onUpdateField, isLoading, loadingKey } = useOnUpdateField({
-    caseId: caseData.id,
     caseData,
   });
 
   const isLoadingAssigneeData =
-    (isLoading && loadingKey === 'assignees') ||
-    isLoadingUserProfiles ||
-    isLoadingCurrentUserProfile;
+    (isLoading && loadingKey === 'assignees') || isLoadingCaseUsers || isLoadingCurrentUserProfile;
 
   const changeStatus = useCallback(
     (status: CaseStatuses) =>
@@ -99,16 +105,13 @@ export const CaseViewActivity = ({
     [onUpdateField]
   );
 
-  const emailContent = useMemo(
-    () => ({
-      subject: i18n.EMAIL_SUBJECT(caseData.title),
-      body: i18n.EMAIL_BODY(getCaseViewUrl({ detailName: caseData.id })),
-    }),
-    [caseData.title, getCaseViewUrl, caseData.id]
-  );
-
   const onSubmitTags = useCallback(
     (newTags) => onUpdateField({ key: 'tags', value: newTags }),
+    [onUpdateField]
+  );
+
+  const onSubmitCategory = useCallback(
+    (newCategory) => onUpdateField({ key: 'category', value: newCategory }),
     [onUpdateField]
   );
 
@@ -127,37 +130,77 @@ export const CaseViewActivity = ({
     [assignees, onUpdateField]
   );
 
-  const { isLoading: isLoadingConnectors, data: connectors = [] } = useGetConnectors();
-
-  const [connectorName, isValidConnector] = useMemo(() => {
-    const connector = connectors.find((c) => c.id === caseData.connector.id);
-    return [connector?.name ?? '', !!connector];
-  }, [connectors, caseData.connector]);
+  const { isLoading: isLoadingAllAvailableConnectors, data: supportedActionConnectors } =
+    useGetSupportedActionConnectors();
 
   const onSubmitConnector = useCallback(
-    (connectorId, connectorFields, onError, onSuccess) => {
-      const connector = getConnectorById(connectorId, connectors);
-      const connectorToUpdate = connector
-        ? normalizeActionConnector(connector)
-        : getNoneConnector();
-
+    (connector) => {
       onUpdateField({
         key: 'connector',
-        value: { ...connectorToUpdate, fields: connectorFields },
-        onSuccess,
-        onError,
+        value: connector,
       });
     },
-    [onUpdateField, connectors]
+    [onUpdateField]
   );
+
+  const onSubmitCustomFields = useCallback(
+    (customFields: CaseUICustomField[]) => {
+      onUpdateField({
+        key: 'customFields',
+        value: customFields,
+      });
+    },
+    [onUpdateField]
+  );
+
+  const handleUserActionsActivityChanged = useCallback(
+    (params: UserActivityParams) => {
+      setUserActivityQueryParams((oldParams) => ({
+        ...oldParams,
+        page: 1,
+        type: params.type,
+        sortOrder: params.sortOrder,
+      }));
+    },
+    [setUserActivityQueryParams]
+  );
+
+  const showUserActions =
+    !isLoadingUserActionsStats &&
+    !isLoadingCaseConnectors &&
+    !isLoadingCaseUsers &&
+    caseConnectors &&
+    caseUsers &&
+    userActionsStats;
+
+  const showConnectorSidebar =
+    pushToServiceAuthorized && caseConnectors && supportedActionConnectors;
+
+  const isLoadingDescription = isLoading && loadingKey === 'description';
 
   return (
     <>
       <EuiFlexItem grow={6}>
-        {isLoadingUserActions && (
-          <EuiLoadingContent lines={8} data-test-subj="case-view-loading-content" />
+        <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ACTIVITY} />
+        <Description
+          isLoadingDescription={isLoadingDescription}
+          caseData={caseData}
+          onUpdateField={onUpdateField}
+        />
+        <EuiSpacer size="l" />
+        <EuiFlexItem grow={false}>
+          <UserActionsActivityBar
+            onUserActionsActivityChanged={handleUserActionsActivityChanged}
+            params={userActivityQueryParams}
+            userActionsStats={userActionsStats}
+            isLoading={isLoadingUserActionsStats}
+          />
+        </EuiFlexItem>
+        <EuiSpacer size="l" />
+        {(isLoadingUserActionsStats || isLoadingCaseConnectors || isLoadingCaseUsers) && (
+          <EuiLoadingSpinner data-test-subj="case-view-loading-content" size="l" />
         )}
-        {!isLoadingUserActions && userActionsData && userProfiles && (
+        {showUserActions ? (
           <EuiFlexGroup direction="column" responsive={false} data-test-subj="case-view-activity">
             <EuiFlexItem>
               <UserActions
@@ -165,13 +208,11 @@ export const CaseViewActivity = ({
                 currentUserProfile={currentUserProfile}
                 getRuleDetailsHref={ruleDetailsNavigation?.href}
                 onRuleDetailsClick={ruleDetailsNavigation?.onClick}
-                caseServices={userActionsData.caseServices}
-                caseUserActions={userActionsData.caseUserActions}
+                caseConnectors={caseConnectors}
                 data={caseData}
+                casesConfiguration={casesConfiguration}
                 actionsNavigation={actionsNavigation}
-                isLoadingDescription={isLoading && loadingKey === 'description'}
-                isLoadingUserActions={isLoadingUserActions}
-                onShowAlertDetails={onShowAlertDetails}
+                onShowAlertDetails={showAlertDetails}
                 onUpdateField={onUpdateField}
                 statusActionButton={
                   permissions.update ? (
@@ -183,65 +224,78 @@ export const CaseViewActivity = ({
                   ) : null
                 }
                 useFetchAlertData={useFetchAlertData}
+                userActivityQueryParams={userActivityQueryParams}
+                userActionsStats={userActionsStats}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-        )}
-      </EuiFlexItem>
-      <EuiFlexItem grow={2}>
-        {caseAssignmentAuthorized ? (
-          <>
-            <AssignUsers
-              caseAssignees={caseData.assignees}
-              currentUserProfile={currentUserProfile}
-              onAssigneesChanged={onUpdateAssignees}
-              isLoading={isLoadingAssigneeData}
-              userProfiles={userProfiles ?? new Map()}
-            />
-            <EuiSpacer size="m" />
-          </>
         ) : null}
-        <SeveritySidebarSelector
-          isDisabled={!permissions.update}
-          isLoading={isLoading}
-          selectedSeverity={caseData.severity}
-          onSeverityChange={onUpdateSeverity}
-        />
-        <UserList
-          dataTestSubj="case-view-user-list-reporter"
-          email={emailContent}
-          headline={i18n.REPORTER}
-          users={[caseData.createdBy]}
-          userProfiles={userProfiles}
-        />
-        {userActionsData?.participants ? (
+      </EuiFlexItem>
+      <EuiFlexItem grow={2} data-test-subj="case-view-page-sidebar">
+        <EuiFlexGroup direction="column" responsive={false} gutterSize="xl">
+          {caseAssignmentAuthorized ? (
+            <>
+              <AssignUsers
+                caseAssignees={caseData.assignees}
+                currentUserProfile={currentUserProfile}
+                onAssigneesChanged={onUpdateAssignees}
+                isLoading={isLoadingAssigneeData}
+                userProfiles={userProfiles ?? new Map()}
+              />
+            </>
+          ) : null}
+          <SeveritySidebarSelector
+            isDisabled={!permissions.update}
+            isLoading={isLoading && loadingKey === 'severity'}
+            selectedSeverity={caseData.severity}
+            onSeverityChange={onUpdateSeverity}
+          />
           <UserList
-            dataTestSubj="case-view-user-list-participants"
-            email={emailContent}
-            headline={i18n.PARTICIPANTS}
-            loading={isLoadingUserActions}
-            users={userActionsData.participants}
+            dataTestSubj="case-view-user-list-reporter"
+            theCase={caseData}
+            headline={i18n.REPORTER}
+            users={reporterAsArray}
             userProfiles={userProfiles}
           />
-        ) : null}
-        <EditTags
-          tags={caseData.tags}
-          onSubmit={onSubmitTags}
-          isLoading={isLoading && loadingKey === 'tags'}
-        />
-        {pushToServiceAuthorized && userActionsData ? (
-          <EditConnector
-            caseData={caseData}
-            caseServices={userActionsData.caseServices}
-            connectorName={connectorName}
-            connectors={connectors}
-            hasDataToPush={userActionsData.hasDataToPush}
-            isLoading={isLoadingConnectors || (isLoading && loadingKey === 'connector')}
-            isValidConnector={isLoadingConnectors ? true : isValidConnector}
-            onSubmit={onSubmitConnector}
-            userActions={userActionsData.caseUserActions}
+          {caseUsers != null ? (
+            <UserList
+              dataTestSubj="case-view-user-list-participants"
+              theCase={caseData}
+              headline={i18n.PARTICIPANTS}
+              loading={isLoadingCaseUsers}
+              users={[...caseUsers.participants, ...caseUsers.assignees]}
+              userProfiles={userProfiles}
+            />
+          ) : null}
+          <EditTags
+            tags={caseData.tags}
+            onSubmit={onSubmitTags}
+            isLoading={isLoading && loadingKey === 'tags'}
           />
-        ) : null}
+          <EditCategory
+            category={caseData.category}
+            onSubmit={onSubmitCategory}
+            isLoading={isLoading && loadingKey === 'category'}
+          />
+          {showConnectorSidebar ? (
+            <EditConnector
+              caseData={caseData}
+              caseConnectors={caseConnectors}
+              supportedActionConnectors={supportedActionConnectors}
+              isLoading={
+                isLoadingAllAvailableConnectors || (isLoading && loadingKey === 'connector')
+              }
+              onSubmit={onSubmitConnector}
+              key={caseData.connector.id}
+            />
+          ) : null}
+          <CustomFields
+            isLoading={isLoading && loadingKey === 'customFields'}
+            customFields={caseData.customFields}
+            customFieldsConfiguration={casesConfiguration.customFields}
+            onSubmit={onSubmitCustomFields}
+          />
+        </EuiFlexGroup>
       </EuiFlexItem>
     </>
   );

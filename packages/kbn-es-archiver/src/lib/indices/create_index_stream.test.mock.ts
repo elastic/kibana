@@ -6,10 +6,26 @@
  * Side Public License, v 1.
  */
 
-import type { deleteKibanaIndices } from './kibana_index';
+import type {
+  cleanSavedObjectIndices,
+  deleteSavedObjectIndices,
+  isSavedObjectIndex,
+} from './kibana_index';
 
-export const mockDeleteKibanaIndices = jest.fn() as jest.MockedFunction<typeof deleteKibanaIndices>;
+export const mockCleanSavedObjectIndices = jest.fn() as jest.MockedFunction<
+  typeof cleanSavedObjectIndices
+>;
+
+export const mockDeleteSavedObjectIndices = jest.fn() as jest.MockedFunction<
+  typeof deleteSavedObjectIndices
+>;
+
+export const mockIsSavedObjectIndex = jest.fn() as unknown as jest.MockedFunction<
+  typeof isSavedObjectIndex
+>;
 
 jest.mock('./kibana_index', () => ({
-  deleteKibanaIndices: mockDeleteKibanaIndices,
+  cleanSavedObjectIndices: mockCleanSavedObjectIndices,
+  deleteSavedObjectIndices: mockDeleteSavedObjectIndices,
+  isSavedObjectIndex: mockIsSavedObjectIndex,
 }));

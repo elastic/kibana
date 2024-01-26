@@ -13,8 +13,12 @@ import { parseClientOptions } from './client_config';
 import { instrumentEsQueryAndDeprecationLogger } from './log_query_and_deprecation';
 import { createTransport } from './create_transport';
 import type { AgentFactoryProvider } from './agent_manager';
+import { patchElasticsearchClient } from './patch_client';
 
 const noop = () => undefined;
+
+// Apply ES client patches on module load
+patchElasticsearchClient();
 
 export const configureClient = (
   config: ElasticsearchClientConfig,
@@ -45,7 +49,8 @@ export const configureClient = (
     ConnectionPool: ClusterConnectionPool,
   });
 
-  instrumentEsQueryAndDeprecationLogger({ logger, client, type });
+  const { apisToRedactInLogs = [] } = config;
+  instrumentEsQueryAndDeprecationLogger({ logger, client, type, apisToRedactInLogs });
 
   return client;
 };

@@ -9,12 +9,12 @@ import type { EuiTourStepProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ElementTarget } from '@elastic/eui/src/services/findElement';
 
-export const enum SecurityStepId {
+export enum SecurityStepId {
   rules = 'rules',
   alertsCases = 'alertsCases',
 }
 
-export const enum AlertsCasesTourSteps {
+export enum AlertsCasesTourSteps {
   none = 0,
   pointToAlertName = 1,
   expandEvent = 2,
@@ -64,13 +64,13 @@ const alertsCasesConfig: StepConfig[] = [
     ...defaultConfig,
     step: AlertsCasesTourSteps.pointToAlertName,
     title: i18n.translate('xpack.securitySolution.guided_onboarding.tour.ruleNameStep.tourTitle', {
-      defaultMessage: 'Test alert for practice',
+      defaultMessage: 'Examine the Alerts Table',
     }),
     content: i18n.translate(
       'xpack.securitySolution.guided_onboarding.tour.ruleNameStep.tourContent',
       {
         defaultMessage:
-          'To help you practice triaging alerts, we enabled a rule to create your first alert.',
+          'To help you practice triaging alerts, here is the alert from the rule that we enabled in the previous step.',
       }
     ),
     anchorPosition: 'downCenter',
@@ -105,8 +105,7 @@ const alertsCasesConfig: StepConfig[] = [
     content: i18n.translate(
       'xpack.securitySolution.guided_onboarding.tour.flyoutOverview.tourContent',
       {
-        defaultMessage:
-          'Learn more about alerts by checking out all the information available on each tab.',
+        defaultMessage: 'Learn more about alerts by checking out all the information available.',
       }
     ),
     // needs to use anchor to properly place tour step
@@ -128,7 +127,7 @@ const alertsCasesConfig: StepConfig[] = [
       defaultMessage: 'Create a case',
     }),
     content: i18n.translate('xpack.securitySolution.guided_onboarding.tour.addToCase.tourContent', {
-      defaultMessage: 'From the Take action menu, add the alert to a new case.',
+      defaultMessage: 'From the Take action menu, select "Add to new case".',
     }),
     anchorPosition: 'upRight',
     dataTestSubj: getTourAnchor(AlertsCasesTourSteps.addAlertToCase, SecurityStepId.alertsCases),
@@ -137,12 +136,12 @@ const alertsCasesConfig: StepConfig[] = [
     ...defaultConfig,
     step: AlertsCasesTourSteps.createCase,
     title: i18n.translate('xpack.securitySolution.guided_onboarding.tour.createCase.tourTitle', {
-      defaultMessage: `Add details`,
+      defaultMessage: `Add Case details`,
     }),
     content: i18n.translate(
       'xpack.securitySolution.guided_onboarding.tour.createCase.tourContent',
       {
-        defaultMessage: `In addition to the alert, you can add any relevant information you need to the case.`,
+        defaultMessage: `Provide the relevant information to create the case. We have included sample text for you.`,
       }
     ),
     anchor: `[tour-step="create-case-flyout"] label`,
@@ -155,12 +154,12 @@ const alertsCasesConfig: StepConfig[] = [
     ...defaultConfig,
     step: AlertsCasesTourSteps.submitCase,
     title: i18n.translate('xpack.securitySolution.guided_onboarding.tour.submitCase.tourTitle', {
-      defaultMessage: `Submit case`,
+      defaultMessage: `Create a case`,
     }),
     content: i18n.translate(
       'xpack.securitySolution.guided_onboarding.tour.submitCase.tourContent',
       {
-        defaultMessage: `Press Create case to advance the tour.`,
+        defaultMessage: `Press "Create case" to continue.`,
       }
     ),
     anchor: `[tour-step="create-case-flyout"] [tour-step="create-case-submit"]`,
@@ -178,22 +177,22 @@ const alertsCasesConfig: StepConfig[] = [
       defaultMessage: 'View the case',
     }),
     content: i18n.translate('xpack.securitySolution.guided_onboarding.tour.viewCase.tourContent', {
-      defaultMessage: 'From the Insights, click through to view the new case',
+      defaultMessage: 'Cases are shown under Insights, in the alert details.',
     }),
-    anchorPosition: 'leftUp',
+    anchorPosition: 'rightUp',
     dataTestSubj: getTourAnchor(AlertsCasesTourSteps.viewCase, SecurityStepId.alertsCases),
   },
 ];
 
 export const sampleCase = {
   title: i18n.translate('xpack.securitySolution.guided_onboarding.tour.createCase.title', {
-    defaultMessage: `Demo signal detected`,
+    defaultMessage: `This is a test case`,
   }),
   description: i18n.translate(
     'xpack.securitySolution.guided_onboarding.tour.createCase.description',
     {
       defaultMessage:
-        "This is where you'd document a malicious signal. You can include whatever information is relevant to the case and would be helpful for anyone else that needs to read up on it. `Markdown` **formatting** _is_ [supported](https://www.markdownguide.org/cheat-sheet/).",
+        'Add a description and other relevant information. The alert will be added to the case.',
     }
   ),
 };

@@ -1,0 +1,10 @@
+[[esql-example-queries]]
+
+The following is an example ES|QL query:
+
+```
+FROM postgres-logs
+| DISSECT message "%{} duration: %{query_duration} ms"
+| EVAL query_duration_num = TO_DOUBLE(query_duration)
+| STATS avg_duration = AVG(query_duration_num)
+```

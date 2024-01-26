@@ -142,11 +142,7 @@ describe('AutocompleteFieldMatchComponent', () => {
       />
     );
 
-    expect(
-      wrapper
-        .find('[data-test-subj="comboBoxInput"]')
-        .hasClass('euiComboBox__inputWrap-isClearable')
-    ).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="comboBoxClearButton"]`)).toBeTruthy();
   });
 
   test('it correctly displays selected value', () => {
@@ -170,7 +166,7 @@ describe('AutocompleteFieldMatchComponent', () => {
     );
 
     expect(
-      wrapper.find('[data-test-subj="valuesAutocompleteMatch"] EuiComboBoxPill').at(0).text()
+      wrapper.find('[data-test-subj="valuesAutocompleteMatch"] input').at(0).props().value
     ).toEqual('127.0.0.1');
   });
 

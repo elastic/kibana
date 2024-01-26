@@ -13,19 +13,30 @@ import type {
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import { alertMappings } from './mappings';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { alertMappings } from '../../common/saved_objects/rules/mappings';
+import { rulesSettingsMappings } from './rules_settings_mappings';
+import { maintenanceWindowMappings } from './maintenance_window_mapping';
 import { getMigrations } from './migrations';
 import { transformRulesForExport } from './transform_rule_for_export';
 import { RawRule } from '../types';
 import { getImportWarnings } from './get_import_warnings';
 import { isRuleExportable } from './is_rule_exportable';
 import { RuleTypeRegistry } from '../rule_type_registry';
-export { partiallyUpdateAlert } from './partially_update_alert';
+export { partiallyUpdateRule } from './partially_update_rule';
+export { getLatestRuleVersion, getMinimumCompatibleVersion } from './rule_model_versions';
+import {
+  RULES_SETTINGS_SAVED_OBJECT_TYPE,
+  MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+} from '../../common';
+import { ruleModelVersions } from './rule_model_versions';
+
+export const RULE_SAVED_OBJECT_TYPE = 'alert';
 
 // Use caution when removing items from this array! Any field which has
 // ever existed in the rule SO must be included in this array to prevent
 // decryption failures during migration.
-export const AlertAttributesExcludedFromAAD = [
+export const RuleAttributesExcludedFromAAD = [
   'scheduledTaskId',
   'muteAll',
   'mutedInstanceIds',
@@ -36,13 +47,17 @@ export const AlertAttributesExcludedFromAAD = [
   'snoozeEndTime', // field removed in 8.2, but must be retained in case an rule created/updated in 8.2 is being migrated
   'snoozeSchedule',
   'isSnoozedUntil',
+  'lastRun',
+  'nextRun',
+  'revision',
+  'running',
 ];
 
-// useful for Pick<RawAlert, AlertAttributesExcludedFromAADType> which is a
+// useful for Pick<RawAlert, RuleAttributesExcludedFromAAD> which is a
 // type which is a subset of RawAlert with just attributes excluded from AAD
 
-// useful for Pick<RawAlert, AlertAttributesExcludedFromAADType>
-export type AlertAttributesExcludedFromAADType =
+// useful for Pick<RawAlert, RuleAttributesExcludedFromAAD>
+export type RuleAttributesExcludedFromAADType =
   | 'scheduledTaskId'
   | 'muteAll'
   | 'mutedInstanceIds'
@@ -52,7 +67,11 @@ export type AlertAttributesExcludedFromAADType =
   | 'monitoring'
   | 'snoozeEndTime'
   | 'snoozeSchedule'
-  | 'isSnoozedUntil';
+  | 'isSnoozedUntil'
+  | 'lastRun'
+  | 'nextRun'
+  | 'revision'
+  | 'running';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
@@ -63,7 +82,8 @@ export function setupSavedObjects(
   getSearchSourceMigrations: () => MigrateFunctionsObject
 ) {
   savedObjects.registerType({
-    name: 'alert',
+    name: RULE_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,
     namespaceType: 'multiple-isolated',
     convertToMultiNamespaceTypeVersion: '8.0.0',
@@ -90,10 +110,12 @@ export function setupSavedObjects(
         return isRuleExportable(ruleSavedObject, ruleTypeRegistry, logger);
       },
     },
+    modelVersions: ruleModelVersions,
   });
 
   savedObjects.registerType({
     name: 'api_key_pending_invalidation',
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,
     namespaceType: 'agnostic',
     mappings: {
@@ -108,11 +130,27 @@ export function setupSavedObjects(
     },
   });
 
+  savedObjects.registerType({
+    name: RULES_SETTINGS_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    hidden: true,
+    namespaceType: 'single',
+    mappings: rulesSettingsMappings,
+  });
+
+  savedObjects.registerType({
+    name: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    hidden: true,
+    namespaceType: 'multiple-isolated',
+    mappings: maintenanceWindowMappings,
+  });
+
   // Encrypted attributes
   encryptedSavedObjects.registerType({
-    type: 'alert',
+    type: RULE_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['apiKey']),
-    attributesToExcludeFromAAD: new Set(AlertAttributesExcludedFromAAD),
+    attributesToExcludeFromAAD: new Set(RuleAttributesExcludedFromAAD),
   });
 
   // Encrypted attributes

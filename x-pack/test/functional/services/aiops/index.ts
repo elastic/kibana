@@ -7,19 +7,31 @@
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
-import { ExplainLogRateSpikesProvider } from './explain_log_rate_spikes';
-import { ExplainLogRateSpikesAnalysisTableProvider } from './explain_log_rate_spikes_analysis_table';
-import { ExplainLogRateSpikesAnalysisGroupsTableProvider } from './explain_log_rate_spikes_analysis_groups_table';
+import { LogRateAnalysisPageProvider } from './log_rate_analysis_page';
+import { LogRateAnalysisResultsTableProvider } from './log_rate_analysis_results_table';
+import { LogRateAnalysisResultsGroupsTableProvider } from './log_rate_analysis_results_groups_table';
+import { LogRateAnalysisDataGeneratorProvider } from './log_rate_analysis_data_generator';
+import { LogPatternAnalysisPageProvider } from './log_pattern_analysis_page';
+import { ChangePointDetectionPageProvider } from './change_point_detection_page';
+import { MlTableServiceProvider } from '../ml/common_table_service';
 
 export function AiopsProvider(context: FtrProviderContext) {
-  const explainLogRateSpikes = ExplainLogRateSpikesProvider(context);
-  const explainLogRateSpikesAnalysisTable = ExplainLogRateSpikesAnalysisTableProvider(context);
-  const explainLogRateSpikesAnalysisGroupsTable =
-    ExplainLogRateSpikesAnalysisGroupsTableProvider(context);
+  const logRateAnalysisPage = LogRateAnalysisPageProvider(context);
+  const logRateAnalysisResultsTable = LogRateAnalysisResultsTableProvider(context);
+  const logRateAnalysisResultsGroupsTable = LogRateAnalysisResultsGroupsTableProvider(context);
+  const logRateAnalysisDataGenerator = LogRateAnalysisDataGeneratorProvider(context);
+  const logPatternAnalysisPage = LogPatternAnalysisPageProvider(context);
+
+  const tableService = MlTableServiceProvider(context);
+
+  const changePointDetectionPage = ChangePointDetectionPageProvider(context, tableService);
 
   return {
-    explainLogRateSpikes,
-    explainLogRateSpikesAnalysisTable,
-    explainLogRateSpikesAnalysisGroupsTable,
+    changePointDetectionPage,
+    logRateAnalysisPage,
+    logRateAnalysisResultsTable,
+    logRateAnalysisResultsGroupsTable,
+    logRateAnalysisDataGenerator,
+    logPatternAnalysisPage,
   };
 }

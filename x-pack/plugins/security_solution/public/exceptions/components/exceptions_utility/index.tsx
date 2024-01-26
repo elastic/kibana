@@ -32,11 +32,12 @@ const MyUtilities = styled(EuiFlexGroup)`
 const StyledCondition = styled.span`
   display: inline-block !important;
   vertical-align: middle !important;
+  line-height: 1;
 `;
 interface ExceptionsUtilityComponentProps {
   dataTestSubj?: string;
   exceptionsTitle?: string;
-  pagination: Pagination;
+  pagination: Pagination & { pageSize: number };
   // Corresponds to last time exception items were fetched
   lastUpdated: string | number | null;
 }

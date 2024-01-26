@@ -29,20 +29,29 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     // Trial
     loadTestFile(require.resolve('./cases/push_case'));
     loadTestFile(require.resolve('./cases/user_actions/get_all_user_actions'));
+    loadTestFile(require.resolve('./cases/user_actions/find_user_actions'));
     loadTestFile(require.resolve('./cases/assignees'));
     loadTestFile(require.resolve('./cases/find_cases'));
     loadTestFile(require.resolve('./configure'));
+    loadTestFile(require.resolve('./attachments_framework/registered_persistable_state_trial'));
     // sub privileges are only available with a license above basic
     loadTestFile(require.resolve('./delete_sub_privilege'));
     loadTestFile(require.resolve('./user_profiles/get_current'));
 
     // Internal routes
+    loadTestFile(require.resolve('./internal/get_user_action_stats'));
     loadTestFile(require.resolve('./internal/suggest_user_profiles'));
+    loadTestFile(require.resolve('./internal/get_connectors'));
+    loadTestFile(require.resolve('./internal/user_actions_get_users'));
+    loadTestFile(require.resolve('./internal/bulk_delete_file_attachments'));
 
     // Common
     loadTestFile(require.resolve('../common'));
 
     // NOTE: These need to be at the end because they could delete the .kibana index and inadvertently remove the users and spaces
     loadTestFile(require.resolve('../common/migrations'));
+
+    // NOTE: These need to be at the end because they could delete the .kibana index and inadvertently remove the users and spaces
+    loadTestFile(require.resolve('../common/kibana_alerting_cases_index'));
   });
 };

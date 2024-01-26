@@ -7,8 +7,6 @@
 
 import { CasesActions } from './cases';
 
-const version = '1.0.0-zeta1';
-
 describe('#get', () => {
   it.each`
     operation
@@ -19,7 +17,7 @@ describe('#get', () => {
     ${true}
     ${{}}
   `(`operation of ${JSON.stringify('$operation')}`, ({ operation }) => {
-    const actions = new CasesActions(version);
+    const actions = new CasesActions();
     expect(() => actions.get('owner', operation)).toThrowErrorMatchingSnapshot();
   });
 
@@ -32,14 +30,12 @@ describe('#get', () => {
     ${true}
     ${{}}
   `(`owner of ${JSON.stringify('$owner')}`, ({ owner }) => {
-    const actions = new CasesActions(version);
+    const actions = new CasesActions();
     expect(() => actions.get(owner, 'operation')).toThrowErrorMatchingSnapshot();
   });
 
   it('returns `cases:${owner}/${operation}`', () => {
-    const alertingActions = new CasesActions(version);
-    expect(alertingActions.get('security', 'bar-operation')).toBe(
-      'cases:1.0.0-zeta1:security/bar-operation'
-    );
+    const alertingActions = new CasesActions();
+    expect(alertingActions.get('security', 'bar-operation')).toBe('cases:security/bar-operation');
   });
 });

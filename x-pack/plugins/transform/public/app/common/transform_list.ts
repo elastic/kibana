@@ -20,8 +20,22 @@ export interface TransformListRow {
   id: TransformId;
   config: TransformConfigUnion;
   mode?: string; // added property on client side to allow filtering by this field
-  stats: TransformStats;
+  stats?: TransformStats;
   alerting_rules?: TransformHealthAlertRule[];
+}
+
+export type TransformListRowWithStats = TransformListRow & {
+  stats: TransformStats;
+};
+
+export function isTransformListRowWithStats(
+  arg: TransformListRow
+): arg is TransformListRowWithStats {
+  return arg.stats !== undefined;
+}
+
+export function missingTransformStats(items: TransformListRow[]) {
+  return items.some((i: TransformListRow) => !isTransformListRowWithStats(i));
 }
 
 // The single Action type is not exported as is

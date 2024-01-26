@@ -5,29 +5,48 @@
  * 2.0.
  */
 
+import { useQuery } from '@tanstack/react-query';
+
 import { appRoutesService } from '../../services';
 import type { CheckPermissionsResponse, GenerateServiceTokenResponse } from '../../types';
+import { API_VERSIONS } from '../../../common/constants';
 
-import { sendRequest, useRequest } from './use_request';
+import { sendRequest, sendRequestForRq, useRequest } from './use_request';
 
 export const sendGetPermissionsCheck = (fleetServerSetup?: boolean) => {
   return sendRequest<CheckPermissionsResponse>({
     path: appRoutesService.getCheckPermissionsPath(),
     method: 'get',
     query: { fleetServerSetup },
+    version: API_VERSIONS.public.v1,
   });
 };
 
-export const sendGenerateServiceToken = () => {
+export const sendGenerateServiceToken = (remote?: boolean) => {
   return sendRequest<GenerateServiceTokenResponse>({
     path: appRoutesService.getRegenerateServiceTokenPath(),
     method: 'post',
+    query: { remote },
+    version: API_VERSIONS.public.v1,
   });
+};
+
+export const usePermissionCheckQuery = () => {
+  return useQuery<CheckPermissionsResponse, CheckPermissionsResponse['error']>(
+    ['permissionsCheck'],
+    () =>
+      sendRequestForRq<CheckPermissionsResponse>({
+        path: appRoutesService.getCheckPermissionsPath(),
+        method: 'get',
+        version: API_VERSIONS.public.v1,
+      })
+  );
 };
 
 export const usePermissionCheck = () => {
   return useRequest<CheckPermissionsResponse>({
     path: appRoutesService.getCheckPermissionsPath(),
     method: 'get',
+    version: API_VERSIONS.public.v1,
   });
 };

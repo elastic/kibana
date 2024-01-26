@@ -6,15 +6,19 @@
  */
 
 import {
-  createLogViewsServiceSetupMock,
-  createLogViewsServiceStartMock,
-} from './services/log_views/log_views_service.mock';
+  createInventoryViewsServiceSetupMock,
+  createInventoryViewsServiceStartMock,
+} from './services/inventory_views/inventory_views_service.mock';
+import {
+  createMetricsExplorerViewsServiceSetupMock,
+  createMetricsExplorerViewsServiceStartMock,
+} from './services/metrics_explorer_views/metrics_explorer_views_service.mock';
 import { InfraPluginSetup, InfraPluginStart } from './types';
 
 const createInfraSetupMock = () => {
   const infraSetupMock: jest.Mocked<InfraPluginSetup> = {
-    defineInternalSourceConfiguration: jest.fn(),
-    logViews: createLogViewsServiceSetupMock(),
+    inventoryViews: createInventoryViewsServiceSetupMock(),
+    metricsExplorerViews: createMetricsExplorerViewsServiceSetupMock(),
   };
 
   return infraSetupMock;
@@ -22,8 +26,8 @@ const createInfraSetupMock = () => {
 
 const createInfraStartMock = () => {
   const infraStartMock: jest.Mocked<InfraPluginStart> = {
-    getMetricIndices: jest.fn(),
-    logViews: createLogViewsServiceStartMock(),
+    inventoryViews: createInventoryViewsServiceStartMock(),
+    metricsExplorerViews: createMetricsExplorerViewsServiceStartMock(),
   };
   return infraStartMock;
 };

@@ -33,6 +33,7 @@ export function ResetPercentileZoom({
     <EuiFlexItem grow={false}>
       <EuiShowFor sizes={['xs']}>
         <EuiButtonIcon
+          data-test-subj="uxResetPercentileZoomButton"
           iconType="inspect"
           size="s"
           aria-label={I18LABELS.resetZoom}
@@ -40,7 +41,12 @@ export function ResetPercentileZoom({
         />
       </EuiShowFor>
       <EuiHideFor sizes={['xs']}>
-        <EuiButtonEmpty iconType="inspect" size="s" onClick={onClick}>
+        <EuiButtonEmpty
+          data-test-subj="uxResetPercentileZoomButton"
+          iconType="inspect"
+          size="s"
+          onClick={onClick}
+        >
           {I18LABELS.resetZoom}
         </EuiButtonEmpty>
       </EuiHideFor>

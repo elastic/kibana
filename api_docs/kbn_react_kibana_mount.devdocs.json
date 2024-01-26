@@ -1,0 +1,272 @@
+{
+  "id": "@kbn/react-kibana-mount",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/react-kibana-mount",
+        "id": "def-common.MountPointPortal",
+        "type": "Function",
+        "tags": [],
+        "label": "MountPointPortal",
+        "description": [
+          "\nUtility component to portal a part of a react application into the provided `MountPoint`."
+        ],
+        "signature": [
+          "({ children, setMountPoint }: React.PropsWithChildren<",
+          {
+            "pluginId": "@kbn/react-kibana-mount",
+            "scope": "common",
+            "docId": "kibKbnReactKibanaMountPluginApi",
+            "section": "def-common.MountPointPortalProps",
+            "text": "MountPointPortalProps"
+          },
+          ">) => React.ReactPortal | null"
+        ],
+        "path": "packages/react/kibana_mount/mount_point_portal.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-kibana-mount",
+            "id": "def-common.MountPointPortal.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ children, setMountPoint }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              {
+                "pluginId": "@kbn/react-kibana-mount",
+                "scope": "common",
+                "docId": "kibKbnReactKibanaMountPluginApi",
+                "section": "def-common.MountPointPortalProps",
+                "text": "MountPointPortalProps"
+              },
+              ">"
+            ],
+            "path": "packages/react/kibana_mount/mount_point_portal.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-kibana-mount",
+        "id": "def-common.toMountPoint",
+        "type": "Function",
+        "tags": [],
+        "label": "toMountPoint",
+        "description": [
+          "\nMountPoint converter for react nodes.\n"
+        ],
+        "signature": [
+          "(node: React.ReactNode, params: ",
+          {
+            "pluginId": "@kbn/react-kibana-mount",
+            "scope": "common",
+            "docId": "kibKbnReactKibanaMountPluginApi",
+            "section": "def-common.ToMountPointParams",
+            "text": "ToMountPointParams"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/core-mount-utils-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+            "section": "def-common.MountPoint",
+            "text": "MountPoint"
+          },
+          "<HTMLElement>"
+        ],
+        "path": "packages/react/kibana_mount/to_mount_point.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-kibana-mount",
+            "id": "def-common.toMountPoint.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "node",
+            "description": [
+              "to get a mount point for"
+            ],
+            "signature": [
+              "React.ReactNode"
+            ],
+            "path": "packages/react/kibana_mount/to_mount_point.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/react-kibana-mount",
+            "id": "def-common.toMountPoint.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/react-kibana-mount",
+                "scope": "common",
+                "docId": "kibKbnReactKibanaMountPluginApi",
+                "section": "def-common.ToMountPointParams",
+                "text": "ToMountPointParams"
+              }
+            ],
+            "path": "packages/react/kibana_mount/to_mount_point.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-kibana-mount",
+        "id": "def-common.useIfMounted",
+        "type": "Function",
+        "tags": [],
+        "label": "useIfMounted",
+        "description": [],
+        "signature": [
+          "() => (func: any) => void"
+        ],
+        "path": "packages/react/kibana_mount/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/react-kibana-mount",
+        "id": "def-common.MountPointPortalProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "MountPointPortalProps",
+        "description": [],
+        "path": "packages/react/kibana_mount/mount_point_portal.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-kibana-mount",
+            "id": "def-common.MountPointPortalProps.setMountPoint",
+            "type": "Function",
+            "tags": [],
+            "label": "setMountPoint",
+            "description": [],
+            "signature": [
+              "(mountPoint: ",
+              {
+                "pluginId": "@kbn/core-mount-utils-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                "section": "def-common.MountPoint",
+                "text": "MountPoint"
+              },
+              "<HTMLElement> | undefined) => void"
+            ],
+            "path": "packages/react/kibana_mount/mount_point_portal.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/react-kibana-mount",
+                "id": "def-common.MountPointPortalProps.setMountPoint.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "mountPoint",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-mount-utils-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
+                    "section": "def-common.MountPoint",
+                    "text": "MountPoint"
+                  },
+                  "<HTMLElement> | undefined"
+                ],
+                "path": "packages/react/kibana_mount/mount_point_portal.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/react-kibana-mount",
+        "id": "def-common.ToMountPointParams",
+        "type": "Type",
+        "tags": [],
+        "label": "ToMountPointParams",
+        "description": [],
+        "signature": [
+          "{ i18n: ",
+          {
+            "pluginId": "@kbn/core-i18n-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreI18nBrowserPluginApi",
+            "section": "def-common.I18nStart",
+            "text": "I18nStart"
+          },
+          "; analytics?: ",
+          {
+            "pluginId": "@kbn/core-analytics-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
+            "section": "def-common.AnalyticsServiceStart",
+            "text": "AnalyticsServiceStart"
+          },
+          " | undefined; theme: ",
+          {
+            "pluginId": "@kbn/react-kibana-context-common",
+            "scope": "common",
+            "docId": "kibKbnReactKibanaContextCommonPluginApi",
+            "section": "def-common.ThemeServiceStart",
+            "text": "ThemeServiceStart"
+          },
+          "; }"
+        ],
+        "path": "packages/react/kibana_mount/to_mount_point.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

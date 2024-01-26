@@ -30,3 +30,19 @@ If your usage pattern _has_ changed, the dependency view can quickly show you wh
 that pattern change exists in all upstream services, or just a subset of your services.
 You might then start digging into traces coming from
 impacted services to determine why that pattern change has occurred.
+
+[float]
+[[dependencies-operations]]
+==== Operations
+
+beta::[]
+
+**Dependency operations** provides a granular breakdown of the operations/queries a dependency is executing.
+
+[role="screenshot"]
+image::apm/images/operations.png[operations view in the APM app in Kibana]
+
+Selecting an operation displays the operation's impact and performance trends over time, via key metrics like latency, throughput, and failed transaction rate. In addition, the <<spans,**Trace sample timeline**>> provides a visual drill-down into an end-to-end trace sample.
+
+[role="screenshot"]
+image::apm/images/operations-detail.png[operations detail view in the APM app in Kibana]

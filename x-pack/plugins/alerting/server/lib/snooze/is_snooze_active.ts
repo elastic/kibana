@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RRule, ByWeekday, Weekday, rrulestr } from 'rrule';
+import { RRule, Weekday } from '@kbn/rrule';
 import { RuleSnoozeSchedule } from '../../types';
 
 const MAX_TIMESTAMP = 8640000000000000;
@@ -35,12 +35,13 @@ export function isSnoozeActive(snooze: RuleSnoozeSchedule) {
       ...rRule,
       dtstart: new Date(rRule.dtstart),
       until: rRule.until ? new Date(rRule.until) : null,
-      wkst: rRule.wkst ? Weekday.fromStr(rRule.wkst) : null,
-      byweekday: rRule.byweekday ? parseByWeekday(rRule.byweekday) : null,
+      byweekday: rRule.byweekday ?? null,
+      wkst: rRule.wkst ? Weekday[rRule.wkst] : null,
     };
 
     const recurrenceRule = new RRule(rRuleOptions);
-    const lastOccurrence = recurrenceRule.before(new Date(now), true);
+    const lastOccurrence = recurrenceRule.before(new Date(now));
+
     if (!lastOccurrence) return null;
     // Check if the current recurrence has been skipped manually
     if (snooze.skipRecurrences?.includes(lastOccurrence.toISOString())) return null;
@@ -52,10 +53,4 @@ export function isSnoozeActive(snooze: RuleSnoozeSchedule) {
   }
 
   return null;
-}
-
-export function parseByWeekday(byweekday: Array<string | number>): ByWeekday[] {
-  const rRuleString = `RRULE:BYDAY=${byweekday.join(',')}`;
-  const parsedRRule = rrulestr(rRuleString);
-  return parsedRRule.origOptions.byweekday as ByWeekday[];
 }

@@ -23,14 +23,14 @@ import {
   TIMESTAMP,
   VERSION,
 } from '@kbn/rule-data-utils';
-import { TopAlert } from '../pages/alerts';
+
 import { ConfigSchema } from '../plugin';
 import { isAlertDetailsEnabledPerApp } from './is_alert_details_enabled';
+import type { TopAlert } from '../typings/alerts';
+
 const defaultConfig = {
   unsafe: {
     alertDetails: {
-      apm: { enabled: false },
-      logs: { enabled: false },
       metrics: { enabled: false },
       uptime: { enabled: false },
     },
@@ -62,16 +62,10 @@ describe('isAlertDetailsEnabled', () => {
       start: 1630587249674,
       lastUpdated: 1630588131750,
     } as unknown as TopAlert;
-    it('returns FALSE when logs: { enabled: false }', () => {
-      expect(isAlertDetailsEnabledPerApp(logsAlert, defaultConfig)).toBeFalsy();
-    });
-
-    it('returns TRUE when logs: { enabled: true }', () => {
+    it('returns TRUE when rule type is logs.alert.document.count', () => {
       const updatedConfig = {
         unsafe: {
           alertDetails: {
-            apm: { enabled: false },
-            logs: { enabled: true },
             metrics: { enabled: false },
             uptime: { enabled: false },
           },
@@ -105,22 +99,24 @@ describe('isAlertDetailsEnabled', () => {
       start: 1630587249674,
       lastUpdated: 1630588131750,
     } as unknown as TopAlert;
-    it('returns FALSE when apm: { enabled: false }', () => {
+    it('returns FALSE when the rule type IS NOT apm.transaction_duration', () => {
       expect(isAlertDetailsEnabledPerApp(APMAlert, defaultConfig)).toBeFalsy();
     });
 
-    it('returns TRUE when apm: { enabled: true }', () => {
+    it('returns TRUE when rule type is apm.transaction_duration', () => {
       const updatedConfig = {
         unsafe: {
           alertDetails: {
-            apm: { enabled: true },
-            logs: { enabled: false },
             metrics: { enabled: false },
             uptime: { enabled: false },
           },
         },
       } as ConfigSchema;
-      expect(isAlertDetailsEnabledPerApp(APMAlert, updatedConfig)).toBeTruthy();
+      const apmTransactionDurationAlert = {
+        ...APMAlert,
+        fields: { ...APMAlert.fields, [ALERT_RULE_TYPE_ID]: 'apm.transaction_duration' },
+      };
+      expect(isAlertDetailsEnabledPerApp(apmTransactionDurationAlert, updatedConfig)).toBeTruthy();
     });
   });
   describe('Metrics alert', () => {
@@ -156,8 +152,6 @@ describe('isAlertDetailsEnabled', () => {
       const updatedConfig = {
         unsafe: {
           alertDetails: {
-            apm: { enabled: false },
-            logs: { enabled: false },
             metrics: { enabled: true },
             uptime: { enabled: false },
           },
@@ -199,8 +193,6 @@ describe('isAlertDetailsEnabled', () => {
       const updatedConfig = {
         unsafe: {
           alertDetails: {
-            apm: { enabled: false },
-            logs: { enabled: false },
             metrics: { enabled: false },
             uptime: { enabled: true },
           },
@@ -242,8 +234,6 @@ describe('isAlertDetailsEnabled', () => {
       const updatedConfig = {
         unsafe: {
           alertDetails: {
-            apm: { enabled: true },
-            logs: { enabled: true },
             metrics: { enabled: true },
             uptime: { enabled: true },
           },
@@ -255,8 +245,6 @@ describe('isAlertDetailsEnabled', () => {
       const updatedConfig = {
         unsafe: {
           alertDetails: {
-            apm: { enabled: true },
-            logs: { enabled: true },
             metrics: { enabled: true },
             uptime: { enabled: true },
           },

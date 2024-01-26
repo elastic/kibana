@@ -10,7 +10,7 @@ import { ComponentType } from 'react';
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { Capabilities } from '@kbn/core/public';
-import type { UrlService } from '../common/url_service';
+import type { UrlService, LocatorPublic } from '../common/url_service';
 import type { BrowserShortUrlClientFactoryCreateParams } from './url_service/short_urls/short_url_client_factory';
 import type { BrowserShortUrlClient } from './url_service/short_urls/short_url_client';
 
@@ -41,10 +41,16 @@ export interface ShareContext {
    * If not set it will default to `window.location.href`
    */
   shareableUrl: string;
+  shareableUrlForSavedObject?: string;
+  shareableUrlLocatorParams?: {
+    locator: LocatorPublic<any>;
+    params: any;
+  };
   sharingData: { [key: string]: unknown };
   isDirty: boolean;
   onClose: () => void;
   showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
+  disabledShareUrl?: boolean;
 }
 
 /**
@@ -99,4 +105,5 @@ export interface ShowShareMenuOptions extends Omit<ShareContext, 'onClose'> {
   embedUrlParamExtensions?: UrlParamExtension[];
   snapshotShareWarning?: string;
   onClose?: () => void;
+  objectTypeTitle?: string;
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ML_JOB_FIELD_TYPES } from '@kbn/ml-plugin/common/constants/field_types';
+import { ML_JOB_FIELD_TYPES } from '@kbn/ml-anomaly-utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { TestData, MetricFieldVisConfig } from './types';
 import {
@@ -14,7 +14,7 @@ import {
   farequoteKQLSearchTestData,
   farequoteLuceneSearchTestData,
   sampleLogTestData,
-} from './index_test_data';
+} from './index_test_data_random_sampler';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const headerPage = getPageObject('header');
@@ -26,7 +26,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep(
         `${testData.suiteTitle} loads the saved search selection page`
       );
-      await ml.dataVisualizer.navigateToIndexPatternSelection();
+      await ml.dataVisualizer.navigateToDataViewSelection();
 
       await ml.testExecution.logTestStep(
         `${testData.suiteTitle} loads the index data visualizer page`
@@ -34,6 +34,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await ml.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(
         testData.sourceIndexOrSavedSearch
       );
+      await headerPage.waitUntilLoadingHasFinished();
     });
 
     it(`${testData.suiteTitle} displays index details`, async () => {
@@ -62,7 +63,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       }
 
       await ml.dataVisualizerTable.assertSearchPanelExist();
-      await ml.dataVisualizerTable.assertSampleSizeInputExists();
       await ml.dataVisualizerTable.assertFieldTypeInputExists();
       await ml.dataVisualizerTable.assertFieldNameInputExists();
 
@@ -113,18 +113,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         );
       }
 
-      await ml.testExecution.logTestStep(
-        `${testData.suiteTitle} sample size control changes non-metric fields`
-      );
-      for (const sampleSizeCase of testData.sampleSizeValidations) {
-        const { size, expected } = sampleSizeCase;
-        await ml.dataVisualizerTable.setSampleSizeInputValue(
-          size,
-          expected.field,
-          expected.docCountFormatted
-        );
-      }
-
       await ml.testExecution.logTestStep('sets and resets field type filter correctly');
       await ml.dataVisualizerTable.setFieldTypeFilter(
         testData.fieldTypeFilters,
@@ -159,8 +147,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/module_sample_logs');
 
-      await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
-      await ml.testResources.createIndexPatternIfNeeded('ft_module_sample_logs', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_module_sample_logs', '@timestamp');
       await ml.testResources.createSavedSearchFarequoteLuceneIfNeeded();
       await ml.testResources.createSavedSearchFarequoteKueryIfNeeded();
       await ml.testResources.createSavedSearchFarequoteFilterAndKueryIfNeeded();
@@ -171,8 +159,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.testResources.deleteSavedSearches();
-      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
-      await ml.testResources.deleteIndexPatternByTitle('ft_module_sample_logs');
+      await ml.testResources.deleteDataViewByTitle('ft_farequote');
+      await ml.testResources.deleteDataViewByTitle('ft_module_sample_logs');
     });
 
     describe('with farequote', function () {
@@ -235,7 +223,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         await ml.testExecution.logTestStep(
           `${testData.suiteTitle} loads the saved search selection page`
         );
-        await ml.dataVisualizer.navigateToIndexPatternSelection();
+        await ml.dataVisualizer.navigateToDataViewSelection();
 
         await ml.testExecution.logTestStep(
           `${testData.suiteTitle} loads the index data visualizer page`
@@ -256,9 +244,9 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         if (lensMetricField) {
           await ml.dataVisualizerTable.assertLensActionShowChart(
             lensMetricField.fieldName,
-            'legacyMtrVis'
+            'xyVisChart'
           );
-          await ml.navigation.browserBackTo('dataVisualizerTable');
+          await ml.navigation.browserBackTo('dataVisualizerTableContainer');
         }
         const lensNonMetricField = testData.expected.nonMetricFields?.find(
           (f) => f.type === ML_JOB_FIELD_TYPES.KEYWORD
@@ -267,9 +255,9 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         if (lensNonMetricField) {
           await ml.dataVisualizerTable.assertLensActionShowChart(
             lensNonMetricField.fieldName,
-            'legacyMtrVis'
+            'xyVisChart'
           );
-          await ml.navigation.browserBackTo('dataVisualizerTable');
+          await ml.navigation.browserBackTo('dataVisualizerTableContainer');
         }
       });
     });

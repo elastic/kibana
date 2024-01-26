@@ -33,6 +33,8 @@ experimental[] Create packs.
 
 `policy_ids`:: (Optional, array) A list of agents policy IDs.
 
+`shards`:: (Optional, object) An object with shard configuration for policies included in the pack. For each policy, set the shard configuration to a percentage (1–100) of target hosts.
+
 `queries`:: (Required, object) An object of queries.
 
 
@@ -56,18 +58,27 @@ $ curl -X POST api/osquery/packs \
   "description": "My pack",
   "enabled": true,
   "policy_ids": [
-    "my_policy_id"
+    "my_policy_id",
+    "fleet-server-policy"
   ],
+  "shards": {
+    "my_policy_id": 35,
+    "fleet-server-policy": 58
+  },
   "queries": {
     "my_query": {
       "query": "SELECT * FROM listening_ports;",
       "interval": 60,
+      "timeout": 120,
       "ecs_mapping": {
         "client.port": {
           "field": "port"
         },
         "tags": {
-          "value": ["tag1", "tag2"]
+          "value": [
+            "tag1",
+            "tag2"
+          ]
         }
       }
     }

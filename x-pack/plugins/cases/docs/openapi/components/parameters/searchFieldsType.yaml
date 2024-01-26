@@ -1,0 +1,5 @@
+type: string
+description: The fields to perform the `simple_query_string` parsed query against.
+enum:
+  - description
+  - title

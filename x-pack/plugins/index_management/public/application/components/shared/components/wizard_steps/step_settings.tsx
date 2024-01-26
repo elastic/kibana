@@ -18,9 +18,11 @@ import {
   EuiCode,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { CodeEditor } from '@kbn/code-editor';
 
-import { EuiCodeEditor, Forms } from '../../../../../shared_imports';
+import { Forms } from '../../../../../shared_imports';
 import { useJsonStep } from './use_json_step';
+import { documentationService } from '../../../mappings_editor/shared_imports';
 
 interface Props {
   onChange: (content: Forms.Content) => void;
@@ -64,7 +66,7 @@ export const StepSettings: React.FunctionComponent<Props> = React.memo(
             <EuiButtonEmpty
               size="s"
               flush="right"
-              href={`${esDocsBase}/index-modules.html#index-modules-settings`}
+              href={documentationService.getSettingsDocumentationLink()}
               target="_blank"
               iconType="help"
             >
@@ -99,29 +101,23 @@ export const StepSettings: React.FunctionComponent<Props> = React.memo(
           error={error}
           fullWidth
         >
-          <EuiCodeEditor
-            mode="json"
-            theme="textmate"
-            width="100%"
-            height="500px"
-            setOptions={{
-              showLineNumbers: false,
+          <CodeEditor
+            languageId="json"
+            value={jsonContent}
+            data-test-subj="settingsEditor"
+            height={500}
+            options={{
+              lineNumbers: 'off',
               tabSize: 2,
+              automaticLayout: true,
             }}
-            editorProps={{
-              $blockScrolling: Infinity,
-            }}
-            showGutter={false}
-            minLines={6}
             aria-label={i18n.translate(
               'xpack.idxMgmt.formWizard.stepSettings.fieldIndexSettingsAriaLabel',
               {
                 defaultMessage: 'Index settings editor',
               }
             )}
-            value={jsonContent}
             onChange={setJsonContent}
-            data-test-subj="settingsEditor"
           />
         </EuiFormRow>
       </div>

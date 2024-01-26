@@ -9,22 +9,25 @@ import { uniq } from 'lodash';
 import pLimit from 'p-limit';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { JOB_STATE } from '@kbn/ml-plugin/common';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import { ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
 import { createAnomalyDetectionJobs } from '../../../lib/anomaly_detection/create_anomaly_detection_jobs';
 import { getAnomalyDetectionJobs } from '../../../lib/anomaly_detection/get_anomaly_detection_jobs';
 import { MlClient } from '../../../lib/helpers/get_ml_client';
 import { withApmSpan } from '../../../utils/with_apm_span';
-import { ApmIndicesConfig } from '../apm_indices/get_apm_indices';
 
 export async function updateToV3({
   logger,
   indices,
   mlClient,
   esClient,
+  esCapabilities,
 }: {
   logger: Logger;
   mlClient?: MlClient;
-  indices: ApmIndicesConfig;
+  indices: APMIndices;
   esClient: ElasticsearchClient;
+  esCapabilities: ElasticsearchCapabilities;
 }) {
   const allJobs = await getAnomalyDetectionJobs(mlClient);
 
@@ -57,7 +60,14 @@ export async function updateToV3({
     );
   }
 
-  await createAnomalyDetectionJobs({ mlClient, indices, environments, logger });
+  await createAnomalyDetectionJobs({
+    mlClient,
+    esClient,
+    indices,
+    environments,
+    logger,
+    esCapabilities,
+  });
 
   return true;
 }

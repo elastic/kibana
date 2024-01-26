@@ -1,0 +1,42 @@
+post:
+  summary: Retrieves the historical summary for a list of SLOs
+  operationId: historicalSummaryOp
+  description: >
+    You must have the `read` privileges for the **SLOs** feature in the
+    **Observability** section of the Kibana feature privileges.
+  tags:
+    - slo
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
+    - $ref: ../components/parameters/space_id.yaml
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/historical_summary_request.yaml'
+  responses:
+    '200':
+      description: Successful request
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/historical_summary_response.yaml'
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'
+    '401':
+      description: Unauthorized response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
+    '403':
+      description: Unauthorized response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/403_response.yaml'

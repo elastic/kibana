@@ -11,19 +11,24 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
  * Wraps the supplied aggregations in a sampler aggregation.
  * A supplied samplerShardSize (the shard_size parameter of the sampler aggregation)
  * of less than 1 indicates no sampling, and the aggs are returned as-is.
+ *
+ * @param aggs - The aggregations to be wrapped in the sampler aggregation.
+ * @param shardSize - The shard size parameter for the sampler aggregation.
+ *                    A value less than 1 indicates no sampling.
+ * @returns The wrapped aggregations.
  */
 export function buildSamplerAggregation(
   aggs: any,
-  samplerShardSize: number
+  shardSize: number
 ): Record<string, estypes.AggregationsAggregationContainer> {
-  if (samplerShardSize < 1) {
+  if (shardSize <= 0) {
     return aggs;
   }
 
   return {
     sample: {
       sampler: {
-        shard_size: samplerShardSize,
+        shard_size: shardSize,
       },
       aggs,
     },

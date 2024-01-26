@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type {
   Description,
@@ -58,6 +58,7 @@ export const createList = async ({
 }: CreateListOptions): Promise<ListSchema> => {
   const createdAt = dateNow ?? new Date().toISOString();
   const body: IndexEsListSchema = {
+    '@timestamp': createdAt,
     created_at: createdAt,
     created_by: user,
     description,
@@ -66,18 +67,20 @@ export const createList = async ({
     meta,
     name,
     serializer,
-    tie_breaker_id: tieBreaker ?? uuid.v4(),
+    tie_breaker_id: tieBreaker ?? uuidv4(),
     type,
     updated_at: createdAt,
     updated_by: user,
     version,
   };
-  const response = await esClient.index({
+
+  const response = await esClient.create({
     body,
-    id,
+    id: id ?? uuidv4(),
     index: listIndex,
     refresh: 'wait_for',
   });
+
   return {
     _version: encodeHitVersion(response),
     id: response._id,

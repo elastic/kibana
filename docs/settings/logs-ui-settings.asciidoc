@@ -7,6 +7,13 @@
 
 You do not need to configure any settings to use the Logs app in {kib}. It is enabled by default.
 
+The {kib} logs can be found per operating system under:
+
+* Linux, DEB or RPM package: /var/log/kibana/kibana.log
+* Linux, tar.gz package: $KIBANA_HOME/log/kibana.log
+* Windows: $KIBANA_HOME\log\kibana.log
+
+
 [float]
 [[general-logs-ui-settings-kb]]
 ==== General Logs settings

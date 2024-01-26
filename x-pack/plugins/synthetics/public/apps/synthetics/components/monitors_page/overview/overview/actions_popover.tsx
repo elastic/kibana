@@ -6,16 +6,34 @@
  */
 import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiPopover, EuiButtonIcon, EuiContextMenu, useEuiShadow, EuiPanel } from '@elastic/eui';
-import { FETCH_STATUS } from '@kbn/observability-plugin/public';
-import { useDispatch } from 'react-redux';
+import {
+  EuiPopover,
+  EuiButtonIcon,
+  EuiContextMenu,
+  useEuiShadow,
+  EuiPanel,
+  EuiLoadingSpinner,
+  EuiContextMenuPanelItemDescriptor,
+  EuiToolTip,
+} from '@elastic/eui';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
+import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
-import { useMonitorEnableHandler } from '../../../../hooks/use_monitor_enable_handler';
+import { TEST_SCHEDULED_LABEL } from '../../../monitor_add_edit/form/run_test_btn';
+import { useCanUsePublicLocById } from '../../hooks/use_can_use_public_loc_id';
+import { toggleStatusAlert } from '../../../../../../../common/runtime_types/monitor_management/alert_config';
+import {
+  manualTestMonitorAction,
+  manualTestRunInProgressSelector,
+} from '../../../../state/manual_test_runs';
+import { useMonitorAlertEnable } from '../../../../hooks/use_monitor_alert_enable';
+import { ConfigKey, MonitorOverviewItem } from '../../../../../../../common/runtime_types';
+import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
+import { useMonitorEnableHandler, useLocationName } from '../../../../hooks';
 import { setFlyoutConfig } from '../../../../state/overview/actions';
-import { useEditMonitorLocator } from '../../hooks/use_edit_monitor_locator';
-import { useMonitorDetailLocator } from '../../hooks/use_monitor_detail_locator';
-import { useLocationName } from '../../../../hooks';
+import { useEditMonitorLocator } from '../../../../hooks/use_edit_monitor_locator';
+import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
+import { NoPermissionsTooltip } from '../../../common/components/permissions';
 
 type PopoverPosition = 'relative' | 'default';
 
@@ -50,6 +68,7 @@ interface Props {
   position: PopoverPosition;
   iconHasPanel?: boolean;
   iconSize?: 's' | 'xs';
+  locationId: string;
 }
 
 const CustomShadowPanel = styled(EuiPanel)<{ shadow: string }>`
@@ -81,16 +100,21 @@ export function ActionsPopover({
   position,
   iconHasPanel = true,
   iconSize = 's',
+  locationId,
 }: Props) {
   const euiShadow = useEuiShadow('l');
   const dispatch = useDispatch();
-  const locationName = useLocationName({ locationId: monitor.location.id });
+  const locationName = useLocationName(monitor);
 
   const detailUrl = useMonitorDetailLocator({
-    monitorId: monitor.id,
-    locationId: monitor.location.id,
+    configId: monitor.configId,
+    locationId: locationId ?? monitor.location.id,
   });
-  const editUrl = useEditMonitorLocator({ monitorId: monitor.id });
+  const editUrl = useEditMonitorLocator({ configId: monitor.configId });
+
+  const canEditSynthetics = useCanEditSynthetics();
+
+  const canUsePublicLocations = useCanUsePublicLocById(monitor.configId);
 
   const labels = useMemo(
     () => ({
@@ -101,14 +125,18 @@ export function ActionsPopover({
     [monitor.name]
   );
   const { status, isEnabled, updateMonitorEnabledState } = useMonitorEnableHandler({
-    id: monitor.id,
+    configId: monitor.configId,
     isEnabled: monitor.isEnabled,
     labels,
   });
 
+  const { alertStatus, updateAlertEnabledState } = useMonitorAlertEnable();
+
   const [enableLabel, setEnableLabel] = useState(
     monitor.isEnabled ? disableMonitorLabel : enableMonitorLabel
   );
+
+  const testInProgress = useSelector(manualTestRunInProgressSelector(monitor.configId));
 
   useEffect(() => {
     if (status === FETCH_STATUS.LOADING) {
@@ -125,36 +153,102 @@ export function ActionsPopover({
     disabled: !locationName,
     onClick: () => {
       if (locationName) {
-        dispatch(setFlyoutConfig({ monitorId: monitor.id, location: locationName }));
+        dispatch(
+          setFlyoutConfig({
+            configId: monitor.configId,
+            location: locationName,
+            id: monitor.id,
+            locationId: monitor.location.id,
+          })
+        );
         setIsPopoverOpen(false);
       }
     },
   };
 
-  let popoverItems = [
+  const alertLoading = alertStatus(monitor.configId) === FETCH_STATUS.LOADING;
+  let popoverItems: EuiContextMenuPanelItemDescriptor[] = [
     {
       name: actionsMenuGoToMonitorName,
       icon: 'sortRight',
       href: detailUrl,
     },
     quickInspectPopoverItem,
-    // not rendering this for now because the manual test flyout is
-    // still in the design phase
-    // {
-    //   name: 'Run test manually',
-    //   icon: 'beaker',
-    // },
     {
-      name: actionsMenuEditMonitorName,
+      name: testInProgress ? (
+        <EuiToolTip content={TEST_SCHEDULED_LABEL}>
+          <span>{runTestManually}</span>
+        </EuiToolTip>
+      ) : (
+        <NoPermissionsTooltip canUsePublicLocations={canUsePublicLocations}>
+          {runTestManually}
+        </NoPermissionsTooltip>
+      ),
+      icon: 'beaker',
+      disabled: testInProgress || !canUsePublicLocations,
+      onClick: () => {
+        dispatch(manualTestMonitorAction.get({ configId: monitor.configId, name: monitor.name }));
+        dispatch(setFlyoutConfig(null));
+        setIsPopoverOpen(false);
+      },
+    },
+    {
+      name: (
+        <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
+          {actionsMenuEditMonitorName}
+        </NoPermissionsTooltip>
+      ),
       icon: 'pencil',
+      disabled: !canEditSynthetics,
       href: editUrl,
     },
     {
-      name: enableLabel,
+      name: (
+        <NoPermissionsTooltip
+          canEditSynthetics={canEditSynthetics}
+          canUsePublicLocations={canUsePublicLocations}
+        >
+          {enableLabel}
+        </NoPermissionsTooltip>
+      ),
       icon: 'invert',
+      disabled: !canEditSynthetics || !canUsePublicLocations,
       onClick: () => {
         if (status !== FETCH_STATUS.LOADING) {
           updateMonitorEnabledState(!monitor.isEnabled);
+        }
+      },
+    },
+    {
+      name: (
+        <NoPermissionsTooltip
+          canEditSynthetics={canEditSynthetics}
+          canUsePublicLocations={canUsePublicLocations}
+        >
+          {monitor.isStatusAlertEnabled ? disableAlertLabel : enableMonitorAlertLabel}
+        </NoPermissionsTooltip>
+      ),
+      disabled: !canEditSynthetics || !canUsePublicLocations,
+      icon: alertLoading ? (
+        <EuiLoadingSpinner size="s" />
+      ) : monitor.isStatusAlertEnabled ? (
+        'bellSlash'
+      ) : (
+        'bell'
+      ),
+      onClick: () => {
+        if (!alertLoading) {
+          updateAlertEnabledState({
+            monitor: {
+              [ConfigKey.ALERT_CONFIG]: toggleStatusAlert({
+                status: {
+                  enabled: monitor.isStatusAlertEnabled,
+                },
+              }),
+            },
+            configId: monitor.configId,
+            name: monitor.name,
+          });
         }
       },
     },
@@ -167,12 +261,14 @@ export function ActionsPopover({
         button={
           <IconPanel hasPanel={iconHasPanel}>
             <EuiButtonIcon
+              data-test-subj="syntheticsActionsPopoverButton"
               aria-label={openActionsMenuAria}
               iconType="boxesHorizontal"
               color="primary"
               size={iconSize}
               display="empty"
               onClick={() => setIsPopoverOpen((b: boolean) => !b)}
+              title={openActionsMenuAria}
             />
           </IconPanel>
         }
@@ -199,6 +295,10 @@ export function ActionsPopover({
 
 const quickInspectName = i18n.translate('xpack.synthetics.overview.actions.quickInspect.title', {
   defaultMessage: 'Quick inspect',
+});
+
+const runTestManually = i18n.translate('xpack.synthetics.overview.actions.runTestManually.title', {
+  defaultMessage: 'Run test manually',
 });
 
 const openActionsMenuAria = i18n.translate(
@@ -243,14 +343,28 @@ const loadingLabel = (isEnabled: boolean) =>
 const enableMonitorLabel = i18n.translate(
   'xpack.synthetics.overview.actions.enableLabelEnableMonitor',
   {
-    defaultMessage: 'Enable monitor',
+    defaultMessage: 'Enable monitor (all locations)',
   }
 );
 
 const disableMonitorLabel = i18n.translate(
   'xpack.synthetics.overview.actions.enableLabelDisableMonitor',
   {
-    defaultMessage: 'Disable monitor',
+    defaultMessage: 'Disable monitor (all locations)',
+  }
+);
+
+const disableAlertLabel = i18n.translate(
+  'xpack.synthetics.overview.actions.disableLabelDisableAlert',
+  {
+    defaultMessage: 'Disable status alerts (all locations)',
+  }
+);
+
+const enableMonitorAlertLabel = i18n.translate(
+  'xpack.synthetics.overview.actions.enableLabelDisableAlert',
+  {
+    defaultMessage: 'Enable status alerts (all locations)',
   }
 );
 

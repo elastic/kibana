@@ -18,7 +18,7 @@ import type {
   NewArtifact,
   ListArtifactsProps,
 } from './types';
-import { relativeDownloadUrlFromArtifact } from './mappings';
+import { relativeDownloadUrlFromArtifact, uniqueIdFromId } from './mappings';
 
 import {
   createArtifact,
@@ -27,6 +27,8 @@ import {
   generateArtifactContentHash,
   getArtifact,
   listArtifacts,
+  bulkCreateArtifacts,
+  bulkDeleteArtifacts,
 } from './artifacts';
 
 /**
@@ -76,6 +78,32 @@ export class FleetArtifactsClient implements ArtifactsClientInterface {
     return createArtifact(this.esClient, newArtifactData);
   }
 
+  async bulkCreateArtifacts(
+    optionsList: ArtifactsClientCreateOptions[]
+  ): Promise<{ artifacts?: Artifact[]; errors?: Error[] }> {
+    const newArtifactsData = [];
+
+    for (const options of optionsList) {
+      const { content, type = '', identifier = this.packageName } = options;
+
+      const encodedMetaData = await this.encodeContent(content);
+      const newArtifactData: NewArtifact = {
+        type,
+        identifier,
+        packageName: this.packageName,
+        encryptionAlgorithm: 'none',
+        relative_url: relativeDownloadUrlFromArtifact({
+          identifier,
+          decodedSha256: encodedMetaData.decodedSha256,
+        }),
+        ...encodedMetaData,
+      };
+      newArtifactsData.push(newArtifactData);
+    }
+
+    return bulkCreateArtifacts(this.esClient, newArtifactsData);
+  }
+
   async deleteArtifact(id: string) {
     // get the artifact first, which will also ensure its validated
     const artifact = await this.getArtifact(id);
@@ -83,6 +111,11 @@ export class FleetArtifactsClient implements ArtifactsClientInterface {
     if (artifact) {
       await deleteArtifact(this.esClient, id);
     }
+  }
+
+  async bulkDeleteArtifacts(ids: string[]): Promise<Error[]> {
+    const idsMappedWithPackageName = ids.map((id) => uniqueIdFromId(id, this.packageName));
+    return await bulkDeleteArtifacts(this.esClient, idsMappedWithPackageName);
   }
 
   /**

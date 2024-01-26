@@ -18,27 +18,35 @@ import {
   Subscription,
   takeUntil,
   timer,
+  catchError,
+  defer,
+  EMPTY,
+  retry,
 } from 'rxjs';
 import fetch from 'node-fetch';
 import type { TelemetryCollectionManagerPluginStart } from '@kbn/telemetry-collection-manager-plugin/server';
 import {
-  PluginInitializerContext,
-  Logger,
-  SavedObjectsClientContract,
+  type PluginInitializerContext,
+  type Logger,
+  type SavedObjectsClientContract,
   SavedObjectsClient,
-  CoreStart,
+  type CoreStart,
 } from '@kbn/core/server';
+import { getTelemetryChannelEndpoint } from '../common/telemetry_config';
+import {
+  TELEMETRY_SAVED_OBJECT_TYPE,
+  getTelemetrySavedObject,
+  updateTelemetrySavedObject,
+} from './saved_objects';
 import { getNextAttemptDate } from './get_next_attempt_date';
 import {
-  getTelemetryChannelEndpoint,
   getTelemetryOptIn,
   getTelemetrySendUsageFrom,
   getTelemetryFailureDetails,
-} from '../common/telemetry_config';
-import { getTelemetrySavedObject, updateTelemetrySavedObject } from './telemetry_repository';
+} from './telemetry_config';
 import { PAYLOAD_CONTENT_ENCODING } from '../common/constants';
 import type { EncryptedTelemetryPayload } from '../common/types';
-import { TelemetryConfigType } from './config';
+import type { TelemetryConfigType } from './config';
 import { isReportIntervalExpired } from '../common/is_report_interval_expired';
 
 export interface FetcherTaskDepsStart {
@@ -78,7 +86,9 @@ export class FetcherTask {
   }
 
   public start({ savedObjects }: CoreStart, { telemetryCollectionManager }: FetcherTaskDepsStart) {
-    this.internalRepository = new SavedObjectsClient(savedObjects.createInternalRepository());
+    this.internalRepository = new SavedObjectsClient(
+      savedObjects.createInternalRepository([TELEMETRY_SAVED_OBJECT_TYPE])
+    );
     this.telemetryCollectionManager = telemetryCollectionManager;
 
     this.subscriptions.add(this.validateConnectivity());
@@ -99,7 +109,25 @@ export class FetcherTask {
         // Skip any further processing if already online
         filter(() => !this.isOnline$.value),
         // Fetch current state and configs
-        exhaustMap(async () => await this.getCurrentConfigs()),
+        exhaustMap(() => {
+          return defer(() => {
+            return this.getCurrentConfigs();
+          }).pipe(
+            // exp-backoff retries in case of errors fetching the config
+            retry({
+              count: 5,
+              delay: (error, retryIndex) => {
+                const retryDelay = 1000 * Math.min(Math.pow(2, retryIndex + 2), 64); // 5 retries -> 8s, 16s, 32s, 64s, 64s
+                return timer(retryDelay);
+              },
+            }),
+            // shallow errors if all retry failed, next time tick will continue the emission
+            catchError((err) => {
+              this.logger.error(`Cannot get the current config: ${err.message}`);
+              return EMPTY;
+            })
+          );
+        }),
         // Skip if opted-out, or should only send from the browser
         filter(
           ({ telemetryOptIn, telemetrySendUsageFrom }) =>
@@ -184,7 +212,7 @@ export class FetcherTask {
     } catch (err) {
       await this.updateReportFailure(telemetryConfig);
 
-      this.logger.warn(`Error sending telemetry usage data. (${err})`);
+      this.logger.warn(`Error sending usage to Elastic. (${err})`);
     }
   }
 
@@ -196,6 +224,7 @@ export class FetcherTask {
     const allowChangingOptInStatus = config.allowChangingOptInStatus;
     const configTelemetryOptIn = typeof config.optIn === 'undefined' ? null : config.optIn;
     const telemetryUrl = getTelemetryChannelEndpoint({
+      appendServerlessChannelsSuffix: config.appendServerlessChannelsSuffix,
       channelName: 'snapshot',
       env: config.sendUsageTo,
     });

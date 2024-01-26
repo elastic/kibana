@@ -5,51 +5,88 @@
  * 2.0.
  */
 
+import { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
-import { Query } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
+import {
+  LATEST_FINDINGS_INDEX_PATTERN,
+  SECURITY_DEFAULT_DATA_VIEW_ID,
+} from '../../../common/constants';
 import { findingsNavigation } from '../navigation/constants';
 import { encodeQuery } from '../navigation/query_utils';
-import { FindingsBaseURLQuery } from '../../pages/findings/types';
+import { useKibana } from './use_kibana';
+import { useLatestFindingsDataView } from '../api/use_latest_findings_data_view';
 
-const getFindingsQuery = (queryValue: Query['query']): Pick<FindingsBaseURLQuery, 'query'> => {
-  const query =
-    typeof queryValue === 'string'
-      ? queryValue
-      : // TODO: use a tested query builder instead ASAP
-        Object.entries(queryValue)
-          .reduce<string[]>((a, [key, value]) => {
-            a.push(`${key}: "${value}"`);
-            return a;
-          }, [])
-          .join(' and ');
+interface NegatedValue {
+  value: string | number;
+  negate: boolean;
+}
 
+type FilterValue = string | number | NegatedValue;
+
+export type NavFilter = Record<string, FilterValue>;
+
+const createFilter = (key: string, filterValue: FilterValue, dataViewId: string): Filter => {
+  let negate = false;
+  let value = filterValue;
+  if (typeof filterValue === 'object') {
+    negate = filterValue.negate;
+    value = filterValue.value;
+  }
+  // If the value is '*', we want to create an exists filter
+  if (value === '*') {
+    return {
+      query: { exists: { field: key } },
+      meta: { type: 'exists', index: dataViewId },
+    };
+  }
   return {
-    query: {
-      language: 'kuery',
-      // NOTE: a query object is valid TS but throws on runtime
-      query,
+    meta: {
+      alias: null,
+      negate,
+      disabled: false,
+      type: 'phrase',
+      key,
+      index: dataViewId,
     },
-  }!;
+    query: { match_phrase: { [key]: value } },
+  };
+};
+const useNavigate = (pathname: string, dataViewId = SECURITY_DEFAULT_DATA_VIEW_ID) => {
+  const history = useHistory();
+  const { services } = useKibana();
+
+  return useCallback(
+    (filterParams: NavFilter = {}) => {
+      const filters = Object.entries(filterParams).map(([key, filterValue]) =>
+        createFilter(key, filterValue, dataViewId)
+      );
+
+      history.push({
+        pathname,
+        search: encodeQuery({
+          // Set query language from user's preference
+          query: services.data.query.queryString.getDefaultQuery(),
+          filters,
+        }),
+      });
+    },
+    [pathname, history, services.data.query.queryString, dataViewId]
+  );
 };
 
 export const useNavigateFindings = () => {
-  const history = useHistory();
-
-  return (query?: Query['query']) => {
-    history.push({
-      pathname: findingsNavigation.findings_default.path,
-      ...(query && { search: encodeQuery(getFindingsQuery(query)) }),
-    });
-  };
+  const { data } = useLatestFindingsDataView(LATEST_FINDINGS_INDEX_PATTERN);
+  return useNavigate(findingsNavigation.findings_default.path, data?.id);
 };
 
 export const useNavigateFindingsByResource = () => {
-  const history = useHistory();
-
-  return (query?: Query['query']) => {
-    history.push({
-      pathname: findingsNavigation.findings_by_resource.path,
-      ...(query && { search: encodeQuery(getFindingsQuery(query)) }),
-    });
-  };
+  const { data } = useLatestFindingsDataView(LATEST_FINDINGS_INDEX_PATTERN);
+  return useNavigate(findingsNavigation.findings_by_resource.path, data?.id);
 };
+
+export const useNavigateVulnerabilities = () =>
+  useNavigate(findingsNavigation.vulnerabilities.path);
+
+export const useNavigateVulnerabilitiesByResource = () =>
+  useNavigate(findingsNavigation.vulnerabilities_by_resource.path);

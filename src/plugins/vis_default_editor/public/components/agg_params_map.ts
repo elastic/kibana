@@ -24,18 +24,15 @@ const buckets = {
   [BUCKET_TYPES.FILTERS]: {
     filters: controls.FiltersParamEditor,
   },
-  [BUCKET_TYPES.GEOHASH_GRID]: {
-    autoPrecision: controls.AutoPrecisionParamEditor,
-    precision: controls.PrecisionParamEditor,
-    useGeocentroid: controls.UseGeocentroidParamEditor,
-    isFilteredByCollar: controls.IsFilteredByCollarParamEditor,
-  },
   [BUCKET_TYPES.HISTOGRAM]: {
     interval: controls.NumberIntervalParamEditor,
     maxBars: controls.MaxBarsParamEditor,
     min_doc_count: controls.MinDocCountParamEditor,
     has_extended_bounds: controls.HasExtendedBoundsParamEditor,
     extended_bounds: controls.ExtendedBoundsParamEditor,
+  },
+  [BUCKET_TYPES.IP_PREFIX]: {
+    ipPrefix: controls.IpPrefixParamEditor,
   },
   [BUCKET_TYPES.IP_RANGE]: {
     ipRangeType: controls.IpRangeTypeParamEditor,

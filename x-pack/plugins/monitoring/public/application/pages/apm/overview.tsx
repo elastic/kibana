@@ -14,7 +14,6 @@ import { ApmTemplate } from './apm_template';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { useCharts } from '../../hooks/use_charts';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
-// @ts-ignore
 import { ApmOverview } from '../../../components/apm/overview';
 
 export const ApmOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
@@ -71,7 +70,10 @@ export const ApmOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
       getPageData={getPageData}
       data-test-subj="apmOverviewPage"
     >
-      {data && <ApmOverview {...data} onBrush={onBrush} zoomInfo={zoomInfo} />}
+      {
+        // @ts-expect-error ts upgrade v4.7.4
+        data && <ApmOverview {...data} onBrush={onBrush} zoomInfo={zoomInfo} />
+      }
     </ApmTemplate>
   );
 };

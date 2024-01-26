@@ -12,6 +12,8 @@ import { useActions, useValues } from 'kea';
 import { EuiButton, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { FormattedMessage } from '@kbn/i18n-react';
+
 import { docLinks } from '../../../shared/doc_links';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
@@ -21,7 +23,6 @@ import { SettingsPanel } from './settings_panel';
 export const Settings: React.FC = () => {
   const { makeRequest, setPipeline } = useActions(SettingsLogic);
   const { defaultPipeline, hasNoChanges, isLoading, pipelineState } = useValues(SettingsLogic);
-
   const {
     extract_binary_content: extractBinaryContent,
     reduce_whitespace: reduceWhitespace,
@@ -36,6 +37,21 @@ export const Settings: React.FC = () => {
         }),
       ]}
       pageHeader={{
+        description: (
+          <FormattedMessage
+            id="xpack.enterpriseSearch.content.settings.description"
+            defaultMessage="These settings apply to all new Elasticsearch indices created by Search ingestion mechanisms. For API ingest-based indices, remember to include the pipeline when you ingest documents. These features are powered by {link}."
+            values={{
+              link: (
+                <EuiLink href={docLinks.ingestPipelines} target="_blank">
+                  {i18n.translate('xpack.enterpriseSearch.content.settings.ingestLink', {
+                    defaultMessage: 'ingest pipelines',
+                  })}
+                </EuiLink>
+              ),
+            }}
+          />
+        ),
         pageTitle: i18n.translate('xpack.enterpriseSearch.content.settings.headerTitle', {
           defaultMessage: 'Content Settings',
         }),
@@ -45,6 +61,7 @@ export const Settings: React.FC = () => {
             disabled={hasNoChanges}
             isLoading={isLoading}
             onClick={() => makeRequest(pipelineState)}
+            data-test-subj={'entSearchContentSettingsSaveButton'}
           >
             {i18n.translate('xpack.enterpriseSearch.content.settings.saveButtonLabel', {
               defaultMessage: 'Save',
@@ -54,6 +71,7 @@ export const Settings: React.FC = () => {
             disabled={hasNoChanges}
             isLoading={isLoading}
             onClick={() => setPipeline(defaultPipeline)}
+            data-test-subj={'entSearchContentSettingsResetButton'}
           >
             {i18n.translate('xpack.enterpriseSearch.content.settings.resetButtonLabel', {
               defaultMessage: 'Reset',
@@ -69,19 +87,12 @@ export const Settings: React.FC = () => {
           'xpack.enterpriseSearch.content.settings.contentExtraction.description',
           {
             defaultMessage:
-              'Allow all ingestion mechanisms on your Enterprise Search deployment to extract searchable content from binary files, like PDFs and Word documents. This setting applies to all new Elasticsearch indices created by an Enterprise Search ingestion mechanism.',
+              'Extract searchable content from binary files, like PDFs and Word documents.',
           }
         )}
         label={i18n.translate('xpack.enterpriseSearch.content.settings.contactExtraction.label', {
           defaultMessage: 'Content extraction',
         })}
-        link={
-          <EuiLink href={docLinks.ingestPipelines} target="_blank">
-            {i18n.translate('xpack.enterpriseSearch.content.settings.contactExtraction.link', {
-              defaultMessage: 'Learn more about content extraction',
-            })}
-          </EuiLink>
-        }
         onChange={() =>
           setPipeline({
             ...pipelineState,
@@ -105,13 +116,6 @@ export const Settings: React.FC = () => {
         label={i18n.translate('xpack.enterpriseSearch.content.settings.whitespaceReduction.label', {
           defaultMessage: 'Whitespace reduction',
         })}
-        link={
-          <EuiLink href={docLinks.ingestPipelines} external>
-            {i18n.translate('xpack.enterpriseSearch.content.settings.whitespaceReduction.link', {
-              defaultMessage: 'Learn more about whitespace reduction',
-            })}
-          </EuiLink>
-        }
         onChange={() =>
           setPipeline({
             ...pipelineState,
@@ -139,9 +143,9 @@ export const Settings: React.FC = () => {
           defaultMessage: 'ML Inference',
         })}
         link={
-          <EuiLink href={docLinks.ingestPipelines} target="_blank">
+          <EuiLink href={docLinks.mlDocumentEnrichment} target="_blank">
             {i18n.translate('xpack.enterpriseSearch.content.settings.mlInference.link', {
-              defaultMessage: 'Learn more about content extraction',
+              defaultMessage: 'Learn more about document enrichment with ML',
             })}
           </EuiLink>
         }

@@ -7,15 +7,12 @@
 
 import { has, chunk, omit } from 'lodash/fp';
 import type { Readable } from 'stream';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { createPromiseFromStreams } from '@kbn/utils';
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
-import type { ImportTimelineResultSchema } from '../../../../../../common/types/timeline';
-import {
-  importTimelineResultSchema,
-  TimelineStatus,
-} from '../../../../../../common/types/timeline';
+import type { ImportTimelineResultSchema } from '../../../../../../common/api/timeline';
+import { importTimelineResultSchema, TimelineStatus } from '../../../../../../common/api/timeline';
 
 import type { BulkError } from '../../../../detection_engine/routes/utils';
 import { createBulkErrorObject } from '../../../../detection_engine/routes/utils';
@@ -79,7 +76,7 @@ export const setTimeline = (
     templateTimelineVersion: isTemplateTimeline
       ? parsedTimeline.templateTimelineVersion ?? 1
       : null,
-    templateTimelineId: isTemplateTimeline ? parsedTimeline.templateTimelineId ?? uuid.v4() : null,
+    templateTimelineId: isTemplateTimeline ? parsedTimeline.templateTimelineId ?? uuidv4() : null,
   };
 };
 

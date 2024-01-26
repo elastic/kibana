@@ -10,8 +10,6 @@ type RenameAlertToRule<K extends string> = K extends `alertTypeId`
   ? `ruleTypeId`
   : K extends `alertId`
   ? `ruleId`
-  : K extends `alertExecutionStatus`
-  ? `ruleExecutionStatus`
   : K extends `actionTypeId`
   ? `connectorTypeId`
   : K extends `alertInstanceId`
@@ -24,7 +22,7 @@ type RenameAlertToRule<K extends string> = K extends `alertTypeId`
 
 export type AsApiContract<
   T,
-  ComplexPropertyKeys = `actions` | `executionStatus`,
+  ComplexPropertyKeys = 'actions' | 'executionStatus' | 'lastRun' | 'frequency',
   OpaquePropertyKeys = `params`
 > = T extends Array<infer I>
   ? Array<AsApiContract<I>>
@@ -32,7 +30,7 @@ export type AsApiContract<
       [K in keyof T as CamelToSnake<
         RenameAlertToRule<Extract<K, string>>
       >]: K extends OpaquePropertyKeys
-        ? // don't convert explciitly opaque types which we treat as a black box
+        ? // don't convert explcitly opaque types which we treat as a black box
           T[K]
         : T[K] extends undefined
         ? AsApiContract<Exclude<T[K], undefined>> | undefined
@@ -71,7 +69,7 @@ export type RewriteResponseCase<T> = (
  *
  * For more details see this PR comment: https://github.com/microsoft/TypeScript/pull/40336#issuecomment-686723087
  */
-type CamelToSnake<T extends string> = string extends T
+export type CamelToSnake<T extends string> = string extends T
   ? string
   : T extends `${infer C0}${infer C1}${infer R}`
   ? `${C0 extends Uppercase<C0> ? '_' : ''}${Lowercase<C0>}${C1 extends Uppercase<C1>

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { allowedExperimentalValues } from '../../common/experimental_features';
 import { registerConnectorTypes } from '.';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 
@@ -18,6 +19,7 @@ const ACTION_TYPE_IDS = [
   '.teams',
   '.webhook',
   '.xmatters',
+  '.torq',
 ];
 
 const mockedActions = actionsMock.createSetup();
@@ -30,6 +32,7 @@ describe('registers connectors', () => {
   test('calls registerType with expected connector types', () => {
     registerConnectorTypes({
       actions: mockedActions,
+      experimentalFeatures: allowedExperimentalValues,
     });
     ACTION_TYPE_IDS.forEach((id) =>
       expect(mockedActions.registerType).toHaveBeenCalledWith(

@@ -20,3 +20,6 @@ export interface ChromeBadge {
 export interface ChromeUserBanner {
   content: MountPoint<HTMLDivElement>;
 }
+
+/** @public */
+export type ChromeStyle = 'classic' | 'project';

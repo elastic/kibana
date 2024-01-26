@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const addFilterAndRefresh = async () => {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
-      await filterBar.addFilter('bytes', 'is', '12345678');
+      await filterBar.addFilter({ field: 'bytes', operation: 'is', value: '12345678' });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
       // first round of requests sometimes times out, refresh all visualizations to fetch again
@@ -66,7 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
@@ -91,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('area, bar and heatmap charts filtered', async () => {
-        await dashboardExpect.seriesElementCount(0);
+        await dashboardExpect.heatMapNoResults();
       });
 
       it('data tables are filtered', async () => {
@@ -156,7 +156,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('area, bar and heatmap charts filtered', async () => {
-        await dashboardExpect.seriesElementCount(0);
+        await dashboardExpect.heatMapNoResults();
       });
 
       it('data tables are filtered', async () => {
@@ -212,7 +212,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('area, bar and heatmap charts', async () => {
-        await dashboardExpect.seriesElementCount(2);
+        await dashboardExpect.heatmapXAxisBuckets(11);
       });
 
       it('data tables', async () => {

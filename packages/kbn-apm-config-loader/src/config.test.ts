@@ -91,7 +91,6 @@ describe('ApmConfiguration', () => {
         "contextPropagationOnly": true,
         "environment": "development",
         "globalLabels": Object {},
-        "logUncaughtExceptions": true,
         "metricsInterval": "30s",
         "propagateTracestate": true,
         "secretToken": "JpBCcOQxN81D5yucs2",
@@ -116,7 +115,6 @@ describe('ApmConfiguration', () => {
         "globalLabels": Object {
           "git_rev": "sha",
         },
-        "logUncaughtExceptions": true,
         "metricsInterval": "120s",
         "propagateTracestate": true,
         "secretToken": "JpBCcOQxN81D5yucs2",
@@ -152,31 +150,57 @@ describe('ApmConfiguration', () => {
     beforeEach(() => {
       delete process.env.ELASTIC_APM_ENVIRONMENT;
       delete process.env.ELASTIC_APM_SECRET_TOKEN;
+      delete process.env.ELASTIC_APM_API_KEY;
       delete process.env.ELASTIC_APM_SERVER_URL;
       delete process.env.NODE_ENV;
     });
 
-    it('correctly sets environment by reading env vars', () => {
-      let config = new ApmConfiguration(mockedRootDir, {}, false);
-      expect(config.getConfig('serviceName')).toEqual(
-        expect.objectContaining({
-          environment: 'development',
-        })
-      );
+    describe('correctly sets environment by reading env vars', () => {
+      it('no env var', () => {
+        const config = new ApmConfiguration(mockedRootDir, {}, false);
+        expect(config.getConfig('serviceName')).toEqual(
+          expect.objectContaining({
+            environment: 'development',
+          })
+        );
+      });
+
+      it('NODE_ENV', () => {
+        process.env.NODE_ENV = 'production';
+        const config = new ApmConfiguration(mockedRootDir, {}, false);
+        expect(config.getConfig('serviceName')).toEqual(
+          expect.objectContaining({
+            environment: 'production',
+          })
+        );
+      });
+
+      it('ELASTIC_APM_ENVIRONMENT', () => {
+        process.env.ELASTIC_APM_ENVIRONMENT = 'ci';
+        const config = new ApmConfiguration(mockedRootDir, {}, false);
+        expect(config.getConfig('serviceName')).toEqual(
+          expect.objectContaining({
+            environment: 'ci',
+          })
+        );
+      });
+    });
+
+    it('does not override the environment from NODE_ENV if already set in the config file', () => {
+      const kibanaConfig = {
+        elastic: {
+          apm: {
+            environment: 'local',
+          },
+        },
+      };
 
       process.env.NODE_ENV = 'production';
-      config = new ApmConfiguration(mockedRootDir, {}, false);
-      expect(config.getConfig('serviceName')).toEqual(
-        expect.objectContaining({
-          environment: 'production',
-        })
-      );
 
-      process.env.ELASTIC_APM_ENVIRONMENT = 'ci';
-      config = new ApmConfiguration(mockedRootDir, {}, false);
+      const config = new ApmConfiguration(mockedRootDir, kibanaConfig, false);
       expect(config.getConfig('serviceName')).toEqual(
         expect.objectContaining({
-          environment: 'ci',
+          environment: 'local',
         })
       );
     });
@@ -198,6 +222,15 @@ describe('ApmConfiguration', () => {
       const config = new ApmConfiguration(mockedRootDir, {}, false);
       const serverConfig = config.getConfig('serviceName');
       expect(serverConfig).toHaveProperty('secretToken', process.env.ELASTIC_APM_SECRET_TOKEN);
+      expect(serverConfig).toHaveProperty('serverUrl', process.env.ELASTIC_APM_SERVER_URL);
+    });
+
+    it('uses apiKey instead of secret token if env var is set', () => {
+      process.env.ELASTIC_APM_API_KEY = 'banana';
+      process.env.ELASTIC_APM_SERVER_URL = 'http://banana.com/';
+      const config = new ApmConfiguration(mockedRootDir, {}, false);
+      const serverConfig = config.getConfig('serviceName');
+      expect(serverConfig).toHaveProperty('apiKey', process.env.ELASTIC_APM_API_KEY);
       expect(serverConfig).toHaveProperty('serverUrl', process.env.ELASTIC_APM_SERVER_URL);
     });
   });
@@ -323,6 +356,51 @@ describe('ApmConfiguration', () => {
         expect.objectContaining({
           active: false,
           contextPropagationOnly: false,
+        })
+      );
+    });
+
+    it('allows overriding some services settings', () => {
+      const kibanaConfig = {
+        elastic: {
+          apm: {
+            active: true,
+            serverUrl: 'http://an.internal.apm.server:port/',
+            transactionSampleRate: 0.1,
+            servicesOverrides: {
+              externalServiceName: {
+                active: false,
+                serverUrl: 'http://a.public.apm.server:port/',
+                disableSend: true, // just adding an extra field to prove merging works
+              },
+            },
+          },
+        },
+      };
+
+      const internalService = new ApmConfiguration(mockedRootDir, kibanaConfig, true).getConfig(
+        'internalServiceName'
+      );
+      expect(internalService).toEqual(
+        expect.objectContaining({
+          active: true,
+          serverUrl: 'http://an.internal.apm.server:port/',
+          transactionSampleRate: 0.1,
+          serviceName: 'internalServiceName',
+        })
+      );
+      expect(internalService).not.toHaveProperty('disableSend');
+      expect(internalService).not.toHaveProperty('servicesOverrides'); // We don't want to leak this to the client's config
+
+      expect(
+        new ApmConfiguration(mockedRootDir, kibanaConfig, true).getConfig('externalServiceName')
+      ).toEqual(
+        expect.objectContaining({
+          active: false,
+          serverUrl: 'http://a.public.apm.server:port/',
+          transactionSampleRate: 0.1,
+          disableSend: true,
+          serviceName: 'externalServiceName',
         })
       );
     });

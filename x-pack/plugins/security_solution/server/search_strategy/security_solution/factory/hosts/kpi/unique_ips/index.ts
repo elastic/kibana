@@ -11,17 +11,16 @@ import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type {
   HostsKpiQueries,
   HostsKpiUniqueIpsStrategyResponse,
-  HostsKpiUniqueIpsRequestOptions,
 } from '../../../../../../../common/search_strategy/security_solution/hosts';
 import { inspectStringifyObject } from '../../../../../../utils/build_query';
 import type { SecuritySolutionFactory } from '../../../types';
 import { buildHostsKpiUniqueIpsQuery } from './query.hosts_kpi_unique_ips.dsl';
-import { formatGeneralHistogramData } from '../common';
+import { formatGeneralHistogramData } from '../../../common/format_general_histogram_data';
 
 export const hostsKpiUniqueIps: SecuritySolutionFactory<HostsKpiQueries.kpiUniqueIps> = {
-  buildDsl: (options: HostsKpiUniqueIpsRequestOptions) => buildHostsKpiUniqueIpsQuery(options),
+  buildDsl: (options) => buildHostsKpiUniqueIpsQuery(options),
   parse: async (
-    options: HostsKpiUniqueIpsRequestOptions,
+    options,
     response: IEsSearchResponse<unknown>
   ): Promise<HostsKpiUniqueIpsStrategyResponse> => {
     const inspect = {

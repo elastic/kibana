@@ -11,13 +11,13 @@ import {
   EuiText,
   EuiSpacer,
   EuiLink,
-  EuiLoadingContent,
   EuiLoadingSpinner,
   EuiHorizontalRule,
   EuiFlexGroup,
   EuiFlexItem,
   formatDate,
   EuiDescriptionList,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -143,7 +143,7 @@ export const ConfirmIncomingDataWithPreview: React.FunctionComponent<Props> = ({
   if (!isLoading && enrolledAgents > 0 && numAgentsWithData > 0) {
     setAgentDataConfirmed(true);
     if (isGuidedOnboardingActive) {
-      guidedOnboarding.guidedOnboardingApi?.completeGuidedOnboardingForIntegration(
+      guidedOnboarding?.guidedOnboardingApi?.completeGuidedOnboardingForIntegration(
         packageInfo?.name
       );
     }
@@ -188,7 +188,7 @@ export const ConfirmIncomingDataWithPreview: React.FunctionComponent<Props> = ({
           )}
         </EuiText>
         <EuiSpacer size="m" />
-        <EuiLoadingContent lines={10} />
+        <EuiSkeletonText lines={10} />
       </>
     );
   }

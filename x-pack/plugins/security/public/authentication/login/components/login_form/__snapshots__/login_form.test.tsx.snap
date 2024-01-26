@@ -59,7 +59,6 @@ exports[`LoginForm renders as expected 1`] = `
       <EuiFormRow
         describedByIds={Array []}
         display="row"
-        fullWidth={false}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
         isInvalid={false}
@@ -88,7 +87,6 @@ exports[`LoginForm renders as expected 1`] = `
       <EuiFormRow
         describedByIds={Array []}
         display="row"
-        fullWidth={false}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
         isInvalid={false}
@@ -104,13 +102,10 @@ exports[`LoginForm renders as expected 1`] = `
         <EuiFieldPassword
           aria-required={true}
           autoComplete="off"
-          compressed={false}
           data-test-subj="loginPassword"
           disabled={false}
-          fullWidth={false}
           id="password"
           isInvalid={false}
-          isLoading={false}
           name="password"
           onChange={[Function]}
           type="dual"
@@ -133,7 +128,6 @@ exports[`LoginForm renders as expected 1`] = `
             isDisabled={false}
             isLoading={false}
             onClick={[Function]}
-            size="m"
             type="submit"
           >
             <FormattedMessage

@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { SavedObject, SavedObjectReference } from '@kbn/core/server';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { ActionTaskParams } from '@kbn/actions-plugin/server/types';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
@@ -28,7 +29,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       // Inspect migration of non-preconfigured connector ID
       const response = await es.get<SavedObject<ActionTaskParams>>(
         {
-          index: '.kibana',
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           id: 'action_task_params:b9af6280-0052-11ec-917b-f7aa317691ed',
         },
         { meta: true }
@@ -54,7 +55,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       // Inspect migration of preconfigured connector ID
       const preconfiguredConnectorResponse = await es.get<SavedObject<ActionTaskParams>>(
         {
-          index: '.kibana',
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           id: 'action_task_params:0205a520-0054-11ec-917b-f7aa317691ed',
         },
         { meta: true }

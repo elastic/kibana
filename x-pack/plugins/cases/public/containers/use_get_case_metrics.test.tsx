@@ -13,6 +13,7 @@ import { basicCase } from './mock';
 import * as api from './api';
 import { TestProviders } from '../common/mock';
 import { useToasts } from '../common/lib/kibana';
+import { CaseMetricsFeature } from '../../common/types/api';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
@@ -21,11 +22,10 @@ const wrapper: React.FC<string> = ({ children }) => <TestProviders>{children}</T
 
 describe('useGetCaseMetrics', () => {
   const abortCtrl = new AbortController();
-  const features: SingleCaseMetricsFeature[] = ['alerts.count'];
+  const features: SingleCaseMetricsFeature[] = [CaseMetricsFeature.ALERTS_COUNT];
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   it('calls getSingleCaseMetrics with correct arguments', async () => {

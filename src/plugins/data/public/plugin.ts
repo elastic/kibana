@@ -25,7 +25,6 @@ import { SearchService } from './search/search_service';
 import { QueryService } from './query';
 import {
   setIndexPatterns,
-  setNotifications,
   setOverlays,
   setSearchService,
   setUiSettings,
@@ -34,8 +33,10 @@ import {
 import {
   createFiltersFromValueClickAction,
   createFiltersFromRangeSelectAction,
-  createValueClickAction,
-  createSelectRangeAction,
+  createFiltersFromMultiValueClickAction,
+  createMultiValueClickActionDefinition,
+  createValueClickActionDefinition,
+  createSelectRangeActionDefinition,
 } from './actions';
 import { applyFilterTrigger } from './triggers';
 import { getTableViewDescription } from './utils/table_inspector_view';
@@ -119,10 +120,9 @@ export class DataPublicPlugin
 
   public start(
     core: CoreStart,
-    { uiActions, fieldFormats, dataViews, screenshotMode }: DataStartDependencies
+    { uiActions, fieldFormats, dataViews, inspector, screenshotMode }: DataStartDependencies
   ): DataPublicPluginStart {
-    const { uiSettings, notifications, overlays } = core;
-    setNotifications(notifications);
+    const { uiSettings, overlays } = core;
     setOverlays(overlays);
     setUiSettings(uiSettings);
     setIndexPatterns(dataViews);
@@ -136,21 +136,30 @@ export class DataPublicPlugin
     const search = this.searchService.start(core, {
       fieldFormats,
       indexPatterns: dataViews,
+      inspector,
       screenshotMode,
+      scriptedFieldsEnabled: dataViews.scriptedFieldsEnabled,
     });
     setSearchService(search);
 
     uiActions.addTriggerAction(
       'SELECT_RANGE_TRIGGER',
-      createSelectRangeAction(() => ({
+      createSelectRangeActionDefinition(() => ({
         uiActions,
       }))
     );
 
     uiActions.addTriggerAction(
       'VALUE_CLICK_TRIGGER',
-      createValueClickAction(() => ({
+      createValueClickActionDefinition(() => ({
         uiActions,
+      }))
+    );
+
+    uiActions.addTriggerAction(
+      'MULTI_VALUE_CLICK_TRIGGER',
+      createMultiValueClickActionDefinition(() => ({
+        query,
       }))
     );
 
@@ -159,6 +168,7 @@ export class DataPublicPlugin
       actions: {
         createFiltersFromValueClickAction,
         createFiltersFromRangeSelectAction,
+        createFiltersFromMultiValueClickAction,
       },
       datatableUtilities,
       fieldFormats,

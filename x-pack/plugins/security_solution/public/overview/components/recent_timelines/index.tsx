@@ -9,14 +9,14 @@ import { EuiHorizontalRule, EuiText } from '@elastic/eui';
 import React, { useCallback, useMemo, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { SortFieldTimeline, TimelineType } from '../../../../common/types/timeline';
+import { SortFieldTimeline, TimelineType } from '../../../../common/api/timeline';
 import { useGetAllTimeline } from '../../../timelines/containers/all';
 import {
   queryTimelineById,
   dispatchUpdateTimeline,
 } from '../../../timelines/components/open_timeline/helpers';
 import type { OnOpenTimeline } from '../../../timelines/components/open_timeline/types';
-import { updateIsLoading as dispatchUpdateIsLoading } from '../../../timelines/store/timeline/actions';
+import { updateIsLoading as dispatchUpdateIsLoading } from '../../../timelines/store/actions';
 
 import { RecentTimelines } from './recent_timelines';
 import * as i18n from './translations';

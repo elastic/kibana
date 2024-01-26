@@ -8,17 +8,8 @@
 
 import { discoverServiceMock } from '../__mocks__/services';
 import { SearchEmbeddableFactory, type StartServices } from './search_embeddable_factory';
-import { getSavedSearch } from '@kbn/saved-search-plugin/public';
-import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
-import { dataViewMock } from '../__mocks__/data_view';
 import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-
-jest.mock('@kbn/saved-search-plugin/public', () => {
-  return {
-    ...jest.requireActual('@kbn/saved-search-plugin/public'),
-    getSavedSearch: jest.fn(),
-  };
-});
+import type { SearchByValueInput } from '@kbn/saved-search-plugin/public';
 
 jest.mock('@kbn/embeddable-plugin/public', () => {
   return {
@@ -29,44 +20,62 @@ jest.mock('@kbn/embeddable-plugin/public', () => {
 
 const input = {
   id: 'mock-embeddable-id',
+  savedObjectId: 'mock-saved-object-id',
   timeRange: { from: 'now-15m', to: 'now' },
   columns: ['message', 'extension'],
   rowHeight: 30,
   rowsPerPage: 50,
 };
 
-const getSavedSearchMock = getSavedSearch as unknown as jest.Mock;
 const ErrorEmbeddableMock = ErrorEmbeddable as unknown as jest.Mock;
 
 describe('SearchEmbeddableFactory', () => {
-  it('should create factory correctly', async () => {
-    const savedSearchMock = {
-      id: 'mock-id',
-      sort: [['message', 'asc']] as Array<[string, string]>,
-      searchSource: createSearchSourceMock({ index: dataViewMock }, undefined),
-    };
-    getSavedSearchMock.mockResolvedValue(savedSearchMock);
+  it('should create factory correctly from saved object', async () => {
+    const mockUnwrap = jest
+      .spyOn(discoverServiceMock.savedSearch.byValue.attributeService, 'unwrapAttributes')
+      .mockClear();
 
     const factory = new SearchEmbeddableFactory(
       () => Promise.resolve({ executeTriggerActions: jest.fn() } as unknown as StartServices),
       () => Promise.resolve(discoverServiceMock)
     );
+
     const embeddable = await factory.createFromSavedObject('saved-object-id', input);
 
-    expect(getSavedSearchMock.mock.calls[0][0]).toEqual('saved-object-id');
+    expect(mockUnwrap).toHaveBeenCalledTimes(1);
+    expect(mockUnwrap).toHaveBeenLastCalledWith(input);
     expect(embeddable).toBeDefined();
   });
 
-  it('should throw an error when saved search could not be found', async () => {
-    getSavedSearchMock.mockRejectedValue('Could not find saved search');
+  it('should create factory correctly from by value input', async () => {
+    const mockUnwrap = jest
+      .spyOn(discoverServiceMock.savedSearch.byValue.attributeService, 'unwrapAttributes')
+      .mockClear();
 
     const factory = new SearchEmbeddableFactory(
       () => Promise.resolve({ executeTriggerActions: jest.fn() } as unknown as StartServices),
+      () => Promise.resolve(discoverServiceMock)
+    );
+
+    const { savedObjectId, ...byValueInput } = input;
+    const embeddable = await factory.create(byValueInput as SearchByValueInput);
+
+    expect(mockUnwrap).toHaveBeenCalledTimes(1);
+    expect(mockUnwrap).toHaveBeenLastCalledWith(byValueInput);
+    expect(embeddable).toBeDefined();
+  });
+
+  it('should show error embeddable when create throws an error', async () => {
+    const error = new Error('Failed to create embeddable');
+    const factory = new SearchEmbeddableFactory(
+      () => {
+        throw error;
+      },
       () => Promise.resolve(discoverServiceMock)
     );
 
     await factory.createFromSavedObject('saved-object-id', input);
 
-    expect(ErrorEmbeddableMock.mock.calls[0][0]).toEqual('Could not find saved search');
+    expect(ErrorEmbeddableMock.mock.calls[0][0]).toEqual(error);
   });
 });

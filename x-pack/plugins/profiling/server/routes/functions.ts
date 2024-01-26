@@ -6,15 +6,10 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { RouteRegisterParameters } from '.';
+import { IDLE_SOCKET_TIMEOUT, RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
-import { createTopNFunctions } from '../../common/functions';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
-import { createProfilingEsClient } from '../utils/create_profiling_es_client';
-import { withProfilingSpan } from '../utils/with_profiling_span';
 import { getClient } from './compat';
-import { getExecutablesAndStackTraces } from './get_executables_and_stacktraces';
-import { createCommonFilter } from './query';
 
 const querySchema = schema.object({
   timeFrom: schema.number(),
@@ -26,55 +21,46 @@ const querySchema = schema.object({
 
 type QuerySchemaType = TypeOf<typeof querySchema>;
 
-export function registerTopNFunctionsSearchRoute({ router, logger }: RouteRegisterParameters) {
+export function registerTopNFunctionsSearchRoute({
+  router,
+  logger,
+  dependencies: {
+    start: { profilingDataAccess },
+  },
+}: RouteRegisterParameters) {
   const paths = getRoutePaths();
   router.get(
     {
       path: paths.TopNFunctions,
-      validate: {
-        query: querySchema,
-      },
+      options: { tags: ['access:profiling'], timeout: { idleSocket: IDLE_SOCKET_TIMEOUT } },
+      validate: { query: querySchema },
     },
     async (context, request, response) => {
       try {
+        const core = await context.core;
+
         const { timeFrom, timeTo, startIndex, endIndex, kuery }: QuerySchemaType = request.query;
-
-        const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
         const esClient = await getClient(context);
-        const filter = createCommonFilter({
-          timeFrom,
-          timeTo,
+        const topNFunctions = await profilingDataAccess.services.fetchFunction({
+          core,
+          esClient,
+          rangeFromMs: timeFrom,
+          rangeToMs: timeTo,
           kuery,
+          startIndex,
+          endIndex,
         });
-
-        const { stackFrames, stackTraceEvents, stackTraces, executables } =
-          await getExecutablesAndStackTraces({
-            client: createProfilingEsClient({ request, esClient }),
-            filter,
-            logger,
-            sampleSize: targetSampleSize,
-          });
-
-        const t0 = Date.now();
-        const topNFunctions = await withProfilingSpan('create_topn_functions', async () => {
-          return createTopNFunctions(
-            stackTraceEvents,
-            stackTraces,
-            stackFrames,
-            executables,
-            startIndex,
-            endIndex
-          );
-        });
-        logger.info(`creating topN functions took ${Date.now() - t0} ms`);
-
-        logger.info('returning payload response to client');
 
         return response.ok({
           body: topNFunctions,
         });
       } catch (error) {
-        return handleRouteHandlerError({ error, logger, response });
+        return handleRouteHandlerError({
+          error,
+          logger,
+          response,
+          message: 'Error while fetching TopN functions',
+        });
       }
     }
   );

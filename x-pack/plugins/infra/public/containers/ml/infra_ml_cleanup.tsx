@@ -19,7 +19,7 @@ export const cleanUpJobsAndDatafeeds = async <JobType extends string>(
     await callStopDatafeeds({ spaceId, sourceId, jobTypes }, fetch);
   } catch (err) {
     // Proceed only if datafeed has been deleted or didn't exist in the first place
-    if (err?.res?.status !== 404) {
+    if (err?.response?.status !== 404) {
       throw err;
     }
   }
@@ -46,8 +46,10 @@ const waitUntilJobsAreDeleted = async <JobType extends string>(
 ) => {
   const moduleJobIds = jobTypes.map((jobType) => getJobId(spaceId, sourceId, jobType));
   while (true) {
-    const { jobIds: jobIdsBeingDeleted } = await callGetJobDeletionTasks(fetch);
-    const needToWait = jobIdsBeingDeleted.some((jobId) => moduleJobIds.includes(jobId));
+    const { jobs } = await callGetJobDeletionTasks(fetch);
+    const needToWait = jobs
+      .flatMap((job) => Object.keys(job))
+      .some((jobId) => moduleJobIds.includes(jobId));
 
     if (needToWait) {
       await timeout(1000);

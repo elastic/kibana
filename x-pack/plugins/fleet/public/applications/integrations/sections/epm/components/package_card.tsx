@@ -7,14 +7,19 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { EuiBadge, EuiCard, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiBadge, EuiCard, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
 
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import {
+  DEFERRED_ASSETS_WARNING_LABEL,
+  DEFERRED_ASSETS_WARNING_MSG,
+} from '../screens/detail/assets/deferred_assets_warning';
+
 import { CardIcon } from '../../../../../components/package_icon';
-import type { IntegrationCardItem } from '../../../../../../common/types/models/epm';
+import type { IntegrationCardItem } from '../screens/home';
 
 import { InlineReleaseBadge, WithGuidedOnboardingTour } from '../../../components';
 import { useStartServices, useIsGuidedOnboardingActive } from '../../../hooks';
@@ -39,8 +44,11 @@ export function PackageCard({
   release,
   id,
   fromIntegrations,
+  isReauthorizationRequired,
   isUnverified,
+  isUpdateAvailable,
   showLabels = true,
+  extraLabelsBadges,
 }: PackageCardProps) {
   let releaseBadge: React.ReactNode | null = null;
 
@@ -56,7 +64,6 @@ export function PackageCard({
   }
 
   let verifiedBadge: React.ReactNode | null = null;
-
   if (isUnverified && showLabels) {
     verifiedBadge = (
       <EuiFlexItem grow={false}>
@@ -66,6 +73,43 @@ export function PackageCard({
             <FormattedMessage
               id="xpack.fleet.packageCard.unverifiedLabel"
               defaultMessage="Unverified"
+            />
+          </EuiBadge>
+        </span>
+      </EuiFlexItem>
+    );
+  }
+
+  let hasDeferredInstallationsBadge: React.ReactNode | null = null;
+
+  if (isReauthorizationRequired && showLabels) {
+    hasDeferredInstallationsBadge = (
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="xs" />
+        <span>
+          <EuiToolTip
+            display="inlineBlock"
+            content={DEFERRED_ASSETS_WARNING_MSG}
+            title={DEFERRED_ASSETS_WARNING_LABEL}
+          >
+            <EuiBadge color="warning">{DEFERRED_ASSETS_WARNING_LABEL} </EuiBadge>
+          </EuiToolTip>
+        </span>
+      </EuiFlexItem>
+    );
+  }
+
+  let updateAvailableBadge: React.ReactNode | null = null;
+
+  if (isUpdateAvailable && showLabels) {
+    updateAvailableBadge = (
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="xs" />
+        <span>
+          <EuiBadge color="hollow" iconType="sortUp">
+            <FormattedMessage
+              id="xpack.fleet.packageCard.updateAvailableLabel"
+              defaultMessage="Update available"
             />
           </EuiBadge>
         </span>
@@ -116,9 +160,12 @@ export function PackageCard({
           }
           onClick={onCardClick}
         >
-          <EuiFlexGroup gutterSize="xs">
+          <EuiFlexGroup gutterSize="xs" wrap={true}>
+            {showLabels && extraLabelsBadges ? extraLabelsBadges : null}
             {verifiedBadge}
+            {updateAvailableBadge}
             {releaseBadge}
+            {hasDeferredInstallationsBadge}
           </EuiFlexGroup>
         </Card>
       </TrackApplicationView>

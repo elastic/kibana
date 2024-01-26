@@ -209,25 +209,25 @@
               "(encryptedDoc: ",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectUnsanitizedDoc",
+                "section": "def-common.SavedObjectUnsanitizedDoc",
                 "text": "SavedObjectUnsanitizedDoc"
               },
               "<InputAttributes> | ",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectUnsanitizedDoc",
+                "section": "def-common.SavedObjectUnsanitizedDoc",
                 "text": "SavedObjectUnsanitizedDoc"
               },
               "<MigratedAttributes>) => encryptedDoc is ",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectUnsanitizedDoc",
+                "section": "def-common.SavedObjectUnsanitizedDoc",
                 "text": "SavedObjectUnsanitizedDoc"
               },
               "<InputAttributes>"
@@ -247,17 +247,17 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                    "section": "def-server.SavedObjectUnsanitizedDoc",
+                    "section": "def-common.SavedObjectUnsanitizedDoc",
                     "text": "SavedObjectUnsanitizedDoc"
                   },
                   "<InputAttributes> | ",
                   {
                     "pluginId": "@kbn/core-saved-objects-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                    "section": "def-server.SavedObjectUnsanitizedDoc",
+                    "section": "def-common.SavedObjectUnsanitizedDoc",
                     "text": "SavedObjectUnsanitizedDoc"
                   },
                   "<MigratedAttributes>"
@@ -279,25 +279,25 @@
               "(doc: ",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectUnsanitizedDoc",
+                "section": "def-common.SavedObjectUnsanitizedDoc",
                 "text": "SavedObjectUnsanitizedDoc"
               },
               "<InputAttributes>, context: ",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectMigrationContext",
+                "section": "def-common.SavedObjectMigrationContext",
                 "text": "SavedObjectMigrationContext"
               },
               ") => ",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectUnsanitizedDoc",
+                "section": "def-common.SavedObjectUnsanitizedDoc",
                 "text": "SavedObjectUnsanitizedDoc"
               },
               "<MigratedAttributes>"
@@ -315,7 +315,14 @@
                 "label": "doc",
                 "description": [],
                 "signature": [
-                  "SavedObjectDoc<InputAttributes> & { references?: ",
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-common.SavedObjectDoc",
+                    "text": "SavedObjectDoc"
+                  },
+                  "<InputAttributes> & { references?: ",
                   {
                     "pluginId": "@kbn/core-saved-objects-common",
                     "scope": "common",
@@ -339,9 +346,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                    "section": "def-server.SavedObjectMigrationContext",
+                    "section": "def-common.SavedObjectMigrationContext",
                     "text": "SavedObjectMigrationContext"
                   }
                 ],
@@ -432,9 +439,9 @@
               "<T = unknown>(type: string, id: string, options?: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsBaseOptions",
+                "section": "def-common.SavedObjectsBaseOptions",
                 "text": "SavedObjectsBaseOptions"
               },
               " | undefined) => Promise<",
@@ -491,9 +498,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsBaseOptions",
+                    "section": "def-common.SavedObjectsBaseOptions",
                     "text": "SavedObjectsBaseOptions"
                   },
                   " | undefined"
@@ -519,25 +526,25 @@
               "<T = unknown, A = unknown>(findOptions: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsCreatePointInTimeFinderOptions",
+                "section": "def-common.SavedObjectsCreatePointInTimeFinderOptions",
                 "text": "SavedObjectsCreatePointInTimeFinderOptions"
               },
               ", dependencies?: ",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsCreatePointInTimeFinderDependencies",
+                "section": "def-common.SavedObjectsCreatePointInTimeFinderDependencies",
                 "text": "SavedObjectsCreatePointInTimeFinderDependencies"
               },
               " | undefined) => Promise<",
               {
                 "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.ISavedObjectsPointInTimeFinder",
+                "section": "def-common.ISavedObjectsPointInTimeFinder",
                 "text": "ISavedObjectsPointInTimeFinder"
               },
               "<T, A>>"
@@ -558,9 +565,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsCreatePointInTimeFinderOptions",
+                    "section": "def-common.SavedObjectsCreatePointInTimeFinderOptions",
                     "text": "SavedObjectsCreatePointInTimeFinderOptions"
                   }
                 ],
@@ -581,9 +588,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-server.SavedObjectsCreatePointInTimeFinderDependencies",
+                    "section": "def-common.SavedObjectsCreatePointInTimeFinderDependencies",
                     "text": "SavedObjectsCreatePointInTimeFinderDependencies"
                   },
                   " | undefined"
@@ -820,25 +827,25 @@
           "(encryptedDoc: ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectUnsanitizedDoc",
+            "section": "def-common.SavedObjectUnsanitizedDoc",
             "text": "SavedObjectUnsanitizedDoc"
           },
           "<InputAttributes> | ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectUnsanitizedDoc",
+            "section": "def-common.SavedObjectUnsanitizedDoc",
             "text": "SavedObjectUnsanitizedDoc"
           },
           "<MigratedAttributes>) => encryptedDoc is ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectUnsanitizedDoc",
+            "section": "def-common.SavedObjectUnsanitizedDoc",
             "text": "SavedObjectUnsanitizedDoc"
           },
           "<InputAttributes>"
@@ -858,17 +865,17 @@
             "signature": [
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectUnsanitizedDoc",
+                "section": "def-common.SavedObjectUnsanitizedDoc",
                 "text": "SavedObjectUnsanitizedDoc"
               },
               "<InputAttributes> | ",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectUnsanitizedDoc",
+                "section": "def-common.SavedObjectUnsanitizedDoc",
                 "text": "SavedObjectUnsanitizedDoc"
               },
               "<MigratedAttributes>"
@@ -993,6 +1000,46 @@
                 "<InputAttributes, MigratedAttributes>"
               ],
               "path": "x-pack/plugins/encrypted_saved_objects/server/create_migration.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
+        },
+        {
+          "parentPluginId": "encryptedSavedObjects",
+          "id": "def-server.EncryptedSavedObjectsPluginSetup.createModelVersion",
+          "type": "Function",
+          "tags": [],
+          "label": "createModelVersion",
+          "description": [],
+          "signature": [
+            "(opts: ",
+            "CreateEsoModelVersionFnOpts",
+            ") => ",
+            {
+              "pluginId": "@kbn/core-saved-objects-server",
+              "scope": "common",
+              "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+              "section": "def-common.SavedObjectsModelVersion",
+              "text": "SavedObjectsModelVersion"
+            }
+          ],
+          "path": "x-pack/plugins/encrypted_saved_objects/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "encryptedSavedObjects",
+              "id": "def-server.EncryptedSavedObjectsPluginSetup.createModelVersion.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "opts",
+              "description": [],
+              "signature": [
+                "CreateEsoModelVersionFnOpts"
+              ],
+              "path": "x-pack/plugins/encrypted_saved_objects/server/create_model_version.ts",
               "deprecated": false,
               "trackAdoption": false
             }

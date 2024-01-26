@@ -8,9 +8,9 @@
 import type { Client } from '@elastic/elasticsearch';
 import seedrandom from 'seedrandom';
 import type { KbnClient } from '@kbn/test';
-import type { AxiosResponse } from 'axios';
-import type { CreatePackagePolicyResponse, GetPackagesResponse } from '@kbn/fleet-plugin/common';
-import { EPM_API_ROUTES } from '@kbn/fleet-plugin/common';
+import type { CreatePackagePolicyResponse } from '@kbn/fleet-plugin/common';
+import type { ToolingLog } from '@kbn/tooling-log';
+import { usageTracker } from './data_loaders/usage_tracker';
 import type { TreeOptions } from './generate_data';
 import { EndpointDocGenerator } from './generate_data';
 import type {
@@ -24,7 +24,13 @@ import {
 import { enableFleetServerIfNecessary } from './data_loaders/index_fleet_server';
 import { indexAlerts } from './data_loaders/index_alerts';
 import { setupFleetForEndpoint } from './data_loaders/setup_fleet_for_endpoint';
-import { mergeAndAppendArrays } from './data_loaders/utils';
+import { createToolingLogger, mergeAndAppendArrays } from './data_loaders/utils';
+import {
+  waitForMetadataTransformsReady,
+  stopMetadataTransforms,
+  startMetadataTransforms,
+} from './utils/transforms';
+import { getEndpointPackageInfo } from './utils/package';
 
 export type IndexedHostsAndAlertsResponse = IndexedHostsResponse;
 
@@ -44,99 +50,111 @@ export type IndexedHostsAndAlertsResponse = IndexedHostsResponse;
  * @param fleet
  * @param options
  * @param DocGenerator
+ * @param withResponseActions
+ * @param numResponseActions
+ * @param alertIds
+ * @param logger_
  */
-export async function indexHostsAndAlerts(
-  client: Client,
-  kbnClient: KbnClient,
-  seed: string,
-  numHosts: number,
-  numDocs: number,
-  metadataIndex: string,
-  policyResponseIndex: string,
-  eventIndex: string,
-  alertIndex: string,
-  alertsPerHost: number,
-  fleet: boolean,
-  options: TreeOptions = {},
-  DocGenerator: typeof EndpointDocGenerator = EndpointDocGenerator
-): Promise<IndexedHostsAndAlertsResponse> {
-  const random = seedrandom(seed);
-  const epmEndpointPackage = await getEndpointPackageInfo(kbnClient);
-  const response: IndexedHostsAndAlertsResponse = {
-    hosts: [],
-    policyResponses: [],
-    agents: [],
-    fleetAgentsIndex: '',
-    metadataIndex,
-    policyResponseIndex,
-    actionResponses: [],
-    responsesIndex: '',
-    actions: [],
-    actionsIndex: '',
-    endpointActions: [],
-    endpointActionsIndex: '',
-    endpointActionResponses: [],
-    endpointActionResponsesIndex: '',
-    integrationPolicies: [],
-    agentPolicies: [],
-  };
-
-  // Ensure fleet is setup and endpoint package installed
-  await setupFleetForEndpoint(kbnClient);
-
-  // If `fleet` integration is true, then ensure a (fake) fleet-server is connected
-  if (fleet) {
-    await enableFleetServerIfNecessary(client);
-  }
-
-  // Keep a map of host applied policy ids (fake) to real ingest package configs (policy record)
-  const realPolicies: Record<string, CreatePackagePolicyResponse['item']> = {};
-
-  for (let i = 0; i < numHosts; i++) {
-    const generator = new DocGenerator(random);
-    const indexedHosts = await indexEndpointHostDocs({
-      numDocs,
-      client,
-      kbnClient,
-      realPolicies,
-      epmEndpointPackage,
+export const indexHostsAndAlerts = usageTracker.track(
+  'indexHostsAndAlerts',
+  async (
+    client: Client,
+    kbnClient: KbnClient,
+    seed: string,
+    numHosts: number,
+    numDocs: number,
+    metadataIndex: string,
+    policyResponseIndex: string,
+    eventIndex: string,
+    alertIndex: string,
+    alertsPerHost: number,
+    fleet: boolean,
+    options: TreeOptions = {},
+    DocGenerator: typeof EndpointDocGenerator = EndpointDocGenerator,
+    withResponseActions = true,
+    numResponseActions?: number,
+    alertIds?: string[],
+    logger_?: ToolingLog
+  ): Promise<IndexedHostsAndAlertsResponse> => {
+    const random = seedrandom(seed);
+    const logger = logger_ ?? createToolingLogger();
+    const epmEndpointPackage = await getEndpointPackageInfo(kbnClient);
+    const response: IndexedHostsAndAlertsResponse = {
+      hosts: [],
+      policyResponses: [],
+      agents: [],
+      fleetAgentsIndex: '',
       metadataIndex,
       policyResponseIndex,
-      enrollFleet: fleet,
-      generator,
-    });
+      actionResponses: [],
+      responsesIndex: '',
+      actions: [],
+      actionsIndex: '',
+      endpointActions: [],
+      endpointActionsIndex: '',
+      endpointActionResponses: [],
+      endpointActionResponsesIndex: '',
+      integrationPolicies: [],
+      agentPolicies: [],
+    };
 
-    mergeAndAppendArrays(response, indexedHosts);
+    // Ensure fleet is setup and endpoint package installed
+    await setupFleetForEndpoint(kbnClient, logger);
 
-    await indexAlerts({
-      client,
-      eventIndex,
-      alertIndex,
-      generator,
-      numAlerts: alertsPerHost,
-      options,
-    });
+    // If `fleet` integration is true, then ensure a (fake) fleet-server is connected
+    if (fleet) {
+      await enableFleetServerIfNecessary(client);
+    }
+
+    // Keep a map of host applied policy ids (fake) to real ingest package configs (policy record)
+    const realPolicies: Record<string, CreatePackagePolicyResponse['item']> = {};
+
+    const shouldWaitForEndpointMetadataDocs = fleet;
+    if (shouldWaitForEndpointMetadataDocs) {
+      await waitForMetadataTransformsReady(client, epmEndpointPackage.version);
+      await stopMetadataTransforms(client, epmEndpointPackage.version);
+    }
+
+    for (let i = 0; i < numHosts; i++) {
+      const generator = new DocGenerator(random);
+      const indexedHosts = await indexEndpointHostDocs({
+        numDocs,
+        client,
+        kbnClient,
+        realPolicies,
+        epmEndpointPackage,
+        metadataIndex,
+        policyResponseIndex,
+        enrollFleet: fleet,
+        generator,
+        withResponseActions,
+        numResponseActions,
+        alertIds,
+      });
+
+      mergeAndAppendArrays(response, indexedHosts);
+
+      await indexAlerts({
+        client,
+        eventIndex,
+        alertIndex,
+        generator,
+        numAlerts: alertsPerHost,
+        options,
+      });
+    }
+
+    if (shouldWaitForEndpointMetadataDocs) {
+      await startMetadataTransforms(
+        client,
+        response.agents.map((agent) => agent.agent?.id ?? ''),
+        epmEndpointPackage.version
+      );
+    }
+
+    return response;
   }
-
-  return response;
-}
-
-const getEndpointPackageInfo = async (
-  kbnClient: KbnClient
-): Promise<GetPackagesResponse['items'][0]> => {
-  const endpointPackage = (
-    (await kbnClient.request({
-      path: `${EPM_API_ROUTES.LIST_PATTERN}?category=security`,
-      method: 'GET',
-    })) as AxiosResponse<GetPackagesResponse>
-  ).data.items.find((epmPackage) => epmPackage.name === 'endpoint');
-
-  if (!endpointPackage) {
-    throw new Error('EPM Endpoint package was not found!');
-  }
-
-  return endpointPackage;
-};
+);
 
 export type DeleteIndexedHostsAndAlertsResponse = DeleteIndexedEndpointHostsResponse;
 

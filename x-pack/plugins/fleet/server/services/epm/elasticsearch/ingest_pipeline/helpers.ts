@@ -69,21 +69,71 @@ function mutatePipelineContentWithNewProcessor(jsonPipelineContent: any, process
   jsonPipelineContent.processors.push(processor);
 }
 
-export function addCustomPipelineProcessor(pipeline: PipelineInstall): PipelineInstall {
-  if (!pipeline.customIngestPipelineNameForInstallation) {
+export function addCustomPipelineAndLocalRoutingRulesProcessor(
+  pipeline: PipelineInstall
+): PipelineInstall {
+  if (!pipeline.shouldInstallCustomPipelines || !pipeline.dataStream) {
     return pipeline;
   }
 
-  const customPipelineProcessor = {
-    pipeline: {
-      name: pipeline.customIngestPipelineNameForInstallation,
-      ignore_missing_pipeline: true,
+  const localRoutingRules =
+    pipeline.dataStream?.routing_rules?.find(
+      (rule) => rule.source_dataset === pipeline.dataStream?.dataset
+    )?.rules ?? [];
+
+  const customPipelineProcessors = [
+    {
+      pipeline: {
+        name: 'global@custom',
+        ignore_missing_pipeline: true,
+        description: '[Fleet] Global pipeline for all data streams',
+      },
     },
-  };
+    {
+      pipeline: {
+        name: `${pipeline.dataStream.type}@custom`,
+        ignore_missing_pipeline: true,
+        description: `[Fleet] Pipeline for all data streams of type \`${pipeline.dataStream.type}\``,
+      },
+    },
+    ...(pipeline.dataStream.package
+      ? [
+          {
+            pipeline: {
+              // This pipeline name gets the `.integration` suffix to avoid conflicts with the pipeline name for the dataset below
+              name: `${pipeline.dataStream.type}-${pipeline.dataStream.package}.integration@custom`,
+              ignore_missing_pipeline: true,
+              description: `[Fleet] Pipeline for all data streams of type \`${pipeline.dataStream.type}\` defined by the \`${pipeline.dataStream.package}\` integration`,
+            },
+          },
+        ]
+      : []),
+    {
+      pipeline: {
+        name: `${pipeline.dataStream.type}-${pipeline.dataStream.dataset}@custom`,
+        ignore_missing_pipeline: true,
+        description: `[Fleet] Pipeline for the \`${pipeline.dataStream.dataset}\` dataset`,
+      },
+    },
+  ];
+
+  const rerouteProcessors = localRoutingRules.map((routingRule) => ({
+    reroute: {
+      tag: pipeline.dataStream?.dataset,
+      dataset: routingRule.target_dataset,
+      namespace: routingRule.namespace,
+      if: routingRule.if,
+    },
+  }));
 
   if (pipeline.extension === 'yml') {
     const parsedPipelineContent = safeLoad(pipeline.contentForInstallation);
-    mutatePipelineContentWithNewProcessor(parsedPipelineContent, customPipelineProcessor);
+    customPipelineProcessors.forEach((processor) =>
+      mutatePipelineContentWithNewProcessor(parsedPipelineContent, processor)
+    );
+    rerouteProcessors.forEach((processor) =>
+      mutatePipelineContentWithNewProcessor(parsedPipelineContent, processor)
+    );
     return {
       ...pipeline,
       contentForInstallation: `---\n${safeDump(parsedPipelineContent)}`,
@@ -91,7 +141,12 @@ export function addCustomPipelineProcessor(pipeline: PipelineInstall): PipelineI
   }
 
   const parsedPipelineContent = JSON.parse(pipeline.contentForInstallation);
-  mutatePipelineContentWithNewProcessor(parsedPipelineContent, customPipelineProcessor);
+  customPipelineProcessors.forEach((processor) =>
+    mutatePipelineContentWithNewProcessor(parsedPipelineContent, processor)
+  );
+  rerouteProcessors.forEach((processor) =>
+    mutatePipelineContentWithNewProcessor(parsedPipelineContent, processor)
+  );
 
   return {
     ...pipeline,

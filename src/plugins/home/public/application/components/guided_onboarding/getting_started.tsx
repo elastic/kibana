@@ -7,48 +7,79 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
+import { parse } from 'query-string';
 import {
-  EuiFlexGrid,
-  EuiFlexItem,
-  EuiHorizontalRule,
+  EuiButton,
   EuiLink,
+  EuiLoadingSpinner,
   EuiPageTemplate,
-  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
 
-import { css } from '@emotion/react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import type { GuideState, GuideId, UseCase } from '@kbn/guided-onboarding';
-import { GuideCard, ObservabilityLinkCard } from '@kbn/guided-onboarding';
-
+import {
+  GuideFilterValues,
+  GuideCards,
+  GuideFilters,
+  GuideCardConstants,
+  guideCards,
+} from '@kbn/guided-onboarding/guide';
+import {
+  GuideCardsClassic,
+  GuideFiltersClassic,
+  guideCardsClassic,
+  type GuideFilterValuesClassic,
+} from '@kbn/guided-onboarding/classic';
+import { GuideId, GuideState } from '@kbn/guided-onboarding/src/types';
 import { getServices } from '../../kibana_services';
 import { KEY_ENABLE_WELCOME } from '../home';
 
 const homeBreadcrumb = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
 const gettingStartedBreadcrumb = i18n.translate('home.breadcrumbs.gettingStartedTitle', {
-  defaultMessage: 'Guided setup',
+  defaultMessage: 'Setup guides',
 });
 const title = i18n.translate('home.guidedOnboarding.gettingStarted.useCaseSelectionTitle', {
   defaultMessage: 'What would you like to do first?',
 });
 const subtitle = i18n.translate('home.guidedOnboarding.gettingStarted.useCaseSelectionSubtitle', {
-  defaultMessage: 'Select a guide to help you make the most of your data.',
+  defaultMessage: `Filter by solution to see related use cases`,
 });
 const skipText = i18n.translate('home.guidedOnboarding.gettingStarted.skip.buttonLabel', {
-  defaultMessage: `I’d like to do something else (skip)`,
+  defaultMessage: `I’d like to explore on my own.`,
 });
 
 export const GettingStarted = () => {
-  const { application, trackUiMetric, chrome, guidedOnboardingService, http, uiSettings, cloud } =
-    getServices();
+  const {
+    application,
+    trackUiMetric,
+    chrome,
+    guidedOnboardingService,
+    cloud,
+    openModal,
+    theme,
+    i18nStart,
+    docLinks,
+    share,
+  } = getServices();
+
   const [guidesState, setGuidesState] = useState<GuideState[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isError, setIsError] = useState<boolean>(false);
+  const [filteredCards, setFilteredCards] = useState<GuideCardConstants[]>();
+  const { search } = useLocation();
+  const query = parse(search);
+  // using for A/B testing
+  const [classicGuide] = useState<boolean>(false);
+  const useCase = query.useCase as GuideFilterValues;
+  const [filter, setFilter] = useState<GuideFilterValues | GuideFilterValuesClassic>(
+    classicGuide ? useCase ?? 'all' : useCase ?? 'search'
+  );
+
   const history = useHistory();
 
   useEffect(() => {
@@ -68,9 +99,17 @@ export const GettingStarted = () => {
   }, [chrome, trackUiMetric]);
 
   const fetchGuidesState = useCallback(async () => {
-    const allGuides = await guidedOnboardingService?.fetchAllGuidesState();
-    if (allGuides) {
-      setGuidesState(allGuides.state);
+    setIsLoading(true);
+    setIsError(false);
+    try {
+      const allGuides = await guidedOnboardingService?.fetchAllGuidesState();
+      setIsLoading(false);
+      if (allGuides) {
+        setGuidesState(allGuides.state);
+      }
+    } catch (error) {
+      setIsLoading(false);
+      setIsError(true);
     }
   }, [guidedOnboardingService]);
 
@@ -84,72 +123,159 @@ export const GettingStarted = () => {
     }
   }, [cloud, history]);
 
-  const onSkip = () => {
-    trackUiMetric(METRIC_TYPE.CLICK, 'guided_onboarding__skipped');
+  useEffect(() => {
     // disable welcome screen on the home page
     localStorage.setItem(KEY_ENABLE_WELCOME, JSON.stringify(false));
+  }, []);
+
+  const onSkip = async () => {
+    try {
+      await guidedOnboardingService?.skipGuidedOnboarding();
+    } catch (error) {
+      // if the state update fails, it's safe to ignore the error
+    }
+    trackUiMetric(METRIC_TYPE.CLICK, 'guided_onboarding__skipped');
     application.navigateToApp('home');
   };
-  const { euiTheme } = useEuiTheme();
-  const paddingCss = css`
-    padding: calc(${euiTheme.size.base}*3) calc(${euiTheme.size.base}*4);
-  `;
 
-  const isDarkTheme = uiSettings.get<boolean>('theme:darkMode');
-  const activateGuide = async (useCase: UseCase, guideState?: GuideState) => {
-    await guidedOnboardingService?.activateGuide(useCase as GuideId, guideState);
-    // TODO error handling https://github.com/elastic/kibana/issues/139798
-  };
+  const activateGuide = useCallback(
+    async (guideId: GuideId, guideState?: GuideState) => {
+      try {
+        await guidedOnboardingService?.activateGuide(guideId, guideState);
+      } catch (err) {
+        getServices().toastNotifications.addDanger({
+          title: i18n.translate('home.guidedOnboarding.gettingStarted.activateGuide.errorMessage', {
+            defaultMessage: 'Unable to start the guide. Wait a moment and try again.',
+          }),
+          text: err.message,
+        });
+      }
+    },
+    [guidedOnboardingService]
+  );
+
+  // filter cards for solution and based on classic or new format
+  const guide = classicGuide ? guideCardsClassic : guideCards;
+  useEffect(() => {
+    const tempFiltered = guide.filter(({ solution }) => solution === filter);
+    setFilteredCards(tempFiltered);
+  }, [filter, guide]);
+
+  if (isLoading) {
+    return (
+      <KibanaPageTemplate.EmptyPrompt
+        title={<EuiLoadingSpinner size="xl" />}
+        body={
+          <EuiText color="subdued">
+            {i18n.translate('home.guidedOnboarding.gettingStarted.loadingIndicator', {
+              defaultMessage: 'Loading the guide state...',
+            })}
+          </EuiText>
+        }
+        data-test-subj="onboarding--loadingIndicator"
+      />
+    );
+  }
+
+  if (isError) {
+    return (
+      <KibanaPageTemplate.EmptyPrompt
+        iconType="warning"
+        color="danger"
+        title={
+          <h2>
+            {i18n.translate('home.guidedOnboarding.gettingStarted.errorSectionTitle', {
+              defaultMessage: 'Unable to load the guide state',
+            })}
+          </h2>
+        }
+        body={
+          <>
+            <EuiText color="subdued">
+              {i18n.translate('home.guidedOnboarding.gettingStarted.errorSectionDescription', {
+                defaultMessage: `The guide couldn't be loaded. Wait a moment and try again.`,
+              })}
+            </EuiText>
+            <EuiSpacer />
+            <EuiButton
+              iconSide="right"
+              onClick={fetchGuidesState}
+              iconType="refresh"
+              color="danger"
+            >
+              {i18n.translate('home.guidedOnboarding.gettingStarted.errorSectionRefreshButton', {
+                defaultMessage: 'Refresh',
+              })}
+            </EuiButton>
+          </>
+        }
+        data-test-subj="onboarding--errorSection"
+      />
+    );
+  }
+
+  const setGuideFilters = classicGuide ? (
+    <GuideFiltersClassic
+      application={application}
+      activeFilter={filter}
+      setActiveFilter={setFilter}
+      data-test-subj="onboarding--guideFilters"
+    />
+  ) : (
+    <GuideFilters
+      application={application}
+      activeFilter={filter as GuideFilterValues}
+      setActiveFilter={setFilter}
+      data-test-subj="onboarding--guideFilters"
+      trackUiMetric={trackUiMetric}
+    />
+  );
+
+  const setGuideCards = classicGuide ? (
+    <GuideCardsClassic
+      activateGuide={activateGuide}
+      navigateToApp={application.navigateToApp}
+      activeFilter={filter as GuideFilterValues}
+      guidesState={guidesState}
+    />
+  ) : (
+    <GuideCards
+      activateGuide={activateGuide}
+      navigateToApp={application.navigateToApp}
+      activeFilter={filter as GuideFilterValues}
+      guidesState={guidesState}
+      filteredCards={filteredCards}
+      openModal={openModal}
+      i18nStart={i18nStart}
+      theme={theme}
+      docLinks={docLinks}
+      cloud={cloud!}
+      url={share.url}
+      navigateToUrl={application.navigateToUrl}
+    />
+  );
 
   return (
-    <KibanaPageTemplate panelled={false} grow>
-      <EuiPageTemplate.Section alignment="center">
-        <EuiPanel color="plain" hasShadow css={paddingCss}>
-          <EuiTitle size="l" className="eui-textCenter">
-            <h1>{title}</h1>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText size="m" textAlign="center">
-            <p>{subtitle}</p>
-          </EuiText>
-          <EuiSpacer size="s" />
-          <EuiSpacer size="xxl" />
-          <EuiFlexGrid columns={4} gutterSize="l">
-            {['search', 'observability', 'observabilityLink', 'security'].map((useCase) => {
-              if (useCase === 'observabilityLink') {
-                return (
-                  <EuiFlexItem key={`linkCard-${useCase}`}>
-                    <ObservabilityLinkCard
-                      navigateToApp={application.navigateToApp}
-                      isDarkTheme={isDarkTheme}
-                      addBasePath={http.basePath.prepend}
-                    />
-                  </EuiFlexItem>
-                );
-              }
-              return (
-                <EuiFlexItem key={`guideCard-${useCase}`}>
-                  <GuideCard
-                    useCase={useCase as UseCase}
-                    guides={guidesState}
-                    activateGuide={activateGuide}
-                    isDarkTheme={isDarkTheme}
-                    addBasePath={http.basePath.prepend}
-                  />
-                </EuiFlexItem>
-              );
-            })}
-          </EuiFlexGrid>
-          <EuiSpacer />
-          <EuiHorizontalRule />
-          <EuiSpacer />
-          <div className="eui-textCenter">
-            {/* data-test-subj used for FS tracking */}
-            <EuiLink onClick={onSkip} data-test-subj="onboarding--skipGuideLink">
-              {skipText}
-            </EuiLink>
-          </div>
-        </EuiPanel>
+    <KibanaPageTemplate panelled={false}>
+      <EuiPageTemplate.Section data-test-subj="guided-onboarding--landing-page">
+        <EuiTitle size="l" className="eui-textCenter">
+          <h1>{title}</h1>
+        </EuiTitle>
+        <EuiSpacer size="l" />
+        <EuiText size="m" textAlign="center">
+          <p>{subtitle}</p>
+        </EuiText>
+        <EuiSpacer size="l" />
+        {setGuideFilters}
+        <EuiSpacer size="xxl" />
+        {setGuideCards}
+        <EuiSpacer size="xxl" />
+        <div className="eui-textCenter">
+          {/* data-test-subj used for FS tracking */}
+          <EuiLink onClick={onSkip} data-test-subj="onboarding--skipGuideLink">
+            {skipText}
+          </EuiLink>
+        </div>
       </EuiPageTemplate.Section>
     </KibanaPageTemplate>
   );

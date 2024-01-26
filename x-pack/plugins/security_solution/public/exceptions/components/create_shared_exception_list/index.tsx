@@ -26,7 +26,10 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 import type { ErrorToastOptions, Toast, ToastInput } from '@kbn/core-notifications-browser';
 import { i18n as translate } from '@kbn/i18n';
 import type { ListDetails } from '@kbn/securitysolution-exception-list-components';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
 
+import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';
 import { useCreateSharedExceptionListWithOptionalSignal } from '../../hooks/use_create_shared_list';
 import {
   CREATE_SHARED_LIST_TITLE,
@@ -54,6 +57,8 @@ export const CreateSharedListFlyout = memo(
     addError: (error: unknown, options: ErrorToastOptions) => Toast;
     handleCloseFlyout: () => void;
   }) => {
+    const { navigateToApp } = useKibana<CoreStart>().services.application;
+
     const { start: createSharedExceptionList, ...createSharedExceptionListState } =
       useCreateSharedExceptionListWithOptionalSignal();
     const ctrl = useRef(new AbortController());
@@ -75,6 +80,15 @@ export const CreateSharedListFlyout = memo(
       setNewListDetails({ ...newListDetails, [detailProperty]: value });
     };
 
+    useEffect(() => {
+      if (createSharedExceptionListState.result != null) {
+        navigateToApp(APP_UI_ID, {
+          deepLinkId: SecurityPageName.exceptions,
+          path: `/details/${createSharedExceptionListState.result.list_id}`,
+        });
+      }
+    }, [createSharedExceptionListState, navigateToApp]);
+
     const handleCreateSharedExceptionList = useCallback(() => {
       if (!createSharedExceptionListState.loading && newListDetails.name !== '') {
         ctrl.current = new AbortController();
@@ -86,7 +100,13 @@ export const CreateSharedListFlyout = memo(
           description: newListDetails.description ?? '',
         });
       }
-    }, [createSharedExceptionList, createSharedExceptionListState.loading, newListDetails, http]);
+    }, [
+      createSharedExceptionListState.loading,
+      newListDetails.name,
+      newListDetails.description,
+      createSharedExceptionList,
+      http,
+    ]);
 
     const handleCreateSuccess = useCallback(
       (response) => {
@@ -151,7 +171,8 @@ export const CreateSharedListFlyout = memo(
             placeholder={CREATE_SHARED_LIST_NAME_FIELD_PLACEHOLDER}
             value={newListDetails.name}
             onChange={(e) => onChange(e, DetailProperty.name)}
-            aria-label="Use aria labels when no actual label is in use"
+            aria-label="Shared exception list name"
+            data-test-subj="createSharedExceptionListNameInput"
           />
           <EuiSpacer />
           <EuiText>{CREATE_SHARED_LIST_DESCRIPTION}</EuiText>
@@ -159,7 +180,8 @@ export const CreateSharedListFlyout = memo(
             placeholder={CREATE_SHARED_LIST_DESCRIPTION_PLACEHOLDER}
             value={newListDetails.description}
             onChange={(e) => onChange(e, DetailProperty.description)}
-            aria-label="Stop the hackers"
+            aria-label="Shared exception list description"
+            data-test-subj="createSharedExceptionListDescriptionInput"
           />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>

@@ -9,6 +9,7 @@ import React from 'react';
 import turfBbox from '@turf/bbox';
 import { multiPoint } from '@turf/helpers';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { type Filter, buildExistsFilter } from '@kbn/es-query';
 import { lastValueFrom } from 'rxjs';
 import type {
@@ -23,18 +24,18 @@ import { SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { getDataSourceLabel, getDataViewLabel } from '../../../../common/i18n_getters';
 import { convertToLines } from './convert_to_lines';
 import { AbstractESAggSource } from '../es_agg_source';
-import { registerSource } from '../source_registry';
 import { turfBboxToBounds } from '../../../../common/elasticsearch_util';
 import { DataRequestAbortError } from '../../util/data_request';
-import { makePublicExecutionContext } from '../../../util';
+import { mergeExecutionContext } from '../execution_context_utils';
 import { SourceEditorArgs } from '../source';
 import {
+  DataFilters,
   ESPewPewSourceDescriptor,
   MapExtent,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { isValidStringConfig } from '../../util/valid_string_config';
-import { BoundsRequestMeta, GeoJsonWithMeta } from '../vector_source';
+import { BoundsRequestMeta, GeoJsonWithMeta, getLayerFeaturesRequestName } from '../vector_source';
 
 const MAX_GEOTILE_LEVEL = 29;
 
@@ -66,13 +67,19 @@ export class ESPewPewSource extends AbstractESAggSource {
     this._descriptor = descriptor;
   }
 
+  getBucketsName() {
+    return i18n.translate('xpack.maps.source.pewPew.bucketsName', {
+      defaultMessage: 'paths',
+    });
+  }
+
   renderSourceSettingsEditor({ onChange }: SourceEditorArgs) {
     return (
       <UpdateSourceEditor
+        bucketsName={this.getBucketsName()}
         indexPatternId={this.getIndexPatternId()}
         onChange={onChange}
         metrics={this._descriptor.metrics}
-        applyGlobalQuery={this._descriptor.applyGlobalQuery}
       />
     );
   }
@@ -81,8 +88,15 @@ export class ESPewPewSource extends AbstractESAggSource {
     return true;
   }
 
-  showJoinEditor() {
+  supportsJoins() {
     return false;
+  }
+
+  getSyncMeta(dataFilters: DataFilters) {
+    return {
+      ...super.getSyncMeta(dataFilters),
+      geogridPrecision: this.getGeoGridPrecision(dataFilters.zoom),
+    };
   }
 
   isGeoGridPrecisionAware() {
@@ -125,13 +139,13 @@ export class ESPewPewSource extends AbstractESAggSource {
 
   async getGeoJsonWithMeta(
     layerName: string,
-    searchFilters: VectorSourceRequestMeta,
+    requestMeta: VectorSourceRequestMeta,
     registerCancelCallback: (callback: () => void) => void,
     isRequestStillActive: () => boolean,
     inspectorAdapters: Adapters
   ): Promise<GeoJsonWithMeta> {
     const indexPattern = await this.getIndexPattern();
-    const searchSource = await this.makeSearchSource(searchFilters, 0);
+    const searchSource = await this.makeSearchSource(requestMeta, 0);
     searchSource.setField('trackTotalHits', false);
     searchSource.setField('aggs', {
       destSplit: {
@@ -149,7 +163,7 @@ export class ESPewPewSource extends AbstractESAggSource {
           sourceGrid: {
             geotile_grid: {
               field: this._descriptor.sourceGeoField,
-              precision: searchFilters.geogridPrecision,
+              precision: this.getGeoGridPrecision(requestMeta.zoom),
               size: 500,
             },
             aggs: {
@@ -175,17 +189,21 @@ export class ESPewPewSource extends AbstractESAggSource {
       buildExistsFilter({ name: this._descriptor.sourceGeoField, type: 'geo_point' }, indexPattern),
     ]);
 
+    const warnings: SearchResponseWarning[] = [];
     const esResponse = await this._runEsQuery({
       requestId: this.getId(),
-      requestName: layerName,
+      requestName: getLayerFeaturesRequestName(layerName),
       searchSource,
       registerCancelCallback,
-      requestDescription: i18n.translate('xpack.maps.source.pewPew.inspectorDescription', {
-        defaultMessage: 'Source-destination connections request',
-      }),
-      searchSessionId: searchFilters.searchSessionId,
-      executionContext: makePublicExecutionContext('es_pew_pew_source:connections'),
+      searchSessionId: requestMeta.searchSessionId,
+      executionContext: mergeExecutionContext(
+        { description: 'es_pew_pew_source:connections' },
+        requestMeta.executionContext
+      ),
       requestsAdapter: inspectorAdapters.requests,
+      onWarning: (warning: SearchResponseWarning) => {
+        warnings.push(warning);
+      },
     });
 
     const { featureCollection } = convertToLines(esResponse);
@@ -194,6 +212,7 @@ export class ESPewPewSource extends AbstractESAggSource {
       data: featureCollection,
       meta: {
         areResultsTrimmed: false,
+        warnings,
       },
     };
   }
@@ -229,7 +248,10 @@ export class ESPewPewSource extends AbstractESAggSource {
         searchSource.fetch$({
           abortSignal: abortController.signal,
           legacyHitsTotal: false,
-          executionContext: makePublicExecutionContext('es_pew_pew_source:bounds'),
+          executionContext: mergeExecutionContext(
+            { description: 'es_pew_pew_source:bounds' },
+            boundsFilters.executionContext
+          ),
         })
       );
       const destBounds = (esResp.aggregations?.destFitToBounds as AggregationsGeoBoundsAggregate)
@@ -276,8 +298,3 @@ export class ESPewPewSource extends AbstractESAggSource {
     return true;
   }
 }
-
-registerSource({
-  ConstructorFunction: ESPewPewSource,
-  type: SOURCE_TYPES.ES_PEW_PEW,
-});

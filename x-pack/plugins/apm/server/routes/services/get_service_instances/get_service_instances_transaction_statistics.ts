@@ -10,14 +10,14 @@ import {
   SERVICE_NAME,
   SERVICE_NODE_NAME,
   TRANSACTION_TYPE,
-} from '../../../../common/elasticsearch_fieldnames';
+} from '../../../../common/es_fields/apm';
 import { EventOutcome } from '../../../../common/event_outcome';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import { Coordinate } from '../../../../typings/timeseries';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
-  getDocumentTypeFilterForTransactions,
+  getBackwardCompatibleDocumentTypeFilter,
   getDurationFieldForTransactions,
   getProcessorEventForTransactions,
 } from '../../../lib/helpers/transactions';
@@ -114,11 +114,15 @@ export async function getServiceInstancesTransactionStatistics<
       filter: [
         { term: { [SERVICE_NAME]: serviceName } },
         { term: { [TRANSACTION_TYPE]: transactionType } },
-        ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
+        ...getBackwardCompatibleDocumentTypeFilter(
+          searchAggregatedTransactions
+        ),
         ...rangeQuery(startWithOffset, endWithOffset),
         ...environmentQuery(environment),
         ...kqlQuery(kuery),
-        ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
+        ...getBackwardCompatibleDocumentTypeFilter(
+          searchAggregatedTransactions
+        ),
         ...(isComparisonSearch && serviceNodeIds
           ? [{ terms: { [SERVICE_NODE_NAME]: serviceNodeIds } }]
           : []),

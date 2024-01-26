@@ -15,7 +15,7 @@ import expect from '@kbn/expect';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 const farequoteMappings: estypes.MappingTypeMapping = {
   properties: {
@@ -101,9 +101,9 @@ export default ({ getService }: FtrProviderContext) => {
       const job = getBaseJobConfig();
 
       const { body, status } = await supertest
-        .post('/api/ml/validate/datafeed_preview')
+        .post('/internal/ml/validate/datafeed_preview')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send({ job });
       ml.api.assertResponseStatusCode(200, status, body);
 
@@ -119,9 +119,9 @@ export default ({ getService }: FtrProviderContext) => {
       job.analysis_config.detectors[0].field_name = 'no_such_field';
 
       const { body, status } = await supertest
-        .post('/api/ml/validate/datafeed_preview')
+        .post('/internal/ml/validate/datafeed_preview')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send({ job });
       ml.api.assertResponseStatusCode(200, status, body);
 
@@ -137,9 +137,9 @@ export default ({ getService }: FtrProviderContext) => {
       job.datafeed_config.indices = ['farequote_empty'];
 
       const { body, status } = await supertest
-        .post('/api/ml/validate/datafeed_preview')
+        .post('/internal/ml/validate/datafeed_preview')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send({ job });
       ml.api.assertResponseStatusCode(200, status, body);
 
@@ -154,9 +154,9 @@ export default ({ getService }: FtrProviderContext) => {
       const job = getBaseJobConfig();
 
       const { body, status } = await supertest
-        .post('/api/ml/validate/datafeed_preview')
+        .post('/internal/ml/validate/datafeed_preview')
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send({ job });
       ml.api.assertResponseStatusCode(403, status, body);
     });
@@ -165,9 +165,9 @@ export default ({ getService }: FtrProviderContext) => {
       const job = getBaseJobConfig();
 
       const { body, status } = await supertest
-        .post('/api/ml/validate/datafeed_preview')
+        .post('/internal/ml/validate/datafeed_preview')
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send({ job });
       ml.api.assertResponseStatusCode(403, status, body);
     });
@@ -176,9 +176,9 @@ export default ({ getService }: FtrProviderContext) => {
       const job = getBaseJobConfig();
 
       const { body, status } = await supertest
-        .post('/api/ml/validate/datafeed_preview')
+        .post('/internal/ml/validate/datafeed_preview')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send({ job, start: 1454889600000, end: 1454976000000 });
       ml.api.assertResponseStatusCode(200, status, body);
 
@@ -193,9 +193,9 @@ export default ({ getService }: FtrProviderContext) => {
       const job = getBaseJobConfig();
 
       const { body, status } = await supertest
-        .post('/api/ml/validate/datafeed_preview')
+        .post('/internal/ml/validate/datafeed_preview')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send({ job, start: 0, end: 1249497607000 });
       ml.api.assertResponseStatusCode(200, status, body);
 

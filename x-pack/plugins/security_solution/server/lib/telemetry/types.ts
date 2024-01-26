@@ -52,6 +52,7 @@ export interface TelemetryEvent {
   };
   cluster_name?: string;
   cluster_uuid?: string;
+  package_version?: string;
   file?: {
     [key: string]: SearchTypes;
     Ext?: {
@@ -62,6 +63,19 @@ export interface TelemetryEvent {
   event?: {
     id?: string;
     kind?: string;
+  };
+  kubernetes?: {
+    audit?: {
+      user?: {
+        username?: string;
+        groups?: string[];
+      };
+      impersonated_user?: {
+        username?: string;
+        groups?: string[];
+      };
+      pod?: SearchTypes;
+    };
   };
 }
 
@@ -381,7 +395,7 @@ export interface ValueListMetaData {
 
 export interface ValueListResponseAggregation {
   aggregations: {
-    total_value_list_count: number;
+    total_value_list_count: { value: number };
     type_breakdown: {
       buckets: Array<{
         key: string;
@@ -435,4 +449,29 @@ export interface TelemetryFilterListArtifact {
   endpoint_alerts: AllowlistFields;
   exception_lists: AllowlistFields;
   prebuilt_rules_alerts: AllowlistFields;
+}
+
+export interface ValueListResponse {
+  listMetricsResponse: ValueListResponseAggregation;
+  itemMetricsResponse: ValueListItemsResponseAggregation;
+  exceptionListMetricsResponse: ValueListExceptionListResponseAggregation;
+  indicatorMatchMetricsResponse: ValueListIndicatorMatchResponseAggregation;
+}
+
+export type Nullable<T> = T | null | undefined;
+
+export interface ExtraInfo {
+  clusterInfo: ESClusterInfo;
+  licenseInfo: ESLicense | undefined;
+}
+
+export interface TimeFrame {
+  startOfDay: string;
+  endOfDay: string;
+}
+
+export interface TimelineResult {
+  nodes: number;
+  events: number;
+  timeline: TimelineTelemetryTemplate | undefined;
 }

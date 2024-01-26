@@ -7,12 +7,12 @@
 
 import type { StartServicesAccessor } from '@kbn/core/public';
 
+import { getComponents } from './components';
+import type { LazyComponentFn, SpacesApiUi, SpacesApiUiComponent } from './types';
 import { createRedirectLegacyUrl } from '../legacy_urls';
 import type { PluginsStart } from '../plugin';
 import { useSpaces } from '../spaces_context';
 import type { SpacesManager } from '../spaces_manager';
-import { getComponents } from './components';
-import type { LazyComponentFn, SpacesApiUi, SpacesApiUiComponent } from './types';
 
 interface GetUiApiOptions {
   spacesManager: SpacesManager;

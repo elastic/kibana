@@ -58,10 +58,10 @@ export function postgresqlLogsSpecProvider(context: TutorialContext): TutorialSc
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/postgresql_logs/screenshot.webp',
+    previewImagePath: context.staticAssets.getPluginAssetHref('/postgresql_logs/screenshot.webp'),
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
-    integrationBrowserCategories: ['datastore'],
+    integrationBrowserCategories: ['datastore', 'observability'],
   };
 }

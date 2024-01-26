@@ -5,55 +5,29 @@
  * 2.0.
  */
 
+import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
 
 export const signalsMigrationType = 'security-solution-signals-migration';
 
 export const signalsMigrationMappings: SavedObjectsType['mappings'] = {
+  dynamic: false,
   properties: {
     sourceIndex: {
       type: 'keyword',
     },
-    destinationIndex: {
-      type: 'keyword',
-      index: false,
+    updated: {
+      type: 'date',
     },
     version: {
       type: 'long',
-    },
-    error: {
-      type: 'text',
-      index: false,
-    },
-    taskId: {
-      type: 'keyword',
-      index: false,
-    },
-    status: {
-      type: 'keyword',
-      index: false,
-    },
-    created: {
-      type: 'date',
-      index: false,
-    },
-    createdBy: {
-      type: 'text',
-      index: false,
-    },
-    updated: {
-      type: 'date',
-      index: false,
-    },
-    updatedBy: {
-      type: 'text',
-      index: false,
     },
   },
 };
 
 export const type: SavedObjectsType = {
   name: signalsMigrationType,
+  indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'single',
   mappings: signalsMigrationMappings,

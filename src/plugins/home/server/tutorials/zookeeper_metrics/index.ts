@@ -26,7 +26,7 @@ export function zookeeperMetricsSpecProvider(context: TutorialContext): Tutorial
       defaultMessage: 'Zookeeper Metrics',
     }),
     moduleName,
-    euiIconType: '/plugins/home/assets/logos/zookeeper.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/zookeeper.svg'),
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.zookeeperMetrics.shortDescription', {
@@ -57,6 +57,6 @@ export function zookeeperMetricsSpecProvider(context: TutorialContext): Tutorial
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['datastore', 'config_management'],
+    integrationBrowserCategories: ['observability'],
   };
 }

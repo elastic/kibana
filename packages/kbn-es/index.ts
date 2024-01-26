@@ -6,8 +6,17 @@
  * Side Public License, v 1.
  */
 
-// @ts-expect-error not typed yet
 export { run } from './src/cli';
-// @ts-expect-error not typed yet
 export { Cluster } from './src/cluster';
-export { SYSTEM_INDICES_SUPERUSER } from './src/utils';
+export {
+  SYSTEM_INDICES_SUPERUSER,
+  ELASTIC_SERVERLESS_SUPERUSER,
+  ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
+  SERVERLESS_NODES,
+  getDockerFileMountPath,
+  verifyDockerInstalled,
+  maybeCreateDockerNetwork,
+  type ServerlessProjectType,
+} from './src/utils';
+export type { ArtifactLicense } from './src/artifact';
+export { SERVERLESS_ROLES_ROOT_PATH } from './src/paths';

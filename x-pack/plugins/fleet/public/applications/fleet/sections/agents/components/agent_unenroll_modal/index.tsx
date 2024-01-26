@@ -47,6 +47,8 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
         : await sendPostBulkAgentUnenroll({
             agents: Array.isArray(agents) ? agents.map((agent) => agent.id) : agents,
             revoke: forceUnenroll,
+            // includeInactive is only used when the agents are selected by query, it's ignored in the case of agent ids
+            includeInactive: true,
           });
       if (error) {
         throw error;
@@ -133,7 +135,7 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
                 defaultMessage: 'This agent is running Fleet Server',
               })}
               color="warning"
-              iconType="alert"
+              iconType="warning"
             >
               <p>
                 <FormattedMessage

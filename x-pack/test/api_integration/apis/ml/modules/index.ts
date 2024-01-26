@@ -26,6 +26,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
         const version = await ml.testResources.installFleetPackage(fleetPackage);
         installedPackages.push({ pkgName: fleetPackage, version });
       }
+
+      // ensure fleet installed packages are ready
+      await ml.testResources.assertModuleExists('apache_data_stream');
+      await ml.testResources.assertModuleExists('nginx_data_stream');
     });
 
     after(async () => {

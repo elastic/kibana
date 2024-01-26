@@ -25,6 +25,7 @@ import { EventFiltersApiClient } from '../../../../event_filters/service/api_cli
 const endpointGenerator = new EndpointDocGenerator('seed');
 const getDefaultQueryParameters = (customFilter: string | undefined = '') => ({
   path: '/api/exception_lists/items/_find',
+  version: '2023-10-31',
   query: {
     filter: customFilter,
     list_id: ['endpoint_event_filters'],
@@ -39,7 +40,7 @@ const getDefaultQueryParameters = (customFilter: string | undefined = '') => ({
 jest.setTimeout(10000);
 
 describe('Policy details artifacts list', () => {
-  let render: (externalPrivileges?: boolean) => Promise<ReturnType<AppContextTestRender['render']>>;
+  let render: (canWriteArtifact?: boolean) => Promise<ReturnType<AppContextTestRender['render']>>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let history: AppContextTestRender['history'];
   let mockedContext: AppContextTestRender;
@@ -55,7 +56,7 @@ describe('Policy details artifacts list', () => {
     getEndpointPrivilegesInitialStateMock({
       canCreateArtifactsByPolicy: true,
     });
-    render = async (externalPrivileges = true) => {
+    render = async (canWriteArtifact = true) => {
       await act(async () => {
         renderResult = mockedContext.render(
           <PolicyArtifactsList
@@ -64,7 +65,7 @@ describe('Policy details artifacts list', () => {
             searchableFields={[...SEARCHABLE_FIELDS]}
             labels={POLICY_ARTIFACT_LIST_LABELS}
             onDeleteActionCallback={handleOnDeleteActionCallbackMock}
-            externalPrivileges={externalPrivileges}
+            canWriteArtifact={canWriteArtifact}
             getPolicyArtifactsPath={getPolicyEventFiltersPath}
             getArtifactPath={getEventFiltersListPath}
           />

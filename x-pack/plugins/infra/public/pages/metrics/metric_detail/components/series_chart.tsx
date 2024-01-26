@@ -14,8 +14,8 @@ import {
   BarSeriesStyle,
   AreaSeriesStyle,
 } from '@elastic/charts';
+import { InventoryVisType } from '@kbn/metrics-data-access-plugin/common';
 import { NodeDetailsDataSeries } from '../../../../../common/http_api/node_details_api';
-import { InventoryVisType } from '../../../../../common/inventory_models/types';
 import { useKibanaTimeZoneSetting } from '../../../../hooks/use_kibana_time_zone_setting';
 
 interface Props {

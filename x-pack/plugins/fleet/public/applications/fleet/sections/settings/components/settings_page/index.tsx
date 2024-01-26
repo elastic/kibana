@@ -8,29 +8,37 @@
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
-import type { Output, DownloadSource, FleetServerHost } from '../../../../types';
+import type { Output, DownloadSource, FleetServerHost, FleetProxy } from '../../../../types';
+import { useConfig } from '../../../../hooks';
 
 import { FleetServerHostsSection } from './fleet_server_hosts_section';
 import { OutputSection } from './output_section';
 import { AgentBinarySection } from './agent_binary_section';
+import { FleetProxiesSection } from './fleet_proxies_section';
 
 export interface SettingsPageProps {
   outputs: Output[];
+  proxies: FleetProxy[];
   fleetServerHosts: FleetServerHost[];
   deleteOutput: (output: Output) => void;
   deleteFleetServerHost: (fleetServerHost: FleetServerHost) => void;
   downloadSources: DownloadSource[];
   deleteDownloadSource: (ds: DownloadSource) => void;
+  deleteFleetProxy: (proxy: FleetProxy) => void;
 }
 
 export const SettingsPage: React.FunctionComponent<SettingsPageProps> = ({
   outputs,
+  proxies,
   fleetServerHosts,
   deleteOutput,
   deleteFleetServerHost,
   downloadSources,
   deleteDownloadSource,
+  deleteFleetProxy,
 }) => {
+  const showProxySection = useConfig().internal?.disableProxies !== true;
+
   return (
     <>
       <EuiSpacer size="m" />
@@ -45,6 +53,12 @@ export const SettingsPage: React.FunctionComponent<SettingsPageProps> = ({
         downloadSources={downloadSources}
         deleteDownloadSource={deleteDownloadSource}
       />
+      {showProxySection && (
+        <>
+          <EuiSpacer size="m" />
+          <FleetProxiesSection proxies={proxies} deleteFleetProxy={deleteFleetProxy} />
+        </>
+      )}
     </>
   );
 };

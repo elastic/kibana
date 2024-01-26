@@ -6,9 +6,10 @@
  */
 
 import React, { memo, useState, useEffect, useCallback } from 'react';
-import { EuiPopover, EuiFilterButton, EuiFilterSelectItem } from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
+import { EuiPopover, EuiFilterButton, EuiSelectable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataViewField, FieldSpec } from '@kbn/data-views-plugin/public';
 
 import { useStartServices } from '../../../../../hooks';
 
@@ -18,7 +19,7 @@ export const DatasetFilter: React.FunctionComponent<{
   selectedDatasets: string[];
   onToggleDataset: (dataset: string) => void;
 }> = memo(({ selectedDatasets, onToggleDataset }) => {
-  const { unifiedSearch } = useStartServices();
+  const { unifiedSearch, data } = useStartServices();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [datasetValues, setDatasetValues] = useState<string[]>([AGENT_DATASET]);
@@ -26,31 +27,59 @@ export const DatasetFilter: React.FunctionComponent<{
   const togglePopover = useCallback(() => setIsOpen((prevIsOpen) => !prevIsOpen), [setIsOpen]);
   const closePopover = useCallback(() => setIsOpen(false), [setIsOpen]);
 
+  const datasetValuesToOptions = useCallback(
+    (values: string[]): EuiSelectableOption[] => {
+      return values.map((value) => ({
+        label: value,
+        checked: selectedDatasets.includes(value) ? 'on' : undefined,
+        key: value,
+      }));
+    },
+    [selectedDatasets]
+  );
+  const [options, setOptions] = useState<EuiSelectableOption[]>(
+    datasetValuesToOptions(datasetValues)
+  );
+
   useEffect(() => {
     const fetchValues = async () => {
       setIsLoading(true);
       try {
+        const fields: FieldSpec[] = await data.dataViews.getFieldsForWildcard({
+          pattern: AGENT_LOG_INDEX_PATTERN,
+        });
+        const fieldsMap = fields.reduce((acc: Record<string, FieldSpec>, curr: FieldSpec) => {
+          acc[curr.name] = curr;
+          return acc;
+        }, {});
+        const newDataView = await data.dataViews.create({
+          title: AGENT_LOG_INDEX_PATTERN,
+          fields: fieldsMap,
+        });
+
         const values = await unifiedSearch.autocomplete.getValueSuggestions({
-          indexPattern: {
-            title: AGENT_LOG_INDEX_PATTERN,
-            fields: [DATASET_FIELD],
-          } as DataView,
+          indexPattern: newDataView,
           field: DATASET_FIELD as DataViewField,
           query: '',
         });
-        if (values.length > 0) setDatasetValues(values.sort());
+        if (values.length > 0) {
+          setDatasetValues(values.sort());
+          setOptions(datasetValuesToOptions(values.sort()));
+        }
       } catch (e) {
         setDatasetValues([AGENT_DATASET]);
+        setOptions(datasetValuesToOptions([AGENT_DATASET]));
       }
       setIsLoading(false);
     };
     fetchValues();
-  }, [unifiedSearch.autocomplete]);
+  }, [data.dataViews, unifiedSearch.autocomplete, datasetValuesToOptions]);
 
   return (
     <EuiPopover
       button={
         <EuiFilterButton
+          data-test-subj="agentList.datasetFilterBtn"
           iconType="arrowDown"
           onClick={togglePopover}
           isSelected={isOpen}
@@ -68,15 +97,28 @@ export const DatasetFilter: React.FunctionComponent<{
       closePopover={closePopover}
       panelPaddingSize="none"
     >
-      {datasetValues.map((dataset) => (
-        <EuiFilterSelectItem
-          checked={selectedDatasets.includes(dataset) ? 'on' : undefined}
-          key={dataset}
-          onClick={() => onToggleDataset(dataset)}
-        >
-          {dataset}
-        </EuiFilterSelectItem>
-      ))}
+      <EuiSelectable
+        options={options}
+        onChange={(newOptions) => {
+          setOptions(newOptions);
+          newOptions.forEach((option, index) => {
+            if (option.checked !== options[index].checked) {
+              onToggleDataset(option.label);
+              return;
+            }
+          });
+        }}
+        data-test-subj="agentList.datasetFilterOptions"
+        isLoading={isLoading}
+        listProps={{
+          paddingSize: 's',
+          style: {
+            minWidth: 220,
+          },
+        }}
+      >
+        {(list) => list}
+      </EuiSelectable>
     </EuiPopover>
   );
 });

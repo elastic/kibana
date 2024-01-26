@@ -15,11 +15,13 @@ import {
   ALERT_RULE_CONSUMER,
   ALERT_RULE_NAME,
   ALERT_RULE_PRODUCER,
+  ALERT_RULE_REVISION,
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_START,
   ALERT_STATUS,
+  ALERT_STATUS_UNTRACKED,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
   EVENT_ACTION,
@@ -28,7 +30,8 @@ import {
   TIMESTAMP,
   VERSION,
 } from '@kbn/rule-data-utils';
-import { TopAlert } from '../../alerts';
+import { AlertData } from '../../../hooks/use_fetch_alert_detail';
+import type { TopAlert } from '../../../typings/alerts';
 
 export const tags: string[] = ['tag1', 'tag2', 'tag3'];
 
@@ -46,6 +49,7 @@ export const alert: TopAlert = {
     [ALERT_RULE_PRODUCER]: 'logs',
     [ALERT_RULE_CONSUMER]: 'logs',
     [ALERT_RULE_CATEGORY]: 'Log threshold',
+    [ALERT_RULE_REVISION]: 0,
     [ALERT_START]: '2021-09-02T12:54:09.674Z',
     [ALERT_RULE_TYPE_ID]: 'logs.alert.document.count',
     [EVENT_ACTION]: 'active',
@@ -64,11 +68,26 @@ export const alert: TopAlert = {
   lastUpdated: 1630588131750,
 };
 
+export const alertDetail: AlertData = {
+  formatted: alert,
+  raw: Object.fromEntries(
+    Object.entries(alert.fields).map(([k, v]) => [k, !Array.isArray(v) ? [v] : v])
+  ) as unknown as AlertData['raw'],
+};
+
 export const alertWithTags: TopAlert = {
   ...alert,
   fields: {
     ...alert.fields,
     [ALERT_RULE_TAGS]: tags,
+  },
+};
+
+export const untrackedAlert: TopAlert = {
+  ...alertWithTags,
+  fields: {
+    ...alertWithTags.fields,
+    [ALERT_STATUS]: ALERT_STATUS_UNTRACKED,
   },
 };
 

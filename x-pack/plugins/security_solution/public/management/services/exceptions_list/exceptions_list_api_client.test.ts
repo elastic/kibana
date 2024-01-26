@@ -32,6 +32,8 @@ const getQueryParams = () => ({
   sortOrder: 'asc',
 });
 
+const apiVersion = '2023-10-31';
+
 describe('Exceptions List Api Client', () => {
   let fakeCoreStart: jest.Mocked<CoreStart>;
   let fakeHttpServices: jest.Mocked<HttpSetup>;
@@ -69,6 +71,7 @@ describe('Exceptions List Api Client', () => {
       expect(fakeHttpServices.post).toHaveBeenCalledWith(
         INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL,
         {
+          version: '1',
           body: JSON.stringify(getFakeListDefinition()),
         }
       );
@@ -135,6 +138,7 @@ describe('Exceptions List Api Client', () => {
       expect(fakeHttpServices.get).toHaveBeenCalledTimes(1);
       const expectedQueryParams = getQueryParams();
       expect(fakeHttpServices.get).toHaveBeenCalledWith(`${EXCEPTION_LIST_ITEM_URL}/_find`, {
+        version: apiVersion,
         query: {
           page: expectedQueryParams.page,
           per_page: expectedQueryParams.perPage,
@@ -155,6 +159,7 @@ describe('Exceptions List Api Client', () => {
 
       expect(fakeHttpServices.get).toHaveBeenCalledTimes(1);
       expect(fakeHttpServices.get).toHaveBeenCalledWith(EXCEPTION_LIST_ITEM_URL, {
+        version: apiVersion,
         query: {
           item_id: fakeItemId,
           id: undefined,
@@ -174,6 +179,7 @@ describe('Exceptions List Api Client', () => {
 
       expect(fakeHttpServices.post).toHaveBeenCalledTimes(1);
       expect(fakeHttpServices.post).toHaveBeenCalledWith(EXCEPTION_LIST_ITEM_URL, {
+        version: apiVersion,
         body: JSON.stringify(exceptionItem),
       });
     });
@@ -201,6 +207,7 @@ describe('Exceptions List Api Client', () => {
 
       expect(fakeHttpServices.put).toHaveBeenCalledTimes(1);
       expect(fakeHttpServices.put).toHaveBeenCalledWith(EXCEPTION_LIST_ITEM_URL, {
+        version: apiVersion,
         body: JSON.stringify(ExceptionsListApiClient.cleanExceptionsBeforeUpdate(exceptionItem)),
       });
     });
@@ -213,6 +220,7 @@ describe('Exceptions List Api Client', () => {
 
       expect(fakeHttpServices.delete).toHaveBeenCalledTimes(1);
       expect(fakeHttpServices.delete).toHaveBeenCalledWith(EXCEPTION_LIST_ITEM_URL, {
+        version: apiVersion,
         query: {
           item_id: fakeItemId,
           id: undefined,
@@ -229,6 +237,7 @@ describe('Exceptions List Api Client', () => {
 
       expect(fakeHttpServices.get).toHaveBeenCalledTimes(1);
       expect(fakeHttpServices.get).toHaveBeenCalledWith(`${EXCEPTION_LIST_URL}/summary`, {
+        version: apiVersion,
         query: {
           filter: fakeQklFilter,
           list_id: getFakeListId(),
@@ -247,6 +256,7 @@ describe('Exceptions List Api Client', () => {
       await expect(exceptionsListApiClientInstance.hasData()).resolves.toBe(true);
 
       expect(fakeHttpServices.get).toHaveBeenCalledWith(`${EXCEPTION_LIST_ITEM_URL}/_find`, {
+        version: apiVersion,
         query: expect.objectContaining({
           page: 1,
           per_page: 1,

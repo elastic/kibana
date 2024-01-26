@@ -6,31 +6,7 @@
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-
-interface Detector {
-  identifier: string;
-  function: string;
-  field?: string;
-  byField?: string;
-  overField?: string;
-  partitionField?: string;
-  excludeFrequent?: string;
-  description?: string;
-}
-
-interface DatafeedConfig {
-  queryDelay?: string;
-  frequency?: string;
-  scrollSize?: string;
-}
-
-interface PickFieldsConfig {
-  detectors: Detector[];
-  influencers: string[];
-  bucketSpan: string;
-  memoryLimit: string;
-  summaryCountField?: string;
-}
+import type { PickFieldsConfig, DatafeedConfig, Detector } from './types';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -118,17 +94,14 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags(['ml']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/event_rate_nanos');
-      await ml.testResources.createIndexPatternIfNeeded(
-        'ft_event_rate_gen_trend_nanos',
-        '@timestamp'
-      );
+      await ml.testResources.createDataViewIfNeeded('ft_event_rate_gen_trend_nanos', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {
       await ml.api.cleanMlIndices();
-      await ml.testResources.deleteIndexPatternByTitle('ft_event_rate_gen_trend_nanos');
+      await ml.testResources.deleteDataViewByTitle('ft_event_rate_gen_trend_nanos');
     });
 
     for (const testData of testDataList) {

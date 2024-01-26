@@ -5,54 +5,88 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
-import { LazyField } from '@kbn/advanced-settings-plugin/public';
+import { EuiSpacer } from '@elastic/eui';
+import { withSuspense } from '@kbn/shared-ux-utility';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   apmLabsButton,
-  apmProgressiveLoading,
   apmServiceGroupMaxNumberOfServices,
   defaultApmServiceEnvironment,
   enableComparisonByDefault,
   enableInspectEsQueries,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
+  apmEnableServiceMetrics,
+  apmEnableContinuousRollups,
+  enableAgentExplorerView,
+  apmEnableProfilingIntegration,
+  apmEnableTableSearchBar,
 } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import React from 'react';
+import {
+  BottomBarActions,
+  useEditableSettings,
+  useUiTracker,
+} from '@kbn/observability-shared-plugin/public';
+import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
+import { ValueValidation } from '@kbn/core-ui-settings-browser/src/types';
+import { useApmFeatureFlag } from '../../../../hooks/use_apm_feature_flag';
+import { ApmFeatureFlagName } from '../../../../../common/apm_feature_flags';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { useApmEditableSettings } from '../../../../hooks/use_apm_editable_settings';
-import { BottomBarActions } from '../bottom_bar_actions';
 
-const apmSettingsKeys = [
-  enableComparisonByDefault,
-  defaultApmServiceEnvironment,
-  apmProgressiveLoading,
-  apmServiceGroupMaxNumberOfServices,
-  enableInspectEsQueries,
-  apmLabsButton,
-  apmAWSLambdaPriceFactor,
-  apmAWSLambdaRequestCostPerMillion,
-];
+const LazyFieldRow = React.lazy(async () => ({
+  default: (await import('@kbn/management-settings-components-field-row'))
+    .FieldRow,
+}));
+
+const FieldRow = withSuspense(LazyFieldRow);
+
+function getApmSettingsKeys(isProfilingIntegrationEnabled: boolean) {
+  const keys = [
+    enableComparisonByDefault,
+    defaultApmServiceEnvironment,
+    apmServiceGroupMaxNumberOfServices,
+    enableInspectEsQueries,
+    apmLabsButton,
+    apmAWSLambdaPriceFactor,
+    apmAWSLambdaRequestCostPerMillion,
+    apmEnableServiceMetrics,
+    apmEnableContinuousRollups,
+    enableAgentExplorerView,
+    apmEnableTableSearchBar,
+  ];
+
+  if (isProfilingIntegrationEnabled) {
+    keys.push(apmEnableProfilingIntegration);
+  }
+
+  return keys;
+}
 
 export function GeneralSettings() {
-  const { docLinks, notifications, application } = useApmPluginContext().core;
+  const trackApmEvent = useUiTracker({ app: 'apm' });
+  const { docLinks, notifications } = useApmPluginContext().core;
+  const isProfilingIntegrationEnabled = useApmFeatureFlag(
+    ApmFeatureFlagName.ProfilingIntegrationAvailable
+  );
+  const apmSettingsKeys = getApmSettingsKeys(isProfilingIntegrationEnabled);
   const {
+    fields,
     handleFieldChange,
-    settingsEditableConfig,
     unsavedChanges,
     saveAll,
     isSaving,
     cleanUnsavedChanges,
-  } = useApmEditableSettings(apmSettingsKeys);
+  } = useEditableSettings('apm', apmSettingsKeys);
 
   async function handleSave() {
     try {
       const reloadPage = Object.keys(unsavedChanges).some((key) => {
-        return settingsEditableConfig[key].requiresPageReload;
+        return fields[key].requiresPageReload;
       });
-      await saveAll({ trackMetricName: 'general_settings_save' });
+      await saveAll();
+      trackApmEvent({ metric: 'general_settings_save' });
       if (reloadPage) {
         window.location.reload();
       }
@@ -67,43 +101,33 @@ export function GeneralSettings() {
     }
   }
 
+  // We don't validate the user input on these settings
+  const settingsValidationResponse: ValueValidation = {
+    successfulValidation: true,
+    valid: true,
+  };
+
   return (
     <>
-      <EuiCallOut
-        title={
-          <FormattedMessage
-            id="xpack.apm.apmSettings.kibanaLink"
-            defaultMessage="The full list of APM options can be found in {link}"
-            values={{
-              link: (
-                <EuiLink
-                  href={application.getUrlForApp('management', {
-                    path: `/kibana/settings?query=category:(observability)`,
-                  })}
-                >
-                  {i18n.translate('xpack.apm.apmSettings.kibanaLink.label', {
-                    defaultMessage: 'Kibana advanced settings',
-                  })}
-                </EuiLink>
-              ),
-            }}
-          />
-        }
-        iconType="iInCircle"
-      />
       <EuiSpacer />
       {apmSettingsKeys.map((settingKey) => {
-        const editableConfig = settingsEditableConfig[settingKey];
+        const field = fields[settingKey];
         return (
-          <LazyField
-            key={settingKey}
-            setting={editableConfig}
-            handleChange={handleFieldChange}
-            enableSaving
-            docLinks={docLinks.links}
-            toasts={notifications.toasts}
-            unsavedChanges={unsavedChanges[settingKey]}
-          />
+          <FieldRowProvider
+            {...{
+              links: docLinks.links.management,
+              showDanger: (message: string) =>
+                notifications.toasts.addDanger(message),
+              validateChange: async () => settingsValidationResponse,
+            }}
+          >
+            <FieldRow
+              field={field}
+              isSavingEnabled={true}
+              onFieldChange={handleFieldChange}
+              unsavedChange={unsavedChanges[settingKey]}
+            />
+          </FieldRowProvider>
         );
       })}
       {!isEmpty(unsavedChanges) && (
@@ -115,6 +139,7 @@ export function GeneralSettings() {
             defaultMessage: 'Save changes',
           })}
           unsavedChangesCount={Object.keys(unsavedChanges).length}
+          appTestSubj="apm"
         />
       )}
     </>

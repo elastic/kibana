@@ -20,6 +20,7 @@ export * from './src/default_severity_mapping_array';
 export * from './src/default_threat_array';
 export * from './src/default_to_string';
 export * from './src/default_uuid';
+export * from './src/frequency';
 export * from './src/language';
 export * from './src/machine_learning_job_id';
 export * from './src/max_signals';

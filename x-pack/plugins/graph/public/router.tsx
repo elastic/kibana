@@ -7,7 +7,9 @@
 
 import React from 'react';
 import { createHashHistory } from 'history';
-import { Redirect, Route, Router, Switch } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
+
 import { ListingRoute } from './apps/listing_route';
 import { GraphServices } from './application';
 import { WorkspaceRoute } from './apps/workspace_route';
@@ -17,7 +19,7 @@ export const graphRouter = (deps: GraphServices) => {
 
   return (
     <Router history={history}>
-      <Switch>
+      <Routes>
         <Route exact path="/home">
           <ListingRoute deps={deps} />
         </Route>
@@ -27,7 +29,7 @@ export const graphRouter = (deps: GraphServices) => {
         <Route>
           <Redirect exact to="/home" />
         </Route>
-      </Switch>
+      </Routes>
     </Router>
   );
 };

@@ -10,23 +10,25 @@ import 'brace/mode/json';
 // brace/ace uses the Worker class, which is not currently provided by JSDOM.
 // This is not required for the tests to pass, but it rather suppresses lengthy
 // warnings in the console which adds unnecessary noise to the test output.
-import '@kbn/test-jest-helpers/target_node/src/stub_web_worker';
+import '@kbn/web-worker-stub';
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import '@kbn/code-editor-mock/jest_helper';
 
-import { CodeEditorField } from '@kbn/kibana-react-plugin/public';
+import { CodeEditorField } from '@kbn/code-editor';
 import type { monaco } from '@kbn/monaco';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
-import { AllRule, AnyRule, ExceptAllRule, ExceptAnyRule, FieldRule } from '../../model';
 import { JSONRuleEditor } from './json_rule_editor';
+import { AllRule, AnyRule, ExceptAllRule, ExceptAnyRule, FieldRule } from '../../model';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   ...jest.requireActual('@kbn/kibana-react-plugin/public'),
   useKibana: jest.fn().mockReturnValue({
     services: { docLinks: { links: { apis: { createRoleMapping: 'createRoleMappingLink' } } } },
   }),
+  useDarkMode: jest.fn().mockReturnValue(false),
 }));
 
 describe('JSONRuleEditor', () => {
@@ -154,5 +156,34 @@ describe('JSONRuleEditor', () => {
     expect(props.onChange).toHaveBeenCalledTimes(1);
     const [updatedRule] = props.onChange.mock.calls[0];
     expect(JSON.stringify(updatedRule.toRaw())).toEqual(allRule);
+  });
+
+  it('can render a readonly view', () => {
+    const props = {
+      rules: new AllRule([
+        new AnyRule([new FieldRule('username', '*')]),
+        new ExceptAnyRule([
+          new FieldRule('metadata.foo.bar', '*'),
+          new AllRule([new FieldRule('realm.name', 'special-one')]),
+        ]),
+        new ExceptAllRule([new FieldRule('realm.name', '*')]),
+      ]),
+      onChange: jest.fn(),
+      onValidityChange: jest.fn(),
+      readOnly: true,
+    };
+    const wrapper = renderView(props);
+
+    // The code editor is read-only
+    const codeEditors = wrapper.find(CodeEditorField);
+    expect(codeEditors).toHaveLength(1);
+    expect(codeEditors.at(0).props().options).not.toBeUndefined();
+    expect(codeEditors.at(0).props().options?.readOnly).toBeTruthy();
+    expect(codeEditors.at(0).props().options?.domReadOnly).toBeTruthy();
+
+    // No reformat button
+    expect(wrapper.find('EuiButton[data-test-subj="roleMappingsJSONReformatButton"]')).toHaveLength(
+      0
+    );
   });
 });

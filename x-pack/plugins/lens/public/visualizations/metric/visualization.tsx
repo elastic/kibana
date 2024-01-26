@@ -7,34 +7,33 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n-react';
-import { render } from 'react-dom';
 import { PaletteOutput, PaletteRegistry, CustomPaletteParams } from '@kbn/coloring';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { LayoutDirection } from '@elastic/charts';
 import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { IconChartMetric } from '@kbn/chart-icons';
+import { AccessorConfig } from '@kbn/visualization-ui-components';
+import { isNumericFieldForDatatable } from '../../../common/expressions/datatable/utils';
 import { CollapseFunction } from '../../../common/expressions';
-import type { LayerType } from '../../../common';
+import type { LayerType } from '../../../common/types';
 import { layerTypes } from '../../../common/layer_types';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import { getSuggestions } from './suggestions';
 import {
   Visualization,
   OperationMetadata,
-  AccessorConfig,
   VisualizationConfigProps,
   VisualizationDimensionGroupConfig,
   Suggestion,
+  UserMessage,
 } from '../../types';
 import { GROUP_ID, LENS_METRIC_ID } from './constants';
 import { DimensionEditor, DimensionEditorAdditionalSection } from './dimension_editor';
 import { Toolbar } from './toolbar';
 import { generateId } from '../../id_generator';
-import { FormatSelectorOptions } from '../../datasources/form_based/dimension_panel/format_selector';
 import { toExpression } from './to_expression';
+import { nonNullable } from '../../utils';
 
 export const DEFAULT_MAX_COLUMNS = 3;
 
@@ -43,8 +42,11 @@ export const showingBar = (
 ): state is MetricVisualizationState & { showBar: true; maxAccessor: string } =>
   Boolean(state.showBar && state.maxAccessor);
 
-export const getDefaultColor = (state: MetricVisualizationState) =>
-  showingBar(state) ? euiLightVars.euiColorPrimary : euiThemeVars.euiColorLightestShade;
+export const getDefaultColor = (state: MetricVisualizationState, isMetricNumeric?: boolean) => {
+  return showingBar(state) && isMetricNumeric
+    ? euiLightVars.euiColorPrimary
+    : euiThemeVars.euiColorEmptyShade;
+};
 
 export interface MetricVisualizationState {
   layerId: string;
@@ -61,6 +63,7 @@ export interface MetricVisualizationState {
   progressDirection?: LayoutDirection;
   showBar?: boolean;
   color?: string;
+  icon?: string;
   palette?: PaletteOutput<CustomPaletteParams>;
   maxCols?: number;
 
@@ -72,7 +75,13 @@ export interface MetricVisualizationState {
   trendlineBreakdownByAccessor?: string;
 }
 
-export const supportedDataTypes = new Set(['number']);
+export const supportedDataTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);
+
+const isSupportedMetric = (op: OperationMetadata) =>
+  !op.isBucketed && supportedDataTypes.has(op.dataType);
+
+const isSupportedDynamicMetric = (op: OperationMetadata) =>
+  !op.isBucketed && supportedDataTypes.has(op.dataType) && !op.isStaticValue;
 
 export const metricLabel = i18n.translate('xpack.lens.metric.label', {
   defaultMessage: 'Metric',
@@ -86,37 +95,29 @@ const getMetricLayerConfiguration = (
 ): {
   groups: VisualizationDimensionGroupConfig[];
 } => {
-  const isSupportedMetric = (op: OperationMetadata) =>
-    !op.isBucketed && supportedDataTypes.has(op.dataType);
+  const currentData = props.frame.activeData?.[props.state.layerId];
 
-  const isSupportedDynamicMetric = (op: OperationMetadata) =>
-    !op.isBucketed && supportedDataTypes.has(op.dataType) && !op.isStaticValue;
+  const isMetricNumeric = Boolean(
+    props.state.metricAccessor &&
+      isNumericFieldForDatatable(currentData, props.state.metricAccessor)
+  );
 
   const getPrimaryAccessorDisplayConfig = (): Partial<AccessorConfig> => {
+    const hasDynamicColoring = Boolean(isMetricNumeric && props.state.palette);
     const stops = props.state.palette?.params?.stops || [];
-    const hasStaticColoring = !!props.state.color;
-    const hasDynamicColoring = !!props.state.palette;
+
     return hasDynamicColoring
       ? {
-          triggerIcon: 'colorBy',
+          triggerIconType: 'colorBy',
           palette: stops.map(({ color }) => color),
         }
-      : hasStaticColoring
-      ? {
-          triggerIcon: 'color',
-          color: props.state.color,
-        }
       : {
-          triggerIcon: 'color',
-          color: getDefaultColor(props.state),
+          triggerIconType: 'color',
+          color: props.state.color ?? getDefaultColor(props.state, isMetricNumeric),
         };
   };
 
   const isBucketed = (op: OperationMetadata) => op.isBucketed;
-
-  const formatterOptions: FormatSelectorOptions = {
-    disableExtraOptions: true,
-  };
 
   return {
     groups: [
@@ -144,7 +145,6 @@ const getMetricLayerConfiguration = (
         isMetricDimension: true,
         enableDimensionEditor: true,
         enableFormatSelector: true,
-        formatSelectorOptions: formatterOptions,
         requiredMinDimensionCount: 1,
       },
       {
@@ -170,7 +170,6 @@ const getMetricLayerConfiguration = (
         isMetricDimension: true,
         enableDimensionEditor: true,
         enableFormatSelector: true,
-        formatSelectorOptions: formatterOptions,
       },
       {
         groupId: GROUP_ID.MAX,
@@ -188,11 +187,11 @@ const getMetricLayerConfiguration = (
               },
             ]
           : [],
+        isHidden: !props.state.maxAccessor && !isMetricNumeric,
         supportsMoreColumns: !props.state.maxAccessor,
         filterOperations: isSupportedMetric,
         enableDimensionEditor: true,
         enableFormatSelector: false,
-        formatSelectorOptions: formatterOptions,
         supportStaticValue: true,
         prioritizedOperation: 'max',
         groupTooltip: i18n.translate('xpack.lens.metric.maxTooltip', {
@@ -209,7 +208,7 @@ const getMetricLayerConfiguration = (
           ? [
               {
                 columnId: props.state.breakdownByAccessor,
-                triggerIcon: props.state.collapseFn ? ('aggregate' as const) : undefined,
+                triggerIconType: props.state.collapseFn ? ('aggregate' as const) : undefined,
               },
             ]
           : [],
@@ -217,7 +216,6 @@ const getMetricLayerConfiguration = (
         filterOperations: isBucketed,
         enableDimensionEditor: true,
         enableFormatSelector: true,
-        formatSelectorOptions: formatterOptions,
       },
     ],
   };
@@ -379,7 +377,7 @@ export const getMetricVisualization = ({
       state ?? {
         layerId: addNewLayer(),
         layerType: layerTypes.DATA,
-        palette: mainPalette,
+        palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
       }
     );
   },
@@ -418,7 +416,6 @@ export const getMetricVisualization = ({
             ]
           : undefined,
         disabled: true,
-        canAddViaMenu: true,
       },
       {
         type: layerTypes.METRIC_TRENDLINE,
@@ -429,7 +426,6 @@ export const getMetricVisualization = ({
           { groupId: GROUP_ID.TREND_TIME, columnId: generateId(), autoTimeField: true },
         ],
         disabled: Boolean(state?.trendlineLayerId),
-        canAddViaMenu: true,
       },
     ];
   },
@@ -530,7 +526,7 @@ export const getMetricVisualization = ({
     return state.trendlineLayerId ? [state.trendlineLayerId] : [];
   },
 
-  toExpression: (state, datasourceLayers, attributes, datasourceExpressionsByLayers) =>
+  toExpression: (state, datasourceLayers, _attributes, datasourceExpressionsByLayers) =>
     toExpression(paletteService, state, datasourceLayers, datasourceExpressionsByLayers),
 
   setDimension({ prevState, columnId, groupId }) {
@@ -601,47 +597,21 @@ export const getMetricVisualization = ({
     return updated;
   },
 
-  renderToolbar(domElement, props) {
-    render(
-      <KibanaThemeProvider theme$={theme.theme$}>
-        <I18nProvider>
-          <Toolbar {...props} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
+  ToolbarComponent(props) {
+    return <Toolbar {...props} />;
   },
 
-  renderDimensionEditor(domElement, props) {
-    render(
-      <KibanaThemeProvider theme$={theme.theme$}>
-        <I18nProvider>
-          <DimensionEditor {...props} paletteService={paletteService} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
+  DimensionEditorComponent(props) {
+    return <DimensionEditor {...props} paletteService={paletteService} />;
   },
 
-  renderDimensionEditorAdditionalSection(domElement, props) {
-    render(
-      <KibanaThemeProvider theme$={theme.theme$}>
-        <I18nProvider>
-          <DimensionEditorAdditionalSection {...props} />
-        </I18nProvider>
-      </KibanaThemeProvider>,
-      domElement
-    );
-  },
-
-  getErrorMessages(state) {
-    // Is it possible to break it?
-    return undefined;
+  DimensionEditorAdditionalSectionComponent(props) {
+    return <DimensionEditorAdditionalSection {...props} />;
   },
 
   getDisplayOptions() {
     return {
-      noPanelTitle: true,
+      noPanelTitle: false,
       noPadding: true,
     };
   },
@@ -670,7 +640,7 @@ export const getMetricVisualization = ({
     return suggestion;
   },
 
-  getVisualizationInfo(state: MetricVisualizationState) {
+  getVisualizationInfo(state, frame) {
     const dimensions = [];
     if (state.metricAccessor) {
       dimensions.push({
@@ -678,6 +648,7 @@ export const getMetricVisualization = ({
         name: i18n.translate('xpack.lens.primaryMetric.label', {
           defaultMessage: 'Primary metric',
         }),
+        dimensionType: 'primary_metric',
       });
     }
 
@@ -687,6 +658,7 @@ export const getMetricVisualization = ({
         name: i18n.translate('xpack.lens.metric.secondaryMetric', {
           defaultMessage: 'Secondary metric',
         }),
+        dimensionType: 'secondary_metric',
       });
     }
 
@@ -694,6 +666,7 @@ export const getMetricVisualization = ({
       dimensions.push({
         id: state.maxAccessor,
         name: i18n.translate('xpack.lens.metric.max', { defaultMessage: 'Maximum value' }),
+        dimensionType: 'max',
       });
     }
 
@@ -703,8 +676,18 @@ export const getMetricVisualization = ({
         name: i18n.translate('xpack.lens.metric.breakdownBy', {
           defaultMessage: 'Break down by',
         }),
+        dimensionType: 'breakdown',
       });
     }
+
+    const stops = state.palette?.params?.stops || [];
+    const hasStaticColoring = !!state.color;
+    const hasDynamicColoring = !!state.palette;
+
+    const currentData = frame?.activeData?.[state.layerId];
+    const isMetricNumeric = Boolean(
+      state.metricAccessor && isNumericFieldForDatatable(currentData, state.metricAccessor)
+    );
 
     return {
       layers: [
@@ -714,8 +697,38 @@ export const getMetricVisualization = ({
           chartType: 'metric',
           ...this.getDescription(state),
           dimensions,
+          palette: (hasDynamicColoring
+            ? stops.map(({ color }) => color)
+            : hasStaticColoring
+            ? [state.color]
+            : [getDefaultColor(state, isMetricNumeric)]
+          ).filter(nonNullable),
         },
       ],
     };
+  },
+
+  getUserMessages(state, { frame }) {
+    const currentData = frame.activeData?.[state.layerId];
+
+    const errors: UserMessage[] = [];
+
+    if (state.maxAccessor) {
+      const isMetricNonNumeric = Boolean(
+        state.metricAccessor && !isNumericFieldForDatatable(currentData, state.metricAccessor)
+      );
+      if (isMetricNonNumeric) {
+        errors.push({
+          severity: 'error',
+          fixableInEditor: true,
+          displayLocations: [{ id: 'dimensionButton', dimensionId: state.maxAccessor }],
+          shortMessage: i18n.translate('xpack.lens.lnsMetric_maxDimensionPanel.nonNumericError', {
+            defaultMessage: 'Primary metric must be numeric to set a maximum value.',
+          }),
+          longMessage: '',
+        });
+      }
+    }
+    return errors;
   },
 });

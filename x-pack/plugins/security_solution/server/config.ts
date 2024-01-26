@@ -10,13 +10,8 @@ import { schema } from '@kbn/config-schema';
 import type { PluginInitializerContext } from '@kbn/core/server';
 import { SIGNALS_INDEX_KEY, DEFAULT_SIGNALS_INDEX } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
-import {
-  getExperimentalAllowedValues,
-  isValidExperimentalValue,
-  parseExperimentalConfigValue,
-} from '../common/experimental_features';
-
-const allowedExperimentalValues = getExperimentalAllowedValues();
+import { parseExperimentalConfigValue } from '../common/experimental_features';
+import { parseConfigSettings, type ConfigSettings } from '../common/config_settings';
 
 export const configSchema = schema.object({
   maxRuleImportExportSize: schema.number({ defaultValue: 10000 }),
@@ -26,7 +21,7 @@ export const configSchema = schema.object({
 
   /**
    * This is used within the merge strategies:
-   * server/lib/detection_engine/signals/source_fields_merging
+   * server/lib/detection_engine/rule_types/utils/source_fields_merging
    *
    * For determining which strategy for merging "fields" and "_source" together to get
    * runtime fields, constant keywords, etc...
@@ -44,7 +39,7 @@ export const configSchema = schema.object({
 
   /**
    * This is used within the merge strategies:
-   * server/lib/detection_engine/signals/source_fields_merging
+   * server/lib/detection_engine/rule_types/utils/source_fields_merging
    *
    * For determining if we need to ignore particular "fields" and not merge them with "_source" such as
    * runtime fields, constant keywords, etc...
@@ -94,15 +89,6 @@ export const configSchema = schema.object({
    */
   enableExperimental: schema.arrayOf(schema.string(), {
     defaultValue: () => [],
-    validate(list) {
-      for (const key of list) {
-        if (!isValidExperimentalValue(key)) {
-          return `[${key}] is not allowed. Allowed values are: ${allowedExperimentalValues.join(
-            ', '
-          )}`;
-        }
-      }
-    },
   }),
 
   /**
@@ -111,24 +97,84 @@ export const configSchema = schema.object({
   packagerTaskInterval: schema.string({ defaultValue: '60s' }),
 
   /**
-   * Detection prebuilt rules
+   * Artifacts Configuration for package policy update concurrency
    */
-  prebuiltRulesFromFileSystem: schema.boolean({ defaultValue: true }),
-  prebuiltRulesFromSavedObjects: schema.boolean({ defaultValue: true }),
+  packagerTaskPackagePolicyUpdateBatchSize: schema.number({ defaultValue: 10, max: 50, min: 1 }),
+
+  /**
+   * For internal use. Specify which version of the Detection Rules fleet package to install
+   * when upgrading rules. If not provided, the latest compatible package will be installed,
+   * or if running from a dev environment or -SNAPSHOT build, the latest pre-release package
+   * will be used (if fleet is available or not within an airgapped environment).
+   *
+   * Note: This is for `upgrade only`, which occurs by means of the `useUpgradeSecurityPackages`
+   * hook when navigating to a Security Solution page. The package version specified in
+   * `fleet_packages.json` in project root will always be installed first on Kibana start if
+   * the package is not already installed.
+   */
+  prebuiltRulesPackageVersion: schema.maybe(schema.string()),
+  enabled: schema.boolean({ defaultValue: true }),
+  enableUiSettingsValidations: schema.boolean({ defaultValue: false }),
+
+  /**
+   * The Max number of Bytes allowed for the `upload` endpoint response action
+   */
+  maxUploadResponseActionFileBytes: schema.number({
+    defaultValue: 26214400, // 25MB,
+    max: 104857600, // 100MB,
+  }),
+  /**
+   * Defines the settings for a specific offering of the Security Solution app.
+   * They override the default values.
+   * @example
+   * xpack.securitySolution.offeringSettings: {
+   *  "ILMEnabled": false,
+   * }
+   */
+  offeringSettings: schema.recordOf(schema.string(), schema.boolean(), {
+    defaultValue: {},
+  }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;
 
-export type ConfigType = ConfigSchema & {
+export type ConfigType = Omit<ConfigSchema, 'offeringSettings'> & {
   experimentalFeatures: ExperimentalFeatures;
+  settings: ConfigSettings;
+  enableUiSettingsValidations: boolean;
 };
 
 export const createConfig = (context: PluginInitializerContext): ConfigType => {
   const pluginConfig = context.config.get<TypeOf<typeof configSchema>>();
-  const experimentalFeatures = parseExperimentalConfigValue(pluginConfig.enableExperimental);
+  const logger = context.logger.get('config');
+
+  const { invalid, features: experimentalFeatures } = parseExperimentalConfigValue(
+    pluginConfig.enableExperimental
+  );
+
+  if (invalid.length) {
+    logger.warn(`Unsupported "xpack.securitySolution.enableExperimental" values detected.
+The following configuration values are no longer supported and should be removed from the kibana configuration file:
+
+    xpack.securitySolution.enableExperimental:
+${invalid.map((key) => `      - ${key}`).join('\n')}
+`);
+  }
+
+  const { invalid: invalidConfigSettings, settings } = parseConfigSettings(
+    pluginConfig.offeringSettings
+  );
+
+  if (invalidConfigSettings.length) {
+    logger.warn(`Unsupported "xpack.securitySolution.offeringSettings" values detected.
+The following configuration values are no longer supported and should be removed from the kibana configuration file:
+${invalidConfigSettings.map((key) => `      - ${key}`).join('\n')}
+`);
+  }
 
   return {
     ...pluginConfig,
     experimentalFeatures,
+    settings,
   };
 };

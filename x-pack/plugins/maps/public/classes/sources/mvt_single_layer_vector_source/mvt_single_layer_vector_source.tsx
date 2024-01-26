@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import React from 'react';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import { AbstractSource, ImmutableSourceProperty, SourceEditorArgs } from '../source';
@@ -23,7 +23,6 @@ import {
   SOURCE_TYPES,
   VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
-import { registerSource } from '../source_registry';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 import {
   MapExtent,
@@ -53,7 +52,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
   }: Partial<TiledSingleLayerVectorSourceDescriptor>) {
     return {
       type: SOURCE_TYPES.MVT_SINGLE_LAYER,
-      id: uuid(),
+      id: uuidv4(),
       urlTemplate: urlTemplate ? urlTemplate : '',
       layerName: layerName ? layerName : '',
       minSourceZoom:
@@ -93,12 +92,6 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
     );
   }
 
-  getFieldNames(): string[] {
-    return this._descriptor.fields.map((field: MVTFieldDescriptor) => {
-      return field.name;
-    });
-  }
-
   addFeature(geometry: Geometry | Position[]): Promise<void> {
     throw new Error('Does not implement addFeature');
   }
@@ -119,26 +112,17 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
   }
 
   getFieldByName(fieldName: string): MVTField | null {
-    try {
-      return this.createField({ fieldName });
-    } catch (e) {
-      return null;
-    }
-  }
-
-  createField({ fieldName }: { fieldName: string }): MVTField {
     const field = this._descriptor.fields.find((f: MVTFieldDescriptor) => {
       return f.name === fieldName;
     });
-    if (!field) {
-      throw new Error(`Cannot create field for fieldName ${fieldName}`);
-    }
-    return new MVTField({
-      fieldName: field.name,
-      type: field.type,
-      source: this,
-      origin: FIELD_ORIGIN.SOURCE,
-    });
+    return field
+      ? new MVTField({
+          fieldName: field.name,
+          type: field.type,
+          source: this,
+          origin: FIELD_ORIGIN.SOURCE,
+        })
+      : null;
   }
 
   getGeoJsonWithMeta(): Promise<GeoJsonWithMeta> {
@@ -192,8 +176,12 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
     return null;
   }
 
-  getSyncMeta(): null {
-    return null;
+  getSyncMeta() {
+    return {
+      mvtFields: this._descriptor.fields.map((field: MVTFieldDescriptor) => {
+        return field.name;
+      }),
+    };
   }
 
   isBoundsAware() {
@@ -208,10 +196,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
     return [];
   }
 
-  async getTooltipProperties(
-    properties: GeoJsonProperties,
-    featureId?: string | number
-  ): Promise<ITooltipProperty[]> {
+  async getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]> {
     const tooltips = [];
     for (const key in properties) {
       if (properties.hasOwnProperty(key)) {
@@ -236,25 +221,16 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
     return false;
   }
 
-  async getDefaultFields(): Promise<Record<string, Record<string, string>>> {
-    return {};
-  }
-
-  showJoinEditor(): boolean {
+  supportsJoins(): boolean {
     return false;
-  }
-
-  getJoinsDisabledReason(): string | null {
-    return null;
   }
 
   getFeatureActions(args: GetFeatureActionsArgs): TooltipFeatureAction[] {
     // Its not possible to filter by geometry for vector tile sources since there is no way to get original geometry
     return [];
   }
-}
 
-registerSource({
-  ConstructorFunction: MVTSingleLayerVectorSource,
-  type: SOURCE_TYPES.MVT_SINGLE_LAYER,
-});
+  getInspectorRequestIds(): string[] {
+    return [];
+  }
+}

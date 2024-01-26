@@ -76,7 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
-      await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.createMLTestDashboardIfNeeded();
       await ml.testResources.setKibanaTimeZoneToUTC();
 
@@ -85,7 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await ml.testResources.deleteMLTestDashboard();
-      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.deleteDataViewByTitle('ft_farequote');
     });
 
     for (const testData of testDataList) {
@@ -149,6 +149,46 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('anomalies table is not empty');
           await ml.anomaliesTable.assertTableNotEmpty();
+        });
+
+        it('should allow filtering by influencer', async () => {
+          const fieldName = testData.expected.influencers[0].field;
+          const fieldValue = testData.expected.influencers[0].labelsContained[0];
+
+          await ml.testExecution.logTestStep(
+            'adds influencer filter by clicking on the influencer add filter button'
+          );
+          await ml.anomalyExplorer.addFilterForInfluencer(fieldName, fieldValue);
+          await ml.testExecution.logTestStep('query bar and table rows reflect filter');
+          await ml.anomalyExplorer.assertQueryBarContent(`${fieldName}:"${fieldValue}"`);
+          await ml.anomaliesTable.assertInfluencersCellsContainFilter(
+            `${fieldName}: ${fieldValue}`
+          );
+          await ml.testExecution.logTestStep('influencers list and swimlane reflect filter');
+          await ml.swimLane.assertAxisLabels(viewBySwimLaneTestSubj, 'y', [fieldValue]);
+          await ml.anomalyExplorer.assertInfluencerFieldListLength('airline', 1);
+          await ml.testExecution.logTestStep(
+            'removes influencer filter by clicking on the influencer remove filter button'
+          );
+          await ml.anomalyExplorer.removeFilterForInfluencer(fieldName, fieldValue);
+          await ml.testExecution.logTestStep('query bar reflects filter removal');
+          await ml.anomalyExplorer.assertQueryBarContent('');
+          await ml.testExecution.logTestStep(
+            'influencers list and swimlane reflect filter removal'
+          );
+          await ml.swimLane.assertAxisLabels(viewBySwimLaneTestSubj, 'y', [
+            'AAL',
+            'EGF',
+            'VRD',
+            'SWR',
+            'JZA',
+            'AMX',
+            'TRS',
+            'ACA',
+            'BAW',
+            'ASA',
+          ]);
+          await ml.anomalyExplorer.assertInfluencerFieldListLength('airline', 10);
         });
 
         it('has enabled Single Metric Viewer button', async () => {

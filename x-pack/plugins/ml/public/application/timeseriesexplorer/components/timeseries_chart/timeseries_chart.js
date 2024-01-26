@@ -16,13 +16,11 @@ import useObservable from 'react-use/lib/useObservable';
 import { isEqual, reduce, each, get } from 'lodash';
 import d3 from 'd3';
 import moment from 'moment';
-import { i18n } from '@kbn/i18n';
 
-import {
-  getFormattedSeverityScore,
-  getSeverityWithLow,
-  getMultiBucketImpactLabel,
-} from '../../../../../common/util/anomaly_utils';
+import { i18n } from '@kbn/i18n';
+import { getFormattedSeverityScore, getSeverityWithLow } from '@kbn/ml-anomaly-utils';
+import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
+
 import { formatValue } from '../../../formatters/format_value';
 import {
   LINE_CHART_ANOMALY_RADIUS,
@@ -34,8 +32,8 @@ import {
   numTicksForDateFormat,
   showMultiBucketAnomalyMarker,
   showMultiBucketAnomalyTooltip,
+  getMultiBucketImpactTooltipValue,
 } from '../../../util/chart_utils';
-import { formatHumanReadableDateTimeSeconds } from '../../../../../common/util/date_utils';
 import { getTimeBucketsFromCache } from '../../../util/time_buckets';
 import { mlTableService } from '../../../services/table_service';
 import { ContextChartMask } from '../context_chart_mask';
@@ -1509,12 +1507,12 @@ class TimeseriesChartIntl extends Component {
       if (showMultiBucketAnomalyTooltip(marker) === true) {
         tooltipData.push({
           label: i18n.translate(
-            'xpack.ml.timeSeriesExplorer.timeSeriesChart.multiBucketImpactLabel',
+            'xpack.ml.timeSeriesExplorer.timeSeriesChart.multiBucketAnomalyLabel',
             {
               defaultMessage: 'multi-bucket impact',
             }
           ),
-          value: getMultiBucketImpactLabel(marker.multiBucketImpact),
+          value: getMultiBucketImpactTooltipValue(marker),
           seriesIdentifier: {
             key: seriesKey,
           },

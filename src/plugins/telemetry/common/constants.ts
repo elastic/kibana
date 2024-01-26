@@ -42,7 +42,7 @@ export const PAYLOAD_CONTENT_ENCODING = 'aes256gcm';
 /**
  * The endpoint version when hitting the remote telemetry service
  */
-export const ENDPOINT_VERSION = 'v2';
+export const ENDPOINT_VERSION = 'v3';
 
 /**
  * The staging telemetry endpoint for the remote telemetry service.
@@ -60,6 +60,6 @@ export const ENDPOINT_PROD = 'https://telemetry.elastic.co/';
  * The telemetry channels for the remote telemetry service.
  */
 export const TELEMETRY_CHANNELS = {
-  SNAPSHOT_CHANNEL: 'xpack',
-  OPT_IN_STATUS_CHANNEL: 'opt_in_status',
+  SNAPSHOT_CHANNEL: 'kibana-snapshot',
+  OPT_IN_STATUS_CHANNEL: 'kibana-opt-in-reports',
 };

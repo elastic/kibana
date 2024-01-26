@@ -5,27 +5,31 @@
  * 2.0.
  */
 
+import type { Socket } from 'net';
 import { lastValueFrom, Observable, of } from 'rxjs';
 
+import type { FakeRawRequest } from '@kbn/core/server';
+import { CoreKibanaRequest } from '@kbn/core/server';
 import {
   coreMock,
   httpServerMock,
   httpServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import type { AuditEvent } from '@kbn/security-plugin-types-server';
 
-import { licenseMock } from '../../common/licensing/index.mock';
-import type { ConfigType } from '../config';
-import { ConfigSchema, createConfig } from '../config';
-import type { AuditEvent } from './audit_events';
 import {
   AuditService,
   createLoggingConfig,
   filterEvent,
+  getForwardedFor,
   RECORD_USAGE_INTERVAL,
 } from './audit_service';
+import { licenseMock } from '../../common/licensing/index.mock';
+import type { ConfigType } from '../config';
+import { ConfigSchema, createConfig } from '../config';
 
-jest.useFakeTimers('legacy');
+jest.useFakeTimers({ legacyFakeTimers: true });
 
 const logger = loggingSystemMock.createLogger();
 const license = licenseMock.create();
@@ -48,6 +52,7 @@ const recordAuditLoggingUsage = jest.fn();
 beforeEach(() => {
   logger.info.mockClear();
   logging.configure.mockClear();
+  logger.isLevelEnabled.mockClear().mockReturnValue(true);
   recordAuditLoggingUsage.mockClear();
   http.registerOnPostAuth.mockClear();
 });
@@ -173,7 +178,7 @@ describe('#setup', () => {
 });
 
 describe('#asScoped', () => {
-  it('logs event enriched with meta data', async () => {
+  it('logs event enriched with meta data from request', async () => {
     const audit = new AuditService(logger);
     const auditSetup = audit.setup({
       license,
@@ -186,15 +191,74 @@ describe('#asScoped', () => {
       recordAuditLoggingUsage,
     });
     const request = httpServerMock.createKibanaRequest({
+      socket: { remoteAddress: '3.3.3.3' } as Socket,
+      headers: {
+        'x-forwarded-for': '1.1.1.1, 2.2.2.2',
+      },
       kibanaRequestState: { requestId: 'REQUEST_ID', requestUuid: 'REQUEST_UUID' },
     });
 
-    await auditSetup.asScoped(request).log({ message: 'MESSAGE', event: { action: 'ACTION' } });
-    expect(logger.info).toHaveBeenCalledWith('MESSAGE', {
+    await auditSetup.asScoped(request).log({
+      message: 'MESSAGE',
+      event: { action: 'ACTION' },
+      http: { request: { method: 'GET' } },
+    });
+    expect(logger.info).toHaveBeenLastCalledWith('MESSAGE', {
       event: { action: 'ACTION' },
       kibana: { space_id: 'default', session_id: 'SESSION_ID' },
       trace: { id: 'REQUEST_ID' },
+      client: { ip: '3.3.3.3' },
+      http: {
+        request: { method: 'GET', headers: { 'x-forwarded-for': '1.1.1.1, 2.2.2.2' } },
+      },
       user: { id: 'uid', name: 'jdoe', roles: ['admin'] },
+    });
+    audit.stop();
+  });
+
+  it('logs event enriched with meta data from fake request', async () => {
+    const audit = new AuditService(logger);
+    const auditSetup = audit.setup({
+      license,
+      config,
+      logging,
+      http,
+      getCurrentUser,
+      getSpaceId: () => undefined,
+      getSID: () => Promise.resolve(undefined),
+      recordAuditLoggingUsage,
+    });
+
+    const fakeRawRequest: FakeRawRequest = {
+      headers: {},
+      path: '/',
+    };
+    const request = CoreKibanaRequest.from(fakeRawRequest);
+
+    await auditSetup.asScoped(request).log({
+      message: 'MESSAGE',
+      event: { action: 'ACTION' },
+    });
+    expect(logger.info).toHaveBeenLastCalledWith('MESSAGE', {
+      client: {
+        ip: undefined,
+      },
+      event: {
+        action: 'ACTION',
+      },
+      http: undefined,
+      kibana: {
+        session_id: undefined,
+        space_id: undefined,
+      },
+      trace: {
+        id: expect.any(String),
+      },
+      user: {
+        id: 'uid',
+        name: 'jdoe',
+        roles: ['admin'],
+      },
     });
     audit.stop();
   });
@@ -256,6 +320,41 @@ describe('#asScoped', () => {
 
     await auditSetup.asScoped(request).log(undefined);
     expect(logger.info).not.toHaveBeenCalled();
+    audit.stop();
+  });
+
+  it('does not log to audit logger if info logging level is disabled', async () => {
+    logger.isLevelEnabled.mockReturnValue(false);
+
+    const audit = new AuditService(logger);
+    const auditSetup = audit.setup({
+      license,
+      config,
+      logging,
+      http,
+      getCurrentUser,
+      getSpaceId,
+      getSID,
+      recordAuditLoggingUsage,
+    });
+    const request = httpServerMock.createKibanaRequest({
+      socket: { remoteAddress: '3.3.3.3' } as Socket,
+      headers: {
+        'x-forwarded-for': '1.1.1.1, 2.2.2.2',
+      },
+      kibanaRequestState: { requestId: 'REQUEST_ID', requestUuid: 'REQUEST_UUID' },
+    });
+
+    await auditSetup.asScoped(request).log({
+      message: 'MESSAGE',
+      event: { action: 'ACTION' },
+      http: { request: { method: 'GET' } },
+    });
+
+    expect(logger.info).not.toHaveBeenCalled();
+    expect(logger.isLevelEnabled).toHaveBeenCalledTimes(1);
+    expect(logger.isLevelEnabled).toHaveBeenCalledWith('info');
+
     audit.stop();
   });
 });
@@ -421,6 +520,32 @@ describe('#createLoggingConfig', () => {
     );
 
     expect(loggingConfig.loggers![0].level).toEqual('off');
+  });
+});
+
+describe('#getForwardedFor', () => {
+  it('extracts x-forwarded-for header from request', () => {
+    const request = httpServerMock.createKibanaRequest({
+      headers: {
+        'x-forwarded-for': '1.1.1.1',
+      },
+    });
+    expect(getForwardedFor(request)).toBe('1.1.1.1');
+  });
+
+  it('concatenates multiple headers into single string in correct order', () => {
+    const request = httpServerMock.createKibanaRequest({
+      headers: {
+        // @ts-expect-error Headers can be arrays but HAPI mocks are incorrectly typed
+        'x-forwarded-for': ['1.1.1.1, 2.2.2.2', '3.3.3.3'],
+      },
+    });
+    expect(getForwardedFor(request)).toBe('1.1.1.1, 2.2.2.2, 3.3.3.3');
+  });
+
+  it('returns undefined when header not present', () => {
+    const request = httpServerMock.createKibanaRequest();
+    expect(getForwardedFor(request)).toBeUndefined();
   });
 });
 

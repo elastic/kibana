@@ -10,21 +10,26 @@ import React, { Component, Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { FieldRuleEditor } from './field_rule_editor';
+import { RuleGroupEditor } from './rule_group_editor';
 import type { Rule, RuleGroup } from '../../model';
 import { AllRule, FieldRule } from '../../model';
 import { isRuleGroup } from '../services/is_rule_group';
 import { VISUAL_MAX_RULE_DEPTH } from '../services/role_mapping_constants';
-import { FieldRuleEditor } from './field_rule_editor';
-import { RuleGroupEditor } from './rule_group_editor';
 
 interface Props {
   rules: Rule | null;
   maxDepth: number;
   onChange: (rules: Rule | null) => void;
   onSwitchEditorMode: () => void;
+  readOnly?: boolean;
 }
 
 export class VisualRuleEditor extends Component<Props, {}> {
+  static defaultProps: Partial<Props> = {
+    readOnly: false,
+  };
+
   public render() {
     if (this.props.rules) {
       const rules = this.renderRule(this.props.rules, this.onRuleChange);
@@ -57,19 +62,21 @@ export class VisualRuleEditor extends Component<Props, {}> {
         }
         data-test-subj="roleMappingsNoRulesDefined"
         actions={
-          <EuiButton
-            color="primary"
-            iconType="plusInCircle"
-            data-test-subj="roleMappingsAddRuleButton"
-            onClick={() => {
-              this.props.onChange(new AllRule([new FieldRule('username', '*')]));
-            }}
-          >
-            <FormattedMessage
-              id="xpack.security.management.editRoleMapping.addFirstRuleButton"
-              defaultMessage="Add rules"
-            />
-          </EuiButton>
+          !this.props.readOnly && (
+            <EuiButton
+              color="primary"
+              iconType="plusInCircle"
+              data-test-subj="roleMappingsAddRuleButton"
+              onClick={() => {
+                this.props.onChange(new AllRule([new FieldRule('username', '*')]));
+              }}
+            >
+              <FormattedMessage
+                id="xpack.security.management.editRoleMapping.addFirstRuleButton"
+                defaultMessage="Add rules"
+              />
+            </EuiButton>
+          )
         }
       />
     );
@@ -84,7 +91,7 @@ export class VisualRuleEditor extends Component<Props, {}> {
     return (
       <Fragment>
         <EuiCallOut
-          iconType="alert"
+          iconType="warning"
           title={
             <FormattedMessage
               id="xpack.security.management.editRoleMapping.visualRuleEditor.switchToJSONEditorTitle"
@@ -133,6 +140,7 @@ export class VisualRuleEditor extends Component<Props, {}> {
           allowAdd={this.canUseVisualEditor()}
           onChange={(value) => onChange(value)}
           onDelete={this.onRuleDelete}
+          readOnly={this.props.readOnly}
         />
       );
     }
@@ -141,6 +149,7 @@ export class VisualRuleEditor extends Component<Props, {}> {
         rule={rule as FieldRule}
         onChange={(value) => onChange(value)}
         onDelete={this.onRuleDelete}
+        readOnly={this.props.readOnly}
       />
     );
   }

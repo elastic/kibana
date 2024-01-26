@@ -7,7 +7,7 @@
 
 import type { Transaction } from '@elastic/apm-rum';
 import { useCallback } from 'react';
-import { CommentType } from '../../../common';
+import { AttachmentType } from '../../../common/types/domain';
 import type { CaseAttachmentsWithoutOwner } from '../../types';
 import { useStartTransaction } from './use_start_transaction';
 
@@ -77,7 +77,7 @@ export const useAddAttachmentToExistingCaseTransaction = () => {
 
 const getAlertCount = (attachments: CaseAttachmentsWithoutOwner) => {
   return attachments.reduce((total, attachment) => {
-    if (attachment.type !== CommentType.alert) {
+    if (attachment.type !== AttachmentType.alert) {
       return total;
     }
     if (!Array.isArray(attachment.alertId)) {

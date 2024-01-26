@@ -14,13 +14,10 @@ import {
   EuiPage,
   EuiPageBody,
   EuiFlexGroup,
-  EuiPageContent_Deprecated as EuiPageContent,
   EuiScreenReaderOnly,
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-
-// @ts-ignore could not find declaration file
 import { MonitoringTimeseriesContainer } from '../chart';
 import { checkAgentTypeMetric } from '../../lib/apm_agent';
 
@@ -51,7 +48,7 @@ const createCharts = (series: unknown[], props: Partial<Props>) => {
   return series.map((data, index) => {
     return (
       <EuiFlexItem style={{ minWidth: '45%' }} key={index}>
-        <MonitoringTimeseriesContainer {...props} series={data} />
+        <MonitoringTimeseriesContainer {...props} series={data as any} />
       </EuiFlexItem>
     );
   });
@@ -119,13 +116,13 @@ export const ApmMetrics = ({
           <EuiFlexGroup wrap>{createCharts(topSeries, props)}</EuiFlexGroup>
         </EuiPanel>
         <EuiSpacer size="m" />
-        <EuiPageContent>
+        <EuiPanel>
           <EuiTitle>
             <h3>{title}</h3>
           </EuiTitle>
           <EuiSpacer size="m" />
           <EuiFlexGroup wrap>{createCharts(seriesToShow, props)}</EuiFlexGroup>
-        </EuiPageContent>
+        </EuiPanel>
       </EuiPageBody>
     </EuiPage>
   );

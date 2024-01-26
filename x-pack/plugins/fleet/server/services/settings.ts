@@ -10,14 +10,21 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { normalizeHostsForAgents } from '../../common/services';
 import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE, GLOBAL_SETTINGS_ID } from '../../common/constants';
-import type { SettingsSOAttributes, Settings, BaseSettings } from '../../common/types';
+import type { Settings, BaseSettings } from '../../common/types';
+import type { SettingsSOAttributes } from '../types';
 
 import { appContextService } from './app_context';
 import { listFleetServerHosts } from './fleet_server_host';
+import { auditLoggingService } from './audit_logging';
 
 export async function getSettings(soClient: SavedObjectsClientContract): Promise<Settings> {
   const res = await soClient.find<SettingsSOAttributes>({
     type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+  });
+  auditLoggingService.writeCustomSoAuditLog({
+    action: 'get',
+    id: GLOBAL_SETTINGS_ID,
+    savedObjectType: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
   });
 
   if (res.total === 0) {
@@ -32,6 +39,20 @@ export async function getSettings(soClient: SavedObjectsClientContract): Promise
     fleet_server_hosts: fleetServerHosts.items.flatMap((item) => item.host_urls),
     preconfigured_fields: getConfigFleetServerHosts() ? ['fleet_server_hosts'] : [],
   };
+}
+
+export async function getSettingsOrUndefined(
+  soClient: SavedObjectsClientContract
+): Promise<Settings | undefined> {
+  try {
+    return await getSettings(soClient);
+  } catch (e) {
+    if (e.isBoom && e.output.statusCode === 404) {
+      return undefined;
+    }
+
+    throw e;
+  }
 }
 
 export async function settingsSetup(soClient: SavedObjectsClientContract) {
@@ -59,6 +80,12 @@ export async function saveSettings(
   try {
     const settings = await getSettings(soClient);
 
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'update',
+      id: settings.id,
+      savedObjectType: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+    });
+
     const res = await soClient.update<SettingsSOAttributes>(
       GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
       settings.id,
@@ -72,6 +99,13 @@ export async function saveSettings(
   } catch (e) {
     if (e.isBoom && e.output.statusCode === 404) {
       const defaultSettings = createDefaultSettings();
+
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'create',
+        id: GLOBAL_SETTINGS_ID,
+        savedObjectType: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+      });
+
       const res = await soClient.create<SettingsSOAttributes>(
         GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
         {

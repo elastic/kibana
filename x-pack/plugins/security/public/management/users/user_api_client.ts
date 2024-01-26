@@ -7,7 +7,7 @@
 
 import type { HttpStart } from '@kbn/core/public';
 
-import type { EditUser, User } from '../../../common/model';
+import type { EditUser, User } from '../../../common';
 
 const usersUrl = '/internal/security/users';
 

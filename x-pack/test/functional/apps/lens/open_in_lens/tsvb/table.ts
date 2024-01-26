@@ -82,13 +82,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await visualize.hasNavigateToLensButton()).to.be(false);
     });
 
-    it('should not allow converting series with different aggregation fucntion or aggregation by', async () => {
+    it('should not allow converting series with different aggregation function or aggregation by', async () => {
       await visualBuilder.createNewAggSeries();
       await visualBuilder.selectAggType('Static Value', 1);
       await visualBuilder.setStaticValue(10);
+      await header.waitUntilLoadingHasFinished();
       await visualBuilder.clickSeriesOption();
+      await header.waitUntilLoadingHasFinished();
       await visualBuilder.setFieldForAggregateBy('bytes');
       await visualBuilder.setFunctionForAggregateFunction('Sum');
+      await header.waitUntilLoadingHasFinished();
       await visualBuilder.clickSeriesOption(1);
       await visualBuilder.setFieldForAggregateBy('bytes');
       await visualBuilder.setFunctionForAggregateFunction('Min');
@@ -107,12 +110,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualBuilder.clickDataTab('table');
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('lnsDataTable');
       await lens.openDimensionEditor('lnsDatatable_metrics > lns-dimensionTrigger');
       await testSubjects.click('indexPattern-advanced-accordion');
-      const reducedTimeRange = await testSubjects.find('indexPattern-dimension-reducedTimeRange');
-      expect(await reducedTimeRange.getVisibleText()).to.be('1 minute (1m)');
+      const reducedTimeRange = await testSubjects.find(
+        'indexPattern-dimension-reducedTimeRange > comboBoxSearchInput'
+      );
+      expect(await reducedTimeRange.getAttribute('value')).to.be('1 minute (1m)');
       await retry.try(async () => {
         const layerCount = await lens.getLayerCount();
         expect(layerCount).to.be(1);
@@ -128,7 +133,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('lnsDataTable');
       await retry.try(async () => {
         const layerCount = await lens.getLayerCount();
@@ -146,7 +151,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualBuilder.setFunctionForAggregateFunction('Sum');
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('lnsDataTable');
       await retry.try(async () => {
         const layerCount = await lens.getLayerCount();
@@ -166,7 +171,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualBuilder.setColumnLabelValue('test');
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('lnsDataTable');
       await retry.try(async () => {
         const layerCount = await lens.getLayerCount();
@@ -190,7 +195,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualBuilder.setColorPickerValue('#54A000', 1);
 
       await header.waitUntilLoadingHasFinished();
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
 
       await lens.waitForVisualization('lnsDataTable');
       await retry.try(async () => {
@@ -213,6 +218,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           { stop: '', color: undefined },
         ]);
       });
+    });
+
+    it('should bring the ignore global filters configured at panel level over', async () => {
+      await visualBuilder.clickPanelOptions('table');
+      await visualBuilder.setIgnoreFilters(true);
+      await header.waitUntilLoadingHasFinished();
+      await visualize.navigateToLensFromAnotherVisualization();
+      await lens.waitForVisualization('lnsDataTable');
+      expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);
     });
   });
 }

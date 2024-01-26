@@ -11,9 +11,9 @@ import Path from 'path';
 
 import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { KbnClient } from '@kbn/test';
-
+import type { LoadActionPerfOptions } from './lib';
 import {
   saveAction,
   loadAction,
@@ -22,7 +22,6 @@ import {
   emptyKibanaIndexAction,
   editAction,
 } from './actions';
-
 interface Options {
   client: Client;
   baseDir?: string;
@@ -89,7 +88,13 @@ export class EsArchiver {
       skipExisting = false,
       useCreate = false,
       docsOnly = false,
-    }: { skipExisting?: boolean; useCreate?: boolean; docsOnly?: boolean } = {}
+      performance,
+    }: {
+      skipExisting?: boolean;
+      useCreate?: boolean;
+      docsOnly?: boolean;
+      performance?: LoadActionPerfOptions;
+    } = {}
   ) {
     return await loadAction({
       inputDir: this.findArchive(path),
@@ -99,6 +104,7 @@ export class EsArchiver {
       client: this.client,
       log: this.log,
       kbnClient: this.kbnClient,
+      performance,
     });
   }
 
@@ -154,14 +160,12 @@ export class EsArchiver {
   }
 
   /**
-   * Delete any Kibana indices, and initialize the Kibana index as Kibana would do
-   * on startup.
+   * Cleanup saved object indices, preserving the space:default saved object.
    */
   async emptyKibanaIndex() {
     return await emptyKibanaIndexAction({
       client: this.client,
       log: this.log,
-      kbnClient: this.kbnClient,
     });
   }
 

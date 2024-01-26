@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -12,7 +13,7 @@ import {
   deleteAllCaseItems,
   getAuthWithSuperUser,
   getCasesMetrics,
-} from '../../../../common/lib/utils';
+} from '../../../../common/lib/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -51,7 +52,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should calculate the mttr correctly on space 1', async () => {
         const metrics = await getCasesMetrics({
           supertest: supertestWithoutAuth,
-          features: ['mttr'],
+          features: [CaseMetricsFeature.MTTR],
           auth: authSpace1,
         });
 
@@ -62,7 +63,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const authSpace2 = getAuthWithSuperUser('space2');
         const metrics = await getCasesMetrics({
           supertest: supertestWithoutAuth,
-          features: ['mttr'],
+          features: [CaseMetricsFeature.MTTR],
           auth: authSpace2,
         });
 

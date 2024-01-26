@@ -12,8 +12,11 @@ import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/c
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 import type { ConfigType } from './config';
-import type { CreateEncryptedSavedObjectsMigrationFn } from './create_migration';
-import { getCreateMigration } from './create_migration';
+import {
+  type CreateEncryptedSavedObjectsMigrationFn,
+  getCreateMigration,
+} from './create_migration';
+import { type CreateEsoModelVersionFn, getCreateEsoModelVersion } from './create_model_version';
 import type { EncryptedSavedObjectTypeRegistration } from './crypto';
 import {
   EncryptedSavedObjectsService,
@@ -35,6 +38,7 @@ export interface EncryptedSavedObjectsPluginSetup {
   canEncrypt: boolean;
   registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) => void;
   createMigration: CreateEncryptedSavedObjectsMigrationFn;
+  createModelVersion: CreateEsoModelVersionFn;
 }
 
 export interface EncryptedSavedObjectsPluginStart {
@@ -95,25 +99,41 @@ export class EncryptedSavedObjectsPlugin
       getStartServices: core.getStartServices,
     });
 
-    defineRoutes({
-      router: core.http.createRouter(),
-      logger: this.initializerContext.logger.get('routes'),
-      encryptionKeyRotationService: Object.freeze(
-        new EncryptionKeyRotationService({
-          logger: this.logger.get('key-rotation-service'),
-          service,
-          getStartServices: core.getStartServices,
-          security: deps.security,
-        })
-      ),
-      config,
-    });
+    // In the serverless environment, the encryption keys for saved objects is managed internally and never
+    // exposed to users and administrators, eliminating the need for any public Encrypted Saved Objects HTTP APIs
+    if (this.initializerContext.env.packageInfo.buildFlavor !== 'serverless') {
+      defineRoutes({
+        router: core.http.createRouter(),
+        logger: this.initializerContext.logger.get('routes'),
+        encryptionKeyRotationService: Object.freeze(
+          new EncryptionKeyRotationService({
+            logger: this.logger.get('key-rotation-service'),
+            service,
+            getStartServices: core.getStartServices,
+            security: deps.security,
+          })
+        ),
+        config,
+      });
+    }
 
     return {
       canEncrypt,
       registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) =>
         service.registerType(typeRegistration),
       createMigration: getCreateMigration(
+        service,
+        (typeRegistration: EncryptedSavedObjectTypeRegistration) => {
+          const serviceForMigration = new EncryptedSavedObjectsService({
+            primaryCrypto,
+            decryptionOnlyCryptos,
+            logger: this.logger,
+          });
+          serviceForMigration.registerType(typeRegistration);
+          return serviceForMigration;
+        }
+      ),
+      createModelVersion: getCreateEsoModelVersion(
         service,
         (typeRegistration: EncryptedSavedObjectTypeRegistration) => {
           const serviceForMigration = new EncryptedSavedObjectsService({

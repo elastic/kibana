@@ -26,6 +26,16 @@ describe('setupCapabilities', () => {
     `);
   });
 
+  it('registers a capabilities switcher with the correct options', async () => {
+    const coreSetup = coreMock.createSetup();
+    setupCapabilities(coreSetup);
+
+    expect(coreSetup.capabilities.registerSwitcher).toHaveBeenCalledTimes(1);
+    expect(coreSetup.capabilities.registerSwitcher).toHaveBeenCalledWith(expect.any(Function), {
+      capabilityPath: 'fileUpload.*',
+    });
+  });
+
   it('registers a capabilities switcher that returns unaltered capabilities when security is disabled', async () => {
     const coreSetup = coreMock.createSetup();
     setupCapabilities(coreSetup);
@@ -44,16 +54,9 @@ describe('setupCapabilities', () => {
 
     const request = httpServerMock.createKibanaRequest();
 
-    await expect(switcher(request, capabilities, false)).resolves.toMatchInlineSnapshot(`
-            Object {
-              "catalogue": Object {},
-              "fileUpload": Object {
-                "show": true,
-              },
-              "management": Object {},
-              "navLinks": Object {},
-            }
-          `);
+    await expect(switcher(request, capabilities, false)).resolves.toMatchInlineSnapshot(
+      `Object {}`
+    );
   });
 
   it('registers a capabilities switcher that returns unaltered capabilities when default capabilities are requested', async () => {
@@ -81,16 +84,7 @@ describe('setupCapabilities', () => {
 
     const request = httpServerMock.createKibanaRequest();
 
-    await expect(switcher(request, capabilities, true)).resolves.toMatchInlineSnapshot(`
-            Object {
-              "catalogue": Object {},
-              "fileUpload": Object {
-                "show": true,
-              },
-              "management": Object {},
-              "navLinks": Object {},
-            }
-          `);
+    await expect(switcher(request, capabilities, true)).resolves.toMatchInlineSnapshot(`Object {}`);
 
     expect(security.authz.mode.useRbacForRequest).not.toHaveBeenCalled();
     expect(security.authz.checkPrivilegesDynamicallyWithRequest).not.toHaveBeenCalled();
@@ -166,16 +160,9 @@ describe('setupCapabilities', () => {
 
     const request = httpServerMock.createKibanaRequest();
 
-    await expect(switcher(request, capabilities, false)).resolves.toMatchInlineSnapshot(`
-            Object {
-              "catalogue": Object {},
-              "fileUpload": Object {
-                "show": true,
-              },
-              "management": Object {},
-              "navLinks": Object {},
-            }
-          `);
+    await expect(switcher(request, capabilities, false)).resolves.toMatchInlineSnapshot(
+      `Object {}`
+    );
 
     expect(security.authz.mode.useRbacForRequest).toHaveBeenCalledTimes(1);
     expect(security.authz.mode.useRbacForRequest).toHaveBeenCalledWith(request);
@@ -249,16 +236,9 @@ describe('setupCapabilities', () => {
 
     const request = httpServerMock.createKibanaRequest();
 
-    await expect(switcher(request, capabilities, false)).resolves.toMatchInlineSnapshot(`
-            Object {
-              "catalogue": Object {},
-              "fileUpload": Object {
-                "show": true,
-              },
-              "management": Object {},
-              "navLinks": Object {},
-            }
-          `);
+    await expect(switcher(request, capabilities, false)).resolves.toMatchInlineSnapshot(
+      `Object {}`
+    );
 
     expect(security.authz.mode.useRbacForRequest).toHaveBeenCalledTimes(1);
     expect(security.authz.mode.useRbacForRequest).toHaveBeenCalledWith(request);

@@ -1,11 +1,21 @@
 {
   "slm.delete_lifecycle": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "DELETE"
     ],
     "patterns": [
       "_slm/policy/{policy_id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/slm-api-delete-policy.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/slm-api-delete-policy.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

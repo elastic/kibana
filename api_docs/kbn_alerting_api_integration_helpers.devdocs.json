@@ -1,0 +1,479 @@
+{
+  "id": "@kbn/alerting-api-integration-helpers",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/alerting-api-integration-helpers",
+        "id": "def-common.ESTestIndexTool",
+        "type": "Class",
+        "tags": [],
+        "label": "ESTestIndexTool",
+        "description": [],
+        "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-api-integration-helpers",
+            "id": "def-common.ESTestIndexTool.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/alerting-api-integration-helpers",
+                "id": "def-common.ESTestIndexTool.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "es",
+                "description": [],
+                "signature": [
+                  "default"
+                ],
+                "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/alerting-api-integration-helpers",
+                "id": "def-common.ESTestIndexTool.Unnamed.$2",
+                "type": "Any",
+                "tags": [],
+                "label": "retry",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/alerting-api-integration-helpers",
+                "id": "def-common.ESTestIndexTool.Unnamed.$3",
+                "type": "string",
+                "tags": [],
+                "label": "index",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/alerting-api-integration-helpers",
+            "id": "def-common.ESTestIndexTool.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "() => Promise<",
+              "TransportResult",
+              "<",
+              "IndicesCreateResponse",
+              ", unknown>>"
+            ],
+            "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/alerting-api-integration-helpers",
+            "id": "def-common.ESTestIndexTool.indexDoc",
+            "type": "Function",
+            "tags": [],
+            "label": "indexDoc",
+            "description": [],
+            "signature": [
+              "(source: string, reference?: string | undefined) => Promise<",
+              "WriteResponseBase",
+              ">"
+            ],
+            "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/alerting-api-integration-helpers",
+                "id": "def-common.ESTestIndexTool.indexDoc.$1",
+                "type": "string",
+                "tags": [],
+                "label": "source",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/alerting-api-integration-helpers",
+                "id": "def-common.ESTestIndexTool.indexDoc.$2",
+                "type": "string",
+                "tags": [],
+                "label": "reference",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/alerting-api-integration-helpers",
+            "id": "def-common.ESTestIndexTool.destroy",
+            "type": "Function",
+            "tags": [],
+            "label": "destroy",
+            "description": [],
+            "signature": [
+              "() => Promise<",
+              "TransportResult",
+              "<",
+              "IndicesResponseBase",
+              ", unknown> | undefined>"
+            ],
+            "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/alerting-api-integration-helpers",
+            "id": "def-common.ESTestIndexTool.search",
+            "type": "Function",
+            "tags": [],
+            "label": "search",
+            "description": [],
+            "signature": [
+              "(source: string, reference?: string | undefined) => Promise<",
+              "TransportResult",
+              "<",
+              "SearchResponse",
+              "<unknown, Record<string, ",
+              "AggregationsAggregate",
+              ">>, unknown>>"
+            ],
+            "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/alerting-api-integration-helpers",
+                "id": "def-common.ESTestIndexTool.search.$1",
+                "type": "string",
+                "tags": [],
+                "label": "source",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/alerting-api-integration-helpers",
+                "id": "def-common.ESTestIndexTool.search.$2",
+                "type": "string",
+                "tags": [],
+                "label": "reference",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/alerting-api-integration-helpers",
+            "id": "def-common.ESTestIndexTool.getAll",
+            "type": "Function",
+            "tags": [],
+            "label": "getAll",
+            "description": [],
+            "signature": [
+              "(size?: number) => Promise<",
+              "TransportResult",
+              "<",
+              "SearchResponse",
+              "<unknown, Record<string, ",
+              "AggregationsAggregate",
+              ">>, unknown>>"
+            ],
+            "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/alerting-api-integration-helpers",
+                "id": "def-common.ESTestIndexTool.getAll.$1",
+                "type": "number",
+                "tags": [],
+                "label": "size",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/alerting-api-integration-helpers",
+            "id": "def-common.ESTestIndexTool.removeAll",
+            "type": "Function",
+            "tags": [],
+            "label": "removeAll",
+            "description": [],
+            "signature": [
+              "() => Promise<",
+              "DeleteByQueryResponse",
+              ">"
+            ],
+            "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/alerting-api-integration-helpers",
+            "id": "def-common.ESTestIndexTool.waitForDocs",
+            "type": "Function",
+            "tags": [],
+            "label": "waitForDocs",
+            "description": [],
+            "signature": [
+              "(source: string, reference: string, numDocs?: number) => Promise<any>"
+            ],
+            "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/alerting-api-integration-helpers",
+                "id": "def-common.ESTestIndexTool.waitForDocs.$1",
+                "type": "string",
+                "tags": [],
+                "label": "source",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/alerting-api-integration-helpers",
+                "id": "def-common.ESTestIndexTool.waitForDocs.$2",
+                "type": "string",
+                "tags": [],
+                "label": "reference",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/alerting-api-integration-helpers",
+                "id": "def-common.ESTestIndexTool.waitForDocs.$3",
+                "type": "number",
+                "tags": [],
+                "label": "numDocs",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/alerting-api-integration-helpers",
+        "id": "def-common.getHttpProxyServer",
+        "type": "Function",
+        "tags": [],
+        "label": "getHttpProxyServer",
+        "description": [],
+        "signature": [
+          "(targetUrl: string, kbnTestServerConfig: any, onProxyResHandler: (proxyRes?: unknown, req?: unknown, res?: unknown) => void) => Promise<",
+          "node_modules/@types/http-proxy/index",
+          ">"
+        ],
+        "path": "x-pack/test/alerting_api_integration/packages/helpers/get_proxy_server.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-api-integration-helpers",
+            "id": "def-common.getHttpProxyServer.$1",
+            "type": "string",
+            "tags": [],
+            "label": "targetUrl",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/test/alerting_api_integration/packages/helpers/get_proxy_server.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/alerting-api-integration-helpers",
+            "id": "def-common.getHttpProxyServer.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "kbnTestServerConfig",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/test/alerting_api_integration/packages/helpers/get_proxy_server.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/alerting-api-integration-helpers",
+            "id": "def-common.getHttpProxyServer.$3",
+            "type": "Function",
+            "tags": [],
+            "label": "onProxyResHandler",
+            "description": [],
+            "signature": [
+              "(proxyRes?: unknown, req?: unknown, res?: unknown) => void"
+            ],
+            "path": "x-pack/test/alerting_api_integration/packages/helpers/get_proxy_server.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-api-integration-helpers",
+        "id": "def-common.getProxyPort",
+        "type": "Function",
+        "tags": [],
+        "label": "getProxyPort",
+        "description": [],
+        "signature": [
+          "(kbnTestServerConfig: any) => number"
+        ],
+        "path": "x-pack/test/alerting_api_integration/packages/helpers/get_proxy_server.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-api-integration-helpers",
+            "id": "def-common.getProxyPort.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "kbnTestServerConfig",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/test/alerting_api_integration/packages/helpers/get_proxy_server.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/alerting-api-integration-helpers",
+        "id": "def-common.ES_TEST_INDEX_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "ES_TEST_INDEX_NAME",
+        "description": [],
+        "signature": [
+          "\".kibana-alerting-test-data\""
+        ],
+        "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

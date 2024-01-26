@@ -18,7 +18,6 @@ import {
 } from '@elastic/eui';
 import { maplibregl, Map as MapboxMap } from '@kbn/mapbox-gl';
 import { i18n } from '@kbn/i18n';
-import { ResizeChecker } from '@kbn/kibana-utils-plugin/public';
 import { CUSTOM_ICON_PIXEL_RATIO, createSdfIcon } from '../../symbol_utils';
 
 export interface Props {
@@ -35,7 +34,6 @@ interface State {
 
 export class IconPreview extends Component<Props, State> {
   static iconId = `iconPreview`;
-  private _checker?: ResizeChecker;
   private _isMounted = false;
   private _containerRef: HTMLDivElement | null = null;
 
@@ -61,9 +59,6 @@ export class IconPreview extends Component<Props, State> {
 
   componentWillUnmount() {
     this._isMounted = false;
-    if (this._checker) {
-      this._checker.destroy();
-    }
     if (this.state.map) {
       this.state.map.remove();
       this.state.map = null;
@@ -115,15 +110,6 @@ export class IconPreview extends Component<Props, State> {
     map.setLayoutProperty('icon-layer', 'icon-size', 12);
   }
 
-  _initResizerChecker() {
-    this._checker = new ResizeChecker(this._containerRef!);
-    this._checker.on('resize', () => {
-      if (this.state.map) {
-        this.state.map.resize();
-      }
-    });
-  }
-
   _createMapInstance(): MapboxMap {
     const map = new maplibregl.Map({
       container: this._containerRef!,
@@ -171,9 +157,7 @@ export class IconPreview extends Component<Props, State> {
   _initializeMap() {
     const map: MapboxMap = this._createMapInstance();
 
-    this.setState({ map }, () => {
-      this._initResizerChecker();
-    });
+    this.setState({ map });
   }
 
   render() {

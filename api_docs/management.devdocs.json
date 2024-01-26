@@ -518,7 +518,13 @@
             "description": [],
             "signature": [
               "(crumbs: ",
-              "EuiBreadcrumbProps",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.ChromeBreadcrumb",
+                "text": "ChromeBreadcrumb"
+              },
               "[]) => void"
             ],
             "path": "src/plugins/management/public/types.ts",
@@ -533,7 +539,13 @@
                 "label": "crumbs",
                 "description": [],
                 "signature": [
-                  "EuiBreadcrumbProps",
+                  {
+                    "pluginId": "@kbn/core-chrome-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreChromeBrowserPluginApi",
+                    "section": "def-common.ChromeBreadcrumb",
+                    "text": "ChromeBreadcrumb"
+                  },
                   "[]"
                 ],
                 "path": "src/plugins/management/public/types.ts",
@@ -772,7 +784,74 @@
       "path": "src/plugins/management/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "management",
+          "id": "def-public.ManagementStart.setIsSidebarEnabled",
+          "type": "Function",
+          "tags": [],
+          "label": "setIsSidebarEnabled",
+          "description": [],
+          "signature": [
+            "(enabled: boolean) => void"
+          ],
+          "path": "src/plugins/management/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "management",
+              "id": "def-public.ManagementStart.setIsSidebarEnabled.$1",
+              "type": "boolean",
+              "tags": [],
+              "label": "enabled",
+              "description": [],
+              "signature": [
+                "boolean"
+              ],
+              "path": "src/plugins/management/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "management",
+          "id": "def-public.ManagementStart.setupCardsNavigation",
+          "type": "Function",
+          "tags": [],
+          "label": "setupCardsNavigation",
+          "description": [],
+          "signature": [
+            "({ enabled, hideLinksTo, extendCardNavDefinitions, }: ",
+            "NavigationCardsSubject",
+            ") => void"
+          ],
+          "path": "src/plugins/management/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "management",
+              "id": "def-public.ManagementStart.setupCardsNavigation.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "{\n    enabled,\n    hideLinksTo,\n    extendCardNavDefinitions,\n  }",
+              "description": [],
+              "signature": [
+                "NavigationCardsSubject"
+              ],
+              "path": "src/plugins/management/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
       "lifecycle": "start",
       "initialIsOpen": true
     }

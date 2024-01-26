@@ -8,16 +8,35 @@
 
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
 
-/** @public */
+/**
+ * Per-object parameters for bulk update operation
+ *
+ * @public
+ * @deprecated See https://github.com/elastic/kibana/issues/149098
+ */
 export interface SavedObjectsBulkUpdateObject<T = unknown> {
+  /** Type of the saved object to update */
   type: string;
+  /** ID of the saved object to update */
   id: string;
+  /** The attributes to update */
   attributes: T;
+  /** The version string for the saved object */
   version?: string;
+  /** Array of references to other saved objects */
   references?: SavedObjectReference[];
 }
 
-/** @public */
+/**
+ * Options for bulk update operation
+ *
+ * @public
+ * @deprecated See https://github.com/elastic/kibana/issues/149098
+ * */
 export interface SavedObjectsBulkUpdateOptions {
+  /**
+   * The namespace from which to apply the bulk update operation
+   * Not permitted if spaces extension is enabled
+   */
   namespace?: string;
 }

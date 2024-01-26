@@ -11,10 +11,27 @@ import { ProtectionModes } from '../types';
 /**
  * Return a new default `PolicyConfig` for platinum and above licenses
  */
-export const policyFactory = (): PolicyConfig => {
+export const policyFactory = (
+  license = '',
+  cloud = false,
+  licenseUid = '',
+  clusterUuid = '',
+  clusterName = '',
+  serverless = false
+): PolicyConfig => {
   return {
+    meta: {
+      license,
+      license_uuid: licenseUid,
+      cluster_uuid: clusterUuid,
+      cluster_name: clusterName,
+      cloud,
+      serverless,
+    },
+    global_manifest_version: 'latest',
     windows: {
       events: {
+        credential_access: true,
         dll_and_driver_load: true,
         dns: true,
         file: true,
@@ -37,6 +54,7 @@ export const policyFactory = (): PolicyConfig => {
       },
       behavior_protection: {
         mode: ProtectionModes.prevent,
+        reputation_service: cloud, // Defaults to true if on cloud
         supported: true,
       },
       popup: {
@@ -81,6 +99,7 @@ export const policyFactory = (): PolicyConfig => {
       },
       behavior_protection: {
         mode: ProtectionModes.prevent,
+        reputation_service: cloud, // Defaults to true if on cloud
         supported: true,
       },
       memory_protection: {
@@ -103,6 +122,9 @@ export const policyFactory = (): PolicyConfig => {
       },
       logging: {
         file: 'info',
+      },
+      advanced: {
+        capture_env_vars: 'DYLD_INSERT_LIBRARIES,DYLD_FRAMEWORK_PATH,DYLD_LIBRARY_PATH,LD_PRELOAD',
       },
     },
     linux: {
@@ -119,6 +141,7 @@ export const policyFactory = (): PolicyConfig => {
       },
       behavior_protection: {
         mode: ProtectionModes.prevent,
+        reputation_service: cloud, // Defaults to true if on cloud
         supported: true,
       },
       memory_protection: {
@@ -142,7 +165,23 @@ export const policyFactory = (): PolicyConfig => {
       logging: {
         file: 'info',
       },
+      advanced: {
+        capture_env_vars: 'LD_PRELOAD,LD_LIBRARY_PATH',
+      },
     },
+  };
+};
+
+/**
+ * Strips paid features from an existing or new `PolicyConfig` for license below enterprise
+ */
+
+export const policyFactoryWithoutPaidEnterpriseFeatures = (
+  policy: PolicyConfig = policyFactory()
+): PolicyConfig => {
+  return {
+    ...policy,
+    global_manifest_version: 'latest',
   };
 };
 
@@ -162,6 +201,7 @@ export const policyFactoryWithoutPaidFeatures = (
 
   return {
     ...policy,
+    global_manifest_version: 'latest',
     windows: {
       ...policy.windows,
       advanced:
@@ -189,6 +229,7 @@ export const policyFactoryWithoutPaidFeatures = (
       },
       behavior_protection: {
         mode: ProtectionModes.off,
+        reputation_service: false,
         supported: false,
       },
       attack_surface_reduction: {
@@ -220,6 +261,7 @@ export const policyFactoryWithoutPaidFeatures = (
       ...policy.mac,
       behavior_protection: {
         mode: ProtectionModes.off,
+        reputation_service: false,
         supported: false,
       },
       memory_protection: {
@@ -246,6 +288,7 @@ export const policyFactoryWithoutPaidFeatures = (
       ...policy.linux,
       behavior_protection: {
         mode: ProtectionModes.off,
+        reputation_service: false,
         supported: false,
       },
       memory_protection: {

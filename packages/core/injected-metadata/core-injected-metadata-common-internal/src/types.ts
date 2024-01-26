@@ -9,12 +9,14 @@
 import type { PluginName, DiscoveredPlugin } from '@kbn/core-base-common';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 import type { EnvironmentMode, PackageInfo } from '@kbn/config';
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
 
 /** @internal */
 export interface InjectedMetadataClusterInfo {
   cluster_uuid?: string;
   cluster_name?: string;
   cluster_version?: string;
+  cluster_build_flavor?: string;
 }
 
 /** @internal */
@@ -41,6 +43,7 @@ export interface InjectedMetadata {
   basePath: string;
   serverBasePath: string;
   publicBaseUrl?: string;
+  assetsHrefBase: string;
   clusterInfo: InjectedMetadataClusterInfo;
   env: {
     mode: EnvironmentMode;
@@ -65,5 +68,10 @@ export interface InjectedMetadata {
       defaults: Record<string, any>; // unreferencing UiSettingsParams here
       user: Record<string, any>; // unreferencing UserProvidedValues here
     };
+    globalUiSettings: {
+      defaults: Record<string, any>; // unreferencing UiSettingsParams here
+      user: Record<string, any>; // unreferencing UserProvidedValues here
+    };
   };
+  customBranding: Pick<CustomBranding, 'logo' | 'customizedLogo' | 'pageTitle'>;
 }

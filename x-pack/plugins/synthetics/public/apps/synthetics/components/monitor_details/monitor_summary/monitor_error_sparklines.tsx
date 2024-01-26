@@ -6,48 +6,47 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
+import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
+import { ERRORS_LABEL } from './monitor_errors_count';
 import { ClientPluginsStart } from '../../../../../plugin';
-import { useSelectedLocation } from '../hooks/use_selected_location';
 
 interface Props {
   from: string;
   to: string;
+  id: string;
 }
-export const MonitorErrorSparklines = (props: Props) => {
-  const { observability } = useKibana<ClientPluginsStart>().services;
-
-  const { ExploratoryViewEmbeddable } = observability;
-
-  const { monitorId } = useParams<{ monitorId: string }>();
+export const MonitorErrorSparklines = ({ from, to, id }: Props) => {
+  const {
+    exploratoryView: { ExploratoryViewEmbeddable },
+  } = useKibana<ClientPluginsStart>().services;
 
   const { euiTheme } = useEuiTheme();
+  const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
 
-  const selectedLocation = useSelectedLocation();
+  const time = useMemo(() => ({ from, to }), [from, to]);
 
-  if (!selectedLocation) {
+  if (!queryIdFilter) {
     return null;
   }
 
   return (
     <ExploratoryViewEmbeddable
+      id={id}
       reportType="kpi-over-time"
       axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
       legendIsVisible={false}
       hideTicks={true}
       attributes={[
         {
+          time,
           seriesType: 'area',
-          time: props,
-          reportDefinitions: {
-            'monitor.id': [monitorId],
-            'observer.geo.name': [selectedLocation?.label],
-          },
+          reportDefinitions: queryIdFilter,
+          filters: locationFilter,
           dataType: 'synthetics',
-          selectedMetricField: 'state.up',
-          name: 'Monitor errors',
+          selectedMetricField: 'monitor_errors',
+          name: ERRORS_LABEL,
           color: euiTheme.colors.danger,
           operationType: 'unique_count',
         },

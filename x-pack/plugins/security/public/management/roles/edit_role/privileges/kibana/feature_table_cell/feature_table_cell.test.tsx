@@ -10,9 +10,9 @@ import React from 'react';
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
+import { FeatureTableCell } from './feature_table_cell';
 import { createFeature } from '../../../../__fixtures__/kibana_features';
 import { SecuredFeature } from '../../../../model';
-import { FeatureTableCell } from './feature_table_cell';
 
 describe('FeatureTableCell', () => {
   it('renders the feature name', () => {
@@ -25,7 +25,7 @@ describe('FeatureTableCell', () => {
       <FeatureTableCell feature={new SecuredFeature(feature.toRaw())} />
     );
 
-    expect(wrapper.text()).toMatchInlineSnapshot(`"Test Feature "`);
+    expect(wrapper.text()).toMatchInlineSnapshot(`"Test Feature"`);
     expect(wrapper.find(EuiIconTip)).toHaveLength(0);
   });
 
@@ -40,7 +40,7 @@ describe('FeatureTableCell', () => {
       <FeatureTableCell feature={new SecuredFeature(feature.toRaw())} />
     );
 
-    expect(wrapper.text()).toMatchInlineSnapshot(`"Test Feature Info"`);
+    expect(wrapper.text()).toMatchInlineSnapshot(`"Test FeatureInfo"`);
 
     expect(wrapper.find(EuiIconTip).props().content).toMatchInlineSnapshot(`
       <EuiText>

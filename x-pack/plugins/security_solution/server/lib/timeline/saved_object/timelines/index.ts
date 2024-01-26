@@ -13,29 +13,32 @@ import {
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/server';
+
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
-import type { NoteSavedObject } from '../../../../../common/types/timeline/note';
-import type { PinnedEventSavedObject } from '../../../../../common/types/timeline/pinned_event';
 import type {
+  Note,
+  PinnedEvent,
   AllTimelinesResponse,
   ExportTimelineNotFoundError,
   PageInfoTimeline,
   ResponseTimelines,
   ResponseFavoriteTimeline,
   ResponseTimeline,
-  SavedTimeline,
   SortTimeline,
-  TimelineSavedObject,
+  TimelineResult,
   TimelineTypeLiteralWithNull,
   TimelineStatusLiteralWithNull,
-  TimelineResult,
-  TimelineWithoutExternalRefs,
   ResolvedTimelineWithOutcomeSavedObject,
-} from '../../../../../common/types/timeline';
-import { TimelineType, TimelineStatus } from '../../../../../common/types/timeline';
+  TimelineSavedObject,
+  SavedTimeline,
+  TimelineWithoutExternalRefs,
+} from '../../../../../common/api/timeline';
+import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
+import type { SavedObjectTimelineWithoutExternalRefs } from '../../../../../common/types/timeline/saved_object';
 import type { FrameworkRequest } from '../../../framework';
 import * as note from '../notes/saved_object';
 import * as pinnedEvent from '../pinned_events';
+import { deleteSearchByTimelineId } from '../saved_search';
 import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
 import { pickSavedTimeline } from './pick_saved_timeline';
 import { timelineSavedObjectType } from '../../saved_object_mappings';
@@ -92,6 +95,7 @@ export const resolveTimelineOrNull = async (
     // eslint-disable-next-line no-empty
   } catch (e) {}
   return resolvedTimeline;
+  // }
 };
 
 export const getTimelineByTemplateTimelineId = async (
@@ -105,6 +109,7 @@ export const getTimelineByTemplateTimelineId = async (
     type: timelineSavedObjectType,
     filter: `siem-ui-timeline.attributes.templateTimelineId: "${templateTimelineId}"`,
   };
+
   return getAllSavedTimeline(request, options);
 };
 
@@ -172,6 +177,13 @@ const getTimelineFavoriteFilter = ({
 
 const combineFilters = (filters: Array<string | null>) =>
   filters.filter((f) => f != null).join(' and ');
+
+const getTimelinesCreatedAndUpdatedByCurrentUser = ({ request }: { request: FrameworkRequest }) => {
+  const username = request.user?.username ?? UNAUTHENTICATED_USER;
+  const updatedBy = `siem-ui-timeline.attributes.updatedBy: ${username}`;
+  const createdBy = `siem-ui-timeline.attributes.createdBy: ${username}`;
+  return combineFilters([updatedBy, createdBy]);
+};
 
 export const getExistingPrepackagedTimelines = async (
   request: FrameworkRequest,
@@ -279,10 +291,14 @@ export const getDraftTimeline = async (
   request: FrameworkRequest,
   timelineType: TimelineTypeLiteralWithNull
 ): Promise<ResponseTimelines> => {
+  const filter = combineFilters([
+    getTimelineTypeFilter(timelineType ?? null, TimelineStatus.draft),
+    getTimelinesCreatedAndUpdatedByCurrentUser({ request }),
+  ]);
   const options: SavedObjectsFindOptions = {
     type: timelineSavedObjectType,
     perPage: 1,
-    filter: getTimelineTypeFilter(timelineType, TimelineStatus.draft),
+    filter,
     sortField: 'created',
     sortOrder: 'desc',
   };
@@ -381,7 +397,6 @@ export const persistTimeline = async (
     if (timelineId == null) {
       return await createTimeline({ timelineId, timeline, userInfo, savedObjectsClient });
     }
-
     return await updateTimeline({
       request,
       timelineId,
@@ -464,10 +479,11 @@ const updateTimeline = async ({
   userInfo: AuthenticatedUser | null;
   version: string | null;
 }) => {
-  const rawTimelineSavedObject = await savedObjectsClient.get<TimelineWithoutExternalRefs>(
-    timelineSavedObjectType,
-    timelineId
-  );
+  const rawTimelineSavedObject =
+    await savedObjectsClient.get<SavedObjectTimelineWithoutExternalRefs>(
+      timelineSavedObjectType,
+      timelineId
+    );
 
   const { transformedFields: migratedPatchAttributes, references } =
     timelineFieldsMigrator.extractFieldsToReferences<TimelineWithoutExternalRefs>({
@@ -494,7 +510,7 @@ export const updatePartialSavedTimeline = async (
   timeline: SavedTimeline
 ) => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
-  const currentSavedTimeline = await savedObjectsClient.get<SavedTimeline>(
+  const currentSavedTimeline = await savedObjectsClient.get<SavedObjectTimelineWithoutExternalRefs>(
     timelineSavedObjectType,
     timelineId
   );
@@ -557,24 +573,86 @@ export const resetTimeline = async (
   return response;
 };
 
-export const deleteTimeline = async (request: FrameworkRequest, timelineIds: string[]) => {
+export const deleteTimeline = async (
+  request: FrameworkRequest,
+  timelineIds: string[],
+  searchIds?: string[]
+) => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
 
-  await Promise.all(
-    timelineIds.map((timelineId) =>
+  await Promise.all([
+    ...timelineIds.map((timelineId) =>
       Promise.all([
         savedObjectsClient.delete(timelineSavedObjectType, timelineId),
         note.deleteNoteByTimelineId(request, timelineId),
         pinnedEvent.deleteAllPinnedEventsOnTimeline(request, timelineId),
       ])
-    )
+    ),
+    deleteSearchByTimelineId(request, searchIds),
+  ]);
+};
+
+export const copyTimeline = async (
+  request: FrameworkRequest,
+  timeline: SavedTimeline,
+  timelineId: string
+): Promise<ResponseTimeline> => {
+  const savedObjectsClient = (await request.context.core).savedObjects.client;
+
+  // Fetch all objects that need to be copied
+  const [notes, pinnedEvents] = await Promise.all([
+    note.getNotesByTimelineId(request, timelineId),
+    pinnedEvent.getAllPinnedEventsByTimelineId(request, timelineId),
+  ]);
+
+  const isImmutable = timeline.status === TimelineStatus.immutable;
+  const userInfo = isImmutable ? ({ username: 'Elastic' } as AuthenticatedUser) : request.user;
+
+  const timelineResponse = await createTimeline({
+    savedObjectsClient,
+    timeline,
+    timelineId: null,
+    userInfo,
+  });
+
+  const newTimelineId = timelineResponse.timeline.savedObjectId;
+
+  const copiedNotes = Promise.all(
+    notes.map((_note) => {
+      return note.persistNote({
+        request,
+        noteId: null,
+        note: {
+          ..._note,
+          timelineId: newTimelineId,
+        },
+        overrideOwner: false,
+      });
+    })
   );
+
+  const copiedPinnedEvents = pinnedEvents.map((_pinnedEvent) => {
+    return pinnedEvent.persistPinnedEventOnTimeline(
+      request,
+      null,
+      _pinnedEvent.eventId,
+      newTimelineId
+    );
+  });
+
+  await Promise.all([copiedNotes, copiedPinnedEvents]);
+
+  return {
+    code: 200,
+    message: 'success',
+    timeline: await getSavedTimeline(request, newTimelineId),
+  };
 };
 
 const resolveBasicSavedTimeline = async (request: FrameworkRequest, timelineId: string) => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
   const { saved_object: savedObject, ...resolveAttributes } =
-    await savedObjectsClient.resolve<TimelineWithoutExternalRefs>(
+    await savedObjectsClient.resolve<SavedObjectTimelineWithoutExternalRefs>(
       timelineSavedObjectType,
       timelineId
     );
@@ -611,7 +689,7 @@ const resolveSavedTimeline = async (request: FrameworkRequest, timelineId: strin
 
 const getBasicSavedTimeline = async (request: FrameworkRequest, timelineId: string) => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
-  const savedObject = await savedObjectsClient.get<TimelineWithoutExternalRefs>(
+  const savedObject = await savedObjectsClient.get<SavedObjectTimelineWithoutExternalRefs>(
     timelineSavedObjectType,
     timelineId
   );
@@ -641,7 +719,9 @@ const getAllSavedTimeline = async (request: FrameworkRequest, options: SavedObje
   const userName = request.user?.username ?? UNAUTHENTICATED_USER;
   const savedObjectsClient = (await request.context.core).savedObjects.client;
 
-  const savedObjects = await savedObjectsClient.find<TimelineWithoutExternalRefs>(options);
+  const savedObjects = await savedObjectsClient.find<SavedObjectTimelineWithoutExternalRefs>(
+    options
+  );
 
   const timelinesWithNotesAndPinnedEvents = await Promise.all(
     savedObjects.saved_objects.map(async (savedObject) => {
@@ -667,8 +747,8 @@ const getAllSavedTimeline = async (request: FrameworkRequest, options: SavedObje
 export const convertStringToBase64 = (text: string): string => Buffer.from(text).toString('base64');
 
 export const timelineWithReduxProperties = (
-  notes: NoteSavedObject[],
-  pinnedEvents: PinnedEventSavedObject[],
+  notes: Note[],
+  pinnedEvents: PinnedEvent[],
   timeline: TimelineSavedObject,
   userName: string
 ): TimelineSavedObject => ({
@@ -707,7 +787,7 @@ export const getSelectedTimelines = async (
   }
 
   const savedObjects = await Promise.resolve(
-    savedObjectsClient.bulkGet<TimelineWithoutExternalRefs>(
+    savedObjectsClient.bulkGet<SavedObjectTimelineWithoutExternalRefs>(
       (exportedIds ?? []).reduce(
         (acc, timelineId) => [...acc, { id: timelineId, type: timelineSavedObjectType }],
         [] as Array<{ id: string; type: string }>

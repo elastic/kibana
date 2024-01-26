@@ -7,6 +7,7 @@
 
 import axios from 'axios';
 import { pick } from 'lodash';
+import { SyntheticsServerSetup } from '../types';
 import {
   ManifestLocation,
   PublicLocation,
@@ -15,11 +16,10 @@ import {
   BandwidthLimitKey,
   LocationStatus,
 } from '../../common/runtime_types';
-import { UptimeServerSetup } from '../legacy_uptime/lib/adapters/framework';
 
 export const getDevLocation = (devUrl: string): PublicLocation => ({
-  id: 'localhost',
-  label: 'Local Synthetics Service',
+  id: 'dev',
+  label: 'Dev Service',
   geo: { lat: 0, lon: 0 },
   url: devUrl,
   isServiceManaged: true,
@@ -27,14 +27,15 @@ export const getDevLocation = (devUrl: string): PublicLocation => ({
   isInvalid: false,
 });
 
-export async function getServiceLocations(server: UptimeServerSetup) {
+export async function getServiceLocations(server: SyntheticsServerSetup) {
   let locations: PublicLocations = [];
 
   if (server.config.service?.devUrl) {
     locations = [getDevLocation(server.config.service.devUrl)];
   }
+  const manifestUrl = server.config.service?.manifestUrl;
 
-  if (!server.config.service?.manifestUrl) {
+  if (!manifestUrl || manifestUrl === 'mockDevUrl') {
     return { locations };
   }
 
@@ -44,12 +45,7 @@ export async function getServiceLocations(server: UptimeServerSetup) {
       locations: Record<string, ManifestLocation>;
     }>(server.config.service!.manifestUrl!);
 
-    const availableLocations =
-      server.isDev || server.config.service?.showExperimentalLocations
-        ? Object.entries(data.locations)
-        : Object.entries(data.locations).filter(([_, location]) => {
-            return location.status === LocationStatus.GA;
-          });
+    const availableLocations = Object.entries(data.locations);
 
     availableLocations.forEach(([locationId, location]) => {
       locations.push({

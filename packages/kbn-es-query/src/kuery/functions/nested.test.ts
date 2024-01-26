@@ -9,10 +9,9 @@
 import { nodeTypes } from '../node_types';
 import { fields } from '../../filters/stubs';
 import { DataViewBase } from '../../..';
-
 import * as ast from '../ast';
-
 import * as nested from './nested';
+import type { KqlNestedFunctionNode } from './nested';
 
 jest.mock('../grammar');
 
@@ -43,7 +42,11 @@ describe('kuery functions', () => {
 
     describe('toElasticsearchQuery', () => {
       test('should wrap subqueries in an ES nested query', () => {
-        const node = nodeTypes.function.buildNode('nested', 'nestedField', childNode);
+        const node = nodeTypes.function.buildNode(
+          'nested',
+          'nestedField',
+          childNode
+        ) as KqlNestedFunctionNode;
         const result = nested.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toHaveProperty('nested');
@@ -54,13 +57,53 @@ describe('kuery functions', () => {
       });
 
       test('should pass the nested path to subqueries so the full field name can be used', () => {
-        const node = nodeTypes.function.buildNode('nested', 'nestedField', childNode);
+        const node = nodeTypes.function.buildNode(
+          'nested',
+          'nestedField',
+          childNode
+        ) as KqlNestedFunctionNode;
         const result = nested.toElasticsearchQuery(node, indexPattern);
         const expectedSubQuery = ast.toElasticsearchQuery(
           nodeTypes.function.buildNode('is', 'nestedField.child', 'foo')
         );
 
         expect(result.nested!.query).toEqual(expectedSubQuery);
+      });
+    });
+
+    describe('toKqlExpression', () => {
+      test('single nested query', () => {
+        const node = nodeTypes.function.buildNode(
+          'nested',
+          'nestedField',
+          childNode
+        ) as KqlNestedFunctionNode;
+        const result = nested.toKqlExpression(node);
+        expect(result).toMatchInlineSnapshot(`"nestedField: { child: foo }"`);
+      });
+
+      test('multiple nested queries', () => {
+        const andNode = nodeTypes.function.buildNode('and', [childNode, childNode]);
+        const node = nodeTypes.function.buildNode(
+          'nested',
+          'nestedField',
+          andNode
+        ) as KqlNestedFunctionNode;
+        const result = nested.toKqlExpression(node);
+        expect(result).toMatchInlineSnapshot(`"nestedField: { (child: foo AND child: foo) }"`);
+      });
+
+      test('doubly nested query', () => {
+        const subNode = nodeTypes.function.buildNode('nested', 'anotherNestedField', childNode);
+        const node = nodeTypes.function.buildNode(
+          'nested',
+          'nestedField',
+          subNode
+        ) as KqlNestedFunctionNode;
+        const result = nested.toKqlExpression(node);
+        expect(result).toMatchInlineSnapshot(
+          `"nestedField: { anotherNestedField: { child: foo } }"`
+        );
       });
     });
   });

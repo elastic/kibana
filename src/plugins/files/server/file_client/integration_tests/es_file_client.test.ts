@@ -13,14 +13,33 @@ import { createEsFileClient } from '../create_es_file_client';
 import { FileClient } from '../types';
 import { FileMetadata } from '../../../common';
 
-// FLAKY: https://github.com/elastic/kibana/issues/144505
-// FLAKY: https://github.com/elastic/kibana/issues/144506
-describe.skip('ES-index-backed file client', () => {
+describe('ES-index-backed file client', () => {
   let esClient: TestEnvironmentUtils['esClient'];
   let fileClient: FileClient;
   let testHarness: TestEnvironmentUtils;
   const blobStorageIndex = '.kibana-test-blob';
   const metadataIndex = '.kibana-test-metadata';
+
+  const deleteFile = async ({
+    id,
+    hasContent,
+    refreshIndex = true,
+  }: {
+    id: string;
+    hasContent?: boolean;
+    refreshIndex?: boolean;
+  }) => {
+    if (refreshIndex) {
+      try {
+        // Make sure to refresh the index before deleting the file to avoid an conflict error thrown by
+        // ES when deleting by query documents that don't exist yet.
+        await esClient.indices.refresh({ index: blobStorageIndex });
+      } catch (e) {
+        // Silently fail if the index does not exist
+      }
+    }
+    await fileClient.delete({ id, hasContent });
+  };
 
   beforeAll(async () => {
     testHarness = await setupIntegrationEnvironment();
@@ -57,7 +76,7 @@ describe.skip('ES-index-backed file client', () => {
         name: 'cool name',
       })
     );
-    await fileClient.delete({ id: file.id, hasContent: false });
+    await deleteFile({ id: file.id, hasContent: false });
   });
 
   test('uploads and downloads file content', async () => {
@@ -75,7 +94,27 @@ describe.skip('ES-index-backed file client', () => {
     }
     expect(Buffer.concat(chunks).toString('utf-8')).toBe('test');
 
-    await fileClient.delete({ id: file.id, hasContent: true });
+    await deleteFile({ id: file.id, hasContent: true });
+  });
+
+  test('computes file hashes', async () => {
+    const file = await fileClient.create({
+      id: '123',
+      metadata: {
+        name: 'cool name',
+      },
+    });
+    await file.uploadContent(Readable.from([Buffer.from('test')]));
+
+    expect(file.toJSON().hash).toStrictEqual({
+      md5: '098f6bcd4621d373cade4e832627b4f6',
+      sha1: 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3',
+      sha256: '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08',
+      sha512:
+        'ee26b0dd4af7e749aa1a8ee3c10ae9923f618980772e473f8819a5d4940e0db27ac185f8a0e1d5f84f88bc887fd67b143732c304cc5fa9ad8e6f57f50028a8ff',
+    });
+
+    await deleteFile({ id: file.id, hasContent: true });
   });
 
   test('searches across files', async () => {
@@ -150,10 +189,12 @@ describe.skip('ES-index-backed file client', () => {
       );
     }
 
+    await esClient.indices.refresh({ index: blobStorageIndex });
+
     await Promise.all([
-      fileClient.delete({ id: id1 }),
-      fileClient.delete({ id: id2 }),
-      fileClient.delete({ id: file3.id }),
+      deleteFile({ id: id1, refreshIndex: false }),
+      deleteFile({ id: id2, refreshIndex: false }),
+      deleteFile({ id: file3.id, refreshIndex: false }),
     ]);
   });
 
@@ -197,9 +238,11 @@ describe.skip('ES-index-backed file client', () => {
       })
     );
 
+    await esClient.indices.refresh({ index: blobStorageIndex });
+
     await Promise.all([
-      fileClient.delete({ id: id1, hasContent: false }),
-      fileClient.delete({ id: id2, hasContent: false }),
+      deleteFile({ id: id1, hasContent: false, refreshIndex: false }),
+      deleteFile({ id: id2, hasContent: false, refreshIndex: false }),
     ]);
   });
 });

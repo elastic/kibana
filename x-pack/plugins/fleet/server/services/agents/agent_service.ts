@@ -7,17 +7,28 @@
 
 /* eslint-disable max-classes-per-file */
 
-import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
+
+import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 
 import type { AgentStatus, ListWithKuery } from '../../types';
 import type { Agent, GetAgentStatusResponse } from '../../../common/types';
 
-import { getAuthzFromRequest } from '../../routes/security';
+import { getAuthzFromRequest } from '../security';
 
 import { FleetUnauthorizedError } from '../../errors';
 
 import { getAgentsByKuery, getAgentById } from './crud';
 import { getAgentStatusById, getAgentStatusForAgentPolicy } from './status';
+import { getLatestAvailableVersion } from './versions';
 
 /**
  * A service for interacting with Agent data. See {@link AgentClient} for more information.
@@ -67,13 +78,23 @@ export interface AgentClient {
   listAgents(
     options: ListWithKuery & {
       showInactive: boolean;
+      aggregations?: Record<string, AggregationsAggregationContainer>;
+      searchAfter?: SortResults;
+      pitId?: string;
+      getStatusSummary?: boolean;
     }
   ): Promise<{
     agents: Agent[];
     total: number;
     page: number;
     perPage: number;
+    aggregations?: Record<string, estypes.AggregationsAggregate>;
   }>;
+
+  /**
+   * Return the latest agent available version
+   */
+  getLatestAgentAvailableVersion(includeCurrentVersion?: boolean): Promise<string>;
 }
 
 /**
@@ -82,31 +103,43 @@ export interface AgentClient {
 class AgentClientImpl implements AgentClient {
   constructor(
     private readonly internalEsClient: ElasticsearchClient,
+    private readonly soClient: SavedObjectsClientContract,
     private readonly preflightCheck?: () => void | Promise<void>
   ) {}
 
   public async listAgents(
     options: ListWithKuery & {
       showInactive: boolean;
+      aggregations?: Record<string, AggregationsAggregationContainer>;
     }
   ) {
     await this.#runPreflight();
-    return getAgentsByKuery(this.internalEsClient, options);
+    return getAgentsByKuery(this.internalEsClient, this.soClient, options);
   }
 
   public async getAgent(agentId: string) {
     await this.#runPreflight();
-    return getAgentById(this.internalEsClient, agentId);
+    return getAgentById(this.internalEsClient, this.soClient, agentId);
   }
 
   public async getAgentStatusById(agentId: string) {
     await this.#runPreflight();
-    return getAgentStatusById(this.internalEsClient, agentId);
+    return getAgentStatusById(this.internalEsClient, this.soClient, agentId);
   }
 
   public async getAgentStatusForAgentPolicy(agentPolicyId?: string, filterKuery?: string) {
     await this.#runPreflight();
-    return getAgentStatusForAgentPolicy(this.internalEsClient, agentPolicyId, filterKuery);
+    return getAgentStatusForAgentPolicy(
+      this.internalEsClient,
+      this.soClient,
+      agentPolicyId,
+      filterKuery
+    );
+  }
+
+  public async getLatestAgentAvailableVersion(includeCurrentVersion?: boolean) {
+    await this.#runPreflight();
+    return getLatestAvailableVersion(includeCurrentVersion);
   }
 
   #runPreflight = async () => {
@@ -120,7 +153,10 @@ class AgentClientImpl implements AgentClient {
  * @internal
  */
 export class AgentServiceImpl implements AgentService {
-  constructor(private readonly internalEsClient: ElasticsearchClient) {}
+  constructor(
+    private readonly internalEsClient: ElasticsearchClient,
+    private readonly soClient: SavedObjectsClientContract
+  ) {}
 
   public asScoped(req: KibanaRequest) {
     const preflightCheck = async () => {
@@ -132,10 +168,10 @@ export class AgentServiceImpl implements AgentService {
       }
     };
 
-    return new AgentClientImpl(this.internalEsClient, preflightCheck);
+    return new AgentClientImpl(this.internalEsClient, this.soClient, preflightCheck);
   }
 
   public get asInternalUser() {
-    return new AgentClientImpl(this.internalEsClient);
+    return new AgentClientImpl(this.internalEsClient, this.soClient);
   }
 }

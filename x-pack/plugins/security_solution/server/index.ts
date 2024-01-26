@@ -6,20 +6,22 @@
  */
 
 import type { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
-import type { PluginSetup, PluginStart } from './plugin';
-import { Plugin } from './plugin';
+import type { Plugin, PluginSetup, PluginStart } from './plugin';
 import type { ConfigSchema, ConfigType } from './config';
 import { configSchema } from './config';
 import { SIGNALS_INDEX_KEY } from '../common/constants';
 import { AppClient } from './types';
 
-export const plugin = (context: PluginInitializerContext) => {
+export const plugin = async (context: PluginInitializerContext) => {
+  const { Plugin } = await import('./plugin');
   return new Plugin(context);
 };
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
     enableExperimental: true,
+    prebuiltRulesPackageVersion: true,
+    offeringSettings: true,
   },
   schema: configSchema,
   deprecations: ({ renameFromRoot, unused }) => [
@@ -50,6 +52,8 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
       { level: 'critical' }
     ),
     unused('ruleExecutionLog.underlyingClient', { level: 'warning' }),
+    unused('prebuiltRulesFromFileSystem', { level: 'warning' }),
+    unused('prebuiltRulesFromSavedObjects', { level: 'warning' }),
   ],
 };
 

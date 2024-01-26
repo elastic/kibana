@@ -11,7 +11,9 @@ Learn how to perform common APM app tasks.
 * <<custom-links>>
 * <<filters>>
 * <<correlations>>
+* <<agent-explorer>>
 * <<machine-learning-integration>>
+* <<mobile-session-explorer>>
 * <<apm-lambda>>
 * <<advanced-queries>>
 * <<storage-explorer>>
@@ -30,7 +32,11 @@ include::filters.asciidoc[]
 
 include::correlations.asciidoc[]
 
+include::agent-explorer.asciidoc[]
+
 include::machine-learning.asciidoc[]
+
+include::mobile-session-explorer.asciidoc[]
 
 include::lambda.asciidoc[]
 

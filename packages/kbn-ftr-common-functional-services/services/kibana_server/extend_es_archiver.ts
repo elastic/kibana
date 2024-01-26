@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { ProvidedType } from '@kbn/test';
 
 import type { EsArchiverProvider } from '../es_archiver';
@@ -13,7 +14,6 @@ import type { RetryService } from '../retry';
 import type { KibanaServerProvider } from './kibana_server';
 
 const ES_ARCHIVER_LOAD_METHODS = ['load', 'loadIfNeeded', 'unload', 'emptyKibanaIndex'] as const;
-const KIBANA_INDEX = '.kibana';
 
 interface Options {
   esArchiver: ProvidedType<typeof EsArchiverProvider>;
@@ -38,7 +38,7 @@ export function extendEsArchiver({ esArchiver, kibanaServer, retry, defaults }: 
       const statsKeys = Object.keys(stats);
       const kibanaKeys = statsKeys.filter(
         // this also matches stats keys like '.kibana_1' and '.kibana_2,.kibana_1'
-        (key) => key.includes(KIBANA_INDEX) && stats[key].created
+        (key) => key.includes(MAIN_SAVED_OBJECT_INDEX) && stats[key].created
       );
 
       // if the kibana index was created by the esArchiver then update the uiSettings

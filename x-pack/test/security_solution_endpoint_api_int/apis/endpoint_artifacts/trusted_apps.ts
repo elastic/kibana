@@ -13,14 +13,11 @@ import {
   GLOBAL_ARTIFACT_TAG,
 } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
+import { targetTags } from '../../../security_solution_endpoint/target_tags';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../../security_solution_endpoint/services/endpoint_policy';
 import { ArtifactTestData } from '../../../security_solution_endpoint/services/endpoint_artifacts';
-import {
-  createUserAndRole,
-  deleteUserAndRole,
-  ROLES,
-} from '../../../common/services/security_solution';
+import { ROLE } from '../../services/roles_users';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -28,24 +25,19 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
 
-  describe('Endpoint artifacts (via lists plugin): Trusted Applications', () => {
+  describe('Endpoint artifacts (via lists plugin): Trusted Applications', function () {
+    targetTags(this, ['@ess', '@serverless']);
+
     let fleetEndpointPolicy: PolicyTestResourceInfo;
 
     before(async () => {
-      // Create an endpoint policy in fleet we can work with
       fleetEndpointPolicy = await endpointPolicyTestResources.createPolicy();
-
-      // create role/user
-      await createUserAndRole(getService, ROLES.detections_admin);
     });
 
     after(async () => {
       if (fleetEndpointPolicy) {
         await fleetEndpointPolicy.cleanup();
       }
-
-      // delete role/user
-      await deleteUserAndRole(getService, ROLES.detections_admin);
     });
 
     const anEndpointArtifactError = (res: { body: { message: string } }) => {
@@ -93,6 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
       > = [
         {
           method: 'post',
+          info: 'create single item',
           path: EXCEPTION_LIST_ITEM_URL,
           getBody: () => {
             return exceptionsGenerator.generateTrustedAppForCreate({ tags: [GLOBAL_ARTIFACT_TAG] });
@@ -100,6 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
         {
           method: 'put',
+          info: 'update single item',
           path: EXCEPTION_LIST_ITEM_URL,
           getBody: () =>
             exceptionsGenerator.generateTrustedAppForUpdate({
@@ -110,14 +104,61 @@ export default function ({ getService }: FtrProviderContext) {
         },
       ];
 
-      describe('and has authorization to manage endpoint security', () => {
+      const needsWritePrivilege: TrustedAppApiCallsInterface = [
+        {
+          method: 'delete',
+          info: 'delete single item',
+          get path() {
+            return `${EXCEPTION_LIST_ITEM_URL}?item_id=${trustedAppData.artifact.item_id}&namespace_type=${trustedAppData.artifact.namespace_type}`;
+          },
+          getBody: () => undefined,
+        },
+      ];
+
+      const needsReadPrivilege: TrustedAppApiCallsInterface = [
+        {
+          method: 'get',
+          info: 'single item',
+          get path() {
+            return `${EXCEPTION_LIST_ITEM_URL}?item_id=${trustedAppData.artifact.item_id}&namespace_type=${trustedAppData.artifact.namespace_type}`;
+          },
+          getBody: () => undefined,
+        },
+        {
+          method: 'get',
+          info: 'list summary',
+          get path() {
+            return `${EXCEPTION_LIST_URL}/summary?list_id=${trustedAppData.artifact.list_id}&namespace_type=${trustedAppData.artifact.namespace_type}`;
+          },
+          getBody: () => undefined,
+        },
+        {
+          method: 'get',
+          info: 'find items',
+          get path() {
+            return `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${trustedAppData.artifact.list_id}&namespace_type=${trustedAppData.artifact.namespace_type}&page=1&per_page=1&sort_field=name&sort_order=asc`;
+          },
+          getBody: () => undefined,
+        },
+        {
+          method: 'post',
+          info: 'list export',
+          get path() {
+            return `${EXCEPTION_LIST_URL}/_export?list_id=${trustedAppData.artifact.list_id}&namespace_type=${trustedAppData.artifact.namespace_type}&id=${trustedAppData.artifact.id}&include_expired_exceptions=true`;
+          },
+          getBody: () => undefined,
+        },
+      ];
+
+      describe('and has authorization to write trusted apps', () => {
         for (const trustedAppApiCall of trustedAppApiCalls) {
           it(`should error on [${trustedAppApiCall.method}] if invalid condition entry fields are used`, async () => {
             const body = trustedAppApiCall.getBody();
 
             body.entries[0].field = 'some.invalid.field';
 
-            await supertest[trustedAppApiCall.method](trustedAppApiCall.path)
+            await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
+              .auth(ROLE.endpoint_policy_manager, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -130,7 +171,8 @@ export default function ({ getService }: FtrProviderContext) {
 
             body.entries.push({ ...body.entries[0] });
 
-            await supertest[trustedAppApiCall.method](trustedAppApiCall.path)
+            await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
+              .auth(ROLE.endpoint_policy_manager, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -150,7 +192,8 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ];
 
-            await supertest[trustedAppApiCall.method](trustedAppApiCall.path)
+            await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
+              .auth(ROLE.endpoint_policy_manager, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -183,7 +226,8 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ];
 
-            await supertest[trustedAppApiCall.method](trustedAppApiCall.path)
+            await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
+              .auth(ROLE.endpoint_policy_manager, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -196,7 +240,8 @@ export default function ({ getService }: FtrProviderContext) {
 
             body.os_types = ['linux', 'windows'];
 
-            await supertest[trustedAppApiCall.method](trustedAppApiCall.path)
+            await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
+              .auth(ROLE.endpoint_policy_manager, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -209,7 +254,9 @@ export default function ({ getService }: FtrProviderContext) {
 
             body.tags = [`${BY_POLICY_ARTIFACT_TAG_PREFIX}123`];
 
+            // Using superuser here as we need custom license for this action
             await supertest[trustedAppApiCall.method](trustedAppApiCall.path)
+              .auth(ROLE.endpoint_policy_manager, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
@@ -217,63 +264,53 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(anErrorMessageWith(/invalid policy ids/));
           });
         }
-      });
-
-      describe('and user DOES NOT have authorization to manage endpoint security', () => {
-        const allTrustedAppApiCalls: TrustedAppApiCallsInterface = [
-          ...trustedAppApiCalls,
-          {
-            method: 'get',
-            info: 'single item',
-            get path() {
-              return `${EXCEPTION_LIST_ITEM_URL}?item_id=${trustedAppData.artifact.item_id}&namespace_type=${trustedAppData.artifact.namespace_type}`;
-            },
-            getBody: () => undefined,
-          },
-          {
-            method: 'get',
-            info: 'list summary',
-            get path() {
-              return `${EXCEPTION_LIST_URL}/summary?list_id=${trustedAppData.artifact.list_id}&namespace_type=${trustedAppData.artifact.namespace_type}`;
-            },
-            getBody: () => undefined,
-          },
-          {
-            method: 'delete',
-            info: 'single item',
-            get path() {
-              return `${EXCEPTION_LIST_ITEM_URL}?item_id=${trustedAppData.artifact.item_id}&namespace_type=${trustedAppData.artifact.namespace_type}`;
-            },
-            getBody: () => undefined,
-          },
-          {
-            method: 'post',
-            info: 'list export',
-            get path() {
-              return `${EXCEPTION_LIST_URL}/_export?list_id=${trustedAppData.artifact.list_id}&namespace_type=${trustedAppData.artifact.namespace_type}&id=1`;
-            },
-            getBody: () => undefined,
-          },
-          {
-            method: 'get',
-            info: 'single items',
-            get path() {
-              return `${EXCEPTION_LIST_ITEM_URL}/_find?list_id=${trustedAppData.artifact.list_id}&namespace_type=${trustedAppData.artifact.namespace_type}&page=1&per_page=1&sort_field=name&sort_order=asc`;
-            },
-            getBody: () => undefined,
-          },
-        ];
-
-        for (const trustedAppApiCall of allTrustedAppApiCalls) {
-          it(`should error on [${trustedAppApiCall.method}]`, async () => {
+        for (const trustedAppApiCall of [...needsWritePrivilege, ...needsReadPrivilege]) {
+          it(`should not error on [${trustedAppApiCall.method}] - [${trustedAppApiCall.info}]`, async () => {
             await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
-              .auth(ROLES.detections_admin, 'changeme')
+              .auth(ROLE.endpoint_policy_manager, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(trustedAppApiCall.getBody())
-              .expect(403, {
-                status_code: 403,
-                message: 'EndpointArtifactError: Endpoint authorization failure',
-              });
+              .expect(200);
+          });
+        }
+      });
+
+      describe('and user has authorization to read trusted apps', function () {
+        targetTags(this, ['@skipInServerless']); // no such role in serverless
+
+        for (const trustedAppApiCall of [...trustedAppApiCalls, ...needsWritePrivilege]) {
+          it(`should error on [${trustedAppApiCall.method}] - [${trustedAppApiCall.info}]`, async () => {
+            await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
+              .auth(ROLE.hunter, 'changeme')
+              .set('kbn-xsrf', 'true')
+              .send(trustedAppApiCall.getBody())
+              .expect(403);
+          });
+        }
+
+        for (const trustedAppApiCall of needsReadPrivilege) {
+          it(`should not error on [${trustedAppApiCall.method}] - [${trustedAppApiCall.info}]`, async () => {
+            await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
+              .auth(ROLE.hunter, 'changeme')
+              .set('kbn-xsrf', 'true')
+              .send(trustedAppApiCall.getBody())
+              .expect(200);
+          });
+        }
+      });
+
+      describe('and user has no authorization to trusted apps', () => {
+        for (const trustedAppApiCall of [
+          ...trustedAppApiCalls,
+          ...needsWritePrivilege,
+          ...needsReadPrivilege,
+        ]) {
+          it(`should error on [${trustedAppApiCall.method}] - [${trustedAppApiCall.info}]`, async () => {
+            await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
+              .auth(ROLE.t1_analyst, 'changeme')
+              .set('kbn-xsrf', 'true')
+              .send(trustedAppApiCall.getBody())
+              .expect(403);
           });
         }
       });

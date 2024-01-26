@@ -18,6 +18,7 @@ import {
 } from '../../sources/es_geo_grid_source';
 import { geoLineLayerWizardConfig } from '../../sources/es_geo_line_source';
 import { point2PointLayerWizardConfig } from '../../sources/es_pew_pew_source/point_2_point_layer_wizard';
+import { esqlLayerWizardConfig } from '../../sources/esql_source';
 import { emsBoundariesLayerWizardConfig } from '../../sources/ems_file_source';
 import { emsBaseMapLayerWizardConfig } from '../../sources/ems_tms_source';
 import { kibanaBasemapLayerWizardConfig } from '../../sources/kibana_tilemap_source/kibana_base_map_layer_wizard';
@@ -28,6 +29,7 @@ import { ObservabilityLayerWizardConfig } from './solution_layers/observability'
 import { SecurityLayerWizardConfig } from './solution_layers/security';
 import { choroplethLayerWizardConfig } from './choropleth_layer_wizard';
 import { newVectorLayerWizardConfig } from './new_vector_layer_wizard';
+import { spatialJoinWizardConfig } from './spatial_join_wizard';
 
 let registered = false;
 
@@ -38,20 +40,29 @@ export function registerLayerWizards() {
 
   registerLayerWizardInternal(uploadLayerWizardConfig);
   registerLayerWizardInternal(layerGroupWizardConfig);
+
   registerLayerWizardInternal(esDocumentsLayerWizardConfig);
+  registerLayerWizardInternal(esqlLayerWizardConfig);
+
   registerLayerWizardInternal(choroplethLayerWizardConfig);
+  registerLayerWizardInternal(spatialJoinWizardConfig);
+
   registerLayerWizardInternal(clustersLayerWizardConfig);
   registerLayerWizardInternal(heatmapLayerWizardConfig);
+
   registerLayerWizardInternal(esTopHitsLayerWizardConfig);
   registerLayerWizardInternal(geoLineLayerWizardConfig);
+
   registerLayerWizardInternal(point2PointLayerWizardConfig);
-  registerLayerWizardInternal(emsBoundariesLayerWizardConfig);
   registerLayerWizardInternal(newVectorLayerWizardConfig);
+
+  registerLayerWizardInternal(emsBoundariesLayerWizardConfig);
   registerLayerWizardInternal(emsBaseMapLayerWizardConfig);
-  registerLayerWizardInternal(kibanaBasemapLayerWizardConfig);
+
   registerLayerWizardInternal(tmsLayerWizardConfig);
   registerLayerWizardInternal(wmsLayerWizardConfig);
 
+  registerLayerWizardInternal(kibanaBasemapLayerWizardConfig);
   registerLayerWizardInternal(mvtVectorSourceWizardConfig);
   registerLayerWizardInternal(ObservabilityLayerWizardConfig);
   registerLayerWizardInternal(SecurityLayerWizardConfig);

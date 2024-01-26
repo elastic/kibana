@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { aggregateAlertRoute } from './aggregate';
 import { createAlertRoute } from './create';
 import { deleteAlertRoute } from './delete';
 import { findAlertRoute } from './find';
@@ -28,7 +27,6 @@ export function defineLegacyRoutes(opts: RouteOptions) {
   const { router, licenseState, encryptedSavedObjects, usageCounter } = opts;
 
   createAlertRoute(opts);
-  aggregateAlertRoute(router, licenseState, usageCounter);
   deleteAlertRoute(router, licenseState, usageCounter);
   findAlertRoute(router, licenseState, usageCounter);
   getAlertRoute(router, licenseState, usageCounter);

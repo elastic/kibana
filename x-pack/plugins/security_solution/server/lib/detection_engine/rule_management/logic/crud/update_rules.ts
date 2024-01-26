@@ -8,13 +8,12 @@
 /* eslint-disable complexity */
 import type { PartialRule, RulesClient } from '@kbn/alerting-plugin/server';
 import { DEFAULT_MAX_SIGNALS } from '../../../../../../common/constants';
-import type { RuleUpdateProps } from '../../../../../../common/detection_engine/rule_schema';
+import type { RuleUpdateProps } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { transformRuleToAlertAction } from '../../../../../../common/detection_engine/transform_actions';
 
 import type { InternalRuleUpdate, RuleParams, RuleAlertType } from '../../../rule_schema';
-import { transformToAlertThrottle, transformToNotifyWhen } from '../../normalization/rule_actions';
+import { transformToActionFrequency } from '../../normalization/rule_actions';
 import { typeSpecificSnakeToCamel } from '../../normalization/rule_converters';
-import { maybeMute } from '../rule_actions/muting';
 
 export interface UpdateRulesOptions {
   rulesClient: RulesClient;
@@ -31,6 +30,10 @@ export const updateRules = async ({
     return null;
   }
 
+  const alertActions =
+    ruleUpdate.actions?.map((action) => transformRuleToAlertAction(action)) ?? [];
+  const actions = transformToActionFrequency(alertActions, ruleUpdate.throttle);
+
   const typeSpecificParams = typeSpecificSnakeToCamel(ruleUpdate);
   const enabled = ruleUpdate.enabled ?? true;
   const newInternalRule: InternalRuleUpdate = {
@@ -43,6 +46,7 @@ export const updateRules = async ({
       ruleId: existingRule.params.ruleId,
       falsePositives: ruleUpdate.false_positives ?? [],
       from: ruleUpdate.from ?? 'now-6m',
+      investigationFields: ruleUpdate.investigation_fields,
       // Unlike the create route, immutable comes from the existing rule here
       immutable: existingRule.params.immutable,
       license: ruleUpdate.license,
@@ -66,31 +70,17 @@ export const updateRules = async ({
       references: ruleUpdate.references ?? [],
       namespace: ruleUpdate.namespace,
       note: ruleUpdate.note,
-      // Always use the version from the request if specified. If it isn't specified, leave immutable rules alone and
-      // increment the version of mutable rules by 1.
-      version:
-        ruleUpdate.version ?? existingRule.params.immutable
-          ? existingRule.params.version
-          : existingRule.params.version + 1,
+      version: ruleUpdate.version ?? existingRule.params.version,
       exceptionsList: ruleUpdate.exceptions_list ?? [],
       ...typeSpecificParams,
     },
     schedule: { interval: ruleUpdate.interval ?? '5m' },
-    actions: ruleUpdate.actions != null ? ruleUpdate.actions.map(transformRuleToAlertAction) : [],
-    throttle: transformToAlertThrottle(ruleUpdate.throttle),
-    notifyWhen: transformToNotifyWhen(ruleUpdate.throttle),
+    actions,
   };
 
   const update = await rulesClient.update({
     id: existingRule.id,
     data: newInternalRule,
-  });
-
-  await maybeMute({
-    rulesClient,
-    muteAll: existingRule.muteAll,
-    throttle: ruleUpdate.throttle,
-    id: update.id,
   });
 
   if (existingRule.enabled && enabled === false) {

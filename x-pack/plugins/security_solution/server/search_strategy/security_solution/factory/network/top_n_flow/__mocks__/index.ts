@@ -6,11 +6,9 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { NetworkTopNFlowRequestOptions } from '../../../../../../../common/api/search_strategy';
 
-import type {
-  NetworkTopNFlowRequestOptions,
-  NetworkTopNFlowStrategyResponse,
-} from '../../../../../../../common/search_strategy';
+import type { NetworkTopNFlowStrategyResponse } from '../../../../../../../common/search_strategy';
 import {
   Direction,
   FlowTargetSourceDest,
@@ -118,6 +116,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
                       _id: 'dd4fa2d4bd-1526378075029582',
                       _score: 0,
                       fields: {
+                        '@timestamp': ['2022-07-18T15:08:48.064Z'],
                         'source.geo.continent_name': ['North America'],
                         'source.geo.region_iso_code': ['US-VA'],
                         'source.geo.country_iso_code': ['US'],

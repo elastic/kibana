@@ -90,6 +90,7 @@ export const createStartServices = (basePath: string = '/mock'): MockedFleetStar
       ...cloudStart,
       ...cloudSetup,
     },
+    dashboard: {} as unknown as MockedFleetStartServices['dashboard'],
     storage: new Storage(createMockStore()) as jest.Mocked<Storage>,
     authz: fleetAuthzMock,
     guidedOnboarding: guidedOnboardingMock.createStart(),

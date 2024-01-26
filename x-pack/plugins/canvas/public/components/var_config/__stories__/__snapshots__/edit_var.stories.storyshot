@@ -47,7 +47,7 @@ Array [
             aria-hidden="true"
             className="emotion-euiCallOut__icon"
             color="inherit"
-            data-euiicon-type="alert"
+            data-euiicon-type="warning"
             size="m"
           >
             
@@ -422,7 +422,7 @@ Array [
             aria-hidden="true"
             className="emotion-euiCallOut__icon"
             color="inherit"
-            data-euiicon-type="alert"
+            data-euiicon-type="warning"
             size="m"
           >
             
@@ -738,7 +738,7 @@ Array [
             aria-hidden="true"
             className="emotion-euiCallOut__icon"
             color="inherit"
-            data-euiicon-type="alert"
+            data-euiicon-type="warning"
             size="m"
           >
             

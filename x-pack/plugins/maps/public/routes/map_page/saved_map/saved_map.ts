@@ -9,8 +9,9 @@ import _ from 'lodash';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import { ScopedHistory } from '@kbn/core/public';
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
-import { MapSavedObjectAttributes } from '../../../../common/map_saved_object_type';
+import type { MapAttributes } from '../../../../common/content_management';
 import { APP_ID, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
 import { createMapStore, MapStore, MapStoreState } from '../../../reducers/store';
 import { MapSettings } from '../../../../common/descriptor_types';
@@ -44,8 +45,8 @@ import {
   getSavedObjectsTagging,
   getTimeFilter,
   getUsageCollection,
+  getServerless,
 } from '../../../kibana_services';
-import { goToSpecifiedPath } from '../../../render_app';
 import { LayerDescriptor } from '../../../../common/descriptor_types';
 import { copyPersistentState } from '../../../reducers/copy_persistent_state';
 import { getBreadcrumbs } from './get_breadcrumbs';
@@ -71,7 +72,7 @@ function setMapSettingsFromEncodedState(settings: Partial<MapSettings>) {
 }
 
 export class SavedMap {
-  private _attributes: MapSavedObjectAttributes | null = null;
+  private _attributes: MapAttributes | null = null;
   private _sharingSavedObjectProps: SharingSavedObjectProps | null = null;
   private readonly _defaultLayers: LayerDescriptor[];
   private readonly _embeddableId?: string;
@@ -326,19 +327,28 @@ export class SavedMap {
     }
   }
 
-  setBreadcrumbs() {
+  setBreadcrumbs(history: ScopedHistory) {
     if (!this._attributes) {
       throw new Error('Invalid usage, must await whenReady before calling hasUnsavedChanges');
     }
 
-    const breadcrumbs = getBreadcrumbs({
-      pageTitle: this._getPageTitle(),
-      isByValue: this.isByValue(),
-      getHasUnsavedChanges: this.hasUnsavedChanges,
-      originatingApp: this._originatingApp,
-      getAppNameFromId: this._getStateTransfer().getAppNameFromId,
-    });
-    getCoreChrome().setBreadcrumbs(breadcrumbs);
+    if (getServerless()) {
+      // TODO: https://github.com/elastic/kibana/issues/163488
+      // for now, serverless breadcrumbs only set the title,
+      // the rest of the breadcrumbs are handled by the serverless navigation
+      // the serverless navigation is not yet aware of the byValue/originatingApp context
+      getServerless()!.setBreadcrumbs({ text: this._getPageTitle() });
+    } else {
+      const breadcrumbs = getBreadcrumbs({
+        pageTitle: this._getPageTitle(),
+        isByValue: this.isByValue(),
+        getHasUnsavedChanges: this.hasUnsavedChanges,
+        originatingApp: this._originatingApp,
+        getAppNameFromId: this._getStateTransfer().getAppNameFromId,
+        history,
+      });
+      getCoreChrome().setBreadcrumbs(breadcrumbs);
+    }
   }
 
   public getSavedObjectId(): string | undefined {
@@ -384,7 +394,7 @@ export class SavedMap {
     return this._attributes.title !== undefined ? this._attributes.title : '';
   }
 
-  public getAttributes(): MapSavedObjectAttributes {
+  public getAttributes(): MapAttributes {
     if (!this._attributes) {
       throw new Error('Invalid usage, must await whenReady before calling getAttributes');
     }
@@ -433,11 +443,13 @@ export class SavedMap {
     newTags,
     saveByReference,
     dashboardId,
+    history,
   }: OnSaveProps & {
     returnToOrigin?: boolean;
     newTags?: string[];
     saveByReference: boolean;
     dashboardId?: string | null;
+    history: ScopedHistory;
   }) {
     if (!this._attributes) {
       throw new Error('Invalid usage, must await whenReady before calling save');
@@ -525,8 +537,8 @@ export class SavedMap {
     });
 
     getCoreChrome().docTitle.change(newTitle);
-    this.setBreadcrumbs();
-    goToSpecifiedPath(`/${MAP_PATH}/${this.getSavedObjectId()}${window.location.hash}`);
+    this.setBreadcrumbs(history);
+    history.push(`/${MAP_PATH}/${this.getSavedObjectId()}${window.location.hash}`);
 
     if (this._onSaveCallback) {
       this._onSaveCallback();

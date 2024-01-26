@@ -6,7 +6,7 @@
  */
 
 import { NOTE_URL } from '../../../../common/constants';
-import type { NoteSavedObject, SavedNote } from '../../../../common/types/timeline/note';
+import type { BareNote, Note } from '../../../../common/api/timeline';
 import { KibanaServices } from '../../../common/lib/kibana';
 
 export const persistNote = async ({
@@ -15,7 +15,7 @@ export const persistNote = async ({
   version,
   overrideOwner,
 }: {
-  note: SavedNote;
+  note: BareNote;
   noteId?: string | null;
   version?: string | null;
   overrideOwner?: boolean;
@@ -27,9 +27,10 @@ export const persistNote = async ({
   } catch (err) {
     return Promise.reject(new Error(`Failed to stringify query: ${JSON.stringify(err)}`));
   }
-  const response = await KibanaServices.get().http.patch<NoteSavedObject[]>(NOTE_URL, {
+  const response = await KibanaServices.get().http.patch<Note[]>(NOTE_URL, {
     method: 'PATCH',
     body: requestBody,
+    version: '2023-10-31',
   });
   return response;
 };

@@ -8,7 +8,7 @@
 
 import { spawnSync } from 'child_process';
 
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 const INVALID_CONFIG_PATH = require.resolve('./__fixtures__/invalid_config.yml');
 
@@ -41,7 +41,7 @@ describe('cli invalid config support', () => {
           .split('\n')
           .filter(Boolean)
           .map((line) => JSON.parse(line) as LogEntry)
-          .filter((line) => line.log.level === 'FATAL');
+          .filter((line) => line.log?.level === 'FATAL');
       } catch (e) {
         throw new Error(
           `error parsing log output:\n\n${e.stack}\n\nstdout: \n${stdout}\n\nstderr:\n${stderr}`

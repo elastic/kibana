@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
     });
 
     after(async () => {
@@ -114,7 +114,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('visualize app menu navigates to the visualize listing page if the last opened visualization was linked to dashboard', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
 
@@ -133,7 +133,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('by value', () => {
       it('save and return button returns to dashboard after editing visualization with changes saved', async () => {
-        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.clickNewDashboard();
 
         await createMarkdownVis();

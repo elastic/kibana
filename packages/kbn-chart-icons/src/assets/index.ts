@@ -40,3 +40,4 @@ export { IconRegionMap } from './region_map';
 export { IconChartHeatmap } from './chart_heatmap';
 export { IconChartHorizontalBullet } from './chart_horizontal_bullet';
 export { IconChartVerticalBullet } from './chart_vertical_bullet';
+export { IconChartTagcloud } from './chart_tagcloud';

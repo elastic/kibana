@@ -7,6 +7,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import { FLEET_SERVER_SERVERS_INDEX } from '@kbn/fleet-plugin/common';
+import { usageTracker } from './usage_tracker';
 import { wrapErrorAndRejectPromise } from './utils';
 
 /**
@@ -16,39 +17,42 @@ import { wrapErrorAndRejectPromise } from './utils';
  * @param esClient
  * @param version
  */
-export const enableFleetServerIfNecessary = async (esClient: Client, version: string = '8.0.0') => {
-  const res = await esClient.search({
-    index: FLEET_SERVER_SERVERS_INDEX,
-    ignore_unavailable: true,
-    rest_total_hits_as_int: true,
-  });
-
-  if (res.hits.total) {
-    return;
-  }
-
-  // Create a Fake fleet-server in this kibana instance
-  await esClient
-    .index({
+export const enableFleetServerIfNecessary = usageTracker.track(
+  'enableFleetServerIfNecessary',
+  async (esClient: Client, version: string = '8.0.0') => {
+    const res = await esClient.search({
       index: FLEET_SERVER_SERVERS_INDEX,
-      refresh: 'wait_for',
-      body: {
-        agent: {
-          id: '12988155-475c-430d-ac89-84dc84b67cd1',
-          version,
+      ignore_unavailable: true,
+      rest_total_hits_as_int: true,
+    });
+
+    if (res.hits.total) {
+      return;
+    }
+
+    // Create a Fake fleet-server in this kibana instance
+    await esClient
+      .index({
+        index: FLEET_SERVER_SERVERS_INDEX,
+        refresh: 'wait_for',
+        body: {
+          agent: {
+            id: '12988155-475c-430d-ac89-84dc84b67cd1',
+            version,
+          },
+          host: {
+            architecture: 'linux',
+            id: 'c3e5f4f690b4a3ff23e54900701a9513',
+            ip: ['127.0.0.1', '::1', '10.201.0.213', 'fe80::4001:aff:fec9:d5'],
+            name: 'endpoint-data-generator',
+          },
+          server: {
+            id: '12988155-475c-430d-ac89-84dc84b67cd1',
+            version,
+          },
+          '@timestamp': '2021-05-12T18:42:52.009482058Z',
         },
-        host: {
-          architecture: 'linux',
-          id: 'c3e5f4f690b4a3ff23e54900701a9513',
-          ip: ['127.0.0.1', '::1', '10.201.0.213', 'fe80::4001:aff:fec9:d5'],
-          name: 'endpoint-data-generator',
-        },
-        server: {
-          id: '12988155-475c-430d-ac89-84dc84b67cd1',
-          version,
-        },
-        '@timestamp': '2021-05-12T18:42:52.009482058Z',
-      },
-    })
-    .catch(wrapErrorAndRejectPromise);
-};
+      })
+      .catch(wrapErrorAndRejectPromise);
+  }
+);

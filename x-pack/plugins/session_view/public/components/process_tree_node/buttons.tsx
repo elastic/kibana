@@ -7,7 +7,7 @@
 import React, { useMemo } from 'react';
 import { EuiButton, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AlertTypeCount } from '../../../common/types/process_tree';
+import type { AlertTypeCount } from '../../../common';
 import { useButtonStyles } from './use_button_styles';
 import { ALERT_ICONS } from '../../../common/constants';
 

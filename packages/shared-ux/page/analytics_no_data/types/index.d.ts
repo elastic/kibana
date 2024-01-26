@@ -5,6 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { Observable } from 'rxjs';
+
+import { NoDataPagePluginSetup } from '@kbn/no-data-page-plugin/public';
 import {
   KibanaNoDataPageServices,
   KibanaNoDataPageKibanaDependencies,
@@ -15,12 +19,18 @@ import {
  */
 export interface Services {
   kibanaGuideDocLink: string;
+  customBranding: { hasCustomBranding$: Observable<boolean> };
+  prependBasePath: (path: string) => string;
+  getHttp: <T>(path: string) => Promise<T>;
+  pageFlavor: AnalyticsNoDataPageFlavor;
 }
 
 /**
  * Services that are consumed by this component and any dependencies.
  */
 export type AnalyticsNoDataPageServices = Services & KibanaNoDataPageServices;
+
+export type AnalyticsNoDataPageFlavor = 'kibana' | 'serverless_search' | 'serverless_observability';
 
 export interface KibanaDependencies {
   coreStart: {
@@ -31,7 +41,17 @@ export interface KibanaDependencies {
         };
       };
     };
+    customBranding: {
+      hasCustomBranding$: Observable<boolean>;
+    };
+    http: {
+      basePath: {
+        prepend: (path: string) => string;
+      };
+      get: <T>(path: string, options?: object) => Promise<T>;
+    };
   };
+  noDataPage?: NoDataPagePluginSetup;
 }
 
 /**

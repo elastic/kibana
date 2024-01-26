@@ -22,6 +22,7 @@ type ServiceIconsReturnType =
 
 interface Args {
   serviceName: string;
+  environment: string;
   start: string;
   end: string;
   icons: ServiceIconsReturnType;
@@ -64,7 +65,12 @@ const stories: Meta<Args> = {
 };
 export default stories;
 
-export const Example: Story<Args> = ({ serviceName, start, end }) => {
+export const Example: Story<Args> = ({
+  serviceName,
+  environment,
+  start,
+  end,
+}) => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
@@ -83,6 +89,7 @@ export const Example: Story<Args> = ({ serviceName, start, end }) => {
                   <EuiFlexItem grow={false}>
                     <ServiceIcons
                       serviceName={serviceName}
+                      environment={environment}
                       start={start}
                       end={end}
                     />
@@ -98,6 +105,7 @@ export const Example: Story<Args> = ({ serviceName, start, end }) => {
 };
 Example.args = {
   serviceName: 'opbeans-java',
+  environment: 'dev',
   start: '2021-09-10T13:59:00.000Z',
   end: '2021-09-10T14:14:04.789Z',
   icons: {

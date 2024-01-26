@@ -18,42 +18,52 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiHorizontalRule,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
+  EuiPageSection,
+  EuiPageHeader,
   EuiSelect,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiSelectOption,
+  EuiFlexGrid,
 } from '@elastic/eui';
 import type { GuideState, GuideStepIds, GuideId, GuideStep } from '@kbn/guided-onboarding';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
-import { guidesConfig } from '@kbn/guided-onboarding-plugin/public';
 
 interface MainProps {
-  guidedOnboarding: GuidedOnboardingPluginStart;
+  guidedOnboarding?: GuidedOnboardingPluginStart;
   notifications: CoreStart['notifications'];
 }
 
+const exampleGuideIds: GuideId[] = [
+  'appSearch',
+  'websiteSearch',
+  'databaseSearch',
+  'siem',
+  'kubernetes',
+  'testGuide',
+];
+const selectOptions: EuiSelectOption[] = exampleGuideIds.map((guideId) => ({
+  value: guideId,
+  text: guideId,
+}));
 export const Main = (props: MainProps) => {
-  const {
-    guidedOnboarding: { guidedOnboardingApi },
-    notifications,
-  } = props;
+  const { guidedOnboarding, notifications } = props;
   const history = useHistory();
   const [guidesState, setGuidesState] = useState<GuideState[] | undefined>(undefined);
   const [activeGuide, setActiveGuide] = useState<GuideState | undefined>(undefined);
 
-  const [selectedGuide, setSelectedGuide] = useState<GuideId | undefined>('observability');
+  const [selectedGuide, setSelectedGuide] = useState<GuideId | undefined>('kubernetes');
   const [selectedStep, setSelectedStep] = useState<GuideStepIds | undefined>(undefined);
 
   useEffect(() => {
     const fetchGuidesState = async () => {
-      const newGuidesState = await guidedOnboardingApi?.fetchAllGuidesState();
+      const newGuidesState = await guidedOnboarding?.guidedOnboardingApi?.fetchAllGuidesState();
       setGuidesState(newGuidesState ? newGuidesState.state : []);
     };
 
     fetchGuidesState();
-  }, [guidedOnboardingApi]);
+  }, [guidedOnboarding]);
 
   useEffect(() => {
     const newActiveGuide = guidesState?.find((guide) => guide.isActive === true);
@@ -63,7 +73,10 @@ export const Main = (props: MainProps) => {
   }, [guidesState, setActiveGuide]);
 
   const activateGuide = async (guideId: GuideId, guideState?: GuideState) => {
-    const response = await guidedOnboardingApi?.activateGuide(guideId, guideState);
+    const response = await guidedOnboarding?.guidedOnboardingApi?.activateGuide(
+      guideId,
+      guideState
+    );
 
     if (response) {
       notifications.toasts.addSuccess(
@@ -75,7 +88,17 @@ export const Main = (props: MainProps) => {
   };
 
   const updateGuideState = async () => {
-    const selectedGuideConfig = guidesConfig[selectedGuide!];
+    if (!selectedGuide) {
+      return;
+    }
+
+    const selectedGuideConfig = await guidedOnboarding?.guidedOnboardingApi?.getGuideConfig(
+      selectedGuide
+    );
+
+    if (!selectedGuideConfig) {
+      return;
+    }
     const selectedStepIndex = selectedGuideConfig.steps.findIndex(
       (step) => step.id === selectedStep!
     );
@@ -113,7 +136,10 @@ export const Main = (props: MainProps) => {
       guideId: selectedGuide!,
     };
 
-    const response = await guidedOnboardingApi?.updateGuideState(updatedGuideState, true);
+    const response = await guidedOnboarding?.guidedOnboardingApi?.updatePluginState(
+      { status: 'in_progress', guide: updatedGuideState },
+      true
+    );
     if (response) {
       notifications.toasts.addSuccess(
         i18n.translate('guidedOnboardingExample.updateGuideState.toastLabel', {
@@ -125,7 +151,7 @@ export const Main = (props: MainProps) => {
 
   return (
     <>
-      <EuiPageContentHeader>
+      <EuiPageHeader>
         <EuiTitle>
           <h2>
             <FormattedMessage
@@ -134,8 +160,8 @@ export const Main = (props: MainProps) => {
             />
           </h2>
         </EuiTitle>
-      </EuiPageContentHeader>
-      <EuiPageContentBody>
+      </EuiPageHeader>
+      <EuiPageSection>
         <EuiText>
           <h3>
             <FormattedMessage
@@ -146,7 +172,7 @@ export const Main = (props: MainProps) => {
           <p>
             <FormattedMessage
               id="guidedOnboardingExample.guidesSelection.state.explanation"
-              defaultMessage="The guide state on this page is updated automatically via an Observable,
+              defaultMessage="The guide state on this page is updated automatically via an Observable subscription,
               so there is no need to 'load' the state from the server."
             />
           </p>
@@ -195,8 +221,8 @@ export const Main = (props: MainProps) => {
           </h3>
         </EuiText>
         <EuiSpacer />
-        <EuiFlexGroup>
-          {(Object.keys(guidesConfig) as GuideId[]).map((guideId) => {
+        <EuiFlexGrid columns={3}>
+          {exampleGuideIds.map((guideId) => {
             const guideState = guidesState?.find((guide) => guide.guideId === guideId);
             return (
               <EuiFlexItem>
@@ -239,7 +265,7 @@ export const Main = (props: MainProps) => {
               </EuiFlexItem>
             );
           })}
-        </EuiFlexGroup>
+        </EuiFlexGrid>
         <EuiSpacer />
         <EuiHorizontalRule />
         <EuiText>
@@ -256,12 +282,7 @@ export const Main = (props: MainProps) => {
             <EuiFormRow label="Guide" helpText="Select a guide">
               <EuiSelect
                 id="guideSelect"
-                options={[
-                  { value: 'observability', text: 'observability' },
-                  { value: 'security', text: 'security' },
-                  { value: 'search', text: 'search' },
-                  { value: 'testGuide', text: 'test guide' },
-                ]}
+                options={selectOptions}
                 value={selectedGuide}
                 onChange={(e) => {
                   const value = e.target.value as GuideId;
@@ -326,8 +347,16 @@ export const Main = (props: MainProps) => {
               />
             </EuiButton>
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton onClick={() => history.push('stepFour')}>
+              <FormattedMessage
+                id="guidedOnboardingExample.main.examplePages.stepFour.link"
+                defaultMessage="Step 4"
+              />
+            </EuiButton>
+          </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPageContentBody>
+      </EuiPageSection>
     </>
   );
 };

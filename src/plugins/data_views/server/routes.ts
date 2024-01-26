@@ -8,24 +8,36 @@
 
 import { HttpServiceSetup, StartServicesAccessor } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { routes } from './rest_api_routes';
+import { routes } from './rest_api_routes/public';
 import type { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies } from './types';
 
-import { registerFieldForWildcard } from './routes/fields_for';
-import { registerHasDataViewsRoute } from './routes/has_data_views';
+import { registerExistingIndicesPath } from './rest_api_routes/internal/existing_indices';
+import { registerFieldForWildcard } from './rest_api_routes/internal/fields_for';
+import { registerHasDataViewsRoute } from './rest_api_routes/internal/has_data_views';
+import { registerFields } from './rest_api_routes/internal/fields';
 
-export function registerRoutes(
-  http: HttpServiceSetup,
+interface RegisterRoutesArgs {
+  http: HttpServiceSetup;
   getStartServices: StartServicesAccessor<
     DataViewsServerPluginStartDependencies,
     DataViewsServerPluginStart
-  >,
-  dataViewRestCounter?: UsageCounter
-) {
+  >;
+  isRollupsEnabled: () => boolean;
+  dataViewRestCounter?: UsageCounter;
+}
+
+export function registerRoutes({
+  http,
+  getStartServices,
+  dataViewRestCounter,
+  isRollupsEnabled,
+}: RegisterRoutesArgs) {
   const router = http.createRouter();
 
   routes.forEach((route) => route(router, getStartServices, dataViewRestCounter));
 
-  registerFieldForWildcard(router, getStartServices);
+  registerExistingIndicesPath(router);
+  registerFieldForWildcard(router, getStartServices, isRollupsEnabled);
+  registerFields(router, getStartServices, isRollupsEnabled);
   registerHasDataViewsRoute(router);
 }

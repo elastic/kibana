@@ -1,0 +1,11 @@
+description: The comparison function for the threshold. For example, "is above", "is above or equals", "is below", "is below or equals", "is between", and "is not between".
+type: string
+enum:
+  - ">"
+  - ">="
+  - "<"
+  - "<="
+  - between
+  - notBetween
+examples:
+  - ">"

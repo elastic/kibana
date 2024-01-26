@@ -18,9 +18,18 @@ import type { SavedObjectsBaseOptions } from './base';
  * @public
  */
 export interface SavedObjectsCollectMultiNamespaceReferencesObject {
+  /** The ID of the object to collect references for */
   id: string;
+  /** The type of the object to collect references for */
   type: string;
 }
+
+/**
+ * Purpose for collecting references.
+ */
+export type SavedObjectsCollectMultiNamespaceReferencesPurpose =
+  | 'collectMultiNamespaceReferences'
+  | 'updateObjectsSpaces';
 
 /**
  * Options for collecting references.
@@ -30,7 +39,7 @@ export interface SavedObjectsCollectMultiNamespaceReferencesObject {
 export interface SavedObjectsCollectMultiNamespaceReferencesOptions
   extends SavedObjectsBaseOptions {
   /** Optional purpose used to determine filtering and authorization checks; default is 'collectMultiNamespaceReferences' */
-  purpose?: 'collectMultiNamespaceReferences' | 'updateObjectsSpaces';
+  purpose?: SavedObjectsCollectMultiNamespaceReferencesPurpose;
 }
 
 /**
@@ -73,5 +82,6 @@ export interface SavedObjectReferenceWithContext {
  * @public
  */
 export interface SavedObjectsCollectMultiNamespaceReferencesResponse {
+  /** array of {@link SavedObjectReferenceWithContext} */
   objects: SavedObjectReferenceWithContext[];
 }

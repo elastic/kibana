@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { COUNTER_RATE_ID, COUNTER_RATE_NAME } from '@kbn/lens-formula-docs';
 import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
 import { FormBasedLayer } from '../../../types';
 import {
@@ -18,8 +19,7 @@ import {
 } from './utils';
 import { DEFAULT_TIME_SCALE } from '../../time_scale_utils';
 import { OperationDefinition } from '..';
-import { getFormatFromPreviousColumn, getFilter, combineErrorMessages } from '../helpers';
-import { getDisallowedPreviousShiftMessage } from '../../../time_shift_utils';
+import { getFormatFromPreviousColumn, getFilter } from '../helpers';
 
 const ofName = buildLabelFunction((name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.CounterRateOf', {
@@ -36,18 +36,16 @@ const ofName = buildLabelFunction((name?: string) => {
 
 export type CounterRateIndexPatternColumn = FormattedIndexPatternColumn &
   ReferenceBasedIndexPatternColumn & {
-    operationType: 'counter_rate';
+    operationType: typeof COUNTER_RATE_ID;
   };
 
 export const counterRateOperation: OperationDefinition<
   CounterRateIndexPatternColumn,
   'fullReference'
 > = {
-  type: 'counter_rate',
+  type: COUNTER_RATE_ID,
   priority: 1,
-  displayName: i18n.translate('xpack.lens.indexPattern.counterRate', {
-    defaultMessage: 'Counter rate',
-  }),
+  displayName: COUNTER_RATE_NAME,
   input: 'fullReference',
   selectionStyle: 'field',
   requiredReferences: [
@@ -57,6 +55,11 @@ export const counterRateOperation: OperationDefinition<
       validateMetadata: (meta) => meta.dataType === 'number' && !meta.isBucketed,
     },
   ],
+  // return false for quick function as the built-in reference will use max
+  // in formula this check won't be used and the check is performed on the formula AST tree traversal independently
+  getUnsupportedSettings: () => ({
+    sampling: false,
+  }),
   getPossibleOperation: (indexPattern) => {
     if (hasDateField(indexPattern)) {
       return {
@@ -66,11 +69,11 @@ export const counterRateOperation: OperationDefinition<
       };
     }
   },
-  getDefaultLabel: (column, indexPattern, columns) => {
+  getDefaultLabel: (column, columns, indexPattern) => {
     const ref = columns[column.references[0]];
     return ofName(
       ref && 'sourceField' in ref
-        ? indexPattern.getFieldByName(ref.sourceField)?.displayName
+        ? indexPattern?.getFieldByName(ref.sourceField)?.displayName
         : undefined,
       column.timeScale,
       column.timeShift
@@ -107,16 +110,13 @@ export const counterRateOperation: OperationDefinition<
     return hasDateField(newIndexPattern);
   },
   getErrorMessage: (layer: FormBasedLayer, columnId: string) => {
-    return combineErrorMessages([
-      getErrorsForDateReference(
-        layer,
-        columnId,
-        i18n.translate('xpack.lens.indexPattern.counterRate', {
-          defaultMessage: 'Counter rate',
-        })
-      ),
-      getDisallowedPreviousShiftMessage(layer, columnId),
-    ]);
+    return getErrorsForDateReference(
+      layer,
+      columnId,
+      i18n.translate('xpack.lens.indexPattern.counterRate', {
+        defaultMessage: 'Counter rate',
+      })
+    );
   },
   getDisabledStatus(indexPattern, layer, layerType) {
     const opName = i18n.translate('xpack.lens.indexPattern.counterRate', {
@@ -133,24 +133,6 @@ export const counterRateOperation: OperationDefinition<
   },
   timeScalingMode: 'mandatory',
   filterable: true,
-  documentation: {
-    section: 'calculation',
-    signature: i18n.translate('xpack.lens.indexPattern.counterRate.signature', {
-      defaultMessage: 'metric: number',
-    }),
-    description: i18n.translate('xpack.lens.indexPattern.counterRate.documentation.markdown', {
-      defaultMessage: `
-Calculates the rate of an ever increasing counter. This function will only yield helpful results on counter metric fields which contain a measurement of some kind monotonically growing over time.
-If the value does get smaller, it will interpret this as a counter reset. To get most precise results, \`counter_rate\` should be calculated on the \`max\` of a field.
-
-This calculation will be done separately for separate series defined by filters or top values dimensions.
-It uses the current interval when used in Formula.
-
-Example: Visualize the rate of bytes received over time by a memcached server:
-\`counter_rate(max(memcached.stats.read.bytes))\`
-      `,
-    }),
-  },
   quickFunctionDocumentation: i18n.translate(
     'xpack.lens.indexPattern.counterRate.documentation.quick',
     {

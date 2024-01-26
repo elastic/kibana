@@ -12,7 +12,7 @@ import { buildQueryFromKuery } from './from_kuery';
 import { buildQueryFromFilters } from './from_filters';
 import { buildQueryFromLucene } from './from_lucene';
 import { Filter, Query, AggregateQuery } from '../filters';
-import { isOfQueryType } from './es_query_sql';
+import { isOfQueryType } from './es_aggregate_query';
 import { BoolQuery, DataViewBase } from './types';
 import type { KueryQueryOptions } from '../kuery';
 import type { EsQueryFiltersConfig } from './from_filters';
@@ -67,6 +67,7 @@ export function buildEsQuery(
       dateFormatTZ: config.dateFormatTZ,
       filtersInMustClause: config.filtersInMustClause,
       nestedIgnoreUnmapped: config.nestedIgnoreUnmapped,
+      caseInsensitive: config.caseInsensitive,
     }
   );
   const luceneQuery = buildQueryFromLucene(

@@ -8,7 +8,6 @@
 import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 
 import { ConfigSchema } from './config';
-import { SpacesPlugin } from './plugin';
 
 // These exports are part of public Spaces plugin contract, any change in signature of exported
 // functions or removal of exports should be considered as a breaking change. Ideally we should
@@ -27,16 +26,17 @@ export type {
   SpacesClientWrapper,
 } from './spaces_client';
 
-export type {
-  Space,
-  GetAllSpacesOptions,
-  GetAllSpacesPurpose,
-  GetSpaceResult,
-  LegacyUrlAliasTarget,
-} from '../common';
+export type { Space, GetAllSpacesOptions, GetAllSpacesPurpose, GetSpaceResult } from '../common';
 
 export const config: PluginConfigDescriptor = {
   schema: ConfigSchema,
+  exposeToBrowser: {
+    maxSpaces: true,
+    allowFeatureVisibility: true,
+  },
 };
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new SpacesPlugin(initializerContext);
+
+export const plugin = async (initializerContext: PluginInitializerContext) => {
+  const { SpacesPlugin } = await import('./plugin');
+  return new SpacesPlugin(initializerContext);
+};

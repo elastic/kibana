@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { kibanaPackageJson as pkg } from '@kbn/utils';
+import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 import Url from 'url';
 import { systemIndicesSuperuser } from '../kbn';
 
@@ -25,6 +25,10 @@ class EsTestConfig {
 
   getBuildFrom() {
     return process.env.TEST_ES_FROM || 'snapshot';
+  }
+
+  getESServerlessImage() {
+    return process.env.TEST_ES_SERVERLESS_IMAGE;
   }
 
   getTransportPort() {

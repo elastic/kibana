@@ -22,10 +22,26 @@ export const STEP_THREE_TITLE = i18n.translate('xpack.cases.create.stepThreeTitl
   defaultMessage: 'External Connector Fields',
 });
 
+export const ADDITIONAL_FIELDS = i18n.translate('xpack.cases.create.additionalFields', {
+  defaultMessage: 'Additional fields',
+});
+
 export const SYNC_ALERTS_LABEL = i18n.translate('xpack.cases.create.syncAlertsLabel', {
   defaultMessage: 'Sync alert status with case status',
 });
 
 export const ASSIGN_YOURSELF = i18n.translate('xpack.cases.create.assignYourself', {
   defaultMessage: 'Assign yourself',
+});
+
+export const MODAL_TITLE = i18n.translate('xpack.cases.create.modalTitle', {
+  defaultMessage: 'Discard case?',
+});
+
+export const CANCEL_MODAL_BUTTON = i18n.translate('xpack.cases.create.cancelModalButton', {
+  defaultMessage: 'Cancel',
+});
+
+export const CONFIRM_MODAL_BUTTON = i18n.translate('xpack.cases.create.confirmModalButton', {
+  defaultMessage: 'Exit without saving',
 });

@@ -18,6 +18,7 @@ import { Feature } from 'geojson';
 import type { Map as MbMap, MapMouseEvent, MapGeoJSONFeature } from '@kbn/mapbox-gl';
 import { TooltipControl } from './tooltip_control';
 import { IVectorLayer } from '../../../classes/layers/vector_layer';
+import { mockVectorLayer } from '../../../classes/layers/__fixtures__/mock_vector_layer';
 import { IVectorSource } from '../../../classes/sources/vector_source';
 
 // mutable map state
@@ -26,6 +27,7 @@ let featuresAtLocation: MapGeoJSONFeature[] = [];
 const layerId = 'tfi3f';
 const mbLayerId = 'tfi3f_circle';
 const mockLayer = {
+  ...mockVectorLayer,
   getMbLayerIds: () => {
     return [mbLayerId];
   },
@@ -70,6 +72,9 @@ const mockLayer = {
       },
     } as unknown as IVectorSource;
   },
+  getMasks: () => {
+    return [];
+  },
 } as unknown as IVectorLayer;
 
 const mockMbMapHandlers: { [key: string]: (event?: MapMouseEvent) => void } = {};
@@ -101,6 +106,7 @@ const defaultProps = {
   hasLockedTooltips: false,
   filterModeActive: false,
   drawModeActive: false,
+  executionContext: {},
 };
 
 const hoverTooltipState = {

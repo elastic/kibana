@@ -6,14 +6,11 @@
  */
 
 import type {
-  TimelineExpandedDetail,
-  TimelineExpandedDetailType,
-} from '../../../common/types/timeline';
+  TimelineEventsAllOptionsInput,
+  TimelineEqlRequestOptionsInput,
+} from '@kbn/timelines-plugin/common';
+import type { ExpandedDetailTimeline, ExpandedDetailType } from '../../../common/types';
 import { TimelineTabs } from '../../../common/types/timeline';
-import type {
-  TimelineEqlRequestOptions,
-  TimelineEventsAllRequestOptions,
-} from '../../../common/search_strategy/timeline';
 import type { TimelineArgs } from '.';
 
 /*
@@ -29,11 +26,11 @@ import type { TimelineArgs } from '.';
 
 class ActiveTimelineEvents {
   private _activePage: number = 0;
-  private _expandedDetail: TimelineExpandedDetail = {};
+  private _expandedDetail: ExpandedDetailTimeline = {};
   private _pageName: string = '';
-  private _request: TimelineEventsAllRequestOptions | null = null;
+  private _request: TimelineEventsAllOptionsInput | null = null;
   private _response: TimelineArgs | null = null;
-  private _eqlRequest: TimelineEqlRequestOptions | null = null;
+  private _eqlRequest: TimelineEqlRequestOptionsInput | null = null;
   private _eqlResponse: TimelineArgs | null = null;
 
   getActivePage() {
@@ -48,7 +45,7 @@ class ActiveTimelineEvents {
     return this._expandedDetail;
   }
 
-  toggleExpandedDetail(expandedDetail: TimelineExpandedDetailType) {
+  toggleExpandedDetail(expandedDetail: ExpandedDetailType) {
     const queryTab = TimelineTabs.query;
     const currentExpandedDetail = this._expandedDetail[queryTab];
     let isSameExpandedDetail;
@@ -76,7 +73,7 @@ class ActiveTimelineEvents {
     }
   }
 
-  setExpandedDetail(expandedDetail: TimelineExpandedDetail) {
+  setExpandedDetail(expandedDetail: ExpandedDetailTimeline) {
     this._expandedDetail = expandedDetail;
   }
 
@@ -92,7 +89,7 @@ class ActiveTimelineEvents {
     return this._request;
   }
 
-  setRequest(req: TimelineEventsAllRequestOptions) {
+  setRequest(req: TimelineEventsAllOptionsInput) {
     this._request = req;
   }
 
@@ -108,7 +105,7 @@ class ActiveTimelineEvents {
     return this._eqlRequest;
   }
 
-  setEqlRequest(req: TimelineEqlRequestOptions) {
+  setEqlRequest(req: TimelineEqlRequestOptionsInput) {
     this._eqlRequest = req;
   }
 

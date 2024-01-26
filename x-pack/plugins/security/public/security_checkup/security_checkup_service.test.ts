@@ -9,8 +9,8 @@ import type { DocLinksStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import type { ConfigType } from '../config';
 import { SecurityCheckupService } from './security_checkup_service';
+import type { ConfigType } from '../config';
 
 let mockOnDismissCallback: (persist: boolean) => void = jest.fn().mockImplementation(() => {
   throw new Error('expected callback to be replaced!');
@@ -146,7 +146,7 @@ describe('SecurityCheckupService', () => {
       expect(coreStart.notifications.toasts.addWarning.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "iconType": "alert",
+            "iconType": "warning",
             "text": "mock insecure cluster text",
             "title": "mock insecure cluster title",
           },

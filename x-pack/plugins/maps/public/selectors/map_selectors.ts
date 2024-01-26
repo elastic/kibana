@@ -8,14 +8,15 @@
 import { createSelector } from 'reselect';
 import { FeatureCollection } from 'geojson';
 import _ from 'lodash';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { Query } from '@kbn/data-plugin/common';
 import { Filter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
 import { RasterTileLayer } from '../classes/layers/raster_tile_layer/raster_tile_layer';
 import { EmsVectorTileLayer } from '../classes/layers/ems_vector_tile_layer/ems_vector_tile_layer';
 import {
+  hasVectorLayerMethod,
   BlendedVectorLayer,
-  IVectorLayer,
   MvtVectorLayer,
   GeoJsonVectorLayer,
 } from '../classes/layers/vector_layer';
@@ -26,7 +27,7 @@ import { getTimeFilter } from '../kibana_services';
 import { getChartsPaletteServiceGetColor } from '../reducers/non_serializable_instances';
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/copy_persistent_state';
 import { InnerJoin } from '../classes/joins/inner_join';
-import { getSourceByType } from '../classes/sources/source_registry';
+import { createSourceInstance } from '../classes/sources/create_source_instance';
 import { GeoJsonFileSource } from '../classes/sources/geojson_file_source';
 import {
   LAYER_TYPE,
@@ -39,7 +40,6 @@ import {
 import { extractFeaturesFromFilters } from '../../common/elasticsearch_util';
 import { MapStoreState } from '../reducers/store';
 import {
-  AbstractSourceDescriptor,
   DataRequestDescriptor,
   CustomIcon,
   DrawState,
@@ -125,17 +125,6 @@ export function createLayerInstance(
     default:
       throw new Error(`Unrecognized layerType ${layerDescriptor.type}`);
   }
-}
-
-function createSourceInstance(sourceDescriptor: AbstractSourceDescriptor | null): ISource {
-  if (sourceDescriptor === null) {
-    throw new Error('Source-descriptor should be initialized');
-  }
-  const source = getSourceByType(sourceDescriptor.type);
-  if (!source) {
-    throw new Error(`Unrecognized sourceType ${sourceDescriptor.type}`);
-  }
-  return new source.ConstructorFunction(sourceDescriptor);
 }
 
 export const getMapSettings = ({ map }: MapStoreState): MapSettings => map.settings;
@@ -239,6 +228,10 @@ export function getDataRequestDescriptor(state: MapStoreState, layerId: string, 
   });
 }
 
+export function getExecutionContext(state: MapStoreState): KibanaExecutionContext {
+  return state.map.executionContext;
+}
+
 export const getDataFilters = createSelector(
   getMapExtent,
   getMapBuffer,
@@ -251,6 +244,7 @@ export const getDataFilters = createSelector(
   getSearchSessionId,
   getSearchSessionMapBuffer,
   getIsReadOnly,
+  getExecutionContext,
   (
     mapExtent,
     mapBuffer,
@@ -262,7 +256,8 @@ export const getDataFilters = createSelector(
     embeddableSearchContext,
     searchSessionId,
     searchSessionMapBuffer,
-    isReadOnly
+    isReadOnly,
+    executionContext
   ) => {
     return {
       extent: mapExtent,
@@ -275,17 +270,22 @@ export const getDataFilters = createSelector(
       embeddableSearchContext,
       searchSessionId,
       isReadOnly,
+      executionContext,
     };
   }
 );
 
 export const getSpatialFiltersLayer = createSelector(
   getFilters,
+  getEmbeddableSearchContext,
   getMapSettings,
-  (filters, settings) => {
+  (filters, embeddableSearchContext, settings) => {
     const featureCollection: FeatureCollection = {
       type: 'FeatureCollection',
-      features: extractFeaturesFromFilters(filters),
+      features: extractFeaturesFromFilters([
+        ...filters,
+        ...(embeddableSearchContext?.filters ?? []),
+      ]),
     };
     const geoJsonSourceDescriptor = GeoJsonFileSource.createDescriptor({
       __featureCollection: featureCollection,
@@ -351,7 +351,7 @@ export const getLayerList = createSelector(
       if (!parentLayer || !isLayerGroup(parentLayer)) {
         return;
       }
-      (parentLayer as LayerGroup).setChildren(children);
+      parentLayer.setChildren(children);
     });
 
     return layers;
@@ -386,12 +386,6 @@ export const hasPreviewLayers = createSelector(getLayerList, (layerList) => {
   });
 });
 
-export const isLoadingPreviewLayers = createSelector(getLayerList, (layerList) => {
-  return layerList.some((layer) => {
-    return layer.isPreviewLayer() && layer.isLayerLoading();
-  });
-});
-
 export const getMapColors = createSelector(getLayerListRaw, (layerList) =>
   layerList
     .filter((layerDescriptor) => {
@@ -408,11 +402,11 @@ export const getMapColors = createSelector(getLayerListRaw, (layerList) =>
 );
 
 export const getSelectedLayerJoinDescriptors = createSelector(getSelectedLayer, (selectedLayer) => {
-  if (!selectedLayer || !('getJoins' in selectedLayer)) {
+  if (!selectedLayer || !hasVectorLayerMethod(selectedLayer, 'getJoins')) {
     return [];
   }
 
-  return (selectedLayer as IVectorLayer).getJoins().map((join: InnerJoin) => {
+  return selectedLayer.getJoins().map((join: InnerJoin) => {
     return join.toDescriptor();
   });
 });
@@ -438,6 +432,42 @@ export const getQueryableUniqueIndexPatternIds = createSelector(
       });
     }
     return _.uniq(indexPatternIds);
+  }
+);
+
+export const getMostCommonDataViewId = createSelector(
+  getLayerList,
+  getWaitingForMapReadyLayerListRaw,
+  (layerList, waitingForMapReadyLayerList) => {
+    const counts: { [key: string]: number } = {};
+    function incrementCount(ids: string[]) {
+      ids.forEach((id) => {
+        const count = counts.hasOwnProperty(id) ? counts[id] : 0;
+        counts[id] = count + 1;
+      });
+    }
+
+    if (waitingForMapReadyLayerList.length) {
+      waitingForMapReadyLayerList.forEach((layerDescriptor) => {
+        const layer = createLayerInstance(layerDescriptor, []); // custom icons not needed, layer instance only used to get index pattern ids
+        incrementCount(layer.getIndexPatternIds());
+      });
+    } else {
+      layerList.forEach((layer) => {
+        incrementCount(layer.getIndexPatternIds());
+      });
+    }
+
+    let mostCommonId: string | undefined;
+    let mostCommonCount = 0;
+    Object.keys(counts).forEach((id) => {
+      if (counts[id] > mostCommonCount) {
+        mostCommonId = id;
+        mostCommonCount = counts[id];
+      }
+    });
+
+    return mostCommonId;
   }
 );
 
@@ -476,26 +506,21 @@ export const hasDirtyState = createSelector(getLayerListRaw, (layerListRaw) => {
   });
 });
 
-export const areLayersLoaded = createSelector(
+export const isMapLoading = createSelector(
   getLayerList,
   getWaitingForMapReadyLayerListRaw,
   getMapZoom,
   (layerList, waitingForMapReadyLayerList, zoom) => {
     if (waitingForMapReadyLayerList.length) {
-      return false;
+      return true;
     }
 
     for (let i = 0; i < layerList.length; i++) {
       const layer = layerList[i];
-      if (
-        layer.isVisible() &&
-        layer.showAtZoomLevel(zoom) &&
-        !layer.hasErrors() &&
-        !layer.isInitialDataLoadComplete()
-      ) {
-        return false;
+      if (!layer.hasErrors() && layer.isLayerLoading(zoom)) {
+        return true;
       }
     }
-    return true;
+    return false;
   }
 );

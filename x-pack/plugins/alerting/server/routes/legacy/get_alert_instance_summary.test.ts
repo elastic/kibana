@@ -13,6 +13,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { rulesClientMock } from '../../rules_client.mock';
 import { AlertSummary } from '../../types';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../../lib/license_api_access', () => ({
@@ -47,6 +48,7 @@ describe('getAlertInstanceSummaryRoute', () => {
       average: 0,
       valuesWithTimestamp: {},
     },
+    revision: 0,
   };
 
   it('gets alert instance summary', async () => {
@@ -97,7 +99,9 @@ describe('getAlertInstanceSummaryRoute', () => {
 
     rulesClient.getAlertSummary = jest
       .fn()
-      .mockResolvedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('alert', '1'));
+      .mockResolvedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(RULE_SAVED_OBJECT_TYPE, '1')
+      );
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },

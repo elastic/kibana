@@ -10,40 +10,42 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiDataGridColumn } from '@elastic/eui';
 
 import { CoreSetup } from '@kbn/core/public';
-
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { MlApiServices } from '../../../../../services/ml_api_service';
-
-import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
-
+import { extractErrorMessage } from '@kbn/ml-error-utils';
+import {
+  getPredictionFieldName,
+  getDefaultPredictionFieldName,
+  isClassificationAnalysis,
+  isRegressionAnalysis,
+  sortExplorationResultsFields,
+  DEFAULT_RESULTS_FIELD,
+  FEATURE_IMPORTANCE,
+  ML__ID_COPY,
+  TOP_CLASSES,
+  type DataFrameAnalyticsConfig,
+  type FeatureImportanceBaseline,
+} from '@kbn/ml-data-frame-analytics-utils';
 import {
   getDataGridSchemasFromFieldTypes,
   getFieldType,
   showDataGridColumnChartErrorMessageToast,
   useRenderCellValue,
-  UseIndexDataReturnType,
-} from '../../../../../components/data_grid';
-import { SavedSearchQuery } from '../../../../../contexts/ml';
-import { getIndexData, getIndexFields, DataFrameAnalyticsConfig } from '../../../../common';
-import {
-  getPredictionFieldName,
-  getDefaultPredictionFieldName,
-  isClassificationAnalysis,
-} from '../../../../../../../common/util/analytics_utils';
-import { FEATURE_IMPORTANCE, TOP_CLASSES } from '../../../../common/constants';
-import { DEFAULT_RESULTS_FIELD } from '../../../../../../../common/constants/data_frame_analytics';
-import { sortExplorationResultsFields, ML__ID_COPY } from '../../../../common/fields';
-import { isRegressionAnalysis } from '../../../../common/analytics';
-import { extractErrorMessage } from '../../../../../../../common/util/errors';
+  type UseIndexDataReturnType,
+} from '@kbn/ml-data-grid';
+
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { MlApiServices } from '../../../../../services/ml_api_service';
+import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
+
+import { getIndexData, getIndexFields } from '../../../../common';
 import { useTrainedModelsApiService } from '../../../../../services/ml_api_service/trained_models';
-import { FeatureImportanceBaseline } from '../../../../../../../common/types/feature_importance';
 import { useExplorationDataGrid } from './use_exploration_data_grid';
 
 export const useExplorationResults = (
-  indexPattern: DataView | undefined,
+  dataView: DataView | undefined,
   jobConfig: DataFrameAnalyticsConfig | undefined,
-  searchQuery: SavedSearchQuery,
+  searchQuery: estypes.QueryDslQueryContainer,
   toastNotifications: CoreSetup['notifications']['toasts'],
   mlApiServices: MlApiServices
 ): UseIndexDataReturnType => {
@@ -52,7 +54,7 @@ export const useExplorationResults = (
   const trainedModelsApiService = useTrainedModelsApiService();
 
   const needsDestIndexFields =
-    indexPattern !== undefined && indexPattern.title === jobConfig?.source.index[0];
+    dataView !== undefined && dataView.title === jobConfig?.source.index[0];
 
   const columns: EuiDataGridColumn[] = [];
 
@@ -88,10 +90,9 @@ export const useExplorationResults = (
   }, [jobConfig && jobConfig.id, dataGrid.pagination, searchQuery, dataGrid.sortingColumns]);
 
   const dataLoader = useMemo(
-    () =>
-      indexPattern !== undefined ? new DataLoader(indexPattern, toastNotifications) : undefined,
+    () => (dataView !== undefined ? new DataLoader(dataView, toastNotifications) : undefined),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [indexPattern]
+    [dataView]
   );
 
   const fetchColumnChartsData = async function () {
@@ -177,7 +178,7 @@ export const useExplorationResults = (
 
   const resultsField = jobConfig?.dest.results_field ?? DEFAULT_RESULTS_FIELD;
   const renderCellValue = useRenderCellValue(
-    indexPattern,
+    dataView,
     dataGrid.pagination,
     dataGrid.tableItems,
     resultsField

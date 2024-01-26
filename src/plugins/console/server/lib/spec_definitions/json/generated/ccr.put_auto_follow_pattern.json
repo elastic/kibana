@@ -1,11 +1,21 @@
 {
   "ccr.put_auto_follow_pattern": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "PUT"
     ],
     "patterns": [
       "_ccr/auto_follow/{name}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ccr-put-auto-follow-pattern.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/ccr-put-auto-follow-pattern.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

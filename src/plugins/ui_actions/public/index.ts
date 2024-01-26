@@ -13,17 +13,20 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new UiActionsPlugin(initializerContext);
 }
 
-export type { UiActionsSetup, UiActionsStart } from './plugin';
+export type {
+  UiActionsPublicSetup as UiActionsSetup,
+  UiActionsPublicStart as UiActionsStart,
+} from './plugin';
 export type { UiActionsServiceParams } from './service';
 export { UiActionsService } from './service';
 export type { Action, ActionDefinition as UiActionsActionDefinition } from './actions';
-export { createAction, IncompatibleActionError } from './actions';
+export { ActionInternal, createAction, IncompatibleActionError } from './actions';
 export { buildContextMenuForActions } from './context_menu';
 export type {
   Presentable as UiActionsPresentable,
   PresentableGrouping as UiActionsPresentableGrouping,
-} from './util';
-export type { Trigger, RowClickContext } from './triggers';
+} from '@kbn/ui-actions-browser/src/types';
+export type { Trigger, RowClickContext } from '@kbn/ui-actions-browser/src/triggers';
 export {
   VISUALIZE_FIELD_TRIGGER,
   visualizeFieldTrigger,
@@ -31,11 +34,16 @@ export {
   visualizeGeoFieldTrigger,
   ROW_CLICK_TRIGGER,
   rowClickTrigger,
-} from './triggers';
+} from '@kbn/ui-actions-browser/src/triggers';
 export type { VisualizeFieldContext } from './types';
 export {
   ACTION_VISUALIZE_FIELD,
   ACTION_VISUALIZE_GEO_FIELD,
   ACTION_VISUALIZE_LENS_FIELD,
 } from './types';
-export type { ActionExecutionContext, ActionExecutionMeta, ActionMenuItemProps } from './actions';
+export type {
+  ActionExecutionContext,
+  ActionExecutionMeta,
+  ActionMenuItemProps,
+  FrequentCompatibilityChangeAction,
+} from './actions';

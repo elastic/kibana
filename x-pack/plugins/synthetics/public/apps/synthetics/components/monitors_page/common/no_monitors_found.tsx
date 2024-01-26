@@ -28,7 +28,11 @@ export function NoMonitorsFound() {
 
 export function ClearFilters() {
   const [_, updateUrlParams] = useUrlParams();
-  return <EuiLink onClick={() => updateUrlParams(null)}>{CLEAR_FILTERS_LABEL}</EuiLink>;
+  return (
+    <EuiLink data-test-subj="syntheticsClearFiltersLink" onClick={() => updateUrlParams(null)}>
+      {CLEAR_FILTERS_LABEL}
+    </EuiLink>
+  );
 }
 
 const NO_MONITORS_FOUND_HEADING = i18n.translate(

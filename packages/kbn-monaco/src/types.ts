@@ -5,16 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Observable } from 'rxjs';
 
+import type { Observable } from 'rxjs';
 import { monaco } from './monaco_imports';
 
 export interface LangModuleType {
   ID: string;
-  lexerRules: monaco.languages.IMonarchLanguage;
+  lexerRules?: monaco.languages.IMonarchLanguage;
   languageConfiguration?: monaco.languages.LanguageConfiguration;
   getSuggestionProvider?: Function;
-  getSyntaxErrors?: Function;
 }
 
 export interface CompleteLangModuleType extends LangModuleType {
@@ -24,7 +23,25 @@ export interface CompleteLangModuleType extends LangModuleType {
   validation$: () => Observable<LangValidation>;
 }
 
+export interface LanguageProvidersModule<Deps = unknown> {
+  validate: (
+    model: monaco.editor.ITextModel,
+    code: string,
+    callbacks?: Deps
+  ) => Promise<{ errors: monaco.editor.IMarkerData[]; warnings: monaco.editor.IMarkerData[] }>;
+  getSuggestionProvider: (callbacks?: Deps) => monaco.languages.CompletionItemProvider;
+  getSignatureProvider?: (callbacks?: Deps) => monaco.languages.SignatureHelpProvider;
+  getHoverProvider?: (callbacks?: Deps) => monaco.languages.HoverProvider;
+}
+
+export interface CustomLangModuleType<Deps = unknown>
+  extends Omit<LangModuleType, 'getSuggestionProvider'>,
+    LanguageProvidersModule<Deps> {
+  onLanguage: () => void;
+}
+
 export interface EditorError {
+  severity: monaco.MarkerSeverity;
   startLineNumber: number;
   startColumn: number;
   endLineNumber: number;
@@ -40,4 +57,8 @@ export interface LangValidation {
 
 export interface SyntaxErrors {
   [modelId: string]: EditorError[];
+}
+
+export interface BaseWorkerDefinition {
+  getSyntaxErrors: (modelUri: string) => Promise<EditorError[] | undefined>;
 }

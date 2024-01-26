@@ -25,19 +25,31 @@ interface Props {
 }
 export const SnapshotContainer = ({ render }: Props) => {
   const { sourceId } = useSourceContext();
-  const { metric, groupBy, nodeType, accountId, region } = useWaffleOptionsContext();
+  const { metric, groupBy, nodeType, accountId, region, view } = useWaffleOptionsContext();
   const { currentTime } = useWaffleTimeContext();
   const { filterQueryAsJson } = useWaffleFiltersContext();
-  const { loading, nodes, reload, interval } = useSnapshot(
-    filterQueryAsJson,
-    [metric],
-    groupBy,
-    nodeType,
-    sourceId,
-    currentTime,
-    accountId,
-    region,
-    false
+  const {
+    loading,
+    nodes,
+    reload,
+    interval = '60s',
+  } = useSnapshot(
+    {
+      filterQuery: filterQueryAsJson,
+      metrics: [metric],
+      groupBy,
+      nodeType,
+      sourceId,
+      currentTime,
+      accountId,
+      region,
+      sendRequestImmediately: false,
+      includeTimeseries: view === 'table',
+    },
+    {
+      abortable: true,
+    }
   );
+
   return render({ loading, nodes, reload, interval });
 };

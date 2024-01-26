@@ -6,6 +6,7 @@
  */
 
 import { getSuggestions } from './suggestions';
+import { IconChartVerticalBullet, IconChartHorizontalBullet } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { GaugeShapes } from '@kbn/expression-gauge-plugin/common';
 import { GaugeVisualizationState } from './constants';
@@ -157,12 +158,14 @@ describe('shows suggestions', () => {
         },
         title: 'Gauge',
         hide: true,
-        previewIcon: 'empty',
+        incomplete: true,
+        previewIcon: IconChartHorizontalBullet,
         score: 0.5,
       },
       {
         hide: true,
-        previewIcon: 'empty',
+        incomplete: true,
+        previewIcon: IconChartVerticalBullet,
         title: 'Gauge',
         score: 0.5,
         state: {
@@ -204,9 +207,10 @@ describe('shows suggestions', () => {
           ticksPosition: 'auto',
           layerId: 'first',
         },
-        previewIcon: 'empty',
+        previewIcon: IconChartVerticalBullet,
         title: 'Gauge',
         hide: false, // shows suggestion when current is gauge
+        incomplete: false,
         score: 0.5,
       },
     ]);

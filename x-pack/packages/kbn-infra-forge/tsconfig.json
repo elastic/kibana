@@ -1,0 +1,26 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "./src/data_sources/composable/component/base.json",
+    "./src/data_sources/composable/component/event.json",
+    "./src/data_sources/composable/component/host.json",
+    "./src/data_sources/composable/component/metricset.json",
+    "./src/data_sources/composable/component/system.json",
+    "./src/data_sources/composable/template.json"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/tooling-log",
+    "@kbn/datemath"
+  ]
+}

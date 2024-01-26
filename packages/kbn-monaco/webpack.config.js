@@ -19,32 +19,72 @@ const getWorkerEntry = (language) => {
   }
 };
 
-const getWorkerConfig = (language) => ({
-  mode: 'production',
-  entry: getWorkerEntry(language),
+/**
+ * @param {string[]} languages - list of supported languages to build workers for
+ * @returns {import('webpack').Configuration}
+ */
+const workerConfig = (languages) => ({
+  mode: process.env.NODE_ENV || 'development',
+  entry: languages.reduce((entries, language) => {
+    entries[language] = getWorkerEntry(language);
+    return entries;
+  }, {}),
+  devtool: process.env.NODE_ENV === 'production' ? false : '#cheap-source-map',
   output: {
     path: path.resolve(__dirname, 'target_workers'),
-    filename: `${language}.editor.worker.js`,
+    filename: ({ chunk }) => `${chunk.name}.editor.worker.js`,
   },
   resolve: {
     extensions: ['.js', '.ts', '.tsx'],
+    alias: {
+      // swap default umd import for the esm one provided in vscode-uri package
+      'vscode-uri$': require.resolve('vscode-uri').replace(/\/umd\/index.js/, '/esm/index.mjs'),
+    },
   },
   stats: 'errors-only',
   module: {
     rules: [
       {
-        test: /\.(js|ts)$/,
-        exclude: /node_modules/,
+        test: /\.(jsx?|tsx?)$/,
+        exclude: /node_modules(?!\/@kbn\/)(\/[^\/]+\/)/,
         use: {
           loader: 'babel-loader',
           options: {
             babelrc: false,
+            envName: process.env.NODE_ENV || 'development',
+            presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+          },
+        },
+      },
+      {
+        /**
+         * further process the modules exported by monaco-editor and monaco-yaml
+         * because their exports leverage some none-standard language APIs at this time.
+         */
+        test: /(monaco-editor\/esm\/vs\/language|monaco-yaml|vscode-uri)\/.*m?(t|j)sx?$/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            babelrc: false,
+            envName: process.env.NODE_ENV || 'development',
             presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
           },
         },
       },
     ],
   },
+  optimization: {
+    minimizer: [
+      (compiler) => {
+        const TerserPlugin = require('terser-webpack-plugin');
+        new TerserPlugin({
+          // exclude this file from being processed by terser,
+          // because attempts at tree shaking actually botches up the file
+          exclude: /monaco-editor[\\/]esm[\\/]vs[\\/]base[\\/]common[\\/]map.js/,
+        }).apply(compiler);
+      },
+    ],
+  },
 });
 
-module.exports = ['default', 'json', 'painless', 'xjson'].map(getWorkerConfig);
+module.exports = workerConfig(['default', 'json', 'painless', 'xjson', 'esql', 'yaml']);

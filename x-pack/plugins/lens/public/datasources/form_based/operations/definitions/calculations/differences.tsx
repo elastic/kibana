@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { DIFFERENCES_ID, DIFFERENCES_NAME } from '@kbn/lens-formula-docs';
 import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
 import { FormBasedLayer } from '../../../types';
 import {
@@ -17,10 +18,7 @@ import {
   checkForDataLayerType,
 } from './utils';
 import { OperationDefinition } from '..';
-import { getFormatFromPreviousColumn, getFilter, combineErrorMessages } from '../helpers';
-import { getDisallowedPreviousShiftMessage } from '../../../time_shift_utils';
-
-const OPERATION_NAME = 'differences';
+import { getFormatFromPreviousColumn, getFilter } from '../helpers';
 
 const ofName = buildLabelFunction((name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.derivativeOf', {
@@ -37,18 +35,16 @@ const ofName = buildLabelFunction((name?: string) => {
 
 export type DerivativeIndexPatternColumn = FormattedIndexPatternColumn &
   ReferenceBasedIndexPatternColumn & {
-    operationType: typeof OPERATION_NAME;
+    operationType: typeof DIFFERENCES_ID;
   };
 
 export const derivativeOperation: OperationDefinition<
   DerivativeIndexPatternColumn,
   'fullReference'
 > = {
-  type: OPERATION_NAME,
+  type: DIFFERENCES_ID,
   priority: 1,
-  displayName: i18n.translate('xpack.lens.indexPattern.derivative', {
-    defaultMessage: 'Differences',
-  }),
+  displayName: DIFFERENCES_NAME,
   input: 'fullReference',
   selectionStyle: 'full',
   requiredReferences: [
@@ -66,7 +62,7 @@ export const derivativeOperation: OperationDefinition<
       };
     }
   },
-  getDefaultLabel: (column, indexPattern, columns) => {
+  getDefaultLabel: (column, columns, indexPattern) => {
     return ofName(columns[column.references[0]]?.label, column.timeScale, column.timeShift);
   },
   toExpression: (layer, columnId) => {
@@ -79,7 +75,7 @@ export const derivativeOperation: OperationDefinition<
     return {
       label: ofName(ref?.label, previousColumn?.timeScale, previousColumn?.timeShift),
       dataType: 'number',
-      operationType: OPERATION_NAME,
+      operationType: DIFFERENCES_ID,
       isBucketed: false,
       scale: 'ratio',
       references: referenceIds,
@@ -93,16 +89,13 @@ export const derivativeOperation: OperationDefinition<
     return hasDateField(newIndexPattern);
   },
   getErrorMessage: (layer: FormBasedLayer, columnId: string) => {
-    return combineErrorMessages([
-      getErrorsForDateReference(
-        layer,
-        columnId,
-        i18n.translate('xpack.lens.indexPattern.derivative', {
-          defaultMessage: 'Differences',
-        })
-      ),
-      getDisallowedPreviousShiftMessage(layer, columnId),
-    ]);
+    return getErrorsForDateReference(
+      layer,
+      columnId,
+      i18n.translate('xpack.lens.indexPattern.derivative', {
+        defaultMessage: 'Differences',
+      })
+    );
   },
   getDisabledStatus(indexPattern, layer, layerType) {
     const opName = i18n.translate('xpack.lens.indexPattern.derivative', {
@@ -118,23 +111,6 @@ export const derivativeOperation: OperationDefinition<
   },
   timeScalingMode: 'optional',
   filterable: true,
-  documentation: {
-    section: 'calculation',
-    signature: i18n.translate('xpack.lens.indexPattern.differences.signature', {
-      defaultMessage: 'metric: number',
-    }),
-    description: i18n.translate('xpack.lens.indexPattern.differences.documentation.markdown', {
-      defaultMessage: `
-Calculates the difference to the last value of a metric over time. To use this function, you need to configure a date histogram dimension as well.
-Differences requires the data to be sequential. If your data is empty when using differences, try increasing the date histogram interval.
-
-This calculation will be done separately for separate series defined by filters or top values dimensions.
-
-Example: Visualize the change in bytes received over time:
-\`differences(sum(bytes))\`
-      `,
-    }),
-  },
   quickFunctionDocumentation: i18n.translate(
     'xpack.lens.indexPattern.differences.documentation.quick',
     {

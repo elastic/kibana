@@ -1,7 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/content-management-inspector",
-  "owner": "@elastic/shared-ux",
-  "runtimeDeps": [],
-  "typeDeps": [],
-}

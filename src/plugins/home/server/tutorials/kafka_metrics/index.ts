@@ -56,6 +56,6 @@ export function kafkaMetricsSpecProvider(context: TutorialContext): TutorialSche
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
-    integrationBrowserCategories: ['message_queue'],
+    integrationBrowserCategories: ['observability', 'stream_processing'],
   };
 }

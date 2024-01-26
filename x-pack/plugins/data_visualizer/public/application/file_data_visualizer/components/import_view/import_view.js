@@ -10,12 +10,14 @@ import React, { Component } from 'react';
 
 import {
   EuiButton,
-  EuiPage,
   EuiPageBody,
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
+  EuiPageHeader,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -26,14 +28,15 @@ import { ImportProgress, IMPORT_STATUS } from '../import_progress';
 import { ImportErrors } from '../import_errors';
 import { ImportSummary } from '../import_summary';
 import { ImportSettings } from '../import_settings';
+import { DocCountChart } from '../doc_count_chart';
 import {
   addCombinedFieldsToPipeline,
   addCombinedFieldsToMappings,
   getDefaultCombinedFields,
 } from '../../../common/components/combined_fields';
+import { MODE as DATAVISUALIZER_MODE } from '../file_data_visualizer_view/constants';
 
-const DEFAULT_TIME_FIELD = '@timestamp';
-const DEFAULT_INDEX_SETTINGS = { number_of_shards: 1 };
+const DEFAULT_INDEX_SETTINGS = {};
 const CONFIG_MODE = { SIMPLE: 0, ADVANCED: 1 };
 
 const DEFAULT_STATE = {
@@ -70,6 +73,7 @@ const DEFAULT_STATE = {
   isFilebeatFlyoutVisible: false,
   checkingValidIndex: false,
   combinedFields: [],
+  importer: undefined,
 };
 
 export class ImportView extends Component {
@@ -97,7 +101,7 @@ export class ImportView extends Component {
 
   // TODO - sort this function out. it's a mess
   async import() {
-    const { data, results, dataViewsContract, showBottomBar, fileUpload } = this.props;
+    const { data, results, dataViewsContract, fileUpload } = this.props;
 
     const { format } = results;
     let { timeFieldName } = this.state;
@@ -148,7 +152,6 @@ export class ImportView extends Component {
               permissionCheckStatus: IMPORT_STATUS.COMPLETE,
             },
             () => {
-              this.props.hideBottomBar();
               setTimeout(async () => {
                 let success = true;
                 const createPipeline = pipelineString !== '';
@@ -202,15 +205,6 @@ export class ImportView extends Component {
                   parseJSONStatus: success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
                 });
 
-                // if an @timestamp field has been added to the
-                // mappings, use this field as the time field.
-                // This relies on the field being populated by
-                // the ingest pipeline on ingest
-                if (mappings.properties[DEFAULT_TIME_FIELD] !== undefined) {
-                  timeFieldName = DEFAULT_TIME_FIELD;
-                  this.setState({ timeFieldName });
-                }
-
                 if (success) {
                   const importer = await fileUpload.importerFactory(format, {
                     excludeLinesPattern: results.exclude_lines_pattern,
@@ -222,6 +216,7 @@ export class ImportView extends Component {
                     this.setState({
                       readStatus: success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
                       reading: false,
+                      importer,
                     });
 
                     if (readResp.success === false) {
@@ -236,6 +231,9 @@ export class ImportView extends Component {
                         mappings,
                         pipeline
                       );
+
+                      timeFieldName = importer.getTimeField();
+                      this.setState({ timeFieldName });
 
                       const indexCreated = initializeImportResp.index !== undefined;
                       this.setState({
@@ -307,8 +305,6 @@ export class ImportView extends Component {
                     }
                   }
                 }
-
-                showBottomBar();
 
                 this.setState({
                   importing: false,
@@ -407,12 +403,10 @@ export class ImportView extends Component {
 
   showFilebeatFlyout = () => {
     this.setState({ isFilebeatFlyoutVisible: true });
-    this.props.hideBottomBar();
   };
 
   closeFilebeatFlyout = () => {
     this.setState({ isFilebeatFlyoutVisible: false });
-    this.props.showBottomBar();
   };
 
   async loadDataViewNames() {
@@ -455,6 +449,7 @@ export class ImportView extends Component {
       isFilebeatFlyoutVisible,
       checkingValidIndex,
       combinedFields,
+      importer,
     } = this.state;
 
     const createPipeline = pipelineString !== '';
@@ -481,15 +476,19 @@ export class ImportView extends Component {
       checkingValidIndex === true;
 
     return (
-      <EuiPage data-test-subj="dataVisualizerPageFileImport">
-        <EuiPageBody>
-          <EuiPageContentHeader>
-            <EuiTitle>
-              <h1>{this.props.fileName}</h1>
-            </EuiTitle>
-          </EuiPageContentHeader>
-          <EuiSpacer size="m" />
-          <EuiPanel data-test-subj="dataVisualizerFileImportSettingsPanel">
+      <EuiPageBody data-test-subj="dataVisualizerPageFileImport">
+        <EuiPageHeader>
+          <EuiTitle>
+            <h1>{this.props.fileName}</h1>
+          </EuiTitle>
+        </EuiPageHeader>
+        <EuiSpacer size="m" />
+        {initialized === false ? (
+          <EuiPanel
+            data-test-subj="dataVisualizerFileImportSettingsPanel"
+            hasShadow={false}
+            hasBorder
+          >
             <EuiTitle size="s">
               <h2>
                 <FormattedMessage
@@ -522,87 +521,128 @@ export class ImportView extends Component {
 
             <EuiSpacer size="m" />
 
-            {(initialized === false || importing === true) && (
-              <EuiButton
-                isDisabled={disableImport}
-                onClick={this.clickImport}
-                isLoading={importing}
-                iconSide="right"
-                fill
-                data-test-subj="dataVisualizerFileImportButton"
-              >
-                <FormattedMessage
-                  id="xpack.dataVisualizer.file.importView.importButtonLabel"
-                  defaultMessage="Import"
-                />
-              </EuiButton>
-            )}
-
-            {initialized === true && importing === false && (
-              <EuiButton onClick={this.clickReset}>
-                <FormattedMessage
-                  id="xpack.dataVisualizer.file.importView.resetButtonLabel"
-                  defaultMessage="Reset"
-                />
-              </EuiButton>
-            )}
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  isDisabled={disableImport}
+                  onClick={this.clickImport}
+                  isLoading={importing}
+                  iconSide="right"
+                  fill
+                  data-test-subj="dataVisualizerFileImportButton"
+                >
+                  <FormattedMessage
+                    id="xpack.dataVisualizer.file.importView.importButtonLabel"
+                    defaultMessage="Import"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  onClick={() => this.props.onChangeMode(DATAVISUALIZER_MODE.READ)}
+                  isDisabled={importing}
+                >
+                  <FormattedMessage
+                    id="xpack.dataVisualizer.file.importView.backButtonLabel"
+                    defaultMessage="Back"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty onClick={() => this.props.onCancel()} isDisabled={importing}>
+                  <FormattedMessage
+                    id="xpack.dataVisualizer.file.importView.cancelButtonLabel"
+                    defaultMessage="Select a different file"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiPanel>
+        ) : null}
 
-          {initialized === true && (
-            <React.Fragment>
-              <EuiSpacer size="m" />
+        {initialized === true && (
+          <React.Fragment>
+            <EuiSpacer size="m" />
 
-              <EuiPanel>
-                <ImportProgress statuses={statuses} />
+            <EuiPanel hasShadow={false} hasBorder>
+              <ImportProgress statuses={statuses} />
 
-                {imported === true && (
-                  <React.Fragment>
-                    <EuiSpacer size="m" />
+              {importer !== undefined && importer.initialized() && (
+                <DocCountChart
+                  statuses={statuses}
+                  dataStart={this.props.dataStart}
+                  importer={importer}
+                />
+              )}
 
-                    <ImportSummary
+              {imported === true && (
+                <React.Fragment>
+                  <EuiSpacer size="m" />
+
+                  <ImportSummary
+                    index={index}
+                    dataView={dataView === '' ? index : dataView}
+                    ingestPipelineId={ingestPipelineId}
+                    docCount={docCount}
+                    importFailures={importFailures}
+                    createDataView={createDataView}
+                    createPipeline={createPipeline}
+                  />
+
+                  <EuiSpacer size="l" />
+
+                  <EuiFlexGroup>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton onClick={this.clickReset}>
+                        <FormattedMessage
+                          id="xpack.dataVisualizer.file.importView.resetButtonLabel"
+                          defaultMessage="Reset"
+                        />
+                      </EuiButton>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty onClick={() => this.props.onCancel()} isDisabled={importing}>
+                        <FormattedMessage
+                          id="xpack.dataVisualizer.file.importView.importNewButtonLabel"
+                          defaultMessage="Import a new file"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+
+                  <EuiSpacer size="l" />
+
+                  <ResultsLinks
+                    fieldStats={this.props.results?.field_stats}
+                    index={index}
+                    dataViewId={dataViewId}
+                    timeFieldName={timeFieldName}
+                    createDataView={createDataView}
+                    showFilebeatFlyout={this.showFilebeatFlyout}
+                    getAdditionalLinks={this.props.getAdditionalLinks ?? []}
+                  />
+
+                  {isFilebeatFlyoutVisible && (
+                    <FilebeatConfigFlyout
                       index={index}
-                      dataView={dataView === '' ? index : dataView}
+                      results={this.props.results}
                       ingestPipelineId={ingestPipelineId}
-                      docCount={docCount}
-                      importFailures={importFailures}
-                      createDataView={createDataView}
-                      createPipeline={createPipeline}
+                      closeFlyout={this.closeFilebeatFlyout}
                     />
+                  )}
+                </React.Fragment>
+              )}
+            </EuiPanel>
+          </React.Fragment>
+        )}
+        {errors.length > 0 && (
+          <React.Fragment>
+            <EuiSpacer size="m" />
 
-                    <EuiSpacer size="l" />
-
-                    <ResultsLinks
-                      fieldStats={this.props.results?.field_stats}
-                      index={index}
-                      dataViewId={dataViewId}
-                      timeFieldName={timeFieldName}
-                      createDataView={createDataView}
-                      showFilebeatFlyout={this.showFilebeatFlyout}
-                      getAdditionalLinks={this.props.getAdditionalLinks ?? []}
-                    />
-
-                    {isFilebeatFlyoutVisible && (
-                      <FilebeatConfigFlyout
-                        index={index}
-                        results={this.props.results}
-                        ingestPipelineId={ingestPipelineId}
-                        closeFlyout={this.closeFilebeatFlyout}
-                      />
-                    )}
-                  </React.Fragment>
-                )}
-              </EuiPanel>
-            </React.Fragment>
-          )}
-          {errors.length > 0 && (
-            <React.Fragment>
-              <EuiSpacer size="m" />
-
-              <ImportErrors errors={errors} statuses={statuses} />
-            </React.Fragment>
-          )}
-        </EuiPageBody>
-      </EuiPage>
+            <ImportErrors errors={errors} statuses={statuses} />
+          </React.Fragment>
+        )}
+      </EuiPageBody>
     );
   }
 }

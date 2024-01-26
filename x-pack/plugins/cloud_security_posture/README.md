@@ -4,81 +4,107 @@ Cloud Posture automates the identification and remediation of risks across cloud
 
 ---
 
-## Table of contents
-
-- [Development](#development)
-  - [Local checks before creating a PR](#local-checks-before-creating-a-pr)
-  - [Install pre-commit hooks (optional)](#install-pre-commit-hooks-optional)
-  - [Running unit tests](#running-unit-tests)
-  - [Running integration tests](#running-integration-tests)
-
----
-
 ## Development
 
-See the [kibana contributing guide](https://github.com/elastic/kibana/blob/main/CONTRIBUTING.md) for instructions
-setting up your development environment.
+Read [Kibana Contributing Guide](https://github.com/elastic/kibana/blob/main/CONTRIBUTING.md) for more details
 
-### Local checks before creating a PR
+## Testing
 
-Kibana has a pretty long CI process.
-Therefore, we suggest running the following commands locally before creating a PR:
+For general guidelines, read [Kibana Testing Guide](https://www.elastic.co/guide/en/kibana/current/development-tests.html) for more details
 
-1. Typescript check: `node scripts/type_check.js --project=x-pack/plugins/cloud_security_posture/tsconfig.json`
-2. Linter check: `yarn lint:es x-pack/plugins/cloud_security_posture`
-3. Unit tests: `yarn jest --config x-pack/plugins/cloud_security_posture/jest.config.js`
+### Tests
 
-### Install pre-commit hooks (optional)
+1. Unit Tests (Jest) - located in sibling files to the source code
+1. [API Integration Tests](../../test/api_integration/apis/cloud_security_posture/config.ts)
+1. [Telemetry Integration Tests](../../test/cloud_security_posture_api/config.ts)
+1. [End-to-End Tests](../../test/cloud_security_posture_functional/config.ts)
+1. [Serverless API Integration tests](../../test_serverless/api_integration/test_suites/security/config.ts)
+1. [Serverless End-to-End Tests](../../test_serverless/functional/test_suites/security/config.ts)
 
-We
-use [pre-commit](https://docs.elastic.dev/kibana-dev-docs/getting-started/setup-dev-env#install-pre-commit-hook-optional)
-to run linters and tests before each commit. To install the pre-commit hooks, run the following command from the root of
-the repository:
 
-```bash
-node scripts/register_git_hook
-```
+### Tools
 
-### Running unit tests
-
-Our [unit tests](https://docs.elastic.dev/kibana-dev-docs/tutorials/testing-plugins#unit-testing) are written
-using [jest](https://jestjs.io/) framework.
-
-As a convention, we use the `.test.ts` suffix for all our tests.
-
-You can run all cloud security posture tests with the following command:
+Run **TypeScript**:
 
 ```bash
-yarn jest --config x-pack/plugins/cloud_security_posture/jest.config.js
+node scripts/type_check.js --project=x-pack/plugins/cloud_security_posture/tsconfig.json
 ```
 
-To run a specific test, you can use the `--testNamePattern` flag:
+Run **ESLint**:
 
 ```bash
-yarn jest --config x-pack/plugins/cloud_security_posture/jest.config.js --testNamePattern=FilePattern -t MyTest
+yarn lint:es x-pack/plugins/cloud_security_posture
 ```
 
-### Running integration tests
+Run **i18n check**:
+```bash
+node scripts/i18n_check.js
+```
 
-The cloud security posture plugin has
-also [integration tests](https://docs.elastic.dev/kibana-dev-docs/tutorials/testing-plugins#integration-tests) that run
-against a real Elasticsearch and Kibana instances.
-We use these tests to verify that the plugin works as expected when running in a real environment.
-In order to run the integration tests, you need to have a running Elasticsearch and Kibana instances with the
-integration test configuration.
+> **Note**
+>
+> i18n should run on project scope as it checks translations files outside of our plugin.
+>
+> Fixes can be applied using the --fix flag
 
-You can run Kibana and Elastic with the integration test configuration by running the following command from the root of
-the Kibana repository:
+Run [**Unit Tests**](https://www.elastic.co/guide/en/kibana/current/development-tests.html#_unit_testing):
 
 ```bash
-node scripts/functional_tests_server.js --config x-pack/test/api_integration/config.ts
+yarn test:jest --config x-pack/plugins/cloud_security_posture/jest.config.js
 ```
 
-** You should wait until the server is ready to accept connections before running the integration tests.
+> **Note**
+>
+> for a coverage report, add the `--coverage` flag, and run `open target/kibana-coverage/jest/x-pack/plugins/cloud_security_posture/index.html`
 
-Then, in a separate terminal, you can run the integration test.
-In order to do so, run the following command:
+Run [**Integration Tests**](https://docs.elastic.dev/kibana-dev-docs/tutorials/testing-plugins#):
 
-``` bash  
-node scripts/functional_test_runner.js --config x-pack/test/api_integration/config.ts --include=test_file_path
+```bash
+yarn test:ftr --config x-pack/test/api_integration/config.ts
+```
+
+Run [**End-to-End Tests**](https://www.elastic.co/guide/en/kibana/current/development-tests.html#_running_functional_tests):
+
+```bash
+yarn test:ftr --config x-pack/test/cloud_security_posture_functional/config.ts
+yarn test:ftr --config x-pack/test/api_integration/apis/cloud_security_posture/config.ts
+yarn test:ftr --config x-pack/test/cloud_security_posture_api/config.ts
+yarn test:ftr --config x-pack/test_serverless/api_integration/test_suites/security/config.ts --include-tag=cloud_security_posture
+yarn test:ftr --config x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.ts
+```
+
+#### Run **FTR tests (integration or e2e) for development**
+
+Functional test runner (FTR) can be used separately with `ftr:runner` and `ftr:server`. This is convenient while developing tests.
+
+For example, 
+
+run ESS (stateful) api integration tests:
+```bash
+yarn test:ftr:server --config x-pack/test/api_integration/config.ts
+yarn test:ftr:runner --config x-pack/test/api_integration/apis/cloud_security_posture/config.ts
+```
+
+run ESS (stateful) telemetry integration tests:
+```bash
+yarn test:ftr:server --config x-pack/test/cloud_security_posture_api/config.ts
+yarn test:ftr:runner --config x-pack/test/cloud_security_posture_api/config.ts
+```
+
+run ESS (stateful) e2e tests:
+```bash
+yarn test:ftr:server --config x-pack/test/cloud_security_posture_functional/config.ts
+yarn test:ftr:runner --config x-pack/test/cloud_security_posture_functional/config.ts
+```
+
+run serverless api integration tests:
+```bash
+yarn test:ftr:server --config x-pack/test_serverless/api_integration/test_suites/security/config.ts
+yarn test:ftr:runner --config x-pack/test_serverless/api_integration/test_suites/security/config.ts --include-tag=cloud_security_posture
+```
+
+run serverless e2e tests:
+```bash
+yarn test:ftr:server --config x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.ts
+yarn test:ftr:runner ---config x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.ts
 ```

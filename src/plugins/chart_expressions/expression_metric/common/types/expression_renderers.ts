@@ -24,8 +24,9 @@ export interface MetricVisParam {
   subtitle?: string;
   secondaryPrefix?: string;
   color?: string;
+  icon?: string;
   palette?: CustomPaletteState;
-  progressDirection: LayoutDirection;
+  progressDirection?: LayoutDirection;
   maxCols: number;
   minTiles?: number;
   trends?: TrendlineResult['trends'];

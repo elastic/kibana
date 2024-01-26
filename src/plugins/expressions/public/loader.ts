@@ -60,7 +60,9 @@ export class ExpressionLoader {
       syncColors: params?.syncColors,
       syncTooltips: params?.syncTooltips,
       syncCursor: params?.syncCursor,
+      shouldUseSizeTransitionVeil: params?.shouldUseSizeTransitionVeil,
       hasCompatibleActions: params?.hasCompatibleActions,
+      getCompatibleCellValueActions: params?.getCompatibleCellValueActions,
       executionContext: params?.executionContext,
     });
     this.render$ = this.renderHandler.render$;
@@ -147,6 +149,7 @@ export class ExpressionLoader {
       syncColors: params.syncColors,
       syncCursor: params?.syncCursor,
       syncTooltips: params.syncTooltips,
+      shouldUseSizeTransitionVeil: params.shouldUseSizeTransitionVeil,
       executionContext: params.executionContext,
       partial: params.partial,
       throttle: params.throttle,

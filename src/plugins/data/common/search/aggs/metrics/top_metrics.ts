@@ -14,6 +14,7 @@ import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { DataViewField, KBN_FIELD_TYPES } from '../../..';
 import { BaseAggParams } from '../types';
+import { createTopHitFilter } from './lib/create_filter';
 
 export interface BaseAggParamsTopMetrics extends BaseAggParams {
   field: string;
@@ -40,6 +41,9 @@ export const getTopMetricsMetricAgg = () => {
     title: i18n.translate('data.search.aggs.metrics.topMetricsTitle', {
       defaultMessage: 'Top metrics',
     }),
+    getValueType: (aggConfig) => {
+      return aggConfig.getParam('field')?.type;
+    },
     makeLabel(aggConfig) {
       const isDescOrder = aggConfig.getParam('sortOrder').value === 'desc';
       const size = aggConfig.getParam('size');
@@ -162,5 +166,6 @@ export const getTopMetricsMetricAgg = () => {
       if (results.length === 1) return results[0];
       return results;
     },
+    createFilter: createTopHitFilter,
   });
 };

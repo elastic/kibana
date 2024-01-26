@@ -42,6 +42,7 @@ export const callGetLatestCategoriesDatasetsStatsAPI = async (
         },
       })
     ),
+    version: '1',
   });
 
   return decodeOrThrow(getLatestLogEntryCategoryDatasetsStatsSuccessResponsePayloadRT)(response);

@@ -8,7 +8,9 @@
 
 import * as React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Switch, Route, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
+
 import { CoreSetup, Plugin } from '@kbn/core/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
 
@@ -26,7 +28,7 @@ export class ManagementTestPlugin
         ReactDOM.render(
           <Router history={params.history}>
             <h1 data-test-subj="test-management-header">Hello from management test plugin</h1>
-            <Switch>
+            <Routes>
               <Route path={'/one'}>
                 <Link to={`${params.basePath}`} data-test-subj="test-management-link-basepath">
                   Link to basePath
@@ -37,7 +39,7 @@ export class ManagementTestPlugin
                   Link to /one
                 </Link>
               </Route>
-            </Switch>
+            </Routes>
           </Router>,
           params.element
         );

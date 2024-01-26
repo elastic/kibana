@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { merge, flattenDeep } from 'lodash';
 import type { Client } from '@elastic/elasticsearch';
 import { makePing } from './make_ping';
@@ -37,7 +37,7 @@ export const makeCheck = async ({
 }: CheckProps): Promise<{ monitorId: string; docs: any }> => {
   const cgFields = {
     monitor: {
-      check_group: fields.monitor?.check_group || uuid.v4(),
+      check_group: fields.monitor?.check_group || uuidv4(),
     },
   };
 
@@ -139,6 +139,7 @@ export const makeChecksWithStatus = async (
       if (d.summary) {
         d.summary[status] += d.summary[oppositeStatus];
         d.summary[oppositeStatus] = 0;
+        d.summary.final_attempt = true;
       }
 
       return mogrify(d);

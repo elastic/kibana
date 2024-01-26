@@ -7,9 +7,9 @@
 
 import Boom from '@hapi/boom';
 
+import { AuthenticationResult } from './authentication_result';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import type { UserProfileGrant } from '../user_profile';
-import { AuthenticationResult } from './authentication_result';
 
 describe('AuthenticationResult', () => {
   describe('notHandled', () => {

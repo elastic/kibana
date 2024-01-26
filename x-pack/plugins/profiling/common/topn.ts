@@ -9,9 +9,9 @@ import { euiPaletteColorBlind } from '@elastic/eui';
 import { InferSearchResponseOf } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
-import { ProfilingESField } from './elasticsearch';
+import { ProfilingESField } from '@kbn/profiling-utils';
+import type { StackFrameMetadata } from '@kbn/profiling-utils';
 import { createUniformBucketsForTimeRange } from './histogram';
-import { StackFrameMetadata } from './profiling';
 
 export const OTHER_BUCKET_LABEL = i18n.translate('xpack.profiling.topn.otherBucketLabel', {
   defaultMessage: 'Other',
@@ -19,11 +19,13 @@ export const OTHER_BUCKET_LABEL = i18n.translate('xpack.profiling.topn.otherBuck
 
 export interface CountPerTime {
   Timestamp: number;
+  Percentage: number;
   Count: number | null;
 }
 
 export interface TopNSample extends CountPerTime {
   Category: string;
+  Percentage: number;
 }
 
 export interface TopNSamples {
@@ -157,6 +159,8 @@ export function createTopNSamples(
   // from the total
   const otherFrameCountsByTimestamp = new Map<number, number>();
 
+  const totalFrameCountsByTimestamp = new Map<number, number>();
+
   let addOtherBucket = false;
 
   for (let i = 0; i < response.over_time.buckets.length; i++) {
@@ -170,6 +174,8 @@ export function createTopNSamples(
     }
 
     otherFrameCountsByTimestamp.set(timestamp, valueForOtherBucket);
+
+    totalFrameCountsByTimestamp.set(timestamp, bucket.count.value ?? 0);
   }
 
   // Only add the 'other' bucket if at least one value per timestamp is > 0
@@ -190,10 +196,12 @@ export function createTopNSamples(
   for (const category of bucketsByCategories.keys()) {
     const frameCountsByTimestamp = bucketsByCategories.get(category);
     for (const timestamp of timestamps) {
+      const count = frameCountsByTimestamp.get(timestamp) ?? 0;
       const sample: TopNSample = {
         Timestamp: timestamp,
-        Count: frameCountsByTimestamp.get(timestamp) ?? 0,
+        Count: count,
         Category: category,
+        Percentage: (count / totalFrameCountsByTimestamp.get(timestamp)!) * 100,
       };
       samples.push(sample);
     }
@@ -212,17 +220,39 @@ export interface TopNSubchart {
   Metadata: StackFrameMetadata[];
 }
 
-export function groupSamplesByCategory({
-  samples,
-  totalCount,
-  metadata,
-  labels,
+export function getCategoryColor({
+  category,
+  subChartSize,
+  colors,
 }: {
-  samples: TopNSample[];
-  totalCount: number;
-  metadata: Record<string, StackFrameMetadata[]>;
-  labels: Record<string, string>;
-}): TopNSubchart[] {
+  category: string;
+  subChartSize: number;
+  colors: ReturnType<typeof euiPaletteColorBlind>;
+}) {
+  // We want the mapping from the category string to the color to be constant,
+  // so that the same category string will always map to the same color.
+  const stringhash = (s: string): number => {
+    let hash: number = 0;
+    for (let i = 0; i < s.length; i++) {
+      const ch = s.charCodeAt(i);
+      hash = (hash << 5) - hash + ch; // eslint-disable-line no-bitwise
+      // Apply bit mask to ensure positive value.
+      hash &= 0x7fffffff; // eslint-disable-line no-bitwise
+    }
+    return hash % subChartSize;
+  };
+
+  return colors[stringhash(category)];
+}
+
+export function groupSamplesByCategory(topNResponse: TopNResponse): { charts: TopNSubchart[] } {
+  const {
+    TotalCount: totalCount,
+    TopN: samples,
+    Metadata: metadata,
+    Labels: labels,
+  } = topNResponse;
+
   const seriesByCategory = new Map<string, CountPerTime[]>();
 
   for (let i = 0; i < samples.length; i++) {
@@ -233,6 +263,7 @@ export function groupSamplesByCategory({
     }
     const series = seriesByCategory.get(sample.Category)!;
     series.push({
+      Percentage: sample.Percentage,
       Timestamp: sample.Timestamp,
       Count: sample.Count,
     });
@@ -255,17 +286,23 @@ export function groupSamplesByCategory({
     rotations: Math.ceil(subcharts.length / 10),
   });
 
-  return orderBy(subcharts, ['Percentage', 'Category'], ['desc', 'asc']).map((chart, index) => {
-    return {
-      ...chart,
-      Color: colors[index],
-      Index: index + 1,
-      Series: chart.Series.map((value) => {
-        return {
-          ...value,
-          Category: chart.Category,
-        };
-      }),
-    };
-  });
+  return {
+    charts: orderBy(subcharts, ['Percentage', 'Category'], ['desc', 'asc']).map((chart, index) => {
+      return {
+        ...chart,
+        Color: getCategoryColor({
+          category: chart.Category,
+          colors,
+          subChartSize: subcharts.length,
+        }),
+        Index: index + 1,
+        Series: chart.Series.map((value) => {
+          return {
+            ...value,
+            Category: chart.Category,
+          };
+        }),
+      };
+    }),
+  };
 }

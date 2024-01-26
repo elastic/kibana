@@ -35,6 +35,7 @@ export function buildFiltersFunction(
       context: {
         types: ['null'],
       },
+      deprecated: true,
       args: {
         group: {
           aliases: ['_'],

@@ -11,7 +11,7 @@ import useDebounce from 'react-use/lib/useDebounce';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { SearchFilterConfig } from '@elastic/eui/src/components/search_bar/search_filters';
-import { SchemaType } from '@elastic/eui/src/components/search_bar/search_box';
+import { SchemaType } from '@elastic/eui/src/components/search_bar/search_bar';
 import { EuiSearchBarOnChangeArgs } from '@elastic/eui/src/components/search_bar/search_bar';
 import { EuiButton, EuiCallOut, EuiSearchBar, EuiSpacer, Query } from '@elastic/eui';
 import { SnapshotDeleteProvider } from '../../../../components';
@@ -159,7 +159,7 @@ export const SnapshotSearchBar: React.FunctionComponent<Props> = ({
         <>
           <EuiCallOut
             data-test-subj="snapshotListSearchError"
-            iconType="alert"
+            iconType="warning"
             color="danger"
             title={
               <FormattedMessage

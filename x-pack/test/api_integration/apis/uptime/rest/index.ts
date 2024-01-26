@@ -8,7 +8,7 @@
 import {
   settingsObjectId,
   settingsObjectType,
-} from '@kbn/synthetics-plugin/server/legacy_uptime/lib/saved_objects/uptime_settings';
+} from '@kbn/synthetics-plugin/server/saved_objects/uptime_settings';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
@@ -49,8 +49,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./dynamic_settings'));
       loadTestFile(require.resolve('./snapshot'));
       loadTestFile(require.resolve('./monitor_states_generated'));
-      loadTestFile(require.resolve('./telemetry_collectors'));
-      loadTestFile(require.resolve('./telemetry_collectors_fleet'));
     });
 
     describe('with real-world data', () => {
@@ -70,7 +68,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./monitor_duration'));
       loadTestFile(require.resolve('./index_status'));
       loadTestFile(require.resolve('./monitor_states_real_data'));
-      loadTestFile(require.resolve('./uptime_zip_url_deprecation.ts'));
+      loadTestFile(require.resolve('./uptime_integration_deprecation.ts'));
     });
   });
 }

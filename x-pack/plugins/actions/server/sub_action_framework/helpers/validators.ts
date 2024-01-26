@@ -9,6 +9,23 @@ import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { ValidatorServices } from '../../types';
 
+const validProtocols: string[] = ['http:', 'https:'];
+export const assertURL = (url: string) => {
+  try {
+    const parsedUrl = new URL(url);
+
+    if (!parsedUrl.hostname) {
+      throw new Error(`URL must contain hostname`);
+    }
+
+    if (!validProtocols.includes(parsedUrl.protocol)) {
+      throw new Error(`Invalid protocol`);
+    }
+  } catch (error) {
+    throw new Error(`URL Error: ${error.message}`);
+  }
+};
+
 export const urlAllowListValidator = <T>(urlKey: string) => {
   return (obj: T, validatorServices: ValidatorServices) => {
     const { configurationUtilities } = validatorServices;

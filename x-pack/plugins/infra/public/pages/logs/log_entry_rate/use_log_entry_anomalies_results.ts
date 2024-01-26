@@ -7,10 +7,12 @@
 
 import { useMemo, useState, useCallback, useEffect, useReducer } from 'react';
 import useMount from 'react-use/lib/useMount';
+import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
+import { IdFormatByJobType } from '../../../../common/http_api/latest';
 import { useTrackedPromise, CanceledPromiseError } from '../../../utils/use_tracked_promise';
 import { callGetLogEntryAnomaliesAPI } from './service_calls/get_log_entry_anomalies';
 import { callGetLogEntryAnomaliesDatasetsAPI } from './service_calls/get_log_entry_anomalies_datasets';
-import { GetLogEntryAnomaliesDatasetsSuccessResponsePayload } from '../../../../common/http_api/log_analysis';
+import { GetLogEntryAnomaliesDatasetsSuccessResponsePayload } from '../../../../common/http_api';
 import {
   AnomaliesSort,
   Pagination,
@@ -137,7 +139,8 @@ const STATE_DEFAULTS: ReducerStateDefaults = {
 export const useLogEntryAnomaliesResults = ({
   endTime,
   startTime,
-  sourceId,
+  logViewReference,
+  idFormats,
   defaultSortOptions,
   defaultPaginationOptions,
   onGetLogEntryAnomaliesDatasetsError,
@@ -145,7 +148,8 @@ export const useLogEntryAnomaliesResults = ({
 }: {
   endTime: number;
   startTime: number;
-  sourceId: string;
+  logViewReference: PersistedLogViewReference;
+  idFormats: IdFormatByJobType | null;
   defaultSortOptions: AnomaliesSort;
   defaultPaginationOptions: Pick<Pagination, 'pageSize'>;
   onGetLogEntryAnomaliesDatasetsError?: (error: Error) => void;
@@ -174,6 +178,10 @@ export const useLogEntryAnomaliesResults = ({
     {
       cancelPreviousOn: 'creation',
       createPromise: async () => {
+        if (!idFormats) {
+          throw new Error('idFormats is undefined');
+        }
+
         const {
           timeRange: { start: queryStartTime, end: queryEndTime },
           sortOptions,
@@ -183,7 +191,8 @@ export const useLogEntryAnomaliesResults = ({
         } = reducerState;
         return await callGetLogEntryAnomaliesAPI(
           {
-            sourceId,
+            logViewReference,
+            idFormats,
             startTime: queryStartTime,
             endTime: queryEndTime,
             sort: sortOptions,
@@ -216,7 +225,8 @@ export const useLogEntryAnomaliesResults = ({
       },
     },
     [
-      sourceId,
+      logViewReference,
+      idFormats,
       dispatch,
       reducerState.timeRange,
       reducerState.sortOptions,
@@ -293,8 +303,12 @@ export const useLogEntryAnomaliesResults = ({
     {
       cancelPreviousOn: 'creation',
       createPromise: async () => {
+        if (!idFormats) {
+          throw new Error('idFormats is undefined');
+        }
+
         return await callGetLogEntryAnomaliesDatasetsAPI(
-          { sourceId, startTime, endTime },
+          { logViewReference, idFormats, startTime, endTime },
           services.http.fetch
         );
       },
@@ -311,7 +325,7 @@ export const useLogEntryAnomaliesResults = ({
         }
       },
     },
-    [endTime, sourceId, startTime]
+    [endTime, logViewReference, idFormats, startTime]
   );
 
   const isLoadingDatasets = useMemo(

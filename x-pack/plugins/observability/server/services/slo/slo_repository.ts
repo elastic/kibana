@@ -5,111 +5,150 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
-
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
-
-import { StoredSLO, SLO } from '../../domain/models';
+import { Logger } from '@kbn/core/server';
+import { ALL_VALUE, Paginated, Pagination, sloSchema } from '@kbn/slo-schema';
+import { isLeft } from 'fp-ts/lib/Either';
+import { SLO_MODEL_VERSION } from '../../../common/slo/constants';
+import { SLO, StoredSLO } from '../../domain/models';
+import { SLOIdConflict, SLONotFound } from '../../errors';
 import { SO_SLO_TYPE } from '../../saved_objects';
-import { SLONotFound } from '../../errors';
-import { sloSchema } from '../../types/schema';
-
-export interface Criteria {
-  name?: string;
-}
-
-export interface Pagination {
-  page: number;
-  perPage: number;
-}
-
-export interface Paginated<T> {
-  page: number;
-  perPage: number;
-  total: number;
-  results: T[];
-}
 
 export interface SLORepository {
-  save(slo: SLO): Promise<SLO>;
+  save(slo: SLO, options?: { throwOnConflict: boolean }): Promise<SLO>;
+  findAllByIds(ids: string[]): Promise<SLO[]>;
   findById(id: string): Promise<SLO>;
   deleteById(id: string): Promise<void>;
-  find(criteria: Criteria, pagination: Pagination): Promise<Paginated<SLO>>;
+  search(
+    search: string,
+    pagination: Pagination,
+    options?: { includeOutdatedOnly?: boolean }
+  ): Promise<Paginated<SLO>>;
 }
 
 export class KibanaSavedObjectsSLORepository implements SLORepository {
-  constructor(private soClient: SavedObjectsClientContract) {}
+  constructor(private soClient: SavedObjectsClientContract, private logger: Logger) {}
 
-  async save(slo: SLO): Promise<SLO> {
-    const savedSLO = await this.soClient.create<StoredSLO>(SO_SLO_TYPE, toStoredSLO(slo), {
-      id: slo.id,
+  async save(slo: SLO, options = { throwOnConflict: false }): Promise<SLO> {
+    let existingSavedObjectId;
+    const findResponse = await this.soClient.find<StoredSLO>({
+      type: SO_SLO_TYPE,
+      page: 1,
+      perPage: 1,
+      filter: `slo.attributes.id:(${slo.id})`,
+    });
+    if (findResponse.total === 1) {
+      if (options.throwOnConflict) {
+        throw new SLOIdConflict(`SLO [${slo.id}] already exists`);
+      }
+
+      existingSavedObjectId = findResponse.saved_objects[0].id;
+    }
+
+    await this.soClient.create<StoredSLO>(SO_SLO_TYPE, toStoredSLO(slo), {
+      id: existingSavedObjectId,
       overwrite: true,
     });
 
-    return toSLO(savedSLO.attributes);
+    return slo;
   }
 
   async findById(id: string): Promise<SLO> {
-    try {
-      const slo = await this.soClient.get<StoredSLO>(SO_SLO_TYPE, id);
-      return toSLO(slo.attributes);
-    } catch (err) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-        throw new SLONotFound(`SLO [${id}] not found`);
-      }
-      throw err;
+    const response = await this.soClient.find<StoredSLO>({
+      type: SO_SLO_TYPE,
+      page: 1,
+      perPage: 1,
+      filter: `slo.attributes.id:(${id})`,
+    });
+
+    if (response.total === 0) {
+      throw new SLONotFound(`SLO [${id}] not found`);
     }
+
+    const slo = this.toSLO(response.saved_objects[0].attributes);
+    if (slo === undefined) {
+      throw new Error('Invalid stored SLO');
+    }
+
+    return slo;
   }
 
   async deleteById(id: string): Promise<void> {
-    try {
-      await this.soClient.delete(SO_SLO_TYPE, id);
-    } catch (err) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-        throw new SLONotFound(`SLO [${id}] not found`);
-      }
-      throw err;
+    const response = await this.soClient.find<StoredSLO>({
+      type: SO_SLO_TYPE,
+      page: 1,
+      perPage: 1,
+      filter: `slo.attributes.id:(${id})`,
+    });
+
+    if (response.total === 0) {
+      throw new SLONotFound(`SLO [${id}] not found`);
     }
+
+    await this.soClient.delete(SO_SLO_TYPE, response.saved_objects[0].id);
   }
 
-  async find(criteria: Criteria, pagination: Pagination): Promise<Paginated<SLO>> {
-    const filterKuery = buildFilterKuery(criteria);
+  async findAllByIds(ids: string[]): Promise<SLO[]> {
+    if (ids.length === 0) return [];
+
+    const response = await this.soClient.find<StoredSLO>({
+      type: SO_SLO_TYPE,
+      page: 1,
+      perPage: ids.length,
+      filter: `slo.attributes.id:(${ids.join(' or ')})`,
+    });
+
+    return response.saved_objects
+      .map((slo) => this.toSLO(slo.attributes))
+      .filter((slo) => slo !== undefined) as SLO[];
+  }
+
+  async search(
+    search: string,
+    pagination: Pagination,
+    options: { includeOutdatedOnly?: boolean } = { includeOutdatedOnly: false }
+  ): Promise<Paginated<SLO>> {
     const response = await this.soClient.find<StoredSLO>({
       type: SO_SLO_TYPE,
       page: pagination.page,
       perPage: pagination.perPage,
-      filter: filterKuery,
+      search,
+      searchFields: ['name'],
+      ...(!!options.includeOutdatedOnly && {
+        filter: `slo.attributes.version < ${SLO_MODEL_VERSION}`,
+      }),
     });
 
     return {
       total: response.total,
-      page: response.page,
       perPage: response.per_page,
-      results: response.saved_objects.map((slo) => toSLO(slo.attributes)),
+      page: response.page,
+      results: response.saved_objects
+        .map((savedObject) => this.toSLO(savedObject.attributes))
+        .filter((slo) => slo !== undefined) as SLO[],
     };
   }
-}
 
-function buildFilterKuery(criteria: Criteria): string | undefined {
-  const filters: string[] = [];
-  if (!!criteria.name) {
-    filters.push(`slo.attributes.name: ${criteria.name}`);
+  toSLO(storedSLO: StoredSLO): SLO | undefined {
+    const result = sloSchema.decode({
+      ...storedSLO,
+      // groupBy was added in 8.10.0
+      groupBy: storedSLO.groupBy ?? ALL_VALUE,
+      // version was added in 8.12.0. This is a safeguard against SO migration issue.
+      // if not present, we considered the version to be 1, e.g. not migrated.
+      // We would need to call the _reset api on this SLO.
+      version: storedSLO.version ?? 1,
+    });
+
+    if (isLeft(result)) {
+      this.logger.error(`Invalid stored SLO with id [${storedSLO.id}]`);
+      return undefined;
+    }
+
+    return result.right;
   }
-  return filters.length > 0 ? filters.join(' and ') : undefined;
 }
 
 function toStoredSLO(slo: SLO): StoredSLO {
   return sloSchema.encode(slo);
-}
-
-function toSLO(storedSLO: StoredSLO): SLO {
-  return pipe(
-    sloSchema.decode(storedSLO),
-    fold(() => {
-      throw new Error('Invalid Stored SLO');
-    }, t.identity)
-  );
 }

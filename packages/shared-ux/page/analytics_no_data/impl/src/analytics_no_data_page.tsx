@@ -8,6 +8,7 @@
 import React from 'react';
 import type { AnalyticsNoDataPageProps } from '@kbn/shared-ux-page-analytics-no-data-types';
 
+import useObservable from 'react-use/lib/useObservable';
 import { useServices } from './services';
 import { AnalyticsNoDataPage as Component } from './analytics_no_data_page.component';
 
@@ -19,16 +20,15 @@ export const AnalyticsNoDataPage = ({
   onDataViewCreated,
   allowAdHocDataView,
 }: AnalyticsNoDataPageProps) => {
-  const services = useServices();
-  const { kibanaGuideDocLink } = services;
+  const { customBranding, ...services } = useServices();
+  const showPlainSpinner = useObservable(customBranding.hasCustomBranding$) ?? false;
 
   return (
     <Component
-      {...{
-        onDataViewCreated,
-        allowAdHocDataView,
-        kibanaGuideDocLink,
-      }}
+      {...services}
+      showPlainSpinner={showPlainSpinner}
+      allowAdHocDataView={allowAdHocDataView}
+      onDataViewCreated={onDataViewCreated}
     />
   );
 };

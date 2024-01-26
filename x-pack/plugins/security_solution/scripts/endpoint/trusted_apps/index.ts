@@ -18,13 +18,14 @@ import {
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
 import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import type { TrustedApp } from '../../../common/endpoint/types';
 import { TrustedAppGenerator } from '../../../common/endpoint/data_generators/trusted_app_generator';
 
 import { newTrustedAppToCreateExceptionListItem } from '../../../public/management/pages/trusted_apps/service/mappers';
 import { randomPolicyIdGenerator } from '../common/random_policy_id_generator';
 
-const defaultLogger = new ToolingLog({ level: 'info', writeTo: process.stdout });
+const defaultLogger = createToolingLogger();
 const separator = '----------------------------------------';
 const trustedAppGenerator = new TrustedAppGenerator();
 
@@ -33,7 +34,7 @@ export const cli = async () => {
     string: ['kibana'],
     default: {
       count: 10,
-      kibana: 'http://elastic:changeme@localhost:5601',
+      kibana: 'http://elastic:changeme@127.0.0.1:5601',
     },
   };
   const options: RunOptions = minimist<RunOptions>(process.argv.slice(2), cliDefaults);
@@ -70,7 +71,7 @@ interface RunOptions {
 }
 export const run: (options?: RunOptions) => Promise<TrustedApp[]> = async ({
   count = 10,
-  kibana = 'http://elastic:changeme@localhost:5601',
+  kibana = 'http://elastic:changeme@127.0.0.1:5601',
   logger = defaultLogger,
 }: RunOptions = {}) => {
   const kbnClient = new KbnClient({

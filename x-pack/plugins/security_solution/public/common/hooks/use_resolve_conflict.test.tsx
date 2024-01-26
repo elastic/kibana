@@ -9,7 +9,6 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useDeepEqualSelector } from './use_selector';
 import { useKibana } from '../lib/kibana';
 import { useResolveConflict } from './use_resolve_conflict';
-import * as urlHelpers from '../utils/global_query_string/helpers';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -21,7 +20,7 @@ jest.mock('react-router-dom', () => {
 });
 jest.mock('../lib/kibana');
 jest.mock('./use_selector');
-jest.mock('../../timelines/store/timeline', () => ({
+jest.mock('../../timelines/store', () => ({
   timelineSelectors: {
     getTimelineByIdSelector: () => jest.fn(),
   },
@@ -30,7 +29,7 @@ jest.mock('../../timelines/store/timeline', () => ({
 describe('useResolveConflict', () => {
   const mockGetLegacyUrlConflict = jest.fn().mockReturnValue('Test!');
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
     // Mock rison format in actual url
     (useLocation as jest.Mock).mockReturnValue({
       pathname: 'my/cool/path',
@@ -127,9 +126,6 @@ describe('useResolveConflict', () => {
 
     describe('rison is unable to be decoded', () => {
       it('should use timeline values from redux to create the otherObjectPath', async () => {
-        jest.spyOn(urlHelpers, 'decodeRisonUrlState').mockImplementation(() => {
-          throw new Error('Unable to decode');
-        });
         (useLocation as jest.Mock).mockReturnValue({
           pathname: 'my/cool/path',
           search: '?foo=bar',

@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { EuiFlyoutSize, EuiOverlayMaskProps } from '@elastic/eui';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
 
 /**
@@ -28,20 +28,10 @@ export interface OverlayFlyoutStart {
 /**
  * @public
  */
-export interface OverlayFlyoutOpenOptions {
-  className?: string;
-  closeButtonAriaLabel?: string;
-  ownFocus?: boolean;
-  'data-test-subj'?: string;
-  'aria-label'?: string;
-  size?: EuiFlyoutSize;
-  maxWidth?: boolean | number | string;
-  hideCloseButton?: boolean;
-  outsideClickCloses?: boolean;
-  maskProps?: EuiOverlayMaskProps;
+export type OverlayFlyoutOpenOptions = Omit<EuiFlyoutProps, 'onClose'> & {
   /**
    * EuiFlyout onClose handler.
    * If provided the consumer is responsible for calling flyout.close() to close the flyout;
    */
   onClose?: (flyout: OverlayRef) => void;
-}
+};

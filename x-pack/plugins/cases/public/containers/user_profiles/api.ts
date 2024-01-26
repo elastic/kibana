@@ -14,7 +14,7 @@ export interface SuggestUserProfilesArgs {
   http: HttpStart;
   name: string;
   owners: string[];
-  signal: AbortSignal;
+  signal?: AbortSignal;
   size?: number;
 }
 

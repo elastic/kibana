@@ -35,6 +35,7 @@ const rewriteBodyRes: RewriteResponseCase<ActionResult> = ({
   isPreconfigured,
   isDeprecated,
   isMissingSecrets,
+  isSystemAction,
   ...res
 }) => ({
   ...res,
@@ -42,6 +43,7 @@ const rewriteBodyRes: RewriteResponseCase<ActionResult> = ({
   is_preconfigured: isPreconfigured,
   is_deprecated: isDeprecated,
   is_missing_secrets: isMissingSecrets,
+  is_system_action: isSystemAction,
 });
 
 export const createActionRoute = (
@@ -50,8 +52,13 @@ export const createActionRoute = (
 ) => {
   router.post(
     {
-      path: `${BASE_ACTION_API_PATH}/connector`,
+      path: `${BASE_ACTION_API_PATH}/connector/{id?}`,
       validate: {
+        params: schema.maybe(
+          schema.object({
+            id: schema.maybe(schema.string()),
+          })
+        ),
         body: bodySchema,
       },
     },
@@ -60,7 +67,7 @@ export const createActionRoute = (
         const actionsClient = (await context.actions).getActionsClient();
         const action = rewriteBodyReq(req.body);
         return res.ok({
-          body: rewriteBodyRes(await actionsClient.create({ action })),
+          body: rewriteBodyRes(await actionsClient.create({ action, options: req.params })),
         });
       })
     )

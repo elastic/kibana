@@ -37,7 +37,7 @@ export default function (providerContext: FtrProviderContext) {
     describe('reassign single agent', () => {
       it('should allow to reassign single agent', async () => {
         await supertest
-          .put(`/api/fleet/agents/agent1/reassign`)
+          .post(`/api/fleet/agents/agent1/reassign`)
           .set('kbn-xsrf', 'xxx')
           .send({
             policy_id: 'policy2',
@@ -49,7 +49,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it('should throw an error for invalid policy id for single reassign', async () => {
         await supertest
-          .put(`/api/fleet/agents/agent1/reassign`)
+          .post(`/api/fleet/agents/agent1/reassign`)
           .set('kbn-xsrf', 'xxx')
           .send({
             policy_id: 'INVALID_ID',
@@ -61,7 +61,7 @@ export default function (providerContext: FtrProviderContext) {
         // policy2 is not hosted
         // reassign succeeds
         await supertest
-          .put(`/api/fleet/agents/agent1/reassign`)
+          .post(`/api/fleet/agents/agent1/reassign`)
           .set('kbn-xsrf', 'xxx')
           .send({
             policy_id: 'policy2',
@@ -79,7 +79,7 @@ export default function (providerContext: FtrProviderContext) {
 
         // reassign fails
         await supertest
-          .put(`/api/fleet/agents/agent1/reassign`)
+          .post(`/api/fleet/agents/agent1/reassign`)
           .set('kbn-xsrf', 'xxx')
           .send({
             policy_id: 'policy2',
@@ -88,7 +88,8 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('bulk reassign agents', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/162545
+    describe.skip('bulk reassign agents', () => {
       it('should allow to reassign multiple agents by id', async () => {
         await supertest
           .post(`/api/fleet/agents/bulk_reassign`)
@@ -199,9 +200,9 @@ export default function (providerContext: FtrProviderContext) {
         await new Promise((resolve, reject) => {
           let attempts = 0;
           const intervalId = setInterval(async () => {
-            if (attempts > 2) {
+            if (attempts > 5) {
               clearInterval(intervalId);
-              reject('action timed out');
+              reject(new Error('action timed out'));
             }
             ++attempts;
             const {

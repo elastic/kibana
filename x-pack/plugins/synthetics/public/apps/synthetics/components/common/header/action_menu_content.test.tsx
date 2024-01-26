@@ -25,18 +25,7 @@ describe('ActionMenuContent', () => {
       'Navigate to the "Explore Data" view to visualize Synthetics/User data'
     );
 
-    expect(analyzeAnchor.getAttribute('href')).toContain('/app/observability/exploratory-view');
+    expect(analyzeAnchor.getAttribute('href')).toContain('/app/exploratory-view');
     expect(getByText('Explore data'));
-  });
-
-  it('renders Add Data link', () => {
-    const { getByLabelText, getByText } = render(<ActionMenuContent />);
-
-    const addDataAnchor = getByLabelText('Navigate to a tutorial about adding Uptime data');
-
-    // this href value is mocked, so it doesn't correspond to the real link
-    // that Kibana core services will provide
-    expect(addDataAnchor.getAttribute('href')).toBe('/home#/tutorial/uptimeMonitors');
-    expect(getByText('Add data'));
   });
 });

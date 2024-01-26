@@ -22,6 +22,7 @@ describe('FeatureRegistry', () => {
 
       const featureRegistry = new FeatureRegistry();
       featureRegistry.registerKibanaFeature(feature);
+      featureRegistry.lockRegistration();
       const result = featureRegistry.getAllKibanaFeatures();
       expect(result).toHaveLength(1);
 
@@ -51,7 +52,7 @@ describe('FeatureRegistry', () => {
             app: ['app1'],
             savedObject: {
               all: ['space', 'etc', 'telemetry'],
-              read: ['canvas', 'config', 'url'],
+              read: ['canvas', 'config', 'config-global', 'url'],
             },
             api: ['someApiEndpointTag', 'anotherEndpointTag'],
             ui: ['allowsFoo', 'showBar', 'showBaz'],
@@ -59,7 +60,7 @@ describe('FeatureRegistry', () => {
           read: {
             savedObject: {
               all: [],
-              read: ['config', 'url', 'telemetry'],
+              read: ['config', 'config-global', 'url', 'telemetry'],
             },
             ui: [],
           },
@@ -124,7 +125,7 @@ describe('FeatureRegistry', () => {
                 app: ['app1'],
                 savedObject: {
                   all: ['space', 'etc', 'telemetry'],
-                  read: ['canvas', 'config', 'url'],
+                  read: ['canvas', 'config', 'config-global', 'url'],
                 },
                 api: ['someApiEndpointTag', 'anotherEndpointTag'],
                 ui: ['allowsFoo', 'showBar', 'showBaz'],
@@ -137,6 +138,7 @@ describe('FeatureRegistry', () => {
 
       const featureRegistry = new FeatureRegistry();
       featureRegistry.registerKibanaFeature(feature);
+      featureRegistry.lockRegistration();
       const result = featureRegistry.getAllKibanaFeatures();
       expect(result).toHaveLength(1);
 
@@ -278,6 +280,7 @@ describe('FeatureRegistry', () => {
 
       const featureRegistry = new FeatureRegistry();
       featureRegistry.registerKibanaFeature(feature);
+      featureRegistry.lockRegistration();
       const result = featureRegistry.getAllKibanaFeatures();
 
       expect(result[0].privileges).toHaveProperty('all');
@@ -287,7 +290,7 @@ describe('FeatureRegistry', () => {
       expect(allPrivilege?.savedObject.all).toEqual(['telemetry']);
     });
 
-    it(`automatically grants access to config, url, and telemetry saved objects`, () => {
+    it(`automatically grants access to config, config-global, url, and telemetry saved objects`, () => {
       const feature: KibanaFeatureConfig = {
         id: 'test-feature',
         name: 'Test Feature',
@@ -313,6 +316,7 @@ describe('FeatureRegistry', () => {
 
       const featureRegistry = new FeatureRegistry();
       featureRegistry.registerKibanaFeature(feature);
+      featureRegistry.lockRegistration();
       const result = featureRegistry.getAllKibanaFeatures();
 
       expect(result[0].privileges).toHaveProperty('all');
@@ -320,11 +324,16 @@ describe('FeatureRegistry', () => {
 
       const allPrivilege = result[0].privileges?.all;
       const readPrivilege = result[0].privileges?.read;
-      expect(allPrivilege?.savedObject.read).toEqual(['config', 'url']);
-      expect(readPrivilege?.savedObject.read).toEqual(['config', 'telemetry', 'url']);
+      expect(allPrivilege?.savedObject.read).toEqual(['config', 'config-global', 'url']);
+      expect(readPrivilege?.savedObject.read).toEqual([
+        'config',
+        'config-global',
+        'telemetry',
+        'url',
+      ]);
     });
 
-    it(`automatically grants 'all' access to telemetry and 'read' to [config, url] saved objects for the reserved privilege`, () => {
+    it(`automatically grants 'all' access to telemetry and 'read' to [config, config-global, url] saved objects for the reserved privilege`, () => {
       const feature: KibanaFeatureConfig = {
         id: 'test-feature',
         name: 'Test Feature',
@@ -350,11 +359,12 @@ describe('FeatureRegistry', () => {
 
       const featureRegistry = new FeatureRegistry();
       featureRegistry.registerKibanaFeature(feature);
+      featureRegistry.lockRegistration();
       const result = featureRegistry.getAllKibanaFeatures();
 
       const reservedPrivilege = result[0]!.reserved!.privileges[0].privilege;
       expect(reservedPrivilege.savedObject.all).toEqual(['telemetry']);
-      expect(reservedPrivilege.savedObject.read).toEqual(['config', 'url']);
+      expect(reservedPrivilege.savedObject.read).toEqual(['config', 'config-global', 'url']);
     });
 
     it(`does not duplicate the automatic grants if specified on the incoming feature`, () => {
@@ -368,14 +378,14 @@ describe('FeatureRegistry', () => {
             ui: [],
             savedObject: {
               all: ['telemetry'],
-              read: ['config', 'url'],
+              read: ['config', 'config-global', 'url'],
             },
           },
           read: {
             ui: [],
             savedObject: {
               all: [],
-              read: ['config', 'url'],
+              read: ['config', 'config-global', 'url'],
             },
           },
         },
@@ -383,6 +393,7 @@ describe('FeatureRegistry', () => {
 
       const featureRegistry = new FeatureRegistry();
       featureRegistry.registerKibanaFeature(feature);
+      featureRegistry.lockRegistration();
       const result = featureRegistry.getAllKibanaFeatures();
 
       expect(result[0].privileges).toHaveProperty('all');
@@ -391,8 +402,13 @@ describe('FeatureRegistry', () => {
       const allPrivilege = result[0].privileges!.all;
       const readPrivilege = result[0].privileges!.read;
       expect(allPrivilege?.savedObject.all).toEqual(['telemetry']);
-      expect(allPrivilege?.savedObject.read).toEqual(['config', 'url']);
-      expect(readPrivilege?.savedObject.read).toEqual(['config', 'url', 'telemetry']);
+      expect(allPrivilege?.savedObject.read).toEqual(['config', 'config-global', 'url']);
+      expect(readPrivilege?.savedObject.read).toEqual([
+        'config',
+        'config-global',
+        'url',
+        'telemetry',
+      ]);
     });
 
     it(`does not allow duplicate features to be registered`, () => {
@@ -478,7 +494,7 @@ describe('FeatureRegistry', () => {
             name: 'Foo',
             app: ['app1', 'app2'],
             savedObject: {
-              all: ['config', 'space', 'etc'],
+              all: ['config', 'config-global', 'space', 'etc'],
               read: ['canvas'],
             },
             api: ['someApiEndpointTag', 'anotherEndpointTag'],
@@ -1645,6 +1661,7 @@ describe('FeatureRegistry', () => {
 
       const featureRegistry = new FeatureRegistry();
       featureRegistry.registerKibanaFeature(feature);
+      featureRegistry.lockRegistration();
       const result = featureRegistry.getAllKibanaFeatures();
       expect(result).toHaveLength(1);
       expect(result[0].reserved?.privileges).toHaveLength(2);
@@ -1802,7 +1819,7 @@ describe('FeatureRegistry', () => {
       `);
     });
 
-    it('cannot register feature after getAll has been called', () => {
+    it('cannot register kibana feature after lockRegistration has been called', () => {
       const feature1: KibanaFeatureConfig = {
         id: 'test-feature',
         name: 'Test Feature',
@@ -1820,6 +1837,7 @@ describe('FeatureRegistry', () => {
 
       const featureRegistry = new FeatureRegistry();
       featureRegistry.registerKibanaFeature(feature1);
+      featureRegistry.lockRegistration();
       featureRegistry.getAllKibanaFeatures();
       expect(() => {
         featureRegistry.registerKibanaFeature(feature2);
@@ -1827,6 +1845,7 @@ describe('FeatureRegistry', () => {
         `"Features are locked, can't register new features. Attempt to register test-feature-2 failed."`
       );
     });
+
     describe('#getAllKibanaFeatures', () => {
       const features: KibanaFeatureConfig[] = [
         {
@@ -1879,6 +1898,7 @@ describe('FeatureRegistry', () => {
 
       const registry = new FeatureRegistry();
       features.forEach((f) => registry.registerKibanaFeature(f));
+      registry.lockRegistration();
 
       it('returns all features and sub-feature privileges by default', () => {
         const result = registry.getAllKibanaFeatures();
@@ -1926,6 +1946,7 @@ describe('FeatureRegistry', () => {
 
       const featureRegistry = new FeatureRegistry();
       featureRegistry.registerElasticsearchFeature(feature);
+      featureRegistry.lockRegistration();
       const result = featureRegistry.getAllElasticsearchFeatures();
       expect(result).toHaveLength(1);
 
@@ -1962,6 +1983,7 @@ describe('FeatureRegistry', () => {
 
       const featureRegistry = new FeatureRegistry();
       featureRegistry.registerElasticsearchFeature(feature);
+      featureRegistry.lockRegistration();
       const result = featureRegistry.getAllElasticsearchFeatures();
       expect(result).toHaveLength(1);
 
@@ -2014,6 +2036,27 @@ describe('FeatureRegistry', () => {
       expect(() =>
         featureRegistry.registerElasticsearchFeature(feature)
       ).toThrowErrorMatchingInlineSnapshot(`"Feature with id test-feature is already registered."`);
+    });
+
+    it('cannot register elasticsearch feature after lockRegistration has been called', () => {
+      const feature: ElasticsearchFeatureConfig = {
+        id: 'test-feature',
+        privileges: [
+          {
+            requiredClusterPrivileges: ['all'],
+            ui: [],
+          },
+        ],
+      };
+
+      const featureRegistry = new FeatureRegistry();
+      featureRegistry.lockRegistration();
+
+      expect(() =>
+        featureRegistry.registerElasticsearchFeature(feature)
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Features are locked, can't register new features. Attempt to register test-feature failed."`
+      );
     });
   });
 

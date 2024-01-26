@@ -11,9 +11,8 @@
 
 import { PluginInitializerContext } from '@kbn/core/public';
 import { DevToolsPlugin } from './plugin';
+export * from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new DevToolsPlugin();
+  return new DevToolsPlugin(initializerContext);
 }
-
-export * from './plugin';

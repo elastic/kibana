@@ -9,7 +9,7 @@
 import { flatten } from 'lodash';
 import { CoreSetup } from '@kbn/core/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { escapeQuotes } from './lib/escape_kuery';
+import { escapeQuotes } from '@kbn/es-query';
 import { KqlQuerySuggestionProvider } from './types';
 import type { UnifiedSearchPublicPluginStart } from '../../../types';
 import { QuerySuggestion, QuerySuggestionTypes } from '../query_suggestion_provider';
@@ -31,7 +31,7 @@ export const setupGetValueSuggestions: KqlQuerySuggestionProvider = (
     .getStartServices()
     .then(([_, __, dataStart]) => dataStart.autocomplete);
   return async (
-    { indexPatterns, boolFilter, useTimeRange, signal, method },
+    { indexPatterns, boolFilter, useTimeRange, signal, method, suggestionsAbstraction },
     { start, end, prefix, suffix, fieldName, nestedPath }
   ): Promise<QuerySuggestion[]> => {
     const fullFieldName = nestedPath ? `${nestedPath}.${fieldName}` : fieldName;
@@ -56,6 +56,7 @@ export const setupGetValueSuggestions: KqlQuerySuggestionProvider = (
           useTimeRange,
           signal,
           method,
+          querySuggestionKey: suggestionsAbstraction?.type,
         }).then((valueSuggestions) => {
           const quotedValues = valueSuggestions.map((value) =>
             typeof value === 'string' ? `"${escapeQuotes(value)}"` : `${value}`

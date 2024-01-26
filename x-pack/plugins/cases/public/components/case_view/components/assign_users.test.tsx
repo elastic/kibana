@@ -46,7 +46,7 @@ describe('AssignUsers', () => {
   it('does not show any assignees when there are none assigned', () => {
     appMockRender.render(<AssignUsers {...defaultProps} />);
 
-    expect(screen.getByText('No users have been assigned.')).toBeInTheDocument();
+    expect(screen.getByText('No users are assigned')).toBeInTheDocument();
   });
 
   it('does not show the suggest users edit button when the user does not have update permissions', () => {
@@ -95,7 +95,7 @@ describe('AssignUsers', () => {
     expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
     expect(screen.getByText('Physical Dinosaur')).toBeInTheDocument();
     expect(screen.queryByText('Wet Dingo')).not.toBeInTheDocument();
-    expect(screen.queryByText('No users have been assigned.')).not.toBeInTheDocument();
+    expect(screen.queryByText('No users are assigned')).not.toBeInTheDocument();
     expect(screen.queryByTestId('case-view-assignees-loading')).not.toBeInTheDocument();
   });
 
@@ -112,7 +112,7 @@ describe('AssignUsers', () => {
     expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
     expect(screen.getByText('Physical Dinosaur')).toBeInTheDocument();
     expect(screen.queryByText('Wet Dingo')).not.toBeInTheDocument();
-    expect(screen.queryByText('No users have been assigned.')).not.toBeInTheDocument();
+    expect(screen.queryByText('No users are assigned')).not.toBeInTheDocument();
     expect(screen.queryByTestId('case-view-assignees-loading')).not.toBeInTheDocument();
   });
 
@@ -188,10 +188,12 @@ describe('AssignUsers', () => {
     appMockRender.render(<AssignUsers {...props} />);
 
     fireEvent.mouseEnter(
-      screen.getByTestId(`user-profile-assigned-user-group-${userProfiles[0].user.username}`)
+      screen.getByTestId(`user-profile-assigned-user-${userProfiles[0].user.username}-remove-group`)
     );
     fireEvent.click(
-      screen.getByTestId(`user-profile-assigned-user-cross-${userProfiles[0].user.username}`)
+      screen.getByTestId(
+        `user-profile-assigned-user-${userProfiles[0].user.username}-remove-button`
+      )
     );
 
     await waitFor(() => expect(onAssigneesChanged).toBeCalledTimes(1));
@@ -268,8 +270,8 @@ describe('AssignUsers', () => {
     };
     appMockRender.render(<AssignUsers {...props} />);
 
-    fireEvent.mouseEnter(screen.getByTestId(`user-profile-assigned-user-group-unknownId1`));
-    fireEvent.click(screen.getByTestId(`user-profile-assigned-user-cross-unknownId1`));
+    fireEvent.mouseEnter(screen.getByTestId(`user-profile-assigned-user-unknownId1-remove-group`));
+    fireEvent.click(screen.getByTestId(`user-profile-assigned-user-unknownId1-remove-button`));
 
     await waitFor(() => expect(onAssigneesChanged).toBeCalledTimes(1));
 
@@ -291,8 +293,12 @@ describe('AssignUsers', () => {
     appMockRender.render(<AssignUsers {...props} />);
 
     expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
-    expect(screen.getByTestId('user-profile-assigned-user-group-unknownId1')).toBeInTheDocument();
-    expect(screen.getByTestId('user-profile-assigned-user-group-unknownId2')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('user-profile-assigned-user-unknownId1-remove-group')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId('user-profile-assigned-user-unknownId2-remove-group')
+    ).toBeInTheDocument();
   });
 
   it('calls onAssigneesChanged with both users with profiles and without', async () => {

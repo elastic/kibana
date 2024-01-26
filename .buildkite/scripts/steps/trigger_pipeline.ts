@@ -11,6 +11,7 @@ import { BuildkiteClient } from '#pipeline-utils';
 const pipelineSlug = process.argv[2];
 const branch = process.argv[3] || 'main';
 const commit = process.argv[4] || 'HEAD';
+const kibanaBuildId = process.argv[5] || '';
 
 (async () => {
   try {
@@ -18,6 +19,9 @@ const commit = process.argv[4] || 'HEAD';
     const build = await client.triggerBuild(pipelineSlug, {
       commit,
       branch,
+      env: {
+        ...(kibanaBuildId && { KIBANA_BUILD_ID: kibanaBuildId }),
+      },
       ignore_pipeline_branch_filters: true, // Required because of a Buildkite bug
     });
     console.log(`Triggered build: ${build.web_url}`);

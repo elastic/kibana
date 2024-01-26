@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { ReactWrapper } from 'enzyme';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { Provider } from 'react-redux';
 import { act } from 'react-dom/test-utils';
 import { PreloadedState } from '@reduxjs/toolkit';
+import { RenderOptions, render } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { LensAppServices } from '../app_plugin/types';
-
 import { makeConfigureStore, LensAppState, LensState, LensStoreDeps } from '../state_management';
 import { getResolvedDateRange } from '../utils';
 import { DatasourceMap, VisualizationMap } from '../types';
@@ -62,6 +63,36 @@ export const defaultState = {
   },
 };
 
+export const renderWithReduxStore = (
+  ui: ReactElement,
+  options?: RenderOptions,
+  {
+    preloadedState,
+    storeDeps,
+  }: { preloadedState: Partial<LensAppState>; storeDeps?: LensStoreDeps } = {
+    preloadedState: {},
+    storeDeps: mockStoreDeps(),
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): any => {
+  const { store } = makeLensStore({ preloadedState, storeDeps });
+
+  const Wrapper: React.FC<{
+    children: React.ReactNode;
+  }> = ({ children }) => (
+    <Provider store={store}>
+      <I18nProvider>{children}</I18nProvider>
+    </Provider>
+  );
+
+  const rtlRender = render(ui, { wrapper: Wrapper, ...options });
+
+  return {
+    store,
+    ...rtlRender,
+  };
+};
+
 export function makeLensStore({
   preloadedState,
   dispatch,
@@ -100,6 +131,7 @@ export const mountWithProvider = async (
     wrappingComponent?: React.FC<{
       children: React.ReactNode;
     }>;
+    wrappingComponentProps?: Record<string, unknown>;
     attachTo?: HTMLElement;
   }
 ) => {
@@ -113,13 +145,14 @@ export const mountWithProvider = async (
   return { instance, lensStore, deps };
 };
 
-export const getMountWithProviderParams = (
+const getMountWithProviderParams = (
   component: React.ReactElement,
   store?: MountStoreProps,
   options?: {
     wrappingComponent?: React.FC<{
       children: React.ReactNode;
     }>;
+    wrappingComponentProps?: Record<string, unknown>;
     attachTo?: HTMLElement;
   }
 ) => {
@@ -133,12 +166,13 @@ export const getMountWithProviderParams = (
     attachTo?: HTMLElement | undefined;
   } = {};
   if (options) {
-    const { wrappingComponent: _wrappingComponent, ...rest } = options;
+    const { wrappingComponent: _wrappingComponent, wrappingComponentProps, ...rest } = options;
     restOptions = rest;
 
     if (_wrappingComponent) {
       wrappingComponent = ({ children }) => {
         return _wrappingComponent({
+          ...wrappingComponentProps,
           children: <Provider store={lensStore}>{children}</Provider>,
         });
       };

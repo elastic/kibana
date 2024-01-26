@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export type { ExtensionsSetup } from './extensions_service';
+export type { ExtensionsSetup, IndexContent } from './extensions_service';
 export { ExtensionsService } from './extensions_service';
+
+export type { PublicApiServiceSetup } from './public_api_service';
+export { PublicApiService } from './public_api_service';

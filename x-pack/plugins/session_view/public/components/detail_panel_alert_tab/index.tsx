@@ -9,7 +9,7 @@ import { EuiEmptyPrompt, EuiButtonGroup, EuiHorizontalRule, EuiButton } from '@e
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { groupBy } from 'lodash';
-import { ProcessEvent } from '../../../common/types/process_tree';
+import type { ProcessEvent } from '../../../common';
 import { useStyles } from './styles';
 import { DetailPanelAlertListItem } from '../detail_panel_alert_list_item';
 import { DetailPanelAlertGroupItem } from '../detail_panel_alert_group_item';

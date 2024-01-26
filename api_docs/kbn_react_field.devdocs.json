@@ -27,7 +27,7 @@
         "label": "FieldButton",
         "description": [],
         "signature": [
-          "({\n  size = 'm',\n  isActive = false,\n  fieldIcon,\n  fieldName,\n  fieldInfoIcon,\n  fieldAction,\n  className,\n  isDraggable = false,\n  onClick,\n  dataTestSubj,\n  buttonProps,\n  ...rest\n}: ",
+          "({\n  size,\n  isActive = false,\n  fieldIcon,\n  fieldName,\n  fieldInfoIcon,\n  fieldAction,\n  flush,\n  className,\n  dragHandle,\n  onClick,\n  dataTestSubj,\n  buttonProps,\n  ...rest\n}: ",
           {
             "pluginId": "@kbn/react-field",
             "scope": "common",
@@ -46,7 +46,7 @@
             "id": "def-common.FieldButton.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  size = 'm',\n  isActive = false,\n  fieldIcon,\n  fieldName,\n  fieldInfoIcon,\n  fieldAction,\n  className,\n  isDraggable = false,\n  onClick,\n  dataTestSubj,\n  buttonProps,\n  ...rest\n}",
+            "label": "{\n  size,\n  isActive = false,\n  fieldIcon,\n  fieldName,\n  fieldInfoIcon,\n  fieldAction,\n  flush,\n  className,\n  dragHandle,\n  onClick,\n  dataTestSubj,\n  buttonProps,\n  ...rest\n}",
             "description": [],
             "signature": [
               {
@@ -220,15 +220,15 @@
           },
           {
             "parentPluginId": "@kbn/react-field",
-            "id": "def-common.FieldButtonProps.isDraggable",
-            "type": "CompoundType",
+            "id": "def-common.FieldButtonProps.dragHandle",
+            "type": "Object",
             "tags": [],
-            "label": "isDraggable",
+            "label": "dragHandle",
             "description": [
-              "\nStyles the component differently to indicate it is draggable"
+              "\nCustom drag handle element"
             ],
             "signature": [
-              "boolean | undefined"
+              "React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined"
             ],
             "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
             "deprecated": false,
@@ -241,10 +241,26 @@
             "tags": [],
             "label": "size",
             "description": [
-              "\nUse the small size in condensed areas"
+              "\nUse the xs size in condensed areas"
             ],
             "signature": [
-              "\"m\" | \"s\" | undefined"
+              "\"s\" | \"xs\""
+            ],
+            "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/react-field",
+            "id": "def-common.FieldButtonProps.flush",
+            "type": "string",
+            "tags": [],
+            "label": "flush",
+            "description": [
+              "\nWhether to skip side paddings"
+            ],
+            "signature": [
+              "\"both\" | undefined"
             ],
             "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
             "deprecated": false,
@@ -256,7 +272,9 @@
             "type": "string",
             "tags": [],
             "label": "className",
-            "description": [],
+            "description": [
+              "\nCustom class name"
+            ],
             "signature": [
               "string | undefined"
             ],
@@ -395,7 +413,7 @@
         "label": "ButtonSize",
         "description": [],
         "signature": [
-          "\"m\" | \"s\""
+          "\"s\" | \"xs\""
         ],
         "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
         "deprecated": false,

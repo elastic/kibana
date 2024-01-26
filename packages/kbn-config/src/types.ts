@@ -14,6 +14,8 @@ export interface PackageInfo {
   branch: string;
   buildNum: number;
   buildSha: string;
+  buildDate: Date;
+  buildFlavor: BuildFlavor;
   dist: boolean;
 }
 
@@ -25,3 +27,5 @@ export interface EnvironmentMode {
   dev: boolean;
   prod: boolean;
 }
+
+export type BuildFlavor = 'serverless' | 'traditional';

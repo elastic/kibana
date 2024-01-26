@@ -15,11 +15,11 @@ export const BASE_ACTION_API_PATH = '/api/actions';
 
 export interface Props {
   http: HttpSetup;
-  signal: AbortSignal;
   connectorId: string;
+  signal?: AbortSignal;
 }
 
-export async function getIncidentTypes({ http, signal, connectorId }: Props) {
+export async function getIncidentTypes({ http, connectorId, signal }: Props) {
   const res = await http.post<ConnectorExecutorResult<ResilientIncidentTypes>>(
     getExecuteConnectorUrl(connectorId),
     {
@@ -33,7 +33,7 @@ export async function getIncidentTypes({ http, signal, connectorId }: Props) {
   return rewriteResponseToCamelCase(res);
 }
 
-export async function getSeverity({ http, signal, connectorId }: Props) {
+export async function getSeverity({ http, connectorId, signal }: Props) {
   const res = await http.post<ConnectorExecutorResult<ResilientSeverity>>(
     getExecuteConnectorUrl(connectorId),
     {

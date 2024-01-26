@@ -66,7 +66,7 @@ export const formatIndicesToSelectable = (
         }
       } else {
         if (index.alias) {
-          icon = 'alert';
+          icon = 'warning';
           color = 'danger';
           toolTipTitle = 'Alias name is incompatible';
           toolTipContent = 'You\'ll have to create a new alias prefixed with "search-".';

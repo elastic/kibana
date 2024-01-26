@@ -22,8 +22,14 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FormProvider } from 'react-hook-form';
 
-import { DEFAULT_PLATFORM } from '../../../common/constants';
-import { QueryIdField, IntervalField, VersionField, ResultsTypeField } from '../../form';
+import { DEFAULT_PLATFORM, QUERY_TIMEOUT } from '../../../common/constants';
+import {
+  QueryIdField,
+  IntervalField,
+  VersionField,
+  ResultsTypeField,
+  TimeoutField,
+} from '../../form';
 import { CodeEditorField } from '../../saved_queries/form/code_editor_field';
 import { PlatformCheckBoxGroupField } from './platform_checkbox_group_field';
 import { ALL_OSQUERY_VERSIONS_OPTIONS } from './constants';
@@ -36,6 +42,7 @@ import { usePackQueryForm } from './use_pack_query_form';
 import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
 import { ECSMappingEditorField } from './lazy_ecs_mapping_editor_field';
 import { useKibana } from '../../common/lib/kibana';
+import { overflowCss } from '../utils';
 
 interface QueryFlyoutProps {
   uniqueQueryIds: string[];
@@ -78,6 +85,9 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
         });
         resetField('version', { defaultValue: savedQuery.version ? [savedQuery.version] : [] });
         resetField('interval', { defaultValue: savedQuery.interval ? savedQuery.interval : 3600 });
+        resetField('timeout', {
+          defaultValue: savedQuery.timeout ? savedQuery.timeout : QUERY_TIMEOUT.DEFAULT,
+        });
         resetField('snapshot', { defaultValue: savedQuery.snapshot ?? true });
         resetField('removed', { defaultValue: savedQuery.removed });
         resetField('ecs_mapping', { defaultValue: savedQuery.ecs_mapping ?? {} });
@@ -145,13 +155,18 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
               <EuiSpacer />
               <ResultsTypeField />
             </EuiFlexItem>
-            <EuiFlexItem>
-              <PlatformCheckBoxGroupField />
-            </EuiFlexItem>
+            <EuiFlexGroup direction={'column'} justifyContent={'spaceBetween'}>
+              <EuiFlexItem>
+                <PlatformCheckBoxGroupField />
+              </EuiFlexItem>
+              <EuiFlexItem grow={0}>
+                <TimeoutField />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexGroup>
           <EuiSpacer />
           <EuiFlexGroup>
-            <EuiFlexItem>
+            <EuiFlexItem css={overflowCss}>
               <ECSMappingEditorField />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -160,7 +175,12 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
+            <EuiButtonEmpty
+              data-test-subj="query-flyout-cancel-button"
+              iconType="cross"
+              onClick={onClose}
+              flush="left"
+            >
               <FormattedMessage
                 id="xpack.osquery.queryFlyoutForm.cancelButtonLabel"
                 defaultMessage="Cancel"
@@ -168,7 +188,12 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton isLoading={isSubmitting} onClick={handleSubmit(onSubmit)} fill>
+            <EuiButton
+              data-test-subj="query-flyout-save-button"
+              isLoading={isSubmitting}
+              onClick={handleSubmit(onSubmit)}
+              fill
+            >
               <FormattedMessage
                 id="xpack.osquery.queryFlyoutForm.saveButtonLabel"
                 defaultMessage="Save"

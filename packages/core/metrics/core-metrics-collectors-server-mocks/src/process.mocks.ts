@@ -15,9 +15,16 @@ export function createMockOpsProcessMetrics(): OpsProcessMetrics {
     memory: {
       heap: { total_in_bytes: 1, used_in_bytes: 1, size_limit: 1 },
       resident_set_size_in_bytes: 1,
+      external_in_bytes: 1,
+      array_buffers_in_bytes: 1,
     },
     event_loop_delay: 1,
     event_loop_delay_histogram: histogram,
+    event_loop_utilization: {
+      active: 1,
+      idle: 1,
+      utilization: 1,
+    },
     pid: 1,
     uptime_in_millis: 1,
   };

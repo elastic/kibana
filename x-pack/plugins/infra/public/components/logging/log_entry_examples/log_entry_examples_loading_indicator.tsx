@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiLoadingContent } from '@elastic/eui';
+import { EuiSkeletonText } from '@elastic/eui';
 import React from 'react';
 
 export const LogEntryExampleMessagesLoadingIndicator: React.FunctionComponent<{
@@ -13,7 +13,7 @@ export const LogEntryExampleMessagesLoadingIndicator: React.FunctionComponent<{
 }> = ({ exampleCount }) => (
   <>
     {Array.from(new Array(exampleCount), (_value, index) => (
-      <EuiLoadingContent key={index} lines={1} />
+      <EuiSkeletonText key={index} lines={1} />
     ))}
   </>
 );

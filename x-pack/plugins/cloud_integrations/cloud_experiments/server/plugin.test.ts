@@ -116,7 +116,7 @@ describe('Cloud Experiments server plugin', () => {
         ).mock.instances[0];
         advance(100); // Remove the debounceTime effect
         expect(launchDarklyInstanceMock.updateUserMetadata).toHaveBeenCalledWith({
-          userId: '1c2412b751f056aef6e340efa5637d137442d489a4b1e3117071e7c87f8523f2',
+          userId: 'deployment-id',
           kibanaVersion: coreMock.createPluginInitializerContext().env.packageInfo.version,
           isElasticStaff: true,
           trialEndDate: expect.any(String),

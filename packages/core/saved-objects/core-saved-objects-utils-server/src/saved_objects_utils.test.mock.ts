@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
-const mockUuidv1 = jest.fn().mockReturnValue('uuidv1');
-jest.mock('uuid/v1', () => mockUuidv1);
-
+const mockUuidv4 = jest.fn().mockReturnValue('uuidv4');
 const mockUuidv5 = jest.fn().mockReturnValue('uuidv5');
 Object.defineProperty(mockUuidv5, 'DNS', { value: 'DNSUUID', writable: false });
-jest.mock('uuid/v5', () => mockUuidv5);
 
-export { mockUuidv1, mockUuidv5 };
+jest.mock('uuid', () => ({
+  v4: mockUuidv4,
+  v5: mockUuidv5,
+}));
+
+export { mockUuidv4, mockUuidv5 };

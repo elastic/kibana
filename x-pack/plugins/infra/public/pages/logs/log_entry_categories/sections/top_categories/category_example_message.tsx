@@ -5,28 +5,27 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { encode } from 'rison-node';
-import moment from 'moment';
-
-import { useUiTracker, useLinkProps } from '@kbn/observability-plugin/public';
-import { LogEntry, LogEntryContext } from '../../../../../../common/log_entry';
-import { TimeRange } from '../../../../../../common/time';
-import {
-  getFriendlyNameForPartitionId,
-  partitionField,
-} from '../../../../../../common/log_analysis';
-import { useViewLogInProviderContext } from '../../../../../containers/logs/view_log_in_context';
+import { LogEntry, LogEntryContext } from '@kbn/logs-shared-plugin/common';
 import {
   LogEntryColumn,
+  LogEntryContextMenu,
   LogEntryFieldColumn,
   LogEntryMessageColumn,
   LogEntryRowWrapper,
   LogEntryTimestampColumn,
-} from '../../../../../components/logging/log_text_stream';
+} from '@kbn/logs-shared-plugin/public';
+import { useLinkProps, useUiTracker } from '@kbn/observability-shared-plugin/public';
+import { encode } from '@kbn/rison';
+import moment from 'moment';
+import React, { useCallback, useState } from 'react';
+import {
+  getFriendlyNameForPartitionId,
+  partitionField,
+} from '../../../../../../common/log_analysis';
+import { TimeRange } from '../../../../../../common/time';
+import { useViewLogInProviderContext } from '../../../../../containers/logs/view_log_in_context';
 import { LogColumnConfiguration } from '../../../../../utils/source_configuration';
-import { LogEntryContextMenu } from '../../../../../components/logging/log_text_stream/log_entry_context_menu';
 
 export const exampleMessageScale = 'medium' as const;
 export const exampleTimestampFormat = 'dateTime' as const;
@@ -53,13 +52,15 @@ export const CategoryExampleMessage: React.FunctionComponent<{
   const openMenu = useCallback(() => setIsMenuOpen(true), []);
   const closeMenu = useCallback(() => setIsMenuOpen(false), []);
 
+  const time = moment(timestamp).toISOString();
+
   const viewInStreamLinkProps = useLinkProps({
     app: 'logs',
     pathname: 'stream',
     search: {
       logPosition: encode({
         end: moment(timeRange.endTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
-        position: { tiebreaker, time: timestamp },
+        position: { tiebreaker, time },
         start: moment(timeRange.startTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
         streamLive: false,
       }),
@@ -80,7 +81,7 @@ export const CategoryExampleMessage: React.FunctionComponent<{
       onMouseLeave={setNotHovered}
     >
       <LogEntryColumn {...columnWidths[timestampColumnId]}>
-        <LogEntryTimestampColumn format={exampleTimestampFormat} time={timestamp} />
+        <LogEntryTimestampColumn format={exampleTimestampFormat} time={time} />
       </LogEntryColumn>
       <LogEntryColumn {...columnWidths[messageColumnId]}>
         <LogEntryMessageColumn
@@ -129,7 +130,10 @@ export const CategoryExampleMessage: React.FunctionComponent<{
                     id,
                     index: '', // TODO: use real index when loading via async search
                     context,
-                    cursor: { time: timestamp, tiebreaker },
+                    cursor: {
+                      time: moment(timestamp).toISOString(),
+                      tiebreaker,
+                    },
                     columns: [],
                   };
                   trackMetric({ metric: 'view_in_context__categories' });

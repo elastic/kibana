@@ -7,23 +7,29 @@
 
 import Path from 'path';
 
-import * as kbnTestServer from '@kbn/core/test_helpers/kbn_server';
+import {
+  type TestElasticsearchUtils,
+  type TestKibanaUtils,
+  createRootWithCorePlugins,
+  createTestServers,
+} from '@kbn/core-test-helpers-kbn-server';
 
 import type { AgentPolicySOAttributes } from '../types';
 import { PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE } from '../../common';
+import { API_VERSIONS } from '../../common/constants';
 
 import { useDockerRegistry, waitForFleetSetup, getSupertestWithAdminUser } from './helpers';
 
 const logFilePath = Path.join(__dirname, 'logs.log');
 
 describe('Fleet preconfiguration reset', () => {
-  let esServer: kbnTestServer.TestElasticsearchUtils;
-  let kbnServer: kbnTestServer.TestKibanaUtils;
+  let esServer: TestElasticsearchUtils;
+  let kbnServer: TestKibanaUtils;
 
   const registryUrl = useDockerRegistry();
 
   const startServers = async () => {
-    const { startES } = kbnTestServer.createTestServers({
+    const { startES } = createTestServers({
       adjustTimeout: (t) => jest.setTimeout(t),
       settings: {
         es: {
@@ -35,7 +41,7 @@ describe('Fleet preconfiguration reset', () => {
 
     esServer = await startES();
     const startKibana = async () => {
-      const root = kbnTestServer.createRootWithCorePlugins(
+      const root = createRootWithCorePlugins(
         {
           xpack: {
             fleet: {
@@ -179,7 +185,11 @@ describe('Fleet preconfiguration reset', () => {
         'post',
         '/internal/fleet/reset_preconfigured_agent_policies'
       );
-      await resetAPI.set('kbn-sxrf', 'xx').expect(200).send();
+      await resetAPI
+        .set('kbn-sxrf', 'xx')
+        .set('Elastic-Api-Version', `${API_VERSIONS.internal.v1}`)
+        .expect(200)
+        .send();
 
       const agentPolicies = await kbnServer.coreStart.savedObjects
         .createInternalRepository()
@@ -221,7 +231,11 @@ describe('Fleet preconfiguration reset', () => {
         'post',
         '/internal/fleet/reset_preconfigured_agent_policies/test-12345'
       );
-      await resetAPI.set('kbn-sxrf', 'xx').expect(200).send();
+      await resetAPI
+        .set('kbn-sxrf', 'xx')
+        .set('Elastic-Api-Version', `${API_VERSIONS.internal.v1}`)
+        .expect(200)
+        .send();
 
       const agentPolicies = await kbnServer.coreStart.savedObjects
         .createInternalRepository()
@@ -255,7 +269,11 @@ describe('Fleet preconfiguration reset', () => {
         'post',
         '/internal/fleet/reset_preconfigured_agent_policies/test-12345'
       );
-      await resetAPI.set('kbn-sxrf', 'xx').expect(200).send();
+      await resetAPI
+        .set('kbn-sxrf', 'xx')
+        .set('Elastic-Api-Version', `${API_VERSIONS.internal.v1}`)
+        .expect(200)
+        .send();
 
       const agentPolicies = await soClient.find<AgentPolicySOAttributes>({
         type: 'ingest-agent-policies',
@@ -287,7 +305,11 @@ describe('Fleet preconfiguration reset', () => {
         'post',
         `/internal/fleet/reset_preconfigured_agent_policies/${POLICY_ID}`
       );
-      await resetAPI.set('kbn-sxrf', 'xx').expect(200).send();
+      await resetAPI
+        .set('kbn-sxrf', 'xx')
+        .set('Elastic-Api-Version', `${API_VERSIONS.internal.v1}`)
+        .expect(200)
+        .send();
 
       const agentPolicies = await kbnServer.coreStart.savedObjects
         .createInternalRepository()

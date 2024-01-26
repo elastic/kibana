@@ -26,6 +26,8 @@ describe('expression params validation', () => {
       threshold: [0],
       timeField: '',
       excludeHitsFromPreviousRun: true,
+      aggType: 'count',
+      groupBy: 'all',
     };
     expect(validateExpression(initialParams).errors.index.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.index[0]).toBe('Index is required.');
@@ -41,9 +43,104 @@ describe('expression params validation', () => {
       threshold: [0],
       timeField: '',
       excludeHitsFromPreviousRun: true,
+      aggType: 'count',
+      groupBy: 'all',
     };
     expect(validateExpression(initialParams).errors.timeField.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.timeField[0]).toBe('Time field is required.');
+  });
+
+  test('if aggField property is invalid should return proper error message', () => {
+    const initialParams: EsQueryRuleParams<SearchType.esQuery> = {
+      index: ['test'],
+      esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+      size: 100,
+      timeWindowSize: 1,
+      timeWindowUnit: 's',
+      threshold: [0],
+      timeField: '',
+      excludeHitsFromPreviousRun: true,
+      aggType: 'avg',
+      groupBy: 'all',
+    };
+    expect(validateExpression(initialParams).errors.aggField.length).toBeGreaterThan(0);
+    expect(validateExpression(initialParams).errors.aggField[0]).toBe(
+      'Aggregation field is required.'
+    );
+  });
+
+  test('if termSize property is not set should return proper error message', () => {
+    const initialParams: EsQueryRuleParams<SearchType.esQuery> = {
+      index: ['test'],
+      esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+      size: 100,
+      timeWindowSize: 1,
+      timeWindowUnit: 's',
+      threshold: [0],
+      timeField: '',
+      excludeHitsFromPreviousRun: true,
+      aggType: 'count',
+      groupBy: 'top',
+    };
+    expect(validateExpression(initialParams).errors.termSize.length).toBeGreaterThan(0);
+    expect(validateExpression(initialParams).errors.termSize[0]).toBe('Term size is required.');
+  });
+  test('if termField property is not set should return proper error message', () => {
+    const initialParams: EsQueryRuleParams<SearchType.esQuery> = {
+      index: ['test'],
+      esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+      size: 100,
+      timeWindowSize: 1,
+      timeWindowUnit: 's',
+      threshold: [0],
+      timeField: '',
+      excludeHitsFromPreviousRun: true,
+      aggType: 'count',
+      groupBy: 'top',
+      termSize: 10,
+    };
+    expect(validateExpression(initialParams).errors.termField.length).toBeGreaterThan(0);
+    expect(validateExpression(initialParams).errors.termField[0]).toBe('Term field is required.');
+  });
+
+  test('if termField property is an array but has no items should return proper error message', () => {
+    const initialParams: EsQueryRuleParams<SearchType.esQuery> = {
+      index: ['test'],
+      esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+      size: 100,
+      timeWindowSize: 1,
+      timeWindowUnit: 's',
+      threshold: [0],
+      timeField: '',
+      excludeHitsFromPreviousRun: true,
+      aggType: 'count',
+      groupBy: 'top',
+      termSize: 10,
+      termField: [],
+    };
+    expect(validateExpression(initialParams).errors.termField.length).toBeGreaterThan(0);
+    expect(validateExpression(initialParams).errors.termField[0]).toBe('Term field is required.');
+  });
+
+  test('if termField property is an array but has more than 4 items, should return proper error message', () => {
+    const initialParams: EsQueryRuleParams<SearchType.esQuery> = {
+      index: ['test'],
+      esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+      size: 100,
+      timeWindowSize: 1,
+      timeWindowUnit: 's',
+      threshold: [0],
+      timeField: '',
+      excludeHitsFromPreviousRun: true,
+      aggType: 'count',
+      groupBy: 'top',
+      termSize: 10,
+      termField: ['term', 'term2', 'term3', 'term4', 'term5'],
+    };
+    expect(validateExpression(initialParams).errors.termField.length).toBeGreaterThan(0);
+    expect(validateExpression(initialParams).errors.termField[0]).toBe(
+      'Cannot select more than 4 terms'
+    );
   });
 
   test('if esQuery property is invalid JSON should return proper error message', () => {
@@ -56,6 +153,8 @@ describe('expression params validation', () => {
       threshold: [0],
       timeField: '',
       excludeHitsFromPreviousRun: true,
+      aggType: 'count',
+      groupBy: 'all',
     };
     expect(validateExpression(initialParams).errors.esQuery.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.esQuery[0]).toBe('Query must be valid JSON.');
@@ -71,6 +170,8 @@ describe('expression params validation', () => {
       threshold: [0],
       timeField: '',
       excludeHitsFromPreviousRun: true,
+      aggType: 'count',
+      groupBy: 'all',
     };
     expect(validateExpression(initialParams).errors.esQuery.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.esQuery[0]).toBe(`Query field is required.`);
@@ -102,6 +203,8 @@ describe('expression params validation', () => {
       thresholdComparator: '<',
       timeField: '',
       excludeHitsFromPreviousRun: true,
+      aggType: 'count',
+      groupBy: 'all',
     };
     expect(validateExpression(initialParams).errors.threshold0.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.threshold0[0]).toBe('Threshold 0 is required.');
@@ -118,6 +221,8 @@ describe('expression params validation', () => {
       thresholdComparator: 'between',
       timeField: '',
       excludeHitsFromPreviousRun: true,
+      aggType: 'count',
+      groupBy: 'all',
     };
     expect(validateExpression(initialParams).errors.threshold1.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.threshold1[0]).toBe('Threshold 1 is required.');
@@ -134,6 +239,8 @@ describe('expression params validation', () => {
       thresholdComparator: 'between',
       timeField: '',
       excludeHitsFromPreviousRun: true,
+      aggType: 'count',
+      groupBy: 'all',
     };
     expect(validateExpression(initialParams).errors.threshold1.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.threshold1[0]).toBe(
@@ -151,6 +258,8 @@ describe('expression params validation', () => {
       threshold: [0],
       timeField: '',
       excludeHitsFromPreviousRun: true,
+      aggType: 'count',
+      groupBy: 'all',
     };
     expect(validateExpression(initialParams).errors.size.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.size[0]).toBe(
@@ -168,6 +277,8 @@ describe('expression params validation', () => {
       threshold: [0],
       timeField: '',
       excludeHitsFromPreviousRun: true,
+      aggType: 'count',
+      groupBy: 'all',
     };
     expect(validateExpression(initialParams).errors.size.length).toBe(0);
   });
@@ -182,6 +293,8 @@ describe('expression params validation', () => {
       threshold: [0],
       timeField: '',
       excludeHitsFromPreviousRun: true,
+      aggType: 'count',
+      groupBy: 'all',
     };
     expect(validateExpression(initialParams).errors.size.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.size[0]).toBe(
@@ -199,8 +312,92 @@ describe('expression params validation', () => {
       threshold: [0],
       timeField: '@timestamp',
       excludeHitsFromPreviousRun: true,
+      aggType: 'count',
+      groupBy: 'all',
     };
     expect(validateExpression(initialParams).errors.size.length).toBe(0);
     expect(hasExpressionValidationErrors(initialParams)).toBe(false);
+  });
+
+  test('if esqlQuery property is not set should return proper error message', () => {
+    const initialParams = {
+      size: 100,
+      timeWindowSize: 1,
+      timeWindowUnit: 's',
+      threshold: [0],
+      timeField: '@timestamp',
+      searchType: SearchType.esqlQuery,
+    } as EsQueryRuleParams<SearchType.esqlQuery>;
+    expect(validateExpression(initialParams).errors.esqlQuery.length).toBeGreaterThan(0);
+    expect(validateExpression(initialParams).errors.esqlQuery[0]).toBe(`ES|QL query is required.`);
+  });
+
+  test('if esqlQuery timeField property is not defined should return proper error message', () => {
+    const initialParams = {
+      size: 100,
+      timeWindowSize: 1,
+      timeWindowUnit: 's',
+      threshold: [0],
+      esqlQuery: { esql: 'test' },
+      searchType: SearchType.esqlQuery,
+    } as EsQueryRuleParams<SearchType.esqlQuery>;
+    expect(validateExpression(initialParams).errors.timeField.length).toBeGreaterThan(0);
+    expect(validateExpression(initialParams).errors.timeField[0]).toBe('Time field is required.');
+  });
+
+  test('if esqlQuery thresholdComparator property is not gt should return proper error message', () => {
+    const initialParams = {
+      size: 100,
+      timeWindowSize: 1,
+      timeWindowUnit: 's',
+      threshold: [0],
+      esqlQuery: { esql: 'test' },
+      searchType: SearchType.esqlQuery,
+      thresholdComparator: '<',
+      timeField: '@timestamp',
+    } as EsQueryRuleParams<SearchType.esqlQuery>;
+    expect(validateExpression(initialParams).errors.thresholdComparator.length).toBeGreaterThan(0);
+    expect(validateExpression(initialParams).errors.thresholdComparator[0]).toBe(
+      'Threshold comparator is required to be greater than.'
+    );
+  });
+
+  test('if esqlQuery threshold property is not 0 should return proper error message', () => {
+    const initialParams = {
+      size: 100,
+      timeWindowSize: 1,
+      timeWindowUnit: 's',
+      threshold: [8],
+      esqlQuery: { esql: 'test' },
+      searchType: SearchType.esqlQuery,
+      timeField: '@timestamp',
+    } as EsQueryRuleParams<SearchType.esqlQuery>;
+    expect(validateExpression(initialParams).errors.threshold0.length).toBeGreaterThan(0);
+    expect(validateExpression(initialParams).errors.threshold0[0]).toBe(
+      'Threshold is required to be 0.'
+    );
+  });
+
+  test('if sourceFields property is an array but has more than 5 items, should return proper error message', () => {
+    const sourceField = { label: 'test', searchPath: 'test' };
+    const initialParams: EsQueryRuleParams<SearchType.esQuery> = {
+      index: ['test'],
+      esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
+      size: 100,
+      timeWindowSize: 1,
+      timeWindowUnit: 's',
+      threshold: [0],
+      timeField: '',
+      excludeHitsFromPreviousRun: true,
+      aggType: 'count',
+      groupBy: 'top',
+      termSize: 10,
+      termField: ['term'],
+      sourceFields: [sourceField, sourceField, sourceField, sourceField, sourceField, sourceField],
+    };
+    expect(validateExpression(initialParams).errors.sourceFields.length).toBeGreaterThan(0);
+    expect(validateExpression(initialParams).errors.sourceFields[0]).toBe(
+      'Cannot select more than 5 fields'
+    );
   });
 });

@@ -114,7 +114,7 @@ export const FieldDataParameter = ({ field, defaultToggleValue }: Props) => {
             <>
               <EuiCallOut
                 color="warning"
-                iconType="alert"
+                iconType="warning"
                 size="s"
                 title={
                   <FormattedMessage

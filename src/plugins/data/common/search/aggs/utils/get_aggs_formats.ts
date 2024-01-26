@@ -19,6 +19,7 @@ import {
 import { SerializableRecord } from '@kbn/utility-types';
 import { DateRange } from '../../expressions';
 import { convertDateRangeToString } from '../buckets/lib/date_range';
+import { convertIPPrefixToString, IpPrefixKey } from '../buckets/lib/ip_prefix';
 import { convertIPRangeToString, IpRangeKey } from '../buckets/lib/ip_range';
 import { MultiFieldKey } from '../buckets/multi_field_key';
 
@@ -113,6 +114,20 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
         return convertDateRangeToString(range, format.convert.bind(format));
       };
     },
+    class AggsIpPrefixFieldFormat extends FieldFormatWithCache {
+      static id = 'ip_prefix';
+      static hidden = true;
+
+      textConvert = (cidr: IpPrefixKey) => {
+        if (cidr == null) {
+          return '';
+        }
+
+        const nestedFormatter = this._params as SerializedFieldFormat;
+        const format = this.getCachedFormat(nestedFormatter);
+        return convertIPPrefixToString(cidr, format.convert.bind(format));
+      };
+    },
     class AggsIpRangeFieldFormat extends FieldFormatWithCache {
       static id = 'ip_range';
       static hidden = true;
@@ -164,9 +179,11 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
 
         const joinTemplate = `${params.separator ?? ' › '}`;
 
-        return (val as MultiFieldKey).keys
-          .map((valPart, i) => formats[i].convert(valPart, type))
-          .join(joinTemplate);
+        return (
+          (val as MultiFieldKey)?.keys
+            ?.map((valPart, i) => formats[i].convert(valPart, type))
+            .join(joinTemplate) ?? ''
+        );
       };
       getConverterFor = (type: FieldFormatsContentType) => (val: string) => this.convert(val, type);
     },

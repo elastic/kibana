@@ -25,6 +25,22 @@ export const AlertingConnectorFeatureId = 'alerting';
 export const CasesConnectorFeatureId = 'cases';
 export const UptimeConnectorFeatureId = 'uptime';
 export const SecurityConnectorFeatureId = 'siem';
+export const GenerativeAIForSecurityConnectorFeatureId = 'generativeAIForSecurity';
+export const GenerativeAIForObservabilityConnectorFeatureId = 'generativeAIForObservability';
+
+const compatibilityGenerativeAIForSecurity = i18n.translate(
+  'xpack.actions.availableConnectorFeatures.compatibility.generativeAIForSecurity',
+  {
+    defaultMessage: 'Generative AI for Security',
+  }
+);
+
+const compatibilityGenerativeAIForObservability = i18n.translate(
+  'xpack.actions.availableConnectorFeatures.compatibility.generativeAIForObservability',
+  {
+    defaultMessage: 'Generative AI for Observability',
+  }
+);
 
 const compatibilityAlertingRules = i18n.translate(
   'xpack.actions.availableConnectorFeatures.compatibility.alertingRules',
@@ -72,11 +88,25 @@ export const SecuritySolutionFeature: ConnectorFeatureConfig = {
   compatibility: compatibilityAlertingRules,
 };
 
+export const GenerativeAIForSecurityFeature: ConnectorFeatureConfig = {
+  id: GenerativeAIForSecurityConnectorFeatureId,
+  name: compatibilityGenerativeAIForSecurity,
+  compatibility: compatibilityGenerativeAIForSecurity,
+};
+
+export const GenerativeAIForObservabilityFeature: ConnectorFeatureConfig = {
+  id: GenerativeAIForObservabilityConnectorFeatureId,
+  name: compatibilityGenerativeAIForObservability,
+  compatibility: compatibilityGenerativeAIForObservability,
+};
+
 const AllAvailableConnectorFeatures = {
   [AlertingConnectorFeature.id]: AlertingConnectorFeature,
   [CasesConnectorFeature.id]: CasesConnectorFeature,
   [UptimeConnectorFeature.id]: UptimeConnectorFeature,
   [SecuritySolutionFeature.id]: SecuritySolutionFeature,
+  [GenerativeAIForSecurityFeature.id]: GenerativeAIForSecurityFeature,
+  [GenerativeAIForObservabilityFeature.id]: GenerativeAIForObservabilityFeature,
 };
 
 export function areValidFeatures(ids: string[]) {

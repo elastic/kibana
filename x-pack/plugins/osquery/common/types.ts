@@ -9,24 +9,3 @@ export const savedQuerySavedObjectType = 'osquery-saved-query';
 export const packSavedObjectType = 'osquery-pack';
 export const packAssetSavedObjectType = 'osquery-pack-asset';
 export const usageMetricSavedObjectType = 'osquery-manager-usage-metric';
-export type SavedObjectType =
-  | 'osquery-saved-query'
-  | 'osquery-pack'
-  | 'osquery-manager-usage-metric';
-
-/**
- * This makes any optional property the same as Required<T> would but also has the
- * added benefit of keeping your undefined.
- *
- * For example:
- * type A = RequiredKeepUndefined<{ a?: undefined; b: number }>;
- *
- * will yield a type of:
- * type A = { a: undefined; b: number; }
- *
- */
-export type RequiredKeepUndefined<T> = { [K in keyof T]-?: [T[K]] } extends infer U
-  ? U extends Record<keyof U, [unknown]>
-    ? { [K in keyof U]: U[K][0] }
-    : never
-  : never;

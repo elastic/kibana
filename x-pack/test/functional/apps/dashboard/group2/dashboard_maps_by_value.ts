@@ -21,11 +21,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
-  const appsMenu = getService('appsMenu');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const kibanaServer = getService('kibanaServer');
 
-  const LAYER_NAME = 'World Countries';
   let mapCounter = 0;
 
   async function createAndAddMapByValue() {
@@ -45,13 +43,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.dashboard.switchToEditMode();
     }
 
+    await dashboardPanelActions.openContextMenu();
     await dashboardPanelActions.clickEdit();
     await PageObjects.maps.clickAddLayer();
-    await PageObjects.maps.selectEMSBoundariesSource();
-    await PageObjects.maps.selectVectorLayer(LAYER_NAME);
+    await PageObjects.maps.selectLayerGroupCard();
+
+    await testSubjects.click('importFileButton');
 
     if (saveToLibrary) {
-      await testSubjects.click('importFileButton');
       await testSubjects.click('mapSaveButton');
       await PageObjects.timeToVisualize.ensureSaveModalIsOpen;
 
@@ -60,7 +59,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       if (!saveToDashboard) {
-        await appsMenu.clickLink('Dashboard');
+        await PageObjects.dashboard.navigateToAppFromAppsMenu();
       }
     } else {
       await PageObjects.maps.clickSaveAndReturnButton();
@@ -70,7 +69,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   }
 
   async function createNewDashboard() {
-    await PageObjects.common.navigateToApp('dashboard');
+    await PageObjects.dashboard.navigateToApp();
     await PageObjects.dashboard.preserveCrossAppState();
     await PageObjects.dashboard.clickNewDashboard();
   }
@@ -113,7 +112,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('updates the panel on return', async () => {
-        const hasLayer = await PageObjects.maps.doesLayerExist(LAYER_NAME);
+        const hasLayer = await PageObjects.maps.doesLayerExist('Layer group');
         expect(hasLayer).to.be(true);
       });
     });
@@ -127,13 +126,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('updates the existing panel when adding to dashboard', async () => {
         await editByValueMap(true);
 
-        const hasLayer = await PageObjects.maps.doesLayerExist(LAYER_NAME);
-
+        const hasLayer = await PageObjects.maps.doesLayerExist('Layer group');
         expect(hasLayer).to.be(true);
       });
 
       it('does not update the panel when only saving to library', async () => {
         await editByValueMap(true, false);
+
+        const hasLayer = await PageObjects.maps.doesLayerExist('Layer group');
+        expect(hasLayer).to.be(false);
       });
     });
   });

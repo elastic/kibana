@@ -10,10 +10,11 @@ import type SuperTest from 'supertest';
 import type {
   RuleCreateProps,
   RuleResponse,
-} from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { deleteRule } from './delete_rule';
+import { routeWithNamespace } from './route_with_namespace';
 
 /**
  * Helper to cut down on the noise in some of the tests. If this detects
@@ -27,11 +28,14 @@ import { deleteRule } from './delete_rule';
 export const createRule = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   log: ToolingLog,
-  rule: RuleCreateProps
+  rule: RuleCreateProps,
+  namespace?: string
 ): Promise<RuleResponse> => {
+  const route = routeWithNamespace(DETECTION_ENGINE_RULES_URL, namespace);
   const response = await supertest
-    .post(DETECTION_ENGINE_RULES_URL)
+    .post(route)
     .set('kbn-xsrf', 'true')
+    .set('elastic-api-version', '2023-10-31')
     .send(rule);
   if (response.status === 409) {
     if (rule.rule_id != null) {
@@ -40,10 +44,11 @@ export const createRule = async (
           response.body
         )}, status: ${JSON.stringify(response.status)}`
       );
-      await deleteRule(supertest, log, rule.rule_id);
+      await deleteRule(supertest, rule.rule_id);
       const secondResponseTry = await supertest
         .post(DETECTION_ENGINE_RULES_URL)
         .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
         .send(rule);
       if (secondResponseTry.status !== 200) {
         throw new Error(
@@ -59,7 +64,9 @@ export const createRule = async (
     }
   } else if (response.status !== 200) {
     throw new Error(
-      `Unexpected non 200 ok when attempting to create a rule: ${JSON.stringify(response.status)}`
+      `Unexpected non 200 ok when attempting to create a rule: ${JSON.stringify(
+        response.status
+      )},${JSON.stringify(response, null, 4)}`
     );
   } else {
     return response.body;

@@ -7,13 +7,19 @@
 
 import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
-import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { ALERT_REASON, ApmRuleType } from '@kbn/rule-data-utils';
 import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 import {
   getAlertUrlErrorCount,
   getAlertUrlTransaction,
 } from '../../../../common/utils/formatters';
-import { ApmRuleType } from '../../../../common/rules/apm_rule_types';
+import {
+  anomalyMessage,
+  errorCountMessage,
+  transactionDurationMessage,
+  transactionErrorRateMessage,
+} from '../../../../common/rules/default_action_message';
+import { AlertParams } from './anomaly_rule_type';
 
 // copied from elasticsearch_fieldnames.ts to limit page load bundle size
 const SERVICE_ENVIRONMENT = 'service.environment';
@@ -33,7 +39,8 @@ export function registerApmRuleTypes(
       return {
         reason: fields[ALERT_REASON]!,
         link: getAlertUrlErrorCount(
-          String(fields[SERVICE_NAME][0]!),
+          // TODO:fix SERVICE_NAME when we move it to initializeIndex
+          String(fields[SERVICE_NAME]![0]),
           fields[SERVICE_ENVIRONMENT] && String(fields[SERVICE_ENVIRONMENT][0])
         ),
       };
@@ -47,17 +54,8 @@ export function registerApmRuleTypes(
       errors: [],
     }),
     requiresAppContext: false,
-    defaultActionMessage: i18n.translate(
-      'xpack.apm.alertTypes.errorCount.defaultActionMessage',
-      {
-        defaultMessage: `\\{\\{alertName\\}\\} alert is firing because of the following conditions:
-
-- Service name: \\{\\{context.serviceName\\}\\}
-- Environment: \\{\\{context.environment\\}\\}
-- Threshold: \\{\\{context.threshold\\}\\} errors
-- Triggered value: \\{\\{context.triggerValue\\}\\} errors over the last \\{\\{context.interval\\}\\}`,
-      }
-    ),
+    defaultActionMessage: errorCountMessage,
+    priority: 80,
   });
 
   observabilityRuleTypeRegistry.register({
@@ -69,13 +67,14 @@ export function registerApmRuleTypes(
           'Alert when the latency of a specific transaction type in a service exceeds a defined threshold.',
       }
     ),
-    format: ({ fields, formatters: { asDuration } }) => {
+    format: ({ fields }) => {
       return {
         reason: fields[ALERT_REASON]!,
         link: getAlertUrlTransaction(
-          String(fields[SERVICE_NAME][0]!),
+          // TODO:fix SERVICE_NAME when we move it to initializeIndex
+          String(fields[SERVICE_NAME]![0]),
           fields[SERVICE_ENVIRONMENT] && String(fields[SERVICE_ENVIRONMENT][0]),
-          String(fields[TRANSACTION_TYPE][0]!)
+          String(fields[TRANSACTION_TYPE]![0])
         ),
       };
     },
@@ -89,19 +88,12 @@ export function registerApmRuleTypes(
     validate: () => ({
       errors: [],
     }),
-    requiresAppContext: false,
-    defaultActionMessage: i18n.translate(
-      'xpack.apm.alertTypes.transactionDuration.defaultActionMessage',
-      {
-        defaultMessage: `\\{\\{alertName\\}\\} alert is firing because of the following conditions:
-
-- Service name: \\{\\{context.serviceName\\}\\}
-- Type: \\{\\{context.transactionType\\}\\}
-- Environment: \\{\\{context.environment\\}\\}
-- Latency threshold: \\{\\{context.threshold\\}\\}ms
-- Latency observed: \\{\\{context.triggerValue\\}\\} over the last \\{\\{context.interval\\}\\}`,
-      }
+    alertDetailsAppSection: lazy(
+      () => import('../ui_components/alert_details_app_section')
     ),
+    requiresAppContext: false,
+    defaultActionMessage: transactionDurationMessage,
+    priority: 60,
   });
 
   observabilityRuleTypeRegistry.register({
@@ -113,12 +105,13 @@ export function registerApmRuleTypes(
           'Alert when the rate of transaction errors in a service exceeds a defined threshold.',
       }
     ),
-    format: ({ fields, formatters: { asPercent } }) => ({
+    format: ({ fields }) => ({
       reason: fields[ALERT_REASON]!,
       link: getAlertUrlTransaction(
-        String(fields[SERVICE_NAME][0]!),
+        // TODO:fix SERVICE_NAME when we move it to initializeIndex
+        String(fields[SERVICE_NAME]![0]),
         fields[SERVICE_ENVIRONMENT] && String(fields[SERVICE_ENVIRONMENT][0]),
-        String(fields[TRANSACTION_TYPE][0]!)
+        String(fields[TRANSACTION_TYPE]![0])
       ),
     }),
     iconClass: 'bell',
@@ -132,18 +125,8 @@ export function registerApmRuleTypes(
       errors: [],
     }),
     requiresAppContext: false,
-    defaultActionMessage: i18n.translate(
-      'xpack.apm.alertTypes.transactionErrorRate.defaultActionMessage',
-      {
-        defaultMessage: `\\{\\{alertName\\}\\} alert is firing because of the following conditions:
-
-- Service name: \\{\\{context.serviceName\\}\\}
-- Type: \\{\\{context.transactionType\\}\\}
-- Environment: \\{\\{context.environment\\}\\}
-- Threshold: \\{\\{context.threshold\\}\\}%
-- Triggered value: \\{\\{context.triggerValue\\}\\}% of errors over the last \\{\\{context.interval\\}\\}`,
-      }
-    ),
+    defaultActionMessage: transactionErrorRateMessage,
+    priority: 70,
   });
 
   observabilityRuleTypeRegistry.register({
@@ -155,34 +138,40 @@ export function registerApmRuleTypes(
     format: ({ fields }) => ({
       reason: fields[ALERT_REASON]!,
       link: getAlertUrlTransaction(
-        String(fields[SERVICE_NAME][0]!),
+        // TODO:fix SERVICE_NAME when we move it to initializeIndex
+        String(fields[SERVICE_NAME]![0]),
         fields[SERVICE_ENVIRONMENT] && String(fields[SERVICE_ENVIRONMENT][0]),
-        String(fields[TRANSACTION_TYPE][0]!)
+        String(fields[TRANSACTION_TYPE]![0])
       ),
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
       return `${docLinks.links.alerting.apmRules}`;
     },
-    ruleParamsExpression: lazy(
-      () => import('./transaction_duration_anomaly_rule_type')
-    ),
-    validate: () => ({
-      errors: [],
-    }),
+    ruleParamsExpression: lazy(() => import('./anomaly_rule_type')),
+    validate: validateAnomalyRule,
     requiresAppContext: false,
-    defaultActionMessage: i18n.translate(
-      'xpack.apm.alertTypes.transactionDurationAnomaly.defaultActionMessage',
-      {
-        defaultMessage: `\\{\\{alertName\\}\\} alert is firing because of the following conditions:
-
-- Service name: \\{\\{context.serviceName\\}\\}
-- Type: \\{\\{context.transactionType\\}\\}
-- Environment: \\{\\{context.environment\\}\\}
-- Severity threshold: \\{\\{context.threshold\\}\\}
-- Severity value: \\{\\{context.triggerValue\\}\\}
-`,
-      }
-    ),
+    defaultActionMessage: anomalyMessage,
+    priority: 90,
   });
+}
+
+function validateAnomalyRule(ruleParams: AlertParams) {
+  const validationResult = { errors: {} };
+  const errors: {
+    anomalyDetectorTypes?: string;
+  } = {};
+  validationResult.errors = errors;
+  if (
+    ruleParams.anomalyDetectorTypes &&
+    ruleParams.anomalyDetectorTypes.length < 1
+  ) {
+    errors.anomalyDetectorTypes = i18n.translate(
+      'xpack.apm.validateAnomalyRule.',
+      {
+        defaultMessage: 'At least one detector type is required',
+      }
+    );
+  }
+  return validationResult;
 }

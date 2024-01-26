@@ -1,0 +1,32 @@
+openapi: 3.0.0
+info:
+  title: Read Rule API endpoint
+  version: '2023-10-31'
+paths:
+  /api/detection_engine/rules:
+    get:
+      operationId: ReadRule
+      x-codegen-enabled: true
+      description: Read a single rule
+      tags:
+        - Rules API
+      parameters:
+        - name: id
+          in: query
+          required: false
+          description: The rule's `id` value.
+          schema:
+            $ref: '../../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleObjectId'
+        - name: rule_id
+          in: query
+          required: false
+          description: The rule's `rule_id` value.
+          schema:
+            $ref: '../../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleSignatureId'
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '../../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleResponse'

@@ -16,7 +16,7 @@ import { TestProviders } from '../../../mock/test_providers';
 import { getEmptyValue } from '../../empty_value';
 import type { Anomalies } from '../types';
 import { useMountAppended } from '../../../utils/use_mount_appended';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 
 jest.mock('../../../lib/kibana');
 
@@ -39,6 +39,7 @@ describe('anomaly_scores', () => {
         endDate={endDate}
         isLoading={false}
         narrowDateRange={narrowDateRange}
+        jobNameById={{}}
       />
     );
     expect(wrapper).toMatchSnapshot();
@@ -53,6 +54,7 @@ describe('anomaly_scores', () => {
           endDate={endDate}
           isLoading={true}
           narrowDateRange={narrowDateRange}
+          jobNameById={{}}
         />
       </TestProviders>
     );
@@ -68,6 +70,7 @@ describe('anomaly_scores', () => {
           endDate={endDate}
           isLoading={false}
           narrowDateRange={narrowDateRange}
+          jobNameById={{}}
         />
       </TestProviders>
     );
@@ -83,6 +86,7 @@ describe('anomaly_scores', () => {
           endDate={endDate}
           isLoading={false}
           narrowDateRange={narrowDateRange}
+          jobNameById={{}}
         />
       </TestProviders>
     );
@@ -99,6 +103,7 @@ describe('anomaly_scores', () => {
           endDate={endDate}
           isLoading={false}
           narrowDateRange={narrowDateRange}
+          jobNameById={{}}
         />
       </TestProviders>
     );
@@ -119,6 +124,7 @@ describe('anomaly_scores', () => {
           endDate={endDate}
           isLoading={false}
           narrowDateRange={narrowDateRange}
+          jobNameById={{}}
         />
       </TestProviders>
     );
@@ -134,6 +140,7 @@ describe('anomaly_scores', () => {
           endDate={endDate}
           isLoading={false}
           narrowDateRange={narrowDateRange}
+          jobNameById={{}}
         />
       </TestProviders>
     );

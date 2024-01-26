@@ -19,17 +19,16 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
 
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
-      await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
-
-      await observability.alerts.common.navigateToTimeWithData();
+      await esArchiver.load('x-pack/test/functional/es_archives/infra/simple_logs');
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      await esArchiver.unload('x-pack/test/functional/es_archives/infra/simple_logs');
       await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
     });
 
     it('remembers column changes', async () => {
+      await observability.alerts.common.navigateToTimeWithData();
       const durationColumnButton = await testSubjects.find(
         'dataGridHeaderCellActionButton-kibana.alert.duration.us'
       );
@@ -50,18 +49,23 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
     });
 
     it('remembers sorting changes', async () => {
-      const timestampColumnButton = await testSubjects.find(
-        'dataGridHeaderCellActionButton-@timestamp'
+      await observability.alerts.common.navigateToTimeWithData();
+      const triggeredColumnButton = await testSubjects.find(
+        'dataGridHeaderCellActionButton-kibana.alert.start'
       );
-      await timestampColumnButton.click();
-      const columnMenu = await testSubjects.find('dataGridHeaderCellActionGroup-@timestamp');
+      await triggeredColumnButton.click();
+      const columnMenu = await testSubjects.find(
+        'dataGridHeaderCellActionGroup-kibana.alert.start'
+      );
       const sortButton = await columnMenu.findByCssSelector('[title="Sort Old-New"]');
       await sortButton.click();
 
       await observability.alerts.common.navigateToTimeWithData();
 
-      const timestampColumnHeading = await testSubjects.find('dataGridHeaderCell-@timestamp');
-      expect(await timestampColumnHeading.getAttribute('aria-sort')).to.be('ascending');
+      const triggeredColumnHeading = await testSubjects.find(
+        'dataGridHeaderCell-kibana.alert.start'
+      );
+      expect(await triggeredColumnHeading.getAttribute('aria-sort')).to.be('ascending');
     });
   });
 };

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { AbortSignal } from 'abort-controller';
 import type { CloudService } from './cloud_service';
 import type { CloudServiceResponseJson } from './cloud_response';
 

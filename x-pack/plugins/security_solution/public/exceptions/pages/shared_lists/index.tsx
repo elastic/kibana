@@ -5,51 +5,53 @@
  * 2.0.
  */
 
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { EuiSearchBarProps } from '@elastic/eui';
-
 import {
+  EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
-  EuiPagination,
-  EuiPopover,
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingContent,
-  EuiProgress,
-  EuiSpacer,
-  EuiPageHeader,
   EuiHorizontalRule,
+  EuiPageHeader,
+  EuiPagination,
+  EuiPopover,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 
-import type { NamespaceType, ExceptionListFilter } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListFilter, NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
+import { EmptyViewerState, ViewerStatus } from '@kbn/securitysolution-exception-list-components';
 
 import { AutoDownload } from '../../../common/components/auto_download/auto_download';
-import { Loader } from '../../../common/components/loader';
 import { useKibana } from '../../../common/lib/kibana';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
 import * as i18n from '../../translations/shared_list';
-import { ExceptionsTableUtilityBar } from '../../components/shared_list_utilty_bar';
+import {
+  CreateSharedListFlyout,
+  ExceptionsListCard,
+  ExceptionsTableUtilityBar,
+  ImportExceptionListFlyout,
+  ListsSearchBar,
+} from '../../components';
 import { useAllExceptionLists } from '../../hooks/use_all_exception_lists';
 import { ReferenceErrorModal } from '../../../detections/components/value_lists_management_flyout/reference_error_modal';
 import { patchRule } from '../../../detection_engine/rule_management/api/api';
-import { ExceptionsSearchBar } from '../../components/list_search_bar';
+
 import { getSearchFilters } from '../../../detection_engine/rule_management_ui/components/rules_table/helpers';
 import { useUserData } from '../../../detections/components/user_info';
 import { useListsConfig } from '../../../detections/containers/detection_engine/lists/use_lists_config';
 import { MissingPrivilegesCallOut } from '../../../detections/components/callouts/missing_privileges_callout';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../common/endpoint/service/artifacts/constants';
-import { ExceptionsListCard } from '../../components/exceptions_list_card';
-
-import { ImportExceptionListFlyout } from '../../components/import_exceptions_list_flyout';
-import { CreateSharedListFlyout } from '../../components/create_shared_exception_list';
 
 import { AddExceptionFlyout } from '../../../detection_engine/rule_exceptions/components/add_exception_flyout';
+import { useEndpointExceptionsCapability } from '../../hooks/use_endpoint_exceptions_capability';
 
 export type Func = () => Promise<void>;
 
@@ -69,33 +71,65 @@ const exceptionReferenceModalInitialState: ReferenceModalState = {
   listNamespaceType: 'single',
 };
 
+const SORT_FIELDS: Array<{ field: string; label: string; defaultOrder: 'asc' | 'desc' }> = [
+  {
+    field: 'created_at',
+    label: i18n.SORT_BY_CREATE_AT,
+    defaultOrder: 'desc',
+  },
+];
+
 export const SharedLists = React.memo(() => {
   const [{ loading: userInfoLoading, canUserCRUD, canUserREAD }] = useUserData();
 
   const { loading: listsConfigLoading } = useListsConfig();
   const loading = userInfoLoading || listsConfigLoading;
 
+  const canAccessEndpointExceptions = useEndpointExceptionsCapability('showEndpointExceptions');
   const {
-    services: { http, notifications, timelines },
+    services: {
+      http,
+      notifications,
+      timelines,
+      application: { navigateToApp },
+    },
   } = useKibana();
-  const { exportExceptionList, deleteExceptionList } = useApi(http);
+  const { exportExceptionList, deleteExceptionList, duplicateExceptionList } = useApi(http);
 
   const [showReferenceErrorModal, setShowReferenceErrorModal] = useState(false);
   const [referenceModalState, setReferenceModalState] = useState<ReferenceModalState>(
     exceptionReferenceModalInitialState
   );
-  const [filters, setFilters] = useState<ExceptionListFilter | undefined>({
-    types: [ExceptionListTypeEnum.DETECTION, ExceptionListTypeEnum.ENDPOINT],
+  const [filters, setFilters] = useState<ExceptionListFilter | undefined>();
+
+  const [viewerStatus, setViewStatus] = useState<ViewerStatus | null>(ViewerStatus.LOADING);
+
+  const exceptionListTypes = useMemo(() => {
+    const lists = [ExceptionListTypeEnum.DETECTION];
+    if (canAccessEndpointExceptions) {
+      lists.push(ExceptionListTypeEnum.ENDPOINT);
+    }
+    return lists;
+  }, [canAccessEndpointExceptions]);
+  const [
+    loadingExceptions,
+    exceptions,
+    pagination,
+    setPagination,
+    refreshExceptions,
+    sort,
+    setSort,
+  ] = useExceptionLists({
+    errorMessage: i18n.ERROR_EXCEPTION_LISTS,
+    filterOptions: {
+      ...filters,
+      types: exceptionListTypes,
+    },
+    http,
+    namespaceTypes: ['single', 'agnostic'],
+    notifications,
+    hideLists: ALL_ENDPOINT_ARTIFACT_LIST_IDS,
   });
-  const [loadingExceptions, exceptions, pagination, setPagination, refreshExceptions] =
-    useExceptionLists({
-      errorMessage: i18n.ERROR_EXCEPTION_LISTS,
-      filterOptions: filters,
-      http,
-      namespaceTypes: ['single', 'agnostic'],
-      notifications,
-      hideLists: ALL_ENDPOINT_ARTIFACT_LIST_IDS,
-    });
   const [loadingTableInfo, exceptionListsWithRuleRefs, exceptionsListsRef] = useAllExceptionLists({
     exceptionLists: exceptions ?? [],
   });
@@ -106,6 +140,12 @@ export const SharedLists = React.memo(() => {
   const [exportDownload, setExportDownload] = useState<{ name?: string; blob?: Blob }>({});
   const [displayImportListFlyout, setDisplayImportListFlyout] = useState(false);
   const { addError, addSuccess } = useAppToasts();
+
+  // Loading states
+  const exceptionsLoaded = !loadingTableInfo && !initLoading;
+  const hasNoExceptions = !loadingExceptions && !exceptionListsWithRuleRefs.length;
+  const isSearchingExceptions = viewerStatus === ViewerStatus.SEARCHING;
+  const isLoadingExceptions = viewerStatus === ViewerStatus.LOADING;
 
   const handleDeleteSuccess = useCallback(
     (listId?: string) => () => {
@@ -126,7 +166,7 @@ export const SharedLists = React.memo(() => {
   );
 
   const handleDelete = useCallback(
-    ({ id, listId, namespaceType }: { id: string; listId: string; namespaceType: NamespaceType }) =>
+    ({ id, namespaceType }: { id: string; namespaceType: NamespaceType }) =>
       async () => {
         try {
           if (exceptionsListsRef[id] != null) {
@@ -151,9 +191,9 @@ export const SharedLists = React.memo(() => {
   );
 
   const handleExportSuccess = useCallback(
-    (listId: string) =>
+    (listId: string, name: string) =>
       (blob: Blob): void => {
-        addSuccess(i18n.EXCEPTION_EXPORT_SUCCESS);
+        addSuccess(i18n.EXCEPTION_LIST_EXPORTED_SUCCESSFULLY(name));
         setExportDownload({ name: listId, blob });
       },
     [addSuccess]
@@ -167,14 +207,27 @@ export const SharedLists = React.memo(() => {
   );
 
   const handleExport = useCallback(
-    ({ id, listId, namespaceType }: { id: string; listId: string; namespaceType: NamespaceType }) =>
+    ({
+        id,
+        listId,
+        name,
+        namespaceType,
+        includeExpiredExceptions,
+      }: {
+        id: string;
+        listId: string;
+        name: string;
+        namespaceType: NamespaceType;
+        includeExpiredExceptions: boolean;
+      }) =>
       async () => {
         await exportExceptionList({
           id,
+          includeExpiredExceptions,
           listId,
           namespaceType,
           onError: handleExportError,
-          onSuccess: handleExportSuccess(listId),
+          onSuccess: handleExportSuccess(listId, name),
         });
       },
     [exportExceptionList, handleExportError, handleExportSuccess]
@@ -198,6 +251,7 @@ export const SharedLists = React.memo(() => {
       query,
       queryText,
     }: Parameters<NonNullable<EuiSearchBarProps['onChange']>>[0]): Promise<void> => {
+      setViewStatus(ViewerStatus.SEARCHING);
       const filterOptions = {
         name: null,
         list_id: null,
@@ -214,6 +268,45 @@ export const SharedLists = React.memo(() => {
       setFilters(searchTerms);
     },
     []
+  );
+
+  const handleDuplicationError = useCallback(
+    (err: Error) => {
+      addError(err, { title: i18n.EXCEPTION_DUPLICATE_ERROR });
+    },
+    [addError]
+  );
+
+  const handleDuplicateSuccess = useCallback(
+    (name: string) => (): void => {
+      addSuccess(i18n.EXCEPTION_LIST_DUPLICATED_SUCCESSFULLY(name));
+      handleRefresh();
+    },
+    [addSuccess, handleRefresh]
+  );
+
+  const handleDuplicate = useCallback(
+    ({
+        listId,
+        name,
+        namespaceType,
+        includeExpiredExceptions,
+      }: {
+        listId: string;
+        name: string;
+        namespaceType: NamespaceType;
+        includeExpiredExceptions: boolean;
+      }) =>
+      async () => {
+        await duplicateExceptionList({
+          includeExpiredExceptions,
+          listId,
+          namespaceType,
+          onError: handleDuplicationError,
+          onSuccess: handleDuplicateSuccess(name),
+        });
+      },
+    [duplicateExceptionList, handleDuplicateSuccess, handleDuplicationError]
   );
 
   const handleCloseReferenceErrorModal = useCallback((): void => {
@@ -293,8 +386,7 @@ export const SharedLists = React.memo(() => {
       iconSide="right"
       onClick={onRowSizeButtonClick}
     >
-      {/* TODO move to translations */}
-      {`Rows per page: ${rowSize}`}
+      {i18n.allExceptionsRowPerPage(rowSize)}
     </EuiButtonEmpty>
   );
 
@@ -302,35 +394,20 @@ export const SharedLists = React.memo(() => {
     return size === rowSize ? 'check' : 'empty';
   };
 
+  const onPerPageClick = useCallback((size: number) => {
+    closeRowSizePopover();
+    setRowSize(size);
+    setActivePage(0);
+  }, []);
+
   const rowSizeItems = [
-    <EuiContextMenuItem
-      key="5 rows"
-      icon={getIconType(5)}
-      onClick={() => {
-        closeRowSizePopover();
-        setRowSize(5);
-      }}
-    >
+    <EuiContextMenuItem key="5 rows" icon={getIconType(5)} onClick={() => onPerPageClick(5)}>
       {'5 rows'}
     </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="10 rows"
-      icon={getIconType(10)}
-      onClick={() => {
-        closeRowSizePopover();
-        setRowSize(10);
-      }}
-    >
+    <EuiContextMenuItem key="10 rows" icon={getIconType(10)} onClick={() => onPerPageClick(10)}>
       {'10 rows'}
     </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="25 rows"
-      icon={getIconType(25)}
-      onClick={() => {
-        closeRowSizePopover();
-        setRowSize(25);
-      }}
-    >
+    <EuiContextMenuItem key="25 rows" icon={getIconType(25)} onClick={() => onPerPageClick(25)}>
       {'25 rows'}
     </EuiContextMenuItem>,
   ];
@@ -357,26 +434,57 @@ export const SharedLists = React.memo(() => {
     setDisplayAddExceptionItemFlyout(false);
     setIsCreatePopoverOpen(false);
   };
+  const onCreateExceptionListOpenClick = () => setDisplayCreateSharedListFlyout(true);
+
+  const isReadOnly = useMemo(() => {
+    return (canUserREAD && !canUserCRUD) ?? true;
+  }, [canUserREAD, canUserCRUD]);
+
+  useEffect(() => {
+    if (isSearchingExceptions && hasNoExceptions) {
+      setViewStatus(ViewerStatus.EMPTY_SEARCH);
+    } else if (!exceptionsLoaded) {
+      setViewStatus(ViewerStatus.LOADING);
+    } else if (isLoadingExceptions && hasNoExceptions) {
+      setViewStatus(ViewerStatus.EMPTY);
+    } else if (isLoadingExceptions && exceptionsLoaded) {
+      setViewStatus(null);
+    }
+  }, [isSearchingExceptions, hasNoExceptions, exceptionsLoaded, isLoadingExceptions]);
 
   return (
     <>
       <MissingPrivilegesCallOut />
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiPageHeader
-            pageTitle={i18n.ALL_EXCEPTIONS}
-            description={timelines.getLastUpdated({
-              showUpdating: loading,
-              updatedAt: lastUpdated,
-            })}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton iconType={'importAction'} onClick={() => setDisplayImportListFlyout(true)}>
-            {i18n.IMPORT_EXCEPTION_LIST_BUTTON}
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+      <EuiPageHeader
+        pageTitle={i18n.ALL_EXCEPTIONS}
+        description={
+          <EuiFlexGroup gutterSize="xs" direction="column">
+            <EuiFlexItem>
+              <EuiFlexGroup gutterSize="none" direction="row">
+                <EuiFlexItem grow={false}>
+                  <EuiText>{i18n.ALL_EXCEPTIONS_SUBTITLE}</EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiButtonIcon
+                    iconType="popout"
+                    aria-label="go-to-rules"
+                    color="primary"
+                    onClick={() =>
+                      navigateToApp('security', { openInNewTab: true, path: '/rules' })
+                    }
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              {timelines.getLastUpdated({
+                showUpdating: loading,
+                updatedAt: lastUpdated,
+              })}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+        rightSideItems={[
           <EuiPopover
             data-test-subj="manageExceptionListCreateButton"
             button={
@@ -391,15 +499,17 @@ export const SharedLists = React.memo(() => {
               items={[
                 <EuiContextMenuItem
                   key={'createList'}
+                  data-test-subj="manageExceptionListCreateExceptionListButton"
                   onClick={() => {
                     onCloseCreatePopover();
-                    setDisplayCreateSharedListFlyout(true);
+                    onCreateExceptionListOpenClick();
                   }}
                 >
                   {i18n.CREATE_SHARED_LIST_BUTTON}
                 </EuiContextMenuItem>,
                 <EuiContextMenuItem
                   key={'createItem'}
+                  data-test-subj="manageExceptionListCreateExceptionButton"
                   onClick={() => {
                     onCloseCreatePopover();
                     setDisplayAddExceptionItemFlyout(true);
@@ -409,9 +519,16 @@ export const SharedLists = React.memo(() => {
                 </EuiContextMenuItem>,
               ]}
             />
-          </EuiPopover>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          </EuiPopover>,
+          <EuiButton
+            data-test-subj="importSharedExceptionList"
+            iconType={'importAction'}
+            onClick={() => setDisplayImportListFlyout(true)}
+          >
+            {i18n.IMPORT_EXCEPTION_LIST_BUTTON}
+          </EuiButton>,
+        ]}
+      />
 
       {displayCreateSharedListFlyout && (
         <CreateSharedListFlyout
@@ -429,8 +546,11 @@ export const SharedLists = React.memo(() => {
           isEndpointItem={false}
           isBulkAction={false}
           showAlertCloseOptions
-          onCancel={(didRuleChange: boolean) => setDisplayAddExceptionItemFlyout(false)}
-          onConfirm={(didRuleChange: boolean) => setDisplayAddExceptionItemFlyout(false)}
+          onCancel={() => setDisplayAddExceptionItemFlyout(false)}
+          onConfirm={(didRuleChange: boolean) => {
+            setDisplayAddExceptionItemFlyout(false);
+            if (didRuleChange) handleRefresh();
+          }}
         />
       )}
 
@@ -446,39 +566,37 @@ export const SharedLists = React.memo(() => {
 
       <EuiHorizontalRule />
       <div data-test-subj="allExceptionListsPanel">
-        {loadingTableInfo && (
-          <EuiProgress
-            data-test-subj="loadingRulesInfoProgress"
-            size="xs"
-            position="absolute"
-            color="accent"
-          />
-        )}
-        {!initLoading && <ExceptionsSearchBar onSearch={handleSearch} />}
+        {!initLoading && <ListsSearchBar onSearch={handleSearch} />}
         <EuiSpacer size="m" />
-
-        {loadingTableInfo && !initLoading && !showReferenceErrorModal && (
-          <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
-        )}
-
-        {initLoading || loadingTableInfo ? (
-          <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
+        {viewerStatus != null ? (
+          <EmptyViewerState
+            isReadOnly={isReadOnly}
+            title={i18n.NO_EXCEPTION_LISTS}
+            viewerStatus={viewerStatus}
+            buttonText={i18n.CREATE_SHARED_LIST_BUTTON}
+            body={i18n.NO_LISTS_BODY}
+            onEmptyButtonStateClick={onCreateExceptionListOpenClick}
+          />
         ) : (
           <>
             <ExceptionsTableUtilityBar
               totalExceptionLists={exceptionListsWithRuleRefs.length}
               onRefresh={handleRefresh}
+              setSort={setSort}
+              sort={sort}
+              sortFields={SORT_FIELDS}
             />
-            {exceptionListsWithRuleRefs.length > 0 && canUserCRUD !== null && canUserREAD !== null && (
+            {exceptionListsWithRuleRefs.length > 0 && (
               <div data-test-subj="exceptionsTable">
                 {exceptionListsWithRuleRefs.map((excList) => (
                   <ExceptionsListCard
                     key={excList.list_id}
                     data-test-subj="exceptionsListCard"
-                    readOnly={canUserREAD && !canUserCRUD}
+                    readOnly={isReadOnly}
                     exceptionsList={excList}
                     handleDelete={handleDelete}
                     handleExport={handleExport}
+                    handleDuplicate={handleDuplicate}
                   />
                 ))}
               </div>

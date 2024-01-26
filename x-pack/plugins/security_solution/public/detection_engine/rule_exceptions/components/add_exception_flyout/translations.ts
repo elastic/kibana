@@ -83,3 +83,13 @@ export const COMMENTS_SECTION_TITLE = (comments: number) =>
     values: { comments },
     defaultMessage: 'Add comments ({comments})',
   });
+
+export const ADD_RULE_EXCEPTION_FROM_ALERT_COMMENT = (alertId: string) =>
+  i18n.translate(
+    'xpack.securitySolution.ruleExceptions.addExceptionFlyout.addRuleExceptionFromAlertComment',
+    {
+      values: { alertId },
+      defaultMessage:
+        'Exception conditions are pre-filled with relevant data from an alert with the alert id (_id): {alertId}.',
+    }
+  );

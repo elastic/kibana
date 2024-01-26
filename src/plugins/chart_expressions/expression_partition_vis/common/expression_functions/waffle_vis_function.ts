@@ -9,7 +9,11 @@
 import { Position } from '@elastic/charts';
 import { prepareLogTable, validateAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/visualizations-plugin/common/constants';
-import { LegendDisplay, PartitionVisParams } from '../types/expression_renderers';
+import {
+  LegendDisplay,
+  type PartitionChartProps,
+  type PartitionVisParams,
+} from '../types/expression_renderers';
 import { ChartTypes, WaffleVisExpressionFunctionDefinition } from '../types';
 import {
   PARTITION_LABELS_FUNCTION,
@@ -25,10 +29,15 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
   inputTypes: ['datatable'],
   help: strings.getPieVisFunctionName(),
   args: {
-    metric: {
+    metrics: {
       types: ['vis_dimension'],
       help: strings.getMetricArgHelp(),
       required: true,
+      multi: true,
+    },
+    metricsToLabels: {
+      types: ['string'],
+      help: strings.getMetricToLabelHelp(),
     },
     bucket: {
       types: ['vis_dimension'],
@@ -105,13 +114,18 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
       help: strings.getAriaLabelHelp(),
       required: false,
     },
+    colorMapping: {
+      types: ['string'],
+      help: strings.getColorMappingHelp(),
+    },
   },
   fn(context, args, handlers) {
     if (args.splitColumn && args.splitRow) {
       throw new Error(errors.splitRowAndSplitColumnAreSpecifiedError());
     }
 
-    validateAccessor(args.metric, context.columns);
+    args.metrics.forEach((accessor) => validateAccessor(accessor, context.columns));
+
     if (args.bucket) {
       validateAccessor(args.bucket, context.columns);
     }
@@ -125,17 +139,19 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
     const buckets = args.bucket ? [args.bucket] : [];
     const visConfig: PartitionVisParams = {
       ...args,
+      metricsToLabels: args.metricsToLabels ? JSON.parse(args.metricsToLabels) : {},
       ariaLabel:
         args.ariaLabel ??
         (handlers.variables?.embeddableTitle as string) ??
         handlers.getExecutionContext?.()?.description,
       palette: args.palette,
       dimensions: {
-        metric: args.metric,
+        metrics: args.metrics,
         buckets,
         splitColumn: args.splitColumn,
         splitRow: args.splitRow,
       },
+      colorMapping: args.colorMapping,
     };
 
     if (handlers?.inspectorAdapters?.tables) {
@@ -145,7 +161,7 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
       const logTable = prepareLogTable(
         context,
         [
-          [[args.metric], strings.getSliceSizeHelp()],
+          [args.metrics, strings.getSliceSizeHelp()],
           [buckets, strings.getSliceHelp()],
           [args.splitColumn, strings.getColumnSplitHelp()],
           [args.splitRow, strings.getRowSplitHelp()],
@@ -166,6 +182,7 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
         params: {
           listenOnChange: true,
         },
+        overrides: handlers.variables?.overrides as PartitionChartProps['overrides'],
       },
     };
   },

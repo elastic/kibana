@@ -5,21 +5,18 @@
  * 2.0.
  */
 
-import type { RuleAction } from '@kbn/alerting-plugin/common';
-
+import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
 import {
+  NOTIFICATION_DEFAULT_FREQUENCY,
   NOTIFICATION_THROTTLE_NO_ACTIONS,
   NOTIFICATION_THROTTLE_RULE,
 } from '../../../../../common/constants';
 
-import type { RuleResponse } from '../../../../../common/detection_engine/rule_schema';
-// eslint-disable-next-line no-restricted-imports
-import type { LegacyRuleActions } from '../../rule_actions_legacy';
 import type { RuleAlertType } from '../../rule_schema';
 
 import {
-  transformActions,
   transformFromAlertThrottle,
+  transformToActionFrequency,
   transformToAlertThrottle,
   transformToNotifyWhen,
 } from './rule_actions';
@@ -86,309 +83,275 @@ describe('Rule actions normalization', () => {
   });
 
   describe('transformFromAlertThrottle', () => {
-    test('muteAll returns "NOTIFICATION_THROTTLE_NO_ACTIONS" even with notifyWhen set and actions has an array element', () => {
+    test('returns first action throttle if rule.notifyWhen is not set', () => {
       expect(
-        transformFromAlertThrottle(
-          {
-            muteAll: true,
-            notifyWhen: 'onActiveAlert',
-            actions: [
-              {
-                group: 'group',
-                id: 'id-123',
-                actionTypeId: 'id-456',
-                params: {},
+        transformFromAlertThrottle({
+          actions: [
+            {
+              group: 'group',
+              id: 'id-123',
+              actionTypeId: 'id-456',
+              params: {},
+              frequency: {
+                notifyWhen: 'onThrottleInterval',
+                throttle: '1d',
               },
-            ],
-          } as RuleAlertType,
-          undefined
-        )
-      ).toEqual(NOTIFICATION_THROTTLE_NO_ACTIONS);
-    });
-
-    test('returns "NOTIFICATION_THROTTLE_NO_ACTIONS" if actions is an empty array and we do not have a throttle', () => {
-      expect(
-        transformFromAlertThrottle(
-          {
-            muteAll: false,
-            notifyWhen: 'onActiveAlert',
-            actions: [],
-          } as unknown as RuleAlertType,
-          undefined
-        )
-      ).toEqual(NOTIFICATION_THROTTLE_NO_ACTIONS);
-    });
-
-    test('returns "NOTIFICATION_THROTTLE_NO_ACTIONS" if actions is an empty array and we have a throttle', () => {
-      expect(
-        transformFromAlertThrottle(
-          {
-            muteAll: false,
-            notifyWhen: 'onThrottleInterval',
-            actions: [],
-            throttle: '1d',
-          } as unknown as RuleAlertType,
-          undefined
-        )
-      ).toEqual(NOTIFICATION_THROTTLE_NO_ACTIONS);
-    });
-
-    test('it returns "NOTIFICATION_THROTTLE_RULE" if "notifyWhen" is set, muteAll is false and we have an actions array', () => {
-      expect(
-        transformFromAlertThrottle(
-          {
-            muteAll: false,
-            notifyWhen: 'onActiveAlert',
-            actions: [
-              {
-                group: 'group',
-                id: 'id-123',
-                actionTypeId: 'id-456',
-                params: {},
+            },
+            {
+              group: 'group',
+              id: 'id-123',
+              actionTypeId: 'id-456',
+              params: {},
+              frequency: {
+                notifyWhen: 'onThrottleInterval',
+                throttle: '2d',
               },
-            ],
-          } as RuleAlertType,
-          undefined
-        )
-      ).toEqual(NOTIFICATION_THROTTLE_RULE);
+            },
+          ],
+        } as RuleAlertType)
+      ).toBe('1d');
     });
 
-    test('it returns "NOTIFICATION_THROTTLE_RULE" if "notifyWhen" and "throttle" are not set, but we have an actions array', () => {
+    test('returns "NOTIFICATION_THROTTLE_RULE" if rule.notifyWhen and first action notifyWhen are not set', () => {
       expect(
-        transformFromAlertThrottle(
-          {
-            muteAll: false,
-            actions: [
-              {
-                group: 'group',
-                id: 'id-123',
-                actionTypeId: 'id-456',
-                params: {},
+        transformFromAlertThrottle({
+          actions: [
+            {
+              group: 'group',
+              id: 'id-123',
+              actionTypeId: 'id-456',
+              params: {},
+              frequency: {
+                throttle: '1d',
               },
-            ],
-          } as RuleAlertType,
-          undefined
-        )
-      ).toEqual(NOTIFICATION_THROTTLE_RULE);
-    });
-
-    test('it will use the "rule" and not the "legacyRuleActions" if the rule and actions is defined', () => {
-      const legacyRuleActions: LegacyRuleActions = {
-        id: 'id_1',
-        ruleThrottle: '',
-        alertThrottle: '',
-        actions: [
-          {
-            id: 'id_2',
-            group: 'group',
-            action_type_id: 'actionTypeId',
-            params: {},
-          },
-        ],
-      };
-
-      expect(
-        transformFromAlertThrottle(
-          {
-            muteAll: true,
-            notifyWhen: 'onActiveAlert',
-            actions: [
-              {
-                group: 'group',
-                id: 'id-123',
-                actionTypeId: 'id-456',
-                params: {},
+            },
+            {
+              group: 'group',
+              id: 'id-123',
+              actionTypeId: 'id-456',
+              params: {},
+              frequency: {
+                notifyWhen: 'onThrottleInterval',
+                throttle: '2d',
               },
-            ],
-          } as RuleAlertType,
-          legacyRuleActions
-        )
-      ).toEqual(NOTIFICATION_THROTTLE_NO_ACTIONS);
+            },
+          ],
+        } as RuleAlertType)
+      ).toBe(NOTIFICATION_THROTTLE_RULE);
     });
 
-    test('it will use the "legacyRuleActions" and not the "rule" if the rule actions is an empty array', () => {
-      const legacyRuleActions: LegacyRuleActions = {
-        id: 'id_1',
-        ruleThrottle: NOTIFICATION_THROTTLE_RULE,
-        alertThrottle: null,
-        actions: [
-          {
-            id: 'id_2',
-            group: 'group',
-            action_type_id: 'actionTypeId',
-            params: {},
-          },
-        ],
-      };
-
+    test('returns "NOTIFICATION_THROTTLE_RULE" if rule.notifyWhen is not set and there are no actions', () => {
       expect(
-        transformFromAlertThrottle(
-          {
-            muteAll: true,
-            notifyWhen: 'onActiveAlert',
-            actions: [],
-          } as unknown as RuleAlertType,
-          legacyRuleActions
-        )
-      ).toEqual(NOTIFICATION_THROTTLE_RULE);
+        transformFromAlertThrottle({
+          actions: [],
+        } as unknown as RuleAlertType)
+      ).toBe(NOTIFICATION_THROTTLE_RULE);
     });
 
-    test('it will use the "legacyRuleActions" and not the "rule" if the rule actions is a null', () => {
-      const legacyRuleActions: LegacyRuleActions = {
-        id: 'id_1',
-        ruleThrottle: NOTIFICATION_THROTTLE_RULE,
-        alertThrottle: null,
-        actions: [
-          {
-            id: 'id_2',
-            group: 'group',
-            action_type_id: 'actionTypeId',
-            params: {},
-          },
-        ],
-      };
-
+    test('returns "NOTIFICATION_THROTTLE_RULE" if rule.notifyWhen is "onActiveAlert"', () => {
       expect(
-        transformFromAlertThrottle(
-          {
-            muteAll: true,
-            notifyWhen: 'onActiveAlert',
-            actions: null,
-          } as unknown as RuleAlertType,
-          legacyRuleActions
-        )
-      ).toEqual(NOTIFICATION_THROTTLE_RULE);
+        transformFromAlertThrottle({
+          notifyWhen: 'onActiveAlert',
+          actions: [],
+        } as unknown as RuleAlertType)
+      ).toBe(NOTIFICATION_THROTTLE_RULE);
+    });
+
+    test('returns rule.throttle value if rule.notifyWhen is "onThrottleInterval"', () => {
+      expect(
+        transformFromAlertThrottle({
+          notifyWhen: 'onThrottleInterval',
+          throttle: '1d',
+          actions: [],
+        } as unknown as RuleAlertType)
+      ).toBe('1d');
+    });
+
+    test('returns undefined if rule.notifyWhen is "onThrottleInterval" and rule.throttle is not set', () => {
+      expect(
+        transformFromAlertThrottle({
+          notifyWhen: 'onThrottleInterval',
+          actions: [],
+        } as unknown as RuleAlertType)
+      ).toBeUndefined();
+    });
+
+    test('returns first action throttle if rule.notifyWhen is not set even if muteAll is set to true', () => {
+      expect(
+        transformFromAlertThrottle({
+          muteAll: true,
+          actions: [
+            {
+              group: 'group',
+              id: 'id-123',
+              actionTypeId: 'id-456',
+              params: {},
+              frequency: {
+                notifyWhen: 'onThrottleInterval',
+                throttle: '1d',
+              },
+            },
+            {
+              group: 'group',
+              id: 'id-123',
+              actionTypeId: 'id-456',
+              params: {},
+              frequency: {
+                notifyWhen: 'onThrottleInterval',
+                throttle: '2d',
+              },
+            },
+          ],
+        } as RuleAlertType)
+      ).toBe('1d');
     });
   });
 
-  describe('transformActions', () => {
-    test('It transforms two alert actions', () => {
-      const alertAction: RuleAction[] = [
+  describe('transformToActionFrequency', () => {
+    describe('actions without frequencies', () => {
+      const actionsWithoutFrequencies: SanitizedRuleAction[] = [
         {
-          id: 'id_1',
           group: 'group',
-          actionTypeId: 'actionTypeId',
+          id: 'id-123',
+          actionTypeId: 'id-456',
           params: {},
         },
         {
-          id: 'id_2',
           group: 'group',
-          actionTypeId: 'actionTypeId',
+          id: 'id-789',
+          actionTypeId: 'id-012',
+          params: {},
+        },
+      ];
+
+      test.each([undefined, null, NOTIFICATION_THROTTLE_NO_ACTIONS, NOTIFICATION_THROTTLE_RULE])(
+        `it sets each action's frequency attribute to default value when 'throttle' is '%s'`,
+        (throttle) => {
+          expect(transformToActionFrequency(actionsWithoutFrequencies, throttle)).toEqual(
+            actionsWithoutFrequencies.map((action) => ({
+              ...action,
+              frequency: NOTIFICATION_DEFAULT_FREQUENCY,
+            }))
+          );
+        }
+      );
+
+      test.each(['47s', '10m', '3h', '101d'])(
+        `it correctly transforms 'throttle = %s' and sets it as a frequency of each action`,
+        (throttle) => {
+          expect(transformToActionFrequency(actionsWithoutFrequencies, throttle)).toEqual(
+            actionsWithoutFrequencies.map((action) => ({
+              ...action,
+              frequency: {
+                summary: true,
+                throttle,
+                notifyWhen: 'onThrottleInterval',
+              },
+            }))
+          );
+        }
+      );
+    });
+
+    describe('actions with frequencies', () => {
+      const actionsWithFrequencies: SanitizedRuleAction[] = [
+        {
+          group: 'group',
+          id: 'id-123',
+          actionTypeId: 'id-456',
+          params: {},
+          frequency: {
+            summary: true,
+            throttle: null,
+            notifyWhen: 'onActiveAlert',
+          },
+        },
+        {
+          group: 'group',
+          id: 'id-789',
+          actionTypeId: 'id-012',
+          params: {},
+          frequency: {
+            summary: false,
+            throttle: '1s',
+            notifyWhen: 'onThrottleInterval',
+          },
+        },
+      ];
+
+      test.each([
+        undefined,
+        null,
+        NOTIFICATION_THROTTLE_NO_ACTIONS,
+        NOTIFICATION_THROTTLE_RULE,
+        '1h',
+        '1d',
+      ])(`it does not change actions frequency attributes when 'throttle' is '%s'`, (throttle) => {
+        expect(transformToActionFrequency(actionsWithFrequencies, throttle)).toEqual(
+          actionsWithFrequencies
+        );
+      });
+    });
+
+    describe('some actions with frequencies', () => {
+      const someActionsWithFrequencies: SanitizedRuleAction[] = [
+        {
+          group: 'group',
+          id: 'id-123',
+          actionTypeId: 'id-456',
+          params: {},
+          frequency: {
+            summary: true,
+            throttle: null,
+            notifyWhen: 'onActiveAlert',
+          },
+        },
+        {
+          group: 'group',
+          id: 'id-789',
+          actionTypeId: 'id-012',
+          params: {},
+          frequency: {
+            summary: false,
+            throttle: '1s',
+            notifyWhen: 'onThrottleInterval',
+          },
+        },
+        {
+          group: 'group',
+          id: 'id-345',
+          actionTypeId: 'id-678',
           params: {},
         },
       ];
 
-      const transformed = transformActions(alertAction, null);
-      expect(transformed).toEqual<RuleResponse['actions']>([
-        {
-          id: 'id_1',
-          group: 'group',
-          action_type_id: 'actionTypeId',
-          params: {},
-        },
-        {
-          id: 'id_2',
-          group: 'group',
-          action_type_id: 'actionTypeId',
-          params: {},
-        },
-      ]);
-    });
+      test.each([undefined, null, NOTIFICATION_THROTTLE_NO_ACTIONS, NOTIFICATION_THROTTLE_RULE])(
+        `it overrides each action's frequency attribute to default value when 'throttle' is '%s'`,
+        (throttle) => {
+          expect(transformToActionFrequency(someActionsWithFrequencies, throttle)).toEqual(
+            someActionsWithFrequencies.map((action) => ({
+              ...action,
+              frequency: action.frequency ?? NOTIFICATION_DEFAULT_FREQUENCY,
+            }))
+          );
+        }
+      );
 
-    test('It transforms two alert actions but not a legacyRuleActions if this is also passed in', () => {
-      const alertAction: RuleAction[] = [
-        {
-          id: 'id_1',
-          group: 'group',
-          actionTypeId: 'actionTypeId',
-          params: {},
-        },
-        {
-          id: 'id_2',
-          group: 'group',
-          actionTypeId: 'actionTypeId',
-          params: {},
-        },
-      ];
-      const legacyRuleActions: LegacyRuleActions = {
-        id: 'id_1',
-        ruleThrottle: '',
-        alertThrottle: '',
-        actions: [
-          {
-            id: 'id_2',
-            group: 'group',
-            action_type_id: 'actionTypeId',
-            params: {},
-          },
-        ],
-      };
-      const transformed = transformActions(alertAction, legacyRuleActions);
-      expect(transformed).toEqual<RuleResponse['actions']>([
-        {
-          id: 'id_1',
-          group: 'group',
-          action_type_id: 'actionTypeId',
-          params: {},
-        },
-        {
-          id: 'id_2',
-          group: 'group',
-          action_type_id: 'actionTypeId',
-          params: {},
-        },
-      ]);
-    });
-
-    test('It will transform the legacyRuleActions if the alertAction is an empty array', () => {
-      const alertAction: RuleAction[] = [];
-      const legacyRuleActions: LegacyRuleActions = {
-        id: 'id_1',
-        ruleThrottle: '',
-        alertThrottle: '',
-        actions: [
-          {
-            id: 'id_2',
-            group: 'group',
-            action_type_id: 'actionTypeId',
-            params: {},
-          },
-        ],
-      };
-      const transformed = transformActions(alertAction, legacyRuleActions);
-      expect(transformed).toEqual<RuleResponse['actions']>([
-        {
-          id: 'id_2',
-          group: 'group',
-          action_type_id: 'actionTypeId',
-          params: {},
-        },
-      ]);
-    });
-
-    test('It will transform the legacyRuleActions if the alertAction is undefined', () => {
-      const legacyRuleActions: LegacyRuleActions = {
-        id: 'id_1',
-        ruleThrottle: '',
-        alertThrottle: '',
-        actions: [
-          {
-            id: 'id_2',
-            group: 'group',
-            action_type_id: 'actionTypeId',
-            params: {},
-          },
-        ],
-      };
-      const transformed = transformActions(undefined, legacyRuleActions);
-      expect(transformed).toEqual<RuleResponse['actions']>([
-        {
-          id: 'id_2',
-          group: 'group',
-          action_type_id: 'actionTypeId',
-          params: {},
-        },
-      ]);
+      test.each(['47s', '10m', '3h', '101d'])(
+        `it correctly transforms 'throttle = %s' and overrides frequency attribute of each action`,
+        (throttle) => {
+          expect(transformToActionFrequency(someActionsWithFrequencies, throttle)).toEqual(
+            someActionsWithFrequencies.map((action) => ({
+              ...action,
+              frequency: action.frequency ?? {
+                summary: true,
+                throttle,
+                notifyWhen: 'onThrottleInterval',
+              },
+            }))
+          );
+        }
+      );
     });
   });
 });

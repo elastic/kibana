@@ -7,10 +7,9 @@
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { LogEntryTime } from '@kbn/logs-shared-plugin/common';
 import classNames from 'classnames';
 import * as React from 'react';
-
-import { LogEntryTime } from '../../../../common/log_entry';
 
 interface LogSearchButtonsProps {
   className?: string;
@@ -47,6 +46,7 @@ export class LogSearchButtons extends React.PureComponent<LogSearchButtonsProps,
       <EuiFlexGroup className={classes} gutterSize="xs">
         <EuiFlexItem>
           <EuiButtonEmpty
+            data-test-subj="infraPreviousButton"
             onClick={this.handleJumpToPreviousSearchResult}
             iconType="arrowLeft"
             iconSide="left"
@@ -61,6 +61,7 @@ export class LogSearchButtons extends React.PureComponent<LogSearchButtonsProps,
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiButtonEmpty
+            data-test-subj="infraNextButton"
             onClick={this.handleJumpToNextSearchResult}
             iconType="arrowRight"
             iconSide="right"

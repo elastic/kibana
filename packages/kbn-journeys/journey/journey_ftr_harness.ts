@@ -8,23 +8,27 @@
 
 import Url from 'url';
 import { inspect, format } from 'util';
-import { setTimeout } from 'timers/promises';
-
+import { setTimeout as setTimer } from 'timers/promises';
 import * as Rx from 'rxjs';
 import apmNode from 'elastic-apm-node';
 import playwright, { ChromiumBrowser, Page, BrowserContext, CDPSession, Request } from 'playwright';
 import { asyncMap, asyncForEach } from '@kbn/std';
 import { ToolingLog } from '@kbn/tooling-log';
 import { Config } from '@kbn/test';
-import { EsArchiver, KibanaServer } from '@kbn/ftr-common-functional-services';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 
-import { Auth } from '../services/auth';
+import { AxiosError } from 'axios';
+import { Auth, Es, EsArchiver, KibanaServer, Retry } from '../services';
 import { getInputDelays } from '../services/input_delays';
 import { KibanaUrl } from '../services/kibana_url';
 
 import type { Step, AnyStep } from './journey';
 import type { JourneyConfig } from './journey_config';
 import { JourneyScreenshots } from './journey_screenshots';
+import { getNewPageObject } from '../services/page';
 
 export class JourneyFtrHarness {
   private readonly screenshots: JourneyScreenshots;
@@ -34,6 +38,8 @@ export class JourneyFtrHarness {
     private readonly config: Config,
     private readonly esArchiver: EsArchiver,
     private readonly kibanaServer: KibanaServer,
+    private readonly es: Es,
+    private readonly retry: Retry,
     private readonly auth: Auth,
     private readonly journeyConfig: JourneyConfig<any>
   ) {
@@ -52,8 +58,39 @@ export class JourneyFtrHarness {
 
   private apm: apmNode.Agent | null = null;
 
+  // Update the Telemetry and APM global labels to link traces with journey
+  private async updateTelemetryAndAPMLabels(labels: { [k: string]: string }) {
+    this.log.info(`Updating telemetry & APM labels: ${JSON.stringify(labels)}`);
+
+    try {
+      await this.kibanaServer.request({
+        path: '/internal/core/_settings',
+        method: 'PUT',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'ftr',
+        },
+        body: { telemetry: { labels } },
+      });
+    } catch (error) {
+      const statusCode = (error as AxiosError).response?.status;
+      if (statusCode === 404) {
+        throw new Error(
+          `Failed to update labels, supported Kibana version is 8.11.0+ and must be started with "coreApp.allowDynamicConfigOverrides:true"`
+        );
+      } else throw error;
+    }
+  }
+
   private async setupApm() {
     const kbnTestServerEnv = this.config.get(`kbnTestServer.env`);
+
+    const journeyLabels: { [k: string]: string } = Object.fromEntries(
+      kbnTestServerEnv.ELASTIC_APM_GLOBAL_LABELS.split(',').map((kv: string) => kv.split('='))
+    );
+
+    // Update labels before start for consistency b/w APM services
+    await this.updateTelemetryAndAPMLabels(journeyLabels);
 
     this.apm = apmNode.start({
       serviceName: 'functional test runner',
@@ -97,10 +134,11 @@ export class JourneyFtrHarness {
 
   private async setupBrowserAndPage() {
     const browser = await this.getBrowserInstance();
-    this.context = await browser.newContext({ bypassCSP: true });
+    const browserContextArgs = this.auth.isCloud() ? {} : { bypassCSP: true };
+    this.context = await browser.newContext(browserContextArgs);
 
     if (this.journeyConfig.shouldAutoLogin()) {
-      const cookie = await this.auth.login({ username: 'elastic', password: 'changeme' });
+      const cookie = await this.auth.login();
       await this.context.addCookies([cookie]);
     }
 
@@ -117,8 +155,12 @@ export class JourneyFtrHarness {
   }
 
   private async onSetup() {
+    // We start browser and init page in the first place
+    await this.setupBrowserAndPage();
+    // We allow opt-in beforeSteps hook to manage Kibana/ES state
+    await this.journeyConfig.getBeforeStepsFn(this.getCtx());
+    // Loading test data
     await Promise.all([
-      this.setupBrowserAndPage(),
       asyncForEach(this.journeyConfig.getEsArchives(), async (esArchive) => {
         await this.esArchiver.load(esArchive);
       }),
@@ -180,7 +222,7 @@ export class JourneyFtrHarness {
     // can't track but hope it is started within 3 seconds, node will stay
     // alive for active requests
     // https://github.com/elastic/apm-agent-nodejs/issues/2088
-    await setTimeout(3000);
+    await setTimer(3000);
   }
 
   private async onTeardown() {
@@ -233,9 +275,8 @@ export class JourneyFtrHarness {
       return await block();
     }
 
-    const span = this.apm?.startSpan(name, type ?? null, {
-      childOf: this.currentTransaction,
-    });
+    const span = this.currentTransaction.startSpan(name, type ?? null);
+
     if (!span) {
       return await block();
     }
@@ -292,33 +333,36 @@ export class JourneyFtrHarness {
   private telemetryTrackerCount = 0;
 
   private trackTelemetryRequests(page: Page) {
-    const id = ++this.telemetryTrackerCount;
-
-    const requestFailure$ = Rx.fromEvent<Request>(page, 'requestfailed');
-    const requestSuccess$ = Rx.fromEvent<Request>(page, 'requestfinished');
-    const request$ = Rx.fromEvent<Request>(page, 'request').pipe(
+    const requestSuccess$ = Rx.fromEvent(
+      page,
+      'requestfinished'
+    ) as Rx.Observable<playwright.Request>;
+    const request$ = (Rx.fromEvent(page, 'request') as Rx.Observable<playwright.Request>).pipe(
       Rx.takeUntil(
         this.pageTeardown$.pipe(
           Rx.first((p) => p === page),
           Rx.delay(3000)
-          // If EBT client buffers:
-          // Rx.mergeMap(async () => {
-          //  await page.waitForFunction(() => {
-          //    // return window.kibana_ebt_client.buffer_size == 0
-          //  });
-          // })
         )
       ),
-      Rx.mergeMap((request) => {
+      Rx.mergeMap((request: Request) => {
         if (!request.url().includes('telemetry-staging.elastic.co')) {
           return Rx.EMPTY;
         }
 
-        this.log.debug(`Waiting for telemetry request #${id} to complete`);
-        return Rx.merge(requestFailure$, requestSuccess$).pipe(
-          Rx.first((r) => r === request),
+        const id = ++this.telemetryTrackerCount;
+        this.log.info(`Waiting for telemetry request #${id} to complete`);
+        return Rx.of(requestSuccess$).pipe(
+          Rx.timeout(60_000),
+          Rx.catchError((error) => {
+            if (error instanceof Error && error.name === 'TimeoutError') {
+              this.log.error(`Timeout error occurred: ${error.message}`);
+            }
+            // Rethrow the error if it's not a TimeoutError
+            return Rx.throwError(() => new Error(error));
+          }),
           Rx.tap({
-            complete: () => this.log.debug(`Telemetry request #${id} complete`),
+            complete: () => this.log.info(`Telemetry request #${id} complete`),
+            error: (err) => this.log.error(`Telemetry request was not processed: ${err.message}`),
           })
         );
       })
@@ -351,7 +395,11 @@ export class JourneyFtrHarness {
       throw new Error('performance service is not properly initialized');
     }
 
+    const isServerlessProject = !!this.config.get('serverless');
+    const kibanaPage = getNewPageObject(isServerlessProject, page, this.log, this.retry);
+
     this.#_ctx = this.journeyConfig.getExtendedStepCtx({
+      kibanaPage,
       page,
       log: this.log,
       inputDelays: getInputDelays(),
@@ -365,6 +413,9 @@ export class JourneyFtrHarness {
         )
       ),
       kibanaServer: this.kibanaServer,
+      es: this.es,
+      retry: this.retry,
+      auth: this.auth,
     });
 
     return this.#_ctx;
@@ -398,6 +449,15 @@ export class JourneyFtrHarness {
   private onConsoleEvent = async (message: playwright.ConsoleMessage) => {
     try {
       const { url, lineNumber, columnNumber } = message.location();
+
+      if (
+        url.includes('kbn-ui-shared-deps-npm.dll.js') ||
+        url.includes('kbn-ui-shared-deps-src.js')
+      ) {
+        // ignore messages from kbn-ui-shared-deps-npm.dll.js & kbn-ui-shared-deps-src.js
+        return;
+      }
+
       const location = `${url}:${lineNumber}:${columnNumber}`;
 
       const args = await asyncMap(message.args(), (handle) => handle.jsonValue());
@@ -405,11 +465,17 @@ export class JourneyFtrHarness {
         ? args.map((arg) => (typeof arg === 'string' ? arg : inspect(arg, false, null))).join(' ')
         : message.text();
 
+      if (text.includes(`Unrecognized feature: 'web-share'`)) {
+        // ignore Error with Permissions-Policy header: Unrecognized feature: 'web-share'
+        return;
+      }
+
       if (
-        url.includes('kbn-ui-shared-deps-npm.dll.js') &&
-        text.includes('moment construction falls')
+        url.includes('core.entry.js') &&
+        args.length > 1 &&
+        !('performance_metric' === args[1]?.ebt_event?.event_type)
       ) {
-        // ignore errors from moment about constructing dates with invalid formats
+        // ignore events like "click", log to console only 'event_type: performance_metric'
         return;
       }
 

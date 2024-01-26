@@ -8,11 +8,12 @@
 import { EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-plugin/public';
-import { AlertDropdown } from '../../alerting/log_threshold';
+import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-shared-plugin/public';
+import { LazyAlertDropdownWrapper } from '../../alerting/log_threshold';
 import { HelpCenterContent } from '../../components/help_center_content';
+import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
 import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
 import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
@@ -20,12 +21,20 @@ import { LogEntryCategoriesPage } from './log_entry_categories';
 import { LogEntryRatePage } from './log_entry_rate';
 import { LogsSettingsPage } from './settings';
 import { StreamPage } from './stream';
+import { isDevMode } from '../../utils/dev_mode';
+import { StateMachinePlayground } from '../../observability_logs/xstate_helpers';
+import { NotFoundPage } from '../404';
 
 export const LogsPageContent: React.FunctionComponent = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
 
-  const kibana = useKibana();
+  const {
+    application: { getUrlForApp },
+    observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
+  } = useKibanaContextForPlugin().services;
+
+  const enableDeveloperRoutes = isDevMode();
 
   useReadOnlyBadge(!uiCapabilities?.logs?.save);
 
@@ -69,27 +78,34 @@ export const LogsPageContent: React.FunctionComponent = () => {
             <EuiHeaderLink color={'text'} {...settingsLinkProps}>
               {settingsTabTitle}
             </EuiHeaderLink>
-            <AlertDropdown />
+            <LazyAlertDropdownWrapper />
             <EuiHeaderLink
-              href={kibana.services?.application?.getUrlForApp('/integrations/browse')}
+              href={getUrlForApp('/integrations/browse')}
               color="primary"
               iconType="indexOpen"
             >
               {ADD_DATA_LABEL}
             </EuiHeaderLink>
+            {ObservabilityAIAssistantActionMenuItem ? (
+              <ObservabilityAIAssistantActionMenuItem />
+            ) : null}
           </EuiHeaderLinks>
         </HeaderMenuPortal>
       )}
 
-      <Switch>
+      <Routes>
         <Route path={streamTab.pathname} component={StreamPage} />
         <Route path={anomaliesTab.pathname} component={LogEntryRatePage} />
         <Route path={logCategoriesTab.pathname} component={LogEntryCategoriesPage} />
         <Route path={settingsTab.pathname} component={LogsSettingsPage} />
+        {enableDeveloperRoutes && (
+          <Route path={'/state-machine-playground'} component={StateMachinePlayground} />
+        )}
         <RedirectWithQueryParams from={'/analysis'} to={anomaliesTab.pathname} exact />
         <RedirectWithQueryParams from={'/log-rate'} to={anomaliesTab.pathname} exact />
         <RedirectWithQueryParams from={'/'} to={streamTab.pathname} exact />
-      </Switch>
+        <Route render={() => <NotFoundPage title="Logs" />} />
+      </Routes>
     </>
   );
 };

@@ -33,8 +33,8 @@ const isAccessible = (
   if (getInAppUrl === undefined) {
     throw new Error('Trying to map an object from a type without management metadata');
   }
-  const { uiCapabilitiesPath } = getInAppUrl(object);
-  return Boolean(get(capabilities, uiCapabilitiesPath) ?? false);
+  const inAppUrl = getInAppUrl(object);
+  return inAppUrl ? Boolean(get(capabilities, inAppUrl.uiCapabilitiesPath) ?? false) : false;
 };
 
 export const mapToResult = (
@@ -52,7 +52,7 @@ export const mapToResult = (
     title: getTitle ? getTitle(object) : (object.attributes as any)[defaultSearchField],
     type: object.type,
     icon: type.management?.icon ?? undefined,
-    url: getInAppUrl(object).path,
+    url: getInAppUrl(object)!.path,
     score: object.score,
     meta: {
       tagIds: object.references.filter((ref) => ref.type === 'tag').map(({ id }) => id),

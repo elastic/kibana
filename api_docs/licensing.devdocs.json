@@ -343,7 +343,7 @@
               "\nThe state of checking the results of a license type meeting the license minimum."
             ],
             "signature": [
-              "\"invalid\" | \"unavailable\" | \"valid\" | \"expired\""
+              "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
@@ -440,7 +440,7 @@
               "\nThe validity status of the license."
             ],
             "signature": [
-              "\"invalid\" | \"active\" | \"expired\""
+              "\"active\" | \"invalid\" | \"expired\""
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
@@ -543,6 +543,26 @@
                 "path": "x-pack/plugins/apm/common/license_check.test.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/common/services/agent_policy_config.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/common/services/agent_policy_config.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/agent_policy_watch.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/agent_policy_watch.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/agent_policy_watch.test.ts"
+              },
+              {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
               },
@@ -593,6 +613,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -691,7 +715,7 @@
         "label": "LicenseCheckState",
         "description": [],
         "signature": [
-          "\"invalid\" | \"unavailable\" | \"valid\" | \"expired\""
+          "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
         ],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
@@ -706,7 +730,7 @@
         "label": "LicenseStatus",
         "description": [],
         "signature": [
-          "\"invalid\" | \"active\" | \"expired\""
+          "\"active\" | \"invalid\" | \"expired\""
         ],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
@@ -787,12 +811,24 @@
               "path": "x-pack/plugins/security/public/plugin.tsx"
             },
             {
+              "plugin": "aiops",
+              "path": "x-pack/plugins/aiops/public/plugin.tsx"
+            },
+            {
               "plugin": "licenseManagement",
               "path": "x-pack/plugins/license_management/public/plugin.ts"
             },
             {
               "plugin": "ml",
               "path": "x-pack/plugins/ml/public/plugin.ts"
+            },
+            {
+              "plugin": "observability",
+              "path": "x-pack/plugins/observability/public/plugin.ts"
+            },
+            {
+              "plugin": "profiling",
+              "path": "x-pack/plugins/profiling/public/components/contexts/license/license_context.tsx"
             },
             {
               "plugin": "apm",
@@ -967,35 +1003,23 @@
             "text": "CheckLicense"
           },
           ", handler: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.RequestHandler",
-            "text": "RequestHandler"
-          },
+          "RequestHandler",
           "<P, Q, B, Context, any, ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.KibanaResponseFactory",
+            "section": "def-common.KibanaResponseFactory",
             "text": "KibanaResponseFactory"
           },
           ">) => ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.RequestHandler",
-            "text": "RequestHandler"
-          },
+          "RequestHandler",
           "<P, Q, B, Context, any, ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.KibanaResponseFactory",
+            "section": "def-common.KibanaResponseFactory",
             "text": "KibanaResponseFactory"
           },
           ">"
@@ -1033,19 +1057,13 @@
             "label": "handler",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.RequestHandler",
-                "text": "RequestHandler"
-              },
+              "RequestHandler",
               "<P, Q, B, Context, any, ",
               {
                 "pluginId": "@kbn/core-http-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaResponseFactory",
+                "section": "def-common.KibanaResponseFactory",
                 "text": "KibanaResponseFactory"
               },
               ">"
@@ -1588,7 +1606,7 @@
               "\nThe state of checking the results of a license type meeting the license minimum."
             ],
             "signature": [
-              "\"invalid\" | \"unavailable\" | \"valid\" | \"expired\""
+              "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
@@ -1735,7 +1753,7 @@
               "\nThe validity status of the license."
             ],
             "signature": [
-              "\"invalid\" | \"active\" | \"expired\""
+              "\"active\" | \"invalid\" | \"expired\""
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false,
@@ -1838,6 +1856,26 @@
                 "path": "x-pack/plugins/apm/common/license_check.test.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/common/services/agent_policy_config.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/common/services/agent_policy_config.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/agent_policy_watch.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/agent_policy_watch.test.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/agent_policy_watch.test.ts"
+              },
+              {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/common/licensing/license_service.test.ts"
               },
@@ -1888,6 +1926,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -2033,7 +2075,7 @@
         "label": "LicenseCheckState",
         "description": [],
         "signature": [
-          "\"invalid\" | \"unavailable\" | \"valid\" | \"expired\""
+          "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
         ],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
@@ -2048,7 +2090,7 @@
         "label": "LicenseStatus",
         "description": [],
         "signature": [
-          "\"invalid\" | \"active\" | \"expired\""
+          "\"active\" | \"invalid\" | \"expired\""
         ],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
@@ -2149,8 +2191,8 @@
               "path": "x-pack/plugins/alerting/server/plugin.ts"
             },
             {
-              "plugin": "ml",
-              "path": "x-pack/plugins/ml/server/plugin.ts"
+              "plugin": "aiops",
+              "path": "x-pack/plugins/aiops/server/plugin.ts"
             },
             {
               "plugin": "ml",
@@ -2170,7 +2212,19 @@
             },
             {
               "plugin": "mapsEms",
-              "path": "src/plugins/maps_ems/server/index.ts"
+              "path": "src/plugins/maps_ems/server/plugin.ts"
+            },
+            {
+              "plugin": "osquery",
+              "path": "x-pack/plugins/osquery/server/handlers/action/create_action_service.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/query/query.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/threshold/threshold.ts"
             },
             {
               "plugin": "painlessLab",
@@ -2183,10 +2237,6 @@
             {
               "plugin": "searchprofiler",
               "path": "x-pack/plugins/searchprofiler/server/plugin.ts"
-            },
-            {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/executors/query.ts"
             },
             {
               "plugin": "snapshotRestore",
@@ -2253,7 +2303,7 @@
           "references": [
             {
               "plugin": "mapsEms",
-              "path": "src/plugins/maps_ems/server/index.ts"
+              "path": "src/plugins/maps_ems/server/plugin.ts"
             }
           ],
           "children": [],
@@ -2348,9 +2398,9 @@
             "(clusterClient: ",
             {
               "pluginId": "@kbn/core-elasticsearch-server",
-              "scope": "server",
+              "scope": "common",
               "docId": "kibKbnCoreElasticsearchServerPluginApi",
-              "section": "def-server.IClusterClient",
+              "section": "def-common.IClusterClient",
               "text": "IClusterClient"
             },
             ", pollingFrequency: number) => { license$: ",
@@ -2375,9 +2425,9 @@
               "signature": [
                 {
                   "pluginId": "@kbn/core-elasticsearch-server",
-                  "scope": "server",
+                  "scope": "common",
                   "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                  "section": "def-server.IClusterClient",
+                  "section": "def-common.IClusterClient",
                   "text": "IClusterClient"
                 }
               ],

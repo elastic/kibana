@@ -9,11 +9,10 @@ import React, { lazy } from 'react';
 
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import userEvent from '@testing-library/user-event';
-import { waitFor } from '@testing-library/dom';
-import { act } from '@testing-library/react';
-import { AppMockRenderer, createAppMockRenderer } from '../../../components/test_utils';
+import { waitFor, act } from '@testing-library/react';
 import CreateConnectorFlyout from '.';
 import { betaBadgeProps } from '../beta_badge_props';
+import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
 
 jest.mock('../../../lib/action_connector_api', () => ({
   ...(jest.requireActual('../../../lib/action_connector_api') as any),

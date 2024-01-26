@@ -15,11 +15,15 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import { METRIC_TYPE } from '@kbn/analytics';
+import {
+  type ChartSizeEvent,
+  extractContainerType,
+  extractVisualizationType,
+} from '@kbn/chart-expressions-common';
+
 import { ExpressionTagcloudRendererDependencies } from '../plugin';
 import { TagcloudRendererConfig } from '../../common/types';
 import { EXPRESSION_NAME } from '../../common';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { extractContainerType, extractVisualizationType } from '../../../common';
 
 export const strings = {
   getDisplayName: () =>
@@ -66,9 +70,25 @@ export const tagcloudRenderer: (
       handlers.done();
     };
 
-    const palettesRegistry = await plugins.charts.palettes.getPalettes();
+    const chartSizeEvent: ChartSizeEvent = {
+      name: 'chartSize',
+      data: {
+        maxDimensions: {
+          x: { value: 100, unit: 'percentage' },
+          y: { value: 100, unit: 'percentage' },
+        },
+      },
+    };
 
-    const showNoResult = config.visData.rows.length === 0;
+    handlers.event(chartSizeEvent);
+
+    const palettesRegistry = await plugins.charts.palettes.getPalettes();
+    let isDarkMode = false;
+    plugins.charts.theme.darkModeEnabled$
+      .subscribe((val) => {
+        isDarkMode = val.darkMode;
+      })
+      .unsubscribe();
 
     render(
       <KibanaThemeProvider theme$={core.theme.theme$}>
@@ -81,7 +101,6 @@ export const tagcloudRenderer: (
                 // It is used for rendering at `Canvas`.
                 className={cx('tagCloudContainer', css(tagCloudVisClass))}
                 renderComplete={renderComplete}
-                showNoResult={showNoResult}
               >
                 <TagCloudChart
                   {...config}
@@ -89,6 +108,8 @@ export const tagcloudRenderer: (
                   renderComplete={renderComplete}
                   fireEvent={handlers.event}
                   syncColors={config.syncColors}
+                  overrides={config.overrides}
+                  isDarkMode={isDarkMode}
                 />
               </VisualizationContainer>
             )}

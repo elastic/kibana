@@ -16,6 +16,8 @@ const onEditListDetails = jest.fn();
 const onExportList = jest.fn();
 const onDeleteList = jest.fn();
 const onManageRules = jest.fn();
+const onNavigate = jest.fn();
+const onDuplicateList = jest.fn();
 jest.mock('./use_list_header');
 
 describe('ExceptionListHeader', () => {
@@ -39,6 +41,8 @@ describe('ExceptionListHeader', () => {
         onExportList={onExportList}
         onDeleteList={onDeleteList}
         onManageRules={onManageRules}
+        onDuplicateList={onDuplicateList}
+        backOptions={{ pageId: '', path: '', onNavigate }}
       />
     );
     expect(wrapper).toMatchSnapshot();
@@ -68,6 +72,8 @@ describe('ExceptionListHeader', () => {
         onExportList={onExportList}
         onDeleteList={onDeleteList}
         onManageRules={onManageRules}
+        onDuplicateList={onDuplicateList}
+        backOptions={{ pageId: '', path: '', onNavigate }}
       />
     );
     expect(wrapper.queryByTestId('RightSideMenuItemsMenuActionsButtonIcon')).toBeEnabled();
@@ -76,6 +82,7 @@ describe('ExceptionListHeader', () => {
 
     expect(wrapper.queryByTestId('RightSideMenuItemsMenuActionsActionItem1')).toBeEnabled();
     expect(wrapper.queryByTestId('RightSideMenuItemsMenuActionsActionItem2')).toBeDisabled();
+    expect(wrapper.queryByTestId('RightSideMenuItemsMenuActionsActionItem3')).toBeDisabled();
     expect(wrapper.queryByTestId('EditTitleIcon')).not.toBeInTheDocument();
   });
   it('should render the List Header with name, default description and  actions', () => {
@@ -90,6 +97,8 @@ describe('ExceptionListHeader', () => {
         onExportList={onExportList}
         onDeleteList={onDeleteList}
         onManageRules={onManageRules}
+        onDuplicateList={onDuplicateList}
+        backOptions={{ pageId: '', path: '', onNavigate }}
       />
     );
     expect(wrapper).toMatchSnapshot();
@@ -119,9 +128,37 @@ describe('ExceptionListHeader', () => {
         onExportList={onExportList}
         onDeleteList={onDeleteList}
         onManageRules={onManageRules}
+        onDuplicateList={onDuplicateList}
+        backOptions={{ pageId: '', path: '', onNavigate }}
       />
     );
     expect(wrapper).toMatchSnapshot();
     expect(wrapper.getByTestId('EditModal')).toBeInTheDocument();
+  });
+  it('should go back the page path when back button is clicked', () => {
+    (useExceptionListHeaderMock as jest.Mock).mockReturnValue({
+      isModalVisible: true,
+      listDetails: { name: 'List Name', description: 'List description' },
+      onSave: jest.fn(),
+      onCancel: jest.fn(),
+    });
+    const wrapper = render(
+      <ExceptionListHeader
+        name="List Name"
+        listId="List_Id"
+        description="List description"
+        isReadonly={false}
+        linkedRules={[]}
+        securityLinkAnchorComponent={securityLinkAnchorComponentMock}
+        onEditListDetails={onEditListDetails}
+        onExportList={onExportList}
+        onDeleteList={onDeleteList}
+        onManageRules={onManageRules}
+        onDuplicateList={onDuplicateList}
+        backOptions={{ pageId: '', path: 'test-path', onNavigate }}
+      />
+    );
+    fireEvent.click(wrapper.getByTestId('Breadcrumb'));
+    expect(onNavigate).toBeCalledWith('test-path');
   });
 });

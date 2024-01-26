@@ -11,18 +11,14 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type {
-  MitreTacticsOptions,
-  MitreTechniquesOptions,
-  MitreSubtechniquesOptions,
-} from './types';
+import type { MitreTactic, MitreTechnique, MitreSubTechnique } from './types';
 
-export const tacticsOptions: MitreTacticsOptions[] = [
+export const tactics: MitreTactic[] = [
   {
     id: 'TA0009',
     name: 'Collection',
     reference: 'https://attack.mitre.org/tactics/TA0009',
-    text: i18n.translate(
+    label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackTactics.collectionDescription',
       { defaultMessage: 'Collection (TA0009)' }
     ),
@@ -32,7 +28,7 @@ export const tacticsOptions: MitreTacticsOptions[] = [
     id: 'TA0011',
     name: 'Command and Control',
     reference: 'https://attack.mitre.org/tactics/TA0011',
-    text: i18n.translate(
+    label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackTactics.commandAndControlDescription',
       { defaultMessage: 'Command and Control (TA0011)' }
     ),
@@ -42,7 +38,7 @@ export const tacticsOptions: MitreTacticsOptions[] = [
     id: 'TA0006',
     name: 'Credential Access',
     reference: 'https://attack.mitre.org/tactics/TA0006',
-    text: i18n.translate(
+    label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackTactics.credentialAccessDescription',
       { defaultMessage: 'Credential Access (TA0006)' }
     ),
@@ -52,7 +48,7 @@ export const tacticsOptions: MitreTacticsOptions[] = [
     id: 'TA0005',
     name: 'Defense Evasion',
     reference: 'https://attack.mitre.org/tactics/TA0005',
-    text: i18n.translate(
+    label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackTactics.defenseEvasionDescription',
       { defaultMessage: 'Defense Evasion (TA0005)' }
     ),
@@ -62,7 +58,7 @@ export const tacticsOptions: MitreTacticsOptions[] = [
     id: 'TA0007',
     name: 'Discovery',
     reference: 'https://attack.mitre.org/tactics/TA0007',
-    text: i18n.translate(
+    label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackTactics.discoveryDescription',
       { defaultMessage: 'Discovery (TA0007)' }
     ),
@@ -72,7 +68,7 @@ export const tacticsOptions: MitreTacticsOptions[] = [
     id: 'TA0002',
     name: 'Execution',
     reference: 'https://attack.mitre.org/tactics/TA0002',
-    text: i18n.translate(
+    label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackTactics.executionDescription',
       { defaultMessage: 'Execution (TA0002)' }
     ),
@@ -82,7 +78,7 @@ export const tacticsOptions: MitreTacticsOptions[] = [
     id: 'TA0010',
     name: 'Exfiltration',
     reference: 'https://attack.mitre.org/tactics/TA0010',
-    text: i18n.translate(
+    label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackTactics.exfiltrationDescription',
       { defaultMessage: 'Exfiltration (TA0010)' }
     ),
@@ -92,7 +88,7 @@ export const tacticsOptions: MitreTacticsOptions[] = [
     id: 'TA0040',
     name: 'Impact',
     reference: 'https://attack.mitre.org/tactics/TA0040',
-    text: i18n.translate(
+    label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackTactics.impactDescription',
       { defaultMessage: 'Impact (TA0040)' }
     ),
@@ -102,7 +98,7 @@ export const tacticsOptions: MitreTacticsOptions[] = [
     id: 'TA0001',
     name: 'Initial Access',
     reference: 'https://attack.mitre.org/tactics/TA0001',
-    text: i18n.translate(
+    label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackTactics.initialAccessDescription',
       { defaultMessage: 'Initial Access (TA0001)' }
     ),
@@ -112,7 +108,7 @@ export const tacticsOptions: MitreTacticsOptions[] = [
     id: 'TA0008',
     name: 'Lateral Movement',
     reference: 'https://attack.mitre.org/tactics/TA0008',
-    text: i18n.translate(
+    label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackTactics.lateralMovementDescription',
       { defaultMessage: 'Lateral Movement (TA0008)' }
     ),
@@ -122,7 +118,7 @@ export const tacticsOptions: MitreTacticsOptions[] = [
     id: 'TA0003',
     name: 'Persistence',
     reference: 'https://attack.mitre.org/tactics/TA0003',
-    text: i18n.translate(
+    label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackTactics.persistenceDescription',
       { defaultMessage: 'Persistence (TA0003)' }
     ),
@@ -132,7 +128,7 @@ export const tacticsOptions: MitreTacticsOptions[] = [
     id: 'TA0004',
     name: 'Privilege Escalation',
     reference: 'https://attack.mitre.org/tactics/TA0004',
-    text: i18n.translate(
+    label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackTactics.privilegeEscalationDescription',
       { defaultMessage: 'Privilege Escalation (TA0004)' }
     ),
@@ -142,7 +138,7 @@ export const tacticsOptions: MitreTacticsOptions[] = [
     id: 'TA0043',
     name: 'Reconnaissance',
     reference: 'https://attack.mitre.org/tactics/TA0043',
-    text: i18n.translate(
+    label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackTactics.reconnaissanceDescription',
       { defaultMessage: 'Reconnaissance (TA0043)' }
     ),
@@ -152,7 +148,7 @@ export const tacticsOptions: MitreTacticsOptions[] = [
     id: 'TA0042',
     name: 'Resource Development',
     reference: 'https://attack.mitre.org/tactics/TA0042',
-    text: i18n.translate(
+    label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackTactics.resourceDevelopmentDescription',
       { defaultMessage: 'Resource Development (TA0042)' }
     ),
@@ -160,7 +156,7 @@ export const tacticsOptions: MitreTacticsOptions[] = [
   },
 ];
 
-export const techniquesOptions: MitreTechniquesOptions[] = [
+export const techniques: MitreTechnique[] = [
   {
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackTechniques.abuseElevationControlMechanismDescription',
@@ -169,7 +165,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1548',
     name: 'Abuse Elevation Control Mechanism',
     reference: 'https://attack.mitre.org/techniques/T1548',
-    tactics: 'privilege-escalation,defense-evasion',
+    tactics: ['privilege-escalation', 'defense-evasion'],
     value: 'abuseElevationControlMechanism',
   },
   {
@@ -180,19 +176,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1134',
     name: 'Access Token Manipulation',
     reference: 'https://attack.mitre.org/techniques/T1134',
-    tactics: 'defense-evasion,privilege-escalation',
+    tactics: ['defense-evasion', 'privilege-escalation'],
     value: 'accessTokenManipulation',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.accessibilityFeaturesDescription',
-      { defaultMessage: 'Accessibility Features (T1015)' }
-    ),
-    id: 'T1015',
-    name: 'Accessibility Features',
-    reference: 'https://attack.mitre.org/techniques/T1015',
-    tactics: 'persistence,privilege-escalation',
-    value: 'accessibilityFeatures',
   },
   {
     label: i18n.translate(
@@ -202,7 +187,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1531',
     name: 'Account Access Removal',
     reference: 'https://attack.mitre.org/techniques/T1531',
-    tactics: 'impact',
+    tactics: ['impact'],
     value: 'accountAccessRemoval',
   },
   {
@@ -213,7 +198,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1087',
     name: 'Account Discovery',
     reference: 'https://attack.mitre.org/techniques/T1087',
-    tactics: 'discovery',
+    tactics: ['discovery'],
     value: 'accountDiscovery',
   },
   {
@@ -224,8 +209,19 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1098',
     name: 'Account Manipulation',
     reference: 'https://attack.mitre.org/techniques/T1098',
-    tactics: 'persistence',
+    tactics: ['persistence'],
     value: 'accountManipulation',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.acquireAccessDescription',
+      { defaultMessage: 'Acquire Access (T1650)' }
+    ),
+    id: 'T1650',
+    name: 'Acquire Access',
+    reference: 'https://attack.mitre.org/techniques/T1650',
+    tactics: ['resource-development'],
+    value: 'acquireAccess',
   },
   {
     label: i18n.translate(
@@ -235,7 +231,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1583',
     name: 'Acquire Infrastructure',
     reference: 'https://attack.mitre.org/techniques/T1583',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     value: 'acquireInfrastructure',
   },
   {
@@ -246,7 +242,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1595',
     name: 'Active Scanning',
     reference: 'https://attack.mitre.org/techniques/T1595',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     value: 'activeScanning',
   },
   {
@@ -257,63 +253,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1557',
     name: 'Adversary-in-the-Middle',
     reference: 'https://attack.mitre.org/techniques/T1557',
-    tactics: 'credential-access,collection',
+    tactics: ['credential-access', 'collection'],
     value: 'adversaryInTheMiddle',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.appCertDlLsDescription',
-      { defaultMessage: 'AppCert DLLs (T1182)' }
-    ),
-    id: 'T1182',
-    name: 'AppCert DLLs',
-    reference: 'https://attack.mitre.org/techniques/T1182',
-    tactics: 'persistence,privilege-escalation',
-    value: 'appCertDlLs',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.appInitDlLsDescription',
-      { defaultMessage: 'AppInit DLLs (T1103)' }
-    ),
-    id: 'T1103',
-    name: 'AppInit DLLs',
-    reference: 'https://attack.mitre.org/techniques/T1103',
-    tactics: 'persistence,privilege-escalation',
-    value: 'appInitDlLs',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.appleScriptDescription',
-      { defaultMessage: 'AppleScript (T1155)' }
-    ),
-    id: 'T1155',
-    name: 'AppleScript',
-    reference: 'https://attack.mitre.org/techniques/T1155',
-    tactics: 'execution',
-    value: 'appleScript',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.applicationAccessTokenDescription',
-      { defaultMessage: 'Application Access Token (T1527)' }
-    ),
-    id: 'T1527',
-    name: 'Application Access Token',
-    reference: 'https://attack.mitre.org/techniques/T1527',
-    tactics: 'defense-evasion,lateral-movement',
-    value: 'applicationAccessToken',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.applicationDeploymentSoftwareDescription',
-      { defaultMessage: 'Application Deployment Software (T1017)' }
-    ),
-    id: 'T1017',
-    name: 'Application Deployment Software',
-    reference: 'https://attack.mitre.org/techniques/T1017',
-    tactics: 'lateral-movement',
-    value: 'applicationDeploymentSoftware',
   },
   {
     label: i18n.translate(
@@ -323,19 +264,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1071',
     name: 'Application Layer Protocol',
     reference: 'https://attack.mitre.org/techniques/T1071',
-    tactics: 'command-and-control',
+    tactics: ['command-and-control'],
     value: 'applicationLayerProtocol',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.applicationShimmingDescription',
-      { defaultMessage: 'Application Shimming (T1138)' }
-    ),
-    id: 'T1138',
-    name: 'Application Shimming',
-    reference: 'https://attack.mitre.org/techniques/T1138',
-    tactics: 'persistence,privilege-escalation',
-    value: 'applicationShimming',
   },
   {
     label: i18n.translate(
@@ -345,7 +275,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1010',
     name: 'Application Window Discovery',
     reference: 'https://attack.mitre.org/techniques/T1010',
-    tactics: 'discovery',
+    tactics: ['discovery'],
     value: 'applicationWindowDiscovery',
   },
   {
@@ -356,7 +286,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1560',
     name: 'Archive Collected Data',
     reference: 'https://attack.mitre.org/techniques/T1560',
-    tactics: 'collection',
+    tactics: ['collection'],
     value: 'archiveCollectedData',
   },
   {
@@ -367,19 +297,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1123',
     name: 'Audio Capture',
     reference: 'https://attack.mitre.org/techniques/T1123',
-    tactics: 'collection',
+    tactics: ['collection'],
     value: 'audioCapture',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.authenticationPackageDescription',
-      { defaultMessage: 'Authentication Package (T1131)' }
-    ),
-    id: 'T1131',
-    name: 'Authentication Package',
-    reference: 'https://attack.mitre.org/techniques/T1131',
-    tactics: 'persistence',
-    value: 'authenticationPackage',
   },
   {
     label: i18n.translate(
@@ -389,7 +308,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1119',
     name: 'Automated Collection',
     reference: 'https://attack.mitre.org/techniques/T1119',
-    tactics: 'collection',
+    tactics: ['collection'],
     value: 'automatedCollection',
   },
   {
@@ -400,7 +319,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1020',
     name: 'Automated Exfiltration',
     reference: 'https://attack.mitre.org/techniques/T1020',
-    tactics: 'exfiltration',
+    tactics: ['exfiltration'],
     value: 'automatedExfiltration',
   },
   {
@@ -411,30 +330,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1197',
     name: 'BITS Jobs',
     reference: 'https://attack.mitre.org/techniques/T1197',
-    tactics: 'defense-evasion,persistence',
+    tactics: ['defense-evasion', 'persistence'],
     value: 'bitsJobs',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.bashHistoryDescription',
-      { defaultMessage: 'Bash History (T1139)' }
-    ),
-    id: 'T1139',
-    name: 'Bash History',
-    reference: 'https://attack.mitre.org/techniques/T1139',
-    tactics: 'credential-access',
-    value: 'bashHistory',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.binaryPaddingDescription',
-      { defaultMessage: 'Binary Padding (T1009)' }
-    ),
-    id: 'T1009',
-    name: 'Binary Padding',
-    reference: 'https://attack.mitre.org/techniques/T1009',
-    tactics: 'defense-evasion',
-    value: 'binaryPadding',
   },
   {
     label: i18n.translate(
@@ -444,7 +341,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1547',
     name: 'Boot or Logon Autostart Execution',
     reference: 'https://attack.mitre.org/techniques/T1547',
-    tactics: 'persistence,privilege-escalation',
+    tactics: ['persistence', 'privilege-escalation'],
     value: 'bootOrLogonAutostartExecution',
   },
   {
@@ -455,30 +352,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1037',
     name: 'Boot or Logon Initialization Scripts',
     reference: 'https://attack.mitre.org/techniques/T1037',
-    tactics: 'persistence,privilege-escalation',
+    tactics: ['persistence', 'privilege-escalation'],
     value: 'bootOrLogonInitializationScripts',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.bootkitDescription',
-      { defaultMessage: 'Bootkit (T1067)' }
-    ),
-    id: 'T1067',
-    name: 'Bootkit',
-    reference: 'https://attack.mitre.org/techniques/T1067',
-    tactics: 'persistence',
-    value: 'bootkit',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.browserBookmarkDiscoveryDescription',
-      { defaultMessage: 'Browser Bookmark Discovery (T1217)' }
-    ),
-    id: 'T1217',
-    name: 'Browser Bookmark Discovery',
-    reference: 'https://attack.mitre.org/techniques/T1217',
-    tactics: 'discovery',
-    value: 'browserBookmarkDiscovery',
   },
   {
     label: i18n.translate(
@@ -488,8 +363,19 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1176',
     name: 'Browser Extensions',
     reference: 'https://attack.mitre.org/techniques/T1176',
-    tactics: 'persistence',
+    tactics: ['persistence'],
     value: 'browserExtensions',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.browserInformationDiscoveryDescription',
+      { defaultMessage: 'Browser Information Discovery (T1217)' }
+    ),
+    id: 'T1217',
+    name: 'Browser Information Discovery',
+    reference: 'https://attack.mitre.org/techniques/T1217',
+    tactics: ['discovery'],
+    value: 'browserInformationDiscovery',
   },
   {
     label: i18n.translate(
@@ -499,7 +385,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1185',
     name: 'Browser Session Hijacking',
     reference: 'https://attack.mitre.org/techniques/T1185',
-    tactics: 'collection',
+    tactics: ['collection'],
     value: 'browserSessionHijacking',
   },
   {
@@ -510,7 +396,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1110',
     name: 'Brute Force',
     reference: 'https://attack.mitre.org/techniques/T1110',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     value: 'bruteForce',
   },
   {
@@ -521,52 +407,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1612',
     name: 'Build Image on Host',
     reference: 'https://attack.mitre.org/techniques/T1612',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     value: 'buildImageOnHost',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.bypassUserAccountControlDescription',
-      { defaultMessage: 'Bypass User Account Control (T1088)' }
-    ),
-    id: 'T1088',
-    name: 'Bypass User Account Control',
-    reference: 'https://attack.mitre.org/techniques/T1088',
-    tactics: 'defense-evasion,privilege-escalation',
-    value: 'bypassUserAccountControl',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.cmstpDescription',
-      { defaultMessage: 'CMSTP (T1191)' }
-    ),
-    id: 'T1191',
-    name: 'CMSTP',
-    reference: 'https://attack.mitre.org/techniques/T1191',
-    tactics: 'defense-evasion,execution',
-    value: 'cmstp',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.changeDefaultFileAssociationDescription',
-      { defaultMessage: 'Change Default File Association (T1042)' }
-    ),
-    id: 'T1042',
-    name: 'Change Default File Association',
-    reference: 'https://attack.mitre.org/techniques/T1042',
-    tactics: 'persistence',
-    value: 'changeDefaultFileAssociation',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.clearCommandHistoryDescription',
-      { defaultMessage: 'Clear Command History (T1146)' }
-    ),
-    id: 'T1146',
-    name: 'Clear Command History',
-    reference: 'https://attack.mitre.org/techniques/T1146',
-    tactics: 'defense-evasion',
-    value: 'clearCommandHistory',
   },
   {
     label: i18n.translate(
@@ -576,8 +418,19 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1115',
     name: 'Clipboard Data',
     reference: 'https://attack.mitre.org/techniques/T1115',
-    tactics: 'collection',
+    tactics: ['collection'],
     value: 'clipboardData',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.cloudAdministrationCommandDescription',
+      { defaultMessage: 'Cloud Administration Command (T1651)' }
+    ),
+    id: 'T1651',
+    name: 'Cloud Administration Command',
+    reference: 'https://attack.mitre.org/techniques/T1651',
+    tactics: ['execution'],
+    value: 'cloudAdministrationCommand',
   },
   {
     label: i18n.translate(
@@ -587,19 +440,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1580',
     name: 'Cloud Infrastructure Discovery',
     reference: 'https://attack.mitre.org/techniques/T1580',
-    tactics: 'discovery',
+    tactics: ['discovery'],
     value: 'cloudInfrastructureDiscovery',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.cloudInstanceMetadataApiDescription',
-      { defaultMessage: 'Cloud Instance Metadata API (T1522)' }
-    ),
-    id: 'T1522',
-    name: 'Cloud Instance Metadata API',
-    reference: 'https://attack.mitre.org/techniques/T1522',
-    tactics: 'credential-access',
-    value: 'cloudInstanceMetadataApi',
   },
   {
     label: i18n.translate(
@@ -609,7 +451,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1538',
     name: 'Cloud Service Dashboard',
     reference: 'https://attack.mitre.org/techniques/T1538',
-    tactics: 'discovery',
+    tactics: ['discovery'],
     value: 'cloudServiceDashboard',
   },
   {
@@ -620,7 +462,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1526',
     name: 'Cloud Service Discovery',
     reference: 'https://attack.mitre.org/techniques/T1526',
-    tactics: 'discovery',
+    tactics: ['discovery'],
     value: 'cloudServiceDiscovery',
   },
   {
@@ -631,19 +473,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1619',
     name: 'Cloud Storage Object Discovery',
     reference: 'https://attack.mitre.org/techniques/T1619',
-    tactics: 'discovery',
+    tactics: ['discovery'],
     value: 'cloudStorageObjectDiscovery',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.codeSigningDescription',
-      { defaultMessage: 'Code Signing (T1116)' }
-    ),
-    id: 'T1116',
-    name: 'Code Signing',
-    reference: 'https://attack.mitre.org/techniques/T1116',
-    tactics: 'defense-evasion',
-    value: 'codeSigning',
   },
   {
     label: i18n.translate(
@@ -653,19 +484,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1059',
     name: 'Command and Scripting Interpreter',
     reference: 'https://attack.mitre.org/techniques/T1059',
-    tactics: 'execution',
+    tactics: ['execution'],
     value: 'commandAndScriptingInterpreter',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.commonlyUsedPortDescription',
-      { defaultMessage: 'Commonly Used Port (T1043)' }
-    ),
-    id: 'T1043',
-    name: 'Commonly Used Port',
-    reference: 'https://attack.mitre.org/techniques/T1043',
-    tactics: 'command-and-control',
-    value: 'commonlyUsedPort',
   },
   {
     label: i18n.translate(
@@ -675,63 +495,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1092',
     name: 'Communication Through Removable Media',
     reference: 'https://attack.mitre.org/techniques/T1092',
-    tactics: 'command-and-control',
+    tactics: ['command-and-control'],
     value: 'communicationThroughRemovableMedia',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.compileAfterDeliveryDescription',
-      { defaultMessage: 'Compile After Delivery (T1500)' }
-    ),
-    id: 'T1500',
-    name: 'Compile After Delivery',
-    reference: 'https://attack.mitre.org/techniques/T1500',
-    tactics: 'defense-evasion',
-    value: 'compileAfterDelivery',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.compiledHtmlFileDescription',
-      { defaultMessage: 'Compiled HTML File (T1223)' }
-    ),
-    id: 'T1223',
-    name: 'Compiled HTML File',
-    reference: 'https://attack.mitre.org/techniques/T1223',
-    tactics: 'defense-evasion,execution',
-    value: 'compiledHtmlFile',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.componentFirmwareDescription',
-      { defaultMessage: 'Component Firmware (T1109)' }
-    ),
-    id: 'T1109',
-    name: 'Component Firmware',
-    reference: 'https://attack.mitre.org/techniques/T1109',
-    tactics: 'defense-evasion,persistence',
-    value: 'componentFirmware',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.componentObjectModelHijackingDescription',
-      { defaultMessage: 'Component Object Model Hijacking (T1122)' }
-    ),
-    id: 'T1122',
-    name: 'Component Object Model Hijacking',
-    reference: 'https://attack.mitre.org/techniques/T1122',
-    tactics: 'defense-evasion,persistence',
-    value: 'componentObjectModelHijacking',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.componentObjectModelAndDistributedComDescription',
-      { defaultMessage: 'Component Object Model and Distributed COM (T1175)' }
-    ),
-    id: 'T1175',
-    name: 'Component Object Model and Distributed COM',
-    reference: 'https://attack.mitre.org/techniques/T1175',
-    tactics: 'lateral-movement,execution',
-    value: 'componentObjectModelAndDistributedCom',
   },
   {
     label: i18n.translate(
@@ -741,7 +506,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1586',
     name: 'Compromise Accounts',
     reference: 'https://attack.mitre.org/techniques/T1586',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     value: 'compromiseAccounts',
   },
   {
@@ -752,7 +517,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1554',
     name: 'Compromise Client Software Binary',
     reference: 'https://attack.mitre.org/techniques/T1554',
-    tactics: 'persistence',
+    tactics: ['persistence'],
     value: 'compromiseClientSoftwareBinary',
   },
   {
@@ -763,7 +528,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1584',
     name: 'Compromise Infrastructure',
     reference: 'https://attack.mitre.org/techniques/T1584',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     value: 'compromiseInfrastructure',
   },
   {
@@ -774,7 +539,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1609',
     name: 'Container Administration Command',
     reference: 'https://attack.mitre.org/techniques/T1609',
-    tactics: 'execution',
+    tactics: ['execution'],
     value: 'containerAdministrationCommand',
   },
   {
@@ -785,19 +550,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1613',
     name: 'Container and Resource Discovery',
     reference: 'https://attack.mitre.org/techniques/T1613',
-    tactics: 'discovery',
+    tactics: ['discovery'],
     value: 'containerAndResourceDiscovery',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.controlPanelItemsDescription',
-      { defaultMessage: 'Control Panel Items (T1196)' }
-    ),
-    id: 'T1196',
-    name: 'Control Panel Items',
-    reference: 'https://attack.mitre.org/techniques/T1196',
-    tactics: 'defense-evasion,execution',
-    value: 'controlPanelItems',
   },
   {
     label: i18n.translate(
@@ -807,7 +561,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1136',
     name: 'Create Account',
     reference: 'https://attack.mitre.org/techniques/T1136',
-    tactics: 'persistence',
+    tactics: ['persistence'],
     value: 'createAccount',
   },
   {
@@ -818,7 +572,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1543',
     name: 'Create or Modify System Process',
     reference: 'https://attack.mitre.org/techniques/T1543',
-    tactics: 'persistence,privilege-escalation',
+    tactics: ['persistence', 'privilege-escalation'],
     value: 'createOrModifySystemProcess',
   },
   {
@@ -829,96 +583,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1555',
     name: 'Credentials from Password Stores',
     reference: 'https://attack.mitre.org/techniques/T1555',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     value: 'credentialsFromPasswordStores',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.credentialsFromWebBrowsersDescription',
-      { defaultMessage: 'Credentials from Web Browsers (T1503)' }
-    ),
-    id: 'T1503',
-    name: 'Credentials from Web Browsers',
-    reference: 'https://attack.mitre.org/techniques/T1503',
-    tactics: 'credential-access',
-    value: 'credentialsFromWebBrowsers',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.credentialsInFilesDescription',
-      { defaultMessage: 'Credentials in Files (T1081)' }
-    ),
-    id: 'T1081',
-    name: 'Credentials in Files',
-    reference: 'https://attack.mitre.org/techniques/T1081',
-    tactics: 'credential-access',
-    value: 'credentialsInFiles',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.credentialsInRegistryDescription',
-      { defaultMessage: 'Credentials in Registry (T1214)' }
-    ),
-    id: 'T1214',
-    name: 'Credentials in Registry',
-    reference: 'https://attack.mitre.org/techniques/T1214',
-    tactics: 'credential-access',
-    value: 'credentialsInRegistry',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.customCommandAndControlProtocolDescription',
-      { defaultMessage: 'Custom Command and Control Protocol (T1094)' }
-    ),
-    id: 'T1094',
-    name: 'Custom Command and Control Protocol',
-    reference: 'https://attack.mitre.org/techniques/T1094',
-    tactics: 'command-and-control',
-    value: 'customCommandAndControlProtocol',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.customCryptographicProtocolDescription',
-      { defaultMessage: 'Custom Cryptographic Protocol (T1024)' }
-    ),
-    id: 'T1024',
-    name: 'Custom Cryptographic Protocol',
-    reference: 'https://attack.mitre.org/techniques/T1024',
-    tactics: 'command-and-control',
-    value: 'customCryptographicProtocol',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.dllSearchOrderHijackingDescription',
-      { defaultMessage: 'DLL Search Order Hijacking (T1038)' }
-    ),
-    id: 'T1038',
-    name: 'DLL Search Order Hijacking',
-    reference: 'https://attack.mitre.org/techniques/T1038',
-    tactics: 'persistence,privilege-escalation,defense-evasion',
-    value: 'dllSearchOrderHijacking',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.dllSideLoadingDescription',
-      { defaultMessage: 'DLL Side-Loading (T1073)' }
-    ),
-    id: 'T1073',
-    name: 'DLL Side-Loading',
-    reference: 'https://attack.mitre.org/techniques/T1073',
-    tactics: 'defense-evasion',
-    value: 'dllSideLoading',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.dataCompressedDescription',
-      { defaultMessage: 'Data Compressed (T1002)' }
-    ),
-    id: 'T1002',
-    name: 'Data Compressed',
-    reference: 'https://attack.mitre.org/techniques/T1002',
-    tactics: 'exfiltration',
-    value: 'dataCompressed',
   },
   {
     label: i18n.translate(
@@ -928,7 +594,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1485',
     name: 'Data Destruction',
     reference: 'https://attack.mitre.org/techniques/T1485',
-    tactics: 'impact',
+    tactics: ['impact'],
     value: 'dataDestruction',
   },
   {
@@ -939,19 +605,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1132',
     name: 'Data Encoding',
     reference: 'https://attack.mitre.org/techniques/T1132',
-    tactics: 'command-and-control',
+    tactics: ['command-and-control'],
     value: 'dataEncoding',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.dataEncryptedDescription',
-      { defaultMessage: 'Data Encrypted (T1022)' }
-    ),
-    id: 'T1022',
-    name: 'Data Encrypted',
-    reference: 'https://attack.mitre.org/techniques/T1022',
-    tactics: 'exfiltration',
-    value: 'dataEncrypted',
   },
   {
     label: i18n.translate(
@@ -961,7 +616,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1486',
     name: 'Data Encrypted for Impact',
     reference: 'https://attack.mitre.org/techniques/T1486',
-    tactics: 'impact',
+    tactics: ['impact'],
     value: 'dataEncryptedForImpact',
   },
   {
@@ -972,7 +627,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1565',
     name: 'Data Manipulation',
     reference: 'https://attack.mitre.org/techniques/T1565',
-    tactics: 'impact',
+    tactics: ['impact'],
     value: 'dataManipulation',
   },
   {
@@ -983,7 +638,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1001',
     name: 'Data Obfuscation',
     reference: 'https://attack.mitre.org/techniques/T1001',
-    tactics: 'command-and-control',
+    tactics: ['command-and-control'],
     value: 'dataObfuscation',
   },
   {
@@ -994,7 +649,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1074',
     name: 'Data Staged',
     reference: 'https://attack.mitre.org/techniques/T1074',
-    tactics: 'collection',
+    tactics: ['collection'],
     value: 'dataStaged',
   },
   {
@@ -1005,19 +660,19 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1030',
     name: 'Data Transfer Size Limits',
     reference: 'https://attack.mitre.org/techniques/T1030',
-    tactics: 'exfiltration',
+    tactics: ['exfiltration'],
     value: 'dataTransferSizeLimits',
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.dataFromCloudStorageObjectDescription',
-      { defaultMessage: 'Data from Cloud Storage Object (T1530)' }
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.dataFromCloudStorageDescription',
+      { defaultMessage: 'Data from Cloud Storage (T1530)' }
     ),
     id: 'T1530',
-    name: 'Data from Cloud Storage Object',
+    name: 'Data from Cloud Storage',
     reference: 'https://attack.mitre.org/techniques/T1530',
-    tactics: 'collection',
-    value: 'dataFromCloudStorageObject',
+    tactics: ['collection'],
+    value: 'dataFromCloudStorage',
   },
   {
     label: i18n.translate(
@@ -1027,7 +682,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1602',
     name: 'Data from Configuration Repository',
     reference: 'https://attack.mitre.org/techniques/T1602',
-    tactics: 'collection',
+    tactics: ['collection'],
     value: 'dataFromConfigurationRepository',
   },
   {
@@ -1038,7 +693,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1213',
     name: 'Data from Information Repositories',
     reference: 'https://attack.mitre.org/techniques/T1213',
-    tactics: 'collection',
+    tactics: ['collection'],
     value: 'dataFromInformationRepositories',
   },
   {
@@ -1049,7 +704,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1005',
     name: 'Data from Local System',
     reference: 'https://attack.mitre.org/techniques/T1005',
-    tactics: 'collection',
+    tactics: ['collection'],
     value: 'dataFromLocalSystem',
   },
   {
@@ -1060,7 +715,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1039',
     name: 'Data from Network Shared Drive',
     reference: 'https://attack.mitre.org/techniques/T1039',
-    tactics: 'collection',
+    tactics: ['collection'],
     value: 'dataFromNetworkSharedDrive',
   },
   {
@@ -1071,7 +726,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1025',
     name: 'Data from Removable Media',
     reference: 'https://attack.mitre.org/techniques/T1025',
-    tactics: 'collection',
+    tactics: ['collection'],
     value: 'dataFromRemovableMedia',
   },
   {
@@ -1082,7 +737,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1622',
     name: 'Debugger Evasion',
     reference: 'https://attack.mitre.org/techniques/T1622',
-    tactics: 'defense-evasion,discovery',
+    tactics: ['defense-evasion', 'discovery'],
     value: 'debuggerEvasion',
   },
   {
@@ -1093,7 +748,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1491',
     name: 'Defacement',
     reference: 'https://attack.mitre.org/techniques/T1491',
-    tactics: 'impact',
+    tactics: ['impact'],
     value: 'defacement',
   },
   {
@@ -1104,7 +759,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1140',
     name: 'Deobfuscate/Decode Files or Information',
     reference: 'https://attack.mitre.org/techniques/T1140',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     value: 'deobfuscateDecodeFilesOrInformation',
   },
   {
@@ -1115,7 +770,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1610',
     name: 'Deploy Container',
     reference: 'https://attack.mitre.org/techniques/T1610',
-    tactics: 'defense-evasion,execution',
+    tactics: ['defense-evasion', 'execution'],
     value: 'deployContainer',
   },
   {
@@ -1126,8 +781,19 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1587',
     name: 'Develop Capabilities',
     reference: 'https://attack.mitre.org/techniques/T1587',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     value: 'developCapabilities',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.deviceDriverDiscoveryDescription',
+      { defaultMessage: 'Device Driver Discovery (T1652)' }
+    ),
+    id: 'T1652',
+    name: 'Device Driver Discovery',
+    reference: 'https://attack.mitre.org/techniques/T1652',
+    tactics: ['discovery'],
+    value: 'deviceDriverDiscovery',
   },
   {
     label: i18n.translate(
@@ -1137,41 +803,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1006',
     name: 'Direct Volume Access',
     reference: 'https://attack.mitre.org/techniques/T1006',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     value: 'directVolumeAccess',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.disablingSecurityToolsDescription',
-      { defaultMessage: 'Disabling Security Tools (T1089)' }
-    ),
-    id: 'T1089',
-    name: 'Disabling Security Tools',
-    reference: 'https://attack.mitre.org/techniques/T1089',
-    tactics: 'defense-evasion',
-    value: 'disablingSecurityTools',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.diskContentWipeDescription',
-      { defaultMessage: 'Disk Content Wipe (T1488)' }
-    ),
-    id: 'T1488',
-    name: 'Disk Content Wipe',
-    reference: 'https://attack.mitre.org/techniques/T1488',
-    tactics: 'impact',
-    value: 'diskContentWipe',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.diskStructureWipeDescription',
-      { defaultMessage: 'Disk Structure Wipe (T1487)' }
-    ),
-    id: 'T1487',
-    name: 'Disk Structure Wipe',
-    reference: 'https://attack.mitre.org/techniques/T1487',
-    tactics: 'impact',
-    value: 'diskStructureWipe',
   },
   {
     label: i18n.translate(
@@ -1181,30 +814,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1561',
     name: 'Disk Wipe',
     reference: 'https://attack.mitre.org/techniques/T1561',
-    tactics: 'impact',
+    tactics: ['impact'],
     value: 'diskWipe',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.domainFrontingDescription',
-      { defaultMessage: 'Domain Fronting (T1172)' }
-    ),
-    id: 'T1172',
-    name: 'Domain Fronting',
-    reference: 'https://attack.mitre.org/techniques/T1172',
-    tactics: 'command-and-control',
-    value: 'domainFronting',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.domainGenerationAlgorithmsDescription',
-      { defaultMessage: 'Domain Generation Algorithms (T1483)' }
-    ),
-    id: 'T1483',
-    name: 'Domain Generation Algorithms',
-    reference: 'https://attack.mitre.org/techniques/T1483',
-    tactics: 'command-and-control',
-    value: 'domainGenerationAlgorithms',
   },
   {
     label: i18n.translate(
@@ -1214,7 +825,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1484',
     name: 'Domain Policy Modification',
     reference: 'https://attack.mitre.org/techniques/T1484',
-    tactics: 'defense-evasion,privilege-escalation',
+    tactics: ['defense-evasion', 'privilege-escalation'],
     value: 'domainPolicyModification',
   },
   {
@@ -1225,7 +836,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1482',
     name: 'Domain Trust Discovery',
     reference: 'https://attack.mitre.org/techniques/T1482',
-    tactics: 'discovery',
+    tactics: ['discovery'],
     value: 'domainTrustDiscovery',
   },
   {
@@ -1236,30 +847,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1189',
     name: 'Drive-by Compromise',
     reference: 'https://attack.mitre.org/techniques/T1189',
-    tactics: 'initial-access',
+    tactics: ['initial-access'],
     value: 'driveByCompromise',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.dylibHijackingDescription',
-      { defaultMessage: 'Dylib Hijacking (T1157)' }
-    ),
-    id: 'T1157',
-    name: 'Dylib Hijacking',
-    reference: 'https://attack.mitre.org/techniques/T1157',
-    tactics: 'persistence,privilege-escalation',
-    value: 'dylibHijacking',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.dynamicDataExchangeDescription',
-      { defaultMessage: 'Dynamic Data Exchange (T1173)' }
-    ),
-    id: 'T1173',
-    name: 'Dynamic Data Exchange',
-    reference: 'https://attack.mitre.org/techniques/T1173',
-    tactics: 'execution',
-    value: 'dynamicDataExchange',
   },
   {
     label: i18n.translate(
@@ -1269,19 +858,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1568',
     name: 'Dynamic Resolution',
     reference: 'https://attack.mitre.org/techniques/T1568',
-    tactics: 'command-and-control',
+    tactics: ['command-and-control'],
     value: 'dynamicResolution',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.elevatedExecutionWithPromptDescription',
-      { defaultMessage: 'Elevated Execution with Prompt (T1514)' }
-    ),
-    id: 'T1514',
-    name: 'Elevated Execution with Prompt',
-    reference: 'https://attack.mitre.org/techniques/T1514',
-    tactics: 'privilege-escalation',
-    value: 'elevatedExecutionWithPrompt',
   },
   {
     label: i18n.translate(
@@ -1291,19 +869,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1114',
     name: 'Email Collection',
     reference: 'https://attack.mitre.org/techniques/T1114',
-    tactics: 'collection',
+    tactics: ['collection'],
     value: 'emailCollection',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.emondDescription',
-      { defaultMessage: 'Emond (T1519)' }
-    ),
-    id: 'T1519',
-    name: 'Emond',
-    reference: 'https://attack.mitre.org/techniques/T1519',
-    tactics: 'persistence,privilege-escalation',
-    value: 'emond',
   },
   {
     label: i18n.translate(
@@ -1313,7 +880,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1573',
     name: 'Encrypted Channel',
     reference: 'https://attack.mitre.org/techniques/T1573',
-    tactics: 'command-and-control',
+    tactics: ['command-and-control'],
     value: 'encryptedChannel',
   },
   {
@@ -1324,7 +891,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1499',
     name: 'Endpoint Denial of Service',
     reference: 'https://attack.mitre.org/techniques/T1499',
-    tactics: 'impact',
+    tactics: ['impact'],
     value: 'endpointDenialOfService',
   },
   {
@@ -1335,7 +902,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1611',
     name: 'Escape to Host',
     reference: 'https://attack.mitre.org/techniques/T1611',
-    tactics: 'privilege-escalation',
+    tactics: ['privilege-escalation'],
     value: 'escapeToHost',
   },
   {
@@ -1346,7 +913,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1585',
     name: 'Establish Accounts',
     reference: 'https://attack.mitre.org/techniques/T1585',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     value: 'establishAccounts',
   },
   {
@@ -1357,7 +924,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1546',
     name: 'Event Triggered Execution',
     reference: 'https://attack.mitre.org/techniques/T1546',
-    tactics: 'privilege-escalation,persistence',
+    tactics: ['privilege-escalation', 'persistence'],
     value: 'eventTriggeredExecution',
   },
   {
@@ -1368,7 +935,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1480',
     name: 'Execution Guardrails',
     reference: 'https://attack.mitre.org/techniques/T1480',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     value: 'executionGuardrails',
   },
   {
@@ -1379,7 +946,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1048',
     name: 'Exfiltration Over Alternative Protocol',
     reference: 'https://attack.mitre.org/techniques/T1048',
-    tactics: 'exfiltration',
+    tactics: ['exfiltration'],
     value: 'exfiltrationOverAlternativeProtocol',
   },
   {
@@ -1390,7 +957,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1041',
     name: 'Exfiltration Over C2 Channel',
     reference: 'https://attack.mitre.org/techniques/T1041',
-    tactics: 'exfiltration',
+    tactics: ['exfiltration'],
     value: 'exfiltrationOverC2Channel',
   },
   {
@@ -1401,7 +968,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1011',
     name: 'Exfiltration Over Other Network Medium',
     reference: 'https://attack.mitre.org/techniques/T1011',
-    tactics: 'exfiltration',
+    tactics: ['exfiltration'],
     value: 'exfiltrationOverOtherNetworkMedium',
   },
   {
@@ -1412,7 +979,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1052',
     name: 'Exfiltration Over Physical Medium',
     reference: 'https://attack.mitre.org/techniques/T1052',
-    tactics: 'exfiltration',
+    tactics: ['exfiltration'],
     value: 'exfiltrationOverPhysicalMedium',
   },
   {
@@ -1423,7 +990,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1567',
     name: 'Exfiltration Over Web Service',
     reference: 'https://attack.mitre.org/techniques/T1567',
-    tactics: 'exfiltration',
+    tactics: ['exfiltration'],
     value: 'exfiltrationOverWebService',
   },
   {
@@ -1434,7 +1001,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1190',
     name: 'Exploit Public-Facing Application',
     reference: 'https://attack.mitre.org/techniques/T1190',
-    tactics: 'initial-access',
+    tactics: ['initial-access'],
     value: 'exploitPublicFacingApplication',
   },
   {
@@ -1445,7 +1012,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1203',
     name: 'Exploitation for Client Execution',
     reference: 'https://attack.mitre.org/techniques/T1203',
-    tactics: 'execution',
+    tactics: ['execution'],
     value: 'exploitationForClientExecution',
   },
   {
@@ -1456,7 +1023,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1212',
     name: 'Exploitation for Credential Access',
     reference: 'https://attack.mitre.org/techniques/T1212',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     value: 'exploitationForCredentialAccess',
   },
   {
@@ -1467,7 +1034,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1211',
     name: 'Exploitation for Defense Evasion',
     reference: 'https://attack.mitre.org/techniques/T1211',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     value: 'exploitationForDefenseEvasion',
   },
   {
@@ -1478,7 +1045,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1068',
     name: 'Exploitation for Privilege Escalation',
     reference: 'https://attack.mitre.org/techniques/T1068',
-    tactics: 'privilege-escalation',
+    tactics: ['privilege-escalation'],
     value: 'exploitationForPrivilegeEscalation',
   },
   {
@@ -1489,7 +1056,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1210',
     name: 'Exploitation of Remote Services',
     reference: 'https://attack.mitre.org/techniques/T1210',
-    tactics: 'lateral-movement',
+    tactics: ['lateral-movement'],
     value: 'exploitationOfRemoteServices',
   },
   {
@@ -1500,19 +1067,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1133',
     name: 'External Remote Services',
     reference: 'https://attack.mitre.org/techniques/T1133',
-    tactics: 'persistence,initial-access',
+    tactics: ['persistence', 'initial-access'],
     value: 'externalRemoteServices',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.extraWindowMemoryInjectionDescription',
-      { defaultMessage: 'Extra Window Memory Injection (T1181)' }
-    ),
-    id: 'T1181',
-    name: 'Extra Window Memory Injection',
-    reference: 'https://attack.mitre.org/techniques/T1181',
-    tactics: 'defense-evasion,privilege-escalation',
-    value: 'extraWindowMemoryInjection',
   },
   {
     label: i18n.translate(
@@ -1522,30 +1078,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1008',
     name: 'Fallback Channels',
     reference: 'https://attack.mitre.org/techniques/T1008',
-    tactics: 'command-and-control',
+    tactics: ['command-and-control'],
     value: 'fallbackChannels',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.fileDeletionDescription',
-      { defaultMessage: 'File Deletion (T1107)' }
-    ),
-    id: 'T1107',
-    name: 'File Deletion',
-    reference: 'https://attack.mitre.org/techniques/T1107',
-    tactics: 'defense-evasion',
-    value: 'fileDeletion',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.fileSystemPermissionsWeaknessDescription',
-      { defaultMessage: 'File System Permissions Weakness (T1044)' }
-    ),
-    id: 'T1044',
-    name: 'File System Permissions Weakness',
-    reference: 'https://attack.mitre.org/techniques/T1044',
-    tactics: 'persistence,privilege-escalation',
-    value: 'fileSystemPermissionsWeakness',
   },
   {
     label: i18n.translate(
@@ -1555,7 +1089,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1083',
     name: 'File and Directory Discovery',
     reference: 'https://attack.mitre.org/techniques/T1083',
-    tactics: 'discovery',
+    tactics: ['discovery'],
     value: 'fileAndDirectoryDiscovery',
   },
   {
@@ -1566,7 +1100,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1222',
     name: 'File and Directory Permissions Modification',
     reference: 'https://attack.mitre.org/techniques/T1222',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     value: 'fileAndDirectoryPermissionsModification',
   },
   {
@@ -1577,7 +1111,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1495',
     name: 'Firmware Corruption',
     reference: 'https://attack.mitre.org/techniques/T1495',
-    tactics: 'impact',
+    tactics: ['impact'],
     value: 'firmwareCorruption',
   },
   {
@@ -1588,7 +1122,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1187',
     name: 'Forced Authentication',
     reference: 'https://attack.mitre.org/techniques/T1187',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     value: 'forcedAuthentication',
   },
   {
@@ -1599,19 +1133,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1606',
     name: 'Forge Web Credentials',
     reference: 'https://attack.mitre.org/techniques/T1606',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     value: 'forgeWebCredentials',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.gatekeeperBypassDescription',
-      { defaultMessage: 'Gatekeeper Bypass (T1144)' }
-    ),
-    id: 'T1144',
-    name: 'Gatekeeper Bypass',
-    reference: 'https://attack.mitre.org/techniques/T1144',
-    tactics: 'defense-evasion',
-    value: 'gatekeeperBypass',
   },
   {
     label: i18n.translate(
@@ -1621,7 +1144,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1592',
     name: 'Gather Victim Host Information',
     reference: 'https://attack.mitre.org/techniques/T1592',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     value: 'gatherVictimHostInformation',
   },
   {
@@ -1632,7 +1155,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1589',
     name: 'Gather Victim Identity Information',
     reference: 'https://attack.mitre.org/techniques/T1589',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     value: 'gatherVictimIdentityInformation',
   },
   {
@@ -1643,7 +1166,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1590',
     name: 'Gather Victim Network Information',
     reference: 'https://attack.mitre.org/techniques/T1590',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     value: 'gatherVictimNetworkInformation',
   },
   {
@@ -1654,19 +1177,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1591',
     name: 'Gather Victim Org Information',
     reference: 'https://attack.mitre.org/techniques/T1591',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     value: 'gatherVictimOrgInformation',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.graphicalUserInterfaceDescription',
-      { defaultMessage: 'Graphical User Interface (T1061)' }
-    ),
-    id: 'T1061',
-    name: 'Graphical User Interface',
-    reference: 'https://attack.mitre.org/techniques/T1061',
-    tactics: 'execution',
-    value: 'graphicalUserInterface',
   },
   {
     label: i18n.translate(
@@ -1676,19 +1188,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1615',
     name: 'Group Policy Discovery',
     reference: 'https://attack.mitre.org/techniques/T1615',
-    tactics: 'discovery',
+    tactics: ['discovery'],
     value: 'groupPolicyDiscovery',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.histcontrolDescription',
-      { defaultMessage: 'HISTCONTROL (T1148)' }
-    ),
-    id: 'T1148',
-    name: 'HISTCONTROL',
-    reference: 'https://attack.mitre.org/techniques/T1148',
-    tactics: 'defense-evasion',
-    value: 'histcontrol',
   },
   {
     label: i18n.translate(
@@ -1698,41 +1199,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1200',
     name: 'Hardware Additions',
     reference: 'https://attack.mitre.org/techniques/T1200',
-    tactics: 'initial-access',
+    tactics: ['initial-access'],
     value: 'hardwareAdditions',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.hiddenFilesAndDirectoriesDescription',
-      { defaultMessage: 'Hidden Files and Directories (T1158)' }
-    ),
-    id: 'T1158',
-    name: 'Hidden Files and Directories',
-    reference: 'https://attack.mitre.org/techniques/T1158',
-    tactics: 'defense-evasion,persistence',
-    value: 'hiddenFilesAndDirectories',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.hiddenUsersDescription',
-      { defaultMessage: 'Hidden Users (T1147)' }
-    ),
-    id: 'T1147',
-    name: 'Hidden Users',
-    reference: 'https://attack.mitre.org/techniques/T1147',
-    tactics: 'defense-evasion',
-    value: 'hiddenUsers',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.hiddenWindowDescription',
-      { defaultMessage: 'Hidden Window (T1143)' }
-    ),
-    id: 'T1143',
-    name: 'Hidden Window',
-    reference: 'https://attack.mitre.org/techniques/T1143',
-    tactics: 'defense-evasion',
-    value: 'hiddenWindow',
   },
   {
     label: i18n.translate(
@@ -1742,7 +1210,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1564',
     name: 'Hide Artifacts',
     reference: 'https://attack.mitre.org/techniques/T1564',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     value: 'hideArtifacts',
   },
   {
@@ -1753,41 +1221,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1574',
     name: 'Hijack Execution Flow',
     reference: 'https://attack.mitre.org/techniques/T1574',
-    tactics: 'persistence,privilege-escalation,defense-evasion',
+    tactics: ['persistence', 'privilege-escalation', 'defense-evasion'],
     value: 'hijackExecutionFlow',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.hookingDescription',
-      { defaultMessage: 'Hooking (T1179)' }
-    ),
-    id: 'T1179',
-    name: 'Hooking',
-    reference: 'https://attack.mitre.org/techniques/T1179',
-    tactics: 'persistence,privilege-escalation,credential-access',
-    value: 'hooking',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.hypervisorDescription',
-      { defaultMessage: 'Hypervisor (T1062)' }
-    ),
-    id: 'T1062',
-    name: 'Hypervisor',
-    reference: 'https://attack.mitre.org/techniques/T1062',
-    tactics: 'persistence',
-    value: 'hypervisor',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.imageFileExecutionOptionsInjectionDescription',
-      { defaultMessage: 'Image File Execution Options Injection (T1183)' }
-    ),
-    id: 'T1183',
-    name: 'Image File Execution Options Injection',
-    reference: 'https://attack.mitre.org/techniques/T1183',
-    tactics: 'privilege-escalation,persistence,defense-evasion',
-    value: 'imageFileExecutionOptionsInjection',
   },
   {
     label: i18n.translate(
@@ -1797,7 +1232,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1562',
     name: 'Impair Defenses',
     reference: 'https://attack.mitre.org/techniques/T1562',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     value: 'impairDefenses',
   },
   {
@@ -1808,41 +1243,19 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1525',
     name: 'Implant Internal Image',
     reference: 'https://attack.mitre.org/techniques/T1525',
-    tactics: 'persistence',
+    tactics: ['persistence'],
     value: 'implantInternalImage',
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.indicatorBlockingDescription',
-      { defaultMessage: 'Indicator Blocking (T1054)' }
-    ),
-    id: 'T1054',
-    name: 'Indicator Blocking',
-    reference: 'https://attack.mitre.org/techniques/T1054',
-    tactics: 'defense-evasion',
-    value: 'indicatorBlocking',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.indicatorRemovalFromToolsDescription',
-      { defaultMessage: 'Indicator Removal from Tools (T1066)' }
-    ),
-    id: 'T1066',
-    name: 'Indicator Removal from Tools',
-    reference: 'https://attack.mitre.org/techniques/T1066',
-    tactics: 'defense-evasion',
-    value: 'indicatorRemovalFromTools',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.indicatorRemovalOnHostDescription',
-      { defaultMessage: 'Indicator Removal on Host (T1070)' }
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.indicatorRemovalDescription',
+      { defaultMessage: 'Indicator Removal (T1070)' }
     ),
     id: 'T1070',
-    name: 'Indicator Removal on Host',
+    name: 'Indicator Removal',
     reference: 'https://attack.mitre.org/techniques/T1070',
-    tactics: 'defense-evasion',
-    value: 'indicatorRemovalOnHost',
+    tactics: ['defense-evasion'],
+    value: 'indicatorRemoval',
   },
   {
     label: i18n.translate(
@@ -1852,7 +1265,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1202',
     name: 'Indirect Command Execution',
     reference: 'https://attack.mitre.org/techniques/T1202',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     value: 'indirectCommandExecution',
   },
   {
@@ -1863,7 +1276,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1105',
     name: 'Ingress Tool Transfer',
     reference: 'https://attack.mitre.org/techniques/T1105',
-    tactics: 'command-and-control',
+    tactics: ['command-and-control'],
     value: 'ingressToolTransfer',
   },
   {
@@ -1874,7 +1287,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1490',
     name: 'Inhibit System Recovery',
     reference: 'https://attack.mitre.org/techniques/T1490',
-    tactics: 'impact',
+    tactics: ['impact'],
     value: 'inhibitSystemRecovery',
   },
   {
@@ -1885,41 +1298,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1056',
     name: 'Input Capture',
     reference: 'https://attack.mitre.org/techniques/T1056',
-    tactics: 'collection,credential-access',
+    tactics: ['collection', 'credential-access'],
     value: 'inputCapture',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.inputPromptDescription',
-      { defaultMessage: 'Input Prompt (T1141)' }
-    ),
-    id: 'T1141',
-    name: 'Input Prompt',
-    reference: 'https://attack.mitre.org/techniques/T1141',
-    tactics: 'credential-access',
-    value: 'inputPrompt',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.installRootCertificateDescription',
-      { defaultMessage: 'Install Root Certificate (T1130)' }
-    ),
-    id: 'T1130',
-    name: 'Install Root Certificate',
-    reference: 'https://attack.mitre.org/techniques/T1130',
-    tactics: 'defense-evasion',
-    value: 'installRootCertificate',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.installUtilDescription',
-      { defaultMessage: 'InstallUtil (T1118)' }
-    ),
-    id: 'T1118',
-    name: 'InstallUtil',
-    reference: 'https://attack.mitre.org/techniques/T1118',
-    tactics: 'defense-evasion,execution',
-    value: 'installUtil',
   },
   {
     label: i18n.translate(
@@ -1929,7 +1309,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1559',
     name: 'Inter-Process Communication',
     reference: 'https://attack.mitre.org/techniques/T1559',
-    tactics: 'execution',
+    tactics: ['execution'],
     value: 'interProcessCommunication',
   },
   {
@@ -1940,85 +1320,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1534',
     name: 'Internal Spearphishing',
     reference: 'https://attack.mitre.org/techniques/T1534',
-    tactics: 'lateral-movement',
+    tactics: ['lateral-movement'],
     value: 'internalSpearphishing',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.kerberoastingDescription',
-      { defaultMessage: 'Kerberoasting (T1208)' }
-    ),
-    id: 'T1208',
-    name: 'Kerberoasting',
-    reference: 'https://attack.mitre.org/techniques/T1208',
-    tactics: 'credential-access',
-    value: 'kerberoasting',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.kernelModulesAndExtensionsDescription',
-      { defaultMessage: 'Kernel Modules and Extensions (T1215)' }
-    ),
-    id: 'T1215',
-    name: 'Kernel Modules and Extensions',
-    reference: 'https://attack.mitre.org/techniques/T1215',
-    tactics: 'persistence',
-    value: 'kernelModulesAndExtensions',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.keychainDescription',
-      { defaultMessage: 'Keychain (T1142)' }
-    ),
-    id: 'T1142',
-    name: 'Keychain',
-    reference: 'https://attack.mitre.org/techniques/T1142',
-    tactics: 'credential-access',
-    value: 'keychain',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.lcLoadDylibAdditionDescription',
-      { defaultMessage: 'LC_LOAD_DYLIB Addition (T1161)' }
-    ),
-    id: 'T1161',
-    name: 'LC_LOAD_DYLIB Addition',
-    reference: 'https://attack.mitre.org/techniques/T1161',
-    tactics: 'persistence',
-    value: 'lcLoadDylibAddition',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.lcMainHijackingDescription',
-      { defaultMessage: 'LC_MAIN Hijacking (T1149)' }
-    ),
-    id: 'T1149',
-    name: 'LC_MAIN Hijacking',
-    reference: 'https://attack.mitre.org/techniques/T1149',
-    tactics: 'defense-evasion',
-    value: 'lcMainHijacking',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.llmnrNbtNsPoisoningAndRelayDescription',
-      { defaultMessage: 'LLMNR/NBT-NS Poisoning and Relay (T1171)' }
-    ),
-    id: 'T1171',
-    name: 'LLMNR/NBT-NS Poisoning and Relay',
-    reference: 'https://attack.mitre.org/techniques/T1171',
-    tactics: 'credential-access',
-    value: 'llmnrNbtNsPoisoningAndRelay',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.lsassDriverDescription',
-      { defaultMessage: 'LSASS Driver (T1177)' }
-    ),
-    id: 'T1177',
-    name: 'LSASS Driver',
-    reference: 'https://attack.mitre.org/techniques/T1177',
-    tactics: 'execution,persistence',
-    value: 'lsassDriver',
   },
   {
     label: i18n.translate(
@@ -2028,74 +1331,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1570',
     name: 'Lateral Tool Transfer',
     reference: 'https://attack.mitre.org/techniques/T1570',
-    tactics: 'lateral-movement',
+    tactics: ['lateral-movement'],
     value: 'lateralToolTransfer',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.launchAgentDescription',
-      { defaultMessage: 'Launch Agent (T1159)' }
-    ),
-    id: 'T1159',
-    name: 'Launch Agent',
-    reference: 'https://attack.mitre.org/techniques/T1159',
-    tactics: 'persistence',
-    value: 'launchAgent',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.launchDaemonDescription',
-      { defaultMessage: 'Launch Daemon (T1160)' }
-    ),
-    id: 'T1160',
-    name: 'Launch Daemon',
-    reference: 'https://attack.mitre.org/techniques/T1160',
-    tactics: 'persistence,privilege-escalation',
-    value: 'launchDaemon',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.launchctlDescription',
-      { defaultMessage: 'Launchctl (T1152)' }
-    ),
-    id: 'T1152',
-    name: 'Launchctl',
-    reference: 'https://attack.mitre.org/techniques/T1152',
-    tactics: 'defense-evasion,execution,persistence',
-    value: 'launchctl',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.localJobSchedulingDescription',
-      { defaultMessage: 'Local Job Scheduling (T1168)' }
-    ),
-    id: 'T1168',
-    name: 'Local Job Scheduling',
-    reference: 'https://attack.mitre.org/techniques/T1168',
-    tactics: 'persistence,execution',
-    value: 'localJobScheduling',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.loginItemDescription',
-      { defaultMessage: 'Login Item (T1162)' }
-    ),
-    id: 'T1162',
-    name: 'Login Item',
-    reference: 'https://attack.mitre.org/techniques/T1162',
-    tactics: 'persistence',
-    value: 'loginItem',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.maliciousShellModificationDescription',
-      { defaultMessage: 'Malicious Shell Modification (T1156)' }
-    ),
-    id: 'T1156',
-    name: 'Malicious Shell Modification',
-    reference: 'https://attack.mitre.org/techniques/T1156',
-    tactics: 'persistence',
-    value: 'maliciousShellModification',
   },
   {
     label: i18n.translate(
@@ -2105,7 +1342,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1036',
     name: 'Masquerading',
     reference: 'https://attack.mitre.org/techniques/T1036',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     value: 'masquerading',
   },
   {
@@ -2116,7 +1353,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1556',
     name: 'Modify Authentication Process',
     reference: 'https://attack.mitre.org/techniques/T1556',
-    tactics: 'credential-access,defense-evasion,persistence',
+    tactics: ['credential-access', 'defense-evasion', 'persistence'],
     value: 'modifyAuthenticationProcess',
   },
   {
@@ -2127,19 +1364,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1578',
     name: 'Modify Cloud Compute Infrastructure',
     reference: 'https://attack.mitre.org/techniques/T1578',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     value: 'modifyCloudComputeInfrastructure',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.modifyExistingServiceDescription',
-      { defaultMessage: 'Modify Existing Service (T1031)' }
-    ),
-    id: 'T1031',
-    name: 'Modify Existing Service',
-    reference: 'https://attack.mitre.org/techniques/T1031',
-    tactics: 'persistence',
-    value: 'modifyExistingService',
   },
   {
     label: i18n.translate(
@@ -2149,7 +1375,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1112',
     name: 'Modify Registry',
     reference: 'https://attack.mitre.org/techniques/T1112',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     value: 'modifyRegistry',
   },
   {
@@ -2160,19 +1386,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1601',
     name: 'Modify System Image',
     reference: 'https://attack.mitre.org/techniques/T1601',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     value: 'modifySystemImage',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.mshtaDescription',
-      { defaultMessage: 'Mshta (T1170)' }
-    ),
-    id: 'T1170',
-    name: 'Mshta',
-    reference: 'https://attack.mitre.org/techniques/T1170',
-    tactics: 'defense-evasion,execution',
-    value: 'mshta',
   },
   {
     label: i18n.translate(
@@ -2182,7 +1397,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1111',
     name: 'Multi-Factor Authentication Interception',
     reference: 'https://attack.mitre.org/techniques/T1111',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     value: 'multiFactorAuthenticationInterception',
   },
   {
@@ -2193,7 +1408,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1621',
     name: 'Multi-Factor Authentication Request Generation',
     reference: 'https://attack.mitre.org/techniques/T1621',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     value: 'multiFactorAuthenticationRequestGeneration',
   },
   {
@@ -2204,52 +1419,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1104',
     name: 'Multi-Stage Channels',
     reference: 'https://attack.mitre.org/techniques/T1104',
-    tactics: 'command-and-control',
+    tactics: ['command-and-control'],
     value: 'multiStageChannels',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.multiHopProxyDescription',
-      { defaultMessage: 'Multi-hop Proxy (T1188)' }
-    ),
-    id: 'T1188',
-    name: 'Multi-hop Proxy',
-    reference: 'https://attack.mitre.org/techniques/T1188',
-    tactics: 'command-and-control',
-    value: 'multiHopProxy',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.multibandCommunicationDescription',
-      { defaultMessage: 'Multiband Communication (T1026)' }
-    ),
-    id: 'T1026',
-    name: 'Multiband Communication',
-    reference: 'https://attack.mitre.org/techniques/T1026',
-    tactics: 'command-and-control',
-    value: 'multibandCommunication',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.multilayerEncryptionDescription',
-      { defaultMessage: 'Multilayer Encryption (T1079)' }
-    ),
-    id: 'T1079',
-    name: 'Multilayer Encryption',
-    reference: 'https://attack.mitre.org/techniques/T1079',
-    tactics: 'command-and-control',
-    value: 'multilayerEncryption',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.ntfsFileAttributesDescription',
-      { defaultMessage: 'NTFS File Attributes (T1096)' }
-    ),
-    id: 'T1096',
-    name: 'NTFS File Attributes',
-    reference: 'https://attack.mitre.org/techniques/T1096',
-    tactics: 'defense-evasion',
-    value: 'ntfsFileAttributes',
   },
   {
     label: i18n.translate(
@@ -2259,19 +1430,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1106',
     name: 'Native API',
     reference: 'https://attack.mitre.org/techniques/T1106',
-    tactics: 'execution',
+    tactics: ['execution'],
     value: 'nativeApi',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.netshHelperDllDescription',
-      { defaultMessage: 'Netsh Helper DLL (T1128)' }
-    ),
-    id: 'T1128',
-    name: 'Netsh Helper DLL',
-    reference: 'https://attack.mitre.org/techniques/T1128',
-    tactics: 'persistence',
-    value: 'netshHelperDll',
   },
   {
     label: i18n.translate(
@@ -2281,7 +1441,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1599',
     name: 'Network Boundary Bridging',
     reference: 'https://attack.mitre.org/techniques/T1599',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     value: 'networkBoundaryBridging',
   },
   {
@@ -2292,7 +1452,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1498',
     name: 'Network Denial of Service',
     reference: 'https://attack.mitre.org/techniques/T1498',
-    tactics: 'impact',
+    tactics: ['impact'],
     value: 'networkDenialOfService',
   },
   {
@@ -2303,19 +1463,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1046',
     name: 'Network Service Discovery',
     reference: 'https://attack.mitre.org/techniques/T1046',
-    tactics: 'discovery',
+    tactics: ['discovery'],
     value: 'networkServiceDiscovery',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.networkShareConnectionRemovalDescription',
-      { defaultMessage: 'Network Share Connection Removal (T1126)' }
-    ),
-    id: 'T1126',
-    name: 'Network Share Connection Removal',
-    reference: 'https://attack.mitre.org/techniques/T1126',
-    tactics: 'defense-evasion',
-    value: 'networkShareConnectionRemoval',
   },
   {
     label: i18n.translate(
@@ -2325,7 +1474,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1135',
     name: 'Network Share Discovery',
     reference: 'https://attack.mitre.org/techniques/T1135',
-    tactics: 'discovery',
+    tactics: ['discovery'],
     value: 'networkShareDiscovery',
   },
   {
@@ -2336,19 +1485,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1040',
     name: 'Network Sniffing',
     reference: 'https://attack.mitre.org/techniques/T1040',
-    tactics: 'credential-access,discovery',
+    tactics: ['credential-access', 'discovery'],
     value: 'networkSniffing',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.newServiceDescription',
-      { defaultMessage: 'New Service (T1050)' }
-    ),
-    id: 'T1050',
-    name: 'New Service',
-    reference: 'https://attack.mitre.org/techniques/T1050',
-    tactics: 'persistence,privilege-escalation',
-    value: 'newService',
   },
   {
     label: i18n.translate(
@@ -2358,7 +1496,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1095',
     name: 'Non-Application Layer Protocol',
     reference: 'https://attack.mitre.org/techniques/T1095',
-    tactics: 'command-and-control',
+    tactics: ['command-and-control'],
     value: 'nonApplicationLayerProtocol',
   },
   {
@@ -2369,7 +1507,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1571',
     name: 'Non-Standard Port',
     reference: 'https://attack.mitre.org/techniques/T1571',
-    tactics: 'command-and-control',
+    tactics: ['command-and-control'],
     value: 'nonStandardPort',
   },
   {
@@ -2380,7 +1518,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1003',
     name: 'OS Credential Dumping',
     reference: 'https://attack.mitre.org/techniques/T1003',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     value: 'osCredentialDumping',
   },
   {
@@ -2391,7 +1529,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1027',
     name: 'Obfuscated Files or Information',
     reference: 'https://attack.mitre.org/techniques/T1027',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     value: 'obfuscatedFilesOrInformation',
   },
   {
@@ -2402,7 +1540,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1588',
     name: 'Obtain Capabilities',
     reference: 'https://attack.mitre.org/techniques/T1588',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     value: 'obtainCapabilities',
   },
   {
@@ -2413,52 +1551,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1137',
     name: 'Office Application Startup',
     reference: 'https://attack.mitre.org/techniques/T1137',
-    tactics: 'persistence',
+    tactics: ['persistence'],
     value: 'officeApplicationStartup',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.parentPidSpoofingDescription',
-      { defaultMessage: 'Parent PID Spoofing (T1502)' }
-    ),
-    id: 'T1502',
-    name: 'Parent PID Spoofing',
-    reference: 'https://attack.mitre.org/techniques/T1502',
-    tactics: 'defense-evasion,privilege-escalation',
-    value: 'parentPidSpoofing',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.passTheHashDescription',
-      { defaultMessage: 'Pass the Hash (T1075)' }
-    ),
-    id: 'T1075',
-    name: 'Pass the Hash',
-    reference: 'https://attack.mitre.org/techniques/T1075',
-    tactics: 'lateral-movement',
-    value: 'passTheHash',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.passTheTicketDescription',
-      { defaultMessage: 'Pass the Ticket (T1097)' }
-    ),
-    id: 'T1097',
-    name: 'Pass the Ticket',
-    reference: 'https://attack.mitre.org/techniques/T1097',
-    tactics: 'lateral-movement',
-    value: 'passTheTicket',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.passwordFilterDllDescription',
-      { defaultMessage: 'Password Filter DLL (T1174)' }
-    ),
-    id: 'T1174',
-    name: 'Password Filter DLL',
-    reference: 'https://attack.mitre.org/techniques/T1174',
-    tactics: 'credential-access',
-    value: 'passwordFilterDll',
   },
   {
     label: i18n.translate(
@@ -2468,19 +1562,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1201',
     name: 'Password Policy Discovery',
     reference: 'https://attack.mitre.org/techniques/T1201',
-    tactics: 'discovery',
+    tactics: ['discovery'],
     value: 'passwordPolicyDiscovery',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.pathInterceptionDescription',
-      { defaultMessage: 'Path Interception (T1034)' }
-    ),
-    id: 'T1034',
-    name: 'Path Interception',
-    reference: 'https://attack.mitre.org/techniques/T1034',
-    tactics: 'persistence,privilege-escalation',
-    value: 'pathInterception',
   },
   {
     label: i18n.translate(
@@ -2490,7 +1573,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1120',
     name: 'Peripheral Device Discovery',
     reference: 'https://attack.mitre.org/techniques/T1120',
-    tactics: 'discovery',
+    tactics: ['discovery'],
     value: 'peripheralDeviceDiscovery',
   },
   {
@@ -2501,7 +1584,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1069',
     name: 'Permission Groups Discovery',
     reference: 'https://attack.mitre.org/techniques/T1069',
-    tactics: 'discovery',
+    tactics: ['discovery'],
     value: 'permissionGroupsDiscovery',
   },
   {
@@ -2512,7 +1595,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1566',
     name: 'Phishing',
     reference: 'https://attack.mitre.org/techniques/T1566',
-    tactics: 'initial-access',
+    tactics: ['initial-access'],
     value: 'phishing',
   },
   {
@@ -2523,7 +1606,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1598',
     name: 'Phishing for Information',
     reference: 'https://attack.mitre.org/techniques/T1598',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     value: 'phishingForInformation',
   },
   {
@@ -2534,52 +1617,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1647',
     name: 'Plist File Modification',
     reference: 'https://attack.mitre.org/techniques/T1647',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     value: 'plistFileModification',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.plistModificationDescription',
-      { defaultMessage: 'Plist Modification (T1150)' }
-    ),
-    id: 'T1150',
-    name: 'Plist Modification',
-    reference: 'https://attack.mitre.org/techniques/T1150',
-    tactics: 'defense-evasion,persistence,privilege-escalation',
-    value: 'plistModification',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.portMonitorsDescription',
-      { defaultMessage: 'Port Monitors (T1013)' }
-    ),
-    id: 'T1013',
-    name: 'Port Monitors',
-    reference: 'https://attack.mitre.org/techniques/T1013',
-    tactics: 'persistence,privilege-escalation',
-    value: 'portMonitors',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.powerShellDescription',
-      { defaultMessage: 'PowerShell (T1086)' }
-    ),
-    id: 'T1086',
-    name: 'PowerShell',
-    reference: 'https://attack.mitre.org/techniques/T1086',
-    tactics: 'execution',
-    value: 'powerShell',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.powerShellProfileDescription',
-      { defaultMessage: 'PowerShell Profile (T1504)' }
-    ),
-    id: 'T1504',
-    name: 'PowerShell Profile',
-    reference: 'https://attack.mitre.org/techniques/T1504',
-    tactics: 'persistence,privilege-escalation',
-    value: 'powerShellProfile',
   },
   {
     label: i18n.translate(
@@ -2589,19 +1628,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1542',
     name: 'Pre-OS Boot',
     reference: 'https://attack.mitre.org/techniques/T1542',
-    tactics: 'defense-evasion,persistence',
+    tactics: ['defense-evasion', 'persistence'],
     value: 'preOsBoot',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.privateKeysDescription',
-      { defaultMessage: 'Private Keys (T1145)' }
-    ),
-    id: 'T1145',
-    name: 'Private Keys',
-    reference: 'https://attack.mitre.org/techniques/T1145',
-    tactics: 'credential-access',
-    value: 'privateKeys',
   },
   {
     label: i18n.translate(
@@ -2611,30 +1639,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1057',
     name: 'Process Discovery',
     reference: 'https://attack.mitre.org/techniques/T1057',
-    tactics: 'discovery',
+    tactics: ['discovery'],
     value: 'processDiscovery',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.processDoppelgangingDescription',
-      { defaultMessage: 'Process Doppelgänging (T1186)' }
-    ),
-    id: 'T1186',
-    name: 'Process Doppelgänging',
-    reference: 'https://attack.mitre.org/techniques/T1186',
-    tactics: 'defense-evasion',
-    value: 'processDoppelganging',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.processHollowingDescription',
-      { defaultMessage: 'Process Hollowing (T1093)' }
-    ),
-    id: 'T1093',
-    name: 'Process Hollowing',
-    reference: 'https://attack.mitre.org/techniques/T1093',
-    tactics: 'defense-evasion',
-    value: 'processHollowing',
   },
   {
     label: i18n.translate(
@@ -2644,7 +1650,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1055',
     name: 'Process Injection',
     reference: 'https://attack.mitre.org/techniques/T1055',
-    tactics: 'defense-evasion,privilege-escalation',
+    tactics: ['defense-evasion', 'privilege-escalation'],
     value: 'processInjection',
   },
   {
@@ -2655,7 +1661,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1572',
     name: 'Protocol Tunneling',
     reference: 'https://attack.mitre.org/techniques/T1572',
-    tactics: 'command-and-control',
+    tactics: ['command-and-control'],
     value: 'protocolTunneling',
   },
   {
@@ -2666,7 +1672,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1090',
     name: 'Proxy',
     reference: 'https://attack.mitre.org/techniques/T1090',
-    tactics: 'command-and-control',
+    tactics: ['command-and-control'],
     value: 'proxy',
   },
   {
@@ -2677,41 +1683,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1012',
     name: 'Query Registry',
     reference: 'https://attack.mitre.org/techniques/T1012',
-    tactics: 'discovery',
+    tactics: ['discovery'],
     value: 'queryRegistry',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.rcCommonDescription',
-      { defaultMessage: 'Rc.common (T1163)' }
-    ),
-    id: 'T1163',
-    name: 'Rc.common',
-    reference: 'https://attack.mitre.org/techniques/T1163',
-    tactics: 'persistence',
-    value: 'rcCommon',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.reOpenedApplicationsDescription',
-      { defaultMessage: 'Re-opened Applications (T1164)' }
-    ),
-    id: 'T1164',
-    name: 'Re-opened Applications',
-    reference: 'https://attack.mitre.org/techniques/T1164',
-    tactics: 'persistence',
-    value: 'reOpenedApplications',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.redundantAccessDescription',
-      { defaultMessage: 'Redundant Access (T1108)' }
-    ),
-    id: 'T1108',
-    name: 'Redundant Access',
-    reference: 'https://attack.mitre.org/techniques/T1108',
-    tactics: 'defense-evasion,persistence',
-    value: 'redundantAccess',
   },
   {
     label: i18n.translate(
@@ -2721,41 +1694,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1620',
     name: 'Reflective Code Loading',
     reference: 'https://attack.mitre.org/techniques/T1620',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     value: 'reflectiveCodeLoading',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.registryRunKeysStartupFolderDescription',
-      { defaultMessage: 'Registry Run Keys / Startup Folder (T1060)' }
-    ),
-    id: 'T1060',
-    name: 'Registry Run Keys / Startup Folder',
-    reference: 'https://attack.mitre.org/techniques/T1060',
-    tactics: 'persistence',
-    value: 'registryRunKeysStartupFolder',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.regsvcsRegasmDescription',
-      { defaultMessage: 'Regsvcs/Regasm (T1121)' }
-    ),
-    id: 'T1121',
-    name: 'Regsvcs/Regasm',
-    reference: 'https://attack.mitre.org/techniques/T1121',
-    tactics: 'defense-evasion,execution',
-    value: 'regsvcsRegasm',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.regsvr32Description',
-      { defaultMessage: 'Regsvr32 (T1117)' }
-    ),
-    id: 'T1117',
-    name: 'Regsvr32',
-    reference: 'https://attack.mitre.org/techniques/T1117',
-    tactics: 'defense-evasion,execution',
-    value: 'regsvr32',
   },
   {
     label: i18n.translate(
@@ -2765,19 +1705,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1219',
     name: 'Remote Access Software',
     reference: 'https://attack.mitre.org/techniques/T1219',
-    tactics: 'command-and-control',
+    tactics: ['command-and-control'],
     value: 'remoteAccessSoftware',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.remoteDesktopProtocolDescription',
-      { defaultMessage: 'Remote Desktop Protocol (T1076)' }
-    ),
-    id: 'T1076',
-    name: 'Remote Desktop Protocol',
-    reference: 'https://attack.mitre.org/techniques/T1076',
-    tactics: 'lateral-movement',
-    value: 'remoteDesktopProtocol',
   },
   {
     label: i18n.translate(
@@ -2787,7 +1716,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1563',
     name: 'Remote Service Session Hijacking',
     reference: 'https://attack.mitre.org/techniques/T1563',
-    tactics: 'lateral-movement',
+    tactics: ['lateral-movement'],
     value: 'remoteServiceSessionHijacking',
   },
   {
@@ -2798,7 +1727,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1021',
     name: 'Remote Services',
     reference: 'https://attack.mitre.org/techniques/T1021',
-    tactics: 'lateral-movement',
+    tactics: ['lateral-movement'],
     value: 'remoteServices',
   },
   {
@@ -2809,7 +1738,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1018',
     name: 'Remote System Discovery',
     reference: 'https://attack.mitre.org/techniques/T1018',
-    tactics: 'discovery',
+    tactics: ['discovery'],
     value: 'remoteSystemDiscovery',
   },
   {
@@ -2820,7 +1749,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1091',
     name: 'Replication Through Removable Media',
     reference: 'https://attack.mitre.org/techniques/T1091',
-    tactics: 'lateral-movement,initial-access',
+    tactics: ['lateral-movement', 'initial-access'],
     value: 'replicationThroughRemovableMedia',
   },
   {
@@ -2831,19 +1760,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1496',
     name: 'Resource Hijacking',
     reference: 'https://attack.mitre.org/techniques/T1496',
-    tactics: 'impact',
+    tactics: ['impact'],
     value: 'resourceHijacking',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.revertCloudInstanceDescription',
-      { defaultMessage: 'Revert Cloud Instance (T1536)' }
-    ),
-    id: 'T1536',
-    name: 'Revert Cloud Instance',
-    reference: 'https://attack.mitre.org/techniques/T1536',
-    tactics: 'defense-evasion',
-    value: 'revertCloudInstance',
   },
   {
     label: i18n.translate(
@@ -2853,7 +1771,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1207',
     name: 'Rogue Domain Controller',
     reference: 'https://attack.mitre.org/techniques/T1207',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     value: 'rogueDomainController',
   },
   {
@@ -2864,63 +1782,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1014',
     name: 'Rootkit',
     reference: 'https://attack.mitre.org/techniques/T1014',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     value: 'rootkit',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.rundll32Description',
-      { defaultMessage: 'Rundll32 (T1085)' }
-    ),
-    id: 'T1085',
-    name: 'Rundll32',
-    reference: 'https://attack.mitre.org/techniques/T1085',
-    tactics: 'defense-evasion,execution',
-    value: 'rundll32',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.runtimeDataManipulationDescription',
-      { defaultMessage: 'Runtime Data Manipulation (T1494)' }
-    ),
-    id: 'T1494',
-    name: 'Runtime Data Manipulation',
-    reference: 'https://attack.mitre.org/techniques/T1494',
-    tactics: 'impact',
-    value: 'runtimeDataManipulation',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.sidHistoryInjectionDescription',
-      { defaultMessage: 'SID-History Injection (T1178)' }
-    ),
-    id: 'T1178',
-    name: 'SID-History Injection',
-    reference: 'https://attack.mitre.org/techniques/T1178',
-    tactics: 'privilege-escalation',
-    value: 'sidHistoryInjection',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.sipAndTrustProviderHijackingDescription',
-      { defaultMessage: 'SIP and Trust Provider Hijacking (T1198)' }
-    ),
-    id: 'T1198',
-    name: 'SIP and Trust Provider Hijacking',
-    reference: 'https://attack.mitre.org/techniques/T1198',
-    tactics: 'defense-evasion,persistence',
-    value: 'sipAndTrustProviderHijacking',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.sshHijackingDescription',
-      { defaultMessage: 'SSH Hijacking (T1184)' }
-    ),
-    id: 'T1184',
-    name: 'SSH Hijacking',
-    reference: 'https://attack.mitre.org/techniques/T1184',
-    tactics: 'lateral-movement',
-    value: 'sshHijacking',
   },
   {
     label: i18n.translate(
@@ -2930,7 +1793,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1053',
     name: 'Scheduled Task/Job',
     reference: 'https://attack.mitre.org/techniques/T1053',
-    tactics: 'execution,persistence,privilege-escalation',
+    tactics: ['execution', 'persistence', 'privilege-escalation'],
     value: 'scheduledTaskJob',
   },
   {
@@ -2941,7 +1804,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1029',
     name: 'Scheduled Transfer',
     reference: 'https://attack.mitre.org/techniques/T1029',
-    tactics: 'exfiltration',
+    tactics: ['exfiltration'],
     value: 'scheduledTransfer',
   },
   {
@@ -2952,30 +1815,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1113',
     name: 'Screen Capture',
     reference: 'https://attack.mitre.org/techniques/T1113',
-    tactics: 'collection',
+    tactics: ['collection'],
     value: 'screenCapture',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.screensaverDescription',
-      { defaultMessage: 'Screensaver (T1180)' }
-    ),
-    id: 'T1180',
-    name: 'Screensaver',
-    reference: 'https://attack.mitre.org/techniques/T1180',
-    tactics: 'persistence',
-    value: 'screensaver',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.scriptingDescription',
-      { defaultMessage: 'Scripting (T1064)' }
-    ),
-    id: 'T1064',
-    name: 'Scripting',
-    reference: 'https://attack.mitre.org/techniques/T1064',
-    tactics: 'defense-evasion,execution',
-    value: 'scripting',
   },
   {
     label: i18n.translate(
@@ -2985,7 +1826,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1597',
     name: 'Search Closed Sources',
     reference: 'https://attack.mitre.org/techniques/T1597',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     value: 'searchClosedSources',
   },
   {
@@ -2996,7 +1837,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1596',
     name: 'Search Open Technical Databases',
     reference: 'https://attack.mitre.org/techniques/T1596',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     value: 'searchOpenTechnicalDatabases',
   },
   {
@@ -3007,7 +1848,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1593',
     name: 'Search Open Websites/Domains',
     reference: 'https://attack.mitre.org/techniques/T1593',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     value: 'searchOpenWebsitesDomains',
   },
   {
@@ -3018,41 +1859,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1594',
     name: 'Search Victim-Owned Websites',
     reference: 'https://attack.mitre.org/techniques/T1594',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     value: 'searchVictimOwnedWebsites',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.securitySoftwareDiscoveryDescription',
-      { defaultMessage: 'Security Software Discovery (T1063)' }
-    ),
-    id: 'T1063',
-    name: 'Security Software Discovery',
-    reference: 'https://attack.mitre.org/techniques/T1063',
-    tactics: 'discovery',
-    value: 'securitySoftwareDiscovery',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.securitySupportProviderDescription',
-      { defaultMessage: 'Security Support Provider (T1101)' }
-    ),
-    id: 'T1101',
-    name: 'Security Support Provider',
-    reference: 'https://attack.mitre.org/techniques/T1101',
-    tactics: 'persistence',
-    value: 'securitySupportProvider',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.securitydMemoryDescription',
-      { defaultMessage: 'Securityd Memory (T1167)' }
-    ),
-    id: 'T1167',
-    name: 'Securityd Memory',
-    reference: 'https://attack.mitre.org/techniques/T1167',
-    tactics: 'credential-access',
-    value: 'securitydMemory',
   },
   {
     label: i18n.translate(
@@ -3062,30 +1870,19 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1505',
     name: 'Server Software Component',
     reference: 'https://attack.mitre.org/techniques/T1505',
-    tactics: 'persistence',
+    tactics: ['persistence'],
     value: 'serverSoftwareComponent',
   },
   {
     label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.serviceExecutionDescription',
-      { defaultMessage: 'Service Execution (T1035)' }
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.serverlessExecutionDescription',
+      { defaultMessage: 'Serverless Execution (T1648)' }
     ),
-    id: 'T1035',
-    name: 'Service Execution',
-    reference: 'https://attack.mitre.org/techniques/T1035',
-    tactics: 'execution',
-    value: 'serviceExecution',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.serviceRegistryPermissionsWeaknessDescription',
-      { defaultMessage: 'Service Registry Permissions Weakness (T1058)' }
-    ),
-    id: 'T1058',
-    name: 'Service Registry Permissions Weakness',
-    reference: 'https://attack.mitre.org/techniques/T1058',
-    tactics: 'persistence,privilege-escalation',
-    value: 'serviceRegistryPermissionsWeakness',
+    id: 'T1648',
+    name: 'Serverless Execution',
+    reference: 'https://attack.mitre.org/techniques/T1648',
+    tactics: ['execution'],
+    value: 'serverlessExecution',
   },
   {
     label: i18n.translate(
@@ -3095,19 +1892,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1489',
     name: 'Service Stop',
     reference: 'https://attack.mitre.org/techniques/T1489',
-    tactics: 'impact',
+    tactics: ['impact'],
     value: 'serviceStop',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.setuidAndSetgidDescription',
-      { defaultMessage: 'Setuid and Setgid (T1166)' }
-    ),
-    id: 'T1166',
-    name: 'Setuid and Setgid',
-    reference: 'https://attack.mitre.org/techniques/T1166',
-    tactics: 'privilege-escalation,persistence',
-    value: 'setuidAndSetgid',
   },
   {
     label: i18n.translate(
@@ -3117,30 +1903,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1129',
     name: 'Shared Modules',
     reference: 'https://attack.mitre.org/techniques/T1129',
-    tactics: 'execution',
+    tactics: ['execution'],
     value: 'sharedModules',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.sharedWebrootDescription',
-      { defaultMessage: 'Shared Webroot (T1051)' }
-    ),
-    id: 'T1051',
-    name: 'Shared Webroot',
-    reference: 'https://attack.mitre.org/techniques/T1051',
-    tactics: 'lateral-movement',
-    value: 'sharedWebroot',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.shortcutModificationDescription',
-      { defaultMessage: 'Shortcut Modification (T1023)' }
-    ),
-    id: 'T1023',
-    name: 'Shortcut Modification',
-    reference: 'https://attack.mitre.org/techniques/T1023',
-    tactics: 'persistence',
-    value: 'shortcutModification',
   },
   {
     label: i18n.translate(
@@ -3150,7 +1914,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1072',
     name: 'Software Deployment Tools',
     reference: 'https://attack.mitre.org/techniques/T1072',
-    tactics: 'execution,lateral-movement',
+    tactics: ['execution', 'lateral-movement'],
     value: 'softwareDeploymentTools',
   },
   {
@@ -3161,74 +1925,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1518',
     name: 'Software Discovery',
     reference: 'https://attack.mitre.org/techniques/T1518',
-    tactics: 'discovery',
+    tactics: ['discovery'],
     value: 'softwareDiscovery',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.softwarePackingDescription',
-      { defaultMessage: 'Software Packing (T1045)' }
-    ),
-    id: 'T1045',
-    name: 'Software Packing',
-    reference: 'https://attack.mitre.org/techniques/T1045',
-    tactics: 'defense-evasion',
-    value: 'softwarePacking',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.sourceDescription',
-      { defaultMessage: 'Source (T1153)' }
-    ),
-    id: 'T1153',
-    name: 'Source',
-    reference: 'https://attack.mitre.org/techniques/T1153',
-    tactics: 'execution',
-    value: 'source',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.spaceAfterFilenameDescription',
-      { defaultMessage: 'Space after Filename (T1151)' }
-    ),
-    id: 'T1151',
-    name: 'Space after Filename',
-    reference: 'https://attack.mitre.org/techniques/T1151',
-    tactics: 'defense-evasion,execution',
-    value: 'spaceAfterFilename',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.spearphishingAttachmentDescription',
-      { defaultMessage: 'Spearphishing Attachment (T1193)' }
-    ),
-    id: 'T1193',
-    name: 'Spearphishing Attachment',
-    reference: 'https://attack.mitre.org/techniques/T1193',
-    tactics: 'initial-access',
-    value: 'spearphishingAttachment',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.spearphishingLinkDescription',
-      { defaultMessage: 'Spearphishing Link (T1192)' }
-    ),
-    id: 'T1192',
-    name: 'Spearphishing Link',
-    reference: 'https://attack.mitre.org/techniques/T1192',
-    tactics: 'initial-access',
-    value: 'spearphishingLink',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.spearphishingViaServiceDescription',
-      { defaultMessage: 'Spearphishing via Service (T1194)' }
-    ),
-    id: 'T1194',
-    name: 'Spearphishing via Service',
-    reference: 'https://attack.mitre.org/techniques/T1194',
-    tactics: 'initial-access',
-    value: 'spearphishingViaService',
   },
   {
     label: i18n.translate(
@@ -3238,30 +1936,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1608',
     name: 'Stage Capabilities',
     reference: 'https://attack.mitre.org/techniques/T1608',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     value: 'stageCapabilities',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.standardCryptographicProtocolDescription',
-      { defaultMessage: 'Standard Cryptographic Protocol (T1032)' }
-    ),
-    id: 'T1032',
-    name: 'Standard Cryptographic Protocol',
-    reference: 'https://attack.mitre.org/techniques/T1032',
-    tactics: 'command-and-control',
-    value: 'standardCryptographicProtocol',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.startupItemsDescription',
-      { defaultMessage: 'Startup Items (T1165)' }
-    ),
-    id: 'T1165',
-    name: 'Startup Items',
-    reference: 'https://attack.mitre.org/techniques/T1165',
-    tactics: 'persistence,privilege-escalation',
-    value: 'startupItems',
   },
   {
     label: i18n.translate(
@@ -3271,7 +1947,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1528',
     name: 'Steal Application Access Token',
     reference: 'https://attack.mitre.org/techniques/T1528',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     value: 'stealApplicationAccessToken',
   },
   {
@@ -3282,8 +1958,19 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1539',
     name: 'Steal Web Session Cookie',
     reference: 'https://attack.mitre.org/techniques/T1539',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     value: 'stealWebSessionCookie',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.stealOrForgeAuthenticationCertificatesDescription',
+      { defaultMessage: 'Steal or Forge Authentication Certificates (T1649)' }
+    ),
+    id: 'T1649',
+    name: 'Steal or Forge Authentication Certificates',
+    reference: 'https://attack.mitre.org/techniques/T1649',
+    tactics: ['credential-access'],
+    value: 'stealOrForgeAuthenticationCertificates',
   },
   {
     label: i18n.translate(
@@ -3293,19 +1980,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1558',
     name: 'Steal or Forge Kerberos Tickets',
     reference: 'https://attack.mitre.org/techniques/T1558',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     value: 'stealOrForgeKerberosTickets',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.storedDataManipulationDescription',
-      { defaultMessage: 'Stored Data Manipulation (T1492)' }
-    ),
-    id: 'T1492',
-    name: 'Stored Data Manipulation',
-    reference: 'https://attack.mitre.org/techniques/T1492',
-    tactics: 'impact',
-    value: 'storedDataManipulation',
   },
   {
     label: i18n.translate(
@@ -3315,30 +1991,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1553',
     name: 'Subvert Trust Controls',
     reference: 'https://attack.mitre.org/techniques/T1553',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     value: 'subvertTrustControls',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.sudoDescription',
-      { defaultMessage: 'Sudo (T1169)' }
-    ),
-    id: 'T1169',
-    name: 'Sudo',
-    reference: 'https://attack.mitre.org/techniques/T1169',
-    tactics: 'privilege-escalation',
-    value: 'sudo',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.sudoCachingDescription',
-      { defaultMessage: 'Sudo Caching (T1206)' }
-    ),
-    id: 'T1206',
-    name: 'Sudo Caching',
-    reference: 'https://attack.mitre.org/techniques/T1206',
-    tactics: 'privilege-escalation',
-    value: 'sudoCaching',
   },
   {
     label: i18n.translate(
@@ -3348,7 +2002,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1195',
     name: 'Supply Chain Compromise',
     reference: 'https://attack.mitre.org/techniques/T1195',
-    tactics: 'initial-access',
+    tactics: ['initial-access'],
     value: 'supplyChainCompromise',
   },
   {
@@ -3359,19 +2013,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1218',
     name: 'System Binary Proxy Execution',
     reference: 'https://attack.mitre.org/techniques/T1218',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     value: 'systemBinaryProxyExecution',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.systemFirmwareDescription',
-      { defaultMessage: 'System Firmware (T1019)' }
-    ),
-    id: 'T1019',
-    name: 'System Firmware',
-    reference: 'https://attack.mitre.org/techniques/T1019',
-    tactics: 'persistence',
-    value: 'systemFirmware',
   },
   {
     label: i18n.translate(
@@ -3381,7 +2024,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1082',
     name: 'System Information Discovery',
     reference: 'https://attack.mitre.org/techniques/T1082',
-    tactics: 'discovery',
+    tactics: ['discovery'],
     value: 'systemInformationDiscovery',
   },
   {
@@ -3392,7 +2035,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1614',
     name: 'System Location Discovery',
     reference: 'https://attack.mitre.org/techniques/T1614',
-    tactics: 'discovery',
+    tactics: ['discovery'],
     value: 'systemLocationDiscovery',
   },
   {
@@ -3403,7 +2046,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1016',
     name: 'System Network Configuration Discovery',
     reference: 'https://attack.mitre.org/techniques/T1016',
-    tactics: 'discovery',
+    tactics: ['discovery'],
     value: 'systemNetworkConfigurationDiscovery',
   },
   {
@@ -3414,7 +2057,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1049',
     name: 'System Network Connections Discovery',
     reference: 'https://attack.mitre.org/techniques/T1049',
-    tactics: 'discovery',
+    tactics: ['discovery'],
     value: 'systemNetworkConnectionsDiscovery',
   },
   {
@@ -3425,7 +2068,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1033',
     name: 'System Owner/User Discovery',
     reference: 'https://attack.mitre.org/techniques/T1033',
-    tactics: 'discovery',
+    tactics: ['discovery'],
     value: 'systemOwnerUserDiscovery',
   },
   {
@@ -3436,7 +2079,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1216',
     name: 'System Script Proxy Execution',
     reference: 'https://attack.mitre.org/techniques/T1216',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     value: 'systemScriptProxyExecution',
   },
   {
@@ -3447,7 +2090,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1007',
     name: 'System Service Discovery',
     reference: 'https://attack.mitre.org/techniques/T1007',
-    tactics: 'discovery',
+    tactics: ['discovery'],
     value: 'systemServiceDiscovery',
   },
   {
@@ -3458,7 +2101,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1569',
     name: 'System Services',
     reference: 'https://attack.mitre.org/techniques/T1569',
-    tactics: 'execution',
+    tactics: ['execution'],
     value: 'systemServices',
   },
   {
@@ -3469,7 +2112,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1529',
     name: 'System Shutdown/Reboot',
     reference: 'https://attack.mitre.org/techniques/T1529',
-    tactics: 'impact',
+    tactics: ['impact'],
     value: 'systemShutdownReboot',
   },
   {
@@ -3480,19 +2123,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1124',
     name: 'System Time Discovery',
     reference: 'https://attack.mitre.org/techniques/T1124',
-    tactics: 'discovery',
+    tactics: ['discovery'],
     value: 'systemTimeDiscovery',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.systemdServiceDescription',
-      { defaultMessage: 'Systemd Service (T1501)' }
-    ),
-    id: 'T1501',
-    name: 'Systemd Service',
-    reference: 'https://attack.mitre.org/techniques/T1501',
-    tactics: 'persistence',
-    value: 'systemdService',
   },
   {
     label: i18n.translate(
@@ -3502,7 +2134,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1080',
     name: 'Taint Shared Content',
     reference: 'https://attack.mitre.org/techniques/T1080',
-    tactics: 'lateral-movement',
+    tactics: ['lateral-movement'],
     value: 'taintSharedContent',
   },
   {
@@ -3513,30 +2145,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1221',
     name: 'Template Injection',
     reference: 'https://attack.mitre.org/techniques/T1221',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     value: 'templateInjection',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.timeProvidersDescription',
-      { defaultMessage: 'Time Providers (T1209)' }
-    ),
-    id: 'T1209',
-    name: 'Time Providers',
-    reference: 'https://attack.mitre.org/techniques/T1209',
-    tactics: 'persistence',
-    value: 'timeProviders',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.timestompDescription',
-      { defaultMessage: 'Timestomp (T1099)' }
-    ),
-    id: 'T1099',
-    name: 'Timestomp',
-    reference: 'https://attack.mitre.org/techniques/T1099',
-    tactics: 'defense-evasion',
-    value: 'timestomp',
   },
   {
     label: i18n.translate(
@@ -3546,7 +2156,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1205',
     name: 'Traffic Signaling',
     reference: 'https://attack.mitre.org/techniques/T1205',
-    tactics: 'defense-evasion,persistence,command-and-control',
+    tactics: ['defense-evasion', 'persistence', 'command-and-control'],
     value: 'trafficSignaling',
   },
   {
@@ -3557,30 +2167,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1537',
     name: 'Transfer Data to Cloud Account',
     reference: 'https://attack.mitre.org/techniques/T1537',
-    tactics: 'exfiltration',
+    tactics: ['exfiltration'],
     value: 'transferDataToCloudAccount',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.transmittedDataManipulationDescription',
-      { defaultMessage: 'Transmitted Data Manipulation (T1493)' }
-    ),
-    id: 'T1493',
-    name: 'Transmitted Data Manipulation',
-    reference: 'https://attack.mitre.org/techniques/T1493',
-    tactics: 'impact',
-    value: 'transmittedDataManipulation',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.trapDescription',
-      { defaultMessage: 'Trap (T1154)' }
-    ),
-    id: 'T1154',
-    name: 'Trap',
-    reference: 'https://attack.mitre.org/techniques/T1154',
-    tactics: 'execution,persistence',
-    value: 'trap',
   },
   {
     label: i18n.translate(
@@ -3590,7 +2178,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1127',
     name: 'Trusted Developer Utilities Proxy Execution',
     reference: 'https://attack.mitre.org/techniques/T1127',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     value: 'trustedDeveloperUtilitiesProxyExecution',
   },
   {
@@ -3601,19 +2189,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1199',
     name: 'Trusted Relationship',
     reference: 'https://attack.mitre.org/techniques/T1199',
-    tactics: 'initial-access',
+    tactics: ['initial-access'],
     value: 'trustedRelationship',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.uncommonlyUsedPortDescription',
-      { defaultMessage: 'Uncommonly Used Port (T1065)' }
-    ),
-    id: 'T1065',
-    name: 'Uncommonly Used Port',
-    reference: 'https://attack.mitre.org/techniques/T1065',
-    tactics: 'command-and-control',
-    value: 'uncommonlyUsedPort',
   },
   {
     label: i18n.translate(
@@ -3623,7 +2200,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1552',
     name: 'Unsecured Credentials',
     reference: 'https://attack.mitre.org/techniques/T1552',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     value: 'unsecuredCredentials',
   },
   {
@@ -3634,7 +2211,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1535',
     name: 'Unused/Unsupported Cloud Regions',
     reference: 'https://attack.mitre.org/techniques/T1535',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     value: 'unusedUnsupportedCloudRegions',
   },
   {
@@ -3645,7 +2222,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1550',
     name: 'Use Alternate Authentication Material',
     reference: 'https://attack.mitre.org/techniques/T1550',
-    tactics: 'defense-evasion,lateral-movement',
+    tactics: ['defense-evasion', 'lateral-movement'],
     value: 'useAlternateAuthenticationMaterial',
   },
   {
@@ -3656,7 +2233,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1204',
     name: 'User Execution',
     reference: 'https://attack.mitre.org/techniques/T1204',
-    tactics: 'execution',
+    tactics: ['execution'],
     value: 'userExecution',
   },
   {
@@ -3667,7 +2244,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1078',
     name: 'Valid Accounts',
     reference: 'https://attack.mitre.org/techniques/T1078',
-    tactics: 'defense-evasion,persistence,privilege-escalation,initial-access',
+    tactics: ['defense-evasion', 'persistence', 'privilege-escalation', 'initial-access'],
     value: 'validAccounts',
   },
   {
@@ -3678,7 +2255,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1125',
     name: 'Video Capture',
     reference: 'https://attack.mitre.org/techniques/T1125',
-    tactics: 'collection',
+    tactics: ['collection'],
     value: 'videoCapture',
   },
   {
@@ -3689,7 +2266,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1497',
     name: 'Virtualization/Sandbox Evasion',
     reference: 'https://attack.mitre.org/techniques/T1497',
-    tactics: 'defense-evasion,discovery',
+    tactics: ['defense-evasion', 'discovery'],
     value: 'virtualizationSandboxEvasion',
   },
   {
@@ -3700,7 +2277,7 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1600',
     name: 'Weaken Encryption',
     reference: 'https://attack.mitre.org/techniques/T1600',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     value: 'weakenEncryption',
   },
   {
@@ -3711,41 +2288,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1102',
     name: 'Web Service',
     reference: 'https://attack.mitre.org/techniques/T1102',
-    tactics: 'command-and-control',
+    tactics: ['command-and-control'],
     value: 'webService',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.webSessionCookieDescription',
-      { defaultMessage: 'Web Session Cookie (T1506)' }
-    ),
-    id: 'T1506',
-    name: 'Web Session Cookie',
-    reference: 'https://attack.mitre.org/techniques/T1506',
-    tactics: 'defense-evasion,lateral-movement',
-    value: 'webSessionCookie',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.webShellDescription',
-      { defaultMessage: 'Web Shell (T1100)' }
-    ),
-    id: 'T1100',
-    name: 'Web Shell',
-    reference: 'https://attack.mitre.org/techniques/T1100',
-    tactics: 'persistence,privilege-escalation',
-    value: 'webShell',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.windowsAdminSharesDescription',
-      { defaultMessage: 'Windows Admin Shares (T1077)' }
-    ),
-    id: 'T1077',
-    name: 'Windows Admin Shares',
-    reference: 'https://attack.mitre.org/techniques/T1077',
-    tactics: 'lateral-movement',
-    value: 'windowsAdminShares',
   },
   {
     label: i18n.translate(
@@ -3755,41 +2299,8 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1047',
     name: 'Windows Management Instrumentation',
     reference: 'https://attack.mitre.org/techniques/T1047',
-    tactics: 'execution',
+    tactics: ['execution'],
     value: 'windowsManagementInstrumentation',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.windowsManagementInstrumentationEventSubscriptionDescription',
-      { defaultMessage: 'Windows Management Instrumentation Event Subscription (T1084)' }
-    ),
-    id: 'T1084',
-    name: 'Windows Management Instrumentation Event Subscription',
-    reference: 'https://attack.mitre.org/techniques/T1084',
-    tactics: 'persistence',
-    value: 'windowsManagementInstrumentationEventSubscription',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.windowsRemoteManagementDescription',
-      { defaultMessage: 'Windows Remote Management (T1028)' }
-    ),
-    id: 'T1028',
-    name: 'Windows Remote Management',
-    reference: 'https://attack.mitre.org/techniques/T1028',
-    tactics: 'execution,lateral-movement',
-    value: 'windowsRemoteManagement',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.winlogonHelperDllDescription',
-      { defaultMessage: 'Winlogon Helper DLL (T1004)' }
-    ),
-    id: 'T1004',
-    name: 'Winlogon Helper DLL',
-    reference: 'https://attack.mitre.org/techniques/T1004',
-    tactics: 'persistence',
-    value: 'winlogonHelperDll',
   },
   {
     label: i18n.translate(
@@ -3799,12 +2310,12 @@ export const techniquesOptions: MitreTechniquesOptions[] = [
     id: 'T1220',
     name: 'XSL Script Processing',
     reference: 'https://attack.mitre.org/techniques/T1220',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     value: 'xslScriptProcessing',
   },
 ];
 
-export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
+export const subtechniques: MitreSubTechnique[] = [
   {
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.etcPasswdAndEtcShadowT1003Description',
@@ -3813,7 +2324,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1003.008',
     name: '/etc/passwd and /etc/shadow',
     reference: 'https://attack.mitre.org/techniques/T1003/008',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     techniqueId: 'T1003',
     value: 'etcPasswdAndEtcShadow',
   },
@@ -3825,7 +2336,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1557.002',
     name: 'ARP Cache Poisoning',
     reference: 'https://attack.mitre.org/techniques/T1557/002',
-    tactics: 'credential-access,collection',
+    tactics: ['credential-access', 'collection'],
     techniqueId: 'T1557',
     value: 'arpCachePoisoning',
   },
@@ -3837,7 +2348,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1558.004',
     name: 'AS-REP Roasting',
     reference: 'https://attack.mitre.org/techniques/T1558/004',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     techniqueId: 'T1558',
     value: 'asRepRoasting',
   },
@@ -3849,7 +2360,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1546.008',
     name: 'Accessibility Features',
     reference: 'https://attack.mitre.org/techniques/T1546/008',
-    tactics: 'privilege-escalation,persistence',
+    tactics: ['privilege-escalation', 'persistence'],
     techniqueId: 'T1546',
     value: 'accessibilityFeatures',
   },
@@ -3861,7 +2372,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1547.014',
     name: 'Active Setup',
     reference: 'https://attack.mitre.org/techniques/T1547/014',
-    tactics: 'persistence,privilege-escalation',
+    tactics: ['persistence', 'privilege-escalation'],
     techniqueId: 'T1547',
     value: 'activeSetup',
   },
@@ -3873,7 +2384,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1137.006',
     name: 'Add-ins',
     reference: 'https://attack.mitre.org/techniques/T1137/006',
-    tactics: 'persistence',
+    tactics: ['persistence'],
     techniqueId: 'T1137',
     value: 'addIns',
   },
@@ -3885,7 +2396,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1098.001',
     name: 'Additional Cloud Credentials',
     reference: 'https://attack.mitre.org/techniques/T1098/001',
-    tactics: 'persistence',
+    tactics: ['persistence'],
     techniqueId: 'T1098',
     value: 'additionalCloudCredentials',
   },
@@ -3897,7 +2408,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1098.003',
     name: 'Additional Cloud Roles',
     reference: 'https://attack.mitre.org/techniques/T1098/003',
-    tactics: 'persistence',
+    tactics: ['persistence'],
     techniqueId: 'T1098',
     value: 'additionalCloudRoles',
   },
@@ -3909,7 +2420,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1098.002',
     name: 'Additional Email Delegate Permissions',
     reference: 'https://attack.mitre.org/techniques/T1098/002',
-    tactics: 'persistence',
+    tactics: ['persistence'],
     techniqueId: 'T1098',
     value: 'additionalEmailDelegatePermissions',
   },
@@ -3921,7 +2432,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1546.009',
     name: 'AppCert DLLs',
     reference: 'https://attack.mitre.org/techniques/T1546/009',
-    tactics: 'privilege-escalation,persistence',
+    tactics: ['privilege-escalation', 'persistence'],
     techniqueId: 'T1546',
     value: 'appCertDlLs',
   },
@@ -3933,7 +2444,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1546.010',
     name: 'AppInit DLLs',
     reference: 'https://attack.mitre.org/techniques/T1546/010',
-    tactics: 'privilege-escalation,persistence',
+    tactics: ['privilege-escalation', 'persistence'],
     techniqueId: 'T1546',
     value: 'appInitDlLs',
   },
@@ -3945,7 +2456,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1059.002',
     name: 'AppleScript',
     reference: 'https://attack.mitre.org/techniques/T1059/002',
-    tactics: 'execution',
+    tactics: ['execution'],
     techniqueId: 'T1059',
     value: 'appleScript',
   },
@@ -3957,7 +2468,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1550.001',
     name: 'Application Access Token',
     reference: 'https://attack.mitre.org/techniques/T1550/001',
-    tactics: 'defense-evasion,lateral-movement',
+    tactics: ['defense-evasion', 'lateral-movement'],
     techniqueId: 'T1550',
     value: 'applicationAccessToken',
   },
@@ -3969,7 +2480,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1499.003',
     name: 'Application Exhaustion Flood',
     reference: 'https://attack.mitre.org/techniques/T1499/003',
-    tactics: 'impact',
+    tactics: ['impact'],
     techniqueId: 'T1499',
     value: 'applicationExhaustionFlood',
   },
@@ -3981,7 +2492,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1546.011',
     name: 'Application Shimming',
     reference: 'https://attack.mitre.org/techniques/T1546/011',
-    tactics: 'privilege-escalation,persistence',
+    tactics: ['privilege-escalation', 'persistence'],
     techniqueId: 'T1546',
     value: 'applicationShimming',
   },
@@ -3993,7 +2504,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1499.004',
     name: 'Application or System Exploitation',
     reference: 'https://attack.mitre.org/techniques/T1499/004',
-    tactics: 'impact',
+    tactics: ['impact'],
     techniqueId: 'T1499',
     value: 'applicationOrSystemExploitation',
   },
@@ -4005,7 +2516,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1560.003',
     name: 'Archive via Custom Method',
     reference: 'https://attack.mitre.org/techniques/T1560/003',
-    tactics: 'collection',
+    tactics: ['collection'],
     techniqueId: 'T1560',
     value: 'archiveViaCustomMethod',
   },
@@ -4017,7 +2528,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1560.002',
     name: 'Archive via Library',
     reference: 'https://attack.mitre.org/techniques/T1560/002',
-    tactics: 'collection',
+    tactics: ['collection'],
     techniqueId: 'T1560',
     value: 'archiveViaLibrary',
   },
@@ -4029,7 +2540,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1560.001',
     name: 'Archive via Utility',
     reference: 'https://attack.mitre.org/techniques/T1560/001',
-    tactics: 'collection',
+    tactics: ['collection'],
     techniqueId: 'T1560',
     value: 'archiveViaUtility',
   },
@@ -4041,7 +2552,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1573.002',
     name: 'Asymmetric Cryptography',
     reference: 'https://attack.mitre.org/techniques/T1573/002',
-    tactics: 'command-and-control',
+    tactics: ['command-and-control'],
     techniqueId: 'T1573',
     value: 'asymmetricCryptography',
   },
@@ -4053,7 +2564,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1055.004',
     name: 'Asynchronous Procedure Call',
     reference: 'https://attack.mitre.org/techniques/T1055/004',
-    tactics: 'defense-evasion,privilege-escalation',
+    tactics: ['defense-evasion', 'privilege-escalation'],
     techniqueId: 'T1055',
     value: 'asynchronousProcedureCall',
   },
@@ -4065,21 +2576,9 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1053.002',
     name: 'At',
     reference: 'https://attack.mitre.org/techniques/T1053/002',
-    tactics: 'execution,persistence,privilege-escalation',
+    tactics: ['execution', 'persistence', 'privilege-escalation'],
     techniqueId: 'T1053',
     value: 'at',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.atLinuxT1053Description',
-      { defaultMessage: 'At (Linux) (T1053.001)' }
-    ),
-    id: 'T1053.001',
-    name: 'At (Linux)',
-    reference: 'https://attack.mitre.org/techniques/T1053/001',
-    tactics: 'execution,persistence,privilege-escalation',
-    techniqueId: 'T1053',
-    value: 'atLinux',
   },
   {
     label: i18n.translate(
@@ -4089,7 +2588,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1547.002',
     name: 'Authentication Package',
     reference: 'https://attack.mitre.org/techniques/T1547/002',
-    tactics: 'persistence,privilege-escalation',
+    tactics: ['persistence', 'privilege-escalation'],
     techniqueId: 'T1547',
     value: 'authenticationPackage',
   },
@@ -4101,7 +2600,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1552.003',
     name: 'Bash History',
     reference: 'https://attack.mitre.org/techniques/T1552/003',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     techniqueId: 'T1552',
     value: 'bashHistory',
   },
@@ -4113,7 +2612,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1102.002',
     name: 'Bidirectional Communication',
     reference: 'https://attack.mitre.org/techniques/T1102/002',
-    tactics: 'command-and-control',
+    tactics: ['command-and-control'],
     techniqueId: 'T1102',
     value: 'bidirectionalCommunication',
   },
@@ -4125,7 +2624,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1027.001',
     name: 'Binary Padding',
     reference: 'https://attack.mitre.org/techniques/T1027/001',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1027',
     value: 'binaryPadding',
   },
@@ -4137,7 +2636,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1542.003',
     name: 'Bootkit',
     reference: 'https://attack.mitre.org/techniques/T1542/003',
-    tactics: 'persistence,defense-evasion',
+    tactics: ['persistence', 'defense-evasion'],
     techniqueId: 'T1542',
     value: 'bootkit',
   },
@@ -4149,7 +2648,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1583.005',
     name: 'Botnet',
     reference: 'https://attack.mitre.org/techniques/T1583/005',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     techniqueId: 'T1583',
     value: 'botnet',
   },
@@ -4161,7 +2660,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1584.005',
     name: 'Botnet',
     reference: 'https://attack.mitre.org/techniques/T1584/005',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     techniqueId: 'T1584',
     value: 'botnet',
   },
@@ -4173,7 +2672,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1591.002',
     name: 'Business Relationships',
     reference: 'https://attack.mitre.org/techniques/T1591/002',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     techniqueId: 'T1591',
     value: 'businessRelationships',
   },
@@ -4185,7 +2684,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1548.002',
     name: 'Bypass User Account Control',
     reference: 'https://attack.mitre.org/techniques/T1548/002',
-    tactics: 'privilege-escalation,defense-evasion',
+    tactics: ['privilege-escalation', 'defense-evasion'],
     techniqueId: 'T1548',
     value: 'bypassUserAccountControl',
   },
@@ -4197,7 +2696,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1596.004',
     name: 'CDNs',
     reference: 'https://attack.mitre.org/techniques/T1596/004',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     techniqueId: 'T1596',
     value: 'cdNs',
   },
@@ -4209,7 +2708,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1218.003',
     name: 'CMSTP',
     reference: 'https://attack.mitre.org/techniques/T1218/003',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1218',
     value: 'cmstp',
   },
@@ -4221,7 +2720,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1574.012',
     name: 'COR_PROFILER',
     reference: 'https://attack.mitre.org/techniques/T1574/012',
-    tactics: 'persistence,privilege-escalation,defense-evasion',
+    tactics: ['persistence', 'privilege-escalation', 'defense-evasion'],
     techniqueId: 'T1574',
     value: 'corProfiler',
   },
@@ -4233,7 +2732,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1003.005',
     name: 'Cached Domain Credentials',
     reference: 'https://attack.mitre.org/techniques/T1003/005',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     techniqueId: 'T1003',
     value: 'cachedDomainCredentials',
   },
@@ -4245,9 +2744,21 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1546.001',
     name: 'Change Default File Association',
     reference: 'https://attack.mitre.org/techniques/T1546/001',
-    tactics: 'privilege-escalation,persistence',
+    tactics: ['privilege-escalation', 'persistence'],
     techniqueId: 'T1546',
     value: 'changeDefaultFileAssociation',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.chatMessagesT1552Description',
+      { defaultMessage: 'Chat Messages (T1552.008)' }
+    ),
+    id: 'T1552.008',
+    name: 'Chat Messages',
+    reference: 'https://attack.mitre.org/techniques/T1552/008',
+    tactics: ['credential-access'],
+    techniqueId: 'T1552',
+    value: 'chatMessages',
   },
   {
     label: i18n.translate(
@@ -4257,7 +2768,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1070.003',
     name: 'Clear Command History',
     reference: 'https://attack.mitre.org/techniques/T1070/003',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1070',
     value: 'clearCommandHistory',
   },
@@ -4269,9 +2780,45 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1070.002',
     name: 'Clear Linux or Mac System Logs',
     reference: 'https://attack.mitre.org/techniques/T1070/002',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1070',
     value: 'clearLinuxOrMacSystemLogs',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.clearMailboxDataT1070Description',
+      { defaultMessage: 'Clear Mailbox Data (T1070.008)' }
+    ),
+    id: 'T1070.008',
+    name: 'Clear Mailbox Data',
+    reference: 'https://attack.mitre.org/techniques/T1070/008',
+    tactics: ['defense-evasion'],
+    techniqueId: 'T1070',
+    value: 'clearMailboxData',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.clearNetworkConnectionHistoryAndConfigurationsT1070Description',
+      { defaultMessage: 'Clear Network Connection History and Configurations (T1070.007)' }
+    ),
+    id: 'T1070.007',
+    name: 'Clear Network Connection History and Configurations',
+    reference: 'https://attack.mitre.org/techniques/T1070/007',
+    tactics: ['defense-evasion'],
+    techniqueId: 'T1070',
+    value: 'clearNetworkConnectionHistoryAndConfigurations',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.clearPersistenceT1070Description',
+      { defaultMessage: 'Clear Persistence (T1070.009)' }
+    ),
+    id: 'T1070.009',
+    name: 'Clear Persistence',
+    reference: 'https://attack.mitre.org/techniques/T1070/009',
+    tactics: ['defense-evasion'],
+    techniqueId: 'T1070',
+    value: 'clearPersistence',
   },
   {
     label: i18n.translate(
@@ -4281,7 +2828,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1070.001',
     name: 'Clear Windows Event Logs',
     reference: 'https://attack.mitre.org/techniques/T1070/001',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1070',
     value: 'clearWindowsEventLogs',
   },
@@ -4293,9 +2840,21 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1592.004',
     name: 'Client Configurations',
     reference: 'https://attack.mitre.org/techniques/T1592/004',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     techniqueId: 'T1592',
     value: 'clientConfigurations',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.cloudApiT1059Description',
+      { defaultMessage: 'Cloud API (T1059.009)' }
+    ),
+    id: 'T1059.009',
+    name: 'Cloud API',
+    reference: 'https://attack.mitre.org/techniques/T1059/009',
+    tactics: ['execution'],
+    techniqueId: 'T1059',
+    value: 'cloudApi',
   },
   {
     label: i18n.translate(
@@ -4305,7 +2864,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1087.004',
     name: 'Cloud Account',
     reference: 'https://attack.mitre.org/techniques/T1087/004',
-    tactics: 'discovery',
+    tactics: ['discovery'],
     techniqueId: 'T1087',
     value: 'cloudAccount',
   },
@@ -4317,9 +2876,33 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1136.003',
     name: 'Cloud Account',
     reference: 'https://attack.mitre.org/techniques/T1136/003',
-    tactics: 'persistence',
+    tactics: ['persistence'],
     techniqueId: 'T1136',
     value: 'cloudAccount',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.cloudAccountsT1586Description',
+      { defaultMessage: 'Cloud Accounts (T1586.003)' }
+    ),
+    id: 'T1586.003',
+    name: 'Cloud Accounts',
+    reference: 'https://attack.mitre.org/techniques/T1586/003',
+    tactics: ['resource-development'],
+    techniqueId: 'T1586',
+    value: 'cloudAccounts',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.cloudAccountsT1585Description',
+      { defaultMessage: 'Cloud Accounts (T1585.003)' }
+    ),
+    id: 'T1585.003',
+    name: 'Cloud Accounts',
+    reference: 'https://attack.mitre.org/techniques/T1585/003',
+    tactics: ['resource-development'],
+    techniqueId: 'T1585',
+    value: 'cloudAccounts',
   },
   {
     label: i18n.translate(
@@ -4329,7 +2912,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1078.004',
     name: 'Cloud Accounts',
     reference: 'https://attack.mitre.org/techniques/T1078/004',
-    tactics: 'defense-evasion,persistence,privilege-escalation,initial-access',
+    tactics: ['defense-evasion', 'persistence', 'privilege-escalation', 'initial-access'],
     techniqueId: 'T1078',
     value: 'cloudAccounts',
   },
@@ -4341,7 +2924,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1069.003',
     name: 'Cloud Groups',
     reference: 'https://attack.mitre.org/techniques/T1069/003',
-    tactics: 'discovery',
+    tactics: ['discovery'],
     techniqueId: 'T1069',
     value: 'cloudGroups',
   },
@@ -4353,9 +2936,33 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1552.005',
     name: 'Cloud Instance Metadata API',
     reference: 'https://attack.mitre.org/techniques/T1552/005',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     techniqueId: 'T1552',
     value: 'cloudInstanceMetadataApi',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.cloudServicesT1021Description',
+      { defaultMessage: 'Cloud Services (T1021.007)' }
+    ),
+    id: 'T1021.007',
+    name: 'Cloud Services',
+    reference: 'https://attack.mitre.org/techniques/T1021/007',
+    tactics: ['lateral-movement'],
+    techniqueId: 'T1021',
+    value: 'cloudServices',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.codeRepositoriesT1593Description',
+      { defaultMessage: 'Code Repositories (T1593.003)' }
+    ),
+    id: 'T1593.003',
+    name: 'Code Repositories',
+    reference: 'https://attack.mitre.org/techniques/T1593/003',
+    tactics: ['reconnaissance'],
+    techniqueId: 'T1593',
+    value: 'codeRepositories',
   },
   {
     label: i18n.translate(
@@ -4365,7 +2972,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1213.003',
     name: 'Code Repositories',
     reference: 'https://attack.mitre.org/techniques/T1213/003',
-    tactics: 'collection',
+    tactics: ['collection'],
     techniqueId: 'T1213',
     value: 'codeRepositories',
   },
@@ -4377,7 +2984,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1553.002',
     name: 'Code Signing',
     reference: 'https://attack.mitre.org/techniques/T1553/002',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1553',
     value: 'codeSigning',
   },
@@ -4389,7 +2996,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1587.002',
     name: 'Code Signing Certificates',
     reference: 'https://attack.mitre.org/techniques/T1587/002',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     techniqueId: 'T1587',
     value: 'codeSigningCertificates',
   },
@@ -4401,7 +3008,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1588.003',
     name: 'Code Signing Certificates',
     reference: 'https://attack.mitre.org/techniques/T1588/003',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     techniqueId: 'T1588',
     value: 'codeSigningCertificates',
   },
@@ -4413,9 +3020,21 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1553.006',
     name: 'Code Signing Policy Modification',
     reference: 'https://attack.mitre.org/techniques/T1553/006',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1553',
     value: 'codeSigningPolicyModification',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.commandObfuscationT1027Description',
+      { defaultMessage: 'Command Obfuscation (T1027.010)' }
+    ),
+    id: 'T1027.010',
+    name: 'Command Obfuscation',
+    reference: 'https://attack.mitre.org/techniques/T1027/010',
+    tactics: ['defense-evasion'],
+    techniqueId: 'T1027',
+    value: 'commandObfuscation',
   },
   {
     label: i18n.translate(
@@ -4425,7 +3044,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1027.004',
     name: 'Compile After Delivery',
     reference: 'https://attack.mitre.org/techniques/T1027/004',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1027',
     value: 'compileAfterDelivery',
   },
@@ -4437,7 +3056,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1218.001',
     name: 'Compiled HTML File',
     reference: 'https://attack.mitre.org/techniques/T1218/001',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1218',
     value: 'compiledHtmlFile',
   },
@@ -4449,7 +3068,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1542.002',
     name: 'Component Firmware',
     reference: 'https://attack.mitre.org/techniques/T1542/002',
-    tactics: 'persistence,defense-evasion',
+    tactics: ['persistence', 'defense-evasion'],
     techniqueId: 'T1542',
     value: 'componentFirmware',
   },
@@ -4461,7 +3080,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1559.001',
     name: 'Component Object Model',
     reference: 'https://attack.mitre.org/techniques/T1559/001',
-    tactics: 'execution',
+    tactics: ['execution'],
     techniqueId: 'T1559',
     value: 'componentObjectModel',
   },
@@ -4473,7 +3092,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1546.015',
     name: 'Component Object Model Hijacking',
     reference: 'https://attack.mitre.org/techniques/T1546/015',
-    tactics: 'privilege-escalation,persistence',
+    tactics: ['privilege-escalation', 'persistence'],
     techniqueId: 'T1546',
     value: 'componentObjectModelHijacking',
   },
@@ -4485,7 +3104,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1195.003',
     name: 'Compromise Hardware Supply Chain',
     reference: 'https://attack.mitre.org/techniques/T1195/003',
-    tactics: 'initial-access',
+    tactics: ['initial-access'],
     techniqueId: 'T1195',
     value: 'compromiseHardwareSupplyChain',
   },
@@ -4497,7 +3116,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1195.001',
     name: 'Compromise Software Dependencies and Development Tools',
     reference: 'https://attack.mitre.org/techniques/T1195/001',
-    tactics: 'initial-access',
+    tactics: ['initial-access'],
     techniqueId: 'T1195',
     value: 'compromiseSoftwareDependenciesAndDevelopmentTools',
   },
@@ -4509,7 +3128,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1195.002',
     name: 'Compromise Software Supply Chain',
     reference: 'https://attack.mitre.org/techniques/T1195/002',
-    tactics: 'initial-access',
+    tactics: ['initial-access'],
     techniqueId: 'T1195',
     value: 'compromiseSoftwareSupplyChain',
   },
@@ -4521,7 +3140,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1213.001',
     name: 'Confluence',
     reference: 'https://attack.mitre.org/techniques/T1213/001',
-    tactics: 'collection',
+    tactics: ['collection'],
     techniqueId: 'T1213',
     value: 'confluence',
   },
@@ -4533,7 +3152,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1552.007',
     name: 'Container API',
     reference: 'https://attack.mitre.org/techniques/T1552/007',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     techniqueId: 'T1552',
     value: 'containerApi',
   },
@@ -4545,7 +3164,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1053.007',
     name: 'Container Orchestration Job',
     reference: 'https://attack.mitre.org/techniques/T1053/007',
-    tactics: 'execution,persistence,privilege-escalation',
+    tactics: ['execution', 'persistence', 'privilege-escalation'],
     techniqueId: 'T1053',
     value: 'containerOrchestrationJob',
   },
@@ -4557,7 +3176,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1218.002',
     name: 'Control Panel',
     reference: 'https://attack.mitre.org/techniques/T1218/002',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1218',
     value: 'controlPanel',
   },
@@ -4569,7 +3188,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1578.002',
     name: 'Create Cloud Instance',
     reference: 'https://attack.mitre.org/techniques/T1578/002',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1578',
     value: 'createCloudInstance',
   },
@@ -4581,7 +3200,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1134.002',
     name: 'Create Process with Token',
     reference: 'https://attack.mitre.org/techniques/T1134/002',
-    tactics: 'defense-evasion,privilege-escalation',
+    tactics: ['defense-evasion', 'privilege-escalation'],
     techniqueId: 'T1134',
     value: 'createProcessWithToken',
   },
@@ -4593,7 +3212,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1578.001',
     name: 'Create Snapshot',
     reference: 'https://attack.mitre.org/techniques/T1578/001',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1578',
     value: 'createSnapshot',
   },
@@ -4605,7 +3224,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1056.004',
     name: 'Credential API Hooking',
     reference: 'https://attack.mitre.org/techniques/T1056/004',
-    tactics: 'collection,credential-access',
+    tactics: ['collection', 'credential-access'],
     techniqueId: 'T1056',
     value: 'credentialApiHooking',
   },
@@ -4617,7 +3236,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1110.004',
     name: 'Credential Stuffing',
     reference: 'https://attack.mitre.org/techniques/T1110/004',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     techniqueId: 'T1110',
     value: 'credentialStuffing',
   },
@@ -4629,7 +3248,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1589.001',
     name: 'Credentials',
     reference: 'https://attack.mitre.org/techniques/T1589/001',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     techniqueId: 'T1589',
     value: 'credentials',
   },
@@ -4641,7 +3260,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1552.001',
     name: 'Credentials In Files',
     reference: 'https://attack.mitre.org/techniques/T1552/001',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     techniqueId: 'T1552',
     value: 'credentialsInFiles',
   },
@@ -4653,7 +3272,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1555.003',
     name: 'Credentials from Web Browsers',
     reference: 'https://attack.mitre.org/techniques/T1555/003',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     techniqueId: 'T1555',
     value: 'credentialsFromWebBrowsers',
   },
@@ -4665,7 +3284,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1552.002',
     name: 'Credentials in Registry',
     reference: 'https://attack.mitre.org/techniques/T1552/002',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     techniqueId: 'T1552',
     value: 'credentialsInRegistry',
   },
@@ -4677,7 +3296,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1053.003',
     name: 'Cron',
     reference: 'https://attack.mitre.org/techniques/T1053/003',
-    tactics: 'execution,persistence,privilege-escalation',
+    tactics: ['execution', 'persistence', 'privilege-escalation'],
     techniqueId: 'T1053',
     value: 'cron',
   },
@@ -4689,7 +3308,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1003.006',
     name: 'DCSync',
     reference: 'https://attack.mitre.org/techniques/T1003/006',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     techniqueId: 'T1003',
     value: 'dcSync',
   },
@@ -4701,7 +3320,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1557.003',
     name: 'DHCP Spoofing',
     reference: 'https://attack.mitre.org/techniques/T1557/003',
-    tactics: 'credential-access,collection',
+    tactics: ['credential-access', 'collection'],
     techniqueId: 'T1557',
     value: 'dhcpSpoofing',
   },
@@ -4713,7 +3332,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1574.001',
     name: 'DLL Search Order Hijacking',
     reference: 'https://attack.mitre.org/techniques/T1574/001',
-    tactics: 'persistence,privilege-escalation,defense-evasion',
+    tactics: ['persistence', 'privilege-escalation', 'defense-evasion'],
     techniqueId: 'T1574',
     value: 'dllSearchOrderHijacking',
   },
@@ -4725,7 +3344,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1574.002',
     name: 'DLL Side-Loading',
     reference: 'https://attack.mitre.org/techniques/T1574/002',
-    tactics: 'persistence,privilege-escalation,defense-evasion',
+    tactics: ['persistence', 'privilege-escalation', 'defense-evasion'],
     techniqueId: 'T1574',
     value: 'dllSideLoading',
   },
@@ -4737,7 +3356,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1590.002',
     name: 'DNS',
     reference: 'https://attack.mitre.org/techniques/T1590/002',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     techniqueId: 'T1590',
     value: 'dns',
   },
@@ -4749,7 +3368,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1071.004',
     name: 'DNS',
     reference: 'https://attack.mitre.org/techniques/T1071/004',
-    tactics: 'command-and-control',
+    tactics: ['command-and-control'],
     techniqueId: 'T1071',
     value: 'dns',
   },
@@ -4761,7 +3380,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1568.003',
     name: 'DNS Calculation',
     reference: 'https://attack.mitre.org/techniques/T1568/003',
-    tactics: 'command-and-control',
+    tactics: ['command-and-control'],
     techniqueId: 'T1568',
     value: 'dnsCalculation',
   },
@@ -4773,7 +3392,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1583.002',
     name: 'DNS Server',
     reference: 'https://attack.mitre.org/techniques/T1583/002',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     techniqueId: 'T1583',
     value: 'dnsServer',
   },
@@ -4785,7 +3404,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1584.002',
     name: 'DNS Server',
     reference: 'https://attack.mitre.org/techniques/T1584/002',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     techniqueId: 'T1584',
     value: 'dnsServer',
   },
@@ -4797,7 +3416,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1596.001',
     name: 'DNS/Passive DNS',
     reference: 'https://attack.mitre.org/techniques/T1596/001',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     techniqueId: 'T1596',
     value: 'dnsPassiveDns',
   },
@@ -4809,7 +3428,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1102.001',
     name: 'Dead Drop Resolver',
     reference: 'https://attack.mitre.org/techniques/T1102/001',
-    tactics: 'command-and-control',
+    tactics: ['command-and-control'],
     techniqueId: 'T1102',
     value: 'deadDropResolver',
   },
@@ -4821,7 +3440,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1078.001',
     name: 'Default Accounts',
     reference: 'https://attack.mitre.org/techniques/T1078/001',
-    tactics: 'defense-evasion,persistence,privilege-escalation,initial-access',
+    tactics: ['defense-evasion', 'persistence', 'privilege-escalation', 'initial-access'],
     techniqueId: 'T1078',
     value: 'defaultAccounts',
   },
@@ -4833,7 +3452,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1578.003',
     name: 'Delete Cloud Instance',
     reference: 'https://attack.mitre.org/techniques/T1578/003',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1578',
     value: 'deleteCloudInstance',
   },
@@ -4845,7 +3464,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1591.001',
     name: 'Determine Physical Locations',
     reference: 'https://attack.mitre.org/techniques/T1591/001',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     techniqueId: 'T1591',
     value: 'determinePhysicalLocations',
   },
@@ -4857,7 +3476,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1098.005',
     name: 'Device Registration',
     reference: 'https://attack.mitre.org/techniques/T1098/005',
-    tactics: 'persistence',
+    tactics: ['persistence'],
     techniqueId: 'T1098',
     value: 'deviceRegistration',
   },
@@ -4869,7 +3488,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1596.003',
     name: 'Digital Certificates',
     reference: 'https://attack.mitre.org/techniques/T1596/003',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     techniqueId: 'T1596',
     value: 'digitalCertificates',
   },
@@ -4881,7 +3500,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1588.004',
     name: 'Digital Certificates',
     reference: 'https://attack.mitre.org/techniques/T1588/004',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     techniqueId: 'T1588',
     value: 'digitalCertificates',
   },
@@ -4893,7 +3512,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1587.003',
     name: 'Digital Certificates',
     reference: 'https://attack.mitre.org/techniques/T1587/003',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     techniqueId: 'T1587',
     value: 'digitalCertificates',
   },
@@ -4905,7 +3524,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1498.001',
     name: 'Direct Network Flood',
     reference: 'https://attack.mitre.org/techniques/T1498/001',
-    tactics: 'impact',
+    tactics: ['impact'],
     techniqueId: 'T1498',
     value: 'directNetworkFlood',
   },
@@ -4917,7 +3536,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1562.008',
     name: 'Disable Cloud Logs',
     reference: 'https://attack.mitre.org/techniques/T1562/008',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1562',
     value: 'disableCloudLogs',
   },
@@ -4929,7 +3548,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1600.002',
     name: 'Disable Crypto Hardware',
     reference: 'https://attack.mitre.org/techniques/T1600/002',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1600',
     value: 'disableCryptoHardware',
   },
@@ -4941,7 +3560,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1562.002',
     name: 'Disable Windows Event Logging',
     reference: 'https://attack.mitre.org/techniques/T1562/002',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1562',
     value: 'disableWindowsEventLogging',
   },
@@ -4953,7 +3572,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1562.007',
     name: 'Disable or Modify Cloud Firewall',
     reference: 'https://attack.mitre.org/techniques/T1562/007',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1562',
     value: 'disableOrModifyCloudFirewall',
   },
@@ -4965,7 +3584,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1562.004',
     name: 'Disable or Modify System Firewall',
     reference: 'https://attack.mitre.org/techniques/T1562/004',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1562',
     value: 'disableOrModifySystemFirewall',
   },
@@ -4977,7 +3596,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1562.001',
     name: 'Disable or Modify Tools',
     reference: 'https://attack.mitre.org/techniques/T1562/001',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1562',
     value: 'disableOrModifyTools',
   },
@@ -4989,7 +3608,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1561.001',
     name: 'Disk Content Wipe',
     reference: 'https://attack.mitre.org/techniques/T1561/001',
-    tactics: 'impact',
+    tactics: ['impact'],
     techniqueId: 'T1561',
     value: 'diskContentWipe',
   },
@@ -5001,7 +3620,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1561.002',
     name: 'Disk Structure Wipe',
     reference: 'https://attack.mitre.org/techniques/T1561/002',
-    tactics: 'impact',
+    tactics: ['impact'],
     techniqueId: 'T1561',
     value: 'diskStructureWipe',
   },
@@ -5013,7 +3632,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1021.003',
     name: 'Distributed Component Object Model',
     reference: 'https://attack.mitre.org/techniques/T1021/003',
-    tactics: 'lateral-movement',
+    tactics: ['lateral-movement'],
     techniqueId: 'T1021',
     value: 'distributedComponentObjectModel',
   },
@@ -5025,7 +3644,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1087.002',
     name: 'Domain Account',
     reference: 'https://attack.mitre.org/techniques/T1087/002',
-    tactics: 'discovery',
+    tactics: ['discovery'],
     techniqueId: 'T1087',
     value: 'domainAccount',
   },
@@ -5037,7 +3656,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1136.002',
     name: 'Domain Account',
     reference: 'https://attack.mitre.org/techniques/T1136/002',
-    tactics: 'persistence',
+    tactics: ['persistence'],
     techniqueId: 'T1136',
     value: 'domainAccount',
   },
@@ -5049,7 +3668,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1078.002',
     name: 'Domain Accounts',
     reference: 'https://attack.mitre.org/techniques/T1078/002',
-    tactics: 'defense-evasion,persistence,privilege-escalation,initial-access',
+    tactics: ['defense-evasion', 'persistence', 'privilege-escalation', 'initial-access'],
     techniqueId: 'T1078',
     value: 'domainAccounts',
   },
@@ -5061,7 +3680,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1556.001',
     name: 'Domain Controller Authentication',
     reference: 'https://attack.mitre.org/techniques/T1556/001',
-    tactics: 'credential-access,defense-evasion,persistence',
+    tactics: ['credential-access', 'defense-evasion', 'persistence'],
     techniqueId: 'T1556',
     value: 'domainControllerAuthentication',
   },
@@ -5073,7 +3692,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1090.004',
     name: 'Domain Fronting',
     reference: 'https://attack.mitre.org/techniques/T1090/004',
-    tactics: 'command-and-control',
+    tactics: ['command-and-control'],
     techniqueId: 'T1090',
     value: 'domainFronting',
   },
@@ -5085,7 +3704,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1568.002',
     name: 'Domain Generation Algorithms',
     reference: 'https://attack.mitre.org/techniques/T1568/002',
-    tactics: 'command-and-control',
+    tactics: ['command-and-control'],
     techniqueId: 'T1568',
     value: 'domainGenerationAlgorithms',
   },
@@ -5097,7 +3716,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1069.002',
     name: 'Domain Groups',
     reference: 'https://attack.mitre.org/techniques/T1069/002',
-    tactics: 'discovery',
+    tactics: ['discovery'],
     techniqueId: 'T1069',
     value: 'domainGroups',
   },
@@ -5109,7 +3728,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1590.001',
     name: 'Domain Properties',
     reference: 'https://attack.mitre.org/techniques/T1590/001',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     techniqueId: 'T1590',
     value: 'domainProperties',
   },
@@ -5121,7 +3740,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1484.002',
     name: 'Domain Trust Modification',
     reference: 'https://attack.mitre.org/techniques/T1484/002',
-    tactics: 'defense-evasion,privilege-escalation',
+    tactics: ['defense-evasion', 'privilege-escalation'],
     techniqueId: 'T1484',
     value: 'domainTrustModification',
   },
@@ -5133,7 +3752,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1583.001',
     name: 'Domains',
     reference: 'https://attack.mitre.org/techniques/T1583/001',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     techniqueId: 'T1583',
     value: 'domains',
   },
@@ -5145,7 +3764,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1584.001',
     name: 'Domains',
     reference: 'https://attack.mitre.org/techniques/T1584/001',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     techniqueId: 'T1584',
     value: 'domains',
   },
@@ -5157,7 +3776,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1036.007',
     name: 'Double File Extension',
     reference: 'https://attack.mitre.org/techniques/T1036/007',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1036',
     value: 'doubleFileExtension',
   },
@@ -5169,7 +3788,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1562.010',
     name: 'Downgrade Attack',
     reference: 'https://attack.mitre.org/techniques/T1562/010',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1562',
     value: 'downgradeAttack',
   },
@@ -5181,7 +3800,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1601.002',
     name: 'Downgrade System Image',
     reference: 'https://attack.mitre.org/techniques/T1601/002',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1601',
     value: 'downgradeSystemImage',
   },
@@ -5193,7 +3812,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1608.004',
     name: 'Drive-by Target',
     reference: 'https://attack.mitre.org/techniques/T1608/004',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     techniqueId: 'T1608',
     value: 'driveByTarget',
   },
@@ -5205,9 +3824,21 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1574.004',
     name: 'Dylib Hijacking',
     reference: 'https://attack.mitre.org/techniques/T1574/004',
-    tactics: 'persistence,privilege-escalation,defense-evasion',
+    tactics: ['persistence', 'privilege-escalation', 'defense-evasion'],
     techniqueId: 'T1574',
     value: 'dylibHijacking',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.dynamicApiResolutionT1027Description',
+      { defaultMessage: 'Dynamic API Resolution (T1027.007)' }
+    ),
+    id: 'T1027.007',
+    name: 'Dynamic API Resolution',
+    reference: 'https://attack.mitre.org/techniques/T1027/007',
+    tactics: ['defense-evasion'],
+    techniqueId: 'T1027',
+    value: 'dynamicApiResolution',
   },
   {
     label: i18n.translate(
@@ -5217,7 +3848,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1559.002',
     name: 'Dynamic Data Exchange',
     reference: 'https://attack.mitre.org/techniques/T1559/002',
-    tactics: 'execution',
+    tactics: ['execution'],
     techniqueId: 'T1559',
     value: 'dynamicDataExchange',
   },
@@ -5229,7 +3860,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1574.006',
     name: 'Dynamic Linker Hijacking',
     reference: 'https://attack.mitre.org/techniques/T1574/006',
-    tactics: 'persistence,privilege-escalation,defense-evasion',
+    tactics: ['persistence', 'privilege-escalation', 'defense-evasion'],
     techniqueId: 'T1574',
     value: 'dynamicLinkerHijacking',
   },
@@ -5241,7 +3872,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1055.001',
     name: 'Dynamic-link Library Injection',
     reference: 'https://attack.mitre.org/techniques/T1055/001',
-    tactics: 'defense-evasion,privilege-escalation',
+    tactics: ['defense-evasion', 'privilege-escalation'],
     techniqueId: 'T1055',
     value: 'dynamicLinkLibraryInjection',
   },
@@ -5253,7 +3884,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1548.004',
     name: 'Elevated Execution with Prompt',
     reference: 'https://attack.mitre.org/techniques/T1548/004',
-    tactics: 'privilege-escalation,defense-evasion',
+    tactics: ['privilege-escalation', 'defense-evasion'],
     techniqueId: 'T1548',
     value: 'elevatedExecutionWithPrompt',
   },
@@ -5265,7 +3896,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1087.003',
     name: 'Email Account',
     reference: 'https://attack.mitre.org/techniques/T1087/003',
-    tactics: 'discovery',
+    tactics: ['discovery'],
     techniqueId: 'T1087',
     value: 'emailAccount',
   },
@@ -5277,7 +3908,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1586.002',
     name: 'Email Accounts',
     reference: 'https://attack.mitre.org/techniques/T1586/002',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     techniqueId: 'T1586',
     value: 'emailAccounts',
   },
@@ -5289,7 +3920,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1585.002',
     name: 'Email Accounts',
     reference: 'https://attack.mitre.org/techniques/T1585/002',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     techniqueId: 'T1585',
     value: 'emailAccounts',
   },
@@ -5301,7 +3932,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1589.002',
     name: 'Email Addresses',
     reference: 'https://attack.mitre.org/techniques/T1589/002',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     techniqueId: 'T1589',
     value: 'emailAddresses',
   },
@@ -5313,7 +3944,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1114.003',
     name: 'Email Forwarding Rule',
     reference: 'https://attack.mitre.org/techniques/T1114/003',
-    tactics: 'collection',
+    tactics: ['collection'],
     techniqueId: 'T1114',
     value: 'emailForwardingRule',
   },
@@ -5325,9 +3956,21 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1564.008',
     name: 'Email Hiding Rules',
     reference: 'https://attack.mitre.org/techniques/T1564/008',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1564',
     value: 'emailHidingRules',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.embeddedPayloadsT1027Description',
+      { defaultMessage: 'Embedded Payloads (T1027.009)' }
+    ),
+    id: 'T1027.009',
+    name: 'Embedded Payloads',
+    reference: 'https://attack.mitre.org/techniques/T1027/009',
+    tactics: ['defense-evasion'],
+    techniqueId: 'T1027',
+    value: 'embeddedPayloads',
   },
   {
     label: i18n.translate(
@@ -5337,7 +3980,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1546.014',
     name: 'Emond',
     reference: 'https://attack.mitre.org/techniques/T1546/014',
-    tactics: 'privilege-escalation,persistence',
+    tactics: ['privilege-escalation', 'persistence'],
     techniqueId: 'T1546',
     value: 'emond',
   },
@@ -5349,7 +3992,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1589.003',
     name: 'Employee Names',
     reference: 'https://attack.mitre.org/techniques/T1589/003',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     techniqueId: 'T1589',
     value: 'employeeNames',
   },
@@ -5361,7 +4004,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1480.001',
     name: 'Environmental Keying',
     reference: 'https://attack.mitre.org/techniques/T1480/001',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1480',
     value: 'environmentalKeying',
   },
@@ -5373,7 +4016,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1574.005',
     name: 'Executable Installer File Permissions Weakness',
     reference: 'https://attack.mitre.org/techniques/T1574/005',
-    tactics: 'persistence,privilege-escalation,defense-evasion',
+    tactics: ['persistence', 'privilege-escalation', 'defense-evasion'],
     techniqueId: 'T1574',
     value: 'executableInstallerFilePermissionsWeakness',
   },
@@ -5385,7 +4028,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1048.002',
     name: 'Exfiltration Over Asymmetric Encrypted Non-C2 Protocol',
     reference: 'https://attack.mitre.org/techniques/T1048/002',
-    tactics: 'exfiltration',
+    tactics: ['exfiltration'],
     techniqueId: 'T1048',
     value: 'exfiltrationOverAsymmetricEncryptedNonC2Protocol',
   },
@@ -5397,7 +4040,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1011.001',
     name: 'Exfiltration Over Bluetooth',
     reference: 'https://attack.mitre.org/techniques/T1011/001',
-    tactics: 'exfiltration',
+    tactics: ['exfiltration'],
     techniqueId: 'T1011',
     value: 'exfiltrationOverBluetooth',
   },
@@ -5409,7 +4052,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1048.001',
     name: 'Exfiltration Over Symmetric Encrypted Non-C2 Protocol',
     reference: 'https://attack.mitre.org/techniques/T1048/001',
-    tactics: 'exfiltration',
+    tactics: ['exfiltration'],
     techniqueId: 'T1048',
     value: 'exfiltrationOverSymmetricEncryptedNonC2Protocol',
   },
@@ -5421,7 +4064,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1048.003',
     name: 'Exfiltration Over Unencrypted Non-C2 Protocol',
     reference: 'https://attack.mitre.org/techniques/T1048/003',
-    tactics: 'exfiltration',
+    tactics: ['exfiltration'],
     techniqueId: 'T1048',
     value: 'exfiltrationOverUnencryptedNonC2Protocol',
   },
@@ -5433,7 +4076,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1052.001',
     name: 'Exfiltration over USB',
     reference: 'https://attack.mitre.org/techniques/T1052/001',
-    tactics: 'exfiltration',
+    tactics: ['exfiltration'],
     techniqueId: 'T1052',
     value: 'exfiltrationOverUsb',
   },
@@ -5445,7 +4088,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1567.002',
     name: 'Exfiltration to Cloud Storage',
     reference: 'https://attack.mitre.org/techniques/T1567/002',
-    tactics: 'exfiltration',
+    tactics: ['exfiltration'],
     techniqueId: 'T1567',
     value: 'exfiltrationToCloudStorage',
   },
@@ -5457,9 +4100,21 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1567.001',
     name: 'Exfiltration to Code Repository',
     reference: 'https://attack.mitre.org/techniques/T1567/001',
-    tactics: 'exfiltration',
+    tactics: ['exfiltration'],
     techniqueId: 'T1567',
     value: 'exfiltrationToCodeRepository',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.exfiltrationToTextStorageSitesT1567Description',
+      { defaultMessage: 'Exfiltration to Text Storage Sites (T1567.003)' }
+    ),
+    id: 'T1567.003',
+    name: 'Exfiltration to Text Storage Sites',
+    reference: 'https://attack.mitre.org/techniques/T1567/003',
+    tactics: ['exfiltration'],
+    techniqueId: 'T1567',
+    value: 'exfiltrationToTextStorageSites',
   },
   {
     label: i18n.translate(
@@ -5469,7 +4124,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1587.004',
     name: 'Exploits',
     reference: 'https://attack.mitre.org/techniques/T1587/004',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     techniqueId: 'T1587',
     value: 'exploits',
   },
@@ -5481,7 +4136,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1588.005',
     name: 'Exploits',
     reference: 'https://attack.mitre.org/techniques/T1588/005',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     techniqueId: 'T1588',
     value: 'exploits',
   },
@@ -5493,7 +4148,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1491.002',
     name: 'External Defacement',
     reference: 'https://attack.mitre.org/techniques/T1491/002',
-    tactics: 'impact',
+    tactics: ['impact'],
     techniqueId: 'T1491',
     value: 'externalDefacement',
   },
@@ -5505,7 +4160,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1090.002',
     name: 'External Proxy',
     reference: 'https://attack.mitre.org/techniques/T1090/002',
-    tactics: 'command-and-control',
+    tactics: ['command-and-control'],
     techniqueId: 'T1090',
     value: 'externalProxy',
   },
@@ -5517,7 +4172,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1055.011',
     name: 'Extra Window Memory Injection',
     reference: 'https://attack.mitre.org/techniques/T1055/011',
-    tactics: 'defense-evasion,privilege-escalation',
+    tactics: ['defense-evasion', 'privilege-escalation'],
     techniqueId: 'T1055',
     value: 'extraWindowMemoryInjection',
   },
@@ -5529,7 +4184,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1568.001',
     name: 'Fast Flux DNS',
     reference: 'https://attack.mitre.org/techniques/T1568/001',
-    tactics: 'command-and-control',
+    tactics: ['command-and-control'],
     techniqueId: 'T1568',
     value: 'fastFluxDns',
   },
@@ -5541,7 +4196,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1070.004',
     name: 'File Deletion',
     reference: 'https://attack.mitre.org/techniques/T1070/004',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1070',
     value: 'fileDeletion',
   },
@@ -5553,9 +4208,21 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1071.002',
     name: 'File Transfer Protocols',
     reference: 'https://attack.mitre.org/techniques/T1071/002',
-    tactics: 'command-and-control',
+    tactics: ['command-and-control'],
     techniqueId: 'T1071',
     value: 'fileTransferProtocols',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.filelessStorageT1027Description',
+      { defaultMessage: 'Fileless Storage (T1027.011)' }
+    ),
+    id: 'T1027.011',
+    name: 'Fileless Storage',
+    reference: 'https://attack.mitre.org/techniques/T1027/011',
+    tactics: ['defense-evasion'],
+    techniqueId: 'T1027',
+    value: 'filelessStorage',
   },
   {
     label: i18n.translate(
@@ -5565,7 +4232,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1592.003',
     name: 'Firmware',
     reference: 'https://attack.mitre.org/techniques/T1592/003',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     techniqueId: 'T1592',
     value: 'firmware',
   },
@@ -5577,7 +4244,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1056.002',
     name: 'GUI Input Capture',
     reference: 'https://attack.mitre.org/techniques/T1056/002',
-    tactics: 'collection,credential-access',
+    tactics: ['collection', 'credential-access'],
     techniqueId: 'T1056',
     value: 'guiInputCapture',
   },
@@ -5589,7 +4256,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1553.001',
     name: 'Gatekeeper Bypass',
     reference: 'https://attack.mitre.org/techniques/T1553/001',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1553',
     value: 'gatekeeperBypass',
   },
@@ -5601,7 +4268,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1558.001',
     name: 'Golden Ticket',
     reference: 'https://attack.mitre.org/techniques/T1558/001',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     techniqueId: 'T1558',
     value: 'goldenTicket',
   },
@@ -5613,7 +4280,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1484.001',
     name: 'Group Policy Modification',
     reference: 'https://attack.mitre.org/techniques/T1484/001',
-    tactics: 'defense-evasion,privilege-escalation',
+    tactics: ['defense-evasion', 'privilege-escalation'],
     techniqueId: 'T1484',
     value: 'groupPolicyModification',
   },
@@ -5625,7 +4292,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1552.006',
     name: 'Group Policy Preferences',
     reference: 'https://attack.mitre.org/techniques/T1552/006',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     techniqueId: 'T1552',
     value: 'groupPolicyPreferences',
   },
@@ -5637,7 +4304,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1027.006',
     name: 'HTML Smuggling',
     reference: 'https://attack.mitre.org/techniques/T1027/006',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1027',
     value: 'htmlSmuggling',
   },
@@ -5649,7 +4316,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1592.001',
     name: 'Hardware',
     reference: 'https://attack.mitre.org/techniques/T1592/001',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     techniqueId: 'T1592',
     value: 'hardware',
   },
@@ -5661,7 +4328,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1564.005',
     name: 'Hidden File System',
     reference: 'https://attack.mitre.org/techniques/T1564/005',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1564',
     value: 'hiddenFileSystem',
   },
@@ -5673,7 +4340,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1564.001',
     name: 'Hidden Files and Directories',
     reference: 'https://attack.mitre.org/techniques/T1564/001',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1564',
     value: 'hiddenFilesAndDirectories',
   },
@@ -5685,7 +4352,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1564.002',
     name: 'Hidden Users',
     reference: 'https://attack.mitre.org/techniques/T1564/002',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1564',
     value: 'hiddenUsers',
   },
@@ -5697,9 +4364,21 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1564.003',
     name: 'Hidden Window',
     reference: 'https://attack.mitre.org/techniques/T1564/003',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1564',
     value: 'hiddenWindow',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.hybridIdentityT1556Description',
+      { defaultMessage: 'Hybrid Identity (T1556.007)' }
+    ),
+    id: 'T1556.007',
+    name: 'Hybrid Identity',
+    reference: 'https://attack.mitre.org/techniques/T1556/007',
+    tactics: ['credential-access', 'defense-evasion', 'persistence'],
+    techniqueId: 'T1556',
+    value: 'hybridIdentity',
   },
   {
     label: i18n.translate(
@@ -5709,7 +4388,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1505.004',
     name: 'IIS Components',
     reference: 'https://attack.mitre.org/techniques/T1505/004',
-    tactics: 'persistence',
+    tactics: ['persistence'],
     techniqueId: 'T1505',
     value: 'iisComponents',
   },
@@ -5721,7 +4400,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1590.005',
     name: 'IP Addresses',
     reference: 'https://attack.mitre.org/techniques/T1590/005',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     techniqueId: 'T1590',
     value: 'ipAddresses',
   },
@@ -5733,7 +4412,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1591.003',
     name: 'Identify Business Tempo',
     reference: 'https://attack.mitre.org/techniques/T1591/003',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     techniqueId: 'T1591',
     value: 'identifyBusinessTempo',
   },
@@ -5745,7 +4424,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1591.004',
     name: 'Identify Roles',
     reference: 'https://attack.mitre.org/techniques/T1591/004',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     techniqueId: 'T1591',
     value: 'identifyRoles',
   },
@@ -5757,7 +4436,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1546.012',
     name: 'Image File Execution Options Injection',
     reference: 'https://attack.mitre.org/techniques/T1546/012',
-    tactics: 'privilege-escalation,persistence',
+    tactics: ['privilege-escalation', 'persistence'],
     techniqueId: 'T1546',
     value: 'imageFileExecutionOptionsInjection',
   },
@@ -5769,7 +4448,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1562.003',
     name: 'Impair Command History Logging',
     reference: 'https://attack.mitre.org/techniques/T1562/003',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1562',
     value: 'impairCommandHistoryLogging',
   },
@@ -5781,7 +4460,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1562.006',
     name: 'Indicator Blocking',
     reference: 'https://attack.mitre.org/techniques/T1562/006',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1562',
     value: 'indicatorBlocking',
   },
@@ -5793,7 +4472,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1027.005',
     name: 'Indicator Removal from Tools',
     reference: 'https://attack.mitre.org/techniques/T1027/005',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1027',
     value: 'indicatorRemovalFromTools',
   },
@@ -5805,7 +4484,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1608.003',
     name: 'Install Digital Certificate',
     reference: 'https://attack.mitre.org/techniques/T1608/003',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     techniqueId: 'T1608',
     value: 'installDigitalCertificate',
   },
@@ -5817,7 +4496,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1553.004',
     name: 'Install Root Certificate',
     reference: 'https://attack.mitre.org/techniques/T1553/004',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1553',
     value: 'installRootCertificate',
   },
@@ -5829,9 +4508,21 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1218.004',
     name: 'InstallUtil',
     reference: 'https://attack.mitre.org/techniques/T1218/004',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1218',
     value: 'installUtil',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.installerPackagesT1546Description',
+      { defaultMessage: 'Installer Packages (T1546.016)' }
+    ),
+    id: 'T1546.016',
+    name: 'Installer Packages',
+    reference: 'https://attack.mitre.org/techniques/T1546/016',
+    tactics: ['privilege-escalation', 'persistence'],
+    techniqueId: 'T1546',
+    value: 'installerPackages',
   },
   {
     label: i18n.translate(
@@ -5841,7 +4532,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1491.001',
     name: 'Internal Defacement',
     reference: 'https://attack.mitre.org/techniques/T1491/001',
-    tactics: 'impact',
+    tactics: ['impact'],
     techniqueId: 'T1491',
     value: 'internalDefacement',
   },
@@ -5853,7 +4544,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1090.001',
     name: 'Internal Proxy',
     reference: 'https://attack.mitre.org/techniques/T1090/001',
-    tactics: 'command-and-control',
+    tactics: ['command-and-control'],
     techniqueId: 'T1090',
     value: 'internalProxy',
   },
@@ -5865,7 +4556,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1016.001',
     name: 'Internet Connection Discovery',
     reference: 'https://attack.mitre.org/techniques/T1016/001',
-    tactics: 'discovery',
+    tactics: ['discovery'],
     techniqueId: 'T1016',
     value: 'internetConnectionDiscovery',
   },
@@ -5877,7 +4568,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1036.001',
     name: 'Invalid Code Signature',
     reference: 'https://attack.mitre.org/techniques/T1036/001',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1036',
     value: 'invalidCodeSignature',
   },
@@ -5889,7 +4580,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1059.007',
     name: 'JavaScript',
     reference: 'https://attack.mitre.org/techniques/T1059/007',
-    tactics: 'execution',
+    tactics: ['execution'],
     techniqueId: 'T1059',
     value: 'javaScript',
   },
@@ -5901,7 +4592,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1001.001',
     name: 'Junk Data',
     reference: 'https://attack.mitre.org/techniques/T1001/001',
-    tactics: 'command-and-control',
+    tactics: ['command-and-control'],
     techniqueId: 'T1001',
     value: 'junkData',
   },
@@ -5913,7 +4604,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1558.003',
     name: 'Kerberoasting',
     reference: 'https://attack.mitre.org/techniques/T1558/003',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     techniqueId: 'T1558',
     value: 'kerberoasting',
   },
@@ -5925,7 +4616,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1547.006',
     name: 'Kernel Modules and Extensions',
     reference: 'https://attack.mitre.org/techniques/T1547/006',
-    tactics: 'persistence,privilege-escalation',
+    tactics: ['persistence', 'privilege-escalation'],
     techniqueId: 'T1547',
     value: 'kernelModulesAndExtensions',
   },
@@ -5937,7 +4628,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1574.013',
     name: 'KernelCallbackTable',
     reference: 'https://attack.mitre.org/techniques/T1574/013',
-    tactics: 'persistence,privilege-escalation,defense-evasion',
+    tactics: ['persistence', 'privilege-escalation', 'defense-evasion'],
     techniqueId: 'T1574',
     value: 'kernelCallbackTable',
   },
@@ -5949,7 +4640,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1555.001',
     name: 'Keychain',
     reference: 'https://attack.mitre.org/techniques/T1555/001',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     techniqueId: 'T1555',
     value: 'keychain',
   },
@@ -5961,7 +4652,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1056.001',
     name: 'Keylogging',
     reference: 'https://attack.mitre.org/techniques/T1056/001',
-    tactics: 'collection,credential-access',
+    tactics: ['collection', 'credential-access'],
     techniqueId: 'T1056',
     value: 'keylogging',
   },
@@ -5973,7 +4664,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1546.006',
     name: 'LC_LOAD_DYLIB Addition',
     reference: 'https://attack.mitre.org/techniques/T1546/006',
-    tactics: 'privilege-escalation,persistence',
+    tactics: ['privilege-escalation', 'persistence'],
     techniqueId: 'T1546',
     value: 'lcLoadDylibAddition',
   },
@@ -5985,7 +4676,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1557.001',
     name: 'LLMNR/NBT-NS Poisoning and SMB Relay',
     reference: 'https://attack.mitre.org/techniques/T1557/001',
-    tactics: 'credential-access,collection',
+    tactics: ['credential-access', 'collection'],
     techniqueId: 'T1557',
     value: 'llmnrNbtNsPoisoningAndSmbRelay',
   },
@@ -5997,7 +4688,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1003.004',
     name: 'LSA Secrets',
     reference: 'https://attack.mitre.org/techniques/T1003/004',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     techniqueId: 'T1003',
     value: 'lsaSecrets',
   },
@@ -6009,7 +4700,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1547.008',
     name: 'LSASS Driver',
     reference: 'https://attack.mitre.org/techniques/T1547/008',
-    tactics: 'persistence,privilege-escalation',
+    tactics: ['persistence', 'privilege-escalation'],
     techniqueId: 'T1547',
     value: 'lsassDriver',
   },
@@ -6021,7 +4712,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1003.001',
     name: 'LSASS Memory',
     reference: 'https://attack.mitre.org/techniques/T1003/001',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     techniqueId: 'T1003',
     value: 'lsassMemory',
   },
@@ -6033,7 +4724,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1543.001',
     name: 'Launch Agent',
     reference: 'https://attack.mitre.org/techniques/T1543/001',
-    tactics: 'persistence,privilege-escalation',
+    tactics: ['persistence', 'privilege-escalation'],
     techniqueId: 'T1543',
     value: 'launchAgent',
   },
@@ -6045,7 +4736,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1543.004',
     name: 'Launch Daemon',
     reference: 'https://attack.mitre.org/techniques/T1543/004',
-    tactics: 'persistence,privilege-escalation',
+    tactics: ['persistence', 'privilege-escalation'],
     techniqueId: 'T1543',
     value: 'launchDaemon',
   },
@@ -6057,21 +4748,9 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1569.001',
     name: 'Launchctl',
     reference: 'https://attack.mitre.org/techniques/T1569/001',
-    tactics: 'execution',
+    tactics: ['execution'],
     techniqueId: 'T1569',
     value: 'launchctl',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.launchdT1053Description',
-      { defaultMessage: 'Launchd (T1053.004)' }
-    ),
-    id: 'T1053.004',
-    name: 'Launchd',
-    reference: 'https://attack.mitre.org/techniques/T1053/004',
-    tactics: 'execution,persistence,privilege-escalation',
-    techniqueId: 'T1053',
-    value: 'launchd',
   },
   {
     label: i18n.translate(
@@ -6081,7 +4760,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1608.005',
     name: 'Link Target',
     reference: 'https://attack.mitre.org/techniques/T1608/005',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     techniqueId: 'T1608',
     value: 'linkTarget',
   },
@@ -6093,7 +4772,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1222.002',
     name: 'Linux and Mac File and Directory Permissions Modification',
     reference: 'https://attack.mitre.org/techniques/T1222/002',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1222',
     value: 'linuxAndMacFileAndDirectoryPermissionsModification',
   },
@@ -6105,7 +4784,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1055.015',
     name: 'ListPlanting',
     reference: 'https://attack.mitre.org/techniques/T1055/015',
-    tactics: 'defense-evasion,privilege-escalation',
+    tactics: ['defense-evasion', 'privilege-escalation'],
     techniqueId: 'T1055',
     value: 'listPlanting',
   },
@@ -6117,7 +4796,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1087.001',
     name: 'Local Account',
     reference: 'https://attack.mitre.org/techniques/T1087/001',
-    tactics: 'discovery',
+    tactics: ['discovery'],
     techniqueId: 'T1087',
     value: 'localAccount',
   },
@@ -6129,7 +4808,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1136.001',
     name: 'Local Account',
     reference: 'https://attack.mitre.org/techniques/T1136/001',
-    tactics: 'persistence',
+    tactics: ['persistence'],
     techniqueId: 'T1136',
     value: 'localAccount',
   },
@@ -6141,7 +4820,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1078.003',
     name: 'Local Accounts',
     reference: 'https://attack.mitre.org/techniques/T1078/003',
-    tactics: 'defense-evasion,persistence,privilege-escalation,initial-access',
+    tactics: ['defense-evasion', 'persistence', 'privilege-escalation', 'initial-access'],
     techniqueId: 'T1078',
     value: 'localAccounts',
   },
@@ -6153,7 +4832,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1074.001',
     name: 'Local Data Staging',
     reference: 'https://attack.mitre.org/techniques/T1074/001',
-    tactics: 'collection',
+    tactics: ['collection'],
     techniqueId: 'T1074',
     value: 'localDataStaging',
   },
@@ -6165,7 +4844,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1114.001',
     name: 'Local Email Collection',
     reference: 'https://attack.mitre.org/techniques/T1114/001',
-    tactics: 'collection',
+    tactics: ['collection'],
     techniqueId: 'T1114',
     value: 'localEmailCollection',
   },
@@ -6177,7 +4856,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1069.001',
     name: 'Local Groups',
     reference: 'https://attack.mitre.org/techniques/T1069/001',
-    tactics: 'discovery',
+    tactics: ['discovery'],
     techniqueId: 'T1069',
     value: 'localGroups',
   },
@@ -6189,7 +4868,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1037.002',
     name: 'Login Hook',
     reference: 'https://attack.mitre.org/techniques/T1037/002',
-    tactics: 'persistence,privilege-escalation',
+    tactics: ['persistence', 'privilege-escalation'],
     techniqueId: 'T1037',
     value: 'loginHook',
   },
@@ -6201,7 +4880,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1547.015',
     name: 'Login Items',
     reference: 'https://attack.mitre.org/techniques/T1547/015',
-    tactics: 'persistence,privilege-escalation',
+    tactics: ['persistence', 'privilege-escalation'],
     techniqueId: 'T1547',
     value: 'loginItems',
   },
@@ -6213,7 +4892,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1037.001',
     name: 'Logon Script (Windows)',
     reference: 'https://attack.mitre.org/techniques/T1037/001',
-    tactics: 'persistence,privilege-escalation',
+    tactics: ['persistence', 'privilege-escalation'],
     techniqueId: 'T1037',
     value: 'logonScriptWindows',
   },
@@ -6225,7 +4904,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1218.014',
     name: 'MMC',
     reference: 'https://attack.mitre.org/techniques/T1218/014',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1218',
     value: 'mmc',
   },
@@ -6237,7 +4916,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1127.001',
     name: 'MSBuild',
     reference: 'https://attack.mitre.org/techniques/T1127/001',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1127',
     value: 'msBuild',
   },
@@ -6249,7 +4928,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1071.003',
     name: 'Mail Protocols',
     reference: 'https://attack.mitre.org/techniques/T1071/003',
-    tactics: 'command-and-control',
+    tactics: ['command-and-control'],
     techniqueId: 'T1071',
     value: 'mailProtocols',
   },
@@ -6261,7 +4940,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1134.003',
     name: 'Make and Impersonate Token',
     reference: 'https://attack.mitre.org/techniques/T1134/003',
-    tactics: 'defense-evasion,privilege-escalation',
+    tactics: ['defense-evasion', 'privilege-escalation'],
     techniqueId: 'T1134',
     value: 'makeAndImpersonateToken',
   },
@@ -6273,7 +4952,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1204.002',
     name: 'Malicious File',
     reference: 'https://attack.mitre.org/techniques/T1204/002',
-    tactics: 'execution',
+    tactics: ['execution'],
     techniqueId: 'T1204',
     value: 'maliciousFile',
   },
@@ -6285,7 +4964,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1204.003',
     name: 'Malicious Image',
     reference: 'https://attack.mitre.org/techniques/T1204/003',
-    tactics: 'execution',
+    tactics: ['execution'],
     techniqueId: 'T1204',
     value: 'maliciousImage',
   },
@@ -6297,9 +4976,21 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1204.001',
     name: 'Malicious Link',
     reference: 'https://attack.mitre.org/techniques/T1204/001',
-    tactics: 'execution',
+    tactics: ['execution'],
     techniqueId: 'T1204',
     value: 'maliciousLink',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.malvertisingT1583Description',
+      { defaultMessage: 'Malvertising (T1583.008)' }
+    ),
+    id: 'T1583.008',
+    name: 'Malvertising',
+    reference: 'https://attack.mitre.org/techniques/T1583/008',
+    tactics: ['resource-development'],
+    techniqueId: 'T1583',
+    value: 'malvertising',
   },
   {
     label: i18n.translate(
@@ -6309,7 +5000,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1587.001',
     name: 'Malware',
     reference: 'https://attack.mitre.org/techniques/T1587/001',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     techniqueId: 'T1587',
     value: 'malware',
   },
@@ -6321,7 +5012,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1588.001',
     name: 'Malware',
     reference: 'https://attack.mitre.org/techniques/T1588/001',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     techniqueId: 'T1588',
     value: 'malware',
   },
@@ -6333,9 +5024,21 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1553.005',
     name: 'Mark-of-the-Web Bypass',
     reference: 'https://attack.mitre.org/techniques/T1553/005',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1553',
     value: 'markOfTheWebBypass',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.masqueradeFileTypeT1036Description',
+      { defaultMessage: 'Masquerade File Type (T1036.008)' }
+    ),
+    id: 'T1036.008',
+    name: 'Masquerade File Type',
+    reference: 'https://attack.mitre.org/techniques/T1036/008',
+    tactics: ['defense-evasion'],
+    techniqueId: 'T1036',
+    value: 'masqueradeFileType',
   },
   {
     label: i18n.translate(
@@ -6345,7 +5048,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1036.004',
     name: 'Masquerade Task or Service',
     reference: 'https://attack.mitre.org/techniques/T1036/004',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1036',
     value: 'masqueradeTaskOrService',
   },
@@ -6357,7 +5060,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1036.005',
     name: 'Match Legitimate Name or Location',
     reference: 'https://attack.mitre.org/techniques/T1036/005',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1036',
     value: 'matchLegitimateNameOrLocation',
   },
@@ -6369,7 +5072,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1218.013',
     name: 'Mavinject',
     reference: 'https://attack.mitre.org/techniques/T1218/013',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1218',
     value: 'mavinject',
   },
@@ -6381,7 +5084,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1218.005',
     name: 'Mshta',
     reference: 'https://attack.mitre.org/techniques/T1218/005',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1218',
     value: 'mshta',
   },
@@ -6393,9 +5096,21 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1218.007',
     name: 'Msiexec',
     reference: 'https://attack.mitre.org/techniques/T1218/007',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1218',
     value: 'msiexec',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.multiFactorAuthenticationT1556Description',
+      { defaultMessage: 'Multi-Factor Authentication (T1556.006)' }
+    ),
+    id: 'T1556.006',
+    name: 'Multi-Factor Authentication',
+    reference: 'https://attack.mitre.org/techniques/T1556/006',
+    tactics: ['credential-access', 'defense-evasion', 'persistence'],
+    techniqueId: 'T1556',
+    value: 'multiFactorAuthentication',
   },
   {
     label: i18n.translate(
@@ -6405,7 +5120,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1090.003',
     name: 'Multi-hop Proxy',
     reference: 'https://attack.mitre.org/techniques/T1090/003',
-    tactics: 'command-and-control',
+    tactics: ['command-and-control'],
     techniqueId: 'T1090',
     value: 'multiHopProxy',
   },
@@ -6417,7 +5132,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1003.003',
     name: 'NTDS',
     reference: 'https://attack.mitre.org/techniques/T1003/003',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     techniqueId: 'T1003',
     value: 'ntds',
   },
@@ -6429,7 +5144,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1564.004',
     name: 'NTFS File Attributes',
     reference: 'https://attack.mitre.org/techniques/T1564/004',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1564',
     value: 'ntfsFileAttributes',
   },
@@ -6441,7 +5156,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1546.007',
     name: 'Netsh Helper DLL',
     reference: 'https://attack.mitre.org/techniques/T1546/007',
-    tactics: 'privilege-escalation,persistence',
+    tactics: ['privilege-escalation', 'persistence'],
     techniqueId: 'T1546',
     value: 'netshHelperDll',
   },
@@ -6453,7 +5168,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1599.001',
     name: 'Network Address Translation Traversal',
     reference: 'https://attack.mitre.org/techniques/T1599/001',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1599',
     value: 'networkAddressTranslationTraversal',
   },
@@ -6465,7 +5180,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1556.004',
     name: 'Network Device Authentication',
     reference: 'https://attack.mitre.org/techniques/T1556/004',
-    tactics: 'credential-access,defense-evasion,persistence',
+    tactics: ['credential-access', 'defense-evasion', 'persistence'],
     techniqueId: 'T1556',
     value: 'networkDeviceAuthentication',
   },
@@ -6477,7 +5192,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1059.008',
     name: 'Network Device CLI',
     reference: 'https://attack.mitre.org/techniques/T1059/008',
-    tactics: 'execution',
+    tactics: ['execution'],
     techniqueId: 'T1059',
     value: 'networkDeviceCli',
   },
@@ -6489,7 +5204,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1602.002',
     name: 'Network Device Configuration Dump',
     reference: 'https://attack.mitre.org/techniques/T1602/002',
-    tactics: 'collection',
+    tactics: ['collection'],
     techniqueId: 'T1602',
     value: 'networkDeviceConfigurationDump',
   },
@@ -6501,9 +5216,21 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1037.003',
     name: 'Network Logon Script',
     reference: 'https://attack.mitre.org/techniques/T1037/003',
-    tactics: 'persistence,privilege-escalation',
+    tactics: ['persistence', 'privilege-escalation'],
     techniqueId: 'T1037',
     value: 'networkLogonScript',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.networkProviderDllT1556Description',
+      { defaultMessage: 'Network Provider DLL (T1556.008)' }
+    ),
+    id: 'T1556.008',
+    name: 'Network Provider DLL',
+    reference: 'https://attack.mitre.org/techniques/T1556/008',
+    tactics: ['credential-access', 'defense-evasion', 'persistence'],
+    techniqueId: 'T1556',
+    value: 'networkProviderDll',
   },
   {
     label: i18n.translate(
@@ -6513,7 +5240,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1590.006',
     name: 'Network Security Appliances',
     reference: 'https://attack.mitre.org/techniques/T1590/006',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     techniqueId: 'T1590',
     value: 'networkSecurityAppliances',
   },
@@ -6525,7 +5252,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1070.005',
     name: 'Network Share Connection Removal',
     reference: 'https://attack.mitre.org/techniques/T1070/005',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1070',
     value: 'networkShareConnectionRemoval',
   },
@@ -6537,7 +5264,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1590.004',
     name: 'Network Topology',
     reference: 'https://attack.mitre.org/techniques/T1590/004',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     techniqueId: 'T1590',
     value: 'networkTopology',
   },
@@ -6549,7 +5276,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1590.003',
     name: 'Network Trust Dependencies',
     reference: 'https://attack.mitre.org/techniques/T1590/003',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     techniqueId: 'T1590',
     value: 'networkTrustDependencies',
   },
@@ -6561,7 +5288,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1132.002',
     name: 'Non-Standard Encoding',
     reference: 'https://attack.mitre.org/techniques/T1132/002',
-    tactics: 'command-and-control',
+    tactics: ['command-and-control'],
     techniqueId: 'T1132',
     value: 'nonStandardEncoding',
   },
@@ -6573,7 +5300,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1499.001',
     name: 'OS Exhaustion Flood',
     reference: 'https://attack.mitre.org/techniques/T1499/001',
-    tactics: 'impact',
+    tactics: ['impact'],
     techniqueId: 'T1499',
     value: 'osExhaustionFlood',
   },
@@ -6585,7 +5312,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1218.008',
     name: 'Odbcconf',
     reference: 'https://attack.mitre.org/techniques/T1218/008',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1218',
     value: 'odbcconf',
   },
@@ -6597,7 +5324,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1137.001',
     name: 'Office Template Macros',
     reference: 'https://attack.mitre.org/techniques/T1137/001',
-    tactics: 'persistence',
+    tactics: ['persistence'],
     techniqueId: 'T1137',
     value: 'officeTemplateMacros',
   },
@@ -6609,7 +5336,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1137.002',
     name: 'Office Test',
     reference: 'https://attack.mitre.org/techniques/T1137/002',
-    tactics: 'persistence',
+    tactics: ['persistence'],
     techniqueId: 'T1137',
     value: 'officeTest',
   },
@@ -6621,7 +5348,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1102.003',
     name: 'One-Way Communication',
     reference: 'https://attack.mitre.org/techniques/T1102/003',
-    tactics: 'command-and-control',
+    tactics: ['command-and-control'],
     techniqueId: 'T1102',
     value: 'oneWayCommunication',
   },
@@ -6633,7 +5360,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1137.003',
     name: 'Outlook Forms',
     reference: 'https://attack.mitre.org/techniques/T1137/003',
-    tactics: 'persistence',
+    tactics: ['persistence'],
     techniqueId: 'T1137',
     value: 'outlookForms',
   },
@@ -6645,7 +5372,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1137.004',
     name: 'Outlook Home Page',
     reference: 'https://attack.mitre.org/techniques/T1137/004',
-    tactics: 'persistence',
+    tactics: ['persistence'],
     techniqueId: 'T1137',
     value: 'outlookHomePage',
   },
@@ -6657,7 +5384,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1137.005',
     name: 'Outlook Rules',
     reference: 'https://attack.mitre.org/techniques/T1137/005',
-    tactics: 'persistence',
+    tactics: ['persistence'],
     techniqueId: 'T1137',
     value: 'outlookRules',
   },
@@ -6669,7 +5396,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1134.004',
     name: 'Parent PID Spoofing',
     reference: 'https://attack.mitre.org/techniques/T1134/004',
-    tactics: 'defense-evasion,privilege-escalation',
+    tactics: ['defense-evasion', 'privilege-escalation'],
     techniqueId: 'T1134',
     value: 'parentPidSpoofing',
   },
@@ -6681,7 +5408,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1550.002',
     name: 'Pass the Hash',
     reference: 'https://attack.mitre.org/techniques/T1550/002',
-    tactics: 'defense-evasion,lateral-movement',
+    tactics: ['defense-evasion', 'lateral-movement'],
     techniqueId: 'T1550',
     value: 'passTheHash',
   },
@@ -6693,7 +5420,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1550.003',
     name: 'Pass the Ticket',
     reference: 'https://attack.mitre.org/techniques/T1550/003',
-    tactics: 'defense-evasion,lateral-movement',
+    tactics: ['defense-evasion', 'lateral-movement'],
     techniqueId: 'T1550',
     value: 'passTheTicket',
   },
@@ -6705,7 +5432,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1110.002',
     name: 'Password Cracking',
     reference: 'https://attack.mitre.org/techniques/T1110/002',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     techniqueId: 'T1110',
     value: 'passwordCracking',
   },
@@ -6717,7 +5444,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1556.002',
     name: 'Password Filter DLL',
     reference: 'https://attack.mitre.org/techniques/T1556/002',
-    tactics: 'credential-access,defense-evasion,persistence',
+    tactics: ['credential-access', 'defense-evasion', 'persistence'],
     techniqueId: 'T1556',
     value: 'passwordFilterDll',
   },
@@ -6729,7 +5456,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1110.001',
     name: 'Password Guessing',
     reference: 'https://attack.mitre.org/techniques/T1110/001',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     techniqueId: 'T1110',
     value: 'passwordGuessing',
   },
@@ -6741,7 +5468,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1555.005',
     name: 'Password Managers',
     reference: 'https://attack.mitre.org/techniques/T1555/005',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     techniqueId: 'T1555',
     value: 'passwordManagers',
   },
@@ -6753,7 +5480,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1110.003',
     name: 'Password Spraying',
     reference: 'https://attack.mitre.org/techniques/T1110/003',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     techniqueId: 'T1110',
     value: 'passwordSpraying',
   },
@@ -6765,7 +5492,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1601.001',
     name: 'Patch System Image',
     reference: 'https://attack.mitre.org/techniques/T1601/001',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1601',
     value: 'patchSystemImage',
   },
@@ -6777,7 +5504,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1574.007',
     name: 'Path Interception by PATH Environment Variable',
     reference: 'https://attack.mitre.org/techniques/T1574/007',
-    tactics: 'persistence,privilege-escalation,defense-evasion',
+    tactics: ['persistence', 'privilege-escalation', 'defense-evasion'],
     techniqueId: 'T1574',
     value: 'pathInterceptionByPathEnvironmentVariable',
   },
@@ -6789,7 +5516,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1574.008',
     name: 'Path Interception by Search Order Hijacking',
     reference: 'https://attack.mitre.org/techniques/T1574/008',
-    tactics: 'persistence,privilege-escalation,defense-evasion',
+    tactics: ['persistence', 'privilege-escalation', 'defense-evasion'],
     techniqueId: 'T1574',
     value: 'pathInterceptionBySearchOrderHijacking',
   },
@@ -6801,21 +5528,9 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1574.009',
     name: 'Path Interception by Unquoted Path',
     reference: 'https://attack.mitre.org/techniques/T1574/009',
-    tactics: 'persistence,privilege-escalation,defense-evasion',
+    tactics: ['persistence', 'privilege-escalation', 'defense-evasion'],
     techniqueId: 'T1574',
     value: 'pathInterceptionByUnquotedPath',
-  },
-  {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.plistModificationT1547Description',
-      { defaultMessage: 'Plist Modification (T1547.011)' }
-    ),
-    id: 'T1547.011',
-    name: 'Plist Modification',
-    reference: 'https://attack.mitre.org/techniques/T1547/011',
-    tactics: 'persistence,privilege-escalation',
-    techniqueId: 'T1547',
-    value: 'plistModification',
   },
   {
     label: i18n.translate(
@@ -6825,7 +5540,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1556.003',
     name: 'Pluggable Authentication Modules',
     reference: 'https://attack.mitre.org/techniques/T1556/003',
-    tactics: 'credential-access,defense-evasion,persistence',
+    tactics: ['credential-access', 'defense-evasion', 'persistence'],
     techniqueId: 'T1556',
     value: 'pluggableAuthenticationModules',
   },
@@ -6837,7 +5552,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1205.001',
     name: 'Port Knocking',
     reference: 'https://attack.mitre.org/techniques/T1205/001',
-    tactics: 'defense-evasion,persistence,command-and-control',
+    tactics: ['defense-evasion', 'persistence', 'command-and-control'],
     techniqueId: 'T1205',
     value: 'portKnocking',
   },
@@ -6849,7 +5564,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1547.010',
     name: 'Port Monitors',
     reference: 'https://attack.mitre.org/techniques/T1547/010',
-    tactics: 'persistence,privilege-escalation',
+    tactics: ['persistence', 'privilege-escalation'],
     techniqueId: 'T1547',
     value: 'portMonitors',
   },
@@ -6861,7 +5576,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1055.002',
     name: 'Portable Executable Injection',
     reference: 'https://attack.mitre.org/techniques/T1055/002',
-    tactics: 'defense-evasion,privilege-escalation',
+    tactics: ['defense-evasion', 'privilege-escalation'],
     techniqueId: 'T1055',
     value: 'portableExecutableInjection',
   },
@@ -6873,7 +5588,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1059.001',
     name: 'PowerShell',
     reference: 'https://attack.mitre.org/techniques/T1059/001',
-    tactics: 'execution',
+    tactics: ['execution'],
     techniqueId: 'T1059',
     value: 'powerShell',
   },
@@ -6885,7 +5600,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1546.013',
     name: 'PowerShell Profile',
     reference: 'https://attack.mitre.org/techniques/T1546/013',
-    tactics: 'privilege-escalation,persistence',
+    tactics: ['privilege-escalation', 'persistence'],
     techniqueId: 'T1546',
     value: 'powerShellProfile',
   },
@@ -6897,7 +5612,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1547.012',
     name: 'Print Processors',
     reference: 'https://attack.mitre.org/techniques/T1547/012',
-    tactics: 'persistence,privilege-escalation',
+    tactics: ['persistence', 'privilege-escalation'],
     techniqueId: 'T1547',
     value: 'printProcessors',
   },
@@ -6909,7 +5624,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1552.004',
     name: 'Private Keys',
     reference: 'https://attack.mitre.org/techniques/T1552/004',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     techniqueId: 'T1552',
     value: 'privateKeys',
   },
@@ -6921,7 +5636,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1003.007',
     name: 'Proc Filesystem',
     reference: 'https://attack.mitre.org/techniques/T1003/007',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     techniqueId: 'T1003',
     value: 'procFilesystem',
   },
@@ -6933,7 +5648,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1055.009',
     name: 'Proc Memory',
     reference: 'https://attack.mitre.org/techniques/T1055/009',
-    tactics: 'defense-evasion,privilege-escalation',
+    tactics: ['defense-evasion', 'privilege-escalation'],
     techniqueId: 'T1055',
     value: 'procMemory',
   },
@@ -6945,7 +5660,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1564.010',
     name: 'Process Argument Spoofing',
     reference: 'https://attack.mitre.org/techniques/T1564/010',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1564',
     value: 'processArgumentSpoofing',
   },
@@ -6957,7 +5672,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1055.013',
     name: 'Process Doppelgänging',
     reference: 'https://attack.mitre.org/techniques/T1055/013',
-    tactics: 'defense-evasion,privilege-escalation',
+    tactics: ['defense-evasion', 'privilege-escalation'],
     techniqueId: 'T1055',
     value: 'processDoppelganging',
   },
@@ -6969,7 +5684,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1055.012',
     name: 'Process Hollowing',
     reference: 'https://attack.mitre.org/techniques/T1055/012',
-    tactics: 'defense-evasion,privilege-escalation',
+    tactics: ['defense-evasion', 'privilege-escalation'],
     techniqueId: 'T1055',
     value: 'processHollowing',
   },
@@ -6981,7 +5696,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1001.003',
     name: 'Protocol Impersonation',
     reference: 'https://attack.mitre.org/techniques/T1001/003',
-    tactics: 'command-and-control',
+    tactics: ['command-and-control'],
     techniqueId: 'T1001',
     value: 'protocolImpersonation',
   },
@@ -6993,7 +5708,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1055.008',
     name: 'Ptrace System Calls',
     reference: 'https://attack.mitre.org/techniques/T1055/008',
-    tactics: 'defense-evasion,privilege-escalation',
+    tactics: ['defense-evasion', 'privilege-escalation'],
     techniqueId: 'T1055',
     value: 'ptraceSystemCalls',
   },
@@ -7005,7 +5720,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1216.001',
     name: 'PubPrn',
     reference: 'https://attack.mitre.org/techniques/T1216/001',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1216',
     value: 'pubPrn',
   },
@@ -7017,7 +5732,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1597.002',
     name: 'Purchase Technical Data',
     reference: 'https://attack.mitre.org/techniques/T1597/002',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     techniqueId: 'T1597',
     value: 'purchaseTechnicalData',
   },
@@ -7029,7 +5744,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1059.006',
     name: 'Python',
     reference: 'https://attack.mitre.org/techniques/T1059/006',
-    tactics: 'execution',
+    tactics: ['execution'],
     techniqueId: 'T1059',
     value: 'python',
   },
@@ -7041,7 +5756,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1037.004',
     name: 'RC Scripts',
     reference: 'https://attack.mitre.org/techniques/T1037/004',
-    tactics: 'persistence,privilege-escalation',
+    tactics: ['persistence', 'privilege-escalation'],
     techniqueId: 'T1037',
     value: 'rcScripts',
   },
@@ -7053,7 +5768,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1563.002',
     name: 'RDP Hijacking',
     reference: 'https://attack.mitre.org/techniques/T1563/002',
-    tactics: 'lateral-movement',
+    tactics: ['lateral-movement'],
     techniqueId: 'T1563',
     value: 'rdpHijacking',
   },
@@ -7065,7 +5780,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1542.004',
     name: 'ROMMONkit',
     reference: 'https://attack.mitre.org/techniques/T1542/004',
-    tactics: 'defense-evasion,persistence',
+    tactics: ['defense-evasion', 'persistence'],
     techniqueId: 'T1542',
     value: 'rommoNkit',
   },
@@ -7077,7 +5792,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1547.007',
     name: 'Re-opened Applications',
     reference: 'https://attack.mitre.org/techniques/T1547/007',
-    tactics: 'persistence,privilege-escalation',
+    tactics: ['persistence', 'privilege-escalation'],
     techniqueId: 'T1547',
     value: 'reOpenedApplications',
   },
@@ -7089,7 +5804,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1600.001',
     name: 'Reduce Key Space',
     reference: 'https://attack.mitre.org/techniques/T1600/001',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1600',
     value: 'reduceKeySpace',
   },
@@ -7101,7 +5816,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1498.002',
     name: 'Reflection Amplification',
     reference: 'https://attack.mitre.org/techniques/T1498/002',
-    tactics: 'impact',
+    tactics: ['impact'],
     techniqueId: 'T1498',
     value: 'reflectionAmplification',
   },
@@ -7113,7 +5828,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1547.001',
     name: 'Registry Run Keys / Startup Folder',
     reference: 'https://attack.mitre.org/techniques/T1547/001',
-    tactics: 'persistence,privilege-escalation',
+    tactics: ['persistence', 'privilege-escalation'],
     techniqueId: 'T1547',
     value: 'registryRunKeysStartupFolder',
   },
@@ -7125,7 +5840,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1218.009',
     name: 'Regsvcs/Regasm',
     reference: 'https://attack.mitre.org/techniques/T1218/009',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1218',
     value: 'regsvcsRegasm',
   },
@@ -7137,7 +5852,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1218.010',
     name: 'Regsvr32',
     reference: 'https://attack.mitre.org/techniques/T1218/010',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1218',
     value: 'regsvr32',
   },
@@ -7149,7 +5864,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1074.002',
     name: 'Remote Data Staging',
     reference: 'https://attack.mitre.org/techniques/T1074/002',
-    tactics: 'collection',
+    tactics: ['collection'],
     techniqueId: 'T1074',
     value: 'remoteDataStaging',
   },
@@ -7161,7 +5876,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1021.001',
     name: 'Remote Desktop Protocol',
     reference: 'https://attack.mitre.org/techniques/T1021/001',
-    tactics: 'lateral-movement',
+    tactics: ['lateral-movement'],
     techniqueId: 'T1021',
     value: 'remoteDesktopProtocol',
   },
@@ -7173,7 +5888,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1114.002',
     name: 'Remote Email Collection',
     reference: 'https://attack.mitre.org/techniques/T1114/002',
-    tactics: 'collection',
+    tactics: ['collection'],
     techniqueId: 'T1114',
     value: 'remoteEmailCollection',
   },
@@ -7185,7 +5900,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1036.003',
     name: 'Rename System Utilities',
     reference: 'https://attack.mitre.org/techniques/T1036/003',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1036',
     value: 'renameSystemUtilities',
   },
@@ -7197,7 +5912,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1564.009',
     name: 'Resource Forking',
     reference: 'https://attack.mitre.org/techniques/T1564/009',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1564',
     value: 'resourceForking',
   },
@@ -7209,7 +5924,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1556.005',
     name: 'Reversible Encryption',
     reference: 'https://attack.mitre.org/techniques/T1556/005',
-    tactics: 'credential-access,defense-evasion,persistence',
+    tactics: ['credential-access', 'defense-evasion', 'persistence'],
     techniqueId: 'T1556',
     value: 'reversibleEncryption',
   },
@@ -7221,7 +5936,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1578.004',
     name: 'Revert Cloud Instance',
     reference: 'https://attack.mitre.org/techniques/T1578/004',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1578',
     value: 'revertCloudInstance',
   },
@@ -7233,7 +5948,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1036.002',
     name: 'Right-to-Left Override',
     reference: 'https://attack.mitre.org/techniques/T1036/002',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1036',
     value: 'rightToLeftOverride',
   },
@@ -7245,7 +5960,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1564.006',
     name: 'Run Virtual Instance',
     reference: 'https://attack.mitre.org/techniques/T1564/006',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1564',
     value: 'runVirtualInstance',
   },
@@ -7257,7 +5972,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1218.011',
     name: 'Rundll32',
     reference: 'https://attack.mitre.org/techniques/T1218/011',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1218',
     value: 'rundll32',
   },
@@ -7269,7 +5984,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1565.003',
     name: 'Runtime Data Manipulation',
     reference: 'https://attack.mitre.org/techniques/T1565/003',
-    tactics: 'impact',
+    tactics: ['impact'],
     techniqueId: 'T1565',
     value: 'runtimeDataManipulation',
   },
@@ -7281,9 +5996,21 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1606.002',
     name: 'SAML Tokens',
     reference: 'https://attack.mitre.org/techniques/T1606/002',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     techniqueId: 'T1606',
     value: 'samlTokens',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.seoPoisoningT1608Description',
+      { defaultMessage: 'SEO Poisoning (T1608.006)' }
+    ),
+    id: 'T1608.006',
+    name: 'SEO Poisoning',
+    reference: 'https://attack.mitre.org/techniques/T1608/006',
+    tactics: ['resource-development'],
+    techniqueId: 'T1608',
+    value: 'seoPoisoning',
   },
   {
     label: i18n.translate(
@@ -7293,7 +6020,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1134.005',
     name: 'SID-History Injection',
     reference: 'https://attack.mitre.org/techniques/T1134/005',
-    tactics: 'defense-evasion,privilege-escalation',
+    tactics: ['defense-evasion', 'privilege-escalation'],
     techniqueId: 'T1134',
     value: 'sidHistoryInjection',
   },
@@ -7305,7 +6032,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1553.003',
     name: 'SIP and Trust Provider Hijacking',
     reference: 'https://attack.mitre.org/techniques/T1553/003',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1553',
     value: 'sipAndTrustProviderHijacking',
   },
@@ -7317,7 +6044,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1021.002',
     name: 'SMB/Windows Admin Shares',
     reference: 'https://attack.mitre.org/techniques/T1021/002',
-    tactics: 'lateral-movement',
+    tactics: ['lateral-movement'],
     techniqueId: 'T1021',
     value: 'smbWindowsAdminShares',
   },
@@ -7329,7 +6056,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1602.001',
     name: 'SNMP (MIB Dump)',
     reference: 'https://attack.mitre.org/techniques/T1602/001',
-    tactics: 'collection',
+    tactics: ['collection'],
     techniqueId: 'T1602',
     value: 'snmpMibDump',
   },
@@ -7341,7 +6068,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1505.001',
     name: 'SQL Stored Procedures',
     reference: 'https://attack.mitre.org/techniques/T1505/001',
-    tactics: 'persistence',
+    tactics: ['persistence'],
     techniqueId: 'T1505',
     value: 'sqlStoredProcedures',
   },
@@ -7353,7 +6080,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1021.004',
     name: 'SSH',
     reference: 'https://attack.mitre.org/techniques/T1021/004',
-    tactics: 'lateral-movement',
+    tactics: ['lateral-movement'],
     techniqueId: 'T1021',
     value: 'ssh',
   },
@@ -7365,7 +6092,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1098.004',
     name: 'SSH Authorized Keys',
     reference: 'https://attack.mitre.org/techniques/T1098/004',
-    tactics: 'persistence',
+    tactics: ['persistence'],
     techniqueId: 'T1098',
     value: 'sshAuthorizedKeys',
   },
@@ -7377,7 +6104,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1563.001',
     name: 'SSH Hijacking',
     reference: 'https://attack.mitre.org/techniques/T1563/001',
-    tactics: 'lateral-movement',
+    tactics: ['lateral-movement'],
     techniqueId: 'T1563',
     value: 'sshHijacking',
   },
@@ -7389,7 +6116,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1562.009',
     name: 'Safe Mode Boot',
     reference: 'https://attack.mitre.org/techniques/T1562/009',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1562',
     value: 'safeModeBoot',
   },
@@ -7401,7 +6128,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1596.005',
     name: 'Scan Databases',
     reference: 'https://attack.mitre.org/techniques/T1596/005',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     techniqueId: 'T1596',
     value: 'scanDatabases',
   },
@@ -7413,7 +6140,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1595.001',
     name: 'Scanning IP Blocks',
     reference: 'https://attack.mitre.org/techniques/T1595/001',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     techniqueId: 'T1595',
     value: 'scanningIpBlocks',
   },
@@ -7425,7 +6152,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1053.005',
     name: 'Scheduled Task',
     reference: 'https://attack.mitre.org/techniques/T1053/005',
-    tactics: 'execution,persistence,privilege-escalation',
+    tactics: ['execution', 'persistence', 'privilege-escalation'],
     techniqueId: 'T1053',
     value: 'scheduledTask',
   },
@@ -7437,7 +6164,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1546.002',
     name: 'Screensaver',
     reference: 'https://attack.mitre.org/techniques/T1546/002',
-    tactics: 'privilege-escalation,persistence',
+    tactics: ['privilege-escalation', 'persistence'],
     techniqueId: 'T1546',
     value: 'screensaver',
   },
@@ -7449,7 +6176,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1593.002',
     name: 'Search Engines',
     reference: 'https://attack.mitre.org/techniques/T1593/002',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     techniqueId: 'T1593',
     value: 'searchEngines',
   },
@@ -7461,7 +6188,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1003.002',
     name: 'Security Account Manager',
     reference: 'https://attack.mitre.org/techniques/T1003/002',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     techniqueId: 'T1003',
     value: 'securityAccountManager',
   },
@@ -7473,7 +6200,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1518.001',
     name: 'Security Software Discovery',
     reference: 'https://attack.mitre.org/techniques/T1518/001',
-    tactics: 'discovery',
+    tactics: ['discovery'],
     techniqueId: 'T1518',
     value: 'securitySoftwareDiscovery',
   },
@@ -7485,7 +6212,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1547.005',
     name: 'Security Support Provider',
     reference: 'https://attack.mitre.org/techniques/T1547/005',
-    tactics: 'persistence,privilege-escalation',
+    tactics: ['persistence', 'privilege-escalation'],
     techniqueId: 'T1547',
     value: 'securitySupportProvider',
   },
@@ -7497,7 +6224,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1555.002',
     name: 'Securityd Memory',
     reference: 'https://attack.mitre.org/techniques/T1555/002',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     techniqueId: 'T1555',
     value: 'securitydMemory',
   },
@@ -7509,7 +6236,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1583.004',
     name: 'Server',
     reference: 'https://attack.mitre.org/techniques/T1583/004',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     techniqueId: 'T1583',
     value: 'server',
   },
@@ -7521,9 +6248,33 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1584.004',
     name: 'Server',
     reference: 'https://attack.mitre.org/techniques/T1584/004',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     techniqueId: 'T1584',
     value: 'server',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.serverlessT1583Description',
+      { defaultMessage: 'Serverless (T1583.007)' }
+    ),
+    id: 'T1583.007',
+    name: 'Serverless',
+    reference: 'https://attack.mitre.org/techniques/T1583/007',
+    tactics: ['resource-development'],
+    techniqueId: 'T1583',
+    value: 'serverless',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.serverlessT1584Description',
+      { defaultMessage: 'Serverless (T1584.007)' }
+    ),
+    id: 'T1584.007',
+    name: 'Serverless',
+    reference: 'https://attack.mitre.org/techniques/T1584/007',
+    tactics: ['resource-development'],
+    techniqueId: 'T1584',
+    value: 'serverless',
   },
   {
     label: i18n.translate(
@@ -7533,7 +6284,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1569.002',
     name: 'Service Execution',
     reference: 'https://attack.mitre.org/techniques/T1569/002',
-    tactics: 'execution',
+    tactics: ['execution'],
     techniqueId: 'T1569',
     value: 'serviceExecution',
   },
@@ -7545,7 +6296,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1499.002',
     name: 'Service Exhaustion Flood',
     reference: 'https://attack.mitre.org/techniques/T1499/002',
-    tactics: 'impact',
+    tactics: ['impact'],
     techniqueId: 'T1499',
     value: 'serviceExhaustionFlood',
   },
@@ -7557,7 +6308,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1574.010',
     name: 'Services File Permissions Weakness',
     reference: 'https://attack.mitre.org/techniques/T1574/010',
-    tactics: 'persistence,privilege-escalation,defense-evasion',
+    tactics: ['persistence', 'privilege-escalation', 'defense-evasion'],
     techniqueId: 'T1574',
     value: 'servicesFilePermissionsWeakness',
   },
@@ -7569,7 +6320,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1574.011',
     name: 'Services Registry Permissions Weakness',
     reference: 'https://attack.mitre.org/techniques/T1574/011',
-    tactics: 'persistence,privilege-escalation,defense-evasion',
+    tactics: ['persistence', 'privilege-escalation', 'defense-evasion'],
     techniqueId: 'T1574',
     value: 'servicesRegistryPermissionsWeakness',
   },
@@ -7581,7 +6332,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1548.001',
     name: 'Setuid and Setgid',
     reference: 'https://attack.mitre.org/techniques/T1548/001',
-    tactics: 'privilege-escalation,defense-evasion',
+    tactics: ['privilege-escalation', 'defense-evasion'],
     techniqueId: 'T1548',
     value: 'setuidAndSetgid',
   },
@@ -7593,7 +6344,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1213.002',
     name: 'Sharepoint',
     reference: 'https://attack.mitre.org/techniques/T1213/002',
-    tactics: 'collection',
+    tactics: ['collection'],
     techniqueId: 'T1213',
     value: 'sharepoint',
   },
@@ -7605,7 +6356,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1547.009',
     name: 'Shortcut Modification',
     reference: 'https://attack.mitre.org/techniques/T1547/009',
-    tactics: 'persistence,privilege-escalation',
+    tactics: ['persistence', 'privilege-escalation'],
     techniqueId: 'T1547',
     value: 'shortcutModification',
   },
@@ -7617,7 +6368,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1558.002',
     name: 'Silver Ticket',
     reference: 'https://attack.mitre.org/techniques/T1558/002',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     techniqueId: 'T1558',
     value: 'silverTicket',
   },
@@ -7629,7 +6380,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1593.001',
     name: 'Social Media',
     reference: 'https://attack.mitre.org/techniques/T1593/001',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     techniqueId: 'T1593',
     value: 'socialMedia',
   },
@@ -7641,7 +6392,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1586.001',
     name: 'Social Media Accounts',
     reference: 'https://attack.mitre.org/techniques/T1586/001',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     techniqueId: 'T1586',
     value: 'socialMediaAccounts',
   },
@@ -7653,9 +6404,21 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1585.001',
     name: 'Social Media Accounts',
     reference: 'https://attack.mitre.org/techniques/T1585/001',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     techniqueId: 'T1585',
     value: 'socialMediaAccounts',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.socketFiltersT1205Description',
+      { defaultMessage: 'Socket Filters (T1205.002)' }
+    ),
+    id: 'T1205.002',
+    name: 'Socket Filters',
+    reference: 'https://attack.mitre.org/techniques/T1205/002',
+    tactics: ['defense-evasion', 'persistence', 'command-and-control'],
+    techniqueId: 'T1205',
+    value: 'socketFilters',
   },
   {
     label: i18n.translate(
@@ -7665,7 +6428,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1592.002',
     name: 'Software',
     reference: 'https://attack.mitre.org/techniques/T1592/002',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     techniqueId: 'T1592',
     value: 'software',
   },
@@ -7677,7 +6440,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1027.002',
     name: 'Software Packing',
     reference: 'https://attack.mitre.org/techniques/T1027/002',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1027',
     value: 'softwarePacking',
   },
@@ -7689,7 +6452,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1036.006',
     name: 'Space after Filename',
     reference: 'https://attack.mitre.org/techniques/T1036/006',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1036',
     value: 'spaceAfterFilename',
   },
@@ -7701,7 +6464,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1566.001',
     name: 'Spearphishing Attachment',
     reference: 'https://attack.mitre.org/techniques/T1566/001',
-    tactics: 'initial-access',
+    tactics: ['initial-access'],
     techniqueId: 'T1566',
     value: 'spearphishingAttachment',
   },
@@ -7713,7 +6476,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1598.002',
     name: 'Spearphishing Attachment',
     reference: 'https://attack.mitre.org/techniques/T1598/002',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     techniqueId: 'T1598',
     value: 'spearphishingAttachment',
   },
@@ -7725,7 +6488,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1566.002',
     name: 'Spearphishing Link',
     reference: 'https://attack.mitre.org/techniques/T1566/002',
-    tactics: 'initial-access',
+    tactics: ['initial-access'],
     techniqueId: 'T1566',
     value: 'spearphishingLink',
   },
@@ -7737,7 +6500,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1598.003',
     name: 'Spearphishing Link',
     reference: 'https://attack.mitre.org/techniques/T1598/003',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     techniqueId: 'T1598',
     value: 'spearphishingLink',
   },
@@ -7749,7 +6512,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1598.001',
     name: 'Spearphishing Service',
     reference: 'https://attack.mitre.org/techniques/T1598/001',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     techniqueId: 'T1598',
     value: 'spearphishingService',
   },
@@ -7761,9 +6524,21 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1566.003',
     name: 'Spearphishing via Service',
     reference: 'https://attack.mitre.org/techniques/T1566/003',
-    tactics: 'initial-access',
+    tactics: ['initial-access'],
     techniqueId: 'T1566',
     value: 'spearphishingViaService',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.spoofSecurityAlertingT1562Description',
+      { defaultMessage: 'Spoof Security Alerting (T1562.011)' }
+    ),
+    id: 'T1562.011',
+    name: 'Spoof Security Alerting',
+    reference: 'https://attack.mitre.org/techniques/T1562/011',
+    tactics: ['defense-evasion'],
+    techniqueId: 'T1562',
+    value: 'spoofSecurityAlerting',
   },
   {
     label: i18n.translate(
@@ -7773,7 +6548,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1132.001',
     name: 'Standard Encoding',
     reference: 'https://attack.mitre.org/techniques/T1132/001',
-    tactics: 'command-and-control',
+    tactics: ['command-and-control'],
     techniqueId: 'T1132',
     value: 'standardEncoding',
   },
@@ -7785,7 +6560,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1037.005',
     name: 'Startup Items',
     reference: 'https://attack.mitre.org/techniques/T1037/005',
-    tactics: 'persistence,privilege-escalation',
+    tactics: ['persistence', 'privilege-escalation'],
     techniqueId: 'T1037',
     value: 'startupItems',
   },
@@ -7797,7 +6572,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1027.003',
     name: 'Steganography',
     reference: 'https://attack.mitre.org/techniques/T1027/003',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1027',
     value: 'steganography',
   },
@@ -7809,7 +6584,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1001.002',
     name: 'Steganography',
     reference: 'https://attack.mitre.org/techniques/T1001/002',
-    tactics: 'command-and-control',
+    tactics: ['command-and-control'],
     techniqueId: 'T1001',
     value: 'steganography',
   },
@@ -7821,9 +6596,21 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1565.001',
     name: 'Stored Data Manipulation',
     reference: 'https://attack.mitre.org/techniques/T1565/001',
-    tactics: 'impact',
+    tactics: ['impact'],
     techniqueId: 'T1565',
     value: 'storedDataManipulation',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.strippedPayloadsT1027Description',
+      { defaultMessage: 'Stripped Payloads (T1027.008)' }
+    ),
+    id: 'T1027.008',
+    name: 'Stripped Payloads',
+    reference: 'https://attack.mitre.org/techniques/T1027/008',
+    tactics: ['defense-evasion'],
+    techniqueId: 'T1027',
+    value: 'strippedPayloads',
   },
   {
     label: i18n.translate(
@@ -7833,7 +6620,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1548.003',
     name: 'Sudo and Sudo Caching',
     reference: 'https://attack.mitre.org/techniques/T1548/003',
-    tactics: 'privilege-escalation,defense-evasion',
+    tactics: ['privilege-escalation', 'defense-evasion'],
     techniqueId: 'T1548',
     value: 'sudoAndSudoCaching',
   },
@@ -7845,7 +6632,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1573.001',
     name: 'Symmetric Cryptography',
     reference: 'https://attack.mitre.org/techniques/T1573/001',
-    tactics: 'command-and-control',
+    tactics: ['command-and-control'],
     techniqueId: 'T1573',
     value: 'symmetricCryptography',
   },
@@ -7857,7 +6644,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1497.001',
     name: 'System Checks',
     reference: 'https://attack.mitre.org/techniques/T1497/001',
-    tactics: 'defense-evasion,discovery',
+    tactics: ['defense-evasion', 'discovery'],
     techniqueId: 'T1497',
     value: 'systemChecks',
   },
@@ -7869,7 +6656,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1542.001',
     name: 'System Firmware',
     reference: 'https://attack.mitre.org/techniques/T1542/001',
-    tactics: 'persistence,defense-evasion',
+    tactics: ['persistence', 'defense-evasion'],
     techniqueId: 'T1542',
     value: 'systemFirmware',
   },
@@ -7881,7 +6668,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1614.001',
     name: 'System Language Discovery',
     reference: 'https://attack.mitre.org/techniques/T1614/001',
-    tactics: 'discovery',
+    tactics: ['discovery'],
     techniqueId: 'T1614',
     value: 'systemLanguageDiscovery',
   },
@@ -7893,7 +6680,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1543.002',
     name: 'Systemd Service',
     reference: 'https://attack.mitre.org/techniques/T1543/002',
-    tactics: 'persistence,privilege-escalation',
+    tactics: ['persistence', 'privilege-escalation'],
     techniqueId: 'T1543',
     value: 'systemdService',
   },
@@ -7905,7 +6692,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1053.006',
     name: 'Systemd Timers',
     reference: 'https://attack.mitre.org/techniques/T1053/006',
-    tactics: 'execution,persistence,privilege-escalation',
+    tactics: ['execution', 'persistence', 'privilege-escalation'],
     techniqueId: 'T1053',
     value: 'systemdTimers',
   },
@@ -7917,7 +6704,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1542.005',
     name: 'TFTP Boot',
     reference: 'https://attack.mitre.org/techniques/T1542/005',
-    tactics: 'defense-evasion,persistence',
+    tactics: ['defense-evasion', 'persistence'],
     techniqueId: 'T1542',
     value: 'tftpBoot',
   },
@@ -7929,7 +6716,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1505.005',
     name: 'Terminal Services DLL',
     reference: 'https://attack.mitre.org/techniques/T1505/005',
-    tactics: 'persistence',
+    tactics: ['persistence'],
     techniqueId: 'T1505',
     value: 'terminalServicesDll',
   },
@@ -7941,7 +6728,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1055.003',
     name: 'Thread Execution Hijacking',
     reference: 'https://attack.mitre.org/techniques/T1055/003',
-    tactics: 'defense-evasion,privilege-escalation',
+    tactics: ['defense-evasion', 'privilege-escalation'],
     techniqueId: 'T1055',
     value: 'threadExecutionHijacking',
   },
@@ -7953,7 +6740,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1055.005',
     name: 'Thread Local Storage',
     reference: 'https://attack.mitre.org/techniques/T1055/005',
-    tactics: 'defense-evasion,privilege-escalation',
+    tactics: ['defense-evasion', 'privilege-escalation'],
     techniqueId: 'T1055',
     value: 'threadLocalStorage',
   },
@@ -7965,7 +6752,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1597.001',
     name: 'Threat Intel Vendors',
     reference: 'https://attack.mitre.org/techniques/T1597/001',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     techniqueId: 'T1597',
     value: 'threatIntelVendors',
   },
@@ -7977,7 +6764,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1497.003',
     name: 'Time Based Evasion',
     reference: 'https://attack.mitre.org/techniques/T1497/003',
-    tactics: 'defense-evasion,discovery',
+    tactics: ['defense-evasion', 'discovery'],
     techniqueId: 'T1497',
     value: 'timeBasedEvasion',
   },
@@ -7989,7 +6776,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1547.003',
     name: 'Time Providers',
     reference: 'https://attack.mitre.org/techniques/T1547/003',
-    tactics: 'persistence,privilege-escalation',
+    tactics: ['persistence', 'privilege-escalation'],
     techniqueId: 'T1547',
     value: 'timeProviders',
   },
@@ -8001,7 +6788,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1070.006',
     name: 'Timestomp',
     reference: 'https://attack.mitre.org/techniques/T1070/006',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1070',
     value: 'timestomp',
   },
@@ -8013,7 +6800,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1134.001',
     name: 'Token Impersonation/Theft',
     reference: 'https://attack.mitre.org/techniques/T1134/001',
-    tactics: 'defense-evasion,privilege-escalation',
+    tactics: ['defense-evasion', 'privilege-escalation'],
     techniqueId: 'T1134',
     value: 'tokenImpersonationTheft',
   },
@@ -8025,7 +6812,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1588.002',
     name: 'Tool',
     reference: 'https://attack.mitre.org/techniques/T1588/002',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     techniqueId: 'T1588',
     value: 'tool',
   },
@@ -8037,7 +6824,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1020.001',
     name: 'Traffic Duplication',
     reference: 'https://attack.mitre.org/techniques/T1020/001',
-    tactics: 'exfiltration',
+    tactics: ['exfiltration'],
     techniqueId: 'T1020',
     value: 'trafficDuplication',
   },
@@ -8049,7 +6836,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1565.002',
     name: 'Transmitted Data Manipulation',
     reference: 'https://attack.mitre.org/techniques/T1565/002',
-    tactics: 'impact',
+    tactics: ['impact'],
     techniqueId: 'T1565',
     value: 'transmittedDataManipulation',
   },
@@ -8061,7 +6848,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1505.002',
     name: 'Transport Agent',
     reference: 'https://attack.mitre.org/techniques/T1505/002',
-    tactics: 'persistence',
+    tactics: ['persistence'],
     techniqueId: 'T1505',
     value: 'transportAgent',
   },
@@ -8073,7 +6860,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1546.005',
     name: 'Trap',
     reference: 'https://attack.mitre.org/techniques/T1546/005',
-    tactics: 'privilege-escalation,persistence',
+    tactics: ['privilege-escalation', 'persistence'],
     techniqueId: 'T1546',
     value: 'trap',
   },
@@ -8085,7 +6872,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1059.004',
     name: 'Unix Shell',
     reference: 'https://attack.mitre.org/techniques/T1059/004',
-    tactics: 'execution',
+    tactics: ['execution'],
     techniqueId: 'T1059',
     value: 'unixShell',
   },
@@ -8097,7 +6884,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1546.004',
     name: 'Unix Shell Configuration Modification',
     reference: 'https://attack.mitre.org/techniques/T1546/004',
-    tactics: 'privilege-escalation,persistence',
+    tactics: ['privilege-escalation', 'persistence'],
     techniqueId: 'T1546',
     value: 'unixShellConfigurationModification',
   },
@@ -8109,7 +6896,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1608.001',
     name: 'Upload Malware',
     reference: 'https://attack.mitre.org/techniques/T1608/001',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     techniqueId: 'T1608',
     value: 'uploadMalware',
   },
@@ -8121,7 +6908,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1608.002',
     name: 'Upload Tool',
     reference: 'https://attack.mitre.org/techniques/T1608/002',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     techniqueId: 'T1608',
     value: 'uploadTool',
   },
@@ -8133,7 +6920,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1497.002',
     name: 'User Activity Based Checks',
     reference: 'https://attack.mitre.org/techniques/T1497/002',
-    tactics: 'defense-evasion,discovery',
+    tactics: ['defense-evasion', 'discovery'],
     techniqueId: 'T1497',
     value: 'userActivityBasedChecks',
   },
@@ -8145,7 +6932,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1564.007',
     name: 'VBA Stomping',
     reference: 'https://attack.mitre.org/techniques/T1564/007',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1564',
     value: 'vbaStomping',
   },
@@ -8157,7 +6944,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1055.014',
     name: 'VDSO Hijacking',
     reference: 'https://attack.mitre.org/techniques/T1055/014',
-    tactics: 'defense-evasion,privilege-escalation',
+    tactics: ['defense-evasion', 'privilege-escalation'],
     techniqueId: 'T1055',
     value: 'vdsoHijacking',
   },
@@ -8169,7 +6956,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1021.005',
     name: 'VNC',
     reference: 'https://attack.mitre.org/techniques/T1021/005',
-    tactics: 'lateral-movement',
+    tactics: ['lateral-movement'],
     techniqueId: 'T1021',
     value: 'vnc',
   },
@@ -8181,7 +6968,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1218.012',
     name: 'Verclsid',
     reference: 'https://attack.mitre.org/techniques/T1218/012',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1218',
     value: 'verclsid',
   },
@@ -8193,7 +6980,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1584.003',
     name: 'Virtual Private Server',
     reference: 'https://attack.mitre.org/techniques/T1584/003',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     techniqueId: 'T1584',
     value: 'virtualPrivateServer',
   },
@@ -8205,7 +6992,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1583.003',
     name: 'Virtual Private Server',
     reference: 'https://attack.mitre.org/techniques/T1583/003',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     techniqueId: 'T1583',
     value: 'virtualPrivateServer',
   },
@@ -8217,7 +7004,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1059.005',
     name: 'Visual Basic',
     reference: 'https://attack.mitre.org/techniques/T1059/005',
-    tactics: 'execution',
+    tactics: ['execution'],
     techniqueId: 'T1059',
     value: 'visualBasic',
   },
@@ -8229,7 +7016,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1588.006',
     name: 'Vulnerabilities',
     reference: 'https://attack.mitre.org/techniques/T1588/006',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     techniqueId: 'T1588',
     value: 'vulnerabilities',
   },
@@ -8241,7 +7028,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1595.002',
     name: 'Vulnerability Scanning',
     reference: 'https://attack.mitre.org/techniques/T1595/002',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     techniqueId: 'T1595',
     value: 'vulnerabilityScanning',
   },
@@ -8253,7 +7040,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1596.002',
     name: 'WHOIS',
     reference: 'https://attack.mitre.org/techniques/T1596/002',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     techniqueId: 'T1596',
     value: 'whois',
   },
@@ -8265,7 +7052,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1606.001',
     name: 'Web Cookies',
     reference: 'https://attack.mitre.org/techniques/T1606/001',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     techniqueId: 'T1606',
     value: 'webCookies',
   },
@@ -8277,7 +7064,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1056.003',
     name: 'Web Portal Capture',
     reference: 'https://attack.mitre.org/techniques/T1056/003',
-    tactics: 'collection,credential-access',
+    tactics: ['collection', 'credential-access'],
     techniqueId: 'T1056',
     value: 'webPortalCapture',
   },
@@ -8289,7 +7076,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1071.001',
     name: 'Web Protocols',
     reference: 'https://attack.mitre.org/techniques/T1071/001',
-    tactics: 'command-and-control',
+    tactics: ['command-and-control'],
     techniqueId: 'T1071',
     value: 'webProtocols',
   },
@@ -8301,7 +7088,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1583.006',
     name: 'Web Services',
     reference: 'https://attack.mitre.org/techniques/T1583/006',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     techniqueId: 'T1583',
     value: 'webServices',
   },
@@ -8313,7 +7100,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1584.006',
     name: 'Web Services',
     reference: 'https://attack.mitre.org/techniques/T1584/006',
-    tactics: 'resource-development',
+    tactics: ['resource-development'],
     techniqueId: 'T1584',
     value: 'webServices',
   },
@@ -8325,7 +7112,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1550.004',
     name: 'Web Session Cookie',
     reference: 'https://attack.mitre.org/techniques/T1550/004',
-    tactics: 'defense-evasion,lateral-movement',
+    tactics: ['defense-evasion', 'lateral-movement'],
     techniqueId: 'T1550',
     value: 'webSessionCookie',
   },
@@ -8337,7 +7124,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1505.003',
     name: 'Web Shell',
     reference: 'https://attack.mitre.org/techniques/T1505/003',
-    tactics: 'persistence',
+    tactics: ['persistence'],
     techniqueId: 'T1505',
     value: 'webShell',
   },
@@ -8349,7 +7136,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1059.003',
     name: 'Windows Command Shell',
     reference: 'https://attack.mitre.org/techniques/T1059/003',
-    tactics: 'execution',
+    tactics: ['execution'],
     techniqueId: 'T1059',
     value: 'windowsCommandShell',
   },
@@ -8361,7 +7148,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1555.004',
     name: 'Windows Credential Manager',
     reference: 'https://attack.mitre.org/techniques/T1555/004',
-    tactics: 'credential-access',
+    tactics: ['credential-access'],
     techniqueId: 'T1555',
     value: 'windowsCredentialManager',
   },
@@ -8373,7 +7160,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1222.001',
     name: 'Windows File and Directory Permissions Modification',
     reference: 'https://attack.mitre.org/techniques/T1222/001',
-    tactics: 'defense-evasion',
+    tactics: ['defense-evasion'],
     techniqueId: 'T1222',
     value: 'windowsFileAndDirectoryPermissionsModification',
   },
@@ -8385,7 +7172,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1546.003',
     name: 'Windows Management Instrumentation Event Subscription',
     reference: 'https://attack.mitre.org/techniques/T1546/003',
-    tactics: 'privilege-escalation,persistence',
+    tactics: ['privilege-escalation', 'persistence'],
     techniqueId: 'T1546',
     value: 'windowsManagementInstrumentationEventSubscription',
   },
@@ -8397,7 +7184,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1021.006',
     name: 'Windows Remote Management',
     reference: 'https://attack.mitre.org/techniques/T1021/006',
-    tactics: 'lateral-movement',
+    tactics: ['lateral-movement'],
     techniqueId: 'T1021',
     value: 'windowsRemoteManagement',
   },
@@ -8409,7 +7196,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1543.003',
     name: 'Windows Service',
     reference: 'https://attack.mitre.org/techniques/T1543/003',
-    tactics: 'persistence,privilege-escalation',
+    tactics: ['persistence', 'privilege-escalation'],
     techniqueId: 'T1543',
     value: 'windowsService',
   },
@@ -8421,7 +7208,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1547.004',
     name: 'Winlogon Helper DLL',
     reference: 'https://attack.mitre.org/techniques/T1547/004',
-    tactics: 'persistence,privilege-escalation',
+    tactics: ['persistence', 'privilege-escalation'],
     techniqueId: 'T1547',
     value: 'winlogonHelperDll',
   },
@@ -8433,7 +7220,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1595.003',
     name: 'Wordlist Scanning',
     reference: 'https://attack.mitre.org/techniques/T1595/003',
-    tactics: 'reconnaissance',
+    tactics: ['reconnaissance'],
     techniqueId: 'T1595',
     value: 'wordlistScanning',
   },
@@ -8445,7 +7232,7 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1547.013',
     name: 'XDG Autostart Entries',
     reference: 'https://attack.mitre.org/techniques/T1547/013',
-    tactics: 'persistence,privilege-escalation',
+    tactics: ['persistence', 'privilege-escalation'],
     techniqueId: 'T1547',
     value: 'xdgAutostartEntries',
   },
@@ -8457,34 +7244,130 @@ export const subtechniquesOptions: MitreSubtechniquesOptions[] = [
     id: 'T1559.003',
     name: 'XPC Services',
     reference: 'https://attack.mitre.org/techniques/T1559/003',
-    tactics: 'execution',
+    tactics: ['execution'],
     techniqueId: 'T1559',
     value: 'xpcServices',
   },
 ];
 
 /**
- * A full object of Mitre Attack Threat data that is taken directly from the `mitre_tactics_techniques.ts` file
+ * An array of full Mitre Attack Threat objects that are taken directly from the `mitre_tactics_techniques.ts` file
  *
  * Is built alongside and sampled from the data in the file so to always be valid with the most up to date MITRE ATT&CK data
  */
-export const getMockThreatData = () => ({
-  tactic: {
-    name: 'Credential Access',
-    id: 'TA0006',
-    reference: 'https://attack.mitre.org/tactics/TA0006',
+export const getMockThreatData = () => [
+  {
+    tactic: {
+      name: 'Credential Access',
+      id: 'TA0006',
+      reference: 'https://attack.mitre.org/tactics/TA0006',
+    },
+    technique: {
+      name: 'OS Credential Dumping',
+      id: 'T1003',
+      reference: 'https://attack.mitre.org/techniques/T1003',
+      tactics: ['credential-access'],
+    },
+    subtechnique: {
+      name: '/etc/passwd and /etc/shadow',
+      id: 'T1003.008',
+      reference: 'https://attack.mitre.org/techniques/T1003/008',
+      tactics: ['credential-access'],
+      techniqueId: 'T1003',
+    },
   },
-  technique: {
-    name: 'OS Credential Dumping',
-    id: 'T1003',
-    reference: 'https://attack.mitre.org/techniques/T1003',
-    tactics: ['credential-access'],
+  {
+    tactic: {
+      name: 'Credential Access',
+      id: 'TA0006',
+      reference: 'https://attack.mitre.org/tactics/TA0006',
+    },
+    technique: {
+      name: 'Steal or Forge Kerberos Tickets',
+      id: 'T1558',
+      reference: 'https://attack.mitre.org/techniques/T1558',
+      tactics: ['credential-access'],
+    },
+    subtechnique: {
+      name: 'AS-REP Roasting',
+      id: 'T1558.004',
+      reference: 'https://attack.mitre.org/techniques/T1558/004',
+      tactics: ['credential-access'],
+      techniqueId: 'T1558',
+    },
   },
-  subtechnique: {
-    name: '/etc/passwd and /etc/shadow',
-    id: 'T1003.008',
-    reference: 'https://attack.mitre.org/techniques/T1003/008',
-    tactics: ['credential-access'],
-    techniqueId: 'T1003',
+  {
+    tactic: {
+      name: 'Persistence',
+      id: 'TA0003',
+      reference: 'https://attack.mitre.org/tactics/TA0003',
+    },
+    technique: {
+      name: 'Boot or Logon Autostart Execution',
+      id: 'T1547',
+      reference: 'https://attack.mitre.org/techniques/T1547',
+      tactics: ['persistence', 'privilege-escalation'],
+    },
+    subtechnique: {
+      name: 'Active Setup',
+      id: 'T1547.014',
+      reference: 'https://attack.mitre.org/techniques/T1547/014',
+      tactics: ['persistence', 'privilege-escalation'],
+      techniqueId: 'T1547',
+    },
   },
-});
+  {
+    tactic: {
+      name: 'Persistence',
+      id: 'TA0003',
+      reference: 'https://attack.mitre.org/tactics/TA0003',
+    },
+    technique: {
+      name: 'Account Manipulation',
+      id: 'T1098',
+      reference: 'https://attack.mitre.org/techniques/T1098',
+      tactics: ['persistence'],
+    },
+    subtechnique: {
+      name: 'Additional Cloud Credentials',
+      id: 'T1098.001',
+      reference: 'https://attack.mitre.org/techniques/T1098/001',
+      tactics: ['persistence'],
+      techniqueId: 'T1098',
+    },
+  },
+];
+
+/**
+ * An array of specifically chosen Mitre Attack Threat objects that is taken directly from the `mitre_tactics_techniques.ts` file
+ *
+ * These objects have identical technique fields but are assigned to different tactics
+ */
+export const getDuplicateTechniqueThreatData = () => [
+  {
+    tactic: {
+      name: 'Privilege Escalation',
+      id: 'TA0004',
+      reference: 'https://attack.mitre.org/tactics/TA0004',
+    },
+    technique: {
+      name: 'Event Triggered Execution',
+      id: 'T1546',
+      reference: 'https://attack.mitre.org/techniques/T1546',
+      tactics: ['privilege-escalation', 'persistence'],
+    },
+  },
+  {
+    tactic: {
+      name: 'Persistence',
+      id: 'TA0003',
+      reference: 'https://attack.mitre.org/tactics/TA0003',
+    },
+    technique: {
+      name: 'Event Triggered Execution',
+      id: 'T1546',
+      reference: 'https://attack.mitre.org/techniques/T1546',
+      tactics: ['privilege-escalation', 'persistence'],
+    },
+  },
+];

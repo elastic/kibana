@@ -12,9 +12,9 @@ import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 
-import type { RoleMapping } from '../../../../../common/model';
-import { roleMappingsAPIClientMock } from '../../index.mock';
 import { DeleteProvider } from './delete_provider';
+import type { RoleMapping } from '../../../../../common';
+import { roleMappingsAPIClientMock } from '../../index.mock';
 
 describe('DeleteProvider', () => {
   beforeEach(() => {

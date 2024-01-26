@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
-import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 import type { CanvasElementColorStats } from '../canvas_element';
@@ -344,7 +344,7 @@ export function MachineLearningCommonUIProvider({
     },
 
     async waitForRefreshButtonEnabled() {
-      await testSubjects.waitForEnabled('~mlRefreshPageButton');
+      await testSubjects.waitForEnabled('~mlDatePickerRefreshPageButton');
     },
 
     async assertOneOfExists(subjectsToCheck: string[], timeout: number = 0) {
@@ -363,15 +363,21 @@ export function MachineLearningCommonUIProvider({
       });
     },
 
-    async selectButtonGroupValue(inputTestSubj: string, value: string) {
+    async selectButtonGroupValue(inputTestSubj: string, value: string, valueTestSubj?: string) {
       await retry.tryForTime(5000, async () => {
         // The input element can not be clicked directly.
         // Instead, we need to click the corresponding label
 
-        const fieldSetElement = await testSubjects.find(inputTestSubj);
+        let labelElement: WebElementWrapper;
 
-        const labelElement = await fieldSetElement.findByCssSelector(`label[title="${value}"]`);
-        await labelElement.click();
+        if (valueTestSubj) {
+          await testSubjects.click(valueTestSubj);
+          labelElement = await testSubjects.find(valueTestSubj);
+        } else {
+          const fieldSetElement = await testSubjects.find(inputTestSubj);
+          labelElement = await fieldSetElement.findByCssSelector(`label[title="${value}"]`);
+          await labelElement.click();
+        }
 
         const labelClasses = await labelElement.getAttribute('class');
         expect(labelClasses).to.contain(
@@ -402,17 +408,36 @@ export function MachineLearningCommonUIProvider({
       });
     },
 
-    async invokeTableRowAction(rowSelector: string, actionTestSubject: string) {
+    async ensureComboBoxClosed() {
+      await retry.tryForTime(5000, async () => {
+        await browser.pressKeys(browser.keys.ESCAPE);
+        const comboBoxOpen = await testSubjects.exists('~comboBoxOptionsList', { timeout: 50 });
+        expect(comboBoxOpen).to.eql(false, 'Combo box should be closed');
+      });
+    },
+
+    async invokeTableRowAction(
+      rowSelector: string,
+      actionTestSubject: string,
+      fromContextMenu: boolean = true
+    ) {
       await retry.tryForTime(30 * 1000, async () => {
-        await this.ensureAllMenuPopoversClosed();
-        await testSubjects.click(`${rowSelector} > euiCollapsedItemActionsButton`);
-        await find.existsByCssSelector('euiContextMenuPanel');
+        if (fromContextMenu) {
+          await this.ensureAllMenuPopoversClosed();
 
-        const isEnabled = await testSubjects.isEnabled(actionTestSubject);
+          await testSubjects.click(`${rowSelector} > euiCollapsedItemActionsButton`);
+          await find.existsByCssSelector('euiContextMenuPanel');
 
-        expect(isEnabled).to.eql(true, `Expected action "${actionTestSubject}" to be enabled.`);
+          const isEnabled = await testSubjects.isEnabled(actionTestSubject);
 
-        await testSubjects.click(actionTestSubject);
+          expect(isEnabled).to.eql(true, `Expected action "${actionTestSubject}" to be enabled.`);
+
+          await testSubjects.click(actionTestSubject);
+        } else {
+          const isEnabled = await testSubjects.isEnabled(`${rowSelector} > ${actionTestSubject}`);
+          expect(isEnabled).to.eql(true, `Expected action "${actionTestSubject}" to be enabled.`);
+          await testSubjects.click(`${rowSelector} > ${actionTestSubject}`);
+        }
       });
     },
   };

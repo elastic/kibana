@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { useExpandedRowCss } from './use_expanded_row_css';
 import { GeoPointContentWithMap } from './geo_point_content_with_map';
 import { SUPPORTED_FIELD_TYPES } from '../../../../../common/constants';
 import {
@@ -42,6 +43,7 @@ export const IndexBasedDataVisualizerExpandedRow = ({
 }) => {
   const config = { ...item, stats: { ...item.stats, totalDocuments } };
   const { loading, type, existsInDocs, fieldName } = config;
+  const dvExpandedRow = useExpandedRowCss();
 
   function getCardContent() {
     if (existsInDocs === false) {
@@ -88,7 +90,7 @@ export const IndexBasedDataVisualizerExpandedRow = ({
   }
 
   return (
-    <div className="dvExpandedRow" data-test-subj={`dataVisualizerFieldExpandedRow-${fieldName}`}>
+    <div css={dvExpandedRow} data-test-subj={`dataVisualizerFieldExpandedRow-${fieldName}`}>
       {loading === true ? <LoadingIndicator /> : getCardContent()}
     </div>
   );

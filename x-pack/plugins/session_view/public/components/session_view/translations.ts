@@ -6,10 +6,6 @@
  */
 import { i18n } from '@kbn/i18n';
 
-export const BETA = i18n.translate('xpack.sessionView.beta', {
-  defaultMessage: 'Beta',
-});
-
 export const REFRESH_SESSION = i18n.translate('xpack.sessionView.refreshSession', {
   defaultMessage: 'Refresh session',
 });

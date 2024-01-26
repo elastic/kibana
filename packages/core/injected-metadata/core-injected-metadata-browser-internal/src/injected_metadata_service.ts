@@ -48,6 +48,10 @@ export class InjectedMetadataService {
         return this.state.publicBaseUrl;
       },
 
+      getAssetsHrefBase: () => {
+        return this.state.assetsHrefBase;
+      },
+
       getAnonymousStatusPage: () => {
         return this.state.anonymousStatusPage;
       },
@@ -94,6 +98,10 @@ export class InjectedMetadataService {
 
       getElasticsearchInfo: () => {
         return this.state.clusterInfo;
+      },
+
+      getCustomBranding: () => {
+        return this.state.customBranding;
       },
     };
   }

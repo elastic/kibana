@@ -20,6 +20,7 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { VisTypeTimeseriesPublicConfig } from '../config';
 
 import { EditorController, TSVB_EDITOR_NAME } from './application/editor_controller';
 
@@ -71,13 +72,15 @@ export interface TimeseriesVisDependencies extends Partial<CoreStart> {
 
 /** @internal */
 export class MetricsPlugin implements Plugin<void, void> {
-  initializerContext: PluginInitializerContext;
+  initializerContext: PluginInitializerContext<VisTypeTimeseriesPublicConfig>;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext<VisTypeTimeseriesPublicConfig>) {
     this.initializerContext = initializerContext;
   }
 
   public setup(core: CoreSetup, { expressions, visualizations }: MetricsPluginSetupDependencies) {
+    const { readOnly } = this.initializerContext.config.get<VisTypeTimeseriesPublicConfig>();
+
     visualizations.visEditorsRegistry.register(TSVB_EDITOR_NAME, EditorController);
     expressions.registerFunction(createMetricsFn);
     expressions.registerRenderer(
@@ -87,7 +90,11 @@ export class MetricsPlugin implements Plugin<void, void> {
       })
     );
     setUISettings(core.uiSettings);
-    visualizations.createBaseVisualization(metricsVisDefinition);
+    visualizations.createBaseVisualization({
+      ...metricsVisDefinition,
+      disableCreate: Boolean(readOnly),
+      disableEdit: Boolean(readOnly),
+    });
   }
 
   public start(

@@ -7,14 +7,18 @@
 import type { QueryObserverResult, UseQueryOptions } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { GetAgentPoliciesResponse, GetPackagesResponse } from '@kbn/fleet-plugin/common';
-import { useHttp } from '../../../common/lib/kibana';
+import type { GetInfoResponse } from '@kbn/fleet-plugin/common';
+import { firstValueFrom } from 'rxjs';
+import type { IKibanaSearchResponse } from '@kbn/data-plugin/common';
+import { ENDPOINT_PACKAGE_POLICIES_STATS_STRATEGY } from '../../../../common/endpoint/constants';
+import { useHttp, useKibana } from '../../../common/lib/kibana';
 import { MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
-import { sendBulkGetAgentPolicyList, sendGetEndpointSecurityPackage } from './ingest';
+import { sendGetEndpointSecurityPackage } from './ingest';
 import type { GetPolicyListResponse } from '../../pages/policy/types';
 import { sendGetEndpointSpecificPackagePolicies } from './policies';
 import type { ServerApiError } from '../../../common/types';
 
+// FIXME:PT move to `hooks` folder
 export function useGetEndpointSpecificPolicies(
   {
     onError,
@@ -34,6 +38,7 @@ export function useGetEndpointSpecificPolicies(
         query: {
           page,
           perPage,
+          withAgentCount: true,
         },
       });
     },
@@ -45,26 +50,19 @@ export function useGetEndpointSpecificPolicies(
   );
 }
 
-/**
- * @param policyIds: list of policyIds to grab the agent policies list for
- * @param customQueryOptions: useQuery options such as enabled, which will set whether the query automatically runs or not
- *
- * This hook returns the fleet agent policies list filtered by policy id
- */
-export function useGetAgentCountForPolicy({
-  agentPolicyIds,
-  customQueryOptions,
-}: {
-  agentPolicyIds: string[];
-  customQueryOptions?: UseQueryOptions<GetAgentPoliciesResponse, IHttpFetchError>;
-}): QueryObserverResult<GetAgentPoliciesResponse, IHttpFetchError> {
-  const http = useHttp();
-  return useQuery<GetAgentPoliciesResponse, IHttpFetchError>(
-    ['endpointCountForPolicy', agentPolicyIds],
-    () => {
-      return sendBulkGetAgentPolicyList(http, agentPolicyIds);
+export function useEndpointPackagePoliciesStats(enabled: boolean) {
+  const { data } = useKibana().services;
+  return useQuery(
+    ['endpointPackagePoliciesStatsStrategy'],
+    async () => {
+      return firstValueFrom(
+        data.search.search<{}, IKibanaSearchResponse<{ outdatedManifestsCount: number }>>(
+          {},
+          { strategy: ENDPOINT_PACKAGE_POLICIES_STATS_STRATEGY }
+        )
+      );
     },
-    customQueryOptions
+    { select: (response) => response.rawResponse, enabled }
   );
 }
 
@@ -74,10 +72,10 @@ export function useGetAgentCountForPolicy({
 export function useGetEndpointSecurityPackage({
   customQueryOptions,
 }: {
-  customQueryOptions?: UseQueryOptions<GetPackagesResponse['items'][number], IHttpFetchError>;
-}): QueryObserverResult<GetPackagesResponse['items'][number], IHttpFetchError> {
+  customQueryOptions?: UseQueryOptions<GetInfoResponse['item'], IHttpFetchError>;
+}): QueryObserverResult<GetInfoResponse['item'], IHttpFetchError> {
   const http = useHttp();
-  return useQuery<GetPackagesResponse['items'][number], IHttpFetchError>(
+  return useQuery<GetInfoResponse['item'], IHttpFetchError>(
     ['endpointPackageVersion', customQueryOptions],
     () => {
       return sendGetEndpointSecurityPackage(http);

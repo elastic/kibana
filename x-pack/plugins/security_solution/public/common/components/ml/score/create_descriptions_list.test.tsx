@@ -11,7 +11,7 @@ import { mockAnomalies } from '../mock';
 import { createDescriptionList } from './create_description_list';
 import { EuiDescriptionList } from '@elastic/eui';
 import type { Anomaly } from '../types';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 
 jest.mock('../../../lib/kibana');
 
@@ -33,7 +33,8 @@ describe('create_description_list', () => {
           startDate,
           endDate,
           'hours',
-          narrowDateRange
+          narrowDateRange,
+          'job-1'
         )}
       />
     );
@@ -48,7 +49,8 @@ describe('create_description_list', () => {
           startDate,
           endDate,
           'hours',
-          narrowDateRange
+          narrowDateRange,
+          'job-1'
         )}
       />
     );
@@ -69,7 +71,8 @@ describe('create_description_list', () => {
           startDate,
           endDate,
           'hours',
-          narrowDateRange
+          narrowDateRange,
+          'job-1'
         )}
       />
     );
@@ -129,7 +132,8 @@ describe('create_description_list', () => {
           startDate,
           endDate,
           'hours',
-          narrowDateRange
+          narrowDateRange,
+          'job-1'
         )}
       />
     );

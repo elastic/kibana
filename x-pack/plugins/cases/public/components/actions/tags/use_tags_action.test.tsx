@@ -53,31 +53,6 @@ describe('useTagsAction', () => {
     `);
   });
 
-  it('closes the flyout', async () => {
-    const { result, waitFor } = renderHook(
-      () => useTagsAction({ onAction, onActionSuccess, isDisabled: false }),
-      {
-        wrapper: appMockRender.AppWrapper,
-      }
-    );
-
-    const action = result.current.getAction([basicCase]);
-
-    act(() => {
-      action.onClick();
-    });
-
-    expect(result.current.isFlyoutOpen).toBe(true);
-
-    act(() => {
-      result.current.onFlyoutClosed();
-    });
-
-    await waitFor(() => {
-      expect(result.current.isFlyoutOpen).toBe(false);
-    });
-  });
-
   it('update the tags correctly', async () => {
     const updateSpy = jest.spyOn(api, 'updateCases');
 
@@ -98,49 +73,15 @@ describe('useTagsAction', () => {
     expect(result.current.isFlyoutOpen).toBe(true);
 
     act(() => {
-      result.current.onSaveTags({ selectedTags: ['one'], unSelectedTags: ['pepsi'] });
+      result.current.onSaveTags({ selectedItems: ['one'], unSelectedItems: ['pepsi'] });
     });
 
     await waitFor(() => {
       expect(result.current.isFlyoutOpen).toBe(false);
       expect(onActionSuccess).toHaveBeenCalled();
-      expect(updateSpy).toHaveBeenCalledWith(
-        [{ tags: ['coke', 'one'], id: basicCase.id, version: basicCase.version }],
-        expect.anything()
-      );
-    });
-  });
-
-  it('removes duplicates', async () => {
-    const updateSpy = jest.spyOn(api, 'updateCases');
-
-    const { result, waitFor } = renderHook(
-      () => useTagsAction({ onAction, onActionSuccess, isDisabled: false }),
-      {
-        wrapper: appMockRender.AppWrapper,
-      }
-    );
-
-    const action = result.current.getAction([basicCase]);
-
-    act(() => {
-      action.onClick();
-    });
-
-    expect(onAction).toHaveBeenCalled();
-    expect(result.current.isFlyoutOpen).toBe(true);
-
-    act(() => {
-      result.current.onSaveTags({ selectedTags: ['one', 'one'], unSelectedTags: ['pepsi'] });
-    });
-
-    await waitFor(() => {
-      expect(result.current.isFlyoutOpen).toBe(false);
-      expect(onActionSuccess).toHaveBeenCalled();
-      expect(updateSpy).toHaveBeenCalledWith(
-        [{ tags: ['coke', 'one'], id: basicCase.id, version: basicCase.version }],
-        expect.anything()
-      );
+      expect(updateSpy).toHaveBeenCalledWith({
+        cases: [{ tags: ['coke', 'one'], id: basicCase.id, version: basicCase.version }],
+      });
     });
   });
 
@@ -159,13 +100,14 @@ describe('useTagsAction', () => {
     });
 
     act(() => {
-      result.current.onSaveTags({ selectedTags: ['one', 'one'], unSelectedTags: ['pepsi'] });
+      result.current.onSaveTags({ selectedItems: ['one', 'one'], unSelectedItems: ['pepsi'] });
     });
 
     await waitFor(() => {
-      expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith(
-        'Edited case'
-      );
+      expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+        title: 'Edited case',
+        className: 'eui-textBreakWord',
+      });
     });
   });
 
@@ -184,13 +126,14 @@ describe('useTagsAction', () => {
     });
 
     act(() => {
-      result.current.onSaveTags({ selectedTags: ['one', 'one'], unSelectedTags: ['pepsi'] });
+      result.current.onSaveTags({ selectedItems: ['one', 'one'], unSelectedItems: ['pepsi'] });
     });
 
     await waitFor(() => {
-      expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith(
-        'Edited 2 cases'
-      );
+      expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+        title: 'Edited 2 cases',
+        className: 'eui-textBreakWord',
+      });
     });
   });
 });

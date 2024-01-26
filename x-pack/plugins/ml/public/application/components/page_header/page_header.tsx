@@ -7,7 +7,7 @@
 
 import React, { FC, useContext, useEffect } from 'react';
 import { InPortal, OutPortal } from 'react-reverse-portal';
-import { EuiLoadingContent } from '@elastic/eui';
+import { EuiSkeletonText } from '@elastic/eui';
 import { MlPageControlsContext } from '../ml_page/ml_page';
 
 /**
@@ -33,5 +33,5 @@ export const MlPageHeader: FC = ({ children }) => {
 export const MlPageHeaderRenderer: FC = () => {
   const { headerPortal, isHeaderMounted } = useContext(MlPageControlsContext);
 
-  return isHeaderMounted ? <OutPortal node={headerPortal} /> : <EuiLoadingContent lines={1} />;
+  return isHeaderMounted ? <OutPortal node={headerPortal} /> : <EuiSkeletonText lines={1} />;
 };

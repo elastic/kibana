@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
   ]);
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const dashboardSettings = getService('dashboardSettings');
   const filterBar = getService('filterBar');
   const elasticChart = getService('elasticChart');
   const kibanaServer = getService('kibanaServer');
@@ -34,8 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return colorMapping;
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/97403
-  describe.skip('sync colors', function () {
+  describe('sync colors', function () {
     before(async function () {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load(
@@ -48,14 +48,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
       );
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('should sync colors on dashboard by default', async function () {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await elasticChart.setNewChartUiDebugFlag(true);
       await PageObjects.dashboard.clickCreateDashboardPrompt();
       await dashboardAddPanel.clickCreateNewLink();
-      await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.lens.goToTimeRange();
 
       await PageObjects.lens.configureDimension({
@@ -68,12 +68,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'geo.src',
+        palette: { mode: 'legacy', id: 'default' },
       });
 
       await PageObjects.lens.save('vis1', false, true);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await dashboardAddPanel.clickCreateNewLink();
-      await PageObjects.header.waitUntilLoadingHasFinished();
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
@@ -85,14 +85,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'geo.src',
+        palette: { mode: 'legacy', id: 'default' },
       });
 
-      await filterBar.addFilter('geo.src', 'is not', 'CN');
+      await filterBar.addFilter({ field: 'geo.src', operation: 'is not', value: 'CN' });
 
       await PageObjects.lens.save('vis2', false, true);
+      await PageObjects.dashboard.openSettingsFlyout();
+      await dashboardSettings.toggleSyncColors(true);
+      await dashboardSettings.clickApplyButton();
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.dashboard.waitForRenderComplete();
+
       const colorMapping1 = getColorMapping(await PageObjects.dashboard.getPanelChartDebugState(0));
       const colorMapping2 = getColorMapping(await PageObjects.dashboard.getPanelChartDebugState(1));
+
       expect(Object.keys(colorMapping1)).to.have.length(6);
       expect(Object.keys(colorMapping1)).to.have.length(6);
       const panel1Keys = ['CN'];
@@ -115,7 +122,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should be possible to disable color sync', async () => {
-      await PageObjects.dashboard.useColorSync(false);
+      await PageObjects.dashboard.openSettingsFlyout();
+      await dashboardSettings.toggleSyncColors(false);
+      await dashboardSettings.clickApplyButton();
       await PageObjects.header.waitUntilLoadingHasFinished();
       const colorMapping1 = getColorMapping(await PageObjects.dashboard.getPanelChartDebugState(0));
       const colorMapping2 = getColorMapping(await PageObjects.dashboard.getPanelChartDebugState(1));

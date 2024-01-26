@@ -7,3 +7,8 @@ value:
     type: .jira
     fields: null
   closure_type: close-by-user
+  customFields:
+    - key: d312efda-ec2b-42ec-9e2c-84981795c581
+      label: my-text-field
+      required: false
+      type: text

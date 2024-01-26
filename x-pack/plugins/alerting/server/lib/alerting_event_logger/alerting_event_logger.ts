@@ -13,6 +13,7 @@ import {
 } from '@kbn/event-log-plugin/server';
 import { EVENT_LOG_ACTIONS } from '../../plugin';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { TaskRunnerTimings } from '../../task_runner/task_runner_timer';
 import { AlertInstanceState, RuleExecutionStatus } from '../../types';
 import { createAlertEventLogRecordObject } from '../create_alert_event_log_record_object';
@@ -30,6 +31,7 @@ export interface RuleContextOpts {
   executionId: string;
   taskScheduledAt: Date;
   ruleName?: string;
+  ruleRevision?: number;
 }
 
 type RuleContext = RuleContextOpts & {
@@ -45,17 +47,24 @@ interface DoneOpts {
 interface AlertOpts {
   action: string;
   id: string;
+  uuid: string;
   message: string;
   group?: string;
   state?: AlertInstanceState;
   flapping: boolean;
+  maintenanceWindowIds?: string[];
 }
 
 interface ActionOpts {
   id: string;
   typeId: string;
-  alertId: string;
+  alertId?: string;
   alertGroup?: string;
+  alertSummary?: {
+    new: number;
+    ongoing: number;
+    recovered: number;
+  };
 }
 
 export class AlertingEventLogger {
@@ -84,12 +93,12 @@ export class AlertingEventLogger {
     this.ruleContext = context;
   }
 
-  public start() {
+  public start(runDate: Date) {
     if (!this.isInitialized || !this.ruleContext) {
       throw new Error('AlertingEventLogger not initialized');
     }
 
-    this.startTime = new Date();
+    this.startTime = runDate;
 
     const context = {
       ...this.ruleContext,
@@ -129,6 +138,14 @@ export class AlertingEventLogger {
     }
 
     updateEvent(this.event, { message, outcome: 'success', alertingOutcome: 'success' });
+  }
+
+  public setMaintenanceWindowIds(maintenanceWindowIds: string[]) {
+    if (!this.isInitialized || !this.event) {
+      throw new Error('AlertingEventLogger not initialized');
+    }
+
+    updateEvent(this.event, { maintenanceWindowIds });
   }
 
   public setExecutionFailed(message: string, errorMessage: string) {
@@ -184,7 +201,7 @@ export class AlertingEventLogger {
           alertingOutcome: 'failure',
           reason: status.error?.reason || 'unknown',
           error: this.event?.error?.message || status.error.message,
-          ...(this.event.message
+          ...(this.event.message && this.event.event?.outcome === 'failure'
             ? {}
             : {
                 message: `${this.ruleContext.ruleType.id}:${this.ruleContext.ruleId}: execution failed`,
@@ -234,6 +251,7 @@ export function createAlertRecord(context: RuleContextOpts, alert: AlertOpts) {
     namespace: context.namespace,
     spaceId: context.spaceId,
     executionId: context.executionId,
+    alertUuid: alert.uuid,
     action: alert.action,
     state: alert.state,
     instanceId: alert.id,
@@ -242,13 +260,15 @@ export function createAlertRecord(context: RuleContextOpts, alert: AlertOpts) {
     savedObjects: [
       {
         id: context.ruleId,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         typeId: context.ruleType.id,
         relation: SAVED_OBJECT_REL_PRIMARY,
       },
     ],
     ruleName: context.ruleName,
     flapping: alert.flapping,
+    maintenanceWindowIds: alert.maintenanceWindowIds,
+    ruleRevision: context.ruleRevision,
   });
 }
 
@@ -267,7 +287,7 @@ export function createActionExecuteRecord(context: RuleContextOpts, action: Acti
     savedObjects: [
       {
         id: context.ruleId,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         typeId: context.ruleType.id,
         relation: SAVED_OBJECT_REL_PRIMARY,
       },
@@ -278,6 +298,8 @@ export function createActionExecuteRecord(context: RuleContextOpts, action: Acti
       },
     ],
     ruleName: context.ruleName,
+    alertSummary: action.alertSummary,
+    ruleRevision: context.ruleRevision,
   });
 }
 
@@ -298,12 +320,13 @@ export function createExecuteTimeoutRecord(context: RuleContextOpts) {
     savedObjects: [
       {
         id: context.ruleId,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         typeId: context.ruleType.id,
         relation: SAVED_OBJECT_REL_PRIMARY,
       },
     ],
     ruleName: context.ruleName,
+    ruleRevision: context.ruleRevision,
   });
 }
 
@@ -316,6 +339,7 @@ export function initializeExecuteRecord(context: RuleContext) {
     spaceId: context.spaceId,
     executionId: context.executionId,
     action: EVENT_LOG_ACTIONS.execute,
+    ruleRevision: context.ruleRevision,
     task: {
       scheduled: context.taskScheduledAt.toISOString(),
       scheduleDelay: Millis2Nanos * context.taskScheduleDelay,
@@ -323,7 +347,7 @@ export function initializeExecuteRecord(context: RuleContext) {
     savedObjects: [
       {
         id: context.ruleId,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         typeId: context.ruleType.id,
         relation: SAVED_OBJECT_REL_PRIMARY,
       },
@@ -341,11 +365,22 @@ interface UpdateEventOpts {
   reason?: string;
   metrics?: RuleRunMetrics;
   timings?: TaskRunnerTimings;
+  maintenanceWindowIds?: string[];
 }
 
 export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
-  const { message, outcome, error, ruleName, status, reason, metrics, timings, alertingOutcome } =
-    opts;
+  const {
+    message,
+    outcome,
+    error,
+    ruleName,
+    status,
+    reason,
+    metrics,
+    timings,
+    alertingOutcome,
+    maintenanceWindowIds,
+  } = opts;
   if (!event) {
     throw new Error('Cannot update event because it is not initialized.');
   }
@@ -420,5 +455,11 @@ export function updateEvent(event: IEvent, opts: UpdateEventOpts) {
       ...event.kibana.alert.rule.execution.metrics,
       ...timings,
     };
+  }
+
+  if (maintenanceWindowIds) {
+    event.kibana = event.kibana || {};
+    event.kibana.alert = event.kibana.alert || {};
+    event.kibana.alert.maintenance_window_ids = maintenanceWindowIds;
   }
 }

@@ -6,18 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { commonFunctionalUIServices } from '@kbn/ftr-common-functional-ui-services';
 import { services as commonServiceProviders } from '../../common/services';
 
 import { AppsMenuService } from './apps_menu';
 import {
-  BrowserProvider,
   FailureDebuggingProvider,
-  FindProvider,
   PngService,
   ScreenshotsService,
   SnapshotsService,
-  TestSubjects,
-  RetryOnStaleProvider,
 } from './common';
 import { ComboBoxService } from './combo_box';
 import {
@@ -25,7 +22,11 @@ import {
   DashboardReplacePanelService,
   DashboardExpectService,
   DashboardPanelActionsService,
+  DashboardCustomizePanelProvider,
+  DashboardBadgeActionsProvider,
   DashboardVisualizationsService,
+  DashboardDrilldownPanelActionsProvider,
+  DashboardDrilldownsManageProvider,
 } from './dashboard';
 import { DocTableService } from './doc_table';
 import { EmbeddingService } from './embedding';
@@ -36,7 +37,6 @@ import { InspectorService } from './inspector';
 import { FieldEditorService } from './field_editor';
 import { ManagementMenuService } from './management';
 import { QueryBarService } from './query_bar';
-import { RemoteProvider } from './remote';
 import { RenderableService } from './renderable';
 import { ToastsService } from './toasts';
 import { DataGridService } from './data_grid';
@@ -50,15 +50,15 @@ import { SavedQueryManagementComponentService } from './saved_query_management_c
 import { KibanaSupertestProvider } from './supertest';
 import { MenuToggleService } from './menu_toggle';
 import { MonacoEditorService } from './monaco_editor';
+import { UsageCollectionService } from './usage_collection';
+import { SavedObjectsFinderService } from './saved_objects_finder';
+import { DashboardSettingsProvider } from './dashboard/dashboard_settings';
 
 export const services = {
   ...commonServiceProviders,
-
-  __webdriver__: RemoteProvider,
+  ...commonFunctionalUIServices,
   filterBar: FilterBarService,
   queryBar: QueryBarService,
-  find: FindProvider,
-  testSubjects: TestSubjects,
   docTable: DocTableService,
   png: PngService,
   screenshots: ScreenshotsService,
@@ -70,12 +70,16 @@ export const services = {
   dashboardAddPanel: DashboardAddPanelService,
   dashboardReplacePanel: DashboardReplacePanelService,
   dashboardPanelActions: DashboardPanelActionsService,
+  dashboardCustomizePanel: DashboardCustomizePanelProvider,
+  dashboardBadgeActions: DashboardBadgeActionsProvider,
+  dashboardDrilldownPanelActions: DashboardDrilldownPanelActionsProvider,
+  dashboardDrilldownsManage: DashboardDrilldownsManageProvider,
+  dashboardSettings: DashboardSettingsProvider,
   flyout: FlyoutService,
   comboBox: ComboBoxService,
   dataGrid: DataGridService,
   embedding: EmbeddingService,
   renderable: RenderableService,
-  browser: BrowserProvider,
   pieChart: PieChartService,
   inspector: InspectorService,
   fieldEditor: FieldEditorService,
@@ -89,5 +93,6 @@ export const services = {
   managementMenu: ManagementMenuService,
   monacoEditor: MonacoEditorService,
   menuToggle: MenuToggleService,
-  retryOnStale: RetryOnStaleProvider,
+  usageCollection: UsageCollectionService,
+  savedObjectsFinder: SavedObjectsFinderService,
 };

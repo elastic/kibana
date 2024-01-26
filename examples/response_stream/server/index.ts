@@ -8,8 +8,7 @@
 
 import { PluginInitializerContext } from '@kbn/core/server';
 
-import { ResponseStreamPlugin } from './plugin';
-
-export function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { ResponseStreamPlugin } = await import('./plugin');
   return new ResponseStreamPlugin(initializerContext);
 }

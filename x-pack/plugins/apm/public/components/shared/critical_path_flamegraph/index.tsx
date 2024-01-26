@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Chart, Datum, Flame, Settings } from '@elastic/charts';
+import { Chart, Datum, Flame, Settings, Tooltip } from '@elastic/charts';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -12,10 +12,15 @@ import {
   euiPaletteColorBlind,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { useChartTheme } from '@kbn/observability-plugin/public';
+import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import { uniqueId } from 'lodash';
 import React, { useMemo, useRef } from 'react';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { i18n } from '@kbn/i18n';
+import {
+  FETCH_STATUS,
+  useFetcher,
+  isPending,
+} from '../../../hooks/use_fetcher';
 import { CriticalPathFlamegraphTooltip } from './critical_path_flamegraph_tooltip';
 import { criticalPathToFlamegraph } from './critical_path_to_flamegraph';
 
@@ -68,13 +73,10 @@ export function CriticalPathFlamegraph(
     [timerange, traceIds, serviceName, transactionName]
   );
 
-  const chartTheme = useChartTheme();
+  const chartThemes = useChartThemes();
 
   const isLoading =
-    traceIdsFetchStatus === FETCH_STATUS.NOT_INITIATED ||
-    traceIdsFetchStatus === FETCH_STATUS.LOADING ||
-    criticalPathFetchStatus === FETCH_STATUS.NOT_INITIATED ||
-    criticalPathFetchStatus === FETCH_STATUS.LOADING;
+    isPending(traceIdsFetchStatus) || isPending(criticalPathFetchStatus);
 
   const flameGraph = useMemo(() => {
     if (!criticalPath) {
@@ -116,37 +118,36 @@ export function CriticalPathFlamegraph(
         flameGraph && (
           <EuiFlexItem grow>
             <Chart key={flameGraph.key} className={chartClassName}>
+              <Tooltip
+                customTooltip={(tooltipProps) => {
+                  const valueIndex = tooltipProps.values[0]
+                    .valueAccessor as number;
+                  const operationId = flameGraph.operationId[valueIndex];
+                  const operationMetadata = criticalPath?.metadata[operationId];
+                  const countInclusive = flameGraph.viewModel.value[valueIndex];
+                  const countExclusive = flameGraph.countExclusive[valueIndex];
+
+                  return (
+                    <CriticalPathFlamegraphTooltip
+                      metadata={operationMetadata}
+                      countInclusive={countInclusive}
+                      countExclusive={countExclusive}
+                      totalCount={flameGraph.viewModel.value[0]}
+                    />
+                  );
+                }}
+              />
               <Settings
                 theme={[
                   {
                     chartMargins: themeOverrides.chartMargins,
                     chartPaddings: themeOverrides.chartPaddings,
                   },
-                  ...chartTheme,
+                  ...chartThemes.theme,
                 ]}
-                tooltip={{
-                  customTooltip: (tooltipProps) => {
-                    const valueIndex = tooltipProps.values[0]
-                      .valueAccessor as number;
-                    const operationId = flameGraph.operationId[valueIndex];
-                    const operationMetadata =
-                      criticalPath?.metadata[operationId];
-                    const countInclusive =
-                      flameGraph.viewModel.value[valueIndex];
-                    const countExclusive =
-                      flameGraph.countExclusive[valueIndex];
-
-                    return (
-                      <CriticalPathFlamegraphTooltip
-                        metadata={operationMetadata}
-                        countInclusive={countInclusive}
-                        countExclusive={countExclusive}
-                        totalCount={flameGraph.viewModel.value[0]}
-                      />
-                    );
-                  },
-                }}
+                baseTheme={chartThemes.baseTheme}
                 onElementClick={(elements) => {}}
+                locale={i18n.getLocale()}
               />
               <Flame
                 id="aggregated_critical_path"

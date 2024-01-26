@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { DeprecationsDetails, GetDeprecationsContext } from '@kbn/core/server';
-import { API_MIGRATE_ILM_POLICY_URL, ILM_POLICY_NAME } from '../../common/constants';
+import { i18n } from '@kbn/i18n';
+import { ILM_POLICY_NAME } from '@kbn/reporting-common';
+import { INTERNAL_ROUTES } from '../../common/constants';
 import { ReportingCore } from '../core';
 import { deprecations } from '../lib/deprecations';
 
@@ -54,7 +55,7 @@ export const getDeprecationsInfo = async (
           ],
           api: {
             method: 'PUT',
-            path: API_MIGRATE_ILM_POLICY_URL,
+            path: INTERNAL_ROUTES.MIGRATE.MIGRATE_ILM_POLICY,
           },
         },
       },

@@ -13,13 +13,13 @@ import {
   mockTimelineModel,
   mockGetOneTimelineResult,
 } from '../../../common/mock';
-import { timelineDefaults } from '../../store/timeline/defaults';
+import { timelineDefaults } from '../../store/defaults';
 import { setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker } from '../../../common/store/inputs/actions';
 import {
   applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
   addTimeline as dispatchAddTimeline,
   addNote as dispatchAddGlobalTimelineNote,
-} from '../../store/timeline/actions';
+} from '../../store/actions';
 import {
   addNotes as dispatchAddNotes,
   updateNote as dispatchUpdateNote,
@@ -40,7 +40,8 @@ import type { Note } from '../../../common/lib/note';
 import moment from 'moment';
 import sinon from 'sinon';
 import type { KueryFilterQueryKind } from '../../../../common/types/timeline';
-import { TimelineId, TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import { TimelineId } from '../../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
 import {
   mockTimeline as mockSelectedTimeline,
   mockTemplate as mockSelectedTemplate,
@@ -49,12 +50,12 @@ import { resolveTimeline } from '../../containers/api';
 
 jest.mock('../../../common/store/inputs/actions');
 jest.mock('../../../common/utils/normalize_time_range');
-jest.mock('../../store/timeline/actions');
+jest.mock('../../store/actions');
 jest.mock('../../../common/store/app/actions');
 jest.mock('uuid', () => {
   return {
-    v1: jest.fn(() => 'uuid.v1()'),
-    v4: jest.fn(() => 'uuid.v4()'),
+    v1: jest.fn(() => 'uuidv1()'),
+    v4: jest.fn(() => 'uuidv4()'),
   };
 });
 
@@ -631,6 +632,7 @@ describe('helpers', () => {
               end: '2020-07-08T08:20:18.966Z',
             },
           },
+          preventSettingQuery: true,
           duplicate: false,
           from: '2020-07-07T08:20:18.966Z',
           to: '2020-07-08T08:20:18.966Z',
@@ -775,7 +777,12 @@ describe('helpers', () => {
       expect(dispatchAddTimeline).toHaveBeenCalledWith({
         id: TimelineId.active,
         savedTimeline: true,
-        timeline: mockTimelineModel,
+        timeline: {
+          ...mockTimelineModel,
+          version: null,
+          updated: undefined,
+          changed: undefined,
+        },
       });
     });
 
@@ -846,6 +853,8 @@ describe('helpers', () => {
             updated: 1585233356356,
             noteId: 'note-id',
             note: 'I am a note',
+            timelineId: null,
+            version: 'testVersion',
           },
         ],
       })();
@@ -863,7 +872,7 @@ describe('helpers', () => {
             user: 'unknown',
             saveObjectId: 'note-id',
             timelineId: null,
-            version: undefined,
+            version: 'testVersion',
           },
         ],
       });
@@ -876,7 +885,7 @@ describe('helpers', () => {
       })();
       const expectedNote: Note = {
         created: new Date(anchor),
-        id: 'uuid.v4()',
+        id: 'uuidv4()',
         lastEdit: null,
         note: '# this would be some markdown',
         saveObjectId: null,
@@ -888,7 +897,7 @@ describe('helpers', () => {
       expect(dispatchUpdateNote).toHaveBeenCalledWith({ note: expectedNote });
       expect(dispatchAddGlobalTimelineNote).toHaveBeenLastCalledWith({
         id: TimelineId.active,
-        noteId: 'uuid.v4()',
+        noteId: 'uuidv4()',
       });
     });
   });

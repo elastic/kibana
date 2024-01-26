@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { checkPermission } from '../../../../capabilities/check_capabilities';
+import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
 
 import React from 'react';
@@ -16,7 +16,8 @@ import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_cr
 import { ML_PAGES } from '../../../../../../common/constants/locator';
 
 export function NewJobButton() {
-  const buttonEnabled = checkPermission('canCreateJob') && mlNodesAvailable();
+  const canCreateJob = usePermissionCheck('canCreateJob');
+  const buttonEnabled = canCreateJob && mlNodesAvailable();
   const newJob = useCreateAndNavigateToMlLink(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX);
 
   return (

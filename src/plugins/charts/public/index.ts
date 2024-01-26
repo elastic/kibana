@@ -9,7 +9,11 @@
 // TODO: https://github.com/elastic/kibana/issues/110891
 /* eslint-disable @kbn/eslint/no_export_all */
 
-import { RangeSelectContext, ValueClickContext } from '@kbn/embeddable-plugin/public';
+import {
+  RangeSelectContext,
+  ValueClickContext,
+  MultiValueClickContext,
+} from '@kbn/embeddable-plugin/public';
 import { ChartsPlugin } from './plugin';
 
 export const plugin = () => new ChartsPlugin();
@@ -30,6 +34,11 @@ export interface BrushTriggerEvent {
   data: RangeSelectContext['data'];
 }
 
+export interface MultiClickTriggerEvent {
+  name: 'multiFilter';
+  data: MultiValueClickContext['data'];
+}
+
 export type {
   CustomPaletteArguments,
   CustomPaletteState,
@@ -47,8 +56,6 @@ export {
   vislibColorMaps,
   colorSchemas,
   getHeatmapColors,
-  truncatedColorMaps,
-  truncatedColorSchemas,
   ColorMode,
   LabelRotation,
   defaultCountLabel,

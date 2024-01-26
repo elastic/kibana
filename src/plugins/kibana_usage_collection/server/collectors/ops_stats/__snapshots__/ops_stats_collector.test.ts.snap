@@ -26,7 +26,14 @@ Object {
   "process": Object {
     "event_loop_delay": 1,
     "event_loop_delay_histogram": Any<Object>,
+    "event_loop_utilization": Object {
+      "active": 1,
+      "idle": 1,
+      "utilization": 1,
+    },
     "memory": Object {
+      "array_buffers_in_bytes": 1,
+      "external_in_bytes": 1,
       "heap": Object {
         "size_limit": 1,
         "total_in_bytes": 1,
@@ -40,7 +47,14 @@ Object {
     Object {
       "event_loop_delay": 1,
       "event_loop_delay_histogram": Any<Object>,
+      "event_loop_utilization": Object {
+        "active": 1,
+        "idle": 1,
+        "utilization": 1,
+      },
       "memory": Object {
+        "array_buffers_in_bytes": 1,
+        "external_in_bytes": 1,
         "heap": Object {
           "size_limit": 1,
           "total_in_bytes": 1,

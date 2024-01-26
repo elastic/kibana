@@ -6,13 +6,14 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { NetworkHttpRequestOptions } from '../../../../../../../common/api/search_strategy';
 
-import type {
+import type { SortField } from '../../../../../../../common/search_strategy';
+import {
+  Direction,
+  NetworkQueries,
   NetworkDnsFields,
-  NetworkHttpRequestOptions,
-  SortField,
 } from '../../../../../../../common/search_strategy';
-import { Direction, NetworkQueries } from '../../../../../../../common/search_strategy';
 
 export const mockOptions: NetworkHttpRequestOptions = {
   defaultIndex: [
@@ -28,7 +29,10 @@ export const mockOptions: NetworkHttpRequestOptions = {
   factoryQueryType: NetworkQueries.http,
   filterQuery: '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
   pagination: { activePage: 0, cursorStart: 0, fakePossibleCount: 50, querySize: 10 },
-  sort: { direction: Direction.desc } as SortField<NetworkDnsFields>,
+  sort: {
+    direction: Direction.desc,
+    field: NetworkDnsFields.dnsName,
+  } as SortField<NetworkDnsFields>,
   timerange: { interval: '12h', from: '2020-09-13T09:00:43.249Z', to: '2020-09-14T09:00:43.249Z' },
 } as NetworkHttpRequestOptions;
 
@@ -83,8 +87,8 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
               buckets: [
-                { key: 200, doc_count: 72174 },
-                { key: 401, doc_count: 34530 },
+                { key: '200', doc_count: 72174 },
+                { key: '401', doc_count: 34530 },
               ],
             },
           },
@@ -125,8 +129,8 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
               buckets: [
-                { key: 200, doc_count: 75394 },
-                { key: 401, doc_count: 1350 },
+                { key: '200', doc_count: 75394 },
+                { key: '401', doc_count: 1350 },
               ],
             },
           },
@@ -166,7 +170,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
             status: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
-              buckets: [{ key: 200, doc_count: 58746 }],
+              buckets: [{ key: '200', doc_count: 58746 }],
             },
           },
           {
@@ -202,7 +206,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
             status: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
-              buckets: [{ key: 200, doc_count: 28715 }],
+              buckets: [{ key: '200', doc_count: 28715 }],
             },
           },
           {
@@ -238,7 +242,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
             status: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
-              buckets: [{ key: 200, doc_count: 28161 }],
+              buckets: [{ key: '200', doc_count: 28161 }],
             },
           },
           {
@@ -277,7 +281,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
             status: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
-              buckets: [{ key: 200, doc_count: 23283 }],
+              buckets: [{ key: '200', doc_count: 23283 }],
             },
           },
           {
@@ -317,8 +321,8 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
               buckets: [
-                { key: 200, doc_count: 12084 },
-                { key: 401, doc_count: 8640 },
+                { key: '200', doc_count: 12084 },
+                { key: '401', doc_count: 8640 },
               ],
             },
           },
@@ -365,10 +369,10 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 3,
               buckets: [
-                { key: 401, doc_count: 18220 },
-                { key: 404, doc_count: 30 },
-                { key: 302, doc_count: 27 },
-                { key: 200, doc_count: 26 },
+                { key: '401', doc_count: 18220 },
+                { key: '404', doc_count: 30 },
+                { key: '302', doc_count: 27 },
+                { key: '200', doc_count: 26 },
               ],
             },
           },
@@ -408,7 +412,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
             status: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
-              buckets: [{ key: 200, doc_count: 18048 }],
+              buckets: [{ key: '200', doc_count: 18048 }],
             },
           },
           {
@@ -444,7 +448,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
             status: {
               doc_count_error_upper_bound: 0,
               sum_other_doc_count: 0,
-              buckets: [{ key: 200, doc_count: 14046 }],
+              buckets: [{ key: '200', doc_count: 14046 }],
             },
           },
         ],

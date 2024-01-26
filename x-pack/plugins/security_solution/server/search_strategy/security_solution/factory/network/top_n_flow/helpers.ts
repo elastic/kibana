@@ -8,20 +8,16 @@
 import { getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import { assertUnreachable } from '../../../../../../common/utility_types';
+import type { NetworkTopNFlowRequestOptions } from '../../../../../../common/api/search_strategy';
 import type {
   Direction,
   GeoItem,
-  SortField,
   NetworkTopNFlowBuckets,
   NetworkTopNFlowEdges,
-  NetworkTopNFlowRequestOptions,
   AutonomousSystemItem,
-} from '../../../../../../common/search_strategy';
-import {
-  NetworkTopTablesFields,
   FlowTargetSourceDest,
 } from '../../../../../../common/search_strategy';
+import { NetworkTopTablesFields } from '../../../../../../common/search_strategy';
 import { getOppositeField } from '../helpers';
 import {
   formatResponseObjectValues,
@@ -48,7 +44,7 @@ const formatTopNFlowEdges = (
       [flowTarget]: {
         domain: bucket.domain.buckets.map((bucketDomain) => bucketDomain.key),
         ip: bucket.key,
-        location: getGeoItem(bucket),
+        location: getGeoItem(bucket, flowTarget),
         autonomous_system: getAsItem(bucket),
         flows: getOr(0, 'flows.value', bucket),
         [`${getOppositeField(flowTarget)}_ips`]: getOr(
@@ -68,24 +64,22 @@ const formatTopNFlowEdges = (
     },
   }));
 
-const getFlowTargetFromString = (flowAsString: string) =>
-  flowAsString === 'source' ? FlowTargetSourceDest.source : FlowTargetSourceDest.destination;
-
-const getGeoItem = (result: NetworkTopNFlowBuckets): GeoItem | null =>
+const getGeoItem = (
+  result: NetworkTopNFlowBuckets,
+  flowTarget: FlowTargetSourceDest
+): GeoItem | null =>
   result.location.top_geo.hits.hits.length > 0 && result.location.top_geo.hits.hits[0].fields
     ? {
         geo: formatResponseObjectValues(
           getOr(
             '',
-            `${Object.keys(result.location.top_geo.hits.hits[0].fields)[0].split('.geo')[0]}.geo`,
+            `${flowTarget}.geo`,
             unflattenObject(
               transformLocationFields(getOr({}, `location.top_geo.hits.hits[0].fields`, result))
             )
           )
         ),
-        flowTarget: getFlowTargetFromString(
-          Object.keys(result.location.top_geo.hits.hits[0].fields)[0].split('.geo')[0]
-        ),
+        flowTarget,
       }
     : null;
 
@@ -118,19 +112,19 @@ type QueryOrder =
   | { source_ips: Direction };
 
 export const getQueryOrder = (
-  networkTopNFlowSortField: SortField<NetworkTopTablesFields>
+  networkTopNFlowSortField: NetworkTopNFlowRequestOptions['sort']
 ): QueryOrder => {
-  switch (networkTopNFlowSortField.field) {
-    case NetworkTopTablesFields.bytes_in:
-      return { bytes_in: networkTopNFlowSortField.direction };
-    case NetworkTopTablesFields.bytes_out:
-      return { bytes_out: networkTopNFlowSortField.direction };
-    case NetworkTopTablesFields.flows:
-      return { flows: networkTopNFlowSortField.direction };
-    case NetworkTopTablesFields.destination_ips:
-      return { destination_ips: networkTopNFlowSortField.direction };
-    case NetworkTopTablesFields.source_ips:
-      return { source_ips: networkTopNFlowSortField.direction };
+  if (networkTopNFlowSortField.field === NetworkTopTablesFields.bytes_in) {
+    return { bytes_in: networkTopNFlowSortField.direction };
+  } else if (networkTopNFlowSortField.field === NetworkTopTablesFields.bytes_out) {
+    return { bytes_out: networkTopNFlowSortField.direction };
+  } else if (networkTopNFlowSortField.field === NetworkTopTablesFields.flows) {
+    return { flows: networkTopNFlowSortField.direction };
+  } else if (networkTopNFlowSortField.field === NetworkTopTablesFields.destination_ips) {
+    return { destination_ips: networkTopNFlowSortField.direction };
+  } else if (networkTopNFlowSortField.field === NetworkTopTablesFields.source_ips) {
+    return { source_ips: networkTopNFlowSortField.direction };
+  } else {
+    throw new Error(`Ordering on ${networkTopNFlowSortField.field} not currently supported`);
   }
-  assertUnreachable(networkTopNFlowSortField.field);
 };

@@ -162,6 +162,20 @@ export type AggregateOf<
       cardinality: {
         value: number;
       };
+      change_point: {
+        bucket?: {
+          key: string;
+        };
+        type: Record<
+          string,
+          {
+            change_point?: number;
+            r_value?: number;
+            trend?: string;
+            p_value: number;
+          }
+        >;
+      };
       children: {
         doc_count: number;
       } & SubAggregateOf<TAggregationContainer, TDocument>;
@@ -577,7 +591,7 @@ export type AggregateOf<
   >
 >;
 
-type AggregateOfMap<TAggregationMap extends AggregationMap | undefined, TDocument> = {
+export type AggregateOfMap<TAggregationMap extends AggregationMap | undefined, TDocument> = {
   [TAggregationName in keyof TAggregationMap]: Required<TAggregationMap>[TAggregationName] extends AggregationsAggregationContainer
     ? AggregateOf<TAggregationMap[TAggregationName], TDocument>
     : never; // using never means we effectively ignore optional keys, using {} creates a union type of { ... } | {}
@@ -630,3 +644,34 @@ export type InferSearchResponseOf<
         >;
       };
   };
+
+export interface ClusterDetails {
+  status: 'running' | 'successful' | 'partial' | 'skipped' | 'failed';
+  indices: string;
+  took?: number;
+  timed_out: boolean;
+  _shards?: estypes.ShardStatistics;
+  failures?: estypes.ShardFailure[];
+}
+
+export interface ESQLColumn {
+  name: string;
+  type: string;
+}
+
+export type ESQLRow = unknown[];
+
+export interface ESQLSearchReponse {
+  columns: ESQLColumn[];
+  values: ESQLRow[];
+}
+
+export interface ESQLSearchParams {
+  // TODO: time_zone support was temporarily removed from ES|QL,
+  // we will need to add it back in once it is supported again.
+  // https://github.com/elastic/elasticsearch/pull/102767
+  // time_zone?: string;
+  query: string;
+  filter?: unknown;
+  locale?: string;
+}

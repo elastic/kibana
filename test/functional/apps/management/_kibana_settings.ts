@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('when false, dashboard state is unhashed', async function () {
-        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         const globalState = await getStateFromUrl();
@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('when true, dashboard state is hashed', async function () {
-        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         const globalState = await getStateFromUrl();

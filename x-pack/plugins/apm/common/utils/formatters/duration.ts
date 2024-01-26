@@ -31,7 +31,11 @@ export type TimeFormatter = (
   options?: FormatterOptions
 ) => ConvertedDuration;
 
-type TimeFormatterBuilder = (max: number, threshold?: number) => TimeFormatter;
+type TimeFormatterBuilder = (
+  max: number,
+  threshold?: number,
+  scalingFactor?: number
+) => TimeFormatter;
 
 // threshold defines the value from which upwards there should be no decimal places.
 function getUnitLabelAndConvertedValue(
@@ -150,10 +154,15 @@ function getDurationUnitKey(max: number, threshold = 10): DurationTimeUnit {
 // memoizer with a custom resolver to consider both arguments max/threshold.
 // by default lodash's memoize only considers the first argument.
 export const getDurationFormatter: TimeFormatterBuilder = memoize(
-  (max: number, threshold: number = 10) => {
+  (max: number, threshold: number = 10, scalingFactor: number = 1) => {
     const unit = getDurationUnitKey(max, threshold);
     return (value: Maybe<number>, { defaultValue }: FormatterOptions = {}) => {
-      return convertTo({ unit, microseconds: value, defaultValue, threshold });
+      return convertTo({
+        unit,
+        microseconds: isFiniteNumber(value) ? value * scalingFactor : value,
+        defaultValue,
+        threshold,
+      });
     };
   },
   (max, threshold) => `${max}_${threshold}`

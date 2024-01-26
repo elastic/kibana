@@ -23,11 +23,12 @@ describe('get_list_item_template', () => {
   test('it returns a list template with the string filled in', async () => {
     const template = getListItemTemplate('some_index');
     expect(template).toEqual({
-      index_patterns: ['some_index-*'],
+      data_stream: {},
+      index_patterns: ['some_index'],
       template: {
+        lifecycle: {},
         mappings: { listMappings: {} },
         settings: {
-          index: { lifecycle: { name: 'some_index', rollover_alias: 'some_index' } },
           mapping: {
             total_fields: {
               limit: 10000,

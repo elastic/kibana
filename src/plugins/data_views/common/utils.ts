@@ -6,10 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { DataViewSavedObjectAttrs } from './data_views';
-import type { SavedObjectsClientCommon } from './types';
-
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from './constants';
+import type { PersistenceAPI } from './types';
 
 /**
  * Returns an object matching a given name
@@ -18,10 +15,9 @@ import { DATA_VIEW_SAVED_OBJECT_TYPE } from './constants';
  * @param name {string}
  * @returns {SavedObject|undefined}
  */
-export async function findByName(client: SavedObjectsClientCommon, name: string) {
+export async function findByName(client: PersistenceAPI, name: string) {
   if (name) {
-    const savedObjects = await client.find<{ name: DataViewSavedObjectAttrs['name'] }>({
-      type: DATA_VIEW_SAVED_OBJECT_TYPE,
+    const savedObjects = await client.find({
       perPage: 10,
       search: `"${name}"`,
       searchFields: ['name.keyword'],
@@ -30,4 +26,12 @@ export async function findByName(client: SavedObjectsClientCommon, name: string)
 
     return savedObjects ? savedObjects[0] : undefined;
   }
+}
+
+export function unwrapEtag(ifNoneMatch: string) {
+  let requestHash = ifNoneMatch.replace(/^"(.+)"$/, '$1');
+  if (requestHash.indexOf('-') > -1) {
+    requestHash = requestHash.split('-')[0];
+  }
+  return requestHash;
 }

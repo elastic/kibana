@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isArray, isEmpty, pickBy, map } from 'lodash';
+import { isArray, isEmpty, pickBy, map, isNumber } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBasicTable,
@@ -20,9 +20,10 @@ import {
 import React, { useState, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 
+import { QUERY_TIMEOUT } from '../../common/constants';
+import { removeMultilines } from '../../common/utils/build_query/remove_multilines';
 import { useAllLiveQueries } from './use_all_live_queries';
 import type { SearchHit } from '../../common/search_strategy';
-import { Direction } from '../../common/search_strategy';
 import { useRouterNavigate, useKibana } from '../common/lib/kibana';
 import { usePacks } from '../packs/use_packs';
 
@@ -62,13 +63,7 @@ const ActionsTableComponent = () => {
   const { data: actionsData } = useAllLiveQueries({
     activePage: pageIndex,
     limit: pageSize,
-    direction: Direction.desc,
-    sortField: '@timestamp',
-    filterQuery: {
-      exists: {
-        field: 'user_id',
-      },
-    },
+    kuery: 'user_id: *',
   });
 
   const onTableChange = useCallback(({ page = {} }) => {
@@ -90,9 +85,13 @@ const ActionsTableComponent = () => {
       );
     }
 
+    const query = item._source.queries[0].query;
+    const singleLine = removeMultilines(query);
+    const content = singleLine.length > 90 ? `${singleLine?.substring(0, 90)}...` : singleLine;
+
     return (
       <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
-        {item._source.queries[0].query}
+        {content}
       </EuiCodeBlock>
     );
   }, []);
@@ -138,6 +137,7 @@ const ActionsTableComponent = () => {
             query: item._source.queries[0].query,
             ecs_mapping: item._source.queries[0].ecs_mapping,
             savedQueryId: item._source.queries[0].saved_query_id,
+            timeout: item._source.queries[0].timeout ?? QUERY_TIMEOUT.DEFAULT,
             agentSelection: {
               agents: item._source.agent_ids,
               allAgentsSelected: item._source.agent_all,
@@ -145,7 +145,7 @@ const ActionsTableComponent = () => {
               policiesSelected: item._source.agent_policy_ids,
             },
           },
-          (value) => !isEmpty(value)
+          (value) => !isEmpty(value) || isNumber(value)
         ),
       });
     },
@@ -196,6 +196,7 @@ const ActionsTableComponent = () => {
           defaultMessage: 'Query',
         }),
         truncateText: true,
+        width: '60%',
         render: renderQueryColumn,
       },
       {
@@ -258,6 +259,13 @@ const ActionsTableComponent = () => {
     [actionsData, pageIndex, pageSize]
   );
 
+  const rowProps = useCallback(
+    (data) => ({
+      'data-test-subj': `row-${data._source.action_id}`,
+    }),
+    []
+  );
+
   return (
     <EuiBasicTable
       items={actionsData?.data?.items ?? EMPTY_ARRAY}
@@ -265,6 +273,8 @@ const ActionsTableComponent = () => {
       columns={columns}
       pagination={pagination}
       onChange={onTableChange}
+      rowProps={rowProps}
+      data-test-subj="liveQueryActionsTable"
     />
   );
 };

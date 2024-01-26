@@ -9,7 +9,7 @@
 import { Logger } from '../cli/logger';
 import { confirm, question } from './utils';
 // import from path since add.test.js mocks 'fs' required for @kbn/utils
-import { createPromiseFromStreams, createConcatStream } from '@kbn/utils/target_node/src/streams';
+import { createPromiseFromStreams, createConcatStream } from '@kbn/utils/src/streams';
 
 /**
  * @param {Keystore} keystore
@@ -64,7 +64,9 @@ export async function add(keystore, key, options = {}) {
 export function addCli(program, keystore) {
   program
     .command('add <key>')
-    .description('Add a string setting to the keystore')
+    .description(
+      'Add a setting to the keystore. Note: The value will be JSON parsed. Use quotes to force string inputs.'
+    )
     .option('-f, --force', 'overwrite existing setting without prompting')
     .option('-x, --stdin', 'read setting value from stdin')
     .option('-s, --silent', 'prevent all logging')

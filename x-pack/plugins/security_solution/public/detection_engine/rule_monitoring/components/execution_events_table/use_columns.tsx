@@ -13,7 +13,7 @@ import type {
   LogLevel,
   RuleExecutionEvent,
   RuleExecutionEventType,
-} from '../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../common/api/detection_engine/rule_monitoring';
 
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { EventTypeIndicator } from '../basic/indicators/event_type_indicator';

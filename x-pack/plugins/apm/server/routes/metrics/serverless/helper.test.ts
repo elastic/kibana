@@ -8,7 +8,32 @@ import {
   calcMemoryUsed,
   calcMemoryUsedRate,
   calcEstimatedCost,
+  convertComputeUsageToGbSec,
 } from './helper';
+
+describe('convertComputeUsageToGbSec', () => {
+  it('returns undefined', () => {
+    [
+      { computeUsageBytesMs: undefined, countInvocations: 1 },
+      { computeUsageBytesMs: null, countInvocations: 1 },
+      { computeUsageBytesMs: 1, countInvocations: undefined },
+      { computeUsageBytesMs: 1, countInvocations: null },
+    ].forEach(({ computeUsageBytesMs, countInvocations }) => {
+      expect(
+        convertComputeUsageToGbSec({ computeUsageBytesMs, countInvocations })
+      ).toBeUndefined();
+    });
+  });
+
+  it('converts to gb sec', () => {
+    const totalMemory = 536870912; // 0.5gb
+    const billedDuration = 4000;
+    const computeUsageBytesMs = totalMemory * billedDuration;
+    expect(
+      convertComputeUsageToGbSec({ computeUsageBytesMs, countInvocations: 1 })
+    ).toBe(computeUsageBytesMs / 1024 ** 3 / 1000);
+  });
+});
 describe('calcMemoryUsed', () => {
   it('returns undefined when memory values are no a number', () => {
     [
@@ -49,13 +74,19 @@ const AWS_LAMBDA_PRICE_FACTOR = {
 };
 
 describe('calcEstimatedCost', () => {
+  const totalMemory = 536870912; // 0.5gb
+  const billedDuration = 4000;
+  const computeUsageBytesMs = totalMemory * billedDuration;
+  const computeUsageGbSec = convertComputeUsageToGbSec({
+    computeUsageBytesMs,
+    countInvocations: 1,
+  });
   it('returns undefined when price factor is not defined', () => {
     expect(
       calcEstimatedCost({
-        totalMemory: 1,
-        billedDuration: 1,
         transactionThroughput: 1,
         architecture: 'arm',
+        computeUsageGbSec,
       })
     ).toBeUndefined();
   });
@@ -63,10 +94,9 @@ describe('calcEstimatedCost', () => {
   it('returns undefined when architecture is not defined', () => {
     expect(
       calcEstimatedCost({
-        totalMemory: 1,
-        billedDuration: 1,
         transactionThroughput: 1,
         awsLambdaPriceFactor: AWS_LAMBDA_PRICE_FACTOR,
+        computeUsageGbSec,
       })
     ).toBeUndefined();
   });
@@ -84,11 +114,10 @@ describe('calcEstimatedCost', () => {
   it('returns undefined when request cost per million is not defined', () => {
     expect(
       calcEstimatedCost({
-        totalMemory: 1,
-        billedDuration: 1,
         transactionThroughput: 1,
         awsLambdaPriceFactor: AWS_LAMBDA_PRICE_FACTOR,
         architecture: 'arm',
+        computeUsageGbSec,
       })
     ).toBeUndefined();
   });
@@ -100,11 +129,9 @@ describe('calcEstimatedCost', () => {
         calcEstimatedCost({
           awsLambdaPriceFactor: AWS_LAMBDA_PRICE_FACTOR,
           architecture,
-          billedDuration: 4000,
-          totalMemory: 536870912, // 0.5gb
           transactionThroughput: 100000,
           awsLambdaRequestCostPerMillion: 0.2,
-          countInvocations: 1,
+          computeUsageGbSec,
         })
       ).toEqual(0.03);
     });
@@ -112,15 +139,20 @@ describe('calcEstimatedCost', () => {
   describe('arm architecture', () => {
     const architecture = 'arm';
     it('returns correct cost', () => {
+      const _totalMemory = 536870912; // 0.5gb
+      const _billedDuration = 8000;
+      const _computeUsageBytesMs = _totalMemory * _billedDuration;
+      const _computeUsageGbSec = convertComputeUsageToGbSec({
+        computeUsageBytesMs: _computeUsageBytesMs,
+        countInvocations: 1,
+      });
       expect(
         calcEstimatedCost({
           awsLambdaPriceFactor: AWS_LAMBDA_PRICE_FACTOR,
           architecture,
-          billedDuration: 8000,
-          totalMemory: 536870912, // 0.5gb
           transactionThroughput: 200000,
           awsLambdaRequestCostPerMillion: 0.2,
-          countInvocations: 1,
+          computeUsageGbSec: _computeUsageGbSec,
         })
       ).toEqual(0.05);
     });

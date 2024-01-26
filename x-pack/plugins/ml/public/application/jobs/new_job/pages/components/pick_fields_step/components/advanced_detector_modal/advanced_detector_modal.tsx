@@ -16,18 +16,19 @@ import {
   EuiHorizontalRule,
   EuiTextArea,
 } from '@elastic/eui';
+import {
+  type Field,
+  type Aggregation,
+  EVENT_RATE_FIELD_ID,
+  mlCategory,
+} from '@kbn/ml-anomaly-utils';
+import { useFieldStatsTrigger } from '../../../../../../../components/field_stats_flyout/use_field_stats_trigger';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { AdvancedJobCreator } from '../../../../../common/job_creator';
 import {
   createFieldOptions,
   createMlcategoryFieldOption,
 } from '../../../../../common/job_creator/util/general';
-import {
-  Field,
-  Aggregation,
-  EVENT_RATE_FIELD_ID,
-  mlCategory,
-} from '../../../../../../../../../common/types/fields';
 import { filterCategoryFields } from '../../../../../../../../../common/util/fields_utils';
 import { RichDetector } from '../../../../../common/job_creator/advanced_job_creator';
 import { ModalWrapper } from './modal_wrapper';
@@ -99,9 +100,12 @@ export const AdvancedDetectorModal: FC<Props> = ({
   const usingScriptFields = jobCreator.additionalFields.length > 0;
   // list of aggregation combobox options.
 
+  const { renderOption, optionCss } = useFieldStatsTrigger();
+
   const aggOptions: EuiComboBoxOptionOption[] = aggs
     .filter((agg) => filterAggs(agg, usingScriptFields))
-    .map(createAggOption);
+    .map(createAggOption)
+    .map((o) => ({ ...o, css: optionCss }));
 
   // fields available for the selected agg
   const { currentFieldOptions, setCurrentFieldOptions } = useCurrentFieldOptions(
@@ -109,17 +113,19 @@ export const AdvancedDetectorModal: FC<Props> = ({
     filterCategoryFields(jobCreator.additionalFields, false),
     selectedFieldNames
   );
-
   const allFieldOptions: EuiComboBoxOptionOption[] = [
     ...createFieldOptions(fields, jobCreator.additionalFields),
-  ].sort(comboBoxOptionsSort);
+  ]
+    .sort(comboBoxOptionsSort)
+    .map((o) => ({ ...o, css: optionCss }));
 
   const splitFieldOptions: EuiComboBoxOptionOption[] = [
     ...allFieldOptions,
     ...createMlcategoryFieldOption(jobCreator.categorizationFieldName),
   ]
     .sort(comboBoxOptionsSort)
-    .filter(({ label }) => selectedFieldNames.includes(label) === false);
+    .filter(({ label }) => selectedFieldNames.includes(label) === false)
+    .map((o) => ({ ...o, css: optionCss }));
 
   const eventRateField = fields.find((f) => f.id === EVENT_RATE_FIELD_ID);
 
@@ -245,6 +251,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 selectedOptions={createSelectedOptions(aggOption)}
                 onChange={onOptionChange(setAggOption)}
                 isClearable={true}
+                renderOption={renderOption}
               />
             </AggDescription>
           </EuiFlexItem>
@@ -257,6 +264,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 onChange={onOptionChange(setFieldOption)}
                 isClearable={true}
                 isDisabled={fieldOptionEnabled === false}
+                renderOption={renderOption}
               />
             </FieldDescription>
           </EuiFlexItem>
@@ -272,6 +280,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 onChange={onOptionChange(setByFieldOption)}
                 isClearable={true}
                 isDisabled={splitFieldsEnabled === false}
+                renderOption={renderOption}
               />
             </ByFieldDescription>
           </EuiFlexItem>
@@ -284,6 +293,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 onChange={onOptionChange(setOverFieldOption)}
                 isClearable={true}
                 isDisabled={splitFieldsEnabled === false}
+                renderOption={renderOption}
               />
             </OverFieldDescription>
           </EuiFlexItem>
@@ -296,6 +306,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 onChange={onOptionChange(setPartitionFieldOption)}
                 isClearable={true}
                 isDisabled={splitFieldsEnabled === false}
+                renderOption={renderOption}
               />
             </PartitionFieldDescription>
           </EuiFlexItem>
@@ -308,6 +319,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
                 onChange={onOptionChange(setExcludeFrequentOption)}
                 isClearable={true}
                 isDisabled={splitFieldsEnabled === false || excludeFrequentEnabled === false}
+                renderOption={renderOption}
               />
             </ExcludeFrequentDescription>
           </EuiFlexItem>

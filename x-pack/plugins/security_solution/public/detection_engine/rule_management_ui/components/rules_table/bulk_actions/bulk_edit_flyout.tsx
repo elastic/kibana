@@ -7,8 +7,11 @@
 
 import React from 'react';
 
-import type { BulkActionEditPayload } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import { BulkActionEditType } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import type {
+  BulkActionEditPayload,
+  BulkActionEditType,
+} from '../../../../../../common/api/detection_engine/rule_management';
+import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 
 import { IndexPatternsForm } from './forms/index_patterns_form';
 import { TagsForm } from './forms/tags_form';
@@ -25,23 +28,23 @@ interface BulkEditFlyoutProps {
 
 const BulkEditFlyoutComponent = ({ editAction, ...props }: BulkEditFlyoutProps) => {
   switch (editAction) {
-    case BulkActionEditType.add_index_patterns:
-    case BulkActionEditType.delete_index_patterns:
-    case BulkActionEditType.set_index_patterns:
+    case BulkActionEditTypeEnum.add_index_patterns:
+    case BulkActionEditTypeEnum.delete_index_patterns:
+    case BulkActionEditTypeEnum.set_index_patterns:
       return <IndexPatternsForm {...props} editAction={editAction} />;
 
-    case BulkActionEditType.add_tags:
-    case BulkActionEditType.delete_tags:
-    case BulkActionEditType.set_tags:
+    case BulkActionEditTypeEnum.add_tags:
+    case BulkActionEditTypeEnum.delete_tags:
+    case BulkActionEditTypeEnum.set_tags:
       return <TagsForm {...props} editAction={editAction} />;
 
-    case BulkActionEditType.set_timeline:
+    case BulkActionEditTypeEnum.set_timeline:
       return <TimelineTemplateForm {...props} />;
 
-    case BulkActionEditType.add_rule_actions:
-    case BulkActionEditType.set_rule_actions:
+    case BulkActionEditTypeEnum.add_rule_actions:
+    case BulkActionEditTypeEnum.set_rule_actions:
       return <RuleActionsForm {...props} />;
-    case BulkActionEditType.set_schedule:
+    case BulkActionEditTypeEnum.set_schedule:
       return <ScheduleForm {...props} />;
 
     default:

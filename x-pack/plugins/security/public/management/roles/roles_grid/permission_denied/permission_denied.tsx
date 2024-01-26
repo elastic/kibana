@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPageSection } from '@elastic/eui';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export const PermissionDenied = () => (
-  <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+  <EuiPageSection alignment="center" color="danger">
     <EuiEmptyPrompt
       iconType="securityApp"
       title={
@@ -31,5 +31,5 @@ export const PermissionDenied = () => (
         </p>
       }
     />
-  </EuiPageContent>
+  </EuiPageSection>
 );

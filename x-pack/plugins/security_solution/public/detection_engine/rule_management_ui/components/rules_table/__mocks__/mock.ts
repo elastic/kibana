@@ -6,17 +6,20 @@
  */
 
 import { FilterStateStore } from '@kbn/es-query';
-import type { Rule } from '../../../../rule_management/logic';
 import type {
   AboutStepRule,
   ActionsStepRule,
   DefineStepRule,
   ScheduleStepRule,
 } from '../../../../../detections/pages/detection_engine/rules/types';
-import { DataSourceType } from '../../../../../detections/pages/detection_engine/rules/types';
-import type { FieldValueQueryBar } from '../../../../../detections/components/rules/query_bar';
+import {
+  DataSourceType,
+  GroupByOptions,
+} from '../../../../../detections/pages/detection_engine/rules/types';
+import type { FieldValueQueryBar } from '../../../../rule_creation_ui/components/query_bar';
 import { fillEmptySeverityMappings } from '../../../../../detections/pages/detection_engine/rules/helpers';
 import { getThreatMock } from '../../../../../../common/detection_engine/schemas/types/threat.mock';
+import type { RuleResponse, SavedQueryRule } from '../../../../../../common/api/detection_engine';
 
 export const mockQueryBar: FieldValueQueryBar = {
   query: {
@@ -48,7 +51,7 @@ export const mockQueryBar: FieldValueQueryBar = {
   saved_id: 'test123',
 };
 
-export const mockRule = (id: string): Rule => ({
+export const mockRule = (id: string): SavedQueryRule => ({
   actions: [],
   author: [],
   created_at: '2020-01-10T21:11:45.839Z',
@@ -89,9 +92,11 @@ export const mockRule = (id: string): Rule => ({
   throttle: 'no_actions',
   note: '# this is some markdown documentation',
   version: 1,
+  revision: 1,
+  exceptions_list: [],
 });
 
-export const mockRuleWithEverything = (id: string): Rule => ({
+export const mockRuleWithEverything = (id: string): RuleResponse => ({
   actions: [],
   author: [],
   created_at: '2020-01-10T21:11:45.839Z',
@@ -152,6 +157,7 @@ export const mockRuleWithEverything = (id: string): Rule => ({
   to: 'now',
   type: 'saved_query',
   threat: getThreatMock(),
+  // @ts-expect-error This rule stub contains all the fields making it invalid for the RuleResponse type
   threshold: {
     field: ['host.name'],
     value: 50,
@@ -167,6 +173,9 @@ export const mockRuleWithEverything = (id: string): Rule => ({
   timestamp_override_fallback_disabled: false,
   note: '# this is some markdown documentation',
   version: 1,
+  alert_suppression: {
+    group_by: ['host.name'],
+  },
   new_terms_fields: ['host.name'],
   history_window_start: 'now-7d',
 });
@@ -188,13 +197,13 @@ export const mockAboutStepRule = (): AboutStepRule => ({
   tags: ['tag1', 'tag2'],
   threat: getThreatMock(),
   note: '# this is some markdown documentation',
+  investigationFields: ['foo', 'bar'],
 });
 
 export const mockActionsStepRule = (enabled = false): ActionsStepRule => ({
   actions: [],
   kibanaSiemAppUrl: 'http://localhost:5601/app/siem',
   enabled,
-  throttle: 'no_actions',
 });
 
 export const mockDefineStepRule = (): DefineStepRule => ({
@@ -226,6 +235,13 @@ export const mockDefineStepRule = (): DefineStepRule => ({
   newTermsFields: ['host.ip'],
   historyWindowSize: '7d',
   shouldLoadQueryDynamically: false,
+  groupByFields: [],
+  groupByRadioSelection: GroupByOptions.PerRuleExecution,
+  groupByDuration: {
+    unit: 'm',
+    value: 5,
+  },
+  enableThresholdSuppression: false,
 });
 
 export const mockScheduleStepRule = (): ScheduleStepRule => ({

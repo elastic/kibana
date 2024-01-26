@@ -89,9 +89,11 @@ function wrapSearchBarInContext(testProps: any) {
 
   const services = {
     uiSettings: startMock.uiSettings,
+    settings: startMock.settings,
     savedObjects: startMock.savedObjects,
     notifications: startMock.notifications,
     http: startMock.http,
+    theme: startMock.theme,
     storage: createMockStorage(),
     data: {
       query: {
@@ -284,7 +286,7 @@ describe('SearchBar', () => {
         },
       })
     );
-    const queryInput = component.find(QUERY_INPUT).at(0).getDOMNode();
+    const queryInput = component.find(QUERY_INPUT).last().getDOMNode();
     expect(queryInput.querySelector('textarea')).toBeDisabled();
     expect(queryInput.querySelector('[title="Clear input"]')).toBeNull();
 

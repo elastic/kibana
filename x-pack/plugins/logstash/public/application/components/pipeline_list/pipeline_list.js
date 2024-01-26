@@ -12,7 +12,7 @@ import {
   EuiCallOut,
   EuiEmptyPrompt,
   EuiLoadingSpinner,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageSection,
   EuiPageHeader,
   EuiSpacer,
 } from '@elastic/eui';
@@ -291,7 +291,7 @@ class PipelineListUi extends React.Component {
     const { clonePipeline, createPipeline, isReadOnly, openPipeline } = this.props;
     const { isSelectable, message, pipelines, selection, showConfirmDeleteModal } = this.state;
     return (
-      <EuiPageContentBody data-test-subj="pipelineList">
+      <EuiPageSection data-test-subj="pipelineList">
         <EuiPageHeader
           pageTitle={
             <FormattedMessage id="xpack.logstash.pipelineList.head" defaultMessage="Pipelines" />
@@ -329,7 +329,7 @@ class PipelineListUi extends React.Component {
           showAddRoleAlert={this.state.showAddRoleAlert}
           showEnableMonitoringAlert={this.state.showEnableMonitoringAlert}
         />
-      </EuiPageContentBody>
+      </EuiPageSection>
     );
   }
 }

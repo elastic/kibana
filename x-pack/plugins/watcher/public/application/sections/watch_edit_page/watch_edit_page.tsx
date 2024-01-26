@@ -8,10 +8,10 @@
 import React, { useEffect, useReducer } from 'react';
 import { isEqual } from 'lodash';
 
-import { EuiPageContent_Deprecated as EuiPageContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { EuiPageTemplate } from '@elastic/eui';
 import { WATCH_TYPES } from '../../../../common/constants';
 import { BaseWatch } from '../../../../common/types/watch_types';
 import { getPageErrorCode, PageError, SectionLoading } from '../../components';
@@ -133,11 +133,7 @@ export const WatchEditPage = ({
 
   const errorCode = getPageErrorCode(loadError);
   if (errorCode) {
-    return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
-        <PageError errorCode={errorCode} id={id} />
-      </EuiPageContent>
-    );
+    return <PageError errorCode={errorCode} id={id} />;
   } else if (loadError) {
     return (
       <GenericPageError
@@ -154,14 +150,14 @@ export const WatchEditPage = ({
 
   if (!watch) {
     return (
-      <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+      <EuiPageTemplate.EmptyPrompt>
         <SectionLoading>
           <FormattedMessage
             id="xpack.watcher.sections.watchEdit.loadingWatchDescription"
             defaultMessage="Loading watch…"
           />
         </SectionLoading>
-      </EuiPageContent>
+      </EuiPageTemplate.EmptyPrompt>
     );
   }
 

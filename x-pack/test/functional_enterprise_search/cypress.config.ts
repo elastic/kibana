@@ -7,9 +7,6 @@
 
 import { FtrConfigProviderContext } from '@kbn/test';
 
-// TODO: If Kibana CI doesn't end up using this (e.g., uses Dockerized containers
-// instead of the functional test server), we can opt to delete this file later.
-
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const baseConfig = await readConfigFile(require.resolve('./base_config'));
 
@@ -32,7 +29,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...baseConfig.get('kbnTestServer.serverArgs'),
         '--csp.strict=false',
         '--csp.warnLegacyBrowsers=false',
-        '--enterpriseSearch.host=http://localhost:3002',
+        '--enterpriseSearch.host=http://localhost:3022',
+        '--usageCollection.uiCounters.enabled=false',
+        `--home.disableWelcomeScreen=true`,
       ],
     },
   };

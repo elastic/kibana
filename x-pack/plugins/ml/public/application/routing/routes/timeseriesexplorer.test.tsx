@@ -8,12 +8,12 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { MlContext } from '../../contexts/ml';
-import { kibanaContextValueMock } from '../../contexts/ml/__mocks__/kibana_context_value';
 import { TimeSeriesExplorerUrlStateManager } from './timeseriesexplorer';
 import { TimeSeriesExplorer } from '../../timeseriesexplorer';
 import { TimeSeriesExplorerPage } from '../../timeseriesexplorer/timeseriesexplorer_page';
 import { TimeseriesexplorerNoJobsFound } from '../../timeseriesexplorer/components/timeseriesexplorer_no_jobs_found';
+import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
+import type { IUiSettingsClient } from '@kbn/core/public';
 
 jest.mock('../../services/toast_notification_service');
 
@@ -43,7 +43,52 @@ const MockedTimeseriesexplorerNoJobsFound = TimeseriesexplorerNoJobsFound as jes
   typeof TimeseriesexplorerNoJobsFound
 >;
 
-jest.mock('../../util/url_state');
+const getMockedTimefilter = () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { of } = require('rxjs');
+  return {
+    timefilter: {
+      disableTimeRangeSelector: jest.fn(),
+      disableAutoRefreshSelector: jest.fn(),
+      enableTimeRangeSelector: jest.fn(),
+      enableAutoRefreshSelector: jest.fn(),
+      getRefreshInterval: jest.fn(),
+      setRefreshInterval: jest.fn(),
+      getActiveBounds: jest.fn(),
+      getTime: jest.fn(),
+      isAutoRefreshSelectorEnabled: jest.fn(),
+      isTimeRangeSelectorEnabled: jest.fn(),
+      getRefreshIntervalUpdate$: jest.fn(),
+      getTimeUpdate$: jest.fn(() => {
+        return of();
+      }),
+      getEnabledUpdated$: jest.fn(),
+    },
+    history: { get: jest.fn() },
+  };
+};
+
+const getMockedDatePickerDependencies = () => {
+  return {
+    data: {
+      query: {
+        timefilter: getMockedTimefilter(),
+      },
+    },
+    notifications: {},
+  } as unknown as DatePickerDependencies;
+};
+
+jest.mock('@kbn/ml-url-state', () => {
+  return {
+    usePageUrlState: jest.fn(() => {
+      return [{}, jest.fn(), {}];
+    }),
+    useUrlState: jest.fn(() => {
+      return [{ refreshInterval: { value: 0, pause: true } }, jest.fn()];
+    }),
+  };
+});
 
 jest.mock('../../timeseriesexplorer/hooks/use_timeseriesexplorer_url_state');
 
@@ -52,8 +97,6 @@ jest.mock('../../components/help_menu', () => ({
 }));
 
 jest.mock('../../contexts/kibana/kibana_context', () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { of } = require('rxjs');
   return {
     useMlKibana: () => {
       return {
@@ -66,25 +109,7 @@ jest.mock('../../contexts/kibana/kibana_context', () => {
           uiSettings: { get: jest.fn() },
           data: {
             query: {
-              timefilter: {
-                timefilter: {
-                  disableTimeRangeSelector: jest.fn(),
-                  disableAutoRefreshSelector: jest.fn(),
-                  enableTimeRangeSelector: jest.fn(),
-                  enableAutoRefreshSelector: jest.fn(),
-                  getRefreshInterval: jest.fn(),
-                  setRefreshInterval: jest.fn(),
-                  getTime: jest.fn(),
-                  isAutoRefreshSelectorEnabled: jest.fn(),
-                  isTimeRangeSelectorEnabled: jest.fn(),
-                  getRefreshIntervalUpdate$: jest.fn(),
-                  getTimeUpdate$: jest.fn(() => {
-                    return of();
-                  }),
-                  getEnabledUpdated$: jest.fn(),
-                },
-                history: { get: jest.fn() },
-              },
+              timefilter: getMockedTimefilter(),
             },
           },
           notifications: {
@@ -106,16 +131,16 @@ jest.mock('../../contexts/kibana/kibana_context', () => {
 describe('TimeSeriesExplorerUrlStateManager', () => {
   test('should render TimeseriesexplorerNoJobsFound when no jobs provided', () => {
     const props = {
-      config: { get: () => 'Browser' },
+      config: { get: () => 'Browser' } as unknown as IUiSettingsClient,
       jobsWithTimeRange: [],
     };
 
     render(
-      <MlContext.Provider value={kibanaContextValueMock}>
-        <I18nProvider>
+      <I18nProvider>
+        <DatePickerContextProvider {...getMockedDatePickerDependencies()}>
           <TimeSeriesExplorerUrlStateManager {...props} />
-        </I18nProvider>
-      </MlContext.Provider>
+        </DatePickerContextProvider>
+      </I18nProvider>
     );
 
     // assert

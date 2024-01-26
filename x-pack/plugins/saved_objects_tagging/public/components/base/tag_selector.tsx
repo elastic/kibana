@@ -106,6 +106,7 @@ export const TagSelector: FC<TagSelectorProps> = ({
   onTagsSelected,
   allowCreate,
   openCreateModal,
+  fullWidth = true,
   ...otherProps
 }) => {
   const [currentSearch, setCurrentSearch] = useState('');
@@ -174,6 +175,7 @@ export const TagSelector: FC<TagSelectorProps> = ({
       onSearchChange={setCurrentSearch}
       onChange={onChange}
       renderOption={renderOption}
+      fullWidth={fullWidth}
       {...otherProps}
     />
   );

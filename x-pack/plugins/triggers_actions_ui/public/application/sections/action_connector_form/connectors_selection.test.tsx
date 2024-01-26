@@ -45,6 +45,7 @@ describe('connectors_selection', () => {
       group: 'group',
       class: 'test class',
     },
+    uuid: '123-456',
   };
 
   const actionTypeIndex: Record<string, ActionType> = {
@@ -56,6 +57,7 @@ describe('connectors_selection', () => {
       enabledInLicense: true,
       minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
+      isSystemActionType: false,
     },
   };
 
@@ -68,6 +70,7 @@ describe('connectors_selection', () => {
       id: 'testId',
       isPreconfigured: false,
       isDeprecated: false,
+      isSystemAction: false as const,
       name: 'test pagerduty',
       secrets: {},
     },
@@ -120,6 +123,6 @@ describe('connectors_selection', () => {
       </EuiThemeProvider>
     );
 
-    expect(screen.queryAllByText('test pagerduty')).toHaveLength(1);
+    expect(screen.getByRole('combobox')).toHaveValue('test pagerduty');
   });
 });

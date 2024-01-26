@@ -92,5 +92,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(componentTemplateList).to.be(true);
       });
     });
+
+    describe('Enrich policies', () => {
+      it('renders the enrich policies tab', async () => {
+        // Navigate to the component templates tab
+        await pageObjects.indexManagement.changeTabs('enrich_policiesTab');
+
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        // Verify url
+        const url = await browser.getCurrentUrl();
+        expect(url).to.contain(`/enrich_policies`);
+
+        // Verify content
+        const enrichPoliciesList = await testSubjects.exists('sectionEmpty');
+        expect(enrichPoliciesList).to.be(true);
+      });
+    });
   });
 };
