@@ -342,6 +342,7 @@ export function ChatBody({
                                 name: 'visualize_query',
                                 arguments: JSON.stringify({
                                   query: payload.query,
+                                  intention: VisualizeESQLUserIntention.visualizeAuto,
                                 }),
                                 trigger: MessageRole.User,
                               },
