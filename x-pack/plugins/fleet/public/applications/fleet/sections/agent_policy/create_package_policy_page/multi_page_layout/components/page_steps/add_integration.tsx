@@ -92,7 +92,7 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
   const [packagePolicy, setPackagePolicy] = useState<NewPackagePolicy>({
     name: '',
     description: '',
-    namespace: 'default',
+    namespace: '',
     policy_id: '',
     enabled: true,
     inputs: [],

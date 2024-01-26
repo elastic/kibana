@@ -121,6 +121,8 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   isDisabled?: boolean;
 
   submitOnBlur?: boolean;
+
+  renderQueryInputAppend?: () => React.ReactNode;
 }
 
 export type SearchBarProps<QT extends Query | AggregateQuery = Query> = SearchBarOwnProps<QT> &
@@ -526,6 +528,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
             : undefined
         }
         suggestionsAbstraction={this.props.suggestionsAbstraction}
+        renderQueryInputAppend={this.props.renderQueryInputAppend}
         queryBarMenuRef={this.queryBarMenuRef}
       />
     ) : undefined;
@@ -613,6 +616,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           onTextLangQueryChange={this.onTextLangQueryChange}
           submitOnBlur={this.props.submitOnBlur}
           suggestionsAbstraction={this.props.suggestionsAbstraction}
+          renderQueryInputAppend={this.props.renderQueryInputAppend}
         />
       </div>
     );

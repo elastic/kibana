@@ -114,6 +114,16 @@ export function Profiling() {
           <Threads />
         </>
       ),
+      append: (
+        <Popover iconSize="s" iconColor="subdued" icon="questionInCircle">
+          <EuiText size="xs">
+            <FormattedMessage
+              id="xpack.infra.profiling.threadsInfoPopoverBody"
+              defaultMessage="Visualize profiling stacktraces grouped by process thread names. This view enables you to identify the top threads consuming CPU resources and allows you to drill down into the call stack of each thread, so you can quickly identify resource-intensive lines of code within the thread."
+            />
+          </EuiText>
+        </Popover>
+      ),
     },
   ];
 

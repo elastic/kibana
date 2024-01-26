@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { CanExpandPanels } from '@kbn/presentation-containers';
-import { ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { ExpandPanelActionApi, ExpandPanelAction } from './expand_panel_action';
 
@@ -19,12 +17,11 @@ describe('Expand panel action', () => {
     action = new ExpandPanelAction();
     context = {
       embeddable: {
-        uuid: new BehaviorSubject<string>('superId'),
-        viewMode: new BehaviorSubject<ViewMode>('edit'),
-        parentApi: new BehaviorSubject<CanExpandPanels>({
+        uuid: 'superId',
+        parentApi: {
           expandPanel: jest.fn(),
           expandedPanelId: new BehaviorSubject<string | undefined>(undefined),
-        }),
+        },
       },
     };
   });
@@ -42,7 +39,7 @@ describe('Expand panel action', () => {
 
   it('returns the correct icon based on expanded panel id', async () => {
     expect(await action.getIconType(context)).toBe('expand');
-    context.embeddable.parentApi.value.expandedPanelId = new BehaviorSubject<string | undefined>(
+    context.embeddable.parentApi.expandedPanelId = new BehaviorSubject<string | undefined>(
       'superPanelId'
     );
     expect(await action.getIconType(context)).toBe('minimize');
@@ -50,7 +47,7 @@ describe('Expand panel action', () => {
 
   it('returns the correct display name based on expanded panel id', async () => {
     expect(await action.getDisplayName(context)).toBe('Maximize panel');
-    context.embeddable.parentApi.value.expandedPanelId = new BehaviorSubject<string | undefined>(
+    context.embeddable.parentApi.expandedPanelId = new BehaviorSubject<string | undefined>(
       'superPanelId'
     );
     expect(await action.getDisplayName(context)).toBe('Minimize');
@@ -58,6 +55,6 @@ describe('Expand panel action', () => {
 
   it('calls the parent expandPanel method on execute', async () => {
     action.execute(context);
-    expect(context.embeddable.parentApi.value.expandPanel).toHaveBeenCalled();
+    expect(context.embeddable.parentApi.expandPanel).toHaveBeenCalled();
   });
 });

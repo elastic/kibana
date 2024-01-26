@@ -284,6 +284,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                     >
                       <EuiComboBox
                         noSuggestions
+                        placeholder={agentPolicy?.namespace}
                         isDisabled={isEditPage && packageInfo.type === 'input'}
                         singleSelection={true}
                         selectedOptions={
