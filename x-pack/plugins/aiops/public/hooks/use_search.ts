@@ -43,33 +43,43 @@ export const useSearch = (
     [dataView, uiSettings, savedSearch, filterManager]
   );
 
-  if (searchData === undefined || (aiopsListState && aiopsListState.searchString !== '')) {
-    if (aiopsListState?.filters && readOnly === false) {
-      const globalFilters = filterManager?.getGlobalFilters();
+  return useMemo(() => {
+    if (searchData === undefined || (aiopsListState && aiopsListState.searchString !== '')) {
+      if (aiopsListState?.filters && readOnly === false) {
+        const globalFilters = filterManager?.getGlobalFilters();
 
-      if (filterManager) filterManager.setFilters(aiopsListState.filters);
-      if (globalFilters) filterManager?.addFilters(globalFilters);
+        if (filterManager) filterManager.setFilters(aiopsListState.filters);
+        if (globalFilters) filterManager?.addFilters(globalFilters);
+      }
+
+      // In cases where the url state contains only a KQL query and not yet
+      // the transformed ES query we regenerate it. This may happen if we restore
+      // url state on page load coming from another page like ML's Single Metric Viewer.
+      let searchQuery = aiopsListState?.searchQuery;
+      const query = {
+        language: aiopsListState?.searchQueryLanguage,
+        query: aiopsListState?.searchString,
+      };
+      if (
+        aiopsListState?.searchString !== '' &&
+        (isDefaultSearchQuery(searchQuery) || searchQuery === undefined) &&
+        isQuery(query)
+      ) {
+        searchQuery = createMergedEsQuery(query, [], dataView, uiSettings);
+      }
+
+      return {
+        ...(isDefaultSearchQuery(searchQuery) ? {} : { searchQuery }),
+        searchString: aiopsListState?.searchString,
+        searchQueryLanguage: aiopsListState?.searchQueryLanguage,
+      };
+    } else {
+      return {
+        searchQuery: searchData.searchQuery,
+        searchString: searchData.searchString,
+        searchQueryLanguage: searchData.queryLanguage,
+      };
     }
-
-    // In cases where the url state contains only a KQL query and not yet
-    // the transformed ES query we regenerate it. This may happen if we restore
-    // url state on page load coming from another page like ML's Single Metric Viewer.
-    let searchQuery = aiopsListState?.searchQuery;
-    const query = { language: 'kuery', query: aiopsListState?.searchString };
-    if ((isDefaultSearchQuery(searchQuery) || searchQuery === undefined) && isQuery(query)) {
-      searchQuery = createMergedEsQuery(query, [], dataView, uiSettings);
-    }
-
-    return {
-      searchQuery,
-      searchString: aiopsListState?.searchString,
-      searchQueryLanguage: aiopsListState?.searchQueryLanguage,
-    };
-  } else {
-    return {
-      searchQuery: searchData.searchQuery,
-      searchString: searchData.searchString,
-      searchQueryLanguage: searchData.queryLanguage,
-    };
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify([searchData, aiopsListState])]);
 };
