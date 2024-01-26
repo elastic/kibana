@@ -2546,6 +2546,20 @@
             "path": "src/plugins/presentation_util/public/components/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.SaveModalDashboardProps.mustCopyOnSaveMessage",
+            "type": "string",
+            "tags": [],
+            "label": "mustCopyOnSaveMessage",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/presentation_util/public/components/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
