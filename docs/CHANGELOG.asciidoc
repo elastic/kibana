@@ -108,11 +108,11 @@ Roles with at least a sub-feature privilege configured will not have access to t
 === Features
 {kib} 8.12.0 adds the following new and notable features.
 
-Alerting::
-* The case list filter bar is now customizable, filters are removable and custom fields can be used as filters ({kibana-pull}172276[#172276]).
 APM::
 * Adds viewInApp URL to the custom threshold rule type ({kibana-pull}171985[#171985]).
 * Adds back the mobile crashes & errors tab ({kibana-pull}165892[#165892]).
+Cases::
+* The case list filter bar is now customizable, filters are removable and custom fields can be used as filters ({kibana-pull}172276[#172276]).
 Elastic Security::
 For the Elastic Security 8.12.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Elastic Search::
