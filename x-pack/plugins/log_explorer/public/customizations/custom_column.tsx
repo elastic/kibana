@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { CONTENT_FIELD } from '../../common/constants';
+import { CONTENT_FIELD, RESOURCE_FIELD } from '../../common/constants';
 import { renderColumn } from '../components/virtual_columns/column';
 
 export const createCustomGridColumnsConfiguration = () => ({
   [CONTENT_FIELD]: renderColumn(CONTENT_FIELD),
+  [RESOURCE_FIELD]: renderColumn(RESOURCE_FIELD),
 });
