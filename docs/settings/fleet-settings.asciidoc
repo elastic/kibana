@@ -208,7 +208,7 @@ NOTE: The `xpack.fleet.outputs` settings are intended for advanced configuration
   `is_default_monitoring`::: 
     If `true`, the output specified in `xpack.fleet.outputs` will be the one used to send agent monitoring data unless there is another one configured specifically for the agent policy.
   `is_internal`:::
-    If `true`, the output specified in `xpack.fleet.outputs` will be TBD
+    If `true`, the output specified in `xpack.fleet.outputs` will be protected from user manipulation in the UI.
   `config`::: 
     Extra config for that output.
   `proxy_id`:::
