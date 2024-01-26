@@ -297,10 +297,9 @@ export function ChatBody({
                               role: MessageRole.Assistant,
                               content: '',
                               function_call: {
-                                name: 'visualize_query',
+                                name: 'execute_query',
                                 arguments: JSON.stringify({
                                   query: payload.query,
-                                  intention: VisualizeESQLUserIntention.executeAndReturnResults,
                                 }),
                                 trigger: MessageRole.User,
                               },

@@ -65,7 +65,7 @@ export function EsqlCodeBlock({
                 disabled={actionsDisabled}
               >
                 {i18n.translate('xpack.observabilityAiAssistant.runThisQuery', {
-                  defaultMessage: 'Run this query',
+                  defaultMessage: 'Display results',
                 })}
               </EuiButtonEmpty>
             </EuiFlexItem>
