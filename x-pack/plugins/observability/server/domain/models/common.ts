@@ -11,11 +11,13 @@ import {
   historicalSummarySchema,
   statusSchema,
   summarySchema,
+  groupSummarySchema,
 } from '@kbn/slo-schema';
 
 type Status = t.TypeOf<typeof statusSchema>;
 type DateRange = t.TypeOf<typeof dateRangeSchema>;
 type HistoricalSummary = t.TypeOf<typeof historicalSummarySchema>;
 type Summary = t.TypeOf<typeof summarySchema>;
+type GroupSummary = t.TypeOf<typeof groupSummarySchema>;
 
-export type { DateRange, HistoricalSummary, Status, Summary };
+export type { DateRange, HistoricalSummary, Status, Summary, GroupSummary };

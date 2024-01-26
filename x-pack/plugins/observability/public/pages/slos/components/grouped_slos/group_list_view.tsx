@@ -10,6 +10,7 @@ import { EuiPanel, EuiAccordion, EuiTablePagination } from '@elastic/eui';
 import { useFetchSloList } from '../../../../hooks/slo/use_fetch_slo_list';
 import { SlosView } from '../slos_view';
 import type { SortDirection } from '../slo_list_search_bar';
+import { SLI_OPTIONS } from '../../../slo_edit/constants';
 
 interface Props {
   isCompact: boolean;
@@ -18,13 +19,26 @@ interface Props {
   sloView: string;
   sort: string;
   direction: SortDirection;
+  groupBy: string;
 }
 
-export function GroupListView({ isCompact, group, kqlQuery, sloView, sort, direction }: Props) {
-  const query = kqlQuery ? `"slo.tags": ${group} and ${kqlQuery}` : `"slo.tags": ${group}`;
+export function GroupListView({
+  isCompact,
+  group,
+  kqlQuery,
+  sloView,
+  sort,
+  direction,
+  groupBy,
+}: Props) {
+  const query = kqlQuery ? `"${groupBy}": ${group} and ${kqlQuery}` : `"${groupBy}": ${group}`;
+  let groupName = group.toLowerCase();
+  if (groupBy === 'slo.indicator.type') {
+    groupName = SLI_OPTIONS.find((option) => option.value === group)?.text ?? group;
+  }
+
   const [page, setPage] = useState(0);
   const ITEMS_PER_PAGE = 10;
-  // TODO get sortBy and sortDirection from parent
   const {
     isLoading,
     isRefetching,
@@ -41,12 +55,13 @@ export function GroupListView({ isCompact, group, kqlQuery, sloView, sort, direc
 
   const handlePageClick = (pageNumber: number) => {
     setPage(pageNumber);
-    // storeState({ page: pageNumber });
   };
+
+  const groupTitle = `${groupName} (${total})`;
 
   return (
     <EuiPanel>
-      <MemoEuiAccordion buttonContent={group} id={group} initialIsOpen={false}>
+      <MemoEuiAccordion buttonContent={groupTitle} id={group} initialIsOpen={false}>
         <>
           <SlosView
             sloList={results}

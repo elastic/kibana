@@ -32,17 +32,19 @@ export function getAssignmentDefinitionCompletitionItem() {
 
 export const getBuiltinCompatibleFunctionDefinition = (
   command: string,
+  option: string | undefined,
   argType: string,
   returnTypes?: string[]
 ): AutocompleteCommandDefinition[] => {
   const compatibleFunctions = builtinFunctions.filter(
-    ({ name, supportedCommands, signatures, ignoreAsSuggestion }) =>
+    ({ name, supportedCommands, supportedOptions, signatures, ignoreAsSuggestion }) =>
       !ignoreAsSuggestion &&
       !/not_/.test(name) &&
-      supportedCommands.includes(command) &&
-      signatures.some(({ params }) => params.some((pArg) => pArg.type === argType))
+      (option ? supportedOptions?.includes(option) : supportedCommands.includes(command)) &&
+      signatures.some(
+        ({ params }) => !params.length || params.some((pArg) => pArg.type === argType)
+      )
   );
-
   if (!returnTypes) {
     return compatibleFunctions.map(getAutocompleteBuiltinDefinition);
   }

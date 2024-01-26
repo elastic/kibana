@@ -21,11 +21,11 @@ interface Props {
   direction: SortDirection;
 }
 
-export function GroupView({ isCompact, kqlQuery, sloView, sort, direction }: Props) {
+export function GroupView({ isCompact, kqlQuery, sloView, sort, direction, groupBy }: Props) {
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(DEFAULT_SLO_GROUPS_PAGE_SIZE);
-  const { data, isLoading } = useFetchSloGroups({ perPage, page: page + 1 });
-  const { results = {}, total = 0 } = data ?? {};
+  const { data, isLoading } = useFetchSloGroups({ perPage, page: page + 1, groupBy });
+  const { results = [], total = 0 } = data ?? {};
   const handlePageClick = (pageNumber: number) => {
     setPage(pageNumber);
   };
@@ -42,12 +42,13 @@ export function GroupView({ isCompact, kqlQuery, sloView, sort, direction }: Pro
   return (
     <>
       {results &&
-        Object.keys(results).map((group) => {
+        results.map((result) => {
           return (
             <GroupListView
-              key={group}
+              groupBy={result.groupBy}
+              key={result.group}
               sloView={sloView}
-              group={group}
+              group={result.group}
               kqlQuery={kqlQuery}
               isCompact={isCompact}
               sort={sort}
@@ -63,7 +64,7 @@ export function GroupView({ isCompact, kqlQuery, sloView, sort, direction }: Pro
             activePage={page}
             onChangePage={handlePageClick}
             itemsPerPage={perPage}
-            itemsPerPageOptions={[25, 50, 100]}
+            itemsPerPageOptions={[10, 25, 50, 100]}
             onChangeItemsPerPage={(newPerPage) => {
               setPerPage(newPerPage);
             }}

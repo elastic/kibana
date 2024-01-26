@@ -30,6 +30,10 @@ export interface SearchState {
   groupBy: GroupByField;
   filters: Filter[];
   lastRefresh?: number;
+  tags?: {
+    included?: string[];
+    excluded?: string[];
+  };
 }
 
 export const DEFAULT_STATE = {
@@ -75,7 +79,6 @@ export function useUrlSearchState(): {
       sub?.unsubscribe();
     };
   }, [urlStateStorage]);
-
   return {
     state: deepmerge(DEFAULT_STATE, state),
     store: (newState: Partial<SearchState>) =>
