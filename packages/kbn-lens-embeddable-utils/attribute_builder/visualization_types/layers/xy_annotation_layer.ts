@@ -8,15 +8,15 @@
 
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { PointInTimeEventAnnotationConfig } from '@kbn/event-annotation-common';
+import { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import type { FormBasedPersistedState, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
-import type { XYByValueAnnotationLayerConfig } from '@kbn/lens-plugin/public/visualizations/xy/types';
+import type { XYAnnotationLayerConfig } from '@kbn/lens-plugin/public/visualizations/xy/types';
 import type { ChartLayer } from '../../types';
 import { getDefaultReferences } from '../../utils';
 import { XY_ANNOTATIONS_ID } from '../constants';
 
-export interface XYByValueAnnotationsLayerConfig {
-  annotations: PointInTimeEventAnnotationConfig[];
+export interface XYAnnotationsLayerConfig {
+  annotations: EventAnnotationConfig[];
   layerType?: typeof XY_ANNOTATIONS_ID;
   /**
    * It is possible to define a specific dataView for the layer. It will override the global chart one
@@ -25,10 +25,10 @@ export interface XYByValueAnnotationsLayerConfig {
   ignoreGlobalFilters?: boolean;
 }
 
-export class XYByValueAnnotationsLayer implements ChartLayer<XYByValueAnnotationLayerConfig> {
-  private layerConfig: XYByValueAnnotationsLayerConfig;
+export class XYAnnotationsLayer implements ChartLayer<XYAnnotationLayerConfig> {
+  private layerConfig: XYAnnotationsLayerConfig;
 
-  constructor(layerConfig: XYByValueAnnotationsLayerConfig) {
+  constructor(layerConfig: XYAnnotationsLayerConfig) {
     this.layerConfig = {
       ...layerConfig,
       layerType: layerConfig.layerType ?? 'annotations',
@@ -50,7 +50,7 @@ export class XYByValueAnnotationsLayer implements ChartLayer<XYByValueAnnotation
     return getDefaultReferences(this.layerConfig.dataView ?? chartDataView, `${layerId}_reference`);
   }
 
-  getLayerConfig(layerId: string): XYByValueAnnotationLayerConfig {
+  getLayerConfig(layerId: string): XYAnnotationLayerConfig {
     return {
       layerId: `${layerId}_annotation`,
       layerType: 'annotations',

@@ -12,9 +12,6 @@ export {
   XYReferenceLinesLayer,
   type XYReferenceLinesLayerConfig,
 } from './xy_reference_lines_layer';
-export {
-  XYByValueAnnotationsLayer,
-  type XYByValueAnnotationsLayerConfig,
-} from './xy_annotation_layer';
+export { XYAnnotationsLayer, type XYAnnotationsLayerConfig } from './xy_annotation_layer';
 export { FormulaColumn } from './columns/formula';
 export { StaticColumn } from './columns/static';

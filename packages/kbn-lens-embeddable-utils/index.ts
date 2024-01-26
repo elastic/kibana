@@ -30,7 +30,7 @@ export {
   XYChart,
   XYDataLayer,
   XYReferenceLinesLayer,
-  XYByValueAnnotationsLayer,
+  XYAnnotationsLayer,
   METRIC_ID,
   METRIC_TREND_LINE_ID,
   XY_ID,

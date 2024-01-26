@@ -17,15 +17,16 @@ import {
   XYDataLayer,
   XYLayerOptions,
   XYReferenceLinesLayer,
-  XYByValueAnnotationsLayer,
+  XYAnnotationsLayer,
 } from '@kbn/lens-embeddable-utils';
 
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
 import chroma from 'chroma-js';
-import type { PointInTimeEventAnnotationConfig } from '@kbn/event-annotation-common';
+import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import { TimeRange } from '@kbn/es-query';
+import moment from 'moment';
 import {
   Aggregators,
   Comparator,
@@ -75,7 +76,7 @@ export function RuleConditionChart({
   const [aggMap, setAggMap] = useState<AggMap>();
   const [formula, setFormula] = useState<string>('');
   const [thresholdReferenceLine, setThresholdReferenceLine] = useState<XYReferenceLinesLayer[]>();
-  const [alertAnnotation, setAlertAnnotation] = useState<XYByValueAnnotationsLayer>();
+  const [alertAnnotation, setAlertAnnotation] = useState<XYAnnotationsLayer>();
   const [chartLoading, setChartLoading] = useState<boolean>(false);
   const formulaAsync = useAsync(() => {
     return lens.stateHelperApi();
@@ -177,29 +178,56 @@ export function RuleConditionChart({
 
   // Build alert annotation
   useEffect(() => {
-    const annotationLayer = new XYByValueAnnotationsLayer({
-      annotations: [
+    if (!annotation) return;
+
+    const annotations: EventAnnotationConfig[] = [];
+
+    if (annotation.endTimestamp) {
+      annotations.push({
+        label: `Alert`,
+        type: 'manual',
+        key: {
+          type: 'range',
+          timestamp: annotation.timestamp,
+          endTimestamp: annotation.endTimestamp,
+        },
+        color: chroma(transparentize('#F04E981A', 0.2)).hex().toUpperCase(),
+        id: uuidv4(),
+      } as EventAnnotationConfig);
+    } else {
+      annotations.push(
         {
           label: `Alert`,
           type: 'manual',
           key: {
-            type: annotation?.endTimestamp ? 'range' : 'point_in_time',
-            timestamp: annotation?.timestamp,
-            endTimestamp: annotation?.endTimestamp,
+            type: 'point_in_time',
+            timestamp: annotation.timestamp,
           },
-          color: annotation?.endTimestamp
-            ? chroma(transparentize('#F04E981A', 0.2)).hex().toUpperCase()
-            : euiTheme.colors.danger,
+          color: euiTheme.colors.danger,
           icon: 'alert',
-          textVisibility: true,
           id: uuidv4(),
-        } as PointInTimeEventAnnotationConfig,
-      ],
+        } as EventAnnotationConfig,
+        {
+          label: `Active Alert`,
+          type: 'manual',
+          key: {
+            type: 'range',
+            timestamp: annotation.timestamp,
+            endTimestamp: moment().toISOString(),
+          },
+          color: chroma(transparentize('#F04E981A', 0.2)).hex().toUpperCase(),
+          id: uuidv4(),
+        } as EventAnnotationConfig
+      );
+    }
+
+    const alertAnnotationLayer = new XYAnnotationsLayer({
+      annotations,
       ignoreGlobalFilters: true,
       dataView,
     });
 
-    setAlertAnnotation(annotationLayer);
+    setAlertAnnotation(alertAnnotationLayer);
   }, [euiTheme.colors.danger, dataView, annotation]);
 
   // Build the aggregation map from the metrics
@@ -294,9 +322,7 @@ export function RuleConditionChart({
       options: xYDataLayerOptions,
     });
 
-    const layers: Array<XYDataLayer | XYReferenceLinesLayer | XYByValueAnnotationsLayer> = [
-      xyDataLayer,
-    ];
+    const layers: Array<XYDataLayer | XYReferenceLinesLayer | XYAnnotationsLayer> = [xyDataLayer];
     if (thresholdReferenceLine) {
       layers.push(...thresholdReferenceLine);
     }
