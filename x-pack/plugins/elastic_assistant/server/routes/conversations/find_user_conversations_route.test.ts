@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { getFindRequest, requestMock } from '../../__mocks__/request';
 import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND_USER_CONVERSATIONS } from '@kbn/elastic-assistant-common';
 import { serverMock } from '../../__mocks__/server';
@@ -20,11 +19,9 @@ import {
 describe('Find user conversations route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
-  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(async () => {
     server = serverMock.create();
-    logger = loggingSystemMock.createLogger();
     ({ clients, context } = requestContextMock.createTools());
 
     clients.elasticAssistant.getAIAssistantConversationsDataClient.findConversations.mockResolvedValue(

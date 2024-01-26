@@ -151,10 +151,6 @@ describe('createResourceInstallationHelper', () => {
   });
 
   test(`should retry using new common init function if specified`, async () => {
-    const context = {
-      context: 'test1',
-      mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
-    };
     const helper = createResourceInstallationHelper(
       logger,
       getCommonInitPromise(false, 100),

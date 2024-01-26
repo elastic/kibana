@@ -89,6 +89,7 @@ components:
       required:
         - id
         - reference
+        - input
       properties:
         id:
           type: string

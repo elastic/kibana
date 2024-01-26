@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { serverMock } from '../../__mocks__/server';
 import { readConversationRoute } from './read_route';
@@ -20,12 +19,10 @@ import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID } from '@kbn/elastic-assis
 describe('Read conversation route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
-  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   const myFakeId = '99403909-ca9b-49ba-9d7a-7e5320e68d05';
   beforeEach(() => {
     server = serverMock.create();
-    logger = loggingSystemMock.createLogger();
     ({ clients, context } = requestContextMock.createTools());
 
     clients.elasticAssistant.getAIAssistantConversationsDataClient.findConversations.mockResolvedValue(

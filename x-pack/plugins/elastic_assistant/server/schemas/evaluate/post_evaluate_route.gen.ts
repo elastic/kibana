@@ -19,7 +19,7 @@ import { z } from 'zod';
 export type DatasetItem = z.infer<typeof DatasetItem>;
 export const DatasetItem = z.object({
   id: z.string(),
-  input: z.string().optional(),
+  input: z.string(),
   reference: z.string(),
   tags: z.array(z.string()).optional(),
   prediction: z.string().optional(),

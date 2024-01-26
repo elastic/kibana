@@ -5,56 +5,75 @@
  * 2.0.
  */
 
-export const getCreateConversationSchemaMock = (ruleId = 'rule-1'): QueryRuleCreateProps => ({
-  description: 'Detecting root and admin users',
-  name: 'Query with a rule id',
-  query: 'user.name: root or user.name: admin',
-  severity: 'high',
-  type: 'query',
-  risk_score: 55,
-  language: 'kuery',
-  rule_id: ruleId,
-});
+import { PerformBulkActionRequestBody } from '../schemas/conversations/bulk_crud_conversations_route.gen';
+import {
+  ConversationCreateProps,
+  ConversationResponse,
+  ConversationUpdateProps,
+} from '../schemas/conversations/common_attributes.gen';
 
-export const getUpdateConversationSchemaMock = (ruleId = 'rule-1'): QueryRuleCreateProps => ({
-  description: 'Detecting root and admin users',
-  name: 'Query with a rule id',
-  query: 'user.name: root or user.name: admin',
-  severity: 'high',
-  type: 'query',
-  risk_score: 55,
-  language: 'kuery',
-  rule_id: ruleId,
-});
-
-export const getConversationMock = <T extends RuleParams>(params: T): SanitizedRule<T> => ({
-  id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-  name: 'Detect Root/Admin Users',
-  tags: [],
-  alertTypeId: ruleTypeMappings[params.type],
-  consumer: 'siem',
-  params,
-  createdAt: new Date('2019-12-13T16:40:33.400Z'),
-  updatedAt: new Date('2019-12-13T16:40:33.400Z'),
-  schedule: { interval: '5m' },
-  enabled: true,
-  actions: [],
-  throttle: null,
-  notifyWhen: null,
-  createdBy: 'elastic',
-  updatedBy: 'elastic',
-  apiKeyOwner: 'elastic',
-  muteAll: false,
-  mutedInstanceIds: [],
-  scheduledTaskId: '2dabe330-0702-11ea-8b50-773b89126888',
-  executionStatus: {
-    status: 'unknown',
-    lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+export const getCreateConversationSchemaMock = (): ConversationCreateProps => ({
+  title: 'Welcome',
+  apiConfig: {
+    connectorId: '1',
+    defaultSystemPromptId: 'Default',
+    connectorTypeTitle: 'Test connector',
+    model: 'model',
   },
-  revision: 0,
+  excludeFromLastConversationStorage: false,
+  isDefault: true,
+  messages: [
+    {
+      content: 'test content',
+      role: 'user',
+      timestamp: '2019-12-13T16:40:33.400Z',
+      traceData: {
+        traceId: '1',
+        transactionId: '2',
+      },
+    },
+  ],
 });
 
-export const getQueryConversationParams = (): QueryRuleParams => {
+export const getUpdateConversationSchemaMock = (
+  conversationId = 'conversation-1'
+): ConversationUpdateProps => ({
+  title: 'Welcome 2',
+  apiConfig: {
+    connectorId: '2',
+    defaultSystemPromptId: 'Default',
+    connectorTypeTitle: 'Test connector',
+    model: 'model',
+  },
+  excludeFromLastConversationStorage: false,
+  messages: [
+    {
+      content: 'test content',
+      role: 'user',
+      timestamp: '2019-12-13T16:40:33.400Z',
+      traceData: {
+        traceId: '1',
+        transactionId: '2',
+      },
+    },
+  ],
+  id: conversationId,
+});
+
+export const getConversationMock = (
+  params: ConversationCreateProps | ConversationUpdateProps
+): ConversationResponse => ({
+  id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+  ...params,
+  createdAt: '2019-12-13T16:40:33.400Z',
+  updatedAt: '2019-12-13T16:40:33.400Z',
+  namespace: 'default',
+  user: {
+    name: 'elastic',
+  },
+});
+
+export const getQueryConversationParams = (): ConversationCreateProps | ConversationUpdateProps => {
   return {
     ...getBaseRuleParams(),
     type: 'query',

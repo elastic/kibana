@@ -8,12 +8,13 @@
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { getConversationMock, getQueryConversationParams } from './conversations_schema.mock';
 import { estypes } from '@elastic/elasticsearch';
+import { ConversationResponse } from '../schemas/conversations/common_attributes.gen';
 
 export const responseMock = {
   create: httpServerMock.createResponseFactory,
 };
 
-export interface FindHit<T = C> {
+export interface FindHit<T = ConversationResponse> {
   page: number;
   perPage: number;
   total: number;

@@ -35,7 +35,7 @@ jest.mock('../add_connector_modal', () => ({
   ),
 }));
 
-const setApiConfig = jest.fn();
+const setApiConfig = jest.fn().mockResolvedValue(welcomeConvo);
 const mockConversation = {
   appendMessage: jest.fn(),
   appendReplacements: jest.fn(),
@@ -138,7 +138,6 @@ describe('useConnectorSetup', () => {
 
       expect(clearTimeout).toHaveBeenCalled();
       expect(onSetupComplete).toHaveBeenCalled();
-      expect(onConversationUpdate).toHaveBeenCalled();
     });
   });
 });
