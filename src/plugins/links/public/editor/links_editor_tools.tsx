@@ -28,3 +28,14 @@ export const memoizedGetOrderedLinkList = memoize(
     return links;
   }
 );
+
+/**
+ * Return focus to the main flyout div to align with a11y standards
+ * @param flyoutId ID of the main flyout div element
+ */
+export const focusMainFlyout = (flyoutId: string) => {
+  const flyoutElement = document.getElementById(flyoutId);
+  if (flyoutElement) {
+    flyoutElement.focus();
+  }
+};

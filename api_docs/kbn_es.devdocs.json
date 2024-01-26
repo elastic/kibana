@@ -851,6 +851,33 @@
       },
       {
         "parentPluginId": "@kbn/es",
+        "id": "def-common.SERVERLESS_ROLES_ROOT_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "SERVERLESS_ROLES_ROOT_PATH",
+        "description": [],
+        "path": "packages/kbn-es/src/paths.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es",
+        "id": "def-common.ServerlessProjectType",
+        "type": "Type",
+        "tags": [],
+        "label": "ServerlessProjectType",
+        "description": [],
+        "signature": [
+          "\"security\" | \"es\" | \"oblt\""
+        ],
+        "path": "packages/kbn-es/src/utils/docker.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es",
         "id": "def-common.SYSTEM_INDICES_SUPERUSER",
         "type": "string",
         "tags": [],

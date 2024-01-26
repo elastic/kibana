@@ -152,6 +152,59 @@
       },
       {
         "parentPluginId": "@kbn/es-types",
+        "id": "def-common.ESQLSearchParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "ESQLSearchParams",
+        "description": [],
+        "path": "packages/kbn-es-types/src/search.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-types",
+            "id": "def-common.ESQLSearchParams.query",
+            "type": "string",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "path": "packages/kbn-es-types/src/search.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-types",
+            "id": "def-common.ESQLSearchParams.filter",
+            "type": "Unknown",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/kbn-es-types/src/search.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-types",
+            "id": "def-common.ESQLSearchParams.locale",
+            "type": "string",
+            "tags": [],
+            "label": "locale",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-es-types/src/search.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-types",
         "id": "def-common.ESQLSearchReponse",
         "type": "Interface",
         "tags": [],

@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CanDuplicatePanels } from '@kbn/presentation-containers';
-import { ViewMode } from '@kbn/presentation-publishing';
+import { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { ClonePanelAction, ClonePanelActionApi } from './clone_panel_action';
 
@@ -19,11 +18,11 @@ describe('Clone panel action', () => {
     action = new ClonePanelAction();
     context = {
       embeddable: {
-        uuid: new BehaviorSubject<string>('superId'),
+        uuid: 'superId',
         viewMode: new BehaviorSubject<ViewMode>('edit'),
-        parentApi: new BehaviorSubject<CanDuplicatePanels>({
+        parentApi: {
           duplicatePanel: jest.fn(),
-        }),
+        },
       },
     };
   });
@@ -40,12 +39,12 @@ describe('Clone panel action', () => {
   });
 
   it('is incompatible when view mode is view', async () => {
-    context.embeddable.viewMode = new BehaviorSubject<ViewMode>('view');
+    (context.embeddable as PublishesViewMode).viewMode = new BehaviorSubject<ViewMode>('view');
     expect(await action.isCompatible(context)).toBe(false);
   });
 
   it('calls the parent duplicatePanel method on execute', async () => {
     action.execute(context);
-    expect(context.embeddable.parentApi.value.duplicatePanel).toHaveBeenCalled();
+    expect(context.embeddable.parentApi.duplicatePanel).toHaveBeenCalled();
   });
 });
