@@ -20,7 +20,7 @@ import {
   LogExplorerControllerStateMachine,
   LogExplorerControllerStateService,
 } from '../state_machines/log_explorer_controller';
-import { LogExplorerCustomizations } from './controller_customizations';
+import { LogExplorerCustomizations } from '../customizations/types';
 
 export interface LogExplorerController {
   actions: {};

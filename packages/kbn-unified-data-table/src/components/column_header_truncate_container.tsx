@@ -15,7 +15,7 @@ const ColumnHeaderTruncateContainer = ({
   headerRowHeight = 1,
   children,
 }: {
-  headerRowHeight: number;
+  headerRowHeight?: number;
   children: React.ReactNode;
 }) => {
   return (
