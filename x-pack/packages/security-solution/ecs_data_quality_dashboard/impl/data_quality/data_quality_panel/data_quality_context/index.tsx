@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import type { HttpHandler } from '@kbn/core-http-browser';
 import React, { useMemo } from 'react';
-import { TelemetryEvents } from '../../types';
+import type { HttpHandler } from '@kbn/core-http-browser';
+import type { IToasts } from '@kbn/core-notifications-browser';
+import type { TelemetryEvents } from '../../types';
 
 interface DataQualityProviderProps {
   httpFetch: HttpHandler;
   isILMAvailable: boolean;
   telemetryEvents: TelemetryEvents;
+  toasts: IToasts;
 }
 
 const DataQualityContext = React.createContext<DataQualityProviderProps | undefined>(undefined);
@@ -20,16 +22,18 @@ const DataQualityContext = React.createContext<DataQualityProviderProps | undefi
 export const DataQualityProvider: React.FC<DataQualityProviderProps> = ({
   children,
   httpFetch,
+  toasts,
   isILMAvailable,
   telemetryEvents,
 }) => {
   const value = useMemo(
     () => ({
       httpFetch,
+      toasts,
       isILMAvailable,
       telemetryEvents,
     }),
-    [httpFetch, isILMAvailable, telemetryEvents]
+    [httpFetch, toasts, isILMAvailable, telemetryEvents]
   );
 
   return <DataQualityContext.Provider value={value}>{children}</DataQualityContext.Provider>;

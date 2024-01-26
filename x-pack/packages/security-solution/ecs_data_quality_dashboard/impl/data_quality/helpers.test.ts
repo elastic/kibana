@@ -35,6 +35,9 @@ import {
   getTotalSizeInBytes,
   hasValidTimestampMapping,
   isMappingCompatible,
+  postResult,
+  getResults,
+  ResultData,
 } from './helpers';
 import {
   hostNameWithTextMapping,
@@ -77,6 +80,8 @@ import {
   PatternRollup,
   UnallowedValueCount,
 } from './types';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
 const ecsMetadata: Record<string, EcsMetadata> = EcsFlat as unknown as Record<string, EcsMetadata>;
 
@@ -1487,6 +1492,83 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
         },
       ]);
+    });
+  });
+
+  describe('postResult', () => {
+    const { fetch } = httpServiceMock.createStartContract();
+    const { toasts } = notificationServiceMock.createStartContract();
+    beforeEach(() => {
+      fetch.mockClear();
+    });
+
+    test('it posts the result', async () => {
+      const result = { meta: {}, rollup: {} } as unknown as ResultData;
+      await postResult({
+        httpFetch: fetch,
+        result,
+        abortController: new AbortController(),
+        toasts,
+      });
+
+      expect(fetch).toHaveBeenCalledWith(
+        '/internal/ecs_data_quality_dashboard/results',
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify(result),
+        })
+      );
+    });
+
+    test('it throws error', async () => {
+      const result = { meta: {}, rollup: {} } as unknown as ResultData;
+      fetch.mockRejectedValueOnce('test-error');
+      await postResult({
+        httpFetch: fetch,
+        result,
+        abortController: new AbortController(),
+        toasts,
+      });
+      expect(toasts.addError).toHaveBeenCalledWith('test-error', { title: expect.any(String) });
+    });
+  });
+
+  describe('getResults', () => {
+    const { fetch } = httpServiceMock.createStartContract();
+    const { toasts } = notificationServiceMock.createStartContract();
+    beforeEach(() => {
+      fetch.mockClear();
+    });
+
+    test('it gets the results', async () => {
+      await getResults({
+        httpFetch: fetch,
+        abortController: new AbortController(),
+        patterns: ['auditbeat-*', 'packetbeat-*'],
+        toasts,
+      });
+
+      expect(fetch).toHaveBeenCalledWith(
+        '/internal/ecs_data_quality_dashboard/results',
+        expect.objectContaining({
+          method: 'GET',
+          query: { patterns: 'auditbeat-*,packetbeat-*' },
+        })
+      );
+    });
+
+    it('should catch error', async () => {
+      fetch.mockRejectedValueOnce('test-error');
+
+      const results = await getResults({
+        httpFetch: fetch,
+        abortController: new AbortController(),
+        patterns: ['auditbeat-*', 'packetbeat-*'],
+        toasts,
+      });
+
+      expect(toasts.addError).toHaveBeenCalledWith('test-error', { title: expect.any(String) });
+      expect(results).toEqual([]);
     });
   });
 });
