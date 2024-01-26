@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import sortBy from 'lodash/sortBy';
 import dateMath from '@elastic/datemath';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
@@ -17,16 +18,30 @@ import {
   ALERT_START,
   ALERT_SUPPRESSION_DOCS_COUNT,
   ALERT_SUPPRESSION_END,
+  ALERT_SUPPRESSION_START,
   ALERT_UUID,
+  ALERT_RULE_EXECUTION_UUID,
   ALERT_WORKFLOW_STATUS,
   TIMESTAMP,
   VERSION,
 } from '@kbn/rule-data-utils';
 import { mapKeys, snakeCase } from 'lodash/fp';
+import type { IRuleDataClient } from '..';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import { CreatePersistenceRuleTypeWrapper } from './persistence_types';
 import { errorAggregator } from './utils';
 import { AlertWithSuppressionFields870 } from '../../common/schemas/8.7.0';
+
+/**
+ * alerts returned from BE have date type coerce to ISO strings
+ */
+export type BackendAlertWithSuppressionFields870<T> = Omit<
+  AlertWithSuppressionFields870<T>,
+  typeof ALERT_SUPPRESSION_START | typeof ALERT_SUPPRESSION_END
+> & {
+  [ALERT_SUPPRESSION_START]: string;
+  [ALERT_SUPPRESSION_END]: string;
+};
 
 export const ALERT_GROUP_INDEX = `${ALERT_NAMESPACE}.group.index` as const;
 
@@ -63,6 +78,158 @@ const mapAlertsToBulkCreate = <T>(alerts: Array<{ _id: string; _source: T }>) =>
   return alerts.flatMap((alert) => [{ create: { _id: alert._id } }, alert._source]);
 };
 
+const filterDuplicateAlerts = async <T extends { _id: string }>({
+  alerts,
+  spaceId,
+  ruleDataClient,
+}: {
+  alerts: T[];
+  spaceId: string;
+  ruleDataClient: IRuleDataClient;
+}) => {
+  const CHUNK_SIZE = 10000;
+  const alertChunks = chunk(alerts, CHUNK_SIZE);
+  const filteredAlerts: typeof alerts = [];
+
+  for (const alertChunk of alertChunks) {
+    const request: estypes.SearchRequest = {
+      body: {
+        query: {
+          ids: {
+            values: alertChunk.map((alert) => alert._id),
+          },
+        },
+        aggs: {
+          uuids: {
+            terms: {
+              field: ALERT_UUID,
+              size: CHUNK_SIZE,
+            },
+          },
+        },
+        size: 0,
+      },
+    };
+    const response = await ruleDataClient.getReader({ namespace: spaceId }).search(request);
+    const uuidsMap: Record<string, boolean> = {};
+    const aggs = response.aggregations as
+      | Record<estypes.AggregateName, { buckets: Array<{ key: string }> }>
+      | undefined;
+    if (aggs != null) {
+      aggs.uuids.buckets.forEach((bucket) => (uuidsMap[bucket.key] = true));
+      const newAlerts = alertChunk.filter((alert) => !uuidsMap[alert._id]);
+      filteredAlerts.push(...newAlerts);
+    } else {
+      filteredAlerts.push(...alertChunk);
+    }
+  }
+
+  return filteredAlerts;
+};
+
+/**
+ * suppress alerts by ALERT_INSTANCE_ID in memory
+ */
+export const suppressAlertsInMemory = <
+  T extends {
+    _id: string;
+    _source: {
+      [ALERT_SUPPRESSION_DOCS_COUNT]: number;
+      [ALERT_INSTANCE_ID]: string;
+      [ALERT_SUPPRESSION_START]: Date;
+      [ALERT_SUPPRESSION_END]: Date;
+    };
+  }
+>(
+  alerts: T[]
+): {
+  alertCandidates: T[];
+  suppressedAlerts: T[];
+} => {
+  const idsMap: Record<string, { count: number; suppressionEnd: Date }> = {};
+  const suppressedAlerts: T[] = [];
+
+  const filteredAlerts = sortBy(alerts, (alert) => alert._source[ALERT_SUPPRESSION_START]).filter(
+    (alert) => {
+      const instanceId = alert._source[ALERT_INSTANCE_ID];
+      const suppressionDocsCount = alert._source[ALERT_SUPPRESSION_DOCS_COUNT];
+      const suppressionEnd = alert._source[ALERT_SUPPRESSION_END];
+
+      if (instanceId && idsMap[instanceId] != null) {
+        idsMap[instanceId].count += suppressionDocsCount + 1;
+        // store the max value of suppression end boundary
+        if (suppressionEnd > idsMap[instanceId].suppressionEnd) {
+          idsMap[instanceId].suppressionEnd = suppressionEnd;
+        }
+        suppressedAlerts.push(alert);
+        return false;
+      } else {
+        idsMap[instanceId] = { count: suppressionDocsCount, suppressionEnd };
+        return true;
+      }
+    },
+    []
+  );
+
+  const alertCandidates = filteredAlerts.map((alert) => {
+    const instanceId = alert._source[ALERT_INSTANCE_ID];
+    if (instanceId) {
+      alert._source[ALERT_SUPPRESSION_DOCS_COUNT] = idsMap[instanceId].count;
+      alert._source[ALERT_SUPPRESSION_END] = idsMap[instanceId].suppressionEnd;
+    }
+    return alert;
+  });
+
+  return {
+    alertCandidates,
+    suppressedAlerts,
+  };
+};
+
+/**
+ * Compare existing alert suppression date props with alert to suppressed alert values
+ **/
+export const isExistingDateGtEqThanAlert = <
+  T extends { [ALERT_SUPPRESSION_END]: Date; [ALERT_SUPPRESSION_START]: Date }
+>(
+  existingAlert: estypes.SearchHit<BackendAlertWithSuppressionFields870<{}>>,
+  alert: { _id: string; _source: T },
+  property: typeof ALERT_SUPPRESSION_END | typeof ALERT_SUPPRESSION_START
+) => {
+  const existingDate = existingAlert?._source?.[property];
+  return existingDate ? existingDate >= alert._source[property].toISOString() : false;
+};
+
+interface SuppressionBoundaries {
+  [ALERT_SUPPRESSION_END]: Date;
+  [ALERT_SUPPRESSION_START]: Date;
+}
+
+/**
+ * returns updated suppression time boundaries
+ */
+export const getUpdatedSuppressionBoundaries = <T extends SuppressionBoundaries>(
+  existingAlert: estypes.SearchHit<BackendAlertWithSuppressionFields870<{}>>,
+  alert: { _id: string; _source: T },
+  executionId: string
+): Partial<SuppressionBoundaries> => {
+  const boundaries: Partial<SuppressionBoundaries> = {};
+
+  if (!isExistingDateGtEqThanAlert(existingAlert, alert, ALERT_SUPPRESSION_END)) {
+    boundaries[ALERT_SUPPRESSION_END] = alert._source[ALERT_SUPPRESSION_END];
+  }
+  // start date can only be updated for alert created in the same rule execution
+  // it can happen when alert was created in first bulk created, but some of the alerts can be suppressed in the next bulk create request
+  if (
+    existingAlert?._source?.[ALERT_RULE_EXECUTION_UUID] === executionId &&
+    isExistingDateGtEqThanAlert(existingAlert, alert, ALERT_SUPPRESSION_START)
+  ) {
+    boundaries[ALERT_SUPPRESSION_START] = alert._source[ALERT_SUPPRESSION_START];
+  }
+
+  return boundaries;
+};
+
 export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper =
   ({ logger, ruleDataClient, formatAlert }) =>
   (type) => {
@@ -91,44 +258,11 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 ruleDataClient.isWriteEnabled() && options.services.shouldWriteAlerts();
 
               if (writeAlerts && numAlerts) {
-                const CHUNK_SIZE = 10000;
-                const alertChunks = chunk(alerts, CHUNK_SIZE);
-                const filteredAlerts: typeof alerts = [];
-
-                for (const alertChunk of alertChunks) {
-                  const request: estypes.SearchRequest = {
-                    body: {
-                      query: {
-                        ids: {
-                          values: alertChunk.map((alert) => alert._id),
-                        },
-                      },
-                      aggs: {
-                        uuids: {
-                          terms: {
-                            field: ALERT_UUID,
-                            size: CHUNK_SIZE,
-                          },
-                        },
-                      },
-                      size: 0,
-                    },
-                  };
-                  const response = await ruleDataClient
-                    .getReader({ namespace: options.spaceId })
-                    .search(request);
-                  const uuidsMap: Record<string, boolean> = {};
-                  const aggs = response.aggregations as
-                    | Record<estypes.AggregateName, { buckets: Array<{ key: string }> }>
-                    | undefined;
-                  if (aggs != null) {
-                    aggs.uuids.buckets.forEach((bucket) => (uuidsMap[bucket.key] = true));
-                    const newAlerts = alertChunk.filter((alert) => !uuidsMap[alert._id]);
-                    filteredAlerts.push(...newAlerts);
-                  } else {
-                    filteredAlerts.push(...alertChunk);
-                  }
-                }
+                const filteredAlerts: typeof alerts = await filterDuplicateAlerts({
+                  alerts,
+                  ruleDataClient,
+                  spaceId: options.spaceId,
+                });
 
                 if (filteredAlerts.length === 0) {
                   return { createdAlerts: [], errors: {}, alertsWereTruncated: false };
@@ -219,7 +353,8 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
               alerts,
               suppressionWindow,
               enrichAlerts,
-              currentTimeOverride
+              currentTimeOverride,
+              isRuleExecutionOnly
             ) => {
               const ruleDataClientWriter = await ruleDataClient.getWriter({
                 namespace: options.spaceId,
@@ -238,13 +373,24 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 const suppressionWindowStart = dateMath.parse(suppressionWindow, {
                   forceNow: currentTimeOverride,
                 });
+
                 if (!suppressionWindowStart) {
                   throw new Error('Failed to parse suppression window');
                 }
 
+                const filteredDuplicates = await filterDuplicateAlerts({
+                  alerts,
+                  ruleDataClient,
+                  spaceId: options.spaceId,
+                });
+
+                if (filteredDuplicates.length === 0) {
+                  return { createdAlerts: [], errors: {}, suppressedAlerts: [] };
+                }
+
                 const suppressionAlertSearchRequest = {
                   body: {
-                    size: alerts.length,
+                    size: filteredDuplicates.length,
                     query: {
                       bool: {
                         filter: [
@@ -257,7 +403,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                           },
                           {
                             terms: {
-                              [ALERT_INSTANCE_ID]: alerts.map(
+                              [ALERT_INSTANCE_ID]: filteredDuplicates.map(
                                 (alert) => alert._source['kibana.alert.instance.id']
                               ),
                             },
@@ -287,33 +433,65 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   },
                 };
 
-                // We use AlertWithSuppressionFields870 explicitly here as the type instead of
+                // We use BackendAlertWithSuppressionFields870 explicitly here as the type instead of
                 // AlertWithSuppressionFieldsLatest since we're reading alerts rather than writing,
                 // so future versions of Kibana may read 8.7.0 version alerts and need to update them
                 const response = await ruleDataClient
                   .getReader({ namespace: options.spaceId })
-                  .search<typeof suppressionAlertSearchRequest, AlertWithSuppressionFields870<{}>>(
-                    suppressionAlertSearchRequest
-                  );
+                  .search<
+                    typeof suppressionAlertSearchRequest,
+                    BackendAlertWithSuppressionFields870<{}>
+                  >(suppressionAlertSearchRequest);
 
                 const existingAlertsByInstanceId = response.hits.hits.reduce<
-                  Record<string, estypes.SearchHit<AlertWithSuppressionFields870<{}>>>
+                  Record<string, estypes.SearchHit<BackendAlertWithSuppressionFields870<{}>>>
                 >((acc, hit) => {
-                  acc[hit._source['kibana.alert.instance.id']] = hit;
+                  acc[hit._source[ALERT_INSTANCE_ID]] = hit;
                   return acc;
                 }, {});
 
-                const [duplicateAlerts, newAlerts] = partition(
-                  alerts,
-                  (alert) =>
-                    existingAlertsByInstanceId[alert._source['kibana.alert.instance.id']] != null
-                );
+                const nonSuppressedAlerts = filteredDuplicates.filter((alert) => {
+                  const existingAlert =
+                    existingAlertsByInstanceId[alert._source[ALERT_INSTANCE_ID]];
+
+                  // if existing alert was generated earlier during rule execution, it means new ones are not suppressed yet
+                  if (
+                    !existingAlert ||
+                    existingAlert?._source?.[ALERT_RULE_EXECUTION_UUID] === options.executionId
+                  ) {
+                    return true;
+                  }
+
+                  return !isExistingDateGtEqThanAlert(existingAlert, alert, ALERT_SUPPRESSION_END);
+                });
+
+                if (nonSuppressedAlerts.length === 0) {
+                  return { createdAlerts: [], errors: {}, suppressedAlerts: [] };
+                }
+
+                const { alertCandidates, suppressedAlerts: suppressedInMemoryAlerts } =
+                  suppressAlertsInMemory(nonSuppressedAlerts);
+
+                const [duplicateAlerts, newAlerts] = partition(alertCandidates, (alert) => {
+                  const existingAlert =
+                    existingAlertsByInstanceId[alert._source[ALERT_INSTANCE_ID]];
+
+                  // if suppression enabled only on rule execution, we need to account for alerts created earlier
+                  if (isRuleExecutionOnly) {
+                    return (
+                      existingAlert?._source?.[ALERT_RULE_EXECUTION_UUID] === options.executionId
+                    );
+                  } else {
+                    return existingAlert != null;
+                  }
+                });
 
                 const duplicateAlertUpdates = duplicateAlerts.flatMap((alert) => {
                   const existingAlert =
-                    existingAlertsByInstanceId[alert._source['kibana.alert.instance.id']];
+                    existingAlertsByInstanceId[alert._source[ALERT_INSTANCE_ID]];
                   const existingDocsCount =
                     existingAlert._source?.[ALERT_SUPPRESSION_DOCS_COUNT] ?? 0;
+
                   return [
                     {
                       update: {
@@ -324,8 +502,12 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                     },
                     {
                       doc: {
+                        ...getUpdatedSuppressionBoundaries(
+                          existingAlert,
+                          alert,
+                          options.executionId
+                        ),
                         [ALERT_LAST_DETECTED]: currentTimeOverride ?? new Date(),
-                        [ALERT_SUPPRESSION_END]: alert._source[ALERT_SUPPRESSION_END],
                         [ALERT_SUPPRESSION_DOCS_COUNT]:
                           existingDocsCount + alert._source[ALERT_SUPPRESSION_DOCS_COUNT] + 1,
                       },
@@ -358,7 +540,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 });
 
                 if (bulkResponse == null) {
-                  return { createdAlerts: [], errors: {} };
+                  return { createdAlerts: [], errors: {}, suppressedAlerts: [] };
                 }
 
                 const createdAlerts = augmentedAlerts
@@ -402,11 +584,12 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
 
                 return {
                   createdAlerts,
+                  suppressedAlerts: [...duplicateAlerts, ...suppressedInMemoryAlerts],
                   errors: errorAggregator(bulkResponse.body, [409]),
                 };
               } else {
                 logger.debug('Writing is disabled.');
-                return { createdAlerts: [], errors: {} };
+                return { createdAlerts: [], errors: {}, suppressedAlerts: [] };
               }
             },
           },

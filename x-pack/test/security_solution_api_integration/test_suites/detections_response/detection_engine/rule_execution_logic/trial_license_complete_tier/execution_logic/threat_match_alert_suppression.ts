@@ -15,7 +15,9 @@ import {
   ALERT_SUPPRESSION_TERMS,
   ALERT_LAST_DETECTED,
   TIMESTAMP,
+  ALERT_START,
 } from '@kbn/rule-data-utils';
+import { getSuppressionMaxSignalsWarning as getSuppressionMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_URL } from '@kbn/security-solution-plugin/common/constants';
 
@@ -215,12 +217,12 @@ export default ({ getService }: FtrProviderContext) => {
               [ALERT_SUPPRESSION_TERMS]: [
                 {
                   field: 'host.name',
-                  value: 'host-a',
+                  value: ['host-a'],
                 },
               ],
-              // suppression boundaries equal to alert time, since no alert been suppressed
-              [ALERT_SUPPRESSION_START]: suppressionStart,
-              [ALERT_SUPPRESSION_END]: suppressionStart,
+              // suppression boundaries equal to original event time, since no alert been suppressed
+              [ALERT_SUPPRESSION_START]: firstTimestamp,
+              [ALERT_SUPPRESSION_END]: firstTimestamp,
               [ALERT_ORIGINAL_TIME]: firstTimestamp,
               [TIMESTAMP]: suppressionStart,
               [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
@@ -258,11 +260,12 @@ export default ({ getService }: FtrProviderContext) => {
               [ALERT_SUPPRESSION_TERMS]: [
                 {
                   field: 'host.name',
-                  value: 'host-a',
+                  value: ['host-a'],
                 },
               ],
               [ALERT_ORIGINAL_TIME]: firstTimestamp, // timestamp is the same
-              [ALERT_SUPPRESSION_START]: suppressionStart, // suppression start is the same
+              [ALERT_SUPPRESSION_START]: firstTimestamp, // suppression start is the same
+              [ALERT_SUPPRESSION_END]: secondTimestamp, // suppression end is updated
               [ALERT_SUPPRESSION_DOCS_COUNT]: 2, // 2 alerts from second rule run, that's why 2 suppressed
             })
           );
@@ -357,7 +360,7 @@ export default ({ getService }: FtrProviderContext) => {
               [ALERT_SUPPRESSION_TERMS]: [
                 {
                   field: 'host.name',
-                  value: 'host-a',
+                  value: ['host-a'],
                 },
               ],
               [ALERT_ORIGINAL_TIME]: firstTimestamp,
@@ -434,12 +437,12 @@ export default ({ getService }: FtrProviderContext) => {
               [ALERT_SUPPRESSION_TERMS]: [
                 {
                   field: 'host.name',
-                  value: 'host-a',
+                  value: ['host-a'],
                 },
               ],
               [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
-              [ALERT_SUPPRESSION_START]: '2020-10-28T06:00:00.000Z',
-              [ALERT_SUPPRESSION_END]: '2020-10-28T06:00:00.000Z',
+              [ALERT_SUPPRESSION_START]: firstTimestamp,
+              [ALERT_SUPPRESSION_END]: firstTimestamp,
               [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
             })
           );
@@ -449,12 +452,12 @@ export default ({ getService }: FtrProviderContext) => {
               [ALERT_SUPPRESSION_TERMS]: [
                 {
                   field: 'host.name',
-                  value: 'host-a',
+                  value: ['host-a'],
                 },
               ],
               [TIMESTAMP]: '2020-10-28T06:30:00.000Z',
-              [ALERT_SUPPRESSION_START]: '2020-10-28T06:30:00.000Z',
-              [ALERT_SUPPRESSION_END]: '2020-10-28T06:30:00.000Z',
+              [ALERT_SUPPRESSION_START]: secondTimestamp,
+              [ALERT_SUPPRESSION_END]: secondTimestamp,
               [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
             })
           );
@@ -536,14 +539,15 @@ export default ({ getService }: FtrProviderContext) => {
             [ALERT_SUPPRESSION_TERMS]: [
               {
                 field: 'host.name',
-                value: 'host-a',
+                value: ['host-a'],
               },
             ],
             [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
             [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z', // Note: ALERT_LAST_DETECTED gets updated, timestamp does not
+            [ALERT_START]: '2020-10-28T06:00:00.000Z',
             [ALERT_ORIGINAL_TIME]: firstTimestamp,
-            [ALERT_SUPPRESSION_START]: '2020-10-28T06:00:00.000Z',
-            [ALERT_SUPPRESSION_END]: '2020-10-28T07:00:00.000Z',
+            [ALERT_SUPPRESSION_START]: firstTimestamp,
+            [ALERT_SUPPRESSION_END]: thirdTimestamp,
             [ALERT_SUPPRESSION_DOCS_COUNT]: 4, // in total 4 alert got suppressed: 1 from the first run, 2 from the second, 1 from the third
           });
         });
@@ -634,18 +638,17 @@ export default ({ getService }: FtrProviderContext) => {
             [ALERT_SUPPRESSION_TERMS]: [
               {
                 field: 'host.name',
-                value: 'host-a',
+                value: ['host-a'],
               },
               {
                 field: 'agent.version',
-                value: '1',
+                value: ['1'],
               },
             ],
             [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
-            [ALERT_LAST_DETECTED]: '2020-10-28T06:30:00.000Z', // Note: ALERT_LAST_DETECTED gets updated, timestamp does not
             [ALERT_ORIGINAL_TIME]: firstTimestamp,
-            [ALERT_SUPPRESSION_START]: '2020-10-28T06:00:00.000Z',
-            [ALERT_SUPPRESSION_END]: '2020-10-28T06:30:00.000Z',
+            [ALERT_SUPPRESSION_START]: firstTimestamp,
+            [ALERT_SUPPRESSION_END]: secondTimestamp,
             [ALERT_SUPPRESSION_DOCS_COUNT]: 3, // 3 alerts suppressed from the second run
           });
           expect(previewAlerts[1]._source).toEqual({
@@ -653,18 +656,18 @@ export default ({ getService }: FtrProviderContext) => {
             [ALERT_SUPPRESSION_TERMS]: [
               {
                 field: 'host.name',
-                value: 'host-a',
+                value: ['host-a'],
               },
               {
                 field: 'agent.version',
-                value: '2',
+                value: ['2'],
               },
             ],
             [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
             [ALERT_LAST_DETECTED]: '2020-10-28T06:00:00.000Z',
             [ALERT_ORIGINAL_TIME]: firstTimestamp,
-            [ALERT_SUPPRESSION_START]: '2020-10-28T06:00:00.000Z',
-            [ALERT_SUPPRESSION_END]: '2020-10-28T06:00:00.000Z',
+            [ALERT_SUPPRESSION_START]: firstTimestamp,
+            [ALERT_SUPPRESSION_END]: firstTimestamp,
             [ALERT_SUPPRESSION_DOCS_COUNT]: 0, // no suppressed alerts
           });
         });
@@ -743,12 +746,12 @@ export default ({ getService }: FtrProviderContext) => {
             [ALERT_SUPPRESSION_TERMS]: [
               {
                 field: 'host.name',
-                value: 'host-a',
+                value: ['host-a'],
               },
             ],
             [ALERT_ORIGINAL_TIME]: firstTimestamp,
-            [ALERT_SUPPRESSION_START]: '2020-10-28T06:00:00.000Z',
-            [ALERT_SUPPRESSION_END]: '2020-10-28T06:30:00.000Z',
+            [ALERT_SUPPRESSION_START]: firstTimestamp,
+            [ALERT_SUPPRESSION_END]: secondTimestamp,
             [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
           });
         });
@@ -825,7 +828,7 @@ export default ({ getService }: FtrProviderContext) => {
               [ALERT_SUPPRESSION_TERMS]: [
                 {
                   field: 'agent.name',
-                  value: 'agent-0',
+                  value: ['agent-0'],
                 },
               ],
               [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
@@ -833,7 +836,7 @@ export default ({ getService }: FtrProviderContext) => {
           );
         });
 
-        it('should deduplicate alerts while suppressing new ones', async () => {
+        it('should deduplicate multiple alerts while suppressing new ones', async () => {
           const id = uuidv4();
           const firstTimestamp = '2020-10-28T05:45:00.000Z';
           const secondTimestamp = '2020-10-28T06:10:00.000Z';
@@ -901,13 +904,92 @@ export default ({ getService }: FtrProviderContext) => {
             [ALERT_SUPPRESSION_TERMS]: [
               {
                 field: 'host.name',
-                value: 'host-a',
+                value: ['host-a'],
               },
             ],
             [ALERT_ORIGINAL_TIME]: firstTimestamp,
-            [ALERT_SUPPRESSION_START]: '2020-10-28T06:00:00.000Z',
-            [ALERT_SUPPRESSION_END]: '2020-10-28T06:30:00.000Z',
+            [ALERT_SUPPRESSION_START]: firstTimestamp,
+            [ALERT_SUPPRESSION_END]: secondTimestamp,
+            // TODO: fix count, it should be 4 suppressed
             [ALERT_SUPPRESSION_DOCS_COUNT]: 4,
+          });
+        });
+
+        it('should deduplicate single alerts while suppressing new ones', async () => {
+          const id = uuidv4();
+          const firstTimestamp = '2020-10-28T05:45:00.000Z';
+          const secondTimestamp = '2020-10-28T06:10:00.000Z';
+          const doc1 = {
+            id,
+            '@timestamp': firstTimestamp,
+            host: { name: 'host-a' },
+          };
+
+          const doc2 = {
+            ...doc1,
+            '@timestamp': secondTimestamp,
+          };
+
+          await eventsFiller({
+            id,
+            count: eventsCount,
+            timestamp: [firstTimestamp, secondTimestamp],
+          });
+          await threatsFiller({ id, count: threatsCount, timestamp: firstTimestamp });
+
+          // 3 alerts should be suppressed
+          await indexListOfSourceDocuments([doc1, doc2, doc2, doc2]);
+
+          await addThreatDocuments({
+            id,
+            timestamp: firstTimestamp,
+            fields: {
+              host: {
+                name: 'host-a',
+              },
+            },
+            count: 1,
+          });
+
+          const rule: ThreatMatchRuleCreateProps = {
+            ...indicatorMatchRule(id),
+            alert_suppression: {
+              group_by: ['host.name'],
+              duration: {
+                value: 300,
+                unit: 'm',
+              },
+              missing_fields_strategy: 'suppress',
+            },
+            // large look-back time covers all docs
+            from: 'now-1h',
+            interval: '30m',
+          };
+
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+            invocationCount: 2,
+          });
+          const previewAlerts = await getPreviewAlerts({
+            es,
+            previewId,
+            sort: ['host.name', ALERT_ORIGINAL_TIME],
+          });
+          expect(previewAlerts.length).toEqual(1);
+          expect(previewAlerts[0]._source).toEqual({
+            ...previewAlerts[0]._source,
+            [ALERT_SUPPRESSION_TERMS]: [
+              {
+                field: 'host.name',
+                value: ['host-a'],
+              },
+            ],
+            [ALERT_ORIGINAL_TIME]: firstTimestamp,
+            [ALERT_SUPPRESSION_START]: firstTimestamp,
+            [ALERT_SUPPRESSION_END]: secondTimestamp,
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 3,
           });
         });
 
@@ -995,12 +1077,12 @@ export default ({ getService }: FtrProviderContext) => {
             [ALERT_SUPPRESSION_TERMS]: [
               {
                 field: 'agent.name',
-                value: 'agent-1',
+                value: ['agent-1'],
               },
             ],
             [ALERT_ORIGINAL_TIME]: firstTimestamp,
-            [ALERT_SUPPRESSION_START]: '2020-10-28T06:00:00.000Z',
-            [ALERT_SUPPRESSION_END]: '2020-10-28T06:30:00.000Z',
+            [ALERT_SUPPRESSION_START]: firstTimestamp,
+            [ALERT_SUPPRESSION_END]: secondTimestamp,
             [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
           });
 
@@ -1013,8 +1095,8 @@ export default ({ getService }: FtrProviderContext) => {
               },
             ],
             [ALERT_ORIGINAL_TIME]: firstTimestamp,
-            [ALERT_SUPPRESSION_START]: '2020-10-28T06:00:00.000Z',
-            [ALERT_SUPPRESSION_END]: '2020-10-28T06:30:00.000Z',
+            [ALERT_SUPPRESSION_START]: firstTimestamp,
+            [ALERT_SUPPRESSION_END]: secondTimestamp,
             [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
           });
         });
@@ -1103,12 +1185,12 @@ export default ({ getService }: FtrProviderContext) => {
             [ALERT_SUPPRESSION_TERMS]: [
               {
                 field: 'agent.name',
-                value: 'agent-1',
+                value: ['agent-1'],
               },
             ],
             [ALERT_ORIGINAL_TIME]: firstTimestamp,
-            [ALERT_SUPPRESSION_START]: '2020-10-28T06:00:00.000Z',
-            [ALERT_SUPPRESSION_END]: '2020-10-28T06:30:00.000Z',
+            [ALERT_SUPPRESSION_START]: firstTimestamp,
+            [ALERT_SUPPRESSION_END]: secondTimestamp,
             [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
           });
 
@@ -1127,10 +1209,15 @@ export default ({ getService }: FtrProviderContext) => {
           it('should suppress alerts during rule execution only', async () => {
             const id = uuidv4();
             const timestamp = '2020-10-28T06:45:00.000Z';
+            const laterTimestamp = '2020-10-28T06:50:00.000Z';
             const doc1 = {
               id,
               '@timestamp': timestamp,
               host: { name: 'host-a' },
+            };
+            const doc1WithLaterTimestamp = {
+              ...doc1,
+              '@timestamp': laterTimestamp,
             };
             // doc2 does not generate alert
             const doc2 = {
@@ -1141,7 +1228,7 @@ export default ({ getService }: FtrProviderContext) => {
             await eventsFiller({ id, count: eventsCount, timestamp: [timestamp] });
             await threatsFiller({ id, count: threatsCount, timestamp });
 
-            await indexListOfSourceDocuments([doc1, doc1, doc1, doc2]);
+            await indexListOfSourceDocuments([doc1, doc1WithLaterTimestamp, doc1, doc2]);
 
             await addThreatDocuments({
               id,
@@ -1181,15 +1268,213 @@ export default ({ getService }: FtrProviderContext) => {
               [ALERT_SUPPRESSION_TERMS]: [
                 {
                   field: 'host.name',
-                  value: 'host-a',
+                  value: ['host-a'],
                 },
               ],
               [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
               [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
               [ALERT_ORIGINAL_TIME]: timestamp,
-              [ALERT_SUPPRESSION_START]: '2020-10-28T07:00:00.000Z',
-              [ALERT_SUPPRESSION_END]: '2020-10-28T07:00:00.000Z',
+              [ALERT_SUPPRESSION_START]: timestamp,
+              [ALERT_SUPPRESSION_END]: laterTimestamp, // suppression ends with later timestamp
               [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
+            });
+          });
+
+          it('should suppress alerts during rule execution only for array field', async () => {
+            const id = uuidv4();
+            const timestamp = '2020-10-28T06:45:00.000Z';
+            const doc1 = {
+              id,
+              '@timestamp': timestamp,
+              host: { name: ['host-a', 'host-b'] },
+            };
+
+            await eventsFiller({ id, count: eventsCount, timestamp: [timestamp] });
+            await threatsFiller({ id, count: threatsCount, timestamp });
+
+            await indexListOfSourceDocuments([doc1, doc1, doc1]);
+
+            await addThreatDocuments({
+              id,
+              timestamp,
+              fields: {
+                host: {
+                  name: 'host-a',
+                },
+              },
+              count: 1,
+            });
+
+            const rule: ThreatMatchRuleCreateProps = {
+              ...indicatorMatchRule(id),
+              alert_suppression: {
+                group_by: ['host.name'],
+                missing_fields_strategy: 'suppress',
+              },
+              from: 'now-35m',
+              interval: '30m',
+            };
+
+            const { previewId } = await previewRule({
+              supertest,
+              rule,
+              timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+              invocationCount: 1,
+            });
+            const previewAlerts = await getPreviewAlerts({
+              es,
+              previewId,
+              sort: [ALERT_ORIGINAL_TIME],
+            });
+            expect(previewAlerts.length).toEqual(1);
+            expect(previewAlerts[0]._source).toEqual({
+              ...previewAlerts[0]._source,
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'host.name',
+                  value: ['host-a', 'host-b'],
+                },
+              ],
+              [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
+              [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
+              [ALERT_ORIGINAL_TIME]: timestamp,
+              [ALERT_SUPPRESSION_START]: timestamp,
+              [ALERT_SUPPRESSION_END]: timestamp,
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
+            });
+          });
+
+          it('should suppress alerts with missing fields during rule execution only for multiple suppress by fields', async () => {
+            const id = uuidv4();
+            const timestamp = '2020-10-28T06:45:00.000Z';
+            const noMissingFieldsDoc = {
+              id,
+              '@timestamp': timestamp,
+              host: { name: 'host-a' },
+              agent: { name: 'agent-a', version: 10 },
+            };
+
+            const missingNameFieldsDoc = {
+              ...noMissingFieldsDoc,
+              agent: { version: 10 },
+            };
+
+            const missingVersionFieldsDoc = {
+              ...noMissingFieldsDoc,
+              agent: { name: 'agent-a' },
+            };
+
+            const missingAgentFieldsDoc = {
+              ...noMissingFieldsDoc,
+              agent: undefined,
+            };
+
+            await eventsFiller({ id, count: eventsCount, timestamp: [timestamp] });
+            await threatsFiller({ id, count: threatsCount, timestamp });
+
+            // 4 alerts should be suppressed: 1 for each pair of documents
+            await indexListOfSourceDocuments([
+              noMissingFieldsDoc,
+              noMissingFieldsDoc,
+              missingNameFieldsDoc,
+              missingNameFieldsDoc,
+              missingVersionFieldsDoc,
+              missingVersionFieldsDoc,
+              missingAgentFieldsDoc,
+              missingAgentFieldsDoc,
+            ]);
+
+            await addThreatDocuments({
+              id,
+              timestamp,
+              fields: {
+                host: {
+                  name: 'host-a',
+                },
+              },
+              count: 1,
+            });
+
+            const rule: ThreatMatchRuleCreateProps = {
+              ...indicatorMatchRule(id),
+              alert_suppression: {
+                group_by: ['agent.name', 'agent.version'],
+                missing_fields_strategy: 'suppress',
+              },
+              from: 'now-35m',
+              interval: '30m',
+            };
+
+            const { previewId } = await previewRule({
+              supertest,
+              rule,
+              timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+              invocationCount: 1,
+            });
+            const previewAlerts = await getPreviewAlerts({
+              es,
+              previewId,
+              sort: ['agent.name', 'agent.version', ALERT_ORIGINAL_TIME],
+            });
+            expect(previewAlerts.length).toEqual(4);
+            expect(previewAlerts[0]._source).toEqual({
+              ...previewAlerts[0]._source,
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'agent.name',
+                  value: ['agent-a'],
+                },
+                {
+                  field: 'agent.version',
+                  value: ['10'],
+                },
+              ],
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+            });
+
+            expect(previewAlerts[1]._source).toEqual({
+              ...previewAlerts[1]._source,
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'agent.name',
+                  value: ['agent-a'],
+                },
+                {
+                  field: 'agent.version',
+                  value: null,
+                },
+              ],
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+            });
+
+            expect(previewAlerts[2]._source).toEqual({
+              ...previewAlerts[2]._source,
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'agent.name',
+                  value: null,
+                },
+                {
+                  field: 'agent.version',
+                  value: ['10'],
+                },
+              ],
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+            });
+
+            expect(previewAlerts[3]._source).toEqual({
+              ...previewAlerts[3]._source,
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'agent.name',
+                  value: null,
+                },
+                {
+                  field: 'agent.version',
+                  value: null,
+                },
+              ],
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
             });
           });
 
@@ -1251,14 +1536,14 @@ export default ({ getService }: FtrProviderContext) => {
               [ALERT_SUPPRESSION_TERMS]: [
                 {
                   field: 'agent.name',
-                  value: 'agent-1',
+                  value: ['agent-1'],
                 },
               ],
               [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
               [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
               [ALERT_ORIGINAL_TIME]: timestamp,
-              [ALERT_SUPPRESSION_START]: '2020-10-28T07:00:00.000Z',
-              [ALERT_SUPPRESSION_END]: '2020-10-28T07:00:00.000Z',
+              [ALERT_SUPPRESSION_START]: timestamp,
+              [ALERT_SUPPRESSION_END]: timestamp,
               [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
             });
 
@@ -1273,8 +1558,8 @@ export default ({ getService }: FtrProviderContext) => {
               [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
               [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
               [ALERT_ORIGINAL_TIME]: timestamp,
-              [ALERT_SUPPRESSION_START]: '2020-10-28T07:00:00.000Z',
-              [ALERT_SUPPRESSION_END]: '2020-10-28T07:00:00.000Z',
+              [ALERT_SUPPRESSION_START]: timestamp,
+              [ALERT_SUPPRESSION_END]: timestamp,
               [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
             });
           });
@@ -1337,14 +1622,14 @@ export default ({ getService }: FtrProviderContext) => {
               [ALERT_SUPPRESSION_TERMS]: [
                 {
                   field: 'agent.name',
-                  value: 'agent-1',
+                  value: ['agent-1'],
                 },
               ],
               [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
               [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
               [ALERT_ORIGINAL_TIME]: timestamp,
-              [ALERT_SUPPRESSION_START]: '2020-10-28T07:00:00.000Z',
-              [ALERT_SUPPRESSION_END]: '2020-10-28T07:00:00.000Z',
+              [ALERT_SUPPRESSION_START]: timestamp,
+              [ALERT_SUPPRESSION_END]: timestamp,
               [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
             });
 
@@ -1356,6 +1641,628 @@ export default ({ getService }: FtrProviderContext) => {
               expect(source).not.toHaveProperty(ALERT_SUPPRESSION_END);
               expect(source).not.toHaveProperty(ALERT_SUPPRESSION_TERMS);
               expect(source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
+            });
+          });
+
+          it('should not suppress alerts with missing fields during rule execution only if configured so for multiple suppress by fields', async () => {
+            const id = uuidv4();
+            const timestamp = '2020-10-28T06:45:00.000Z';
+            const noMissingFieldsDoc = {
+              id,
+              '@timestamp': timestamp,
+              host: { name: 'host-a' },
+              agent: { name: 'agent-a', version: 10 },
+            };
+
+            const missingNameFieldsDoc = {
+              ...noMissingFieldsDoc,
+              agent: { version: 10 },
+            };
+
+            const missingVersionFieldsDoc = {
+              ...noMissingFieldsDoc,
+              agent: { name: 'agent-a' },
+            };
+
+            const missingAgentFieldsDoc = {
+              ...noMissingFieldsDoc,
+              agent: undefined,
+            };
+
+            await eventsFiller({ id, count: eventsCount, timestamp: [timestamp] });
+            await threatsFiller({ id, count: threatsCount, timestamp });
+
+            // 1 alert should be suppressed: 1 doc only
+            await indexListOfSourceDocuments([
+              noMissingFieldsDoc,
+              noMissingFieldsDoc,
+              missingNameFieldsDoc,
+              missingNameFieldsDoc,
+              missingVersionFieldsDoc,
+              missingVersionFieldsDoc,
+              missingAgentFieldsDoc,
+            ]);
+
+            await addThreatDocuments({
+              id,
+              timestamp,
+              fields: {
+                host: {
+                  name: 'host-a',
+                },
+              },
+              count: 1,
+            });
+
+            const rule: ThreatMatchRuleCreateProps = {
+              ...indicatorMatchRule(id),
+              alert_suppression: {
+                group_by: ['agent.name', 'agent.version'],
+                missing_fields_strategy: 'doNotSuppress',
+              },
+              from: 'now-35m',
+              interval: '30m',
+            };
+
+            const { previewId } = await previewRule({
+              supertest,
+              rule,
+              timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+              invocationCount: 1,
+            });
+            const previewAlerts = await getPreviewAlerts({
+              es,
+              previewId,
+              sort: ['agent.name', 'agent.version', ALERT_ORIGINAL_TIME],
+            });
+            // from 7 injected, only one should be suppressed
+            expect(previewAlerts.length).toEqual(6);
+            expect(previewAlerts[0]._source).toEqual({
+              ...previewAlerts[0]._source,
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'agent.name',
+                  value: ['agent-a'],
+                },
+                {
+                  field: 'agent.version',
+                  value: ['10'],
+                },
+              ],
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+            });
+
+            // rest of alerts are not suppressed and do not have suppress properties
+            previewAlerts.slice(1).forEach((previewAlert) => {
+              const source = previewAlert._source;
+              expect(source).toHaveProperty('id', id);
+              expect(source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
+              expect(source).not.toHaveProperty(ALERT_SUPPRESSION_END);
+              expect(source).not.toHaveProperty(ALERT_SUPPRESSION_TERMS);
+              expect(source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
+            });
+          });
+
+          it('should deduplicate multiple alerts while suppressing on rule interval only', async () => {
+            const id = uuidv4();
+            const firstTimestamp = '2020-10-28T05:45:00.000Z';
+            const secondTimestamp = '2020-10-28T06:10:00.000Z';
+            const doc1 = {
+              id,
+              '@timestamp': firstTimestamp,
+              host: { name: 'host-a' },
+            };
+
+            const doc2 = {
+              ...doc1,
+              '@timestamp': secondTimestamp,
+            };
+
+            await eventsFiller({
+              id,
+              count: eventsCount,
+              timestamp: [firstTimestamp, secondTimestamp],
+            });
+            await threatsFiller({ id, count: threatsCount, timestamp: firstTimestamp });
+
+            // 4 alert should be suppressed
+            await indexListOfSourceDocuments([doc1, doc1, doc2, doc2, doc2]);
+
+            await addThreatDocuments({
+              id,
+              timestamp: firstTimestamp,
+              fields: {
+                host: {
+                  name: 'host-a',
+                },
+              },
+              count: 1,
+            });
+
+            const rule: ThreatMatchRuleCreateProps = {
+              ...indicatorMatchRule(id),
+              alert_suppression: {
+                group_by: ['host.name'],
+                missing_fields_strategy: 'suppress',
+              },
+              // large look-back time covers all docs
+              from: 'now-50m',
+              interval: '30m',
+            };
+
+            const { previewId } = await previewRule({
+              supertest,
+              rule,
+              timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+              invocationCount: 2,
+            });
+            const previewAlerts = await getPreviewAlerts({
+              es,
+              previewId,
+              sort: ['host.name', ALERT_ORIGINAL_TIME],
+            });
+            expect(previewAlerts.length).toEqual(2);
+            expect(previewAlerts[0]._source).toEqual({
+              ...previewAlerts[0]._source,
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'host.name',
+                  value: ['host-a'],
+                },
+              ],
+              [ALERT_ORIGINAL_TIME]: firstTimestamp,
+              [ALERT_SUPPRESSION_START]: firstTimestamp,
+              [ALERT_SUPPRESSION_END]: firstTimestamp,
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+            });
+
+            expect(previewAlerts[1]._source).toEqual({
+              ...previewAlerts[1]._source,
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'host.name',
+                  value: ['host-a'],
+                },
+              ],
+              [ALERT_ORIGINAL_TIME]: secondTimestamp,
+              [ALERT_SUPPRESSION_START]: secondTimestamp,
+              [ALERT_SUPPRESSION_END]: secondTimestamp,
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
+            });
+          });
+
+          it('should deduplicate single alert while suppressing new ones on rule execution', async () => {
+            const id = uuidv4();
+            const firstTimestamp = '2020-10-28T05:45:00.000Z';
+            const secondTimestamp = '2020-10-28T06:10:00.000Z';
+            const doc1 = {
+              id,
+              '@timestamp': firstTimestamp,
+              host: { name: 'host-a' },
+            };
+
+            const doc2 = {
+              ...doc1,
+              '@timestamp': secondTimestamp,
+            };
+
+            await eventsFiller({
+              id,
+              count: eventsCount,
+              timestamp: [firstTimestamp, secondTimestamp],
+            });
+            await threatsFiller({ id, count: threatsCount, timestamp: firstTimestamp });
+
+            // 3 alerts should be suppressed
+            await indexListOfSourceDocuments([doc1, doc2, doc2, doc2]);
+
+            await addThreatDocuments({
+              id,
+              timestamp: firstTimestamp,
+              fields: {
+                host: {
+                  name: 'host-a',
+                },
+              },
+              count: 1,
+            });
+
+            const rule: ThreatMatchRuleCreateProps = {
+              ...indicatorMatchRule(id),
+              alert_suppression: {
+                group_by: ['host.name'],
+                missing_fields_strategy: 'suppress',
+              },
+              // large look-back time covers all docs
+              from: 'now-1h',
+              interval: '30m',
+            };
+
+            const { previewId } = await previewRule({
+              supertest,
+              rule,
+              timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+              invocationCount: 2,
+            });
+            const previewAlerts = await getPreviewAlerts({
+              es,
+              previewId,
+              sort: ['host.name', ALERT_ORIGINAL_TIME],
+            });
+            expect(previewAlerts.length).toEqual(2);
+            expect(previewAlerts[0]._source).toEqual({
+              ...previewAlerts[0]._source,
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'host.name',
+                  value: ['host-a'],
+                },
+              ],
+              [ALERT_ORIGINAL_TIME]: firstTimestamp,
+              [ALERT_SUPPRESSION_START]: firstTimestamp,
+              [ALERT_SUPPRESSION_END]: firstTimestamp,
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
+            });
+            expect(previewAlerts[1]._source).toEqual({
+              ...previewAlerts[1]._source,
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'host.name',
+                  value: ['host-a'],
+                },
+              ],
+              [ALERT_ORIGINAL_TIME]: secondTimestamp,
+              [ALERT_SUPPRESSION_START]: secondTimestamp,
+              [ALERT_SUPPRESSION_END]: secondTimestamp,
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
+            });
+          });
+
+          it('should create and suppress alert on rule execution when alert created on previous execution', async () => {
+            const id = uuidv4();
+            const firstTimestamp = '2020-10-28T05:45:00.000Z';
+            const secondTimestamp = '2020-10-28T06:10:00.000Z';
+            const doc1 = {
+              id,
+              '@timestamp': firstTimestamp,
+              host: { name: 'host-a' },
+            };
+
+            const doc2 = {
+              ...doc1,
+              '@timestamp': secondTimestamp,
+            };
+
+            await eventsFiller({
+              id,
+              count: eventsCount,
+              timestamp: [firstTimestamp, secondTimestamp],
+            });
+            await threatsFiller({ id, count: threatsCount, timestamp: firstTimestamp });
+
+            // 1 created + 1 suppressed on first run
+            // 1 created + 2 suppressed on second run
+            await indexListOfSourceDocuments([doc1, doc1, doc2, doc2, doc2]);
+
+            await addThreatDocuments({
+              id,
+              timestamp: firstTimestamp,
+              fields: {
+                host: {
+                  name: 'host-a',
+                },
+              },
+              count: 1,
+            });
+
+            const rule: ThreatMatchRuleCreateProps = {
+              ...indicatorMatchRule(id),
+              alert_suppression: {
+                group_by: ['host.name'],
+                missing_fields_strategy: 'suppress',
+              },
+              from: 'now-35m',
+              interval: '30m',
+            };
+
+            const { previewId } = await previewRule({
+              supertest,
+              rule,
+              timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+              invocationCount: 2,
+            });
+            const previewAlerts = await getPreviewAlerts({
+              es,
+              previewId,
+              sort: ['host.name', ALERT_ORIGINAL_TIME],
+            });
+            expect(previewAlerts.length).toEqual(2);
+            expect(previewAlerts[0]._source).toEqual({
+              ...previewAlerts[0]._source,
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'host.name',
+                  value: ['host-a'],
+                },
+              ],
+              [ALERT_ORIGINAL_TIME]: firstTimestamp,
+              [ALERT_SUPPRESSION_START]: firstTimestamp,
+              [ALERT_SUPPRESSION_END]: firstTimestamp,
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+            });
+            expect(previewAlerts[1]._source).toEqual({
+              ...previewAlerts[1]._source,
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'host.name',
+                  value: ['host-a'],
+                },
+              ],
+              [ALERT_ORIGINAL_TIME]: secondTimestamp,
+              [ALERT_SUPPRESSION_START]: secondTimestamp,
+              [ALERT_SUPPRESSION_END]: secondTimestamp,
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
+            });
+          });
+
+          it('should not suppress more than limited number (max_signals x5)', async () => {
+            const id = uuidv4();
+            const timestamp = '2020-10-28T06:45:00.000Z';
+
+            await eventsFiller({ id, count: 100 * eventsCount, timestamp: [timestamp] });
+            await threatsFiller({ id, count: 100 * threatsCount, timestamp });
+
+            await indexGeneratedSourceDocuments({
+              docsCount: 700,
+              seed: (index) => ({
+                id,
+                '@timestamp': `2020-10-28T06:50:00.${index}Z`,
+                host: {
+                  name: `host-a`,
+                },
+                agent: { name: 'agent-a' },
+              }),
+            });
+
+            await addThreatDocuments({
+              id,
+              timestamp,
+              fields: {
+                host: {
+                  name: 'host-a',
+                },
+              },
+              count: 1,
+            });
+
+            const rule: ThreatMatchRuleCreateProps = {
+              ...indicatorMatchRule(id),
+              alert_suppression: {
+                group_by: ['agent.name'],
+                missing_fields_strategy: 'suppress',
+              },
+              from: 'now-35m',
+              interval: '30m',
+            };
+
+            const { previewId, logs } = await previewRule({
+              supertest,
+              rule,
+              timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+              invocationCount: 1,
+            });
+
+            expect(logs[0].warnings).toEqual(
+              expect.arrayContaining([getSuppressionMaxAlertsWarning()])
+            );
+
+            const previewAlerts = await getPreviewAlerts({
+              es,
+              previewId,
+              sort: ['agent.name', ALERT_ORIGINAL_TIME],
+            });
+            expect(previewAlerts.length).toEqual(1);
+            expect(previewAlerts[0]._source).toEqual({
+              ...previewAlerts[0]._source,
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'agent.name',
+                  value: ['agent-a'],
+                },
+              ],
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 499,
+            });
+          });
+
+          // 9,000 is the size of chunk that is processed in IM rule
+          // when number of documents in either of index exceeds this number it may leads to unexpected behavior
+          // this test added to ensure these cases covered
+          it('should not suppress more than limited number (max_signals x5) for number of events/threats greater than 9,000', async () => {
+            const id = uuidv4();
+            const timestamp = '2020-10-28T06:45:00.000Z';
+
+            await eventsFiller({ id, count: 10000 * eventsCount, timestamp: [timestamp] });
+            await threatsFiller({ id, count: 10000 * threatsCount, timestamp });
+
+            await indexGeneratedSourceDocuments({
+              docsCount: 15000,
+              seed: (index) => ({
+                id,
+                '@timestamp': `2020-10-28T06:50:00.${index}Z`,
+                host: {
+                  name: `host-a`,
+                },
+                agent: { name: 'agent-a' },
+              }),
+            });
+
+            await addThreatDocuments({
+              id,
+              timestamp,
+              fields: {
+                host: {
+                  name: 'host-a',
+                },
+              },
+              count: 1,
+            });
+
+            const rule: ThreatMatchRuleCreateProps = {
+              ...indicatorMatchRule(id),
+              alert_suppression: {
+                group_by: ['agent.name'],
+                missing_fields_strategy: 'suppress',
+              },
+              from: 'now-35m',
+              interval: '30m',
+            };
+
+            const { previewId, logs } = await previewRule({
+              supertest,
+              rule,
+              timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+              invocationCount: 1,
+            });
+
+            expect(logs[0].warnings).toEqual(
+              expect.arrayContaining([getSuppressionMaxAlertsWarning()])
+            );
+
+            const previewAlerts = await getPreviewAlerts({
+              es,
+              previewId,
+              sort: ['agent.name', ALERT_ORIGINAL_TIME],
+            });
+            expect(previewAlerts.length).toEqual(1);
+            expect(previewAlerts[0]._source).toEqual({
+              ...previewAlerts[0]._source,
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'agent.name',
+                  value: ['agent-a'],
+                },
+              ],
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 499,
+            });
+          });
+
+          it('should detect threats beyond max_signals if large number of alerts suppressed', async () => {
+            const id = uuidv4();
+            const timestamp = '2020-10-28T06:45:00.000Z';
+            const doc1 = {
+              id,
+              '@timestamp': timestamp,
+              host: { name: 'host-a' },
+              agent: { name: 'agent-b' },
+            };
+
+            const doc2 = {
+              id,
+              '@timestamp': timestamp,
+              host: { name: 'host-c' },
+              agent: { name: 'agent-c' },
+            };
+
+            await eventsFiller({ id, count: 20 * eventsCount, timestamp: [timestamp] });
+            await threatsFiller({ id, count: 20 * threatsCount, timestamp });
+
+            await indexGeneratedSourceDocuments({
+              docsCount: 150,
+              seed: (index) => ({
+                id,
+                '@timestamp': `2020-10-28T06:50:00.${100 + index}Z`,
+                host: {
+                  name: `host-a`,
+                },
+                agent: { name: 'agent-a' },
+              }),
+            });
+
+            await indexListOfSourceDocuments([doc1, doc1, doc1, doc2, doc2]);
+
+            await addThreatDocuments({
+              id,
+              timestamp,
+              fields: {
+                host: {
+                  name: 'host-a',
+                },
+              },
+              count: 1,
+            });
+
+            await addThreatDocuments({
+              id,
+              timestamp,
+              fields: {
+                host: {
+                  name: 'host-c',
+                },
+              },
+              count: 1,
+            });
+
+            const rule: ThreatMatchRuleCreateProps = {
+              ...indicatorMatchRule(id),
+              alert_suppression: {
+                group_by: ['agent.name'],
+                missing_fields_strategy: 'suppress',
+              },
+              from: 'now-35m',
+              interval: '30m',
+            };
+
+            const { previewId } = await previewRule({
+              supertest,
+              rule,
+              timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+              invocationCount: 1,
+            });
+
+            const previewAlerts = await getPreviewAlerts({
+              es,
+              previewId,
+              sort: ['agent.name', ALERT_ORIGINAL_TIME],
+            });
+
+            // 3 alerts in total
+            // 1 + 149 suppressed host-a threat, 'agent-a' suppressed by
+            // 1 + 2 suppressed host-a threat, 'agent-b' suppressed by
+            // 1 + 1 suppressed host-c threat, 'agent-c' suppressed by
+            expect(previewAlerts.length).toEqual(3);
+            expect(previewAlerts[0]._source).toEqual({
+              ...previewAlerts[0]._source,
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'agent.name',
+                  value: ['agent-a'],
+                },
+              ],
+              [ALERT_SUPPRESSION_START]: '2020-10-28T06:50:00.100Z',
+              [ALERT_SUPPRESSION_END]: '2020-10-28T06:50:00.249Z', // the largest suppression end boundary
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 149,
+            });
+
+            expect(previewAlerts[1]._source).toEqual({
+              ...previewAlerts[1]._source,
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'agent.name',
+                  value: ['agent-b'],
+                },
+              ],
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
+            });
+
+            expect(previewAlerts[2]._source).toEqual({
+              ...previewAlerts[2]._source,
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'agent.name',
+                  value: ['agent-c'],
+                },
+              ],
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
             });
           });
         });
