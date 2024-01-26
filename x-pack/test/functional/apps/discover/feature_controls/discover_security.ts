@@ -120,12 +120,10 @@ export default function (ctx: FtrProviderContext) {
       });
 
       it('Permalinks shows create short-url button', async () => {
-        if (await !PageObjects.share.isShareMenuOpen()) {
-          await PageObjects.share.clickShareTopNavButton();
-        }
+        await PageObjects.share.clickShareTopNavButton();
         await testSubjects.click('sharePanel-Permalinks');
         await PageObjects.share.createShortUrlExistOrFail();
-        // close the menu
+        // close the modal
         await PageObjects.share.closeShareModal();
       });
 
