@@ -19,17 +19,11 @@ import {
 
 export const alertsFieldMap8130 = {
   ...alertsFieldMap840,
-  /**
-   * @deprecated Use ALERT_HOST_CRITICALITY instead.
-   */
   [LEGACY_ALERT_HOST_CRITICALITY]: {
     type: 'keyword',
     array: false,
     required: false,
   },
-  /**
-   * @deprecated use ALERT_USER_CRITICALITY instead.
-   */
   [LEGACY_ALERT_USER_CRITICALITY]: {
     type: 'keyword',
     array: false,

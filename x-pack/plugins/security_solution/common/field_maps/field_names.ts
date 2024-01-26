@@ -18,11 +18,11 @@ export const ALERT_THRESHOLD_RESULT_COUNT = `${ALERT_THRESHOLD_RESULT}.count` as
 export const ALERT_NEW_TERMS = `${ALERT_NAMESPACE}.new_terms` as const;
 export const ALERT_NEW_TERMS_FIELDS = `${ALERT_RULE_PARAMETERS}.new_terms_fields` as const;
 /**
- * @deprecated Use ALERT_HOST_CRITICALITY
+ * @deprecated Use {@link ALERT_HOST_CRITICALITY}
  */
 export const LEGACY_ALERT_HOST_CRITICALITY = `${ALERT_NAMESPACE}.host.criticality_level` as const;
 /**
- * @deprecated Use ALERT_USER_CRITICALITY
+ * @deprecated Use {@link ALERT_USER_CRITICALITY}
  */
 export const LEGACY_ALERT_USER_CRITICALITY = `${ALERT_NAMESPACE}.user.criticality_level` as const;
 
