@@ -98,13 +98,13 @@ export const RangeSliderControl: FC = () => {
       ];
     }
 
-    const minTick = Math.floor(min / step) * step;
-    const maxTick = Math.ceil(max / step) * step;
+    const roundedMin = Math.floor(min / step) * step;
+    const roundedMax = Math.ceil(max / step) * step;
 
     return [
       {
-        min: minTick,
-        max: maxTick,
+        min: roundedMin,
+        max: roundedMax,
         color: 'success',
       },
     ];
