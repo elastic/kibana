@@ -12,11 +12,10 @@ import { getShouldShowFieldHandler } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import { useDocDetail, getMessageWithFallbacks } from '../../hooks/use_doc_detail';
-import { LogDocument, LogExplorerDiscoverServices } from '../../controller';
+import { LogDocument } from '../../../common/document';
 import { LogLevel } from '../common/log_level';
 import * as constants from '../../../common/constants';
 import { dynamic } from '../../utils/dynamic';
-import { VirtualColumnServiceProvider } from '../../hooks/use_virtual_column_services';
 import './virtual_column.scss';
 
 const SourceDocument = dynamic(
@@ -72,7 +71,7 @@ const SourcePopoverContent = ({
   );
 };
 
-const Content = ({
+export const Content = ({
   row,
   dataView,
   fieldFormats,
@@ -116,18 +115,3 @@ const Content = ({
     </span>
   );
 };
-
-export const renderContent =
-  ({ data }: { data: LogExplorerDiscoverServices['data'] }) =>
-  (props: DataGridCellValueElementProps) => {
-    const { dataView } = props;
-    const virtualColumnServices = {
-      data,
-      dataView,
-    };
-    return (
-      <VirtualColumnServiceProvider services={virtualColumnServices}>
-        <Content {...props} />
-      </VirtualColumnServiceProvider>
-    );
-  };
