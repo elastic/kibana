@@ -33,7 +33,6 @@ import {
   SERVER_APP_ID,
 } from '../../../common/constants';
 import { telemetryMiddleware } from '../lib/telemetry';
-import { appSelectors } from './app';
 import { timelineSelectors } from '../../timelines/store';
 import * as timelineActions from '../../timelines/store/actions';
 import type { TimelineModel } from '../../timelines/store/model';
@@ -275,7 +274,6 @@ export const createStore = (
   const middlewareDependencies: TimelineEpicDependencies<State> = {
     kibana$,
     selectAllTimelineQuery: inputsSelectors.globalQueryByIdSelector,
-    selectNotesByIdSelector: appSelectors.selectNotesByIdSelector,
     timelineByIdSelector: timelineSelectors.timelineByIdSelector,
     timelineTimeRangeSelector: inputsSelectors.timelineTimeRangeSelector,
   };

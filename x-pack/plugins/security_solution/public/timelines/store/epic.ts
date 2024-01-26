@@ -50,7 +50,6 @@ import {
   setChanged,
 } from './actions';
 import type { TimelineModel } from './model';
-import { epicPersistNote, isNoteAction } from './epic_note';
 import { epicPersistPinnedEvent, isPinnedEventAction } from './epic_pinned_event';
 import { isNotNull } from './helpers';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
@@ -66,13 +65,7 @@ export const createTimelineEpic =
   (
     action$,
     state$,
-    {
-      selectAllTimelineQuery,
-      selectNotesByIdSelector,
-      timelineByIdSelector,
-      timelineTimeRangeSelector,
-      kibana$,
-    }
+    { selectAllTimelineQuery, timelineByIdSelector, timelineTimeRangeSelector, kibana$ }
   ) => {
     const timeline$ = state$.pipe(map(timelineByIdSelector), filter(isNotNull));
 
@@ -83,8 +76,6 @@ export const createTimelineEpic =
       }),
       filter(isNotNull)
     );
-
-    const notes$ = state$.pipe(map(selectNotesByIdSelector), filter(isNotNull));
 
     const timelineTimeRange$ = state$.pipe(map(timelineTimeRangeSelector), filter(isNotNull));
 
@@ -130,17 +121,15 @@ export const createTimelineEpic =
         })
       ),
       dispatcherTimelinePersistQueue.pipe(
-        withLatestFrom(timeline$, notes$, timelineTimeRange$),
-        concatMap(([objAction, timeline, notes, timelineTimeRange]) => {
+        withLatestFrom(timeline$, timelineTimeRange$),
+        concatMap(([objAction, timeline, timelineTimeRange]) => {
           const action: Action = get('action', objAction);
           const timelineId = myEpicTimelineId.getTimelineId();
           const version = myEpicTimelineId.getTimelineVersion();
           const templateTimelineId = myEpicTimelineId.getTemplateTimelineId();
           const templateTimelineVersion = myEpicTimelineId.getTemplateTimelineVersion();
 
-          if (isNoteAction(action)) {
-            return epicPersistNote(action, notes, action$, timeline$, notes$, allTimelineQuery$);
-          } else if (isPinnedEventAction(action)) {
+          if (isPinnedEventAction(action)) {
             return epicPersistPinnedEvent(action, timeline, action$, timeline$, allTimelineQuery$);
           } else if (isSaveTimelineAction(action)) {
             const saveAction = action as unknown as ReturnType<typeof saveTimeline>;

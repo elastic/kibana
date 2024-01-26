@@ -8,7 +8,12 @@ import type { CoreStart } from '@kbn/core/public';
 
 import { timelineChangedMiddleware } from './changed';
 import { favoriteTimelineMiddleware } from './favorite_timeline';
+import { addNoteToTimelineMiddleware } from './timeline_note';
 
 export function createTimelineMiddlewares(kibana: CoreStart) {
-  return [timelineChangedMiddleware, favoriteTimelineMiddleware(kibana)];
+  return [
+    timelineChangedMiddleware,
+    favoriteTimelineMiddleware(kibana),
+    addNoteToTimelineMiddleware(kibana),
+  ];
 }
