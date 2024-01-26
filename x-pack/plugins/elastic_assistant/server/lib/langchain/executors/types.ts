@@ -12,7 +12,8 @@ import { Logger } from '@kbn/logging';
 import { KibanaRequest } from '@kbn/core-http-server';
 import type { LangChainTracer } from 'langchain/callbacks';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
-import { RequestBody, ResponseBody } from '../types';
+import { ExecuteConnectorRequestBody } from '../../../schemas/actions_connector/post_actions_connector_execute_route.gen';
+import { ResponseBody } from '../types';
 import type { AssistantTool } from '../../../types';
 
 export interface AgentExecutorParams {
@@ -30,7 +31,7 @@ export interface AgentExecutorParams {
   logger: Logger;
   onNewReplacements?: (newReplacements: Record<string, string>) => void;
   replacements?: Record<string, string>;
-  request: KibanaRequest<unknown, unknown, RequestBody>;
+  request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   size?: number;
   elserId?: string;
   traceOptions?: TraceOptions;

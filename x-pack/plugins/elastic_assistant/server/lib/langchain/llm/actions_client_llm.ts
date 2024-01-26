@@ -11,8 +11,8 @@ import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plu
 import { LLM } from 'langchain/llms/base';
 import { get } from 'lodash/fp';
 
+import { ExecuteConnectorRequestBody } from '../../../schemas/actions_connector/post_actions_connector_execute_route.gen';
 import { getMessageContentAndRole } from '../helpers';
-import { RequestBody } from '../types';
 
 const LLM_TYPE = 'ActionsClientLlm';
 
@@ -21,7 +21,7 @@ interface ActionsClientLlmParams {
   connectorId: string;
   llmType?: string;
   logger: Logger;
-  request: KibanaRequest<unknown, unknown, RequestBody>;
+  request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   traceId?: string;
 }
 
@@ -29,7 +29,7 @@ export class ActionsClientLlm extends LLM {
   #actions: ActionsPluginStart;
   #connectorId: string;
   #logger: Logger;
-  #request: KibanaRequest<unknown, unknown, RequestBody>;
+  #request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   #actionResultData: string;
   #traceId: string;
 

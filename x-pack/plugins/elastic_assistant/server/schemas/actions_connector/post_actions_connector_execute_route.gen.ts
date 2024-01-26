@@ -27,30 +27,28 @@ export type ExecuteConnectorRequestParamsInput = z.input<typeof ExecuteConnector
 
 export type ExecuteConnectorRequestBody = z.infer<typeof ExecuteConnectorRequestBody>;
 export const ExecuteConnectorRequestBody = z.object({
-  params: z
-    .object({
-      subActionParams: z
-        .object({
-          messages: z
-            .array(
-              z.object({
-                /**
-                 * Message role.
-                 */
-                role: z.enum(['system', 'user', 'assistant']).optional(),
-                content: z.string().optional(),
-              })
-            )
-            .optional(),
-          model: z.string().optional(),
-          n: z.number().optional(),
-          stop: z.array(z.string()).optional(),
-          temperature: z.number().optional(),
-        })
-        .optional(),
-      subAction: z.string().optional(),
-    })
-    .optional(),
+  params: z.object({
+    subActionParams: z
+      .object({
+        messages: z
+          .array(
+            z.object({
+              /**
+               * Message role.
+               */
+              role: z.enum(['system', 'user', 'assistant']).optional(),
+              content: z.string().optional(),
+            })
+          )
+          .optional(),
+        model: z.string().optional(),
+        n: z.number().optional(),
+        stop: z.array(z.string()).optional(),
+        temperature: z.number().optional(),
+      })
+      .optional(),
+    subAction: z.string().optional(),
+  }),
   alertsIndexPattern: z.string().optional(),
   allow: z.array(z.string()).optional(),
   allowReplacement: z.array(z.string()).optional(),

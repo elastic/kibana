@@ -9,12 +9,12 @@ import { get } from 'lodash/fp';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { KibanaRequest } from '@kbn/core-http-server';
 import { PassThrough, Readable } from 'stream';
-import { RequestBody } from './langchain/types';
+import { ExecuteConnectorRequestBody } from '../schemas/actions_connector/post_actions_connector_execute_route.gen';
 
 export interface Props {
   actions: ActionsPluginStart;
   connectorId: string;
-  request: KibanaRequest<unknown, unknown, RequestBody>;
+  request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
 }
 interface StaticResponse {
   connector_id: string;

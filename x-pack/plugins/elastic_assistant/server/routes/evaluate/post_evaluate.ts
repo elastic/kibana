@@ -27,13 +27,13 @@ import {
   setupEvaluationIndex,
 } from '../../lib/model_evaluator/output_index/utils';
 import { fetchLangSmithDataset, getConnectorName, getLangSmithTracer, getLlmType } from './utils';
-import { RequestBody } from '../../lib/langchain/types';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
 import {
   EvaluateRequestBody,
   EvaluateRequestQuery,
 } from '../../schemas/evaluate/post_evaluate_route.gen';
 import { buildRouteValidationWithZod } from '../route_validation';
+import { ExecuteConnectorRequestBody } from '../../schemas/actions_connector/post_actions_connector_execute_route.gen';
 
 /**
  * To support additional Agent Executors from the UI, add them to this map
@@ -143,7 +143,7 @@ export const postEvaluateRoute = (
 
           // Skeleton request from route to pass to the agents
           // params will be passed to the actions executor
-          const skeletonRequest: KibanaRequest<unknown, unknown, RequestBody> = {
+          const skeletonRequest: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody> = {
             ...request,
             body: {
               alertsIndexPattern: '',

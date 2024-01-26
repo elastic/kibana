@@ -24,6 +24,8 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - params
               properties:
                 params:
                   type: object
