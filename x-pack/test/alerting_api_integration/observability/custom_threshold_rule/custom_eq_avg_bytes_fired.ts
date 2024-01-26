@@ -34,7 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Custom Threshold rule - CUSTOM_EQ - AVG - BYTES - FIRED', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
-    // DATE_VIEW should match the index template:
+    // DATA_VIEW should match the index template:
     const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
     const DATA_VIEW_ID = 'data-view-id';
     let dataForgeConfig: PartialConfig;
