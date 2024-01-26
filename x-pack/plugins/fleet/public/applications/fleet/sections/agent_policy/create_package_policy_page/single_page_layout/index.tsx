@@ -63,9 +63,9 @@ import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/
 
 import { CreatePackagePolicySinglePageLayout, PostInstallAddAgentModal } from './components';
 import { useDevToolsRequest, useOnSubmit, useSetupTechnology } from './hooks';
-import { PostInstallCloudFormationModal } from './components/post_install_cloud_formation_modal';
-import { PostInstallGoogleCloudShellModal } from './components/post_install_google_cloud_shell_modal';
-import { PostInstallAzureArmTemplateModal } from './components/post_install_azure_arm_template_modal';
+import { PostInstallCloudFormationModal } from './components/cloud_security_posture/post_install_cloud_formation_modal';
+import { PostInstallGoogleCloudShellModal } from './components/cloud_security_posture/post_install_google_cloud_shell_modal';
+import { PostInstallAzureArmTemplateModal } from './components/cloud_security_posture/post_install_azure_arm_template_modal';
 
 const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
