@@ -7,7 +7,6 @@
 import { useCallback } from 'react';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { isSuppressibleAlertRule } from '../../../../common/detection_engine/utils';
-import { SuppressibleAlertRules } from '../../../../common/detection_engine/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 export interface UseAlertSuppressionReturn {
   isSuppressionEnabled: boolean;
@@ -21,7 +20,7 @@ export const useAlertSuppression = (ruleType?: Type): UseAlertSuppressionReturn 
   const isSuppressionEnabledForRuleType = useCallback(() => {
     if (!ruleType) return false;
 
-    if (ruleType === SuppressibleAlertRules.THREAT_MATCH) return isThreatMatchRuleFFEnabled;
+    if (ruleType === 'threat_match') return isThreatMatchRuleFFEnabled;
 
     return isSuppressibleAlertRule(ruleType);
   }, [ruleType, isThreatMatchRuleFFEnabled]);

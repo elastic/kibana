@@ -6,7 +6,6 @@
  */
 import { renderHook } from '@testing-library/react-hooks';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import { SuppressibleAlertRules } from '../../../../common/detection_engine/constants';
 import * as useIsExperimentalFeatureEnabledMock from '../../../common/hooks/use_experimental_features';
 import { useAlertSuppression } from './use_alert_suppression';
 
@@ -17,7 +16,7 @@ describe('useAlertSuppression', () => {
       .mockImplementation((featureFlagName: string) => {
         return featureFlagName === 'alertSuppressionForIndicatorMatchRuleEnabled';
       });
-    const { result } = renderHook(() => useAlertSuppression(SuppressibleAlertRules.THREAT_MATCH));
+    const { result } = renderHook(() => useAlertSuppression('threat_match'));
 
     expect(result.current.isSuppressionEnabled).toBe(true);
   });
@@ -27,13 +26,13 @@ describe('useAlertSuppression', () => {
       .mockImplementation((featureFlagName: string) => {
         return featureFlagName !== 'alertSuppressionForIndicatorMatchRuleEnabled';
       });
-    const { result } = renderHook(() => useAlertSuppression(SuppressibleAlertRules.THREAT_MATCH));
+    const { result } = renderHook(() => useAlertSuppression('threat_match'));
 
     expect(result.current.isSuppressionEnabled).toBe(false);
   });
 
   it('should return the correct isSuppressionEnabled value if rule Type exists in SuppressibleAlertRules', () => {
-    const { result } = renderHook(() => useAlertSuppression(SuppressibleAlertRules.QUERY));
+    const { result } = renderHook(() => useAlertSuppression('query'));
 
     expect(result.current.isSuppressionEnabled).toBe(true);
   });

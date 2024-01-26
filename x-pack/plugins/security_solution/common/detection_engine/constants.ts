@@ -39,9 +39,4 @@ export const DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY = 'suppress' as const;
 
 export const MINIMUM_LICENSE_FOR_SUPPRESSION = 'platinum' as const;
 
-export const SuppressibleAlertRules: { [key: string]: Type } = {
-  THRESHOLD: 'threshold',
-  SAVED_QUERY: 'saved_query',
-  QUERY: 'query',
-  THREAT_MATCH: 'threat_match',
-};
+export const SuppressibleAlertRules: Type[] = ['threshold', 'saved_query', 'query', 'threat_match'];
