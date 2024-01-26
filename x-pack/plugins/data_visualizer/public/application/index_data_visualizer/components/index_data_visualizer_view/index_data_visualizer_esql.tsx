@@ -41,9 +41,9 @@ import { getFieldType } from '@kbn/field-utils';
 import { UI_SETTINGS } from '@kbn/data-service';
 import type { SupportedFieldType } from '../../../../../common/types';
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
-import { FieldVisConfig } from '../../../common/components/stats_table/types';
+import type { FieldVisConfig } from '../../../common/components/stats_table/types';
 import { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
-import { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
+import type { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { GetAdditionalLinks } from '../../../common/components/results_links';
 import { DocumentCountContent } from '../../../common/components/document_count_content';
@@ -68,8 +68,8 @@ import {
   type ESQLDefaultLimitSizeOption,
   ESQLDefaultLimitSizeSelect,
 } from '../search_panel/esql/limit_size';
-import { Column, useESQLOverallStatsData } from '../../hooks/esql/use_esql_overall_stats_data';
-import { AggregatableField } from '../../types/esql_data_visualizer';
+import { type Column, useESQLOverallStatsData } from '../../hooks/esql/use_esql_overall_stats_data';
+import { type AggregatableField } from '../../types/esql_data_visualizer';
 
 const defaults = getDefaultPageState();
 
@@ -597,7 +597,6 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
     if (fieldStatsProgress.loaded === 100 && fieldStats) {
       combinedConfigs = combinedConfigs.map((c) => {
         const loadedFullStats = fieldStats.get(c.fieldName) ?? {};
-
         return loadedFullStats
           ? {
               ...c,

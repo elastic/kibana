@@ -9,13 +9,12 @@ import type { UseCancellableSearch } from '@kbn/ml-cancellable-search';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import pLimit from 'p-limit';
-import { isDefined } from '@kbn/ml-is-defined';
 import type { Column } from '../../hooks/esql/use_esql_overall_stats_data';
 import { getSafeESQLName } from '../requests/esql_utils';
-import { isFulfilled } from '../../../common/util/promise_all_settled_utils';
+import { isFulfilled, isRejected } from '../../../common/util/promise_all_settled_utils';
 import { MAX_CONCURRENT_REQUESTS } from '../../constants/index_data_visualizer_viewer';
 import type { BucketCount } from '../../types/esql_data_visualizer';
-import type { BooleanFieldStats } from '../../../../../common/types/field_stats';
+import type { BooleanFieldStats, FieldStatsError } from '../../../../../common/types/field_stats';
 
 interface Params {
   runRequest: UseCancellableSearch['runRequest'];
@@ -29,43 +28,42 @@ export const getESQLBooleanFieldStats = async ({
   columns,
   esqlBaseQuery,
   filter,
-}: Params) => {
+}: Params): Promise<Array<BooleanFieldStats | FieldStatsError | undefined>> => {
   const limiter = pLimit(MAX_CONCURRENT_REQUESTS);
 
   const booleanFields = columns
     .filter((f) => f.secondaryType === 'boolean')
     .map((field) => {
+      const query = `| STATS ${getSafeESQLName(`${field.name}_terms`)} = count(${getSafeESQLName(
+        field.name
+      )}) BY ${getSafeESQLName(field.name)}
+        | LIMIT 3`;
+
       return {
         field,
-        query: `| STATS ${getSafeESQLName(`${field.name}_terms`)} = count(${getSafeESQLName(
-          field.name
-        )}) BY ${getSafeESQLName(field.name)}
-      | LIMIT 3`,
+        request: {
+          params: {
+            query: esqlBaseQuery + query,
+            ...(filter ? { filter } : {}),
+          },
+        },
       };
     });
 
   if (booleanFields.length > 0) {
-    const response = await Promise.allSettled(
-      booleanFields.map(({ query }) =>
-        limiter(() =>
-          runRequest(
-            {
-              params: {
-                query: esqlBaseQuery + query,
-                ...(filter ? { filter } : {}),
-              },
-            },
-            { strategy: ESQL_SEARCH_STRATEGY }
-          )
-        )
+    const booleanTopTermsResp = await Promise.allSettled(
+      booleanFields.map(({ request }) =>
+        limiter(() => runRequest(request, { strategy: ESQL_SEARCH_STRATEGY }))
       )
     );
-    const booleanTopTermsResp = response.filter(isFulfilled).flatMap((r) => r.value);
     if (booleanTopTermsResp) {
-      booleanFields.forEach(({ field }, idx) => {
+      return booleanFields.map(({ field, request }, idx) => {
         const resp = booleanTopTermsResp[idx];
-        if (isDefined(resp)) {
-          const results = resp.rawResponse.values as Array<[BucketCount, boolean]>;
+
+        if (!resp) return;
+
+        if (isFulfilled(resp)) {
+          const results = resp.value?.rawResponse.values as Array<[BucketCount, boolean]>;
           const topValuesSampleSize = results.reduce((acc, row) => acc + row[0], 0);
 
           let falseCount = 0;
@@ -94,6 +92,17 @@ export const getESQLBooleanFieldStats = async ({
             falseCount,
             count: trueCount + falseCount,
           } as BooleanFieldStats;
+        }
+
+        if (isRejected(resp)) {
+          // Log for debugging purposes
+          // eslint-disable-next-line no-console
+          console.error(resp, request);
+
+          return {
+            fieldName: field.name,
+            error: resp.reason,
+          } as FieldStatsError;
         }
       });
     }

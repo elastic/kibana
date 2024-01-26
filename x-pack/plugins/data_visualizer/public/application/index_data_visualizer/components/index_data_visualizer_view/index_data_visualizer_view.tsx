@@ -64,9 +64,9 @@ import { SearchPanel } from '../search_panel';
 import { ActionsPanel } from '../actions_panel';
 import { createMergedEsQuery } from '../../utils/saved_search_utils';
 import { DataVisualizerDataViewManagement } from '../data_view_management';
-import { GetAdditionalLinks } from '../../../common/components/results_links';
+import type { GetAdditionalLinks } from '../../../common/components/results_links';
 import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
-import { DataVisualizerGridInput } from '../../embeddables/grid_embeddable/grid_embeddable';
+import type { DataVisualizerGridInput } from '../../embeddables/grid_embeddable/grid_embeddable';
 import {
   MIN_SAMPLER_PROBABILITY,
   RANDOM_SAMPLER_OPTION,

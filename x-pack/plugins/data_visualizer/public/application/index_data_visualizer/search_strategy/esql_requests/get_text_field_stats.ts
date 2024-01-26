@@ -9,7 +9,7 @@ import type { UseCancellableSearch } from '@kbn/ml-cancellable-search';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import type { Column } from '../../hooks/esql/use_esql_overall_stats_data';
-import type { FieldExamples } from '../../../../../common/types/field_stats';
+import type { FieldExamples, FieldStatsError } from '../../../../../common/types/field_stats';
 
 interface Params {
   runRequest: UseCancellableSearch['runRequest'];
@@ -29,21 +29,19 @@ export const getESQLTextFieldStats = async ({
   columns: textFields,
   esqlBaseQuery,
   filter,
-}: Params) => {
+}: Params): Promise<Array<FieldExamples | FieldStatsError>> => {
   try {
     if (textFields.length > 0) {
-      const textFieldsResp = await runRequest(
-        {
-          params: {
-            query:
-              esqlBaseQuery +
-              `| KEEP ${textFields.map((f) => f.name).join(',')}
-             | LIMIT 10`,
-            ...(filter ? { filter } : {}),
-          },
+      const request = {
+        params: {
+          query:
+            esqlBaseQuery +
+            `| KEEP ${textFields.map((f) => f.name).join(',')}
+           | LIMIT 10`,
+          ...(filter ? { filter } : {}),
         },
-        { strategy: ESQL_SEARCH_STRATEGY }
-      );
+      };
+      const textFieldsResp = await runRequest(request, { strategy: ESQL_SEARCH_STRATEGY });
 
       if (textFieldsResp) {
         return textFields.map((textField, idx) => {
@@ -62,7 +60,7 @@ export const getESQLTextFieldStats = async ({
     return textFields.map((textField, idx) => ({
       fieldName: textField.name,
       error,
-    }));
+    })) as FieldStatsError[];
   }
   return [];
 };

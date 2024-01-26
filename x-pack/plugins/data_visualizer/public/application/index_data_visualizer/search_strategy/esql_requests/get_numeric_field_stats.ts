@@ -16,6 +16,11 @@ import { PERCENTILE_SPACING } from '../requests/constants';
 import { getESQLPercentileQueryArray, getSafeESQLName, PERCENTS } from '../requests/esql_utils';
 import { isFulfilled } from '../../../common/util/promise_all_settled_utils';
 import { MAX_CONCURRENT_REQUESTS } from '../../constants/index_data_visualizer_viewer';
+import { handleError } from './handle_error';
+import type {
+  FieldStatsError,
+  NonSampledNumericFieldStats,
+} from '../../../../../common/types/field_stats';
 
 interface Params {
   runRequest: UseCancellableSearch['runRequest'];
@@ -28,7 +33,7 @@ const getESQLNumericFieldStatsInChunk = async ({
   columns,
   esqlBaseQuery,
   filter,
-}: Params) => {
+}: Params): Promise<Array<NonSampledNumericFieldStats | FieldStatsError>> => {
   // Hashmap of agg to index/order of which is made in the ES|QL query
   // {min: 0, max: 1, p0: 2, p5: 3, ..., p100: 22}
   const numericAccessorMap = PERCENTS.reduce<{ [key: string]: number }>(
@@ -60,51 +65,59 @@ const getESQLNumericFieldStatsInChunk = async ({
   if (numericFields.length > 0) {
     const numericStatsQuery = '| STATS ' + numericFields.map(({ query }) => query).join(',');
 
-    const fieldStatsResp = await runRequest(
-      {
-        params: {
-          query: esqlBaseQuery + numericStatsQuery,
-          ...(filter ? { filter } : {}),
-        },
+    const request = {
+      params: {
+        query: esqlBaseQuery + numericStatsQuery,
+        ...(filter ? { filter } : {}),
       },
-      { strategy: ESQL_SEARCH_STRATEGY }
-    );
+    };
+    try {
+      const fieldStatsResp = await runRequest(request, { strategy: ESQL_SEARCH_STRATEGY });
 
-    if (fieldStatsResp) {
-      const values = fieldStatsResp.rawResponse.values[0];
+      if (fieldStatsResp) {
+        const values = fieldStatsResp.rawResponse.values[0];
 
-      return numericFields.map(({ field, startIndex }, idx) => {
-        /** Order of aggs we are expecting back from query
-         * 0 = min; 23 = startIndex + 0 for 2nd field
-         * 1 = max; 24 = startIndex + 1
-         * 2 p0; 25; 24 = startIndex + 2
-         * 3 p5; 26
-         * 4 p10; 27
-         * ...
-         * 22 p100;
-         */
-        const min = values[startIndex + numericAccessorMap.min];
-        const max = values[startIndex + numericAccessorMap.max];
-        const median = values[startIndex + numericAccessorMap.p50];
+        return numericFields.map(({ field, startIndex }, idx) => {
+          /** Order of aggs we are expecting back from query
+           * 0 = min; 23 = startIndex + 0 for 2nd field
+           * 1 = max; 24 = startIndex + 1
+           * 2 p0; 25; 24 = startIndex + 2
+           * 3 p5; 26
+           * 4 p10; 27
+           * ...
+           * 22 p100;
+           */
+          const min = values[startIndex + numericAccessorMap.min];
+          const max = values[startIndex + numericAccessorMap.max];
+          const median = values[startIndex + numericAccessorMap.p50];
 
-        const percentiles = values
-          .slice(startIndex + numericAccessorMap.p0, startIndex + numericAccessorMap.p100)
-          .map((value: number) => ({ value }));
+          const percentiles = values
+            .slice(startIndex + numericAccessorMap.p0, startIndex + numericAccessorMap.p100)
+            .map((value: number) => ({ value }));
 
-        const distribution = processDistributionData(percentiles, PERCENTILE_SPACING, min);
+          const distribution = processDistributionData(percentiles, PERCENTILE_SPACING, min);
 
+          return {
+            fieldName: field.name,
+            ...field,
+            min,
+            max,
+            median,
+            distribution,
+          } as NonSampledNumericFieldStats;
+        });
+      }
+    } catch (error) {
+      handleError({ error, request });
+      return numericFields.map(({ field }) => {
         return {
           fieldName: field.name,
-          ...field,
-          min,
-          max,
-          median,
-          distribution,
-        };
+          error,
+        } as FieldStatsError;
       });
     }
-    return [];
   }
+  return [];
 };
 
 export const getESQLNumericFieldStats = async ({
@@ -112,7 +125,7 @@ export const getESQLNumericFieldStats = async ({
   columns,
   esqlBaseQuery,
   filter,
-}: Params) => {
+}: Params): Promise<Array<NonSampledNumericFieldStats | FieldStatsError>> => {
   const limiter = pLimit(MAX_CONCURRENT_REQUESTS);
 
   // Breakdown so that each requests only contains 10 numeric fields
@@ -131,5 +144,6 @@ export const getESQLNumericFieldStats = async ({
       )
     )
   );
+
   return numericStats.filter(isFulfilled).flatMap((stat) => stat.value);
 };

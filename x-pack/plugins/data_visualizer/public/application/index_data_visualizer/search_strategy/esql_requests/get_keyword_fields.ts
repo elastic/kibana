@@ -9,13 +9,12 @@ import type { UseCancellableSearch } from '@kbn/ml-cancellable-search';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import pLimit from 'p-limit';
-import { isDefined } from '@kbn/ml-is-defined';
 import type { Column } from '../../hooks/esql/use_esql_overall_stats_data';
 import { getSafeESQLName } from '../requests/esql_utils';
-import { isFulfilled } from '../../../common/util/promise_all_settled_utils';
+import { isFulfilled, isRejected } from '../../../common/util/promise_all_settled_utils';
 import { MAX_CONCURRENT_REQUESTS } from '../../constants/index_data_visualizer_viewer';
 import type { BucketCount, BucketTerm } from '../../types/esql_data_visualizer';
-import type { StringFieldStats } from '../../../../../common/types/field_stats';
+import type { FieldStatsError, StringFieldStats } from '../../../../../common/types/field_stats';
 
 interface Params {
   runRequest: UseCancellableSearch['runRequest'];
@@ -32,38 +31,37 @@ export const getESQLKeywordFieldStats = async ({
   const limiter = pLimit(MAX_CONCURRENT_REQUESTS);
 
   const keywordFields = columns.map((field) => {
-    return {
-      field,
-      query: `| STATS ${getSafeESQLName(`${field.name}_terms`)} = count(${getSafeESQLName(
+    const query =
+      esqlBaseQuery +
+      `| STATS ${getSafeESQLName(`${field.name}_terms`)} = count(${getSafeESQLName(
         field.name
       )}) BY ${getSafeESQLName(field.name)}
-      | LIMIT 10
-      | SORT ${getSafeESQLName(`${field.name}_terms`)} DESC`,
+    | LIMIT 10
+    | SORT ${getSafeESQLName(`${field.name}_terms`)} DESC`;
+    return {
+      field,
+      request: {
+        params: {
+          query,
+          ...(filter ? { filter } : {}),
+        },
+      },
     };
   });
 
   if (keywordFields.length > 0) {
-    const response = await Promise.allSettled(
-      keywordFields.map(({ query }) =>
-        limiter(() =>
-          runRequest(
-            {
-              params: {
-                query: esqlBaseQuery + query,
-                ...(filter ? { filter } : {}),
-              },
-            },
-            { strategy: ESQL_SEARCH_STRATEGY }
-          )
-        )
+    const keywordTopTermsResp = await Promise.allSettled(
+      keywordFields.map(({ request }) =>
+        limiter(() => runRequest(request, { strategy: ESQL_SEARCH_STRATEGY }))
       )
     );
-    const keywordTopTermsResp = response.filter(isFulfilled).flatMap((r) => r.value);
     if (keywordTopTermsResp) {
-      return keywordFields.map(({ field }, idx) => {
+      return keywordFields.map(({ field, request }, idx) => {
         const resp = keywordTopTermsResp[idx];
-        if (isDefined(resp)) {
-          const results = resp.rawResponse.values as Array<[BucketCount, BucketTerm]>;
+        if (!resp) return;
+
+        if (isFulfilled(resp)) {
+          const results = resp.value?.rawResponse.values as Array<[BucketCount, BucketTerm]>;
           const topValuesSampleSize = results.reduce((acc: number, row) => acc + row[0], 0);
 
           const terms = results.map((row) => ({
@@ -79,6 +77,17 @@ export const getESQLKeywordFieldStats = async ({
             topValuesSamplerShardSize: topValuesSampleSize,
             isTopValuesSampled: false,
           } as StringFieldStats;
+        }
+
+        if (isRejected(resp)) {
+          // Log for debugging purposes
+          // eslint-disable-next-line no-console
+          console.error(resp, request);
+
+          return {
+            fieldName: field.name,
+            error: resp.reason,
+          } as FieldStatsError;
         }
       });
     }

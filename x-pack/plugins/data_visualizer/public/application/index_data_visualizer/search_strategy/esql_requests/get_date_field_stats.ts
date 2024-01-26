@@ -10,7 +10,7 @@ import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types
 import { ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import type { Column } from '../../hooks/esql/use_esql_overall_stats_data';
 import { getSafeESQLName } from '../requests/esql_utils';
-import type { DateFieldStats } from '../../../../../common/types/field_stats';
+import type { DateFieldStats, FieldStatsError } from '../../../../../common/types/field_stats';
 
 interface Params {
   runRequest: UseCancellableSearch['runRequest'];
@@ -36,29 +36,38 @@ export const getESQLDateFieldStats = async ({
 
   if (dateFields.length > 0) {
     const dateStatsQuery = ' | STATS ' + dateFields.map(({ query }) => query).join(',');
-
-    const dateFieldsResp = await runRequest(
-      {
-        params: {
-          query: esqlBaseQuery + dateStatsQuery,
-          ...(filter ? { filter } : {}),
-        },
+    const request = {
+      params: {
+        query: esqlBaseQuery + dateStatsQuery,
+        ...(filter ? { filter } : {}),
       },
-      { strategy: ESQL_SEARCH_STRATEGY }
-    );
+    };
+    try {
+      const dateFieldsResp = await runRequest(request, { strategy: ESQL_SEARCH_STRATEGY });
 
-    if (dateFieldsResp) {
-      return dateFields.map(({ field: dateField }, idx) => {
-        const row = dateFieldsResp.rawResponse.values[0] as Array<null | string | number>;
+      if (dateFieldsResp) {
+        return dateFields.map(({ field: dateField }, idx) => {
+          const row = dateFieldsResp.rawResponse.values[0] as Array<null | string | number>;
 
-        const earliest = row[idx * 2];
-        const latest = row[idx * 2 + 1];
+          const earliest = row[idx * 2];
+          const latest = row[idx * 2 + 1];
 
+          return {
+            fieldName: dateField.name,
+            earliest,
+            latest,
+          } as DateFieldStats;
+        });
+      }
+    } catch (error) {
+      // Log for debugging purposes
+      // eslint-disable-next-line no-console
+      console.error(error, request);
+      return dateFields.map(({ field }, idx) => {
         return {
-          fieldName: dateField.name,
-          earliest,
-          latest,
-        } as DateFieldStats;
+          fieldName: field.name,
+          error,
+        } as FieldStatsError;
       });
     }
   }
