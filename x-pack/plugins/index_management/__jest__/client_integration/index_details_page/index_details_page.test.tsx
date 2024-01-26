@@ -227,6 +227,13 @@ describe('<IndexDetailsPage />', () => {
     expect(header).toEqual(testIndexName);
   });
 
+  it('changes the tab when its header is clicked', async () => {
+    await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+    expect(testBed.exists('indexDetailsMappingsCodeBlock')).toBe(true);
+    await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Settings);
+    expect(testBed.exists('indexDetailsSettingsCodeBlock')).toBe(true);
+  });
+
   describe('Overview tab', () => {
     it('updates the breadcrumbs to index details overview', async () => {
       expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
@@ -650,11 +657,31 @@ describe('<IndexDetailsPage />', () => {
     });
   });
 
-  it('navigates back to indices', async () => {
-    jest.spyOn(testBed.routerMock.history, 'push');
-    await testBed.actions.clickBackToIndicesButton();
-    expect(testBed.routerMock.history.push).toHaveBeenCalledTimes(1);
-    expect(testBed.routerMock.history.push).toHaveBeenCalledWith('/indices');
+  describe('navigates back to the indices list', () => {
+    it('without indices list params', async () => {
+      jest.spyOn(testBed.routerMock.history, 'push');
+      await testBed.actions.clickBackToIndicesButton();
+      expect(testBed.routerMock.history.push).toHaveBeenCalledTimes(1);
+      expect(testBed.routerMock.history.push).toHaveBeenCalledWith('/indices');
+    });
+    it('with indices list params', async () => {
+      const filter = 'isFollower:true';
+      await act(async () => {
+        testBed = await setup({
+          httpSetup,
+          initialEntry: `/indices/index_details?indexName=${testIndexName}&filter=${encodeURIComponent(
+            filter
+          )}&includeHiddenIndices=true`,
+        });
+      });
+      testBed.component.update();
+      jest.spyOn(testBed.routerMock.history, 'push');
+      await testBed.actions.clickBackToIndicesButton();
+      expect(testBed.routerMock.history.push).toHaveBeenCalledTimes(1);
+      expect(testBed.routerMock.history.push).toHaveBeenCalledWith(
+        `/indices?filter=${encodeURIComponent(filter)}&includeHiddenIndices=true`
+      );
+    });
   });
 
   it('renders a link to discover', () => {

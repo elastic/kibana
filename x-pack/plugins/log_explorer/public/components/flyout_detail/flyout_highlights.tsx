@@ -8,7 +8,7 @@ import React from 'react';
 import { CloudProvider, CloudProviderIcon } from '@kbn/custom-icons';
 import { useMeasure } from 'react-use/lib';
 import { first } from 'lodash';
-import { FlyoutDoc, LogDocument } from './types';
+import { FlyoutDoc, LogDocument } from '../../../common/document';
 import * as constants from '../../../common/constants';
 import { HighlightField } from './sub_components/highlight_field';
 import {

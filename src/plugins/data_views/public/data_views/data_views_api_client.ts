@@ -16,11 +16,16 @@ const API_BASE_URL: string = `/api/index_patterns/`;
 const version = '1';
 
 async function sha1(str: string) {
-  const enc = new TextEncoder();
-  const hash = await crypto.subtle.digest('SHA-1', enc.encode(str));
-  return Array.from(new Uint8Array(hash))
-    .map((v) => v.toString(16).padStart(2, '0'))
-    .join('');
+  if (crypto.subtle) {
+    const enc = new TextEncoder();
+    const hash = await crypto.subtle.digest('SHA-256', enc.encode(str));
+    return Array.from(new Uint8Array(hash))
+      .map((v) => v.toString(16).padStart(2, '0'))
+      .join('');
+  } else {
+    const { sha256 } = await import('./sha256');
+    return sha256(str);
+  }
 }
 
 /**
