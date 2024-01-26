@@ -27,6 +27,7 @@ import { registerActionListRoutes } from './list';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import { doesLogsEndpointActionsIndexExist } from '../../utils';
 import { getActionList, getActionListByStatus } from '../../services';
+import { CustomHttpRequestError } from '@kbn/osquery-plugin/server/common/error';
 
 jest.mock('../../utils');
 const mockDoesLogsEndpointActionsIndexExist = doesLogsEndpointActionsIndexExist as jest.Mock;
@@ -94,6 +95,16 @@ describe('Action List Handler', () => {
       });
     });
 
+    it('should return `badRequest` when sentinel_one feature flag is not enabled and agentType is `sentinel_one`', async () => {
+      // @ts-expect-error We're writing to a readonly property just for the purpose of the test
+      endpointAppContextService.experimentalFeatures.responseActionsSentinelOneV1Enabled = false;
+      await actionListHandler({ ...defaultParams, agentTypes: 'sentinel_one' });
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 400,
+        body: new CustomHttpRequestError('[request body.agentTypes]: sentinel_one is disabled'),
+      });
+    });
+
     it('should return `ok` when actions index exists', async () => {
       await actionListHandler(defaultParams);
       expect(mockResponse.ok).toHaveBeenCalled();
@@ -110,12 +121,14 @@ describe('Action List Handler', () => {
       await actionListHandler({
         withOutputs: 'actionX',
         agentIds: 'agentX',
+        agentTypes: 'endpoint',
         commands: 'running-processes',
         statuses: 'failed',
         userIds: 'userX',
       });
       expect(mockGetActionListByStatus).toBeCalledWith(
         expect.objectContaining({
+          agentTypes: ['endpoint'],
           withOutputs: ['actionX'],
           elasticAgentIds: ['agentX'],
           commands: ['running-processes'],
@@ -143,12 +156,14 @@ describe('Action List Handler', () => {
       await actionListHandler({
         ...defaultParams,
         agentIds: 'agentX',
+        agentTypes: 'endpoint',
         commands: 'isolate',
         userIds: 'userX',
       });
 
       expect(mockGetActionList).toHaveBeenCalledWith(
         expect.objectContaining({
+          agentTypes: ['endpoint'],
           commands: ['isolate'],
           elasticAgentIds: ['agentX'],
           userIds: ['userX'],

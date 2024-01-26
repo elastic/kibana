@@ -4,7 +4,7 @@
 enterpriseSearch.enabled: false
 xpack.apm.enabled: false
 xpack.infra.enabled: false
-xpack.observabilityLogExplorer.enabled: false
+xpack.observabilityLogsExplorer.enabled: false
 xpack.observability.enabled: false
 
 ## Cloud settings

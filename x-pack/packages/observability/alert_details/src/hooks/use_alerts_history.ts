@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { AggregationsDateHistogramBucketKeys } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { type HttpSetup } from '@kbn/core/public';
 import {
   ALERT_DURATION,
   ALERT_RULE_UUID,
@@ -13,10 +15,8 @@ import {
   ALERT_TIME_RANGE,
   ValidFeatureId,
 } from '@kbn/rule-data-utils';
-import { type HttpSetup } from '@kbn/core/public';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 import { useQuery } from '@tanstack/react-query';
-import { AggregationsDateHistogramBucketKeys } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export interface Props {
   http: HttpSetup | undefined;
