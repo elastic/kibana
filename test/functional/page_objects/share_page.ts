@@ -17,12 +17,7 @@ export class SharePageObject extends FtrService {
   }
 
   async isShareModalOpen() {
-    return (
-      (await this.testSubjects.exists('link-modal')) ||
-      (await this.testSubjects.exists('embed-modal')) ||
-      (await this.testSubjects.exists('export-csv-modal')) ||
-      (await this.testSubjects.exists('export-image-modal'))
-    );
+    return await this.testSubjects.exists('share.doneButton');
   }
 
   async clickShareTopNavButton() {

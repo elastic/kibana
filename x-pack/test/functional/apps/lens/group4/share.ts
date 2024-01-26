@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const filterBarService = getService('filterBar');
   const queryBar = getService('queryBar');
+  const testSubjects = getService('testSubjects');
 
   describe('lens share tests', () => {
     before(async () => {
@@ -124,6 +125,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should be able to download CSV of multi layer visualization', async () => {
+      // modal being open is blocking test execution
+      if (await testSubjects.exists('share.doneButton')) {
+        await PageObjects.share.closeShareModal();
+      }
       await PageObjects.lens.createLayer();
 
       await PageObjects.lens.configureDimension({
@@ -141,7 +146,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.openCSVDownloadShare();
 
       const csv = await PageObjects.lens.getCSVContent();
-      if (await PageObjects.share.isShareModalOpen()) {
+      if (await testSubjects.exists('share.doneButton')) {
         await PageObjects.share.closeShareModal();
       }
       expect(csv).to.be.ok();
