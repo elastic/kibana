@@ -7,7 +7,7 @@
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Detection Engine - Rule Creation APIs', function () {
+  describe('Rules Management  - Rule Creation APIs', function () {
     loadTestFile(require.resolve('./create_rules'));
     loadTestFile(require.resolve('./create_ml_rules_privileges'));
   });

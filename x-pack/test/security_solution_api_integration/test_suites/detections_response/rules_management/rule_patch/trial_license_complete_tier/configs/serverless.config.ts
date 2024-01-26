@@ -10,6 +10,6 @@ export default createTestConfig({
   testFiles: [require.resolve('..')],
   junit: {
     reportName:
-      'Detection Engine - Rule Patch Integration Tests - Serverless Env - Complete License',
+      'Rules Management - Rule Patch Integration Tests - Serverless Env - Complete License',
   },
 });

@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Detection Engine - Rule Patch APIs', function () {
-    loadTestFile(require.resolve('./patch_rules_bulk'));
-    loadTestFile(require.resolve('./patch_rules'));
-    loadTestFile(require.resolve('./patch_rules_ess'));
+  describe('Rules Management - Rule creation APIs', function () {
+    loadTestFile(require.resolve('./create_rules'));
+    loadTestFile(require.resolve('./create_new_terms'));
+    loadTestFile(require.resolve('./preview_rules'));
   });
 }
