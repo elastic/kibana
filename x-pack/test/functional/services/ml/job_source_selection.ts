@@ -16,15 +16,15 @@ export function MachineLearningJobSourceSelectionProvider({ getService }: FtrPro
       await testSubjects.existOrFail(`savedObjectTitle${sourceName}`);
     },
 
-    async filterSourceSelection(sourceName: string) {
+    async filterSourceSelection(sourceName: string, dataTestSubjPostFix?: string) {
       await testSubjects.setValue('savedObjectFinderSearchInput', sourceName, {
         clearWithKeyboard: true,
       });
-      await this.assertSourceListContainsEntry(sourceName);
+      await this.assertSourceListContainsEntry(dataTestSubjPostFix ?? sourceName);
     },
 
     async selectSource(sourceName: string, nextPageSubj: string, dataTestSubjPostFix?: string) {
-      await this.filterSourceSelection(sourceName);
+      await this.filterSourceSelection(sourceName, dataTestSubjPostFix);
       await retry.tryForTime(30 * 1000, async () => {
         const dataTestSubj = `savedObjectTitle${dataTestSubjPostFix ?? sourceName}`;
         await testSubjects.clickWhenNotDisabledWithoutRetry(dataTestSubj);
