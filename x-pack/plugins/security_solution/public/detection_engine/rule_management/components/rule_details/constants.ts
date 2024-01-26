@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { DiffableAllFields } from '../../../../../common/api/detection_engine';
+
 export const DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS: [string, string] = ['50%', '50%'];
 export const LARGE_DESCRIPTION_LIST_COLUMN_WIDTHS: [string, string] = ['30%', '70%'];
 
@@ -12,8 +14,9 @@ export const LARGE_DESCRIPTION_LIST_COLUMN_WIDTHS: [string, string] = ['30%', '7
  * This order is derived from a combination of the Rule Details Flyout display order
  * and the `DiffableRule` type that is returned from the rule diff API endpoint
  */
-export const UPGRADE_FIELD_ORDER: string[] = [
+export const UPGRADE_FIELD_ORDER: Array<keyof DiffableAllFields> = [
   // Rule About fields
+  'version',
   'name',
   'description',
   'author',
@@ -24,7 +27,6 @@ export const UPGRADE_FIELD_ORDER: string[] = [
   'risk_score_mapping',
   'references',
   'false_positives',
-  'investigation_fields',
   'license',
   'rule_name_override',
   'threat',
@@ -48,7 +50,6 @@ export const UPGRADE_FIELD_ORDER: string[] = [
   'threshold',
   'threat_index',
   'threat_mapping',
-  'threat_filters',
   'threat_query',
   'threat_indicator_path',
   'concurrent_searches',
@@ -56,17 +57,16 @@ export const UPGRADE_FIELD_ORDER: string[] = [
   'alert_suppression',
   'new_terms_fields',
   'history_window_start',
+  'max_signals',
   // Rule Schedule fields
   'rule_schedule',
   // Rule Setup fields
   'setup',
   'note',
-  // Other fields
-  'throttle',
-  'max_signals',
 ];
 
 export const ABOUT_UPGRADE_FIELD_ORDER = [
+  'version',
   'name',
   'description',
   'author',
@@ -77,7 +77,6 @@ export const ABOUT_UPGRADE_FIELD_ORDER = [
   'risk_score_mapping',
   'references',
   'false_positives',
-  'investigation_fields',
   'license',
   'rule_name_override',
   'threat',
@@ -111,10 +110,9 @@ export const DEFINITION_UPGRADE_FIELD_ORDER = [
   'alert_suppression',
   'new_terms_fields',
   'history_window_start',
+  'max_signals',
 ];
 
 export const SCHEDULE_UPGRADE_FIELD_ORDER = ['rule_schedule'];
 
 export const SETUP_UPGRADE_FIELD_ORDER = ['setup', 'note'];
-
-export const OTHER_UPGRADE_FIELD_ORDER = ['throttle', 'max_signals'];

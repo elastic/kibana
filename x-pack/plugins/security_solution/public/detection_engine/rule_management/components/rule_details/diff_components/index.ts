@@ -5,5 +5,7 @@
  * 2.0.
  */
 
-export * from './index_patterns';
 export * from './field_diff';
+export * from './header_bar';
+export * from './panel_wrapper';
+export * from './rule_diff_section';

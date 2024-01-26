@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-export interface RuleFieldDiff {
-  formattedDiffs: Array<{ currentVersion: unknown; targetVersion: unknown; fieldName: string }>;
+import type { DiffableAllFields } from '../../../../../common/api/detection_engine';
+
+export interface FormattedFieldDiff {
+  currentVersion: unknown;
+  targetVersion: unknown;
   fieldName: string;
+}
+export interface RuleFieldDiff {
+  formattedDiffs: FormattedFieldDiff[];
+  fieldName: keyof DiffableAllFields;
 }

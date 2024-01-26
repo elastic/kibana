@@ -6,16 +6,15 @@
  */
 
 import React, { useMemo } from 'react';
-import type { FullRuleDiff, RuleFieldsDiff } from '../../../../../common/api/detection_engine';
+import type { PartialRuleDiff, RuleFieldsDiff } from '../../../../../common/api/detection_engine';
 import { getFormattedFieldDiff } from '../../logic/rule_details/get_formatted_field_diff';
 import { UPGRADE_FIELD_ORDER } from './constants';
-import { RuleDiffHeaderBar } from './diff_components/header_bar';
+import { RuleDiffHeaderBar, RuleDiffSection } from './diff_components';
 import { getSectionedFieldDiffs } from './helpers';
-import { RuleDiffSection } from './diff_components/rule_diff_section';
 import type { RuleFieldDiff } from '../../model/rule_details/rule_field_diff';
 
 interface PerFieldRuleDiffTabProps {
-  ruleDiff: FullRuleDiff;
+  ruleDiff: PartialRuleDiff;
 }
 
 export const PerFieldRuleDiffTab = ({ ruleDiff }: PerFieldRuleDiffTabProps) => {
@@ -27,7 +26,7 @@ export const PerFieldRuleDiffTab = ({ ruleDiff }: PerFieldRuleDiffTabProps) => {
       if (Object.hasOwn(ruleDiff.fields, field)) {
         const typedField = field as keyof RuleFieldsDiff;
         const formattedDiffs = getFormattedFieldDiff(typedField, ruleDiff.fields);
-        fields.push({ formattedDiffs, fieldName: field });
+        fields.push({ formattedDiffs, fieldName: typedField });
       }
     }
     const sortedFields = fields.sort(
@@ -36,7 +35,7 @@ export const PerFieldRuleDiffTab = ({ ruleDiff }: PerFieldRuleDiffTabProps) => {
     return sortedFields;
   }, [ruleDiff.fields]);
 
-  const { aboutFields, definitionFields, scheduleFields, setupFields, otherFields } = useMemo(
+  const { aboutFields, definitionFields, scheduleFields, setupFields } = useMemo(
     () => getSectionedFieldDiffs(fieldsToRender),
     [fieldsToRender]
   );
@@ -52,7 +51,6 @@ export const PerFieldRuleDiffTab = ({ ruleDiff }: PerFieldRuleDiffTabProps) => {
         <RuleDiffSection title={'Schedule'} fields={scheduleFields} />
       )}
       {setupFields.length !== 0 && <RuleDiffSection title={'Setup'} fields={setupFields} />}
-      {otherFields.length !== 0 && <RuleDiffSection title={'Other'} fields={otherFields} />}
     </>
   );
 };

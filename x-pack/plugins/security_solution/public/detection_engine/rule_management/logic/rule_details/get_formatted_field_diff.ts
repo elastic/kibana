@@ -6,11 +6,12 @@
  */
 
 import type { AllFieldsDiff } from '../../../../../common/api/detection_engine';
+import type { FormattedFieldDiff } from '../../model/rule_details/rule_field_diff';
 
 export const getFormattedFieldDiff = (
   fieldName: keyof AllFieldsDiff,
   fields: AllFieldsDiff
-): Array<{ currentVersion: unknown; targetVersion: unknown; fieldName: string }> => {
+): FormattedFieldDiff[] => {
   switch (fieldName) {
     case 'data_source':
       const dataSourceObj = fields[fieldName];
