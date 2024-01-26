@@ -11,34 +11,17 @@ import { TestProviders } from '../../mock/test_providers/test_providers';
 import { welcomeConvo } from '../../mock/conversation';
 import React from 'react';
 import { ConversationRole } from '../../assistant_context/types';
-import {
-  appendConversationMessagesApi,
-  deleteConversationApi,
-  getConversationById,
-  updateConversationApi,
-} from '../api/conversations';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { WELCOME_CONVERSATION } from './sample_conversations';
+import {
+  appendConversationMessagesApi as _appendConversationMessagesApi,
+  deleteConversationApi,
+  getConversationById as _getConversationById,
+  updateConversationApi,
+  createConversationApi as _createConversationApi,
+} from '../api/conversations';
 
-jest.mock('../api/conversations', () => {
-  const actual = jest.requireActual('../api/conversations');
-  return {
-    ...actual,
-    updateConversationApi: jest.fn((...args) => actual.updateConversationApi(...args)),
-    appendConversationMessagesApi: jest.fn((...args) =>
-      actual.appendConversationMessagesApi(...args)
-    ),
-    createConversationApi: jest.fn((...args) => actual.createConversationApi(...args)),
-    deleteConversationApi: jest.fn((...args) => actual.deleteConversationApi(...args)),
-    getConversationById: jest.fn((...args) => actual.getConversationById(...args)),
-  };
-});
-
-const updateConversationApiMock = updateConversationApi as jest.Mock;
-const getConversationByIdMock = getConversationById as jest.Mock;
-const deleteConversationApiMock = deleteConversationApi as jest.Mock;
-const appendConversationMessagesApiMock = appendConversationMessagesApi as jest.Mock;
-
+jest.mock('../api/conversations');
 const message = {
   content: 'You are a robot',
   role: 'user' as ConversationRole,
@@ -57,6 +40,10 @@ const mockConvo = {
   apiConfig: { defaultSystemPromptId: 'default-system-prompt' },
 };
 
+const appendConversationMessagesApi = _appendConversationMessagesApi as jest.Mock;
+const getConversationById = _getConversationById as jest.Mock;
+const createConversationApi = _createConversationApi as jest.Mock;
+
 describe('useConversation', () => {
   let httpMock: ReturnType<typeof httpServiceMock.createSetupContract>;
 
@@ -71,6 +58,9 @@ describe('useConversation', () => {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
       await waitForNextUpdate();
+      appendConversationMessagesApi.mockResolvedValue({
+        messages: [message, anotherMessage, message],
+      });
 
       const appendResult = await result.current.appendMessage({
         conversationId: welcomeConvo.id,
@@ -101,6 +91,8 @@ describe('useConversation', () => {
         ),
       });
       await waitForNextUpdate();
+
+      appendConversationMessagesApi.mockResolvedValue([message, anotherMessage, message]);
       await result.current.appendMessage({
         conversationId: welcomeConvo.id,
         message,
@@ -117,9 +109,12 @@ describe('useConversation', () => {
   it('should create a new conversation when called with valid conversationId and message', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        wrapper: ({ children }) => (
+          <TestProviders providerContext={{ http: httpMock }}>{children}</TestProviders>
+        ),
       });
       await waitForNextUpdate();
+      createConversationApi.mockResolvedValue(mockConvo);
 
       const createResult = await result.current.createConversation({
         id: mockConvo.id,
@@ -135,13 +130,15 @@ describe('useConversation', () => {
   it('should delete an existing conversation when called with valid conversationId', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        wrapper: ({ children }) => (
+          <TestProviders providerContext={{ http: httpMock }}>{children}</TestProviders>
+        ),
       });
       await waitForNextUpdate();
 
       await result.current.deleteConversation('new-convo');
 
-      expect(deleteConversationApiMock).toHaveBeenCalledWith({
+      expect(deleteConversationApi).toHaveBeenCalledWith({
         http: httpMock,
         id: 'new-convo',
       });
@@ -151,7 +148,9 @@ describe('useConversation', () => {
   it('should update the apiConfig for an existing conversation when called with a valid conversationId and apiConfig', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        wrapper: ({ children }) => (
+          <TestProviders providerContext={{ http: httpMock }}>{children}</TestProviders>
+        ),
       });
       await waitForNextUpdate();
 
@@ -160,10 +159,9 @@ describe('useConversation', () => {
         apiConfig: mockConvo.apiConfig,
       });
 
-      expect(updateConversationApiMock).toHaveBeenCalledWith({
+      expect(createConversationApi).toHaveBeenCalledWith({
         http: httpMock,
-        conversationId: welcomeConvo.id,
-        apiConfig: mockConvo.apiConfig,
+        conversation: { ...WELCOME_CONVERSATION, apiConfig: mockConvo.apiConfig, id: '' },
       });
     });
   });
@@ -171,11 +169,13 @@ describe('useConversation', () => {
   it('appends replacements', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        wrapper: ({ children }) => (
+          <TestProviders providerContext={{ http: httpMock }}>{children}</TestProviders>
+        ),
       });
       await waitForNextUpdate();
 
-      getConversationByIdMock.mockResolvedValue(mockConvo);
+      getConversationById.mockResolvedValue(mockConvo);
 
       await result.current.appendReplacements({
         conversationId: welcomeConvo.id,
@@ -186,7 +186,7 @@ describe('useConversation', () => {
         },
       });
 
-      expect(updateConversationApiMock).toHaveBeenCalledWith({
+      expect(updateConversationApi).toHaveBeenCalledWith({
         http: httpMock,
         conversationId: welcomeConvo.id,
         replacements: {
@@ -201,11 +201,13 @@ describe('useConversation', () => {
   it('should remove the last message from a conversation when called with valid conversationId', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        wrapper: ({ children }) => (
+          <TestProviders providerContext={{ http: httpMock }}>{children}</TestProviders>
+        ),
       });
       await waitForNextUpdate();
 
-      getConversationByIdMock.mockResolvedValue(mockConvo);
+      getConversationById.mockResolvedValue(mockConvo);
 
       const removeResult = await result.current.removeLastMessage('new-convo');
 
@@ -216,7 +218,9 @@ describe('useConversation', () => {
   it('amendMessage updates the last message of conversation[] for a given conversationId with provided content', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+        wrapper: ({ children }) => (
+          <TestProviders providerContext={{ http: httpMock }}>{children}</TestProviders>
+        ),
       });
       await waitForNextUpdate();
 
@@ -225,7 +229,7 @@ describe('useConversation', () => {
         content: 'hello world',
       });
 
-      expect(appendConversationMessagesApiMock).toHaveBeenCalledWith({
+      expect(appendConversationMessagesApi).toHaveBeenCalledWith({
         conversationId: mockConvo.id,
         http: httpMock,
         messages: [
