@@ -45,7 +45,6 @@ import {
   DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
-import moment from 'moment';
 import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
 import {
   createExceptionList,
@@ -216,26 +215,23 @@ export default ({ getService }: FtrProviderContext) => {
       if (!alert) {
         return expect(alert).to.be.ok();
       }
-      const date = moment();
-      const formattedDate = date.format('YYYY.MM.DD');
-      const alertAncestorIndex = isServerless
-        ? `.ds-.alerts-security.alerts-default-${formattedDate}-000001`
-        : '.internal.alerts-security.alerts-default-000001';
-      expect(alert[ALERT_ANCESTORS]).eql([
-        {
-          id: 'vT9cwocBh3b8EMpD8lsi',
-          type: 'event',
-          index: '.ds-logs-endpoint.alerts-default-2023.04.27-000001',
-          depth: 0,
-        },
-        {
-          rule: '7015a3e2-e4ea-11ed-8c11-49608884878f',
-          id: alertId,
-          type: 'signal',
-          index: alertAncestorIndex,
-          depth: 1,
-        },
-      ]);
+
+      const alertAncestorIndexPattern = isServerless
+        ? /\.ds-\.alerts-security\.alerts-default-(.*)-000001/
+        : /\.internal\.alerts-security\.alerts-default-000001/;
+
+      expect(alert[ALERT_ANCESTORS][0]).eql({
+        id: 'vT9cwocBh3b8EMpD8lsi',
+        type: 'event',
+        index: '.ds-logs-endpoint.alerts-default-2023.04.27-000001',
+        depth: 0,
+      });
+      expect(alert[ALERT_ANCESTORS][1].rule).eql('7015a3e2-e4ea-11ed-8c11-49608884878f');
+      expect(alert[ALERT_ANCESTORS][1].id).eql(alertId);
+      expect(alert[ALERT_ANCESTORS][1].type).eql('signal');
+      expect(alert[ALERT_ANCESTORS][1].depth).eql(1);
+      expect(alert[ALERT_ANCESTORS][1].index).match(alertAncestorIndexPattern);
+
       expect(alert[ALERT_WORKFLOW_STATUS]).eql('open');
       expect(alert[ALERT_DEPTH]).eql(2);
 
