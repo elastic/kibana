@@ -20,6 +20,25 @@ const queryOptions = Object.freeze({
   ignore: [404],
 });
 
+const getActionTypeFilter = (actionType: string): SearchRequest => {
+  return actionType === 'manual'
+    ? {
+        must_not: {
+          exists: {
+            field: 'data.alert_id',
+          },
+        },
+      }
+    : actionType === 'automated'
+    ? {
+        filter: {
+          exists: {
+            field: 'data.alert_id',
+          },
+        },
+      }
+    : {};
+};
 export const getActions = async ({
   agentTypes,
   commands,
@@ -70,35 +89,13 @@ export const getActions = async ({
     },
   ];
 
-  const getTypesFilter = (): SearchRequest => {
-    const singleType = types?.length === 1 && types[0];
-    if (!singleType) {
-      return {};
-    }
-    return singleType === 'manual'
-      ? {
-          must_not: {
-            exists: {
-              field: 'data.alert_id',
-            },
-          },
-        }
-      : singleType === 'automated'
-      ? {
-          filter: {
-            exists: {
-              field: 'data.alert_id',
-            },
-          },
-        }
-      : {};
-  };
-
   if (userIds?.length) {
     const userIdsKql = userIds.map((userId) => `user_id:${userId}`).join(' or ');
     const mustClause = toElasticsearchQuery(fromKueryExpression(userIdsKql));
     must.push(mustClause);
   }
+
+  const isNotASingleActionType = !types || (types && types.length > 1);
 
   const actionsSearchQuery: SearchRequest = {
     index: ENDPOINT_ACTIONS_INDEX,
@@ -108,7 +105,7 @@ export const getActions = async ({
       query: {
         bool: {
           must,
-          ...getTypesFilter(),
+          ...(isNotASingleActionType ? {} : getActionTypeFilter(types[0])),
         },
       },
       sort: [
