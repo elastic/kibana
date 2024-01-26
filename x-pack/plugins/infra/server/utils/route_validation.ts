@@ -27,7 +27,11 @@ type RequestValidationResult<T> =
 
 export const buildRouteValidationWithExcess =
   <
-    T extends rt.InterfaceType<rt.Props> | GenericIntersectionC | rt.PartialType<rt.Props>,
+    T extends
+      | rt.InterfaceType<rt.Props>
+      | GenericIntersectionC
+      | rt.PartialType<rt.Props>
+      | rt.ExactC<any>,
     A = rt.TypeOf<T>
   >(
     schema: T
@@ -48,7 +52,11 @@ export type GenericIntersectionC =
   | rt.IntersectionC<[any, any, any, any, any]>;
 
 export const excess = <
-  C extends rt.InterfaceType<rt.Props> | GenericIntersectionC | rt.PartialType<rt.Props>
+  C extends
+    | rt.InterfaceType<rt.Props>
+    | GenericIntersectionC
+    | rt.PartialType<rt.Props>
+    | rt.ExactC<any>
 >(
   codec: C
 ): C => {
@@ -129,13 +137,9 @@ const getProps = (
     case 'RefinementType':
     case 'ReadonlyType':
       return getProps(codec.type);
-    case 'InterfaceType':
     case 'ExactType':
-      // Handle ExactType by extracting props from the underlying InterfaceType
-      if (codec._tag === 'ExactType') {
-        return getProps(codec.type);
-      }
-    case 'StrictType':
+      return getProps(codec.type);
+    case 'InterfaceType':
     case 'PartialType':
       return codec.props;
     case 'IntersectionType': {

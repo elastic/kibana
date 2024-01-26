@@ -19,11 +19,9 @@ export const sizeRT = rt.union([
 ]);
 export const assetDateRT = rt.union([dateRt, datemathStringRt]);
 
-export const servicesFiltersRT = rt.exact(
-  rt.type({
-    ['host.name']: rt.string,
-  })
-);
+export const servicesFiltersRT = rt.strict({
+  ['host.name']: rt.string,
+});
 
 export type ServicesFilter = rt.TypeOf<typeof servicesFiltersRT>;
 
