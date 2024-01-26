@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiBadge } from '@elastic/eui';
-import { FlyoutDoc } from '../types';
+import { FlyoutDoc } from '../../../../common/document';
 
 interface TimestampProps {
   timestamp: FlyoutDoc['@timestamp'];

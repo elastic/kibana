@@ -188,6 +188,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [inactiveShownAgents, setInactiveShownAgents] = useState(0);
   const [totalInactiveAgents, setTotalInactiveAgents] = useState(0);
   const [totalManagedAgentIds, setTotalManagedAgentIds] = useState<string[]>([]);
+  const [inactiveManagedAgentIds, setInactiveManagedAgentIds] = useState<string[]>([]);
   const [managedAgentsOnCurrentPage, setManagedAgentsOnCurrentPage] = useState(0);
   const [showAgentActivityTour, setShowAgentActivityTour] = useState({ isOpen: false });
   const getSortFieldForAPI = (field: keyof Agent): string => {
@@ -335,7 +336,11 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             }
             const allManagedAgents = response.data?.items ?? [];
             const allManagedAgentIds = allManagedAgents?.map((agent) => agent.id);
+            const inactiveManagedIds = allManagedAgents
+              ?.filter((agent) => agent.status === 'inactive')
+              .map((agent) => agent.id);
             setTotalManagedAgentIds(allManagedAgentIds);
+            setInactiveManagedAgentIds(inactiveManagedIds);
 
             setManagedAgentsOnCurrentPage(
               agentsResponse.data.items
@@ -606,6 +611,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         inactiveShownAgents={inactiveShownAgents}
         totalInactiveAgents={totalInactiveAgents}
         totalManagedAgentIds={totalManagedAgentIds}
+        inactiveManagedAgentIds={inactiveManagedAgentIds}
         selectionMode={selectionMode}
         currentQuery={kuery}
         selectedAgents={selectedAgents}

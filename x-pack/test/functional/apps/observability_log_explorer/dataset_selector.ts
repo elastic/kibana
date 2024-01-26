@@ -295,7 +295,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expect(nodes.length).to.be(20);
           });
 
-          cleanupAdditionalSetup();
+          await cleanupAdditionalSetup();
         });
 
         describe('clicking on integration and moving into the second navigation level', () => {
