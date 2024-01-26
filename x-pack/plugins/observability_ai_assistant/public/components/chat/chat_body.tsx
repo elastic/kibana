@@ -21,6 +21,7 @@ import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { findLastIndex } from 'lodash';
+import { VisualizeESQLUserIntention } from '../../../common/functions/visualize_esql';
 import { ChatState } from '../../hooks/use_chat';
 import { useConversation } from '../../hooks/use_conversation';
 import { useLicense } from '../../hooks/use_license';
@@ -296,9 +297,10 @@ export function ChatBody({
                               role: MessageRole.Assistant,
                               content: '',
                               function_call: {
-                                name: 'execute_query',
+                                name: 'visualize_query',
                                 arguments: JSON.stringify({
                                   query: payload.query,
+                                  intention: VisualizeESQLUserIntention.executeAndReturnResults,
                                 }),
                                 trigger: MessageRole.User,
                               },
@@ -321,6 +323,7 @@ export function ChatBody({
                                 arguments: JSON.stringify({
                                   query: payload.query,
                                   newInput: payload.newInput,
+                                  intention: VisualizeESQLUserIntention.visualizeAuto,
                                 }),
                                 trigger: MessageRole.User,
                               },
