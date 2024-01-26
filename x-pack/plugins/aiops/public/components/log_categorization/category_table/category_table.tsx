@@ -156,7 +156,7 @@ export const CategoryTable: FC<Props> = ({
       isExpander: true,
       render: (item: Category) => (
         <EuiButtonIcon
-          data-test-subj="aiopsColumnsButton"
+          data-test-subj="aiopsLogPatternsColumnsButton"
           onClick={() => toggleDetails(item)}
           aria-label={
             itemIdToExpandedRowMap[item.key]

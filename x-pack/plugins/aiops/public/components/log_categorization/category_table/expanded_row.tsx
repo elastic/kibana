@@ -6,9 +6,10 @@
  */
 
 import React, { FC } from 'react';
-import { EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiText, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { css } from '@emotion/react';
 import type { Category } from '../../../../common/api/log_categorization/types';
 import { FormattedPatternExamples, FormattedRegex, FormattedTokens } from '../format_category';
 
@@ -17,8 +18,14 @@ interface ExpandedRowProps {
 }
 
 export const ExpandedRow: FC<ExpandedRowProps> = ({ category }) => {
+  const { euiTheme } = useEuiTheme();
+  const cssExpandedRow = css({
+    marginRight: euiTheme.size.xxl,
+    width: '100%',
+  });
+
   return (
-    <div css={{ marginRight: '40px', width: '100%' }}>
+    <div css={cssExpandedRow}>
       <EuiSpacer />
 
       <Section

@@ -104,11 +104,11 @@ const useCreateFormattedExample = () => {
     return elements;
   }
 
-  return { createFormattedExample };
+  return createFormattedExample;
 };
 
 export const FormattedPatternExamples: FC<Props> = ({ category, count }) => {
-  const { createFormattedExample } = useCreateFormattedExample();
+  const createFormattedExample = useCreateFormattedExample();
 
   const e = useMemo(() => {
     const { key, examples } = category;
