@@ -167,6 +167,7 @@ export const loadDashboardState = async ({
     {
       ...DEFAULT_DASHBOARD_INPUT,
       ...options,
+
       id: embeddableId,
       refreshInterval,
       timeRestore,
