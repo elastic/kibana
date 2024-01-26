@@ -9,7 +9,6 @@
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { dynamic } from './dynamic';
-import { TestComponentProps } from './test_component';
 
 export type ExpectTrue<T extends true> = T;
 
@@ -23,25 +22,25 @@ describe('dynamic', () => {
   it(`should create a lazy loaded component starting from a dynamic default import`, async () => {
     const LazyTestComponent = dynamic(() => import('./test_component'));
 
-    const { queryByText } = render(<LazyTestComponent />);
+    const { queryByText } = render(<LazyTestComponent>Hello</LazyTestComponent>);
 
     // Component is suspended and not rendered at first due to lazy loading
-    expect(queryByText('Test component')).not.toBeInTheDocument();
+    expect(queryByText('Hello Test component')).not.toBeInTheDocument();
     // The component finally renders when is done fetching it
-    await waitFor(() => expect(queryByText('Test component')).toBeInTheDocument());
+    await waitFor(() => expect(queryByText('Hello Test component')).toBeInTheDocument());
   });
 
   it(`should create a lazy loaded component starting from a dynamic named import`, async () => {
-    const LazyTestComponent = dynamic<TestComponentProps>(() =>
+    const LazyTestComponent = dynamic(() =>
       import('./test_component').then((mod) => ({ default: mod.TestComponent }))
     );
 
-    const { queryByText } = render(<LazyTestComponent />);
+    const { queryByText } = render(<LazyTestComponent>Hello</LazyTestComponent>);
 
     // Component is suspended and not rendered at first due to lazy loading
-    expect(queryByText('Test component')).not.toBeInTheDocument();
+    expect(queryByText('Hello Test component')).not.toBeInTheDocument();
     // The component finally renders when is done fetching it
-    await waitFor(() => expect(queryByText('Test component')).toBeInTheDocument());
+    await waitFor(() => expect(queryByText('Hello Test component')).toBeInTheDocument());
   });
 
   it(`should accept an optional "fallback" node to display while loading the component`, async () => {
@@ -49,48 +48,52 @@ describe('dynamic', () => {
       fallback: <span>Loading</span>,
     });
 
-    const { queryByText } = render(<LazyTestComponent />);
+    const { queryByText } = render(<LazyTestComponent>Hello</LazyTestComponent>);
 
     // Component is suspended and display the provided fallback element
-    expect(queryByText('Test component')).not.toBeInTheDocument();
+    expect(queryByText('Hello Test component')).not.toBeInTheDocument();
     expect(queryByText('Loading')).toBeInTheDocument();
     // The component finally renders when is done fetching it
-    await waitFor(() => expect(queryByText('Test component')).toBeInTheDocument());
+    await waitFor(() => expect(queryByText('Hello Test component')).toBeInTheDocument());
   });
 
   describe('the created lazy loaded component', () => {
     it(`should forward the ref property if provided`, async () => {
-      const LazyForwardeRefTestComponent = dynamic<TestComponentProps>(() =>
+      const LazyForwardeRefTestComponent = dynamic(() =>
         import('./test_component').then((mod) => ({ default: mod.ForwardeRefTestComponent }))
       );
 
       const ref = React.createRef<HTMLSpanElement>();
 
-      const { queryByText } = render(<LazyForwardeRefTestComponent ref={ref} />);
+      const { queryByText } = render(
+        <LazyForwardeRefTestComponent ref={ref}>Hello</LazyForwardeRefTestComponent>
+      );
 
       // The component finally renders when is done fetching it
-      await waitFor(() => expect(queryByText('Test component')).toBeInTheDocument());
+      await waitFor(() => expect(queryByText('Hello Test component')).toBeInTheDocument());
 
       expect(ref.current?.tagName).toBe('SPAN');
     });
 
     it('should be properly typed respecting the original properties contract', () => {
       const LazyTestComponent = dynamic(() => import('./test_component'));
-      const LazyForwardeRefTestComponent = dynamic<TestComponentProps>(() =>
+      const LazyForwardeRefTestComponent = dynamic(() =>
         import('./test_component').then((mod) => ({ default: mod.ForwardeRefTestComponent }))
       );
 
       type LazyTestComponentProps = React.ComponentPropsWithRef<typeof LazyTestComponent>;
-      type LazyLazyForwardeRefTestComponentProps = React.ComponentPropsWithRef<
+      type LazyForwardeRefTestComponentProps = React.ComponentPropsWithRef<
         typeof LazyForwardeRefTestComponent
       >;
 
       // @ts-ignore ignore unused tuple Assertion
       type Assertions = [
+        ExpectTrue<MatchesProperty<LazyTestComponentProps, 'children'>>,
         ExpectTrue<MatchesProperty<LazyTestComponentProps, 'ref'>>,
         ExpectTrue<MatchesProperty<LazyTestComponentProps, 'customProp'>>,
-        ExpectTrue<MatchesProperty<LazyLazyForwardeRefTestComponentProps, 'ref'>>,
-        ExpectTrue<MatchesProperty<LazyLazyForwardeRefTestComponentProps, 'customProp'>>
+        ExpectTrue<MatchesProperty<LazyForwardeRefTestComponentProps, 'children'>>,
+        ExpectTrue<MatchesProperty<LazyForwardeRefTestComponentProps, 'ref'>>,
+        ExpectTrue<MatchesProperty<LazyForwardeRefTestComponentProps, 'customProp'>>
       ];
     });
   });

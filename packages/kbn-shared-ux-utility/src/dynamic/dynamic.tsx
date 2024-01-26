@@ -8,8 +8,8 @@
 
 import React, { Suspense } from 'react';
 
-type Loader<TProps extends {}> = () => Promise<{
-  default: React.ComponentType<TProps>;
+type Loader<TElement extends React.ComponentType<any>> = () => Promise<{
+  default: TElement;
 }>;
 
 /**
@@ -31,15 +31,15 @@ export interface DynamicOptions {
  * // Lazy load a named exported component
  * const MobileHeader = dynamic<MobileHeaderProps>(() => import('./components/header').then(mod => ({default: mod.MobileHeader})))
  */
-export function dynamic<TProps = {}, TRef = {}>(
-  loader: Loader<TProps>,
+export function dynamic<TElement extends React.ComponentType<any>, TRef = {}>(
+  loader: Loader<TElement>,
   options: DynamicOptions = {}
 ) {
   const Component = React.lazy(loader);
 
-  return React.forwardRef((props: React.PropsWithoutRef<TProps>, ref: React.ForwardedRef<TRef>) => (
+  return React.forwardRef<TRef, React.ComponentPropsWithRef<TElement>>((props, ref) => (
     <Suspense fallback={options.fallback ?? null}>
-      <Component {...props} ref={ref} />
+      {React.createElement(Component, { ...props, ref })}
     </Suspense>
   ));
 }
