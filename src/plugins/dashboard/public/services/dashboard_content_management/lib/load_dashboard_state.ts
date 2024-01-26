@@ -63,7 +63,7 @@ export const loadDashboardState = async ({
   /**
    * Load the saved object from Content Management
    */
-  let rawDashboardContent;
+  let rawDashboardContent: DashboardCrudTypes['GetOut']['item'];
   let resolveMeta: DashboardCrudTypes['GetOut']['meta'];
 
   const cachedDashboard = dashboardContentManagementCache.fetchDashboard(id);
