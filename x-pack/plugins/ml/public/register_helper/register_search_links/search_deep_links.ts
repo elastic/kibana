@@ -263,7 +263,7 @@ function createDeepLinks(
       };
     },
 
-    getIndexDataVisualizerDeepLink: (): AppDeepLink<LinkId> => {
+    getESQLDataVisualizerDeepLink: (): AppDeepLink<LinkId> => {
       return {
         id: 'indexDataVisualizer',
         title: i18n.translate('xpack.ml.deepLink.esqlDataVisualizer', {
