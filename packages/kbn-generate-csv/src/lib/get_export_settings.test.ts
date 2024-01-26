@@ -19,23 +19,25 @@ import {
   UI_SETTINGS_CSV_SEPARATOR,
   UI_SETTINGS_DATEFORMAT_TZ,
   UI_SETTINGS_SEARCH_INCLUDE_FROZEN,
-} from './constants';
+} from '../../constants';
 import { getExportSettings } from './get_export_settings';
 
 describe('getExportSettings', () => {
   let uiSettingsClient: IUiSettingsClient;
-  const config: ReportingConfigType['csv'] = {
-    checkForFormulas: true,
-    escapeFormulaValues: false,
-    maxSizeBytes: 180000,
-    scroll: { size: 500, duration: '30s' },
-    useByteOrderMarkEncoding: false,
-    maxConcurrentShardRequests: 5,
-    enablePanelActionDownload: true,
-  };
+  let config: ReportingConfigType['csv'];
   const logger = loggingSystemMock.createLogger();
 
   beforeEach(() => {
+    config = {
+      checkForFormulas: true,
+      escapeFormulaValues: false,
+      maxSizeBytes: 180000,
+      scroll: { size: 500, duration: '30s', strategy: 'pit' },
+      useByteOrderMarkEncoding: false,
+      maxConcurrentShardRequests: 5,
+      enablePanelActionDownload: true,
+    };
+
     uiSettingsClient = uiSettingsServiceMock
       .createStartContract()
       .asScopedToClient(savedObjectsClientMock.create());
@@ -56,23 +58,48 @@ describe('getExportSettings', () => {
   });
 
   test('getExportSettings: returns the expected result', async () => {
-    expect(await getExportSettings(uiSettingsClient, config, '', logger)).toMatchInlineSnapshot(`
-      Object {
-        "bom": "",
-        "checkForFormulas": true,
-        "escapeFormulaValues": false,
-        "escapeValue": [Function],
-        "includeFrozen": false,
-        "maxConcurrentShardRequests": 5,
-        "maxSizeBytes": 180000,
-        "scroll": Object {
-          "duration": "30s",
-          "size": 500,
-        },
-        "separator": ",",
-        "timezone": "UTC",
-      }
-    `);
+    expect(await getExportSettings(uiSettingsClient, config, '', logger)).toMatchObject({
+      bom: '',
+      checkForFormulas: true,
+      escapeFormulaValues: false,
+      includeFrozen: false,
+      maxConcurrentShardRequests: 5,
+      maxSizeBytes: 180000,
+      scroll: {
+        duration: '30s',
+        size: 500,
+      },
+      separator: ',',
+      timezone: 'UTC',
+    });
+  });
+
+  test('does not add a default scroll strategy', async () => {
+    // @ts-expect-error undefined isn't allowed
+    config = { ...config, scroll: { strategy: undefined } };
+    expect(await getExportSettings(uiSettingsClient, config, '', logger)).toMatchObject(
+      expect.objectContaining({ scroll: expect.objectContaining({ strategy: undefined }) })
+    );
+  });
+
+  test('passes the scroll=pit strategy through', async () => {
+    config = { ...config, scroll: { ...config.scroll, strategy: 'pit' } };
+
+    expect(await getExportSettings(uiSettingsClient, config, '', logger)).toMatchObject(
+      expect.objectContaining({ scroll: expect.objectContaining({ strategy: 'pit' }) })
+    );
+  });
+
+  test('passes the scroll=scroll strategy through', async () => {
+    config = { ...config, scroll: { ...config.scroll, strategy: 'scroll' } };
+
+    expect(await getExportSettings(uiSettingsClient, config, '', logger)).toMatchObject(
+      expect.objectContaining({
+        scroll: expect.objectContaining({
+          strategy: 'scroll',
+        }),
+      })
+    );
   });
 
   test('escapeValue function', async () => {
