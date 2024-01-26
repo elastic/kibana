@@ -16,6 +16,7 @@ import {
   AlertProvidedActionVariables,
   hasMustacheTokens,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { isPlainObject } from 'lodash';
 import {
   PagerDutyConfig,
   PagerDutySecrets,
@@ -92,18 +93,22 @@ export function getConnectorType(): ConnectorTypeModel<
           }
         });
       }
-      if (actionParams.customDetails?.length && !hasMustacheTokens(actionParams.customDetails)) {
+      if (actionParams.customDetails?.length) {
+        const errorMessage = i18n.translate(
+          'xpack.stackConnectors.components.pagerDuty.error.invalidCustomDetails',
+          {
+            defaultMessage: 'Custom details must be a valid JSON object.',
+          }
+        );
+
         try {
-          JSON.parse(actionParams.customDetails);
+          const parsedJSON = JSON.parse(actionParams.customDetails);
+
+          if (!isPlainObject(parsedJSON)) {
+            errors.customDetails.push(errorMessage);
+          }
         } catch {
-          errors.customDetails.push(
-            i18n.translate(
-              'xpack.stackConnectors.components.pagerDuty.error.invalidCustomDetails',
-              {
-                defaultMessage: 'Custom details must be a valid JSON.',
-              }
-            )
-          );
+          errors.customDetails.push(errorMessage);
         }
       }
       return validationResult;
