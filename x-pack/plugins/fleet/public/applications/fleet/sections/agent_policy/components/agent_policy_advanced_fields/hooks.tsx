@@ -101,7 +101,7 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
       getDefaultOutput(defaultOutputName, defaultOutputDisabled, defaultOutputDisabledMessage),
       ...outputsRequest.data.items.map((item) => {
         const isOutputTypeUnsupported = !allowedOutputTypes.includes(item.type);
-        const isInternalOutput = item.is_internal;
+        const isInternalOutput = !!item.is_internal;
 
         return {
           value: item.id,
@@ -134,7 +134,7 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
     return [
       getDefaultOutput(defaultOutputName),
       ...outputsRequest.data.items.map((item) => {
-        const isInternalOutput = item.is_internal;
+        const isInternalOutput = !!item.is_internal;
 
         return {
           value: item.id,
