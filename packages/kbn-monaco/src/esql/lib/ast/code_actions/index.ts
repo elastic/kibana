@@ -156,10 +156,9 @@ async function getQuotableActionForColumns(
     error.endColumn - 1,
     error.endColumn + stopIndex
   );
-  const errorText = queryString.substring(
-    error.startColumn - 1,
-    error.endColumn + possibleUnquotedText.length
-  );
+  const errorText = queryString
+    .substring(error.startColumn - 1, error.endColumn + possibleUnquotedText.length)
+    .trimEnd();
   const actions = [];
   if (shouldBeQuotedText(errorText)) {
     const solution = `\`${errorText}\``;
