@@ -1,6 +1,6 @@
 [role="xpack"]
 [[maps-clean-your-data]]
-=== Cleaning your data
+=== Clean your data
 
 // https://github.com/elastic/kibana/issues/135319
 
