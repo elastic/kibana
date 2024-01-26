@@ -585,6 +585,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       sloBurnRateRule: isServerless
         ? `${SERVERLESS_OBSERVABILITY_DOCS}create-slo-burn-rate-alert-rule`
         : `${OBSERVABILITY_DOCS}slo-burn-rate-alert.html`,
+      slos: isServerless ? `${SERVERLESS_OBSERVABILITY_DOCS}slos` : `${OBSERVABILITY_DOCS}slo.html`,
     },
     alerting: {
       guide: isServerless
