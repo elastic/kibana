@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiToken, useEuiTheme } from '@elastic/eui';
+import { EuiText, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { CustomGridColumnProps } from '@kbn/unified-data-table';
 import { css } from '@emotion/react';
@@ -14,12 +14,10 @@ import {
   contentHeaderTooltipParagraph2,
   contentLabel,
 } from '../../common/translations';
-import { dynamic } from '../../../utils/dynamic';
 import { HoverPopover } from '../../common/hover_popover';
-
-const ColumnHeaderTruncateContainer = dynamic(
-  () => import('@kbn/unified-data-table/src/components/column_header_truncate_container')
-);
+import { TooltipButtonComponent } from './tooltip_button';
+import { FieldWithToken } from './field_with_token';
+import * as constants from '../../../../common/constants';
 
 export const ContentColumnTooltip = ({ column, headerRowHeight }: CustomGridColumnProps) => {
   const { euiTheme } = useEuiTheme();
@@ -27,13 +25,16 @@ export const ContentColumnTooltip = ({ column, headerRowHeight }: CustomGridColu
     margin-bottom: ${euiTheme.size.s};
   `;
 
-  const contentButtonComponent = (
-    <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
-      {column.displayAsText} <EuiIcon type="questionInCircle" />
-    </ColumnHeaderTruncateContainer>
-  );
   return (
-    <HoverPopover button={contentButtonComponent} title={contentLabel}>
+    <HoverPopover
+      button={
+        <TooltipButtonComponent
+          displayText={column.displayAsText}
+          headerRowHeight={headerRowHeight}
+        />
+      }
+      title={contentLabel}
+    >
       <div style={{ width: '230px' }}>
         <EuiText size="s" css={spacingCSS}>
           <p>{contentHeaderTooltipParagraph1}</p>
@@ -41,36 +42,8 @@ export const ContentColumnTooltip = ({ column, headerRowHeight }: CustomGridColu
         <EuiText size="s" css={spacingCSS}>
           <p>{contentHeaderTooltipParagraph2}</p>
         </EuiText>
-        <EuiFlexGroup
-          responsive={false}
-          alignItems="center"
-          justifyContent="flexStart"
-          gutterSize="xs"
-        >
-          <EuiFlexItem grow={false}>
-            <EuiToken iconType="tokenKeyword" size="s" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <strong>error.message</strong>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiFlexGroup
-          responsive={false}
-          alignItems="center"
-          justifyContent="flexStart"
-          gutterSize="xs"
-        >
-          <EuiFlexItem grow={false}>
-            <EuiToken iconType="tokenEvent" size="s" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <strong>event.original</strong>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <FieldWithToken field={constants.ERROR_MESSAGE_FIELD} />
+        <FieldWithToken field={constants.EVENT_ORIGINAL_FIELD} iconType="tokenEvent" />
       </div>
     </HoverPopover>
   );

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import createContainer from 'constate';
-import type { LogExplorerFlyoutContentProps } from '../components/flyout_detail/types';
+import type { LogExplorerFlyoutContentProps } from '../customizations/types';
 
 interface UseFlyoutActionsDeps {
   value: LogExplorerFlyoutContentProps['actions'];
