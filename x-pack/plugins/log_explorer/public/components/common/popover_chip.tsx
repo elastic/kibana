@@ -11,7 +11,6 @@ import {
   type EuiBadgeProps,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiPopover,
   useEuiFontSize,
   EuiPopoverFooter,
@@ -24,6 +23,7 @@ import { FilterInButton } from './filter_in_button';
 import { FilterOutButton } from './filter_out_button';
 import { CopyButton } from './copy_button';
 import { dynamic } from '../../utils/dynamic';
+
 const DataTablePopoverCellValue = dynamic(
   () => import('@kbn/unified-data-table/src/components/data_table_cell_value')
 );
@@ -38,7 +38,7 @@ interface ChipWithPopoverProps {
    */
   text: string;
   dataTestSubj?: string;
-  leftSideIcon?: EuiBadgeProps['iconType'];
+  leftSideIcon?: React.ReactNode;
   rightSideIcon?: EuiBadgeProps['iconType'];
   borderColor?: string | null;
   style?: React.CSSProperties;
@@ -78,15 +78,12 @@ export function ChipWithPopover({
         font-size: ${xsFontSize};
         display: flex;
         justify-content: center;
+        margin-top: -3px;
       `}
       style={style}
     >
       <EuiFlexGroup gutterSize="xs">
-        {leftSideIcon && (
-          <EuiFlexItem>
-            <EuiIcon type={leftSideIcon} />
-          </EuiFlexItem>
-        )}
+        {leftSideIcon && <EuiFlexItem>{leftSideIcon}</EuiFlexItem>}
         <EuiFlexItem>{text}</EuiFlexItem>
       </EuiFlexGroup>
     </EuiBadge>
