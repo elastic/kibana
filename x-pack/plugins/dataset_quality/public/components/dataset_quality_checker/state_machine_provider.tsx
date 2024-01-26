@@ -12,15 +12,17 @@ import {
   createDataStreamQualityChecksStateMachine,
   DataStreamQualityChecksStateMachineArguments,
 } from './state_machine';
-import { logXStateTransition } from '../../utils/log_xstate_transition';
+import { useDeepXStateLogger } from '../../utils/log_xstate_transition';
 
 export const useDataStreamQualityChecksState = (
   initialArguments: DataStreamQualityChecksStateMachineArguments
 ) => {
+  const deepLogger = useDeepXStateLogger();
+
   const ingestPathwaysStateService = useInterpret(
     () => createDataStreamQualityChecksStateMachine(initialArguments),
     { devTools: getDevToolsOptions() },
-    logXStateTransition
+    deepLogger
   );
 
   return ingestPathwaysStateService;

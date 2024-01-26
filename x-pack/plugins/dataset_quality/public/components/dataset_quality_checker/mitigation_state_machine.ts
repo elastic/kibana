@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { concatMap, from } from 'rxjs';
 import { createMachine, assign, ActionTypes } from 'xstate';
 import { CheckTimeRange, MitigationForCause, QualityProblemParams } from '../../../common';
 import { IDataStreamQualityClient } from '../../services/data_stream_quality';
@@ -100,6 +99,11 @@ export const createPureDataStreamQualityMitigationStateMachine = (
             mitigations: event.data,
           };
         }),
+      },
+      guards: {
+        hasMitigations: (context, event) =>
+          event.type === (`${ActionTypes.DoneInvoke}.getMitigations` as const) &&
+          event.data.length > 0,
       },
     }
   );

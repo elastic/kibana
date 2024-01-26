@@ -184,9 +184,9 @@ const CheckListFinishedItem = ({
       <EuiPanel color="danger">
         <DetailsPreJson title={`Check: ${check.check_id}`} value={check} />
         <DetailsPreJson title={`Result: ${execution.result.type}`} value={execution} />
-        {execution.result.reasons.map((problem) => {
+        {execution.result.reasons.map((problem, problemIndex) => {
           return (
-            <EuiPanel color="danger" hasShadow={false}>
+            <EuiPanel key={problemIndex} color="danger" hasShadow={false}>
               <EuiFlexGroup direction="row">
                 <EuiFlexItem grow>
                   {problem.type === 'ignored-field'
