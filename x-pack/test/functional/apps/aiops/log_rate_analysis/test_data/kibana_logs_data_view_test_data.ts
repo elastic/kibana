@@ -14,7 +14,7 @@ export const kibanaLogsDataViewTestData: TestData = {
   analysisType: LOG_RATE_ANALYSIS_TYPE.SPIKE,
   dataGenerator: 'kibana_sample_data_logs',
   isSavedSearch: false,
-  sourceIndexOrSavedSearch: 'kibana_sample_data_logs',
+  sourceIndexOrSavedSearch: 'Kibana Sample Data Logs',
   brushIntervalFactor: 1,
   chartClickCoordinates: [235, 0],
   fieldSelectorSearch: 'referer',

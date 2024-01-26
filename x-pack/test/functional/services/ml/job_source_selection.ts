@@ -23,10 +23,11 @@ export function MachineLearningJobSourceSelectionProvider({ getService }: FtrPro
       await this.assertSourceListContainsEntry(sourceName);
     },
 
-    async selectSource(sourceName: string, nextPageSubj: string) {
+    async selectSource(sourceName: string, nextPageSubj: string, dataTestSubjPostFix?: string) {
       await this.filterSourceSelection(sourceName);
       await retry.tryForTime(30 * 1000, async () => {
-        await testSubjects.clickWhenNotDisabledWithoutRetry(`savedObjectTitle${sourceName}`);
+        const dataTestSubj = `savedObjectTitle${dataTestSubjPostFix ?? sourceName}`;
+        await testSubjects.clickWhenNotDisabledWithoutRetry(dataTestSubj);
         await testSubjects.existOrFail(nextPageSubj, { timeout: 10 * 1000 });
       });
     },
@@ -47,8 +48,8 @@ export function MachineLearningJobSourceSelectionProvider({ getService }: FtrPro
       await this.selectSource(sourceName, 'dataVisualizerIndexPage');
     },
 
-    async selectSourceForLogRateAnalysis(sourceName: string) {
-      await this.selectSource(sourceName, 'aiopsLogRateAnalysisPage');
+    async selectSourceForLogRateAnalysis(sourceName: string, dataTestSubjPostFix?: string) {
+      await this.selectSource(sourceName, 'aiopsLogRateAnalysisPage', dataTestSubjPostFix);
     },
 
     async selectSourceForChangePointDetection(sourceName: string) {

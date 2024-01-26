@@ -32,7 +32,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await aiops.logRateAnalysisPage.navigateToDataViewSelection();
 
       await ml.testExecution.logTestStep(`${testData.suiteTitle} loads the log rate analysis page`);
-      await ml.jobSourceSelection.selectSourceForLogRateAnalysis(testData.sourceIndexOrSavedSearch);
+      await ml.jobSourceSelection.selectSourceForLogRateAnalysis(
+        testData.sourceIndexOrSavedSearch,
+        testData.sourceIndexOrSavedSearch === 'Kibana Sample Data Logs'
+          ? testData.dataGenerator
+          : undefined
+      );
     });
 
     it(`${testData.suiteTitle} displays index details`, async () => {
@@ -274,11 +279,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         before(async () => {
           await aiops.logRateAnalysisDataGenerator.generateData(testData.dataGenerator);
 
-          await ml.testResources.createDataViewIfNeeded(
-            testData.sourceIndexOrSavedSearch,
-            '@timestamp'
-          );
-
           await ml.testResources.setKibanaTimeZoneToUTC();
 
           if (testData.dataGenerator === 'kibana_sample_data_logs') {
@@ -294,6 +294,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await PageObjects.header.waitUntilLoadingHasFinished();
           } else {
             await ml.securityUI.loginAsMlPowerUser();
+            await ml.testResources.createDataViewIfNeeded(
+              testData.sourceIndexOrSavedSearch,
+              '@timestamp'
+            );
           }
         });
 
