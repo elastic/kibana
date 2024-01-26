@@ -488,6 +488,10 @@ describe('validation logic', () => {
     testErrorsAndWarnings('show', ['SyntaxError: expected {SHOW} but found "<EOF>"']);
     testErrorsAndWarnings('show functions', []);
     testErrorsAndWarnings('show info', []);
+    testErrorsAndWarnings('show functions()', [
+      "SyntaxError: token recognition error at: '('",
+      "SyntaxError: token recognition error at: ')'",
+    ]);
     testErrorsAndWarnings('show functions blah', [
       "SyntaxError: token recognition error at: 'b'",
       "SyntaxError: token recognition error at: 'l'",
