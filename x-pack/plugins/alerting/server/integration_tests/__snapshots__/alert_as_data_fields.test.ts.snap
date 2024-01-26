@@ -9043,7 +9043,7 @@ exports[`Alert as data fields checks detect AAD fields changes for: xpack.ml.ano
 Object {
   "fieldMap": Object {
     "kibana.alert.anomaly_score": Object {
-      "array": false,
+      "array": true,
       "required": false,
       "type": "double",
     },
