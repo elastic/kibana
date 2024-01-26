@@ -11,15 +11,15 @@ import { EuiBadge } from '@elastic/eui';
 import classnames from 'classnames';
 import { PRODUCT_TIER_ESSENTIAL, PRODUCT_TIER_COMPLETE } from './translations';
 import { ProductTier } from '../configs';
-import { useProductTierBadgeStyles } from '../styles/product_tier_badge.styles';
+import { useCurrentPlanBadgeStyles } from '../styles/current_plan_badge.styles';
 
 const PRODUCT_TIER_TRANSLATES: { [key: string]: string } = {
   [ProductTier.essentials]: PRODUCT_TIER_ESSENTIAL,
   [ProductTier.complete]: PRODUCT_TIER_COMPLETE,
 };
 
-const ProductTierBadgeComponent = ({ currentPlan }: { currentPlan: string | undefined }) => {
-  const { wrapperStyles, textStyles } = useProductTierBadgeStyles();
+const CurrentPlanBadgeComponent = ({ currentPlan }: { currentPlan: string | undefined }) => {
+  const { wrapperStyles, textStyles } = useCurrentPlanBadgeStyles();
   const wrapperClassNames = classnames('eui-alignMiddle', wrapperStyles);
   return currentPlan ? (
     <EuiBadge color="warning" className={wrapperClassNames} data-test-subj="product-tier-badge">
@@ -28,4 +28,4 @@ const ProductTierBadgeComponent = ({ currentPlan }: { currentPlan: string | unde
   ) : null;
 };
 
-export const ProductTierBadge = React.memo(ProductTierBadgeComponent);
+export const CurrentPlanBadge = React.memo(CurrentPlanBadgeComponent);

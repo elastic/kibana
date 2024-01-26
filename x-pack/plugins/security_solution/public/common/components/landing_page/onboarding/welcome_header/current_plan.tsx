@@ -13,7 +13,7 @@ import { useLicense } from '../../../../hooks/use_license';
 import { useAppUrl } from '../../../../lib/kibana';
 import { useCurrentPlanStyles } from '../styles/current_plan.styles';
 import { CURRENT_PLAN_LABEL, CURRENT_TIER_LABEL } from '../translations';
-import { ProductTierBadge } from './product_tier_badge';
+import { CurrentPlanBadge } from './current_plan_badge';
 
 const CurrentPlanComponent = ({
   productTier,
@@ -57,7 +57,7 @@ const CurrentPlanComponent = ({
           <span data-test-subj="currentPlanLabel" className={currentPlanTextStyles}>
             {label}
           </span>
-          <ProductTierBadge currentPlan={currentPlan} />
+          <CurrentPlanBadge currentPlan={currentPlan} />
 
           {link && (
             <EuiButtonIcon

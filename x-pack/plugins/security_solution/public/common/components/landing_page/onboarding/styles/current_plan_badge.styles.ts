@@ -8,7 +8,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { useMemo } from 'react';
 
-export const useProductTierBadgeStyles = () => {
+export const useCurrentPlanBadgeStyles = () => {
   const { euiTheme } = useEuiTheme();
   const styles = useMemo(() => {
     return {
