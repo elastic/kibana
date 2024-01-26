@@ -6,7 +6,6 @@
  */
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { differenceBy, isEqual } from 'lodash';
-import type { EuiBasicTable } from '@elastic/eui';
 import { EuiSpacer, EuiPortal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -72,7 +71,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [search, setSearch] = useState<string>(defaultKuery);
   const [selectionMode, setSelectionMode] = useState<SelectionMode>('manual');
   const [selectedAgents, setSelectedAgents] = useState<Agent[]>([]);
-  const tableRef = useRef<EuiBasicTable<Agent>>(null);
   const { pagination, pageSizeOptions, setPagination } = usePagination();
   const [sortField, setSortField] = useState<keyof Agent>('enrolled_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
@@ -413,21 +411,19 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   );
 
   const onSelectionChange = (newAgents: Agent[]) => {
-    setSelectedAgents(newAgents);
     if (selectionMode === 'query' && newAgents.length < selectedAgents.length) {
       // differentiating between selection changed by agents dropping from current page or user action
       const areSelectedAgentsStillVisible =
         selectedAgents.length > 0 &&
         differenceBy(selectedAgents, agentsOnCurrentPage, 'id').length === 0;
-      if (areSelectedAgentsStillVisible) {
-        setSelectionMode('manual');
-      } else {
+      if (!areSelectedAgentsStillVisible) {
         // force selecting all agents on current page if staying in query mode
-        if (tableRef?.current) {
-          tableRef.current.setSelection(agentsOnCurrentPage);
-        }
+        return setSelectedAgents(agentsOnCurrentPage);
+      } else {
+        setSelectionMode('manual');
       }
     }
+    setSelectedAgents(newAgents);
   };
 
   const agentToUnenrollHasFleetServer = useMemo(() => {
@@ -634,10 +630,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         setSelectionMode={setSelectionMode}
         selectedAgents={selectedAgents}
         setSelectedAgents={(newAgents: Agent[]) => {
-          if (tableRef?.current) {
-            tableRef.current.setSelection(newAgents);
-            setSelectionMode('manual');
-          }
+          setSelectedAgents(newAgents);
+          setSelectionMode('manual');
         }}
         clearFilters={clearFilters}
         isUsingFilter={isUsingFilter}
@@ -653,7 +647,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         agentPoliciesIndexedById={agentPoliciesIndexedById}
         renderActions={renderActions}
         onSelectionChange={onSelectionChange}
-        tableRef={tableRef}
+        selected={selectedAgents}
         showUpgradeable={showUpgradeable}
         onTableChange={onTableChange}
         pagination={pagination}
