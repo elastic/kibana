@@ -200,6 +200,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await actionsMenuItemElem.at(1)?.click();
 
+        await testSubjects.click('confirmModalConfirmButton');
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
         await retry.try(async () => {
           expect(await actionsDropdown.getVisibleText()).to.eql('Disabled');
         });
