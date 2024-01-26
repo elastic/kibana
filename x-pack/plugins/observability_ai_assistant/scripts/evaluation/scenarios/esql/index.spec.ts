@@ -127,7 +127,7 @@ describe('ES|QL query generation', () => {
           question:
             'From employees, I want to see the 5 earliest employees (hire_date), I want to display only the month and the year that they were hired in and their employee number (emp_no). Format the date as e.g. "September 2019".',
           expected: `FROM employees
-          | EVAL hire_date_formatted = DATE_FORMAT(hire_date, ""MMMM yyyy"")
+          | EVAL hire_date_formatted = DATE_FORMAT("MMMM YYYY", hire_date)
           | SORT hire_date
           | KEEP emp_no, hire_date_formatted
           | LIMIT 5`,
@@ -148,10 +148,9 @@ describe('ES|QL query generation', () => {
       it('employee hire date', async () => {
         await evaluateEsqlQuery({
           question:
-            'From employees, show 10 employees whose hire_date year was 2024',
+            'From employees, extract the year from hire_date and show 10 employees hired in 2024',
           expected: `FROM employees
-          | EVAL year_of_hire = DATE_EXTRACT("year", hire_date)
-          | WHERE year_of_hire == 2024
+          | WHERE DATE_EXTRACT("year", hire_date) == 2024
           | LIMIT 10`,
           execute: true
         });
@@ -180,10 +179,11 @@ describe('ES|QL query generation', () => {
 
     it('metricbeat avg cpu', async () => {
       await evaluateEsqlQuery({
-        question: `From metricbeat*, using ES|QL, show me a query to see the percentage of CPU time normalized by the number of CPU cores, broken down by hostname. the fields are system.cpu.user.pct, system.cpu.system.pct, and system.cpu.cores`,
+        question: `From metricbeat*, using ES|QL, show me a query to see the percentage of CPU time (system.cpu.system.pct) normalized by the number of CPU cores (system.cpu.cores), broken down by hostname`,
         expected: `FROM metricbeat*
-        | EVAL cpu_pct_normalized = (system.cpu.user.pct + system.cpu.system.pct) / system.cpu.cores
-        | STATS AVG(cpu_pct_normalized) BY host.name`,
+      | EVAL system_pct_normalized = TO_DOUBLE(system.cpu.system.pct) / system.cpu.cores
+      | STATS avg_system_pct_normalized = AVG(system_pct_normalized) BY host.name
+      | SORT host.name ASC`,
         execute: false
       });
     });
@@ -192,10 +192,10 @@ describe('ES|QL query generation', () => {
       await evaluateEsqlQuery({
         question:
           'Show me an ESQL query to extract the query duration from postgres log messages in postgres-logs*, with this format "2021-01-01 00:00:00 UTC [12345]: [1-1] user=postgres,db=mydb,app=[unknown],client=127.0.0.1 LOG:  duration: 123.456 ms  statement: SELECT * FROM my_table", using ECS fields, and calculate the avg',
-        expected: `FROM postgres-logs
-        | DISSECT message "%{timestamp} UTC [%{pid}]: [%{session_id}] user=%{user},db=%{db},app=%{app},client=%{client} LOG:  duration: %{query_duration} ms  statement: %{query}"
-        | EVAL query_duration_num = TO_DOUBLE(query_duration)
-        | STATS avg_duration = AVG(query_duration_num)`,
+        expected: `FROM postgres-logs*
+      | DISSECT message "%{}:  duration: %{query_duration} ms  %{}"
+      | EVAL duration_double = TO_DOUBLE(duration)
+      | STATS AVG(duration_double)`,
         execute: false
       });
     });
@@ -258,7 +258,10 @@ describe('ES|QL query generation', () => {
       | STATS total_requests = COUNT(*), avg_duration = AVG(transaction.duration.us), total_failures = SUM(is_failure), total_success = SUM(is_success) BY service.name
       | EVAL success_rate = total_success / (total_failures + total_success)
       | KEEP service.name, avg_duration, success_rate, total_requests`,
-        execute: true
+        execute: true,
+        criteria: [
+          'The query provided by the Assistant does not include operations (/, +, -) when declaring aggregations using STATS',
+        ],
       });
     });
 
@@ -273,8 +276,12 @@ describe('ES|QL query generation', () => {
           avg_latency = AVG(total_response_time),
           failure_rate = AVG(total_failures)
           BY span.destination.service.resource`,
-        execute: false
+        execute: false,
+        criteria: [
+          'The query provided by the Assistant does not include operations (/, +, -) when declaring aggregations using STATS',
+        ],
       });
+
     });
 
     it('trace duration', async () => {
@@ -290,7 +297,7 @@ describe('ES|QL query generation', () => {
 
     it('error logs rate', async () => {
       await evaluateEsqlQuery({
-        question: `i have logs in logs-apm*. Using ESQL, show me the error rate as a percetage of the error logs vs the total logs per day for the last 7 days. Errors are the logs identified as processor.event containing the value error. `,
+        question: `i have logs in logs-apm*. Using ESQL, show me the error rate as a percetage of the error logs (identified as processor.event containing the value error) vs the total logs per day for the last 7 days `,
         expected: `FROM logs-apm*
         | WHERE @timestamp >= NOW() - 7 days
         | EVAL day = DATE_TRUNC(1 day, @timestamp)
@@ -298,14 +305,17 @@ describe('ES|QL query generation', () => {
         | STATS total_logs = COUNT(*), total_errors = SUM(is_error) BY day
         | EVAL error_rate = total_errors / total_logs * 100
         | SORT day ASC`,
-        execute: true
+        execute: true,
+        criteria: [
+          'The query provided by the Assistant does not include operations (/, +, -) when declaring aggregations using STATS',
+        ],
       });
     });
 
     it('error message and date', async () => {
       await evaluateEsqlQuery({
         question:
-          'From logs-apm*, I want to see the 5 latest messages, I want to display only the date that they were indexed, processor.event and message. Format the date as e.g. "10:30 AM, 1 of September 2019".',
+          'From logs-apm*, I want to see the 5 latest messages using ESQL, I want to display only the date that they were indexed, processor.event and message. Format the date as e.g. "10:30 AM, 1 of September 2019".',
         expected: `FROM logs-apm*
         | SORT @timestamp DESC
         | EVAL formatted_date = DATE_FORMAT("hh:mm a, d 'of' MMMM yyyy", @timestamp)
