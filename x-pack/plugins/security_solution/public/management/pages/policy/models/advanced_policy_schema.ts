@@ -1540,7 +1540,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.alerts.sample_collection',
       {
-        defaultMessage: "A value of 'false' disables malicious sample collection for Mac alerts. Default: true.",
+        defaultMessage:
+          "A value of 'false' disables malicious sample collection for Mac alerts. Default: true.",
       }
     ),
   },
@@ -1550,7 +1551,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.alerts.sample_collection',
       {
-        defaultMessage: "A value of 'false' disables malicious sample collection for Linux alerts. Default: true.",
+        defaultMessage:
+          "A value of 'false' disables malicious sample collection for Linux alerts. Default: true.",
       }
     ),
   },
