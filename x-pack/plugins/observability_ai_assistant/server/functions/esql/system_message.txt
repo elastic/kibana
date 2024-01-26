@@ -54,14 +54,17 @@ pattern.
 Aggregation functions are not supported for EVAL.
 - GROK: extracts structured data out of a string, using a grok pattern
 - KEEP: keeps one or more columns, drop the ones that are not kept
+  only the colums included in KEEP can be used after a KEEP command
 - LIMIT: returns the first n number of rows. The maximum value for this
 is 10000.
 - MV_EXPAND: expands multi-value columns into a single row per value
 - RENAME: renames a column
-- SORT: sorts the row in a table
+- SORT: sorts the row in a table, does not support direct functions like COUNT()
+  only supports column names or aliases
 - STATS ... BY: groups rows according to a common value and calculates
-one or more aggregated values over the grouped rows. This commands only
-  supports aggregation functions, and no other functions or operators.
+  one or more aggregated values over the grouped rows. This commands only
+  supports aggregation functions declared below, and no other functions or operators.
+  This command also does not support numerical operations (+, -, /), that should be done with EVAL
 - WHERE: produces a table that contains all the rows from the input table
   for which the provided condition returns true. WHERE supports the same
   functions as EVAL.
