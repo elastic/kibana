@@ -5,6 +5,23 @@
     "functions": [
       {
         "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
+        "id": "def-public.DataViewIllustration",
+        "type": "Function",
+        "tags": [],
+        "label": "DataViewIllustration",
+        "description": [],
+        "signature": [
+          "() => JSX.Element"
+        ],
+        "path": "packages/shared-ux/prompt/no_data_views/impl/src/data_view_illustration.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
         "id": "def-public.NoDataViewsPrompt",
         "type": "Function",
         "tags": [],

@@ -13,7 +13,7 @@ import { interpret } from 'xstate';
 import { DatasetsService } from '../services/datasets';
 import { createLogExplorerControllerStateMachine } from '../state_machines/log_explorer_controller';
 import { LogExplorerStartDeps } from '../types';
-import { LogExplorerCustomizations } from './controller_customizations';
+import { LogExplorerCustomizations } from '../customizations/types';
 import { createDataServiceProxy } from './custom_data_service';
 import { createUiSettingsServiceProxy } from './custom_ui_settings_service';
 import {

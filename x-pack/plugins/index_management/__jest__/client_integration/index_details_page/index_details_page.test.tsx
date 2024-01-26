@@ -30,8 +30,8 @@ import {
   testIndexStats,
 } from './mocks';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/code-editor', () => {
+  const original = jest.requireActual('@kbn/code-editor');
   return {
     ...original,
     // Mocking CodeEditor, which uses React Monaco under the hood
@@ -225,6 +225,13 @@ describe('<IndexDetailsPage />', () => {
     const header = testBed.actions.getHeader();
     // testIndexName is configured in initialEntries of the memory router
     expect(header).toEqual(testIndexName);
+  });
+
+  it('changes the tab when its header is clicked', async () => {
+    await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+    expect(testBed.exists('indexDetailsMappingsCodeBlock')).toBe(true);
+    await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Settings);
+    expect(testBed.exists('indexDetailsSettingsCodeBlock')).toBe(true);
   });
 
   describe('Overview tab', () => {
@@ -650,11 +657,31 @@ describe('<IndexDetailsPage />', () => {
     });
   });
 
-  it('navigates back to indices', async () => {
-    jest.spyOn(testBed.routerMock.history, 'push');
-    await testBed.actions.clickBackToIndicesButton();
-    expect(testBed.routerMock.history.push).toHaveBeenCalledTimes(1);
-    expect(testBed.routerMock.history.push).toHaveBeenCalledWith('/indices');
+  describe('navigates back to the indices list', () => {
+    it('without indices list params', async () => {
+      jest.spyOn(testBed.routerMock.history, 'push');
+      await testBed.actions.clickBackToIndicesButton();
+      expect(testBed.routerMock.history.push).toHaveBeenCalledTimes(1);
+      expect(testBed.routerMock.history.push).toHaveBeenCalledWith('/indices');
+    });
+    it('with indices list params', async () => {
+      const filter = 'isFollower:true';
+      await act(async () => {
+        testBed = await setup({
+          httpSetup,
+          initialEntry: `/indices/index_details?indexName=${testIndexName}&filter=${encodeURIComponent(
+            filter
+          )}&includeHiddenIndices=true`,
+        });
+      });
+      testBed.component.update();
+      jest.spyOn(testBed.routerMock.history, 'push');
+      await testBed.actions.clickBackToIndicesButton();
+      expect(testBed.routerMock.history.push).toHaveBeenCalledTimes(1);
+      expect(testBed.routerMock.history.push).toHaveBeenCalledWith(
+        `/indices?filter=${encodeURIComponent(filter)}&includeHiddenIndices=true`
+      );
+    });
   });
 
   it('renders a link to discover', () => {

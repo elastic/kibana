@@ -20,6 +20,7 @@
       "dataViews",
       "dataViewEditor",
       "embeddable",
+      "fieldFormats",
       "uiActions",
       "presentationUtil",
       "exploratoryView",
@@ -57,7 +58,8 @@
       "unifiedSearch",
       "stackAlerts",
       "spaces",
-      "embeddable"
+      "embeddable",
+      "ingestPipelines"
     ],
     "extraPublicDirs": [
       "common"

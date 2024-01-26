@@ -36,18 +36,28 @@
     border-top: $euiBorderThin;
   }
 
+  .euiDataGridHeaderCell {
+    align-items: start;
+  }
+
   .euiDataGrid--headerUnderline .euiDataGridHeaderCell {
     border-bottom: $euiBorderThin;
   }
 
+  .euiDataGridRowCell--controlColumn:hover::after,
+  .euiDataGridRowCell--controlColumn:focus::after,
+  .euiDataGridRowCell--controlColumn.euiDataGridRowCell--open::after {
+    border-color: transparent;
+  }
+
+  .euiDataGridRowCell--controlColumn .euiDataGridRowCell__content,
   .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='openDetails'],
   .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='select'] {
     padding-left: 0;
     padding-right: 0;
   }
 
-  .euiDataGrid--rowHoverHighlight .euiDataGridRow:hover,
-  .euiDataGrid--rowHoverHighlight .euiDataGridRow:hover .euiDataGridRowCell__actions--overlay {
+  .euiDataGrid--rowHoverHighlight .euiDataGridRow:hover {
     background-color: tintOrShade($euiColorLightShade, 50%, 0);
   }
 
@@ -55,8 +65,8 @@
     background-color: transparent; // otherwise the grid scrollbar border visually conflicts with the grid toolbar controls
   }
 
-  .euiDataGridRowCell__autoHeight,
-  .euiDataGridRowCell__lineCountHeight {
+  .euiDataGridRowCell__content--autoHeight,
+  .euiDataGridRowCell__content--lineCountHeight {
     white-space: pre-wrap;
   }
 }
@@ -67,22 +77,11 @@
   min-height: 0;
 }
 
-.unifiedDataTable__flyoutHeader {
-  white-space: nowrap;
-}
-
-.unifiedDataTable__flyoutDocumentNavigation {
-  justify-content: flex-end;
-}
-
 // We only truncate if the cell is not a control column.
 .euiDataGridHeader {
 
   .euiDataGridHeaderCell__content {
-    @include euiTextTruncate;
-    overflow: hidden;
     white-space: pre-wrap;
-    flex-grow: 1;
   }
 
   .euiDataGridHeaderCell__popover {
@@ -114,15 +113,15 @@
 
 .unifiedDataTable__rowControl {
   // fine-tuning the vertical alignment with the text for any row height setting
-  margin-top: -3px;
-  .euiDataGridRowCell__defaultHeight & { // "Single line" row height setting
+  margin-top: -$euiSizeXS;
+  .euiDataGridRowCell__content--defaultHeight & { // "Single line" row height setting
     margin-top: 0;
   }
 }
 
 .unifiedDataTable__descriptionList {
   // force the content truncation when "Single line" row height setting is active
-  .euiDataGridRowCell__defaultHeight & {
+  .euiDataGridRowCell__content--defaultHeight & {
     -webkit-line-clamp: 1;
     display: -webkit-box;
     -webkit-box-orient: vertical;

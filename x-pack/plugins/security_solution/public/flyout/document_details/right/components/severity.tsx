@@ -14,7 +14,7 @@ import { getSourcererScopeId } from '../../../../helpers';
 import { SecurityCellActions } from '../../../../common/components/cell_actions';
 import { SecurityCellActionsTrigger } from '../../../../actions/constants';
 import { useRightPanelContext } from '../context';
-import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
+import { SeverityBadge } from '../../../../common/components/severity_badge';
 
 const isSeverity = (x: unknown): x is Severity =>
   x === 'low' || x === 'medium' || x === 'high' || x === 'critical';

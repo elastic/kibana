@@ -114,87 +114,80 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
         className={classNames('fieldDataTopValuesContainer', 'dvTopValues__wrapper')}
       >
         {Array.isArray(topValues)
-          ? topValues.map((value) => (
-              <EuiFlexGroup gutterSize="xs" alignItems="center" key={value.key}>
-                <EuiFlexItem data-test-subj="dataVisualizerFieldDataTopValueBar">
-                  <EuiProgress
-                    value={value.percent}
-                    max={1}
-                    color={barColor}
-                    size="xs"
-                    label={kibanaFieldFormat(value.key, fieldFormat)}
-                    className={classNames('eui-textTruncate', 'topValuesValueLabelContainer')}
-                    valueText={`${value.doc_count}${
-                      totalDocuments !== undefined
-                        ? ` (${getPercentLabel(value.percent * 100)})`
-                        : ''
-                    }`}
-                  />
-                </EuiFlexItem>
-                {fieldName !== undefined && value.key !== undefined && onAddFilter !== undefined ? (
-                  <div
-                    css={css`
-                      width: 48px;
-                    `}
-                  >
-                    <EuiButtonIcon
-                      iconSize="s"
-                      iconType="plusInCircle"
-                      onClick={() =>
-                        onAddFilter(
-                          fieldName,
-                          typeof value.key === 'number' ? value.key.toString() : value.key,
-                          '+'
-                        )
-                      }
-                      aria-label={i18n.translate(
-                        'xpack.dataVisualizer.dataGrid.field.addFilterAriaLabel',
-                        {
-                          defaultMessage: 'Filter for {fieldName}: "{value}"',
-                          values: { fieldName, value: value.key },
-                        }
-                      )}
-                      data-test-subj={`dvFieldDataTopValuesAddFilterButton-${value.key}-${value.key}`}
-                      style={{
-                        minHeight: 'auto',
-                        minWidth: 'auto',
-                        paddingRight: 2,
-                        paddingLeft: 2,
-                        paddingTop: 0,
-                        paddingBottom: 0,
-                      }}
+          ? topValues.map((value) => {
+              const fieldValue = value.key_as_string ?? value.key.toString();
+              return (
+                <EuiFlexGroup gutterSize="xs" alignItems="center" key={fieldValue}>
+                  <EuiFlexItem data-test-subj="dataVisualizerFieldDataTopValueBar">
+                    <EuiProgress
+                      value={value.percent}
+                      max={1}
+                      color={barColor}
+                      size="xs"
+                      label={kibanaFieldFormat(value.key, fieldFormat)}
+                      className={classNames('eui-textTruncate', 'topValuesValueLabelContainer')}
+                      valueText={`${value.doc_count}${
+                        totalDocuments !== undefined
+                          ? ` (${getPercentLabel(value.percent * 100)})`
+                          : ''
+                      }`}
                     />
-                    <EuiButtonIcon
-                      iconSize="s"
-                      iconType="minusInCircle"
-                      onClick={() =>
-                        onAddFilter(
-                          fieldName,
-                          typeof value.key === 'number' ? value.key.toString() : value.key,
-                          '-'
-                        )
-                      }
-                      aria-label={i18n.translate(
-                        'xpack.dataVisualizer.dataGrid.field.removeFilterAriaLabel',
-                        {
-                          defaultMessage: 'Filter out {fieldName}: "{value}"',
-                          values: { fieldName, value: value.key },
-                        }
-                      )}
-                      data-test-subj={`dvFieldDataTopValuesExcludeFilterButton-${value.key}-${value.key}`}
-                      style={{
-                        minHeight: 'auto',
-                        minWidth: 'auto',
-                        paddingTop: 0,
-                        paddingBottom: 0,
-                        paddingRight: 2,
-                        paddingLeft: 2,
-                      }}
-                    />
-                  </div>
-                ) : null}
-              </EuiFlexGroup>
-            ))
+                  </EuiFlexItem>
+                  {fieldName !== undefined &&
+                  fieldValue !== undefined &&
+                  onAddFilter !== undefined ? (
+                    <div
+                      css={css`
+                        width: 48px;
+                      `}
+                    >
+                      <EuiButtonIcon
+                        iconSize="s"
+                        iconType="plusInCircle"
+                        onClick={() => onAddFilter(fieldName, fieldValue, '+')}
+                        aria-label={i18n.translate(
+                          'xpack.dataVisualizer.dataGrid.field.addFilterAriaLabel',
+                          {
+                            defaultMessage: 'Filter for {fieldName}: "{value}"',
+                            values: { fieldName, value: fieldValue },
+                          }
+                        )}
+                        data-test-subj={`dvFieldDataTopValuesAddFilterButton-${fieldName}-${fieldValue}`}
+                        style={{
+                          minHeight: 'auto',
+                          minWidth: 'auto',
+                          paddingRight: 2,
+                          paddingLeft: 2,
+                          paddingTop: 0,
+                          paddingBottom: 0,
+                        }}
+                      />
+                      <EuiButtonIcon
+                        iconSize="s"
+                        iconType="minusInCircle"
+                        onClick={() => onAddFilter(fieldName, fieldValue, '-')}
+                        aria-label={i18n.translate(
+                          'xpack.dataVisualizer.dataGrid.field.removeFilterAriaLabel',
+                          {
+                            defaultMessage: 'Filter out {fieldName}: "{value}"',
+                            values: { fieldName, value: fieldValue },
+                          }
+                        )}
+                        data-test-subj={`dvFieldDataTopValuesExcludeFilterButton-${fieldName}-${fieldValue}`}
+                        style={{
+                          minHeight: 'auto',
+                          minWidth: 'auto',
+                          paddingTop: 0,
+                          paddingBottom: 0,
+                          paddingRight: 2,
+                          paddingLeft: 2,
+                        }}
+                      />
+                    </div>
+                  ) : null}
+                </EuiFlexGroup>
+              );
+            })
           : null}
         {topValuesOtherCount > 0 ? (
           <EuiFlexGroup gutterSize="xs" alignItems="center" key="other">

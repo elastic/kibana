@@ -22,7 +22,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
-import { type DataViewField } from '@kbn/data-views-plugin/public';
+import { DataViewField, type FieldSpec } from '@kbn/data-views-plugin/common';
 import { getDataViewFieldSubtypeMulti } from '@kbn/es-query/src/utils';
 import { FIELDS_LIMIT_SETTING, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
 import { FieldList } from '../../components/field_list';
@@ -191,25 +191,6 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
     onSelectedFieldFilter,
   ]);
 
-  useEffect(() => {
-    if (
-      searchMode !== 'documents' ||
-      !useNewFieldsApi ||
-      stateService.creationOptions.disableMultiFieldsGroupingByParent
-    ) {
-      setMultiFieldsMap(undefined); // we don't have to calculate multifields in this case
-    } else {
-      setMultiFieldsMap(calculateMultiFields(allFields, selectedFieldsState.selectedFieldsMap));
-    }
-  }, [
-    stateService.creationOptions.disableMultiFieldsGroupingByParent,
-    selectedFieldsState.selectedFieldsMap,
-    allFields,
-    useNewFieldsApi,
-    setMultiFieldsMap,
-    searchMode,
-  ]);
-
   const popularFieldsLimit = useMemo(
     () => core.uiSettings.get(FIELDS_LIMIT_SETTING),
     [core.uiSettings]
@@ -226,24 +207,47 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
       [searchMode, stateService.creationOptions.disableMultiFieldsGroupingByParent]
     );
 
-  const { fieldListFiltersProps, fieldListGroupedProps } = useGroupedFields<DataViewField>({
-    dataViewId: (searchMode === 'documents' && dataView?.id) || null, // passing `null` for text-based queries
-    allFields,
-    popularFieldsLimit:
-      searchMode !== 'documents' || stateService.creationOptions.disablePopularFields
-        ? 0
-        : popularFieldsLimit,
-    isAffectedByGlobalFilter,
-    services: {
-      dataViews,
-      core,
-    },
-    sortedSelectedFields: onSelectedFieldFilter ? undefined : selectedFieldsState.selectedFields,
-    onSelectedFieldFilter,
-    onSupportedFieldFilter:
-      stateService.creationOptions.onSupportedFieldFilter ?? onSupportedFieldFilter,
-    onOverrideFieldGroupDetails: stateService.creationOptions.onOverrideFieldGroupDetails,
-  });
+  const { fieldListFiltersProps, fieldListGroupedProps, allFieldsModified } =
+    useGroupedFields<DataViewField>({
+      dataViewId: (searchMode === 'documents' && dataView?.id) || null, // passing `null` for text-based queries
+      allFields,
+      popularFieldsLimit:
+        searchMode !== 'documents' || stateService.creationOptions.disablePopularFields
+          ? 0
+          : popularFieldsLimit,
+      isAffectedByGlobalFilter,
+      services: {
+        dataViews,
+        core,
+      },
+      sortedSelectedFields: onSelectedFieldFilter ? undefined : selectedFieldsState.selectedFields,
+      onSelectedFieldFilter,
+      onSupportedFieldFilter:
+        stateService.creationOptions.onSupportedFieldFilter ?? onSupportedFieldFilter,
+      onOverrideFieldGroupDetails: stateService.creationOptions.onOverrideFieldGroupDetails,
+      getNewFieldsBySpec,
+    });
+
+  useEffect(() => {
+    if (
+      searchMode !== 'documents' ||
+      !useNewFieldsApi ||
+      stateService.creationOptions.disableMultiFieldsGroupingByParent
+    ) {
+      setMultiFieldsMap(undefined); // we don't have to calculate multifields in this case
+    } else {
+      setMultiFieldsMap(
+        calculateMultiFields(allFieldsModified, selectedFieldsState.selectedFieldsMap)
+      );
+    }
+  }, [
+    stateService.creationOptions.disableMultiFieldsGroupingByParent,
+    selectedFieldsState.selectedFieldsMap,
+    allFieldsModified,
+    useNewFieldsApi,
+    setMultiFieldsMap,
+    searchMode,
+  ]);
 
   const renderFieldItem: FieldListGroupedProps<DataViewField>['renderFieldItem'] = useCallback(
     ({ field, groupName, groupIndex, itemIndex, fieldSearchHighlight }) => (
@@ -300,26 +304,14 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
     return null;
   }
 
-  const sidebarToggleButton =
-    typeof isSidebarCollapsed === 'boolean' && onToggleSidebar ? (
-      <SidebarToggleButton
-        buttonSize={compressed ? 's' : 'm'}
-        isSidebarCollapsed={isSidebarCollapsed}
-        onChange={onToggleSidebar}
-      />
-    ) : null;
-
   const pageSidebarProps: Partial<EuiPageSidebarProps> = {
     className: classnames('unifiedFieldListSidebar', {
       'unifiedFieldListSidebar--collapsed': isSidebarCollapsed,
       ['unifiedFieldListSidebar--fullWidth']: fullWidth,
     }),
-    'aria-label': i18n.translate(
-      'unifiedFieldList.fieldListSidebar.indexAndFieldsSectionAriaLabel',
-      {
-        defaultMessage: 'Index and fields',
-      }
-    ),
+    'aria-label': i18n.translate('unifiedFieldList.fieldListSidebar.fieldsSidebarAriaLabel', {
+      defaultMessage: 'Fields',
+    }),
     id:
       stateService.creationOptions.dataTestSubj?.fieldListSidebarDataTestSubj ??
       'unifiedFieldListSidebarId',
@@ -327,6 +319,16 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
       stateService.creationOptions.dataTestSubj?.fieldListSidebarDataTestSubj ??
       'unifiedFieldListSidebarId',
   };
+
+  const sidebarToggleButton =
+    typeof isSidebarCollapsed === 'boolean' && onToggleSidebar ? (
+      <SidebarToggleButton
+        buttonSize={compressed ? 's' : 'm'}
+        isSidebarCollapsed={isSidebarCollapsed}
+        panelId={pageSidebarProps.id}
+        onChange={onToggleSidebar}
+      />
+    ) : null;
 
   if (isSidebarCollapsed && sidebarToggleButton) {
     return (
@@ -455,4 +457,8 @@ function calculateMultiFields(
     map.set(parent, value);
   });
   return map;
+}
+
+function getNewFieldsBySpec(fieldSpecArr: FieldSpec[]): DataViewField[] {
+  return fieldSpecArr.map((fieldSpec) => new DataViewField(fieldSpec));
 }

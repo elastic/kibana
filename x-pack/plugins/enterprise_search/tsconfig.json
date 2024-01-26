@@ -66,5 +66,6 @@
     "@kbn/core-application-browser",
     "@kbn/core-capabilities-common",
     "@kbn/react-kibana-context-theme",
+    "@kbn/code-editor"
   ]
 }

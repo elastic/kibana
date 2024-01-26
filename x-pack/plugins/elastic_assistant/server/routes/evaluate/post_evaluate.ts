@@ -29,6 +29,7 @@ import {
 } from '../../lib/model_evaluator/output_index/utils';
 import { fetchLangSmithDataset, getConnectorName, getLangSmithTracer, getLlmType } from './utils';
 import { RequestBody } from '../../lib/langchain/types';
+import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
 
 /**
  * To support additional Agent Executors from the UI, add them to this map
@@ -53,11 +54,22 @@ export const postEvaluateRoute = (
         query: buildRouteValidation(PostEvaluatePathQuery),
       },
     },
-    // TODO: Limit route based on experimental feature
     async (context, request, response) => {
       const assistantContext = await context.elasticAssistant;
       const logger = assistantContext.logger;
       const telemetry = assistantContext.telemetry;
+
+      // Validate evaluation feature is enabled
+      const pluginName = getPluginNameFromRequest({
+        request,
+        defaultPluginName: DEFAULT_PLUGIN_NAME,
+        logger,
+      });
+      const registeredFeatures = assistantContext.getRegisteredFeatures(pluginName);
+      if (!registeredFeatures.assistantModelEvaluation) {
+        return response.notFound();
+      }
+
       try {
         const evaluationId = uuidv4();
         const {

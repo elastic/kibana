@@ -8,7 +8,7 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { CspRouter } from '../../../types';
 import { CSP_GET_BENCHMARK_RULES_STATE_ROUTE_PATH } from '../../../../common/constants';
-import { CspBenchmarkRulesStates } from '../../../../common/types/rules/v3';
+import { CspBenchmarkRulesStates } from '../../../../common/types/rules/v4';
 import { getCspBenchmarkRulesStatesHandler } from './v1';
 
 export const defineGetCspBenchmarkRulesStatesRoute = (router: CspRouter) =>

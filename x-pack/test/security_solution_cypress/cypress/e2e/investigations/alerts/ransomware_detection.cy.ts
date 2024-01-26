@@ -13,7 +13,7 @@ import { ALERTS_URL, TIMELINES_URL } from '../../../urls/navigation';
 import { ALERTS_HISTOGRAM_SERIES, ALERT_RULE_NAME, MESSAGE } from '../../../screens/alerts';
 import { TIMELINE_QUERY, TIMELINE_VIEW_IN_ANALYZER } from '../../../screens/timeline';
 import { selectAlertsHistogram } from '../../../tasks/alerts';
-import { createTimeline } from '../../../tasks/timelines';
+import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import { deleteTimelines } from '../../../tasks/api_calls/common';
 
 describe('Ransomware Detection Alerts', { tags: ['@ess', '@serverless'] }, () => {
@@ -53,10 +53,10 @@ describe('Ransomware Detection Alerts', { tags: ['@ess', '@serverless'] }, () =>
       deleteTimelines();
       login();
       visitWithTimeRange(TIMELINES_URL);
-      createTimeline();
     });
 
     it('should show ransomware entries in timelines table', () => {
+      openTimelineUsingToggle();
       cy.get(TIMELINE_QUERY).type('event.code: "ransomware"{enter}');
 
       // Wait for grid to load, it should have an analyzer icon

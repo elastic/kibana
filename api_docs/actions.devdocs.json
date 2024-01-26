@@ -5272,13 +5272,13 @@
       },
       {
         "parentPluginId": "actions",
-        "id": "def-common.GenerativeAIConnectorFeatureId",
+        "id": "def-common.GenerativeAIForObservabilityConnectorFeatureId",
         "type": "string",
         "tags": [],
-        "label": "GenerativeAIConnectorFeatureId",
+        "label": "GenerativeAIForObservabilityConnectorFeatureId",
         "description": [],
         "signature": [
-          "\"generativeAI\""
+          "\"generativeAIForObservability\""
         ],
         "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
         "deprecated": false,
@@ -5287,13 +5287,13 @@
       },
       {
         "parentPluginId": "actions",
-        "id": "def-common.GenerativeAIForObservabilityConnectorFeatureId",
+        "id": "def-common.GenerativeAIForSecurityConnectorFeatureId",
         "type": "string",
         "tags": [],
-        "label": "GenerativeAIForObservabilityConnectorFeatureId",
+        "label": "GenerativeAIForSecurityConnectorFeatureId",
         "description": [],
         "signature": [
-          "\"generativeAIForObservability\""
+          "\"generativeAIForSecurity\""
         ],
         "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
         "deprecated": false,
@@ -5627,53 +5627,6 @@
       },
       {
         "parentPluginId": "actions",
-        "id": "def-common.GenerativeAIFeature",
-        "type": "Object",
-        "tags": [],
-        "label": "GenerativeAIFeature",
-        "description": [],
-        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "actions",
-            "id": "def-common.GenerativeAIFeature.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-common.GenerativeAIFeature.name",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [],
-            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "actions",
-            "id": "def-common.GenerativeAIFeature.compatibility",
-            "type": "string",
-            "tags": [],
-            "label": "compatibility",
-            "description": [],
-            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "actions",
         "id": "def-common.GenerativeAIForObservabilityFeature",
         "type": "Object",
         "tags": [],
@@ -5708,6 +5661,53 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.GenerativeAIForObservabilityFeature.compatibility",
+            "type": "string",
+            "tags": [],
+            "label": "compatibility",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.GenerativeAIForSecurityFeature",
+        "type": "Object",
+        "tags": [],
+        "label": "GenerativeAIForSecurityFeature",
+        "description": [],
+        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.GenerativeAIForSecurityFeature.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.GenerativeAIForSecurityFeature.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.GenerativeAIForSecurityFeature.compatibility",
             "type": "string",
             "tags": [],
             "label": "compatibility",

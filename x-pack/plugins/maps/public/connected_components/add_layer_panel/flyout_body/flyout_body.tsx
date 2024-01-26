@@ -27,6 +27,7 @@ export const FlyoutBody = (props: Props) => {
     const renderWizardArgs = {
       previewLayers: props.previewLayers,
       mapColors: props.mapColors,
+      mostCommonDataViewId: props.mostCommonDataViewId,
       currentStepId: props.currentStepId,
       isOnFinalStep: props.isOnFinalStep,
       enableNextBtn: props.enableNextBtn,

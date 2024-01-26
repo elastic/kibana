@@ -18,7 +18,12 @@ const errorMessage = i18n.translate(
   }
 );
 
-export function registerConfigDataRoute({ router, config, log }: RouteDependencies) {
+export function registerConfigDataRoute({
+  router,
+  config,
+  log,
+  globalConfigService,
+}: RouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/config_data',
@@ -43,6 +48,19 @@ export function registerConfigDataRoute({ router, config, log }: RouteDependenci
           headers: { 'content-type': 'application/json' },
         });
       }
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/enterprise_search/es_config',
+      validate: false,
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      return response.ok({
+        body: { elasticsearch_host: globalConfigService.elasticsearchUrl },
+        headers: { 'content-type': 'application/json' },
+      });
     })
   );
 }

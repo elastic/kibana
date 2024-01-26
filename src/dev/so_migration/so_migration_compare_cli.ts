@@ -15,11 +15,11 @@ const scriptName = process.argv[1].replace(/^.*scripts\//, 'scripts/');
 run(
   async ({ log, flagsReader, procRunner }) => {
     const outputPath = flagsReader.string('outputPath');
-
     const from = flagsReader.requiredString('from');
     const to = flagsReader.requiredString('to');
+    const emitJson = flagsReader.boolean('json');
 
-    const result = await compareSnapshots({ from, to, outputPath, log });
+    const result = await compareSnapshots({ from, to, outputPath, log, emitJson });
 
     return {
       outputPath,
@@ -35,14 +35,17 @@ run(
       '--from <rev|filename|url>',
       '--to <rev|filename|url>',
       '[--outputPath <outputPath>]',
+      '[--json]',
     ].join(' '),
     description: `Compares two Saved Object snapshot files based on hashes, filenames or urls.`,
     flags: {
+      boolean: ['json'],
       string: ['outputPath', 'from', 'to'],
       help: `
         --from            The source snapshot to compare from. Can be a revision, filename or url.
         --to              The target snapshot to compare to. Can be a revision, filename or url.
-        --outputPath      The path to write the comparison report to. If omitted, raw JSON will be output to stdout.
+        --outputPath      The path to write the JSON comparison report to (assumes --json=true).
+        --json            If true, the JSON output will be emitted to stdout. Add --quiet for the JSON only.
       `,
     },
   }

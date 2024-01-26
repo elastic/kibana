@@ -20,11 +20,11 @@ import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 import { UpsellingProvider } from '../common/components/upselling_provider';
 import { ManageUserInfo } from '../detections/components/user_info';
-import { DEFAULT_DARK_MODE, APP_NAME } from '../../common/constants';
+import { APP_NAME } from '../../common/constants';
 import { ErrorToastDispatcher } from '../common/components/error_toast_dispatcher';
 import { MlCapabilitiesProvider } from '../common/components/ml/permissions/ml_capabilities_provider';
 import { GlobalToaster, ManageGlobalToaster } from '../common/components/toasters';
-import { KibanaContextProvider, useKibana, useUiSetting$ } from '../common/lib/kibana';
+import { KibanaContextProvider, useKibana, useDarkMode } from '../common/lib/kibana';
 import type { State } from '../common/store';
 import type { StartServices } from '../types';
 import { PageRouter } from './routes';
@@ -57,7 +57,7 @@ const StartAppComponent: FC<StartAppComponent> = ({
     upselling,
   } = services;
 
-  const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
+  const darkMode = useDarkMode();
 
   return (
     <KibanaErrorBoundaryProvider analytics={analytics}>

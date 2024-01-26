@@ -16,9 +16,9 @@ import {
   CoreTheme,
   DocLinksStart,
 } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { KibanaThemeProvider } from '../shared_imports';
 import {
   createStorage,
   createHistory,
@@ -73,7 +73,7 @@ export function renderApp({
 
   render(
     <I18nContext>
-      <KibanaThemeProvider theme$={theme$}>
+      <KibanaThemeProvider theme={{ theme$ }}>
         <ServicesContextProvider
           value={{
             docLinkVersion,
