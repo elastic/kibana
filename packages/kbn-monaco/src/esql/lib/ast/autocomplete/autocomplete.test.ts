@@ -317,6 +317,13 @@ describe('autocomplete', () => {
     testSuggestions('from index', suggestedIndexes, 6 /* index index in from */);
   });
 
+  describe('show', () => {
+    testSuggestions('show ', ['functions', 'info']);
+    for (const fn of ['functions', 'info']) {
+      testSuggestions(`show ${fn} `, ['|']);
+    }
+  });
+
   describe('where', () => {
     const allEvalFns = getFunctionSignaturesByReturnType('where', 'any', {
       evalMath: true,
