@@ -102,7 +102,7 @@ export const showChangeBenchmarkRuleStatesSuccessToast = (
               </EuiText>
               <FormattedMessage
                 id="xpack.csp.flyout.ruleEnabledToast"
-                defaultMessage={`Successfully enabled rule`}
+                defaultMessage="Successfully enabled rule"
               />
             </>
           ) : (
@@ -117,7 +117,7 @@ export const showChangeBenchmarkRuleStatesSuccessToast = (
               </EuiText>
               <FormattedMessage
                 id="xpack.csp.flyout.ruleDisabledToast"
-                defaultMessage={`Successfully disabled rule`}
+                defaultMessage="Successfully disabled rule"
               />
             </>
           )}
