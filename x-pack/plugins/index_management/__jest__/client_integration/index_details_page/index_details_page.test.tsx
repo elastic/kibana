@@ -507,6 +507,21 @@ describe('<IndexDetailsPage />', () => {
         await testBed.actions.mappings.clickErrorReloadButton();
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
       });
+
+      it('handles errors from json.stringify function', async () => {
+        const circularReference: any = { otherData: 123 };
+        circularReference.myself = circularReference;
+        httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, {
+          mappings: circularReference,
+        });
+        await act(async () => {
+          testBed = await setup({ httpSetup });
+        });
+
+        testBed.component.update();
+        await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+        expect(testBed.actions.mappings.isErrorDisplayed()).toBe(true);
+      });
     });
 
     it('renders the content set via the extensions service', async () => {
