@@ -396,9 +396,9 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       }
       const pageState = await generateRedirectUrlPageState(true, 'time');
 
-      const { indexPatternId, wp, query, ...globalState } = pageState;
+      const { indexPatternId, wp, query, filters, ...globalState } = pageState;
 
-      const url = await mlLocator.getUrl(
+      const url = await mlLocator.getRedirectUrl(
         {
           page: ML_PAGES.AIOPS_LOG_RATE_ANALYSIS,
           pageState: {
@@ -409,6 +409,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
                 wp,
                 ...(isQuery(query)
                   ? {
+                      filters,
                       searchString: query.query,
                       searchQueryLanguage: query.language,
                     }
