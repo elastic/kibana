@@ -11,6 +11,8 @@ export default function ({ loadTestFile }: any) {
     describe('Rules Endpoints', () => {
       loadTestFile(require.resolve('./metric_threshold_rule'));
       loadTestFile(require.resolve('./custom_threshold_rule/avg_pct_fired'));
+      loadTestFile(require.resolve('./custom_threshold_rule/p99_pct_fired'));
+      loadTestFile(require.resolve('./custom_threshold_rule/rate_bytes_fired'));
       loadTestFile(require.resolve('./custom_threshold_rule/avg_pct_no_data'));
       loadTestFile(require.resolve('./custom_threshold_rule/avg_us_fired'));
       loadTestFile(require.resolve('./custom_threshold_rule/custom_eq_avg_bytes_fired'));
