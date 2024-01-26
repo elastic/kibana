@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AdvancedSettingsConfig } from '@kbn/advanced-settings-plugin/server/config';
+import { AdvancedSettingsConfig } from './config';
 
 export const capabilitiesProvider = (config: AdvancedSettingsConfig) => ({
   globalSettings: {

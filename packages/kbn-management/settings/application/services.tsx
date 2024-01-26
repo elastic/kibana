@@ -22,7 +22,7 @@ import { ApplicationStart, ScopedHistory } from '@kbn/core-application-browser';
 import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import { RegistryEntry, SectionRegistryStart } from '@kbn/management-settings-section-registry';
 import { ToastsStart } from '@kbn/core-notifications-browser';
-import { ChromeBadge, ChromeStart } from "@kbn/core-chrome-browser";
+import { ChromeBadge, ChromeStart } from '@kbn/core-chrome-browser';
 
 export interface Services {
   getAllowlistedSettings: (scope: UiSettingsScope) => Record<string, UiSettingMetadata>;
@@ -118,8 +118,17 @@ export const SettingsApplicationKibanaProvider: FC<SettingsApplicationKibanaDepe
   children,
   ...dependencies
 }) => {
-  const { docLinks, notifications, theme, i18n, settings, history, sectionRegistry, application, chrome } =
-    dependencies;
+  const {
+    docLinks,
+    notifications,
+    theme,
+    i18n,
+    settings,
+    history,
+    sectionRegistry,
+    application,
+    chrome,
+  } = dependencies;
   const { client, globalClient } = settings;
 
   const getScopeClient = (scope: UiSettingsScope) => {
