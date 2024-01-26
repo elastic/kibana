@@ -15,6 +15,10 @@ export const contentLabel = i18n.translate('xpack.logExplorer.dataTable.header.p
   defaultMessage: 'Content',
 });
 
+export const resourceLabel = i18n.translate('xpack.logExplorer.dataTable.header.popover.resource', {
+  defaultMessage: 'Resource',
+});
+
 export const flyoutServiceLabel = i18n.translate('xpack.logExplorer.flyoutDetail.label.service', {
   defaultMessage: 'Service',
 });
@@ -209,5 +213,12 @@ export const contentHeaderTooltipParagraph2 = i18n.translate(
   'xpack.logExplorer.dataTable.header.content.tooltip.paragraph2',
   {
     defaultMessage: 'When the message field is empty, one of the following is displayed',
+  }
+);
+
+export const resourceHeaderTooltipParagraph = i18n.translate(
+  'xpack.logExplorer.dataTable.header.resource.tooltip.paragraph',
+  {
+    defaultMessage: "Fields that provide information on the document's source, such as:",
   }
 );

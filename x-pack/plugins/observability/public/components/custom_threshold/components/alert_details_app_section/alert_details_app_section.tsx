@@ -83,6 +83,9 @@ export default function AlertDetailsAppSection({
   };
   const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
   const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
+  const groups = alert.fields[ALERT_GROUP];
+  const tags = alert.fields[TAGS];
+
   const annotations = [
     <AlertAnnotation
       alertStart={alert.start}
@@ -101,8 +104,6 @@ export default function AlertDetailsAppSection({
   ];
 
   useEffect(() => {
-    const groups = alert.fields[ALERT_GROUP];
-    const tags = alert.fields[TAGS];
     const alertSummaryFields = [];
     if (groups) {
       alertSummaryFields.push({
@@ -141,7 +142,7 @@ export default function AlertDetailsAppSection({
     });
 
     setAlertSummaryFields(alertSummaryFields);
-  }, [alert, rule, ruleLink, setAlertSummaryFields]);
+  }, [groups, tags, rule, ruleLink, setAlertSummaryFields]);
 
   const derivedIndexPattern = useMemo<DataViewBase>(
     () => ({

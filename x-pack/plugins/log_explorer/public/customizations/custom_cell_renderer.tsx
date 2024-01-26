@@ -6,11 +6,12 @@
  */
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { CONTENT_FIELD } from '../../common/constants';
-import { renderContent } from '../components/virtual_columns/content';
+import { CONTENT_FIELD, RESOURCE_FIELD } from '../../common/constants';
+import { renderCell } from '../components/virtual_columns/cell_renderer';
 
 export const createCustomCellRenderer = ({ data }: { data: DataPublicPluginStart }) => {
   return {
-    [CONTENT_FIELD]: renderContent({ data }),
+    [CONTENT_FIELD]: renderCell(CONTENT_FIELD, { data }),
+    [RESOURCE_FIELD]: renderCell(RESOURCE_FIELD, { data }),
   };
 };

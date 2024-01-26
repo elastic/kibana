@@ -270,6 +270,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.index_management.enableIndexStats (any)',
         'xpack.index_management.editableIndexSettings (any)',
         'xpack.index_management.enableDataStreamsStorageColumn (any)',
+        'xpack.index_management.enableEmbeddedConsole (boolean)',
         'xpack.infra.sources.default.fields.message (array)',
         /**
          * Feature flags bellow are conditional based on traditional/serverless offering
