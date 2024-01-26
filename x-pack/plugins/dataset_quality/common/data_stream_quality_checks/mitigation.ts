@@ -6,6 +6,7 @@
  */
 
 import * as rt from 'io-ts';
+import { qualityProblemCauseRT } from './cause';
 
 export const increaseIgnoreAboveMitigationRT = rt.strict({
   type: rt.literal('mapping-increase-ignore-above'),
@@ -30,3 +31,12 @@ export const mitigationRT = rt.union([
   truncateValueMitigationRT,
   removeFieldMitigationRT,
 ]);
+
+export type Mitigation = rt.TypeOf<typeof mitigationRT>;
+
+export const mitigationForCauseRT = rt.strict({
+  cause: qualityProblemCauseRT,
+  mitigations: rt.array(mitigationRT),
+});
+
+export type MitigationForCause = rt.TypeOf<typeof mitigationForCauseRT>;

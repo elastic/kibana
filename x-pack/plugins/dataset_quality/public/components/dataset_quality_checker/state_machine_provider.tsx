@@ -12,6 +12,7 @@ import {
   createDataStreamQualityChecksStateMachine,
   DataStreamQualityChecksStateMachineArguments,
 } from './state_machine';
+import { logXStateTransition } from '../../utils/log_xstate_transition';
 
 export const useDataStreamQualityChecksState = (
   initialArguments: DataStreamQualityChecksStateMachineArguments
@@ -19,9 +20,7 @@ export const useDataStreamQualityChecksState = (
   const ingestPathwaysStateService = useInterpret(
     () => createDataStreamQualityChecksStateMachine(initialArguments),
     { devTools: getDevToolsOptions() },
-    (state) => {
-      console.log('state', state);
-    }
+    logXStateTransition
   );
 
   return ingestPathwaysStateService;

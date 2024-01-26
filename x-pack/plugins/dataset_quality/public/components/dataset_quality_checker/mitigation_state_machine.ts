@@ -7,12 +7,7 @@
 
 import { concatMap, from } from 'rxjs';
 import { createMachine, assign, ActionTypes } from 'xstate';
-import {
-  CheckPlan,
-  CheckPlanStep,
-  CheckTimeRange,
-  DataStreamQualityCheckExecution,
-} from '../../../common';
+import { CheckTimeRange, MitigationForCause, QualityProblemParams } from '../../../common';
 import { IDataStreamQualityClient } from '../../services/data_stream_quality';
 
 export const createPureDataStreamQualityMitigationStateMachine = (
@@ -20,7 +15,7 @@ export const createPureDataStreamQualityMitigationStateMachine = (
 ) =>
   createMachine(
     {
-      /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVBldAnMqAtgIoCuqANgJboCeAsjVVBlQPYB2AdBW6hFQ5RG6Zq06wAxBE5guggG5sA1nJjoRY0RIDaABgC6iUAAc2sJp2MgAHogCsAJi4BGAJz2AzC8f2ANCC0iI4uABxcepGRnk4uer4A7I4AvskBaJg4+ERklDQMTCza3Lz8gsKF4hxSMhxyiipqYBqVxbA6LkZIIGYWxdZ2CAC0jgBsnlyhjnoxUwnjo0kBQQgh4VHRsfH2SanpGNh4BCTk1HSaRezcABaosBdVUqgmJhQFopec+l2m5pYcA0QLk8ABZJlNQj5-IFEJ4EvYuPYNjEQtt4XsQBlDtkTnlzq0rlxnq9aOUHsVpLJ5BwlKoiS83uSrt9rL1-oCED49JNHJC9G4EiCfHE3CDlg5RRFkVtEhisVljrkzu8tITiW8yQTOJIwLhcGxcFxXhgAGYGwj0klMr6GVl-frdQYgvQIvShexuPSjNxTEEhNzihAgyVIqIouKJexyg4KnKnfLWm53ABybETUhNgiosGuLO6bIdoEGQxcCQm9lGvmDnlGLhcIPsILFMIQ7pcXGDbh9o0bZZdbmjmSOcbxKs+3HVVEgickmY42dztvz9quHNL7c8ehBi0cjiFqNFgfm4VDm1RsrSmJjw9xysTXBNqCoFGnWo4knweFoed+fVXjsQRYwXrfsm19f1Ax8ZwNhmGUdhSS95RvJUEzfB8nxfCAZznBcfx6FcrAAhBFnbcZHASSEfT3CCWzbRFpXPHZUkvDg2AgOBrCQnEUPxD4qjtP9CKLRAhm8dsplguYFiWFs6ylKIyxiIVQnmKNEOvbj4141VOB4PgBCEdMBPZIjRj0QMfXosM4N2dSh000d71ue433gZdBIBIifFCQNHC7eSzwjHY1P2ezFS0scqktDVDLfYzC1sBxy3dNw4WhFZtzcKzArREKrzCkc7zQ5zUyM9yTOE4Zpg3aYaxdUJIlreJfP8mDw1ywdsXCxy0NqMB4v-Sr6w3GI3F3PdhX5ZsVndblfGsxiEk62Nb1QvjimiqcsLi8qEsGYFuT0CiRUFSbDxbUZQgmNqbOW5CIvvR9n1fdbBvwjyOXGBIIhSr0qL9dxA2rALYMWtTUiAA */
+      /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVBldAnMqAtgIoCuqANgJboCeAsjVVBlQPYB2AdBW6hFQ5RG6Zq06wAxBE5guggG5sA1nJjoRY0RIDaABgC6iUAAc2sJp2MgAHogCsAZi4AOAJx6AbI5eO9Adjc3AEZggBYAGhBaRGD-Zz1ExMd7ACZgvVT7f1SAX1yotEwcfCIyShoGJhZtbl5+QWFq8Q4pGQ45RRU1MA1m2tgdYKMkEDMLWus7BABaVO9XVL1HT1T05fng+yiYhDiEpOW0jKz-fMKMbDwCEnJqOk0a9m4AC1RYR5apVBMTCirRE9OPoRqZzJYOFNYo4wq4XKkXMEsjtEI5-PYuPZDil1qd7OcQEUrqVbhUHv1nlwfn9aI1PrVpLJ5BwlKoqb9-vTniDrOMIVC9ktFoi9G5-GEkRk3JFog5pVxDkdcdkCUSSjdyvcAVpKdT-nSKZxJGBcLg2LguH8MAAzc2Edk0rnAwy88GTUbTCXBBUueweTxueFhdJuFEIML+b3+eKONzeZKeQL4gqEy7qsp3SpO17vABybGzUmtgiosBePNGfPdoGmM32mNW9jCbhWoTCTZlu193ubQRcnib8T0ftVaeuGbJ2qB3D1VEg2ckxY4pfLLsrbueAri3r8YUTawl62lYf8nhcmOxx0yKpTavHpK12a41tQVAo88NHEk+DwtArYImTcPUQRNYXCYdPDCX0JTRfww3bLggiQyN+xSTxQlHYp701LNP2fV93wgBclxXf8xg3KxgIQRNvW8VJ-ERQNUmDYJQ1lBBuwvJIcROG8Uw4NgIDgaw7xJHDyUBFpXUAyia0QGZHFCRZllWdZHE2bZ2JmDxEKQtx7EgiMXCMzDiQ1TMJJ1TgeD4AQhELaT+Sozw9AVJJgkcPxAhCcIwwUrheyCSCGLFYN4VM9MH1wyTai4N4Pk-eB1xkyEqI8twuADJxWKWMIVj9VIw1SII3O4q88Qi7CLKnFoHX1ezP0c6tbAcZx7F9Ft0XggMuOScrsmTC4sLE6qn3i-MHOSpy5NmJYdyWFZhxcRJ0MyIqSsVHjr3RSqRsnJ92jAJqgJm8IdxSNw1mYyVRU7RBfVcrIyuVM5bzHPbHzw2cPxik7yJSrc-AVBipXFG7j3Ys8Dme3jXqGsyJ0+37rJfN8fqs1KAOmlrqLRH0-S8JiWLY3Zm2hvqXuTfIgA */
       context: initialContext,
       predictableActionArguments: true,
       id: 'DataStreamQualityMitigation',
@@ -40,10 +35,16 @@ export const createPureDataStreamQualityMitigationStateMachine = (
               {
                 target: 'hasMitigations',
                 cond: 'hasMitigations',
+                actions: 'storeMitigations',
               },
-              'hasNoMitigations',
+              {
+                target: 'hasNoMitigations',
+                actions: 'storeMitigations',
+              },
             ],
           },
+
+          entry: ['clearMitigations', 'clearErrors'],
         },
 
         hasMitigations: {
@@ -57,7 +58,10 @@ export const createPureDataStreamQualityMitigationStateMachine = (
             src: 'applyMitigation',
             id: 'applyMitigation',
             onDone: 'appliedMitigation',
-            onError: 'failedMitigation',
+            onError: {
+              target: 'failedMitigation',
+              actions: 'storeApplicationError',
+            },
           },
         },
 
@@ -86,7 +90,17 @@ export const createPureDataStreamQualityMitigationStateMachine = (
       },
     },
     {
-      actions: {},
+      actions: {
+        storeMitigations: assign((context, event) => {
+          if (event.type !== (`${ActionTypes.DoneInvoke}.getMitigations` as const)) {
+            return context;
+          }
+
+          return {
+            mitigations: event.data,
+          };
+        }),
+      },
     }
   );
 
@@ -103,17 +117,53 @@ export const createDataStreamQualityMitigationStateMachine = ({
 }: DataStreamQualityMitigationStateMachineArguments) =>
   createPureDataStreamQualityMitigationStateMachine({
     parameters: initialParameters,
+    mitigations: [],
   }).withConfig({
-    services: {},
+    services: {
+      getMitigations: async (
+        context,
+        event
+      ): Promise<DataStreamQualityMitigationServices['getMitigations']['data']> => {
+        return [
+          {
+            cause: {
+              type: 'value-too-large',
+              field: 'message',
+              limit: 1024,
+              values: ['123', '457'],
+            },
+            mitigations: [
+              {
+                type: 'mapping-increase-ignore-above',
+                data_stream: 'logs-custom_2-default',
+                field: 'message',
+              },
+              {
+                type: 'pipeline-truncate-value',
+                data_stream: 'logs-custom_2-default',
+                field: 'message',
+              },
+              {
+                type: 'pipeline-remove-field',
+                data_stream: 'logs-custom_2-default',
+                field: 'message',
+              },
+            ],
+          },
+        ];
+      },
+    },
   });
 
 interface Parameters {
   dataStream: string;
   timeRange: CheckTimeRange;
+  problem: QualityProblemParams;
 }
 
 export interface DataStreamQualityMitigationContext {
   parameters: Parameters;
+  mitigations: MitigationForCause[];
 }
 
 export interface DataStreamQualityMitigationServices {
@@ -121,7 +171,7 @@ export interface DataStreamQualityMitigationServices {
     data: any;
   };
   getMitigations: {
-    data: null;
+    data: MitigationForCause[];
   };
   applyMitigation: {
     data: null;
@@ -146,5 +196,5 @@ export type DataStreamQualityMitigationEvent =
       type: `${ActionTypes.DoneInvoke}.applyMitigations`;
     }
   | {
-      type: `${ActionTypes.ErrorExecution}.applyMitigations`;
+      type: `${ActionTypes.ErrorPlatform}.applyMitigations`;
     };

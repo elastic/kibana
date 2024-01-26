@@ -12,15 +12,17 @@ import {
   CheckPlanStep,
   CheckTimeRange,
   DataStreamQualityCheckExecution,
+  QualityProblem,
 } from '../../../common';
 import { IDataStreamQualityClient } from '../../services/data_stream_quality';
+import { createDataStreamQualityMitigationStateMachine } from './mitigation_state_machine';
 
 export const createPureDataStreamQualityChecksStateMachine = (
   initialContext: DataStreamQualityChecksContext
 ) =>
   createMachine(
     {
-      /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVBldAnMqAtgIoCuqANgJboCeAwgBZgDGA1gHSkB2Vv6VSlQBekAMQBtAAwBdRKAAOAe1g0qS7vJAAPRAEYATAHYOBqQDYALHvMG71owE5LAGhC1EBgMx6OlywCsAV4AHI4h-gYBRgEAvrFuaJg4+ERkQnRMrJwKFKjcvNxQYhAaYBx8AG5KbOUw6FnsAAp53NJySCDKqgIaWroIRiY2Rl7BRvZ6Tq7uiIGWHEZSlo7mMebRPlJG8YkY2HgEJOTUmczsHLn5hcVguLhKuJd56ABmj4Qc9Y1sLfntWm6aj6nQGlikvj0XmW5ghQ0ceikBjcHgQXnRHER0McUgsMSc6N2ICSB1SxwyDHOOVa3HECju71whD+BUgP1gAM6QN6mlBiGipi8RjWej0IQMoomIRRiHMYQ4AXMYuizhCMSkISJJJSR3Sp0p2S43CurIgYhNnMUKmBvNAYICviRiPxQ2MDplCDsjg4ziC6OiAWsOPMWv2OrSJxoBouLCpfGKpVpFW41VqlwZHwAghQKOzLV1rTz+rKAhwIaKoWsIiE9IGPc4DGWAo4DCEIej0UY9KHkocIxSfhxY9l42I7g8nlc3h907hGYRs7mqRzZIDC+pbTpEKEQj6jEGomYJRKjB6243lsFHM5wbZHD3SbrI2dDcP2KO32wAGJ8KiwZgQPm3IbsWnryuYYyXhsXgGOYqz1lMHAhDBXabE4dghgkxJhn25L6oOn50hmTIsrSEB5quXLriCdqIAAtFMUimJYXg4terbhBY5j1uCCrNt4cHNpYVheA+4Z4VGBFUnSrRAdRm4DHRh4KiEEHGI4ATilEawes2vhyhsEqceCUJibheqSVSRqEWaFqUVaPQgXyCAbL4qm1gYjijDWaoBLpCIcAZARGW2JmiVh2rmc+0acDwNnmsRzI0myy5yY5NFbmibYKhxYptoGYSnrMLnyoqYreIYrGKveRLcEoEBwFokVkhZL7sGu6UKfR0JMZpalOJpdiKjMqJyqYqGVuYcH5QYZktdFg48L+AhCKIEAdTaoGIr46ItmY2wOp5UheB6talkMtaioEioahsc1PgOVkmjcG1Fs5egLJYUS1vCZVhKpHo+CY4qrEscpfXpmF7L282PYaz2QK9Tm0QgFamMEnmGJM0z+fpql+msPiOD4939vhVk8Aj61UZ1oFKt6iqjFMDodsTgPQkhnlTVMIQBFIOLdhFOGw+Tr5xkUSMZYp3qrIGlhqgiSoTF4I2IEYqmLF2XlKl9UTXqTEltZwNmS11qOiujMHOBs4qqUVqKIgKELXl5XkKwYlgG61MXWdJ1MOZtzlKuYPphGYRNeHKUh+cVTjeq6x1yi2VY7PEsRAA */
+      /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVBldAnMqAtgIoCuqANgJboCeAwgBZgDGA1gHSkB2Vv6VSlQBekAMQBtAAwBdRKAAOAe1g0qS7vJAAPRAEYATAHYOBqQDYALHvMG71owE5LAGhC1EBgMx6OlywCsAV4AHI4h-gYBRgEAvrFuaJg4+ERkQnRMrJwKFKjcvNxQYhAaYBx8AG5KbOUw6FnsAAp53NJySCDKqgIaWroIRiY2Rl7BRvZ6Tq7uiIGWHEZSlo7mMebRPlJG8YkY2HgEJOTUmczsHLn5hcVguLhKuJd56ABmj4Qc9Y1sLfntWm6aj6nQGlikvj0XmW5ghQ0ceikBjcHgQXnRHER0McUgsMSc6N2ICSB1SxwyDHOOVa3HECju71whD+BUgP1gAM6QN6mlBiGipi8RjWej0IQMoomIRRiHMYQ4AXMYuizhCMSkISJJJSR3Sp0p2S43CurIgYhNnMUKmBvNAYICviRiPxQ2MDplCDsjg4ziC6OiAWsOPMWv2OrSJxoBouLCpfGKpVpFW41VqlwZHwAghQKOzLV1rTz+rKAhwIaKoWsIiE9IGPc4DGWAo4DCEIej0UY9KHkocIxSfhxY9l42I7g8nlc3h907hGYRs7mqRzZIDC+pbTpEKEQj6jEGomYJRKjB6243lsFHM5wbZHD3SbrI2dDcP2KO32wAGJ8KiwZgQPm3IbsWnryuYYyXhsXgGOYqz1lMHAhDBXabE4dghgkxJhn25L6oOn50hmTIsrSEB5quXLriCdqIAAtFMUimJYXg4terbhBY5j1uCCrNt4cHNpYVheA+4Z4VGBFUnSrRAdRm4DHRUS7o4MTKsKuKWHYHpaUxQxCnKARSKxtaWGJuF6pJVJGoRZoWpRVo9CBfIIBsvghEqAQGKpoRijEHrNr4cobBKnHglC5lkpZL4XDwtnmsRzI0myy5yU5NFbmibYKhxYptoGYSnrMrnyoqYreIYrGKveWHahZz7Rpw8WEGoUAYGATQPAARhQYCEGlNqgchfiKl4VhhEiYQ+B6oqhBwwVKsJsGqYqkVPgO1ktQIbUCEUnVKD1fUlGUyapuUW1UDtHXdb1-UOQW6UKfRJkcDBYp6CxDohF5zgemMpbiqsljfSxoRCjsRLcEoEBwFodVRQ1Pxro9oF0Sx3pvTWn3Kt5MyonKpioVMThfS2om1ThCMbYaPC-gIQiiBAyODS5iK+OiLZmNsDrecZM1BIsRMfUEsIeXEFO9lT+HWSaNzM0WrMLFpDrRCTSphB5f2IYDawWBEUQIpheyS+t0uGrLkDy85tEIBWpjBN5hiTNMAUIvNYvBGsPiOD4a39mbsXGslTNUSjLlKt6iqjFMDodj7f3Qkh3nmEqRjfVIOLdhLj7+1Zr5xkUVsZYp3qrIGwNODYUzeHjiBp+Ygt6Kpi12M2NXGznEkxU10kh45LM23bUQwc4Gzih5RWooiAoQteqmqWqLZmdn4nRY1Nm90XT2uTYPphGY3tjflHpON6rrGXKLZVhDHer4jm2tRg8b7YdhBb6jTEsVpn0Fei1gqzNAwgQfRWBsAJZYxN4jxCAA */
       context: initialContext,
       predictableActionArguments: true,
       id: 'DataStreamQualityCheck',
@@ -95,8 +97,10 @@ export const createPureDataStreamQualityChecksStateMachine = (
           on: {
             performPlannedChecks: 'checking',
             plan: 'planning',
+            mitigateProblem: 'mitigatingProblem',
           },
         },
+
         unchecked: {
           on: {
             plan: 'planning',
@@ -104,6 +108,14 @@ export const createPureDataStreamQualityChecksStateMachine = (
           },
 
           exit: 'clearCheckingError',
+        },
+
+        mitigatingProblem: {
+          invoke: {
+            src: 'mitigateProblem',
+            id: 'mitigateProblem',
+            onDone: 'planning',
+          },
         },
       },
     },
@@ -199,6 +211,22 @@ export const createDataStreamQualityChecksStateMachine = ({
           })
         );
       },
+      mitigateProblem: (context, event) => {
+        if (event.type !== 'mitigateProblem') {
+          return Promise.reject();
+        }
+
+        return createDataStreamQualityMitigationStateMachine({
+          dependencies: {
+            dataStreamQualityClient,
+          },
+          initialParameters: {
+            dataStream: event.check.data_stream,
+            timeRange: event.check.time_range,
+            problem: event.problem,
+          },
+        });
+      },
     },
   });
 
@@ -225,6 +253,9 @@ export interface DataStreamQualityChecksServices {
   performAllChecks: {
     data: undefined;
   };
+  mitigateProblem: {
+    data: undefined;
+  };
 }
 
 export type DataStreamQualityChecksEvent =
@@ -233,6 +264,11 @@ export type DataStreamQualityChecksEvent =
     }
   | {
       type: 'performPlannedChecks';
+    }
+  | {
+      type: 'mitigateProblem';
+      check: CheckPlanStep;
+      problem: QualityProblem;
     }
   | {
       type: 'checkFinished';

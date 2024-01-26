@@ -7,9 +7,8 @@
 
 import * as rt from 'io-ts';
 import {
-  qualityProblemCauseRT,
   checkTimeRangeRT,
-  mitigationRT,
+  mitigationForCauseRT,
   qualityProblemParamsRT,
 } from '../data_stream_quality_checks';
 import { DATASET_QUALITY_URL_PREFIX } from './shared';
@@ -25,11 +24,6 @@ export const getDatastreamMitigationsRequestParamsRT = rt.strict({
 export const getDatastreamMitigationsRequestPayloadRT = rt.strict({
   time_range: checkTimeRangeRT,
   problem: qualityProblemParamsRT,
-});
-
-export const mitigationForCauseRT = rt.strict({
-  cause: qualityProblemCauseRT,
-  mitigations: rt.array(mitigationRT),
 });
 
 export const getDatastreamMitigationsResponsePayloadRT = rt.strict({

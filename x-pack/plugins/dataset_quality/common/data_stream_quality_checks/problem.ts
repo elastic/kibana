@@ -46,5 +46,7 @@ export type QualityProblemType = QualityProblem['type'];
 
 export const qualityProblemParamsRT = rt.union([
   ignoredFieldProblemParamsRT,
-  ingestPipelineErrorProblemRT,
+  ingestPipelineErrorProblemParamsRT,
 ]);
+
+export type QualityProblemParams = rt.TypeOf<typeof qualityProblemParamsRT>;

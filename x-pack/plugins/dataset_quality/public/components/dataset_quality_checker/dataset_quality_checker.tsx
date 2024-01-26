@@ -15,7 +15,12 @@ import {
 } from '@elastic/eui';
 import { useActor } from '@xstate/react';
 import React, { useCallback, useMemo, useState } from 'react';
-import { CheckPlanStep, CheckTimeRange, DataStreamQualityCheckExecution } from '../../../common';
+import {
+  CheckPlanStep,
+  CheckTimeRange,
+  DataStreamQualityCheckExecution,
+  QualityProblem,
+} from '../../../common';
 import { IDataStreamQualityClient } from '../../services/data_stream_quality';
 import {
   DataStreamQualityChecksStateProvider,
@@ -112,9 +117,19 @@ const ConnectedPlannedChecksList = () => {
 };
 
 const ConnectedCheckProgressList = () => {
-  const [state] = useActor(useDataStreamQualityChecksStateContext());
+  const [state, send] = useActor(useDataStreamQualityChecksStateContext());
 
   const checkProgress = state.context.checkProgress;
+
+  const mitigateProblem = useCallback(
+    (check: CheckPlanStep, problem: QualityProblem) =>
+      send({
+        type: 'mitigateProblem',
+        check,
+        problem,
+      }),
+    [send]
+  );
 
   return (
     <EuiFlexGroup direction="column">
@@ -123,7 +138,11 @@ const ConnectedCheckProgressList = () => {
           {check.progress === 'pending' ? (
             <CheckListPendingItem check={check.check} />
           ) : (
-            <CheckListFinishedItem check={check.check} execution={check.execution} />
+            <CheckListFinishedItem
+              check={check.check}
+              execution={check.execution}
+              onMitigateProblem={mitigateProblem}
+            />
           )}
         </EuiFlexItem>
       ))}
@@ -140,30 +159,49 @@ const CheckListPendingItem = ({ check }: { check: CheckPlanStep }) => (
 const CheckListFinishedItem = ({
   check,
   execution,
+  onMitigateProblem,
 }: {
   check: CheckPlanStep;
   execution: DataStreamQualityCheckExecution;
+  onMitigateProblem: (check: CheckPlanStep, problem: QualityProblem) => void;
 }) => {
   if (execution.result.type === 'skipped') {
     return (
       <EuiPanel color="warning">
-        <PreJson value={check} />
-        <PreJson value={execution} />
+        <DetailsPreJson title={`Check: ${check.check_id}`} value={check} />
+        <DetailsPreJson title={`Result: ${execution.result.type}`} value={execution} />
       </EuiPanel>
     );
   } else if (execution.result.type === 'passed') {
     return (
       <EuiPanel color="success">
-        <PreJson value={check} />
-        <PreJson value={execution} />
+        <DetailsPreJson title={`Check: ${check.check_id}`} value={check} />
+        <DetailsPreJson title={`Result: ${execution.result.type}`} value={execution} />
       </EuiPanel>
     );
   } else if (execution.result.type === 'failed') {
     return (
       <EuiPanel color="danger">
-        <PreJson value={check} />
-        <PreJson value={execution} />
-        <EuiButton color="danger">Fix this problem</EuiButton>
+        <DetailsPreJson title={`Check: ${check.check_id}`} value={check} />
+        <DetailsPreJson title={`Result: ${execution.result.type}`} value={execution} />
+        {execution.result.reasons.map((problem) => {
+          return (
+            <EuiPanel color="danger" hasShadow={false}>
+              <EuiFlexGroup direction="row">
+                <EuiFlexItem grow>
+                  {problem.type === 'ignored-field'
+                    ? `Ignored field ${problem.field_name} in ${problem.document_count} documents `
+                    : problem.type}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton color="danger" onClick={() => onMitigateProblem(check, problem)}>
+                    Fix this problem
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+          );
+        })}
       </EuiPanel>
     );
   }
@@ -176,6 +214,12 @@ const CheckListFinishedItem = ({
   );
 };
 
+const DetailsPreJson = ({ title, value }: { title: string; value: unknown }) => (
+  <details>
+    <summary>{title}</summary>
+    <PreJson value={value} />
+  </details>
+);
 const PreJson = ({ value }: { value: unknown }) => <pre>{JSON.stringify(value, null, 2)}</pre>;
 
 const useRandomId = (prefix: string) => {

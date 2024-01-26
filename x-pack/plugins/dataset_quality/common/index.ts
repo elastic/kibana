@@ -20,6 +20,8 @@ export {
   ignoredFieldCauseRT,
   ignoredFieldProblemRT,
   ingestPipelineErrorProblemRT,
+  mitigationRT,
+  mitigationForCauseRT,
   qualityProblemRT,
 } from './data_stream_quality_checks';
 export type {
@@ -30,7 +32,10 @@ export type {
   DataStreamQualityCheckArguments,
   DataStreamQualityCheckExecution,
   IgnoredFieldCause,
+  Mitigation,
+  MitigationForCause,
   QualityProblem,
+  QualityProblemParams,
   QualityProblemType,
 } from './data_stream_quality_checks';
 export type { FetchOptions } from './fetch_options';
