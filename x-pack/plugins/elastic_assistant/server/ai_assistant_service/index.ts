@@ -69,7 +69,7 @@ export class AIAssistantService {
     );
   }
 
-  public async isInitialized() {
+  public isInitialized() {
     return this.initialized;
   }
 

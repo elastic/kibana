@@ -116,39 +116,10 @@ describe('Create conversation route', () => {
 
       expect(result.badRequest).toHaveBeenCalled();
     });
-
-    test('allows rule type of query and custom from and interval', async () => {
-      const request = requestMock.create({
-        method: 'post',
-        path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
-        body: { from: 'now-7m', interval: '5m', ...getCreateConversationSchemaMock() },
-      });
-      const result = server.validate(request);
-
-      expect(result.ok).toHaveBeenCalled();
-    });
-
-    test('disallows invalid "from" param on rule', async () => {
-      const request = requestMock.create({
-        method: 'post',
-        path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
-        body: {
-          from: 'now-3755555555555555.67s',
-          interval: '5m',
-          ...getCreateConversationSchemaMock(),
-        },
-      });
-      const result = server.validate(request);
-      expect(result.badRequest).toHaveBeenCalledWith('from: Failed to parse date-math expression');
-    });
   });
-  describe('rule containing response actions', () => {
-    beforeEach(() => {
-      // @ts-expect-error We're writting to a read only property just for the purpose of the test
-      clients.config.experimentalFeatures.endpointResponseActionsEnabled = true;
-    });
+  describe('conversation containing messages', () => {
     const getResponseAction = (command: string = 'isolate') => ({
-      action_type_id: '.endpoint',
+      role: 'user',
       params: {
         command,
         comment: '',
@@ -170,20 +141,20 @@ describe('Create conversation route', () => {
       expect(response.status).toEqual(200);
     });
 
-    test('fails when provided with an unsupported command', async () => {
-      const wrongAction = getResponseAction('processes');
+    test('fails when provided with an unsupported message role', async () => {
+      const wrongMessage = getResponseAction('test_thing');
 
       const request = requestMock.create({
         method: 'post',
         path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
         body: {
           ...getCreateConversationSchemaMock(),
-          response_actions: [wrongAction],
+          messages: [wrongMessage],
         },
       });
       const result = await server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'response_actions.0.action_type_id: Invalid literal value, expected ".osquery", response_actions.0.params.command: Invalid literal value, expected "isolate"'
+        'messages.0.role: Invalid literal value, expected "user", messages.0.params.command: Invalid literal value, expected "isolate"'
       );
     });
   });

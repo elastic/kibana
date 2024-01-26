@@ -73,31 +73,60 @@ export const getConversationMock = (
   },
 });
 
-export const getQueryConversationParams = (): ConversationCreateProps | ConversationUpdateProps => {
-  return {
-    ...getBaseRuleParams(),
-    type: 'query',
-    language: 'kuery',
-    query: 'user.name: root or user.name: admin',
-    index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-    dataViewId: undefined,
-    filters: [
-      {
-        query: {
-          match_phrase: {
-            'host.name': 'some-host',
-          },
+export const getQueryConversationParams = (
+  isUpdate?: boolean
+): ConversationCreateProps | ConversationUpdateProps => {
+  return isUpdate
+    ? {
+        title: 'Welcome 2',
+        apiConfig: {
+          connectorId: '2',
+          defaultSystemPromptId: 'Default',
+          connectorTypeTitle: 'Test connector',
+          model: 'model',
         },
-      },
-    ],
-    savedId: undefined,
-    alertSuppression: undefined,
-    responseActions: undefined,
-  };
+        excludeFromLastConversationStorage: false,
+        messages: [
+          {
+            content: 'test content',
+            role: 'user',
+            timestamp: '2019-12-13T16:40:33.400Z',
+            traceData: {
+              traceId: '1',
+              transactionId: '2',
+            },
+          },
+        ],
+        id: '1',
+      }
+    : {
+        title: 'Welcome',
+        apiConfig: {
+          connectorId: '1',
+          defaultSystemPromptId: 'Default',
+          connectorTypeTitle: 'Test connector',
+          model: 'model',
+        },
+        excludeFromLastConversationStorage: false,
+        isDefault: true,
+        messages: [
+          {
+            content: 'test content',
+            role: 'user',
+            timestamp: '2019-12-13T16:40:33.400Z',
+            traceData: {
+              traceId: '1',
+              transactionId: '2',
+            },
+          },
+        ],
+      };
 };
 
 export const getPerformBulkActionSchemaMock = (): PerformBulkActionRequestBody => ({
-  query: '',
-  ids: undefined,
-  action: BulkActionTypeEnum.disable,
+  create: [],
+  delete: {
+    ids: [],
+  },
+  update: [],
 });

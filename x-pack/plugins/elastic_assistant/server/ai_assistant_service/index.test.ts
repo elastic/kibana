@@ -10,11 +10,9 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { ReplaySubject, Subject } from 'rxjs';
-import { IRuleTypeAlerts, RecoveredActionGroup } from '../types';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { retryUntil } from './test_utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import { UntypedNormalizedRuleType } from '../rule_type_registry';
-import { getDataStreamAdapter } from './lib/data_stream_adapter';
 import { conversationsDataClientMock } from '../__mocks__/conversations_data_client.mock';
 import { AIAssistantConversationsDataClient } from '../conversations_data_client';
 import { AIAssistantService } from '.';
@@ -107,16 +105,14 @@ interface GetIndexTemplatePutBodyOpts {
   useDataStream?: boolean;
 }
 const getIndexTemplatePutBody = (opts?: GetIndexTemplatePutBodyOpts) => {
-  const context = opts ? opts.context : undefined;
   const namespace = (opts ? opts.namespace : undefined) ?? DEFAULT_NAMESPACE_STRING;
-  const useLegacyAlerts = opts ? opts.useLegacyAlerts : undefined;
   const useEcs = opts ? opts.useEcs : undefined;
   const secondaryAlias = opts ? opts.secondaryAlias : undefined;
   const useDataStream = opts?.useDataStream ?? false;
 
   const indexPatterns = useDataStream
-    ? [`.alerts-${context ? context : 'test'}.alerts-${namespace}`]
-    : [`.internal.alerts-${context ? context : 'test'}.alerts-${namespace}-*`];
+    ? [`.alerts-.alerts-${namespace}`]
+    : [`.internal.alerts-.alerts-${namespace}-*`];
   return {
     name: `.alerts-${context ? context : 'test'}.alerts-${namespace}-index-template`,
     body: {
@@ -171,15 +167,8 @@ const getIndexTemplatePutBody = (opts?: GetIndexTemplatePutBodyOpts) => {
   };
 };
 
-const TestRegistrationContext: IRuleTypeAlerts = {
-  context: 'test',
-  mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
-  shouldWrite: true,
-};
-
 const getContextInitialized = async (
   assistantService: AIAssistantService,
-  context: string = TestRegistrationContext.context,
   namespace: string = DEFAULT_NAMESPACE_STRING
 ) => {
   const { result } = await assistantService.getSpaceResourcesInitializationPromise(namespace);
@@ -187,30 +176,6 @@ const getContextInitialized = async (
 };
 
 const conversationsDataClient = conversationsDataClientMock.create();
-const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
-  id: 'test.rule-type',
-  name: 'My test rule',
-  actionGroups: [{ id: 'default', name: 'Default' }, RecoveredActionGroup],
-  defaultActionGroupId: 'default',
-  minimumLicenseRequired: 'basic',
-  isExportable: true,
-  recoveryActionGroup: RecoveredActionGroup,
-  executor: jest.fn(),
-  category: 'test',
-  producer: 'alerts',
-  cancelAlertsOnRuleTimeout: true,
-  ruleTaskTimeout: '5m',
-  autoRecoverAlerts: true,
-  validate: {
-    params: { validate: (params) => params },
-  },
-  validLegacyConsumers: [],
-};
-
-const ruleTypeWithAlertDefinition: jest.Mocked<UntypedNormalizedRuleType> = {
-  ...ruleType,
-  alerts: TestRegistrationContext as IRuleTypeAlerts<{}>,
-};
 
 describe('AI Assistant Service', () => {
   let pluginStop$: Subject<void>;
@@ -245,7 +210,7 @@ describe('AI Assistant Service', () => {
             elasticsearchClientPromise: Promise.resolve(clusterClient),
             pluginStop$,
             kibanaVersion: '8.8.0',
-            dataStreamAdapter,
+            taskManager: taskManagerMock.createSetup(),
           });
 
           await retryUntil(
@@ -270,29 +235,6 @@ describe('AI Assistant Service', () => {
           expect(componentTemplate3.name).toEqual('.alerts-ecs-mappings');
         });
 
-        test('should log error and set initialized to false if adding ILM policy throws error', async () => {
-          if (useDataStreamForAlerts) return;
-
-          clusterClient.ilm.putLifecycle.mockRejectedValueOnce(new Error('fail'));
-          const assistantService = new AIAssistantService({
-            logger,
-            elasticsearchClientPromise: Promise.resolve(clusterClient),
-            pluginStop$,
-            kibanaVersion: '8.8.0',
-            dataStreamAdapter,
-          });
-
-          await retryUntil('error log called', async () => logger.error.mock.calls.length > 0);
-
-          expect(assistantService.isInitialized()).toEqual(false);
-
-          expect(logger.error).toHaveBeenCalledWith(
-            `Error installing ILM policy .alerts-ilm-policy - fail`
-          );
-
-          expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(1);
-        });
-
         test('should log error and set initialized to false if creating/updating common component template throws error', async () => {
           clusterClient.cluster.putComponentTemplate.mockRejectedValueOnce(new Error('fail'));
           const assistantService = new AIAssistantService({
@@ -300,7 +242,7 @@ describe('AI Assistant Service', () => {
             elasticsearchClientPromise: Promise.resolve(clusterClient),
             pluginStop$,
             kibanaVersion: '8.8.0',
-            dataStreamAdapter,
+            taskManager: taskManagerMock.createSetup(),
           });
 
           await retryUntil('error log called', async () => logger.error.mock.calls.length > 0);
@@ -380,11 +322,11 @@ describe('AI Assistant Service', () => {
             elasticsearchClientPromise: Promise.resolve(clusterClient),
             pluginStop$,
             kibanaVersion: '8.8.0',
-            dataStreamAdapter,
+            taskManager: taskManagerMock.createSetup(),
           });
 
           await retryUntil(
-            'alert service initialized',
+            'assistant service initialized',
             async () => assistantService.isInitialized() === true
           );
 
@@ -421,7 +363,7 @@ describe('AI Assistant Service', () => {
             elasticsearchClientPromise: Promise.resolve(clusterClient),
             pluginStop$,
             kibanaVersion: '8.8.0',
-            dataStreamAdapter,
+            taskManager: taskManagerMock.createSetup(),
           });
 
           await retryUntil(
