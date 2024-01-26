@@ -11,6 +11,8 @@ import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { usePluginConfig } from '../../../../containers/plugin_config_context';
 import type { AlertsEsQuery } from '../../../../common/alerts/types';
 import { createAlertsEsQuery } from '../../../../common/alerts/create_alerts_es_query';
@@ -24,6 +26,8 @@ import { ALERT_STATUS_ALL } from '../../../../common/alerts/constants';
 import { AlertsSectionTitle } from '../../components/section_titles';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { CollapsibleSection } from './section/collapsible_section';
+import { AlertsClosedContent } from './alerts_closed_content';
+import { useAlertsCount } from '../../../../hooks/use_alerts_count';
 
 export const AlertsSummaryContent = ({
   assetName,
@@ -75,9 +79,10 @@ export const AlertsSummaryContent = ({
       <CollapsibleSection
         title={AlertsSectionTitle}
         shouldCollapse={true}
-        data-test-subj="infraAssetDetailsMetricsSectionExpandButton"
-        id={'metrics'}
+        data-test-subj="infraAssetDetailsAlertsSectionExpandButton"
+        id={'alerts'}
         extraAction={<ExtraActions />}
+        closedSectionContent={<AlertsClosedContent alertsEsQuery={alertsEsQueryByStatus} />}
       >
         <MemoAlertSummaryWidget alertsQuery={alertsEsQueryByStatus} dateRange={dateRange} />
       </CollapsibleSection>
@@ -112,6 +117,28 @@ const MemoAlertSummaryWidget = React.memo(
     const chartProps = {
       baseTheme: charts.theme.useChartsBaseTheme(),
     };
+
+    const { alertsCount, loading } = useAlertsCount({
+      featureIds: infraAlertFeatureIds,
+      query: alertsQuery,
+    });
+
+    const NoAlerts =
+      typeof alertsCount?.activeAlertCount === 'number' && alertsCount?.activeAlertCount === 0;
+
+    if (loading) {
+      return <EuiLoadingSpinner />;
+    }
+
+    if (NoAlerts) {
+      return (
+        <FormattedMessage
+          id="xpack.infra.assetDetails.noActiveAlertsContentClosedSection"
+          defaultMessage="No active alerts"
+          data-test-subj="infraAssetDetailsAlertsClosedContentWithAlerts"
+        />
+      );
+    }
 
     return (
       <AlertSummaryWidget

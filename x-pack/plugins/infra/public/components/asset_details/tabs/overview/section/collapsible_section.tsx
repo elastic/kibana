@@ -10,6 +10,7 @@ import React, { useState } from 'react';
 
 export const CollapsibleSection = ({
   title,
+  closedSectionContent,
   extraAction,
   children,
   shouldCollapse,
@@ -17,6 +18,7 @@ export const CollapsibleSection = ({
   id,
 }: {
   title: React.FunctionComponent;
+  closedSectionContent?: React.ReactNode;
   extraAction?: React.ReactNode;
   dependsOn?: string[];
   children: React.ReactNode;
@@ -27,6 +29,19 @@ export const CollapsibleSection = ({
   const [trigger, setTrigger] = useState<'closed' | 'open'>('open');
 
   const Title = title;
+  const ButtonContent = () =>
+    closedSectionContent && trigger === 'closed' ? (
+      <EuiFlexGroup gutterSize="m">
+        <EuiFlexItem grow={false}>
+          <>
+            <Title />
+          </>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{closedSectionContent}</EuiFlexItem>
+      </EuiFlexGroup>
+    ) : (
+      <Title />
+    );
   const collapsibleSectionAccordionId = useGeneratedHtmlId({
     prefix: id,
   });
@@ -42,7 +57,7 @@ export const CollapsibleSection = ({
       data-section-id={id}
       buttonElement="div"
       element="fieldset"
-      buttonContent={<Title />}
+      buttonContent={<ButtonContent />}
       paddingSize="s"
       initialIsOpen={true}
       extraAction={extraAction ?? undefined}
