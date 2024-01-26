@@ -1548,7 +1548,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     key: 'linux.advanced.alerts.sample_collection',
     first_supported_version: '8.13',
     documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.alerts.sample_collection',
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.alerts.sample_collection',
       {
         defaultMessage: "A value of 'false' disables malicious sample collection for Linux alerts. Default: true.",
       }
