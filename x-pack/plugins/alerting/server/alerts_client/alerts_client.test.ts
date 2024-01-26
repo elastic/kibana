@@ -2219,6 +2219,99 @@ describe('Alerts Client', () => {
             ],
           });
         });
+
+        test('should return undefined if an alert doc with provided id do not exist', async () => {
+          const mockAlertPayload = { count: 1, url: `https://url1` };
+          const alertInstanceId = 'existing_alert';
+          const alertSource = {
+            ...mockAlertPayload,
+            [ALERT_INSTANCE_ID]: alertInstanceId,
+          };
+
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 1 },
+              hits: [
+                {
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _source: alertSource,
+                },
+              ],
+            },
+          });
+
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          await alertsClient.initializeExecution({
+            ...defaultExecutionOpts,
+            activeAlertsFromState: {
+              [alertInstanceId]: {},
+            },
+          });
+
+          const { alertDoc } = alertsClient.report({
+            id: 'another_alert',
+            actionGroup: 'default',
+            state: {},
+            context: {},
+          });
+
+          expect(alertDoc).toBeUndefined();
+        });
+
+        test('should return a previous alert payload if one exists', async () => {
+          const mockAlertPayload = { count: 1, url: `https://url1` };
+          const alertInstanceId = 'existing_alert';
+          const alertSource = {
+            ...mockAlertPayload,
+            [ALERT_INSTANCE_ID]: alertInstanceId,
+          };
+
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 1 },
+              hits: [
+                {
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _source: alertSource,
+                },
+              ],
+            },
+          });
+
+          const alertsClient = new AlertsClient<
+            { count: number; url: string },
+            {},
+            {},
+            'default',
+            'recovered'
+          >(alertsClientParams);
+
+          await alertsClient.initializeExecution({
+            ...defaultExecutionOpts,
+            activeAlertsFromState: {
+              [alertInstanceId]: {},
+            },
+          });
+
+          // Report the same alert again
+          const { alertDoc } = alertsClient.report({
+            id: alertInstanceId,
+            actionGroup: 'default',
+          });
+
+          expect(alertDoc).toEqual(alertSource);
+        });
       });
 
       describe('setAlertData()', () => {

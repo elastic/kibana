@@ -15,7 +15,7 @@ import {
   useGeneratedHtmlId,
   EuiTitle,
 } from '@elastic/eui';
-import { FlyoutDoc } from './types';
+import { FlyoutDoc } from '../../../common/document';
 import { getMessageWithFallbacks } from '../../hooks/use_doc_detail';
 import { LogLevel } from '../common/log_level';
 import { Timestamp } from './sub_components/timestamp';
