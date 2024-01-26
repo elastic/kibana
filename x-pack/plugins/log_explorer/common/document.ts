@@ -5,24 +5,7 @@
  * 2.0.
  */
 
-import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-
-export interface LogExplorerCustomizations {
-  flyout?: {
-    renderContent?: RenderContentCustomization<LogExplorerFlyoutContentProps>;
-  };
-}
-
-export interface LogExplorerFlyoutContentProps {
-  actions: {
-    addFilter: DocViewRenderProps['filter'];
-    addColumn: DocViewRenderProps['onAddColumn'];
-    removeColumn: DocViewRenderProps['onRemoveColumn'];
-  };
-  dataView: DocViewRenderProps['dataView'];
-  doc: LogDocument;
-}
+import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 
 export interface LogDocument extends DataTableRecord {
   flattened: {
@@ -37,7 +20,11 @@ export interface LogDocument extends DataTableRecord {
     'trace.id'?: string;
     'agent.name'?: string;
     'orchestrator.cluster.name'?: string;
+    'orchestrator.cluster.id'?: string;
     'orchestrator.resource.id'?: string;
+    'orchestrator.namespace'?: string;
+    'container.name'?: string;
+    'container.id'?: string;
     'cloud.provider'?: string;
     'cloud.region'?: string;
     'cloud.availability_zone'?: string;
@@ -61,7 +48,10 @@ export interface FlyoutDoc {
   'trace.id'?: string;
   'agent.name'?: string;
   'orchestrator.cluster.name'?: string;
+  'orchestrator.cluster.id'?: string;
   'orchestrator.resource.id'?: string;
+  'orchestrator.namespace'?: string;
+  'container.name'?: string;
   'cloud.provider'?: string;
   'cloud.region'?: string;
   'cloud.availability_zone'?: string;
@@ -72,8 +62,15 @@ export interface FlyoutDoc {
   'data_stream.dataset': string;
 }
 
-export type RenderContentCustomization<Props> = (
-  renderPreviousContent: RenderPreviousContent<Props>
-) => (props: Props) => React.ReactNode;
-
-export type RenderPreviousContent<Props> = (props: Props) => React.ReactNode;
+export interface ResourceFields {
+  'host.name'?: string;
+  'service.name'?: string;
+  'agent.name'?: string;
+  'orchestrator.cluster.name'?: string;
+  'orchestrator.cluster.id'?: string;
+  'orchestrator.resource.id'?: string;
+  'orchestrator.namespace'?: string;
+  'container.name'?: string;
+  'container.id'?: string;
+  'cloud.instance.id'?: string;
+}
