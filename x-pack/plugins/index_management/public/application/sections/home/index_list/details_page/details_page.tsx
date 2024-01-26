@@ -6,12 +6,12 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState, FunctionComponent } from 'react';
-import qs from 'query-string';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageTemplate, EuiText, EuiCode } from '@elastic/eui';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 
+import { resetIndexUrlParams } from './reset_index_url_params';
 import {
   IndexDetailsSection,
   IndexDetailsTabId,
@@ -35,10 +35,7 @@ export const DetailsPage: FunctionComponent<
   const [index, setIndex] = useState<Index | null>();
 
   const navigateToIndicesList = useCallback(() => {
-    const indicesListParams = qs.parse(search);
-    delete indicesListParams.indexName;
-    delete indicesListParams.tab;
-    const paramsString = qs.stringify(indicesListParams);
+    const paramsString = resetIndexUrlParams(search);
     history.push(`/${Section.Indices}${paramsString ? '?' : ''}${paramsString}`);
   }, [history, search]);
 

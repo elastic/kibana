@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { LogExplorerFlyoutContentProps } from './types';
+import { LogExplorerFlyoutContentProps } from '../../customizations/types';
 import { useDocDetail } from '../../hooks/use_doc_detail';
 import { FlyoutHeader } from './flyout_header';
 import { FlyoutHighlights } from './flyout_highlights';
