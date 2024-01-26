@@ -2013,8 +2013,8 @@ export default ({ getService }: FtrProviderContext) => {
             const id = uuidv4();
             const timestamp = '2020-10-28T06:45:00.000Z';
 
-            await eventsFiller({ id, count: 20 * eventsCount, timestamp: [timestamp] });
-            await threatsFiller({ id, count: 20 * threatsCount, timestamp });
+            await eventsFiller({ id, count: 100 * eventsCount, timestamp: [timestamp] });
+            await threatsFiller({ id, count: 100 * threatsCount, timestamp });
 
             await indexGeneratedSourceDocuments({
               docsCount: 700,
@@ -2174,7 +2174,7 @@ export default ({ getService }: FtrProviderContext) => {
               docsCount: 150,
               seed: (index) => ({
                 id,
-                '@timestamp': `2020-10-28T06:50:00.${index}Z`,
+                '@timestamp': `2020-10-28T06:50:00.${100 + index}Z`,
                 host: {
                   name: `host-a`,
                 },
@@ -2242,6 +2242,8 @@ export default ({ getService }: FtrProviderContext) => {
                   value: ['agent-a'],
                 },
               ],
+              [ALERT_SUPPRESSION_START]: '2020-10-28T06:50:00.100Z',
+              [ALERT_SUPPRESSION_END]: '2020-10-28T06:50:00.249Z', // the largest suppression end boundary
               [ALERT_SUPPRESSION_DOCS_COUNT]: 149,
             });
 

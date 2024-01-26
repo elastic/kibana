@@ -32,6 +32,17 @@ import { CreatePersistenceRuleTypeWrapper } from './persistence_types';
 import { errorAggregator } from './utils';
 import { AlertWithSuppressionFields870 } from '../../common/schemas/8.7.0';
 
+/**
+ * alerts returned from BE have date type coerce to ISO strings
+ */
+type BackendAlertWithSuppressionFields870<T> = Omit<
+  AlertWithSuppressionFields870<T>,
+  typeof ALERT_SUPPRESSION_START | typeof ALERT_SUPPRESSION_END
+> & {
+  [ALERT_SUPPRESSION_START]: string;
+  [ALERT_SUPPRESSION_END]: string;
+};
+
 export const ALERT_GROUP_INDEX = `${ALERT_NAMESPACE}.group.index` as const;
 
 const augmentAlerts = <T>({
@@ -121,23 +132,22 @@ const filterDuplicateAlerts = async <T extends { _id: string }>({
  */
 const suppressAlertsInMemory = <
   T extends {
-    [ALERT_SUPPRESSION_DOCS_COUNT]: number;
-    [ALERT_INSTANCE_ID]: string;
-    [ALERT_SUPPRESSION_START]: Date;
-    [ALERT_SUPPRESSION_END]: Date;
-  },
-  A extends {
     _id: string;
-    _source: T;
+    _source: {
+      [ALERT_SUPPRESSION_DOCS_COUNT]: number;
+      [ALERT_INSTANCE_ID]: string;
+      [ALERT_SUPPRESSION_START]: Date;
+      [ALERT_SUPPRESSION_END]: Date;
+    };
   }
 >(
-  alerts: A[]
+  alerts: T[]
 ): {
-  alertCandidates: A[];
-  suppressedAlerts: A[];
+  alertCandidates: T[];
+  suppressedAlerts: T[];
 } => {
   const idsMap: Record<string, { count: number; suppressionEnd: Date }> = {};
-  const suppressedAlerts: A[] = [];
+  const suppressedAlerts: T[] = [];
 
   const filteredAlerts = sortBy(alerts, (alert) => alert._source[ALERT_SUPPRESSION_START]).filter(
     (alert) => {
@@ -174,6 +184,49 @@ const suppressAlertsInMemory = <
     alertCandidates,
     suppressedAlerts,
   };
+};
+
+/**
+ * Compare existing alert suppression date props with alert to suppressed alert values
+ **/
+const isExistingDateGtEqThanAlert = <T extends { [ALERT_SUPPRESSION_END]: Date }>(
+  existingAlert: estypes.SearchHit<BackendAlertWithSuppressionFields870<{}>>,
+  alert: { _id: string; _source: T },
+  property: typeof ALERT_SUPPRESSION_END | typeof ALERT_SUPPRESSION_START
+) => {
+  const existingDate = existingAlert?._source?.[property];
+
+  return existingDate && existingDate >= alert._source[ALERT_SUPPRESSION_END].toISOString();
+};
+
+interface SuppressionBoundaries {
+  [ALERT_SUPPRESSION_END]: Date;
+  [ALERT_SUPPRESSION_START]: Date;
+}
+
+/**
+ * returns updated suppression time boundaries
+ */
+const getUpdatedSuppressionBoundaries = <T extends SuppressionBoundaries>(
+  existingAlert: estypes.SearchHit<BackendAlertWithSuppressionFields870<{}>>,
+  alert: { _id: string; _source: T },
+  executionId: string
+): Partial<SuppressionBoundaries> => {
+  const boundaries: Partial<SuppressionBoundaries> = {};
+
+  if (!isExistingDateGtEqThanAlert(existingAlert, alert, ALERT_SUPPRESSION_END)) {
+    boundaries[ALERT_SUPPRESSION_END] = alert._source[ALERT_SUPPRESSION_END];
+  }
+  // start date can only be updated for alert created in the same rule execution
+  // it can happen when alert was created in first bulk created, but some of the alerts can be suppressed in the next bulk create request
+  if (
+    existingAlert?._source?.[ALERT_RULE_EXECUTION_UUID] === executionId &&
+    isExistingDateGtEqThanAlert(existingAlert, alert, ALERT_SUPPRESSION_START)
+  ) {
+    boundaries[ALERT_SUPPRESSION_START] = alert._source[ALERT_SUPPRESSION_START];
+  }
+
+  return boundaries;
 };
 
 export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper =
@@ -379,17 +432,18 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   },
                 };
 
-                // We use AlertWithSuppressionFields870 explicitly here as the type instead of
+                // We use BackendAlertWithSuppressionFields870 explicitly here as the type instead of
                 // AlertWithSuppressionFieldsLatest since we're reading alerts rather than writing,
                 // so future versions of Kibana may read 8.7.0 version alerts and need to update them
                 const response = await ruleDataClient
                   .getReader({ namespace: options.spaceId })
-                  .search<typeof suppressionAlertSearchRequest, AlertWithSuppressionFields870<{}>>(
-                    suppressionAlertSearchRequest
-                  );
+                  .search<
+                    typeof suppressionAlertSearchRequest,
+                    BackendAlertWithSuppressionFields870<{}>
+                  >(suppressionAlertSearchRequest);
 
                 const existingAlertsByInstanceId = response.hits.hits.reduce<
-                  Record<string, estypes.SearchHit<AlertWithSuppressionFields870<{}>>>
+                  Record<string, estypes.SearchHit<BackendAlertWithSuppressionFields870<{}>>>
                 >((acc, hit) => {
                   acc[hit._source[ALERT_INSTANCE_ID]] = hit;
                   return acc;
@@ -406,16 +460,8 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   ) {
                     return true;
                   }
-                  const suppressionEnd = existingAlert?._source?.[ALERT_SUPPRESSION_END];
-                  const suppressionEndDate =
-                    typeof suppressionEnd === 'string'
-                      ? suppressionEnd
-                      : suppressionEnd?.toISOString();
-                  const isSuppressedAlready =
-                    suppressionEndDate &&
-                    suppressionEndDate >= alert._source[ALERT_SUPPRESSION_END].toISOString();
 
-                  return !isSuppressedAlready;
+                  return !isExistingDateGtEqThanAlert(existingAlert, alert, ALERT_SUPPRESSION_END);
                 });
 
                 if (nonSuppressedAlerts.length === 0) {
@@ -455,8 +501,12 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                     },
                     {
                       doc: {
+                        ...getUpdatedSuppressionBoundaries(
+                          existingAlert,
+                          alert,
+                          options.executionId
+                        ),
                         [ALERT_LAST_DETECTED]: currentTimeOverride ?? new Date(),
-                        [ALERT_SUPPRESSION_END]: alert._source[ALERT_SUPPRESSION_END],
                         [ALERT_SUPPRESSION_DOCS_COUNT]:
                           existingDocsCount + alert._source[ALERT_SUPPRESSION_DOCS_COUNT] + 1,
                       },
