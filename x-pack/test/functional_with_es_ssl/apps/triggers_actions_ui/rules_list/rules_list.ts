@@ -232,8 +232,10 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
 
       await header.waitUntilLoadingHasFinished();
 
-      const { alerts: alertInstances } = await getAlertSummary(createdRule.id);
-      expect(alertInstances['alert-id'].tracked).to.eql(false);
+      await retry.try(async () => {
+        const { alerts: alertInstances } = await getAlertSummary(createdRule.id);
+        expect(alertInstances['alert-id'].tracked).to.eql(false);
+      });
     });
 
     it('should not untrack disable rule if untrack switch if false', async () => {
@@ -272,8 +274,10 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
 
       await header.waitUntilLoadingHasFinished();
 
-      const { alerts: alertInstances } = await getAlertSummary(createdRule.id);
-      expect(alertInstances['alert-id'].tracked).to.eql(true);
+      await retry.try(async () => {
+        const { alerts: alertInstances } = await getAlertSummary(createdRule.id);
+        expect(alertInstances['alert-id'].tracked).to.eql(true);
+      });
     });
 
     it('should re-enable single alert', async () => {

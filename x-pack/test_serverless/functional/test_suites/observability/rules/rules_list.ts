@@ -387,6 +387,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await testSubjects.click('bulkAction');
       await testSubjects.click('bulkDisable');
 
+      await testSubjects.click('confirmModalConfirmButton');
+      await header.waitUntilLoadingHasFinished();
+
       await retry.try(async () => {
         const resultToast = await toasts.getToastElement(1);
         const toastText = await resultToast.getVisibleText();
