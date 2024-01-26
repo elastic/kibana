@@ -798,16 +798,19 @@ export default ({ getService }: FtrProviderContext): void => {
           );
         expect(isInvestigationFieldForRuleWithEmptyArrayMigratedInSo).to.eql(false);
 
-        const isInvestigationFieldForRuleWithIntendedTypeMigratedInSo =
+        /*
+          It's duplicate of a rule with properly formatted "investigation fields".
+          So we just check that "investigation fields" are in intended format.
+          No migration needs to happen. 
+        */
+        const isInvestigationFieldForRuleWithIntendedTypeInSo =
           await checkInvestigationFieldSoValue(
             undefined,
             { field_names: ['host.name'] },
             es,
             ruleWithIntendedType.id
           );
-        expect(isInvestigationFieldForRuleWithIntendedTypeMigratedInSo).to.eql({
-          field_names: ['host.name'],
-        });
+        expect(isInvestigationFieldForRuleWithIntendedTypeInSo).to.eql(true);
 
         // ORIGINAL RULES - rules selected to be duplicated
         /**
@@ -834,16 +837,18 @@ export default ({ getService }: FtrProviderContext): void => {
           );
         expect(isInvestigationFieldForOriginalRuleWithEmptyArrayMigratedInSo).to.eql(false);
 
-        const isInvestigationFieldForOriginalRuleWithIntendedTypeMigratedInSo =
+        /*
+          Since this rule was created with intended "investigation fields" format,
+          it shouldn't change - no need to migrate. 
+        */
+        const isInvestigationFieldForOriginalRuleWithIntendedTypeInSo =
           await checkInvestigationFieldSoValue(
             undefined,
             { field_names: ['host.name'] },
             es,
             ruleWithIntendedInvestigationField.id
           );
-        expect(isInvestigationFieldForOriginalRuleWithIntendedTypeMigratedInSo).to.eql({
-          field_names: ['host.name'],
-        });
+        expect(isInvestigationFieldForOriginalRuleWithIntendedTypeInSo).to.eql(true);
       });
 
       it('should edit rules with legacy investigation fields', async () => {
