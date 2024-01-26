@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { firstValueFrom, from, of } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { CoreStart } from '@kbn/core/public';
-import { FieldSpec } from '@kbn/data-plugin/common';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
