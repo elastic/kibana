@@ -274,6 +274,10 @@ Content is fetched from the remote (https://feeds.elastic.co) once a day, with p
 |Helps to globally configure the no data page components
 
 
+|{kib-repo}blob/{branch}/src/plugins/presentation_panel/README.md[presentationPanel]
+|The Presentation Panel is the point of contact between any React component and any registered UI actions. Components provided to the Presentation Panel should use an imperative handle to expose methods and state.
+
+
 |{kib-repo}blob/{branch}/src/plugins/presentation_util/README.mdx[presentationUtil]
 |The Presentation Utility Plugin is a set of common, shared components and toolkits for solutions within the Presentation space, (e.g. Dashboards, Canvas).
 
@@ -500,10 +504,6 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_full_story/README.md[cloudFullStory]
 |Integrates with FullStory in order to provide better product analytics, so we can understand how our users make use of Kibana. This plugin should only run on Elastic Cloud.
-
-
-|{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_gain_sight/README.md[cloudGainsight]
-|Integrates with Gainsight in order to provide better product analytics, so we can understand how our users make use of Kibana. This plugin should only run on Elastic Cloud.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_links/README.md[cloudLinks]

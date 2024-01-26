@@ -80,6 +80,7 @@ const AlertRequired = rt.type({
   'kibana.alert.uuid': schemaString,
   'kibana.space_ids': schemaStringArray,
 });
+// prettier-ignore
 const AlertOptional = rt.partial({
   'event.action': schemaString,
   'event.kind': schemaString,

@@ -1,0 +1,20 @@
+COUNT
+
+Syntax
+COUNT([input])
+Parameters
+input
+Column or literal for which to count the number of values. If omitted, returns a
+count all (the number of rows).
+DescriptionReturns the total number (count) of input values.Supported typesCan take any field type as input.Examples
+```esql
+FROM employees
+| STATS COUNT(height)
+```
+
+To count the number of rows, use COUNT() or COUNT(*):
+```esql
+FROM employees
+| STATS count = COUNT(*) BY languages
+| SORT languages DESC
+```
