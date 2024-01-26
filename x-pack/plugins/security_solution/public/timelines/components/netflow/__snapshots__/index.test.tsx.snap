@@ -26,7 +26,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
 
 .c2::before {
   background-image: linear-gradient( 135deg, #535966 25%, transparent 25% ), linear-gradient( -135deg, #535966 25%, transparent 25% ), linear-gradient( 135deg, transparent 75%, #535966 75% ), linear-gradient( -135deg, transparent 75%, #535966 75% );
-  background-position: 0 0,1px 0,1px -1px,0px 1px;
+  background-position: 0 0, 1px 0, 1px -1px, 0px 1px;
   background-size: 2px 2px;
   bottom: 2px;
   content: '';
