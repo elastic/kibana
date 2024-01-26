@@ -89,15 +89,9 @@ function wrapScopedClusterClient(opts: WrapScopedClusterClientOpts): IScopedClus
 }
 
 function wrapEsClient(opts: WrapEsClientOpts): ElasticsearchClient {
-  const { esClient, requestTimeout, ...rest } = opts;
+  const { esClient, ...rest } = opts;
 
-  const wrappedClient = esClient.child(
-    requestTimeout
-      ? {
-          requestTimeout,
-        }
-      : {}
-  );
+  const wrappedClient = esClient.child({});
 
   // Mutating the functions we want to wrap
   wrappedClient.transport.request = getWrappedTransportRequestFn({
@@ -141,6 +135,7 @@ function getWrappedTransportRequestFn(opts: WrapEsClientOpts) {
           } - ${JSON.stringify(params)} - with options ${JSON.stringify(requestOptions)}`
         );
         const result = (await originalRequestFn.call(opts.esClient.transport, params, {
+          requestTimeout: opts.requestTimeout,
           ...requestOptions,
           signal: opts.abortController.signal,
         })) as Promise<TResponse> | TransportResult<TResponse, TContext>;
@@ -159,11 +154,10 @@ function getWrappedTransportRequestFn(opts: WrapEsClientOpts) {
     }
 
     // No wrap
-    return (await originalRequestFn.call(
-      opts.esClient.transport,
-      params,
-      options
-    )) as Promise<TResponse>;
+    return (await originalRequestFn.call(opts.esClient.transport, params, {
+      requestTimeout: opts.requestTimeout,
+      ...options,
+    })) as Promise<TResponse>;
   }
 
   return request;
@@ -198,6 +192,7 @@ function getWrappedEqlSearchFn(opts: WrapEsClientOpts) {
         } - ${JSON.stringify(params)} - with options ${JSON.stringify(searchOptions)}`
       );
       const result = (await originalEqlSearch.call(opts.esClient, params, {
+        requestTimeout: opts.requestTimeout,
         ...searchOptions,
         signal: opts.abortController.signal,
       })) as TransportResult<EqlSearchResponse<TEvent>, unknown> | EqlSearchResponse<TEvent>;
@@ -271,6 +266,7 @@ function getWrappedSearchFn(opts: WrapEsClientOpts) {
         } - ${JSON.stringify(params)} - with options ${JSON.stringify(searchOptions)}`
       );
       const result = (await originalSearch.call(opts.esClient, params, {
+        requestTimeout: opts.requestTimeout,
         ...searchOptions,
         signal: opts.abortController.signal,
       })) as

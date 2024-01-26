@@ -5,14 +5,20 @@
  * 2.0.
  */
 
+import { Logger } from '@kbn/core/server';
 import { parseDuration } from '../../common';
 
-export function getEsRequestTimeout(timeout?: string): number | undefined {
-  if (timeout === undefined) {
-    return timeout;
+export function getEsRequestTimeout(logger: Logger, timeout?: string): number | undefined {
+  if (!timeout) {
+    return undefined;
   }
   const maxRequestTimeout = 5 * 60 * 1000;
-  const requestTimeout = parseDuration(timeout);
-  // return the ES request timeout in ms that is capped at 5 min.
-  return requestTimeout > maxRequestTimeout ? maxRequestTimeout : requestTimeout;
+  try {
+    const requestTimeout = parseDuration(timeout);
+    // return the ES request timeout in ms that is capped at 5 min.
+    return requestTimeout > maxRequestTimeout ? maxRequestTimeout : requestTimeout;
+  } catch (error) {
+    logger.debug(`Invalid format for the rule ES requestTimeout duration: "${timeout}"`);
+    return undefined;
+  }
 }

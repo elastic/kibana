@@ -403,7 +403,7 @@ export class TaskRunner<
       logger: this.logger,
       abortController: this.searchAbortController,
       // Set the ES request timeout to the rule task timeout
-      requestTimeout: getEsRequestTimeout(this.ruleType.ruleTaskTimeout),
+      requestTimeout: getEsRequestTimeout(this.logger, this.ruleType.ruleTaskTimeout),
     };
     const scopedClusterClient = this.context.elasticsearch.client.asScoped(fakeRequest);
     const wrappedScopedClusterClient = createWrappedScopedClusterClientFactory({

@@ -155,13 +155,13 @@ function wrapFetch$({
 
     return pureSearchSource
       .fetch$({
-        ...searchOptions,
-        abortSignal: abortController.signal,
         ...(requestTimeout
           ? {
               transport: { requestTimeout },
             }
           : {}),
+        ...searchOptions,
+        abortSignal: abortController.signal,
       })
       .pipe(
         catchError((error) => {

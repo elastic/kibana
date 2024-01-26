@@ -58,11 +58,14 @@ describe('wrapScopedClusterClient', () => {
         rule,
         logger,
         abortController,
+        requestTimeout: 5000,
       }).client();
+
       await wrappedSearchClient.asInternalUser.search(esQuery);
 
       expect(asInternalUserWrappedSearchFn).toHaveBeenCalledWith(esQuery, {
         signal: abortController.signal,
+        requestTimeout: 5000,
       });
       expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
       expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
@@ -78,11 +81,13 @@ describe('wrapScopedClusterClient', () => {
         rule,
         logger,
         abortController,
+        requestTimeout: 5000,
       }).client();
       await wrappedSearchClient.asCurrentUser.search(esQuery);
 
       expect(asCurrentUserWrappedSearchFn).toHaveBeenCalledWith(esQuery, {
         signal: abortController.signal,
+        requestTimeout: 5000,
       });
       expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
       expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
@@ -98,12 +103,17 @@ describe('wrapScopedClusterClient', () => {
         rule,
         logger,
         abortController,
+        requestTimeout: 5000,
       }).client();
-      await wrappedSearchClient.asInternalUser.search(esQuery, { ignore: [404] });
+      await wrappedSearchClient.asInternalUser.search(esQuery, {
+        ignore: [404],
+        requestTimeout: 10000,
+      });
 
       expect(asInternalUserWrappedSearchFn).toHaveBeenCalledWith(esQuery, {
         ignore: [404],
         signal: abortController.signal,
+        requestTimeout: 10000,
       });
       expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
       expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
@@ -205,6 +215,77 @@ describe('wrapScopedClusterClient', () => {
   });
 
   describe('eql.search', () => {
+    test('uses asInternalUser when specified', async () => {
+      const { abortController, scopedClusterClient, childClient } = getMockClusterClients();
+
+      const asInternalUserWrappedSearchFn = childClient.eql.search;
+
+      const wrappedSearchClient = createWrappedScopedClusterClientFactory({
+        scopedClusterClient,
+        rule,
+        logger,
+        abortController,
+        requestTimeout: 5000,
+      }).client();
+
+      await wrappedSearchClient.asInternalUser.eql.search(eqlQuery);
+
+      expect(asInternalUserWrappedSearchFn).toHaveBeenCalledWith(eqlQuery, {
+        signal: abortController.signal,
+        requestTimeout: 5000,
+      });
+      expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
+      expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
+    });
+
+    test('uses asCurrentUser when specified', async () => {
+      const { abortController, scopedClusterClient, childClient } = getMockClusterClients(true);
+
+      const asCurrentUserWrappedSearchFn = childClient.eql.search;
+
+      const wrappedSearchClient = createWrappedScopedClusterClientFactory({
+        scopedClusterClient,
+        rule,
+        logger,
+        abortController,
+        requestTimeout: 5000,
+      }).client();
+      await wrappedSearchClient.asCurrentUser.eql.search(eqlQuery);
+
+      expect(asCurrentUserWrappedSearchFn).toHaveBeenCalledWith(eqlQuery, {
+        signal: abortController.signal,
+        requestTimeout: 5000,
+      });
+      expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
+      expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
+    });
+
+    test('uses search options when specified', async () => {
+      const { abortController, scopedClusterClient, childClient } = getMockClusterClients();
+
+      const asInternalUserWrappedSearchFn = childClient.eql.search;
+
+      const wrappedSearchClient = createWrappedScopedClusterClientFactory({
+        scopedClusterClient,
+        rule,
+        logger,
+        abortController,
+        requestTimeout: 5000,
+      }).client();
+      await wrappedSearchClient.asInternalUser.eql.search(eqlQuery, {
+        ignore: [404],
+        requestTimeout: 10000,
+      });
+
+      expect(asInternalUserWrappedSearchFn).toHaveBeenCalledWith(eqlQuery, {
+        ignore: [404],
+        signal: abortController.signal,
+        requestTimeout: 10000,
+      });
+      expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
+      expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
+    });
+
     test('re-throws error when an error is thrown', async () => {
       const { abortController, scopedClusterClient, childClient } = getMockClusterClients();
 
@@ -278,6 +359,77 @@ describe('wrapScopedClusterClient', () => {
 
   describe('transport.request', () => {
     describe('ES|QL', () => {
+      test('uses asInternalUser when specified', async () => {
+        const { abortController, scopedClusterClient, childClient } = getMockClusterClients();
+
+        const asInternalUserWrappedSearchFn = childClient.transport.request;
+
+        const wrappedSearchClient = createWrappedScopedClusterClientFactory({
+          scopedClusterClient,
+          rule,
+          logger,
+          abortController,
+          requestTimeout: 5000,
+        }).client();
+
+        await wrappedSearchClient.asInternalUser.transport.request(esqlQueryRequest);
+
+        expect(asInternalUserWrappedSearchFn).toHaveBeenCalledWith(esqlQueryRequest, {
+          signal: abortController.signal,
+          requestTimeout: 5000,
+        });
+        expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
+        expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
+      });
+
+      test('uses asCurrentUser when specified', async () => {
+        const { abortController, scopedClusterClient, childClient } = getMockClusterClients(true);
+
+        const asCurrentUserWrappedSearchFn = childClient.transport.request;
+
+        const wrappedSearchClient = createWrappedScopedClusterClientFactory({
+          scopedClusterClient,
+          rule,
+          logger,
+          abortController,
+          requestTimeout: 5000,
+        }).client();
+        await wrappedSearchClient.asCurrentUser.transport.request(esqlQueryRequest);
+
+        expect(asCurrentUserWrappedSearchFn).toHaveBeenCalledWith(esqlQueryRequest, {
+          signal: abortController.signal,
+          requestTimeout: 5000,
+        });
+        expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
+        expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
+      });
+
+      test('uses search options when specified', async () => {
+        const { abortController, scopedClusterClient, childClient } = getMockClusterClients();
+
+        const asInternalUserWrappedSearchFn = childClient.transport.request;
+
+        const wrappedSearchClient = createWrappedScopedClusterClientFactory({
+          scopedClusterClient,
+          rule,
+          logger,
+          abortController,
+          requestTimeout: 5000,
+        }).client();
+        await wrappedSearchClient.asInternalUser.transport.request(esqlQueryRequest, {
+          ignore: [404],
+          requestTimeout: 10000,
+        });
+
+        expect(asInternalUserWrappedSearchFn).toHaveBeenCalledWith(esqlQueryRequest, {
+          ignore: [404],
+          signal: abortController.signal,
+          requestTimeout: 10000,
+        });
+        expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
+        expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
+      });
+
       test('re-throws error when an error is thrown', async () => {
         const { abortController, scopedClusterClient, childClient } = getMockClusterClients();
 
@@ -347,6 +499,86 @@ describe('wrapScopedClusterClient', () => {
           `"ES|QL search has been aborted due to cancelled execution"`
         );
       });
+    });
+
+    test('uses asInternalUser when specified', async () => {
+      const { abortController, scopedClusterClient, childClient } = getMockClusterClients();
+
+      const asInternalUserWrappedSearchFn = childClient.transport.request;
+
+      const wrappedSearchClient = createWrappedScopedClusterClientFactory({
+        scopedClusterClient,
+        rule,
+        logger,
+        abortController,
+        requestTimeout: 5000,
+      }).client();
+
+      await wrappedSearchClient.asInternalUser.transport.request({ method: '', path: '' });
+
+      expect(asInternalUserWrappedSearchFn).toHaveBeenCalledWith(
+        { method: '', path: '' },
+        {
+          requestTimeout: 5000,
+        }
+      );
+      expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
+      expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
+    });
+
+    test('uses asCurrentUser when specified', async () => {
+      const { abortController, scopedClusterClient, childClient } = getMockClusterClients(true);
+
+      const asCurrentUserWrappedSearchFn = childClient.transport.request;
+
+      const wrappedSearchClient = createWrappedScopedClusterClientFactory({
+        scopedClusterClient,
+        rule,
+        logger,
+        abortController,
+        requestTimeout: 5000,
+      }).client();
+      await wrappedSearchClient.asCurrentUser.transport.request({ method: '', path: '' });
+
+      expect(asCurrentUserWrappedSearchFn).toHaveBeenCalledWith(
+        { method: '', path: '' },
+        {
+          requestTimeout: 5000,
+        }
+      );
+      expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
+      expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
+    });
+
+    test('uses search options when specified', async () => {
+      const { abortController, scopedClusterClient, childClient } = getMockClusterClients();
+
+      const asInternalUserWrappedSearchFn = childClient.transport.request;
+
+      const wrappedSearchClient = createWrappedScopedClusterClientFactory({
+        scopedClusterClient,
+        rule,
+        logger,
+        abortController,
+        requestTimeout: 5000,
+      }).client();
+      await wrappedSearchClient.asInternalUser.transport.request(
+        { method: '', path: '' },
+        {
+          ignore: [404],
+          requestTimeout: 10000,
+        }
+      );
+
+      expect(asInternalUserWrappedSearchFn).toHaveBeenCalledWith(
+        { method: '', path: '' },
+        {
+          ignore: [404],
+          requestTimeout: 10000,
+        }
+      );
+      expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
+      expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
     });
 
     test('re-throws error when an error is thrown', async () => {
