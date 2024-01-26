@@ -7,9 +7,9 @@
  */
 
 import React from 'react';
-import { State } from './reducer';
+import { State } from './state';
 
-export interface ExpandableFlyoutContextValue {
+export interface ExpandableFlyoutApi {
   /**
    * Right, left and preview panels
    */

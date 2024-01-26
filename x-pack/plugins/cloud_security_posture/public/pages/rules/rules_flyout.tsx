@@ -16,17 +16,22 @@ import {
   EuiDescriptionList,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiSwitch,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { CspBenchmarkRule, CspBenchmarkRuleMetadata } from '../../../common/types/latest';
+import { CspBenchmarkRuleMetadata } from '../../../common/types/latest';
 import { getRuleList } from '../configurations/findings_flyout/rule_tab';
 import { getRemediationList } from '../configurations/findings_flyout/overview_tab';
 import * as TEST_SUBJECTS from './test_subjects';
+import { useChangeCspRuleState } from './change_csp_rule_state';
+import { CspBenchmarkRulesWithStates } from './rules_container';
 
 interface RuleFlyoutProps {
   onClose(): void;
-  rule: CspBenchmarkRule;
+  rule: CspBenchmarkRulesWithStates;
+  refetchRulesStates: () => void;
 }
 
 const tabs = [
@@ -48,9 +53,24 @@ const tabs = [
 
 type RuleTab = typeof tabs[number]['id'];
 
-export const RuleFlyout = ({ onClose, rule }: RuleFlyoutProps) => {
+export const RuleFlyout = ({ onClose, rule, refetchRulesStates }: RuleFlyoutProps) => {
   const [tab, setTab] = useState<RuleTab>('overview');
+  const postRequestChangeRulesStates = useChangeCspRuleState();
+  const isRuleMuted = rule?.state === 'muted';
 
+  const switchRuleStates = async () => {
+    if (rule.metadata.benchmark.rule_number) {
+      const rulesObjectRequest = {
+        benchmark_id: rule.metadata.benchmark.id,
+        benchmark_version: rule.metadata.benchmark.version,
+        rule_number: rule.metadata.benchmark.rule_number,
+        rule_id: rule.metadata.id,
+      };
+      const nextRuleStates = isRuleMuted ? 'unmute' : 'mute';
+      await postRequestChangeRulesStates(nextRuleStates, [rulesObjectRequest]);
+      await refetchRulesStates();
+    }
+  };
   return (
     <EuiFlyout
       ownFocus={false}
@@ -62,6 +82,26 @@ export const RuleFlyout = ({ onClose, rule }: RuleFlyoutProps) => {
         <EuiTitle size="l">
           <h2>{rule.metadata.name}</h2>
         </EuiTitle>
+        <EuiSpacer />
+        <EuiSwitch
+          className="eui-textTruncate"
+          checked={!isRuleMuted}
+          onChange={switchRuleStates}
+          data-test-subj={TEST_SUBJECTS.CSP_RULES_TABLE_ROW_ITEM_NAME}
+          label={
+            rule.state === 'muted' ? (
+              <FormattedMessage
+                id="xpack.csp.rules.ruleFlyout.ruleFlyoutDisabledText"
+                defaultMessage="Disabled"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.csp.rules.ruleFlyout.ruleFlyoutEnabledText"
+                defaultMessage="Enabled"
+              />
+            )
+          }
+        />
         <EuiSpacer />
         <EuiTabs>
           {tabs.map((item) => (

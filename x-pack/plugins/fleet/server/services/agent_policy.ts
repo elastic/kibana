@@ -928,13 +928,15 @@ class AgentPolicyService {
 
     const policies = await agentPolicyService.getByIDs(soClient, agentPolicyIds);
     const policiesMap = keyBy(policies, 'id');
-    const fullPolicies = await Promise.all(
-      agentPolicyIds.map((agentPolicyId) =>
-        // There are some potential performance concerns around using `getFullAgentPolicy` in this context, e.g.
-        // re-fetching outputs, settings, and upgrade download source URI data for each policy. This could potentially
-        // be a bottleneck in environments with several thousand agent policies being deployed here.
-        agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId)
-      )
+    const fullPolicies = await pMap(
+      agentPolicyIds,
+      // There are some potential performance concerns around using `getFullAgentPolicy` in this context, e.g.
+      // re-fetching outputs, settings, and upgrade download source URI data for each policy. This could potentially
+      // be a bottleneck in environments with several thousand agent policies being deployed here.
+      (agentPolicyId) => agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId),
+      {
+        concurrency: 50,
+      }
     );
 
     const fleetServerPolicies = fullPolicies.reduce((acc, fullPolicy) => {
@@ -1031,21 +1033,25 @@ class AgentPolicyService {
       message: `User deleting policy [id=${agentPolicyId}]`,
     });
 
-    await esClient.deleteByQuery({
-      index: AGENT_POLICY_INDEX,
-      ignore_unavailable: true,
-      body: {
+    let hasMore = true;
+    while (hasMore) {
+      const res = await esClient.deleteByQuery({
+        index: AGENT_POLICY_INDEX,
+        ignore_unavailable: true,
+        scroll_size: SO_SEARCH_LIMIT,
+        refresh: true,
         query: {
           term: {
             policy_id: agentPolicyId,
           },
         },
-      },
-    });
+      });
+      hasMore = (res.deleted ?? 0) === SO_SEARCH_LIMIT;
+    }
   }
 
   public async getLatestFleetPolicy(esClient: ElasticsearchClient, agentPolicyId: string) {
-    const res = await esClient.search({
+    const res = await esClient.search<FleetServerPolicy>({
       index: AGENT_POLICY_INDEX,
       ignore_unavailable: true,
       rest_total_hits_as_int: true,

@@ -13,13 +13,12 @@ import { lastValueFrom, Observable } from 'rxjs';
 import { promisify } from 'util';
 import type { FunctionRegistrationParameters } from '..';
 import {
-  CreateChatCompletionResponseChunk,
-  FunctionVisibility,
-  MessageRole,
-} from '../../../common/types';
-import { concatenateOpenAiChunks } from '../../../common/utils/concatenate_openai_chunks';
-import { processOpenAiStream } from '../../../common/utils/process_openai_stream';
-import { streamIntoObservable } from '../../service/util/stream_into_observable';
+  ChatCompletionChunkEvent,
+  StreamingChatResponseEventType,
+} from '../../../common/conversation_complete';
+import { FunctionVisibility, MessageRole } from '../../../common/types';
+import { concatenateChatCompletionChunks } from '../../../common/utils/concatenate_chat_completion_chunks';
+import { emitWithConcatenatedMessage } from '../../../common/utils/emit_with_concatenated_message';
 
 const readFile = promisify(Fs.readFile);
 const readdir = promisify(Fs.readdir);
@@ -126,7 +125,7 @@ export function registerEsqlFunction({
         ...messages.slice(1),
       ];
 
-      const source$ = streamIntoObservable(
+      const source$ = (
         await client.chat({
           connectorId,
           messages: withEsqlSystemMessage(
@@ -151,7 +150,6 @@ export function registerEsqlFunction({
             - "Create a query that ..."`
           ),
           signal,
-          stream: true,
           functions: [
             {
               name: 'classify_esql',
@@ -188,7 +186,7 @@ export function registerEsqlFunction({
           ],
           functionCall: 'classify_esql',
         })
-      ).pipe(processOpenAiStream(), concatenateOpenAiChunks());
+      ).pipe(concatenateChatCompletionChunks());
 
       const response = await lastValueFrom(source$);
 
@@ -202,11 +200,10 @@ export function registerEsqlFunction({
 
       const messagesToInclude = mapValues(pick(esqlDocs, keywords), ({ data }) => data);
 
-      const esqlResponse$: Observable<CreateChatCompletionResponseChunk> = streamIntoObservable(
-        await client.chat({
-          messages: [
-            ...withEsqlSystemMessage(
-              `Format every ES|QL query as Markdown:
+      const esqlResponse$: Observable<ChatCompletionChunkEvent> = await client.chat({
+        messages: [
+          ...withEsqlSystemMessage(
+            `Format every ES|QL query as Markdown:
               \`\`\`esql
               <query>
               \`\`\`
@@ -257,39 +254,38 @@ export function registerEsqlFunction({
               Here is an ES|QL query that you can use:
 
               <query>`
-            ),
-            {
-              '@timestamp': new Date().toISOString(),
-              message: {
-                role: MessageRole.Assistant,
-                content: '',
-                function_call: {
-                  name: 'get_esql_info',
-                  arguments: JSON.stringify(args),
-                  trigger: MessageRole.Assistant as const,
-                },
-              },
-            },
-            {
-              '@timestamp': new Date().toISOString(),
-              message: {
-                role: MessageRole.User,
+          ),
+          {
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.Assistant,
+              content: '',
+              function_call: {
                 name: 'get_esql_info',
-                content: JSON.stringify({
-                  documentation: messagesToInclude,
-                }),
+                arguments: JSON.stringify(args),
+                trigger: MessageRole.Assistant as const,
               },
             },
-          ],
-          connectorId,
-          signal,
-          stream: true,
-        })
-      ).pipe(processOpenAiStream());
+          },
+          {
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.User,
+              name: 'get_esql_info',
+              content: JSON.stringify({
+                documentation: messagesToInclude,
+              }),
+            },
+          },
+        ],
+        connectorId,
+        signal,
+      });
 
       return esqlResponse$.pipe((source) => {
-        return new Observable<CreateChatCompletionResponseChunk>((subscriber) => {
+        return new Observable<ChatCompletionChunkEvent>((subscriber) => {
           let cachedContent: string = '';
+          let id: string = '';
 
           function includesDivider() {
             const firstDividerIndex = cachedContent.indexOf('--');
@@ -298,27 +294,20 @@ export function registerEsqlFunction({
 
           source.subscribe({
             next: (message) => {
+              id = message.id;
               if (includesDivider()) {
                 subscriber.next(message);
               }
-              cachedContent += message.choices[0].delta.content || '';
+              cachedContent += message.message.content || '';
             },
             complete: () => {
               if (!includesDivider()) {
                 subscriber.next({
-                  created: 0,
-                  id: '',
-                  model: '',
-                  object: 'chat.completion.chunk',
-                  choices: [
-                    {
-                      delta: {
-                        content: cachedContent,
-                      },
-                      index: 0,
-                      finish_reason: null,
-                    },
-                  ],
+                  id,
+                  message: {
+                    content: cachedContent,
+                  },
+                  type: StreamingChatResponseEventType.ChatCompletionChunk,
                 });
               }
 
@@ -326,22 +315,14 @@ export function registerEsqlFunction({
 
               if (esqlQuery && args.execute) {
                 subscriber.next({
-                  created: 0,
-                  id: '',
-                  model: '',
-                  object: 'chat.completion.chunk',
-                  choices: [
-                    {
-                      delta: {
-                        function_call: {
-                          name: 'execute_query',
-                          arguments: JSON.stringify({ query: esqlQuery }),
-                        },
-                      },
-                      index: 0,
-                      finish_reason: null,
+                  id,
+                  message: {
+                    function_call: {
+                      name: 'execute_query',
+                      arguments: JSON.stringify({ query: esqlQuery }),
                     },
-                  ],
+                  },
+                  type: StreamingChatResponseEventType.ChatCompletionChunk,
                 });
               }
 
@@ -351,7 +332,7 @@ export function registerEsqlFunction({
               subscriber.error(error);
             },
           });
-        });
+        }).pipe(emitWithConcatenatedMessage());
       });
     }
   );

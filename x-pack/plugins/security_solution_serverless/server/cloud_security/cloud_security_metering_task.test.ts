@@ -167,7 +167,7 @@ describe('should return the relevant product tier', () => {
       ],
     } as unknown as ServerlessSecurityConfig;
 
-    const tier = getCloudProductTier(serverlessSecurityConfig);
+    const tier = getCloudProductTier(serverlessSecurityConfig, logger);
 
     expect(tier).toBe('complete');
   });
@@ -273,7 +273,7 @@ describe('should return the relevant product tier', () => {
       productTypes: [{ product_line: 'endpoint', product_tier: 'complete' }],
     } as unknown as ServerlessSecurityConfig;
 
-    const tier = getCloudProductTier(serverlessSecurityConfig);
+    const tier = getCloudProductTier(serverlessSecurityConfig, logger);
 
     expect(tier).toBe('none');
   });
