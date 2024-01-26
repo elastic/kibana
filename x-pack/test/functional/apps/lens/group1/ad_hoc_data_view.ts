@@ -188,11 +188,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should be possible to download a visualization with adhoc dataViews', async () => {
-      await PageObjects.lens.setCSVDownloadDebugFlag(true);
-      await PageObjects.lens.openCSVDownloadShare();
-      if (await testSubjects.exists('csv-download-modal')) {
+      // modal being open blocks test execution
+      if (await PageObjects.share.isShareModalOpen()) {
         await PageObjects.share.closeShareModal();
       }
+      await PageObjects.lens.setCSVDownloadDebugFlag(true);
+      await PageObjects.lens.openCSVDownloadShare();
+
       const csv = await PageObjects.lens.getCSVContent();
       if (await PageObjects.share.isShareModalOpen()) {
         await PageObjects.share.closeShareModal();
