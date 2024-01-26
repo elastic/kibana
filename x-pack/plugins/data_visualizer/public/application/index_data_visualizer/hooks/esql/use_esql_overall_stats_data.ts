@@ -32,6 +32,10 @@ import { getESQLSupportedAggs } from '../../utils/get_supported_aggs';
 import type { ESQLDefaultLimitSizeOption } from '../../components/search_panel/esql/limit_size';
 import { getESQLOverallStats } from '../../search_strategy/esql_requests/get_count_and_cardinality';
 import type { AggregatableField } from '../../types/esql_data_visualizer';
+import {
+  handleError,
+  type HandleErrorCallback,
+} from '../../search_strategy/esql_requests/handle_error';
 
 export interface Column {
   type: string;
@@ -60,7 +64,8 @@ const getESQLDocumentCountStats = async (
   filter?: estypes.QueryDslQueryContainer,
   timeFieldName?: string,
   intervalMs?: number,
-  searchOptions?: ISearchOptions
+  searchOptions?: ISearchOptions,
+  onError?: HandleErrorCallback
 ): Promise<{ documentCountStats?: DocumentCountStats; totalCount: number }> => {
   if (!isESQLQuery(query)) {
     throw Error(
@@ -80,55 +85,74 @@ const getESQLDocumentCountStats = async (
     | stats rows = count(*) by _timestamp_
     | LIMIT 10000`;
 
-    const esqlResults = await runRequest(
-      {
-        params: {
-          query: esqlBaseQuery + aggQuery,
-          ...(filter ? { filter } : {}),
-        },
+    const request = {
+      params: {
+        query: esqlBaseQuery + aggQuery,
+        ...(filter ? { filter } : {}),
       },
-      { ...(searchOptions ?? {}), strategy: 'esql' }
-    );
-
-    let totalCount = 0;
-    const _buckets: Record<string, number> = {};
-    // @ts-expect-error ES types needs to be updated with columns and values as part of esql response
-    esqlResults?.rawResponse.values.forEach((val) => {
-      const [count, bucket] = val;
-      _buckets[bucket] = count;
-      totalCount += count;
-      if (bucket < earliestMs) {
-        earliestMs = bucket;
-      }
-      if (bucket >= latestMs) {
-        latestMs = bucket;
-      }
-    });
-    const result: DocumentCountStats = {
-      interval: intervalMs,
-      probability: 1,
-      randomlySampled: false,
-      timeRangeEarliest: earliestMs,
-      timeRangeLatest: latestMs,
-      buckets: _buckets,
-      totalCount,
     };
-    return { documentCountStats: result, totalCount };
+    try {
+      const esqlResults = await runRequest(request, { ...(searchOptions ?? {}), strategy: 'esql' });
+      let totalCount = 0;
+      const _buckets: Record<string, number> = {};
+      // @ts-expect-error ES types needs to be updated with columns and values as part of esql response
+      esqlResults?.rawResponse.values.forEach((val) => {
+        const [count, bucket] = val;
+        _buckets[bucket] = count;
+        totalCount += count;
+        if (bucket < earliestMs) {
+          earliestMs = bucket;
+        }
+        if (bucket >= latestMs) {
+          latestMs = bucket;
+        }
+      });
+      const result: DocumentCountStats = {
+        interval: intervalMs,
+        probability: 1,
+        randomlySampled: false,
+        timeRangeEarliest: earliestMs,
+        timeRangeLatest: latestMs,
+        buckets: _buckets,
+        totalCount,
+      };
+      return { documentCountStats: result, totalCount };
+    } catch (error) {
+      handleError({
+        request,
+        error,
+        onError,
+        title: i18n.translate('xpack.dataVisualizer.esql.docCountError', {
+          defaultMessage: `Error getting total count & doc count chart for ES|QL time-series data for request:`,
+        }),
+      });
+      return Promise.reject(error);
+    }
   } else {
     //  If not time field, get the total count
-    const esqlResults = await runRequest(
-      {
-        params: {
-          query: esqlBaseQuery + ' | STATS _count_ = COUNT(*)  | LIMIT 1',
-        },
+    const request = {
+      params: {
+        query: esqlBaseQuery + ' | STATS _count_ = COUNT(*)  | LIMIT 1',
+        ...(filter ? { filter } : {}),
       },
-      { ...(searchOptions ?? {}), strategy: 'esql' }
-    );
-
-    return {
-      documentCountStats: undefined,
-      totalCount: esqlResults?.rawResponse.values[0][0],
     };
+    try {
+      const esqlResults = await runRequest(request, { ...(searchOptions ?? {}), strategy: 'esql' });
+      return {
+        documentCountStats: undefined,
+        totalCount: esqlResults?.rawResponse.values[0][0],
+      };
+    } catch (error) {
+      handleError({
+        request,
+        error,
+        onError,
+        title: i18n.translate('xpack.dataVisualizer.esql.docCountNoneTimeseriesError', {
+          defaultMessage: `Error getting total count for ES|QL data:`,
+        }),
+      });
+      return Promise.reject(error);
+    }
   }
 };
 
@@ -144,20 +168,27 @@ const NON_AGGREGATABLE_FIELD_TYPES = new Set<string>([
   KBN_FIELD_TYPES.HISTOGRAM,
 ]);
 
+const fieldStatsErrorTitle = i18n.translate(
+  'xpack.dataVisualizer.index.errorFetchingESQLFieldStatisticsMessage',
+  {
+    defaultMessage: 'Error fetching field statistics for ES|QL query',
+  }
+);
+
 export const useESQLOverallStatsData = (
   fieldStatsRequest:
     | {
-        earliest: number | undefined;
-        latest: number | undefined;
-        aggInterval: TimeBucketsInterval;
-        intervalMs: number;
-        searchQuery: AggregateQuery;
-        indexPattern: string | undefined;
-        timeFieldName: string | undefined;
-        lastRefresh: number;
-        filter?: QueryDslQueryContainer;
-        limitSize?: ESQLDefaultLimitSizeOption;
-      }
+      earliest: number | undefined;
+      latest: number | undefined;
+      aggInterval: TimeBucketsInterval;
+      intervalMs: number;
+      searchQuery: AggregateQuery;
+      indexPattern: string | undefined;
+      timeFieldName: string | undefined;
+      lastRefresh: number;
+      filter?: QueryDslQueryContainer;
+      limitSize?: ESQLDefaultLimitSizeOption;
+    }
     | undefined
 ) => {
   const {
@@ -173,6 +204,13 @@ export const useESQLOverallStatsData = (
   const [overallStatsProgress, setOverallStatsProgress] = useReducer(
     getReducer<DataStatsFetchProgress>(),
     getInitialProgress()
+  );
+  const onError = useCallback(
+    (error, title?: string) =>
+      toasts.addError(error, {
+        title: title ?? fieldStatsErrorTitle,
+      }),
+    [toasts]
   );
 
   const startFetch = useCallback(
@@ -241,7 +279,9 @@ export const useESQLOverallStatsData = (
           searchQuery,
           filter,
           timeFieldName,
-          intervalInMs
+          intervalInMs,
+          undefined,
+          onError
         );
 
         setTableData({ totalCount, documentCountStats });
@@ -315,6 +355,7 @@ export const useESQLOverallStatsData = (
             filter,
             limitSize,
             totalCount,
+            onError,
           });
 
           setTableData({ overallStats: stats });
@@ -325,25 +366,19 @@ export const useESQLOverallStatsData = (
           });
         }
       } catch (error) {
-        if (error.name !== 'AbortError') {
-          const title = i18n.translate(
-            'xpack.dataVisualizer.index.errorFetchingESQLFieldStatisticsMessage',
-            {
-              defaultMessage: 'Error fetching field statistics for ES|QL query',
-            }
-          );
+        // If error already handled in sub functions, no need to propogate
+        if (error.name !== 'AbortError' && error.handled !== true) {
           toasts.addError(error, {
-            title,
+            title: fieldStatsErrorTitle,
           });
-
           // Log error to console for better debugging
           // eslint-disable-next-line no-console
-          console.error(`${title}: fetchOverallStats`, error);
+          console.error(`${fieldStatsErrorTitle}: fetchOverallStats`, error);
         }
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [runRequest, toasts, JSON.stringify({ fieldStatsRequest })]
+    [runRequest, toasts, JSON.stringify({ fieldStatsRequest }), onError]
   );
 
   // auto-update
