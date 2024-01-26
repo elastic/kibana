@@ -88,6 +88,7 @@
     "**/hoist-non-react-statics": "^3.3.2",
     "**/isomorphic-fetch/node-fetch": "^2.6.7",
     "**/remark-parse/trim": "1.0.1",
+    "**/sharp": "0.32.6",
     "**/typescript": "4.7.4",
     "globby/fast-glob": "^3.2.11"
   },
@@ -1469,7 +1470,6 @@
     "@types/selenium-webdriver": "^4.1.21",
     "@types/semver": "^7",
     "@types/set-value": "^2.0.0",
-    "@types/sharp": "^0.30.4",
     "@types/sinon": "^7.0.13",
     "@types/source-map-support": "^0.5.3",
     "@types/stats-lite": "^2.2.0",
