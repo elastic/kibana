@@ -75,7 +75,7 @@
   },
   "engines": {
     "node": "20.10.0",
-    "yarn": "^1.22.19"
+    "yarn": "^1.22.21"
   },
   "resolutions": {
     "**/@hello-pangea/dnd": "16.2.0",
@@ -1684,5 +1684,6 @@
     "xmlbuilder": "13.0.2",
     "yargs": "^15.4.1",
     "yarn-deduplicate": "^6.0.2"
-  }
+  },
+  "packageManager": "yarn@1.22.21"
 }
