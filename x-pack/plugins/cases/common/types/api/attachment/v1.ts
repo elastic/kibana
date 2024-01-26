@@ -72,6 +72,7 @@ export const AttachmentRequestRt = rt.union([
         rt.strict({
           hostname: rt.string,
           endpointId: rt.string,
+          type: rt.union([rt.string, rt.undefined]),
         })
       ),
       type: rt.string,

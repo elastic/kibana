@@ -80,6 +80,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       .getActionCreateService()
       .createAction(createPayload, agentIds.valid);
 
+    console.log({ agentsIdsHosts: agentIds.hosts, createPayload });
     try {
       await updateCases({
         casesClient: this.options.casesClient,

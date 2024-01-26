@@ -11,12 +11,13 @@ import type { CasesClient } from '@kbn/cases-plugin/server';
 import type { BulkCreateArgs } from '@kbn/cases-plugin/server/client/attachments/types';
 import { i18n } from '@kbn/i18n';
 import { APP_ID } from '../../../../../common';
-import type {
-  ImmutableObject,
-  HostMetadataInterface,
-  HostMetadata,
-} from '../../../../../common/endpoint/types';
+import type { HostMetadataInterface } from '../../../../../common/endpoint/types';
 import type { CreateActionPayload } from './types';
+
+export interface SimplifiedEndpointData {
+  agent: Pick<HostMetadataInterface['agent'], 'id' | 'type'>;
+  host: Pick<HostMetadataInterface['host'], 'hostname'>;
+}
 
 export const updateCases = async ({
   casesClient,
@@ -25,14 +26,18 @@ export const updateCases = async ({
 }: {
   casesClient?: CasesClient;
   createActionPayload: CreateActionPayload;
-  endpointData: Array<ImmutableObject<HostMetadataInterface>>;
+  endpointData: SimplifiedEndpointData[];
 }): Promise<void> => {
+  console.log(1111);
   if (!casesClient) {
     return;
   }
   // convert any alert IDs into cases
   let caseIDs: string[] = createActionPayload.case_ids?.slice() || [];
+  console.log(caseIDs);
+
   if (createActionPayload.alert_ids && createActionPayload.alert_ids.length > 0) {
+    console.log('3333');
     const newIDs: string[][] = await Promise.all(
       createActionPayload.alert_ids.map(async (alertID: string) => {
         const cases: GetRelatedCasesByAlertResponse = await casesClient.cases.getCasesByAlertID({
@@ -50,9 +55,11 @@ export const updateCases = async ({
 
   // Update all cases with a comment
   if (caseIDs.length > 0) {
-    const targets = endpointData.map((endpoint: HostMetadata) => ({
+    console.log({ endpointData });
+    const targets = endpointData.map((endpoint: SimplifiedEndpointData) => ({
       hostname: endpoint.host.hostname,
       endpointId: endpoint.agent.id,
+      type: endpoint.agent.type,
     }));
 
     const attachments = caseIDs.map(() => ({
@@ -65,6 +72,7 @@ export const updateCases = async ({
       owner: APP_ID,
     })) as BulkCreateArgs['attachments'];
 
+    console.log('5', caseIDs);
     await Promise.all(
       caseIDs.map((caseId) =>
         casesClient.attachments.bulkCreate({

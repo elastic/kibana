@@ -41,6 +41,7 @@ export const endpointResponseAction = (
               name: hosts[agent],
             },
           },
+          agent_type: 'endpoint',
           endpoint_ids: [agent],
           alert_ids: alertIds,
           ...commonData,

@@ -31,6 +31,7 @@ import type {
   ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
 } from '../lib/base_response_actions_client';
 import { ResponseActionsClientImpl } from '../lib/base_response_actions_client';
+import { updateCases } from '../../create/update_cases';
 
 export type SentinelOneActionsClientOptions = ResponseActionsClientOptions & {
   connectorActions: ActionsClient;
@@ -41,9 +42,10 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   private readonly connectorActionsClient: ActionsClient;
   private readonly getConnector: () => Promise<ConnectorWithExtraFindData>;
 
-  constructor({ connectorActions, ...options }: SentinelOneActionsClientOptions) {
+  constructor({ connectorActions, username, ...options }: SentinelOneActionsClientOptions) {
     super(options);
     this.connectorActionsClient = connectorActions;
+    this.username = username;
 
     this.getConnector = once(async () => {
       let connectorList: ConnectorWithExtraFindData[] = [];
@@ -178,13 +180,14 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     }
   }
 
-  async isolate(options: IsolationRouteRequestBody): Promise<ActionDetails> {
+  private async handleResponseAction(command: SUB_ACTION, options: IsolationRouteRequestBody) {
     await this.validateRequest(options);
-    await this.sendAction(SUB_ACTION.ISOLATE_HOST, { uuid: options.endpoint_ids[0] });
+    await this.sendAction(command, { uuid: options.endpoint_ids[0] });
 
+    const commandName = getCommandName(SUB_ACTION.ISOLATE_HOST);
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions = {
       ...options,
-      command: 'isolate',
+      command: commandName,
     };
     const actionRequestDoc = await this.writeActionRequestToEndpointIndex(reqIndexOptions);
     await this.writeActionResponseToEndpointIndex({
@@ -195,28 +198,52 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       },
     });
 
+    try {
+      const createPayload = {
+        ...options,
+        command: commandName,
+        user: { username: this.username },
+      };
+      const agentId = options.endpoint_ids[0];
+      await updateCases({
+        casesClient: this.options.casesClient,
+        endpointData: [
+          // TODO: my current understanding is that we might include only one S1 host at a time
+          {
+            host: {
+              hostname: actionRequestDoc.EndpointActions.data.hosts?.[agentId].name as string,
+            },
+            agent: {
+              id: agentId,
+              type: options.agent_type,
+            },
+          },
+        ],
+        createActionPayload: createPayload,
+      });
+    } catch (err) {
+      // TODO add log error
+    }
+
     return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
+  }
+
+  async isolate(options: IsolationRouteRequestBody): Promise<ActionDetails> {
+    return this.handleResponseAction(SUB_ACTION.ISOLATE_HOST, options);
   }
 
   async release(options: IsolationRouteRequestBody): Promise<ActionDetails> {
-    await this.validateRequest(options);
-    await this.sendAction(SUB_ACTION.RELEASE_HOST, {
-      uuid: options.endpoint_ids[0],
-    });
-
-    const actionRequestDoc = await this.writeActionRequestToEndpointIndex({
-      ...options,
-      command: 'unisolate',
-    });
-
-    await this.writeActionResponseToEndpointIndex({
-      actionId: actionRequestDoc.EndpointActions.action_id,
-      agentId: actionRequestDoc.agent.id,
-      data: {
-        command: actionRequestDoc.EndpointActions.data.command,
-      },
-    });
-
-    return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
+    return this.handleResponseAction(SUB_ACTION.RELEASE_HOST, options);
   }
 }
+
+const getCommandName = (command: SUB_ACTION): 'isolate' | 'unisolate' => {
+  switch (command) {
+    case SUB_ACTION.ISOLATE_HOST:
+      return 'isolate';
+    case SUB_ACTION.RELEASE_HOST:
+      return 'unisolate';
+    default:
+      throw new Error('Unsupported action type');
+  }
+};
