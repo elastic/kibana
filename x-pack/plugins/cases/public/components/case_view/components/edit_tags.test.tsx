@@ -25,7 +25,15 @@ const defaultProps: EditTagsProps = {
   tags: [],
 };
 
-describe('EditTags ', () => {
+// The suite is skipped for having several flaky tests
+// See:
+// https://github.com/elastic/kibana/issues/175618
+// https://github.com/elastic/kibana/issues/175619
+// https://github.com/elastic/kibana/issues/175621
+// https://github.com/elastic/kibana/issues/175622
+// https://github.com/elastic/kibana/issues/175623
+// https://github.com/elastic/kibana/issues/175655
+describe.skip('EditTags ', () => {
   let appMockRender: AppMockRenderer;
 
   const sampleTags = ['coke', 'pepsi'];
