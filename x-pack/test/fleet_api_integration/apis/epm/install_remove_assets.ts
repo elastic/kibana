@@ -614,6 +614,10 @@ const expectAssetsInstalled = ({
           type: 'component_template',
         },
         {
+          id: 'ecs@mappings',
+          type: 'component_template',
+        },
+        {
           id: 'metrics-all_assets.test_metrics@package',
           type: 'component_template',
         },
