@@ -90,7 +90,7 @@ describe('alert function', () => {
 
   it('filtered alerts', async () => {
     let conversation = await chatClient.complete(
-      'Do I have any active alerts related to logs_synth?'
+      'Do I have any active alerts related to "Threshold surpassed in AI Assistant eval"?'
     );
 
     conversation = await chatClient.complete(
@@ -102,8 +102,8 @@ describe('alert function', () => {
     );
 
     const result = await chatClient.evaluate(conversation, [
-      'Uses alerts function to retrieve active alerts for logs_synth, uses "filter": "logs_synth" in the alert function, not using service.name:"logs_synth" or tags:"logs_synth"',
-      'Returns one or more alerts related to logs_synth, does not return no active alerts related to logs_synth',
+      'Uses alerts function to retrieve active alerts for "Threshold surpassed in AI Assistant eval", uses "filter": "Threshold surpassed in AI Assistant eval" in the alert function',
+      'Returns one or more alerts related to "Threshold surpassed in AI Assistant eval", does not return no active alerts related to "Threshold surpassed in AI Assistant eval"',
       'Uses alerts function to filtering on service.name my-service to retrieve active alerts for that service',
       'Returns one or more alerts related to my-service',
     ]);

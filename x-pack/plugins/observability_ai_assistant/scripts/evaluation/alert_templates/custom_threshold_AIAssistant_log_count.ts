@@ -44,7 +44,7 @@ export const custom_threshold_AIAssistant_log_count = {
   ruleParams: {
     tags: ['observability'],
     consumer: 'logs',
-    name: 'logs_synth',
+    name: 'Threshold surpassed in AI Assistant eval',
     rule_type_id: 'observability.rules.custom_threshold',
     params: {
       criteria: [
