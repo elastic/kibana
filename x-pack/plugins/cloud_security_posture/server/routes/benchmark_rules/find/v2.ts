@@ -13,7 +13,7 @@ import type {
   CspBenchmarkRule,
   FindCspBenchmarkRuleRequest,
   FindCspBenchmarkRuleResponse,
-} from '../../../../common/types/latest';
+} from '../../../../common/types/rules/v4';
 import { getSortedCspBenchmarkRulesTemplates } from './utils';
 
 export const findBenchmarkRuleHandler = async (
