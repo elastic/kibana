@@ -29,6 +29,14 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
   const objectRemover = new ObjectRemover(supertest);
 
   async function refreshAlertsList() {
+    const existsClearFilter = await testSubjects.exists('rules-list-clear-filter');
+    const existsRefreshButton = await testSubjects.exists('refreshRulesButton');
+    if (existsClearFilter) {
+      await testSubjects.click('rules-list-clear-filter');
+    } else if (existsRefreshButton) {
+      await testSubjects.click('refreshRulesButton');
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+    }
     await testSubjects.click('logsTab');
     await testSubjects.click('rulesTab');
   }

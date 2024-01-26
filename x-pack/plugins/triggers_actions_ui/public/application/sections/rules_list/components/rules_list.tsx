@@ -54,7 +54,6 @@ import {
   Pagination,
   Percentiles,
   SnoozeSchedule,
-  RulesListFilters,
   UpdateFiltersProps,
   BulkEditActions,
   UpdateRulesToBulkEditProps,
@@ -107,6 +106,7 @@ import {
 import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
 import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
 import { useRulesListUiState as useUiState } from '../../../hooks/use_rules_list_ui_state';
+import { useRulesListFilterStore } from './hooks/use_rules_list_filter_store';
 
 // Directly lazy import the flyouts because the suspendedComponentWithProps component
 // cause a visual hitch due to the loading spinner
@@ -190,22 +190,11 @@ export const RulesList = ({
     notifications: { toasts },
     ruleTypeRegistry,
   } = kibanaServices;
+
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
   const [inputText, setInputText] = useState<string>(searchFilter);
-
-  const [filters, setFilters] = useState<RulesListFilters>({
-    actionTypes: [],
-    ruleExecutionStatuses: lastResponseFilter || [],
-    ruleLastRunOutcomes: lastRunOutcomeFilter || [],
-    ruleParams: ruleParamFilter || {},
-    ruleStatuses: statusFilter || [],
-    searchText: searchFilter || '',
-    tags: [],
-    types: typeFilter || [],
-    kueryNode: undefined,
-  });
 
   const [ruleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
@@ -258,6 +247,17 @@ export const RulesList = ({
   } = useLoadRuleTypesQuery({ filteredRuleTypes });
   // Fetch action types
   const { actionTypes } = useLoadActionTypesQuery();
+
+  const { filters, setFiltersStore, numberOfFiltersStore, resetFiltersStore } =
+    useRulesListFilterStore({
+      lastResponseFilter,
+      lastRunOutcomeFilter,
+      rulesListKey,
+      ruleParamFilter,
+      statusFilter,
+      searchFilter,
+      typeFilter,
+    });
 
   const rulesTypesFilter = isEmpty(filters.types)
     ? authorizedRuleTypes.map((art) => art.id)
@@ -406,14 +406,10 @@ export const RulesList = ({
 
   const updateFilters = useCallback(
     (updateFiltersProps: UpdateFiltersProps) => {
-      const { filter, value } = updateFiltersProps;
-      setFilters((prev) => ({
-        ...prev,
-        [filter]: value,
-      }));
+      setFiltersStore(updateFiltersProps);
       handleUpdateFiltersEffect(updateFiltersProps);
     },
-    [setFilters, handleUpdateFiltersEffect]
+    [setFiltersStore, handleUpdateFiltersEffect]
   );
 
   const handleClearRuleParamFilter = () => updateFilters({ filter: 'ruleParams', value: {} });
@@ -982,6 +978,8 @@ export const RulesList = ({
               rulesListKey={rulesListKey}
               config={config}
               visibleColumns={visibleColumns}
+              numberOfFilters={numberOfFiltersStore}
+              resetFilters={resetFiltersStore}
             />
             {manageLicenseModalOpts && (
               <ManageLicenseModal

@@ -39,6 +39,7 @@ import {
   CLEAR_SELECTION,
   TOTAL_RULES,
   SELECT_ALL_ARIA_LABEL,
+  CLEAR_FILTERS,
 } from '../translations';
 import {
   Rule,
@@ -140,6 +141,8 @@ export interface RulesListTableProps {
   ) => React.ReactNode;
   renderRuleError?: (rule: RuleTableItem) => React.ReactNode;
   visibleColumns?: string[];
+  numberOfFilters: number;
+  resetFilters: () => void;
 }
 
 interface ConvertRulesToTableItemsOpts {
@@ -205,6 +208,8 @@ export const RulesListTable = (props: RulesListTableProps) => {
     renderSelectAllDropdown,
     renderRuleError = EMPTY_RENDER,
     visibleColumns,
+    resetFilters,
+    numberOfFilters,
   } = props;
 
   const [tagPopoverOpenIndex, setTagPopoverOpenIndex] = useState<number>(-1);
@@ -844,34 +849,56 @@ export const RulesListTable = (props: RulesListTableProps) => {
 
   return (
     <EuiFlexGroup gutterSize="none" direction="column">
-      <EuiFlexGroup gutterSize="none" alignItems="center">
+      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup justifyContent="flexStart" gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              {numberOfSelectedRules > 0 ? (
+                renderSelectAllDropdown?.()
+              ) : (
+                <EuiText
+                  size="xs"
+                  style={{ fontWeight: euiTheme.font.weight.semiBold }}
+                  data-test-subj="totalRulesCount"
+                >
+                  {TOTAL_RULES(formattedTotalRules, rulesState.totalItemCount)}
+                </EuiText>
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {numberOfSelectedRules > 0 && authorizedToModifyAllRules && (
+                <EuiButtonEmpty
+                  size="xs"
+                  aria-label={SELECT_ALL_ARIA_LABEL}
+                  data-test-subj="selectAllRulesButton"
+                  iconType={isAllSelected ? 'cross' : 'pagesSelect'}
+                  onClick={onSelectAll}
+                >
+                  {selectAllButtonText}
+                </EuiButtonEmpty>
+              )}
+            </EuiFlexItem>
+            {numberOfFilters > 0 && (
+              <EuiFlexItem
+                css={{
+                  borderLeft: euiTheme.border.thin,
+                  paddingLeft: euiTheme.size.m,
+                }}
+              >
+                <EuiButtonEmpty
+                  onClick={resetFilters}
+                  size="xs"
+                  iconSide="left"
+                  flush="left"
+                  data-test-subj="rules-list-clear-filter"
+                >
+                  {CLEAR_FILTERS(numberOfFilters)}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>{ColumnSelector}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {numberOfSelectedRules > 0 ? (
-            renderSelectAllDropdown?.()
-          ) : (
-            <EuiText
-              size="xs"
-              style={{ fontWeight: euiTheme.font.weight.semiBold }}
-              data-test-subj="totalRulesCount"
-            >
-              {TOTAL_RULES(formattedTotalRules, rulesState.totalItemCount)}
-            </EuiText>
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {numberOfSelectedRules > 0 && authorizedToModifyAllRules && (
-            <EuiButtonEmpty
-              size="xs"
-              aria-label={SELECT_ALL_ARIA_LABEL}
-              data-test-subj="selectAllRulesButton"
-              iconType={isAllSelected ? 'cross' : 'pagesSelect'}
-              onClick={onSelectAll}
-            >
-              {selectAllButtonText}
-            </EuiButtonEmpty>
-          )}
-        </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexItem>
         <EuiBasicTable
