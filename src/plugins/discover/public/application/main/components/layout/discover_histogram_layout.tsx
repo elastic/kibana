@@ -55,7 +55,6 @@ export const DiscoverHistogramLayout = ({
     if (
       isPlainRecord &&
       datatable &&
-      datatable &&
       [FetchStatus.PARTIAL, FetchStatus.COMPLETE].includes(datatable.fetchStatus)
     ) {
       return {
