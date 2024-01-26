@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { LinkModal } from './link_modal_page';
-export { EmbedModal } from './embed_modal_page';
+export { LinkModal } from './link_modal';
+export { EmbedModal } from './embed_modal';
