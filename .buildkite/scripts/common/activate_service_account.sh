@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-source "$(dirname "$0")/vault_fns.sh"
+source .buildkite/scripts/common/vault_fns.sh
 
 ACCOUNT_NAME="${1:-}"
 
