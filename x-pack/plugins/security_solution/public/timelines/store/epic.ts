@@ -50,7 +50,6 @@ import {
   setChanged,
 } from './actions';
 import type { TimelineModel } from './model';
-import { epicPersistPinnedEvent, isPinnedEventAction } from './epic_pinned_event';
 import { isNotNull } from './helpers';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
 import { myEpicTimelineId } from './my_epic_timeline_id';
@@ -129,9 +128,7 @@ export const createTimelineEpic =
           const templateTimelineId = myEpicTimelineId.getTemplateTimelineId();
           const templateTimelineVersion = myEpicTimelineId.getTemplateTimelineVersion();
 
-          if (isPinnedEventAction(action)) {
-            return epicPersistPinnedEvent(action, timeline, action$, timeline$, allTimelineQuery$);
-          } else if (isSaveTimelineAction(action)) {
+          if (isSaveTimelineAction(action)) {
             const saveAction = action as unknown as ReturnType<typeof saveTimeline>;
             const savedSearch = timeline[action.payload.id].savedSearch;
             return from(
