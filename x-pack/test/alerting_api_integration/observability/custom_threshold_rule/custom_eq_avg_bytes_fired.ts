@@ -83,7 +83,8 @@ export default function ({ getService }: FtrProviderContext) {
       await cleanup({ client: esClient, config: dataForgeConfig, logger });
     });
 
-    describe('Rule creation', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/175360
+    describe.skip('Rule creation', () => {
       it('creates rule successfully', async () => {
         actionId = await createIndexConnector({
           supertest,
