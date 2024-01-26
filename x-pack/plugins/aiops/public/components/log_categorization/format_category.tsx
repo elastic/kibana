@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useMemo } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 import { EuiText, EuiHorizontalRule } from '@elastic/eui';
 import { css, SerializedStyles } from '@emotion/react';
 import type { Category } from '../../../common/api/log_categorization/types';
@@ -37,72 +37,84 @@ interface Styles {
 
 const useStyles = (): Styles => {
   const isDarkTheme = useIsDarkTheme();
-  return isDarkTheme
-    ? {
-        tokenStyle: tokenStyleDark,
-        wildcardStyle: wildcardStyleDark,
-      }
-    : {
-        tokenStyle: tokenStyleLight,
-        wildcardStyle: wildcardStyleLight,
-      };
+
+  return useMemo(
+    () =>
+      isDarkTheme
+        ? {
+            tokenStyle: tokenStyleDark,
+            wildcardStyle: wildcardStyleDark,
+          }
+        : {
+            tokenStyle: tokenStyleLight,
+            wildcardStyle: wildcardStyleLight,
+          },
+    [isDarkTheme]
+  );
 };
 
 export const useCreateFormattedExample = () => {
   const { tokenStyle, wildcardStyle } = useStyles();
 
-  function createFormattedExample(key: string, example: string): JSX.Element[] {
-    const keyTokens = key.split(' ');
-    let tempExample = ` ${example} `;
-    const positions = keyTokens.map((t) => ({
-      id: t,
-      start: 0,
-      end: 0,
-    }));
-    let offset = 0;
-    // match each token in order and record the start and end position
-    for (let i = 0; i < keyTokens.length; i++) {
-      const token = keyTokens[i];
-      const tokenReg = new RegExp(`(\\W)(${token})(\\W)`);
+  const createFormattedExample = useCallback(
+    (key: string, example: string): JSX.Element[] => {
+      const keyTokens = key.split(' ');
+      let tempExample = ` ${example} `;
+      const positions = keyTokens.map((t) => ({
+        id: t,
+        start: 0,
+        end: 0,
+      }));
+      let offset = 0;
+      // match each token in order and record the start and end position
+      for (let i = 0; i < keyTokens.length; i++) {
+        const token = keyTokens[i];
+        const tokenReg = new RegExp(`(\\W)(${token})(\\W)`);
 
-      let j = 0;
-      const result = tokenReg.exec(tempExample);
-      if (!result) {
-        continue;
+        let j = 0;
+        const result = tokenReg.exec(tempExample);
+        if (!result) {
+          continue;
+        }
+        j = result.index;
+        const localEndOFToken = j + token.length + 1;
+        positions[i].start = offset + j + 1;
+        positions[i].end = offset + localEndOFToken;
+        // slice the example string to remove the token and preceding text
+        // to ensure we don't match future tokens in earlier text
+        tempExample = tempExample.slice(localEndOFToken);
+        offset += localEndOFToken;
       }
-      j = result.index;
-      const localEndOFToken = j + token.length + 1;
-      positions[i].start = offset + j + 1;
-      positions[i].end = offset + localEndOFToken;
-      // slice the example string to remove the token and preceding text
-      // to ensure we don't match future tokens in earlier text
-      tempExample = tempExample.slice(localEndOFToken);
-      offset += localEndOFToken;
-    }
 
-    tempExample = ` ${example} `;
+      tempExample = ` ${example} `;
 
-    // build up the list ot elements by chopping up the example string
-    // using the token positions found above
-    const elements: JSX.Element[] = [];
-    let pos = 0;
-    for (let i = 0; i < positions.length; i++) {
+      // build up the list ot elements by chopping up the example string
+      // using the token positions found above
+      const elements: JSX.Element[] = [];
+      let pos = 0;
+      for (let i = 0; i < positions.length; i++) {
+        elements.push(
+          <span css={wildcardStyle}>{tempExample.substring(pos, positions[i].start)}</span>
+        );
+
+        elements.push(
+          <span css={tokenStyle}>
+            {tempExample.substring(positions[i].start, positions[i].end)}
+          </span>
+        );
+        pos = positions[i].end;
+      }
+
       elements.push(
-        <span css={wildcardStyle}>{tempExample.substring(pos, positions[i].start)}</span>
+        <span css={wildcardStyle}>
+          {tempExample.substring(positions[positions.length - 1].end)}
+        </span>
       );
 
-      elements.push(
-        <span css={tokenStyle}>{tempExample.substring(positions[i].start, positions[i].end)}</span>
-      );
-      pos = positions[i].end;
-    }
-
-    elements.push(
-      <span css={wildcardStyle}>{tempExample.substring(positions[positions.length - 1].end)}</span>
-    );
-
-    return elements;
-  }
+      return elements;
+    },
+    [tokenStyle, wildcardStyle]
+  );
 
   return createFormattedExample;
 };
