@@ -583,6 +583,9 @@ export class FleetPlugin
           }
         );
 
+        // Validate Unintall Tokens asynchronously, showing errors in Kibana logs
+        this.validateUninstallTokens();
+
         this.fleetStatus$.next({
           level: ServiceStatusLevels.available,
           summary: 'Fleet is available',
@@ -697,5 +700,26 @@ export class FleetPlugin
     }
 
     return this.logger;
+  }
+
+  private validateUninstallTokens() {
+    const logger = appContextService.getLogger();
+    const uninstallTokenService = appContextService.getUninstallTokenService();
+
+    logger.debug('Validating uninstall tokens');
+    uninstallTokenService
+      ?.checkTokenValidityForAllPolicies()
+      .catch((error) => {
+        logger.warn('Error happened during uninstall token validation.', {
+          error: { message: error },
+        });
+      })
+      .then((unintallTokenValidationError) => {
+        if (unintallTokenValidationError) {
+          logger.warn(unintallTokenValidationError.error);
+        } else {
+          logger.debug('Uninstall tokens validation successful.');
+        }
+      });
   }
 }
