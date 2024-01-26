@@ -33,7 +33,7 @@ const CurrentPlanComponent = ({
     path: 'stack/license_management/home',
   });
 
-  const currentPlan = productTier ?? !isEmpty(licenseType) ? licenseType : undefined;
+  const currentPlan = productTier ? productTier : !isEmpty(licenseType) ? licenseType : undefined;
   const label = productTier ? CURRENT_TIER_LABEL : CURRENT_PLAN_LABEL;
   const link = productTier ? projectFeaturesUrl : licenseManagementUrl;
 
