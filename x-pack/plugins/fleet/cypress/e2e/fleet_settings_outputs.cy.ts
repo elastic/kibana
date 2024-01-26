@@ -35,6 +35,10 @@ import { login } from '../tasks/login';
 
 import { visit } from '../tasks/common';
 
+export const fillYamlConfigBox = (query: string) => {
+  cy.get('[data-test-subj="kibanaCodeEditor"] textarea').type(query, { force: true });
+};
+
 describe('Outputs', () => {
   beforeEach(() => {
     login();
@@ -51,7 +55,7 @@ describe('Outputs', () => {
       it('forces custom when reserved key is included in config YAML box', () => {
         selectESOutput();
 
-        cy.getBySel('kibanaCodeEditor').click().focused().type('bulk_max_size: 1000');
+        fillYamlConfigBox('bulk_max_size: 1000');
 
         cy.getBySel(SETTINGS_OUTPUTS.PRESET_INPUT)
           .should('have.value', 'custom')
@@ -61,7 +65,7 @@ describe('Outputs', () => {
       it('allows balanced when reserved key is not included in config yaml box', () => {
         selectESOutput();
 
-        cy.getBySel('kibanaCodeEditor').click().focused().type('some_random_key: foo');
+        fillYamlConfigBox('some_random_key: foo');
 
         cy.getBySel(SETTINGS_OUTPUTS.PRESET_INPUT)
           .should('have.value', 'balanced')

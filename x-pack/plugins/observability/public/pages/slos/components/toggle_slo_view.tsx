@@ -10,6 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FindSLOResponse } from '@kbn/slo-schema';
+import { SearchState } from '../hooks/use_url_search_state';
+import { SortBySelect } from './common/sort_by_select';
 import { SLOViewSettings } from './slo_view_settings';
 
 export type SLOView = 'cardView' | 'listView';
@@ -20,6 +22,9 @@ interface Props {
   isCompact: boolean;
   sloView: SLOView;
   sloList?: FindSLOResponse;
+  loading: boolean;
+  initialState: SearchState;
+  onStateChange: (newState: Partial<SearchState>) => void;
 }
 
 const toggleButtonsIcons = [
@@ -43,6 +48,9 @@ export function ToggleSLOView({
   onToggleCompactView,
   isCompact = true,
   sloList,
+  loading,
+  initialState,
+  onStateChange,
 }: Props) {
   const total = sloList?.total ?? 0;
   const pageSize = sloList?.perPage ?? 0;
@@ -74,7 +82,11 @@ export function ToggleSLOView({
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
+        <SortBySelect initialState={initialState} loading={loading} onStateChange={onStateChange} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiButtonGroup
+          buttonSize="compressed"
           legend={i18n.translate('xpack.observability.toggleSLOView.euiButtonGroup.sloView', {
             defaultMessage: 'SLO View',
           })}

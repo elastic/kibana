@@ -6,21 +6,23 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { XYChartModel } from '@kbn/lens-embeddable-utils';
+import type { LensConfigWithId } from '../../../types';
 import { formulas } from '../formulas';
 import type { ChartArgs } from './types';
 
-const TOP_VALUES_SIZE = 5;
-
 export const diskSpaceUsageAvailable = {
-  get: ({ dataView }: ChartArgs): XYChartModel => ({
+  get: ({ dataViewId }: ChartArgs): LensConfigWithId => ({
     id: 'diskSpaceUsageAvailable',
+    chartType: 'xy',
     title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.diskUsage', {
       defaultMessage: 'Disk Usage',
     }),
     layers: [
       {
-        data: [
+        seriesType: 'area',
+        type: 'series',
+        xAxis: '@timestamp',
+        yAxis: [
           {
             ...formulas.diskUsage,
             label: i18n.translate(
@@ -40,26 +42,50 @@ export const diskSpaceUsageAvailable = {
             ),
           },
         ],
-        options: {
-          seriesType: 'area',
-        },
-        layerType: 'data',
       },
     ],
-    visualizationType: 'lnsXY',
-    dataView,
+    fittingFunction: 'Linear',
+    legend: {
+      show: true,
+      position: 'bottom',
+    },
+    yBounds: {
+      mode: 'custom',
+      lowerBound: 0,
+      upperBound: 1,
+    },
+    axisTitleVisibility: {
+      showXAxisTitle: false,
+      showYAxisTitle: false,
+    },
+    ...(dataViewId
+      ? {
+          dataset: {
+            index: dataViewId,
+          },
+        }
+      : {}),
   }),
 };
 
 export const diskUsageByMountPoint = {
-  get: ({ dataView }: ChartArgs): XYChartModel => ({
+  get: ({ dataViewId }: ChartArgs): LensConfigWithId => ({
     id: 'DiskUsageByMountPoint',
+    chartType: 'xy',
     title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.diskUsageByMountingPoint', {
       defaultMessage: 'Disk Usage by Mount Point',
     }),
     layers: [
       {
-        data: [
+        seriesType: 'area',
+        type: 'series',
+        xAxis: '@timestamp',
+        breakdown: {
+          type: 'topValues',
+          field: 'system.filesystem.mount_point',
+          size: 5,
+        },
+        yAxis: [
           {
             ...formulas.diskUsage,
             label: i18n.translate(
@@ -70,44 +96,44 @@ export const diskUsageByMountPoint = {
             ),
           },
         ],
-        options: {
-          seriesType: 'area',
-          breakdown: {
-            type: 'top_values',
-            field: 'system.filesystem.mount_point',
-            params: {
-              size: TOP_VALUES_SIZE,
-            },
-          },
-        },
-        layerType: 'data',
       },
     ],
-    visualOptions: {
-      legend: {
-        isVisible: true,
-        position: 'bottom',
-        legendSize: 50 as any,
-      },
-      yLeftExtent: {
-        mode: 'dataBounds',
-        lowerBound: 0,
-        upperBound: 1,
-      },
+    fittingFunction: 'Linear',
+    legend: {
+      show: true,
+      position: 'bottom',
     },
-    visualizationType: 'lnsXY',
-    dataView,
+    yBounds: {
+      mode: 'custom',
+      lowerBound: 0,
+      upperBound: 1,
+    },
+    axisTitleVisibility: {
+      showXAxisTitle: false,
+      showYAxisTitle: false,
+    },
+    ...(dataViewId
+      ? {
+          dataset: {
+            index: dataViewId,
+          },
+        }
+      : {}),
   }),
 };
 export const diskThroughputReadWrite = {
-  get: ({ dataView }: ChartArgs): XYChartModel => ({
+  get: ({ dataViewId }: ChartArgs): LensConfigWithId => ({
     id: 'diskThroughputReadWrite',
+    chartType: 'xy',
     title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.diskIOPS', {
       defaultMessage: 'Disk IOPS',
     }),
     layers: [
       {
-        data: [
+        seriesType: 'area',
+        type: 'series',
+        xAxis: '@timestamp',
+        yAxis: [
           {
             ...formulas.diskIORead,
             label: i18n.translate(
@@ -127,33 +153,40 @@ export const diskThroughputReadWrite = {
             ),
           },
         ],
-        options: {
-          seriesType: 'area',
-        },
-        layerType: 'data',
       },
     ],
-    visualOptions: {
-      yLeftExtent: {
-        mode: 'dataBounds',
-        lowerBound: 0,
-        upperBound: 1,
-      },
+    fittingFunction: 'Linear',
+    legend: {
+      show: true,
+      position: 'bottom',
     },
-    visualizationType: 'lnsXY',
-    dataView,
+    axisTitleVisibility: {
+      showXAxisTitle: false,
+      showYAxisTitle: false,
+    },
+    ...(dataViewId
+      ? {
+          dataset: {
+            index: dataViewId,
+          },
+        }
+      : {}),
   }),
 };
 
 export const diskIOReadWrite = {
-  get: ({ dataView }: ChartArgs): XYChartModel => ({
+  get: ({ dataViewId }: ChartArgs): LensConfigWithId => ({
     id: 'diskIOReadWrite',
+    chartType: 'xy',
     title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.diskThroughput', {
       defaultMessage: 'Disk Throughput',
     }),
     layers: [
       {
-        data: [
+        seriesType: 'area',
+        type: 'series',
+        xAxis: '@timestamp',
+        yAxis: [
           {
             ...formulas.diskReadThroughput,
             label: i18n.translate(
@@ -173,20 +206,23 @@ export const diskIOReadWrite = {
             ),
           },
         ],
-        options: {
-          seriesType: 'area',
-        },
-        layerType: 'data',
       },
     ],
-    visualOptions: {
-      yLeftExtent: {
-        mode: 'dataBounds',
-        lowerBound: 0,
-        upperBound: 1,
-      },
+    fittingFunction: 'Linear',
+    legend: {
+      show: true,
+      position: 'bottom',
     },
-    visualizationType: 'lnsXY',
-    dataView,
+    axisTitleVisibility: {
+      showXAxisTitle: false,
+      showYAxisTitle: false,
+    },
+    ...(dataViewId
+      ? {
+          dataset: {
+            index: dataViewId,
+          },
+        }
+      : {}),
   }),
 };
