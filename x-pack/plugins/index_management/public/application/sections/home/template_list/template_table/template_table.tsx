@@ -80,6 +80,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       name: i18n.translate('xpack.idxMgmt.templateList.table.componentsColumnTitle', {
         defaultMessage: 'Components',
       }),
+      truncateText: true,
       sortable: true,
       width: '20%',
       render: (composedOf: string[] = []) => <span>{composedOf.join(', ')}</span>,
