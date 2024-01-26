@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { FilterManager, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { NotificationsStart } from '@kbn/core-notifications-browser';
+
 import { createFilter, isEmptyFilterValue } from './create_filter';
 import { FILTER_CELL_ACTION_TYPE } from '../../constants';
 import { createCellActionFactory } from '../factory';
@@ -46,10 +47,10 @@ export const createFilterInActionFactory = createCellActionFactory(
         isTypeSupportedByDefaultActions(field.type as KBN_FIELD_TYPES)
       );
     },
-    execute: async ({ data }) => {
+    execute: async ({ data, metadata }) => {
       const field = data[0]?.field;
       const rawValue = data[0]?.value;
-      const dataViewId = data[0]?.dataViewId;
+      const dataViewId = typeof metadata?.dataViewId === 'string' ? metadata.dataViewId : null;
       const value = filterOutNullableValues(valueToArray(rawValue));
 
       if (isValueSupportedByDefaultActions(value)) {

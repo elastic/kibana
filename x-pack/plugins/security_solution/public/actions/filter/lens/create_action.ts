@@ -73,7 +73,8 @@ export const createFilterLensAction = ({
     execute: async ({ data }) => {
       const field = data[0]?.columnMeta?.field;
       const rawValue = data[0]?.value;
-      const dataViewId = data[0]?.columnMeta?.sourceParams?.indexPatternId;
+      const mayBeDataViewId = data[0]?.columnMeta?.sourceParams?.indexPatternId;
+      const dataViewId = typeof mayBeDataViewId === 'string' ? mayBeDataViewId : null;
       const value = filterOutNullableValues(valueToArray(rawValue));
 
       if (!isValueSupportedByDefaultActions(value)) {

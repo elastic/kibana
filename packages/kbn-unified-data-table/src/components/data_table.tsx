@@ -649,6 +649,9 @@ export const UnifiedDataTable = ({
     getCellValue,
     triggerId: cellActionsTriggerId,
     dataGridRef,
+    metadata: {
+      dataViewId: dataView.id,
+    },
   });
 
   const euiGridColumns = useMemo(
