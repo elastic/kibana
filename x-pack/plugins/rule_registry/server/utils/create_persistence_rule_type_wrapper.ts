@@ -35,7 +35,7 @@ import { AlertWithSuppressionFields870 } from '../../common/schemas/8.7.0';
 /**
  * alerts returned from BE have date type coerce to ISO strings
  */
-type BackendAlertWithSuppressionFields870<T> = Omit<
+export type BackendAlertWithSuppressionFields870<T> = Omit<
   AlertWithSuppressionFields870<T>,
   typeof ALERT_SUPPRESSION_START | typeof ALERT_SUPPRESSION_END
 > & {
@@ -130,7 +130,7 @@ const filterDuplicateAlerts = async <T extends { _id: string }>({
 /**
  * suppress alerts by ALERT_INSTANCE_ID in memory
  */
-const suppressAlertsInMemory = <
+export const suppressAlertsInMemory = <
   T extends {
     _id: string;
     _source: {
@@ -189,14 +189,15 @@ const suppressAlertsInMemory = <
 /**
  * Compare existing alert suppression date props with alert to suppressed alert values
  **/
-const isExistingDateGtEqThanAlert = <T extends { [ALERT_SUPPRESSION_END]: Date }>(
+export const isExistingDateGtEqThanAlert = <
+  T extends { [ALERT_SUPPRESSION_END]: Date; [ALERT_SUPPRESSION_START]: Date }
+>(
   existingAlert: estypes.SearchHit<BackendAlertWithSuppressionFields870<{}>>,
   alert: { _id: string; _source: T },
   property: typeof ALERT_SUPPRESSION_END | typeof ALERT_SUPPRESSION_START
 ) => {
   const existingDate = existingAlert?._source?.[property];
-
-  return existingDate && existingDate >= alert._source[ALERT_SUPPRESSION_END].toISOString();
+  return existingDate ? existingDate >= alert._source[property].toISOString() : false;
 };
 
 interface SuppressionBoundaries {
@@ -207,7 +208,7 @@ interface SuppressionBoundaries {
 /**
  * returns updated suppression time boundaries
  */
-const getUpdatedSuppressionBoundaries = <T extends SuppressionBoundaries>(
+export const getUpdatedSuppressionBoundaries = <T extends SuppressionBoundaries>(
   existingAlert: estypes.SearchHit<BackendAlertWithSuppressionFields870<{}>>,
   alert: { _id: string; _source: T },
   executionId: string
