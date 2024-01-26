@@ -17,7 +17,7 @@ import type {
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
 import { parseDuration, DISABLE_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
-import type { ExecutorType } from '@kbn/alerting-plugin/server/types';
+import type { ExecutorType, GetTimeRangeFnOpts } from '@kbn/alerting-plugin/server/types';
 import type { Alert } from '@kbn/alerting-plugin/server';
 
 import { getTimeRange } from '@kbn/alerting-plugin/server/lib';
@@ -290,11 +290,10 @@ export const previewRulesRoute = async (
                 state: statePreview,
                 logger,
                 flappingSettings: DISABLE_FLAPPING_SETTINGS,
-                getTimeRange: (timeWindow?: string, nowString?: string) =>
+                getTimeRange: (opts: GetTimeRangeFnOpts) =>
                   getTimeRange({
                     logger,
-                    window: timeWindow,
-                    ...(nowString ? { forceNow: nowString } : {}),
+                    ...opts,
                   }),
               })) as { state: TState });
 

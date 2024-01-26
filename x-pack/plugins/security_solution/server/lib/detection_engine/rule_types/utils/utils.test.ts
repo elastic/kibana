@@ -67,6 +67,7 @@ import type { GenericBulkCreateResponse } from '../factories';
 import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
 import { getTimeRange } from '@kbn/alerting-plugin/server/lib';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import type { GetTimeRangeFnOpts } from '@kbn/alerting-plugin/server/types';
 
 describe('utils', () => {
   const anchor = '2020-01-01T06:06:06.666Z';
@@ -446,11 +447,10 @@ describe('utils', () => {
   describe('getRuleRangeTuples', () => {
     const logger: ReturnType<typeof loggingSystemMock.createLogger> =
       loggingSystemMock.createLogger();
-    const getTimeRangeExecutorService = (timeWindow?: string, nowString?: string) =>
+    const getTimeRangeExecutorService = (opts: GetTimeRangeFnOpts) =>
       getTimeRange({
         logger,
-        window: timeWindow,
-        ...(nowString ? { forceNow: nowString } : {}),
+        ...opts,
       });
     test('should return a single tuple if no gap', () => {
       const { tuples, remainingGap } = getRuleRangeTuples({
@@ -471,21 +471,19 @@ describe('utils', () => {
       expect(someTuple.from.utc().format()).toEqual('2020-01-01T06:05:06Z');
     });
 
-    test('should return a single tuple if malformed interval prevents gap calculation', () => {
-      const { tuples, remainingGap } = getRuleRangeTuples({
-        previousStartedAt: moment().subtract(30, 's').toDate(),
-        startedAt: moment().subtract(30, 's').toDate(),
-        interval: 'invalid',
-        from: 'now-30s',
-        to: 'now',
-        maxSignals: 20,
-        ruleExecutionLogger,
-        getTimeRange: getTimeRangeExecutorService,
-      });
-      const someTuple = tuples[0];
-      expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(30);
-      expect(tuples.length).toEqual(1);
-      expect(remainingGap.asMilliseconds()).toEqual(0);
+    test('should throw error if malformed interval', () => {
+      expect(() => {
+        getRuleRangeTuples({
+          previousStartedAt: moment().subtract(30, 's').toDate(),
+          startedAt: moment().subtract(30, 's').toDate(),
+          interval: 'invalid',
+          from: 'now-30s',
+          to: 'now',
+          maxSignals: 20,
+          ruleExecutionLogger,
+          getTimeRange: getTimeRangeExecutorService,
+        });
+      }).toThrowErrorMatchingInlineSnapshot(`"Invalid format for windowSize: \\"invalid\\""`);
     });
 
     test('should return two tuples if gap and previouslyStartedAt', () => {
@@ -495,6 +493,7 @@ describe('utils', () => {
         interval: '50s',
         from: 'now-55s',
         to: 'now',
+        lookback: '5s',
         maxSignals: 20,
         ruleExecutionLogger,
         getTimeRange: getTimeRangeExecutorService,
@@ -516,6 +515,7 @@ describe('utils', () => {
         interval: '10s',
         from: 'now-13s',
         to: 'now',
+        lookback: '3s',
         maxSignals: 20,
         ruleExecutionLogger,
         getTimeRange: getTimeRangeExecutorService,
@@ -549,6 +549,7 @@ describe('utils', () => {
         interval: '10s',
         from: 'now-13s',
         to: 'now',
+        lookback: '3s',
         maxSignals: 20,
         ruleExecutionLogger,
         getTimeRange: getTimeRangeExecutorService,

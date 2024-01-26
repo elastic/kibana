@@ -51,6 +51,7 @@ import type { QueryRuleParams } from '../../rule_schema';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 import { getTimeRange } from '@kbn/alerting-plugin/server/lib';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import type { GetTimeRangeFnOpts } from '@kbn/alerting-plugin/server/types';
 
 describe('searchAfterAndBulkCreate', () => {
   let mockService: RuleExecutorServicesMock;
@@ -86,11 +87,10 @@ describe('searchAfterAndBulkCreate', () => {
 
   const logger: ReturnType<typeof loggingSystemMock.createLogger> =
     loggingSystemMock.createLogger();
-  const getTimeRangeExecutorService = (timeWindow?: string, nowString?: string) =>
+  const getTimeRangeExecutorService = (opts: GetTimeRangeFnOpts) =>
     getTimeRange({
       logger,
-      window: timeWindow,
-      ...(nowString ? { forceNow: nowString } : {}),
+      ...opts,
     });
   beforeEach(() => {
     jest.clearAllMocks();

@@ -81,7 +81,13 @@ export interface AlertingApiRequestHandlerContext {
   areApiKeysEnabled: () => Promise<boolean>;
 }
 
-export type GetTimeRangeFn = (timeWindow?: string, nowString?: string) => GetTimeRangeResult;
+export interface GetTimeRangeFnOpts {
+  window?: string;
+  additionalLookback?: string;
+  forceNow?: Date;
+}
+
+export type GetTimeRangeFn = (opts: GetTimeRangeFnOpts) => GetTimeRangeResult;
 
 /**
  * @internal

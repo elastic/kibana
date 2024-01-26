@@ -7,55 +7,28 @@
 
 import { i18n } from '@kbn/i18n';
 import { Logger } from '@kbn/logging';
-import dateMath from '@kbn/datemath';
-import { parseDuration, RulesSettingsQueryDelayProperties } from '../../common';
+import { parseDuration } from '../../common';
+import { GetTimeRangeFnOpts } from '../types';
 
-const NOW_STRING = 'now';
-
-interface GetTimeRangeOpts {
+type GetTimeRangeOpts = GetTimeRangeFnOpts & {
   logger: Logger;
-  queryDelaySettings?: RulesSettingsQueryDelayProperties;
-  window?: string;
-  forceNow?: string;
-}
+  queryDelay?: number;
+};
 
 export interface GetTimeRangeResult {
   dateStart: string;
   dateEnd: string;
 }
 
-const isDate = (d: string | Date) => Object.prototype.toString.call(d) === '[object Date]';
-const isValidDate = (d: string | Date) => isDate(d) && !isNaN((d as Date).valueOf());
-
-export function convertToEsDateMath(nowDate: Date, window?: string) {
-  if (!window) {
-    return NOW_STRING;
-  }
-
-  if (window.substring(0, 3) === NOW_STRING) {
-    // already in ES datemath format
-    return window;
-  }
-
-  // check that window is valid duration
-  try {
-    parseDuration(window);
-    return `${NOW_STRING}-${window}`;
-  } catch (err) {
-    // check whether the string is a valid date
-    const windowDate = new Date(window);
-
-    if (isValidDate(windowDate)) {
-      const diffInMs = nowDate.getTime() - windowDate.getTime();
-      const diffInMsString = diffInMs >= 0 ? `${diffInMs}` : `${diffInMs}`.substring(1);
-      return diffInMs >= 0
-        ? `${NOW_STRING}-${diffInMsString}ms`
-        : `${NOW_STRING}+${diffInMsString}ms`;
-    } else {
+const getWindowDurationInMs = (window?: string): number => {
+  let durationInMs: number = 0;
+  if (window) {
+    try {
+      durationInMs = parseDuration(window);
+    } catch (err) {
       throw new Error(
-        i18n.translate('xpack.alerting.invalidWindowErrorMessage', {
-          defaultMessage:
-            'Invalid format for window: "{window}" - must be valid duration, valid date, or valid ES date math',
+        i18n.translate('xpack.alerting.invalidWindowSizeErrorMessage', {
+          defaultMessage: 'Invalid format for windowSize: "{window}"',
           values: {
             window,
           },
@@ -63,43 +36,29 @@ export function convertToEsDateMath(nowDate: Date, window?: string) {
       );
     }
   }
-}
 
-function parseDateMath(date: string, nowDate: Date) {
-  const parsedDate = dateMath.parse(date, {
-    forceNow: nowDate,
-  });
-  if (parsedDate == null) {
-    throw new Error(
-      i18n.translate('xpack.alerting.invalidDateErrorMessage', {
-        defaultMessage: 'Failed to parse date math for date: "{date}"',
-        values: {
-          date,
-        },
-      })
-    );
-  }
-
-  return parsedDate;
-}
+  return durationInMs;
+};
 
 export function getTimeRange({
   logger,
-  queryDelaySettings,
+  queryDelay,
   forceNow,
   window,
+  additionalLookback,
 }: GetTimeRangeOpts): GetTimeRangeResult {
-  const nowDate = forceNow ? new Date(forceNow) : new Date();
-  const esDateMathString: string = convertToEsDateMath(nowDate, window);
+  const queryDelayS = queryDelay ?? 0;
+  const timeWindowMs: number = getWindowDurationInMs(window);
+  const lookbackWindowMs: number = getWindowDurationInMs(additionalLookback);
+  const queryDelayMs = queryDelayS * 1000;
+  const date = forceNow ? forceNow : new Date();
 
-  if (queryDelaySettings) {
-    logger.debug(`Adjusting rule query time range by ${queryDelaySettings.delay} seconds`);
-  }
+  logger.debug(`Adjusting rule query time range by ${queryDelayS} seconds`);
 
-  const queryDelayString = queryDelaySettings ? `${queryDelaySettings.delay}s` : `0s`;
+  const dateStart = new Date(
+    date.valueOf() - (timeWindowMs + queryDelayMs + lookbackWindowMs)
+  ).toISOString();
+  const dateEnd = new Date(date.valueOf() - queryDelayMs).toISOString();
 
-  const dateStart = parseDateMath(`${esDateMathString}-${queryDelayString}`, nowDate);
-  const dateEnd = parseDateMath(`now-${queryDelayString}`, nowDate);
-
-  return { dateStart: dateStart.utc().toISOString(), dateEnd: dateEnd.utc().toISOString() };
+  return { dateStart, dateEnd };
 }

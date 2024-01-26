@@ -8,6 +8,7 @@ import { createHash } from 'crypto';
 import { chunk, get, invert, isEmpty, partition } from 'lodash';
 import moment from 'moment';
 
+import dateMath from '@kbn/datemath';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
 import { ALERT_UUID, ALERT_RULE_UUID, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
@@ -415,6 +416,7 @@ export const getRuleRangeTuples = ({
   previousStartedAt,
   from,
   to,
+  lookback,
   interval,
   maxSignals,
   ruleExecutionLogger,
@@ -424,14 +426,19 @@ export const getRuleRangeTuples = ({
   previousStartedAt: Date | null | undefined;
   from: string;
   to: string;
+  lookback?: string;
   interval: string;
   maxSignals: number;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   getTimeRange: GetTimeRangeFn;
 }) => {
-  const startedAtString = new Date(startedAt).toISOString();
+  const originalTo = dateMath.parse(to, { forceNow: startedAt });
+  const { dateStart, dateEnd } = getTimeRange({
+    window: interval,
+    additionalLookback: lookback,
+    forceNow: originalTo?.toDate(),
+  });
 
-  const { dateStart, dateEnd } = getTimeRange(from, startedAtString);
   const momentDateStart = moment(dateStart);
   const momentDateEnd = moment(dateEnd);
 

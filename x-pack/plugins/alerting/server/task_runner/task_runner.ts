@@ -32,6 +32,7 @@ import {
   ruleExecutionStatusToRaw,
 } from '../lib';
 import {
+  GetTimeRangeFnOpts,
   IntervalSchedule,
   RawRuleExecutionStatus,
   RawRuleLastRun,
@@ -531,12 +532,11 @@ export class TaskRunner<
               ...(maintenanceWindowsWithoutScopedQueryIds.length
                 ? { maintenanceWindowIds: maintenanceWindowsWithoutScopedQueryIds }
                 : {}),
-              getTimeRange: (timeWindow?: string, nowString?: string) =>
+              getTimeRange: (opts: GetTimeRangeFnOpts) =>
                 getTimeRange({
+                  ...opts,
                   logger: this.logger,
-                  window: timeWindow,
-                  ...(nowString ? { forceNow: nowString } : {}),
-                  ...(this.ruleType.usesQueryDelaySettings ? { queryDelaySettings } : {}),
+                  queryDelay: this.ruleType.usesQueryDelaySettings ? queryDelaySettings.delay : 0,
                 }),
             })
           );

@@ -136,8 +136,14 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           let inputIndex: string[] = [];
           let inputIndexFields: DataViewFieldBase[] = [];
           let runtimeMappings: estypes.MappingRuntimeFields | undefined;
-          const { from, maxSignals, timestampOverride, timestampOverrideFallbackDisabled, to } =
-            params;
+          const {
+            from,
+            maxSignals,
+            timestampOverride,
+            timestampOverrideFallbackDisabled,
+            to,
+            meta,
+          } = params;
           const {
             alertWithPersistence,
             alertWithSuppression,
@@ -313,6 +319,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             from,
             to,
             interval,
+            lookback: meta?.from ? (meta?.from as string) : undefined,
             maxSignals: maxSignals ?? DEFAULT_MAX_SIGNALS,
             ruleExecutionLogger,
             getTimeRange,
