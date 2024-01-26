@@ -282,7 +282,12 @@ export class LensVisService {
     }
 
     const prevSuggestionDeps = suggestionContextSelectedPreviously?.suggestionDeps;
-    const nextSuggestionDeps = getSuggestionDeps(queryParams);
+    const nextSuggestionDeps = getSuggestionDeps({
+      dataView: queryParams.dataView,
+      query: queryParams.query,
+      columns: queryParams.columns,
+      breakdownField,
+    });
 
     let shouldUpdateSelectedSuggestionDueToDepsChange = false;
 
@@ -682,8 +687,15 @@ const getSuggestionDeps = ({
   dataView,
   query,
   columns,
+  breakdownField,
 }: {
   dataView: DataView;
   query?: Query | AggregateQuery;
   columns?: DatatableColumn[];
-}): UnifiedHistogramSuggestionContext['suggestionDeps'] => [dataView.id, columns, query];
+  breakdownField: DataViewField | undefined;
+}): UnifiedHistogramSuggestionContext['suggestionDeps'] => [
+  dataView.id,
+  columns,
+  query,
+  breakdownField?.name,
+];

@@ -162,7 +162,12 @@ export interface UnifiedHistogramSuggestionContext {
   suggestion: Suggestion | undefined;
   type: UnifiedHistogramSuggestionType;
   suggestionDeps:
-    | [string | undefined, DatatableColumn[] | undefined, Query | AggregateQuery | undefined]
+    | [
+        string | undefined,
+        DatatableColumn[] | undefined,
+        Query | AggregateQuery | undefined,
+        string | undefined
+      ]
     | undefined;
 }
 
