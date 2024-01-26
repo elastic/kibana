@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { ComponentProps } from 'react';
 import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 import { render } from '../../utils/test_helper';
 import { AlertsFlyout } from './alerts_flyout';
 import type { TopAlert } from '../../typings/alerts';
+
+const rawAlert = {} as ComponentProps<typeof AlertsFlyout>['rawAlert'];
 
 describe('AlertsFlyout', () => {
   jest
@@ -22,6 +24,7 @@ describe('AlertsFlyout', () => {
     const flyout = render(
       <AlertsFlyout
         alert={activeAlert}
+        rawAlert={rawAlert}
         observabilityRuleTypeRegistry={observabilityRuleTypeRegistryMock}
         onClose={jest.fn()}
       />
@@ -34,6 +37,7 @@ describe('AlertsFlyout', () => {
     const flyout = render(
       <AlertsFlyout
         alert={recoveredAlert}
+        rawAlert={rawAlert}
         observabilityRuleTypeRegistry={observabilityRuleTypeRegistryMock}
         onClose={jest.fn()}
       />

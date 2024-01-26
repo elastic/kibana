@@ -30,6 +30,7 @@ const defaultProps = {
   shownAgents: 10,
   inactiveShownAgents: 0,
   totalManagedAgentIds: [],
+  inactiveManagedAgentIds: [],
   selectionMode: 'manual',
   currentQuery: '',
   selectedAgents: [],
@@ -126,6 +127,10 @@ describe('AgentBulkActions', () => {
   });
 
   describe('When in query mode', () => {
+    mockedExperimentalFeaturesService.get.mockReturnValue({
+      diagnosticFileUploadEnabled: true,
+    } as any);
+
     it('should show correct actions for active agents when no managed policies exist', async () => {
       const results = render({
         ...defaultProps,
@@ -162,13 +167,55 @@ describe('AgentBulkActions', () => {
 
       expect(results.getByText('Add / remove tags').closest('button')!).toBeEnabled();
       expect(results.getByText('Assign to new policy').closest('button')!).toBeEnabled();
-      expect(results.getByText('Unenroll 8 agents').closest('button')!).toBeEnabled();
-      expect(results.getByText('Upgrade 8 agents').closest('button')!).toBeEnabled();
-      expect(results.getByText('Schedule upgrade for 8 agents').closest('button')!).toBeDisabled();
       expect(
         results.getByText('Request diagnostics for 8 agents').closest('button')!
       ).toBeEnabled();
+      expect(results.getByText('Unenroll 8 agents').closest('button')!).toBeEnabled();
+      expect(results.getByText('Upgrade 8 agents').closest('button')!).toBeEnabled();
+      expect(results.getByText('Schedule upgrade for 8 agents').closest('button')!).toBeDisabled();
       expect(results.getByText('Restart upgrade 8 agents').closest('button')!).toBeEnabled();
+    });
+
+    it('should show correct actions also when there are inactive managed agents', async () => {
+      const results = render({
+        ...defaultProps,
+        inactiveManagedAgentIds: ['agentId1', 'agentId2'],
+        totalManagedAgentIds: ['agentId1', 'agentId2', 'agentId3'],
+        selectionMode: 'query',
+      });
+
+      const bulkActionsButton = results.getByTestId('agentBulkActionsButton');
+      await act(async () => {
+        fireEvent.click(bulkActionsButton);
+      });
+
+      expect(results.getByText('Add / remove tags').closest('button')!).toBeEnabled();
+      expect(results.getByText('Assign to new policy').closest('button')!).toBeEnabled();
+      expect(results.getByText('Unenroll 9 agents').closest('button')!).toBeEnabled();
+      expect(results.getByText('Upgrade 9 agents').closest('button')!).toBeEnabled();
+      expect(results.getByText('Schedule upgrade for 9 agents').closest('button')!).toBeDisabled();
+      expect(results.getByText('Restart upgrade 9 agents').closest('button')!).toBeEnabled();
+    });
+
+    it('should show disabled actions when only inactive agents are selected', async () => {
+      const results = render({
+        ...defaultProps,
+        inactiveShownAgents: 10,
+        selectedAgents: [{ id: 'agent1' }, { id: 'agent2' }] as Agent[],
+        selectionMode: 'query',
+      });
+
+      const bulkActionsButton = results.getByTestId('agentBulkActionsButton');
+      await act(async () => {
+        fireEvent.click(bulkActionsButton);
+      });
+
+      expect(results.getByText('Add / remove tags').closest('button')!).toBeDisabled();
+      expect(results.getByText('Assign to new policy').closest('button')!).toBeDisabled();
+      expect(results.getByText('Unenroll 0 agents').closest('button')!).toBeDisabled();
+      expect(results.getByText('Upgrade 0 agents').closest('button')!).toBeDisabled();
+      expect(results.getByText('Schedule upgrade for 0 agents').closest('button')!).toBeDisabled();
+      expect(results.getByText('Restart upgrade 0 agents').closest('button')!).toBeDisabled();
     });
 
     it('should generate a correct kuery to select agents', async () => {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { RuleResponseAction } from '../../../../common/api/detection_engine/model/rule_response_actions';
-import { getRbacControl } from '../../../management/components/endpoint_responder/lib/console_commands_definition';
-import { getUiCommand } from '../../../management/components/endpoint_response_actions_list/components/hooks';
+import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../common/endpoint/service/response_actions/constants';
+import type { RuleResponseAction } from '../../../../common/api/detection_engine';
+import { getRbacControl } from '../../../../common/endpoint/service/response_actions/utils';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 export const useCheckEndpointPermissions = (action: RuleResponseAction) => {
@@ -15,7 +15,7 @@ export const useCheckEndpointPermissions = (action: RuleResponseAction) => {
 
   if (action?.actionTypeId === '.endpoint' && action?.params?.command) {
     return !getRbacControl({
-      commandName: getUiCommand(action.params.command),
+      commandName: RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[action.params.command],
       privileges: endpointPrivileges,
     });
   }
