@@ -21,6 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const toasts = getService('toasts');
   const deployment = getService('deployment');
+  const testSubjects = getService('testSubjects');
 
   describe('shared links', function describeIndexTests() {
     let baseUrl: string;
@@ -64,6 +65,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('permalink', function () {
         it('should allow for copying the snapshot URL', async function () {
+          if (await PageObjects.share.isShareModalOpen()) {
+            await PageObjects.share.closeShareModal();
+          }
           if (!(await PageObjects.share.isShareMenuOpen())) {
             await PageObjects.share.clickShareTopNavButton();
           }
@@ -99,10 +103,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should allow for copying the snapshot URL as a short URL', async function () {
+          // modal being open blocks test execution
+          if (await PageObjects.share.isShareModalOpen()) {
+            await PageObjects.share.closeShareModal();
+          }
           const re = new RegExp(baseUrl + '/app/r/s/.+$');
-          await PageObjects.share.checkShortenUrl();
+
           await retry.try(async () => {
-            const actualUrl = await PageObjects.share.getSharedUrl();
+            // need to close the modal for the rest of the test to execute on retries
+            if (await PageObjects.share.isShareModalOpen()) {
+              await PageObjects.share.closeShareModal();
+            }
+            if (!(await PageObjects.share.isShareMenuOpen())) {
+              await PageObjects.share.clickShareTopNavButton();
+            }
+            // do not change these testSubjects - this test is very particular
+            await testSubjects.click('Permalinks');
+            await testSubjects.setCheckbox('useShortUrl', 'check');
+            await (
+              await testSubjects.find('createShortUrl')
+            ).waitForDeletedByCssSelector('.euiLoadingSpinner');
+            const actualUrl = await testSubjects.getAttribute(
+              'copyShareUrlButton',
+              'data-share-url'
+            );
             expect(actualUrl).to.match(re);
           });
           await PageObjects.share.closeShareModal();
@@ -113,8 +137,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             baseUrl + '/app/discover#' + '/view/ab12e3c0-f231-11e6-9486-733b1ac9221a' + '?_g=()';
           await PageObjects.discover.loadSavedSearch('A Saved Search');
           await PageObjects.share.clickShareTopNavButton();
-          await PageObjects.share.exportAsSavedObject();
-          const actualUrl = await PageObjects.share.getSharedUrl();
+          await testSubjects.click('Permalinks');
+          await testSubjects.click('exportAsSavedObject');
+          await testSubjects.setCheckbox('useShortUrl', 'check');
+          await (
+            await testSubjects.find('createShortUrl')
+          ).waitForDeletedByCssSelector('.euiLoadingSpinner');
+          const actualUrl = await testSubjects.getAttribute('copyShareUrlButton', 'data-share-url');
           expect(actualUrl).to.be(expectedUrl);
           await PageObjects.share.closeShareModal();
         });

@@ -55,17 +55,15 @@ export class SharePageObject extends FtrService {
    * in a pure OSS environment, the permalinks sharing panel is displayed initially
    */
   async openPermaLinks() {
-    if (await this.testSubjects.exists('sharePanel-Permalinks')) {
-      await this.testSubjects.click(`sharePanel-Permalinks`);
-    }
-  }
-
-  async getSharedUrl() {
     if (await this.testSubjects.exists('Permalinks')) {
       await this.testSubjects.click('Permalinks');
     } else {
       await this.testSubjects.click('sharePanel-Permalinks');
     }
+  }
+
+  async getSharedUrl() {
+    this.openPermaLinks();
     return await this.testSubjects.getAttribute('copyShareUrlButton', 'data-share-url');
   }
 
@@ -78,12 +76,7 @@ export class SharePageObject extends FtrService {
   }
 
   async checkShortenUrl() {
-    await this.closeShareModal();
-    if (await this.testSubjects.exists('Permalinks')) {
-      await this.testSubjects.click('Permalinks');
-    } else {
-      await this.testSubjects.click('sharePanel-Permalinks');
-    }
+    this.openPermaLinks();
     const shareForm = await this.testSubjects.find('shareUrlForm');
     await this.testSubjects.setCheckbox('useShortUrl', 'check');
     await shareForm.waitForDeletedByCssSelector('.euiLoadingSpinner');
