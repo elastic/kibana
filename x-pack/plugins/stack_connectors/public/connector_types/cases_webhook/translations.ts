@@ -211,7 +211,7 @@ export const CREATE_INCIDENT_RESPONSE_KEY = i18n.translate(
 export const CREATE_INCIDENT_RESPONSE_KEY_HELP = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.createIncidentResponseKeyHelpText',
   {
-    defaultMessage: 'JSON key in the create case response that contains the external case ID',
+    defaultMessage: 'JSON key in the create external case response that contains the case ID',
   }
 );
 
@@ -245,7 +245,7 @@ export const GET_INCIDENT_TITLE_KEY = i18n.translate(
 export const GET_INCIDENT_TITLE_KEY_HELP = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.getIncidentResponseExternalTitleKeyHelp',
   {
-    defaultMessage: 'JSON key in the get case response that contains the external case title',
+    defaultMessage: 'JSON key in the get external case response that contains the case title',
   }
 );
 
