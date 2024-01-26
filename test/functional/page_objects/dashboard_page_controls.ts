@@ -258,13 +258,11 @@ export class DashboardPageControls extends FtrService {
 
     if (additionalSettings) {
       if (controlType === OPTIONS_LIST_CONTROL) {
-        // only options lists currently have additional settings
         await this.optionsListSetAdditionalSettings(
           additionalSettings as OptionsListAdditionalSettings
         );
       }
       if (controlType === RANGE_SLIDER_CONTROL) {
-        // only options lists currently have additional settings
         await this.rangeSliderSetAdditionalSettings(
           additionalSettings as RangeSliderAdditionalSettings
         );
