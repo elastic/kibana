@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -10,7 +17,7 @@ describe('UpdateSourceEditor', () => {
   beforeEach(() => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     require('./esql_utils').getFields = async () => {
-      return { 
+      return {
         dateFields: ['timestamp', 'utc_timestamp'],
         geoFields: ['location', 'dest_location'],
       };
@@ -30,14 +37,12 @@ describe('UpdateSourceEditor', () => {
           {
             name: 'location',
             type: 'geo_point',
-          }
+          },
         ],
-        narrowByMapBounds: false
+        narrowByMapBounds: false,
       });
       render(<UpdateSourceEditor onChange={onChange} sourceDescriptor={sourceDescriptor} />);
-      await waitFor(() => 
-        getNarrowByMapBoundsSwitch()
-      );
+      await waitFor(() => getNarrowByMapBoundsSwitch());
       userEvent.click(getNarrowByMapBoundsSwitch());
       await waitFor(() =>
         expect(onChange).toBeCalledWith(
@@ -55,20 +60,16 @@ describe('UpdateSourceEditor', () => {
           {
             name: 'location',
             type: 'geo_point',
-          }
+          },
         ],
         geoField: 'dest_location',
-        narrowByMapBounds: false
+        narrowByMapBounds: false,
       });
       render(<UpdateSourceEditor onChange={onChange} sourceDescriptor={sourceDescriptor} />);
-      await waitFor(() => 
-        getNarrowByMapBoundsSwitch()
-      );
+      await waitFor(() => getNarrowByMapBoundsSwitch());
       userEvent.click(getNarrowByMapBoundsSwitch());
       await waitFor(() =>
-        expect(onChange).toBeCalledWith(
-          { propName: 'narrowByMapBounds', value: true }
-        )
+        expect(onChange).toBeCalledWith({ propName: 'narrowByMapBounds', value: true })
       );
     });
   });
@@ -86,14 +87,12 @@ describe('UpdateSourceEditor', () => {
           {
             name: 'location',
             type: 'geo_point',
-          }
+          },
         ],
-        narrowByGlobalTime: false
+        narrowByGlobalTime: false,
       });
       render(<UpdateSourceEditor onChange={onChange} sourceDescriptor={sourceDescriptor} />);
-      await waitFor(() => 
-        getNarrowByTimeSwitch()
-      );
+      await waitFor(() => getNarrowByTimeSwitch());
       userEvent.click(getNarrowByTimeSwitch());
       await waitFor(() =>
         expect(onChange).toBeCalledWith(
@@ -111,20 +110,16 @@ describe('UpdateSourceEditor', () => {
           {
             name: 'location',
             type: 'geo_point',
-          }
+          },
         ],
         dateField: 'utc_timestamp',
-        narrowByGlobalTime: false
+        narrowByGlobalTime: false,
       });
       render(<UpdateSourceEditor onChange={onChange} sourceDescriptor={sourceDescriptor} />);
-      await waitFor(() => 
-        getNarrowByTimeSwitch()
-      );
+      await waitFor(() => getNarrowByTimeSwitch());
       userEvent.click(getNarrowByTimeSwitch());
       await waitFor(() =>
-        expect(onChange).toBeCalledWith(
-          { propName: 'narrowByGlobalTime', value: true }
-        )
+        expect(onChange).toBeCalledWith({ propName: 'narrowByGlobalTime', value: true })
       );
     });
   });
