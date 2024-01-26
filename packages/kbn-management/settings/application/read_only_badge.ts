@@ -9,10 +9,10 @@
 import { i18n } from '@kbn/i18n';
 
 export const readOnlyBadge = {
-  text: i18n.translate('advancedSettings.badge.readOnly.text', {
+  text: i18n.translate('management.settings.badge.readOnly.text', {
     defaultMessage: 'Read only',
   }),
-  tooltip: i18n.translate('advancedSettings.badge.readOnly.tooltip', {
+  tooltip: i18n.translate('management.settings.badge.readOnly.tooltip', {
     defaultMessage: 'Unable to save advanced settings',
   }),
   iconType: 'glasses',
