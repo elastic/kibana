@@ -223,7 +223,7 @@ export const contentHeaderTooltipParagraph2 = i18n.translate(
 );
 
 export const resourceHeaderTooltipParagraph = i18n.translate(
-  'xpack.logExplorer.dataTable.header.resource.tooltip.paragraph',
+  'xpack.logsExplorer.dataTable.header.resource.tooltip.paragraph',
   {
     defaultMessage: "Fields that provide information on the document's source, such as:",
   }
