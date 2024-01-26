@@ -105,8 +105,9 @@ export type FunctionResponse =
   | Observable<ChatCompletionChunkEvent | MessageAddEvent>;
 
 export enum FunctionVisibility {
-  System = 'system',
-  User = 'user',
+  AssistantOnly = 'assistantOnly',
+  UserOnly = 'userOnly',
+  Internal = 'internal',
   All = 'all',
 }
 

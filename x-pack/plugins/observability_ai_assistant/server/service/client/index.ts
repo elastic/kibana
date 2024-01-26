@@ -26,6 +26,7 @@ import {
 } from '../../../common/conversation_complete';
 import {
   FunctionResponse,
+  FunctionVisibility,
   MessageRole,
   type CompatibleJSONSchema,
   type Conversation,
@@ -199,6 +200,13 @@ export class ObservabilityAIAssistantClient {
                     ? []
                     : functionClient
                         .getFunctions()
+                        .filter((fn) => {
+                          const visibility = fn.definition.visibility ?? FunctionVisibility.All;
+                          return (
+                            visibility === FunctionVisibility.All ||
+                            visibility === FunctionVisibility.AssistantOnly
+                          );
+                        })
                         .map((fn) => pick(fn.definition, 'name', 'description', 'parameters')),
               })
             ).pipe(emitWithConcatenatedMessage(), shareReplay());
