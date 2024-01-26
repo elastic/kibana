@@ -128,7 +128,7 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
       const rows = await tableListContainer.findAllByClassName('euiTableRow');
       const row = rows[rowIndex];
       const cells = await row.findAllByClassName('euiTableRowCell');
-      return Number(await cells[0].getVisibleText());
+      return Number(await cells[1].getVisibleText());
     },
 
     async assertDiscoverDocCountExists() {

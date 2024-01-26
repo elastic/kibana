@@ -39,6 +39,6 @@ export const getSavedSearch = async (savedSearchId: string, deps: GetSavedSearch
     savedSearch.attributes,
     undefined,
     await deps.searchSourceStart.create(searchSourceValues),
-    false
+    Boolean(savedSearch.managed)
   );
 };

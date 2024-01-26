@@ -88,6 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       query2,
       savedSearchesRequests,
       setQuery,
+      expectedRequests = 2,
     }: {
       type: 'ese' | 'esql';
       savedSearch: string;
@@ -95,32 +96,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       query2: string;
       savedSearchesRequests?: number;
       setQuery: (query: string) => Promise<void>;
+      expectedRequests?: number;
+      expectedRefreshRequest?: number;
     }) => {
-      it('should send 2 search requests (documents + chart) on page load', async () => {
+      it(`should send ${expectedRequests} search requests (documents + chart) on page load`, async () => {
         await browser.refresh();
         await browser.execute(async () => {
           performance.setResourceTimingBufferSize(Number.MAX_SAFE_INTEGER);
         });
         await waitForLoadingToFinish();
         const searchCount = await getSearchCount(type);
-        expect(searchCount).to.be(2);
+        expect(searchCount).to.be(expectedRequests);
       });
 
-      it('should send 2 requests (documents + chart) when refreshing', async () => {
-        await expectSearches(type, 2, async () => {
+      it(`should send ${expectedRequests} requests (documents + chart) when refreshing`, async () => {
+        await expectSearches(type, expectedRequests, async () => {
           await queryBar.clickQuerySubmitButton();
         });
       });
 
-      it('should send 2 requests (documents + chart) when changing the query', async () => {
-        await expectSearches(type, 2, async () => {
+      it(`should send ${expectedRequests} requests (documents + chart) when changing the query`, async () => {
+        await expectSearches(type, expectedRequests, async () => {
           await setQuery(query1);
           await queryBar.clickQuerySubmitButton();
         });
       });
 
-      it('should send 2 requests (documents + chart) when changing the time range', async () => {
-        await expectSearches(type, 2, async () => {
+      it(`should send ${expectedRequests} requests (documents + chart) when changing the time range`, async () => {
+        await expectSearches(type, expectedRequests, async () => {
           await PageObjects.timePicker.setAbsoluteRange(
             'Sep 21, 2015 @ 06:31:44.000',
             'Sep 23, 2015 @ 00:00:00.000'
@@ -128,16 +131,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('should send 2 requests (documents + chart) when toggling the chart visibility', async () => {
-        await expectSearches(type, 2, async () => {
-          await PageObjects.discover.toggleChartVisibility();
-        });
-        await expectSearches(type, 2, async () => {
-          await PageObjects.discover.toggleChartVisibility();
-        });
-      });
-
-      it('should send 2 requests for saved search changes', async () => {
+      it(`should send ${savedSearchesRequests} requests for saved search changes`, async () => {
         await setQuery(query1);
         await queryBar.clickQuerySubmitButton();
         await PageObjects.timePicker.setAbsoluteRange(
@@ -148,24 +142,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // TODO: Check why the request happens 4 times in case of opening a saved search
         // https://github.com/elastic/kibana/issues/165192
         // creating the saved search
-        await expectSearches(type, savedSearchesRequests ?? 2, async () => {
+        await expectSearches(type, savedSearchesRequests ?? expectedRequests, async () => {
           await PageObjects.discover.saveSearch(savedSearch);
         });
         // resetting the saved search
         await setQuery(query2);
         await queryBar.clickQuerySubmitButton();
         await waitForLoadingToFinish();
-        await expectSearches(type, 2, async () => {
+        await expectSearches(type, expectedRequests, async () => {
           await PageObjects.discover.revertUnsavedChanges();
         });
         // clearing the saved search
-        await expectSearches('ese', 2, async () => {
+        await expectSearches('ese', savedSearchesRequests ?? expectedRequests, async () => {
           await testSubjects.click('discoverNewButton');
           await waitForLoadingToFinish();
         });
         // loading the saved search
         // TODO: https://github.com/elastic/kibana/issues/165192
-        await expectSearches(type, savedSearchesRequests ?? 2, async () => {
+        await expectSearches(type, savedSearchesRequests ?? expectedRequests, async () => {
           await PageObjects.discover.loadSavedSearch(savedSearch);
         });
       });
@@ -180,6 +174,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         query1: 'bytes > 1000',
         query2: 'bytes < 2000',
         setQuery: (query) => queryBar.setQuery(query),
+      });
+
+      it(`should send 2 requests (documents + chart) when toggling the chart visibility`, async () => {
+        await expectSearches(type, 2, async () => {
+          await PageObjects.discover.toggleChartVisibility();
+        });
+        await expectSearches(type, 2, async () => {
+          await PageObjects.discover.toggleChartVisibility();
+        });
       });
 
       it('should send 2 requests (documents + chart) when adding a filter', async () => {
@@ -240,8 +243,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         savedSearch: 'esql test',
         query1: 'from logstash-* | where bytes > 1000 | stats countB = count(bytes) ',
         query2: 'from logstash-* | where bytes < 2000 | stats countB = count(bytes) ',
-        savedSearchesRequests: 3,
+        savedSearchesRequests: 2,
         setQuery: (query) => monacoEditor.setCodeEditorValue(query),
+        expectedRequests: 1,
+      });
+
+      it(`should send 2 requests (documents + chart) when toggling the chart visibility`, async () => {
+        await expectSearches(type, 2, async () => {
+          await PageObjects.discover.toggleChartVisibility();
+        });
+        await expectSearches(type, 1, async () => {
+          await PageObjects.discover.toggleChartVisibility();
+        });
       });
     });
   });

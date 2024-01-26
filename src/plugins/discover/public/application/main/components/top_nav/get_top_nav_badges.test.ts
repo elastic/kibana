@@ -69,7 +69,7 @@ describe('getTopNavBadges()', function () {
       });
 
       expect(topNavBadges).toHaveLength(2);
-      const unsavedChangesBadge = topNavBadges[1];
+      const unsavedChangesBadge = topNavBadges[0];
       expect(unsavedChangesBadge.badgeText).toEqual('Unsaved changes');
 
       render(unsavedChangesBadge.renderCustomBadge!({ badgeText: 'Unsaved changes' }));
