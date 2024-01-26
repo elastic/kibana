@@ -10,6 +10,7 @@ import { timelineChangedMiddleware } from './changed';
 import { favoriteTimelineMiddleware } from './favorite_timeline';
 import { addNoteToTimelineMiddleware } from './timeline_note';
 import { addPinnedEventToTimelineMiddleware } from './timeline_pinned_event';
+import { saveTimelineMiddleware } from './timeline_save';
 
 export function createTimelineMiddlewares(kibana: CoreStart) {
   return [
@@ -17,5 +18,6 @@ export function createTimelineMiddlewares(kibana: CoreStart) {
     favoriteTimelineMiddleware(kibana),
     addNoteToTimelineMiddleware(kibana),
     addPinnedEventToTimelineMiddleware(kibana),
+    saveTimelineMiddleware(kibana),
   ];
 }

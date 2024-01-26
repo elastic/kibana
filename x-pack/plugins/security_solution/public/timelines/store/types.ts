@@ -6,10 +6,8 @@
  */
 
 import type { FilterManager } from '@kbn/data-plugin/public';
-import type { RootEpicDependencies } from '../../common/store/epic';
 import type { ColumnHeaderOptions, SortColumnTimeline } from '../../../common/types';
 import type { RowRendererId } from '../../../common/api/timeline';
-import type { inputsModel } from '../../common/store/inputs';
 
 import type { TimelineModel } from './model';
 
@@ -32,12 +30,6 @@ export interface TimelineState {
   timelineById: TimelineById;
   showCallOutUnauthorizedMsg: boolean;
   insertTimeline: InsertTimeline | null;
-}
-
-export interface TimelineEpicDependencies<State> extends RootEpicDependencies {
-  timelineByIdSelector: (state: State) => TimelineById;
-  timelineTimeRangeSelector: (state: State) => inputsModel.TimeRange;
-  selectAllTimelineQuery: () => (state: State, id: string) => inputsModel.GlobalQuery;
 }
 
 export interface TimelineModelSettings {
