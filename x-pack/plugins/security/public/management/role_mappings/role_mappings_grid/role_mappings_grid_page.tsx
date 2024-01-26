@@ -74,7 +74,6 @@ export class RoleMappingsGridPage extends Component<Props, State> {
     readOnly: false,
   };
 
-  private tableRef: React.RefObject<EuiInMemoryTable<RoleMapping>>;
   constructor(props: any) {
     super(props);
     this.state = {
@@ -85,7 +84,6 @@ export class RoleMappingsGridPage extends Component<Props, State> {
       selectedItems: [],
       error: undefined,
     };
-    this.tableRef = React.createRef();
   }
 
   public componentDidMount() {
@@ -226,6 +224,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
           selectedItems: newSelectedItems,
         });
       },
+      selected: selectedItems,
     };
 
     const search = {
@@ -298,7 +297,6 @@ export class RoleMappingsGridPage extends Component<Props, State> {
                 loading={loadState === 'loadingTable'}
                 message={message}
                 isSelectable={true}
-                ref={this.tableRef}
                 rowProps={() => {
                   return {
                     'data-test-subj': 'roleMappingRow',
@@ -500,7 +498,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
   };
 
   private onRoleMappingsDeleteCancel = () => {
-    this.tableRef.current?.setSelection([]);
+    this.setState({ selectedItems: [] });
   };
 
   private async checkPrivileges() {
