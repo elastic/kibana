@@ -63,11 +63,12 @@ export class LensConfigBuilder {
     };
 
     if (options.embeddable) {
+      const { state } = chartState;
+      // adHocDataViews is not serializable, so we need to remove it from the state
+      const { adHocDataViews, ...restState } = state;
       return {
         id: uuidv4(),
-        attributes: chartState,
-        timeRange: options.timeRange,
-        references: chartState.references,
+        attributes: { ...chartState, state: restState },
       } as LensEmbeddableInput;
     }
 

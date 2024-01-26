@@ -16,6 +16,7 @@
       "data",
       "dataViews",
       "dataViewEditor",
+      "dashboard",
       "discover",
       "embeddable",
       "features",
@@ -36,7 +37,16 @@
       "visTypeTimeseries",
       "apmDataAccess"
     ],
-    "optionalPlugins": ["spaces", "ml", "home", "embeddable", "osquery", "cloud", "profilingDataAccess", "licenseManagement"],
+    "optionalPlugins": [
+      "spaces",
+      "ml",
+      "home",
+      "embeddable",
+      "osquery",
+      "cloud",
+      "profilingDataAccess",
+      "licenseManagement"
+    ],
     "requiredBundles": [
       "unifiedSearch",
       "observability",
@@ -46,7 +56,7 @@
       "kibanaReact",
       "ml",
       "embeddable",
-      "controls",
+      "controls"
     ]
   }
 }

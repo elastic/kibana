@@ -9,12 +9,12 @@ import React from 'react';
 import { EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useLazyRef } from '../../../../../hooks/use_lazy_ref';
-import { MetricsGrid } from './metrics/metrics_grid';
 import { AlertsTabContent } from './alerts';
 
 import { AlertsTabBadge } from './alerts_tab_badge';
 import { TabIds, useTabId } from '../../hooks/use_tab_id';
 import { LogsTabContent } from './logs';
+import { PortableMetrics } from './metrics/portable_metrics';
 
 const tabs = [
   {
@@ -68,7 +68,7 @@ export const Tabs = () => {
       <EuiSpacer />
       {renderedTabsSet.current.has(TabIds.METRICS) && (
         <div hidden={selectedTabId !== TabIds.METRICS}>
-          <MetricsGrid />
+          <PortableMetrics />
         </div>
       )}
       {renderedTabsSet.current.has(TabIds.LOGS) && (
