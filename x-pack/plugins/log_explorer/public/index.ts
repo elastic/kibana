@@ -8,14 +8,17 @@
 import type { PluginInitializerContext } from '@kbn/core/public';
 import type { LogExplorerConfig } from '../common/plugin_config';
 import { LogExplorerPlugin } from './plugin';
+
 export type {
   CreateLogExplorerController,
   LogExplorerController,
-  LogExplorerCustomizations,
-  LogExplorerFlyoutContentProps,
   LogExplorerPublicState,
   LogExplorerPublicStateUpdate,
 } from './controller';
+export type {
+  LogExplorerCustomizations,
+  LogExplorerFlyoutContentProps,
+} from './customizations/types';
 export type { LogExplorerControllerContext } from './state_machines/log_explorer_controller';
 export type { LogExplorerPluginSetup, LogExplorerPluginStart } from './types';
 export {
