@@ -201,6 +201,7 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
       plugins: filteredStorybookPlugins,
       module: {
         ...storybookConfig.module,
+        // @ts-ignore
         rules: updatedModuleRules,
       },
     },
