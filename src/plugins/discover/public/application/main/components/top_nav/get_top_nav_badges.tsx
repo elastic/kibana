@@ -67,7 +67,7 @@ export const getTopNavBadges = ({
             'This saved search is managed by Elastic. Changes here must be saved to a new saved search.',
         })
       ),
-      order: -100,
+      order: 101,
     });
   }
 
