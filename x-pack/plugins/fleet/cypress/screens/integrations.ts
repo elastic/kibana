@@ -41,6 +41,7 @@ export const POLICY_EDITOR = {
   AGENT_POLICY_SELECT: 'agentPolicySelect',
   INSPECT_PIPELINES_BTN: 'datastreamInspectPipelineBtn',
   EDIT_MAPPINGS_BTN: 'datastreamEditMappingsBtn',
+  CREATE_MAPPINGS_BTN: 'datastreamAddCustomComponentTemplateBtn',
 };
 
 export const INTEGRATION_POLICIES_UPGRADE_CHECKBOX = 'epmDetails.upgradePoliciesCheckbox';
