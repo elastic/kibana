@@ -6,8 +6,8 @@
  */
 
 import {
-  type EndpointCapabilities,
   ENDPOINT_CAPABILITIES,
+  type EndpointCapabilities,
 } from '../../../../../../common/endpoint/service/response_actions/constants';
 import {
   type AppContextTestRender,
@@ -19,9 +19,9 @@ import {
   getConsoleManagerMockRenderResultQueriesAndActions,
 } from '../../../console/components/console_manager/mocks';
 import type {
+  ActionDetailsApiResponse,
   EndpointPrivileges,
   ResponseActionUploadOutputContent,
-  ActionDetailsApiResponse,
 } from '../../../../../../common/endpoint/types';
 import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
 import { getEndpointConsoleCommands } from '../..';
@@ -34,7 +34,7 @@ import { UPLOAD_ROUTE } from '../../../../../../common/endpoint/constants';
 import type { HttpFetchOptionsWithPath } from '@kbn/core-http-browser';
 import {
   INSUFFICIENT_PRIVILEGES_FOR_COMMAND,
-  UPGRADE_ENDPOINT_FOR_RESPONDER,
+  UPGRADE_AGENT_FOR_RESPONDER,
 } from '../../../../../common/translations';
 import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
 
@@ -71,6 +71,7 @@ describe('When using `upload` response action', () => {
               consoleProps: {
                 'data-test-subj': 'test',
                 commands: getEndpointConsoleCommands({
+                  agentType: 'endpoint',
                   endpointAgentId: 'a.b.c',
                   endpointCapabilities,
                   endpointPrivileges,
@@ -202,7 +203,7 @@ describe('When using `upload` response action', () => {
 
     await waitFor(() => {
       expect(getByTestId('test-validationError-message').textContent).toEqual(
-        UPGRADE_ENDPOINT_FOR_RESPONDER
+        UPGRADE_AGENT_FOR_RESPONDER('endpoint', 'upload')
       );
     });
   });
