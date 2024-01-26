@@ -69,9 +69,8 @@ export const addPinnedEventToTimelineMiddleware: (kibana: CoreStart) => Middlewa
           (allTimelineQuery.refetch as inputsModel.Refetch)();
         }
 
-        // The response does not exist in case the request failed
-        // or in case we unpinned an event. In either case we want
-        // to remove the locally pinned event.
+        // The response is null in case we unpinned an event.
+        // In that case we want to remove the locally pinned event.
         if (!response) {
           store.dispatch(
             updateTimeline({
