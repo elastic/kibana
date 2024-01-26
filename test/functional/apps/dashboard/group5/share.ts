@@ -50,12 +50,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       return await PageObjects.share.isShareMenuOpen();
     });
     if (mode === 'savedObject') {
-      if (await !PageObjects.share.isShareMenuOpen()) {
+      if (!(await PageObjects.share.isShareMenuOpen())) {
         await PageObjects.share.clickShareTopNavButton();
       }
-      await PageObjects.share.exportAsSavedObject();
+      await PageObjects.share.openPermaLinks();
+      await testSubjects.click('exportAsSavedObject');
+      const sharedUrl = await testSubjects.getAttribute('copyShareUrlButton', 'data-share-url');
+      if (await PageObjects.share.isShareModalOpen()) {
+        await PageObjects.share.closeShareModal();
+      }
+      return sharedUrl;
     }
-    if (await !PageObjects.share.isShareMenuOpen()) {
+    if (!(await PageObjects.share.isShareMenuOpen())) {
       await PageObjects.share.clickShareTopNavButton();
     }
     await PageObjects.share.openPermaLinks();
@@ -69,6 +75,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('share dashboard', () => {
     const testFilterState = async (mode: TestingModes) => {
       it('should not have "filters" state in either app or global state when no filters', async () => {
+        if (await PageObjects.share.isShareModalOpen()) {
+          await PageObjects.share.closeShareModal();
+        }
         const testMode = await getSharedUrl(mode);
         if (await PageObjects.share.isShareModalOpen()) {
           await PageObjects.share.closeShareModal();
@@ -77,6 +86,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('unpinned filter should show up only in app state when dashboard is unsaved', async () => {
+        if (await PageObjects.share.isShareModalOpen()) {
+          await PageObjects.share.closeShareModal();
+        }
         await filterBar.addFilter({ field: 'geo.src', operation: 'is', value: 'AE' });
         await PageObjects.dashboard.waitForRenderComplete();
 

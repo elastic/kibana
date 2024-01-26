@@ -336,7 +336,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('allows loading a saved query via the saved query management component', async () => {
-        if (!(await PageObjects.share.isShareModalOpen())) {
+        if (await PageObjects.share.isShareModalOpen()) {
           await PageObjects.share.closeShareModal();
         }
         await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
