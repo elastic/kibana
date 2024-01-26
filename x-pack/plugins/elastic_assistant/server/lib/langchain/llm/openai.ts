@@ -31,6 +31,14 @@ interface ActionsClientChatOpenAIParams {
   traceId?: string;
 }
 
+/**
+ * This class is a wrapper around the ChatOpenAI class from @langchain/openai.
+ * It is used to call the OpenAI API via the Actions plugin.
+ * It is used by the OpenAI connector type only.
+ * The completionWithRetry method is overridden to use the Actions plugin.
+ * In the ChatOpenAI class, *_streamResponseChunks calls completionWithRetry
+ * and iterates over the chunks to form the response.
+ */
 export class ActionsClientChatOpenAI extends ChatOpenAI {
   // set streaming to true always
   streaming = true;
@@ -46,7 +54,6 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
   #connectorId: string;
   #logger: Logger;
   #request: KibanaRequest<unknown, unknown, RequestBody>;
-  #actionResultData: string;
   #traceId: string;
   constructor({
     actions,
@@ -71,12 +78,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     this.llmType = llmType ?? LLM_TYPE;
     this.#logger = logger;
     this.#request = request;
-    this.#actionResultData = '';
     this.streaming = true;
-  }
-
-  getActionResultData(): string {
-    return this.#actionResultData;
   }
 
   _llmType() {
@@ -108,9 +110,9 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     return this.caller.call(async () => {
       const requestBody = this.formatRequestForActionsClient(completionRequest);
       this.#logger.debug(
-        `ActionsClientChatOpenAI#completionWithRetry ${
-          this.#traceId
-        } assistantMessage:\n${JSON.stringify(requestBody.params.subActionParams)} `
+        `${LLM_TYPE}#completionWithRetry ${this.#traceId} assistantMessage:\n${JSON.stringify(
+          requestBody.params.subActionParams
+        )} `
       );
 
       // create an actions client from the authenticated request context:
@@ -137,7 +139,6 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
   formatRequestForActionsClient(completionRequest: ChatCompletionCreateParamsStreaming): {
     actionId: string;
     params: {
-      // InvokeAIActionParamsSchema
       subActionParams: InvokeAIActionParamsSchema;
       subAction: string;
     };
@@ -148,14 +149,13 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
       params: {
         ...this.#request.body.params, // the original request body params
         // stream must already be true here
+        // langchain expects stream to be of type AsyncIterator<ChatCompletionChunk>
         subAction: 'invokeAsyncIterator',
         subActionParams: {
           model: completionRequest.model,
-          ...(completionRequest.n !== null ? { n: completionRequest.n } : {}),
-          ...(completionRequest.stop !== null ? { stop: completionRequest.stop } : {}),
-          ...(completionRequest.temperature !== null
-            ? { temperature: completionRequest.temperature }
-            : {}),
+          n: completionRequest.n,
+          stop: completionRequest.stop,
+          temperature: completionRequest.temperature,
           functions: completionRequest.functions,
           // overrides from client request, such as model
           ...this.#request.body.params.subActionParams,

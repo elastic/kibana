@@ -140,6 +140,7 @@ export const postEvaluateRoute = (
                 messages: [],
               },
             },
+            // does not matter in conjunction with invokeAI
             llmType: 'openai',
             replacements: {},
             size: DEFAULT_SIZE,
