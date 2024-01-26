@@ -148,7 +148,9 @@ export interface PublicAlertsClient<
   Context extends AlertInstanceContext,
   ActionGroupIds extends string
 > {
-  report(alert: ReportedAlert<AlertData, State, Context, ActionGroupIds>): ReportedAlertData;
+  report(
+    alert: ReportedAlert<AlertData, State, Context, ActionGroupIds>
+  ): ReportedAlertData<AlertData>;
   setAlertData(alert: UpdateableAlert<AlertData, State, Context, ActionGroupIds>): void;
   getAlertLimitValue: () => number;
   setAlertLimitReached: (reached: boolean) => void;
@@ -178,9 +180,10 @@ export interface RecoveredAlertData<
   hit?: AlertData;
 }
 
-export interface ReportedAlertData {
+export interface ReportedAlertData<AlertData> {
   uuid: string;
   start: string | null;
+  alertDoc?: AlertData;
 }
 
 export type UpdateableAlert<

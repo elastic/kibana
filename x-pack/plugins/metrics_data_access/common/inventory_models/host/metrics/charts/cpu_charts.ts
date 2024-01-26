@@ -6,30 +6,23 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { StaticValueConfig, XYChartModel } from '@kbn/lens-embeddable-utils';
+import type { LensConfigWithId } from '../../../types';
 import { formulas } from '../formulas';
 import type { ChartArgs } from './types';
 
-export const REFERENCE_LINE: StaticValueConfig = {
-  value: '1',
-  format: {
-    id: 'percent',
-    params: {
-      decimals: 0,
-    },
-  },
-  color: '#6092c0',
-};
-
 export const cpuUsageBreakdown = {
-  get: ({ dataView }: ChartArgs): XYChartModel => ({
+  get: ({ dataViewId }: ChartArgs): LensConfigWithId => ({
     id: 'cpuUsageBreakdown',
+    chartType: 'xy',
     title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.cpuUsage', {
       defaultMessage: 'CPU Usage',
     }),
     layers: [
       {
-        data: [
+        seriesType: 'area',
+        type: 'series',
+        xAxis: '@timestamp',
+        yAxis: [
           formulas.cpuUsageIowait,
           formulas.cpuUsageIrq,
           formulas.cpuUsageNice,
@@ -38,48 +31,28 @@ export const cpuUsageBreakdown = {
           formulas.cpuUsageUser,
           formulas.cpuUsageSystem,
         ],
-        options: {
-          seriesType: 'area_stacked',
-        },
-        layerType: 'data',
       },
     ],
-    visualizationType: 'lnsXY',
-    dataView,
-  }),
-};
-
-export const normalizedLoad1m = {
-  get: ({ dataView }: ChartArgs): XYChartModel => ({
-    id: 'normalizedLoad1m',
-    title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.normalizedLoad1m', {
-      defaultMessage: 'Normalized Load',
-    }),
-    layers: [
-      { data: [formulas.normalizedLoad1m], layerType: 'data' },
-      { data: [REFERENCE_LINE], layerType: 'referenceLine' },
-    ],
-    visualizationType: 'lnsXY',
-    dataView,
-  }),
-};
-
-export const loadBreakdown = {
-  get: ({ dataView }: ChartArgs): XYChartModel => ({
-    id: 'loadBreakdown',
-    title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.load', {
-      defaultMessage: 'Load',
-    }),
-    layers: [
-      {
-        data: [formulas.load1m, formulas.load5m, formulas.load15m],
-        options: {
-          seriesType: 'area',
-        },
-        layerType: 'data',
-      },
-    ],
-    visualizationType: 'lnsXY',
-    dataView,
+    fittingFunction: 'Linear',
+    legend: {
+      position: 'bottom',
+      show: true,
+    },
+    yBounds: {
+      mode: 'custom',
+      lowerBound: 0,
+      upperBound: 1,
+    },
+    axisTitleVisibility: {
+      showXAxisTitle: false,
+      showYAxisTitle: false,
+    },
+    ...(dataViewId
+      ? {
+          dataset: {
+            index: dataViewId,
+          },
+        }
+      : {}),
   }),
 };
