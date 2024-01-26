@@ -37,6 +37,13 @@ import {
 import { DataRequest } from '../../util/data_request';
 import { FeatureGeometryFilterForm } from '../../../connected_components/mb_map/tooltip_control/features_tooltip';
 
+export function hasVectorSourceMethod(
+  source: ISource,
+  methodName: keyof IVectorSource
+): source is Pick<IVectorSource, typeof methodName> {
+  return typeof (source as IVectorSource)[methodName] === 'function';
+}
+
 export interface SourceStatus {
   tooltipContent: string | null;
   areResultsTrimmed: boolean;

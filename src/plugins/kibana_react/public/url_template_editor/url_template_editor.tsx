@@ -133,7 +133,6 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
         placeholder={placeholder}
         options={{
           fontSize: 14,
-          highlightActiveIndentGuide: false,
           renderLineHighlight: 'none',
           lineNumbers: 'off',
           glyphMargin: false,
@@ -147,6 +146,9 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
           suggestOnTriggerCharacters: true,
           minimap: {
             enabled: false,
+          },
+          guides: {
+            highlightActiveIndentation: false,
           },
           wordWrap: 'on',
           wrappingIndent: 'none',

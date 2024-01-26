@@ -138,6 +138,32 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     ],
   },
   {
+    name: 'to_lower',
+    description: i18n.translate('monaco.esql.definitions.toLowerDoc', {
+      defaultMessage: 'Returns a new string representing the input string converted to lower case.',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'field', type: 'string' }],
+        returnType: 'string',
+        examples: ['from index | eval to_lower(field1)'],
+      },
+    ],
+  },
+  {
+    name: 'to_upper',
+    description: i18n.translate('monaco.esql.definitions.toUpperDoc', {
+      defaultMessage: 'Returns a new string representing the input string converted to upper case.',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'field', type: 'string' }],
+        returnType: 'string',
+        examples: ['from index | eval to_upper(field1)'],
+      },
+    ],
+  },
+  {
     name: 'trim',
     description: i18n.translate('monaco.esql.definitions.trimDoc', {
       defaultMessage: 'Removes leading and trailing whitespaces from strings.',
@@ -242,6 +268,19 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     ],
   },
   {
+    name: 'to_cartesianshape',
+    description: i18n.translate('monaco.esql.definitions.toCartesianshapeDoc', {
+      defaultMessage: 'Converts an input value to a cartesian_shape value.',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'field', type: 'any' }],
+        returnType: 'cartesian_shape',
+        examples: [`from index | EVAL cartesianshape = to_cartesianshape(field)`],
+      },
+    ],
+  },
+  {
     name: 'to_datetime',
     alias: ['to_dt'],
     description: i18n.translate('monaco.esql.definitions.toDateTimeDoc', {
@@ -292,6 +331,19 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
         params: [{ name: 'field', type: 'any' }],
         returnType: 'geo_point',
         examples: [`from index | EVAL geopoint = to_geopoint(field)`],
+      },
+    ],
+  },
+  {
+    name: 'to_geoshape',
+    description: i18n.translate('monaco.esql.definitions.toGeoshapeDoc', {
+      defaultMessage: 'Converts an input value to a geo_shape value.',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'field', type: 'any' }],
+        returnType: 'geo_shape',
+        examples: [`from index | EVAL geoshape = to_geoshape(field)`],
       },
     ],
   },
@@ -479,45 +531,6 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
         ],
         returnType: 'number',
         examples: ['from index | eval bs = auto_bucket(salary, 20, 25324, 74999)'],
-      },
-    ],
-  },
-  {
-    name: 'is_finite',
-    description: i18n.translate('monaco.esql.definitions.isFiniteDoc', {
-      defaultMessage: 'Returns a boolean that indicates whether its input is a finite number.',
-    }),
-    signatures: [
-      {
-        params: [{ name: 'field', type: 'number' }],
-        returnType: 'boolean',
-        examples: ['from index | eval s = is_finite(field/0)'],
-      },
-    ],
-  },
-  {
-    name: 'is_infinite',
-    description: i18n.translate('monaco.esql.definitions.isInfiniteDoc', {
-      defaultMessage: 'Returns a boolean that indicates whether its input is infinite.',
-    }),
-    signatures: [
-      {
-        params: [{ name: 'field', type: 'number' }],
-        returnType: 'boolean',
-        examples: ['from index | eval s = is_infinite(field/0)'],
-      },
-    ],
-  },
-  {
-    name: 'is_nan',
-    description: i18n.translate('monaco.esql.definitions.isNanDoc', {
-      defaultMessage: 'Returns a boolean that indicates whether its input is not a number.',
-    }),
-    signatures: [
-      {
-        params: [{ name: 'field', type: 'number' }],
-        returnType: 'boolean',
-        examples: ['row a = 1 | eval is_nan(a)'],
       },
     ],
   },
@@ -862,7 +875,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [{ name: 'multivalue', type: 'number[]' }],
         returnType: 'number',
-        examples: ['row a = [1, 2, 3] | mv_avg(a)'],
+        examples: ['row a = [1, 2, 3] | eval mv_avg(a)'],
       },
     ],
   },
@@ -879,7 +892,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'delimeter', type: 'string' },
         ],
         returnType: 'string',
-        examples: ['row a = ["1", "2", "3"] | mv_concat(a, ", ")'],
+        examples: ['row a = ["1", "2", "3"] | eval mv_concat(a, ", ")'],
       },
     ],
   },
@@ -907,6 +920,34 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
         params: [{ name: 'multivalue', type: 'any[]' }],
         returnType: 'any[]',
         examples: ['row a = [2, 2, 3] | eval mv_dedupe(a)'],
+      },
+    ],
+  },
+  {
+    name: 'mv_first',
+    description: i18n.translate('monaco.esql.definitions.mvFirstDoc', {
+      defaultMessage:
+        'Reduce a multivalued field to a single valued field containing the first value.',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'multivalue', type: 'any' }],
+        returnType: 'any',
+        examples: ['row a = [1, 2, 3] | eval one = mv_first(a)'],
+      },
+    ],
+  },
+  {
+    name: 'mv_last',
+    description: i18n.translate('monaco.esql.definitions.mvLastDoc', {
+      defaultMessage:
+        'Reduce a multivalued field to a single valued field containing the last value.',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'multivalue', type: 'any' }],
+        returnType: 'any',
+        examples: ['row a = [1, 2, 3] | eval three = mv_last(a)'],
       },
     ],
   },
@@ -1007,4 +1048,8 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
 ]
   .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-  .map((def) => ({ ...def, supportedCommands: ['eval', 'where', 'row'] }));
+  .map((def) => ({
+    ...def,
+    supportedCommands: ['eval', 'where', 'row'],
+    supportedOptions: ['by'],
+  }));

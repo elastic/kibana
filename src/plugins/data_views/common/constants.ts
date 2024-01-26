@@ -59,6 +59,12 @@ export const PLUGIN_NAME = 'DataViews';
 export const FIELDS_FOR_WILDCARD_PATH = '/internal/data_views/_fields_for_wildcard';
 
 /**
+ * Fields path. Like fields for wildcard but GET only
+ * @public
+ */
+export const FIELDS_PATH = '/internal/data_views/fields';
+
+/**
  * Existing indices path
  * @public
  */

@@ -137,6 +137,14 @@ function getMockedSoClient(
         });
       }
 
+      case outputIdToUuid('existing-remote-es-output'): {
+        return mockOutputSO('existing-remote-es-output', {
+          type: 'remote_elasticsearch',
+          is_default: false,
+          service_token: 'plain',
+        });
+      }
+
       default:
         throw new Error('not found: ' + id);
     }
@@ -1698,6 +1706,24 @@ describe('Output Service', () => {
           type: 'remote_elasticsearch',
         })
       ).resolves.not.toThrow();
+    });
+
+    it('Should delete service_token if updated remote es output does not have a value', async () => {
+      const soClient = getMockedSoClient({});
+      mockedAgentPolicyService.list.mockResolvedValue({
+        items: [{}],
+      } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+      mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
+      mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(false);
+
+      await outputService.update(soClient, esClientMock, 'existing-remote-es-output', {
+        type: 'remote_elasticsearch',
+      });
+
+      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+        type: 'remote_elasticsearch',
+        service_token: null,
+      });
     });
   });
 

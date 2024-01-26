@@ -20,12 +20,12 @@ import { commandDefinitions } from '../definitions/commands';
 
 const triggerCharacters = [',', '(', '=', ' '];
 
-const fields = [
+const fields: Array<{ name: string; type: string; suggestedAs?: string }> = [
   ...['string', 'number', 'date', 'boolean', 'ip'].map((type) => ({
     name: `${type}Field`,
     type,
   })),
-  { name: 'any#Char$ field', type: 'number' },
+  { name: 'any#Char$ field', type: 'number', suggestedAs: '`any#Char$ field`' },
   { name: 'kubernetes.something.something', type: 'number' },
   {
     name: `listField`,
@@ -33,17 +33,35 @@ const fields = [
   },
 ];
 
-const indexes = ['a', 'index', 'otherIndex', '.secretIndex'].map((name) => ({
-  name,
-  hidden: name.startsWith('.'),
-}));
+const indexes = (
+  [] as Array<{ name: string; hidden: boolean; suggestedAs: string | undefined }>
+).concat(
+  ['a', 'index', 'otherIndex', '.secretIndex', 'my-index'].map((name) => ({
+    name,
+    hidden: name.startsWith('.'),
+    suggestedAs: undefined,
+  })),
+  ['my-index[quoted]', 'my-index$', 'my_index{}'].map((name) => ({
+    name,
+    hidden: false,
+    suggestedAs: `\`${name}\``,
+  }))
+);
 const policies = [
   {
     name: 'policy',
     sourceIndices: ['enrichIndex1'],
     matchField: 'otherStringField',
-    enrichFields: ['otherField', 'yetAnotherField'],
+    enrichFields: ['otherField', 'yetAnotherField', 'yet-special-field'],
+    suggestedAs: undefined,
   },
+  ...['my-policy[quoted]', 'my-policy$', 'my_policy{}'].map((name) => ({
+    name,
+    sourceIndices: ['enrichIndex1'],
+    matchField: 'otherStringField',
+    enrichFields: ['otherField', 'yetAnotherField', 'yet-special-field'],
+    suggestedAs: `\`${name}\``,
+  })),
 ];
 
 /**
@@ -111,7 +129,7 @@ function getFunctionSignaturesByReturnType(
 function getFieldNamesByType(requestedType: string) {
   return fields
     .filter(({ type }) => requestedType === 'any' || type === requestedType)
-    .map(({ name }) => name);
+    .map(({ name, suggestedAs }) => suggestedAs || name);
 }
 
 function getLiteralsByType(type: string) {
@@ -169,7 +187,10 @@ function createSuggestContext(text: string, triggerCharacter?: string) {
 function getPolicyFields(policyName: string) {
   return policies
     .filter(({ name }) => name === policyName)
-    .flatMap(({ enrichFields }) => enrichFields);
+    .flatMap(({ enrichFields }) =>
+      // ok, this is a bit of cheating as it's using the same logic as in the helper
+      enrichFields.map((field) => (/[^a-zA-Z\d_\.@]/.test(field) ? `\`${field}\`` : field))
+    );
 }
 
 describe('autocomplete', () => {
@@ -284,7 +305,9 @@ describe('autocomplete', () => {
   });
 
   describe('from', () => {
-    const suggestedIndexes = indexes.filter(({ hidden }) => !hidden).map(({ name }) => name);
+    const suggestedIndexes = indexes
+      .filter(({ hidden }) => !hidden)
+      .map(({ name, suggestedAs }) => suggestedAs || name);
     // Monaco will filter further down here
     testSuggestions('f', sourceCommands);
     testSuggestions('from ', suggestedIndexes);
@@ -292,6 +315,13 @@ describe('autocomplete', () => {
     testSuggestions('from a, b ', ['[metadata $0 ]', '|', ',']);
     testSuggestions('from *,', suggestedIndexes);
     testSuggestions('from index', suggestedIndexes, 6 /* index index in from */);
+  });
+
+  describe('show', () => {
+    testSuggestions('show ', ['functions', 'info']);
+    for (const fn of ['functions', 'info']) {
+      testSuggestions(`show ${fn} `, ['|']);
+    }
   });
 
   describe('where', () => {
@@ -424,24 +454,33 @@ describe('autocomplete', () => {
     testSuggestions('from a | stats ', ['var0 =', ...allAggFunctions]);
     testSuggestions('from a | stats a ', ['= $0']);
     testSuggestions('from a | stats a=', [...allAggFunctions]);
-    testSuggestions('from a | stats a=max(b) by ', getFieldNamesByType('any'));
-    testSuggestions('from a | stats a=max(b) BY ', getFieldNamesByType('any'));
+    testSuggestions('from a | stats a=max(b) by ', [
+      ...getFieldNamesByType('any'),
+      ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+      'var0 =',
+    ]);
+    testSuggestions('from a | stats a=max(b) BY ', [
+      ...getFieldNamesByType('any'),
+      ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+      'var0 =',
+    ]);
     testSuggestions('from a | stats a=c by d ', ['|', ',']);
-    testSuggestions('from a | stats a=c by d, ', getFieldNamesByType('any'));
+    testSuggestions('from a | stats a=c by d, ', [
+      ...getFieldNamesByType('any'),
+      ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+      'var0 =',
+    ]);
     testSuggestions('from a | stats a=max(b), ', ['var0 =', ...allAggFunctions]);
-    testSuggestions(
-      'from a | stats a=min()',
-      fields.filter(({ type }) => type === 'number').map(({ name }) => name),
-      '('
-    );
+    testSuggestions('from a | stats a=min()', getFieldNamesByType('number'), '(');
     testSuggestions('from a | stats a=min(b) ', ['by', '|', ',']);
-    testSuggestions('from a | stats a=min(b) by ', getFieldNamesByType('any'));
+    testSuggestions('from a | stats a=min(b) by ', [
+      ...getFieldNamesByType('any'),
+      ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+      'var0 =',
+    ]);
     testSuggestions('from a | stats a=min(b),', ['var0 =', ...allAggFunctions]);
     testSuggestions('from a | stats var0=min(b),var1=c,', ['var2 =', ...allAggFunctions]);
-    testSuggestions(
-      'from a | stats a=min(b), b=max()',
-      fields.filter(({ type }) => type === 'number').map(({ name }) => name)
-    );
+    testSuggestions('from a | stats a=min(b), b=max()', getFieldNamesByType('number'));
     // @TODO: remove last 2 suggestions if possible
     testSuggestions('from a | eval var0=round(b), var1=round(c) | stats ', [
       'var2 =',
@@ -461,16 +500,53 @@ describe('autocomplete', () => {
       getFieldNamesByType('number'),
       21 /* b column in avg */
     );
+
+    // while nested functions are not suggested, complete them should be possible via suggestions
+    testSuggestions('from a | stats avg(b) by numberField % ', [
+      ...getFieldNamesByType('number'),
+      ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }),
+      '`avg(b)`',
+    ]);
+    testSuggestions('from a | stats avg(b) by var0 = ', [
+      ...getFieldNamesByType('any'),
+      ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+    ]);
+    testSuggestions('from a | stats avg(b) by c, ', [
+      ...getFieldNamesByType('any'),
+      ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+      'var0 =',
+    ]);
+    testSuggestions('from a | stats avg(b) by c, var0 = ', [
+      ...getFieldNamesByType('any'),
+      ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+    ]);
+    testSuggestions('from a | stats avg(b) by numberField % 2 ', ['|', ',']);
   });
 
   describe('enrich', () => {
+    const modes = ['any', 'coordinator', 'remote'];
     for (const prevCommand of [
       '',
       '| enrich other-policy ',
       '| enrich other-policy on b ',
       '| enrich other-policy with c ',
     ]) {
-      testSuggestions(`from a ${prevCommand}| enrich `, ['policy']);
+      testSuggestions(
+        `from a ${prevCommand}| enrich `,
+        policies.map(({ name, suggestedAs }) => suggestedAs || name)
+      );
+      testSuggestions(
+        `from a ${prevCommand}| enrich [`,
+        modes.map((mode) => `ccq.mode:${mode}`),
+        '['
+      );
+      // Not suggesting duplicate setting
+      testSuggestions(`from a ${prevCommand}| enrich [ccq.mode:any] [`, [], '[');
+      testSuggestions(`from a ${prevCommand}| enrich [ccq.mode:`, modes, ':');
+      testSuggestions(
+        `from a ${prevCommand}| enrich [ccq.mode:any] `,
+        policies.map(({ name, suggestedAs }) => suggestedAs || name)
+      );
       testSuggestions(`from a ${prevCommand}| enrich policy `, ['on', 'with', '|']);
       testSuggestions(`from a ${prevCommand}| enrich policy on `, [
         'stringField',
@@ -548,6 +624,19 @@ describe('autocomplete', () => {
         ]),
       ],
       '('
+    );
+    testSuggestions(
+      'from a | eval a=raund()', // note the typo in round
+      [],
+      '('
+    );
+    testSuggestions(
+      'from a | eval a=raund(', // note the typo in round
+      []
+    );
+    testSuggestions(
+      'from a | eval raund(', // note the typo in round
+      []
     );
     testSuggestions('from a | eval a=round(numberField) ', [
       ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true }, ['number']),

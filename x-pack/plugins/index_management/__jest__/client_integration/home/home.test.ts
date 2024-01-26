@@ -7,7 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { setupEnvironment, nextTick } from '../helpers';
+import { setupEnvironment } from '../helpers';
 import { HomeTestBed, setup } from './home.helpers';
 
 describe('<IndexManagementHome />', () => {
@@ -18,14 +18,10 @@ describe('<IndexManagementHome />', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadIndicesResponse([]);
 
-      testBed = await setup(httpSetup);
-
       await act(async () => {
-        const { component } = testBed;
-
-        await nextTick();
-        component.update();
+        testBed = await setup(httpSetup);
       });
+      testBed.component.update();
     });
 
     test('should set the correct app title', () => {
@@ -69,13 +65,11 @@ describe('<IndexManagementHome />', () => {
 
         httpRequestsMockHelpers.setLoadTemplatesResponse({ templates: [], legacyTemplates: [] });
 
-        actions.selectHomeTab('templatesTab');
-
         await act(async () => {
-          await nextTick();
-          component.update();
+          actions.selectHomeTab('templatesTab');
         });
 
+        component.update();
         expect(exists('indicesList')).toBe(false);
         expect(exists('templateList')).toBe(true);
       });
