@@ -38,6 +38,7 @@ describe('Rule condition chart', () => {
         filterQuery={''}
         groupBy={[]}
         error={{}}
+        timeRange={{ from: 'now-15m', to: 'now' }}
       />
     );
 

@@ -42,7 +42,7 @@ interface RuleConditionChartPros {
   filterQuery?: string;
   groupBy?: string | string[];
   error?: IErrorObject;
-  timeRange?: TimeRange;
+  timeRange: TimeRange;
   annotation?: {
     timestamp?: string;
     endTimestamp?: string;
