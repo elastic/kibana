@@ -524,6 +524,7 @@
     "is_default",
     "is_default_monitoring",
     "is_preconfigured",
+    "is_internal",
     "key",
     "name",
     "output_id",
