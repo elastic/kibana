@@ -19,8 +19,9 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./uptime'));
     loadTestFile(require.resolve('./spaces'));
     loadTestFile(require.resolve('./advanced_settings'));
-    loadTestFile(require.resolve('./dashboard_panel_options'));
     loadTestFile(require.resolve('./dashboard_controls'));
+    loadTestFile(require.resolve('./dashboard_links'));
+    loadTestFile(require.resolve('./dashboard_panel_options'));
     loadTestFile(require.resolve('./users'));
     loadTestFile(require.resolve('./roles'));
     loadTestFile(require.resolve('./ingest_node_pipelines'));

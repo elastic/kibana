@@ -6,17 +6,17 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiButtonIcon, EuiText } from '@elastic/eui';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { getShouldShowFieldHandler } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import { useDocDetail, getMessageWithFallbacks } from '../../hooks/use_doc_detail';
-import { LogDocument, LogExplorerDiscoverServices } from '../../controller';
+import { LogDocument } from '../../../common/document';
 import { LogLevel } from '../common/log_level';
 import * as constants from '../../../common/constants';
 import { dynamic } from '../../utils/dynamic';
-import { VirtualColumnServiceProvider } from '../../hooks/use_virtual_column_services';
+import './virtual_column.scss';
 
 const SourceDocument = dynamic(
   () => import('@kbn/unified-data-table/src/components/source_document')
@@ -29,24 +29,14 @@ const DiscoverSourcePopoverContent = dynamic(
 const LogMessage = ({ field, value }: { field?: string; value: string }) => {
   const renderFieldPrefix = field && field !== constants.MESSAGE_FIELD;
   return (
-    <EuiFlexGroup gutterSize="xs">
+    <EuiText size="xs" style={{ display: 'inline', marginLeft: '5px' }}>
       {renderFieldPrefix && (
-        <EuiFlexItem grow={false}>
-          <EuiText
-            size="xs"
-            css={{ fontWeight: 700 }}
-            data-test-subj="logExplorerDataTableMessageKey"
-          >
-            {field}
-          </EuiText>
-        </EuiFlexItem>
+        <strong data-test-subj="logExplorerDataTableMessageKey">{field}</strong>
       )}
-      <EuiFlexItem>
-        <EuiText size="xs" data-test-subj="logExplorerDataTableMessageValue">
-          {value}
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      <span data-test-subj="logExplorerDataTableMessageValue" style={{ marginLeft: '5px' }}>
+        {value}
+      </span>
+    </EuiText>
   );
 };
 
@@ -81,7 +71,7 @@ const SourcePopoverContent = ({
   );
 };
 
-const Content = ({
+export const Content = ({
   row,
   dataView,
   fieldFormats,
@@ -103,43 +93,25 @@ const Content = ({
   }
 
   return (
-    <EuiFlexGroup gutterSize="xs">
+    <span>
       {parsedDoc[constants.LOG_LEVEL_FIELD] && (
-        <EuiFlexItem grow={false} css={{ minWidth: '80px' }}>
-          <LogLevel level={parsedDoc[constants.LOG_LEVEL_FIELD]} />
-        </EuiFlexItem>
+        <LogLevel level={parsedDoc[constants.LOG_LEVEL_FIELD]} />
       )}
-      <EuiFlexItem>
-        {renderLogMessage ? (
-          <LogMessage field={field} value={value} />
-        ) : (
-          <SourceDocument
-            useTopLevelObjectColumns={false}
-            row={row}
-            dataView={dataView}
-            columnId={columnId}
-            fieldFormats={fieldFormats}
-            shouldShowFieldHandler={shouldShowFieldHandler}
-            maxEntries={50}
-            dataTestSubj="logExplorerCellDescriptionList"
-          />
-        )}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      {renderLogMessage ? (
+        <LogMessage field={field} value={value} />
+      ) : (
+        <SourceDocument
+          useTopLevelObjectColumns={false}
+          row={row}
+          dataView={dataView}
+          columnId={columnId}
+          fieldFormats={fieldFormats}
+          shouldShowFieldHandler={shouldShowFieldHandler}
+          maxEntries={50}
+          dataTestSubj="logExplorerCellDescriptionList"
+          className="logsExplorerVirtualColumn__sourceDocument"
+        />
+      )}
+    </span>
   );
 };
-
-export const renderContent =
-  ({ data }: { data: LogExplorerDiscoverServices['data'] }) =>
-  (props: DataGridCellValueElementProps) => {
-    const { dataView } = props;
-    const virtualColumnServices = {
-      data,
-      dataView,
-    };
-    return (
-      <VirtualColumnServiceProvider services={virtualColumnServices}>
-        <Content {...props} />
-      </VirtualColumnServiceProvider>
-    );
-  };

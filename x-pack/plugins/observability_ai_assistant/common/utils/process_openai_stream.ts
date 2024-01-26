@@ -4,21 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable max-classes-per-file*/
 import { filter, map, Observable, tap } from 'rxjs';
+import { v4 } from 'uuid';
+import {
+  type ChatCompletionChunkEvent,
+  createInternalServerError,
+  createTokenLimitReachedError,
+  StreamingChatResponseEventType,
+} from '../conversation_complete';
 import type { CreateChatCompletionResponseChunk } from '../types';
 
-class TokenLimitReachedError extends Error {
-  constructor() {
-    super(`Token limit reached`);
-  }
-}
-
-class ServerError extends Error {}
-
 export function processOpenAiStream() {
-  return (source: Observable<string>): Observable<CreateChatCompletionResponseChunk> =>
-    source.pipe(
+  return (source: Observable<string>): Observable<ChatCompletionChunkEvent> => {
+    const id = v4();
+
+    return source.pipe(
       map((line) => line.substring(6)),
       filter((line) => !!line && line !== '[DONE]'),
       map(
@@ -27,19 +27,30 @@ export function processOpenAiStream() {
       ),
       tap((line) => {
         if ('error' in line) {
-          throw new ServerError(line.error.message);
+          throw createInternalServerError(line.error.message);
         }
         if (
           'choices' in line &&
           line.choices.length &&
           line.choices[0].finish_reason === 'length'
         ) {
-          throw new TokenLimitReachedError();
+          throw createTokenLimitReachedError();
         }
       }),
       filter(
         (line): line is CreateChatCompletionResponseChunk =>
           'object' in line && line.object === 'chat.completion.chunk'
-      )
+      ),
+      map((chunk): ChatCompletionChunkEvent => {
+        return {
+          id,
+          type: StreamingChatResponseEventType.ChatCompletionChunk,
+          message: {
+            content: chunk.choices[0].delta.content || '',
+            function_call: chunk.choices[0].delta.function_call,
+          },
+        };
+      })
     );
+  };
 }

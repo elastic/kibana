@@ -10,13 +10,12 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiToken,
   EuiText,
   EuiAccordion,
   useGeneratedHtmlId,
   EuiTitle,
 } from '@elastic/eui';
-import { FlyoutDoc } from './types';
+import { FlyoutDoc } from '../../../common/document';
 import { getMessageWithFallbacks } from '../../hooks/use_doc_detail';
 import { LogLevel } from '../common/log_level';
 import { Timestamp } from './sub_components/timestamp';
@@ -76,21 +75,9 @@ export function FlyoutHeader({ doc }: { doc: FlyoutDoc }) {
         <EuiFlexItem>
           <EuiFlexGroup alignItems="flexEnd" gutterSize="none" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup
-                responsive={false}
-                alignItems="center"
-                justifyContent="flexStart"
-                gutterSize="xs"
-              >
-                <EuiFlexItem grow={false}>
-                  <EuiToken iconType="tokenEvent" />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText color="subdued" size="xs">
-                    {field}
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <EuiText color="subdued" size="xs">
+                {field}
+              </EuiText>
             </EuiFlexItem>
             {logLevelAndTimestamp}
           </EuiFlexGroup>
