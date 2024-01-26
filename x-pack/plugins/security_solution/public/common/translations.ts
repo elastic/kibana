@@ -6,6 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type {
+  ConsoleResponseActionCommands,
+  ResponseActionAgentType,
+} from '../../common/endpoint/service/response_actions/constants';
 
 export const SOLUTION_NAME = i18n.translate('xpack.securitySolution.pages.common.solutionName', {
   defaultMessage: 'Security',
@@ -29,13 +33,24 @@ export const UPDATE_ALERT_STATUS_FAILED_DETAILED = (updated: number, conflicts: 
          because { conflicts, plural, =1 {it was} other {they were}} already being modified.`,
   });
 
-export const UPGRADE_ENDPOINT_FOR_RESPONDER = i18n.translate(
-  'xpack.securitySolution.endpoint.actions.disabledResponder.tooltip',
-  {
-    defaultMessage:
-      'The current version of the Agent does not support this feature. Upgrade your Agent through Fleet to use this feature and new response actions such as killing and suspending processes.',
+export const UPGRADE_AGENT_FOR_RESPONDER = (
+  _agentType: ResponseActionAgentType,
+  command: ConsoleResponseActionCommands
+) => {
+  const agentType = getAgentTypeName(_agentType);
+
+  if (_agentType === 'endpoint') {
+    return i18n.translate('xpack.securitySolution.endpoint.actions.unsupported.message', {
+      defaultMessage: `The current version of the {agentType} Agent does not support {command}. Upgrade your Elastic Agent through Fleet to the latest version to enable this response action.`,
+      values: { agentType, command },
+    });
   }
-);
+
+  return i18n.translate('xpack.securitySolution.agent.actions.unsupported.message', {
+    defaultMessage: `Support for {command} is not currently available for {agentType}.`,
+    values: { agentType, command },
+  });
+};
 
 export const INSUFFICIENT_PRIVILEGES_FOR_COMMAND = i18n.translate(
   'xpack.securitySolution.endpoint.actions.insufficientPrivileges.error',
@@ -58,3 +73,14 @@ export const UNSAVED_TIMELINE_SAVE_PROMPT_TITLE = i18n.translate(
     defaultMessage: 'Unsaved changes',
   }
 );
+
+const getAgentTypeName = (agentType: ResponseActionAgentType) => {
+  switch (agentType) {
+    case 'endpoint':
+      return 'Endpoint';
+    case 'sentinel_one':
+      return 'SentinelOne';
+    default:
+      return agentType;
+  }
+};

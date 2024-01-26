@@ -16,7 +16,7 @@ import { HostMetricsDocsLink } from '../../../../../components/lens';
 import { Kpi } from './kpi';
 import { useHostCountContext } from '../../hooks/use_host_count';
 import { HostCountKpi } from './host_count_kpi';
-import { useMetricsDataViewContext } from '../../hooks/use_data_view';
+import { useMetricsDataViewContext } from '../../hooks/use_metrics_data_view';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 
 export const KPIGrid = () => {
@@ -43,9 +43,9 @@ export const KPIGrid = () => {
   const charts = useMemo(
     () =>
       dashboards?.kpi.get({
-        metricsDataView: dataView,
+        metricsDataViewId: dataView?.id,
         options: {
-          backgroundColor: euiTheme.colors.lightestShade,
+          seriesColor: euiTheme.colors.lightestShade,
           ...(subtitle ? { subtitle } : {}),
         },
       }).charts ?? [],
