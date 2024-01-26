@@ -139,6 +139,7 @@ export const useLatestVulnerabilitiesGrouping = ({
     groupPanelRenderer,
     groupStatsRenderer,
     groupingLocalStorageKey: LOCAL_STORAGE_VULNERABILITIES_GROUPING_KEY,
+    maxGroupingLevels: 1,
   });
 
   const groupingQuery = getGroupingQuery({
