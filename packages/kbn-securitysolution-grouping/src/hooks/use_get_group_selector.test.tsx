@@ -254,7 +254,7 @@ describe('Group Selector Hooks', () => {
         },
       });
       act(() => result.current.props.onGroupChange(customField));
-      expect(defaultArgs.tracker).not.toHaveBeenCalledTimes(1);
+      expect(defaultArgs.tracker).not.toHaveBeenCalled();
     });
 
     it('On group change, executes callback', () => {
