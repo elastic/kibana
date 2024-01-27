@@ -178,37 +178,6 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
     }
   );
 
-  // TODO: We no longer support fetching all saved queries, so this route should be removed
-  router.versioned.post({ path: `${SAVED_QUERY_BASE_URL}/_all`, access }).addVersion(
-    {
-      version,
-      validate: {
-        request: {},
-        response: {
-          200: {
-            body: schema.object({
-              total: schema.number(),
-              savedQueries: schema.arrayOf(savedQueryResponseSchema),
-            }),
-          },
-        },
-      },
-    },
-    async (context, _, response) => {
-      try {
-        const savedQuery = await context.savedQuery;
-        // Don't try to fetch all the queries since it could be
-        // a lot of data, so just return the first 100 instead
-        const body: { total: number; savedQueries: SavedQueryRestResponse[] } =
-          await savedQuery.find({ page: 1, perPage: 100 });
-        return response.ok({ body });
-      } catch (e) {
-        const err = e.output?.payload ?? e;
-        return reportServerError(response, err);
-      }
-    }
-  );
-
   router.versioned.delete({ path: `${SAVED_QUERY_BASE_URL}/{id}`, access }).addVersion(
     {
       version,

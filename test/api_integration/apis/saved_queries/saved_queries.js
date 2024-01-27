@@ -126,12 +126,6 @@ export default function ({ getService }) {
         .send({ foo: 'bar' })
         .expect(400));
 
-    it('should return 200 for find all saved queries', () =>
-      supertest
-        .post(`${SAVED_QUERY_BASE_URL}/_all`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .expect(200));
-
     it('should return 200 for delete saved query', () =>
       supertest
         .post(`${SAVED_QUERY_BASE_URL}/_create`)
