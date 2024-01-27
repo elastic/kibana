@@ -22,6 +22,7 @@ import type { TimeHistoryContract, SavedQuery } from '@kbn/data-plugin/public';
 import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/public';
 
+import { i18n } from '@kbn/i18n';
 import type { IUnifiedSearchPluginServices } from '../types';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementList } from '../saved_query_management';
@@ -333,7 +334,12 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
       }
 
       this.services.notifications.toasts.addSuccess(
-        `Your query "${response.attributes.title}" was saved`
+        i18n.translate('unifiedSearch.search.searchBar.saveQuerySuccessMessage', {
+          defaultMessage: 'Your query "{queryTitle}" was saved',
+          values: {
+            queryTitle: response.attributes.title,
+          },
+        })
       );
 
       if (this.props.onSaved) {
@@ -341,7 +347,12 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
       }
     } catch (error) {
       this.services.notifications.toasts.addDanger(
-        `An error occured while saving your query: ${error.message}`
+        i18n.translate('unifiedSearch.search.searchBar.saveQueryErrorMessage', {
+          defaultMessage: 'An error occured while saving your query: {errorMessage}',
+          values: {
+            errorMessage: error.message,
+          },
+        })
       );
       throw error;
     }

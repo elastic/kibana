@@ -194,7 +194,7 @@ export const SavedQueryManagementList = ({
   onClearSavedQuery,
   onClose,
 }: SavedQueryManagementListProps) => {
-  const { uiSettings } = useKibana<IUnifiedSearchPluginServices>().services;
+  const { uiSettings, notifications } = useKibana<IUnifiedSearchPluginServices>().services;
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPageNumber, setCurrentPageNumber] = useState(0);
   const [totalQueryCount, setTotalQueryCount] = useState(0);
@@ -278,7 +278,7 @@ export const SavedQueryManagementList = ({
   }, []);
 
   const onDelete = useCallback(
-    (savedQueryToDelete: string) => {
+    (savedQueryToDelete: SavedQuery) => {
       const onDeleteSavedQuery = async (savedQueryId: string) => {
         setTotalQueryCount((currentTotalQueryCount) => currentTotalQueryCount - 1);
         setCurrentPageQueries(
@@ -290,12 +290,41 @@ export const SavedQueryManagementList = ({
           onClearSavedQuery();
         }
 
-        await savedQueryService.deleteSavedQuery(savedQueryId);
+        try {
+          await savedQueryService.deleteSavedQuery(savedQueryId);
+
+          notifications.toasts.addSuccess(
+            i18n.translate('unifiedSearch.search.searchBar.deleteQuerySuccessMessage', {
+              defaultMessage: 'Query "{queryTitle}" was deleted',
+              values: {
+                queryTitle: savedQueryToDelete.attributes.title,
+              },
+            })
+          );
+        } catch (error) {
+          notifications.toasts.addDanger(
+            i18n.translate('unifiedSearch.search.searchBar.deleteQueryErrorMessage', {
+              defaultMessage:
+                'An error occured while deleting query "{queryTitle}": {errorMessage}',
+              values: {
+                queryTitle: savedQueryToDelete.attributes.title,
+                errorMessage: error.message,
+              },
+            })
+          );
+          throw error;
+        }
       };
 
-      onDeleteSavedQuery(savedQueryToDelete);
+      onDeleteSavedQuery(savedQueryToDelete.id);
     },
-    [currentPageQueries, loadedSavedQuery, onClearSavedQuery, savedQueryService]
+    [
+      currentPageQueries,
+      loadedSavedQuery,
+      notifications.toasts,
+      onClearSavedQuery,
+      savedQueryService,
+    ]
   );
 
   const savedQueriesOptions = useMemo(() => {
@@ -531,7 +560,7 @@ export const SavedQueryManagementList = ({
             }
           )}
           onConfirm={() => {
-            onDelete(toBeDeletedSavedQuery.id);
+            onDelete(toBeDeletedSavedQuery);
             setShowDeletionConfirmationModal(false);
           }}
           buttonColor="danger"
