@@ -1,5 +1,5 @@
 {
-  "id": "observabilityLogExplorer",
+  "id": "observabilityLogsExplorer",
   "client": {
     "classes": [],
     "functions": [],
@@ -19,7 +19,7 @@
   "common": {
     "classes": [
       {
-        "parentPluginId": "observabilityLogExplorer",
+        "parentPluginId": "observabilityLogsExplorer",
         "id": "def-common.AllDatasetsLocatorDefinition",
         "type": "Class",
         "tags": [],
@@ -27,9 +27,9 @@
         "description": [],
         "signature": [
           {
-            "pluginId": "observabilityLogExplorer",
+            "pluginId": "observabilityLogsExplorer",
             "scope": "common",
-            "docId": "kibObservabilityLogExplorerPluginApi",
+            "docId": "kibObservabilityLogsExplorerPluginApi",
             "section": "def-common.AllDatasetsLocatorDefinition",
             "text": "AllDatasetsLocatorDefinition"
           },
@@ -51,12 +51,12 @@
           },
           ">"
         ],
-        "path": "x-pack/plugins/observability_log_explorer/common/locators/all_datasets/all_datasets_locator.ts",
+        "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/all_datasets/all_datasets_locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "observabilityLogExplorer",
+            "parentPluginId": "observabilityLogsExplorer",
             "id": "def-common.AllDatasetsLocatorDefinition.id",
             "type": "string",
             "tags": [],
@@ -65,12 +65,12 @@
             "signature": [
               "\"ALL_DATASETS_LOCATOR\""
             ],
-            "path": "x-pack/plugins/observability_log_explorer/common/locators/all_datasets/all_datasets_locator.ts",
+            "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/all_datasets/all_datasets_locator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "observabilityLogExplorer",
+            "parentPluginId": "observabilityLogsExplorer",
             "id": "def-common.AllDatasetsLocatorDefinition.Unnamed",
             "type": "Function",
             "tags": [],
@@ -79,12 +79,12 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/observability_log_explorer/common/locators/all_datasets/all_datasets_locator.ts",
+            "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/all_datasets/all_datasets_locator.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
-                "parentPluginId": "observabilityLogExplorer",
+                "parentPluginId": "observabilityLogsExplorer",
                 "id": "def-common.AllDatasetsLocatorDefinition.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
@@ -93,7 +93,7 @@
                 "signature": [
                   "DatasetLocatorDependencies"
                 ],
-                "path": "x-pack/plugins/observability_log_explorer/common/locators/all_datasets/all_datasets_locator.ts",
+                "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/all_datasets/all_datasets_locator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -102,7 +102,7 @@
             "returnComment": []
           },
           {
-            "parentPluginId": "observabilityLogExplorer",
+            "parentPluginId": "observabilityLogsExplorer",
             "id": "def-common.AllDatasetsLocatorDefinition.getLocation",
             "type": "Function",
             "tags": [],
@@ -119,12 +119,12 @@
               },
               ") => Promise<{ app: string; path: string; state: { origin?: { id: \"application-log-onboarding\"; } | undefined; }; }>"
             ],
-            "path": "x-pack/plugins/observability_log_explorer/common/locators/all_datasets/all_datasets_locator.ts",
+            "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/all_datasets/all_datasets_locator.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
-                "parentPluginId": "observabilityLogExplorer",
+                "parentPluginId": "observabilityLogsExplorer",
                 "id": "def-common.AllDatasetsLocatorDefinition.getLocation.$1",
                 "type": "CompoundType",
                 "tags": [],
@@ -139,7 +139,7 @@
                     "text": "DatasetLocatorParams"
                   }
                 ],
-                "path": "x-pack/plugins/observability_log_explorer/common/locators/all_datasets/all_datasets_locator.ts",
+                "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/all_datasets/all_datasets_locator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -151,7 +151,7 @@
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "observabilityLogExplorer",
+        "parentPluginId": "observabilityLogsExplorer",
         "id": "def-common.SingleDatasetLocatorDefinition",
         "type": "Class",
         "tags": [],
@@ -159,9 +159,9 @@
         "description": [],
         "signature": [
           {
-            "pluginId": "observabilityLogExplorer",
+            "pluginId": "observabilityLogsExplorer",
             "scope": "common",
-            "docId": "kibObservabilityLogExplorerPluginApi",
+            "docId": "kibObservabilityLogsExplorerPluginApi",
             "section": "def-common.SingleDatasetLocatorDefinition",
             "text": "SingleDatasetLocatorDefinition"
           },
@@ -183,12 +183,12 @@
           },
           ">"
         ],
-        "path": "x-pack/plugins/observability_log_explorer/common/locators/single_dataset/single_dataset_locator.ts",
+        "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/single_dataset/single_dataset_locator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "observabilityLogExplorer",
+            "parentPluginId": "observabilityLogsExplorer",
             "id": "def-common.SingleDatasetLocatorDefinition.id",
             "type": "string",
             "tags": [],
@@ -197,12 +197,12 @@
             "signature": [
               "\"SINGLE_DATASET_LOCATOR\""
             ],
-            "path": "x-pack/plugins/observability_log_explorer/common/locators/single_dataset/single_dataset_locator.ts",
+            "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/single_dataset/single_dataset_locator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "observabilityLogExplorer",
+            "parentPluginId": "observabilityLogsExplorer",
             "id": "def-common.SingleDatasetLocatorDefinition.Unnamed",
             "type": "Function",
             "tags": [],
@@ -211,12 +211,12 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/observability_log_explorer/common/locators/single_dataset/single_dataset_locator.ts",
+            "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/single_dataset/single_dataset_locator.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
-                "parentPluginId": "observabilityLogExplorer",
+                "parentPluginId": "observabilityLogsExplorer",
                 "id": "def-common.SingleDatasetLocatorDefinition.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
@@ -225,7 +225,7 @@
                 "signature": [
                   "DatasetLocatorDependencies"
                 ],
-                "path": "x-pack/plugins/observability_log_explorer/common/locators/single_dataset/single_dataset_locator.ts",
+                "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/single_dataset/single_dataset_locator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -234,7 +234,7 @@
             "returnComment": []
           },
           {
-            "parentPluginId": "observabilityLogExplorer",
+            "parentPluginId": "observabilityLogsExplorer",
             "id": "def-common.SingleDatasetLocatorDefinition.getLocation",
             "type": "Function",
             "tags": [],
@@ -251,12 +251,12 @@
               },
               ") => Promise<{ app: string; path: string; state: { origin?: { id: \"application-log-onboarding\"; } | undefined; }; }>"
             ],
-            "path": "x-pack/plugins/observability_log_explorer/common/locators/single_dataset/single_dataset_locator.ts",
+            "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/single_dataset/single_dataset_locator.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
-                "parentPluginId": "observabilityLogExplorer",
+                "parentPluginId": "observabilityLogsExplorer",
                 "id": "def-common.SingleDatasetLocatorDefinition.getLocation.$1",
                 "type": "Object",
                 "tags": [],
@@ -271,7 +271,7 @@
                     "text": "SingleDatasetLocatorParams"
                   }
                 ],
-                "path": "x-pack/plugins/observability_log_explorer/common/locators/single_dataset/single_dataset_locator.ts",
+                "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/single_dataset/single_dataset_locator.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -285,7 +285,7 @@
     ],
     "functions": [
       {
-        "parentPluginId": "observabilityLogExplorer",
+        "parentPluginId": "observabilityLogsExplorer",
         "id": "def-common.deepCompactObject",
         "type": "Function",
         "tags": [],
@@ -294,12 +294,12 @@
         "signature": [
           "<Value extends Record<string, any>>(obj: Value) => Value"
         ],
-        "path": "x-pack/plugins/observability_log_explorer/common/utils/deep_compact_object.ts",
+        "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/utils/deep_compact_object.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "observabilityLogExplorer",
+            "parentPluginId": "observabilityLogsExplorer",
             "id": "def-common.deepCompactObject.$1",
             "type": "Uncategorized",
             "tags": [],
@@ -308,7 +308,7 @@
             "signature": [
               "Value"
             ],
-            "path": "x-pack/plugins/observability_log_explorer/common/utils/deep_compact_object.ts",
+            "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/utils/deep_compact_object.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -320,18 +320,18 @@
     ],
     "interfaces": [
       {
-        "parentPluginId": "observabilityLogExplorer",
+        "parentPluginId": "observabilityLogsExplorer",
         "id": "def-common.ObservabilityLogExplorerLocators",
         "type": "Interface",
         "tags": [],
         "label": "ObservabilityLogExplorerLocators",
         "description": [],
-        "path": "x-pack/plugins/observability_log_explorer/common/locators/index.ts",
+        "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "observabilityLogExplorer",
+            "parentPluginId": "observabilityLogsExplorer",
             "id": "def-common.ObservabilityLogExplorerLocators.allDatasetsLocator",
             "type": "Object",
             "tags": [],
@@ -355,12 +355,12 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/observability_log_explorer/common/locators/index.ts",
+            "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "observabilityLogExplorer",
+            "parentPluginId": "observabilityLogsExplorer",
             "id": "def-common.ObservabilityLogExplorerLocators.singleDatasetLocator",
             "type": "Object",
             "tags": [],
@@ -384,7 +384,7 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/observability_log_explorer/common/locators/index.ts",
+            "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -395,7 +395,7 @@
     "enums": [],
     "misc": [
       {
-        "parentPluginId": "observabilityLogExplorer",
+        "parentPluginId": "observabilityLogsExplorer",
         "id": "def-common.OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY",
         "type": "string",
         "tags": [],
@@ -404,7 +404,7 @@
         "signature": [
           "\"pageState\""
         ],
-        "path": "x-pack/plugins/observability_log_explorer/common/url_schema/common.ts",
+        "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/url_schema/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
