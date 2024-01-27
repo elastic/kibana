@@ -20,7 +20,7 @@ import {
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
 
-interface SLOListParams {
+export interface SLOListParams {
   kqlQuery?: string;
   page?: number;
   sortBy?: string;

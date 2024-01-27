@@ -12,6 +12,7 @@ import {
   SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
   DEFAULT_SLO_GROUPS_PAGE_SIZE,
 } from '../../../common/slo/constants';
+import { getElastichsearchQueryOrThrow } from './transform_generators';
 
 const DEFAULT_PAGE = 1;
 const MAX_PER_PAGE = 5000;
@@ -66,12 +67,13 @@ export class FindSLOGroups {
   public async execute(params: FindSLOGroupsParams): Promise<FindSLOGroupsResponse> {
     const pagination = toPagination(params);
     const groupBy = params.groupBy;
+    const kqlQuery = params.kqlQuery;
     const response = await this.esClient.search<unknown, GroupAggregationsResponse>({
       index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
       size: 0,
       query: {
         bool: {
-          filter: [{ term: { spaceId: this.spaceId } }],
+          filter: [{ term: { spaceId: this.spaceId } }, getElastichsearchQueryOrThrow(kqlQuery)],
         },
       },
       body: {
@@ -167,7 +169,6 @@ export class FindSLOGroups {
           },
         ];
       }, [] as Array<Record<'group' | 'groupBy' | 'summary', any>>) ?? [];
-
     return findSLOGroupsResponseSchema.encode({
       page: pagination.page,
       perPage: pagination.perPage,

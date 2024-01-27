@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useState } from 'react';
-import { EuiPanel, EuiAccordion, EuiTablePagination } from '@elastic/eui';
+import { EuiPanel, EuiAccordion, EuiTablePagination, EuiSpacer } from '@elastic/eui';
 import { useFetchSloList } from '../../../../hooks/slo/use_fetch_slo_list';
 import { SlosView } from '../slos_view';
 import type { SortDirection } from '../slo_list_search_bar';
@@ -31,7 +31,7 @@ export function GroupListView({
   direction,
   groupBy,
 }: Props) {
-  const query = kqlQuery ? `"${groupBy}": ${group} and ${kqlQuery}` : `"${groupBy}": ${group}`;
+  const query = kqlQuery ? `"${groupBy}": (${group}) and ${kqlQuery}` : `"${groupBy}": ${group}`;
   let groupName = group.toLowerCase();
   if (groupBy === 'slo.indicator.type') {
     groupName = SLI_OPTIONS.find((option) => option.value === group)?.text ?? group;
@@ -60,27 +60,30 @@ export function GroupListView({
   const groupTitle = `${groupName} (${total})`;
 
   return (
-    <EuiPanel>
-      <MemoEuiAccordion buttonContent={groupTitle} id={group} initialIsOpen={false}>
-        <>
-          <SlosView
-            sloList={results}
-            loading={isLoading || isRefetching}
-            error={isError}
-            isCompact={isCompact}
-            sloView={sloView}
-            group={group}
-          />
+    <>
+      <EuiPanel data-test-subj="sloGroupViewPanel">
+        <MemoEuiAccordion buttonContent={groupTitle} id={group} initialIsOpen={false}>
+          <>
+            <SlosView
+              sloList={results}
+              loading={isLoading || isRefetching}
+              error={isError}
+              isCompact={isCompact}
+              sloView={sloView}
+              group={group}
+            />
 
-          <EuiTablePagination
-            pageCount={Math.ceil(total / ITEMS_PER_PAGE)}
-            activePage={page}
-            onChangePage={handlePageClick}
-            itemsPerPage={ITEMS_PER_PAGE}
-          />
-        </>
-      </MemoEuiAccordion>
-    </EuiPanel>
+            <EuiTablePagination
+              pageCount={Math.ceil(total / ITEMS_PER_PAGE)}
+              activePage={page}
+              onChangePage={handlePageClick}
+              itemsPerPage={ITEMS_PER_PAGE}
+            />
+          </>
+        </MemoEuiAccordion>
+      </EuiPanel>
+      <EuiSpacer size="m" />
+    </>
   );
 }
 
