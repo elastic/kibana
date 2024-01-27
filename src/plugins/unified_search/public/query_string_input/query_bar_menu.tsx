@@ -25,7 +25,11 @@ import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedQueryService, SavedQuery } from '@kbn/data-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { QueryBarMenuPanels, QueryBarMenuPanelsProps } from './query_bar_menu_panels';
+import {
+  QueryBarMenuPanel,
+  useQueryBarMenuPanels,
+  QueryBarMenuPanelsProps,
+} from './query_bar_menu_panels';
 import { FilterEditorWrapper } from './filter_editor_wrapper';
 import {
   withCloseFilterEditorConfirmModal,
@@ -112,7 +116,9 @@ function QueryBarMenuComponent({
   queryBarMenuRef,
 }: QueryBarMenuProps) {
   const [renderedComponent, setRenderedComponent] = useState('menu');
-  const [currentPanelId, setCurrentPanelId] = useState<EuiContextMenuPanelId>(0);
+  const [currentPanelId, setCurrentPanelId] = useState<EuiContextMenuPanelId>(
+    QueryBarMenuPanel.main
+  );
 
   useEffect(() => {
     if (openQueryBarMenu) {
@@ -153,7 +159,7 @@ function QueryBarMenuComponent({
     </EuiToolTip>
   );
 
-  const panels = QueryBarMenuPanels({
+  const panels = useQueryBarMenuPanels({
     filters,
     savedQuery,
     language,
@@ -164,11 +170,13 @@ function QueryBarMenuComponent({
     showFilterBar,
     showQueryInput,
     savedQueryService,
+    saveFormComponent,
     saveAsNewQueryFormComponent,
     manageFilterSetComponent,
     hiddenPanelOptions,
     nonKqlMode,
     disableQueryLanguageSwitcher,
+    queryBarMenuRef,
     closePopover: plainClosePopover,
     onQueryBarSubmit,
     onFiltersUpdated,
@@ -180,12 +188,11 @@ function QueryBarMenuComponent({
   const renderComponent = () => {
     switch (renderedComponent) {
       case 'menu':
-      default:
         return (
           <EuiContextMenu
             // @ts-expect-error EuiContextMenu ref is mistyped
             ref={queryBarMenuRef}
-            initialPanelId={currentPanelId}
+            initialPanelId={QueryBarMenuPanel.main}
             panels={panels}
             onPanelChange={({ panelId }) => setCurrentPanelId(panelId)}
             data-test-subj="queryBarMenuPanel"
@@ -205,32 +212,16 @@ function QueryBarMenuComponent({
               },
               // Fix the update button underline on hover, and
               // the button focus outline being cut off
-              currentPanelId === 0 && {
+              currentPanelId === QueryBarMenuPanel.main && {
                 '.euiContextMenuPanel__title': {
-                  padding: 0,
-                  '.euiContextMenuItem__text': {
-                    padding: euiThemeVars.euiSizeM,
-                  },
                   ':hover': {
                     textDecoration: 'none !important',
                   },
+                  '.euiContextMenuItem__text': {
+                    overflow: 'visible',
+                  },
                 },
               },
-            ]}
-          />
-        );
-      case 'saveForm':
-        return (
-          <EuiContextMenuPanel
-            title={strings.getSavedQueryPopoverSaveChangesButtonText()}
-            items={[<div css={{ padding: euiThemeVars.euiSize }}>{saveFormComponent}</div>]}
-          />
-        );
-      case 'saveAsNewForm':
-        return (
-          <EuiContextMenuPanel
-            items={[
-              <div css={{ padding: euiThemeVars.euiSize }}>{saveAsNewQueryFormComponent}</div>,
             ]}
           />
         );
@@ -258,21 +249,19 @@ function QueryBarMenuComponent({
   };
 
   return (
-    <>
-      <EuiPopover
-        id={normalContextMenuPopoverId}
-        button={button}
-        isOpen={openQueryBarMenu}
-        closePopover={renderedComponent === 'addFilter' ? closePopover : plainClosePopover}
-        panelPaddingSize="none"
-        anchorPosition="downLeft"
-        repositionOnScroll
-        data-test-subj="queryBarMenuPopover"
-        hasDragDrop
-      >
-        {renderComponent()}
-      </EuiPopover>
-    </>
+    <EuiPopover
+      id={normalContextMenuPopoverId}
+      button={button}
+      isOpen={openQueryBarMenu}
+      closePopover={renderedComponent === 'addFilter' ? closePopover : plainClosePopover}
+      panelPaddingSize="none"
+      anchorPosition="downLeft"
+      repositionOnScroll
+      data-test-subj="queryBarMenuPopover"
+      hasDragDrop
+    >
+      {renderComponent()}
+    </EuiPopover>
   );
 }
 

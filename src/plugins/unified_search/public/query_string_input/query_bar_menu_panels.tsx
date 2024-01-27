@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, RefObject } from 'react';
 import { isEqual } from 'lodash';
 import {
   EuiContextMenuPanelDescriptor,
@@ -36,10 +36,12 @@ import {
 } from '@kbn/data-plugin/common';
 import type { SavedQueryService, SavedQuery } from '@kbn/data-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { IUnifiedSearchPluginServices } from '../types';
 import { fromUser } from './from_user';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { FilterPanelOption } from '../types';
+import { PanelTitle } from './panel_title';
 
 const MAP_ITEMS_TO_FILTER_OPTION: Record<string, FilterPanelOption> = {
   'filter-sets-pinAllFilters': 'pinFilter',
@@ -138,6 +140,15 @@ export const strings = {
     }),
 };
 
+export enum QueryBarMenuPanel {
+  main = 'main',
+  applyToAllFilters = 'applyToAllFilters',
+  updateCurrentQuery = 'updateCurrentQuery',
+  saveAsNewQuery = 'saveAsNewQuery',
+  loadQuery = 'loadQuery',
+  selectLanguage = 'selectLanguage',
+}
+
 export interface QueryBarMenuPanelsProps {
   filters?: Filter[];
   savedQuery?: SavedQuery;
@@ -149,11 +160,13 @@ export interface QueryBarMenuPanelsProps {
   showQueryInput?: boolean;
   showFilterBar?: boolean;
   savedQueryService: SavedQueryService;
+  saveFormComponent?: JSX.Element;
   saveAsNewQueryFormComponent?: JSX.Element;
   manageFilterSetComponent?: JSX.Element;
   hiddenPanelOptions?: FilterPanelOption[];
   nonKqlMode?: 'lucene' | 'text';
   disableQueryLanguageSwitcher?: boolean;
+  queryBarMenuRef: RefObject<EuiContextMenuClass>;
   closePopover: () => void;
   onQueryBarSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onFiltersUpdated?: (filters: Filter[]) => void;
@@ -162,7 +175,7 @@ export interface QueryBarMenuPanelsProps {
   setRenderedComponent: (component: string) => void;
 }
 
-export function QueryBarMenuPanels({
+export function useQueryBarMenuPanels({
   filters,
   savedQuery,
   language,
@@ -173,11 +186,13 @@ export function QueryBarMenuPanels({
   showFilterBar,
   showQueryInput,
   savedQueryService,
+  saveFormComponent,
   saveAsNewQueryFormComponent,
   manageFilterSetComponent,
   hiddenPanelOptions,
   nonKqlMode,
   disableQueryLanguageSwitcher = false,
+  queryBarMenuRef,
   closePopover,
   onQueryBarSubmit,
   onFiltersUpdated,
@@ -252,10 +267,6 @@ export function QueryBarMenuPanels({
       to: dateRangeTo || defaultTimeSetting.to,
     };
   };
-
-  const handleSave = useCallback(() => {
-    setRenderedComponent('saveForm');
-  }, [setRenderedComponent]);
 
   const onEnableAll = () => {
     reportUiCounter?.(METRIC_TYPE.CLICK, `filter:enable_all`);
@@ -340,7 +351,7 @@ export function QueryBarMenuPanels({
     {
       name: strings.getOptionsApplyAllFiltersButtonLabel(),
       icon: 'filter',
-      panel: 2,
+      panel: QueryBarMenuPanel.applyToAllFilters,
       disabled: !Boolean(filters && filters.length > 0),
       'data-test-subj': 'filter-sets-applyToAllFilters',
     },
@@ -351,7 +362,7 @@ export function QueryBarMenuPanels({
       name: savedQuery
         ? strings.getLoadOtherFilterSetLabel()
         : strings.getLoadCurrentFilterSetLabel(),
-      panel: 4,
+      panel: QueryBarMenuPanel.loadQuery,
       icon: 'filter',
       'data-test-subj': 'saved-query-management-load-button',
       disabled: !hasSavedQueries,
@@ -361,7 +372,7 @@ export function QueryBarMenuPanels({
       icon: 'save',
       disabled:
         !Boolean(showSaveQuery) || !hasFiltersOrQuery || (savedQuery && !savedQueryHasChanged),
-      panel: 1,
+      panel: QueryBarMenuPanel.saveAsNewQuery,
       'data-test-subj': 'saved-query-management-save-button',
     },
     { isSeparator: true },
@@ -402,14 +413,14 @@ export function QueryBarMenuPanels({
   if (showQueryInput && !disableQueryLanguageSwitcher) {
     items.push({
       name: `Language: ${language === 'kuery' ? kqlLabel : luceneLabel}`,
-      panel: 3,
+      panel: QueryBarMenuPanel.selectLanguage,
       'data-test-subj': 'switchQueryLanguageButton',
     });
   }
 
   let panels: EuiContextMenuPanelDescriptor[] = [
     {
-      id: 0,
+      id: QueryBarMenuPanel.main,
       title: savedQuery?.attributes.title ? (
         <>
           <EuiFlexGroup direction="column" gutterSize="s">
@@ -427,7 +438,12 @@ export function QueryBarMenuPanels({
                 <EuiButton
                   size="s"
                   fill
-                  onClick={handleSave}
+                  onClick={() => {
+                    queryBarMenuRef.current?.showPanel(
+                      QueryBarMenuPanel.updateCurrentQuery,
+                      'next'
+                    );
+                  }}
                   aria-label={strings.getSavedQueryPopoverSaveChangesButtonAriaLabel(
                     savedQuery?.attributes.title
                   )}
@@ -443,12 +459,7 @@ export function QueryBarMenuPanels({
       items,
     },
     {
-      id: 1,
-      title: strings.getSaveCurrentFilterSetLabel(),
-      content: <div css={{ padding: euiThemeVars.euiSize }}>{saveAsNewQueryFormComponent}</div>,
-    },
-    {
-      id: 2,
+      id: QueryBarMenuPanel.applyToAllFilters,
       initialFocusedItemIndex: 1,
       title: strings.getApplyAllFiltersButtonLabel(),
       items: [
@@ -500,7 +511,29 @@ export function QueryBarMenuPanels({
       ],
     },
     {
-      id: 3,
+      id: QueryBarMenuPanel.updateCurrentQuery,
+      content: (
+        <>
+          <PanelTitle
+            queryBarMenuRef={queryBarMenuRef}
+            title={strings.getSavedQueryPopoverSaveChangesButtonText()}
+          />
+          <div css={{ padding: euiThemeVars.euiSizeM }}>{saveFormComponent}</div>
+        </>
+      ),
+    },
+    {
+      id: QueryBarMenuPanel.saveAsNewQuery,
+      title: strings.getSaveCurrentFilterSetLabel(),
+      content: <div css={{ padding: euiThemeVars.euiSizeM }}>{saveAsNewQueryFormComponent}</div>,
+    },
+    {
+      id: QueryBarMenuPanel.loadQuery,
+      width: 400,
+      content: <div>{manageFilterSetComponent}</div>,
+    },
+    {
+      id: QueryBarMenuPanel.selectLanguage,
       title: strings.getFilterLanguageLabel(),
       content: (
         <QueryLanguageSwitcher
@@ -513,11 +546,6 @@ export function QueryBarMenuPanels({
           }}
         />
       ),
-    },
-    {
-      id: 4,
-      width: 400,
-      content: <div>{manageFilterSetComponent}</div>,
     },
   ];
 

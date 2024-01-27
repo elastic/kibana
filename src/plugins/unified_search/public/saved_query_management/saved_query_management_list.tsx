@@ -20,26 +20,13 @@ import {
   ShortDate,
   EuiPagination,
   EuiBadge,
-  EuiContextMenuItem,
-  EuiTitle,
-  useEuiTheme,
-  logicalCSS,
-  keys,
   EuiToolTip,
   EuiText,
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
 import { i18n } from '@kbn/i18n';
-import React, {
-  useCallback,
-  useState,
-  useRef,
-  useEffect,
-  useMemo,
-  RefObject,
-  KeyboardEvent,
-} from 'react';
+import React, { useCallback, useState, useRef, useEffect, useMemo, RefObject } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SavedQuery, SavedQueryService } from '@kbn/data-plugin/public';
 import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
@@ -47,9 +34,9 @@ import './saved_query_management_list.scss';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { debounce } from 'lodash';
 import useLatest from 'react-use/lib/useLatest';
-import useEffectOnce from 'react-use/lib/useEffectOnce';
 import type { IUnifiedSearchPluginServices } from '../types';
 import { strings as queryBarMenuPanelsStrings } from '../query_string_input/query_bar_menu_panels';
+import { PanelTitle } from '../query_string_input/panel_title';
 
 export interface SavedQueryManagementListProps {
   showSaveQuery?: boolean;
@@ -565,66 +552,13 @@ export const SavedQueryManagementList = ({
 const ListTitle = ({ queryBarMenuRef }: { queryBarMenuRef: RefObject<EuiContextMenuClass> }) => {
   const { application, http } = useKibana<IUnifiedSearchPluginServices>().services;
   const canEditSavedObjects = application.capabilities.savedObjectsManagement.edit;
-  const { euiTheme } = useEuiTheme();
-  const titleRef = useRef<HTMLButtonElement | null>(null);
-
-  const onTitleClick = useCallback(
-    () => queryBarMenuRef.current?.showPreviousPanel(),
-    [queryBarMenuRef]
-  );
-
-  const onTitleKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLButtonElement>) => {
-      if (event.key !== keys.ARROW_LEFT) {
-        return;
-      }
-
-      event.preventDefault();
-      event.stopPropagation();
-      queryBarMenuRef.current?.showPreviousPanel();
-      queryBarMenuRef.current?.onUseKeyboardToNavigate();
-    },
-    [queryBarMenuRef]
-  );
-
-  useEffectOnce(() => {
-    const panel = titleRef.current?.closest('.euiContextMenuPanel');
-    const focus = () => titleRef.current?.focus();
-
-    panel?.addEventListener('animationend', focus, { once: true });
-
-    return () => panel?.removeEventListener('animationend', focus);
-  });
 
   return (
-    <EuiFlexGroup
-      responsive={false}
-      gutterSize="none"
-      alignItems="center"
-      css={[logicalCSS('border-bottom', euiTheme.border.thin)]}
-    >
-      <EuiFlexItem>
-        <EuiTitle size="xxs">
-          <EuiContextMenuItem
-            buttonRef={titleRef}
-            className="euiContextMenuPanel__title"
-            icon="arrowLeft"
-            onClick={onTitleClick}
-            onKeyDown={onTitleKeyDown}
-            data-test-subj="contextMenuPanelTitleButton"
-            css={{
-              '&:enabled:focus': {
-                /* Override the default focus background on EUiContextMenuItems */
-                backgroundColor: 'unset',
-              },
-            }}
-          >
-            {queryBarMenuPanelsStrings.getLoadCurrentFilterSetLabel()}
-          </EuiContextMenuItem>
-        </EuiTitle>
-      </EuiFlexItem>
-      {canEditSavedObjects && (
-        <EuiFlexItem grow={false} css={{ paddingInline: euiTheme.size.s }}>
+    <PanelTitle
+      queryBarMenuRef={queryBarMenuRef}
+      title={queryBarMenuPanelsStrings.getLoadCurrentFilterSetLabel()}
+      append={
+        canEditSavedObjects && (
           <EuiToolTip
             position="bottom"
             content={i18n.translate('unifiedSearch.search.searchBar.savedQueryPopoverManageLabel', {
@@ -645,8 +579,8 @@ const ListTitle = ({ queryBarMenuRef }: { queryBarMenuRef: RefObject<EuiContextM
               )}
             />
           </EuiToolTip>
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
+        )
+      }
+    />
   );
 };
