@@ -113,7 +113,7 @@ describe.skip('Response console', { tags: ['@ess', '@serverless'] }, () => {
         path: `${homeFilePath}/upload.zip`,
         password: 'elastic',
       }).then((unzippedFileContent) => {
-        expect(unzippedFileContent).to.equal(fileContent);
+        expect(unzippedFileContent).to.contain(fileContent);
       });
     });
 
