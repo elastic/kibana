@@ -117,11 +117,14 @@ export const useGetGroupSelector = ({
   const onChange = useCallback(
     (groupSelection: string) => {
       let newSelectedGroups: string[] = [];
+      let sendTelemetry = true;
       // Simulate a toggle behavior when maxGroupingLevels is 1
       if (maxGroupingLevels === 1) {
         newSelectedGroups = [groupSelection];
       } else {
+        // if the group is already selected, remove it
         if (selectedGroups.find((selected) => selected === groupSelection)) {
+          sendTelemetry = false;
           const groups = selectedGroups.filter((selectedGroup) => selectedGroup !== groupSelection);
           if (groups.length === 0) {
             newSelectedGroups = ['none'];
@@ -140,11 +143,13 @@ export const useGetGroupSelector = ({
 
       setSelectedGroups(newSelectedGroups);
 
-      // built-in telemetry: UI-counter
-      tracker?.(
-        METRIC_TYPE.CLICK,
-        getTelemetryEvent.groupChanged({ groupingId, selected: groupSelection })
-      );
+      if (sendTelemetry) {
+        // built-in telemetry: UI-counter
+        tracker?.(
+          METRIC_TYPE.CLICK,
+          getTelemetryEvent.groupChanged({ groupingId, selected: groupSelection })
+        );
+      }
 
       onGroupChange?.({
         tableId: groupingId,
