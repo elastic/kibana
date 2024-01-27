@@ -10,7 +10,8 @@ import {
   getIndexPatternFromSQLQuery,
   getIndexPatternFromESQLQuery,
 } from '@kbn/es-query';
-import { DataView, ESQL_TYPE } from '@kbn/data-views-plugin/common';
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { DiscoverServices } from '../../../build_services';
 
 export async function getDataViewByTextBasedQueryLang(
@@ -19,13 +20,11 @@ export async function getDataViewByTextBasedQueryLang(
   services: DiscoverServices
 ) {
   let indexPatternFromQuery = '';
-  let isEsql = false;
   if ('sql' in query) {
     indexPatternFromQuery = getIndexPatternFromSQLQuery(query.sql);
   }
   if ('esql' in query) {
     indexPatternFromQuery = getIndexPatternFromESQLQuery(query.esql);
-    isEsql = true;
   }
   // we should find a better way to work with ESQL queries which dont need a dataview
   if (!indexPatternFromQuery && currentDataView) return currentDataView;
@@ -34,10 +33,7 @@ export async function getDataViewByTextBasedQueryLang(
     currentDataView?.isPersisted() ||
     indexPatternFromQuery !== currentDataView?.getIndexPattern()
   ) {
-    const dataViewObj = await services.dataViews.create({
-      title: indexPatternFromQuery,
-      type: isEsql ? ESQL_TYPE : undefined,
-    });
+    const dataViewObj = await getESQLAdHocDataview(indexPatternFromQuery, services.dataViews);
 
     if (dataViewObj.fields.getByName('@timestamp')?.type === 'date') {
       dataViewObj.timeFieldName = '@timestamp';

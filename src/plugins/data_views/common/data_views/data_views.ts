@@ -295,7 +295,6 @@ export interface DataViewsServicePublicMethods {
    * Returns whether a default data view exists.
    */
   defaultDataViewExists: () => Promise<boolean>;
-  getDeduplicatedDataViews: (dataViews: DataView[]) => DataView[];
 }
 
 /**
