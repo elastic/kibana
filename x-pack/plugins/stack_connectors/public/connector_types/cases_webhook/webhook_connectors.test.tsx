@@ -324,7 +324,9 @@ describe('CasesWebhookActionConnectorFields renders', () => {
     // this validation is tested in the main validation section
   });
 
-  describe('Validation', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/175497
+  // FLAKY: https://github.com/elastic/kibana/issues/175498
+  describe.skip('Validation', () => {
     const onSubmit = jest.fn();
 
     beforeEach(() => {
