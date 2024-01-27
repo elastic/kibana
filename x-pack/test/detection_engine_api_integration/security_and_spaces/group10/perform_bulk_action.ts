@@ -26,6 +26,7 @@ import { WebhookAuthType } from '@kbn/stack-connectors-plugin/common/webhook/con
 import {
   binaryToString,
   checkInvestigationFieldSoValue,
+  createAlertsIndex,
   createLegacyRuleAction,
   createRule,
   createSignalsIndex,
@@ -46,7 +47,6 @@ import {
   getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
   deleteAllExceptions,
 } from '../../utils';
-import { createAlertsIndex } from '../../../security_solution_api_integration/test_suites/detections_response/utils/alerts/create_alerts_index';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
