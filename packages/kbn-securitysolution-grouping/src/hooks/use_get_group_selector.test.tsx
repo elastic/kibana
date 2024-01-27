@@ -258,6 +258,7 @@ describe('Group Selector Hooks', () => {
       expect(defaultArgs.onGroupChange).toHaveBeenCalledWith({
         tableId: groupingId,
         groupByField: customField,
+        groupByFields: ['host.name', customField],
       });
     });
 
