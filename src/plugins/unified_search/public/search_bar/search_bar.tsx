@@ -20,7 +20,6 @@ import { withKibana, KibanaReactContextValue } from '@kbn/kibana-react-plugin/pu
 import type { TimeHistoryContract, SavedQuery } from '@kbn/data-plugin/public';
 import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { ESQL_TYPE } from '@kbn/data-views-plugin/common';
 
 import type { IUnifiedSearchPluginServices } from '../types';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
@@ -529,27 +528,12 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
     ) : undefined;
 
     let filterBar;
-    const esqlIndexPatternMap = new Map<string, boolean>();
-    const indexPatterns = this.props.indexPatterns
-      ? this.props.indexPatterns.reduce((collector, dataView) => {
-          if (dataView.type !== ESQL_TYPE) {
-            collector.push(dataView);
-          } else {
-            const indexPattern = dataView.getIndexPattern();
-            if (!esqlIndexPatternMap.has(indexPattern)) {
-              esqlIndexPatternMap.set(indexPattern, true);
-              collector.push(dataView);
-            }
-          }
-          return collector;
-        }, [] as DataView[])
-      : [];
     if (this.shouldRenderFilterBar()) {
       filterBar = this.shouldShowDatePickerAsBadge() ? (
         <FilterItems
           filters={this.props.filters!}
           onFiltersUpdated={this.props.onFiltersUpdated}
-          indexPatterns={indexPatterns}
+          indexPatterns={this.props.indexPatterns!}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           filtersForSuggestions={this.props.filtersForSuggestions}
           hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
@@ -561,7 +545,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           afterQueryBar
           filters={this.props.filters!}
           onFiltersUpdated={this.props.onFiltersUpdated}
-          indexPatterns={indexPatterns}
+          indexPatterns={this.props.indexPatterns!}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           filtersForSuggestions={this.props.filtersForSuggestions}
           hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
@@ -580,7 +564,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           query={this.state.query}
           screenTitle={this.props.screenTitle}
           onSubmit={this.onQueryBarSubmit}
-          indexPatterns={indexPatterns}
+          indexPatterns={this.props.indexPatterns!}
           isLoading={this.props.isLoading}
           fillSubmitButton={this.props.fillSubmitButton || false}
           prepend={this.props.showFilterBar || this.props.showQueryInput ? queryBarMenu : undefined}

@@ -12,6 +12,7 @@ import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
 import type { DataViewBase } from '@kbn/es-query';
 import { cloneDeep, each, mapValues, omit, pickBy, reject } from 'lodash';
+import { ESQL_TYPE } from '..';
 import type { DataViewField, IIndexPatternFieldList } from '../fields';
 import { fieldList } from '../fields';
 import type {
@@ -191,6 +192,22 @@ export class DataView extends AbstractDataView implements DataViewBase {
     }
 
     return dataViewSpec;
+  }
+
+  /**
+   * Can be used to check if two data views are the same in terms of their spec.
+   * Useful to detect changes. ES|QL typed data views don't take into account their id.
+   * The id is just used to be identified in the data view cache
+   * and where it's needed from consumers e.g. in Discover state
+   */
+  getSpecHash() {
+    const spec = this.toMinimalSpec();
+    const includeId = this.type !== ESQL_TYPE;
+    if (!includeId) {
+      // remove id from spec ES|QL data views
+      delete spec.id;
+    }
+    return JSON.stringify(spec);
   }
 
   /**

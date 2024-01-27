@@ -164,7 +164,9 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
     super(props);
     const dataView = getIndexPatternFromFilter(props.filter, props.indexPatterns);
     this.state = {
-      indexPatterns: props.indexPatterns,
+      indexPatterns: props.dataViews
+        ? this.getUniqueSpecHashDataViews(props.indexPatterns)
+        : props.indexPatterns,
       selectedDataView: dataView,
       customLabel: props.filter.meta.alias || '',
       queryDsl: this.parseFilterToQueryDsl(props.filter, props.indexPatterns),
@@ -205,7 +207,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
       this.setState({
         selectedDataView: dataView,
         isLoadingDataView: false,
-        indexPatterns: [dataView, ...this.props.indexPatterns],
+        indexPatterns: [dataView, ...this.state.indexPatterns],
         localFilter: merge({}, this.props.filter),
         queryDsl: this.parseFilterToQueryDsl(this.props.filter, this.state.indexPatterns),
       });
@@ -625,6 +627,26 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
     this.setState({ localFilter: newFilter });
     this.props.onLocalFilterUpdate?.(newFilter);
   };
+
+  /**
+   * Helper to get unique data views by spec
+   * There can be multiple ES|QL data view with same spec but different id
+   * Those get filtered out because they don't matter in the filter context
+   * Other data views won't get filtered out
+   * @param dataViews[]
+   */
+  private getUniqueSpecHashDataViews(dataViews: DataView[]) {
+    const map = new Map<string, DataView>();
+
+    for (const dataView of dataViews) {
+      const hash = dataView.getSpecHash();
+      if (!map.has(hash)) {
+        map.set(hash, dataView);
+      }
+    }
+
+    return [...map.values()];
+  }
 
   private onSubmit = () => {
     const { isCustomEditorOpen, queryDsl, customLabel } = this.state;

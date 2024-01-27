@@ -68,7 +68,7 @@ export const loadSavedSearch = async (
 
   // Update saved search by a given app state (in URL)
   if (appState) {
-    if (savedSearchId && appState.index) {
+    if (savedSearchId && appState.index && !nextSavedSearch.isTextBasedQuery) {
       // This is for the case appState is overwriting the loaded saved search data view
       const savedSearchDataViewId = nextSavedSearch.searchSource.getField('index')?.id;
       const stateDataView = await getStateDataView(params, {

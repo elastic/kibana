@@ -30,7 +30,7 @@ import {
   TypeMeta,
 } from '../types';
 
-import { META_FIELDS, SavedObject } from '..';
+import { ESQL_TYPE, META_FIELDS, SavedObject } from '..';
 import { DataViewMissingIndices } from '../lib';
 import { findByName } from '../utils';
 import { DuplicateDataViewError, DataViewInsufficientAccessError } from '../errors';
@@ -295,6 +295,7 @@ export interface DataViewsServicePublicMethods {
    * Returns whether a default data view exists.
    */
   defaultDataViewExists: () => Promise<boolean>;
+  getDeduplicatedDataViews: (dataViews: DataView[]) => DataView[];
 }
 
 /**
@@ -930,13 +931,13 @@ export class DataViewsService {
       return dataView;
     });
 
-    const indexPatternPromise =
-      dataViewFromCache ||
-      this.dataViewCache.set(id, this.getSavedObjectAndInit(id, displayErrors));
+    const indexPatternPromise = dataViewFromCache || this.getSavedObjectAndInit(id, displayErrors);
 
-    // don't cache failed requests
-    indexPatternPromise.catch(() => {
-      this.dataViewCache.clear(id);
+    // add to cache when not yet done, when promise is successful
+    indexPatternPromise.then((dataView) => {
+      if (!dataViewFromCache) {
+        this.dataViewCache.clear(dataView.id!);
+      }
     });
 
     return indexPatternPromise;
@@ -993,17 +994,25 @@ export class DataViewsService {
     const doCreate = () => this.createFromSpec(spec, skipFetchFields, displayErrors);
 
     if (spec.id) {
+      // knock, knock, cache, was this data view already created?
       const cachedDataView = this.dataViewCache.get(spec.id);
 
       if (cachedDataView) {
         return cachedDataView;
       }
-
-      return this.dataViewCache.set(spec.id, doCreate());
+    }
+    // no data view in cache, let's create a new one
+    const dataView = await doCreate();
+    if (dataView.type === ESQL_TYPE) {
+      // this is an esql data view that's just being created, let's search for a data view with the same spec
+      // this prevents creating multiple esql data views with the same spec, that are not needed
+      const dataViewByHash = this.dataViewCache.getByHash(dataView.getSpecHash());
+      if (dataViewByHash) {
+        return Promise.resolve(dataViewByHash);
+      }
     }
 
-    const dataView = await doCreate();
-    return this.dataViewCache.set(dataView.id!, Promise.resolve(dataView));
+    return this.dataViewCache.set(dataView);
   }
 
   /**

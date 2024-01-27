@@ -10,30 +10,40 @@ import { DataView } from './data_view';
 
 export interface DataViewCache {
   get: (id: string) => Promise<DataView> | undefined;
-  set: (id: string, value: Promise<DataView>) => Promise<DataView>;
+  getByHash: (id: string) => DataView | undefined;
+  set: (dataView: DataView) => Promise<DataView>;
   clear: (id: string) => void;
   clearAll: () => void;
 }
 
 export function createDataViewCache(): DataViewCache {
-  const vals: Record<string, Promise<DataView>> = {};
+  const vals: Map<string, DataView> = new Map();
+  const valsByHash: Map<string, DataView> = new Map();
   const cache: DataViewCache = {
     get: (id: string) => {
-      return vals[id];
+      const dataView = vals.get(id);
+      if (!dataView) return undefined;
+      return Promise.resolve(dataView);
     },
-    set: (id: string, prom: Promise<DataView>) => {
-      vals[id] = prom;
-      return prom;
+    getByHash: (hash: string) => {
+      return valsByHash.get(hash);
+    },
+    set: (dataView: DataView) => {
+      const id = dataView.id!;
+      vals.set(id, dataView);
+      valsByHash.set(dataView.getSpecHash(), dataView);
+      return Promise.resolve(dataView);
     },
     clear: (id: string) => {
-      delete vals[id];
+      const dataView = vals.get(id);
+      if (dataView) {
+        vals.delete(id);
+        valsByHash.delete(dataView.getSpecHash());
+      }
     },
     clearAll: () => {
-      for (const id in vals) {
-        if (vals.hasOwnProperty(id)) {
-          delete vals[id];
-        }
-      }
+      vals.clear();
+      valsByHash.clear();
     },
   };
   return cache;
