@@ -55,11 +55,28 @@ export default function ({ getService }) {
         .send({ description: 'my description' })
         .expect(400));
 
+    it('should return 400 for create saved query with duplicate title', () =>
+      supertest
+        .post(`${SAVED_QUERY_BASE_URL}/_create`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .send({ ...mockSavedQuery, title: 'my title 2' })
+        .expect(200)
+        .then(() =>
+          supertest
+            .post(`${SAVED_QUERY_BASE_URL}/_create`)
+            .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+            .send({ ...mockSavedQuery, title: 'my title 2' })
+            .expect(400)
+        ));
+
     it('should return 200 for update saved query', () =>
       supertest
         .post(`${SAVED_QUERY_BASE_URL}/_create`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send(mockSavedQuery)
+        .send({
+          ...mockSavedQuery,
+          title: 'my old title',
+        })
         .expect(200)
         .then(({ body }) =>
           supertest
@@ -80,14 +97,44 @@ export default function ({ getService }) {
       supertest
         .put(`${SAVED_QUERY_BASE_URL}/invalid_id`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send(mockSavedQuery)
+        .send({
+          ...mockSavedQuery,
+          title: 'my non-existent title',
+        })
         .expect(404));
+
+    it('should return 400 for update saved query with duplicate title', () =>
+      supertest
+        .post(`${SAVED_QUERY_BASE_URL}/_create`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .send({
+          ...mockSavedQuery,
+          title: 'my title 3',
+        })
+        .expect(200)
+        .then(({ body }) =>
+          supertest
+            .post(`${SAVED_QUERY_BASE_URL}/_create`)
+            .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+            .send({ ...mockSavedQuery, title: 'my title 4' })
+            .expect(200)
+            .then(() =>
+              supertest
+                .put(`${SAVED_QUERY_BASE_URL}/${body.id}`)
+                .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+                .send({ ...mockSavedQuery, title: 'my title 4' })
+                .expect(400)
+            )
+        ));
 
     it('should return 200 for get saved query', () =>
       supertest
         .post(`${SAVED_QUERY_BASE_URL}/_create`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send(mockSavedQuery)
+        .send({
+          ...mockSavedQuery,
+          title: 'my title 5',
+        })
         .expect(200)
         .then(({ body }) =>
           supertest
@@ -130,7 +177,10 @@ export default function ({ getService }) {
       supertest
         .post(`${SAVED_QUERY_BASE_URL}/_create`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send(mockSavedQuery)
+        .send({
+          ...mockSavedQuery,
+          title: 'my title 6',
+        })
         .expect(200)
         .then(({ body }) =>
           supertest

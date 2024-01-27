@@ -10,7 +10,6 @@ import { schema } from '@kbn/config-schema';
 import { CoreSetup } from '@kbn/core/server';
 import { reportServerError } from '@kbn/kibana-utils-plugin/server';
 import { SavedQueryRouteHandlerContext } from './route_handler_context';
-import { SavedQueryRestResponse } from './route_types';
 import { SAVED_QUERY_BASE_URL } from '../../common/constants';
 
 const SAVED_QUERY_ID_CONFIG = schema.object({
@@ -56,7 +55,12 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
     async (context, request, response) => {
       try {
         const savedQuery = await context.savedQuery;
-        const body: SavedQueryRestResponse = await savedQuery.create(request.body);
+        const { status, body } = await savedQuery.create(request.body);
+
+        if (status === 400) {
+          return response.badRequest({ body });
+        }
+
         return response.ok({ body });
       } catch (e) {
         const err = e.output?.payload ?? e;
@@ -84,7 +88,12 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
       const { id } = request.params;
       try {
         const savedQuery = await context.savedQuery;
-        const body: SavedQueryRestResponse = await savedQuery.update(id, request.body);
+        const { status, body } = await savedQuery.update(id, request.body);
+
+        if (status === 400) {
+          return response.badRequest({ body });
+        }
+
         return response.ok({ body });
       } catch (e) {
         const err = e.output?.payload ?? e;
@@ -111,7 +120,7 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
       const { id } = request.params;
       try {
         const savedQuery = await context.savedQuery;
-        const body: SavedQueryRestResponse = await savedQuery.get(id);
+        const body = await savedQuery.get(id);
         return response.ok({ body });
       } catch (e) {
         const err = e.output?.payload ?? e;
@@ -168,8 +177,7 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
     async (context, request, response) => {
       try {
         const savedQuery = await context.savedQuery;
-        const body: { total: number; savedQueries: SavedQueryRestResponse[] } =
-          await savedQuery.find(request.body);
+        const body = await savedQuery.find(request.body);
         return response.ok({ body });
       } catch (e) {
         const err = e.output?.payload ?? e;

@@ -11,6 +11,7 @@ import { isFilters, isOfQueryType } from '@kbn/es-query';
 import { omit } from 'lodash';
 import { isQuery, SavedQueryAttributes } from '../../common';
 import { extract, inject } from '../../common/query/filters/persistable_state';
+import { SavedQueryRestBody, SavedQueryRestResponse } from './route_types';
 
 export interface InternalSavedQueryAttributes extends SavedQueryAttributes {
   titleKeyword: string;
@@ -72,26 +73,62 @@ function extractReferences({
   return { attributes, references };
 }
 
+function createBadRequestError(message: string): SavedQueryRestResponse {
+  return {
+    status: 400,
+    body: {
+      message,
+    },
+  };
+}
+
 function verifySavedQuery({ title, query, filters = [] }: SavedQueryAttributes) {
   if (!isQuery(query)) {
-    throw new Error(`Invalid query: ${query}`);
+    return createBadRequestError(`Invalid query: ${JSON.stringify(query, null, 2)}`);
   }
 
   if (!isFilters(filters)) {
-    throw new Error(`Invalid filters: ${filters}`);
+    return createBadRequestError(`Invalid filters: ${JSON.stringify(filters, null, 2)}`);
   }
 
   if (!title.trim().length) {
-    throw new Error('Cannot create saved query without a title');
+    return createBadRequestError('Cannot create query without a title');
   }
 }
 
 export async function registerSavedQueryRouteHandlerContext(context: RequestHandlerContext) {
   const soClient = (await context.core).savedObjects.client;
 
-  const createSavedQuery = async (attrs: SavedQueryAttributes) => {
-    verifySavedQuery(attrs);
+  const validateSavedQueryTitle = async (attributes: InternalSavedQueryAttributes, id?: string) => {
+    const { savedQueries } = await findSavedQueries({
+      page: 1,
+      perPage: 1,
+      search: attributes.title,
+    });
+    const existingQuery = savedQueries[0];
+
+    if (
+      existingQuery &&
+      existingQuery.attributes.title === attributes.title &&
+      (!id || existingQuery.id !== id)
+    ) {
+      return createBadRequestError(`Query with title "${attributes.title}" already exists`);
+    }
+  };
+
+  const createSavedQuery = async (attrs: SavedQueryAttributes): Promise<SavedQueryRestResponse> => {
+    const verifyResult = verifySavedQuery(attrs);
+
+    if (verifyResult) {
+      return verifyResult;
+    }
+
     const { attributes, references } = extractReferences(attrs);
+    const validateTitleResult = await validateSavedQueryTitle(attributes);
+
+    if (validateTitleResult) {
+      return validateTitleResult;
+    }
 
     const savedObject = await soClient.create<InternalSavedQueryAttributes>('query', attributes, {
       references,
@@ -100,12 +137,28 @@ export async function registerSavedQueryRouteHandlerContext(context: RequestHand
     // TODO: Handle properly
     if (savedObject.error) throw new Error(savedObject.error.message);
 
-    return injectReferences(savedObject);
+    return {
+      status: 200,
+      body: injectReferences(savedObject),
+    };
   };
 
-  const updateSavedQuery = async (id: string, attrs: SavedQueryAttributes) => {
-    verifySavedQuery(attrs);
+  const updateSavedQuery = async (
+    id: string,
+    attrs: SavedQueryAttributes
+  ): Promise<SavedQueryRestResponse> => {
+    const verifyResult = verifySavedQuery(attrs);
+
+    if (verifyResult) {
+      return verifyResult;
+    }
+
     const { attributes, references } = extractReferences(attrs);
+    const validateTitleResult = await validateSavedQueryTitle(attributes, id);
+
+    if (validateTitleResult) {
+      return validateTitleResult;
+    }
 
     const savedObject = await soClient.update<InternalSavedQueryAttributes>(
       'query',
@@ -119,10 +172,13 @@ export async function registerSavedQueryRouteHandlerContext(context: RequestHand
     // TODO: Handle properly
     if (savedObject.error) throw new Error(savedObject.error.message);
 
-    return injectReferences({ id, attributes, references });
+    return {
+      status: 200,
+      body: injectReferences({ id, attributes, references }),
+    };
   };
 
-  const getSavedQuery = async (id: string) => {
+  const getSavedQuery = async (id: string): Promise<SavedQueryRestBody> => {
     const { saved_object: savedObject, outcome } =
       await soClient.resolve<InternalSavedQueryAttributes>('query', id);
     if (outcome === 'conflict') {
@@ -142,7 +198,10 @@ export async function registerSavedQueryRouteHandlerContext(context: RequestHand
     return total;
   };
 
-  const findSavedQueries = async ({ page = 1, perPage = 50, search = '' } = {}) => {
+  const findSavedQueries = async ({ page = 1, perPage = 50, search = '' } = {}): Promise<{
+    total: number;
+    savedQueries: SavedQueryRestBody[];
+  }> => {
     const { total, saved_objects: savedObjects } =
       await soClient.find<InternalSavedQueryAttributes>({
         type: 'query',

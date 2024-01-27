@@ -103,6 +103,12 @@ describe('saved query route handler context', () => {
         attributes: internalSavedQueryAttributes,
         references: [],
       };
+      mockSavedObjectsClient.find.mockResolvedValue({
+        total: 0,
+        page: 0,
+        per_page: 0,
+        saved_objects: [],
+      });
       mockSavedObjectsClient.create.mockResolvedValue(mockResponse);
 
       const response = await context.create(savedQueryAttributes);
@@ -115,8 +121,11 @@ describe('saved query route handler context', () => {
         }
       );
       expect(response).toEqual({
-        id: 'foo',
-        attributes: savedQueryAttributes,
+        status: 200,
+        body: {
+          id: 'foo',
+          attributes: savedQueryAttributes,
+        },
       });
     });
 
@@ -137,11 +146,23 @@ describe('saved query route handler context', () => {
         },
         references: [],
       };
+      mockSavedObjectsClient.find.mockResolvedValue({
+        total: 0,
+        page: 0,
+        per_page: 0,
+        saved_objects: [],
+      });
       mockSavedObjectsClient.create.mockResolvedValue(mockResponse);
 
-      const { attributes } = await context.create(savedQueryAttributesWithQueryObject);
+      const result = await context.create(savedQueryAttributesWithQueryObject);
 
-      expect(attributes).toEqual(savedQueryAttributesWithQueryObject);
+      expect(result).toEqual({
+        status: 200,
+        body: {
+          id: 'foo',
+          attributes: savedQueryAttributesWithQueryObject,
+        },
+      });
     });
 
     it('should optionally accept filters and timefilters in object format', async () => {
@@ -159,6 +180,12 @@ describe('saved query route handler context', () => {
         },
         references: [],
       };
+      mockSavedObjectsClient.find.mockResolvedValue({
+        total: 0,
+        page: 0,
+        per_page: 0,
+        saved_objects: [],
+      });
       mockSavedObjectsClient.create.mockResolvedValue(mockResponse);
 
       await context.create(savedQueryAttributesWithFilters);
@@ -171,6 +198,12 @@ describe('saved query route handler context', () => {
     });
 
     it('should throw an error when saved objects client returns error', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue({
+        total: 0,
+        page: 0,
+        per_page: 0,
+        saved_objects: [],
+      });
       mockSavedObjectsClient.create.mockResolvedValue({
         error: {
           error: '123',
@@ -184,9 +217,20 @@ describe('saved query route handler context', () => {
     });
 
     it('should throw an error if the saved query does not have a title', async () => {
-      const response = context.create({ ...savedQueryAttributes, title: '' });
-      expect(response).rejects.toMatchInlineSnapshot(
-        `[Error: Cannot create saved query without a title]`
+      const response = await context.create({ ...savedQueryAttributes, title: '' });
+      expect(response).toMatchInlineSnapshot(
+        {
+          body: { message: 'Cannot create query without a title' },
+          status: 400,
+        },
+        `
+        Object {
+          "body": Object {
+            "message": "Cannot create query without a title",
+          },
+          "status": 400,
+        }
+      `
       );
     });
   });
@@ -199,6 +243,12 @@ describe('saved query route handler context', () => {
         attributes: internalSavedQueryAttributes,
         references: [],
       };
+      mockSavedObjectsClient.find.mockResolvedValue({
+        total: 0,
+        page: 0,
+        per_page: 0,
+        saved_objects: [],
+      });
       mockSavedObjectsClient.update.mockResolvedValue(mockResponse);
 
       const response = await context.update('foo', savedQueryAttributes);
@@ -212,12 +262,21 @@ describe('saved query route handler context', () => {
         }
       );
       expect(response).toEqual({
-        id: 'foo',
-        attributes: savedQueryAttributes,
+        status: 200,
+        body: {
+          id: 'foo',
+          attributes: savedQueryAttributes,
+        },
       });
     });
 
     it('should throw an error when saved objects client returns error', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue({
+        total: 0,
+        page: 0,
+        per_page: 0,
+        saved_objects: [],
+      });
       mockSavedObjectsClient.update.mockResolvedValue({
         error: {
           error: '123',
@@ -231,9 +290,20 @@ describe('saved query route handler context', () => {
     });
 
     it('should throw an error if the saved query does not have a title', async () => {
-      const response = context.create({ ...savedQueryAttributes, title: '' });
-      expect(response).rejects.toMatchInlineSnapshot(
-        `[Error: Cannot create saved query without a title]`
+      const response = await context.create({ ...savedQueryAttributes, title: '' });
+      expect(response).toMatchInlineSnapshot(
+        {
+          body: { message: 'Cannot create query without a title' },
+          status: 400,
+        },
+        `
+        Object {
+          "body": Object {
+            "message": "Cannot create query without a title",
+          },
+          "status": 400,
+        }
+      `
       );
     });
   });
