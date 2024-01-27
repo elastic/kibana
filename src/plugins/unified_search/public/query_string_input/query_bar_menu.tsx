@@ -23,7 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { SavedQueryService, SavedQuery } from '@kbn/data-plugin/public';
+import type { SavedQueryService, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 import {
   QueryBarMenuPanel,
@@ -58,6 +58,7 @@ export interface QueryBarMenuProps extends WithCloseFilterEditorConfirmModalProp
   disableQueryLanguageSwitcher?: boolean;
   dateRangeFrom?: string;
   dateRangeTo?: string;
+  timeFilter?: SavedQueryTimeFilter;
   savedQueryService: SavedQueryService;
   saveAsNewQueryFormComponent?: JSX.Element;
   saveFormComponent?: JSX.Element;
@@ -87,6 +88,7 @@ function QueryBarMenuComponent({
   disableQueryLanguageSwitcher,
   dateRangeFrom,
   dateRangeTo,
+  timeFilter,
   onQueryChange,
   onQueryBarSubmit,
   savedQueryService,
@@ -165,6 +167,7 @@ function QueryBarMenuComponent({
     language,
     dateRangeFrom,
     dateRangeTo,
+    timeFilter,
     query,
     showSaveQuery,
     showFilterBar,

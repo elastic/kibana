@@ -18,7 +18,11 @@ import memoizeOne from 'memoize-one';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { Query, Filter, TimeRange, AggregateQuery, isOfQueryType } from '@kbn/es-query';
 import { withKibana, KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
-import type { TimeHistoryContract, SavedQuery } from '@kbn/data-plugin/public';
+import type {
+  TimeHistoryContract,
+  SavedQuery,
+  SavedQueryTimeFilter,
+} from '@kbn/data-plugin/public';
 import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/public';
 
@@ -292,6 +296,24 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
     return true;
   }
 
+  private getTimeFilter(): SavedQueryTimeFilter | undefined {
+    if (
+      this.state.dateRangeTo !== undefined &&
+      this.state.dateRangeFrom !== undefined &&
+      this.props.refreshInterval !== undefined &&
+      this.props.isRefreshPaused !== undefined
+    ) {
+      return {
+        from: this.state.dateRangeFrom,
+        to: this.state.dateRangeTo,
+        refreshInterval: {
+          value: this.props.refreshInterval,
+          pause: this.props.isRefreshPaused,
+        },
+      };
+    }
+  }
+
   public onSave = async (savedQueryMeta: SavedQueryMeta, saveAsNew = false) => {
     if (!this.state.query) return;
 
@@ -305,21 +327,10 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
       savedQueryAttributes.filters = this.props.filters;
     }
 
-    if (
-      savedQueryMeta.shouldIncludeTimefilter &&
-      this.state.dateRangeTo !== undefined &&
-      this.state.dateRangeFrom !== undefined &&
-      this.props.refreshInterval !== undefined &&
-      this.props.isRefreshPaused !== undefined
-    ) {
-      savedQueryAttributes.timefilter = {
-        from: this.state.dateRangeFrom,
-        to: this.state.dateRangeTo,
-        refreshInterval: {
-          value: this.props.refreshInterval,
-          pause: this.props.isRefreshPaused,
-        },
-      };
+    const timeFilter = this.getTimeFilter();
+
+    if (savedQueryMeta.shouldIncludeTimefilter && timeFilter) {
+      savedQueryAttributes.timefilter = timeFilter;
     }
 
     try {
@@ -510,6 +521,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
         onQueryBarSubmit={this.onQueryBarSubmit}
         dateRangeFrom={this.state.dateRangeFrom}
         dateRangeTo={this.state.dateRangeTo}
+        timeFilter={this.getTimeFilter()}
         savedQueryService={this.savedQueryService}
         saveAsNewQueryFormComponent={saveAsNewQueryFormComponent}
         saveFormComponent={saveQueryFormComponent}

@@ -34,7 +34,7 @@ import {
   KQL_TELEMETRY_ROUTE_LATEST_VERSION,
   UI_SETTINGS,
 } from '@kbn/data-plugin/common';
-import type { SavedQueryService, SavedQuery } from '@kbn/data-plugin/public';
+import type { SavedQueryService, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { IUnifiedSearchPluginServices } from '../types';
@@ -85,7 +85,7 @@ export const strings = {
     i18n.translate('unifiedSearch.filter.options.saveFilterSetLabel', {
       defaultMessage: 'Save query',
     }),
-  getClearllFiltersButtonLabel: () =>
+  getClearAllFiltersButtonLabel: () =>
     i18n.translate('unifiedSearch.filter.options.clearllFiltersButtonLabel', {
       defaultMessage: 'Clear all',
     }),
@@ -155,6 +155,7 @@ export interface QueryBarMenuPanelsProps {
   language: string;
   dateRangeFrom?: string;
   dateRangeTo?: string;
+  timeFilter?: SavedQueryTimeFilter;
   query?: Query;
   showSaveQuery?: boolean;
   showQueryInput?: boolean;
@@ -181,6 +182,7 @@ export function useQueryBarMenuPanels({
   language,
   dateRangeFrom,
   dateRangeTo,
+  timeFilter,
   query,
   showSaveQuery,
   showFilterBar,
@@ -246,13 +248,22 @@ export function useQueryBarMenuPanels({
           )
         );
       }
-      if (filtersHaveChanged || !isEqual(query, savedQuery?.attributes.query)) {
+
+      const timeFilterHasChanged =
+        savedQuery?.attributes.timefilter &&
+        !isEqual(timeFilter, savedQuery?.attributes.timefilter);
+
+      if (
+        filtersHaveChanged ||
+        timeFilterHasChanged ||
+        !isEqual(query, savedQuery?.attributes.query)
+      ) {
         setSavedQueryHasChanged(true);
       } else {
         setSavedQueryHasChanged(false);
       }
     }
-  }, [filters, query, savedQuery, savedQuery?.attributes.filters, savedQuery?.attributes.query]);
+  }, [filters, query, savedQuery, timeFilter]);
 
   useEffect(() => {
     const hasFilters = Boolean(filters && filters.length > 0);
@@ -387,7 +398,7 @@ export function useQueryBarMenuPanels({
   if (showFilterBar || showQueryInput) {
     items.push(
       {
-        name: strings.getClearllFiltersButtonLabel(),
+        name: strings.getClearAllFiltersButtonLabel(),
         disabled: !hasFiltersOrQuery && !Boolean(savedQuery),
         icon: 'cross',
         'data-test-subj': 'filter-sets-removeAllFilters',
