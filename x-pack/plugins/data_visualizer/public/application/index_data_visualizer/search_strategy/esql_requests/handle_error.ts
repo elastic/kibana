@@ -32,9 +32,9 @@ export const handleError = ({
     onError(
       error,
       title ??
-      i18n.translate('xpack.dataVisualizer.esql.errorMessage', {
-        defaultMessage: 'Error excecuting ES|QL request:',
-      })
+        i18n.translate('xpack.dataVisualizer.esql.errorMessage', {
+          defaultMessage: 'Error excecuting ES|QL request:',
+        })
     );
   }
 };
