@@ -65,8 +65,44 @@ describe('Get API Keys route', () => {
     );
 
     expect(response.status).toBe(200);
-    expect(response.payload.apiKeys).toContainEqual({ id: '123', invalidated: false });
-    expect(response.payload.apiKeys).not.toContainEqual({ id: '456', invalidated: true });
+    expect(response.payload.apiKeys).toContainEqual({ id: '123', name: '', invalidated: false });
+    expect(response.payload.apiKeys).not.toContainEqual({ id: '456', name: '', invalidated: true });
+  });
+
+  it('should substitute an empty string for keys with `null` names', async () => {
+    esClientMock.asCurrentUser.security.getApiKey.mockRestore();
+    esClientMock.asCurrentUser.security.getApiKey.mockResponse({
+      api_keys: [
+        { id: 'with_name', name: 'foo', invalidated: false },
+        { id: 'undefined_name', invalidated: false },
+        { id: 'null_name', name: null, invalidated: false },
+      ],
+    } as any);
+
+    const response = await routeHandler(
+      mockContext,
+      httpServerMock.createKibanaRequest(),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.payload.apiKeys).toEqual([
+      {
+        id: 'with_name',
+        name: 'foo',
+        invalidated: false,
+      },
+      {
+        id: 'undefined_name',
+        name: '',
+        invalidated: false,
+      },
+      {
+        id: 'null_name',
+        name: '',
+        invalidated: false,
+      },
+    ]);
   });
 
   it('should return `404` if API keys are disabled', async () => {
