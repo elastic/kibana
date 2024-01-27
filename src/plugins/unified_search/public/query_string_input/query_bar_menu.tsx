@@ -16,7 +16,10 @@ import {
   EuiButtonIconProps,
   EuiToolTip,
 } from '@elastic/eui';
-import { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
+import {
+  EuiContextMenuClass,
+  EuiContextMenuPanelId,
+} from '@elastic/eui/src/components/context_menu/context_menu';
 import { i18n } from '@kbn/i18n';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -109,6 +112,7 @@ function QueryBarMenuComponent({
   queryBarMenuRef,
 }: QueryBarMenuProps) {
   const [renderedComponent, setRenderedComponent] = useState('menu');
+  const [currentPanelId, setCurrentPanelId] = useState<EuiContextMenuPanelId>(0);
 
   useEffect(() => {
     if (openQueryBarMenu) {
@@ -181,22 +185,38 @@ function QueryBarMenuComponent({
           <EuiContextMenu
             // @ts-expect-error EuiContextMenu ref is mistyped
             ref={queryBarMenuRef}
-            initialPanelId={0}
+            initialPanelId={currentPanelId}
             panels={panels}
+            onPanelChange={({ panelId }) => setCurrentPanelId(panelId)}
             data-test-subj="queryBarMenuPanel"
-            css={{
-              // Add width to transition properties to smooth
-              // the animation when the panel width changes
-              transitionProperty: 'width, height !important',
-              // Add a white background to panels since panels
-              // of different widths can overlap each other
-              // when transitioning, but the background colour
-              // ensures the incoming panel always overlays
-              // the outgoing panel which improves the effect
-              '.euiContextMenuPanel': {
-                backgroundColor: euiThemeVars.euiColorEmptyShade,
+            css={[
+              {
+                // Add width to transition properties to smooth
+                // the animation when the panel width changes
+                transitionProperty: 'width, height !important',
+                // Add a white background to panels since panels
+                // of different widths can overlap each other
+                // when transitioning, but the background colour
+                // ensures the incoming panel always overlays
+                // the outgoing panel which improves the effect
+                '.euiContextMenuPanel': {
+                  backgroundColor: euiThemeVars.euiColorEmptyShade,
+                },
               },
-            }}
+              // Fix the update button underline on hover, and
+              // the button focus outline being cut off
+              currentPanelId === 0 && {
+                '.euiContextMenuPanel__title': {
+                  padding: 0,
+                  '.euiContextMenuItem__text': {
+                    padding: euiThemeVars.euiSizeM,
+                  },
+                  ':hover': {
+                    textDecoration: 'none !important',
+                  },
+                },
+              },
+            ]}
           />
         );
       case 'saveForm':
