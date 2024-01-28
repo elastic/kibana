@@ -488,6 +488,7 @@ describe('copyTimeline', () => {
       index: dataViewMock,
       query: customQuery,
     }),
+    managed: false,
   };
 
   beforeAll(() => {
