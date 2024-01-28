@@ -6,8 +6,10 @@
  */
 
 export * from './binary_to_string';
+export * from './check_investigation_field_in_so';
 export * from './count_down_es';
 export * from './count_down_test';
+export * from './create_alerts_index';
 export * from './create_container_with_endpoint_entries';
 export * from './create_container_with_entries';
 export * from './create_exception_list';
