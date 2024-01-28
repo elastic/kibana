@@ -639,7 +639,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
     const map = new Map<string, DataView>();
 
     for (const dataView of dataViews) {
-      const hash = dataView.getSpecHash();
+      const hash = dataView.getSpecHash?.() || dataView.id;
       if (!map.has(hash)) {
         map.set(hash, dataView);
       }
