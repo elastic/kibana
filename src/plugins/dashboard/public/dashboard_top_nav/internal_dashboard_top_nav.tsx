@@ -14,6 +14,7 @@ import {
   LazyLabsFlyout,
   getContextProvider as getPresentationUtilContextProvider,
 } from '@kbn/presentation-util-plugin/public';
+import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { TopNavMenuProps } from '@kbn/navigation-plugin/public';
@@ -305,17 +306,7 @@ export function InternalDashboardTopNav({
       });
     }
     if (showWriteControls && managed) {
-      allBadges.push({
-        'data-test-subj': 'dashboardSaveRecommendedBadge',
-        badgeText: dashboardManagedBadge.getText(),
-        title: '',
-        color: 'primary',
-        iconType: 'glasses',
-        toolTipProps: {
-          content: dashboardManagedBadge.getTooltip(),
-          position: 'bottom',
-        } as EuiToolTipProps,
-      });
+      allBadges.push(getManagedContentBadge(dashboardManagedBadge.getTooltip()));
     }
     return allBadges;
   }, [hasUnsavedChanges, viewMode, hasRunMigrations, showWriteControls, managed]);

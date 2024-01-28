@@ -3303,7 +3303,7 @@
             "signature": [
               "Pick<",
               "ServerlessOptions",
-              ", \"image\" | \"host\" | \"tag\" | \"resources\" | \"kibanaUrl\"> | undefined"
+              ", \"image\" | \"host\" | \"tag\" | \"resources\" | \"kibanaUrl\" | \"projectType\"> | undefined"
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,
@@ -5021,6 +5021,20 @@
             "tags": [],
             "label": "isCloud",
             "description": [],
+            "path": "packages/kbn-test/src/auth/session_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.SamlSessionManagerOptions.supportedRoles",
+            "type": "Array",
+            "tags": [],
+            "label": "supportedRoles",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "packages/kbn-test/src/auth/session_manager.ts",
             "deprecated": false,
             "trackAdoption": false

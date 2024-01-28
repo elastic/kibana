@@ -337,6 +337,16 @@ steps:
         - exit_status: '-1'
           limit: 3
 
+  - command: .buildkite/scripts/steps/quick_checks.sh
+    label: 'Quick Checks'
+    agents:
+      queue: n2-2-spot
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
   - command: .buildkite/scripts/steps/checks.sh
     label: 'Checks'
     agents:
