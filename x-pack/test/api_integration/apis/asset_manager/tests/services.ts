@@ -17,8 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const synthtrace = getService('apmSynthtraceEsClient');
 
-  // FAILING VERSION BUMP: https://github.com/elastic/kibana/issues/172755
-  describe.skip('GET /assets/services', () => {
+  describe('GET /assets/services', () => {
     beforeEach(async () => {
       await synthtrace.clean();
     });
