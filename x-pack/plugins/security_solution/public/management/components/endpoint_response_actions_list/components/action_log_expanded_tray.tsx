@@ -9,6 +9,7 @@ import React, { memo, useMemo } from 'react';
 import { EuiCodeBlock, EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css, euiStyled } from '@kbn/kibana-react-plugin/common';
 import { map } from 'lodash';
+import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';
 import {
   isExecuteAction,
   isGetFileAction,
@@ -17,7 +18,6 @@ import {
 import { EndpointUploadActionResult } from '../../endpoint_upload_action_result';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { OUTPUT_MESSAGES } from '../translations';
-import { getUiCommand } from './hooks';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { ResponseActionFileDownloadLink } from '../../response_action_file_download_link';
 import { ExecuteActionHostResponse } from '../../endpoint_execute_action';
@@ -92,7 +92,7 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
     } = useUserPrivileges().endpointPrivileges;
 
     const { command: _command, isCompleted, isExpired, wasSuccessful, errors } = action;
-    const command = getUiCommand(_command);
+    const command = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[_command];
 
     if (errors?.length) {
       return (
@@ -190,7 +190,7 @@ export const ActionsLogExpandedTray = memo<{
     [parameters]
   );
 
-  const command = getUiCommand(_command);
+  const command = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[_command];
 
   const dataList = useMemo(
     () =>

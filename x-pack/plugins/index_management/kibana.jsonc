@@ -20,7 +20,8 @@
       "security",
       "usageCollection",
       "fleet",
-      "cloud"
+      "cloud",
+      "console"
     ],
     "requiredBundles": [
       "kibanaReact",
