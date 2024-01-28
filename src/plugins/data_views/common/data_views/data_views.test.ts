@@ -136,7 +136,7 @@ describe('IndexPatterns', () => {
     SOClientGetDelay = 1000;
     const id = '1';
     setDocsourcePayload(id, {
-      id: 'foo',
+      id,
       version: 'foo',
       attributes: {
         title: 'something',

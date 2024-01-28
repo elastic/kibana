@@ -11,34 +11,44 @@ import { DataView } from './data_view';
 export interface DataViewCache {
   get: (id: string) => Promise<DataView> | undefined;
   getByHash: (id: string) => DataView | undefined;
-  set: (dataView: DataView) => Promise<DataView>;
+  set: (id: string, value: Promise<DataView>) => Promise<DataView>;
   clear: (id: string) => void;
   clearAll: () => void;
 }
 
 export function createDataViewCache(): DataViewCache {
-  const vals: Map<string, DataView> = new Map();
+  const vals: Map<string, Promise<DataView>> = new Map();
   const valsByHash: Map<string, DataView> = new Map();
   const cache: DataViewCache = {
     get: (id: string) => {
-      const dataView = vals.get(id);
-      if (!dataView) return undefined;
-      return Promise.resolve(dataView);
+      return vals.get(id);
     },
     getByHash: (hash: string) => {
       return valsByHash.get(hash);
     },
-    set: (dataView: DataView) => {
-      const id = dataView.id!;
-      vals.set(id, dataView);
-      valsByHash.set(dataView.getSpecHash(), dataView);
-      return Promise.resolve(dataView);
+    set: (id: string, prom: Promise<DataView>) => {
+      vals.set(id, prom);
+      prom
+        .then((dv) => {
+          valsByHash.set(dv.getSpecHash(), dv);
+        })
+        .catch(() => {
+          // no reason to keep a failed promise
+          vals.delete(id);
+        });
+      return prom;
     },
     clear: (id: string) => {
-      const dataView = vals.get(id);
-      if (dataView) {
+      const prom = vals.get(id);
+      if (prom) {
         vals.delete(id);
-        valsByHash.delete(dataView.getSpecHash());
+        prom
+          .then((dv) => {
+            if (dv.id === id) {
+              valsByHash.delete(dv.getSpecHash());
+            }
+          })
+          .catch(() => {});
       }
     },
     clearAll: () => {

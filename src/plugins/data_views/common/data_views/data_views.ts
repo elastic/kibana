@@ -930,14 +930,9 @@ export class DataViewsService {
       return dataView;
     });
 
-    const indexPatternPromise = dataViewFromCache || this.getSavedObjectAndInit(id, displayErrors);
-
-    // add to cache when not yet done, when promise is successful
-    indexPatternPromise.then((dataView) => {
-      if (!dataViewFromCache) {
-        this.dataViewCache.clear(dataView.id!);
-      }
-    });
+    const indexPatternPromise =
+      dataViewFromCache ||
+      this.dataViewCache.set(id, this.getSavedObjectAndInit(id, displayErrors));
 
     return indexPatternPromise;
   };
@@ -999,10 +994,12 @@ export class DataViewsService {
       if (cachedDataView) {
         return cachedDataView;
       }
+
+      return this.dataViewCache.set(spec.id, doCreate());
     }
     // no data view in cache, let's create a new one
     const dataView = await doCreate();
-    if (dataView.type === ESQL_TYPE) {
+    if (spec.type === ESQL_TYPE) {
       // this is an esql data view that's just being created, let's search for a data view with the same spec
       // this prevents creating multiple esql data views with the same spec, that are not needed
       const dataViewByHash = this.dataViewCache.getByHash(dataView.getSpecHash());
@@ -1011,7 +1008,7 @@ export class DataViewsService {
       }
     }
 
-    return this.dataViewCache.set(dataView);
+    return this.dataViewCache.set(dataView.id!, Promise.resolve(dataView));
   }
 
   /**
