@@ -356,6 +356,7 @@ export function getDiscoverStateContainer({
       dataStateContainer,
       internalStateContainer,
       savedSearchContainer,
+      globalStateContainer,
       services,
       setDataView,
     });
