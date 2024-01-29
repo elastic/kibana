@@ -62,7 +62,7 @@ describe('EditTags ', () => {
 
       userEvent.click(await screen.findByTestId('tag-list-edit-button'));
 
-      userEvent.type(screen.getByRole('combobox'), `${sampleTags[0]}{enter}`);
+      userEvent.type(await screen.findByRole('combobox'), `${sampleTags[0]}{enter}`);
 
       userEvent.click(await screen.findByTestId('edit-tags-submit'));
 
@@ -76,7 +76,7 @@ describe('EditTags ', () => {
 
       expect(await screen.findByTestId('edit-tags')).toBeInTheDocument();
 
-      userEvent.type(screen.getByRole('combobox'), 'dude{enter}');
+      userEvent.type(await screen.findByRole('combobox'), 'dude{enter}');
 
       userEvent.click(await screen.findByTestId('edit-tags-submit'));
 
@@ -90,7 +90,7 @@ describe('EditTags ', () => {
 
       expect(await screen.findByTestId('edit-tags')).toBeInTheDocument();
 
-      userEvent.type(screen.getByRole('combobox'), 'dude      {enter}');
+      userEvent.type(await screen.findByRole('combobox'), 'dude      {enter}');
 
       userEvent.click(await screen.findByTestId('edit-tags-submit'));
 
@@ -102,7 +102,7 @@ describe('EditTags ', () => {
 
       userEvent.click(await screen.findByTestId('tag-list-edit-button'));
 
-      userEvent.type(screen.getByRole('combobox'), 'new{enter}');
+      userEvent.type(await screen.findByRole('combobox'), 'new{enter}');
 
       expect(await screen.findByTestId('comboBoxInput')).toHaveTextContent('new');
 
@@ -122,9 +122,9 @@ describe('EditTags ', () => {
 
       expect(await screen.findByTestId('edit-tags')).toBeInTheDocument();
 
-      userEvent.type(screen.getByRole('combobox'), ' {enter}');
+      userEvent.type(await screen.findByRole('combobox'), ' {enter}');
 
-      expect(screen.getByText('A tag must contain at least one non-space character.'));
+      expect(await screen.findByText('A tag must contain at least one non-space character.'));
     });
 
     it('shows error when tag is too long', async () => {
@@ -136,16 +136,14 @@ describe('EditTags ', () => {
 
       expect(await screen.findByTestId('edit-tags')).toBeInTheDocument();
 
-      userEvent.paste(screen.getByRole('combobox'), `${longTag}`);
+      userEvent.paste(await screen.findByRole('combobox'), `${longTag}`);
       userEvent.keyboard('{enter}');
 
-      await waitFor(() => {
-        expect(
-          screen.getByText(
-            'The length of the tag is too long. The maximum length is 256 characters.'
-          )
-        );
-      });
+      expect(
+        await screen.findByText(
+          'The length of the tag is too long. The maximum length is 256 characters.'
+        )
+      );
     });
 
     it('does not render when the user does not have update permissions', () => {
