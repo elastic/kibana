@@ -20,7 +20,9 @@ export const useAlertSuppression = (ruleType?: Type): UseAlertSuppressionReturn 
   const isSuppressionEnabledForRuleType = useCallback(() => {
     if (!ruleType) return false;
 
-    if (ruleType === 'threat_match') return isThreatMatchRuleFFEnabled;
+    // Remove this condition when the Feature Flag for enabling Suppression in the Indicator Match rule is removed.
+    if (ruleType === 'threat_match')
+      return isSuppressibleAlertRule(ruleType) && isThreatMatchRuleFFEnabled;
 
     return isSuppressibleAlertRule(ruleType);
   }, [ruleType, isThreatMatchRuleFFEnabled]);
