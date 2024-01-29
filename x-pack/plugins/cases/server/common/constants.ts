@@ -65,3 +65,9 @@ export const STATUS_ESMODEL_TO_EXTERNAL: Record<CasePersistedStatus, CaseStatuse
   [CasePersistedStatus.IN_PROGRESS]: CaseStatuses['in-progress'],
   [CasePersistedStatus.CLOSED]: CaseStatuses.closed,
 };
+
+/**
+ * The placeholder values used to fill missing default values in configuration requests
+ */
+export const DEFAULT_VALUE_TEXT = 'N/A';
+export const DEFAULT_VALUE_TOGGLE = false;

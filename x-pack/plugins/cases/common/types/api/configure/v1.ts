@@ -114,6 +114,7 @@ export const ConfigurationPatchRequestRt = rt.intersection([
 export type ConfigurationRequest = rt.TypeOf<typeof ConfigurationRequestRt>;
 export type ConfigurationPatchRequest = rt.TypeOf<typeof ConfigurationPatchRequestRt>;
 export type GetConfigurationFindRequest = rt.TypeOf<typeof GetConfigurationFindRequestRt>;
+export type CustomFieldsConfigurationRequest = rt.TypeOf<typeof CustomFieldsConfigurationRt>;
 export type GetConfigureResponse = Configurations;
 export type CreateConfigureResponse = Configuration;
 export type UpdateConfigureResponse = Configuration;

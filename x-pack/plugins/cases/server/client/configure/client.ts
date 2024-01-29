@@ -54,6 +54,7 @@ import {
   validateOptionalCustomFieldsInRequest,
   validateRequiredCustomFieldsInRequest,
 } from './validators';
+import { fillMissingDefaultValues } from './utils';
 
 /**
  * Defines the internal helper functions.
@@ -257,7 +258,6 @@ export async function update(
     const request = decodeWithExcessOrThrow(ConfigurationPatchRequestRt)(req);
 
     validateDuplicatedCustomFieldKeysInRequest({ requestCustomFields: request.customFields });
-    validateRequiredCustomFieldsInRequest({ requestCustomFields: request.customFields });
     validateOptionalCustomFieldsInRequest({ requestCustomFields: request.customFields });
 
     const { version, ...queryWithoutVersion } = request;
@@ -330,6 +330,9 @@ export async function update(
         ...(connector != null && { connector }),
         updated_at: updateDate,
         updated_by: user,
+        customFields: fillMissingDefaultValues({
+          customFields: queryWithoutVersionAndConnector.customFields,
+        }),
       },
       originalConfiguration: configuration,
     });

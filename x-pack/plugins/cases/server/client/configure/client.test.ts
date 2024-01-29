@@ -347,29 +347,6 @@ describe('client', () => {
       );
     });
 
-    it('throws when a required custom field is missing the default value', async () => {
-      await expect(
-        update(
-          'test-id',
-          {
-            version: 'test-version',
-            customFields: [
-              {
-                key: 'missing_default',
-                label: 'text label',
-                type: CustomFieldTypes.TEXT,
-                required: true,
-              },
-            ],
-          },
-          clientArgs,
-          casesClientInternal
-        )
-      ).rejects.toThrow(
-        'Failed to get patch configure in route: Error: The following required custom fields are missing the default value: "text label"'
-      );
-    });
-
     it('throws when an optional custom field has a default value', async () => {
       await expect(
         update(

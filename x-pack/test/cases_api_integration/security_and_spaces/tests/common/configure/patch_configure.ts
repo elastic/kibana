@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ConnectorTypes, CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
+import { CustomFieldsConfigurationRequest } from '@kbn/cases-plugin/common/types/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 
@@ -77,6 +78,46 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const data = removeServerGeneratedPropertiesFromSavedObject(newConfiguration);
       expect(data).to.eql({ ...getConfigurationOutput(true), customFields });
+    });
+
+    it('should patch a configuration with missing customField defaultValues', async () => {
+      const customFields = [
+        {
+          key: 'text_field_with_default',
+          label: '#1',
+          type: CustomFieldTypes.TEXT,
+          required: true,
+          defaultValue: 'my default value',
+        },
+        {
+          key: 'text_field',
+          label: '#2',
+          type: CustomFieldTypes.TEXT,
+          required: true,
+        },
+        {
+          key: 'toggle_field',
+          label: '#3',
+          type: CustomFieldTypes.TOGGLE,
+          required: true,
+        },
+      ] as CustomFieldsConfigurationRequest;
+
+      const configuration = await createConfiguration(supertest);
+      const newConfiguration = await updateConfiguration(supertest, configuration.id, {
+        version: configuration.version,
+        customFields,
+      });
+
+      const data = removeServerGeneratedPropertiesFromSavedObject(newConfiguration);
+      expect(data).to.eql({
+        ...getConfigurationOutput(true),
+        customFields: [
+          customFields[0],
+          { ...customFields[1], defaultValue: 'N/A' },
+          { ...customFields[2], defaultValue: false },
+        ],
+      });
     });
 
     it('should update mapping when changing connector', async () => {
