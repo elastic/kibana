@@ -34,3 +34,5 @@ export const ML_MANAGE_TRAINED_MODELS_PATH = '/app/ml/trained_models';
 export const ML_NOTIFICATIONS_PATH = '/app/ml/notifications';
 
 export const DEV_TOOLS_CONSOLE_PATH = '/app/dev_tools#/console';
+
+export const CONNECTOR_DETAIL_PATH = `${CONNECTORS_PATH}/:connectorId`;
