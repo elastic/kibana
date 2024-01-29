@@ -156,7 +156,9 @@ for (let i = 0; i < 500; i++) {
       userEvent.click(await screen.findByTestId('column-selection-popover-button'));
       userEvent.paste(await screen.findByTestId('column-selection-popover-search'), 'Category');
 
-      expect(onSelectedColumnsChange).not.toHaveBeenCalled();
+      await waitFor(() => {
+        expect(onSelectedColumnsChange).not.toHaveBeenCalled();
+      });
     });
 
     it('searching for text hides the drag and drop icons', async () => {
