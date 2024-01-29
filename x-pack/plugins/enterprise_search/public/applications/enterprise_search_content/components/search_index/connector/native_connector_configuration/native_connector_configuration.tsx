@@ -94,8 +94,8 @@ export const NativeConnectorConfiguration: React.FC = () => {
                 </EuiFlexItem>
               )}
               <EuiFlexItem grow={false}>
-                <EuiTitle size="m">
-                  <h3>{nativeConnector?.name ?? index.connector.name}</h3>
+                <EuiTitle size="s">
+                  <h2>{nativeConnector?.name ?? index.connector.name}</h2>
                 </EuiTitle>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -187,20 +187,20 @@ export const NativeConnectorConfiguration: React.FC = () => {
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={false}>
               <EuiPanel hasBorder hasShadow={false}>
-                <EuiFlexGroup direction="row" alignItems="center" gutterSize="xs">
+                <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
                   <EuiFlexItem grow={false}>
                     <EuiIcon type="clock" />
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiTitle size="xxs">
-                      <h4>
+                    <EuiTitle size="xs">
+                      <h3>
                         {i18n.translate(
                           'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.schedulingReminder.title',
                           {
                             defaultMessage: 'Configurable sync schedule',
                           }
                         )}
-                      </h4>
+                      </h3>
                     </EuiTitle>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -218,20 +218,20 @@ export const NativeConnectorConfiguration: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiPanel hasBorder hasShadow={false}>
-                <EuiFlexGroup direction="row" alignItems="center" gutterSize="xs">
+                <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
                   <EuiFlexItem grow={false}>
                     <EuiIcon type="globe" />
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiTitle size="xxs">
-                      <h4>
+                    <EuiTitle size="xs">
+                      <h3>
                         {i18n.translate(
                           'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.securityReminder.title',
                           {
                             defaultMessage: 'Document level security',
                           }
                         )}
-                      </h4>
+                      </h3>
                     </EuiTitle>
                   </EuiFlexItem>
                 </EuiFlexGroup>

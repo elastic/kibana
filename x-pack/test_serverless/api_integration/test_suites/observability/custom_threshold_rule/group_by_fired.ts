@@ -57,7 +57,12 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           },
         ],
-        indexing: { dataset: 'fake_hosts' as Dataset, eventsPerCycle: 1, interval: 10000 },
+        indexing: {
+          dataset: 'fake_hosts' as Dataset,
+          eventsPerCycle: 1,
+          interval: 10000,
+          alignEventsToInterval: true,
+        },
       };
       dataForgeIndices = await generate({ client: esClient, config: dataForgeConfig, logger });
       await alertingApi.waitForDocumentInIndex({ indexName: DATA_VIEW, docCountTarget: 360 });
