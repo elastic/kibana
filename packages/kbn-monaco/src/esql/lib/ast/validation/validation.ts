@@ -130,7 +130,18 @@ function validateNestedFunctionArg(
     // no need to check the reason here, it is checked already above
     isSupportedFunction(actualArg.name, parentCommand).supported
   ) {
+    // The isSupported check ensure the definition exists
     const argFn = getFunctionDefinition(actualArg.name)!;
+
+    if ('noNestingFunctions' in argDef && argDef.noNestingFunctions) {
+      messages.push(
+        getMessageFromId({
+          messageId: 'noNestedArgumentSupport',
+          values: { name: actualArg.text, argType: argFn.signatures[0].returnType },
+          locations: actualArg.location,
+        })
+      );
+    }
     if (!isEqualType(actualArg, argDef, references, parentCommand)) {
       messages.push(
         getMessageFromId({
@@ -144,16 +155,6 @@ function validateNestedFunctionArg(
           locations: actualArg.location,
         })
       );
-    } else {
-      if ('noNestingFunctions' in argDef && argDef.noNestingFunctions) {
-        messages.push(
-          getMessageFromId({
-            messageId: 'noNestedArgumentSupport',
-            values: { name: actualArg.text, argType: argFn.signatures[0].returnType },
-            locations: actualArg.location,
-          })
-        );
-      }
     }
   }
   return messages;
