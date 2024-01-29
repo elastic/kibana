@@ -45,7 +45,7 @@ export default function (ctx: FtrProviderContext) {
 
   describe('discover feature controls security', () => {
     before(async () => {
-      if (await PageObjects.share.isShareModalOpen) {
+      if (await PageObjects.share.isShareModalOpen()) {
         await PageObjects.share.closeShareModal();
       }
       await kibanaServer.importExport.load(
@@ -70,7 +70,7 @@ export default function (ctx: FtrProviderContext) {
 
     describe('global discover all privileges', () => {
       before(async () => {
-        if (await PageObjects.share.isShareModalOpen) {
+        if (await PageObjects.share.isShareModalOpen()) {
           await PageObjects.share.closeShareModal();
         }
         await security.role.create('global_discover_all_role', {
