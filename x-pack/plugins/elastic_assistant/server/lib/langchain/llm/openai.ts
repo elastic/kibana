@@ -54,6 +54,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
   #connectorId: string;
   #logger: Logger;
   #request: KibanaRequest<unknown, unknown, RequestBody>;
+  #actionResultData: string;
   #traceId: string;
   constructor({
     actions,
@@ -78,7 +79,12 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     this.llmType = llmType ?? LLM_TYPE;
     this.#logger = logger;
     this.#request = request;
+    this.#actionResultData = '';
     this.streaming = true;
+  }
+
+  getActionResultData(): string {
+    return this.#actionResultData;
   }
 
   _llmType() {

@@ -126,16 +126,16 @@ export const fetchConnectorExecuteAction = async ({
 
   try {
     if (isStream) {
-      const response = await http.fetch(
+      const response = await http.post(
         `/internal/elastic_assistant/actions/connector/${apiConfig?.connectorId}/_execute`,
         {
-          method: 'POST',
           body: JSON.stringify(requestBody),
           signal,
           asResponse: true,
           rawResponse: true,
         }
       );
+      console.log('CLIENT CHUNK RESPONSE', response);
 
       const reader = response?.response?.body?.getReader();
 

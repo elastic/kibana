@@ -119,11 +119,25 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
         verbose: false,
       });
 
+  // Sets up tracer for tracing executions to APM. See x-pack/plugins/elastic_assistant/server/lib/langchain/tracers/README.mdx
+  // If LangSmith env vars are set, executions will be traced there as well. See https://docs.smith.langchain.com/tracing
+  const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
+
+  let traceData;
   if (isStream) {
-    const logStream = executor.streamLog({
-      input: latestMessage[0].content,
-      chat_history: [],
-    });
+    const logStream = executor.streamLog(
+      {
+        input: latestMessage[0].content,
+        chat_history: [],
+      }
+      // TODO before merge to main
+      // uncomment
+      // {
+      //   callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
+      //   runName: DEFAULT_AGENT_EXECUTOR_ID,
+      //   tags: traceOptions?.tags ?? [],
+      // }
+    );
 
     const {
       end: streamEnd,
@@ -133,16 +147,11 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
 
     // Do not call this using `await` so it will run asynchronously while we return the stream in responseWithHeaders
     readStream(logStream, push, streamEnd);
-
+    console.log('returning responseWithHeaders', responseWithHeaders);
     // TODO before merge to main
     // figure out how to pass trace_data and replacements @spong @macri @yuliia
     return responseWithHeaders;
   }
-  // Sets up tracer for tracing executions to APM. See x-pack/plugins/elastic_assistant/server/lib/langchain/tracers/README.mdx
-  // If LangSmith env vars are set, executions will be traced there as well. See https://docs.smith.langchain.com/tracing
-  const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
-
-  let traceData;
 
   // Wrap executor call with an APM span for instrumentation
   await withAssistantSpan(DEFAULT_AGENT_EXECUTOR_ID, async (span) => {
@@ -183,6 +192,7 @@ async function readStream(
   push: (arg0: { type: string; payload: string }) => void,
   streamEnd: () => void
 ) {
+  push({ type: 'starting', payload: 'hello world' });
   for await (const chunk of logStream) {
     if (chunk.ops?.length > 0 && chunk.ops[0].op === 'add') {
       const addOp = chunk.ops[0];
@@ -195,5 +205,8 @@ async function readStream(
       }
     }
   }
+
+  push({ type: 'after', payload: 'hello world' });
   streamEnd();
+  push({ type: 'streamEnd', payload: 'hello world' });
 }

@@ -129,6 +129,7 @@ export const postActionsConnectorExecuteRoute = (
         let result: StreamFactoryReturnType['responseWithHeaders'] | StaticReturnType =
           langChainResponse;
         if (Object.hasOwn(langChainResponse.body, 'data')) {
+          console.log('helloworld is non stream');
           // update replacements on static response
           const staticResponse = langChainResponse as StaticReturnType;
           result = {
@@ -138,7 +139,10 @@ export const postActionsConnectorExecuteRoute = (
               replacements: latestReplacements,
             },
           };
+        } else {
+          console.log('helloworld is stream');
         }
+
         return response.ok<
           StreamFactoryReturnType['responseWithHeaders']['body'] | StaticReturnType['body']
         >(result);

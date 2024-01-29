@@ -72,6 +72,9 @@ const parseOpenAIStream: StreamParser = async (streamIterable, logger) => {
   let responseBody: string = '';
   try {
     for await (const data of streamIterable) {
+      if (!data) {
+        continue;
+      }
       const choice = data?.choices[0];
       if (!choice) {
         continue;
