@@ -450,7 +450,7 @@ export class LinkModal extends Component<LinkModalProps, State> {
                         )}
                       </>
                     ),
-                    ['data-test-subj']: 'exportAsSnapshot',
+                    'data-test-subj': 'exportAsSnapshot',
                   },
                   {
                     id: ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT,
@@ -466,7 +466,7 @@ export class LinkModal extends Component<LinkModalProps, State> {
                         values={{ objectType: this.props.objectType }}
                       />
                     ),
-                    ['data-test-subj']: 'exportAsSavedObject',
+                    'data-test-subj': 'exportAsSavedObject',
                   },
                 ]}
                 onChange={this.handleExportUrlAs}

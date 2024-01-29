@@ -139,12 +139,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.share.clickShareTopNavButton();
           await testSubjects.click('Permalinks');
           await testSubjects.click('exportAsSavedObject');
-          await testSubjects.setCheckbox('useShortUrl', 'check');
-          await (
-            await testSubjects.find('createShortUrl')
-          ).waitForDeletedByCssSelector('.euiLoadingSpinner');
-          const actualUrl = await testSubjects.getAttribute('copyShareUrlButton', 'data-share-url');
-          expect(actualUrl).to.be(expectedUrl);
+          const radioOption = await testSubjects.find('exportAsSavedObject');
+          const [label] = await radioOption.findAllByCssSelector('label[for="savedObject"]');
+          await label.click();
+          await testSubjects.click('copyShareUrlButton');
+          expect(await testSubjects.getAttribute('copyShareUrlButton', 'data-share-url')).to.be(
+            expectedUrl
+          );
           await PageObjects.share.closeShareModal();
         });
 
