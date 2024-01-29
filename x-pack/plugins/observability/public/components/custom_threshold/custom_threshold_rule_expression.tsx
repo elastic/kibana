@@ -410,7 +410,7 @@ export default function Expressions(props: Props) {
         indexPatterns={dataView ? [dataView] : undefined}
         showQueryInput={true}
         showQueryMenu={false}
-        showFilterBar={false}
+        showFilterBar={!!ruleParams.searchConfiguration?.filter}
         showDatePicker={false}
         showSubmitButton={false}
         displayStyle="inPage"
@@ -418,6 +418,10 @@ export default function Expressions(props: Props) {
         onQuerySubmit={onFilterChange}
         dataTestSubj="thresholdRuleUnifiedSearchBar"
         query={ruleParams.searchConfiguration?.query as Query}
+        filters={ruleParams.searchConfiguration?.filter}
+        onFiltersUpdated={(filter) => {
+          setRuleParams('searchConfiguration', { ...ruleParams.searchConfiguration, filter });
+        }}
       />
       {errors.filterQuery && (
         <EuiFormErrorText data-test-subj="thresholdRuleDataViewErrorNoTimestamp">

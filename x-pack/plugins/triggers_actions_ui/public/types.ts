@@ -51,6 +51,7 @@ import {
   AlertingFrameworkHealth,
   RuleNotifyWhenType,
   RuleTypeParams,
+  RuleTypeMetaData,
   ActionVariable,
   RuleLastRun,
   MaintenanceWindow,
@@ -127,6 +128,7 @@ export type {
   AlertingFrameworkHealth,
   RuleNotifyWhenType,
   RuleTypeParams,
+  RuleTypeMetaData,
   ResolvedRule,
   SanitizedRule,
   RuleStatusDropdownProps,
@@ -412,8 +414,11 @@ export enum EditConnectorTabs {
   Test = 'test',
 }
 
-export interface RuleEditProps<MetaData = Record<string, any>> {
-  initialRule: Rule;
+export interface RuleEditProps<
+  Params extends RuleTypeParams = RuleTypeParams,
+  MetaData extends RuleTypeMetaData = RuleTypeMetaData
+> {
+  initialRule: Rule<Params>;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   onClose: (reason: RuleFlyoutCloseReason, metadata?: MetaData) => void;
@@ -425,14 +430,27 @@ export interface RuleEditProps<MetaData = Record<string, any>> {
   ruleType?: RuleType<string, string>;
 }
 
-export interface RuleAddProps<MetaData = Record<string, any>> {
+export interface RuleAddProps<
+  Params extends RuleTypeParams = RuleTypeParams,
+  MetaData extends RuleTypeMetaData = RuleTypeMetaData
+> {
+  /**
+   * ID of the feature this rule should be created for.
+   *
+   * Notes:
+   * - The feature needs to be registered using `featuresPluginSetup.registerKibanaFeature()` API during your plugin's setup phase.
+   * - The user needs to have permission to access the feature in order to create the rule.
+   * */
   consumer: string;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   onClose: (reason: RuleFlyoutCloseReason, metadata?: MetaData) => void;
   ruleTypeId?: string;
+  /**
+   * Determines whether the user should be able to change the rule type in the UI.
+   */
   canChangeTrigger?: boolean;
-  initialValues?: Partial<Rule>;
+  initialValues?: Partial<Rule<Params>>;
   /** @deprecated use `onSave` as a callback after an alert is saved*/
   reloadRules?: () => Promise<void>;
   hideGrouping?: boolean;
@@ -445,8 +463,8 @@ export interface RuleAddProps<MetaData = Record<string, any>> {
   useRuleProducer?: boolean;
   initialSelectedConsumer?: RuleCreationValidConsumer | null;
 }
-export interface RuleDefinitionProps {
-  rule: Rule;
+export interface RuleDefinitionProps<Params extends RuleTypeParams = RuleTypeParams> {
+  rule: Rule<Params>;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   onEditRule: () => Promise<void>;

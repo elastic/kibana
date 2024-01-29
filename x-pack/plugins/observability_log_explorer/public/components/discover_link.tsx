@@ -53,18 +53,22 @@ export const DiscoverLinkForValidState = React.memo(
     discover: DiscoverStart;
     pageState: InitializedPageState;
   }) => {
-    const discoverLinkParams = useMemo<DiscoverAppLocatorParams>(
-      () => ({
+    const discoverLinkParams = useMemo<DiscoverAppLocatorParams>(() => {
+      const index = hydrateDatasetSelection(logExplorerState.datasetSelection).toDataviewSpec();
+      return {
         breakdownField: logExplorerState.chart.breakdownField ?? undefined,
         columns: getDiscoverColumnsFromDisplayOptions(logExplorerState),
-        filters: getDiscoverFiltersFromState(logExplorerState.filters, logExplorerState.controls),
+        filters: getDiscoverFiltersFromState(
+          index.id,
+          logExplorerState.filters,
+          logExplorerState.controls
+        ),
         query: logExplorerState.query,
         refreshInterval: logExplorerState.refreshInterval,
         timeRange: logExplorerState.time,
-        dataViewSpec: hydrateDatasetSelection(logExplorerState.datasetSelection).toDataviewSpec(),
-      }),
-      [logExplorerState]
-    );
+        dataViewSpec: index,
+      };
+    }, [logExplorerState]);
 
     return <DiscoverLink discover={discover} discoverLinkParams={discoverLinkParams} />;
   }

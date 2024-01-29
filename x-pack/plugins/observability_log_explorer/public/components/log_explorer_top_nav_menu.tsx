@@ -26,6 +26,7 @@ import { useKibanaContextForPlugin } from '../utils/use_kibana';
 import { ConnectedDiscoverLink } from './discover_link';
 import { FeedbackLink } from './feedback_link';
 import { ConnectedOnboardingLink } from './onboarding_link';
+import { AlertsPopover } from './alerts_popover';
 
 export const LogExplorerTopNavMenu = () => {
   const {
@@ -142,6 +143,8 @@ const StatefulTopNav = () => {
         <EuiHeaderSectionItem>
           <EuiHeaderLinks gutterSize="xs">
             <ConnectedDiscoverLink />
+            <VerticalRule />
+            <AlertsPopover />
             <VerticalRule />
             {ObservabilityAIAssistantActionMenuItem ? (
               <ObservabilityAIAssistantActionMenuItem />

@@ -18,7 +18,8 @@ import { RuleSnooze } from './rule_snooze_type';
 export type { ActionVariable } from '@kbn/alerting-types';
 
 export type RuleTypeState = Record<string, unknown>;
-export type RuleTypeParams = Record<string, unknown>;
+export type RuleTypeParams = {}; // eslint-disable-line @typescript-eslint/consistent-type-definitions
+export type RuleTypeMetaData = {}; // eslint-disable-line @typescript-eslint/consistent-type-definitions
 
 // rule type defined alert fields to persist in alerts index
 export type RuleAlertData = Record<string, unknown>;

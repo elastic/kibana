@@ -79,51 +79,62 @@ const createDiscoverPhrasesFilter = ({
   key,
   values,
   negate,
+  index,
 }: {
-  values: PhraseFilterValue[];
+  index: string;
   key: string;
+  values: PhraseFilterValue[];
   negate?: boolean;
-}): PhrasesFilter =>
-  ({
-    meta: {
-      key,
-      negate,
-      type: FILTERS.PHRASES,
-      params: values,
+}): PhrasesFilter => ({
+  meta: {
+    index,
+    type: FILTERS.PHRASES,
+    key,
+    params: values.map((value) => value.toString()),
+    negate,
+  },
+  query: {
+    bool: {
+      should: values.map((value) => ({ match_phrase: { [key]: value.toString() } })),
+      minimum_should_match: 1,
     },
-    query: {
-      bool: {
-        should: values.map((value) => ({ match_phrase: { [key]: value.toString() } })),
-        minimum_should_match: 1,
-      },
-    },
-  } as PhrasesFilter);
+  },
+});
 
 const createDiscoverExistsFilter = ({
+  index,
   key,
   negate,
 }: {
   key: string;
+  index: string;
   negate?: boolean;
 }): ExistsFilter => ({
   meta: {
+    index,
+    type: FILTERS.EXISTS,
     key,
     negate,
-    type: FILTERS.EXISTS,
   },
   query: { exists: { field: key } },
 });
 
-export const getDiscoverFiltersFromState = (filters: Filter[] = [], controls?: ControlOptions) => [
+export const getDiscoverFiltersFromState = (
+  index: string,
+  filters: Filter[] = [],
+  controls?: ControlOptions
+) => [
   ...filters,
   ...(controls
     ? (Object.keys(controls) as Array<keyof ControlOptions>).map((key) =>
         controls[key as keyof ControlOptions]?.selection.type === 'exists'
           ? createDiscoverExistsFilter({
+              index,
               key,
               negate: controls[key]?.mode === 'exclude',
             })
           : createDiscoverPhrasesFilter({
+              index,
               key,
               values: (controls[key]?.selection as OptionsListControlOption).selectedOptions,
               negate: controls[key]?.mode === 'exclude',
