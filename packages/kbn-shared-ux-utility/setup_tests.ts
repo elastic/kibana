@@ -6,7 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { Fallback } from './src/fallback';
-export { getClosestLink, hasActiveModifierKey } from './src/utils';
-export { withSuspense, type WithSuspenseExtendedDeps } from './src/with_suspense';
-export { dynamic, type DynamicOptions } from './src/dynamic';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import '@testing-library/jest-dom';
