@@ -9,6 +9,7 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { EuiBasicTable, EuiTableSelectionType } from '@elastic/eui';
 import { EuiProgress } from '@elastic/eui';
 import styled, { css } from 'styled-components';
+import deepEqual from 'react-fast-compare';
 
 import type { CaseUI, FilterOptions, CasesUI } from '../../../common/ui/types';
 import type { EuiBasicTableOnChange } from './types';
@@ -30,6 +31,8 @@ import { useIsLoadingCases } from './use_is_loading_cases';
 import { useAllCasesState } from './use_all_cases_state';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { useCasesColumnsSelection } from './use_cases_columns_selection';
+import { DEFAULT_CASES_TABLE_STATE } from '../../containers/constants';
+import { CasesTableUtilityBar } from './utility_bar';
 
 const ProgressLoader = styled(EuiProgress)`
   ${({ $isShow }: { $isShow: boolean }) =>
@@ -185,6 +188,15 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       onRowClick?.(undefined, true);
     }, [onRowClick]);
 
+    const onClearFilters = useCallback(() => {
+      setFilterOptions(DEFAULT_CASES_TABLE_STATE.filterOptions);
+    }, [setFilterOptions]);
+
+    const showClearFiltersButton = !deepEqual(
+      DEFAULT_CASES_TABLE_STATE.filterOptions,
+      filterOptions
+    );
+
     return (
       <>
         <ProgressLoader
@@ -207,6 +219,17 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           currentUserProfile={currentUserProfile}
           filterOptions={filterOptions}
         />
+        <CasesTableUtilityBar
+          pagination={pagination}
+          isSelectorView={isSelectorView}
+          totalCases={data.total ?? 0}
+          selectedCases={selectedCases}
+          deselectCases={deselectCases}
+          selectedColumns={selectedColumns}
+          onSelectedColumnsChange={setSelectedColumns}
+          onClearFilters={onClearFilters}
+          showClearFiltersButton={showClearFiltersButton}
+        />
         <CasesTable
           columns={columns}
           data={data}
@@ -218,14 +241,10 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           isSelectorView={isSelectorView}
           onChange={tableOnChangeCallback}
           pagination={pagination}
-          selectedCases={selectedCases}
           selection={euiBasicTableSelectionProps}
           sorting={sorting}
           tableRef={tableRef}
           tableRowProps={tableRowProps}
-          deselectCases={deselectCases}
-          selectedColumns={selectedColumns}
-          onSelectedColumnsChange={setSelectedColumns}
         />
       </>
     );
