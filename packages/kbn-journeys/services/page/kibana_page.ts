@@ -36,6 +36,10 @@ export class KibanaPage {
     });
   }
 
+  async waitForListViewTable() {
+    await this.page.waitForSelector(subj('table-is-ready'), { state: 'visible' });
+  }
+
   async backToDashboardListing() {
     await this.page.click(subj('breadcrumb dashboardListingBreadcrumb first'));
   }

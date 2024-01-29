@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ChartModel, FormulaValueConfig } from '@kbn/lens-embeddable-utils';
+import type { LensBaseLayer, LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import * as rt from 'io-ts';
 
 export const ItemTypeRT = rt.keyof({
@@ -386,7 +386,7 @@ export interface InventoryMetrics {
 }
 
 export interface InventoryMetricsWithDashboards<
-  TFormula extends Record<string, FormulaValueConfig>,
+  TFormula extends Record<string, LensBaseLayer>,
   TDashboard extends Record<string, DashboardFn>
 > extends InventoryMetrics {
   getFormulas: () => Promise<TFormula>;
@@ -419,11 +419,12 @@ export interface InventoryModel<TMetrics = InventoryMetrics> {
   nodeFilter?: object[];
 }
 
+export type LensConfigWithId = LensConfig & { id: string };
 export interface DashboardFn {
   get: (...args: any[]) => DashboardModel;
 }
 
 export interface DashboardModel {
-  charts: ChartModel[];
+  charts: LensConfigWithId[];
   dependsOn?: string[];
 }

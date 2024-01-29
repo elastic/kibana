@@ -17,7 +17,7 @@ import { RISK_SCORE_TAB, RISK_SCORE_TAB_CONTENT } from '../../../screens/users/u
 import { login } from '../../../tasks/login';
 import { visitUserDetailsPage, visitWithTimeRange } from '../../../tasks/navigation';
 
-import { USERS_URL } from '../../../urls/navigation';
+import { usersUrl } from '../../../urls/navigation';
 import { waitForTabToBeLoaded } from '../../../tasks/common';
 
 describe('Users stats and tables', { tags: ['@ess', '@serverless'] }, () => {
@@ -29,7 +29,7 @@ describe('Users stats and tables', { tags: ['@ess', '@serverless'] }, () => {
 
   beforeEach(() => {
     login();
-    visitWithTimeRange(USERS_URL);
+    visitWithTimeRange(usersUrl('allUsers'));
   });
 
   after(() => {
