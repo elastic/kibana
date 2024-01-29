@@ -7,6 +7,15 @@
 
 import type { AllCasesURLQueryParams } from '../types';
 
+/**
+ * Parses filter options from a URL query string.
+ *
+ * - Parameters in the query string can have multiple formats:
+ *   1. Comma-separated values (e.g., "status=foo,bar")
+ *   2. A single value (e.g., "status=foo")
+ *   3. Repeated keys (e.g., "status=foo&status=bar")
+ *
+ */
 export function parseUrlParams(urlParams: URLSearchParams): AllCasesURLQueryParams {
   const urlParamsMap = new Map<string, Set<string>>();
 

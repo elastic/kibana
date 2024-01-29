@@ -6,31 +6,8 @@
  */
 
 import { difference } from 'lodash';
-import type { ParsedUrlQueryParams, PartialQueryParams } from '../../../../common/ui/types';
 import type { CasesColumnSelection } from '../types';
 import type { CasesColumnsConfiguration } from '../use_cases_columns_configuration';
-
-export const parseUrlQueryParams = (parsedUrlParams: ParsedUrlQueryParams): PartialQueryParams => {
-  const urlParams: PartialQueryParams = {
-    ...(parsedUrlParams.sortField && { sortField: parsedUrlParams.sortField }),
-    ...(parsedUrlParams.sortOrder && { sortOrder: parsedUrlParams.sortOrder }),
-  };
-
-  const intPage = parsedUrlParams.page && parseInt(parsedUrlParams.page, 10);
-  const intPerPage = parsedUrlParams.perPage && parseInt(parsedUrlParams.perPage, 10);
-
-  // page=0 is deliberately ignored
-  if (intPage) {
-    urlParams.page = intPage;
-  }
-
-  // perPage=0 is deliberately ignored
-  if (intPerPage) {
-    urlParams.perPage = intPerPage;
-  }
-
-  return urlParams;
-};
 
 export const mergeSelectedColumnsWithConfiguration = ({
   selectedColumns,

@@ -137,18 +137,6 @@ export interface QueryParams extends SortingParams {
   page: number;
   perPage: number;
 }
-export type PartialQueryParams = Partial<QueryParams>;
-
-export interface UrlQueryParams extends SortingParams {
-  page: string;
-  perPage: string;
-}
-
-export interface ParsedUrlQueryParams extends Partial<UrlQueryParams> {
-  [index: string]: string | string[] | undefined | null;
-}
-
-export type URLParams = UrlQueryParams & FilterOptions;
 
 export interface SystemFilterOptions {
   search: string;
@@ -170,8 +158,6 @@ export interface FilterOptions extends SystemFilterOptions {
     };
   };
 }
-
-export type PartialFilterOptions = Partial<FilterOptions>;
 
 export type SingleCaseMetrics = SingleCaseMetricsResponse;
 export type SingleCaseMetricsFeature = Exclude<CaseMetricsFeature, CaseMetricsFeature.MTTR>;
