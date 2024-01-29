@@ -350,7 +350,7 @@ describe('ES|QL query generation', () => {
       await evaluateEsqlQuery({
         question: `can you convert this SPL query to ESQL? index=network_firewall "SYN Timeout" | stats count by dest`,
         expected: `FROM network_firewall
-        | WHERE message == "SYN Timeout"
+        | WHERE _raw == "SYN Timeout"
         | STATS count = count(*) by dest`,
         execute: false
 
@@ -363,7 +363,7 @@ describe('ES|QL query generation', () => {
         | EVAL length = length(message), k255 = CASE(length > 255, 1, 0), k2 = CASE(length > 2048, 1, 0), k4 = CASE(length > 4096, 1, 0), k16 = CASE(length > 16384, 1, 0)
         | STATS COUNT(*), SUM(k255), SUM(k2), SUM(k4), SUM(k16), SUM(length)`,
         criteria: [
-          'The query provided by the Assistant uses the ESQL functions length and CASE, not the SPL functions len and if',
+          'The query provided by the Assistant uses the ESQL functions LENGTH and CASE, not the SPL functions len and if',
         ],
         execute: false
       });
@@ -372,12 +372,12 @@ describe('ES|QL query generation', () => {
       await evaluateEsqlQuery({
         question: `can you convert this SPL query to ESQL? index=prod_web NOT "Connection reset" NOT "[acm-app] created a ThreadLocal" sourcetype!=prod_urlf_east_logs sourcetype!=prod_urlf_west_logs host!="dbs-tools-*" NOT "Public] in context with path [/global] " host!="*dev*" host!="*qa*" host!="*uat*"`,
         expected: `FROM prod_web
-      | WHERE message NOT LIKE "Connection reset"
-        AND message NOT LIKE "[acm-app] created a ThreadLocal"
+      | WHERE _raw NOT LIKE "Connection reset"
+        AND _raw NOT LIKE "[acm-app] created a ThreadLocal"
         AND sourcetype != "prod_urlf_east_logs"
         AND sourcetype != "prod_urlf_west_logs"
         AND host NOT LIKE "dbs-tools-*"
-        AND message NOT LIKE "Public] in context with path [/global]"
+        AND _raw NOT LIKE "Public] in context with path [/global]"
         AND host NOT LIKE "*dev*"
         AND host NOT LIKE "*qa*"
         AND host NOT LIKE "*uat*"`,
