@@ -11,12 +11,11 @@ import type { AppLeaveHandler } from '@kbn/core/public';
 import { useDispatch } from 'react-redux';
 import type { TimelineId } from '../../../common/types';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
-import { FlyoutBottomBar } from '../components/flyout/bottom_bar';
+import { TimelineBottomBar } from '../components/bottom_bar';
 import { Pane } from '../components/flyout/pane';
 import { getTimelineShowStatusByIdSelector } from '../store/selectors';
 import { useTimelineSavePrompt } from '../../common/hooks/timeline/use_timeline_save_prompt';
 import { timelineActions } from '../store';
-import { focusActiveTimelineButton } from '../components/timeline/helpers';
 
 interface TimelineWrapperProps {
   /**
@@ -42,7 +41,6 @@ export const TimelineWrapper: React.FC<TimelineWrapperProps> = React.memo(
 
     const handleClose = useCallback(() => {
       dispatch(timelineActions.showTimeline({ id: timelineId, show: false }));
-      focusActiveTimelineButton();
     }, [dispatch, timelineId]);
 
     // pressing the ESC key closes the timeline portal
@@ -62,7 +60,7 @@ export const TimelineWrapper: React.FC<TimelineWrapperProps> = React.memo(
         <EuiFocusTrap disabled={!show}>
           <Pane timelineId={timelineId} visible={show} />
         </EuiFocusTrap>
-        <FlyoutBottomBar showTimelineHeaderPanel={!show} timelineId={timelineId} />
+        <TimelineBottomBar show={show} timelineId={timelineId} />
         <EuiWindowEvent event="keydown" handler={onKeyDown} />
       </>
     );

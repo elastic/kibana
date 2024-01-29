@@ -9,7 +9,14 @@ import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
 import { EuiEmptyPrompt, EuiPanel, EuiSpacer } from '@elastic/eui';
-import { ALERT_RULE_CATEGORY, ALERT_RULE_TYPE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import {
+  AlertStatus,
+  ALERT_RULE_CATEGORY,
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_UUID,
+  ALERT_STATUS,
+  ALERT_STATUS_UNTRACKED,
+} from '@kbn/rule-data-utils';
 import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
@@ -54,20 +61,22 @@ export function AlertDetails() {
 
   const { ObservabilityPageTemplate, config } = usePluginContext();
   const { alertId } = useParams<AlertDetailsPathParams>();
-  const [isLoading, alert] = useFetchAlertDetail(alertId);
+  const [isLoading, alertDetail] = useFetchAlertDetail(alertId);
   const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
   const CasesContext = getCasesContext();
   const userCasesPermissions = canUseCases([observabilityFeatureId]);
   const { rule } = useFetchRule({
-    ruleId: alert?.fields[ALERT_RULE_UUID],
+    ruleId: alertDetail?.formatted.fields[ALERT_RULE_UUID],
   });
   const [summaryFields, setSummaryFields] = useState<AlertSummaryField[]>();
+  const [alertStatus, setAlertStatus] = useState<AlertStatus>();
 
   useEffect(() => {
-    if (alert) {
-      setRuleTypeModel(ruleTypeRegistry.get(alert?.fields[ALERT_RULE_TYPE_ID]!));
+    if (alertDetail) {
+      setRuleTypeModel(ruleTypeRegistry.get(alertDetail?.formatted.fields[ALERT_RULE_TYPE_ID]!));
+      setAlertStatus(alertDetail?.formatted?.fields[ALERT_STATUS] as AlertStatus);
     }
-  }, [alert, ruleTypeRegistry]);
+  }, [alertDetail, ruleTypeRegistry]);
   useBreadcrumbs([
     {
       href: http.basePath.prepend(paths.observability.alerts),
@@ -77,20 +86,26 @@ export function AlertDetails() {
       deepLinkId: 'observability-overview:alerts',
     },
     {
-      text: alert ? pageTitleContent(alert.fields[ALERT_RULE_CATEGORY]) : defaultBreadcrumb,
+      text: alertDetail
+        ? pageTitleContent(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])
+        : defaultBreadcrumb,
     },
   ]);
+
+  const onUntrackAlert = () => {
+    setAlertStatus(ALERT_STATUS_UNTRACKED);
+  };
 
   if (isLoading) {
     return <CenterJustifiedSpinner />;
   }
 
   // Redirect to the 404 page when the user hit the page url directly in the browser while the feature flag is off.
-  if (alert && !isAlertDetailsEnabledPerApp(alert, config)) {
+  if (alertDetail && !isAlertDetailsEnabledPerApp(alertDetail.formatted, config)) {
     return <PageNotFound />;
   }
 
-  if (!isLoading && !alert)
+  if (!isLoading && !alertDetail)
     return (
       <EuiPanel data-test-subj="alertDetailsError">
         <EuiEmptyPrompt
@@ -120,7 +135,11 @@ export function AlertDetails() {
     <ObservabilityPageTemplate
       pageHeader={{
         pageTitle: (
-          <PageTitle alert={alert} dataTestSubj={rule?.ruleTypeId || 'alertDetailsPageTitle'} />
+          <PageTitle
+            alert={alertDetail?.formatted ?? null}
+            alertStatus={alertStatus}
+            dataTestSubj={rule?.ruleTypeId || 'alertDetailsPageTitle'}
+          />
         ),
         rightSideItems: [
           <CasesContext
@@ -128,7 +147,11 @@ export function AlertDetails() {
             permissions={userCasesPermissions}
             features={{ alerts: { sync: false } }}
           >
-            <HeaderActions alert={alert} />
+            <HeaderActions
+              alert={alertDetail?.formatted ?? null}
+              alertStatus={alertStatus}
+              onUntrackAlert={onUntrackAlert}
+            />
           </CasesContext>,
         ],
         bottomBorder: true,
@@ -138,9 +161,9 @@ export function AlertDetails() {
       <HeaderMenu />
       <AlertSummary alertSummaryFields={summaryFields} />
       <EuiSpacer size="l" />
-      {AlertDetailsAppSection && rule && (
+      {AlertDetailsAppSection && rule && alertDetail?.formatted && (
         <AlertDetailsAppSection
-          alert={alert}
+          alert={alertDetail.formatted}
           rule={rule}
           timeZone={timeZone}
           setAlertSummaryFields={setSummaryFields}

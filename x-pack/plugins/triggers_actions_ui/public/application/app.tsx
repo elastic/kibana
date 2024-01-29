@@ -23,6 +23,7 @@ import { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/publi
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
@@ -74,6 +75,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   expressions: ExpressionsStart;
   isServerless: boolean;
   fieldFormats: FieldFormatsStart;
+  lens: LensPublicStart;
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {

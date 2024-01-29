@@ -15,8 +15,7 @@ import { mockContextValue } from '../mocks/mock_context';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { RightPanelContext } from '../context';
 import { useAlertPrevalenceFromProcessTree } from '../../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
-import type { ExpandableFlyoutContextValue } from '@kbn/expandable-flyout/src/context';
-import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
+import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 
 jest.mock('../../../../common/containers/alerts/use_alert_prevalence_from_process_tree', () => ({
   useAlertPrevalenceFromProcessTree: jest.fn(),
@@ -39,17 +38,13 @@ describe('<VisualizationsSection />', () => {
   });
 
   it('should render visualizations component', () => {
-    const flyoutContextValue = {
-      openLeftPanel: jest.fn(),
-    } as unknown as ExpandableFlyoutContextValue;
-
     const { getByTestId, getAllByRole } = render(
       <IntlProvider locale="en">
-        <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
+        <TestProvider>
           <RightPanelContext.Provider value={contextValue}>
             <VisualizationsSection />
           </RightPanelContext.Provider>
-        </ExpandableFlyoutContext.Provider>
+        </TestProvider>
       </IntlProvider>
     );
 

@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { EuiToolTip, RIGHT_ALIGNMENT, LEFT_ALIGNMENT } from '@elastic/eui';
+import {
+  EuiToolTip,
+  RIGHT_ALIGNMENT,
+  LEFT_ALIGNMENT,
+  EuiIconTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React, { useMemo } from 'react';
@@ -13,7 +18,7 @@ import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
 import { asInteger } from '../../../../../../common/utils/formatters';
 import { useApmParams } from '../../../../../hooks/use_apm_params';
 import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
-import { truncate } from '../../../../../utils/style';
+import { truncate, unit } from '../../../../../utils/style';
 import {
   ChartType,
   getTimeSeriesColor,
@@ -30,6 +35,15 @@ const MessageAndCulpritCell = euiStyled.div`
 `;
 
 const ErrorLink = euiStyled(ErrorOverviewLink)`
+  ${truncate('100%')};
+`;
+
+const GroupIdLink = euiStyled(CrashDetailLink)`
+  font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
+`;
+
+const MessageLink = euiStyled(CrashDetailLink)`
+  font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
   ${truncate('100%')};
 `;
 
@@ -66,7 +80,45 @@ function MobileCrashGroupList({
   const columns = useMemo(() => {
     return [
       {
-        name: i18n.translate('xpack.apm.errorsTable.typeColumnLabel', {
+        name: (
+          <>
+            {i18n.translate('xpack.apm.crashTable.groupIdColumnLabel', {
+              defaultMessage: 'Group ID',
+            })}{' '}
+            <EuiIconTip
+              size="s"
+              type="questionInCircle"
+              color="subdued"
+              iconProps={{
+                className: 'eui-alignTop',
+              }}
+              content={i18n.translate(
+                'xpack.apm.crashTable.groupIdColumnDescription',
+                {
+                  defaultMessage:
+                    'Hash of the stack trace. Groups similar errors together, even when the error message is different due to dynamic parameters.',
+                }
+              )}
+            />
+          </>
+        ),
+        field: 'groupId',
+        sortable: false,
+        width: `${unit * 6}px`,
+        render: (_, item) => {
+          return (
+            <GroupIdLink
+              serviceName={serviceName}
+              groupId={item.groupId}
+              query={query}
+            >
+              {item.groupId.slice(0, 5) || NOT_AVAILABLE_LABEL}
+            </GroupIdLink>
+          );
+        },
+      },
+      {
+        name: i18n.translate('xpack.apm.crashTable.typeColumnLabel', {
           defaultMessage: 'Type',
         }),
         field: 'type',
@@ -96,20 +148,20 @@ function MobileCrashGroupList({
         field: 'message',
         sortable: false,
         width: '30%',
-        render: (_, item: ErrorGroupItem) => {
+        render: (_, item) => {
           return (
             <MessageAndCulpritCell>
               <EuiToolTip
                 id="error-message-tooltip"
                 content={item.name || NOT_AVAILABLE_LABEL}
               >
-                <CrashDetailLink
+                <MessageLink
                   serviceName={serviceName}
                   groupId={item.groupId}
                   query={query}
                 >
                   {item.name || NOT_AVAILABLE_LABEL}
-                </CrashDetailLink>
+                </MessageLink>
               </EuiToolTip>
             </MessageAndCulpritCell>
           );
@@ -118,7 +170,7 @@ function MobileCrashGroupList({
       {
         field: 'lastSeen',
         sortable: true,
-        name: i18n.translate('xpack.apm.errorsTable.lastSeenColumnLabel', {
+        name: i18n.translate('xpack.apm.crashTable.lastSeenColumnLabel', {
           defaultMessage: 'Last seen',
         }),
         align: LEFT_ALIGNMENT,
@@ -131,7 +183,7 @@ function MobileCrashGroupList({
       },
       {
         field: 'occurrences',
-        name: i18n.translate('xpack.apm.errorsTable.occurrencesColumnLabel', {
+        name: i18n.translate('xpack.apm.crashTable.occurrencesColumnLabel', {
           defaultMessage: 'Occurrences',
         }),
         sortable: true,
@@ -152,7 +204,7 @@ function MobileCrashGroupList({
               isLoading={detailedStatisticsLoading}
               series={currentPeriodTimeseries}
               valueLabel={i18n.translate(
-                'xpack.apm.serviceOverview.errorsTableOccurrences',
+                'xpack.apm.serviceOverview.crashTableOccurrences',
                 {
                   defaultMessage: `{occurrences} occ.`,
                   values: {
@@ -183,7 +235,7 @@ function MobileCrashGroupList({
     <ManagedTable
       noItemsMessage={
         isLoading
-          ? i18n.translate('xpack.apm.errorsTable.loading', {
+          ? i18n.translate('xpack.apm.crashTable.loading', {
               defaultMessage: 'Loading...',
             })
           : i18n.translate('xpack.apm.crashTable.noCrashesLabel', {
