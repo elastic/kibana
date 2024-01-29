@@ -304,6 +304,39 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-public.BottomBarActions",
+        "type": "Function",
+        "tags": [],
+        "label": "BottomBarActions",
+        "description": [],
+        "signature": [
+          "({ isLoading, onDiscardChanges, onSave, unsavedChangesCount, saveLabel, appTestSubj, areChangesInvalid, }: Props) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/bottom_bar_actions/bottom_bar_actions.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.BottomBarActions.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  isLoading,\n  onDiscardChanges,\n  onSave,\n  unsavedChangesCount,\n  saveLabel,\n  appTestSubj,\n  areChangesInvalid = false,\n}",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/bottom_bar_actions/bottom_bar_actions.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-public.createEsParams",
         "type": "Function",
         "tags": [],
@@ -506,6 +539,76 @@
               "FeatureFeedbackButtonProps"
             ],
             "path": "x-pack/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.FieldValueSelection",
+        "type": "Function",
+        "tags": [],
+        "label": "FieldValueSelection",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "FieldValueSelectionProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.FieldValueSelection.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "FieldValueSelectionProps"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.FieldValueSuggestions",
+        "type": "Function",
+        "tags": [],
+        "label": "FieldValueSuggestions",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "FieldValueSuggestionsProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.FieldValueSuggestions.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "FieldValueSuggestionsProps"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1243,7 +1346,15 @@
             "section": "def-common.ChromeBreadcrumb",
             "text": "ChromeBreadcrumb"
           },
-          "[], app?: { id: string; label: string; } | undefined) => void"
+          "[], app?: { id: string; label: string; } | undefined, breadcrumbsAppendExtension?: ",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.ChromeBreadcrumbsAppendExtension",
+            "text": "ChromeBreadcrumbsAppendExtension"
+          },
+          " | undefined) => void"
         ],
         "path": "x-pack/plugins/observability_shared/public/hooks/use_breadcrumbs.ts",
         "deprecated": false,
@@ -1305,6 +1416,28 @@
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.useBreadcrumbs.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "breadcrumbsAppendExtension",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.ChromeBreadcrumbsAppendExtension",
+                "text": "ChromeBreadcrumbsAppendExtension"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/hooks/use_breadcrumbs.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -1969,6 +2102,43 @@
                 "trackAdoption": false
               }
             ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.useValuesList",
+        "type": "Function",
+        "tags": [],
+        "label": "useValuesList",
+        "description": [],
+        "signature": [
+          "({ sourceField, dataViewTitle, query, filters, time, label, keepHistory, cardinalityField, }: ",
+          "Props",
+          ") => { values: ",
+          "ListItem",
+          "[]; loading?: boolean | undefined; }"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/hooks/use_values_list.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.useValuesList.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  sourceField,\n  dataViewTitle,\n  query = '',\n  filters,\n  time,\n  label,\n  keepHistory,\n  cardinalityField,\n}",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/hooks/use_values_list.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],

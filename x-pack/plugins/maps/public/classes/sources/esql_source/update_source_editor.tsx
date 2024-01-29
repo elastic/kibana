@@ -5,25 +5,23 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiFormRow,
   EuiPanel,
-  EuiSelect,
   EuiSkeletonText,
   EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getIndexPatternFromESQLQuery } from '@kbn/es-query';
 import type { ESQLSourceDescriptor } from '../../../../common/descriptor_types';
 import type { OnSourceChangeArgs } from '../source';
 import { ForceRefreshCheckbox } from '../../../components/force_refresh_checkbox';
 import { ESQLEditor } from './esql_editor';
-import { getDateFields } from './esql_utils';
+import { NarrowByMapBounds, NarrowByTime } from './narrow_by_field';
+import { getFields } from './esql_utils';
 
 interface Props {
   onChange(...args: OnSourceChangeArgs[]): void;
@@ -32,16 +30,18 @@ interface Props {
 
 export function UpdateSourceEditor(props: Props) {
   const [dateFields, setDateFields] = useState<string[]>([]);
+  const [geoFields, setGeoFields] = useState<string[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     let ignore = false;
-    getDateFields(props.sourceDescriptor.esql)
-      .then((initialDateFields) => {
+    getFields(props.sourceDescriptor.esql)
+      .then((fields) => {
         if (ignore) {
           return;
         }
-        setDateFields(initialDateFields);
+        setDateFields(fields.dateFields);
+        setGeoFields(fields.geoFields);
         setIsInitialized(true);
       })
       .catch((err) => {
@@ -57,36 +57,6 @@ export function UpdateSourceEditor(props: Props) {
     // only run on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const dateSelectOptions = useMemo(() => {
-    return dateFields.map((dateField) => {
-      return {
-        value: dateField,
-        text: dateField,
-      };
-    });
-  }, [dateFields]);
-
-  const narrowByTimeInput = (
-    <EuiSwitch
-      label={i18n.translate('xpack.maps.esqlSource.narrowByGlobalTimeLabel', {
-        defaultMessage: `Narrow ES|QL statement by global time`,
-      })}
-      checked={dateFields.length === 0 ? false : !!props.sourceDescriptor.dateField}
-      onChange={(event: EuiSwitchEvent) => {
-        if (!event.target.checked) {
-          props.onChange({ propName: 'dateField', value: undefined });
-          return;
-        }
-
-        if (dateFields.length) {
-          props.onChange({ propName: 'dateField', value: dateFields[0] });
-        }
-      }}
-      disabled={dateFields.length === 0}
-      compressed
-    />
-  );
 
   return (
     <>
@@ -104,43 +74,56 @@ export function UpdateSourceEditor(props: Props) {
         <EuiSkeletonText lines={3} isLoading={!isInitialized}>
           <ESQLEditor
             esql={props.sourceDescriptor.esql}
-            onESQLChange={(change: {
-              columns: ESQLSourceDescriptor['columns'];
-              dateFields: string[];
-              esql: string;
-            }) => {
+            onESQLChange={(change) => {
               setDateFields(change.dateFields);
+              setGeoFields(change.geoFields);
               const changes: OnSourceChangeArgs[] = [
                 { propName: 'columns', value: change.columns },
                 { propName: 'esql', value: change.esql },
               ];
-              if (
-                props.sourceDescriptor.dateField &&
-                !change.dateFields.includes(props.sourceDescriptor.dateField)
-              ) {
-                changes.push({
-                  propName: 'dateField',
-                  value: change.dateFields.length ? change.dateFields[0] : undefined,
-                });
+              function ensureField(key: 'dateField' | 'geoField', fields: string[]) {
+                if (props.sourceDescriptor[key] && !fields.includes(props.sourceDescriptor[key]!)) {
+                  const value = fields.length ? fields[0] : undefined;
+                  changes.push({
+                    propName: key,
+                    value,
+                  });
+                  // uncheck narrowing if there are no fields
+                  if (!value) {
+                    changes.push({
+                      propName: key === 'dateField' ? 'narrowByGlobalTime' : 'narrowByMapBounds',
+                      value: false,
+                    });
+                  }
+                }
               }
+              ensureField('dateField', change.dateFields);
+              ensureField('geoField', change.geoFields);
               props.onChange(...changes);
             }}
           />
 
           <EuiSpacer size="m" />
 
-          <EuiFormRow>
-            <EuiSwitch
-              label={i18n.translate('xpack.maps.esqlSource.narrowByMapExtentLabel', {
-                defaultMessage: 'Narrow ES|QL statement by visible map area',
-              })}
-              checked={props.sourceDescriptor.narrowByMapBounds}
-              onChange={(event: EuiSwitchEvent) => {
-                props.onChange({ propName: 'narrowByMapBounds', value: event.target.checked });
-              }}
-              compressed
-            />
-          </EuiFormRow>
+          <NarrowByMapBounds
+            esql={props.sourceDescriptor.esql}
+            field={props.sourceDescriptor.geoField}
+            fields={geoFields}
+            narrowByField={props.sourceDescriptor.narrowByMapBounds}
+            onFieldChange={(fieldName: string) => {
+              props.onChange({ propName: 'geoField', value: fieldName });
+            }}
+            onNarrowByFieldChange={(narrowByField: boolean) => {
+              const changes: OnSourceChangeArgs[] = [
+                { propName: 'narrowByMapBounds', value: narrowByField },
+              ];
+              // auto select first geo field when enabling narrowByMapBounds and geoField is not set
+              if (narrowByField && geoFields.length && !props.sourceDescriptor.geoField) {
+                changes.push({ propName: 'geoField', value: geoFields[0] });
+              }
+              props.onChange(...changes);
+            }}
+          />
 
           <EuiFormRow>
             <EuiSwitch
@@ -155,41 +138,25 @@ export function UpdateSourceEditor(props: Props) {
             />
           </EuiFormRow>
 
-          <EuiFormRow>
-            {dateFields.length === 0 ? (
-              <EuiToolTip
-                position="top"
-                content={i18n.translate('xpack.maps.esqlSource.noDateFieldsDisabledMsg', {
-                  defaultMessage: `No date fields are available from index pattern: {pattern}.`,
-                  values: {
-                    pattern: getIndexPatternFromESQLQuery(props.sourceDescriptor.esql),
-                  },
-                })}
-              >
-                {narrowByTimeInput}
-              </EuiToolTip>
-            ) : (
-              narrowByTimeInput
-            )}
-          </EuiFormRow>
-
-          {props.sourceDescriptor.dateField && (
-            <EuiFormRow
-              label={i18n.translate('xpack.maps.source.esqlSource.dateFieldSelectLabel', {
-                defaultMessage: 'Date field',
-              })}
-              display="columnCompressed"
-            >
-              <EuiSelect
-                options={dateSelectOptions}
-                value={props.sourceDescriptor.dateField}
-                onChange={(e: ChangeEvent<HTMLSelectElement>) => {
-                  props.onChange({ propName: 'dateField', value: e.target.value });
-                }}
-                compressed
-              />
-            </EuiFormRow>
-          )}
+          <NarrowByTime
+            esql={props.sourceDescriptor.esql}
+            field={props.sourceDescriptor.dateField}
+            fields={dateFields}
+            narrowByField={props.sourceDescriptor.narrowByGlobalTime}
+            onFieldChange={(fieldName: string) => {
+              props.onChange({ propName: 'dateField', value: fieldName });
+            }}
+            onNarrowByFieldChange={(narrowByField: boolean) => {
+              const changes: OnSourceChangeArgs[] = [
+                { propName: 'narrowByGlobalTime', value: narrowByField },
+              ];
+              // auto select first date field when enabling narrowByGlobalTime and dateField is not set
+              if (narrowByField && dateFields.length && !props.sourceDescriptor.dateField) {
+                changes.push({ propName: 'dateField', value: dateFields[0] });
+              }
+              props.onChange(...changes);
+            }}
+          />
 
           <ForceRefreshCheckbox
             applyForceRefresh={props.sourceDescriptor.applyForceRefresh}
