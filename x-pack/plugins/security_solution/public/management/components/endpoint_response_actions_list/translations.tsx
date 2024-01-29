@@ -185,6 +185,9 @@ export const FILTER_NAMES = Object.freeze({
   actions: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.actions', {
     defaultMessage: 'Actions',
   }),
+  agentTypes: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.agentTypes', {
+    defaultMessage: 'Agent types',
+  }),
   hosts: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.Hosts', {
     defaultMessage: 'Hosts',
   }),

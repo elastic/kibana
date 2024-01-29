@@ -6,17 +6,20 @@
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import type { ConsoleResponseActionCommands } from '../../../../../common/endpoint/service/response_actions/constants';
+
 import {
   RESPONSE_ACTION_API_COMMANDS_NAMES,
   RESPONSE_ACTION_STATUS,
+  type ConsoleResponseActionCommands,
+  type ResponseActionAgentType,
   type ResponseActionsApiCommandNames,
   type ResponseActionStatus,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import { useUrlParams } from '../../../hooks/use_url_params';
-import { DEFAULT_DATE_RANGE_OPTIONS } from './hooks';
+import { DEFAULT_DATE_RANGE_OPTIONS, isAgentType } from './hooks';
 
 interface UrlParamsActionsLogFilters {
+  agentTypes: string;
   commands: string;
   hosts: string;
   statuses: string;
@@ -28,6 +31,7 @@ interface UrlParamsActionsLogFilters {
 }
 
 interface ActionsLogFiltersFromUrlParams {
+  agentTypes?: ResponseActionAgentType[];
   commands?: ConsoleResponseActionCommands[];
   hosts?: string[];
   withOutputs?: string[];
@@ -35,25 +39,35 @@ interface ActionsLogFiltersFromUrlParams {
   startDate?: string;
   endDate?: string;
   types?: string[];
+  setUrlAgentTypesFilters: (agentTypes: UrlParamsActionsLogFilters['agentTypes']) => void;
   setUrlActionsFilters: (commands: UrlParamsActionsLogFilters['commands']) => void;
   setUrlDateRangeFilters: ({ startDate, endDate }: { startDate: string; endDate: string }) => void;
   setUrlHostsFilters: (agentIds: UrlParamsActionsLogFilters['hosts']) => void;
   setUrlStatusesFilters: (statuses: UrlParamsActionsLogFilters['statuses']) => void;
   setUrlUsersFilters: (users: UrlParamsActionsLogFilters['users']) => void;
   setUrlWithOutputs: (outputs: UrlParamsActionsLogFilters['withOutputs']) => void;
-  setUrlTypeFilters: (outputs: UrlParamsActionsLogFilters['types']) => void;
+  setUrlTypeFilters: (actionTypes: UrlParamsActionsLogFilters['types']) => void;
   users?: string[];
 }
 
 type FiltersFromUrl = Pick<
   ActionsLogFiltersFromUrlParams,
-  'commands' | 'hosts' | 'withOutputs' | 'statuses' | 'users' | 'startDate' | 'endDate' | 'types'
+  | 'agentTypes'
+  | 'commands'
+  | 'hosts'
+  | 'withOutputs'
+  | 'statuses'
+  | 'users'
+  | 'startDate'
+  | 'endDate'
+  | 'types'
 >;
 
 export const actionsLogFiltersFromUrlParams = (
   urlParams: Partial<UrlParamsActionsLogFilters>
 ): FiltersFromUrl => {
   const actionsLogFilters: FiltersFromUrl = {
+    agentTypes: [],
     commands: [],
     hosts: [],
     statuses: [],
@@ -63,6 +77,17 @@ export const actionsLogFiltersFromUrlParams = (
     withOutputs: [],
     types: [],
   };
+
+  const urlAgentTypes = urlParams.agentTypes
+    ? (String(urlParams.agentTypes).split(',') as ResponseActionAgentType[]).reduce<
+        ResponseActionAgentType[]
+      >((acc, curr) => {
+        if (isAgentType(curr)) {
+          acc.push(curr);
+        }
+        return acc.sort();
+      }, [])
+    : [];
 
   const urlCommands = urlParams.commands
     ? String(urlParams.commands)
@@ -99,6 +124,7 @@ export const actionsLogFiltersFromUrlParams = (
 
   const urlUsers = urlParams.users ? String(urlParams.users).split(',').sort() : [];
 
+  actionsLogFilters.agentTypes = urlAgentTypes.length ? urlAgentTypes : undefined;
   actionsLogFilters.commands = urlCommands.length ? urlCommands : undefined;
   actionsLogFilters.hosts = urlHosts.length ? urlHosts : undefined;
   actionsLogFilters.statuses = urlStatuses.length ? urlStatuses : undefined;
@@ -130,6 +156,19 @@ export const useActionHistoryUrlParams = (): ActionsLogFiltersFromUrlParams => {
         search: toUrlParams({
           ...urlParams,
           commands: commands.length ? commands : undefined,
+        }),
+      });
+    },
+    [history, location, toUrlParams, urlParams]
+  );
+
+  const setUrlAgentTypesFilters = useCallback(
+    (agentTypes: string) => {
+      history.push({
+        ...location,
+        search: toUrlParams({
+          ...urlParams,
+          agentTypes: agentTypes.length ? agentTypes : undefined,
         }),
       });
     },
@@ -174,6 +213,7 @@ export const useActionHistoryUrlParams = (): ActionsLogFiltersFromUrlParams => {
     },
     [history, location, toUrlParams, urlParams]
   );
+
   const setUrlTypeFilters = useCallback(
     (types: string) => {
       history.push({
@@ -226,6 +266,7 @@ export const useActionHistoryUrlParams = (): ActionsLogFiltersFromUrlParams => {
   return {
     ...actionsLogFilters,
     setUrlActionsFilters,
+    setUrlAgentTypesFilters,
     setUrlDateRangeFilters,
     setUrlHostsFilters,
     setUrlWithOutputs,

@@ -18,14 +18,7 @@ describe('#actionsLogFiltersFromUrlParams', () => {
   };
 
   it('should not use invalid command values from URL params', () => {
-    expect(actionsLogFiltersFromUrlParams({ commands: 'asa,was' })).toEqual({
-      commands: undefined,
-      endDate: undefined,
-      hosts: undefined,
-      startDate: undefined,
-      statuses: undefined,
-      users: undefined,
-    });
+    expect(actionsLogFiltersFromUrlParams({ commands: 'asa,was' })).toEqual({});
   });
 
   it('should use valid command values from URL params', () => {
@@ -35,23 +28,11 @@ describe('#actionsLogFiltersFromUrlParams', () => {
       })
     ).toEqual({
       commands: getConsoleCommandsAsArray(),
-      endDate: undefined,
-      hosts: undefined,
-      startDate: undefined,
-      statuses: undefined,
-      users: undefined,
     });
   });
 
   it('should not use invalid status values from URL params', () => {
-    expect(actionsLogFiltersFromUrlParams({ statuses: 'asa,was' })).toEqual({
-      commands: undefined,
-      endDate: undefined,
-      hosts: undefined,
-      startDate: undefined,
-      statuses: undefined,
-      users: undefined,
-    });
+    expect(actionsLogFiltersFromUrlParams({ statuses: 'asa,was' })).toEqual({});
   });
 
   it('should use valid status values from URL params', () => {
@@ -60,12 +41,7 @@ describe('#actionsLogFiltersFromUrlParams', () => {
         statuses: 'successful,pending,failed',
       })
     ).toEqual({
-      commands: undefined,
-      endDate: undefined,
-      hosts: undefined,
-      startDate: undefined,
       statuses: ['failed', 'pending', 'successful'],
-      users: undefined,
     });
   });
 
@@ -96,12 +72,8 @@ describe('#actionsLogFiltersFromUrlParams', () => {
         endDate: 'now',
       })
     ).toEqual({
-      commands: undefined,
       endDate: 'now',
-      hosts: undefined,
       startDate: 'now-24h/h',
-      statuses: undefined,
-      users: undefined,
     });
   });
 
@@ -112,12 +84,8 @@ describe('#actionsLogFiltersFromUrlParams', () => {
         endDate: '2022-09-12T08:30:33.140Z',
       })
     ).toEqual({
-      commands: undefined,
       endDate: '2022-09-12T08:30:33.140Z',
-      hosts: undefined,
       startDate: '2022-09-12T08:00:00.000Z',
-      statuses: undefined,
-      users: undefined,
     });
   });
 
@@ -127,12 +95,7 @@ describe('#actionsLogFiltersFromUrlParams', () => {
         hosts: 'agent-id-1,agent-id-2',
       })
     ).toEqual({
-      commands: undefined,
-      endDate: undefined,
       hosts: ['agent-id-1', 'agent-id-2'],
-      startDate: undefined,
-      statuses: undefined,
-      users: undefined,
     });
   });
 
@@ -142,11 +105,6 @@ describe('#actionsLogFiltersFromUrlParams', () => {
         users: 'usernameA,usernameB',
       })
     ).toEqual({
-      commands: undefined,
-      endDate: undefined,
-      hosts: undefined,
-      startDate: undefined,
-      statuses: undefined,
       users: ['usernameA', 'usernameB'],
     });
   });

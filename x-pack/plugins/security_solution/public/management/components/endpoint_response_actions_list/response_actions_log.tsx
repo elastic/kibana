@@ -9,6 +9,7 @@ import type { CriteriaWithPagination } from '@elastic/eui';
 import { EuiEmptyPrompt, EuiFlexItem } from '@elastic/eui';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import {
   RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP,
   type ResponseActionsApiCommandNames,
@@ -48,6 +49,7 @@ export const ResponseActionsLog = memo<
     const { pagination: paginationFromUrlParams, setPagination: setPaginationOnUrlParams } =
       useUrlPagination();
     const {
+      agentTypes: agentTypesFromUrl,
       commands: commandsFromUrl,
       hosts: agentIdsFromUrl,
       statuses: statusesFromUrl,
@@ -66,6 +68,7 @@ export const ResponseActionsLog = memo<
       page: isFlyout ? 1 : paginationFromUrlParams.page,
       pageSize: isFlyout ? 10 : paginationFromUrlParams.pageSize,
       agentIds: isFlyout ? agentIds : agentIdsFromUrl?.length ? agentIdsFromUrl : agentIds,
+      agentTypes: [],
       commands: [],
       statuses: [],
       userIds: [],
@@ -78,6 +81,7 @@ export const ResponseActionsLog = memo<
       if (!isFlyout) {
         setQueryParams((prevState) => ({
           ...prevState,
+          agentTypes: agentTypesFromUrl?.length ? agentTypesFromUrl : prevState.agentTypes,
           commands: commandsFromUrl?.length
             ? commandsFromUrl.map(
                 (commandFromUrl) => RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[commandFromUrl]
@@ -93,6 +97,7 @@ export const ResponseActionsLog = memo<
         }));
       }
     }, [
+      agentTypesFromUrl,
       commandsFromUrl,
       agentIdsFromUrl,
       isFlyout,
@@ -171,6 +176,16 @@ export const ResponseActionsLog = memo<
         setQueryParams((prevState) => ({
           ...prevState,
           statuses: selectedStatuses as ResponseActionStatus[],
+        }));
+      },
+      [setQueryParams]
+    );
+
+    const onChangeAgentTypesFilter = useCallback(
+      (selectedAgentTypes: string[]) => {
+        setQueryParams((prevState) => ({
+          ...prevState,
+          agentTypes: selectedAgentTypes as ResponseActionAgentType[],
         }));
       },
       [setQueryParams]
@@ -256,6 +271,7 @@ export const ResponseActionsLog = memo<
           onChangeCommandsFilter={onChangeCommandsFilter}
           onChangeStatusesFilter={onChangeStatusesFilter}
           onChangeUsersFilter={onChangeUsersFilter}
+          onChangeAgentTypesFilter={onChangeAgentTypesFilter}
           onChangeTypeFilter={onChangeTypeFilter}
           onRefresh={onRefresh}
           onRefreshChange={onRefreshChange}

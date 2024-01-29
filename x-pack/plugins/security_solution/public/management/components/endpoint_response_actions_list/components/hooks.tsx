@@ -10,8 +10,10 @@ import type {
   DurationRange,
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
+import { getAgentTypeName } from '../../../../common/translations';
 import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
 import {
+  RESPONSE_ACTION_AGENT_TYPE,
   RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
   RESPONSE_ACTION_API_COMMANDS_NAMES,
   RESPONSE_ACTION_STATUS,
@@ -137,6 +139,13 @@ export const getActionStatus = (status: ResponseActionStatus): string => {
   return '';
 };
 
+// type guards to ensure only the matching string values are attached to the filter type
+export const isAgentType = (type: string): type is typeof RESPONSE_ACTION_AGENT_TYPE[number] =>
+  RESPONSE_ACTION_AGENT_TYPE.includes(type as typeof RESPONSE_ACTION_AGENT_TYPE[number]);
+
+export const isActionType = (type: string): type is typeof RESPONSE_ACTION_TYPE[number] =>
+  RESPONSE_ACTION_TYPE.includes(type as typeof RESPONSE_ACTION_TYPE[number]);
+
 export type FilterName = keyof typeof FILTER_NAMES;
 export const useActionsLogFilter = ({
   filterName,
@@ -158,16 +167,19 @@ export const useActionsLogFilter = ({
   numFilters: number;
   setAreHostsSelectedOnMount: (value: React.SetStateAction<boolean>) => void;
   setUrlActionsFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlActionsFilters'];
+  setUrlAgentTypesFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlAgentTypesFilters'];
   setUrlHostsFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlHostsFilters'];
   setUrlStatusesFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlStatusesFilters'];
   setUrlTypeFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlTypeFilters'];
 } => {
   const {
+    agentTypes = [],
     commands,
     statuses,
     hosts: selectedAgentIdsFromUrl,
     types = [],
     setUrlActionsFilters,
+    setUrlAgentTypesFilters,
     setUrlHostsFilters,
     setUrlStatusesFilters,
     setUrlTypeFilters,
@@ -194,10 +206,15 @@ export const useActionsLogFilter = ({
   // filter options
   const [items, setItems] = useState<FilterItems>(
     isTypeFilter
-      ? RESPONSE_ACTION_TYPE.map((type) => ({
+      ? [...RESPONSE_ACTION_AGENT_TYPE, ...RESPONSE_ACTION_TYPE].map((type) => ({
           key: type,
-          label: getTypeDisplayName(type),
-          checked: !isFlyout && types?.includes(type) ? 'on' : undefined,
+          label: isAgentType(type) ? getAgentTypeName(type) : getTypeDisplayName(type),
+          checked:
+            !isFlyout &&
+            ((isAgentType(type) && agentTypes?.includes(type)) ||
+              (isActionType(type) && types?.includes(type)))
+              ? 'on'
+              : undefined,
           'data-test-subj': `${filterName}-filter-option`,
         }))
       : isStatusesFilter
@@ -273,6 +290,7 @@ export const useActionsLogFilter = ({
     numFilters,
     setAreHostsSelectedOnMount,
     setUrlActionsFilters,
+    setUrlAgentTypesFilters,
     setUrlHostsFilters,
     setUrlStatusesFilters,
     setUrlTypeFilters,

@@ -13,21 +13,36 @@ import {
   type ResponseActionsApiCommandNames,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import { ActionsLogFilterPopover } from './actions_log_filter_popover';
-import { type FilterItems, type FilterName, useActionsLogFilter } from './hooks';
+import {
+  type FilterItems,
+  type FilterName,
+  useActionsLogFilter,
+  isAgentType,
+  isActionType,
+} from './hooks';
 import { ClearAllButton } from './clear_all_button';
 import { UX_MESSAGES } from '../translations';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
+// maps filter name to a function that updates the query state
+type TypeFilters = {
+  [k in Extract<FilterName, 'agentTypes' | 'type'>]: {
+    onChangeFilterOptions: (selectedOptions: string[]) => void;
+  };
+};
+
 export const ActionsLogFilter = memo(
   ({
     filterName,
+    typeFilters,
     isFlyout,
     onChangeFilterOptions,
     'data-test-subj': dataTestSubj,
   }: {
     filterName: FilterName;
+    typeFilters?: TypeFilters;
     isFlyout: boolean;
-    onChangeFilterOptions: (selectedOptions: string[]) => void;
+    onChangeFilterOptions?: (selectedOptions: string[]) => void;
     'data-test-subj'?: string;
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
@@ -53,6 +68,7 @@ export const ActionsLogFilter = memo(
       numFilters,
       setAreHostsSelectedOnMount,
       setUrlActionsFilters,
+      setUrlAgentTypesFilters,
       setUrlHostsFilters,
       setUrlStatusesFilters,
       setUrlTypeFilters,
@@ -82,13 +98,13 @@ export const ActionsLogFilter = memo(
       [filterName, isPopoverOpen]
     );
 
-    // augmented options based on hosts filter
+    // augmented options based on the host filter
     const sortedHostsFilterOptions = useMemo(() => {
       if (shouldPinSelectedHosts() || areHostsSelectedOnMount) {
         // pin checked items to the top
         return orderBy('checked', 'asc', items);
       }
-      // return options as is for other filters
+      // return options as are for other filters
       return items;
     }, [areHostsSelectedOnMount, shouldPinSelectedHosts, items]);
 
@@ -102,13 +118,30 @@ export const ActionsLogFilter = memo(
         // update filter UI options state
         setItems(newOptions.map((option) => option));
 
-        // compute selected list of options
+        // compute a selected list of options
         const selectedItems = newOptions.reduce<string[]>((acc, curr) => {
           if (curr.checked === 'on') {
             acc.push(curr.key);
           }
           return acc;
         }, []);
+
+        const groupedSelectedTypeFilterOptions = selectedItems.reduce<{
+          agentTypes: string[];
+          actionTypes: string[];
+        }>(
+          (acc, item) => {
+            if (isAgentType(item)) {
+              acc.agentTypes.push(item);
+            }
+            if (isActionType(item)) {
+              acc.actionTypes.push(item);
+            }
+
+            return acc;
+          },
+          { actionTypes: [], agentTypes: [] }
+        );
 
         if (!isFlyout) {
           // update URL params
@@ -128,17 +161,26 @@ export const ActionsLogFilter = memo(
           } else if (filterName === 'statuses') {
             setUrlStatusesFilters(selectedItems.join());
           } else if (filterName === 'type') {
-            setUrlTypeFilters(selectedItems.join());
+            setUrlAgentTypesFilters(groupedSelectedTypeFilterOptions.agentTypes.join());
+            setUrlTypeFilters(groupedSelectedTypeFilterOptions.actionTypes.join());
           }
           // reset shouldPinSelectedHosts, setAreHostsSelectedOnMount
           shouldPinSelectedHosts(false);
           setAreHostsSelectedOnMount(false);
         }
 
-        // update query state
-        onChangeFilterOptions(selectedItems);
+        // update overall query state
+        if (typeFilters && typeof onChangeFilterOptions === 'undefined') {
+          typeFilters.agentTypes.onChangeFilterOptions(groupedSelectedTypeFilterOptions.agentTypes);
+          typeFilters.type.onChangeFilterOptions(groupedSelectedTypeFilterOptions.actionTypes);
+        } else {
+          if (typeof onChangeFilterOptions !== 'undefined') {
+            onChangeFilterOptions(selectedItems);
+          }
+        }
       },
       [
+        typeFilters,
         setItems,
         isFlyout,
         onChangeFilterOptions,
@@ -146,6 +188,7 @@ export const ActionsLogFilter = memo(
         shouldPinSelectedHosts,
         setAreHostsSelectedOnMount,
         setUrlActionsFilters,
+        setUrlAgentTypesFilters,
         setUrlHostsFilters,
         setUrlStatusesFilters,
         setUrlTypeFilters,
@@ -163,7 +206,7 @@ export const ActionsLogFilter = memo(
       );
 
       if (!isFlyout) {
-        // update URL params based on filter
+        // update URL params based on filter on page
         if (filterName === 'actions') {
           setUrlActionsFilters('');
         } else if (filterName === 'hosts') {
@@ -171,20 +214,31 @@ export const ActionsLogFilter = memo(
         } else if (filterName === 'statuses') {
           setUrlStatusesFilters('');
         } else if (filterName === 'type') {
+          setUrlAgentTypesFilters('');
           setUrlTypeFilters('');
         }
       }
-      // update query state
-      onChangeFilterOptions([]);
+
+      // update query state for flyout filters
+      if (typeFilters && typeof onChangeFilterOptions === 'undefined') {
+        typeFilters.agentTypes.onChangeFilterOptions([]);
+        typeFilters.type.onChangeFilterOptions([]);
+      } else {
+        if (typeof onChangeFilterOptions !== 'undefined') {
+          onChangeFilterOptions([]);
+        }
+      }
     }, [
       setItems,
       items,
       isFlyout,
+      typeFilters,
       onChangeFilterOptions,
       filterName,
       setUrlActionsFilters,
       setUrlHostsFilters,
       setUrlStatusesFilters,
+      setUrlAgentTypesFilters,
       setUrlTypeFilters,
     ]);
 
