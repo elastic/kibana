@@ -3,20 +3,9 @@ $mediumControl: $euiSize * 25;
 $largeControl: $euiSize * 50;
 $controlMinWidth: $euiSize * 14;
 
-// .controlGroup {
-//   min-height: $euiSize * 4;
-//   // padding-top: $euiSize;
-//   // padding-bottom: $euiSize;
-// }
-
 .controlsWrapper {
   padding-top: $euiSizeS;
   min-height: $euiSize * 4;
-  // padding-top: 16px;
-  // padding-bottom: 16px;
-  // min-height: $euiSize * 4;
-  // padding-top: $euiSize / 2;
-  // padding-bottom: $euiSize / 2;
 }
 
 .controlsWrapper--twoLine {

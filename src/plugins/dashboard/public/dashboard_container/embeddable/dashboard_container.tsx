@@ -53,6 +53,7 @@ import {
   DashboardPublicState,
   DashboardReduxState,
   DashboardRenderPerformanceStats,
+  DashboardStateFromSaveModal,
 } from '../types';
 import {
   addFromLibrary,
@@ -421,7 +422,6 @@ export class DashboardContainer
   };
 
   public addOrUpdateEmbeddable = addOrUpdateEmbeddable;
-  // public lastSavedInput$: Subject<DashboardContainerInput> = new Subject<DashboardContainerInput>();
 
   public forceRefresh(refreshControlGroup: boolean = true) {
     this.dispatch.setLastReloadRequestTimeToNow({});
@@ -430,20 +430,19 @@ export class DashboardContainer
 
   public onDataViewsUpdate$ = new Subject<DataView[]>();
 
-  public saveDashboard(savedState: DashboardContainerInput) {
+  public saveDashboard(
+    savedState: DashboardContainerInput,
+    stateFromSaveModal?: DashboardStateFromSaveModal
+  ) {
     batch(() => {
-      // console.log('saveDashboard', savedState);
       if (this.controlGroup && savedState?.controlGroupInput) {
         this.controlGroup.dispatch.setLastSavedInput(savedState.controlGroupInput);
       }
-
-      // this.lastSavedInput$.next(savedState);
+      if (stateFromSaveModal) {
+        this.dispatch.setStateFromSaveModal(stateFromSaveModal);
+      }
       this.dispatch.setLastSavedInput(savedState);
     });
-
-    // // if we set the last saved input, it means we have saved this Dashboard - therefore clientside migrations have
-    // // been serialized into the SO.
-    // this.dispatch.setHasRunClientSideMigrations(false);
   }
 
   public resetToLastSavedState() {
@@ -524,7 +523,6 @@ export class DashboardContainer
       this.dispatch.setLastSavedId(newSavedObjectId);
     });
     this.updateInput(newInput);
-    // this.lastSavedInput$.next(newInput);
     dashboardContainerReady$.next(this);
   };
 

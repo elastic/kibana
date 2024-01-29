@@ -151,7 +151,6 @@ export const saveDashboardState = async ({
       ]) as RefreshInterval)
     : undefined;
 
-  // console.log('VERSION', version, LATEST_DASHBOARD_CONTAINER_VERSION);
   const rawDashboardAttributes: DashboardAttributes = {
     version: convertDashboardVersionToNumber(LATEST_DASHBOARD_CONTAINER_VERSION),
     controlGroupInput: serializeControlGroupInput(controlGroupInput),

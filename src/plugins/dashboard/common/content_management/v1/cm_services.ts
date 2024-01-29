@@ -21,38 +21,41 @@ export const controlGroupInputSchema = schema.object({
   ignoreParentSettingsJSON: schema.maybe(schema.string()),
 });
 
-export const dashboardAttributesSchema = schema.object({
-  // General
-  title: schema.string(),
-  description: schema.string({ defaultValue: '' }),
+export const dashboardAttributesSchema = schema.object(
+  {
+    // General
+    title: schema.string(),
+    description: schema.string({ defaultValue: '' }),
 
-  // Search
-  kibanaSavedObjectMeta: schema.object({
-    searchSourceJSON: schema.maybe(schema.string()),
-  }),
+    // Search
+    kibanaSavedObjectMeta: schema.object({
+      searchSourceJSON: schema.maybe(schema.string()),
+    }),
 
-  // Time
-  timeRestore: schema.maybe(schema.boolean()),
-  timeFrom: schema.maybe(schema.string()),
-  timeTo: schema.maybe(schema.string()),
-  refreshInterval: schema.maybe(
-    schema.object({
-      pause: schema.boolean(),
-      value: schema.number(),
-      display: schema.maybe(schema.string()),
-      section: schema.maybe(schema.number()),
-    })
-  ),
+    // Time
+    timeRestore: schema.maybe(schema.boolean()),
+    timeFrom: schema.maybe(schema.string()),
+    timeTo: schema.maybe(schema.string()),
+    refreshInterval: schema.maybe(
+      schema.object({
+        pause: schema.boolean(),
+        value: schema.number(),
+        display: schema.maybe(schema.string()),
+        section: schema.maybe(schema.number()),
+      })
+    ),
 
-  // Dashboard Content
-  controlGroupInput: schema.maybe(controlGroupInputSchema),
-  panelsJSON: schema.string({ defaultValue: '[]' }),
-  optionsJSON: schema.string({ defaultValue: '{}' }),
+    // Dashboard Content
+    controlGroupInput: schema.maybe(controlGroupInputSchema),
+    panelsJSON: schema.string({ defaultValue: '[]' }),
+    optionsJSON: schema.string({ defaultValue: '{}' }),
 
-  // Legacy
-  hits: schema.maybe(schema.number()),
-  version: schema.maybe(schema.number()),
-});
+    // Legacy
+    hits: schema.maybe(schema.number()),
+    version: schema.maybe(schema.number()),
+  },
+  { unknowns: 'forbid' }
+);
 
 export const dashboardSavedObjectSchema = savedObjectSchema(dashboardAttributesSchema);
 
