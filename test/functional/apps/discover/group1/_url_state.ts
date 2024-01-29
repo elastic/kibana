@@ -11,6 +11,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const deployment = getService('deployment');
   const browser = getService('browser');
   const log = getService('log');
   const retry = getService('retry');
@@ -30,6 +31,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
+    'timepicker:timeDefaults':
+      '{  "from": "Sep 18, 2015 @ 19:37:13.000",  "to": "Sep 23, 2015 @ 02:30:09.000"}',
   };
 
   describe('discover URL state', () => {
@@ -116,6 +119,85 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         end: 'Sep 23, 2015 @ 18:31:44.000',
       });
       expect(await PageObjects.discover.getHitCount()).to.be('11,268');
+    });
+
+    it('should merge custom global filters with app filters when opening a saved search', async () => {
+      await kibanaServer.uiSettings.update({
+        'timepicker:timeDefaults':
+          '{  "from": "Sep 18, 2015 @ 19:37:13.000",  "to": "Sep 23, 2015 @ 02:30:09.000"}',
+      });
+      await PageObjects.common.navigateToApp('discover');
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      await filterBar.addFilter({
+        field: 'bytes',
+        operation: 'is between',
+        value: { from: '1000', to: '2000' },
+      });
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      const totalHitsForOneFilter = '737';
+      const totalHitsForTwoFilters = '649';
+
+      expect(await PageObjects.discover.getHitCount()).to.be(totalHitsForOneFilter);
+
+      await PageObjects.discover.saveSearch('testFilters');
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      expect(await PageObjects.discover.getHitCount()).to.be(totalHitsForOneFilter);
+
+      await browser.refresh();
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      expect(await PageObjects.discover.getHitCount()).to.be(totalHitsForOneFilter);
+
+      const url = await browser.getCurrentUrl();
+      const savedSearchIdMatch = url.match(/view\/([^?]+)\?/);
+      const savedSearchId = savedSearchIdMatch?.length === 2 ? savedSearchIdMatch[1] : null;
+
+      expect(typeof savedSearchId).to.be('string');
+
+      await browser.get(`${deployment.getHostPort()}/`);
+      await browser.refresh();
+      await browser.get(`${deployment.getHostPort()}/app/discover#/view/${savedSearchId}`);
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      expect(await PageObjects.discover.getHitCount()).to.be(totalHitsForOneFilter);
+
+      await browser.get(`${deployment.getHostPort()}/`);
+      await browser.refresh();
+      await browser.get(
+        `${deployment.getHostPort()}/app/discover#/view/${savedSearchId}` +
+          "?_g=(filters:!(('$state':(store:globalState)," +
+          "meta:(alias:!n,disabled:!f,field:extension.raw,index:'logstash-*'," +
+          'key:extension.raw,negate:!f,params:!(jpg,css),type:phrases,value:!(jpg,css)),' +
+          'query:(bool:(minimum_should_match:1,should:!((match_phrase:(extension.raw:jpg)),' +
+          "(match_phrase:(extension.raw:css))))))),query:(language:kuery,query:'')," +
+          "refreshInterval:(pause:!t,value:60000),time:(from:'2015-09-19T06:31:44.000Z'," +
+          "to:'2015-09-23T18:31:44.000Z'))"
+      );
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      expect(await PageObjects.discover.getHitCount()).to.be(totalHitsForTwoFilters);
+
+      await browser.refresh();
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      expect(await PageObjects.discover.getHitCount()).to.be(totalHitsForTwoFilters);
     });
   });
 }
