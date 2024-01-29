@@ -8,6 +8,7 @@
 import { IRouter } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { getAllConnectorsRoute } from './connector/get_all';
+import { getAllSystemConnectorsRoute } from './connector/get_all_system';
 import { listTypesRoute } from './connector/list_types';
 import { ILicenseState } from '../lib';
 import { ActionsRequestHandlerContext } from '../types';
@@ -45,4 +46,5 @@ export function defineRoutes(opts: RouteOptions) {
   getGlobalExecutionKPIRoute(router, licenseState);
 
   getOAuthAccessToken(router, licenseState, actionsConfigUtils);
+  getAllSystemConnectorsRoute(router, licenseState);
 }
