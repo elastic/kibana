@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, FC, useMemo, useRef } from 'react';
+import React, { useState, useEffect, FC, useMemo } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
 import { MlPages, ML_PAGES } from '../../../locator';
 import { useMlKibana } from '../../contexts/kibana';
 import { useEnabledFeatures } from '../../contexts/ml';
@@ -43,13 +44,7 @@ export const FeedBackButton: FC<Props> = ({ jobIds, page }) => {
   const [showButton, setShowButton] = useState(false);
 
   const formId = useMemo(() => getFormId(page), [page]);
-  const mounted = useRef(false);
-  useEffect(() => {
-    mounted.current = true;
-    return () => {
-      mounted.current = false;
-    };
-  }, []);
+  const isMounted = useMountedState();
 
   useEffect(() => {
     const tempJobIdsString = jobIds.join(',');
@@ -60,13 +55,13 @@ export const FeedBackButton: FC<Props> = ({ jobIds, page }) => {
     setJobIdsString(tempJobIdsString);
 
     getJobs(jobIds).then((resp) => {
-      if (mounted.current) {
+      if (isMounted()) {
         setShowButton(
           resp.some((job) => MATCHED_CREATED_BY_TAGS.includes(job.custom_settings?.created_by))
         );
       }
     });
-  }, [jobIds, getJobs, jobIdsString]);
+  }, [jobIds, getJobs, jobIdsString, isMounted]);
 
   if (showButton === false || formId === null) {
     return null;
