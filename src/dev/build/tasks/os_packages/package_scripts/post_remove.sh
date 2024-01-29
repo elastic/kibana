@@ -59,7 +59,7 @@ if [ "$REMOVE_DIRS" = "true" ]; then
   if [ "$REMOVE_KEYSTORE" = "true" ]; then
     if [ -e "<%= configDir %>/kibana.keystore" ]; then
       echo -n "Deleting kibana.keystore..."
-      rm -f "<%= configDir %>}/kibana.keystore"
+      rm -f "<%= configDir %>/kibana.keystore"
       echo "OK"
     fi
   fi
