@@ -49,6 +49,7 @@ export interface SearchAndFilterBarProps {
   inactiveShownAgents: number;
   totalInactiveAgents: number;
   totalManagedAgentIds: string[];
+  inactiveManagedAgentIds: string[];
   selectionMode: SelectionMode;
   currentQuery: string;
   selectedAgents: Agent[];
@@ -78,6 +79,7 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
   inactiveShownAgents,
   totalInactiveAgents,
   totalManagedAgentIds,
+  inactiveManagedAgentIds,
   selectionMode,
   currentQuery,
   selectedAgents,
@@ -202,6 +204,7 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
                   shownAgents={shownAgents}
                   inactiveShownAgents={inactiveShownAgents}
                   totalManagedAgentIds={totalManagedAgentIds}
+                  inactiveManagedAgentIds={inactiveManagedAgentIds}
                   selectionMode={selectionMode}
                   currentQuery={currentQuery}
                   selectedAgents={selectedAgents}

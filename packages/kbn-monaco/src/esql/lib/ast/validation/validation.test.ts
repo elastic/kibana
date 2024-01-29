@@ -21,6 +21,9 @@ import { chronoLiterals, timeLiterals } from '../definitions/literals';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import capitalize from 'lodash/capitalize';
 import { EditorError } from '../../../../types';
+import { camelCase } from 'lodash';
+
+const fieldTypes = ['number', 'date', 'boolean', 'ip', 'string', 'cartesian_point', 'geo_point'];
 
 function getCallbackMocks() {
   return {
@@ -33,11 +36,7 @@ function getCallbackMocks() {
         : /unsupported_index/.test(query)
         ? [{ name: 'unsupported_field', type: 'unsupported' }]
         : [
-            ...['string', 'number', 'date', 'boolean', 'ip'].map((type) => ({
-              name: `${type}Field`,
-              type,
-            })),
-            { name: 'geoPointField', type: 'geo_point' },
+            ...fieldTypes.map((type) => ({ name: `${camelCase(type)}Field`, type })),
             { name: 'any#Char$ field', type: 'number' },
             { name: 'kubernetes.something.something', type: 'number' },
             {
@@ -60,6 +59,12 @@ function getCallbackMocks() {
         matchField: 'otherStringField',
         enrichFields: ['otherField', 'yetAnotherField'],
       },
+      {
+        name: 'policy[]',
+        sourceIndices: ['enrichIndex1'],
+        matchField: 'otherStringField',
+        enrichFields: ['otherField', 'yetAnotherField'],
+      },
     ]),
   };
 }
@@ -69,6 +74,10 @@ const toStringSignature = evalFunctionsDefinitions.find(({ name }) => name === '
 const toDateSignature = evalFunctionsDefinitions.find(({ name }) => name === 'to_datetime')!;
 const toBooleanSignature = evalFunctionsDefinitions.find(({ name }) => name === 'to_boolean')!;
 const toIpSignature = evalFunctionsDefinitions.find(({ name }) => name === 'to_ip')!;
+const toGeoPointSignature = evalFunctionsDefinitions.find(({ name }) => name === 'to_geopoint')!;
+const toCartesianPointSignature = evalFunctionsDefinitions.find(
+  ({ name }) => name === 'to_cartesianpoint'
+)!;
 
 const toAvgSignature = statsAggregationFunctionDefinitions.find(({ name }) => name === 'avg')!;
 
@@ -78,6 +87,8 @@ const nestedFunctions = {
   date: prepareNestedFunction(toDateSignature),
   boolean: prepareNestedFunction(toBooleanSignature),
   ip: prepareNestedFunction(toIpSignature),
+  geo_point: prepareNestedFunction(toGeoPointSignature),
+  cartesian_point: prepareNestedFunction(toCartesianPointSignature),
 };
 
 const literals = {
@@ -91,13 +102,15 @@ function getLiteralType(typeString: 'chrono_literal' | 'time_literal') {
   return `1 ${literals[typeString]}`;
 }
 function getFieldName(
-  typeString: 'string' | 'number' | 'date' | 'boolean' | 'ip',
+  typeString: string,
   { useNestedFunction, isStats }: { useNestedFunction: boolean; isStats: boolean }
 ) {
   if (useNestedFunction && isStats) {
     return prepareNestedFunction(toAvgSignature);
   }
-  return useNestedFunction ? nestedFunctions[typeString] : `${typeString}Field`;
+  return useNestedFunction && typeString in nestedFunctions
+    ? nestedFunctions[typeString as keyof typeof nestedFunctions]
+    : `${camelCase(typeString)}Field`;
 }
 
 function getMultiValue(type: 'string[]' | 'number[]' | 'boolean[]' | 'any[]') {
@@ -133,9 +146,9 @@ function getFieldMapping(
 ) {
   return params.map(({ name: _name, type, ...rest }) => {
     const typeString: string = type;
-    if (['string', 'number', 'date', 'boolean', 'ip'].includes(typeString)) {
+    if (fieldTypes.includes(typeString)) {
       return {
-        name: getFieldName(typeString as 'string' | 'number' | 'date' | 'boolean' | 'ip', {
+        name: getFieldName(typeString, {
           useNestedFunction,
           isStats: !useLiterals,
         }),
@@ -388,7 +401,14 @@ describe('validation logic', () => {
 
           const wrongFieldMapping = params.map(({ name: _name, type, ...rest }) => {
             const typeString = type;
-            const canBeFieldButNotString = ['number', 'date', 'boolean', 'ip'].includes(typeString);
+            const canBeFieldButNotString = [
+              'number',
+              'date',
+              'boolean',
+              'ip',
+              'cartesian_point',
+              'geo_point',
+            ].includes(typeString);
             const isLiteralType = /literal$/.test(typeString);
             // pick a field name purposely wrong
             const nameValue = canBeFieldButNotString || isLiteralType ? '"a"' : '5';
@@ -445,16 +465,16 @@ describe('validation logic', () => {
 
     describe('date math', () => {
       testErrorsAndWarnings('row 1 anno', [
-        'Row does not support [date_period] in expression [1 anno]',
+        'ROW does not support [date_period] in expression [1 anno]',
       ]);
       testErrorsAndWarnings('row var = 1 anno', ["Unexpected time interval qualifier: 'anno'"]);
       testErrorsAndWarnings('row now() + 1 anno', ["Unexpected time interval qualifier: 'anno'"]);
       for (const timeLiteral of timeLiterals) {
         testErrorsAndWarnings(`row 1 ${timeLiteral.name}`, [
-          `Row does not support [date_period] in expression [1 ${timeLiteral.name}]`,
+          `ROW does not support [date_period] in expression [1 ${timeLiteral.name}]`,
         ]);
         testErrorsAndWarnings(`row 1                ${timeLiteral.name}`, [
-          `Row does not support [date_period] in expression [1 ${timeLiteral.name}]`,
+          `ROW does not support [date_period] in expression [1 ${timeLiteral.name}]`,
         ]);
 
         // this is not possible for now
@@ -482,6 +502,10 @@ describe('validation logic', () => {
     testErrorsAndWarnings('show', ['SyntaxError: expected {SHOW} but found "<EOF>"']);
     testErrorsAndWarnings('show functions', []);
     testErrorsAndWarnings('show info', []);
+    testErrorsAndWarnings('show functions()', [
+      "SyntaxError: token recognition error at: '('",
+      "SyntaxError: token recognition error at: ')'",
+    ]);
     testErrorsAndWarnings('show functions blah', [
       "SyntaxError: token recognition error at: 'b'",
       "SyntaxError: token recognition error at: 'l'",
@@ -512,15 +536,15 @@ describe('validation logic', () => {
 
   describe('keep', () => {
     testErrorsAndWarnings('from index | keep ', [
-      `SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'`,
+      `SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'`,
     ]);
     testErrorsAndWarnings('from index | keep stringField, numberField, dateField', []);
     testErrorsAndWarnings('from index | keep `stringField`, `numberField`, `dateField`', []);
     testErrorsAndWarnings('from index | keep 4.5', [
       "SyntaxError: token recognition error at: '4'",
       "SyntaxError: token recognition error at: '5'",
-      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '.'",
-      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'",
+      "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '.'",
+      "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'",
       'Unknown column [.]',
     ]);
     testErrorsAndWarnings('from index | keep `4.5`', ['Unknown column [4.5]']);
@@ -530,7 +554,7 @@ describe('validation logic', () => {
     testErrorsAndWarnings('from index | keep `any#Char$ field`', []);
     testErrorsAndWarnings(
       'from index | project ',
-      [`SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'`],
+      [`SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'`],
       ['PROJECT command is no longer supported, please use KEEP instead']
     );
     testErrorsAndWarnings(
@@ -567,14 +591,14 @@ describe('validation logic', () => {
 
   describe('drop', () => {
     testErrorsAndWarnings('from index | drop ', [
-      `SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'`,
+      `SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'`,
     ]);
     testErrorsAndWarnings('from index | drop stringField, numberField, dateField', []);
     testErrorsAndWarnings('from index | drop 4.5', [
       "SyntaxError: token recognition error at: '4'",
       "SyntaxError: token recognition error at: '5'",
-      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '.'",
-      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'",
+      "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '.'",
+      "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'",
       'Unknown column [.]',
     ]);
     testErrorsAndWarnings('from index | drop missingField, numberField, dateField', [
@@ -610,7 +634,7 @@ describe('validation logic', () => {
       "SyntaxError: missing {UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} at '<EOF>'",
     ]);
     testErrorsAndWarnings('from a | mv_expand stringField', [
-      'Mv_expand only supports list type values, found [stringField] of type string',
+      'MV_EXPAND only supports list type values, found [stringField] of type string',
     ]);
 
     testErrorsAndWarnings(`from a | mv_expand listField`, []);
@@ -621,14 +645,14 @@ describe('validation logic', () => {
     ]);
 
     testErrorsAndWarnings('row a = "a" | mv_expand a', [
-      'Mv_expand only supports list type values, found [a] of type string',
+      'MV_EXPAND only supports list type values, found [a] of type string',
     ]);
     testErrorsAndWarnings('row a = [1, 2, 3] | mv_expand a', []);
   });
 
   describe('rename', () => {
     testErrorsAndWarnings('from a | rename', [
-      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'",
+      "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'",
     ]);
     testErrorsAndWarnings('from a | rename stringField', [
       'SyntaxError: expected {DOT, AS} but found "<EOF>"',
@@ -638,10 +662,10 @@ describe('validation logic', () => {
       'Unknown column [a]',
     ]);
     testErrorsAndWarnings('from a | rename stringField as', [
-      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'",
+      "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'",
     ]);
     testErrorsAndWarnings('from a | rename missingField as', [
-      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'",
+      "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'",
       'Unknown column [missingField]',
     ]);
     testErrorsAndWarnings('from a | rename stringField as b', []);
@@ -660,10 +684,10 @@ describe('validation logic', () => {
       []
     );
     testErrorsAndWarnings('from a | eval numberField + 1 | rename `numberField + 1` as ', [
-      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'",
+      "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'",
     ]);
     testErrorsAndWarnings('from a | rename s* as strings', [
-      'Using wildcards (*) in rename is not allowed [s*]',
+      'Using wildcards (*) in RENAME is not allowed [s*]',
       'Unknown column [strings]',
     ]);
   });
@@ -688,24 +712,24 @@ describe('validation logic', () => {
     // Do not try to validate the dissect pattern string
     testErrorsAndWarnings('from a | dissect stringField "%{a}"', []);
     testErrorsAndWarnings('from a | dissect numberField "%{a}"', [
-      'Dissect only supports string type values, found [numberField] of type number',
+      'DISSECT only supports string type values, found [numberField] of type number',
     ]);
     testErrorsAndWarnings('from a | dissect stringField "%{a}" option ', [
       'SyntaxError: expected {ASSIGN} but found "<EOF>"',
     ]);
     testErrorsAndWarnings('from a | dissect stringField "%{a}" option = ', [
       'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET} but found "<EOF>"',
-      'Invalid option for dissect: [option]',
+      'Invalid option for DISSECT: [option]',
     ]);
     testErrorsAndWarnings('from a | dissect stringField "%{a}" option = 1', [
-      'Invalid option for dissect: [option]',
+      'Invalid option for DISSECT: [option]',
     ]);
     testErrorsAndWarnings('from a | dissect stringField "%{a}" append_separator = "-"', []);
     testErrorsAndWarnings('from a | dissect stringField "%{a}" ignore_missing = true', [
-      'Invalid option for dissect: [ignore_missing]',
+      'Invalid option for DISSECT: [ignore_missing]',
     ]);
     testErrorsAndWarnings('from a | dissect stringField "%{a}" append_separator = true', [
-      'Invalid value for dissect append_separator: expected a string, but was [true]',
+      'Invalid value for DISSECT append_separator: expected a string, but was [true]',
     ]);
     // testErrorsAndWarnings('from a | dissect s* "%{a}"', [
     //   'Using wildcards (*) in dissect is not allowed [s*]',
@@ -728,7 +752,7 @@ describe('validation logic', () => {
     // Do not try to validate the grok pattern string
     testErrorsAndWarnings('from a | grok stringField "%{a}"', []);
     testErrorsAndWarnings('from a | grok numberField "%{a}"', [
-      'Grok only supports string type values, found [numberField] of type number',
+      'GROK only supports string type values, found [numberField] of type number',
     ]);
     // testErrorsAndWarnings('from a | grok s* "%{a}"', [
     //   'Using wildcards (*) in grok is not allowed [s*]',
@@ -946,7 +970,9 @@ describe('validation logic', () => {
 
           const wrongFieldMapping = params.map(({ name: _name, type, ...rest }) => {
             const typeString = type;
-            const canBeFieldButNotString = ['number', 'date', 'boolean', 'ip'].includes(typeString);
+            const canBeFieldButNotString = fieldTypes
+              .filter((t) => t !== 'string')
+              .includes(typeString);
             const isLiteralType = /literal$/.test(typeString);
             // pick a field name purposely wrong
             const nameValue =
@@ -1061,12 +1087,12 @@ describe('validation logic', () => {
       'Argument of [not_in] must be [number[]], found value [(1, 2, 3, stringField)] type [(number, number, number, string)]',
     ]);
 
-    testErrorsAndWarnings('from a | eval avg(numberField)', ['Eval does not support function avg']);
+    testErrorsAndWarnings('from a | eval avg(numberField)', ['EVAL does not support function avg']);
     testErrorsAndWarnings('from a | stats avg(numberField) | eval `avg(numberField)` + 1', []);
 
     describe('date math', () => {
       testErrorsAndWarnings('from a | eval 1 anno', [
-        'Eval does not support [date_period] in expression [1 anno]',
+        'EVAL does not support [date_period] in expression [1 anno]',
       ]);
       testErrorsAndWarnings('from a | eval var = 1 anno', [
         "Unexpected time interval qualifier: 'anno'",
@@ -1076,10 +1102,10 @@ describe('validation logic', () => {
       ]);
       for (const timeLiteral of timeLiterals) {
         testErrorsAndWarnings(`from a | eval 1 ${timeLiteral.name}`, [
-          `Eval does not support [date_period] in expression [1 ${timeLiteral.name}]`,
+          `EVAL does not support [date_period] in expression [1 ${timeLiteral.name}]`,
         ]);
         testErrorsAndWarnings(`from a | eval 1                ${timeLiteral.name}`, [
-          `Eval does not support [date_period] in expression [1 ${timeLiteral.name}]`,
+          `EVAL does not support [date_period] in expression [1 ${timeLiteral.name}]`,
         ]);
 
         // this is not possible for now
@@ -1113,28 +1139,26 @@ describe('validation logic', () => {
   describe('stats', () => {
     testErrorsAndWarnings('from a | stats ', []);
     testErrorsAndWarnings('from a | stats numberField ', [
-      'Stats expects an aggregate function, found [numberField]',
+      'STATS expects an aggregate function, found [numberField]',
     ]);
     testErrorsAndWarnings('from a | stats numberField=', [
       'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, LP, NOT, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found "<EOF>"',
     ]);
     testErrorsAndWarnings('from a | stats numberField=5 by ', [
-      "SyntaxError: missing {UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} at '<EOF>'",
+      'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, LP, NOT, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found "<EOF>"',
     ]);
-    testErrorsAndWarnings('from a | stats numberField=5 by ', [
-      "SyntaxError: missing {UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} at '<EOF>'",
-    ]);
-
     testErrorsAndWarnings('from a | stats avg(numberField) by wrongField', [
       'Unknown column [wrongField]',
     ]);
-    testErrorsAndWarnings('from a | stats avg(numberField) by 1', [
-      'SyntaxError: expected {UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found "1"',
-      'Unknown column [1]',
+    testErrorsAndWarnings('from a | stats avg(numberField) by wrongField + 1', [
+      'Unknown column [wrongField]',
     ]);
+    testErrorsAndWarnings('from a | stats avg(numberField) by var0 = wrongField + 1', [
+      'Unknown column [wrongField]',
+    ]);
+    testErrorsAndWarnings('from a | stats avg(numberField) by 1', []);
     testErrorsAndWarnings('from a | stats avg(numberField) by percentile(numberField)', [
-      'SyntaxError: expected {<EOF>, PIPE, COMMA, DOT} but found "("',
-      'Unknown column [percentile]',
+      'STATS BY does not support function percentile',
     ]);
     testErrorsAndWarnings('from a | stats count(`numberField`)', []);
 
@@ -1148,8 +1172,8 @@ describe('validation logic', () => {
     testErrorsAndWarnings(
       'from a | stats avg(numberField) by stringField, percentile(numberField) by ipField',
       [
-        'SyntaxError: expected {<EOF>, PIPE, COMMA, DOT} but found "("',
-        'Unknown column [percentile]',
+        'SyntaxError: expected {<EOF>, PIPE, AND, COMMA, OR, PLUS, MINUS, ASTERISK, SLASH, PERCENT} but found "by"',
+        'STATS BY does not support function percentile',
       ]
     );
 
@@ -1162,31 +1186,40 @@ describe('validation logic', () => {
       'from a | stats avg(numberField), percentile(numberField, 50) BY ipField',
       []
     );
-
-    testErrorsAndWarnings('from a | stats numberField + 1', ['Stats does not support function +']);
+    testErrorsAndWarnings('from a | stats count(* + 1) BY ipField', [
+      'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, LP, NOT, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found "+"',
+    ]);
+    testErrorsAndWarnings('from a | stats count(* + round(numberField)) BY ipField', [
+      'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, LP, NOT, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found "+"',
+    ]);
+    testErrorsAndWarnings('from a | stats count(round(*)) BY ipField', [
+      'Using wildcards (*) in round is not allowed',
+    ]);
+    testErrorsAndWarnings('from a | stats count(count(*)) BY ipField', [
+      `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [count(*)] of type [number]`,
+    ]);
+    testErrorsAndWarnings('from a | stats numberField + 1', ['STATS does not support function +']);
 
     testErrorsAndWarnings('from a | stats numberField + 1 by ipField', [
-      'Stats does not support function +',
+      'STATS does not support function +',
     ]);
 
     testErrorsAndWarnings(
       'from a | stats avg(numberField), percentile(numberField, 50) + 1 by ipField',
-      ['Stats does not support function +']
+      ['STATS does not support function +']
     );
-
-    testErrorsAndWarnings('from a | stats avg(numberField) by avg(numberField)', [
-      'SyntaxError: expected {<EOF>, PIPE, COMMA, DOT} but found "("',
-      'Unknown column [avg]',
-    ]);
 
     testErrorsAndWarnings('from a | stats count(*)', []);
     testErrorsAndWarnings('from a | stats count()', []);
     testErrorsAndWarnings('from a | stats var0 = count(*)', []);
     testErrorsAndWarnings('from a | stats var0 = count()', []);
     testErrorsAndWarnings('from a | stats var0 = avg(numberField), count(*)', []);
+    testErrorsAndWarnings('from a | stats var0 = avg(fn(number)), count(*)', [
+      'Unknown function [fn]',
+    ]);
 
     for (const { name, alias, signatures, ...defRest } of statsAggregationFunctionDefinitions) {
-      for (const { params, returnType } of signatures) {
+      for (const [signatureIndex, { params, returnType }] of Object.entries(signatures)) {
         const fieldMapping = getFieldMapping(params);
         testErrorsAndWarnings(
           `from a | stats var = ${
@@ -1194,7 +1227,8 @@ describe('validation logic', () => {
               { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
               { withTypes: false }
             )[0].declaration
-          }`
+          }`,
+          []
         );
         testErrorsAndWarnings(
           `from a | stats ${
@@ -1202,7 +1236,8 @@ describe('validation logic', () => {
               { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
               { withTypes: false }
             )[0].declaration
-          }`
+          }`,
+          []
         );
 
         if (alias) {
@@ -1216,6 +1251,82 @@ describe('validation logic', () => {
           }
         }
 
+        // test only numeric functions for now
+        if (params[0].type === 'number') {
+          const nestedBuiltin = 'numberField / 2';
+          const fieldMappingWithNestedBuiltinFunctions = getFieldMapping(params);
+          fieldMappingWithNestedBuiltinFunctions[0].name = nestedBuiltin;
+
+          const fnSignatureWithBuiltinString = getFunctionSignatures(
+            {
+              name,
+              ...defRest,
+              signatures: [{ params: fieldMappingWithNestedBuiltinFunctions, returnType }],
+            },
+            { withTypes: false }
+          )[0].declaration;
+          // FROM a | STATS aggFn( numberField / 2 )
+          testErrorsAndWarnings(`from a | stats ${fnSignatureWithBuiltinString}`, []);
+          testErrorsAndWarnings(`from a | stats var0 = ${fnSignatureWithBuiltinString}`, []);
+          testErrorsAndWarnings(
+            `from a | stats avg(numberField), ${fnSignatureWithBuiltinString}`,
+            []
+          );
+          testErrorsAndWarnings(
+            `from a | stats avg(numberField), var0 = ${fnSignatureWithBuiltinString}`,
+            []
+          );
+
+          const nestedEvalAndBuiltin = 'round(numberField / 2)';
+          const fieldMappingWithNestedEvalAndBuiltinFunctions = getFieldMapping(params);
+          fieldMappingWithNestedBuiltinFunctions[0].name = nestedEvalAndBuiltin;
+
+          const fnSignatureWithEvalAndBuiltinString = getFunctionSignatures(
+            {
+              name,
+              ...defRest,
+              signatures: [{ params: fieldMappingWithNestedEvalAndBuiltinFunctions, returnType }],
+            },
+            { withTypes: false }
+          )[0].declaration;
+          // FROM a | STATS aggFn( round(numberField / 2) )
+          testErrorsAndWarnings(`from a | stats ${fnSignatureWithEvalAndBuiltinString}`, []);
+          testErrorsAndWarnings(`from a | stats var0 = ${fnSignatureWithEvalAndBuiltinString}`, []);
+          testErrorsAndWarnings(
+            `from a | stats avg(numberField), ${fnSignatureWithEvalAndBuiltinString}`,
+            []
+          );
+          testErrorsAndWarnings(
+            `from a | stats avg(numberField), var0 = ${fnSignatureWithEvalAndBuiltinString}`,
+            []
+          );
+          // FROM a | STATS aggFn(round(numberField / 2) ) BY round(numberField / 2)
+          testErrorsAndWarnings(
+            `from a | stats ${fnSignatureWithEvalAndBuiltinString} by ${nestedEvalAndBuiltin}`,
+            []
+          );
+          testErrorsAndWarnings(
+            `from a | stats var0 = ${fnSignatureWithEvalAndBuiltinString} by var1 = ${nestedEvalAndBuiltin}`,
+            []
+          );
+          testErrorsAndWarnings(
+            `from a | stats avg(numberField), ${fnSignatureWithEvalAndBuiltinString} by ${nestedEvalAndBuiltin}, ipField`,
+            []
+          );
+          testErrorsAndWarnings(
+            `from a | stats avg(numberField), var0 = ${fnSignatureWithEvalAndBuiltinString} by var1 = ${nestedEvalAndBuiltin}, ipField`,
+            []
+          );
+          testErrorsAndWarnings(
+            `from a | stats avg(numberField), ${fnSignatureWithEvalAndBuiltinString} by ${nestedEvalAndBuiltin}, ${nestedBuiltin}`,
+            []
+          );
+          testErrorsAndWarnings(
+            `from a | stats avg(numberField), var0 = ${fnSignatureWithEvalAndBuiltinString} by var1 = ${nestedEvalAndBuiltin}, ${nestedBuiltin}`,
+            []
+          );
+        }
+
         // Skip functions that have only arguments of type "any", as it is not possible to pass "the wrong type".
         // auto_bucket and to_version functions are a bit harder to test exactly a combination of argument and predict the
         // the right error message
@@ -1224,7 +1335,7 @@ describe('validation logic', () => {
           !['auto_bucket', 'to_version'].includes(name)
         ) {
           // now test nested functions
-          const fieldMappingWithNestedFunctions = getFieldMapping(params, {
+          const fieldMappingWithNestedAggsFunctions = getFieldMapping(params, {
             useNestedFunction: true,
             useLiterals: false,
           });
@@ -1234,20 +1345,38 @@ describe('validation logic', () => {
                 {
                   name,
                   ...defRest,
-                  signatures: [{ params: fieldMappingWithNestedFunctions, returnType }],
+                  signatures: [{ params: fieldMappingWithNestedAggsFunctions, returnType }],
                 },
                 { withTypes: false }
               )[0].declaration
             }`,
             params.map(
               (_) =>
-                `Aggregate function's parameters must be an attribute or literal; found [avg(numberField)] of type [number]`
+                `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]`
+            )
+          );
+          testErrorsAndWarnings(
+            `from a | stats ${
+              getFunctionSignatures(
+                {
+                  name,
+                  ...defRest,
+                  signatures: [{ params: fieldMappingWithNestedAggsFunctions, returnType }],
+                },
+                { withTypes: false }
+              )[0].declaration
+            }`,
+            params.map(
+              (_) =>
+                `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]`
             )
           );
           // and the message is case of wrong argument type is passed
           const wrongFieldMapping = params.map(({ name: _name, type, ...rest }) => {
             const typeString = type;
-            const canBeFieldButNotString = ['number', 'date', 'boolean', 'ip'].includes(typeString);
+            const canBeFieldButNotString = fieldTypes
+              .filter((t) => t !== 'string')
+              .includes(typeString);
             const isLiteralType = /literal$/.test(typeString);
             // pick a field name purposely wrong
             const nameValue =
@@ -1257,9 +1386,13 @@ describe('validation logic', () => {
 
           const expectedErrors = params.map(
             ({ type }, i) =>
-              `Argument of [${name}] must be [${type}], found value [${
-                wrongFieldMapping[i].name
-              }] type [${wrongFieldMapping[i].name.replace('Field', '')}]`
+              `Argument of [${name}] must be [${
+                // If the function has multiple signatures and all fail, then only
+                // one error will be reported for the first signature type
+                +signatureIndex > 0 ? signatures[0].params[i].type : type
+              }], found value [${wrongFieldMapping[i].name}] type [${wrongFieldMapping[
+                i
+              ].name.replace('Field', '')}]`
           );
           testErrorsAndWarnings(
             `from a | stats ${
@@ -1329,22 +1462,68 @@ describe('validation logic', () => {
 
   describe('enrich', () => {
     testErrorsAndWarnings(`from a | enrich`, [
-      "SyntaxError: missing {QUOTED_IDENTIFIER, FROM_UNQUOTED_IDENTIFIER} at '<EOF>'",
+      'SyntaxError: expected {OPENING_BRACKET, ENRICH_POLICY_NAME} but found "<EOF>"',
+    ]);
+    testErrorsAndWarnings(`from a | enrich [`, [
+      'SyntaxError: expected {SETTING} but found "<EOF>"',
+    ]);
+    testErrorsAndWarnings(`from a | enrich [ccq.mode`, [
+      'SyntaxError: expected {COLON} but found "<EOF>"',
+    ]);
+    testErrorsAndWarnings(`from a | enrich [ccq.mode:`, [
+      'SyntaxError: expected {SETTING} but found "<EOF>"',
+    ]);
+    testErrorsAndWarnings(`from a | enrich [ccq.mode:any`, [
+      'SyntaxError: expected {CLOSING_BRACKET} but found "<EOF>"',
+    ]);
+    testErrorsAndWarnings(`from a | enrich [ccq.mode:any] `, [
+      "SyntaxError: extraneous input '<EOF>' expecting {OPENING_BRACKET, ENRICH_POLICY_NAME}",
     ]);
     testErrorsAndWarnings(`from a | enrich policy `, []);
+    testErrorsAndWarnings(`from a | enrich [ccq.mode:value] policy `, [
+      'Unrecognized value [value], ENRICH [ccq.mode] needs to be one of [ANY, COORDINATOR, REMOTE]',
+    ]);
+    for (const value of ['any', 'coordinator', 'remote']) {
+      testErrorsAndWarnings(`from a | enrich [ccq.mode:${value}] policy `, []);
+      testErrorsAndWarnings(`from a | enrich [ccq.mode:${value.toUpperCase()}] policy `, []);
+    }
+
+    testErrorsAndWarnings(`from a | enrich [setting:value policy`, [
+      'SyntaxError: expected {CLOSING_BRACKET} but found "policy"',
+      'Unsupported setting [setting], expected [ccq.mode]',
+    ]);
+
+    testErrorsAndWarnings(`from a | enrich [ccq.mode:any policy`, [
+      'SyntaxError: expected {CLOSING_BRACKET} but found "policy"',
+    ]);
+
+    testErrorsAndWarnings(`from a | enrich [ccq.mode:any policy`, [
+      'SyntaxError: expected {CLOSING_BRACKET} but found "policy"',
+    ]);
+
+    testErrorsAndWarnings(`from a | enrich [setting:value] policy`, [
+      'Unsupported setting [setting], expected [ccq.mode]',
+    ]);
+    testErrorsAndWarnings(`from a | enrich [ccq.mode:any] policy[]`, []);
+
+    testErrorsAndWarnings(
+      `from a | enrich [ccq.mode:any][ccq.mode:coordinator] policy[]`,
+      [],
+      ['Multiple definition of setting [ccq.mode]. Only last one will be applied.']
+    );
     testErrorsAndWarnings(`from a | enrich missing-policy `, ['Unknown policy [missing-policy]']);
     testErrorsAndWarnings(`from a | enrich policy on `, [
-      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'",
+      "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'",
     ]);
     testErrorsAndWarnings(`from a | enrich policy on b `, ['Unknown column [b]']);
     testErrorsAndWarnings(`from a | enrich policy on numberField with `, [
-      'SyntaxError: expected {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} but found "<EOF>"',
+      'SyntaxError: expected {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} but found "<EOF>"',
     ]);
     testErrorsAndWarnings(`from a | enrich policy on numberField with var0 `, [
       'Unknown column [var0]',
     ]);
     testErrorsAndWarnings(`from a | enrich policy on numberField with var0 = `, [
-      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'",
+      "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'",
       'Unknown column [var0]',
     ]);
     testErrorsAndWarnings(`from a | enrich policy on numberField with var0 = c `, [
@@ -1356,8 +1535,8 @@ describe('validation logic', () => {
     //   `Unknown column [stringField]`,
     // ]);
     testErrorsAndWarnings(`from a | enrich policy on numberField with var0 = , `, [
-      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at ','",
-      'SyntaxError: expected {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} but found "<EOF>"',
+      "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at ','",
+      'SyntaxError: expected {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} but found "<EOF>"',
       'Unknown column [var0]',
     ]);
     testErrorsAndWarnings(`from a | enrich policy on numberField with var0 = otherField, var1 `, [
@@ -1369,7 +1548,7 @@ describe('validation logic', () => {
       []
     );
     testErrorsAndWarnings(`from a | enrich policy on numberField with var0 = otherField, var1 = `, [
-      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'",
+      "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'",
       'Unknown column [var1]',
     ]);
 
@@ -1378,13 +1557,13 @@ describe('validation logic', () => {
       []
     );
     testErrorsAndWarnings(`from a | enrich policy with `, [
-      'SyntaxError: expected {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} but found "<EOF>"',
+      'SyntaxError: expected {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} but found "<EOF>"',
     ]);
     testErrorsAndWarnings(`from a | enrich policy with otherField`, []);
     testErrorsAndWarnings(`from a | enrich policy | eval otherField`, []);
     testErrorsAndWarnings(`from a | enrich policy with var0 = otherField | eval var0`, []);
     testErrorsAndWarnings('from a | enrich my-pol*', [
-      'Using wildcards (*) in enrich is not allowed [my-pol*]',
+      'Using wildcards (*) in ENRICH is not allowed [my-pol*]',
     ]);
   });
 

@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ESFilter } from '@kbn/es-types';
-import { FieldValueSuggestions } from '@kbn/exploratory-view-plugin/public';
+import { FieldValueSuggestions } from '@kbn/observability-shared-plugin/public';
 import { useLocalUIFilters } from '../hooks/use_local_uifilters';
 
 import { useBreakpoints } from '../../../../hooks/use_breakpoints';
