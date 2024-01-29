@@ -71,14 +71,27 @@ describe('ES|QL query generation', () => {
             },
           },
         });
+        await esClient.index({
+          index: 'packetbeat-8.11.3',
+          document: {
+            '@timestamp': "2024-01-23T12:30:00.000Z",
+            destination: {
+              domain: "observability.ai.assistant"
+            },
+            url: {
+              domain: "elastic.co"
+            }
+          },
+        });
       });
+
 
       it('top 10 unique domains', async () => {
         await evaluateEsqlQuery({
           question:
             'For standard Elastic ECS compliant packetbeat data view, shows the top 10 unique destination.domain with more docs',
           expected: `FROM packetbeat-*
-          | STATS doc_count = COUNT(destination.domain) BY destination.domain
+          | STATS doc_count = COUNT(*) BY destination.domain
           | SORT doc_count DESC
           | LIMIT 10`,
           execute: true
@@ -260,7 +273,7 @@ describe('ES|QL query generation', () => {
       | KEEP service.name, avg_duration, success_rate, total_requests`,
         execute: true,
         criteria: [
-          'The query provided by the Assistant does not include operations (/, +, -) when declaring aggregations using STATS',
+          'The query provided by the Assistant does NOT include mathematical operations (/, +, -) in STATS aggregations',
         ],
       });
     });
@@ -278,7 +291,7 @@ describe('ES|QL query generation', () => {
           BY span.destination.service.resource`,
         execute: false,
         criteria: [
-          'The query provided by the Assistant does not include operations (/, +, -) when declaring aggregations using STATS',
+          'The query provided by the Assistant does NOT include mathematical operations (/, +, -) in STATS aggregations',
         ],
       });
 
@@ -307,7 +320,7 @@ describe('ES|QL query generation', () => {
         | SORT day ASC`,
         execute: true,
         criteria: [
-          'The query provided by the Assistant does not include operations (/, +, -) when declaring aggregations using STATS',
+          'The query provided by the Assistant does NOT include mathematical operations (/, +, -) in STATS aggregations',
         ],
       });
     });
