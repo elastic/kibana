@@ -23,5 +23,8 @@
     "@kbn/data-plugin",
     "@kbn/i18n-react",
     "@kbn/shared-ux-router",
+    "@kbn/i18n",
+    "@kbn/actions-plugin",
+    "@kbn/config-schema",
   ]
 }
