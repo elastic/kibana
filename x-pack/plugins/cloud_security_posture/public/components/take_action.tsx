@@ -273,7 +273,6 @@ const EnableBenchmarkRule = ({
         setIsLoading(true);
         await enableBenchmarkRuleFn();
         setIsLoading(false);
-        showChangeBenchmarkRuleStatesSuccessToast(notifications, true);
       }}
       data-test-subj={'enable-benchmark-rule-take-action-button'}
     >
@@ -303,7 +302,6 @@ const DisableBenchmarkRule = ({
         setIsLoading(true);
         await disableBenchmarkRuleFn();
         setIsLoading(false);
-        showChangeBenchmarkRuleStatesSuccessToast(notifications, false);
       }}
       data-test-subj={'disable-benchmark-rule-take-action-button'}
     >
