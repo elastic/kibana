@@ -231,7 +231,7 @@ async function attemptToCreateCommand(
         firefoxOptions.setAcceptInsecureCerts(config.acceptInsecureCerts);
 
         if (headlessBrowser === '1') {
-          // See: https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode
+          // See: https://developer.mozilla.org/en-US/docs/Web/WebDriver/Capabilities/firefoxOptions
           firefoxOptions.addArguments('-headless');
         }
 
