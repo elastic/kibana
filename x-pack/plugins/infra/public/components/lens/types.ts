@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
-import type { LensAttributes } from '@kbn/lens-embeddable-utils';
+import type { LensAttributes } from '@kbn/lens-embeddable-utils/config_builder';
 import type { LensEmbeddableInput, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 
@@ -39,6 +38,5 @@ export type BaseChartProps = Pick<
   | 'query'
   | 'title'
 > & {
-  dataView?: DataView;
   height?: number;
 };

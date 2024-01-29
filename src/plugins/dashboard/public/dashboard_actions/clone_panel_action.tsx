@@ -6,34 +6,34 @@
  * Side Public License, v 1.
  */
 
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-
 import { apiCanDuplicatePanels, CanDuplicatePanels } from '@kbn/presentation-containers';
 import {
-  apiPublishesUniqueId,
-  apiPublishesParentApi,
-  apiPublishesViewMode,
+  apiCanAccessViewMode,
+  apiHasParentApi,
+  apiHasUniqueId,
+  CanAccessViewMode,
   EmbeddableApiContext,
+  getInheritedViewMode,
+  HasParentApi,
   PublishesBlockingError,
-  PublishesUniqueId,
-  PublishesParentApi,
-  PublishesViewMode,
+  HasUniqueId,
 } from '@kbn/presentation-publishing';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { dashboardClonePanelActionStrings } from './_dashboard_actions_strings';
 
 export const ACTION_CLONE_PANEL = 'clonePanel';
 
-export type ClonePanelActionApi = PublishesViewMode &
-  PublishesUniqueId &
-  PublishesParentApi<CanDuplicatePanels> &
+export type ClonePanelActionApi = CanAccessViewMode &
+  HasUniqueId &
+  HasParentApi<CanDuplicatePanels> &
   Partial<PublishesBlockingError>;
 
 const isApiCompatible = (api: unknown | null): api is ClonePanelActionApi =>
   Boolean(
-    apiPublishesUniqueId(api) &&
-      apiPublishesViewMode(api) &&
-      apiPublishesParentApi(api) &&
-      apiCanDuplicatePanels(api.parentApi.value)
+    apiHasUniqueId(api) &&
+      apiCanAccessViewMode(api) &&
+      apiHasParentApi(api) &&
+      apiCanDuplicatePanels(api.parentApi)
   );
 
 export class ClonePanelAction implements Action<EmbeddableApiContext> {
@@ -55,11 +55,11 @@ export class ClonePanelAction implements Action<EmbeddableApiContext> {
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) return false;
-    return Boolean(!embeddable.blockingError?.value && embeddable.viewMode.value === 'edit');
+    return Boolean(!embeddable.blockingError?.value && getInheritedViewMode(embeddable) === 'edit');
   }
 
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    embeddable.parentApi.value.duplicatePanel(embeddable.uuid.value);
+    embeddable.parentApi.duplicatePanel(embeddable.uuid);
   }
 }

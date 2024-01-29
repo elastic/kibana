@@ -13,13 +13,13 @@ export const journey = new Journey({
   kbnArchives: ['x-pack/performance/kbn_archives/lens_many_fields'],
   esArchives: ['test/functional/fixtures/es_archiver/stress_test'],
 })
-  .step('Go to Visualize Library landing page', async ({ page, kbnUrl }) => {
+  .step('Go to Visualize Library landing page', async ({ page, kbnUrl, kibanaPage }) => {
     await page.goto(
       kbnUrl.get(
         `/app/visualize#/?_g=(filters:!(),time:(from:'2022-09-07T10:53:30.262Z',to:'2022-09-07T10:55:09.280Z'))`
       )
     );
-    await page.waitForSelector(subj('table-is-ready'));
+    await kibanaPage.waitForListViewTable();
     // wait extra 10 seconds: we're not sure why, but the extra sleep before loading the editor makes the metrics more consistent
     // sometimes lens charts are not loaded
     await page.waitForTimeout(10000);

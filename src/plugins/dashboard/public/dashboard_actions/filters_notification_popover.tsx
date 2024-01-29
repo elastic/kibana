@@ -56,7 +56,7 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
     }
   }, [api, setDisableEditButton]);
 
-  const dataViews = useMemo(() => api.parentApi.value?.getAllDataViews(), [api]);
+  const dataViews = useMemo(() => api.parentApi?.getAllDataViews(), [api]);
 
   return (
     <EuiPopover
@@ -65,7 +65,7 @@ export function FiltersNotificationPopover({ api }: { api: FiltersNotificationAc
           color="text"
           iconType={'filter'}
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-          data-test-subj={`embeddablePanelNotification-${api.uuid.value}`}
+          data-test-subj={`embeddablePanelNotification-${api.uuid}`}
           aria-label={displayName}
         />
       }
