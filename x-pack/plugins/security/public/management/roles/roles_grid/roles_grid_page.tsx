@@ -482,6 +482,6 @@ export class RolesGridPage extends Component<Props, State> {
     );
   }
   private onCancelDelete = () => {
-    this.setState({ showDeleteConfirmation: false, selection: [] });
+    this.setState({ showDeleteConfirmation: false });
   };
 }
