@@ -812,7 +812,7 @@ async function getBuiltinFunctionNextArgument(
           // technically another boolean value should be suggested, but it is a better experience
           // to actually suggest a wider set of fields/functions
           [
-            finalType === 'boolean' && getFunctionDefinition(nodeArg.name)?.type === 'builtin'
+            finalType === 'boolean' && getFunctionDefinition(nodeArg.name)?.type !== 'builtin'
               ? 'any'
               : finalType,
           ],
