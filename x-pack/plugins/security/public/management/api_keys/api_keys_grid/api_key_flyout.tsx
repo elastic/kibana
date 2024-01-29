@@ -38,7 +38,7 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { CodeEditorField } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useDarkMode, useKibana } from '@kbn/kibana-react-plugin/public';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 
 import type { CategorizedApiKey } from './api_keys_grid_page';
@@ -146,6 +146,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const { services } = useKibana();
+  const isDarkMode = useDarkMode();
   const { value: currentUser, loading: isLoadingCurrentUser } = useCurrentUser();
   const [{ value: roles, loading: isLoadingRoles }, getRoles] = useAsyncFn(
     () => new RolesAPIClient(services.http!).getRoles(),
@@ -662,6 +663,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                       fullWidth
                       languageId="xjson"
                       height={200}
+                      useDarkTheme={isDarkMode}
                     />
                   </FormRow>
                 </EuiPanel>
@@ -749,6 +751,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                           fullWidth
                           languageId="xjson"
                           height={200}
+                          useDarkTheme={isDarkMode}
                         />
                       </FormRow>
                     </>
@@ -833,6 +836,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                         fullWidth
                         languageId="xjson"
                         height={200}
+                        useDarkTheme={isDarkMode}
                       />
                     </FormRow>
                   </>
