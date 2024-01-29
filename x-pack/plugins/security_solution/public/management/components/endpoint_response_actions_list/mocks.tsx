@@ -8,12 +8,14 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { ActionListApiResponse } from '../../../../common/endpoint/types';
 import type {
+  ResponseActionAgentType,
   ResponseActionsApiCommandNames,
   ResponseActionStatus,
 } from '../../../../common/endpoint/service/response_actions/constants';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 
 export const getActionListMock = async ({
+  agentTypes = ['endpoint'] as ResponseActionAgentType[],
   agentIds: _agentIds,
   commands,
   actionCount = 0,
@@ -27,6 +29,7 @@ export const getActionListMock = async ({
   wasSuccessful = true,
   status = 'successful',
 }: {
+  agentTypes?: ResponseActionAgentType[];
   agentIds?: string[];
   commands?: string[];
   actionCount?: number;
@@ -103,6 +106,7 @@ export const getActionListMock = async ({
     pageSize,
     startDate,
     endDate,
+    agentTypes,
     elasticAgentIds: agentIds,
     commands,
     data,
