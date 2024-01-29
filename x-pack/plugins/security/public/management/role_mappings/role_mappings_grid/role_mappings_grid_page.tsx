@@ -236,13 +236,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
           {(deleteRoleMappingsPrompt) => {
             return (
               <EuiButton
-                onClick={() =>
-                  deleteRoleMappingsPrompt(
-                    selectedItems,
-                    this.onRoleMappingsDeleted,
-                    this.onRoleMappingsDeleteCancel
-                  )
-                }
+                onClick={() => deleteRoleMappingsPrompt(selectedItems, this.onRoleMappingsDeleted)}
                 color="danger"
                 data-test-subj="bulkDeleteActionButton"
               >
@@ -495,10 +489,6 @@ export class RoleMappingsGridPage extends Component<Props, State> {
     if (roleMappings.length) {
       this.reloadRoleMappings();
     }
-  };
-
-  private onRoleMappingsDeleteCancel = () => {
-    this.setState({ selectedItems: [] });
   };
 
   private async checkPrivileges() {
