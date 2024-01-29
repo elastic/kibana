@@ -444,6 +444,7 @@ export class DashboardContainer
     this.integrationSubscriptions.unsubscribe();
     this.integrationSubscriptions = new Subscription();
     this.stopSyncingWithUnifiedSearch?.();
+
     const {
       dashboardContentManagement: { loadDashboardState },
     } = pluginServices.getServices();
