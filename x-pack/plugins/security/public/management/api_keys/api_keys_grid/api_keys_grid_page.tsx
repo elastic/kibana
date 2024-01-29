@@ -353,12 +353,9 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
     },
     {
       field: 'type',
-      name: (
-        <FormattedMessage
-          id="xpack.security.management.apiKeys.table.typeColumnName"
-          defaultMessage="Type"
-        />
-      ),
+      name: i18n.translate('xpack.security.management.apiKeys.table.typeColumnName', {
+        defaultMessage: 'Type',
+      }),
       sortable: true,
       render: (type: CategorizedApiKey['type']) => <ApiKeyBadge type={type} />,
     }
@@ -367,12 +364,9 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
   if (canManageApiKeys || usernameFilters.length > 1) {
     columns.push({
       field: 'username',
-      name: (
-        <FormattedMessage
-          id="xpack.security.management.apiKeys.table.ownerColumnName"
-          defaultMessage="Owner"
-        />
-      ),
+      name: i18n.translate('xpack.security.management.apiKeys.table.ownerColumnName', {
+        defaultMessage: 'Owner',
+      }),
       sortable: true,
       render: (username: CategorizedApiKey['username']) => <UsernameWithIcon username={username} />,
     });
@@ -381,12 +375,9 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
   columns.push(
     {
       field: 'creation',
-      name: (
-        <FormattedMessage
-          id="xpack.security.management.apiKeys.table.createdColumnName"
-          defaultMessage="Created"
-        />
-      ),
+      name: i18n.translate('xpack.security.management.apiKeys.table.createdColumnName', {
+        defaultMessage: 'Created',
+      }),
       sortable: true,
       mobileOptions: {
         show: false,
@@ -406,12 +397,9 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
     },
     {
       field: 'expiration',
-      name: (
-        <FormattedMessage
-          id="xpack.security.management.apiKeys.table.statusColumnName"
-          defaultMessage="Status"
-        />
-      ),
+      name: i18n.translate('xpack.security.management.apiKeys.table.statusColumnName', {
+        defaultMessage: 'Status',
+      }),
       sortable: true,
       render: (expiration: number) => <ApiKeyStatus expiration={expiration} />,
     }
@@ -422,12 +410,9 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
       width: `${24 + 2 * 8}px`,
       actions: [
         {
-          name: (
-            <FormattedMessage
-              id="xpack.security.management.apiKeys.table.deleteAction"
-              defaultMessage="Delete"
-            />
-          ),
+          name: i18n.translate('xpack.security.management.apiKeys.table.deleteAction', {
+            defaultMessage: 'Delete',
+          }),
           description: i18n.translate('xpack.security.management.apiKeys.table.deleteDescription', {
             defaultMessage: 'Delete this API key',
           }),
