@@ -67,7 +67,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       return {
         message: i18n.translate('monaco.esql.validation.noNestedArgumentSupport', {
           defaultMessage:
-            "Aggregate function's parameters must be an attribute or literal; found [{name}] of type [{argType}]",
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [{name}] of type [{argType}]",
           values: { name: out.name, argType: out.argType },
         }),
       };

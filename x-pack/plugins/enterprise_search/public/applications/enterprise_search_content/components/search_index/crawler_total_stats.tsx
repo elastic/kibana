@@ -77,7 +77,7 @@ export const CrawlerTotalStats: React.FC = () => {
         {stats.map((item, index) => (
           <EuiFlexItem key={index}>
             <EuiPanel color={index === 0 ? 'primary' : 'subdued'} hasShadow={false} paddingSize="l">
-              <EuiStat titleSize="m" {...item} />
+              <EuiStat titleSize="s" {...item} />
             </EuiPanel>
           </EuiFlexItem>
         ))}
