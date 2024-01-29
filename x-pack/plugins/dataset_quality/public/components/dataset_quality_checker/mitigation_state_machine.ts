@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { createMachine, assign, ActionTypes } from 'xstate';
+import { ActionTypes, ActorRef, assign, createMachine, InterpreterFrom, pure } from 'xstate';
 import { CheckTimeRange, MitigationForCause, QualityProblemParams } from '../../../common';
 import { IDataStreamQualityClient } from '../../services/data_stream_quality';
+
+const dataStreamQualityMitigationStateMachineId = 'DataStreamQualityMitigation';
 
 export const createPureDataStreamQualityMitigationStateMachine = (
   initialContext: DataStreamQualityMitigationContext
@@ -17,7 +19,7 @@ export const createPureDataStreamQualityMitigationStateMachine = (
       /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVBldAnMqAtgIoCuqANgJboCeAsjVVBlQPYB2AdBW6hFQ5RG6Zq06wAxBE5guggG5sA1nJjoRY0RIDaABgC6iUAAc2sJp2MgAHogCsAZi4AOAJx6AbI5eO9Adjc3AEZggBYAGhBaRGD-Zz1ExMd7ACZgvVT7f1SAX1yotEwcfCIyShoGJhZtbl5+QWFq8Q4pGQ45RRU1MA1m2tgdYKMkEDMLWus7BABaVO9XVL1HT1T05fng+yiYhDiEpOW0jKz-fMKMbDwCEnJqOk0a9m4AC1RYR5apVBMTCirRE9OPoRqZzJYOFNYo4wq4XKkXMEsjtEI5-PYuPZDil1qd7OcQEUrqVbhUHv1nlwfn9aI1PrVpLJ5BwlKoqb9-vTniDrOMIVC9ktFoi9G5-GEkRk3JFog5pVxDkdcdkCUSSjdyvcAVpKdT-nSKZxJGBcLg2LguH8MAAzc2Edk0rnAwy88GTUbTCXBBUueweTxueFhdJuFEIML+b3+eKONzeZKeQL4gqEy7qsp3SpO17vABybGzUmtgiosBePNGfPdoGmM32mNW9jCbhWoTCTZlu193ubQRcnib8T0ftVaeuGbJ2qB3D1VEg2ckxY4pfLLsrbueAri3r8YUTawl62lYf8nhcmOxx0yKpTavHpK12a41tQVAo88NHEk+DwtArYImTcPUQRNYXCYdPDCX0JTRfww3bLggiQyN+xSTxQlHYp701LNP2fV93wgBclxXf8xg3KxgIQRNvW8VJ-ERQNUmDYJQ1lBBuwvJIcROG8Uw4NgIDgaw7xJHDyUBFpXUAyia0QGZHFCRZllWdZHE2bZ2JmDxEKQtx7EgiMXCMzDiQ1TMJJ1TgeD4AQhELaT+Sozw9AVJJgkcPxAhCcIwwUrheyCSCGLFYN4VM9MH1wyTai4N4Pk-eB1xkyEqI8twuADJxWKWMIVj9VIw1SII3O4q88Qi7CLKnFoHX1ezP0c6tbAcZx7F9Ft0XggMuOScrsmTC4sLE6qn3i-MHOSpy5NmJYdyWFZhxcRJ0MyIqSsVHjr3RSqRsnJ92jAJqgJm8IdxSNw1mYyVRU7RBfVcrIyuVM5bzHPbHzw2cPxik7yJSrc-AVBipXFG7j3Ys8Dme3jXqGsyJ0+37rJfN8fqs1KAOmlrqLRH0-S8JiWLY3Zm2hvqXuTfIgA */
       context: initialContext,
       predictableActionArguments: true,
-      id: 'DataStreamQualityMitigation',
+      id: dataStreamQualityMitigationStateMachineId,
       initial: 'loadingMitigations',
       schema: {
         context: {} as DataStreamQualityMitigationContext,
@@ -90,6 +92,10 @@ export const createPureDataStreamQualityMitigationStateMachine = (
     },
     {
       actions: {
+        clearErrors: pure(() => []),
+        clearMitigations: assign((context, event) => ({
+          mitigations: [],
+        })),
         storeMitigations: assign((context, event) => {
           if (event.type !== (`${ActionTypes.DoneInvoke}.getMitigations` as const)) {
             return context;
@@ -202,3 +208,12 @@ export type DataStreamQualityMitigationEvent =
   | {
       type: `${ActionTypes.ErrorPlatform}.applyMitigations`;
     };
+
+export type DataStreamQualityMitigationInterpreter = InterpreterFrom<
+  typeof createDataStreamQualityMitigationStateMachine
+>;
+
+export const isDataStreamQualityMitigationInterpreter = (
+  actor: ActorRef<any, any>
+): actor is DataStreamQualityMitigationInterpreter =>
+  actor.id === dataStreamQualityMitigationStateMachineId;

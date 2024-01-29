@@ -22,6 +22,7 @@ import {
   QualityProblem,
 } from '../../../common';
 import { IDataStreamQualityClient } from '../../services/data_stream_quality';
+import { ConnectedMitigations } from './mitigations';
 import {
   DataStreamQualityChecksStateProvider,
   useDataStreamQualityChecksStateContext,
@@ -84,6 +85,8 @@ const ConnectedDataStreamQualityCheckerContent = () => {
     return <ConnectedPlannedChecksList />;
   } else if (state.matches('checking') || state.matches('checked')) {
     return <ConnectedCheckProgressList />;
+  } else if (state.matches('mitigatingProblem')) {
+    return <ConnectedMitigations />;
   }
 
   return <>Content</>;
