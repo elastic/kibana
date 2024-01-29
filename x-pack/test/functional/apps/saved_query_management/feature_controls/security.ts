@@ -25,6 +25,7 @@ export default function (ctx: FtrProviderContext) {
     'dashboard',
     'maps',
     'visualize',
+    'share',
   ]);
   const kibanaServer = getService('kibanaServer');
 
@@ -122,10 +123,16 @@ export default function (ctx: FtrProviderContext) {
         before(async () => {
           await login(appName, 'read', 'all');
           await navigateToApp(appName);
+          if (await PageObjects.share.isShareModalOpen()) {
+            await PageObjects.share.closeShareModal();
+          }
           await PageObjects.common.waitForTopNavToBeVisible();
         });
 
         after(async () => {
+          if (await PageObjects.share.isShareModalOpen()) {
+            await PageObjects.share.closeShareModal();
+          }
           await logout(appName);
         });
 
@@ -140,6 +147,9 @@ export default function (ctx: FtrProviderContext) {
         before(async () => {
           await login(appName, 'read', 'none');
           await navigateToApp(appName);
+          if (await PageObjects.share.isShareModalOpen()) {
+            await PageObjects.share.closeShareModal();
+          }
         });
 
         after(async () => {
