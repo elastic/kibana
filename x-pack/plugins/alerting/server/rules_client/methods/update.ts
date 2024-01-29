@@ -17,11 +17,7 @@ import {
 } from '../../types';
 import { validateRuleTypeParams, getRuleNotifyWhenType } from '../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
-import {
-  parseDuration,
-  getRuleCircuitBreakerErrorMessage,
-  NotificationDelay,
-} from '../../../common';
+import { parseDuration, getRuleCircuitBreakerErrorMessage, AlertDelay } from '../../../common';
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
@@ -55,7 +51,7 @@ export interface UpdateOptions<Params extends RuleTypeParams> {
     params: Params;
     throttle?: string | null;
     notifyWhen?: RuleNotifyWhenType | null;
-    notificationDelay?: NotificationDelay;
+    alertDelay?: AlertDelay;
   };
   allowMissingConnectorSecrets?: boolean;
   shouldIncrementRevision?: ShouldIncrementRevision;

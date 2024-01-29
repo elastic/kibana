@@ -375,7 +375,7 @@ describe('rule_form', () => {
         enabled: false,
         mutedInstanceIds: [],
         ...(!showRulesList ? { ruleTypeId: ruleType.id } : {}),
-        notificationDelay: {
+        alertDelay: {
           active: 1,
         },
       } as unknown as Rule;
@@ -1038,22 +1038,22 @@ describe('rule_form', () => {
       expect(wrapper.find(ActionForm).props().hasFieldsForAAD).toEqual(true);
     });
 
-    it('renders rule notification delay', async () => {
-      const getNotificationDelayInput = () => {
-        return wrapper.find('[data-test-subj="notificationDelayInput"] input').first();
+    it('renders rule alert delay', async () => {
+      const getAlertDelayInput = () => {
+        return wrapper.find('[data-test-subj="alertDelayInput"] input').first();
       };
 
       await setup();
-      expect(getNotificationDelayInput().props().value).toEqual(1);
+      expect(getAlertDelayInput().props().value).toEqual(1);
 
-      getNotificationDelayInput().simulate('change', { target: { value: '2' } });
-      expect(getNotificationDelayInput().props().value).toEqual(2);
+      getAlertDelayInput().simulate('change', { target: { value: '2' } });
+      expect(getAlertDelayInput().props().value).toEqual(2);
 
-      getNotificationDelayInput().simulate('change', { target: { value: '20' } });
-      expect(getNotificationDelayInput().props().value).toEqual(20);
+      getAlertDelayInput().simulate('change', { target: { value: '20' } });
+      expect(getAlertDelayInput().props().value).toEqual(20);
 
-      getNotificationDelayInput().simulate('change', { target: { value: '999' } });
-      expect(getNotificationDelayInput().props().value).toEqual(999);
+      getAlertDelayInput().simulate('change', { target: { value: '999' } });
+      expect(getAlertDelayInput().props().value).toEqual(999);
     });
   });
 

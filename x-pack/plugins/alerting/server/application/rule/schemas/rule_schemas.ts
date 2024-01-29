@@ -132,7 +132,7 @@ export const snoozeScheduleSchema = schema.object({
   skipRecurrences: schema.maybe(schema.arrayOf(schema.string())),
 });
 
-export const notificationDelaySchema = schema.object({
+export const alertDelaySchema = schema.object({
   active: schema.number(),
 });
 
@@ -172,7 +172,7 @@ export const ruleDomainSchema = schema.object({
   revision: schema.number(),
   running: schema.maybe(schema.nullable(schema.boolean())),
   viewInAppRelativeUrl: schema.maybe(schema.nullable(schema.string())),
-  notificationDelay: schema.maybe(notificationDelaySchema),
+  alertDelay: schema.maybe(alertDelaySchema),
 });
 
 /**
@@ -210,5 +210,5 @@ export const ruleSchema = schema.object({
   revision: schema.number(),
   running: schema.maybe(schema.nullable(schema.boolean())),
   viewInAppRelativeUrl: schema.maybe(schema.nullable(schema.string())),
-  notificationDelay: schema.maybe(notificationDelaySchema),
+  alertDelay: schema.maybe(alertDelaySchema),
 });

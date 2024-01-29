@@ -62,7 +62,7 @@ const sampleRule: SanitizedRule<RuleTypeParams> & { activeSnoozes?: string[] } =
   },
   nextRun: DATE_2020,
   revision: 0,
-  notificationDelay: {
+  alertDelay: {
     active: 10,
   },
 };

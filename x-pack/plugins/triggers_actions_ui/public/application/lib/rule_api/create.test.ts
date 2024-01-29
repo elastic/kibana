@@ -52,7 +52,7 @@ describe('createRule', () => {
       execution_status: { status: 'pending', last_execution_date: '2021-04-01T21:33:13.250Z' },
       create_at: '2021-04-01T21:33:13.247Z',
       updated_at: '2021-04-01T21:33:13.247Z',
-      notification_delay: {
+      alert_delay: {
         active: 10,
       },
     };
@@ -99,7 +99,7 @@ describe('createRule', () => {
       updatedAt: new Date('2021-04-01T21:33:13.247Z'),
       apiKeyOwner: '',
       revision: 0,
-      notificationDelay: {
+      alertDelay: {
         active: 10,
       },
     };
@@ -154,7 +154,7 @@ describe('createRule', () => {
       tags: [],
       updatedAt: '2021-04-01T21:33:13.247Z',
       updatedBy: undefined,
-      notificationDelay: {
+      alertDelay: {
         active: 10,
       },
     });

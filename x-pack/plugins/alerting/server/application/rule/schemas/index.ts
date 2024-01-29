@@ -13,7 +13,7 @@ export {
   monitoringSchema,
   ruleSchema,
   ruleDomainSchema,
-  notificationDelaySchema,
+  alertDelaySchema,
 } from './rule_schemas';
 
 export {

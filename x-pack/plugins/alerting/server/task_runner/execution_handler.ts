@@ -628,15 +628,12 @@ export class ExecutionHandler<
           continue;
         }
 
-        if (
-          this.rule.notificationDelay &&
-          alert.getActiveCount() < this.rule.notificationDelay.active
-        ) {
+        if (this.rule.alertDelay && alert.getActiveCount() < this.rule.alertDelay.active) {
           this.logger.debug(
             `no scheduling of action "${action.id}" for rule "${
               this.taskInstance.params.alertId
-            }": the alert activeCount: ${alert.getActiveCount()} is less than the rule notificationDelay.active: ${
-              this.rule.notificationDelay.active
+            }": the alert activeCount: ${alert.getActiveCount()} is less than the rule alertDelay.active: ${
+              this.rule.alertDelay.active
             } threshold.`
           );
           continue;

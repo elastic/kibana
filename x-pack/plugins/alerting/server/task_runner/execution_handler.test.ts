@@ -2052,13 +2052,13 @@ describe('Execution Handler', () => {
     `);
   });
 
-  test('does not schedule actions for alerts with activeCount less than the notificationDelay.active threshold', async () => {
+  test('does not schedule actions for alerts with activeCount less than the alertDelay.active threshold', async () => {
     const executionHandler = new ExecutionHandler(
       generateExecutionParams({
         ...defaultExecutionParams,
         rule: {
           ...defaultExecutionParams.rule,
-          notificationDelay: {
+          alertDelay: {
             active: 3,
           },
         },
@@ -2074,20 +2074,20 @@ describe('Execution Handler', () => {
     expect(defaultExecutionParams.logger.debug).toHaveBeenCalledTimes(2);
 
     expect(defaultExecutionParams.logger.debug).toHaveBeenCalledWith(
-      'no scheduling of action "1" for rule "1": the alert activeCount: 0 is less than the rule notificationDelay.active: 3 threshold.'
+      'no scheduling of action "1" for rule "1": the alert activeCount: 0 is less than the rule alertDelay.active: 3 threshold.'
     );
     expect(defaultExecutionParams.logger.debug).toHaveBeenCalledWith(
-      'no scheduling of action "1" for rule "1": the alert activeCount: 2 is less than the rule notificationDelay.active: 3 threshold.'
+      'no scheduling of action "1" for rule "1": the alert activeCount: 2 is less than the rule alertDelay.active: 3 threshold.'
     );
   });
 
-  test('schedules actions for alerts with activeCount greater than or equal the notificationDelay.active threshold', async () => {
+  test('schedules actions for alerts with activeCount greater than or equal the alertDelay.active threshold', async () => {
     const executionHandler = new ExecutionHandler(
       generateExecutionParams({
         ...defaultExecutionParams,
         rule: {
           ...defaultExecutionParams.rule,
-          notificationDelay: {
+          alertDelay: {
             active: 3,
           },
         },
@@ -2166,7 +2166,7 @@ describe('Execution Handler', () => {
     `);
   });
 
-  test('schedules actions if notificationDelay.active threshold is not defined', async () => {
+  test('schedules actions if alertDelay.active threshold is not defined', async () => {
     const executionHandler = new ExecutionHandler(generateExecutionParams());
 
     await executionHandler.run({

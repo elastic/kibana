@@ -119,5 +119,5 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
   ...(rule.viewInAppRelativeUrl !== undefined
     ? { view_in_app_relative_url: rule.viewInAppRelativeUrl }
     : {}),
-  ...(rule.notificationDelay !== undefined ? { notification_delay: rule.notificationDelay } : {}),
+  ...(rule.alertDelay !== undefined ? { alert_delay: rule.alertDelay } : {}),
 });

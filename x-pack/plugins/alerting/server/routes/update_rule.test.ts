@@ -59,7 +59,7 @@ describe('updateRuleRoute', () => {
       },
     ],
     notifyWhen: RuleNotifyWhen.CHANGE,
-    notificationDelay: {
+    alertDelay: {
       active: 10,
     },
   };
@@ -76,7 +76,7 @@ describe('updateRuleRoute', () => {
         alerts_filter: mockedAlert.actions[0].alertsFilter,
       },
     ],
-    notification_delay: {
+    alert_delay: {
       active: 10,
     },
   };
@@ -92,7 +92,7 @@ describe('updateRuleRoute', () => {
       connector_type_id: actionTypeId,
       alerts_filter: alertsFilter,
     })),
-    notification_delay: mockedAlert.notificationDelay,
+    alert_delay: mockedAlert.alertDelay,
   };
 
   it('updates a rule with proper parameters', async () => {
@@ -143,7 +143,7 @@ describe('updateRuleRoute', () => {
               },
             ],
             "name": "abc",
-            "notificationDelay": Object {
+            "alertDelay": Object {
               "active": 10,
             },
             "notifyWhen": "onActionGroupChange",

@@ -1849,7 +1849,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           expect(hasActions).eql(false);
         });
 
-        it('should generate expected events with a notificationDelay', async () => {
+        it('should generate expected events with a alertDelay', async () => {
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
@@ -1884,7 +1884,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                     params: {},
                   },
                 ],
-                notification_delay: {
+                alert_delay: {
                   active: 3,
                 },
               })
@@ -1925,7 +1925,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           expect(actualTriggeredActions).to.eql(1);
         });
 
-        it('should generate expected events with a notificationDelay with AAD', async () => {
+        it('should generate expected events with a alertDelay with AAD', async () => {
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
@@ -1960,7 +1960,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                     params: {},
                   },
                 ],
-                notification_delay: {
+                alert_delay: {
                   active: 3,
                 },
               })

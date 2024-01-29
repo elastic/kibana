@@ -213,7 +213,7 @@ const rawRuleActionSchema = schema.object({
   useAlertDataForTemplate: schema.maybe(schema.boolean()),
 });
 
-export const notificationDelaySchema = schema.object({
+export const alertDelaySchema = schema.object({
   active: schema.number(),
 });
 
@@ -274,5 +274,5 @@ export const rawRuleSchema = schema.object({
   ),
   params: schema.recordOf(schema.string(), schema.maybe(schema.any())),
   typeVersion: schema.maybe(schema.number()),
-  notificationDelay: schema.maybe(notificationDelaySchema),
+  alertDelay: schema.maybe(alertDelaySchema),
 });

@@ -12,7 +12,7 @@ import {
   RuleActionParam,
   IntervalSchedule,
   RuleActionAlertsFilterProperty,
-  NotificationDelay,
+  AlertDelay,
 } from '@kbn/alerting-plugin/common';
 import { isEmpty } from 'lodash/fp';
 import { Rule, RuleAction } from '../../../types';
@@ -31,7 +31,7 @@ interface CommandType<
     | 'setRuleActionProperty'
     | 'setRuleActionFrequency'
     | 'setRuleActionAlertsFilter'
-    | 'setNotificationDelayProperty'
+    | 'setAlertDelayProperty'
 > {
   type: T;
 }
@@ -64,9 +64,9 @@ interface RuleSchedulePayload<Key extends keyof IntervalSchedule> {
   index?: number;
 }
 
-interface NotificationDelayPayload<Key extends keyof NotificationDelay> {
+interface AlertDelayPayload<Key extends keyof AlertDelay> {
   key: Key;
-  value: NotificationDelay[Key] | null;
+  value: AlertDelay[Key] | null;
   index?: number;
 }
 
@@ -104,8 +104,8 @@ export type RuleReducerAction =
       payload: Payload<string, RuleActionAlertsFilterProperty>;
     }
   | {
-      command: CommandType<'setNotificationDelayProperty'>;
-      payload: NotificationDelayPayload<keyof NotificationDelay>;
+      command: CommandType<'setAlertDelayProperty'>;
+      payload: AlertDelayPayload<keyof AlertDelay>;
     };
 
 export type InitialRuleReducer = Reducer<{ rule: InitialRule }, RuleReducerAction>;
@@ -293,20 +293,17 @@ export const ruleReducer = <RulePhase extends InitialRule | Rule>(
         };
       }
     }
-    case 'setNotificationDelayProperty': {
-      const { key, value } = action.payload as Payload<
-        keyof NotificationDelay,
-        SavedObjectAttribute
-      >;
-      if (rule.notificationDelay && isEqual(rule.notificationDelay[key], value)) {
+    case 'setAlertDelayProperty': {
+      const { key, value } = action.payload as Payload<keyof AlertDelay, SavedObjectAttribute>;
+      if (rule.alertDelay && isEqual(rule.alertDelay[key], value)) {
         return state;
       } else {
         return {
           ...state,
           rule: {
             ...rule,
-            notificationDelay: {
-              ...rule.notificationDelay,
+            alertDelay: {
+              ...rule.alertDelay,
               [key]: value,
             },
           },

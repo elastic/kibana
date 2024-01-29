@@ -279,7 +279,7 @@ describe('update()', () => {
         scheduledTaskId: 'task-123',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        notificationDelay: {
+        alertDelay: {
           active: 5,
         },
       },
@@ -337,7 +337,7 @@ describe('update()', () => {
             },
           },
         ],
-        notificationDelay: {
+        alertDelay: {
           active: 10,
         },
       },
@@ -373,7 +373,7 @@ describe('update()', () => {
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
         "id": "1",
-        "notificationDelay": Object {
+        "alertDelay": Object {
           "active": 5,
         },
         "notifyWhen": "onActiveAlert",
@@ -445,7 +445,7 @@ describe('update()', () => {
           "versionApiKeyLastmodified": "v7.10.0",
         },
         "name": "abc",
-        "notificationDelay": Object {
+        "alertDelay": Object {
           "active": 10,
         },
         "notifyWhen": "onActiveAlert",

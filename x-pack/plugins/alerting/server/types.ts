@@ -60,7 +60,7 @@ import {
   AlertsFilter,
   AlertsFilterTimeframe,
   RuleAlertData,
-  NotificationDelay,
+  AlertDelay,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { RulesSettingsFlappingProperties } from '../common/rules_settings';
@@ -486,7 +486,7 @@ export interface RawRule extends SavedObjectAttributes {
   nextRun?: string | null;
   revision: number;
   running?: boolean | null;
-  notificationDelay?: NotificationDelay;
+  alertDelay?: AlertDelay;
 }
 
 export type { DataStreamAdapter } from './alerts_service/lib/data_stream_adapter';

@@ -215,9 +215,7 @@ export const RuleForm = ({
       ? getDurationUnitValue(rule.schedule.interval)
       : defaultScheduleIntervalUnit
   );
-  const [notificationDelay, setNotificationDelay] = useState<number | undefined>(
-    rule.notificationDelay?.active
-  );
+  const [alertDelay, setAlertDelay] = useState<number | undefined>(rule.alertDelay?.active);
   const [defaultActionGroupId, setDefaultActionGroupId] = useState<string | undefined>(undefined);
 
   const [availableRuleTypes, setAvailableRuleTypes] = useState<RuleTypeItems>([]);
@@ -332,10 +330,10 @@ export const RuleForm = ({
   }, [rule.schedule.interval, defaultScheduleInterval, defaultScheduleIntervalUnit]);
 
   useEffect(() => {
-    if (rule.notificationDelay) {
-      setNotificationDelay(rule.notificationDelay.active);
+    if (rule.alertDelay) {
+      setAlertDelay(rule.alertDelay.active);
     }
-  }, [rule.notificationDelay]);
+  }, [rule.alertDelay]);
 
   useEffect(() => {
     if (!flyoutBodyOverflowRef.current) {
@@ -402,8 +400,8 @@ export const RuleForm = ({
     [dispatch]
   );
 
-  const setNotificationDelayProperty = (key: string, value: any) => {
-    dispatch({ command: { type: 'setNotificationDelayProperty' }, payload: { key, value } });
+  const setAlertDelayProperty = (key: string, value: any) => {
+    dispatch({ command: { type: 'setAlertDelayProperty' }, payload: { key, value } });
   };
 
   useEffect(() => {
@@ -831,19 +829,19 @@ export const RuleForm = ({
       <EuiFlexItem>
         <EuiFormRow
           fullWidth
-          data-test-subj="notificationDelayFormRow"
+          data-test-subj="alertDelayFormRow"
           display="rowCompressed"
           label={[
             <FormattedMessage
-              id="xpack.triggersActionsUI.sections.ruleForm.notificationDelayFieldLabel"
-              defaultMessage="Alert notification delay"
+              id="xpack.triggersActionsUI.sections.ruleForm.alertDelayFieldLabel"
+              defaultMessage="Alert alert delay"
             />,
             <EuiIconTip
               position="right"
               type="questionInCircle"
               content={
                 <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.ruleForm.notificationDelayFieldHelp"
+                  id="xpack.triggersActionsUI.sections.ruleForm.alertDelayFieldHelp"
                   defaultMessage="Define how many consecutive active alerts should be reported before triggering an action."
                 />
               }
@@ -853,15 +851,15 @@ export const RuleForm = ({
           <EuiFieldNumber
             fullWidth
             min={0}
-            value={notificationDelay}
-            name="notificationDelay"
-            data-test-subj="notificationDelayInput"
+            value={alertDelay}
+            name="alertDelay"
+            data-test-subj="alertDelayInput"
             onChange={(e) => {
               const value = e.target.value;
               if (value === '' || INTEGER_REGEX.test(value)) {
                 const parsedValue = value === '' ? '' : parseInt(value, 10);
-                setNotificationDelayProperty('active', parsedValue || 0);
-                setNotificationDelay(parsedValue || undefined);
+                setAlertDelayProperty('active', parsedValue || 0);
+                setAlertDelay(parsedValue || undefined);
               }
             }}
           />

@@ -37,7 +37,7 @@ export const metaSchema = schema.object({
   pendingRecoveredCount: schema.maybe(schema.number()),
   uuid: schema.maybe(schema.string()),
   // count of consecutive active alerts
-  // will reset if the alert is recovered or if equal to notificationDelay.active stored in the rule
+  // will reset if the alert is recovered or if equal to alertDelay.active stored in the rule
   activeCount: schema.maybe(schema.number()),
 });
 
