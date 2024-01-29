@@ -208,6 +208,7 @@ describe('createLifecycleExecutor', () => {
               flappingHistory: [],
               flapping: false,
               pendingRecoveredCount: 0,
+              activeCount: 0,
             },
             TEST_ALERT_1: {
               alertId: 'TEST_ALERT_1',
@@ -216,6 +217,7 @@ describe('createLifecycleExecutor', () => {
               flappingHistory: [],
               flapping: false,
               pendingRecoveredCount: 0,
+              activeCount: 0,
             },
           },
           trackedAlertsRecovered: {},
@@ -358,6 +360,7 @@ describe('createLifecycleExecutor', () => {
               flappingHistory: [],
               flapping: false,
               pendingRecoveredCount: 0,
+              activeCount: 0,
             },
             TEST_ALERT_1: {
               alertId: 'TEST_ALERT_1',
@@ -366,6 +369,7 @@ describe('createLifecycleExecutor', () => {
               flappingHistory: [],
               flapping: false,
               pendingRecoveredCount: 0,
+              activeCount: 0,
             },
           },
           trackedAlertsRecovered: {},
@@ -490,6 +494,7 @@ describe('createLifecycleExecutor', () => {
               flappingHistory: [],
               flapping: false,
               pendingRecoveredCount: 0,
+              activeCount: 0,
             },
             TEST_ALERT_1: {
               alertId: 'TEST_ALERT_1',
@@ -498,6 +503,7 @@ describe('createLifecycleExecutor', () => {
               flappingHistory: [],
               flapping: false,
               pendingRecoveredCount: 0,
+              activeCount: 0,
             },
           },
           trackedAlertsRecovered: {},
@@ -732,6 +738,7 @@ describe('createLifecycleExecutor', () => {
                 flappingHistory: [],
                 flapping: false,
                 pendingRecoveredCount: 0,
+                activeCount: 0,
               },
               TEST_ALERT_1: {
                 alertId: 'TEST_ALERT_1',
@@ -740,6 +747,7 @@ describe('createLifecycleExecutor', () => {
                 flappingHistory: [],
                 flapping: false,
                 pendingRecoveredCount: 0,
+                activeCount: 0,
               },
             },
             trackedAlertsRecovered: {},
@@ -850,6 +858,7 @@ describe('createLifecycleExecutor', () => {
                 flappingHistory: [],
                 flapping: false,
                 pendingRecoveredCount: 0,
+                activeCount: 0,
               },
               TEST_ALERT_1: {
                 alertId: 'TEST_ALERT_1',
@@ -858,6 +867,7 @@ describe('createLifecycleExecutor', () => {
                 flappingHistory: [],
                 flapping: false,
                 pendingRecoveredCount: 0,
+                activeCount: 0,
               },
             },
             trackedAlerts: {},
@@ -963,6 +973,7 @@ describe('createLifecycleExecutor', () => {
                 flappingHistory: [],
                 flapping: false,
                 pendingRecoveredCount: 0,
+                activeCount: 0,
               },
               TEST_ALERT_1: {
                 alertId: 'TEST_ALERT_1',
@@ -971,6 +982,7 @@ describe('createLifecycleExecutor', () => {
                 flappingHistory: [],
                 flapping: false,
                 pendingRecoveredCount: 0,
+                activeCount: 0,
               },
             },
             trackedAlertsRecovered: {},
@@ -1077,6 +1089,7 @@ describe('createLifecycleExecutor', () => {
                 flappingHistory: [],
                 flapping: false,
                 pendingRecoveredCount: 0,
+                activeCount: 0,
               },
             },
             trackedAlertsRecovered: {
@@ -1087,6 +1100,7 @@ describe('createLifecycleExecutor', () => {
                 flappingHistory: [],
                 flapping: false,
                 pendingRecoveredCount: 0,
+                activeCount: 0,
               },
             },
           },
@@ -1258,6 +1272,7 @@ describe('createLifecycleExecutor', () => {
                 flappingHistory: [],
                 flapping: false,
                 pendingRecoveredCount: 0,
+                activeCount: 0,
               },
               TEST_ALERT_1: {
                 alertId: 'TEST_ALERT_1',
@@ -1266,6 +1281,7 @@ describe('createLifecycleExecutor', () => {
                 flappingHistory: [],
                 flapping: false,
                 pendingRecoveredCount: 0,
+                activeCount: 0,
               },
             },
             trackedAlertsRecovered: {},
@@ -1388,6 +1404,7 @@ describe('createLifecycleExecutor', () => {
                 flappingHistory: [],
                 flapping: false,
                 pendingRecoveredCount: 0,
+                activeCount: 0,
               },
               TEST_ALERT_1: {
                 alertId: 'TEST_ALERT_1',
@@ -1396,6 +1413,7 @@ describe('createLifecycleExecutor', () => {
                 flappingHistory: [],
                 flapping: false,
                 pendingRecoveredCount: 0,
+                activeCount: 0,
               },
             },
             trackedAlertsRecovered: {},
@@ -1570,6 +1588,7 @@ describe('createLifecycleExecutor', () => {
                 flappingHistory: flapping,
                 flapping: false,
                 pendingRecoveredCount: 0,
+                activeCount: 0,
               },
               TEST_ALERT_1: {
                 alertId: 'TEST_ALERT_1',
@@ -1578,6 +1597,7 @@ describe('createLifecycleExecutor', () => {
                 flappingHistory: [false, false],
                 flapping: false,
                 pendingRecoveredCount: 0,
+                activeCount: 0,
               },
               TEST_ALERT_2: {
                 alertId: 'TEST_ALERT_2',
@@ -1586,6 +1606,7 @@ describe('createLifecycleExecutor', () => {
                 flappingHistory: flapping,
                 flapping: true,
                 pendingRecoveredCount: 0,
+                activeCount: 0,
               },
               TEST_ALERT_3: {
                 alertId: 'TEST_ALERT_3',
@@ -1594,6 +1615,7 @@ describe('createLifecycleExecutor', () => {
                 flappingHistory: [false, false],
                 flapping: true,
                 pendingRecoveredCount: 0,
+                activeCount: 0,
               },
             },
             trackedAlertsRecovered: {},
@@ -1604,6 +1626,7 @@ describe('createLifecycleExecutor', () => {
 
       expect(serializedAlerts.state.trackedAlerts).toEqual({
         TEST_ALERT_0: {
+          activeCount: 1,
           alertId: 'TEST_ALERT_0',
           alertUuid: 'TEST_ALERT_0_UUID',
           flapping: true,
@@ -1612,6 +1635,7 @@ describe('createLifecycleExecutor', () => {
           started: '2020-01-01T12:00:00.000Z',
         },
         TEST_ALERT_1: {
+          activeCount: 1,
           alertId: 'TEST_ALERT_1',
           alertUuid: 'TEST_ALERT_1_UUID',
           flapping: false,
@@ -1620,6 +1644,7 @@ describe('createLifecycleExecutor', () => {
           started: '2020-01-02T12:00:00.000Z',
         },
         TEST_ALERT_2: {
+          activeCount: 1,
           alertId: 'TEST_ALERT_2',
           alertUuid: 'TEST_ALERT_2_UUID',
           flapping: true,
@@ -1628,6 +1653,7 @@ describe('createLifecycleExecutor', () => {
           started: '2020-01-01T12:00:00.000Z',
         },
         TEST_ALERT_3: {
+          activeCount: 1,
           alertId: 'TEST_ALERT_3',
           alertUuid: 'TEST_ALERT_3_UUID',
           flapping: true,
@@ -1786,6 +1812,7 @@ describe('createLifecycleExecutor', () => {
                 flappingHistory: [true, true, true, true],
                 flapping: false,
                 pendingRecoveredCount: 0,
+                activeCount: 0,
               },
               TEST_ALERT_1: {
                 alertId: 'TEST_ALERT_1',
@@ -1794,6 +1821,7 @@ describe('createLifecycleExecutor', () => {
                 flappingHistory: notFlapping,
                 flapping: false,
                 pendingRecoveredCount: 0,
+                activeCount: 0,
               },
               TEST_ALERT_2: {
                 alertId: 'TEST_ALERT_2',
@@ -1802,6 +1830,7 @@ describe('createLifecycleExecutor', () => {
                 flappingHistory: [true, true],
                 flapping: true,
                 pendingRecoveredCount: 0,
+                activeCount: 0,
               },
               TEST_ALERT_3: {
                 alertId: 'TEST_ALERT_3',
@@ -1810,6 +1839,7 @@ describe('createLifecycleExecutor', () => {
                 flappingHistory: notFlapping,
                 flapping: false,
                 pendingRecoveredCount: 0,
+                activeCount: 0,
               },
             },
             trackedAlertsRecovered: {},
@@ -1820,6 +1850,7 @@ describe('createLifecycleExecutor', () => {
 
       expect(serializedAlerts.state.trackedAlerts).toEqual({
         TEST_ALERT_2: {
+          activeCount: 0,
           alertId: 'TEST_ALERT_2',
           alertUuid: 'TEST_ALERT_2_UUID',
           flapping: true,
@@ -1831,6 +1862,7 @@ describe('createLifecycleExecutor', () => {
 
       expect(serializedAlerts.state.trackedAlertsRecovered).toEqual({
         TEST_ALERT_0: {
+          activeCount: 0,
           alertId: 'TEST_ALERT_0',
           alertUuid: 'TEST_ALERT_0_UUID',
           flapping: true,
@@ -1839,6 +1871,7 @@ describe('createLifecycleExecutor', () => {
           started: '2020-01-01T12:00:00.000Z',
         },
         TEST_ALERT_1: {
+          activeCount: 0,
           alertId: 'TEST_ALERT_1',
           alertUuid: 'TEST_ALERT_1_UUID',
           flapping: false,
@@ -1847,6 +1880,7 @@ describe('createLifecycleExecutor', () => {
           started: '2020-01-02T12:00:00.000Z',
         },
         TEST_ALERT_3: {
+          activeCount: 0,
           alertId: 'TEST_ALERT_3',
           alertUuid: 'TEST_ALERT_3_UUID',
           flapping: false,

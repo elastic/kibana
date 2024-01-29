@@ -628,19 +628,6 @@ export class ExecutionHandler<
           continue;
         }
 
-        if (this.rule.alertDelay && alert.getActiveCount() < this.rule.alertDelay.active) {
-          this.logger.debug(
-            `no scheduling of action "${action.id}" for rule "${
-              this.taskInstance.params.alertId
-            }": the alert activeCount: ${alert.getActiveCount()} is less than the rule alertDelay.active: ${
-              this.rule.alertDelay.active
-            } threshold.`
-          );
-          continue;
-        } else {
-          alert.resetActiveCount();
-        }
-
         const actionGroup = this.getActionGroup(alert);
 
         if (!this.ruleTypeActionGroups!.has(actionGroup)) {

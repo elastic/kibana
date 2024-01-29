@@ -834,7 +834,7 @@ export const RuleForm = ({
           label={[
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.ruleForm.alertDelayFieldLabel"
-              defaultMessage="Alert alert delay"
+              defaultMessage="Rule condition should meet X times before creating the alert"
             />,
             <EuiIconTip
               position="right"
@@ -842,7 +842,7 @@ export const RuleForm = ({
               content={
                 <FormattedMessage
                   id="xpack.triggersActionsUI.sections.ruleForm.alertDelayFieldHelp"
-                  defaultMessage="Define how many consecutive active alerts should be reported before triggering an action."
+                  defaultMessage="Define how many consecutive rule runs should meet the condition before creating the alert."
                 />
               }
             />,

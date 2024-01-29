@@ -222,6 +222,7 @@ export type SanitizedRuleConfig = Pick<
   | 'muteAll'
   | 'revision'
   | 'snoozeSchedule'
+  | 'alertDelay'
 > & {
   producer: string;
   ruleTypeId: string;

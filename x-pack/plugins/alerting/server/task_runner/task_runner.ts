@@ -257,6 +257,7 @@ export class TaskRunner<
       revision: rule.revision,
       spaceId,
       tags: rule.tags,
+      alertDelay: rule.alertDelay?.active ?? 0,
     };
   }
 
@@ -582,6 +583,7 @@ export class TaskRunner<
           notifyWhen === RuleNotifyWhen.CHANGE ||
           some(actions, (action) => action.frequency?.notifyWhen === RuleNotifyWhen.CHANGE),
         maintenanceWindowIds: maintenanceWindowsWithoutScopedQueryIds,
+        alertDelay: rule.alertDelay?.active ?? 0,
       });
     });
 

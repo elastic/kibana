@@ -12,31 +12,54 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
   EVENT_ACTION,
+  ALERT_TIME_RANGE,
+  ALERT_MAINTENANCE_WINDOW_IDS,
 } from '@kbn/rule-data-utils';
 
 export function getAlertsForNotification(
+  timestamp: string,
   flappingSettings: RulesSettingsFlappingProperties,
-  trackedEventsToIndex: any[]
+  alertDelay: number,
+  trackedEventsToIndex: any[],
+  newEventsToIndex: any[],
+  maintenanceWindowIds?: string[]
 ) {
-  return trackedEventsToIndex.map((trackedEvent) => {
-    if (!flappingSettings.enabled || trackedEvent.event[ALERT_STATUS] === ALERT_STATUS_ACTIVE) {
+  const events: any[] = [];
+  for (const trackedEvent of [...newEventsToIndex, ...trackedEventsToIndex]) {
+    if (trackedEvent.event[ALERT_STATUS] === ALERT_STATUS_ACTIVE) {
+      const count = trackedEvent.activeCount || 0;
+      trackedEvent.activeCount = count + 1;
       trackedEvent.pendingRecoveredCount = 0;
-    } else if (
-      flappingSettings.enabled &&
-      trackedEvent.event[ALERT_STATUS] === ALERT_STATUS_RECOVERED
-    ) {
-      if (trackedEvent.flapping) {
-        const count = trackedEvent.pendingRecoveredCount || 0;
-        trackedEvent.pendingRecoveredCount = count + 1;
-        if (trackedEvent.pendingRecoveredCount < flappingSettings.statusChangeThreshold) {
-          trackedEvent.event[ALERT_STATUS] = ALERT_STATUS_ACTIVE;
-          trackedEvent.event[EVENT_ACTION] = 'active';
-          delete trackedEvent.event[ALERT_END];
-        } else {
-          trackedEvent.pendingRecoveredCount = 0;
+      if (trackedEvent.activeCount < alertDelay) {
+        continue;
+      } else {
+        if (trackedEvent.activeCount === alertDelay) {
+          trackedEvent.event[ALERT_TIME_RANGE] = { gte: timestamp };
+          trackedEvent.event[EVENT_ACTION] = 'open';
+          if (maintenanceWindowIds?.length) {
+            trackedEvent.event[ALERT_MAINTENANCE_WINDOW_IDS] = maintenanceWindowIds;
+          }
         }
       }
+    } else if (trackedEvent.event[ALERT_STATUS] === ALERT_STATUS_RECOVERED) {
+      trackedEvent.activeCount = 0;
+      if (flappingSettings.enabled) {
+        if (trackedEvent.flapping) {
+          const count = trackedEvent.pendingRecoveredCount || 0;
+          trackedEvent.pendingRecoveredCount = count + 1;
+          if (trackedEvent.pendingRecoveredCount < flappingSettings.statusChangeThreshold) {
+            trackedEvent.event[ALERT_STATUS] = ALERT_STATUS_ACTIVE;
+            trackedEvent.event[EVENT_ACTION] = 'active';
+            delete trackedEvent.event[ALERT_END];
+          } else {
+            trackedEvent.pendingRecoveredCount = 0;
+          }
+        }
+      } else {
+        trackedEvent.pendingRecoveredCount = 0;
+      }
     }
-    return trackedEvent;
-  });
+    events.push(trackedEvent);
+  }
+  return events;
 }
