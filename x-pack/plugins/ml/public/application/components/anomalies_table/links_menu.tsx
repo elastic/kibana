@@ -398,28 +398,25 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
       const { indexPatternId, wp, query, filters, ...globalState } = pageState;
 
-      const url = await mlLocator.getRedirectUrl(
-        {
-          page: ML_PAGES.AIOPS_LOG_RATE_ANALYSIS,
-          pageState: {
-            index: indexPatternId,
-            globalState,
-            appState: {
-              logRateAnalysis: {
-                wp,
-                ...(isQuery(query)
-                  ? {
-                      filters,
-                      searchString: query.query,
-                      searchQueryLanguage: query.language,
-                    }
-                  : {}),
-              },
+      const url = await mlLocator.getRedirectUrl({
+        page: ML_PAGES.AIOPS_LOG_RATE_ANALYSIS,
+        pageState: {
+          index: indexPatternId,
+          globalState,
+          appState: {
+            logRateAnalysis: {
+              wp,
+              ...(isQuery(query)
+                ? {
+                    filters,
+                    searchString: query.query,
+                    searchQueryLanguage: query.language,
+                  }
+                : {}),
             },
           },
         },
-        { absolute: true }
-      );
+      });
 
       if (!unmounted) {
         setOpenInLogRateAnalysisUrl(url);
