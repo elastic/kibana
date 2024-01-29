@@ -301,6 +301,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 4,
           sizeInBytes: 733175040,
+          checkedAt: undefined,
         },
         {
           docsCount: 1628343,
@@ -310,6 +311,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 4,
           sizeInBytes: 731583142,
+          checkedAt: undefined,
         },
         {
           docsCount: 4,
@@ -319,6 +321,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 4,
           sizeInBytes: 28413,
+          checkedAt: 1706526408000,
         },
       ]);
     });
@@ -345,6 +348,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 4,
           sizeInBytes: 733175040,
+          checkedAt: undefined,
         },
         {
           docsCount: 1628343,
@@ -354,6 +358,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 4,
           sizeInBytes: 731583142,
+          checkedAt: undefined,
         },
         {
           docsCount: 4,
@@ -363,6 +368,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 4,
           sizeInBytes: 28413,
+          checkedAt: 1706526408000,
         },
       ]);
     });
@@ -389,6 +395,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 4,
           sizeInBytes: 28413,
+          checkedAt: 1706526408000,
         },
         {
           docsCount: 1628343,
@@ -398,6 +405,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 4,
           sizeInBytes: 731583142,
+          checkedAt: undefined,
         },
         {
           docsCount: 1630289,
@@ -407,6 +415,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 4,
           sizeInBytes: 733175040,
+          checkedAt: undefined,
         },
       ]);
     });
@@ -433,6 +442,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 4,
           sizeInBytes: 0,
+          checkedAt: undefined,
         },
         {
           docsCount: 0,
@@ -442,6 +452,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 4,
           sizeInBytes: 0,
+          checkedAt: undefined,
         },
         {
           docsCount: 0,
@@ -451,6 +462,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 4,
           sizeInBytes: 0,
+          checkedAt: undefined,
         },
       ]);
     });
