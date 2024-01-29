@@ -87,5 +87,5 @@ xpack.ml.dfa.enabled: false
 xpack.ml.nlp.enabled: false
 xpack.ml.compatibleModuleType: 'observability'
 
-// Disable the embedded Dev Console
+# Disable the embedded Dev Console
 console.ui.embeddedEnabled: false
