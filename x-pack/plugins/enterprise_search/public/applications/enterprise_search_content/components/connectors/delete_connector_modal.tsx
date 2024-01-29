@@ -56,7 +56,7 @@ export const DeleteConnectorModal: React.FC = () => {
       onConfirm={() => {
         deleteConnector({
           connectorId,
-          indexNameToDelete: shouldDeleteIndex ? deleteModalIndexName : null,
+          shouldDeleteIndex,
         });
       }}
       cancelButtonText={

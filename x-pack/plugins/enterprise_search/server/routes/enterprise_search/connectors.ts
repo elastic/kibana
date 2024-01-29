@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import {
   deleteConnectorById,
+  fetchConnectorById,
   fetchConnectors,
   fetchSyncJobsByConnectorId,
   putUpdateNative,
@@ -553,17 +554,22 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
           connectorId: schema.string(),
         }),
         query: schema.object({
-          indexNameToDelete: schema.maybe(schema.string()),
+          shouldDeleteIndex: schema.maybe(schema.boolean()),
         }),
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const { connectorId } = request.params;
-      const { indexNameToDelete } = request.query;
+      const { shouldDeleteIndex } = request.query;
 
       let connectorResponse;
+      let indexNameToDelete;
       try {
+        if (shouldDeleteIndex) {
+          const connector = await fetchConnectorById(client.asCurrentUser, connectorId);
+          indexNameToDelete = connector?.value.index_name;
+        }
         connectorResponse = await deleteConnectorById(client.asCurrentUser, connectorId);
         if (indexNameToDelete) {
           await deleteIndexPipelines(client, indexNameToDelete);

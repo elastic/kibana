@@ -12,7 +12,7 @@ import { HttpLogic } from '../../../shared/http';
 
 export interface DeleteConnectorApiLogicArgs {
   connectorId: string;
-  indexNameToDelete: string | null;
+  shouldDeleteIndex: boolean;
 }
 
 export interface DeleteConnectorApiLogicResponse {
@@ -21,13 +21,13 @@ export interface DeleteConnectorApiLogicResponse {
 
 export const deleteConnector = async ({
   connectorId,
-  indexNameToDelete,
+  shouldDeleteIndex = false,
 }: DeleteConnectorApiLogicArgs) => {
   return await HttpLogic.values.http.delete(
     `/internal/enterprise_search/connectors/${connectorId}`,
     {
       query: {
-        indexNameToDelete,
+        shouldDeleteIndex,
       },
     }
   );
