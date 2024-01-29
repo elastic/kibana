@@ -52,7 +52,6 @@ for (let i = 0; i < 500; i++) {
         <FormTestComponent
           onSubmit={onSubmit}
           formDefaultValue={{
-            description: 'default description',
             title: 'Default title',
             tags: [],
           }}
@@ -63,10 +62,9 @@ for (let i = 0; i < 500; i++) {
 
       const description = await screen.findByTestId('euiMarkdownEditorTextArea');
 
-      userEvent.clear(description);
       userEvent.paste(description, 'My new description');
 
-      userEvent.click(screen.getByText('Submit'));
+      userEvent.click(await screen.findByText('Submit'));
 
       await waitFor(() => {
         expect(onSubmit).toBeCalledWith({ description: 'My new description' }, true);
@@ -78,7 +76,6 @@ for (let i = 0; i < 500; i++) {
         <FormTestComponent
           onSubmit={onSubmit}
           formDefaultValue={{
-            description: 'default description',
             title: 'Default title',
             tags: [],
           }}
@@ -90,11 +87,9 @@ for (let i = 0; i < 500; i++) {
 
       const description = await screen.findByTestId('euiMarkdownEditorTextArea');
 
-      userEvent.clear(description);
-
       userEvent.paste(description, '  ');
 
-      userEvent.click(screen.getByText('Submit'));
+      userEvent.click(await screen.findByText('Submit'));
 
       await waitFor(() => {
         expect(onSubmit).toBeCalledWith({}, false);
@@ -110,7 +105,6 @@ for (let i = 0; i < 500; i++) {
         <FormTestComponent
           onSubmit={onSubmit}
           formDefaultValue={{
-            description: 'default description',
             title: 'Default title',
             tags: [],
           }}
@@ -120,12 +114,11 @@ for (let i = 0; i < 500; i++) {
         </FormTestComponent>
       );
 
-      const description = screen.getByTestId('euiMarkdownEditorTextArea');
+      const description = await screen.findByTestId('euiMarkdownEditorTextArea');
 
-      userEvent.clear(description);
       userEvent.paste(description, longDescription);
 
-      userEvent.click(screen.getByText('Submit'));
+      userEvent.click(await screen.findByText('Submit'));
 
       await waitFor(() => {
         expect(onSubmit).toBeCalledWith({}, false);
