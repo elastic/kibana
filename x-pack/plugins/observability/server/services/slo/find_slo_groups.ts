@@ -68,12 +68,24 @@ export class FindSLOGroups {
     const pagination = toPagination(params);
     const groupBy = params.groupBy;
     const kqlQuery = params.kqlQuery;
+    const filters = params.filters;
+    let parsedFilters: any = {};
+
+    try {
+      parsedFilters = JSON.parse(filters);
+    } catch (e) {
+      console.error(`Failed to parse filters: ${e.message}`);
+    }
     const response = await this.esClient.search<unknown, GroupAggregationsResponse>({
       index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
       size: 0,
       query: {
         bool: {
-          filter: [{ term: { spaceId: this.spaceId } }, getElastichsearchQueryOrThrow(kqlQuery)],
+          filter: [
+            { term: { spaceId: this.spaceId } },
+            getElastichsearchQueryOrThrow(kqlQuery), 
+            ...(parsedFilters.filter ?? [])
+          ],
         },
       },
       body: {

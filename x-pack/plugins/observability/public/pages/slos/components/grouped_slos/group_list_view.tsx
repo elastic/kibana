@@ -7,6 +7,7 @@
 
 import React, { memo, useState } from 'react';
 import { EuiPanel, EuiAccordion, EuiTablePagination, EuiSpacer } from '@elastic/eui';
+import { Filter } from '@kbn/es-query';
 import { useFetchSloList } from '../../../../hooks/slo/use_fetch_slo_list';
 import { SlosView } from '../slos_view';
 import type { SortDirection } from '../slo_list_search_bar';
@@ -20,6 +21,8 @@ interface Props {
   sort: string;
   direction: SortDirection;
   groupBy: string;
+  filters: Filter[];
+
 }
 
 export function GroupListView({
@@ -30,6 +33,7 @@ export function GroupListView({
   sort,
   direction,
   groupBy,
+  filters
 }: Props) {
   const query = kqlQuery ? `"${groupBy}": (${group}) and ${kqlQuery}` : `"${groupBy}": ${group}`;
   let groupName = group.toLowerCase();
@@ -50,6 +54,7 @@ export function GroupListView({
     sortDirection: direction,
     perPage: ITEMS_PER_PAGE,
     page: page + 1,
+    filters
   });
   const { results = [], total = 0 } = sloList ?? {};
 

@@ -27,7 +27,7 @@ export function GroupView({ isCompact, kqlQuery, sloView, sort, direction, group
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(DEFAULT_SLO_GROUPS_PAGE_SIZE);
   const { state } = useUrlSearchState();
-  const { tags } = state;
+  const { tags, filters } = state;
 
   const { data, isLoading, isError } = useFetchSloGroups({
     perPage,
@@ -35,6 +35,7 @@ export function GroupView({ isCompact, kqlQuery, sloView, sort, direction, group
     groupBy,
     kqlQuery,
     tags,
+    filters
   });
   const { results = [], total = 0 } = data ?? {};
   const handlePageClick = (pageNumber: number) => {
@@ -71,6 +72,7 @@ export function GroupView({ isCompact, kqlQuery, sloView, sort, direction, group
               isCompact={isCompact}
               sort={sort}
               direction={direction}
+              filters={filters}
             />
           );
         })}

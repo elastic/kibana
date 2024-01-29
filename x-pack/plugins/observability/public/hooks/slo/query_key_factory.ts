@@ -22,6 +22,7 @@ interface SloGroupListFilter {
   perPage: number;
   groupBy: string;
   kqlQuery: string;
+  filters: string;
 }
 
 export const sloKeys = {
