@@ -40,7 +40,7 @@ export const PERCENTILE_95_I18N = (metric: string) =>
 
 export const RATE_I18N = (metric: string) =>
   i18n.translate('xpack.observability.customThreshold.rule.aggregators.rate', {
-    defaultMessage: 'Rate {metric}',
+    defaultMessage: 'Rate of {metric}',
     values: {
       metric,
     },
