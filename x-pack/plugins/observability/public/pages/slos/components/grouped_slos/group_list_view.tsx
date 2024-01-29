@@ -98,7 +98,7 @@ export function GroupListView({
                   <EuiFlexItem>
                     <span>
                       <EuiBadge color="danger">
-                        {i18n.translate('xpack.observability.slo.group.worst', {
+                        {i18n.translate('xpack.observability.slo.group.totalViolated', {
                           defaultMessage: '{total} Violated',
                           values: {
                             total: totalViolated,
@@ -129,7 +129,7 @@ export function GroupListView({
                 {totalViolated && (
                   <EuiFlexItem grow={false}>
                     <EuiStat
-                      description={i18n.translate('xpack.observability.slo.group.violatedTotal', {
+                      description={i18n.translate('xpack.observability.slo.group.violated', {
                         defaultMessage: 'Violated',
                       })}
                       title={totalViolated}
