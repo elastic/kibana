@@ -163,6 +163,7 @@ export const RulesCounters = ({
   if (benchmarkRulesStats.score.totalFindings === 0) {
     return (
       <EuiEmptyPrompt
+        data-test-subj={RULE_COUNTERS_TEST_SUBJ.RULE_COUNTERS_EMPTY_STATE}
         color="plain"
         icon={
           <EuiImage

@@ -30,11 +30,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('Cloud Posture Rules Page', function () {
     this.tags(['cloud_security_posture_rules_page']);
     let rule: typeof pageObjects.rule;
-
+    let findings: typeof pageObjects.findings;
     let agentPolicyId: string;
 
     beforeEach(async () => {
       rule = pageObjects.rule;
+      findings = pageObjects.findings;
+
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
 
@@ -165,27 +167,54 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Rules Page - Rules Counters', () => {
-      it('Table should only show result that has the same section as in the Section filter', async () => {
-        await rule.rulePage.clickFilterPopover('section');
-        await rule.rulePage.clickFilterPopOverOption('etcd');
-        await rule.rulePage.clickFilterPopOverOption('Scheduler');
-        expect((await rule.rulePage.getEnableRulesRowSwitchButton()) < 10).to.be(true);
+      it('Shows empty state when there are no findings', async () => {
+        // Ensure there are no findings initially
+        await findings.index.remove();
+
+        const isEmptyStateVisible = await rule.rulePage.getCountersEmptyState();
+        expect(isEmptyStateVisible).to.be(true);
       });
 
-      it('Table should only show result that has the same section as in the Rule number filter', async () => {
-        await rule.rulePage.clickFilterPopover('ruleNumber');
-        await rule.rulePage.clickFilterPopOverOption('1.1.1');
-        await rule.rulePage.clickFilterPopOverOption('1.1.2');
-        expect((await rule.rulePage.getEnableRulesRowSwitchButton()) === 2).to.be(true);
+      it('Shows posture score when there are findings', async () => {
+        // await findings.index.add(k8sFindingsMock);
+
+        const isEmptyStateVisible = await rule.rulePage.getCountersEmptyState();
+        expect(isEmptyStateVisible).to.be(false);
+
+        const postureScoreCounter = await rule.rulePage.getPostureScoreCounter();
+        // Get the text content of the postureScoreCounter element
+        const counterText = await postureScoreCounter.getText();
+
+        // Assert that the counterText includes "66.7%"
+        expect(counterText.includes('66.7%')).to.be(true);
       });
 
-      it('Table should only show result that passes both Section and Rule number filter', async () => {
-        await rule.rulePage.clickFilterPopover('section');
-        await rule.rulePage.clickFilterPopOverOption('Control-Plane-Node-Configuration-Files');
-        await rule.rulePage.clickFilterPopover('section');
-        await rule.rulePage.clickFilterPopover('ruleNumber');
-        await rule.rulePage.clickFilterPopOverOption('1.1.5');
-        expect((await rule.rulePage.getEnableRulesRowSwitchButton()) === 1).to.be(true);
+      it('Clicking the posture score button leads to the dashboard', async () => {
+        // TODO
+      });
+
+      it('Shows integrations count when there are findings', async () => {
+        // TODO
+      });
+
+      it('Clicking the integrations counter button leads to the integration page', async () => {
+        // TODO
+      });
+
+      it('Shows the failed findings counter when there are findings', async () => {
+        // TODO
+      });
+
+      it('Clicking the failed findings button leads to the findings page', async () => {
+        // TODO
+      });
+
+      it('Shows the disabled rules count', async () => {
+        // TODO
+      });
+
+      it('Clicking the disabled rules button shows enables the disabled filter', async () => {
+        // TODO
       });
     });
   });

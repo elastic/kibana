@@ -111,6 +111,10 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
+    getCountersEmptyState: async () => {
+      return await testSubjects.exists('rules-counters-empty-state');
+    },
+
     getPostureScoreCounter: async () => {
       return await testSubjects.find('rules-counters-posture-score-counter');
     },
