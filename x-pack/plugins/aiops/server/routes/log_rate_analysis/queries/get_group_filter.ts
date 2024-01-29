@@ -43,6 +43,7 @@ export function getGroupFilter(
           key: d.key,
           count: d.docCount,
           examples: [],
+          regex: '',
         },
       ])
     );

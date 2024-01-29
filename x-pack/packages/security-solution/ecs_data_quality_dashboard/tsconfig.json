@@ -25,5 +25,7 @@
     "@kbn/elastic-assistant",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/core",
+    "@kbn/core-notifications-browser",
+    "@kbn/core-notifications-browser-mocks",
   ]
 }
