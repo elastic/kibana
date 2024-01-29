@@ -54,6 +54,8 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
       const timeline = selectTimelineById(store.getState(), localTimelineId);
       const { savedSearch, version, templateTimelineId, templateTimelineVersion } = timeline;
       const timelineId = timeline.savedObjectId ?? null;
+      const { timelineId, timelineVersion, templateTimelineId, templateTimelineVersion } =
+        extractTimelineIdsAndVersions(timeline);
       const timelineTimeRange = inputsSelectors.timelineTimeRangeSelector(store.getState());
 
       store.dispatch(startTimelineSaving({ id: localTimelineId }));
@@ -67,17 +69,17 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
                 templateTimelineId,
                 templateTimelineVersion,
               },
-              savedSearch,
+              savedSearch: timeline.savedSearch,
             })
           : persistTimeline({
               timelineId,
-              version,
+              version: timelineVersion,
               timeline: {
                 ...convertTimelineAsInput(timeline, timelineTimeRange),
                 templateTimelineId,
                 templateTimelineVersion,
               },
-              savedSearch,
+              savedSearch: timeline.savedSearch,
             }));
 
         if (isTimelineErrorResponse(result)) {
@@ -282,4 +284,13 @@ function getErrorFromResponse(response: TimelineErrorResponse) {
   } else if ('statusCode' in response) {
     return { errorCode: response.statusCode, message: response.message };
   }
+}
+
+function extractTimelineIdsAndVersions(timeline: TimelineModel) {
+  return {
+    timelineId: timeline.savedObjectId ?? null,
+    timelineVersion: timeline.version,
+    templateTimelineId: timeline.templateTimelineId ?? null,
+    templateTimelineVersion: timeline.templateTimelineVersion ?? null,
+  };
 }
