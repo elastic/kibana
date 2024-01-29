@@ -22,7 +22,6 @@ import { FlyoutHeaderPanel } from '../flyout/header';
 import type { TimelineId, RowRenderer, TimelineTabs } from '../../../../common/types/timeline';
 import { TimelineType } from '../../../../common/api/timeline';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import { activeTimeline } from '../../containers/active_timeline_context';
 import { EVENTS_COUNT_BUTTON_CLASS_NAME, onTimelineTabKeyPressed } from './helpers';
 import * as i18n from './translations';
 import { TabsContent } from './tabs_content';
@@ -116,7 +115,6 @@ const StatefulTimelineComponent: React.FC<Props> = ({
           columns: defaultHeaders,
           dataViewId: selectedDataViewIdSourcerer,
           indexNames: selectedPatternsSourcerer,
-          expandedDetail: activeTimeline.getExpandedDetail(),
           show: false,
         })
       );
