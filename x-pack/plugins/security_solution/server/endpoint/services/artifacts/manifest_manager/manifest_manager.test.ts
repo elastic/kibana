@@ -80,12 +80,9 @@ describe('ManifestManager', () => {
   const ARTIFACT_NAME_BLOCKLISTS_WINDOWS = 'endpoint-blocklist-windows-v1';
   const ARTIFACT_NAME_BLOCKLISTS_LINUX = 'endpoint-blocklist-linux-v1';
 
-  const mockPolicyListIdsResponse = (items: string[]) =>
-    jest.fn().mockResolvedValue({
-      items,
-      page: 1,
-      per_page: 100,
-      total: items.length,
+  const getMockPolicyFetchAllItemIds = (items: string[]) =>
+    jest.fn(async function* () {
+      yield items;
     });
 
   let ARTIFACTS: InternalArtifactCompleteSchema[] = [];
@@ -277,14 +274,10 @@ describe('ManifestManager', () => {
 
       expect(manifest?.getAllArtifacts()).toStrictEqual(ARTIFACTS.slice(1, 5));
 
-      expect(manifestManagerContext.logger.error).toHaveBeenCalledWith(
-        new InvalidInternalManifestError(
-          `artifact id [${ARTIFACT_ID_EXCEPTIONS_MACOS}] not found!`,
-          {
-            entry: ARTIFACTS_BY_ID[ARTIFACT_ID_EXCEPTIONS_MACOS],
-            action: 'removed from internal ManifestManger tracking map',
-          }
-        )
+      expect(manifestManagerContext.logger.warn).toHaveBeenCalledWith(
+        "Missing artifacts detected! Internal artifact manifest (SavedObject version [2.0.0]) references [1] artifact IDs that don't exist.\n" +
+          "First 10 below (run with logging set to 'debug' to see all):\n" +
+          'endpoint-exceptionlist-macos-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3'
       );
     });
   });
@@ -326,7 +319,9 @@ describe('ManifestManager', () => {
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({});
-      context.packagePolicyService.listIds = mockPolicyListIdsResponse([TEST_POLICY_ID_1]);
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
 
       context.savedObjectsClient.create = jest
         .fn()
@@ -388,7 +383,9 @@ describe('ManifestManager', () => {
         .mockImplementation((_type: string, object: InternalManifestSchema) => ({
           attributes: object,
         }));
-      context.packagePolicyService.listIds = mockPolicyListIdsResponse([TEST_POLICY_ID_1]);
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
 
       const manifest = await manifestManager.buildNewManifest();
 
@@ -459,7 +456,9 @@ describe('ManifestManager', () => {
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
         [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
       });
-      context.packagePolicyService.listIds = mockPolicyListIdsResponse([TEST_POLICY_ID_1]);
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
       context.savedObjectsClient.create = jest
         .fn()
         .mockImplementation((_type: string, object: InternalManifestSchema) => ({
@@ -575,7 +574,7 @@ describe('ManifestManager', () => {
         .mockImplementation((_type: string, object: InternalManifestSchema) => ({
           attributes: object,
         }));
-      context.packagePolicyService.listIds = mockPolicyListIdsResponse([
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
         TEST_POLICY_ID_1,
         TEST_POLICY_ID_2,
       ]);
@@ -678,7 +677,7 @@ describe('ManifestManager', () => {
           linux: [trustedAppListItem, trustedAppListItemPolicy2],
         },
       });
-      context.packagePolicyService.listIds = mockPolicyListIdsResponse([
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
         TEST_POLICY_ID_1,
         TEST_POLICY_ID_2,
       ]);
@@ -794,7 +793,9 @@ describe('ManifestManager', () => {
         .mockImplementation((_type: string, object: InternalManifestSchema) => ({
           attributes: object,
         }));
-      context.packagePolicyService.listIds = mockPolicyListIdsResponse([TEST_POLICY_ID_1]);
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
 
       const manifest = await manifestManager.buildNewManifest();
 
@@ -877,7 +878,9 @@ describe('ManifestManager', () => {
         .mockImplementation((_type: string, object: InternalManifestSchema) => ({
           attributes: object,
         }));
-      context.packagePolicyService.listIds = mockPolicyListIdsResponse([TEST_POLICY_ID_1]);
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
 
       const manifest = await manifestManager.buildNewManifest();
 
@@ -959,7 +962,9 @@ describe('ManifestManager', () => {
         .mockImplementation((_type: string, object: InternalManifestSchema) => ({
           attributes: object,
         }));
-      context.packagePolicyService.listIds = mockPolicyListIdsResponse([TEST_POLICY_ID_1]);
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
 
       const manifest = await manifestManager.buildNewManifest();
 
@@ -1025,7 +1030,9 @@ describe('ManifestManager', () => {
         .mockImplementation((_type: string, object: InternalManifestSchema) => ({
           attributes: object,
         }));
-      context.packagePolicyService.listIds = mockPolicyListIdsResponse([TEST_POLICY_ID_1]);
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
 
       const manifest = await manifestManager.buildNewManifest();
 
@@ -1067,7 +1074,9 @@ describe('ManifestManager', () => {
         .mockImplementation((_type: string, object: InternalManifestSchema) => ({
           attributes: object,
         }));
-      context.packagePolicyService.listIds = mockPolicyListIdsResponse([TEST_POLICY_ID_1]);
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
 
       const manifest = await manifestManager.buildNewManifest();
 
@@ -1298,12 +1307,9 @@ describe('ManifestManager', () => {
   });
 
   describe('tryDispatch', () => {
-    const mockPolicyListResponse = (items: PackagePolicy[]) =>
-      jest.fn().mockResolvedValue({
-        items,
-        page: 1,
-        per_page: 100,
-        total: items.length,
+    const getMockPolicyFetchAllItems = (items: PackagePolicy[]) =>
+      jest.fn(async function* () {
+        yield items;
       });
 
     test('Should not dispatch if no policies', async () => {
@@ -1312,8 +1318,7 @@ describe('ManifestManager', () => {
       const manifest = new Manifest({ soVersion: '1.0.0' });
 
       manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
-
-      context.packagePolicyService.list = mockPolicyListResponse([]);
+      context.packagePolicyService.fetchAllItems = getMockPolicyFetchAllItems([]);
 
       await expect(manifestManager.tryDispatch(manifest)).resolves.toStrictEqual([]);
 
@@ -1327,7 +1332,7 @@ describe('ManifestManager', () => {
       const manifest = new Manifest({ soVersion: '1.0.0' });
       manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
 
-      context.packagePolicyService.list = mockPolicyListResponse([
+      context.packagePolicyService.fetchAllItems = getMockPolicyFetchAllItems([
         createPackagePolicyWithConfigMock({ id: TEST_POLICY_ID_1 }),
       ]);
 
@@ -1345,7 +1350,7 @@ describe('ManifestManager', () => {
       const manifest = new Manifest({ soVersion: '1.0.0' });
       manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
 
-      context.packagePolicyService.list = mockPolicyListResponse([
+      context.packagePolicyService.fetchAllItems = getMockPolicyFetchAllItems([
         createPackagePolicyWithConfigMock({
           id: TEST_POLICY_ID_1,
           config: {
@@ -1377,7 +1382,7 @@ describe('ManifestManager', () => {
       manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_2);
       manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_2);
 
-      context.packagePolicyService.list = mockPolicyListResponse([
+      context.packagePolicyService.fetchAllItems = getMockPolicyFetchAllItems([
         createPackagePolicyWithConfigMock({
           id: TEST_POLICY_ID_1,
           config: {
@@ -1445,7 +1450,7 @@ describe('ManifestManager', () => {
       manifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_2);
       manifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS, TEST_POLICY_ID_2);
 
-      context.packagePolicyService.list = mockPolicyListResponse([
+      context.packagePolicyService.fetchAllItems = getMockPolicyFetchAllItems([
         createPackagePolicyWithConfigMock({
           id: TEST_POLICY_ID_1,
           config: {
@@ -1515,7 +1520,7 @@ describe('ManifestManager', () => {
       const manifest = new Manifest({ soVersion: '1.0.0', semanticVersion: '1.0.1' });
       manifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
 
-      context.packagePolicyService.list = mockPolicyListResponse([
+      context.packagePolicyService.fetchAllItems = getMockPolicyFetchAllItems([
         createPackagePolicyWithConfigMock({
           id: TEST_POLICY_ID_1,
           config: {
@@ -1561,7 +1566,9 @@ describe('ManifestManager', () => {
       );
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({});
-      context.packagePolicyService.listIds = mockPolicyListIdsResponse([TEST_POLICY_ID_1]);
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
 
       context.savedObjectsClient.create = jest
         .fn()
@@ -1584,7 +1591,9 @@ describe('ManifestManager', () => {
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({});
-      context.packagePolicyService.listIds = mockPolicyListIdsResponse([TEST_POLICY_ID_1]);
+      context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
+        TEST_POLICY_ID_1,
+      ]);
 
       context.savedObjectsClient.create = jest
         .fn()

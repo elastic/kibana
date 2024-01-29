@@ -746,10 +746,11 @@ export class ManifestManager {
 
   private async listEndpointPolicyIds(): Promise<string[]> {
     const allPolicyIds: string[] = [];
-
-    for await (const itemIds of this.packagePolicyService.fetchAllItemIds(this.savedObjectsClient, {
+    const idFetcher = this.packagePolicyService.fetchAllItemIds(this.savedObjectsClient, {
       kuery: 'ingest-package-policies.package.name:endpoint',
-    })) {
+    });
+
+    for await (const itemIds of idFetcher) {
       allPolicyIds.push(...itemIds);
     }
 

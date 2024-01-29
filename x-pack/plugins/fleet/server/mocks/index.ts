@@ -31,6 +31,8 @@ import { packageServiceMock } from '../services/epm/package_service.mock';
 import type { UninstallTokenServiceInterface } from '../services/security/uninstall_token_service';
 import type { MessageSigningServiceInterface } from '../services/security';
 
+import { PackagePolicyMocks } from './package_policy.mocks';
+
 // Export all mocks from artifacts
 export * from '../services/artifacts/mocks';
 
@@ -146,8 +148,14 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
     getUpgradePackagePolicyInfo: jest.fn(),
     enrichPolicyWithDefaultsFromPackage: jest.fn(),
     findAllForAgentPolicy: jest.fn(),
-    fetchAllItems: jest.fn(),
-    fetchAllItemIds: jest.fn(),
+    fetchAllItems: jest.fn(async function* () {
+      yield Promise.resolve([PackagePolicyMocks.generatePackagePolicy({ id: '111' })]);
+      yield Promise.resolve([PackagePolicyMocks.generatePackagePolicy({ id: '222' })]);
+    }),
+    fetchAllItemIds: jest.fn(async function* () {
+      yield Promise.resolve(['111']);
+      yield Promise.resolve(['222']);
+    }),
   };
 };
 

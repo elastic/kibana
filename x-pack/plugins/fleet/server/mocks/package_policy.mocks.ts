@@ -7,6 +7,11 @@
 
 import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
 
+import type { SavedObject } from '@kbn/core-saved-objects-api-server';
+
+import { mapPackagePolicySavedObjectToPackagePolicy } from '../services/package_policies';
+
+import type { PackagePolicy } from '../../common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../common';
 
 import type { PackagePolicySOAttributes } from '../types';
@@ -45,6 +50,29 @@ const generatePackagePolicySOAttributesMock = (
   };
 };
 
+const generatePackagePolicyMock = (overrides: Partial<PackagePolicy> = {}) => {
+  return {
+    ...mapPackagePolicySavedObjectToPackagePolicy(generatePackagePolicySavedObjectMock()),
+    ...overrides,
+  };
+};
+
+const generatePackagePolicySavedObjectMock = (
+  soAttributes: PackagePolicySOAttributes = generatePackagePolicySOAttributesMock()
+): SavedObject<PackagePolicySOAttributes> => {
+  return {
+    score: 1,
+    id: 'so-123',
+    type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+    version: 'abc',
+    created_at: soAttributes.created_at,
+    updated_at: soAttributes.updated_at,
+    attributes: soAttributes,
+    references: [],
+    sort: ['created_at'],
+  };
+};
+
 const generatePackagePolicySavedObjectFindResponseMock = (
   soResults?: PackagePolicySOAttributes[]
 ): SavedObjectsFindResponse<PackagePolicySOAttributes> => {
@@ -77,4 +105,5 @@ const generatePackagePolicySavedObjectFindResponseMock = (
 export const PackagePolicyMocks = Object.freeze({
   generatePackagePolicySOAttributes: generatePackagePolicySOAttributesMock,
   generatePackagePolicySavedObjectFindResponse: generatePackagePolicySavedObjectFindResponseMock,
+  generatePackagePolicy: generatePackagePolicyMock,
 });
