@@ -625,6 +625,19 @@ describe('autocomplete', () => {
       ],
       '('
     );
+    testSuggestions(
+      'from a | eval a=raund()', // note the typo in round
+      [],
+      '('
+    );
+    testSuggestions(
+      'from a | eval a=raund(', // note the typo in round
+      []
+    );
+    testSuggestions(
+      'from a | eval raund(', // note the typo in round
+      []
+    );
     testSuggestions('from a | eval a=round(numberField) ', [
       ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true }, ['number']),
       '|',
