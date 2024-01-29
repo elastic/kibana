@@ -11,11 +11,14 @@ import { catchError, tap } from 'rxjs/operators';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
 import { SqlQueryRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SqlGetAsyncResponse } from '@elastic/elasticsearch/lib/api/types';
+import {
+  getCommonDefaultAsyncSubmitParams,
+  getCommonDefaultAsyncGetParams,
+} from '../common/async_utils';
 import { getKbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type { IAsyncSearchOptions } from '../../../../common';
 import { IKibanaSearchRequest, IKibanaSearchResponse, pollSearch } from '../../../../common';
-import { getDefaultAsyncGetParams, getDefaultAsyncSubmitParams } from './request_utils';
 import { toAsyncKibanaSearchResponse } from './response_utils';
 import { SearchConfigSchema } from '../../../../config';
 
@@ -52,14 +55,14 @@ export const esqlAsyncSearchStrategyProvider = (
     const search = async () => {
       const params = id
         ? {
-            ...getDefaultAsyncGetParams(searchConfig, options),
+            ...getCommonDefaultAsyncGetParams(searchConfig, options),
             ...(request.params?.keep_alive ? { keep_alive: request.params.keep_alive } : {}),
             ...(request.params?.wait_for_completion_timeout
               ? { wait_for_completion_timeout: request.params.wait_for_completion_timeout }
               : {}),
           }
         : {
-            ...(await getDefaultAsyncSubmitParams(uiSettingsClient, searchConfig, options)),
+            ...(await getCommonDefaultAsyncSubmitParams(searchConfig, options)),
             ...request.params,
           };
       const { body, headers, meta } = id
