@@ -13,6 +13,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useTheme } from 'styled-components';
 
 import type { FleetServerHost } from '../../../types';
+import { useStartServices } from '../../../hooks';
+import { DEFAULT_FLEET_SERVER_HOST_ID } from '../../../../../../common/constants';
 
 interface FleetServerHostSelectProps {
   selectedFleetServerHost?: FleetServerHost;
@@ -27,14 +29,24 @@ export const FleetServerHostSelect: React.FunctionComponent<FleetServerHostSelec
 }) => {
   const theme = useTheme() as EuiTheme;
 
+  const { cloud } = useStartServices();
+  const isServerless = cloud?.isServerlessEnabled ?? false;
+
   const fleetServerHostsOptions = useMemo(
     () => [
-      ...fleetServerHosts.map((fleetServerHost) => {
-        return {
-          inputDisplay: `${fleetServerHost.name} (${fleetServerHost.host_urls[0]})`,
-          value: fleetServerHost.id,
-        };
-      }),
+      ...fleetServerHosts
+        .filter((fleetServerHost) => {
+          if (!isServerless) {
+            return true;
+          }
+          return fleetServerHost.id === DEFAULT_FLEET_SERVER_HOST_ID; // TODO: is this correct? locally default fs host has id "docker"
+        })
+        .map((fleetServerHost) => {
+          return {
+            inputDisplay: `${fleetServerHost.name} (${fleetServerHost.host_urls[0]})`,
+            value: fleetServerHost.id,
+          };
+        }),
       {
         icon: <EuiIcon type="plus" size="m" color="primary" />,
         inputDisplay: (
@@ -55,7 +67,7 @@ export const FleetServerHostSelect: React.FunctionComponent<FleetServerHostSelec
         value: '@@##ADD_FLEET_SERVER_HOST##@@',
       },
     ],
-    [fleetServerHosts, theme.eui.euiColorPrimary]
+    [fleetServerHosts, theme.eui.euiColorPrimary, isServerless]
   );
 
   return (
@@ -78,6 +90,7 @@ export const FleetServerHostSelect: React.FunctionComponent<FleetServerHostSelec
         }
         valueOfSelected={selectedFleetServerHost?.id}
         options={fleetServerHostsOptions}
+        disabled={isServerless}
       />
       <EuiSpacer size="m" />
     </>
