@@ -7,9 +7,17 @@
 
 import type { FC } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiPanel,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/css';
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import { DocumentStatus } from './status';
 import { DocumentSeverity } from './severity';
@@ -20,7 +28,7 @@ import { useRightPanelContext } from '../context';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { RenderRuleName } from '../../../../timelines/components/timeline/body/renderers/formatted_field_helpers';
 import { SIGNAL_RULE_NAME_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
-import { FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
+import { FLYOUT_HEADER_TITLE_TEST_ID, ALERT_SUMMARY_PANEL_TEST_ID } from './test_ids';
 import { Assignees } from './assignees';
 import { FlyoutTitle } from '../../../shared/components/flyout_title';
 
@@ -39,6 +47,7 @@ export const HeaderTitle: FC = memo(() => {
   const { isAlert, ruleName, timestamp, ruleId } = useBasicDataFromDetailsData(
     dataFormattedForFieldBrowser
   );
+  const { euiTheme } = useEuiTheme();
 
   const ruleTitle = useMemo(
     () =>
@@ -102,25 +111,41 @@ export const HeaderTitle: FC = memo(() => {
         {isAlert && !isEmpty(ruleName) ? ruleTitle : eventTitle}
       </div>
       <EuiSpacer size="m" />
-      <EuiFlexGroup direction="row" gutterSize="m" responsive={false}>
-        {isAlert && !isPreview && (
-          <EuiFlexItem grow={false}>
-            <DocumentStatus />
-          </EuiFlexItem>
-        )}
-        <EuiFlexItem grow={false}>
-          <RiskScore />
-        </EuiFlexItem>
-        {isAlert && !isPreview && (
-          <EuiFlexItem grow={false}>
-            <Assignees
-              eventId={eventId}
-              assignedUserIds={alertAssignees}
-              onAssigneesUpdated={onAssigneesUpdated}
-            />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+      {isAlert && (
+        <EuiPanel
+          hasShadow={false}
+          hasBorder
+          css={css`
+            padding: ${euiTheme.size.m} ${euiTheme.size.s};
+          `}
+          data-test-subj={ALERT_SUMMARY_PANEL_TEST_ID}
+        >
+          <EuiFlexGroup direction="row" gutterSize="m" responsive={false}>
+            <EuiFlexItem
+              css={css`
+                border-right: ${euiTheme.border.thin};
+              `}
+            >
+              <DocumentStatus />
+            </EuiFlexItem>
+            <EuiFlexItem
+              css={css`
+                border-right: ${euiTheme.border.thin};
+              `}
+            >
+              <RiskScore />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <Assignees
+                eventId={eventId}
+                assignedUserIds={alertAssignees}
+                onAssigneesUpdated={onAssigneesUpdated}
+                isPreview={isPreview}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      )}
     </>
   );
 });

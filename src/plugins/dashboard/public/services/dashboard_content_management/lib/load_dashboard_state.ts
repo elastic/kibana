@@ -63,8 +63,8 @@ export const loadDashboardState = async ({
   /**
    * Load the saved object from Content Management
    */
-  let rawDashboardContent;
-  let resolveMeta;
+  let rawDashboardContent: DashboardCrudTypes['GetOut']['item'];
+  let resolveMeta: DashboardCrudTypes['GetOut']['meta'];
 
   const cachedDashboard = dashboardContentManagementCache.fetchDashboard(id);
   if (cachedDashboard) {
@@ -81,8 +81,15 @@ export const loadDashboardState = async ({
         throw new SavedObjectNotFound(DASHBOARD_CONTENT_ID, id);
       });
 
-    dashboardContentManagementCache.addDashboard(result);
     ({ item: rawDashboardContent, meta: resolveMeta } = result);
+    const { outcome: loadOutcome } = resolveMeta;
+    if (loadOutcome !== 'aliasMatch') {
+      /**
+       * Only add the dashboard to the cache if it does not require a redirect - otherwise, the meta
+       * alias info gets cached and prevents the dashboard contents from being updated
+       */
+      dashboardContentManagementCache.addDashboard(result);
+    }
   }
 
   if (!rawDashboardContent || !rawDashboardContent.version) {
