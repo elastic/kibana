@@ -1267,11 +1267,15 @@ describe('Observability AI Assistant client', () => {
 
       await requestAlertsFunctionCall();
 
+      await requestAlertsFunctionCall();
+
+      await requestAlertsFunctionCall();
+
       await finished(stream);
     });
 
     it('executed the function no more than three times', () => {
-      expect(functionClientMock.executeFunction).toHaveBeenCalledTimes(3);
+      expect(functionClientMock.executeFunction).toHaveBeenCalledTimes(5);
     });
 
     it('does not give the LLM the choice to call a function anymore', () => {

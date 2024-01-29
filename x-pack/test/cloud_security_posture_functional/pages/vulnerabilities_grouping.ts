@@ -132,6 +132,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
       it('groups vulnerabilities by resource and sort by number of vulnerabilities desc', async () => {
         const groupSelector = findings.groupSelector();
+        await groupSelector.openDropDown();
         await groupSelector.setValue('Resource');
         const grouping = await findings.findingsGrouping();
 
