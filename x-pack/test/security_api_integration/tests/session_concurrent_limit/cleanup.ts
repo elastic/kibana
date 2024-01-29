@@ -199,17 +199,35 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should properly clean up sessions that exceeded concurrent session limit even for multiple providers', async function () {
-      this.timeout(100000);
+      this.timeout(160000);
 
       log.debug(`Log in as ${testUser.username} and SAML user 3 times each with a 0.5s delay.`);
 
       const basicSessionCookieOne = await loginWithBasic(testUser);
+      await retry.tryForTime(20000, async () => {
+        expect(await getNumberOfSessionDocuments()).to.be(1);
+      });
+
       const samlSessionCookieOne = await loginWithSAML();
-      await setTimeoutAsync(500);
+      await retry.tryForTime(20000, async () => {
+        expect(await getNumberOfSessionDocuments()).to.be(2);
+      });
+
       const basicSessionCookieTwo = await loginWithBasic(testUser);
+      await retry.tryForTime(20000, async () => {
+        expect(await getNumberOfSessionDocuments()).to.be(3);
+      });
+
       const samlSessionCookieTwo = await loginWithSAML();
-      await setTimeoutAsync(500);
+      await retry.tryForTime(20000, async () => {
+        expect(await getNumberOfSessionDocuments()).to.be(4);
+      });
+
       const basicSessionCookieThree = await loginWithBasic(testUser);
+      await retry.tryForTime(20000, async () => {
+        expect(await getNumberOfSessionDocuments()).to.be(5);
+      });
+
       const samlSessionCookieThree = await loginWithSAML();
 
       log.debug('Waiting for all sessions to be persisted...');
@@ -221,7 +239,7 @@ export default function ({ getService }: FtrProviderContext) {
       await runCleanupTaskSoon();
       log.debug('Waiting for cleanup job to run...');
       await retry.tryForTime(30000, async () => {
-        // The oldest session should have been removed, but the rest should still be valid.
+        // The oldest sessions should have been removed, but the rest should still be valid.
         expect(await getNumberOfSessionDocuments()).to.be(4);
       });
 
