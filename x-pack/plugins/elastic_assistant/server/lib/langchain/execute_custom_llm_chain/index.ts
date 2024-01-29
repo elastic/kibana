@@ -202,6 +202,7 @@ async function readStream(
         addOp.value.length
       ) {
         push({ type: 'content', payload: addOp.value });
+        await new Promise((resolve) => setTimeout(resolve, 0));
       }
     }
   }
