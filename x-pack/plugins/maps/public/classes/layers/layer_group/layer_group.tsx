@@ -111,13 +111,7 @@ export class LayerGroup implements ILayer {
   isPreviewLayer(): boolean {
     return !!this._descriptor.__isPreviewLayer;
   }
-
-  supportsElasticsearchFilters(): boolean {
-    return this.getChildren().some((child) => {
-      return child.supportsElasticsearchFilters();
-    });
-  }
-
+  
   async supportsFitToBounds(): Promise<boolean> {
     return this._asyncSomeChildren('supportsFitToBounds');
   }

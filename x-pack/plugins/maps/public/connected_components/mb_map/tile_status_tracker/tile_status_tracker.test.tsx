@@ -81,8 +81,8 @@ class MockLayer {
 
   getSource() {
     return {
-      isESSource() {
-        return true;
+      getIndexPatternId() {
+        return '1234';
       },
     };
   }
@@ -281,9 +281,6 @@ describe('TileStatusTracker', () => {
       const geojsonLayer1 = createMockLayer('layer1', 'layer1Source');
       geojsonLayer1.getSource = () => {
         return {
-          isESSource() {
-            return true;
-          },
           isMvt() {
             return false;
           },
