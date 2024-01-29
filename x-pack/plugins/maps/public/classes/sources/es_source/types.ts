@@ -13,15 +13,16 @@ import type { DataView } from '@kbn/data-plugin/common';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { ISource } from '../source';
 import { type IVectorSource, hasVectorSourceMethod } from '../vector_source';
-import {
-  DynamicStylePropertyOptions,
-  StyleMetaData,
-} from '../../../../common/descriptor_types';
+import { DynamicStylePropertyOptions, StyleMetaData } from '../../../../common/descriptor_types';
 import { IVectorStyle } from '../../styles/vector/vector_style';
 import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 
 export function isESVectorTileSource(source: ISource): boolean {
-  return hasVectorSourceMethod(source, 'isMvt') && source.isMvt() && hasESSourceMethod(source, 'getIndexPatternId');
+  return (
+    hasVectorSourceMethod(source, 'isMvt') &&
+    source.isMvt() &&
+    hasESSourceMethod(source, 'getIndexPatternId')
+  );
 }
 
 export function isESSource(source: ISource): source is IESSource {

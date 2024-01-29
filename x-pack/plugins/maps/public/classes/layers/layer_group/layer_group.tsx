@@ -111,7 +111,7 @@ export class LayerGroup implements ILayer {
   isPreviewLayer(): boolean {
     return !!this._descriptor.__isPreviewLayer;
   }
-  
+
   async supportsFitToBounds(): Promise<boolean> {
     return this._asyncSomeChildren('supportsFitToBounds');
   }

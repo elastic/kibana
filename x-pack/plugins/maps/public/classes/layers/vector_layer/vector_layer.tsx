@@ -51,7 +51,7 @@ import {
   VectorStyleRequestMeta,
 } from '../../../../common/descriptor_types';
 import { IVectorSource } from '../../sources/vector_source';
-import { isESVectorTileSource } from '../../sources/es_source'
+import { isESVectorTileSource } from '../../sources/es_source';
 import { LayerIcon, ILayer, LayerMessage } from '../layer';
 import { InnerJoin } from '../../joins/inner_join';
 import { isSpatialJoin } from '../../joins/is_spatial_join';
