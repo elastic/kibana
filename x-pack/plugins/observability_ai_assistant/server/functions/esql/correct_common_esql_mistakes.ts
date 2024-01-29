@@ -67,12 +67,31 @@ function replaceAsKeywordWithAssignments(command: string) {
   });
 }
 
+function replaceFunctionsinSortWithEval(command: string) {
+  const sortFunction = command.match(/[a-zA-Z_]+\([^\)]*\)(\.[^\)]*\))?/g)?.[0];
+  return (
+    'EVAL sort_key = ' +
+    sortFunction +
+    '\n| ' +
+    command.replaceAll(/[a-zA-Z_]+\([^\)]*\)(\.[^\)]*\))?/g, 'sort_key ')
+  );
+}
+
+function verifySortColumnInKeep(keepCommand: string, sortCommand: string) {
+  const sortColumn = sortCommand.split(' ')[1];
+  if (!keepCommand.includes(sortColumn)) {
+    return keepCommand + ', ' + sortColumn;
+  } else {
+    return keepCommand;
+  }
+}
+
 export function correctCommonEsqlMistakes(content: string, log: Logger) {
   return content.replaceAll(/```esql\n(.*?)\n```/gms, (_, query: string) => {
     const commands = splitIntoCommands(query);
 
     const correctedFormattedQuery = commands
-      .map((command) => {
+      .map((command, index, array) => {
         const commandName = command.match(/^([A-Za-z]+)/)?.[1];
 
         let formattedCommand = command;
@@ -92,6 +111,20 @@ export function correctCommonEsqlMistakes(content: string, log: Logger) {
           case 'STATS':
             formattedCommand = replaceAsKeywordWithAssignments(formattedCommand);
             break;
+
+          case 'SORT':
+            if (formattedCommand.match(/[a-zA-Z_]+\([^\)]*\)(\.[^\)]*\))?/g)) {
+              formattedCommand = replaceFunctionsinSortWithEval(formattedCommand);
+              break;
+            }
+
+          case 'KEEP':
+            if (array.length < index + 1) {
+              if (array[index + 1].match(/^([A-Za-z]+)/)?.[1] === 'SORT') {
+                formattedCommand = verifySortColumnInKeep(formattedCommand, array[index + 1]);
+                break;
+              }
+            }
         }
         return formattedCommand;
       })
