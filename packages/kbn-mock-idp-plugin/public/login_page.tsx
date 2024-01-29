@@ -17,35 +17,27 @@ import {
   EuiComboBoxOptionOption,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import React, { ChangeEvent, FunctionComponent } from 'react';
+import React, { ChangeEvent, useEffect, useState, useRef } from 'react';
 import { FormikProvider, useFormik, Field, Form } from 'formik';
-
-import {
-  MOCK_IDP_SECURITY_ROLE_NAMES,
-  MOCK_IDP_OBSERVABILITY_ROLE_NAMES,
-  MOCK_IDP_SEARCH_ROLE_NAMES,
-} from '@kbn/mock-idp-utils/src/constants';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { useAuthenticator } from './role_switcher';
 
-export interface LoginPageProps {
-  projectType?: string;
-}
-
-export const LoginPage: FunctionComponent<LoginPageProps> = ({ projectType }) => {
-  const roles =
-    projectType === 'security'
-      ? MOCK_IDP_SECURITY_ROLE_NAMES
-      : projectType === 'observability'
-      ? MOCK_IDP_OBSERVABILITY_ROLE_NAMES
-      : MOCK_IDP_SEARCH_ROLE_NAMES;
+export const LoginPage = () => {
+  const { services } = useKibana<CoreStart>();
+  const [roles, setRoles] = useState<string[]>([]);
+  const isRolesDefined = () => roles.length > 0;
 
   const [, switchCurrentUser] = useAuthenticator(true);
   const formik = useFormik({
     initialValues: {
       full_name: 'Test User',
-      role: roles[0],
+      role: undefined,
     },
     async onSubmit(values) {
+      if (!values.role) {
+        return;
+      }
       await switchCurrentUser({
         username: sanitizeUsername(values.full_name),
         full_name: values.full_name,
@@ -54,6 +46,22 @@ export const LoginPage: FunctionComponent<LoginPageProps> = ({ projectType }) =>
       });
     },
   });
+
+  const formikRef = useRef(formik);
+
+  useEffect(() => {
+    formikRef.current = formik;
+  }, [formik]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await services.http.get<{ roles: string[] }>('/mock_idp/supported_roles');
+      setRoles(response.roles);
+      formikRef.current.setFieldValue('role', response.roles[0]);
+    };
+
+    fetchData();
+  }, [services]);
 
   return (
     <FormikProvider value={formik}>
@@ -98,6 +106,8 @@ export const LoginPage: FunctionComponent<LoginPageProps> = ({ projectType }) =>
                   <EuiFormRow error={formik.errors.role} isInvalid={!!formik.errors.role}>
                     <Field
                       as={EuiComboBox}
+                      isLoading={!isRolesDefined()}
+                      disabled={!isRolesDefined()}
                       name="role"
                       placeholder="Select your role"
                       singleSelection={{ asPlainText: true }}
@@ -129,7 +139,7 @@ export const LoginPage: FunctionComponent<LoginPageProps> = ({ projectType }) =>
               actions={[
                 <EuiButton
                   type="submit"
-                  disabled={!formik.isValid}
+                  disabled={!formik.isValid || !isRolesDefined()}
                   isLoading={formik.isSubmitting}
                   fill
                 >

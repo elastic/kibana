@@ -58,10 +58,9 @@ describe('ALL - Live Query', { tags: ['@ess', '@serverless'] }, () => {
       expect(interception.response?.body.data.queries[0]).to.have.property('timeout', 890);
     });
     checkResults();
-    cy.get('[data-gridcell-column-index="0"][data-gridcell-row-index="0"]').should('exist');
-    cy.get(
-      '[data-gridcell-column-index="0"][data-gridcell-row-index="0"] [data-datagrid-interactable="true"]'
-    ).click();
+    const firstCell = '[data-gridcell-column-index="0"][data-gridcell-row-index="0"]';
+    cy.get(firstCell).should('exist');
+    cy.get(firstCell).find('[data-euigrid-tab-managed="true"]').click();
     cy.url().should('include', 'app/fleet/agents/');
   });
 
