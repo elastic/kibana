@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { checkKibanaVersion } from './upgrade_handler';
+import { checkFleetServerVersion, checkKibanaVersion } from './upgrade_handler';
 
 describe('upgrade handler', () => {
   describe('checkKibanaVersion', () => {
@@ -15,7 +15,7 @@ describe('upgrade handler', () => {
 
     it('should throw if upgrade version is higher than kibana version', () => {
       expect(() => checkKibanaVersion('8.5.0', '8.4.0')).toThrowError(
-        'cannot upgrade agent to 8.5.0 because it is higher than the installed kibana version 8.4.0'
+        'Cannot upgrade agent to 8.5.0 because it is higher than the installed kibana version 8.4.0'
       );
     });
 
@@ -40,6 +40,19 @@ describe('upgrade handler', () => {
     it('should not throw if force is specified and major and minor is newer', () => {
       expect(() => checkKibanaVersion('7.5.0', '8.4.0', true)).not.toThrowError();
       expect(() => checkKibanaVersion('8.4.0', '8.4.0', true)).not.toThrowError();
+    });
+  });
+
+  describe('checkFleetServerVersion', () => {
+    it('should not throw if no force is specified and patch is newer', () => {
+      const fleetServers = [
+        { local_metadata: { elastic: { agent: { version: '8.3.0' } } } },
+        { local_metadata: { elastic: { agent: { version: '8.4.0' } } } },
+      ] as any;
+      expect(() => checkFleetServerVersion('8.4.1', fleetServers, false)).not.toThrowError();
+      expect(() =>
+        checkFleetServerVersion('8.4.1-SNAPSHOT', fleetServers, false)
+      ).not.toThrowError();
     });
   });
 });
