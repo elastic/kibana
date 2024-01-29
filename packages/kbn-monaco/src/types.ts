@@ -48,7 +48,7 @@ export interface EditorError {
   endLineNumber: number;
   endColumn: number;
   message: string;
-  code: string;
+  code?: string | undefined;
 }
 
 export interface LangValidation {

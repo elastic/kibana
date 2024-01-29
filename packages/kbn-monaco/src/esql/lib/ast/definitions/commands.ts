@@ -320,6 +320,7 @@ export const commandDefinitions: CommandDefinition[] = [
               },
             }),
             type: 'warning' as const,
+            code: 'duplicateSettingWarning',
           }))
         );
       }
