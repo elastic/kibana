@@ -159,7 +159,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
             description={
               <FormattedMessage
                 id="xpack.security.management.apiKeys.table.apiKeysAllDescription"
-                defaultMessage="Allow external services to access the Elastic Stack on behalf of a user."
+                defaultMessage="Allow external services to access your Elastic Stack."
               />
             }
             rightSideItems={
@@ -571,7 +571,7 @@ export const TypesFilterButton: FunctionComponent<TypesFilterButtonProps> = ({
         >
           <FormattedMessage
             id="xpack.security.accountManagement.apiKeyBadge.restTitle"
-            defaultMessage="Personal"
+            defaultMessage="User"
           />
         </EuiFilterButton>
       ) : null}
@@ -593,7 +593,7 @@ export const TypesFilterButton: FunctionComponent<TypesFilterButtonProps> = ({
         >
           <FormattedMessage
             id="xpack.security.accountManagement.apiKeyBadge.crossClusterLabel"
-            defaultMessage="Cross-Cluster"
+            defaultMessage="Cross-cluster"
           />
         </EuiFilterButton>
       ) : null}
@@ -786,7 +786,7 @@ export const ApiKeyBadge: FunctionComponent<ApiKeyBadgeProps> = ({ type }) => {
       <EuiBadge color="hollow" iconType="cluster">
         <FormattedMessage
           id="xpack.security.accountManagement.apiKeyBadge.crossClusterLabel"
-          defaultMessage="Cross-Cluster"
+          defaultMessage="Cross-cluster"
         />
       </EuiBadge>
     </EuiToolTip>
@@ -818,7 +818,7 @@ export const ApiKeyBadge: FunctionComponent<ApiKeyBadgeProps> = ({ type }) => {
       <EuiBadge color="hollow" iconType="user">
         <FormattedMessage
           id="xpack.security.accountManagement.apiKeyBadge.restTitle"
-          defaultMessage="Personal"
+          defaultMessage="User"
         />
       </EuiBadge>
     </EuiToolTip>
