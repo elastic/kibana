@@ -32,7 +32,6 @@ import {
   type MlKibanaUrlConfig,
   type MlAnomaliesTableRecord,
   MLCATEGORY,
-  ML_JOB_AGGREGATION,
 } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTimeSeconds, timeFormatter } from '@kbn/ml-date-utils';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
@@ -64,16 +63,6 @@ import { useMlKibana } from '../../contexts/kibana';
 import { getFieldTypeFromMapping } from '../../services/mapping_service';
 
 import { getQueryStringForInfluencers } from './get_query_string_for_influencers';
-
-const LOG_RATE_ANALYSIS_ML_FUNCTIONS = [
-  ML_JOB_AGGREGATION.COUNT,
-  ML_JOB_AGGREGATION.LOW_COUNT,
-  ML_JOB_AGGREGATION.HIGH_COUNT,
-  ML_JOB_AGGREGATION.NON_ZERO_COUNT,
-  ML_JOB_AGGREGATION.LOW_NON_ZERO_COUNT,
-  ML_JOB_AGGREGATION.HIGH_NON_ZERO_COUNT,
-] as const;
-type LogRateAnalysisMlFunctions = typeof LOG_RATE_ANALYSIS_ML_FUNCTIONS[number];
 
 const LOG_RATE_ANALYSIS_MARGIN_FACTOR = 20;
 const LOG_RATE_ANALYSIS_BASELINE_FACTOR = 15;
@@ -377,12 +366,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     };
 
     const generateLogRateAnalysisUrl = async () => {
-      if (
-        !LOG_RATE_ANALYSIS_ML_FUNCTIONS.includes(
-          props.anomaly.source.function as LogRateAnalysisMlFunctions
-        ) &&
-        !unmounted
-      ) {
+      if (props.anomaly.source.function_description === 'count' && !unmounted) {
         setOpenInLogRateAnalysisUrl(undefined);
         return;
       }
