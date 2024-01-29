@@ -54,17 +54,19 @@ pattern.
 Aggregation functions are not supported for EVAL.
 - GROK: extracts structured data out of a string, using a grok pattern
 - KEEP: keeps one or more columns, drop the ones that are not kept
-  only the colums included in KEEP can be used after a KEEP command
+  only the colums in the KEEP command can be used after a KEEP command
 - LIMIT: returns the first n number of rows. The maximum value for this
 is 10000.
 - MV_EXPAND: expands multi-value columns into a single row per value
 - RENAME: renames a column
-- SORT: sorts the row in a table, does not support direct functions like COUNT()
-  only supports column names or aliases
+- SORT: sorts the row in a table. Does not support sorting by functions like COUNT(*),
+  only supports sorting by column names or aliases, so it must declare before 
+  with EVAL a new column with the function (EVAL count = COUNT(*) | SORT count)
+  If SORT is used after a KEEP command, it can only use column names in KEEP
 - STATS ... BY: groups rows according to a common value and calculates
   one or more aggregated values over the grouped rows. This commands only
-  supports aggregation functions declared below, and no other functions or operators.
-  This command does not support numerical operations (+, -, /), that should be done with EVAL
+  supports aggregation functions declared below, and no other functions, 
+  operators, combinations of aggregations or mathematical operations (+, -, /), that should be done with EVAL
 - WHERE: produces a table that contains all the rows from the input table
   for which the provided condition returns true. WHERE supports the same
   functions as EVAL.
@@ -201,6 +203,8 @@ ROW a = "2023-01-23T12:15:00.000Z - some text - 127.0.0.1"
 ```esql
 FROM employees
 | WHERE first_name LIKE "?b*"
+| EVAL doc_count = COUNT(*)
+| SORT doc_count DESC
 | KEEP first_name, last_name
 ```
 
