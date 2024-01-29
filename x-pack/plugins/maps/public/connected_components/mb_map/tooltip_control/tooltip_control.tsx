@@ -322,7 +322,7 @@ export class TooltipControl extends Component<Props, {}> {
       (accumulator: string[], layer: ILayer) => {
         // tooltips are only supported for vector layers, filter out all other layer types
         return layer.isVisible() && isVectorLayer(layer)
-          ? accumulator.concat((layer as IVectorLayer).getMbTooltipLayerIds())
+          ? accumulator.concat(layer.getMbTooltipLayerIds())
           : accumulator;
       },
       []

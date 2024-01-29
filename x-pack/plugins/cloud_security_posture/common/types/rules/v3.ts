@@ -6,12 +6,20 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import type { SavedObjectsUpdateResponse } from '@kbn/core-saved-objects-api-server';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../constants';
 
-const DEFAULT_BENCHMARK_RULES_PER_PAGE = 25;
+export const DEFAULT_BENCHMARK_RULES_PER_PAGE = 25;
 
 // Since version 8.7.0
+
+export type FindCspBenchmarkRuleRequest = TypeOf<typeof findCspBenchmarkRuleRequestSchema>;
+
+export type CspBenchmarkRuleMetadata = TypeOf<typeof cspBenchmarkRuleMetadataSchema>;
+
+export type CspBenchmarkRule = TypeOf<typeof cspBenchmarkRuleSchema>;
+
+export type PageUrlParams = Record<'policyId' | 'packagePolicyId', string>;
+
 export const cspBenchmarkRuleMetadataSchema = schema.object({
   audit: schema.string(),
   benchmark: schema.object({
@@ -38,13 +46,9 @@ export const cspBenchmarkRuleMetadataSchema = schema.object({
   version: schema.string(),
 });
 
-export type CspBenchmarkRuleMetadata = TypeOf<typeof cspBenchmarkRuleMetadataSchema>;
-
 export const cspBenchmarkRuleSchema = schema.object({
   metadata: cspBenchmarkRuleMetadataSchema,
 });
-
-export type CspBenchmarkRule = TypeOf<typeof cspBenchmarkRuleSchema>;
 
 export const findCspBenchmarkRuleRequestSchema = schema.object({
   /**
@@ -126,56 +130,9 @@ export const findCspBenchmarkRuleRequestSchema = schema.object({
   section: schema.maybe(schema.string()),
 });
 
-export type FindCspBenchmarkRuleRequest = TypeOf<typeof findCspBenchmarkRuleRequestSchema>;
-
 export interface FindCspBenchmarkRuleResponse {
   items: CspBenchmarkRule[];
   total: number;
   page: number;
   perPage: number;
-}
-
-export type PageUrlParams = Record<'policyId' | 'packagePolicyId', string>;
-
-export const rulesToUpdate = schema.arrayOf(
-  schema.object({
-    rule_id: schema.string(),
-    benchmark_id: schema.string(),
-    benchmark_version: schema.string(),
-    rule_number: schema.string(),
-  })
-);
-
-export const cspBenchmarkRulesBulkActionRequestSchema = schema.object({
-  action: schema.oneOf([schema.literal('mute'), schema.literal('unmute')]),
-  rules: rulesToUpdate,
-});
-
-export type RulesToUpdate = TypeOf<typeof rulesToUpdate>;
-
-export type CspBenchmarkRulesBulkActionRequestSchema = TypeOf<
-  typeof cspBenchmarkRulesBulkActionRequestSchema
->;
-
-const rulesStates = schema.recordOf(
-  schema.string(),
-  schema.object({
-    muted: schema.boolean(),
-    benchmark_id: schema.string(),
-    benchmark_version: schema.string(),
-    rule_number: schema.string(),
-    rule_id: schema.string(),
-  })
-);
-
-export const cspSettingsSchema = schema.object({
-  rules: rulesStates,
-});
-
-export type CspBenchmarkRulesStates = TypeOf<typeof rulesStates>;
-export type CspSettings = TypeOf<typeof cspSettingsSchema>;
-
-export interface BulkActionBenchmarkRulesResponse {
-  newCspSettings: SavedObjectsUpdateResponse<CspSettings>;
-  disabledRulesCounter: number;
 }

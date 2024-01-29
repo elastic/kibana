@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import { omit } from 'lodash';
-import { cleanup, generate } from '@kbn/infra-forge';
+import { cleanup, generate, Dataset, PartialConfig } from '@kbn/data-forge';
 import {
   Aggregators,
   Comparator,
@@ -36,30 +36,54 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Custom Threshold rule - AVG - PCT - FIRED', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
-    // DATE_VIEW should match the index template:
-    // x-pack/packages/kbn-infra-forge/src/data_sources/composable/template.json
-    const DATE_VIEW_TITLE = 'kbn-data-forge-fake_hosts';
-    const DATE_VIEW_NAME = 'ad-hoc-data-view-name';
+    const DATA_VIEW_TITLE = 'kbn-data-forge-fake_hosts.fake_hosts-*';
+    const DATA_VIEW_NAME = 'ad-hoc-data-view-name';
     const DATA_VIEW_ID = 'data-view-id';
     const MOCKED_AD_HOC_DATA_VIEW = {
       id: DATA_VIEW_ID,
-      title: DATE_VIEW_TITLE,
+      title: DATA_VIEW_TITLE,
       timeFieldName: '@timestamp',
       sourceFilters: [],
       fieldFormats: {},
       runtimeFieldMap: {},
       allowNoIndex: false,
-      name: DATE_VIEW_NAME,
+      name: DATA_VIEW_NAME,
       allowHidden: false,
     };
-    let infraDataIndex: string;
+    let dataForgeConfig: PartialConfig;
+    let dataForgeIndices: string[];
     let actionId: string;
     let ruleId: string;
     let alertId: string;
     let startedAt: string;
 
     before(async () => {
-      infraDataIndex = await generate({ esClient, lookback: 'now-15m', logger });
+      dataForgeConfig = {
+        schedule: [
+          {
+            template: 'good',
+            start: 'now-15m',
+            end: 'now',
+            metrics: [
+              { name: 'system.cpu.user.pct', method: 'linear', start: 2.5, end: 2.5 },
+              { name: 'system.cpu.total.pct', method: 'linear', start: 0.5, end: 0.5 },
+            ],
+          },
+        ],
+        indexing: {
+          dataset: 'fake_hosts' as Dataset,
+          eventsPerCycle: 1,
+          interval: 10000,
+          alignEventsToInterval: true,
+        },
+      };
+      dataForgeIndices = await generate({ client: esClient, config: dataForgeConfig, logger });
+      logger.info(JSON.stringify(dataForgeIndices.join(',')));
+      await waitForDocumentInIndex({
+        esClient,
+        indexName: DATA_VIEW_TITLE,
+        docCountTarget: 270,
+      });
     });
 
     after(async () => {
@@ -73,8 +97,8 @@ export default function ({ getService }: FtrProviderContext) {
         index: '.kibana-event-log-*',
         query: { term: { 'kibana.alert.rule.consumer': 'logs' } },
       });
-      await esDeleteAllIndices([ALERT_ACTION_INDEX, infraDataIndex]);
-      await cleanup({ esClient, logger });
+      await esDeleteAllIndices([ALERT_ACTION_INDEX, ...dataForgeIndices]);
+      await cleanup({ client: esClient, config: dataForgeConfig, logger });
     });
 
     describe('Rule creation', () => {
@@ -219,7 +243,7 @@ export default function ({ getService }: FtrProviderContext) {
           `https://localhost:5601/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
-          `Average system.cpu.user.pct is 250%, above the threshold of 50%. (duration: 5 mins, data view: ${DATE_VIEW_NAME})`
+          `Average system.cpu.user.pct is 250%, above the threshold of 50%. (duration: 5 mins, data view: ${DATA_VIEW_NAME})`
         );
         expect(resp.hits.hits[0]._source?.value).eql('250%');
 
@@ -229,7 +253,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resp.hits.hits[0]._source?.viewInAppUrl).contain('LOG_EXPLORER_LOCATOR');
         expect(omit(parsedViewInAppUrl.params, 'timeRange.from')).eql({
-          dataset: DATE_VIEW_TITLE,
+          dataset: DATA_VIEW_TITLE,
           timeRange: { to: 'now' },
           query: { query: '', language: 'kuery' },
         });

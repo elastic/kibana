@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import { decodeOrThrow, indexPatternRt } from '@kbn/io-ts-utils';
-import { DatasetSelectionPlain } from '@kbn/log-explorer-plugin/common';
+import { DatasetSelectionPlain } from '@kbn/logs-explorer-plugin/common';
 import { FtrProviderContext } from './config';
 
 const azureActivityDatasetSelection: DatasetSelectionPlain = {
@@ -87,15 +87,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(azureDatasetSelectionTitle).to.be('[Azure Logs] activitylogs');
 
         // Go back to previous page selection
-        await retry.try(async () => {
+        await retry.tryForTime(30 * 1000, async () => {
           await browser.goBack();
           const backNavigationDatasetSelectionTitle =
             await PageObjects.observabilityLogExplorer.getDatasetSelectorButtonText();
           expect(backNavigationDatasetSelectionTitle).to.be('All logs');
         });
-
         // Go forward to previous page selection
-        await retry.try(async () => {
+        await retry.tryForTime(30 * 1000, async () => {
           await browser.goForward();
           const forwardNavigationDatasetSelectionTitle =
             await PageObjects.observabilityLogExplorer.getDatasetSelectorButtonText();

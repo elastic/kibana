@@ -11,10 +11,8 @@ import { IBasePath } from '@kbn/core/public';
 import { isEmpty, pickBy } from 'lodash';
 import moment from 'moment';
 import url from 'url';
-import {
-  LogsLocatorParams,
-  NodeLogsLocatorParams,
-} from '@kbn/logs-shared-plugin/common';
+import type { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
+import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { AllDatasetsLocatorParams } from '@kbn/deeplinks-observability/locators';
 import type { ProfilingLocators } from '@kbn/observability-shared-plugin/public';
@@ -27,10 +25,6 @@ import { fromQuery } from '../links/url_helpers';
 import { SectionRecord, getNonEmptySections, Action } from './sections_helper';
 import { HOST_NAME, TRACE_ID } from '../../../../common/es_fields/apm';
 import { ApmRouter } from '../../routing/apm_route_config';
-import {
-  getNodeLogsHref,
-  getTraceLogsHref,
-} from '../links/observability_logs_link';
 
 function getInfraMetricsQuery(transaction: Transaction) {
   const timestamp = new Date(transaction['@timestamp']).getTime();
@@ -53,8 +47,7 @@ export const getSections = ({
   rangeTo,
   environment,
   allDatasetsLocator,
-  logsLocator,
-  nodeLogsLocator,
+  logsLocators,
   dataViewId,
 }: {
   transaction?: Transaction;
@@ -67,11 +60,10 @@ export const getSections = ({
   rangeTo: string;
   environment: Environment;
   allDatasetsLocator: LocatorPublic<AllDatasetsLocatorParams>;
-  logsLocator: LocatorPublic<LogsLocatorParams>;
-  nodeLogsLocator: LocatorPublic<NodeLogsLocatorParams>;
+  logsLocators: ReturnType<typeof getLogsLocatorsFromUrlService>;
   dataViewId?: string;
 }) => {
-  if (!transaction || !dataViewId) return [];
+  if (!transaction) return [];
 
   const hostName = transaction.host?.hostname;
   const podId = transaction.kubernetes?.pod?.uid;
@@ -95,33 +87,26 @@ export const getSections = ({
   });
 
   // Logs hrefs
-  const podLogsHref = getNodeLogsHref(
-    'pod',
-    podId!,
+  const podLogsHref = logsLocators.nodeLogsLocator.getRedirectUrl({
+    nodeField: findInventoryFields('pod').id,
+    nodeId: podId!,
     time,
-    allDatasetsLocator,
-    nodeLogsLocator
-  );
-  const containerLogsHref = getNodeLogsHref(
-    'container',
-    containerId!,
+  });
+  const containerLogsHref = logsLocators.nodeLogsLocator.getRedirectUrl({
+    nodeField: findInventoryFields('container').id,
+    nodeId: containerId!,
     time,
-    allDatasetsLocator,
-    nodeLogsLocator
-  );
-  const hostLogsHref = getNodeLogsHref(
-    'host',
-    hostName!,
+  });
+  const hostLogsHref = logsLocators.nodeLogsLocator.getRedirectUrl({
+    nodeField: findInventoryFields('host').id,
+    nodeId: hostName!,
     time,
-    allDatasetsLocator,
-    nodeLogsLocator
-  );
-  const traceLogsHref = getTraceLogsHref(
-    transaction.trace.id!,
+  });
+
+  const traceLogsHref = logsLocators.traceLogsLocator.getRedirectUrl({
+    traceId: transaction.trace.id!,
     time,
-    allDatasetsLocator,
-    logsLocator
-  );
+  });
 
   const podActions: Action[] = [
     {
@@ -273,9 +258,9 @@ export const getSections = ({
         basePath,
         query: getDiscoverQuery(transaction),
         location,
-        dataViewId,
+        dataViewId: dataViewId ?? '',
       }),
-      condition: true,
+      condition: !!dataViewId,
     },
   ];
 

@@ -126,7 +126,6 @@ export const addTimelineToStore = ({
 }: AddTimelineParams): TimelineById => {
   if (shouldResetActiveTimelineContext(id, timelineById[id], timeline)) {
     activeTimeline.setActivePage(0);
-    activeTimeline.setExpandedDetail({});
   }
   return {
     ...timelineById,
@@ -1475,7 +1474,13 @@ export const setInitializeTimelineSettings = ({
           initialized: true,
         },
       }
-    : timelineById;
+    : {
+        ...timelineById,
+        [id]: {
+          ...timeline,
+          ...timelineSettingsProps,
+        },
+      };
 };
 
 interface ApplyDeltaToTableColumnWidth {

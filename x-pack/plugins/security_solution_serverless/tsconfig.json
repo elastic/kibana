@@ -23,8 +23,6 @@
     "@kbn/security-solution-side-nav",
     "@kbn/security-solution-navigation",
     "@kbn/security-solution-upselling",
-    "@kbn/default-nav-ml",
-    "@kbn/default-nav-devtools",
     "@kbn/kibana-react-plugin",
     "@kbn/core-chrome-browser",
     "@kbn/i18n-react",

@@ -61,6 +61,11 @@ export type InfraTelemetryEventParams =
   | HostsViewQueryHostsCountRetrievedParams
   | AssetDetailsFlyoutViewedParams;
 
+export interface PerformanceMetricInnerEvents {
+  key1?: string;
+  value1?: number;
+}
+
 export interface ITelemetryClient {
   reportHostEntryClicked(params: HostEntryClickedParams): void;
   reportHostFlyoutFilterRemoved(params: HostFlyoutFilterActionParams): void;
@@ -69,6 +74,12 @@ export interface ITelemetryClient {
   reportHostsViewQuerySubmitted(params: HostsViewQuerySubmittedParams): void;
   reportAssetDetailsFlyoutViewed(params: AssetDetailsFlyoutViewedParams): void;
   reportAssetDetailsPageViewed(params: AssetDetailsPageViewedParams): void;
+  reportPerformanceMetricEvent(
+    eventName: string,
+    duration: number,
+    innerEvents: PerformanceMetricInnerEvents,
+    meta: Record<string, unknown>
+  ): void;
 }
 
 export type InfraTelemetryEvent =

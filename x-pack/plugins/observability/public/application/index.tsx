@@ -104,6 +104,7 @@ export const renderApp = ({
               >
                 <PluginContext.Provider
                   value={{
+                    isDev,
                     config,
                     appMountParameters,
                     observabilityRuleTypeRegistry,

@@ -396,6 +396,22 @@
           },
           {
             "parentPluginId": "@kbn/text-based-editor",
+            "id": "def-public.TextBasedLanguagesEditorProps.isLoading",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isLoading",
+            "description": [
+              "Disables the editor and displays loading icon in run button"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/text-based-editor",
             "id": "def-public.TextBasedLanguagesEditorProps.isDisabled",
             "type": "CompoundType",
             "tags": [],

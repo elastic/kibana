@@ -51,6 +51,9 @@ export const LOCAL_STORAGE_FINDINGS_LAST_SELECTED_TAB_KEY = 'cloudPosture:findin
 export const LOCAL_STORAGE_COMPLIANCE_DASHBOARD_SELECTED_TAB_KEY =
   'cloudPosture:complianceDashboard:selectedTab';
 
+export const LOCAL_STORAGE_VULNERABILITIES_GROUPING_KEY = 'cspLatestVulnerabilitiesGrouping';
+export const LOCAL_STORAGE_FINDINGS_GROUPING_KEY = 'cspLatestFindingsGrouping';
+
 export const SESSION_STORAGE_FIELDS_MODAL_SHOW_SELECTED = 'cloudPosture:fieldsModal:showSelected';
 
 export type CloudPostureIntegrations = Record<
@@ -227,3 +230,5 @@ export const NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS = 10000;
 
 export const DETECTION_ENGINE_RULES_KEY = 'detection_engine_rules';
 export const DETECTION_ENGINE_ALERTS_KEY = 'detection_engine_alerts';
+
+export const DEFAULT_GROUPING_TABLE_HEIGHT = 512;

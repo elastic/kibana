@@ -13,9 +13,11 @@ import { MergedServiceDashboard } from '..';
 export function EditDashboard({
   onRefresh,
   currentDashboard,
+  serviceName,
 }: {
   onRefresh: () => void;
   currentDashboard: MergedServiceDashboard;
+  serviceName: string;
 }) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   return (
@@ -37,6 +39,7 @@ export function EditDashboard({
           onClose={() => setIsModalVisible(!isModalVisible)}
           onRefresh={onRefresh}
           currentDashboard={currentDashboard}
+          serviceName={serviceName}
         />
       )}
     </>
