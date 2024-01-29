@@ -551,6 +551,7 @@ describe('UninstallTokenService', () => {
     describe('check validity of tokens', () => {
       const okaySO = getDefaultSO(canEncrypt);
 
+      const errorWithDecryptionSO1 = decorateSOWithError(getDefaultSO(canEncrypt));
       const errorWithDecryptionSO2 = decorateSOWithError(getDefaultSO2(canEncrypt));
       const missingTokenSO2 = decorateSOWithMissingToken(getDefaultSO2(canEncrypt));
 
@@ -612,20 +613,31 @@ describe('UninstallTokenService', () => {
             uninstallTokenService.checkTokenValidityForAllPolicies()
           ).resolves.toStrictEqual({
             error: new UninstallTokenError(
-              'Invalid uninstall token: Saved object is missing the token attribute.'
+              'Failed to validate Uninstall Tokens: 1 of 2 tokens are invalid'
             ),
           });
         });
 
-        it('returns error if token decryption gives error', async () => {
+        it('returns error if some of the tokens cannot be decrypted', async () => {
           mockCreatePointInTimeFinderAsInternalUser([okaySO, errorWithDecryptionSO2]);
 
           await expect(
             uninstallTokenService.checkTokenValidityForAllPolicies()
           ).resolves.toStrictEqual({
-            error: new UninstallTokenError(
-              "Error when reading Uninstall Token with id 'test-so-id-two'."
-            ),
+            error: new UninstallTokenError('Failed to decrypt 1 of 2 Uninstall Token(s)'),
+          });
+        });
+
+        it('returns error if none of the tokens can be decrypted', async () => {
+          mockCreatePointInTimeFinderAsInternalUser([
+            errorWithDecryptionSO1,
+            errorWithDecryptionSO2,
+          ]);
+
+          await expect(
+            uninstallTokenService.checkTokenValidityForAllPolicies()
+          ).resolves.toStrictEqual({
+            error: new UninstallTokenError('Failed to decrypt 2 of 2 Uninstall Token(s)'),
           });
         });
 
@@ -641,7 +653,7 @@ describe('UninstallTokenService', () => {
       });
 
       describe('checkTokenValidityForPolicy', () => {
-        it('returns empty array if token is available', async () => {
+        it('returns null if token is available', async () => {
           mockCreatePointInTimeFinderAsInternalUser();
 
           await expect(
@@ -650,28 +662,26 @@ describe('UninstallTokenService', () => {
         });
 
         it('returns error if token is missing', async () => {
-          mockCreatePointInTimeFinderAsInternalUser([okaySO, missingTokenSO2]);
+          mockCreatePointInTimeFinderAsInternalUser([missingTokenSO2]);
 
           await expect(
             uninstallTokenService.checkTokenValidityForPolicy(missingTokenSO2.attributes.policy_id)
           ).resolves.toStrictEqual({
             error: new UninstallTokenError(
-              'Invalid uninstall token: Saved object is missing the token attribute.'
+              'Failed to validate Uninstall Tokens: 1 of 1 tokens are invalid'
             ),
           });
         });
 
         it('returns error if token decryption gives error', async () => {
-          mockCreatePointInTimeFinderAsInternalUser([okaySO, errorWithDecryptionSO2]);
+          mockCreatePointInTimeFinderAsInternalUser([errorWithDecryptionSO2]);
 
           await expect(
             uninstallTokenService.checkTokenValidityForPolicy(
               errorWithDecryptionSO2.attributes.policy_id
             )
           ).resolves.toStrictEqual({
-            error: new UninstallTokenError(
-              "Error when reading Uninstall Token with id 'test-so-id-two'."
-            ),
+            error: new UninstallTokenError('Failed to decrypt 1 of 1 Uninstall Token(s)'),
           });
         });
 
