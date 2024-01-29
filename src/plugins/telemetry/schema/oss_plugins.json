@@ -4587,7 +4587,7 @@
             }
           }
         },
-        "observability-log-explorer": {
+        "observability-logs-explorer": {
           "properties": {
             "appId": {
               "type": "keyword",

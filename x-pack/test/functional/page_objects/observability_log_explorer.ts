@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import {
-  OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY,
+  OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY,
   urlSchemaV1,
 } from '@kbn/observability-logs-explorer-plugin/common';
 import rison from '@kbn/rison';
@@ -215,7 +215,7 @@ export function ObservabilityLogsExplorerPageObject({
       pageState?: urlSchemaV1.UrlSchema;
     } = {}) {
       const queryStringParams = querystring.stringify({
-        [OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY]: rison.encode(
+        [OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY]: rison.encode(
           urlSchemaV1.urlSchemaRT.encode({
             ...defaultPageState,
             ...pageState,
@@ -241,7 +241,7 @@ export function ObservabilityLogsExplorerPageObject({
       pageState?: {};
     } = {}) {
       const queryStringParams = querystring.stringify({
-        [OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY]: rison.encode({
+        [OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY]: rison.encode({
           ...uncheckedPageState,
         }),
       });

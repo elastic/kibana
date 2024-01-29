@@ -184,7 +184,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       before(async () => {
         await esArchiver.load(
-          'x-pack/test/functional/es_archives/observability_log_explorer/data_streams'
+          'x-pack/test/functional/es_archives/observability_logs_explorer/data_streams'
         );
         cleanupIntegrationsSetup =
           await PageObjects.observabilityLogsExplorer.setupInitialIntegrations();
@@ -192,7 +192,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       after(async () => {
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/observability_log_explorer/data_streams'
+          'x-pack/test/functional/es_archives/observability_logs_explorer/data_streams'
         );
         await cleanupIntegrationsSetup();
       });

@@ -24,8 +24,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('is shown in the observability side navigation', async () => {
-      await PageObjects.observabilityLogsExplorer.navigateTo();
-      await testSubjects.existOrFail('observability-nav-observability-log-explorer-explorer');
+      await PageObjects.observabilityLogExplorer.navigateTo();
+      await testSubjects.existOrFail('observability-nav-observability-logs-explorer-explorer');
     });
 
     it('should load logs', async () => {
