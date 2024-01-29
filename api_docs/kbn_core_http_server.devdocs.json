@@ -4661,6 +4661,10 @@
                 "path": "src/plugins/vis_types/timelion/server/routes/functions.ts"
               },
               {
+                "plugin": "mockIdpPlugin",
+                "path": "packages/kbn-mock-idp-plugin/server/plugin.ts"
+              },
+              {
                 "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
               },
@@ -13495,6 +13499,10 @@
                 "path": "x-pack/plugins/ecs_data_quality_dashboard/server/routes/get_ilm_explain.ts"
               },
               {
+                "plugin": "ecsDataQualityDashboard",
+                "path": "x-pack/plugins/ecs_data_quality_dashboard/server/routes/results/get_results.ts"
+              },
+              {
                 "plugin": "elasticAssistant",
                 "path": "x-pack/plugins/elastic_assistant/server/routes/capabilities/get_capabilities_route.ts"
               },
@@ -14811,6 +14819,10 @@
               {
                 "plugin": "ecsDataQualityDashboard",
                 "path": "x-pack/plugins/ecs_data_quality_dashboard/server/routes/get_unallowed_field_values.ts"
+              },
+              {
+                "plugin": "ecsDataQualityDashboard",
+                "path": "x-pack/plugins/ecs_data_quality_dashboard/server/routes/results/post_results.ts"
               },
               {
                 "plugin": "logsShared",
