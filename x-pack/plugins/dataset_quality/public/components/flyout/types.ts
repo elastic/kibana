@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export * from './lazy_flyout_wrapper';
+import { FlyoutDataset } from '../../state_machines/dataset_quality_controller';
+
+export interface FlyoutProps {
+  dataset: FlyoutDataset;
+  closeFlyout: () => void;
+}

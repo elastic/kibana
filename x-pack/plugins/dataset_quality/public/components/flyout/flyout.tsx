@@ -17,17 +17,13 @@ import {
 import React, { Fragment } from 'react';
 import { flyoutCancelText } from '../../../common/translations';
 import { useDatasetQualityFlyout } from '../../hooks';
-import { FlyoutDataset } from '../../state_machines/dataset_quality_controller';
 import { DatasetSummary, DatasetSummaryLoading } from './dataset_summary';
 import { Header } from './header';
 import { IntegrationSummary } from './integration_summary';
+import { FlyoutProps } from './types';
 
-interface FlyoutProps {
-  dataset: FlyoutDataset;
-  closeFlyout: () => void;
-}
-
-export function Flyout({ dataset, closeFlyout }: FlyoutProps) {
+// eslint-disable-next-line import/no-default-export
+export default function Flyout({ dataset, closeFlyout }: FlyoutProps) {
   const { dataStreamStat, dataStreamDetails, dataStreamDetailsLoading, fieldFormats } =
     useDatasetQualityFlyout();
 
