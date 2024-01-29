@@ -439,10 +439,6 @@ export const SavedQueryManagementList = ({
                 WebkitMaskImage: 'unset',
                 maskImage: 'unset',
               },
-              '.euiSelectableListItem': {
-                color: 'inherit !important',
-                backgroundColor: 'inherit !important',
-              },
             }}
           >
             {(list, search) => (
