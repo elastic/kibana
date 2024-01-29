@@ -39,14 +39,14 @@ describe('partially_update_rule', () => {
       });
 
       test('should work with extraneous attributes ', async () => {
-        const attributes = InvalidAttributes as unknown as PartiallyUpdateableRuleAttributes;
+        const attributes = ExtraneousAttributes as unknown as PartiallyUpdateableRuleAttributes;
         soClient.update.mockResolvedValueOnce(MockUpdateValue);
 
         await partiallyUpdateRule(soClient, MockRuleId, attributes);
         expect(soClient.update).toHaveBeenCalledWith(
           RULE_SAVED_OBJECT_TYPE,
           MockRuleId,
-          DefaultAttributes,
+          ExtraneousAttributes,
           {}
         );
       });
@@ -124,7 +124,7 @@ const DefaultAttributes = {
   updatedAt: '2019-02-12T21:01:22.479Z',
 };
 
-const InvalidAttributes = { ...DefaultAttributes, foo: 'bar' };
+const ExtraneousAttributes = { ...DefaultAttributes, foo: 'bar' };
 
 const MockRuleId = 'rule-id';
 

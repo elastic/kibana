@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { pick } from 'lodash';
+import { omit, pick } from 'lodash';
 import {
   SavedObjectsClient,
   SavedObjectsErrorHelpers,
@@ -14,13 +14,13 @@ import {
 import { RawRule } from '../types';
 
 import {
-  RuleAttributesExcludedFromAAD,
-  RuleAttributesExcludedFromAADType,
+  RuleAttributesIncludedInAAD,
+  RuleAttributesIncludedInAADType,
   RULE_SAVED_OBJECT_TYPE,
 } from '.';
 
 export type PartiallyUpdateableRuleAttributes = Partial<
-  Pick<RawRule, RuleAttributesExcludedFromAADType>
+  Omit<RawRule, RuleAttributesIncludedInAADType>
 >;
 
 interface PartiallyUpdateRuleSavedObjectOptions {
@@ -42,7 +42,7 @@ export async function partiallyUpdateRule(
   options: PartiallyUpdateRuleSavedObjectOptions = {}
 ): Promise<void> {
   // ensure we only have the valid attributes excluded from AAD
-  const attributeUpdates = pick(attributes, RuleAttributesExcludedFromAAD);
+  const attributeUpdates = omit(attributes, RuleAttributesIncludedInAAD);
   const updateOptions: SavedObjectsUpdateOptions<RawRule> = pick(
     options,
     'namespace',
