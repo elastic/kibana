@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiFormRow } from '@elastic/eui';
+import { EuiFormRow, EuiText } from '@elastic/eui';
 import React, { ReactNode } from 'react';
 import { Controller, FieldPath, useFormContext } from 'react-hook-form';
+import { i18n } from '@kbn/i18n';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { useKibana } from '../../../../utils/kibana_react';
 import { CreateSLOForm } from '../../types';
@@ -54,6 +55,7 @@ export function QueryBuilder({
           label
         )
       }
+      labelAppend={!required ? <OptionalText /> : undefined}
       isInvalid={getFieldState(name).invalid}
       fullWidth
     >
@@ -62,14 +64,12 @@ export function QueryBuilder({
         name={name}
         control={control}
         rules={{
-          required: Boolean(required),
+          required: Boolean(required) && Boolean(dataView),
         }}
         render={({ field, fieldState }) => (
           <QueryStringInput
             appName="Observability"
-            bubbleSubmitEvent={false}
             dataTestSubj={dataTestSubj}
-            disableAutoFocus
             disableLanguageSwitcher
             indexPatterns={dataView ? [dataView] : []}
             isDisabled={!dataView}
@@ -85,5 +85,15 @@ export function QueryBuilder({
         )}
       />
     </EuiFormRow>
+  );
+}
+
+export function OptionalText() {
+  return (
+    <EuiText size="xs" color="subdued">
+      {i18n.translate('xpack.observability.slo.sloEdit.optionalLabel', {
+        defaultMessage: 'Optional',
+      })}
+    </EuiText>
   );
 }
