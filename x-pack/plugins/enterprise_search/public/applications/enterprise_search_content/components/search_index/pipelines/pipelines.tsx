@@ -135,14 +135,14 @@ export const SearchIndexPipelines: React.FC = () => {
               </EuiLink>
             }
             title={
-              <h2>
+              <h3>
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.pipelines.ingestionPipeline.title',
                   {
                     defaultMessage: 'Ingest Pipelines',
                   }
                 )}
-              </h2>
+              </h3>
             }
             subtitle={
               apiIndex
@@ -203,14 +203,14 @@ export const SearchIndexPipelines: React.FC = () => {
               </EuiLink>
             }
             title={
-              <h2>
+              <h3>
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.pipelines.mlInferencePipelines.title',
                   {
                     defaultMessage: 'Machine Learning Inference Pipelines',
                   }
                 )}
-              </h2>
+              </h3>
             }
             subtitle={
               apiIndex && hasIndexIngestionPipeline

@@ -253,7 +253,7 @@
             "tags": [],
             "label": "options",
             "description": [
-              "\nOptions for the Monaco Code Editor\nDocumentation of options can be found here:\nhttps://microsoft.github.io/monaco-editor/api/interfaces/monaco.editor.istandaloneeditorconstructionoptions.html"
+              "\nOptions for the Monaco Code Editor\nDocumentation of options can be found here:\nhttps://microsoft.github.io/monaco-editor/docs.html#interfaces/editor.IStandaloneEditorConstructionOptions.html"
             ],
             "signature": [
               "editor",
@@ -270,7 +270,7 @@
             "tags": [],
             "label": "suggestionProvider",
             "description": [
-              "\nSuggestion provider for autocompletion\nDocumentation for the provider can be found here:\nhttps://microsoft.github.io/monaco-editor/api/interfaces/monaco.languages.completionitemprovider.html"
+              "\nSuggestion provider for autocompletion\nDocumentation for the provider can be found here:\nhttps://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.CompletionItemProvider.html"
             ],
             "signature": [
               "languages",
@@ -287,7 +287,7 @@
             "tags": [],
             "label": "signatureProvider",
             "description": [
-              "\nSignature provider for function parameter info\nDocumentation for the provider can be found here:\nhttps://microsoft.github.io/monaco-editor/api/interfaces/monaco.languages.signaturehelpprovider.html"
+              "\nSignature provider for function parameter info\nDocumentation for the provider can be found here:\nhttps://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.SignatureHelpProvider.html"
             ],
             "signature": [
               "languages",
@@ -304,7 +304,7 @@
             "tags": [],
             "label": "hoverProvider",
             "description": [
-              "\nHover provider for hover documentation\nDocumentation for the provider can be found here:\nhttps://microsoft.github.io/monaco-editor/api/interfaces/monaco.languages.hoverprovider.html"
+              "\nHover provider for hover documentation\nDocumentation for the provider can be found here:\nhttps://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.HoverProvider.html"
             ],
             "signature": [
               "languages",
@@ -321,7 +321,7 @@
             "tags": [],
             "label": "languageConfiguration",
             "description": [
-              "\nLanguage config provider for bracket\nDocumentation for the provider can be found here:\nhttps://microsoft.github.io/monaco-editor/api/interfaces/monaco.languages.languageconfiguration.html"
+              "\nLanguage config provider for bracket\nDocumentation for the provider can be found here:\nhttps://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.LanguageConfiguration.html"
             ],
             "signature": [
               "languages",
@@ -505,6 +505,22 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/code-editor",
+            "id": "def-common.CodeEditorProps.readOnlyMessage",
+            "type": "string",
+            "tags": [],
+            "label": "readOnlyMessage",
+            "description": [
+              "\nAlternate text to display, when an attempt is made to edit read only content. (Defaults to \"Cannot edit in read-only editor\")"
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
