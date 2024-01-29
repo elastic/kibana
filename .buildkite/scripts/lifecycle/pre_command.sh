@@ -36,6 +36,18 @@ if [[ "$(curl -is metadata.google.internal || true)" ]]; then
   echo ""
 fi
 
+# Check if we have gcloud, if yes, check which account, if not, check the config paths
+if [[ -x "$(command -v gcloud)" ]]; then
+  gcloud config get-value core/account
+else
+  echo "gcloud not found, checking config paths"
+  ls -la $HOME/.config/gcloud
+  ls -la $HOME/.config/gcloud/legacy_credentials
+  if [[ -f "$HOME/.config/gcloud/configurations/config_default" ]]; then
+    cat $HOME/.config/gcloud/configurations/config_default
+  fi
+fi
+
 echo '--- Job Environment Setup'
 
 # Set up a custom ES Snapshot Manifest if one has been specified for this build
