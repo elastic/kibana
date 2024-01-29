@@ -51,6 +51,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
           initialPageSize={5}
           isCompactMode={true}
           saveTableOptionsToUrl={false}
+          showPerPageOptions={false}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

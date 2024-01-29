@@ -65,6 +65,7 @@ interface Props {
   initialPageSize: number;
   comparisonEnabled?: boolean;
   saveTableOptionsToUrl?: boolean;
+  showPerPageOptions?: boolean;
 }
 
 const defaultSorting = {
@@ -78,6 +79,7 @@ export function ErrorGroupList({
   initialPageSize,
   comparisonEnabled,
   saveTableOptionsToUrl,
+  showPerPageOptions = true,
 }: Props) {
   const { query } = useAnyOfApmParams(
     '/services/{serviceName}/overview',
@@ -327,6 +329,7 @@ export function ErrorGroupList({
       onChangeRenderedItems={setRenderedItems}
       onChangeSorting={setSorting}
       saveTableOptionsToUrl={saveTableOptionsToUrl}
+      showPerPageOptions={showPerPageOptions}
     />
   );
 }
