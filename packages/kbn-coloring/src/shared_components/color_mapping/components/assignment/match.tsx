@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { EuiComboBox, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MULTI_FIELD_KEY_SEPARATOR } from '@kbn/data-plugin/common';
@@ -25,19 +25,7 @@ export const Match: React.FC<{
   options: Array<string | string[]>;
   specialTokens: Map<unknown, string>;
   assignmentValuesCounter: Map<string | string[], number>;
-  focusOnMount: boolean;
-  onBlur: () => void;
-}> = ({
-  index,
-  rule,
-  updateValue,
-  editable,
-  options,
-  specialTokens,
-  assignmentValuesCounter,
-  focusOnMount,
-  onBlur,
-}) => {
+}> = ({ index, rule, updateValue, editable, options, specialTokens, assignmentValuesCounter }) => {
   const duplicateWarning = i18n.translate(
     'coloring.colorMapping.assignments.duplicateCategoryWarning',
     {
@@ -82,18 +70,10 @@ export const Match: React.FC<{
       value,
     };
   });
-  const comboBoxRef = useRef<HTMLInputElement | null>();
-  useEffect(() => {
-    if (focusOnMount) comboBoxRef.current?.focus();
-  });
 
   return (
     <EuiFlexItem style={{ minWidth: 1, width: 1 }}>
       <EuiComboBox
-        inputRef={(ref) => {
-          comboBoxRef.current = ref;
-        }}
-        onBlur={onBlur}
         data-test-subj={`lns-colorMapping-assignmentsItem${index}`}
         isDisabled={!editable}
         fullWidth={true}

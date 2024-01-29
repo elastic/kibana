@@ -39,8 +39,6 @@ export function Assignment({
   isDarkMode,
   specialTokens,
   assignmentValuesCounter,
-  focusOnMount,
-  onBlur,
 }: {
   data: ColorMappingInputData;
   index: number;
@@ -55,8 +53,6 @@ export function Assignment({
   isDarkMode: boolean;
   specialTokens: Map<string, string>;
   assignmentValuesCounter: Map<string | string[], number>;
-  focusOnMount: boolean;
-  onBlur: () => void;
 }) {
   const dispatch = useDispatch();
 
@@ -89,8 +85,6 @@ export function Assignment({
       assignment.rule.type === 'matchExactly' ||
       assignment.rule.type === 'matchExactlyCI' ? (
         <Match
-          focusOnMount={focusOnMount}
-          onBlur={onBlur}
           editable={editable}
           index={index}
           rule={assignment.rule}

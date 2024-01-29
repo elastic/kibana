@@ -72,7 +72,6 @@ export function Container({
   specialTokens: Map<string, string>;
 }) {
   const dispatch = useDispatch();
-  const [assignmentOnFocus, setAssignmentOnFocus] = useState<number>(-1);
   const [showOtherActions, setShowOtherActions] = useState<boolean>(false);
 
   const getPaletteFn = getPalette(palettes, NeutralPalette);
@@ -101,7 +100,6 @@ export function Container({
       : [];
 
   const onClickAddNewAssignment = () => {
-    setAssignmentOnFocus(assignments.length);
     dispatch(
       addNewAssignment({
         rule:
@@ -124,7 +122,6 @@ export function Container({
     );
   };
   const onClickAddAllCurrentCategories = () => {
-    setAssignmentOnFocus(-1);
     if (data.type === 'categories') {
       const newAssignments: ColorMapping.Config['assignments'] = unmatchingCategories.map(
         (c, i) => {
@@ -261,8 +258,6 @@ export function Container({
                     disableDelete={false}
                     specialTokens={specialTokens}
                     assignmentValuesCounter={assignmentValuesCounter}
-                    focusOnMount={assignmentOnFocus === i}
-                    onBlur={() => setAssignmentOnFocus(-1)}
                   />
                 );
               })}
@@ -384,7 +379,6 @@ export function Container({
                           icon={<EuiIcon type="eraser" size="m" color="danger" />}
                           onClick={() => {
                             setShowOtherActions(false);
-                            setAssignmentOnFocus(-1);
                             dispatch(removeAllAssignments());
                           }}
                           color="danger"
