@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import './discover_layout.scss';
-import React, { useCallback, useEffect, useMemo, useRef, useState, ReactElement } from 'react';
+import React, { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiPage, EuiPageBody, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -240,6 +240,13 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     panelsToggle,
   ]);
 
+  const isLoading =
+    stateContainer.dataState.data$.documents$.value.fetchStatus === FetchStatus.LOADING;
+
+  const onCancelClick = () => {
+    stateContainer.dataState.cancel();
+  };
+
   return (
     <EuiPage
       className={classNames('dscPage', { 'dscPage--serverless': serverless })}
@@ -271,6 +278,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         textBasedLanguageModeErrors={textBasedLanguageModeErrors}
         textBasedLanguageModeWarning={textBasedLanguageModeWarning}
         onFieldEdited={onFieldEdited}
+        isLoading={isLoading}
+        onCancelClick={onCancelClick}
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
         <div
