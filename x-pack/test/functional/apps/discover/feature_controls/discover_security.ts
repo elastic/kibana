@@ -58,6 +58,9 @@ export default function (ctx: FtrProviderContext) {
     });
 
     after(async () => {
+      if (await PageObjects.share.isShareModalOpen()) {
+        await PageObjects.share.closeShareModal();
+      }
       // logout, so the other tests don't accidentally run as the custom users we're testing below
       // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await PageObjects.security.forceLogout();
@@ -105,6 +108,9 @@ export default function (ctx: FtrProviderContext) {
       });
 
       after(async () => {
+        if (await PageObjects.share.isShareModalOpen()) {
+          await PageObjects.share.closeShareModal();
+        }
         await security.role.delete('global_discover_all_role');
         await security.user.delete('global_discover_all_user');
       });
@@ -144,6 +150,9 @@ export default function (ctx: FtrProviderContext) {
 
     describe('global discover read-only privileges', () => {
       before(async () => {
+        if (await PageObjects.share.isShareModalOpen()) {
+          await PageObjects.share.closeShareModal();
+        }
         await security.role.create('global_discover_read_role', {
           elasticsearch: {
             indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
@@ -174,6 +183,9 @@ export default function (ctx: FtrProviderContext) {
       });
 
       after(async () => {
+        if (await PageObjects.share.isShareModalOpen()) {
+          await PageObjects.share.closeShareModal();
+        }
         await security.role.delete('global_discover_read_role');
         await security.user.delete('global_discover_read_user');
       });
@@ -214,6 +226,9 @@ export default function (ctx: FtrProviderContext) {
 
     describe('discover read-only privileges with url_create', () => {
       before(async () => {
+        if (await PageObjects.share.isShareModalOpen()) {
+          await PageObjects.share.closeShareModal();
+        }
         await security.role.create('global_discover_read_url_create_role', {
           elasticsearch: {
             indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
@@ -244,6 +259,9 @@ export default function (ctx: FtrProviderContext) {
       });
 
       after(async () => {
+        if (await PageObjects.share.isShareModalOpen()) {
+          await PageObjects.share.closeShareModal();
+        }
         await security.user.delete('global_discover_read_url_create_user');
         await security.role.delete('global_discover_read_url_create_role');
       });
@@ -284,6 +302,9 @@ export default function (ctx: FtrProviderContext) {
 
     describe('discover and visualize privileges', () => {
       before(async () => {
+        if (await PageObjects.share.isShareModalOpen()) {
+          await PageObjects.share.closeShareModal();
+        }
         await security.role.create('global_discover_visualize_read_role', {
           elasticsearch: {
             indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
@@ -315,6 +336,9 @@ export default function (ctx: FtrProviderContext) {
       });
 
       after(async () => {
+        if (await PageObjects.share.isShareModalOpen()) {
+          await PageObjects.share.closeShareModal();
+        }
         await security.role.delete('global_discover_visualize_read_role');
         await security.user.delete('global_discover_visualize_read_user');
       });
@@ -330,6 +354,9 @@ export default function (ctx: FtrProviderContext) {
 
     describe('no discover privileges', () => {
       before(async () => {
+        if (await PageObjects.share.isShareModalOpen()) {
+          await PageObjects.share.closeShareModal();
+        }
         await security.role.create('no_discover_privileges_role', {
           elasticsearch: {
             indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
@@ -368,6 +395,9 @@ export default function (ctx: FtrProviderContext) {
       });
 
       after(async () => {
+        if (await PageObjects.share.isShareModalOpen()) {
+          await PageObjects.share.closeShareModal();
+        }
         await security.role.delete('no_discover_privileges_role');
         await security.user.delete('no_discover_privileges_user');
       });
@@ -385,6 +415,9 @@ export default function (ctx: FtrProviderContext) {
 
     describe('when has privileges to read data views but no privileges to read index', () => {
       before(async () => {
+        if (await PageObjects.share.isShareModalOpen()) {
+          await PageObjects.share.closeShareModal();
+        }
         await esSupertest
           .post('/_aliases')
           .send({
@@ -435,6 +468,9 @@ export default function (ctx: FtrProviderContext) {
       });
 
       after(async () => {
+        if (await PageObjects.share.isShareModalOpen()) {
+          await PageObjects.share.closeShareModal();
+        }
         await kibanaServer.uiSettings.unset('defaultIndex');
         await esSupertest
           .post('/_aliases')
