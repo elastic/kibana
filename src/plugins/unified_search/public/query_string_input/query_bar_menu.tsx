@@ -124,6 +124,7 @@ function QueryBarMenuComponent({
 
   useEffect(() => {
     if (openQueryBarMenu) {
+      setCurrentPanelId(QueryBarMenuPanel.main);
       setRenderedComponent('menu');
     }
   }, [openQueryBarMenu]);
