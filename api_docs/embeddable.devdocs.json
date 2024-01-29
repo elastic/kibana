@@ -2066,6 +2066,17 @@
           },
           {
             "parentPluginId": "embeddable",
+            "id": "def-public.Embeddable.disableTriggers",
+            "type": "boolean",
+            "tags": [],
+            "label": "disableTriggers",
+            "description": [],
+            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
             "id": "def-public.Embeddable.onEdit",
             "type": "Function",
             "tags": [],
