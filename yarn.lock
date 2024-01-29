@@ -6573,7 +6573,7 @@
   resolved "https://registry.yarnpkg.com/@kwsites/promise-deferred/-/promise-deferred-1.1.1.tgz#8ace5259254426ccef57f3175bc64ed7095ed919"
   integrity sha512-GaHYm+c0O9MjZRu0ongGBRbinu8gVAMd2UZjji6jVmqKtZluZnptXGWhz1E8j8D2HJ3f/yMxKAUC0b+57wncIw==
 
-"@langchain/community@~0.0.17":
+"@langchain/community@~0.0.20":
   version "0.0.20"
   resolved "https://registry.yarnpkg.com/@langchain/community/-/community-0.0.20.tgz#a64307e959545fa0b4ed6b67d5aba3437cd76879"
   integrity sha512-maPMjvF50Z+4eMs7HKmY3wfT+k6IjULqLUVPtVdN1zSGobRvnUIbQMKUY2IXVTZmaMXKBAIob+49X8vjO2snDQ==
@@ -21110,13 +21110,13 @@ kuler@^2.0.0:
   resolved "https://registry.yarnpkg.com/kuler/-/kuler-2.0.0.tgz#e2c570a3800388fb44407e851531c1d670b061b3"
   integrity sha512-Xq9nH7KlWZmXAtodXDDRE7vs6DU1gTU8zYDHDiWLSip45Egwq3plLHzPn27NgvzL2r1LMPC1vdqh98sQxtqj4A==
 
-langchain@^0.1.6:
-  version "0.1.6"
-  resolved "https://registry.yarnpkg.com/langchain/-/langchain-0.1.6.tgz#7bd5586aa8c3db31d766ea815f2bd8f82544fcac"
-  integrity sha512-ju4LLw6vTax3bfSkphcK8CE6yIKe1NXLT95Ys/gvoONRfZkV4FpNMjDc9Y+keUvzmTv2buhiFU/gslbA4eJtrw==
+langchain@^0.1.9:
+  version "0.1.9"
+  resolved "https://registry.yarnpkg.com/langchain/-/langchain-0.1.9.tgz#d79063d956a9d2213ca1b63bfa576714677aa66e"
+  integrity sha512-4Gm2j8gsT43d4sgpjM7JMSoB83dwxbiLYdcPx23Xi6RfLQ60QB86bogPYqn84ZW9HjrW8IVMXvVyC6DAHNCyIg==
   dependencies:
     "@anthropic-ai/sdk" "^0.9.1"
-    "@langchain/community" "~0.0.17"
+    "@langchain/community" "~0.0.20"
     "@langchain/core" "~0.1.16"
     "@langchain/openai" "~0.0.12"
     binary-extensions "^2.2.0"

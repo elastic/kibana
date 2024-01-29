@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { DynamicTool } from 'langchain/tools';
+import type { DynamicTool } from '@langchain/core/tools';
 import { omit } from 'lodash/fp';
 
 import { OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL } from './open_and_acknowledged_alerts_tool';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ChainTool } from 'langchain/tools';
+import { ChainTool } from 'langchain/tools/chain';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { APP_UI_ID } from '../../../../common';
 

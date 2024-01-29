@@ -8,7 +8,7 @@
 import { initializeAgentExecutorWithOptions } from 'langchain/agents';
 import { RetrievalQAChain } from 'langchain/chains';
 import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
-import { ChainTool } from 'langchain/tools';
+import { ChainTool } from 'langchain/tools/chain';
 import { Tool } from '@langchain/core/tools';
 
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
