@@ -25,8 +25,9 @@ import {
 import { useDatasetSelector } from './state_machine/use_dataset_selector';
 import { DatasetsPopover } from './sub_components/datasets_popover';
 import { DataViewsPanelTitle } from './sub_components/data_views_panel_title';
+import { EsqlSelector } from './sub_components/esql_selector';
 import { SearchControls } from './sub_components/search_controls';
-import { ESQLButton, SelectorFooter, ShowAllLogsButton } from './sub_components/selector_footer';
+import { SelectorActions } from './sub_components/selector_actions';
 import { DatasetSelectorProps } from './types';
 import {
   buildIntegrationsTree,
@@ -215,6 +216,9 @@ export function DatasetSelector({
       onClick={togglePopover}
     >
       <Tabs>{tabEntries}</Tabs>
+      <SelectorActions>
+        <SelectorActions.ShowAllLogs isSelected={isAllMode} onClick={selectAllLogDataset} />
+      </SelectorActions>
       <EuiHorizontalRule margin="none" />
       <SearchControls
         key={panelId}
@@ -277,11 +281,7 @@ export function DatasetSelector({
         data-test-subj="dataViewsContextMenu"
         size="s"
       />
-      <EuiHorizontalRule margin="none" />
-      <SelectorFooter>
-        <ShowAllLogsButton isSelected={isAllMode} onClick={selectAllLogDataset} />
-        {isEsqlEnabled && <ESQLButton {...discoverEsqlUrlProps} />}
-      </SelectorFooter>
+      {isEsqlEnabled && <EsqlSelector {...discoverEsqlUrlProps} />}
     </DatasetsPopover>
   );
 }
