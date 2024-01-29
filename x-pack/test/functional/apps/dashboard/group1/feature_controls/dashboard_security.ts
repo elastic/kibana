@@ -38,8 +38,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('dashboard feature controls security', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional', {
-        batchSize: 5000,
-        concurrency: 4,
+        batchSize: 300,
+        concurrency: 2,
       });
       await kbnServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/security/security.json'
