@@ -285,10 +285,13 @@ function getErrorFromResponse(response: TimelineErrorResponse) {
 }
 
 function extractTimelineIdsAndVersions(timeline: TimelineModel) {
+  // When a timeline hasn't been saved yet, its `savedObectId` is not defined.
+  // In that case, we want to overwrite all locally created properties for the
+  // timeline id, the timeline template id and the timeline template version.
   return {
     timelineId: timeline.savedObjectId ?? null,
     timelineVersion: timeline.version,
-    templateTimelineId: timeline.templateTimelineId ?? null,
-    templateTimelineVersion: timeline.templateTimelineVersion ?? null,
+    templateTimelineId: timeline.savedObjectId ? timeline.templateTimelineId : null,
+    templateTimelineVersion: timeline.savedObjectId ? timeline.templateTimelineVersion : null,
   };
 }
