@@ -262,6 +262,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
               markdownComments,
               pattern,
               sameFamily: indexSameFamily,
+              checkedAt: Date.now(),
             },
           },
         };

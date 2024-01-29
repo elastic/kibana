@@ -454,6 +454,7 @@ export interface StorageResult {
   batchId: string;
   indexName: string;
   isCheckAll: boolean;
+  checkedAt: number;
   docsCount: number;
   totalFieldCount: number;
   ecsFieldCount: number;
@@ -483,6 +484,7 @@ export const formatStorageResult = ({
   batchId: report.batchId,
   indexName: result.indexName,
   isCheckAll: report.isCheckAll,
+  checkedAt: result.checkedAt,
   docsCount: result.docsCount ?? 0,
   totalFieldCount: partitionedFieldMetadata.all.length,
   ecsFieldCount: partitionedFieldMetadata.ecsCompliant.length,
@@ -514,6 +516,7 @@ export const formatResultFromStorage = ({
   indexName: storageResult.indexName,
   markdownComments: storageResult.markdownComments,
   sameFamily: storageResult.sameFamilyFieldCount,
+  checkedAt: storageResult.checkedAt,
   pattern,
 });
 

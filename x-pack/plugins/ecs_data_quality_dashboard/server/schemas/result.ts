@@ -11,6 +11,7 @@ export const ResultDocument = t.type({
   batchId: t.string,
   indexName: t.string,
   isCheckAll: t.boolean,
+  checkedAt: t.number,
   docsCount: t.number,
   totalFieldCount: t.number,
   ecsFieldCount: t.number,

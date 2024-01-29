@@ -156,6 +156,7 @@ export const updateResultOnCheckCompleted = ({
             markdownComments,
             pattern,
             sameFamily,
+            checkedAt: Date.now(),
           },
         },
       },

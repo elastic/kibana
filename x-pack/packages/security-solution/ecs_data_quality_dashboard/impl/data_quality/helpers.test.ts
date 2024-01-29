@@ -102,6 +102,7 @@ describe('helpers', () => {
       ],
       pattern: 'auditbeat-*',
       sameFamily: 0,
+      checkedAt: Date.now(),
     };
 
     it('returns undefined when results is undefined', () => {
@@ -1193,6 +1194,7 @@ describe('helpers', () => {
           markdownComments: ['foo', 'bar', 'baz'],
           pattern: 'packetbeat-*',
           sameFamily: 0,
+          checkedAt: Date.now(),
         },
         '.ds-packetbeat-8.6.1-2023.02.04-000001': {
           docsCount: 1628343,
@@ -1203,6 +1205,7 @@ describe('helpers', () => {
           markdownComments: ['foo', 'bar', 'baz'],
           pattern: 'packetbeat-*',
           sameFamily: 0,
+          checkedAt: Date.now(),
         },
       };
 
@@ -1220,6 +1223,7 @@ describe('helpers', () => {
           markdownComments: ['foo', 'bar', 'baz'],
           pattern: 'auditbeat-*',
           sameFamily: 0,
+          checkedAt: Date.now(),
         },
         'auditbeat-custom-index-1': {
           docsCount: 4,
@@ -1230,6 +1234,7 @@ describe('helpers', () => {
           markdownComments: ['foo', 'bar', 'baz'],
           pattern: 'auditbeat-*',
           sameFamily: 0,
+          checkedAt: Date.now(),
         },
         'auditbeat-custom-empty-index-1': {
           docsCount: 0,
@@ -1240,6 +1245,7 @@ describe('helpers', () => {
           markdownComments: ['foo', 'bar', 'baz'],
           pattern: 'auditbeat-*',
           sameFamily: 0,
+          checkedAt: Date.now(),
         },
       };
 
@@ -1257,6 +1263,7 @@ describe('helpers', () => {
           markdownComments: ['foo', 'bar', 'baz'],
           pattern: 'auditbeat-*',
           sameFamily: 0,
+          checkedAt: Date.now(),
         },
         'auditbeat-custom-index-1': {
           docsCount: 4,
@@ -1267,6 +1274,7 @@ describe('helpers', () => {
           markdownComments: ['foo', 'bar', 'baz'],
           pattern: 'auditbeat-*',
           sameFamily: 0,
+          checkedAt: Date.now(),
         },
         'auditbeat-custom-empty-index-1': {
           docsCount: 0,
@@ -1277,6 +1285,7 @@ describe('helpers', () => {
           markdownComments: ['foo', 'bar', 'baz'],
           pattern: 'auditbeat-*',
           sameFamily: 0,
+          checkedAt: Date.now(),
         },
       };
 
@@ -1342,6 +1351,7 @@ describe('helpers', () => {
         markdownComments: ['foo', 'bar', 'baz'],
         pattern: 'packetbeat-*',
         sameFamily: 0,
+        checkedAt: Date.now(),
       };
 
       expect(getErrorSummary(resultWithError)).toEqual({
