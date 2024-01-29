@@ -366,8 +366,10 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     };
 
     const generateLogRateAnalysisUrl = async () => {
-      if (props.anomaly.source.function_description === 'count' && !unmounted) {
-        setOpenInLogRateAnalysisUrl(undefined);
+      if (props.anomaly.source.function_description !== 'count') {
+        if (!unmounted) {
+          setOpenInLogRateAnalysisUrl(undefined);
+        }
         return;
       }
 
