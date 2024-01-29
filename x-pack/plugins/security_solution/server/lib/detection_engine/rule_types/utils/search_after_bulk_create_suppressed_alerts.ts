@@ -14,6 +14,7 @@ import type {
   SearchAfterAndBulkCreateReturnType,
   WrapSuppressedHits,
 } from '../types';
+import { MAX_SIGNALS_SUPPRESSION_MULTIPLIER } from '../constants';
 
 import { createEnrichEventsFunction } from './enrichments';
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
@@ -57,7 +58,7 @@ export const searchAfterAndBulkCreateSuppressedAlerts = async (
     // max signals for suppression includes suppressed and created alerts
     // this allows to lift max signals limitation to higher value
     // and can detects threats beyond default max_signals value
-    const suppressionMaxSignals = 5 * tuple.maxSignals;
+    const suppressionMaxSignals = MAX_SIGNALS_SUPPRESSION_MULTIPLIER * tuple.maxSignals;
 
     const suppressionDuration = alertSuppression?.duration;
     const suppressionWindow = suppressionDuration
@@ -108,7 +109,7 @@ export const searchAfterAndBulkCreateSuppressedAlerts = async (
       ...bulkCreateResult,
       alertsWereTruncated:
         (toReturn.suppressedAlertsCount ?? 0) + toReturn.createdSignalsCount >=
-        suppressionMaxSignals,
+          suppressionMaxSignals || toReturn.createdSignalsCount >= tuple.maxSignals,
     };
   };
 

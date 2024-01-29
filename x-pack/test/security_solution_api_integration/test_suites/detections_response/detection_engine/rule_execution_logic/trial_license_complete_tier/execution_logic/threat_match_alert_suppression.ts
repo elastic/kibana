@@ -154,7 +154,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
   ];
 
-  describe('@ess @serverless Indicator match type rules, alert suppression', () => {
+  describe.only('@ess @serverless Indicator match type rules, alert suppression', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });
@@ -756,7 +756,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
-        it('should generate and update up to max_signals alerts', async () => {
+        it.only('should generate and update up to max_signals alerts', async () => {
           const expectedMaxSignals = 40;
           const id = uuidv4();
           const firstTimestamp = '2020-10-28T05:45:00.000Z';
@@ -772,7 +772,7 @@ export default ({ getService }: FtrProviderContext) => {
           await Promise.all(
             [firstTimestamp, secondTimestamp].map((t) =>
               indexGeneratedSourceDocuments({
-                docsCount: expectedMaxSignals,
+                docsCount: expectedMaxSignals + 15,
                 seed: (index) => ({
                   id,
                   '@timestamp': t,
@@ -810,12 +810,17 @@ export default ({ getService }: FtrProviderContext) => {
             max_signals: expectedMaxSignals,
           };
 
-          const { previewId } = await previewRule({
+          const { previewId, logs } = await previewRule({
             supertest,
             rule,
             timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
             invocationCount: 2,
           });
+
+          expect(logs[0].warnings).toEqual(
+            expect.arrayContaining([getSuppressionMaxAlertsWarning()])
+          );
+
           const previewAlerts = await getPreviewAlerts({
             es,
             previewId,
