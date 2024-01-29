@@ -67,7 +67,7 @@
   },
   "engines": {
     "node": "20.10.0",
-    "yarn": "^1.21.1"
+    "yarn": "^1.22.21"
   },
   "resolutions": {
     "**/@types/node": "20.10.6",
@@ -833,5 +833,6 @@
     "xmlbuilder": "13.0.2",
     "yargs": "^15.4.1",
     "zlib": "^1.0.5"
-  }
+  },
+  "packageManager": "yarn@1.22.21"
 }
