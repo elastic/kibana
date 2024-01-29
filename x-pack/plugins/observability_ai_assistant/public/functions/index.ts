@@ -10,7 +10,6 @@ import type {
   ObservabilityAIAssistantService,
   RegisterRenderFunctionDefinition,
 } from '../types';
-import { registerLensRenderFunction } from './lens';
 import { registerLensRegionmapFunction } from './lens_regionmap';
 import { registerLensTagcloudFunction } from './lens_tagcloud';
 import { registerLensHeatmapFunction } from './lens_heatmap';
@@ -29,13 +28,12 @@ export async function registerFunctions({
   service: ObservabilityAIAssistantService;
   pluginsStart: ObservabilityAIAssistantPluginStartDependencies;
 }) {
-    registerLensRenderFunction({ service, pluginsStart, registerRenderFunction });
-    registerLensMetricFunction({ service, pluginsStart, registerFunction });
-    registerLensGaugeFunction({ service, pluginsStart, registerFunction });
-    registerLensHeatmapFunction({ service, pluginsStart, registerFunction });
-    registerLensRegionmapFunction({ service, pluginsStart, registerFunction });
-    registerLensTableFunction({ service, pluginsStart, registerFunction });
-    registerLensTagcloudFunction({ service, pluginsStart, registerFunction });
-    registerLensTreemapFunction({ service, pluginsStart, registerFunction });
-    registerLensXYFunction({ service, pluginsStart, registerFunction });
+  registerLensMetricFunction({ service, pluginsStart, registerRenderFunction });
+  registerLensGaugeFunction({ service, pluginsStart, registerRenderFunction });
+  registerLensHeatmapFunction({ service, pluginsStart, registerRenderFunction });
+  registerLensRegionmapFunction({ service, pluginsStart, registerRenderFunction });
+  registerLensTableFunction({ service, pluginsStart, registerRenderFunction });
+  registerLensTagcloudFunction({ service, pluginsStart, registerRenderFunction });
+  registerLensTreemapFunction({ service, pluginsStart, registerRenderFunction });
+  registerLensXYFunction({ service, pluginsStart, registerRenderFunction });
 }

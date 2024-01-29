@@ -40,11 +40,7 @@ export function LensChart({
       {
         chartType,
         title: title || 'chart',
-        layers: [
-          {
-            ...rest,
-          },
-        ],
+        ...rest,
       },
       {
         embeddable: true,
