@@ -10,14 +10,14 @@ import { getTimeline } from '../../../objects/timeline';
 
 import {
   LOCKED_ICON,
-  NOTES_TEXT,
+  // NOTES_TEXT,
   PIN_EVENT,
   TIMELINE_FILTER,
   TIMELINE_FLYOUT_WRAPPER,
   TIMELINE_QUERY,
   TIMELINE_PANEL,
   TIMELINE_STATUS,
-  TIMELINE_TAB_CONTENT_GRAPHS_NOTES,
+  // TIMELINE_TAB_CONTENT_GRAPHS_NOTES,
   SAVE_TIMELINE_ACTION_BTN,
   SAVE_TIMELINE_TOOLTIP,
 } from '../../../screens/timeline';
@@ -33,7 +33,7 @@ import { selectCustomTemplates } from '../../../tasks/templates';
 import {
   addFilter,
   addNameAndDescriptionToTimeline,
-  addNotesToTimeline,
+  // addNotesToTimeline,
   clickingOnCreateTimelineFormTemplateBtn,
   closeTimeline,
   createNewTimeline,
