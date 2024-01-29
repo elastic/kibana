@@ -2413,5 +2413,76 @@ describe('CasesConnectorExecutor', () => {
         ],
       });
     });
+
+    it('increase oracle counter but is missing', async () => {
+      const nonFoundRecord = {
+        id: oracleRecords[0].id,
+        type: CASE_ORACLE_SAVED_OBJECT,
+        message: 'Not found',
+        statusCode: 404,
+        error: 'Not found',
+      };
+
+      dateMathMock.parse
+        // time window has passed. should increase the counter
+        .mockImplementationOnce(() => moment('2023-11-10T10:23:42.769Z'))
+        // time window has not passed. counter should not be increased
+        .mockImplementationOnce(() => moment('2023-10-09T10:23:42.769Z'));
+
+      mockGetRecordId.mockReturnValue(oracleRecords[0].id);
+      mockBulkGetRecords
+        .mockResolvedValueOnce([oracleRecords[0]])
+        .mockResolvedValueOnce([nonFoundRecord]);
+
+      mockBulkCreateRecords.mockResolvedValueOnce(oracleRecords[0]);
+      mockBulkUpdateRecord.mockResolvedValueOnce(nonFoundRecord);
+
+      mockGetCaseId.mockReturnValueOnce('mock-id-1');
+
+      casesClientMock.cases.bulkGet.mockResolvedValue({
+        cases: [cases[0]],
+        errors: [],
+      });
+
+      await connectorExecutor.execute(missingDataParams);
+      await connectorExecutor.execute(missingDataParams);
+
+      expect(mockBulkUpdateRecord).toBeCalledTimes(1);
+      expect(mockBulkUpdateRecord).toHaveBeenCalledWith([
+        { payload: { counter: 2 }, recordId: 'so-oracle-record-0', version: 'so-version-0' },
+      ]);
+
+      expect(mockBulkCreateRecords).toBeCalledTimes(1);
+      expect(mockBulkCreateRecords).toHaveBeenCalledWith([
+        {
+          payload: {
+            cases: [],
+            grouping: {
+              foo: 'bar',
+            },
+            rules: [
+              {
+                id: 'rule-test-id',
+              },
+            ],
+          },
+          recordId: 'so-oracle-record-0',
+        },
+      ]);
+
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledWith({
+        caseId: 'mock-id-1',
+        attachments: [
+          {
+            type: 'alert',
+            alertId: 'test-id',
+            index: 'test-index',
+            rule: { id: 'rule-test-id', name: 'Test rule' },
+            owner: 'securitySolution',
+          },
+        ],
+      });
+    });
   });
 });
