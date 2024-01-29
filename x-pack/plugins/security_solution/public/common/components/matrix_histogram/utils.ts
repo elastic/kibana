@@ -53,8 +53,7 @@ export const getBarchartConfigs = ({
     // the showLegendExtra will display the last element of the data array as the default legend value
     // and if empty buckets are filtered out you can probably see a value that doesn't correspond
     // to the value in the last time bucket visualized.
-    // showLegendExtra
-    // showLegendExtra: true,
+    showLegendExtra: false,
     theme: {
       scales: {
         barsPadding: 0.08,
