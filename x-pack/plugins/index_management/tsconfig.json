@@ -43,6 +43,7 @@
     "@kbn/ui-theme",
     "@kbn/core-application-browser",
     "@kbn/code-editor",
+    "@kbn/console-plugin",
   ],
   "exclude": [
     "target/**/*",

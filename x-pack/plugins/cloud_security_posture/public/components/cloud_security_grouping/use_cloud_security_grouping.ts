@@ -20,7 +20,7 @@ import { FindingsBaseURLQuery } from '../../common/types';
 import { useBaseEsQuery, usePersistedQuery } from '../../common/hooks/use_cloud_posture_data_table';
 
 const DEFAULT_PAGE_SIZE = 10;
-const MAX_GROUPING_LEVELS = 3;
+const DEFAULT_MAX_GROUPING_LEVELS = 3;
 
 /*
  Utility hook to handle the grouping logic of the cloud security components
@@ -35,6 +35,7 @@ export const useCloudSecurityGrouping = ({
   groupStatsRenderer,
   groupingLevel,
   groupingLocalStorageKey,
+  maxGroupingLevels = DEFAULT_MAX_GROUPING_LEVELS,
 }: {
   dataView: DataView;
   groupingTitle: string;
@@ -45,6 +46,7 @@ export const useCloudSecurityGrouping = ({
   groupStatsRenderer?: GroupStatsRenderer<any>;
   groupingLevel?: number;
   groupingLocalStorageKey: string;
+  maxGroupingLevels?: number;
 }) => {
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
@@ -65,7 +67,7 @@ export const useCloudSecurityGrouping = ({
     defaultGroupingOptions,
     fields: dataView.fields,
     groupingId: groupingLocalStorageKey,
-    maxGroupingLevels: MAX_GROUPING_LEVELS,
+    maxGroupingLevels,
     title: groupingTitle,
     onGroupChange: () => {
       setActivePageIndex(0);
