@@ -92,6 +92,13 @@ export async function sendEmailWithExchange(
   const { transport, configurationUtilities, connectorId } = options;
   const { clientId, clientSecret, tenantId, oauthTokenUrl } = transport;
 
+  let tokenUrl = oauthTokenUrl;
+  if (!tokenUrl) {
+    const exchangeUrl =
+      configurationUtilities.getMicrosoftExchangeUrl() ?? EXCHANGE_ONLINE_SERVER_HOST;
+    tokenUrl = `${exchangeUrl}/${tenantId}/oauth2/v2.0/token`;
+  }
+
   const accessToken = await getOAuthClientCredentialsAccessToken({
     connectorId,
     logger,
@@ -105,8 +112,8 @@ export async function sendEmailWithExchange(
         clientSecret: clientSecret as string,
       },
     },
-    oAuthScope: GRAPH_API_OAUTH_SCOPE,
-    tokenUrl: oauthTokenUrl ?? `${EXCHANGE_ONLINE_SERVER_HOST}/${tenantId}/oauth2/v2.0/token`,
+    oAuthScope: configurationUtilities.getMicrosoftGraphApiScope() ?? GRAPH_API_OAUTH_SCOPE,
+    tokenUrl,
     connectorTokenClient,
   });
 

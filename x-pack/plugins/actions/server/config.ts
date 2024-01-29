@@ -121,6 +121,8 @@ export const configSchema = schema.object({
   responseTimeout: schema.duration({ defaultValue: '60s' }),
   customHostSettings: schema.maybe(schema.arrayOf(customHostSettingsSchema)),
   microsoftGraphApiUrl: schema.maybe(schema.string()),
+  microsoftGraphApiScope: schema.maybe(schema.string()),
+  microsoftExchangeUrl: schema.maybe(schema.string()),
   email: schema.maybe(
     schema.object({
       domain_allowlist: schema.arrayOf(schema.string()),

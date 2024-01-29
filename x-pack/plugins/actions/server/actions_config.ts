@@ -48,6 +48,8 @@ export interface ActionsConfigurationUtilities {
   getResponseSettings: () => ResponseSettings;
   getCustomHostSettings: (targetUrl: string) => CustomHostSettings | undefined;
   getMicrosoftGraphApiUrl: () => undefined | string;
+  getMicrosoftGraphApiScope: () => undefined | string;
+  getMicrosoftExchangeUrl: () => undefined | string;
   getMaxAttempts: ({
     actionTypeMaxAttempts,
     actionTypeId,
@@ -131,6 +133,14 @@ function getMicrosoftGraphApiUrlFromConfig(config: ActionsConfig): undefined | s
   return config.microsoftGraphApiUrl;
 }
 
+function getMicrosoftGraphApiScopeFromConfig(config: ActionsConfig): undefined | string {
+  return config.microsoftGraphApiScope;
+}
+
+function getMicrosoftExchangeUrlFromConfig(config: ActionsConfig): undefined | string {
+  return config.microsoftExchangeUrl;
+}
+
 function arrayAsSet<T>(arr: T[] | undefined): Set<T> | undefined {
   if (!arr) return;
   return new Set(arr);
@@ -209,6 +219,8 @@ export function getActionsConfigurationUtilities(
     },
     getCustomHostSettings: (targetUrl: string) => getCustomHostSettings(config, targetUrl),
     getMicrosoftGraphApiUrl: () => getMicrosoftGraphApiUrlFromConfig(config),
+    getMicrosoftGraphApiScope: () => getMicrosoftGraphApiScopeFromConfig(config),
+    getMicrosoftExchangeUrl: () => getMicrosoftExchangeUrlFromConfig(config),
     validateEmailAddresses: (addresses: string[], options: ValidateEmailAddressesOptions) =>
       validatedEmailCurried(addresses, options),
     getMaxAttempts: ({ actionTypeMaxAttempts, actionTypeId }) => {
