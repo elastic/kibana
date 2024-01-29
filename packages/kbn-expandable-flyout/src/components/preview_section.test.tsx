@@ -14,7 +14,8 @@ import {
   PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID,
   PREVIEW_SECTION_TEST_ID,
 } from './test_ids';
-import { ExpandableFlyoutContext, ExpandableFlyoutContextValue } from '../context';
+import { ExpandableFlyoutContextValue } from '../context';
+import { TestProvider } from '../test/provider';
 
 describe('PreviewSection', () => {
   const context = {
@@ -36,9 +37,9 @@ describe('PreviewSection', () => {
     const showBackButton = false;
 
     const { getByTestId } = render(
-      <ExpandableFlyoutContext.Provider value={context}>
+      <TestProvider state={context.panels}>
         <PreviewSection component={component} leftPosition={left} showBackButton={showBackButton} />
-      </ExpandableFlyoutContext.Provider>
+      </TestProvider>
     );
 
     expect(getByTestId(PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID)).toBeInTheDocument();
@@ -48,9 +49,9 @@ describe('PreviewSection', () => {
     const showBackButton = true;
 
     const { getByTestId } = render(
-      <ExpandableFlyoutContext.Provider value={context}>
+      <TestProvider state={context.panels}>
         <PreviewSection component={component} leftPosition={left} showBackButton={showBackButton} />
-      </ExpandableFlyoutContext.Provider>
+      </TestProvider>
     );
 
     expect(getByTestId(PREVIEW_SECTION_BACK_BUTTON_TEST_ID)).toBeInTheDocument();
@@ -66,14 +67,14 @@ describe('PreviewSection', () => {
     };
 
     const { getByTestId, getByText } = render(
-      <ExpandableFlyoutContext.Provider value={context}>
+      <TestProvider state={context.panels}>
         <PreviewSection
           component={component}
           leftPosition={left}
           showBackButton={showBackButton}
           banner={banner}
         />
-      </ExpandableFlyoutContext.Provider>
+      </TestProvider>
     );
 
     expect(getByTestId(`${PREVIEW_SECTION_TEST_ID}BannerPanel`)).toHaveClass(

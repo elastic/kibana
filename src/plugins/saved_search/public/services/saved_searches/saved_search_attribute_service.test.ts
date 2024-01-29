@@ -190,6 +190,7 @@ describe('getSavedSearchAttributeService', () => {
           "hideChart": false,
           "id": "saved-object-id",
           "isTextBasedQuery": false,
+          "managed": false,
           "references": Array [
             Object {
               "id": "1",
