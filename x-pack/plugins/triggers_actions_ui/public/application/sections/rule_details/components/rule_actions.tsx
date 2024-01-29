@@ -15,7 +15,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isSystemAction, RuleDefaultAction, RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
+import { RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
 import { ActionTypeRegistryContract, RuleAction, suspendedComponentWithProps } from '../../../..';
 import { useFetchRuleActionConnectors } from '../../../hooks/use_fetch_rule_action_connectors';
 import { NOTIFY_WHEN_OPTIONS } from '../../rule_form/rule_notify_when';
@@ -51,7 +51,7 @@ export function RuleActions({
     );
   }
 
-  const getNotifyText = (action: RuleDefaultAction) =>
+  const getNotifyText = (action: RuleAction) =>
     (NOTIFY_WHEN_OPTIONS.find((options) => options.value === action.frequency?.notifyWhen)
       ?.inputDisplay ||
       action.frequency?.notifyWhen) ??
@@ -93,18 +93,14 @@ export function RuleActions({
                   <EuiFlexItem grow={false}>
                     <EuiIcon size="s" type="bell" />
                   </EuiFlexItem>
-                  {!isSystemAction(action) && (
-                    <EuiFlexItem>
-                      <EuiText
-                        data-test-subj={`actionConnectorName-${index}-${
-                          actionName || actionTypeId
-                        }`}
-                        size="xs"
-                      >
-                        {String(getNotifyText(action))}
-                      </EuiText>
-                    </EuiFlexItem>
-                  )}
+                  <EuiFlexItem>
+                    <EuiText
+                      data-test-subj={`actionConnectorName-${index}-${actionName || actionTypeId}`}
+                      size="xs"
+                    >
+                      {String(getNotifyText(action))}
+                    </EuiText>
+                  </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>

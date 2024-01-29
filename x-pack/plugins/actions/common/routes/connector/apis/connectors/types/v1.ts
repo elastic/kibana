@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export { transformGetAllConnectorsResponse } from './v1';
+import type { TypeOf } from '@kbn/config-schema';
+import { connectorsQuerySchemaV1 } from '..';
+
+export type ConnectorsRequestQuery = TypeOf<typeof connectorsQuerySchemaV1>;
