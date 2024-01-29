@@ -26,13 +26,7 @@ export function ErrorGroupOverview() {
   const { serviceName } = useApmServiceContext();
 
   const {
-    query: {
-      environment,
-      kuery,
-      sortField = 'occurrences',
-      sortDirection = 'desc',
-      comparisonEnabled,
-    },
+    query: { environment, kuery, comparisonEnabled },
   } = useApmParams('/services/{serviceName}/errors');
 
   const { errorDistributionData, errorDistributionStatus } =

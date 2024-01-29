@@ -67,7 +67,12 @@ interface Props {
   saveTableOptionsToUrl?: boolean;
 }
 
-function ErrorGroupList({
+const defaultSorting = {
+  field: 'occurrences' as const,
+  direction: 'desc' as const,
+};
+
+export function ErrorGroupList({
   serviceName,
   isCompactMode = false,
   initialPageSize,
@@ -82,10 +87,6 @@ function ErrorGroupList({
 
   const [renderedItems, setRenderedItems] = useState<ErrorGroupItem[]>([]);
 
-  const defaultSorting = {
-    field: 'occurrences' as const,
-    direction: 'desc' as const,
-  };
   const [sorting, setSorting] =
     useState<TableOptions<ErrorGroupItem>['sort']>(defaultSorting);
 
@@ -329,5 +330,3 @@ function ErrorGroupList({
     />
   );
 }
-
-export { ErrorGroupList };
