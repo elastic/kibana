@@ -46,7 +46,7 @@ const LensRendererComponent: React.FC<LensProps> = ({ attributes, timeRange, met
       <Container>
         <EmbeddableComponent
           id=""
-          style={{ height: LENS_VISUALIZATION_HEIGHT, width: metadata?.width ?? '100%' }}
+          style={{ height: LENS_VISUALIZATION_HEIGHT }}
           timeRange={timeRange}
           attributes={attributes}
           renderMode="view"

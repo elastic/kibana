@@ -242,6 +242,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
             timerange={timerange}
             title={inspectTitle}
             withActions={withActions}
+            casesAttachmentMetadata={casesAttachmentMetadata}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

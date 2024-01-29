@@ -62,6 +62,7 @@ export interface VisualizationActionsProps {
   timerange: { from: string; to: string };
   title: React.ReactNode;
   withActions?: VisualizationContextMenuActions[];
+  casesAttachmentMetadata?: LensProps['metadata'];
 }
 
 export interface EmbeddableData {

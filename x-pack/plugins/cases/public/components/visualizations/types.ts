@@ -13,6 +13,5 @@ export type LensProps = Pick<TypedLensByValueInput, 'attributes' | 'timeRange'> 
    */
   metadata?: {
     description?: string;
-    width?: string | number;
   };
 };

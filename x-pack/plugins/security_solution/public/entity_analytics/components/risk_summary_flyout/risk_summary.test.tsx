@@ -142,7 +142,6 @@ describe('RiskSummary', () => {
     expect(lensMetadata).toMatchInlineSnapshot(`
       Object {
         "description": "Risk score for host test",
-        "width": 200,
       }
     `);
   });
@@ -164,7 +163,6 @@ describe('RiskSummary', () => {
     expect(lensMetadata).toMatchInlineSnapshot(`
       Object {
         "description": "Risk score for user test",
-        "width": 200,
       }
     `);
   });

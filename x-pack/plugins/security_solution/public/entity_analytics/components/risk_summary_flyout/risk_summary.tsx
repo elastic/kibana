@@ -103,7 +103,6 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
           },
         }
       ),
-      width: 200,
     }),
     [entityData?.name, riskData]
   );
