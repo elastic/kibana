@@ -75,6 +75,42 @@ export function ChatActionsMenu({
               defaultMessage: 'Actions',
             }),
             items: [
+              ...(showLinkToConversationsApp
+                ? [
+                    {
+                      name: conversationId
+                        ? i18n.translate(
+                            'xpack.observabilityAiAssistant.chatHeader.actions.openInConversationsApp',
+                            {
+                              defaultMessage: 'Open in Conversations app',
+                            }
+                          )
+                        : i18n.translate(
+                            'xpack.observabilityAiAssistant.chatHeader.actions.goToConversationsApp',
+                            {
+                              defaultMessage: 'Go to Conversations app',
+                            }
+                          ),
+                      href: conversationId
+                        ? router.link('/conversations/{conversationId}', {
+                            path: { conversationId },
+                          })
+                        : router.link('/conversations/new'),
+                    },
+                  ]
+                : []),
+              {
+                name: i18n.translate(
+                  'xpack.observabilityAiAssistant.chatHeader.actions.knowledgeBase',
+                  {
+                    defaultMessage: 'Manage knowledge base',
+                  }
+                ),
+                onClick: () => {
+                  toggleActionsMenu();
+                  handleNavigateToSettingsKnowledgeBase();
+                },
+              },
               {
                 name: i18n.translate('xpack.observabilityAiAssistant.chatHeader.actions.settings', {
                   defaultMessage: 'AI Assistant Settings',
@@ -100,18 +136,7 @@ export function ChatActionsMenu({
                 ),
                 panel: 1,
               },
-              {
-                name: i18n.translate(
-                  'xpack.observabilityAiAssistant.chatHeader.actions.knowledgeBase',
-                  {
-                    defaultMessage: 'Manage knowledge base',
-                  }
-                ),
-                onClick: () => {
-                  toggleActionsMenu();
-                  handleNavigateToSettingsKnowledgeBase();
-                },
-              },
+
               {
                 name: i18n.translate(
                   'xpack.observabilityAiAssistant.chatHeader.actions.copyConversation',
@@ -125,30 +150,6 @@ export function ChatActionsMenu({
                   onCopyConversationClick();
                 },
               },
-              ...(showLinkToConversationsApp
-                ? [
-                    {
-                      name: conversationId
-                        ? i18n.translate(
-                            'xpack.observabilityAiAssistant.chatHeader.actions.openInConversationsApp',
-                            {
-                              defaultMessage: 'Open in Conversations app',
-                            }
-                          )
-                        : i18n.translate(
-                            'xpack.observabilityAiAssistant.chatHeader.actions.goToConversationsApp',
-                            {
-                              defaultMessage: 'Go to Conversations app',
-                            }
-                          ),
-                      href: conversationId
-                        ? router.link('/conversations/{conversationId}', {
-                            path: { conversationId },
-                          })
-                        : router.link('/conversations/new'),
-                    },
-                  ]
-                : []),
             ],
           },
           {

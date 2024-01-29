@@ -4,7 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiFlyout, EuiResizableContainer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiResizableContainer,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import React, { useState, useMemo, useRef, useCallback } from 'react';
@@ -29,7 +35,6 @@ const containerClassName = css`
 `;
 
 const bodyClassName = css`
-  padding-top: 36px;
   overflow-y: auto;
 `;
 
@@ -50,6 +55,8 @@ export function ChatFlyout({
     services: { http, notifications },
   } = useKibana();
 
+  const euiTheme = useEuiTheme();
+
   const currentUser = useCurrentUser();
 
   const connectors = useGenAIConnectors();
@@ -65,6 +72,7 @@ export function ChatFlyout({
     forceUpdate();
   }, [forceUpdate]);
 
+  const [isConversationListVisible, setIsConversationListVisible] = useState(true);
   const [isUpdatingList, setIsUpdatingList] = useState(false);
   const [conversationId, setConversationId] = useState<string | undefined>(undefined);
   const conversations = useAbortableAsync(
@@ -108,12 +116,26 @@ export function ChatFlyout({
   });
 
   return isOpen ? (
-    <EuiFlyout onClose={onClose} closeButtonProps={{ css: { marginRight: '8px' } }}>
+    <EuiFlyout
+      onClose={onClose}
+      closeButtonProps={{ css: { marginRight: '8px', marginTop: '8px' } }}
+    >
       {confirmDeleteElement}
       <EuiResizableContainer css={{ height: '100%' }}>
         {(EuiResizablePanel, EuiResizableButton) => (
           <>
-            <EuiResizablePanel mode="collapsible" initialSize={20} minSize="20%">
+            <EuiResizablePanel
+              mode="collapsible"
+              initialSize={30}
+              minSize="30"
+              paddingSize="none"
+              onToggleCollapsed={() => {
+                setIsConversationListVisible((oldValue) => !oldValue);
+              }}
+              css={{
+                borderRight: `1px solid ${euiTheme.euiTheme.border.color}`,
+              }}
+            >
               <ConversationList
                 selected={conversationId ?? ''}
                 conversations={displayedConversations}
@@ -180,7 +202,7 @@ export function ChatFlyout({
 
             <EuiResizableButton alignIndicator="center" />
 
-            <EuiResizablePanel mode="main" initialSize={80} minSize="40%" paddingSize="none">
+            <EuiResizablePanel mode="main" initialSize={70} minSize="10" paddingSize="none">
               <EuiFlexGroup
                 css={{ height: '100%' }}
                 responsive={false}
