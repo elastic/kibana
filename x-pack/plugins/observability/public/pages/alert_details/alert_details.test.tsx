@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import { Chance } from 'chance';
 import { waitFor } from '@testing-library/react';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
@@ -29,6 +29,7 @@ import { alertDetail, alertWithNoData } from './mock/alert';
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: jest.fn(),
+  useLocation: jest.fn(),
 }));
 
 jest.mock('../../utils/kibana_react');
@@ -83,6 +84,7 @@ jest.mock('@kbn/observability-shared-plugin/public');
 
 const useFetchAlertDetailMock = useFetchAlertDetail as jest.Mock;
 const useParamsMock = useParams as jest.Mock;
+const useLocationMock = useLocation as jest.Mock;
 const useBreadcrumbsMock = useBreadcrumbs as jest.Mock;
 
 const chance = new Chance();
@@ -108,6 +110,7 @@ describe('Alert details', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useParamsMock.mockReturnValue(params);
+    useLocationMock.mockReturnValue({ pathname: '/alerts/uuid', search: '', state: '', hash: '' });
     useBreadcrumbsMock.mockReturnValue([]);
     ruleTypeRegistry.list.mockReturnValue([ruleType]);
     ruleTypeRegistry.get.mockReturnValue(ruleType);
