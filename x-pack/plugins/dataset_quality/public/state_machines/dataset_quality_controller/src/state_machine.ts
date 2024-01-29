@@ -30,7 +30,7 @@ import {
 export const createPureDatasetQualityControllerStateMachine = (
   initialContext: DatasetQualityControllerContext
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVszoIoFdUAbAS3QE8BhAewDt0AnaoosBgOgDMcBjACxK0oaTAGIIdMO1iZ0UkVhwFiZKnUbNWHbun6DhGVAG0ADAF1EoAA7VYZEnUsgAHogAcAZgBs7AOwAWAIBWNxM3Ly9QgCYAGhByRH8ARhN2NwBOZJMkgICTDw8AX0K4hWw8QlIKGnomFjYuXgEhBXYialQIfTKcWEbdZqhxSXZBADdqAGt5Q3LlKrVazQadPRbDNo6u9cxyvtXBhHHqHgwHWlMzS6cbO3Rzp1cEb392HN8vXw909K8gryivjiCWeSQ87G8UU+6U8biCUSibl8xVKsyUlVUNQ09W0TW6G3anXxu16-TWQzYTA4ViIGE41AYAFt2D0Kipquo6loyYNWoTtgYSeh9nihEdaBNTvc6JdrkgQLd7I55U8Xm9fB8vj8-gCgfFEAjUh4Ah4kgikkl0r4TEEiiUQKz5pjOctcQNiahNkSWmAoAxOpBkCcRe6hMNaFJjtMWWi2QssVyVqLBZ7+d1ff6IIHgzz9OLJWcZeY5dZbEraI9EB54ex8m5-BEkm5LUF-AVgYgvMa-H8QhqkbaGyiHbGnRyljjcztU1t036AxAgzwQ+TRJSGewaXSGczHRjx9juQcPV6BcgMwulyvDscpedZeYbmXpRWVVWa3WG14my22x4OwgravBqvhRGa3y-FabjDnu7KLIeDQkBArCiJQAASACCAByADiACiAD6AAKGH4SWCrPg8b4IBalrsL8GqtukFpRCY6T-vqzymuwQS+L8UQwkkAJBP8QQwaO+7wYmHBISh6HYfhBEAEoAPIAOoAMrEXhSnEaReHkYqL6VjRJi+EEfiBMkoEmFE3g5ABCK+LW-gmJ8nhQtaXhueJQpjlJrqjMhYCoZhuGERpKlKQAKoZlHKqATy0c5bkCQ2vhmma+QARaFm+G4oQmmEyQib5ihxs6E7crJIUqUReFYQRABiAAyACaKkAKqxY+8pGVRiWIOkYRvEJvz-G5fFmgB5lROwTkZc2FqRFEZVzJJCaBTVqEtSpGmEa1HXdXFdwDS4iC0UkPGBEJgT1hk-wAekEL1mEvFpWEHj+NB9qwfGLqTseQhNUQ5DUPg6AKOGkYSlMMx+RtANHsmINgxDCj5ichYXMWvWlqdCXnQg9bgkJQQWjCCKtqBAEZK8vG2gVIT+D8SLFPatDUFm8Dyn9lUIQwT4E6+g0IAAtP4sScWL+W1nkSTJEi9meGt6JwZtgPJgoQvliZXgAf4FmG823xthk+QmCY-iqxVB7SVOKanh6ew68Z1GtjlHhzcxALfNW-xfE2Nv+RryOho7abTnsDuu2dSW2Y5XtpPWOQeFb71-HaqII+rSNJuHfKzlHpI8NQjI0jgYCx4TTzfs9lt0yznnwo5308d4XzeLZ5PJMHiNVfn5KF96wgXlmi7BtXItE62EI2kkIRNkEYTZBxIKG85prMd8rZfZb1u-RJucD26Q8EkXo-zuPV4x318XT-Hc1p+Ti9wivYIAQCV1TWa6TwlEyRAR92PgLB2w8zxj2zMudgpdy6sDkFPPWTY-D5Hyp8ZInwHKcT+KkII-FvIwjbJ8Vah8c7-RPkFVgiDqIWlAn4UC1Y2wKyliCeEzkPh-3+BEesXwfrZ3KiHPOp9Bio3BpDQw1DRYFHmjkNy1YF4RA8AVWm0j-jfACBEZeUIfrFCAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVszoIoFdUAbAS3QE8BhAewDt0AnaoosBgOggyx1nYDMcAYwAWJWlADEEOmHbiAbtQDWctJmx5CpCjXpMWbTt019B6UeKgJF1IRhJ0A2gAYAuq7eJQAB2qwyR1pvEAAPRAB2AE52AFZYqIBmAEZ42IAmCPjkgBoQckRkgA4Y9MT0koAWSsT4gDY6yoBfJrz1Hi1iMio6RmZWDi4NXgFhMQlJNiYOHyIMfmoGAFt2ds0CLt1egwHjYfQzMasbWiV7dCDPTxC-AIu6EPCEZOT0uvYootqX2MqoytiiSieQKzxK7DKFX+NXqjRabRMOA2Oh6+n6RiGHT4RGoqAgkAERHI1Hw6AA8j4wLRJABlACiABk6ZQACoAfQAcnSAOps5AAQRZ-PpLOuSBAt0CD3FTzqEWS7GSWQydQyyTqURcRRBiDqb3YDTqWtiRWiEUSdSK8JAayR2m6ej6hkGiIO7BxeIJ-CJJPJlOplAZZPpbIAYgyAJpkgCqovcN38UuCMsQ6TK7AiRs+dUSEQilS+FR1CCBETixUqlvSUUtv2S1ttnRRjp2GNd2Nx+IghOJpIpVNGFnGUhktDktlUq1dyId23RLv2Hc93e9vb9A-MlgkJzODmc7jFvkT92ToCeL1S7BclUzUSiLyKxUSiWLeqKio15ViZvvsXrrRtad7S2NFnT2LF3U7L0fT7f1By3KQpkWdhZnmRYVkbGcQKdXZMVMSDlx7X1+1oeDhx3Ow91oK543FSUT0eQpkmvCFUhcTVylNIpKmLWIXDLCpUj1ZI70qJVEgbIDNlRHC20XAiu3kCBWEkaMAAUBRZOk2SFAAhJk2UoAAlABJLTTP5Q8JWPIJGIQf52EqdJ+MSaoEgtOUePyXV9UNFw9RccoxMyST9iwmTWwXCCPUUkhlLASQyTUukOTDSMYzjLw6Js6Uz0QSoXHSCF-N+PMzWY7VvIQQEXDiL51SNMTGgSUKOnClt504MAoAYZdkDsQ4hysaRZHkU4VDUKTmznMD8R6vqBrI45bHOS4D1oo87lslMEGrd9En4iIykrOpkgLdJi2YwEDWckS00C1U9Va9ZgIizq5t6rt+qEQaEMmBhphQuZ0AWZYpzC16Otm7rPsgb7fvIlaqJorLNqTOy9vYA682OhozqKC6qprWrTXNIoCZKWpKxaADaGofF4HFTDIZmgYEy23KwkQABaP44miN54gKnNyjqYtediD50gKzM-jJ5z0meu1pKh3D23Z9Gdu5hVvyiQXfn8590hNWJizExyxNqFw+PvQKxKVptZ1AtX5M3YcNYYnaTXeN4bwtA6NWtyrQVed8in8zM-2-AmKwd9rWbk6KoIgD3tryhBK0c5zzTcpIGnzYsUlq1JsZNPWXj1WI45Z53E-wmLoLXEjU852V0yVeJBfSdVNWD-KRI+dVXhquUn2rlWE6i+vk6I2CNyOCQW9PLmEHq9gigSaPYg1cO9V4geNTvY3XKBE1FYA5mJ9rqeRgblcYPXUi76XuzklzSW5Wtxo3kSbiiyqwE7wS7Kj1mUZi58EQQyvrJG+bo75KVYC-Ha1YipR24lkao0saymwATURU2MS7VkCi1C+U0nYwK6vNL6A0kHp1qmXaowlf6uXlP8YsppEjlhEn+IEDQ0jj2mtfShsMIDwyWovbKHNl5PALHVaETCvg3kJqCKI5oIRRBNBECO1tUhRAEeQyKwiFo-QUpAWhK9t6VDiBowEGiS5iS8io8E+YaxHRzNne8NMmhAA */
   createMachine<
     DatasetQualityControllerContext,
     DatasetQualityControllerEvent,
@@ -40,85 +40,89 @@ export const createPureDatasetQualityControllerStateMachine = (
       context: initialContext,
       predictableActionArguments: true,
       id: 'DatasetQualityController',
-      initial: 'fetchingData',
+      type: 'parallel',
       states: {
-        fetchingData: {
-          type: 'parallel',
+        datasets: {
+          initial: 'fetching',
           states: {
-            loadingDatasets: {
-              initial: 'fetching',
-              states: {
-                fetching: {
-                  invoke: {
-                    src: 'loadDataStreamStats',
-                    onDone: {
-                      target: 'complete',
-                      actions: ['storeDataStreamStats'],
-                    },
-                    onError: {
-                      target: 'complete',
-                      actions: ['notifyFetchDatasetStatsFailed'],
-                    },
-                  },
+            fetching: {
+              invoke: {
+                src: 'loadDataStreamStats',
+                onDone: {
+                  target: 'loaded',
+                  actions: ['storeDataStreamStats'],
                 },
-                complete: {
-                  type: 'final',
+                onError: {
+                  target: 'loaded',
+                  actions: ['notifyFetchDatasetStatsFailed'],
                 },
               },
             },
-            loadingDegradedDocs: {
-              initial: 'fetching',
+            loaded: {
+              initial: 'idle',
               states: {
-                fetching: {
-                  invoke: {
-                    src: 'loadDegradedDocs',
-                    onDone: {
-                      target: 'complete',
-                      actions: ['storeDegradedDocStats'],
+                flyoutOpen: {
+                  initial: 'fetching',
+                  states: {
+                    fetching: {
+                      invoke: {
+                        src: 'loadDataStreamDetails',
+                        onDone: {
+                          target: 'loaded',
+                          actions: ['storeDatasetDetails'],
+                        },
+                        onError: {
+                          target: 'loaded',
+                          actions: ['fetchDatasetDetailsFailedNotifier'],
+                        },
+                      },
                     },
-                    onError: {
-                      target: 'complete',
-                      actions: ['notifyFetchDegradedStatsFailed'],
+                    loaded: {},
+                  },
+                  on: {
+                    SELECT_NEW_DATASET: {
+                      target: '#DatasetQualityController.datasets.loaded.flyoutOpen.fetching',
+                      actions: ['storeFlyoutOptions'],
+                    },
+                    CLOSE_FLYOUT: {
+                      target: '#DatasetQualityController.datasets.loaded.idle',
+                      actions: ['resetFlyoutOptions'],
                     },
                   },
                 },
-                complete: {
-                  type: 'final',
+                idle: {
+                  on: {
+                    UPDATE_TABLE_CRITERIA: {
+                      target: 'idle',
+                      actions: ['storeTableOptions'],
+                    },
+                    OPEN_FLYOUT: {
+                      target: '#DatasetQualityController.datasets.loaded.flyoutOpen',
+                      actions: ['storeFlyoutOptions'],
+                    },
+                  },
                 },
               },
             },
           },
-          onDone: {
-            target: 'idle',
-          },
         },
-        idle: {
-          on: {
-            UPDATE_TABLE_CRITERIA: {
-              target: 'idle',
-              actions: ['storeTableOptions'],
+        degradedDocs: {
+          initial: 'fetching',
+          states: {
+            fetching: {
+              invoke: {
+                src: 'loadDegradedDocs',
+                onDone: {
+                  target: 'loaded',
+                  actions: ['storeDegradedDocStats'],
+                },
+                onError: {
+                  target: 'loaded',
+                  actions: ['notifyFetchDegradedStatsFailed'],
+                },
+              },
             },
-            OPEN_FLYOUT: {
-              target: 'fetchingFlyoutData',
-              actions: ['storeFlyoutOptions'],
-            },
-            CLOSE_FLYOUT: {
-              target: 'idle',
-              actions: ['resetFlyoutOptions'],
-            },
-          },
-        },
-        fetchingFlyoutData: {
-          invoke: {
-            src: 'loadDataStreamDetails',
-            onDone: {
-              target: 'idle',
-              actions: ['storeDatasetDetails'],
-            },
-            onError: {
-              target: 'idle',
-              actions: ['fetchDatasetDetailsFailedNotifier'],
-            },
+            loaded: {},
           },
         },
       },

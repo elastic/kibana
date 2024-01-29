@@ -56,33 +56,42 @@ export interface WithDegradedDocs {
   degradedDocStats: DegradedDocsStat[];
 }
 
+export interface WithDatasets {
+  datasets?: string;
+}
+
 export type DefaultDatasetQualityControllerState = WithTableOptions &
   WithDataStreamStats &
   WithDegradedDocs &
-  WithFlyoutOptions;
+  WithFlyoutOptions &
+  WithDatasets;
 
 type DefaultDatasetQualityStateContext = DefaultDatasetQualityControllerState &
   Partial<WithFlyoutOptions>;
 
 export type DatasetQualityControllerTypeState =
   | {
-      value: 'fetchingData';
+      value: 'datasets.fetching';
       context: DefaultDatasetQualityStateContext;
     }
   | {
-      value: 'idle';
+      value: 'datasets.loaded';
       context: DefaultDatasetQualityStateContext;
     }
   | {
-      value: 'fetchingFlyoutData';
+      value: 'datasets.loaded.idle';
       context: DefaultDatasetQualityStateContext;
     }
   | {
-      value: 'fetchingData.loadingDatasets';
+      value: 'datasets.loaded.flyoutOpen.fetching';
       context: DefaultDatasetQualityStateContext;
     }
   | {
-      value: 'fetchingData.loadingDegradedDocs';
+      value: 'datasets.loaded.flyoutOpen';
+      context: DefaultDatasetQualityStateContext;
+    }
+  | {
+      value: 'degradedDocs.fetching';
       context: DefaultDatasetQualityStateContext;
     };
 
@@ -94,7 +103,7 @@ export type DatasetQualityControllerEvent =
       criteria: TableCriteria;
     }
   | {
-      type: 'OPEN_FLYOUT';
+      type: 'OPEN_FLYOUT' | 'SELECT_NEW_DATASET';
       dataset: FlyoutDataset;
     }
   | {

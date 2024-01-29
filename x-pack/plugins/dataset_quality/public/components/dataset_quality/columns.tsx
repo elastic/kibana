@@ -121,7 +121,7 @@ export const getDatasetQualityTableColumns = ({
     {
       name: '',
       render: (dataStreamStat: DataStreamStat) => {
-        const isExpanded = dataStreamStat === selectedDataset;
+        const isExpanded = dataStreamStat.rawName === selectedDataset?.rawName;
 
         return (
           <EuiButtonIcon
