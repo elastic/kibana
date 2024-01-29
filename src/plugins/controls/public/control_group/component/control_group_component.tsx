@@ -30,7 +30,6 @@ import React, { useMemo, useState } from 'react';
 import { TypedUseSelectorHook, useSelector } from 'react-redux';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 
-import { css } from '@emotion/react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { ControlGroupReduxState } from '../types';
@@ -119,7 +118,6 @@ export const ControlGroup = () => {
             gutterSize="s"
             direction="row"
             responsive={false}
-            className={'controlsWrapper-flex'}
             alignItems="stretch"
             justifyContent="center"
             data-test-subj="controls-group"
@@ -164,20 +162,8 @@ export const ControlGroup = () => {
               </DndContext>
             </EuiFlexItem>
             {(showAddButton || showSelectionReset || showApplySelections) && (
-              <EuiFlexItem
-                grow={false}
-                css={css`
-                  align-self: end;
-                `}
-              >
-                <EuiFlexGroup
-                  responsive={false}
-                  gutterSize="s"
-                  alignItems="center"
-                  css={css`
-                    height: 40px;
-                  `}
-                >
+              <EuiFlexItem className="controlGroup--endButtonGroup" grow={false}>
+                <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
                   {showAddButton && (
                     <EuiFlexItem grow={false}>
                       <EuiButtonIcon

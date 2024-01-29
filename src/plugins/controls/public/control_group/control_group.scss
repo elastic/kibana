@@ -4,8 +4,12 @@ $largeControl: $euiSize * 50;
 $controlMinWidth: $euiSize * 14;
 
 .controlsWrapper {
-  padding-top: $euiSizeS;
+  padding-top: $euiSizeM;
   min-height: $euiSize * 4;
+
+  .controlGroup--endButtonGroup {
+    align-self: end;
+  }
 }
 
 .controlsWrapper--twoLine {
