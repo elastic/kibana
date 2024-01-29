@@ -98,7 +98,7 @@ export function TransactionsTable({
   const { isXl } = useBreakpoints();
   const shouldShowSparkPlots = isSingleColumn || !isXl;
   const { transactionType, serviceName } = useApmServiceContext();
-  const [searchQuery, setSearchQueryDebounced] = useStateDebounced('', 300);
+  const [searchQuery, setSearchQueryDebounced] = useStateDebounced('');
 
   const [renderedItems, setRenderedItems] = useState<
     ApiResponse['transactionGroups']

@@ -28,7 +28,7 @@ describe('useStateDebounced', () => {
   });
 
   it('updates debounced value after a delay when setter function is called', () => {
-    const { result } = renderHook(() => useStateDebounced('initialValue', 300));
+    const { result } = renderHook(() => useStateDebounced('initialValue'));
 
     act(() => {
       result.current[1]('updatedValue');
@@ -39,7 +39,7 @@ describe('useStateDebounced', () => {
   });
 
   it('cancels previous debounced updates when new ones occur', () => {
-    const { result } = renderHook(() => useStateDebounced('initialValue', 300));
+    const { result } = renderHook(() => useStateDebounced('initialValue', 400));
 
     act(() => {
       result.current[1]('updatedValue');
@@ -49,7 +49,7 @@ describe('useStateDebounced', () => {
     act(() => {
       result.current[1]('newUpdatedValue');
     });
-    jest.advanceTimersByTime(300);
+    jest.advanceTimersByTime(400);
     expect(result.current[0]).toBe('newUpdatedValue');
   });
 });

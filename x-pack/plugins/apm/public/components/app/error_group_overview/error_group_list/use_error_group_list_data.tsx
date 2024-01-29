@@ -41,7 +41,7 @@ export function useErrorGroupListData({
   sorting: TableOptions<ErrorGroupItem>['sort'];
 }) {
   const { serviceName } = useApmServiceContext();
-  const [searchQuery, setDebouncedSearchQuery] = useStateDebounced('', 200);
+  const [searchQuery, setDebouncedSearchQuery] = useStateDebounced('');
 
   const {
     query: {

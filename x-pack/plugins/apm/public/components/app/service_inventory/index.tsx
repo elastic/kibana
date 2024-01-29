@@ -186,10 +186,7 @@ function useServicesDetailedStatisticsFetcher({
 }
 
 export function ServiceInventory() {
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useStateDebounced(
-    '',
-    200
-  );
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useStateDebounced('');
 
   const [renderedItems, setRenderedItems] = useState<ServiceListItem[]>([]);
 
