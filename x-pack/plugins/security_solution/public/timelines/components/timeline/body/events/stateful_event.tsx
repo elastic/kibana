@@ -15,7 +15,7 @@ import type {
   CellValueElementProps,
   RowRenderer,
 } from '../../../../../../common/types/timeline';
-import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
+import { TimelineTabs } from '../../../../../../common/types/timeline';
 import type {
   TimelineItem,
   TimelineNonEcsData,
@@ -30,7 +30,6 @@ import { EventColumnView } from './event_column_view';
 import type { inputsModel } from '../../../../../common/store';
 import { appSelectors } from '../../../../../common/store';
 import { timelineActions, timelineSelectors } from '../../../../store';
-import { activeTimeline } from '../../../../containers/active_timeline_context';
 import type { TimelineResultNote } from '../../../open_timeline/types';
 import { getRowRenderer } from '../renderers/get_row_renderer';
 import { StatefulRowRenderer } from './stateful_row_renderer';
@@ -207,10 +206,6 @@ const StatefulEventComponent: React.FC<Props> = ({
         id: timelineId,
       })
     );
-
-    if (timelineId === TimelineId.active && tabType === TimelineTabs.query) {
-      activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
-    }
   }, [dispatch, event._id, event._index, refetch, tabType, timelineId]);
 
   const associateNote = useCallback(
