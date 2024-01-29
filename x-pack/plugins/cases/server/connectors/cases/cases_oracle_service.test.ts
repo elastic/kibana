@@ -143,6 +143,22 @@ describe('CasesOracleService', () => {
         expect(service.getRecordId({ ...params, grouping })).toEqual(hex);
       }
     );
+
+    it('constructs a record ID with special characters correctly', async () => {
+      const ruleId = `{}=:&".'/{}}`;
+      const spaceId = 'default:';
+      const owner = 'cases{';
+      const grouping = { '{:}': `{}=:&".'/{}}` };
+
+      const payload = `${ruleId}:${spaceId}:${owner}:${stringify(grouping)}`;
+      const hash = createHash('sha256');
+
+      hash.update(payload);
+
+      const hex = hash.digest('hex');
+
+      expect(service.getRecordId({ ruleId, spaceId, owner, grouping })).toEqual(hex);
+    });
   });
 
   describe('getRecord', () => {

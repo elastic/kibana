@@ -47,5 +47,15 @@ describe('CryptoService', () => {
         service.stringifyDeterministically({ 'host.ip': '0.0.0.1', 'agent.id': '8a4f500d' })
       ).toEqual('{"agent.id":"8a4f500d","host.ip":"0.0.0.1"}');
     });
+
+    it('returns null if the object is not defined', async () => {
+      expect(service.stringifyDeterministically()).toEqual(null);
+    });
+
+    it('handles special characters correctly', async () => {
+      expect(service.stringifyDeterministically({ [`{}=:&".'/{}}`]: `{}=:&".'{}}` })).toEqual(
+        `{\"{}=:&\\\".'/{}}\":\"{}=:&\\\".'{}}\"}`
+      );
+    });
   });
 });
