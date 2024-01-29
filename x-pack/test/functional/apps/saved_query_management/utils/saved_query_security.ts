@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export function getSavedQuerySecurityUtils({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['header']);
+  const PageObjects = getPageObjects(['header', 'share']);
   const testSubjects = getService('testSubjects');
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
@@ -68,6 +68,9 @@ export function getSavedQuerySecurityUtils({ getPageObjects, getService }: FtrPr
     },
     shouldDisallowSavingButAllowLoadingSavedQueries: () => {
       it('allows loading a saved query via the saved query management component', async () => {
+        if (await PageObjects.share.isShareModalOpen()) {
+          await PageObjects.share.closeShareModal();
+        }
         await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
         const queryString = await queryBar.getQueryString();
         expect(queryString).to.eql('response:200');
