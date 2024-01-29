@@ -16,11 +16,7 @@ export function isCompatible(api: SynchronizeMovementActionApi) {
     return false;
   }
 
-  if (
-    api.type === 'lens' &&
-    apiHasLensConfig(api) &&
-    api.getSavedVis()?.visualizationType === 'lnsChoropleth'
-  ) {
+  if (apiHasLensConfig(api) && api.getSavedVis()?.visualizationType === 'lnsChoropleth') {
     return true;
   }
 
