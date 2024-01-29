@@ -248,7 +248,7 @@ async function scoreSuggestions({
 
   const response = await lastValueFrom(
     (
-      await client.chat({
+      await client.chat('score_suggestions', {
         connectorId,
         messages: [extendedSystemMessage, newUserMessage],
         functions: [scoreFunction],
