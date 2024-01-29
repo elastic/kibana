@@ -41,6 +41,9 @@ const mockSource = {
   isGeoGridPrecisionAware: () => {
     return false;
   },
+  isMvt: () => {
+    return true;
+  }
 } as unknown as IMvtVectorSource;
 
 describe('syncMvtSourceData', () => {
