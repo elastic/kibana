@@ -18,11 +18,11 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { closeCellActionPopoverText, openCellActionPopoverAriaText } from './translations';
 import { FilterInButton } from './filter_in_button';
 import { FilterOutButton } from './filter_out_button';
 import { CopyButton } from './copy_button';
-import { dynamic } from '../../utils/dynamic';
 
 const DataTablePopoverCellValue = dynamic(
   () => import('@kbn/unified-data-table/src/components/data_table_cell_value')
