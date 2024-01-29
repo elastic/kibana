@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['timePicker', 'lens', 'common']);
+  const PageObjects = getPageObjects(['timePicker', 'lens', 'common', 'discover']);
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
@@ -25,6 +25,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/managed_content');
     });
 
+    const expectManagedContentSignifiers = async (
+      expected: boolean,
+      saveButtonTestSubject: string
+    ) => {
+      await testSubjects[expected ? 'existOrFail' : 'missingOrFail']('managedContentBadge');
+      await testSubjects.click(saveButtonTestSubject);
+
+      const saveAsNewCheckbox = await testSubjects.find('saveAsNewCheckbox');
+      expect(await testSubjects.isEuiSwitchChecked(saveAsNewCheckbox)).to.be(expected);
+      expect(await saveAsNewCheckbox.getAttribute('disabled')).to.be(expected ? 'true' : null);
+    };
+
     describe('preventing the user from overwriting managed content', () => {
       it('lens', async () => {
         await PageObjects.common.navigateToActualUrl(
@@ -34,11 +46,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await PageObjects.lens.waitForVisualization('xyVisChart');
 
-        await testSubjects.existOrFail('managedContentBadge');
-        await testSubjects.click('lnsApp_saveButton');
-        const saveAsNewCheckbox = await testSubjects.find('saveAsNewCheckbox');
-        expect(await testSubjects.isEuiSwitchChecked(saveAsNewCheckbox)).to.be(true);
-        expect(await saveAsNewCheckbox.getAttribute('disabled')).to.be('true');
+        await expectManagedContentSignifiers(true, 'lnsApp_saveButton');
 
         await PageObjects.common.navigateToActualUrl(
           'lens',
@@ -47,12 +55,26 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await PageObjects.lens.waitForVisualization('xyVisChart');
 
-        await testSubjects.missingOrFail('managedContentBadge');
-        await testSubjects.click('lnsApp_saveButton');
-        await testSubjects.existOrFail('saveAsNewCheckbox');
-        expect(await testSubjects.isEuiSwitchChecked('saveAsNewCheckbox')).to.be(false);
-        expect(await saveAsNewCheckbox.getAttribute('disabled')).to.be(null);
+        await expectManagedContentSignifiers(false, 'lnsApp_saveButton');
       });
+    });
+
+    it('discover', async () => {
+      await PageObjects.common.navigateToActualUrl(
+        'discover',
+        'view/managed-3d62-4113-ac7c-de2e20a68fbc'
+      );
+      await PageObjects.discover.waitForDiscoverAppOnScreen();
+
+      await expectManagedContentSignifiers(true, 'discoverSaveButton');
+
+      await PageObjects.common.navigateToActualUrl(
+        'discover',
+        'view/unmanaged-3d62-4113-ac7c-de2e20a68fbc'
+      );
+      await PageObjects.discover.waitForDiscoverAppOnScreen();
+
+      await expectManagedContentSignifiers(false, 'discoverSaveButton');
     });
   });
 }

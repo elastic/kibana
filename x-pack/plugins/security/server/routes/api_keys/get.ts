@@ -66,7 +66,14 @@ export function defineGetApiKeysRoutes({
           owner: !clusterPrivileges.manage_api_key && !clusterPrivileges.read_security,
         });
 
-        const validKeys = apiResponse.api_keys.filter(({ invalidated }) => !invalidated);
+        const validKeys = apiResponse.api_keys
+          .filter(({ invalidated }) => !invalidated)
+          .map((key) => {
+            if (!key.name) {
+              key.name = key.id;
+            }
+            return key;
+          });
 
         return response.ok<GetAPIKeysResult>({
           body: {
