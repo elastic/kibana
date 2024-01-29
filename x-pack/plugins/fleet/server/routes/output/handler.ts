@@ -10,6 +10,8 @@ import type { TypeOf } from '@kbn/config-schema';
 
 import Boom from '@hapi/boom';
 
+import { isEqual } from 'lodash';
+
 import { DEFAULT_OUTPUT_ID, outputType } from '../../../common/constants';
 
 import type {
@@ -30,7 +32,6 @@ import { outputService } from '../../services/output';
 import { defaultFleetErrorHandler, FleetUnauthorizedError } from '../../errors';
 import { agentPolicyService, appContextService } from '../../services';
 import { generateLogstashApiKey, canCreateLogstashApiKey } from '../../services/api_keys';
-import { isEqual } from 'lodash';
 
 function ensureNoDuplicateSecrets(output: Partial<Output>) {
   if (output.type === outputType.Kafka && output?.password && output?.secrets?.password) {
