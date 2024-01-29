@@ -54,7 +54,11 @@ export function registerGetDatasetInfoFunction({
           name: index === '' ? '*' : index,
           expand_wildcards: 'open',
         });
-        indices = [...body.indices.map((i) => i.name), ...body.data_streams.map((d) => d.name)];
+        indices = [
+          ...body.indices.map((i) => i.name),
+          ...body.data_streams.map((d) => d.name),
+          ...body.aliases.map((d) => d.name),
+        ];
       } catch (e) {
         indices = [];
       }
