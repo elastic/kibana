@@ -105,6 +105,9 @@ export default function (ctx: FtrProviderContext) {
 
         // ensure we're logged out, so we can log in as the appropriate users
         await PageObjects.security.forceLogout();
+        if (await PageObjects.share.isShareModalOpen()) {
+          await PageObjects.share.closeShareModal();
+        }
       });
 
       after(async () => {
@@ -121,6 +124,9 @@ export default function (ctx: FtrProviderContext) {
 
       describe(`${appName} read-only privileges with enabled savedQueryManagement.saveQuery privilege`, () => {
         before(async () => {
+          if (await PageObjects.share.isShareModalOpen()) {
+            await PageObjects.share.closeShareModal();
+          }
           await login(appName, 'read', 'all');
           await navigateToApp(appName);
           if (await PageObjects.share.isShareModalOpen()) {
@@ -145,6 +151,9 @@ export default function (ctx: FtrProviderContext) {
 
       describe(`${appName} read-only privileges with disabled savedQueryManagement.saveQuery privilege`, () => {
         before(async () => {
+          if (await PageObjects.share.isShareModalOpen()) {
+            await PageObjects.share.closeShareModal();
+          }
           await login(appName, 'read', 'none');
           await navigateToApp(appName);
           if (await PageObjects.share.isShareModalOpen()) {
@@ -153,6 +162,9 @@ export default function (ctx: FtrProviderContext) {
         });
 
         after(async () => {
+          if (await PageObjects.share.isShareModalOpen()) {
+            await PageObjects.share.closeShareModal();
+          }
           await logout(appName);
         });
 
@@ -167,9 +179,15 @@ export default function (ctx: FtrProviderContext) {
         before(async () => {
           await login(appName, 'all', 'all');
           await navigateToApp(appName);
+          if (await PageObjects.share.isShareModalOpen()) {
+            await PageObjects.share.closeShareModal();
+          }
         });
 
         after(async () => {
+          if (await PageObjects.share.isShareModalOpen()) {
+            await PageObjects.share.closeShareModal();
+          }
           await logout(appName);
         });
 
@@ -182,11 +200,17 @@ export default function (ctx: FtrProviderContext) {
 
       describe(`${appName} all privileges with disabled savedQueryManagement.saveQuery privilege`, () => {
         before(async () => {
+          if (await PageObjects.share.isShareModalOpen()) {
+            await PageObjects.share.closeShareModal();
+          }
           await login(appName, 'all', 'none');
           await navigateToApp(appName);
         });
 
         after(async () => {
+          if (await PageObjects.share.isShareModalOpen()) {
+            await PageObjects.share.closeShareModal();
+          }
           await logout(appName);
         });
 
