@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { isServerlessAgent } from '../../../../common/agent_name';
+import { isServerlessAgentName } from '../../../../common/agent_name';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
@@ -48,7 +48,7 @@ export function TransactionOverview() {
     replace(history, { query: { transactionType } });
   }
 
-  const isServerless = isServerlessAgent(serverlessType);
+  const isServerless = isServerlessAgentName(serverlessType);
 
   const [sloCalloutDismissed, setSloCalloutDismissed] = useLocalStorage(
     'apm.sloCalloutDismissed',

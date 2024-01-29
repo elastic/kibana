@@ -8,6 +8,7 @@
 import type { IBasePath, IClusterClient, KibanaRequest, LoggerFactory } from '@kbn/core/server';
 import { CoreKibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { AuthenticationResult } from './authentication_result';
@@ -40,7 +41,6 @@ import {
   SESSION_ERROR_REASON_HEADER,
 } from '../../common/constants';
 import { shouldProviderUseLoginForm } from '../../common/model';
-import type { AuditServiceSetup } from '../audit';
 import { accessAgreementAcknowledgedEvent, userLoginEvent, userLogoutEvent } from '../audit';
 import type { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';

@@ -19,6 +19,7 @@ const testProps = {
   content,
   index: 1,
   isLastComment: true,
+  connectorTypeTitle: 'OpenAI',
   regenerateMessage: jest.fn(),
   transformMessage: jest.fn(),
 };

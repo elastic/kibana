@@ -23,7 +23,6 @@ import {
 } from '../../../common/constants';
 
 import { ErrorCode } from '../../../common/types/error_codes';
-import { stripSearchPrefix } from '../../../common/utils/strip_search_prefix';
 
 export const startSync = async (
   client: IScopedClusterClient,
@@ -70,10 +69,9 @@ export const startSync = async (
       });
     }
 
-    const indexNameWithoutSearchPrefix = index_name ? stripSearchPrefix(index_name) : '';
     const targetIndexName =
       jobType === SyncJobType.ACCESS_CONTROL
-        ? `${CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX}${indexNameWithoutSearchPrefix}`
+        ? `${CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX}${index_name}`
         : index_name ?? undefined;
 
     return await startConnectorSync(client.asCurrentUser, {

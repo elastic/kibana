@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { isAllowed, isAnonymized, isDenied } from '@kbn/elastic-assistant-common';
+
 import { SelectedPromptContext } from '../../../assistant/prompt_context/types';
-import { isAllowed, isAnonymized, isDenied } from '../../helpers';
 import { ContextEditorRow } from '../types';
 
 export const getRows = ({

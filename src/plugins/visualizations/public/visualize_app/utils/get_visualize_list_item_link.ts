@@ -17,10 +17,10 @@ export const getVisualizeListItemLink = (
   application: ApplicationStart,
   kbnUrlStateStorage: IKbnUrlStateStorage,
   editApp: string | undefined,
-  editUrl: string,
+  editUrl: string | undefined,
   error: string | undefined = undefined
 ) => {
-  if (error) {
+  if (error || (!editApp && !editUrl)) {
     return undefined;
   }
 

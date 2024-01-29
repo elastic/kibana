@@ -7,6 +7,7 @@
 
 import path from 'path';
 
+import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import { expectedExportedRule, getNewRule } from '../../../../../objects/rule';
 import {
   TOASTER_BODY,
@@ -29,7 +30,7 @@ import {
 } from '../../../../../tasks/api_calls/exceptions';
 import { getExceptionList } from '../../../../../objects/exception';
 import { createRule } from '../../../../../tasks/api_calls/rules';
-import { resetRulesTableState, deleteAlertsAndRules } from '../../../../../tasks/common';
+import { resetRulesTableState } from '../../../../../tasks/common';
 import { login } from '../../../../../tasks/login';
 import { visit } from '../../../../../tasks/navigation';
 

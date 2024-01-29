@@ -35,7 +35,6 @@ export async function upgradePackageInstallVersion({
   logger: Logger;
 }) {
   const res = await findOutdatedInstallations(soClient);
-
   if (res.total === 0) {
     return;
   }
@@ -44,18 +43,20 @@ export async function upgradePackageInstallVersion({
     res.saved_objects,
     ({ attributes: installation }) => {
       // Uploaded package cannot be reinstalled
-      if (installation.install_source === 'upload') {
-        logger.warn(`Uploaded package needs to be manually reinstalled ${installation.name}.`);
-        return;
-      }
       return reinstallPackageForInstallation({
         soClient,
         esClient,
         installation,
       }).catch((err: Error) => {
-        logger.error(
-          `Package needs to be manually reinstalled ${installation.name} updating install_version failed. ${err.message}`
-        );
+        if (installation.install_source === 'upload') {
+          logger.warn(
+            `Uploaded package needs to be manually reinstalled ${installation.name}. ${err.message}`
+          );
+        } else {
+          logger.error(
+            `Package needs to be manually reinstalled ${installation.name} updating install_version failed. ${err.message}`
+          );
+        }
       });
     },
     { concurrency: 10 }

@@ -16,16 +16,16 @@ export default function ({ getService }: FtrProviderContext) {
 
   const calendarId = `wizard-test-calendar_${Date.now()}`;
   const remoteName = 'ftr-remote:';
-  const indexPatternName = 'ft_farequote';
-  const indexPatternString = config.get('esTestCluster.ccs')
-    ? remoteName + indexPatternName
-    : indexPatternName;
+  const esIndexPatternName = 'ft_farequote';
+  const esIndexPatternString = config.get('esTestCluster.ccs')
+    ? remoteName + esIndexPatternName
+    : esIndexPatternName;
 
   describe('single metric job conversion to multi-metric job', function () {
     this.tags(['ml']);
     before(async () => {
       await esNode.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
-      await ml.testResources.createIndexPatternIfNeeded(indexPatternString, '@timestamp');
+      await ml.testResources.createDataViewIfNeeded(esIndexPatternString, '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.api.createCalendar(calendarId);
@@ -34,7 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
-      await ml.testResources.deleteIndexPatternByTitle(indexPatternString);
+      await ml.testResources.deleteDataViewByTitle(esIndexPatternString);
     });
 
     const jobId = `fq_single_to_multi_${Date.now()}`;
@@ -59,7 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobManagement.navigateToNewJobSourceSelection();
 
       await ml.testExecution.logTestStep('loads the job type selection page');
-      await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob(indexPatternString);
+      await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob(esIndexPatternString);
 
       await ml.testExecution.logTestStep('loads the single metric job wizard page');
       await ml.jobTypeSelection.selectSingleMetricJob();

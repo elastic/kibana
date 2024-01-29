@@ -8,8 +8,7 @@
 
 import * as React from 'react';
 import { monaco } from '@kbn/monaco';
-import { Props as CodeEditorProps } from '../code_editor/code_editor';
-import { CodeEditor, HandlebarsLang } from '../code_editor';
+import { CodeEditor, HandlebarsLang, type CodeEditorProps } from '@kbn/code-editor';
 
 import './styles.scss';
 
@@ -134,7 +133,6 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
         placeholder={placeholder}
         options={{
           fontSize: 14,
-          highlightActiveIndentGuide: false,
           renderLineHighlight: 'none',
           lineNumbers: 'off',
           glyphMargin: false,
@@ -148,6 +146,9 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
           suggestOnTriggerCharacters: true,
           minimap: {
             enabled: false,
+          },
+          guides: {
+            highlightActiveIndentation: false,
           },
           wordWrap: 'on',
           wrappingIndent: 'none',

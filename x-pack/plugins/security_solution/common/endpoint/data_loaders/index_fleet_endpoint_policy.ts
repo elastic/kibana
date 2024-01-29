@@ -22,17 +22,23 @@ import {
   API_VERSIONS,
 } from '@kbn/fleet-plugin/common';
 import { memoize } from 'lodash';
+import type { ToolingLog } from '@kbn/tooling-log';
+import { catchAxiosErrorFormatAndThrow } from '../format_axios_error';
 import { usageTracker } from './usage_tracker';
 import { getEndpointPackageInfo } from '../utils/package';
 import type { PolicyData } from '../types';
 import { policyFactory as policyConfigFactory } from '../models/policy_config';
-import { wrapErrorAndRejectPromise } from './utils';
+import { RETRYABLE_TRANSIENT_ERRORS, retryOnError, wrapErrorAndRejectPromise } from './utils';
 
 export interface IndexedFleetEndpointPolicyResponse {
   integrationPolicies: PolicyData[];
   agentPolicies: AgentPolicy[];
 }
 
+enum TimeoutsInMS {
+  TEN_SECONDS = 10 * 1000,
+  FIVE_MINUTES = 5 * 60 * 1000,
+}
 /**
  * Create an endpoint Integration Policy (and associated Agent Policy) via Fleet
  * (NOTE: ensure that fleet is setup first before calling this loading function)
@@ -43,7 +49,8 @@ export const indexFleetEndpointPolicy = usageTracker.track(
     kbnClient: KbnClient,
     policyName: string,
     endpointPackageVersion?: string,
-    agentPolicyName?: string
+    agentPolicyName?: string,
+    log?: ToolingLog
   ): Promise<IndexedFleetEndpointPolicyResponse> => {
     const response: IndexedFleetEndpointPolicyResponse = {
       integrationPolicies: [],
@@ -84,6 +91,7 @@ export const indexFleetEndpointPolicy = usageTracker.track(
     // Create integration (package) policy
     const newPackagePolicyData: CreatePackagePolicyRequest['body'] = {
       name: policyName,
+      // skip_ensure_installed: true,
       description: 'Protect the worlds data',
       policy_id: agentPolicy.data.item.id,
       enabled: true,
@@ -106,18 +114,48 @@ export const indexFleetEndpointPolicy = usageTracker.track(
         version: packageVersion,
       },
     };
-    const packagePolicy = (await kbnClient
-      .request({
-        path: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
-        method: 'POST',
-        body: newPackagePolicyData,
-        headers: {
-          'elastic-api-version': API_VERSIONS.public.v1,
-        },
-      })
-      .catch(wrapErrorAndRejectPromise)) as AxiosResponse<CreatePackagePolicyResponse>;
 
-    response.integrationPolicies.push(packagePolicy.data.item as PolicyData);
+    const createPackagePolicy = async (): Promise<CreatePackagePolicyResponse> =>
+      kbnClient
+        .request<CreatePackagePolicyResponse>({
+          path: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
+          method: 'POST',
+          body: newPackagePolicyData,
+          headers: {
+            'elastic-api-version': API_VERSIONS.public.v1,
+          },
+        })
+        .catch(catchAxiosErrorFormatAndThrow)
+        .then((res) => res.data);
+
+    const started = new Date();
+    const hasTimedOut = (): boolean => {
+      const elapsedTime = Date.now() - started.getTime();
+      return elapsedTime > TimeoutsInMS.FIVE_MINUTES;
+    };
+
+    let packagePolicy: CreatePackagePolicyResponse | undefined;
+    log?.debug(`Creating integration policy with name: ${policyName}`);
+
+    while (!packagePolicy && !hasTimedOut()) {
+      packagePolicy = await retryOnError(
+        async () => createPackagePolicy(),
+        [...RETRYABLE_TRANSIENT_ERRORS, 'resource_not_found_exception'],
+        log
+      );
+
+      if (!packagePolicy) {
+        await new Promise((resolve) => setTimeout(resolve, TimeoutsInMS.TEN_SECONDS));
+      }
+    }
+
+    if (!packagePolicy) {
+      throw new Error(`Create package policy failed`);
+    }
+
+    log?.verbose(`Integration policy created:`, JSON.stringify(packagePolicy, null, 2));
+
+    response.integrationPolicies.push(packagePolicy.item as PolicyData);
 
     return response;
   }

@@ -201,6 +201,7 @@ export const saveDashboardState = async ({
     if (newId) {
       toasts.addSuccess({
         title: dashboardSaveToastStrings.getSuccessString(currentState.title),
+        className: 'eui-textBreakWord',
         'data-test-subj': 'saveDashboardSuccess',
       });
 

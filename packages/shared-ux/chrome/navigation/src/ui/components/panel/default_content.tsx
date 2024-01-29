@@ -10,10 +10,17 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import React, { Fragment, type FC } from 'react';
 
-import { isGroupNode, isItemNode } from '../../../utils';
 import { PanelGroup } from './panel_group';
 import { PanelNavItem } from './panel_nav_item';
 import type { PanelNavNode } from './types';
+
+function isGroupNode({ children }: Pick<ChromeProjectNavigationNode, 'children'>) {
+  return children !== undefined;
+}
+
+function isItemNode({ children }: Pick<ChromeProjectNavigationNode, 'children'>) {
+  return children === undefined;
+}
 
 /**
  * All the children of a panel must be wrapped into groups. This is because a group in DOM is represented by <ul> tags
@@ -39,7 +46,7 @@ function serializeChildren(node: PanelNavNode): ChromeProjectNavigationNode[] | 
       {
         id: 'root',
         title: '',
-        path: [...node.path, 'root'],
+        path: `${node.path}.root`,
         children: [...node.children],
       },
     ];

@@ -101,6 +101,7 @@ const createMockStaticConfiguration = (): InfraConfig => ({
     metricThresholdAlertRuleEnabled: true,
     logThresholdAlertRuleEnabled: true,
     alertsAndRulesDropdownEnabled: true,
+    profilingEnabled: false,
   },
   enabled: true,
 });

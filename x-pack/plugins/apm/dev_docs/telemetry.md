@@ -7,7 +7,7 @@ two types of telemetry, which we'll refer to here as "Data Telemetry" and
 This document will explain how they are collected and how to make changes to
 them.
 
-[The telemetry repository has information about accessing the clusters](https://github.com/elastic/telemetry#kibana-access).
+[The telemetry repository has information about accessing the clusters](https://github.com/elastic/telemetry#i-just-want-to-see-the-data).
 Telemetry data is uploaded to the "xpack-phone-home" indices.
 
 ## Data Telemetry

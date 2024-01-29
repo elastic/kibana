@@ -13,14 +13,11 @@ import {
   EuiSelectOption,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { QueryStringInput } from '@kbn/unified-search-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ApmPluginStartDeps } from '../../../../plugin';
 import {
   TraceSearchQuery,
   TraceSearchType,
 } from '../../../../../common/trace_explorer';
-import { useApmDataView } from '../../../../hooks/use_apm_data_view';
+import { useAdHocApmDataView } from '../../../../hooks/use_adhoc_apm_data_view';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 import { EQLCodeEditor } from '../../../shared/monaco_code_editor';
@@ -54,13 +51,13 @@ export function TraceSearchBox({
   onQueryCommit,
   loading,
 }: Props) {
-  const { unifiedSearch, core, data, dataViews } = useApmPluginContext();
-  const { notifications, http, docLinks, uiSettings } = core;
   const {
-    services: { storage },
-  } = useKibana<ApmPluginStartDeps>();
+    unifiedSearch: {
+      ui: { QueryStringInput },
+    },
+  } = useApmPluginContext();
 
-  const { dataView } = useApmDataView();
+  const { dataView } = useAdHocApmDataView();
 
   return (
     <EuiFlexGroup direction="row">
@@ -106,16 +103,6 @@ export function TraceSearchBox({
                           defaultMessage: 'APM',
                         }
                       )}
-                      deps={{
-                        unifiedSearch,
-                        notifications,
-                        http,
-                        docLinks,
-                        uiSettings,
-                        data,
-                        dataViews,
-                        storage,
-                      }}
                     />
                   </form>
                 )}

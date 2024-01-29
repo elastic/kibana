@@ -31,7 +31,7 @@ export const INTEGRATION_KEY_REQUIRED = i18n.translate(
 export const API_URL_LABEL = i18n.translate(
   'xpack.stackConnectors.components.pagerDuty.apiUrlTextFieldLabel',
   {
-    defaultMessage: 'API URL (optional)',
+    defaultMessage: 'API URL',
   }
 );
 
@@ -46,5 +46,12 @@ export const INTEGRATION_KEY_LABEL = i18n.translate(
   'xpack.stackConnectors.components.pagerDuty.routingKeyTextFieldLabel',
   {
     defaultMessage: 'Integration key',
+  }
+);
+
+export const OPTIONAL_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.pagerDuty.optionalLabel',
+  {
+    defaultMessage: 'Optional',
   }
 );

@@ -203,7 +203,7 @@ export const ruleParamsModifier = (
     if (!isActionSkipped) {
       isParamsUpdateSkipped = false;
     }
-    return { ...acc, ...ruleParams };
+    return { ...acc, ...ruleParams } as RuleAlertType['params'];
   }, existingRuleParams);
 
   // increment version even if actions are empty, as attributes can be modified as well outside of ruleParamsModifier

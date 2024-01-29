@@ -7,10 +7,9 @@
 
 import * as rt from 'io-ts';
 
-export const logEntryRateJobTypeRT = rt.keyof({
-  'log-entry-rate': null,
-});
+export const logEntryRateJobTypeRT = rt.literal('log-entry-rate');
 
 export type LogEntryRateJobType = rt.TypeOf<typeof logEntryRateJobTypeRT>;
 
-export const logEntryRateJobTypes: LogEntryRateJobType[] = ['log-entry-rate'];
+export const logEntryRateJobType: LogEntryRateJobType = 'log-entry-rate';
+export const logEntryRateJobTypes: LogEntryRateJobType[] = [logEntryRateJobType];

@@ -164,6 +164,79 @@ describe('#SslConfig', () => {
       expect(configValue.certificate).toEqual('content-of-another-path');
     });
   });
+
+  describe('isEqualTo()', () => {
+    const createEnabledConfig = (obj: any) =>
+      createConfig({
+        enabled: true,
+        key: 'same-key',
+        certificate: 'same-cert',
+        ...obj,
+      });
+
+    it('compares `enabled`', () => {
+      const reference = createConfig({ enabled: true, key: 'same-key', certificate: 'same-cert' });
+      const same = createConfig({ enabled: true, key: 'same-key', certificate: 'same-cert' });
+      const different = createConfig({ enabled: false, key: 'same-key', certificate: 'same-cert' });
+
+      expect(reference.isEqualTo(same)).toBe(true);
+      expect(reference.isEqualTo(different)).toBe(false);
+    });
+
+    it('compares `key`', () => {
+      const reference = createEnabledConfig({ key: 'keyA', certificate: 'same-cert' });
+      const same = createEnabledConfig({ key: 'keyA', certificate: 'same-cert' });
+      const different = createEnabledConfig({ key: 'keyB', certificate: 'same-cert' });
+
+      expect(reference.isEqualTo(same)).toBe(true);
+      expect(reference.isEqualTo(different)).toBe(false);
+    });
+
+    it('compares `keyPassphrase`', () => {
+      const reference = createEnabledConfig({ keyPassphrase: 'passA' });
+      const same = createEnabledConfig({ keyPassphrase: 'passA' });
+      const different = createEnabledConfig({ keyPassphrase: 'passB' });
+
+      expect(reference.isEqualTo(same)).toBe(true);
+      expect(reference.isEqualTo(different)).toBe(false);
+    });
+
+    it('compares `certificate`', () => {
+      const reference = createEnabledConfig({ key: 'same-key', certificate: 'cert-a' });
+      const same = createEnabledConfig({ key: 'same-key', certificate: 'cert-a' });
+      const different = createEnabledConfig({ key: 'same-key', certificate: 'cert-b' });
+
+      expect(reference.isEqualTo(same)).toBe(true);
+      expect(reference.isEqualTo(different)).toBe(false);
+    });
+
+    it('compares `cipherSuites`', () => {
+      const reference = createEnabledConfig({ cipherSuites: ['A', 'B'] });
+      const same = createEnabledConfig({ cipherSuites: ['A', 'B'] });
+      const different = createEnabledConfig({ cipherSuites: ['A', 'C'] });
+
+      expect(reference.isEqualTo(same)).toBe(true);
+      expect(reference.isEqualTo(different)).toBe(false);
+    });
+
+    it('compares `supportedProtocols`', () => {
+      const reference = createEnabledConfig({ supportedProtocols: ['TLSv1.1', 'TLSv1.2'] });
+      const same = createEnabledConfig({ supportedProtocols: ['TLSv1.1', 'TLSv1.2'] });
+      const different = createEnabledConfig({ supportedProtocols: ['TLSv1.1', 'TLSv1.3'] });
+
+      expect(reference.isEqualTo(same)).toBe(true);
+      expect(reference.isEqualTo(different)).toBe(false);
+    });
+
+    it('compares `clientAuthentication`', () => {
+      const reference = createEnabledConfig({ clientAuthentication: 'none' });
+      const same = createEnabledConfig({ clientAuthentication: 'none' });
+      const different = createEnabledConfig({ clientAuthentication: 'required' });
+
+      expect(reference.isEqualTo(same)).toBe(true);
+      expect(reference.isEqualTo(different)).toBe(false);
+    });
+  });
 });
 
 describe('#sslSchema', () => {

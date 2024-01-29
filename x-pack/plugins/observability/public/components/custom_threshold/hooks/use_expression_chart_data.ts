@@ -52,11 +52,10 @@ export const useExpressionChartData = (
           equation: expression.equation,
         },
       ],
-      aggregation: expression.aggType || 'custom',
+      aggregation: 'custom',
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
-      expression.aggType,
       expression.equation,
       // eslint-disable-next-line react-hooks/exhaustive-deps
       JSON.stringify(expression.metrics),

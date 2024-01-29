@@ -6,7 +6,7 @@
  */
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { CreateStoredScriptRequestBody } from '../../../../../common/api/risk_score';
+import type { CreateStoredScriptRequestBody } from '../../../../../common/api/entity_analytics/risk_score';
 
 export const createStoredScript = async ({
   esClient,

@@ -8,14 +8,14 @@
 import type { FC } from 'react';
 import React, { useCallback } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
 import { InsightsSummaryRow } from './insights_summary_row';
 import { useRightPanelContext } from '../context';
 import { INSIGHTS_THREAT_INTELLIGENCE_TEST_ID } from './test_ids';
-import { LeftPanelKey, LeftPanelInsightsTab } from '../../left';
+import { DocumentDetailsLeftPanelKey, LeftPanelInsightsTab } from '../../left';
 import { THREAT_INTELLIGENCE_TAB_ID } from '../../left/components/threat_intelligence_details';
 
 /**
@@ -25,11 +25,11 @@ import { THREAT_INTELLIGENCE_TAB_ID } from '../../left/components/threat_intelli
  */
 export const ThreatIntelligenceOverview: FC = () => {
   const { eventId, indexName, scopeId, dataFormattedForFieldBrowser } = useRightPanelContext();
-  const { openLeftPanel } = useExpandableFlyoutContext();
+  const { openLeftPanel } = useExpandableFlyoutApi();
 
   const goToThreatIntelligenceTab = useCallback(() => {
     openLeftPanel({
-      id: LeftPanelKey,
+      id: DocumentDetailsLeftPanelKey,
       path: {
         tab: LeftPanelInsightsTab,
         subTab: THREAT_INTELLIGENCE_TAB_ID,

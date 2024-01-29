@@ -8,7 +8,6 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useKibana as mockUseKibana } from '../../lib/kibana/__mocks__';
 import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_metric';
 import { useAddToNewCase } from './use_add_to_new_case';
-import { useGetUserCasesPermissions } from '../../lib/kibana';
 import {
   allCasesPermissions,
   readCasesPermissions,
@@ -20,13 +19,13 @@ jest.mock('../../lib/kibana/kibana_react');
 
 const mockedUseKibana = mockUseKibana();
 const mockGetUseCasesAddToNewCaseFlyout = jest.fn();
+const mockCanUseCases = jest.fn();
 
 jest.mock('../../lib/kibana', () => {
   const original = jest.requireActual('../../lib/kibana');
 
   return {
     ...original,
-    useGetUserCasesPermissions: jest.fn(),
     useKibana: () => ({
       ...mockedUseKibana,
       services: {
@@ -35,6 +34,7 @@ jest.mock('../../lib/kibana', () => {
           hooks: {
             useCasesAddToNewCaseFlyout: mockGetUseCasesAddToNewCaseFlyout,
           },
+          helpers: { canUseCases: mockCanUseCases },
         },
       },
     }),
@@ -47,7 +47,7 @@ describe('useAddToNewCase', () => {
     to: '2022-03-07T15:59:59.999Z',
   };
   beforeEach(() => {
-    (useGetUserCasesPermissions as jest.Mock).mockReturnValue(allCasesPermissions());
+    mockCanUseCases.mockReturnValue(allCasesPermissions());
   });
 
   it('useCasesAddToNewCaseFlyout with attachments', () => {
@@ -64,7 +64,7 @@ describe('useAddToNewCase', () => {
   });
 
   it("disables the button if the user can't create but can read", () => {
-    (useGetUserCasesPermissions as jest.Mock).mockReturnValue(readCasesPermissions());
+    mockCanUseCases.mockReturnValue(readCasesPermissions());
 
     const { result } = renderHook(() =>
       useAddToNewCase({
@@ -76,7 +76,7 @@ describe('useAddToNewCase', () => {
   });
 
   it("disables the button if the user can't read but can create", () => {
-    (useGetUserCasesPermissions as jest.Mock).mockReturnValue(writeCasesPermissions());
+    mockCanUseCases.mockReturnValue(writeCasesPermissions());
 
     const { result } = renderHook(() =>
       useAddToNewCase({

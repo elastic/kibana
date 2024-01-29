@@ -120,7 +120,7 @@ exports[`LayerControl isLayerTOCOpen Should render expand button 1`] = `
   position="left"
 >
   <ExpandButton
-    hasErrors={false}
+    hasErrorsOrWarnings={false}
     isLoading={false}
     onClick={[Function]}
   />
@@ -135,7 +135,7 @@ exports[`LayerControl isLayerTOCOpen Should render expand button with error icon
   position="left"
 >
   <ExpandButton
-    hasErrors={true}
+    hasErrorsOrWarnings={true}
     isLoading={false}
     onClick={[Function]}
   />
@@ -150,7 +150,7 @@ exports[`LayerControl isLayerTOCOpen Should render expand button with loading ic
   position="left"
 >
   <ExpandButton
-    hasErrors={false}
+    hasErrorsOrWarnings={false}
     isLoading={true}
     onClick={[Function]}
   />

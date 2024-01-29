@@ -8,10 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import { IBasePath } from '@kbn/core/public';
 import moment from 'moment';
-import type { LocatorPublic } from '@kbn/share-plugin/public';
 import { AllDatasetsLocatorParams } from '@kbn/deeplinks-observability/locators';
+import type { LocatorPublic } from '@kbn/share-plugin/public';
 import { NodeLogsLocatorParams } from '@kbn/logs-shared-plugin/common';
-import { getNodeLogsHref } from '../../../../shared/links/observability_logs_link';
+import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 import { getInfraHref } from '../../../../shared/links/infra_link';
 import {
@@ -58,20 +58,17 @@ export function getMenuSections({
     : undefined;
   const infraMetricsQuery = getInfraMetricsQuery(instanceDetails['@timestamp']);
 
-  const podLogsHref = getNodeLogsHref(
-    'pod',
-    podId!,
+  const podLogsHref = nodeLogsLocator.getRedirectUrl({
+    nodeField: findInventoryFields('pod').id,
+    nodeId: podId!,
     time,
-    allDatasetsLocator,
-    nodeLogsLocator
-  );
-  const containerLogsHref = getNodeLogsHref(
-    'container',
-    containerId!,
+  });
+
+  const containerLogsHref = nodeLogsLocator.getRedirectUrl({
+    nodeField: findInventoryFields('container').id,
+    nodeId: containerId!,
     time,
-    allDatasetsLocator,
-    nodeLogsLocator
-  );
+  });
 
   const podActions: Action[] = [
     {

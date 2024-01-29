@@ -101,10 +101,6 @@ export const LogEntryFlyout = ({
   logViewReference,
 }: LogEntryFlyoutProps) => {
   const {
-    services: { observabilityAIAssistant },
-  } = useKibanaContextForPlugin();
-
-  const {
     cancelRequest: cancelLogEntryRequest,
     errors: logEntryErrors,
     fetchLogEntry,
@@ -116,6 +112,8 @@ export const LogEntryFlyout = ({
     logViewReference,
     logEntryId,
   });
+
+  const { observabilityAIAssistant } = useKibanaContextForPlugin().services;
 
   useEffect(() => {
     if (logViewReference && logEntryId) {

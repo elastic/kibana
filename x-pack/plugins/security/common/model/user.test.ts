@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { User } from './user';
+import type { User } from '@kbn/security-plugin-types-common';
+
 import { getUserDisplayName } from './user';
 
 describe('#getUserDisplayName', () => {

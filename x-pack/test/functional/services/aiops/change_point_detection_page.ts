@@ -26,7 +26,7 @@ export function ChangePointDetectionPageProvider(
   const dashboardPage = getPageObject('dashboard');
 
   return {
-    async navigateToIndexPatternSelection() {
+    async navigateToDataViewSelection() {
       await testSubjects.click('mlMainTab changePointDetection');
       await testSubjects.existOrFail('mlPageSourceSelection');
     },

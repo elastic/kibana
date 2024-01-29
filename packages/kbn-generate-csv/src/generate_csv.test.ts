@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { identity, range } from 'lodash';
+import * as Rx from 'rxjs';
+import type { Writable } from 'stream';
+
 import { errors as esErrors, estypes } from '@elastic/elasticsearch';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
@@ -15,27 +19,43 @@ import {
   savedObjectsClientMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import { ISearchClient, ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import { identity, range } from 'lodash';
-import * as Rx from 'rxjs';
-import type { Writable } from 'stream';
+import { CancellationToken } from '@kbn/reporting-common';
+import { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
+import type { ReportingConfigType } from '@kbn/reporting-server';
+import {
+  UI_SETTINGS_CSV_QUOTE_VALUES,
+  UI_SETTINGS_CSV_SEPARATOR,
+  UI_SETTINGS_DATEFORMAT_TZ,
+} from '../constants';
 import { CsvGenerator } from './generate_csv';
-import { CancellationToken, UI_SETTINGS_DATEFORMAT_TZ } from '@kbn/reporting-common';
-import { CsvConfig, JobParams } from '@kbn/generate-csv-types';
-import { UI_SETTINGS_CSV_QUOTE_VALUES, UI_SETTINGS_CSV_SEPARATOR } from './constants';
 
-const createMockJob = (baseObj: any = {}): JobParams => ({
-  ...baseObj,
+type CsvConfigType = ReportingConfigType['csv'];
+
+const getMockConfig = (opts: Partial<CsvConfigType> = {}): CsvConfigType => ({
+  checkForFormulas: true,
+  escapeFormulaValues: true,
+  maxSizeBytes: 180000,
+  useByteOrderMarkEncoding: false,
+  scroll: { size: 500, duration: '30s', strategy: 'pit' },
+  enablePanelActionDownload: true,
+  maxConcurrentShardRequests: 5,
+  ...opts,
 });
+
+const createMockJob = (baseObj: Partial<JobParamsCSV> = {}): JobParamsCSV =>
+  ({
+    ...baseObj,
+  } as JobParamsCSV);
+const mockTaskInstanceFields = { startedAt: null, retryAt: null };
 
 describe('CsvGenerator', () => {
   let mockEsClient: IScopedClusterClient;
-  let mockDataClient: IScopedSearchClient;
-  let mockConfig: CsvConfig;
+  let mockDataClient: ISearchClient;
+  let mockConfig: CsvConfigType;
   let mockLogger: jest.Mocked<Logger>;
   let uiSettingsClient: IUiSettingsClient;
   let stream: jest.Mocked<Writable>;
@@ -55,7 +75,7 @@ describe('CsvGenerator', () => {
     getAllMigrations: jest.fn(),
   };
 
-  const mockPitId = 'oju9fs3698s3902f02-8qg3-u9w36oiewiuyew6';
+  const mockCursorId = 'oju9fs3698s3902f02-8qg3-u9w36oiewiuyew6';
 
   const getMockRawResponse = (
     hits: Array<estypes.SearchHit<unknown>> = [],
@@ -63,7 +83,7 @@ describe('CsvGenerator', () => {
   ) => ({
     took: 1,
     timed_out: false,
-    pit_id: mockPitId,
+    pit_id: mockCursorId,
     _shards: { total: 1, successful: 1, failed: 0, skipped: 0 },
     hits: { hits, total, max_score: 0 },
   });
@@ -89,7 +109,9 @@ describe('CsvGenerator', () => {
     mockDataClient = dataPluginMock.createStartContract().search.asScoped({} as any);
     mockDataClient.search = mockDataClientSearchDefault;
 
-    mockEsClient.asCurrentUser.openPointInTime = jest.fn().mockResolvedValueOnce({ id: mockPitId });
+    mockEsClient.asCurrentUser.openPointInTime = jest
+      .fn()
+      .mockResolvedValueOnce({ id: mockCursorId });
 
     uiSettingsClient = uiSettingsServiceMock
       .createStartContract()
@@ -105,18 +127,12 @@ describe('CsvGenerator', () => {
       }
     });
 
-    mockConfig = {
-      checkForFormulas: true,
-      escapeFormulaValues: true,
-      maxSizeBytes: 180000,
-      useByteOrderMarkEncoding: false,
-      scroll: { size: 500, duration: '30s' },
-    };
+    mockConfig = getMockConfig();
 
     searchSourceMock.getField = jest.fn((key: string) => {
       switch (key) {
         case 'pit':
-          return { id: mockPitId };
+          return { id: mockCursorId };
         case 'index':
           return {
             fields: {
@@ -137,6 +153,7 @@ describe('CsvGenerator', () => {
     const generateCsv = new CsvGenerator(
       createMockJob({ columns: ['date', 'ip', 'message'] }),
       mockConfig,
+      mockTaskInstanceFields,
       {
         es: mockEsClient,
         data: mockDataClient,
@@ -172,6 +189,7 @@ describe('CsvGenerator', () => {
     const generateCsv = new CsvGenerator(
       createMockJob({ columns: ['date', 'ip', 'message'] }),
       mockConfig,
+      mockTaskInstanceFields,
       {
         es: mockEsClient,
         data: mockDataClient,
@@ -211,6 +229,7 @@ describe('CsvGenerator', () => {
     const generateCsv = new CsvGenerator(
       createMockJob({ columns: ['message'] }),
       mockConfig,
+      mockTaskInstanceFields,
       {
         es: mockEsClient,
         data: mockDataClient,
@@ -229,85 +248,28 @@ describe('CsvGenerator', () => {
     expect(csvResult.warnings).toEqual([]);
   });
 
-  it('warns if max size was reached', async () => {
-    const TEST_MAX_SIZE = 500;
-    mockConfig = {
-      checkForFormulas: true,
-      escapeFormulaValues: true,
-      maxSizeBytes: TEST_MAX_SIZE,
-      useByteOrderMarkEncoding: false,
-      scroll: { size: 500, duration: '30s' },
-    };
+  describe('PIT strategy', () => {
+    const mockJobUsingPitPaging = createMockJob({
+      columns: ['date', 'ip', 'message'],
+      pagingStrategy: 'pit',
+    });
 
-    mockDataClient.search = jest.fn().mockImplementation(() =>
-      Rx.of({
-        rawResponse: getMockRawResponse(
-          range(0, HITS_TOTAL).map(
-            () =>
-              ({
-                fields: {
-                  date: ['2020-12-31T00:14:28.000Z'],
-                  ip: ['110.135.176.89'],
-                  message: ['super cali fragile istic XPLA docious'],
-                },
-              } as unknown as estypes.SearchHit)
-          )
-        ),
-      })
-    );
+    it('warns if max size was reached', async () => {
+      const TEST_MAX_SIZE = 500;
+      mockConfig = getMockConfig({
+        maxSizeBytes: TEST_MAX_SIZE,
+      });
 
-    const generateCsv = new CsvGenerator(
-      createMockJob({ columns: ['date', 'ip', 'message'] }),
-      mockConfig,
-      {
-        es: mockEsClient,
-        data: mockDataClient,
-        uiSettings: uiSettingsClient,
-      },
-      {
-        searchSourceStart: mockSearchSourceService,
-        fieldFormatsRegistry: mockFieldFormatsRegistry,
-      },
-      new CancellationToken(),
-      mockLogger,
-      stream
-    );
-    const csvResult = await generateCsv.generateData();
-    expect(csvResult.max_size_reached).toBe(true);
-    expect(csvResult.warnings).toEqual([]);
-    expect(content).toMatchSnapshot();
-  });
-
-  it('uses the pit ID to page all the data', async () => {
-    mockDataClient.search = jest
-      .fn()
-      .mockImplementationOnce(() =>
+      mockDataClient.search = jest.fn().mockImplementation(() =>
         Rx.of({
           rawResponse: getMockRawResponse(
-            range(0, HITS_TOTAL / 10).map(
+            range(0, HITS_TOTAL).map(
               () =>
                 ({
                   fields: {
                     date: ['2020-12-31T00:14:28.000Z'],
                     ip: ['110.135.176.89'],
-                    message: ['hit from the initial search'],
-                  },
-                } as unknown as estypes.SearchHit)
-            ),
-            HITS_TOTAL
-          ),
-        })
-      )
-      .mockImplementation(() =>
-        Rx.of({
-          rawResponse: getMockRawResponse(
-            range(0, HITS_TOTAL / 10).map(
-              () =>
-                ({
-                  fields: {
-                    date: ['2020-12-31T00:14:28.000Z'],
-                    ip: ['110.135.176.89'],
-                    message: ['hit from a subsequent scroll'],
+                    message: ['super cali fragile istic XPLA docious'],
                   },
                 } as unknown as estypes.SearchHit)
             )
@@ -315,95 +277,505 @@ describe('CsvGenerator', () => {
         })
       );
 
-    const generateCsv = new CsvGenerator(
-      createMockJob({ columns: ['date', 'ip', 'message'] }),
-      mockConfig,
-      {
-        es: mockEsClient,
-        data: mockDataClient,
-        uiSettings: uiSettingsClient,
-      },
-      {
-        searchSourceStart: mockSearchSourceService,
-        fieldFormatsRegistry: mockFieldFormatsRegistry,
-      },
-      new CancellationToken(),
-      mockLogger,
-      stream
-    );
-    const csvResult = await generateCsv.generateData();
-    expect(csvResult.warnings).toEqual([]);
-    expect(content).toMatchSnapshot();
-
-    expect(mockDataClient.search).toHaveBeenCalledTimes(10);
-    expect(mockDataClient.search).toBeCalledWith(
-      { params: { body: {}, ignore_throttled: undefined } },
-      { strategy: 'es', transport: { maxRetries: 0, requestTimeout: '30s' } }
-    );
-
-    expect(mockEsClient.asCurrentUser.openPointInTime).toHaveBeenCalledTimes(1);
-    expect(mockEsClient.asCurrentUser.openPointInTime).toHaveBeenCalledWith(
-      {
-        ignore_unavailable: true,
-        index: 'logstash-*',
-        keep_alive: '30s',
-      },
-      { maxRetries: 0, requestTimeout: '30s' }
-    );
-
-    expect(mockEsClient.asCurrentUser.closePointInTime).toHaveBeenCalledTimes(1);
-    expect(mockEsClient.asCurrentUser.closePointInTime).toHaveBeenCalledWith({
-      body: { id: mockPitId },
+      const generateCsv = new CsvGenerator(
+        mockJobUsingPitPaging,
+        mockConfig,
+        mockTaskInstanceFields,
+        {
+          es: mockEsClient,
+          data: mockDataClient,
+          uiSettings: uiSettingsClient,
+        },
+        {
+          searchSourceStart: mockSearchSourceService,
+          fieldFormatsRegistry: mockFieldFormatsRegistry,
+        },
+        new CancellationToken(),
+        mockLogger,
+        stream
+      );
+      const csvResult = await generateCsv.generateData();
+      expect(csvResult.max_size_reached).toBe(true);
+      expect(csvResult.warnings).toEqual([]);
     });
-  });
 
-  it('keeps order of the columns during the scroll', async () => {
-    mockDataClient.search = jest
-      .fn()
-      .mockImplementationOnce(() =>
-        Rx.of({
-          rawResponse: getMockRawResponse(
-            [{ fields: { a: ['a1'], b: ['b1'] } } as unknown as estypes.SearchHit],
-            3
-          ),
-        })
-      )
-      .mockImplementationOnce(() =>
-        Rx.of({
-          rawResponse: getMockRawResponse(
-            [{ fields: { b: ['b2'] } } as unknown as estypes.SearchHit],
-            3
-          ),
-        })
-      )
-      .mockImplementationOnce(() =>
-        Rx.of({
-          rawResponse: getMockRawResponse(
-            [{ fields: { a: ['a3'], c: ['c3'] } } as unknown as estypes.SearchHit],
-            3
-          ),
+    it('uses the pit ID to page all the data', async () => {
+      mockDataClient.search = jest
+        .fn()
+        .mockImplementationOnce(() =>
+          Rx.of({
+            rawResponse: getMockRawResponse(
+              range(0, HITS_TOTAL / 10).map(
+                () =>
+                  ({
+                    fields: {
+                      date: ['2020-12-31T00:14:28.000Z'],
+                      ip: ['110.135.176.89'],
+                      message: ['hit from the initial search'],
+                    },
+                  } as unknown as estypes.SearchHit)
+              ),
+              HITS_TOTAL
+            ),
+          })
+        )
+        .mockImplementation(() =>
+          Rx.of({
+            rawResponse: getMockRawResponse(
+              range(0, HITS_TOTAL / 10).map(
+                () =>
+                  ({
+                    fields: {
+                      date: ['2020-12-31T00:14:28.000Z'],
+                      ip: ['110.135.176.89'],
+                      message: ['hit from a subsequent scroll'],
+                    },
+                  } as unknown as estypes.SearchHit)
+              )
+            ),
+          })
+        );
+
+      const generateCsv = new CsvGenerator(
+        mockJobUsingPitPaging,
+        mockConfig,
+        mockTaskInstanceFields,
+        {
+          es: mockEsClient,
+          data: mockDataClient,
+          uiSettings: uiSettingsClient,
+        },
+        {
+          searchSourceStart: mockSearchSourceService,
+          fieldFormatsRegistry: mockFieldFormatsRegistry,
+        },
+        new CancellationToken(),
+        mockLogger,
+        stream
+      );
+      const csvResult = await generateCsv.generateData();
+      expect(csvResult.warnings).toEqual([]);
+      expect(content).toMatchSnapshot();
+
+      expect(mockDataClient.search).toHaveBeenCalledTimes(10);
+      expect(mockDataClient.search).toBeCalledWith(
+        { params: { body: {}, ignore_throttled: undefined, max_concurrent_shard_requests: 5 } },
+        { strategy: 'es', transport: { maxRetries: 0, requestTimeout: '30s' } }
+      );
+
+      expect(mockEsClient.asCurrentUser.openPointInTime).toHaveBeenCalledTimes(1);
+      expect(mockEsClient.asCurrentUser.openPointInTime).toHaveBeenCalledWith(
+        {
+          ignore_unavailable: true,
+          index: 'logstash-*',
+          keep_alive: '30s',
+        },
+        { maxConcurrentShardRequests: 5, maxRetries: 0, requestTimeout: '30s' }
+      );
+
+      expect(mockEsClient.asCurrentUser.closePointInTime).toHaveBeenCalledTimes(1);
+      expect(mockEsClient.asCurrentUser.closePointInTime).toHaveBeenCalledWith({
+        body: { id: mockCursorId },
+      });
+    });
+
+    it('keeps order of the columns during the scroll', async () => {
+      mockDataClient.search = jest
+        .fn()
+        .mockImplementationOnce(() =>
+          Rx.of({
+            rawResponse: getMockRawResponse(
+              [{ fields: { a: ['a1'], b: ['b1'] } } as unknown as estypes.SearchHit],
+              3
+            ),
+          })
+        )
+        .mockImplementationOnce(() =>
+          Rx.of({
+            rawResponse: getMockRawResponse(
+              [{ fields: { b: ['b2'] } } as unknown as estypes.SearchHit],
+              3
+            ),
+          })
+        )
+        .mockImplementationOnce(() =>
+          Rx.of({
+            rawResponse: getMockRawResponse(
+              [{ fields: { a: ['a3'], c: ['c3'] } } as unknown as estypes.SearchHit],
+              3
+            ),
+          })
+        );
+
+      const generateCsv = new CsvGenerator(
+        createMockJob({ searchSource: {}, columns: [], pagingStrategy: 'pit' }),
+        mockConfig,
+        mockTaskInstanceFields,
+        {
+          es: mockEsClient,
+          data: mockDataClient,
+          uiSettings: uiSettingsClient,
+        },
+        {
+          searchSourceStart: mockSearchSourceService,
+          fieldFormatsRegistry: mockFieldFormatsRegistry,
+        },
+        new CancellationToken(),
+        mockLogger,
+        stream
+      );
+      await generateCsv.generateData();
+      expect(content).toMatchSnapshot();
+    });
+
+    it('adds a warning if export was unable to close the PIT', async () => {
+      mockEsClient.asCurrentUser.closePointInTime = jest.fn().mockRejectedValueOnce(
+        new esErrors.ResponseError({
+          statusCode: 419,
+          warnings: [],
+          meta: { context: 'test' } as any,
         })
       );
 
-    const generateCsv = new CsvGenerator(
-      createMockJob({ searchSource: {}, columns: [] }),
-      mockConfig,
-      {
-        es: mockEsClient,
-        data: mockDataClient,
-        uiSettings: uiSettingsClient,
-      },
-      {
-        searchSourceStart: mockSearchSourceService,
-        fieldFormatsRegistry: mockFieldFormatsRegistry,
-      },
-      new CancellationToken(),
-      mockLogger,
-      stream
-    );
-    await generateCsv.generateData();
+      const generateCsv = new CsvGenerator(
+        mockJobUsingPitPaging,
+        mockConfig,
+        mockTaskInstanceFields,
+        {
+          es: mockEsClient,
+          data: mockDataClient,
+          uiSettings: uiSettingsClient,
+        },
+        {
+          searchSourceStart: mockSearchSourceService,
+          fieldFormatsRegistry: mockFieldFormatsRegistry,
+        },
+        new CancellationToken(),
+        mockLogger,
+        stream
+      );
 
-    expect(content).toMatchSnapshot();
+      await expect(generateCsv.generateData()).resolves.toMatchInlineSnapshot(`
+        Object {
+          "content_type": "text/csv",
+          "csv_contains_formulas": false,
+          "error_code": undefined,
+          "max_size_reached": false,
+          "metrics": Object {
+            "csv": Object {
+              "rows": 0,
+            },
+          },
+          "warnings": Array [
+            "Unable to close the Point-In-Time used for search. Check the Kibana server logs.",
+          ],
+        }
+      `);
+    });
+
+    describe('debug logging', () => {
+      it('logs the the total hits relation if relation is provided', async () => {
+        mockDataClient.search = jest.fn().mockImplementation(() =>
+          Rx.of({
+            rawResponse: {
+              took: 1,
+              timed_out: false,
+              pit_id: mockCursorId,
+              _shards: { total: 1, successful: 1, failed: 0, skipped: 0 },
+              hits: { hits: [], total: { relation: 'eq', value: 12345 }, max_score: 0 },
+            },
+          })
+        );
+
+        const debugLogSpy = jest.spyOn(mockLogger, 'debug');
+        const generateCsv = new CsvGenerator(
+          mockJobUsingPitPaging,
+          mockConfig,
+          mockTaskInstanceFields,
+          {
+            es: mockEsClient,
+            data: mockDataClient,
+            uiSettings: uiSettingsClient,
+          },
+          {
+            searchSourceStart: mockSearchSourceService,
+            fieldFormatsRegistry: mockFieldFormatsRegistry,
+          },
+          new CancellationToken(),
+          mockLogger,
+          stream
+        );
+
+        await generateCsv.generateData();
+        expect(debugLogSpy).toHaveBeenCalledWith('Received total hits: 12345. Accuracy: eq.');
+      });
+
+      it('logs the the total hits relation as "unknown" if relation is not provided', async () => {
+        mockDataClient.search = jest.fn().mockImplementation(() =>
+          Rx.of({
+            rawResponse: {
+              took: 1,
+              timed_out: false,
+              pit_id: mockCursorId,
+              _shards: { total: 1, successful: 1, failed: 0, skipped: 0 },
+              hits: { hits: [], total: 12345, max_score: 0 },
+            },
+          })
+        );
+
+        const debugLogSpy = jest.spyOn(mockLogger, 'debug');
+        const generateCsv = new CsvGenerator(
+          mockJobUsingPitPaging,
+          mockConfig,
+          mockTaskInstanceFields,
+          {
+            es: mockEsClient,
+            data: mockDataClient,
+            uiSettings: uiSettingsClient,
+          },
+          {
+            searchSourceStart: mockSearchSourceService,
+            fieldFormatsRegistry: mockFieldFormatsRegistry,
+          },
+          new CancellationToken(),
+          mockLogger,
+          stream
+        );
+
+        await generateCsv.generateData();
+        expect(debugLogSpy).toHaveBeenCalledWith('Received total hits: 12345. Accuracy: unknown.');
+      });
+    });
+  });
+
+  describe('Scroll strategy', () => {
+    const mockJobUsingScrollPaging = createMockJob({
+      columns: ['date', 'ip', 'message'],
+      pagingStrategy: 'scroll',
+    });
+
+    beforeEach(() => {
+      mockDataClient.search = jest
+        .fn()
+        .mockImplementationOnce(() =>
+          Rx.of({
+            rawResponse: getMockRawResponse(
+              range(0, HITS_TOTAL / 10).map(
+                () =>
+                  ({
+                    fields: {
+                      date: ['2020-12-31T00:14:28.000Z'],
+                      ip: ['110.135.176.89'],
+                      message: ['hit from the initial search'],
+                    },
+                  } as unknown as estypes.SearchHit)
+              ),
+              HITS_TOTAL
+            ),
+          })
+        )
+        .mockImplementation(() =>
+          Rx.of({
+            rawResponse: getMockRawResponse(
+              range(0, HITS_TOTAL / 10).map(
+                () =>
+                  ({
+                    fields: {
+                      date: ['2020-12-31T00:14:28.000Z'],
+                      ip: ['110.135.176.89'],
+                      message: ['hit from a subsequent scroll'],
+                    },
+                  } as unknown as estypes.SearchHit)
+              )
+            ),
+          })
+        );
+    });
+
+    it('warns if max size was reached', async () => {
+      const TEST_MAX_SIZE = 500;
+
+      const generateCsv = new CsvGenerator(
+        mockJobUsingScrollPaging,
+        getMockConfig({
+          maxSizeBytes: TEST_MAX_SIZE,
+          scroll: { size: 500, duration: '30s', strategy: 'scroll' },
+        }),
+        mockTaskInstanceFields,
+        {
+          es: mockEsClient,
+          data: mockDataClient,
+          uiSettings: uiSettingsClient,
+        },
+        {
+          searchSourceStart: mockSearchSourceService,
+          fieldFormatsRegistry: mockFieldFormatsRegistry,
+        },
+        new CancellationToken(),
+        mockLogger,
+        stream
+      );
+      const csvResult = await generateCsv.generateData();
+      expect(csvResult.max_size_reached).toBe(true);
+      expect(csvResult.warnings).toEqual([]);
+    });
+
+    it('uses the scroll context to page all the data', async () => {
+      const generateCsv = new CsvGenerator(
+        mockJobUsingScrollPaging,
+        getMockConfig({
+          scroll: { size: 500, duration: '30s', strategy: 'scroll' },
+        }),
+        mockTaskInstanceFields,
+        {
+          es: mockEsClient,
+          data: mockDataClient,
+          uiSettings: uiSettingsClient,
+        },
+        {
+          searchSourceStart: mockSearchSourceService,
+          fieldFormatsRegistry: mockFieldFormatsRegistry,
+        },
+        new CancellationToken(),
+        mockLogger,
+        stream
+      );
+      const csvResult = await generateCsv.generateData();
+      expect(csvResult.warnings).toEqual([]);
+      expect(content).toMatchSnapshot();
+
+      expect(mockDataClient.search).toHaveBeenCalledTimes(10);
+      expect(mockDataClient.search).toBeCalledWith(
+        {
+          params: expect.objectContaining({
+            index: 'logstash-*',
+            scroll: '30s',
+            size: 500,
+            max_concurrent_shard_requests: 5,
+          }),
+        },
+        { strategy: 'es', transport: { maxRetries: 0, requestTimeout: '30s' } }
+      );
+
+      expect(mockEsClient.asCurrentUser.openPointInTime).not.toHaveBeenCalled();
+    });
+
+    it('keeps order of the columns during the scroll', async () => {
+      mockDataClient.search = jest
+        .fn()
+        .mockImplementationOnce(() =>
+          Rx.of({
+            rawResponse: getMockRawResponse(
+              [{ fields: { a: ['a1'], b: ['b1'] } } as unknown as estypes.SearchHit],
+              3
+            ),
+          })
+        )
+        .mockImplementationOnce(() =>
+          Rx.of({
+            rawResponse: getMockRawResponse(
+              [{ fields: { b: ['b2'] } } as unknown as estypes.SearchHit],
+              3
+            ),
+          })
+        )
+        .mockImplementationOnce(() =>
+          Rx.of({
+            rawResponse: getMockRawResponse(
+              [{ fields: { a: ['a3'], c: ['c3'] } } as unknown as estypes.SearchHit],
+              3
+            ),
+          })
+        );
+
+      const generateCsv = new CsvGenerator(
+        createMockJob({ searchSource: {}, columns: [], pagingStrategy: 'scroll' }),
+        getMockConfig({
+          scroll: { size: 500, duration: '30s', strategy: 'scroll' },
+        }),
+        mockTaskInstanceFields,
+        {
+          es: mockEsClient,
+          data: mockDataClient,
+          uiSettings: uiSettingsClient,
+        },
+        {
+          searchSourceStart: mockSearchSourceService,
+          fieldFormatsRegistry: mockFieldFormatsRegistry,
+        },
+        new CancellationToken(),
+        mockLogger,
+        stream
+      );
+      await generateCsv.generateData();
+      expect(content).toMatchSnapshot();
+    });
+
+    describe('debug logging', () => {
+      it('logs the the total hits relation if relation is provided', async () => {
+        mockDataClient.search = jest.fn().mockImplementation(() =>
+          Rx.of({
+            rawResponse: {
+              took: 1,
+              timed_out: false,
+              _scroll_id: mockCursorId,
+              _shards: { total: 1, successful: 1, failed: 0, skipped: 0 },
+              hits: { hits: [], total: { relation: 'eq', value: 100 }, max_score: 0 },
+            },
+          })
+        );
+
+        const debugLogSpy = jest.spyOn(mockLogger, 'debug');
+        const generateCsv = new CsvGenerator(
+          mockJobUsingScrollPaging,
+          getMockConfig({
+            scroll: { size: 500, duration: '30s', strategy: 'scroll' },
+          }),
+          mockTaskInstanceFields,
+          {
+            es: mockEsClient,
+            data: mockDataClient,
+            uiSettings: uiSettingsClient,
+          },
+          {
+            searchSourceStart: mockSearchSourceService,
+            fieldFormatsRegistry: mockFieldFormatsRegistry,
+          },
+          new CancellationToken(),
+          mockLogger,
+          stream
+        );
+
+        await generateCsv.generateData();
+        expect(debugLogSpy).toHaveBeenCalledWith('Received total hits: 100. Accuracy: eq.');
+      });
+
+      it('logs the the total hits relation as "unknown" if relation is not provided', async () => {
+        const debugLogSpy = jest.spyOn(mockLogger, 'debug');
+        const generateCsv = new CsvGenerator(
+          mockJobUsingScrollPaging,
+          getMockConfig({
+            scroll: { size: 500, duration: '30s', strategy: 'scroll' },
+          }),
+          mockTaskInstanceFields,
+          {
+            es: mockEsClient,
+            data: mockDataClient,
+            uiSettings: uiSettingsClient,
+          },
+          {
+            searchSourceStart: mockSearchSourceService,
+            fieldFormatsRegistry: mockFieldFormatsRegistry,
+          },
+          new CancellationToken(),
+          mockLogger,
+          stream
+        );
+
+        await generateCsv.generateData();
+        expect(debugLogSpy).toHaveBeenCalledWith('Received total hits: 100. Accuracy: unknown.');
+      });
+    });
   });
 
   describe('fields from job.searchSource.getFields() (7.12 generated)', () => {
@@ -426,6 +798,7 @@ describe('CsvGenerator', () => {
       const generateCsv = new CsvGenerator(
         createMockJob({ searchSource: {}, columns: ['_id', 'sku'] }),
         mockConfig,
+        mockTaskInstanceFields,
         {
           es: mockEsClient,
           data: mockDataClient,
@@ -465,7 +838,7 @@ describe('CsvGenerator', () => {
         createMockJob({
           searchSource: {
             query: { query: '', language: 'kuery' },
-            sort: [{ '@date': 'desc' }],
+            sort: [{ '@date': 'desc' as any }],
             index: '93f4bc50-6662-11eb-98bc-f550e2308366',
             fields: ['_id', '_index', '@date', 'message'],
             filter: [],
@@ -473,6 +846,7 @@ describe('CsvGenerator', () => {
           columns: ['_id', '_index', 'date', 'message'],
         }),
         mockConfig,
+        mockTaskInstanceFields,
         {
           es: mockEsClient,
           data: mockDataClient,
@@ -520,13 +894,14 @@ describe('CsvGenerator', () => {
         createMockJob({
           searchSource: {
             query: { query: '', language: 'kuery' },
-            sort: [{ '@date': 'desc' }],
+            sort: [{ '@date': 'desc' as any }],
             index: '93f4bc50-6662-11eb-98bc-f550e2308366',
             fields: ['*'],
             filter: [],
           },
         }),
         mockConfig,
+        mockTaskInstanceFields,
         {
           es: mockEsClient,
           data: mockDataClient,
@@ -569,6 +944,7 @@ describe('CsvGenerator', () => {
       const generateCsv = new CsvGenerator(
         createMockJob({ searchSource: {}, columns: ['product', 'category'] }),
         mockConfig,
+        mockTaskInstanceFields,
         {
           es: mockEsClient,
           data: mockDataClient,
@@ -607,6 +983,7 @@ describe('CsvGenerator', () => {
       const generateCsv = new CsvGenerator(
         createMockJob({ searchSource: {}, columns: ['_id', '_index', 'product', 'category'] }),
         mockConfig,
+        mockTaskInstanceFields,
         {
           es: mockEsClient,
           data: mockDataClient,
@@ -645,6 +1022,7 @@ describe('CsvGenerator', () => {
       const generateCsv = new CsvGenerator(
         createMockJob({ searchSource: {}, columns: [] }),
         mockConfig,
+        mockTaskInstanceFields,
         {
           es: mockEsClient,
           data: mockDataClient,
@@ -685,6 +1063,7 @@ describe('CsvGenerator', () => {
       const generateCsv = new CsvGenerator(
         createMockJob({ columns: ['date', 'ip', 'message'] }),
         mockConfig,
+        mockTaskInstanceFields,
         {
           es: mockEsClient,
           data: mockDataClient,
@@ -723,6 +1102,7 @@ describe('CsvGenerator', () => {
       const generateCsv = new CsvGenerator(
         createMockJob({ columns: ['date', 'ip', TEST_FORMULA] }),
         mockConfig,
+        mockTaskInstanceFields,
         {
           es: mockEsClient,
           data: mockDataClient,
@@ -744,13 +1124,11 @@ describe('CsvGenerator', () => {
     });
 
     it('can check for formulas, without escaping them', async () => {
-      mockConfig = {
+      mockConfig = getMockConfig({
         checkForFormulas: true,
         escapeFormulaValues: false,
-        maxSizeBytes: 180000,
-        useByteOrderMarkEncoding: false,
-        scroll: { size: 500, duration: '30s' },
-      };
+      });
+
       mockDataClient.search = jest.fn().mockImplementation(() =>
         Rx.of({
           rawResponse: getMockRawResponse([
@@ -768,6 +1146,7 @@ describe('CsvGenerator', () => {
       const generateCsv = new CsvGenerator(
         createMockJob({ columns: ['date', 'ip', 'message'] }),
         mockConfig,
+        mockTaskInstanceFields,
         {
           es: mockEsClient,
           data: mockDataClient,
@@ -801,6 +1180,7 @@ describe('CsvGenerator', () => {
     const generateCsv = new CsvGenerator(
       createMockJob({}),
       mockConfig,
+      mockTaskInstanceFields,
       { es: mockEsClient, data: mockDataClient, uiSettings: uiSettingsClient },
       {
         searchSourceStart: mockSearchSourceService,
@@ -820,7 +1200,7 @@ describe('CsvGenerator', () => {
         index: 'logstash-*',
         keep_alive: '30s',
       },
-      { maxRetries: 0, requestTimeout: '30s' }
+      { maxConcurrentShardRequests: 5, maxRetries: 0, requestTimeout: '30s' }
     );
 
     expect(mockEsClient.asCurrentUser.openPointInTime).toHaveBeenCalledWith(
@@ -830,61 +1210,18 @@ describe('CsvGenerator', () => {
         index: 'logstash-*',
         keep_alive: '30s',
       },
-      { maxRetries: 0, requestTimeout: '30s' }
+      { maxConcurrentShardRequests: 5, maxRetries: 0, requestTimeout: '30s' }
     );
 
     expect(mockDataClient.search).toBeCalledWith(
       {
         params: {
           body: {},
+          max_concurrent_shard_requests: 5,
         },
       },
       { strategy: 'es', transport: { maxRetries: 0, requestTimeout: '30s' } }
     );
-  });
-
-  it('adds a warning if export was unable to close the PIT', async () => {
-    mockEsClient.asCurrentUser.closePointInTime = jest.fn().mockRejectedValueOnce(
-      new esErrors.ResponseError({
-        statusCode: 419,
-        warnings: [],
-        meta: { context: 'test' } as any,
-      })
-    );
-
-    const generateCsv = new CsvGenerator(
-      createMockJob({ columns: ['date', 'ip', 'message'] }),
-      mockConfig,
-      {
-        es: mockEsClient,
-        data: mockDataClient,
-        uiSettings: uiSettingsClient,
-      },
-      {
-        searchSourceStart: mockSearchSourceService,
-        fieldFormatsRegistry: mockFieldFormatsRegistry,
-      },
-      new CancellationToken(),
-      mockLogger,
-      stream
-    );
-
-    await expect(generateCsv.generateData()).resolves.toMatchInlineSnapshot(`
-      Object {
-        "content_type": "text/csv",
-        "csv_contains_formulas": false,
-        "error_code": undefined,
-        "max_size_reached": false,
-        "metrics": Object {
-          "csv": Object {
-            "rows": 0,
-          },
-        },
-        "warnings": Array [
-          "Unable to close the Point-In-Time used for search. Check the Kibana server logs.",
-        ],
-      }
-    `);
   });
 
   it('will return partial data if the scroll or search fails', async () => {
@@ -899,6 +1236,7 @@ describe('CsvGenerator', () => {
     const generateCsv = new CsvGenerator(
       createMockJob({ columns: ['date', 'ip', 'message'] }),
       mockConfig,
+      mockTaskInstanceFields,
       {
         es: mockEsClient,
         data: mockDataClient,
@@ -948,6 +1286,7 @@ describe('CsvGenerator', () => {
     const generateCsv = new CsvGenerator(
       createMockJob({ columns: ['date', 'ip', 'message'] }),
       mockConfig,
+      mockTaskInstanceFields,
       {
         es: mockEsClient,
         data: mockDataClient,
@@ -1007,6 +1346,7 @@ describe('CsvGenerator', () => {
       const generateCsv = new CsvGenerator(
         createMockJob({ columns: ['date', 'ip', 'message'] }),
         mockConfig,
+        mockTaskInstanceFields,
         {
           es: mockEsClient,
           data: mockDataClient,

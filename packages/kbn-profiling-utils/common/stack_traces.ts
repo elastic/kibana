@@ -15,6 +15,7 @@ import {
   StackTrace,
   StackTraceID,
 } from './profiling';
+import { convertTonsToKgs } from './utils';
 
 /** Profiling status response */
 export interface ProfilingStatusResponse {
@@ -42,6 +43,9 @@ export interface ProfilingStackTrace {
   ['frame_ids']: string[];
   ['address_or_lines']: number[];
   ['type_ids']: number[];
+  ['annual_co2_tons']: number;
+  ['annual_costs_usd']: number;
+  count: number;
 }
 
 interface ProfilingStackTraces {
@@ -140,7 +144,10 @@ const createInlineTrace = (
     FileIDs: fileIDs,
     AddressOrLines: addressOrLines,
     Types: typeIDs,
-  } as StackTrace;
+    selfAnnualCO2Kgs: convertTonsToKgs(trace.annual_co2_tons),
+    selfAnnualCostUSD: trace.annual_costs_usd,
+    Count: trace.count,
+  };
 };
 
 /**

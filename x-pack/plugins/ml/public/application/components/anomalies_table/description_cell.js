@@ -10,7 +10,7 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 
-import { getMetricChangeDescription } from '../../formatters/metric_change_description';
+import { getMetricChangeDescription } from '../../../../common/util/metric_change_description';
 
 /*
  * Component for rendering the description cell in the anomalies table, which provides a

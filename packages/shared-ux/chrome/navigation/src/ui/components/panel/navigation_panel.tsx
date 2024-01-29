@@ -38,7 +38,9 @@ export const NavigationPanel: FC = () => {
     ({ target }: Event) => {
       // Only close if we are not clicking on the currently selected nav node
       if (
-        !(target as HTMLButtonElement).dataset.testSubj?.includes(`panelOpener-${selectedNode?.id}`)
+        !(target as HTMLButtonElement).dataset.testSubj?.includes(
+          `panelOpener-${selectedNode?.path}`
+        )
       ) {
         close();
       }

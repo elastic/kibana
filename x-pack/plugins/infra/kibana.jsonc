@@ -35,7 +35,7 @@
       "usageCollection",
       "visTypeTimeseries"
     ],
-    "optionalPlugins": ["spaces", "ml", "home", "embeddable", "osquery", "cloud"],
+    "optionalPlugins": ["spaces", "ml", "home", "embeddable", "osquery", "cloud", "profilingDataAccess"],
     "requiredBundles": [
       "unifiedSearch",
       "observability",
@@ -46,7 +46,6 @@
       "ml",
       "embeddable",
       "controls",
-      "advancedSettings"
     ]
   }
 }

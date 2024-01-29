@@ -9,3 +9,11 @@
 // disable moment deprecation warnings
 var moment = require('moment');
 moment.suppressDeprecationWarnings = true;
+
+// disable rison-node parsing errors
+// eslint-disable-next-line @kbn/eslint/module_migration
+var rison = require('rison-node');
+rison.parser.prototype.error = function (message) {
+  this.message = message;
+  return undefined;
+};

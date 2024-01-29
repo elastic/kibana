@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { cleanup, generate } from '@kbn/infra-forge';
-import { CUSTOM_AGGREGATOR } from '@kbn/observability-plugin/common/custom_threshold_rule/constants';
+import { cleanup, generate, Dataset, PartialConfig } from '@kbn/data-forge';
 import {
   Aggregators,
   Comparator,
@@ -26,21 +25,41 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Custom Threshold rule - DOCUMENTS_COUNT - FIRED', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
-    // DATE_VIEW should match the index template:
-    // x-pack/packages/kbn-infra-forge/src/data_sources/composable/template.json
-    const DATE_VIEW = 'kbn-data-forge-fake_hosts';
+    const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
     const DATA_VIEW_ID = 'data-view-id';
-    let infraDataIndex: string;
+    let dataForgeConfig: PartialConfig;
+    let dataForgeIndices: string[];
     let actionId: string;
     let ruleId: string;
 
     before(async () => {
-      infraDataIndex = await generate({ esClient, lookback: 'now-15m', logger });
+      dataForgeConfig = {
+        schedule: [
+          {
+            template: 'good',
+            start: 'now-15m',
+            end: 'now+5m',
+            metrics: [
+              { name: 'system.cpu.user.pct', method: 'linear', start: 2.5, end: 2.5 },
+              { name: 'system.cpu.total.pct', method: 'linear', start: 0.5, end: 0.5 },
+              { name: 'system.cpu.total.norm.pct', method: 'linear', start: 0.8, end: 0.8 },
+            ],
+          },
+        ],
+        indexing: {
+          dataset: 'fake_hosts' as Dataset,
+          eventsPerCycle: 1,
+          interval: 60000,
+          alignEventsToInterval: true,
+        },
+      };
+      dataForgeIndices = await generate({ client: esClient, config: dataForgeConfig, logger });
+      await alertingApi.waitForDocumentInIndex({ indexName: DATA_VIEW, docCountTarget: 60 });
       await dataViewApi.create({
-        name: DATE_VIEW,
+        name: DATA_VIEW,
         id: DATA_VIEW_ID,
-        title: DATE_VIEW,
+        title: DATA_VIEW,
       });
     });
 
@@ -66,11 +85,12 @@ export default function ({ getService }: FtrProviderContext) {
       await dataViewApi.delete({
         id: DATA_VIEW_ID,
       });
-      await esDeleteAllIndices([ALERT_ACTION_INDEX, infraDataIndex]);
-      await cleanup({ esClient, logger });
+      await esDeleteAllIndices([ALERT_ACTION_INDEX, ...dataForgeIndices]);
+      await cleanup({ client: esClient, config: dataForgeConfig, logger });
     });
 
-    describe('Rule creation', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/175499
+    describe.skip('Rule creation', () => {
       it('creates rule successfully', async () => {
         actionId = await alertingApi.createIndexConnector({
           name: 'Index Connector: Threshold API test',
@@ -85,9 +105,8 @@ export default function ({ getService }: FtrProviderContext) {
           params: {
             criteria: [
               {
-                aggType: CUSTOM_AGGREGATOR,
-                comparator: Comparator.GT,
-                threshold: [2],
+                comparator: Comparator.OUTSIDE_RANGE,
+                threshold: [1, 2],
                 timeSize: 1,
                 timeUnit: 'm',
                 metrics: [{ name: 'A', filter: '', aggType: Aggregators.COUNT }],
@@ -148,7 +167,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resp.hits.hits[0]._source).property(
           'kibana.alert.rule.category',
-          'Custom threshold (Technical Preview)'
+          'Custom threshold (Beta)'
         );
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', 'observability');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.name', 'Threshold rule');
@@ -178,9 +197,8 @@ export default function ({ getService }: FtrProviderContext) {
           .eql({
             criteria: [
               {
-                aggType: 'custom',
-                comparator: '>',
-                threshold: [2],
+                comparator: Comparator.OUTSIDE_RANGE,
+                threshold: [1, 2],
                 timeSize: 1,
                 timeUnit: 'm',
                 metrics: [{ name: 'A', filter: '', aggType: 'count' }],

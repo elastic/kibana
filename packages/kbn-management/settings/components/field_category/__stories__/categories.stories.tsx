@@ -53,6 +53,13 @@ export const Categories: Story<Params> = (params) => {
     <FieldCategoryProvider
       showDanger={action('showDanger')}
       links={{ deprecationKey: 'link/to/deprecation/docs' }}
+      validateChange={async (key, value) => {
+        action(`validateChange`)({
+          key,
+          value,
+        });
+        return { successfulValidation: true, valid: true };
+      }}
     >
       <Component
         {...{

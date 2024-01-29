@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { LEARN_MORE_LABEL } from '../../../common/i18n_string';
 import { PLUGIN_ID } from '../../../common';
@@ -28,9 +28,12 @@ import { ConnectorsTable } from './connectors/connectors_table';
 
 export const ConnectorsOverview = () => {
   const { data, isLoading: connectorsLoading } = useConnectors();
-  const { http } = useKibanaServices();
-
+  const { http, console: consolePlugin } = useKibanaServices();
   const { createConnector, isLoading } = useCreateConnector();
+  const embeddableConsole = useMemo(
+    () => consolePlugin?.renderEmbeddableConsole?.() ?? <></>,
+    [consolePlugin]
+  );
 
   return (
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchConnectorsPage">
@@ -38,6 +41,7 @@ export const ConnectorsOverview = () => {
         pageTitle={i18n.translate('xpack.serverlessSearch.connectors.title', {
           defaultMessage: 'Connectors',
         })}
+        data-test-subj="serverlessSearchConnectorsTitle"
         restrictWidth
         rightSideItems={[
           <EuiFlexGroup direction="row" alignItems="flexStart">
@@ -56,7 +60,11 @@ export const ConnectorsOverview = () => {
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size="s">
-                    <EuiLink target="_blank" href="https://github.com/elastic/connectors">
+                    <EuiLink
+                      data-test-subj="serverlessSearchConnectorsOverviewElasticConnectorsLink"
+                      target="_blank"
+                      href="https://github.com/elastic/connectors"
+                    >
                       {i18n.translate('xpack.serverlessSearch.connectorsPythonLink', {
                         defaultMessage: 'elastic/connectors',
                       })}
@@ -67,6 +75,7 @@ export const ConnectorsOverview = () => {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiButton
+                data-test-subj="serverlessSearchConnectorsOverviewCreateConnectorButton"
                 isLoading={isLoading}
                 fill
                 iconType="plusInCircleFilled"
@@ -87,7 +96,12 @@ export const ConnectorsOverview = () => {
               defaultMessage="Sync third-party data sources to Elasticsearch, by deploying Elastic connectors on your own infrastructure. {learnMoreLink}"
               values={{
                 learnMoreLink: (
-                  <EuiLink external target="_blank" href={'TODO TODO'}>
+                  <EuiLink
+                    data-test-subj="serverlessSearchConnectorsOverviewLink"
+                    external
+                    target="_blank"
+                    href={'TODO TODO'}
+                  >
                     {LEARN_MORE_LABEL}
                   </EuiLink>
                 ),
@@ -105,6 +119,7 @@ export const ConnectorsOverview = () => {
           <EmptyConnectorsPrompt />
         </EuiPageTemplate.Section>
       )}
+      {embeddableConsole}
     </EuiPageTemplate>
   );
 };

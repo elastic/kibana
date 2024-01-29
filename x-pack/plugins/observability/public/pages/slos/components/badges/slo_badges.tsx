@@ -17,8 +17,9 @@ import { SloTimeWindowBadge } from './slo_time_window_badge';
 import { SloRulesBadge } from './slo_rules_badge';
 import type { SloRule } from '../../../../hooks/slo/use_fetch_rules_for_slo';
 import { SloGroupByBadge } from '../../../../components/slo/slo_status_badge/slo_group_by_badge';
+export type ViewMode = 'default' | 'compact';
 
-export interface Props {
+export interface SloBadgesProps {
   activeAlerts?: number;
   isLoading: boolean;
   rules: Array<Rule<SloRule>> | undefined;
@@ -26,33 +27,17 @@ export interface Props {
   onClickRuleBadge: () => void;
 }
 
-export function SloBadges({ activeAlerts, isLoading, rules, slo, onClickRuleBadge }: Props) {
+export function SloBadges({
+  activeAlerts,
+  isLoading,
+  rules,
+  slo,
+  onClickRuleBadge,
+}: SloBadgesProps) {
   return (
     <EuiFlexGroup direction="row" responsive={false} gutterSize="s" alignItems="center" wrap>
       {isLoading ? (
-        <>
-          <EuiSkeletonRectangle
-            isLoading
-            contentAriaLabel="Loading"
-            width="54.16px"
-            height="20px"
-            borderRadius="s"
-          />
-          <EuiSkeletonRectangle
-            isLoading
-            contentAriaLabel="Loading"
-            width="54.16px"
-            height="20px"
-            borderRadius="s"
-          />
-          <EuiSkeletonRectangle
-            isLoading
-            contentAriaLabel="Loading"
-            width="54.16px"
-            height="20px"
-            borderRadius="s"
-          />
-        </>
+        <LoadingBadges />
       ) : (
         <>
           <SloStatusBadge slo={slo} />
@@ -64,5 +49,33 @@ export function SloBadges({ activeAlerts, isLoading, rules, slo, onClickRuleBadg
         </>
       )}
     </EuiFlexGroup>
+  );
+}
+
+export function LoadingBadges() {
+  return (
+    <>
+      <EuiSkeletonRectangle
+        isLoading
+        contentAriaLabel="Loading"
+        width="54.16px"
+        height="20px"
+        borderRadius="s"
+      />
+      <EuiSkeletonRectangle
+        isLoading
+        contentAriaLabel="Loading"
+        width="54.16px"
+        height="20px"
+        borderRadius="s"
+      />
+      <EuiSkeletonRectangle
+        isLoading
+        contentAriaLabel="Loading"
+        width="54.16px"
+        height="20px"
+        borderRadius="s"
+      />
+    </>
   );
 }

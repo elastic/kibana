@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import { ResponseHeaders } from '@kbn/core-http-server';
 import { Stream } from 'stream';
+
+import { ResponseHeaders } from '@kbn/core-http-server';
+import { ReportApiJSON } from '@kbn/reporting-common/types';
+import { CSV_JOB_TYPE, CSV_JOB_TYPE_DEPRECATED } from '@kbn/reporting-export-types-csv-common';
+import { JOB_STATUS } from '@kbn/reporting-common';
+import { ExportType } from '@kbn/reporting-server';
+
 import { ReportingCore } from '../../..';
-import { CSV_JOB_TYPE, CSV_JOB_TYPE_DEPRECATED } from '../../../../common/constants';
-import { ReportApiJSON } from '../../../../common/types';
-import { ExportType } from '../../../export_types/common';
-import { getContentStream, statuses } from '../../../lib';
+import { getContentStream } from '../../../lib';
 import { jobsQueryFactory } from './jobs_query';
 
 export interface ErrorFromPayload {
@@ -106,11 +109,11 @@ export function getDocumentPayloadFactory(reporting: ReportingCore) {
 
   return async function getDocumentPayload(report: ReportApiJSON): Promise<Payload> {
     if (report.output) {
-      if ([statuses.JOB_STATUS_COMPLETED, statuses.JOB_STATUS_WARNINGS].includes(report.status)) {
+      if ([JOB_STATUS.COMPLETED, JOB_STATUS.WARNINGS].includes(report.status)) {
         return getCompleted(report as Required<ReportApiJSON>);
       }
 
-      if (statuses.JOB_STATUS_FAILED === report.status) {
+      if (JOB_STATUS.FAILED === report.status) {
         return getFailure(report);
       }
     }

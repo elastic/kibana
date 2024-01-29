@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getRunningProcesses } from '../../../tasks/response_actions';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
 import type { CreateAndEnrollEndpointHostResponse } from '../../../../../../scripts/endpoint/common/endpoint_host_services';
 import {
@@ -23,16 +24,12 @@ import { enableAllPolicyProtections } from '../../../tasks/endpoint_policy';
 import { createEndpointHost } from '../../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../../tasks/delete_all_endpoint_data';
 
-// FLAKY: https://github.com/elastic/kibana/issues/170563
-describe.skip('Response console', { tags: ['@ess', '@serverless'] }, () => {
+describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
   });
 
   describe('Processes operations:', () => {
-    let cronPID: string;
-    let newCronPID: string;
-
     let indexedPolicy: IndexedFleetEndpointPolicyResponse;
     let policy: PolicyData;
     let createdHost: CreateAndEnrollEndpointHostResponse;
@@ -70,58 +67,47 @@ describe.skip('Response console', { tags: ['@ess', '@serverless'] }, () => {
     it('"processes" - should obtain a list of processes', () => {
       waitForEndpointListPageToBeLoaded(createdHost.hostname);
       openResponseConsoleFromEndpointList();
+
+      // get running processes
       performCommandInputChecks('processes');
       submitCommand();
       cy.contains('Action pending.').should('exist');
-      cy.getByTestSubj('getProcessesSuccessCallout', { timeout: 120000 }).within(() => {
+
+      // on success
+      cy.getByTestSubj('getProcessListTable', { timeout: 120000 }).within(() => {
         ['USER', 'PID', 'ENTITY ID', 'COMMAND'].forEach((header) => {
           cy.contains(header);
         });
 
         cy.get('tbody > tr').should('have.length.greaterThan', 0);
-        cy.get('tbody > tr > td').should('contain', '/usr/sbin/cron');
-        cy.get('tbody > tr > td')
-          .contains('/usr/sbin/cron')
-          .parents('td')
-          .siblings('td')
-          .eq(1)
-          .find('span')
-          .then((span) => {
-            cronPID = span.text();
-          });
+        cy.get('tbody > tr > td').should('contain', '/components/filebeat');
       });
     });
 
     it('"kill-process --pid" - should kill a process', () => {
       waitForEndpointListPageToBeLoaded(createdHost.hostname);
       openResponseConsoleFromEndpointList();
-      inputConsoleCommand(`kill-process --pid ${cronPID}`);
-      submitCommand();
-      waitForCommandToBeExecuted('kill-process');
 
-      performCommandInputChecks('processes');
-      submitCommand();
-
-      cy.getByTestSubj('getProcessesSuccessCallout', { timeout: 120000 }).within(() => {
-        cy.get('tbody > tr > td')
-          .contains('/usr/sbin/cron')
-          .parents('td')
-          .siblings('td')
-          .eq(1)
-          .find('span')
-          .then((span) => {
-            newCronPID = span.text();
-          });
+      // get running processes
+      getRunningProcesses('/components/filebeat').then((pid) => {
+        // kill the process using PID
+        inputConsoleCommand(`kill-process --pid ${pid}`);
+        submitCommand();
+        waitForCommandToBeExecuted('kill-process');
       });
-      expect(newCronPID).to.not.equal(cronPID);
     });
 
     it('"suspend-process --pid" - should suspend a process', () => {
       waitForEndpointListPageToBeLoaded(createdHost.hostname);
       openResponseConsoleFromEndpointList();
-      inputConsoleCommand(`suspend-process --pid ${newCronPID}`);
-      submitCommand();
-      waitForCommandToBeExecuted('suspend-process');
+
+      // get running processes
+      getRunningProcesses('/components/filebeat').then((pid) => {
+        // suspend the process using PID
+        inputConsoleCommand(`suspend-process --pid ${pid}`);
+        submitCommand();
+        waitForCommandToBeExecuted('suspend-process');
+      });
     });
   });
 });

@@ -9,7 +9,6 @@
 import { join } from 'path';
 import { merge } from 'lodash';
 import { execSync } from 'child_process';
-// deep import to avoid loading the whole package
 import { getDataPath } from '@kbn/utils';
 import { readFileSync } from 'fs';
 import type { AgentConfigOptions } from 'elastic-apm-node';

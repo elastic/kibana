@@ -12,11 +12,18 @@ import { CONTENT_TEST_ID, HEADER_TEST_ID } from './expandable_section';
 
 const FLYOUT_HEADER_TEST_ID = `${PREFIX}Header` as const;
 export const FLYOUT_HEADER_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}Title` as const;
+export const ALERT_SUMMARY_PANEL_TEST_ID = `${FLYOUT_HEADER_TEST_ID}AlertSumaryPanel` as const;
+export const STATUS_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}StatusTitle` as const;
 export const STATUS_BUTTON_TEST_ID = 'rule-status-badge' as const;
 export const SEVERITY_VALUE_TEST_ID = 'severity' as const;
 export const RISK_SCORE_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}RiskScoreTitle` as const;
 export const RISK_SCORE_VALUE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}RiskScoreValue` as const;
 export const SHARE_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}ShareButton` as const;
+export const CHAT_BUTTON_TEST_ID = 'newChatById' as const;
+
+export const ASSIGNEES_HEADER_TEST_ID = `${FLYOUT_HEADER_TEST_ID}AssigneesHeader` as const;
+export const ASSIGNEES_TITLE_TEST_ID = `${FLYOUT_HEADER_TEST_ID}AssigneesTitle` as const;
+export const ASSIGNEES_ADD_BUTTON_TEST_ID = `${FLYOUT_HEADER_TEST_ID}AssigneesAddButton` as const;
 
 /* About section */
 
@@ -96,8 +103,6 @@ export const ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID =
   `${ENTITIES_HOST_OVERVIEW_TEST_ID}LastSeen` as const;
 export const ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID =
   `${ENTITIES_HOST_OVERVIEW_TEST_ID}RiskLevel` as const;
-export const TECHNICAL_PREVIEW_ICON_TEST_ID =
-  `${INSIGHTS_ENTITIES_TEST_ID}TechnicalPreviewIcon` as const;
 
 /* Threat intelligence */
 

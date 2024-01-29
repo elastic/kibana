@@ -8,11 +8,13 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import type { HttpHandler } from '@kbn/core/public';
+import { IdFormat } from '../../../../../../common/http_api/latest';
 import {
   bucketSpan,
   categoriesMessageField,
   DatasetFilter,
   getJobId,
+  logEntryCategoriesJobType,
   LogEntryCategoriesJobType,
   logEntryCategoriesJobTypes,
   partitionField,
@@ -36,21 +38,26 @@ const moduleDescription = i18n.translate(
   }
 );
 
-const getJobIds = (spaceId: string, logViewId: string) =>
+const getJobIds = (spaceId: string, logViewId: string, idFormat: IdFormat) =>
   logEntryCategoriesJobTypes.reduce(
     (accumulatedJobIds, jobType) => ({
       ...accumulatedJobIds,
-      [jobType]: getJobId(spaceId, logViewId, jobType),
+      [jobType]: getJobId(spaceId, logViewId, idFormat, jobType),
     }),
     {} as Record<LogEntryCategoriesJobType, string>
   );
 
-const getJobSummary = async (spaceId: string, logViewId: string, fetch: HttpHandler) => {
+const getJobSummary = async (
+  spaceId: string,
+  logViewId: string,
+  idFormat: IdFormat,
+  fetch: HttpHandler
+) => {
   const response = await callJobsSummaryAPI(
-    { spaceId, logViewId, jobTypes: logEntryCategoriesJobTypes },
+    { spaceId, logViewId, idFormat, jobTypes: logEntryCategoriesJobTypes },
     fetch
   );
-  const jobIds = Object.values(getJobIds(spaceId, logViewId));
+  const jobIds = Object.values(getJobIds(spaceId, logViewId, idFormat));
 
   return response.filter((jobSummary) => jobIds.includes(jobSummary.id));
 };
@@ -69,7 +76,7 @@ const setUpModule = async (
   const indexNamePattern = indices.join(',');
   const jobOverrides = [
     {
-      job_id: 'log-entry-categories-count' as const,
+      job_id: logEntryCategoriesJobType,
       analysis_config: {
         bucket_span: `${bucketSpan}ms`,
       },
@@ -88,7 +95,7 @@ const setUpModule = async (
   ];
   const datafeedOverrides = [
     {
-      job_id: 'log-entry-categories-count' as const,
+      job_id: logEntryCategoriesJobType,
       runtime_mappings: runtimeMappings,
     },
   ];
@@ -130,8 +137,19 @@ const setUpModule = async (
   );
 };
 
-const cleanUpModule = async (spaceId: string, logViewId: string, fetch: HttpHandler) => {
-  return await cleanUpJobsAndDatafeeds(spaceId, logViewId, logEntryCategoriesJobTypes, fetch);
+const cleanUpModule = async (
+  spaceId: string,
+  logViewId: string,
+  idFormat: IdFormat,
+  fetch: HttpHandler
+) => {
+  return await cleanUpJobsAndDatafeeds(
+    spaceId,
+    logViewId,
+    idFormat,
+    logEntryCategoriesJobTypes,
+    fetch
+  );
 };
 
 const validateSetupIndices = async (

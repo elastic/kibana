@@ -7,11 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 
-import type { SecurityLicense } from '../../common/licensing';
-
-export interface AuthorizationMode {
-  useRbacForRequest(request: KibanaRequest): boolean;
-}
+import type { SecurityLicense } from '../../common';
 
 export function authorizationModeFactory(license: SecurityLicense) {
   const useRbacForRequestCache = new WeakMap<KibanaRequest, boolean>();

@@ -428,8 +428,7 @@ export const ActionTypeForm = ({
     setActionGroupIdByIndex &&
     !actionItem.frequency?.summary;
 
-  const showActionAlertsFilter =
-    hasFieldsForAAD || producerId === AlertConsumers.SIEM || hasAlertsMappings;
+  const showActionAlertsFilter = hasFieldsForAAD || producerId === AlertConsumers.SIEM;
 
   const accordionContent = checkEnabledResult.isEnabled ? (
     <>
@@ -550,6 +549,7 @@ export const ActionTypeForm = ({
                     actionParams={actionItem.params as any}
                     errors={actionParamsErrors.errors}
                     index={index}
+                    selectedActionGroupId={selectedActionGroup?.id}
                     editAction={(key: string, value: RuleActionParam, i: number) => {
                       setWarning(
                         validateParamsForWarnings(

@@ -1222,7 +1222,7 @@
             "section": "def-common.PluginInitializerContext",
             "text": "PluginInitializerContext"
           },
-          "<unknown>) => ",
+          "<unknown>) => Promise<",
           {
             "pluginId": "@kbn/core-plugins-server",
             "scope": "common",
@@ -1246,7 +1246,7 @@
             "section": "def-common.AsyncPlugin",
             "text": "AsyncPlugin"
           },
-          "<TSetup, TStart, TPluginsSetup, TPluginsStart>"
+          "<TSetup, TStart, TPluginsSetup, TPluginsStart>>"
         ],
         "path": "packages/core/plugins/core-plugins-server/src/types.ts",
         "deprecated": false,

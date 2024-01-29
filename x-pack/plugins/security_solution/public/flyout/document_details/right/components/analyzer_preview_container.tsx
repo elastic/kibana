@@ -14,9 +14,9 @@ import { useStartTransaction } from '../../../../common/lib/apm/use_start_transa
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { getScopedActions } from '../../../../helpers';
-import { setActiveTabTimeline } from '../../../../timelines/store/timeline/actions';
+import { setActiveTabTimeline } from '../../../../timelines/store/actions';
 import { useRightPanelContext } from '../context';
-import { isInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
+import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { AnalyzerPreview } from './analyzer_preview';
 import { ANALYZER_PREVIEW_TEST_ID } from './test_ids';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
@@ -27,10 +27,10 @@ const timelineId = 'timeline-1';
  * Analyzer preview under Overview, Visualizations. It shows a tree representation of analyzer.
  */
 export const AnalyzerPreviewContainer: React.FC = () => {
-  const { dataAsNestedObject } = useRightPanelContext();
+  const { dataAsNestedObject, isPreview } = useRightPanelContext();
 
   // decide whether to show the analyzer preview or not
-  const isEnabled = isInvestigateInResolverActionEnabled(dataAsNestedObject);
+  const isEnabled = useIsInvestigateInResolverActionEnabled(dataAsNestedObject);
 
   const dispatch = useDispatch();
   const { startTransaction } = useStartTransaction();
@@ -64,17 +64,18 @@ export const AnalyzerPreviewContainer: React.FC = () => {
           />
         ),
         iconType: 'timeline',
-        ...(isEnabled && {
-          link: {
-            callback: goToAnalyzerTab,
-            tooltip: (
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.analyzerPreviewTooltip"
-                defaultMessage="Show analyzer graph"
-              />
-            ),
-          },
-        }),
+        ...(isEnabled &&
+          !isPreview && {
+            link: {
+              callback: goToAnalyzerTab,
+              tooltip: (
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.right.visualizations.analyzerPreview.analyzerPreviewTooltip"
+                  defaultMessage="Show analyzer graph"
+                />
+              ),
+            },
+          }),
       }}
       data-test-subj={ANALYZER_PREVIEW_TEST_ID}
     >

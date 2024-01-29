@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getAdvancedButton } from '../screens/integrations';
 import { LIVE_QUERY_EDITOR, OSQUERY_FLYOUT_BODY_EDITOR } from '../screens/live_query';
 import { ServerlessRoleName } from '../support/roles';
 import { waitForAlertsToPopulate } from '../../../../test/security_solution_cypress/cypress/tasks/create_new_rule';
@@ -38,6 +39,19 @@ export const inputQueryInFlyout = (
 export const submitQuery = () => {
   cy.wait(1000); // wait for the validation to trigger - cypress is way faster than users ;)
   cy.contains('Submit').click();
+};
+
+export const fillInQueryTimeout = (timeout: string) => {
+  cy.getBySel('advanced-accordion-content').within(() => {
+    cy.getBySel('timeout-input').clear().type(timeout);
+  });
+};
+
+export const verifyQueryTimeout = (timeout: string) => {
+  getAdvancedButton().click();
+  cy.getBySel('advanced-accordion-content').within(() => {
+    cy.getBySel('timeout-input').should('have.value', timeout);
+  });
 };
 
 // sometimes the results get stuck in the tests, this is a workaround

@@ -105,21 +105,8 @@ export const getFTRConfig = ({
         return value;
       });
 
-      if (
-        specFileFTRConfig?.enableExperimental?.length &&
-        _.some(vars.kbnTestServer.serverArgs, (value) =>
-          value.includes('--xpack.securitySolution.enableExperimental')
-        )
-      ) {
-        vars.kbnTestServer.serverArgs = _.filter(
-          vars.kbnTestServer.serverArgs,
-          (value) => !value.includes('--xpack.securitySolution.enableExperimental')
-        );
-        vars.kbnTestServer.serverArgs.push(
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify(
-            specFileFTRConfig?.enableExperimental
-          )}`
-        );
+      if (specFileFTRConfig?.kbnServerArgs?.length) {
+        vars.kbnTestServer.serverArgs.push(...specFileFTRConfig?.kbnServerArgs);
       }
 
       if (specFileFTRConfig?.license) {
@@ -169,17 +156,6 @@ export const getFTRConfig = ({
             `--xpack.fleet.agents.elasticsearch.host=http://${hostRealIp}:${esPort}`
           );
         }
-      }
-
-      // Serverless Specific
-      if (vars.serverless) {
-        log.info(`Serverless mode detected`);
-
-        vars.esTestCluster.serverArgs.push(
-          `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.entity_id=http://host.docker.internal:${kibanaPort}`,
-          `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.logout=http://host.docker.internal:${kibanaPort}/logout`,
-          `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.acs=http://host.docker.internal:${kibanaPort}/api/security/saml/callback`
-        );
       }
 
       if (specFileFTRConfig?.productTypes) {

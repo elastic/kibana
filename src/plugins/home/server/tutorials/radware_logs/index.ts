@@ -39,7 +39,7 @@ export function radwareLogsSpecProvider(context: TutorialContext): TutorialSchem
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-radware.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/radware.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/radware.svg'),
     artifacts: {
       dashboards: [],
       application: {

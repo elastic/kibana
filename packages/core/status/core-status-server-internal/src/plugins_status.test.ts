@@ -41,7 +41,7 @@ describe('PluginStatusService', () => {
         pluginDependencies,
       });
 
-      service.blockNewRegistrations();
+      service.start();
       expect(() => {
         service.set(
           'a',
@@ -365,6 +365,8 @@ describe('PluginStatusService', () => {
 
       const pluginA$ = new ReplaySubject<ServiceStatus>(1);
       service.set('a', pluginA$);
+      service.start(); // the plugin emission timeout starts counting when we call pluginsStatus.start()
+
       // the first emission happens right after core$ services emit
       const firstEmission = firstValueFrom(service.getAll$().pipe(skip(1)));
 

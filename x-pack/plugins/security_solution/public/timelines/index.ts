@@ -7,8 +7,8 @@
 
 import type { SecuritySubPluginWithStore } from '../app/types';
 import { routes } from './routes';
-import { initialTimelineState, timelineReducer } from './store/timeline/reducer';
-import type { TimelineState } from './store/timeline/types';
+import { initialTimelineState, timelineReducer } from './store/reducer';
+import type { TimelineState } from './store/types';
 
 export class Timelines {
   public setup() {}

@@ -13,11 +13,16 @@ import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
 export type CasesSupportedOperations = typeof allOperations[number];
 
-// if you add a value here you'll likely also need to make changes here:
-// x-pack/plugins/cases/server/authorization/index.ts
+/**
+ * If you add a new operation type (all, push, update, etc) you should also
+ * extend the mapping here x-pack/plugins/features/server/feature_privilege_iterator/feature_privilege_iterator.ts
+ *
+ * Also if you add a new operation (createCase, updateCase, etc) here you'll likely also need to make changes here:
+ * x-pack/plugins/cases/server/authorization/index.ts
+ */
 
 const pushOperations = ['pushCase'] as const;
-const createOperations = ['createCase', 'createComment', 'createConfiguration'] as const;
+const createOperations = ['createCase', 'createComment'] as const;
 const readOperations = [
   'getCase',
   'getComment',
@@ -26,14 +31,16 @@ const readOperations = [
   'getUserActions',
   'findConfigurations',
 ] as const;
-const updateOperations = ['updateCase', 'updateComment', 'updateConfiguration'] as const;
+const updateOperations = ['updateCase', 'updateComment'] as const;
 const deleteOperations = ['deleteCase', 'deleteComment'] as const;
+const settingsOperations = ['createConfiguration', 'updateConfiguration'] as const;
 const allOperations = [
   ...pushOperations,
   ...createOperations,
   ...readOperations,
   ...updateOperations,
   ...deleteOperations,
+  ...settingsOperations,
 ] as const;
 
 export class FeaturePrivilegeCasesBuilder extends BaseFeaturePrivilegeBuilder {
@@ -57,6 +64,7 @@ export class FeaturePrivilegeCasesBuilder extends BaseFeaturePrivilegeBuilder {
       ...getCasesPrivilege(readOperations, privilegeDefinition.cases?.read),
       ...getCasesPrivilege(updateOperations, privilegeDefinition.cases?.update),
       ...getCasesPrivilege(deleteOperations, privilegeDefinition.cases?.delete),
+      ...getCasesPrivilege(settingsOperations, privilegeDefinition.cases?.settings),
     ]);
   }
 }

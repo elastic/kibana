@@ -7,41 +7,42 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
 
 import {
-  EuiForm,
   EuiBadge,
-  EuiTitle,
   EuiButton,
-  EuiSwitch,
-  EuiFormRow,
-  EuiToolTip,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiDroppable,
-  EuiDraggable,
-  EuiFlyoutBody,
   EuiButtonEmpty,
   EuiButtonGroup,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
+  EuiButtonGroupOptionProps,
   EuiDragDropContext,
   euiDragDropReorder,
-  EuiButtonGroupOptionProps,
+  EuiDraggable,
+  EuiDroppable,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiForm,
+  EuiFormRow,
+  EuiSwitch,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
-import { LinksLayoutInfo } from '../../embeddable/types';
 import {
   Link,
   LinksLayoutType,
   LINKS_HORIZONTAL_LAYOUT,
   LINKS_VERTICAL_LAYOUT,
 } from '../../../common/content_management';
+import { focusMainFlyout, memoizedGetOrderedLinkList } from '../../editor/links_editor_tools';
+import { openLinkEditorFlyout } from '../../editor/open_link_editor_flyout';
+import { LinksLayoutInfo } from '../../embeddable/types';
 import { coreServices } from '../../services/kibana_services';
 import { LinksStrings } from '../links_strings';
-import { openLinkEditorFlyout } from '../../editor/open_link_editor_flyout';
-import { memoizedGetOrderedLinkList } from '../../editor/links_editor_tools';
 import { LinksEditorEmptyPrompt } from './links_editor_empty_prompt';
 import { LinksEditorSingleLink } from './links_editor_single_link';
 
@@ -70,6 +71,7 @@ const LinksEditor = ({
   initialLayout,
   parentDashboard,
   isByReference,
+  flyoutId,
 }: {
   onSaveToLibrary: (newLinks: Link[], newLayout: LinksLayoutType) => Promise<void>;
   onAddToDashboard: (newLinks: Link[], newLayout: LinksLayoutType) => void;
@@ -78,8 +80,10 @@ const LinksEditor = ({
   initialLayout?: LinksLayoutType;
   parentDashboard?: DashboardContainer;
   isByReference: boolean;
+  flyoutId: string; // used to manage the focus of this flyout after individual link editor flyout is closed
 }) => {
   const toasts = coreServices.notifications.toasts;
+  const isMounted = useMountedState();
   const editLinkFlyoutRef = useRef<HTMLDivElement>(null);
 
   const [currentLayout, setCurrentLayout] = useState<LinksLayoutType>(
@@ -118,6 +122,7 @@ const LinksEditor = ({
       const newLink = await openLinkEditorFlyout({
         parentDashboard,
         link: linkToEdit,
+        mainFlyoutId: flyoutId,
         ref: editLinkFlyoutRef,
       });
       if (newLink) {
@@ -135,7 +140,7 @@ const LinksEditor = ({
         }
       }
     },
-    [editLinkFlyoutRef, orderedLinks, parentDashboard]
+    [editLinkFlyoutRef, orderedLinks, parentDashboard, flyoutId]
   );
 
   const hasZeroLinks = useMemo(() => {
@@ -149,8 +154,9 @@ const LinksEditor = ({
           return link.id !== linkId;
         })
       );
+      focusMainFlyout(flyoutId);
     },
-    [orderedLinks]
+    [orderedLinks, flyoutId]
   );
 
   return (
@@ -170,7 +176,12 @@ const LinksEditor = ({
           <EuiFlexItem grow={false}>
             <EuiToolTip content={LinksStrings.editor.panelEditor.getTechnicalPreviewTooltip()}>
               {/* The EuiBadge needs an empty title to prevent the default tooltip */}
-              <EuiBadge color="hollow" tabIndex={0} title="">
+              <EuiBadge
+                color="hollow"
+                tabIndex={0}
+                title=""
+                aria-label={LinksStrings.editor.panelEditor.getTechnicalPreviewTooltip()}
+              >
                 {LinksStrings.editor.panelEditor.getTechnicalPreviewLabel()}
               </EuiBadge>
             </EuiToolTip>
@@ -294,7 +305,9 @@ const LinksEditor = ({
                             });
                           })
                           .finally(() => {
-                            setIsSaving(false);
+                            if (isMounted()) {
+                              setIsSaving(false);
+                            }
                           });
                       } else {
                         onAddToDashboard(orderedLinks, currentLayout);

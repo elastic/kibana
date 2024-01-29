@@ -29,17 +29,15 @@ import type {
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { QueryClientProvider } from '@tanstack/react-query';
+import { useGetMutedAlerts } from './hooks/alert_mute/use_get_muted_alerts';
 import { useFetchAlerts } from './hooks/use_fetch_alerts';
 import { AlertsTable } from './alerts_table';
-import { BulkActionsContext } from './bulk_actions/context';
 import { EmptyState } from './empty_state';
 import {
   Alert,
   Alerts,
   AlertsTableConfigurationRegistry,
   AlertsTableProps,
-  BulkActionsReducerAction,
-  BulkActionsState,
   RowSelectionState,
   TableUpdateHandlerArgs,
 } from '../../../types';
@@ -52,6 +50,7 @@ import { useBulkGetCases } from './hooks/use_bulk_get_cases';
 import { useBulkGetMaintenanceWindows } from './hooks/use_bulk_get_maintenance_windows';
 import { CasesService } from './types';
 import { AlertTableConfigRegistry } from '../../alert_table_config_registry';
+import { AlertsTableContext, AlertsTableQueryContext } from './contexts/alerts_table_context';
 
 const DefaultPagination = {
   pageSize: 10,
@@ -67,6 +66,7 @@ export type AlertsTableStateProps = {
   pageSize?: number;
   browserFields?: BrowserFields;
   onUpdate?: (args: TableUpdateHandlerArgs) => void;
+  onLoaded?: () => void;
   runtimeMappings?: MappingRuntimeFields;
   showAlertStatusWithFlapping?: boolean;
   toolbarVisibility?: EuiDataGridToolBarVisibilityOptions;
@@ -78,6 +78,7 @@ export type AlertsTableStateProps = {
    * Enable when rows may have variable heights (disables virtualization)
    */
   dynamicRowHeight?: boolean;
+  lastReloadRequestTime?: number;
 } & Partial<EuiDataGridProps>;
 
 export interface AlertsTableStorage {
@@ -92,17 +93,6 @@ const EmptyConfiguration: AlertsTableConfigurationRegistry = {
   sort: [],
   getRenderCellValue: () => () => null,
 };
-
-const AlertsTableWithBulkActionsContextComponent: React.FunctionComponent<{
-  tableProps: AlertsTableProps;
-  initialBulkActionsState: [BulkActionsState, React.Dispatch<BulkActionsReducerAction>];
-}> = ({ tableProps, initialBulkActionsState }) => (
-  <BulkActionsContext.Provider value={initialBulkActionsState}>
-    <AlertsTable {...tableProps} />
-  </BulkActionsContext.Provider>
-);
-
-const AlertsTableWithBulkActionsContext = React.memo(AlertsTableWithBulkActionsContextComponent);
 
 type AlertWithCaseIds = Alert & Required<Pick<Alert, typeof ALERT_CASE_IDS>>;
 type AlertWithMaintenanceWindowIds = Alert &
@@ -138,7 +128,7 @@ const isMaintenanceWindowColumnEnabled = (columns: EuiDataGridColumn[]): boolean
 
 const AlertsTableState = (props: AlertsTableStateProps) => {
   return (
-    <QueryClientProvider client={alertsTableQueryClient}>
+    <QueryClientProvider client={alertsTableQueryClient} context={AlertsTableQueryContext}>
       <AlertsTableStateWithQueryProvider {...props} />
     </QueryClientProvider>
   );
@@ -158,14 +148,15 @@ const AlertsTableStateWithQueryProvider = ({
   gridStyle,
   browserFields: propBrowserFields,
   onUpdate,
+  onLoaded,
   runtimeMappings,
   showAlertStatusWithFlapping,
   toolbarVisibility,
   shouldHighlightRow,
   dynamicRowHeight,
+  lastReloadRequestTime,
 }: AlertsTableStateProps) => {
   const { cases: casesService } = useKibana<{ cases?: CasesService }>().services;
-
   const hasAlertsTableConfiguration =
     alertsTableConfigurationRegistry?.has(configurationId) ?? false;
 
@@ -258,10 +249,15 @@ const AlertsTableStateWithQueryProvider = ({
     query,
     pagination,
     onPageChange,
+    onLoaded,
     runtimeMappings,
     sort,
     skip: false,
   });
+
+  const { data: mutedAlerts } = useGetMutedAlerts([
+    ...new Set(alerts.map((a) => a['kibana.alert.rule.uuid']![0])),
+  ]);
 
   useEffect(() => {
     alertsTableConfigurationRegistry.update(configurationId, {
@@ -276,6 +272,11 @@ const AlertsTableStateWithQueryProvider = ({
       onUpdate({ isLoading, totalCount: alertsCount, refresh });
     }
   }, [isLoading, alertsCount, onUpdate, refresh]);
+  useEffect(() => {
+    if (lastReloadRequestTime) {
+      refresh();
+    }
+  }, [lastReloadRequestTime, refresh]);
 
   const caseIds = useMemo(() => getCaseIdsFromAlerts(alerts), [alerts]);
   const maintenanceWindowIds = useMemo(() => getMaintenanceWindowIdsFromAlerts(alerts), [alerts]);
@@ -297,6 +298,7 @@ const AlertsTableStateWithQueryProvider = ({
     useBulkGetMaintenanceWindows({
       ids: Array.from(maintenanceWindowIds.values()),
       canFetchMaintenanceWindows: fetchMaintenanceWindows,
+      queryContext: AlertsTableQueryContext,
     });
 
   const initialBulkActionsState = useReducer(bulkActionsReducer, {
@@ -443,7 +445,12 @@ const AlertsTableStateWithQueryProvider = ({
   );
 
   return hasAlertsTableConfiguration ? (
-    <>
+    <AlertsTableContext.Provider
+      value={{
+        mutedAlerts: mutedAlerts ?? {},
+        bulkActions: initialBulkActionsState,
+      }}
+    >
       {!isLoading && alertsCount === 0 && (
         <InspectButtonContainer>
           <EmptyState
@@ -462,19 +469,11 @@ const AlertsTableStateWithQueryProvider = ({
           permissions={casesPermissions}
           features={{ alerts: { sync: alertsTableConfiguration.cases?.syncAlerts ?? false } }}
         >
-          <AlertsTableWithBulkActionsContext
-            tableProps={tableProps}
-            initialBulkActionsState={initialBulkActionsState}
-          />
+          <AlertsTable {...tableProps} />
         </CasesContext>
       )}
-      {alertsCount !== 0 && !isCasesContextAvailable && (
-        <AlertsTableWithBulkActionsContext
-          tableProps={tableProps}
-          initialBulkActionsState={initialBulkActionsState}
-        />
-      )}
-    </>
+      {alertsCount !== 0 && !isCasesContextAvailable && <AlertsTable {...tableProps} />}
+    </AlertsTableContext.Provider>
   ) : (
     <EuiEmptyPrompt
       data-test-subj="alertsTableNoConfiguration"

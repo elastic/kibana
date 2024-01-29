@@ -15,7 +15,10 @@ import { filter, firstValueFrom, from, concatMap } from 'rxjs';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getConfigDirectory } from '@kbn/utils';
 
-describe('cli serverless project type', () => {
+// Failing: See https://github.com/elastic/kibana/issues/163257
+// Failing: See https://github.com/elastic/kibana/issues/163258
+// Failing: See https://github.com/elastic/kibana/issues/163259
+describe.skip('cli serverless project type', () => {
   let child: ChildProcessWithoutNullStreams | undefined;
 
   afterEach(() => {

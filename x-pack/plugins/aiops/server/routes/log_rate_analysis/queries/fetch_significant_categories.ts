@@ -42,39 +42,10 @@ export const fetchSignificantCategories = async (
   emitError: (m: string) => void,
   abortSignal?: AbortSignal
 ) => {
-  // Filter that includes docs from both the baseline and deviation time range.
-  const baselineOrDeviationFilter = {
-    bool: {
-      should: [
-        {
-          range: {
-            [params.timeFieldName]: {
-              gte: params.baselineMin,
-              lte: params.baselineMax,
-              format: 'epoch_millis',
-            },
-          },
-        },
-        {
-          range: {
-            [params.timeFieldName]: {
-              gte: params.deviationMin,
-              lte: params.deviationMax,
-              format: 'epoch_millis',
-            },
-          },
-        },
-      ],
-    },
-  };
-
   const categoriesOverall = await fetchCategories(
     esClient,
     params,
     fieldNames,
-    undefined,
-    undefined,
-    baselineOrDeviationFilter,
     logger,
     sampleProbability,
     emitError,

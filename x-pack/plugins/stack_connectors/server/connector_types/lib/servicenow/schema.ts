@@ -115,6 +115,13 @@ export const ExecutorSubActionGetIncidentParamsSchema = schema.object({
   externalId: schema.string(),
 });
 
+export const ExecutorSubActionCloseIncidentParamsSchema = schema.object({
+  incident: schema.object({
+    externalId: schema.nullable(schema.string()),
+    correlation_id: schema.nullable(schema.string({ defaultValue: DEFAULT_ALERTS_GROUPING_KEY })),
+  }),
+});
+
 // Reserved for future implementation
 export const ExecutorSubActionHandshakeParamsSchema = schema.object({});
 export const ExecutorSubActionCommonFieldsParamsSchema = schema.object({});
@@ -143,6 +150,10 @@ export const ExecutorParamsSchemaITSM = schema.oneOf([
   schema.object({
     subAction: schema.literal('getChoices'),
     subActionParams: ExecutorSubActionGetChoicesParamsSchema,
+  }),
+  schema.object({
+    subAction: schema.literal('closeIncident'),
+    subActionParams: ExecutorSubActionCloseIncidentParamsSchema,
   }),
 ]);
 

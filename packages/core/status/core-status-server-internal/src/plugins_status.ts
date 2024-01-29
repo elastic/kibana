@@ -6,15 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, type Observable, ReplaySubject, type Subscription } from 'rxjs';
+import {
+  BehaviorSubject,
+  merge,
+  Observable,
+  ReplaySubject,
+  Subject,
+  type Subscription,
+} from 'rxjs';
 import {
   map,
   distinctUntilChanged,
   filter,
-  timeout,
-  startWith,
   tap,
   debounceTime,
+  takeUntil,
+  delay,
 } from 'rxjs/operators';
 import { sortBy } from 'lodash';
 import { isDeepStrictEqual } from 'util';
@@ -62,6 +69,7 @@ export class PluginsStatusService {
   private pluginData: PluginData;
   private rootPlugins: PluginName[]; // root plugins are those that do not have any dependencies
   private orderedPluginNames: PluginName[];
+  private start$ = new Subject<void>();
   private pluginData$ = new ReplaySubject<PluginData>(1);
   private pluginStatus: PluginsStatus = {};
   private pluginStatus$ = new BehaviorSubject<PluginsStatus>(this.pluginStatus);
@@ -110,26 +118,21 @@ export class PluginsStatusService {
     // delete any derived statuses calculated before the custom status Observable was registered
     delete this.pluginStatus[plugin];
 
-    const statusChanged$ = status$.pipe(distinctUntilChanged());
+    const firstEmissionTimeout$ = this.start$.pipe(
+      delay(this.statusTimeoutMs),
+      map(() => ({
+        level: ServiceStatusLevels.unavailable,
+        summary: `Status check timed out after ${
+          this.statusTimeoutMs < 1000
+            ? `${this.statusTimeoutMs}ms`
+            : `${this.statusTimeoutMs / 1000}s`
+        }`,
+      })),
+      takeUntil(status$)
+    );
 
-    this.reportedStatusSubscriptions[plugin] = statusChanged$
-      .pipe(
-        // Set a timeout for externally-defined status Observables
-        timeout({
-          first: this.statusTimeoutMs,
-          with: () =>
-            statusChanged$.pipe(
-              startWith({
-                level: ServiceStatusLevels.unavailable,
-                summary: `Status check timed out after ${
-                  this.statusTimeoutMs < 1000
-                    ? `${this.statusTimeoutMs}ms`
-                    : `${this.statusTimeoutMs / 1000}s`
-                }`,
-              })
-            ),
-        })
-      )
+    this.reportedStatusSubscriptions[plugin] = merge(firstEmissionTimeout$, status$)
+      .pipe(distinctUntilChanged())
       .subscribe((status) => {
         const { levelChanged, summaryChanged } = this.updatePluginReportedStatus(plugin, status);
 
@@ -143,11 +146,11 @@ export class PluginsStatusService {
       });
   }
 
-  /**
-   * Prevent plugins from registering status Observables
-   */
-  public blockNewRegistrations() {
+  public start() {
+    // Prevent plugins from registering status Observables
     this.newRegistrationsAllowed = false;
+    this.start$.next();
+    this.start$.complete();
   }
 
   /**

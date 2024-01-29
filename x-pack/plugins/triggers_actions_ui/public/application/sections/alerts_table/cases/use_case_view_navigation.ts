@@ -13,26 +13,26 @@ import { useKibana } from '../../../../common/lib/kibana';
 
 type NavigateToCaseView = (pathParams: { caseId: string }) => void;
 
-const CASE_APP_ID = 'cases';
+const CASE_DEEP_LINK_ID = 'cases';
 
 const generateCaseViewPath = (caseId: string): string => {
   return generatePath('/:caseId', { caseId });
 };
 
-export const useCaseViewNavigation = () => {
+export const useCaseViewNavigation = (appId?: string) => {
   const {
     application: { navigateToApp, currentAppId$ },
   } = useKibana().services;
 
-  const appId = useObservable(currentAppId$);
+  const currentAppId = useObservable(currentAppId$) ?? '';
 
   const navigateToCaseView = useCallback<NavigateToCaseView>(
     (pathParams) =>
-      navigateToApp(appId ?? '', {
-        deepLinkId: CASE_APP_ID,
+      navigateToApp(appId ?? currentAppId, {
+        deepLinkId: CASE_DEEP_LINK_ID,
         path: generateCaseViewPath(pathParams.caseId),
       }),
-    [navigateToApp, appId]
+    [navigateToApp, appId, currentAppId]
   );
 
   return { navigateToCaseView };

@@ -6,7 +6,6 @@
  */
 
 export {
-  createMockConfigSchema,
   createMockPluginSetup,
   createMockPluginStart,
   createMockReportingCore,

@@ -111,6 +111,7 @@ export const DurationChartComponent = ({
             onBrushEnd={onBrushEnd}
             onLegendItemClick={legendToggleVisibility}
             locale={i18n.getLocale()}
+            // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
             {...chartTheme}
           />
           <Axis

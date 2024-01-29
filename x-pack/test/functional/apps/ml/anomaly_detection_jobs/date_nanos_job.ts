@@ -94,17 +94,14 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags(['ml']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/event_rate_nanos');
-      await ml.testResources.createIndexPatternIfNeeded(
-        'ft_event_rate_gen_trend_nanos',
-        '@timestamp'
-      );
+      await ml.testResources.createDataViewIfNeeded('ft_event_rate_gen_trend_nanos', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {
       await ml.api.cleanMlIndices();
-      await ml.testResources.deleteIndexPatternByTitle('ft_event_rate_gen_trend_nanos');
+      await ml.testResources.deleteDataViewByTitle('ft_event_rate_gen_trend_nanos');
     });
 
     for (const testData of testDataList) {

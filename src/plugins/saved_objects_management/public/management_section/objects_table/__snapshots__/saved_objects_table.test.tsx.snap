@@ -188,6 +188,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
       }
       basePath={
         BasePath {
+          "assetsHrefBase": "",
           "basePath": "",
           "get": [Function],
           "prepend": [Function],

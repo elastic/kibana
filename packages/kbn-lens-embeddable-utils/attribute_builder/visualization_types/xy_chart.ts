@@ -7,15 +7,19 @@
  */
 
 import type {
+  AxisExtentConfig,
   FormBasedPersistedState,
+  LegendConfig,
   XYArgs,
   XYLayerConfig,
   XYState,
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedObjectReference } from '@kbn/core/server';
+import { AxesSettingsConfig } from '@kbn/visualizations-plugin/common';
 import type { Chart, ChartConfig, ChartLayer } from '../types';
 import { DEFAULT_LAYER_ID } from '../utils';
+import { XY_ID } from './constants';
 
 const ACCESSOR = 'formula_accessor';
 
@@ -25,6 +29,10 @@ export interface XYVisualOptions {
   missingValues?: XYArgs['fittingFunction'];
   endValues?: XYArgs['endValue'];
   showDottedLine?: boolean;
+  valueLabels?: XYArgs['valueLabels'];
+  axisTitlesVisibilitySettings?: AxesSettingsConfig;
+  legend?: LegendConfig;
+  yLeftExtent?: AxisExtentConfig;
 }
 
 export class XYChart implements Chart<XYState> {
@@ -36,7 +44,7 @@ export class XYChart implements Chart<XYState> {
   ) {}
 
   getVisualizationType(): string {
-    return 'lnsXY';
+    return XY_ID;
   }
 
   private get layers() {
@@ -76,10 +84,23 @@ export class XYChart implements Chart<XYState> {
           }),
         ],
       }),
+      legend: this.chartConfig.visualOptions?.legend ?? {
+        isVisible: false,
+        position: 'right',
+        showSingleSeries: false,
+      },
       fittingFunction: this.chartConfig.visualOptions?.missingValues ?? 'None',
       endValue: this.chartConfig.visualOptions?.endValues,
       curveType: this.chartConfig.visualOptions?.lineInterpolation,
       emphasizeFitting: !this.chartConfig.visualOptions?.showDottedLine,
+      valueLabels: this.chartConfig.visualOptions?.valueLabels,
+      axisTitlesVisibilitySettings: this.chartConfig.visualOptions
+        ?.axisTitlesVisibilitySettings ?? {
+        x: false,
+        yLeft: false,
+        yRight: true,
+      },
+      yLeftExtent: this.chartConfig.visualOptions?.yLeftExtent,
     };
   }
 
@@ -112,11 +133,6 @@ export const getXYVisualizationState = (
   },
   valueLabels: 'show',
   yLeftScale: 'linear',
-  axisTitlesVisibilitySettings: {
-    x: false,
-    yLeft: false,
-    yRight: true,
-  },
   tickLabelsVisibilitySettings: {
     x: true,
     yLeft: true,

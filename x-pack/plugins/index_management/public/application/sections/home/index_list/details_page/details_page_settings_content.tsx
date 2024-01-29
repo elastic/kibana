@@ -24,7 +24,7 @@ import { css } from '@emotion/react';
 import _ from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import { IndexSettingsResponse } from '../../../../../../common';
 import { Error } from '../../../../../shared_imports';
 import { documentationService, updateIndexSettings } from '../../../../services';

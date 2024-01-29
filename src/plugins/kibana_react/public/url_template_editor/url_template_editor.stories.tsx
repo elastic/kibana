@@ -9,8 +9,8 @@
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
+import { CodeEditor } from '@kbn/code-editor';
 import { UrlTemplateEditor } from './url_template_editor';
-import { CodeEditor } from '../code_editor/code_editor';
 
 storiesOf('UrlTemplateEditor', module)
   .add('default', () => (

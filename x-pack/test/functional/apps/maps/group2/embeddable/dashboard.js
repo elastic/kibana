@@ -77,7 +77,7 @@ export default function ({ getPageObjects, getService }) {
       await retry.try(async () => {
         const joinExampleRequestNames = await inspector.getRequestNames();
         expect(joinExampleRequestNames).to.equal(
-          'geo_shapes* documents request,geo_shapes* term join request'
+          'load layer features (geo_shapes*),load join metrics (geo_shapes*)'
         );
       });
       await inspector.close();
@@ -88,7 +88,7 @@ export default function ({ getPageObjects, getService }) {
       await inspector.close();
 
       expect(singleExampleRequest).to.be(true);
-      expect(selectedExampleRequest).to.equal('logstash-* grid request');
+      expect(selectedExampleRequest).to.equal('load layer features (logstash-*)');
     });
 
     it('should apply container state (time, query, filters) to embeddable when loaded', async () => {
@@ -120,7 +120,7 @@ export default function ({ getPageObjects, getService }) {
 
       const { rawResponse: joinResponse } = await PageObjects.maps.getResponseFromDashboardPanel(
         'join example',
-        'geo_shapes* term join request'
+        'load join metrics (geo_shapes*)'
       );
       expect(joinResponse.aggregations.join.buckets.length).to.equal(1);
     });

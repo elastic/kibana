@@ -38,6 +38,7 @@
     "@kbn/datemath",
     "@kbn/mapbox-gl",
     "@kbn/config-schema",
+    "@kbn/code-editor",
   ],
   "exclude": [
     "target/**/*",

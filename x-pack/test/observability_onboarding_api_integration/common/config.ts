@@ -13,6 +13,7 @@ import { createObservabilityOnboardingUsers } from '@kbn/observability-onboardin
 import { FtrConfigProviderContext } from '@kbn/test';
 import supertest from 'supertest';
 import { format, UrlObject } from 'url';
+import { createLogger, LogLevel, LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { ObservabilityOnboardingFtrConfigName } from '../configs';
 import {
   FtrProviderContext,
@@ -64,6 +65,9 @@ export interface CreateTest {
   services: InheritedServices & {
     observabilityOnboardingFtrConfig: () => ObservabilityOnboardingFtrConfig;
     registry: ({ getService }: FtrProviderContext) => ReturnType<typeof RegistryProvider>;
+    logSynthtraceEsClient: (
+      context: InheritedFtrProviderContext
+    ) => Promise<LogsSynthtraceEsClient>;
     observabilityOnboardingApiClient: (
       context: InheritedFtrProviderContext
     ) => ObservabilityOnboardingApiClient;
@@ -97,6 +101,12 @@ export function createTestConfig(
         ...services,
         observabilityOnboardingFtrConfig: () => config,
         registry: RegistryProvider,
+        logSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
+          new LogsSynthtraceEsClient({
+            client: context.getService('es'),
+            logger: createLogger(LogLevel.info),
+            refreshAfterIndex: true,
+          }),
         observabilityOnboardingApiClient: async (_: InheritedFtrProviderContext) => {
           const { username, password } = servers.kibana;
           const esUrl = format(esServer);

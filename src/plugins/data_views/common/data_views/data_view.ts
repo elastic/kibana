@@ -61,6 +61,8 @@ export class DataView extends AbstractDataView implements DataViewBase {
    */
   public flattenHit: (hit: Record<string, unknown[]>, deep?: boolean) => Record<string, unknown>;
 
+  private etag: string | undefined;
+
   /**
    * constructor
    * @param config - config data and dependencies
@@ -77,6 +79,10 @@ export class DataView extends AbstractDataView implements DataViewBase {
     this.fields.replaceAll(Object.values(spec.fields || {}));
   }
 
+  getEtag = () => this.etag;
+
+  setEtag = (etag: string | undefined) => (this.etag = etag);
+
   /**
    * Returns scripted fields
    */
@@ -85,7 +91,6 @@ export class DataView extends AbstractDataView implements DataViewBase {
     const scriptFields: Record<string, estypes.ScriptField> = {};
     if (!this.fields) {
       return {
-        storedFields: ['*'],
         scriptFields,
         docvalueFields: [] as Array<{ field: string; format: string }>,
         runtimeFields: {},
@@ -117,7 +122,6 @@ export class DataView extends AbstractDataView implements DataViewBase {
     const runtimeFields = this.getRuntimeMappings();
 
     return {
-      storedFields: ['*'],
       scriptFields,
       docvalueFields,
       runtimeFields,

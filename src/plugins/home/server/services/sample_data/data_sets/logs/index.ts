@@ -10,7 +10,7 @@ import path from 'path';
 import { i18n } from '@kbn/i18n';
 import { getSavedObjects } from './saved_objects';
 import { fieldMappings } from './field_mappings';
-import { SampleDatasetSchema } from '../../lib/sample_dataset_registry_types';
+import { SampleDatasetProvider } from '../../lib/sample_dataset_registry_types';
 
 const logsName = i18n.translate('home.sampleData.logsSpecTitle', {
   defaultMessage: 'Sample web logs',
@@ -20,13 +20,15 @@ const logsDescription = i18n.translate('home.sampleData.logsSpecDescription', {
 });
 
 export const GLOBE_ICON_PATH = '/plugins/home/assets/sample_data_resources/logs/icon.svg';
-export const logsSpecProvider = function (): SampleDatasetSchema {
+export const logsSpecProvider: SampleDatasetProvider = ({ staticAssets }) => {
   return {
     id: 'logs',
     name: logsName,
     description: logsDescription,
-    previewImagePath: '/plugins/home/assets/sample_data_resources/logs/dashboard.webp',
-    darkPreviewImagePath: '/plugins/home/assets/sample_data_resources/logs/dashboard_dark.webp',
+    previewImagePath: staticAssets.getPluginAssetHref('/sample_data_resources/logs/dashboard.webp'),
+    darkPreviewImagePath: staticAssets.getPluginAssetHref(
+      '/sample_data_resources/logs/dashboard_dark.webp'
+    ),
     overviewDashboard: 'edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b',
     defaultIndex: '90943e30-9a47-11e8-b64d-95841ca0b247',
     savedObjects: getSavedObjects(),
@@ -42,6 +44,6 @@ export const logsSpecProvider = function (): SampleDatasetSchema {
       },
     ],
     status: 'not_installed',
-    iconPath: GLOBE_ICON_PATH,
+    iconPath: staticAssets.getPluginAssetHref('/sample_data_resources/logs/icon.svg'),
   };
 };

@@ -38,7 +38,7 @@ import {
   getTestRunDetailRelativeLink,
   TestDetailsLink,
 } from '../../common/links/test_details_link';
-import { ConfigKey, DataStream, Ping } from '../../../../../../common/runtime_types';
+import { ConfigKey, MonitorTypeEnum, Ping } from '../../../../../../common/runtime_types';
 import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 import { sortPings } from '../../../utils/monitor_test_result/sort_pings';
 import { selectPingsError } from '../../../state';
@@ -93,7 +93,7 @@ export const TestRunsTable = ({
   const selectedLocation = useSelectedLocation();
   const isTabletOrGreater = useIsWithinMinBreakpoint('s');
 
-  const isBrowserMonitor = monitor?.[ConfigKey.MONITOR_TYPE] === DataStream.BROWSER;
+  const isBrowserMonitor = monitor?.[ConfigKey.MONITOR_TYPE] === MonitorTypeEnum.BROWSER;
 
   const { expandedRows, setExpandedRows } = useExpandedPingList(pings);
 

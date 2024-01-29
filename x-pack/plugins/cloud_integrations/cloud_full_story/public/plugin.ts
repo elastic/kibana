@@ -13,15 +13,17 @@ import type {
   Plugin,
 } from '@kbn/core/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import { duration } from 'moment';
 
 interface SetupFullStoryDeps {
   analytics: AnalyticsServiceSetup;
   basePath: IBasePath;
 }
 
-interface CloudFullStoryConfig {
+export interface CloudFullStoryConfig {
   org_id?: string;
   eventTypesAllowlist: string[];
+  pageVarsDebounceTime: string;
 }
 
 interface CloudFullStorySetupDeps {
@@ -61,7 +63,7 @@ export class CloudFullStoryPlugin implements Plugin {
    * @private
    */
   private async setupFullStory({ analytics, basePath }: SetupFullStoryDeps) {
-    const { org_id: fullStoryOrgId, eventTypesAllowlist } = this.config;
+    const { org_id: fullStoryOrgId, eventTypesAllowlist, pageVarsDebounceTime } = this.config;
     if (!fullStoryOrgId) {
       return; // do not load any FullStory code in the browser if not enabled
     }
@@ -71,6 +73,10 @@ export class CloudFullStoryPlugin implements Plugin {
     analytics.registerShipper(FullStoryShipper, {
       eventTypesAllowlist,
       fullStoryOrgId,
+      // Duration configs get stringified when forwarded to the UI and need reconversion
+      ...(pageVarsDebounceTime
+        ? { pageVarsDebounceTimeMs: duration(pageVarsDebounceTime).asMilliseconds() }
+        : {}),
       // Load an Elastic-internally audited script. Ideally, it should be hosted on a CDN.
       scriptUrl: basePath.prepend(
         `/internal/cloud/${this.initializerContext.env.packageInfo.buildNum}/fullstory.js`

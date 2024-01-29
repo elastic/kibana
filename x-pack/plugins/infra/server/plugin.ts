@@ -112,6 +112,12 @@ export const config: PluginConfigDescriptor<InfraConfig> = {
         traditional: schema.boolean({ defaultValue: true }),
         serverless: schema.boolean({ defaultValue: true }),
       }),
+      /**
+       * Depends on optional "profilingDataAccess" and "profiling"
+       * plugins. Enable both with `xpack.profiling.enabled: true` before
+       * enabling this feature flag.
+       */
+      profilingEnabled: schema.boolean({ defaultValue: false }),
     }),
   }),
   exposeToBrowser: publicConfigKeys,

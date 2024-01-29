@@ -10,7 +10,7 @@ import { ALL_VALUE, DeleteSLOInstancesParams } from '@kbn/slo-schema';
 import {
   SLO_DESTINATION_INDEX_PATTERN,
   SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
-} from '../../assets/constants';
+} from '../../../common/slo/constants';
 import { IllegalArgumentError } from '../../errors';
 
 interface SloInstanceTuple {

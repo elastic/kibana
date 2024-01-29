@@ -81,8 +81,9 @@ import type { BreadcrumbsNav } from './common/breadcrumbs/types';
 import type { TopValuesPopoverService } from './app/components/top_values_popover/top_values_popover_service';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import type { DeepLinksFormatter } from './common/links/deep_links';
-import type { SetComponents, GetComponent$ } from './contract_components';
+import type { SetComponents, GetComponents$ } from './contract_components';
 import type { ConfigSettings } from '../common/config_settings';
+import type { OnboardingPageService } from './app/components/onboarding/onboarding_page_service';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -147,8 +148,9 @@ export interface StartPluginsDependencies extends StartPlugins {
 
 export interface ContractStartServices {
   extraRoutes$: Observable<RouteProps[]>;
-  getComponent$: GetComponent$;
+  getComponents$: GetComponents$;
   upselling: UpsellingService;
+  onboarding: OnboardingPageService;
 }
 
 export type StartServices = CoreStart &
@@ -188,6 +190,7 @@ export interface PluginStart {
   setComponents: SetComponents;
   getBreadcrumbsNav$: () => Observable<BreadcrumbsNav>;
   getUpselling: () => UpsellingService;
+  setOnboardingPageSettings: OnboardingPageService;
 }
 
 export interface AppObservableLibs {

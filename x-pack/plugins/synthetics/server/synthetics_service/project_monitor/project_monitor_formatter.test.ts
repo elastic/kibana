@@ -9,7 +9,7 @@ import { savedObjectsClientMock, savedObjectsServiceMock } from '@kbn/core/serve
 import { ProjectMonitorFormatter } from './project_monitor_formatter';
 import {
   ConfigKey,
-  DataStream,
+  MonitorTypeEnum,
   Locations,
   LocationStatus,
   PrivateLocation,
@@ -353,7 +353,7 @@ describe('ProjectMonitorFormatter', () => {
 
 const payloadData = [
   {
-    ...DEFAULT_FIELDS[DataStream.BROWSER],
+    ...DEFAULT_FIELDS[MonitorTypeEnum.BROWSER],
     __ui: {
       script_source: {
         file_name: '',
@@ -403,7 +403,7 @@ const payloadData = [
     hash: 'lleklrkelkj',
   },
   {
-    ...DEFAULT_FIELDS[DataStream.BROWSER],
+    ...DEFAULT_FIELDS[MonitorTypeEnum.BROWSER],
     __ui: {
       script_source: {
         file_name: '',

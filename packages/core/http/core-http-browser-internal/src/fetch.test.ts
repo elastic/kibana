@@ -27,7 +27,7 @@ const BASE_PATH = 'http://localhost/myBase';
 describe('Fetch', () => {
   const executionContextMock = executionContextServiceMock.createSetupContract();
   const fetchInstance = new Fetch({
-    basePath: new BasePath(BASE_PATH),
+    basePath: new BasePath({ basePath: BASE_PATH }),
     kibanaVersion: 'VERSION',
     buildNumber: 1234,
     executionContext: executionContextMock,

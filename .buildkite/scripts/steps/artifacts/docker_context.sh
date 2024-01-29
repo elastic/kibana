@@ -23,11 +23,8 @@ case $KIBANA_DOCKER_CONTEXT in
   cloud)
     DOCKER_CONTEXT_FILE="kibana-cloud-$FULL_VERSION-docker-build-context.tar.gz"
   ;;
-  ubi8)
-    DOCKER_CONTEXT_FILE="kibana-ubi8-$FULL_VERSION-docker-build-context.tar.gz"
-  ;;
-  ubi9)
-    DOCKER_CONTEXT_FILE="kibana-ubi9-$FULL_VERSION-docker-build-context.tar.gz"
+  ubi)
+    DOCKER_CONTEXT_FILE="kibana-ubi-$FULL_VERSION-docker-build-context.tar.gz"
   ;;
   ironbank)
     DOCKER_CONTEXT_FILE="kibana-ironbank-$FULL_VERSION-docker-build-context.tar.gz"

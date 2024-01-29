@@ -21,7 +21,6 @@ export default createTestConfig({
   kbnServerArgs: [
     '--xpack.infra.enabled=true',
     '--xpack.infra.featureFlags.customThresholdAlertsEnabled=true',
-    '--xpack.observability.unsafe.thresholdRule.enabled=true',
   ],
   // load tests in the index file
   testFiles: [require.resolve('./index.feature_flags.ts')],

@@ -8,12 +8,12 @@
 import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getField } from '../../shared/utils';
-import { AlertReasonPreviewPanel, PreviewPanelKey } from '../../preview';
+import { AlertReasonPreviewPanel, DocumentDetailsPreviewPanelKey } from '../../preview';
 import {
   REASON_DETAILS_PREVIEW_BUTTON_TEST_ID,
   REASON_DETAILS_TEST_ID,
@@ -31,21 +31,21 @@ export const Reason: FC = () => {
   const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
   const alertReason = getField(getFieldsData(ALERT_REASON));
 
-  const { openPreviewPanel } = useExpandableFlyoutContext();
+  const { openPreviewPanel } = useExpandableFlyoutApi();
   const openRulePreview = useCallback(() => {
     openPreviewPanel({
-      id: PreviewPanelKey,
+      id: DocumentDetailsPreviewPanelKey,
       path: { tab: AlertReasonPreviewPanel },
       params: {
         id: eventId,
         indexName,
         scopeId,
         banner: {
-          title: (
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.right.about.reason.alertReasonPreviewTitle"
-              defaultMessage="Preview alert reason"
-            />
+          title: i18n.translate(
+            'xpack.securitySolution.flyout.right.about.reason.alertReasonPreviewTitle',
+            {
+              defaultMessage: 'Preview alert reason',
+            }
           ),
           backgroundColor: 'warning',
           textColor: 'warning',
@@ -96,8 +96,13 @@ export const Reason: FC = () => {
         <EuiTitle size="xxs">
           <h5>
             {isAlert ? (
-              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-                <EuiFlexItem>
+              <EuiFlexGroup
+                justifyContent="spaceBetween"
+                alignItems="center"
+                gutterSize="none"
+                responsive={false}
+              >
+                <EuiFlexItem grow={false}>
                   <h5>
                     <FormattedMessage
                       id="xpack.securitySolution.flyout.right.about.reason.alertReasonTitle"

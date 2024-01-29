@@ -17,13 +17,17 @@ import qs from 'query-string';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import url from 'url';
-import { ObservabilityAIAssistantActionMenuItem } from '@kbn/observability-ai-assistant-plugin/public';
 import { useProfilingRouter } from '../hooks/use_profiling_router';
 import { AddDataTabs } from '../views/add_data_view';
+import { useProfilingDependencies } from './contexts/profiling_dependencies/use_profiling_dependencies';
 
 export function ProfilingHeaderActionMenu() {
   const router = useProfilingRouter();
   const history = useHistory();
+
+  const {
+    observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
+  } = useProfilingDependencies().start;
 
   return (
     <EuiHeaderLinks gutterSize="xs">
@@ -81,7 +85,7 @@ export function ProfilingHeaderActionMenu() {
           defaultMessage: 'Settings',
         })}
       </EuiHeaderLink>
-      <ObservabilityAIAssistantActionMenuItem />
+      {ObservabilityAIAssistantActionMenuItem ? <ObservabilityAIAssistantActionMenuItem /> : null}
     </EuiHeaderLinks>
   );
 }

@@ -27,7 +27,7 @@ describe('url overflow detection', () => {
   let unlisten: any;
 
   beforeEach(() => {
-    basePath = new BasePath('/test-123');
+    basePath = new BasePath({ basePath: '/test-123' });
     history = createMemoryHistory();
     toasts = notificationServiceMock.createStartContract().toasts;
     uiSettings = uiSettingsServiceMock.createStartContract();

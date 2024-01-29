@@ -72,7 +72,13 @@ export const BasicSetupForm: React.FC<BasicSetupFormProps> = ({
           defaultMessage: 'User',
         })}
       >
-        <EuiFieldText fullWidth disabled={true} value={user} onChange={() => {}} />
+        <EuiFieldText
+          data-test-subj="serverlessSearchBasicSetupFormFieldText"
+          fullWidth
+          disabled={true}
+          value={user}
+          onChange={() => {}}
+        />
       </EuiFormRow>
       <EuiFormRow
         fullWidth

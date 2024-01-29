@@ -25,10 +25,20 @@ interface TableActionsProps {
   pinned: boolean;
   flattenedField: unknown;
   fieldMapping?: DataViewField;
-  onFilter: DocViewFilterFn;
+  onFilter?: DocViewFilterFn;
   onToggleColumn: (field: string) => void;
   ignoredValue: boolean;
   onTogglePinned: (field: string) => void;
+}
+
+interface PanelItem {
+  name: string;
+  'aria-label': string;
+  toolTipContent?: string;
+  disabled?: boolean;
+  'data-test-subj': string;
+  icon: string;
+  onClick: () => void;
 }
 
 export const TableActions = ({
@@ -144,51 +154,61 @@ export const TableActions = ({
     [closePopover]
   );
 
+  let panelItems: PanelItem[] = [
+    {
+      name: toggleColumnsLabel,
+      'aria-label': toggleColumnsAriaLabel,
+      'data-test-subj': `toggleColumnButton-${field}`,
+      icon: 'listAdd',
+      onClick: onClickAction(onToggleColumn.bind({}, field)),
+    },
+    {
+      name: pinnedLabel,
+      'aria-label': pinnedAriaLabel,
+      icon: pinnedIconType,
+      'data-test-subj': `togglePinFilterButton-${field}`,
+      onClick: onClickAction(togglePinned),
+    },
+  ];
+
+  if (onFilter) {
+    panelItems = [
+      {
+        name: filterAddLabel,
+        'aria-label': filterAddAriaLabel,
+        toolTipContent: filtersPairToolTip,
+        icon: 'plusInCircle',
+        disabled: filtersPairDisabled,
+        'data-test-subj': `addFilterForValueButton-${field}`,
+        onClick: onClickAction(onFilter.bind({}, fieldMapping, flattenedField, '+')),
+      },
+      {
+        name: filterOutLabel,
+        'aria-label': filterOutAriaLabel,
+        toolTipContent: filtersPairToolTip,
+        icon: 'minusInCircle',
+        disabled: filtersPairDisabled,
+        'data-test-subj': `addFilterOutValueButton-${field}`,
+        onClick: onClickAction(onFilter.bind({}, fieldMapping, flattenedField, '-')),
+      },
+      {
+        name: filterExistsLabel,
+        'aria-label': filterExistsAriaLabel,
+        toolTipContent: filtersExistsToolTip,
+        icon: 'filter',
+        disabled: filtersExistsDisabled,
+        'data-test-subj': `addExistsFilterButton-${field}`,
+        onClick: onClickAction(onFilter.bind({}, '_exists_', field, '+')),
+      },
+      ...panelItems,
+    ];
+  }
+
   const panels = [
     {
       id: 0,
       title: actionsLabel,
-      items: [
-        {
-          name: filterAddLabel,
-          'aria-label': filterAddAriaLabel,
-          toolTipContent: filtersPairToolTip,
-          icon: 'plusInCircle',
-          disabled: filtersPairDisabled,
-          'data-test-subj': `addFilterForValueButton-${field}`,
-          onClick: onClickAction(onFilter.bind({}, fieldMapping, flattenedField, '+')),
-        },
-        {
-          name: filterOutLabel,
-          'aria-label': filterOutAriaLabel,
-          toolTipContent: filtersPairToolTip,
-          icon: 'minusInCircle',
-          disabled: filtersPairDisabled,
-          onClick: onClickAction(onFilter.bind({}, fieldMapping, flattenedField, '-')),
-        },
-        {
-          name: filterExistsLabel,
-          'aria-label': filterExistsAriaLabel,
-          toolTipContent: filtersExistsToolTip,
-          icon: 'filter',
-          disabled: filtersExistsDisabled,
-          'data-test-subj': `addExistsFilterButton-${field}`,
-          onClick: onClickAction(onFilter.bind({}, '_exists_', field, '+')),
-        },
-        {
-          name: toggleColumnsLabel,
-          'aria-label': toggleColumnsAriaLabel,
-          'data-test-subj': `toggleColumnButton-${field}`,
-          icon: 'listAdd',
-          onClick: onClickAction(onToggleColumn.bind({}, field)),
-        },
-        {
-          name: pinnedLabel,
-          'aria-label': pinnedAriaLabel,
-          icon: pinnedIconType,
-          onClick: onClickAction(togglePinned),
-        },
-      ],
+      items: panelItems,
     },
   ];
 
