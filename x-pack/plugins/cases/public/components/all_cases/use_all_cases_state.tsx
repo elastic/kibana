@@ -6,14 +6,19 @@
  */
 
 import type { Dispatch, SetStateAction } from 'react';
-import { useCallback, useMemo, useState } from 'react';
+import { useEffect, useRef, useCallback, useMemo, useState } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import deepEqual from 'react-fast-compare';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { isEmpty } from 'lodash';
 
-import type { FilterOptions, PartialFilterOptions, QueryParams } from '../../../common/ui/types';
-import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from '../../containers/constants';
+import { url as urlUtils } from '@kbn/kibana-utils-plugin/common';
+import type { FilterOptions, QueryParams } from '../../../common/ui/types';
+import {
+  DEFAULT_CASES_TABLE_STATE,
+  DEFAULT_FILTER_OPTIONS,
+  DEFAULT_QUERY_PARAMS,
+} from '../../containers/constants';
 import { LOCAL_STORAGE_KEYS } from '../../../common/constants';
 import type { AllCasesTableState, AllCasesURLState } from './types';
 import { stringifyUrlParams } from './utils/stringify_url_params';
@@ -24,27 +29,29 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 
 interface UseAllCasesStateReturn {
   filterOptions: FilterOptions;
-  setQueryParams: (queryParam: QueryParams) => void;
-  setFilterOptions: (filterOptions: FilterOptions) => void;
+  setQueryParams: (queryParam: Partial<QueryParams>) => void;
+  setFilterOptions: (filterOptions: Partial<FilterOptions>) => void;
   queryParams: QueryParams;
 }
 
-export function useAllCasesState(
-  isModalView: boolean = false,
-  initialFilterOptions?: PartialFilterOptions
-): UseAllCasesStateReturn {
-  // TODO: Handle initial filters
-  // TODO: Use React state to handle modal that do not support filters
+export function useAllCasesState(isModalView: boolean = false): UseAllCasesStateReturn {
+  const isStateLoadedFromLocalStorage = useRef(false);
+  const [tableState, setTableState] = useState<AllCasesTableState>(DEFAULT_CASES_TABLE_STATE);
   const [urlState, setUrlState] = useAllCasesUrlState();
   const [localStorageState, setLocalStorageState] = useAllCasesLocalStorage();
 
   const allCasesTableState: AllCasesTableState = useMemo(
-    () => getAllCasesTableState(urlState, localStorageState),
-    [localStorageState, urlState]
+    () => (isModalView ? tableState : getAllCasesTableState(urlState, localStorageState)),
+    [isModalView, tableState, urlState, localStorageState]
   );
 
   const setState = useCallback(
     (state: AllCasesTableState) => {
+      if (isModalView) {
+        setTableState(state);
+        return;
+      }
+
       if (!deepEqual(state, urlState)) {
         setUrlState(state);
       }
@@ -53,23 +60,34 @@ export function useAllCasesState(
         setLocalStorageState(state);
       }
     },
-    [localStorageState, urlState, setLocalStorageState, setUrlState]
+    [localStorageState, urlState, isModalView, setLocalStorageState, setUrlState]
   );
+
+  useEffect(() => {
+    if (
+      !isStateLoadedFromLocalStorage.current &&
+      isURLStateEmpty(urlState) &&
+      localStorageState &&
+      !deepEqual(urlState, localStorageState) &&
+      !isModalView
+    ) {
+      setUrlState(localStorageState);
+      isStateLoadedFromLocalStorage.current = true;
+    }
+  }, [localStorageState, setUrlState, urlState, isModalView]);
 
   return {
     ...allCasesTableState,
-    setQueryParams: (newQueryParams: QueryParams) => {
-      // TODO: Set only the new changes and not the defaults by removing empty values
+    setQueryParams: (newQueryParams: Partial<QueryParams>) => {
       setState({
-        filterOptions: { ...DEFAULT_FILTER_OPTIONS, ...urlState.filterOptions },
-        queryParams: newQueryParams,
+        filterOptions: allCasesTableState.filterOptions,
+        queryParams: { ...allCasesTableState.queryParams, ...newQueryParams },
       });
     },
-    setFilterOptions: (newFilterOptions: FilterOptions) => {
-      // TODO: Set only the new changes and not the defaults by removing empty values
+    setFilterOptions: (newFilterOptions: Partial<FilterOptions>) => {
       setState({
-        filterOptions: newFilterOptions,
-        queryParams: { ...DEFAULT_QUERY_PARAMS, ...urlState.queryParams },
+        filterOptions: { ...allCasesTableState.filterOptions, ...newFilterOptions },
+        queryParams: allCasesTableState.queryParams,
       });
     },
   };
@@ -78,11 +96,6 @@ export function useAllCasesState(
 const useAllCasesUrlState = (): [AllCasesURLState, (updated: AllCasesTableState) => void] => {
   const history = useHistory();
   const { search } = useLocation();
-
-  const [urlState, setUrlState] = useState<AllCasesURLState>({
-    queryParams: {},
-    filterOptions: {},
-  });
 
   const urlParams = useMemo(
     () => parseUrlParams(new URLSearchParams(decodeURIComponent(search))),
@@ -95,21 +108,14 @@ const useAllCasesUrlState = (): [AllCasesURLState, (updated: AllCasesTableState)
     (updated: AllCasesTableState) => {
       const updatedQuery = allCasesUrlStateSerializer(updated);
 
-      // TODO: Change with useAllCasesNavigate??
       history.push({
-        // TODO: Change with encodeUriQuery?
-        // src/plugins/kibana_utils/common/url/encode_uri_query.ts
-        search: encodeURIComponent(stringifyUrlParams(updatedQuery)),
+        search: urlUtils.encodeUriQuery(stringifyUrlParams(updatedQuery)),
       });
     },
     [history]
   );
 
-  if (!deepEqual(parsedUrlParams, urlState)) {
-    setUrlState(parsedUrlParams);
-  }
-
-  return [urlState, updateQueryParams];
+  return [parsedUrlParams, updateQueryParams];
 };
 
 const getAllCasesTableState = (
@@ -118,16 +124,17 @@ const getAllCasesTableState = (
 ): AllCasesTableState => {
   if (isURLStateEmpty(urlState)) {
     return {
-      // TODO: Combine defaults to DEFAULT_CASES_TABLE_STATE
-      queryParams: { ...DEFAULT_QUERY_PARAMS, ...localStorageState?.queryParams },
-      filterOptions: { ...DEFAULT_FILTER_OPTIONS, ...localStorageState?.filterOptions },
+      queryParams: { ...DEFAULT_CASES_TABLE_STATE.queryParams, ...localStorageState?.queryParams },
+      filterOptions: {
+        ...DEFAULT_CASES_TABLE_STATE.filterOptions,
+        ...localStorageState?.filterOptions,
+      },
     };
   }
 
   return {
-    // TODO: Combine defaults to DEFAULT_CASES_TABLE_STATE
-    queryParams: { ...DEFAULT_QUERY_PARAMS, ...urlState.queryParams },
-    filterOptions: { ...DEFAULT_FILTER_OPTIONS, ...urlState.filterOptions },
+    queryParams: { ...DEFAULT_CASES_TABLE_STATE.queryParams, ...urlState.queryParams },
+    filterOptions: { ...DEFAULT_CASES_TABLE_STATE.filterOptions, ...urlState.filterOptions },
   };
 };
 

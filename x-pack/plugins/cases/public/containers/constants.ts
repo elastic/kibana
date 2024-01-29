@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AllCasesTableState } from '../components/all_cases/types';
 import type { FilterOptions, QueryParams, SingleCaseMetricsFeature } from './types';
 import { SortFieldCase } from './types';
 
@@ -84,4 +85,9 @@ export const DEFAULT_QUERY_PARAMS: QueryParams = {
   perPage: DEFAULT_TABLE_LIMIT,
   sortField: SortFieldCase.createdAt,
   sortOrder: 'desc',
+};
+
+export const DEFAULT_CASES_TABLE_STATE: AllCasesTableState = {
+  filterOptions: DEFAULT_FILTER_OPTIONS,
+  queryParams: DEFAULT_QUERY_PARAMS,
 };

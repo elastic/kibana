@@ -8,7 +8,6 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { EuiBasicTable, EuiTableSelectionType } from '@elastic/eui';
 import { EuiProgress } from '@elastic/eui';
-import { difference, head, isEmpty } from 'lodash/fp';
 import styled, { css } from 'styled-components';
 
 import type { CaseUI, FilterOptions, CasesUI } from '../../../common/ui/types';
@@ -16,7 +15,6 @@ import type { EuiBasicTableOnChange } from './types';
 
 import { SortFieldCase } from '../../../common/ui/types';
 import type { CaseStatuses } from '../../../common/types/domain';
-import { caseStatuses } from '../../../common/types/domain';
 import { useCasesColumns } from './use_cases_columns';
 import { CasesTableFilters } from './table_filters';
 import { CASES_TABLE_PER_PAGE_VALUES } from './types';
@@ -64,15 +62,9 @@ export const AllCasesList = React.memo<AllCasesListProps>(
 
     const hasOwner = !!owner.length;
 
-    const firstAvailableStatus = head(difference(caseStatuses, hiddenStatuses));
-    const initialFilterOptions = {
-      ...(!isEmpty(hiddenStatuses) && firstAvailableStatus && { status: [firstAvailableStatus] }),
-    };
+    const { queryParams, setQueryParams, filterOptions, setFilterOptions } =
+      useAllCasesState(isSelectorView);
 
-    const { queryParams, setQueryParams, filterOptions, setFilterOptions } = useAllCasesState(
-      isSelectorView,
-      initialFilterOptions
-    );
     const [selectedCases, setSelectedCases] = useState<CasesUI>([]);
 
     const { data = initialData, isFetching: isLoadingCases } = useGetCases({
