@@ -85,3 +85,16 @@ export function isAgentUpgrading(agent: Agent) {
   }
   return agent.upgrade_started_at && !agent.upgraded_at;
 }
+
+export const differsOnlyInPatch = (
+  versionA: string,
+  versionB: string,
+  allowEqualPatch: boolean = true
+): boolean => {
+  const [majorA, minorA, patchA] = versionA.split('.');
+  const [majorB, minorB, patchB] = versionB.split('.');
+
+  return (
+    majorA === majorB && minorA === minorB && (allowEqualPatch ? patchA >= patchB : patchA > patchB)
+  );
+};
