@@ -22,7 +22,6 @@ import React, { useState } from 'react';
 import { useCloneSlo } from '../../../../hooks/slo/use_clone_slo';
 import { rulesLocatorID, sloFeatureId } from '../../../../../common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../../common/constants';
-import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { paths } from '../../../../../common/locators/paths';
 import { SloDeleteConfirmationModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { SloStatusBadge } from '../../../../components/slo/slo_status_badge';
@@ -41,6 +40,7 @@ import { SloRulesBadge } from '../badges/slo_rules_badge';
 import { SloListEmpty } from '../slo_list_empty';
 import { SloListError } from '../slo_list_error';
 import { SloSparkline } from '../slo_sparkline';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 
 export interface Props {
   sloList: SLOWithSummaryResponse[];
@@ -374,7 +374,12 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
 
   return (
     <>
-      <EuiBasicTable<SLOWithSummaryResponse> items={sloList} columns={columns} />
+      <EuiBasicTable<SLOWithSummaryResponse>
+        items={sloList}
+        columns={columns}
+        loading={loading}
+        noItemsMessage={loading ? LOADING_SLOS_LABEL : NO_SLOS_FOUND}
+      />
       {sloToAddRule ? (
         <AddRuleFlyout
           consumer={sloFeatureId}
@@ -402,3 +407,11 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
     </>
   );
 }
+
+const LOADING_SLOS_LABEL = i18n.translate('xpack.observability.slo.loadingSlosLabel', {
+  defaultMessage: 'Loading SLOs ...',
+});
+
+const NO_SLOS_FOUND = i18n.translate('xpack.observability.slo.noSlosFound', {
+  defaultMessage: 'No SLOs found',
+});

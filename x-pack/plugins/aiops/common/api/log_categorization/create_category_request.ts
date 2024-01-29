@@ -15,7 +15,7 @@ import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 import { createCategorizeQuery } from './create_categorize_query';
 
 const CATEGORY_LIMIT = 1000;
-const EXAMPLE_LIMIT = 1;
+const EXAMPLE_LIMIT = 4;
 
 export interface CategorizationAdditionalFilter {
   from: number;
