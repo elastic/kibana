@@ -37,7 +37,7 @@ export function SloGroupBy({ onStateChange, groupBy }: Props) {
   const groupByOptions: Option[] = [
     {
       label: i18n.translate('xpack.observability.slo.list.groupBy.sliIndicator', {
-        defaultMessage: 'Ungrouped',
+        defaultMessage: 'None',
       }),
       checked: groupBy === 'ungrouped',
       value: 'ungrouped',
@@ -45,7 +45,7 @@ export function SloGroupBy({ onStateChange, groupBy }: Props) {
         handleChangeGroupBy({
           value: 'ungrouped',
           label: i18n.translate('xpack.observability.slo.list.groupBy.upgrouped', {
-            defaultMessage: 'Ungrouped',
+            defaultMessage: 'None',
           }),
         });
       },
@@ -65,7 +65,36 @@ export function SloGroupBy({ onStateChange, groupBy }: Props) {
         });
       },
     },
-    // TODO add more options (SLI indicator, status, instance id)
+    {
+      label: i18n.translate('xpack.observability.slo.list.groupBy.status', {
+        defaultMessage: 'Status',
+      }),
+      checked: groupBy === 'status',
+      value: 'status',
+      onClick: () => {
+        handleChangeGroupBy({
+          value: 'status',
+          label: i18n.translate('xpack.observability.slo.list.groupBy.status', {
+            defaultMessage: 'Status',
+          }),
+        });
+      },
+    },
+    {
+      label: i18n.translate('xpack.observability.slo.list.groupBy.sliType', {
+        defaultMessage: 'SLI type',
+      }),
+      checked: groupBy === 'slo.indicator.type',
+      value: 'slo.indicator.type',
+      onClick: () => {
+        handleChangeGroupBy({
+          value: 'slo.indicator.type',
+          label: i18n.translate('xpack.observability.slo.list.groupBy.sliType', {
+            defaultMessage: 'SLI type',
+          }),
+        });
+      },
+    },
   ];
 
   const [groupLabel, setGroupLabel] = useState(
