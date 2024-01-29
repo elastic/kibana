@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { EuiButtonIcon, EuiExpression, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { FieldValueSuggestions } from '@kbn/exploratory-view-plugin/public';
+import { FieldValueSuggestions } from '@kbn/observability-shared-plugin/public';
 import { filterLabels } from '../../filter_group/translations';
 import { alertFilterLabels, filterAriaLabels } from './translations';
 import { useUptimeDataView } from '../../../../contexts/uptime_data_view_context';
