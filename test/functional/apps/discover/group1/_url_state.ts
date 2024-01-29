@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
+  const dataGrid = getService('dataGrid');
   const PageObjects = getPageObjects([
     'common',
     'discover',
@@ -31,6 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
+    hideAnnouncements: true,
     'timepicker:timeDefaults':
       '{  "from": "Sep 18, 2015 @ 19:37:13.000",  "to": "Sep 23, 2015 @ 02:30:09.000"}',
   };
@@ -136,12 +138,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'is between',
         value: { from: '1000', to: '2000' },
       });
+      await PageObjects.unifiedFieldList.clickFieldListItemAdd('extension');
+      await PageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
       const totalHitsForOneFilter = '737';
-      const totalHitsForTwoFilters = '649';
+      const totalHitsForTwoFilters = '137';
 
       expect(await PageObjects.discover.getHitCount()).to.be(totalHitsForOneFilter);
 
@@ -165,23 +169,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(typeof savedSearchId).to.be('string');
 
-      await browser.get(`${deployment.getHostPort()}/`);
-      await browser.refresh();
+      await browser.openNewTab();
       await browser.get(`${deployment.getHostPort()}/app/discover#/view/${savedSearchId}`);
 
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
+      expect(await dataGrid.getRowsText()).to.eql([
+        'Sep 22, 2015 @ 20:44:05.521jpg1,808',
+        'Sep 22, 2015 @ 20:41:53.463png1,969',
+        'Sep 22, 2015 @ 20:40:22.952jpg1,576',
+        'Sep 22, 2015 @ 20:11:39.532png1,708',
+        'Sep 22, 2015 @ 19:45:13.813php1,406',
+      ]);
+
       expect(await PageObjects.discover.getHitCount()).to.be(totalHitsForOneFilter);
 
-      await browser.get(`${deployment.getHostPort()}/`);
-      await browser.refresh();
+      await browser.openNewTab();
       await browser.get(
         `${deployment.getHostPort()}/app/discover#/view/${savedSearchId}` +
           "?_g=(filters:!(('$state':(store:globalState)," +
           "meta:(alias:!n,disabled:!f,field:extension.raw,index:'logstash-*'," +
-          'key:extension.raw,negate:!f,params:!(jpg,css),type:phrases,value:!(jpg,css)),' +
-          'query:(bool:(minimum_should_match:1,should:!((match_phrase:(extension.raw:jpg)),' +
+          'key:extension.raw,negate:!f,params:!(png,css),type:phrases,value:!(png,css)),' +
+          'query:(bool:(minimum_should_match:1,should:!((match_phrase:(extension.raw:png)),' +
           "(match_phrase:(extension.raw:css))))))),query:(language:kuery,query:'')," +
           "refreshInterval:(pause:!t,value:60000),time:(from:'2015-09-19T06:31:44.000Z'," +
           "to:'2015-09-23T18:31:44.000Z'))"
@@ -190,12 +200,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
+      const filteredRows = [
+        'Sep 22, 2015 @ 20:41:53.463png1,969',
+        'Sep 22, 2015 @ 20:11:39.532png1,708',
+        'Sep 22, 2015 @ 18:50:22.335css1,841',
+        'Sep 22, 2015 @ 18:40:32.329css1,945',
+        'Sep 22, 2015 @ 18:13:35.361css1,752',
+      ];
+
+      expect(await dataGrid.getRowsText()).to.eql(filteredRows);
+
       expect(await PageObjects.discover.getHitCount()).to.be(totalHitsForTwoFilters);
 
       await browser.refresh();
 
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      expect(await dataGrid.getRowsText()).to.eql(filteredRows);
 
       expect(await PageObjects.discover.getHitCount()).to.be(totalHitsForTwoFilters);
     });
