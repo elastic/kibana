@@ -42,7 +42,8 @@
       "security",
       "spaces",
       "usageCollection",
-      "cases"
+      "cases",
+      "console"
     ],
     "requiredBundles": [
       "cases",

@@ -125,6 +125,7 @@ export const ModelsList: FC<Props> = ({
   const {
     services: {
       application: { capabilities },
+      console: consolePlugin,
       docLinks,
     },
   } = useMlKibana();
@@ -848,6 +849,7 @@ export const ModelsList: FC<Props> = ({
           }}
         />
       ) : null}
+      {consolePlugin?.renderEmbeddableConsole?.() ?? null}
     </>
   );
 };

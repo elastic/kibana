@@ -31,11 +31,13 @@ import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { MlServicesContext } from '../../app';
 
 interface StartPlugins {
   cases?: CasesUiStart;
   charts: ChartsPluginStart;
+  console?: ConsolePluginStart;
   contentManagement: ContentManagementPublicStart;
   dashboard: DashboardStart;
   data: DataPublicPluginStart;

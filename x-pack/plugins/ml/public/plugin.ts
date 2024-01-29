@@ -24,6 +24,7 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 
 import { AppStatus, type AppUpdater, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -74,6 +75,7 @@ import type { MlApiServices } from './application/services/ml_api_service';
 export interface MlStartDependencies {
   cases?: CasesUiStart;
   charts: ChartsPluginStart;
+  console?: ConsolePluginStart;
   contentManagement: ContentManagementPublicStart;
   dashboard: DashboardStart;
   data: DataPublicPluginStart;
@@ -158,6 +160,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           {
             cases: pluginsStart.cases,
             charts: pluginsStart.charts,
+            console: pluginsStart.console,
             contentManagement: pluginsStart.contentManagement,
             dashboard: pluginsStart.dashboard,
             data: pluginsStart.data,

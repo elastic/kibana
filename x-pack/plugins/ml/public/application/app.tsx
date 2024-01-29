@@ -83,6 +83,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless, mlFe
     return {
       cases: deps.cases,
       charts: deps.charts,
+      console: deps.console,
       contentManagement: deps.contentManagement,
       dashboard: deps.dashboard,
       data: deps.data,
