@@ -73,6 +73,10 @@ export class CasesOracleService {
       tags: ['cases-oracle-service', 'bulkGetRecords', ...ids],
     });
 
+    if (ids.length === 0) {
+      return [];
+    }
+
     const oracleRecords = (await this.savedObjectsClient.bulkGet<OracleRecordAttributes>(
       ids.map((id) => ({ id, type: CASE_ORACLE_SAVED_OBJECT }))
     )) as SavedObjectsBulkResponseWithErrors<OracleRecordAttributes>;
@@ -105,6 +109,10 @@ export class CasesOracleService {
     this.logger.debug(`Creating oracle record with ID: ${recordIds}`, {
       tags: ['cases-oracle-service', 'bulkCreateRecord', ...recordIds],
     });
+
+    if (records.length === 0) {
+      return [];
+    }
 
     const req = records.map((record) => ({
       id: record.recordId,
@@ -152,6 +160,10 @@ export class CasesOracleService {
     this.logger.debug(`Updating oracle record with ID: ${recordIds}`, {
       tags: ['cases-oracle-service', 'bulkUpdateRecord', ...recordIds],
     });
+
+    if (records.length === 0) {
+      return [];
+    }
 
     const req = records.map((record) => ({
       id: record.recordId,

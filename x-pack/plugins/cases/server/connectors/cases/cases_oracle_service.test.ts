@@ -251,6 +251,12 @@ describe('CasesOracleService', () => {
         { id: 'so-id-2', type: 'cases-oracle' },
       ]);
     });
+
+    it('does not call the savedObjectsClient if the input is an empty array', async () => {
+      await service.bulkGetRecords([]);
+
+      expect(savedObjectsClient.bulkGet).not.toHaveBeenCalledWith();
+    });
   });
 
   describe('createRecord', () => {
@@ -384,6 +390,12 @@ describe('CasesOracleService', () => {
         },
       ]);
     });
+
+    it('does not call the savedObjectsClient if the input is an empty array', async () => {
+      await service.bulkCreateRecord([]);
+
+      expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalledWith();
+    });
   });
 
   describe('increaseCounter', () => {
@@ -438,6 +450,85 @@ describe('CasesOracleService', () => {
         },
         { version: 'so-version' }
       );
+    });
+  });
+
+  describe('bulkUpdateRecord', () => {
+    const bulkUpdateSOs = [
+      {
+        id: 'so-id',
+        version: 'so-version',
+        attributes: {
+          counter: 1,
+          cases: [],
+          rules: [],
+          grouping: {},
+          createdAt: '2023-10-10T10:23:42.769Z',
+          updatedAt: '2023-10-10T10:23:42.769Z',
+        },
+        type: CASE_ORACLE_SAVED_OBJECT,
+        references: [],
+      },
+      {
+        id: 'so-id-2',
+        type: CASE_ORACLE_SAVED_OBJECT,
+        error: {
+          message: 'Conflict',
+          statusCode: 409,
+          error: 'Conflict',
+        },
+      },
+    ];
+
+    beforeEach(() => {
+      // @ts-expect-error: types of the SO client are wrong and they do not accept errors
+      savedObjectsClient.bulkUpdate.mockResolvedValue({ saved_objects: bulkUpdateSOs });
+    });
+
+    it('formats the response correctly', async () => {
+      const res = await service.bulkUpdateRecord([
+        { recordId: 'so-id', version: 'so-version-1', payload: { counter: 2 } },
+        { recordId: 'so-id-2', version: 'so-version-22', payload: { counter: 3 } },
+      ]);
+
+      expect(res).toEqual([
+        { ...bulkUpdateSOs[0].attributes, id: 'so-id', version: 'so-version' },
+        { ...bulkUpdateSOs[1].error, id: 'so-id-2' },
+      ]);
+    });
+
+    it('calls the bulkUpdateRecord correctly', async () => {
+      await service.bulkUpdateRecord([
+        { recordId: 'so-id', version: 'so-version-1', payload: { counter: 2 } },
+        { recordId: 'so-id-2', version: 'so-version-2', payload: { counter: 3 } },
+      ]);
+
+      expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith([
+        {
+          attributes: {
+            counter: 2,
+            updatedAt: expect.anything(),
+          },
+          id: 'so-id',
+          version: 'so-version-1',
+          type: 'cases-oracle',
+        },
+        {
+          attributes: {
+            counter: 3,
+            updatedAt: expect.anything(),
+          },
+          id: 'so-id-2',
+          version: 'so-version-2',
+          type: 'cases-oracle',
+        },
+      ]);
+    });
+
+    it('does not call the savedObjectsClient if the input is an empty array', async () => {
+      await service.bulkUpdateRecord([]);
+
+      expect(savedObjectsClient.bulkUpdate).not.toHaveBeenCalledWith();
     });
   });
 });
