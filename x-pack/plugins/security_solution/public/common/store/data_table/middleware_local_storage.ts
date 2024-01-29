@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import type { Action } from 'redux';
-import { map, filter, ignoreElements, tap, withLatestFrom, delay } from 'rxjs/operators';
-import type { Epic } from 'redux-observable';
+import type { Action, Middleware } from 'redux';
 import { get } from 'lodash/fp';
 
-import { dataTableActions } from '@kbn/securitysolution-data-table';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import { dataTableActions, dataTableSelectors } from '@kbn/securitysolution-data-table';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import { updateTotalCount } from '../../../timelines/store/actions';
 import { addTableInStorage } from '../../../timelines/containers/local_storage';
 
-import type { TimelineEpicDependencies } from '../../../timelines/store/types';
+import type { State } from '../types';
 
 const {
   applyDeltaToColumnWidth,
@@ -31,8 +30,6 @@ const {
   updateSort,
   upsertColumn,
 } = dataTableActions;
-
-export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
 const tableActionTypes = new Set([
   removeColumn.type,
@@ -50,21 +47,19 @@ const tableActionTypes = new Set([
   toggleDetailPanel.type,
 ]);
 
-export const createDataTableLocalStorageEpic =
-  <State>(): Epic<Action, Action, State, TimelineEpicDependencies<State>> =>
-  (action$, state$, { tableByIdSelector, storage }) => {
-    const table$ = state$.pipe(map(tableByIdSelector), filter(isNotNull));
-    return action$.pipe(
-      delay(500),
-      withLatestFrom(table$),
-      tap(([action, tableById]) => {
-        if (tableActionTypes.has(action.type)) {
-          if (storage) {
-            const tableId: TableIdLiteral = get('payload.id', action);
-            addTableInStorage(storage, tableId, tableById[tableId]);
-          }
-        }
-      }),
-      ignoreElements()
-    );
+export const dataTableLocalStorageMiddleware: (storage: Storage) => Middleware<{}, State> =
+  (storage: Storage) => (store) => (next) => (action: Action) => {
+    // perform the action
+    const ret = next(action);
+
+    // persist the data table state when a table action has been performed
+    if (tableActionTypes.has(action.type)) {
+      const tableById = dataTableSelectors.tableByIdSelector(store.getState());
+      const tableId: TableIdLiteral = get('payload.id', action);
+      if (tableById && tableById[tableId] && storage) {
+        addTableInStorage(storage, tableId, tableById[tableId]);
+      }
+    }
+
+    return ret;
   };
