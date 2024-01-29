@@ -112,10 +112,6 @@ const createSLORoute = createObservabilityServerRoute({
 
     const response = await createSLO.execute(params.body);
 
-    for (let i = 0; i < 50; i++) {
-      await createSLO.execute(params.body);
-    }
-
     return response;
   },
 });
