@@ -812,7 +812,7 @@ async function getBuiltinFunctionNextArgument(
           // technically another boolean value should be suggested, but it is a better experience
           // to actually suggest a wider set of fields/functions
           [
-            finalType === 'boolean' && getFunctionDefinition(nodeArg.name)?.type !== 'builtin'
+            finalType === 'boolean' && getFunctionDefinition(nodeArg.name)?.builtin
               ? 'any'
               : finalType,
           ],
@@ -1013,7 +1013,7 @@ async function getFunctionArgsSuggestions(
         ? {
             ...suggestion,
             insertText:
-              hasMoreMandatoryArgs && fnDefinition.type !== 'builtin'
+              hasMoreMandatoryArgs && !fnDefinition.builtin
                 ? `${suggestion.insertText},`
                 : suggestion.insertText,
           }
@@ -1024,7 +1024,7 @@ async function getFunctionArgsSuggestions(
   return suggestions.map(({ insertText, ...rest }) => ({
     ...rest,
     insertText:
-      hasMoreMandatoryArgs && fnDefinition.type !== 'builtin' ? `${insertText},` : insertText,
+      insertText: hasMoreMandatoryArgs && !fnDefinition.builtin ? `${insertText},` : insertText,
   }));
 }
 
