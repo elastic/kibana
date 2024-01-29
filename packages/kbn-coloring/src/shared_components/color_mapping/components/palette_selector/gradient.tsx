@@ -6,12 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { euiFocusRing, EuiIcon, euiShadowSmall, useEuiTheme } from '@elastic/eui';
+import {
+  euiCanAnimate,
+  euiFocusRing,
+  EuiIcon,
+  euiShadowSmall,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import React from 'react';
 import { useDispatch } from 'react-redux';
 
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { changeAlpha } from '../../color/color_math';
 
 import { ColorMapping } from '../../config';
@@ -71,6 +79,11 @@ export function Gradient({
       css={css`
         position: relative;
         height: 24px;
+        &:hover {
+          button {
+            opacity: 1;
+          }
+        }
       `}
     >
       <div
@@ -178,64 +191,75 @@ function AddStop({
   const euiTheme = useEuiTheme();
   const dispatch = useDispatch();
   return (
-    <button
-      css={css`
-        position: relative;
-        border-radius: 50%;
-        width: 17px;
-        height: 17px;
-        padding: 0 0.5px;
-        ${euiFocusRing(euiTheme)};
-      `}
-      onClick={() => {
-        dispatch(
-          addGradientColorStep({
-            color: {
-              type: 'categorical',
-              // TODO assign the next available color or a better one
-              colorIndex: colorMode.steps.length,
-              paletteId: currentPalette.id,
-            },
-            at,
-          })
-        );
-        dispatch(
-          colorPickerVisibility({
-            index: at,
-            type: 'gradient',
-            visible: true,
-          })
-        );
-      }}
+    <EuiToolTip
+      position="top"
+      content={i18n.translate('coloring.colorMapping.container.invertGradientButtonLabel', {
+        defaultMessage: 'Add gradient stop',
+      })}
     >
-      <div
+      <button
         css={css`
-          width: 15px;
-          height: 15px;
+          position: relative;
           border-radius: 50%;
-          transition: 200ms background-color;
-          background-color: lightgrey;
-          &:hover {
-            background-color: #696f7d;
+          width: 17px;
+          height: 17px;
+          padding: 0 0.5px;
+          ${euiFocusRing(euiTheme)};
+          opacity: 0;
+          ${euiCanAnimate} {
+            transition: opacity ${euiTheme.euiTheme.animation.fast} ease-in;
           }
-          ${euiShadowSmall(euiTheme)}
         `}
+        onClick={() => {
+          dispatch(
+            addGradientColorStep({
+              color: {
+                type: 'categorical',
+                // TODO assign the next available color or a better one
+                colorIndex: colorMode.steps.length,
+                paletteId: currentPalette.id,
+              },
+              at,
+            })
+          );
+          dispatch(
+            colorPickerVisibility({
+              index: at,
+              type: 'gradient',
+              visible: true,
+            })
+          );
+        }}
       >
-        <EuiIcon
-          type="plus"
+        <div
           css={css`
-            position: absolute;
-            top: 0.5px;
-            left: 0;
-            transition: 200ms fill;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            transition: 200ms background-color;
+            background-color: lightgrey;
             &:hover {
-              fill: white;
+              background-color: #696f7d;
             }
+            ${euiShadowSmall(euiTheme)}
           `}
-          color={'#696f7d'}
-        />
-      </div>
-    </button>
+        >
+          <EuiIcon
+            type="plus"
+            css={css`
+              position: absolute;
+              top: 0.5px;
+              left: 0;
+              transition: 200ms fill;
+              &:hover {
+                fill: white;
+              }
+            `}
+            color={'#696f7d'}
+          />
+        </div>
+      </button>
+    </EuiToolTip>
   );
 }
 

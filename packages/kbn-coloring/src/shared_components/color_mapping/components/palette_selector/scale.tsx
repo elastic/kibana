@@ -102,7 +102,7 @@ export function ScaleMode({ getPaletteFn }: { getPaletteFn: ReturnType<typeof ge
       {colorScaleModal}
       <EuiFormRow
         label={i18n.translate('coloring.colorMapping.paletteSelector.scaleLabel', {
-          defaultMessage: `Color mode`,
+          defaultMessage: `Mode`,
         })}
       >
         <EuiButtonGroup
@@ -124,8 +124,7 @@ export function ScaleMode({ getPaletteFn }: { getPaletteFn: ReturnType<typeof ge
               iconType: 'gradient',
             },
           ]}
-          isFullWidth
-          buttonSize="compressed"
+          isIconOnly
           idSelected={colorMode.type}
           onChange={(id) => {
             const hasChanges = model.assignments.some((a) => a.touched);

@@ -89,7 +89,7 @@ export function PaletteSelector({
       {preserveChangesModal}
       <EuiFormRow
         label={i18n.translate('coloring.colorMapping.paletteSelector.paletteLabel', {
-          defaultMessage: `Palette`,
+          defaultMessage: `Color palette`,
         })}
       >
         <EuiColorPalettePicker

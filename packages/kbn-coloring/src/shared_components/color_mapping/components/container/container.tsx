@@ -15,18 +15,24 @@ import {
   EuiFlexItem,
   EuiFormLabel,
   EuiFormRow,
-  EuiIcon,
   EuiPanel,
-  EuiSpacer,
-  EuiToolTip,
   EuiHorizontalRule,
   EuiEmptyPrompt,
   EuiButton,
+  EuiText,
+  EuiPopover,
+  EuiContextMenuPanel,
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiIcon,
+  EuiNotificationBadge,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { Assignment } from '../assignment/assignment';
 import { SpecialAssignment } from '../assignment/special_assignment';
 import { PaletteSelector } from '../palette_selector/palette_selector';
@@ -67,6 +73,7 @@ export function Container({
 }) {
   const dispatch = useDispatch();
   const [assignmentOnFocus, setAssignmentOnFocus] = useState<number>(-1);
+  const [showOtherActions, setShowOtherActions] = useState<boolean>(false);
 
   const getPaletteFn = getPalette(palettes, NeutralPalette);
 
@@ -74,8 +81,6 @@ export function Container({
   const colorMode = useSelector(selectColorMode);
   const assignments = useSelector(selectComputedAssignments);
   const specialAssignments = useSelector(selectSpecialAssignments);
-
-  const canAddNewAssignment = assignments.length < MAX_ASSIGNABLE_COLORS;
 
   const assignmentValuesCounter = assignments.reduce<Map<string | string[], number>>(
     (acc, assignment) => {
@@ -147,45 +152,68 @@ export function Container({
   const otherAssignment = specialAssignments[0];
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexStart">
+    <EuiFlexGroup direction="column" gutterSize="m" justifyContent="flexStart">
       <EuiFlexItem>
-        <PaletteSelector palettes={palettes} getPaletteFn={getPaletteFn} isDarkMode={isDarkMode} />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <ScaleMode getPaletteFn={getPaletteFn} />
+        <EuiFlexGroup
+          direction="row"
+          alignItems="center"
+          justifyContent="spaceBetween"
+          gutterSize="s"
+        >
+          <EuiFlexItem>
+            <PaletteSelector
+              palettes={palettes}
+              getPaletteFn={getPaletteFn}
+              isDarkMode={isDarkMode}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={0}>
+            <ScaleMode getPaletteFn={getPaletteFn} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
       {colorMode.type === 'gradient' && (
-        <EuiFlexItem>
+        <EuiFlexItem style={{ position: 'relative' }}>
+          <div
+            css={css`
+              position: absolute;
+              right: 0;
+            }`}
+          >
+            <EuiToolTip
+              position="top"
+              content={i18n.translate('coloring.colorMapping.container.invertGradientButtonLabel', {
+                defaultMessage: 'Invert gradient',
+              })}
+            >
+              <EuiButtonIcon
+                data-test-subj="lns-colorMapping-invertGradient"
+                iconType="merge"
+                size="xs"
+                aria-label={i18n.translate(
+                  'coloring.colorMapping.container.invertGradientButtonLabel',
+                  {
+                    defaultMessage: 'Invert gradient',
+                  }
+                )}
+                onClick={() => {
+                  dispatch(changeGradientSortOrder(colorMode.sort === 'asc' ? 'desc' : 'asc'));
+                }}
+              />
+            </EuiToolTip>
+          </div>
           <EuiFormRow
             label={i18n.translate('coloring.colorMapping.container.gradientHeader', {
               defaultMessage: 'Gradient',
             })}
           >
-            <div>
-              <Gradient
-                colorMode={colorMode}
-                getPaletteFn={getPaletteFn}
-                isDarkMode={isDarkMode}
-                paletteId={palette.id}
-                assignmentsSize={assignments.length}
-              />
-              <EuiSpacer size="xs" />
-              <EuiFlexGroup justifyContent="flexEnd" direction="row">
-                <EuiButtonEmpty
-                  flush="both"
-                  data-test-subj="lns-colorMapping-invertGradient"
-                  iconType="merge"
-                  size="xs"
-                  onClick={() => {
-                    dispatch(changeGradientSortOrder(colorMode.sort === 'asc' ? 'desc' : 'asc'));
-                  }}
-                >
-                  {i18n.translate('coloring.colorMapping.container.invertGradientButtonLabel', {
-                    defaultMessage: 'Invert gradient',
-                  })}
-                </EuiButtonEmpty>
-              </EuiFlexGroup>
-            </div>
+            <Gradient
+              colorMode={colorMode}
+              getPaletteFn={getPaletteFn}
+              isDarkMode={isDarkMode}
+              paletteId={palette.id}
+              assignmentsSize={assignments.length}
+            />
           </EuiFormRow>
         </EuiFlexItem>
       )}
@@ -195,186 +223,199 @@ export function Container({
           <EuiFlexItem>
             <EuiFormLabel>
               {i18n.translate('coloring.colorMapping.container.mappingAssignmentHeader', {
-                defaultMessage: 'Mappings',
+                defaultMessage: 'Color assignments',
               })}
             </EuiFormLabel>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiPanel color="subdued" borderRadius="none" hasShadow={false} paddingSize="s">
-          {assignments.length > 0 && (
-            <>
+        <EuiPanel
+          color="subdued"
+          borderRadius="none"
+          hasShadow={false}
+          paddingSize="none"
+          css={css`
+            overflow: hidden;
+          `}
+        >
+          <div
+            css={css`
+              padding: ${euiThemeVars.euiPanelPaddingModifiers.paddingSmall};
+            `}
+          >
+            <EuiFlexGroup direction="column" gutterSize="s">
+              {assignments.map((assignment, i) => {
+                return (
+                  <Assignment
+                    data={data}
+                    index={i}
+                    total={assignments.length}
+                    colorMode={colorMode}
+                    editable={true}
+                    canPickColor={true}
+                    palette={palette}
+                    isDarkMode={isDarkMode}
+                    getPaletteFn={getPaletteFn}
+                    assignment={assignment}
+                    disableDelete={false}
+                    specialTokens={specialTokens}
+                    assignmentValuesCounter={assignmentValuesCounter}
+                    focusOnMount={assignmentOnFocus === i}
+                    onBlur={() => setAssignmentOnFocus(-1)}
+                  />
+                );
+              })}
+              {assignments.length === 0 && (
+                <EuiEmptyPrompt
+                  paddingSize="s"
+                  body={
+                    <EuiText size="s">
+                      <p>
+                        <FormattedMessage
+                          id="coloring.colorMapping.container.mapValuesPromptDescription.mapValuesPromptDetail"
+                          defaultMessage="Add new assignments to begin associating terms in your data with specified colors."
+                        />
+                      </p>
+                    </EuiText>
+                  }
+                  actions={[
+                    <EuiButton
+                      color="primary"
+                      size="s"
+                      onClick={onClickAddNewAssignment}
+                      iconType="plus"
+                    >
+                      {i18n.translate('coloring.colorMapping.container.AddAssignmentButtonLabel', {
+                        defaultMessage: 'Add assignment',
+                      })}
+                    </EuiButton>,
+                    <EuiButtonEmpty
+                      color="primary"
+                      size="xs"
+                      onClick={onClickAddAllCurrentCategories}
+                    >
+                      {i18n.translate('coloring.colorMapping.container.mapValueButtonLabel', {
+                        defaultMessage: 'Add all unassigned terms',
+                      })}
+                    </EuiButtonEmpty>,
+                  ]}
+                />
+              )}
+            </EuiFlexGroup>
+          </div>
+          {assignments.length > 0 && <EuiHorizontalRule margin="none" />}
+          <div
+            css={css`
+              padding: ${euiThemeVars.euiPanelPaddingModifiers.paddingSmall};
+              overflow: hidden;
+            `}
+          >
+            {assignments.length > 0 && (
               <EuiFlexGroup
                 direction="row"
                 alignItems="center"
                 justifyContent="spaceBetween"
                 gutterSize="none"
               >
-                <EuiButtonEmpty
-                  data-test-subj="lns-colorMapping-addNewAssignment"
-                  size="xs"
-                  flush="both"
-                  onClick={onClickAddNewAssignment}
-                  disabled={!canAddNewAssignment}
-                  css={css`
-                    margin-right: 8px;
-                  `}
-                >
-                  {i18n.translate('coloring.colorMapping.container.mapValueButtonLabel', {
-                    defaultMessage: 'Map a value',
+                <EuiButton color="text" size="s" onClick={onClickAddNewAssignment} iconType="plus">
+                  {i18n.translate('coloring.colorMapping.container.AddAssignmentButtonLabel', {
+                    defaultMessage: 'Add assignment',
                   })}
-                </EuiButtonEmpty>
-
+                </EuiButton>
                 {data.type === 'categories' && (
-                  <EuiButtonEmpty
-                    data-test-subj="lns-colorMapping-addNewAssignment"
-                    size="xs"
-                    flush="both"
-                    onClick={onClickAddAllCurrentCategories}
-                    disabled={unmatchingCategories.length === 0}
-                    css={css`
-                      margin-right: 8px;
-                    `}
-                  >
-                    {i18n.translate('coloring.colorMapping.container.mapCurrentValuesButtonLabel', {
-                      defaultMessage: 'Map current values {termsCount}',
-                      values: {
-                        termsCount:
-                          unmatchingCategories.length > 0 ? `(${unmatchingCategories.length})` : '',
-                      },
-                    })}
-                  </EuiButtonEmpty>
-                )}
-
-                <EuiButtonEmpty
-                  data-test-subj="lns-colorMapping-addNewAssignment"
-                  size="xs"
-                  flush="both"
-                  color="danger"
-                  onClick={() => {
-                    setAssignmentOnFocus(-1);
-                    dispatch(removeAllAssignments());
-                  }}
-                  disabled={assignments.length === 0}
-                  css={css`
-                    margin-right: 8px;
-                  `}
-                >
-                  {i18n.translate('coloring.colorMapping.container.resetButtonLabel', {
-                    defaultMessage: 'Clear all',
-                  })}
-                </EuiButtonEmpty>
-              </EuiFlexGroup>
-              <EuiHorizontalRule margin="xs" />
-            </>
-          )}
-
-          <EuiFlexGroup direction="column">
-            <div
-              data-test-subj="lns-colorMapping-assignmentsList"
-              css={css`
-                display: grid;
-                grid-template-columns: [assignment] auto;
-                gap: 8px;
-              `}
-            >
-              {assignments.map((assignment, i) => {
-                return (
-                  <div
-                    key={i}
-                    css={css`
-                      position: relative;
-                      grid-column: 1;
-                      grid-row: ${i + 1};
-                      width: 100%;
-                    `}
-                  >
-                    <Assignment
-                      data={data}
-                      index={i}
-                      total={assignments.length}
-                      colorMode={colorMode}
-                      editable={true}
-                      canPickColor={true}
-                      palette={palette}
-                      isDarkMode={isDarkMode}
-                      getPaletteFn={getPaletteFn}
-                      assignment={assignment}
-                      disableDelete={false}
-                      specialTokens={specialTokens}
-                      assignmentValuesCounter={assignmentValuesCounter}
-                      focusOnMount={assignmentOnFocus === i}
-                      onBlur={() => setAssignmentOnFocus(-1)}
-                    />
-                  </div>
-                );
-              })}
-              {assignments.length === 0 && (
-                <EuiEmptyPrompt
-                  paddingSize="none"
-                  body={
-                    <p style={{ fontSize: '0.8em' }}>
-                      <FormattedMessage
-                        id="coloring.colorMapping.container.mapValuesPromptDescription.mapValuesPromptDetail"
-                        defaultMessage="Map values to colors to {strongPersist} the associations across data changes."
-                        values={{
-                          verb: (
-                            <strong>
-                              <FormattedMessage
-                                id="coloring.colorMapping.container.mapValuesPromptDescription.strongPersistLabel"
-                                defaultMessage="persist"
-                              />
-                            </strong>
-                          ),
-                        }}
+                  <EuiPopover
+                    id={'TODO popoverid'}
+                    button={
+                      <EuiButtonIcon
+                        iconType="boxesVertical"
+                        onClick={() => setShowOtherActions(true)}
                       />
-                    </p>
-                  }
-                  actions={[
-                    <EuiButton
-                      color="primary"
-                      fill
+                    }
+                    isOpen={showOtherActions}
+                    closePopover={() => setShowOtherActions(false)}
+                    panelPaddingSize="xs"
+                    anchorPosition="downRight"
+                    ownFocus
+                  >
+                    <EuiContextMenuPanel
                       size="s"
-                      onClick={onClickAddAllCurrentCategories}
-                    >
-                      {i18n.translate(
-                        'coloring.colorMapping.container.mapCurrentValuesButtonLabel',
-                        {
-                          defaultMessage: 'Map current values {termsCount}',
-                          values: {
-                            termsCount:
-                              unmatchingCategories.length > 0
-                                ? `(${unmatchingCategories.length})`
-                                : '',
-                          },
-                        }
-                      )}
-                    </EuiButton>,
-                    <EuiButtonEmpty color="primary" size="s" onClick={onClickAddNewAssignment}>
-                      {i18n.translate('coloring.colorMapping.container.mapValueButtonLabel', {
-                        defaultMessage: 'Map a value',
-                      })}
-                    </EuiButtonEmpty>,
-                  ]}
-                />
-              )}
-            </div>
-          </EuiFlexGroup>
+                      items={[
+                        <EuiContextMenuItem
+                          data-test-subj="lns-colorMapping-addAllAssignments"
+                          key="item-1"
+                          icon="listAdd"
+                          size="s"
+                          onClick={() => {
+                            setShowOtherActions(false);
+                            requestAnimationFrame(() => {
+                              onClickAddAllCurrentCategories();
+                            });
+                          }}
+                          disabled={unmatchingCategories.length === 0}
+                        >
+                          <EuiFlexGroup>
+                            <EuiFlexItem>
+                              {i18n.translate(
+                                'coloring.colorMapping.container.mapCurrentValuesButtonLabel',
+                                {
+                                  defaultMessage: 'Add all unsassigned terms',
+                                  values: {
+                                    termsCount:
+                                      unmatchingCategories.length > 0
+                                        ? `(${unmatchingCategories.length})`
+                                        : '',
+                                  },
+                                }
+                              )}
+                            </EuiFlexItem>
+                            {unmatchingCategories.length > 0 && (
+                              <EuiFlexItem grow={0}>
+                                <EuiNotificationBadge color="subdued">
+                                  {unmatchingCategories.length}
+                                </EuiNotificationBadge>
+                              </EuiFlexItem>
+                            )}
+                          </EuiFlexGroup>
+                        </EuiContextMenuItem>,
+                        <EuiContextMenuItem
+                          data-test-subj="lns-colorMapping-clearAllAssignments"
+                          size="s"
+                          icon={<EuiIcon type="eraser" size="m" color="danger" />}
+                          onClick={() => {
+                            setShowOtherActions(false);
+                            setAssignmentOnFocus(-1);
+                            dispatch(removeAllAssignments());
+                          }}
+                          color="danger"
+                        >
+                          {i18n.translate(
+                            'coloring.colorMapping.container.clearAllAssignmentsButtonLabel',
+                            {
+                              defaultMessage: 'Clear all assignments',
+                              values: {
+                                termsCount:
+                                  unmatchingCategories.length > 0
+                                    ? `(${unmatchingCategories.length})`
+                                    : '',
+                              },
+                            }
+                          )}
+                        </EuiContextMenuItem>,
+                      ]}
+                    />
+                  </EuiPopover>
+                )}
+              </EuiFlexGroup>
+            )}
+          </div>
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiFormRow
-          label={
-            <EuiToolTip content="How color are applied to not mapped values">
-              <span>
-                {i18n.translate('coloring.colorMapping.container.fallbackModeHeader', {
-                  defaultMessage: 'Fallback mode',
-                })}
-                <EuiIcon type="questionInCircle" color="subdued" />
-              </span>
-            </EuiToolTip>
-          }
+          label={i18n.translate('coloring.colorMapping.container.fallbackModeHeader', {
+            defaultMessage: 'Color for unassigned terms',
+          })}
         >
           <EuiButtonGroup
             legend={'color mode'}
@@ -386,13 +427,13 @@ export function Container({
                     ? i18n.translate(
                         'coloring.colorMapping.container.fallbackMode.ReuseGradientLabel',
                         {
-                          defaultMessage: 'Reuse gradient',
+                          defaultMessage: 'Loop gradient',
                         }
                       )
                     : i18n.translate(
                         'coloring.colorMapping.container.fallbackMode.ReuseColorsLabel',
                         {
-                          defaultMessage: 'Reuse colors',
+                          defaultMessage: 'Loop palette colors',
                         }
                       ),
               },
@@ -401,7 +442,7 @@ export function Container({
                 label: i18n.translate(
                   'coloring.colorMapping.container.fallbackMode.SingleColorLabel',
                   {
-                    defaultMessage: 'Single color',
+                    defaultMessage: 'Select Single color',
                   }
                 ),
               },
