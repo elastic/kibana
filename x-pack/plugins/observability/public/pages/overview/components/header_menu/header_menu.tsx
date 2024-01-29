@@ -8,10 +8,9 @@
 import { EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-
 import { useLocation } from 'react-router-dom';
-import { useKibana } from '../../../../utils/kibana_react';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
+import { useKibana } from '../../../../utils/kibana_react';
 import HeaderMenuPortal from './header_menu_portal';
 
 const SLO_FEEDBACK_LINK = 'https://ela.st/slo-feedback';
@@ -28,7 +27,7 @@ export function HeaderMenu(): React.ReactElement | null {
   } = usePluginContext();
 
   const { pathname } = useLocation();
-  const path = pathname.split('/').slice(1)[0];
+  const path = pathname?.split('/').slice(1)[0] ?? '';
   const isSloRelatedPath = path === 'slos';
 
   return (
