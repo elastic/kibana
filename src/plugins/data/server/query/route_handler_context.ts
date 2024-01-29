@@ -7,7 +7,7 @@
  */
 
 import { CustomRequestHandlerContext, RequestHandlerContext, SavedObject } from '@kbn/core/server';
-import { isFilters, isOfQueryType, nodeBuilder, nodeTypes } from '@kbn/es-query';
+import { escapeKuery, isFilters, isOfQueryType } from '@kbn/es-query';
 import { omit } from 'lodash';
 import { isQuery, SavedQueryAttributes } from '../../common';
 import { extract, inject } from '../../common/query/filters/persistable_state';
@@ -103,7 +103,7 @@ export async function registerSavedQueryRouteHandlerContext(context: RequestHand
     const { savedQueries } = await findSavedQueries({
       page: 1,
       perPage: 1,
-      search: attributes.title,
+      search: `"${escapeKuery(attributes.title.trim())}"`,
     });
     const existingQuery = savedQueries[0];
 
@@ -207,9 +207,7 @@ export async function registerSavedQueryRouteHandlerContext(context: RequestHand
         type: 'query',
         page,
         perPage,
-        filter: search
-          ? nodeBuilder.is('query.attributes.title', nodeTypes.wildcard.buildNode(search))
-          : undefined,
+        filter: search ? `query.attributes.title:(${search})` : undefined,
         sortField: 'titleKeyword',
         sortOrder: 'asc',
       });

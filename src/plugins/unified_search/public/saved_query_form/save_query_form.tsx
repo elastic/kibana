@@ -11,6 +11,7 @@ import { EuiButton, EuiForm, EuiFormRow, EuiFieldText, EuiSwitch } from '@elasti
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { SavedQuery, SavedQueryService } from '@kbn/data-plugin/public';
+import { escapeKuery } from '@kbn/es-query';
 
 interface Props {
   savedQuery?: SavedQuery;
@@ -69,7 +70,7 @@ export function SaveQueryForm({
 
     if (!savedQuery) {
       const { queries }: { queries: Array<SavedQuery | undefined> } =
-        await savedQueryService.findSavedQueries(title, 1, 1);
+        await savedQueryService.findSavedQueries(`"${escapeKuery(title.trim())}"`, 1, 1);
 
       if (queries[0]?.attributes.title === title) {
         errors.push(titleConflictErrorText);

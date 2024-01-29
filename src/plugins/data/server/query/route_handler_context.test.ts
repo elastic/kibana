@@ -7,7 +7,7 @@
  */
 
 import { coreMock } from '@kbn/core/server/mocks';
-import { FilterStateStore, nodeBuilder, nodeTypes, Query } from '@kbn/es-query';
+import { FilterStateStore, Query } from '@kbn/es-query';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../common';
 import type { SavedObject, SavedQueryAttributes } from '../../common';
 import {
@@ -371,7 +371,7 @@ describe('saved query route handler context', () => {
         type: 'query',
         page: 1,
         perPage: 50,
-        filter: nodeBuilder.is('query.attributes.title', nodeTypes.wildcard.buildNode('foo')),
+        filter: 'query.attributes.title:(foo)',
         sortField: 'titleKeyword',
         sortOrder: 'asc',
       });
