@@ -21,6 +21,7 @@ import {
 import { FLEET_ROUTING_PATHS, pagePathGetters } from '../../constants';
 import { DefaultLayout } from '../../layouts';
 import { Loading } from '../../components';
+import { DEFAULT_OUTPUT_ID } from '../../../../../common/constants';
 
 import { FleetServerFlyout } from '../../components';
 
@@ -126,7 +127,7 @@ export const SettingsApp = withConfirmModalProvider(() => {
             <EditOutputFlyout
               proxies={proxies.data.items}
               onClose={onCloseCallback}
-              defaultOuput={outputs.data?.items.find((o) => o.id === 'fleet-default-output')}
+              defaultOuput={outputs.data?.items.find((o) => o.id === DEFAULT_OUTPUT_ID)}
             />
           </EuiPortal>
         </Route>
