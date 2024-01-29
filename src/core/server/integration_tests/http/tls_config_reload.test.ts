@@ -26,6 +26,7 @@ const EXTERNAL_URL_CONFIG = externalUrlConfig.schema.validate({});
 const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 
 describe('HttpServer - TLS config', () => {
+  const PKG_INFO = { packageInfo: { buildSha: '123' } };
   let server: HttpServer;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
@@ -53,7 +54,7 @@ describe('HttpServer - TLS config', () => {
       },
       shutdownTimeout: '1s',
     });
-    const firstConfig = new HttpConfig(rawHttpConfig, CSP_CONFIG, EXTERNAL_URL_CONFIG);
+    const firstConfig = new HttpConfig(rawHttpConfig, CSP_CONFIG, EXTERNAL_URL_CONFIG, PKG_INFO);
 
     const config$ = new BehaviorSubject(firstConfig);
 
@@ -108,7 +109,7 @@ describe('HttpServer - TLS config', () => {
       shutdownTimeout: '1s',
     });
 
-    const secondConfig = new HttpConfig(secondRawConfig, CSP_CONFIG, EXTERNAL_URL_CONFIG);
+    const secondConfig = new HttpConfig(secondRawConfig, CSP_CONFIG, EXTERNAL_URL_CONFIG, PKG_INFO);
     config$.next(secondConfig);
 
     const secondCertificate = await fetchPeerCertificate(firstConfig.host, firstConfig.port);

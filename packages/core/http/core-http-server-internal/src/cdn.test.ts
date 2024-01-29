@@ -9,6 +9,10 @@
 import { CdnConfig } from './cdn';
 
 describe('CdnConfig', () => {
+  const PKG_INFO = { packageInfo: { buildSha: 'a816c7fae954ed02b0705fb4388ad6c88def41db' } };
+  const getCdnConfig = (url: string, suffixSHADigestToPath = false) =>
+    CdnConfig.from({ url, suffixSHADigestToPath }, PKG_INFO);
+
   it.each([
     ['https://cdn.elastic.co', 'cdn.elastic.co'],
     ['https://foo.bar', 'foo.bar'],
@@ -16,7 +20,7 @@ describe('CdnConfig', () => {
     ['https://cdn.elastic.co:9999', 'cdn.elastic.co:9999'],
     ['https://cdn.elastic.co:9999/with-a-path', 'cdn.elastic.co:9999'],
   ])('host as expected for %p', (url, expected) => {
-    expect(CdnConfig.from({ url }).host).toEqual(expected);
+    expect(getCdnConfig(url).host).toEqual(expected);
   });
 
   it.each([
@@ -26,20 +30,20 @@ describe('CdnConfig', () => {
     ['https://cdn.elastic.co:9999', 'https://cdn.elastic.co:9999'],
     ['https://cdn.elastic.co:9999/with-a-path', 'https://cdn.elastic.co:9999/with-a-path'],
   ])('base HREF as expected for %p', (url, expected) => {
-    expect(CdnConfig.from({ url }).baseHref).toEqual(expected);
+    expect(getCdnConfig(url).baseHref).toEqual(expected);
   });
 
   it.each([['foo'], ['#!']])('throws for invalid URLs (%p)', (url) => {
-    expect(() => CdnConfig.from({ url })).toThrow(/Invalid URL/);
+    expect(() => getCdnConfig(url)).toThrow(/Invalid URL/);
   });
 
   it('handles empty urls', () => {
-    expect(CdnConfig.from({ url: '' }).baseHref).toBeUndefined();
-    expect(CdnConfig.from({ url: '' }).host).toBeUndefined();
+    expect(getCdnConfig('').baseHref).toBeUndefined();
+    expect(getCdnConfig('').host).toBeUndefined();
   });
 
   it('generates the expected CSP additions', () => {
-    const cdnConfig = CdnConfig.from({ url: 'https://foo.bar:9999' });
+    const cdnConfig = getCdnConfig('https://foo.bar:9999');
     expect(cdnConfig.getCspConfig()).toEqual({
       connect_src: ['foo.bar:9999'],
       font_src: ['foo.bar:9999'],
@@ -51,7 +55,22 @@ describe('CdnConfig', () => {
   });
 
   it('generates the expected CSP additions when no URL is provided', () => {
-    const cdnConfig = CdnConfig.from({ url: '' });
+    const cdnConfig = getCdnConfig('');
     expect(cdnConfig.getCspConfig()).toEqual({});
+  });
+
+  it('suffixes the SHA digest to the path when enabled', () => {
+    expect(getCdnConfig('https://foo.bar:9999', true).baseHref).toEqual(
+      'https://foo.bar:9999/a816c7fae954'
+    );
+    expect(getCdnConfig('https://foo.bar:9999/cool-path', true).baseHref).toEqual(
+      'https://foo.bar:9999/cool-path/a816c7fae954'
+    );
+    expect(
+      CdnConfig.from(
+        { url: 'https://foo.bar:9999/cool-path', suffixSHADigestToPath: true },
+        { packageInfo: { buildSha: '123' } }
+      ).baseHref
+    ).toEqual('https://foo.bar:9999/cool-path/123');
   });
 });

@@ -61,6 +61,10 @@ const configSchema = schema.object(
     }),
     cdn: schema.object({
       url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
+      suffixSHADigestToPath: offeringBasedSchema({
+        traditional: schema.never(),
+        serverless: schema.boolean({ defaultValue: true }),
+      }),
     }),
     cors: schema.object(
       {
@@ -299,7 +303,8 @@ export class HttpConfig implements IHttpConfig {
   constructor(
     rawHttpConfig: HttpConfigType,
     rawCspConfig: CspConfigType,
-    rawExternalUrlConfig: ExternalUrlConfig
+    rawExternalUrlConfig: ExternalUrlConfig,
+    env: { packageInfo: { buildSha: string } }
   ) {
     this.autoListen = rawHttpConfig.autoListen;
     this.host = rawHttpConfig.host;
@@ -327,7 +332,7 @@ export class HttpConfig implements IHttpConfig {
     this.rewriteBasePath = rawHttpConfig.rewriteBasePath;
     this.ssl = new SslConfig(rawHttpConfig.ssl || {});
     this.compression = rawHttpConfig.compression;
-    this.cdn = CdnConfig.from(rawHttpConfig.cdn);
+    this.cdn = CdnConfig.from(rawHttpConfig.cdn, env);
     this.csp = new CspConfig({ ...rawCspConfig, disableEmbedding }, this.cdn.getCspConfig());
     this.externalUrl = rawExternalUrlConfig;
     this.xsrf = rawHttpConfig.xsrf;

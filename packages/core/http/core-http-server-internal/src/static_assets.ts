@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Env } from '@kbn/config';
 import type { BasePath } from './base_path_service';
 import { CdnConfig } from './cdn';
 
@@ -17,7 +18,7 @@ export interface InternalStaticAssets {
 export class StaticAssets implements InternalStaticAssets {
   private readonly assetsHrefBase: string;
 
-  constructor(basePath: BasePath, cdnConfig: CdnConfig) {
+  constructor(env: Env, basePath: BasePath, cdnConfig: CdnConfig) {
     const hrefToUse = cdnConfig.baseHref ?? basePath.serverBasePath;
     this.assetsHrefBase = hrefToUse.endsWith('/') ? hrefToUse.slice(0, -1) : hrefToUse;
   }

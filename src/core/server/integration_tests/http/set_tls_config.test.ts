@@ -25,6 +25,7 @@ import { flattenCertificateChain, fetchPeerCertificate, isServerTLS } from './tl
 describe('setTlsConfig', () => {
   const CSP_CONFIG = cspConfig.schema.validate({});
   const EXTERNAL_URL_CONFIG = externalUrlConfig.schema.validate({});
+  const PKG_INFO = { packageInfo: { buildSha: '123' } };
 
   beforeAll(() => {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -44,7 +45,7 @@ describe('setTlsConfig', () => {
       },
       shutdownTimeout: '1s',
     });
-    const firstConfig = new HttpConfig(rawHttpConfig, CSP_CONFIG, EXTERNAL_URL_CONFIG);
+    const firstConfig = new HttpConfig(rawHttpConfig, CSP_CONFIG, EXTERNAL_URL_CONFIG, PKG_INFO);
 
     const serverOptions = getServerOptions(firstConfig);
     const listenerOptions = getListenerOptions(firstConfig);
@@ -90,7 +91,7 @@ describe('setTlsConfig', () => {
       shutdownTimeout: '1s',
     });
 
-    const secondConfig = new HttpConfig(secondRawConfig, CSP_CONFIG, EXTERNAL_URL_CONFIG);
+    const secondConfig = new HttpConfig(secondRawConfig, CSP_CONFIG, EXTERNAL_URL_CONFIG, PKG_INFO);
 
     setTlsConfig(server, secondConfig.ssl);
 

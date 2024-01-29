@@ -531,6 +531,9 @@ describe('restrictInternalApis', () => {
 });
 
 describe('HttpConfig', () => {
+  const pkgInfo = {
+    packageInfo: { buildSha: 'sha' },
+  };
   it('converts customResponseHeaders to strings or arrays of strings', () => {
     const httpSchema = config.schema;
     const rawConfig = httpSchema.validate({
@@ -546,7 +549,7 @@ describe('HttpConfig', () => {
       },
     });
     const rawCspConfig = cspConfig.schema.validate({});
-    const httpConfig = new HttpConfig(rawConfig, rawCspConfig, ExternalUrlConfig.DEFAULT);
+    const httpConfig = new HttpConfig(rawConfig, rawCspConfig, ExternalUrlConfig.DEFAULT, pkgInfo);
 
     expect(httpConfig.customResponseHeaders).toEqual({
       string: 'string',
@@ -560,7 +563,7 @@ describe('HttpConfig', () => {
   it('defaults restrictInternalApis to false', () => {
     const rawConfig = config.schema.validate({}, {});
     const rawCspConfig = cspConfig.schema.validate({});
-    const httpConfig = new HttpConfig(rawConfig, rawCspConfig, ExternalUrlConfig.DEFAULT);
+    const httpConfig = new HttpConfig(rawConfig, rawCspConfig, ExternalUrlConfig.DEFAULT, pkgInfo);
     expect(httpConfig.restrictInternalApis).toBe(false);
   });
 });

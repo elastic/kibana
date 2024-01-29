@@ -74,7 +74,7 @@ export class HttpService
       configService.atPath<HttpConfigType>(httpConfig.path, { ignoreUnchanged: false }),
       configService.atPath<CspConfigType>(cspConfig.path),
       configService.atPath<ExternalUrlConfigType>(externalUrlConfig.path),
-    ]).pipe(map(([http, csp, externalUrl]) => new HttpConfig(http, csp, externalUrl)));
+    ]).pipe(map(([http, csp, externalUrl]) => new HttpConfig(http, csp, externalUrl, this.env)));
     const shutdownTimeout$ = this.config$.pipe(map(({ shutdownTimeout }) => shutdownTimeout));
     this.prebootServer = new HttpServer(logger, 'Preboot', shutdownTimeout$);
     this.httpServer = new HttpServer(logger, 'Kibana', shutdownTimeout$);
