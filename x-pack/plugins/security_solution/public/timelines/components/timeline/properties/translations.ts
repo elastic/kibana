@@ -32,43 +32,9 @@ export const NOTES = i18n.translate('xpack.securitySolution.timeline.properties.
   defaultMessage: 'Notes',
 });
 
-export const NEW_TIMELINE = i18n.translate(
-  'xpack.securitySolution.timeline.properties.newTimelineButtonLabel',
-  {
-    defaultMessage: 'Create new Timeline',
-  }
-);
-
-export const NEW_TEMPLATE_TIMELINE = i18n.translate(
-  'xpack.securitySolution.timeline.properties.newTemplateTimelineButtonLabel',
-  {
-    defaultMessage: 'Create new Timeline template',
-  }
-);
-
 export const ADD_TIMELINE = i18n.translate(
   'xpack.securitySolution.timeline.properties.addTimelineButtonLabel',
   {
     defaultMessage: 'Add new timeline or template',
-  }
-);
-
-export const ATTACH_TO_CASE = i18n.translate(
-  'xpack.securitySolution.timeline.properties.attachToCaseButtonLabel',
-  {
-    defaultMessage: 'Attach to case',
-  }
-);
-
-export const ATTACH_TO_NEW_CASE = i18n.translate(
-  'xpack.securitySolution.timeline.properties.attachToNewCaseButtonLabel',
-  {
-    defaultMessage: 'Attach to new case',
-  }
-);
-export const ATTACH_TO_EXISTING_CASE = i18n.translate(
-  'xpack.securitySolution.timeline.properties.attachToExistingCaseButtonLabel',
-  {
-    defaultMessage: 'Attach to existing case',
   }
 );

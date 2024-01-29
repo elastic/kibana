@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import {
   OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY,
   urlSchemaV1,
-} from '@kbn/observability-log-explorer-plugin/common';
+} from '@kbn/observability-logs-explorer-plugin/common';
 import rison from '@kbn/rison';
 import querystring from 'querystring';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
