@@ -6,12 +6,15 @@
  */
 
 import React, { memo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiAccordion,
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
+  EuiStat,
   EuiTablePagination,
   EuiTitle,
 } from '@elastic/eui';
@@ -19,6 +22,7 @@ import { useFetchSloList } from '../../../../hooks/slo/use_fetch_slo_list';
 import { SlosView } from '../slos_view';
 import type { SortDirection } from '../slo_list_search_bar';
 import { SLI_OPTIONS } from '../../../slo_edit/constants';
+import { useSloFormattedSLIValue } from '../../hooks/use_slo_summary';
 
 interface Props {
   isCompact: boolean;
@@ -28,6 +32,11 @@ interface Props {
   sort: string;
   direction: SortDirection;
   groupBy: string;
+  summary: {
+    worst?: number;
+    total: number;
+    violated: number;
+  };
 }
 
 export function GroupListView({
@@ -38,6 +47,7 @@ export function GroupListView({
   sort,
   direction,
   groupBy,
+  summary,
 }: Props) {
   const query = kqlQuery ? `"${groupBy}": ${group} and ${kqlQuery}` : `"${groupBy}": ${group}`;
   let groupName = group.toLowerCase();
@@ -47,7 +57,6 @@ export function GroupListView({
 
   const [page, setPage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  // TODO get sortBy and sortDirection from parent
   const {
     isLoading,
     isRefetching,
@@ -67,6 +76,11 @@ export function GroupListView({
   };
 
   const groupTitle = `${groupName} (${total})`;
+  const worstSLI = useSloFormattedSLIValue(summary.worst);
+  const totalViolated =
+    !isNullOrUndefined(summary.violated) && !isNullOrUndefined(summary.total)
+      ? `${summary.violated}/${summary.total}`
+      : null;
 
   return (
     <EuiPanel hasBorder={true}>
@@ -74,9 +88,59 @@ export function GroupListView({
         <EuiFlexItem>
           <MemoEuiAccordion
             buttonContent={
-              <EuiTitle size="xs">
-                <h3>{groupTitle}</h3>
-              </EuiTitle>
+              <EuiFlexGroup direction="column" gutterSize="xs">
+                <EuiFlexItem>
+                  <EuiTitle size="xs">
+                    <h3>{groupTitle}</h3>
+                  </EuiTitle>
+                </EuiFlexItem>
+                {totalViolated && (
+                  <EuiFlexItem>
+                    <span>
+                      <EuiBadge color="danger">
+                        {i18n.translate('xpack.observability.slo.group.worst', {
+                          defaultMessage: '{total} Violated',
+                          values: {
+                            total: totalViolated,
+                          },
+                        })}
+                      </EuiBadge>
+                    </span>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            }
+            extraAction={
+              <EuiFlexGroup>
+                {worstSLI && (
+                  <EuiFlexItem grow={false}>
+                    <EuiStat
+                      description={i18n.translate('xpack.observability.slo.group.worst', {
+                        defaultMessage: 'Worst SLO',
+                      })}
+                      title={worstSLI}
+                      textAlign="right"
+                      titleColor="danger"
+                      titleSize="s"
+                      reverse
+                    />
+                  </EuiFlexItem>
+                )}
+                {totalViolated && (
+                  <EuiFlexItem grow={false}>
+                    <EuiStat
+                      description={i18n.translate('xpack.observability.slo.group.violatedTotal', {
+                        defaultMessage: 'Violated',
+                      })}
+                      title={totalViolated}
+                      textAlign="right"
+                      titleColor="danger"
+                      titleSize="s"
+                      reverse
+                    />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
             }
             id={group}
             initialIsOpen={false}
@@ -108,3 +172,7 @@ export function GroupListView({
 }
 
 const MemoEuiAccordion = memo(EuiAccordion);
+
+function isNullOrUndefined(value: any) {
+  return value === undefined || value === null;
+}

@@ -39,6 +39,7 @@ export function GroupView({ isCompact, kqlQuery, sloView, sort, direction, group
       </div>
     );
   }
+
   return (
     <>
       {results &&
@@ -53,6 +54,11 @@ export function GroupView({ isCompact, kqlQuery, sloView, sort, direction, group
               isCompact={isCompact}
               sort={sort}
               direction={direction}
+              summary={{
+                worst: result.summary.worst,
+                total: result.summary.total,
+                violated: result.summary.violated,
+              }}
             />
           );
         })}
