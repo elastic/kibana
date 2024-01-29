@@ -67,10 +67,10 @@ function replaceAsKeywordWithAssignments(command: string) {
   });
 }
 
-function replaceFunctionsinSortWithEval(command: string) {
+function replaceFunctionsinSortWithStats(command: string) {
   const sortFunction = command.match(/[a-zA-Z_]+\([^\)]*\)(\.[^\)]*\))?/g)?.[0];
   return (
-    'EVAL sort_key = ' +
+    'STATS sort_key = ' +
     sortFunction +
     '\n| ' +
     command.replaceAll(/[a-zA-Z_]+\([^\)]*\)(\.[^\)]*\))?/g, 'sort_key ')
@@ -114,7 +114,7 @@ export function correctCommonEsqlMistakes(content: string, log: Logger) {
 
           case 'SORT':
             if (formattedCommand.match(/[a-zA-Z_]+\([^\)]*\)(\.[^\)]*\))?/g)) {
-              formattedCommand = replaceFunctionsinSortWithEval(formattedCommand);
+              formattedCommand = replaceFunctionsinSortWithStats(formattedCommand);
               break;
             }
 
