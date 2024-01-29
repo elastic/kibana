@@ -453,7 +453,7 @@ test('creates a control group from the control group factory and waits for it to
   expect(mockControlGroupFactory.create).toHaveBeenCalledWith(
     expect.objectContaining({ controlStyle: 'twoLine' }),
     undefined,
-    { lastSavedInput: expect.objectContaining({ controlStyle: 'twoLine' }) }
+    { lastSavedInput: expect.objectContaining({ controlStyle: 'oneLine' }) }
   );
   expect(mockControlGroupContainer.untilInitialized).toHaveBeenCalled();
 });
