@@ -125,6 +125,48 @@ describe('RiskSummary', () => {
     );
   });
 
+  it('builds lens cases attachment metadata for host risk score', () => {
+    render(
+      <TestProviders>
+        <RiskSummary
+          riskScoreData={mockHostRiskScoreState}
+          queryId={'testQuery'}
+          openDetailsPanel={() => {}}
+        />
+      </TestProviders>
+    );
+
+    const lensMetadata: LensAttributes =
+      mockVisualizationEmbeddable.mock.calls[0][0].casesAttachmentMetadata;
+
+    expect(lensMetadata).toMatchInlineSnapshot(`
+      Object {
+        "description": "Risk score for host test",
+      }
+    `);
+  });
+
+  it('builds lens cases attachment metadata for user risk score', () => {
+    render(
+      <TestProviders>
+        <RiskSummary
+          riskScoreData={mockUserRiskScoreState}
+          queryId={'testQuery'}
+          openDetailsPanel={() => {}}
+        />
+      </TestProviders>
+    );
+
+    const lensMetadata: LensAttributes =
+      mockVisualizationEmbeddable.mock.calls[0][0].casesAttachmentMetadata;
+
+    expect(lensMetadata).toMatchInlineSnapshot(`
+      Object {
+        "description": "Risk score for user test",
+      }
+    `);
+  });
+
   it('builds lens attributes for user risk score', () => {
     render(
       <TestProviders>

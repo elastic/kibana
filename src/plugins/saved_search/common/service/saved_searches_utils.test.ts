@@ -37,7 +37,8 @@ describe('saved_searches_utils', () => {
           ['tags-1', 'tags-2'],
           [],
           createSearchSourceMock(),
-          {}
+          {},
+          false
         )
       ).toMatchInlineSnapshot(`
         Object {
@@ -52,6 +53,7 @@ describe('saved_searches_utils', () => {
           "hideChart": true,
           "id": "id",
           "isTextBasedQuery": false,
+          "managed": false,
           "references": Array [],
           "refreshInterval": undefined,
           "rowHeight": undefined,
@@ -106,6 +108,7 @@ describe('saved_searches_utils', () => {
         hideChart: true,
         isTextBasedQuery: true,
         usesAdHocDataView: false,
+        managed: false,
       };
 
       expect(toSavedSearchAttributes(savedSearch, '{}')).toMatchInlineSnapshot(`
