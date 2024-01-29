@@ -28,7 +28,6 @@ export const dataTiersUiSettingsConfig: Record<string, UiSettingsParams> = {
 };
 
 export const cacheMaxAge = {
-  // to do probably use variable from constants
   'data_views:cache_max_age': {
     name: i18n.translate('dataViews.advancedSettings.cacheMaxAgeTitle', {
       defaultMessage: 'Field cache max age (in seconds)',
