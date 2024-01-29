@@ -22,7 +22,7 @@ export const createRateAggsBucketScript = (
           first: `${id}_first_bucket.maxValue`,
           second: `${id}_second_bucket.maxValue`,
         },
-        script: `params.second > 0.0 && params.first > 0.0 && params.second > params.first ? (params.second - params.first) / ${intervalInSeconds}: null`,
+        script: `params.second > 0.0 && params.first > 0.0 && params.second > params.first ? (params.second - params.first) / ${intervalInSeconds}: 0`,
       },
     },
   };
