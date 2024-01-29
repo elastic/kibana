@@ -12,6 +12,7 @@ import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { getInspectResponse } from '@kbn/observability-shared-plugin/common';
 import { kibanaService } from '../../../../utils/kibana_service';
 import { apiService } from '../../../../utils/api_service';
+import { withSpan } from '@kbn/apm-utils';
 
 export const executeEsQueryAPI = async ({
   params,
@@ -96,6 +97,8 @@ export const executeEsQueryAPI = async ({
       });
   });
 
-  const { rawResponse } = await response;
-  return { result: rawResponse as ESSearchResponse, name };
+  return withSpan("CUST" + name, async () => { 
+    const { rawResponse } = await response;
+    return { result: rawResponse as ESSearchResponse, name };
+  });
 };
