@@ -10,21 +10,22 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FindSLOResponse } from '@kbn/slo-schema';
-import { SearchState } from '../hooks/use_url_search_state';
-import { SortBySelect } from './common/sort_by_select';
+import { SLOSortBy } from './common/sort_by_select';
 import { SLOViewSettings } from './slo_view_settings';
+import { SloGroupBy } from './slo_list_group_by';
+import type { SearchState } from '../hooks/use_url_search_state';
 
 export type SLOView = 'cardView' | 'listView';
 
 interface Props {
   onToggleCompactView: () => void;
   onChangeView: (view: SLOView) => void;
+  onStateChange: (newState: Partial<SearchState>) => void;
   isCompact: boolean;
   sloView: SLOView;
+  state: SearchState;
   sloList?: FindSLOResponse;
   loading: boolean;
-  initialState: SearchState;
-  onStateChange: (newState: Partial<SearchState>) => void;
 }
 
 const toggleButtonsIcons = [
@@ -46,11 +47,11 @@ export function ToggleSLOView({
   sloView,
   onChangeView,
   onToggleCompactView,
+  onStateChange,
+  loading,
   isCompact = true,
   sloList,
-  loading,
-  initialState,
-  onStateChange,
+  state,
 }: Props) {
   const total = sloList?.total ?? 0;
   const pageSize = sloList?.perPage ?? 0;
@@ -82,7 +83,10 @@ export function ToggleSLOView({
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <SortBySelect initialState={initialState} loading={loading} onStateChange={onStateChange} />
+        <SLOSortBy initialState={state} sortBy={state.sort.by} onStateChange={onStateChange} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <SloGroupBy onStateChange={onStateChange} groupBy={state.groupBy} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonGroup

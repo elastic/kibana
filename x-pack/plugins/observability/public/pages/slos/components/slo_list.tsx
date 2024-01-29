@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTablePagination } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTablePagination } from '@elastic/eui';
 import { useIsMutating } from '@tanstack/react-query';
 import React from 'react';
 import { CreateSloBtn } from './common/create_slo_btn';
@@ -15,7 +15,6 @@ import { SlosView } from './slos_view';
 
 import { SloListSearchBar } from './slo_list_search_bar';
 import { ToggleSLOView } from './toggle_slo_view';
-import { SloGroupBy } from './slo_list_group_by';
 import { GroupView } from './grouped_slos/group_view';
 
 export function SloList() {
@@ -65,26 +64,16 @@ export function SloList() {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexGroup direction="row">
-        <EuiFlexItem>
-          <SloGroupBy
-            onStateChange={onStateChange}
-            initialState={state.groupBy}
-            loading={isLoading || isCreatingSlo || isCloningSlo || isUpdatingSlo || isDeletingSlo}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="xs" />
       <EuiFlexItem grow={false}>
         <ToggleSLOView
           sloList={sloList}
           sloView={view}
           onChangeView={(newView) => onStateChange({ view: newView })}
           onToggleCompactView={() => onStateChange({ compact: !isCompact })}
-          isCompact={isCompact}
-          loading={isLoading || isCreatingSlo || isCloningSlo || isUpdatingSlo || isDeletingSlo}
           onStateChange={onStateChange}
-          initialState={state}
+          isCompact={isCompact}
+          state={state}
+          loading={isLoading || isCreatingSlo || isCloningSlo || isUpdatingSlo || isDeletingSlo}
         />
       </EuiFlexItem>
       {groupBy === 'ungrouped' && (

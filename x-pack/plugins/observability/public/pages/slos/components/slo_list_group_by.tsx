@@ -5,25 +5,18 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import React, { useState, useEffect } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiSelectable,
-  EuiSelectableOption,
-  EuiFilterGroup,
-  EuiFilterButton,
-} from '@elastic/eui';
+import React, { useState } from 'react';
+import { EuiPanel, EuiSelectableOption, EuiText } from '@elastic/eui';
+
 import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
-import { SearchState } from '../hooks/use_url_search_state';
+import { SLOContextMenu, ContextMenuItem } from './slo_context_menu';
+import type { Option } from './slo_context_menu';
+import type { SearchState } from '../hooks/use_url_search_state';
 
 export type GroupByField = 'ungrouped' | 'slo.tags' | 'status' | 'slo.indicator.type';
 export interface Props {
-  loading: boolean;
-  initialState: SearchState['groupBy'];
   onStateChange: (newState: Partial<SearchState>) => void;
+  groupBy: GroupByField;
 }
 
 export type Item<T> = EuiSelectableOption & {
@@ -32,104 +25,81 @@ export type Item<T> = EuiSelectableOption & {
   checked?: EuiSelectableOptionCheckedType;
 };
 
-const GROUP_BY_OPTIONS: Array<Item<GroupByField>> = [
-  {
-    label: i18n.translate('xpack.observability.slo.list.groupBy.sliIndicator', {
-      defaultMessage: 'Ungrouped',
-    }),
-    type: 'ungrouped',
-  },
-  {
-    label: i18n.translate('xpack.observability.slo.list.groupBy.tags', {
-      defaultMessage: 'Tags',
-    }),
-    type: 'slo.tags',
-  },
-  {
-    label: i18n.translate('xpack.observability.slo.list.groupBy.status', {
-      defaultMessage: 'Status',
-    }),
-    type: 'status',
-  },
-  {
-    label: i18n.translate('xpack.observability.slo.list.groupBy.sliType', {
-      defaultMessage: 'SLI type',
-    }),
-    type: 'slo.indicator.type',
-  },
-];
-export function SloGroupBy({ loading, onStateChange, initialState }: Props) {
-  const [isGroupByPopoverOpen, setGroupByPopoverOpen] = useState(false);
-  const [groupByOptions, setGroupByOptions] = useState<Array<Item<GroupByField>>>(
-    GROUP_BY_OPTIONS.map((option) => ({
-      ...option,
-      checked: option.type === initialState ? 'on' : undefined,
-    }))
-  );
-
-  useEffect(() => {
-    setGroupByOptions(
-      GROUP_BY_OPTIONS.map((option) => ({
-        ...option,
-        checked: option.type === initialState ? 'on' : undefined,
-      }))
-    );
-  }, [initialState]);
-
-  const selectedGroupBy = groupByOptions.find((option) => option.checked === 'on');
-  const handleToggleGroupByButton = () => setGroupByPopoverOpen(!isGroupByPopoverOpen);
-
-  const handleChangeGroupBy = (newOptions: Array<Item<GroupByField>>) => {
-    setGroupByOptions(newOptions);
-    setGroupByPopoverOpen(false);
+export function SloGroupBy({ onStateChange, groupBy }: Props) {
+  const [isGroupByPopoverOpen, setIsGroupByPopoverOpen] = useState(false);
+  const handleChangeGroupBy = ({ value, label }: { value: GroupByField; label: string }) => {
+    setGroupLabel(label);
     onStateChange({
       page: 0,
-      groupBy: newOptions.find((o) => o.checked)!.type,
+      groupBy: value,
     });
   };
+  const groupByOptions: Option[] = [
+    {
+      label: i18n.translate('xpack.observability.slo.list.groupBy.sliIndicator', {
+        defaultMessage: 'Ungrouped',
+      }),
+      checked: groupBy === 'ungrouped',
+      value: 'ungrouped',
+      onClick: () => {
+        handleChangeGroupBy({
+          value: 'ungrouped',
+          label: i18n.translate('xpack.observability.slo.list.groupBy.upgrouped', {
+            defaultMessage: 'Ungrouped',
+          }),
+        });
+      },
+    },
+    {
+      label: i18n.translate('xpack.observability.slo.list.groupBy.tags', {
+        defaultMessage: 'Tags',
+      }),
+      checked: groupBy === 'slo.tags',
+      value: 'slo.tags',
+      onClick: () => {
+        handleChangeGroupBy({
+          value: 'slo.tags',
+          label: i18n.translate('xpack.observability.slo.list.groupBy.tags', {
+            defaultMessage: 'Tags',
+          }),
+        });
+      },
+    },
+    // TODO add more options (SLI indicator, status, instance id)
+  ];
+
+  const [groupLabel, setGroupLabel] = useState(
+    groupByOptions.find((option) => option.value === groupBy)?.label || 'None'
+  );
+
+  const items = [
+    <EuiPanel paddingSize="s" hasShadow={false} key="group_title_panel">
+      <EuiText size="xs">
+        <h4>{GROUP_TITLE}</h4>
+      </EuiText>
+    </EuiPanel>,
+
+    ...groupByOptions.map((option) => (
+      <ContextMenuItem
+        option={option}
+        onClosePopover={() => setIsGroupByPopoverOpen(false)}
+        key={option.value}
+      />
+    )),
+  ];
+
   return (
-    <EuiFlexItem grow={false}>
-      <EuiFlexGroup direction="row" gutterSize="s" responsive>
-        <EuiFlexItem style={{ maxWidth: 250 }}>
-          <EuiFilterGroup>
-            <EuiPopover
-              button={
-                <EuiFilterButton
-                  disabled={loading}
-                  iconType="arrowDown"
-                  onClick={handleToggleGroupByButton}
-                  isSelected={isGroupByPopoverOpen}
-                >
-                  {i18n.translate('xpack.observability.slo.list.groupByType', {
-                    defaultMessage: 'Group by {type}',
-                    values: { type: selectedGroupBy?.label.toLowerCase() ?? '' },
-                  })}
-                </EuiFilterButton>
-              }
-              isOpen={isGroupByPopoverOpen}
-              closePopover={handleToggleGroupByButton}
-              panelPaddingSize="none"
-              anchorPosition="downCenter"
-            >
-              <div style={{ width: 250 }}>
-                <EuiPopoverTitle paddingSize="s">
-                  {i18n.translate('xpack.observability.slo.list.groupBy', {
-                    defaultMessage: 'Group by',
-                  })}
-                </EuiPopoverTitle>
-                <EuiSelectable<Item<GroupByField>>
-                  singleSelection="always"
-                  options={groupByOptions}
-                  onChange={handleChangeGroupBy}
-                  isLoading={loading}
-                >
-                  {(list) => list}
-                </EuiSelectable>
-              </div>
-            </EuiPopover>
-          </EuiFilterGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
+    <SLOContextMenu
+      items={items}
+      id="groupBy"
+      selected={groupLabel}
+      isPopoverOpen={isGroupByPopoverOpen}
+      setIsPopoverOpen={setIsGroupByPopoverOpen}
+      label={GROUP_TITLE}
+    />
   );
 }
+
+export const GROUP_TITLE = i18n.translate('xpack.observability.slo.groupPopover.group.title', {
+  defaultMessage: 'Group by',
+});

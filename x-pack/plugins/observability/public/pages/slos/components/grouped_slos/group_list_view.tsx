@@ -6,7 +6,15 @@
  */
 
 import React, { memo, useState } from 'react';
-import { EuiPanel, EuiAccordion, EuiTablePagination } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiTablePagination,
+  EuiTitle,
+} from '@elastic/eui';
 import { useFetchSloList } from '../../../../hooks/slo/use_fetch_slo_list';
 import { SlosView } from '../slos_view';
 import type { SortDirection } from '../slo_list_search_bar';
@@ -38,7 +46,8 @@ export function GroupListView({
   }
 
   const [page, setPage] = useState(0);
-  const ITEMS_PER_PAGE = 10;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  // TODO get sortBy and sortDirection from parent
   const {
     isLoading,
     isRefetching,
@@ -48,7 +57,7 @@ export function GroupListView({
     kqlQuery: query,
     sortBy: sort,
     sortDirection: direction,
-    perPage: ITEMS_PER_PAGE,
+    perPage: itemsPerPage,
     page: page + 1,
   });
   const { results = [], total = 0 } = sloList ?? {};
@@ -60,26 +69,40 @@ export function GroupListView({
   const groupTitle = `${groupName} (${total})`;
 
   return (
-    <EuiPanel>
-      <MemoEuiAccordion buttonContent={groupTitle} id={group} initialIsOpen={false}>
-        <>
-          <SlosView
-            sloList={results}
-            loading={isLoading || isRefetching}
-            error={isError}
-            isCompact={isCompact}
-            sloView={sloView}
-            group={group}
-          />
-
-          <EuiTablePagination
-            pageCount={Math.ceil(total / ITEMS_PER_PAGE)}
-            activePage={page}
-            onChangePage={handlePageClick}
-            itemsPerPage={ITEMS_PER_PAGE}
-          />
-        </>
-      </MemoEuiAccordion>
+    <EuiPanel hasBorder={true}>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <MemoEuiAccordion
+            buttonContent={
+              <EuiTitle size="xs">
+                <h3>{groupTitle}</h3>
+              </EuiTitle>
+            }
+            id={group}
+            initialIsOpen={false}
+          >
+            <>
+              <EuiSpacer size="m" />
+              <SlosView
+                sloList={results}
+                loading={isLoading || isRefetching}
+                error={isError}
+                isCompact={isCompact}
+                sloView={sloView}
+                group={group}
+              />
+              <EuiSpacer size="m" />
+              <EuiTablePagination
+                pageCount={Math.ceil(total / itemsPerPage)}
+                activePage={page}
+                onChangePage={handlePageClick}
+                itemsPerPage={itemsPerPage}
+                onChangeItemsPerPage={(perPage) => setItemsPerPage(perPage)}
+              />
+            </>
+          </MemoEuiAccordion>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiPanel>
   );
 }
