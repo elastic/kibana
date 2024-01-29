@@ -7,11 +7,10 @@
 import React, { useMemo } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { DatasetQualityContext, DatasetQualityContextValue } from './context';
 import { useKibanaContextForPluginProvider } from '../../utils';
 import { DatasetQualityStartDeps } from '../../types';
-import { Header } from './header';
-import { Table } from './table';
 import { DatasetQualityController } from '../../controller';
 
 export interface DatasetQualityProps {
@@ -43,6 +42,9 @@ export const createDatasetQuality = ({ core, plugins }: CreateDatasetQualityArgs
     );
   };
 };
+
+const Header = dynamic(() => import('./header'));
+const Table = dynamic(() => import('./table'));
 
 function DatasetQuality() {
   return (

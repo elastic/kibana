@@ -71,3 +71,7 @@ export const Table = () => {
     </>
   );
 };
+
+// Allow for lazy loading
+// eslint-disable-next-line import/no-default-export
+export default Table;

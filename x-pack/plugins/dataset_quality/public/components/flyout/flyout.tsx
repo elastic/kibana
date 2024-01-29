@@ -22,6 +22,7 @@ import { Header } from './header';
 import { IntegrationSummary } from './integration_summary';
 import { FlyoutProps } from './types';
 
+// Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function Flyout({ dataset, closeFlyout }: FlyoutProps) {
   const { dataStreamStat, dataStreamDetails, dataStreamDetailsLoading, fieldFormats } =
