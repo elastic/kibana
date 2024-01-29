@@ -177,6 +177,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await aiops.logRateAnalysisPage.clickLogRateAnalysisResultsGroupSwitchOn();
 
           await aiops.logRateAnalysisResultsGroupsTable.assertLogRateAnalysisResultsTableExists();
+          await aiops.logRateAnalysisResultsGroupsTable.scrollAnalysisTableIntoView();
 
           const analysisGroupsTable =
             await aiops.logRateAnalysisResultsGroupsTable.parseAnalysisTable();
@@ -200,6 +201,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await ml.testExecution.logTestStep('expand table row');
         await aiops.logRateAnalysisResultsGroupsTable.assertExpandRowButtonExists();
         await aiops.logRateAnalysisResultsGroupsTable.expandRow();
+        await aiops.logRateAnalysisResultsGroupsTable.scrollAnalysisTableIntoView();
 
         const analysisTable = await aiops.logRateAnalysisResultsTable.parseAnalysisTable();
 
