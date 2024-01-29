@@ -138,19 +138,19 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
       supportedCommands: ['stats'],
       signatures: [
         {
-          params: [{ name: 'column', type: 'geo_point', noNestingFunctions: true }],
-          returnType: 'number',
-          examples: [
-            `from index | stats result = st_centroid(geo_field)`,
-            `from index | stats st_centroid(geo_field)`,
-          ],
-        },
-        {
           params: [{ name: 'column', type: 'cartesian_point', noNestingFunctions: true }],
           returnType: 'number',
           examples: [
             `from index | stats result = st_centroid(cartesian_field)`,
             `from index | stats st_centroid(cartesian_field)`,
+          ],
+        },
+        {
+          params: [{ name: 'column', type: 'geo_point', noNestingFunctions: true }],
+          returnType: 'number',
+          examples: [
+            `from index | stats result = st_centroid(geo_field)`,
+            `from index | stats st_centroid(geo_field)`,
           ],
         },
       ],
