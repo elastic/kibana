@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { Rule, RuleTypeParams } from '@kbn/alerting-plugin/common';
@@ -40,6 +41,7 @@ import {
   AlertParams,
   CustomThresholdAlertFields,
   CustomThresholdRuleTypeParams,
+  MetricExpression,
 } from '../../types';
 import { ExpressionChart } from '../expression_chart';
 import { TIME_LABELS } from '../criterion_preview_chart/criterion_preview_chart';
@@ -85,6 +87,34 @@ export default function AlertDetailsAppSection({
   const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
   const groups = alert.fields[ALERT_GROUP];
   const tags = alert.fields[TAGS];
+  const CHART_TITLE_LIMIT = 120;
+
+  const generateChartTitle = (criterion: MetricExpression) => {
+    let equationTitle = '';
+    const equation = criterion.equation ?? (criterion.metrics.length === 2 ? 'A + B' : 'A');
+    const symbolResolver: Record<string, string> = {};
+
+    criterion.metrics.forEach(
+      (metric) =>
+        (symbolResolver[metric.name] = `${metric.aggType} (${
+          metric.field ?? metric.filter ?? 'all documents'
+        })`)
+    );
+
+    [...equation].forEach((symbol) =>
+      symbolResolver[symbol] ? (equationTitle += symbolResolver[symbol]) : (equationTitle += symbol)
+    );
+
+    const chartTitle =
+      equationTitle.length > CHART_TITLE_LIMIT
+        ? `${equationTitle.substring(0, CHART_TITLE_LIMIT)}...`
+        : equationTitle;
+
+    return {
+      tooltip: `Equation result for ${equationTitle}`,
+      title: `Equation result for ${chartTitle}`,
+    };
+  };
 
   const annotations = [
     <AlertAnnotation
@@ -172,9 +202,11 @@ export default function AlertDetailsAppSection({
       {ruleParams.criteria.map((criterion, index) => (
         <EuiFlexItem key={`criterion-${index}`}>
           <EuiPanel hasBorder hasShadow={false}>
-            <EuiTitle size="xs">
-              <h4>{criterion.label || 'CUSTOM'} </h4>
-            </EuiTitle>
+            <EuiToolTip content={generateChartTitle(criterion).tooltip}>
+              <EuiTitle size="xs">
+                <h4>{generateChartTitle(criterion).title}</h4>
+              </EuiTitle>
+            </EuiToolTip>
             <EuiText size="s" color="subdued">
               <FormattedMessage
                 id="xpack.observability.customThreshold.rule.alertDetailsAppSection.criterion.subtitle"
