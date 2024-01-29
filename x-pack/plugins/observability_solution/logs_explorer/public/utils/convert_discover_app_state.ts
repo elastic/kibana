@@ -16,7 +16,7 @@ import {
   GridColumnDisplayOptions,
   GridRowsDisplayOptions,
 } from '../../common';
-import { ControlOptions, OptionsListControlOption } from '../controller';
+import type { ControlOptions, OptionsListControl } from '../controller';
 
 export const getGridColumnDisplayOptionsFromDiscoverAppState = (
   discoverAppState: DiscoverAppState
@@ -113,6 +113,7 @@ const createDiscoverExistsFilter = ({
   meta: {
     index,
     type: FILTERS.EXISTS,
+    value: FILTERS.EXISTS, // Required for the filter to be displayed correctly in FilterBadge
     key,
     negate,
   },
@@ -123,22 +124,33 @@ export const getDiscoverFiltersFromState = (
   index: string,
   filters: Filter[] = [],
   controls?: ControlOptions
-) => [
-  ...filters,
-  ...(controls
-    ? (Object.keys(controls) as Array<keyof ControlOptions>).map((key) =>
-        controls[key as keyof ControlOptions]?.selection.type === 'exists'
-          ? createDiscoverExistsFilter({
-              index,
-              key,
-              negate: controls[key]?.mode === 'exclude',
-            })
-          : createDiscoverPhrasesFilter({
-              index,
-              key,
-              values: (controls[key]?.selection as OptionsListControlOption).selectedOptions,
-              negate: controls[key]?.mode === 'exclude',
-            })
-      )
-    : []),
-];
+) => {
+  return [
+    ...filters,
+    ...(controls
+      ? (Object.entries(controls) as Array<[keyof ControlOptions, OptionsListControl]>).reduce<
+          Filter[]
+        >((acc, [key, control]) => {
+          if (control.selection.type === 'exists') {
+            acc.push(
+              createDiscoverExistsFilter({
+                index,
+                key,
+                negate: control.mode === 'exclude',
+              })
+            );
+          } else if (control.selection.selectedOptions.length > 0) {
+            acc.push(
+              createDiscoverPhrasesFilter({
+                index,
+                key,
+                values: control.selection.selectedOptions,
+                negate: control.mode === 'exclude',
+              })
+            );
+          }
+          return acc;
+        }, [])
+      : []),
+  ];
+};
