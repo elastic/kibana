@@ -11,7 +11,7 @@ export const resultDocument: ResultDocument = {
   batchId: '33d95427-1fd3-43c3-bdeb-74324533a31e',
   indexName: '.ds-logs-endpoint.alerts-default-2023.11.23-000001',
   isCheckAll: false,
-  checkedAt: 1637673600000,
+  checkedAt: 1706526408000,
   docsCount: 100,
   totalFieldCount: 1582,
   ecsFieldCount: 677,
