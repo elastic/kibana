@@ -52,13 +52,8 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
     if (isSaveTimelineAction(action)) {
       const { id: localTimelineId } = action.payload;
       const timeline = selectTimelineById(store.getState(), localTimelineId);
-      const {
-        id: timelineId,
-        savedSearch,
-        version,
-        templateTimelineId,
-        templateTimelineVersion,
-      } = timeline;
+      const { savedSearch, version, templateTimelineId, templateTimelineVersion } = timeline;
+      const timelineId = timeline.savedObjectId ?? null;
       const timelineTimeRange = inputsSelectors.timelineTimeRangeSelector(store.getState());
 
       store.dispatch(startTimelineSaving({ id: localTimelineId }));
