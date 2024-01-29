@@ -7,6 +7,8 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+import { testHasEmbeddedConsole } from './embedded_console';
+
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects([
     'svlSearchLandingPage',
@@ -44,12 +46,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('has embedded dev console', async () => {
-      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleControlBarExists();
-      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleToBeClosed();
-      await pageObjects.svlCommonNavigation.devConsole.clickEmbeddedConsoleControlBar();
-      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleToBeOpen();
-      await pageObjects.svlCommonNavigation.devConsole.clickEmbeddedConsoleControlBar();
-      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleToBeClosed();
+      await testHasEmbeddedConsole(pageObjects);
     });
 
     describe('API Key creation', async () => {
