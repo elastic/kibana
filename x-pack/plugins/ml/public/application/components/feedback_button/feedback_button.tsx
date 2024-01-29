@@ -45,8 +45,6 @@ export const FeedBackButton: FC<Props> = ({ jobIds, page }) => {
   const formId = useMemo(() => getFormId(page), [page]);
 
   useEffect(() => {
-    setShowButton(false);
-
     const tempJobIdsString = jobIds.join(',');
     if (tempJobIdsString === jobIdsString || tempJobIdsString === '') {
       return;
@@ -54,6 +52,7 @@ export const FeedBackButton: FC<Props> = ({ jobIds, page }) => {
     setJobIdsString(tempJobIdsString);
 
     getJobs(jobIds).then((resp) => {
+      setShowButton(false);
       for (const job of resp) {
         const createdBy = job.custom_settings?.created_by;
 
