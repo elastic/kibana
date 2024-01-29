@@ -36,6 +36,7 @@ webpack_cli(
   data = SRCS + SHARED_DEPS + [
     "//:.browserslistrc",
     "//packages/kbn-babel-preset",
+    "@npm//terser-webpack-plugin",
     "@npm//@babel/runtime",
     "@npm//babel-loader",
     "@npm//raw-loader",

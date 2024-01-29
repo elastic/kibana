@@ -11,13 +11,13 @@ import React from 'react';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import {
   apiIsOfType,
-  apiPublishesUniqueId,
-  apiPublishesParentApi,
+  apiHasUniqueId,
+  apiHasParentApi,
   apiPublishesSavedObjectId,
   HasType,
   EmbeddableApiContext,
-  PublishesUniqueId,
-  PublishesParentApi,
+  HasUniqueId,
+  HasParentApi,
   PublishesSavedObjectId,
 } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -37,18 +37,18 @@ export interface DashboardCopyToCapabilities {
 }
 
 export type CopyToDashboardAPI = HasType &
-  PublishesUniqueId &
-  PublishesParentApi<
+  HasUniqueId &
+  HasParentApi<
     { type: typeof DASHBOARD_CONTAINER_TYPE } & PublishesSavedObjectId &
       DashboardPluginInternalFunctions
   >;
 
 const apiIsCompatible = (api: unknown): api is CopyToDashboardAPI => {
   return (
-    apiPublishesUniqueId(api) &&
-    apiPublishesParentApi(api) &&
-    apiIsOfType(api.parentApi.value, DASHBOARD_CONTAINER_TYPE) &&
-    apiPublishesSavedObjectId(api.parentApi.value)
+    apiHasUniqueId(api) &&
+    apiHasParentApi(api) &&
+    apiIsOfType(api.parentApi, DASHBOARD_CONTAINER_TYPE) &&
+    apiPublishesSavedObjectId(api.parentApi)
   );
 };
 

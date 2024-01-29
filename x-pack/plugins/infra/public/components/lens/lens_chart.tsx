@@ -21,6 +21,7 @@ export type LensChartProps = UseLensAttributesParams &
   Pick<EuiPanelProps, 'borderRadius'> & {
     toolTip?: React.ReactElement<TooltipContentProps>;
     searchSessionId?: string;
+    description?: string;
   };
 
 export const LensChart = React.memo(
@@ -97,9 +98,12 @@ export const LensChart = React.memo(
         css={css`
           position: relative;
           min-height: ${height}px;
+          .embPanel-isLoading {
+            min-height: ${height}px;
+          }
         `}
       >
-        {error ? <ChartLoadError /> : content}
+        {error ? <ChartLoadError error={error} /> : content}
       </EuiPanel>
     );
   }

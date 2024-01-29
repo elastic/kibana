@@ -24,6 +24,7 @@ Object {
     "isLinkedToOriginatingApp": false,
     "isLoading": false,
     "isSaveable": true,
+    "managed": false,
     "persistedDoc": Object {
       "exactMatchDoc": Object {
         "attributes": Object {
