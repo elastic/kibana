@@ -5,9 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import {buildDataViewMock} from "@kbn/discover-utils/src/__mocks__";
-import {DataView} from "@kbn/data-views-plugin/common";
-
+import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { DataView } from '@kbn/data-views-plugin/common';
 
 const fields = [
   {
