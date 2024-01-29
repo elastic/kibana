@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import React, { FC, useMemo, useState } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 
 import {
   useEuiBackgroundColor,
   EuiInMemoryTable,
   EuiBasicTableColumn,
-  EuiCode,
-  EuiText,
   EuiTableSelectionType,
   EuiHorizontalRule,
   EuiSpacer,
+  EuiButtonIcon,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -42,6 +41,8 @@ import type { EventRate } from '../use_categorize_request';
 
 import { getLabels } from './labels';
 import { TableHeader } from './table_header';
+import { ExpandedRow } from './expanded_row';
+import { FormattedPatternExamples } from '../format_category';
 
 interface Props {
   categories: Category[];
@@ -83,6 +84,9 @@ export const CategoryTable: FC<Props> = ({
   const { openInDiscoverWithFilter } = useDiscoverLinks();
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
   const { onTableChange, pagination, sorting } = useTableState<Category>(categories ?? [], 'key');
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
+    {}
+  );
 
   const labels = useMemo(() => {
     const isFlyout = onAddFilter !== undefined && onClose !== undefined;
@@ -132,7 +136,42 @@ export const CategoryTable: FC<Props> = ({
     );
   };
 
+  const toggleDetails = useCallback(
+    (category: Category) => {
+      const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
+      if (itemIdToExpandedRowMapValues[category.key]) {
+        delete itemIdToExpandedRowMapValues[category.key];
+      } else {
+        itemIdToExpandedRowMapValues[category.key] = <ExpandedRow category={category} />;
+      }
+      setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
+    },
+    [itemIdToExpandedRowMap]
+  );
+
   const columns: Array<EuiBasicTableColumn<Category>> = [
+    {
+      align: 'left',
+      width: '40px',
+      isExpander: true,
+      render: (item: Category) => (
+        <EuiButtonIcon
+          data-test-subj="aiopsLogPatternsColumnsButton"
+          onClick={() => toggleDetails(item)}
+          aria-label={
+            itemIdToExpandedRowMap[item.key]
+              ? i18n.translate('xpack.aiops.logCategorization.column.collapseRow', {
+                  defaultMessage: 'Collapse',
+                })
+              : i18n.translate('xpack.aiops.logCategorization.column.expandRow', {
+                  defaultMessage: 'Expand',
+                })
+          }
+          iconType={itemIdToExpandedRowMap[item.key] ? 'arrowDown' : 'arrowRight'}
+        />
+      ),
+      'data-test-subj': 'aiopsLogPatternsExpandRowToggle',
+    },
     {
       field: 'count',
       name: i18n.translate('xpack.aiops.logCategorization.column.count', {
@@ -142,20 +181,13 @@ export const CategoryTable: FC<Props> = ({
       width: '80px',
     },
     {
-      field: 'examples',
       name: i18n.translate('xpack.aiops.logCategorization.column.examples', {
         defaultMessage: 'Examples',
       }),
       sortable: true,
-      render: (examples: string[]) => (
+      render: (item: Category) => (
         <>
-          {examples.map((e) => (
-            <EuiText size="s" key={e}>
-              <EuiCode language="log" transparentBackground css={{ paddingInline: '0px' }}>
-                {e}
-              </EuiCode>
-            </EuiText>
-          ))}
+          <FormattedPatternExamples category={item} count={1} />
         </>
       ),
     },
@@ -187,7 +219,7 @@ export const CategoryTable: FC<Props> = ({
   ] as Array<EuiBasicTableColumn<Category>>;
 
   if (showSparkline === true) {
-    columns.splice(1, 0, {
+    columns.splice(2, 0, {
       field: 'sparkline',
       name: i18n.translate('xpack.aiops.logCategorization.column.logRate', {
         defaultMessage: 'Log rate',
@@ -271,6 +303,8 @@ export const CategoryTable: FC<Props> = ({
         pagination={pagination}
         sorting={sorting}
         data-test-subj="aiopsLogPatternsTable"
+        isExpandable={true}
+        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         rowProps={(category) => {
           return enableRowActions
             ? {
