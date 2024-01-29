@@ -33,8 +33,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const defaultSettings = {
     defaultIndex: 'logstash-*',
     hideAnnouncements: true,
-    'timepicker:timeDefaults':
-      '{  "from": "Sep 18, 2015 @ 19:37:13.000",  "to": "Sep 23, 2015 @ 02:30:09.000"}',
   };
 
   describe('discover URL state', () => {
