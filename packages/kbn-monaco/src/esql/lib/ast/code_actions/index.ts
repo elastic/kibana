@@ -13,7 +13,7 @@ import {
   getPolicyHelper,
   getSourcesHelper,
 } from '../shared/resources_helpers';
-import { getAllFunctions, shouldBeQuotedText } from '../shared/helpers';
+import { getAllFunctions, isSourceItem, shouldBeQuotedText } from '../shared/helpers';
 import { ESQLCallbacks } from '../shared/types';
 import { AstProviderFn, ESQLAst } from '../types';
 import { buildQueryForFieldsFromSource } from '../validation/helpers';
@@ -21,11 +21,13 @@ import { buildQueryForFieldsFromSource } from '../validation/helpers';
 type GetSourceFn = () => Promise<string[]>;
 type GetFieldsByTypeFn = (type: string | string[], ignored?: string[]) => Promise<string[]>;
 type GetPoliciesFn = () => Promise<string[]>;
+type GetPolicyFieldsFn = (name: string) => Promise<string[]>;
 
 interface Callbacks {
   getSources: GetSourceFn;
   getFieldsByType: GetFieldsByTypeFn;
   getPolicies: GetPoliciesFn;
+  getPolicyFields: GetPolicyFieldsFn;
 }
 
 function getFieldsByTypeRetriever(queryString: string, resourceRetriever?: ESQLCallbacks) {
@@ -46,7 +48,10 @@ function getPolicyRetriever(resourceRetriever?: ESQLCallbacks) {
       const policies = await helpers.getPolicies();
       return policies.map(({ name }) => name);
     },
-    getPolicyMetadata: helpers.getPolicyMetadata,
+    getPolicyFields: async (policy: string) => {
+      const metadata = await helpers.getPolicyMetadata(policy);
+      return metadata?.enrichFields || [];
+    },
   };
 }
 
@@ -109,7 +114,8 @@ function createAction(
 }
 
 async function getSpellingPossibilities(fn: () => Promise<string[]>, errorText: string) {
-  const allActions = (await fn()).reduce((solutions, item) => {
+  const allPossibilities = await fn();
+  const allSolutions = allPossibilities.reduce((solutions, item) => {
     const distance = levenshtein(item, errorText);
     if (distance < 3) {
       solutions.push(item);
@@ -117,17 +123,30 @@ async function getSpellingPossibilities(fn: () => Promise<string[]>, errorText: 
     return solutions;
   }, [] as string[]);
   // filter duplicates
-  return Array.from(new Set(allActions));
+  return Array.from(new Set(allSolutions));
 }
 
 async function getSpellingActionForColumns(
   error: monaco.editor.IMarkerData,
   uri: monaco.Uri,
   queryString: string,
-  { getFieldsByType }: Callbacks
+  ast: ESQLAst,
+  { getFieldsByType, getPolicies, getPolicyFields }: Callbacks
 ) {
   const errorText = queryString.substring(error.startColumn - 1, error.endColumn - 1);
-  const possibleFields = await getSpellingPossibilities(() => getFieldsByType('any'), errorText);
+  // @TODO add variables support
+  const possibleFields = await getSpellingPossibilities(async () => {
+    const availableFields = await getFieldsByType('any');
+    const enrichPolicies = ast.filter(({ name }) => name === 'enrich');
+    if (enrichPolicies.length) {
+      const enrichPolicyNames = enrichPolicies.flatMap(({ args }) =>
+        args.filter(isSourceItem).map(({ name }) => name)
+      );
+      const enrichFields = await Promise.all(enrichPolicyNames.map(getPolicyFields));
+      availableFields.push(...enrichFields.flat());
+    }
+    return availableFields;
+  }, errorText);
   return wrapIntoSpellingChangeAction(error, uri, possibleFields);
 }
 
@@ -147,9 +166,11 @@ async function getQuotableActionForColumns(
     commandEndIndex ? commandEndIndex + 1 : undefined
   );
   const stopIndex = Math.max(
-    remainingCommandText.indexOf(',') > 1
+    /,/.test(remainingCommandText)
       ? remainingCommandText.indexOf(',')
-      : remainingCommandText.indexOf(' '),
+      : /\s/.test(remainingCommandText)
+      ? remainingCommandText.indexOf(' ')
+      : remainingCommandText.length,
     0
   );
   const possibleUnquotedText = queryString.substring(
@@ -161,20 +182,23 @@ async function getQuotableActionForColumns(
     .trimEnd();
   const actions = [];
   if (shouldBeQuotedText(errorText)) {
+    const availableFields = new Set(await getFieldsByType('any'));
     const solution = `\`${errorText}\``;
-    actions.push(
-      createAction(
-        i18n.translate('monaco.esql.quickfix.replaceWithSolution', {
-          defaultMessage: 'Did you mean {solution} ?',
-          values: {
-            solution,
-          },
-        }),
-        solution,
-        { ...error, endColumn: error.startColumn + errorText.length }, // override the location
-        uri
-      )
-    );
+    if (availableFields.has(errorText) || availableFields.has(solution)) {
+      actions.push(
+        createAction(
+          i18n.translate('monaco.esql.quickfix.replaceWithSolution', {
+            defaultMessage: 'Did you mean {solution} ?',
+            values: {
+              solution,
+            },
+          }),
+          solution,
+          { ...error, endColumn: error.startColumn + errorText.length }, // override the location
+          uri
+        )
+      );
+    }
   }
   return actions;
 }
@@ -183,6 +207,7 @@ async function getSpellingActionForIndex(
   error: monaco.editor.IMarkerData,
   uri: monaco.Uri,
   queryString: string,
+  ast: ESQLAst,
   { getSources }: Callbacks
 ) {
   const errorText = queryString.substring(error.startColumn - 1, error.endColumn - 1);
@@ -203,6 +228,7 @@ async function getSpellingActionForPolicies(
   error: monaco.editor.IMarkerData,
   uri: monaco.Uri,
   queryString: string,
+  ast: ESQLAst,
   { getPolicies }: Callbacks
 ) {
   const errorText = queryString.substring(error.startColumn - 1, error.endColumn - 1);
@@ -224,8 +250,12 @@ async function getSpellingActionForFunctions(
     return [];
   }
   const possibleSolutions = await getSpellingPossibilities(
-    async () => getCompatibleFunctionDefinitions(commandContext.name, undefined),
-    errorText.substring(0, errorText.lastIndexOf('('))
+    async () =>
+      getCompatibleFunctionDefinitions(commandContext.name, undefined).concat(
+        // support nested expressions in STATS
+        commandContext.name === 'stats' ? getCompatibleFunctionDefinitions('eval', undefined) : []
+      ),
+    errorText.substring(0, errorText.lastIndexOf('(')).toLowerCase() // reduce a bit the distance check making al lowercase
   );
   return wrapIntoSpellingChangeAction(
     error,
@@ -256,7 +286,7 @@ function wrapIntoSpellingChangeAction(
 }
 
 function inferCodeFromError(error: monaco.editor.IMarkerData & { owner?: string }) {
-  if (error.owner === 'esql' && error.message.includes('missing STRING')) {
+  if (error.message.includes('missing STRING')) {
     const [, value] = error.message.split('at ');
     return value.startsWith("'") && value.endsWith("'") ? 'wrongQuotes' : undefined;
   }
@@ -268,9 +298,10 @@ export async function getActions(
   context: monaco.languages.CodeActionContext,
   astProvider: AstProviderFn,
   resourceRetriever?: ESQLCallbacks
-) {
+): Promise<monaco.languages.CodeAction[]> {
+  const actions: monaco.languages.CodeAction[] = [];
   if (context.markers.length === 0) {
-    return [];
+    return actions;
   }
   const innerText = model.getValue();
   const { ast } = await astProvider(innerText);
@@ -278,15 +309,15 @@ export async function getActions(
   const queryForFields = buildQueryForFieldsFromSource(innerText, ast);
   const { getFieldsByType } = getFieldsByTypeRetriever(queryForFields, resourceRetriever);
   const getSources = getSourcesRetriever(resourceRetriever);
-  const { getPolicies } = getPolicyRetriever(resourceRetriever);
+  const { getPolicies, getPolicyFields } = getPolicyRetriever(resourceRetriever);
 
   const callbacks = {
     getFieldsByType,
     getSources,
     getPolicies,
+    getPolicyFields,
   };
 
-  const actions: monaco.languages.CodeAction[] = [];
   // Markers are sent only on hover and are limited to the hovered area
   // so unless there are multiple error/markers for the same area, there's just one
   // in some cases, like syntax + semantic errors (i.e. unquoted fields eval field-1 ), there might be more than one
@@ -295,7 +326,7 @@ export async function getActions(
     switch (code) {
       case 'unknownColumn':
         const [columnsSpellChanges, columnsQuotedChanges] = await Promise.all([
-          getSpellingActionForColumns(error, model.uri, innerText, callbacks),
+          getSpellingActionForColumns(error, model.uri, innerText, ast, callbacks),
           getQuotableActionForColumns(error, model.uri, innerText, ast, callbacks),
         ]);
         actions.push(...(columnsQuotedChanges.length ? columnsQuotedChanges : columnsSpellChanges));
@@ -305,6 +336,7 @@ export async function getActions(
           error,
           model.uri,
           innerText,
+          ast,
           callbacks
         );
         actions.push(...indexSpellChanges);
@@ -314,6 +346,7 @@ export async function getActions(
           error,
           model.uri,
           innerText,
+          ast,
           callbacks
         );
         actions.push(...policySpellChanges);
@@ -345,7 +378,6 @@ export async function getActions(
       default:
         break;
     }
-
-    return actions;
   }
+  return actions;
 }
