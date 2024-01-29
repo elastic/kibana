@@ -330,12 +330,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           },
         ],
         display: DisplayType.TEXTBOX,
-        label: i18n.translate(
-          'searchConnectors.nativeConnectors.confluenceDataCenter.usernameLabel',
-          {
-            defaultMessage: 'Confluence Data Center username',
-          }
-        ),
+        label: i18n.translate('searchConnectors.nativeConnectors.confluenceDataCenter.usernameLabel', {
+          defaultMessage: 'Username',
+        }),
         options: [],
         order: 4,
         required: true,
@@ -355,12 +352,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           },
         ],
         display: DisplayType.TEXTBOX,
-        label: i18n.translate(
-          'searchConnectors.nativeConnectors.confluenceDataCenter.passwordLabel',
-          {
-            defaultMessage: 'Confluence Data Center password',
-          }
-        ),
+        label: i18n.translate('searchConnectors.nativeConnectors.confluenceDataCenter.passwordLabel', {
+          defaultMessage: 'Password',
+        }),
         options: [],
         order: 5,
         required: true,
@@ -1331,7 +1325,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ],
         display: DisplayType.TEXTBOX,
         label: i18n.translate('searchConnectors.nativeConnectors.jira.dataCenterUsername', {
-          defaultMessage: 'Jira Data Center username',
+          defaultMessage: 'Username',
         }),
         options: [],
         order: 4,
@@ -1353,7 +1347,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         ],
         display: DisplayType.TEXTBOX,
         label: i18n.translate('searchConnectors.nativeConnectors.jira.dataCenterPasswordLabel', {
-          defaultMessage: 'Jira Data Center password',
+          defaultMessage: 'Password',
         }),
         options: [],
         order: 5,
