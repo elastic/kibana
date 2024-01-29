@@ -60,7 +60,6 @@ ServiceListWithItems.args = {
   initialSortDirection: 'desc',
   initialPageSize: 25,
   sortFn: (sortItems) => sortItems,
-  onChangeCurrentPage: (page) => {},
 };
 
 export const ServiceListEmptyState: Story<Args> = (args) => {
@@ -74,7 +73,6 @@ ServiceListEmptyState.args = {
   initialSortDirection: 'desc',
   initialPageSize: 25,
   sortFn: (sortItems) => sortItems,
-  onChangeCurrentPage: (page) => {},
 };
 
 export const WithHealthWarnings: Story<Args> = (args) => {
@@ -102,5 +100,4 @@ ServiceListWithOverflowBucket.args = {
   initialSortDirection: 'desc',
   initialPageSize: 25,
   sortFn: (sortItems) => sortItems,
-  onChangeCurrentPage: (page) => {},
 };
