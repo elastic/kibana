@@ -83,22 +83,31 @@ export async function createEvents(
       );
       epc = epc * (1 - config.indexing.reduceWeekendTrafficBy);
     }
-    // range(epc).map((i) => {
-    //   const generateEvent = generateEvents[config.indexing.dataset] || generateEvents.fake_logs;
-    //   const eventTimestamp = moment(random(currentTimestamp.valueOf(), currentTimestamp.valueOf() + interval));
-    //   return generateEvent(config, schedule, i, eventTimestamp);
-    // }).flat().forEach((event) => queue.push(event));
-    range(epc)
-      .map(() =>
-        moment(random(currentTimestamp.valueOf(), currentTimestamp.valueOf() + interval - 1))
-      )
-      .sort()
-      .map((ts, i) => {
-        const generateEvent = generateEvents[config.indexing.dataset] || generateEvents.fake_logs;
-        return generateEvent(config, schedule, i, ts);
-      })
-      .flat()
-      .forEach((event) => queue.push(event));
+
+    // When --align-events-to-interval is set, we will index all the events on the same
+    // timestamp. Otherwise they will be distributed across the interval randomly.
+    if (config.indexing.alignEventsToInterval) {
+      range(epc)
+        .map((i) => {
+          const generateEvent = generateEvents[config.indexing.dataset] || generateEvents.fake_logs;
+          return generateEvent(config, schedule, i, currentTimestamp);
+        })
+        .flat()
+        .forEach((event) => queue.push(event));
+    } else {
+      range(epc)
+        .map(() =>
+          moment(random(currentTimestamp.valueOf(), currentTimestamp.valueOf() + interval - 1))
+        )
+        .sort()
+        .map((ts, i) => {
+          const generateEvent = generateEvents[config.indexing.dataset] || generateEvents.fake_logs;
+          return generateEvent(config, schedule, i, ts);
+        })
+        .flat()
+        .forEach((event) => queue.push(event));
+    }
+
     await queue.drain();
   } else {
     logger.info({ took: 0, latency: 0, indexed: 0 }, 'Indexing 0 documents.');

@@ -1874,7 +1874,80 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-public.AddIntegrationsSteps",
+        "type": "string",
+        "tags": [],
+        "label": "AddIntegrationsSteps",
+        "description": [],
+        "path": "x-pack/plugins/security_solution/public/common/components/landing_page/onboarding/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-public.CreateProjectSteps",
+        "type": "string",
+        "tags": [],
+        "label": "CreateProjectSteps",
+        "description": [],
+        "path": "x-pack/plugins/security_solution/public/common/components/landing_page/onboarding/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-public.EnablePrebuiltRulesSteps",
+        "type": "string",
+        "tags": [],
+        "label": "EnablePrebuiltRulesSteps",
+        "description": [],
+        "path": "x-pack/plugins/security_solution/public/common/components/landing_page/onboarding/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-public.OverviewSteps",
+        "type": "string",
+        "tags": [],
+        "label": "OverviewSteps",
+        "description": [],
+        "path": "x-pack/plugins/security_solution/public/common/components/landing_page/onboarding/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-public.ViewAlertsSteps",
+        "type": "string",
+        "tags": [],
+        "label": "ViewAlertsSteps",
+        "description": [],
+        "path": "x-pack/plugins/security_solution/public/common/components/landing_page/onboarding/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-public.ViewDashboardSteps",
+        "type": "string",
+        "tags": [],
+        "label": "ViewDashboardSteps",
+        "description": [],
+        "path": "x-pack/plugins/security_solution/public/common/components/landing_page/onboarding/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [],
     "setup": {
       "parentPluginId": "securitySolution",
@@ -2124,6 +2197,20 @@
           "trackAdoption": false,
           "children": [],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "securitySolution",
+          "id": "def-public.PluginStart.setOnboardingPageSettings",
+          "type": "Object",
+          "tags": [],
+          "label": "setOnboardingPageSettings",
+          "description": [],
+          "signature": [
+            "OnboardingPageService"
+          ],
+          "path": "x-pack/plugins/security_solution/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",

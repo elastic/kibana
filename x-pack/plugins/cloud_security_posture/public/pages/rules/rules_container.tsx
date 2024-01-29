@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { useState, useMemo } from 'react';
+import compareVersions from 'compare-versions';
 import { EuiSpacer } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 import { buildRuleKey } from '../../../common/utils/rules_states';
@@ -117,7 +118,7 @@ export const RulesContainer = () => {
         const rulesKey = buildRuleKey(
           rule.metadata.benchmark.id,
           rule.metadata.benchmark.version,
-          /* Since Packages are automatically upgraded, we can be sure that rule_number will Always exist */
+          /* Rule number always exists* from 8.7 */
           rule.metadata.benchmark.rule_number!
         );
 
@@ -147,7 +148,7 @@ export const RulesContainer = () => {
   const cleanedSectionList = [...new Set(sectionList)].sort((a, b) => {
     return a.localeCompare(b, 'en', { sensitivity: 'base' });
   });
-  const cleanedRuleNumberList = [...new Set(ruleNumberList)];
+  const cleanedRuleNumberList = [...new Set(ruleNumberList)].sort(compareVersions);
 
   const rulesPageData = useMemo(
     () => getRulesPage(filteredRulesWithStates, status, error, rulesQuery),
