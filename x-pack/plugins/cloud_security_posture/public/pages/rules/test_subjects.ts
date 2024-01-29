@@ -16,7 +16,7 @@ export const CSP_RULES_FLYOUT_CONTAINER = 'csp_rules_flyout_container';
 export const RULE_COUNTERS_TEST_SUBJ = {
   RULE_COUNTERS_EMPTY_STATE: 'rules-counters-empty-state',
   POSTURE_SCORE_COUNTER: 'rules-counters-posture-score-counter',
-  POSTURE_SCORE_COUNTER_BUTTON: 'rules-counters-posture-score-button',
+  POSTURE_SCORE_BUTTON: 'rules-counters-posture-score-button',
   INTEGRATIONS_EVALUATED_COUNTER: 'rules-counters-integrations-evaluated-counter',
   INTEGRATIONS_EVALUATED_BUTTON: 'rules-counters-integrations-evaluated-button',
   FAILED_FINDINGS_COUNTER: 'rules-counters-failed-findings-counter',

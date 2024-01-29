@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
 import { Chart, Partition, PartitionLayout, Settings } from '@elastic/charts';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { getPostureScorePercentage } from '../compliance_dashboard/compliance_charts/compliance_score_chart';
 import { RULE_COUNTERS_TEST_SUBJ } from './test_subjects';
 import noDataIllustration from '../../assets/illustrations/no_data_illustration.svg';
 import { BenchmarksCisId } from '../../../common/types/benchmarks/v2';
@@ -247,7 +248,9 @@ export const RulesCounters = ({
               passed={benchmarkRulesStats.score.totalPassed}
             />
           </EuiFlexItem>
-          <EuiFlexItem>{`${benchmarkRulesStats.score.postureScore}%`}</EuiFlexItem>
+          <EuiFlexItem>
+            {getPostureScorePercentage(benchmarkRulesStats.score.postureScore)}
+          </EuiFlexItem>
         </EuiFlexGroup>
       ),
       button: (
