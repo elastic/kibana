@@ -5,17 +5,12 @@
  * 2.0.
  */
 
-import { v4 as uuidV4 } from 'uuid';
 import {
   type TestElasticsearchUtils,
   type TestKibanaUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import { schema } from '@kbn/config-schema';
-import { TaskDefinition, TaskPriority, TaskStatus } from '../task';
-import { type TaskPollingLifecycleOpts } from '../polling_lifecycle';
-import { type TaskClaimingOpts } from '../queries/task_claiming';
-import { TaskManagerPlugin, type TaskManagerStartContract } from '../plugin';
-import { injectTask, setupTestServers, retry } from './lib';
+import { TaskDefinition, TaskPriority } from '../task';
+import { setupTestServers } from './lib';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 
 jest.mock('../task_type_dictionary', () => {
@@ -30,7 +25,6 @@ jest.mock('../task_type_dictionary', () => {
 
 // Notify response-ops if a task sets a priority to something other than `Normal`
 describe('Task priority checks', () => {
-  const taskIdsToRemove: string[] = [];
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
   let taskTypeDictionary: TaskTypeDictionary;
