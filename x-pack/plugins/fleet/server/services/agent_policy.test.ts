@@ -24,7 +24,7 @@ import type {
 } from '../types';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 
-import { AGENT_POLICY_INDEX } from '../../common';
+import { AGENT_POLICY_INDEX, SO_SEARCH_LIMIT } from '../../common';
 
 import { agentPolicyService } from './agent_policy';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
@@ -1005,6 +1005,21 @@ describe('agent policy', () => {
       expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
         message: 'User deleting policy [id=test-agent-policy]',
       });
+    });
+
+    it('should call deleteByQuery multiple time if there is more than 10000 .fleet-policies', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      esClient.deleteByQuery.mockResolvedValueOnce({
+        deleted: SO_SEARCH_LIMIT,
+      });
+      esClient.deleteByQuery.mockResolvedValueOnce({
+        deleted: 10,
+      });
+
+      await agentPolicyService.deleteFleetServerPoliciesForPolicyId(esClient, 'test-agent-policy');
+
+      expect(esClient.deleteByQuery).toBeCalledTimes(2);
     });
   });
 });

@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import { decodeOrThrow, indexPatternRt } from '@kbn/io-ts-utils';
-import { DatasetSelectionPlain } from '@kbn/log-explorer-plugin/common';
+import { DatasetSelectionPlain } from '@kbn/logs-explorer-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const azureActivityDatasetSelection: DatasetSelectionPlain = {

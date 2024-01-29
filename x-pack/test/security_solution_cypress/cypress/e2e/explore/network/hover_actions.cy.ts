@@ -11,7 +11,7 @@ import { DATA_PROVIDERS } from '../../../screens/timeline';
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-import { NETWORK_URL } from '../../../urls/navigation';
+import { networkUrl } from '../../../urls/navigation';
 import {
   clickOnAddToTimeline,
   clickOnCopyValue,
@@ -42,7 +42,7 @@ describe.skip('Hover actions', { tags: ['@ess', '@serverless'] }, () => {
 
   beforeEach(() => {
     login();
-    visit(NETWORK_URL, { visitOptions: { onBeforeLoad: onBeforeLoadCallback } });
+    visit(networkUrl('flows'), { visitOptions: { onBeforeLoad: onBeforeLoadCallback } });
     openHoverActions();
     mouseoverOnToOverflowItem();
   });
