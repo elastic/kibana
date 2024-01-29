@@ -164,7 +164,7 @@ describe('Handlebars.compileAST', () => {
       });
 
       describe('blocks', () => {
-        it('should escape a non-nested value with an block input and default value for `noEscape`', () => {
+        it('should escape a non-nested value with a block input and default value for `noEscape`', () => {
           expectTemplate('{{#with foo}}{{#../myFunction}}{{value}}{{/../myFunction}}{{/with}}')
             .withInput({
               foo: { value: '<bar>' },
