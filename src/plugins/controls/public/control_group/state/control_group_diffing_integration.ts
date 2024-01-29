@@ -11,6 +11,7 @@ import { debounceTime, Observable, startWith, Subject, switchMap } from 'rxjs';
 
 import { ControlGroupContainer } from '..';
 import { persistableControlGroupInputIsEqual } from '../../../common';
+import { CHANGE_CHECK_DEBOUNCE } from '../../constants';
 import { controlGroupReducers } from './control_group_reducers';
 
 /**
@@ -33,7 +34,7 @@ export function startDiffingControlGroupState(this: ControlGroupContainer) {
     checkForUnsavedChangesSubject$
       .pipe(
         startWith(null),
-        debounceTime(100), // TODO: constant
+        debounceTime(CHANGE_CHECK_DEBOUNCE),
         switchMap(() => {
           return new Observable((observer) => {
             if (observer.closed) return;

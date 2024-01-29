@@ -106,7 +106,7 @@ export class ControlGroupContainer extends Container<
   public onFiltersPublished$: Subject<Filter[]>;
   public onControlRemoved$: Subject<string>;
 
-  /** This currently reports the **entire** control group input on unsaved changes  */
+  /** This currently reports the **entire** persistable control group input on unsaved changes */
   public unsavedChanges: BehaviorSubject<PersistableControlGroupInput | undefined>;
 
   public fieldFilterPredicate: FieldFilterPredicate | undefined;
@@ -130,7 +130,7 @@ export class ControlGroupContainer extends Container<
     this.onFiltersPublished$ = new Subject<Filter[]>();
     this.onControlRemoved$ = new Subject<string>();
 
-    // start diffing dashboard state
+    // start diffing control group state
     this.unsavedChanges = new BehaviorSubject<PersistableControlGroupInput | undefined>(undefined);
     const diffingMiddleware = startDiffingControlGroupState.bind(this)();
 

@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { cloneDeep, identity, omit, pickBy } from 'lodash';
+import { cloneDeep, identity, omit, pick, pickBy } from 'lodash';
 import { BehaviorSubject, combineLatestWith, distinctUntilChanged, map, Subject } from 'rxjs';
 import { v4 } from 'uuid';
 
@@ -14,7 +14,7 @@ import {
   CONTROL_GROUP_TYPE,
   getDefaultControlGroupInput,
   getDefaultControlGroupPersistableInput,
-  PersistableControlGroupInput,
+  persistableControlGroupInputKeys,
 } from '@kbn/controls-plugin/common';
 import {
   ControlGroupContainerFactory,
@@ -214,11 +214,6 @@ export const initializeDashboard = async ({
     }),
     'controlGroupInput'
   );
-  const initialControlGroupInput: PersistableControlGroupInput | {} = {
-    ...(loadDashboardReturn?.dashboardInput?.controlGroupInput ?? {}),
-    ...(sessionStorageInput?.controlGroupInput ?? {}),
-    ...(overrideInput?.controlGroupInput ?? {}),
-  };
 
   // Back up any view mode passed in explicitly.
   if (overrideInput?.viewMode) {
@@ -405,6 +400,11 @@ export const initializeDashboard = async ({
       create: ControlGroupContainerFactory['create'];
     };
     const { filters, query, timeRange, viewMode, id } = initialDashboardInput;
+    const initialControlGroupInput: ControlGroupInput | {} = {
+      ...(loadDashboardReturn?.dashboardInput?.controlGroupInput ?? {}),
+      ...(sessionStorageInput?.controlGroupInput ?? {}),
+      ...(overrideInput?.controlGroupInput ?? {}),
+    };
     const fullControlGroupInput = {
       id: `control_group_${id ?? 'new_dashboard'}`,
       ...getDefaultControlGroupInput(),
@@ -418,10 +418,18 @@ export const initializeDashboard = async ({
     if (controlGroup) {
       controlGroup.updateInputAndReinitialize(fullControlGroupInput);
     } else {
+      const lastSavedControlGroupInput = pick(
+        {
+          ...(loadDashboardReturn?.dashboardInput?.controlGroupInput ?? {}),
+          ...(overrideInput?.controlGroupInput ?? {}),
+        },
+        persistableControlGroupInputKeys
+      );
       const newControlGroup = await controlsGroupFactory?.create(fullControlGroupInput, this, {
-        lastSavedInput:
-          loadDashboardReturn?.dashboardInput.controlGroupInput ??
-          getDefaultControlGroupPersistableInput(),
+        lastSavedInput: {
+          ...getDefaultControlGroupPersistableInput(),
+          ...lastSavedControlGroupInput,
+        },
       });
       if (!newControlGroup || isErrorEmbeddable(newControlGroup)) {
         throw new Error('Error in control group startup');
