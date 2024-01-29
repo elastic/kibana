@@ -119,6 +119,7 @@ export const ConfigRT = rt.type({
     concurrency: rt.number,
     reduceWeekendTrafficBy: rt.number,
     ephemeralProjectIds: rt.number,
+    alignEventsToInterval: rt.boolean,
   }),
   schedule: rt.array(ScheduleRT),
 });
@@ -177,4 +178,5 @@ export interface CliOptions {
   eventTemplate: string;
   reduceWeekendTrafficBy: number;
   ephemeralProjectIds: number;
+  alignEventsToInterval: boolean;
 }

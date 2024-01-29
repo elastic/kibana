@@ -26,5 +26,6 @@
     "@kbn/security-plugin-types-common",
     "@kbn/mock-idp-utils",
     "@kbn/cloud-plugin",
+    "@kbn/es",
   ]
 }
