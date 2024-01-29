@@ -202,12 +202,23 @@ export function runCli() {
           WARNING: If the indices exist already they will be deleted!
 
           $ node scripts/es_archiver load my_test_data --config ../config.js
+
+        Example with Performance Option Override:
+          Load the [my_test_data] snapshot override the default of 5000 for
+          the batch size, and the default of 4 for the concurrency.
+
+          $ node scripts/es_archiver load my_test_data --config ../config.js --batch-size 300 --concurrency 2
+
       `,
+      // TODO-TRE: change descriptions for batch size and concurrency
       flags: {
         boolean: ['use-create', 'docs-only'],
+        string: ['batch-size', 'concurrency'],
         help: `
           --use-create       use create instead of index for loading documents
-          --docs-only        load only documents, not indices
+          --docs-only        load only documents, not
+          --batch-size       BLAH-BLAH-BLAH
+          --concurrency      BLAH-BLAH-BLAH
         `,
       },
       async run({ flags, esArchiver, statsMeta }) {
@@ -231,7 +242,36 @@ export function runCli() {
           throw createFlagError('--docs-only does not take a value');
         }
 
-        await esArchiver.load(path, { useCreate, docsOnly });
+        const batchSize = flags['batch-size'];
+        if (typeof batchSize !== 'string' || batchSize === '')
+          throw createFlagError(
+            '--batch-size should be a string that can be converted to an number'
+          );
+        const highWaterMark = parseInt(batchSize, 10);
+
+        const concurrency = flags.concurrency;
+        if (typeof concurrency !== 'string' || concurrency === '')
+          throw createFlagError(
+            '--concurrency should be a string that can be converted to an number'
+          );
+        const bulkRequestsCount = parseInt(concurrency, 10);
+
+        [highWaterMark, bulkRequestsCount].forEach((x): void => {
+          if (Number.isNaN(x))
+            throw createFlagError(
+              `invalid argument, please use a number for --batch-size & --concurrency.
+Provided: --batch-size: [ ${batchSize} ], --concurrency: [ ${concurrency} ]`
+            );
+        });
+
+        await esArchiver.load(path, {
+          useCreate,
+          docsOnly,
+          performance: {
+            batchSize: highWaterMark,
+            concurrency: bulkRequestsCount,
+          },
+        });
       },
     })
     .command({
