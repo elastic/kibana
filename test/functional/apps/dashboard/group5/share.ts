@@ -54,7 +54,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.share.clickShareTopNavButton();
       }
       await PageObjects.share.openPermaLinks();
-      await testSubjects.click('exportAsSavedObject');
+      const radioOption = await testSubjects.find('exportAsSavedObject');
+      const [label] = await radioOption.findAllByCssSelector('label[for="savedObject"]');
+      await label.click();
+      await testSubjects.click('copyShareUrlButton');
       const sharedUrl = await testSubjects.getAttribute('copyShareUrlButton', 'data-share-url');
       if (await PageObjects.share.isShareModalOpen()) {
         await PageObjects.share.closeShareModal();
