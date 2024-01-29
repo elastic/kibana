@@ -26,8 +26,7 @@ import { parseQueryValue } from '../timeline/body/renderers/parse_query_value';
 import type { DataProvider } from '../timeline/data_providers/data_provider';
 import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
 import { Provider } from '../timeline/data_providers/provider';
-import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
-import { activeTimeline } from '../../containers/active_timeline_context';
+import type { TimelineTabs } from '../../../../common/types/timeline';
 import { NetworkDetailsLink } from '../../../common/components/links';
 
 const getUniqueId = ({
@@ -210,10 +209,6 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
               tabType: tabType as TimelineTabs,
             })
           );
-        }
-
-        if (timelineID === TimelineId.active && tabType === TimelineTabs.query) {
-          activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
         }
       }
     },
