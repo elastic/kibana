@@ -166,6 +166,7 @@ describe('constructor', () => {
     expect(ChromeServiceConstructor).toHaveBeenCalledWith({
       browserSupportsCsp: true,
       kibanaVersion: 'version',
+      coreContext: expect.any(Object),
     });
   });
 
