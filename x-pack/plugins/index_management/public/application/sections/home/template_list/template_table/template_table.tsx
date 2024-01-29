@@ -19,7 +19,7 @@ import { useServices } from '../../../../app_context';
 import { TemplateDeleteModal } from '../../../../components';
 import { TemplateContentIndicator } from '../../../../components/shared';
 import { TemplateTypeIndicator } from '../components';
-import { getTemplateDetailsLink } from '../../../../services/routing';
+import { getComponentTemplatesLink, getTemplateDetailsLink } from '../../../../services/routing';
 
 interface Props {
   templates: TemplateListItem[];
@@ -82,8 +82,17 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       }),
       truncateText: true,
       sortable: true,
-      width: '20%',
-      render: (composedOf: string[] = []) => <span>{composedOf.join(', ')}</span>,
+      render: (composedOf: string[] = [], item: TemplateListItem) =>
+        composedOf.length === 0 ? (
+          <span>0</span>
+        ) : (
+          <EuiLink
+            data-test-subj="componentTemplatesLink"
+            {...reactRouterNavigate(history, getComponentTemplatesLink(item.name))}
+          >
+            {composedOf.length}
+          </EuiLink>
+        ),
     },
     {
       name: i18n.translate('xpack.idxMgmt.templateList.table.dataStreamColumnTitle', {

@@ -26,6 +26,7 @@ import { useComponentTemplatesContext } from '../component_templates_context';
 
 export interface Props {
   componentTemplates: ComponentTemplateListItem[];
+  defaultFilter: string;
   onReloadClick: () => void;
   onDeleteClick: (componentTemplateName: string[]) => void;
   onEditClick: (componentTemplateName: string) => void;
@@ -35,6 +36,7 @@ export interface Props {
 
 export const ComponentTable: FunctionComponent<Props> = ({
   componentTemplates,
+  defaultFilter,
   onReloadClick,
   onDeleteClick,
   onEditClick,
@@ -143,6 +145,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
           ],
         },
       ],
+      defaultQuery: defaultFilter,
     },
     pagination: {
       initialPageSize: 10,
