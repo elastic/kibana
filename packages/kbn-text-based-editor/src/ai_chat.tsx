@@ -19,6 +19,9 @@ import {
   EuiPopoverTitle,
   EuiDescriptionList,
   EuiDescriptionListDescription,
+  EuiCommentList,
+  EuiComment,
+  EuiMarkdownFormat,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css as classNameCss } from '@emotion/css';
@@ -26,6 +29,7 @@ import { Interpolation, Theme, css } from '@emotion/react';
 import {
   type ObservabilityAIAssistantPluginStart,
   type ObservabilityAIAssistantChatService,
+  type Message,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { getAiService } from './get_ai_service';
 
@@ -116,6 +120,7 @@ export enum MessageRole {
 interface ChatProps {
   containerCSS: Interpolation<Theme>;
   textAreaCSS: Interpolation<Theme>;
+  timelineCSS: Interpolation<Theme>;
   observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
   chatService: ObservabilityAIAssistantChatService;
   height: number;
@@ -127,6 +132,7 @@ interface ChatProps {
 export const Chat = memo(function Chat({
   containerCSS,
   textAreaCSS,
+  timelineCSS,
   observabilityAIAssistant,
   chatService,
   height,
@@ -135,8 +141,10 @@ export const Chat = memo(function Chat({
   onHumanLanguageRun,
 }: ChatProps) {
   const [chatAreaValue, setChatAreaValue] = useState('');
+  const [isTimelineOpen, setIsTimelineOpen] = useState(false);
   const [wrongResult, setWrongResult] = useState<string | undefined>(undefined);
   const [requestHasBeenSubmitted, setRequestHasBeenSubmitted] = useState(false);
+
   const onChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (wrongResult) {
       setWrongResult(undefined);
@@ -144,6 +152,18 @@ export const Chat = memo(function Chat({
     setChatAreaValue(e.target.value);
   };
   const aiService = getAiService(observabilityAIAssistant, chatService);
+  const messagesWithoutSystem = aiService.messages.filter(
+    (message) => message.message.role !== MessageRole.System
+  );
+  const messagesWithContent = messagesWithoutSystem.filter((message) => {
+    return (
+      message.message.content &&
+      message.message.content !== '[]' &&
+      message.message.content !== '{}' &&
+      !message.message.content.includes('parsing_exception')
+    );
+  });
+
   if (!aiService.isLoading && requestHasBeenSubmitted) {
     const assistantESQLMessages = aiService.messages.filter(({ message }) => {
       return (
@@ -154,7 +174,7 @@ export const Chat = memo(function Chat({
       );
     });
     if (assistantESQLMessages.length) {
-      const message = assistantESQLMessages[assistantESQLMessages.length - 1];
+      const message: Message = assistantESQLMessages[assistantESQLMessages.length - 1];
       // if (message && message.message.content?.includes('ES|QL')) {
       if (message) {
         const splitCode = message.message.content?.split('```');
@@ -165,10 +185,11 @@ export const Chat = memo(function Chat({
           aiService.stop();
         }
       } else {
-        if (!wrongResult) {
-          setWrongResult(message.message.content ?? 'Unknown error');
-          setRequestHasBeenSubmitted(false);
-        }
+        // if (!wrongResult) {
+        //   setWrongResult(message.message.content ?? 'Unknown error');
+        //   setRequestHasBeenSubmitted(false);
+        // }
+        setRequestHasBeenSubmitted(false);
         aiService.stop();
       }
     }
@@ -179,29 +200,73 @@ export const Chat = memo(function Chat({
     <>
       <div ref={resizeRef} css={resizableCSS}>
         <EuiFlexItem className="TextBasedLangEditor--expanded">
-          <div css={textAreaCSS}>
+          <div css={isTimelineOpen ? timelineCSS : textAreaCSS}>
             {aiService.isLoading && <EuiProgress size="xs" color="accent" />}
-            <EuiTextArea
-              placeholder="I can help with ES|QL!"
-              value={chatAreaValue}
-              onChange={(e) => onChange(e)}
-              fullWidth
-              css={css`
-                width: 100%;
-                height: ${textAreaHeight}px !important;
-              `}
-              resize="none"
-            />
+            {isTimelineOpen && (
+              <EuiCommentList
+                css={css`
+                  padding-top: 12px;
+                  padding-bottom: 12px;
+                `}
+              >
+                {messagesWithContent.map((message) => {
+                  return (
+                    <EuiComment
+                      username={message.message.role}
+                      event={message['@timestamp']}
+                      eventColor="accent"
+                    >
+                      <EuiMarkdownFormat textSize="s">
+                        {message.message.content ?? ''}
+                      </EuiMarkdownFormat>
+                    </EuiComment>
+                  );
+                })}
+              </EuiCommentList>
+            )}
+
+            {!isTimelineOpen && (
+              <EuiCommentList>
+                <EuiComment
+                  {...{
+                    username: 'stratou',
+                    timelineAvatarAriaLabel: 'stratou',
+                    children: (
+                      <EuiTextArea
+                        placeholder="I want the average of bytes from the logs"
+                        value={chatAreaValue}
+                        onChange={(e) => onChange(e)}
+                        fullWidth
+                        css={css`
+                          width: 100%;
+                          height: ${textAreaHeight}px !important;
+                        `}
+                        resize="none"
+                      />
+                    ),
+                  }}
+                  eventColor="accent"
+                />
+              </EuiCommentList>
+            )}
           </div>
         </EuiFlexItem>
       </div>
       <EuiFlexGroup
         gutterSize="s"
-        justifyContent={wrongResult ? 'spaceBetween' : 'flexEnd'}
+        justifyContent={'spaceBetween'}
         alignItems="center"
         css={containerCSS}
         responsive={false}
       >
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="editorComment"
+            color="accent"
+            size="s"
+            onClick={() => setIsTimelineOpen(!isTimelineOpen)}
+          />
+        </EuiFlexItem>
         {wrongResult && <ErrorsPopover error={wrongResult} />}
         <EuiFlexItem grow={false}>
           <EuiFlexGroup

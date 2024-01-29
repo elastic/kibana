@@ -109,6 +109,8 @@ export interface TextBasedLanguagesEditorProps {
   editorIsInline?: boolean;
   /** Disables the submit query action*/
   disableSubmitAction?: boolean;
+  isAiChatVisible?: boolean;
+  setIsAiChatVisible?: (status: boolean) => void;
 }
 
 interface TextBasedEditorDeps {
@@ -163,6 +165,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   editorIsInline,
   disableSubmitAction,
   dataTestSubj,
+  isAiChatVisible,
+  setIsAiChatVisible,
 }: TextBasedLanguagesEditorProps) {
   const { euiTheme } = useEuiTheme();
   const language = getAggregateQueryMode(query);
@@ -194,7 +198,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [isCompactFocused, setIsCompactFocused] = useState(isCodeEditorExpanded);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
 
-  const [isChatVisible, setIsChatVisible] = useState(false);
+  const [isChatVisible, setIsChatVisible] = useState(isAiChatVisible);
 
   const [editorMessages, setEditorMessages] = useState<{
     errors: MonacoMessage[];
@@ -528,7 +532,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const onHumanLanguageRun = useCallback(
     (predictedQueryString: string) => {
       setCode(predictedQueryString);
-      setIsChatVisible(false);
+      // setIsChatVisible(false);
       onTextLangQueryChange({ [language]: predictedQueryString } as AggregateQuery);
       editor1.current?.setValue(predictedQueryString);
       setTimeout(() => {
@@ -547,6 +551,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       getDocumentation();
     }
   }, [language, documentationSections]);
+
+  if (!chatService.value) {
+    return null;
+  }
 
   const codeEditorOptions: CodeEditorProps['options'] = {
     automaticLayout: false,
@@ -700,6 +708,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       size="s"
                       onClick={() => {
                         expandCodeEditor(false);
+                        setIsAiChatVisible?.(false);
                         updateLinesFromModel = false;
                       }}
                     />
@@ -755,6 +764,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     onHumanLanguageRun={onHumanLanguageRun}
                     containerCSS={styles.bottomContainer}
                     textAreaCSS={styles.editorContainer}
+                    timelineCSS={styles.timelineContainer}
                     resizeRef={resizeRef}
                     resizableCSS={styles.resizableContainer}
                   />
@@ -964,8 +974,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         ),
                         size: 'm',
                         css: {
-                          borderTopLeftRadius: 0,
-                          borderBottomLeftRadius: 0,
+                          borderRadius: 0,
                           backgroundColor: isDark ? euiTheme.colors.lightestShade : '#e9edf3',
                           border: '1px solid rgb(17 43 134 / 10%) !important',
                           borderLeft: 'transparent !important',
@@ -983,7 +992,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                   css={{
                     ...(documentationSections
                       ? {
-                          borderRadius: 0,
+                          borderTopLeftRadius: 0,
+                          borderBottomLeftRadius: 0,
                         }
                       : {
                           borderTopLeftRadius: 0,
@@ -994,8 +1004,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                   }}
                   isDisabled={!observabilityAIAssistant}
                   onClick={() => {
+                    setIsAiChatVisible?.(true);
                     expandCodeEditor(true);
-                    setIsChatVisible(true);
                   }}
                 />
               </EuiFlexItem>

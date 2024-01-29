@@ -43,6 +43,21 @@ export const textBasedLanguagedEditorStyles = (
         ? euiTheme.border.thin
         : 'none',
     },
+    timelineContainer: {
+      position,
+      zIndex: isCompactFocused ? 4 : 0,
+      height: `${editorHeight}px`,
+      border: isCompactFocused ? euiTheme.border.thin : 'none',
+      borderLeft: editorIsInline || !isCompactFocused ? 'none' : euiTheme.border.thin,
+      borderRight: editorIsInline || !isCompactFocused ? 'none' : euiTheme.border.thin,
+      borderTopLeftRadius: isCodeEditorExpanded ? 0 : euiTheme.border.radius.medium,
+      overflowY: 'auto' as 'auto',
+      borderBottom: isCodeEditorExpanded
+        ? 'none'
+        : isCompactFocused
+        ? euiTheme.border.thin
+        : 'none',
+    },
     resizableContainer: {
       display: 'flex',
       width: isCodeEditorExpanded ? '100%' : `calc(100% - ${hasReference ? 120 : 40}px)`,
