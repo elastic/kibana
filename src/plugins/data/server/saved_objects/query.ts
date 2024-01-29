@@ -21,7 +21,6 @@ export const querySavedObjectType: SavedObjectsType = {
   hidden: false,
   namespaceType: 'multiple',
   convertToMultiNamespaceTypeVersion: '8.0.0',
-  switchToModelVersionAt: '8.10.0',
   management: {
     icon: 'search',
     defaultSearchField: 'title',
