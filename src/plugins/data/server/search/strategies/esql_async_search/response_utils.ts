@@ -18,7 +18,7 @@ export function toAsyncKibanaSearchResponse(
   response: SqlGetAsyncResponse,
   warning?: string,
   requestParams?: ConnectionRequestParams
-) {
+): IKibanaSearchResponse<SqlGetAsyncResponse> {
   return {
     id: response.id,
     rawResponse: {
@@ -28,5 +28,5 @@ export function toAsyncKibanaSearchResponse(
     isRunning: response.is_running,
     ...(warning ? { warning } : {}),
     ...(requestParams ? { requestParams: sanitizeRequestParams(requestParams) } : {}),
-  } as IKibanaSearchResponse<SqlGetAsyncResponse>;
+  };
 }
