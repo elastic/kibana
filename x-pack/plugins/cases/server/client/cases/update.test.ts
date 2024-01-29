@@ -1052,6 +1052,21 @@ describe('update', () => {
   describe('Custom Fields', () => {
     const clientArgs = createCasesClientMockArgs();
     const casesClient = createCasesClientMock();
+    const defaultCustomFieldsConfiguration = [
+      {
+        key: 'first_key',
+        type: CustomFieldTypes.TEXT,
+        label: 'missing field 1',
+        required: true,
+        defaultValue: 'default value',
+      },
+      {
+        key: 'second_key',
+        type: CustomFieldTypes.TOGGLE,
+        label: 'foo',
+        required: false,
+      },
+    ];
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -1066,20 +1081,7 @@ describe('update', () => {
       casesClient.configure.get = jest.fn().mockResolvedValue([
         {
           owner: mockCases[0].attributes.owner,
-          customFields: [
-            {
-              key: 'first_key',
-              type: CustomFieldTypes.TEXT,
-              label: 'missing field 1',
-              required: true,
-            },
-            {
-              key: 'second_key',
-              type: CustomFieldTypes.TOGGLE,
-              label: 'foo',
-              required: false,
-            },
-          ],
+          customFields: defaultCustomFieldsConfiguration,
         },
       ]);
       clientArgs.services.attachmentService.getter.getCaseCommentStats.mockResolvedValue(new Map());
@@ -1197,6 +1199,120 @@ describe('update', () => {
       );
     });
 
+    it('fills out missing required custom fields', async () => {
+      const customFields = [
+        {
+          key: 'second_key',
+          type: CustomFieldTypes.TOGGLE as const,
+          value: false,
+        },
+      ];
+
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [{ ...mockCases[0] }],
+      });
+
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                customFields,
+              },
+            ],
+          },
+          clientArgs,
+          casesClient
+        )
+      ).resolves.not.toThrow();
+
+      expect(clientArgs.services.caseService.patchCases).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cases: [
+            {
+              caseId: mockCases[0].id,
+              version: mockCases[0].version,
+              originalCase: {
+                ...mockCases[0],
+              },
+              updatedAttributes: {
+                customFields: [
+                  ...customFields,
+                  {
+                    key: 'first_key',
+                    type: CustomFieldTypes.TEXT as const,
+                    value: 'default value',
+                  },
+                ],
+                updated_at: expect.any(String),
+                updated_by: expect.any(Object),
+              },
+            },
+          ],
+          refresh: false,
+        })
+      );
+    });
+
+    it('updates required custom fields that have value: null', async () => {
+      const customFields = [
+        {
+          key: 'first_key',
+          type: CustomFieldTypes.TEXT as const,
+          value: null,
+        },
+      ];
+
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [{ ...mockCases[0] }],
+      });
+
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                customFields,
+              },
+            ],
+          },
+          clientArgs,
+          casesClient
+        )
+      ).resolves.not.toThrow();
+
+      expect(clientArgs.services.caseService.patchCases).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cases: [
+            {
+              caseId: mockCases[0].id,
+              version: mockCases[0].version,
+              originalCase: {
+                ...mockCases[0],
+              },
+              updatedAttributes: {
+                customFields: [
+                  { ...customFields[0], value: 'default value' },
+                  {
+                    key: 'second_key',
+                    type: CustomFieldTypes.TOGGLE as const,
+                    value: null,
+                  },
+                ],
+                updated_at: expect.any(String),
+                updated_by: expect.any(Object),
+              },
+            },
+          ],
+          refresh: false,
+        })
+      );
+    });
+
     it('throws error when the customFields array is too long', async () => {
       const customFields = Array(MAX_CUSTOM_FIELDS_PER_CASE + 1).fill({
         key: 'first_custom_field_key',
@@ -1285,7 +1401,27 @@ describe('update', () => {
       );
     });
 
-    it('throws error when custom fields are missing', async () => {
+    it('throws error when custom fields are missing and they dont have a default value', async () => {
+      casesClient.configure.get = jest.fn().mockResolvedValue([
+        {
+          owner: mockCases[0].attributes.owner,
+          customFields: [
+            {
+              key: 'first_key',
+              type: CustomFieldTypes.TEXT,
+              label: 'missing field 1',
+              required: true,
+            },
+            {
+              key: 'second_key',
+              type: CustomFieldTypes.TOGGLE,
+              label: 'missing field 2',
+              required: false,
+            },
+          ],
+        },
+      ]);
+
       await expect(
         update(
           {
@@ -1307,7 +1443,7 @@ describe('update', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: Missing required custom fields: \\"missing field 1\\""`
+        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: Missing required custom fields without default value configured: \\"missing field 1\\""`
       );
     });
 

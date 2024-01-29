@@ -16,6 +16,7 @@ import type {
   Case,
   CaseAssignees,
   CaseAttributes,
+  CaseCustomField,
   ConnectorMappings,
   ConnectorMappingSource,
   ConnectorMappingTarget,
@@ -469,17 +470,44 @@ export const fillMissingCustomFields = ({
   const customFieldsKeys = new Set(customFields.map((customField) => customField.key));
   const missingCustomFields: CaseRequestCustomFields = [];
 
+  // update required custom fields that have value: null and a defaultValue
+  const updatedCustomFields = customFields.map((customField) => {
+    const customFieldConfiguration = customFieldsConfiguration.find(
+      (config) => config.key === customField.key
+    );
+    if (
+      customFieldConfiguration &&
+      customFieldConfiguration.required &&
+      customFieldConfiguration.defaultValue !== null &&
+      customFieldConfiguration.defaultValue !== undefined &&
+      customField.value === null
+    ) {
+      return {
+        key: customField.key,
+        type: customField.type,
+        value: customFieldConfiguration.defaultValue,
+      } as CaseCustomField;
+    }
+    return customField;
+  });
+
+  // add missing custom fields
   for (const confCustomField of customFieldsConfiguration) {
     if (!customFieldsKeys.has(confCustomField.key)) {
       missingCustomFields.push({
         key: confCustomField.key,
         type: confCustomField.type,
-        value: null,
-      });
+        value:
+          confCustomField.required &&
+          confCustomField?.defaultValue !== null &&
+          confCustomField?.defaultValue !== undefined
+            ? confCustomField.defaultValue
+            : null,
+      } as CaseCustomField);
     }
   }
 
-  return [...customFields, ...missingCustomFields];
+  return [...updatedCustomFields, ...missingCustomFields];
 };
 
 export const normalizeCreateCaseRequest = (

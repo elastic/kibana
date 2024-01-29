@@ -432,25 +432,21 @@ describe('create', () => {
     clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
 
     const casesClient = createCasesClientMock();
-    casesClient.configure.get = jest.fn().mockResolvedValue([
+    const defaultCustomFieldsConfiguration = [
       {
-        owner: theCase.owner,
-        customFields: [
-          {
-            key: 'first_key',
-            type: CustomFieldTypes.TEXT,
-            label: 'foo',
-            required: true,
-          },
-          {
-            key: 'second_key',
-            type: CustomFieldTypes.TOGGLE,
-            label: 'foo',
-            required: false,
-          },
-        ],
+        key: 'first_key',
+        type: CustomFieldTypes.TEXT,
+        label: 'label 1',
+        required: true,
+        defaultValue: 'default value',
       },
-    ]);
+      {
+        key: 'second_key',
+        type: CustomFieldTypes.TOGGLE,
+        label: 'label 2',
+        required: false,
+      },
+    ];
 
     const theCustomFields: CaseCustomFields = [
       {
@@ -467,6 +463,12 @@ describe('create', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
+      casesClient.configure.get = jest.fn().mockResolvedValue([
+        {
+          owner: theCase.owner,
+          customFields: defaultCustomFieldsConfiguration,
+        },
+      ]);
     });
 
     it('should create customFields correctly', async () => {
@@ -504,25 +506,6 @@ describe('create', () => {
     });
 
     it('should not throw an error and fill out missing customFields when they are undefined', async () => {
-      casesClient.configure.get = jest.fn().mockResolvedValue([
-        {
-          owner: theCase.owner,
-          customFields: [
-            {
-              key: 'first_key',
-              type: CustomFieldTypes.TEXT,
-              label: 'foo',
-              required: false,
-            },
-            {
-              key: 'second_key',
-              type: CustomFieldTypes.TOGGLE,
-              label: 'foo',
-              required: false,
-            },
-          ],
-        },
-      ]);
       await expect(create({ ...theCase }, clientArgs, casesClient)).resolves.not.toThrow();
 
       expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
@@ -540,7 +523,7 @@ describe('create', () => {
             duration: null,
             status: CaseStatuses.open,
             customFields: [
-              { key: 'first_key', type: 'text', value: null },
+              { key: 'first_key', type: 'text', value: 'default value' },
               { key: 'second_key', type: 'toggle', value: null },
             ],
           },
@@ -550,22 +533,60 @@ describe('create', () => {
       );
     });
 
-    it('should throw an error when required customFields are undefined', async () => {
+    it('should not throw an error and fill out missing customFields when they are null', async () => {
+      await expect(
+        create(
+          {
+            ...theCase,
+            customFields: [
+              { ...theCustomFields[0], value: null },
+              { ...theCustomFields[1], value: null },
+            ],
+          },
+          clientArgs,
+          casesClient
+        )
+      ).resolves.not.toThrow();
+
+      expect(clientArgs.services.caseService.createCase).toHaveBeenCalledWith(
+        expect.objectContaining({
+          attributes: {
+            ...theCase,
+            closed_by: null,
+            closed_at: null,
+            category: null,
+            created_at: expect.any(String),
+            created_by: expect.any(Object),
+            updated_at: null,
+            updated_by: null,
+            external_service: null,
+            duration: null,
+            status: CaseStatuses.open,
+            customFields: [
+              { key: 'first_key', type: 'text', value: 'default value' },
+              { key: 'second_key', type: 'toggle', value: null },
+            ],
+          },
+          id: expect.any(String),
+          refresh: false,
+        })
+      );
+    });
+
+    it('should throw an error when required customFields are undefined and missing a default value', async () => {
       casesClient.configure.get = jest.fn().mockResolvedValue([
         {
           owner: theCase.owner,
           customFields: [
             {
-              key: 'first_key',
-              type: CustomFieldTypes.TEXT,
+              ...defaultCustomFieldsConfiguration[0],
               label: 'missing field 1',
-              required: true,
+              defaultValue: undefined,
             },
             {
-              key: 'second_key',
-              type: CustomFieldTypes.TOGGLE,
-              label: 'foo',
-              required: false,
+              ...defaultCustomFieldsConfiguration[1],
+              label: 'missing field 2',
+              required: true,
             },
           ],
         },
@@ -574,11 +595,11 @@ describe('create', () => {
       await expect(
         create({ ...theCase }, clientArgs, casesClient)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to create case: Error: Missing required custom fields: \\"missing field 1\\""`
+        `"Failed to create case: Error: Missing required custom fields without default value configured: \\"missing field 1\\", \\"missing field 2\\""`
       );
     });
 
-    it('should throw an error when required customFields are null', async () => {
+    it('should throw an error when required customFields are null and missing a default value', async () => {
       casesClient.configure.get = jest.fn().mockResolvedValue([
         {
           owner: theCase.owner,
@@ -604,23 +625,15 @@ describe('create', () => {
           {
             ...theCase,
             customFields: [
-              {
-                key: 'first_key',
-                type: CustomFieldTypes.TEXT,
-                value: null,
-              },
-              {
-                key: 'second_key',
-                type: CustomFieldTypes.TOGGLE,
-                value: null,
-              },
+              { ...theCustomFields[0], value: null },
+              { ...theCustomFields[1], value: null },
             ],
           },
           clientArgs,
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to create case: Error: Missing required custom fields: \\"missing field 1\\", \\"missing field 2\\""`
+        `"Failed to create case: Error: Missing required custom fields without default value configured: \\"missing field 1\\", \\"missing field 2\\""`
       );
     });
 
@@ -686,27 +699,6 @@ describe('create', () => {
       );
     });
 
-    it('throws error when required custom fields are missing', async () => {
-      await expect(
-        create(
-          {
-            ...theCase,
-            customFields: [
-              {
-                key: 'second_key',
-                type: CustomFieldTypes.TEXT,
-                value: 'this is a text field value',
-              },
-            ],
-          },
-          clientArgs,
-          casesClient
-        )
-      ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to create case: Error: Missing required custom fields: \\"missing field 1\\""`
-      );
-    });
-
     it('throws when the customField types do not match the configuration', async () => {
       await expect(
         create(
@@ -729,7 +721,7 @@ describe('create', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to create case: Error: The following custom fields have the wrong type in the request: \\"missing field 1\\", \\"missing field 2\\""`
+        `"Failed to create case: Error: The following custom fields have the wrong type in the request: \\"label 1\\", \\"label 2\\""`
       );
     });
   });

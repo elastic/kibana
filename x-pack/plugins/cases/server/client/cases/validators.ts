@@ -106,6 +106,7 @@ export const validateCustomFieldKeysAgainstConfiguration = ({
 
 /**
  * Returns a list of required custom fields missing from the request
+ * that don't have a default value configured.
  */
 export const validateRequiredCustomFields = ({
   requestCustomFields,
@@ -120,7 +121,9 @@ export const validateRequiredCustomFields = ({
   }
 
   const requiredCustomFields = customFieldsConfiguration.filter(
-    (customField) => customField.required
+    (customField) =>
+      customField.required &&
+      (customField.defaultValue === undefined || customField.defaultValue === null)
   );
 
   if (!requiredCustomFields.length) {
@@ -145,7 +148,9 @@ export const validateRequiredCustomFields = ({
 
   if (missingRequiredCustomFields.length) {
     throw Boom.badRequest(
-      `Missing required custom fields: ${missingRequiredCustomFields.join(', ')}`
+      `Missing required custom fields without default value configured: ${missingRequiredCustomFields.join(
+        ', '
+      )}`
     );
   }
 };
