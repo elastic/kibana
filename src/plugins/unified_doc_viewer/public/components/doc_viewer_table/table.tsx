@@ -18,6 +18,7 @@ import {
   EuiI18n,
   EuiDataGrid,
   EuiDataGridProps,
+  EuiDataGridColumnCellActionProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
@@ -32,19 +33,20 @@ import {
   usePager,
 } from '@kbn/discover-utils';
 import { fieldNameWildcardMatcher, getFieldSearchMatchingHighlight } from '@kbn/field-utils';
-import type { DocViewRenderProps, FieldRecordLegacy } from '@kbn/unified-doc-viewer/types';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { FieldName } from '@kbn/unified-doc-viewer';
 import { getUnifiedDocViewerServices } from '../../plugin';
 import { TableFieldValue } from './table_cell_value';
+import {
+  type TableRow,
+  FilterIn,
+  FilterOut,
+  FilterExist,
+  ToggleColumn,
+  PinToggle,
+} from './table_cell_actions';
 
-export interface FieldRecord {
-  action: Omit<FieldRecordLegacy['action'], 'isActive'>;
-  field: {
-    pinned: boolean;
-    onTogglePinned: (field: string) => void;
-  } & FieldRecordLegacy['field'];
-  value: FieldRecordLegacy['value'];
-}
+export type FieldRecord = TableRow;
 
 interface ItemsEntry {
   pinnedItems: FieldRecord[];
@@ -152,7 +154,7 @@ export const DocViewerTable = ({
   );
 
   const fieldToItem = useCallback(
-    (field: string) => {
+    (field: string): TableRow => {
       const fieldMapping = mapping(field);
       const displayName = fieldMapping?.displayName ?? field;
       const fieldType = columnTypes
@@ -169,7 +171,6 @@ export const DocViewerTable = ({
         action: {
           onToggleColumn,
           onFilter: filter,
-          isActive: !!columns?.includes(field),
           flattenedField: flattened[field],
         },
         field: {
@@ -199,7 +200,6 @@ export const DocViewerTable = ({
       hit,
       onToggleColumn,
       filter,
-      columns,
       columnTypes,
       flattened,
       pinnedFields,
@@ -278,6 +278,22 @@ export const DocViewerTable = ({
       }),
       initialWidth: 270,
       actions: false,
+      visibleCellActions: 3,
+      cellActions: [
+        ...(filter
+          ? [
+              ({ Component, rowIndex }: EuiDataGridColumnCellActionProps) => {
+                return <FilterExist row={rows[rowIndex]} Component={Component} />;
+              },
+            ]
+          : []),
+        ({ Component, rowIndex }) => {
+          return <ToggleColumn row={rows[rowIndex]} Component={Component} />;
+        },
+        ({ Component, rowIndex }) => {
+          return <PinToggle row={rows[rowIndex]} Component={Component} />;
+        },
+      ],
     },
     {
       id: 'value',
@@ -285,6 +301,17 @@ export const DocViewerTable = ({
         defaultMessage: 'Value',
       }),
       actions: false,
+      visibleCellActions: 2,
+      cellActions: filter
+        ? [
+            ({ Component, rowIndex }) => {
+              return <FilterIn row={rows[rowIndex]} Component={Component} />;
+            },
+            ({ Component, rowIndex }) => {
+              return <FilterOut row={rows[rowIndex]} Component={Component} />;
+            },
+          ]
+        : [],
     },
   ];
 
@@ -348,7 +375,7 @@ export const DocViewerTable = ({
                 const row = rows[rowIndex];
                 const {
                   action: { flattenedField },
-                  field: { field, fieldMapping, fieldType, scripted, pinned },
+                  field: { field, fieldMapping, fieldType, scripted },
                   value: { formattedValue, ignored },
                 } = row;
 
@@ -366,7 +393,6 @@ export const DocViewerTable = ({
                         )}
                       />
                       {/* TODO: how to highlight pinned fields? */}
-                      {pinned ? <EuiFlexItem grow={false}>{'(pinned)'}</EuiFlexItem> : null}
                     </EuiFlexGroup>
                   );
                 }
