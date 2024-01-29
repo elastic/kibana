@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-
-export const connectorTypesQuerySchema = schema.object({
-  feature_id: schema.maybe(schema.string()),
-});
+export { transformListTypesResponse } from './transform_list_types_response/latest';
+export { transformListTypesResponse as transformListTypesResponseV1 } from './transform_list_types_response/v1';

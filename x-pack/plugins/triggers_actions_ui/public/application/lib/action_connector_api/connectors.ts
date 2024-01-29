@@ -5,8 +5,11 @@
  * 2.0.
  */
 import { HttpSetup } from '@kbn/core/public';
-import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
-import { BASE_ACTION_API_PATH } from '../../constants';
+import {
+  AsApiContract,
+  INTERNAL_BASE_ACTION_API_PATH,
+  RewriteRequestCase,
+} from '@kbn/actions-plugin/common';
 import type { ActionConnector, ActionConnectorProps } from '../../../types';
 
 const rewriteResponseRes = (
@@ -38,13 +41,11 @@ const transformConnector: RewriteRequestCase<
 });
 
 export async function loadAllActions({ http }: { http: HttpSetup }): Promise<ActionConnector[]> {
+  // Use the internal get_all_system route to load all action connectors and preconfigured system action connectors
+  // This is necessary to load UI elements that require system action connectors, even if they're not selectable and
+  // editable from the connector selection UI like a normal action connector.
   const res = await http.get<Parameters<typeof rewriteResponseRes>[0]>(
-    `${BASE_ACTION_API_PATH}/connectors`,
-    {
-      query: {
-        include_system_actions: true,
-      },
-    }
+    `${INTERNAL_BASE_ACTION_API_PATH}/connectors_with_system`
   );
 
   return rewriteResponseRes(res) as ActionConnector[];

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getAllConnectorsRoute } from './get_all';
+import { getAllSystemConnectorsRoute } from './get_all_system';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../lib/license_state.mock';
 import { mockHandlerArguments } from '../../legacy/_mock_handler_arguments';
@@ -21,12 +21,12 @@ beforeEach(() => {
   (verifyAccessAndContext as jest.Mock).mockImplementation((license, handler) => handler);
 });
 
-describe('getAllConnectorsRoute', () => {
+describe('getAllSystemConnectorsRoute', () => {
   it('get all connectors with proper parameters', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getAllConnectorsRoute(router, licenseState);
+    getAllSystemConnectorsRoute(router, licenseState);
 
     const [config, handler] = router.get.mock.calls[0];
 
@@ -54,7 +54,7 @@ describe('getAllConnectorsRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getAllConnectorsRoute(router, licenseState);
+    getAllSystemConnectorsRoute(router, licenseState);
 
     const [config, handler] = router.get.mock.calls[0];
 
@@ -78,7 +78,7 @@ describe('getAllConnectorsRoute', () => {
       throw new Error('OMG');
     });
 
-    getAllConnectorsRoute(router, licenseState);
+    getAllSystemConnectorsRoute(router, licenseState);
 
     const [config, handler] = router.get.mock.calls[0];
 

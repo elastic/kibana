@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-
-export const connectorTypesQuerySchema = schema.object({
-  feature_id: schema.maybe(schema.string()),
-});
+export { listTypesSystemRoute } from './list_types_system';

@@ -155,9 +155,13 @@ export const ActionForm = ({
     (async () => {
       try {
         setIsLoadingActionTypes(true);
-        const registeredActionTypes = (await loadActionTypes({ http, featureId })).sort((a, b) =>
-          a.name.localeCompare(b.name)
-        );
+        const registeredActionTypes = (
+          await loadActionTypes({
+            http,
+            featureId,
+            includeSystemActions: ruleTypeId?.startsWith('example.'),
+          })
+        ).sort((a, b) => a.name.localeCompare(b.name));
         const index: ActionTypeIndex = {};
         for (const actionTypeItem of registeredActionTypes) {
           index[actionTypeItem.id] = actionTypeItem;
