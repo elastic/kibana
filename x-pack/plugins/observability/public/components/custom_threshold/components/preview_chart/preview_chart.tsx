@@ -29,6 +29,7 @@ import {
   getBufferThreshold,
   getLensOperationFromRuleMetric,
   isRate,
+  LensFieldFormat,
 } from './helpers';
 
 interface PreviewChartPros {
@@ -189,7 +190,7 @@ export function PreviewChart({
       format: {
         id: formatId,
         params: {
-          decimals: 2,
+          decimals: formatId === LensFieldFormat.PERCENT ? 0 : 2,
         },
       },
     };
