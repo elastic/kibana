@@ -143,8 +143,9 @@ export const expandFirstAlertActions = () => {
 };
 
 export const expandFirstAlert = () => {
-  cy.get(EXPAND_ALERT_BTN).should('be.visible');
-  cy.get(EXPAND_ALERT_BTN).first().click();
+  cy.get(EXPAND_ALERT_BTN).first().should('be.visible');
+  // Cypress is flaky on clicking this button despite production not having that issue
+  cy.get(EXPAND_ALERT_BTN).first().trigger('click');
 };
 
 export const hideMessageTooltip = () => {

@@ -293,11 +293,13 @@ exports[`<CodeEditor /> is rendered 1`] = `
       <MockedMonacoEditor
         editorDidMount={[Function]}
         editorWillMount={[Function]}
+        editorWillUnmount={[Function]}
         height={250}
         language="loglang"
         onChange={[Function]}
         options={
           Object {
+            "bracketPairColorization.enabled": false,
             "fontFamily": "Roboto Mono",
             "fontSize": 12,
             "lineHeight": 21,
@@ -328,12 +330,14 @@ exports[`<CodeEditor /> is rendered 1`] = `
           <div />
           <textarea
             data-test-subj="monacoEditorTextarea"
+            editorWillUnmount={[Function]}
             height={250}
             language="loglang"
             onChange={[Function]}
             onKeyDown={[Function]}
             options={
               Object {
+                "bracketPairColorization.enabled": false,
                 "fontFamily": "Roboto Mono",
                 "fontSize": 12,
                 "lineHeight": 21,

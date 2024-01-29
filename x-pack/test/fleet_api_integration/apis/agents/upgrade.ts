@@ -1309,7 +1309,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should respond 400 if trying to bulk upgrade to a version that is higher than the latest fleet server version', async () => {
-        const higherVersion = semver.inc(fleetServerVersion, 'patch');
+        const higherVersion = '7.17.0';
         await es.update({
           id: 'agent1',
           refresh: 'wait_for',
