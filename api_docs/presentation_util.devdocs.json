@@ -1858,8 +1858,8 @@
             "label": "store",
             "description": [],
             "signature": [
-              "EnhancedStore",
-              "<ReduxEmbeddableStateType, ",
+              "ToolkitStore",
+              "<ReduxEmbeddableStateType & {}, ",
               "AnyAction",
               ", Middlewares<ReduxEmbeddableStateType>>"
             ],
@@ -1937,7 +1937,7 @@
             "label": "getState",
             "description": [],
             "signature": [
-              "() => ReduxEmbeddableStateType"
+              "() => ReduxEmbeddableStateType & {}"
             ],
             "path": "src/plugins/presentation_util/public/redux_tools/redux_embeddables/types.ts",
             "deprecated": false,
@@ -2027,8 +2027,8 @@
             "label": "store",
             "description": [],
             "signature": [
-              "EnhancedStore",
-              "<ReduxStateType, ",
+              "ToolkitStore",
+              "<ReduxStateType & {}, ",
               "AnyAction",
               ", Middlewares<ReduxStateType>>"
             ],
@@ -2106,7 +2106,7 @@
             "label": "getState",
             "description": [],
             "signature": [
-              "() => ReduxStateType"
+              "() => ReduxStateType & {}"
             ],
             "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
             "deprecated": false,
@@ -2542,6 +2542,20 @@
                 "text": "SaveModalState"
               },
               ") => React.ReactNode)"
+            ],
+            "path": "src/plugins/presentation_util/public/components/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "presentationUtil",
+            "id": "def-public.SaveModalDashboardProps.mustCopyOnSaveMessage",
+            "type": "string",
+            "tags": [],
+            "label": "mustCopyOnSaveMessage",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/plugins/presentation_util/public/components/types.ts",
             "deprecated": false,

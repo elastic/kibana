@@ -32,7 +32,6 @@ import { TimelineActionMenu } from '../action_menu';
 import { AddToFavoritesButton } from '../../add_to_favorites';
 import { TimelineSaveStatus } from '../../save_status';
 import { timelineDefaults } from '../../../store/defaults';
-import { AddTimelineButton } from '../add_timeline_button';
 
 interface FlyoutHeaderPanelProps {
   timelineId: string;
@@ -121,11 +120,6 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
       >
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-            {!show ? (
-              <EuiFlexItem grow={false}>
-                <AddTimelineButton timelineId={timelineId} />
-              </EuiFlexItem>
-            ) : null}
             <EuiFlexItem grow={false}>
               <AddToFavoritesButton timelineId={timelineId} />
             </EuiFlexItem>
