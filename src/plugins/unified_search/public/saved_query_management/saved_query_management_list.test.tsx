@@ -361,7 +361,7 @@ describe('Saved query management list component', () => {
     expect(screen.getAllByRole('option')).toHaveLength(5);
   });
 
-  it('should clear the currently selected saved query when navigating between pages', async () => {
+  it('should not clear the currently selected saved query when navigating between pages', async () => {
     const findSavedQueriesSpy = jest.fn().mockResolvedValue({
       total: 6,
       queries: generateSavedQueries(5),
@@ -377,9 +377,9 @@ describe('Saved query management list component', () => {
     await waitFor(() => {
       expect(findSavedQueriesSpy).toHaveBeenLastCalledWith(undefined, 5, 1);
     });
-    expect(screen.getByRole('option', { name: 'Test 0', selected: false })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Test 0', checked: false })).toBeInTheDocument();
     userEvent.click(screen.getByRole('option', { name: 'Test 0' }));
-    expect(screen.getByRole('option', { name: 'Test 0', selected: true })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Test 0', checked: true })).toBeInTheDocument();
     findSavedQueriesSpy.mockResolvedValue({
       total: 6,
       queries: generateSavedQueries(1),
@@ -396,7 +396,7 @@ describe('Saved query management list component', () => {
     await waitFor(() => {
       expect(findSavedQueriesSpy).toHaveBeenLastCalledWith(undefined, 5, 1);
     });
-    expect(screen.getByRole('option', { name: 'Test 0', selected: false })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Test 0', checked: true })).toBeInTheDocument();
   });
 
   it('should allow providing a search term', async () => {

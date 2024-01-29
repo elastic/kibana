@@ -244,10 +244,6 @@ export const SavedQueryManagementList = ({
         ];
       }
 
-      if (!filteredQueries.some((savedQuery) => savedQuery.id === selectedSavedQuery?.id)) {
-        setSelectedSavedQuery(undefined);
-      }
-
       setTotalQueryCount(total);
       setCurrentPageQueries(filteredQueries);
       selectableRef.current?.scrollToItem(0);
