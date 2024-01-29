@@ -132,76 +132,76 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.switchToWindow(reportingWindowHandler);
       });
     });
-  });
 
-  describe(`PNG report`, () => {
-    it(`should not allow to download reports for incomplete visualization`, async () => {
-      await PageObjects.visualize.gotoVisualizationLandingPage();
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickVisType('lens');
-      await PageObjects.lens.goToTimeRange();
+    describe(`PNG report`, () => {
+      it(`should not allow to download reports for incomplete visualization`, async () => {
+        await PageObjects.visualize.gotoVisualizationLandingPage();
+        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.clickVisType('lens');
+        await PageObjects.lens.goToTimeRange();
 
-      await PageObjects.lens.configureDimension({
-        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-        operation: 'date_histogram',
-        field: '@timestamp',
-      });
-      await PageObjects.lens.configureDimension({
-        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'average',
-        field: 'bytes',
-      });
+        await PageObjects.lens.configureDimension({
+          dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+          operation: 'date_histogram',
+          field: '@timestamp',
+        });
+        await PageObjects.lens.configureDimension({
+          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+          operation: 'average',
+          field: 'bytes',
+        });
 
-      // now remove a dimension to make it incomplete
-      await PageObjects.lens.removeDimension('lnsXY_yDimensionPanel');
-      // open the share menu and check that reporting is disabled
-      await PageObjects.lens.clickShareMenu();
+        // now remove a dimension to make it incomplete
+        await PageObjects.lens.removeDimension('lnsXY_yDimensionPanel');
+        // open the share menu and check that reporting is disabled
+        await PageObjects.lens.clickShareMenu();
 
-      expect(await PageObjects.lens.isShareActionEnabled(`imageExports`));
-    });
-
-    it(`should be able to download report of the current visualization`, async () => {
-      // make the configuration complete
-      await PageObjects.lens.configureDimension({
-        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'average',
-        field: 'bytes',
+        expect(await PageObjects.lens.isShareActionEnabled(`imageExports`));
       });
 
-      await PageObjects.lens.openReportingShare();
-      await testSubjects.click('pngReportOption');
-      await PageObjects.reporting.clickGenerateReportButton();
-      const url = await PageObjects.reporting.getReportURL(60000);
-      expect(url).to.be.ok();
-      if (await testSubjects.exists('toastCloseButton')) {
-        await testSubjects.click('toastCloseButton');
-      }
-    });
+      it(`should be able to download report of the current visualization`, async () => {
+        // make the configuration complete
+        await PageObjects.lens.configureDimension({
+          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+          operation: 'average',
+          field: 'bytes',
+        });
 
-    it(`should produce a valid URL for reporting`, async () => {
-      await PageObjects.lens.openReportingShare();
-      await testSubjects.click('pngReportOption');
-      await PageObjects.reporting.clickGenerateReportButton();
-      await PageObjects.reporting.getReportURL(60000);
-      if (await testSubjects.exists('toastCloseButton')) {
-        await testSubjects.click('toastCloseButton');
-      }
-      // navigate to the reporting page
-      await PageObjects.common.navigateToUrl('management', '/insightsAndAlerting');
-      await testSubjects.click('reporting');
-      // find the latest Lens report
-      await testSubjects.click('reportJobRow > euiCollapsedItemActionsButton');
-      // click on Open in Kibana and check that all is ok
-      await testSubjects.click('reportOpenInKibanaApp');
+        await PageObjects.lens.openReportingShare();
+        await testSubjects.click('pngReportOption');
+        await PageObjects.reporting.clickGenerateReportButton();
+        const url = await PageObjects.reporting.getReportURL(60000);
+        expect(url).to.be.ok();
+        if (await testSubjects.exists('toastCloseButton')) {
+          await testSubjects.click('toastCloseButton');
+        }
+      });
 
-      const [reportingWindowHandler, lensWindowHandle] = await browser.getAllWindowHandles();
-      await browser.switchToWindow(lensWindowHandle);
-      // verify some configuration
-      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
-        'Average of bytes'
-      );
-      await browser.closeCurrentWindow();
-      await browser.switchToWindow(reportingWindowHandler);
+      it(`should produce a valid URL for reporting`, async () => {
+        await PageObjects.lens.openReportingShare();
+        await testSubjects.click('pngReportOption');
+        await PageObjects.reporting.clickGenerateReportButton();
+        await PageObjects.reporting.getReportURL(60000);
+        if (await testSubjects.exists('toastCloseButton')) {
+          await testSubjects.click('toastCloseButton');
+        }
+        // navigate to the reporting page
+        await PageObjects.common.navigateToUrl('management', '/insightsAndAlerting');
+        await testSubjects.click('reporting');
+        // find the latest Lens report
+        await testSubjects.click('reportJobRow > euiCollapsedItemActionsButton');
+        // click on Open in Kibana and check that all is ok
+        await testSubjects.click('reportOpenInKibanaApp');
+
+        const [reportingWindowHandler, lensWindowHandle] = await browser.getAllWindowHandles();
+        await browser.switchToWindow(lensWindowHandle);
+        // verify some configuration
+        expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
+          'Average of bytes'
+        );
+        await browser.closeCurrentWindow();
+        await browser.switchToWindow(reportingWindowHandler);
+      });
     });
   });
 }

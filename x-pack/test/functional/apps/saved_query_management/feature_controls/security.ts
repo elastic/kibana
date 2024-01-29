@@ -95,6 +95,9 @@ export default function (ctx: FtrProviderContext) {
   describe('Security: App vs Global privilege', () => {
     apps.forEach((appName) => {
       before(async () => {
+        if (await PageObjects.share.isShareModalOpen()) {
+          await PageObjects.share.closeShareModal();
+        }
         await kibanaServer.savedObjects.cleanStandardList();
 
         await kibanaServer.importExport.load(
@@ -105,12 +108,12 @@ export default function (ctx: FtrProviderContext) {
 
         // ensure we're logged out, so we can log in as the appropriate users
         await PageObjects.security.forceLogout();
-        if (await PageObjects.share.isShareModalOpen()) {
-          await PageObjects.share.closeShareModal();
-        }
       });
 
       after(async () => {
+        if (await PageObjects.share.isShareModalOpen()) {
+          await PageObjects.share.closeShareModal();
+        }
         // logout, so the other tests don't accidentally run as the custom users we're testing below
         // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await PageObjects.security.forceLogout();

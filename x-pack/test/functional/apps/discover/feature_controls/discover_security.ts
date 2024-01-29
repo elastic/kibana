@@ -45,9 +45,6 @@ export default function (ctx: FtrProviderContext) {
 
   describe('discover feature controls security', () => {
     before(async () => {
-      if (await PageObjects.share.isShareModalOpen()) {
-        await PageObjects.share.closeShareModal();
-      }
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/security'
       );
