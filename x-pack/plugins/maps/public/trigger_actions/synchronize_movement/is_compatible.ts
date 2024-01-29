@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { apiHasLensConfig } from '@kbn/lens-plugin/public';
+import { apiIsOfType } from '@kbn/presentation-publishing';
+import { type HasLensConfig, apiHasLensConfig } from '@kbn/lens-plugin/public';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { isLegacyMapApi } from '../../legacy_visualizations/is_legacy_map';
 import { mapEmbeddablesSingleton } from '../../embeddable/map_embeddables_singleton';
@@ -16,7 +17,7 @@ export function isCompatible(api: SynchronizeMovementActionApi) {
     return false;
   }
 
-  if (apiHasLensConfig(api) && api.getSavedVis()?.visualizationType === 'lnsChoropleth') {
+  if (apiHasLensConfig(api) && (api as HasLensConfig).getSavedVis()?.visualizationType === 'lnsChoropleth') {
     return true;
   }
 
@@ -24,5 +25,5 @@ export function isCompatible(api: SynchronizeMovementActionApi) {
     return true;
   }
 
-  return api.type === MAP_SAVED_OBJECT_TYPE;
+  return apiIsOfType(api, MAP_SAVED_OBJECT_TYPE);
 }

@@ -8,7 +8,7 @@
 import { type HasType, apiIsOfType } from '@kbn/presentation-publishing';
 import { Document } from '../../persistence';
 
-export type HasLensConfig = HasType & {
+export type HasLensConfig = HasType<'lens'> & {
   getSavedVis: () => Readonly<Document | undefined>;
 };
 
