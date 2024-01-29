@@ -25,7 +25,6 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useKnowledgeBase } from '../../hooks/use_knowledge_base';
 import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
 import { EMPTY_CONVERSATION_TITLE } from '../../i18n';
-import { getConnectorsManagementHref } from '../../utils/get_connectors_management_href';
 import { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
 import { ChatBody } from './chat_body';
 import { ConversationList } from './conversation_list';
@@ -52,10 +51,10 @@ export function ChatFlyout({
   onClose: () => void;
 }) {
   const {
-    services: { http, notifications },
+    services: { notifications },
   } = useKibana();
 
-  const euiTheme = useEuiTheme();
+  const { euiTheme } = useEuiTheme();
 
   const currentUser = useCurrentUser();
 
@@ -133,7 +132,7 @@ export function ChatFlyout({
                 setIsConversationListVisible((oldValue) => !oldValue);
               }}
               css={{
-                borderRight: `1px solid ${euiTheme.euiTheme.border.color}`,
+                borderRight: `1px solid ${euiTheme.border.color}`,
               }}
             >
               <ConversationList
@@ -218,7 +217,6 @@ export function ChatFlyout({
                     initialMessages={initialMessages}
                     initialConversationId={conversationId}
                     currentUser={currentUser}
-                    connectorsManagementHref={getConnectorsManagementHref(http)}
                     knowledgeBase={knowledgeBase}
                     startedFrom={startedFrom}
                     onConversationUpdate={(conversation) => {

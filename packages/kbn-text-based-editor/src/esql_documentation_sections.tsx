@@ -1620,6 +1620,44 @@ NOTE: \`MV_DEDUPE\` may, but won’t always, sort the values in the field.
     },
     {
       label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvFirstFunction',
+        {
+          defaultMessage: 'MV_FIRST',
+        }
+      ),
+      description: (
+        <Markdown
+          openLinksInNewTab={true}
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvFirstFunction.markdown',
+            {
+              defaultMessage: `### MV_FIRST
+Converts a multivalued field into a single valued field containing the first value. This is most useful when reading from a function that emits multivalued fields in a known order like \`SPLIT\`.
+
+For example:
+
+\`\`\`
+ROW a="foo;bar;baz" 
+| EVAL first_a = MV_FIRST(SPLIT(a, ";"))
+\`\`\`
+
+Returning:
+
+\`\`\`
+foo;bar;baz | foo
+\`\`\`
+
+The order that [multivalued fields](https://www.elastic.co/guide/en/elasticsearch/reference/current/esql-multivalued-fields.html) are read from underlying storage is not guaranteed. It is frequently ascending, but don’t rely on that. If you need the minimum field value use \`MV_MIN\` instead of \`MV_FIRST\`. \`MV_MIN\` has optimizations for sorted values so there isn’t a performance benefit to \`MV_FIRST\`. \`MV_FIRST\` is mostly useful with functions that create multivalued fields like \`SPLIT\`.
+            `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvMaxFunction',
         {
           defaultMessage: 'MV_MAX',
@@ -1783,6 +1821,39 @@ Returning:
 
 NOTE: The input type can be any number and the output type is the same as the input type.
               `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvLastFunction',
+        {
+          defaultMessage: 'MV_LAST',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvLastFunction.markdown',
+            {
+              defaultMessage: `### MV_LAST
+Converts a multivalued field into a single valued field containing the last value. This is most useful when reading from a function that emits multivalued fields in a known order like \`SPLIT\`:
+  
+\`\`\`
+ROW a="foo;bar;baz" 
+| EVAL first_a = MV_LAST(SPLIT(a, ";"))
+\`\`\`
+
+Returning:
+
+\`\`\`
+foo;bar;baz | baz
+\`\`\`
+            `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
@@ -2311,6 +2382,41 @@ ROW wkt = ["POINT(4297.11 -1475.53)", "POINT(7580.93 2272.77)"]
     },
     {
       label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toCartesianShapeFunction',
+        {
+          defaultMessage: 'TO_CARTESIANSHAPE',
+        }
+      ),
+      description: (
+        <Markdown
+          openLinksInNewTab={true}
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toCartesianShapeFunction.markdown',
+            {
+              defaultMessage: `### TO_CARTESIANSHAPE
+Converts an input value to a \`cartesian_shape\` value.
+
+The input can be a single- or multi-valued field or an expression. The input type must be a string or a \`cartesian_shape\`.
+              
+A string will only be successfully converted if it respects the [WKT](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry) format:
+    
+For example:
+    
+\`\`\`
+ROW wkt = ["POINT(4297.11 -1475.53)", "POLYGON ((3339584.72 1118889.97, 4452779.63 4865942.27, 2226389.81 4865942.27, 1113194.90 2273030.92, 3339584.72 1118889.97))"]
+| MV_EXPAND wkt
+| EVAL geom = TO_CARTESIANSHAPE(wkt)
+\`\`\`
+                        `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toDatetimeFunction',
         {
           defaultMessage: 'TO_DATETIME',
@@ -2471,6 +2577,46 @@ ROW wkt = "POINT(42.97109630194 14.7552534413725)"
     },
     {
       label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toGeoshapeFunction',
+        {
+          defaultMessage: 'TO_GEOSHAPE',
+        }
+      ),
+      description: (
+        <Markdown
+          openLinksInNewTab={true}
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toGeoshapeFunction.markdown',
+            {
+              defaultMessage: `### TO_GEOSHAPE
+Converts an input value to a \`geo_shape\` value.
+
+The input can be a single- or multi-valued field or an expression. The input type must be a string or a \`geo_shape\`.
+
+A string will only be successfully converted if it respects the [WKT format](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry).
+
+For example:
+
+\`\`\`
+ROW wkt = "POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))"
+| EVAL geom = TO_GEOSHAPE(wkt)
+\`\`\`
+
+Returning:
+
+\`\`\`
+POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10)) | POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toIntegerFunction',
         {
           defaultMessage: 'TO_INTEGER',
@@ -2599,6 +2745,40 @@ Boolean \`true\` will be converted to long \`1\`, \`false\` to \`0\`.
     },
     {
       label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toLowerFunction',
+        {
+          defaultMessage: 'TO_LOWER',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toLowerFunction.markdown',
+            {
+              defaultMessage: `### TO_LOWER
+Returns a new string representing the input string converted to lower case.
+For example:
+    
+\`\`\`
+ROW message = "Some Text" 
+| EVAL message_lower = TO_LOWER(message)
+\`\`\`
+
+Returning:
+
+\`\`\`
+Some Text | some text
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toRadiansFunction',
         {
           defaultMessage: 'TO_RADIANS',
@@ -2699,6 +2879,41 @@ If the input parameter is of a date type, its value will be interpreted as milli
 Boolean \`true\` will be converted to unsigned long \`1\`, \`false\` to \`0\`.
 
 Alias: TO_ULONG, TO_UL
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toUpperFunction',
+        {
+          defaultMessage: 'TO_UPPER',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toUpperFunction.markdown',
+            {
+              defaultMessage: `### TO_UPPER
+Returns a new string representing the input string converted to upper case.
+
+For example:
+
+\`\`\`
+ROW message = "Some Text" 
+| EVAL message_upper = TO_UPPER(message)
+\`\`\`
+
+Returning:
+
+\`\`\`
+Some Text | SOME TEXT
+\`\`\`
               `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
