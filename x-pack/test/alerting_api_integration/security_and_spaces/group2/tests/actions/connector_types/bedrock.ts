@@ -16,6 +16,10 @@ import { PassThrough } from 'stream';
 import { EventStreamCodec } from '@smithy/eventstream-codec';
 import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 
@@ -423,6 +427,8 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
               supertest
                 .post(`/internal/elastic_assistant/actions/connector/${bedrockActionId}/_execute`)
                 .set('kbn-xsrf', 'foo')
+                .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+                .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
                 .on('error', reject)
                 .send({
                   params: {

@@ -70,7 +70,7 @@ export const createConversation = async ({
   conversation,
 }: CreateConversationParams): Promise<ConversationResponse> => {
   const createdAt = new Date().toISOString();
-  const body: CreateMessageSchema = transformToCreateScheme(createdAt, spaceId, user, conversation);
+  const body = transformToCreateScheme(createdAt, spaceId, user, conversation);
 
   const response = await esClient.create({
     body,

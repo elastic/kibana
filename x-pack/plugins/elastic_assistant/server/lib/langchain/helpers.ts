@@ -9,7 +9,7 @@ import { KibanaRequest } from '@kbn/core-http-server';
 import type { Message } from '@kbn/elastic-assistant';
 import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from 'langchain/schema';
 
-import { RequestBody } from './types';
+import { ExecuteConnectorRequestBody } from '../../schemas/actions_connector/post_actions_connector_execute_route.gen';
 
 export const getLangChainMessage = (
   assistantMessage: Pick<Message, 'content' | 'role'>
@@ -36,7 +36,7 @@ export const getMessageContentAndRole = (prompt: string): Pick<Message, 'content
 });
 
 export const requestHasRequiredAnonymizationParams = (
-  request: KibanaRequest<unknown, unknown, RequestBody>
+  request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>
 ): boolean => {
   const { allow, allowReplacement, replacements } = request?.body ?? {};
 

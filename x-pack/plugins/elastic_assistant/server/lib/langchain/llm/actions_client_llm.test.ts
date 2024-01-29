@@ -11,7 +11,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 
 import { ActionsClientLlm } from './actions_client_llm';
 import { mockActionResponse } from '../../../__mocks__/action_result_data';
-import { RequestBody } from '../types';
+import { ExecuteConnectorRequestBody } from '../../../schemas/actions_connector/post_actions_connector_execute_route.gen';
 
 const connectorId = 'mock-connector-id';
 
@@ -28,7 +28,7 @@ const mockActions = {
   })),
 } as unknown as ActionsPluginStart;
 
-const mockRequest: KibanaRequest<unknown, unknown, RequestBody> = {
+const mockRequest: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody> = {
   params: { connectorId },
   body: {
     params: {
@@ -53,7 +53,7 @@ const mockRequest: KibanaRequest<unknown, unknown, RequestBody> = {
     },
     isEnabledKnowledgeBase: true,
   },
-} as KibanaRequest<unknown, unknown, RequestBody>;
+} as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
 
 const prompt = 'Do you know my name?';
 
