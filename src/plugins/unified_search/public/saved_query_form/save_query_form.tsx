@@ -143,9 +143,6 @@ export function SaveQueryForm({
         label={i18n.translate('unifiedSearch.search.searchBar.savedQueryNameLabelText', {
           defaultMessage: 'Name',
         })}
-        helpText={i18n.translate('unifiedSearch.search.searchBar.savedQueryNameHelpText', {
-          defaultMessage: 'Name must be unique.',
-        })}
         isInvalid={hasErrors}
         display="rowCompressed"
       >
