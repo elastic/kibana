@@ -8,11 +8,11 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
-import { useMetricsDataViewContext } from '../../../../pages/metrics/hosts/hooks/use_data_view';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { buildMetadataFilter } from './build_metadata_filter';
 import { useUnifiedSearchContext } from '../../../../pages/metrics/hosts/hooks/use_unified_search';
 import type { Field } from './utils';
+import { useDataViewsContext } from '../../hooks/use_data_views';
 
 interface AddMetadataFilterButtonProps {
   item: Field;
@@ -23,7 +23,7 @@ const filterAddedToastTitle = i18n.translate('xpack.infra.metadataEmbeddable.fil
 });
 
 export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) => {
-  const { dataView } = useMetricsDataViewContext();
+  const { metrics } = useDataViewsContext();
   const { searchCriteria } = useUnifiedSearchContext();
 
   const {
@@ -45,7 +45,7 @@ export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) 
     const newFilter = buildMetadataFilter({
       field: item.name,
       value: item.value ?? '',
-      dataView,
+      dataView: metrics.dataView,
       negate: false,
     });
     if (newFilter) {

@@ -56,12 +56,15 @@ export const createThreatSignals = async ({
   tuple,
   type,
   wrapHits,
+  wrapSuppressedHits,
+  runOpts,
   runtimeMappings,
   primaryTimestamp,
   secondaryTimestamp,
   exceptionFilter,
   unprocessedExceptions,
   inputIndexFields,
+  licensing,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatMatchedFields = getMatchedFields(threatMapping);
   const allowedFieldsForTermsQuery = await getAllowedFieldsForTermQuery({
@@ -87,6 +90,7 @@ export const createThreatSignals = async ({
     searchAfterTimes: [],
     lastLookBackDate: null,
     createdSignalsCount: 0,
+    suppressedAlertsCount: 0,
     createdSignals: [],
     errors: [],
     warningMessages: [],
@@ -177,7 +181,18 @@ export const createThreatSignals = async ({
         `bulk create times ${results.bulkCreateTimes}ms,`,
         `all successes are ${results.success}`
       );
-      if (results.createdSignalsCount >= params.maxSignals) {
+      // if alerts suppressed it means suppression enabled, so suppression alert limit should be applied (5 * max_signals)
+      if (
+        results.suppressedAlertsCount &&
+        results.suppressedAlertsCount > 0 &&
+        results.suppressedAlertsCount + results.createdSignalsCount >= 5 * params.maxSignals
+      ) {
+        // warning should be already set
+        ruleExecutionLogger.debug(
+          `Indicator match has reached its max signals count ${params.maxSignals}. Additional documents not checked are ${documentCount}`
+        );
+        break;
+      } else if (results.createdSignalsCount >= params.maxSignals) {
         if (results.warningMessages.includes(getMaxSignalsWarning())) {
           results.warningMessages = uniq(results.warningMessages);
         } else if (documentCount > 0) {
@@ -247,6 +262,7 @@ export const createThreatSignals = async ({
           tuple,
           type,
           wrapHits,
+          wrapSuppressedHits,
           runtimeMappings,
           primaryTimestamp,
           secondaryTimestamp,
@@ -256,6 +272,8 @@ export const createThreatSignals = async ({
           threatMatchedFields,
           inputIndexFields,
           threatIndexFields,
+          runOpts,
+          licensing,
         }),
     });
   } else {
@@ -302,6 +320,7 @@ export const createThreatSignals = async ({
           tuple,
           type,
           wrapHits,
+          wrapSuppressedHits,
           runtimeMappings,
           primaryTimestamp,
           secondaryTimestamp,
@@ -317,6 +336,8 @@ export const createThreatSignals = async ({
           allowedFieldsForTermsQuery,
           inputIndexFields,
           threatIndexFields,
+          runOpts,
+          licensing,
         }),
     });
   }
