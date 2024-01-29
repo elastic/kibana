@@ -33,7 +33,7 @@ export interface BulkOperationError {
   status?: number;
   conversation: {
     id: string;
-    name: string;
+    name?: string;
   };
 }
 
@@ -48,7 +48,7 @@ const buildBulkResponse = (
     deleted = [],
     skipped = [],
   }: {
-    errors?: BulkActionError[];
+    errors?: BulkOperationError[];
     updated?: ConversationResponse[];
     created?: ConversationResponse[];
     deleted?: string[];
@@ -78,9 +78,14 @@ const buildBulkResponse = (
       headers: { 'content-type': 'application/json' },
       body: {
         message: summary.succeeded > 0 ? 'Bulk edit partially failed' : 'Bulk edit failed',
-        status_code: 500,
+        // status_code: 500,
         attributes: {
-          errors: [],
+          errors: errors.map((e: BulkOperationError) => ({
+            status_code: e.status ?? 500,
+            conversations: [{ id: e.conversation.id, name: '' }],
+            message: e.message,
+            // err_code: '500',
+          })),
           results,
           summary,
         },
@@ -126,7 +131,11 @@ export const bulkActionConversationsRoute = (
         const { body } = request;
         const assistantResponse = buildResponse(response);
 
-        if (body?.update && body.update?.length > CONVERSATIONS_TABLE_MAX_PAGE_SIZE) {
+        const operationsCount =
+          (body?.update ? body.update?.length : 0) +
+          (body?.create ? body.create?.length : 0) +
+          (body?.delete ? body.delete?.ids?.length ?? 0 : 0);
+        if (operationsCount > CONVERSATIONS_TABLE_MAX_PAGE_SIZE) {
           return assistantResponse.error({
             body: `More than ${CONVERSATIONS_TABLE_MAX_PAGE_SIZE} ids sent for bulk edit action.`,
             statusCode: 400,
@@ -143,6 +152,7 @@ export const bulkActionConversationsRoute = (
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
 
           const writer = await dataClient?.getWriter();
+
           const {
             errors,
             docs_created: docsCreated,

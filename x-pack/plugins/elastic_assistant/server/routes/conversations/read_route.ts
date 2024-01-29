@@ -36,7 +36,7 @@ export const readConversationRoute = (router: ElasticAssistantPluginRouter) => {
         },
       },
       async (context, request, response): Promise<IKibanaResponse<ConversationResponse>> => {
-        const responseObj = buildResponse(response);
+        const assistantResponse = buildResponse(response);
 
         const { id } = request.params;
 
@@ -45,10 +45,17 @@ export const readConversationRoute = (router: ElasticAssistantPluginRouter) => {
 
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
           const conversation = await dataClient?.getConversation(id);
-          return response.ok({ body: conversation ?? {} });
+
+          if (conversation == null) {
+            return assistantResponse.error({
+              body: `conversation id: "${id}" not found`,
+              statusCode: 404,
+            });
+          }
+          return response.ok({ body: conversation });
         } catch (err) {
           const error = transformError(err);
-          return responseObj.error({
+          return assistantResponse.error({
             body: error.message,
             statusCode: error.statusCode,
           });

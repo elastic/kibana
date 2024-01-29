@@ -18,6 +18,21 @@ export const getConversationResponseMock = (): ConversationResponse => ({
   messages: [],
   id: '1',
   namespace: 'default',
+  isDefault: true,
+  excludeFromLastConversationStorage: false,
+  timestamp: '2020-04-20T15:25:31.830Z',
+  apiConfig: {
+    connectorId: 'c1',
+    connectorTypeTitle: 'title-c-1',
+    defaultSystemPromptId: 'prompt-1',
+    model: 'test',
+    provider: 'Azure OpenAI',
+  },
+  user: {
+    id: '1111',
+    name: 'elastic',
+  },
+  replacements: undefined,
 });
 
 export const getSearchConversationMock =
@@ -43,6 +58,20 @@ export const getSearchConversationMock =
             messages: [],
             id: '1',
             namespace: 'default',
+            is_default: true,
+            exclude_from_last_conversation_storage: false,
+            api_config: {
+              connector_id: 'c1',
+              connector_type_title: 'title-c-1',
+              default_system_prompt_id: 'prompt-1',
+              model: 'test',
+              provider: 'Azure OpenAI',
+            },
+            user: {
+              id: '1111',
+              name: 'elastic',
+            },
+            replacements: undefined,
           },
         },
       ],
@@ -66,7 +95,11 @@ describe('getConversation', () => {
     const data = getSearchConversationMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.search.mockResponse(data);
-    const conversation = await getConversation(esClient, '', '1');
+    const conversation = await getConversation(
+      esClient,
+      '.kibana-elastic-ai-assistant-conversations',
+      '1'
+    );
     const expected = getConversationResponseMock();
     expect(conversation).toEqual(expected);
   });
@@ -76,7 +109,11 @@ describe('getConversation', () => {
     data.hits.hits = [];
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.search.mockResponse(data);
-    const conversation = await getConversation(esClient, '', '1');
+    const conversation = await getConversation(
+      esClient,
+      '.kibana-elastic-ai-assistant-conversations',
+      '1'
+    );
     expect(conversation).toEqual(null);
   });
 });

@@ -136,6 +136,10 @@ export const updateConversation = async ({
       );
       return null;
     }
+
+    if (!response.updated && response.updated === 0) {
+      throw Error('No conversation has been updated');
+    }
   } catch (err) {
     logger.warn(`Error updating conversation: ${err} by ID: ${existingConversation.id}`);
     throw err;

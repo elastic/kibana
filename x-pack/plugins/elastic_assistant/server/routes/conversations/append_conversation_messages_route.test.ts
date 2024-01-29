@@ -4,18 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID } from '@kbn/elastic-assistant-common';
-import { getUpdateConversationRequest, requestMock } from '../../__mocks__/request';
+import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID_MESSAGES } from '@kbn/elastic-assistant-common';
+import { getAppendConversationMessageRequest, requestMock } from '../../__mocks__/request';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { serverMock } from '../../__mocks__/server';
 import {
+  getAppendConversationMessagesSchemaMock,
   getConversationMock,
   getQueryConversationParams,
   getUpdateConversationSchemaMock,
 } from '../../__mocks__/conversations_schema.mock';
-import { updateConversationRoute } from './update_route';
+import { appendConversationMessageRoute } from './append_conversation_messages_route';
 
-describe('Update conversation route', () => {
+describe('Append conversation messages route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
 
@@ -26,29 +27,29 @@ describe('Update conversation route', () => {
     clients.elasticAssistant.getAIAssistantConversationsDataClient.getConversation.mockResolvedValue(
       getConversationMock(getQueryConversationParams())
     );
-    clients.elasticAssistant.getAIAssistantConversationsDataClient.updateConversation.mockResolvedValue(
+    clients.elasticAssistant.getAIAssistantConversationsDataClient.appendConversationMessages.mockResolvedValue(
       getConversationMock(getQueryConversationParams())
-    ); // successful update
+    ); // successful append
 
-    updateConversationRoute(server.router);
+    appendConversationMessageRoute(server.router);
   });
 
   describe('status codes', () => {
     test('returns 200', async () => {
       const response = await server.inject(
-        getUpdateConversationRequest(),
+        getAppendConversationMessageRequest('04128c15-0d1b-4716-a4c5-46997ac7f3bd'),
         requestContextMock.convertContext(context)
       );
       expect(response.status).toEqual(200);
     });
 
-    test('returns 404 when updating a single conversation that does not exist', async () => {
+    test('returns 404 when append to a conversation that does not exist', async () => {
       clients.elasticAssistant.getAIAssistantConversationsDataClient.getConversation.mockResolvedValue(
         null
       );
 
       const response = await server.inject(
-        getUpdateConversationRequest(),
+        getAppendConversationMessageRequest(),
         requestContextMock.convertContext(context)
       );
 
@@ -66,7 +67,7 @@ describe('Update conversation route', () => {
         }
       );
       const response = await server.inject(
-        getUpdateConversationRequest(),
+        getAppendConversationMessageRequest(),
         requestContextMock.convertContext(context)
       );
       expect(response.status).toEqual(500);
@@ -80,10 +81,10 @@ describe('Update conversation route', () => {
   describe('request validation', () => {
     test('rejects payloads with no ID', async () => {
       const noIdRequest = requestMock.create({
-        method: 'put',
-        path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
+        method: 'post',
+        path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID_MESSAGES,
         body: {
-          ...getUpdateConversationSchemaMock(),
+          ...getAppendConversationMessagesSchemaMock(),
           id: undefined,
         },
       });
@@ -91,29 +92,17 @@ describe('Update conversation route', () => {
       expect(response.badRequest).toHaveBeenCalled();
     });
 
-    test('rejects isDefault update', async () => {
+    test('allows messages only', async () => {
       const request = requestMock.create({
-        method: 'put',
-        path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
-        body: { ...getUpdateConversationSchemaMock(), isDefault: false },
-      });
-      const result = await server.validate(request);
-
-      expect(result.badRequest).toHaveBeenCalled();
-    });
-
-    test('allows title, excludeFromLastConversationStorage, apiConfig, replacements and message', async () => {
-      const request = requestMock.create({
-        method: 'put',
-        path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
+        method: 'post',
+        path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID_MESSAGES,
         body: {
-          title: 'test2',
-          excludeFromLastConversationStorage: true,
-          ...getUpdateConversationSchemaMock(),
+          ...getAppendConversationMessagesSchemaMock(),
           apiConfig: {
             defaultSystemPromptId: 'test',
           },
         },
+        params: { id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd' },
       });
       const result = server.validate(request);
 
@@ -122,8 +111,8 @@ describe('Update conversation route', () => {
 
     test('disallows invalid message "role" value', async () => {
       const request = requestMock.create({
-        method: 'put',
-        path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
+        method: 'post',
+        path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID_MESSAGES,
         body: {
           ...getUpdateConversationSchemaMock(),
           messages: [

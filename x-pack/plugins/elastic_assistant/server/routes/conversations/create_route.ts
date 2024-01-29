@@ -44,6 +44,21 @@ export const createConversationRoute = (router: ElasticAssistantPluginRouter): v
           const ctx = await context.resolve(['core', 'elasticAssistant']);
 
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
+          const currentUser = ctx.elasticAssistant.getCurrentUser();
+
+          const additionalFilter = `title:${request.body.title}`;
+          const result = await dataClient?.findConversations({
+            perPage: 100,
+            page: 1,
+            filter: `user.id:${currentUser?.profile_uid}${additionalFilter}`,
+            fields: ['title'],
+          });
+          if (result?.data != null && result.data.length > 0) {
+            return assistantResponse.error({
+              statusCode: 409,
+              body: `conversation title: "${request.body.title}" already exists`,
+            });
+          }
           const createdConversation = await dataClient?.createConversation(request.body);
           return response.ok({
             body: ConversationResponse.parse(createdConversation),

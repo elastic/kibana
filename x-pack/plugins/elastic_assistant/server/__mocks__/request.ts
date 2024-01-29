@@ -14,12 +14,19 @@ import {
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
+  ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID_MESSAGES,
+  ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND_USER_CONVERSATIONS,
 } from '@kbn/elastic-assistant-common';
 import {
+  getAppendConversationMessagesSchemaMock,
   getCreateConversationSchemaMock,
   getUpdateConversationSchemaMock,
 } from './conversations_schema.mock';
+import {
+  ConversationCreateProps,
+  ConversationUpdateProps,
+} from '../schemas/conversations/common_attributes.gen';
 
 export const requestMock = {
   create: httpServerMock.createKibanaRequest,
@@ -66,17 +73,23 @@ export const getPostEvaluateRequest = ({
     query,
   });
 
-export const getFindRequest = () =>
+export const getCurrentUserFindRequest = () =>
   requestMock.create({
     method: 'get',
     path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND_USER_CONVERSATIONS,
   });
 
-export const getDeleteConversationRequest = () =>
+export const getFindRequest = () =>
+  requestMock.create({
+    method: 'get',
+    path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
+  });
+
+export const getDeleteConversationRequest = (id: string = '04128c15-0d1b-4716-a4c5-46997ac7f3bd') =>
   requestMock.create({
     method: 'delete',
     path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
-    query: { id: 'conversation-1' },
+    params: { id },
   });
 
 export const getCreateConversationRequest = () =>
@@ -86,36 +99,44 @@ export const getCreateConversationRequest = () =>
     body: getCreateConversationSchemaMock(),
   });
 
-export const getUpdateConversationRequest = () =>
+export const getUpdateConversationRequest = (id: string = '04128c15-0d1b-4716-a4c5-46997ac7f3bd') =>
   requestMock.create({
     method: 'put',
-    path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
+    path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
     body: getUpdateConversationSchemaMock(),
+    params: { id },
   });
 
-export const getConversationReadRequest = () =>
+export const getAppendConversationMessageRequest = (
+  id: string = '04128c15-0d1b-4716-a4c5-46997ac7f3bd'
+) =>
+  requestMock.create({
+    method: 'post',
+    path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID_MESSAGES,
+    body: getAppendConversationMessagesSchemaMock(),
+    params: { id },
+  });
+
+export const getConversationReadRequest = (id: string = '04128c15-0d1b-4716-a4c5-46997ac7f3bd') =>
   requestMock.create({
     method: 'get',
     path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
-    query: { id: 'conversation-1' },
+    params: { id },
   });
 
-export const getConversationReadRequestWithId = (id: string) =>
-  requestMock.create({
-    method: 'get',
-    path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
-    query: { id },
-  });
-
-export const getConversationsBulkActionRequest = () =>
+export const getConversationsBulkActionRequest = (
+  create: ConversationCreateProps[] = [],
+  update: ConversationUpdateProps[] = [],
+  deleteIds: string[] = []
+) =>
   requestMock.create({
     method: 'patch',
     path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
     body: {
-      create: [],
-      update: [],
+      create,
+      update,
       delete: {
-        ids: [],
+        ids: deleteIds,
       },
     },
   });

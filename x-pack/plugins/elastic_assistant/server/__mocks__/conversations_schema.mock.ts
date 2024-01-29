@@ -11,6 +11,7 @@ import {
   ConversationResponse,
   ConversationUpdateProps,
 } from '../schemas/conversations/common_attributes.gen';
+import { AppendConversationMessageRequestBody } from '../schemas/conversations/crud_conversation_route.gen';
 
 export const getCreateConversationSchemaMock = (): ConversationCreateProps => ({
   title: 'Welcome',
@@ -59,6 +60,21 @@ export const getUpdateConversationSchemaMock = (
   ],
   id: conversationId,
 });
+
+export const getAppendConversationMessagesSchemaMock =
+  (): AppendConversationMessageRequestBody => ({
+    messages: [
+      {
+        content: 'test content',
+        role: 'user',
+        timestamp: '2019-12-13T16:40:33.400Z',
+        traceData: {
+          traceId: '1',
+          transactionId: '2',
+        },
+      },
+    ],
+  });
 
 export const getConversationMock = (
   params: ConversationCreateProps | ConversationUpdateProps
@@ -124,9 +140,9 @@ export const getQueryConversationParams = (
 };
 
 export const getPerformBulkActionSchemaMock = (): PerformBulkActionRequestBody => ({
-  create: [],
+  create: [getQueryConversationParams(false) as ConversationCreateProps],
   delete: {
-    ids: [],
+    ids: ['99403909-ca9b-49ba-9d7a-7e5320e68d05'],
   },
-  update: [],
+  update: [getQueryConversationParams(true) as ConversationUpdateProps],
 });

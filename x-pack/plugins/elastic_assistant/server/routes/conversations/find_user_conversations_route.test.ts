@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-import { getFindRequest, requestMock } from '../../__mocks__/request';
+import { getCurrentUserFindRequest, requestMock } from '../../__mocks__/request';
 import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND_USER_CONVERSATIONS } from '@kbn/elastic-assistant-common';
 import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { getFindConversationsResultWithSingleHit } from '../../__mocks__/response';
 import { findUserConversationsRoute } from './find_user_conversations_route';
-import {
-  getConversationMock,
-  getQueryConversationParams,
-} from '../../__mocks__/conversations_schema.mock';
 
 describe('Find user conversations route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -27,9 +23,13 @@ describe('Find user conversations route', () => {
     clients.elasticAssistant.getAIAssistantConversationsDataClient.findConversations.mockResolvedValue(
       getFindConversationsResultWithSingleHit()
     );
-    clients.elasticAssistant.getAIAssistantConversationsDataClient.getConversation.mockResolvedValue(
-      getConversationMock(getQueryConversationParams())
-    );
+    clients.elasticAssistant.getCurrentUser.mockResolvedValue({
+      username: 'my_username',
+      authentication_realm: {
+        type: 'my_realm_type',
+        name: 'my_realm_name',
+      },
+    });
 
     findUserConversationsRoute(server.router);
   });
@@ -37,7 +37,7 @@ describe('Find user conversations route', () => {
   describe('status codes', () => {
     test('returns 200', async () => {
       const response = await server.inject(
-        getFindRequest(),
+        getCurrentUserFindRequest(),
         requestContextMock.convertContext(context)
       );
       expect(response.status).toEqual(200);
@@ -50,7 +50,7 @@ describe('Find user conversations route', () => {
         }
       );
       const response = await server.inject(
-        getFindRequest(),
+        getCurrentUserFindRequest(),
         requestContextMock.convertContext(context)
       );
       expect(response.status).toEqual(500);
@@ -69,13 +69,31 @@ describe('Find user conversations route', () => {
         query: {
           page: 2,
           per_page: 20,
-          sort_field: 'name',
+          sort_field: 'title',
           fields: ['field1', 'field2'],
         },
       });
       const result = server.validate(request);
 
       expect(result.ok).toHaveBeenCalled();
+    });
+
+    test('disallows invalid sort fields', async () => {
+      const request = requestMock.create({
+        method: 'get',
+        path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND_USER_CONVERSATIONS,
+        query: {
+          page: 2,
+          per_page: 20,
+          sort_field: 'name',
+          fields: ['field1', 'field2'],
+        },
+      });
+      const result = server.validate(request);
+
+      expect(result.badRequest).toHaveBeenCalledWith(
+        `sort_field: Invalid enum value. Expected 'created_at' | 'is_default' | 'title' | 'updated_at', received 'name'`
+      );
     });
 
     test('ignores unknown query params', async () => {

@@ -17,7 +17,7 @@ export const deleteConversation = async ({
   esClient,
   conversationIndex,
   id,
-}: DeleteConversationParams): Promise<void> => {
+}: DeleteConversationParams): Promise<string | null> => {
   const conversation = await getConversation(esClient, conversationIndex, id);
   if (conversation !== null) {
     const response = await esClient.deleteByQuery({
@@ -36,5 +36,7 @@ export const deleteConversation = async ({
     if (!response.deleted && response.deleted === 0) {
       throw Error('No conversation has been deleted');
     }
+    return conversation.id ?? null;
   }
+  return null;
 };

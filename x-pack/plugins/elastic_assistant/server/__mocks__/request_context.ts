@@ -15,6 +15,7 @@ import {
 } from '../types';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { conversationsDataClientMock } from './conversations_data_client.mock';
+import { AIAssistantConversationsDataClient } from '../conversations_data_client';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
@@ -32,6 +33,8 @@ export const createMockClients = () => {
       getAIAssistantConversationsDataClient: conversationsDataClientMock.create(),
       getAIAssistantPromptsSOClient: jest.fn(),
       getAIAssistantAnonimizationFieldsSOClient: jest.fn(),
+      getSpaceId: jest.fn(),
+      getCurrentUser: jest.fn(),
     },
     savedObjectsClient: core.savedObjects.client,
 
@@ -82,7 +85,16 @@ const createElasticAssistantRequestContextMock = (
     getRegisteredFeatures: jest.fn(),
     getRegisteredTools: jest.fn(),
     logger: clients.elasticAssistant.logger,
-    getAIAssistantConversationsDataClient: jest.fn(),
+
+    getAIAssistantConversationsDataClient: jest.fn(
+      () => clients.elasticAssistant.getAIAssistantConversationsDataClient
+    ) as unknown as jest.MockInstance<
+      Promise<AIAssistantConversationsDataClient | null>,
+      [],
+      unknown
+    > &
+      (() => Promise<AIAssistantConversationsDataClient | null>),
+
     getAIAssistantPromptsSOClient: jest.fn(),
     getAIAssistantAnonimizationFieldsSOClient: jest.fn(),
     getCurrentUser: jest.fn(),

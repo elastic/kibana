@@ -89,27 +89,13 @@ describe('Create conversation route', () => {
   });
 
   describe('request validation', () => {
-    test('allows rule type of query', async () => {
+    test('disallows unknown title', async () => {
       const request = requestMock.create({
         method: 'post',
         path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
         body: {
           ...getCreateConversationSchemaMock(),
-          type: 'query',
-        },
-      });
-      const result = server.validate(request);
-
-      expect(result.ok).toHaveBeenCalled();
-    });
-
-    test('disallows unknown rule type', async () => {
-      const request = requestMock.create({
-        method: 'post',
-        path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
-        body: {
-          ...getCreateConversationSchemaMock(),
-          type: 'unexpected_type',
+          title: true,
         },
       });
       const result = server.validate(request);
@@ -118,14 +104,12 @@ describe('Create conversation route', () => {
     });
   });
   describe('conversation containing messages', () => {
-    const getResponseAction = (command: string = 'isolate') => ({
-      role: 'user',
-      params: {
-        command,
-        comment: '',
-      },
+    const getMessage = (role: string = 'user') => ({
+      role,
+      content: 'test content',
+      timestamp: '2019-12-13T16:40:33.400Z',
     });
-    const defaultAction = getResponseAction();
+    const defaultMessage = getMessage();
 
     test('is successful', async () => {
       const request = requestMock.create({
@@ -133,7 +117,7 @@ describe('Create conversation route', () => {
         path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
         body: {
           ...getCreateConversationSchemaMock(),
-          response_actions: [defaultAction],
+          messages: [defaultMessage],
         },
       });
 
@@ -142,7 +126,7 @@ describe('Create conversation route', () => {
     });
 
     test('fails when provided with an unsupported message role', async () => {
-      const wrongMessage = getResponseAction('test_thing');
+      const wrongMessage = getMessage('test_thing');
 
       const request = requestMock.create({
         method: 'post',
@@ -154,7 +138,7 @@ describe('Create conversation route', () => {
       });
       const result = await server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'messages.0.role: Invalid literal value, expected "user", messages.0.params.command: Invalid literal value, expected "isolate"'
+        `messages.0.role: Invalid enum value. Expected 'system' | 'user' | 'assistant', received 'test_thing'`
       );
     });
   });

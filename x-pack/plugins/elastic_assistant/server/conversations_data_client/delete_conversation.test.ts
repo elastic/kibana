@@ -53,17 +53,17 @@ describe('deleteConversation', () => {
   test('Delete returns a null if the conversation is also null', async () => {
     (getConversation as unknown as jest.Mock).mockResolvedValueOnce(null);
     const options = getDeleteConversationOptionsMock();
-    const deletedList = await deleteConversation(options);
-    expect(deletedList).toEqual(null);
+    const deletedConversation = await deleteConversation(options);
+    expect(deletedConversation).toEqual(null);
   });
 
-  test('Delete returns the conversation if a conversation is returned from getConversation', async () => {
+  test('Delete returns the conversation id if a conversation is returned from getConversation', async () => {
     const conversation = getConversationResponseMock();
     (getConversation as unknown as jest.Mock).mockResolvedValueOnce(conversation);
     const options = getDeleteConversationOptionsMock();
     options.esClient.deleteByQuery = jest.fn().mockResolvedValue({ deleted: 1 });
-    const deletedList = await deleteConversation(options);
-    expect(deletedList).toEqual(conversation);
+    const deletedConversationId = await deleteConversation(options);
+    expect(deletedConversationId).toEqual(conversation.id);
   });
 
   test('Delete does not call data client if the conversation returns null', async () => {

@@ -32,7 +32,7 @@ export const getFindConversationsResultWithSingleHit = (): FindHit => ({
   page: 1,
   perPage: 1,
   total: 1,
-  data: [getConversationMock(getQueryConversationParams())],
+  data: [getConversationMock(getQueryConversationParams(true))],
 });
 
 export const getBasicEmptySearchResponse = (): estypes.SearchResponse<unknown> => ({

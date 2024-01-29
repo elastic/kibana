@@ -8,12 +8,11 @@
 import { requestContextMock } from '../../__mocks__/request_context';
 import { serverMock } from '../../__mocks__/server';
 import { readConversationRoute } from './read_route';
-import { getFindConversationsResultWithSingleHit } from '../../__mocks__/response';
+import { getConversationReadRequest, requestMock } from '../../__mocks__/request';
 import {
-  getConversationReadRequest,
-  getConversationReadRequestWithId,
-  requestMock,
-} from '../../__mocks__/request';
+  getConversationMock,
+  getQueryConversationParams,
+} from '../../__mocks__/conversations_schema.mock';
 import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID } from '@kbn/elastic-assistant-common';
 
 describe('Read conversation route', () => {
@@ -25,8 +24,8 @@ describe('Read conversation route', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
 
-    clients.elasticAssistant.getAIAssistantConversationsDataClient.findConversations.mockResolvedValue(
-      getFindConversationsResultWithSingleHit()
+    clients.elasticAssistant.getAIAssistantConversationsDataClient.getConversation.mockResolvedValue(
+      getConversationMock(getQueryConversationParams())
     );
     readConversationRoute(server.router);
   });
@@ -40,9 +39,9 @@ describe('Read conversation route', () => {
       expect(response.status).toEqual(200);
     });
 
-    test('returns 200 when reading a single rule outcome === exactMatch', async () => {
+    test('returns 200 when reading a single conversation outcome === exactMatch', async () => {
       const response = await server.inject(
-        getConversationReadRequestWithId(myFakeId),
+        getConversationReadRequest(myFakeId),
         requestContextMock.convertContext(context)
       );
       expect(response.status).toEqual(200);
@@ -69,17 +68,20 @@ describe('Read conversation route', () => {
   describe('data validation', () => {
     test('returns 404 if given a non-existent id', async () => {
       clients.elasticAssistant.getAIAssistantConversationsDataClient.getConversation.mockResolvedValue(
-        {}
+        null
       );
       const request = requestMock.create({
         method: 'get',
         path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
-        query: { id: 'DNE_RULE' },
+        params: { id: '99403909-ca9b-49ba-9d7a-7e5320e68d05' },
       });
       const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: 'rule_id: "DNE_RULE" not found', status_code: 404 });
+      expect(response.body).toEqual({
+        message: 'conversation id: "99403909-ca9b-49ba-9d7a-7e5320e68d05" not found',
+        status_code: 404,
+      });
     });
   });
 });

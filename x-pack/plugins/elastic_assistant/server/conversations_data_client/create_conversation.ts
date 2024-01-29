@@ -72,12 +72,11 @@ export const createConversation = async ({
   const createdAt = new Date().toISOString();
   const body: CreateMessageSchema = transformToCreateScheme(createdAt, spaceId, user, conversation);
 
-  const response = await esClient.index({
+  const response = await esClient.create({
     body,
     id: uuidv4(),
     index: conversationIndex,
     refresh: 'wait_for',
-    op_type: 'create',
   });
 
   return {

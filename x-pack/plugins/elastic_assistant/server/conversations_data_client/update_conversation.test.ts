@@ -44,11 +44,11 @@ export const getConversationResponseMock = (): ConversationResponse => ({
   messages: [],
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   replacements: {} as any,
-  createdAt: Date.now().toLocaleString(),
+  createdAt: '2020-04-20T15:25:31.830Z',
   namespace: 'default',
   isDefault: false,
-  updatedAt: Date.now().toLocaleString(),
-  timestamp: Date.now().toLocaleString(),
+  updatedAt: '2020-04-20T15:25:31.830Z',
+  timestamp: '2020-04-20T15:25:31.830Z',
 });
 
 jest.mock('./get_conversation', () => ({

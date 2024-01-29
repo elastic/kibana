@@ -42,11 +42,14 @@ export const getConversationResponseMock = (): ConversationResponse => ({
   messages: [],
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   replacements: {} as any,
-  createdAt: Date.now().toLocaleString(),
-  namespace: 'default',
+  createdAt: '2024-01-28T04:20:02.394Z',
+  namespace: 'test',
   isDefault: false,
-  updatedAt: Date.now().toLocaleString(),
-  timestamp: Date.now().toLocaleString(),
+  updatedAt: '2024-01-28T04:20:02.394Z',
+  timestamp: '2024-01-28T04:20:02.394Z',
+  user: {
+    name: 'test',
+  },
 });
 
 describe('createConversation', () => {
@@ -56,6 +59,16 @@ describe('createConversation', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  beforeAll(() => {
+    jest.useFakeTimers();
+    const date = '2024-01-28T04:20:02.394Z';
+    jest.setSystemTime(new Date(date));
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
   });
 
   test('it returns a conversation as expected with the id changed out for the elastic id', async () => {
@@ -85,7 +98,7 @@ describe('createConversation', () => {
   test('it returns a conversation as expected with the id changed out for the elastic id and title set', async () => {
     const conversation: ConversationCreateProps = {
       ...getCreateConversationMock(),
-      title: '{{value}}',
+      title: 'test new title',
     };
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.create.mockResponse(

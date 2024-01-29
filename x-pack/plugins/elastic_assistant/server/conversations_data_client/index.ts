@@ -62,14 +62,14 @@ export class AIAssistantConversationsDataClient {
     this.spaceId = this.options.spaceId;
   }
 
-  public async getWriter(): Promise<ConversationDataWriter> {
+  public getWriter = async (): Promise<ConversationDataWriter> => {
     const spaceId = this.spaceId;
     if (this.writerCache.get(spaceId)) {
       return this.writerCache.get(spaceId) as ConversationDataWriter;
     }
     await this.initializeWriter(spaceId, this.indexTemplateAndPattern.alias);
     return this.writerCache.get(spaceId) as ConversationDataWriter;
-  }
+  };
 
   private async initializeWriter(spaceId: string, index: string): Promise<ConversationDataWriter> {
     const esClient = await this.options.elasticsearchClientPromise;
@@ -85,7 +85,7 @@ export class AIAssistantConversationsDataClient {
     return writer;
   }
 
-  public getReader(options: { spaceId?: string } = {}) {
+  public getReader = async (options: { spaceId?: string } = {}) => {
     const indexPatterns = this.indexTemplateAndPattern.alias;
 
     return {
@@ -111,7 +111,7 @@ export class AIAssistantConversationsDataClient {
         }
       },
     };
-  }
+  };
 
   public getConversation = async (id: string): Promise<ConversationResponse | null> => {
     const esClient = await this.options.elasticsearchClientPromise;
@@ -229,6 +229,10 @@ export class AIAssistantConversationsDataClient {
    */
   public deleteConversation = async (id: string): Promise<void> => {
     const esClient = await this.options.elasticsearchClientPromise;
-    deleteConversation({ esClient, conversationIndex: this.indexTemplateAndPattern.alias, id });
+    await deleteConversation({
+      esClient,
+      conversationIndex: this.indexTemplateAndPattern.alias,
+      id,
+    });
   };
 }

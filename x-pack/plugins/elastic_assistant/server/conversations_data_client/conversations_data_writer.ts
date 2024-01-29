@@ -17,8 +17,16 @@ import { transformToCreateScheme } from './create_conversation';
 import { transformToUpdateScheme } from './update_conversation';
 import { SearchEsConversationSchema } from './types';
 
+export interface BulkOperationError {
+  message: string;
+  status?: number;
+  conversation: {
+    id: string;
+  };
+}
+
 interface WriterBulkResponse {
-  errors: string[];
+  errors: BulkOperationError[];
   docs_created: string[];
   docs_deleted: string[];
   docs_updated: string[];
@@ -65,13 +73,34 @@ export class ConversationDataWriter implements ConversationDataWriter {
       return {
         errors: errors
           ? items
-              .map(
-                (item) =>
-                  item.create?.error?.reason ??
-                  item.update?.error?.reason ??
-                  item.delete?.error?.reason
+              .map((item) =>
+                item.create?.error
+                  ? {
+                      message: item.create.error?.reason,
+                      status: item.create.status,
+                      conversation: {
+                        id: item.create._id,
+                      },
+                    }
+                  : item.update?.error
+                  ? {
+                      message: item.update.error?.reason,
+                      status: item.update.status,
+                      conversation: {
+                        id: item.update._id,
+                      },
+                    }
+                  : item.delete?.error
+                  ? {
+                      message: item.delete?.error?.reason,
+                      status: item.delete?.status,
+                      conversation: {
+                        id: item.delete?._id,
+                      },
+                    }
+                  : undefined
               )
-              .filter((error): error is string => !!error)
+              .filter((e) => e !== undefined)
           : [],
         docs_created: items
           .filter((item) => item.create?.status === 201 || item.create?.status === 200)
@@ -83,16 +112,23 @@ export class ConversationDataWriter implements ConversationDataWriter {
           .filter((item) => item.update?.status === 201 || item.update?.status === 200)
           .map((item) => item.update?._id ?? ''),
         took,
-      };
+      } as WriterBulkResponse;
     } catch (e) {
       this.options.logger.error(`Error bulk actions for conversations: ${e.message}`);
       return {
-        errors: [`${e.message}`],
+        errors: [
+          {
+            message: e.message,
+            conversation: {
+              id: '',
+            },
+          },
+        ],
         docs_created: [],
         docs_deleted: [],
         docs_updated: [],
         took: 0,
-      };
+      } as WriterBulkResponse;
     }
   };
 
