@@ -13,6 +13,13 @@ import {
 } from '../../common/constants';
 import { SyntheticsRestApiRouteFactory, SyntheticsRoute, SyntheticsRouteHandler } from './types';
 
+function getWriteAccessFlag(method: string, writeAccessOverride?: boolean, writeAccess?: boolean) {
+  // if route includes an override, skip write-only access with `undefined`
+  // otherwise, if route is not a GET, require write access
+  // if route is get, use writeAccess value with `false` as default
+  return writeAccessOverride === true ? undefined : method !== 'GET' ? true : writeAccess ?? false;
+}
+
 export const createSyntheticsRouteWithAuth = <ClientContract = unknown>(
   routeCreator: SyntheticsRestApiRouteFactory
 ): SyntheticsRoute<ClientContract> => {
@@ -49,11 +56,7 @@ export const createSyntheticsRouteWithAuth = <ClientContract = unknown>(
     options,
     handler: licenseCheckHandler,
     ...rest,
-    writeAccess:
-      // if route includes an override, skip write-only access with `undefined`
-      // otherwise, if route is not a GET, require write access
-      // if route is get, use writeAccess value with `false` as default
-      writeAccessOverride === true ? undefined : method !== 'GET' ? true : writeAccess ?? false,
+    writeAccess: getWriteAccessFlag(method, writeAccessOverride, writeAccess),
   };
 };
 
