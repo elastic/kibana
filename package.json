@@ -1041,7 +1041,7 @@
     "pretty-ms": "6.0.0",
     "prop-types": "^15.8.1",
     "proxy-from-env": "1.0.0",
-    "puppeteer": "21.5.2",
+    "puppeteer": "21.9.0",
     "query-string": "^6.13.2",
     "rbush": "^3.0.1",
     "re-resizable": "^6.9.9",
