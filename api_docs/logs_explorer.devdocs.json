@@ -1,10 +1,10 @@
 {
-  "id": "logExplorer",
+  "id": "logsExplorer",
   "client": {
     "classes": [],
     "functions": [
       {
-        "parentPluginId": "logExplorer",
+        "parentPluginId": "logsExplorer",
         "id": "def-public.getDiscoverColumnsFromDisplayOptions",
         "type": "Function",
         "tags": [],
@@ -13,20 +13,20 @@
         "signature": [
           "(displayOptions: ",
           {
-            "pluginId": "logExplorer",
+            "pluginId": "logsExplorer",
             "scope": "common",
-            "docId": "kibLogExplorerPluginApi",
+            "docId": "kibLogsExplorerPluginApi",
             "section": "def-common.DisplayOptions",
             "text": "DisplayOptions"
           },
           ") => string[] | undefined"
         ],
-        "path": "x-pack/plugins/log_explorer/public/utils/convert_discover_app_state.ts",
+        "path": "x-pack/plugins/observability_solution/logs_explorer/public/utils/convert_discover_app_state.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-public.getDiscoverColumnsFromDisplayOptions.$1",
             "type": "Object",
             "tags": [],
@@ -34,14 +34,14 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "logExplorer",
+                "pluginId": "logsExplorer",
                 "scope": "common",
-                "docId": "kibLogExplorerPluginApi",
+                "docId": "kibLogsExplorerPluginApi",
                 "section": "def-common.DisplayOptions",
                 "text": "DisplayOptions"
               }
             ],
-            "path": "x-pack/plugins/log_explorer/public/utils/convert_discover_app_state.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/public/utils/convert_discover_app_state.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -51,7 +51,7 @@
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "logExplorer",
+        "parentPluginId": "logsExplorer",
         "id": "def-public.getDiscoverFiltersFromState",
         "type": "Function",
         "tags": [],
@@ -78,12 +78,12 @@
           },
           "[]"
         ],
-        "path": "x-pack/plugins/log_explorer/public/utils/convert_discover_app_state.ts",
+        "path": "x-pack/plugins/observability_solution/logs_explorer/public/utils/convert_discover_app_state.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-public.getDiscoverFiltersFromState.$1",
             "type": "Array",
             "tags": [],
@@ -99,13 +99,13 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/log_explorer/public/utils/convert_discover_app_state.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/public/utils/convert_discover_app_state.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-public.getDiscoverFiltersFromState.$2",
             "type": "Object",
             "tags": [],
@@ -115,7 +115,7 @@
               "ControlOptions",
               " | undefined"
             ],
-            "path": "x-pack/plugins/log_explorer/public/utils/convert_discover_app_state.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/public/utils/convert_discover_app_state.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -125,7 +125,7 @@
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "logExplorer",
+        "parentPluginId": "logsExplorer",
         "id": "def-public.getDiscoverGridFromDisplayOptions",
         "type": "Function",
         "tags": [],
@@ -134,9 +134,9 @@
         "signature": [
           "(displayOptions: ",
           {
-            "pluginId": "logExplorer",
+            "pluginId": "logsExplorer",
             "scope": "common",
-            "docId": "kibLogExplorerPluginApi",
+            "docId": "kibLogsExplorerPluginApi",
             "section": "def-common.DisplayOptions",
             "text": "DisplayOptions"
           },
@@ -150,12 +150,12 @@
           },
           " | undefined"
         ],
-        "path": "x-pack/plugins/log_explorer/public/utils/convert_discover_app_state.ts",
+        "path": "x-pack/plugins/observability_solution/logs_explorer/public/utils/convert_discover_app_state.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-public.getDiscoverGridFromDisplayOptions.$1",
             "type": "Object",
             "tags": [],
@@ -163,14 +163,14 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "logExplorer",
+                "pluginId": "logsExplorer",
                 "scope": "common",
-                "docId": "kibLogExplorerPluginApi",
+                "docId": "kibLogsExplorerPluginApi",
                 "section": "def-common.DisplayOptions",
                 "text": "DisplayOptions"
               }
             ],
-            "path": "x-pack/plugins/log_explorer/public/utils/convert_discover_app_state.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/public/utils/convert_discover_app_state.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -182,18 +182,18 @@
     ],
     "interfaces": [
       {
-        "parentPluginId": "logExplorer",
+        "parentPluginId": "logsExplorer",
         "id": "def-public.LogExplorerController",
         "type": "Interface",
         "tags": [],
         "label": "LogExplorerController",
         "description": [],
-        "path": "x-pack/plugins/log_explorer/public/controller/types.ts",
+        "path": "x-pack/plugins/observability_solution/logs_explorer/public/controller/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-public.LogExplorerController.actions",
             "type": "Object",
             "tags": [],
@@ -202,12 +202,12 @@
             "signature": [
               "{}"
             ],
-            "path": "x-pack/plugins/log_explorer/public/controller/types.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/public/controller/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-public.LogExplorerController.customizations",
             "type": "Object",
             "tags": [],
@@ -215,19 +215,19 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "logExplorer",
+                "pluginId": "logsExplorer",
                 "scope": "public",
-                "docId": "kibLogExplorerPluginApi",
+                "docId": "kibLogsExplorerPluginApi",
                 "section": "def-public.LogExplorerCustomizations",
                 "text": "LogExplorerCustomizations"
               }
             ],
-            "path": "x-pack/plugins/log_explorer/public/controller/types.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/public/controller/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-public.LogExplorerController.datasetsClient",
             "type": "Object",
             "tags": [],
@@ -236,12 +236,12 @@
             "signature": [
               "IDatasetsClient"
             ],
-            "path": "x-pack/plugins/log_explorer/public/controller/types.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/public/controller/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-public.LogExplorerController.discoverServices",
             "type": "CompoundType",
             "tags": [],
@@ -260,12 +260,12 @@
               },
               "; }"
             ],
-            "path": "x-pack/plugins/log_explorer/public/controller/types.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/public/controller/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-public.LogExplorerController.event$",
             "type": "Object",
             "tags": [],
@@ -275,12 +275,12 @@
               "Observable",
               "<never>"
             ],
-            "path": "x-pack/plugins/log_explorer/public/controller/types.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/public/controller/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-public.LogExplorerController.service",
             "type": "Object",
             "tags": [],
@@ -302,9 +302,9 @@
               },
               " & ",
               {
-                "pluginId": "logExplorer",
+                "pluginId": "logsExplorer",
                 "scope": "common",
-                "docId": "kibLogExplorerPluginApi",
+                "docId": "kibLogsExplorerPluginApi",
                 "section": "def-common.DisplayOptions",
                 "text": "DisplayOptions"
               },
@@ -322,9 +322,9 @@
               },
               " & ",
               {
-                "pluginId": "logExplorer",
+                "pluginId": "logsExplorer",
                 "scope": "common",
-                "docId": "kibLogExplorerPluginApi",
+                "docId": "kibLogsExplorerPluginApi",
                 "section": "def-common.DisplayOptions",
                 "text": "DisplayOptions"
               },
@@ -346,9 +346,9 @@
               },
               " & ",
               {
-                "pluginId": "logExplorer",
+                "pluginId": "logsExplorer",
                 "scope": "common",
-                "docId": "kibLogExplorerPluginApi",
+                "docId": "kibLogsExplorerPluginApi",
                 "section": "def-common.DisplayOptions",
                 "text": "DisplayOptions"
               },
@@ -370,12 +370,12 @@
               "ServiceMap",
               ">>"
             ],
-            "path": "x-pack/plugins/log_explorer/public/controller/types.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/public/controller/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-public.LogExplorerController.state$",
             "type": "Object",
             "tags": [],
@@ -385,20 +385,20 @@
               "Observable",
               "<",
               {
-                "pluginId": "logExplorer",
+                "pluginId": "logsExplorer",
                 "scope": "public",
-                "docId": "kibLogExplorerPluginApi",
+                "docId": "kibLogsExplorerPluginApi",
                 "section": "def-public.LogExplorerPublicState",
                 "text": "LogExplorerPublicState"
               },
               ">"
             ],
-            "path": "x-pack/plugins/log_explorer/public/controller/types.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/public/controller/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-public.LogExplorerController.stateMachine",
             "type": "Object",
             "tags": [],
@@ -420,9 +420,9 @@
               },
               " & ",
               {
-                "pluginId": "logExplorer",
+                "pluginId": "logsExplorer",
                 "scope": "common",
-                "docId": "kibLogExplorerPluginApi",
+                "docId": "kibLogsExplorerPluginApi",
                 "section": "def-common.DisplayOptions",
                 "text": "DisplayOptions"
               },
@@ -440,9 +440,9 @@
               },
               " & ",
               {
-                "pluginId": "logExplorer",
+                "pluginId": "logsExplorer",
                 "scope": "common",
-                "docId": "kibLogExplorerPluginApi",
+                "docId": "kibLogsExplorerPluginApi",
                 "section": "def-common.DisplayOptions",
                 "text": "DisplayOptions"
               },
@@ -464,9 +464,9 @@
               },
               " & ",
               {
-                "pluginId": "logExplorer",
+                "pluginId": "logsExplorer",
                 "scope": "common",
-                "docId": "kibLogExplorerPluginApi",
+                "docId": "kibLogsExplorerPluginApi",
                 "section": "def-common.DisplayOptions",
                 "text": "DisplayOptions"
               },
@@ -492,7 +492,7 @@
               "ServiceMap",
               ">>"
             ],
-            "path": "x-pack/plugins/log_explorer/public/controller/types.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/public/controller/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -500,18 +500,18 @@
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "logExplorer",
+        "parentPluginId": "logsExplorer",
         "id": "def-public.LogExplorerCustomizations",
         "type": "Interface",
         "tags": [],
         "label": "LogExplorerCustomizations",
         "description": [],
-        "path": "x-pack/plugins/log_explorer/public/controller/controller_customizations.ts",
+        "path": "x-pack/plugins/observability_solution/logs_explorer/public/customizations/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-public.LogExplorerCustomizations.flyout",
             "type": "Object",
             "tags": [],
@@ -522,15 +522,15 @@
               "RenderContentCustomization",
               "<",
               {
-                "pluginId": "logExplorer",
+                "pluginId": "logsExplorer",
                 "scope": "public",
-                "docId": "kibLogExplorerPluginApi",
+                "docId": "kibLogsExplorerPluginApi",
                 "section": "def-public.LogExplorerFlyoutContentProps",
                 "text": "LogExplorerFlyoutContentProps"
               },
               "> | undefined; } | undefined"
             ],
-            "path": "x-pack/plugins/log_explorer/public/controller/controller_customizations.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/public/customizations/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -538,18 +538,18 @@
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "logExplorer",
+        "parentPluginId": "logsExplorer",
         "id": "def-public.LogExplorerFlyoutContentProps",
         "type": "Interface",
         "tags": [],
         "label": "LogExplorerFlyoutContentProps",
         "description": [],
-        "path": "x-pack/plugins/log_explorer/public/controller/controller_customizations.ts",
+        "path": "x-pack/plugins/observability_solution/logs_explorer/public/customizations/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-public.LogExplorerFlyoutContentProps.actions",
             "type": "Object",
             "tags": [],
@@ -560,12 +560,12 @@
               "DocViewFilterFn",
               " | undefined; addColumn: ((columnName: string) => void) | undefined; removeColumn: ((columnName: string) => void) | undefined; }"
             ],
-            "path": "x-pack/plugins/log_explorer/public/controller/controller_customizations.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/public/customizations/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-public.LogExplorerFlyoutContentProps.dataView",
             "type": "Object",
             "tags": [],
@@ -580,12 +580,12 @@
                 "text": "DataView"
               }
             ],
-            "path": "x-pack/plugins/log_explorer/public/controller/controller_customizations.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/public/customizations/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-public.LogExplorerFlyoutContentProps.doc",
             "type": "Object",
             "tags": [],
@@ -594,7 +594,7 @@
             "signature": [
               "LogDocument"
             ],
-            "path": "x-pack/plugins/log_explorer/public/controller/controller_customizations.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/public/customizations/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -605,7 +605,7 @@
     "enums": [],
     "misc": [
       {
-        "parentPluginId": "logExplorer",
+        "parentPluginId": "logsExplorer",
         "id": "def-public.CreateLogExplorerController",
         "type": "Type",
         "tags": [],
@@ -614,37 +614,37 @@
         "signature": [
           "({ customizations, initialState, }: { customizations?: ",
           {
-            "pluginId": "logExplorer",
+            "pluginId": "logsExplorer",
             "scope": "public",
-            "docId": "kibLogExplorerPluginApi",
+            "docId": "kibLogsExplorerPluginApi",
             "section": "def-public.LogExplorerCustomizations",
             "text": "LogExplorerCustomizations"
           },
           " | undefined; initialState?: ",
           {
-            "pluginId": "logExplorer",
+            "pluginId": "logsExplorer",
             "scope": "public",
-            "docId": "kibLogExplorerPluginApi",
+            "docId": "kibLogsExplorerPluginApi",
             "section": "def-public.LogExplorerPublicStateUpdate",
             "text": "LogExplorerPublicStateUpdate"
           },
           " | undefined; }) => Promise<",
           {
-            "pluginId": "logExplorer",
+            "pluginId": "logsExplorer",
             "scope": "public",
-            "docId": "kibLogExplorerPluginApi",
+            "docId": "kibLogsExplorerPluginApi",
             "section": "def-public.LogExplorerController",
             "text": "LogExplorerController"
           },
           ">"
         ],
-        "path": "x-pack/plugins/log_explorer/public/controller/create_controller.ts",
+        "path": "x-pack/plugins/observability_solution/logs_explorer/public/controller/create_controller.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-public.CreateLogExplorerController.$1",
             "type": "Object",
             "tags": [],
@@ -653,23 +653,23 @@
             "signature": [
               "{ customizations?: ",
               {
-                "pluginId": "logExplorer",
+                "pluginId": "logsExplorer",
                 "scope": "public",
-                "docId": "kibLogExplorerPluginApi",
+                "docId": "kibLogsExplorerPluginApi",
                 "section": "def-public.LogExplorerCustomizations",
                 "text": "LogExplorerCustomizations"
               },
               " | undefined; initialState?: ",
               {
-                "pluginId": "logExplorer",
+                "pluginId": "logsExplorer",
                 "scope": "public",
-                "docId": "kibLogExplorerPluginApi",
+                "docId": "kibLogsExplorerPluginApi",
                 "section": "def-public.LogExplorerPublicStateUpdate",
                 "text": "LogExplorerPublicStateUpdate"
               },
               " | undefined; }"
             ],
-            "path": "x-pack/plugins/log_explorer/public/controller/create_controller.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/public/controller/create_controller.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -677,7 +677,7 @@
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "logExplorer",
+        "parentPluginId": "logsExplorer",
         "id": "def-public.LogExplorerControllerContext",
         "type": "Type",
         "tags": [],
@@ -698,9 +698,9 @@
           },
           " & ",
           {
-            "pluginId": "logExplorer",
+            "pluginId": "logsExplorer",
             "scope": "common",
-            "docId": "kibLogExplorerPluginApi",
+            "docId": "kibLogsExplorerPluginApi",
             "section": "def-common.DisplayOptions",
             "text": "DisplayOptions"
           },
@@ -718,9 +718,9 @@
           },
           " & ",
           {
-            "pluginId": "logExplorer",
+            "pluginId": "logsExplorer",
             "scope": "common",
-            "docId": "kibLogExplorerPluginApi",
+            "docId": "kibLogsExplorerPluginApi",
             "section": "def-common.DisplayOptions",
             "text": "DisplayOptions"
           },
@@ -742,9 +742,9 @@
           },
           " & ",
           {
-            "pluginId": "logExplorer",
+            "pluginId": "logsExplorer",
             "scope": "common",
-            "docId": "kibLogExplorerPluginApi",
+            "docId": "kibLogsExplorerPluginApi",
             "section": "def-common.DisplayOptions",
             "text": "DisplayOptions"
           },
@@ -752,13 +752,13 @@
           "WithDiscoverStateContainer",
           ")"
         ],
-        "path": "x-pack/plugins/log_explorer/public/state_machines/log_explorer_controller/src/types.ts",
+        "path": "x-pack/plugins/observability_solution/logs_explorer/public/state_machines/log_explorer_controller/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "logExplorer",
+        "parentPluginId": "logsExplorer",
         "id": "def-public.LogExplorerPublicState",
         "type": "Type",
         "tags": [],
@@ -774,9 +774,9 @@
           },
           " & ",
           {
-            "pluginId": "logExplorer",
+            "pluginId": "logsExplorer",
             "scope": "common",
-            "docId": "kibLogExplorerPluginApi",
+            "docId": "kibLogsExplorerPluginApi",
             "section": "def-common.DisplayOptions",
             "text": "DisplayOptions"
           },
@@ -792,13 +792,13 @@
           "IndexPatternBrand",
           ">; } & { title?: string | undefined; }; }; }; }"
         ],
-        "path": "x-pack/plugins/log_explorer/public/controller/types.ts",
+        "path": "x-pack/plugins/observability_solution/logs_explorer/public/controller/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "logExplorer",
+        "parentPluginId": "logsExplorer",
         "id": "def-public.LogExplorerPublicStateUpdate",
         "type": "Type",
         "tags": [],
@@ -814,9 +814,9 @@
           },
           " & ",
           {
-            "pluginId": "logExplorer",
+            "pluginId": "logsExplorer",
             "scope": "common",
-            "docId": "kibLogExplorerPluginApi",
+            "docId": "kibLogsExplorerPluginApi",
             "section": "def-common.PartialDisplayOptions",
             "text": "PartialDisplayOptions"
           },
@@ -832,7 +832,7 @@
           "IndexPatternBrand",
           ">; } & { title?: string | undefined; }; }; } | undefined; }"
         ],
-        "path": "x-pack/plugins/log_explorer/public/controller/types.ts",
+        "path": "x-pack/plugins/observability_solution/logs_explorer/public/controller/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -840,18 +840,18 @@
     ],
     "objects": [],
     "setup": {
-      "parentPluginId": "logExplorer",
+      "parentPluginId": "logsExplorer",
       "id": "def-public.LogExplorerPluginSetup",
       "type": "Interface",
       "tags": [],
       "label": "LogExplorerPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/log_explorer/public/types.ts",
+      "path": "x-pack/plugins/observability_solution/logs_explorer/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
         {
-          "parentPluginId": "logExplorer",
+          "parentPluginId": "logsExplorer",
           "id": "def-public.LogExplorerPluginSetup.locators",
           "type": "Object",
           "tags": [],
@@ -860,7 +860,7 @@
           "signature": [
             "LogExplorerLocators"
           ],
-          "path": "x-pack/plugins/log_explorer/public/types.ts",
+          "path": "x-pack/plugins/observability_solution/logs_explorer/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -869,18 +869,18 @@
       "initialIsOpen": true
     },
     "start": {
-      "parentPluginId": "logExplorer",
+      "parentPluginId": "logsExplorer",
       "id": "def-public.LogExplorerPluginStart",
       "type": "Interface",
       "tags": [],
       "label": "LogExplorerPluginStart",
       "description": [],
-      "path": "x-pack/plugins/log_explorer/public/types.ts",
+      "path": "x-pack/plugins/observability_solution/logs_explorer/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
         {
-          "parentPluginId": "logExplorer",
+          "parentPluginId": "logsExplorer",
           "id": "def-public.LogExplorerPluginStart.LogExplorer",
           "type": "CompoundType",
           "tags": [],
@@ -893,12 +893,12 @@
             "LogExplorerProps",
             ">"
           ],
-          "path": "x-pack/plugins/log_explorer/public/types.ts",
+          "path": "x-pack/plugins/observability_solution/logs_explorer/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         },
         {
-          "parentPluginId": "logExplorer",
+          "parentPluginId": "logsExplorer",
           "id": "def-public.LogExplorerPluginStart.createLogExplorerController",
           "type": "Function",
           "tags": [],
@@ -907,37 +907,37 @@
           "signature": [
             "({ customizations, initialState, }: { customizations?: ",
             {
-              "pluginId": "logExplorer",
+              "pluginId": "logsExplorer",
               "scope": "public",
-              "docId": "kibLogExplorerPluginApi",
+              "docId": "kibLogsExplorerPluginApi",
               "section": "def-public.LogExplorerCustomizations",
               "text": "LogExplorerCustomizations"
             },
             " | undefined; initialState?: ",
             {
-              "pluginId": "logExplorer",
+              "pluginId": "logsExplorer",
               "scope": "public",
-              "docId": "kibLogExplorerPluginApi",
+              "docId": "kibLogsExplorerPluginApi",
               "section": "def-public.LogExplorerPublicStateUpdate",
               "text": "LogExplorerPublicStateUpdate"
             },
             " | undefined; }) => Promise<",
             {
-              "pluginId": "logExplorer",
+              "pluginId": "logsExplorer",
               "scope": "public",
-              "docId": "kibLogExplorerPluginApi",
+              "docId": "kibLogsExplorerPluginApi",
               "section": "def-public.LogExplorerController",
               "text": "LogExplorerController"
             },
             ">"
           ],
-          "path": "x-pack/plugins/log_explorer/public/types.ts",
+          "path": "x-pack/plugins/observability_solution/logs_explorer/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
           "children": [
             {
-              "parentPluginId": "logExplorer",
+              "parentPluginId": "logsExplorer",
               "id": "def-public.LogExplorerPluginStart.createLogExplorerController.$1",
               "type": "Object",
               "tags": [],
@@ -946,23 +946,23 @@
               "signature": [
                 "{ customizations?: ",
                 {
-                  "pluginId": "logExplorer",
+                  "pluginId": "logsExplorer",
                   "scope": "public",
-                  "docId": "kibLogExplorerPluginApi",
+                  "docId": "kibLogsExplorerPluginApi",
                   "section": "def-public.LogExplorerCustomizations",
                   "text": "LogExplorerCustomizations"
                 },
                 " | undefined; initialState?: ",
                 {
-                  "pluginId": "logExplorer",
+                  "pluginId": "logsExplorer",
                   "scope": "public",
-                  "docId": "kibLogExplorerPluginApi",
+                  "docId": "kibLogsExplorerPluginApi",
                   "section": "def-public.LogExplorerPublicStateUpdate",
                   "text": "LogExplorerPublicStateUpdate"
                 },
                 " | undefined; }"
               ],
-              "path": "x-pack/plugins/log_explorer/public/controller/create_controller.ts",
+              "path": "x-pack/plugins/observability_solution/logs_explorer/public/controller/create_controller.ts",
               "deprecated": false,
               "trackAdoption": false
             }
@@ -984,7 +984,7 @@
   "common": {
     "classes": [
       {
-        "parentPluginId": "logExplorer",
+        "parentPluginId": "logsExplorer",
         "id": "def-common.AllDatasetSelection",
         "type": "Class",
         "tags": [],
@@ -992,21 +992,21 @@
         "description": [],
         "signature": [
           {
-            "pluginId": "logExplorer",
+            "pluginId": "logsExplorer",
             "scope": "common",
-            "docId": "kibLogExplorerPluginApi",
+            "docId": "kibLogsExplorerPluginApi",
             "section": "def-common.AllDatasetSelection",
             "text": "AllDatasetSelection"
           },
           " implements ",
           "DatasetSelectionStrategy"
         ],
-        "path": "x-pack/plugins/log_explorer/common/dataset_selection/all_dataset_selection.ts",
+        "path": "x-pack/plugins/observability_solution/logs_explorer/common/dataset_selection/all_dataset_selection.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-common.AllDatasetSelection.selectionType",
             "type": "string",
             "tags": [],
@@ -1015,12 +1015,12 @@
             "signature": [
               "\"all\""
             ],
-            "path": "x-pack/plugins/log_explorer/common/dataset_selection/all_dataset_selection.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/common/dataset_selection/all_dataset_selection.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-common.AllDatasetSelection.selection",
             "type": "Object",
             "tags": [],
@@ -1031,12 +1031,12 @@
               "Dataset",
               "; }"
             ],
-            "path": "x-pack/plugins/log_explorer/common/dataset_selection/all_dataset_selection.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/common/dataset_selection/all_dataset_selection.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-common.AllDatasetSelection.toDataviewSpec",
             "type": "Function",
             "tags": [],
@@ -1046,14 +1046,14 @@
               "() => ",
               "DataViewSpecWithId"
             ],
-            "path": "x-pack/plugins/log_explorer/common/dataset_selection/all_dataset_selection.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/common/dataset_selection/all_dataset_selection.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-common.AllDatasetSelection.toPlainSelection",
             "type": "Function",
             "tags": [],
@@ -1062,14 +1062,14 @@
             "signature": [
               "() => { selectionType: \"all\"; }"
             ],
-            "path": "x-pack/plugins/log_explorer/common/dataset_selection/all_dataset_selection.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/common/dataset_selection/all_dataset_selection.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-common.AllDatasetSelection.create",
             "type": "Function",
             "tags": [],
@@ -1078,14 +1078,14 @@
             "signature": [
               "() => ",
               {
-                "pluginId": "logExplorer",
+                "pluginId": "logsExplorer",
                 "scope": "common",
-                "docId": "kibLogExplorerPluginApi",
+                "docId": "kibLogsExplorerPluginApi",
                 "section": "def-common.AllDatasetSelection",
                 "text": "AllDatasetSelection"
               }
             ],
-            "path": "x-pack/plugins/log_explorer/common/dataset_selection/all_dataset_selection.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/common/dataset_selection/all_dataset_selection.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1095,7 +1095,7 @@
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "logExplorer",
+        "parentPluginId": "logsExplorer",
         "id": "def-common.UnresolvedDatasetSelection",
         "type": "Class",
         "tags": [],
@@ -1103,21 +1103,21 @@
         "description": [],
         "signature": [
           {
-            "pluginId": "logExplorer",
+            "pluginId": "logsExplorer",
             "scope": "common",
-            "docId": "kibLogExplorerPluginApi",
+            "docId": "kibLogsExplorerPluginApi",
             "section": "def-common.UnresolvedDatasetSelection",
             "text": "UnresolvedDatasetSelection"
           },
           " implements ",
           "DatasetSelectionStrategy"
         ],
-        "path": "x-pack/plugins/log_explorer/common/dataset_selection/unresolved_dataset_selection.ts",
+        "path": "x-pack/plugins/observability_solution/logs_explorer/common/dataset_selection/unresolved_dataset_selection.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-common.UnresolvedDatasetSelection.selectionType",
             "type": "string",
             "tags": [],
@@ -1126,12 +1126,12 @@
             "signature": [
               "\"unresolved\""
             ],
-            "path": "x-pack/plugins/log_explorer/common/dataset_selection/unresolved_dataset_selection.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/common/dataset_selection/unresolved_dataset_selection.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-common.UnresolvedDatasetSelection.selection",
             "type": "Object",
             "tags": [],
@@ -1142,12 +1142,12 @@
               "Dataset",
               "; }"
             ],
-            "path": "x-pack/plugins/log_explorer/common/dataset_selection/unresolved_dataset_selection.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/common/dataset_selection/unresolved_dataset_selection.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-common.UnresolvedDatasetSelection.toDataviewSpec",
             "type": "Function",
             "tags": [],
@@ -1157,14 +1157,14 @@
               "() => ",
               "DataViewSpecWithId"
             ],
-            "path": "x-pack/plugins/log_explorer/common/dataset_selection/unresolved_dataset_selection.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/common/dataset_selection/unresolved_dataset_selection.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-common.UnresolvedDatasetSelection.toPlainSelection",
             "type": "Function",
             "tags": [],
@@ -1177,14 +1177,14 @@
               "IndexPatternBrand",
               ">; title: string; }; }; }"
             ],
-            "path": "x-pack/plugins/log_explorer/common/dataset_selection/unresolved_dataset_selection.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/common/dataset_selection/unresolved_dataset_selection.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-common.UnresolvedDatasetSelection.fromSelection",
             "type": "Function",
             "tags": [],
@@ -1197,19 +1197,19 @@
               "IndexPatternBrand",
               ">; } & { title?: string | undefined; }; }) => ",
               {
-                "pluginId": "logExplorer",
+                "pluginId": "logsExplorer",
                 "scope": "common",
-                "docId": "kibLogExplorerPluginApi",
+                "docId": "kibLogsExplorerPluginApi",
                 "section": "def-common.UnresolvedDatasetSelection",
                 "text": "UnresolvedDatasetSelection"
               }
             ],
-            "path": "x-pack/plugins/log_explorer/common/dataset_selection/unresolved_dataset_selection.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/common/dataset_selection/unresolved_dataset_selection.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
-                "parentPluginId": "logExplorer",
+                "parentPluginId": "logsExplorer",
                 "id": "def-common.UnresolvedDatasetSelection.fromSelection.$1",
                 "type": "CompoundType",
                 "tags": [],
@@ -1222,7 +1222,7 @@
                   "IndexPatternBrand",
                   ">; } & { title?: string | undefined; }; }"
                 ],
-                "path": "x-pack/plugins/log_explorer/common/dataset_selection/unresolved_dataset_selection.ts",
+                "path": "x-pack/plugins/observability_solution/logs_explorer/common/dataset_selection/unresolved_dataset_selection.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1231,7 +1231,7 @@
             "returnComment": []
           },
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-common.UnresolvedDatasetSelection.create",
             "type": "Function",
             "tags": [],
@@ -1242,19 +1242,19 @@
               "Dataset",
               ") => ",
               {
-                "pluginId": "logExplorer",
+                "pluginId": "logsExplorer",
                 "scope": "common",
-                "docId": "kibLogExplorerPluginApi",
+                "docId": "kibLogsExplorerPluginApi",
                 "section": "def-common.UnresolvedDatasetSelection",
                 "text": "UnresolvedDatasetSelection"
               }
             ],
-            "path": "x-pack/plugins/log_explorer/common/dataset_selection/unresolved_dataset_selection.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/common/dataset_selection/unresolved_dataset_selection.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
-                "parentPluginId": "logExplorer",
+                "parentPluginId": "logsExplorer",
                 "id": "def-common.UnresolvedDatasetSelection.create.$1",
                 "type": "Object",
                 "tags": [],
@@ -1263,7 +1263,7 @@
                 "signature": [
                   "Dataset"
                 ],
-                "path": "x-pack/plugins/log_explorer/common/dataset_selection/unresolved_dataset_selection.ts",
+                "path": "x-pack/plugins/observability_solution/logs_explorer/common/dataset_selection/unresolved_dataset_selection.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1277,7 +1277,7 @@
     ],
     "functions": [
       {
-        "parentPluginId": "logExplorer",
+        "parentPluginId": "logsExplorer",
         "id": "def-common.hydrateDatasetSelection",
         "type": "Function",
         "tags": [],
@@ -1294,9 +1294,9 @@
           "IndexPatternBrand",
           ">; } & { title?: string | undefined; }; }; }) => ",
           {
-            "pluginId": "logExplorer",
+            "pluginId": "logsExplorer",
             "scope": "common",
-            "docId": "kibLogExplorerPluginApi",
+            "docId": "kibLogsExplorerPluginApi",
             "section": "def-common.AllDatasetSelection",
             "text": "AllDatasetSelection"
           },
@@ -1304,19 +1304,19 @@
           "SingleDatasetSelection",
           " | ",
           {
-            "pluginId": "logExplorer",
+            "pluginId": "logsExplorer",
             "scope": "common",
-            "docId": "kibLogExplorerPluginApi",
+            "docId": "kibLogsExplorerPluginApi",
             "section": "def-common.UnresolvedDatasetSelection",
             "text": "UnresolvedDatasetSelection"
           }
         ],
-        "path": "x-pack/plugins/log_explorer/common/dataset_selection/hydrate_dataset_selection.ts.ts",
+        "path": "x-pack/plugins/observability_solution/logs_explorer/common/dataset_selection/hydrate_dataset_selection.ts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-common.hydrateDatasetSelection.$1",
             "type": "CompoundType",
             "tags": [],
@@ -1333,7 +1333,7 @@
               "IndexPatternBrand",
               ">; } & { title?: string | undefined; }; }; }"
             ],
-            "path": "x-pack/plugins/log_explorer/common/dataset_selection/hydrate_dataset_selection.ts.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/common/dataset_selection/hydrate_dataset_selection.ts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1345,18 +1345,18 @@
     ],
     "interfaces": [
       {
-        "parentPluginId": "logExplorer",
+        "parentPluginId": "logsExplorer",
         "id": "def-common.ChartDisplayOptions",
         "type": "Interface",
         "tags": [],
         "label": "ChartDisplayOptions",
         "description": [],
-        "path": "x-pack/plugins/log_explorer/common/display_options/types.ts",
+        "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-common.ChartDisplayOptions.breakdownField",
             "type": "CompoundType",
             "tags": [],
@@ -1365,7 +1365,7 @@
             "signature": [
               "string | null"
             ],
-            "path": "x-pack/plugins/log_explorer/common/display_options/types.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1373,18 +1373,18 @@
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "logExplorer",
+        "parentPluginId": "logsExplorer",
         "id": "def-common.DisplayOptions",
         "type": "Interface",
         "tags": [],
         "label": "DisplayOptions",
         "description": [],
-        "path": "x-pack/plugins/log_explorer/common/display_options/types.ts",
+        "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-common.DisplayOptions.grid",
             "type": "Object",
             "tags": [],
@@ -1392,19 +1392,19 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "logExplorer",
+                "pluginId": "logsExplorer",
                 "scope": "common",
-                "docId": "kibLogExplorerPluginApi",
+                "docId": "kibLogsExplorerPluginApi",
                 "section": "def-common.GridDisplayOptions",
                 "text": "GridDisplayOptions"
               }
             ],
-            "path": "x-pack/plugins/log_explorer/common/display_options/types.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-common.DisplayOptions.chart",
             "type": "Object",
             "tags": [],
@@ -1412,14 +1412,14 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "logExplorer",
+                "pluginId": "logsExplorer",
                 "scope": "common",
-                "docId": "kibLogExplorerPluginApi",
+                "docId": "kibLogsExplorerPluginApi",
                 "section": "def-common.ChartDisplayOptions",
                 "text": "ChartDisplayOptions"
               }
             ],
-            "path": "x-pack/plugins/log_explorer/common/display_options/types.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1427,29 +1427,29 @@
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "logExplorer",
+        "parentPluginId": "logsExplorer",
         "id": "def-common.GridColumnDisplayOptions",
         "type": "Interface",
         "tags": [],
         "label": "GridColumnDisplayOptions",
         "description": [],
-        "path": "x-pack/plugins/log_explorer/common/display_options/types.ts",
+        "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-common.GridColumnDisplayOptions.field",
             "type": "string",
             "tags": [],
             "label": "field",
             "description": [],
-            "path": "x-pack/plugins/log_explorer/common/display_options/types.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-common.GridColumnDisplayOptions.width",
             "type": "number",
             "tags": [],
@@ -1458,7 +1458,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/log_explorer/common/display_options/types.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1466,18 +1466,18 @@
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "logExplorer",
+        "parentPluginId": "logsExplorer",
         "id": "def-common.GridDisplayOptions",
         "type": "Interface",
         "tags": [],
         "label": "GridDisplayOptions",
         "description": [],
-        "path": "x-pack/plugins/log_explorer/common/display_options/types.ts",
+        "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-common.GridDisplayOptions.columns",
             "type": "Array",
             "tags": [],
@@ -1485,20 +1485,20 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "logExplorer",
+                "pluginId": "logsExplorer",
                 "scope": "common",
-                "docId": "kibLogExplorerPluginApi",
+                "docId": "kibLogsExplorerPluginApi",
                 "section": "def-common.GridColumnDisplayOptions",
                 "text": "GridColumnDisplayOptions"
               },
               "[]"
             ],
-            "path": "x-pack/plugins/log_explorer/common/display_options/types.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-common.GridDisplayOptions.rows",
             "type": "Object",
             "tags": [],
@@ -1506,14 +1506,14 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "logExplorer",
+                "pluginId": "logsExplorer",
                 "scope": "common",
-                "docId": "kibLogExplorerPluginApi",
+                "docId": "kibLogsExplorerPluginApi",
                 "section": "def-common.GridRowsDisplayOptions",
                 "text": "GridRowsDisplayOptions"
               }
             ],
-            "path": "x-pack/plugins/log_explorer/common/display_options/types.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1521,35 +1521,35 @@
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "logExplorer",
+        "parentPluginId": "logsExplorer",
         "id": "def-common.GridRowsDisplayOptions",
         "type": "Interface",
         "tags": [],
         "label": "GridRowsDisplayOptions",
         "description": [],
-        "path": "x-pack/plugins/log_explorer/common/display_options/types.ts",
+        "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-common.GridRowsDisplayOptions.rowHeight",
             "type": "number",
             "tags": [],
             "label": "rowHeight",
             "description": [],
-            "path": "x-pack/plugins/log_explorer/common/display_options/types.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-common.GridRowsDisplayOptions.rowsPerPage",
             "type": "number",
             "tags": [],
             "label": "rowsPerPage",
             "description": [],
-            "path": "x-pack/plugins/log_explorer/common/display_options/types.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1557,18 +1557,18 @@
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "logExplorer",
+        "parentPluginId": "logsExplorer",
         "id": "def-common.PartialDisplayOptions",
         "type": "Interface",
         "tags": [],
         "label": "PartialDisplayOptions",
         "description": [],
-        "path": "x-pack/plugins/log_explorer/common/display_options/types.ts",
+        "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-common.PartialDisplayOptions.grid",
             "type": "Object",
             "tags": [],
@@ -1577,28 +1577,28 @@
             "signature": [
               "Partial<Omit<",
               {
-                "pluginId": "logExplorer",
+                "pluginId": "logsExplorer",
                 "scope": "common",
-                "docId": "kibLogExplorerPluginApi",
+                "docId": "kibLogsExplorerPluginApi",
                 "section": "def-common.GridDisplayOptions",
                 "text": "GridDisplayOptions"
               },
               ", \"rows\"> & { rows?: Partial<",
               {
-                "pluginId": "logExplorer",
+                "pluginId": "logsExplorer",
                 "scope": "common",
-                "docId": "kibLogExplorerPluginApi",
+                "docId": "kibLogsExplorerPluginApi",
                 "section": "def-common.GridRowsDisplayOptions",
                 "text": "GridRowsDisplayOptions"
               },
               "> | undefined; }> | undefined"
             ],
-            "path": "x-pack/plugins/log_explorer/common/display_options/types.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-common.PartialDisplayOptions.chart",
             "type": "Object",
             "tags": [],
@@ -1607,15 +1607,15 @@
             "signature": [
               "Partial<",
               {
-                "pluginId": "logExplorer",
+                "pluginId": "logsExplorer",
                 "scope": "common",
-                "docId": "kibLogExplorerPluginApi",
+                "docId": "kibLogsExplorerPluginApi",
                 "section": "def-common.ChartDisplayOptions",
                 "text": "ChartDisplayOptions"
               },
               "> | undefined"
             ],
-            "path": "x-pack/plugins/log_explorer/common/display_options/types.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1626,7 +1626,7 @@
     "enums": [],
     "misc": [
       {
-        "parentPluginId": "logExplorer",
+        "parentPluginId": "logsExplorer",
         "id": "def-common.availableControlPanelFields",
         "type": "Array",
         "tags": [],
@@ -1635,13 +1635,13 @@
         "signature": [
           "\"data_stream.namespace\"[]"
         ],
-        "path": "x-pack/plugins/log_explorer/common/control_panels/available_control_panels.ts",
+        "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/available_control_panels.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "logExplorer",
+        "parentPluginId": "logsExplorer",
         "id": "def-common.AvailableControlPanels",
         "type": "Type",
         "tags": [],
@@ -1650,13 +1650,13 @@
         "signature": [
           "{ readonly NAMESPACE: \"data_stream.namespace\"; }"
         ],
-        "path": "x-pack/plugins/log_explorer/common/control_panels/available_control_panels.ts",
+        "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/available_control_panels.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "logExplorer",
+        "parentPluginId": "logsExplorer",
         "id": "def-common.ControlPanels",
         "type": "Type",
         "tags": [],
@@ -1665,13 +1665,13 @@
         "signature": [
           "{ [x: string]: { order: number; width: \"small\" | \"medium\" | \"large\"; grow: boolean; type: string; explicitInput: { id: string; } & { dataViewId?: string | undefined; exclude?: boolean | undefined; existsSelected?: boolean | undefined; fieldName?: string | undefined; selectedOptions?: string[] | undefined; title?: string | undefined; }; }; }"
         ],
-        "path": "x-pack/plugins/log_explorer/common/control_panels/types.ts",
+        "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "logExplorer",
+        "parentPluginId": "logsExplorer",
         "id": "def-common.DatasetSelectionPlain",
         "type": "Type",
         "tags": [],
@@ -1688,13 +1688,13 @@
           "IndexPatternBrand",
           ">; } & { title?: string | undefined; }; }; }"
         ],
-        "path": "x-pack/plugins/log_explorer/common/dataset_selection/types.ts",
+        "path": "x-pack/plugins/observability_solution/logs_explorer/common/dataset_selection/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "logExplorer",
+        "parentPluginId": "logsExplorer",
         "id": "def-common.PartialChartDisplayOptions",
         "type": "Type",
         "tags": [],
@@ -1703,13 +1703,13 @@
         "signature": [
           "{ breakdownField?: string | null | undefined; }"
         ],
-        "path": "x-pack/plugins/log_explorer/common/display_options/types.ts",
+        "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "logExplorer",
+        "parentPluginId": "logsExplorer",
         "id": "def-common.PartialGridDisplayOptions",
         "type": "Type",
         "tags": [],
@@ -1718,29 +1718,29 @@
         "signature": [
           "{ columns?: ",
           {
-            "pluginId": "logExplorer",
+            "pluginId": "logsExplorer",
             "scope": "common",
-            "docId": "kibLogExplorerPluginApi",
+            "docId": "kibLogsExplorerPluginApi",
             "section": "def-common.GridColumnDisplayOptions",
             "text": "GridColumnDisplayOptions"
           },
           "[] | undefined; rows?: Partial<",
           {
-            "pluginId": "logExplorer",
+            "pluginId": "logsExplorer",
             "scope": "common",
-            "docId": "kibLogExplorerPluginApi",
+            "docId": "kibLogsExplorerPluginApi",
             "section": "def-common.GridRowsDisplayOptions",
             "text": "GridRowsDisplayOptions"
           },
           "> | undefined; }"
         ],
-        "path": "x-pack/plugins/log_explorer/common/display_options/types.ts",
+        "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "logExplorer",
+        "parentPluginId": "logsExplorer",
         "id": "def-common.PartialGridRowsDisplayOptions",
         "type": "Type",
         "tags": [],
@@ -1749,7 +1749,7 @@
         "signature": [
           "{ rowHeight?: number | undefined; rowsPerPage?: number | undefined; }"
         ],
-        "path": "x-pack/plugins/log_explorer/common/display_options/types.ts",
+        "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1757,7 +1757,7 @@
     ],
     "objects": [
       {
-        "parentPluginId": "logExplorer",
+        "parentPluginId": "logsExplorer",
         "id": "def-common.availableControlsPanels",
         "type": "Object",
         "tags": [],
@@ -1766,46 +1766,46 @@
         "signature": [
           "{ readonly NAMESPACE: \"data_stream.namespace\"; }"
         ],
-        "path": "x-pack/plugins/log_explorer/common/control_panels/available_control_panels.ts",
+        "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/available_control_panels.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "logExplorer",
+        "parentPluginId": "logsExplorer",
         "id": "def-common.controlPanelConfigs",
         "type": "Object",
         "tags": [],
         "label": "controlPanelConfigs",
         "description": [],
-        "path": "x-pack/plugins/log_explorer/common/control_panels/available_control_panels.ts",
+        "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/available_control_panels.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
-            "parentPluginId": "logExplorer",
+            "parentPluginId": "logsExplorer",
             "id": "def-common.controlPanelConfigs.availableControlsPanels.NAMESPACE",
             "type": "Object",
             "tags": [],
             "label": "[availableControlsPanels.NAMESPACE]",
             "description": [],
-            "path": "x-pack/plugins/log_explorer/common/control_panels/available_control_panels.ts",
+            "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/available_control_panels.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
-                "parentPluginId": "logExplorer",
+                "parentPluginId": "logsExplorer",
                 "id": "def-common.controlPanelConfigs.availableControlsPanels.NAMESPACE.order",
                 "type": "number",
                 "tags": [],
                 "label": "order",
                 "description": [],
-                "path": "x-pack/plugins/log_explorer/common/control_panels/available_control_panels.ts",
+                "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/available_control_panels.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "logExplorer",
+                "parentPluginId": "logsExplorer",
                 "id": "def-common.controlPanelConfigs.availableControlsPanels.NAMESPACE.width",
                 "type": "string",
                 "tags": [],
@@ -1814,12 +1814,12 @@
                 "signature": [
                   "\"medium\""
                 ],
-                "path": "x-pack/plugins/log_explorer/common/control_panels/available_control_panels.ts",
+                "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/available_control_panels.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "logExplorer",
+                "parentPluginId": "logsExplorer",
                 "id": "def-common.controlPanelConfigs.availableControlsPanels.NAMESPACE.grow",
                 "type": "boolean",
                 "tags": [],
@@ -1828,34 +1828,34 @@
                 "signature": [
                   "false"
                 ],
-                "path": "x-pack/plugins/log_explorer/common/control_panels/available_control_panels.ts",
+                "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/available_control_panels.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "logExplorer",
+                "parentPluginId": "logsExplorer",
                 "id": "def-common.controlPanelConfigs.availableControlsPanels.NAMESPACE.type",
                 "type": "string",
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "path": "x-pack/plugins/log_explorer/common/control_panels/available_control_panels.ts",
+                "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/available_control_panels.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
-                "parentPluginId": "logExplorer",
+                "parentPluginId": "logsExplorer",
                 "id": "def-common.controlPanelConfigs.availableControlsPanels.NAMESPACE.explicitInput",
                 "type": "Object",
                 "tags": [],
                 "label": "explicitInput",
                 "description": [],
-                "path": "x-pack/plugins/log_explorer/common/control_panels/available_control_panels.ts",
+                "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/available_control_panels.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
                   {
-                    "parentPluginId": "logExplorer",
+                    "parentPluginId": "logsExplorer",
                     "id": "def-common.controlPanelConfigs.availableControlsPanels.NAMESPACE.explicitInput.id",
                     "type": "string",
                     "tags": [],
@@ -1864,12 +1864,12 @@
                     "signature": [
                       "\"data_stream.namespace\""
                     ],
-                    "path": "x-pack/plugins/log_explorer/common/control_panels/available_control_panels.ts",
+                    "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/available_control_panels.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
                   {
-                    "parentPluginId": "logExplorer",
+                    "parentPluginId": "logsExplorer",
                     "id": "def-common.controlPanelConfigs.availableControlsPanels.NAMESPACE.explicitInput.fieldName",
                     "type": "string",
                     "tags": [],
@@ -1878,18 +1878,18 @@
                     "signature": [
                       "\"data_stream.namespace\""
                     ],
-                    "path": "x-pack/plugins/log_explorer/common/control_panels/available_control_panels.ts",
+                    "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/available_control_panels.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
                   {
-                    "parentPluginId": "logExplorer",
+                    "parentPluginId": "logsExplorer",
                     "id": "def-common.controlPanelConfigs.availableControlsPanels.NAMESPACE.explicitInput.title",
                     "type": "string",
                     "tags": [],
                     "label": "title",
                     "description": [],
-                    "path": "x-pack/plugins/log_explorer/common/control_panels/available_control_panels.ts",
+                    "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/available_control_panels.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -1901,7 +1901,7 @@
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "logExplorer",
+        "parentPluginId": "logsExplorer",
         "id": "def-common.ControlPanelRT",
         "type": "Object",
         "tags": [],
@@ -1955,13 +1955,13 @@
           "UndefinedC",
           "]>; }>]>; }>>"
         ],
-        "path": "x-pack/plugins/log_explorer/common/control_panels/types.ts",
+        "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
-        "parentPluginId": "logExplorer",
+        "parentPluginId": "logsExplorer",
         "id": "def-common.datasetSelectionPlainRT",
         "type": "Object",
         "tags": [],
@@ -2039,7 +2039,7 @@
           "StringC",
           "; }>]>>; }>]>; }>]>"
         ],
-        "path": "x-pack/plugins/log_explorer/common/dataset_selection/types.ts",
+        "path": "x-pack/plugins/observability_solution/logs_explorer/common/dataset_selection/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { dynamic } from '../../../common/dynamic';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { LogAIAssistantProps } from './log_ai_assistant';
 
 export const LogAIAssistant = dynamic(() => import('./log_ai_assistant'));
