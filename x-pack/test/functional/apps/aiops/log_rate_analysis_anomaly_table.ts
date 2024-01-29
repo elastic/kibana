@@ -31,7 +31,7 @@ function getJobWithDataFeed(
     description: `${detectorFunction}(${
       detectorField ? detectorField : ''
     }) on farequote dataset with 15m bucket span`,
-    groups: ['farequote', 'automated', 'single-metric'],
+    groups: ['farequote', 'automated', partitionFieldName ? 'multi-metric' : 'single-metric'],
     analysis_config: {
       bucket_span: '15m',
       influencers: [],
@@ -117,10 +117,11 @@ const testData: TestData[] = [
 ];
 
 export default function ({ getService }: FtrProviderContext) {
+  const aiops = getService('aiops');
+  const browser = getService('browser');
+  const comboBox = getService('comboBox');
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
-  const comboBox = getService('comboBox');
-  const aiops = getService('aiops');
   const ml = getService('ml');
 
   describe('anomaly table with link to log rate analysis', async function () {
@@ -225,6 +226,16 @@ export default function ({ getService }: FtrProviderContext) {
                 );
               });
             }
+
+            it('should navigate back to the anomaly table', async () => {
+              await browser.goBack();
+
+              await ml.testExecution.logTestStep('displays the anomalies table');
+              await ml.anomaliesTable.assertTableExists();
+
+              await ml.testExecution.logTestStep('anomalies table is not empty');
+              await ml.anomaliesTable.assertTableNotEmpty();
+            });
           } else {
             it('should not show the log rate analysis action', async () => {
               await ml.anomaliesTable.assertAnomalyActionsMenuButtonExists(0);
