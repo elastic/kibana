@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './lazy_flyout_wrapper';
+export * from './flyout';
