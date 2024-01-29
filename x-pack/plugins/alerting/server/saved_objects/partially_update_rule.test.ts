@@ -11,9 +11,9 @@ import {
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 
-import { partiallyUpdateRule, PartiallyUpdateableRuleAttributes } from './partially_update_rule';
+import { partiallyUpdateRule } from './partially_update_rule';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { RULE_SAVED_OBJECT_TYPE } from '.';
+import { PartiallyUpdateableRuleAttributes, RULE_SAVED_OBJECT_TYPE } from '.';
 
 const MockSavedObjectsClientContract = savedObjectsClientMock.create();
 const MockISavedObjectsRepository =

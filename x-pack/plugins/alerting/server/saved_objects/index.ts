@@ -33,6 +33,8 @@ import { ruleModelVersions } from './rule_model_versions';
 
 export const RULE_SAVED_OBJECT_TYPE = 'alert';
 
+export const RuleAttributesToEncrypt = ['apiKey'];
+
 // Use caution when removing items from this array! These fields
 // are used to construct decryption AAD and must be remain in
 // this array to prevent decryption failures during migration.
@@ -58,24 +60,29 @@ export const RuleAttributesIncludedInAAD = [
 
 // useful for Omit<RawAlert, RuleAttributesExcludedFromAAD> which is a
 // type which is a subset of RawAlert with just attributes excluded from AAD
-export type RuleAttributesIncludedInAADType =
-  | 'enabled'
-  | 'name'
-  | 'tags'
-  | 'alertTypeId'
-  | 'consumer'
-  | 'legacyId'
-  | 'schedule'
-  | 'actions'
-  | 'params'
-  | 'mapped_params'
-  | 'createdBy'
-  | 'createdAt'
-  | 'apiKeyOwner'
-  | 'apiKeyCreatedByUser'
-  | 'throttle'
-  | 'notifyWhen'
-  | 'meta';
+export type PartiallyUpdateableRuleAttributes = Partial<
+  Omit<
+    RawRule,
+    | 'apiKey'
+    | 'enabled'
+    | 'name'
+    | 'tags'
+    | 'alertTypeId'
+    | 'consumer'
+    | 'legacyId'
+    | 'schedule'
+    | 'actions'
+    | 'params'
+    | 'mapped_params'
+    | 'createdBy'
+    | 'createdAt'
+    | 'apiKeyOwner'
+    | 'apiKeyCreatedByUser'
+    | 'throttle'
+    | 'notifyWhen'
+    | 'meta'
+  >
+>;
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
@@ -153,7 +160,7 @@ export function setupSavedObjects(
   // Encrypted attributes
   encryptedSavedObjects.registerType({
     type: RULE_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set(['apiKey']),
+    attributesToEncrypt: new Set(RuleAttributesToEncrypt),
     attributesToIncludeInAAD: new Set(RuleAttributesIncludedInAAD),
   });
 

@@ -14,14 +14,11 @@ import {
 import { RawRule } from '../types';
 
 import {
+  RuleAttributesToEncrypt,
   RuleAttributesIncludedInAAD,
-  RuleAttributesIncludedInAADType,
+  PartiallyUpdateableRuleAttributes,
   RULE_SAVED_OBJECT_TYPE,
 } from '.';
-
-export type PartiallyUpdateableRuleAttributes = Partial<
-  Omit<RawRule, RuleAttributesIncludedInAADType>
->;
 
 interface PartiallyUpdateRuleSavedObjectOptions {
   refresh?: SavedObjectsUpdateOptions['refresh'];
@@ -41,8 +38,11 @@ export async function partiallyUpdateRule(
   attributes: PartiallyUpdateableRuleAttributes,
   options: PartiallyUpdateRuleSavedObjectOptions = {}
 ): Promise<void> {
-  // ensure we only have the valid attributes excluded from AAD
-  const attributeUpdates = omit(attributes, RuleAttributesIncludedInAAD);
+  // ensure we only have the valid attributes that are not encrypted and are excluded from AAD
+  const attributeUpdates = omit(attributes, [
+    ...RuleAttributesToEncrypt,
+    ...RuleAttributesIncludedInAAD,
+  ]);
   const updateOptions: SavedObjectsUpdateOptions<RawRule> = pick(
     options,
     'namespace',
