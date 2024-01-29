@@ -64,7 +64,7 @@
                 "label": "config",
                 "description": [],
                 "signature": [
-                  "Readonly<{} & { scroll: Readonly<{} & { duration: string; size: number; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
+                  "Readonly<{} & { scroll: Readonly<{} & { duration: string; size: number; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
                   {
                     "pluginId": "@kbn/config-schema",
                     "scope": "common",
@@ -225,7 +225,7 @@
                 "label": "config",
                 "description": [],
                 "signature": [
-                  "Readonly<{} & { scroll: Readonly<{} & { duration: string; size: number; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
+                  "Readonly<{} & { scroll: Readonly<{} & { duration: string; size: number; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; enablePanelActionDownload: boolean; maxSizeBytes: number | ",
                   {
                     "pluginId": "@kbn/config-schema",
                     "scope": "common",
@@ -448,7 +448,25 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/generate-csv",
+        "id": "def-server.CsvPagingStrategy",
+        "type": "Type",
+        "tags": [],
+        "label": "CsvPagingStrategy",
+        "description": [
+          "\nDuplicated from @kbn/reporting-export-types-csv-common to reduce dependencies"
+        ],
+        "signature": [
+          "\"scroll\" | \"pit\""
+        ],
+        "path": "packages/kbn-generate-csv/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   },
   "common": {
