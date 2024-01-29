@@ -5,25 +5,24 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
-import { Chance } from 'chance';
-import { waitFor } from '@testing-library/react';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
-import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
-import { ruleTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/rule_type_registry.mock';
+import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { RuleTypeModel, ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
-
+import { ruleTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/rule_type_registry.mock';
+import { waitFor } from '@testing-library/react';
+import { Chance } from 'chance';
+import React, { Fragment } from 'react';
+import { useLocation, useParams } from 'react-router-dom';
+import { useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
+import { ConfigSchema } from '../../plugin';
 import { Subset } from '../../typings';
-import { render } from '../../utils/test_helper';
 import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
-import { useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
+import { render } from '../../utils/test_helper';
 import { AlertDetails } from './alert_details';
-import { ConfigSchema } from '../../plugin';
 import { alertDetail, alertWithNoData } from './mock/alert';
 
 jest.mock('react-router-dom', () => ({

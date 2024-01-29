@@ -18,12 +18,18 @@ import { euiDarkVars } from '@kbn/ui-theme';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import * as dataContext from '../../hooks/use_has_data';
 import * as pluginContext from '../../hooks/use_plugin_context';
 import { ObservabilityPublicPluginsStart } from '../../plugin';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { AlertsPage } from './alerts';
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: jest.fn(),
+}));
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 mockUseKibanaReturnValue.services.application.capabilities = {
@@ -46,6 +52,8 @@ jest.mock('../../utils/kibana_react', () => ({
     },
   })),
 }));
+
+const useLocationMock = useLocation as jest.Mock;
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   __esModule: true,
@@ -165,6 +173,7 @@ describe('AlertsPage with all capabilities', () => {
   beforeEach(() => {
     fetchActiveMaintenanceWindowsMock.mockClear();
     useTimeBuckets.mockReturnValue(timeBuckets);
+    useLocationMock.mockReturnValue({ pathname: '/alerts', search: '', state: '', hash: '' });
   });
 
   it('should render an alerts page template', async () => {
