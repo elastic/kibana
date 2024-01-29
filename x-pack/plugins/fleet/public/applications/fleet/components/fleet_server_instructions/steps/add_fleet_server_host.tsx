@@ -61,10 +61,9 @@ export const AddFleetServerHostStepContent = ({
   const {
     setFleetServerHost,
     fleetServerHost: selectedFleetServerHost,
-    submitForm,
+    handleSubmitForm,
     fleetServerHosts,
     error,
-    validate: validateForm,
     inputs,
   } = fleetServerHostForm;
   const [isLoading, setIsLoading] = useState(false);
@@ -77,8 +76,8 @@ export const AddFleetServerHostStepContent = ({
       setSubmittedFleetServerHost(undefined);
       setIsLoading(true);
 
-      if (validateForm()) {
-        const savedFleetServerHost = await submitForm();
+      const savedFleetServerHost = await handleSubmitForm();
+      if (savedFleetServerHost) {
         setFleetServerHost(savedFleetServerHost);
         setSubmittedFleetServerHost(savedFleetServerHost);
       }
@@ -91,7 +90,7 @@ export const AddFleetServerHostStepContent = ({
     } finally {
       setIsLoading(false);
     }
-  }, [validateForm, submitForm, setFleetServerHost, notifications.toasts]);
+  }, [handleSubmitForm, setFleetServerHost, notifications.toasts]);
 
   return (
     <EuiForm onSubmit={onSubmit}>

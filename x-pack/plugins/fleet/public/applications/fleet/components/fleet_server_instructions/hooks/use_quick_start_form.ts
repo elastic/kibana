@@ -64,10 +64,9 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
     fleetServerHosts,
     fleetServerHost,
     isFleetServerHostSubmitted,
-    submitForm,
+    handleSubmitForm,
     error: fleetServerError,
     setFleetServerHost,
-    validate,
     inputs,
   } = useFleetServerHost();
 
@@ -84,12 +83,17 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
 
   const submit = useCallback(async () => {
     try {
-      if ((!fleetServerHost && validate()) || fleetServerHost) {
+      if (!fleetServerHost || fleetServerHost) {
         setStatus('loading');
 
         if (!fleetServerHost) {
-          const res = await submitForm();
-          setFleetServerHost(res);
+          const res = await handleSubmitForm();
+          if (res) {
+            setFleetServerHost(res);
+          } else {
+            setStatus('initial');
+            return;
+          }
         }
 
         await generateServiceToken();
@@ -124,9 +128,8 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
       setError(err.message);
     }
   }, [
-    validate,
     fleetServerHost,
-    submitForm,
+    handleSubmitForm,
     setFleetServerHost,
     generateServiceToken,
     setFleetServerPolicyId,

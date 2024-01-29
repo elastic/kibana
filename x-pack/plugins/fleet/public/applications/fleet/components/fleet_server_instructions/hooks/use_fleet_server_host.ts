@@ -23,11 +23,10 @@ import {
 
 export interface FleetServerHostForm {
   fleetServerHosts: FleetServerHost[];
-  submitForm: () => Promise<FleetServerHost>;
+  handleSubmitForm: () => Promise<FleetServerHost | undefined>;
   isFleetServerHostSubmitted: boolean;
   fleetServerHost?: FleetServerHost | null;
   setFleetServerHost: React.Dispatch<React.SetStateAction<FleetServerHost | undefined | null>>;
-  validate: () => boolean;
   error?: string;
   inputs: {
     hostUrlsInput: ReturnType<typeof useComboInput>;
@@ -72,7 +71,10 @@ export const useFleetServerHost = (): FleetServerHostForm => {
     }
   }, [fleetServerHosts, setDefaultInputValue]);
 
-  const submitForm = useCallback(async () => {
+  const handleSubmitForm = useCallback(async () => {
+    if (!validate()) {
+      return;
+    }
     setIsFleetServerHostSubmitted(false);
     const newFleetServerHost = {
       name: inputs.nameInput.value,
@@ -94,6 +96,7 @@ export const useFleetServerHost = (): FleetServerHostForm => {
 
     return res.data.item;
   }, [
+    validate,
     refreshGetFleetServerHosts,
     inputs.nameInput.value,
     inputs.hostUrlsInput.value,
@@ -102,11 +105,10 @@ export const useFleetServerHost = (): FleetServerHostForm => {
 
   return {
     fleetServerHosts,
-    submitForm,
+    handleSubmitForm,
     fleetServerHost,
     isFleetServerHostSubmitted,
     setFleetServerHost,
-    validate,
     inputs,
   };
 };
