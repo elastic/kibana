@@ -30,6 +30,7 @@ import {
   MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
 } from '../../common';
 import { ruleModelVersions } from './rule_model_versions';
+import { RuleAttributes } from '../data/rule/types';
 
 export const RULE_SAVED_OBJECT_TYPE = 'alert';
 
@@ -58,11 +59,12 @@ export const RuleAttributesIncludedInAAD = [
   'meta',
 ];
 
-// useful for Omit<RawAlert, RuleAttributesExcludedFromAAD> which is a
-// type which is a subset of RawAlert with just attributes excluded from AAD
+// useful type for Omit<RuleAttributes, [...RuleAttributesToEncrypt, ...RuleAttributesIncludedInAAD]>
+// which will produce a subset of RuleAttributes with just attributes that are safe to partually
+// update from AAD
 export type PartiallyUpdateableRuleAttributes = Partial<
   Omit<
-    RawRule,
+    RuleAttributes,
     | 'apiKey'
     | 'enabled'
     | 'name'

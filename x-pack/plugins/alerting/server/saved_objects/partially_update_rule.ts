@@ -11,7 +11,6 @@ import {
   SavedObjectsErrorHelpers,
   SavedObjectsUpdateOptions,
 } from '@kbn/core/server';
-import { RawRule } from '../types';
 
 import {
   RuleAttributesToEncrypt,
@@ -19,6 +18,7 @@ import {
   PartiallyUpdateableRuleAttributes,
   RULE_SAVED_OBJECT_TYPE,
 } from '.';
+import { RuleAttributes } from '../data/rule/types';
 
 interface PartiallyUpdateRuleSavedObjectOptions {
   refresh?: SavedObjectsUpdateOptions['refresh'];
@@ -43,7 +43,7 @@ export async function partiallyUpdateRule(
     ...RuleAttributesToEncrypt,
     ...RuleAttributesIncludedInAAD,
   ]);
-  const updateOptions: SavedObjectsUpdateOptions<RawRule> = pick(
+  const updateOptions: SavedObjectsUpdateOptions<RuleAttributes> = pick(
     options,
     'namespace',
     'version',
@@ -51,7 +51,7 @@ export async function partiallyUpdateRule(
   );
 
   try {
-    await savedObjectsClient.update<RawRule>(
+    await savedObjectsClient.update<RuleAttributes>(
       RULE_SAVED_OBJECT_TYPE,
       id,
       attributeUpdates,
