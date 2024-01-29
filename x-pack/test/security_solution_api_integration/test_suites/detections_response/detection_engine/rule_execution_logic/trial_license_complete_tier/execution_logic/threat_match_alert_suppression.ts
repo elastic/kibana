@@ -140,6 +140,7 @@ export default ({ getService }: FtrProviderContext) => {
     name: 'ALert suppression IM test rule',
   });
 
+  // cases to cover 2 execution paths of IM
   const cases = [
     {
       eventsCount: 10,

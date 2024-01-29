@@ -11,10 +11,9 @@ import partition from 'lodash/partition';
 import type { SignalSourceHit } from '../types';
 
 /**
- * TODO: add description
- * @param events
- * @param suppressedBy
- * @returns
+ * partition events in 2 arrays:
+ * 1. first one, where no suppressed by field has empty value
+ * 2. where any of fields is empty
  */
 export const partitionMissingFieldsEvents = (
   events: SignalSourceHit[],
