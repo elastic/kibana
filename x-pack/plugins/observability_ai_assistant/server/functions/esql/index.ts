@@ -254,7 +254,7 @@ export function registerEsqlFunction({
 
       return esqlResponse$.pipe(
         emitWithConcatenatedMessage((msg) => {
-          const esqlQuery = msg.message.content.match(/```esql([\s\S]*?)```/)?.[1];
+          const esqlQuery = correctCommonEsqlMistakes(msg.message.content, resources.logger).match(/```esql([\s\S]*?)```/)?.[1];
 
           return {
             ...msg,
@@ -263,12 +263,12 @@ export function registerEsqlFunction({
               content: correctCommonEsqlMistakes(msg.message.content, resources.logger),
               ...(esqlQuery && args.execute
                 ? {
-                    function_call: {
-                      name: 'execute_query',
-                      arguments: JSON.stringify({ query: esqlQuery }),
-                      trigger: MessageRole.Assistant as const,
-                    },
-                  }
+                  function_call: {
+                    name: 'execute_query',
+                    arguments: JSON.stringify({ query: esqlQuery }),
+                    trigger: MessageRole.Assistant as const,
+                  },
+                }
                 : {}),
             },
           };
