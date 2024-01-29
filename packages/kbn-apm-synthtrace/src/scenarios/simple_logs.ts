@@ -24,9 +24,9 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
       const CLOUD_REGION = ['eu-central-1', 'us-east-1', 'area-51'];
 
       const CLUSTER = [
-        { clusterId: generateShortId(), clusterName: 'synth-cluster-1' },
-        { clusterId: generateShortId(), clusterName: 'synth-cluster-2' },
-        { clusterId: generateShortId(), clusterName: 'synth-cluster-3' },
+        { clusterId: generateShortId(), clusterName: 'synth-cluster-1', namespace: 'default' },
+        { clusterId: generateShortId(), clusterName: 'synth-cluster-2', namespace: 'production' },
+        { clusterId: generateShortId(), clusterName: 'synth-cluster-3', namespace: 'kube' },
       ];
 
       const SERVICE_NAMES = Array(3)
@@ -48,9 +48,11 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
                 .service(SERVICE_NAMES[index])
                 .defaults({
                   'trace.id': generateShortId(),
-                  'agent.name': 'synth-agent',
+                  'agent.name': 'nodejs',
                   'orchestrator.cluster.name': CLUSTER[index].clusterName,
                   'orchestrator.cluster.id': CLUSTER[index].clusterId,
+                  'orchestrator.namespace': CLUSTER[index].namespace,
+                  'container.name': `${SERVICE_NAMES[index]}-${generateShortId()}`,
                   'orchestrator.resource.id': generateShortId(),
                   'cloud.provider': CLOUD_PROVIDERS[Math.floor(Math.random() * 3)],
                   'cloud.region': CLOUD_REGION[index],
@@ -77,10 +79,12 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
                 .defaults({
                   'trace.id': generateShortId(),
                   'error.message': MESSAGE_LOG_LEVELS[index].message,
-                  'agent.name': 'synth-agent',
+                  'agent.name': 'nodejs',
                   'orchestrator.cluster.name': CLUSTER[index].clusterName,
                   'orchestrator.cluster.id': CLUSTER[index].clusterId,
                   'orchestrator.resource.id': generateShortId(),
+                  'orchestrator.namespace': CLUSTER[index].namespace,
+                  'container.name': `${SERVICE_NAMES[index]}-${generateShortId()}`,
                   'cloud.provider': CLOUD_PROVIDERS[Math.floor(Math.random() * 3)],
                   'cloud.region': CLOUD_REGION[index],
                   'cloud.availability_zone': `${CLOUD_REGION[index]}a`,
@@ -107,10 +111,12 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
                 .defaults({
                   'trace.id': generateShortId(),
                   'error.message': MESSAGE_LOG_LEVELS[index].message,
-                  'agent.name': 'synth-agent',
+                  'agent.name': 'nodejs',
                   'orchestrator.cluster.name': CLUSTER[index].clusterName,
                   'orchestrator.cluster.id': CLUSTER[index].clusterId,
                   'orchestrator.resource.id': generateShortId(),
+                  'orchestrator.namespace': CLUSTER[index].namespace,
+                  'container.name': `${SERVICE_NAMES[index]}-${generateShortId()}`,
                   'cloud.provider': CLOUD_PROVIDERS[Math.floor(Math.random() * 3)],
                   'cloud.region': CLOUD_REGION[index],
                   'cloud.availability_zone': `${CLOUD_REGION[index]}a`,
@@ -137,10 +143,12 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
                 .defaults({
                   'trace.id': generateShortId(),
                   'event.original': MESSAGE_LOG_LEVELS[index].message,
-                  'agent.name': 'synth-agent',
+                  'agent.name': 'nodejs',
                   'orchestrator.cluster.name': CLUSTER[index].clusterName,
                   'orchestrator.cluster.id': CLUSTER[index].clusterId,
                   'orchestrator.resource.id': generateShortId(),
+                  'orchestrator.namespace': CLUSTER[index].namespace,
+                  'container.name': `${SERVICE_NAMES[index]}-${generateShortId()}`,
                   'cloud.provider': CLOUD_PROVIDERS[Math.floor(Math.random() * 3)],
                   'cloud.region': CLOUD_REGION[index],
                   'cloud.availability_zone': `${CLOUD_REGION[index]}a`,
@@ -166,10 +174,12 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
                 .service(SERVICE_NAMES[index])
                 .defaults({
                   'trace.id': generateShortId(),
-                  'agent.name': 'synth-agent',
+                  'agent.name': 'nodejs',
                   'orchestrator.cluster.name': CLUSTER[index].clusterName,
                   'orchestrator.cluster.id': CLUSTER[index].clusterId,
                   'orchestrator.resource.id': generateShortId(),
+                  'orchestrator.namespace': CLUSTER[index].namespace,
+                  'container.name': `${SERVICE_NAMES[index]}-${generateShortId()}`,
                   'cloud.provider': CLOUD_PROVIDERS[Math.floor(Math.random() * 3)],
                   'cloud.region': CLOUD_REGION[index],
                   'cloud.availability_zone': `${CLOUD_REGION[index]}a`,

@@ -22,6 +22,7 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import {
+  type ChartSizeEvent,
   extractContainerType,
   extractVisualizationType,
   isOnAggBasedEditor,
@@ -115,6 +116,18 @@ export const getPartitionVisRenderer: (
     ]);
 
     const hasOpenedOnAggBasedEditor = isOnAggBasedEditor(handlers.getExecutionContext());
+
+    const chartSizeEvent: ChartSizeEvent = {
+      name: 'chartSize',
+      data: {
+        maxDimensions: {
+          x: { value: 100, unit: 'percentage' },
+          y: { value: 100, unit: 'percentage' },
+        },
+      },
+    };
+
+    handlers.event(chartSizeEvent);
 
     render(
       <I18nProvider>

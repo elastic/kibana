@@ -20,6 +20,7 @@ function createMathDefinition(
     name,
     description,
     supportedCommands: ['eval', 'where', 'row'],
+    supportedOptions: ['by'],
     signatures: types.map((type) => {
       if (Array.isArray(type)) {
         return {
@@ -57,6 +58,7 @@ function createComparisonDefinition(
     name,
     description,
     supportedCommands: ['eval', 'where', 'row'],
+    supportedOptions: ['by'],
     signatures: [
       {
         params: [
@@ -211,6 +213,7 @@ export const builtinFunctions: FunctionDefinition[] = [
     name,
     description,
     supportedCommands: ['eval', 'where', 'row'],
+    supportedOptions: ['by'],
     signatures: [
       {
         params: [
@@ -285,6 +288,7 @@ export const builtinFunctions: FunctionDefinition[] = [
     name,
     description,
     supportedCommands: ['eval', 'where', 'row'],
+    supportedOptions: ['by'],
     signatures: [
       {
         params: [
@@ -302,6 +306,7 @@ export const builtinFunctions: FunctionDefinition[] = [
       defaultMessage: 'Not',
     }),
     supportedCommands: ['eval', 'where', 'row'],
+    supportedOptions: ['by'],
     signatures: [
       {
         params: [{ name: 'expression', type: 'boolean' }],
@@ -316,6 +321,7 @@ export const builtinFunctions: FunctionDefinition[] = [
       defaultMessage: 'Assign (=)',
     }),
     supportedCommands: ['eval', 'stats', 'row', 'dissect', 'where', 'enrich'],
+    supportedOptions: ['by', 'with'],
     signatures: [
       {
         params: [

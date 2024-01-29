@@ -30,7 +30,7 @@ import {
   LOGGING_TAG,
   SAVED_OBJECT_TELEMETRY,
 } from '../common/constants';
-import { AlertsFactory } from './alerts';
+import { RulesFactory } from './rules';
 import { configSchema, createConfig, MonitoringConfig } from './config';
 import { instantiateClient } from './es_client/instantiate_client';
 import { initBulkUploader } from './kibana_monitoring';
@@ -123,9 +123,9 @@ export class MonitoringPlugin
       setupPlugins: this.setupPlugins!,
     });
 
-    const alerts = AlertsFactory.getAll();
-    for (const alert of alerts) {
-      plugins.alerting?.registerType(alert.getRuleType());
+    const rules = RulesFactory.getAll();
+    for (const rule of rules) {
+      plugins.alerting?.registerType(rule.getRuleType());
     }
 
     const config = createConfig(this.initializerContext.config.get<TypeOf<typeof configSchema>>());

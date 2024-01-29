@@ -26,6 +26,7 @@ import {
   buildDatasourceStates,
   buildReferences,
   getAdhocDataviews,
+  mapToFormula,
 } from '../utils';
 import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
 
@@ -73,14 +74,7 @@ function buildFormulaLayer(
 ): FormBasedPersistedState['layers'][0] {
   const layers = {
     [DEFAULT_LAYER_ID]: {
-      ...getFormulaColumn(
-        ACCESSOR,
-        {
-          value: layer.value,
-        },
-        dataView,
-        formulaAPI
-      ),
+      ...getFormulaColumn(ACCESSOR, mapToFormula(layer), dataView, formulaAPI),
     },
   };
 
