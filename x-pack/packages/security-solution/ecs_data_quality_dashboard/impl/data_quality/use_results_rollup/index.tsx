@@ -77,7 +77,7 @@ const useStoredPatternResults = (patterns: string[]) => {
     const abortController = new AbortController();
     const fetchStoredPatternResults = async () => {
       const requests = patterns.map((pattern) =>
-        getStorageResults({ pattern, httpFetch, abortController, toasts }).then((results) => ({
+        getStorageResults({ pattern, httpFetch, abortController, toasts }).then((results = []) => ({
           pattern,
           results: Object.fromEntries(
             results.map((storageResult) => [
