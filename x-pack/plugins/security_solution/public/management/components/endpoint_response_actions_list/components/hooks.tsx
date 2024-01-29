@@ -11,15 +11,13 @@ import type {
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
 import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
-import type {
-  ConsoleResponseActionCommands,
-  ResponseActionsApiCommandNames,
-  ResponseActionStatus,
-} from '../../../../../common/endpoint/service/response_actions/constants';
 import {
+  RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
   RESPONSE_ACTION_API_COMMANDS_NAMES,
   RESPONSE_ACTION_STATUS,
   RESPONSE_ACTION_TYPE,
+  RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP,
+  type ResponseActionStatus,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import type { DateRangePickerValues } from './actions_log_date_range_picker';
 import type { FILTER_NAMES } from '../translations';
@@ -139,40 +137,6 @@ export const getActionStatus = (status: ResponseActionStatus): string => {
   return '';
 };
 
-/**
- * map actual command to ui command
- * unisolate -> release
- * running-processes -> processes
- */
-export const getUiCommand = (
-  command: ResponseActionsApiCommandNames
-): ConsoleResponseActionCommands => {
-  if (command === 'unisolate') {
-    return 'release';
-  } else if (command === 'running-processes') {
-    return 'processes';
-  } else {
-    return command;
-  }
-};
-
-/**
- * map UI command back to actual command
- * release -> unisolate
- * processes -> running-processes
- */
-export const getCommandKey = (
-  uiCommand: ConsoleResponseActionCommands
-): ResponseActionsApiCommandNames => {
-  if (uiCommand === 'release') {
-    return 'unisolate';
-  } else if (uiCommand === 'processes') {
-    return 'running-processes';
-  } else {
-    return uiCommand;
-  }
-};
-
 export type FilterName = keyof typeof FILTER_NAMES;
 export const useActionsLogFilter = ({
   filterName,
@@ -267,9 +231,12 @@ export const useActionsLogFilter = ({
           return true;
         }).map((commandName) => ({
           key: commandName,
-          label: getUiCommand(commandName),
+          label: RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[commandName],
           checked:
-            !isFlyout && commands?.map((command) => getCommandKey(command)).includes(commandName)
+            !isFlyout &&
+            commands
+              ?.map((command) => RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[command])
+              .includes(commandName)
               ? 'on'
               : undefined,
           'data-test-subj': `${filterName}-filter-option`,
