@@ -11,27 +11,18 @@ export function mixKqlWithTags(kqlQuery: string, tags: SearchState['tags']) {
   if (!tags) {
     return kqlQuery;
   }
-  const tagsKqlIncluded = tags.included?.join(' or ') || '';
-  const excludedTagsKql = tags.excluded?.join(' or ') || '';
+  const includedKqlTags = tags?.included?.join(' or ');
+  const excludedKqlTags = tags?.excluded?.join(' or ');
 
-  let tagsQuery = '';
-  if (tagsKqlIncluded && excludedTagsKql) {
-    tagsQuery = `slo.tags: (${excludedTagsKql}) and not slo.tags: (${tagsKqlIncluded})`;
+  let queryParts = [];
+  if (!!kqlQuery) {
+    queryParts.push(kqlQuery);
   }
-  if (!excludedTagsKql && tagsKqlIncluded) {
-    tagsQuery = `slo.tags: (${tagsKqlIncluded})`;
+  if (!!includedKqlTags) {
+    queryParts.push(`slo.tags: (${includedKqlTags})`);
   }
-  if (!tagsKqlIncluded && excludedTagsKql) {
-    tagsQuery = `not slo.tags: (${excludedTagsKql})`;
+  if (!!excludedKqlTags) {
+    queryParts.push(`not slo.tags: (${excludedKqlTags})`);
   }
-
-  if (!kqlQuery) {
-    return tagsQuery;
-  }
-
-  if (tagsQuery) {
-    return `${kqlQuery} and ${tagsQuery}`;
-  } else {
-    return kqlQuery;
-  }
+  return queryParts.join(" and ");
 }

@@ -7,7 +7,7 @@
 
 import { mixKqlWithTags } from './mix_kql_with_tags';
 
-describe('mixKQlQWithTags', () => {
+describe('mixKqlWithTags', () => {
   it('mixes kql with selected tags', async () => {
     const query = 'something';
     const tags = {
