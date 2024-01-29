@@ -7,7 +7,7 @@
  */
 
 import { coreMock } from '@kbn/core/server/mocks';
-import { FilterStateStore, Query } from '@kbn/es-query';
+import { FilterStateStore, nodeBuilder, nodeTypes, Query } from '@kbn/es-query';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../common';
 import type { SavedObject, SavedQueryAttributes } from '../../common';
 import {
@@ -332,7 +332,6 @@ describe('saved query route handler context', () => {
         type: 'query',
         page: 1,
         perPage: 50,
-        search: '',
         sortField: 'titleKeyword',
         sortOrder: 'asc',
       });
@@ -372,9 +371,9 @@ describe('saved query route handler context', () => {
         type: 'query',
         page: 1,
         perPage: 50,
-        search: 'foo',
-        sortField: undefined,
-        sortOrder: undefined,
+        filter: nodeBuilder.is('query.attributes.title', nodeTypes.wildcard.buildNode('foo')),
+        sortField: 'titleKeyword',
+        sortOrder: 'asc',
       });
       expect(response.savedQueries).toEqual([{ id: 'foo', attributes: savedQueryAttributes }]);
     });
@@ -457,7 +456,6 @@ describe('saved query route handler context', () => {
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
         page: 1,
         perPage: 2,
-        search: '',
         sortField: 'titleKeyword',
         sortOrder: 'asc',
         type: 'query',

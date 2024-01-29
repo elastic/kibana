@@ -7,7 +7,7 @@
  */
 
 import { CustomRequestHandlerContext, RequestHandlerContext, SavedObject } from '@kbn/core/server';
-import { isFilters, isOfQueryType } from '@kbn/es-query';
+import { isFilters, isOfQueryType, nodeBuilder, nodeTypes } from '@kbn/es-query';
 import { omit } from 'lodash';
 import { isQuery, SavedQueryAttributes } from '../../common';
 import { extract, inject } from '../../common/query/filters/persistable_state';
@@ -207,9 +207,11 @@ export async function registerSavedQueryRouteHandlerContext(context: RequestHand
         type: 'query',
         page,
         perPage,
-        search,
-        sortField: search ? undefined : 'titleKeyword',
-        sortOrder: search ? undefined : 'asc',
+        filter: search
+          ? nodeBuilder.is('query.attributes.title', nodeTypes.wildcard.buildNode(search))
+          : undefined,
+        sortField: 'titleKeyword',
+        sortOrder: 'asc',
       });
 
     const savedQueries = savedObjects.map(injectReferences);

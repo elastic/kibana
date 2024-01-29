@@ -38,6 +38,7 @@ describe('Saved query management list component', () => {
       uiSettings: startMock.uiSettings,
       http: startMock.http,
       application: applicationService,
+      notifications: startMock.notifications,
     };
 
     return (
@@ -430,9 +431,9 @@ describe('Saved query management list component', () => {
       total: 1,
       queries: generateSavedQueries(1),
     });
-    userEvent.type(screen.getByRole('combobox', { name: 'Query list' }), 'Test');
+    userEvent.type(screen.getByRole('combobox', { name: 'Query list' }), 'Test And Search');
     await waitFor(() => {
-      expect(findSavedQueriesSpy).toHaveBeenLastCalledWith('Test*', 5, 1);
+      expect(findSavedQueriesSpy).toHaveBeenLastCalledWith('*Test AND \\And AND Search*', 5, 1);
     });
     expect(screen.queryByText(/1 of/)).not.toBeInTheDocument();
     expect(screen.getAllByRole('option')).toHaveLength(1);
@@ -582,9 +583,9 @@ describe('Saved query management list component', () => {
     expect(await screen.findAllByRole('option')).toHaveLength(2);
     expect(screen.getAllByRole('option')[0]).toHaveTextContent('Foo');
     expect(screen.getAllByRole('option')[0]).toHaveTextContent('Active');
-    userEvent.type(screen.getByRole('searchbox', { name: 'Query list' }), 'Test');
+    userEvent.type(screen.getByRole('searchbox', { name: 'Query list' }), 'Test And Search');
     await waitFor(() => {
-      expect(findSavedQueriesSpy).toHaveBeenLastCalledWith('Test*', 5, 1);
+      expect(findSavedQueriesSpy).toHaveBeenLastCalledWith('*Test AND \\And AND Search*', 5, 1);
     });
     expect(screen.getAllByRole('option')).toHaveLength(2);
     expect(screen.getAllByRole('option')[0]).toHaveTextContent('Bar');

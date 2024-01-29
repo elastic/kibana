@@ -34,6 +34,7 @@ import './saved_query_management_list.scss';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { debounce } from 'lodash';
 import useLatest from 'react-use/lib/useLatest';
+import { escapeKuery } from '@kbn/es-query';
 import type { IUnifiedSearchPluginServices } from '../types';
 import { strings as queryBarMenuPanelsStrings } from '../query_string_input/query_bar_menu_panels';
 import { PanelTitle } from '../query_string_input/panel_title';
@@ -223,9 +224,9 @@ export const SavedQueryManagementList = ({
     const fetchIdValue = ++currentPageFetchId.current;
 
     try {
-      const trimmedSearchTerm = searchTerm.trim();
+      const preparedSearch = escapeKuery(searchTerm.trim()).split(/\s+/).join(' AND ');
       const { total, queries } = await savedQueryService.findSavedQueries(
-        trimmedSearchTerm ? `${trimmedSearchTerm}*` : undefined,
+        preparedSearch ? `*${preparedSearch}*` : undefined,
         SAVED_QUERY_PAGE_SIZE,
         currentPageNumber + 1
       );
@@ -236,7 +237,7 @@ export const SavedQueryManagementList = ({
 
       let filteredQueries = queries;
 
-      if (loadedSavedQuery && !trimmedSearchTerm && currentPageNumber === 0) {
+      if (loadedSavedQuery && !preparedSearch && currentPageNumber === 0) {
         filteredQueries = [
           loadedSavedQuery,
           ...queries.filter((savedQuery) => savedQuery.id !== loadedSavedQuery.id),
