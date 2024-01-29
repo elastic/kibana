@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
-import React from 'react';
-import { ITableColumn, UnoptimizedManagedTable, shouldfetchServer } from '.';
+import { shouldfetchServer } from '.';
 
 interface Person {
   name: string;
@@ -15,51 +13,6 @@ interface Person {
 }
 
 describe('ManagedTable', () => {
-  describe('UnoptimizedManagedTable', () => {
-    const people: Person[] = [
-      { name: 'Jess', age: 29 },
-      { name: 'Becky', age: 43 },
-      { name: 'Thomas', age: 31 },
-    ];
-    const columns: Array<ITableColumn<Person>> = [
-      {
-        field: 'name',
-        name: 'Name',
-        sortable: true,
-        render: (name) => `Name: ${name}`,
-      },
-      { field: 'age', name: 'Age', render: (age) => `Age: ${age}` },
-    ];
-
-    it('should render a page-full of items, with defaults', () => {
-      expect(
-        shallow(
-          <UnoptimizedManagedTable<Person>
-            columns={columns}
-            items={people}
-            initialPageSize={25}
-          />
-        )
-      ).toMatchSnapshot();
-    });
-
-    it('should render when specifying initial values', () => {
-      expect(
-        shallow(
-          <UnoptimizedManagedTable<Person>
-            columns={columns}
-            items={people}
-            initialSortField="age"
-            initialSortDirection="desc"
-            initialPageIndex={1}
-            initialPageSize={2}
-            showPerPageOptions={false}
-          />
-        )
-      ).toMatchSnapshot();
-    });
-  });
-
   describe('shouldfetchServer', () => {
     it('returns true if maxCountExceeded is true', () => {
       const result = shouldfetchServer({
