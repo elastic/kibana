@@ -648,6 +648,22 @@
             "path": "x-pack/plugins/index_management/public/application/index.tsx"
           },
           {
+            "plugin": "devTools",
+            "path": "src/plugins/dev_tools/public/application.tsx"
+          },
+          {
+            "plugin": "devTools",
+            "path": "src/plugins/dev_tools/public/application.tsx"
+          },
+          {
+            "plugin": "devTools",
+            "path": "src/plugins/dev_tools/public/application.tsx"
+          },
+          {
+            "plugin": "console",
+            "path": "src/plugins/console/public/shared_imports.ts"
+          },
+          {
             "plugin": "visualizations",
             "path": "src/plugins/visualizations/public/visualize_app/utils/use/use_visualize_app_state.tsx"
           },
@@ -1528,18 +1544,6 @@
             "path": "x-pack/plugins/observability_onboarding/public/application/app.tsx"
           },
           {
-            "plugin": "devTools",
-            "path": "src/plugins/dev_tools/public/application.tsx"
-          },
-          {
-            "plugin": "devTools",
-            "path": "src/plugins/dev_tools/public/application.tsx"
-          },
-          {
-            "plugin": "devTools",
-            "path": "src/plugins/dev_tools/public/application.tsx"
-          },
-          {
             "plugin": "painlessLab",
             "path": "x-pack/plugins/painless_lab/public/shared_imports.ts"
           },
@@ -1614,10 +1618,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/app/app.tsx"
-          },
-          {
-            "plugin": "console",
-            "path": "src/plugins/console/public/shared_imports.ts"
           },
           {
             "plugin": "snapshotRestore",
@@ -2437,6 +2437,18 @@
             "path": "src/plugins/saved_objects/public/saved_object/helpers/confirm_modal_promise.tsx"
           },
           {
+            "plugin": "console",
+            "path": "src/plugins/console/public/shared_imports.ts"
+          },
+          {
+            "plugin": "console",
+            "path": "src/plugins/console/public/application/hooks/use_send_current_request/use_send_current_request.ts"
+          },
+          {
+            "plugin": "console",
+            "path": "src/plugins/console/public/application/hooks/use_send_current_request/use_send_current_request.ts"
+          },
+          {
             "plugin": "runtimeFields",
             "path": "x-pack/plugins/runtime_fields/public/shared_imports.ts"
           },
@@ -2450,11 +2462,11 @@
           },
           {
             "plugin": "indexManagement",
-            "path": "x-pack/plugins/index_management/public/application/components/component_templates/component_template_wizard/component_template_edit/component_template_edit.tsx"
+            "path": "x-pack/plugins/index_management/public/application/components/component_templates/component_template_wizard/component_template_datastreams_rollover/use_datastreams_rollover.tsx"
           },
           {
             "plugin": "indexManagement",
-            "path": "x-pack/plugins/index_management/public/application/components/component_templates/component_template_wizard/component_template_edit/component_template_edit.tsx"
+            "path": "x-pack/plugins/index_management/public/application/components/component_templates/component_template_wizard/component_template_datastreams_rollover/use_datastreams_rollover.tsx"
           },
           {
             "plugin": "dataViewEditor",
@@ -3111,18 +3123,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/detection_engine/rule_management_ui/components/rules_table/bulk_actions/use_bulk_actions.tsx"
-          },
-          {
-            "plugin": "console",
-            "path": "src/plugins/console/public/shared_imports.ts"
-          },
-          {
-            "plugin": "console",
-            "path": "src/plugins/console/public/application/hooks/use_send_current_request/use_send_current_request.ts"
-          },
-          {
-            "plugin": "console",
-            "path": "src/plugins/console/public/application/hooks/use_send_current_request/use_send_current_request.ts"
           },
           {
             "plugin": "synthetics",

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import React from 'react';
 import { Filter } from '@kbn/es-query';
 import { DataTableRecord } from '@kbn/discover-utils/types';
 import { i18n } from '@kbn/i18n';
 import { EuiDataGridCellValueElementProps, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React from 'react';
 import * as TEST_SUBJECTS from '../test_subjects';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
 import { ErrorCallout } from '../layout/error_callout';
@@ -27,7 +27,6 @@ interface LatestFindingsTableProps {
   showDistributionBar?: boolean;
   nonPersistedFilters?: Filter[];
 }
-
 /**
  * Type Guard for checking if the given source is a CspFinding
  */
