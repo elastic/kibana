@@ -33,7 +33,7 @@ import { errorAggregator } from './utils';
 import { AlertWithSuppressionFields870 } from '../../common/schemas/8.7.0';
 
 /**
- * alerts returned from BE have date type coerce to ISO strings
+ * alerts returned from BE have date type coerced to ISO strings
  */
 export type BackendAlertWithSuppressionFields870<T> = Omit<
   AlertWithSuppressionFields870<T>,
@@ -78,6 +78,9 @@ const mapAlertsToBulkCreate = <T>(alerts: Array<{ _id: string; _source: T }>) =>
   return alerts.flatMap((alert) => [{ create: { _id: alert._id } }, alert._source]);
 };
 
+/**
+ * finds if any of alerts has duplicate and filter them out
+ */
 const filterDuplicateAlerts = async <T extends { _id: string }>({
   alerts,
   spaceId,
@@ -450,11 +453,14 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   return acc;
                 }, {});
 
+                // filter out alerts that were already suppressed
+                // alert was suppressed if its suppression ends is older than suppression end of existing alert
+                // if existing alert was created earlier during the same rule execution - then alerts can be counted as not suppressed yet
+                // as they are processed for the first against this existing alert
                 const nonSuppressedAlerts = filteredDuplicates.filter((alert) => {
                   const existingAlert =
                     existingAlertsByInstanceId[alert._source[ALERT_INSTANCE_ID]];
 
-                  // if existing alert was generated earlier during rule execution, it means new ones are not suppressed yet
                   if (
                     !existingAlert ||
                     existingAlert?._source?.[ALERT_RULE_EXECUTION_UUID] === options.executionId
@@ -476,7 +482,8 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   const existingAlert =
                     existingAlertsByInstanceId[alert._source[ALERT_INSTANCE_ID]];
 
-                  // if suppression enabled only on rule execution, we need to account for alerts created earlier
+                  // if suppression enabled only on rule execution, we need to suppress alerts only against
+                  // alert created in the same rule execution. Otherwise, we need to create a new alert to accommodate per rule execution suppression
                   if (isRuleExecutionOnly) {
                     return (
                       existingAlert?._source?.[ALERT_RULE_EXECUTION_UUID] === options.executionId

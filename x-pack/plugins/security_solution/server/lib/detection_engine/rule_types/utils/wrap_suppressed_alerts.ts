@@ -8,6 +8,7 @@
 import objectHash from 'object-hash';
 import pick from 'lodash/pick';
 import get from 'lodash/get';
+import sortBy from 'lodash/sortBy';
 
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import {
@@ -69,10 +70,14 @@ export const wrapSuppressedAlerts = ({
       string,
       string[] | number[] | undefined
     >;
-    const suppressionTerms = suppressedBy.map((field) => ({
-      field,
-      value: suppressedProps[field] ?? null,
-    }));
+    const suppressionTerms = suppressedBy.map((field) => {
+      const value = suppressedProps[field] ?? null;
+      const sortedValue = Array.isArray(value) ? (sortBy(value) as string[] | number[]) : value;
+      return {
+        field,
+        value: sortedValue,
+      };
+    });
 
     const id = objectHash([
       event._index,

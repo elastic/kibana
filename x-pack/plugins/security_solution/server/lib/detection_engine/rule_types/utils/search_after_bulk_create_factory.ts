@@ -34,10 +34,6 @@ export interface SearchAfterAndBulkCreateFactoryParams extends SearchAfterAndBul
     enrichedEvents: SignalSourceHit[];
     toReturn: SearchAfterAndBulkCreateReturnType;
   }) => Promise<GenericBulkCreateResponse<BaseFieldsLatest>>;
-  //   }) => Promise<{
-  //     bulkCreateResult: GenericBulkCreateResponse<BaseFieldsLatest>;
-  //     alertsWereTruncated: boolean;
-  //   }>;
   getWarningMessage: () => string;
 }
 

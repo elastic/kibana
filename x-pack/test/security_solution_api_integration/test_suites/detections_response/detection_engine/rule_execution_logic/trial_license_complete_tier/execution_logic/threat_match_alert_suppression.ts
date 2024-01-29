@@ -140,6 +140,7 @@ export default ({ getService }: FtrProviderContext) => {
     name: 'ALert suppression IM test rule',
   });
 
+  // cases to cover 2 execution paths of IM
   const cases = [
     {
       eventsCount: 10,
@@ -772,7 +773,7 @@ export default ({ getService }: FtrProviderContext) => {
           await Promise.all(
             [firstTimestamp, secondTimestamp].map((t) =>
               indexGeneratedSourceDocuments({
-                docsCount: expectedMaxSignals,
+                docsCount: expectedMaxSignals + 15,
                 seed: (index) => ({
                   id,
                   '@timestamp': t,
@@ -810,12 +811,17 @@ export default ({ getService }: FtrProviderContext) => {
             max_signals: expectedMaxSignals,
           };
 
-          const { previewId } = await previewRule({
+          const { previewId, logs } = await previewRule({
             supertest,
             rule,
             timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
             invocationCount: 2,
           });
+
+          expect(logs[0].warnings).toEqual(
+            expect.arrayContaining([getSuppressionMaxAlertsWarning()])
+          );
+
           const previewAlerts = await getPreviewAlerts({
             es,
             previewId,

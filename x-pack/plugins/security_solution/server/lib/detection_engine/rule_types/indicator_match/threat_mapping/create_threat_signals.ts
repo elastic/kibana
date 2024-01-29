@@ -17,6 +17,7 @@ import type {
 import { createThreatSignal } from './create_threat_signal';
 import { createEventSignal } from './create_event_signal';
 import type { SearchAfterAndBulkCreateReturnType } from '../../types';
+import { MAX_SIGNALS_SUPPRESSION_MULTIPLIER } from '../../constants';
 import {
   buildExecutionIntervalValidator,
   combineConcurrentResults,
@@ -181,18 +182,9 @@ export const createThreatSignals = async ({
         `bulk create times ${results.bulkCreateTimes}ms,`,
         `all successes are ${results.success}`
       );
+
       // if alerts suppressed it means suppression enabled, so suppression alert limit should be applied (5 * max_signals)
-      if (
-        results.suppressedAlertsCount &&
-        results.suppressedAlertsCount > 0 &&
-        results.suppressedAlertsCount + results.createdSignalsCount >= 5 * params.maxSignals
-      ) {
-        // warning should be already set
-        ruleExecutionLogger.debug(
-          `Indicator match has reached its max signals count ${params.maxSignals}. Additional documents not checked are ${documentCount}`
-        );
-        break;
-      } else if (results.createdSignalsCount >= params.maxSignals) {
+      if (results.createdSignalsCount >= params.maxSignals) {
         if (results.warningMessages.includes(getMaxSignalsWarning())) {
           results.warningMessages = uniq(results.warningMessages);
         } else if (documentCount > 0) {
@@ -200,6 +192,19 @@ export const createThreatSignals = async ({
         }
         ruleExecutionLogger.debug(
           `Indicator match has reached its max signals count ${params.maxSignals}. Additional documents not checked are ${documentCount}`
+        );
+        break;
+      } else if (
+        results.suppressedAlertsCount &&
+        results.suppressedAlertsCount > 0 &&
+        results.suppressedAlertsCount + results.createdSignalsCount >=
+          MAX_SIGNALS_SUPPRESSION_MULTIPLIER * params.maxSignals
+      ) {
+        // warning should be already set
+        ruleExecutionLogger.debug(
+          `Indicator match has reached its max signals count ${
+            MAX_SIGNALS_SUPPRESSION_MULTIPLIER * params.maxSignals
+          }. Additional documents not checked are ${documentCount}`
         );
         break;
       }

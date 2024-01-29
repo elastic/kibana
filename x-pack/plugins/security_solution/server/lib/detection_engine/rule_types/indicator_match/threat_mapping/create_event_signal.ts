@@ -139,6 +139,26 @@ export const createEventSignal = async ({
     );
 
     let createResult: SearchAfterAndBulkCreateReturnType;
+    const searchAfterBulkCreateParams = {
+      buildReasonMessage: buildReasonMessageForThreatMatchAlert,
+      bulkCreate,
+      enrichment,
+      eventsTelemetry,
+      exceptionsList: unprocessedExceptions,
+      filter: esFilter,
+      inputIndexPattern: inputIndex,
+      listClient,
+      pageSize: searchAfterSize,
+      ruleExecutionLogger,
+      services,
+      sortOrder: 'desc' as const,
+      trackTotalHits: false,
+      tuple,
+      wrapHits,
+      runtimeMappings,
+      primaryTimestamp,
+      secondaryTimestamp,
+    };
 
     if (
       isAlertSuppressionEnabled &&
@@ -146,50 +166,14 @@ export const createEventSignal = async ({
       hasPlatinumLicense
     ) {
       createResult = await searchAfterAndBulkCreateSuppressedAlerts({
-        buildReasonMessage: buildReasonMessageForThreatMatchAlert,
-        bulkCreate,
-        enrichment,
-        eventsTelemetry,
-        exceptionsList: unprocessedExceptions,
-        filter: esFilter,
-        inputIndexPattern: inputIndex,
-        listClient,
-        pageSize: searchAfterSize,
-        ruleExecutionLogger,
-        services,
-        sortOrder: 'desc',
-        trackTotalHits: false,
-        tuple,
-        wrapHits,
+        ...searchAfterBulkCreateParams,
         wrapSuppressedHits,
-        runtimeMappings,
-        primaryTimestamp,
-        secondaryTimestamp,
         alertTimestampOverride: runOpts.alertTimestampOverride,
         alertWithSuppression: runOpts.alertWithSuppression,
         alertSuppression: completeRule.ruleParams.alertSuppression,
       });
     } else {
-      createResult = await searchAfterAndBulkCreate({
-        buildReasonMessage: buildReasonMessageForThreatMatchAlert,
-        bulkCreate,
-        enrichment,
-        eventsTelemetry,
-        exceptionsList: unprocessedExceptions,
-        filter: esFilter,
-        inputIndexPattern: inputIndex,
-        listClient,
-        pageSize: searchAfterSize,
-        ruleExecutionLogger,
-        services,
-        sortOrder: 'desc',
-        trackTotalHits: false,
-        tuple,
-        wrapHits,
-        runtimeMappings,
-        primaryTimestamp,
-        secondaryTimestamp,
-      });
+      createResult = await searchAfterAndBulkCreate(searchAfterBulkCreateParams);
     }
     ruleExecutionLogger.debug(
       `${
