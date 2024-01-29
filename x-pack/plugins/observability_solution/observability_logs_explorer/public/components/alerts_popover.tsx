@@ -110,7 +110,7 @@ export const AlertsPopover = () => {
         button={
           <EuiButtonEmpty onClick={togglePopover} iconType="arrowDown" iconSide="right">
             <FormattedMessage
-              id="xpack.observabilityLogExplorer.alertsPopover.buttonLabel"
+              id="xpack.observabilityLogsExplorer.alertsPopover.buttonLabel"
               defaultMessage="Alerts"
             />
           </EuiButtonEmpty>
@@ -124,13 +124,13 @@ export const AlertsPopover = () => {
           items={[
             <EuiContextMenuItem key="createRule" icon="bell" onClick={openAddRuleFlyout}>
               <FormattedMessage
-                id="xpack.observabilityLogExplorer.alertsPopover.createRuleMenuItem"
+                id="xpack.observabilityLogsExplorer.alertsPopover.createRuleMenuItem"
                 defaultMessage="Create rule"
               />
             </EuiContextMenuItem>,
             <EuiContextMenuItem key="manageRules" icon="tableOfContents" {...manageRulesLinkProps}>
               <FormattedMessage
-                id="xpack.observabilityLogExplorer.alertsPopover.manageRulesMenuItem"
+                id="xpack.observabilityLogsExplorer.alertsPopover.manageRulesMenuItem"
                 defaultMessage="Manage rules"
               />
             </EuiContextMenuItem>,
