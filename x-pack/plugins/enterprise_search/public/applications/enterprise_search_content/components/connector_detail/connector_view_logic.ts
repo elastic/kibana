@@ -7,83 +7,27 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { i18n } from '@kbn/i18n';
-
-import { Connector, FeatureName, IngestPipelineParams, SyncStatus } from '@kbn/search-connectors';
-
-import { Status } from '../../../../../common/types/api';
-import { Actions } from '../../../shared/api_logic/create_api_logic';
-import { flashSuccessToast } from '../../../shared/flash_messages';
-import { KibanaLogic } from '../../../shared/kibana';
+import { Connector, FeatureName, IngestPipelineParams } from '@kbn/search-connectors';
 
 import {
-  StartAccessControlSyncApiLogic,
-  StartAccessControlSyncArgs,
-} from '../../api/connector/start_access_control_sync_api_logic';
-import {
-  StartIncrementalSyncApiLogic,
-  StartIncrementalSyncArgs,
-} from '../../api/connector/start_incremental_sync_api_logic';
-import { StartSyncApiLogic, StartSyncArgs } from '../../api/connector/start_sync_api_logic';
-import {
-  ConnectorConfigurationApiLogic,
-  PostConnectorConfigurationActions,
-} from '../../api/connector/update_connector_configuration_api_logic';
-import {
-  CachedFetchIndexApiLogic,
-  CachedFetchIndexApiLogicActions,
-} from '../../api/index/cached_fetch_index_api_logic';
+  FetchConnectorByIdApiLogic,
+  FetchConnectorByIdApiLogicActions,
+} from '../../api/connector/fetch_connector_by_id_logic';
 
-import { FetchIndexApiResponse } from '../../api/index/fetch_index_api_logic';
 import { ElasticsearchViewIndex, IngestionMethod, IngestionStatus } from '../../types';
-import {
-  getIngestionMethod,
-  getIngestionStatus,
-  getLastUpdated,
-  indexToViewIndex,
-  isConnectorIndex,
-  isConnectorViewIndex,
-  isCrawlerIndex,
-} from '../../utils/indices';
-
-import { CrawlerLogic } from './crawler/crawler_logic';
-
-type StartSyncApiActions = Actions<StartSyncArgs, {}>;
-type StartIncrementalSyncApiActions = Actions<StartIncrementalSyncArgs, {}>;
-type StartAccessControlSyncApiActions = Actions<StartAccessControlSyncArgs, {}>;
 
 export interface IndexViewActions {
-  cancelSyncs(): void;
-  clearFetchIndexTimeout(): void;
-  createNewFetchIndexTimeout(duration: number): { duration: number };
-  fetchConnector: () => void;
-  fetchCrawlerData: () => void;
-  fetchIndex: () => void;
-  fetchIndexApiSuccess: CachedFetchIndexApiLogicActions['apiSuccess'];
-  makeFetchIndexRequest: CachedFetchIndexApiLogicActions['makeRequest'];
-  makeStartAccessControlSyncRequest: StartAccessControlSyncApiActions['makeRequest'];
-  makeStartIncrementalSyncRequest: StartIncrementalSyncApiActions['makeRequest'];
-  makeStartSyncRequest: StartSyncApiActions['makeRequest'];
-  recheckIndex: () => void;
-  resetFetchIndexApi: CachedFetchIndexApiLogicActions['apiReset'];
-  resetRecheckIndexLoading: () => void;
-  startAccessControlSync(): void;
-  startFetchIndexPoll: CachedFetchIndexApiLogicActions['startPolling'];
-  startIncrementalSync(): void;
-  startSync(): void;
-  stopFetchIndexPoll(): CachedFetchIndexApiLogicActions['stopPolling'];
-  stopFetchIndexPoll(): void;
-  updateConfigurationApiSuccess: PostConnectorConfigurationActions['apiSuccess'];
+  fetchConnector: FetchConnectorByIdApiLogicActions['makeRequest'];
+  fetchConnectorApiSuccess: FetchConnectorByIdApiLogicActions['apiSuccess'];
+  fetchConnectorApiError: FetchConnectorByIdApiLogicActions['apiError'];
 }
 
 // TODO UPDATE
 export interface IndexViewValues {
-  connector: Connector | undefined;
+  connector: typeof FetchConnectorByIdApiLogic.values.data;
   connectorError: string | undefined;
   connectorId: string | null;
   error: string | undefined;
-  fetchIndexApiData: typeof CachedFetchIndexApiLogic.values.fetchIndexApiData;
-  fetchIndexApiStatus: Status;
   hasAdvancedFilteringFeature: boolean;
   hasBasicFilteringFeature: boolean;
   hasDocumentLevelSecurityFeature: boolean;
@@ -91,20 +35,16 @@ export interface IndexViewValues {
   hasIncrementalSyncFeature: boolean;
   htmlExtraction: boolean | undefined;
   index: ElasticsearchViewIndex | undefined;
-  indexData: typeof CachedFetchIndexApiLogic.values.indexData;
   indexName: string;
   ingestionMethod: IngestionMethod;
   ingestionStatus: IngestionStatus;
   isCanceling: boolean;
   isHiddenIndex: boolean;
-  isInitialLoading: typeof CachedFetchIndexApiLogic.values.isInitialLoading;
   isSyncing: boolean;
   isWaitingForSync: boolean;
   lastUpdated: string | null;
   pipelineData: IngestPipelineParams | undefined;
   recheckIndexLoading: boolean;
-  resetFetchIndexLoading: boolean;
-  syncStatus: SyncStatus | null;
   syncTriggeredLocally: boolean; // holds local value after update so UI updates correctly
 }
 
@@ -112,122 +52,23 @@ export const ConnectorViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAc
   actions: {
     fetchIndex: true,
     recheckIndex: true,
-    resetRecheckIndexLoading: true,
-    startAccessControlSync: true,
-    startIncrementalSync: true,
-    startSync: true,
   },
   connect: {
     actions: [
-      CachedFetchIndexApiLogic,
+      FetchConnectorByIdApiLogic,
       [
-        'apiError as fetchIndexApiError',
-        'apiReset as resetFetchIndexApi',
-        'apiSuccess as fetchIndexApiSuccess',
-        'makeRequest as makeFetchIndexRequest',
-        'startPolling as startFetchIndexPoll',
-        'stopPolling as stopFetchIndexPoll',
+        'makeRequest as fetchConnector',
+        'apiSuccess as fetchConnectorApiSuccess',
+        'apiError as fetchConnectorApiError',
       ],
-      ConnectorConfigurationApiLogic,
-      ['apiSuccess as updateConfigurationApiSuccess'],
-      StartSyncApiLogic,
-      ['apiSuccess as startSyncApiSuccess', 'makeRequest as makeStartSyncRequest'],
-      StartIncrementalSyncApiLogic,
-      [
-        'apiSuccess as startIncrementalSyncApiSuccess',
-        'makeRequest as makeStartIncrementalSyncRequest',
-      ],
-      StartAccessControlSyncApiLogic,
-      [
-        'apiSuccess as startAccessControlSyncApiSuccess',
-        'makeRequest as makeStartAccessControlSyncRequest',
-      ],
-      CrawlerLogic,
-      ['fetchCrawlerData'],
     ],
     values: [
-      IndexNameLogic,
-      ['indexName'],
-      CachedFetchIndexApiLogic,
-      ['fetchIndexApiData', 'status as fetchIndexApiStatus', 'indexData', 'isInitialLoading'],
+      FetchConnectorByIdApiLogic,
+      ['status as fetchConnectorApiStatus', 'data as connector'],
     ],
   },
-  events: ({ actions }) => ({
-    beforeUnmount: () => {
-      actions.stopFetchIndexPoll();
-      actions.resetFetchIndexApi();
-    },
-  }),
-  listeners: ({ actions, values }) => ({
-    fetchIndex: () => {
-      const { indexName } = IndexNameLogic.values;
-      actions.makeFetchIndexRequest({ indexName });
-    },
-    fetchIndexApiSuccess: (index) => {
-      if (isCrawlerIndex(index) && index.name === values.indexName) {
-        actions.fetchCrawlerData();
-      }
-      if (values.recheckIndexLoading) {
-        actions.resetRecheckIndexLoading();
-        flashSuccessToast(
-          i18n.translate(
-            'xpack.enterpriseSearch.content.searchIndex.index.recheckSuccess.message',
-            {
-              defaultMessage: 'Your connector has been rechecked.',
-            }
-          )
-        );
-      }
-    },
-    recheckIndex: () => actions.fetchIndex(),
-    setIndexName: ({ indexName }) => {
-      actions.startFetchIndexPoll(indexName);
-    },
-    startAccessControlSync: () => {
-      if (
-        isConnectorIndex(values.fetchIndexApiData) &&
-        values.hasDocumentLevelSecurityFeature &&
-        KibanaLogic.values.productFeatures.hasDocumentLevelSecurityEnabled
-      ) {
-        actions.makeStartAccessControlSyncRequest({
-          connectorId: values.fetchIndexApiData.connector.id,
-        });
-      }
-    },
-    startIncrementalSync: () => {
-      if (
-        isConnectorIndex(values.fetchIndexApiData) &&
-        values.hasIncrementalSyncFeature &&
-        KibanaLogic.values.productFeatures.hasIncrementalSyncEnabled
-      ) {
-        actions.makeStartIncrementalSyncRequest({
-          connectorId: values.fetchIndexApiData.connector.id,
-        });
-      }
-    },
-    startSync: () => {
-      if (isConnectorIndex(values.fetchIndexApiData)) {
-        actions.makeStartSyncRequest({ connectorId: values.fetchIndexApiData.connector.id });
-      }
-    },
-    updateConfigurationApiSuccess: ({ configuration }) => {
-      if (isConnectorIndex(values.fetchIndexApiData)) {
-        actions.fetchIndexApiSuccess({
-          ...values.fetchIndexApiData,
-          connector: { ...values.fetchIndexApiData.connector, configuration },
-        });
-      }
-    },
-  }),
-  path: ['enterprise_search', 'content', 'index_view_logic'],
+  path: ['enterprise_search', 'content', 'connector_view_logic'],
   reducers: {
-    recheckIndexLoading: [
-      false,
-      {
-        recheckIndex: () => true,
-        resetRecheckIndexLoading: () => false,
-      },
-    ],
     syncTriggeredLocally: [
       false,
       {
@@ -237,20 +78,9 @@ export const ConnectorViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAc
     ],
   },
   selectors: ({ selectors }) => ({
-    connector: [
-      () => [selectors.indexData],
-      (index) =>
-        index && (isConnectorViewIndex(index) || isCrawlerIndex(index))
-          ? index.connector
-          : undefined,
-    ],
     connectorError: [
       () => [selectors.connector],
       (connector: Connector | undefined) => connector?.error,
-    ],
-    connectorId: [
-      () => [selectors.indexData],
-      (index) => (isConnectorViewIndex(index) ? index.connector.id : null),
     ],
     error: [
       () => [selectors.connector],
@@ -291,44 +121,9 @@ export const ConnectorViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAc
       (connector: Connector | undefined) =>
         connector?.configuration.extract_full_html?.value ?? undefined,
     ],
-    index: [
-      () => [selectors.indexData],
-      (data: IndexViewValues['indexData']) => (data ? indexToViewIndex(data) : undefined),
-    ],
-    ingestionMethod: [() => [selectors.indexData], (data) => getIngestionMethod(data)],
-    ingestionStatus: [() => [selectors.indexData], (data) => getIngestionStatus(data)],
-    isCanceling: [
-      () => [selectors.syncStatus],
-      (syncStatus: SyncStatus) => syncStatus === SyncStatus.CANCELING,
-    ],
-    isConnectorIndex: [
-      () => [selectors.indexData],
-      (data: FetchIndexApiResponse | undefined) => isConnectorIndex(data),
-    ],
-    isHiddenIndex: [
-      () => [selectors.indexData],
-      (data: FetchIndexApiResponse | undefined) =>
-        data?.hidden || (data?.name ?? '').startsWith('.'),
-    ],
-    isSyncing: [
-      () => [selectors.indexData, selectors.syncStatus],
-      (indexData: FetchIndexApiResponse | null, syncStatus: SyncStatus) =>
-        indexData?.has_in_progress_syncs || syncStatus === SyncStatus.IN_PROGRESS,
-    ],
-    isWaitingForSync: [
-      () => [selectors.indexData, selectors.syncTriggeredLocally],
-      (indexData: FetchIndexApiResponse | null, syncTriggeredLocally: boolean) =>
-        indexData?.has_pending_syncs || syncTriggeredLocally || false,
-    ],
-    lastUpdated: [() => [selectors.fetchIndexApiData], (data) => getLastUpdated(data)],
     pipelineData: [
       () => [selectors.connector],
       (connector: Connector | undefined) => connector?.pipeline ?? undefined,
     ],
-    syncStatus: [
-      () => [selectors.fetchIndexApiData],
-      (data) => data?.connector?.last_sync_status ?? null,
-    ],
   }),
 });
-

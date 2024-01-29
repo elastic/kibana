@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React /* , { useEffect } */ from 'react';
+import React, { useEffect } from 'react';
 
 import { useParams } from 'react-router-dom';
 
-import { useValues } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 
@@ -21,12 +21,12 @@ import { i18n } from '@kbn/i18n';
 import { KibanaLogic } from '../../../shared/kibana';
 // import { SEARCH_INDEX_PATH, SEARCH_INDEX_TAB_PATH } from '../../routes';
 
-import { isConnectorIndex /* isCrawlerIndex */ } from '../../utils/indices';
+// import { isConnectorIndex /* isCrawlerIndex */ } from '../../utils/indices';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 import { baseBreadcrumbs } from '../search_indices';
 
-import { getHeaderActions } from './components/header_actions/header_actions';
+// import { getHeaderActions } from './components/header_actions/header_actions';
 import { ConnectorConfiguration } from './connector/connector_configuration';
 import { ConnectorSchedulingComponent } from './connector/connector_scheduling';
 import { ConnectorSyncRules } from './connector/sync_rules/connector_rules';
@@ -35,10 +35,10 @@ import { ConnectorSyncRules } from './connector/sync_rules/connector_rules';
 // import { CrawlerConfiguration } from './crawler/crawler_configuration/crawler_configuration';
 // import { SearchIndexDomainManagement } from './crawler/domain_management/domain_management';
 // import { NoConnectorRecord } from './crawler/no_connector_record';
+import { ConnectorViewLogic } from './connector_view_logic';
 import { SearchIndexDocuments } from './documents';
 import { SearchIndexIndexMappings } from './index_mappings';
 // import { IndexNameLogic } from './index_name_logic';
-import { IndexViewLogic } from './index_view_logic';
 import { ConnectorDetailOverview } from './overview';
 import { SearchIndexPipelines } from './pipelines/pipelines';
 
@@ -58,7 +58,11 @@ export enum ConnectorDetailTabId {
 }
 
 export const ConnectorDetail: React.FC = () => {
-  const { hasFilteringFeature, index, isInitialLoading } = useValues(IndexViewLogic);
+  const { hasFilteringFeature } = useValues(ConnectorViewLogic);
+  const { fetchConnector } = useActions(ConnectorViewLogic);
+  useEffect(() => {
+    fetchConnector({ connectorId: '6vzqVY0BeXPM5g_EQfu0' });
+  }, []);
 
   const { tabId = ConnectorDetailTabId.OVERVIEW } = useParams<{
     tabId?: string;
@@ -147,14 +151,14 @@ export const ConnectorDetail: React.FC = () => {
     },
     ...(hasFilteringFeature
       ? [
-          {
-            content: <ConnectorSyncRules />,
-            id: ConnectorDetailTabId.SYNC_RULES,
-            name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.syncRulesTabLabel', {
-              defaultMessage: 'Sync rules',
-            }),
-          },
-        ]
+        {
+          content: <ConnectorSyncRules />,
+          id: ConnectorDetailTabId.SYNC_RULES,
+          name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.syncRulesTabLabel', {
+            defaultMessage: 'Sync rules',
+          }),
+        },
+      ]
       : []),
     {
       content: <ConnectorSchedulingComponent />,
@@ -203,7 +207,8 @@ export const ConnectorDetail: React.FC = () => {
 
   const tabs: EuiTabbedContentTab[] = [
     ...ALL_INDICES_TABS,
-    ...(isConnectorIndex(index) ? CONNECTOR_TABS : []),
+    CONNECTOR_TABS,
+    // ...(isConnectorIndex(index) ? CONNECTOR_TABS : []),
     // ...(isCrawlerIndex(index) ? CRAWLER_TABS : []),
     ...(hasDefaultIngestPipeline ? [PIPELINES_TAB] : []),
   ];
@@ -225,10 +230,10 @@ export const ConnectorDetail: React.FC = () => {
     <EnterpriseSearchContentPageTemplate
       pageChrome={[...baseBreadcrumbs, 'TODO CHANGEME']}
       pageViewTelemetry={tabId}
-      isLoading={isInitialLoading}
+      isLoading={false} // TODO
       pageHeader={{
         pageTitle: 'CONNECTOR DETAIL CHANGEME',
-        rightSideItems: getHeaderActions(index, hasAppSearchAccess),
+        rightSideItems: [], // getHeaderActions(index, hasAppSearchAccess),
       }}
     >
       {
