@@ -6,7 +6,8 @@
  */
 
 import { ServerlessProjectType, SERVERLESS_ROLES_ROOT_PATH } from '@kbn/es';
-import { readRolesFromResource, SamlSessionManager } from '@kbn/test';
+import { SamlSessionManager } from '@kbn/test';
+import { readRolesFromResource } from '@kbn/es';
 import { resolve } from 'path';
 import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
