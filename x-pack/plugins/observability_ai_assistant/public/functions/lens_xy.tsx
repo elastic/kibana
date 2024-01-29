@@ -37,11 +37,20 @@ function LensXYChart({
   const embeddableInputAsync = useAsync(async () => {
     const formulaAPI = await lens.stateHelperApi();
     const configBuilder = new LensConfigBuilder(formulaAPI.formula, dataViews);
-    const { title, ...rest } = config;
+    const { title, esql, layers, ...rest } = config;
     return (await configBuilder.build(
       {
         chartType: 'xy',
         title: title || 'chart',
+        dataset: {
+          esql,
+        },
+        layers: layers.map((layer: object) => {
+          return {
+            ...layer,
+            yAxis: [layer],
+          };
+        }),
         ...rest,
       },
       {
@@ -127,8 +136,6 @@ export function registerLensXYFunction({
   pluginsStart: ObservabilityAIAssistantPluginStartDependencies;
 }) {
   registerRenderFunction('lens_xy', ({ arguments: { end, start, ...rest } }) => {
-    // if (!argumentstimeField) return;
-
     return (
       <LensXYChart
         config={rest}

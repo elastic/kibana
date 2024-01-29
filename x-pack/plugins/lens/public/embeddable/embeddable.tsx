@@ -257,6 +257,7 @@ function VisualizationErrorPanel({ errors, canEdit }: { errors: UserMessage[]; c
         data-test-subj="embeddable-lens-failure"
         body={
           <>
+            <pre>{JSON.stringify(errors)}</pre>
             {errors.length ? (
               <>
                 <p>{errors[0].longMessage}</p>

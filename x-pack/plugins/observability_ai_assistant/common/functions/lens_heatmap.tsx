@@ -71,7 +71,7 @@ export const lensHeatmapFunctionDefinition = {
         description: 'The end of the time range, in Elasticsearch datemath',
       },
     },
-    required: ['esql', 'start', 'end', 'value'],
+    required: ['esql', 'start', 'end', 'value', 'xAxis', 'breakdown'],
   } as const,
 };
 

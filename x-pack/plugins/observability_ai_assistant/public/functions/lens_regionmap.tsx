@@ -21,7 +21,7 @@ export function registerLensRegionmapFunction({
   registerRenderFunction: RegisterRenderFunctionDefinition;
   pluginsStart: ObservabilityAIAssistantPluginStartDependencies;
 }) {
-  registerRenderFunction('region_map', ({ arguments: { end, start, esql, ...rest } }) => {
+  registerRenderFunction('lens_regionmap', ({ arguments: { end, start, esql, ...rest } }) => {
     return (
       <LensChart
         chartType="regionmap"

@@ -18,7 +18,6 @@ import {
   buildDatasourceStates,
   buildReferences,
   getAdhocDataviews,
-  isFormulaDataset,
   mapToFormula,
 } from '../utils';
 import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
@@ -31,18 +30,17 @@ function getAccessorName(type: 'breakdown') {
 
 function buildVisualizationState(config: LensTagCloudConfig): TagcloudState {
   const layer = config;
-  const isFormula = isFormulaDataset(config.dataset) || isFormulaDataset(layer.dataset);
 
   return {
     layerId: DEFAULT_LAYER_ID,
-    valueAccessor: !isFormula ? layer.value : ACCESSOR,
+    valueAccessor: ACCESSOR,
     maxFontSize: 72,
     minFontSize: 12,
     orientation: 'single',
     showLabel: true,
     ...(layer.breakdown
       ? {
-          tagAccessor: !isFormula ? (layer.breakdown as string) : getAccessorName('breakdown'),
+          tagAccessor: getAccessorName('breakdown'),
         }
       : {}),
   };
