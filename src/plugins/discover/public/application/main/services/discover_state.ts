@@ -24,6 +24,7 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import { merge } from 'rxjs';
 import { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
+import { fromExternalVisContextJSONString } from '@kbn/unified-histogram-plugin/public';
 import { loadSavedSearch as loadSavedSearchFn } from './load_saved_search';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 import { DiscoverCustomizationContext, FetchStatus } from '../../types';
@@ -54,6 +55,7 @@ import {
   getDiscoverGlobalStateContainer,
   DiscoverGlobalStateContainer,
 } from './discover_global_state_container';
+
 interface DiscoverStateContainerParams {
   /**
    * Browser history
@@ -232,6 +234,10 @@ export function getDiscoverStateContainer({
     history,
     session: services.data.search.session,
   });
+  /**
+   * Internal State Container, state that's not persisted and not part of the URL
+   */
+  const internalStateContainer = getInternalStateContainer();
 
   /**
    * Global State Container, synced with the _g part URL
@@ -244,6 +250,7 @@ export function getDiscoverStateContainer({
   const savedSearchContainer = getSavedSearchContainer({
     services,
     globalStateContainer,
+    internalStateContainer,
   });
 
   /**
@@ -254,11 +261,6 @@ export function getDiscoverStateContainer({
     savedSearch: savedSearchContainer.getState(),
     services,
   });
-
-  /**
-   * Internal State Container, state that's not persisted and not part of the URL
-   */
-  const internalStateContainer = getInternalStateContainer();
 
   const pauseAutoRefreshInterval = async (dataView: DataView) => {
     if (dataView && (!dataView.isTimeBased() || dataView.type === DataViewType.ROLLUP)) {
@@ -465,6 +467,9 @@ export function getDiscoverStateContainer({
       savedSearch: nextSavedSearch,
       timefilter: services.timefilter,
     });
+    internalStateContainer.transitions.setVisContext(
+      fromExternalVisContextJSONString(nextSavedSearch.visContextJSON)
+    );
     const newAppState = getDefaultAppState(nextSavedSearch, services);
 
     // a saved search can't have global (pinned) filters so we can reset global filters state

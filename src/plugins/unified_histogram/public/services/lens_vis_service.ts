@@ -148,11 +148,11 @@ export class LensVisService {
   }) => {
     const suggestionContextSelectedPreviously = this.state$.getValue().currentSuggestionContext;
 
-    // console.log('recalculating chart', queryParams.query, externalVisContext, table);
+    console.log('recalculating chart', queryParams.query, externalVisContext, table);
 
     const allSuggestions = this.getAllSuggestions({ queryParams });
 
-    // console.log('service allSuggestions', allSuggestions);
+    console.log('service allSuggestions', allSuggestions);
 
     const suggestionState = this.getCurrentSuggestionState({
       suggestionContextSelectedPreviously,
@@ -163,7 +163,7 @@ export class LensVisService {
       breakdownField,
     });
 
-    // console.log('service suggestionState', suggestionState);
+    console.log('service suggestionState', suggestionState);
 
     const lensAttributesState = this.getLensAttributesState({
       currentSuggestionContext: suggestionState.currentSuggestionContext,
@@ -175,7 +175,7 @@ export class LensVisService {
       table,
     });
 
-    // console.log('service lensAttributesState', lensAttributesState);
+    console.log('service lensAttributesState', lensAttributesState);
 
     if (suggestionState.shouldUpdateSelectedSuggestionDueToDepsChange) {
       onSuggestionContextChange?.(suggestionState.currentSuggestionContext);
@@ -186,11 +186,11 @@ export class LensVisService {
       (suggestionState.shouldUpdateSelectedSuggestionDueToDepsChange ||
         lensAttributesState.shouldUpdateVisContextDueToIncompatibleSuggestion)
     ) {
-      // console.log(
-      //   'forced to update selected suggestion and vis context',
-      //   suggestionState.currentSuggestionContext.suggestion,
-      //   lensAttributesState.lensAttributesContext
-      // );
+      console.log(
+        'forced to update selected suggestion and vis context',
+        suggestionState.currentSuggestionContext.suggestion,
+        lensAttributesState.lensAttributesContext
+      );
       onVisContextChanged?.(lensAttributesState.lensAttributesContext);
     }
 
@@ -240,7 +240,7 @@ export class LensVisService {
       table,
     });
 
-    // console.log('lensAttributes after editing', lensAttributesState);
+    console.log('lensAttributes after editing', lensAttributesState);
 
     this.state$.next({
       ...this.state$.getValue(),

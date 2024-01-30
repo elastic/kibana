@@ -338,8 +338,12 @@ export const useDiscoverHistogram = ({
 
   const onVisContextChanged = useCallback(
     (newVisContext: ExternalVisContext | undefined) => {
-      // console.log('got new vis context from histogram', newVisContext);
-      stateContainer.appState.update({ visContext: newVisContext });
+      console.log('got new vis context from histogram', newVisContext);
+      stateContainer.internalState.transitions.setVisContext(newVisContext);
+      stateContainer.savedSearchState.update({
+        nextDataView: stateContainer.internalState.getState().dataView,
+        nextState: stateContainer.appState.getState(),
+      });
     },
     [stateContainer]
   );
@@ -474,7 +478,7 @@ function getUnifiedHistogramPropsForTextBased({
   const nextProps = {
     dataView: stateContainer.internalState.getState().dataView!,
     query: stateContainer.appState.getState().query!,
-    externalVisContext: stateContainer.appState.getState().visContext,
+    externalVisContext: stateContainer.internalState.getState().visContext,
     columns,
     table:
       result && documentsValue?.recordRawType === RecordRawType.PLAIN

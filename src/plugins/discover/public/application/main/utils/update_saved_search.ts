@@ -9,6 +9,7 @@ import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { toExternalVisContextJSONString } from '@kbn/unified-histogram-plugin/public';
 import { cloneDeep } from 'lodash';
+import { DiscoverInternalStateContainer } from '../services/discover_internal_state_container';
 import { isTextBasedQuery } from './is_text_based_query';
 import type { DiscoverAppState } from '../services/discover_app_state_container';
 import type { DiscoverServices } from '../../../build_services';
@@ -22,6 +23,8 @@ import type { DiscoverGlobalStateContainer } from '../services/discover_global_s
  * @param dataView
  * @param state
  * @param services
+ * @param globalStateContainer
+ * @param internalStateContainer
  * @param useFilterAndQueryServices - when true data services are being used for updating filter + query
  */
 export function updateSavedSearch({
@@ -29,6 +32,7 @@ export function updateSavedSearch({
   dataView,
   state,
   globalStateContainer,
+  internalStateContainer,
   services,
   useFilterAndQueryServices = false,
 }: {
@@ -36,6 +40,7 @@ export function updateSavedSearch({
   dataView?: DataView;
   state?: DiscoverAppState;
   globalStateContainer: DiscoverGlobalStateContainer;
+  internalStateContainer: DiscoverInternalStateContainer;
   services: DiscoverServices;
   useFilterAndQueryServices?: boolean;
 }) {
@@ -65,7 +70,9 @@ export function updateSavedSearch({
     savedSearch.rowHeight = state.rowHeight;
     savedSearch.rowsPerPage = state.rowsPerPage;
     savedSearch.sampleSize = state.sampleSize;
-    savedSearch.visContextJSON = toExternalVisContextJSONString(state.visContext);
+    savedSearch.visContextJSON = toExternalVisContextJSONString(
+      internalStateContainer.getState().visContext
+    );
 
     if (state.viewMode) {
       savedSearch.viewMode = state.viewMode;
