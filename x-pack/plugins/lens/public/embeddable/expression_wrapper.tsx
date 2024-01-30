@@ -47,7 +47,7 @@ export interface ExpressionWrapperProps {
   lensInspector: LensInspector;
   noPadding?: boolean;
   shouldUseSizeTransitionVeil?: boolean;
-  abortController: AbortController;
+  abortController?: AbortController;
 }
 
 export function ExpressionWrapper({

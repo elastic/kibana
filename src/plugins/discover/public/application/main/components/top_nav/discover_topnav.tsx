@@ -33,8 +33,8 @@ export interface DiscoverTopNavProps {
   textBasedLanguageModeErrors?: Error;
   textBasedLanguageModeWarning?: string;
   onFieldEdited: () => Promise<void>;
-  isLoading: boolean;
-  onCancelClick: () => void;
+  isLoading?: boolean;
+  onCancelClick?: () => void;
 }
 
 export const DiscoverTopNav = ({
