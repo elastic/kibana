@@ -37,7 +37,7 @@ const startSync = (appState: DiscoverAppStateContainer) => {
 
 const customizationContext: DiscoverCustomizationContext = {
   displayMode: 'standalone',
-  showLogExplorerTabs: false,
+  showLogsExplorerTabs: false,
 };
 
 async function getState(

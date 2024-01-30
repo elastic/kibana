@@ -16,12 +16,12 @@ import { LogsSharedClientStartExports } from '@kbn/logs-shared-plugin/public';
 import { DatasetQualityPluginStart } from '@kbn/dataset-quality-plugin/public';
 import { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
 import {
-  ObservabilityLogExplorerLocators,
-  ObservabilityLogExplorerLocationState,
+  ObservabilityLogsExplorerLocators,
+  ObservabilityLogsExplorerLocationState,
 } from '../common/locators';
 
 export interface ObservabilityLogExplorerPluginSetup {
-  locators: ObservabilityLogExplorerLocators;
+  locators: ObservabilityLogsExplorerLocators;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -45,6 +45,6 @@ export interface ObservabilityLogExplorerStartDeps {
   datasetQuality: DatasetQualityPluginStart;
 }
 
-export type ObservabilityLogExplorerHistory = ScopedHistory<ObservabilityLogExplorerLocationState>;
+export type ObservabilityLogExplorerHistory = ScopedHistory<ObservabilityLogsExplorerLocationState>;
 export type ObservabilityLogExplorerAppMountParameters =
-  AppMountParameters<ObservabilityLogExplorerLocationState>;
+  AppMountParameters<ObservabilityLogsExplorerLocationState>;

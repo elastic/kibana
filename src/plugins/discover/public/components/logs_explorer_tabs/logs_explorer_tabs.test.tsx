@@ -10,7 +10,7 @@ import userEvent from '@testing-library/user-event';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { discoverServiceMock } from '../../__mocks__/services';
-import { LogExplorerTabs, LogExplorerTabsProps } from './log_explorer_tabs';
+import { LogsExplorerTabs, LogsExplorerTabsProps } from './logs_explorer_tabs';
 import { DISCOVER_APP_LOCATOR } from '../../../common';
 import { ALL_DATASETS_LOCATOR_ID } from '@kbn/deeplinks-observability';
 
@@ -19,10 +19,10 @@ const createMockLocator = (id: string) => ({
   getRedirectUrl: jest.fn().mockReturnValue(id),
 });
 
-describe('LogExplorerTabs', () => {
-  const renderTabs = (selectedTab: LogExplorerTabsProps['selectedTab'] = 'discover') => {
+describe('LogsExplorerTabs', () => {
+  const renderTabs = (selectedTab: LogsExplorerTabsProps['selectedTab'] = 'discover') => {
     const mockDiscoverLocator = createMockLocator(DISCOVER_APP_LOCATOR);
-    const mockLogExplorerLocator = createMockLocator(ALL_DATASETS_LOCATOR_ID);
+    const mockLogsExplorerLocator = createMockLocator(ALL_DATASETS_LOCATOR_ID);
     const services = {
       ...discoverServiceMock,
       share: {
@@ -35,7 +35,7 @@ describe('LogExplorerTabs', () => {
                 case DISCOVER_APP_LOCATOR:
                   return mockDiscoverLocator;
                 case ALL_DATASETS_LOCATOR_ID:
-                  return mockLogExplorerLocator;
+                  return mockLogsExplorerLocator;
                 default:
                   throw new Error(`Unknown locator id: ${id}`);
               }
@@ -45,42 +45,42 @@ describe('LogExplorerTabs', () => {
       },
     } as unknown as typeof discoverServiceMock;
 
-    render(<LogExplorerTabs services={services} selectedTab={selectedTab} />);
+    render(<LogsExplorerTabs services={services} selectedTab={selectedTab} />);
 
     return {
       mockDiscoverLocator,
-      mockLogExplorerLocator,
+      mockLogsExplorerLocator,
     };
   };
 
   const getDiscoverTab = () => screen.getByText('Discover').closest('a')!;
-  const getLogExplorerTab = () => screen.getByText('Logs Explorer').closest('a')!;
+  const getLogsExplorerTab = () => screen.getByText('Logs Explorer').closest('a')!;
 
   it('should render properly', () => {
-    const { mockDiscoverLocator, mockLogExplorerLocator } = renderTabs();
+    const { mockDiscoverLocator, mockLogsExplorerLocator } = renderTabs();
     expect(getDiscoverTab()).toBeInTheDocument();
     expect(mockDiscoverLocator.getRedirectUrl).toHaveBeenCalledWith({});
     expect(getDiscoverTab()).toHaveAttribute('href', DISCOVER_APP_LOCATOR);
-    expect(getLogExplorerTab()).toBeInTheDocument();
-    expect(mockLogExplorerLocator.getRedirectUrl).toHaveBeenCalledWith({});
-    expect(getLogExplorerTab()).toHaveAttribute('href', ALL_DATASETS_LOCATOR_ID);
+    expect(getLogsExplorerTab()).toBeInTheDocument();
+    expect(mockLogsExplorerLocator.getRedirectUrl).toHaveBeenCalledWith({});
+    expect(getLogsExplorerTab()).toHaveAttribute('href', ALL_DATASETS_LOCATOR_ID);
   });
 
   it('should render Discover as the selected tab', () => {
-    const { mockDiscoverLocator, mockLogExplorerLocator } = renderTabs();
+    const { mockDiscoverLocator, mockLogsExplorerLocator } = renderTabs();
     expect(getDiscoverTab()).toHaveAttribute('aria-selected', 'true');
     userEvent.click(getDiscoverTab());
     expect(mockDiscoverLocator.navigate).not.toHaveBeenCalled();
-    expect(getLogExplorerTab()).toHaveAttribute('aria-selected', 'false');
-    userEvent.click(getLogExplorerTab());
-    expect(mockLogExplorerLocator.navigate).toHaveBeenCalledWith({});
+    expect(getLogsExplorerTab()).toHaveAttribute('aria-selected', 'false');
+    userEvent.click(getLogsExplorerTab());
+    expect(mockLogsExplorerLocator.navigate).toHaveBeenCalledWith({});
   });
 
   it('should render Log Explorer as the selected tab', () => {
-    const { mockDiscoverLocator, mockLogExplorerLocator } = renderTabs('log-explorer');
-    expect(getLogExplorerTab()).toHaveAttribute('aria-selected', 'true');
-    userEvent.click(getLogExplorerTab());
-    expect(mockLogExplorerLocator.navigate).not.toHaveBeenCalled();
+    const { mockDiscoverLocator, mockLogsExplorerLocator } = renderTabs('logs-explorer');
+    expect(getLogsExplorerTab()).toHaveAttribute('aria-selected', 'true');
+    userEvent.click(getLogsExplorerTab());
+    expect(mockLogsExplorerLocator.navigate).not.toHaveBeenCalled();
     expect(getDiscoverTab()).toHaveAttribute('aria-selected', 'false');
     userEvent.click(getDiscoverTab());
     expect(mockDiscoverLocator.navigate).toHaveBeenCalledWith({});
