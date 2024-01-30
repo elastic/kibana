@@ -102,7 +102,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the new user details flyout displayed on the Alerts table.
    *
    **/
-  newUserDetailsFlyout: false,
+  newUserDetailsFlyout: true,
 
   /*
    * Enables the Managed User section inside the new user details flyout.
@@ -115,7 +115,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the new host details flyout displayed on the Alerts table.
    *
    **/
-  newHostDetailsFlyout: false,
+  newHostDetailsFlyout: true,
 
   /**
    * Enable risk engine client and initialisation of datastream, component templates and mappings
@@ -152,7 +152,7 @@ export const allowedExperimentalValues = Object.freeze({
   /*
    * Enables experimental Entity Analytics Asset Criticality feature
    */
-  entityAnalyticsAssetCriticalityEnabled: false,
+  entityAnalyticsAssetCriticalityEnabled: true,
 
   /*
    * Enables experimental Experimental S1 integration data to be available in Analyzer

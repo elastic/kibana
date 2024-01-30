@@ -36,17 +36,6 @@ describe(
   'Entity Flyout',
   {
     tags: ['@ess', '@serverless'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'newUserDetailsFlyout',
-            'newHostDetailsFlyout',
-            'entityAnalyticsAssetCriticalityEnabled',
-          ])}`,
-        ],
-      },
-    },
   },
   () => {
     before(() => {
