@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DataViewLazy addRuntimeField and removeRuntimeField add and remove runtime field as new field 1`] = `
+Object {
+  "script": Object {
+    "source": "emit('hello world');",
+  },
+  "type": "keyword",
+}
+`;
