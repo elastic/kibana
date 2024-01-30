@@ -95,16 +95,41 @@ export function useChat({
 
   const handleError = useCallback(
     (error: Error) => {
-      notifications.toasts.addError(error, {
-        title: i18n.translate('xpack.observabilityAiAssistant.failedToLoadResponse', {
-          defaultMessage: 'Failed to load response from the AI Assistant',
-        }),
-      });
       if (error instanceof AbortError) {
         setChatState(ChatState.Aborted);
       } else {
         setChatState(ChatState.Error);
       }
+
+      const tokenLimitRegex =
+        /This model's maximum context length is (\d+) tokens\. However, your messages resulted in (\d+) tokens/g;
+      const tokenLimitRegexResult = tokenLimitRegex.exec(error.message);
+      if (tokenLimitRegexResult) {
+        const [, tokenLimit, tokenCount] = tokenLimitRegexResult;
+
+        setMessages((msgs) => [
+          ...msgs,
+          {
+            '@timestamp': new Date().toISOString(),
+            message: {
+              content: i18n.translate('xpack.observabilityAiAssistant.tokenLimitError', {
+                defaultMessage:
+                  'The conversation has exceeded the token limit. The maximum token limit is **{tokenLimit}**, but the current conversation has **{tokenCount}** tokens. Please start a new conversation to continue.',
+                values: { tokenLimit, tokenCount },
+              }),
+              role: MessageRole.Assistant,
+            },
+          },
+        ]);
+
+        return;
+      }
+
+      notifications.toasts.addError(error, {
+        title: i18n.translate('xpack.observabilityAiAssistant.failedToLoadResponse', {
+          defaultMessage: 'Failed to load response from the AI Assistant',
+        }),
+      });
     },
     [notifications.toasts]
   );
