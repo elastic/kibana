@@ -33,16 +33,15 @@ type Props = Pick<
 
 export function BurnRateRuleEditor(props: Props) {
   const { setRuleParams, ruleParams, errors } = props;
-  const { isLoading: loadingInitialSlo, data: initialSlo } = useFetchSloDetails({
+  const { data: initialSlo } = useFetchSloDetails({
     sloId: ruleParams?.sloId,
   });
 
   const [selectedSlo, setSelectedSlo] = useState<SLOResponse | undefined>(undefined);
 
   useEffect(() => {
-    const hasInitialSlo = !loadingInitialSlo && initialSlo !== undefined;
-    setSelectedSlo(hasInitialSlo ? initialSlo : undefined);
-  }, [loadingInitialSlo, initialSlo, setRuleParams]);
+    setSelectedSlo(initialSlo);
+  }, [initialSlo]);
 
   const onSelectedSlo = (slo: SLOResponse | undefined) => {
     setSelectedSlo(slo);

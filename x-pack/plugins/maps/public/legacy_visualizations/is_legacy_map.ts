@@ -6,7 +6,7 @@
  */
 
 import { Embeddable } from '@kbn/embeddable-plugin/public';
-import type { VisualizeEmbeddable } from '@kbn/visualizations-plugin/public';
+import type { HasVisualizeConfig, VisualizeEmbeddable } from '@kbn/visualizations-plugin/public';
 
 export function isLegacyMap(embeddable: Embeddable) {
   return (
@@ -14,4 +14,8 @@ export function isLegacyMap(embeddable: Embeddable) {
     typeof (embeddable as VisualizeEmbeddable).getVis === 'function' &&
     ['region_map', 'tile_map'].includes((embeddable as VisualizeEmbeddable).getVis()?.type?.name)
   );
+}
+
+export function isLegacyMapApi(api: HasVisualizeConfig) {
+  return ['region_map', 'tile_map'].includes(api.getVis().type?.name);
 }
