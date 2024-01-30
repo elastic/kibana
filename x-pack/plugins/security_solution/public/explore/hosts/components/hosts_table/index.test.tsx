@@ -13,7 +13,7 @@ import {
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
-  kibanaObservable,
+  kibanaMock,
   createSecuritySolutionStorageMock,
 } from '../../../../common/mock';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
@@ -60,11 +60,11 @@ describe('Hosts Table', () => {
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
 
-  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaMock, storage);
   const mount = useMountAppended();
 
   beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaMock, storage);
   });
 
   describe('rendering', () => {

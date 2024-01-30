@@ -8,7 +8,7 @@
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import {
   createSecuritySolutionStorageMock,
-  kibanaObservable,
+  kibanaMock,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
 } from '../../../common/mock';
@@ -46,7 +46,7 @@ jest.mock('@kbn/ui-actions-plugin/public', () => ({
 }));
 
 const { storage } = createSecuritySolutionStorageMock();
-const mockStore = createStore(mockState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+const mockStore = createStore(mockState, SUB_PLUGINS_REDUCER, kibanaMock, storage);
 
 describe('createFilterInCellActionFactory', () => {
   const createFilterInCellAction = createFilterInCellActionFactory({ store: mockStore, services });

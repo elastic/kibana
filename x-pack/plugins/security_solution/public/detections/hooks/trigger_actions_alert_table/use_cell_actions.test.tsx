@@ -29,7 +29,6 @@ import { makeAction } from '../../../common/components/cell_actions/mocks';
 import { VIEW_SELECTION } from '../../../../common/constants';
 import { createStore } from '../../../common/store';
 import { createStartServicesMock } from '@kbn/timelines-plugin/public/mock';
-import { BehaviorSubject } from 'rxjs';
 
 const useCellActions = getUseCellActionsHook(TableId.test);
 
@@ -86,17 +85,12 @@ const mockedStateWithEventRenderedView: typeof mockGlobalState = {
     },
   },
 };
-export const kibanaObservable = new BehaviorSubject(createStartServicesMock());
+const kibanaMock = createStartServicesMock();
 const { storage } = createSecuritySolutionStorageMock();
 
 const TestProviderWithCustomStateAndActions = withCustomPropsAndCellActions({
   cellActions: compatibleActions,
-  store: createStore(
-    mockedStateWithEventRenderedView,
-    SUB_PLUGINS_REDUCER,
-    kibanaObservable,
-    storage
-  ),
+  store: createStore(mockedStateWithEventRenderedView, SUB_PLUGINS_REDUCER, kibanaMock, storage),
 });
 
 describe('getUseCellActionsHook', () => {

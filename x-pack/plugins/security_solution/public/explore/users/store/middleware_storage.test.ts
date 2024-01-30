@@ -7,7 +7,7 @@
 
 import {
   createSecuritySolutionStorageMock,
-  kibanaObservable,
+  kibanaMock,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
 } from '../../../common/mock';
@@ -23,7 +23,7 @@ const storage = createSecuritySolutionStorageMock().storage;
 describe('UsersAssetTable localStorage middleware', () => {
   beforeEach(() => {
     storage.clear();
-    store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaMock, storage);
   });
 
   it('persist asset table when adding and removing fields', async () => {

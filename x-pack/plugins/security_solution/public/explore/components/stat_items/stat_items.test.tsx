@@ -18,7 +18,7 @@ import { EuiHorizontalRule } from '@elastic/eui';
 import { mockUpdateDateRange } from '../../network/components/kpi_network/mock';
 import {
   createSecuritySolutionStorageMock,
-  kibanaObservable,
+  kibanaMock,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
 } from '../../../common/mock';
@@ -59,7 +59,7 @@ describe('Stat Items Component', () => {
   const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
-  const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaMock, storage);
   const testProps = {
     description: 'HOSTS',
     fields: [{ key: 'hosts', value: null, color: '#6092C0', icon: 'cross' }],

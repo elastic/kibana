@@ -11,7 +11,7 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { renderHook } from '@testing-library/react-hooks';
 import {
   createSecuritySolutionStorageMock,
-  kibanaObservable,
+  kibanaMock,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
   TestProviders,
@@ -70,7 +70,7 @@ jest.mock('./use_discover_in_timeline_actions', () => {
 const { storage } = createSecuritySolutionStorageMock();
 
 const getTestProviderWithCustomState = (state: State = mockState) => {
-  const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaMock, storage);
 
   const MockTestProvider: FC<PropsWithChildren<{}>> = ({ children }) => (
     <TestProviders store={store}> {children}</TestProviders>

@@ -15,7 +15,7 @@ import {
 } from '../../../common/containers/use_full_screen';
 import {
   createSecuritySolutionStorageMock,
-  kibanaObservable,
+  kibanaMock,
   mockGlobalState,
   mockIndexNames,
   SUB_PLUGINS_REDUCER,
@@ -135,7 +135,7 @@ describe('GraphOverlay', () => {
               },
             },
             SUB_PLUGINS_REDUCER,
-            kibanaObservable,
+            kibanaMock,
             storage
           )}
         >
@@ -218,7 +218,7 @@ describe('GraphOverlay', () => {
               },
             },
             SUB_PLUGINS_REDUCER,
-            kibanaObservable,
+            kibanaMock,
             storage
           )}
         >
@@ -262,7 +262,7 @@ describe('GraphOverlay', () => {
               },
             },
             SUB_PLUGINS_REDUCER,
-            kibanaObservable,
+            kibanaMock,
             storage
           )}
         >
@@ -303,7 +303,7 @@ describe('GraphOverlay', () => {
               },
             },
             SUB_PLUGINS_REDUCER,
-            kibanaObservable,
+            kibanaMock,
             storage
           )}
         >

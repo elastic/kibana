@@ -13,7 +13,7 @@ import { useIsElementMounted } from '../../../../detection_engine/rule_managemen
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import {
   createSecuritySolutionStorageMock,
-  kibanaObservable,
+  kibanaMock,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
   TestProviders,
@@ -33,7 +33,7 @@ const mockedUseKibana = mockUseKibana();
 
 const switchTabMock = jest.fn();
 const { storage: storageMock } = createSecuritySolutionStorageMock();
-const mockStore = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storageMock);
+const mockStore = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaMock, storageMock);
 
 const TestComponent = (props: Partial<TimelineTourProps> = {}) => {
   return (

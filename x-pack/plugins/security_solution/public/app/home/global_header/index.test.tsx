@@ -24,7 +24,7 @@ import {
 } from '../../../common/mock';
 import { TimelineId } from '../../../../common/types/timeline';
 import { createStore } from '../../../common/store';
-import { kibanaObservable } from '@kbn/timelines-plugin/public/mock';
+import { kibanaMock } from '@kbn/timelines-plugin/public/mock';
 import { sourcererPaths } from '../../../common/containers/sourcerer';
 
 jest.mock('react-router-dom', () => {
@@ -62,7 +62,7 @@ describe('global header', () => {
     },
   };
   const { storage } = createSecuritySolutionStorageMock();
-  const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaMock, storage);
 
   beforeEach(() => {
     useVariationMock.mockReset();
@@ -159,7 +159,7 @@ describe('global header', () => {
         },
       },
     };
-    const mockStore = createStore(mockstate, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    const mockStore = createStore(mockstate, SUB_PLUGINS_REDUCER, kibanaMock, storage);
 
     (useLocation as jest.Mock).mockReturnValue({ pathname: sourcererPaths[2] });
 

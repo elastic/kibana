@@ -13,7 +13,6 @@ import type { DropResult, ResponderProvided } from '@hello-pangea/dnd';
 import { DragDropContext } from '@hello-pangea/dnd';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import type { Store } from 'redux';
-import { BehaviorSubject } from 'rxjs';
 import { ThemeProvider } from 'styled-components';
 import type { Capabilities } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -48,7 +47,7 @@ interface Props {
   cellActions?: Action[];
 }
 
-export const kibanaObservable = new BehaviorSubject(createStartServicesMock());
+export const kibanaMock = createStartServicesMock();
 
 Object.defineProperty(window, 'localStorage', {
   value: localStorageMock(),
@@ -60,7 +59,7 @@ const { storage } = createSecuritySolutionStorageMock();
 /** A utility for wrapping children in the providers required to run most tests */
 export const TestProvidersComponent: React.FC<Props> = ({
   children,
-  store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage),
+  store = createStore(state, SUB_PLUGINS_REDUCER, kibanaMock, storage),
   onDragEnd = jest.fn(),
   cellActions = [],
 }) => {
@@ -118,7 +117,7 @@ const UpsellingProviderMock = ({ children }: React.PropsWithChildren<{}>) => {
  */
 const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
   children,
-  store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage),
+  store = createStore(state, SUB_PLUGINS_REDUCER, kibanaMock, storage),
   onDragEnd = jest.fn(),
   cellActions = [],
 }) => {

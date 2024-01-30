@@ -15,7 +15,7 @@ import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers'
 import { sourcererActions, sourcererModel } from '../../store/sourcerer';
 import {
   createSecuritySolutionStorageMock,
-  kibanaObservable,
+  kibanaMock,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
   TestProviders,
@@ -121,7 +121,7 @@ describe('Sourcerer integration tests', () => {
       ...sourcererDataView,
       activePatterns: ['myFakebeat-*'],
     });
-    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaMock, storage);
     jest.clearAllMocks();
   });
 

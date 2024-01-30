@@ -18,7 +18,7 @@ import { globalUrlParamActions } from '../../store/global_url_param';
 import { mockHistory } from '../route/mocks';
 import {
   createSecuritySolutionStorageMock,
-  kibanaObservable,
+  kibanaMock,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
   TestProviders,
@@ -65,7 +65,7 @@ describe('global query string', () => {
         globalUrlParam,
       },
       SUB_PLUGINS_REDUCER,
-      kibanaObservable,
+      kibanaMock,
       storage
     );
 
@@ -194,7 +194,7 @@ describe('global query string', () => {
           },
         },
         SUB_PLUGINS_REDUCER,
-        kibanaObservable,
+        kibanaMock,
         storage
       );
       const wrapper = ({ children }: { children: React.ReactElement }) => (

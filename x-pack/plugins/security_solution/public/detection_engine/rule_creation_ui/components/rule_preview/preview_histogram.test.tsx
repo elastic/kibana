@@ -15,7 +15,7 @@ import { render } from '@testing-library/react';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import {
   createSecuritySolutionStorageMock,
-  kibanaObservable,
+  kibanaMock,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
   TestProviders,
@@ -102,7 +102,7 @@ describe('PreviewHistogram', () => {
       },
     },
     SUB_PLUGINS_REDUCER,
-    kibanaObservable,
+    kibanaMock,
     storage
   );
 

@@ -13,7 +13,7 @@ import useResizeObserver from 'use-resize-observer/polyfilled';
 import '../../../common/mock/match_media';
 import {
   createSecuritySolutionStorageMock,
-  kibanaObservable,
+  kibanaMock,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
   TestProviders,
@@ -167,7 +167,7 @@ describe('GroupedAlertsTable', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
-      kibanaObservable,
+      kibanaMock,
       storage
     );
     (useSourcererDataView as jest.Mock).mockReturnValue({
@@ -186,7 +186,7 @@ describe('GroupedAlertsTable', () => {
   });
 
   it('calls the proper initial dispatch actions for groups', () => {
-    store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaMock, storage);
     const { getByTestId, queryByTestId } = render(
       <TestProviders store={store}>
         <GroupedAlertsTable {...testProps} />
@@ -271,7 +271,7 @@ describe('GroupedAlertsTable', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
-      kibanaObservable,
+      kibanaMock,
       storage
     );
 
@@ -303,7 +303,7 @@ describe('GroupedAlertsTable', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
-      kibanaObservable,
+      kibanaMock,
       storage
     );
 
@@ -366,7 +366,7 @@ describe('GroupedAlertsTable', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
-      kibanaObservable,
+      kibanaMock,
       storage
     );
 
@@ -416,7 +416,7 @@ describe('GroupedAlertsTable', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
-      kibanaObservable,
+      kibanaMock,
       storage
     );
 
@@ -479,7 +479,7 @@ describe('GroupedAlertsTable', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
-      kibanaObservable,
+      kibanaMock,
       storage
     );
 
@@ -532,7 +532,7 @@ describe('GroupedAlertsTable', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
-      kibanaObservable,
+      kibanaMock,
       storage
     );
 

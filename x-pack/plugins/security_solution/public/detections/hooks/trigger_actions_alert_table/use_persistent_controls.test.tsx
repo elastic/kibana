@@ -12,7 +12,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { render, fireEvent } from '@testing-library/react';
 import {
   createSecuritySolutionStorageMock,
-  kibanaObservable,
+  kibanaMock,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
   TestProviders,
@@ -87,7 +87,7 @@ describe('usePersistentControls', () => {
         groups,
       },
       SUB_PLUGINS_REDUCER,
-      kibanaObservable,
+      kibanaMock,
       storage
     );
     (useSourcererDataView as jest.Mock).mockReturnValue({

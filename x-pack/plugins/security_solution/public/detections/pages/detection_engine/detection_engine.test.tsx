@@ -11,7 +11,7 @@ import { useParams } from 'react-router-dom';
 import '../../../common/mock/match_media';
 import {
   createSecuritySolutionStorageMock,
-  kibanaObservable,
+  kibanaMock,
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
@@ -175,7 +175,7 @@ const state: State = {
 const { storage } = createSecuritySolutionStorageMock();
 
 const getStoreWithCustomState = (newState: State = state) => {
-  return createStore(newState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  return createStore(newState, SUB_PLUGINS_REDUCER, kibanaMock, storage);
 };
 
 const store = getStoreWithCustomState();

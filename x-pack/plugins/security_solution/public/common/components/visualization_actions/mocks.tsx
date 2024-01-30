@@ -11,7 +11,7 @@ import {
   TestProviders,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
-  kibanaObservable,
+  kibanaMock,
   createSecuritySolutionStorageMock,
 } from '../../mock';
 import type { State } from '../../store';
@@ -58,7 +58,7 @@ export const mockCreateStoreWithQueryFilters = () => {
       filters: filterFromSearchBar,
     },
   };
-  return createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  return createStore(myState, SUB_PLUGINS_REDUCER, kibanaMock, storage);
 };
 
 export const wrapper = ({ children }: { children: React.ReactElement }) => (

@@ -10,7 +10,7 @@ import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook } from '@testing-library/react-hooks';
 import {
   createSecuritySolutionStorageMock,
-  kibanaObservable,
+  kibanaMock,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
   TestProviders,
@@ -27,7 +27,7 @@ import type { ISessionService } from '@kbn/data-plugin/public';
 const state: State = mockGlobalState;
 
 const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaMock, storage);
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <TestProviders store={store}>{children}</TestProviders>

@@ -9,7 +9,7 @@ import type { RenderResult } from '@testing-library/react';
 import React from 'react';
 import {
   createSecuritySolutionStorageMock,
-  kibanaObservable,
+  kibanaMock,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
   TestProviders,
@@ -78,7 +78,7 @@ describe('LensEmbeddable', () => {
   };
 
   const { storage } = createSecuritySolutionStorageMock();
-  const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaMock, storage);
   const mockEmbeddableComponent = jest
     .fn()
     .mockReturnValue(<div data-test-subj="embeddableComponent" />);

@@ -15,7 +15,7 @@ import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { TimelineId } from '../../../../common/types/timeline';
 import {
   createSecuritySolutionStorageMock,
-  kibanaObservable,
+  kibanaMock,
   mockGlobalState,
   mockIndexNames,
   mockIndexPattern,
@@ -172,7 +172,7 @@ describe('StatefulTimeline', () => {
             },
           },
           SUB_PLUGINS_REDUCER,
-          kibanaObservable,
+          kibanaMock,
           storage
         )}
       >
@@ -209,7 +209,7 @@ describe('StatefulTimeline', () => {
             },
           },
           SUB_PLUGINS_REDUCER,
-          kibanaObservable,
+          kibanaMock,
           storage
         )}
       >

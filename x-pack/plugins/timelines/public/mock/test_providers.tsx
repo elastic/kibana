@@ -11,7 +11,6 @@ import { I18nProvider } from '@kbn/i18n-react';
 import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { Store } from 'redux';
-import { BehaviorSubject } from 'rxjs';
 import { ThemeProvider } from 'styled-components';
 
 import { configureStore } from '@reduxjs/toolkit';
@@ -23,7 +22,8 @@ interface Props {
   store?: Store;
 }
 
-export const kibanaObservable = new BehaviorSubject(createStartServicesMock());
+// TODO: can this be imported from somewhere else?
+export const kibanaMock = createStartServicesMock();
 
 interface State {
   timelineById: Record<string, unknown>;

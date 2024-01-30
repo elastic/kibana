@@ -8,7 +8,7 @@
 import React from 'react';
 import {
   createSecuritySolutionStorageMock,
-  kibanaObservable,
+  kibanaMock,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
   TestProviders,
@@ -77,7 +77,7 @@ describe('useSignalHelpers', () => {
       },
     };
     const { storage } = createSecuritySolutionStorageMock();
-    const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaMock, storage);
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useSignalHelpers(), {
         wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,
@@ -107,7 +107,7 @@ describe('useSignalHelpers', () => {
       },
     };
     const { storage } = createSecuritySolutionStorageMock();
-    const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaMock, storage);
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useSignalHelpers(), {
         wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,
@@ -139,7 +139,7 @@ describe('useSignalHelpers', () => {
       },
     };
     const { storage } = createSecuritySolutionStorageMock();
-    const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaMock, storage);
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useSignalHelpers(), {
         wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,
@@ -174,7 +174,7 @@ describe('useSignalHelpers', () => {
       },
     };
     const { storage } = createSecuritySolutionStorageMock();
-    const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaMock, storage);
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useSignalHelpers(), {
         wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,

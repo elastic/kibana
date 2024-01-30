@@ -10,7 +10,7 @@ import React from 'react';
 
 import {
   createSecuritySolutionStorageMock,
-  kibanaObservable,
+  kibanaMock,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
   TestProviders,
@@ -32,7 +32,7 @@ describe('useChartSettingsPopoverConfiguration', () => {
 
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
-  const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaMock, storage);
   const wrapper = ({ children }: { children: React.ReactNode }) => (
     <TestProviders store={store}>{children}</TestProviders>
   );
