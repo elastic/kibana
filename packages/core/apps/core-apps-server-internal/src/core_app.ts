@@ -268,7 +268,7 @@ export class CoreAppsService {
   // assets are exposed at the root of the package and in the package's node_modules dir
   private registerStaticDirs(core: InternalCoreSetup | InternalCorePreboot) {
     core.http.registerStaticDir(
-      `/${this.env.packageInfo.buildSha.slice(0, 12)}/ui/{path*}`,
+      `/${this.env.packageInfo.buildShaShort}/ui/{path*}`,
       fromRoot('node_modules/@kbn/core-apps-server-internal/assets')
     );
   }
