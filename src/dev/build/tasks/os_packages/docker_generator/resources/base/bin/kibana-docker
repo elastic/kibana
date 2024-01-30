@@ -337,6 +337,7 @@ kibana_vars=(
     xpack.reporting.csv.maxSizeBytes
     xpack.reporting.csv.scroll.duration
     xpack.reporting.csv.scroll.size
+    xpack.reporting.csv.scroll.strategy
     xpack.reporting.csv.useByteOrderMarkEncoding
     xpack.reporting.enabled
     xpack.reporting.encryptionKey

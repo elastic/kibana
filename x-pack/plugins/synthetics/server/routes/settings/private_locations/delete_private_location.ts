@@ -28,7 +28,6 @@ export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<undefined
       }),
     },
   },
-  writeAccess: true,
   handler: async ({ response, savedObjectsClient, syntheticsMonitorClient, request, server }) => {
     const { locationId } = request.params as { locationId: string };
 
