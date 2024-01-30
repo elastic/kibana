@@ -49,7 +49,7 @@ export const RESOURCE_FIELD = 'resource';
 // Sizing
 export const DATA_GRID_COLUMN_WIDTH_SMALL = 240;
 export const DATA_GRID_COLUMN_WIDTH_MEDIUM = 320;
-export const MARKER_COLUMN_WIDTH = 78;
+export const ACTIONS_COLUMN_WIDTH = 80;
 // UI preferences
 export const DEFAULT_COLUMNS = [
   {

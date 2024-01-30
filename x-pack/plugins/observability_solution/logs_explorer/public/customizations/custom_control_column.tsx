@@ -20,7 +20,7 @@ import {
 import * as constants from '../../common/constants';
 import { getStacktraceFields } from '../utils/get_stack_trace';
 import { LogDocument } from '../../common/document';
-import { MarkerColumnTooltip } from '../components/virtual_columns/column_tooltips/marker_column_tooltip';
+import { ActionsColumnTooltip } from '../components/virtual_columns/column_tooltips/actions_column_tooltip';
 
 const MalformedDocs = ({ row, rowIndex }: { row: DataTableRecord; rowIndex: number }) => {
   const isMalformedDocumentExists = !!row.raw[constants.MALFORMED_DOCS_FIELD];
@@ -96,10 +96,10 @@ export const createCustomControlColumnsConfiguration = ({
   if (openDetails && rows) {
     const ExpandButton =
       openDetails.rowCellRender as ComponentClass<EuiDataGridCellValueElementProps>;
-    const markerColumn = {
-      id: 'markerColumn',
-      width: constants.MARKER_COLUMN_WIDTH,
-      headerCellRender: MarkerColumnTooltip,
+    const actionsColumn = {
+      id: 'actionsColumn',
+      width: constants.ACTIONS_COLUMN_WIDTH,
+      headerCellRender: ActionsColumnTooltip,
       rowCellRender: ({ rowIndex, setCellProps, ...rest }: EuiDataGridCellValueElementProps) => (
         <span>
           <ExpandButton rowIndex={rowIndex} setCellProps={setCellProps} {...rest} />
@@ -111,12 +111,12 @@ export const createCustomControlColumnsConfiguration = ({
 
     return {
       leadingControlColumns: customLeadingColumnWithoutOpenDetails,
-      trailingControlColumns: [markerColumn],
+      trailingControlColumns: [actionsColumn],
     };
   }
 
   return {
-    leadingControlColumns: customLeadingColumnWithoutOpenDetails,
+    leadingControlColumns,
     trailingControlColumns,
   };
 };

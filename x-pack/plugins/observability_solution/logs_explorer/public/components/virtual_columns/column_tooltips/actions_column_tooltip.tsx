@@ -10,12 +10,12 @@ import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import {
-  markerHeaderTooltipExpandAction,
-  markerHeaderTooltipMalformedAction,
-  markerHeaderTooltipParagraph,
-  markerHeaderTooltipStacktraceAction,
-  markerLabel,
-  markerLabelLowerCase,
+  actionsHeaderTooltipExpandAction,
+  actionsHeaderTooltipMalformedAction,
+  actionsHeaderTooltipParagraph,
+  actionsHeaderTooltipStacktraceAction,
+  actionsLabel,
+  actionsLabelLowerCase,
 } from '../../common/translations';
 import { HoverPopover } from '../../common/hover_popover';
 import { TooltipButtonComponent } from './tooltip_button';
@@ -26,15 +26,15 @@ const spacingCSS = css`
   margin-bottom: ${euiThemeVars.euiSizeS};
 `;
 
-export const MarkerColumnTooltip = () => {
+export const ActionsColumnTooltip = () => {
   return (
     <HoverPopover
-      button={<TooltipButtonComponent displayText={markerLabelLowerCase} />}
-      title={markerLabel}
+      button={<TooltipButtonComponent displayText={actionsLabelLowerCase} />}
+      title={actionsLabel}
     >
       <div style={{ width: '230px' }}>
         <EuiText size="s" css={spacingCSS}>
-          <p>{markerHeaderTooltipParagraph}</p>
+          <p>{actionsHeaderTooltipParagraph}</p>
         </EuiText>
         <EuiFlexGroup
           responsive={false}
@@ -48,7 +48,7 @@ export const MarkerColumnTooltip = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">
-              <p>{markerHeaderTooltipExpandAction}</p>
+              <p>{actionsHeaderTooltipExpandAction}</p>
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -64,7 +64,7 @@ export const MarkerColumnTooltip = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">
-              <p>{markerHeaderTooltipMalformedAction}</p>
+              <p>{actionsHeaderTooltipMalformedAction}</p>
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -80,7 +80,7 @@ export const MarkerColumnTooltip = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">
-              <p>{markerHeaderTooltipStacktraceAction}</p>
+              <p>{actionsHeaderTooltipStacktraceAction}</p>
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>

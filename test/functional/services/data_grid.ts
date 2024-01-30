@@ -18,6 +18,7 @@ export interface TabbedGridData {
 interface SelectOptions {
   isAnchorRow?: boolean;
   rowIndex?: number;
+  columnIndex?: number;
   renderMoreRows?: boolean;
 }
 
@@ -242,13 +243,14 @@ export class DataGridService extends FtrService {
   }
 
   public async clickRowToggle(
-    options: SelectOptions = { isAnchorRow: false, rowIndex: 0 }
+    options: SelectOptions = { isAnchorRow: false, rowIndex: 0, columnIndex: 0 }
   ): Promise<void> {
-    const row = await this.getRow(options);
+    const rowColumns = await this.getRow(options);
     const testSubj = options.isAnchorRow
       ? '~docTableExpandToggleColumnAnchor'
       : '~docTableExpandToggleColumn';
-    const toggle = await row[0].findByTestSubject(testSubj);
+
+    const toggle = await rowColumns[options.columnIndex].findByTestSubject(testSubj);
 
     await toggle.scrollIntoViewIfNecessary();
     await toggle.click();
