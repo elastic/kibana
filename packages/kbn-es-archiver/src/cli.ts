@@ -23,6 +23,7 @@ import { createFlagError } from '@kbn/dev-cli-errors';
 import { readConfigFile, KbnClient, EsVersion } from '@kbn/test';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
 
+import { cliPerfOptionOverride } from './actions/cli_perf_option_override';
 import { EsArchiver } from './es_archiver';
 
 const resolveConfigPath = (v: string) => Path.resolve(process.cwd(), v);
@@ -241,36 +242,7 @@ export function runCli() {
           throw createFlagError('--docs-only does not take a value');
         }
 
-        const batchSize = flags['batch-size'];
-        if (typeof batchSize !== 'string' || batchSize === '')
-          throw createFlagError(
-            '--batch-size should be a string that can be converted to an number'
-          );
-        const highWaterMark = parseInt(batchSize, 10);
-
-        const concurrency = flags.concurrency;
-        if (typeof concurrency !== 'string' || concurrency === '')
-          throw createFlagError(
-            '--concurrency should be a string that can be converted to an number'
-          );
-        const bulkRequestsCount = parseInt(concurrency, 10);
-
-        [highWaterMark, bulkRequestsCount].forEach((x): void => {
-          if (Number.isNaN(x))
-            throw createFlagError(
-              `invalid argument, please use a number for --batch-size & --concurrency.
-Provided: --batch-size: [ ${batchSize} ], --concurrency: [ ${concurrency} ]`
-            );
-        });
-
-        await esArchiver.load(path, {
-          useCreate,
-          docsOnly,
-          performance: {
-            batchSize: highWaterMark,
-            concurrency: bulkRequestsCount,
-          },
-        });
+        await cliPerfOptionOverride(useCreate, docsOnly, path, flags, esArchiver);
       },
     })
     .command({
