@@ -152,8 +152,9 @@ export const Benchmarks = () => {
 
   const queryResult = useCspBenchmarkIntegrationsV2();
   const benchmarkResult =
-    queryResult.data?.items.filter((obj) => getBenchmarkCisName(obj.id)?.includes(query.name)) ||
-    [];
+    queryResult.data?.items.filter((obj) =>
+      getBenchmarkCisName(obj.id)?.toLowerCase().includes(query.name.toLowerCase())
+    ) || [];
   const totalItemCount = queryResult.data?.items.length || 0;
 
   // Check if we have any CSP Integration or not
