@@ -42,7 +42,7 @@ export const alertsFieldMap8130 = {
     type: 'keyword',
     array: false,
     required: false,
-  }
+  },
 } as const;
 
 export type AlertsFieldMap8130 = typeof alertsFieldMap8130;
