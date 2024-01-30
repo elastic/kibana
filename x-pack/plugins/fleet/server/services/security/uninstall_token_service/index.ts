@@ -219,14 +219,31 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
       ({ _id }) => `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.id: "${_id}"`
     );
 
-    const tokenObjectChunks: Array<Array<SavedObjectsFindResult<UninstallTokenSOAttributes>>> =
-      await asyncMap(
+    let tokenObjectChunks: Array<Array<SavedObjectsFindResult<UninstallTokenSOAttributes>>> = [];
+
+    try {
+      tokenObjectChunks = await asyncMap(
         chunk(filterEntries, this.getUninstallTokenVerificationBatchSize()),
         async (entries) => {
           const filter = entries.join(' or ');
           return this.getDecryptedTokenObjects({ filter });
         }
       );
+    } catch (error) {
+      if (isResponseError(error) && error.message.includes('too_many_nested_clauses')) {
+        // `too_many_nested_clauses` is considered non-fatal
+        const errorMessage =
+          'Failed to validate uninstall tokens: `too_many_nested_clauses` error received. ' +
+          'Setting/decreasing the value of `xpack.fleet.setup.uninstallTokenVerificationBatchSize` in your kibana.yml should help. ' +
+          `Current value is ${this.getUninstallTokenVerificationBatchSize()}.`;
+
+        appContextService.getLogger().warn(`${errorMessage}: '${error}'`);
+
+        throw new UninstallTokenError(errorMessage);
+      } else {
+        throw error;
+      }
+    }
 
     return tokenObjectChunks.flat();
   }
@@ -533,15 +550,15 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
   public async checkTokenValidityForPolicy(
     policyId: string
   ): Promise<UninstallTokenInvalidError | null> {
-    return await this.checkTokenValidity([policyId]);
+    return await this.checkTokenValidityForPolicies([policyId]);
   }
 
   public async checkTokenValidityForAllPolicies(): Promise<UninstallTokenInvalidError | null> {
     const policyIds = await this.getAllPolicyIds();
-    return await this.checkTokenValidity(policyIds);
+    return await this.checkTokenValidityForPolicies(policyIds);
   }
 
-  private async checkTokenValidity(
+  private async checkTokenValidityForPolicies(
     policyIds: string[]
   ): Promise<UninstallTokenInvalidError | null> {
     try {
@@ -571,16 +588,6 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
       if (error instanceof UninstallTokenError) {
         // known errors are considered non-fatal
         return { error };
-      } else if (isResponseError(error) && error.message.includes('too_many_nested_clauses')) {
-        // `too_many_nested_clauses` is considered non-fatal
-        const errorMessage =
-          'Failed to validate uninstall tokens: `too_many_nested_clauses` error received. ' +
-          'Setting/decreasing the value of `xpack.fleet.setup.uninstallTokenVerificationBatchSize` in your kibana.yml should help. ' +
-          `Current value is ${this.getUninstallTokenVerificationBatchSize()}.`;
-
-        appContextService.getLogger().warn(`${errorMessage}: '${error}'`);
-
-        return { error: new UninstallTokenError(errorMessage) };
       } else {
         const errorMessage = 'Unknown error happened while checking Uninstall Tokens validity';
         appContextService.getLogger().error(`${errorMessage}: '${error}'`);

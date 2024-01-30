@@ -732,7 +732,7 @@ export class FleetPlugin
     uninstallTokenService
       ?.checkTokenValidityForAllPolicies()
       .catch((error) => {
-        logger.warn('Error happened during uninstall token validation.', {
+        logger.error('Error happened during uninstall token validation.', {
           error: { message: error },
         });
       })
