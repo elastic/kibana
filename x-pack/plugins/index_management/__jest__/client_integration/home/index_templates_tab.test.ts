@@ -161,19 +161,18 @@ describe('Index Templates tab', () => {
       // Test composable table content
       tableCellsValues.forEach((row, i) => {
         const indexTemplate = templates[i];
-        const { name, indexPatterns, ilmPolicy, composedOf, template } = indexTemplate;
+        const { name, indexPatterns, composedOf, template } = indexTemplate;
 
         const hasContent = !!template?.settings || !!template?.mappings || !!template?.aliases;
-        const ilmPolicyName = ilmPolicy && ilmPolicy.name ? ilmPolicy.name : '';
-        const composedOfString = composedOf ? composedOf.join(',') : '';
+        const composedOfCount = `${composedOf ? composedOf.length : 0}`;
 
         try {
           expect(removeWhiteSpaceOnArrayValues(row)).toEqual([
             '', // Checkbox to select row
             name,
             indexPatterns.join(', '),
-            ilmPolicyName,
-            composedOfString,
+            composedOfCount,
+            '', // data stream column
             hasContent ? 'M S A' : 'None', // M S A -> Mappings Settings Aliases badges
             'EditDelete', // Column of actions
           ]);

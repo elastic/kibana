@@ -67,7 +67,7 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     component.update();
   };
 
-  const clickTemplateAction = (
+  const clickTemplateAction = async (
     templateName: TemplateDeserialized['name'],
     action: 'edit' | 'clone' | 'delete'
   ) => {
@@ -76,7 +76,7 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
 
     clickActionMenu(templateName);
 
-    act(() => {
+    await act(async () => {
       component.find('button.euiContextMenuItem').at(actions.indexOf(action)).simulate('click');
     });
     component.update();

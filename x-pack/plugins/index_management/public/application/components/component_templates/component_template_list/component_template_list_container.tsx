@@ -36,7 +36,7 @@ export const ComponentTemplateListContainer: React.FunctionComponent<
   });
 
   const urlParams = qs.parse(location.search);
-  const filter = urlParams.filter;
+  const filter = urlParams.filter ?? '';
 
   return (
     <ComponentTemplatesAuthProvider>
