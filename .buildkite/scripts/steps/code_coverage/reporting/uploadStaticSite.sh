@@ -4,7 +4,7 @@ set -euo pipefail
 
 xs=("$@")
 
-# TODO: Safe to remove this after 2024-03-01 (and usages below)
+# TODO: Safe to remove this after 2024-03-01 (https://github.com/elastic/kibana/issues/175904) - also clean up usages
 uploadPrefix_old="gs://elastic-bekitzur-kibana-coverage-live/"
 uploadPrefixWithTimeStamp_old="${uploadPrefix}${TIME_STAMP}/"
 
