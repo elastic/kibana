@@ -5,7 +5,7 @@ xpack.apm.enabled: false
 
 xpack.cloudSecurityPosture.enabled: false
 xpack.infra.enabled: false
-xpack.observabilityLogExplorer.enabled: false
+xpack.observabilityLogsExplorer.enabled: false
 xpack.observability.enabled: false
 xpack.securitySolution.enabled: false
 xpack.serverless.observability.enabled: false
@@ -41,3 +41,6 @@ xpack.ml.ad.enabled: false
 xpack.ml.dfa.enabled: false
 xpack.ml.nlp.enabled: true
 xpack.ml.compatibleModuleType: 'search'
+
+# Enable the embedded dev console for index management pages
+xpack.index_management.enableEmbeddedConsole: true
