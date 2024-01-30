@@ -8,6 +8,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { sum } from 'lodash/fp';
 
 import type {
   HostRiskScore,
@@ -18,7 +19,7 @@ import type {
 interface TableItem {
   category: string;
   count: number;
-  score: string;
+  score: number;
 }
 
 interface EntityData {
@@ -38,6 +39,12 @@ export const buildColumns: () => Array<EuiBasicTableColumn<TableItem>> = () => [
     truncateText: false,
     mobileOptions: { show: true },
     sortable: true,
+    footer: (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.entityDetails.categoryColumnFooterLabel"
+        defaultMessage="Result"
+      />
+    ),
   },
   {
     field: 'score',
@@ -51,6 +58,9 @@ export const buildColumns: () => Array<EuiBasicTableColumn<TableItem>> = () => [
     mobileOptions: { show: true },
     sortable: true,
     dataType: 'number',
+    align: 'right',
+    render: (score: number) => displayNumber(score),
+    footer: (props) => displayNumber(sum(props.items.map((i) => i.score))),
   },
   {
     field: 'count',
@@ -64,6 +74,8 @@ export const buildColumns: () => Array<EuiBasicTableColumn<TableItem>> = () => [
     mobileOptions: { show: true },
     sortable: true,
     dataType: 'number',
+    align: 'right',
+    footer: (props) => sum(props.items.map((i) => i.count)),
   },
 ];
 
@@ -73,14 +85,14 @@ export const getItems: (entityData: EntityData | undefined) => TableItem[] = (en
       category: i18n.translate('xpack.securitySolution.flyout.entityDetails.alertsGroupLabel', {
         defaultMessage: 'Alerts',
       }),
-      score: displayNumber(entityData?.risk.category_1_score ?? 0),
+      score: entityData?.risk.category_1_score ?? 0,
       count: entityData?.risk.category_1_count ?? 0,
     },
     {
       category: i18n.translate('xpack.securitySolution.flyout.entityDetails.contextGroupLabel', {
         defaultMessage: 'Contexts',
       }),
-      score: displayNumber(entityData?.risk.category_2_score ?? 0),
+      score: entityData?.risk.category_2_score ?? 0,
       count: entityData?.risk.category_2_count ?? 0,
     },
   ];
