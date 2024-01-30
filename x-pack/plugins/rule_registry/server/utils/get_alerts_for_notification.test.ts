@@ -14,6 +14,10 @@ import { cloneDeep } from 'lodash';
 import { getAlertsForNotification } from './get_alerts_for_notification';
 
 describe('getAlertsForNotification', () => {
+  const newEventParams = {
+    maintenanceWindowIds: ['maintenance-window-id'],
+    timestamp: 'timestamp',
+  };
   const alert1 = {
     event: {
       'kibana.alert.status': ALERT_STATUS_RECOVERED,
@@ -54,7 +58,13 @@ describe('getAlertsForNotification', () => {
     const trackedEvents = cloneDeep([alert4]);
     const newEvents = cloneDeep([alert5]);
     expect(
-      getAlertsForNotification('timestamp', DEFAULT_FLAPPING_SETTINGS, 0, trackedEvents, newEvents)
+      getAlertsForNotification(
+        DEFAULT_FLAPPING_SETTINGS,
+        0,
+        trackedEvents,
+        newEvents,
+        newEventParams
+      )
     ).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -82,8 +92,9 @@ describe('getAlertsForNotification', () => {
 
   test('should not remove alerts if the num of recovered alerts is not at the limit', () => {
     const trackedEvents = cloneDeep([alert1, alert2, alert3]);
-    expect(getAlertsForNotification('timestamp', DEFAULT_FLAPPING_SETTINGS, 0, trackedEvents, []))
-      .toMatchInlineSnapshot(`
+    expect(
+      getAlertsForNotification(DEFAULT_FLAPPING_SETTINGS, 0, trackedEvents, [], newEventParams)
+    ).toMatchInlineSnapshot(`
       Array [
         Object {
           "activeCount": 0,
@@ -115,8 +126,9 @@ describe('getAlertsForNotification', () => {
 
   test('should reset counts and not modify alerts if flapping is disabled', () => {
     const trackedEvents = cloneDeep([alert1, alert2, alert3]);
-    expect(getAlertsForNotification('timestamp', DISABLE_FLAPPING_SETTINGS, 0, trackedEvents, []))
-      .toMatchInlineSnapshot(`
+    expect(
+      getAlertsForNotification(DISABLE_FLAPPING_SETTINGS, 0, trackedEvents, [], newEventParams)
+    ).toMatchInlineSnapshot(`
       Array [
         Object {
           "activeCount": 0,
@@ -150,7 +162,13 @@ describe('getAlertsForNotification', () => {
     const trackedEvents = cloneDeep([alert4]);
     const newEvents = cloneDeep([alert5]);
     expect(
-      getAlertsForNotification('timestamp', DEFAULT_FLAPPING_SETTINGS, 0, trackedEvents, newEvents)
+      getAlertsForNotification(
+        DEFAULT_FLAPPING_SETTINGS,
+        0,
+        trackedEvents,
+        newEvents,
+        newEventParams
+      )
     ).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -178,8 +196,9 @@ describe('getAlertsForNotification', () => {
 
   test('should reset activeCount for all recovered alerts', () => {
     const trackedEvents = cloneDeep([alert1, alert2]);
-    expect(getAlertsForNotification('timestamp', DEFAULT_FLAPPING_SETTINGS, 0, trackedEvents, []))
-      .toMatchInlineSnapshot(`
+    expect(
+      getAlertsForNotification(DEFAULT_FLAPPING_SETTINGS, 0, trackedEvents, [], newEventParams)
+    ).toMatchInlineSnapshot(`
       Array [
         Object {
           "activeCount": 0,
@@ -204,30 +223,31 @@ describe('getAlertsForNotification', () => {
     const trackedEvents = cloneDeep([alert4]);
     const newEvents = cloneDeep([alert5]);
     expect(
-      getAlertsForNotification('timestamp', DEFAULT_FLAPPING_SETTINGS, 5, trackedEvents, newEvents)
+      getAlertsForNotification(
+        DEFAULT_FLAPPING_SETTINGS,
+        5,
+        trackedEvents,
+        newEvents,
+        newEventParams
+      )
     ).toMatchInlineSnapshot(`Array []`);
   });
 
   test('should update active alert to look like a new alert if the activeCount is equal to the rule alertDelay', () => {
     const trackedEvents = cloneDeep([alert5]);
     expect(
-      getAlertsForNotification(
-        'timestamp',
-        DEFAULT_FLAPPING_SETTINGS,
-        2,
-        trackedEvents,
-        [],
-        ['maintenance-window-id']
-      )
+      getAlertsForNotification(DEFAULT_FLAPPING_SETTINGS, 2, trackedEvents, [], newEventParams)
     ).toMatchInlineSnapshot(`
       Array [
         Object {
           "activeCount": 2,
           "event": Object {
             "event.action": "open",
+            "kibana.alert.duration.us": 0,
             "kibana.alert.maintenance_window_ids": Array [
               "maintenance-window-id",
             ],
+            "kibana.alert.start": "timestamp",
             "kibana.alert.status": "active",
             "kibana.alert.time_range": Object {
               "gte": "timestamp",

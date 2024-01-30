@@ -351,12 +351,11 @@ export const createLifecycleExecutor =
     const newEventsToIndex = makeEventsDataMapFor(newAlertIds);
     const trackedRecoveredEventsToIndex = makeEventsDataMapFor(trackedAlertRecoveredIds);
     const allEventsToIndex = getAlertsForNotification(
-      commonRuleFields[TIMESTAMP],
       flappingSettings,
       rule.alertDelay?.active ?? 0,
       trackedEventsToIndex,
       newEventsToIndex,
-      maintenanceWindowIds
+      { maintenanceWindowIds, timestamp: commonRuleFields[TIMESTAMP] }
     );
 
     // Only write alerts if:
@@ -398,7 +397,7 @@ export const createLifecycleExecutor =
     }
 
     const nextTrackedAlerts = Object.fromEntries(
-      [...allEventsToIndex, ...trackedEventsToIndex]
+      [...newEventsToIndex, ...trackedEventsToIndex]
         .filter(({ event }) => event[ALERT_STATUS] !== ALERT_STATUS_RECOVERED)
         .map(
           ({

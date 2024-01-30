@@ -37,20 +37,7 @@ export default function createAlertDelayTests({ getService }: FtrProviderContext
 
     afterEach(() => objectRemover.removeAll());
 
-    it('should clear the activeCount if the alertDelay is not configured for the rule', async () => {
-      const start = new Date().toISOString();
-      const pattern = {
-        instance: [true],
-      };
-
-      const ruleId = await createRule(actionId, pattern);
-      objectRemover.add(space.id, ruleId, 'rule', 'alerting');
-
-      const state = await getAlertState(start, ruleId, 0);
-      expect(get(state, ACTIVE_PATH)).to.eql(0);
-    });
-
-    it('should update the activeCount when alert is active and clear when recovered if the alertDelay is configured for the rule', async () => {
+    it('should update the activeCount when alert is active and clear when recovered', async () => {
       let start = new Date().toISOString();
       const pattern = {
         instance: [true, true, true, false, true],
@@ -79,7 +66,7 @@ export default function createAlertDelayTests({ getService }: FtrProviderContext
       expect(get(state, ACTIVE_PATH)).to.eql(1);
     });
 
-    it('should reset the activeCount when count of consecutive active alerts exceeds the alertDelay count', async () => {
+    it('should continue incrementing the activeCount when count of consecutive active alerts exceeds the alertDelay count', async () => {
       let start = new Date().toISOString();
       const pattern = {
         instance: [true, true, true, true, true],
@@ -96,16 +83,16 @@ export default function createAlertDelayTests({ getService }: FtrProviderContext
       expect(get(state, ACTIVE_PATH)).to.eql(2);
 
       start = new Date().toISOString();
-      state = await getAlertState(start, ruleId, 0, true);
-      expect(get(state, ACTIVE_PATH)).to.eql(0);
+      state = await getAlertState(start, ruleId, 3, true);
+      expect(get(state, ACTIVE_PATH)).to.eql(3);
 
       start = new Date().toISOString();
-      state = await getAlertState(start, ruleId, 1, true);
-      expect(get(state, ACTIVE_PATH)).to.eql(1);
+      state = await getAlertState(start, ruleId, 4, true);
+      expect(get(state, ACTIVE_PATH)).to.eql(4);
 
       start = new Date().toISOString();
-      state = await getAlertState(start, ruleId, 2, true);
-      expect(get(state, ACTIVE_PATH)).to.eql(2);
+      state = await getAlertState(start, ruleId, 5, true);
+      expect(get(state, ACTIVE_PATH)).to.eql(5);
     });
   });
 

@@ -11,18 +11,23 @@ import {
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
+  ALERT_START,
+  ALERT_DURATION,
   EVENT_ACTION,
   ALERT_TIME_RANGE,
   ALERT_MAINTENANCE_WINDOW_IDS,
 } from '@kbn/rule-data-utils';
 
 export function getAlertsForNotification(
-  timestamp: string,
   flappingSettings: RulesSettingsFlappingProperties,
   alertDelay: number,
   trackedEventsToIndex: any[],
   newEventsToIndex: any[],
-  maintenanceWindowIds?: string[]
+  newEventParams: {
+    // values used to create a new event
+    maintenanceWindowIds?: string[];
+    timestamp: string;
+  }
 ) {
   const events: any[] = [];
   for (const trackedEvent of [...newEventsToIndex, ...trackedEventsToIndex]) {
@@ -30,10 +35,18 @@ export function getAlertsForNotification(
       const count = trackedEvent.activeCount || 0;
       trackedEvent.activeCount = count + 1;
       trackedEvent.pendingRecoveredCount = 0;
+      // do not index the event if the number of consecutive
+      // active alerts is less than the rule alertDelay threshold
       if (trackedEvent.activeCount < alertDelay) {
+        // remove from array of events to index
         continue;
       } else {
+        const { timestamp, maintenanceWindowIds } = newEventParams;
+        // if the active count is equal to the alertDelay it is considered a new event
         if (trackedEvent.activeCount === alertDelay) {
+          // update the event to look like a new event
+          trackedEvent.event[ALERT_DURATION] = 0;
+          trackedEvent.event[ALERT_START] = timestamp;
           trackedEvent.event[ALERT_TIME_RANGE] = { gte: timestamp };
           trackedEvent.event[EVENT_ACTION] = 'open';
           if (maintenanceWindowIds?.length) {
