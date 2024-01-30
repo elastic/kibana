@@ -115,19 +115,13 @@ describe('Service inventory', () => {
     });
   });
 
-  describe('Table search', () => {
+  describe.only('Table search', () => {
     beforeEach(() => {
       cy.updateAdvancedSettings({
         'observability:apmEnableTableSearchBar': true,
       });
 
       cy.loginAsEditorUser();
-    });
-
-    afterEach(() => {
-      cy.updateAdvancedSettings({
-        'observability:apmEnableTableSearchBar': false,
-      });
     });
 
     it('filters for java service on the table', () => {

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-let seq = Date.now();
+let seq = 0;
 
 function generateId(seed?: string, length: number = 32) {
   const str = seed ?? String(seq++);
