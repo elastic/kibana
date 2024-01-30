@@ -71,7 +71,6 @@ export function ChatFlyout({
     forceUpdate();
   }, [forceUpdate]);
 
-  const [isConversationListVisible, setIsConversationListVisible] = useState(true);
   const [isUpdatingList, setIsUpdatingList] = useState(false);
   const [conversationId, setConversationId] = useState<string | undefined>(undefined);
   const conversations = useAbortableAsync(
@@ -128,9 +127,6 @@ export function ChatFlyout({
               initialSize={30}
               minSize="30"
               paddingSize="none"
-              onToggleCollapsed={() => {
-                setIsConversationListVisible((oldValue) => !oldValue);
-              }}
               css={{
                 borderRight: `1px solid ${euiTheme.border.color}`,
               }}
