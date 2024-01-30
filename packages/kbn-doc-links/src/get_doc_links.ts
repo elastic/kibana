@@ -593,7 +593,18 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       actionTypes: isServerless
         ? `${SERVERLESS_DOCS}action-connectors`
         : `${KIBANA_DOCS}action-types.html`,
-      apmRules: `${KIBANA_DOCS}apm-alerts.html`,
+      apmRulesErrorCount: isServerless
+        ? `${SERVERLESS_DOCS}TBD`
+        : `${KIBANA_DOCS}TBD.html`,
+      apmRulesTransactionDuration: isServerless
+        ? `${SERVERLESS_DOCS}TBD`
+        : `${KIBANA_DOCS}TBD.html`,
+      apmRulesTransactionError: isServerless
+        ? `${SERVERLESS_DOCS}TBD`
+        : `${KIBANA_DOCS}TBD.html`,
+      apmRulesAnomaly: isServerless
+        ? `${SERVERLESS_DOCS}TBD`
+        : `${KIBANA_DOCS}TBD.html`,
       emailAction: `${KIBANA_DOCS}email-action-type.html`,
       emailActionConfig: `${KIBANA_DOCS}email-action-type.html`,
       emailExchangeClientSecretConfig: `${KIBANA_DOCS}email-action-type.html#exchange-client-secret`,

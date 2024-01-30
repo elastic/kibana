@@ -47,7 +47,7 @@ export function registerApmRuleTypes(
     },
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.links.alerting.apmRules}`;
+      return `${docLinks.links.alerting.apmRulesErrorCount}`;
     },
     ruleParamsExpression: lazy(() => import('./error_count_rule_type')),
     validate: () => ({
@@ -80,7 +80,7 @@ export function registerApmRuleTypes(
     },
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.links.alerting.apmRules}`;
+      return `${docLinks.links.alerting.apmRulesTransactionDuration}`;
     },
     ruleParamsExpression: lazy(
       () => import('./transaction_duration_rule_type')
@@ -116,7 +116,7 @@ export function registerApmRuleTypes(
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.links.alerting.apmRules}`;
+      return `${docLinks.links.alerting.apmRulesTransactionError}`;
     },
     ruleParamsExpression: lazy(
       () => import('./transaction_error_rate_rule_type')
@@ -146,7 +146,7 @@ export function registerApmRuleTypes(
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.links.alerting.apmRules}`;
+      return `${docLinks.links.alerting.apmRulesAnomaly}`;
     },
     ruleParamsExpression: lazy(() => import('./anomaly_rule_type')),
     validate: validateAnomalyRule,
