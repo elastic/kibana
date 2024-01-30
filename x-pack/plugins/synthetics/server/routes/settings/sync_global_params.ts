@@ -14,7 +14,6 @@ export const syncParamsSyntheticsParamsRoute: SyntheticsRestApiRouteFactory = ()
   method: 'GET',
   path: SYNTHETICS_API_URLS.SYNC_GLOBAL_PARAMS,
   validate: {},
-  writeAccess: true,
   handler: async ({
     savedObjectsClient,
     syntheticsMonitorClient,

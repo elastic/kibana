@@ -20,7 +20,7 @@ import {
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
 } from '@kbn/reporting-common';
-import { TaskInstanceFields } from '@kbn/reporting-common/types';
+import { CsvPagingStrategy, TaskInstanceFields } from '@kbn/reporting-common/types';
 import {
   CSV_JOB_TYPE,
   CSV_REPORT_TYPE,
@@ -67,7 +67,8 @@ export class CsvSearchSourceExportType extends ExportType<
   }
 
   public createJob = async (jobParams: JobParamsCSV) => {
-    return { ...jobParams };
+    const pagingStrategy = this.config.csv.scroll.strategy as CsvPagingStrategy;
+    return { pagingStrategy, ...jobParams };
   };
 
   public runTask = async (
