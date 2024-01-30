@@ -106,6 +106,20 @@ export const validateWildcardInput = (value?: string): string | undefined => {
   }
 };
 
+export const validateWildcardWithWrongOperator = ({
+  operator,
+  value,
+}: {
+  operator: EntryTypes | TrustedAppEntryTypes;
+  value: string;
+}): boolean => {
+  if (operator !== EntryTypes.wildcard && validateWildcardInput(value)) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
 export const hasSimpleExecutableName = ({
   os,
   type,
