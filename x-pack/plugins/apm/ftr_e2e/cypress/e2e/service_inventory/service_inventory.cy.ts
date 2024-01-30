@@ -115,7 +115,7 @@ describe('Service inventory', () => {
     });
   });
 
-  describe.only('Table search', () => {
+  describe('Table search', () => {
     beforeEach(() => {
       cy.updateAdvancedSettings({
         'observability:apmEnableTableSearchBar': true,
