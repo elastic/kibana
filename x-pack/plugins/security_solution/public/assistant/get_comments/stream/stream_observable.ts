@@ -71,7 +71,7 @@ export const getStreamObservable = ({
             // TODO before merge to main
             // remove log for cloud testing
             // eslint-disable-next-line no-console
-            console.log('CLIENT CHUNK', JSON.stringify(decoded));
+            console.log('CLIENT CHUNK', decoded);
             let nextChunks;
             if (isError) {
               nextChunks = [`${API_ERROR}\n\n${JSON.parse(decoded).message}`];
