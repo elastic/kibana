@@ -23,7 +23,6 @@ export const testNowMonitorRoute: SyntheticsRestApiRouteFactory<TestNowResponse>
       monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
     }),
   },
-  writeAccess: true,
   handler: async (routeContext) => {
     const { monitorId } = routeContext.request.params;
     return triggerTestNow(monitorId, routeContext);

@@ -2993,6 +2993,10 @@
             "path": "x-pack/plugins/cloud_security_posture/public/components/take_action.tsx"
           },
           {
+            "plugin": "cloudSecurityPosture",
+            "path": "x-pack/plugins/cloud_security_posture/public/components/take_action.tsx"
+          },
+          {
             "plugin": "dashboardEnhanced",
             "path": "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/actions/flyout_create_drilldown/flyout_create_drilldown.tsx"
           },
