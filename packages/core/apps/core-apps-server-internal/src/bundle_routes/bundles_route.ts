@@ -22,40 +22,29 @@ export function registerRouteForBundle(
   }: {
     publicPath: string;
     routePath: string;
-    /**
-     * We register multiple plugin bundle paths to allow plugins time to migrate
-     * to using the correct public path for their bundles.
-     *
-     * Eventually we only want to serve from the sha scoped path
-     */
-    bundlesPath: string | string[];
+    bundlesPath: string;
     fileHashCache: FileHashCache;
     isDist: boolean;
   }
 ) {
-  if (!Array.isArray(bundlesPath)) {
-    bundlesPath = [bundlesPath];
-  }
-  bundlesPath.forEach((bp) => {
-    router.get(
-      {
-        path: `${routePath}{path*}`,
-        options: {
-          authRequired: false,
-          access: 'public',
-        },
-        validate: {
-          params: schema.object({
-            path: schema.string(),
-          }),
-        },
+  router.get(
+    {
+      path: `${routePath}{path*}`,
+      options: {
+        authRequired: false,
+        access: 'public',
       },
-      createDynamicAssetHandler({
-        publicPath,
-        bundlesPath: bp,
-        isDist,
-        fileHashCache,
-      })
-    );
-  });
+      validate: {
+        params: schema.object({
+          path: schema.string(),
+        }),
+      },
+    },
+    createDynamicAssetHandler({
+      publicPath,
+      bundlesPath,
+      isDist,
+      fileHashCache,
+    })
+  );
 }

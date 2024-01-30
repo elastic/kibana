@@ -8,16 +8,26 @@
 
 import type { BasePath } from '../base_path_service';
 import { CdnConfig } from '../cdn_config';
+import { suffixValueToPathname, suffixValueToURLPathname, removeLeadSlashes } from './util';
 
 export interface InternalStaticAssets {
   getHrefBase(): string;
+  /**
+   * Intended for use by server code rendering UI or generating links to static assets
+   * that will ultimately be called from the browser and must respect settings like
+   * serverBasePath
+   */
   getPluginAssetHref(pluginName: string, assetPath: string): string;
+  /**
+   * Intended for use by server code wanting to register static assets against Kibana
+   * as server paths
+   */
+  getPluginServerPath(pluginName: string, assetPath: string): string;
 }
-
-import { suffixValueToPathname, suffixValueToURLPathname } from './suffix_value_to_pathname';
 
 export class StaticAssets implements InternalStaticAssets {
   private readonly assetsHrefBase: string;
+  private readonly assetsServerPathBase: string;
 
   constructor(basePath: BasePath, cdnConfig: CdnConfig, shaDigest: string) {
     const cdnBaseHref = cdnConfig.baseHref;
@@ -26,6 +36,7 @@ export class StaticAssets implements InternalStaticAssets {
     } else {
       this.assetsHrefBase = suffixValueToPathname(basePath.serverBasePath, shaDigest);
     }
+    this.assetsServerPathBase = `/${shaDigest}`;
   }
 
   /**
@@ -40,6 +51,12 @@ export class StaticAssets implements InternalStaticAssets {
     if (assetPath.startsWith('/')) {
       assetPath = assetPath.slice(1);
     }
-    return `${this.assetsHrefBase}/plugins/${pluginName}/assets/${assetPath}`;
+    return `${this.assetsHrefBase}/plugins/${pluginName}/assets/${removeLeadSlashes(assetPath)}`;
+  }
+
+  getPluginServerPath(pluginName: string, assetPath: string): string {
+    return `${this.assetsServerPathBase}/plugins/${pluginName}/assets/${removeLeadSlashes(
+      assetPath
+    )}`;
   }
 }

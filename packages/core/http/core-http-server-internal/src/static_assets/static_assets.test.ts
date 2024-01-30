@@ -76,7 +76,7 @@ describe('StaticAssets', () => {
       });
     });
 
-    describe('serverBasePath', () => {
+    describe('base path', () => {
       it.each([
         ['', '/beef'],
         ['/', '/beef'],
@@ -87,6 +87,16 @@ describe('StaticAssets', () => {
         staticAssets = new StaticAssets(basePath, cdnConfig, 'beef');
         expect(staticAssets.getHrefBase()).toEqual(expectedPath);
       });
+    });
+  });
+
+  describe('#getPluginServerPath()', () => {
+    it('provides fallback to server base path', () => {
+      cdnConfig = CdnConfig.from();
+      staticAssets = new StaticAssets(basePath, cdnConfig, '1234');
+      expect(staticAssets.getPluginServerPath('myPlugin', '/fun/times')).toEqual(
+        '/1234/plugins/myPlugin/assets/fun/times'
+      );
     });
   });
 });

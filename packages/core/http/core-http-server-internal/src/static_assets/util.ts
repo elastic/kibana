@@ -20,6 +20,10 @@ function normalizeTrailingSlashes(string: string): string {
   return string.replace(/\/+$/, '');
 }
 
+export function removeLeadSlashes(string: string): string {
+  return string.replace(/^\/+/, '');
+}
+
 export function suffixValueToURLPathname(urlString: string, value: string): string {
   const url = new URL(urlString);
   url.pathname = suffixValueToPathname(url.pathname, value);
