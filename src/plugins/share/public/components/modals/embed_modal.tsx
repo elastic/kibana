@@ -55,6 +55,7 @@ export interface EmbedModalProps {
   urlService: BrowserUrlService;
   snapshotShareWarning?: string;
   onClose: () => void;
+  isDirty?: boolean;
 }
 
 export enum ExportUrlAsType {
@@ -157,7 +158,9 @@ export class EmbedModal extends Component<EmbedModalProps, State> {
   }
 
   private isNotSaved = () => {
-    return this.props.objectId === undefined || this.props.objectId === '';
+    return (
+      this.props.objectId === undefined || this.props.objectId === '' || this.props.isDirty === true
+    );
   };
 
   private resetUrl = () => {

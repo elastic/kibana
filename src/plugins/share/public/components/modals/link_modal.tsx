@@ -57,6 +57,7 @@ export interface LinkModalProps {
   urlService: BrowserUrlService;
   snapshotShareWarning?: string;
   onClose: () => void;
+  isDirty?: boolean;
 }
 
 export enum ExportUrlAsType {
@@ -153,7 +154,9 @@ export class LinkModal extends Component<LinkModalProps, State> {
   }
 
   private isNotSaved = () => {
-    return this.props.objectId === undefined || this.props.objectId === '';
+    return (
+      this.props.objectId === undefined || this.props.objectId === '' || this.props.isDirty === true
+    );
   };
 
   private makeUrlEmbeddable = (url: string): string => {

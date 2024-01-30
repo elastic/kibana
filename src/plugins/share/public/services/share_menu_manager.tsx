@@ -47,6 +47,7 @@ export class ShareMenuManager {
 
         this.toggleShareContextMenu({
           ...options,
+          isDirty: options.isDirty,
           allowEmbed: disableEmbed ? false : options.allowEmbed,
           onClose,
           menuItems,
@@ -88,6 +89,7 @@ export class ShareMenuManager {
     disabledShareUrl,
     i18n,
     overlays,
+    isDirty,
   }: ShowShareMenuOptions & {
     menuItems: ShareMenuItem[];
     urlService: BrowserUrlService;
@@ -138,6 +140,7 @@ export class ShareMenuManager {
               openModal={overlays.openModal}
               theme={theme}
               i18nStart={i18n}
+              isDirty={isDirty}
             />
           </EuiWrappingPopover>
         </KibanaThemeProvider>

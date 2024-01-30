@@ -43,6 +43,7 @@ export interface ShareContextMenuProps {
   openModal: OverlayStart['openModal'];
   theme: CoreStart['theme'];
   i18nStart: CoreStart['i18n'];
+  isDirty: boolean;
 }
 
 export const ShareContextMenu: FC<ShareContextMenuProps> = (props: ShareContextMenuProps) => {
@@ -65,6 +66,7 @@ export const ShareContextMenu: FC<ShareContextMenuProps> = (props: ShareContextM
     showPublicUrlSwitch,
     snapshotShareWarning,
     embedUrlParamExtensions,
+    isDirty,
   } = props;
   const openLinkModal = () => {
     const session = openModal(
@@ -85,6 +87,7 @@ export const ShareContextMenu: FC<ShareContextMenuProps> = (props: ShareContextM
           showPublicUrlSwitch={showPublicUrlSwitch}
           urlService={urlService}
           snapshotShareWarning={snapshotShareWarning}
+          isDirty={isDirty}
         />,
         { theme, i18n: i18nStart }
       ),
@@ -115,6 +118,7 @@ export const ShareContextMenu: FC<ShareContextMenuProps> = (props: ShareContextM
           showPublicUrlSwitch={showPublicUrlSwitch}
           urlService={urlService}
           snapshotShareWarning={snapshotShareWarning}
+          isDirty={isDirty}
         />,
         { theme, i18n: i18nStart }
       ),
