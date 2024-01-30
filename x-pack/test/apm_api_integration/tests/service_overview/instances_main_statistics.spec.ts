@@ -153,7 +153,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         after(() => {
           return synthtrace.clean();
         });
-        describe('feetch instances', () => {
+        describe('fetch instances', () => {
           let instancesMainStats: ServiceOverviewInstancesMainStatistics['currentPeriod'];
           before(async () => {
             instancesMainStats = await getServiceOverviewInstancesMainStatistics({
