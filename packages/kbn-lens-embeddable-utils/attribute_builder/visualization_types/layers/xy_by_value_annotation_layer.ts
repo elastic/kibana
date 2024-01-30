@@ -10,12 +10,12 @@ import type { SavedObjectReference } from '@kbn/core/server';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import type { FormBasedPersistedState, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
-import type { XYAnnotationLayerConfig } from '@kbn/lens-plugin/public/visualizations/xy/types';
+import type { XYByValueAnnotationLayerConfig } from '@kbn/lens-plugin/public/visualizations/xy/types';
 import type { ChartLayer } from '../../types';
 import { getDefaultReferences } from '../../utils';
 import { XY_ANNOTATIONS_ID } from '../constants';
 
-export interface XYAnnotationsLayerConfig {
+export interface XYByValueAnnotationsLayerConfig {
   annotations: EventAnnotationConfig[];
   layerType?: typeof XY_ANNOTATIONS_ID;
   /**
@@ -25,10 +25,10 @@ export interface XYAnnotationsLayerConfig {
   ignoreGlobalFilters?: boolean;
 }
 
-export class XYAnnotationsLayer implements ChartLayer<XYAnnotationLayerConfig> {
-  private layerConfig: XYAnnotationsLayerConfig;
+export class XYByValueAnnotationsLayer implements ChartLayer<XYByValueAnnotationLayerConfig> {
+  private layerConfig: XYByValueAnnotationsLayerConfig;
 
-  constructor(layerConfig: XYAnnotationsLayerConfig) {
+  constructor(layerConfig: XYByValueAnnotationsLayerConfig) {
     this.layerConfig = {
       ...layerConfig,
       layerType: layerConfig.layerType ?? 'annotations',
@@ -50,7 +50,7 @@ export class XYAnnotationsLayer implements ChartLayer<XYAnnotationLayerConfig> {
     return getDefaultReferences(this.layerConfig.dataView ?? chartDataView, `${layerId}_reference`);
   }
 
-  getLayerConfig(layerId: string): XYAnnotationLayerConfig {
+  getLayerConfig(layerId: string): XYByValueAnnotationLayerConfig {
     return {
       layerId: `${layerId}_annotation`,
       layerType: 'annotations',

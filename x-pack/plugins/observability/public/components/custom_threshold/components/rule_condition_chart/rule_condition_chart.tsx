@@ -17,7 +17,7 @@ import {
   XYDataLayer,
   XYLayerOptions,
   XYReferenceLinesLayer,
-  XYAnnotationsLayer,
+  XYByValueAnnotationsLayer,
 } from '@kbn/lens-embeddable-utils';
 
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
@@ -76,7 +76,7 @@ export function RuleConditionChart({
   const [aggMap, setAggMap] = useState<AggMap>();
   const [formula, setFormula] = useState<string>('');
   const [thresholdReferenceLine, setThresholdReferenceLine] = useState<XYReferenceLinesLayer[]>();
-  const [alertAnnotation, setAlertAnnotation] = useState<XYAnnotationsLayer>();
+  const [alertAnnotation, setAlertAnnotation] = useState<XYByValueAnnotationsLayer>();
   const [chartLoading, setChartLoading] = useState<boolean>(false);
   const formulaAsync = useAsync(() => {
     return lens.stateHelperApi();
@@ -221,7 +221,7 @@ export function RuleConditionChart({
       );
     }
 
-    const alertAnnotationLayer = new XYAnnotationsLayer({
+    const alertAnnotationLayer = new XYByValueAnnotationsLayer({
       annotations,
       ignoreGlobalFilters: true,
       dataView,
@@ -322,7 +322,9 @@ export function RuleConditionChart({
       options: xYDataLayerOptions,
     });
 
-    const layers: Array<XYDataLayer | XYReferenceLinesLayer | XYAnnotationsLayer> = [xyDataLayer];
+    const layers: Array<XYDataLayer | XYReferenceLinesLayer | XYByValueAnnotationsLayer> = [
+      xyDataLayer,
+    ];
     if (thresholdReferenceLine) {
       layers.push(...thresholdReferenceLine);
     }
