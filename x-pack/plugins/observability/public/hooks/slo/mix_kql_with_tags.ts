@@ -14,7 +14,7 @@ export function mixKqlWithTags(kqlQuery: string, tags: SearchState['tags']) {
   const includedKqlTags = tags?.included?.join(' or ');
   const excludedKqlTags = tags?.excluded?.join(' or ');
 
-  let queryParts = [];
+  const queryParts = [];
   if (!!kqlQuery) {
     queryParts.push(kqlQuery);
   }
@@ -24,5 +24,5 @@ export function mixKqlWithTags(kqlQuery: string, tags: SearchState['tags']) {
   if (!!excludedKqlTags) {
     queryParts.push(`not slo.tags: (${excludedKqlTags})`);
   }
-  return queryParts.join(" and ");
+  return queryParts.join(' and ');
 }
