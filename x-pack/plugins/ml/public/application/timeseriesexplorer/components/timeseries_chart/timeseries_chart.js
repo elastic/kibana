@@ -359,7 +359,7 @@ class TimeseriesChartIntl extends Component {
         );
       })
       .remove();
-    d3.select('.temp-axis-label').remove();
+    chartElement.select('.temp-axis-label').remove();
 
     margin.left = Math.max(maxYAxisLabelWidth, 40);
     this.vizWidth = Math.max(svgWidth - margin.left - margin.right, 0);
@@ -606,12 +606,12 @@ class TimeseriesChartIntl extends Component {
 
     const hideFocusChartTooltip = this.props.tooltipService.hide.bind(this.props.tooltipService);
 
-    const focusChart = d3.select('.focus-chart');
+    const chartElement = d3.select(this.rootNode);
+    const focusChart = chartElement.select('.focus-chart');
 
     // Update the plot interval labels.
     const focusAggInt = focusAggregationInterval.expression;
     const bucketSpan = selectedJob.analysis_config.bucket_span;
-    const chartElement = d3.select(this.rootNode);
     chartElement.select('.zoom-aggregation-interval').text(
       i18n.translate('xpack.ml.timeSeriesExplorer.timeSeriesChart.zoomAggregationIntervalLabel', {
         defaultMessage: '(aggregation interval: {focusAggInt}, bucket span: {bucketSpan})',
@@ -765,7 +765,7 @@ class TimeseriesChartIntl extends Component {
     // These are used for displaying tooltips on mouseover.
     // Don't render dots where value=null (data gaps, with no anomalies)
     // or for multi-bucket anomalies.
-    const dots = d3
+    const dots = chartElement
       .select('.focus-chart-markers')
       .selectAll('.metric-value')
       .data(
@@ -984,7 +984,7 @@ class TimeseriesChartIntl extends Component {
     const chartElement = d3.select(this.rootNode);
     chartElement.selectAll('.focus-zoom a').on('click', function () {
       d3.event.preventDefault();
-      setZoomInterval(d3.select(this).attr('data-ms'));
+      setZoomInterval(chartElement.select(this).attr('data-ms'));
     });
   }
 
@@ -1307,6 +1307,7 @@ class TimeseriesChartIntl extends Component {
           </svg>
         </div>`);
 
+    const that = this;
     function brushing() {
       const brushExtent = brush.extent();
       mask.reveal(brushExtent);
@@ -1324,11 +1325,11 @@ class TimeseriesChartIntl extends Component {
       topBorder.attr('width', topBorderWidth);
 
       const isEmpty = brush.empty();
-      d3.selectAll('.brush-handle').style('visibility', isEmpty ? 'hidden' : 'visible');
+      const chartElement = d3.select(that.rootNode);
+      chartElement.selectAll('.brush-handle').style('visibility', isEmpty ? 'hidden' : 'visible');
     }
     brushing();
 
-    const that = this;
     function brushed() {
       const isEmpty = brush.empty();
       const selectedBounds = isEmpty ? contextXScale.domain() : brush.extent();
@@ -1457,18 +1458,19 @@ class TimeseriesChartIntl extends Component {
   // Sets the extent of the brush on the context chart to the
   // supplied from and to Date objects.
   setContextBrushExtent = (from, to) => {
+    const chartElement = d3.select(this.rootNode);
     const brush = this.brush;
     const brushExtent = brush.extent();
 
     const newExtent = [from, to];
     brush.extent(newExtent);
-    brush(d3.select('.brush'));
+    brush(chartElement.select('.brush'));
 
     if (
       newExtent[0].getTime() !== brushExtent[0].getTime() ||
       newExtent[1].getTime() !== brushExtent[1].getTime()
     ) {
-      brush.event(d3.select('.brush'));
+      brush.event(chartElement.select('.brush'));
     }
   };
 
@@ -1862,7 +1864,8 @@ class TimeseriesChartIntl extends Component {
   }
 
   unhighlightFocusChartAnomaly() {
-    d3.select('.focus-chart-markers').selectAll('.anomaly-marker.highlighted').remove();
+    const chartElement = d3.select(this.rootNode);
+    chartElement.select('.focus-chart-markers').selectAll('.anomaly-marker.highlighted').remove();
     this.props.tooltipService.hide();
   }
 
