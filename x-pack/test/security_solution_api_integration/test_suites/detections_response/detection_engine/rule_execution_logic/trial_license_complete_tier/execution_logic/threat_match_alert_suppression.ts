@@ -2067,7 +2067,7 @@ export default ({ getService }: FtrProviderContext) => {
             });
           });
 
-          it('should generate to max_signals alerts' + ' ' + i, async () => {
+          it('should generate to max_signals alerts', async () => {
             const id = uuidv4();
             const firstTimestamp = '2020-10-28T06:05:00.000Z';
             const secondTimestamp = '2020-10-28T06:10:00.000Z';

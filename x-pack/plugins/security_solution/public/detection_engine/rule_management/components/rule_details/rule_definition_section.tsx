@@ -54,8 +54,7 @@ import { TechnicalPreviewBadge } from '../../../../common/components/technical_p
 import { BadgeList } from './badge_list';
 import { DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
 import * as i18n from './translations';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
+import { useAlertSuppression } from '../../hooks/use_alert_suppression';
 
 interface SavedQueryNameProps {
   savedQueryName: string;
@@ -427,7 +426,7 @@ const prepareDefinitionSectionListItems = (
   rule: Partial<RuleResponse>,
   isInteractive: boolean,
   savedQuery: SavedQuery | undefined,
-  { alertSuppressionForIndicatorMatchRuleEnabled }: Partial<ExperimentalFeatures> = {}
+  isSuppressionEnabled: boolean
 ): EuiDescriptionListProps['listItems'] => {
   const definitionSectionListItems: EuiDescriptionListProps['listItems'] = [];
 
@@ -657,11 +656,7 @@ const prepareDefinitionSectionListItems = (
     });
   }
 
-  const isSuppressionEnabled =
-    (rule.type === 'threat_match' && alertSuppressionForIndicatorMatchRuleEnabled) ||
-    (rule.type && (['query', 'saved_query', 'threshold'] as Type[]).includes(rule.type));
-
-  if ('alert_suppression' in rule && rule.alert_suppression && isSuppressionEnabled) {
+  if (isSuppressionEnabled && 'alert_suppression' in rule && rule.alert_suppression) {
     if ('group_by' in rule.alert_suppression) {
       definitionSectionListItems.push({
         title: (
@@ -743,15 +738,13 @@ export const RuleDefinitionSection = ({
     ruleType: rule.type,
   });
 
-  const alertSuppressionForIndicatorMatchRuleEnabled = useIsExperimentalFeatureEnabled(
-    'alertSuppressionForIndicatorMatchRuleEnabled'
-  );
+  const { isSuppressionEnabled } = useAlertSuppression(rule.type);
 
   const definitionSectionListItems = prepareDefinitionSectionListItems(
     rule,
     isInteractive,
     savedQuery,
-    { alertSuppressionForIndicatorMatchRuleEnabled }
+    isSuppressionEnabled
   );
 
   return (
