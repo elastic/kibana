@@ -48,6 +48,17 @@ export const ResultsView: FC<Props> = ({
   onCancel,
   disableImport,
 }) => {
+  const semiStructureTextData =
+    results.format === 'semi_structured_text'
+      ? {
+          grokPattern: results.grok_pattern,
+          multilineStartPattern: results.multiline_start_pattern,
+          sampleStart: results.sample_start,
+          excludeLinesPattern: results.exclude_lines_pattern,
+          mappings: results.mappings,
+          ecsCompatibility: results.ecs_compatibility,
+        }
+      : null;
   return (
     <EuiPageBody data-test-subj="dataVisualizerPageFileResults">
       <EuiFlexGroup>
@@ -77,6 +88,7 @@ export const ResultsView: FC<Props> = ({
             data={data}
             format={results.format}
             numberOfLines={results.num_lines_analyzed}
+            semiStructureTextData={semiStructureTextData}
           />
         </EuiPanel>
 

@@ -6,23 +6,61 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 
-import { EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiTitle, EuiSpacer, EuiHorizontalRule } from '@elastic/eui';
 
-import { JsonEditor, EDITOR_MODE } from '../json_editor';
+import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import { EDITOR_MODE, JsonEditor } from '../json_editor';
+import { useDataVisualizerKibana } from '../../../kibana_context';
+import { TextParser } from './text_parser';
 
 interface Props {
   data: string;
   format: string;
   numberOfLines: number;
+  semiStructureTextData: {
+    grokPattern: string | undefined;
+    multilineStartPattern: string | undefined;
+    excludeLinesPattern: string | undefined;
+    sampleStart: string;
+    mappings: FindFileStructureResponse['mappings'];
+    ecsCompatibility: string | undefined;
+  } | null;
 }
 
-export const FileContents: FC<Props> = ({ data, format, numberOfLines }) => {
+export const FileContents: FC<Props> = ({ data, format, numberOfLines, semiStructureTextData }) => {
   let mode = EDITOR_MODE.TEXT;
   if (format === EDITOR_MODE.JSON) {
     mode = EDITOR_MODE.JSON;
   }
+  const [lines, setLines] = useState<JSX.Element[] | null>(null);
+
+  const {
+    services: { http },
+  } = useDataVisualizerKibana();
+
+  useEffect(() => {
+    if (
+      semiStructureTextData === null ||
+      semiStructureTextData.multilineStartPattern === undefined ||
+      semiStructureTextData.grokPattern === undefined
+    ) {
+      return;
+    }
+    const { grokPattern, multilineStartPattern, excludeLinesPattern, mappings, ecsCompatibility } =
+      semiStructureTextData;
+    const textParser = new TextParser(
+      http,
+      mappings,
+      ecsCompatibility,
+      multilineStartPattern,
+      excludeLinesPattern
+    );
+    textParser.read(data, grokPattern).then((docs) => {
+      setLines(docs);
+    });
+  }, [http, format, data, semiStructureTextData]);
 
   const formattedData = limitByNumberOfLines(data, numberOfLines);
 
@@ -49,7 +87,18 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines }) => {
 
       <EuiSpacer size="s" />
 
-      <JsonEditor mode={mode} readOnly={true} value={formattedData} height="200px" />
+      {lines === null ? (
+        <JsonEditor mode={mode} readOnly={true} value={formattedData} height="200px" />
+      ) : (
+        <>
+          {lines.map((line, i) => (
+            <>
+              {line}
+              {i === lines.length - 1 ? null : <EuiHorizontalRule margin="s" />}
+            </>
+          ))}
+        </>
+      )}
     </React.Fragment>
   );
 };
