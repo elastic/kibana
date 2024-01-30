@@ -188,12 +188,23 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             'group'
           );
 
-          expect(actualAnalysisGroupsTable).to.be.eql(
-            expectedAnalysisGroupsTable,
-            `Expected analysis groups table to be ${JSON.stringify(
-              expectedAnalysisGroupsTable
-            )}, got ${JSON.stringify(actualAnalysisGroupsTable)}`
-          );
+          // The Kibana Sample Data Logs are somewhat randomized, so in rare cases there might
+          // be additional results, that's why we just test for the first group in this case.
+          if (testData.dataGenerator === 'kibana_sample_data_logs') {
+            expect(actualAnalysisGroupsTable[0]).to.be.eql(
+              expectedAnalysisGroupsTable[0],
+              `Expected analysis groups table to be ${JSON.stringify(
+                expectedAnalysisGroupsTable[0]
+              )}, got ${JSON.stringify(actualAnalysisGroupsTable[0])}`
+            );
+          } else {
+            expect(actualAnalysisGroupsTable).to.be.eql(
+              expectedAnalysisGroupsTable,
+              `Expected analysis groups table to be ${JSON.stringify(
+                expectedAnalysisGroupsTable
+              )}, got ${JSON.stringify(actualAnalysisGroupsTable)}`
+            );
+          }
         }
       });
 
