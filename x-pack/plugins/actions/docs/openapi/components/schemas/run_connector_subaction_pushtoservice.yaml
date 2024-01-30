@@ -3,7 +3,7 @@ type: object
 required:
   - subAction
   - subActionParams
-description: The `pushToService` subaction for Jira, ServiceNow ITSM, ServiceNow SecOps, and Swimlane connectors.
+description: The `pushToService` subaction for Jira, ServiceNow ITSM, ServiceNow SecOps, Swimlane, and Webhook - Case Management connectors.
 properties: 
   subAction:
     type: string
@@ -52,7 +52,7 @@ properties:
               NOTE: Using the default configuration of `{{ruleID}}:{{alert ID}}` ensures that ServiceNow creates a separate incident record for every generated alert that uses a unique alert ID. If the rule generates multiple alerts that use the same alert IDs, ServiceNow creates and continually updates a single incident record for the alert.
           description:
             type: string
-            description: The description of the incident for Jira, ServiceNow ITSM, ServiceNow SecOps, and Swimlane connectors.
+            description: The description of the incident for Jira, ServiceNow ITSM, ServiceNow SecOps, Swimlane, and Webhook - Case Management connectors.
           dest_ip:
             description: >
               A list of destination IP addresses related to the security incident for ServiceNow SecOps connectors. The IPs are added as observables to the security incident.
@@ -66,6 +66,9 @@ properties:
             description: >
               The Jira, ServiceNow ITSM, or ServiceNow SecOps issue identifier.
               If present, the incident is updated. Otherwise, a new incident is created.
+          id:
+            type: string
+            description: The external case identifier for Webhook - Case Management connectors.
           impact:
             type: string
             description: The impact of the incident for ServiceNow ITSM connectors.
@@ -117,16 +120,24 @@ properties:
               - type: array
                 items:
                   type: string
+          status:
+            type: string
+            description: The status of the incident for Webhook - Case Management connectors.
           subcategory:
             type: string
             description: The subcategory of the incident for ServiceNow ITSM and ServiceNow SecOps connectors.
           summary:
             type: string
             description: A summary of the incident for Jira connectors.
+          tags:
+            type: array
+            items:
+              type: string
+            description: A list of tags for Webhook - Case Management connectors.
           title:
             type: string
             description: >
-              A title for the incident for Jira connectors.
+              A title for the incident for Jira and Webhook - Case Management connectors.
               It is used for searching the contents of the knowledge base.
           urgency:
             type: string

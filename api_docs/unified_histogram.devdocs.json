@@ -466,7 +466,15 @@
             "section": "def-common.RequestAdapter",
             "text": "RequestAdapter"
           },
-          " | undefined; isChartLoading?: boolean | undefined; } & Pick<",
+          " | undefined; isChartLoading?: boolean | undefined; table?: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          " | undefined; } & Pick<",
           "UnifiedHistogramLayoutProps",
           ", \"children\" | \"className\" | \"query\" | \"filters\" | \"columns\" | \"container\" | \"onBrushEnd\" | \"disabledActions\" | \"timeRange\" | \"services\" | \"dataView\" | \"relativeTimeRange\" | \"renderCustomChartToggleActions\" | \"onFilter\" | \"withDefaultActions\"> & ",
           {
@@ -1242,7 +1250,15 @@
             "section": "def-common.RequestAdapter",
             "text": "RequestAdapter"
           },
-          " | undefined; isChartLoading?: boolean | undefined; } & Pick<",
+          " | undefined; isChartLoading?: boolean | undefined; table?: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          " | undefined; } & Pick<",
           "UnifiedHistogramLayoutProps",
           ", \"children\" | \"className\" | \"query\" | \"filters\" | \"columns\" | \"container\" | \"onBrushEnd\" | \"disabledActions\" | \"timeRange\" | \"services\" | \"dataView\" | \"relativeTimeRange\" | \"renderCustomChartToggleActions\" | \"onFilter\" | \"withDefaultActions\">"
         ],
