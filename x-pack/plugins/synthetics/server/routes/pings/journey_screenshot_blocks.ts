@@ -22,6 +22,7 @@ export const createJourneyScreenshotBlocksRoute: SyntheticsRestApiRouteFactory =
       hashes: schema.arrayOf(schema.string()),
     }),
   },
+  writeAccessOverride: true,
   handler: async (routeProps) => {
     return await journeyScreenshotBlocksHandler(routeProps);
   },

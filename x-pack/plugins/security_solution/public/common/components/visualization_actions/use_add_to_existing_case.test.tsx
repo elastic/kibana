@@ -56,6 +56,7 @@ describe('useAddToExistingCase', () => {
         lensAttributes: kpiHostMetricLensAttributes,
         timeRange,
         onAddToCaseClicked: mockOnAddToCaseClicked,
+        lensMetadata: undefined,
       })
     );
     expect(mockGetUseCasesAddToExistingCaseModal).toHaveBeenCalledWith({
@@ -75,6 +76,7 @@ describe('useAddToExistingCase', () => {
         lensAttributes: kpiHostMetricLensAttributes,
         timeRange,
         onAddToCaseClicked: mockOnAddToCaseClicked,
+        lensMetadata: undefined,
       })
     );
     expect(result.current.disabled).toEqual(true);
@@ -88,6 +90,7 @@ describe('useAddToExistingCase', () => {
         lensAttributes: kpiHostMetricLensAttributes,
         timeRange,
         onAddToCaseClicked: mockOnAddToCaseClicked,
+        lensMetadata: undefined,
       })
     );
     expect(result.current.disabled).toEqual(true);
@@ -99,6 +102,7 @@ describe('useAddToExistingCase', () => {
         lensAttributes: null,
         timeRange,
         onAddToCaseClicked: mockOnAddToCaseClicked,
+        lensMetadata: undefined,
       })
     );
     expect(result.current.disabled).toEqual(true);
@@ -110,6 +114,7 @@ describe('useAddToExistingCase', () => {
         lensAttributes: kpiHostMetricLensAttributes,
         timeRange: null,
         onAddToCaseClicked: mockOnAddToCaseClicked,
+        lensMetadata: undefined,
       })
     );
     expect(result.current.disabled).toEqual(true);
@@ -118,6 +123,9 @@ describe('useAddToExistingCase', () => {
   it('should open add to existing case modal', () => {
     const mockOpenCaseModal = jest.fn();
     const mockClick = jest.fn();
+    const lensMetadata = {
+      description: 'test_description',
+    };
 
     mockGetUseCasesAddToExistingCaseModal.mockReturnValue({ open: mockOpenCaseModal });
 
@@ -126,6 +134,7 @@ describe('useAddToExistingCase', () => {
         lensAttributes: kpiHostMetricLensAttributes,
         timeRange,
         onAddToCaseClicked: mockClick,
+        lensMetadata,
       })
     );
 
@@ -137,6 +146,7 @@ describe('useAddToExistingCase', () => {
         persistableStateAttachmentState: {
           attributes: kpiHostMetricLensAttributes,
           timeRange,
+          metadata: lensMetadata,
         },
         persistableStateAttachmentTypeId: '.lens',
         type: AttachmentType.persistableState as const,
