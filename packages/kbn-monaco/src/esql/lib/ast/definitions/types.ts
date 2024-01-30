@@ -57,7 +57,11 @@ export interface CommandOptionsDefinition extends CommandBaseDefinition {
   wrapped?: string[];
   optional: boolean;
   skipCommonValidation?: boolean;
-  validate?: (option: ESQLCommandOption, command: ESQLCommand) => ESQLMessage[];
+  validate?: (
+    option: ESQLCommandOption,
+    command: ESQLCommand,
+    references?: unknown
+  ) => ESQLMessage[];
 }
 
 export interface CommandModeDefinition extends CommandBaseDefinition {
