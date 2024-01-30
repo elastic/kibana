@@ -117,12 +117,6 @@ describe('postResultsRoute route', () => {
     });
 
     it('should authorize pattern', async () => {
-      // const mockHasPrivileges =
-      //   context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges;
-      // mockHasPrivileges.mockResolvedValueOnce({
-      //   has_all_requested: true,
-      // } as unknown as SecurityHasPrivilegesResponse);
-
       const response = await server.inject(req, requestContextMock.convertContext(context));
       expect(mockCheckIndicesPrivileges).toHaveBeenCalledWith({
         client: context.core.elasticsearch.client,
@@ -134,11 +128,6 @@ describe('postResultsRoute route', () => {
     });
 
     it('should not index unauthorized pattern', async () => {
-      // const mockHasPrivileges =
-      //   context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges;
-      // mockHasPrivileges.mockResolvedValueOnce({
-      //   has_all_requested: false,
-      // } as unknown as SecurityHasPrivilegesResponse);
       mockCheckIndicesPrivileges.mockResolvedValueOnce({ [resultDocument.indexName]: false });
 
       const response = await server.inject(req, requestContextMock.convertContext(context));
@@ -154,10 +143,6 @@ describe('postResultsRoute route', () => {
 
     it('handles pattern authorization error', async () => {
       const errorMessage = 'Error!';
-      // const mockHasPrivileges =
-      //   context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges;
-      // mockHasPrivileges.mockRejectedValueOnce({ message: errorMessage });
-
       mockCheckIndicesPrivileges.mockRejectedValueOnce(Error(errorMessage));
 
       const response = await server.inject(req, requestContextMock.convertContext(context));

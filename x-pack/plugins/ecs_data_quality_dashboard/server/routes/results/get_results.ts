@@ -90,7 +90,7 @@ export const getResultsRoute = (
 
           return response.ok({ body: results });
         } catch (err) {
-          logger.error(JSON.stringify(err));
+          logger.error(err.message);
 
           return resp.error({
             body: err.message ?? API_DEFAULT_ERROR_MESSAGE,
