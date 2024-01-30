@@ -57,12 +57,12 @@ export interface WithDegradedDocs {
 }
 
 export interface WithDatasets {
-  datasets?: string;
+  datasets: DataStreamStat[];
 }
 
 export type DefaultDatasetQualityControllerState = WithTableOptions &
-  WithDataStreamStats &
-  WithDegradedDocs &
+  Partial<WithDataStreamStats> &
+  Partial<WithDegradedDocs> &
   WithFlyoutOptions &
   WithDatasets;
 

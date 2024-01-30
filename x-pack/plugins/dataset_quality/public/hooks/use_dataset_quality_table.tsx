@@ -6,7 +6,7 @@
  */
 
 import { useSelector } from '@xstate/react';
-import { find, orderBy } from 'lodash';
+import { orderBy } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../../common/constants';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
@@ -35,13 +35,12 @@ export const useDatasetQualityTable = () => {
 
   const flyout = useSelector(service, (state) => state.context.flyout);
 
-  const dataStreamStats = useSelector(service, (state) => state.context.dataStreamStats);
   const loading = useSelector(service, (state) => state.matches('datasets.fetching'));
-
-  const degradedStats = useSelector(service, (state) => state.context.degradedDocStats);
   const loadingDegradedStats = useSelector(service, (state) =>
     state.matches('degradedDocs.fetching')
   );
+
+  const datasets = useSelector(service, (state) => state.context.datasets);
 
   const isDatasetQualityPageIdle = useSelector(service, (state) =>
     state.matches('datasets.loaded.idle')
@@ -88,7 +87,7 @@ export const useDatasetQualityTable = () => {
   const pagination = {
     pageIndex: page,
     pageSize: rowsPerPage,
-    totalItemCount: dataStreamStats.length,
+    totalItemCount: datasets.length,
     hidePerPageOptions: true,
   };
 
@@ -114,19 +113,10 @@ export const useDatasetQualityTable = () => {
 
   const renderedItems = useMemo(() => {
     const overridenSortingField = sortingOverrides[sort.field] || sort.field;
-    const mergedData = dataStreamStats.map((dataStream) => {
-      const degradedDocs = find(degradedStats, { dataset: dataStream.rawName });
-
-      return {
-        ...dataStream,
-        degradedDocs: degradedDocs?.percentage,
-      };
-    });
-
-    const sortedItems = orderBy(mergedData, overridenSortingField, sort.direction);
+    const sortedItems = orderBy(datasets, overridenSortingField, sort.direction);
 
     return sortedItems.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
-  }, [sort.field, sort.direction, dataStreamStats, page, rowsPerPage, degradedStats]);
+  }, [sort.field, sort.direction, datasets, page, rowsPerPage]);
 
   const resultsCount = useMemo(() => {
     const startNumberItemsOnPage = rowsPerPage ?? 1 * page ?? 0 + (renderedItems.length ? 1 : 0);
@@ -139,10 +129,10 @@ export const useDatasetQualityTable = () => {
         <strong>
           {startNumberItemsOnPage}-{endNumberItemsOnPage}
         </strong>{' '}
-        {tableSummaryOfText} {dataStreamStats.length}
+        {tableSummaryOfText} {datasets.length}
       </>
     );
-  }, [dataStreamStats.length, renderedItems.length, page, rowsPerPage]);
+  }, [rowsPerPage, page, renderedItems.length, datasets.length]);
 
   return {
     sort: { sort },

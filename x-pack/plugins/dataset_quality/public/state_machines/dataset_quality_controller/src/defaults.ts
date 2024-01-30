@@ -18,6 +18,5 @@ export const DEFAULT_CONTEXT: DefaultDatasetQualityControllerState = {
     },
   },
   flyout: {},
-  dataStreamStats: [],
-  degradedDocStats: [],
+  datasets: [],
 };

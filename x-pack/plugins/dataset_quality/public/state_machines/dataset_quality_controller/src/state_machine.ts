@@ -7,6 +7,7 @@
 
 import { IToasts } from '@kbn/core/public';
 import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
+import { find } from 'lodash';
 import { DataStreamDetails } from '../../../../common/data_streams_stats';
 import { DataStreamType } from '../../../../common/types';
 import { dataStreamPartsToIndexName } from '../../../../common/utils';
@@ -51,7 +52,7 @@ export const createPureDatasetQualityControllerStateMachine = (
                 src: 'loadDataStreamStats',
                 onDone: {
                   target: 'loaded',
-                  actions: ['storeDataStreamStats'],
+                  actions: ['storeDataStreamStats', 'storeDatasets'],
                 },
                 onError: {
                   target: 'loaded',
@@ -117,7 +118,7 @@ export const createPureDatasetQualityControllerStateMachine = (
                 src: 'loadDegradedDocs',
                 onDone: {
                   target: 'loaded',
-                  actions: ['storeDegradedDocStats'],
+                  actions: ['storeDegradedDocStats', 'storeDatasets'],
                 },
                 onError: {
                   target: 'loaded',
@@ -173,6 +174,24 @@ export const createPureDatasetQualityControllerStateMachine = (
                 },
               }
             : {};
+        }),
+        storeDatasets: assign((context, _event) => {
+          return context.dataStreamStats && context.degradedDocStats
+            ? {
+                datasets: context.dataStreamStats?.map((dataStream) => {
+                  const degradedDocs = find(context.degradedDocStats, {
+                    dataset: dataStream.rawName,
+                  });
+
+                  return {
+                    ...dataStream,
+                    degradedDocs: degradedDocs?.percentage,
+                  };
+                }),
+              }
+            : context.dataStreamStats
+            ? { datasets: context.dataStreamStats }
+            : { datasets: [] };
         }),
       },
     }
