@@ -210,15 +210,14 @@ export function runCli() {
           $ node scripts/es_archiver load my_test_data --config ../config.js --batch-size 300 --concurrency 2
 
       `,
-      // TODO-TRE: change descriptions for batch size and concurrency
       flags: {
         boolean: ['use-create', 'docs-only'],
         string: ['batch-size', 'concurrency'],
         help: `
           --use-create       use create instead of index for loading documents
           --docs-only        load only documents, not
-          --batch-size       BLAH-BLAH-BLAH
-          --concurrency      BLAH-BLAH-BLAH
+          --batch-size       the "high water mark"; the nubmer of records processed per bulk request
+          --concurrency      number of bulk requests made by the api
         `,
       },
       async run({ flags, esArchiver, statsMeta }) {
