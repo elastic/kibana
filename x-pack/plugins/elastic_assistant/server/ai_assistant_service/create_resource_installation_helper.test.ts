@@ -95,8 +95,6 @@ describe('createResourceInstallationHelper', () => {
     await retryUntil('init fns run', async () => logger.info.mock.calls.length === 3);
 
     expect(logger.info).toHaveBeenNthCalledWith(1, `commonInitPromise resolved`);
-    // expect(logger.info).toHaveBeenNthCalledWith(2, 'test1_default');
-    // expect(logger.info).toHaveBeenNthCalledWith(3, 'test2_default');
     expect(await helper.getInitializedResources('test1')).toEqual({
       result: true,
     });

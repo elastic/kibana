@@ -11,6 +11,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import {
   ConversationCreateProps,
   ConversationResponse,
+  Message,
   Replacement,
   UUID,
 } from '../schemas/conversations/common_attributes.gen';
@@ -153,7 +154,7 @@ function transform(conversationSchema: CreateMessageSchema): ConversationRespons
       presentation: message.presentation,
       reader: message.reader,
       replacements: message.replacements as Replacement[],
-      role: message.role,
+      role: message.role as Message['role'],
       traceData: {
         traceId: message.trace_data?.trace_id,
         transactionId: message.trace_data?.transaction_id,

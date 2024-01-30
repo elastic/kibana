@@ -121,8 +121,8 @@ describe('AI Assistant Service', () => {
       expect(assistantService.isInitialized()).toEqual(true);
       expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(1);
 
-      const componentTemplate1 = clusterClient.cluster.putComponentTemplate.mock.calls[0][0];
-      expect(componentTemplate1.name).toEqual(
+      const componentTemplate = clusterClient.cluster.putComponentTemplate.mock.calls[0][0];
+      expect(componentTemplate.name).toEqual(
         '.kibana-elastic-ai-assistant-component-template-conversations'
       );
     });
@@ -199,8 +199,6 @@ describe('AI Assistant Service', () => {
 
       expect(assistantService.isInitialized()).toEqual(false);
 
-      // Installing ILM policy failed so no calls to install context-specific resources
-      // should be made
       expect(clusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
       expect(clusterClient.indices.getAlias).not.toHaveBeenCalled();
       expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
@@ -231,10 +229,10 @@ describe('AI Assistant Service', () => {
       expect(logger.info).toHaveBeenCalledWith(`Retrying common resource initialization`);
       expect(logger.info).toHaveBeenCalledWith(`Retrying common resource initialization`);
       expect(logger.info).toHaveBeenCalledWith(
-        `Installing component template .kibana-elastic-ai-assistant-component-template-conversations`,
-        'Retrying common resource initialization',
-        `Retrying resource initialization for "default"`
+        `Installing component template .kibana-elastic-ai-assistant-component-template-conversations`
       );
+      expect(logger.info).toHaveBeenCalledWith(`Retrying common resource initialization`);
+      expect(logger.info).toHaveBeenCalledWith(`Retrying resource initialization for "default"`);
     });
 
     test('should not retry initializing common resources if common resource initialization is in progress', async () => {
@@ -259,8 +257,6 @@ describe('AI Assistant Service', () => {
 
       expect(assistantService.isInitialized()).toEqual(false);
 
-      // Installing ILM policy failed so no calls to install context-specific resources
-      // should be made
       expect(clusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
       expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
       expect(clusterClient.indices.create).not.toHaveBeenCalled();
@@ -298,17 +294,19 @@ describe('AI Assistant Service', () => {
       expect(result[1]).not.toBe(null);
       expect(logger.info).toHaveBeenCalledWith(`Retrying common resource initialization`);
       expect(logger.info).toHaveBeenCalledWith(
-        `Retrying resource initialization for context "test"`
+        `Installing component template .kibana-elastic-ai-assistant-component-template-conversations`
       );
+      expect(logger.info).toHaveBeenCalledWith(`Retrying common resource initialization`);
+      expect(logger.info).toHaveBeenCalledWith(`Retrying resource initialization for "default"`);
       expect(logger.info).toHaveBeenCalledWith(
-        `Resource installation for "test" succeeded after retry`
+        `Resource installation for "default" succeeded after retry`
       );
       expect(logger.info).toHaveBeenCalledWith(
         `Skipped retrying common resource initialization because it is already being retried.`
       );
     });
 
-    test('should retry initializing context specific resources if context specific resource initialization failed', async () => {
+    test('should retry initializing space specific resources if space specific resource initialization failed', async () => {
       clusterClient.indices.simulateTemplate.mockImplementationOnce(async () => ({
         ...SimulateTemplateResponse,
         template: {
@@ -316,7 +314,13 @@ describe('AI Assistant Service', () => {
           mappings: {},
         },
       }));
-
+      clusterClient.indices.simulateIndexTemplate.mockImplementationOnce(async () => ({
+        ...SimulateTemplateResponse,
+        template: {
+          ...SimulateTemplateResponse.template,
+          mappings: {},
+        },
+      }));
       assistantService = new AIAssistantService({
         logger,
         elasticsearchClientPromise: Promise.resolve(clusterClient),
@@ -346,18 +350,25 @@ describe('AI Assistant Service', () => {
       });
 
       expect(result).not.toBe(null);
-      expect(logger.info).not.toHaveBeenCalledWith(`Retrying common resource initialization`);
+
+      expect(logger.info).toHaveBeenCalledWith(`Retrying common resource initialization`);
+      expect(logger.info).toHaveBeenCalledWith(`Retrying resource initialization for "default"`);
       expect(logger.info).toHaveBeenCalledWith(
-        `Retrying resource initialization for context "test"`
-      );
-      expect(logger.info).toHaveBeenCalledWith(
-        `Resource installation for "test" succeeded after retry`
+        `Resource installation for "default" succeeded after retry`
       );
     });
 
     test('should not retry initializing context specific resources if context specific resource initialization is in progress', async () => {
       // this is the initial call that fails
       clusterClient.indices.simulateTemplate.mockImplementationOnce(async () => ({
+        ...SimulateTemplateResponse,
+        template: {
+          ...SimulateTemplateResponse.template,
+          mappings: {},
+        },
+      }));
+
+      clusterClient.indices.simulateIndexTemplate.mockImplementationOnce(async () => ({
         ...SimulateTemplateResponse,
         template: {
           ...SimulateTemplateResponse.template,
@@ -413,20 +424,20 @@ describe('AI Assistant Service', () => {
 
       expect(result[0]).not.toBe(null);
       expect(result[1]).not.toBe(null);
-      expect(logger.info).not.toHaveBeenCalledWith(`Retrying common resource initialization`);
+      expect(logger.info).toHaveBeenCalledWith(`Retrying common resource initialization`);
 
       // Should only log the retry once because the second call should
       // leverage the outcome of the first retry
       expect(
         logger.info.mock.calls.filter(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (calls: any[]) => calls[0] === `Retrying resource initialization for context "test"`
+          (calls: any[]) => calls[0] === `Retrying resource initialization for "default"`
         ).length
       ).toEqual(1);
       expect(
         logger.info.mock.calls.filter(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (calls: any[]) => calls[0] === `Resource installation for "test" succeeded after retry`
+          (calls: any[]) => calls[0] === `Resource installation for "default" succeeded after retry`
         ).length
       ).toEqual(1);
     });
@@ -434,6 +445,14 @@ describe('AI Assistant Service', () => {
     test('should throttle retries of initializing context specific resources', async () => {
       // this is the initial call that fails
       clusterClient.indices.simulateTemplate.mockImplementation(async () => ({
+        ...SimulateTemplateResponse,
+        template: {
+          ...SimulateTemplateResponse.template,
+          mappings: {},
+        },
+      }));
+
+      clusterClient.indices.simulateIndexTemplate.mockImplementation(async () => ({
         ...SimulateTemplateResponse,
         template: {
           ...SimulateTemplateResponse.template,
@@ -472,13 +491,13 @@ describe('AI Assistant Service', () => {
         createAIAssistantDatastreamClientWithDelay(2),
       ]);
 
-      expect(logger.info).not.toHaveBeenCalledWith(`Retrying common resource initialization`);
+      expect(logger.info).toHaveBeenCalledWith(`Retrying common resource initialization`);
 
       // Should only log the retry once because the second and third retries should be throttled
       expect(
         logger.info.mock.calls.filter(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (calls: any[]) => calls[0] === `Retrying resource initialization for context "test"`
+          (calls: any[]) => calls[0] === `Retrying resource initialization for "default"`
         ).length
       ).toEqual(1);
     });
@@ -497,12 +516,10 @@ describe('AI Assistant Service', () => {
         taskManager: taskManagerMock.createSetup(),
       });
 
-      await retryUntil('error log called', async () => logger.error.mock.calls.length > 0);
+      await retryUntil('error log called', async () => logger.error.mock.calls.length > 0, 1);
 
       expect(assistantService.isInitialized()).toEqual(false);
 
-      // Installing ILM policy failed so no calls to install context-specific resources
-      // should be made
       expect(clusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
       expect(clusterClient.indices.getAlias).not.toHaveBeenCalled();
       expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
@@ -510,7 +527,7 @@ describe('AI Assistant Service', () => {
 
       const result = await assistantService.createAIAssistantDatastreamClient({
         logger,
-        spaceId: 'default',
+        spaceId: 'test',
         currentUser: mockUser1,
       });
 
@@ -523,12 +540,19 @@ describe('AI Assistant Service', () => {
       expect(AIAssistantConversationsDataClient).not.toHaveBeenCalled();
       expect(logger.info).toHaveBeenCalledWith(`Retrying common resource initialization`);
       expect(logger.info).toHaveBeenCalledWith(
-        `Retrying resource initialization for context "test"`
+        `Installing component template .kibana-elastic-ai-assistant-component-template-conversations`
+      );
+      expect(logger.info).toHaveBeenCalledWith(`Retrying common resource initialization`);
+      expect(logger.info).toHaveBeenCalledWith(`Retrying resource initialization for "test"`);
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Common resources were not initialized, cannot initialize resources for test`
       );
       expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringMatching(
-          /There was an error in the framework installing namespace-level resources and creating concrete indices for context "test" - Original error: Failure during installation\. fail \d+; Error after retry: Failure during installation\. fail \d+/
-        )
+        `Common resources were not initialized, cannot initialize resources for test`
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        `There was an error in the framework installing spaceId-level resources and creating concrete indices for spaceId "test" - Retry failed with errors: Failure during installation of create or update .kibana-elastic-ai-assistant-component-template-conversations component template. fail 1`
       );
     });
 
@@ -556,7 +580,7 @@ describe('AI Assistant Service', () => {
 
       const result = await assistantService.createAIAssistantDatastreamClient({
         logger,
-        spaceId: 'default',
+        spaceId: 'test',
         currentUser: mockUser1,
       });
 
@@ -569,10 +593,18 @@ describe('AI Assistant Service', () => {
       expect(AIAssistantConversationsDataClient).not.toHaveBeenCalled();
       expect(logger.info).toHaveBeenCalledWith(`Retrying common resource initialization`);
       expect(logger.info).toHaveBeenCalledWith(
-        `Retrying resource initialization for context "test"`
+        `Installing component template .kibana-elastic-ai-assistant-component-template-conversations`
+      );
+      expect(logger.info).toHaveBeenCalledWith(`Retrying common resource initialization`);
+      expect(logger.info).toHaveBeenCalledWith(`Retrying resource initialization for "test"`);
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Common resources were not initialized, cannot initialize resources for test`
       );
       expect(logger.warn).toHaveBeenCalledWith(
-        `There was an error in the framework installing namespace-level resources and creating concrete indices for context "test" - Retry failed with error: Failure during installation. fail`
+        `Common resources were not initialized, cannot initialize resources for test`
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        `There was an error in the framework installing spaceId-level resources and creating concrete indices for spaceId "test" - Retry failed with errors: Failure during installation of create or update .kibana-elastic-ai-assistant-component-template-conversations component template. fail`
       );
     });
 
@@ -603,18 +635,25 @@ describe('AI Assistant Service', () => {
 
       const result = await assistantService.createAIAssistantDatastreamClient({
         logger,
-        spaceId: 'default',
+        spaceId: 'test',
         currentUser: mockUser1,
       });
 
       expect(AIAssistantConversationsDataClient).not.toHaveBeenCalled();
       expect(result).toBe(null);
-      expect(logger.info).not.toHaveBeenCalledWith(`Retrying common resource initialization`);
+      expect(logger.info).toHaveBeenCalledWith(`Retrying common resource initialization`);
       expect(logger.info).toHaveBeenCalledWith(
-        `Retrying resource initialization for context "default"`
+        `Installing component template .kibana-elastic-ai-assistant-component-template-conversations`
+      );
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Common resources were not initialized, cannot initialize resources for test`
       );
       expect(logger.warn).toHaveBeenCalledWith(
-        `There was an error in the framework installing namespace-level resources and creating concrete indices for context "test" - Original error: Failure during installation. No mappings would be generated for .alerts-test.alerts-default-index-template, possibly due to failed/misconfigured bootstrapping; Error after retry: Failure during installation. fail index template`
+        `Common resources were not initialized, cannot initialize resources for test`
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        `There was an error in the framework installing spaceId-level resources and creating concrete indices for spaceId \"test\" - Retry failed with errors: Failure during installation of create or update .kibana-elastic-ai-assistant-index-template-conversations index template. No mappings would be generated for .kibana-elastic-ai-assistant-index-template-conversations, possibly due to failed/misconfigured bootstrapping`
       );
     });
   });
@@ -720,17 +759,14 @@ describe('AI Assistant Service', () => {
     });
 
     test('should retry creating concrete index for transient ES errors', async () => {
-      clusterClient.indices.getDataStream.mockImplementationOnce(async () => ({
+      clusterClient.indices.getDataStream.mockImplementation(async () => ({
         data_streams: [],
       }));
       clusterClient.indices.createDataStream
         .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
         .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
         .mockResolvedValue({ acknowledged: true });
-      clusterClient.indices.create
-        .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
-        .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
-        .mockResolvedValue({ index: 'index', shards_acknowledged: true, acknowledged: true });
+
       const assistantService = new AIAssistantService({
         logger,
         elasticsearchClientPromise: Promise.resolve(clusterClient),
@@ -743,6 +779,12 @@ describe('AI Assistant Service', () => {
         'AI Assistant service initialized',
         async () => assistantService.isInitialized() === true
       );
+
+      await assistantService.createAIAssistantDatastreamClient({
+        logger,
+        spaceId: 'default',
+        currentUser: mockUser1,
+      });
 
       await retryUntil(
         'space resources initialized',

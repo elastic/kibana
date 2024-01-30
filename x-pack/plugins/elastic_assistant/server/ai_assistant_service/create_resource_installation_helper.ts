@@ -84,7 +84,7 @@ export function createResourceInstallationHelper(
       initPromise?: Promise<InitializationPromise>,
       timeoutMs?: number
     ) => {
-      const key = `${namespace}`;
+      const key = namespace;
       // Use the new common initialization promise if specified
       if (initPromise) {
         commonInitPromise = initPromise;
@@ -110,7 +110,7 @@ export function createResourceInstallationHelper(
       }
     },
     getInitializedResources: async (namespace: string): Promise<InitializationPromise> => {
-      const key = `${namespace}`;
+      const key = namespace;
       return (
         initializedResources.has(key)
           ? initializedResources.get(key)
