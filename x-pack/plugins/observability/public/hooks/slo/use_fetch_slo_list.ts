@@ -53,25 +53,15 @@ export function useFetchSloList({
 }: SLOListParams = {}): UseFetchSloListResponse {
   const {
     http,
-    notifications: { toasts },
+    // notifications: { toasts },
   } = useKibana().services;
   const queryClient = useQueryClient();
 
-  const { dataView } = useCreateDataView({
-    indexPatternString: SLO_SUMMARY_DESTINATION_INDEX_NAME,
-  });
+  // const { dataView } = useCreateDataView({
+  //   indexPatternString: SLO_SUMMARY_DESTINATION_INDEX_NAME,
+  // });
 
-  const filters = useMemo(() => {
-    try {
-      return JSON.stringify(
-        buildQueryFromFilters(filterDSL, dataView, {
-          ignoreFilterIfFieldNotInIndex: true,
-        })
-      );
-    } catch (e) {
-      return '';
-    }
-  }, [filterDSL, dataView]);
+  const filters = [];
 
   const kqlQueryValue = useMemo(() => {
     return mixKqlWithTags(kqlQuery, tags);
@@ -114,11 +104,11 @@ export function useFetchSloList({
       queryClient.invalidateQueries({ queryKey: sloKeys.rules(), exact: false });
     },
     onError: (error: Error) => {
-      toasts.addError(error, {
-        title: i18n.translate('xpack.observability.slo.list.errorNotification', {
-          defaultMessage: 'Something went wrong while fetching SLOs',
-        }),
-      });
+      // toasts.addError(error, {
+      //   title: i18n.translate('xpack.observability.slo.list.errorNotification', {
+      //     defaultMessage: 'Something went wrong while fetching SLOs',
+      //   }),
+      // });
     },
   });
 

@@ -12,6 +12,11 @@ export interface EmbeddableSloProps {
   sloInstanceId: string | undefined;
   reloadSubject?: Subject<boolean>;
   onRenderComplete?: () => void;
+  showGroupSLOs?: boolean; // delete this one
+  overviewMode?: 'single' | 'groups';
+  groupBy: string; // TODO add groupBy options
+  groups: [];
+  sloView: string; // TODO add sloView types
 }
 
 export type SloEmbeddableInput = EmbeddableInput & EmbeddableSloProps;

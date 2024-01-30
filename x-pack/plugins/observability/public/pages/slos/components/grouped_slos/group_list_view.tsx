@@ -29,12 +29,12 @@ import { useSloFormattedSLIValue } from '../../hooks/use_slo_summary';
 interface Props {
   isCompact: boolean;
   group: string;
-  kqlQuery: string;
+  kqlQuery?: string;
   sloView: string;
-  sort: string;
-  direction: SortDirection;
+  sort?: string;
+  direction?: SortDirection;
   groupBy: string;
-  summary: {
+  summary?: {
     worst: {
       sliValue: number;
       status: string;
@@ -42,7 +42,7 @@ interface Props {
     total: number;
     violated: number;
   };
-  filters: Filter[];
+  filters?: Filter[];
 }
 
 export function GroupListView({

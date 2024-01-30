@@ -19,6 +19,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { type CoreStart, IUiSettingsClient, ApplicationStart } from '@kbn/core/public';
 import { Subject } from 'rxjs';
 import { SloOverview } from './slo_overview';
+import { GroupListView } from '../../../pages/slos/components/grouped_slos/group_list_view';
 import type { SloEmbeddableInput } from './types';
 
 export const SLO_EMBEDDABLE = 'SLO_EMBEDDABLE';
@@ -65,20 +66,38 @@ export class SLOEmbeddable extends AbstractEmbeddable<SloEmbeddableInput, Embedd
     // required for the export feature to work
     this.node.setAttribute('data-shared-item', '');
 
-    const { sloId, sloInstanceId } = this.getInput();
+    const { sloId, sloInstanceId, overviewMode, groupBy, groups, sloView } = this.getInput();
+    console.log(this.getInput(), '!!get Input');
     const queryClient = new QueryClient();
-
+    const summary = {
+      worst: {
+        sliValue: 12,
+        status: 'healthy',
+      },
+      total: 10,
+      violated: 9,
+    };
     const I18nContext = this.deps.i18n.Context;
     ReactDOM.render(
       <I18nContext>
         <KibanaContextProvider services={this.deps}>
           <QueryClientProvider client={queryClient}>
-            <SloOverview
-              onRenderComplete={() => this.onRenderComplete()}
-              sloId={sloId}
-              sloInstanceId={sloInstanceId}
-              reloadSubject={this.reloadSubject}
-            />
+            {overviewMode === 'groups' ? (
+              <GroupListView
+                groupBy={groupBy}
+                isCompact={true}
+                group="production"
+                sloView={sloView}
+                summary={summary}
+              />
+            ) : (
+              <SloOverview
+                onRenderComplete={() => this.onRenderComplete()}
+                sloId={sloId}
+                sloInstanceId={sloInstanceId}
+                reloadSubject={this.reloadSubject}
+              />
+            )}
           </QueryClientProvider>
         </KibanaContextProvider>
       </I18nContext>,

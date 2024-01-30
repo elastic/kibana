@@ -66,6 +66,7 @@ export function useFetchSloGroups({
   const kqlQueryValue = useMemo(() => {
     return mixKqlWithTags(kqlQuery, tags);
   }, [kqlQuery, tags]);
+
   const { data, isLoading, isSuccess, isError, isRefetching } = useQuery({
     queryKey: sloKeys.group({ page, perPage, groupBy, kqlQuery: kqlQueryValue, filters }),
     queryFn: async ({ signal }) => {
