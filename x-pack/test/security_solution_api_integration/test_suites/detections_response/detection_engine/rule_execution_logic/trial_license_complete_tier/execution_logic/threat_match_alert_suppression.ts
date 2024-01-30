@@ -772,7 +772,7 @@ export default ({ getService }: FtrProviderContext) => {
           await Promise.all(
             [firstTimestamp, secondTimestamp].map((t) =>
               indexGeneratedSourceDocuments({
-                docsCount: 115,
+                docsCount: 100,
                 seed: (index) => ({
                   id,
                   '@timestamp': t,
