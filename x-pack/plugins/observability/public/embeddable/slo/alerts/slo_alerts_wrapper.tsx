@@ -39,7 +39,7 @@ export function SloAlertsWrapper({
   timeRange: initialTimeRange,
   onRenderComplete,
   reloadSubject,
-  showAllGroupByInstances,
+  showAllGroupByInstances: initialShowAllGroupByInstances,
 }: Props) {
   const {
     application: { navigateToUrl },
@@ -48,6 +48,9 @@ export function SloAlertsWrapper({
 
   const [timeRange, setTimeRange] = useState<TimeRange>(initialTimeRange);
   const [slos, setSlos] = useState<SloItem[]>(initialSlos);
+  const [showAllGroupByInstances, setShowAllGroupByInstances] = useState<boolean | undefined>(
+    initialShowAllGroupByInstances
+  );
 
   const [lastRefreshTime, setLastRefreshTime] = useState<number | undefined>(undefined);
 
@@ -61,6 +64,7 @@ export function SloAlertsWrapper({
         if (nTimeRange && (nTimeRange.from !== timeRange.from || nTimeRange.to !== timeRange.to)) {
           setTimeRange(nTimeRange);
         }
+        setShowAllGroupByInstances(input.showAllGroupByInstances);
       }
       setLastRefreshTime(Date.now());
     });
@@ -143,6 +147,7 @@ export function SloAlertsWrapper({
             deps={deps}
             timeRange={timeRange}
             onLoaded={() => setIsSummaryLoaded(true)}
+            showAllGroupByInstances={showAllGroupByInstances}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
