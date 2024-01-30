@@ -12,7 +12,7 @@ import Boom from '@hapi/boom';
 
 import { isEqual } from 'lodash';
 
-import { DEFAULT_OUTPUT_ID, outputType } from '../../../common/constants';
+import { SERVERLESS_DEFAULT_OUTPUT_ID, outputType } from '../../../common/constants';
 
 import type {
   DeleteOutputRequestSchema,
@@ -104,7 +104,7 @@ export const putOutputHandler: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const outputUpdate = request.body;
   try {
-    await validateOutputServerless(outputUpdate, soClient);
+    await validateOutputServerless(outputUpdate, soClient, request.params.outputId);
     ensureNoDuplicateSecrets(outputUpdate);
     await outputService.update(soClient, esClient, request.params.outputId, outputUpdate);
     const output = await outputService.get(soClient, request.params.outputId);
@@ -159,7 +159,8 @@ export const postOutputHandler: RequestHandler<
 
 async function validateOutputServerless(
   output: Partial<Output>,
-  soClient: SavedObjectsClientContract
+  soClient: SavedObjectsClientContract,
+  outputId?: string
 ): Promise<void> {
   const cloudSetup = appContextService.getCloud();
   if (!cloudSetup?.isServerlessEnabled) {
@@ -168,9 +169,14 @@ async function validateOutputServerless(
   if (output.type === outputType.RemoteElasticsearch) {
     throw Boom.badRequest('Output type remote_elasticsearch not supported in serverless');
   }
-  // Elasticsearch outputs must have the default host URL
-  const defaultOutput = await outputService.get(soClient, DEFAULT_OUTPUT_ID);
-  if (output.type === outputType.Elasticsearch && !isEqual(output.hosts, defaultOutput.hosts)) {
+  // Elasticsearch outputs must have the default host URL in serverless.
+  const defaultOutput = await outputService.get(soClient, SERVERLESS_DEFAULT_OUTPUT_ID);
+  let originalOutput;
+  if (outputId) {
+    originalOutput = await outputService.get(soClient, outputId);
+  }
+  const type = output.type || originalOutput?.type;
+  if (type === outputType.Elasticsearch && !isEqual(output.hosts, defaultOutput.hosts)) {
     throw Boom.badRequest('Elasticsearch output host must equal default output host in serverless');
   }
 }

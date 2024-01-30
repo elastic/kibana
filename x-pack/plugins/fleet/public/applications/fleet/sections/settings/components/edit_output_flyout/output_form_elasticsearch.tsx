@@ -12,31 +12,15 @@ import { i18n } from '@kbn/i18n';
 
 import { MultiRowInput } from '../multi_row_input';
 
-import type { Output } from '../../../../types';
-
 import type { OutputFormInputsType } from './use_output_form';
 
 interface Props {
   inputs: OutputFormInputsType;
-  defaultOuput?: Output;
-  isStateful?: boolean;
 }
 
-export const OutputFormElasticsearchSection: React.FunctionComponent<Props> = ({
-  inputs,
-  defaultOuput,
-  isStateful,
-}) => {
-  const inputProps = isStateful
-    ? inputs.elasticsearchUrlInput.props
-    : {
-        ...inputs.elasticsearchUrlInput.props,
-        disabled: true,
-        value:
-          inputs.elasticsearchUrlInput.props.value.length > 0
-            ? inputs.elasticsearchUrlInput.props.value
-            : defaultOuput?.hosts || [],
-      };
+export const OutputFormElasticsearchSection: React.FunctionComponent<Props> = (props) => {
+  const { inputs } = props;
+
   return (
     <>
       <MultiRowInput
@@ -50,7 +34,7 @@ export const OutputFormElasticsearchSection: React.FunctionComponent<Props> = ({
             defaultMessage: 'Specify host URL',
           }
         )}
-        {...inputProps}
+        {...inputs.elasticsearchUrlInput.props}
         isUrl
       />
       <EuiFormRow

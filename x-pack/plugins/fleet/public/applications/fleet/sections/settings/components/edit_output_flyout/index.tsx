@@ -78,7 +78,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   proxies,
 }) => {
   useBreadcrumbs('settings');
-  const form = useOutputForm(onClose, output);
+  const form = useOutputForm(onClose, output, defaultOuput);
   const inputs = form.inputs;
   const { docLinks, cloud } = useStartServices();
   const { euiTheme } = useEuiTheme();
@@ -126,13 +126,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   };
 
   const renderElasticsearchSection = () => {
-    return (
-      <OutputFormElasticsearchSection
-        inputs={inputs}
-        defaultOuput={defaultOuput}
-        isStateful={isStateful}
-      />
-    );
+    return <OutputFormElasticsearchSection inputs={inputs} />;
   };
 
   const renderRemoteElasticsearchSection = () => {
