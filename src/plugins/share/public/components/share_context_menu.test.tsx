@@ -26,6 +26,7 @@ const defaultProps: ShareContextMenuProps = {
   openModal: jest.fn(),
   theme: themeServiceMock.createStartContract(),
   i18nStart: i18nServiceMock.createStartContract(),
+  isDirty: false,
 };
 
 test('should render context menu panel when there are more than one panel', () => {
