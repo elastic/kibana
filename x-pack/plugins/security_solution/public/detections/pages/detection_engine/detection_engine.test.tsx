@@ -168,6 +168,7 @@ jest.mock('../../../timelines/components/side_panel/hooks/use_detail_panel', () 
   };
 });
 
+const dataViewId = 'security-solution-default';
 const state: State = {
   ...mockGlobalState,
 };
@@ -297,6 +298,7 @@ describe('DetectionEnginePageComponent', () => {
               type: 'exists',
               key: 'kibana.alert.building_block_type',
               value: 'exists',
+              index: dataViewId,
             },
             query: {
               exists: {
@@ -335,6 +337,7 @@ describe('DetectionEnginePageComponent', () => {
               type: 'exists',
               key: 'kibana.alert.building_block_type',
               value: 'exists',
+              index: dataViewId,
             },
             query: {
               exists: {

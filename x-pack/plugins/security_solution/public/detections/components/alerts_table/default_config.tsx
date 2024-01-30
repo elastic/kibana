@@ -105,6 +105,7 @@ export const buildAlertsFilter = (ruleStaticId: string | null): Filter[] =>
           meta: {
             alias: null,
             negate: false,
+            index: 'security-solution-default',
             disabled: false,
             type: 'phrase',
             key: ALERT_RULE_RULE_ID,

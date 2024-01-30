@@ -78,6 +78,8 @@ const platinumBaseColumns = [
   { columnHeaderType: 'not-filtered', id: 'destination.ip' },
 ];
 
+const dataViewId = 'security-solution-default';
+
 describe('alerts default_config', () => {
   describe('buildAlertsRuleIdFilter', () => {
     test('given a rule id this will return an array with a single filter', () => {
@@ -86,6 +88,7 @@ describe('alerts default_config', () => {
         meta: {
           alias: null,
           negate: false,
+          index: dataViewId,
           disabled: false,
           type: 'phrase',
           key: 'kibana.alert.rule.rule_id',
@@ -110,6 +113,7 @@ describe('alerts default_config', () => {
           meta: {
             alias: null,
             disabled: false,
+            index: dataViewId,
             negate: false,
             key: 'kibana.alert.rule.type',
             type: 'term',
@@ -233,6 +237,7 @@ describe('alerts default_config', () => {
         meta: {
           alias: null,
           disabled: false,
+          index: dataViewId,
           negate: false,
         },
         query: {
