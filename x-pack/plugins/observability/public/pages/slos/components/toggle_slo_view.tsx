@@ -48,7 +48,6 @@ export function ToggleSLOView({
   onChangeView,
   onToggleCompactView,
   onStateChange,
-  loading,
   isCompact = true,
   sloList,
   state,

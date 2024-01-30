@@ -14,8 +14,9 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
-  EuiStat,
   EuiTablePagination,
+  EuiText,
+  EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
 import { useFetchSloList } from '../../../../hooks/slo/use_fetch_slo_list';
@@ -33,7 +34,10 @@ interface Props {
   direction: SortDirection;
   groupBy: string;
   summary: {
-    worst?: number;
+    worst: {
+      sliValue: number;
+      status: string;
+    };
     total: number;
     violated: number;
   };
@@ -75,12 +79,29 @@ export function GroupListView({
     setPage(pageNumber);
   };
 
-  const groupTitle = `${groupName} (${total})`;
-  const worstSLI = useSloFormattedSLIValue(summary.worst);
-  const totalViolated =
-    !isNullOrUndefined(summary.violated) && !isNullOrUndefined(summary.total)
-      ? `${summary.violated}/${summary.total}`
-      : null;
+  const getTotalViolated = () => {
+    if (isNullOrUndefined(summary.violated) || isNullOrUndefined(summary.total)) {
+      return null;
+    }
+    if (summary.violated === 0) {
+      return i18n.translate('xpack.observability.slo.group.totalHealthy', {
+        defaultMessage: '{total} Healthy',
+        values: {
+          total: `${summary.total}/${summary.total}`,
+        },
+      });
+    } else {
+      return i18n.translate('xpack.observability.slo.group.totalViolated', {
+        defaultMessage: '{total} Violated',
+        values: {
+          total: `${summary.violated}/${summary.total}`,
+        },
+      });
+    }
+  };
+
+  const worstSLI = useSloFormattedSLIValue(summary.worst.sliValue);
+  const totalViolated = getTotalViolated();
 
   return (
     <EuiPanel hasBorder={true}>
@@ -88,58 +109,28 @@ export function GroupListView({
         <EuiFlexItem>
           <MemoEuiAccordion
             buttonContent={
-              <EuiFlexGroup direction="column" gutterSize="xs">
+              <EuiFlexGroup alignItems="center">
                 <EuiFlexItem>
                   <EuiTitle size="xs">
-                    <h3>{groupTitle}</h3>
+                    <h3>{groupName}</h3>
                   </EuiTitle>
                 </EuiFlexItem>
                 {totalViolated && (
                   <EuiFlexItem>
-                    <span>
-                      <EuiBadge color="danger">
-                        {i18n.translate('xpack.observability.slo.group.totalViolated', {
-                          defaultMessage: '{total} Violated',
-                          values: {
-                            total: totalViolated,
-                          },
-                        })}
-                      </EuiBadge>
-                    </span>
+                    <EuiBadge color={summary.violated > 0 ? 'danger' : 'success'}>
+                      {totalViolated}
+                    </EuiBadge>
                   </EuiFlexItem>
                 )}
-              </EuiFlexGroup>
-            }
-            extraAction={
-              <EuiFlexGroup>
-                {worstSLI && (
-                  <EuiFlexItem grow={false}>
-                    <EuiStat
-                      description={i18n.translate('xpack.observability.slo.group.worst', {
-                        defaultMessage: 'Worst SLO',
-                      })}
-                      title={worstSLI}
-                      textAlign="right"
-                      titleColor="danger"
-                      titleSize="s"
-                      reverse
-                    />
-                  </EuiFlexItem>
-                )}
-                {totalViolated && (
-                  <EuiFlexItem grow={false}>
-                    <EuiStat
-                      description={i18n.translate('xpack.observability.slo.group.violated', {
-                        defaultMessage: 'Violated',
-                      })}
-                      title={totalViolated}
-                      textAlign="right"
-                      titleColor="danger"
-                      titleSize="s"
-                      reverse
-                    />
-                  </EuiFlexItem>
-                )}
+                <EuiText size="s">
+                  {i18n.translate('xpack.observability.slo.group.worstPerforming', {
+                    defaultMessage: 'Worst performing',
+                  })}
+                  {': '}
+                  <EuiTextColor color={summary.worst.status !== 'HEALTHY' ? 'danger' : undefined}>
+                    <strong>{worstSLI}</strong>
+                  </EuiTextColor>
+                </EuiText>
               </EuiFlexGroup>
             }
             id={group}

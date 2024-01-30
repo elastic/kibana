@@ -12,6 +12,7 @@ import {
   SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
   DEFAULT_SLO_GROUPS_PAGE_SIZE,
 } from '../../../common/slo/constants';
+import { Status } from '../../domain/models';
 
 const DEFAULT_PAGE = 1;
 const MAX_PER_PAGE = 5000;
@@ -30,12 +31,18 @@ function toPagination(params: FindSLOGroupsParams): Pagination {
   };
 }
 
+interface TopHitsResult {
+  _source: {
+    sliValue: number;
+    status: Status;
+  };
+}
 interface Aggregation {
   doc_count: number;
   key: string;
-  min_sli_value: {
-    worst: {
-      value: number | undefined;
+  worst: {
+    hits: {
+      hits: TopHitsResult[];
     };
   };
   violated: {
@@ -82,18 +89,17 @@ export class FindSLOGroups {
               size: 10000,
             },
             aggs: {
-              min_sli_value: {
-                filter: {
-                  term: {
-                    status: 'VIOLATED',
-                  },
-                },
-                aggs: {
-                  worst: {
-                    min: {
-                      field: 'sliValue',
+              worst: {
+                top_hits: {
+                  sort: {
+                    errorBudgetRemaining: {
+                      order: 'asc',
                     },
                   },
+                  _source: {
+                    includes: ['sliValue', 'status'],
+                  },
+                  size: 1,
                 },
               },
               violated: {
@@ -158,7 +164,10 @@ export class FindSLOGroups {
             groupBy,
             summary: {
               total: bucket.doc_count ?? 0,
-              worst: bucket.min_sli_value?.worst?.value,
+              worst: {
+                sliValue: bucket.worst?.hits?.hits[0]?._source?.sliValue,
+                status: bucket.worst?.hits?.hits[0]?._source?.status,
+              },
               violated: bucket.violated?.doc_count,
               healthy: bucket.healthy?.doc_count,
               degrading: bucket.degrading?.doc_count,
