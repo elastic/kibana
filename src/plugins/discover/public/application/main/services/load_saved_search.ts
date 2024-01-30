@@ -70,7 +70,11 @@ export const loadSavedSearch = async (
   // Sync global filters (coming from URL) to filter manager.
   // It needs to be done manually here as `syncGlobalQueryStateWithUrl` is being called after this `loadSavedSearch` function.
   const globalFilters = globalStateContainer?.get()?.filters;
-  if (globalFilters && globalFilters?.length && !services.filterManager.getGlobalFilters().length) {
+  if (
+    globalFilters &&
+    globalFilters?.length &&
+    !services.filterManager.getGlobalFilters()?.length
+  ) {
     services.filterManager.setGlobalFilters(globalFilters);
   }
 
@@ -150,7 +154,7 @@ function updateBySavedSearch(savedSearch: SavedSearch, deps: LoadSavedSearchDeps
   // Combine global filters (if defined) and app filters when loading a saved search.
   // We do the same in `updateSavedSearch` function when user updates the saved search.
   const globalFilters = services.filterManager.getGlobalFilters();
-  if (globalFilters.length) {
+  if (globalFilters?.length) {
     savedSearch.searchSource.setField('filter', [
       ...globalFilters,
       ...services.filterManager.getAppFilters(),
