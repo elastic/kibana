@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { Action } from 'redux';
-import type { Epic } from 'redux-observable';
+import type { Action, Middleware } from 'redux';
 import { get } from 'lodash/fp';
-import { filter, map } from 'rxjs/operators';
 
 import {
   applyKqlFilterQuery,
@@ -33,7 +31,7 @@ import {
   setSavedQueryId,
   setChanged,
   updateSavedSearch,
-} from './actions';
+} from '../actions';
 
 /**
  * All action types that will mark a timeline as changed
@@ -65,19 +63,26 @@ const timelineChangedTypes = new Set([
 ]);
 
 /**
- * Maps actions that mark a timeline change to `setChanged` actions.
+ * Emit actions that will mark a timeline change to `setChanged` actions.
  * This allows to detect unsaved timeline changes when navigating away from the timeline.
  */
-export const createTimelineChangedEpic = (): Epic<Action, Action> => (action$) => {
-  return action$.pipe(
-    // Only apply mapping to some actions
-    filter((action) => timelineChangedTypes.has(action.type)),
-    // Map the action to a `changed` action
-    map((action) =>
-      setChanged({
-        id: get('payload.id', action) as string,
-        changed: true,
-      })
-    )
-  );
-};
+export const timelineChangedMiddleware: Middleware =
+  ({ dispatch }) =>
+  (next) =>
+  (action: Action) => {
+    // perform the action
+    const ret = next(action);
+
+    // if the action matches one of the "change" actions,
+    // dispatch a `setChanged` action on top
+    if (timelineChangedTypes.has(action.type)) {
+      dispatch(
+        setChanged({
+          id: get('payload.id', action) as string,
+          changed: true,
+        })
+      );
+    }
+
+    return ret;
+  };
