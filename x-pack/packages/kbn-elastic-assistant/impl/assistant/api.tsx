@@ -135,7 +135,6 @@ export const fetchConnectorExecuteAction = async ({
           rawResponse: true,
         }
       );
-      console.log('CLIENT CHUNK RESPONSE', response);
 
       const reader = response?.response?.body?.getReader();
 

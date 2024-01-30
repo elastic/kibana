@@ -141,19 +141,18 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
             handleLLMNewToken(payload) {
               push({ payload, type: 'content' });
             },
-            handleLLMEnd() {
+            handleLLMEnd(llmResult) {
+              // @yuliia this could be a good place for pushing the response to the chat history
+              // the full response is under llmResult.generations[0][0].text
               streamEnd();
             },
           },
+          apmTracer,
+          ...(traceOptions?.tracers ?? []),
         ],
+        runName: DEFAULT_AGENT_EXECUTOR_ID,
+        tags: traceOptions?.tags ?? [],
       }
-      // TODO before merge to main
-      // uncomment
-      // {
-      //   callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
-      //   runName: DEFAULT_AGENT_EXECUTOR_ID,
-      //   tags: traceOptions?.tags ?? [],
-      // }
     );
 
     // TODO before merge to main

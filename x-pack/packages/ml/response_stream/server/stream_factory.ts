@@ -177,7 +177,6 @@ export function streamFactory<T = unknown>(
 
       waitForCallbacks.push(1);
       const writeOk = stream.write(line, () => {
-        console.log('STREAM.WRITE', line);
         waitForCallbacks.pop();
         // Calling .flush() on a compression stream will
         // make zlib return as much output as currently possible.

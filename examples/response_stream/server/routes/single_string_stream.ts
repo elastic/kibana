@@ -80,7 +80,6 @@ export const defineSimpleStringStreamRoute = (router: IRouter, logger: Logger) =
         // do not call this using `await` so it will run asynchronously while we return the stream already.
         pushStreamUpdate();
 
-        console.log('responseWithHeaders', responseWithHeaders);
         return response.ok(responseWithHeaders);
       }
     );
