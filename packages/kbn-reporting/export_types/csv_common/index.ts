@@ -12,6 +12,7 @@ import type {
   BaseParamsV2,
   BasePayload,
   BasePayloadV2,
+  CsvPagingStrategy,
 } from '@kbn/reporting-common/types';
 
 export * from './constants';
@@ -41,7 +42,10 @@ interface CsvFromSavedObjectBase {
 export type JobParamsCsvFromSavedObject = CsvFromSavedObjectBase &
   Omit<BaseParamsV2, 'title'> & { title?: string };
 
-export type TaskPayloadCsvFromSavedObject = CsvFromSavedObjectBase & BasePayloadV2;
+export interface TaskPayloadCsvFromSavedObject extends CsvFromSavedObjectBase, BasePayloadV2 {
+  objectType: 'search';
+  pagingStrategy: CsvPagingStrategy;
+}
 
 export const CSV_REPORTING_ACTION = 'downloadCsvReport';
 
