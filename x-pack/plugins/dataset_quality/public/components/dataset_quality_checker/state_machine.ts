@@ -6,7 +6,7 @@
  */
 
 import { concatMap, from } from 'rxjs';
-import { createMachine, assign, ActionTypes } from 'xstate';
+import { createMachine, assign, ActionTypes, StateFrom } from 'xstate';
 import {
   CheckPlan,
   CheckPlanStep,
@@ -15,7 +15,10 @@ import {
   QualityProblem,
 } from '../../../common';
 import { IDataStreamQualityClient } from '../../services/data_stream_quality';
-import { createDataStreamQualityMitigationStateMachine } from './mitigation_state_machine';
+import {
+  createDataStreamQualityMitigationStateMachine,
+  DataStreamQualityMitigationInterpreter,
+} from './mitigation_state_machine';
 
 export const createPureDataStreamQualityChecksStateMachine = (
   initialContext: DataStreamQualityChecksContext
@@ -295,3 +298,8 @@ export type DataStreamQualityCheckProgress =
     };
 
 const getStepId = (check: CheckPlanStep) => `${check.check_id}-${check.data_stream}`;
+
+export const getDataStreamQualityMitigationActor = (
+  state: StateFrom<typeof createDataStreamQualityChecksStateMachine>
+): DataStreamQualityMitigationInterpreter | null =>
+  (state.children.mitigateProblem as DataStreamQualityMitigationInterpreter) ?? null;

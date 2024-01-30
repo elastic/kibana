@@ -35,6 +35,7 @@ export type {
   Mitigation,
   MitigationForCause,
   QualityProblem,
+  QualityProblemCause,
   QualityProblemParams,
   QualityProblemType,
 } from './data_stream_quality_checks';

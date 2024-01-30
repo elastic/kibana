@@ -22,7 +22,8 @@ import {
   QualityProblem,
 } from '../../../common';
 import { IDataStreamQualityClient } from '../../services/data_stream_quality';
-import { ConnectedMitigations } from './mitigations';
+import { DetailsPreJson, PreJson } from './json_details';
+import { ConnectedMitigations } from './mitigation_wizard';
 import {
   DataStreamQualityChecksStateProvider,
   useDataStreamQualityChecksStateContext,
@@ -216,14 +217,6 @@ const CheckListFinishedItem = ({
     </EuiPanel>
   );
 };
-
-const DetailsPreJson = ({ title, value }: { title: string; value: unknown }) => (
-  <details>
-    <summary>{title}</summary>
-    <PreJson value={value} />
-  </details>
-);
-const PreJson = ({ value }: { value: unknown }) => <pre>{JSON.stringify(value, null, 2)}</pre>;
 
 const useRandomId = (prefix: string) => {
   const generateId = useMemo(() => htmlIdGenerator(prefix), [prefix]);
