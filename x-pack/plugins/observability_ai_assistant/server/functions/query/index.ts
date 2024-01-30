@@ -63,7 +63,7 @@ const loadEsqlDocs = once(async () => {
   );
 });
 
-export function registerEsqlFunction({
+export function registerQueryFunction({
   client,
   registerFunction,
   resources,
@@ -101,9 +101,9 @@ export function registerEsqlFunction({
   );
   registerFunction(
     {
-      name: 'esql',
+      name: 'query',
       contexts: ['core'],
-      description: `This function answers ES|QL related questions including query generation and syntax/command questions.`,
+      description: `This function generates, executes and/or visualizes a query based on the user's request.`,
       visibility: FunctionVisibility.AssistantOnly,
       parameters: {
         type: 'object',
@@ -228,6 +228,22 @@ export function registerEsqlFunction({
 
       const messagesToInclude = mapValues(pick(esqlDocs, keywords), ({ data }) => data);
 
+      let userIntentionMessage: string;
+
+      switch (args.intention) {
+        case VisualizeESQLUserIntention.executeAndReturnResults:
+          userIntentionMessage = `When you generate a query, it will automatically be executed and its results returned to you. The user does not need to do anything for this.`;
+          break;
+
+        case VisualizeESQLUserIntention.generateQueryOnly:
+          userIntentionMessage = `Any generated query will not be executed automatically, the user needs to do this themselves.`;
+          break;
+
+        default:
+          userIntentionMessage = `The generated query will automatically be visualized to the user, displayed below your message. The user does not need to do anything for this.`;
+          break;
+      }
+
       const esqlResponse$: Observable<ChatCompletionChunkEvent> = await client.chat({
         messages: [
           ...withEsqlSystemMessage(
@@ -237,6 +253,8 @@ export function registerEsqlFunction({
               \`\`\`
 
               Prefer to use commands and functions for which you have requested documentation.
+
+              ${userIntentionMessage}
 
               DO NOT UNDER ANY CIRCUMSTANCES use commands or functions that are not a capability of ES|QL
               as mentioned in the system message and documentation.
