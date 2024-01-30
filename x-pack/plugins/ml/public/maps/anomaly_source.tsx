@@ -307,6 +307,11 @@ export class AnomalySource implements IVectorSource {
     return null;
   }
 
+  getIndexPatternIds(): string[] {
+    // IGNORE: This is only relevant if your source is backed by an index-pattern
+    return [];
+  }
+
   getInspectorAdapters(): Adapters | undefined {
     // IGNORE: This is only relevant if your source is backed by an index-pattern
     return undefined;
