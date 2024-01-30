@@ -6,10 +6,12 @@
  */
 
 import { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
+import type { RuleTypeMetaData } from '@kbn/alerting-plugin/common';
+
 import moment from 'moment';
 
-export interface AlertMetadata {
-  environment: string;
+export interface AlertMetadata extends RuleTypeMetaData {
+  environment?: string;
   serviceName?: string;
   transactionType?: string;
   start?: string;
