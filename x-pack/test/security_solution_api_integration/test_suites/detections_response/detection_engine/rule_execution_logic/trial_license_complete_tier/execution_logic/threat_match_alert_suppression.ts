@@ -758,7 +758,6 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should generate and update up to max_signals alerts', async () => {
-          const expectedMaxSignals = 40;
           const id = uuidv4();
           const firstTimestamp = '2020-10-28T05:45:00.000Z';
           const secondTimestamp = '2020-10-28T06:10:00.000Z';
@@ -773,7 +772,7 @@ export default ({ getService }: FtrProviderContext) => {
           await Promise.all(
             [firstTimestamp, secondTimestamp].map((t) =>
               indexGeneratedSourceDocuments({
-                docsCount: expectedMaxSignals + 15,
+                docsCount: 115,
                 seed: (index) => ({
                   id,
                   '@timestamp': t,
@@ -808,7 +807,6 @@ export default ({ getService }: FtrProviderContext) => {
             },
             from: 'now-35m',
             interval: '30m',
-            max_signals: expectedMaxSignals,
           };
 
           const { previewId, logs } = await previewRule({
@@ -828,7 +826,7 @@ export default ({ getService }: FtrProviderContext) => {
             size: 1000,
             sort: ['agent.name', ALERT_ORIGINAL_TIME],
           });
-          expect(previewAlerts.length).toEqual(expectedMaxSignals);
+          expect(previewAlerts.length).toEqual(100);
           expect(previewAlerts[0]._source).toEqual(
             expect.objectContaining({
               [ALERT_SUPPRESSION_TERMS]: [
