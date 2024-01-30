@@ -114,6 +114,8 @@ const findSLOGroupsParamsSchema = t.partial({
     page: t.string,
     perPage: t.string,
     groupBy: groupBySchema,
+    kqlQuery: t.string,
+    filters: t.string,
   }),
 });
 

@@ -21,7 +21,7 @@ import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
 import { mixKqlWithTags } from './mix_kql_with_tags';
 
-interface SLOListParams {
+export interface SLOListParams {
   kqlQuery?: string;
   page?: number;
   sortBy?: string;
