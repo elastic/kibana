@@ -12,6 +12,9 @@ import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { getInspectResponse } from '@kbn/observability-shared-plugin/common';
 import { kibanaService } from '../../../../utils/kibana_service';
 import { apiService } from '../../../../utils/api_service';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { ApmBase } from '@elastic/apm-rum'
 
 export const executeEsQueryAPI = async ({
   params,
@@ -96,6 +99,23 @@ export const executeEsQueryAPI = async ({
       });
   });
 
-  const { rawResponse } = await response;
+
+  const { rawResponse } = await withSpan(name, response);
   return { result: rawResponse as ESSearchResponse, name };
+};
+
+
+export type UseKbnApm = CoreStart & { apm: ApmBase };
+
+async function withSpan<T>(name: string, cb: Promise<T>): Promise<T> {
+  const {
+    services: { apm },
+  } = useKibana<UseKbnApm>();
+
+  console.log("STARTSPAN")
+  const span = apm.startSpan("MYNAME" + name)
+  const res = await cb;
+  span?.end()
+
+  return res
 };
