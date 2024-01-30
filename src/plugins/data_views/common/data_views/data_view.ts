@@ -77,6 +77,18 @@ export class DataView extends AbstractDataView implements DataViewBase {
     this.fields.replaceAll(Object.values(spec.fields || {}));
   }
 
+  getScriptedFieldsForQuery() {
+    return this.getScriptedFields().reduce((scriptFields, field) => {
+      scriptFields[field.name] = {
+        script: {
+          source: field.script as string,
+          lang: field.lang,
+        },
+      };
+      return scriptFields;
+    }, {} as Record<string, estypes.ScriptField>);
+  }
+
   /**
    * Returns scripted fields
    */
@@ -113,12 +125,10 @@ export class DataView extends AbstractDataView implements DataViewBase {
       };
     });
 
-    const runtimeFields = this.getRuntimeMappings();
-
     return {
-      scriptFields,
+      scriptFields: this.getScriptedFieldsForQuery(),
       docvalueFields,
-      runtimeFields,
+      runtimeFields: this.getRuntimeMappings(),
     };
   }
 
@@ -366,11 +376,11 @@ export class DataView extends AbstractDataView implements DataViewBase {
    * Return the "runtime_mappings" section of the ES search query.
    */
   getRuntimeMappings(): estypes.MappingRuntimeFields {
-    const mappedFields = this.getMappedFieldNames();
     const records = Object.keys(this.runtimeFieldMap).reduce<Record<string, RuntimeFieldSpec>>(
       (acc, fieldName) => {
         // do not include fields that are mapped
-        if (!mappedFields.includes(fieldName)) {
+        const field = this.fields.getByName(fieldName);
+        if (!field?.isMapped) {
           acc[fieldName] = this.runtimeFieldMap[fieldName];
         }
 
@@ -413,15 +423,6 @@ export class DataView extends AbstractDataView implements DataViewBase {
       else fieldObject.count = newCount;
     }
     this.setFieldAttrs(fieldName, 'count', newCount);
-  }
-
-  private getMappedFieldNames() {
-    return this.fields.getAll().reduce<string[]>((acc, dataViewField) => {
-      if (dataViewField.isMapped) {
-        acc.push(dataViewField.name);
-      }
-      return acc;
-    }, []);
   }
 
   /**

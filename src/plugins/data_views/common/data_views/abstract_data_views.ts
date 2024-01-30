@@ -297,6 +297,17 @@ export abstract class AbstractDataView {
   }
 
   /**
+   * TODO use with regular data view class
+   * Set field count
+   * @param fieldName name of field to set count on
+   * @param count count value. If undefined, count is removed
+   */
+
+  protected setFieldCountInternal(fieldName: string, count: number | undefined | null) {
+    this.setFieldAttrs(fieldName, 'count', count === null ? undefined : count);
+  }
+
+  /**
    * Set field formatter
    * @param fieldName name of field to set format on
    * @param format field format in serialized form

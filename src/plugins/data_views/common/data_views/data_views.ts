@@ -292,6 +292,12 @@ export interface DataViewsServicePublicMethods {
    * Returns whether a default data view exists.
    */
   defaultDataViewExists: () => Promise<boolean>;
+
+  getLegacy: (id: string, displayErrors?: boolean) => Promise<DataView>;
+
+  toDataView: (toDataView: DataViewLazy) => Promise<DataView>;
+
+  toDataViewLazy: (dataView: DataView) => Promise<DataViewLazy>;
 }
 
 /**
@@ -1239,6 +1245,32 @@ export class DataViewsService {
     } else {
       return null;
     }
+  }
+
+  // unsaved DataViewLazy changes will not be reflected in the returned DataView
+  async toDataView(dataViewLazy: DataViewLazy) {
+    const shortDotsEnable = await this.config.get<boolean>(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
+    const metaFields = await this.config.get<string[] | undefined>(META_FIELDS);
+
+    const dataView = new DataView({
+      spec: dataViewLazy.toSpec(),
+      fieldFormats: this.fieldFormats,
+      shortDotsEnable,
+      metaFields,
+    });
+
+    // necessary to load fields
+    await this.refreshFields(dataView, false);
+
+    return dataView;
+  }
+
+  // unsaved DataView changes will not be reflected in the returned DataViewLazy
+  toDataViewLazy(dataView: DataView) {
+    if (!dataView.id) {
+      throw new Error('DataView must have an id');
+    }
+    return this.get(dataView.id);
   }
 }
 
