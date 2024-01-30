@@ -59,7 +59,10 @@ export class SloOverviewEmbeddableFactoryDefinition
   public getPanelPlacementSettings: IProvidesPanelPlacementSettings<
     SloEmbeddableInput,
     unknown
-  >['getPanelPlacementSettings'] = () => {
+  >['getPanelPlacementSettings'] = (input) => {
+    if (input.showAllGroupByInstances) {
+      return { width: 24, height: 8 };
+    }
     return { width: 12, height: 8 };
   };
 

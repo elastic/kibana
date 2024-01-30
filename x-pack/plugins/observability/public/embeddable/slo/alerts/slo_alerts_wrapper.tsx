@@ -76,10 +76,7 @@ export function SloAlertsWrapper({
   const [isSummaryLoaded, setIsSummaryLoaded] = useState(false);
   const [isTableLoaded, setIsTableLoaded] = useState(false);
   useEffect(() => {
-    if (!onRenderComplete) {
-      return;
-    }
-    if (isSummaryLoaded && isTableLoaded) {
+    if (isSummaryLoaded && isTableLoaded && onRenderComplete) {
       onRenderComplete();
     }
   }, [isSummaryLoaded, isTableLoaded, onRenderComplete]);
@@ -120,7 +117,8 @@ export function SloAlertsWrapper({
             data-test-subj="o11ySloAlertsWrapperSlOsIncludedLink"
           >
             {i18n.translate('xpack.observability.sloAlertsWrapper.sLOsIncludedFlexItemLabel', {
-              defaultMessage: '{numOfSlos} SLOs included',
+              defaultMessage:
+                '{numOfSlos, number} {numOfSlos, plural, one {SLO} other {SLOs}} included',
               values: { numOfSlos: slos.length },
             })}
           </EuiLink>
