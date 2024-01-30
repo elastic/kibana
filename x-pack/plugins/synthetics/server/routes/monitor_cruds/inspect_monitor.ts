@@ -25,7 +25,6 @@ export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
       hideParams: schema.maybe(schema.boolean()),
     }),
   },
-  writeAccess: true,
   handler: async (routeContext): Promise<any> => {
     const { savedObjectsClient, server, syntheticsMonitorClient, request, spaceId, response } =
       routeContext;

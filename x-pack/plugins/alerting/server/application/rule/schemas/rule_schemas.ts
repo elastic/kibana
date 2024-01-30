@@ -132,6 +132,10 @@ export const snoozeScheduleSchema = schema.object({
   skipRecurrences: schema.maybe(schema.arrayOf(schema.string())),
 });
 
+export const notificationDelaySchema = schema.object({
+  active: schema.number(),
+});
+
 /**
  * Unsanitized (domain) rule schema, used by internal rules clients
  */
@@ -168,6 +172,7 @@ export const ruleDomainSchema = schema.object({
   revision: schema.number(),
   running: schema.maybe(schema.nullable(schema.boolean())),
   viewInAppRelativeUrl: schema.maybe(schema.nullable(schema.string())),
+  notificationDelay: schema.maybe(notificationDelaySchema),
 });
 
 /**
@@ -205,4 +210,5 @@ export const ruleSchema = schema.object({
   revision: schema.number(),
   running: schema.maybe(schema.nullable(schema.boolean())),
   viewInAppRelativeUrl: schema.maybe(schema.nullable(schema.string())),
+  notificationDelay: schema.maybe(notificationDelaySchema),
 });
