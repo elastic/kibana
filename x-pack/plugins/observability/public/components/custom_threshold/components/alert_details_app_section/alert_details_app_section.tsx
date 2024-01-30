@@ -92,12 +92,14 @@ export default function AlertDetailsAppSection({
   const generateChartTitle = (criterion: MetricExpression) => {
     let equationTitle = '';
     const symbolResolver: Record<string, string> = {};
-    const equation = criterion.equation ?? criterion.metrics.map((m) => m.name).join(' + ');
+    const equation = criterion.equation
+      ? criterion.equation
+      : criterion.metrics.map((m) => m.name).join(' + ');
 
     criterion.metrics.forEach(
       (metric) =>
         (symbolResolver[metric.name] = `${metric.aggType} (${
-          metric.field ?? metric.filter ?? 'all documents'
+          metric.field ? metric.field : metric.filter ? metric.filter : 'all documents'
         })`)
     );
 
