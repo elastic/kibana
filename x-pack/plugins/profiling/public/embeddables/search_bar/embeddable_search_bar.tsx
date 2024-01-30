@@ -43,7 +43,7 @@ export class EmbeddableSearchBar extends Embeddable<
           `}
         >
           <ProfilingSearchBar
-            showDatePicker={showDatePicker || true}
+            showDatePicker={showDatePicker ?? true}
             showSubmitButton
             kuery={kuery}
             onQuerySubmit={({ dateRange, query }) => {

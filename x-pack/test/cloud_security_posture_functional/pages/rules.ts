@@ -66,7 +66,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
 
-    describe('Rules Page - Bulk Action buttons', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/175614
+    describe.skip('Rules Page - Bulk Action buttons', () => {
       it('It should disable both Enable and Disable options when there are no rules selected', async () => {
         await rule.rulePage.toggleBulkActionButton();
         expect(
@@ -161,6 +162,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await rule.rulePage.clickFilterPopover('ruleNumber');
         await rule.rulePage.clickFilterPopOverOption('1.1.5');
         expect((await rule.rulePage.getEnableRulesRowSwitchButton()) === 1).to.be(true);
+      });
+    });
+
+    describe('Rules Page - Flyout', () => {
+      it('Users are able to Enable/Disable Rule from Switch on Rule Flyout', async () => {
+        await rule.rulePage.clickRulesNames(0);
+        await rule.rulePage.clickFlyoutEnableSwitchButton();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        expect((await rule.rulePage.getEnableSwitchButtonState()) === 'false').to.be(true);
+      });
+      it('Users are able to Enable/Disable Rule from Take Action on Rule Flyout', async () => {
+        await rule.rulePage.clickRulesNames(0);
+        await rule.rulePage.clickTakeActionButton();
+        await rule.rulePage.clickTakeActionButtonOption('enable');
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        expect((await rule.rulePage.getEnableSwitchButtonState()) === 'true').to.be(true);
       });
     });
   });

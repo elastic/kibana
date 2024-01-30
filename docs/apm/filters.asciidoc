@@ -7,8 +7,8 @@
 ++++
 
 Global filters are ways you can filter data across the APM app based on a specific
-time range or environment. They are available in the Services, Transactions, Errors,
-Metrics, and Traces views, and any filter applied will persist as you move between pages.
+time range or environment. When viewing a specific service, the filter persists
+as you move between tabs.
 
 [role="screenshot"]
 image::apm/images/global-filters.png[Global filters available in the APM app in Kibana]

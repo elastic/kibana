@@ -349,7 +349,22 @@ describe('autocomplete', () => {
       ...getFieldNamesByType('string'),
       ...getFunctionSignaturesByReturnType('where', 'string', { evalMath: true }),
     ]);
+    testSuggestions('from a | where stringField =~ ', [
+      ...getFieldNamesByType('string'),
+      ...getFunctionSignaturesByReturnType('where', 'string', { evalMath: true }),
+    ]);
     testSuggestions('from a | where stringField >= stringField ', [
+      ...getFunctionSignaturesByReturnType(
+        'where',
+        'boolean',
+        {
+          builtin: true,
+        },
+        ['boolean']
+      ),
+      '|',
+    ]);
+    testSuggestions('from a | where stringField =~ stringField ', [
       ...getFunctionSignaturesByReturnType(
         'where',
         'boolean',
@@ -614,6 +629,10 @@ describe('autocomplete', () => {
       ...getFieldNamesByType('any'),
       ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
       'a',
+    ]);
+    testSuggestions('from a | eval a=stringField =~ ', [
+      ...getFieldNamesByType('string'),
+      ...getFunctionSignaturesByReturnType('eval', 'string', { evalMath: true }),
     ]);
     testSuggestions(
       'from a | eval a=round()',
