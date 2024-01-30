@@ -179,22 +179,6 @@ export class RangeSliderEmbeddable
         .subscribe()
     );
 
-    // fetch available min/max when input changes
-    // this.subscriptions.add(
-    //   dataFetchPipe
-    //     .pipe(
-    //       skip(1), // Skip the first input update because range slider query will be run by initialize.
-    //       switchMap(async () => {
-    //         try {
-    //           await this.runRangeSliderQuery();
-    //         } catch (e) {
-    //           this.onLoadingError(e.message);
-    //         }
-    //       })
-    //     )
-    //     .subscribe()
-    // );
-
     // publish filters when input changes
     this.subscriptions.add(
       this.getInput$()
