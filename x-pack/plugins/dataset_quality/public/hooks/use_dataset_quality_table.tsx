@@ -33,7 +33,7 @@ export const useDatasetQualityTable = () => {
 
   const { page, rowsPerPage, sort } = useSelector(service, (state) => state.context.table);
 
-  const flyout = useSelector(service, (state) => state.context?.flyout);
+  const flyout = useSelector(service, (state) => state.context.flyout);
 
   const dataStreamStats = useSelector(service, (state) => state.context.dataStreamStats);
   const loading = useSelector(service, (state) => state.matches('datasets.fetching'));
@@ -43,7 +43,9 @@ export const useDatasetQualityTable = () => {
     state.matches('degradedDocs.fetching')
   );
 
-  const flyoutClosed = useSelector(service, (state) => state.matches('datasets.loaded.idle'));
+  const isDatasetQualityPageIdle = useSelector(service, (state) =>
+    state.matches('datasets.loaded.idle')
+  );
 
   const closeFlyout = useCallback(() => service.send({ type: 'CLOSE_FLYOUT' }), [service]);
   const openFlyout = useCallback(
@@ -57,11 +59,11 @@ export const useDatasetQualityTable = () => {
       }
 
       service.send({
-        type: flyoutClosed ? 'OPEN_FLYOUT' : 'SELECT_NEW_DATASET',
+        type: isDatasetQualityPageIdle ? 'OPEN_FLYOUT' : 'SELECT_NEW_DATASET',
         dataset: selectedDataset as FlyoutDataset,
       });
     },
-    [flyout?.dataset?.rawName, flyoutClosed, service]
+    [flyout?.dataset?.rawName, isDatasetQualityPageIdle, service]
   );
 
   const columns = useMemo(
