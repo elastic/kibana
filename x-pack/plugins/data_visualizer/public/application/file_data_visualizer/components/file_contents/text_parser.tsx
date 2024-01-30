@@ -30,7 +30,7 @@ interface TestGrokPatternResponse {
   }>;
 }
 
-export class TextParser {
+export class GrokHighlighter {
   private http: HttpSetup;
   private mappings: FindFileStructureResponse['mappings'];
   private ecsCompatibility: string | undefined;
@@ -56,7 +56,7 @@ export class TextParser {
     this.lineLimit = lineLimit;
   }
 
-  public async read(text: string, grokPattern: string) {
+  public async createDocs(text: string, grokPattern: string) {
     const docs = this._createDocs(text, true);
     const lines = docs.docs.map((doc) => doc.message);
     const { matches } = await this.http.fetch<TestGrokPatternResponse>(
@@ -71,7 +71,7 @@ export class TextParser {
         }),
       }
     );
-    // const newLines = [];
+
     const formattedDocs = lines.map((line, index) => {
       const match = matches[index];
       if (match.matched === false) {

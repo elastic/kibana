@@ -13,7 +13,7 @@ import { EuiTitle, EuiSpacer, EuiHorizontalRule } from '@elastic/eui';
 import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import { EDITOR_MODE, JsonEditor } from '../json_editor';
 import { useDataVisualizerKibana } from '../../../kibana_context';
-import { TextParser } from './text_parser';
+import { GrokHighlighter } from './text_parser';
 
 interface Props {
   data: string;
@@ -34,7 +34,7 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines, semiStruc
   if (format === EDITOR_MODE.JSON) {
     mode = EDITOR_MODE.JSON;
   }
-  const [lines, setLines] = useState<JSX.Element[] | null>(null);
+  const [highlightedLines, setHighlightedLines] = useState<JSX.Element[] | null>(null);
 
   const {
     services: { http },
@@ -50,15 +50,15 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines, semiStruc
     }
     const { grokPattern, multilineStartPattern, excludeLinesPattern, mappings, ecsCompatibility } =
       semiStructureTextData;
-    const textParser = new TextParser(
+    const textParser = new GrokHighlighter(
       http,
       mappings,
       ecsCompatibility,
       multilineStartPattern,
       excludeLinesPattern
     );
-    textParser.read(data, grokPattern).then((docs) => {
-      setLines(docs);
+    textParser.createDocs(data, grokPattern).then((docs) => {
+      setHighlightedLines(docs);
     });
   }, [http, format, data, semiStructureTextData]);
 
@@ -87,14 +87,14 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines, semiStruc
 
       <EuiSpacer size="s" />
 
-      {lines === null ? (
+      {highlightedLines === null ? (
         <JsonEditor mode={mode} readOnly={true} value={formattedData} height="200px" />
       ) : (
         <>
-          {lines.map((line, i) => (
+          {highlightedLines.map((line, i) => (
             <>
               {line}
-              {i === lines.length - 1 ? null : <EuiHorizontalRule margin="s" />}
+              {i === highlightedLines.length - 1 ? null : <EuiHorizontalRule margin="s" />}
             </>
           ))}
         </>
