@@ -6,7 +6,7 @@
  */
 
 export {
-  type ObservabilityLogExplorerLocators,
+  type ObservabilityLogsExplorerLocators,
   SingleDatasetLocatorDefinition,
   AllDatasetsLocatorDefinition,
 } from './locators';
