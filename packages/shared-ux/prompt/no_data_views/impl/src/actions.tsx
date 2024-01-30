@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiButton, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
@@ -30,49 +30,35 @@ export const NoDataButtonLink = ({
     return null;
   }
 
-  let tryEsqlPrompt = null;
-  let createDataViewButton = null;
-  let orDivider = null;
-
-  if (onTryEsql) {
-    tryEsqlPrompt = (
-      <EuiText size="s">
-        <FormattedMessage
-          id="sharedUXPackages.no_data_views.button"
-          defaultMessage="Query your data directly with ES|QL (Beta).  "
-        />
-        <EuiLink onClick={onTryEsql}>Try ES|QL</EuiLink>
-      </EuiText>
-    );
-  }
-
-  if (canCreateNewDataView) {
-    createDataViewButton = (
-      <EuiButton
-        onClick={onClickCreate}
-        iconType="plusInCircle"
-        fill={true}
-        data-test-subj="createDataViewButton"
-      >
-        {createDataViewText}
-      </EuiButton>
-    );
-  }
-
-  if (canCreateNewDataView && onTryEsql) {
-    orDivider = (
-      <>
-        <EuiSpacer size="m" />- OR -
-        <EuiSpacer size="m" />
-      </>
-    );
-  }
-
   return (
     <>
-      {createDataViewButton}
-      {orDivider}
-      {tryEsqlPrompt}
+      {canCreateNewDataView && (
+        <EuiButton
+          onClick={onClickCreate}
+          iconType="plusInCircle"
+          fill={true}
+          data-test-subj="createDataViewButton"
+          size="s"
+        >
+          {createDataViewText}
+        </EuiButton>
+      )}
+      {canCreateNewDataView && onTryEsql && <EuiSpacer />}
+      {onTryEsql && (
+        <EuiText size="xs" color={'subdued'}>
+          <FormattedMessage
+            id="sharedUXPackages.no_data_views.esqlMessage"
+            defaultMessage="Alternatively, you can query your data directly using ES|QL (technical preview)."
+          />
+          <EuiSpacer size={'s'} />
+          <EuiButton color="success" onClick={onTryEsql} size="s">
+            <FormattedMessage
+              id="sharedUXPackages.no_data_views.esqlButtonLabel"
+              defaultMessage="Try ES|QL"
+            />
+          </EuiButton>
+        </EuiText>
+      )}
     </>
   );
 };

@@ -53,7 +53,7 @@ export class StorybookMock extends AbstractStorybookMock<
     const { canCreateNewDataView, dataViewsDocLink, canTryEsql } = params;
     let onTryEsql;
 
-    if (canTryEsql !== 'false') {
+    if (canTryEsql !== false) {
       onTryEsql = action('onTryEsql');
     }
 
