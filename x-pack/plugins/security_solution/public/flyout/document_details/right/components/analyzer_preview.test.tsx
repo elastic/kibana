@@ -59,6 +59,30 @@ describe('<AnalyzerPreview />', () => {
     expect(wrapper.getByTestId(ANALYZER_PREVIEW_TEST_ID)).toBeInTheDocument();
   });
 
+  it('should use ancestor id when in preview', () => {
+    mockUseAlertPrevalenceFromProcessTree.mockReturnValue({
+      loading: false,
+      error: false,
+      alertIds: ['alertid'],
+      statsNodes: mock.mockStatsNodes,
+    });
+    const contextValue = {
+      ...mockContextValue,
+      getFieldsData: () => 'ancestors-id',
+      dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
+      isPreview: true,
+    };
+
+    const wrapper = renderAnalyzerPreview(contextValue);
+
+    expect(mockUseAlertPrevalenceFromProcessTree).toHaveBeenCalledWith({
+      isActiveTimeline: false,
+      documentId: 'ancestors-id',
+      indices: ['rule-indices'],
+    });
+    expect(wrapper.getByTestId(ANALYZER_PREVIEW_TEST_ID)).toBeInTheDocument();
+  });
+
   it('shows error message when index is not present', () => {
     mockUseAlertPrevalenceFromProcessTree.mockReturnValue({
       loading: false,

@@ -2876,52 +2876,6 @@
       },
       {
         "parentPluginId": "visualizations",
-        "id": "def-public.HasVisualizeConfig",
-        "type": "Interface",
-        "tags": [],
-        "label": "HasVisualizeConfig",
-        "description": [],
-        "path": "src/plugins/visualizations/public/embeddable/interfaces/has_visualize_config.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-public.HasVisualizeConfig.getVis",
-            "type": "Function",
-            "tags": [],
-            "label": "getVis",
-            "description": [],
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "visualizations",
-                "scope": "public",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-public.Vis",
-                "text": "Vis"
-              },
-              "<",
-              {
-                "pluginId": "visualizations",
-                "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-common.VisParams",
-                "text": "VisParams"
-              },
-              ">"
-            ],
-            "path": "src/plugins/visualizations/public/embeddable/interfaces/has_visualize_config.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
         "id": "def-public.HistogramParams",
         "type": "Interface",
         "tags": [],
@@ -6525,6 +6479,44 @@
           ">; }"
         ],
         "path": "src/plugins/visualizations/common/expression_functions/xy_dimension.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-public.HasVisualizeConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "HasVisualizeConfig",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasType",
+            "text": "HasType"
+          },
+          "<\"visualization\"> & { getVis: () => ",
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.Vis",
+            "text": "Vis"
+          },
+          "<",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.VisParams",
+            "text": "VisParams"
+          },
+          ">; }"
+        ],
+        "path": "src/plugins/visualizations/public/embeddable/interfaces/has_visualize_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

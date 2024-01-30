@@ -23,29 +23,30 @@ export const journey = new Journey({
   },
   ftrConfigPath: 'x-pack/performance/configs/cloud_security_posture_config.ts',
   esArchives: ['x-pack/performance/es_archives/kspm_findings'],
-  scalabilitySetup: {
-    warmup: [
-      {
-        action: 'constantConcurrentUsers',
-        userCount: 10,
-        duration: '30s',
-      },
-      {
-        action: 'rampConcurrentUsers',
-        minUsersCount: 10,
-        maxUsersCount: 50,
-        duration: '2m',
-      },
-    ],
-    test: [
-      {
-        action: 'constantConcurrentUsers',
-        userCount: 50,
-        duration: '3m',
-      },
-    ],
-    maxDuration: '10m',
-  },
+  // unskip when https://github.com/elastic/kibana-load-testing/issues/448 is fixed
+  // scalabilitySetup: {
+  //   warmup: [
+  //     {
+  //       action: 'constantConcurrentUsers',
+  //       userCount: 10,
+  //       duration: '30s',
+  //     },
+  //     {
+  //       action: 'rampConcurrentUsers',
+  //       minUsersCount: 10,
+  //       maxUsersCount: 50,
+  //       duration: '2m',
+  //     },
+  //   ],
+  //   test: [
+  //     {
+  //       action: 'constantConcurrentUsers',
+  //       userCount: 50,
+  //       duration: '3m',
+  //     },
+  //   ],
+  //   maxDuration: '10m',
+  // },
 }).step('Go to cloud security dashboards Page', async ({ page, kbnUrl }) => {
   await page.goto(kbnUrl.get(`/app/security/cloud_security_posture/dashboard`));
   await page.waitForSelector(subj('csp:dashboard-sections-table-header-score'));
