@@ -30,7 +30,7 @@ import {
 export const createPureDatasetQualityControllerStateMachine = (
   initialContext: DatasetQualityControllerContext
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVszoIoFdUAbAS3QE8BhAewDt0AnaoosBgOggyx1nYDMcAYwAWJWlADEEOmHbiAbtQDWctJmx5CpCjXpMWbTt019B6UeKgJF1IRhJ0A2gAYAuq7eJQAB2qwyR1pvEAAPRAB2AE52AFZYqIBmAEZ42IAmCPjkgBoQckRkgA4Y9MT0koAWSsT4gDY6yoBfJrz1Hi1iMio6RmZWDi4NXgFhMQlJNiYOHyIMfmoGAFt2ds0CLt1egwHjYfQzMasbWiV7dCDPTxC-AIu6EPCEZOT0uvYootqX2MqoytiiSieQKzxK7DKFX+NXqjRabRMOA2Oh6+n6RiGHT4RGoqAgkAERHI1Hw6AA8j4wLRJABlACiABk6ZQACoAfQAcnSAOps5AAQRZ-PpLOuSBAt0CD3FTzqEWS7GSWQydQyyTqURcRRBiDqb3YDTqWtiRWiEUSdSK8JAayR2m6ej6hkGiIO7BxeIJ-CJJPJlOplAZZPpbIAYgyAJpkgCqovcN38UuCMsQ6TK7AiRs+dUSEQilS+FR1CCBETixUqlvSUUtv2S1ttnRRjp2GNd2Nx+IghOJpIpVNGFnGUhktDktlUq1dyId23RLv2Hc93e9vb9A-MlgkJzODmc7jFvkT92ToCeL1S7BclUzUSiLyKxUSiWLeqKio15ViZvvsXrrRtad7S2NFnT2LF3U7L0fT7f1By3KQpkWdhZnmRYVkbGcQKdXZMVMSDlx7X1+1oeDhx3Ow91oK543FSUT0eQpkmvCFUhcTVylNIpKmLWIXDLCpUj1ZI70qJVEgbIDNlRHC20XAiu3kCBWEkaMAAUBRZOk2SFAAhJk2UoAAlABJLTTP5Q8JWPIJGIQf52EqdJ+MSaoEgtOUePyXV9UNFw9RccoxMyST9iwmTWwXCCPUUkhlLASQyTUukOTDSMYzjLw6Js6Uz0QSoXHSCF-N+PMzWY7VvIQQEXDiL51SNMTGgSUKOnClt504MAoAYZdkDsQ4hysaRZHkU4VDUKTmznMD8R6vqBrI45bHOS4D1oo87lslMEGrd9En4iIykrOpkgLdJi2YwEDWckS00C1U9Va9ZgIizq5t6rt+qEQaEMmBhphQuZ0AWZYpzC16Otm7rPsgb7fvIlaqJorLNqTOy9vYA682OhozqKC6qprWrTXNIoCZKWpKxaADaGofF4HFTDIZmgYEy23KwkQABaP44miN54gKnNyjqYtediD50gKzM-jJ5z0meu1pKh3D23Z9Gdu5hVvyiQXfn8590hNWJizExyxNqFw+PvQKxKVptZ1AtX5M3YcNYYnaTXeN4bwtA6NWtyrQVed8in8zM-2-AmKwd9rWbk6KoIgD3tryhBK0c5zzTcpIGnzYsUlq1JsZNPWXj1WI45Z53E-wmLoLXEjU852V0yVeJBfSdVNWD-KRI+dVXhquUn2rlWE6i+vk6I2CNyOCQW9PLmEHq9gigSaPYg1cO9V4geNTvY3XKBE1FYA5mJ9rqeRgblcYPXUi76XuzklzSW5Wtxo3kSbiiyqwE7wS7Kj1mUZi58EQQyvrJG+bo75KVYC-Ha1YipR24lkao0saymwATURU2MS7VkCi1C+U0nYwK6vNL6A0kHp1qmXaowlf6uXlP8YsppEjlhEn+IEDQ0jj2mtfShsMIDwyWovbKHNl5PALHVaETCvg3kJqCKI5oIRRBNBECO1tUhRAEeQyKwiFo-QUpAWhK9t6VDiBowEGiS5iS8io8E+YaxHRzNne8NMmhAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVszoIoFdUAbAS3QE8BhAewDt0AnaoosBgOggyx1gGIAqgAVkAQQAqAUQD640QCEAMjMoAlAJJSNogNoAGALqJQAB2qwyJOsZAAPRAFoA7AFZ2AJncAWABxf3Tp4uAJyBAGwANCDkiADMAIyx7C4J8e7Beu5hwS6eTgC++VFomNh4hKQUNPRMLGyc3GWw7ABmOADGABYktFB8EHRg7D0AbtQA1kMlPOXEZFR0jMysHFylvK0d3b0Io9TtGFa0+gYnNmYW6Ec29gjxfuyxLi5eubHBXvHB8ZlRMXcJdjxeK+eJOL6uPTBAKFYqNHAEOZVRa1FYNdboZptdBdHp9NhMDgmIgYFrUBgAW3Y0zKiMqCxqy3qaxmWK2eN2tDGByudBOZyQIAulmsgtuP3c8Q8Tli6VirjCnx8sT+iESUuBoPBoRcUO8sJANIRFXm1SWdVW8Mx7CI1FQEEgrSI5Go+HQAHkTGBaHwAMqSZSUcTSABykgA6tIxHJ-eIBaZzCLaDdEGFvOw9F4oV8Qi4wmEVdFU+4kpmUrEfHoUn5MgajbN6WbUcyrc1bfbHS1na6PV6fZRFO7-dIAGKKACa7oEccM50TvOTYriXic7ECKVePi+Xx8qoQWeCHkrW9iekzx6edatdNNKKZloxbbtDogTpdbs93s2OO2fQGtCGPZJmpa8TWRRkLXRVkbWfTtuw-Ptv1xHY9h5I5+VnQVhQXFM7j0MJV2+U9oS+SVnhcPc0y8ZJfBcJwnFCdw9HuLwrwxG9wPNNEWSaGCO1fLt317L9sWQ-EGEJdhiVJckqXrDiGS4ltHz4l83x7T9aCQ39OW5Q4+UMeMhXna4lzwuiM0rXxYizAI80Lf5dSSfM9C3Lx5SeJiwjYmYFKbe8oN49s1JICBWD4d0hEkENRwnKcZyMLCTNFUBbieNw9G1LMfBSMJlT3XIwnYYIqPuMinC8YJYh82kwMU5tVjAKAGH45B9jZH88X6QZhi5CYplApF6oCh1mta9rtI5VD9OOQzMITS5TNStUnCKgsQk+b54hcHKKKLcypScPwGI+H5gUymrjSG-zINGlqXza9oOrEvgCXJKSSXQMlKRA9i6pu7imvuyBHuenTpoXDDEoWpNcLBNanlOraduePcckPTMvhySqdqhaqDVoagHXgQV5P+u8LTnRaUrsRwwSlTxfH8QJ3BCcI9wcV5iu8NInEye4tx+FxLobW8IO41sqdhsyHDSJJGb8AIgkYyJ9s+dgvE+BIMgI0I9HlEW-IpiWVNE38pZwsydqKrIV1iAt8IyHa9zSHx2ErAiwhcbajslPxDfJ8XlOg4LIAtpbabuBiNaq55SIPGU91ZtxlVePJcgYgsCiKQ1BsbY3g6C2CBPg4TFxhy3loQOiiszbN0bzAs9xspIsZKnxFcVI6A+uguHxD4v1IQkT2V6cOadudcPBx3xfbSX41dPZIvc+SrZUq6Fs7hP7e6D-ui-4oey9UsOkup8vI8SLms1eAtgj8WIKy8AqHh8EtvhXTwmK8byc7J3elL7w2KHV8oVWDjwvrcPIMd0rxyhInfaLxDw7T8D8HwYR47423r5QOgDOBA3Gk9CBuFZaSksiWJ4NlMruErPEPcPhwTsE9mETIyoshVXcD3fOe98FjQehNM2eJiEyxlOQx+G5qG0LRown+mZ6IMOyHzX+2DaoAIarw4GEBQYnwgMIqumt3Dc3lHREqmUjoVTRgw4qIIAj3wrOWbOhQgA */
   createMachine<
     DatasetQualityControllerContext,
     DatasetQualityControllerEvent,
@@ -92,10 +92,6 @@ export const createPureDatasetQualityControllerStateMachine = (
                 },
                 idle: {
                   on: {
-                    UPDATE_TABLE_CRITERIA: {
-                      target: 'idle',
-                      actions: ['storeTableOptions'],
-                    },
                     OPEN_FLYOUT: {
                       target: '#DatasetQualityController.datasets.loaded.flyoutOpen',
                       actions: ['storeFlyoutOptions'],
@@ -103,6 +99,12 @@ export const createPureDatasetQualityControllerStateMachine = (
                   },
                 },
               },
+            },
+          },
+          on: {
+            UPDATE_TABLE_CRITERIA: {
+              target: 'datasets.loaded',
+              actions: ['storeTableOptions'],
             },
           },
         },
