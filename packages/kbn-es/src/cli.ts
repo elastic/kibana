@@ -22,6 +22,7 @@ function help() {
   // eslint-disable-next-line no-console
   console.log(dedent`
     usage: es <command> [<args>]
+    usage: es --serverless=<projectType>
 
     Assists with running Elasticsearch for Kibana development
 
@@ -46,7 +47,14 @@ export async function run(defaults = {}) {
       default: defaults,
     });
     const args = options._;
-    const commandName = args[0];
+    let commandName = args[0];
+
+    // Converting --serverless flag to command
+    if (options.serverless) {
+      const projectType: string = options.serverless;
+      commandName = 'serverless';
+      args.push('--projectType', projectType);
+    }
 
     if (args.length === 0 || (!commandName && options.help)) {
       help();

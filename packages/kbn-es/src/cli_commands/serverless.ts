@@ -70,7 +70,8 @@ export const serverless: Command = {
     });
     const reportTime = getTimeReporter(log, 'scripts/es serverless');
 
-    const argv = process.argv.slice(2);
+    // replacing --serverless with --projectType when 'scripts/es --serverless=<projectType>' is called
+    const argv = process.argv.slice(2).map((arg) => arg.replace('serverless', 'projectType'));
     const options = getopts(argv, {
       alias: {
         basePath: 'base-path',
