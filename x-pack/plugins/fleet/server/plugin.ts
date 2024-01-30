@@ -583,10 +583,8 @@ export class FleetPlugin
           }
         );
 
-        // Generate/encrypt uninstall tokens asynchronously
-        this.generateUninstallTokens();
-        // Validate Unintall Tokens asynchronously, showing errors in Kibana logs
-        this.validateUninstallTokens();
+        // initialize (generate/encrypt/validate) Uninstall Tokens asynchronously
+        this.initializeUninstallTokens();
 
         this.fleetStatus$.next({
           level: ServiceStatusLevels.available,
@@ -702,6 +700,11 @@ export class FleetPlugin
     }
 
     return this.logger;
+  }
+
+  private async initializeUninstallTokens() {
+    await this.generateUninstallTokens();
+    this.validateUninstallTokens();
   }
 
   private async generateUninstallTokens() {
