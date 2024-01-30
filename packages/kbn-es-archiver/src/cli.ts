@@ -215,7 +215,7 @@ export function runCli() {
         string: ['batch-size', 'concurrency'],
         help: `
           --use-create       use create instead of index for loading documents
-          --docs-only        load only documents, not
+          --docs-only        load only documents, not indices
           --batch-size       the "high water mark"; the nubmer of records processed per bulk request
           --concurrency      number of bulk requests made by the api
         `,
