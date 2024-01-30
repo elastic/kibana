@@ -109,14 +109,14 @@ export function GroupListView({
         <EuiFlexItem>
           <MemoEuiAccordion
             buttonContent={
-              <EuiFlexGroup alignItems="center">
+              <EuiFlexGroup alignItems="center" responsive={false}>
                 <EuiFlexItem>
                   <EuiTitle size="xs">
                     <h3>{groupName}</h3>
                   </EuiTitle>
                 </EuiFlexItem>
                 {totalViolated && (
-                  <EuiFlexItem>
+                  <EuiFlexItem grow={false}>
                     <EuiBadge color={summary.violated > 0 ? 'danger' : 'success'}>
                       {totalViolated}
                     </EuiBadge>
