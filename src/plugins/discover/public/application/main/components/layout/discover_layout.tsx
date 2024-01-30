@@ -246,6 +246,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   const onCancelClick = () => {
     stateContainer.dataState.cancel();
+    stateContainer.dataState.data$.documents$.next({ fetchStatus: FetchStatus.ERROR });
+    stateContainer.dataState.data$.main$.next({ fetchStatus: FetchStatus.ERROR });
   };
 
   return (
