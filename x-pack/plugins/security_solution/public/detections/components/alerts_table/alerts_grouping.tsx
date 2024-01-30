@@ -76,8 +76,8 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
 
   const { onGroupChange, onGroupToggle } = useMemo(
     () => ({
-      onGroupChange: (param: { groupByField: string; tableId: string }) => {
-        telemetry.reportAlertsGroupingChanged(param);
+      onGroupChange: ({ groupByField, tableId }: { groupByField: string; tableId: string }) => {
+        telemetry.reportAlertsGroupingChanged({ groupByField, tableId });
       },
       onGroupToggle: (param: {
         isOpen: boolean;
