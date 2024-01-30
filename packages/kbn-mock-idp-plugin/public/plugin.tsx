@@ -50,7 +50,7 @@ export const plugin: PluginInitializer<
           <KibanaThemeProvider theme={coreStart.theme}>
             <KibanaContextProvider services={coreStart}>
               <I18nProvider>
-                <LoginPage projectType={plugins.cloud?.serverless.projectType} />
+                <LoginPage />
               </I18nProvider>
             </KibanaContextProvider>
           </KibanaThemeProvider>,
@@ -70,7 +70,7 @@ export const plugin: PluginInitializer<
           <KibanaThemeProvider theme={coreStart.theme}>
             <KibanaContextProvider services={coreStart}>
               <I18nProvider>
-                <RoleSwitcher projectType={plugins.cloud?.serverless.projectType} />
+                <RoleSwitcher />
               </I18nProvider>
             </KibanaContextProvider>
           </KibanaThemeProvider>,
