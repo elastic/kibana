@@ -1023,8 +1023,7 @@ async function getFunctionArgsSuggestions(
 
   return suggestions.map(({ insertText, ...rest }) => ({
     ...rest,
-    insertText:
-      insertText: hasMoreMandatoryArgs && !fnDefinition.builtin ? `${insertText},` : insertText,
+    insertText: hasMoreMandatoryArgs && !fnDefinition.builtin ? `${insertText},` : insertText,
   }));
 }
 
