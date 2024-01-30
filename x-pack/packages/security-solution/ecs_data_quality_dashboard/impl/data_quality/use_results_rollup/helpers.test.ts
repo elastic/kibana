@@ -453,7 +453,7 @@ describe('helpers', () => {
               indexName: '.ds-packetbeat-8.6.1-2023.02.04-000001',
               markdownComments: [],
               pattern: 'packetbeat-*',
-              checkedAt: expect.any(Number),
+              checkedAt: undefined,
             },
           },
           sizeInBytes: 1464758182,

@@ -484,7 +484,7 @@ export const formatStorageResult = ({
   batchId: report.batchId,
   indexName: result.indexName,
   isCheckAll: report.isCheckAll,
-  checkedAt: result.checkedAt,
+  checkedAt: result.checkedAt ?? Date.now(),
   docsCount: result.docsCount ?? 0,
   totalFieldCount: partitionedFieldMetadata.all.length,
   ecsFieldCount: partitionedFieldMetadata.ecsCompliant.length,

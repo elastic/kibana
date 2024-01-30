@@ -13,6 +13,7 @@ import { buildRouteValidation } from '../../schemas/common';
 import { PostResultBody } from '../../schemas/result';
 import { API_DEFAULT_ERROR_MESSAGE } from '../../translations';
 import type { DataQualityDashboardRequestHandlerContext } from '../../types';
+import { checkIndicesPrivileges } from './privileges';
 import { API_RESULTS_INDEX_NOT_AVAILABLE } from './translations';
 
 export const postResultsRoute = (
@@ -46,20 +47,18 @@ export const postResultsRoute = (
         }
 
         try {
+          const { client } = services.core.elasticsearch;
+
           // Confirm user has authorization for the indexName payload
           const { indexName } = request.body;
-          const userEsClient = services.core.elasticsearch.client.asCurrentUser;
-          const privileges = await userEsClient.security.hasPrivileges({
-            index: [{ names: [indexName], privileges: ['all', 'read', 'view_index_metadata'] }],
-          });
-          if (!privileges.has_all_requested) {
+          const hadIndexPrivileges = await checkIndicesPrivileges({ client, indices: [indexName] });
+          if (!hadIndexPrivileges[indexName]) {
             return response.ok({ body: { result: 'noop' } });
           }
 
           // Index the result
           const body = { '@timestamp': Date.now(), ...request.body };
-          const esClient = services.core.elasticsearch.client.asInternalUser;
-          const outcome = await esClient.index({ index, body });
+          const outcome = await client.asInternalUser.index({ index, body });
 
           return response.ok({ body: { result: outcome.result } });
         } catch (err) {

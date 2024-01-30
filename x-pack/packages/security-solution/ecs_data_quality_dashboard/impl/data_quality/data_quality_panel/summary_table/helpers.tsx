@@ -245,7 +245,7 @@ export const getSummaryTableColumns = ({
     name: i18n.LAST_CHECK,
     render: (_, { checkedAt }) => (
       <EuiText size="xs">
-        {moment(checkedAt).isValid() ? moment(checkedAt).fromNow() : EMPTY_STAT}
+        {checkedAt && moment(checkedAt).isValid() ? moment(checkedAt).fromNow() : EMPTY_STAT}
       </EuiText>
     ),
     sortable: true,

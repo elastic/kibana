@@ -15,6 +15,7 @@ import type { ResultDocument } from '../../schemas/result';
 import { API_DEFAULT_ERROR_MESSAGE } from '../../translations';
 import type { DataQualityDashboardRequestHandlerContext } from '../../types';
 import { API_RESULTS_INDEX_NOT_AVAILABLE } from './translations';
+import { checkIndicesPrivileges } from './privileges';
 
 export const getQuery = (indexName: string[]) => ({
   size: 0,
@@ -66,18 +67,19 @@ export const getResultsRoute = (
           const { pattern } = request.query;
 
           // Get authorized indices
-          const userEsClient = services.core.elasticsearch.client.asCurrentUser;
-          const indices = await userEsClient.indices.get({ index: pattern });
-          const authorizedIndexNames = Object.keys(indices);
+          const { client } = services.core.elasticsearch;
+          const indicesResponse = await client.asCurrentUser.indices.get({ index: pattern });
+          const indices = Object.keys(indicesResponse);
+
+          const hadIndexPrivileges = await checkIndicesPrivileges({ client, indices });
+          const authorizedIndexNames = indices.filter((indexName) => hadIndexPrivileges[indexName]);
           if (authorizedIndexNames.length === 0) {
             return response.ok({ body: [] });
           }
 
           // Get the latest result of each pattern
           const query = { index, ...getQuery(authorizedIndexNames) };
-          const internalEsClient = services.core.elasticsearch.client.asInternalUser;
-
-          const { aggregations } = await internalEsClient.search<
+          const { aggregations } = await client.asInternalUser.search<
             ResultDocument,
             Record<string, { buckets: LatestAggResponseBucket[] }>
           >(query);

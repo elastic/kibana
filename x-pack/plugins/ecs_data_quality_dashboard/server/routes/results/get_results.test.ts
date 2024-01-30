@@ -32,6 +32,13 @@ const searchResponse = {
   Record<string, { buckets: LatestAggResponseBucket[] }>
 >;
 
+const mockCheckIndicesPrivileges = jest
+  .fn()
+  .mockResolvedValue({ [resultDocument.indexName]: true });
+jest.mock('./privileges', () => ({
+  checkIndicesPrivileges: (params: unknown) => mockCheckIndicesPrivileges(params),
+}));
+
 describe('getResultsRoute route', () => {
   describe('querying', () => {
     let server: ReturnType<typeof serverMock.create>;

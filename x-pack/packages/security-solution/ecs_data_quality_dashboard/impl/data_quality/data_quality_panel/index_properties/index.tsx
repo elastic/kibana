@@ -249,6 +249,8 @@ const IndexPropertiesComponent: React.FC<Props> = ({
               })
             : EMPTY_MARKDOWN_COMMENTS;
 
+        const checkedAt = partitionedFieldMetadata ? Date.now() : undefined;
+
         const updatedRollup = {
           ...patternRollup,
           results: {
@@ -262,7 +264,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
               markdownComments,
               pattern,
               sameFamily: indexSameFamily,
-              checkedAt: Date.now(),
+              checkedAt,
             },
           },
         };

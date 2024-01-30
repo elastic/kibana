@@ -111,18 +111,19 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
 
   useEffect(() => {
     if (!isEmpty(storedPatternsResults)) {
-      setPatternRollups((current) => {
-        const updatedRollups = { ...current };
-        storedPatternsResults.forEach((storedPatternResult) => {
-          const { pattern, results } = storedPatternResult;
-          updatedRollups[pattern] = {
-            ...current[pattern],
-            pattern,
-            results,
-          };
-        });
-        return updatedRollups;
-      });
+      setPatternRollups((current) =>
+        storedPatternsResults.reduce(
+          (acc, { pattern, results }) => ({
+            ...acc,
+            [pattern]: {
+              ...current[pattern],
+              pattern,
+              results,
+            },
+          }),
+          current
+        )
+      );
     }
   }, [storedPatternsResults]);
 

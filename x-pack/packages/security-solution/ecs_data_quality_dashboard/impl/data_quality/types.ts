@@ -107,7 +107,7 @@ export interface DataQualityCheckResult {
   markdownComments: string[];
   sameFamily: number | undefined;
   pattern: string;
-  checkedAt: number;
+  checkedAt: number | undefined;
 }
 
 export interface PatternRollup {
