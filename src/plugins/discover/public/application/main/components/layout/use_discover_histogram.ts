@@ -227,7 +227,7 @@ export const useDiscoverHistogram = ({
   } = useObservable(textBasedFetchComplete$, {
     dataView: stateContainer.internalState.getState().dataView!,
     query: stateContainer.appState.getState().query!,
-    externalVisContext: stateContainer.appState.getState().visContext,
+    externalVisContext: stateContainer.internalState.getState().visContext,
     columns: savedSearchData$.documents$.getValue().textBasedQueryColumns ?? [],
   });
 
@@ -333,7 +333,7 @@ export const useDiscoverHistogram = ({
   const onVisContextChanged = useCallback(
     (newVisContext: ExternalVisContext | undefined) => {
       // console.log('got new vis context from histogram', newVisContext);
-      stateContainer.appState.update({ visContext: newVisContext });
+      stateContainer.internalState.transitions.setVisContext(newVisContext);
     },
     [stateContainer]
   );

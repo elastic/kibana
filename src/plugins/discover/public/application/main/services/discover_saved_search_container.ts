@@ -13,6 +13,7 @@ import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 import { isEqual, isFunction } from 'lodash';
+import { DiscoverInternalStateContainer } from './discover_internal_state_container';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 import { updateSavedSearch } from '../utils/update_saved_search';
 import { addLog } from '../../../utils/add_log';
@@ -32,6 +33,10 @@ export interface UpdateParams {
    * The next data view to be used
    */
   nextDataView?: DataView | undefined;
+  /**
+   * Discover's internal state container
+   */
+  internalStateContainer?: DiscoverInternalStateContainer;
   /**
    * The next AppState that should be used for updating the saved search
    */
@@ -115,9 +120,11 @@ export interface DiscoverSavedSearchContainer {
 export function getSavedSearchContainer({
   services,
   globalStateContainer,
+  internalStateContainer,
 }: {
   services: DiscoverServices;
   globalStateContainer: DiscoverGlobalStateContainer;
+  internalStateContainer: DiscoverInternalStateContainer;
 }): DiscoverSavedSearchContainer {
   const initialSavedSearch = services.savedSearch.getNew();
   const savedSearchInitial$ = new BehaviorSubject(initialSavedSearch);
@@ -148,6 +155,7 @@ export function getSavedSearchContainer({
       dataView,
       state: newAppState,
       globalStateContainer,
+      internalStateContainer,
       services,
     });
     return set(nextSavedSearchToSet);
@@ -158,6 +166,7 @@ export function getSavedSearchContainer({
     updateSavedSearch({
       savedSearch: nextSavedSearch,
       globalStateContainer,
+      internalStateContainer,
       services,
       useFilterAndQueryServices: true,
     });
@@ -169,12 +178,12 @@ export function getSavedSearchContainer({
     }
     return { id };
   };
-  const update = ({ nextDataView, nextState, useFilterAndQueryServices }: UpdateParams) => {
-    addLog('[savedSearch] update', { nextDataView, nextState });
+  const update = ({ nextState, useFilterAndQueryServices }: UpdateParams) => {
+    addLog('[savedSearch] update', { nextState });
 
     const previousSavedSearch = getState();
-    const dataView = nextDataView
-      ? nextDataView
+    const dataView = internalStateContainer.getState().dataView
+      ? internalStateContainer.getState().dataView
       : previousSavedSearch.searchSource.getField('index')!;
 
     const nextSavedSearch = updateSavedSearch({
@@ -182,6 +191,7 @@ export function getSavedSearchContainer({
       dataView,
       state: nextState || {},
       globalStateContainer,
+      internalStateContainer,
       services,
       useFilterAndQueryServices,
     });

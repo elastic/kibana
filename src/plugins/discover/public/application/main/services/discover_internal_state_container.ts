@@ -14,6 +14,7 @@ import {
 import { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { ExternalVisContext } from '@kbn/unified-histogram-plugin/public';
 
 export interface InternalState {
   dataView: DataView | undefined;
@@ -21,6 +22,7 @@ export interface InternalState {
   adHocDataViews: DataView[];
   expandedDoc: DataTableRecord | undefined;
   customFilters: Filter[];
+  visContext: ExternalVisContext | undefined;
 }
 
 interface InternalStateTransitions {
@@ -38,6 +40,9 @@ interface InternalStateTransitions {
     state: InternalState
   ) => (dataView: DataTableRecord | undefined) => InternalState;
   setCustomFilters: (state: InternalState) => (customFilters: Filter[]) => InternalState;
+  setVisContext: (
+    state: InternalState
+  ) => (visContext: ExternalVisContext | undefined) => InternalState;
 }
 
 export type DiscoverInternalStateContainer = ReduxLikeStateContainer<
@@ -56,6 +61,7 @@ export function getInternalStateContainer() {
       savedDataViews: [],
       expandedDoc: undefined,
       customFilters: [],
+      visContext: undefined,
     },
     {
       setDataView: (prevState: InternalState) => (nextDataView: DataView) => ({
@@ -105,6 +111,11 @@ export function getInternalStateContainer() {
         ...prevState,
         customFilters,
       }),
+      setVisContext:
+        (prevState: InternalState) => (visContext: ExternalVisContext | undefined) => ({
+          ...prevState,
+          visContext,
+        }),
     },
     {},
     { freeze: (state) => state }

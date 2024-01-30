@@ -7,6 +7,7 @@
  */
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { cloneDeep, isEqual } from 'lodash';
+import { fromExternalVisContextJSONString } from '@kbn/unified-histogram-plugin/public';
 import { getDataViewByTextBasedQueryLang } from '../utils/get_data_view_by_text_based_query_lang';
 import { isTextBasedQuery } from '../utils/is_text_based_query';
 import { loadAndResolveDataView } from '../utils/resolve_data_view';
@@ -114,6 +115,11 @@ function updateBySavedSearch(savedSearch: SavedSearch, deps: LoadSavedSearchDeps
   setDataView(savedSearchDataView);
   if (!savedSearchDataView.isPersisted()) {
     internalStateContainer.transitions.appendAdHocDataViews(savedSearchDataView);
+  }
+  if (savedSearch.visContextJSON) {
+    internalStateContainer.transitions.setVisContext(
+      fromExternalVisContextJSONString(savedSearch.visContextJSON)
+    );
   }
 
   // Finally notify dataStateContainer, data.query and filterManager about new derived state
