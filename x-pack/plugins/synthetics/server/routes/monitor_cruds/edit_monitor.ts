@@ -42,7 +42,6 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
     }),
     body: schema.any(),
   },
-  writeAccess: true,
   handler: async (routeContext): Promise<any> => {
     const { request, response, savedObjectsClient, server } = routeContext;
     const { logger } = server;
