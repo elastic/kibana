@@ -125,3 +125,10 @@ export type RegisterContextDefinition = (options: ContextDefinition) => void;
 
 export type ContextRegistry = Map<string, ContextDefinition>;
 export type FunctionRegistry = Map<string, FunctionDefinition>;
+
+export interface ChatContext {
+  [key: string]: {
+    value: string | number;
+    description: string;
+  };
+}

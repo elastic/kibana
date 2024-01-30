@@ -13,6 +13,7 @@ import {
   ConversationUpdateRequest,
   Message,
   MessageRole,
+  ChatContext,
 } from '../../common/types';
 
 const serializeableRt = t.any;
@@ -92,3 +93,11 @@ export const conversationRt: t.Type<Conversation> = t.intersection([
     }),
   }),
 ]);
+
+export const chatContextRt: t.Type<ChatContext> = t.record(
+  t.string,
+  t.type({
+    value: t.union([t.string, t.number]),
+    description: t.string,
+  })
+);

@@ -57,7 +57,7 @@ describe('createChatService', () => {
     }
 
     function chat({ signal }: { signal: AbortSignal } = { signal: new AbortController().signal }) {
-      return service.chat({ signal, messages: [], connectorId: '' });
+      return service.chat({ signal, messages: [], connectorId: '', chatContext: {} });
     }
 
     beforeEach(async () => {

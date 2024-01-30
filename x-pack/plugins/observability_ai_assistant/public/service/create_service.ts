@@ -11,6 +11,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { createCallObservabilityAIAssistantAPI } from '../api';
 import type { ChatRegistrationRenderFunction, ObservabilityAIAssistantService } from '../types';
+import type { ChatContext } from '../../common/types';
 
 export function createService({
   analytics,
@@ -31,6 +32,13 @@ export function createService({
 
   const registrations: ChatRegistrationRenderFunction[] = [];
 
+  let chatContext: ChatContext = {
+    url: {
+      value: window.location.href,
+      description: 'The URL that the user is currently looking at',
+    },
+  };
+
   return {
     isEnabled: () => {
       return enabled;
@@ -46,5 +54,12 @@ export function createService({
     getCurrentUser: () => securityStart.authc.getCurrentUser(),
     getLicense: () => licenseStart.license$,
     getLicenseManagementLocator: () => shareStart,
+    setChatContext: (newChatContext: ChatContext) => {
+      chatContext = {
+        ...chatContext,
+        ...newChatContext,
+      };
+    },
+    getChatContext: () => chatContext,
   };
 }

@@ -64,6 +64,8 @@ export const mockService: ObservabilityAIAssistantService = {
       navigate: () => {},
     } as unknown as SharePluginStart),
   register: () => {},
+  setChatContext: () => {},
+  getChatContext: () => ({}),
 };
 
 function createSetupContract(): ObservabilityAIAssistantPluginSetup {
@@ -86,6 +88,10 @@ function createStartContract(): ObservabilityAIAssistantPluginStart {
       loading: false,
       selectConnector: () => {},
       reloadConnectors: () => {},
+    }),
+    useObservabilityAIAssistantChatContext: () => ({
+      setChatContext: () => {},
+      getChatContext: () => ({}),
     }),
   };
 }

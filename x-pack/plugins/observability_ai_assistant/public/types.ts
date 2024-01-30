@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { ForwardRefExoticComponent, RefAttributes } from 'react';
+import type { Observable } from 'rxjs';
 import type { AnalyticsServiceStart } from '@kbn/core/public';
 import type {
   DataViewsPublicPluginSetup,
@@ -29,10 +31,9 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { ForwardRefExoticComponent, RefAttributes } from 'react';
-import type { Observable } from 'rxjs';
 import type { StreamingChatResponseEventWithoutError } from '../common/conversation_complete';
 import type {
+  ChatContext,
   ContextDefinition,
   FunctionDefinition,
   FunctionResponse,
@@ -51,16 +52,18 @@ export type { PendingMessage };
 export interface ObservabilityAIAssistantChatService {
   analytics: AnalyticsServiceStart;
   chat: (options: {
-    messages: Message[];
+    chatContext: ChatContext;
     connectorId: string;
     function?: 'none' | 'auto';
+    messages: Message[];
     signal: AbortSignal;
   }) => Observable<StreamingChatResponseEventWithoutError>;
   complete: (options: {
-    messages: Message[];
-    connectorId: string;
-    persist: boolean;
+    chatContext: ChatContext;
     conversationId?: string;
+    connectorId: string;
+    messages: Message[];
+    persist: boolean;
     signal: AbortSignal;
   }) => Observable<StreamingChatResponseEventWithoutError>;
   getContexts: () => ContextDefinition[];
@@ -82,6 +85,8 @@ export interface ObservabilityAIAssistantService {
   getLicenseManagementLocator: () => SharePluginStart;
   start: ({}: { signal: AbortSignal }) => Promise<ObservabilityAIAssistantChatService>;
   register: (fn: ChatRegistrationRenderFunction) => void;
+  setChatContext: (newChatContext: ChatContext) => void;
+  getChatContext: () => ChatContext;
 }
 
 export type RenderFunction<TArguments, TResponse extends FunctionResponse> = (options: {
@@ -132,4 +137,5 @@ export interface ObservabilityAIAssistantPluginStart {
       RefAttributes<{}>
   > | null;
   useGenAIConnectors: () => UseGenAIConnectorsResult;
+  useObservabilityAIAssistantChatContext: () => {};
 }

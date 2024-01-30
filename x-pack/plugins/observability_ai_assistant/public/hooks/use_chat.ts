@@ -16,7 +16,10 @@ import {
   StreamingChatResponseEventType,
 } from '../../common/conversation_complete';
 import { getAssistantSetupMessage } from '../service/get_assistant_setup_message';
-import type { ObservabilityAIAssistantChatService } from '../types';
+import type {
+  ObservabilityAIAssistantChatService,
+  ObservabilityAIAssistantService,
+} from '../types';
 import { useKibana } from './use_kibana';
 import { useOnce } from './use_once';
 
@@ -45,6 +48,7 @@ export interface UseChatResult {
 export interface UseChatProps {
   initialMessages: Message[];
   initialConversationId?: string;
+  service: ObservabilityAIAssistantService;
   chatService: ObservabilityAIAssistantChatService;
   connectorId?: string;
   persist: boolean;
@@ -55,6 +59,7 @@ export interface UseChatProps {
 export function useChat({
   initialMessages,
   initialConversationId,
+  service,
   chatService,
   connectorId,
   onConversationUpdate,
@@ -130,6 +135,7 @@ export function useChat({
       setChatState(ChatState.Loading);
 
       const next$ = chatService.complete({
+        chatContext: service.getChatContext(),
         connectorId,
         messages: getWithSystemMessage(nextMessages, systemMessage),
         persist,
@@ -224,13 +230,14 @@ export function useChat({
       });
     },
     [
-      connectorId,
       chatService,
-      handleSignalAbort,
-      systemMessage,
-      handleError,
-      persist,
+      connectorId,
       conversationId,
+      handleError,
+      handleSignalAbort,
+      persist,
+      service,
+      systemMessage,
     ]
   );
 

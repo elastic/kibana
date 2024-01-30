@@ -27,6 +27,7 @@ import {
 import {
   FunctionResponse,
   MessageRole,
+  type ChatContext,
   type CompatibleJSONSchema,
   type Conversation,
   type ConversationCreateRequest,
@@ -48,6 +49,8 @@ import { getAccessQuery } from '../util/get_access_query';
 import { streamIntoObservable } from '../util/stream_into_observable';
 
 export class ObservabilityAIAssistantClient {
+  chatContext: ChatContext = {};
+
   constructor(
     private readonly dependencies: {
       actionsClient: PublicMethodsOf<ActionsClient>;
@@ -157,21 +160,21 @@ export class ObservabilityAIAssistantClient {
 
           const isUserMessageWithoutFunctionResponse = isUserMessage && !lastMessage?.message.name;
 
-          const recallFirst =
-            isUserMessageWithoutFunctionResponse && functionClient.hasFunction('recall');
+          const contextFirst =
+            isUserMessageWithoutFunctionResponse && functionClient.hasFunction('context');
 
           const isAssistantMessageWithFunctionRequest =
             lastMessage?.message.role === MessageRole.Assistant &&
             !!lastMessage?.message.function_call?.name;
 
-          if (recallFirst) {
+          if (contextFirst) {
             const addedMessage = {
               '@timestamp': new Date().toISOString(),
               message: {
                 role: MessageRole.Assistant,
                 content: '',
                 function_call: {
-                  name: 'recall',
+                  name: 'context',
                   arguments: JSON.stringify({
                     queries: [],
                     contexts: [],
@@ -672,5 +675,17 @@ export class ObservabilityAIAssistantClient {
 
   deleteKnowledgeBaseEntry = async (id: string) => {
     return this.dependencies.knowledgeBaseService.deleteEntry({ id });
+  };
+
+  setChatContext = (newContext: ChatContext) => {
+    this.chatContext = { ...this.chatContext, ...newContext };
+  };
+
+  getChatContext = async () => {
+    return this.chatContext;
+  };
+
+  clearChatContext = () => {
+    this.chatContext = {};
   };
 }

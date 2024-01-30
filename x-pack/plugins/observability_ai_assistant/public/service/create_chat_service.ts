@@ -19,6 +19,7 @@ import {
   type FunctionRegistry,
   type FunctionResponse,
   type Message,
+  type ChatContext,
 } from '../../common/types';
 import { filterFunctionDefinitions } from '../../common/utils/filter_function_definitions';
 import { throwSerializedChatCompletionErrors } from '../../common/utils/throw_serialized_chat_completion_errors';
@@ -140,49 +141,17 @@ export async function createChatService({
     hasRenderFunction: (name: string) => {
       return renderFunctionRegistry.has(name);
     },
-    complete({ connectorId, messages, conversationId, persist, signal }) {
-      return new Observable<StreamingChatResponseEventWithoutError>((subscriber) => {
-        client('POST /internal/observability_ai_assistant/chat/complete', {
-          params: {
-            body: {
-              messages,
-              connectorId,
-              conversationId,
-              persist,
-            },
-          },
-          signal,
-          asResponse: true,
-          rawResponse: true,
-        })
-          .then((_response) => {
-            const response = _response as unknown as HttpResponse<IncomingMessage>;
-            const response$ = toObservable(response)
-              .pipe(
-                map((line) => JSON.parse(line) as StreamingChatResponseEvent),
-                throwSerializedChatCompletionErrors()
-              )
-              .subscribe(subscriber);
-
-            signal.addEventListener('abort', () => {
-              response$.unsubscribe();
-            });
-          })
-          .catch((err) => {
-            subscriber.error(err);
-            subscriber.complete();
-          });
-      });
-    },
     chat({
+      chatContext,
       connectorId,
-      messages,
       function: callFunctions = 'auto',
+      messages,
       signal,
     }: {
       connectorId: string;
-      messages: Message[];
+      chatContext: ChatContext;
       function?: 'none' | 'auto';
+      messages: Message[];
       signal: AbortSignal;
     }) {
       return new Observable<StreamingChatResponseEventWithoutError>((subscriber) => {
@@ -193,8 +162,9 @@ export async function createChatService({
         client('POST /internal/observability_ai_assistant/chat', {
           params: {
             body: {
-              messages,
+              chatContext,
               connectorId,
+              messages,
               functions:
                 callFunctions === 'none'
                   ? []
@@ -243,6 +213,41 @@ export async function createChatService({
         // even with multiple subscribers
         shareReplay()
       );
+    },
+    complete({ chatContext, connectorId, conversationId, messages, persist, signal }) {
+      return new Observable<StreamingChatResponseEventWithoutError>((subscriber) => {
+        client('POST /internal/observability_ai_assistant/chat/complete', {
+          params: {
+            body: {
+              chatContext,
+              connectorId,
+              conversationId,
+              messages,
+              persist,
+            },
+          },
+          signal,
+          asResponse: true,
+          rawResponse: true,
+        })
+          .then((_response) => {
+            const response = _response as unknown as HttpResponse<IncomingMessage>;
+            const response$ = toObservable(response)
+              .pipe(
+                map((line) => JSON.parse(line) as StreamingChatResponseEvent),
+                throwSerializedChatCompletionErrors()
+              )
+              .subscribe(subscriber);
+
+            signal.addEventListener('abort', () => {
+              response$.unsubscribe();
+            });
+          })
+          .catch((err) => {
+            subscriber.error(err);
+            subscriber.complete();
+          });
+      });
     },
   };
 }

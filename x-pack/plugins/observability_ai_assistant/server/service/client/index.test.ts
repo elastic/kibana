@@ -122,7 +122,7 @@ describe('Observability AI Assistant client', () => {
 
     functionClientMock.getFunctions.mockReturnValue([]);
     functionClientMock.hasFunction.mockImplementation((name) => {
-      return name !== 'recall';
+      return name !== 'context';
     });
 
     currentUserEsClientMock.search.mockResolvedValue({
@@ -1066,7 +1066,7 @@ describe('Observability AI Assistant client', () => {
     });
   });
 
-  describe('when recall is available', () => {
+  describe('when context is available', () => {
     let stream: Readable;
 
     let dataHandler: jest.Mock;
@@ -1119,7 +1119,7 @@ describe('Observability AI Assistant client', () => {
       await finished(stream);
     });
 
-    it('appends the recall request message', () => {
+    it('appends the context request message', () => {
       expect(JSON.parse(dataHandler.mock.calls[0]!)).toEqual({
         type: StreamingChatResponseEventType.MessageAdd,
         id: expect.any(String),
@@ -1129,7 +1129,7 @@ describe('Observability AI Assistant client', () => {
             content: '',
             role: MessageRole.Assistant,
             function_call: {
-              name: 'recall',
+              name: 'context',
               arguments: JSON.stringify({ queries: [], contexts: [] }),
               trigger: MessageRole.Assistant,
             },
@@ -1138,7 +1138,7 @@ describe('Observability AI Assistant client', () => {
       });
     });
 
-    it('appends the recall response', () => {
+    it('appends the context response', () => {
       expect(JSON.parse(dataHandler.mock.calls[1]!)).toEqual({
         type: StreamingChatResponseEventType.MessageAdd,
         id: expect.any(String),
@@ -1147,7 +1147,7 @@ describe('Observability AI Assistant client', () => {
           message: {
             content: JSON.stringify([{ id: 'my_document', text: 'My document' }]),
             role: MessageRole.User,
-            name: 'recall',
+            name: 'context',
           },
         },
       });

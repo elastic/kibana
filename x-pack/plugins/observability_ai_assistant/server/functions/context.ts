@@ -16,38 +16,32 @@ import { MessageRole, type Message } from '../../common/types';
 import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
 import type { ObservabilityAIAssistantClient } from '../service/client';
 
-export function registerRecallFunction({
+export function registerContextFunction({
   client,
   registerFunction,
   resources,
 }: FunctionRegistrationParameters) {
   registerFunction(
     {
-      name: 'recall',
+      name: 'context',
       contexts: ['core'],
-      description: `Use this function to recall earlier learnings. Anything you will summarize can be retrieved again later via this function.
-      
-      The learnings are sorted by score, descending.
-      
-      Make sure the query covers ONLY the following aspects:
-      - Anything you've inferred from the user's request, but is not mentioned in the user's request
-      - The functions you think might be suitable for answering the user's request. If there are multiple functions that seem suitable, create multiple queries. Use the function name in the query.  
+      description:
+        dedent(`Use this function to recall earlier learnings and get the context in which the user is currently using Kibana.
 
-      DO NOT include the user's request. It will be added internally.
-      
-      The user asks: "can you visualise the average request duration for opbeans-go over the last 7 days?"
-      You recall: {
-        "queries": [
-          "APM service,
-          "lens function usage",
-          "get_apm_timeseries function usage"    
-        ],
-        "contexts": [
-          "lens",
-          "apm"
-        ]
-      }`,
-      descriptionForUser: 'This function allows the assistant to recall previous learnings.',
+        Anything this is summarized can be retrieved again later via this function. The learnings are sorted by score, descending.
+
+      Make sure the query covers ONLY the following aspects:
+      - Anything you've inferred from the user's request but is not mentioned in the user's request
+      - The functions you think might be suitable for answering the user's request. If there are multiple functions that seem suitable, create multiple queries. Use the function name in the query. DO NOT include the user's request. It will be added internally.
+
+      Use this function to get the context of the application that the user is currently using. Examples of context are: 
+      - the URL the user is at;
+      - the time range the user is looking at;
+      - the service the user is looking at.
+
+      This context can change every time the user adds a prompt, so you should call this function every time you need the context.`),
+      descriptionForUser:
+        'This function allows the assistant to recall previous learnings from the Knowledge base and gather context of how you are using the application.',
       parameters: {
         type: 'object',
         additionalProperties: false,
@@ -83,6 +77,8 @@ export function registerRecallFunction({
         throw new Error('No system message found');
       }
 
+      const chatContext = await client.getChatContext();
+
       const userMessage = last(
         messages.filter((message) => message.message.role === MessageRole.User)
       );
@@ -101,7 +97,7 @@ export function registerRecallFunction({
 
       if (suggestions.length === 0) {
         return {
-          content: [] as unknown as Serializable,
+          content: { learnings: [] as unknown as Serializable, chatContext },
         };
       }
 
@@ -119,7 +115,7 @@ export function registerRecallFunction({
       resources.logger.debug(JSON.stringify(relevantDocuments, null, 2));
 
       return {
-        content: relevantDocuments as unknown as Serializable,
+        content: { learnings: relevantDocuments as unknown as Serializable, chatContext },
       };
     }
   );
@@ -130,7 +126,6 @@ async function retrieveSuggestions({
   queries,
   client,
   contexts,
-  signal,
 }: {
   userMessage?: Message;
   queries: string[];

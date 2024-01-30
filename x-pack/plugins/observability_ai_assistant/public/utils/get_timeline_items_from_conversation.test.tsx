@@ -114,7 +114,7 @@ describe('getTimelineItemsFromConversation', () => {
             message: {
               role: MessageRole.Assistant,
               function_call: {
-                name: 'recall',
+                name: 'context',
                 arguments: JSON.stringify({ queries: [], contexts: [] }),
                 trigger: MessageRole.Assistant,
               },
@@ -124,7 +124,7 @@ describe('getTimelineItemsFromConversation', () => {
             '@timestamp': new Date().toISOString(),
             message: {
               role: MessageRole.User,
-              name: 'recall',
+              name: 'context',
               content: JSON.stringify([]),
             },
           },
@@ -155,7 +155,7 @@ describe('getTimelineItemsFromConversation', () => {
         ),
       });
 
-      expect(container.textContent).toBe('requested the function recall');
+      expect(container.textContent).toBe('requested the function context');
     });
 
     it('formats the function response', () => {
@@ -181,7 +181,7 @@ describe('getTimelineItemsFromConversation', () => {
         ),
       });
 
-      expect(container.textContent).toBe('executed the function recall');
+      expect(container.textContent).toBe('executed the function context');
     });
   });
   describe('with a render function', () => {
@@ -453,7 +453,7 @@ describe('getTimelineItemsFromConversation', () => {
             message: {
               role: MessageRole.Assistant,
               function_call: {
-                name: 'recall',
+                name: 'context',
                 arguments: JSON.stringify({ queries: [], contexts: [] }),
                 trigger: MessageRole.User,
               },
@@ -463,7 +463,7 @@ describe('getTimelineItemsFromConversation', () => {
             '@timestamp': new Date().toISOString(),
             message: {
               role: MessageRole.User,
-              name: 'recall',
+              name: 'context',
               content: JSON.stringify([]),
             },
           },
