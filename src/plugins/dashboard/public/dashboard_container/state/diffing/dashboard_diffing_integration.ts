@@ -75,8 +75,9 @@ const sessionChangeKeys: Array<keyof Omit<DashboardContainerInput, 'panels'>> = 
 ];
 
 /**
- * Does an initial diff between @param initialInput and @param initialLastSavedInput, and created a middleware
- * which listens to the redux store and checks for & publishes the unsaved changes on dispatches.
+ * Does an initial diff between @param initialInput and @param initialLastSavedInput, and creates a middleware
+ * which listens to the redux store and pushes updates to the `hasUnsavedChanges` and `backupUnsavedChanges` behaviour
+ * subjects so that the corresponding subscriptions can dispatch updates as necessary
  */
 export function startDiffingDashboardState(
   this: DashboardContainer,
