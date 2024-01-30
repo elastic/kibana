@@ -68,13 +68,17 @@ function replaceAsKeywordWithAssignments(command: string) {
 }
 
 function replaceFunctionsinSortWithStats(command: string) {
-  const sortFunction = command.match(/[a-zA-Z_]+\([^\)]*\)(\.[^\)]*\))?/g)?.[0];
-  return (
-    'STATS sort_key = ' +
-    sortFunction +
-    '\n| ' +
-    command.replaceAll(/[a-zA-Z_]+\([^\)]*\)(\.[^\)]*\))?/g, 'sort_key ')
-  );
+  if (command.match(/[a-zA-Z_]+\([^\)]*\)(\.[^\)]*\))?/g)) {
+    const sortFunction = command.match(/[a-zA-Z_]+\([^\)]*\)(\.[^\)]*\))?/g)?.[0];
+    return (
+      'STATS sort_key = ' +
+      sortFunction +
+      '\n| ' +
+      command.replaceAll(/[a-zA-Z_]+\([^\)]*\)(\.[^\)]*\))?/g, 'sort_key ')
+    );
+  } else {
+    return command;
+  }
 }
 
 function verifySortColumnInKeep(keepCommand: string, sortCommand: string) {
@@ -113,10 +117,7 @@ export function correctCommonEsqlMistakes(content: string, log: Logger) {
             break;
 
           case 'SORT':
-            if (formattedCommand.match(/[a-zA-Z_]+\([^\)]*\)(\.[^\)]*\))?/g)) {
-              formattedCommand = replaceFunctionsinSortWithStats(formattedCommand);
-              break;
-            }
+            formattedCommand = replaceFunctionsinSortWithStats(formattedCommand);
             break;
 
           case 'KEEP':
