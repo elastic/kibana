@@ -167,7 +167,7 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
             title={
               <FormattedMessage
                 id="xpack.ml.trainedModels.modelsList.deleteModal.inferenceAPIWarningHeader"
-                defaultMessage="{modelsCount, plural, one {{modelId} has} other {# models have}} associated inference APIs."
+                defaultMessage="{modelsCount, plural, one {{modelId} has} other {# models have}} associated inference services."
                 values={{
                   modelsCount: modelsWithInferenceAPIs.length,
                   modelId: modelsWithInferenceAPIs[0].model_id,

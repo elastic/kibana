@@ -443,7 +443,7 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
                   <EuiFlexItem grow={false}>
                     <FormattedMessage
                       id="xpack.ml.trainedModels.modelsList.expandedRow.inferenceAPIsTabLabel"
-                      defaultMessage="Infernce APIs"
+                      defaultMessage="Infernce services"
                     />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
