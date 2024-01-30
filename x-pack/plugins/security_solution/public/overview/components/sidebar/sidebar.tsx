@@ -8,7 +8,12 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import { ENABLE_NEWS_FEED_SETTING, NEWS_FEED_URL_SETTING } from '../../../../common/constants';
+import { useKibana } from '../../../common/lib/kibana/kibana_react';
+import {
+  APP_ID,
+  ENABLE_NEWS_FEED_SETTING,
+  NEWS_FEED_URL_SETTING,
+} from '../../../../common/constants';
 import { Filters as RecentTimelinesFilters } from '../recent_timelines/filters';
 import { StatefulRecentTimelines } from '../recent_timelines';
 import { StatefulNewsFeed } from '../../../common/components/news_feed';
@@ -17,7 +22,6 @@ import { SidebarHeader } from '../../../common/components/sidebar_header';
 
 import * as i18n from '../../pages/translations';
 import { RecentCases } from '../recent_cases';
-import { useGetUserCasesPermissions } from '../../../common/lib/kibana';
 
 const SidebarSpacerComponent = () => (
   <EuiFlexItem grow={false}>
@@ -30,6 +34,7 @@ export const Sidebar = React.memo<{
   recentTimelinesFilterBy: RecentTimelinesFilterMode;
   setRecentTimelinesFilterBy: (filterBy: RecentTimelinesFilterMode) => void;
 }>(({ recentTimelinesFilterBy, setRecentTimelinesFilterBy }) => {
+  const { cases } = useKibana().services;
   const recentTimelinesFilters = useMemo(
     () => (
       <RecentTimelinesFilters
@@ -41,7 +46,8 @@ export const Sidebar = React.memo<{
   );
 
   // only render the recently created cases view if the user has at least read permissions
-  const hasCasesReadPermissions = useGetUserCasesPermissions().read;
+  const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
+  const hasCasesReadPermissions = userCasesPermissions.read;
 
   return (
     <EuiFlexGroup direction="column" responsive={false} gutterSize="l">

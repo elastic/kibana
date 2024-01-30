@@ -11,15 +11,15 @@ import type { RuleHealthSnapshot } from './rule_health';
 
 const getEmptyRuleHealthSnapshot = (): RuleHealthSnapshot => {
   return {
-    stats_at_the_moment: {
+    state_at_the_moment: {
       rule: getRulesSchemaMock(),
     },
-    stats_over_interval: healthStatsMock.getEmptyRuleExecutionStats(),
+    stats_over_interval: healthStatsMock.getEmptyHealthOverviewStats(),
     history_over_interval: {
       buckets: [
         {
           timestamp: '2023-05-15T16:12:14.967Z',
-          stats: healthStatsMock.getEmptyRuleExecutionStats(),
+          stats: healthStatsMock.getEmptyHealthOverviewStats(),
         },
       ],
     },

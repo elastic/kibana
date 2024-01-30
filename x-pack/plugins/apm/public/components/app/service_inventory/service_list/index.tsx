@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import { TypeOf } from '@kbn/typed-react-router-config';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import {
   ServiceInventoryFieldName,
@@ -327,6 +327,7 @@ export function ServiceList({
   } = useApmParams('/services');
 
   const { kuery } = query;
+
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
     kuery,
   });
@@ -355,6 +356,16 @@ export function ServiceList({
       link,
       serviceOverflowCount,
     ]
+  );
+
+  const handleSort = useCallback(
+    (itemsToSort, sortField, sortDirection) =>
+      sortFn(
+        itemsToSort,
+        sortField as ServiceInventoryFieldName,
+        sortDirection
+      ),
+    [sortFn]
   );
 
   return (
@@ -404,13 +415,7 @@ export function ServiceList({
           initialSortField={initialSortField}
           initialSortDirection={initialSortDirection}
           initialPageSize={initialPageSize}
-          sortFn={(itemsToSort, sortField, sortDirection) =>
-            sortFn(
-              itemsToSort,
-              sortField as ServiceInventoryFieldName,
-              sortDirection
-            )
-          }
+          sortFn={handleSort}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

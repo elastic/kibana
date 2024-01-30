@@ -24,7 +24,7 @@ export function TimeSliderPopoverButton(props: Props) {
       onClick={props.onClick}
       data-test-subj="timeSlider-popoverToggleButton"
     >
-      <EuiText className="eui-textTruncate" size="s">
+      <EuiText className="timeSlider__anchorText eui-textTruncate" size="s">
         <span>{props.formatDate(props.from)}</span>
         &nbsp;&nbsp;→&nbsp;&nbsp;
         <span>{props.formatDate(props.to)}</span>

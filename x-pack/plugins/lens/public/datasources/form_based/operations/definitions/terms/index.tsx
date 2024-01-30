@@ -46,6 +46,7 @@ import {
   isSortableByColumn,
   isPercentileRankSortable,
   isPercentileSortable,
+  getOtherBucketSwitchDefault,
 } from './helpers';
 import {
   DEFAULT_MAX_DOC_COUNT,
@@ -385,9 +386,9 @@ export const termsOperation: OperationDefinition<
       }),
     }).toAst();
   },
-  getDefaultLabel: (column, indexPattern) =>
+  getDefaultLabel: (column, columns, indexPattern) =>
     ofName(
-      indexPattern.getFieldByName(column.sourceField)?.displayName,
+      indexPattern?.getFieldByName(column.sourceField)?.displayName,
       column.params.secondaryFields?.length,
       column.params.orderBy.type === 'rare',
       column.params.orderBy.type === 'significant',
@@ -733,6 +734,7 @@ The top values of a specified field ranked by the chosen metric.
                   params: {
                     ...currentColumn.params,
                     size: value,
+                    otherBucket: getOtherBucketSwitchDefault(currentColumn, value),
                   },
                 },
               } as Record<string, TermsIndexPatternColumn>,

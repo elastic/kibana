@@ -14,7 +14,7 @@
       "_analyze",
       "{index}/_analyze"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-analyze.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/indices-analyze.html",
     "availability": {
       "stack": true,
       "serverless": true

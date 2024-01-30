@@ -9,6 +9,7 @@ import { CoreSetup } from '@kbn/core/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
+import { type TransformEnabledFeatures } from './serverless_context';
 import { PluginsDependencies } from '../plugin';
 import { getMlSharedImports } from '../shared_imports';
 
@@ -45,6 +46,7 @@ export async function mountManagementSection(
   const {
     data,
     dataViews,
+    dataViewEditor,
     share,
     spaces,
     triggersActionsUi,
@@ -68,6 +70,7 @@ export async function mountManagementSection(
     application,
     chrome,
     data,
+    dataViewEditor,
     dataViews,
     docLinks,
     http,
@@ -93,7 +96,10 @@ export async function mountManagementSection(
     contentManagement,
   };
 
-  const unmountAppCallback = renderApp(element, appDependencies, isServerless);
+  const enabledFeatures: TransformEnabledFeatures = {
+    showNodeInfo: !isServerless,
+  };
+  const unmountAppCallback = renderApp(element, appDependencies, enabledFeatures);
 
   return () => {
     docTitle.reset();

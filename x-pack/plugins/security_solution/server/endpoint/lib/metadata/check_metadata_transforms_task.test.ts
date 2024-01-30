@@ -70,6 +70,7 @@ describe('check metadata transforms task', () => {
           { type: ElasticsearchAssetType.transform } as EsAssetReference,
           { type: ElasticsearchAssetType.transform } as EsAssetReference,
         ],
+        version: '8.11.0',
       } as Installation);
   });
 

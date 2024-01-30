@@ -12,3 +12,5 @@ export const DEFAULT_MAX_DOC_COUNT = 1;
 export const supportedTypes = new Set(['string', 'boolean', 'number', 'ip']);
 
 export const MULTI_KEY_VISUAL_SEPARATOR = '›';
+
+export const MAX_TERMS_OTHER_ENABLED = 1000;

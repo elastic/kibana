@@ -25,7 +25,7 @@ import { RandomSampler } from '../../lib/helpers/get_random_sampler';
 import { SERVICE_NAME, TIER, INDEX } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import {
-  getDocumentTypeFilterForTransactions,
+  getBackwardCompatibleDocumentTypeFilter,
   getProcessorEventForTransactions,
   getDurationFieldForTransactions,
   isRootTransaction,
@@ -65,7 +65,7 @@ async function getTracesPerMinute({
       query: {
         bool: {
           filter: [
-            ...getDocumentTypeFilterForTransactions(
+            ...getBackwardCompatibleDocumentTypeFilter(
               searchAggregatedTransactions
             ),
             ...environmentQuery(environment),

@@ -31,6 +31,7 @@ type OpenTelemetryAgentName =
   | 'opentelemetry/python'
   | 'opentelemetry/ruby'
   | 'opentelemetry/swift'
+  | 'opentelemetry/android'
   | 'opentelemetry/webjs';
 
 // Unable to reference AgentName from '@kbn/apm-plugin/typings/es_schemas/ui/fields/agent' due to circular reference

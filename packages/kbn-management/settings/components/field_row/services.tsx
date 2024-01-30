@@ -29,11 +29,11 @@ export interface FieldRowProviderProps extends FieldRowServices {
 export const FieldRowProvider = ({ children, ...services }: FieldRowProviderProps) => {
   // Typescript types are widened to accept more than what is needed.  Take only what is necessary
   // so the context remains clean.
-  const { links, showDanger } = services;
+  const { links, showDanger, validateChange } = services;
 
   return (
     <FieldRowContext.Provider value={{ links }}>
-      <FieldInputProvider {...{ showDanger }}>{children}</FieldInputProvider>
+      <FieldInputProvider {...{ showDanger, validateChange }}>{children}</FieldInputProvider>
     </FieldRowContext.Provider>
   );
 };
@@ -44,7 +44,8 @@ export const FieldRowProvider = ({ children, ...services }: FieldRowProviderProp
 export const FieldRowKibanaProvider: FC<FieldRowKibanaDependencies> = ({
   children,
   docLinks,
-  toasts,
+  notifications,
+  settings,
 }) => {
   return (
     <FieldRowContext.Provider
@@ -52,7 +53,9 @@ export const FieldRowKibanaProvider: FC<FieldRowKibanaDependencies> = ({
         links: docLinks.links.management,
       }}
     >
-      <FieldInputKibanaProvider {...{ toasts }}>{children}</FieldInputKibanaProvider>
+      <FieldInputKibanaProvider {...{ notifications, settings }}>
+        {children}
+      </FieldInputKibanaProvider>
     </FieldRowContext.Provider>
   );
 };

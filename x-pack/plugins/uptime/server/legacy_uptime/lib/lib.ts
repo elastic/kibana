@@ -24,7 +24,6 @@ import { DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES } from '../../constants/settings';
 import { DynamicSettingsAttributes } from '../../runtime_types/settings';
 import { settingsObjectId, umDynamicSettings } from './saved_objects/uptime_settings';
 import { API_URLS } from '../../../common/constants';
-import { UptimeServerSetup } from './adapters';
 
 export type { UMServerLibs } from '../uptime_server';
 
@@ -186,7 +185,7 @@ export class UptimeEsClient {
     const showInspectData =
       (isInspectorEnabled || this.isDev) && path !== API_URLS.DYNAMIC_SETTINGS;
 
-    if (showInspectData) {
+    if (showInspectData && this.inspectableEsQueries.length > 0) {
       return { _inspect: this.inspectableEsQueries };
     }
     return {};
@@ -287,7 +286,3 @@ export function debugESCall({
   }
   console.log(`\n`);
 }
-
-export const isTestUser = (server: UptimeServerSetup) => {
-  return server.config.service?.username === 'localKibanaIntegrationTestsUser';
-};

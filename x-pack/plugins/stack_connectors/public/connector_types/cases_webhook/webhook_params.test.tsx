@@ -8,20 +8,7 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import WebhookParamsFields from './webhook_params';
-import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
 import { CasesWebhookActionConnector } from './types';
-
-const kibanaReactPath = '../../../../../../src/plugins/kibana_react/public';
-
-jest.mock(kibanaReactPath, () => {
-  const original = jest.requireActual(kibanaReactPath);
-  return {
-    ...original,
-    CodeEditor: (props: any) => {
-      return <MockCodeEditor {...props} />;
-    },
-  };
-});
 
 const actionParams = {
   subAction: 'pushToService',
@@ -31,6 +18,9 @@ const actionParams = {
       description: 'some description',
       tags: ['kibana'],
       externalId: null,
+      id: '10006',
+      severity: 'High',
+      status: 'Open',
     },
     comments: [],
   },
@@ -50,7 +40,7 @@ describe('WebhookParamsFields renders', () => {
         actionConnector={actionConnector}
         actionParams={actionParams}
         errors={{ body: [] }}
-        editAction={() => {}}
+        editAction={jest.fn()}
         index={0}
         messageVariables={[
           {
@@ -65,6 +55,10 @@ describe('WebhookParamsFields renders', () => {
     expect(wrapper.find('[data-test-subj="descriptionTextArea"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="tagsComboBox"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="commentsTextArea"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="tagsComboBox"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="commentsTextArea"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="case-severity-selection"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="case-status-filter"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="commentsTextArea"]').first().prop('disabled')).toEqual(
       false
     );
@@ -78,7 +72,7 @@ describe('WebhookParamsFields renders', () => {
         actionConnector={actionConnectorNoComments}
         actionParams={actionParams}
         errors={{ body: [] }}
-        editAction={() => {}}
+        editAction={jest.fn()}
         index={0}
         messageVariables={[
           {

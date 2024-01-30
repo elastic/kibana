@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './composite_slo';
 export * from './slo';

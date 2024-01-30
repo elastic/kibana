@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { invert } from 'lodash';
-import { DataStream, ServiceLocations } from '../../../../../common/runtime_types';
+import { MonitorTypeEnum, ServiceLocations } from '../../../../../common/runtime_types';
 import { MonitorFilterState } from '../../state';
 
 export type SyntheticsMonitorFilterField = keyof Omit<
@@ -43,7 +43,7 @@ export function getSyntheticsFilterDisplayValues(
   switch (field) {
     case 'monitorTypes':
       return values.map(({ label, count }: { label: string; count: number }) => ({
-        label: monitorTypeKeyLabelMap[label as DataStream] ?? label,
+        label: monitorTypeKeyLabelMap[label as MonitorTypeEnum] ?? label,
         count,
       }));
     case 'schedules':
@@ -88,9 +88,9 @@ export const valueToLabelWithEmptyCount = (value?: string | string[]): LabelWith
   return value ? [{ label: value, count: 0 }] : [];
 };
 
-export const monitorTypeKeyLabelMap: Record<DataStream, string> = {
-  [DataStream.BROWSER]: 'Journey / Page',
-  [DataStream.HTTP]: 'HTTP',
-  [DataStream.TCP]: 'TCP',
-  [DataStream.ICMP]: 'ICMP',
+export const monitorTypeKeyLabelMap: Record<MonitorTypeEnum, string> = {
+  [MonitorTypeEnum.BROWSER]: 'Journey / Page',
+  [MonitorTypeEnum.HTTP]: 'HTTP',
+  [MonitorTypeEnum.TCP]: 'TCP',
+  [MonitorTypeEnum.ICMP]: 'ICMP',
 };

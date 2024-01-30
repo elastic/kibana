@@ -99,6 +99,9 @@ export const useInfraMLModule = <JobType extends string>({
       createPromise: async () => {
         return await moduleDescriptor.cleanUpModule(spaceId, sourceId, services.http.fetch);
       },
+      onReject: (e) => {
+        throw new Error(`Failed to clean up previous ML job: ${e}`);
+      },
     },
     [spaceId, sourceId]
   );
@@ -121,8 +124,8 @@ export const useInfraMLModule = <JobType extends string>({
         .then(() => {
           setUpModule(selectedIndices, start, end, filter, partitionField);
         })
-        .catch(() => {
-          dispatchModuleStatus({ type: 'failedSetup' });
+        .catch((e) => {
+          dispatchModuleStatus({ type: 'failedSetup', reason: e.toString() });
         });
     },
     [cleanUpModule, dispatchModuleStatus, setUpModule]

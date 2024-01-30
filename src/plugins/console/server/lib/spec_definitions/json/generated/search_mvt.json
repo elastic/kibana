@@ -36,7 +36,7 @@
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-vector-tile-api.html",
     "availability": {
       "stack": true,
-      "serverless": false
+      "serverless": true
     }
   }
 }

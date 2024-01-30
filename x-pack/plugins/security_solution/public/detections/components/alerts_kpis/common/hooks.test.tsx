@@ -124,11 +124,11 @@ describe('hooks', () => {
         <TestProviders>{children}</TestProviders>
       );
       const { result, unmount } = renderHook(() => useStackByFields(), { wrapper });
-      const aggregateableFields = result.current;
+      const aggregateableFields = result.current();
       unmount();
-      expect(aggregateableFields?.find((field) => field.label === 'agent.id')).toBeTruthy();
+      expect(aggregateableFields!.find((field) => field.label === 'agent.id')).toBeTruthy();
       expect(
-        aggregateableFields?.find((field) => field.label === 'nestedField.firstAttributes')
+        aggregateableFields!.find((field) => field.label === 'nestedField.firstAttributes')
       ).toBe(undefined);
     });
 
@@ -144,10 +144,10 @@ describe('hooks', () => {
       const { result, unmount } = renderHook(() => useStackByFields(useLensCompatibleFields), {
         wrapper,
       });
-      const aggregateableFields = result.current;
+      const aggregateableFields = result.current();
       unmount();
-      expect(aggregateableFields?.find((field) => field.label === '@timestamp')).toBeUndefined();
-      expect(aggregateableFields?.find((field) => field.label === '_id')).toBeUndefined();
+      expect(aggregateableFields!.find((field) => field.label === '@timestamp')).toBeUndefined();
+      expect(aggregateableFields!.find((field) => field.label === '_id')).toBeUndefined();
     });
 
     it('returns only Lens compatible fields (check if it is a nested field)', () => {
@@ -162,7 +162,7 @@ describe('hooks', () => {
       const { result, unmount } = renderHook(() => useStackByFields(useLensCompatibleFields), {
         wrapper,
       });
-      const aggregateableFields = result.current;
+      const aggregateableFields = result.current();
       unmount();
       expect(aggregateableFields).toHaveLength(0);
     });

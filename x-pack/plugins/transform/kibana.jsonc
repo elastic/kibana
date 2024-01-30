@@ -29,13 +29,13 @@
       "contentManagement",
     ],
     "optionalPlugins": [
+      "dataViewEditor",
       "security",
       "usageCollection",
       "spaces",
       "alerting"
     ],
     "requiredBundles": [
-      "unifiedSearch",
       "esUiShared",
       "discover",
       "kibanaUtils",

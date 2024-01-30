@@ -61,6 +61,7 @@ export function fetchAll(
     services,
     inspectorAdapters,
     savedSearch,
+    abortController,
   } = fetchDeps;
   const { data } = services;
   const searchSource = savedSearch.searchSource.createChild();
@@ -88,12 +89,19 @@ export function fetchAll(
     // Mark all subjects as loading
     sendLoadingMsg(dataSubjects.main$, { recordRawType });
     sendLoadingMsg(dataSubjects.documents$, { recordRawType, query });
-    sendLoadingMsg(dataSubjects.totalHits$, { recordRawType });
+    // histogram will send `loading` for totalHits$
 
     // Start fetching all required requests
     const response =
       useTextbased && query
-        ? fetchTextBased(query, dataView, data, services.expressions, inspectorAdapters)
+        ? fetchTextBased(
+            query,
+            dataView,
+            data,
+            services.expressions,
+            inspectorAdapters,
+            abortController.signal
+          )
         : fetchDocuments(searchSource, fetchDeps);
     const fetchType = useTextbased && query ? 'fetchTextBased' : 'fetchDocuments';
     const startTime = window.performance.now();
@@ -108,9 +116,12 @@ export function fetchAll(
             meta: { fetchType },
           });
         }
+
+        const currentTotalHits = dataSubjects.totalHits$.getValue();
         // If the total hits (or chart) query is still loading, emit a partial
         // hit count that's at least our retrieved document count
-        if (dataSubjects.totalHits$.getValue().fetchStatus === FetchStatus.LOADING) {
+        if (currentTotalHits.fetchStatus === FetchStatus.LOADING && !currentTotalHits.result) {
+          // trigger `partial` only for the first request (if no total hits value yet)
           dataSubjects.totalHits$.next({
             fetchStatus: FetchStatus.PARTIAL,
             result: records.length,
@@ -140,6 +151,10 @@ export function fetchAll(
         });
 
         checkHitCount(dataSubjects.main$, records.length);
+      })
+      // In the case that the request was aborted (e.g. a refresh), swallow the abort error
+      .catch((e) => {
+        if (!abortController.signal.aborted) throw e;
       })
       // Only the document query should send its errors to main$, to cause the full Discover app
       // to get into an error state. The other queries will not cause all of Discover to error out

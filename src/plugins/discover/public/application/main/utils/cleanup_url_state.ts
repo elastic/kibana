@@ -6,14 +6,19 @@
  * Side Public License, v 1.
  */
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { DiscoverAppState, AppStateUrl } from '../services/discover_app_state_container';
 import { migrateLegacyQuery } from '../../../utils/migrate_legacy_query';
+import { getMaxAllowedSampleSize } from '../../../utils/get_allowed_sample_size';
 
 /**
  * Takes care of the given url state, migrates legacy props and cleans up empty props
  * @param appStateFromUrl
  */
-export function cleanupUrlState(appStateFromUrl: AppStateUrl): DiscoverAppState {
+export function cleanupUrlState(
+  appStateFromUrl: AppStateUrl,
+  uiSettings: IUiSettingsClient
+): DiscoverAppState {
   if (
     appStateFromUrl &&
     appStateFromUrl.query &&
@@ -44,6 +49,19 @@ export function cleanupUrlState(appStateFromUrl: AppStateUrl): DiscoverAppState 
   ) {
     // remove the param if it's invalid
     delete appStateFromUrl.rowsPerPage;
+  }
+
+  if (
+    appStateFromUrl?.sampleSize &&
+    (isOfAggregateQueryType(appStateFromUrl.query) || // not supported yet for ES|QL
+      !(
+        typeof appStateFromUrl.sampleSize === 'number' &&
+        appStateFromUrl.sampleSize > 0 &&
+        appStateFromUrl.sampleSize <= getMaxAllowedSampleSize(uiSettings)
+      ))
+  ) {
+    // remove the param if it's invalid
+    delete appStateFromUrl.sampleSize;
   }
 
   return appStateFromUrl as DiscoverAppState;

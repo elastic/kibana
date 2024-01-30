@@ -12,7 +12,7 @@ import {
 } from './get_alert_evaluation_unit_type_by_rule_type_id';
 
 export const formatAlertEvaluationValue = (ruleTypeId?: string, evaluationValue?: number) => {
-  if (!evaluationValue || !ruleTypeId) return '-';
+  if (null == evaluationValue || !ruleTypeId) return '-';
   const unitType = getAlertEvaluationUnitTypeByRuleTypeId(ruleTypeId);
   switch (unitType) {
     case ALERT_EVALUATION_UNIT_TYPE.DURATION:

@@ -73,7 +73,6 @@ export const SourceConfigurationSavedObjectAttributesRT = rt.type({
   logIndices: logIndexSavedObjectReferenceRT,
   inventoryDefaultView: rt.string,
   metricsExplorerDefaultView: rt.string,
-  fields: rt.record(rt.string, rt.unknown),
   logColumns: rt.array(SourceConfigurationSavedObjectColumnRT),
   anomalyThreshold: rt.number,
 });

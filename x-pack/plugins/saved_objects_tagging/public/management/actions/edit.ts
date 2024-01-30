@@ -27,7 +27,7 @@ export const getEditAction = ({
   tagClient,
   fetchTags,
 }: GetEditActionOptions): TagAction => {
-  const editModalOpener = getEditModalOpener({ overlays, theme, tagClient });
+  const editModalOpener = getEditModalOpener({ overlays, theme, tagClient, notifications });
   return {
     id: 'edit',
     name: ({ name }) =>

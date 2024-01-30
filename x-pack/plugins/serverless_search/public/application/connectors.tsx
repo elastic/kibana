@@ -16,22 +16,26 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import ReactDOM from 'react-dom';
 import React from 'react';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { Router } from '@kbn/shared-ux-router';
 import { ServerlessSearchContext } from './hooks/use_kibana';
 
 export async function renderApp(
   element: HTMLElement,
   core: CoreStart,
-  services: ServerlessSearchContext
+  services: ServerlessSearchContext,
+  queryClient: QueryClient
 ) {
-  const { ConnectorsOverview } = await import('./components/connectors_overview');
-  const queryClient = new QueryClient();
+  const { ConnectorsRouter } = await import('./components/connectors_router');
+
   ReactDOM.render(
     <KibanaThemeProvider theme={core.theme}>
       <KibanaContextProvider services={{ ...core, ...services }}>
         <QueryClientProvider client={queryClient}>
           <ReactQueryDevtools initialIsOpen={false} />
           <I18nProvider>
-            <ConnectorsOverview />
+            <Router history={services.history}>
+              <ConnectorsRouter />
+            </Router>
           </I18nProvider>
         </QueryClientProvider>
       </KibanaContextProvider>

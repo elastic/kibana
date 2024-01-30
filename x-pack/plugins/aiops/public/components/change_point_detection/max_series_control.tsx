@@ -42,6 +42,7 @@ export const MaxSeriesControl: FC<{
       label={inline ? undefined : label}
     >
       <EuiFieldNumber
+        data-test-subj="aiopsMaxSeriesControlFieldNumber"
         disabled={disabled}
         prepend={inline ? label : undefined}
         append={

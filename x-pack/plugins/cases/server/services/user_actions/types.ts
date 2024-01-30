@@ -26,6 +26,7 @@ import type {
   CaseStatuses,
   User,
   CaseAssignees,
+  CaseCustomFields,
 } from '../../../common/types/domain';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import type {
@@ -91,6 +92,9 @@ export interface BuilderParameters {
   };
   category: {
     parameters: { payload: { category: string | null } };
+  };
+  customFields: {
+    parameters: { payload: { customFields: CaseCustomFields } };
   };
 }
 
@@ -308,9 +312,13 @@ export interface BulkCreateAttachmentUserAction
   attachments: Array<{ id: string; owner: string; attachment: AttachmentRequest }>;
 }
 
-export type CreateUserActionClient<T extends keyof BuilderParameters> = CreateUserAction<T> &
-  CommonUserActionArgs &
-  IndexRefresh;
+export type CreateUserActionArgs<T extends keyof BuilderParameters> = {
+  userAction: CreateUserAction<T> & CommonUserActionArgs;
+} & IndexRefresh;
+
+export type BulkCreateUserActionArgs<T extends keyof BuilderParameters> = {
+  userActions: Array<CreateUserAction<T> & CommonUserActionArgs>;
+} & IndexRefresh;
 
 export interface CreateUserActionES<T> extends IndexRefresh {
   attributes: T;

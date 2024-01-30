@@ -44,7 +44,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           description: 'I just added this tag',
           color: '#FF00CC',
         },
-        { submit: true }
+        {
+          submit: true,
+          clearWithKeyboard: true,
+        }
       );
       await tagModal.waitUntilClosed();
       await tagManagementPage.waitUntilTableIsLoaded();
@@ -64,7 +67,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           description: 'The name will fails validation',
           color: '#FF00CC',
         },
-        { submit: true }
+        {
+          submit: true,
+          clearWithKeyboard: true,
+        }
       );
 
       expect(await tagModal.isOpened()).to.be(true);
@@ -83,7 +89,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           description: 'The name will fails validation',
           color: '#FF00CC',
         },
-        { submit: true }
+        {
+          submit: true,
+          clearWithKeyboard: true,
+        }
       );
 
       expect(await tagModal.isOpened()).to.be(true);
@@ -93,7 +102,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         {
           name: 'valid name',
         },
-        { submit: true }
+        {
+          submit: true,
+          clearWithKeyboard: true,
+        }
       );
 
       await tagModal.waitUntilClosed();
@@ -113,7 +125,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           description: 'I will not add this tag',
           color: '#FF00CC',
         },
-        { submit: false }
+        {
+          submit: false,
+          clearWithKeyboard: true,
+        }
       );
       await tagModal.clickCancel();
       await tagModal.waitUntilClosed();

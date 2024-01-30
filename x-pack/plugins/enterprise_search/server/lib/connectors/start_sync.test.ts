@@ -299,7 +299,11 @@ describe('startSync lib function', () => {
         _id: 'connectorId',
         _source: {
           api_key_id: null,
-          configuration: {},
+          configuration: {
+            use_document_level_security: {
+              value: true,
+            },
+          },
           created_at: null,
           custom_scheduling: {},
           error: null,
@@ -334,10 +338,14 @@ describe('startSync lib function', () => {
         canceled_at: null,
         completed_at: null,
         connector: {
-          configuration: {},
+          configuration: {
+            use_document_level_security: {
+              value: true,
+            },
+          },
           filtering: null,
           id: 'connectorId',
-          index_name: `${CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX}index_name`,
+          index_name: `${CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX}search-index_name`,
           language: null,
           pipeline: null,
           service_type: null,

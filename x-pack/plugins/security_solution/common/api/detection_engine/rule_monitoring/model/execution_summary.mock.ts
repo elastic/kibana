@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { RuleExecutionStatus } from './execution_status';
-import type { RuleExecutionSummary } from './execution_summary';
+import { RuleExecutionStatusEnum } from './execution_status.gen';
+import type { RuleExecutionSummary } from './execution_summary.gen';
 
 const getSummarySucceeded = (): RuleExecutionSummary => ({
   last_execution: {
     date: '2020-02-18T15:26:49.783Z',
-    status: RuleExecutionStatus.succeeded,
+    status: RuleExecutionStatusEnum.succeeded,
     status_order: 0,
     message: 'succeeded',
     metrics: {
@@ -25,7 +25,7 @@ const getSummarySucceeded = (): RuleExecutionSummary => ({
 const getSummaryFailed = (): RuleExecutionSummary => ({
   last_execution: {
     date: '2020-02-18T15:15:58.806Z',
-    status: RuleExecutionStatus.failed,
+    status: RuleExecutionStatusEnum.failed,
     status_order: 30,
     message:
       'Signal rule name: "Query with a rule id Number 1", id: "1ea5a820-4da1-4e82-92a1-2b43a7bece08", rule_id: "query-rule-id-1" has a time gap of 5 days (412682928ms), and could be missing signals within that time. Consider increasing your look behind time or adding more Kibana instances.',

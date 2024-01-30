@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { LensServerPlugin } from './plugin';
-
+import type { PluginInitializerContext } from '@kbn/core-plugins-server';
 export type { LensServerPluginSetup } from './plugin';
 
-export const plugin = () => new LensServerPlugin();
+export const plugin = async (initContext: PluginInitializerContext) => {
+  const { LensServerPlugin } = await import('./plugin');
+  return new LensServerPlugin(initContext);
+};
 
 export type { LensDocShape715 } from './migrations/types';

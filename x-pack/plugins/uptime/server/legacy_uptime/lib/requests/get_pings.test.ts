@@ -130,35 +130,25 @@ describe('getAll', () => {
               "bool": Object {
                 "filter": Array [
                   Object {
+                    "exists": Object {
+                      "field": "summary",
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "must_not": Object {
+                        "exists": Object {
+                          "field": "run_once",
+                        },
+                      },
+                    },
+                  },
+                  Object {
                     "range": Object {
                       "@timestamp": Object {
                         "gte": "now-1h",
                         "lte": "now",
                       },
-                    },
-                  },
-                ],
-                "must_not": Array [
-                  Object {
-                    "bool": Object {
-                      "filter": Array [
-                        Object {
-                          "term": Object {
-                            "monitor.type": "browser",
-                          },
-                        },
-                        Object {
-                          "bool": Object {
-                            "must_not": Array [
-                              Object {
-                                "exists": Object {
-                                  "field": "summary",
-                                },
-                              },
-                            ],
-                          },
-                        },
-                      ],
                     },
                   },
                 ],
@@ -173,7 +163,7 @@ describe('getAll', () => {
               },
             ],
           },
-          "index": "heartbeat-8*,heartbeat-7*",
+          "index": "heartbeat-*",
         },
         Object {
           "meta": true,
@@ -202,35 +192,25 @@ describe('getAll', () => {
               "bool": Object {
                 "filter": Array [
                   Object {
+                    "exists": Object {
+                      "field": "summary",
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "must_not": Object {
+                        "exists": Object {
+                          "field": "run_once",
+                        },
+                      },
+                    },
+                  },
+                  Object {
                     "range": Object {
                       "@timestamp": Object {
                         "gte": "now-1h",
                         "lte": "now",
                       },
-                    },
-                  },
-                ],
-                "must_not": Array [
-                  Object {
-                    "bool": Object {
-                      "filter": Array [
-                        Object {
-                          "term": Object {
-                            "monitor.type": "browser",
-                          },
-                        },
-                        Object {
-                          "bool": Object {
-                            "must_not": Array [
-                              Object {
-                                "exists": Object {
-                                  "field": "summary",
-                                },
-                              },
-                            ],
-                          },
-                        },
-                      ],
                     },
                   },
                 ],
@@ -245,7 +225,7 @@ describe('getAll', () => {
               },
             ],
           },
-          "index": "heartbeat-8*,heartbeat-7*",
+          "index": "heartbeat-*",
         },
         Object {
           "meta": true,
@@ -274,35 +254,25 @@ describe('getAll', () => {
               "bool": Object {
                 "filter": Array [
                   Object {
+                    "exists": Object {
+                      "field": "summary",
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "must_not": Object {
+                        "exists": Object {
+                          "field": "run_once",
+                        },
+                      },
+                    },
+                  },
+                  Object {
                     "range": Object {
                       "@timestamp": Object {
                         "gte": "now-1h",
                         "lte": "now",
                       },
-                    },
-                  },
-                ],
-                "must_not": Array [
-                  Object {
-                    "bool": Object {
-                      "filter": Array [
-                        Object {
-                          "term": Object {
-                            "monitor.type": "browser",
-                          },
-                        },
-                        Object {
-                          "bool": Object {
-                            "must_not": Array [
-                              Object {
-                                "exists": Object {
-                                  "field": "summary",
-                                },
-                              },
-                            ],
-                          },
-                        },
-                      ],
                     },
                   },
                 ],
@@ -317,7 +287,7 @@ describe('getAll', () => {
               },
             ],
           },
-          "index": "heartbeat-8*,heartbeat-7*",
+          "index": "heartbeat-*",
         },
         Object {
           "meta": true,
@@ -346,6 +316,20 @@ describe('getAll', () => {
               "bool": Object {
                 "filter": Array [
                   Object {
+                    "exists": Object {
+                      "field": "summary",
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "must_not": Object {
+                        "exists": Object {
+                          "field": "run_once",
+                        },
+                      },
+                    },
+                  },
+                  Object {
                     "range": Object {
                       "@timestamp": Object {
                         "gte": "now-1h",
@@ -356,30 +340,6 @@ describe('getAll', () => {
                   Object {
                     "term": Object {
                       "monitor.id": "testmonitorid",
-                    },
-                  },
-                ],
-                "must_not": Array [
-                  Object {
-                    "bool": Object {
-                      "filter": Array [
-                        Object {
-                          "term": Object {
-                            "monitor.type": "browser",
-                          },
-                        },
-                        Object {
-                          "bool": Object {
-                            "must_not": Array [
-                              Object {
-                                "exists": Object {
-                                  "field": "summary",
-                                },
-                              },
-                            ],
-                          },
-                        },
-                      ],
                     },
                   },
                 ],
@@ -394,7 +354,7 @@ describe('getAll', () => {
               },
             ],
           },
-          "index": "heartbeat-8*,heartbeat-7*",
+          "index": "heartbeat-*",
         },
         Object {
           "meta": true,
@@ -420,15 +380,11 @@ describe('getAll', () => {
     expect(mockEsClient.search.mock.calls[0][0].body.query.bool.filter[1]).toMatchInlineSnapshot(`
       Object {
         "bool": Object {
-          "must_not": Array [
-            Object {
-              "terms": Object {
-                "observer.geo.name": Array [
-                  "fairbanks",
-                ],
-              },
+          "must_not": Object {
+            "exists": Object {
+              "field": "run_once",
             },
-          ],
+          },
         },
       }
     `);
@@ -468,6 +424,20 @@ describe('getAll', () => {
               "bool": Object {
                 "filter": Array [
                   Object {
+                    "exists": Object {
+                      "field": "summary",
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "must_not": Object {
+                        "exists": Object {
+                          "field": "run_once",
+                        },
+                      },
+                    },
+                  },
+                  Object {
                     "range": Object {
                       "@timestamp": Object {
                         "gte": "now-1h",
@@ -478,30 +448,6 @@ describe('getAll', () => {
                   Object {
                     "term": Object {
                       "monitor.status": "down",
-                    },
-                  },
-                ],
-                "must_not": Array [
-                  Object {
-                    "bool": Object {
-                      "filter": Array [
-                        Object {
-                          "term": Object {
-                            "monitor.type": "browser",
-                          },
-                        },
-                        Object {
-                          "bool": Object {
-                            "must_not": Array [
-                              Object {
-                                "exists": Object {
-                                  "field": "summary",
-                                },
-                              },
-                            ],
-                          },
-                        },
-                      ],
                     },
                   },
                 ],
@@ -516,7 +462,7 @@ describe('getAll', () => {
               },
             ],
           },
-          "index": "heartbeat-8*,heartbeat-7*",
+          "index": "heartbeat-*",
         },
         Object {
           "meta": true,

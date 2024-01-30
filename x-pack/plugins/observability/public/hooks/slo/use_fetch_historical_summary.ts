@@ -10,6 +10,7 @@ import { FetchHistoricalSummaryResponse } from '@kbn/slo-schema';
 
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
+import { SLO_LONG_REFETCH_INTERVAL } from '../../constants';
 
 export interface UseFetchHistoricalSummaryResponse {
   data: FetchHistoricalSummaryResponse | undefined;
@@ -24,8 +25,6 @@ export interface Params {
   list: Array<{ sloId: string; instanceId: string }>;
   shouldRefetch?: boolean;
 }
-
-const LONG_REFETCH_INTERVAL = 1000 * 60; // 1 minute
 
 export function useFetchHistoricalSummary({
   list = [],
@@ -50,7 +49,7 @@ export function useFetchHistoricalSummary({
         // ignore error
       }
     },
-    refetchInterval: shouldRefetch ? LONG_REFETCH_INTERVAL : undefined,
+    refetchInterval: shouldRefetch ? SLO_LONG_REFETCH_INTERVAL : undefined,
     refetchOnWindowFocus: false,
     keepPreviousData: true,
   });

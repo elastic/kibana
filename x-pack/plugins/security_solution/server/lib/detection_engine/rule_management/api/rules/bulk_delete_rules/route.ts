@@ -7,7 +7,7 @@
 
 import type { VersionedRouteConfig } from '@kbn/core-http-server';
 import type { IKibanaResponse, Logger, RequestHandler } from '@kbn/core/server';
-import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   BulkCrudRulesResponse,
   BulkDeleteRulesRequestBody,
@@ -18,7 +18,7 @@ import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../../../../types';
-import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
+import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import {
   buildSiemResponse,
   createBulkErrorObject,
@@ -51,51 +51,52 @@ export const bulkDeleteRulesRoute = (router: SecuritySolutionPluginRouter, logge
 
     const siemResponse = buildSiemResponse(response);
 
-    const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
+    try {
+      const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
 
-    const rulesClient = ctx.alerting.getRulesClient();
+      const rulesClient = ctx.alerting.getRulesClient();
 
-    const rules = await Promise.all(
-      request.body.map(async (payloadRule) => {
-        const { id, rule_id: ruleId } = payloadRule;
-        const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
-        const validationErrors = validateQueryRuleByIds(payloadRule);
-        if (validationErrors.length) {
-          return createBulkErrorObject({
-            ruleId: idOrRuleIdOrUnknown,
-            statusCode: 400,
-            message: validationErrors.join(),
-          });
-        }
-
-        try {
-          const rule = await readRules({ rulesClient, id, ruleId });
-          if (!rule) {
-            return getIdBulkError({ id, ruleId });
+      const rules = await Promise.all(
+        request.body.map(async (payloadRule) => {
+          const { id, rule_id: ruleId } = payloadRule;
+          const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
+          const validationErrors = validateQueryRuleByIds(payloadRule);
+          if (validationErrors.length) {
+            return createBulkErrorObject({
+              ruleId: idOrRuleIdOrUnknown,
+              statusCode: 400,
+              message: validationErrors.join(),
+            });
           }
 
-          await deleteRules({
-            ruleId: rule.id,
-            rulesClient,
-          });
+          try {
+            const rule = await readRules({ rulesClient, id, ruleId });
+            if (!rule) {
+              return getIdBulkError({ id, ruleId });
+            }
 
-          return transformValidateBulkError(idOrRuleIdOrUnknown, rule);
-        } catch (err) {
-          return transformBulkError(idOrRuleIdOrUnknown, err);
-        }
-      })
-    );
-    const [validated, errors] = validate(rules, BulkCrudRulesResponse);
-    if (errors != null) {
-      return siemResponse.error({
-        statusCode: 500,
-        body: errors,
+            await deleteRules({
+              ruleId: rule.id,
+              rulesClient,
+            });
+
+            return transformValidateBulkError(idOrRuleIdOrUnknown, rule);
+          } catch (err) {
+            return transformBulkError(idOrRuleIdOrUnknown, err);
+          }
+        })
+      );
+
+      return response.ok({
+        body: BulkCrudRulesResponse.parse(rules),
         headers: getDeprecatedBulkEndpointHeader(DETECTION_ENGINE_RULES_BULK_DELETE),
       });
-    } else {
-      return response.ok({
-        body: validated ?? {},
+    } catch (err) {
+      const error = transformError(err);
+      return siemResponse.error({
+        body: error.message,
         headers: getDeprecatedBulkEndpointHeader(DETECTION_ENGINE_RULES_BULK_DELETE),
+        statusCode: error.statusCode,
       });
     }
   };
@@ -111,7 +112,7 @@ export const bulkDeleteRulesRoute = (router: SecuritySolutionPluginRouter, logge
     version: '2023-10-31',
     validate: {
       request: {
-        body: buildRouteValidation(BulkDeleteRulesRequestBody),
+        body: buildRouteValidationWithZod(BulkDeleteRulesRequestBody),
       },
     },
   };

@@ -11,7 +11,12 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
-import { chromeServiceMock, coreMock, docLinksServiceMock } from '@kbn/core/public/mocks';
+import {
+  chromeServiceMock,
+  coreMock,
+  docLinksServiceMock,
+  themeServiceMock,
+} from '@kbn/core/public/mocks';
 import {
   CONTEXT_STEP_SETTING,
   DEFAULT_COLUMNS_SETTING,
@@ -133,9 +138,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     ...uiSettingsMock,
   };
 
-  const theme = {
-    theme$: of({ darkMode: false }),
-  };
+  const theme = themeServiceMock.createSetupContract({ darkMode: false });
 
   corePluginMock.theme = theme;
 

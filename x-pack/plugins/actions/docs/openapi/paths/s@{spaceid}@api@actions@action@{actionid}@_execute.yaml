@@ -47,7 +47,3 @@ post:
                 description: The status of the action.
     '401':
       $ref: '../components/responses/401.yaml'
-  servers:
-    - url: https://localhost:5601
-servers:
-  - url: https://localhost:5601

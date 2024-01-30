@@ -185,26 +185,6 @@ export const changePointDetectionIndexOrSearchRouteFactory = (
   breadcrumbs: getChangePointDetectionBreadcrumbs(navigateToPath, basePath),
 });
 
-export const dataComparisonIndexOrSearchRouteFactory = (
-  navigateToPath: NavigateToPath,
-  basePath: string
-): MlRoute => ({
-  id: 'data_view_data_comparison',
-  path: createPath(ML_PAGES.DATA_COMPARISON_INDEX_SELECT),
-  title: i18n.translate('xpack.ml.selectDataViewLabel', {
-    defaultMessage: 'Select Data View',
-  }),
-  render: (props, deps) => (
-    <PageWrapper
-      {...props}
-      nextStepPath={createPath(ML_PAGES.DATA_COMPARISON)}
-      deps={deps}
-      mode={MODE.NEW_JOB}
-    />
-  ),
-  breadcrumbs: getDataVisBreadcrumbs(navigateToPath, basePath),
-});
-
 const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, mode }) => {
   const {
     services: {

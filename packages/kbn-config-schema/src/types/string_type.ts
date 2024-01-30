@@ -14,6 +14,7 @@ export type StringOptions = TypeOptions<string> & {
   minLength?: number;
   maxLength?: number;
   hostname?: boolean;
+  coerceFromNumber?: boolean;
 };
 
 export class StringType extends Type<string> {
@@ -25,14 +26,17 @@ export class StringType extends Type<string> {
     let schema =
       options.hostname === true
         ? internals.string().hostname()
-        : internals.any().custom(
-            convertValidationFunction((value) => {
-              if (typeof value !== 'string') {
-                return `expected value of type [string] but got [${typeDetect(value)}]`;
+        : internals.any().custom((value, { error }) => {
+            if (typeof value !== 'string') {
+              if (options.coerceFromNumber && typeof value === 'number') {
+                return value.toString(10);
               }
-            })
-          );
-
+              return error('any.custom', {
+                message: `expected value of type [string] but got [${typeDetect(value)}]`,
+              });
+            }
+            return value;
+          });
     if (options.minLength !== undefined) {
       schema = schema.custom(
         convertValidationFunction((value) => {

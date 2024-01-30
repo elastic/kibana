@@ -7,7 +7,11 @@
 
 import { createBurnRateRule } from '../fixtures/rule';
 import { buildQuery } from './build_query';
-import { createKQLCustomIndicator, createSLO } from '../../../../services/slo/fixtures/slo';
+import {
+  createKQLCustomIndicator,
+  createSLO,
+  createSLOWithTimeslicesBudgetingMethod,
+} from '../../../../services/slo/fixtures/slo';
 
 const STARTED_AT = new Date('2023-01-01T00:00:00.000Z');
 
@@ -29,10 +33,9 @@ describe('buildQuery()', () => {
     expect(buildQuery(STARTED_AT, slo, rule, { instanceId: 'example' })).toMatchSnapshot();
   });
   it('should return a valid query for timeslices', () => {
-    const slo = createSLO({
+    const slo = createSLOWithTimeslicesBudgetingMethod({
       id: 'test-slo',
       indicator: createKQLCustomIndicator(),
-      budgetingMethod: 'timeslices',
     });
     const rule = createBurnRateRule(slo);
     expect(buildQuery(STARTED_AT, slo, rule)).toMatchSnapshot();

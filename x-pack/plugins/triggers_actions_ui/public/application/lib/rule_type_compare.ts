@@ -8,25 +8,19 @@
 import { RuleTypeModel } from '../../types';
 import { IsEnabledResult, IsDisabledResult } from './check_rule_type_enabled';
 
+export type RuleTypeGroup = [
+  string,
+  Array<{
+    id: string;
+    name: string;
+    checkEnabledResult: IsEnabledResult | IsDisabledResult;
+    ruleTypeItem: RuleTypeModel;
+  }>
+];
+
 export function ruleTypeGroupCompare(
-  left: [
-    string,
-    Array<{
-      id: string;
-      name: string;
-      checkEnabledResult: IsEnabledResult | IsDisabledResult;
-      ruleTypeItem: RuleTypeModel;
-    }>
-  ],
-  right: [
-    string,
-    Array<{
-      id: string;
-      name: string;
-      checkEnabledResult: IsEnabledResult | IsDisabledResult;
-      ruleTypeItem: RuleTypeModel;
-    }>
-  ],
+  left: RuleTypeGroup,
+  right: RuleTypeGroup,
   groupNames: Map<string, string> | undefined
 ) {
   const groupNameA = left[0];
@@ -52,6 +46,35 @@ export function ruleTypeGroupCompare(
   return groupNames
     ? groupNames.get(groupNameA)!.localeCompare(groupNames.get(groupNameB)!)
     : groupNameA.localeCompare(groupNameB);
+}
+
+export function ruleTypeUngroupedCompare(
+  left: RuleTypeGroup,
+  right: RuleTypeGroup,
+  ruleTypes?: string[]
+) {
+  const leftRuleTypesList = left[1];
+  const rightRuleTypesList = right[1];
+
+  const hasEnabledRuleTypeInListLeft =
+    leftRuleTypesList.find((ruleTypeItem) => ruleTypeItem.checkEnabledResult.isEnabled) !==
+    undefined;
+
+  const hasEnabledRuleTypeInListRight =
+    rightRuleTypesList.find((ruleTypeItem) => ruleTypeItem.checkEnabledResult.isEnabled) !==
+    undefined;
+
+  if (hasEnabledRuleTypeInListLeft && !hasEnabledRuleTypeInListRight) {
+    return -1;
+  }
+  if (!hasEnabledRuleTypeInListLeft && hasEnabledRuleTypeInListRight) {
+    return 1;
+  }
+
+  return ruleTypes
+    ? ruleTypes.findIndex((frtA) => leftRuleTypesList.some((aRuleType) => aRuleType.id === frtA)) -
+        ruleTypes.findIndex((frtB) => rightRuleTypesList.some((bRuleType) => bRuleType.id === frtB))
+    : 0;
 }
 
 export function ruleTypeCompare(

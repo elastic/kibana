@@ -12,8 +12,7 @@ import type {
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { createRuleExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-
-import { RuleObjectId } from '../../model';
+import { UUID } from '@kbn/securitysolution-io-ts-types';
 
 /**
  * URL path parameters of the API route.
@@ -21,7 +20,7 @@ import { RuleObjectId } from '../../model';
 export type CreateRuleExceptionsRequestParams = t.TypeOf<typeof CreateRuleExceptionsRequestParams>;
 export const CreateRuleExceptionsRequestParams = t.exact(
   t.type({
-    id: RuleObjectId,
+    id: UUID,
   })
 );
 

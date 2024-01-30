@@ -20,26 +20,16 @@ export const preparePack = (packName: string) => {
   createdPack.click();
 };
 
-export const deactivatePack = (packName: string) => {
-  cy.react('ActiveStateSwitchComponent', {
-    props: { item: { name: packName } },
-  }).click();
+export const changePackActiveStatus = (packName: string) => {
+  const regex = new RegExp(`Successfully (activated|deactivated) "${packName}" pack`);
+
+  cy.getBySel('globalLoadingIndicator').should('not.exist');
+  cy.get(`[aria-label="${packName}"]`).click();
   closeModalIfVisible();
-
-  cy.contains(`Successfully deactivated "${packName}" pack`).should('not.exist');
-  cy.contains(`Successfully deactivated "${packName}" pack`).should('exist');
+  cy.contains(regex).should('not.exist');
+  cy.contains(regex).should('exist');
   closeToastIfVisible();
-};
-
-export const activatePack = (packName: string) => {
-  cy.react('ActiveStateSwitchComponent', {
-    props: { item: { name: packName } },
-  }).click();
-  closeModalIfVisible();
-
-  cy.contains(`Successfully activated "${packName}" pack`).should('not.exist');
-  cy.contains(`Successfully activated "${packName}" pack`).should('exist');
-  closeToastIfVisible();
+  cy.contains(regex).should('not.exist');
 };
 
 export const cleanupAllPrebuiltPacks = () => {

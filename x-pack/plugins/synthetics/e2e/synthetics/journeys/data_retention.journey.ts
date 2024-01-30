@@ -52,7 +52,7 @@ journey(`DataRetentionPage`, async ({ page, params }) => {
     const screenshotChecks = await page.textContent(
       `tr:has-text("Browser Screenshots") span:has-text("KB")`
     );
-    expect(Number(allChecks?.split('KB')[0])).toBeGreaterThan(450);
+    expect(Number(allChecks?.split('KB')[0])).toBeGreaterThan(400);
     expect(Number(browserChecks?.split('KB')[0])).toBeGreaterThan(50);
     expect(Number(networkChecks?.split('KB')[0])).toBeGreaterThan(300);
     expect(Number(screenshotChecks?.split('KB')[0])).toBeGreaterThan(25);

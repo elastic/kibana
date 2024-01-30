@@ -11,7 +11,7 @@ import {
 } from '@kbn/observability-plugin/server';
 import {
   getProcessorEventForTransactions,
-  getDocumentTypeFilterForTransactions,
+  getBackwardCompatibleDocumentTypeFilter,
 } from '../../lib/helpers/transactions';
 import { SERVICE_NAME, TIER } from '../../../common/es_fields/apm';
 import {
@@ -55,7 +55,7 @@ export async function getTotalTransactionsPerService({
         query: {
           bool: {
             filter: [
-              ...getDocumentTypeFilterForTransactions(
+              ...getBackwardCompatibleDocumentTypeFilter(
                 searchAggregatedTransactions
               ),
               ...environmentQuery(environment),

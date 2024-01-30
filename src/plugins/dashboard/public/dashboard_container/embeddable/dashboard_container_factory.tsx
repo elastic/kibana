@@ -16,6 +16,7 @@ import {
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
   EmbeddablePackageState,
+  EmbeddableAppContext,
 } from '@kbn/embeddable-plugin/public';
 import { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
@@ -58,7 +59,20 @@ export interface DashboardCreationOptions {
   validateLoadedSavedObject?: (result: LoadDashboardReturn) => 'valid' | 'invalid' | 'redirected';
 
   isEmbeddedExternally?: boolean;
+
+  getEmbeddableAppContext?: (dashboardId?: string) => EmbeddableAppContext;
 }
+
+export const dashboardTypeDisplayName = i18n.translate('dashboard.factory.displayName', {
+  defaultMessage: 'Dashboard',
+});
+
+export const dashboardTypeDisplayLowercase = i18n.translate(
+  'dashboard.factory.displayNameLowercase',
+  {
+    defaultMessage: 'dashboard',
+  }
+);
 
 export class DashboardContainerFactoryDefinition
   implements
@@ -80,11 +94,7 @@ export class DashboardContainerFactoryDefinition
     return false;
   };
 
-  public readonly getDisplayName = () => {
-    return i18n.translate('dashboard.factory.displayName', {
-      defaultMessage: 'Dashboard',
-    });
-  };
+  public readonly getDisplayName = () => dashboardTypeDisplayName;
 
   public getDefaultInput(): Partial<DashboardContainerInput> {
     return DEFAULT_DASHBOARD_INPUT;

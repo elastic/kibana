@@ -37,7 +37,7 @@ export const callDeleteJobs = async <JobType extends string>(
 };
 
 export const callGetJobDeletionTasks = async (fetch: HttpHandler) => {
-  const jobDeletionTasksResponse = await fetch('/internal/ml/jobs/deleting_jobs_tasks', {
+  const jobDeletionTasksResponse = await fetch('/internal/ml/jobs/blocking_jobs_tasks', {
     version: '1',
   });
 
@@ -86,7 +86,7 @@ export const deleteJobsResponsePayloadRT = rt.record(
 export type DeleteJobsResponsePayload = rt.TypeOf<typeof deleteJobsResponsePayloadRT>;
 
 export const getJobDeletionTasksResponsePayloadRT = rt.type({
-  jobIds: rt.array(rt.string),
+  jobs: rt.array(rt.record(rt.string, rt.string)),
 });
 
 export const stopDatafeedsRequestPayloadRT = rt.type({

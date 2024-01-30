@@ -7,7 +7,7 @@
 
 import { KibanaResponse } from '@kbn/core-http-router-server-internal';
 import { UMKibanaRouteWrapper } from './types';
-import { isTestUser, UptimeEsClient } from '../lib/lib';
+import { UptimeEsClient } from '../lib/lib';
 
 export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) => ({
   ...uptimeRoute,
@@ -24,7 +24,7 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) =>
       {
         request,
         uiSettings: coreContext.uiSettings,
-        isDev: Boolean(server.isDev && !isTestUser(server)),
+        isDev: Boolean(server.isDev),
       }
     );
 

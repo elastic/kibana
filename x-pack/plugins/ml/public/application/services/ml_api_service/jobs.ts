@@ -67,8 +67,8 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  jobForCloning(jobId: string) {
-    const body = JSON.stringify({ jobId });
+  jobForCloning(jobId: string, retainCreatedBy = false) {
+    const body = JSON.stringify({ jobId, retainCreatedBy });
     return httpService.http<{ job?: Job; datafeed?: Datafeed } | undefined>({
       path: `${ML_INTERNAL_BASE_PATH}/jobs/job_for_cloning`,
       method: 'POST',

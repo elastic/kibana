@@ -16,6 +16,8 @@
     "@kbn/std",
     "@kbn/core-execution-context-common",
     "@kbn/tinymath",
+    "@kbn/panel-loader",
+    "@kbn/es-query",
   ],
   "exclude": [
     "target/**/*",

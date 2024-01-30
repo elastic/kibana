@@ -23,7 +23,7 @@
     "documentation": " https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/get-async-eql-search-api.html",
     "availability": {
       "stack": true,
-      "serverless": false
+      "serverless": true
     }
   }
 }

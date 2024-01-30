@@ -6,4 +6,5 @@ properties:
   syncAlerts:
     description: Turns alert syncing on or off.
     type: boolean
-    example: true
+    examples:
+      - true

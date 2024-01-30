@@ -6,7 +6,7 @@
  */
 
 import { encode } from '@kbn/rison';
-import { v1 as uuidv1 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { set } from '@kbn/safer-lodash-set';
 import { LinkDescriptor } from '@kbn/observability-shared-plugin/public';
 import { TIMESTAMP_FIELD } from '../../../../../../common/constants';
@@ -35,9 +35,9 @@ const TSVB_WORKAROUND_INDEX_PATTERN = 'metric*';
 
 export const metricsExplorerMetricToTSVBMetric = (metric: MetricsExplorerOptionsMetric) => {
   if (metric.aggregation === 'rate') {
-    const metricId = uuidv1();
-    const positiveOnlyId = uuidv1();
-    const derivativeId = uuidv1();
+    const metricId = uuidv4();
+    const positiveOnlyId = uuidv4();
+    const derivativeId = uuidv4();
     return [
       {
         id: metricId,
@@ -60,12 +60,12 @@ export const metricsExplorerMetricToTSVBMetric = (metric: MetricsExplorerOptions
     const percentileValue = metric.aggregation === 'p95' ? '95' : '99';
     return [
       {
-        id: uuidv1(),
+        id: uuidv4(),
         type: 'percentile',
         field: metric.field,
         percentiles: [
           {
-            id: uuidv1(),
+            id: uuidv4(),
             value: percentileValue,
             mode: 'line',
             percentile: '',
@@ -77,7 +77,7 @@ export const metricsExplorerMetricToTSVBMetric = (metric: MetricsExplorerOptions
   } else {
     return [
       {
-        id: uuidv1(),
+        id: uuidv4(),
         type: metric.aggregation,
         field: metric.field || void 0,
       },
@@ -96,7 +96,7 @@ const mapMetricToSeries =
       fill: chartOptions.type === MetricsExplorerChartType.area ? 0.5 : 0,
       formatter: format === InfraFormatterType.bits ? InfraFormatterType.bytes : format,
       value_template: 'rate' === metric.aggregation ? '{{value}}/s' : '{{value}}',
-      id: uuidv1(),
+      id: uuidv4(),
       line_width: 2,
       metrics: metricsExplorerMetricToTSVBMetric(metric),
       point_size: 0,
@@ -163,7 +163,7 @@ export const createTSVBLink = (
         axis_formatter: 'number',
         axis_position: 'left',
         axis_scale: 'normal',
-        id: uuidv1(),
+        id: uuidv4(),
         default_index_pattern: tsvbIndexPattern,
         index_pattern: tsvbIndexPattern,
         interval: 'auto',

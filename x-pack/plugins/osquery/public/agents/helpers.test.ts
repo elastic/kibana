@@ -7,14 +7,10 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { generateGroupOption } from './agent_grouper';
-import {
-  getNumOverlapped,
-  getNumAgentsInGrouping,
-  processAggregations,
-  generateAgentSelection,
-} from './helpers';
+import { getNumOverlapped, getNumAgentsInGrouping, generateAgentSelection } from './helpers';
 import type { GroupOption, Overlap, SelectedGroups } from './types';
 import { AGENT_GROUP_KEY } from './types';
+import { processAggregations } from '../../common/utils/aggregations';
 
 describe('generateAgentSelection', () => {
   it('should handle empty input', () => {
@@ -23,6 +19,7 @@ describe('generateAgentSelection', () => {
     expect(newAgentSelection).toEqual({
       agents: [],
       allAgentsSelected: false,
+      offlineAgentsSelected: false,
       platformsSelected: [],
       policiesSelected: [],
     });
@@ -51,6 +48,7 @@ describe('generateAgentSelection', () => {
     expect(newAgentSelection).toEqual({
       agents: [],
       allAgentsSelected: false,
+      offlineAgentsSelected: false,
       platformsSelected: platformOptions.map(({ value: { id } }) => id),
       policiesSelected: policyOptions.map(({ value: { id } }) => id),
     });

@@ -29,7 +29,7 @@ const getLastUpdateText = (lastUpdate: string) => {
     {
       defaultMessage: 'Updated {lastUpdateText}',
       values: {
-        lastUpdateText: moment(lastUpdate).fromNow(),
+        lastUpdateText: moment(lastUpdate).locale(i18n.getLocale()).fromNow(),
       },
     }
   );

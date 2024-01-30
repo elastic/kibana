@@ -7,11 +7,15 @@
 import { sha256 } from 'js-sha256';
 import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/server';
-import { parseDuration } from '@kbn/alerting-plugin/server';
 import { isGroupAggregation, UngroupedGroupId } from '@kbn/triggers-actions-ui-plugin/common';
-import { ALERT_EVALUATION_VALUE, ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
+import {
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+  ALERT_REASON,
+  ALERT_URL,
+} from '@kbn/rule-data-utils';
 
-import { expandFlattenedAlert } from '@kbn/alerting-plugin/server/alerts_client/lib';
+import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { ComparatorFns } from '../../../common';
 import {
   addMessages,
@@ -42,12 +46,16 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     state,
     spaceId,
     logger,
+    getTimeRange,
   } = options;
   const { alertsClient, scopedClusterClient, searchSourceClient, share, dataViews } = services;
+  if (!alertsClient) {
+    throw new AlertsClientError();
+  }
   const currentTimestamp = new Date().toISOString();
   const publicBaseUrl = core.http.basePath.publicBaseUrl ?? '';
   const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
-  const alertLimit = alertsClient?.getAlertLimitValue();
+  const alertLimit = alertsClient.getAlertLimitValue();
   const compareFn = ComparatorFns.get(params.thresholdComparator);
   if (compareFn == null) {
     throw new Error(getInvalidComparatorError(params.thresholdComparator));
@@ -61,7 +69,9 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
   // avoid counting a document multiple times.
   // latestTimestamp will be ignored if set for grouped queries
   let latestTimestamp: string | undefined = tryToParseAsDate(state.latestTimestamp);
-  const { parsedResults, dateStart, dateEnd, link } = searchSourceRule
+  const { dateStart, dateEnd } = getTimeRange(`${params.timeWindowSize}${params.timeWindowUnit}`);
+
+  const { parsedResults, link, index } = searchSourceRule
     ? await fetchSearchSourceQuery({
         ruleId,
         alertLimit,
@@ -74,6 +84,8 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
           logger,
           dataViews,
         },
+        dateStart,
+        dateEnd,
       })
     : esqlQueryRule
     ? await fetchEsqlQuery({
@@ -86,8 +98,9 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
           share,
           scopedClusterClient,
           logger,
-          dataViews,
         },
+        dateStart,
+        dateEnd,
       })
     : await fetchEsQuery({
         ruleId,
@@ -101,6 +114,8 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
           scopedClusterClient,
           logger,
         },
+        dateStart,
+        dateEnd,
       });
   const unmetGroupValues: Record<string, number> = {};
   for (const result of parsedResults.results) {
@@ -121,6 +136,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       value,
       hits: result.hits,
       link,
+      sourceFields: result.sourceFields,
     };
     const baseActiveContext: EsQueryRuleActionContext = {
       ...baseContext,
@@ -139,22 +155,25 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       baseContext: baseActiveContext,
       params,
       ...(isGroupAgg ? { group: alertId } : {}),
+      index,
     });
 
     const id = alertId === UngroupedGroupId && !isGroupAgg ? ConditionMetAlertInstanceId : alertId;
 
-    alertsClient!.report({
+    alertsClient.report({
       id,
       actionGroup: ActionGroupId,
       state: { latestTimestamp, dateStart, dateEnd },
       context: actionContext,
-      payload: expandFlattenedAlert({
+      payload: {
         [ALERT_URL]: actionContext.link,
         [ALERT_REASON]: actionContext.message,
         [ALERT_TITLE]: actionContext.title,
         [ALERT_EVALUATION_CONDITIONS]: actionContext.conditions,
-        [ALERT_EVALUATION_VALUE]: actionContext.value,
-      }),
+        [ALERT_EVALUATION_VALUE]: `${actionContext.value}`,
+        [ALERT_EVALUATION_THRESHOLD]: params.threshold?.length === 1 ? params.threshold[0] : null,
+        ...actionContext.sourceFields,
+      },
     });
     if (!isGroupAgg) {
       // update the timestamp based on the current search results
@@ -166,9 +185,9 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       }
     }
   }
-  alertsClient!.setAlertLimitReached(parsedResults.truncated);
+  alertsClient.setAlertLimitReached(parsedResults.truncated);
 
-  const { getRecoveredAlerts } = alertsClient!;
+  const { getRecoveredAlerts } = alertsClient;
   for (const recoveredAlert of getRecoveredAlerts()) {
     const alertId = recoveredAlert.alert.getId();
     const baseRecoveryContext: EsQueryRuleActionContext = {
@@ -186,6 +205,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         aggField: params.aggField,
         ...(isGroupAgg ? { group: alertId } : {}),
       }),
+      sourceFields: [],
     } as EsQueryRuleActionContext;
     const recoveryContext = addMessages({
       ruleName: name,
@@ -193,67 +213,22 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       params,
       isRecovered: true,
       ...(isGroupAgg ? { group: alertId } : {}),
+      index,
     });
-    alertsClient?.setAlertData({
+    alertsClient.setAlertData({
       id: alertId,
       context: recoveryContext,
-      payload: expandFlattenedAlert({
+      payload: {
         [ALERT_URL]: recoveryContext.link,
         [ALERT_REASON]: recoveryContext.message,
         [ALERT_TITLE]: recoveryContext.title,
         [ALERT_EVALUATION_CONDITIONS]: recoveryContext.conditions,
-        [ALERT_EVALUATION_VALUE]: recoveryContext.value,
-      }),
+        [ALERT_EVALUATION_VALUE]: `${recoveryContext.value}`,
+        [ALERT_EVALUATION_THRESHOLD]: params.threshold?.length === 1 ? params.threshold[0] : null,
+      },
     });
   }
   return { state: { latestTimestamp } };
-}
-
-function getInvalidWindowSizeError(windowValue: string) {
-  return i18n.translate('xpack.stackAlerts.esQuery.invalidWindowSizeErrorMessage', {
-    defaultMessage: 'invalid format for windowSize: "{windowValue}"',
-    values: {
-      windowValue,
-    },
-  });
-}
-
-function getInvalidQueryError(query: string) {
-  return i18n.translate('xpack.stackAlerts.esQuery.invalidQueryErrorMessage', {
-    defaultMessage: 'invalid query specified: "{query}" - query must be JSON',
-    values: {
-      query,
-    },
-  });
-}
-
-export function getSearchParams(queryParams: OnlyEsQueryRuleParams) {
-  const date = Date.now();
-  const { esQuery, timeWindowSize, timeWindowUnit } = queryParams;
-
-  let parsedQuery;
-  try {
-    parsedQuery = JSON.parse(esQuery);
-  } catch (err) {
-    throw new Error(getInvalidQueryError(esQuery));
-  }
-
-  if (parsedQuery && !parsedQuery.query) {
-    throw new Error(getInvalidQueryError(esQuery));
-  }
-
-  const window = `${timeWindowSize}${timeWindowUnit}`;
-  let timeWindow: number;
-  try {
-    timeWindow = parseDuration(window);
-  } catch (err) {
-    throw new Error(getInvalidWindowSizeError(window));
-  }
-
-  const dateStart = new Date(date - timeWindow).toISOString();
-  const dateEnd = new Date(date).toISOString();
-
-  return { parsedQuery, dateStart, dateEnd };
 }
 
 export function getValidTimefieldSort(

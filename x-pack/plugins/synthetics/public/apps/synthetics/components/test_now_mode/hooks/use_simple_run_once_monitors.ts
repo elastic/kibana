@@ -7,7 +7,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createEsParams, useEsSearch } from '@kbn/observability-shared-plugin/public';
-import { SUMMARY_FILTER } from '../../../../../../common/constants/client_defaults';
+import { FINAL_SUMMARY_FILTER } from '../../../../../../common/constants/client_defaults';
 import { Ping } from '../../../../../../common/runtime_types';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useTickTick } from './use_tick_tick';
@@ -36,7 +36,7 @@ export const useSimpleRunOnceMonitors = ({
         query: {
           bool: {
             filter: [
-              SUMMARY_FILTER,
+              FINAL_SUMMARY_FILTER,
               {
                 term: {
                   test_run_id: testRunId,

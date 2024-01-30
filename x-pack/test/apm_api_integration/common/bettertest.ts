@@ -11,20 +11,32 @@ import request from 'superagent';
 
 type HttpMethod = 'get' | 'post' | 'put' | 'delete';
 
-export type BetterTest = <T extends any>(options: {
+export type BetterTest = <T>(options: BetterTestOptions) => Promise<BetterTestResponse<T>>;
+
+interface BetterTestOptions {
   pathname: string;
   query?: Record<string, any>;
   method?: HttpMethod;
   body?: any;
-}) => Promise<{ status: number; body: T }>;
+}
+
+export interface BetterTestResponse<T> {
+  status: number;
+  body: T;
+}
 
 /*
  * This is a wrapper around supertest that throws an error if the response status is not 200.
  * This is useful for tests that expect a 200 response
  * It also makes it easier to debug tests that fail because of a 500 response.
  */
-export function getBettertest(st: supertest.SuperTest<supertest.Test>): BetterTest {
-  return async ({ pathname, method = 'get', query, body }) => {
+export function getBettertest(st: supertest.SuperTest<supertest.Test>) {
+  return async <T>({
+    pathname,
+    method = 'get',
+    query,
+    body,
+  }: BetterTestOptions): Promise<BetterTestResponse<T>> => {
     const url = format({ pathname, query });
 
     let res: request.Response;
@@ -60,7 +72,7 @@ export class BetterTestError extends Error {
     const req = res.req as any;
     super(
       `Unhandled BetterTestError:
-Status: "${res.status}"      
+Status: "${res.status}"
 Path: "${req.method} ${req.path}"
 Body: ${JSON.stringify(res.body)}`
     );

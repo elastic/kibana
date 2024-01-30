@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import type { HttpHandler } from '@kbn/core-http-browser';
 import type {
   IlmExplainLifecycleLifecycleExplain,
   IndicesStatsIndicesStats,
 } from '@elastic/elasticsearch/lib/api/types';
 import { has, sortBy } from 'lodash/fp';
+import { IToasts } from '@kbn/core-notifications-browser';
 import { getIlmPhase } from './data_quality_panel/pattern/helpers';
 import { getFillColor } from './data_quality_panel/tabs/summary_tab/helpers';
 
@@ -17,6 +19,7 @@ import * as i18n from './translations';
 
 import type {
   DataQualityCheckResult,
+  DataQualityIndexCheckedParams,
   EcsMetadata,
   EnrichedFieldMetadata,
   ErrorSummary,
@@ -27,6 +30,7 @@ import type {
 } from './types';
 
 const EMPTY_INDEX_NAMES: string[] = [];
+export const INTERNAL_API_VERSION = '1';
 
 export const getIndexNames = ({
   ilmExplain,
@@ -180,7 +184,11 @@ export const getEnrichedFieldMetadata = ({
     const ecsExpectedType = ecsMetadata[field].type;
     const isEcsCompliant =
       isMappingCompatible({ ecsExpectedType, type }) && indexInvalidValues.length === 0;
-    const isInSameFamily = getIsInSameFamily({ ecsExpectedType, type });
+
+    const isInSameFamily =
+      !isMappingCompatible({ ecsExpectedType, type }) &&
+      indexInvalidValues.length === 0 &&
+      getIsInSameFamily({ ecsExpectedType, type });
 
     return {
       ...ecsMetadata[field],
@@ -223,26 +231,31 @@ export const getPartitionedFieldMetadata = (
       ecsCompliant: x.isEcsCompliant ? [...acc.ecsCompliant, x] : acc.ecsCompliant,
       custom: !x.hasEcsMetadata ? [...acc.custom, x] : acc.custom,
       incompatible:
-        x.hasEcsMetadata && !x.isEcsCompliant ? [...acc.incompatible, x] : acc.incompatible,
+        x.hasEcsMetadata && !x.isEcsCompliant && !x.isInSameFamily
+          ? [...acc.incompatible, x]
+          : acc.incompatible,
+      sameFamily: x.isInSameFamily ? [...acc.sameFamily, x] : acc.sameFamily,
     }),
     {
       all: [],
       ecsCompliant: [],
       custom: [],
       incompatible: [],
+      sameFamily: [],
     }
   );
 
 export const getPartitionedFieldMetadataStats = (
   partitionedFieldMetadata: PartitionedFieldMetadata
 ): PartitionedFieldMetadataStats => {
-  const { all, ecsCompliant, custom, incompatible } = partitionedFieldMetadata;
+  const { all, ecsCompliant, custom, incompatible, sameFamily } = partitionedFieldMetadata;
 
   return {
     all: all.length,
     ecsCompliant: ecsCompliant.length,
     custom: custom.length,
     incompatible: incompatible.length,
+    sameFamily: sameFamily.length,
   };
 };
 
@@ -273,7 +286,7 @@ export const getSizeInBytes = ({
 }: {
   indexName: string;
   stats: Record<string, IndicesStatsIndicesStats> | null;
-}): number => (stats && stats[indexName]?.primaries?.store?.size_in_bytes) ?? 0;
+}): number => (stats && stats[indexName]?.primaries?.store?.total_data_set_size_in_bytes) ?? 0;
 
 export const getTotalDocsCount = ({
   indexNames,
@@ -369,8 +382,23 @@ export const getTotalPatternIndicesChecked = (patternRollup: PatternRollup | und
   }
 };
 
+export const getTotalPatternSameFamily = (
+  results: Record<string, DataQualityCheckResult> | undefined
+): number | undefined => {
+  if (results == null) {
+    return undefined;
+  }
+
+  const allResults = Object.values(results);
+
+  return allResults.reduce<number>((acc, { sameFamily }) => acc + (sameFamily ?? 0), 0);
+};
+
 export const getIncompatibleStatColor = (incompatible: number | undefined): string | undefined =>
   incompatible != null && incompatible > 0 ? getFillColor('incompatible') : undefined;
+
+export const getSameFamilyStatColor = (sameFamily: number | undefined): string | undefined =>
+  sameFamily != null && sameFamily > 0 ? getFillColor('same-family') : undefined;
 
 export const getErrorSummary = ({
   error,
@@ -418,3 +446,58 @@ export const getErrorSummaries = (
     []
   );
 };
+
+export const RESULTS_API_ROUTE = '/internal/ecs_data_quality_dashboard/results';
+
+export interface ResultData {
+  meta: DataQualityIndexCheckedParams;
+  rollup: PatternRollup;
+}
+
+export async function postResult({
+  result,
+  httpFetch,
+  toasts,
+  abortController,
+}: {
+  result: ResultData;
+  httpFetch: HttpHandler;
+  toasts: IToasts;
+  abortController: AbortController;
+}): Promise<void> {
+  try {
+    await httpFetch<void>(RESULTS_API_ROUTE, {
+      method: 'POST',
+      signal: abortController.signal,
+      version: INTERNAL_API_VERSION,
+      body: JSON.stringify(result),
+    });
+  } catch (err) {
+    toasts.addError(err, { title: i18n.POST_RESULT_ERROR_TITLE });
+  }
+}
+
+export async function getResults({
+  patterns,
+  httpFetch,
+  toasts,
+  abortController,
+}: {
+  patterns: string[];
+  httpFetch: HttpHandler;
+  toasts: IToasts;
+  abortController: AbortController;
+}): Promise<ResultData[]> {
+  try {
+    const results = await httpFetch<ResultData[]>(RESULTS_API_ROUTE, {
+      method: 'GET',
+      signal: abortController.signal,
+      version: INTERNAL_API_VERSION,
+      query: { patterns: patterns.join(',') },
+    });
+    return results;
+  } catch (err) {
+    toasts.addError(err, { title: i18n.GET_RESULTS_ERROR_TITLE });
+    return [];
+  }
+}

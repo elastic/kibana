@@ -44,7 +44,7 @@ const errorMessage = i18n.translate('management.settings.field.imageChangeErrorM
  * Component for manipulating an `image` field.
  */
 export const ImageInput = React.forwardRef<ResetInputRef, ImageInputProps>(
-  ({ field, unsavedChange, isSavingEnabled, onChange: onChangeProp }, ref) => {
+  ({ field, unsavedChange, isSavingEnabled, onInputChange }, ref) => {
     const inputRef = useRef<EuiFilePicker>(null);
 
     useImperativeHandle(ref, () => ({
@@ -53,7 +53,7 @@ export const ImageInput = React.forwardRef<ResetInputRef, ImageInputProps>(
 
     const { showDanger } = useServices();
 
-    const onUpdate = useUpdate({ onChange: onChangeProp, field });
+    const onUpdate = useUpdate({ onInputChange, field });
 
     const onChange: EuiFilePickerProps['onChange'] = async (files: FileList | null) => {
       if (files === null || !files.length) {

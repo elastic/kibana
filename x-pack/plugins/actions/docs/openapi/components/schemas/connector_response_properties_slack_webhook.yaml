@@ -26,3 +26,5 @@ properties:
   name:
     type: string
     description: The display name for the connector.
+  referenced_by_count:
+    $ref: 'referenced_by_count.yaml'

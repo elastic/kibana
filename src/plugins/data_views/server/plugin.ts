@@ -23,6 +23,7 @@ import {
   DataViewsServerPluginStartDependencies,
 } from './types';
 import { DataViewsStorage } from './content_management';
+import { cacheMaxAge } from './ui_settings';
 
 export class DataViewsServerPlugin
   implements
@@ -46,14 +47,21 @@ export class DataViewsServerPlugin
   ) {
     core.savedObjects.registerType(dataViewSavedObjectType);
     core.capabilities.registerProvider(capabilitiesProvider);
+
+    const config = this.initializerContext.config.get<ClientConfigType>();
+
+    if (config.fieldListCachingEnabled) {
+      core.uiSettings.register(cacheMaxAge);
+    }
+
     const dataViewRestCounter = usageCollection?.createUsageCounter('dataViewsRestApi');
 
-    registerRoutes(
-      core.http,
-      core.getStartServices,
-      () => this.rollupsEnabled,
-      dataViewRestCounter
-    );
+    registerRoutes({
+      http: core.http,
+      getStartServices: core.getStartServices,
+      isRollupsEnabled: () => this.rollupsEnabled,
+      dataViewRestCounter,
+    });
 
     expressions.registerFunction(getIndexPatternLoad({ getStartServices: core.getStartServices }));
     registerIndexPatternsUsageCollector(core.getStartServices, usageCollection);
@@ -61,7 +69,10 @@ export class DataViewsServerPlugin
 
     contentManagement.register({
       id: DATA_VIEW_SAVED_OBJECT_TYPE,
-      storage: new DataViewsStorage(),
+      storage: new DataViewsStorage({
+        throwOnResultValidationError: this.initializerContext.env.mode.dev,
+        logger: this.logger.get('storage'),
+      }),
       version: {
         latest: LATEST_VERSION,
       },

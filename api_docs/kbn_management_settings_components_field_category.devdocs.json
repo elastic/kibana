@@ -1,0 +1,589 @@
+{
+  "id": "@kbn/management-settings-components-field-category",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/management-settings-components-field-category",
+        "id": "def-common.FieldCategories",
+        "type": "Function",
+        "tags": [],
+        "label": "FieldCategories",
+        "description": [
+          "\nConvenience component for displaying a set of {@link FieldCategory} components, given\na set of categorized fields.\n"
+        ],
+        "signature": [
+          "({ categorizedFields, categoryCounts, unsavedChanges, onClearQuery, isSavingEnabled, onFieldChange, }: ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-category",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
+            "section": "def-common.FieldCategoriesProps",
+            "text": "FieldCategoriesProps"
+          },
+          ") => JSX.Element"
+        ],
+        "path": "packages/kbn-management/settings/components/field_category/categories.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-components-field-category",
+            "id": "def-common.FieldCategories.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  categorizedFields,\n  categoryCounts,\n  unsavedChanges = {},\n  onClearQuery,\n  isSavingEnabled,\n  onFieldChange,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/management-settings-components-field-category",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
+                "section": "def-common.FieldCategoriesProps",
+                "text": "FieldCategoriesProps"
+              }
+            ],
+            "path": "packages/kbn-management/settings/components/field_category/categories.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-components-field-category",
+        "id": "def-common.FieldCategory",
+        "type": "Function",
+        "tags": [],
+        "label": "FieldCategory",
+        "description": [
+          "\nComponent for displaying a container of fields pertaining to a single\ncategory."
+        ],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-category",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
+            "section": "def-common.FieldCategoryProps",
+            "text": "FieldCategoryProps"
+          },
+          ") => JSX.Element"
+        ],
+        "path": "packages/kbn-management/settings/components/field_category/category.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-components-field-category",
+            "id": "def-common.FieldCategory.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [
+              "- the props to pass to the {@link FieldCategory } component."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/management-settings-components-field-category",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
+                "section": "def-common.FieldCategoryProps",
+                "text": "FieldCategoryProps"
+              }
+            ],
+            "path": "packages/kbn-management/settings/components/field_category/category.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-components-field-category",
+        "id": "def-common.FieldCategoryKibanaProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "FieldCategoryKibanaProvider",
+        "description": [
+          "\nKibana-specific Provider that maps Kibana plugins and services to a {@link FieldCategoryProvider}."
+        ],
+        "signature": [
+          "React.FunctionComponent<",
+          {
+            "pluginId": "@kbn/management-settings-components-field-row",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+            "section": "def-common.FieldRowKibanaDependencies",
+            "text": "FieldRowKibanaDependencies"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-management/settings/components/field_category/services.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-components-field-category",
+            "id": "def-common.FieldCategoryKibanaProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P & { children?: React.ReactNode; }"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-components-field-category",
+            "id": "def-common.FieldCategoryKibanaProvider.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-components-field-category",
+        "id": "def-common.FieldCategoryProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "FieldCategoryProvider",
+        "description": [
+          "\nReact Provider that provides services to a {@link FieldCategory} component and its dependents."
+        ],
+        "signature": [
+          "({ children, ...services }: ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-row",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+            "section": "def-common.FieldRowProviderProps",
+            "text": "FieldRowProviderProps"
+          },
+          ") => JSX.Element"
+        ],
+        "path": "packages/kbn-management/settings/components/field_category/services.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-components-field-category",
+            "id": "def-common.FieldCategoryProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "__0",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/management-settings-components-field-row",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+                "section": "def-common.FieldRowProviderProps",
+                "text": "FieldRowProviderProps"
+              }
+            ],
+            "path": "packages/kbn-management/settings/components/field_row/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/management-settings-components-field-category",
+        "id": "def-common.ClearQueryLinkProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ClearQueryLinkProps",
+        "description": [
+          "\nProps for the {@link ClearQueryLink} component."
+        ],
+        "path": "packages/kbn-management/settings/components/field_category/clear_query_link.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-components-field-category",
+            "id": "def-common.ClearQueryLinkProps.fieldCount",
+            "type": "number",
+            "tags": [],
+            "label": "fieldCount",
+            "description": [
+              "The total number of fields in the category."
+            ],
+            "path": "packages/kbn-management/settings/components/field_category/clear_query_link.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-components-field-category",
+            "id": "def-common.ClearQueryLinkProps.displayCount",
+            "type": "number",
+            "tags": [],
+            "label": "displayCount",
+            "description": [
+              "The number of fields currently being displayed."
+            ],
+            "path": "packages/kbn-management/settings/components/field_category/clear_query_link.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-components-field-category",
+            "id": "def-common.ClearQueryLinkProps.onClearQuery",
+            "type": "Function",
+            "tags": [],
+            "label": "onClearQuery",
+            "description": [
+              "Handler to invoke when clearing the current filtering query."
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/kbn-management/settings/components/field_category/clear_query_link.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-components-field-category",
+        "id": "def-common.FieldCategoriesProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldCategoriesProps",
+        "description": [
+          "\nProps for the {@link FieldCategories} component."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-components-field-category",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
+            "section": "def-common.FieldCategoriesProps",
+            "text": "FieldCategoriesProps"
+          },
+          " extends Pick<",
+          {
+            "pluginId": "@kbn/management-settings-components-field-category",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
+            "section": "def-common.FieldCategoryProps",
+            "text": "FieldCategoryProps"
+          },
+          ", \"onClearQuery\">,Pick<",
+          {
+            "pluginId": "@kbn/management-settings-components-field-row",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+            "section": "def-common.FieldRowProps",
+            "text": "FieldRowProps"
+          },
+          ", \"onFieldChange\" | \"isSavingEnabled\">"
+        ],
+        "path": "packages/kbn-management/settings/components/field_category/categories.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-components-field-category",
+            "id": "def-common.FieldCategoriesProps.categorizedFields",
+            "type": "Object",
+            "tags": [],
+            "label": "categorizedFields",
+            "description": [
+              "Categorized fields for display."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-common.CategorizedFields",
+                "text": "CategorizedFields"
+              }
+            ],
+            "path": "packages/kbn-management/settings/components/field_category/categories.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-components-field-category",
+            "id": "def-common.FieldCategoriesProps.categoryCounts",
+            "type": "Object",
+            "tags": [],
+            "label": "categoryCounts",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-common.CategoryCounts",
+                "text": "CategoryCounts"
+              }
+            ],
+            "path": "packages/kbn-management/settings/components/field_category/categories.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-components-field-category",
+            "id": "def-common.FieldCategoriesProps.unsavedChanges",
+            "type": "Object",
+            "tags": [],
+            "label": "unsavedChanges",
+            "description": [
+              "And unsaved changes currently managed by the parent component."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-common.UnsavedFieldChanges",
+                "text": "UnsavedFieldChanges"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-management/settings/components/field_category/categories.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-components-field-category",
+        "id": "def-common.FieldCategoryProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldCategoryProps",
+        "description": [
+          "\nProps for a {@link FieldCategory} component."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-components-field-category",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
+            "section": "def-common.FieldCategoryProps",
+            "text": "FieldCategoryProps"
+          },
+          " extends Pick<",
+          {
+            "pluginId": "@kbn/management-settings-components-field-category",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
+            "section": "def-common.ClearQueryLinkProps",
+            "text": "ClearQueryLinkProps"
+          },
+          ", \"onClearQuery\" | \"fieldCount\">"
+        ],
+        "path": "packages/kbn-management/settings/components/field_category/category.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-components-field-category",
+            "id": "def-common.FieldCategoryProps.category",
+            "type": "string",
+            "tags": [],
+            "label": "category",
+            "description": [
+              "The name of the category."
+            ],
+            "path": "packages/kbn-management/settings/components/field_category/category.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/management-settings-components-field-category",
+            "id": "def-common.FieldCategoryProps.children",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "children",
+            "description": [
+              "Children-- should be {@link FieldRow} components."
+            ],
+            "signature": [
+              "React.ReactElement<",
+              {
+                "pluginId": "@kbn/management-settings-components-field-row",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+                "section": "def-common.FieldRowProps",
+                "text": "FieldRowProps"
+              },
+              ", \"FieldRow\"> | React.ReactElement<",
+              {
+                "pluginId": "@kbn/management-settings-components-field-row",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+                "section": "def-common.FieldRowProps",
+                "text": "FieldRowProps"
+              },
+              ", \"FieldRow\">[]"
+            ],
+            "path": "packages/kbn-management/settings/components/field_category/category.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-components-field-category",
+        "id": "def-common.FieldCategoryProviderProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldCategoryProviderProps",
+        "description": [
+          "\nProps for {@link FieldCategoryProvider}."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-components-field-category",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
+            "section": "def-common.FieldCategoryProviderProps",
+            "text": "FieldCategoryProviderProps"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-row",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+            "section": "def-common.FieldRowServices",
+            "text": "FieldRowServices"
+          }
+        ],
+        "path": "packages/kbn-management/settings/components/field_category/services.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-components-field-category",
+            "id": "def-common.FieldCategoryProviderProps.children",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "children",
+            "description": [],
+            "signature": [
+              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+            ],
+            "path": "packages/kbn-management/settings/components/field_category/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/management-settings-components-field-category",
+        "id": "def-common.FieldCategoryKibanaDependencies",
+        "type": "Type",
+        "tags": [],
+        "label": "FieldCategoryKibanaDependencies",
+        "description": [
+          "\nAn interface containing a collection of Kibana plugins and services required to\nrender a {@link FieldCategory} component and its dependents."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-components-field-row",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+            "section": "def-common.KibanaDependencies",
+            "text": "KibanaDependencies"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-input",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsComponentsFieldInputPluginApi",
+            "section": "def-common.FieldInputKibanaDependencies",
+            "text": "FieldInputKibanaDependencies"
+          }
+        ],
+        "path": "packages/kbn-management/settings/components/field_category/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-components-field-category",
+        "id": "def-common.FieldCategoryServices",
+        "type": "Type",
+        "tags": [],
+        "label": "FieldCategoryServices",
+        "description": [
+          "\nContextual services used by a {@link FieldCategory} component and its dependents."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/management-settings-components-field-input",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsComponentsFieldInputPluginApi",
+            "section": "def-common.FieldInputServices",
+            "text": "FieldInputServices"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-row",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+            "section": "def-common.Services",
+            "text": "Services"
+          }
+        ],
+        "path": "packages/kbn-management/settings/components/field_category/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

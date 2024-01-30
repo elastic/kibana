@@ -11,6 +11,3 @@ import { CloudChatPlugin } from './plugin';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new CloudChatPlugin(initializerContext);
 }
-
-export { Chat } from './components';
-export type { CloudChatPluginStart } from './plugin';

@@ -11,7 +11,6 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 import React, { Suspense } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ExternalReferenceAttachmentType } from '@kbn/cases-plugin/public/client/attachment_framework/types';
-import { SubscriptionTrackingProvider } from '@kbn/subscription-tracking';
 import { generateAttachmentType } from './modules/cases/utils/attachments';
 import { KibanaContextProvider } from './hooks/use_kibana';
 import {
@@ -44,16 +43,11 @@ export const createApp =
         <ReduxStoreProvider store={securitySolutionContext.securitySolutionStore}>
           <SecuritySolutionContext.Provider value={securitySolutionContext}>
             <KibanaContextProvider services={services}>
-              <SubscriptionTrackingProvider
-                analyticsClient={services.analytics}
-                navigateToApp={services.application.navigateToApp}
-              >
-                <EnterpriseGuard>
-                  <Suspense fallback={<div />}>
-                    <LazyIndicatorsPageWrapper />
-                  </Suspense>
-                </EnterpriseGuard>
-              </SubscriptionTrackingProvider>
+              <EnterpriseGuard>
+                <Suspense fallback={<div />}>
+                  <LazyIndicatorsPageWrapper />
+                </Suspense>
+              </EnterpriseGuard>
             </KibanaContextProvider>
           </SecuritySolutionContext.Provider>
         </ReduxStoreProvider>

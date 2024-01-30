@@ -35,7 +35,12 @@
     "@kbn/embeddable-plugin",
     "@kbn/profiling-utils",
     "@kbn/utility-types",
-    "@kbn/share-plugin"
+    "@kbn/share-plugin",
+    "@kbn/shared-ux-error-boundary",
+    "@kbn/management-settings-field-definition",
+    "@kbn/management-settings-types",
+    "@kbn/management-settings-utilities",
+    "@kbn/core-chrome-browser"
   ],
   "exclude": ["target/**/*"]
 }

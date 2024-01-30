@@ -7,7 +7,9 @@
 
 import { schema } from '@kbn/config-schema';
 import { maintenanceWindowStatusV1 } from '..';
+import { maintenanceWindowCategoryIdsSchemaV1 } from '../../shared';
 import { rRuleResponseSchemaV1 } from '../../../r_rule';
+import { alertsFilterQuerySchemaV1 } from '../../../alerts_filter_query';
 
 export const maintenanceWindowEventSchema = schema.object({
   gte: schema.string(),
@@ -34,4 +36,6 @@ export const maintenanceWindowResponseSchema = schema.object({
     schema.literal(maintenanceWindowStatusV1.FINISHED),
     schema.literal(maintenanceWindowStatusV1.ARCHIVED),
   ]),
+  category_ids: maintenanceWindowCategoryIdsSchemaV1,
+  scoped_query: schema.maybe(schema.nullable(alertsFilterQuerySchemaV1)),
 });

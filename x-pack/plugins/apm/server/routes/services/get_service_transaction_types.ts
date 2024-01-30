@@ -6,12 +6,10 @@
  */
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import { ApmServiceTransactionDocumentType } from '../../../common/document_type';
 import { SERVICE_NAME, TRANSACTION_TYPE } from '../../../common/es_fields/apm';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import {
-  getDocumentTypeFilterForTransactions,
-  getProcessorEventForTransactions,
-} from '../../lib/helpers/transactions';
+import { RollupInterval } from '../../../common/rollup';
 
 export interface ServiceTransactionTypesResponse {
   transactionTypes: string[];
@@ -20,19 +18,26 @@ export interface ServiceTransactionTypesResponse {
 export async function getServiceTransactionTypes({
   apmEventClient,
   serviceName,
-  searchAggregatedTransactions,
   start,
   end,
+  documentType,
+  rollupInterval,
 }: {
   serviceName: string;
   apmEventClient: APMEventClient;
-  searchAggregatedTransactions: boolean;
   start: number;
   end: number;
+  documentType: ApmServiceTransactionDocumentType;
+  rollupInterval: RollupInterval;
 }): Promise<ServiceTransactionTypesResponse> {
   const params = {
     apm: {
-      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
+      sources: [
+        {
+          documentType,
+          rollupInterval,
+        },
+      ],
     },
     body: {
       track_total_hits: false,
@@ -40,9 +45,6 @@ export async function getServiceTransactionTypes({
       query: {
         bool: {
           filter: [
-            ...getDocumentTypeFilterForTransactions(
-              searchAggregatedTransactions
-            ),
             { term: { [SERVICE_NAME]: serviceName } },
             ...rangeQuery(start, end),
           ],
@@ -61,6 +63,10 @@ export async function getServiceTransactionTypes({
     params
   );
   const transactionTypes =
-    aggregations?.types.buckets.map((bucket) => bucket.key as string) || [];
+    aggregations?.types.buckets
+      .map((bucket) => bucket.key as string)
+      // we exclude page-exit transactions because they are not relevant for the apm app
+      // and are only used for the INP values
+      .filter((value) => value !== 'page-exit') || [];
   return { transactionTypes };
 }

@@ -78,6 +78,7 @@ export const Layout = React.memo(({ currentView, reload, interval, nodes, loadin
     false
   );
   const hostsLinkClickedRef = useRef<boolean | undefined>(hostsLinkClicked);
+  const AUTO_REFRESH_INTERVAL = 5 * 1000;
 
   const options = {
     formatter: InfraFormatterType.percent,
@@ -94,7 +95,7 @@ export const Layout = React.memo(({ currentView, reload, interval, nodes, loadin
         jumpToTime(Date.now());
       }
     },
-    isAutoReloading ? 5000 : null
+    isAutoReloading ? AUTO_REFRESH_INTERVAL : null
   );
 
   const dataBounds = calculateBoundsFromNodes(nodes);
@@ -211,6 +212,8 @@ export const Layout = React.memo(({ currentView, reload, interval, nodes, loadin
                   boundsOverride={boundsOverride}
                   formatter={formatter}
                   bottomMargin={height}
+                  isAutoReloading={isAutoReloading}
+                  refreshInterval={AUTO_REFRESH_INTERVAL}
                 />
               )}
             </AutoSizer>

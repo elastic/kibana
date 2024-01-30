@@ -74,6 +74,7 @@ export const getCaseResponse = (): Case => ({
   status: CaseStatuses.open,
   severity: CaseSeverity.HIGH,
   assignees: [],
+  customFields: [],
   settings: {
     syncAlerts: false,
   },

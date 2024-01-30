@@ -7,7 +7,6 @@
 
 import { EcsVersion } from '@kbn/ecs';
 
-import { getIncompatiableFieldsInSameFamilyCount } from '../callouts/incompatible_callout/helpers';
 import {
   getSummaryMarkdownComment,
   getIncompatibleMappingsMarkdownTableRows,
@@ -32,28 +31,17 @@ import {
   DOCUMENT_VALUES_ACTUAL,
   ECS_VALUES_EXPECTED,
 } from '../../../compare_fields_table/translations';
+import { getIsInSameFamily } from '../../../helpers';
 
-export const getIncompatibleFieldsMarkdownComment = ({
-  fieldsInSameFamily,
-  incompatible,
-}: {
-  fieldsInSameFamily: number;
-  incompatible: number;
-}): string =>
+export const getIncompatibleFieldsMarkdownComment = (incompatible: number): string =>
   getMarkdownComment({
-    suggestedAction: `${i18n.INCOMPATIBLE_CALLOUT({
-      fieldCount: incompatible,
-      version: EcsVersion,
-    })}
+    suggestedAction: `${i18n.INCOMPATIBLE_CALLOUT(EcsVersion)}
 
-${i18n.INCOMPATIBLE_FIELDS_WITH}
-
-${i18n.WHEN_AN_INCOMPATIBLE_FIELD}
 ${i18n.DETECTION_ENGINE_RULES_MAY_NOT_MATCH}
 ${i18n.PAGES_MAY_NOT_DISPLAY_EVENTS}
 ${i18n.MAPPINGS_THAT_CONFLICT_WITH_ECS}
 `,
-    title: i18n.INCOMPATIBLE_CALLOUT_TITLE({ fieldCount: incompatible, fieldsInSameFamily }),
+    title: i18n.INCOMPATIBLE_CALLOUT_TITLE(incompatible),
   });
 
 export const showInvalidCallout = (enrichedFieldMetadata: EnrichedFieldMetadata[]): boolean =>
@@ -61,16 +49,38 @@ export const showInvalidCallout = (enrichedFieldMetadata: EnrichedFieldMetadata[
 
 export const getIncompatibleColor = (): string => getFillColor('incompatible');
 
+export const getSameFamilyColor = (): string => getFillColor('same-family');
+
 export const getIncompatibleMappings = (
   enrichedFieldMetadata: EnrichedFieldMetadata[]
 ): EnrichedFieldMetadata[] =>
-  enrichedFieldMetadata.filter((x) => !x.isEcsCompliant && x.type !== x.indexFieldType);
+  enrichedFieldMetadata.filter(
+    (x) =>
+      !x.isEcsCompliant &&
+      x.type !== x.indexFieldType &&
+      !getIsInSameFamily({ ecsExpectedType: x.type, type: x.indexFieldType })
+  );
 
 export const getIncompatibleMappingsFields = (
   enrichedFieldMetadata: EnrichedFieldMetadata[]
 ): string[] =>
   enrichedFieldMetadata.reduce<string[]>((acc, x) => {
-    if (!x.isEcsCompliant && x.type !== x.indexFieldType) {
+    if (
+      !x.isEcsCompliant &&
+      x.type !== x.indexFieldType &&
+      !getIsInSameFamily({ ecsExpectedType: x.type, type: x.indexFieldType })
+    ) {
+      const field = escape(x.indexFieldName);
+      if (field != null) {
+        return [...acc, field];
+      }
+    }
+    return acc;
+  }, []);
+
+export const getSameFamilyFields = (enrichedFieldMetadata: EnrichedFieldMetadata[]): string[] =>
+  enrichedFieldMetadata.reduce<string[]>((acc, x) => {
+    if (!x.isEcsCompliant && x.type !== x.indexFieldType && x.isInSameFamily) {
       const field = escape(x.indexFieldName);
       if (field != null) {
         return [...acc, field];
@@ -151,16 +161,10 @@ export const getAllIncompatibleMarkdownComments = ({
 }): string[] => {
   const incompatibleMappings = getIncompatibleMappings(partitionedFieldMetadata.incompatible);
   const incompatibleValues = getIncompatibleValues(partitionedFieldMetadata.incompatible);
-  const fieldsInSameFamily = getIncompatiableFieldsInSameFamilyCount(
-    partitionedFieldMetadata.incompatible
-  );
 
   const incompatibleFieldsMarkdownComment =
     partitionedFieldMetadata.incompatible.length > 0
-      ? getIncompatibleFieldsMarkdownComment({
-          fieldsInSameFamily,
-          incompatible: partitionedFieldMetadata.incompatible.length,
-        })
+      ? getIncompatibleFieldsMarkdownComment(partitionedFieldMetadata.incompatible.length)
       : '';
 
   return [

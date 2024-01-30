@@ -6,4 +6,3 @@
  */
 
 export const ASSETS_INDEX_PREFIX = 'assets';
-export const ASSET_MANAGER_API_BASE = '/api/asset-manager';

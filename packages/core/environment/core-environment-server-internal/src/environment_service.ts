@@ -46,13 +46,11 @@ export type InternalEnvironmentServiceSetup = InternalEnvironmentServicePreboot;
 /** @internal */
 export class EnvironmentService {
   private readonly log: Logger;
-  private readonly processLogger: Logger;
   private readonly configService: IConfigService;
   private uuid: string = '';
 
   constructor(core: CoreContext) {
     this.log = core.logger.get('environment');
-    this.processLogger = core.logger.get('process');
     this.configService = core.configService;
   }
 
@@ -69,14 +67,6 @@ export class EnvironmentService {
     process.on('unhandledRejection', (reason) => {
       const message = (reason as Error)?.stack ?? JSON.stringify(reason);
       this.log.warn(`Detected an unhandled Promise rejection: ${message}`);
-    });
-
-    process.on('warning', (warning) => {
-      // deprecation warnings do no reflect a current problem for the user and should be filtered out.
-      if (warning.name === 'DeprecationWarning') {
-        return;
-      }
-      this.processLogger.warn(warning);
     });
 
     await createDataFolder({ pathConfig, logger: this.log });

@@ -12,7 +12,7 @@ import { noop } from 'lodash';
 import { useCallback, useEffect, useReducer, useRef, useMemo } from 'react';
 import { Subscription } from 'rxjs';
 
-import { isCompleteResponse } from '@kbn/data-plugin/common';
+import { isRunningResponse } from '@kbn/data-plugin/common';
 import type {
   RuleRegistrySearchRequest,
   RuleRegistrySearchRequestPagination,
@@ -36,6 +36,7 @@ export interface FetchAlertsArgs {
     pageIndex: number;
     pageSize: number;
   };
+  onLoaded?: () => void;
   onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
   runtimeMappings?: MappingRuntimeFields;
   sort: SortCombinations[];
@@ -147,6 +148,7 @@ export type UseFetchAlerts = ({
   fields,
   query,
   pagination,
+  onLoaded,
   onPageChange,
   runtimeMappings,
   skip,
@@ -157,6 +159,7 @@ const useFetchAlerts = ({
   fields,
   query,
   pagination,
+  onLoaded,
   onPageChange,
   runtimeMappings,
   skip,
@@ -206,7 +209,7 @@ const useFetchAlerts = ({
             )
             .subscribe({
               next: (response: RuleRegistrySearchResponse) => {
-                if (isCompleteResponse(response)) {
+                if (!isRunningResponse(response)) {
                   const { rawResponse } = response;
                   inspectQuery.current = {
                     request: response?.inspect?.dsl ?? [],
@@ -258,11 +261,14 @@ const useFetchAlerts = ({
                     ecsAlertsData,
                     totalAlerts,
                   });
+                  dispatch({ type: 'loading', loading: false });
+                  onLoaded?.();
                   searchSubscription$.current.unsubscribe();
                 }
               },
               error: (msg) => {
                 dispatch({ type: 'loading', loading: false });
+                onLoaded?.();
                 data.search.showError(msg);
                 searchSubscription$.current.unsubscribe();
               },
@@ -275,7 +281,7 @@ const useFetchAlerts = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [skip, data, featureIds, query, fields]
+    [skip, data, featureIds, query, fields, onLoaded]
   );
 
   // FUTURE ENGINEER

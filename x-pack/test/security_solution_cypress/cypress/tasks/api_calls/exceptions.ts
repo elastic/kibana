@@ -13,13 +13,12 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_LIST_ITEM_URL, ENDPOINT_LIST_URL } from '@kbn/securitysolution-list-constants';
 import type { ExceptionList, ExceptionListItem, RuleExceptionItem } from '../../objects/exception';
-import { rootRequest } from '../common';
+import { rootRequest } from './common';
 
 export const createEndpointExceptionList = () =>
   rootRequest<ExceptionListSchema>({
     method: 'POST',
     url: ENDPOINT_LIST_URL,
-    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
   });
 
 export const createEndpointExceptionListItem = (item: CreateEndpointListItemSchema) =>
@@ -27,7 +26,6 @@ export const createEndpointExceptionListItem = (item: CreateEndpointListItemSche
     method: 'POST',
     url: ENDPOINT_LIST_ITEM_URL,
     body: item,
-    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
   });
 
 export const createExceptionList = (
@@ -43,7 +41,6 @@ export const createExceptionList = (
       name: exceptionList.name,
       type: exceptionList.type,
     },
-    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
     failOnStatusCode: false,
   });
 
@@ -76,7 +73,6 @@ export const createExceptionListItem = (
       ],
       expire_time: exceptionListItem?.expire_time,
     },
-    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
     failOnStatusCode: false,
   });
 
@@ -87,7 +83,6 @@ export const createRuleExceptionItem = (ruleId: string, exceptionListItems: Rule
     body: {
       items: exceptionListItems,
     },
-    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
     failOnStatusCode: false,
   });
 
@@ -102,7 +97,6 @@ export const updateExceptionListItem = (
       item_id: exceptionListItemId,
       ...exceptionListItemUpdate,
     },
-    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
     failOnStatusCode: false,
   });
 
@@ -110,6 +104,5 @@ export const deleteExceptionList = (listId: string, namespaceType: string) =>
   rootRequest({
     method: 'DELETE',
     url: `/api/exception_lists?list_id=${listId}&namespace_type=${namespaceType}`,
-    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
     failOnStatusCode: false,
   });

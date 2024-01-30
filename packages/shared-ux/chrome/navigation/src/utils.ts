@@ -6,6 +6,21 @@
  * Side Public License, v 1.
  */
 
+import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+
 export function isAbsoluteLink(link: string) {
   return link.startsWith('http://') || link.startsWith('https://');
+}
+
+function isSamePath(pathA: string | null, pathB: string | null) {
+  if (pathA === null || pathB === null) {
+    return false;
+  }
+  return pathA === pathB;
+}
+
+export function isActiveFromUrl(nodePath: string, activeNodes: ChromeProjectNavigationNode[][]) {
+  return activeNodes.reduce((acc, nodesBranch) => {
+    return acc === true ? acc : nodesBranch.some((branch) => isSamePath(branch.path, nodePath));
+  }, false);
 }

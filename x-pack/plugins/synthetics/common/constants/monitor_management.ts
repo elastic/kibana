@@ -76,6 +76,7 @@ export enum ConfigKey {
   USERNAME = 'username',
   WAIT = 'wait',
   MONITOR_QUERY_ID = 'id',
+  MAX_ATTEMPTS = 'max_attempts',
 }
 
 export const secretKeys = [

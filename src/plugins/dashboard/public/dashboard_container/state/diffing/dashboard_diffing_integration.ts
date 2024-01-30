@@ -211,8 +211,8 @@ function backupUnsavedChanges(
   this: DashboardContainer,
   unsavedChanges: Partial<DashboardContainerInput>
 ) {
-  const { dashboardSessionStorage } = pluginServices.getServices();
-  dashboardSessionStorage.setState(
+  const { dashboardBackup } = pluginServices.getServices();
+  dashboardBackup.setState(
     this.getDashboardSavedObjectId(),
     omit(unsavedChanges, keysToOmitFromSessionStorage)
   );

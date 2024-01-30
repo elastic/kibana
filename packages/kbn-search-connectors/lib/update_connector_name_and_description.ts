@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { WriteResponseBase } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 
@@ -17,7 +18,7 @@ export const updateConnectorNameAndDescription = async (
   client: ElasticsearchClient,
   connectorId: string,
   connectorUpdates: Partial<Pick<Connector, 'name' | 'description'>>
-) => {
+): Promise<WriteResponseBase> => {
   const connectorResult = await client.get<ConnectorDocument>({
     id: connectorId,
     index: CONNECTORS_INDEX,

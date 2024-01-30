@@ -10,13 +10,13 @@ import { i18n } from '@kbn/i18n';
 import { EuiStepsHorizontal, EuiStepStatus, EuiSpacer, EuiPageSection } from '@elastic/eui';
 
 import { RemoteClusterSetupTrust, RemoteClusterForm } from '../components';
-import { Cluster } from '../../../../common/lib/cluster_serialization';
+import { ClusterPayload } from '../../../../common/lib/cluster_serialization';
 
 const CONFIGURE_CONNECTION = 1;
 const SETUP_TRUST = 2;
 
 interface Props {
-  saveRemoteClusterConfig: (config: Cluster) => void;
+  saveRemoteClusterConfig: (config: ClusterPayload) => void;
   onCancel: () => void;
   addClusterError: { message: string } | undefined;
   isSaving: boolean;
@@ -28,7 +28,7 @@ export const RemoteClusterWizard = ({
   isSaving,
   addClusterError,
 }: Props) => {
-  const [formState, setFormState] = useState<Cluster>();
+  const [formState, setFormState] = useState<ClusterPayload>();
   const [currentStep, setCurrentStep] = useState(CONFIGURE_CONNECTION);
 
   // If there was an error saving the cluster, we need
@@ -65,13 +65,13 @@ export const RemoteClusterWizard = ({
   // Upon finalizing configuring the connection, we need to temporarily store the
   // cluster configuration so that we can persist it when the user completes the
   // trust step.
-  const completeConfigStep = (clusterConfig: Cluster) => {
+  const completeConfigStep = (clusterConfig: ClusterPayload) => {
     setFormState(clusterConfig);
     setCurrentStep(SETUP_TRUST);
   };
 
   const completeTrustStep = () => {
-    saveRemoteClusterConfig(formState as Cluster);
+    saveRemoteClusterConfig(formState as ClusterPayload);
   };
 
   return (

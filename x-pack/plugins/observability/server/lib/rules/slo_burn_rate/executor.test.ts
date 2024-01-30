@@ -97,10 +97,17 @@ function createFindResponse(sloList: SLO[]): SavedObjectsFindResponse<StoredSLO>
   };
 }
 
+function getTimeRange() {
+  const date = new Date(Date.now()).toISOString();
+  return { dateStart: date, dateEnd: date };
+}
+
 describe('BurnRateRuleExecutor', () => {
   let esClientMock: ElasticsearchClientMock;
   let soClientMock: jest.Mocked<SavedObjectsClientContract>;
   let loggerMock: jest.Mocked<MockedLogger>;
+  let alertUuidMap: Map<string, string>;
+  let alertMock: Partial<Alert>;
   const alertUuid = 'mockedAlertUuid';
   const basePathMock = { publicBaseUrl: 'https://kibana.dev' } as IBasePath;
   const alertsLocatorMock = {
@@ -124,9 +131,17 @@ describe('BurnRateRuleExecutor', () => {
     LifecycleAlertServices<BurnRateAlertState, BurnRateAlertContext, BurnRateAllowedActionGroups>;
 
   beforeEach(() => {
+    alertUuidMap = new Map<string, string>();
+    alertMock = {
+      scheduleActions: jest.fn(),
+      replaceState: jest.fn(),
+    };
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();
     soClientMock = savedObjectsClientMock.create();
-    alertWithLifecycleMock = jest.fn();
+    alertWithLifecycleMock = jest.fn().mockImplementation(({ id }) => {
+      alertUuidMap.set(id, alertUuid);
+      return alertMock as any;
+    });
     alertFactoryMock = {
       create: jest.fn(),
       done: jest.fn(),
@@ -144,7 +159,7 @@ describe('BurnRateRuleExecutor', () => {
       shouldWriteAlerts: jest.fn(),
       shouldStopExecution: jest.fn(),
       getAlertStartedDate: jest.fn(),
-      getAlertUuid: jest.fn().mockImplementation(() => alertUuid),
+      getAlertUuid: jest.fn().mockImplementation((id) => alertUuidMap.get(id) || 'bad-uuid'),
       getAlertByAlertUuid: jest.fn(),
       share: {} as SharePluginStart,
       dataViews: dataViewPluginMocks.createStartContract(),
@@ -168,6 +183,7 @@ describe('BurnRateRuleExecutor', () => {
           spaceId: 'irrelevant',
           state: {},
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+          getTimeRange,
         })
       ).rejects.toThrowError();
     });
@@ -188,6 +204,7 @@ describe('BurnRateRuleExecutor', () => {
         spaceId: 'irrelevant',
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        getTimeRange,
       });
 
       expect(esClientMock.search).not.toHaveBeenCalled();
@@ -236,6 +253,7 @@ describe('BurnRateRuleExecutor', () => {
         spaceId: 'irrelevant',
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        getTimeRange,
       });
 
       expect(alertWithLifecycleMock).not.toBeCalled();
@@ -281,6 +299,7 @@ describe('BurnRateRuleExecutor', () => {
         spaceId: 'irrelevant',
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        getTimeRange,
       });
 
       expect(alertWithLifecycleMock).not.toBeCalled();
@@ -312,11 +331,6 @@ describe('BurnRateRuleExecutor', () => {
       esClientMock.search.mockResolvedValueOnce(
         generateEsResponse(ruleParams, [], { instanceId: 'bar' })
       );
-      const alertMock: Partial<Alert> = {
-        scheduleActions: jest.fn(),
-        replaceState: jest.fn(),
-      };
-      alertWithLifecycleMock.mockImplementation(() => alertMock as any);
       alertFactoryMock.done.mockReturnValueOnce({ getRecoveredAlerts: () => [] });
 
       const executor = getRuleExecutor({
@@ -334,6 +348,7 @@ describe('BurnRateRuleExecutor', () => {
         spaceId: 'irrelevant',
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        getTimeRange,
       });
 
       expect(alertWithLifecycleMock).toBeCalledWith({
@@ -417,11 +432,6 @@ describe('BurnRateRuleExecutor', () => {
       esClientMock.search.mockResolvedValueOnce(
         generateEsResponse(ruleParams, [], { instanceId: 'bar' })
       );
-      const alertMock: Partial<Alert> = {
-        scheduleActions: jest.fn(),
-        replaceState: jest.fn(),
-      };
-      alertWithLifecycleMock.mockImplementation(() => alertMock as any);
       alertFactoryMock.done.mockReturnValueOnce({ getRecoveredAlerts: () => [] });
 
       const executor = getRuleExecutor({ basePath: basePathMock });
@@ -436,6 +446,7 @@ describe('BurnRateRuleExecutor', () => {
         spaceId: 'irrelevant',
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        getTimeRange,
       });
 
       expect(alertWithLifecycleMock).toBeCalledWith({

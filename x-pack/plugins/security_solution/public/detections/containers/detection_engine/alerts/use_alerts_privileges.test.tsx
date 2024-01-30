@@ -100,7 +100,7 @@ describe('useAlertsPrivileges', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
     appToastsMock = useAppToastsMock.create();
     (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
     useUserPrivilegesMock.mockReturnValue(userPrivilegesInitial);

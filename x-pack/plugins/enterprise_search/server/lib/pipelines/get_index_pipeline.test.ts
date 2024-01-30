@@ -87,7 +87,7 @@ describe('getIndexPipelineParameters', () => {
       extract_binary_content: true,
       name: 'my-index',
       reduce_whitespace: true,
-      run_ml_inference: false,
+      run_ml_inference: true,
     });
   });
   it('returns default connector index pipeline if found in mapping', async () => {

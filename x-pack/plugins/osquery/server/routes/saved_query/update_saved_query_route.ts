@@ -60,6 +60,7 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
           query,
           version,
           interval,
+          timeout,
           snapshot,
           removed,
           // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -102,6 +103,7 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
             query,
             version,
             interval,
+            timeout,
             snapshot,
             removed,
             ecs_mapping: convertECSMappingToArray(ecs_mapping),
@@ -133,6 +135,7 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
           version: attributes.version,
           ecs_mapping: attributes.ecs_mapping,
           interval: attributes.interval,
+          timeout: attributes.timeout,
           platform: attributes.platform,
           query: attributes.query,
           updated_at: attributes.updated_at,

@@ -139,6 +139,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.navigateToApp();
+        if (await PageObjects.dashboard.onDashboardLandingPage()) {
+          await testSubjects.existOrFail('unsavedDashboardsCallout');
+        }
         await PageObjects.dashboard.loadSavedDashboard('few panels');
         const currentPanelCount = await PageObjects.dashboard.getPanelCount();
         expect(currentPanelCount).to.eql(unsavedPanelCount);

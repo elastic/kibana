@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/url-drilldown-plugin",
-  "owner": "@elastic/kibana-app-services",
+  "owner": "@elastic/appex-sharedux",
   "description": "Adds drilldown implementations to Kibana",
   "plugin": {
     "id": "urlDrilldown",
@@ -9,13 +9,13 @@
     "browser": true,
     "requiredPlugins": [
       "embeddable",
-      "uiActions",
       "uiActionsEnhanced"
     ],
     "requiredBundles": [
       "kibanaUtils",
       "kibanaReact",
-      "imageEmbeddable"
+      "imageEmbeddable",
+      "uiActions"
     ]
   }
 }

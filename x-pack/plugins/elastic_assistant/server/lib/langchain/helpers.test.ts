@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { KibanaRequest } from '@kbn/core-http-server';
 import type { Message } from '@kbn/elastic-assistant';
 import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from 'langchain/schema';
 
@@ -12,9 +13,10 @@ import {
   getLangChainMessage,
   getLangChainMessages,
   getMessageContentAndRole,
-  unsafeGetAssistantMessagesFromRequest,
+  requestHasRequiredAnonymizationParams,
 } from './helpers';
 import { langChainMessages } from '../../__mocks__/lang_chain_messages';
+import { RequestBody } from './types';
 
 describe('helpers', () => {
   describe('getLangChainMessage', () => {
@@ -111,75 +113,117 @@ describe('helpers', () => {
     });
   });
 
-  describe('unsafeGetAssistantMessagesFromRequest', () => {
-    const rawSubActionParamsBody = {
-      messages: [
-        { role: 'user', content: '\n\n\n\nWhat is my name?' },
-        {
-          role: 'assistant',
-          content:
-            "Hello! Since we are communicating through text, I do not have the information about your name. Please feel free to share your name with me, if you'd like.",
+  describe('requestHasRequiredAnonymizationParams', () => {
+    it('returns true if the request has valid anonymization params', () => {
+      const request = {
+        body: {
+          allow: ['a', 'b', 'c'],
+          allowReplacement: ['b', 'c'],
+          replacements: { key: 'value' },
         },
-        { role: 'user', content: '\n\nMy name is Andrew' },
-        {
-          role: 'assistant',
-          content:
-            "Hi, Andrew! It's nice to meet you. How can I help you or what would you like to talk about today?",
-        },
-        { role: 'user', content: '\n\nDo you know my name?' },
-      ],
-    };
+      } as unknown as KibanaRequest<unknown, unknown, RequestBody>;
 
-    it('returns the expected assistant messages from a conversation', () => {
-      const result = unsafeGetAssistantMessagesFromRequest(JSON.stringify(rawSubActionParamsBody));
+      const result = requestHasRequiredAnonymizationParams(request);
 
-      const expected = [
-        { role: 'user', content: '\n\n\n\nWhat is my name?' },
-        {
-          role: 'assistant',
-          content:
-            "Hello! Since we are communicating through text, I do not have the information about your name. Please feel free to share your name with me, if you'd like.",
-        },
-        { role: 'user', content: '\n\nMy name is Andrew' },
-        {
-          role: 'assistant',
-          content:
-            "Hi, Andrew! It's nice to meet you. How can I help you or what would you like to talk about today?",
-        },
-        { role: 'user', content: '\n\nDo you know my name?' },
-      ];
-
-      expect(result).toEqual(expected);
+      expect(result).toBe(true);
     });
 
-    it('returns an empty array when the rawSubActionParamsBody is undefined', () => {
-      const result = unsafeGetAssistantMessagesFromRequest(undefined);
+    it('returns false if allow is undefined', () => {
+      const request = {
+        body: {
+          // allow is undefined
+          allowReplacement: ['b', 'c'],
+          replacements: { key: 'value' },
+        },
+      } as unknown as KibanaRequest<unknown, unknown, RequestBody>;
 
-      expect(result).toEqual([]);
+      const result = requestHasRequiredAnonymizationParams(request);
+
+      expect(result).toBe(false);
     });
 
-    it('returns an empty array when the rawSubActionParamsBody messages[] array is empty', () => {
-      const hasEmptyMessages = {
-        messages: [],
-      };
+    it('returns false if allow is empty', () => {
+      const request = {
+        body: {
+          allow: [], // <-- empty
+          allowReplacement: ['b', 'c'],
+          replacements: { key: 'value' },
+        },
+      } as unknown as KibanaRequest<unknown, unknown, RequestBody>;
 
-      const result = unsafeGetAssistantMessagesFromRequest(JSON.stringify(hasEmptyMessages));
+      const result = requestHasRequiredAnonymizationParams(request);
 
-      expect(result).toEqual([]);
+      expect(result).toBe(false);
     });
 
-    it('returns an empty array when the rawSubActionParamsBody shape is unexpected', () => {
-      const unexpected = { invalidKey: 'some_value' };
+    it('returns false if allow has non-string values', () => {
+      const request = {
+        body: {
+          allow: ['a', 9876, 'c'], // <-- non-string value
+          allowReplacement: ['b', 'c'],
+          replacements: { key: 'value' },
+        },
+      } as unknown as KibanaRequest<unknown, unknown, RequestBody>;
 
-      const result = unsafeGetAssistantMessagesFromRequest(JSON.stringify(unexpected));
+      const result = requestHasRequiredAnonymizationParams(request);
 
-      expect(result).toEqual([]);
+      expect(result).toBe(false);
     });
 
-    it('returns an empty array when the rawSubActionParamsBody is invalid JSON', () => {
-      const result = unsafeGetAssistantMessagesFromRequest('[]');
+    it('returns true if allowReplacement is empty', () => {
+      const request = {
+        body: {
+          allow: ['a', 'b', 'c'],
+          allowReplacement: [],
+          replacements: { key: 'value' },
+        },
+      } as unknown as KibanaRequest<unknown, unknown, RequestBody>;
 
-      expect(result).toEqual([]);
+      const result = requestHasRequiredAnonymizationParams(request);
+
+      expect(result).toBe(true);
+    });
+
+    it('returns false if allowReplacement has non-string values', () => {
+      const request = {
+        body: {
+          allow: ['a', 'b', 'c'],
+          allowReplacement: ['b', 12345], // <-- non-string value
+          replacements: { key: 'value' },
+        },
+      } as unknown as KibanaRequest<unknown, unknown, RequestBody>;
+
+      const result = requestHasRequiredAnonymizationParams(request);
+
+      expect(result).toBe(false);
+    });
+
+    it('returns true if replacements is empty', () => {
+      const request = {
+        body: {
+          allow: ['a', 'b', 'c'],
+          allowReplacement: ['b', 'c'],
+          replacements: {},
+        },
+      } as unknown as KibanaRequest<unknown, unknown, RequestBody>;
+
+      const result = requestHasRequiredAnonymizationParams(request);
+
+      expect(result).toBe(true);
+    });
+
+    it('returns false if replacements has non-string values', () => {
+      const request = {
+        body: {
+          allow: ['a', 'b', 'c'],
+          allowReplacement: ['b', 'c'],
+          replacements: { key: 76543 }, // <-- non-string value
+        },
+      } as unknown as KibanaRequest<unknown, unknown, RequestBody>;
+
+      const result = requestHasRequiredAnonymizationParams(request);
+
+      expect(result).toBe(false);
     });
   });
 });

@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { InventoryMetricRT, ItemTypeRT } from '../inventory_models/types';
+import { InventoryMetricRT, ItemTypeRT } from '@kbn/metrics-data-access-plugin/common';
 import { InfraTimerangeInputRT } from './snapshot_api';
 
 const NodeDetailsDataPointRT = rt.intersection([

@@ -6,13 +6,14 @@
  */
 
 import {
+  AI_SEARCH_PLUGIN,
   ANALYTICS_PLUGIN,
   APP_SEARCH_PLUGIN,
-  WORKPLACE_SEARCH_PLUGIN,
+  ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
   SEARCH_PRODUCT_NAME,
-  AI_SEARCH_PLUGIN,
   VECTOR_SEARCH_PLUGIN,
+  WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
 
 /**
@@ -53,3 +54,6 @@ export const aiSearchTitle = (page: Title = []) => generateTitle([...page, AI_SE
 
 export const vectorSearchTitle = (page: Title = []) =>
   generateTitle([...page, VECTOR_SEARCH_PLUGIN.NAME]);
+
+export const enterpriseSearchContentTitle = (page: Title = []) =>
+  generateTitle([...page, ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME]);

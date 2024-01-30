@@ -9,7 +9,7 @@ Mute all alerts.
 [NOTE]
 ====
 For the most up-to-date API details, refer to the
-{kib-repo}/tree/{branch}/x-pack/plugins/alerting/docs/openapi[open API specification]. For a preview, check out <<rule-apis>>.
+{kib-repo}/tree/{branch}/x-pack/plugins/alerting/docs/openapi[open API specification].
 ====
 
 [[mute-all-alerts-api-request]]

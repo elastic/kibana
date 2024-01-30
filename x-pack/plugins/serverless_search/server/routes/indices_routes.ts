@@ -5,9 +5,13 @@
  * 2.0.
  */
 
+import { IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
 
+import { fetchSearchResults } from '@kbn/search-index-documents/lib';
+import { DEFAULT_DOCS_PER_PAGE } from '@kbn/search-index-documents/types';
 import { fetchIndices } from '../lib/indices/fetch_indices';
+import { fetchIndex } from '../lib/indices/fetch_index';
 import { RouteDependencies } from '../plugin';
 
 export const registerIndicesRoutes = ({ router, security }: RouteDependencies) => {
@@ -44,4 +48,101 @@ export const registerIndicesRoutes = ({ router, security }: RouteDependencies) =
       });
     }
   );
+
+  router.get(
+    {
+      path: '/internal/serverless_search/index_names',
+      validate: {
+        query: schema.object({
+          query: schema.maybe(schema.string()),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const client = (await context.core).elasticsearch.client.asCurrentUser;
+
+      const result = await client.indices.get({
+        expand_wildcards: 'open',
+        index: request.query.query ? `*${request.query.query}*` : '*',
+      });
+      return response.ok({
+        body: {
+          index_names: Object.keys(result || {}).filter(
+            (indexName) => !isHidden(result[indexName]) && !isClosed(result[indexName])
+          ),
+        },
+        headers: { 'content-type': 'application/json' },
+      });
+    }
+  );
+
+  router.get(
+    {
+      path: '/internal/serverless_search/index/{indexName}',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const body = await fetchIndex(client.asCurrentUser, request.params.indexName);
+      return body
+        ? response.ok({
+            body,
+            headers: { 'content-type': 'application/json' },
+          })
+        : response.notFound();
+    }
+  );
+
+  router.post(
+    {
+      path: '/internal/serverless_search/indices/{index_name}/search',
+      validate: {
+        body: schema.object({
+          searchQuery: schema.string({
+            defaultValue: '',
+          }),
+        }),
+        params: schema.object({
+          index_name: schema.string(),
+        }),
+        query: schema.object({
+          page: schema.number({ defaultValue: 0, min: 0 }),
+          size: schema.number({
+            defaultValue: DEFAULT_DOCS_PER_PAGE,
+            min: 0,
+          }),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const client = (await context.core).elasticsearch.client.asCurrentUser;
+      const indexName = decodeURIComponent(request.params.index_name);
+      const searchQuery = request.body.searchQuery;
+      const { page = 0, size = DEFAULT_DOCS_PER_PAGE } = request.query;
+      const from = page * size;
+
+      const searchResults = await fetchSearchResults(client, indexName, searchQuery, from, size);
+
+      return response.ok({
+        body: {
+          results: searchResults,
+        },
+        headers: { 'content-type': 'application/json' },
+      });
+    }
+  );
 };
+
+function isHidden(index?: IndicesIndexState): boolean {
+  return index?.settings?.index?.hidden === true || index?.settings?.index?.hidden === 'true';
+}
+function isClosed(index?: IndicesIndexState): boolean {
+  return (
+    index?.settings?.index?.verified_before_close === true ||
+    index?.settings?.index?.verified_before_close === 'true'
+  );
+}

@@ -8,6 +8,7 @@
 import React, { createContext, ReactNode } from 'react';
 import { useHistory } from 'react-router-dom';
 import { History } from 'history';
+import { ApmDocumentType } from '../../../common/document_type';
 import { getDefaultTransactionType } from '../../../common/transaction_types';
 import { useServiceTransactionTypesFetcher } from './use_service_transaction_types_fetcher';
 import { useServiceAgentFetcher } from './use_service_agent_fetcher';
@@ -17,6 +18,7 @@ import { useFallbackToTransactionsFetcher } from '../../hooks/use_fallback_to_tr
 import { replace } from '../../components/shared/links/url_helpers';
 import { FETCH_STATUS } from '../../hooks/use_fetcher';
 import { ServerlessType } from '../../../common/serverless';
+import { usePreferredDataSourceAndBucketSize } from '../../hooks/use_preferred_data_source_and_bucket_size';
 
 export interface APMServiceContextValue {
   serviceName: string;
@@ -67,11 +69,21 @@ export function ApmServiceContextProvider({
     end,
   });
 
+  const preferred = usePreferredDataSourceAndBucketSize({
+    start,
+    end,
+    kuery,
+    type: ApmDocumentType.TransactionMetric,
+    numBuckets: 100,
+  });
+
   const { transactionTypes, status: transactionTypeStatus } =
     useServiceTransactionTypesFetcher({
       serviceName,
       start,
       end,
+      documentType: preferred?.source.documentType,
+      rollupInterval: preferred?.source.rollupInterval,
     });
 
   const currentTransactionType = getOrRedirectToTransactionType({

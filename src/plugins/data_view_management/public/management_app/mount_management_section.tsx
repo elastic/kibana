@@ -21,7 +21,11 @@ import {
   EditIndexPatternContainer,
   CreateEditFieldContainer,
 } from '../components';
-import { IndexPatternManagementStartDependencies, IndexPatternManagementStart } from '../plugin';
+import {
+  IndexPatternManagementStartDependencies,
+  IndexPatternManagementStart,
+  IndexPatternManagementSetupDependencies,
+} from '../plugin';
 import { IndexPatternManagmentContext } from '../types';
 
 const readOnlyBadge = {
@@ -36,6 +40,7 @@ const readOnlyBadge = {
 
 export async function mountManagementSection(
   getStartServices: StartServicesAccessor<IndexPatternManagementStartDependencies>,
+  { noDataPage }: Pick<IndexPatternManagementSetupDependencies, 'noDataPage'>,
   params: ManagementAppMountParams
 ) {
   const [
@@ -87,9 +92,10 @@ export async function mountManagementSection(
     fieldFormatEditors: dataViewFieldEditor.fieldFormatEditors,
     IndexPatternEditor: dataViewEditor.IndexPatternEditorComponent,
     fieldFormats,
-    spaces,
+    spaces: spaces?.hasOnlyDefaultSpace ? undefined : spaces,
     theme,
     savedObjectsManagement,
+    noDataPage,
   };
 
   const editPath = '/dataView/:id/field/:fieldName';

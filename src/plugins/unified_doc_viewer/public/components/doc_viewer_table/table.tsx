@@ -29,7 +29,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { getFieldIconType } from '@kbn/unified-field-list/src/utils/field_types/get_field_icon_type';
+import { getFieldIconType } from '@kbn/field-utils/src/utils/get_field_icon_type';
 import {
   SHOW_MULTIFIELDS,
   formatFieldValue,
@@ -38,9 +38,10 @@ import {
   isNestedFieldParent,
   usePager,
 } from '@kbn/discover-utils';
+import { fieldNameWildcardMatcher, getFieldSearchMatchingHighlight } from '@kbn/field-utils';
 import type { DocViewRenderProps, FieldRecordLegacy } from '@kbn/unified-doc-viewer/types';
 import { FieldName } from '@kbn/unified-doc-viewer';
-import { useUnifiedDocViewerServices } from '../../hooks';
+import { getUnifiedDocViewerServices } from '../../plugin';
 import { TableFieldValue } from './table_cell_value';
 import { TableActions } from './table_cell_actions';
 
@@ -115,18 +116,19 @@ const updateSearchText = debounce(
 
 export const DocViewerTable = ({
   columns,
+  columnTypes,
   hit,
   dataView,
+  hideActionsColumn,
   filter,
   onAddColumn,
   onRemoveColumn,
 }: DocViewRenderProps) => {
   const showActionsInsideTableCell = useIsWithinBreakpoints(['xl'], true);
 
-  const { fieldFormats, storage, uiSettings } = useUnifiedDocViewerServices();
+  const { fieldFormats, storage, uiSettings } = getUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const currentDataViewId = dataView?.id;
-  const isSingleDocView = !filter;
 
   const [searchText, setSearchText] = useState(getSearchText(storage));
   const [pinnedFields, setPinnedFields] = useState<string[]>(
@@ -178,7 +180,9 @@ export const DocViewerTable = ({
     (field: string) => {
       const fieldMapping = mapping(field);
       const displayName = fieldMapping?.displayName ?? field;
-      const fieldType = isNestedFieldParent(field, dataView)
+      const fieldType = columnTypes
+        ? columnTypes[field] // for text-based results types come separately
+        : isNestedFieldParent(field, dataView)
         ? 'nested'
         : fieldMapping
         ? getFieldIconType(fieldMapping)
@@ -221,6 +225,7 @@ export const DocViewerTable = ({
       onToggleColumn,
       filter,
       columns,
+      columnTypes,
       flattened,
       pinnedFields,
       onTogglePinned,
@@ -255,8 +260,13 @@ export const DocViewerTable = ({
           acc.pinnedItems.push(fieldToItem(curFieldName));
         } else {
           const fieldMapping = mapping(curFieldName);
-          const displayName = fieldMapping?.displayName ?? curFieldName;
-          if (displayName.toLowerCase().includes(searchText.toLowerCase())) {
+          if (
+            !searchText?.trim() ||
+            fieldNameWildcardMatcher(
+              { name: curFieldName, displayName: fieldMapping?.displayName },
+              searchText
+            )
+          ) {
             // filter only unpinned fields
             acc.restItems.push(fieldToItem(curFieldName));
           }
@@ -286,11 +296,11 @@ export const DocViewerTable = ({
   );
 
   const headers = [
-    !isSingleDocView && (
+    !hideActionsColumn && (
       <EuiTableHeaderCell
         key="header-cell-actions"
         align="left"
-        width={showActionsInsideTableCell ? 150 : 62}
+        width={showActionsInsideTableCell && filter ? 150 : 62}
         isSorted={false}
       >
         <EuiText size="xs">
@@ -327,7 +337,6 @@ export const DocViewerTable = ({
 
   const renderRows = useCallback(
     (items: FieldRecord[]) => {
-      const highlight = searchText?.toLowerCase();
       return items.map(
         ({
           action: { flattenedField, onFilter },
@@ -336,7 +345,7 @@ export const DocViewerTable = ({
         }: FieldRecord) => {
           return (
             <EuiTableRow key={field} className="kbnDocViewer__tableRow" isSelected={pinned}>
-              {!isSingleDocView && (
+              {!hideActionsColumn && (
                 <EuiTableRowCell
                   key={field + '-actions'}
                   align={showActionsInsideTableCell ? 'left' : 'center'}
@@ -351,7 +360,7 @@ export const DocViewerTable = ({
                     pinned={pinned}
                     fieldMapping={fieldMapping}
                     flattenedField={flattenedField}
-                    onFilter={onFilter!}
+                    onFilter={onFilter}
                     onToggleColumn={onToggleColumn}
                     ignoredValue={!!ignored}
                     onTogglePinned={onTogglePinned}
@@ -371,7 +380,10 @@ export const DocViewerTable = ({
                   fieldType={fieldType}
                   fieldMapping={fieldMapping}
                   scripted={scripted}
-                  highlight={highlight}
+                  highlight={getFieldSearchMatchingHighlight(
+                    fieldMapping?.displayName ?? field,
+                    searchText
+                  )}
                 />
               </EuiTableRowCell>
               <EuiTableRowCell
@@ -393,7 +405,7 @@ export const DocViewerTable = ({
         }
       );
     },
-    [onToggleColumn, onTogglePinned, isSingleDocView, showActionsInsideTableCell, searchText]
+    [hideActionsColumn, showActionsInsideTableCell, onToggleColumn, onTogglePinned, searchText]
   );
 
   const rowElements = [
@@ -414,6 +426,7 @@ export const DocViewerTable = ({
           onChange={handleOnChange}
           placeholder={searchPlaceholder}
           value={searchText}
+          data-test-subj="unifiedDocViewerFieldsSearchInput"
         />
       </EuiFlexItem>
 

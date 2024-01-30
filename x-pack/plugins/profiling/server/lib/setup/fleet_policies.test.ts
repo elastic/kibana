@@ -72,4 +72,29 @@ describe('getVarsFor', () => {
       tls_key_path: { type: 'text', value: '456' },
     });
   });
+
+  it('returns vars with the telemetry key', () => {
+    const config: PackageInputType = {
+      host: 'example.com',
+      telemetry: true,
+      tls_enabled: true,
+      tls_supported_protocols: ['foo', 'bar'],
+      tls_certificate_path: '123',
+      tls_key_path: '456',
+    };
+
+    const { secret_token: secretToken, ...result } = getVarsFor({
+      config,
+      includeSecretToken: false,
+    });
+    expect(secretToken).toBeUndefined();
+    expect(result).toEqual({
+      host: { type: 'text', value: 'example.com' },
+      telemetry: { type: 'bool', value: true },
+      tls_enabled: { type: 'bool', value: true },
+      tls_supported_protocols: { type: 'text', value: ['foo', 'bar'] },
+      tls_certificate_path: { type: 'text', value: '123' },
+      tls_key_path: { type: 'text', value: '456' },
+    });
+  });
 });

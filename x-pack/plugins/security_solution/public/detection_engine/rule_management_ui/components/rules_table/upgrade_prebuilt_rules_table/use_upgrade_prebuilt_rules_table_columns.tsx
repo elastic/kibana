@@ -15,7 +15,7 @@ import { PopoverItems } from '../../../../../common/components/popover_items';
 import { useUiSetting$ } from '../../../../../common/lib/kibana';
 import { hasUserCRUDPermission } from '../../../../../common/utils/privileges';
 import { IntegrationsPopover } from '../../../../../detections/components/rules/related_integrations/integrations_popover';
-import { SeverityBadge } from '../../../../../detections/components/rules/severity_badge';
+import { SeverityBadge } from '../../../../../common/components/severity_badge';
 import { useUserData } from '../../../../../detections/components/user_info';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import type { Rule } from '../../../../rule_management/logic';
@@ -40,6 +40,7 @@ const RuleName = ({ name, ruleId }: RuleNameProps) => {
       onClick={() => {
         openRulePreview(ruleId);
       }}
+      data-test-subj="ruleName"
     >
       {name}
     </EuiLink>
@@ -120,7 +121,14 @@ const createUpgradeButtonColumn = (
         onClick={() => upgradeOneRule(ruleId)}
         data-test-subj={`upgradeSinglePrebuiltRuleButton-${ruleId}`}
       >
-        {isRuleUpgrading ? <EuiLoadingSpinner size="s" /> : i18n.UPDATE_RULE_BUTTON}
+        {isRuleUpgrading ? (
+          <EuiLoadingSpinner
+            size="s"
+            data-test-subj={`upgradeSinglePrebuiltRuleButton-loadingSpinner-${ruleId}`}
+          />
+        ) : (
+          i18n.UPDATE_RULE_BUTTON
+        )}
       </EuiButtonEmpty>
     );
   },

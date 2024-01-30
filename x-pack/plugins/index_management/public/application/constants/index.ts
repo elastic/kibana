@@ -5,16 +5,8 @@
  * 2.0.
  */
 
-export { REFRESH_RATE_INDEX_LIST } from './refresh_intervals';
-
-export {
-  TAB_SUMMARY,
-  TAB_SETTINGS,
-  TAB_MAPPING,
-  TAB_STATS,
-  TAB_EDIT_SETTINGS,
-} from './detail_panel_tabs';
-
 export const REACT_ROOT_ID = 'indexManagementReactRoot';
+
+export const ENRICH_POLICIES_REQUIRED_PRIVILEGES = ['manage_enrich'];
 
 export * from './ilm_locator';

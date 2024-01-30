@@ -36,7 +36,6 @@ export { PhrasesValuesInput } from './phrases_values_input';
 export { PhraseValueInput } from './phrase_value_input';
 export { RangeValueInput, isRangeParams } from './range_value_input';
 export { ValueInputType } from './value_input_type';
-export { TruncatedLabel } from './truncated_label';
 
 export { FilterEditor } from './filter_editor';
 export type { FilterEditorProps } from './filter_editor';

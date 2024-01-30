@@ -17,3 +17,5 @@ export const DEFAULT_EMS_ROADMAP_DESATURATED_ID = 'road_map_desaturated';
 export const DEFAULT_EMS_DARKMAP_ID = 'dark_map';
 
 export const EMS_APP_NAME = 'kibana'; // app-name submitted as the `app`-param to EMS
+
+export const DEFAULT_EMS_REST_VERSION = '2023-10-31';

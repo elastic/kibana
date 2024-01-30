@@ -7,13 +7,16 @@
  */
 
 import type {
-  ChromeProjectNavigation,
   ChromeStart,
   SideNavComponent,
   ChromeProjectBreadcrumb,
   ChromeSetProjectBreadcrumbsParams,
+  ChromeProjectNavigationNode,
+  AppDeepLinkId,
+  NavigationTreeDefinition,
+  NavigationTreeDefinitionUI,
+  CloudURLs,
 } from '@kbn/core-chrome-browser';
-import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser/src';
 import type { Observable } from 'rxjs';
 
 /** @internal */
@@ -57,13 +60,21 @@ export interface InternalChromeStart extends ChromeStart {
     setProjectName(projectName: string): void;
 
     /**
-     * Sets the project navigation config to be used for rendering project navigation.
-     * It is used for default project sidenav, project breadcrumbs, tracking active deep link.
-     * @param projectNavigation The project navigation config
-     *
-     * Use {@link ServerlessPluginStart.setNavigation} to set project navigation config.
+     * Sets the project url.
+     * @param projectUrl
      */
-    setNavigation(projectNavigation: ChromeProjectNavigation): void;
+    setProjectUrl(projectUrl: string): void;
+
+    initNavigation<
+      LinkId extends AppDeepLinkId = AppDeepLinkId,
+      Id extends string = string,
+      ChildrenId extends string = Id
+    >(
+      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>,
+      deps: { cloudUrls: CloudURLs }
+    ): void;
+
+    getNavigationTreeUi$: () => Observable<NavigationTreeDefinitionUI>;
 
     /**
      * Returns an observable of the active nodes in the project navigation.

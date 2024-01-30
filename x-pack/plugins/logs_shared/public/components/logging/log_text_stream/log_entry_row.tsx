@@ -189,7 +189,7 @@ export const LogEntryRow = memo(
               >
                 {isTimestampColumn(column) ? (
                   <LogEntryTimestampColumn
-                    time={column.timestamp}
+                    time={column.time}
                     render={columnConfiguration.timestampColumn.render}
                   />
                 ) : null}

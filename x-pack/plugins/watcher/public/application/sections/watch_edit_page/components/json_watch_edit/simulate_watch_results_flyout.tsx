@@ -81,6 +81,7 @@ export const SimulateWatchResultsFlyout = ({
       return Object.keys(actions).map((actionKey) => {
         const actionStatus = actionStatuses.find((status) => status.id === actionKey);
         const isConditionMet = executeResults.details?.result?.condition.met;
+
         return {
           actionId: actionKey,
           actionType: getTypeFromAction(actions[actionKey]),
@@ -90,7 +91,7 @@ export const SimulateWatchResultsFlyout = ({
           actionStatus:
             (isConditionMet &&
               executeResults.details.result.actions.find((action: any) => action.id === actionKey)
-                .status) ||
+                ?.status) ||
             conditionNotMetActionStatus(actionModes[actionKey]),
         };
       });

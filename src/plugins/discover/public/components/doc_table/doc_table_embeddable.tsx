@@ -10,27 +10,26 @@ import React, { memo, useCallback, useMemo, useRef } from 'react';
 import './index.scss';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText } from '@elastic/eui';
-import { SAMPLE_SIZE_SETTING, usePager } from '@kbn/discover-utils';
-import type { SearchResponseInterceptedWarning } from '@kbn/search-response-warnings';
+import { usePager } from '@kbn/discover-utils';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import {
   ToolBarPagination,
   MAX_ROWS_PER_PAGE_OPTION,
 } from './components/pager/tool_bar_pagination';
 import { DocTableProps, DocTableRenderProps, DocTableWrapper } from './doc_table_wrapper';
-import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { SavedSearchEmbeddableBase } from '../../embeddable/saved_search_embeddable_base';
 
 export interface DocTableEmbeddableProps extends DocTableProps {
   totalHitCount?: number;
   rowsPerPageState?: number;
-  interceptedWarnings?: SearchResponseInterceptedWarning[];
+  sampleSizeState: number;
+  interceptedWarnings?: SearchResponseWarning[];
   onUpdateRowsPerPage?: (rowsPerPage?: number) => void;
 }
 
 const DocTableWrapperMemoized = memo(DocTableWrapper);
 
 export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
-  const services = useDiscoverServices();
   const onUpdateRowsPerPage = props.onUpdateRowsPerPage;
   const tableWrapperRef = useRef<HTMLDivElement>(null);
   const {
@@ -83,10 +82,6 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
     [hasNextPage, props.rows.length, props.totalHitCount]
   );
 
-  const sampleSize = useMemo(() => {
-    return services.uiSettings.get(SAMPLE_SIZE_SETTING, 500);
-  }, [services]);
-
   const renderDocTable = useCallback(
     (renderProps: DocTableRenderProps) => {
       return (
@@ -112,7 +107,7 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
             <FormattedMessage
               id="discover.docTable.limitedSearchResultLabel"
               defaultMessage="Limited to {resultCount} results. Refine your search."
-              values={{ resultCount: sampleSize }}
+              values={{ resultCount: props.sampleSizeState }}
             />
           </EuiText>
         ) : undefined

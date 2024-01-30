@@ -12,14 +12,17 @@ import type { DocLinksStart, ThemeServiceStart } from '@kbn/core/public';
 import { hasUnsupportedDownsampledAggregationFailure } from '@kbn/search-response-warnings';
 import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { TimeRange } from '@kbn/es-query';
-import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiLink, EuiSpacer } from '@elastic/eui';
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { groupBy, escape, uniq, uniqBy } from 'lodash';
 import type { Query } from '@kbn/data-plugin/common';
 import { SearchRequest } from '@kbn/data-plugin/common';
 
-import { SearchResponseWarning, OpenIncompleteResultsModalButton } from '@kbn/data-plugin/public';
+import {
+  type SearchResponseWarning,
+  SearchResponseWarningsBadgePopoverContent,
+} from '@kbn/search-response-warnings';
 
 import { estypes } from '@elastic/elasticsearch';
 import { isQueryValid } from '@kbn/visualization-ui-components';
@@ -306,22 +309,11 @@ export function getSearchWarningMessages(
               fixableInEditor: true,
               displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
               shortMessage: '',
-              longMessage: (
-                <>
-                  <EuiText size="s">{warning.message}</EuiText>
-                  <EuiSpacer size="s" />
-                  <OpenIncompleteResultsModalButton
-                    theme={theme}
-                    warning={warning}
-                    size="m"
-                    getRequestMeta={() => ({
-                      request,
-                      response,
-                    })}
-                    color="primary"
-                    isButtonEmpty={true}
-                  />
-                </>
+              longMessage: (closePopover) => (
+                <SearchResponseWarningsBadgePopoverContent
+                  onViewDetailsClick={closePopover}
+                  warnings={[warning]}
+                />
               ),
             } as UserMessage,
           ];
@@ -346,20 +338,24 @@ export function getUnsupportedOperationsWarningMessage(
       const columnsEntries = Object.entries(layer.columns);
       return columnsEntries
         .filter(([_, column]) => {
-          if (!hasField(column)) {
+          const operation = operationDefinitionMap[column.operationType] as Extract<
+            GenericOperationDefinition,
+            { input: 'field' }
+          >;
+
+          // this check for getPossibleOperationForField is needed as long as
+          // https://github.com/elastic/kibana/issues/168561 is unresolved
+          if (!operation.getPossibleOperationForField || !hasField(column)) {
             return false;
           }
+
           const field = dataView.getFieldByName(column.sourceField);
           if (!field) {
             return false;
           }
           return (
-            !(
-              operationDefinitionMap[column.operationType] as Extract<
-                GenericOperationDefinition,
-                { input: 'field' }
-              >
-            ).getPossibleOperationForField(field) && field?.timeSeriesMetric === 'counter'
+            !operation.getPossibleOperationForField?.(field) &&
+            field?.timeSeriesMetric === 'counter'
           );
         })
         .map(

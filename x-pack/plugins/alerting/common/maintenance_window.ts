@@ -14,6 +14,13 @@ export enum MaintenanceWindowStatus {
   Archived = 'archived',
 }
 
+export const filterStateStore = {
+  APP_STATE: 'appState',
+  GLOBAL_STATE: 'globalState',
+} as const;
+
+export type FilterStateStore = typeof filterStateStore[keyof typeof filterStateStore];
+
 export interface MaintenanceWindowModificationMetadata {
   createdBy: string | null;
   updatedBy: string | null;
@@ -26,6 +33,23 @@ export interface DateRange {
   lte: string;
 }
 
+export interface ScopeQueryFilter {
+  query?: Record<string, unknown>;
+  meta: Record<string, unknown>;
+  $state?: {
+    store: FilterStateStore;
+  };
+}
+
+export interface ScopedQueryAttributes {
+  kql: string;
+  filters: ScopeQueryFilter[];
+  dsl?: string;
+}
+
+/**
+ * @deprecated Use the data/maintenance_window types instead
+ */
 export interface MaintenanceWindowSOProperties {
   title: string;
   enabled: boolean;
@@ -33,11 +57,19 @@ export interface MaintenanceWindowSOProperties {
   expirationDate: string;
   events: DateRange[];
   rRule: RRuleParams;
+  categoryIds?: string[] | null;
+  scopedQuery?: ScopedQueryAttributes | null;
 }
 
+/**
+ * @deprecated Use the data/maintenance_window types instead
+ */
 export type MaintenanceWindowSOAttributes = MaintenanceWindowSOProperties &
   MaintenanceWindowModificationMetadata;
 
+/**
+ * @deprecated Use the application/maintenance_window types instead
+ */
 export type MaintenanceWindow = MaintenanceWindowSOAttributes & {
   status: MaintenanceWindowStatus;
   eventStartTime: string | null;

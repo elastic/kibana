@@ -17,15 +17,19 @@ import {
   Logger,
   SavedObject,
   SavedObjectReference,
+  SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import {
+  createTaskRunError,
   LoadIndirectParamsResult,
   RunContext,
+  TaskErrorSource,
   throwRetryableError,
   throwUnrecoverableError,
 } from '@kbn/task-manager-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { LoadedIndirectParams } from '@kbn/task-manager-plugin/server/task';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { ActionExecutorContract, ActionInfo } from './action_executor';
 import {
   ActionTaskExecutorParams,
@@ -44,7 +48,7 @@ import {
 } from './action_execution_source';
 import { RelatedSavedObjects, validatedRelatedSavedObjects } from './related_saved_objects';
 import { injectSavedObjectReferences } from './action_task_params_utils';
-import { InMemoryMetrics, IN_MEMORY_METRICS } from '../monitoring';
+import { IN_MEMORY_METRICS, InMemoryMetrics } from '../monitoring';
 import { ActionTypeDisabledError } from './errors';
 
 export interface TaskRunnerContext {
@@ -135,7 +139,8 @@ export class TaskRunnerFactory {
             },
           };
           return actionData;
-        } catch (error) {
+        } catch (err) {
+          const error = createTaskRunError(err, getErrorSource(err) || TaskErrorSource.FRAMEWORK);
           actionData = { error };
           return { error };
         }
@@ -187,9 +192,9 @@ export class TaskRunnerFactory {
           logger.error(`Action '${actionId}' failed: ${e.message}`);
           if (e instanceof ActionTypeDisabledError) {
             // We'll stop re-trying due to action being forbidden
-            throwUnrecoverableError(e);
+            throwUnrecoverableError(createTaskRunError(e, TaskErrorSource.USER));
           }
-          throw e;
+          throw createTaskRunError(e, getErrorSource(e) || TaskErrorSource.FRAMEWORK);
         }
 
         inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_EXECUTIONS);
@@ -199,7 +204,7 @@ export class TaskRunnerFactory {
           // Task manager error handler only kicks in when an error thrown (at this time)
           // So what we have to do is throw when the return status is `error`.
           throw throwRetryableError(
-            new Error(executorResult.message),
+            createTaskRunError(new Error(executorResult.message), executorResult.errorSource),
             executorResult.retry as boolean | Date
           );
         }
@@ -283,28 +288,35 @@ async function getActionTaskParams(
   const { spaceId } = executorParams;
   const namespace = spaceIdToNamespace(spaceId);
   if (isPersistedActionTask(executorParams)) {
-    const actionTask =
-      await encryptedSavedObjectsClient.getDecryptedAsInternalUser<ActionTaskParams>(
-        ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-        executorParams.actionTaskParamsId,
-        { namespace }
-      );
-    const {
-      attributes: { relatedSavedObjects },
-      references,
-    } = actionTask;
+    try {
+      const actionTask =
+        await encryptedSavedObjectsClient.getDecryptedAsInternalUser<ActionTaskParams>(
+          ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+          executorParams.actionTaskParamsId,
+          { namespace }
+        );
+      const {
+        attributes: { relatedSavedObjects },
+        references,
+      } = actionTask;
 
-    const { actionId, relatedSavedObjects: injectedRelatedSavedObjects } =
-      injectSavedObjectReferences(references, relatedSavedObjects as RelatedSavedObjects);
+      const { actionId, relatedSavedObjects: injectedRelatedSavedObjects } =
+        injectSavedObjectReferences(references, relatedSavedObjects as RelatedSavedObjects);
 
-    return {
-      ...actionTask,
-      attributes: {
-        ...actionTask.attributes,
-        ...(actionId ? { actionId } : {}),
-        ...(relatedSavedObjects ? { relatedSavedObjects: injectedRelatedSavedObjects } : {}),
-      },
-    };
+      return {
+        ...actionTask,
+        attributes: {
+          ...actionTask.attributes,
+          ...(actionId ? { actionId } : {}),
+          ...(relatedSavedObjects ? { relatedSavedObjects: injectedRelatedSavedObjects } : {}),
+        },
+      };
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        throw createTaskRunError(e, TaskErrorSource.USER);
+      }
+      throw createTaskRunError(e, TaskErrorSource.FRAMEWORK);
+    }
   } else {
     return { attributes: executorParams.taskParams, references: executorParams.references ?? [] };
   }

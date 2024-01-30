@@ -14,7 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('index based actions panel on trial license', function () {
     this.tags(['ml']);
 
-    const indexPatternName = 'ft_farequote';
+    const esIndexName = 'ft_farequote';
 
     const advancedJobWizardDatafeedQuery = JSON.stringify(
       {
@@ -33,7 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
-      await ml.testResources.createIndexPatternIfNeeded(indexPatternName, '@timestamp');
+      await ml.testResources.createDataViewIfNeeded(esIndexName, '@timestamp');
       await ml.testResources.createSavedSearchFarequoteKueryIfNeeded();
       await ml.testResources.setKibanaTimeZoneToUTC();
 
@@ -42,7 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.testResources.deleteSavedSearches();
-      await ml.testResources.deleteIndexPatternByTitle(indexPatternName);
+      await ml.testResources.deleteDataViewByTitle(esIndexName);
     });
 
     describe('create advanced job action', function () {
@@ -52,10 +52,10 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.navigation.navigateToDataVisualizer();
 
         await ml.testExecution.logTestStep('loads the saved search selection page');
-        await ml.dataVisualizer.navigateToIndexPatternSelection();
+        await ml.dataVisualizer.navigateToDataViewSelection();
 
         await ml.testExecution.logTestStep('loads the index data visualizer page');
-        await ml.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(indexPatternName);
+        await ml.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(esIndexName);
       });
 
       it('opens the advanced job wizard', async () => {
@@ -84,7 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.navigation.navigateToDataVisualizer();
 
         await ml.testExecution.logTestStep('loads the saved search selection page');
-        await ml.dataVisualizer.navigateToIndexPatternSelection();
+        await ml.dataVisualizer.navigateToDataViewSelection();
 
         await ml.testExecution.logTestStep('loads the index data visualizer page');
         await ml.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(savedSearch);

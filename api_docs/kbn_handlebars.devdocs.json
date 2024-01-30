@@ -420,7 +420,7 @@
           "\nSupported Handlebars compile options.\n\nThis is a subset of all the compile options supported by the upstream\nHandlebars module."
         ],
         "signature": [
-          "{ strict?: boolean | undefined; data?: boolean | undefined; knownHelpers?: KnownHelpers | undefined; knownHelpersOnly?: boolean | undefined; noEscape?: boolean | undefined; assumeObjects?: boolean | undefined; preventIndent?: boolean | undefined; explicitPartialContext?: boolean | undefined; }"
+          "{ data?: boolean | undefined; strict?: boolean | undefined; knownHelpers?: KnownHelpers | undefined; knownHelpersOnly?: boolean | undefined; noEscape?: boolean | undefined; assumeObjects?: boolean | undefined; preventIndent?: boolean | undefined; explicitPartialContext?: boolean | undefined; }"
         ],
         "path": "packages/kbn-handlebars/src/types.ts",
         "deprecated": false,

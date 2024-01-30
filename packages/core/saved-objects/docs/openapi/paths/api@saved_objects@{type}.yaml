@@ -40,5 +40,3 @@ post:
          application/json:
           schema:
             type: object
-servers:
-      - url: https://localhost:5601

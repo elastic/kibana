@@ -7,56 +7,10 @@
 
 import type { CoverageOverviewRuleActivity } from '../../../../../common/api/detection_engine';
 import { getCoverageOverviewFilterMock } from '../../../../../common/api/detection_engine/rule_management/coverage_overview/coverage_overview_route.mock';
-import {
-  getMockCoverageOverviewMitreSubTechnique,
-  getMockCoverageOverviewMitreTactic,
-  getMockCoverageOverviewMitreTechnique,
-} from '../../../rule_management/model/coverage_overview/__mocks__';
 import { ruleActivityFilterDefaultOptions } from './constants';
-import {
-  extractSelected,
-  getNumOfCoveredSubtechniques,
-  getNumOfCoveredTechniques,
-  populateSelected,
-} from './helpers';
+import { extractSelected, populateSelected } from './helpers';
 
 describe('helpers', () => {
-  describe('getNumOfCoveredTechniques', () => {
-    it('returns 0 when no techniques are present', () => {
-      const payload = getMockCoverageOverviewMitreTactic();
-      expect(getNumOfCoveredTechniques(payload)).toEqual(0);
-    });
-
-    it('returns number of techniques when present', () => {
-      const payload = {
-        ...getMockCoverageOverviewMitreTactic(),
-        techniques: [
-          getMockCoverageOverviewMitreTechnique(),
-          getMockCoverageOverviewMitreTechnique(),
-        ],
-      };
-      expect(getNumOfCoveredTechniques(payload)).toEqual(2);
-    });
-  });
-
-  describe('getNumOfCoveredSubtechniques', () => {
-    it('returns 0 when no subtechniques are present', () => {
-      const payload = getMockCoverageOverviewMitreTechnique();
-      expect(getNumOfCoveredSubtechniques(payload)).toEqual(0);
-    });
-
-    it('returns number of subtechniques when present', () => {
-      const payload = {
-        ...getMockCoverageOverviewMitreTechnique(),
-        subtechniques: [
-          getMockCoverageOverviewMitreSubTechnique(),
-          getMockCoverageOverviewMitreSubTechnique(),
-        ],
-      };
-      expect(getNumOfCoveredSubtechniques(payload)).toEqual(2);
-    });
-  });
-
   describe('extractSelected', () => {
     it('returns empty array when no options are checked', () => {
       const payload = ruleActivityFilterDefaultOptions;

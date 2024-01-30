@@ -68,6 +68,7 @@ export const initialState: LensAppState = {
     indexPatterns: {},
   },
   annotationGroups: {},
+  managed: false,
 };
 
 export const getPreloadedState = ({
@@ -203,6 +204,7 @@ export const loadInitial = createAction<{
   initialInput?: LensEmbeddableInput;
   redirectCallback?: (savedObjectId?: string) => void;
   history?: History<unknown>;
+  inlineEditing?: boolean;
 }>('lens/loadInitial');
 export const initEmpty = createAction(
   'initEmpty',
@@ -846,6 +848,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         initialInput?: LensEmbeddableInput;
         redirectCallback?: (savedObjectId?: string) => void;
         history?: History<unknown>;
+        inlineEditing?: boolean;
       }>
     ) => state,
     [initEmpty.type]: (

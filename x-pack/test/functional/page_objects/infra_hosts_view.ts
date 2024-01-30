@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AlertStatus, ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
-import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
+
+import { AlertStatus } from '@kbn/rule-data-utils';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
@@ -45,36 +46,14 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return await testSubjects.click('inventory-hostsView-link-badge');
     },
 
-    // Splash screen
-
-    async getHostsLandingPageDisabled() {
-      const container = await testSubjects.find('hostView-no-enable-access');
-      const containerText = await container.getVisibleText();
-      return containerText;
-    },
-
-    async getHostsLandingPageDocsLink() {
-      const container = await testSubjects.find('hostsView-docs-link');
-      const containerText = await container.getAttribute('href');
-      return containerText;
-    },
-
-    async getHostsLandingPageEnableButton() {
-      return testSubjects.find('hostsView-enable-feature-button');
-    },
-
-    async clickEnableHostViewButton() {
-      return testSubjects.click('hostsView-enable-feature-button');
-    },
-
     // Table
 
     async getHostsTable() {
-      return testSubjects.find('hostsView-table');
+      return testSubjects.find('hostsView-table-loaded');
     },
 
-    async isHostTableLoading() {
-      return !(await testSubjects.exists('tbody[class*=euiBasicTableBodyLoading]'));
+    async isHostTableLoaded() {
+      return !(await testSubjects.exists('hostsView-table-loading'));
     },
 
     async getHostsTableData() {
@@ -129,7 +108,7 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return container.findAllByCssSelector('[data-test-subj*="hostsView-metricChart-"]');
     },
 
-    async clickAndValidateMetriChartActionOptions() {
+    async clickAndValidateMetricChartActionOptions() {
       const element = await testSubjects.find('hostsView-metricChart-tx');
       await element.moveMouseTo();
       const button = await element.findByTestSubject('embeddablePanelToggleMenuIcon');
@@ -201,9 +180,10 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     },
 
     setAlertStatusFilter(alertStatus?: AlertStatus) {
-      const buttons = {
-        [ALERT_STATUS_ACTIVE]: 'hostsView-alert-status-filter-active-button',
-        [ALERT_STATUS_RECOVERED]: 'hostsView-alert-status-filter-recovered-button',
+      const buttons: Record<AlertStatus | 'all', string> = {
+        active: 'hostsView-alert-status-filter-active-button',
+        recovered: 'hostsView-alert-status-filter-recovered-button',
+        untracked: 'hostsView-alert-status-filter-untracked-button',
         all: 'hostsView-alert-status-filter-show-all-button',
       };
 

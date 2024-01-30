@@ -35,7 +35,7 @@ import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { FleetStart } from '@kbn/fleet-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { InfraClientStartExports } from '@kbn/infra-plugin/public';
+import { MetricsDataPluginStart } from '@kbn/metrics-data-access-plugin/public';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -69,8 +69,11 @@ import type {
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { ConfigSchema } from '.';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 import {
@@ -83,8 +86,8 @@ import { getLazyAPMPolicyEditExtension } from './components/fleet_integration/la
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { APMServiceDetailLocator } from './locator/service_detail_locator';
 import { ITelemetryClient, TelemetryService } from './services/telemetry';
-export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 
+export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 export type ApmPluginStart = void;
 
 export interface ApmPluginSetupDeps {
@@ -104,6 +107,7 @@ export interface ApmPluginSetupDeps {
   share: SharePluginSetup;
   uiActions: UiActionsSetup;
   profiling?: ProfilingPluginSetup;
+  cloud?: CloudSetup;
 }
 
 export interface ApmServices {
@@ -128,7 +132,6 @@ export interface ApmPluginStartDeps {
   fieldFormats?: FieldFormatsStart;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
-  infra?: InfraClientStartExports;
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   storage: IStorageWrapper;
@@ -136,6 +139,9 @@ export interface ApmPluginStartDeps {
   uiActions: UiActionsStart;
   profiling?: ProfilingPluginStart;
   observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
+  dashboard: DashboardStart;
+  metricsDataAccess: MetricsDataPluginStart;
+  uiSettings: IUiSettingsClient;
 }
 
 const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
@@ -186,11 +192,16 @@ const apmTutorialTitle = i18n.translate(
 
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   private telemetry: TelemetryService;
+  private kibanaVersion: string;
+  private isServerlessEnv: boolean;
   constructor(
     private readonly initializerContext: PluginInitializerContext<ConfigSchema>
   ) {
     this.initializerContext = initializerContext;
     this.telemetry = new TelemetryService();
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
+    this.isServerlessEnv =
+      initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(core: CoreSetup, plugins: ApmPluginSetupDeps) {
@@ -392,17 +403,25 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         { id: 'tutorial', title: apmTutorialTitle, path: '/tutorial' },
       ],
 
-      async mount(appMountParameters: AppMountParameters<unknown>) {
+      mount: async (appMountParameters: AppMountParameters<unknown>) => {
         // Load application bundle and Get start services
         const [{ renderApp }, [coreStart, pluginsStart]] = await Promise.all([
           import('./application'),
           core.getStartServices(),
         ]);
+        const isCloudEnv = !!pluginSetupDeps.cloud?.isCloudEnabled;
+        const isServerlessEnv =
+          pluginSetupDeps.cloud?.isServerlessEnabled || this.isServerlessEnv;
         return renderApp({
           coreStart,
-          pluginsSetup: pluginSetupDeps,
+          pluginsSetup: pluginSetupDeps as ApmPluginSetupDeps,
           appMountParameters,
           config,
+          kibanaEnvironment: {
+            isCloudEnv,
+            isServerlessEnv,
+            kibanaVersion: this.kibanaVersion,
+          },
           pluginsStart: pluginsStart as ApmPluginStartDeps,
           observabilityRuleTypeRegistry,
           apmServices: {
@@ -426,16 +445,12 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
     const { fleet } = plugins;
 
-    plugins.observabilityAIAssistant.register(
-      async ({ signal, registerContext, registerFunction }) => {
+    plugins.observabilityAIAssistant.service.register(
+      async ({ registerRenderFunction }) => {
         const mod = await import('./assistant_functions');
 
         mod.registerAssistantFunctions({
-          coreStart: core,
-          pluginsStart: plugins,
-          registerContext,
-          registerFunction,
-          signal,
+          registerRenderFunction,
         });
       }
     );

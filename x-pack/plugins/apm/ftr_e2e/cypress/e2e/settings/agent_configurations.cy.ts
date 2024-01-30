@@ -107,7 +107,10 @@ describe('Agent configuration', () => {
     cy.contains('Create configuration');
     cy.contains('Edit').click();
     cy.wait('@serviceEnvironmentApi');
-    cy.contains('production');
+    cy.getByTestSubj('serviceEnviromentComboBox')
+      .find('input')
+      .invoke('val')
+      .should('contain', 'production');
   });
   it('displays All label when selecting all option', () => {
     cy.intercept(
@@ -123,12 +126,15 @@ describe('Agent configuration', () => {
       .click({ force: true })
       .type('All');
 
-    cy.get('mark').contains('All').click();
+    cy.get('mark').contains('All').click({ force: true });
     cy.contains('Next step').click();
     cy.contains('Service name All');
     cy.contains('Environment All');
     cy.contains('Edit').click();
     cy.wait('@serviceEnvironmentApi');
-    cy.contains('All');
+    cy.getByTestSubj('serviceEnviromentComboBox')
+      .find('input')
+      .invoke('val')
+      .should('contain', 'All');
   });
 });

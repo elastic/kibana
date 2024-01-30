@@ -15,7 +15,7 @@ import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../../constants';
 
 export default {
   component: Component,
-  title: 'app/SLO/EditPage/CustomKQL/IndexSelection',
+  title: 'app/SLO/EditPage/Common/IndexSelection',
   decorators: [KibanaReactStorybookDecorator],
 };
 

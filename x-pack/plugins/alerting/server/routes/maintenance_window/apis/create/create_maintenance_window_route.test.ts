@@ -37,6 +37,7 @@ const createParams = {
   title: 'test-title',
   duration: 1000,
   r_rule: mockMaintenanceWindow.rRule,
+  category_ids: ['observability'],
 } as CreateMaintenanceWindowRequestBody;
 
 describe('createMaintenanceWindowRoute', () => {

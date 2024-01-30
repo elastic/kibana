@@ -54,7 +54,7 @@ export class RequestResponder {
   public finish(status: RequestStatus, response: Response): void {
     this.request.time = response.time ?? Date.now() - this.request.startTime;
     this.request.status = status;
-    this.request.response = moveRequestParamsToTopLevel(status, response);
+    this.request.response = moveRequestParamsToTopLevel(response);
     this.onChange();
   }
 

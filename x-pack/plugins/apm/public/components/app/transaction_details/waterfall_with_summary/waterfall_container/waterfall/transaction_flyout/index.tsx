@@ -141,7 +141,7 @@ function TransactionFlyoutBody({
       content: (
         <>
           <EuiSpacer size="m" />
-          <TransactionMetadata transactionId={transaction.transaction.id} />
+          <TransactionMetadata transaction={transaction} />
         </>
       ),
     },

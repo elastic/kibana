@@ -23,6 +23,55 @@
             }
           }
         },
+        "observer": {
+          "properties": {
+            "os": {
+              "properties": {
+                "full": {
+                  "type": "keyword",
+                  "ignore_above": 1024,
+                  "fields": {
+                    "text": {
+                      "type": "match_only_text"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "process": {
+          "properties": {
+            "entry_leader": {
+              "properties": {
+                "name": {
+                  "type": "keyword",
+                  "ignore_above": 1024,
+                  "fields": {
+                    "text": {
+                      "type": "match_only_text"
+                    },
+                    "caseless": {
+                      "type": "keyword",
+                      "ignore_above": 1024,
+                      "normalizer": "lowercase"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "host": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            },
+            "uptime": {
+              "type": "long"
+            }
+          }
+        },
         "container": {
           "properties": {
             "image": {
@@ -39,6 +88,9 @@
         },
         "event": {
           "properties": {
+            "ingested": {
+              "type": "date"
+            },
             "created": {
               "type": "keyword"
             }

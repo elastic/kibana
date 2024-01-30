@@ -1,8 +1,8 @@
-openapi: 3.0.1
+openapi: 3.1.0
 info:
   title: Alerting
   description: OpenAPI schema for alerting endpoints
-  version: '0.1'
+  version: '0.2'
   contact:
     name: Alerting Team
   license:
@@ -12,8 +12,7 @@ tags:
   - name: alerting
     description: Alerting APIs enable you to create and manage rules and alerts.
 servers:
-  - url: 'http://localhost:5601'
-    description: local
+  - url: /
 paths:
   '/s/{spaceId}/api/alerting/rule':
     $ref: 'paths/s@{spaceid}@api@alerting@rule.yaml'
@@ -69,7 +68,8 @@ components:
     apiKeyAuth:
       type: apiKey
       in: header
-      name: ApiKey
+      name: Authorization
+      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
 security:
   - basicAuth: []
   - apiKeyAuth: []

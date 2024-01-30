@@ -105,6 +105,8 @@ export function alertSummaryFromEventLog(params: AlertSummaryFromEventLogParams)
         status.activeStartDate = undefined;
         status.actionGroupId = undefined;
     }
+
+    status.tracked = action !== EVENT_LOG_ACTIONS.untrackedInstance;
   }
 
   for (const event of executionEvents.reverse()) {
@@ -169,6 +171,7 @@ function getAlertStatus(
     actionGroupId: undefined,
     activeStartDate: undefined,
     flapping: false,
+    tracked: true,
   };
   alerts.set(alertId, status);
   return status;

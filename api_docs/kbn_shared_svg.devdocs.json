@@ -45,6 +45,30 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-svg",
+        "id": "def-common.content",
+        "type": "string",
+        "tags": [],
+        "label": "content",
+        "description": [],
+        "path": "packages/kbn-ambient-ui-types/index.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-svg",
+        "id": "def-common.content",
+        "type": "string",
+        "tags": [],
+        "label": "content",
+        "description": [],
+        "path": "packages/kbn-ambient-ui-types/index.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": []

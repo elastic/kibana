@@ -14,22 +14,30 @@ import { Client, ClientOptions, HttpConnection } from '@elastic/elasticsearch';
 
 import { ToolingLog } from '@kbn/tooling-log';
 import { kibanaPackageJson as pkg, REPO_ROOT } from '@kbn/repo-info';
+import { CA_CERT_PATH, ES_P12_PASSWORD, ES_P12_PATH } from '@kbn/dev-utils';
 import {
-  CA_CERT_PATH,
-  ES_P12_PASSWORD,
-  ES_P12_PATH,
-  kibanaDevServiceAccount,
-} from '@kbn/dev-utils';
+  MOCK_IDP_REALM_NAME,
+  MOCK_IDP_ENTITY_ID,
+  MOCK_IDP_ATTRIBUTE_PRINCIPAL,
+  MOCK_IDP_ATTRIBUTE_ROLES,
+  MOCK_IDP_ATTRIBUTE_EMAIL,
+  MOCK_IDP_ATTRIBUTE_NAME,
+  ensureSAMLRoleMapping,
+  createMockIdpMetadata,
+} from '@kbn/mock-idp-utils';
 
+import { waitForSecurityIndex } from './wait_for_security_index';
 import { createCliError } from '../errors';
 import { EsClusterExecOptions } from '../cluster_exec_options';
 import {
   SERVERLESS_RESOURCES_PATHS,
   SERVERLESS_SECRETS_PATH,
   SERVERLESS_JWKS_PATH,
+  SERVERLESS_IDP_METADATA_PATH,
   SERVERLESS_CONFIG_PATH,
   SERVERLESS_FILES_PATH,
   SERVERLESS_SECRETS_SSL_PATH,
+  SERVERLESS_ROLES_ROOT_PATH,
 } from '../paths';
 import {
   ELASTIC_SERVERLESS_SUPERUSER,
@@ -38,9 +46,12 @@ import {
 import { SYSTEM_INDICES_SUPERUSER } from './native_realm';
 import { waitUntilClusterReady } from './wait_until_cluster_ready';
 
-interface BaseOptions {
-  tag?: string;
+interface ImageOptions {
   image?: string;
+  tag?: string;
+}
+
+interface BaseOptions extends ImageOptions {
   port?: number;
   ssl?: boolean;
   /** Kill running cluster before starting a new cluster  */
@@ -48,11 +59,22 @@ interface BaseOptions {
   files?: string | string[];
 }
 
+const serverlessProjectTypes = new Set<string>(['es', 'oblt', 'security']);
+const isServerlessProjectType = (value: string): value is ServerlessProjectType => {
+  return serverlessProjectTypes.has(value);
+};
+
+export type ServerlessProjectType = 'es' | 'oblt' | 'security';
+
 export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
   dockerCmd?: string;
 }
 
 export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
+  /** Publish ES docker container on additional host IP */
+  host?: string;
+  /**  Serverless project type */
+  projectType?: ServerlessProjectType;
   /** Clean (or delete) all data created by the ES cluster after it is stopped */
   clean?: boolean;
   /** Path to the directory where the ES cluster will store data */
@@ -63,6 +85,13 @@ export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
   background?: boolean;
   /** Wait for the ES cluster to be ready to serve requests */
   waitForReady?: boolean;
+  /** Fully qualified URL where Kibana is hosted (including base path) */
+  kibanaUrl?: string;
+  /**
+   * Resource file(s) to overwrite
+   * (see list of files that can be overwritten under `packages/kbn-es/src/serverless_resources/users`)
+   */
+  resources?: string | string[];
 }
 
 interface ServerlessEsNodeArgs {
@@ -106,9 +135,10 @@ export const DOCKER_REPO = `${DOCKER_REGISTRY}/elasticsearch/elasticsearch`;
 export const DOCKER_TAG = `${pkg.version}-SNAPSHOT`;
 export const DOCKER_IMG = `${DOCKER_REPO}:${DOCKER_TAG}`;
 
-export const SERVERLESS_REPO = `${DOCKER_REGISTRY}/elasticsearch-ci/elasticsearch-serverless`;
-export const SERVERLESS_TAG = 'latest';
-export const SERVERLESS_IMG = `${SERVERLESS_REPO}:${SERVERLESS_TAG}`;
+export const ES_SERVERLESS_REPO_KIBANA = `${DOCKER_REGISTRY}/kibana-ci/elasticsearch-serverless`;
+export const ES_SERVERLESS_REPO_ELASTICSEARCH = `${DOCKER_REGISTRY}/elasticsearch-ci/elasticsearch-serverless`;
+export const ES_SERVERLESS_LATEST_VERIFIED_TAG = 'latest-verified';
+export const ES_SERVERLESS_DEFAULT_IMAGE = `${ES_SERVERLESS_REPO_KIBANA}:${ES_SERVERLESS_LATEST_VERIFIED_TAG}`;
 
 // See for default cluster settings
 // https://github.com/elastic/elasticsearch-serverless/blob/main/serverless-build-tools/src/main/kotlin/elasticsearch.serverless-run.gradle.kts
@@ -209,7 +239,7 @@ const DOCKER_SSL_ESARGS: Array<[string, string]> = [
   ['xpack.security.transport.ssl.keystore.password', ES_P12_PASSWORD],
 ];
 
-const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
+export const SERVERLESS_NODES: Array<Omit<ServerlessEsNodeArgs, 'image'>> = [
   {
     name: 'es01',
     params: [
@@ -275,7 +305,12 @@ export function resolveDockerImage({
   image,
   repo,
   defaultImg,
-}: (ServerlessOptions | DockerOptions) & { repo: string; defaultImg: string }) {
+}: {
+  tag?: string;
+  image?: string;
+  repo: string;
+  defaultImg: string;
+}) {
   if (image) {
     if (!image.includes(DOCKER_REGISTRY)) {
       throw createCliError(
@@ -292,19 +327,21 @@ export function resolveDockerImage({
 }
 
 /**
- * Determine the port to bind the Serverless index node or Docker node to
+ * Determine the port and optionally an additional host to bind the Serverless index node or Docker node to
  */
 export function resolvePort(options: ServerlessOptions | DockerOptions) {
-  if (options.port) {
-    return [
-      '-p',
-      `127.0.0.1:${options.port}:${options.port}`,
-      '--env',
-      `http.port=${options.port}`,
-    ];
+  const port = options.port || DEFAULT_PORT;
+  const value = ['-p', `127.0.0.1:${port}:${port}`];
+
+  if ((options as ServerlessOptions).host) {
+    value.push('-p', `${(options as ServerlessOptions).host}:${port}:${port}`);
   }
 
-  return ['-p', `127.0.0.1:${DEFAULT_PORT}:${DEFAULT_PORT}`];
+  if (options.port) {
+    value.push('--env', `http.port=${options.port}`);
+  }
+
+  return value;
 }
 
 /**
@@ -441,6 +478,54 @@ export function resolveEsArgs(
     esArgs.set('ELASTIC_PASSWORD', password);
   }
 
+  // Configure mock identify provider (ES only supports SAML when running in SSL mode)
+  if (
+    ssl &&
+    'kibanaUrl' in options &&
+    options.kibanaUrl &&
+    esArgs.get('xpack.security.enabled') !== 'false'
+  ) {
+    const trimTrailingSlash = (url: string) => (url.endsWith('/') ? url.slice(0, -1) : url);
+
+    esArgs.set(`xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.order`, '0');
+    esArgs.set(
+      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.metadata.path`,
+      `${SERVERLESS_CONFIG_PATH}secrets/idp_metadata.xml`
+    );
+    esArgs.set(
+      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.entity_id`,
+      MOCK_IDP_ENTITY_ID
+    );
+    esArgs.set(
+      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.entity_id`,
+      trimTrailingSlash(options.kibanaUrl)
+    );
+    esArgs.set(
+      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.acs`,
+      `${trimTrailingSlash(options.kibanaUrl)}/api/security/saml/callback`
+    );
+    esArgs.set(
+      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.logout`,
+      `${trimTrailingSlash(options.kibanaUrl)}/logout`
+    );
+    esArgs.set(
+      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.principal`,
+      MOCK_IDP_ATTRIBUTE_PRINCIPAL
+    );
+    esArgs.set(
+      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.groups`,
+      MOCK_IDP_ATTRIBUTE_ROLES
+    );
+    esArgs.set(
+      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.name`,
+      MOCK_IDP_ATTRIBUTE_NAME
+    );
+    esArgs.set(
+      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.mail`,
+      MOCK_IDP_ATTRIBUTE_EMAIL
+    );
+  }
+
   return Array.from(esArgs).flatMap((e) => ['--env', e.join('=')]);
 }
 
@@ -461,18 +546,25 @@ export function getDockerFileMountPath(hostPath: string) {
  * Setup local volumes for Serverless ES
  */
 export async function setupServerlessVolumes(log: ToolingLog, options: ServerlessOptions) {
-  const { basePath, clean, ssl, files } = options;
+  const { basePath, clean, ssl, kibanaUrl, files, resources, projectType } = options;
   const objectStorePath = resolve(basePath, 'stateless');
 
   log.info(chalk.bold(`Checking for local serverless ES object store at ${objectStorePath}`));
   log.indent(4);
 
-  if (clean && fs.existsSync(objectStorePath)) {
+  let exists = null;
+  try {
+    await Fsp.access(objectStorePath);
+    exists = true;
+  } catch (e) {
+    exists = false;
+  }
+  if (clean && exists) {
     log.info('Cleaning existing object store.');
     await Fsp.rm(objectStorePath, { recursive: true, force: true });
   }
 
-  if (clean || !fs.existsSync(objectStorePath)) {
+  if (clean || !exists) {
     await Fsp.mkdir(objectStorePath, { recursive: true }).then(() =>
       log.info('Created new object store.')
     );
@@ -500,11 +592,60 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
     volumeCmds.push(...fileCmds);
   }
 
-  const serverlessResources = SERVERLESS_RESOURCES_PATHS.reduce<string[]>((acc, path) => {
-    acc.push('--volume', `${path}:${SERVERLESS_CONFIG_PATH}${basename(path)}`);
+  const resourceFileOverrides: Record<string, string> = resources
+    ? (Array.isArray(resources) ? resources : [resources]).reduce((acc, filePath) => {
+        acc[basename(filePath)] = resolve(process.cwd(), filePath);
+        return acc;
+      }, {} as Record<string, string>)
+    : {};
+
+  // Check if projectType is valid
+  if (projectType && !isServerlessProjectType(projectType)) {
+    throw new Error(
+      `Incorrect serverless project type: ${projectType}, use one of ${Array.from(
+        serverlessProjectTypes
+      ).join(', ')}`
+    );
+  }
+  // Read roles for the specified projectType, 'es' if it is not defined
+  const rolesResourcePath = resolve(SERVERLESS_ROLES_ROOT_PATH, projectType ?? 'es', 'roles.yml');
+
+  const resourcesPaths = [...SERVERLESS_RESOURCES_PATHS, rolesResourcePath];
+
+  const serverlessResources = resourcesPaths.reduce<string[]>((acc, path) => {
+    const fileName = basename(path);
+    let localFilePath = path;
+
+    if (resourceFileOverrides[fileName]) {
+      localFilePath = resourceFileOverrides[fileName];
+      log.info(`'${fileName}' resource overridden with: ${localFilePath}`);
+      delete resourceFileOverrides[fileName];
+    }
+
+    acc.push('--volume', `${localFilePath}:${SERVERLESS_CONFIG_PATH}${fileName}`);
 
     return acc;
   }, []);
+
+  if (Object.keys(resourceFileOverrides).length > 0) {
+    throw new Error(
+      `Unsupported ES serverless --resources value(s):\n  ${Object.values(
+        resourceFileOverrides
+      ).join('  \n')}\n\nValid resources: ${resourcesPaths
+        .map((filePath) => basename(filePath))
+        .join(' | ')}`
+    );
+  }
+
+  // Create and add meta data for mock identity provider
+  if (ssl && kibanaUrl) {
+    const metadata = await createMockIdpMetadata(kibanaUrl);
+    await Fsp.writeFile(SERVERLESS_IDP_METADATA_PATH, metadata);
+    volumeCmds.push(
+      '--volume',
+      `${SERVERLESS_IDP_METADATA_PATH}:${SERVERLESS_CONFIG_PATH}secrets/idp_metadata.xml:z`
+    );
+  }
 
   volumeCmds.push(
     ...getESp12Volume(),
@@ -514,7 +655,6 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
     `${
       ssl ? SERVERLESS_SECRETS_SSL_PATH : SERVERLESS_SECRETS_PATH
     }:${SERVERLESS_CONFIG_PATH}secrets/secrets.json:z`,
-
     '--volume',
     `${SERVERLESS_JWKS_PATH}:${SERVERLESS_CONFIG_PATH}secrets/jwks.json:z`
   );
@@ -525,11 +665,12 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
 /**
  * Resolve the Serverless ES image based on defaults and CLI options
  */
-function getServerlessImage(options: ServerlessOptions) {
+function getServerlessImage({ image, tag }: ImageOptions) {
   return resolveDockerImage({
-    ...options,
-    repo: SERVERLESS_REPO,
-    defaultImg: SERVERLESS_IMG,
+    image,
+    tag,
+    repo: ES_SERVERLESS_REPO_ELASTICSEARCH,
+    defaultImg: ES_SERVERLESS_DEFAULT_IMAGE,
   });
 }
 
@@ -573,7 +714,10 @@ function getESClient(clientOptions: ClientOptions): Client {
  * Runs an ES Serverless Cluster through Docker
  */
 export async function runServerlessCluster(log: ToolingLog, options: ServerlessOptions) {
-  const image = getServerlessImage(options);
+  const image = getServerlessImage({
+    image: options.image,
+    tag: options.tag,
+  });
   await setupDocker({ log, image, options });
 
   const volumeCmd = await setupServerlessVolumes(log, options);
@@ -612,33 +756,56 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
     process.on('SIGINT', () => teardownServerlessClusterSync(log, options));
   }
 
+  const esNodeUrl = `${options.ssl ? 'https' : 'http'}://${portCmd[1].substring(
+    0,
+    portCmd[1].lastIndexOf(':')
+  )}`;
+
+  const client = getESClient({
+    node: esNodeUrl,
+    auth: {
+      username: ELASTIC_SERVERLESS_SUPERUSER,
+      password: ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
+    },
+    ...(options.ssl
+      ? {
+          tls: {
+            ca: [fs.readFileSync(CA_CERT_PATH)],
+            // NOTE: Even though we've added ca into the tls options, we are using 127.0.0.1 instead of localhost
+            // for the ip which is not validated. As such we are getting the error
+            // Hostname/IP does not match certificate's altnames: IP: 127.0.0.1 is not in the cert's list:
+            // To work around that we are overriding the function checkServerIdentity too
+            checkServerIdentity: () => {
+              return undefined;
+            },
+          },
+        }
+      : {}),
+  });
+
+  const readyPromise = waitUntilClusterReady({ client, expectedStatus: 'green', log }).then(
+    async () => {
+      if (!options.ssl || !options.kibanaUrl) {
+        return;
+      }
+
+      await ensureSAMLRoleMapping(client);
+
+      log.success(
+        `Created role mapping for mock identity provider. You can now login using ${chalk.bold.cyan(
+          MOCK_IDP_REALM_NAME
+        )} realm`
+      );
+    }
+  );
+
   if (options.waitForReady) {
     log.info('Waiting until ES is ready to serve requests...');
-
-    const esNodeUrl = `${options.ssl ? 'https' : 'http'}://${portCmd[1].substring(
-      0,
-      portCmd[1].lastIndexOf(':')
-    )}`;
-
-    const client = getESClient({
-      node: esNodeUrl,
-      auth: { bearer: kibanaDevServiceAccount.token },
-      ...(options.ssl
-        ? {
-            tls: {
-              ca: [fs.readFileSync(CA_CERT_PATH)],
-              // NOTE: Even though we've added ca into the tls options, we are using 127.0.0.1 instead of localhost
-              // for the ip which is not validated. As such we are getting the error
-              // Hostname/IP does not match certificate's altnames: IP: 127.0.0.1 is not in the cert's list:
-              // To work around that we are overriding the function checkServerIdentity too
-              checkServerIdentity: () => {
-                return undefined;
-              },
-            },
-          }
-        : {}),
-    });
-    await waitUntilClusterReady({ client, expectedStatus: 'green', log });
+    await readyPromise;
+    if (!options.esArgs || !options.esArgs.includes('xpack.security.enabled=false')) {
+      // If security is not disabled, make sure the security index exists before running the test to avoid flakiness
+      await waitForSecurityIndex({ client, log });
+    }
   }
 
   if (!options.background) {
@@ -686,8 +853,13 @@ export function teardownServerlessClusterSync(log: ToolingLog, options: Serverle
 /**
  * Resolve the Elasticsearch image based on defaults and CLI options
  */
-function getDockerImage(options: DockerOptions) {
-  return resolveDockerImage({ ...options, repo: DOCKER_REPO, defaultImg: DOCKER_IMG });
+function getDockerImage({ image, tag }: ImageOptions) {
+  return resolveDockerImage({
+    image,
+    tag,
+    repo: DOCKER_REPO,
+    defaultImg: DOCKER_IMG,
+  });
 }
 
 /**
@@ -713,7 +885,10 @@ export async function runDockerContainer(log: ToolingLog, options: DockerOptions
   let image;
 
   if (!options.dockerCmd) {
-    image = getDockerImage(options);
+    image = getDockerImage({
+      image: options.image,
+      tag: options.tag,
+    });
     await setupDocker({ log, image, options });
   }
 

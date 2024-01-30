@@ -13,7 +13,7 @@ import {
   ESTermsWithAggregationRT,
   ESDerivativeAggRT,
   ESBasicMetricAggRT,
-} from '../../../../../common/inventory_models/types';
+} from '@kbn/metrics-data-access-plugin/common';
 import { SnapshotCustomMetricInput } from '../../../../../common/http_api';
 
 export const isMetricRate = (metric: MetricsUIAggregation | undefined): boolean => {

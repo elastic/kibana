@@ -8,7 +8,10 @@ get:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/output_create_request.yaml
+            type: object
+            properties:
+              item:
+                $ref: ../components/schemas/output_create_request.yaml
     '400':
       $ref: ../components/responses/error.yaml
   operationId: get-output
@@ -55,7 +58,10 @@ put:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/output_update_request.yaml
+            type: object
+            properties:
+              item:
+                $ref: ../components/schemas/output_update_request.yaml
     '400':
       $ref: ../components/responses/error.yaml
   parameters:

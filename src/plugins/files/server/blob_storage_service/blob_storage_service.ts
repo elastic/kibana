@@ -20,10 +20,18 @@ export class BlobStorageService {
   /**
    * The number of uploads per Kibana instance that can be running simultaneously
    */
-  private readonly concurrentUploadsToES = 20;
+  private readonly concurrentUploadsToES = 5;
+
+  /**
+   * The number of downloads per Kibana instance that can be running simultaneously
+   */
+  private readonly concurrentDownloadsFromES = 5;
 
   constructor(private readonly esClient: ElasticsearchClient, private readonly logger: Logger) {
-    ElasticsearchBlobStorageClient.configureConcurrentUpload(this.concurrentUploadsToES);
+    ElasticsearchBlobStorageClient.configureConcurrentTransfers([
+      this.concurrentUploadsToES,
+      this.concurrentDownloadsFromES,
+    ]);
   }
 
   private createESBlobStorage({

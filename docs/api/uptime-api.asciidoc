@@ -1,0 +1,11 @@
+[[uptime-apis]]
+== Uptime APIs
+
+The following APIs are available for Uptime.
+
+* <<get-settings-api, Get settings API>> to get a settings
+
+* <<update-settings-api, Update settings API>> to update the attributes for existing settings
+
+include::uptime/get-settings.asciidoc[leveloffset=+1]
+include::uptime/update-settings.asciidoc[leveloffset=+1]

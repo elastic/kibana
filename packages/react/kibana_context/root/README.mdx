@@ -19,12 +19,17 @@ import { BehaviorSubject } from 'rxjs';
 
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
+import { action } from '@storybook/addon-actions';
 
 import type { DecoratorFn } from '@storybook/react';
 import type { CoreTheme } from '@kbn/core-theme-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 
 const theme$ = new BehaviorSubject<CoreTheme>({ darkMode: false });
+
+const analytics = {
+  reportEvent: action('telemetry-report-event'),
+};
 
 const i18n: I18nStart = {
   Context: ({ children }) => <I18nProvider>{children}</I18nProvider>,
@@ -38,7 +43,7 @@ export const KibanaContextDecorator: DecoratorFn = (storyFn, { globals }) => {
   }, [colorMode]);
 
   return (
-    <KibanaRootContextProvider {...{ theme: { theme$ }, i18n }}>
+    <KibanaRootContextProvider {...{ theme: { theme$ }, analytics, i18n }}>
       {storyFn()}
     </KibanaRootContextProvider>
   );

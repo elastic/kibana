@@ -5,26 +5,8 @@
  * 2.0.
  */
 
+import type { TimeKey } from '@kbn/io-ts-utils';
 import { ascending, bisector } from 'd3-array';
-import * as rt from 'io-ts';
-
-export const minimalTimeKeyRT = rt.type({
-  time: rt.number,
-  tiebreaker: rt.number,
-});
-
-export const timeKeyRT = rt.intersection([
-  minimalTimeKeyRT,
-  rt.partial({
-    gid: rt.string,
-    fromAutoReload: rt.boolean,
-  }),
-]);
-export type TimeKey = rt.TypeOf<typeof timeKeyRT>;
-
-export interface UniqueTimeKey extends TimeKey {
-  gid: string;
-}
 
 export type Comparator = (firstValue: any, secondValue: any) => number;
 

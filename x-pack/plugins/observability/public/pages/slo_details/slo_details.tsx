@@ -8,10 +8,10 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useIsMutating } from '@tanstack/react-query';
-import { EuiBreadcrumbProps } from '@elastic/eui/src/components/breadcrumbs/breadcrumb';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { IBasePath } from '@kbn/core-http-browser';
+import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
@@ -26,7 +26,6 @@ import { HeaderControl } from './components/header_control';
 import { paths } from '../../../common/locators/paths';
 import type { SloDetailsPathParams } from './types';
 import { AutoRefreshButton } from '../../components/slo/auto_refresh_button';
-import { FeedbackButton } from '../../components/slo/feedback_button/feedback_button';
 import { useGetInstanceIdQueryParam } from './hooks/use_get_instance_id_query_param';
 import { useAutoRefreshStorage } from '../../components/slo/auto_refresh_button/hooks/use_auto_refresh_storage';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
@@ -45,7 +44,7 @@ export function SloDetailsPage() {
   const sloInstanceId = useGetInstanceIdQueryParam();
   const { storeAutoRefreshState, getAutoRefreshState } = useAutoRefreshStorage();
   const [isAutoRefreshing, setIsAutoRefreshing] = useState(getAutoRefreshState());
-  const { isLoading, slo } = useFetchSloDetails({
+  const { isLoading, data: slo } = useFetchSloDetails({
     sloId,
     instanceId: sloInstanceId,
     shouldRefetch: isAutoRefreshing,
@@ -81,7 +80,6 @@ export function SloDetailsPage() {
             isAutoRefreshing={isAutoRefreshing}
             onClick={handleToggleAutoRefresh}
           />,
-          <FeedbackButton disabled={isPerformingAction} />,
         ],
         bottomBorder: false,
       }}
@@ -97,13 +95,14 @@ export function SloDetailsPage() {
 function getBreadcrumbs(
   basePath: IBasePath,
   slo: SLOWithSummaryResponse | undefined
-): EuiBreadcrumbProps[] {
+): ChromeBreadcrumb[] {
   return [
     {
       href: basePath.prepend(paths.observability.slos),
       text: i18n.translate('xpack.observability.breadcrumbs.slosLinkText', {
         defaultMessage: 'SLOs',
       }),
+      deepLinkId: 'observability-overview:slos',
     },
     {
       text:

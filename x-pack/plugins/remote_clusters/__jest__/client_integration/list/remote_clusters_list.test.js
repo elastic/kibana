@@ -208,6 +208,7 @@ describe('<RemoteClusterList />', () => {
       hasDeprecatedProxySetting: true,
       seeds: null,
       connectedNodesCount: null,
+      securityModel: 'api_keys',
     });
 
     const remoteClusters = [remoteCluster1, remoteCluster2, remoteCluster3];
@@ -246,6 +247,7 @@ describe('<RemoteClusterList />', () => {
           'Connected',
           'default',
           remoteCluster1.seeds.join(', '),
+          'CertificateInfo',
           remoteCluster1.connectedNodesCount.toString(),
           '', // Empty because the last column is for the "actions" on the resource
         ],
@@ -255,6 +257,7 @@ describe('<RemoteClusterList />', () => {
           'Not connected',
           PROXY_MODE,
           remoteCluster2.proxyAddress,
+          'CertificateInfo',
           remoteCluster2.connectedSocketsCount.toString(),
           '',
         ],
@@ -264,6 +267,7 @@ describe('<RemoteClusterList />', () => {
           'Not connected',
           PROXY_MODE,
           remoteCluster2.proxyAddress,
+          'api_keysInfo',
           remoteCluster2.connectedSocketsCount.toString(),
           '',
         ],
@@ -278,11 +282,16 @@ describe('<RemoteClusterList />', () => {
     });
 
     test('should have a tooltip to indicate that the cluster has a deprecated setting', () => {
-      const secondRow = rows[2].reactWrapper; // The third cluster has been defined with deprecated setting
+      const thirdRow = rows[2].reactWrapper; // The third cluster has been defined with deprecated setting
       expect(
-        findTestSubject(secondRow, 'remoteClustersTableListClusterWithDeprecatedSettingTooltip')
+        findTestSubject(thirdRow, 'remoteClustersTableListClusterWithDeprecatedSettingTooltip')
           .length
       ).toBe(1);
+    });
+
+    test('should have a tooltip to indicate that the cluster is using an old security model', () => {
+      const secondRow = rows[1].reactWrapper;
+      expect(findTestSubject(secondRow, 'authenticationTypeWarning').length).toBe(1);
     });
 
     describe('bulk delete button', () => {
@@ -441,6 +450,11 @@ describe('<RemoteClusterList />', () => {
 
         actions.clickRemoteClusterAt(1); // the remoteCluster2 has been configured by node
         expect(exists('remoteClusterConfiguredByNodeWarning')).toBe(true);
+      });
+
+      test('Should display authentication type', () => {
+        actions.clickRemoteClusterAt(2);
+        expect(exists('remoteClusterDetailAuthType')).toBe(true);
       });
     });
   });

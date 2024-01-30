@@ -13,24 +13,3 @@ export const txtChooseDestinationDashboard = i18n.translate(
     defaultMessage: 'Choose destination dashboard',
   }
 );
-
-export const txtUseCurrentFilters = i18n.translate(
-  'xpack.dashboard.components.DashboardDrilldownConfig.useCurrentFilters',
-  {
-    defaultMessage: 'Use filters and query from origin dashboard',
-  }
-);
-
-export const txtUseCurrentDateRange = i18n.translate(
-  'xpack.dashboard.components.DashboardDrilldownConfig.useCurrentDateRange',
-  {
-    defaultMessage: 'Use date range from origin dashboard',
-  }
-);
-
-export const txtOpenInNewTab = i18n.translate(
-  'xpack.dashboard.components.DashboardDrilldownConfig.openInNewTab',
-  {
-    defaultMessage: 'Open dashboard in new tab',
-  }
-);

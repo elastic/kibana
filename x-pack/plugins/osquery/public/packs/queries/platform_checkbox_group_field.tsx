@@ -137,7 +137,7 @@ export const PlatformCheckBoxGroupField = (props: Props) => {
         idToSelectedMap={checkboxIdToSelectedMap}
         options={options}
         onChange={handleChange}
-        data-test-subj="input"
+        data-test-subj="osquery-platform-checkbox-group"
         {...euiFieldProps}
       />
     </EuiFormRow>

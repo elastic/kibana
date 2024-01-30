@@ -30,6 +30,7 @@ exports[`AddItemPopover calls addItems with multiple items on clicking Add butto
     ownFocus={true}
     panelClassName="ml-add-filter-item-popover"
     panelPaddingSize="m"
+    repositionToCrossAxis={true}
   >
     <EuiForm>
       <EuiFormRow
@@ -73,11 +74,9 @@ exports[`AddItemPopover calls addItems with multiple items on clicking Add butto
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="mlFilterListAddItemsButton"
           disabled={true}
           onClick={[Function]}
-          size="m"
         >
           <FormattedMessage
             defaultMessage="Add"
@@ -121,6 +120,7 @@ exports[`AddItemPopover opens the popover onButtonClick 1`] = `
     ownFocus={true}
     panelClassName="ml-add-filter-item-popover"
     panelPaddingSize="m"
+    repositionToCrossAxis={true}
   >
     <EuiForm>
       <EuiFormRow
@@ -164,11 +164,9 @@ exports[`AddItemPopover opens the popover onButtonClick 1`] = `
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="mlFilterListAddItemsButton"
           disabled={true}
           onClick={[Function]}
-          size="m"
         >
           <FormattedMessage
             defaultMessage="Add"
@@ -212,6 +210,7 @@ exports[`AddItemPopover renders the popover 1`] = `
     ownFocus={true}
     panelClassName="ml-add-filter-item-popover"
     panelPaddingSize="m"
+    repositionToCrossAxis={true}
   >
     <EuiForm>
       <EuiFormRow
@@ -255,11 +254,9 @@ exports[`AddItemPopover renders the popover 1`] = `
         grow={false}
       >
         <EuiButton
-          color="primary"
           data-test-subj="mlFilterListAddItemsButton"
           disabled={true}
           onClick={[Function]}
-          size="m"
         >
           <FormattedMessage
             defaultMessage="Add"

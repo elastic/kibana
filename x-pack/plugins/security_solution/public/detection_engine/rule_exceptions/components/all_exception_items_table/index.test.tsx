@@ -19,7 +19,9 @@ import type { Rule } from '../../../rule_management/logic/types';
 import { mockRule } from '../../../rule_management_ui/components/rules_table/__mocks__/mock';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
 import * as i18n from './translations';
+import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
 
+jest.mock('../../../../exceptions/hooks/use_endpoint_exceptions_capability');
 jest.mock('../../../../common/lib/kibana');
 jest.mock('@kbn/securitysolution-list-hooks');
 jest.mock('@kbn/securitysolution-list-api');
@@ -28,6 +30,8 @@ jest.mock('react', () => {
   const r = jest.requireActual('react');
   return { ...r, useReducer: jest.fn() };
 });
+
+const mockUseEndpointExceptionsCapability = useEndpointExceptionsCapability as jest.Mock;
 
 const sampleExceptionItem = {
   _version: 'WzEwMjM4MSwxXQ==',
@@ -80,6 +84,8 @@ describe('ExceptionsViewer', () => {
         },
       },
     });
+
+    mockUseEndpointExceptionsCapability.mockReturnValue(true);
 
     (fetchExceptionListsItemsByListIds as jest.Mock).mockReturnValue({ total: 0 });
 

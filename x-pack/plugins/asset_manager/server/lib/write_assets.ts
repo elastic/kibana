@@ -18,7 +18,7 @@ interface WriteAssetsOptions extends ElasticsearchAccessorOptions {
 }
 
 export async function writeAssets({
-  esClient,
+  elasticsearchClient,
   assetDocs,
   namespace = 'default',
   refresh = false,
@@ -33,5 +33,5 @@ export async function writeAssets({
 
   debug('Performing Write Asset Query', '\n\n', JSON.stringify(dsl, null, 2));
 
-  return await esClient.bulk<{}>(dsl);
+  return await elasticsearchClient.bulk<{}>(dsl);
 }

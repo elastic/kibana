@@ -8,10 +8,11 @@
 import type { ExceptionsListPreMultiListFindServerExtension } from '@kbn/lists-plugin/server';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import {
-  TrustedAppValidator,
-  HostIsolationExceptionsValidator,
-  EventFilterValidator,
   BlocklistValidator,
+  EndpointExceptionsValidator,
+  EventFilterValidator,
+  HostIsolationExceptionsValidator,
+  TrustedAppValidator,
 } from '../validators';
 
 type ValidatorCallback = ExceptionsListPreMultiListFindServerExtension['callback'];
@@ -51,6 +52,15 @@ export const getExceptionsPreMultiListFindHandler = (
     // validate Blocklist
     if (data.listId.some((id) => BlocklistValidator.isBlocklist({ listId: id }))) {
       await new BlocklistValidator(endpointAppContextService, request).validatePreMultiListFind();
+      return data;
+    }
+
+    // Validate Endpoint Exceptions
+    if (data.listId.some((id) => EndpointExceptionsValidator.isEndpointException({ listId: id }))) {
+      await new EndpointExceptionsValidator(
+        endpointAppContextService,
+        request
+      ).validatePreMultiListFind();
       return data;
     }
 

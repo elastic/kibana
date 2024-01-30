@@ -11,6 +11,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
 describe('Cloud Links Plugin - public', () => {
   let plugin: CloudLinksPlugin;
@@ -40,7 +41,11 @@ describe('Cloud Links Plugin - public', () => {
           coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(false);
           const cloud = { ...cloudMock.createStart(), isCloudEnabled: true };
 
-          plugin.start(coreStart, { cloud, guidedOnboarding });
+          plugin.start(coreStart, {
+            cloud,
+            guidedOnboarding,
+            share: sharePluginMock.createStartContract(),
+          });
           expect(coreStart.chrome.registerGlobalHelpExtensionMenuLink).toHaveBeenCalledTimes(1);
         });
 
@@ -48,14 +53,22 @@ describe('Cloud Links Plugin - public', () => {
           const coreStart = coreMock.createStart();
           coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(true);
           const cloud = { ...cloudMock.createStart(), isCloudEnabled: true };
-          plugin.start(coreStart, { cloud, guidedOnboarding });
+          plugin.start(coreStart, {
+            cloud,
+            guidedOnboarding,
+            share: sharePluginMock.createStartContract(),
+          });
           expect(coreStart.chrome.registerGlobalHelpExtensionMenuLink).not.toHaveBeenCalled();
         });
 
         test('does not register the Onboarding Setup Guide link when cloud is not enabled', () => {
           const coreStart = coreMock.createStart();
           const cloud = { ...cloudMock.createStart(), isCloudEnabled: false };
-          plugin.start(coreStart, { cloud, guidedOnboarding });
+          plugin.start(coreStart, {
+            cloud,
+            guidedOnboarding,
+            share: sharePluginMock.createStartContract(),
+          });
           expect(coreStart.chrome.registerGlobalHelpExtensionMenuLink).not.toHaveBeenCalled();
         });
       });
@@ -72,7 +85,11 @@ describe('Cloud Links Plugin - public', () => {
         coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(false);
         const cloud = { ...cloudMock.createStart(), isCloudEnabled: true };
 
-        plugin.start(coreStart, { cloud, guidedOnboarding });
+        plugin.start(coreStart, {
+          cloud,
+          guidedOnboarding,
+          share: sharePluginMock.createStartContract(),
+        });
         expect(coreStart.chrome.registerGlobalHelpExtensionMenuLink).not.toHaveBeenCalled();
       });
     });
@@ -83,7 +100,7 @@ describe('Cloud Links Plugin - public', () => {
         coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(false);
         const cloud = { ...cloudMock.createStart(), isCloudEnabled: true };
         const security = securityMock.createStart();
-        plugin.start(coreStart, { cloud, security });
+        plugin.start(coreStart, { cloud, security, share: sharePluginMock.createStartContract() });
         expect(maybeAddCloudLinksMock).toHaveBeenCalledTimes(1);
       });
 
@@ -91,7 +108,7 @@ describe('Cloud Links Plugin - public', () => {
         const coreStart = coreMock.createStart();
         coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(false);
         const cloud = { ...cloudMock.createStart(), isCloudEnabled: true };
-        plugin.start(coreStart, { cloud });
+        plugin.start(coreStart, { cloud, share: sharePluginMock.createStartContract() });
         expect(maybeAddCloudLinksMock).toHaveBeenCalledTimes(0);
       });
 
@@ -100,7 +117,7 @@ describe('Cloud Links Plugin - public', () => {
         coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(true);
         const cloud = { ...cloudMock.createStart(), isCloudEnabled: true };
         const security = securityMock.createStart();
-        plugin.start(coreStart, { cloud, security });
+        plugin.start(coreStart, { cloud, security, share: sharePluginMock.createStartContract() });
         expect(maybeAddCloudLinksMock).toHaveBeenCalledTimes(0);
       });
 
@@ -108,7 +125,7 @@ describe('Cloud Links Plugin - public', () => {
         const coreStart = coreMock.createStart();
         coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(false);
         const security = securityMock.createStart();
-        plugin.start(coreStart, { security });
+        plugin.start(coreStart, { security, share: sharePluginMock.createStartContract() });
         expect(maybeAddCloudLinksMock).toHaveBeenCalledTimes(0);
       });
 
@@ -117,7 +134,7 @@ describe('Cloud Links Plugin - public', () => {
         coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(false);
         const cloud = { ...cloudMock.createStart(), isCloudEnabled: false };
         const security = securityMock.createStart();
-        plugin.start(coreStart, { cloud, security });
+        plugin.start(coreStart, { cloud, security, share: sharePluginMock.createStartContract() });
         expect(maybeAddCloudLinksMock).toHaveBeenCalledTimes(0);
       });
     });

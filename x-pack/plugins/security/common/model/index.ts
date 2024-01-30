@@ -13,40 +13,23 @@ export type {
   ApiKeyRoleDescriptors,
   CrossClusterApiKeyAccess,
 } from './api_key';
-export type { User, EditUser, GetUserDisplayNameParams } from './user';
-export type {
-  GetUserProfileResponse,
-  UserProfile,
-  UserProfileUserInfo,
-  UserProfileWithSecurity,
-  UserProfileData,
-  UserProfileLabels,
-  UserProfileUserInfoWithSecurity,
-} from './user_profile';
+export type { EditUser, GetUserDisplayNameParams } from './user';
+export type { GetUserProfileResponse } from './user_profile';
 export {
   getUserAvatarColor,
   getUserAvatarInitials,
   USER_AVATAR_MAX_INITIALS,
 } from './user_profile';
 export { getUserDisplayName } from './user';
-export type { AuthenticatedUser, UserRealm } from './authenticated_user';
 export {
   canUserChangePassword,
   canUserChangeDetails,
   isUserAnonymous,
   canUserHaveProfile,
 } from './authenticated_user';
-export type { AuthenticationProvider } from './authentication_provider';
 export { shouldProviderUseLoginForm } from './authentication_provider';
 export type { BuiltinESPrivileges } from './builtin_es_privileges';
 export type { RawKibanaPrivileges, RawKibanaFeaturePrivileges } from './raw_kibana_privileges';
-export type { FeaturesPrivileges } from './features_privileges';
-export type {
-  Role,
-  RoleIndexPrivilege,
-  RoleRemoteIndexPrivilege,
-  RoleKibanaPrivilege,
-} from './role';
 export {
   copyRole,
   isRoleDeprecated,
@@ -65,8 +48,3 @@ export type {
   RoleTemplate,
   RoleMapping,
 } from './role_mapping';
-export type {
-  PrivilegeDeprecationsRolesByFeatureIdRequest,
-  PrivilegeDeprecationsRolesByFeatureIdResponse,
-  PrivilegeDeprecationsService,
-} from './deprecations';

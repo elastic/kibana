@@ -12,7 +12,8 @@ export const fromSavedSearchAttributes = (
   id: string | undefined,
   attributes: SavedSearchAttributes,
   tags: string[] | undefined,
-  searchSource: SavedSearch['searchSource']
+  searchSource: SavedSearch['searchSource'],
+  managed: boolean
 ): SavedSearch => ({
   id,
   searchSource,
@@ -32,5 +33,7 @@ export const fromSavedSearchAttributes = (
   timeRange: attributes.timeRange,
   refreshInterval: attributes.refreshInterval,
   rowsPerPage: attributes.rowsPerPage,
+  sampleSize: attributes.sampleSize,
   breakdownField: attributes.breakdownField,
+  managed,
 });

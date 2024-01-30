@@ -12,7 +12,7 @@ import { createTestConfig } from '../../config.base';
 
 export default createTestConfig({
   serverlessProject: 'es',
-  testFiles: [require.resolve('../common/index.examples')],
+  testFiles: [require.resolve('../common/examples')],
   junit: {
     reportName: 'Serverless Search Examples Functional Tests',
   },
@@ -20,4 +20,8 @@ export default createTestConfig({
     resolve(REPO_ROOT, 'examples'),
     resolve(REPO_ROOT, 'x-pack/examples'),
   ]),
+
+  // include settings from project controller
+  // https://github.com/elastic/project-controller/blob/main/internal/project/esproject/config/elasticsearch.yml
+  esServerArgs: [],
 });

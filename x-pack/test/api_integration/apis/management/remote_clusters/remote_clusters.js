@@ -92,6 +92,7 @@ export default function ({ getService }) {
           seeds: [NODE_SEED],
           isConfiguredByNode: false,
           mode: 'sniff',
+          securityModel: 'certificate',
         });
       });
     });
@@ -115,6 +116,7 @@ export default function ({ getService }) {
               skipUnavailable: false,
               isConfiguredByNode: false,
               mode: 'sniff',
+              securityModel: 'certificate',
             },
           ]);
         });

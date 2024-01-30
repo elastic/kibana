@@ -6,7 +6,7 @@
  */
 import React, { memo, useCallback, useMemo } from 'react';
 import { EuiFlexItem, EuiSwitch } from '@elastic/eui';
-import type { Rule } from '../../../../../rule_management/logic/types';
+import type { RuleResponse } from '../../../../../../../common/api/detection_engine';
 
 export const LinkRuleSwitch = memo(
   ({
@@ -14,9 +14,9 @@ export const LinkRuleSwitch = memo(
     linkedRules,
     onRuleLinkChange,
   }: {
-    rule: Rule;
-    linkedRules: Rule[];
-    onRuleLinkChange: (rulesSelectedToAdd: Rule[]) => void;
+    rule: RuleResponse;
+    linkedRules: RuleResponse[];
+    onRuleLinkChange: (rulesSelectedToAdd: RuleResponse[]) => void;
   }) => {
     const isRuleLinked = useMemo(
       () => Boolean(linkedRules.find((r) => r.id === rule.id)),

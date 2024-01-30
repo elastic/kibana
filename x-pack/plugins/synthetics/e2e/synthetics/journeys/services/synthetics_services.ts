@@ -7,7 +7,7 @@
 
 import axios from 'axios';
 import type { Client } from '@elastic/elasticsearch';
-import { KbnClient, uriencode } from '@kbn/test';
+import { KbnClient } from '@kbn/test';
 import pMap from 'p-map';
 import { SyntheticsMonitor } from '../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
@@ -100,12 +100,13 @@ export class SyntheticsServices {
     });
 
     const { monitors = [] } = data as any;
+
     await pMap(
       monitors,
       async (monitor: Record<string, any>) => {
         await this.requester.request({
           description: 'delete monitor',
-          path: uriencode`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${monitor.id}`,
+          path: `${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${monitor.config_id}`,
           method: 'DELETE',
         });
       },

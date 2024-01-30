@@ -7,8 +7,13 @@
 
 import moment from 'moment';
 import expect from '@kbn/expect';
-import { cleanup, generate } from '@kbn/infra-forge';
-import { Aggregators, Comparator, InfraRuleType } from '@kbn/infra-plugin/common/alerting/metrics';
+import { cleanup, generate, Dataset, PartialConfig } from '@kbn/data-forge';
+import {
+  Aggregators,
+  Comparator,
+  InfraRuleType,
+  MetricThresholdParams,
+} from '@kbn/infra-plugin/common/alerting/metrics';
 import {
   waitForDocumentInIndex,
   waitForAlertInIndex,
@@ -29,20 +34,31 @@ export default function ({ getService }: FtrProviderContext) {
     let alertId: string;
     let startedAt: string;
     let actionId: string;
-    let infraDataIndex: string;
+    let dataForgeConfig: PartialConfig;
+    let dataForgeIndices: string[];
 
     const METRICS_ALERTS_INDEX = '.alerts-observability.metrics.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-metric-threshold';
 
     describe('alert and action creation', () => {
       before(async () => {
-        infraDataIndex = await generate({ esClient, lookback: 'now-15m', logger });
+        await supertest.patch(`/api/metrics/source/default`).set('kbn-xsrf', 'foo').send({
+          anomalyThreshold: 50,
+          description: '',
+          metricAlias: 'kbn-data-forge-fake_hosts.fake_hosts-*',
+          name: 'Default',
+        });
+        dataForgeConfig = {
+          schedule: [{ template: 'good', start: 'now-15m', end: 'now' }],
+          indexing: { dataset: 'fake_hosts' as Dataset },
+        };
+        dataForgeIndices = await generate({ client: esClient, config: dataForgeConfig, logger });
         actionId = await createIndexConnector({
           supertest,
           name: 'Index Connector: Metric threshold API test',
           indexName: ALERT_ACTION_INDEX,
         });
-        const createdRule = await createRule({
+        const createdRule = await createRule<MetricThresholdParams>({
           supertest,
           ruleTypeId: InfraRuleType.MetricThreshold,
           consumer: 'infrastructure',
@@ -92,7 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
       after(async () => {
         await supertest.delete(`/api/alerting/rule/${ruleId}`).set('kbn-xsrf', 'foo');
         await supertest.delete(`/api/actions/connector/${actionId}`).set('kbn-xsrf', 'foo');
-        await esDeleteAllIndices([ALERT_ACTION_INDEX, infraDataIndex]);
+        await esDeleteAllIndices([ALERT_ACTION_INDEX, ...dataForgeIndices]);
         await esClient.deleteByQuery({
           index: METRICS_ALERTS_INDEX,
           query: { term: { 'kibana.alert.rule.uuid': ruleId } },
@@ -101,7 +117,7 @@ export default function ({ getService }: FtrProviderContext) {
           index: '.kibana-event-log-*',
           query: { term: { 'kibana.alert.rule.consumer': 'infrastructure' } },
         });
-        await cleanup({ esClient, logger });
+        await cleanup({ client: esClient, config: dataForgeConfig, logger });
       });
 
       it('rule should be active', async () => {

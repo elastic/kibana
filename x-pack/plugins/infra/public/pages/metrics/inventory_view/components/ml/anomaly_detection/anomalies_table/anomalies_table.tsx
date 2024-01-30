@@ -29,8 +29,9 @@ import { FormattedMessage, FormattedDate } from '@kbn/i18n-react';
 import { useLinkProps, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { css } from '@emotion/react';
+import type { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import { Subject } from 'rxjs';
 import { datemathToEpochMillis } from '../../../../../../../utils/datemath';
-import type { SnapshotMetricType } from '../../../../../../../../common/inventory_models/types';
 import { useSorting } from '../../../../../../../hooks/use_sorting';
 import { useMetricsK8sAnomaliesResults } from '../../../../hooks/use_metrics_k8s_anomalies';
 import { useMetricsHostsAnomaliesResults } from '../../../../hooks/use_metrics_hosts_anomalies';
@@ -197,6 +198,8 @@ interface Props {
   dateRange?: TimeRange;
   // In case the date picker is managed outside this component
   hideDatePicker?: boolean;
+  // subject to watch the completition of the request
+  request$?: Subject<() => Promise<unknown>>;
 }
 
 const DEFAULT_DATE_RANGE: TimeRange = {
@@ -209,6 +212,7 @@ export const AnomaliesTable = ({
   hostName,
   dateRange = DEFAULT_DATE_RANGE,
   hideDatePicker = false,
+  request$,
 }: Props) => {
   const [search, setSearch] = useState('');
   const trackMetric = useUiTracker({ app: 'infra_metrics' });
@@ -255,20 +259,31 @@ export const AnomaliesTable = ({
     []
   );
 
-  const anomalyParams = useMemo(
-    () => ({
+  const getTimeRange = useCallback(() => {
+    if (hideDatePicker) {
+      return {
+        start: datemathToEpochMillis(dateRange.from) || 0,
+        end: datemathToEpochMillis(dateRange.to, 'up') || 0,
+      };
+    } else {
+      return timeRange;
+    }
+  }, [dateRange.from, dateRange.to, hideDatePicker, timeRange]);
+
+  const anomalyParams = useMemo(() => {
+    const { start, end } = getTimeRange();
+    return {
       sourceId: 'default',
       anomalyThreshold: anomalyThreshold || 0,
-      startTime: timeRange.start,
-      endTime: timeRange.end,
+      startTime: start,
+      endTime: end,
       defaultSortOptions: {
         direction: sorting?.direction || 'desc',
         field: (sorting?.field || 'startTime') as SortField,
       },
       defaultPaginationOptions: { pageSize: 10 },
-    }),
-    [timeRange.start, timeRange.end, sorting?.field, sorting?.direction, anomalyThreshold]
-  );
+    };
+  }, [getTimeRange, anomalyThreshold, sorting?.direction, sorting?.field]);
   const {
     metricsHostsAnomalies,
     getMetricsHostsAnomalies,
@@ -450,9 +465,13 @@ export const AnomaliesTable = ({
 
   useEffect(() => {
     if (getAnomalies) {
-      getAnomalies(undefined, search, hostName);
+      if (request$) {
+        request$.next(() => getAnomalies(undefined, search, hostName));
+      } else {
+        getAnomalies(undefined, search, hostName);
+      }
     }
-  }, [getAnomalies, search, hostName]);
+  }, [getAnomalies, hostName, request$, search]);
 
   return (
     <EuiFlexGroup direction="column">

@@ -28,6 +28,8 @@ function shapeForNode(el: cytoscape.NodeSingular, theme: EuiThemeType): MapShape
   switch (type) {
     case JOB_MAP_NODE_TYPES.ANALYTICS:
       return MAP_SHAPES.ELLIPSE;
+    case JOB_MAP_NODE_TYPES.ANALYTICS_JOB_MISSING:
+      return MAP_SHAPES.ELLIPSE;
     case JOB_MAP_NODE_TYPES.TRANSFORM:
       return MAP_SHAPES.RECTANGLE;
     case JOB_MAP_NODE_TYPES.INDEX:
@@ -65,6 +67,8 @@ function borderColorForNode(el: cytoscape.NodeSingular, theme: EuiThemeType) {
   const type = el.data('type');
 
   switch (type) {
+    case JOB_MAP_NODE_TYPES.ANALYTICS_JOB_MISSING:
+      return theme.euiColorFullShade;
     case JOB_MAP_NODE_TYPES.ANALYTICS:
       return theme.euiColorSuccess;
     case JOB_MAP_NODE_TYPES.TRANSFORM:

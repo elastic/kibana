@@ -19,7 +19,7 @@ import {
   SLO_DESTINATION_INDEX_NAME,
   SLO_INGEST_PIPELINE_NAME,
   getSLOTransformId,
-} from '../../../assets/constants';
+} from '../../../../common/slo/constants';
 import { SLO } from '../../../domain/models';
 import { GetHistogramIndicatorAggregation } from '../aggregations';
 
@@ -54,7 +54,7 @@ export class HistogramTransformGenerator extends TransformGenerator {
             {
               range: {
                 [indicator.params.timestampField]: {
-                  gte: `now-${slo.timeWindow.duration.format()}`,
+                  gte: `now-${slo.timeWindow.duration.format()}/d`,
                 },
               },
             },

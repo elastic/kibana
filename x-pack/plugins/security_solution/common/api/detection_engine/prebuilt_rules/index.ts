@@ -7,7 +7,7 @@
 
 export * from './get_prebuilt_rules_and_timelines_status/get_prebuilt_rules_and_timelines_status_route.gen';
 export * from './get_prebuilt_rules_status/get_prebuilt_rules_status_route';
-export * from './install_prebuilt_rules_and_timelines/install_prebuilt_rules_and_timelines_route';
+export * from './install_prebuilt_rules_and_timelines/install_prebuilt_rules_and_timelines_route.gen';
 export * from './perform_rule_installation/perform_rule_installation_route';
 export * from './perform_rule_upgrade/perform_rule_upgrade_route';
 export * from './review_rule_installation/review_rule_installation_route';

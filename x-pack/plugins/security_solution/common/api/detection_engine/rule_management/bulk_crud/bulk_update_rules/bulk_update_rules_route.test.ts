@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { exactCheck, formatErrors, foldLeftRight } from '@kbn/securitysolution-io-ts-utils';
+import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
 import type { RuleUpdateProps } from '../../../model';
 import { getUpdateRulesSchemaMock } from '../../../model/rule_schema/mocks';
-import { BulkUpdateRulesRequestBody } from './bulk_update_rules_route';
+import { BulkUpdateRulesRequestBody } from './bulk_update_rules_route.gen';
 
 // only the basics of testing are here.
 // see: update_rules_schema.test.ts for the bulk of the validation tests
@@ -17,40 +17,27 @@ describe('Bulk update rules request schema', () => {
   test('can take an empty array and validate it', () => {
     const payload: BulkUpdateRulesRequestBody = [];
 
-    const decoded = BulkUpdateRulesRequestBody.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const output = foldLeftRight(checked);
-    expect(output.errors).toEqual([]);
-    expect(output.schema).toEqual([]);
+    const result = BulkUpdateRulesRequestBody.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('made up values do not validate for a single element', () => {
     const payload: Array<{ madeUp: string }> = [{ madeUp: 'hi' }];
 
-    const decoded = BulkUpdateRulesRequestBody.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const output = foldLeftRight(checked);
-    expect(formatErrors(output.errors)).toContain(
-      'Invalid value "undefined" supplied to "description"'
+    const result = BulkUpdateRulesRequestBody.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"0.type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql'"`
     );
-    expect(formatErrors(output.errors)).toContain(
-      'Invalid value "undefined" supplied to "risk_score"'
-    );
-    expect(formatErrors(output.errors)).toContain('Invalid value "undefined" supplied to "name"');
-    expect(formatErrors(output.errors)).toContain(
-      'Invalid value "undefined" supplied to "severity"'
-    );
-    expect(output.schema).toEqual({});
   });
 
   test('single array element does validate', () => {
     const payload: BulkUpdateRulesRequestBody = [getUpdateRulesSchemaMock()];
 
-    const decoded = BulkUpdateRulesRequestBody.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const output = foldLeftRight(checked);
-    expect(formatErrors(output.errors)).toEqual([]);
-    expect(output.schema).toEqual(payload);
+    const result = BulkUpdateRulesRequestBody.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('two array elements do validate', () => {
@@ -59,11 +46,9 @@ describe('Bulk update rules request schema', () => {
       getUpdateRulesSchemaMock(),
     ];
 
-    const decoded = BulkUpdateRulesRequestBody.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const output = foldLeftRight(checked);
-    expect(formatErrors(output.errors)).toEqual([]);
-    expect(output.schema).toEqual(payload);
+    const result = BulkUpdateRulesRequestBody.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('single array element with a missing value (risk_score) will not validate', () => {
@@ -72,13 +57,9 @@ describe('Bulk update rules request schema', () => {
     delete singleItem.risk_score;
     const payload: BulkUpdateRulesRequestBody = [singleItem];
 
-    const decoded = BulkUpdateRulesRequestBody.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const output = foldLeftRight(checked);
-    expect(formatErrors(output.errors)).toEqual([
-      'Invalid value "undefined" supplied to "risk_score"',
-    ]);
-    expect(output.schema).toEqual({});
+    const result = BulkUpdateRulesRequestBody.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"0.risk_score: Required"`);
   });
 
   test('two array elements where the first is valid but the second is invalid (risk_score) will not validate', () => {
@@ -88,13 +69,9 @@ describe('Bulk update rules request schema', () => {
     delete secondItem.risk_score;
     const payload: BulkUpdateRulesRequestBody = [singleItem, secondItem];
 
-    const decoded = BulkUpdateRulesRequestBody.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const output = foldLeftRight(checked);
-    expect(formatErrors(output.errors)).toEqual([
-      'Invalid value "undefined" supplied to "risk_score"',
-    ]);
-    expect(output.schema).toEqual({});
+    const result = BulkUpdateRulesRequestBody.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"1.risk_score: Required"`);
   });
 
   test('two array elements where the first is invalid (risk_score) but the second is valid will not validate', () => {
@@ -104,13 +81,9 @@ describe('Bulk update rules request schema', () => {
     delete singleItem.risk_score;
     const payload: BulkUpdateRulesRequestBody = [singleItem, secondItem];
 
-    const decoded = BulkUpdateRulesRequestBody.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const output = foldLeftRight(checked);
-    expect(formatErrors(output.errors)).toEqual([
-      'Invalid value "undefined" supplied to "risk_score"',
-    ]);
-    expect(output.schema).toEqual({});
+    const result = BulkUpdateRulesRequestBody.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"0.risk_score: Required"`);
   });
 
   test('two array elements where both are invalid (risk_score) will not validate', () => {
@@ -122,46 +95,14 @@ describe('Bulk update rules request schema', () => {
     delete secondItem.risk_score;
     const payload: BulkUpdateRulesRequestBody = [singleItem, secondItem];
 
-    const decoded = BulkUpdateRulesRequestBody.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const output = foldLeftRight(checked);
-    expect(formatErrors(output.errors)).toEqual([
-      'Invalid value "undefined" supplied to "risk_score"',
-    ]);
-    expect(output.schema).toEqual({});
+    const result = BulkUpdateRulesRequestBody.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"0.risk_score: Required, 1.risk_score: Required"`
+    );
   });
 
-  test('two array elements where the first is invalid (extra key and value) but the second is valid will not validate', () => {
-    const singleItem: RuleUpdateProps & { madeUpValue: string } = {
-      ...getUpdateRulesSchemaMock(),
-      madeUpValue: 'something',
-    };
-    const secondItem = getUpdateRulesSchemaMock();
-    const payload = [singleItem, secondItem];
-
-    const decoded = BulkUpdateRulesRequestBody.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const output = foldLeftRight(checked);
-    expect(formatErrors(output.errors)).toEqual(['invalid keys "madeUpValue"']);
-    expect(output.schema).toEqual({});
-  });
-
-  test('two array elements where the second is invalid (extra key and value) but the first is valid will not validate', () => {
-    const singleItem: RuleUpdateProps = getUpdateRulesSchemaMock();
-    const secondItem: RuleUpdateProps & { madeUpValue: string } = {
-      ...getUpdateRulesSchemaMock(),
-      madeUpValue: 'something',
-    };
-    const payload: BulkUpdateRulesRequestBody = [singleItem, secondItem];
-
-    const decoded = BulkUpdateRulesRequestBody.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const output = foldLeftRight(checked);
-    expect(formatErrors(output.errors)).toEqual(['invalid keys "madeUpValue"']);
-    expect(output.schema).toEqual({});
-  });
-
-  test('two array elements where both are invalid (extra key and value) will not validate', () => {
+  test('extra props will be omitted from the payload after validation', () => {
     const singleItem: RuleUpdateProps & { madeUpValue: string } = {
       ...getUpdateRulesSchemaMock(),
       madeUpValue: 'something',
@@ -172,22 +113,20 @@ describe('Bulk update rules request schema', () => {
     };
     const payload: BulkUpdateRulesRequestBody = [singleItem, secondItem];
 
-    const decoded = BulkUpdateRulesRequestBody.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const output = foldLeftRight(checked);
-    expect(formatErrors(output.errors)).toEqual(['invalid keys "madeUpValue,madeUpValue"']);
-    expect(output.schema).toEqual({});
+    const result = BulkUpdateRulesRequestBody.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual([getUpdateRulesSchemaMock(), getUpdateRulesSchemaMock()]);
   });
 
   test('You cannot set the severity to a value other than low, medium, high, or critical', () => {
     const badSeverity = { ...getUpdateRulesSchemaMock(), severity: 'madeup' };
     const payload = [badSeverity];
 
-    const decoded = BulkUpdateRulesRequestBody.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const output = foldLeftRight(checked);
-    expect(formatErrors(output.errors)).toEqual(['Invalid value "madeup" supplied to "severity"']);
-    expect(output.schema).toEqual({});
+    const result = BulkUpdateRulesRequestBody.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"0.severity: Invalid enum value. Expected 'low' | 'medium' | 'high' | 'critical', received 'madeup'"`
+    );
   });
 
   test('You can set "namespace" to a string', () => {
@@ -195,11 +134,9 @@ describe('Bulk update rules request schema', () => {
       { ...getUpdateRulesSchemaMock(), namespace: 'a namespace' },
     ];
 
-    const decoded = BulkUpdateRulesRequestBody.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const output = foldLeftRight(checked);
-    expect(formatErrors(output.errors)).toEqual([]);
-    expect(output.schema).toEqual(payload);
+    const result = BulkUpdateRulesRequestBody.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('You can set "note" to a string', () => {
@@ -207,21 +144,17 @@ describe('Bulk update rules request schema', () => {
       { ...getUpdateRulesSchemaMock(), note: '# test markdown' },
     ];
 
-    const decoded = BulkUpdateRulesRequestBody.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const output = foldLeftRight(checked);
-    expect(formatErrors(output.errors)).toEqual([]);
-    expect(output.schema).toEqual(payload);
+    const result = BulkUpdateRulesRequestBody.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('You can set "note" to an empty string', () => {
     const payload: BulkUpdateRulesRequestBody = [{ ...getUpdateRulesSchemaMock(), note: '' }];
 
-    const decoded = BulkUpdateRulesRequestBody.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const output = foldLeftRight(checked);
-    expect(formatErrors(output.errors)).toEqual([]);
-    expect(output.schema).toEqual(payload);
+    const result = BulkUpdateRulesRequestBody.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('You cant set "note" to anything other than string', () => {
@@ -234,12 +167,10 @@ describe('Bulk update rules request schema', () => {
       },
     ];
 
-    const decoded = BulkUpdateRulesRequestBody.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const output = foldLeftRight(checked);
-    expect(formatErrors(output.errors)).toEqual([
-      'Invalid value "{"something":"some object"}" supplied to "note"',
-    ]);
-    expect(output.schema).toEqual({});
+    const result = BulkUpdateRulesRequestBody.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"0.note: Expected string, received object"`
+    );
   });
 });

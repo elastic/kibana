@@ -6,17 +6,21 @@
  */
 
 import React, { VFC } from 'react';
-import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SubscriptionButtonEmpty } from '@kbn/subscription-tracking';
-import type { SubscriptionContextData } from '@kbn/subscription-tracking';
-
-const subscriptionContext: SubscriptionContextData = {
-  feature: 'threat-intelligence',
-  source: 'security__threat-intelligence',
-};
+import { useKibana } from '../hooks/use_kibana';
 
 export const Paywall: VFC = () => {
+  const {
+    services: { application },
+  } = useKibana();
   return (
     <EuiEmptyPrompt
       icon={<EuiIcon type="logoSecurity" size="xl" />}
@@ -52,12 +56,18 @@ export const Paywall: VFC = () => {
           </EuiFlexItem>
           <EuiFlexItem>
             <div>
-              <SubscriptionButtonEmpty subscriptionContext={subscriptionContext}>
+              <EuiButtonEmpty
+                onClick={() =>
+                  application.navigateToApp('management', {
+                    path: 'stack/license_management/home',
+                  })
+                }
+              >
                 <FormattedMessage
                   id="xpack.threatIntelligence.paywall.trial"
                   defaultMessage="Start a free trial"
                 />
-              </SubscriptionButtonEmpty>
+              </EuiButtonEmpty>
             </div>
           </EuiFlexItem>
         </EuiFlexGroup>

@@ -17,7 +17,7 @@ import { GenericIndexPatternColumn, operationDefinitionMap } from '..';
 import { defaultLabel } from '../filters';
 import { isReferenced } from '../../layer_helpers';
 
-import type { FrameDatasourceAPI, IndexPattern, IndexPatternField } from '../../../../../types';
+import type { FramePublicAPI, IndexPattern, IndexPatternField } from '../../../../../types';
 import type { FiltersIndexPatternColumn } from '..';
 import type { TermsIndexPatternColumn } from './types';
 import type { LastValueIndexPatternColumn } from '../last_value';
@@ -25,7 +25,7 @@ import type { PercentileRanksIndexPatternColumn } from '../percentile_ranks';
 import type { PercentileIndexPatternColumn } from '../percentile';
 
 import type { FormBasedLayer } from '../../../types';
-import { MULTI_KEY_VISUAL_SEPARATOR, supportedTypes } from './constants';
+import { MULTI_KEY_VISUAL_SEPARATOR, supportedTypes, MAX_TERMS_OTHER_ENABLED } from './constants';
 import { isColumnOfType } from '../helpers';
 
 const fullSeparatorString = ` ${MULTI_KEY_VISUAL_SEPARATOR} `;
@@ -126,7 +126,7 @@ export function getDisallowedTermsMessage(
       newState: async (
         data: DataPublicPluginStart,
         core: CoreStart,
-        frame: FrameDatasourceAPI,
+        frame: FramePublicAPI,
         layerId: string
       ) => {
         const currentColumn = layer.columns[columnId] as TermsIndexPatternColumn;
@@ -326,4 +326,9 @@ export function getFieldsByValidationState(
     validFields,
     invalidFields,
   };
+}
+
+export function getOtherBucketSwitchDefault(column: TermsIndexPatternColumn, size: number) {
+  const otherBucketValue = column.params.otherBucket;
+  return (otherBucketValue || otherBucketValue === undefined) && size < MAX_TERMS_OTHER_ENABLED;
 }

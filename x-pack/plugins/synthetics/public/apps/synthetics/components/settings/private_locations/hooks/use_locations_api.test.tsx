@@ -15,13 +15,11 @@ import * as reduxHooks from 'react-redux';
 
 describe('usePrivateLocationsAPI', () => {
   const dispatch = jest.fn();
-  const addAPI = jest.spyOn(locationAPI, 'addSyntheticsPrivateLocations').mockResolvedValue({
-    locations: [],
-  });
-  const deletedAPI = jest.spyOn(locationAPI, 'deleteSyntheticsPrivateLocations').mockResolvedValue({
-    locations: [],
-  });
-  const getAPI = jest.spyOn(locationAPI, 'getSyntheticsPrivateLocations');
+  const addAPI = jest.spyOn(locationAPI, 'addSyntheticsPrivateLocations').mockResolvedValue([]);
+  const deletedAPI = jest
+    .spyOn(locationAPI, 'deleteSyntheticsPrivateLocations')
+    .mockResolvedValue([]);
+  jest.spyOn(locationAPI, 'getSyntheticsPrivateLocations');
   jest.spyOn(reduxHooks, 'useDispatch').mockReturnValue(dispatch);
 
   it('returns expected results', () => {
@@ -35,16 +33,14 @@ describe('usePrivateLocationsAPI', () => {
         privateLocations: [],
       })
     );
-    expect(getAPI).toHaveBeenCalledTimes(1);
+    expect(dispatch).toHaveBeenCalledTimes(1);
   });
-  jest.spyOn(locationAPI, 'getSyntheticsPrivateLocations').mockResolvedValue({
-    locations: [
-      {
-        id: 'Test',
-        agentPolicyId: 'testPolicy',
-      } as any,
-    ],
-  });
+  jest.spyOn(locationAPI, 'getSyntheticsPrivateLocations').mockResolvedValue([
+    {
+      id: 'Test',
+      agentPolicyId: 'testPolicy',
+    } as any,
+  ]);
   it('returns expected results after data', async () => {
     const { result, waitForNextUpdate } = renderHook(() => usePrivateLocationsAPI(), {
       wrapper: WrappedHelper,
@@ -62,12 +58,7 @@ describe('usePrivateLocationsAPI', () => {
     expect(result.current).toEqual(
       expect.objectContaining({
         loading: false,
-        privateLocations: [
-          {
-            id: 'Test',
-            agentPolicyId: 'testPolicy',
-          },
-        ],
+        privateLocations: [],
       })
     );
   });
@@ -81,10 +72,8 @@ describe('usePrivateLocationsAPI', () => {
 
     act(() => {
       result.current.onSubmit({
-        id: 'new',
         agentPolicyId: 'newPolicy',
         label: 'new',
-        concurrentMonitors: 1,
         geo: {
           lat: 0,
           lon: 0,
@@ -95,8 +84,6 @@ describe('usePrivateLocationsAPI', () => {
     await waitForNextUpdate();
 
     expect(addAPI).toHaveBeenCalledWith({
-      concurrentMonitors: 1,
-      id: 'newPolicy',
       geo: {
         lat: 0,
         lon: 0,

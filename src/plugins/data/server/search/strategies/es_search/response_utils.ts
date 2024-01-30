@@ -9,6 +9,7 @@
 import type { ConnectionRequestParams } from '@elastic/transport';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ISearchOptions } from '../../../../common';
+import { sanitizeRequestParams } from '../../sanitize_request_params';
 
 /**
  * Get the `total`/`loaded` for this response (see `IKibanaSearchResponse`). Note that `skipped` is
@@ -33,7 +34,7 @@ export function toKibanaSearchResponse(
     rawResponse,
     isPartial: false,
     isRunning: false,
-    ...(requestParams ? { requestParams } : {}),
+    ...(requestParams ? { requestParams: sanitizeRequestParams(requestParams) } : {}),
     ...getTotalLoaded(rawResponse),
   };
 }

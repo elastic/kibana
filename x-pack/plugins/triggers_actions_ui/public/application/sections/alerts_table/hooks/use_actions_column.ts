@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { useContext } from 'react';
+import { useCallback, useContext } from 'react';
+import { AlertsTableContext } from '../contexts/alerts_table_context';
 import { UseActionsColumnRegistry, BulkActionsVerbs } from '../../../../types';
-import { BulkActionsContext } from '../bulk_actions/context';
 
 const DEFAULT_ACTIONS_COLUMNS_WIDTH = 75;
 
@@ -16,7 +16,9 @@ interface UseActionsColumnProps {
 }
 
 export const useActionsColumn = ({ options }: UseActionsColumnProps) => {
-  const [, updateBulkActionsState] = useContext(BulkActionsContext);
+  const {
+    bulkActions: [, updateBulkActionsState],
+  } = useContext(AlertsTableContext);
 
   const useUserActionsColumn = options
     ? options
@@ -30,15 +32,17 @@ export const useActionsColumn = ({ options }: UseActionsColumnProps) => {
 
   // we save the rowIndex when creating the function to be used by the clients
   // so they don't have to manage it
-  const getSetIsActionLoadingCallback =
+  const getSetIsActionLoadingCallback = useCallback(
     (rowIndex: number) =>
-    (isLoading: boolean = true) => {
-      updateBulkActionsState({
-        action: BulkActionsVerbs.updateRowLoadingState,
-        rowIndex,
-        isLoading,
-      });
-    };
+      (isLoading: boolean = true) => {
+        updateBulkActionsState({
+          action: BulkActionsVerbs.updateRowLoadingState,
+          rowIndex,
+          isLoading,
+        });
+      },
+    [updateBulkActionsState]
+  );
 
   return {
     renderCustomActionsRow,

@@ -13,37 +13,60 @@ import type { OsCgroupMetrics } from './types';
 const PROC_CGROUP2_DIR = '/sys/fs/cgroup';
 const CPU_STATS_FILE = 'cpu.stat';
 const CPU_MAX_FILE = 'cpu.max';
+const MEMORY_CURRENT_FILE = 'memory.current';
+const MEMORY_SWAP_CURRENT_FILE = 'memory.swap.current';
 
-interface Arg {
-  cpuPath: string;
-  cpuAcctPath: string;
-}
+const getCGroupFilePath = (group: string, fileName: string): string => {
+  return joinPath(PROC_CGROUP2_DIR, group, fileName);
+};
 
-export async function gatherV2CgroupMetrics(arg: Arg): Promise<OsCgroupMetrics> {
-  const [{ usage_nanos: usageNanos, ...stat }, cpuMax] = await Promise.all([
-    readCPUStat(arg.cpuPath),
-    readCPUMax(arg.cpuPath),
-  ]);
+export async function gatherV2CgroupMetrics(group: string): Promise<OsCgroupMetrics> {
+  const [{ usage_nanos: usageNanos, ...stat }, cpuMax, memoryCurrent, swapCurrent] =
+    await Promise.all([
+      readCPUStat(group),
+      readCPUMax(group),
+      readMemoryCurrent(group),
+      readSwapCurrent(group),
+    ]);
 
   return {
     cpu: {
       ...cpuMax,
-      control_group: arg.cpuPath,
+      control_group: group,
       stat,
     },
     cpuacct: {
-      control_group: arg.cpuPath,
+      control_group: group,
       usage_nanos: usageNanos,
+    },
+    cgroup_memory: {
+      current_in_bytes: memoryCurrent,
+      swap_current_in_bytes: swapCurrent,
     },
   };
 }
+
 interface CPUMax {
   cfs_period_micros: number;
   cfs_quota_micros: number;
 }
 
+async function readMemoryCurrent(group: string): Promise<number> {
+  const rawMemoryCurrent = (await fs.readFile(getCGroupFilePath(group, MEMORY_CURRENT_FILE)))
+    .toString()
+    .trim();
+  return parseInt(rawMemoryCurrent, 10);
+}
+
+async function readSwapCurrent(group: string): Promise<number> {
+  const rawMemoryCurrent = (await fs.readFile(getCGroupFilePath(group, MEMORY_SWAP_CURRENT_FILE)))
+    .toString()
+    .trim();
+  return parseInt(rawMemoryCurrent, 10);
+}
+
 async function readCPUMax(group: string): Promise<CPUMax> {
-  const [quota, period] = (await fs.readFile(joinPath(PROC_CGROUP2_DIR, group, CPU_MAX_FILE)))
+  const [quota, period] = (await fs.readFile(getCGroupFilePath(group, CPU_MAX_FILE)))
     .toString()
     .trim()
     .split(/\s+/);
@@ -62,7 +85,7 @@ async function readCPUStat(group: string): Promise<CPUStat> {
     time_throttled_nanos: -1,
     usage_nanos: -1,
   };
-  return (await fs.readFile(joinPath(PROC_CGROUP2_DIR, group, CPU_STATS_FILE)))
+  return (await fs.readFile(getCGroupFilePath(group, CPU_STATS_FILE)))
     .toString()
     .split(/\n/)
     .reduce((acc, line) => {

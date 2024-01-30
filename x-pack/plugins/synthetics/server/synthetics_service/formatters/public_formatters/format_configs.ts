@@ -85,10 +85,11 @@ export interface ConfigData {
   runOnce?: boolean;
   testRunId?: string;
   params: Record<string, string>;
+  spaceId: string;
 }
 
 export const formatHeartbeatRequest = (
-  { monitor, configId, heartbeatId, runOnce, testRunId }: Omit<ConfigData, 'params'>,
+  { monitor, configId, heartbeatId, runOnce, testRunId, spaceId }: Omit<ConfigData, 'params'>,
   params?: string
 ): HeartbeatConfig => {
   const projectId = (monitor as BrowserFields)[ConfigKey.PROJECT_ID];
@@ -106,6 +107,9 @@ export const formatHeartbeatRequest = (
       'monitor.project.id': projectId || undefined,
       run_once: runOnce,
       test_run_id: testRunId,
+      meta: {
+        space_id: spaceId,
+      },
     },
     fields_under_root: true,
     params: monitor.type === 'browser' ? paramsString : '',

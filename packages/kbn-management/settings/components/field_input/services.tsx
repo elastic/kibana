@@ -17,9 +17,13 @@ const FieldInputContext = React.createContext<FieldInputServices | null>(null);
 export const FieldInputProvider: FC<FieldInputServices> = ({ children, ...services }) => {
   // Typescript types are widened to accept more than what is needed.  Take only what is necessary
   // so the context remains clean.
-  const { showDanger } = services;
+  const { showDanger, validateChange } = services;
 
-  return <FieldInputContext.Provider value={{ showDanger }}>{children}</FieldInputContext.Provider>;
+  return (
+    <FieldInputContext.Provider value={{ showDanger, validateChange }}>
+      {children}
+    </FieldInputContext.Provider>
+  );
 };
 
 /**
@@ -27,12 +31,16 @@ export const FieldInputProvider: FC<FieldInputServices> = ({ children, ...servic
  */
 export const FieldInputKibanaProvider: FC<FieldInputKibanaDependencies> = ({
   children,
-  toasts,
+  notifications: { toasts },
+  settings: { client },
 }) => {
   return (
     <FieldInputContext.Provider
       value={{
         showDanger: (message) => toasts.addDanger(message),
+        validateChange: async (key, value) => {
+          return await client.validateValue(key, value);
+        },
       }}
     >
       {children}

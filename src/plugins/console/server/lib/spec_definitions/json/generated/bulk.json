@@ -16,10 +16,12 @@
       "_source_excludes": [],
       "_source_includes": [],
       "timeout": [
+        "1m",
         "-1",
         "0"
       ],
       "wait_for_active_shards": [
+        "1",
         "all",
         "index-setting"
       ],

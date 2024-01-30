@@ -15,8 +15,7 @@ import * as mockGetStatus from './get_ml_model_deployment_status';
 import { startMlModelDeployment } from './start_ml_model_deployment';
 
 describe('startMlModelDeployment', () => {
-  const productionModelName = '.elser_model_1';
-  const snapshotModelName = '.elser_model_1_SNAPSHOT';
+  const modelName = '.elser_model_2';
   const mockTrainedModelsProvider = {
     getTrainedModels: jest.fn(),
     getTrainedModelsStats: jest.fn(),
@@ -28,7 +27,7 @@ describe('startMlModelDeployment', () => {
   });
 
   it('should error when there is no trained model provider', () => {
-    expect(() => startMlModelDeployment(productionModelName, undefined)).rejects.toThrowError(
+    expect(() => startMlModelDeployment(modelName, undefined)).rejects.toThrowError(
       'Machine Learning is not enabled'
     );
   });
@@ -50,7 +49,7 @@ describe('startMlModelDeployment', () => {
     jest.spyOn(mockGetStatus, 'getMlModelDeploymentStatus').mockReturnValueOnce(
       Promise.resolve({
         deploymentState: MlModelDeploymentState.Starting,
-        modelId: productionModelName,
+        modelId: modelName,
         nodeAllocationCount: 0,
         startTime: 123456,
         targetAllocationCount: 3,
@@ -59,7 +58,7 @@ describe('startMlModelDeployment', () => {
     );
 
     const response = await startMlModelDeployment(
-      productionModelName,
+      modelName,
       mockTrainedModelsProvider as unknown as MlTrainedModels
     );
 
@@ -70,7 +69,7 @@ describe('startMlModelDeployment', () => {
     jest.spyOn(mockGetStatus, 'getMlModelDeploymentStatus').mockReturnValueOnce(
       Promise.resolve({
         deploymentState: MlModelDeploymentState.Starting,
-        modelId: snapshotModelName,
+        modelId: modelName,
         nodeAllocationCount: 0,
         startTime: 123456,
         targetAllocationCount: 3,
@@ -79,7 +78,7 @@ describe('startMlModelDeployment', () => {
     );
 
     const response = await startMlModelDeployment(
-      snapshotModelName,
+      modelName,
       mockTrainedModelsProvider as unknown as MlTrainedModels
     );
 
@@ -92,7 +91,7 @@ describe('startMlModelDeployment', () => {
       .mockReturnValueOnce(
         Promise.resolve({
           deploymentState: MlModelDeploymentState.Downloaded,
-          modelId: productionModelName,
+          modelId: modelName,
           nodeAllocationCount: 0,
           startTime: 123456,
           targetAllocationCount: 3,
@@ -102,7 +101,7 @@ describe('startMlModelDeployment', () => {
       .mockReturnValueOnce(
         Promise.resolve({
           deploymentState: MlModelDeploymentState.Starting,
-          modelId: productionModelName,
+          modelId: modelName,
           nodeAllocationCount: 0,
           startTime: 123456,
           targetAllocationCount: 3,
@@ -112,7 +111,7 @@ describe('startMlModelDeployment', () => {
     mockTrainedModelsProvider.startTrainedModelDeployment.mockImplementation(async () => {});
 
     const response = await startMlModelDeployment(
-      productionModelName,
+      modelName,
       mockTrainedModelsProvider as unknown as MlTrainedModels
     );
     expect(response.deploymentState).toEqual(MlModelDeploymentState.Starting);

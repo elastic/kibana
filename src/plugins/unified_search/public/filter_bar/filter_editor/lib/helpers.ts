@@ -63,3 +63,6 @@ export const flattenFilters = (filter: Filter[]) => {
 
   return returnArray;
 };
+
+export const MIDDLE_TRUNCATION_PROPS = { truncation: 'middle' as const };
+export const SINGLE_SELECTION_AS_TEXT_PROPS = { asPlainText: true };

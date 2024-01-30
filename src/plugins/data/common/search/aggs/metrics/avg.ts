@@ -26,7 +26,7 @@ export const getAvgMetricAgg = () => {
     name: METRIC_TYPES.AVG,
     expressionName: aggAvgFnName,
     title: averageTitle,
-    valueType: 'number',
+    getValueType: () => 'number',
     makeLabel: (aggConfig) => {
       return i18n.translate('data.search.aggs.metrics.averageLabel', {
         defaultMessage: 'Average {field}',

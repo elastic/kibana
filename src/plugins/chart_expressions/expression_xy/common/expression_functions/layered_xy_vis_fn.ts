@@ -55,6 +55,7 @@ export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers)
       args: {
         ...args,
         layers,
+        minBarHeight: args.minBarHeight ?? 1,
         markSizeRatio: hasMarkSizeAccessors && !args.markSizeRatio ? 10 : args.markSizeRatio,
         ariaLabel:
           args.ariaLabel ??

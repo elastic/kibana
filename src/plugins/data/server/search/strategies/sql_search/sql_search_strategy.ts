@@ -12,6 +12,7 @@ import { catchError, tap } from 'rxjs/operators';
 import type { DiagnosticResult } from '@elastic/transport';
 import { SqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
+import { getKbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type {
   IAsyncSearchOptions,
@@ -28,13 +29,9 @@ export const sqlSearchStrategyProvider = (
   logger: Logger,
   useInternalUser: boolean = false
 ): ISearchStrategy<SqlSearchStrategyRequest, SqlSearchStrategyResponse> => {
-  async function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
-    try {
-      const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
-      await client.sql.deleteAsync({ id });
-    } catch (e) {
-      throw getKbnServerError(e);
-    }
+  function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
+    const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
+    return client.sql.deleteAsync({ id });
   }
 
   function asyncSearch(
@@ -71,7 +68,7 @@ export const sqlSearchStrategyProvider = (
         ));
       }
 
-      if (!body.is_partial && !body.is_running && body.cursor && !keepCursor) {
+      if (!body.is_running && body.cursor && !keepCursor) {
         try {
           await client.sql.clearCursor({ cursor: body.cursor });
         } catch (error) {
@@ -81,12 +78,25 @@ export const sqlSearchStrategyProvider = (
         }
       }
 
-      return toAsyncKibanaSearchResponse(body, startTime, headers?.warning, meta?.request?.params);
+      return toAsyncKibanaSearchResponse(
+        body,
+        startTime,
+        headers?.warning,
+        // do not return requestParams on polling calls
+        id ? undefined : meta?.request?.params
+      );
     };
 
     const cancel = async () => {
-      if (id) {
+      if (!id) return;
+      try {
         await cancelAsyncSearch(id, esClient);
+      } catch (e) {
+        // A 404 means either this search request does not exist, or that it is already cancelled
+        if (e.meta?.statusCode === 404) return;
+
+        // Log all other (unexpected) error messages
+        logger.error(`cancelSqlSearch error: ${e.message}`);
       }
     };
 
@@ -96,7 +106,7 @@ export const sqlSearchStrategyProvider = (
     }).pipe(
       tap((response) => (id = response.id)),
       catchError((e) => {
-        throw getKbnServerError(e);
+        throw getKbnSearchError(e);
       })
     );
   }
@@ -107,7 +117,7 @@ export const sqlSearchStrategyProvider = (
      * @param options
      * @param deps `SearchStrategyDependencies`
      * @returns `Observable<IEsSearchResponse<any>>`
-     * @throws `KbnServerError`
+     * @throws `KbnSearchError`
      */
     search: (request, options: IAsyncSearchOptions, deps) => {
       logger.debug(`sql search: search request=${JSON.stringify(request)}`);
@@ -123,7 +133,11 @@ export const sqlSearchStrategyProvider = (
      */
     cancel: async (id, options, { esClient }) => {
       logger.debug(`sql search: cancel async_search_id=${id}`);
-      await cancelAsyncSearch(id, esClient);
+      try {
+        await cancelAsyncSearch(id, esClient);
+      } catch (e) {
+        throw getKbnServerError(e);
+      }
     },
     /**
      *

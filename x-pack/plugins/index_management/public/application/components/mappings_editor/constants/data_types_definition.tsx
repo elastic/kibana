@@ -851,6 +851,23 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       </p>
     ),
   },
+  sparse_vector: {
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.sparseVectorDescription', {
+      defaultMessage: 'Sparse vector',
+    }),
+    value: 'sparse_vector',
+    documentation: {
+      main: 'sparse-vector.html',
+    },
+    description: () => (
+      <p>
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.dataType.sparseVectorLongDescription"
+          defaultMessage="Sparse vector fields index features and weights, useful for document scoring."
+        />
+      </p>
+    ),
+  },
   point: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.pointDescription', {
       defaultMessage: 'Point',
@@ -958,6 +975,7 @@ export const MAIN_TYPES: MainType[] = [
   'rank_features',
   'search_as_you_type',
   'shape',
+  'sparse_vector',
   'text',
   'token_count',
   'histogram',

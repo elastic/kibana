@@ -44,6 +44,7 @@ const mockSearchApplicationData: EnterpriseSearchApplicationDetails = {
     script: {
       lang: 'mustache',
       params: { query_string: '*' },
+      options: { content_type: 'application/json;charset=utf-8' },
       source: '',
     },
   },

@@ -12,7 +12,6 @@ import {
 } from '@kbn/core/server';
 import { maxSuggestions } from '@kbn/observability-plugin/common';
 import { SearchAggregatedTransactionSetting } from '../common/aggregated_transactions';
-import { APMPlugin } from './plugin';
 
 const disabledOnServerless = offeringBasedSchema({
   serverless: schema.boolean({
@@ -73,6 +72,12 @@ const configSchema = schema.object({
     migrationToFleetAvailable: disabledOnServerless,
     sourcemapApiAvailable: disabledOnServerless,
     storageExplorerAvailable: disabledOnServerless,
+    /**
+     * Depends on optional "profilingDataAccess" and "profiling"
+     * plugins. Enable both with `xpack.profiling.enabled: true` before
+     * enabling this feature flag.
+     */
+    profilingIntegrationAvailable: schema.boolean({ defaultValue: false }),
   }),
   serverless: schema.object({
     enabled: offeringBasedSchema({
@@ -125,8 +130,10 @@ export const config: PluginConfigDescriptor<APMConfig> = {
 
 export type APMConfig = TypeOf<typeof configSchema>;
 
-export const plugin = (initContext: PluginInitializerContext) =>
-  new APMPlugin(initContext);
+export const plugin = async (initContext: PluginInitializerContext) => {
+  const { APMPlugin } = await import('./plugin');
+  return new APMPlugin(initContext);
+};
 
 export { APM_SERVER_FEATURE_ID } from '../common/rules/apm_rule_types';
 export { APMPlugin } from './plugin';

@@ -29,6 +29,7 @@ export interface InternalInjectedMetadataSetup {
   getBasePath: () => string;
   getServerBasePath: () => string;
   getPublicBaseUrl: () => string | undefined;
+  getAssetsHrefBase: () => string;
   getKibanaBuildNumber: () => number;
   getKibanaBranch: () => string;
   getKibanaVersion: () => string;

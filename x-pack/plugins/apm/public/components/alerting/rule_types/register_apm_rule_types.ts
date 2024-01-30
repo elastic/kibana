@@ -7,19 +7,19 @@
 
 import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
-import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { ALERT_REASON, ApmRuleType } from '@kbn/rule-data-utils';
 import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 import {
   getAlertUrlErrorCount,
   getAlertUrlTransaction,
 } from '../../../../common/utils/formatters';
-import { ApmRuleType } from '../../../../common/rules/apm_rule_types';
 import {
   anomalyMessage,
   errorCountMessage,
   transactionDurationMessage,
   transactionErrorRateMessage,
 } from '../../../../common/rules/default_action_message';
+import { AlertParams } from './anomaly_rule_type';
 
 // copied from elasticsearch_fieldnames.ts to limit page load bundle size
 const SERVICE_ENVIRONMENT = 'service.environment';
@@ -55,6 +55,7 @@ export function registerApmRuleTypes(
     }),
     requiresAppContext: false,
     defaultActionMessage: errorCountMessage,
+    priority: 80,
   });
 
   observabilityRuleTypeRegistry.register({
@@ -92,6 +93,7 @@ export function registerApmRuleTypes(
     ),
     requiresAppContext: false,
     defaultActionMessage: transactionDurationMessage,
+    priority: 60,
   });
 
   observabilityRuleTypeRegistry.register({
@@ -124,6 +126,7 @@ export function registerApmRuleTypes(
     }),
     requiresAppContext: false,
     defaultActionMessage: transactionErrorRateMessage,
+    priority: 70,
   });
 
   observabilityRuleTypeRegistry.register({
@@ -145,13 +148,30 @@ export function registerApmRuleTypes(
     documentationUrl(docLinks) {
       return `${docLinks.links.alerting.apmRules}`;
     },
-    ruleParamsExpression: lazy(
-      () => import('./transaction_duration_anomaly_rule_type')
-    ),
-    validate: () => ({
-      errors: [],
-    }),
+    ruleParamsExpression: lazy(() => import('./anomaly_rule_type')),
+    validate: validateAnomalyRule,
     requiresAppContext: false,
     defaultActionMessage: anomalyMessage,
+    priority: 90,
   });
+}
+
+function validateAnomalyRule(ruleParams: AlertParams) {
+  const validationResult = { errors: {} };
+  const errors: {
+    anomalyDetectorTypes?: string;
+  } = {};
+  validationResult.errors = errors;
+  if (
+    ruleParams.anomalyDetectorTypes &&
+    ruleParams.anomalyDetectorTypes.length < 1
+  ) {
+    errors.anomalyDetectorTypes = i18n.translate(
+      'xpack.apm.validateAnomalyRule.',
+      {
+        defaultMessage: 'At least one detector type is required',
+      }
+    );
+  }
+  return validationResult;
 }

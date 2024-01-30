@@ -6,8 +6,10 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { SnapshotRestoreServerPlugin } from './plugin';
 
 export { config } from './config';
 
-export const plugin = (ctx: PluginInitializerContext) => new SnapshotRestoreServerPlugin(ctx);
+export const plugin = async (ctx: PluginInitializerContext) => {
+  const { SnapshotRestoreServerPlugin } = await import('./plugin');
+  return new SnapshotRestoreServerPlugin(ctx);
+};

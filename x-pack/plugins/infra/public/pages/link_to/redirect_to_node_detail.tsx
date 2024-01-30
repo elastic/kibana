@@ -8,9 +8,9 @@
 import React from 'react';
 import { Redirect, useLocation, useRouteMatch } from 'react-router-dom';
 import rison from '@kbn/rison';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { replaceStateKeyInQueryString } from '../../../common/url_state_storage_service';
 import { replaceMetricTimeInQueryString } from '../metrics/metric_detail/hooks/use_metrics_time';
-import { InventoryItemType } from '../../../common/inventory_models/types';
 import { AssetDetailsUrlState } from '../../components/asset_details/types';
 import { ASSET_DETAILS_URL_STATE_KEY } from '../../components/asset_details/constants';
 

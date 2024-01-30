@@ -26,7 +26,7 @@ import { validateGetSpaceHealthRequest } from './get_space_health_request';
 /**
  * Get health overview of the current Kibana space. Scope: all detection rules in the space.
  * Returns:
- * - health stats at the moment of the API call
+ * - health state at the moment of the API call
  * - health stats over a specified period of time ("health interval")
  * - health stats history within the same interval in the form of a histogram
  *   (the same stats are calculated over each of the discreet sub-intervals of the whole interval)

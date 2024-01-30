@@ -8,13 +8,7 @@
 
 import { ExpressionFunctionDefinition, ExecutionContext } from '@kbn/expressions-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common';
-import {
-  KibanaTimerangeOutput,
-  ExecutionContextSearch,
-  KibanaContext,
-  KibanaFilter,
-  KibanaQueryOutput,
-} from '../..';
+import { KibanaTimerangeOutput, KibanaContext, KibanaFilter, KibanaQueryOutput } from '../..';
 
 interface Arguments {
   q?: KibanaQueryOutput[] | null;
@@ -28,5 +22,5 @@ export type ExpressionFunctionKibanaContext = ExpressionFunctionDefinition<
   KibanaContext | null,
   Arguments,
   Promise<KibanaContext>,
-  ExecutionContext<Adapters, ExecutionContextSearch>
+  ExecutionContext<Adapters>
 >;

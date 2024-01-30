@@ -21,5 +21,8 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/config-schema",
     "@kbn/object-versioning",
+    "@kbn/logging",
+    "@kbn/logging-mocks",
+    "@kbn/core",
   ]
 }

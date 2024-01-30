@@ -42,25 +42,25 @@ exports[`AddData render 1`] = `
           grow={false}
         >
           <RedirectAppLinks
-            application={
+            coreStart={
               Object {
-                "capabilities": Object {
-                  "navLinks": Object {
-                    "integrations": true,
+                "application": Object {
+                  "capabilities": Object {
+                    "navLinks": Object {
+                      "integrations": true,
+                    },
                   },
                 },
               }
             }
           >
             <EuiButton
-              color="primary"
               data-test-subj="homeAddData"
               fill={true}
               fullWidth={true}
               href="/app/integrations/browse"
               iconType="plusInCircle"
               onClick={[Function]}
-              size="m"
             >
               <FormattedMessage
                 defaultMessage="Add integrations"

@@ -12,6 +12,7 @@ import {
   savedObjectsClientMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
@@ -27,6 +28,7 @@ import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/li
 import { RecoveredActionGroup } from '../../../../../common';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { getRuleExecutionStatusPending, getDefaultMonitoring } from '../../../../lib';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
 jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -82,6 +84,9 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   minimumScheduleInterval: { value: '1m', enforce: false },
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
+  uiSettings: uiSettingsServiceMock.createStartContract(),
 };
 
 beforeEach(() => {
@@ -172,7 +177,7 @@ describe('create()', () => {
     ): Promise<unknown> {
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
         id: '1',
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         attributes: {
           alertTypeId: '123',
           schedule: { interval: '1m' },
@@ -204,7 +209,7 @@ describe('create()', () => {
       });
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
         id: '1',
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         attributes: {
           actions: [],
           scheduledTaskId: 'task-123',
@@ -268,7 +273,7 @@ describe('create()', () => {
       });
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
         id: '1',
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         attributes: {
           ...data,
           executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
@@ -283,7 +288,7 @@ describe('create()', () => {
             action: 'rule_create',
             outcome: 'unknown',
           }),
-          kibana: { saved_object: { id: 'mock-saved-object-id', type: 'alert' } },
+          kibana: { saved_object: { id: 'mock-saved-object-id', type: RULE_SAVED_OBJECT_TYPE } },
         })
       );
     });
@@ -308,7 +313,7 @@ describe('create()', () => {
           kibana: {
             saved_object: {
               id: 'mock-saved-object-id',
-              type: 'alert',
+              type: RULE_SAVED_OBJECT_TYPE,
             },
           },
           error: {
@@ -349,7 +354,7 @@ describe('create()', () => {
     };
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         ...createdAttributes,
         running: false,
@@ -365,7 +370,7 @@ describe('create()', () => {
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         ...createdAttributes,
         running: false,
@@ -431,7 +436,7 @@ describe('create()', () => {
     `);
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toHaveLength(3);
-    expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toEqual('alert');
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toEqual(RULE_SAVED_OBJECT_TYPE);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).toMatchInlineSnapshot(`
       Object {
         "actions": Array [
@@ -541,7 +546,7 @@ describe('create()', () => {
                                                 `);
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.update.mock.calls[0]).toHaveLength(4);
-    expect(unsecuredSavedObjectsClient.update.mock.calls[0][0]).toEqual('alert');
+    expect(unsecuredSavedObjectsClient.update.mock.calls[0][0]).toEqual(RULE_SAVED_OBJECT_TYPE);
     expect(unsecuredSavedObjectsClient.update.mock.calls[0][1]).toEqual('1');
     expect(unsecuredSavedObjectsClient.update.mock.calls[0][2]).toMatchInlineSnapshot(`
       Object {
@@ -580,7 +585,7 @@ describe('create()', () => {
     };
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '123',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         ...createdAttributes,
         running: false,
@@ -644,7 +649,7 @@ describe('create()', () => {
     };
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '123',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         ...createdAttributes,
         running: false,
@@ -796,7 +801,7 @@ describe('create()', () => {
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         running: false,
         executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
@@ -855,7 +860,7 @@ describe('create()', () => {
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         actions: [],
         scheduledTaskId: 'task-123',
@@ -998,7 +1003,7 @@ describe('create()', () => {
     actionsClient.isPreconfigured.mockReturnValueOnce(false);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
         alertTypeId: '123',
@@ -1052,7 +1057,7 @@ describe('create()', () => {
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         actions: [],
         scheduledTaskId: 'task-123',
@@ -1108,7 +1113,7 @@ describe('create()', () => {
       }
     `);
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       {
         actions: [
           {
@@ -1259,7 +1264,7 @@ describe('create()', () => {
 
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
         alertTypeId: '123',
@@ -1312,7 +1317,7 @@ describe('create()', () => {
 
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         actions: [],
         scheduledTaskId: 'task-123',
@@ -1369,7 +1374,7 @@ describe('create()', () => {
     `);
 
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       {
         actions: [
           {
@@ -1442,7 +1447,7 @@ describe('create()', () => {
     const data = getMockData({ enabled: false });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         enabled: false,
         alertTypeId: '123',
@@ -1543,6 +1548,7 @@ describe('create()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: extractReferencesFn,
@@ -1558,7 +1564,7 @@ describe('create()', () => {
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         alertTypeId: '123',
         schedule: { interval: '1m' },
@@ -1597,7 +1603,7 @@ describe('create()', () => {
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         actions: [],
         scheduledTaskId: 'task-123',
@@ -1608,7 +1614,7 @@ describe('create()', () => {
 
     expect(extractReferencesFn).toHaveBeenCalledWith(ruleParams);
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       {
         actions: [
           {
@@ -1731,6 +1737,7 @@ describe('create()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: extractReferencesFn,
@@ -1746,7 +1753,7 @@ describe('create()', () => {
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         alertTypeId: '123',
         schedule: { interval: '1m' },
@@ -1785,7 +1792,7 @@ describe('create()', () => {
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         actions: [],
         scheduledTaskId: 'task-123',
@@ -1796,7 +1803,7 @@ describe('create()', () => {
 
     expect(extractReferencesFn).toHaveBeenCalledWith(ruleParams);
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       {
         actions: [
           {
@@ -1890,7 +1897,7 @@ describe('create()', () => {
     const data = getMockData({ name: ' my alert name ' });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         enabled: false,
         name: ' my alert name ',
@@ -1959,7 +1966,7 @@ describe('create()', () => {
     };
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: createdAttributes,
       references: [
         {
@@ -1971,7 +1978,7 @@ describe('create()', () => {
     });
     const result = await rulesClient.create({ data });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       {
         actions: [
           {
@@ -2100,7 +2107,7 @@ describe('create()', () => {
     };
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: createdAttributes,
       references: [
         {
@@ -2112,7 +2119,7 @@ describe('create()', () => {
     });
     const result = await rulesClient.create({ data });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       {
         actions: [
           {
@@ -2241,7 +2248,7 @@ describe('create()', () => {
     };
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: createdAttributes,
       references: [
         {
@@ -2253,7 +2260,7 @@ describe('create()', () => {
     });
     const result = await rulesClient.create({ data });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       {
         actions: [
           {
@@ -2390,7 +2397,7 @@ describe('create()', () => {
     };
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '123',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: createdAttributes,
       references: [
         {
@@ -2404,7 +2411,7 @@ describe('create()', () => {
     const result = await rulesClient.create({ data });
 
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       {
         enabled: true,
         name: 'abc',
@@ -2558,6 +2565,7 @@ describe('create()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       validLegacyConsumers: [],
     });
@@ -2602,7 +2610,7 @@ describe('create()', () => {
     const data = getMockData();
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         alertTypeId: '123',
         schedule: { interval: '1m' },
@@ -2651,7 +2659,7 @@ describe('create()', () => {
     const data = getMockData();
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         alertTypeId: '123',
         schedule: { interval: '1m' },
@@ -2698,7 +2706,7 @@ describe('create()', () => {
     const data = getMockData();
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         alertTypeId: '123',
         schedule: { interval: '1m' },
@@ -2756,7 +2764,7 @@ describe('create()', () => {
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         alertTypeId: '123',
         schedule: { interval: '1m' },
@@ -2786,7 +2794,7 @@ describe('create()', () => {
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         actions: [],
         scheduledTaskId: 'task-123',
@@ -2803,7 +2811,7 @@ describe('create()', () => {
 
     expect(rulesClientParams.createAPIKey).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       {
         actions: [
           {
@@ -2861,7 +2869,7 @@ describe('create()', () => {
     const data = getMockData({ enabled: false });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         alertTypeId: '123',
         schedule: { interval: '1m' },
@@ -2891,7 +2899,7 @@ describe('create()', () => {
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         actions: [],
         scheduledTaskId: 'task-123',
@@ -2908,7 +2916,7 @@ describe('create()', () => {
 
     expect(rulesClientParams.createAPIKey).not.toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       {
         actions: [
           {
@@ -3026,6 +3034,7 @@ describe('create()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -3064,7 +3073,7 @@ describe('create()', () => {
     };
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: createdAttributes,
       references: [
         {
@@ -3099,6 +3108,7 @@ describe('create()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -3137,6 +3147,7 @@ describe('create()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -3230,6 +3241,7 @@ describe('create()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -3280,6 +3292,7 @@ describe('create()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -3343,6 +3356,7 @@ describe('create()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -3424,6 +3438,7 @@ describe('create()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -3522,7 +3537,7 @@ describe('create()', () => {
     ]);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         alertTypeId: '123',
         schedule: { interval: '1m' },
@@ -3564,7 +3579,7 @@ describe('create()', () => {
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         actions: [],
         scheduledTaskId: 'task-123',
@@ -3624,6 +3639,7 @@ describe('create()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -3682,6 +3698,7 @@ describe('create()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -3730,7 +3747,7 @@ describe('create()', () => {
     rulesClientParams.isAuthenticationTypeAPIKey.mockReturnValueOnce(true);
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         alertTypeId: '123',
         schedule: { interval: '1m' },
@@ -3760,7 +3777,7 @@ describe('create()', () => {
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         actions: [],
         scheduledTaskId: 'task-123',
@@ -3778,7 +3795,7 @@ describe('create()', () => {
     expect(rulesClientParams.isAuthenticationTypeAPIKey).toHaveBeenCalledTimes(1);
     expect(rulesClientParams.getAuthenticationAPIKey).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       {
         actions: [
           {

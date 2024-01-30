@@ -19,6 +19,7 @@ import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-pl
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import useLifecycles from 'react-use/lib/useLifecycles';
 import useObservable from 'react-use/lib/useObservable';
+import type { MlFeatures } from '../../common/constants/app';
 import { MlLicense } from '../../common/license';
 import { MlCapabilitiesService } from './capabilities/check_capabilities';
 import { ML_STORAGE_KEYS } from '../../common/types/storage';
@@ -30,10 +31,12 @@ import { MlRouter } from './routing';
 import { mlApiServicesProvider } from './services/ml_api_service';
 import { HttpService } from './services/http_service';
 import type { PageDependencies } from './routing/router';
+import { EnabledFeaturesContextProvider } from './contexts/ml';
+import type { StartServices } from './contexts/kibana';
 
 export type MlDependencies = Omit<
   MlSetupDependencies,
-  'share' | 'fieldFormats' | 'maps' | 'cases' | 'licensing'
+  'share' | 'fieldFormats' | 'maps' | 'cases' | 'licensing' | 'uiActions'
 > &
   MlStartDependencies;
 
@@ -42,6 +45,7 @@ interface AppProps {
   deps: MlDependencies;
   appMountParams: AppMountParameters;
   isServerless: boolean;
+  mlFeatures: MlFeatures;
 }
 
 const localStorage = new Storage(window.localStorage);
@@ -49,11 +53,7 @@ const localStorage = new Storage(window.localStorage);
 /**
  * Provides global services available across the entire ML app.
  */
-export function getMlGlobalServices(
-  httpStart: HttpStart,
-  isServerless: boolean,
-  usageCollection?: UsageCollectionSetup
-) {
+export function getMlGlobalServices(httpStart: HttpStart, usageCollection?: UsageCollectionSetup) {
   const httpService = new HttpService(httpStart);
   const mlApiServices = mlApiServicesProvider(httpService);
 
@@ -63,7 +63,6 @@ export function getMlGlobalServices(
     mlUsageCollection: mlUsageCollectionProvider(usageCollection),
     mlCapabilities: new MlCapabilitiesService(mlApiServices),
     mlLicense: new MlLicense(),
-    isServerless,
   };
 }
 
@@ -73,41 +72,43 @@ export interface MlServicesContext {
 
 export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;
 
-const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless }) => {
+const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless, mlFeatures }) => {
   const pageDeps: PageDependencies = {
     history: appMountParams.history,
     setHeaderActionMenu: appMountParams.setHeaderActionMenu,
     setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
   };
 
-  const services = useMemo(() => {
+  const services: StartServices = useMemo(() => {
     return {
-      kibanaVersion: deps.kibanaVersion,
-      share: deps.share,
-      data: deps.data,
-      security: deps.security,
-      licenseManagement: deps.licenseManagement,
-      storage: localStorage,
-      embeddable: deps.embeddable,
-      maps: deps.maps,
-      triggersActionsUi: deps.triggersActionsUi,
-      dataVisualizer: deps.dataVisualizer,
-      usageCollection: deps.usageCollection,
-      fieldFormats: deps.fieldFormats,
-      dashboard: deps.dashboard,
-      charts: deps.charts,
       cases: deps.cases,
-      unifiedSearch: deps.unifiedSearch,
-      licensing: deps.licensing,
+      charts: deps.charts,
+      contentManagement: deps.contentManagement,
+      dashboard: deps.dashboard,
+      data: deps.data,
+      dataViewEditor: deps.dataViewEditor,
+      dataViews: deps.data.dataViews,
+      dataVisualizer: deps.dataVisualizer,
+      embeddable: deps.embeddable,
+      fieldFormats: deps.fieldFormats,
+      kibanaVersion: deps.kibanaVersion,
       lens: deps.lens,
+      licenseManagement: deps.licenseManagement,
+      maps: deps.maps,
+      presentationUtil: deps.presentationUtil,
       savedObjectsManagement: deps.savedObjectsManagement,
       savedSearch: deps.savedSearch,
-      contentManagement: deps.contentManagement,
-      presentationUtil: deps.presentationUtil,
+      security: deps.security,
+      share: deps.share,
+      storage: localStorage,
+      triggersActionsUi: deps.triggersActionsUi,
+      uiActions: deps.uiActions,
+      unifiedSearch: deps.unifiedSearch,
+      usageCollection: deps.usageCollection,
       ...coreStart,
-      mlServices: getMlGlobalServices(coreStart.http, isServerless, deps.usageCollection),
+      mlServices: getMlGlobalServices(coreStart.http, deps.usageCollection),
     };
-  }, [deps, coreStart, isServerless]);
+  }, [deps, coreStart]);
 
   useLifecycles(
     function setupLicenseOnMount() {
@@ -131,7 +132,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless }) =>
   const datePickerDeps: DatePickerDependencies = {
     ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,
-    isServerless,
+    showFrozenDataTierChoice: !isServerless,
   };
 
   const I18nContext = coreStart.i18n.Context;
@@ -145,7 +146,9 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless }) =>
           <KibanaContextProvider services={services}>
             <StorageContextProvider storage={localStorage} storageKeys={ML_STORAGE_KEYS}>
               <DatePickerContextProvider {...datePickerDeps}>
-                <MlRouter pageDeps={pageDeps} />
+                <EnabledFeaturesContextProvider isServerless={isServerless} mlFeatures={mlFeatures}>
+                  <MlRouter pageDeps={pageDeps} />
+                </EnabledFeaturesContextProvider>
               </DatePickerContextProvider>
             </StorageContextProvider>
           </KibanaContextProvider>
@@ -159,7 +162,8 @@ export const renderApp = (
   coreStart: CoreStart,
   deps: MlDependencies,
   appMountParams: AppMountParameters,
-  isServerless: boolean
+  isServerless: boolean,
+  mlFeatures: MlFeatures
 ) => {
   setDependencyCache({
     timefilter: deps.data.query.timefilter,
@@ -193,6 +197,7 @@ export const renderApp = (
       deps={deps}
       appMountParams={appMountParams}
       isServerless={isServerless}
+      mlFeatures={mlFeatures}
     />,
     appMountParams.element
   );

@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import type { IEsError } from '@kbn/data-plugin/public';
+import type { IEsError } from '@kbn/search-errors';
 import type { KibanaError, SecurityAppError } from '@kbn/securitysolution-t-grid';
 
 import { useToasts } from '../lib/kibana';
@@ -234,7 +234,7 @@ describe('useAppToasts', () => {
 
     it('prefers the attributes reason if we have it for the message', async () => {
       const error: IEsError = {
-        attributes: { type: 'some type', reason: 'message we want' },
+        attributes: { error: { type: 'some type', reason: 'message we want' } },
         statusCode: 200,
         message: 'message we do not want',
       };
@@ -244,11 +244,11 @@ describe('useAppToasts', () => {
 
     it('works with an EsError, by using the inner error and not outer error if available', async () => {
       const error: MaybeESError = {
-        attributes: { type: 'some type', reason: 'message we want' },
+        attributes: { error: { type: 'some type', reason: 'message we want' } },
         statusCode: 400,
         err: {
           statusCode: 200,
-          attributes: { reason: 'attribute message we do not want' },
+          attributes: { error: { reason: 'attribute message we do not want' } },
         },
         message: 'main message we do not want',
       };
@@ -258,11 +258,11 @@ describe('useAppToasts', () => {
 
     it('creates a stack trace of a EsError and not the outer object', async () => {
       const error: MaybeESError = {
-        attributes: { type: 'some type', reason: 'message we do not want' },
+        attributes: { error: { type: 'some type', reason: 'message we do not want' } },
         statusCode: 400,
         err: {
           statusCode: 200,
-          attributes: { reason: 'attribute message we do want' },
+          attributes: { error: { reason: 'attribute message we do want' } },
         },
         message: 'main message we do not want',
       };
@@ -270,7 +270,7 @@ describe('useAppToasts', () => {
       const parsedStack = JSON.parse(result.stack ?? '');
       expect(parsedStack).toEqual({
         statusCode: 200,
-        attributes: { reason: 'attribute message we do want' },
+        attributes: { error: { reason: 'attribute message we do want' } },
       });
     });
   });

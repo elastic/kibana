@@ -18,6 +18,7 @@ import {
 } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { set } from '@kbn/safer-lodash-set';
+import { Alert } from '@kbn/alerts-as-data-utils';
 import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
 import { LINK_TO_METRICS_EXPLORER } from '../../../../common/alerting/metrics';
 import { getInventoryViewInAppUrl } from '../../../../common/alerting/metrics/alert_link';
@@ -223,8 +224,10 @@ export const flattenAdditionalContext = (
   return additionalContext ? flattenObject(additionalContext) : {};
 };
 
-export const getContextForRecoveredAlerts = (
-  alertHitSource: Partial<ParsedTechnicalFields & ParsedExperimentalFields> | undefined | null
+export const getContextForRecoveredAlerts = <
+  T extends Alert | (ParsedTechnicalFields & ParsedExperimentalFields)
+>(
+  alertHitSource: Partial<T> | undefined | null
 ): AdditionalContext => {
   const alert = alertHitSource ? unflattenObject(alertHitSource) : undefined;
 

@@ -59,7 +59,6 @@ export enum SecurityPageName {
   noPage = '',
   overview = 'overview',
   policies = 'policy',
-  projectSettings = 'project_settings',
   responseActionsHistory = 'response_actions_history',
   rules = 'rules',
   rulesAdd = 'rules-add',

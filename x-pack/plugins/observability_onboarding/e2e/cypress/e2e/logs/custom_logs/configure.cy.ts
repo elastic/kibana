@@ -12,6 +12,19 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
       cy.visitKibana('/app/observabilityOnboarding/customLogs');
     });
 
+    describe('when user clicks on back button', () => {
+      beforeEach(() => {
+        cy.loginAsViewerUser();
+        cy.visitKibana('/app/observabilityOnboarding/customLogs');
+      });
+
+      it('navigates to observability logs onboarding page', () => {
+        cy.getByTestSubj('observabilityOnboardingBackButtonBackButton').click();
+
+        cy.url().should('include', '/app/observabilityOnboarding');
+      });
+    });
+
     it('Users shouldnt be able to continue if logFilePaths is empty', () => {
       cy.getByTestSubj('obltOnboardingLogFilePath-0')
         .find('input')

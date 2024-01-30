@@ -14,12 +14,13 @@ import { ApmServiceContextProvider } from '../../../context/apm_service/apm_serv
 import { UrlParamsProvider } from '../../../context/url_params_context/url_params_context';
 import type { ApmUrlParams } from '../../../context/url_params_context/types';
 import * as useFetcherHook from '../../../hooks/use_fetcher';
-import * as useApmDataViewHook from '../../../hooks/use_apm_data_view';
+import * as useApmDataViewHook from '../../../hooks/use_adhoc_apm_data_view';
 import * as useServiceTransactionTypesHook from '../../../context/apm_service/use_service_transaction_types_fetcher';
 import { renderWithTheme } from '../../../utils/test_helpers';
 import { fromQuery } from '../links/url_helpers';
 import { CoreStart } from '@kbn/core/public';
 import { SearchBar } from './search_bar';
+import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 
 function setup({
   urlParams,
@@ -36,8 +37,12 @@ function setup({
   });
 
   const KibanaReactContext = createKibanaReactContext({
-    usageCollection: { reportUiCounter: () => {} },
-    dataViews: { get: async () => {} },
+    usageCollection: {
+      reportUiCounter: () => {},
+    },
+    dataViews: {
+      get: async () => {},
+    },
     data: {
       query: {
         queryString: {
@@ -66,7 +71,7 @@ function setup({
 
   // mock transaction types
   jest
-    .spyOn(useApmDataViewHook, 'useApmDataView')
+    .spyOn(useApmDataViewHook, 'useAdHocApmDataView')
     .mockReturnValue({ dataView: undefined });
 
   jest.spyOn(useFetcherHook, 'useFetcher').mockReturnValue({} as any);
@@ -75,9 +80,11 @@ function setup({
     <KibanaReactContext.Provider>
       <MockApmPluginContextWrapper history={history}>
         <UrlParamsProvider>
-          <ApmServiceContextProvider>
-            <SearchBar showTransactionTypeSelector />
-          </ApmServiceContextProvider>
+          <ApmTimeRangeMetadataContextProvider>
+            <ApmServiceContextProvider>
+              <SearchBar showTransactionTypeSelector />
+            </ApmServiceContextProvider>
+          </ApmTimeRangeMetadataContextProvider>
         </UrlParamsProvider>
       </MockApmPluginContextWrapper>
     </KibanaReactContext.Provider>

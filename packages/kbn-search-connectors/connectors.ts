@@ -25,7 +25,7 @@ export interface ConnectorServerSideDefinition {
 export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   {
     iconPath: 'azure_blob_storage.svg',
-    isBeta: true,
+    isBeta: false,
     isNative: true,
     keywords: ['cloud', 'azure', 'blob', 's3', 'connector'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.azureBlob.name', {
@@ -45,7 +45,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   },
   {
     iconPath: 'dropbox.svg',
-    isBeta: true,
+    isBeta: false,
     isNative: true,
     isTechPreview: false,
     keywords: ['dropbox', 'connector'],
@@ -66,8 +66,8 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   },
   {
     iconPath: 'github.svg',
-    isBeta: true,
-    isNative: false,
+    isBeta: false,
+    isNative: true,
     keywords: ['github', 'cloud', 'connector'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.github.name', {
       defaultMessage: 'GitHub & GitHub Enterprise Server',
@@ -76,8 +76,8 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   },
   {
     iconPath: 'google_cloud_storage.svg',
-    isBeta: true,
-    isNative: false,
+    isBeta: false,
+    isNative: true,
     keywords: ['google', 'cloud', 'blob', 's3', 'connector'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.googleCloud.name', {
       defaultMessage: 'Google Cloud Storage',
@@ -87,7 +87,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   {
     iconPath: 'google_drive.svg',
     isBeta: true,
-    isNative: false,
+    isNative: true,
     keywords: ['google', 'drive', 'connector'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.googleDrive.name', {
       defaultMessage: 'Google Drive',
@@ -116,7 +116,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   },
   {
     iconPath: 'mssql.svg',
-    isBeta: true,
+    isBeta: false,
     isNative: true,
     keywords: ['mssql', 'microsoft', 'sql', 'database', 'connector'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.microsoftSQL.name', {
@@ -136,7 +136,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   },
   {
     iconPath: 'postgresql.svg',
-    isBeta: true,
+    isBeta: false,
     isNative: true,
     keywords: ['postgresql', 'sql', 'database', 'connector'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.postgresql.name', {
@@ -147,7 +147,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   {
     iconPath: 'salesforce.svg',
     isBeta: true,
-    isNative: false,
+    isNative: true,
     isTechPreview: false,
     keywords: ['salesforce', 'cloud', 'connector'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.salesforce.name', {
@@ -157,7 +157,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   },
   {
     iconPath: 'servicenow.svg',
-    isBeta: true,
+    isBeta: false,
     isNative: true,
     isTechPreview: false,
     keywords: ['servicenow', 'cloud', 'connector'],
@@ -191,7 +191,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   {
     iconPath: 'oracle.svg',
     isBeta: true,
-    isNative: false,
+    isNative: true,
     keywords: ['oracle', 'sql', 'database', 'connector'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.oracle.name', {
       defaultMessage: 'Oracle',
@@ -201,7 +201,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   {
     iconPath: 'onedrive.svg',
     isBeta: true,
-    isNative: false,
+    isNative: true,
     keywords: ['network', 'drive', 'file', 'connector'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.oneDrive.name', {
       defaultMessage: 'OneDrive',
@@ -210,8 +210,8 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
   },
   {
     iconPath: 's3.svg',
-    isBeta: true,
-    isNative: false,
+    isBeta: false,
+    isNative: true,
     keywords: ['s3', 'cloud', 'amazon', 'connector'],
     name: i18n.translate('searchConnectors.content.nativeConnectors.s3.name', {
       defaultMessage: 'S3',
@@ -239,6 +239,50 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
       defaultMessage: 'Sharepoint Server',
     }),
     serviceType: 'sharepoint_server',
+  },
+  {
+    iconPath: 'box.svg',
+    isBeta: false,
+    isNative: false,
+    isTechPreview: true,
+    keywords: ['cloud', 'box'],
+    name: i18n.translate('searchConnectors.content.nativeConnectors.box.name', {
+      defaultMessage: 'Box',
+    }),
+    serviceType: 'box',
+  },
+  {
+    iconPath: 'outlook.svg',
+    isBeta: false,
+    isNative: false,
+    isTechPreview: true,
+    keywords: ['outlook', 'connector'],
+    name: i18n.translate('searchConnectors.content.nativeConnectors.outlook.name', {
+      defaultMessage: 'Outlook',
+    }),
+    serviceType: 'outlook',
+  },
+  {
+    iconPath: 'teams.svg',
+    isBeta: false,
+    isNative: false,
+    isTechPreview: true,
+    keywords: ['teams', 'connector'],
+    name: i18n.translate('searchConnectors.content.nativeConnectors.teams.name', {
+      defaultMessage: 'Teams',
+    }),
+    serviceType: 'microsoft_teams',
+  },
+  {
+    iconPath: 'zoom.svg',
+    isBeta: false,
+    isNative: false,
+    isTechPreview: true,
+    keywords: ['zoom', 'connector'],
+    name: i18n.translate('searchConnectors.content.nativeConnectors.zoom.name', {
+      defaultMessage: 'Zoom',
+    }),
+    serviceType: 'zoom',
   },
   {
     iconPath: 'custom.svg',

@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import type { CspSetupStatus } from '@kbn/cloud-security-posture-plugin/common/types';
+import type { CspSetupStatus } from '@kbn/cloud-security-posture-plugin/common/types_old';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
@@ -56,6 +56,7 @@ export default function (providerContext: FtrProviderContext) {
 
         const { body: agentPolicyResponse } = await supertest
           .post(`/api/fleet/agent_policies`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'Test policy',
@@ -109,6 +110,7 @@ export default function (providerContext: FtrProviderContext) {
 
         const { body: agentPolicyResponse } = await supertest
           .post(`/api/fleet/agent_policies`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'Test policy',
@@ -245,8 +247,8 @@ export default function (providerContext: FtrProviderContext) {
           `expected unprivileged but got ${res.cspm.status} instead`
         );
         expect(res.vuln_mgmt.status).to.eql(
-          'not-installed',
-          `expected not-installed but got ${res.vuln_mgmt.status} instead`
+          'unprivileged',
+          `expected unprivileged but got ${res.vuln_mgmt.status} instead`
         );
 
         assertIndexStatus(res.indicesDetails, LATEST_FINDINGS_INDEX_DEFAULT_NS, 'unprivileged');

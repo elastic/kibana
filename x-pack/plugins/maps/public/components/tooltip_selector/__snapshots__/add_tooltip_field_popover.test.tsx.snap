@@ -24,6 +24,7 @@ exports[`Should remove selected fields from selectable 1`] = `
   isOpen={false}
   ownFocus={true}
   panelPaddingSize="none"
+  repositionToCrossAxis={true}
 >
   <EuiSelectable
     isPreFiltered={false}
@@ -61,7 +62,6 @@ exports[`Should remove selected fields from selectable 1`] = `
       textAlign="right"
     >
       <EuiButton
-        color="primary"
         fill={true}
         isDisabled={true}
         onClick={[Function]}
@@ -98,6 +98,7 @@ exports[`Should render 1`] = `
   isOpen={false}
   ownFocus={true}
   panelPaddingSize="none"
+  repositionToCrossAxis={true}
 >
   <EuiSelectable
     isPreFiltered={false}
@@ -153,7 +154,6 @@ exports[`Should render 1`] = `
       textAlign="right"
     >
       <EuiButton
-        color="primary"
         fill={true}
         isDisabled={true}
         onClick={[Function]}

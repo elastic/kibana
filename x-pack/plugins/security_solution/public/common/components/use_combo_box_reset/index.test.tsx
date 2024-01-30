@@ -65,20 +65,21 @@ describe('useEuiComboBoxReset', () => {
 
     render(<EuiComboBoxResetTest />);
 
-    const initialValue = screen.getByTestId('comboBoxInput'); // EuiComboBox does NOT render the current selection via it's input; it uses this div
-    expect(initialValue).toHaveTextContent(options[0].label);
+    const initialValue = screen.getByRole('combobox');
+    expect(initialValue).toHaveValue(options[0].label);
 
     // update the EuiComboBox input to an invalid value:
-    const searchInput = screen.getByTestId('comboBoxSearchInput'); // the actual <input /> controlled by EuiComboBox
+    const searchInput = screen.getByRole('combobox'); // the actual <input /> controlled by EuiComboBox
     fireEvent.change(searchInput, { target: { value: invalidValue } });
 
-    const afterInvalidInput = screen.getByTestId('comboBoxInput');
-    expect(afterInvalidInput).toHaveTextContent(invalidValue); // the EuiComboBox is now in the "error state"
+    const afterInvalidInput = screen.getByRole('combobox');
+    expect(searchInput).toHaveValue(invalidValue); // the EuiComboBox is now in the "error state"
+    expect(afterInvalidInput).not.toHaveTextContent(invalidValue); // Value should not have been applied
 
     const resetButton = screen.getByRole('button', { name: 'Reset' });
     fireEvent.click(resetButton); // clicking invokes onReset()
 
-    const afterReset = screen.getByTestId('comboBoxInput');
-    expect(afterReset).toHaveTextContent(options[0].label); // back to the default
+    const afterReset = screen.getByRole('combobox');
+    expect(afterReset).toHaveValue(options[0].label); // back to the default
   });
 });

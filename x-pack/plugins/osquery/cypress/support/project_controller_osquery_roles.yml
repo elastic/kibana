@@ -1,31 +1,12 @@
+# add more functionalities just for ESS environment
 soc_manager:
   applications:
-    - application: discover
+    - application: "kibana-.kibana"
       privileges:
-        - all
-      resources: "*"
-    - application: visualize
-      privileges:
-        - read
-      resources: "*"
-    - application: observabilityCases
-      privileges:
-        - all
-      resources: "*"
-    - application: securitySolutionCases
-      privileges:
-        - all
-      resources: "*"
-    - application: infrastructure
-      privileges:
-        - read
-      resources: "*"
-    - application: indexPatterns
-      privileges:
-        - all
+          - feature_observabilityCases.all
       resources: "*"
 
-# custom roles for osquery lack of permission testing
+## custom roles for osquery lack of permission testing - reader extends viewer in ESS, but we cannot use viewer directly
 reader:
   indices:
     - names:
@@ -34,7 +15,7 @@ reader:
         - read
         - write
   applications:
-    - application: osquery
+    - application: "kibana-.kibana"
       privileges:
-        - read
+        - feature_osquery.read
       resources: "*"

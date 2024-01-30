@@ -41,8 +41,8 @@ export const parseFields = (fields: string | string[]): string[] => {
 
 const access = 'internal';
 
-type IBody = { index_filter?: estypes.QueryDslQueryContainer } | undefined;
-interface IQuery {
+export type IBody = { index_filter?: estypes.QueryDslQueryContainer } | undefined;
+export interface IQuery {
   pattern: string;
   meta_fields: string | string[];
   type?: string;
@@ -50,9 +50,10 @@ interface IQuery {
   allow_no_index?: boolean;
   include_unmapped?: boolean;
   fields?: string[];
+  allow_hidden?: boolean;
 }
 
-const querySchema = schema.object({
+export const querySchema = schema.object({
   pattern: schema.string(),
   meta_fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
     defaultValue: [],
@@ -62,6 +63,7 @@ const querySchema = schema.object({
   allow_no_index: schema.maybe(schema.boolean()),
   include_unmapped: schema.maybe(schema.boolean()),
   fields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+  allow_hidden: schema.maybe(schema.boolean()),
 });
 
 const fieldSubTypeSchema = schema.object({
@@ -95,7 +97,7 @@ const FieldDescriptorSchema = schema.object({
   ),
 });
 
-const validate: FullValidationConfig<any, any, any> = {
+export const validate: FullValidationConfig<any, any, any> = {
   request: {
     query: querySchema,
     // not available to get request
@@ -122,6 +124,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
       rollup_index: rollupIndex,
       allow_no_index: allowNoIndex,
       include_unmapped: includeUnmapped,
+      allow_hidden: allowHidden,
     } = request.query;
 
     // not available to get request
@@ -147,6 +150,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
           includeUnmapped,
         },
         indexFilter,
+        allowHidden,
         ...(parsedFields.length > 0 ? { fields: parsedFields } : {}),
       });
 

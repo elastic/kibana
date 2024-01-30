@@ -18,9 +18,11 @@ import {
   Tree,
   RelatedEventCategory,
 } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
+import { targetTags } from '../../../security_solution_endpoint/target_tags';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { Options, GeneratedTrees } from '../../services/resolver';
 import { compareArrays } from './common';
+import { HEADERS } from '../../headers';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -48,7 +50,9 @@ export default function ({ getService }: FtrProviderContext) {
     ancestryArraySize: 2,
   };
 
-  describe('event route', () => {
+  describe('event route', function () {
+    targetTags(this, ['@ess', '@serverless']);
+
     let entityIDFilterArray: JsonObject[] | undefined;
     let entityIDFilter: string | undefined;
     before(async () => {
@@ -77,7 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
       const { body }: { body: ResolverPaginatedEvents } = await supertest
         .post(`/api/endpoint/resolver/events`)
-        .set('kbn-xsrf', 'xxx')
+        .set(HEADERS)
         .send({
           filter,
           indexPatterns: [eventsIndexPattern],
@@ -100,7 +104,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
       const { body }: { body: ResolverPaginatedEvents } = await supertest
         .post(`/api/endpoint/resolver/events`)
-        .set('kbn-xsrf', 'xxx')
+        .set(HEADERS)
         .send({
           filter,
           indexPatterns: [eventsIndexPattern],
@@ -117,7 +121,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return related events for the root node', async () => {
       const { body }: { body: ResolverPaginatedEvents } = await supertest
         .post(`/api/endpoint/resolver/events`)
-        .set('kbn-xsrf', 'xxx')
+        .set(HEADERS)
         .send({
           filter: entityIDFilter,
           indexPatterns: [eventsIndexPattern],
@@ -143,7 +147,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
       const { body }: { body: ResolverPaginatedEvents } = await supertest
         .post(`/api/endpoint/resolver/events`)
-        .set('kbn-xsrf', 'xxx')
+        .set(HEADERS)
         .send({
           filter,
           indexPatterns: [eventsIndexPattern],
@@ -164,7 +168,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return paginated results for the root node', async () => {
       let { body }: { body: ResolverPaginatedEvents } = await supertest
         .post(`/api/endpoint/resolver/events?limit=2`)
-        .set('kbn-xsrf', 'xxx')
+        .set(HEADERS)
         .send({
           filter: entityIDFilter,
           indexPatterns: [eventsIndexPattern],
@@ -180,7 +184,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       ({ body } = await supertest
         .post(`/api/endpoint/resolver/events?limit=2&afterEvent=${body.nextEvent}`)
-        .set('kbn-xsrf', 'xxx')
+        .set(HEADERS)
         .send({
           filter: entityIDFilter,
           indexPatterns: [eventsIndexPattern],
@@ -196,7 +200,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       ({ body } = await supertest
         .post(`/api/endpoint/resolver/events?limit=2&afterEvent=${body.nextEvent}`)
-        .set('kbn-xsrf', 'xxx')
+        .set(HEADERS)
         .send({
           filter: entityIDFilter,
           indexPatterns: [eventsIndexPattern],
@@ -213,7 +217,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return the first page of information when the cursor is invalid', async () => {
       const { body }: { body: ResolverPaginatedEvents } = await supertest
         .post(`/api/endpoint/resolver/events?afterEvent=blah`)
-        .set('kbn-xsrf', 'xxx')
+        .set(HEADERS)
         .send({
           filter: entityIDFilter,
           indexPatterns: [eventsIndexPattern],
@@ -231,7 +235,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should sort the events in descending order', async () => {
       const { body }: { body: ResolverPaginatedEvents } = await supertest
         .post(`/api/endpoint/resolver/events`)
-        .set('kbn-xsrf', 'xxx')
+        .set(HEADERS)
         .send({
           filter: entityIDFilter,
           indexPatterns: [eventsIndexPattern],
@@ -258,7 +262,7 @@ export default function ({ getService }: FtrProviderContext) {
       const to = from;
       const { body }: { body: ResolverPaginatedEvents } = await supertest
         .post(`/api/endpoint/resolver/events`)
-        .set('kbn-xsrf', 'xxx')
+        .set(HEADERS)
         .send({
           filter: entityIDFilter,
           indexPatterns: [eventsIndexPattern],
@@ -276,7 +280,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should not find events when using an incorrect index pattern', async () => {
       const { body }: { body: ResolverPaginatedEvents } = await supertest
         .post(`/api/endpoint/resolver/events`)
-        .set('kbn-xsrf', 'xxx')
+        .set(HEADERS)
         .send({
           filter: entityIDFilter,
           indexPatterns: ['doesnotexist-*'],
@@ -295,7 +299,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(originParentID).to.not.be('');
       const { body }: { body: ResolverPaginatedEvents } = await supertest
         .post(`/api/endpoint/resolver/events`)
-        .set('kbn-xsrf', 'xxx')
+        .set(HEADERS)
         .send({
           filter: JSON.stringify({
             bool: {
@@ -323,7 +327,7 @@ export default function ({ getService }: FtrProviderContext) {
       let { body }: { body: ResolverPaginatedEvents } = await supertest
         .post(`/api/endpoint/resolver/events`)
         .query({ limit: 2 })
-        .set('kbn-xsrf', 'xxx')
+        .set(HEADERS)
         .send({
           filter: JSON.stringify({
             bool: {
@@ -346,7 +350,7 @@ export default function ({ getService }: FtrProviderContext) {
       ({ body } = await supertest
         .post(`/api/endpoint/resolver/events`)
         .query({ limit: 3, afterEvent: body.nextEvent })
-        .set('kbn-xsrf', 'xxx')
+        .set(HEADERS)
         .send({
           filter: JSON.stringify({
             bool: {

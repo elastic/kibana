@@ -22,12 +22,17 @@ import * as Registry from '../registry';
 
 import { createInstallation, handleInstallPackageFailure, installPackage } from './install';
 import * as install from './_install_package';
-import { getBundledPackages } from './bundled_packages';
+import { getBundledPackageByPkgKey } from './bundled_packages';
 
 import * as obj from '.';
 
 jest.mock('../../app_context', () => {
   const logger = { error: jest.fn(), debug: jest.fn(), warn: jest.fn(), info: jest.fn() };
+  const mockedSavedObjectTagging = {
+    createInternalAssignmentService: jest.fn(),
+    createTagClient: jest.fn(),
+  };
+
   return {
     appContextService: {
       getLogger: jest.fn(() => {
@@ -38,13 +43,12 @@ jest.mock('../../app_context', () => {
         createImporter: jest.fn(),
       })),
       getConfig: jest.fn(() => ({})),
-      getSavedObjectsTagging: jest.fn(() => ({
-        createInternalAssignmentService: jest.fn(),
-        createTagClient: jest.fn(),
-      })),
+      getSavedObjectsTagging: jest.fn(() => mockedSavedObjectTagging),
+      getInternalUserSOClientForSpaceId: jest.fn(),
     },
   };
 });
+
 jest.mock('.');
 jest.mock('../registry', () => {
   return {
@@ -73,14 +77,19 @@ jest.mock('../archive', () => {
     generatePackageInfoFromArchiveBuffer: jest.fn(() =>
       Promise.resolve({ packageInfo: { name: 'apache', version: '1.3.0' } })
     ),
-    unpackBufferToCache: jest.fn(),
+    unpackBufferToAssetsMap: jest.fn(() =>
+      Promise.resolve({
+        assetsMap: new Map(),
+        paths: [],
+      })
+    ),
     setPackageInfo: jest.fn(),
     deleteVerificationResult: jest.fn(),
   };
 });
 jest.mock('../../audit_logging');
 
-const mockGetBundledPackages = jest.mocked(getBundledPackages);
+const mockGetBundledPackageByPkgKey = jest.mocked(getBundledPackageByPkgKey);
 const mockedAuditLoggingService = jest.mocked(auditLoggingService);
 
 describe('createInstallation', () => {
@@ -143,13 +152,14 @@ describe('install', () => {
       } as any)
     );
 
-    mockGetBundledPackages.mockReset();
+    mockGetBundledPackageByPkgKey.mockReset();
     (install._installPackage as jest.Mock).mockClear();
+    jest.mocked(appContextService.getInternalUserSOClientForSpaceId).mockReset();
   });
 
   describe('registry', () => {
     beforeEach(() => {
-      mockGetBundledPackages.mockResolvedValue([]);
+      mockGetBundledPackageByPkgKey.mockResolvedValue(undefined);
     });
 
     it('should send telemetry on install failure, out of date', async () => {
@@ -186,7 +196,7 @@ describe('install', () => {
       expect(sendTelemetryEvents).toHaveBeenCalledWith(expect.anything(), undefined, {
         currentVersion: 'not_installed',
         dryRun: false,
-        errorMessage: 'Requires basic license',
+        errorMessage: 'Installation requires basic license',
         eventType: 'package-install',
         installType: 'install',
         newVersion: '1.3.0',
@@ -243,6 +253,7 @@ describe('install', () => {
     it('should send telemetry on install failure, async error', async () => {
       jest.mocked(install._installPackage).mockRejectedValue(new Error('error'));
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+
       await installPackage({
         spaceId: DEFAULT_SPACE_ID,
         installSource: 'registry',
@@ -265,13 +276,11 @@ describe('install', () => {
 
     it('should install from bundled package if one exists', async () => {
       (install._installPackage as jest.Mock).mockResolvedValue({});
-      mockGetBundledPackages.mockResolvedValue([
-        {
-          name: 'test_package',
-          version: '1.0.0',
-          buffer: Buffer.from('test_package'),
-        },
-      ]);
+      mockGetBundledPackageByPkgKey.mockResolvedValue({
+        name: 'test_package',
+        version: '1.0.0',
+        getBuffer: async () => Buffer.from('test_package'),
+      });
 
       const response = await installPackage({
         spaceId: DEFAULT_SPACE_ID,
@@ -284,7 +293,7 @@ describe('install', () => {
       expect(response.error).toBeUndefined();
 
       expect(install._installPackage).toHaveBeenCalledWith(
-        expect.objectContaining({ installSource: 'upload' })
+        expect.objectContaining({ installSource: 'bundled' })
       );
     });
 
@@ -332,7 +341,7 @@ describe('install', () => {
       expect(response.status).toEqual('already_installed');
     });
 
-    it('should not allow to install fleet_server if internal.fleetServerStandalone is configured', async () => {
+    it('should allow to install fleet_server if internal.fleetServerStandalone is configured', async () => {
       jest.mocked(appContextService.getConfig).mockReturnValueOnce({
         internal: {
           fleetServerStandalone: true,
@@ -347,8 +356,39 @@ describe('install', () => {
         esClient: {} as ElasticsearchClient,
       });
 
-      expect(response.error).toBeDefined();
-      expect(response.error?.message).toMatch(/fleet_server installation is not authorized/);
+      expect(response.status).toEqual('installed');
+    });
+
+    it('should use a scopped to package space soClient for tagging', async () => {
+      const mockedTaggingSo = savedObjectsClientMock.create();
+      jest
+        .mocked(appContextService.getInternalUserSOClientForSpaceId)
+        .mockReturnValue(mockedTaggingSo);
+      jest
+        .spyOn(obj, 'getInstallationObject')
+        .mockImplementationOnce(() => Promise.resolve({ attributes: { version: '1.2.0' } } as any));
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      await installPackage({
+        spaceId: 'test',
+        installSource: 'registry',
+        pkgkey: 'apache-1.3.0',
+        savedObjectsClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+      });
+
+      expect(appContextService.getInternalUserSOClientForSpaceId).toBeCalledWith('test');
+      expect(appContextService.getSavedObjectsTagging().createTagClient).toBeCalledWith(
+        expect.objectContaining({
+          client: mockedTaggingSo,
+        })
+      );
+      expect(
+        appContextService.getSavedObjectsTagging().createInternalAssignmentService
+      ).toBeCalledWith(
+        expect.objectContaining({
+          client: mockedTaggingSo,
+        })
+      );
     });
   });
 
@@ -429,7 +469,7 @@ describe('handleInstallPackageFailure', () => {
     jest.mocked(install._installPackage).mockClear();
     jest.mocked(install._installPackage).mockResolvedValue({} as any);
     mockedLogger.error.mockClear();
-    mockGetBundledPackages.mockResolvedValue([]);
+    mockGetBundledPackageByPkgKey.mockResolvedValue(undefined);
     jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
     jest.spyOn(Registry, 'splitPkgKey').mockImplementation((pkgKey: string) => {
       const [pkgName, pkgVersion] = pkgKey.split('-');
@@ -518,7 +558,9 @@ describe('handleInstallPackageFailure', () => {
     expect(install._installPackage).toBeCalledTimes(1);
     expect(install._installPackage).toBeCalledWith(
       expect.objectContaining({
-        packageInfo: expect.objectContaining({ name: pkgName, version: '1.0.0' }),
+        packageInstallContext: expect.objectContaining({
+          packageInfo: expect.objectContaining({ name: pkgName, version: '1.0.0' }),
+        }),
       })
     );
   });
@@ -562,7 +604,9 @@ describe('handleInstallPackageFailure', () => {
     expect(install._installPackage).toBeCalledTimes(1);
     expect(install._installPackage).toBeCalledWith(
       expect.objectContaining({
-        packageInfo: expect.objectContaining({ name: pkgName, version: '1.0.0' }),
+        packageInstallContext: expect.objectContaining({
+          packageInfo: expect.objectContaining({ name: pkgName, version: '1.0.0' }),
+        }),
       })
     );
   });

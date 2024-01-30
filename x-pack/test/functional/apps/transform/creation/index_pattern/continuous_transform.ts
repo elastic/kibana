@@ -6,6 +6,7 @@
  */
 
 import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
@@ -24,9 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const pageObjects = getPageObjects(['discover']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/165146
-  // Failing: See https://github.com/elastic/kibana/issues/165144
-  describe.skip('creation_continuous_transform', function () {
+  describe('creation_continuous_transform', function () {
     before(async () => {
       // installing the sample data with test user with super user role and then switching roles with limited privileges
       await security.testUser.setRoles(['superuser'], { skipBrowserRefresh: true });
@@ -37,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await transform.api.cleanTransformIndices();
-      await transform.testResources.deleteIndexPatternByTitle('ft_ecommerce');
+      await transform.testResources.deleteDataViewByTitle('ft_ecommerce');
     });
 
     const DEFAULT_NUM_FAILURE_RETRIES = '5';
@@ -327,7 +326,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         after(async () => {
           await transform.api.deleteIndices(testData.destinationIndex);
-          await transform.testResources.deleteIndexPatternByTitle(testData.destinationIndex);
+          await transform.testResources.deleteDataViewByTitle(testData.destinationIndex);
         });
 
         it('loads the wizard for the source data', async () => {
@@ -441,9 +440,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await transform.wizard.assertTransformDescriptionValue('');
           await transform.wizard.setTransformDescription(testData.transformDescription);
 
-          await transform.testExecution.logTestStep('inputs the destination index');
+          await transform.testExecution.logTestStep(
+            'should default the set destination index to job id switch to true'
+          );
+          await transform.wizard.assertDestIndexSameAsIdSwitchExists();
+          await transform.wizard.assertDestIndexSameAsIdCheckState(true);
+
+          await transform.testExecution.logTestStep('should input the destination index');
+          await transform.wizard.setDestIndexSameAsIdCheckState(false);
           await transform.wizard.assertDestinationIndexInputExists();
-          await transform.wizard.assertDestinationIndexValue('');
+          await transform.wizard.assertDestinationIndexValue(testData.transformId);
           await transform.wizard.setDestinationIndex(testData.destinationIndex);
 
           await transform.testExecution.logTestStep('displays the create data view switch');
@@ -515,9 +521,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await transform.wizard.assertCopyToClipboardButtonEnabled(true);
         });
 
-        // FLAKY: https://github.com/elastic/kibana/issues/158612
-        // FLAKY: https://github.com/elastic/kibana/issues/158613
-        it.skip('runs the transform and displays it correctly in the job list', async () => {
+        it('runs the transform and displays it correctly in the job list', async () => {
           await transform.testExecution.logTestStep('creates the transform');
           await transform.wizard.createTransform();
 

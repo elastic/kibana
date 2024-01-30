@@ -7,6 +7,7 @@
  */
 
 import { ApmError } from './apm_error';
+import { Event } from './event';
 import { BaseSpan } from './base_span';
 import { generateShortId } from '../utils/generate_id';
 import { ApmFields } from './apm_fields';
@@ -15,6 +16,7 @@ import { getBreakdownMetrics } from './processors/get_breakdown_metrics';
 export class Transaction extends BaseSpan {
   private _sampled: boolean = true;
   private readonly _errors: ApmError[] = [];
+  private readonly _events: Event[] = [];
 
   constructor(fields: ApmFields) {
     super({
@@ -34,6 +36,27 @@ export class Transaction extends BaseSpan {
       error.fields['transaction.type'] = this.fields['transaction.type'];
       error.fields['transaction.sampled'] = this.fields['transaction.sampled'];
     });
+
+    this._events.forEach((event) => {
+      event.fields['trace.id'] = this.fields['trace.id'];
+      event.fields['transaction.id'] = this.fields['transaction.id'];
+      event.fields['transaction.type'] = this.fields['transaction.type'];
+      event.fields['transaction.sampled'] = this.fields['transaction.sampled'];
+    });
+
+    return this;
+  }
+
+  events(...events: Event[]) {
+    events.forEach((event) => {
+      event.fields['trace.id'] = this.fields['trace.id'];
+      event.fields['transaction.id'] = this.fields['transaction.id'];
+      event.fields['transaction.name'] = this.fields['transaction.name'];
+      event.fields['transaction.type'] = this.fields['transaction.type'];
+      event.fields['transaction.sampled'] = this.fields['transaction.sampled'];
+    });
+
+    this._events.push(...events);
 
     return this;
   }
@@ -62,6 +85,9 @@ export class Transaction extends BaseSpan {
     this._errors.forEach((error) => {
       error.fields['transaction.sampled'] = sampled;
     });
+    this._events.forEach((event) => {
+      event.fields['transaction.sampled'] = sampled;
+    });
     return this;
   }
 
@@ -69,6 +95,7 @@ export class Transaction extends BaseSpan {
     const [transaction, ...spans] = super.serialize();
 
     const errors = this._errors.flatMap((error) => error.serialize());
+    const logEvents = this._events.flatMap((event) => event.serialize());
 
     const directChildren = this.getChildren().map((child) => child.fields);
 
@@ -80,6 +107,6 @@ export class Transaction extends BaseSpan {
       events.push(...spans);
     }
 
-    return events.concat(errors).concat(breakdownMetrics);
+    return events.concat(errors).concat(breakdownMetrics).concat(logEvents);
   }
 }

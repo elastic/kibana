@@ -37,7 +37,7 @@ describe('useChartSettingsPopoverConfiguration', () => {
     <TestProviders store={store}>{children}</TestProviders>
   );
 
-  beforeEach(() => jest.resetAllMocks());
+  beforeEach(() => jest.clearAllMocks());
 
   test('it returns the expected defaultInitialPanelId', () => {
     const { result } = renderHook(

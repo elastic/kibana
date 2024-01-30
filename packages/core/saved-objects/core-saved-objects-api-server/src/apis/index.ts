@@ -35,6 +35,7 @@ export type {
   SavedObjectReferenceWithContext,
   SavedObjectsCollectMultiNamespaceReferencesResponse,
   SavedObjectsCollectMultiNamespaceReferencesOptions,
+  SavedObjectsCollectMultiNamespaceReferencesPurpose,
 } from './collect_multinamespace_references';
 export type { SavedObjectsCreateOptions } from './create';
 export type {

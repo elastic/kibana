@@ -10,13 +10,15 @@ import React, { useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { OnSaveProps, SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
+import {
+  OnSaveProps,
+  SavedObjectSaveModal,
+  type SaveModalState,
+} from '@kbn/saved-objects-plugin/public';
 
 import { pluginServices } from '../services';
 import { SaveModalDashboardProps } from './types';
 import { SaveModalDashboardSelector } from './saved_object_save_modal_dashboard_selector';
-
-import './saved_object_save_modal_dashboard.scss';
 
 function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
   const { documentInfo, tagOptions, objectType, onClose, canSaveByReference } = props;
@@ -41,7 +43,7 @@ function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
   const [copyOnSave, setCopyOnSave] = useState<boolean>(initialCopyOnSave);
 
   const rightOptions = !disableDashboardOptions
-    ? () => (
+    ? ({ hasAttemptedSubmit }: SaveModalState) => (
         <SaveModalDashboardSelector
           onSelectDashboard={(dash) => {
             setSelectedDashboard(dash);
@@ -50,7 +52,15 @@ function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
             setDashboardOption(option);
           }}
           canSaveByReference={canSaveByReference}
-          {...{ copyOnSave, documentId, dashboardOption, setAddToLibrary, isAddToLibrarySelected }}
+          {...{
+            copyOnSave,
+            documentId,
+            dashboardOption,
+            setAddToLibrary,
+            isAddToLibrarySelected,
+            hasAttemptedSubmit,
+            hasSelectedDashboard: Boolean(selectedDashboard),
+          }}
         />
       )
     : null;
@@ -107,6 +117,7 @@ function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
       options={isAddToLibrarySelected ? tagOptions : undefined} // Show tags when not adding to dashboard
       description={documentInfo.description}
       showDescription={true}
+      mustCopyOnSaveMessage={props.mustCopyOnSaveMessage}
       {...{
         confirmButtonLabel,
         initialCopyOnSave,

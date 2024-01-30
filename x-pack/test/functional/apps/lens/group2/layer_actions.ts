@@ -12,6 +12,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
   const find = getService('find');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   describe('lens layer actions tests', () => {
     it('should allow creation of lens xy chart', async () => {
@@ -238,6 +239,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // add annotation layer
       // by default annotations ignore global filters
       await PageObjects.lens.createLayer('annotations');
+
+      await testSubjects.click('lns-layerPanel-2 > lnsXY_xAnnotationsPanel > lns-dimensionTrigger');
+
+      await testSubjects.click('lnsXY_annotation_query');
+
+      await retry.try(async () => {
+        if (!(await testSubjects.exists('annotation-query-based-query-input'))) {
+          await testSubjects.setValue('annotation-query-based-query-input', '*', {
+            clearWithKeyboard: true,
+            typeCharByChar: true,
+          });
+        }
+      });
+
+      await PageObjects.lens.closeDimensionEditor();
 
       await PageObjects.lens.save('sampledVisualization', false, true, false, 'new');
 

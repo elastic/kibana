@@ -19,6 +19,8 @@ jest.mock('@kbn/repo-info', () => ({
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
+import { GlobalConfigService } from '../services/global_config_service';
+
 import {
   callEnterpriseSearchConfigAPI,
   warnMismatchedVersions,
@@ -37,6 +39,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
   };
   const mockDependencies = {
     config: mockConfig,
+    globalConfigService: new GlobalConfigService(),
     request: mockRequest,
     log: loggingSystemMock.create().get(),
   } as any;
@@ -96,6 +99,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
         organization: {
           name: 'ACME Donuts',
           default_org_name: 'My Organization',
+          kibanaUIsEnabled: false,
         },
         account: {
           id: 'some-id-string',
@@ -188,6 +192,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
         organization: {
           name: undefined,
           defaultOrgName: undefined,
+          kibanaUIsEnabled: false,
         },
         account: {
           id: undefined,

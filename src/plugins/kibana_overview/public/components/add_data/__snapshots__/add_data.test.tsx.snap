@@ -55,7 +55,13 @@ exports[`AddData render 1`] = `
     <EuiFlexItem
       key="home_tutorial_directory"
     >
-      <RedirectAppLinks>
+      <RedirectAppLinks
+        coreStart={
+          Object {
+            "application": undefined,
+          }
+        }
+      >
         <Synopsis
           description="Ingest data from popular apps and services."
           iconType="indexOpen"
@@ -71,7 +77,13 @@ exports[`AddData render 1`] = `
     <EuiFlexItem
       key="ingestManager"
     >
-      <RedirectAppLinks>
+      <RedirectAppLinks
+        coreStart={
+          Object {
+            "application": undefined,
+          }
+        }
+      >
         <Synopsis
           description="Add and manage your fleet of Elastic Agents and integrations."
           iconType="indexManagementApp"
@@ -87,7 +99,13 @@ exports[`AddData render 1`] = `
     <EuiFlexItem
       key="ml_file_data_visualizer"
     >
-      <RedirectAppLinks>
+      <RedirectAppLinks
+        coreStart={
+          Object {
+            "application": undefined,
+          }
+        }
+      >
         <Synopsis
           description="Import your own CSV, NDJSON, or log file"
           iconType="document"

@@ -134,6 +134,22 @@
           },
           {
             "parentPluginId": "@kbn/core-base-common",
+            "id": "def-common.DiscoveredPlugin.runtimePluginDependencies",
+            "type": "Object",
+            "tags": [],
+            "label": "runtimePluginDependencies",
+            "description": [
+              "\nAn optional list of plugin dependencies that can be resolved dynamically at runtime\nusing the dynamic contract resolving capabilities from the plugin service."
+            ],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "packages/core/base/core-base-common/src/plugins.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-base-common",
             "id": "def-common.DiscoveredPlugin.enabledOnAnonymousPages",
             "type": "CompoundType",
             "tags": [],

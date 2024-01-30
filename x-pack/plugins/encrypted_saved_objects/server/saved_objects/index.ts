@@ -118,7 +118,7 @@ export function setupSavedObjects({
             {
               type,
               id,
-              namespace: getDescriptorNamespace(typeRegistry, type, options?.namespace),
+              namespace: getDescriptorNamespace(typeRegistry, type, savedObject.namespaces),
             },
             savedObject.attributes as Record<string, unknown>
           )) as T,
@@ -148,7 +148,7 @@ export function setupSavedObjects({
                   namespace: getDescriptorNamespace(
                     typeRegistry,
                     savedObject.type,
-                    findOptions.namespaces
+                    savedObject.namespaces
                   ),
                 };
 

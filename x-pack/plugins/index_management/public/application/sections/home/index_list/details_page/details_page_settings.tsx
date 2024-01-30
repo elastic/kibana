@@ -53,10 +53,9 @@ export const DetailsPageSettings: FunctionComponent<{
             <EuiText color="subdued">
               <FormattedMessage
                 id="xpack.idxMgmt.indexDetails.settings.errorDescription"
-                defaultMessage="There was an error loading settings for index {indexName}: {error}"
+                defaultMessage="We encountered an error loading settings for index {indexName}. Make sure that the index name in the URL is correct and try again."
                 values={{
                   indexName,
-                  error: error?.error,
                 }}
               />
             </EuiText>

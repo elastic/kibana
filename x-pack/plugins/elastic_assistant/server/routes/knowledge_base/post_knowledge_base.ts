@@ -10,10 +10,11 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { buildResponse } from '../../lib/build_response';
 import { buildRouteValidation } from '../../schemas/common';
-import { ElasticAssistantRequestHandlerContext } from '../../types';
+import { ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
 import { KNOWLEDGE_BASE } from '../../../common/constants';
 import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
 import { ESQL_DOCS_LOADED_QUERY, ESQL_RESOURCE, KNOWLEDGE_BASE_INDEX_PATTERN } from './constants';
+import { getKbResource } from './get_kb_resource';
 import { PostKnowledgeBasePathParams } from '../../schemas/knowledge_base/post_knowledge_base';
 import { loadESQL } from '../../lib/langchain/content_loaders/esql_loader';
 
@@ -21,7 +22,10 @@ import { loadESQL } from '../../lib/langchain/content_loaders/esql_loader';
  * Load Knowledge Base index, pipeline, and resources (collection of documents)
  * @param router
  */
-export const postKnowledgeBaseRoute = (router: IRouter<ElasticAssistantRequestHandlerContext>) => {
+export const postKnowledgeBaseRoute = (
+  router: IRouter<ElasticAssistantRequestHandlerContext>,
+  getElser: GetElser
+) => {
   router.post(
     {
       path: KNOWLEDGE_BASE,
@@ -36,15 +40,24 @@ export const postKnowledgeBaseRoute = (router: IRouter<ElasticAssistantRequestHa
     },
     async (context, request, response) => {
       const resp = buildResponse(response);
-      const logger = (await context.elasticAssistant).logger;
+      const assistantContext = await context.elasticAssistant;
+      const logger = assistantContext.logger;
+      const telemetry = assistantContext.telemetry;
 
       try {
-        const kbResource =
-          request.params.resource != null ? decodeURIComponent(request.params.resource) : undefined;
-
+        const core = await context.core;
         // Get a scoped esClient for creating the Knowledge Base index, pipeline, and documents
-        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-        const esStore = new ElasticsearchStore(esClient, KNOWLEDGE_BASE_INDEX_PATTERN, logger);
+        const esClient = core.elasticsearch.client.asCurrentUser;
+        const elserId = await getElser(request, core.savedObjects.getClient());
+        const kbResource = getKbResource(request);
+        const esStore = new ElasticsearchStore(
+          esClient,
+          KNOWLEDGE_BASE_INDEX_PATTERN,
+          logger,
+          telemetry,
+          elserId,
+          kbResource
+        );
 
         // Pre-check on index/pipeline
         let indexExists = await esStore.indexExists();

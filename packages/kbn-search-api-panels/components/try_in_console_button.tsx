@@ -40,10 +40,10 @@ export const TryInConsoleButton = ({
   if (!consolePreviewLink) return null;
 
   return (
-    <EuiButtonEmpty href={consolePreviewLink} iconType="popout" target="_blank">
+    <EuiButtonEmpty href={consolePreviewLink} iconType="popout" target="_blank" size="s">
       <FormattedMessage
         id="searchApiPanels.welcomeBanner.tryInConsoleButton"
-        defaultMessage="Try in console"
+        defaultMessage="Try in Console"
       />
     </EuiButtonEmpty>
   );

@@ -8,6 +8,7 @@
 import moment from 'moment';
 import { FilterStateStore, type TimeRange } from '@kbn/es-query';
 import { type TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import { useMemo } from 'react';
 import { useFilerQueryUpdates } from '../../hooks/use_filters_query';
 import { fnOperationTypeMapping } from './constants';
@@ -38,9 +39,11 @@ export const useCommonChartProps = ({
    * we need to adjust time bound based on the change point timestamp.
    */
   const chartTimeRange = useMemo<TimeRange>(() => {
+    const absoluteTimeRange = getAbsoluteTimeRange(timeRange);
+
     return {
-      from: moment.min(moment(timeRange.from), moment(annotation.timestamp)).toISOString(),
-      to: moment.max(moment(timeRange.to), moment(annotation.timestamp)).toISOString(),
+      from: moment.min(moment(absoluteTimeRange.from), moment(annotation.timestamp)).toISOString(),
+      to: moment.max(moment(absoluteTimeRange.to), moment(annotation.timestamp)).toISOString(),
     };
   }, [timeRange, annotation.timestamp]);
 

@@ -8,20 +8,50 @@
 import { memoize } from 'lodash';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
+/**
+ * Represents the result of number validation.
+ * @interface
+ */
 export interface NumberValidationResult {
+  /** The minimum allowed value. */
   min: boolean;
+
+  /** The maximum allowed value. */
   max: boolean;
+
+  /** Boolean flag to allow integer values only. */
   integerOnly: boolean;
 }
 
 /**
- * Validate if a number is greater than a specified minimum & lesser than specified maximum
+ * An interface describing conditions for validating numbers.
+ * @interface
  */
-export function numberValidator(conditions?: {
+interface NumberValidatorConditions {
+  /**
+   * The minimum value for validation.
+   */
   min?: number;
+
+  /**
+   * The maximum value for validation.
+   */
   max?: number;
+
+  /**
+   * Indicates whether only integer values are valid.
+   */
   integerOnly?: boolean;
-}) {
+}
+
+/**
+ * Validate if a number is within specified minimum and maximum bounds.
+ *
+ * @param conditions - An optional object containing validation conditions.
+ * @returns validation results.
+ * @throws {Error} If the provided conditions are invalid (min is greater than max).
+ */
+export function numberValidator(conditions?: NumberValidatorConditions) {
   if (
     conditions?.min !== undefined &&
     conditions.max !== undefined &&

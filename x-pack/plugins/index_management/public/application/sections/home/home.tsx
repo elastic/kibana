@@ -13,8 +13,8 @@ import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 
 import { Section } from '../../../../common/constants';
 import { documentationService } from '../../services/documentation';
-import { useAppContext } from '../../app_context';
 import { ComponentTemplateList } from '../../components/component_templates';
+import { useAppContext } from '../../app_context';
 import { IndexList } from './index_list';
 import { EnrichPoliciesList } from './enrich_policies_list';
 import { IndexDetailsPage } from './index_list/details_page';
@@ -40,7 +40,8 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
   history,
 }) => {
   const {
-    config: { enableIndexDetailsPage },
+    config: { enableEmbeddedConsole },
+    plugins: { console: consolePlugin },
   } = useAppContext();
   const tabs = [
     {
@@ -145,17 +146,13 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
         />
         <Route exact path={`/${Section.EnrichPolicies}`} component={EnrichPoliciesList} />
       </Routes>
+      {(enableEmbeddedConsole && consolePlugin?.renderEmbeddableConsole?.()) ?? <></>}
     </>
   );
-  if (enableIndexDetailsPage) {
-    return (
-      <>
-        <Routes>
-          <Route path={`/${Section.Indices}/index_details`} component={IndexDetailsPage} />
-          <Route render={() => indexManagementTabs} />
-        </Routes>
-      </>
-    );
-  }
-  return indexManagementTabs;
+  return (
+    <Routes>
+      <Route path={`/${Section.Indices}/index_details`} component={IndexDetailsPage} />
+      <Route render={() => indexManagementTabs} />
+    </Routes>
+  );
 };

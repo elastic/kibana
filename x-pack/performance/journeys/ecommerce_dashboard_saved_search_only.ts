@@ -13,12 +13,12 @@ export const journey = new Journey({
   kbnArchives: ['x-pack/performance/kbn_archives/ecommerce_saved_search_only_dashboard'],
 })
 
-  .step('Go to Dashboards Page', async ({ page, kbnUrl }) => {
+  .step('Go to Dashboards Page', async ({ page, kbnUrl, kibanaPage }) => {
     await page.goto(kbnUrl.get(`/app/dashboards`));
-    await page.waitForSelector('#dashboardListingHeading');
+    await kibanaPage.waitForListViewTable();
   })
 
   .step('Go to Ecommerce Dashboard with Saved Search only', async ({ page, kibanaPage }) => {
     await page.click(subj('dashboardListingTitleLink-[eCommerce]-Saved-Search-Dashboard'));
-    await kibanaPage.waitForVisualizations(1);
+    await kibanaPage.waitForVisualizations({ count: 1 });
   });

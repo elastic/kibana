@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout kibana-operations
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           repository: 'elastic/kibana-operations'
           ref: main

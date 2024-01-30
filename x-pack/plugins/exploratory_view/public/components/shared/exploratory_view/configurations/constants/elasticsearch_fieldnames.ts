@@ -129,6 +129,7 @@ export const FCP_FIELD = 'transaction.marks.agent.firstContentfulPaint';
 export const LCP_FIELD = 'transaction.marks.agent.largestContentfulPaint';
 export const TBT_FIELD = 'transaction.experience.tbt';
 export const FID_FIELD = 'transaction.experience.fid';
+export const INP_FIELD = 'numeric_labels.inp_value';
 export const CLS_FIELD = 'transaction.experience.cls';
 
 export const PROFILE_ID = 'profile.id';

@@ -22,3 +22,5 @@ export const mockEventPromptContext: PromptContext = {
   id: 'mock-event-prompt-context-1',
   tooltip: 'Add this event as context',
 };
+
+export const mockPromptContexts: PromptContext[] = [mockAlertPromptContext, mockEventPromptContext];

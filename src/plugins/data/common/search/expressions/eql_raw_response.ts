@@ -13,7 +13,7 @@ const name = 'eql_raw_response';
 
 export interface EqlRawResponse {
   type: typeof name;
-  body: EqlSearchStrategyResponse['rawResponse']['body'];
+  body: EqlSearchStrategyResponse['rawResponse'];
 }
 
 // duplocated from x-pack/timelines plugin

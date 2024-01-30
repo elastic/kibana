@@ -36,28 +36,24 @@ export function PalettePicker({
     });
   return (
     <EuiFormRow
-      display="columnCompressed"
       fullWidth
       label={i18n.translate('xpack.lens.palettePicker.label', {
-        defaultMessage: 'Color palette',
+        defaultMessage: 'Palette',
       })}
     >
-      <>
-        <EuiColorPalettePicker
-          fullWidth
-          data-test-subj="lns-palettePicker"
-          compressed
-          palettes={palettesToShow}
-          onChange={(newPalette) => {
-            setPalette({
-              type: 'palette',
-              name: newPalette,
-            });
-          }}
-          valueOfSelected={activePalette?.name || 'default'}
-          selectionDisplay={'palette'}
-        />
-      </>
+      <EuiColorPalettePicker
+        fullWidth
+        data-test-subj="lns-palettePicker"
+        palettes={palettesToShow}
+        onChange={(newPalette) => {
+          setPalette({
+            type: 'palette',
+            name: newPalette,
+          });
+        }}
+        valueOfSelected={activePalette?.name || 'default'}
+        selectionDisplay={'palette'}
+      />
     </EuiFormRow>
   );
 }

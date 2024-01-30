@@ -14,13 +14,13 @@ export const updateSearchSource = (
   searchSource: ISearchSource,
   dataView: DataView | undefined,
   sort: (SortOrder[] & string[][]) | undefined,
+  sampleSize: number,
   useNewFieldsApi: boolean,
   defaults: {
-    sampleSize: number;
     sortDir: string;
   }
 ) => {
-  const { sampleSize, sortDir } = defaults;
+  const { sortDir } = defaults;
   searchSource.setField('size', sampleSize);
   searchSource.setField(
     'sort',

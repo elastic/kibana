@@ -63,6 +63,8 @@ class DocumentationService {
   private indicesComponentTemplate: string = '';
   private bulkIndexAlias: string = '';
   private indexStats: string = '';
+  private bulkApi: string = '';
+  private updateExistingDS: string = '';
 
   public setup(docLinks: DocLinksStart): void {
     const { links } = docLinks;
@@ -119,6 +121,8 @@ class DocumentationService {
     this.indicesComponentTemplate = links.apis.putComponentTemplate;
     this.bulkIndexAlias = links.apis.bulkIndexAlias;
     this.indexStats = links.apis.indexStats;
+    this.bulkApi = links.enterpriseSearch.bulkApi;
+    this.updateExistingDS = links.elasticsearch.tutorialUpdateExistingDataStream;
   }
 
   public getEsDocsBase() {
@@ -333,6 +337,14 @@ class DocumentationService {
 
   public getIndexStats() {
     return this.indexStats;
+  }
+
+  public getBulkApi() {
+    return this.bulkApi;
+  }
+
+  public getUpdateExistingDS() {
+    return this.updateExistingDS;
   }
 
   public getWellKnownTextLink() {

@@ -18,7 +18,7 @@ import {
   getPostCaseRequest,
 } from '../../../../common/lib/mock';
 import {
-  deleteCasesByESQuery,
+  deleteAllCaseItems,
   createCase,
   resolveCase,
   createComment,
@@ -46,7 +46,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('resolve_case', () => {
     afterEach(async () => {
-      await deleteCasesByESQuery(es);
+      await deleteAllCaseItems(es);
     });
 
     it('should resolve a case with no comments', async () => {

@@ -64,17 +64,12 @@ describe('Cloud Chat Plugin', () => {
 
         const cloud = cloudMock.createSetup();
 
-        const cloudChatProvider = {
-          registerChatProvider: jest.fn(),
-        };
-
         plugin.setup(coreSetup, {
           cloud: { ...cloud, isCloudEnabled, trialEndDate },
           ...(securityEnabled ? { security: securitySetup } : {}),
-          cloudChatProvider,
         });
 
-        return { initContext, plugin, coreSetup, cloudChatProvider };
+        return { initContext, plugin, coreSetup };
       };
 
       it('chatConfig is not retrieved if cloud is not enabled', async () => {
@@ -118,11 +113,6 @@ describe('Cloud Chat Plugin', () => {
           trialEndDate: new Date(),
         });
         expect(coreSetup.http.get).toHaveBeenCalled();
-      });
-
-      it('Chat component is registered with chatProvider plugin', async () => {
-        const { cloudChatProvider } = await setupPlugin({});
-        expect(cloudChatProvider.registerChatProvider).toBeCalled();
       });
     });
   });

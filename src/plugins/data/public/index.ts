@@ -138,7 +138,6 @@ export type {
   OptionedValueProp,
   ParsedInterval,
   // expressions
-  ExecutionContextSearch,
   ExpressionFunctionKql,
   ExpressionFunctionLucene,
   ExpressionFunctionKibana,
@@ -165,12 +164,7 @@ export type {
   SearchRequest,
   SearchSourceFields,
   SerializedSearchSourceFields,
-  // errors
-  IEsError,
-  Reason,
   WaitUntilNextSessionCompletesOptions,
-  SearchResponseWarning,
-  SearchResponseIncompleteWarning,
 } from './search';
 
 export {
@@ -181,8 +175,6 @@ export {
   noSearchSessionStorageCapabilityMessage,
   SEARCH_SESSIONS_MANAGEMENT_ID,
   waitUntilNextSessionCompletes$,
-  isEsError,
-  getSearchErrorOverrideDisplay,
   SearchSource,
   SearchSessionState,
   SortDirection,
@@ -197,7 +189,7 @@ export type {
 } from './search';
 
 export type { ISearchOptions } from '../common';
-export { isErrorResponse, isCompleteResponse, isPartialResponse } from '../common';
+export { isRunningResponse } from '../common';
 
 // Search namespace
 export const search = {
@@ -272,9 +264,6 @@ export type {
   TimefilterSetup,
   GlobalQueryStateFromUrl,
 } from './query';
-
-// TODO: move to @kbn/search-response-warnings
-export { OpenIncompleteResultsModalButton } from './incomplete_results_modal';
 
 export type { AggsStart } from './search/aggs';
 

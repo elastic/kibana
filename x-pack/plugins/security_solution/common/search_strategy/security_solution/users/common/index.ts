@@ -11,6 +11,7 @@ import type { CommonFields, Maybe, RiskScoreFields, RiskSeverity, SortField } fr
 export interface UserRiskScoreItem {
   _id?: Maybe<string>;
   [RiskScoreFields.userName]: Maybe<string>;
+  [RiskScoreFields.timestamp]: Maybe<string>;
   [RiskScoreFields.userRisk]: Maybe<RiskSeverity>;
   [RiskScoreFields.userRiskScore]: Maybe<number>;
 }

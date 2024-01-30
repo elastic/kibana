@@ -12,7 +12,7 @@ import { SHOW_RELATED_INTEGRATIONS_SETTING } from '../../../../../../common/cons
 import { PopoverItems } from '../../../../../common/components/popover_items';
 import { useUiSetting$ } from '../../../../../common/lib/kibana';
 import { IntegrationsPopover } from '../../../../../detections/components/rules/related_integrations/integrations_popover';
-import { SeverityBadge } from '../../../../../detections/components/rules/severity_badge';
+import { SeverityBadge } from '../../../../../common/components/severity_badge';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import type { Rule } from '../../../../rule_management/logic';
 import { useUserData } from '../../../../../detections/components/user_info';
@@ -42,6 +42,7 @@ const RuleName = ({ name, ruleId }: RuleNameProps) => {
       onClick={() => {
         openRulePreview(ruleId);
       }}
+      data-test-subj="ruleName"
     >
       {name}
     </EuiLink>
@@ -121,7 +122,14 @@ const createInstallButtonColumn = (
         onClick={() => installOneRule(ruleId)}
         data-test-subj={`installSinglePrebuiltRuleButton-${ruleId}`}
       >
-        {isRuleInstalling ? <EuiLoadingSpinner size="s" /> : i18n.INSTALL_RULE_BUTTON}
+        {isRuleInstalling ? (
+          <EuiLoadingSpinner
+            size="s"
+            data-test-subj={`installSinglePrebuiltRuleButton-loadingSpinner-${ruleId}`}
+          />
+        ) : (
+          i18n.INSTALL_RULE_BUTTON
+        )}
       </EuiButtonEmpty>
     );
   },

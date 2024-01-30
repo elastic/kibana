@@ -31,7 +31,7 @@ export const createSchemaFromFieldMap = ({
   useAlert = false,
   useEcs = false,
   useLegacyAlerts = false,
-  flattened = false,
+  flattened = true,
 }: CreateSchemaFromFieldMapOpts) => {
   const lineWriters = {
     IMPORTS: createLineWriter(),
@@ -150,7 +150,7 @@ const generateSchemaLines = ({
         break;
       case 'object':
       case 'nested':
-        if (!isEnabled) {
+        if (!isEnabled || !isArray) {
           lineWriter.addLine(`${keyToWrite}: ${getSchemaDefinition('schemaUnknown', isArray)},`);
         } else if (isArray && null != fieldMap.properties) {
           lineWriter.addLineAndIndent(`${keyToWrite}: rt.array(`);
@@ -198,6 +198,7 @@ const generateSchemaLines = ({
         break;
       case 'float':
       case 'integer':
+      case 'double':
         lineWriter.addLine(`${keyToWrite}: ${getSchemaDefinition('schemaNumber', isArray)},`);
         break;
       case 'boolean':
@@ -279,19 +280,19 @@ export const IsoDateString = new rt.Type<string, string, unknown>(
   rt.identity
 );
 export type IsoDateStringC = typeof IsoDateString;
-export const schemaDate = IsoDateString;
-export const schemaDateArray = rt.array(IsoDateString);
-export const schemaDateRange = rt.partial({
-  gte: schemaDate,
-  lte: schemaDate,
-});
-export const schemaDateRangeArray = rt.array(schemaDateRange);
 export const schemaUnknown = rt.unknown;
 export const schemaUnknownArray = rt.array(rt.unknown);
 export const schemaString = rt.string;
 export const schemaStringArray = rt.array(schemaString);
 export const schemaNumber = rt.number;
 export const schemaNumberArray = rt.array(schemaNumber);
+export const schemaDate = rt.union([IsoDateString, schemaNumber]);
+export const schemaDateArray = rt.array(schemaDate);
+export const schemaDateRange = rt.partial({
+  gte: schemaDate,
+  lte: schemaDate,
+});
+export const schemaDateRangeArray = rt.array(schemaDateRange);
 export const schemaStringOrNumber = rt.union([schemaString, schemaNumber]);
 export const schemaStringOrNumberArray = rt.array(schemaStringOrNumber);
 export const schemaBoolean = rt.boolean;
@@ -321,6 +322,7 @@ export const schemaGeoPoint = rt.union([
 export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 // prettier-ignore
 const %%schemaPrefix%%Required = %%REQUIRED_FIELDS%%;
+// prettier-ignore
 const %%schemaPrefix%%Optional = %%OPTIONAL_FIELDS%%;
 
 // prettier-ignore

@@ -59,7 +59,7 @@ export const TTYPlayerControls = ({
   const commonButtonProps: Partial<EuiButtonIconProps> = {
     display: 'empty',
     size: 's',
-    color: 'ghost',
+    color: 'text',
     css: styles.controlButton,
   };
 
@@ -188,7 +188,7 @@ export const TTYPlayerControls = ({
             onClick={handleViewInSession}
             iconType="arrowRight"
             aria-label={VIEW_IN_SESSION}
-            color="ghost"
+            color="text"
           >
             {VIEW_IN_SESSION}
           </EuiButtonEmpty>

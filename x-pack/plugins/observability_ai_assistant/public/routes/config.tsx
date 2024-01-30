@@ -31,11 +31,18 @@ const observabilityAIAssistantRoutes = {
         element: <ConversationView />,
       },
       '/conversations/{conversationId}': {
-        params: t.type({
-          path: t.type({
-            conversationId: t.string,
+        params: t.intersection([
+          t.type({
+            path: t.type({
+              conversationId: t.string,
+            }),
           }),
-        }),
+          t.partial({
+            state: t.partial({
+              prevConversationKey: t.string,
+            }),
+          }),
+        ]),
         element: <ConversationView />,
       },
       '/conversations': {

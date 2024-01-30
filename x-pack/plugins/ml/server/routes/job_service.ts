@@ -30,7 +30,7 @@ import {
   deleteJobsSchema,
 } from './schemas/job_service_schema';
 
-import { jobIdSchema } from './schemas/anomaly_detectors_schema';
+import { jobForCloningSchema, jobIdSchema } from './schemas/anomaly_detectors_schema';
 
 import { jobServiceProvider } from '../models/job_service';
 import { getAuthorizationHeader } from '../lib/request_authorization';
@@ -428,16 +428,16 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
         version: '1',
         validate: {
           request: {
-            body: jobIdSchema,
+            body: jobForCloningSchema,
           },
         },
       },
       routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
         try {
           const { getJobForCloning } = jobServiceProvider(client, mlClient);
-          const { jobId } = request.body;
+          const { jobId, retainCreatedBy } = request.body;
 
-          const resp = await getJobForCloning(jobId);
+          const resp = await getJobForCloning(jobId, retainCreatedBy);
           return response.ok({
             body: resp,
           });

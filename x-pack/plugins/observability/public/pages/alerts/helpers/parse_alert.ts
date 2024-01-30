@@ -38,10 +38,17 @@ export const parseAlert =
     };
 
     const formatter = observabilityRuleTypeRegistry.getFormatter(parsedFields[ALERT_RULE_TYPE_ID]!);
+    let formattedFields = {};
+    try {
+      formattedFields =
+        formatter?.({ fields: parsedFields, formatters: { asDuration, asPercent } }) ?? {};
+    } catch (error) {
+      // Ignore formatted fields if there is a formatting error
+    }
     const formatted = {
       link: undefined,
       reason: parsedFields[ALERT_REASON] ?? parsedFields[ALERT_RULE_NAME] ?? '',
-      ...(formatter?.({ fields: parsedFields, formatters: { asDuration, asPercent } }) ?? {}),
+      ...formattedFields,
     };
 
     return {

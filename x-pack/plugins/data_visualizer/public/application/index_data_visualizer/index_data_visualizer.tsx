@@ -265,10 +265,13 @@ export const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextPr
 
 interface Props {
   getAdditionalLinks?: GetAdditionalLinks;
-  isServerless?: boolean;
+  showFrozenDataTierChoice?: boolean;
 }
 
-export const IndexDataVisualizer: FC<Props> = ({ getAdditionalLinks, isServerless = false }) => {
+export const IndexDataVisualizer: FC<Props> = ({
+  getAdditionalLinks,
+  showFrozenDataTierChoice = true,
+}) => {
   const coreStart = getCoreStart();
   const {
     data,
@@ -302,7 +305,7 @@ export const IndexDataVisualizer: FC<Props> = ({ getAdditionalLinks, isServerles
   const datePickerDeps: DatePickerDependencies = {
     ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,
-    isServerless,
+    showFrozenDataTierChoice,
   };
 
   return (

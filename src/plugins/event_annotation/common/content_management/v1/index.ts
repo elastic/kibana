@@ -23,5 +23,6 @@ export type {
   EventAnnotationGroupSearchIn,
   EventAnnotationGroupSearchOut,
   EventAnnotationGroupSearchQuery,
+  EventAnnotationGroupCrudTypes,
   Reference,
 } from './types';

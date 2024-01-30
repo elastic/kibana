@@ -19,6 +19,7 @@ import { Moment } from 'moment-timezone';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { MockApmPluginContextWrapper } from '../context/apm_plugin/mock_apm_plugin_context';
 import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
 
@@ -61,20 +62,27 @@ export function mockMoment() {
 
 // Useful for getting the rendered href from any kind of link component
 export async function getRenderedHref(Component: React.FC, location: Location) {
+  const mockSpaces = {
+    getActiveSpace: jest.fn().mockImplementation(() => ({ id: 'mockSpaceId' })),
+  };
+
   const el = render(
     <MemoryRouter initialEntries={[location]}>
       <MockApmPluginContextWrapper>
-        <UrlParamsProvider>
-          <Component />
-        </UrlParamsProvider>
+        <KibanaContextProvider services={{ spaces: mockSpaces }}>
+          <UrlParamsProvider>
+            <Component />
+          </UrlParamsProvider>
+        </KibanaContextProvider>
       </MockApmPluginContextWrapper>
     </MemoryRouter>
   );
-  const a = el.container.querySelector('a');
 
-  await waitFor(() => {}, { container: a! });
+  await waitFor(() => el.container.querySelector('a') !== null, {
+    container: el.container,
+  });
 
-  return a ? a.getAttribute('href') : '';
+  return el.container.querySelector('a')?.getAttribute('href');
 }
 
 export function mockNow(date: string | number | Date) {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { initializeDataViews } from '../../tasks/login';
 import { getAdvancedButton } from '../../screens/integrations';
 import { navigateTo } from '../../tasks/navigation';
 import {
@@ -19,6 +20,10 @@ import {
 import { ServerlessRoleName } from '../../support/roles';
 
 describe('EcsMapping', { tags: ['@ess', '@serverless'] }, () => {
+  before(() => {
+    initializeDataViews();
+  });
+
   beforeEach(() => {
     cy.login(ServerlessRoleName.SOC_MANAGER);
   });

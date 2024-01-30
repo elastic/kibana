@@ -16,6 +16,17 @@ export const casesVars: ActionVariable[] = [
     useWithTripleBracesInTemplates: true,
   },
   { name: 'case.tags', description: i18n.CASE_TAGS_DESC, useWithTripleBracesInTemplates: true },
+  { name: 'case.id', description: i18n.CASE_ID_DESC, useWithTripleBracesInTemplates: true },
+  {
+    name: 'case.status',
+    description: i18n.CASE_SEVERITY_DESC,
+    useWithTripleBracesInTemplates: true,
+  },
+  {
+    name: 'case.severity',
+    description: i18n.CASE_STATUS_DESC,
+    useWithTripleBracesInTemplates: true,
+  },
 ];
 
 export const commentVars: ActionVariable[] = [

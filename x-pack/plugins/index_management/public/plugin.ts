@@ -41,12 +41,22 @@ export class IndexMgmtUIPlugin {
       enableIndexActions,
       enableLegacyTemplates,
       enableIndexStats,
-      dev: { enableIndexDetailsPage },
+      editableIndexSettings,
+      enableDataStreamsStorageColumn,
+      enableEmbeddedConsole,
     } = this.ctx.config.get<ClientConfigType>();
 
     if (isIndexManagementUiEnabled) {
       const { fleet, usageCollection, management, cloud } = plugins;
       const kibanaVersion = new SemVer(this.ctx.env.packageInfo.version);
+      const config = {
+        enableIndexActions: enableIndexActions ?? true,
+        enableLegacyTemplates: enableLegacyTemplates ?? true,
+        enableIndexStats: enableIndexStats ?? true,
+        editableIndexSettings: editableIndexSettings ?? 'all',
+        enableDataStreamsStorageColumn: enableDataStreamsStorageColumn ?? true,
+        enableEmbeddedConsole: enableEmbeddedConsole ?? false,
+      };
       management.sections.section.data.registerApp({
         id: PLUGIN.id,
         title: i18n.translate('xpack.idxMgmt.appTitle', { defaultMessage: 'Index Management' }),
@@ -60,10 +70,7 @@ export class IndexMgmtUIPlugin {
             extensionsService: this.extensionsService,
             isFleetEnabled: Boolean(fleet),
             kibanaVersion,
-            enableIndexActions,
-            enableLegacyTemplates,
-            enableIndexDetailsPage,
-            enableIndexStats,
+            config,
             cloud,
           });
         },
@@ -76,6 +83,10 @@ export class IndexMgmtUIPlugin {
     };
   }
 
-  public start() {}
+  public start() {
+    return {
+      extensionsService: this.extensionsService.setup(),
+    };
+  }
   public stop() {}
 }

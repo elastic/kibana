@@ -21,18 +21,31 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { LazyField } from '@kbn/advanced-settings-plugin/public';
+import { withSuspense } from '@kbn/shared-ux-utility';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import {
+  useEditableSettings,
+  useUiTracker,
+} from '@kbn/observability-shared-plugin/public';
+import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
+import { ValueValidation } from '@kbn/core-ui-settings-browser/src/types';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
-import { useApmEditableSettings } from '../../../../../hooks/use_apm_editable_settings';
 import { useFetcher, isPending } from '../../../../../hooks/use_fetcher';
+
+const LazyFieldRow = React.lazy(async () => ({
+  default: (await import('@kbn/management-settings-components-field-row'))
+    .FieldRow,
+}));
+
+const FieldRow = withSuspense(LazyFieldRow);
 
 interface Props {
   onClose: () => void;
 }
 
 export function LabsFlyout({ onClose }: Props) {
+  const trackApmEvent = useUiTracker({ app: 'apm' });
   const { docLinks, notifications } = useApmPluginContext().core;
 
   const { data, status } = useFetcher(
@@ -42,21 +55,22 @@ export function LabsFlyout({ onClose }: Props) {
   const labsItems = data?.labsItems || [];
 
   const {
+    fields,
     handleFieldChange,
-    settingsEditableConfig,
     unsavedChanges,
     saveAll,
     isSaving,
     cleanUnsavedChanges,
-  } = useApmEditableSettings(labsItems);
+  } = useEditableSettings('apm', labsItems);
 
   async function handleSave() {
     try {
       const reloadPage = Object.keys(unsavedChanges).some((key) => {
-        return settingsEditableConfig[key].requiresPageReload;
+        return fields[key].requiresPageReload;
       });
 
-      await saveAll({ trackMetricName: 'labs_save' });
+      await saveAll();
+      trackApmEvent({ metric: 'labs_save' });
 
       if (reloadPage) {
         window.location.reload();
@@ -80,6 +94,12 @@ export function LabsFlyout({ onClose }: Props) {
   }
 
   const isLoading = isPending(status);
+
+  // We don't validate the user input on these settings
+  const settingsValidationResponse: ValueValidation = {
+    successfulValidation: true,
+    valid: true,
+  };
 
   return (
     <EuiFlyout onClose={onClose}>
@@ -133,19 +153,25 @@ export function LabsFlyout({ onClose }: Props) {
       ) : (
         <>
           <EuiFlyoutBody>
-            {labsItems.map((settingKey, i) => {
-              const editableConfig = settingsEditableConfig[settingKey];
+            {labsItems.map((settingKey) => {
+              const field = fields[settingKey];
               return (
                 <>
-                  <LazyField
-                    key={settingKey}
-                    setting={editableConfig}
-                    handleChange={handleFieldChange}
-                    enableSaving
-                    docLinks={docLinks.links}
-                    toasts={notifications.toasts}
-                    unsavedChanges={unsavedChanges[settingKey]}
-                  />
+                  <FieldRowProvider
+                    {...{
+                      links: docLinks.links.management,
+                      showDanger: (message: string) =>
+                        notifications.toasts.addDanger(message),
+                      validateChange: async () => settingsValidationResponse,
+                    }}
+                  >
+                    <FieldRow
+                      field={field}
+                      isSavingEnabled={true}
+                      onFieldChange={handleFieldChange}
+                      unsavedChange={unsavedChanges[settingKey]}
+                    />
+                  </FieldRowProvider>
                   <EuiHorizontalRule />
                 </>
               );

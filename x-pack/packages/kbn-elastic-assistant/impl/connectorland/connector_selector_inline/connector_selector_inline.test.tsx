@@ -6,15 +6,23 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 
-import { noop } from 'lodash/fp';
 import { TestProviders } from '../../mock/test_providers/test_providers';
+import { mockConnectors } from '../../mock/connectors';
 import { ConnectorSelectorInline } from './connector_selector_inline';
 import * as i18n from '../translations';
 import { Conversation } from '../../..';
 import { useLoadConnectors } from '../use_load_connectors';
 
+const setApiConfig = jest.fn();
+const mockConversation = {
+  setApiConfig,
+};
+
+jest.mock('../../assistant/use_conversation', () => ({
+  useConversation: () => mockConversation,
+}));
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/constants', () => ({
   loadActionTypes: jest.fn(() => {
     return Promise.resolve([
@@ -40,18 +48,6 @@ jest.mock('../use_load_connectors', () => ({
   }),
 }));
 
-const mockConnectors = [
-  {
-    id: 'connectorId',
-    name: 'Captain Connector',
-    isMissingSecrets: false,
-    actionTypeId: '.gen-ai',
-    config: {
-      apiProvider: 'OpenAI',
-    },
-  },
-];
-
 (useLoadConnectors as jest.Mock).mockReturnValue({
   data: mockConnectors,
   error: null,
@@ -59,12 +55,14 @@ const mockConnectors = [
 });
 
 describe('ConnectorSelectorInline', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   it('renders empty view if no selected conversation is provided', () => {
     const { getByText } = render(
       <TestProviders>
         <ConnectorSelectorInline
           isDisabled={false}
-          onConnectorModalVisibilityChange={noop}
           selectedConnectorId={undefined}
           selectedConversation={undefined}
         />
@@ -83,7 +81,6 @@ describe('ConnectorSelectorInline', () => {
       <TestProviders>
         <ConnectorSelectorInline
           isDisabled={false}
-          onConnectorModalVisibilityChange={noop}
           selectedConnectorId={'missing-connector-id'}
           selectedConversation={conversation}
         />
@@ -91,23 +88,74 @@ describe('ConnectorSelectorInline', () => {
     );
     expect(getByText(i18n.INLINE_CONNECTOR_PLACEHOLDER)).toBeInTheDocument();
   });
-
-  it('renders selected connector if selected selectedConnectorId is in list of connectors', () => {
+  it('Clicking add connector button opens the connector selector', () => {
     const conversation: Conversation = {
       id: 'conversation_id',
       messages: [],
       apiConfig: {},
     };
-    const { getByText } = render(
+    const { getByTestId, queryByTestId } = render(
       <TestProviders>
         <ConnectorSelectorInline
           isDisabled={false}
-          onConnectorModalVisibilityChange={noop}
-          selectedConnectorId={mockConnectors[0].id}
+          selectedConnectorId={'missing-connector-id'}
           selectedConversation={conversation}
         />
       </TestProviders>
     );
-    expect(getByText(mockConnectors[0].name)).toBeInTheDocument();
+    expect(queryByTestId('connector-selector')).not.toBeInTheDocument();
+    fireEvent.click(getByTestId('connectorSelectorPlaceholderButton'));
+    expect(getByTestId('connector-selector')).toBeInTheDocument();
+  });
+  it('On connector change, update conversation API config', () => {
+    const connectorTwo = mockConnectors[1];
+    const conversation: Conversation = {
+      id: 'conversation_id',
+      messages: [],
+      apiConfig: {},
+    };
+    const { getByTestId, queryByTestId } = render(
+      <TestProviders>
+        <ConnectorSelectorInline
+          isDisabled={false}
+          selectedConnectorId={'missing-connector-id'}
+          selectedConversation={conversation}
+        />
+      </TestProviders>
+    );
+    fireEvent.click(getByTestId('connectorSelectorPlaceholderButton'));
+    fireEvent.click(getByTestId('connector-selector'));
+    fireEvent.click(getByTestId(connectorTwo.id));
+    expect(queryByTestId('connector-selector')).not.toBeInTheDocument();
+    expect(setApiConfig).toHaveBeenCalledWith({
+      apiConfig: {
+        connectorId: connectorTwo.id,
+        connectorTypeTitle: 'OpenAI',
+        model: undefined,
+        provider: 'OpenAI',
+      },
+      conversationId: 'conversation_id',
+    });
+  });
+  it('On connector change to add new connector, onchange event does nothing', () => {
+    const conversation: Conversation = {
+      id: 'conversation_id',
+      messages: [],
+      apiConfig: {},
+    };
+    const { getByTestId } = render(
+      <TestProviders>
+        <ConnectorSelectorInline
+          isDisabled={false}
+          selectedConnectorId={'missing-connector-id'}
+          selectedConversation={conversation}
+        />
+      </TestProviders>
+    );
+    fireEvent.click(getByTestId('connectorSelectorPlaceholderButton'));
+    fireEvent.click(getByTestId('connector-selector'));
+    fireEvent.click(getByTestId('addNewConnectorButton'));
+    expect(getByTestId('connector-selector')).toBeInTheDocument();
+    expect(setApiConfig).not.toHaveBeenCalled();
   });
 });

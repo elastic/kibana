@@ -18,9 +18,9 @@ export type AbortableAsyncState<T> = (T extends Promise<infer TReturn>
   : State<T>) & { refresh: () => void };
 
 export function useAbortableAsync<T>(
-  fn: ({}: { signal: AbortSignal }) => T,
+  fn: ({}: { signal: AbortSignal }) => T | Promise<T>,
   deps: any[],
-  options?: { clearValueOnNext?: boolean }
+  options?: { clearValueOnNext?: boolean; defaultValue?: () => T }
 ): AbortableAsyncState<T> {
   const clearValueOnNext = options?.clearValueOnNext;
 
@@ -30,7 +30,7 @@ export function useAbortableAsync<T>(
 
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState(false);
-  const [value, setValue] = useState<T>();
+  const [value, setValue] = useState<T | undefined>(options?.defaultValue);
 
   useEffect(() => {
     controllerRef.current.abort();

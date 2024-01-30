@@ -24,7 +24,6 @@ journey('OverviewScrolling', async ({ page, params }) => {
   const listOfRequests: string[] = [];
   const expected = [
     'http://localhost:5620/internal/synthetics/service/enablement',
-    'http://localhost:5620/internal/uptime/dynamic_settings',
     'http://localhost:5620/internal/synthetics/monitor/filters',
     'http://localhost:5620/internal/uptime/service/locations',
     'http://localhost:5620/internal/synthetics/overview?sortField=status&sortOrder=asc&',

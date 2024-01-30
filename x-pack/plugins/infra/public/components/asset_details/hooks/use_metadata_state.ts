@@ -7,28 +7,28 @@
 
 import { useEffect, useCallback } from 'react';
 import createContainer from 'constate';
-import { findInventoryModel } from '../../../../common/inventory_models';
 import { useSourceContext } from '../../../containers/metrics_source';
 import { useMetadata } from './use_metadata';
 import { AssetDetailsProps } from '../types';
-import { useDateRangeProviderContext } from './use_date_range';
+import { useDatePickerContext } from './use_date_picker';
 import { useAssetDetailsUrlState } from './use_asset_details_url_state';
+import { useRequestObservable } from './use_request_observable';
 
-export type UseMetadataProviderProps = Pick<AssetDetailsProps, 'asset' | 'assetType'>;
+export type UseMetadataProviderProps = Pick<AssetDetailsProps, 'assetId' | 'assetType'>;
 
-export function useMetadataProvider({ asset, assetType }: UseMetadataProviderProps) {
+export function useMetadataProvider({ assetId, assetType }: UseMetadataProviderProps) {
+  const { request$ } = useRequestObservable();
   const [, setUrlState] = useAssetDetailsUrlState();
-  const { getDateRangeInTimestamp } = useDateRangeProviderContext();
-  const inventoryModel = findInventoryModel(assetType);
+  const { getDateRangeInTimestamp } = useDatePickerContext();
   const { sourceId } = useSourceContext();
 
-  const { loading, error, metadata, reload } = useMetadata(
-    asset.id,
+  const { loading, error, metadata, reload } = useMetadata({
+    assetId,
     assetType,
-    inventoryModel.requiredMetrics,
     sourceId,
-    getDateRangeInTimestamp()
-  );
+    timeRange: getDateRangeInTimestamp(),
+    request$,
+  });
 
   const refresh = useCallback(() => {
     reload();
@@ -48,5 +48,5 @@ export function useMetadataProvider({ asset, assetType }: UseMetadataProviderPro
   };
 }
 
-export const [MetadataStateProvider, useMetadataStateProviderContext] =
+export const [MetadataStateProvider, useMetadataStateContext] =
   createContainer(useMetadataProvider);

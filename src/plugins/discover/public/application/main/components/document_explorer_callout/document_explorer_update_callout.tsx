@@ -51,6 +51,7 @@ export const DocumentExplorerUpdateCallout = () => {
 
   return (
     <EuiCallOut
+      data-test-subj="dscDocumentExplorerTourCallout"
       className="dscDocumentExplorerCallout"
       title={<CalloutTitle onCloseCallout={onCloseCallout} />}
       iconType="tableDensityNormal"

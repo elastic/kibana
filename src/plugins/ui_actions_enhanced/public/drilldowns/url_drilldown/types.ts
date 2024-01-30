@@ -8,8 +8,14 @@
 
 export type UrlDrilldownConfig = {
   url: { format?: 'handlebars_v1'; template: string };
+} & UrlDrilldownOptions;
+
+/**
+ * User-configurable options for URL drilldowns
+ */
+export type UrlDrilldownOptions = {
   openInNewTab: boolean;
-  encodeUrl?: boolean;
+  encodeUrl: boolean;
 };
 
 /**

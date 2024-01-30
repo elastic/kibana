@@ -36,6 +36,7 @@ Similarly to Security Solution cypress tests, we use tags in order to select whi
 - `@serverless` includes a test in the Serverless test suite. You need to explicitly add this tag to any test you want to run against a Serverless environment.
 - `@ess` includes a test in the normal, non-Serverless test suite. You need to explicitly add this tag to any test you want to run against a non-Serverless environment.
 - `@brokenInServerless` excludes a test from the Serverless test suite (even if it's tagged as `@serverless`). Indicates that a test should run in Serverless, but currently is broken.
+- `@skipInServerless` excludes a test from the Serverless test suite (even if it's tagged as `@serverless`). Indicates that we don't want to run the given test in Serverless.
 
 Important: if you don't provide any tag, your test won't be executed.
 

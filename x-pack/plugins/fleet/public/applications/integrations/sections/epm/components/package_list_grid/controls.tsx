@@ -6,6 +6,7 @@
  */
 
 import React, { type ReactNode } from 'react';
+import styled from 'styled-components';
 
 import { EuiFlexGroup, EuiSpacer, EuiTitle } from '@elastic/eui';
 
@@ -13,6 +14,10 @@ interface ControlsColumnProps {
   controls: ReactNode;
   title: string | undefined;
 }
+
+const FlexGroupWithMaxHeight = styled(EuiFlexGroup)`
+  max-height: calc(100vh - 120px);
+`;
 
 export const ControlsColumn = ({ controls, title }: ControlsColumnProps) => {
   let titleContent;
@@ -27,9 +32,9 @@ export const ControlsColumn = ({ controls, title }: ControlsColumnProps) => {
     );
   }
   return (
-    <EuiFlexGroup direction="column" gutterSize="none">
+    <FlexGroupWithMaxHeight direction="column" gutterSize="none">
       {titleContent}
       {controls}
-    </EuiFlexGroup>
+    </FlexGroupWithMaxHeight>
   );
 };

@@ -12,7 +12,7 @@ exports[`<DocViewer /> Render <DocViewer/> with 3 different tabs 1`] = `
       Array [
         Object {
           "content": <DocViewerTab
-            id={0}
+            id="function"
             render={[MockFunction]}
             renderProps={
               Object {
@@ -21,14 +21,14 @@ exports[`<DocViewer /> Render <DocViewer/> with 3 different tabs 1`] = `
             }
             title="Render function"
           />,
-          "data-test-subj": "docViewerTab-0",
-          "id": "kbn_doc_viewer_tab_0",
+          "data-test-subj": "docViewerTab-function",
+          "id": "kbn_doc_viewer_tab_function",
           "name": "Render function",
         },
         Object {
           "content": <DocViewerTab
             component={[Function]}
-            id={1}
+            id="component"
             renderProps={
               Object {
                 "hit": Object {},
@@ -36,13 +36,13 @@ exports[`<DocViewer /> Render <DocViewer/> with 3 different tabs 1`] = `
             }
             title="React component"
           />,
-          "data-test-subj": "docViewerTab-1",
-          "id": "kbn_doc_viewer_tab_1",
+          "data-test-subj": "docViewerTab-component",
+          "id": "kbn_doc_viewer_tab_component",
           "name": "React component",
         },
         Object {
           "content": <DocViewerTab
-            id={2}
+            id="invalid"
             renderProps={
               Object {
                 "hit": Object {},
@@ -50,8 +50,8 @@ exports[`<DocViewer /> Render <DocViewer/> with 3 different tabs 1`] = `
             }
             title="Invalid doc view"
           />,
-          "data-test-subj": "docViewerTab-2",
-          "id": "kbn_doc_viewer_tab_2",
+          "data-test-subj": "docViewerTab-invalid",
+          "id": "kbn_doc_viewer_tab_invalid",
           "name": "Invalid doc view",
         },
       ]

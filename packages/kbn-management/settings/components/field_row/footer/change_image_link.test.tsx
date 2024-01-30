@@ -16,7 +16,7 @@ const IMAGE = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAIAAADTED8
 describe('ChangeImageLink', () => {
   const defaultProps: ChangeImageLinkProps = {
     field: {
-      name: 'test',
+      id: 'test',
       type: 'image',
       ariaAttributes: {
         ariaLabel: 'test',

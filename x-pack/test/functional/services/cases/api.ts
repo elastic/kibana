@@ -6,7 +6,12 @@
  */
 
 import pMap from 'p-map';
-import { Case, CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
+import {
+  Case,
+  CaseSeverity,
+  CaseStatuses,
+  Configuration,
+} from '@kbn/cases-plugin/common/types/domain';
 import { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
 import {
   createCase as createCaseAPI,
@@ -14,6 +19,8 @@ import {
   createComment,
   updateCase,
   getCase,
+  createConfiguration,
+  getConfigurationRequest,
 } from '../../../cases_api_integration/common/lib/api';
 import {
   loginUsers,
@@ -135,6 +142,24 @@ export function CasesAPIServiceProvider({ getService }: FtrProviderContext) {
 
         latestVersion = theCase[0].version;
       }
+    },
+
+    async createConfigWithCustomFields({
+      customFields,
+      owner,
+    }: {
+      customFields: Configuration['customFields'];
+      owner: string;
+    }) {
+      return createConfiguration(
+        kbnSupertest,
+        getConfigurationRequest({
+          overrides: {
+            customFields,
+            owner,
+          },
+        })
+      );
     },
   };
 }

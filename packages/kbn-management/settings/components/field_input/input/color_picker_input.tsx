@@ -32,9 +32,9 @@ export const ColorPickerInput = ({
   field,
   unsavedChange,
   isSavingEnabled,
-  onChange: onChangeProp,
+  onInputChange,
 }: ColorPickerInputProps) => {
-  const onUpdate = useUpdate({ onChange: onChangeProp, field });
+  const onUpdate = useUpdate({ onInputChange, field });
 
   const onChange: EuiColorPickerProps['onChange'] = (newColor, { isValid }) => {
     const update: UnsavedFieldChange<'color'> = { type: field.type, unsavedValue: newColor };

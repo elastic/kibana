@@ -7,19 +7,26 @@
 
 import { createSLO } from './fixtures/slo';
 import { ManageSLO } from './manage_slo';
-import { createSLORepositoryMock, createTransformManagerMock } from './mocks';
+import {
+  createSLORepositoryMock,
+  createSummaryTransformManagerMock,
+  createTransformManagerMock,
+} from './mocks';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
 
 describe('ManageSLO', () => {
   let mockRepository: jest.Mocked<SLORepository>;
   let mockTransformManager: jest.Mocked<TransformManager>;
+  let mockSummaryTransformManager: jest.Mocked<TransformManager>;
   let manageSLO: ManageSLO;
 
   beforeEach(() => {
     mockRepository = createSLORepositoryMock();
     mockTransformManager = createTransformManagerMock();
-    manageSLO = new ManageSLO(mockRepository, mockTransformManager);
+    mockSummaryTransformManager = createSummaryTransformManagerMock();
+
+    manageSLO = new ManageSLO(mockRepository, mockTransformManager, mockSummaryTransformManager);
   });
 
   describe('Enable', () => {
@@ -30,16 +37,18 @@ describe('ManageSLO', () => {
       await manageSLO.enable(slo.id);
 
       expect(mockTransformManager.start).not.toHaveBeenCalled();
+      expect(mockSummaryTransformManager.start).not.toHaveBeenCalled();
       expect(mockRepository.save).not.toHaveBeenCalled();
     });
 
     it('enables the slo when disabled', async () => {
-      const slo = createSLO({ enabled: false });
+      const slo = createSLO({ id: 'irrelevant', enabled: false });
       mockRepository.findById.mockResolvedValue(slo);
 
       await manageSLO.enable(slo.id);
 
-      expect(mockTransformManager.start).toHaveBeenCalled();
+      expect(mockTransformManager.start).toMatchSnapshot();
+      expect(mockSummaryTransformManager.start).toMatchSnapshot();
       expect(mockRepository.save).toHaveBeenCalledWith(expect.objectContaining({ enabled: true }));
     });
   });
@@ -52,16 +61,18 @@ describe('ManageSLO', () => {
       await manageSLO.disable(slo.id);
 
       expect(mockTransformManager.stop).not.toHaveBeenCalled();
+      expect(mockSummaryTransformManager.stop).not.toHaveBeenCalled();
       expect(mockRepository.save).not.toHaveBeenCalled();
     });
 
     it('disables the slo when enabled', async () => {
-      const slo = createSLO({ enabled: true });
+      const slo = createSLO({ id: 'irrelevant', enabled: true });
       mockRepository.findById.mockResolvedValue(slo);
 
       await manageSLO.disable(slo.id);
 
-      expect(mockTransformManager.stop).toHaveBeenCalled();
+      expect(mockTransformManager.stop).toMatchSnapshot();
+      expect(mockSummaryTransformManager.stop).toMatchSnapshot();
       expect(mockRepository.save).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
     });
   });

@@ -9,9 +9,15 @@
 import { EmbeddableInput, ViewMode } from '@kbn/embeddable-plugin/public';
 import { mockedReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public/mocks';
 
-import { DashboardStart } from './plugin';
 import { DashboardContainerInput, DashboardPanelState } from '../common';
 import { DashboardContainer } from './dashboard_container/embeddable/dashboard_container';
+import { DashboardStart } from './plugin';
+import { pluginServices } from './services/plugin_services';
+export { setStubDashboardServices } from './services/mocks';
+
+export const getMockedDashboardServices = () => {
+  return pluginServices.getServices();
+};
 
 export type Start = jest.Mocked<DashboardStart>;
 
@@ -66,7 +72,13 @@ export function setupIntersectionObserverMock({
   });
 }
 
-export function buildMockDashboard(overrides?: Partial<DashboardContainerInput>) {
+export function buildMockDashboard({
+  overrides,
+  savedObjectId,
+}: {
+  overrides?: Partial<DashboardContainerInput>;
+  savedObjectId?: string;
+} = {}) {
   const initialInput = getSampleDashboardInput(overrides);
   const dashboardContainer = new DashboardContainer(
     initialInput,
@@ -75,7 +87,7 @@ export function buildMockDashboard(overrides?: Partial<DashboardContainerInput>)
     undefined,
     undefined,
     undefined,
-    { lastSavedInput: initialInput }
+    { lastSavedInput: initialInput, lastSavedId: savedObjectId }
   );
   return dashboardContainer;
 }

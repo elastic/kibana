@@ -7,10 +7,9 @@
 
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { LOGS_ONBOARDING_FEEDBACK_LINK } from '@kbn/observability-shared-plugin/common';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-
-const LOGS_ONBOARDING_FEEDBACK_LINK = 'https://ela.st/logs-onboarding-feedback';
 
 export function ObservabilityOnboardingHeaderActionMenu() {
   const location = useLocation();

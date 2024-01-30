@@ -120,12 +120,12 @@ const MySPALink = () =>
 ----
 
 As it would be too much boilerplate to do this for each {kib} link in your app, there is a handy wrapper that helps with it: 
-{kib-repo}tree/{branch}/src/plugins/kibana_react/public/app_links/redirect_app_link.tsx#L49[RedirectAppLinks].
+{kib-repo}tree/{branch}/packages/shared-ux/link/redirect_app/impl/src/redirect_app_links.tsx[RedirectAppLinks].
 
 [source,typescript jsx]
 ----
 const MyApp = () => 
-  <RedirectAppLinks application={core.application}>
+  <RedirectAppLinks coreStart={{application: core.application}}>
     {/*...*/}
     {/* navigations using this link will happen in SPA friendly way */}
       <a href={urlToADashboard}>Go to Dashboard</a>

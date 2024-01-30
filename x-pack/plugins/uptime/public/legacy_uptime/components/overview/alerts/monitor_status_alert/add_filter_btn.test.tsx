@@ -38,8 +38,9 @@ describe('AddFilterButton component', () => {
         isOpen={false}
         ownFocus={true}
         panelPaddingSize="none"
+        repositionToCrossAxis={true}
       >
-        <EuiContextMenuPanel
+        <EuiContextMenuPanelClass
           items={
             Array [
               <EuiContextMenuItem
@@ -104,8 +105,9 @@ describe('AddFilterButton component', () => {
         isOpen={false}
         ownFocus={true}
         panelPaddingSize="none"
+        repositionToCrossAxis={true}
       >
-        <EuiContextMenuPanel
+        <EuiContextMenuPanelClass
           items={
             Array [
               <EuiContextMenuItem
@@ -157,8 +159,9 @@ describe('AddFilterButton component', () => {
         isOpen={false}
         ownFocus={true}
         panelPaddingSize="none"
+        repositionToCrossAxis={true}
       >
-        <EuiContextMenuPanel
+        <EuiContextMenuPanelClass
           items={Array []}
         />
       </EuiPopover>

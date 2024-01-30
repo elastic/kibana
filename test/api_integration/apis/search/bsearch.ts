@@ -262,10 +262,11 @@ export default function ({ getService }: FtrProviderContext) {
             const jsonBody = parseBfetchResponse(resp);
 
             expect(resp.status).to.be(200);
-            expect(jsonBody[0].result).to.have.property('requestParams');
-            expect(jsonBody[0].result.requestParams.method).to.be('POST');
-            expect(jsonBody[0].result.requestParams.path).to.be('/.kibana/_search');
-            expect(jsonBody[0].result.requestParams.querystring).to.be('ignore_unavailable=true');
+            expect(jsonBody[0].result.requestParams).to.eql({
+              method: 'POST',
+              path: '/.kibana/_search',
+              querystring: 'ignore_unavailable=true',
+            });
           });
 
           it(`should return request meta when request fails`, async () => {
@@ -309,10 +310,11 @@ export default function ({ getService }: FtrProviderContext) {
             const jsonBody = parseBfetchResponse(resp);
 
             expect(resp.status).to.be(200);
-            expect(jsonBody[0].error).to.have.property('requestParams');
-            expect(jsonBody[0].error.requestParams.method).to.be('POST');
-            expect(jsonBody[0].error.requestParams.path).to.be('/.kibana/_search');
-            expect(jsonBody[0].error.requestParams.querystring).to.be('ignore_unavailable=true');
+            expect(jsonBody[0].error.attributes.requestParams).to.eql({
+              method: 'POST',
+              path: '/.kibana/_search',
+              querystring: 'ignore_unavailable=true',
+            });
           });
         });
 
@@ -344,12 +346,12 @@ export default function ({ getService }: FtrProviderContext) {
             const jsonBody = parseBfetchResponse(resp);
 
             expect(resp.status).to.be(200);
-            expect(jsonBody[0].result).to.have.property('requestParams');
-            expect(jsonBody[0].result.requestParams.method).to.be('POST');
-            expect(jsonBody[0].result.requestParams.path).to.be('/.kibana/_async_search');
-            expect(jsonBody[0].result.requestParams.querystring).to.be(
-              'batched_reduce_size=64&ccs_minimize_roundtrips=true&wait_for_completion_timeout=200ms&keep_on_completion=false&keep_alive=60000ms&ignore_unavailable=true'
-            );
+            expect(jsonBody[0].result.requestParams).to.eql({
+              method: 'POST',
+              path: '/.kibana/_async_search',
+              querystring:
+                'batched_reduce_size=64&ccs_minimize_roundtrips=true&wait_for_completion_timeout=200ms&keep_on_completion=false&keep_alive=60000ms&ignore_unavailable=true',
+            });
           });
 
           it(`should return request meta when request fails`, async () => {
@@ -391,12 +393,12 @@ export default function ({ getService }: FtrProviderContext) {
             const jsonBody = parseBfetchResponse(resp);
 
             expect(resp.status).to.be(200);
-            expect(jsonBody[0].error).to.have.property('requestParams');
-            expect(jsonBody[0].error.requestParams.method).to.be('POST');
-            expect(jsonBody[0].error.requestParams.path).to.be('/.kibana/_async_search');
-            expect(jsonBody[0].error.requestParams.querystring).to.be(
-              'batched_reduce_size=64&ccs_minimize_roundtrips=true&wait_for_completion_timeout=200ms&keep_on_completion=false&keep_alive=60000ms&ignore_unavailable=true'
-            );
+            expect(jsonBody[0].error.attributes.requestParams).to.eql({
+              method: 'POST',
+              path: '/.kibana/_async_search',
+              querystring:
+                'batched_reduce_size=64&ccs_minimize_roundtrips=true&wait_for_completion_timeout=200ms&keep_on_completion=false&keep_alive=60000ms&ignore_unavailable=true',
+            });
           });
         });
 
@@ -423,10 +425,10 @@ export default function ({ getService }: FtrProviderContext) {
             const jsonBody = parseBfetchResponse(resp);
 
             expect(resp.status).to.be(200);
-            expect(jsonBody[0].result).to.have.property('requestParams');
-            expect(jsonBody[0].result.requestParams.method).to.be('POST');
-            expect(jsonBody[0].result.requestParams.path).to.be('/_query');
-            expect(jsonBody[0].result.requestParams.querystring).to.be('');
+            expect(jsonBody[0].result.requestParams).to.eql({
+              method: 'POST',
+              path: '/_query',
+            });
           });
 
           it(`should return request meta when request fails`, async () => {
@@ -451,10 +453,10 @@ export default function ({ getService }: FtrProviderContext) {
             const jsonBody = parseBfetchResponse(resp);
 
             expect(resp.status).to.be(200);
-            expect(jsonBody[0].error).to.have.property('requestParams');
-            expect(jsonBody[0].error.requestParams.method).to.be('POST');
-            expect(jsonBody[0].error.requestParams.path).to.be('/_query');
-            expect(jsonBody[0].error.requestParams.querystring).to.be('');
+            expect(jsonBody[0].error.attributes.requestParams).to.eql({
+              method: 'POST',
+              path: '/_query',
+            });
           });
         });
 
@@ -481,10 +483,11 @@ export default function ({ getService }: FtrProviderContext) {
             const jsonBody = parseBfetchResponse(resp);
 
             expect(resp.status).to.be(200);
-            expect(jsonBody[0].result).to.have.property('requestParams');
-            expect(jsonBody[0].result.requestParams.method).to.be('POST');
-            expect(jsonBody[0].result.requestParams.path).to.be('/_sql');
-            expect(jsonBody[0].result.requestParams.querystring).to.be('format=json');
+            expect(jsonBody[0].result.requestParams).to.eql({
+              method: 'POST',
+              path: '/_sql',
+              querystring: 'format=json',
+            });
           });
 
           it(`should return request meta when request fails`, async () => {
@@ -509,10 +512,11 @@ export default function ({ getService }: FtrProviderContext) {
             const jsonBody = parseBfetchResponse(resp);
 
             expect(resp.status).to.be(200);
-            expect(jsonBody[0].error).to.have.property('requestParams');
-            expect(jsonBody[0].error.requestParams.method).to.be('POST');
-            expect(jsonBody[0].error.requestParams.path).to.be('/_sql');
-            expect(jsonBody[0].error.requestParams.querystring).to.be('format=json');
+            expect(jsonBody[0].error.attributes.requestParams).to.eql({
+              method: 'POST',
+              path: '/_sql',
+              querystring: 'format=json',
+            });
           });
         });
 
@@ -541,39 +545,11 @@ export default function ({ getService }: FtrProviderContext) {
             const jsonBody = parseBfetchResponse(resp);
 
             expect(resp.status).to.be(200);
-            expect(jsonBody[0].result).to.have.property('requestParams');
-            expect(jsonBody[0].result.requestParams.method).to.be('POST');
-            expect(jsonBody[0].result.requestParams.path).to.be('/.kibana/_eql/search');
-            expect(jsonBody[0].result.requestParams.querystring).to.be('ignore_unavailable=true');
-          });
-
-          it(`should return request meta when request fails`, async () => {
-            const resp = await supertest
-              .post(`/internal/bsearch`)
-              .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
-              .send({
-                batch: [
-                  {
-                    request: {
-                      params: {
-                        index: '.kibana',
-                        query: 'any where true',
-                      },
-                    },
-                    options: {
-                      strategy: 'eql',
-                    },
-                  },
-                ],
-              });
-
-            const jsonBody = parseBfetchResponse(resp);
-
-            expect(resp.status).to.be(200);
-            expect(jsonBody[0].error).to.have.property('requestParams');
-            expect(jsonBody[0].error.requestParams.method).to.be('POST');
-            expect(jsonBody[0].error.requestParams.path).to.be('/.kibana/_eql/search');
-            expect(jsonBody[0].error.requestParams.querystring).to.be('ignore_unavailable=true');
+            expect(jsonBody[0].result.requestParams).to.eql({
+              method: 'POST',
+              path: '/.kibana/_eql/search',
+              querystring: 'ignore_unavailable=true',
+            });
           });
         });
       });

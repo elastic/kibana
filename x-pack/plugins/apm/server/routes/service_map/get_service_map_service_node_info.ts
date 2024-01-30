@@ -19,7 +19,7 @@ import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { getBucketSizeForAggregatedTransactions } from '../../lib/helpers/get_bucket_size_for_aggregated_transactions';
 import {
-  getDocumentTypeFilterForTransactions,
+  getBackwardCompatibleDocumentTypeFilter,
   getDurationFieldForTransactions,
   getProcessorEventForTransactions,
 } from '../../lib/helpers/transactions';
@@ -184,7 +184,7 @@ async function getTransactionStats({
         bool: {
           filter: [
             ...filter,
-            ...getDocumentTypeFilterForTransactions(
+            ...getBackwardCompatibleDocumentTypeFilter(
               searchAggregatedTransactions
             ),
             {

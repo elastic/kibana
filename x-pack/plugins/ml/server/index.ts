@@ -6,7 +6,8 @@
  */
 
 import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { MlServerPlugin } from './plugin';
+import { type ConfigSchema } from '../common/constants/app';
+import { configSchema } from './config_schema';
 export type { MlPluginSetup, MlPluginStart } from './plugin';
 export type {
   DatafeedStats as MlDatafeedStats,
@@ -26,10 +27,17 @@ export {
   InsufficientMLCapabilities,
   MLPrivilegesUninitialized,
 } from './shared';
-import { configSchema, type ConfigSchema } from './config_schema';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
+  exposeToBrowser: {
+    ad: true,
+    dfa: true,
+    nlp: true,
+  },
 };
 
-export const plugin = (ctx: PluginInitializerContext<ConfigSchema>) => new MlServerPlugin(ctx);
+export const plugin = async (ctx: PluginInitializerContext<ConfigSchema>) => {
+  const { MlServerPlugin } = await import('./plugin');
+  return new MlServerPlugin(ctx);
+};

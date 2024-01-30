@@ -25,7 +25,7 @@ import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-p
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
-  getDataComparisonComponent,
+  getDataDriftComponent,
   getFileDataVisualizerComponent,
   getIndexDataVisualizerComponent,
 } from './api';
@@ -90,7 +90,7 @@ export class DataVisualizerPlugin
     return {
       getFileDataVisualizerComponent,
       getIndexDataVisualizerComponent,
-      getDataComparisonComponent,
+      getDataDriftComponent,
       getMaxBytesFormatted,
     };
   }

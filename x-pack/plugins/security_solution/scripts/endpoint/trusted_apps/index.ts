@@ -18,13 +18,14 @@ import {
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
 import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import type { TrustedApp } from '../../../common/endpoint/types';
 import { TrustedAppGenerator } from '../../../common/endpoint/data_generators/trusted_app_generator';
 
 import { newTrustedAppToCreateExceptionListItem } from '../../../public/management/pages/trusted_apps/service/mappers';
 import { randomPolicyIdGenerator } from '../common/random_policy_id_generator';
 
-const defaultLogger = new ToolingLog({ level: 'info', writeTo: process.stdout });
+const defaultLogger = createToolingLogger();
 const separator = '----------------------------------------';
 const trustedAppGenerator = new TrustedAppGenerator();
 

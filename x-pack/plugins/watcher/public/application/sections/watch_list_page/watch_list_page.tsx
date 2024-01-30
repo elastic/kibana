@@ -47,6 +47,80 @@ import { goToCreateThresholdAlert, goToCreateAdvancedWatch } from '../../lib/nav
 import { useAppContext } from '../../app_context';
 import { PageError as GenericPageError } from '../../shared_imports';
 
+/*
+ * EuiMemoryTable relies on referential equality of a column's name field when sorting by that column.
+ * Therefore, we want the JSX elements preserved through renders.
+ */
+const stateColumnHeader = (
+  <EuiToolTip
+    content={i18n.translate('xpack.watcher.sections.watchList.watchTable.stateHeader.tooltipText', {
+      defaultMessage: 'Active, inactive, or error.',
+    })}
+  >
+    <span>
+      {i18n.translate('xpack.watcher.sections.watchList.watchTable.stateHeader', {
+        defaultMessage: 'State',
+      })}{' '}
+      <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+    </span>
+  </EuiToolTip>
+);
+
+const conditionLastMetHeader = (
+  <EuiToolTip
+    content={i18n.translate(
+      'xpack.watcher.sections.watchList.watchTable.lastFiredHeader.tooltipText',
+      {
+        defaultMessage: `The last time the condition was met and action taken.`,
+      }
+    )}
+  >
+    <span>
+      {i18n.translate('xpack.watcher.sections.watchList.watchTable.lastFiredHeader', {
+        defaultMessage: 'Condition last met',
+      })}{' '}
+      <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+    </span>
+  </EuiToolTip>
+);
+
+const lastCheckedHeader = (
+  <EuiToolTip
+    content={i18n.translate(
+      'xpack.watcher.sections.watchList.watchTable.lastTriggeredHeader.tooltipText',
+      {
+        defaultMessage: `The last time the condition was checked.`,
+      }
+    )}
+  >
+    <span>
+      {i18n.translate('xpack.watcher.sections.watchList.watchTable.lastTriggeredHeader', {
+        defaultMessage: 'Last checked',
+      })}{' '}
+      <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+    </span>
+  </EuiToolTip>
+);
+
+const commentHeader = (
+  <EuiToolTip
+    content={i18n.translate(
+      'xpack.watcher.sections.watchList.watchTable.commentHeader.tooltipText',
+      {
+        defaultMessage:
+          'Whether any actions have been acknowledged, throttled, or failed to execute.',
+      }
+    )}
+  >
+    <span>
+      {i18n.translate('xpack.watcher.sections.watchList.watchTable.commentHeader', {
+        defaultMessage: 'Comment',
+      })}{' '}
+      <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+    </span>
+  </EuiToolTip>
+);
+
 export const WatchListPage = () => {
   // hooks
   const {
@@ -273,46 +347,14 @@ export const WatchListPage = () => {
       },
       {
         field: 'watchStatus.state',
-        name: (
-          <EuiToolTip
-            content={i18n.translate(
-              'xpack.watcher.sections.watchList.watchTable.stateHeader.tooltipText',
-              {
-                defaultMessage: 'Active, inactive, or error.',
-              }
-            )}
-          >
-            <span>
-              {i18n.translate('xpack.watcher.sections.watchList.watchTable.stateHeader', {
-                defaultMessage: 'State',
-              })}{' '}
-              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-            </span>
-          </EuiToolTip>
-        ),
+        name: stateColumnHeader,
         sortable: true,
         width: '130px',
         render: (state: string) => <WatchStateBadge state={state} />,
       },
       {
         field: 'watchStatus.lastMetCondition',
-        name: (
-          <EuiToolTip
-            content={i18n.translate(
-              'xpack.watcher.sections.watchList.watchTable.lastFiredHeader.tooltipText',
-              {
-                defaultMessage: `The last time the condition was met and action taken.`,
-              }
-            )}
-          >
-            <span>
-              {i18n.translate('xpack.watcher.sections.watchList.watchTable.lastFiredHeader', {
-                defaultMessage: 'Condition last met',
-              })}{' '}
-              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-            </span>
-          </EuiToolTip>
-        ),
+        name: conditionLastMetHeader,
         sortable: true,
         truncateText: true,
         width: '160px',
@@ -322,23 +364,7 @@ export const WatchListPage = () => {
       },
       {
         field: 'watchStatus.lastChecked',
-        name: (
-          <EuiToolTip
-            content={i18n.translate(
-              'xpack.watcher.sections.watchList.watchTable.lastTriggeredHeader.tooltipText',
-              {
-                defaultMessage: `The last time the condition was checked.`,
-              }
-            )}
-          >
-            <span>
-              {i18n.translate('xpack.watcher.sections.watchList.watchTable.lastTriggeredHeader', {
-                defaultMessage: 'Last checked',
-              })}{' '}
-              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-            </span>
-          </EuiToolTip>
-        ),
+        name: lastCheckedHeader,
         sortable: true,
         truncateText: true,
         width: '160px',
@@ -348,24 +374,7 @@ export const WatchListPage = () => {
       },
       {
         field: 'watchStatus.comment',
-        name: (
-          <EuiToolTip
-            content={i18n.translate(
-              'xpack.watcher.sections.watchList.watchTable.commentHeader.tooltipText',
-              {
-                defaultMessage:
-                  'Whether any actions have been acknowledged, throttled, or failed to execute.',
-              }
-            )}
-          >
-            <span>
-              {i18n.translate('xpack.watcher.sections.watchList.watchTable.commentHeader', {
-                defaultMessage: 'Comment',
-              })}{' '}
-              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-            </span>
-          </EuiToolTip>
-        ),
+        name: commentHeader,
         sortable: true,
         truncateText: true,
       },

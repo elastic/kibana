@@ -16,7 +16,9 @@ interface EmptyStateErrorProps {
 
 export const EmptyStateError = ({ errors }: EmptyStateErrorProps) => {
   const unauthorized = errors.find(
-    (error) => error.message && error.message.includes('unauthorized')
+    (error) =>
+      (error.message && error.message.includes('unauthorized')) ||
+      (error.body?.message && error.body.message.includes('unauthorized'))
   );
 
   return (

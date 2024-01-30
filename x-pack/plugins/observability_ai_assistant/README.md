@@ -6,7 +6,7 @@ This document gives an overview of the features of the Observability AI Assistan
 
 #### **1.1. Configuration**
 
-Users can connect to an LLM using [connectors](https://www.elastic.co/guide/en/kibana/current/action-types.html) - specifically the [Generative AI connector](https://www.elastic.co/guide/en/kibana/current/gen-ai-action-type.html), which currently supports both OpenAI and Azure OpenAI as providers. The connector is Enterprise-only. Users can also leverage [preconfigured connectors](https://www.elastic.co/guide/en/kibana/current/pre-configured-connectors.html), in which case the following should be added to `kibana.yml`:
+Users can connect to an LLM using [connectors](https://www.elastic.co/guide/en/kibana/current/action-types.html) - specifically the [OpenAI connector](https://www.elastic.co/guide/en/kibana/current/openai-action-type.html), which currently supports both OpenAI and Azure OpenAI as providers. The connector is Enterprise-only. Users can also leverage [preconfigured connectors](https://www.elastic.co/guide/en/kibana/current/pre-configured-connectors.html), in which case the following should be added to `kibana.yml`:
 
 ```yaml
 xpack.actions.preconfigured:

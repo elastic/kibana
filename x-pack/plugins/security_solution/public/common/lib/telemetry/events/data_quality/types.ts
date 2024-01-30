@@ -13,6 +13,7 @@ export type ReportDataQualityIndexCheckedParams = ReportDataQualityCheckAllCompl
   ilmPhase?: string;
   indexId: string;
   indexName: string;
+  sameFamilyFields?: string[];
   unallowedMappingFields?: string[];
   unallowedValueFields?: string[];
 };
@@ -22,9 +23,13 @@ export interface ReportDataQualityCheckAllCompletedParams {
   ecsVersion?: string;
   isCheckAll?: boolean;
   numberOfDocuments?: number;
+  numberOfFields?: number;
   numberOfIncompatibleFields?: number;
+  numberOfEcsFields?: number;
+  numberOfCustomFields?: number;
   numberOfIndices?: number;
   numberOfIndicesChecked?: number;
+  numberOfSameFamily?: number;
   sizeInBytes?: number;
   timeConsumedMs?: number;
 }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RenderCellValueContext } from '../../../../../detections/configurations/security_solution_detections/fetch_page_context';
 import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import type { ColumnRenderer } from './column_renderer';
 
@@ -15,10 +16,11 @@ const unhandledColumnRenderer = (): never => {
 export const getColumnRenderer = (
   columnName: string,
   columnRenderers: ColumnRenderer[],
-  data: TimelineNonEcsData[]
+  data: TimelineNonEcsData[],
+  context?: RenderCellValueContext
 ): ColumnRenderer => {
   const renderer = columnRenderers.find((columnRenderer) =>
-    columnRenderer.isInstance(columnName, data)
+    columnRenderer.isInstance(columnName, data, context)
   );
   return renderer != null ? renderer : unhandledColumnRenderer();
 };

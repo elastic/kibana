@@ -16,21 +16,19 @@ import {
   metricsDataSourceSavedObjectName,
 } from '../saved_objects/metrics_data_source';
 
+export const DEFAULT_METRIC_INDICES = 'metrics-*,metricbeat-*';
+
 export class MetricsDataClient {
   private readonly defaultSavedObjectId = 'default';
   private getDefaultMetricIndices: DefaultMetricIndicesHandler = null;
 
   async getMetricIndices(options: GetMetricIndicesOptions): Promise<string> {
-    if (!this.getDefaultMetricIndices) {
-      throw new Error('Missing getMetricsIndices fallback');
-    }
-
     const metricIndices = await options.savedObjectsClient
       .get<MetricsDataSavedObject>(metricsDataSourceSavedObjectName, this.defaultSavedObjectId)
       .then(({ attributes }) => attributes.metricIndices)
       .catch((err) => {
         if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-          return this.getDefaultMetricIndices!(options);
+          return this.getDefaultMetricIndices?.(options) ?? DEFAULT_METRIC_INDICES;
         }
 
         throw err;

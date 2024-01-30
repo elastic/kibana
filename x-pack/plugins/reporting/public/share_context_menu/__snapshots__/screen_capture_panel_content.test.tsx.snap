@@ -134,7 +134,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
       class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isClosed"
       id="advanced-options"
       inert=""
-      role="region"
+      role="group"
       style="block-size: 0;"
       tabindex="-1"
     >
@@ -172,7 +172,10 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
             Unsaved work
           </p>
           <div
-            class="euiText emotion-euiText-xs-euiTextColor-default-euiCallOut__description"
+            class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+          />
+          <div
+            class="euiText emotion-euiText-xs-euiTextColor-default"
           >
             <div
               class="euiText emotion-euiText-s"
@@ -328,7 +331,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
       class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isClosed"
       id="advanced-options"
       inert=""
-      role="region"
+      role="group"
       style="block-size: 0;"
       tabindex="-1"
     >
@@ -366,7 +369,10 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
             Unsaved work
           </p>
           <div
-            class="euiText emotion-euiText-xs-euiTextColor-default-euiCallOut__description"
+            class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+          />
+          <div
+            class="euiText emotion-euiText-xs-euiTextColor-default"
           >
             <div
               class="euiText emotion-euiText-s"
@@ -463,7 +469,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
       class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isClosed"
       id="advanced-options"
       inert=""
-      role="region"
+      role="group"
       style="block-size: 0;"
       tabindex="-1"
     >
@@ -501,7 +507,10 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
             Unsaved work
           </p>
           <div
-            class="euiText emotion-euiText-xs-euiTextColor-default-euiCallOut__description"
+            class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+          />
+          <div
+            class="euiText emotion-euiText-xs-euiTextColor-default"
           >
             <div
               class="euiText emotion-euiText-s"

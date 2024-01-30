@@ -3,7 +3,7 @@
   "keep_stale": false,
   "monitors": [
     {
-      "locations": ["localhost"],
+      "locations": ["dev"],
       "type": "http",
       "enabled": false,
       "id": "my-monitor-2",
@@ -39,7 +39,7 @@
       "hash": "ekrjelkjrelkjre"
     },
     {
-      "locations": ["localhost"],
+      "locations": ["dev"],
       "type": "http",
       "enabled": false,
       "id": "my-monitor-3",
@@ -79,7 +79,8 @@
       "params": {
         "testLocal1": "testLocalParamsValue",
         "testGlobalParam2": "testGlobalParamOverwrite"
-      }
+      },
+      "max_attempts": 2
     }
   ]
 }

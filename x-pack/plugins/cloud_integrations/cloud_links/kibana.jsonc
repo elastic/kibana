@@ -14,6 +14,9 @@
     ],
     "requiredBundles": [
       "kibanaReact"
+    ],
+    "requiredPlugins": [
+      "share"
     ]
   }
 }

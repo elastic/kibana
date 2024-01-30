@@ -26,3 +26,11 @@ export function getDisplayedColumns(stateColumns: string[] = [], dataView?: Data
     ? stateColumns
     : SOURCE_ONLY;
 }
+
+export function getInnerColumns(fields: Record<string, unknown[]>, columnId: string) {
+  return Object.fromEntries(
+    Object.entries(fields).filter(([key]) => {
+      return key.startsWith(`${columnId}.`);
+    })
+  );
+}

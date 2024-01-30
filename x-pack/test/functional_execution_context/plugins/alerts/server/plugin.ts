@@ -73,6 +73,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           name: 'Default',
         },
       ],
+      category: 'kibana',
       producer: 'fecAlertsTestPlugin',
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',

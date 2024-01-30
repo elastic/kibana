@@ -14,7 +14,6 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { DataViewsPublicPluginSetup } from '@kbn/data-views-plugin/public/types';
 import { rollupBadgeExtension, rollupToggleExtension } from './extend_index_management';
 import { UIM_APP_NAME } from '../common';
-// @ts-ignore
 import { setHttp, init as initDocumentation } from './crud_app/services';
 import { setNotifications, setFatalErrors, setUiStatsReporter } from './kibana_services';
 import { ClientConfigType } from './types';
@@ -43,27 +42,27 @@ export class RollupPlugin implements Plugin {
       setUiStatsReporter(usageCollection.reportUiCounter.bind(usageCollection, UIM_APP_NAME));
     }
 
-    if (indexManagement) {
-      indexManagement.extensionsService.addBadge(rollupBadgeExtension);
-      indexManagement.extensionsService.addToggle(rollupToggleExtension);
-    }
-
-    if (home && isRollupUiEnabled) {
-      home.featureCatalogue.register({
-        id: 'rollup_jobs',
-        title: 'Rollups',
-        description: i18n.translate('xpack.rollupJobs.featureCatalogueDescription', {
-          defaultMessage:
-            'Summarize and store historical data in a smaller index for future analysis.',
-        }),
-        icon: 'indexRollupApp',
-        path: `/app/management/data/rollup_jobs/job_list`,
-        showOnHomePage: false,
-        category: 'admin',
-      });
-    }
-
     if (isRollupUiEnabled) {
+      if (indexManagement) {
+        indexManagement.extensionsService.addBadge(rollupBadgeExtension);
+        indexManagement.extensionsService.addToggle(rollupToggleExtension);
+      }
+
+      if (home) {
+        home.featureCatalogue.register({
+          id: 'rollup_jobs',
+          title: 'Rollups',
+          description: i18n.translate('xpack.rollupJobs.featureCatalogueDescription', {
+            defaultMessage:
+              'Summarize and store historical data in a smaller index for future analysis.',
+          }),
+          icon: 'indexRollupApp',
+          path: `/app/management/data/rollup_jobs/job_list`,
+          showOnHomePage: false,
+          category: 'admin',
+        });
+      }
+
       dataViews.enableRollups();
       const pluginName = i18n.translate('xpack.rollupJobs.appTitle', {
         defaultMessage: 'Rollup Jobs',

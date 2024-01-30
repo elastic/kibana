@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import type { SignificantTerm } from '@kbn/ml-agg-utils';
+import type { SignificantItem } from '@kbn/ml-agg-utils';
 
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
@@ -65,7 +65,7 @@ export const useViewInDiscoverAction = (dataViewId?: string): TableItemAction =>
     }
   }, [application.capabilities.discover?.show, dataViewId, discoverLocator]);
 
-  const generateDiscoverUrl = async (groupTableItem: GroupTableItem | SignificantTerm) => {
+  const generateDiscoverUrl = async (groupTableItem: GroupTableItem | SignificantItem) => {
     if (discoverLocator !== undefined) {
       const url = await discoverLocator.getRedirectUrl({
         indexPatternId: dataViewId,
@@ -82,7 +82,7 @@ export const useViewInDiscoverAction = (dataViewId?: string): TableItemAction =>
   };
 
   return {
-    render: (tableItem: SignificantTerm | GroupTableItem) => {
+    render: (tableItem: SignificantItem | GroupTableItem) => {
       const tooltipText = discoverUrlError ? discoverUrlError : viewInDiscoverMessage;
 
       const clickHandler = async () => {

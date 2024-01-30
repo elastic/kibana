@@ -105,7 +105,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
     async clickOnNodeDetailsFlyoutOpenAsPage() {
       await retry.try(async () => {
-        await testSubjects.click('infraNodeContextPopoverOpenAsPageButton');
+        await testSubjects.click('infraAssetDetailsOpenAsPageButton');
       });
     },
 
@@ -337,7 +337,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.click('superDatePickerAbsoluteTab');
       const datePickerInput = await testSubjects.find('superDatePickerAbsoluteDateInput');
       await datePickerInput.clearValueWithKeyboard();
-      await datePickerInput.type([date]);
+      await datePickerInput.type([date, browser.keys.RETURN]);
     },
     async setAnomaliesThreshold(threshold: string) {
       const thresholdInput = await find.byCssSelector(
@@ -345,6 +345,10 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       );
       await thresholdInput.clearValueWithKeyboard({ charByChar: true });
       await thresholdInput.type([threshold]);
+    },
+
+    async ensureAlertsAndRulesDropdownIsMissing() {
+      await testSubjects.missingOrFail('infrastructure-alerts-and-rules');
     },
 
     async clickAlertsAndRules() {
@@ -359,9 +363,17 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.missingOrFail('metrics-alert-menu');
     },
 
+    async ensureCustomThresholdAlertMenuItemIsVisible() {
+      await testSubjects.existOrFail('custom-threshold-alerts-menu-option');
+    },
+
+    async ensureCustomThresholdAlertMenuItemIsMissing() {
+      await testSubjects.missingOrFail('custom-threshold-alerts-menu-option');
+    },
+
     async dismissDatePickerTooltip() {
       const isTooltipOpen = await testSubjects.exists(`waffleDatePickerIntervalTooltip`, {
-        timeout: 1000,
+        timeout: 3000,
       });
 
       if (isTooltipOpen) {
@@ -432,6 +444,14 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     async inputQueryData() {
       const queryBar = await testSubjects.find('infraSearchField');
       await queryBar.type('h');
+    },
+
+    async inputAddHostNameFilter(hostName: string) {
+      await this.enterSearchTerm(`host.name:"${hostName}"`);
+    },
+
+    async clickOnNode() {
+      return testSubjects.click('nodeContainer');
     },
 
     async ensureSuggestionsPanelVisible() {

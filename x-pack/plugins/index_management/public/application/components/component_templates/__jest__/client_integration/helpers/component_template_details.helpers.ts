@@ -78,6 +78,7 @@ export type ComponentTemplateDetailsTestSubjects =
   | 'summaryTabContent.usedByTitle'
   | 'summaryTabContent.versionTitle'
   | 'summaryTabContent.metaTitle'
+  | 'summaryTabContent.dataRetentionTitle'
   | 'notInUseCallout'
   | 'aliasesTabContent'
   | 'noAliasesCallout'

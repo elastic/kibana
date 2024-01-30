@@ -8,7 +8,9 @@
     "server": true,
     "browser": true,
     "requiredPlugins": [
-      "navigation",
+      "navigation"
+    ],
+    "optionalPlugins": [
       "guidedOnboarding"
     ]
   }

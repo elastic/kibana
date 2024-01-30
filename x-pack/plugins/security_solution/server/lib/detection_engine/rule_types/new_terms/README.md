@@ -12,7 +12,7 @@ Each page is evaluated in 3 phases.
 Phase 1: Collect "recent" terms - terms that have appeared in the last rule interval, without regard to whether or not they have appeared in historical data. This is done using a composite aggregation to ensure we can iterate over every term.
 
 Phase 2: Check if the page of terms contains any new terms. This uses a regular terms agg with the include parameter - every term is added to the array of include values, so the terms agg is limited to only aggregating on the terms of interest from phase 1. This avoids issues with the terms agg providing approximate results due to getting different terms from different shards.
-For multiple new terms fields(['source.host', 'source.ip']), in terms aggregation uses a runtime field. Which is created by joining values from new terms fields into one single keyword value. Fields values encoded in base64 and joined with configured a delimiter symbol, which is not part of base64 symbols(a–Z, 0–9, +, /,  =) to avoid a situation when delimiter can be part of field value. Include parameter consists of encoded in base64 results from Phase 1.
+For multiple new terms fields(['source.host', 'source.ip']), in composite aggregation uses pagination through phase 1 aggregation results. It is done, by splitting page results(10,000 buckets) into chunks(500 size of a chunk). Each chunk then gets converted into a DSL query as a filter and applied in a single request.
 
 Phase 3: Any new terms from phase 2 are processed and the first document to contain that term is retrieved. The document becomes the basis of the generated alert. This is done with an aggregation query that is very similar to the agg used in phase 2, except it also includes a top_hits agg. top_hits is moved to a separate, later phase for efficiency - top_hits is slow and most terms will not be new in phase 2. This means we only execute the top_hits agg on the terms that are actually new which is faster.
 
@@ -27,7 +27,3 @@ The new terms rule type reuses the singleSearchAfter function which implements t
 ## Limitations and future enhancements
 
 - Value list exceptions are not supported at the moment. Commit ead04ce removes an experimental method I tried for evaluating value list exceptions.
-- Runtime field supports only 100 emitted values. So for large arrays or combination of values greater than 100, results may not be exhaustive. This applies only to new terms with multiple fields.
-  Following edge cases possible:
-    - false negatives (alert is not generated) if too many fields were emitted and actual new values are not getting evaluated if it happened in document in rule run window.
-    - false positives (wrong alert generated) if too many fields were emitted in historical document and some old terms are not getting evaluated against values in new documents.

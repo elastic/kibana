@@ -7,7 +7,6 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { UsageCollectionPlugin } from './plugin';
 
 export type {
   Collector,
@@ -31,5 +30,7 @@ export { USAGE_COUNTERS_SAVED_OBJECT_TYPE, serializeCounterKey } from './usage_c
 
 export type { UsageCollectionSetup } from './plugin';
 export { config } from './config';
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new UsageCollectionPlugin(initializerContext);
+export const plugin = async (initializerContext: PluginInitializerContext) => {
+  const { UsageCollectionPlugin } = await import('./plugin');
+  return new UsageCollectionPlugin(initializerContext);
+};

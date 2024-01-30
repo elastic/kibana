@@ -137,7 +137,7 @@ export class JobsListView extends Component {
         loadFullJob(jobId)
           .then((job) => {
             const fullJobsList = { ...this.state.fullJobsList };
-            if (this.props.isServerless) {
+            if (this.props.showNodeInfo === false) {
               job = removeNodeInfo(job);
             }
             fullJobsList[jobId] = job;
@@ -318,7 +318,7 @@ export class JobsListView extends Component {
       const fullJobsList = {};
       const jobsSummaryList = jobs.map((job) => {
         if (job.fullJob !== undefined) {
-          if (this.props.isServerless) {
+          if (this.props.showNodeInfo === false) {
             job.fullJob = removeNodeInfo(job.fullJob);
           }
           fullJobsList[job.id] = job.fullJob;
@@ -350,7 +350,10 @@ export class JobsListView extends Component {
       });
 
       this.isDoneRefreshing();
-      if (jobsSummaryList.some((j) => j.blocked !== undefined)) {
+      if (
+        blockingJobsRefreshTimeout === null &&
+        jobsSummaryList.some((j) => j.blocked !== undefined)
+      ) {
         // if there are some jobs in a deleting state, start polling for
         // deleting jobs so we can update the jobs list once the
         // deleting tasks are over
@@ -417,7 +420,7 @@ export class JobsListView extends Component {
                 <EuiFlexItem grow={false}>
                   <JobStatsBar
                     jobsSummaryList={jobsSummaryList}
-                    isServerless={this.props.isServerless}
+                    showNodeInfo={this.props.showNodeInfo}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>

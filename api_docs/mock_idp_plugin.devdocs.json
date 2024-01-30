@@ -1,0 +1,59 @@
+{
+  "id": "mockIdpPlugin",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "mockIdpPlugin",
+        "id": "def-server.CreateSAMLResponseParams",
+        "type": "Type",
+        "tags": [],
+        "label": "CreateSAMLResponseParams",
+        "description": [],
+        "signature": [
+          "{ readonly email?: string | null | undefined; readonly full_name?: string | null | undefined; readonly username: string; readonly roles: string[]; }"
+        ],
+        "path": "packages/kbn-mock-idp-plugin/server/plugin.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "mockIdpPlugin",
+        "id": "def-common.MOCK_IDP_REALM_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "MOCK_IDP_REALM_NAME",
+        "description": [],
+        "signature": [
+          "\"cloud-saml-kibana\""
+        ],
+        "path": "packages/kbn-mock-idp-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

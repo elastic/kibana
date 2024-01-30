@@ -6,6 +6,8 @@
  */
 
 import { RRuleAttributes } from '../../r_rule/types';
+import type { MaintenanceWindowCategoryIdTypes } from '../constants';
+import { AlertsFilterQueryAttributes } from '../../alerts_filter_query/types';
 
 export interface MaintenanceWindowEventAttributes {
   gte: string;
@@ -23,4 +25,6 @@ export interface MaintenanceWindowAttributes {
   updatedBy: string | null;
   createdAt: string;
   updatedAt: string;
+  categoryIds?: MaintenanceWindowCategoryIdTypes[] | null;
+  scopedQuery?: AlertsFilterQueryAttributes | null;
 }

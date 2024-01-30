@@ -16,25 +16,28 @@ import {
   buildExpressionFunction,
   ExpressionFunctionTheme,
 } from '@kbn/expressions-plugin/common';
-import { PaletteRegistry } from '@kbn/coloring';
+import { PaletteRegistry, getColorsFromMapping } from '@kbn/coloring';
 import { IconChartTagcloud } from '@kbn/chart-icons';
 import { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
+import useObservable from 'react-use/lib/useObservable';
 import type { OperationMetadata, Visualization } from '../..';
+import { getColorMappingDefaults } from '../../utils';
 import type { TagcloudState } from './types';
 import { getSuggestions } from './suggestions';
 import { TagcloudToolbar } from './tagcloud_toolbar';
 import { TagsDimensionEditor } from './tags_dimension_editor';
 import { DEFAULT_STATE, TAGCLOUD_LABEL } from './constants';
+import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
 
 const TAG_GROUP_ID = 'tags';
 const METRIC_GROUP_ID = 'metric';
 
 export const getTagcloudVisualization = ({
   paletteService,
-  theme,
+  kibanaTheme,
 }: {
   paletteService: PaletteRegistry;
-  theme: ThemeServiceStart;
+  kibanaTheme: ThemeServiceStart;
 }): Visualization<TagcloudState> => ({
   id: 'lnsTagcloud',
 
@@ -46,7 +49,6 @@ export const getTagcloudVisualization = ({
       groupLabel: i18n.translate('xpack.lens.pie.groupLabel', {
         defaultMessage: 'Proportion',
       }),
-      showExperimentalBadge: true,
     },
   ],
 
@@ -89,20 +91,46 @@ export const getTagcloudVisualization = ({
           },
         };
   },
+  getMainPalette: (state) => {
+    if (!state) return;
+
+    return state.colorMapping
+      ? { type: 'colorMapping', value: state.colorMapping }
+      : state.palette
+      ? { type: 'legacyPalette', value: state.palette }
+      : undefined;
+  },
 
   triggers: [VIS_EVENT_TO_TRIGGER.filter],
 
-  initialize(addNewLayer, state) {
+  initialize(addNewLayer, state, mainPalette) {
     return (
       state || {
         layerId: addNewLayer(),
         layerType: LayerTypes.DATA,
         ...DEFAULT_STATE,
+        colorMapping:
+          mainPalette?.type === 'colorMapping' ? mainPalette.value : getColorMappingDefaults(),
       }
     );
   },
 
   getConfiguration({ state }) {
+    const canUseColorMapping = state.colorMapping ? true : false;
+    let colors: string[] = [];
+    if (canUseColorMapping) {
+      kibanaTheme.theme$
+        .subscribe({
+          next(theme) {
+            colors = getColorsFromMapping(theme.darkMode, state.colorMapping);
+          },
+        })
+        .unsubscribe();
+    } else {
+      colors = paletteService
+        .get(state.palette?.name || 'default')
+        .getCategoricalColors(10, state.palette?.params);
+    }
     return {
       groups: [
         {
@@ -116,9 +144,7 @@ export const getTagcloudVisualization = ({
                 {
                   columnId: state.tagAccessor,
                   triggerIconType: 'colorBy',
-                  palette: paletteService
-                    .get(state.palette?.name || 'default')
-                    .getCategoricalColors(10, state.palette?.params),
+                  palette: colors,
                 },
               ]
             : [],
@@ -197,6 +223,7 @@ export const getTagcloudVisualization = ({
                 ),
           ]).toAst(),
           showLabel: state.showLabel,
+          colorMapping: state.colorMapping ? JSON.stringify(state.colorMapping) : undefined,
         }).toAst(),
       ],
     };
@@ -235,6 +262,7 @@ export const getTagcloudVisualization = ({
                 ),
           ]).toAst(),
           showLabel: false,
+          colorMapping: state.colorMapping ? JSON.stringify(state.colorMapping) : undefined,
         }).toAst(),
       ],
     };
@@ -266,12 +294,17 @@ export const getTagcloudVisualization = ({
   },
 
   DimensionEditorComponent(props) {
+    const isDarkMode: boolean = useObservable(kibanaTheme.theme$, { darkMode: false }).darkMode;
     if (props.groupId === TAG_GROUP_ID) {
       return (
         <TagsDimensionEditor
+          isDarkMode={isDarkMode}
           paletteService={paletteService}
           state={props.state}
           setState={props.setState}
+          frame={props.frame}
+          panelRef={props.panelRef}
+          isInlineEditing={props.isInlineEditing}
         />
       );
     }
@@ -280,5 +313,8 @@ export const getTagcloudVisualization = ({
 
   ToolbarComponent(props) {
     return <TagcloudToolbar {...props} />;
+  },
+  getTelemetryEventsOnSave(state, prevState) {
+    return getColorMappingTelemetryEvents(state?.colorMapping, prevState?.colorMapping);
   },
 });

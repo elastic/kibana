@@ -6,15 +6,22 @@
  */
 
 import React from 'react';
-import { act, render, fireEvent, screen } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
+import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
 
 import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../lib/test_utils';
-import SlackActionFields from './slack_connectors';
-import { useFetchChannels } from './use_fetch_channels';
+import { SlackActionFieldsComponents as SlackActionFields } from './slack_connectors';
+import { useValidChannels } from './use_valid_channels';
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
-jest.mock('./use_fetch_channels');
+const mockUseKibanaReturnValue = createStartServicesMock();
+jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => ({
+  __esModule: true,
+  useKibana: jest.fn(() => ({
+    services: mockUseKibanaReturnValue,
+  })),
+}));
+jest.mock('./use_valid_channels');
 
 (useKibana as jest.Mock).mockImplementation(() => ({
   services: {
@@ -32,15 +39,19 @@ jest.mock('./use_fetch_channels');
   },
 }));
 
-(useFetchChannels as jest.Mock).mockImplementation(() => ({
-  channels: [],
-  isLoading: false,
-}));
+const useValidChannelsMock = useValidChannels as jest.Mock;
 
 describe('SlackActionFields renders', () => {
   const onSubmit = jest.fn();
   beforeEach(() => {
+    useValidChannelsMock.mockClear();
+    onSubmit.mockClear();
     jest.clearAllMocks();
+    useValidChannelsMock.mockImplementation(() => ({
+      channels: [],
+      isLoading: false,
+      resetChannelsToValidate: jest.fn(),
+    }));
   });
 
   it('all connector fields is rendered for web_api type', async () => {
@@ -77,27 +88,68 @@ describe('SlackActionFields renders', () => {
       isDeprecated: false,
     };
 
+    // Simulate that user just type a channel ID
+    useValidChannelsMock.mockImplementation(() => ({
+      channels: ['my-channel'],
+      isLoading: false,
+      resetChannelsToValidate: jest.fn(),
+    }));
+
     render(
       <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
         <SlackActionFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
       </ConnectorFormTestProvider>
     );
     await waitForComponentToUpdate();
-    await act(async () => {
-      fireEvent.click(screen.getByTestId('form-test-provide-submit'));
+    act(() => {
+      screen.getByTestId('form-test-provide-submit').click();
     });
-    expect(onSubmit).toBeCalledTimes(1);
-    expect(onSubmit).toBeCalledWith({
-      data: {
-        secrets: {
-          token: 'some token',
+
+    await waitFor(() => {
+      expect(onSubmit).toBeCalledTimes(1);
+      expect(onSubmit).toBeCalledWith({
+        data: {
+          secrets: {
+            token: 'some token',
+          },
+          config: {
+            allowedChannels: ['my-channel'],
+          },
+          id: 'test',
+          actionTypeId: '.slack',
+          name: 'slack',
+          isDeprecated: false,
         },
-        id: 'test',
-        actionTypeId: '.slack',
-        name: 'slack',
-        isDeprecated: false,
+        isValid: true,
+      });
+    });
+  });
+
+  it('connector validation should failed when allowedChannels is empty', async () => {
+    const actionConnector = {
+      secrets: {
+        token: 'some token',
       },
-      isValid: true,
+      id: 'test',
+      actionTypeId: '.slack',
+      name: 'slack',
+      config: {},
+      isDeprecated: false,
+    };
+
+    render(
+      <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+        <SlackActionFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+      </ConnectorFormTestProvider>
+    );
+    await waitForComponentToUpdate();
+    act(() => {
+      screen.getByTestId('form-test-provide-submit').click();
+    });
+
+    await waitFor(() => {
+      expect(onSubmit).toBeCalledTimes(1);
+      expect(onSubmit).toBeCalledWith(expect.objectContaining({ isValid: false }));
     });
   });
 });

@@ -4,31 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ROLES } from '@kbn/security-solution-plugin/common/test';
+import { ROLES, SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 
 import { getNewRule } from '../../../objects/rule';
 
 import { expandFirstAlertActions } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { cleanKibana } from '../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 
 import { ALERTS_URL } from '../../../urls/navigation';
-import { ATTACH_ALERT_TO_CASE_BUTTON, ATTACH_TO_NEW_CASE_BUTTON } from '../../../screens/alerts';
+import { ATTACH_ALERT_TO_CASE_BUTTON, TIMELINE_CONTEXT_MENU_BTN } from '../../../screens/alerts';
 import { LOADING_INDICATOR } from '../../../screens/security_header';
 
-const loadDetectionsPage = (role: ROLES) => {
+const loadDetectionsPage = (role: SecurityRoleName) => {
   login(role);
-  visit(ALERTS_URL, { role });
+  visit(ALERTS_URL);
   waitForAlertsToPopulate();
 };
 
-describe('Alerts timeline', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Alerts timeline', { tags: ['@ess'] }, () => {
   before(() => {
     // First we login as a privileged user to create alerts.
-    cleanKibana();
     login();
     createRule(getNewRule());
     visit(ALERTS_URL);
@@ -41,15 +39,13 @@ describe('Alerts timeline', { tags: ['@ess', '@serverless', '@brokenInServerless
     });
 
     it('should not allow user with read only privileges to attach alerts to existing cases', () => {
-      // Disabled actions for read only users are hidden, so only open alert details button should show
-      expandFirstAlertActions();
-      cy.get(ATTACH_ALERT_TO_CASE_BUTTON).should('not.exist');
+      // Disabled actions for read only users are hidden, so the ... icon is not even shown
+      cy.get(TIMELINE_CONTEXT_MENU_BTN).should('not.exist');
     });
 
     it('should not allow user with read only privileges to attach alerts to a new case', () => {
-      // Disabled actions for read only users are hidden, so only open alert details button should show
-      expandFirstAlertActions();
-      cy.get(ATTACH_TO_NEW_CASE_BUTTON).should('not.exist');
+      // Disabled actions for read only users are hidden, so the ... icon is not even shown
+      cy.get(TIMELINE_CONTEXT_MENU_BTN).should('not.exist');
     });
   });
 

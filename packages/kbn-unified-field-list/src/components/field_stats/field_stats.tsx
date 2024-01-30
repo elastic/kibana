@@ -8,6 +8,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { getTimeZone } from '@kbn/visualization-utils';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
 import type { IUiSettingsClient } from '@kbn/core/public';
@@ -28,6 +29,7 @@ import {
   Settings,
   TooltipType,
   Tooltip,
+  PartialTheme,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { buildEsQuery, Query, Filter, AggregateQuery } from '@kbn/es-query';
@@ -222,22 +224,18 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
     };
   }, []);
 
-  const chartTheme = charts.theme.useChartsTheme();
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
-  const customChartTheme: typeof chartTheme = useMemo(() => {
+  const chartThemeOverrides = useMemo<PartialTheme>(() => {
     return color
       ? {
-          ...chartTheme,
           barSeriesStyle: {
-            ...chartTheme.barSeriesStyle,
             rect: {
-              ...(chartTheme.barSeriesStyle?.rect || {}),
               fill: color,
             },
           },
         }
-      : chartTheme;
-  }, [chartTheme, color]);
+      : {};
+  }, [color]);
 
   const {
     isLoading,
@@ -270,7 +268,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   const [showingHistogram, setShowingHistogram] = useState(histogramDefault);
 
   if (isLoading) {
-    return <EuiLoadingSpinner />;
+    return <EuiLoadingSpinner data-test-subj={`${dataTestSubject}-statsLoading`} />;
   }
 
   if (!dataView) {
@@ -484,7 +482,8 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
             <Chart size={{ height: 200, width: 300 - 32 }}>
               <Tooltip type={TooltipType.None} />
               <Settings
-                theme={customChartTheme}
+                locale={i18n.getLocale()}
+                theme={chartThemeOverrides}
                 baseTheme={chartBaseTheme}
                 xDomain={
                   fromDateParsed && toDateParsed
@@ -517,7 +516,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
                 yAccessors={['count']}
                 xScaleType={ScaleType.Time}
                 yScaleType={ScaleType.Linear}
-                timeZone="local"
+                timeZone={getTimeZone(uiSettings)}
               />
             </Chart>
           </div>
@@ -533,7 +532,12 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
             size={{ height: 200, width: '100%' }}
           >
             <Tooltip type={TooltipType.None} />
-            <Settings rotation={90} theme={customChartTheme} baseTheme={chartBaseTheme} />
+            <Settings
+              locale={i18n.getLocale()}
+              rotation={90}
+              theme={chartThemeOverrides}
+              baseTheme={chartBaseTheme}
+            />
 
             <Axis
               id="key"

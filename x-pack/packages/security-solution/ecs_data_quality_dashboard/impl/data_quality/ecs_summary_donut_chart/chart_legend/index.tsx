@@ -13,9 +13,13 @@ import {
   ECS_COMPLIANT_TAB_ID,
   CUSTOM_TAB_ID,
   INCOMPATIBLE_TAB_ID,
+  SAME_FAMILY_TAB_ID,
 } from '../../data_quality_panel/index_properties/helpers';
 import { getCustomColor } from '../../data_quality_panel/tabs/custom_tab/helpers';
-import { getIncompatibleColor } from '../../data_quality_panel/tabs/incompatible_tab/helpers';
+import {
+  getIncompatibleColor,
+  getSameFamilyColor,
+} from '../../data_quality_panel/tabs/incompatible_tab/helpers';
 import type { PartitionedFieldMetadata } from '../../types';
 import * as i18n from '../../data_quality_panel/index_properties/translations';
 import { LegendContainer } from '../../data_quality_panel/tabs/styles';
@@ -30,6 +34,11 @@ interface Props {
 const ChartLegendComponent: React.FC<Props> = ({ partitionedFieldMetadata, setSelectedTabId }) => {
   const showIncompatibleTab = useCallback(
     () => setSelectedTabId(INCOMPATIBLE_TAB_ID),
+    [setSelectedTabId]
+  );
+
+  const showSameFamilyTab = useCallback(
+    () => setSelectedTabId(SAME_FAMILY_TAB_ID),
     [setSelectedTabId]
   );
 
@@ -48,6 +57,15 @@ const ChartLegendComponent: React.FC<Props> = ({ partitionedFieldMetadata, setSe
           count={partitionedFieldMetadata.incompatible.length}
           onClick={showIncompatibleTab}
           text={i18n.INCOMPATIBLE_FIELDS}
+        />
+      )}
+
+      {partitionedFieldMetadata.sameFamily.length > 0 && (
+        <ChartLegendItem
+          color={getSameFamilyColor()}
+          count={partitionedFieldMetadata.sameFamily.length}
+          onClick={showSameFamilyTab}
+          text={i18n.SAME_FAMILY}
         />
       )}
 

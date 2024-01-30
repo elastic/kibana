@@ -26,10 +26,11 @@ export const updateConnectorConfiguration = async (
   const connector = connectorResult?.value;
   if (connector) {
     const status =
-      connector.status === ConnectorStatus.NEEDS_CONFIGURATION
+      connector.status === ConnectorStatus.NEEDS_CONFIGURATION ||
+      connector.status === ConnectorStatus.CREATED
         ? ConnectorStatus.CONFIGURED
         : connector.status;
-    const updatedConfig = Object.keys(connector.configuration)
+    const updatedConfig: ConnectorConfiguration = Object.keys(connector.configuration)
       .map((key) => {
         const configEntry = connector.configuration[key];
         return isConfigEntry(configEntry)

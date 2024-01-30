@@ -40,10 +40,11 @@ export const showSuccessToast = (
     toastLifeTimeMs: 10000,
     color: 'success',
     iconType: '',
+    'data-test-subj': 'csp:toast-success',
     text: toMountPoint(
       <div>
         <EuiText size="m">
-          <strong>{ruleResponse.name}</strong>
+          <strong data-test-subj="csp:toast-success-title">{ruleResponse.name}</strong>
           {` `}
           <FormattedMessage
             id="xpack.csp.flyout.ruleCreatedToastTitle"
@@ -58,7 +59,11 @@ export const showSuccessToast = (
         </EuiText>
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiButton size="s" href={http.basePath.prepend(RULE_PAGE_PATH + ruleResponse.id)}>
+            <EuiButton
+              data-test-subj="csp:toast-success-link"
+              size="s"
+              href={http.basePath.prepend(RULE_PAGE_PATH + ruleResponse.id)}
+            >
               <FormattedMessage
                 id="xpack.csp.flyout.ruleCreatedToastViewRuleButton"
                 defaultMessage="View rule"

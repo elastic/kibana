@@ -8,13 +8,16 @@
 import expect from '@kbn/expect';
 import { eventsIndexPattern } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { ResolverEntityIndex } from '@kbn/security-solution-plugin/common/endpoint/types';
+import { targetTags } from '../../../security_solution_endpoint/target_tags';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('Resolver tests for the entity route', () => {
+  describe('Resolver tests for the entity route', function () {
+    targetTags(this, ['@ess', '@serverless']);
+
     describe('winlogbeat tests', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/endpoint/resolver/winlogbeat');
@@ -27,9 +30,12 @@ export default function ({ getService }: FtrProviderContext) {
       it('returns a winlogbeat sysmon event when the event matches the schema correctly', async () => {
         // this id is from the es archive
         const _id = 'sysmon-event';
-        const { body }: { body: ResolverEntityIndex } = await supertest.get(
-          `/api/endpoint/resolver/entity?_id=${_id}&indices=${eventsIndexPattern}&indices=winlogbeat-7.11.0-default`
-        );
+        const { body }: { body: ResolverEntityIndex } = await supertest
+          .get(
+            `/api/endpoint/resolver/entity?_id=${_id}&indices=${eventsIndexPattern}&indices=winlogbeat-7.11.0-default`
+          )
+          .set('x-elastic-internal-origin', 'xxx');
+
         expect(body).eql([
           {
             name: 'winlogbeat',
@@ -47,14 +53,20 @@ export default function ({ getService }: FtrProviderContext) {
       it('does not return a powershell event that has event.module set to powershell', async () => {
         // this id is from the es archive
         const _id = 'powershell-event';
-        const { body }: { body: ResolverEntityIndex } = await supertest.get(
-          `/api/endpoint/resolver/entity?_id=${_id}&indices=${eventsIndexPattern}&indices=winlogbeat-7.11.0-default`
-        );
+        const { body }: { body: ResolverEntityIndex } = await supertest
+          .get(
+            `/api/endpoint/resolver/entity?_id=${_id}&indices=${eventsIndexPattern}&indices=winlogbeat-7.11.0-default`
+          )
+          .set('x-elastic-internal-origin', 'xxx');
+
         expect(body).to.be.empty();
       });
     });
 
-    describe('signals index mapping tests', () => {
+    describe('signals index mapping tests', function () {
+      // illegal_argument_exception: unknown setting [index.lifecycle.name] in before
+      targetTags(this, ['@brokenInServerless']);
+
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/endpoint/resolver/signals');
       });

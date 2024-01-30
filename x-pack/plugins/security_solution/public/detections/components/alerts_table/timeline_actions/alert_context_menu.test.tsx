@@ -28,6 +28,10 @@ jest.mock('../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
 }));
 
+jest.mock('../../../../common/hooks/use_license', () => ({
+  useLicense: jest.fn().mockReturnValue({ isPlatinumPlus: () => true }),
+}));
+
 const ecsRowData: Ecs = {
   _id: '1',
   agent: { type: ['blah'] },
@@ -74,16 +78,21 @@ jest.mock('../../../../common/lib/kibana', () => {
         application: {
           capabilities: { siem: { crud_alerts: true, read_alerts: true } },
         },
-        cases: mockCasesContract(),
+        cases: {
+          ...mockCasesContract(),
+          helpers: {
+            canUseCases: jest.fn().mockReturnValue({
+              all: true,
+              create: true,
+              read: true,
+              update: true,
+              delete: true,
+              push: true,
+            }),
+            getRuleIdFromEvent: jest.fn(),
+          },
+        },
       },
-    }),
-    useGetUserCasesPermissions: jest.fn().mockReturnValue({
-      all: true,
-      create: true,
-      read: true,
-      update: true,
-      delete: true,
-      push: true,
     }),
   };
 });
@@ -99,8 +108,8 @@ const markAsOpenButton = '[data-test-subj="open-alert-status"]';
 const markAsAcknowledgedButton = '[data-test-subj="acknowledged-alert-status"]';
 const markAsClosedButton = '[data-test-subj="close-alert-status"]';
 const addEndpointEventFilterButton = '[data-test-subj="add-event-filter-menu-item"]';
-const openAlertDetailsPageButton = '[data-test-subj="open-alert-details-page-menu-item"]';
 const applyAlertTagsButton = '[data-test-subj="alert-tags-context-menu-item"]';
+const applyAlertAssigneesButton = '[data-test-subj="alert-assignees-context-menu-item"]';
 
 describe('Alert table context menu', () => {
   describe('Case actions', () => {
@@ -289,44 +298,6 @@ describe('Alert table context menu', () => {
     });
   });
 
-  describe('Open alert details action', () => {
-    test('it does not render the open alert details page action if kibana.alert.rule.uuid is not set', () => {
-      const nonAlertProps = {
-        ...props,
-        ecsRowData: {
-          ...ecsRowData,
-          kibana: {
-            alert: {
-              workflow_status: ['open'],
-              rule: {
-                parameters: {},
-                uuid: [],
-              },
-            },
-          },
-        },
-      };
-
-      const wrapper = mount(<AlertContextMenu {...nonAlertProps} scopeId={TimelineId.active} />, {
-        wrappingComponent: TestProviders,
-      });
-
-      wrapper.find(actionMenuButton).simulate('click');
-
-      expect(wrapper.find(openAlertDetailsPageButton).first().exists()).toEqual(false);
-    });
-
-    test('it renders the open alert details action button', () => {
-      const wrapper = mount(<AlertContextMenu {...props} scopeId={TimelineId.active} />, {
-        wrappingComponent: TestProviders,
-      });
-
-      wrapper.find(actionMenuButton).simulate('click');
-
-      expect(wrapper.find(openAlertDetailsPageButton).first().exists()).toEqual(true);
-    });
-  });
-
   describe('Apply alert tags action', () => {
     test('it renders the apply alert tags action button', () => {
       const wrapper = mount(<AlertContextMenu {...props} scopeId={TimelineId.active} />, {
@@ -336,6 +307,18 @@ describe('Alert table context menu', () => {
       wrapper.find(actionMenuButton).simulate('click');
 
       expect(wrapper.find(applyAlertTagsButton).first().exists()).toEqual(true);
+    });
+  });
+
+  describe('Assign alert action', () => {
+    test('it renders the assign alert action button', () => {
+      const wrapper = mount(<AlertContextMenu {...props} scopeId={TimelineId.active} />, {
+        wrappingComponent: TestProviders,
+      });
+
+      wrapper.find(actionMenuButton).simulate('click');
+
+      expect(wrapper.find(applyAlertAssigneesButton).first().exists()).toEqual(true);
     });
   });
 });

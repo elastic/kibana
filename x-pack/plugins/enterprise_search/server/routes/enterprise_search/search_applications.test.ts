@@ -217,6 +217,65 @@ describe('engines routes', () => {
         },
       });
     });
+
+    it('PUT - Upsert API request - create with template', async () => {
+      mockClient.asCurrentUser.searchApplication.put.mockImplementation(() => ({
+        acknowledged: true,
+      }));
+
+      await mockRouter.callRoute({
+        body: {
+          indices: ['test-indices-1'],
+          template: {
+            script: {
+              source: '"query":{"term":{"{{field_name}}":["{{field_value}}"',
+              lang: 'mustache',
+              options: {
+                content_type: 'application/json;charset=utf-8',
+              },
+              params: {
+                field_name: 'hello',
+                field_value: 'world',
+              },
+            },
+          },
+        },
+        params: {
+          engine_name: 'engine-name',
+        },
+        query: { create: true },
+      });
+      expect(mockClient.asCurrentUser.searchApplication.put).toHaveBeenCalledWith({
+        create: true,
+        name: 'engine-name',
+        search_application: {
+          indices: ['test-indices-1'],
+          name: 'engine-name',
+          template: {
+            script: {
+              source: '"query":{"term":{"{{field_name}}":["{{field_value}}"',
+              lang: 'mustache',
+              options: {
+                content_type: 'application/json;charset=utf-8',
+              },
+              params: {
+                field_name: 'hello',
+                field_value: 'world',
+              },
+            },
+          },
+          updated_at_millis: expect.any(Number),
+        },
+      });
+      const mock = jest.fn();
+      const mockResponse = mock({ result: 'created' });
+      expect(mockRouter.response.ok).toHaveReturnedWith(mockResponse);
+      expect(mockRouter.response.ok).toHaveBeenCalledWith({
+        body: {
+          acknowledged: true,
+        },
+      });
+    });
     it('returns 400, create search application with invalid characters', async () => {
       (mockClient.asCurrentUser.searchApplication.put as jest.Mock).mockRejectedValueOnce({
         meta: {

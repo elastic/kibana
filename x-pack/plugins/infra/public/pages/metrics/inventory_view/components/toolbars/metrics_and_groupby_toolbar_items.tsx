@@ -7,7 +7,7 @@
 
 import { EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { SnapshotMetricType } from '../../../../../../common/inventory_models/types';
+import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { toMetricOpt } from '../../../../../../common/snapshot_metric_i18n';
 import { WaffleMetricControls } from '../waffle/metric_control';
 import { WaffleGroupByControls } from '../waffle/waffle_group_by_controls';

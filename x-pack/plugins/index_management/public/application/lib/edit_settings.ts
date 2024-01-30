@@ -22,7 +22,25 @@ export const readOnlySettings = [
   'index.routing_partition_size',
   'index.store.type',
 ];
-export const settingsToDisplay = [
+
+export const limitedEditableSettings = [
+  'index.blocks.write',
+  'index.blocks.read',
+  'index.blocks.read_only',
+  'index.default_pipeline',
+  'index.lifecycle.origination_date',
+  'index.final_pipeline',
+  'index.query.default_field',
+  'index.refresh_interval',
+  'index.mapping.ignore_malformed',
+  'index.mapping.total_fields.limit',
+  'index.merge.policy.deletes_pct_allowed',
+  'index.merge.policy.max_merge_at_once',
+  'index.merge.policy.expunge_deletes_allowed',
+  'index.merge.policy.floor_segment',
+];
+
+export const defaultsToDisplay = [
   'index.number_of_replicas',
   'index.blocks.read_only_allow_delete',
   'index.codec',

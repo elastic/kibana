@@ -41,6 +41,7 @@ export async function getServicesItems({
   randomSampler,
   documentType,
   rollupInterval,
+  useDurationSummary,
 }: {
   environment: string;
   kuery: string;
@@ -54,6 +55,7 @@ export async function getServicesItems({
   randomSampler: RandomSampler;
   documentType: ApmServiceTransactionDocumentType;
   rollupInterval: RollupInterval;
+  useDurationSummary: boolean;
 }): Promise<ServicesItemsResponse> {
   return withApmSpan('get_services_items', async () => {
     const commonParams = {
@@ -66,6 +68,7 @@ export async function getServicesItems({
       randomSampler,
       documentType,
       rollupInterval,
+      useDurationSummary,
     };
 
     const [

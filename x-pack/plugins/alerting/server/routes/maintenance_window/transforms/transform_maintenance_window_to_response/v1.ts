@@ -26,5 +26,11 @@ export const transformMaintenanceWindowToResponse = (
     event_start_time: maintenanceWindow.eventStartTime,
     event_end_time: maintenanceWindow.eventEndTime,
     status: maintenanceWindow.status,
+    ...(maintenanceWindow.categoryIds !== undefined
+      ? { category_ids: maintenanceWindow.categoryIds }
+      : {}),
+    ...(maintenanceWindow.scopedQuery !== undefined
+      ? { scoped_query: maintenanceWindow.scopedQuery }
+      : {}),
   };
 };

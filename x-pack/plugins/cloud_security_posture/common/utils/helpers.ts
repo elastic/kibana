@@ -17,9 +17,10 @@ import {
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   CLOUDBEAT_VANILLA,
-  CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+  CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
   AWS_CREDENTIALS_TYPE_TO_FIELDS_MAP,
   GCP_CREDENTIALS_TYPE_TO_FIELDS_MAP,
+  AZURE_CREDENTIALS_TYPE_TO_FIELDS_MAP,
 } from '../constants';
 import type {
   BenchmarkId,
@@ -27,7 +28,11 @@ import type {
   BaseCspSetupStatus,
   AwsCredentialsType,
   GcpCredentialsType,
-} from '../types';
+  AzureCredentialsType,
+  RuleSection,
+} from '../types_old';
+import type { BenchmarkRuleSelectParams, BenchmarksCisId } from '../types/latest';
+import type { BenchmarkRuleSelectParams as BenchmarkRuleSelectParamsV1 } from '../types/rules/v4';
 
 /**
  * @example
@@ -46,8 +51,12 @@ export const extractErrorMessage = (e: unknown, defaultMessage = 'Unknown Error'
   return defaultMessage; // TODO: i18n
 };
 
-export const getBenchmarkTypeFilter = (type: BenchmarkId): string =>
-  `${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id: "${type}"`;
+export const getBenchmarkFilter = (type: BenchmarkId, section?: RuleSection): string =>
+  `${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id: "${type}"${
+    section
+      ? ` AND ${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.section: "${section}"`
+      : ''
+  }`;
 
 export const isEnabledBenchmarkInputType = (input: PackagePolicyInput | NewPackagePolicyInput) =>
   input.enabled;
@@ -114,8 +123,10 @@ export const cleanupCredentials = (packagePolicy: NewPackagePolicy | UpdatePacka
     enabledInput?.streams?.[0].vars?.['aws.credentials.type']?.value;
   const gcpCredentialType: GcpCredentialsType | undefined =
     enabledInput?.streams?.[0].vars?.['gcp.credentials.type']?.value;
+  const azureCredentialType: AzureCredentialsType | undefined =
+    enabledInput?.streams?.[0].vars?.['azure.credentials.type']?.value;
 
-  if (awsCredentialType || gcpCredentialType) {
+  if (awsCredentialType || gcpCredentialType || azureCredentialType) {
     let credsToKeep: string[] = [' '];
     let credFields: string[] = [' '];
     if (awsCredentialType) {
@@ -124,6 +135,9 @@ export const cleanupCredentials = (packagePolicy: NewPackagePolicy | UpdatePacka
     } else if (gcpCredentialType) {
       credsToKeep = GCP_CREDENTIALS_TYPE_TO_FIELDS_MAP[gcpCredentialType];
       credFields = Object.values(GCP_CREDENTIALS_TYPE_TO_FIELDS_MAP).flat();
+    } else if (azureCredentialType) {
+      credsToKeep = AZURE_CREDENTIALS_TYPE_TO_FIELDS_MAP[azureCredentialType];
+      credFields = Object.values(AZURE_CREDENTIALS_TYPE_TO_FIELDS_MAP).flat();
     }
 
     if (credsToKeep) {
@@ -159,4 +173,94 @@ export const cleanupCredentials = (packagePolicy: NewPackagePolicy | UpdatePacka
 
   // nothing to do, return unmutated policy
   return packagePolicy;
+};
+
+export const getBenchmarkCisName = (benchmarkId: BenchmarksCisId) => {
+  switch (benchmarkId) {
+    case 'cis_k8s':
+      return 'CIS Kubernetes';
+    case 'cis_azure':
+      return 'CIS Azure';
+    case 'cis_aws':
+      return 'CIS AWS';
+    case 'cis_eks':
+      return 'CIS EKS';
+    case 'cis_gcp':
+      return 'CIS GCP';
+  }
+};
+
+const CLOUD_PROVIDER_NAMES = {
+  AWS: 'Amazon Web Services',
+  AZURE: 'Microsoft Azure',
+  GCP: 'Google Cloud Platform',
+};
+
+export const getBenchmarkApplicableTo = (benchmarkId: BenchmarksCisId) => {
+  switch (benchmarkId) {
+    case 'cis_k8s':
+      return 'Kubernetes';
+    case 'cis_azure':
+      return CLOUD_PROVIDER_NAMES.AZURE;
+    case 'cis_aws':
+      return CLOUD_PROVIDER_NAMES.AWS;
+    case 'cis_eks':
+      return 'Amazon Elastic Kubernetes Service';
+    case 'cis_gcp':
+      return CLOUD_PROVIDER_NAMES.GCP;
+  }
+};
+
+export const getCloudProviderNameFromAbbreviation = (cloudProvider: string) => {
+  switch (cloudProvider) {
+    case 'azure':
+      return CLOUD_PROVIDER_NAMES.AZURE;
+    case 'aws':
+      return CLOUD_PROVIDER_NAMES.AWS;
+    case 'gcp':
+      return CLOUD_PROVIDER_NAMES.GCP;
+    default:
+      return cloudProvider;
+  }
+};
+
+export const getBenchmarkFilterQuery = (
+  benchmarkId: BenchmarkId,
+  benchmarkVersion?: string,
+  selectParams?: BenchmarkRuleSelectParamsV1
+): string => {
+  const baseQuery = `${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id:${benchmarkId} AND ${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.version:"v${benchmarkVersion}"`;
+  const sectionQuery = selectParams?.section
+    ? ` AND ${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.section: "${selectParams.section}"`
+    : '';
+  const ruleNumberQuery = selectParams?.ruleNumber
+    ? ` AND ${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.rule_number: "${selectParams.ruleNumber}"`
+    : '';
+  return baseQuery + sectionQuery + ruleNumberQuery;
+};
+
+export const getBenchmarkFilterQueryV2 = (
+  benchmarkId: BenchmarkId,
+  benchmarkVersion?: string,
+  selectParams?: BenchmarkRuleSelectParams
+): string => {
+  const baseQuery = `${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id:${benchmarkId} AND ${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.version:"v${benchmarkVersion}"`;
+
+  let sectionQuery = '';
+  let ruleNumberQuery = '';
+  if (selectParams?.section) {
+    const sectionParamsArr = selectParams.section?.map(
+      (params) => `${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.section: "${params}"`
+    );
+    sectionQuery = ' AND (' + sectionParamsArr.join(' OR ') + ')';
+  }
+  if (selectParams?.ruleNumber) {
+    const ruleNumbersParamsArr = selectParams.ruleNumber?.map(
+      (params) =>
+        `${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.rule_number: "${params}"`
+    );
+    ruleNumberQuery = ' AND (' + ruleNumbersParamsArr.join(' OR ') + ')';
+  }
+
+  return baseQuery + sectionQuery + ruleNumberQuery;
 };

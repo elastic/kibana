@@ -8,14 +8,15 @@
 import { IScopedClusterClient } from '@kbn/core/server';
 
 import { CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX } from '../../../common/constants';
-import { stripSearchPrefix } from '../../../common/utils/strip_search_prefix';
 
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';
 
-export const deleteAccessControlIndex = async (client: IScopedClusterClient, index: string) => {
+export const deleteAccessControlIndex = async (client: IScopedClusterClient, indexName: string) => {
+  const aclIndexName = `${CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX}${indexName}`;
+
   try {
     return await client.asCurrentUser.indices.delete({
-      index: stripSearchPrefix(index, CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX),
+      index: aclIndexName,
     });
   } catch (e) {
     // Gracefully exit if index not found. This is a valid case.

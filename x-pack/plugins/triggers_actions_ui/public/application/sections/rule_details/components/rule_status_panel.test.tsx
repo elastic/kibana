@@ -51,7 +51,7 @@ jest.mock('../../../../common/lib/kibana', () => ({
 }));
 
 const mockAPIs = {
-  bulkEnableRules: jest.fn(),
+  bulkEnableRules: jest.fn().mockResolvedValue({ errors: [] }),
   bulkDisableRules: jest.fn(),
   snoozeRule: jest.fn(),
   unsnoozeRule: jest.fn(),
@@ -126,7 +126,7 @@ describe('rule status panel', () => {
 
     await act(async () => {
       const actionsMenuElem = wrapper.find('[data-test-subj="ruleStatusMenu"]');
-      const actionsMenuItemElem = actionsMenuElem.first().find('.euiContextMenuItem');
+      const actionsMenuItemElem = actionsMenuElem.first().find('button.euiContextMenuItem');
       actionsMenuItemElem.at(1).simulate('click');
       await nextTick();
     });
@@ -160,7 +160,7 @@ describe('rule status panel', () => {
 
     await act(async () => {
       const actionsMenuElem = wrapper.find('[data-test-subj="ruleStatusMenu"]');
-      const actionsMenuItemElem = actionsMenuElem.first().find('.euiContextMenuItem');
+      const actionsMenuItemElem = actionsMenuElem.first().find('button.euiContextMenuItem');
       actionsMenuItemElem.at(1).simulate('click');
       await nextTick();
     });
@@ -170,7 +170,6 @@ describe('rule status panel', () => {
 
   it('should enable the rule when picking enable in the dropdown', async () => {
     const rule = mockRule({ enabled: false });
-    const bulkEnableRules = jest.fn();
     const wrapper = mountWithIntl(
       <RuleStatusPanelWithProvider
         {...mockAPIs}
@@ -179,7 +178,6 @@ describe('rule status panel', () => {
         healthColor="primary"
         statusMessage="Ok"
         requestRefresh={requestRefresh}
-        bulkEnableRules={bulkEnableRules}
       />
     );
     const actionsElem = wrapper
@@ -194,12 +192,12 @@ describe('rule status panel', () => {
 
     await act(async () => {
       const actionsMenuElem = wrapper.find('[data-test-subj="ruleStatusMenu"]');
-      const actionsMenuItemElem = actionsMenuElem.first().find('.euiContextMenuItem');
+      const actionsMenuItemElem = actionsMenuElem.first().find('button.euiContextMenuItem');
       actionsMenuItemElem.at(0).simulate('click');
       await nextTick();
     });
 
-    expect(bulkEnableRules).toHaveBeenCalledTimes(1);
+    expect(mockAPIs.bulkEnableRules).toHaveBeenCalledTimes(1);
   });
 
   it('if rule is already enabled should do nothing when picking enable in the dropdown', async () => {
@@ -228,7 +226,7 @@ describe('rule status panel', () => {
 
     await act(async () => {
       const actionsMenuElem = wrapper.find('[data-test-subj="ruleStatusMenu"]');
-      const actionsMenuItemElem = actionsMenuElem.first().find('.euiContextMenuItem');
+      const actionsMenuItemElem = actionsMenuElem.first().find('button.euiContextMenuItem');
       actionsMenuItemElem.at(0).simulate('click');
       await nextTick();
     });
@@ -269,7 +267,7 @@ describe('rule status panel', () => {
 
     await act(async () => {
       const actionsMenuElem = wrapper.find('[data-test-subj="ruleStatusMenu"]');
-      const actionsMenuItemElem = actionsMenuElem.first().find('.euiContextMenuItem');
+      const actionsMenuItemElem = actionsMenuElem.first().find('button.euiContextMenuItem');
       actionsMenuItemElem.at(1).simulate('click');
     });
 

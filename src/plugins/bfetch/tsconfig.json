@@ -11,6 +11,7 @@
     "@kbn/config-schema",
     "@kbn/std",
     "@kbn/core-http-common",
+    "@kbn/bfetch-error",
   ],
   "exclude": [
     "target/**/*",

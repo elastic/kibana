@@ -23,7 +23,7 @@
     "patterns": [
       "_ingest/pipeline/{id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/put-pipeline-api.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/ingest.html",
     "availability": {
       "stack": true,
       "serverless": true

@@ -15,14 +15,14 @@ import { i18n } from '@kbn/i18n';
 import * as myI18n from './translations';
 import * as commonI18n from '../translations';
 
-import type { Rule } from '../../../../rule_management/logic/types';
 import { getRulesTableColumn } from '../utils';
 import { LinkRuleSwitch } from './link_rule_switch';
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
+import type { RuleResponse } from '../../../../../../common/api/detection_engine/model';
 
 export interface ExceptionsAddToRulesComponentProps {
-  initiallySelectedRules?: Rule[];
-  onRuleSelectionChange: (rulesSelectedToAdd: Rule[]) => void;
+  initiallySelectedRules?: RuleResponse[];
+  onRuleSelectionChange: (rulesSelectedToAdd: RuleResponse[]) => void;
 }
 export const useAddToRulesTable = ({
   initiallySelectedRules,
@@ -48,7 +48,7 @@ export const useAddToRulesTable = ({
     showPerPageOptions: false,
   });
 
-  const [linkedRules, setLinkedRules] = useState<Rule[]>(initiallySelectedRules || []);
+  const [linkedRules, setLinkedRules] = useState<RuleResponse[]>(initiallySelectedRules || []);
   useEffect(() => {
     onRuleSelectionChange(linkedRules);
   }, [linkedRules, onRuleSelectionChange]);
@@ -64,12 +64,15 @@ export const useAddToRulesTable = ({
   );
 
   const tagOptions = useMemo(() => {
-    const uniqueTags = sortedRulesByLinkedRulesOnTop.reduce((acc: Set<string>, item: Rule) => {
-      const { tags } = item;
+    const uniqueTags = sortedRulesByLinkedRulesOnTop.reduce(
+      (acc: Set<string>, item: RuleResponse) => {
+        const { tags } = item;
 
-      tags.forEach((tag) => acc.add(tag));
-      return acc;
-    }, new Set());
+        tags.forEach((tag) => acc.add(tag));
+        return acc;
+      },
+      new Set()
+    );
     return Array.from(uniqueTags).map((tag) => ({ value: tag, name: tag, field: 'tags' }));
   }, [sortedRulesByLinkedRulesOnTop]);
 
@@ -97,14 +100,14 @@ export const useAddToRulesTable = ({
     [tagOptions]
   );
 
-  const rulesTableColumnsWithLinkSwitch: Array<EuiBasicTableColumn<Rule>> = useMemo(
+  const rulesTableColumnsWithLinkSwitch: Array<EuiBasicTableColumn<RuleResponse>> = useMemo(
     () => [
       {
         field: 'link',
         name: commonI18n.LINK_COLUMN,
         align: 'left' as HorizontalAlignment,
         'data-test-subj': 'ruleActionLinkRuleSwitch',
-        render: (_: unknown, rule: Rule) => (
+        render: (_: unknown, rule: RuleResponse) => (
           <LinkRuleSwitch rule={rule} linkedRules={linkedRules} onRuleLinkChange={setLinkedRules} />
         ),
       },

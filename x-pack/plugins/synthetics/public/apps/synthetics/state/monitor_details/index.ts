@@ -19,6 +19,7 @@ import {
   getMonitorRecentPingsAction,
   setMonitorDetailsLocationAction,
   getMonitorAction,
+  setStatusFilter,
 } from './actions';
 
 export interface MonitorDetailsState {
@@ -37,6 +38,7 @@ export interface MonitorDetailsState {
   syntheticsMonitorDispatchedAt: number;
   error: IHttpSerializedFetchError | null;
   selectedLocationId: string | null;
+  statusFilter?: 'up' | 'down' | undefined;
 }
 
 const initialState: MonitorDetailsState = {
@@ -110,6 +112,9 @@ export const monitorDetailsReducer = createReducer(initialState, (builder) => {
       if ('updated_at' in action.payload && state.syntheticsMonitor) {
         state.syntheticsMonitor = action.payload;
       }
+    })
+    .addCase(setStatusFilter, (state, action) => {
+      state.statusFilter = action.payload;
     });
 });
 

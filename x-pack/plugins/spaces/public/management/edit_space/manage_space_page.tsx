@@ -10,9 +10,8 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPageHeader,
+  EuiPageSection,
   EuiSpacer,
   hexToHsv,
   hsvToHex,
@@ -119,9 +118,9 @@ export class ManageSpacePage extends Component<Props, State> {
   public render() {
     if (!this.props.capabilities.spaces.manage) {
       return (
-        <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+        <EuiPageSection alignment="center" color="danger">
           <UnauthorizedPrompt />
-        </EuiPageContent>
+        </EuiPageSection>
       );
     }
 
@@ -130,24 +129,24 @@ export class ManageSpacePage extends Component<Props, State> {
     }
 
     return (
-      <EuiPageContentBody restrictWidth>
+      <EuiPageSection restrictWidth>
         <EuiPageHeader pageTitle={this.getTitle()} description={getSpacesFeatureDescription()} />
         <EuiSpacer size="l" />
 
         {this.getForm()}
-      </EuiPageContentBody>
+      </EuiPageSection>
     );
   }
 
   public getLoadingIndicator = () => (
-    <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+    <EuiPageSection alignment="center" color="subdued">
       <SectionLoading>
         <FormattedMessage
           id="xpack.spaces.management.manageSpacePage.loadingMessage"
           defaultMessage="Loading…"
         />
       </SectionLoading>
-    </EuiPageContent>
+    </EuiPageSection>
   );
 
   public getForm = () => {

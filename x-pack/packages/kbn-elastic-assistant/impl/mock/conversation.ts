@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/gen_ai/constants';
+import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { Conversation } from '../..';
 
 export const alertConvo: Conversation = {
@@ -68,4 +68,14 @@ export const welcomeConvo: Conversation = {
       timestamp: '7/17/2023, 1:00:40 PM',
     },
   ],
+};
+
+export const customConvo: Conversation = {
+  id: 'Custom option',
+  isDefault: false,
+  messages: [],
+  apiConfig: {
+    connectorId: 'c29c28a0-20fe-11ee-9306-a1f4d42ec542',
+    provider: OpenAiProviderType.OpenAi,
+  },
 };

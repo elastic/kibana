@@ -96,8 +96,14 @@ const STANDARD_LIST_TYPES = [
   'dashboard',
   'search',
   'lens',
+  'links',
   'map',
+  // cases saved objects
   'cases',
+  'cases-comments',
+  'cases-user-actions',
+  'cases-configure',
+  'cases-connector-mappings',
   // synthetics based objects
   'synthetics-monitor',
   'uptime-dynamic-settings',

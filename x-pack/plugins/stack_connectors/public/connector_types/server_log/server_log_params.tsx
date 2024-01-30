@@ -37,7 +37,7 @@ export const ServerLogParamsFields: React.FunctionComponent<
       editAction('level', 'info', index);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [actionParams.level]);
 
   const [[isUsingDefault, defaultMessageUsed], setDefaultMessageUsage] = useState<
     [boolean, string | undefined]

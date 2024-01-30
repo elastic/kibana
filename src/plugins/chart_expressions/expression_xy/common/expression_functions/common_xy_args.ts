@@ -103,4 +103,8 @@ export const commonXYArgs: CommonXYFn['args'] = {
     types: ['string'],
     help: strings.getMinTimeBarIntervalHelp(),
   },
+  minBarHeight: {
+    types: ['number'],
+    help: strings.getMinBarHeightHelp(),
+  },
 };

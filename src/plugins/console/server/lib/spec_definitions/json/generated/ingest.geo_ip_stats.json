@@ -12,7 +12,7 @@
     "patterns": [
       "_ingest/geoip/stats"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/geoip-stats-api.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/geoip-processor.html",
     "availability": {
       "stack": true,
       "serverless": false

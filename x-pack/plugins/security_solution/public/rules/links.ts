@@ -7,13 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  RULES_PATH,
-  RULES_CREATE_PATH,
-  EXCEPTIONS_PATH,
-  RULES_LANDING_PATH,
-  RULES_ADD_PATH,
-  SERVER_APP_ID,
   COVERAGE_OVERVIEW_PATH,
+  EXCEPTIONS_PATH,
+  RULES_ADD_PATH,
+  RULES_CREATE_PATH,
+  RULES_LANDING_PATH,
+  RULES_PATH,
+  SERVER_APP_ID,
 } from '../../common/constants';
 import {
   ADD_RULES,
@@ -65,7 +65,7 @@ export const links: LinkItem = {
           title: CREATE_NEW_RULE,
           path: RULES_CREATE_PATH,
           skipUrlState: true,
-          hideTimeline: true,
+          hideTimeline: false,
         },
       ],
     },
@@ -78,6 +78,7 @@ export const links: LinkItem = {
       }),
       landingIcon: IconConsoleCloud,
       path: EXCEPTIONS_PATH,
+      capabilities: [`${SERVER_APP_ID}.showEndpointExceptions`],
       skipUrlState: true,
       hideTimeline: true,
       globalSearchKeywords: [

@@ -6,7 +6,7 @@
  */
 
 import { Direction, Query } from '@elastic/eui';
-import { SchemaType } from '@elastic/eui/src/components/search_bar/search_box';
+import { SchemaType } from '@elastic/eui/src/components/search_bar/search_bar';
 
 export type SortField =
   | 'snapshot'

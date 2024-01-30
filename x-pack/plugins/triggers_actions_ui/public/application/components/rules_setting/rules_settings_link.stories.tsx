@@ -36,6 +36,8 @@ withAllPermission.decorators = [
             save: true,
             readFlappingSettingsUI: true,
             writeFlappingSettingsUI: true,
+            readQueryDelaySettingsUI: true,
+            writeQueryDelaySettingsUI: true,
           },
         }),
       }}
@@ -58,6 +60,8 @@ withReadPermission.decorators = [
             save: false,
             readFlappingSettingsUI: true,
             writeFlappingSettingsUI: false,
+            readQueryDelaySettingsUI: true,
+            writeQueryDelaySettingsUI: false,
           },
         }),
       }}
@@ -80,6 +84,8 @@ withNoPermission.decorators = [
             save: false,
             readFlappingSettingsUI: false,
             writeFlappingSettingsUI: false,
+            readQueryDelaySettingsUI: false,
+            writeQueryDelaySettingsUI: false,
           },
         }),
       }}

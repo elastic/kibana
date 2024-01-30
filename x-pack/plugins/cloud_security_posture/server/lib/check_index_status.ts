@@ -7,27 +7,47 @@
 
 import { ElasticsearchClient, type Logger } from '@kbn/core/server';
 import { getSafePostureTypeRuntimeMapping } from '../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
-import { IndexStatus, PostureTypes } from '../../common/types';
+import { IndexStatus, PostureTypes } from '../../common/types_old';
+
+export interface PostureTypeAndRetention {
+  postureType?: PostureTypes;
+  retentionTime?: string;
+}
 
 export const checkIndexStatus = async (
   esClient: ElasticsearchClient,
   index: string,
   logger: Logger,
-  postureType?: PostureTypes
+  PostureTypeAndRetention?: PostureTypeAndRetention
 ): Promise<IndexStatus> => {
-  const query =
-    !postureType || postureType === 'all' || postureType === 'vuln_mgmt'
-      ? undefined
-      : {
-          bool: {
-            filter: {
-              term: {
-                safe_posture_type: postureType,
+  const isNotKspmOrCspm =
+    !PostureTypeAndRetention?.postureType ||
+    PostureTypeAndRetention?.postureType === 'all' ||
+    PostureTypeAndRetention?.postureType === 'vuln_mgmt';
+
+  const query = {
+    bool: {
+      filter: [
+        ...(isNotKspmOrCspm
+          ? []
+          : [
+              {
+                term: {
+                  safe_posture_type: PostureTypeAndRetention?.postureType,
+                },
               },
+            ]),
+        {
+          range: {
+            '@timestamp': {
+              gte: `now-${PostureTypeAndRetention?.retentionTime}`,
+              lte: 'now',
             },
           },
-        };
-
+        },
+      ],
+    },
+  };
   try {
     const queryResult = await esClient.search({
       index,
@@ -37,7 +57,6 @@ export const checkIndexStatus = async (
       query,
       size: 1,
     });
-
     return queryResult.hits.hits.length ? 'not-empty' : 'empty';
   } catch (e) {
     logger.debug(e);

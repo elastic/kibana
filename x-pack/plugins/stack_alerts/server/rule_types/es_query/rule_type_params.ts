@@ -15,7 +15,10 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/server';
 import { RuleTypeState } from '@kbn/alerting-plugin/server';
 import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import { MAX_SELECTABLE_GROUP_BY_TERMS } from '../../../common/constants';
+import {
+  MAX_SELECTABLE_SOURCE_FIELDS,
+  MAX_SELECTABLE_GROUP_BY_TERMS,
+} from '../../../common/constants';
 import { ComparatorFnNames } from '../../../common';
 import { Comparator } from '../../../common/comparator_types';
 import { getComparatorSchemaType } from '../lib/comparator';
@@ -96,6 +99,17 @@ const EsQueryRuleParamsSchemaProperties = {
     schema.object({ esql: schema.string({ minLength: 1 }) }),
     schema.never()
   ),
+  sourceFields: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        label: schema.string(),
+        searchPath: schema.string(),
+      }),
+      {
+        maxSize: MAX_SELECTABLE_SOURCE_FIELDS,
+      }
+    )
+  ),
 };
 
 export const EsQueryRuleParamsSchema = schema.object(EsQueryRuleParamsSchemaProperties, {
@@ -159,7 +173,28 @@ function validateParams(anyParams: unknown): string | undefined {
     }
   }
 
-  if (isSearchSourceRule(searchType) || isEsqlQueryRule(searchType)) {
+  if (isSearchSourceRule(searchType)) {
+    return;
+  }
+
+  if (isEsqlQueryRule(searchType)) {
+    const { timeField } = anyParams as EsQueryRuleParams;
+
+    if (!timeField) {
+      return i18n.translate('xpack.stackAlerts.esQuery.esqlTimeFieldErrorMessage', {
+        defaultMessage: '[timeField]: is required',
+      });
+    }
+    if (thresholdComparator !== Comparator.GT) {
+      return i18n.translate('xpack.stackAlerts.esQuery.esqlThresholdComparatorErrorMessage', {
+        defaultMessage: '[thresholdComparator]: is required to be greater than',
+      });
+    }
+    if (threshold && threshold[0] !== 0) {
+      return i18n.translate('xpack.stackAlerts.esQuery.esqlThresholdErrorMessage', {
+        defaultMessage: '[threshold]: is required to be 0',
+      });
+    }
     return;
   }
 

@@ -10,21 +10,29 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { License } from '@kbn/licensing-plugin/common/license';
+import {
+  LOGS_LOCATOR_ID,
+  NODE_LOGS_LOCATOR_ID,
+  TRACE_LOGS_LOCATOR_ID,
+} from '@kbn/logs-shared-plugin/common';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
+  logsLocatorsMock,
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { LicenseContext } from '../../../context/license/license_context';
 import * as hooks from '../../../hooks/use_fetcher';
-import * as apmApi from '../../../services/rest/create_call_apm_api';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,
 } from '../../../utils/test_helpers';
 import { TransactionActionMenu } from './transaction_action_menu';
 import * as Transactions from './__fixtures__/mock_data';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import * as useAdHocApmDataView from '../../../hooks/use_adhoc_apm_data_view';
+import { useProfilingIntegrationSetting } from '../../../hooks/use_profiling_integration_setting';
 
 const apmContextMock = {
   ...mockApmPluginContextValue,
@@ -32,7 +40,30 @@ const apmContextMock = {
     ...mockApmPluginContextValue.core,
     application: { capabilities: { apm: { save: true }, ml: {} } },
   },
+  share: {
+    url: {
+      locators: {
+        get: (id: string) => {
+          if (id === LOGS_LOCATOR_ID) {
+            return logsLocatorsMock.logsLocator;
+          }
+
+          if (id === NODE_LOGS_LOCATOR_ID) {
+            return logsLocatorsMock.nodeLogsLocator;
+          }
+
+          if (id === TRACE_LOGS_LOCATOR_ID) {
+            return logsLocatorsMock.traceLogsLocator;
+          }
+        },
+      },
+    },
+  },
 } as unknown as ApmPluginContextValue;
+
+jest.mock('../../../hooks/use_profiling_integration_setting', () => ({
+  useProfilingIntegrationSetting: jest.fn().mockReturnValue(false),
+}));
 
 const history = createMemoryHistory();
 history.replace(
@@ -40,10 +71,24 @@ history.replace(
 );
 
 function Wrapper({ children }: { children?: React.ReactNode }) {
+  const mockServices = {
+    dataViews: {
+      get: async () => {},
+      create: jest.fn(),
+    },
+    spaces: {
+      getActiveSpace: jest
+        .fn()
+        .mockImplementation(() => ({ id: 'mockSpaceId' })),
+    },
+  };
+
   return (
     <MemoryRouter>
       <MockApmPluginContextWrapper value={apmContextMock} history={history}>
-        {children}
+        <KibanaContextProvider services={mockServices}>
+          {children}
+        </KibanaContextProvider>
       </MockApmPluginContextWrapper>
     </MemoryRouter>
   );
@@ -67,39 +112,56 @@ const renderTransaction = async (transaction: Record<string, any>) => {
   return rendered;
 };
 
-const expectInfraLocatorsToBeCalled = () => {
-  expect(
-    apmContextMock.infra?.locators.nodeLogsLocator.getRedirectUrl
-  ).toBeCalled();
-  expect(
-    apmContextMock.infra?.locators.logsLocator.getRedirectUrl
-  ).toBeCalled();
+const expectLogsLocatorsToBeCalled = () => {
+  expect(logsLocatorsMock.nodeLogsLocator.getRedirectUrl).toBeCalled();
+  expect(logsLocatorsMock.traceLogsLocator.getRedirectUrl).toBeCalled();
 };
 
-describe('TransactionActionMenu component', () => {
-  beforeAll(() => {
-    jest.spyOn(hooks, 'useFetcher').mockReturnValue({
-      // return as Profiling had been initialized
-      data: { initialized: true },
-      status: hooks.FETCH_STATUS.SUCCESS,
-      refetch: jest.fn(),
-    });
+let useAdHocApmDataViewSpy: jest.SpyInstance;
+
+describe('TransactionActionMenu ', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
+
+  jest.spyOn(hooks, 'useFetcher').mockReturnValue({
+    // return as Profiling had been initialized
+    data: {
+      initialized: true,
+    },
+    status: hooks.FETCH_STATUS.SUCCESS,
+    refetch: jest.fn(),
+  });
+
+  useAdHocApmDataViewSpy = jest.spyOn(
+    useAdHocApmDataView,
+    'useAdHocApmDataView'
+  );
+
+  useAdHocApmDataViewSpy.mockImplementation(() => {
+    return {
+      dataView: {
+        id: 'foo-1',
+      },
+    };
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
-  it('should always render the discover link', async () => {
-    const { queryByText } = await renderTransaction(
+
+  it('should render the discover link when there is adhoc data view', async () => {
+    const { findByText } = await renderTransaction(
       Transactions.transactionWithMinimalData
     );
 
-    expect(queryByText('View transaction in Discover')).not.toBeNull();
+    expect(findByText('View transaction in Discover')).not.toBeNull();
   });
 
-  it('should call infra locators getRedirectUrl function', async () => {
+  it('should call logs locators getRedirectUrl function', async () => {
     await renderTransaction(Transactions.transactionWithMinimalData);
 
-    expectInfraLocatorsToBeCalled();
+    expectLogsLocatorsToBeCalled();
   });
 
   describe('when there is no pod id', () => {
@@ -121,10 +183,10 @@ describe('TransactionActionMenu component', () => {
   });
 
   describe('when there is a pod id', () => {
-    it('should call infra locators getRedirectUrl function', async () => {
+    it('should call logs locators getRedirectUrl function', async () => {
       await renderTransaction(Transactions.transactionWithKubernetesData);
 
-      expectInfraLocatorsToBeCalled();
+      expectLogsLocatorsToBeCalled();
     });
 
     it('renders the pod metrics link', async () => {
@@ -158,11 +220,11 @@ describe('TransactionActionMenu component', () => {
     });
   });
 
-  describe('should call infra locators getRedirectUrl function', () => {
+  describe('should call logs locators getRedirectUrl function', () => {
     it('renders the Container logs link', async () => {
       await renderTransaction(Transactions.transactionWithContainerData);
 
-      expectInfraLocatorsToBeCalled();
+      expectLogsLocatorsToBeCalled();
     });
 
     it('renders the Container metrics link', async () => {
@@ -197,10 +259,10 @@ describe('TransactionActionMenu component', () => {
   });
 
   describe('when there is a hostname', () => {
-    it('should call infra locators getRedirectUrl function', async () => {
+    it('should call logs locators getRedirectUrl function', async () => {
       await renderTransaction(Transactions.transactionWithHostData);
 
-      expectInfraLocatorsToBeCalled();
+      expectLogsLocatorsToBeCalled();
     });
 
     it('renders the Host metrics link', async () => {
@@ -255,6 +317,10 @@ describe('TransactionActionMenu component', () => {
   });
 
   describe('Profiling items', () => {
+    beforeEach(() => {
+      (useProfilingIntegrationSetting as jest.Mock).mockReturnValue(true);
+    });
+
     it('renders flamegraph item', async () => {
       const component = await renderTransaction(
         Transactions.transactionWithHostData
@@ -276,10 +342,6 @@ describe('TransactionActionMenu component', () => {
   });
 
   describe('Custom links', () => {
-    beforeAll(() => {
-      // Mocks callApmAPI because it's going to be used to fecth the transaction in the custom links flyout.
-      jest.spyOn(apmApi, 'callApmApi').mockResolvedValue({});
-    });
     afterAll(() => {
       jest.resetAllMocks();
     });
@@ -396,9 +458,9 @@ describe('TransactionActionMenu component', () => {
             component
               .getByTestId(`${key}.value`)
               .querySelector(
-                '[data-test-subj="comboBoxInput"] span'
-              ) as HTMLSpanElement
-          ).textContent,
+                '[data-test-subj="comboBoxSearchInput"]'
+              ) as HTMLInputElement
+          ).value,
         };
       };
       expect(getFilterKeyValue('service.name')).toEqual({
@@ -423,6 +485,19 @@ describe('Profiling not initialized', () => {
       data: { initialized: false },
       status: hooks.FETCH_STATUS.SUCCESS,
       refetch: jest.fn(),
+    });
+
+    useAdHocApmDataViewSpy = jest.spyOn(
+      useAdHocApmDataView,
+      'useAdHocApmDataView'
+    );
+
+    useAdHocApmDataViewSpy.mockImplementation(() => {
+      return {
+        dataView: {
+          id: 'foo-1',
+        },
+      };
     });
   });
   afterEach(() => {

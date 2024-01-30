@@ -10,6 +10,7 @@ import {
   savedObjectsClientMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
@@ -26,6 +27,7 @@ import { RegistryRuleType } from '../../rule_type_registry';
 import { schema } from '@kbn/config-schema';
 import { enabledRule1, enabledRule2, siemRule1, siemRule2 } from './test_helpers';
 import { formatLegacyActions } from '../lib';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 jest.mock('../lib/siem_legacy_actions/format_legacy_actions', () => {
   return {
@@ -63,6 +65,9 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   kibanaVersion,
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
+  uiSettings: uiSettingsServiceMock.createStartContract(),
 };
 
 beforeEach(() => {
@@ -87,6 +92,7 @@ describe('find()', () => {
       isExportable: true,
       id: 'myType',
       name: 'myType',
+      category: 'test',
       producer: 'myApp',
       enabledInLicense: true,
       hasAlertsMappings: false,
@@ -105,7 +111,7 @@ describe('find()', () => {
       saved_objects: [
         {
           id: '1',
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           attributes: {
             alertTypeId: 'myType',
             schedule: { interval: '10s' },
@@ -147,6 +153,7 @@ describe('find()', () => {
           defaultActionGroupId: 'default',
           minimumLicenseRequired: 'basic',
           isExportable: true,
+          category: 'test',
           producer: 'alerts',
           authorizedConsumers: {
             myApp: { read: true, all: true },
@@ -217,7 +224,7 @@ describe('find()', () => {
       saved_objects: [
         {
           id: '1',
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           attributes: {
             alertTypeId: 'myType',
             schedule: { interval: '10s' },
@@ -318,7 +325,7 @@ describe('find()', () => {
       saved_objects: [
         {
           id: '1',
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           attributes: {
             alertTypeId: 'myType',
             schedule: { interval: '10s' },
@@ -464,6 +471,7 @@ describe('find()', () => {
           isExportable: true,
           id: '123',
           name: 'myType',
+          category: 'test',
           producer: 'myApp',
           enabledInLicense: true,
           hasAlertsMappings: false,
@@ -483,6 +491,7 @@ describe('find()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'myApp',
       validate: {
         params: schema.any(),
@@ -500,6 +509,7 @@ describe('find()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -517,7 +527,7 @@ describe('find()', () => {
       saved_objects: [
         {
           id: '1',
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           attributes: {
             alertTypeId: 'myType',
             schedule: { interval: '10s' },
@@ -548,7 +558,7 @@ describe('find()', () => {
         },
         {
           id: '2',
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           attributes: {
             alertTypeId: '123',
             schedule: { interval: '20s' },
@@ -675,6 +685,7 @@ describe('find()', () => {
           isExportable: true,
           id: '123',
           name: 'myType',
+          category: 'test',
           producer: 'myApp',
           enabledInLicense: true,
           hasAlertsMappings: false,
@@ -694,6 +705,7 @@ describe('find()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'myApp',
       validate: {
         params: schema.any(),
@@ -711,6 +723,7 @@ describe('find()', () => {
       async executor() {
         return { state: {} };
       },
+      category: 'test',
       producer: 'alerts',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
@@ -728,7 +741,7 @@ describe('find()', () => {
       saved_objects: [
         {
           id: '1',
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           attributes: {
             alertTypeId: 'myType',
             schedule: { interval: '10s' },
@@ -759,7 +772,7 @@ describe('find()', () => {
         },
         {
           id: '2',
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           attributes: {
             alertTypeId: '123',
             schedule: { interval: '20s' },
@@ -844,7 +857,7 @@ describe('find()', () => {
         saved_objects: [
           {
             id: '1',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             attributes: {
               actions: [],
               alertTypeId: 'myType',
@@ -883,7 +896,7 @@ describe('find()', () => {
         fields: ['tags', 'alertTypeId', 'consumer'],
         filter: null,
         sortField: undefined,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
       });
       expect(ensureRuleTypeIsAuthorized).toHaveBeenCalledWith('myType', 'myApp', 'rule');
     });
@@ -899,7 +912,7 @@ describe('find()', () => {
             action: 'rule_find',
             outcome: 'success',
           }),
-          kibana: { saved_object: { id: '1', type: 'alert' } },
+          kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE } },
         })
       );
     });
@@ -938,7 +951,7 @@ describe('find()', () => {
             action: 'rule_find',
             outcome: 'failure',
           }),
-          kibana: { saved_object: { id: '1', type: 'alert' } },
+          kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE } },
           error: {
             code: 'Error',
             message: 'Unauthorized',

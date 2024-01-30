@@ -49,21 +49,17 @@ exports[`SetupModeRenderer should render the flyout open 1`] = `
           <EuiFlexItem
             grow={false}
           >
-            <EuiTextColor
-              color="ghost"
-            >
-              <FormattedMessage
-                defaultMessage="You are in setup mode. The ({flagIcon}) icon indicates configuration options."
-                id="xpack.monitoring.setupMode.description"
-                values={
-                  Object {
-                    "flagIcon": <EuiIcon
-                      type="flag"
-                    />,
-                  }
+            <FormattedMessage
+              defaultMessage="You are in setup mode. The ({flagIcon}) icon indicates configuration options."
+              id="xpack.monitoring.setupMode.description"
+              values={
+                Object {
+                  "flagIcon": <EuiIcon
+                    type="flag"
+                  />,
                 }
-              />
-            </EuiTextColor>
+              }
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -142,21 +138,17 @@ exports[`SetupModeRenderer should render with setup mode enabled 1`] = `
           <EuiFlexItem
             grow={false}
           >
-            <EuiTextColor
-              color="ghost"
-            >
-              <FormattedMessage
-                defaultMessage="You are in setup mode. The ({flagIcon}) icon indicates configuration options."
-                id="xpack.monitoring.setupMode.description"
-                values={
-                  Object {
-                    "flagIcon": <EuiIcon
-                      type="flag"
-                    />,
-                  }
+            <FormattedMessage
+              defaultMessage="You are in setup mode. The ({flagIcon}) icon indicates configuration options."
+              id="xpack.monitoring.setupMode.description"
+              values={
+                Object {
+                  "flagIcon": <EuiIcon
+                    type="flag"
+                  />,
                 }
-              />
-            </EuiTextColor>
+              }
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

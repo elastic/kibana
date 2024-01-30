@@ -180,6 +180,9 @@
     "InferTrainedModelDeployment",
     "CreateInferencePipeline",
     "GetIngestPipelines",
+    "GetTrainedModelDownloadList",
+    "GetElserConfig",
+    "InstallElasticTrainedModel",
 
     "Alerting",
     "PreviewAlert",

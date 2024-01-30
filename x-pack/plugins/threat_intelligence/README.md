@@ -84,20 +84,15 @@ You can use this approach to load separate data dumps for every test case, to co
 
 ### CI Execution
 
-The entry point for PR testing is `.buildkite/pipelines/pull_request/threat_intelligence.yml` file, see that for details on
+The entry point for PR testing is `.buildkite/pipelines/pull_request/base.yml` file, see that for details on
 how the test suite is executed & extra options regarding parallelism, retrying etc.
-
-E2E tests for this plugin will only be executed if any of the files changed within the PR matches dependency list here:
-`.buildkite/scripts/pipelines/pull_request/pipeline.ts`
-
-It is also possible to run all tests by attaching a PR flag: `ci:all-cypress-suites`.
 
 ## FAQ
 
 ### How is the Threat Intelligence code loaded in Kibana?
 
 The Threat Intelligence plugin is loaded lazily within the [security_solution](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution) plugin,
-from `x-pack/plugins/security_solution/public/threat_intelligence` owned by the Protections Experience Team.
+from `x-pack/plugins/security_solution/public/threat_intelligence` owned by the Threat Hunting Investigations Team.
 
 ## QA and demo for implemented features
 

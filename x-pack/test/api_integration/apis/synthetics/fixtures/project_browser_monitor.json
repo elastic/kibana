@@ -9,7 +9,7 @@
     },
     "schedule": 10,
     "locations": [
-      "localhost"
+      "dev"
     ],
     "params": {},
     "playwrightOptions": {
@@ -23,6 +23,7 @@
     "filter": {
       "match": "check if title is present"
     },
-    "hash": "ekrjelkjrelkjre"
+    "hash": "ekrjelkjrelkjre",
+    "max_attempts": 2
   }]
 }

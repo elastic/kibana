@@ -58,6 +58,7 @@ describe('createMonitoringStatsStream', () => {
       max_attempts: 20,
     },
     metrics_reset_interval: 3000,
+    claim_strategy: 'default',
   };
 
   it('returns the initial config used to configure Task Manager', async () => {

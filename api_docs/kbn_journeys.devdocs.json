@@ -276,13 +276,7 @@
             ],
             "signature": [
               "({ getService }: ",
-              {
-                "pluginId": "@kbn/ftr-common-functional-services",
-                "scope": "common",
-                "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-                "section": "def-common.FtrProviderContext",
-                "text": "FtrProviderContext"
-              },
+              "FtrProviderContext",
               ") => void"
             ],
             "path": "packages/kbn-journeys/journey/journey.ts",
@@ -297,13 +291,7 @@
                 "label": "{ getService }",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/ftr-common-functional-services",
-                    "scope": "common",
-                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
-                    "section": "def-common.FtrProviderContext",
-                    "text": "FtrProviderContext"
-                  }
+                  "FtrProviderContext"
                 ],
                 "path": "packages/kbn-journeys/journey/journey.ts",
                 "deprecated": false,

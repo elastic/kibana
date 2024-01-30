@@ -70,6 +70,9 @@ export const ConfirmTrustSetupModal = ({ closeModal, onSubmit }: ModalProps) => 
               label={i18n.translate('xpack.remoteClusters.clusterWizard.trustStep.modal.checkbox', {
                 defaultMessage: 'Yes, I have setup trust',
               })}
+              labelProps={{
+                'data-test-subj': 'remoteClusterTrustCheckboxLabel',
+              }}
               checked={hasSetupTrust}
               onChange={() => setHasSetupTrust(!hasSetupTrust)}
               data-test-subj="remoteClusterTrustCheckbox"

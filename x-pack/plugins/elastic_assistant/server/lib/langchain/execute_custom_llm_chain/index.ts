@@ -5,63 +5,131 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { initializeAgentExecutorWithOptions } from 'langchain/agents';
+import { RetrievalQAChain } from 'langchain/chains';
 import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
-import { BaseMessage } from 'langchain/schema';
+import { Tool } from 'langchain/tools';
 
-import { ConversationalRetrievalQAChain } from 'langchain/chains';
-import { ResponseBody } from '../helpers';
-import { ActionsClientLlm } from '../llm/actions_client_llm';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
+import { ActionsClientLlm } from '../llm/actions_client_llm';
 import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
+import type { AgentExecutorParams, AgentExecutorResponse } from '../executors/types';
+import { withAssistantSpan } from '../tracers/with_assistant_span';
+import { APMTracer } from '../tracers/apm_tracer';
+import { AssistantToolParams } from '../../../types';
 
-export const executeCustomLlmChain = async ({
+export const DEFAULT_AGENT_EXECUTOR_ID = 'Elastic AI Assistant Agent Executor';
+
+/**
+ * The default agent executor used by the Elastic AI Assistant. Main agent/chain that wraps the ActionsClientLlm,
+ * sets up a conversation BufferMemory from chat history, and registers tools like the ESQLKnowledgeBaseTool.
+ *
+ */
+export const callAgentExecutor = async ({
   actions,
+  alertsIndexPattern,
+  allow,
+  allowReplacement,
+  isEnabledKnowledgeBase,
+  assistantTools = [],
   connectorId,
+  elserId,
   esClient,
+  kbResource,
   langChainMessages,
+  llmType,
   logger,
+  onNewReplacements,
+  replacements,
   request,
-}: {
-  actions: ActionsPluginStart;
-  connectorId: string;
-  esClient: ElasticsearchClient;
-  langChainMessages: BaseMessage[];
-  logger: Logger;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  request: KibanaRequest<unknown, unknown, any, any>;
-}): Promise<ResponseBody> => {
-  const llm = new ActionsClientLlm({ actions, connectorId, request, logger });
+  size,
+  telemetry,
+  traceOptions,
+}: AgentExecutorParams): AgentExecutorResponse => {
+  const llm = new ActionsClientLlm({ actions, connectorId, request, llmType, logger });
 
-  // Chat History Memory: in-memory memory, from client local storage, first message is the system prompt
   const pastMessages = langChainMessages.slice(0, -1); // all but the last message
   const latestMessage = langChainMessages.slice(-1); // the last message
+
   const memory = new BufferMemory({
     chatHistory: new ChatMessageHistory(pastMessages),
-    memoryKey: 'chat_history',
+    memoryKey: 'chat_history', // this is the key expected by https://github.com/langchain-ai/langchainjs/blob/a13a8969345b0f149c1ca4a120d63508b06c52a5/langchain/src/agents/initialize.ts#L166
+    inputKey: 'input',
+    outputKey: 'output',
+    returnMessages: true,
   });
 
   // ELSER backed ElasticsearchStore for Knowledge Base
-  const esStore = new ElasticsearchStore(esClient, KNOWLEDGE_BASE_INDEX_PATTERN, logger);
+  const esStore = new ElasticsearchStore(
+    esClient,
+    KNOWLEDGE_BASE_INDEX_PATTERN,
+    logger,
+    telemetry,
+    elserId,
+    kbResource
+  );
 
-  // Chain w/ chat history memory and knowledge base retriever
-  const chain = ConversationalRetrievalQAChain.fromLLM(llm, esStore.asRetriever(), {
+  const modelExists = await esStore.isModelInstalled();
+
+  // Create a chain that uses the ELSER backed ElasticsearchStore, override k=10 for esql query generation for now
+  const chain = RetrievalQAChain.fromLLM(llm, esStore.asRetriever(10));
+
+  // Fetch any applicable tools that the source plugin may have registered
+  const assistantToolParams: AssistantToolParams = {
+    allow,
+    allowReplacement,
+    alertsIndexPattern,
+    isEnabledKnowledgeBase,
+    chain,
+    esClient,
+    modelExists,
+    onNewReplacements,
+    replacements,
+    request,
+    size,
+  };
+  const tools: Tool[] = assistantTools.flatMap((tool) => tool.getTool(assistantToolParams) ?? []);
+
+  logger.debug(`applicable tools: ${JSON.stringify(tools.map((t) => t.name).join(', '), null, 2)}`);
+
+  const executor = await initializeAgentExecutorWithOptions(tools, llm, {
+    agentType: 'chat-conversational-react-description',
     memory,
-    // See `qaChainOptions` from https://js.langchain.com/docs/modules/chains/popular/chat_vector_db
-    qaChainOptions: { type: 'stuff' },
+    verbose: false,
   });
-  await chain.call({ question: latestMessage[0].content });
 
-  // Chain w/ just knowledge base retriever
-  // const chain = RetrievalQAChain.fromLLM(llm, esStore.asRetriever());
-  // await chain.call({ query: latestMessage[0].content });
+  // Sets up tracer for tracing executions to APM. See x-pack/plugins/elastic_assistant/server/lib/langchain/tracers/README.mdx
+  // If LangSmith env vars are set, executions will be traced there as well. See https://docs.smith.langchain.com/tracing
+  const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
 
-  // The assistant (on the client side) expects the same response returned
-  // from the actions framework, so we need to return the same shape of data:
+  let traceData;
+
+  // Wrap executor call with an APM span for instrumentation
+  await withAssistantSpan(DEFAULT_AGENT_EXECUTOR_ID, async (span) => {
+    if (span?.transaction?.ids['transaction.id'] != null && span?.ids['trace.id'] != null) {
+      traceData = {
+        // Transactions ID since this span is the parent
+        transaction_id: span.transaction.ids['transaction.id'],
+        trace_id: span.ids['trace.id'],
+      };
+      span.addLabels({ evaluationId: traceOptions?.evaluationId });
+    }
+
+    return executor.call(
+      { input: latestMessage[0].content },
+      {
+        callbacks: [apmTracer, ...(traceOptions?.tracers ?? [])],
+        runName: DEFAULT_AGENT_EXECUTOR_ID,
+        tags: traceOptions?.tags ?? [],
+      }
+    );
+  });
+
   return {
     connector_id: connectorId,
     data: llm.getActionResultData(), // the response from the actions framework
+    trace_data: traceData,
+    replacements,
     status: 'ok',
   };
 };

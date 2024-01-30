@@ -11,6 +11,23 @@ import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-utils';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+const LOG_RATE_ANALYSYS_DATA_GENERATOR = {
+  KIBANA_SAMPLE_DATA_LOGS: 'kibana_sample_data_logs',
+  FAREQUOTE_WITH_SPIKE: 'farequote_with_spike',
+  ARTIFICIAL_LOGS_WITH_SPIKE_ZERODOCSFALLBACK: 'artificial_logs_with_spike_zerodocsfallback',
+  ARTIFICIAL_LOGS_WITH_SPIKE_TEXTFIELD_ZERODOCSFALLBACK:
+    'artificial_logs_with_spike_textfield_zerodocsfallback',
+  ARTIFICIAL_LOGS_WITH_DIP_ZERODOCSFALLBACK: 'artificial_logs_with_dip_zerodocsfallback',
+  ARTIFICIAL_LOGS_WITH_DIP_TEXTFIELD_ZERODOCSFALLBACK:
+    'artificial_logs_with_dip_textfield_zerodocsfallback',
+  ARTIFICIAL_LOGS_WITH_SPIKE: 'artificial_logs_with_spike',
+  ARTIFICIAL_LOGS_WITH_SPIKE_TEXTFIELD: 'artificial_logs_with_spike_textfield',
+  ARTIFICIAL_LOGS_WITH_DIP: 'artificial_logs_with_dip',
+  ARTIFICIAL_LOGS_WITH_DIP_TEXTFIELD: 'artificial_logs_with_dip_textfield',
+} as const;
+export type LogRateAnalysisDataGenerator =
+  typeof LOG_RATE_ANALYSYS_DATA_GENERATOR[keyof typeof LOG_RATE_ANALYSYS_DATA_GENERATOR];
+
 export interface GeneratedDoc {
   user: string;
   response_code: string;
@@ -18,6 +35,7 @@ export interface GeneratedDoc {
   version: string;
   '@timestamp': number;
   should_ignore_this_field: string;
+  message?: string;
 }
 
 const REFERENCE_TS = 1669018354793;
@@ -26,10 +44,44 @@ const DAY_MS = 86400000;
 const DEVIATION_TS = REFERENCE_TS - DAY_MS * 2;
 const BASELINE_TS = DEVIATION_TS - DAY_MS * 1;
 
-function getArtificialLogsWithDeviation(index: string, deviationType: string) {
+function getTextFieldMessage(timestamp: number, user: string, url: string, responseCode: string) {
+  const date = new Date(timestamp);
+  return `${user} [${date.toLocaleString('en-US')}] "GET /${url} HTTP/1.1" ${responseCode}`;
+}
+
+function getArtificialLogsWithDeviation(
+  index: string,
+  deviationType: string,
+  includeTextField = false,
+  includeGaps = false
+) {
   const bulkBody: estypes.BulkRequest<GeneratedDoc, GeneratedDoc>['body'] = [];
   const action = { index: { _index: index } };
   let tsOffset = 0;
+
+  if (includeGaps) {
+    const earliestDoc: GeneratedDoc = {
+      user: 'Peter',
+      response_code: '200',
+      url: 'login.php',
+      version: 'v1.0.0',
+      '@timestamp': BASELINE_TS - DAY_MS,
+      should_ignore_this_field: 'should_ignore_this_field',
+    };
+    bulkBody.push(action);
+    bulkBody.push(earliestDoc);
+
+    const latestDoc: GeneratedDoc = {
+      user: 'Peter',
+      response_code: '200',
+      url: 'login.php',
+      version: 'v1.0.0',
+      '@timestamp': DEVIATION_TS + 2 * DAY_MS,
+      should_ignore_this_field: 'should_ignore_this_field',
+    };
+    bulkBody.push(action);
+    bulkBody.push(latestDoc);
+  }
 
   // Creates docs evenly spread across baseline and deviation time frame
   [BASELINE_TS, DEVIATION_TS].forEach((ts) => {
@@ -45,16 +97,45 @@ function getArtificialLogsWithDeviation(index: string, deviationType: string) {
             )
           ) {
             tsOffset = 0;
-            [...Array(100)].forEach(() => {
-              tsOffset += Math.round(DAY_MS / 100);
+
+            let docCount = 100;
+            let responseCodeFactor = 1;
+
+            if (includeGaps) {
+              if (responseCode === '404') {
+                responseCodeFactor = 2;
+              } else if (responseCode === '500') {
+                responseCodeFactor = 3;
+              }
+
+              if (url === 'user.php') {
+                responseCodeFactor *= 2;
+              } else if (url === 'home.php') {
+                responseCodeFactor *= 3;
+              }
+
+              if (user === 'Paul') {
+                docCount = 40 * responseCodeFactor;
+              } else if (user === 'Mary') {
+                docCount = 25 * responseCodeFactor;
+              }
+            }
+
+            [...Array(docCount)].forEach(() => {
+              tsOffset += Math.round(DAY_MS / docCount);
+              const timestamp = ts + tsOffset;
               const doc: GeneratedDoc = {
                 user,
                 response_code: responseCode,
                 url,
                 version: 'v1.0.0',
-                '@timestamp': ts + tsOffset,
+                '@timestamp': timestamp,
                 should_ignore_this_field: 'should_ignore_this_field',
               };
+
+              if (includeTextField) {
+                doc.message = getTextFieldMessage(timestamp, user, url, responseCode);
+              }
 
               bulkBody.push(action);
               bulkBody.push(doc);
@@ -77,17 +158,24 @@ function getArtificialLogsWithDeviation(index: string, deviationType: string) {
       tsOffset = 0;
       [...Array(docsPerUrl1[url])].forEach(() => {
         tsOffset += Math.round(DAY_MS / docsPerUrl1[url]);
-        bulkBody.push(action);
-        bulkBody.push({
+        const timestamp =
+          (deviationType === LOG_RATE_ANALYSIS_TYPE.SPIKE ? DEVIATION_TS : BASELINE_TS) + tsOffset;
+
+        const doc: GeneratedDoc = {
           user: 'Peter',
           response_code: responseCode,
           url,
           version: 'v1.0.0',
-          '@timestamp':
-            (deviationType === LOG_RATE_ANALYSIS_TYPE.SPIKE ? DEVIATION_TS : BASELINE_TS) +
-            tsOffset,
+          '@timestamp': timestamp,
           should_ignore_this_field: 'should_ignore_this_field',
-        });
+        };
+
+        if (includeTextField) {
+          doc.message = getTextFieldMessage(timestamp, 'Peter', url, responseCode);
+        }
+
+        bulkBody.push(action);
+        bulkBody.push(doc);
       });
     });
   });
@@ -102,17 +190,24 @@ function getArtificialLogsWithDeviation(index: string, deviationType: string) {
       tsOffset = 0;
       [...Array(docsPerUrl2[url] + userIndex)].forEach(() => {
         tsOffset += Math.round(DAY_MS / docsPerUrl2[url]);
-        bulkBody.push(action);
-        bulkBody.push({
+        const timestamp =
+          (deviationType === LOG_RATE_ANALYSIS_TYPE.SPIKE ? DEVIATION_TS : BASELINE_TS) + tsOffset;
+
+        const doc: GeneratedDoc = {
           user,
           response_code: '500',
           url,
           version: 'v1.0.0',
-          '@timestamp':
-            (deviationType === LOG_RATE_ANALYSIS_TYPE.SPIKE ? DEVIATION_TS : BASELINE_TS) +
-            tsOffset,
+          '@timestamp': timestamp,
           should_ignore_this_field: 'should_ignore_this_field',
-        });
+        };
+
+        if (includeTextField) {
+          doc.message = 'an unexpected error occured';
+        }
+
+        bulkBody.push(action);
+        bulkBody.push(doc);
       });
     });
   });
@@ -126,7 +221,7 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
   const log = getService('log');
 
   return new (class DataGenerator {
-    public async generateData(dataGenerator: string) {
+    public async generateData(dataGenerator: LogRateAnalysisDataGenerator) {
       switch (dataGenerator) {
         case 'kibana_sample_data_logs':
           // will be added via UI
@@ -165,11 +260,22 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
           break;
 
         case 'artificial_logs_with_spike':
+        case 'artificial_logs_with_spike_textfield':
         case 'artificial_logs_with_dip':
+        case 'artificial_logs_with_dip_textfield':
+        case 'artificial_logs_with_spike_zerodocsfallback':
+        case 'artificial_logs_with_spike_textfield_zerodocsfallback':
+        case 'artificial_logs_with_dip_zerodocsfallback':
+        case 'artificial_logs_with_dip_textfield_zerodocsfallback':
           try {
-            await es.indices.delete({
+            const indexExists = await es.indices.exists({
               index: dataGenerator,
             });
+            if (indexExists) {
+              await es.indices.delete({
+                index: dataGenerator,
+              });
+            }
           } catch (e) {
             log.info(`Could not delete index '${dataGenerator}' in before() callback`);
           }
@@ -185,15 +291,31 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
                 version: { type: 'keyword' },
                 '@timestamp': { type: 'date' },
                 should_ignore_this_field: { type: 'keyword', doc_values: false, index: false },
+                message: { type: 'text' },
               },
             },
           });
+
+          const dataGeneratorOptions = dataGenerator.split('_');
+
+          let deviationType = dataGeneratorOptions.includes(LOG_RATE_ANALYSIS_TYPE.SPIKE)
+            ? LOG_RATE_ANALYSIS_TYPE.SPIKE
+            : LOG_RATE_ANALYSIS_TYPE.DIP;
+
+          const textField = dataGeneratorOptions.includes('textfield');
+          const zeroDocsFallback = dataGeneratorOptions.includes('zerodocsfallback');
+
+          if (zeroDocsFallback) {
+            deviationType = LOG_RATE_ANALYSIS_TYPE.SPIKE;
+          }
 
           await es.bulk({
             refresh: 'wait_for',
             body: getArtificialLogsWithDeviation(
               dataGenerator,
-              dataGenerator.split('_').pop() ?? LOG_RATE_ANALYSIS_TYPE.SPIKE
+              deviationType,
+              textField,
+              zeroDocsFallback
             ),
           });
           break;
@@ -203,7 +325,7 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
       }
     }
 
-    public async removeGeneratedData(dataGenerator: string) {
+    public async removeGeneratedData(dataGenerator: LogRateAnalysisDataGenerator) {
       switch (dataGenerator) {
         case 'kibana_sample_data_logs':
           // do not remove
@@ -214,7 +336,13 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
           break;
 
         case 'artificial_logs_with_spike':
+        case 'artificial_logs_with_spike_textfield':
         case 'artificial_logs_with_dip':
+        case 'artificial_logs_with_dip_textfield':
+        case 'artificial_logs_with_spike_zerodocsfallback':
+        case 'artificial_logs_with_spike_textfield_zerodocsfallback':
+        case 'artificial_logs_with_dip_zerodocsfallback':
+        case 'artificial_logs_with_dip_textfield_zerodocsfallback':
           try {
             await es.indices.delete({
               index: dataGenerator,

@@ -26,6 +26,7 @@ export function runTestsCli() {
     {
       description: `Run Functional Tests`,
       usage: `
+      Usage:
         node scripts/functional_tests --help
         node scripts/functional_tests [--config <file1> [--config <file2> ...]]
         node scripts/functional_tests [options] [-- --<other args>]

@@ -22,6 +22,7 @@ import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { DataViewBase } from '@kbn/es-query';
 import { first, last } from 'lodash';
 
+import { i18n } from '@kbn/i18n';
 import { useTimelineChartTheme } from '../../../utils/use_timeline_chart_theme';
 import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
 import { Color } from '../../../../common/color_palette';
@@ -200,6 +201,7 @@ export const ExpressionChart: React.FC<Props> = ({
               tooltip: { visible: true },
             }}
             baseTheme={chartTheme.baseTheme}
+            locale={i18n.getLocale()}
           />
         </Chart>
       </ChartContainer>

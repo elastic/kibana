@@ -53,6 +53,7 @@ export interface PartitionedFieldMetadata {
   custom: EnrichedFieldMetadata[];
   ecsCompliant: EnrichedFieldMetadata[];
   incompatible: EnrichedFieldMetadata[];
+  sameFamily: EnrichedFieldMetadata[];
 }
 
 export interface PartitionedFieldMetadataStats {
@@ -60,6 +61,7 @@ export interface PartitionedFieldMetadataStats {
   custom: number;
   ecsCompliant: number;
   incompatible: number;
+  sameFamily: number;
 }
 
 export interface UnallowedValueRequestItem {
@@ -103,6 +105,7 @@ export interface DataQualityCheckResult {
   incompatible: number | undefined;
   indexName: string;
   markdownComments: string[];
+  sameFamily: number | undefined;
   pattern: string;
 }
 
@@ -139,19 +142,7 @@ export interface IndexToCheck {
   indexName: string;
 }
 
-export type OnCheckCompleted = ({
-  batchId,
-  checkAllStartTime,
-  error,
-  formatBytes,
-  formatNumber,
-  indexName,
-  isLastCheck,
-  partitionedFieldMetadata,
-  pattern,
-  version,
-  requestTime,
-}: {
+export type OnCheckCompleted = (param: {
   batchId: string;
   checkAllStartTime: number;
   error: string | null;
@@ -188,6 +179,7 @@ export type DataQualityIndexCheckedParams = DataQualityCheckAllCompletedParams &
   ilmPhase?: string;
   indexId: string;
   indexName: string;
+  sameFamilyFields?: string[];
   unallowedMappingFields?: string[];
   unallowedValueFields?: string[];
 };
@@ -200,6 +192,7 @@ export interface DataQualityCheckAllCompletedParams {
   numberOfIncompatibleFields?: number;
   numberOfIndices?: number;
   numberOfIndicesChecked?: number;
+  numberOfSameFamily?: number;
   sizeInBytes?: number;
   timeConsumedMs?: number;
 }

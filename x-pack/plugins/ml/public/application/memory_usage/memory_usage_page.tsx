@@ -13,7 +13,7 @@ import { NodesList } from './nodes_overview';
 import { MlPageHeader } from '../components/page_header';
 import { MemoryPage, JobMemoryTreeMap } from './memory_tree_map';
 import { SavedObjectsWarning } from '../components/saved_objects_warning';
-import { useIsServerless } from '../contexts/kibana';
+import { useEnabledFeatures } from '../contexts/ml';
 
 enum TAB {
   NODES,
@@ -24,7 +24,7 @@ export const MemoryUsagePage: FC = () => {
   const [selectedTab, setSelectedTab] = useState<TAB>(TAB.NODES);
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: true });
 
-  const isServerless = useIsServerless();
+  const { showNodeInfo } = useEnabledFeatures();
 
   const refresh = useCallback(() => {
     mlTimefilterRefresh$.next({
@@ -47,7 +47,7 @@ export const MemoryUsagePage: FC = () => {
 
       <SavedObjectsWarning onCloseFlyout={refresh} />
 
-      {isServerless === false ? (
+      {showNodeInfo ? (
         <>
           <EuiTabs>
             <EuiTab

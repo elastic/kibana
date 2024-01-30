@@ -13,7 +13,7 @@ import { DataPublicPluginStart, UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { DateRange } from '../../../../common/types';
 import type {
   DatasourceFixAction,
-  FrameDatasourceAPI,
+  FramePublicAPI,
   IndexPattern,
   IndexPatternField,
   OperationMetadata,
@@ -636,7 +636,7 @@ export function replaceColumn({
         previousColumn.customLabel &&
         hypotheticalLayer.columns[columnId] &&
         previousColumn.label !==
-          previousDefinition.getDefaultLabel(previousColumn, indexPattern, tempLayer.columns)
+          previousDefinition.getDefaultLabel(previousColumn, tempLayer.columns, indexPattern)
       ) {
         hypotheticalLayer.columns[columnId].customLabel = true;
         hypotheticalLayer.columns[columnId].label = previousColumn.label;
@@ -1594,7 +1594,7 @@ export function getErrorMessages(
         fixAction: errorMessage.fixAction
           ? {
               ...errorMessage.fixAction,
-              newState: async (frame: FrameDatasourceAPI) => ({
+              newState: async (frame: FramePublicAPI) => ({
                 ...state,
                 layers: {
                   ...state.layers,
@@ -1723,8 +1723,8 @@ export function updateDefaultLabels(
         ...col,
         label: operationDefinitionMap[col.operationType].getDefaultLabel(
           col,
-          indexPattern,
-          copiedColumns
+          copiedColumns,
+          indexPattern
         ),
       };
     }

@@ -153,3 +153,26 @@ export const limitedNumberSchema = ({ fieldName, min, max }: LimitedSchemaType) 
       }),
     rt.identity
   );
+
+export interface RegexStringSchemaType {
+  codec: rt.Type<string, string, unknown>;
+  pattern: string;
+  message: string;
+}
+
+export const regexStringRt = ({ codec, pattern, message }: RegexStringSchemaType) =>
+  new rt.Type<string, string, unknown>(
+    'RegexString',
+    codec.is,
+    (input, context) =>
+      either.chain(codec.validate(input, context), (value) => {
+        const regex = new RegExp(pattern, 'g');
+
+        if (!regex.test(value)) {
+          return rt.failure(input, context, message);
+        }
+
+        return rt.success(value);
+      }),
+    rt.identity
+  );

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SettingType, UiSettingMetadata, Value } from '@kbn/management-settings-types';
+import { UiSettingMetadata, Value } from '@kbn/management-settings-types';
 import isEqual from 'lodash/isEqual';
 
 /**
@@ -17,7 +17,7 @@ import isEqual from 'lodash/isEqual';
  * @returns True if the provided value is equal to the setting's default value, false otherwise.
  */
 export const isSettingDefaultValue = (
-  setting: UiSettingMetadata<SettingType>,
+  setting: UiSettingMetadata,
   userValue: Value = setting.userValue
 ) => {
   const { value } = setting;

@@ -5,79 +5,40 @@
  * 2.0.
  */
 
-import React, { useRef, useState } from 'react';
-import { css } from '@emotion/react';
-
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
-
-import { useChatConfig } from './use_chat_config';
+import { WhenIdle } from './when_idle';
+import { useChatConfig, ChatApi } from './use_chat_config';
+export type { ChatApi } from './use_chat_config';
 
 export interface Props {
-  /** Handler invoked when chat is hidden by someone. */
-  onHide?: () => void;
   /** Handler invoked when the chat widget signals it is ready. */
-  onReady?: () => void;
+  onReady?: (chatApi: ChatApi) => void;
   /** Handler invoked when the chat widget signals to be resized. */
   onResize?: () => void;
+  /** Handler invoked when the playbook is fired. */
+  onPlaybookFired?: () => void;
+  /** The offset from the top of the page to the chat widget. */
+  topOffset?: number;
 }
 
 /**
  * A component that will display a trigger that will allow the user to chat with a human operator,
  * when the service is enabled; otherwise, it renders nothing.
  */
-export const Chat = ({ onHide = () => {}, onReady, onResize }: Props) => {
-  const config = useChatConfig({ onReady, onResize });
-  const ref = useRef<HTMLDivElement>(null);
-  const [isClosed, setIsClosed] = useState(false);
+export const Chat = ({ onReady, onResize, onPlaybookFired, topOffset = 0 }: Props) => {
+  const config = useChatConfig({
+    onReady,
+    onResize,
+    onPlaybookFired,
+  });
 
-  if (!config.enabled || isClosed) {
+  if (!config.enabled) {
     return null;
   }
 
-  const { isReady, isResized, style } = config;
-  const { right } = style;
-
-  const buttonCSS = css`
-    bottom: ${euiThemeVars.euiSizeXS};
-    position: fixed;
-    right: calc(${right} + ${euiThemeVars.euiSizeXS});
-    visibility: ${isReady && isResized ? 'visible' : 'hidden'};
-  `;
-
-  const button = (
-    <EuiButtonEmpty
-      css={buttonCSS}
-      data-test-subj="cloud-chat-hide"
-      name="cloudChatHide"
-      onClick={() => {
-        onHide();
-        setIsClosed(true);
-      }}
-      size="xs"
-    >
-      {i18n.translate('xpack.cloudChat.hideChatButtonLabel', {
-        defaultMessage: 'Hide chat',
-      })}
-    </EuiButtonEmpty>
-  );
-
-  const containerCSS = css`
-    bottom: ${euiThemeVars.euiSizeXL};
-    position: fixed;
-    right: ${euiThemeVars.euiSizeXL};
-    z-index: ${euiThemeVars.euiZMaskBelowHeader - 1};
-
-    &:focus [name='cloudChatHide'],
-    &:hover [name='cloudChatHide'] {
-      visibility: visible;
-    }
-  `;
-
   return (
-    <div css={containerCSS} ref={ref} data-test-subj="cloud-chat">
-      {button}
+    <WhenIdle>
       <iframe
         data-test-subj="cloud-chat-frame"
         title={i18n.translate('xpack.cloudChat.chatFrameTitle', {
@@ -85,8 +46,25 @@ export const Chat = ({ onHide = () => {}, onReady, onResize }: Props) => {
         })}
         src={config.src}
         ref={config.ref}
-        style={config.style}
+        style={
+          config.isReady
+            ? {
+                position: 'fixed',
+                ...config.style,
+                // reset default button positioning
+                bottom: 'auto',
+                inset: 'initial',
+                // force position to the top and of the page
+                top: topOffset,
+                right: 0,
+                // TODO: if the page height is smaller than widget height + topOffset,
+                // the widget will be cut off from the bottom.
+                // @ts-ignore - fixes white background on iframe in chrome/system dark mode
+                colorScheme: 'light',
+              }
+            : { display: 'none' }
+        }
       />
-    </div>
+    </WhenIdle>
   );
 };

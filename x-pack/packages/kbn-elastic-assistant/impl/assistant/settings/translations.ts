@@ -21,6 +21,13 @@ export const SETTINGS_TOOLTIP = i18n.translate(
   }
 );
 
+export const SETTINGS_UPDATED_TOAST_TITLE = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.settingsUpdatedToastTitle',
+  {
+    defaultMessage: 'Settings updated',
+  }
+);
+
 export const CONVERSATIONS_MENU_ITEM = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.settingsConversationsMenuItemTitle',
   {
@@ -49,10 +56,17 @@ export const ANONYMIZATION_MENU_ITEM = i18n.translate(
   }
 );
 
-export const ADVANCED_MENU_ITEM = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.settingsAdvancedMenuItemTitle',
+export const KNOWLEDGE_BASE_MENU_ITEM = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.settingsKnowledgeBaseMenuItemTitle',
   {
-    defaultMessage: 'Advanced',
+    defaultMessage: 'Knowledge Base',
+  }
+);
+
+export const EVALUATION_MENU_ITEM = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.settingsEvaluationMenuItemTitle',
+  {
+    defaultMessage: 'Evaluation',
   }
 );
 
