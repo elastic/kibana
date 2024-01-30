@@ -529,7 +529,7 @@ export const QueryBarTopRow = React.memo(
               aria-label={buttonLabelCancel}
               onClick={onClickCancelButton}
               size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
-              data-test-subj="queryCanelButton"
+              data-test-subj="queryCancelButton"
               value={buttonLabelCancel}
               // @ts-expect-error Need to fix expecting `children` in EUI
               toolTipProps={{
