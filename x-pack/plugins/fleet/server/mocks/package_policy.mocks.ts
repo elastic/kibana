@@ -7,7 +7,7 @@
 
 import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
 
-import type { SavedObject } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 
 import { mapPackagePolicySavedObjectToPackagePolicy } from '../services/package_policies';
 
@@ -59,7 +59,7 @@ const generatePackagePolicyMock = (overrides: Partial<PackagePolicy> = {}) => {
 
 const generatePackagePolicySavedObjectMock = (
   soAttributes: PackagePolicySOAttributes = generatePackagePolicySOAttributesMock()
-): SavedObject<PackagePolicySOAttributes> => {
+): SavedObjectsFindResult<PackagePolicySOAttributes> => {
   return {
     score: 1,
     id: 'so-123',

@@ -148,13 +148,21 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
     getUpgradePackagePolicyInfo: jest.fn(),
     enrichPolicyWithDefaultsFromPackage: jest.fn(),
     findAllForAgentPolicy: jest.fn(),
-    fetchAllItems: jest.fn(async function* () {
-      yield Promise.resolve([PackagePolicyMocks.generatePackagePolicy({ id: '111' })]);
-      yield Promise.resolve([PackagePolicyMocks.generatePackagePolicy({ id: '222' })]);
+    fetchAllItems: jest.fn(() => {
+      return {
+        async *[Symbol.asyncIterator]() {
+          yield Promise.resolve([PackagePolicyMocks.generatePackagePolicy({ id: '111' })]);
+          yield Promise.resolve([PackagePolicyMocks.generatePackagePolicy({ id: '222' })]);
+        },
+      };
     }),
-    fetchAllItemIds: jest.fn(async function* () {
-      yield Promise.resolve(['111']);
-      yield Promise.resolve(['222']);
+    fetchAllItemIds: jest.fn(() => {
+      return {
+        async *[Symbol.asyncIterator]() {
+          yield Promise.resolve(['111']);
+          yield Promise.resolve(['222']);
+        },
+      };
     }),
   };
 };
