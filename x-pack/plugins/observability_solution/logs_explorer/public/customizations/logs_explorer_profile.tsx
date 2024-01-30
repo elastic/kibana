@@ -20,6 +20,8 @@ import { useKibanaContextForPluginProvider } from '../utils/use_kibana';
 import { createCustomSearchBar } from './custom_search_bar';
 import { createCustomCellRenderer } from './custom_cell_renderer';
 import { createCustomGridColumnsConfiguration } from './custom_column';
+import { createCustomControlColumnsConfiguration } from './custom_control_column';
+
 
 const LazyCustomDatasetFilters = dynamic(() => import('./custom_dataset_filters'));
 const LazyCustomDatasetSelector = dynamic(() => import('./custom_dataset_selector'));
@@ -87,6 +89,7 @@ export const createLogsExplorerProfileCustomizations =
       id: 'data_table',
       customCellRenderer: createCustomCellRenderer({ data }),
       customGridColumnsConfiguration: createCustomGridColumnsConfiguration(),
+      customControlColumnsConfiguration: createCustomControlColumnsConfiguration,
     });
 
     /**

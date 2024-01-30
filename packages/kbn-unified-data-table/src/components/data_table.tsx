@@ -52,6 +52,7 @@ import {
   DataTableColumnTypes,
   CustomCellRenderer,
   CustomGridColumnsConfiguration,
+  CustomControlColumnConfiguration,
 } from '../types';
 import { getDisplayedColumns } from '../utils/columns';
 import { convertValueToString } from '../utils/convert_value_to_string';
@@ -335,6 +336,10 @@ export interface UnifiedDataTableProps {
    */
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
   /**
+   * An optional settings to control which columns to render as trailing and leading control columns
+   */
+  customControlColumnsConfiguration?: CustomControlColumnConfiguration;
+  /**
    * Name of the UnifiedDataTable consumer component or application
    */
   consumer?: string;
@@ -412,6 +417,7 @@ export const UnifiedDataTable = ({
   gridStyleOverride,
   rowLineHeightOverride,
   customGridColumnsConfiguration,
+  customControlColumnsConfiguration,
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
@@ -746,19 +752,33 @@ export const UnifiedDataTable = ({
         onSort: onTableSort,
       };
     }
-    return { columns: sortingColumns, onSort: () => {} };
+    return {
+      columns: sortingColumns,
+      onSort: () => {},
+    };
   }, [isSortEnabled, sortingColumns, isPlainRecord, inmemorySortingColumns, onTableSort]);
 
   const canSetExpandedDoc = Boolean(setExpandedDoc && !!renderDocumentView);
 
-  const leadingControlColumns = useMemo(() => {
+  let leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
     const internalControlColumns = getLeadControlColumns(canSetExpandedDoc).filter(({ id }) =>
       controlColumnIds.includes(id)
     );
     return externalControlColumns
       ? [...internalControlColumns, ...externalControlColumns]
       : internalControlColumns;
-  }, [canSetExpandedDoc, externalControlColumns, controlColumnIds]);
+  }, [canSetExpandedDoc, controlColumnIds, externalControlColumns]);
+  let customTrailingControlColumn = trailingControlColumns;
+
+  if (customControlColumnsConfiguration) {
+    const customControlColumns = customControlColumnsConfiguration({
+      leadingControlColumns,
+      trailingControlColumns,
+      rows,
+    });
+    leadingControlColumns = customControlColumns.leadingControlColumns;
+    customTrailingControlColumn = customControlColumns.trailingControlColumns;
+  }
 
   const additionalControls = useMemo(() => {
     if (!externalAdditionalControls && !usedSelectedDocs.length) {
@@ -921,7 +941,7 @@ export const UnifiedDataTable = ({
             gridStyle={gridStyleOverride ?? GRID_STYLE}
             renderCustomGridBody={renderCustomGridBody}
             renderCustomToolbar={renderCustomToolbarFn}
-            trailingControlColumns={trailingControlColumns}
+            trailingControlColumns={customTrailingControlColumn}
           />
         </div>
         {loadingState !== DataLoadingState.loading &&

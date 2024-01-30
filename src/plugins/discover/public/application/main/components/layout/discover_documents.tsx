@@ -255,9 +255,11 @@ function DiscoverDocumentsComponent({
     [dataView, onAddColumn, onAddFilter, onRemoveColumn, query, savedSearch.id, setExpandedDoc]
   );
 
-  const externalCustomRenderers = useDiscoverCustomization('data_table')?.customCellRenderer;
-  const customGridColumnsConfiguration =
-    useDiscoverCustomization('data_table')?.customGridColumnsConfiguration;
+  const {
+    customCellRenderer: externalCustomRenderers,
+    customGridColumnsConfiguration,
+    customControlColumnsConfiguration,
+  } = useDiscoverCustomization('data_table') || {};
 
   const documents = useObservable(stateContainer.dataState.data$.documents$);
 
@@ -427,6 +429,7 @@ function DiscoverDocumentsComponent({
                   headerRowHeight={3}
                   externalCustomRenderers={externalCustomRenderers}
                   customGridColumnsConfiguration={customGridColumnsConfiguration}
+                  customControlColumnsConfiguration={customControlColumnsConfiguration}
                 />
               </CellActionsProvider>
             </div>

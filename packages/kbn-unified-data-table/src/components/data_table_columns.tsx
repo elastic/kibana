@@ -30,8 +30,11 @@ import { DataTableColumnHeader, DataTableTimeColumnHeader } from './data_table_c
 const DataTableColumnHeaderMemoized = React.memo(DataTableColumnHeader);
 const DataTableTimeColumnHeaderMemoized = React.memo(DataTableTimeColumnHeader);
 
+export const OPEN_DETAILS = 'openDetails';
+export const SELECT_ROW = 'select';
+
 const openDetails = {
-  id: 'openDetails',
+  id: OPEN_DETAILS,
   width: 26,
   headerCellRender: () => (
     <EuiScreenReaderOnly>
@@ -46,7 +49,7 @@ const openDetails = {
 };
 
 const select = {
-  id: 'select',
+  id: SELECT_ROW,
   width: 24,
   rowCellRender: SelectButton,
   headerCellRender: () => (

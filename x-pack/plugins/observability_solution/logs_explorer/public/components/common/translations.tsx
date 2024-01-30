@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiCode } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export const flyoutContentLabel = i18n.translate('xpack.logsExplorer.flyoutDetail.label.message', {
   defaultMessage: 'Content breakdown',
@@ -19,6 +22,17 @@ export const resourceLabel = i18n.translate(
   'xpack.logsExplorer.dataTable.header.popover.resource',
   {
     defaultMessage: 'Resource',
+  }
+);
+
+export const markerLabel = i18n.translate('xpack.logsExplorer.dataTable.header.popover.marker', {
+  defaultMessage: 'Marker',
+});
+
+export const markerLabelLowerCase = i18n.translate(
+  'xpack.logsExplorer.dataTable.header.popover.marker.lowercase',
+  {
+    defaultMessage: 'marker',
   }
 );
 
@@ -226,5 +240,65 @@ export const resourceHeaderTooltipParagraph = i18n.translate(
   'xpack.logsExplorer.dataTable.header.resource.tooltip.paragraph',
   {
     defaultMessage: "Fields that provide information on the document's source, such as:",
+  }
+);
+
+export const markerHeaderTooltipParagraph = i18n.translate(
+  'xpack.logsExplorer.dataTable.header.marker.tooltip.paragraph',
+  {
+    defaultMessage: 'Fields that provide actionable information, such as:',
+  }
+);
+
+export const markerHeaderTooltipExpandAction = i18n.translate(
+  'xpack.logsExplorer.dataTable.header.marker.tooltip.expand',
+  { defaultMessage: 'Expand log details' }
+);
+
+export const markerHeaderTooltipMalformedAction = (
+  <FormattedMessage
+    id="xpack.logsExplorer.dataTable.controlColumn.marker.button.malformedDoc"
+    defaultMessage="Access to malformed doc with {ignoredProperty} field"
+    values={{
+      ignoredProperty: (
+        <EuiCode language="json" transparentBackground>
+          _ignored
+        </EuiCode>
+      ),
+    }}
+  />
+);
+
+export const markerHeaderTooltipStacktraceAction = i18n.translate(
+  'xpack.logsExplorer.dataTable.header.marker.tooltip.stacktrace',
+  { defaultMessage: 'Access to available stacktraces based on:' }
+);
+
+export const malformedDocButtonLabelWhenPresent = i18n.translate(
+  'xpack.logsExplorer.dataTable.controlColumn.marker.button.malformedDocPresent',
+  {
+    defaultMessage:
+      "This document couldn't be parsed correctly. Not all fields are properly populated",
+  }
+);
+
+export const malformedDocButtonLabelWhenNotPresent = i18n.translate(
+  'xpack.logsExplorer.dataTable.controlColumn.marker.button.malformedDocNotPresent',
+  {
+    defaultMessage: 'All fields in this document were parsed correctly',
+  }
+);
+
+export const stacktraceAvailableControlButton = i18n.translate(
+  'xpack.logsExplorer.dataTable.controlColumn.marker.button.stacktrace.available',
+  {
+    defaultMessage: 'Stacktraces available',
+  }
+);
+
+export const stacktraceNotAvailableControlButton = i18n.translate(
+  'xpack.logsExplorer.dataTable.controlColumn.marker.button.stacktrace.notAvailable',
+  {
+    defaultMessage: 'Stacktraces not available',
   }
 );

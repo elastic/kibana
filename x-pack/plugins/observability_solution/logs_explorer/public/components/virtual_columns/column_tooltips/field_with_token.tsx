@@ -22,7 +22,7 @@ export const FieldWithToken = ({
   iconType?: string;
 }) => {
   return (
-    <div css={spacingXsCss}>
+    <div css={spacingXsCss} key={field}>
       <EuiFlexGroup
         responsive={false}
         alignItems="center"

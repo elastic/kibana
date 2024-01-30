@@ -6,10 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { CustomCellRenderer, CustomGridColumnsConfiguration } from '@kbn/unified-data-table';
+import {
+  CustomCellRenderer,
+  CustomControlColumnConfiguration,
+  CustomGridColumnsConfiguration,
+} from '@kbn/unified-data-table';
 
 export interface DataTableCustomization {
   id: 'data_table';
   customCellRenderer?: CustomCellRenderer;
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
+  customControlColumnsConfiguration?: CustomControlColumnConfiguration;
 }
