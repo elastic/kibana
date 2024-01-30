@@ -46,27 +46,7 @@ export const alertsFieldMap8130 = {
     type: 'keyword',
     array: false,
     required: false,
-  },
-  [ALERT_HOST_RISK_SCORE_CALCULATED_LEVEL]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [ALERT_HOST_RISK_SCORE_CALCULATED_SCORE_NORM]: {
-    type: 'float',
-    array: false,
-    required: false,
-  },
-  [ALERT_USER_RISK_SCORE_CALCULATED_LEVEL]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [ALERT_USER_RISK_SCORE_CALCULATED_SCORE_NORM]: {
-    type: 'float',
-    array: false,
-    required: false,
-  },
+  }
 } as const;
 
 export type AlertsFieldMap8130 = typeof alertsFieldMap8130;
