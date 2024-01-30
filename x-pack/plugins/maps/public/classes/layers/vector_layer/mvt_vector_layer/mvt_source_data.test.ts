@@ -43,7 +43,7 @@ const mockSource = {
   },
   isMvt: () => {
     return true;
-  }
+  },
 } as unknown as IMvtVectorSource;
 
 describe('syncMvtSourceData', () => {
