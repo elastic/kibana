@@ -6,6 +6,7 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import type { TimelineFullScreenClickedParams } from './events/timeline/types';
 import type {
   TelemetryClientStart,
   ReportAlertsGroupingChangedParams,
@@ -142,5 +143,9 @@ export class TelemetryClient implements TelemetryClientStart {
     this.analytics.reportEvent(TelemetryEventTypes.BreadcrumbClicked, {
       title,
     });
+  };
+
+  public reportTimelineFullScreenClicked = (params: TimelineFullScreenClickedParams) => {
+    this.analytics.reportEvent(TelemetryEventTypes.TimelineFullScreenClicked, params);
   };
 }

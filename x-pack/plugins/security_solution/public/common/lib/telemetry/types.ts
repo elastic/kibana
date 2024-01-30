@@ -7,6 +7,11 @@
 
 import type { RootSchema } from '@kbn/analytics-client';
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
+import type {
+  TimelineFullScreenClickedParams,
+  TimelineTelemetryEvent,
+  TimelineTelemetryEventParams,
+} from './events/timeline/types';
 import type { SecurityMetadata } from '../../../actions/types';
 import type { ML_JOB_TELEMETRY_STATUS, TelemetryEventTypes } from './constants';
 import type {
@@ -89,7 +94,8 @@ export type TelemetryEventParams =
   | ReportAnomaliesCountClickedParams
   | ReportDataQualityIndexCheckedParams
   | ReportDataQualityCheckAllCompletedParams
-  | ReportBreadcrumbClickedParams;
+  | ReportBreadcrumbClickedParams
+  | TimelineTelemetryEventParams;
 
 export interface TelemetryClientStart {
   reportAlertsGroupingChanged(params: ReportAlertsGroupingChangedParams): void;
@@ -117,6 +123,8 @@ export interface TelemetryClientStart {
   reportDataQualityIndexChecked(params: ReportDataQualityIndexCheckedParams): void;
   reportDataQualityCheckAllCompleted(params: ReportDataQualityCheckAllCompletedParams): void;
   reportBreadcrumbClicked(params: ReportBreadcrumbClickedParams): void;
+
+  reportTimelineFullScreenClicked(params: TimelineFullScreenClickedParams): void;
 }
 
 export type TelemetryEvent =
@@ -139,4 +147,5 @@ export type TelemetryEvent =
   | {
       eventType: TelemetryEventTypes.BreadcrumbClicked;
       schema: RootSchema<ReportBreadcrumbClickedParams>;
-    };
+    }
+  | TimelineTelemetryEvent;

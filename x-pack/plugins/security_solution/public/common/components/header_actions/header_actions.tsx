@@ -78,7 +78,7 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
   timelineId,
   fieldBrowserOptions,
 }) => {
-  const { triggersActionsUi } = useKibana().services;
+  const { triggersActionsUi, telemetry } = useKibana().services;
   const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
   const dispatch = useDispatch();
@@ -88,12 +88,15 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
 
   const toggleFullScreen = useCallback(() => {
     if (timelineId === TimelineId.active) {
+      telemetry.reportTimelineFullScreenClicked({ timelineId, tab: tabType });
       setTimelineFullScreen(!timelineFullScreen);
     } else {
       setGlobalFullScreen(!globalFullScreen);
     }
   }, [
+    tabType,
     timelineId,
+    telemetry,
     setTimelineFullScreen,
     timelineFullScreen,
     setGlobalFullScreen,
