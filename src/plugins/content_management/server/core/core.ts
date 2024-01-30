@@ -7,10 +7,20 @@
  */
 
 import { Logger } from '@kbn/core/server';
+import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import type { Version } from '@kbn/object-versioning';
+
+import { getContentClientFactory, IContentClient } from '../content_client';
 import { EventStreamService } from '../event_stream';
 import { ContentCrud } from './crud';
 import { EventBus } from './event_bus';
 import { ContentRegistry } from './registry';
+
+export interface GetContentClientForRequestDeps {
+  contentTypeId: string;
+  requestHandlerContext: RequestHandlerContext;
+  version?: Version;
+}
 
 export interface CoreApi {
   /**
@@ -24,6 +34,9 @@ export interface CoreApi {
   crud: <T = unknown>(contentType: string) => ContentCrud<T>;
   /** Content management event bus */
   eventBus: EventBus;
+  contentClient: {
+    getForRequest(deps: GetContentClientForRequestDeps): IContentClient;
+  };
 }
 
 export interface CoreInitializerContext {
@@ -58,6 +71,17 @@ export class Core {
         register: this.contentRegistry.register.bind(this.contentRegistry),
         crud: this.contentRegistry.getCrud.bind(this.contentRegistry),
         eventBus: this.eventBus,
+        contentClient: {
+          getForRequest: ({
+            contentTypeId,
+            requestHandlerContext,
+            version,
+          }: GetContentClientForRequestDeps) => {
+            return getContentClientFactory({ contentRegistry: this.contentRegistry })(
+              contentTypeId
+            ).getForRequest({ requestHandlerContext, version });
+          },
+        },
       },
     };
   }

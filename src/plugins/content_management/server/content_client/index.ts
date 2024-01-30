@@ -6,13 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { Type, ValidationError } from '@kbn/config-schema';
+export { getContentClientFactory } from './content_client_factory';
 
-export const validate = (input: unknown, schema: Type<any>): ValidationError | null => {
-  try {
-    schema.validate(input);
-    return null;
-  } catch (e: any) {
-    return e as ValidationError;
-  }
-};
+export type { IContentClient } from './content_client';

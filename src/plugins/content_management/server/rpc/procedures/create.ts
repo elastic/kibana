@@ -8,9 +8,9 @@
 
 import { rpcSchemas } from '../../../common/schemas';
 import type { CreateIn } from '../../../common';
+import { getStorageContext } from '../../utils';
 import type { ProcedureDefinition } from '../rpc_service';
 import type { Context } from '../types';
-import { getStorageContext } from './utils';
 
 export const create: ProcedureDefinition<Context, CreateIn<string>> = {
   schemas: rpcSchemas.create,
