@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects([
     'discover',
-    'observabilityLogExplorer',
+    'observabilityLogsExplorer',
     'svlCommonPage',
     'timePicker',
     'header',
@@ -27,11 +27,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await esArchiver.load(
-        'x-pack/test/functional/es_archives/observability_log_explorer/data_streams'
+        'x-pack/test/functional/es_archives/observability_logs_explorer/data_streams'
       );
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await PageObjects.svlCommonPage.login();
-      await PageObjects.observabilityLogExplorer.navigateTo();
+      await PageObjects.observabilityLogsExplorer.navigateTo();
       await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
@@ -39,19 +39,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.svlCommonPage.forceLogout();
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
       await esArchiver.unload(
-        'x-pack/test/functional/es_archives/observability_log_explorer/data_streams'
+        'x-pack/test/functional/es_archives/observability_logs_explorer/data_streams'
       );
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
     it('should inject the app header menu on the top navbar', async () => {
-      const headerMenu = await PageObjects.observabilityLogExplorer.getHeaderMenu();
+      const headerMenu = await PageObjects.observabilityLogsExplorer.getHeaderMenu();
       expect(await headerMenu.isDisplayed()).to.be(true);
     });
 
     describe('Discover fallback link', () => {
       before(async () => {
-        await PageObjects.observabilityLogExplorer.navigateTo({
+        await PageObjects.observabilityLogsExplorer.navigateTo({
           pageState: {
             // avoid aligning with the test data, because that's what Discover
             // does later in this test and we wouldn't be able to check the time
@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should render a button link ', async () => {
-        const discoverLink = await PageObjects.observabilityLogExplorer.getDiscoverFallbackLink();
+        const discoverLink = await PageObjects.observabilityLogsExplorer.getDiscoverFallbackLink();
         expect(await discoverLink.isDisplayed()).to.be(true);
       });
 
@@ -78,9 +78,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         const timeConfig = await PageObjects.timePicker.getTimeConfig();
         // Set query bar value
-        await PageObjects.observabilityLogExplorer.submitQuery('*favicon*');
+        await PageObjects.observabilityLogsExplorer.submitQuery('*favicon*');
 
-        const discoverLink = await PageObjects.observabilityLogExplorer.getDiscoverFallbackLink();
+        const discoverLink = await PageObjects.observabilityLogsExplorer.getDiscoverFallbackLink();
         discoverLink.click();
 
         await PageObjects.discover.waitForDocTableLoadingComplete();
@@ -99,14 +99,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await PageObjects.timePicker.getTimeConfig()).to.eql(timeConfig);
         });
         await retry.try(async () => {
-          expect(await PageObjects.observabilityLogExplorer.getQueryBarValue()).to.eql('*favicon*');
+          expect(await PageObjects.observabilityLogsExplorer.getQueryBarValue()).to.eql(
+            '*favicon*'
+          );
         });
       });
     });
 
     describe('Discover tabs', () => {
       before(async () => {
-        await PageObjects.observabilityLogExplorer.navigateTo({
+        await PageObjects.observabilityLogsExplorer.navigateTo({
           pageState: {
             // avoid aligning with the test data, because that's what Discover
             // does later in this test and we wouldn't be able to check the time
@@ -130,7 +132,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const timeConfig = await PageObjects.timePicker.getTimeConfig();
 
         // Set query bar value
-        await PageObjects.observabilityLogExplorer.submitQuery('*favicon*');
+        await PageObjects.observabilityLogsExplorer.submitQuery('*favicon*');
 
         // go to discover tab
         await testSubjects.click('discoverTab');
@@ -138,7 +140,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           deepLinkId: 'discover',
         });
         await PageObjects.svlCommonNavigation.breadcrumbs.expectBreadcrumbMissing({
-          deepLinkId: 'observability-log-explorer',
+          deepLinkId: 'observability-logs-explorer',
         });
         expect(await browser.getCurrentUrl()).contain('/app/discover');
 
@@ -159,36 +161,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         await retry.try(async () => {
-          expect(await PageObjects.observabilityLogExplorer.getQueryBarValue()).not.to.eql(
+          expect(await PageObjects.observabilityLogsExplorer.getQueryBarValue()).not.to.eql(
             '*favicon*'
           );
         });
 
-        // go to log explorer tab
-        await testSubjects.click('logExplorerTab');
+        // go to logs explorer tab
+        await testSubjects.click('logsExplorerTab');
         await PageObjects.svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
           deepLinkId: 'discover',
         });
         await PageObjects.svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
-          deepLinkId: 'observability-log-explorer',
+          deepLinkId: 'observability-logs-explorer',
         });
-        expect(await browser.getCurrentUrl()).contain('/app/observability-log-explorer');
+        expect(await browser.getCurrentUrl()).contain('/app/observability-logs-explorer');
       });
     });
 
     describe('Add data link', () => {
       before(async () => {
-        await PageObjects.observabilityLogExplorer.navigateTo();
+        await PageObjects.observabilityLogsExplorer.navigateTo();
         await PageObjects.header.waitUntilLoadingHasFinished();
       });
 
       it('should render a button link ', async () => {
-        const onboardingLink = await PageObjects.observabilityLogExplorer.getOnboardingLink();
+        const onboardingLink = await PageObjects.observabilityLogsExplorer.getOnboardingLink();
         expect(await onboardingLink.isDisplayed()).to.be(true);
       });
 
       it('should navigate to the observability onboarding overview page', async () => {
-        const onboardingLink = await PageObjects.observabilityLogExplorer.getOnboardingLink();
+        const onboardingLink = await PageObjects.observabilityLogsExplorer.getOnboardingLink();
         onboardingLink.click();
 
         await retry.try(async () => {

@@ -66,7 +66,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
 
-    describe('Rules Page - Bulk Action buttons', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/175614
+    describe.skip('Rules Page - Bulk Action buttons', () => {
       it('It should disable both Enable and Disable options when there are no rules selected', async () => {
         await rule.rulePage.toggleBulkActionButton();
         expect(

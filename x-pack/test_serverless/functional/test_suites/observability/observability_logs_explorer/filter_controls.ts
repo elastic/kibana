@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['observabilityLogExplorer', 'svlCommonPage']);
+  const PageObjects = getPageObjects(['observabilityLogsExplorer', 'svlCommonPage']);
 
   describe('Filter controls customization', () => {
     before('initialize tests', async () => {
@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('renders a filter controls section as part of the unified search bar', async () => {
-      await PageObjects.observabilityLogExplorer.navigateTo();
+      await PageObjects.observabilityLogsExplorer.navigateTo();
       await testSubjects.existOrFail('datasetFiltersCustomization', { allowHidden: true });
     });
   });
