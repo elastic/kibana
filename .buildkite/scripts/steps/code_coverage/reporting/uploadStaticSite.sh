@@ -4,7 +4,7 @@ set -euo pipefail
 
 xs=("$@")
 
-uploadPrefix="gs://elastic-bekitzur-kibana-coverage-live/"
+uploadPrefix="gs://elastic-kibana-coverage-live/"
 uploadPrefixWithTimeStamp="${uploadPrefix}${TIME_STAMP}/"
 
 uploadBase() {

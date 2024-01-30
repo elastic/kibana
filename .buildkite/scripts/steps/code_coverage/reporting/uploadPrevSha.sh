@@ -9,4 +9,4 @@ collectPrevious() {
 }
 collectPrevious
 
-gsutil cp previous.txt gs://elastic-bekitzur-kibana-coverage-live/previous_pointer/
+gsutil cp previous.txt gs://elastic-kibana-coverage-live/previous_pointer/
