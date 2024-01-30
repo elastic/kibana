@@ -137,6 +137,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           reportURL.split(/query:\(range:\(order_date:\(format:strict_date_optional_time/).length -
           1;
         const timeFiltersNumberInSharedURL = sharedURL.split('time:').length - 1;
+        expect(timeFiltersNumberInSharedURL).to.be(1);
         expect(timeFiltersNumberInSharedURL).equal(timeFiltersNumberInReportURL);
         expect(sharedURL.includes('time:(from:now-24h%2Fh,to:now))')).to.be(true);
 
