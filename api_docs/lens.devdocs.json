@@ -989,7 +989,48 @@
         "initialIsOpen": false
       }
     ],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.apiHasLensConfig",
+        "type": "Function",
+        "tags": [],
+        "label": "apiHasLensConfig",
+        "description": [],
+        "signature": [
+          "(api: unknown) => api is ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.HasLensConfig",
+            "text": "HasLensConfig"
+          }
+        ],
+        "path": "x-pack/plugins/lens/public/embeddable/interfaces/has_lens_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.apiHasLensConfig.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "api",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/plugins/lens/public/embeddable/interfaces/has_lens_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "lens",
@@ -10621,6 +10662,30 @@
           "ReferenceBasedIndexPatternColumn"
         ],
         "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/column_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.HasLensConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "HasLensConfig",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasType",
+            "text": "HasType"
+          },
+          "<\"lens\"> & { getSavedVis: () => Readonly<",
+          "Document",
+          " | undefined>; }"
+        ],
+        "path": "x-pack/plugins/lens/public/embeddable/interfaces/has_lens_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
