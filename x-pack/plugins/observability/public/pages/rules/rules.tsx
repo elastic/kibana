@@ -5,21 +5,20 @@
  * 2.0.
  */
 
-import React, { lazy, useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
-
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useLoadRuleTypesQuery } from '@kbn/triggers-actions-ui-plugin/public';
-import { RULES_LOGS_PATH, RULES_PATH } from '../../../common/locators/paths';
-import { useKibana } from '../../utils/kibana_react';
-import { usePluginContext } from '../../hooks/use_plugin_context';
-import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
+import React, { lazy, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { observabilityRuleCreationValidConsumers } from '../../../common/constants';
+import { RULES_LOGS_PATH, RULES_PATH } from '../../../common/locators/paths';
+import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
+import { usePluginContext } from '../../hooks/use_plugin_context';
+import { useKibana } from '../../utils/kibana_react';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { RulesTab } from './rules_tab';
 
