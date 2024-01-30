@@ -8,20 +8,28 @@
 import * as rt from 'io-ts';
 import { qualityProblemCauseRT } from './cause';
 
+export const increaseIgnoreAboveMitigationTypeRT = rt.literal('mapping-increase-ignore-above');
+
 export const increaseIgnoreAboveMitigationRT = rt.strict({
-  type: rt.literal('mapping-increase-ignore-above'),
+  type: increaseIgnoreAboveMitigationTypeRT,
   data_stream: rt.string,
   field: rt.string,
+  limit: rt.number,
 });
+
+export const truncateValueMitigationTypeRT = rt.literal('pipeline-truncate-value');
 
 export const truncateValueMitigationRT = rt.strict({
-  type: rt.literal('pipeline-truncate-value'),
+  type: truncateValueMitigationTypeRT,
   data_stream: rt.string,
   field: rt.string,
+  limit: rt.number,
 });
 
+export const removeFieldMitigationTypeRT = rt.literal('pipeline-remove-field');
+
 export const removeFieldMitigationRT = rt.strict({
-  type: rt.literal('pipeline-remove-field'),
+  type: removeFieldMitigationTypeRT,
   data_stream: rt.string,
   field: rt.string,
 });

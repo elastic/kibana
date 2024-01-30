@@ -44,6 +44,7 @@ export type { DatasetQualityConfig } from './plugin_config';
 export {
   DATA_STREAM_CHECKS_PATH,
   DATA_STREAM_CHECK_PATH,
+  DATA_STREAM_MITIGATION_PATH,
   DATA_STREAM_MITIGATIONS_PATH,
   getDataStreamCheckPath,
   getDatastreamCheckRequestParamsRT,
@@ -57,6 +58,10 @@ export {
   getDatastreamMitigationsRequestParamsRT,
   getDatastreamMitigationsRequestPayloadRT,
   getDatastreamMitigationsResponsePayloadRT,
+  getDataStreamMitigationPath,
+  postDatastreamMitigationRequestParamsRT,
+  postDatastreamMitigationRequestPayloadRT,
+  postDatastreamMitigationResponsePayloadRT,
 } from './rest';
 export type {
   APIClientRequestParamsOf,

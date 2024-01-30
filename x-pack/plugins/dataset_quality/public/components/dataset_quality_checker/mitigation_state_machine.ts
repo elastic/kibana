@@ -161,11 +161,13 @@ export const createDataStreamQualityMitigationStateMachine = ({
                 type: 'mapping-increase-ignore-above',
                 data_stream: 'logs-custom_2-default',
                 field: 'message',
+                limit: 2048,
               },
               {
                 type: 'pipeline-truncate-value',
                 data_stream: 'logs-custom_2-default',
                 field: 'message',
+                limit: 2048,
               },
               {
                 type: 'pipeline-remove-field',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataStreamQualityCheckExecution } from '../../../common';
+import { DataStreamQualityCheckExecution, Mitigation } from '../../../common';
 import {
   checkForIgnoredFields,
   DataStreamQualityCheck,
@@ -56,5 +56,9 @@ export class DataStreamQualityService {
       finished,
       result,
     };
+  }
+
+  public async applyMitigation(mitigationParams: Mitigation): Promise<void> {
+    return;
   }
 }
