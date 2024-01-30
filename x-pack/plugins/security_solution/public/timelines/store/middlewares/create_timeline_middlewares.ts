@@ -7,8 +7,8 @@
 
 import type { CoreStart } from '@kbn/core/public';
 
-import { timelineChangedMiddleware } from './changed';
-import { favoriteTimelineMiddleware } from './favorite_timeline';
+import { timelineChangedMiddleware } from './timeline_changed';
+import { favoriteTimelineMiddleware } from './timeline_favorite';
 import { addNoteToTimelineMiddleware } from './timeline_note';
 import { addPinnedEventToTimelineMiddleware } from './timeline_pinned_event';
 import { saveTimelineMiddleware } from './timeline_save';
