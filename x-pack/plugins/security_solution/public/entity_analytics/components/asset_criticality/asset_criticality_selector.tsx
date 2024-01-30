@@ -39,7 +39,7 @@ import type { CriticalityLevel } from '../../../../common/entity_analytics/asset
 interface Props {
   entity: Entity;
 }
-export const AssetCriticalitySelector: React.FC<Props> = ({ entity }) => {
+const AssetCriticalityComponent: React.FC<Props> = ({ entity }) => {
   const modal = useCriticalityModal();
   const criticality = useAssetCriticalityData(entity, modal);
   const { euiTheme } = useEuiTheme();
@@ -51,6 +51,7 @@ export const AssetCriticalitySelector: React.FC<Props> = ({ entity }) => {
   return (
     <>
       <EuiAccordion
+        initialIsOpen
         id="asset-criticality-selector"
         buttonContent={
           <EuiTitle size="xs">
@@ -80,12 +81,10 @@ export const AssetCriticalitySelector: React.FC<Props> = ({ entity }) => {
           >
             <EuiFlexItem>
               <EuiText size="s">
-                {criticality.status === 'update' && (
-                  <AssetCriticalityBadgeAllowMissing
-                    criticalityLevel={criticality.query.data?.criticality_level}
-                    dataTestSubj="asset-criticality-level"
-                  />
-                )}
+                <AssetCriticalityBadgeAllowMissing
+                  criticalityLevel={criticality.query.data?.criticality_level}
+                  dataTestSubj="asset-criticality-level"
+                />
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem css={{ flexGrow: 'unset' }}>
@@ -196,3 +195,6 @@ const options: Array<EuiSuperSelectOption<CriticalityLevel>> = [
   option('important'),
   option('very_important'),
 ];
+
+export const AssetCriticalitySelector = React.memo(AssetCriticalityComponent);
+AssetCriticalitySelector.displayName = 'AssetCriticalitySelector';

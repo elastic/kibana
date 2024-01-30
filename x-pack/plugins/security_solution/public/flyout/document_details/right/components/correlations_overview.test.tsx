@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { RightPanelContext } from '../context';
 import { TestProviders } from '../../../../common/mock';
 import { CorrelationsOverview } from './correlations_overview';
@@ -89,17 +89,19 @@ const flyoutContextValue = {
 } as unknown as ExpandableFlyoutApi;
 
 jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutContext: jest.fn(),
+  useExpandableFlyoutApi: jest.fn(),
   ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
 }));
 
 describe('<CorrelationsOverview />', () => {
   beforeAll(() => {
-    jest.mocked(useExpandableFlyoutContext).mockReturnValue(flyoutContextValue);
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
   });
 
   it('should render wrapper component', () => {
-    jest.mocked(useShowRelatedAlertsByAncestry).mockReturnValue({ show: false });
+    jest
+      .mocked(useShowRelatedAlertsByAncestry)
+      .mockReturnValue({ show: false, documentId: 'event-id' });
     jest.mocked(useShowRelatedAlertsBySameSourceEvent).mockReturnValue({ show: false });
     jest.mocked(useShowRelatedAlertsBySession).mockReturnValue({ show: false });
     jest.mocked(useShowRelatedCases).mockReturnValue(false);
@@ -115,7 +117,7 @@ describe('<CorrelationsOverview />', () => {
   it('should show component with all rows in expandable panel', () => {
     jest
       .mocked(useShowRelatedAlertsByAncestry)
-      .mockReturnValue({ show: true, indices: ['index1'] });
+      .mockReturnValue({ show: true, documentId: 'event-id', indices: ['index1'] });
     jest
       .mocked(useShowRelatedAlertsBySameSourceEvent)
       .mockReturnValue({ show: true, originalEventId: 'originalEventId' });
@@ -158,7 +160,7 @@ describe('<CorrelationsOverview />', () => {
   it('should hide rows and show error message if show values are false', () => {
     jest
       .mocked(useShowRelatedAlertsByAncestry)
-      .mockReturnValue({ show: false, indices: ['index1'] });
+      .mockReturnValue({ show: false, documentId: 'event-id', indices: ['index1'] });
     jest
       .mocked(useShowRelatedAlertsBySameSourceEvent)
       .mockReturnValue({ show: false, originalEventId: 'originalEventId' });
@@ -178,7 +180,9 @@ describe('<CorrelationsOverview />', () => {
   });
 
   it('should hide rows if values are null', () => {
-    jest.mocked(useShowRelatedAlertsByAncestry).mockReturnValue({ show: true });
+    jest
+      .mocked(useShowRelatedAlertsByAncestry)
+      .mockReturnValue({ show: true, documentId: 'event-id' });
     jest.mocked(useShowRelatedAlertsBySameSourceEvent).mockReturnValue({ show: true });
     jest.mocked(useShowRelatedAlertsBySession).mockReturnValue({ show: true });
     jest.mocked(useShowRelatedCases).mockReturnValue(false);

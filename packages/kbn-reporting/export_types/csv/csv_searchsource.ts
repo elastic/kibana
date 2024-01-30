@@ -10,7 +10,7 @@ import { Writable } from 'stream';
 
 import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
-import { CsvGenerator } from '@kbn/generate-csv';
+import { CsvGenerator, type CsvPagingStrategy } from '@kbn/generate-csv';
 import {
   CancellationToken,
   LICENSE_TYPE_BASIC,
@@ -67,7 +67,8 @@ export class CsvSearchSourceExportType extends ExportType<
   }
 
   public createJob = async (jobParams: JobParamsCSV) => {
-    return { ...jobParams };
+    const pagingStrategy = this.config.csv.scroll.strategy as CsvPagingStrategy;
+    return { pagingStrategy, ...jobParams };
   };
 
   public runTask = async (
