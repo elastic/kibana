@@ -67,8 +67,8 @@ export class FindSLOGroups {
   public async execute(params: FindSLOGroupsParams): Promise<FindSLOGroupsResponse> {
     const pagination = toPagination(params);
     const groupBy = params.groupBy;
-    const kqlQuery = params.kqlQuery;
-    const filters = params.filters;
+    const kqlQuery = params.kqlQuery ?? '';
+    const filters = params.filters ?? '';
     let parsedFilters: any = {};
 
     try {
@@ -83,8 +83,8 @@ export class FindSLOGroups {
         bool: {
           filter: [
             { term: { spaceId: this.spaceId } },
-            getElastichsearchQueryOrThrow(kqlQuery), 
-            ...(parsedFilters.filter ?? [])
+            getElastichsearchQueryOrThrow(kqlQuery),
+            ...(parsedFilters.filter ?? []),
           ],
         },
       },

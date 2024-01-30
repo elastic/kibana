@@ -35,7 +35,7 @@ export function GroupView({ isCompact, kqlQuery, sloView, sort, direction, group
     groupBy,
     kqlQuery,
     tags,
-    filters
+    filters,
   });
   const { results = [], total = 0 } = data ?? {};
   const handlePageClick = (pageNumber: number) => {

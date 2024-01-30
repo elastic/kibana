@@ -22,7 +22,6 @@ interface Props {
   direction: SortDirection;
   groupBy: string;
   filters: Filter[];
-
 }
 
 export function GroupListView({
@@ -33,7 +32,7 @@ export function GroupListView({
   sort,
   direction,
   groupBy,
-  filters
+  filters,
 }: Props) {
   const query = kqlQuery ? `"${groupBy}": (${group}) and ${kqlQuery}` : `"${groupBy}": ${group}`;
   let groupName = group.toLowerCase();
@@ -54,7 +53,7 @@ export function GroupListView({
     sortDirection: direction,
     perPage: ITEMS_PER_PAGE,
     page: page + 1,
-    filters
+    filters,
   });
   const { results = [], total = 0 } = sloList ?? {};
 

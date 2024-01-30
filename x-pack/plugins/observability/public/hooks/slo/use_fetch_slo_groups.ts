@@ -14,9 +14,8 @@ import { useCreateDataView } from '../use_create_data_view';
 import { sloKeys } from './query_key_factory';
 import { DEFAULT_SLO_GROUPS_PAGE_SIZE } from '../../../common/slo/constants';
 import { SearchState } from '../../pages/slos/hooks/use_url_search_state';
-import {
-  SLO_SUMMARY_DESTINATION_INDEX_NAME,
-} from '../../../common/slo/constants';
+import { SLO_SUMMARY_DESTINATION_INDEX_NAME } from '../../../common/slo/constants';
+import { mixKqlWithTags } from './mix_kql_with_tags';
 
 interface SLOGroupsParams {
   page?: number;
@@ -25,7 +24,6 @@ interface SLOGroupsParams {
   kqlQuery?: string;
   tags?: SearchState['tags'];
   filters?: Filter[];
-
 }
 
 interface UseFetchSloGroupsResponse {
@@ -111,32 +109,3 @@ export function useFetchSloGroups({
     isRefetching,
   };
 }
-
-const mixKqlWithTags = (kqlQuery: string, tags: SearchState['tags']) => {
-  if (!tags) {
-    return kqlQuery;
-  }
-  const tagsKqlIncluded = tags.included?.join(' or ') || '';
-  const excludedTagsKql = tags.excluded?.join(' or ') || '';
-
-  let tagsQuery = '';
-  if (tagsKqlIncluded && excludedTagsKql) {
-    tagsQuery = `slo.tags: (${excludedTagsKql}) and not slo.tags: (${tagsKqlIncluded})`;
-  }
-  if (!excludedTagsKql && tagsKqlIncluded) {
-    tagsQuery = `slo.tags: (${tagsKqlIncluded})`;
-  }
-  if (!tagsKqlIncluded && excludedTagsKql) {
-    tagsQuery = `not slo.tags: (${excludedTagsKql})`;
-  }
-
-  if (!kqlQuery) {
-    return tagsQuery;
-  }
-  if (tagsQuery) {
-    return `${kqlQuery} and ${tagsQuery}`;
-  } else {
-    return kqlQuery;
-  }
-  // return `${kqlQuery} and ${tagsQuery}`;
-};
