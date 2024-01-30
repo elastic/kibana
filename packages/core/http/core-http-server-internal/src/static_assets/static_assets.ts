@@ -23,6 +23,10 @@ export interface InternalStaticAssets {
    * as server paths
    */
   getPluginServerPath(pluginName: string, assetPath: string): string;
+  /**
+   * Similar to getPluginServerPath, but not plugin-scoped
+   */
+  prependServerPath(path: string): string;
 }
 
 export class StaticAssets implements InternalStaticAssets {
@@ -52,6 +56,10 @@ export class StaticAssets implements InternalStaticAssets {
       assetPath = assetPath.slice(1);
     }
     return `${this.assetsHrefBase}/plugins/${pluginName}/assets/${removeLeadSlashes(assetPath)}`;
+  }
+
+  prependServerPath(path: string): string {
+    return `${this.assetsServerPathBase}/${removeLeadSlashes(path)}`;
   }
 
   getPluginServerPath(pluginName: string, assetPath: string): string {
