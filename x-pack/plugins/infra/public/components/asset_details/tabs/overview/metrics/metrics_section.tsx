@@ -129,9 +129,7 @@ const Section = ({
       title={title}
       shouldCollapse={shouldCollapse}
       data-test-subj={
-        shouldCollapse
-          ? 'infraAssetDetailsMetricsSectionExpandButton'
-          : 'infraAssetDetailsMetricsSection'
+        shouldCollapse ? 'infraAssetDetailsMetricsCollapsible' : 'infraAssetDetailsMetricsSection'
       }
       id={'metrics'}
     >

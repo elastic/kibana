@@ -102,7 +102,7 @@ const MetadataSummaryListWrapper = ({
       <CollapsibleSection
         title={MetadataSectionTitle}
         shouldCollapse={true}
-        data-test-subj="infraAssetDetailsMetadataSectionExpandButton"
+        data-test-subj="infraAssetDetailsMetadataCollapsible"
         id={'metadata'}
         extraAction={<ExtraActions />}
       >

@@ -79,7 +79,7 @@ export const AlertsSummaryContent = ({
       <CollapsibleSection
         title={AlertsSectionTitle}
         shouldCollapse={true}
-        data-test-subj="infraAssetDetailsAlertsSectionExpandButton"
+        data-test-subj="infraAssetDetailsAlertsCollapsible"
         id={'alerts'}
         extraAction={<ExtraActions />}
         closedSectionContent={<AlertsClosedContent alertsEsQuery={alertsEsQueryByStatus} />}
