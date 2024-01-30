@@ -5,11 +5,12 @@
  * 2.0.
  */
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
-import type { LensEmbeddableInput, LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
+import type { LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
 import { LENS_EMBEDDABLE_TYPE, type Embeddable as LensEmbeddable } from '@kbn/lens-plugin/public';
 import { LENS_ATTACHMENT_TYPE } from '../../../../common/constants/visualizations';
 import type { PersistableStateAttachmentPayload } from '../../../../common/types/domain';
 import { AttachmentType } from '../../../../common/types/domain';
+import type { LensProps } from '../types';
 
 export const isLensEmbeddable = (embeddable: IEmbeddable): embeddable is LensEmbeddable => {
   return embeddable.type === LENS_EMBEDDABLE_TYPE;
@@ -26,12 +27,14 @@ type PersistableStateAttachmentWithoutOwner = Omit<PersistableStateAttachmentPay
 export const getLensCaseAttachment = ({
   timeRange,
   attributes,
+  metadata,
 }: {
-  timeRange: LensEmbeddableInput['timeRange'];
+  timeRange: LensProps['timeRange'];
   attributes: LensSavedObjectAttributes;
+  metadata?: LensProps['metadata'];
 }): PersistableStateAttachmentWithoutOwner =>
   ({
-    persistableStateAttachmentState: { attributes, timeRange },
+    persistableStateAttachmentState: { attributes, timeRange, metadata },
     persistableStateAttachmentTypeId: LENS_ATTACHMENT_TYPE,
     type: AttachmentType.persistableState,
   } as unknown as PersistableStateAttachmentWithoutOwner);

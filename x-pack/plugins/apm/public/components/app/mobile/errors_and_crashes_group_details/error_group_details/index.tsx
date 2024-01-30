@@ -180,13 +180,15 @@ export function ErrorGroupDetails() {
     [environment, kueryWithMobileFilters, serviceName, start, end, groupId]
   );
 
-  const { errorDistributionData, status: errorDistributionStatus } =
-    useErrorGroupDistributionFetcher({
-      serviceName,
-      groupId,
-      environment,
-      kuery: kueryWithMobileFilters,
-    });
+  const {
+    errorDistributionData,
+    errorDistributionStatus: errorDistributionStatus,
+  } = useErrorGroupDistributionFetcher({
+    serviceName,
+    groupId,
+    environment,
+    kuery: kueryWithMobileFilters,
+  });
 
   useEffect(() => {
     const selectedSample = errorSamplesData?.errorSampleIds.find(

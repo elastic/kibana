@@ -34,7 +34,6 @@ export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
       monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
     }),
   },
-  writeAccess: true,
   handler: async (routeContext): Promise<any> => {
     const { request, response } = routeContext;
     const { monitorId } = request.params;
