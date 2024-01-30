@@ -9,25 +9,35 @@ import { kea, MakeLogicType } from 'kea';
 
 import { Connector, FeatureName, IngestPipelineParams } from '@kbn/search-connectors';
 
+import { Status } from '../../../../../common/types/api';
+
 import {
   FetchConnectorByIdApiLogic,
   FetchConnectorByIdApiLogicActions,
 } from '../../api/connector/fetch_connector_by_id_logic';
 
+import { FetchIndexActions, FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
 import { ElasticsearchViewIndex, IngestionMethod, IngestionStatus } from '../../types';
 
-export interface IndexViewActions {
+export interface ConnectorViewActions {
   fetchConnector: FetchConnectorByIdApiLogicActions['makeRequest'];
-  fetchConnectorApiSuccess: FetchConnectorByIdApiLogicActions['apiSuccess'];
   fetchConnectorApiError: FetchConnectorByIdApiLogicActions['apiError'];
+  fetchConnectorApiSuccess: FetchConnectorByIdApiLogicActions['apiSuccess'];
+  fetchIndex: FetchIndexActions['makeRequest'];
+  fetchIndexApiError: FetchIndexActions['apiError'];
+  fetchIndexApiSuccess: FetchIndexActions['apiSuccess'];
 }
 
 // TODO UPDATE
-export interface IndexViewValues {
-  connector: typeof FetchConnectorByIdApiLogic.values.data;
+export interface ConnectorViewValues {
+  connector: Connector | undefined;
+  connectorData: typeof FetchConnectorByIdApiLogic.values.data;
   connectorError: string | undefined;
   connectorId: string | null;
+  connectorName: string | null;
   error: string | undefined;
+  fetchConnectorApiStatus: Status;
+  fetchIndexApiStatus: Status;
   hasAdvancedFilteringFeature: boolean;
   hasBasicFilteringFeature: boolean;
   hasDocumentLevelSecurityFeature: boolean;
@@ -40,6 +50,7 @@ export interface IndexViewValues {
   ingestionStatus: IngestionStatus;
   isCanceling: boolean;
   isHiddenIndex: boolean;
+  isLoading: boolean;
   isSyncing: boolean;
   isWaitingForSync: boolean;
   lastUpdated: string | null;
@@ -48,11 +59,8 @@ export interface IndexViewValues {
   syncTriggeredLocally: boolean; // holds local value after update so UI updates correctly
 }
 
-export const ConnectorViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewActions>>({
-  actions: {
-    fetchIndex: true,
-    recheckIndex: true,
-  },
+export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, ConnectorViewActions>>({
+  actions: {},
   connect: {
     actions: [
       FetchConnectorByIdApiLogic,
@@ -61,12 +69,28 @@ export const ConnectorViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAc
         'apiSuccess as fetchConnectorApiSuccess',
         'apiError as fetchConnectorApiError',
       ],
+      FetchIndexApiLogic,
+      [
+        'makeRequest as fetchIndex',
+        'apiSuccess as fetchIndexApiSuccess',
+        'apiError as fetchIndexApiError',
+      ],
     ],
     values: [
       FetchConnectorByIdApiLogic,
-      ['status as fetchConnectorApiStatus', 'data as connector'],
+      ['status as fetchConnectorApiStatus', 'data as connectorData'],
+      FetchIndexApiLogic,
+      ['data as index', 'status as fetchIndexApiStatus'],
     ],
   },
+  listeners: ({ actions, values }) => ({
+    fetchConnectorApiSuccess: () => {
+      console.log('debug listener: ', values.indexName);
+      if (values.indexName) {
+        actions.fetchIndex({ indexName: values.indexName });
+      }
+    },
+  }),
   path: ['enterprise_search', 'content', 'connector_view_logic'],
   reducers: {
     syncTriggeredLocally: [
@@ -78,6 +102,27 @@ export const ConnectorViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAc
     ],
   },
   selectors: ({ selectors }) => ({
+    connector: [
+      () => [selectors.connectorData],
+      (connectorData) => {
+        console.log('debug connector:', connectorData);
+        return connectorData?.connector;
+      },
+    ],
+    indexName: [
+      () => [selectors.connector],
+      (connector: Connector | undefined) => {
+        console.log('debug: ', connector, connector?.index_name);
+        return connector?.index_name || undefined;
+      },
+    ],
+    isLoading: [
+      () => [selectors.fetchConnectorApiStatus, selectors.fetchIndexApiStatus],
+      (fetchConnectorApiStatus: Status, fetchIndexApiStatus: Status) =>
+        [Status.IDLE && Status.LOADING].includes(fetchConnectorApiStatus) ||
+        [Status.IDLE && Status.LOADING].includes(fetchIndexApiStatus),
+    ],
+    connectorId: [() => [selectors.connector], (connector) => connector?.id],
     connectorError: [
       () => [selectors.connector],
       (connector: Connector | undefined) => connector?.error,

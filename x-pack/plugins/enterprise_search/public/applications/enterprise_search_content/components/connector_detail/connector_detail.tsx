@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
-
-import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -52,13 +50,10 @@ export enum ConnectorDetailTabId {
   CONFIGURATION = 'configuration',
   SYNC_RULES = 'sync_rules',
   SCHEDULING = 'scheduling',
-  // crawler indices
-  DOMAIN_MANAGEMENT = 'domain_management',
-  CRAWLER_CONFIGURATION = 'crawler_configuration',
 }
 
 export const ConnectorDetail: React.FC = () => {
-  const { hasFilteringFeature } = useValues(ConnectorViewLogic);
+  const { hasFilteringFeature, isLoading, index } = useValues(ConnectorViewLogic);
   const { fetchConnector } = useActions(ConnectorViewLogic);
   useEffect(() => {
     fetchConnector({ connectorId: '6vzqVY0BeXPM5g_EQfu0' });
@@ -68,188 +63,123 @@ export const ConnectorDetail: React.FC = () => {
     tabId?: string;
   }>();
 
-  // const { indexName } = useValues(IndexNameLogic);
-  // const { errorConnectingMessage } = useValues(HttpLogic);
-
-  /**
-   * Guided Onboarding needs us to mark the add data step as complete as soon as the user has data in an index.
-   * This needs to be checked for any of the 3 registered search guideIds
-   * Putting it here guarantees that if a user is viewing an index with data, it'll be marked as complete
-   */
   const {
-    // config,
-    // guidedOnboarding,
-    productAccess: { hasAppSearchAccess },
     productFeatures: { hasDefaultIngestPipeline },
   } = useValues(KibanaLogic);
 
-  // useEffect(() => {
-  //   const subscription = guidedOnboarding?.guidedOnboardingApi
-  //     ?.isGuideStepActive$('appSearch', 'add_data')
-  //     .subscribe((isStepActive) => {
-  //       if (isStepActive && index?.count) {
-  //         guidedOnboarding?.guidedOnboardingApi?.completeGuideStep('appSearch', 'add_data');
-  //       }
-  //     });
-  //   return () => subscription?.unsubscribe();
-  // }, [guidedOnboarding, index?.count]);
-
-  // useEffect(() => {
-  //   const subscription = guidedOnboarding?.guidedOnboardingApi
-  //     ?.isGuideStepActive$('websiteSearch', 'add_data')
-  //     .subscribe((isStepActive) => {
-  //       if (isStepActive && index?.count) {
-  //         guidedOnboarding?.guidedOnboardingApi?.completeGuideStep('websiteSearch', 'add_data');
-  //       }
-  //     });
-  //   return () => subscription?.unsubscribe();
-  // }, [guidedOnboarding, index?.count]);
-
-  // useEffect(() => {
-  //   const subscription = guidedOnboarding?.guidedOnboardingApi
-  //     ?.isGuideStepActive$('databaseSearch', 'add_data')
-  //     .subscribe((isStepActive) => {
-  //       if (isStepActive && index?.count) {
-  //         guidedOnboarding.guidedOnboardingApi?.completeGuideStep('databaseSearch', 'add_data');
-  //       }
-  //     });
-  //   return () => subscription?.unsubscribe();
-  // }, [guidedOnboarding, index?.count]);
-
-  const ALL_INDICES_TABS: EuiTabbedContentTab[] = [
+  const [selectedTabId, setSelectedTabId] = useState<string>(tabId);
+  const ALL_INDICES_TABS = [
     {
+      isSelected: selectedTabId === ConnectorDetailTabId.OVERVIEW,
       content: <ConnectorDetailOverview />,
-      'data-test-subj': 'entSearchContent-index-overview-tab',
       id: ConnectorDetailTabId.OVERVIEW,
-      name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.overviewTabLabel', {
+      label: i18n.translate('xpack.enterpriseSearch.content.searchIndex.overviewTabLabel', {
         defaultMessage: 'Overview',
       }),
+      onClick: () => setSelectedTabId(ConnectorDetailTabId.OVERVIEW),
     },
     {
+      isSelected: selectedTabId === ConnectorDetailTabId.DOCUMENTS,
+      disabled: !index,
       content: <SearchIndexDocuments />,
       id: ConnectorDetailTabId.DOCUMENTS,
-      name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.documentsTabLabel', {
+      label: i18n.translate('xpack.enterpriseSearch.content.searchIndex.documentsTabLabel', {
         defaultMessage: 'Documents',
       }),
+      onClick: () => setSelectedTabId(ConnectorDetailTabId.DOCUMENTS),
     },
     {
+      isSelected: selectedTabId === ConnectorDetailTabId.INDEX_MAPPINGS,
+      disabled: !index,
       content: <SearchIndexIndexMappings />,
       id: ConnectorDetailTabId.INDEX_MAPPINGS,
-      name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.indexMappingsTabLabel', {
+      label: i18n.translate('xpack.enterpriseSearch.content.searchIndex.indexMappingsTabLabel', {
         defaultMessage: 'Index mappings',
       }),
+      onClick: () => setSelectedTabId(ConnectorDetailTabId.INDEX_MAPPINGS),
     },
   ];
 
-  const CONNECTOR_TABS: EuiTabbedContentTab[] = [
+  const CONNECTOR_TABS = [
     {
+      isSelected: selectedTabId === ConnectorDetailTabId.CONFIGURATION,
       content: <ConnectorConfiguration />,
       id: ConnectorDetailTabId.CONFIGURATION,
-      name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.configurationTabLabel', {
+      label: i18n.translate('xpack.enterpriseSearch.content.searchIndex.configurationTabLabel', {
         defaultMessage: 'Configuration',
       }),
+      onClick: () => setSelectedTabId(ConnectorDetailTabId.CONFIGURATION),
     },
     ...(hasFilteringFeature
       ? [
-        {
-          content: <ConnectorSyncRules />,
-          id: ConnectorDetailTabId.SYNC_RULES,
-          name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.syncRulesTabLabel', {
-            defaultMessage: 'Sync rules',
-          }),
-        },
-      ]
+          {
+            isSelected: selectedTabId === ConnectorDetailTabId.SYNC_RULES,
+            disabled: !index,
+            content: <ConnectorSyncRules />,
+            id: ConnectorDetailTabId.SYNC_RULES,
+            label: i18n.translate('xpack.enterpriseSearch.content.searchIndex.syncRulesTabLabel', {
+              defaultMessage: 'Sync rules',
+            }),
+            onClick: () => setSelectedTabId(ConnectorDetailTabId.SYNC_RULES),
+          },
+        ]
       : []),
     {
+      isSelected: selectedTabId === ConnectorDetailTabId.SCHEDULING,
+      disabled: !index,
       content: <ConnectorSchedulingComponent />,
       id: ConnectorDetailTabId.SCHEDULING,
-      name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.schedulingTabLabel', {
+      label: i18n.translate('xpack.enterpriseSearch.content.searchIndex.schedulingTabLabel', {
         defaultMessage: 'Scheduling',
       }),
+      onClick: () => setSelectedTabId(ConnectorDetailTabId.SCHEDULING),
     },
   ];
 
-  // const CRAWLER_TABS: EuiTabbedContentTab[] = [
-  //   {
-  //     content: <SearchIndexDomainManagement />,
-  //     id: SearchIndexTabId.DOMAIN_MANAGEMENT,
-  //     name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.domainManagementTabLabel', {
-  //       defaultMessage: 'Manage Domains',
-  //     }),
-  //   },
-  //   {
-  //     content: <CrawlerConfiguration />,
-  //     id: SearchIndexTabId.CRAWLER_CONFIGURATION,
-  //     name: i18n.translate(
-  //       'xpack.enterpriseSearch.content.searchIndex.crawlerConfigurationTabLabel',
-  //       {
-  //         defaultMessage: 'Configuration',
-  //       }
-  //     ),
-  //   },
-  //   {
-  //     content: <AutomaticCrawlScheduler />,
-  //     'data-test-subj': 'entSearchContent-index-crawler-scheduler-tab',
-  //     id: SearchIndexTabId.SCHEDULING,
-  //     name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.schedulingTabLabel', {
-  //       defaultMessage: 'Scheduling',
-  //     }),
-  //   },
-  // ];
-
-  const PIPELINES_TAB: EuiTabbedContentTab = {
+  const PIPELINES_TAB = {
+    isSelected: selectedTabId === ConnectorDetailTabId.PIPELINES,
+    disabled: !index,
     content: <SearchIndexPipelines />,
     id: ConnectorDetailTabId.PIPELINES,
-    name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.pipelinesTabLabel', {
+    label: i18n.translate('xpack.enterpriseSearch.content.searchIndex.pipelinesTabLabel', {
       defaultMessage: 'Pipelines',
     }),
+    onClick: () => setSelectedTabId(ConnectorDetailTabId.PIPELINES),
   };
 
-  const tabs: EuiTabbedContentTab[] = [
+  interface TabMenuItem {
+    content: JSX.Element;
+    disabled?: boolean;
+    id: string;
+    label: string;
+    onClick?: () => void;
+    prepend?: React.ReactNode;
+    route?: string;
+    testSubj?: string;
+  }
+
+  const tabs: TabMenuItem[] = [
     ...ALL_INDICES_TABS,
-    CONNECTOR_TABS,
+    ...CONNECTOR_TABS,
     // ...(isConnectorIndex(index) ? CONNECTOR_TABS : []),
     // ...(isCrawlerIndex(index) ? CRAWLER_TABS : []),
     ...(hasDefaultIngestPipeline ? [PIPELINES_TAB] : []),
   ];
 
-  const selectedTab = tabs.find((tab) => tab.id === tabId);
+  const selectedTab = tabs.find((tab) => tab.id === selectedTabId);
 
-  const onTabClick = (tab: EuiTabbedContentTab) => {
-    // KibanaLogic.values.navigateToUrl(
-    //   generateEncodedPath(
-    //     tab.id === SearchIndexTabId.OVERVIEW ? SEARCH_INDEX_PATH : SEARCH_INDEX_TAB_PATH,
-    //     {
-    //       indexName,
-    //       tabId: tab.id,
-    //     }
-    //   )
-    // );
-  };
   return (
     <EnterpriseSearchContentPageTemplate
       pageChrome={[...baseBreadcrumbs, 'TODO CHANGEME']}
       pageViewTelemetry={tabId}
-      isLoading={false} // TODO
+      isLoading={isLoading}
       pageHeader={{
+        tabs,
         pageTitle: 'CONNECTOR DETAIL CHANGEME',
         rightSideItems: [], // getHeaderActions(index, hasAppSearchAccess),
       }}
     >
-      {
-        /* isCrawlerIndex(index) && !index.connector ? (
-        <NoConnectorRecord />
-      ) : isCrawlerIndex(index) && (Boolean(errorConnectingMessage) || !config.host) ? (
-        <ErrorStatePrompt />
-      ) : */ <>
-          {
-            // indexName === index?.name && (
-            <EuiTabbedContent tabs={tabs} selectedTab={selectedTab} onTabClick={onTabClick} />
-            // )
-          }
-          {/* isCrawlerIndex(index) && <CrawlCustomSettingsFlyout /> */}
-        </>
-      }
+      {selectedTab?.content || null}
     </EnterpriseSearchContentPageTemplate>
   );
 };
