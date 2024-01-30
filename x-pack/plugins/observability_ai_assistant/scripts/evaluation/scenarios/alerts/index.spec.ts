@@ -13,9 +13,9 @@ import moment from 'moment';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { chatClient, kibanaClient, synthtraceEsClients, logger } from '../../services';
 import {
-  apm_transaction_rate_AIAssistant,
-  custom_threshold_AIAssistant_log_count,
-} from '../../alert_templates';
+  apmTransactionRateAIAssistant,
+  customThresholdAIAssistantLogCount,
+} from '../../alert_templates/templates';
 import { MessageRole } from '../../../../common';
 
 describe('alert function', () => {
@@ -26,7 +26,7 @@ describe('alert function', () => {
     const responseApmRule = await kibanaClient.callKibana<RuleResponse>(
       'post',
       { pathname: '/api/alerting/rule' },
-      apm_transaction_rate_AIAssistant.ruleParams
+      apmTransactionRateAIAssistant.ruleParams
     );
     ruleIds.push(responseApmRule.data.id);
 
@@ -34,14 +34,14 @@ describe('alert function', () => {
     await kibanaClient.callKibana(
       'post',
       { pathname: '/api/content_management/rpc/create' },
-      custom_threshold_AIAssistant_log_count.dataViewParams
+      customThresholdAIAssistantLogCount.dataViewParams
     );
 
     logger.info('Creating logs rule');
     const responseLogsRule = await kibanaClient.callKibana<RuleResponse>(
       'post',
       { pathname: '/api/alerting/rule' },
-      custom_threshold_AIAssistant_log_count.ruleParams
+      customThresholdAIAssistantLogCount.ruleParams
     );
     ruleIds.push(responseLogsRule.data.id);
 
@@ -123,7 +123,7 @@ describe('alert function', () => {
       { pathname: `/api/content_management/rpc/delete` },
       {
         contentTypeId: 'index-pattern',
-        id: custom_threshold_AIAssistant_log_count.dataViewParams.options.id,
+        id: customThresholdAIAssistantLogCount.dataViewParams.options.id,
         options: { force: true },
         version: 1,
       }

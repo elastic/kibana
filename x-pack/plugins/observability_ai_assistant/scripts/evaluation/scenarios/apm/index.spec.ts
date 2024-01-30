@@ -13,7 +13,7 @@ import { apm, timerange, serviceMap } from '@kbn/apm-synthtrace-client';
 import { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1';
 import { chatClient, kibanaClient, synthtraceEsClients } from '../../services';
 import { MessageRole } from '../../../../common';
-import { apm_error_count_AIAssistant } from '../../alert_templates';
+import { apmErrorCountAIAssistant } from '../../alert_templates/templates';
 
 describe('apm', () => {
   const ruleIds: any[] = [];
@@ -21,7 +21,7 @@ describe('apm', () => {
     const responseApmRule = await kibanaClient.callKibana<RuleResponse>(
       'post',
       { pathname: '/api/alerting/rule' },
-      apm_error_count_AIAssistant.ruleParams
+      apmErrorCountAIAssistant.ruleParams
     );
     ruleIds.push(responseApmRule.data.id);
 
