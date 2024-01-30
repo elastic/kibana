@@ -28,11 +28,13 @@ async function evaluateEsqlQuery({
   const evaluation = await chatClient.evaluate(conversation, [
     ...(expected
       ? [
-        `Returns a ES|QL query that is functionally equivalent to:      
+          `Returns a ES|QL query that is functionally equivalent to:      
       ${expected}`,
-      ]
+        ]
       : []),
-    ...(execute ? [`The query successfully executed without an error`] : [`The query was not executed`]),
+    ...(execute
+      ? [`The query successfully executed without an error`]
+      : [`The query was not executed`]),
     ...criteria,
   ]);
 
@@ -74,17 +76,16 @@ describe('ES|QL query generation', () => {
         await esClient.index({
           index: 'packetbeat-8.11.3',
           document: {
-            '@timestamp': "2024-01-23T12:30:00.000Z",
+            '@timestamp': '2024-01-23T12:30:00.000Z',
             destination: {
-              domain: "observability.ai.assistant"
+              domain: 'observability.ai.assistant',
             },
             url: {
-              domain: "elastic.co"
-            }
+              domain: 'elastic.co',
+            },
           },
         });
       });
-
 
       it('top 10 unique domains', async () => {
         await evaluateEsqlQuery({
@@ -94,7 +95,7 @@ describe('ES|QL query generation', () => {
           | STATS doc_count = COUNT(*) BY destination.domain
           | SORT doc_count DESC
           | LIMIT 10`,
-          execute: true
+          execute: true,
         });
       });
 
@@ -128,9 +129,9 @@ describe('ES|QL query generation', () => {
         await esClient.index({
           index: 'employees',
           document: {
-            hire_date: "2024-01-23T12:30:00.000Z",
+            hire_date: '2024-01-23T12:30:00.000Z',
             emp_no: 1,
-            salary: 100
+            salary: 100,
           },
         });
       });
@@ -144,7 +145,7 @@ describe('ES|QL query generation', () => {
           | SORT hire_date
           | KEEP emp_no, hire_date_formatted
           | LIMIT 5`,
-          execute: true
+          execute: true,
         });
       });
 
@@ -165,7 +166,7 @@ describe('ES|QL query generation', () => {
           expected: `FROM employees
           | WHERE DATE_EXTRACT("year", hire_date) == 2024
           | LIMIT 10`,
-          execute: true
+          execute: true,
         });
       });
 
@@ -186,7 +187,7 @@ describe('ES|QL query generation', () => {
         | STATS avg_cpu = AVG(system.cpu.total.norm.pct) BY bucket, service.name
         | SORT avg_cpu DESC
         | LIMIT 10`,
-        execute: false
+        execute: false,
       });
     });
 
@@ -197,7 +198,7 @@ describe('ES|QL query generation', () => {
       | EVAL system_pct_normalized = TO_DOUBLE(system.cpu.system.pct) / system.cpu.cores
       | STATS avg_system_pct_normalized = AVG(system_pct_normalized) BY host.name
       | SORT host.name ASC`,
-        execute: false
+        execute: false,
       });
     });
 
@@ -209,10 +210,9 @@ describe('ES|QL query generation', () => {
       | DISSECT message "%{}:  duration: %{query_duration} ms  %{}"
       | EVAL duration_double = TO_DOUBLE(duration)
       | STATS AVG(duration_double)`,
-        execute: false
+        execute: false,
       });
     });
-
   });
 
   describe('APM queries', () => {
@@ -245,9 +245,15 @@ describe('ES|QL query generation', () => {
               .duration(50)
               .failure()
               .errors(
-                myServiceInstance.error({ message: "2024-11-15T13:12:00 - ERROR - duration: 12ms", type: 'My Type' }).timestamp(timestamp)
+                myServiceInstance
+                  .error({
+                    message: '2024-11-15T13:12:00 - ERROR - duration: 12ms',
+                    type: 'My Type',
+                  })
+                  .timestamp(timestamp)
               )
-          ));
+          )
+      );
     });
 
     it('metrics avg duration', async () => {
@@ -294,7 +300,6 @@ describe('ES|QL query generation', () => {
           'The query provided by the Assistant does NOT include mathematical operations (/, +, -) in STATS aggregations',
         ],
       });
-
     });
 
     it('trace duration', async () => {
@@ -304,7 +309,7 @@ describe('ES|QL query generation', () => {
         expected: `FROM .ds-traces-apm-default-*
         | WHERE @timestamp > NOW() - 1 hour
         | STATS AVG(transaction.duration.us) BY service.name`,
-        execute: true
+        execute: true,
       });
     });
 
@@ -334,11 +339,9 @@ describe('ES|QL query generation', () => {
         | EVAL formatted_date = DATE_FORMAT("hh:mm a, d 'of' MMMM yyyy", @timestamp)
         | KEEP formatted_date, log.level, message
         | LIMIT 5`,
-        execute: true
+        execute: true,
       });
     });
-
-
 
     after(async () => {
       await synthtraceEsClients.apmSynthtraceEsClient.clean();
@@ -352,8 +355,7 @@ describe('ES|QL query generation', () => {
         expected: `FROM network_firewall
         | WHERE _raw == "SYN Timeout"
         | STATS count = count(*) by dest`,
-        execute: false
-
+        execute: false,
       });
     });
     it('prod_web length', async () => {
@@ -365,9 +367,9 @@ describe('ES|QL query generation', () => {
         criteria: [
           'The query provided by the Assistant uses the ESQL functions LENGTH and CASE, not the SPL functions len and if',
         ],
-        execute: false
+        execute: false,
       });
-    })
+    });
     it('prod_web filter message and host', async () => {
       await evaluateEsqlQuery({
         question: `can you convert this SPL query to ESQL? index=prod_web NOT "Connection reset" NOT "[acm-app] created a ThreadLocal" sourcetype!=prod_urlf_east_logs sourcetype!=prod_urlf_west_logs host!="dbs-tools-*" NOT "Public] in context with path [/global] " host!="*dev*" host!="*qa*" host!="*uat*"`,
@@ -381,8 +383,8 @@ describe('ES|QL query generation', () => {
         AND host NOT LIKE "*dev*"
         AND host NOT LIKE "*qa*"
         AND host NOT LIKE "*uat*"`,
-        execute: false
+        execute: false,
       });
-    })
-  })
+    });
+  });
 });

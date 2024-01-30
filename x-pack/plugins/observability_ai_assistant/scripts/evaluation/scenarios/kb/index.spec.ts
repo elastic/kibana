@@ -12,7 +12,6 @@ import { chatClient, esClient } from '../../services';
 import { MessageRole } from '../../../../common';
 
 describe('kb functions', () => {
-
   it('summarizes and recalls information', async () => {
     let conversation = await chatClient.complete(
       'Remember that this cluster is used to test the AI Assistant using the Observability AI Evaluation Framework'
@@ -22,10 +21,9 @@ describe('kb functions', () => {
       conversation.conversationId!,
       conversation.messages.concat({
         content: 'What is this cluster used for?',
-        role: MessageRole.User
+        role: MessageRole.User,
       })
     );
-
 
     const result = await chatClient.evaluate(conversation, [
       'Calls the summarize function',
@@ -44,10 +42,10 @@ describe('kb functions', () => {
       query: {
         match: {
           text: {
-            query: "*Observability AI Evaluation Framework*"
-          }
-        }
-      }
+            query: '*Observability AI Evaluation Framework*',
+          },
+        },
+      },
     });
   });
-})
+});

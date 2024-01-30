@@ -44,23 +44,21 @@ describe('elasticsearch functions', () => {
                 type: 'keyword',
               },
             },
-          }
+          },
         });
 
         await esClient.index({
           index: 'kb',
           document: {
-            date: "2024-01-23T12:30:00.000Z",
-            kb_doc: "document_1",
-            user: "user1"
+            date: '2024-01-23T12:30:00.000Z',
+            kb_doc: 'document_1',
+            user: 'user1',
           },
         });
       });
 
       it('returns the count of docs in the KB', async () => {
-        const conversation = await chatClient.complete(
-          'How many documents are in the index kb?'
-        );
+        const conversation = await chatClient.complete('How many documents are in the index kb?');
 
         const result = await chatClient.evaluate(conversation, [
           'Calls the Elasticsearch function',
@@ -71,15 +69,13 @@ describe('elasticsearch functions', () => {
       });
 
       it('returns store and refresh stats of an index', async () => {
-        let conversation = await chatClient.complete(
-          'What are the store stats of the index kb?'
-        );
+        let conversation = await chatClient.complete('What are the store stats of the index kb?');
 
         conversation = await chatClient.complete(
           conversation.conversationId!,
           conversation.messages.concat({
             content: 'What are the the refresh stats of the index?',
-            role: MessageRole.User
+            role: MessageRole.User,
           })
         );
 
@@ -98,7 +94,7 @@ describe('elasticsearch functions', () => {
 
         expect(result.passed).to.be(true);
       });
-    })
+    });
 
     describe('assistant created index', () => {
       it('creates index, adds documents and deletes index', async () => {
@@ -110,7 +106,7 @@ describe('elasticsearch functions', () => {
           conversation.conversationId!,
           conversation.messages.concat({
             content: 'What are the fields types for the index testing_ai_assistant?',
-            role: MessageRole.User
+            role: MessageRole.User,
           })
         );
 
@@ -118,7 +114,7 @@ describe('elasticsearch functions', () => {
           conversation.conversationId!,
           conversation.messages.concat({
             content: 'Delete the testing_ai_assistant index',
-            role: MessageRole.User
+            role: MessageRole.User,
           })
         );
 
@@ -126,19 +122,16 @@ describe('elasticsearch functions', () => {
           'Calls the Elasticsearch function to create the index testing_ai_assistant and add the documents to it',
           'Successfully created index and adds two documents to it',
           'Calls get_dataset_info and retrieves the field types of the index',
-          'Deletes the testing_ai_assistant index'
+          'Deletes the testing_ai_assistant index',
         ]);
 
         expect(result.passed).to.be(true);
       });
-    })
-
+    });
   });
   describe('other', () => {
     it('returns clusters license', async () => {
-      const conversation = await chatClient.complete(
-        'What is my clusters license?'
-      );
+      const conversation = await chatClient.complete('What is my clusters license?');
 
       const result = await chatClient.evaluate(conversation, [
         'Calls the Elasticsearch function',
@@ -148,4 +141,4 @@ describe('elasticsearch functions', () => {
       expect(result.passed).to.be(true);
     });
   });
-})
+});
