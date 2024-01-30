@@ -10,6 +10,7 @@ import type { Action, Trigger } from '@kbn/ui-actions-plugin/public';
 
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
+import type { LensProps } from '@kbn/cases-plugin/public/types';
 import { useKibana } from '../../lib/kibana/kibana_react';
 import { useAddToExistingCase } from './use_add_to_existing_case';
 import { useAddToNewCase } from './use_add_to_new_case';
@@ -84,12 +85,14 @@ const ACTION_DEFINITION: Record<
 
 export const useActions = ({
   attributes,
+  lensMetadata,
   extraActions = [],
   inspectActionProps,
   timeRange,
   withActions = DEFAULT_ACTIONS,
 }: {
   attributes: LensAttributes | null;
+  lensMetadata?: LensProps['metadata'];
   extraActions?: Action[];
   inspectActionProps: {
     handleInspectClick: () => void;
@@ -123,11 +126,13 @@ export const useActions = ({
     useAddToExistingCase({
       lensAttributes: attributes,
       timeRange,
+      lensMetadata,
     });
 
   const { onAddToNewCaseClicked, disabled: isAddToNewCaseDisabled } = useAddToNewCase({
     timeRange,
     lensAttributes: attributes,
+    lensMetadata,
   });
 
   const { openSaveVisualizationFlyout, disableVisualizations } = useSaveToLibrary({ attributes });
