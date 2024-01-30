@@ -7,7 +7,7 @@
  */
 
 import type { BasePath } from './base_path_service';
-import { CdnConfig } from './cdn';
+import { CdnConfig } from './cdn_config';
 
 export interface InternalStaticAssets {
   getHrefBase(): string;

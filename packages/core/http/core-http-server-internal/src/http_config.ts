@@ -24,7 +24,7 @@ import {
   securityResponseHeadersSchema,
   parseRawSecurityResponseHeadersConfig,
 } from './security_response_headers_config';
-import { CdnConfig } from './cdn';
+import { CdnConfig } from './cdn_config';
 
 const validBasePathRegex = /^\/.*[^\/]$/;
 
