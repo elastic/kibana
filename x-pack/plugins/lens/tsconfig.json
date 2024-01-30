@@ -107,7 +107,8 @@
     "@kbn/shared-ux-utility",
     "@kbn/text-based-editor",
     "@kbn/managed-content-badge",
-    "@kbn/sort-predicates"
+    "@kbn/sort-predicates",
+    "@kbn/presentation-publishing"
   ],
   "exclude": ["target/**/*"]
 }
