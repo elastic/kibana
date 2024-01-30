@@ -70,8 +70,13 @@ export const serverless: Command = {
     });
     const reportTime = getTimeReporter(log, 'scripts/es serverless');
 
-    // replacing --serverless with --projectType when 'scripts/es --serverless=<projectType>' is called
-    const argv = process.argv.slice(2).map((arg) => arg.replace('serverless', 'projectType'));
+    // replacing --serverless with --projectType when flag is passed from 'scripts/es'
+    const argv = process.argv.slice(2);
+    if (argv[0].startsWith('--serverless')) {
+      const projectTypeArg = argv[0].replace('--serverless', '--projectType');
+      argv[0] = projectTypeArg;
+    }
+
     const options = getopts(argv, {
       alias: {
         basePath: 'base-path',
@@ -88,7 +93,9 @@ export const serverless: Command = {
 
     if (!options.projectType || !isServerlessProjectType(options.projectType)) {
       throw createCliError(
-        `you must provide a valid project type: ${Array.from(serverlessProjectTypes).join(' |')}`
+        `Invalid project type: ${options.projectType}, supported: ${Array.from(
+          serverlessProjectTypes
+        ).join(' |')}`
       );
     }
 
