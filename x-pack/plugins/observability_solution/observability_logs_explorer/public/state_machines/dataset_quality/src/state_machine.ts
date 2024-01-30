@@ -9,7 +9,11 @@ import { IToasts } from '@kbn/core-notifications-browser';
 import { CreateDatasetQualityController } from '@kbn/dataset-quality-plugin/public/controller';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { actions, createMachine, InterpreterFrom } from 'xstate';
-import { createController, subscribeToDatasetQualityState } from './controller_service';
+import {
+  createController,
+  openDatasetFlyout,
+  subscribeToDatasetQualityState,
+} from './controller_service';
 import { DEFAULT_CONTEXT } from './defaults';
 import {
   ObservabilityDatasetQualityContext,
@@ -51,7 +55,7 @@ export const createPureObservabilityDatasetQualityStateMachine = (
           on: {
             CONTROLLER_CREATED: {
               target: 'initialized',
-              actions: ['storeController'],
+              actions: ['storeController', 'openDatasetFlyout'],
             },
           },
         },
@@ -128,6 +132,7 @@ export const createObservabilityDatasetQualityStateMachine = ({
       updateUrlFromDatasetQualityState: updateUrlFromDatasetQualityState({
         urlStateStorageContainer,
       }),
+      openDatasetFlyout,
     },
     services: {
       createController: createController({ createDatasetQualityController }),

@@ -50,3 +50,21 @@ export const subscribeToDatasetQualityState: InvokeCreator<
     controller.service.stop();
   };
 };
+
+export const openDatasetFlyout = (context: ObservabilityDatasetQualityContext) => {
+  if (!('controller' in context)) {
+    throw new Error('Failed to subscribe to controller: no controller in context');
+  }
+
+  const {
+    controller,
+    initialDatasetQualityState: { flyout },
+  } = context;
+
+  if (flyout?.dataset) {
+    controller.service.send({
+      type: 'OPEN_FLYOUT',
+      dataset: flyout.dataset,
+    });
+  }
+};

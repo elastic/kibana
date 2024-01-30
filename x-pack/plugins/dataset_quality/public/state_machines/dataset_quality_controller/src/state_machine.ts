@@ -32,7 +32,7 @@ import {
 export const createPureDatasetQualityControllerStateMachine = (
   initialContext: DatasetQualityControllerContext
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVszoIoFdUAbAS3QE8BhAewDt0AnaoosBgOggyx1gGIAqgAVkAQQAqAUQD640QCEAMjMoAlAJJSNogNoAGALqJQAB2qwyJOsZAAPRAFoA7AFZ2AJncAWABxf3Tp4uAJyBAGwANCDkiADMAIyx7C4J8e7Beu5hwS6eTgC++VFomNh4hKQUNPRMLGyc3GWw7ABmOADGABYktFB8EHRg7D0AbtQA1kMlPOXEZFR0jMysHFylvK0d3b0Io9TtGFa0+gYnNmYW6Ec29gjxfuyxLi5eubHBXvHB8ZlRMXcJdjxeK+eJOL6uPTBAKFYqNHAEOZVRa1FYNdboZptdBdHp9NhMDgmIgYFrUBgAW3Y0zKiMqCxqy3qaxmWK2eN2tDGByudBOZyQIAulmsgtuP3c8Q8Tli6VirjCnx8sT+iESUuBoPBoRcUO8sJANIRFXm1SWdVW8Mx7CI1FQEEgrSI5Go+HQAHkTGBaHwAMqSZSUcTSABykgA6tIxHJ-eIBaZzCLaDdEGFvOw9F4oV8Qi4wmEVdFU+4kpmUrEfHoUn5MgajbN6WbUcyrc1bfbHS1na6PV6fZRFO7-dIAGKKACa7oEccM50TvOTYriXic7ECKVePi+Xx8qoQWeCHkrW9iekzx6edatdNNKKZloxbbtDogTpdbs93s2OO2fQGtCGPZJmpa8TWRRkLXRVkbWfTtuw-Ptv1xHY9h5I5+VnQVhQXFM7j0MJV2+U9oS+SVnhcPc0y8ZJfBcJwnFCdw9HuLwrwxG9wPNNEWSaGCO1fLt317L9sWQ-EGEJdhiVJckqXrDiGS4ltHz4l83x7T9aCQ39OW5Q4+UMeMhXna4lzwuiM0rXxYizAI80Lf5dSSfM9C3Lx5SeJiwjYmYFKbe8oN49s1JICBWD4d0hEkENRwnKcZyMLCTNFUBbieNw9G1LMfBSMJlT3XIwnYYIqPuMinC8YJYh82kwMU5tVjAKAGH45B9jZH88X6QZhi5CYplApF6oCh1mta9rtI5VD9OOQzMITS5TNStUnCKgsQk+b54hcHKKKLcypScPwGI+H5gUymrjSG-zINGlqXza9oOrEvgCXJKSSXQMlKRA9i6pu7imvuyBHuenTpoXDDEoWpNcLBNanlOraduePcckPTMvhySqdqhaqDVoagHXgQV5P+u8LTnRaUrsRwwSlTxfH8QJ3BCcI9wcV5iu8NInEye4tx+FxLobW8IO41sqdhsyHDSJJGb8AIgkYyJ9s+dgvE+BIMgI0I9HlEW-IpiWVNE38pZwsydqKrIV1iAt8IyHa9zSHx2ErAiwhcbajslPxDfJ8XlOg4LIAtpbabuBiNaq55SIPGU91ZtxlVePJcgYgsCiKQ1BsbY3g6C2CBPg4TFxhy3loQOiiszbN0bzAs9xspIsZKnxFcVI6A+uguHxD4v1IQkT2V6cOadudcPBx3xfbSX41dPZIvc+SrZUq6Fs7hP7e6D-ui-4oey9UsOkup8vI8SLms1eAtgj8WIKy8AqHh8EtvhXTwmK8byc7J3elL7w2KHV8oVWDjwvrcPIMd0rxyhInfaLxDw7T8D8HwYR47423r5QOgDOBA3Gk9CBuFZaSksiWJ4NlMruErPEPcPhwTsE9mETIyoshVXcD3fOe98FjQehNM2eJiEyxlOQx+G5qG0LRown+mZ6IMOyHzX+2DaoAIarw4GEBQYnwgMIqumt3Dc3lHREqmUjoVTRgw4qIIAj3wrOWbOhQgA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVszoIoFdUAbAS3QE8BhAewDt0AnaoosBgOggyx1gGIAqgAVkAQQAqAUQD640QCEAMjMoAlAJJSNogNoAGALqJQAB2qwyJOsZAAPRAFoA7AEZ2AJhcBmVwFYAnL4+-gBsLk4ANCDkji6h7CH+7u5eABxeel5evu4ALAC++VFomNh4hKQUNPRMLGyc3GWw7ABmOADGABYktFB8EHRg7D0AbtQA1kMlPOXEZFR0jMysHFylvK0d3b0Io9TtGFa0+gYnNmYW6Ec29ggOIb7sqf7+LrmvuVmpLnlRMXfufweFy+XIuVJ6EIhXIpPSpApFEDTMoEOZVRa1FYNdboZptdBdHp9NhMDgmIgYFrUBgAW3YyJwqMqCxqy3qaxmeK2RN2tDGByudBOZyQIAulmsotuLyc7F8cV8qRyTgeISVf1ijycvhCelyuT0Lj0TlyThe-kKxUajIq82qSzqqzAUAYqAgkGQ+y5BO2fQGtCGe0m9Ots2Z9sx7OdrvdEE97W9hJ2ewFR2FhnO5gltBuiCN7i1hrhyT0pb07g1CBS7jlTlSEIhkP8TjSTktSNDTLtGLZTpdbo9Xs2PqJfBJ1PY5Mp1LpDLD3dZjs40YHcaH+KTUF5-MOQsMItMWcFOaljicNb0oRbpf17hCXnckWiiDyIXYmVS7j1egCULSqXbOcu3RRcsRaIhyGofB0D4ABlSRlEocRpAAOUkAB1aQxDkeDxAPMUj2uU8EFyCEnn8LwQWhVJdSyXJKx1VInnPMFoVce960AztbRAh0wIgqCYMoRQAHl4OkAAxRQAE0RIEPCM1FcVj1zO4Ww8EJPB+Lx9XhLTKyhIFIU-OFXihFs20RICeJZPj6nAyDoOHTd+kGYY+QmKZuLRWzIw4BzBOc31t32Xdjn3RTD0uIjQFudIgTNGjSyCJwm1SStzxrNVcl8XwfweG8LSs7zwx7JcAqcjdfTHBhSUnCl0CpWkQxxYDfN7VoBMq7lkw81M91OSKCOiyVYsQb43D1QFFUSSj-DhBjnieXxUtSqFTPeLjWpsiMOoq9B2CIahVz4YSxJkKTZPk-DlJiuwXwedg6xCOtvDvHSHxCSslVlRUTQCfwDXvdwtpmNrdvKrqDvaI7sAgPgRKESQUMkmS5IUowlMI0b7qrVx33lTxS0CcsXC+58EESN8VW+VLDUSF4vEKRFaGod14FFayfIhlZMxGk8xruMmgTvLSUl0mEXErBwfDcGEMjVfxUlcdxvl8UGUR2sqsQ5Jo+ezVSHBcOJgVlgIUtCcJpdV3ICZVIJoRyA0meK7bue19lQ0TX19ZU4infYZskhowJ9QeCsKYcJjvhSZXnlyvLlY1m13dAz2cWaI7V19u7bkVR4KJbQJwTyCiI-+BwKMDlVm1IpJIU+ZP514vzl37WN4w5qKDeIo2v3fK8Mj1GFgaff43keTwshe154X1bwm-Bj2+xjQcEyCokc5x25cmhdhTU8QI8kyLIx5fT4noycJH11bU1sXrW05X1dO8O47Yy3gXcdBW30jhHwlRq00pWYIGkYTPHSICSELsrRu1Kk-Tqjl0Cf0Nj8Nwotjbi1IpLKWFNSJuDyokFUaRKKXhcA-VOdl-JQw3r0FBxFTRvh+DlYOXg2JOG1AZQIgd7wwnLIfCERVYFg0flQxBgUs4fyxvzVSxtSL70-EHcsysCzk3+C2NwdZcqhHeCxHwFD4FiP2uwGG5hID0MFm8WUbE8rJFeBwtWGUTZeEBt4E0xtDTM3yEAA */
   createMachine<
     DatasetQualityControllerContext,
     DatasetQualityControllerEvent,
@@ -60,48 +60,7 @@ export const createPureDatasetQualityControllerStateMachine = (
                 },
               },
             },
-            loaded: {
-              initial: 'idle',
-              states: {
-                flyoutOpen: {
-                  initial: 'fetching',
-                  states: {
-                    fetching: {
-                      invoke: {
-                        src: 'loadDataStreamDetails',
-                        onDone: {
-                          target: 'loaded',
-                          actions: ['storeDatasetDetails'],
-                        },
-                        onError: {
-                          target: 'loaded',
-                          actions: ['fetchDatasetDetailsFailedNotifier'],
-                        },
-                      },
-                    },
-                    loaded: {},
-                  },
-                  on: {
-                    SELECT_NEW_DATASET: {
-                      target: '#DatasetQualityController.datasets.loaded.flyoutOpen.fetching',
-                      actions: ['storeFlyoutOptions'],
-                    },
-                    CLOSE_FLYOUT: {
-                      target: '#DatasetQualityController.datasets.loaded.idle',
-                      actions: ['resetFlyoutOptions'],
-                    },
-                  },
-                },
-                idle: {
-                  on: {
-                    OPEN_FLYOUT: {
-                      target: '#DatasetQualityController.datasets.loaded.flyoutOpen',
-                      actions: ['storeFlyoutOptions'],
-                    },
-                  },
-                },
-              },
-            },
+            loaded: {},
           },
           on: {
             UPDATE_TABLE_CRITERIA: {
@@ -127,6 +86,50 @@ export const createPureDatasetQualityControllerStateMachine = (
               },
             },
             loaded: {},
+          },
+        },
+        flyout: {
+          initial: 'closed',
+          states: {
+            fetching: {
+              invoke: {
+                src: 'loadDataStreamDetails',
+                onDone: {
+                  target: 'loaded',
+                  actions: ['storeDatasetDetails'],
+                },
+                onError: {
+                  target: 'loaded',
+                  actions: ['fetchDatasetDetailsFailedNotifier'],
+                },
+              },
+            },
+            loaded: {
+              on: {
+                CLOSE_FLYOUT: {
+                  target: 'closed',
+                  actions: ['resetFlyoutOptions'],
+                },
+              },
+            },
+            closed: {
+              on: {
+                OPEN_FLYOUT: {
+                  target: '#DatasetQualityController.flyout.fetching',
+                  actions: ['storeFlyoutOptions'],
+                },
+              },
+            },
+          },
+          on: {
+            SELECT_NEW_DATASET: {
+              target: '#DatasetQualityController.flyout.fetching',
+              actions: ['storeFlyoutOptions'],
+            },
+            CLOSE_FLYOUT: {
+              target: '#DatasetQualityController.flyout.closed',
+              actions: ['resetFlyoutOptions'],
+            },
           },
         },
       },

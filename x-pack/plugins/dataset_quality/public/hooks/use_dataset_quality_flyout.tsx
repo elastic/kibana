@@ -16,8 +16,6 @@ export const useDatasetQualityFlyout = () => {
 
   const { service } = useDatasetQualityContext();
 
-  const isLoaded = useSelector(service, (state) => state.matches('datasets.loaded'));
-
   const { dataset: dataStreamStat, datasetDetails: dataStreamDetails } = useSelector(
     service,
     (state) => state.context.flyout
@@ -25,13 +23,6 @@ export const useDatasetQualityFlyout = () => {
   const dataStreamDetailsLoading = useSelector(service, (state) =>
     state.matches('datasets.loaded.flyoutOpen.fetching')
   );
-
-  if (isLoaded && !!dataStreamStat && !dataStreamDetails) {
-    service.send({
-      type: 'OPEN_FLYOUT',
-      dataset: dataStreamStat,
-    });
-  }
 
   return {
     dataStreamStat,
