@@ -170,7 +170,7 @@ describe('task', () => {
 
       await runTask(manifestManager);
 
-      expect(logger.info).toHaveBeenCalledWith('recovering from invalid internal manifest');
+      expect(logger.warn).toHaveBeenCalledWith('recovering from invalid internal manifest');
       expect(logger.error).toHaveBeenNthCalledWith(1, expect.any(InvalidInternalManifestError));
     });
 
