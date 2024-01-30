@@ -1146,6 +1146,7 @@ export class Embeddable
               className={input.className}
               style={input.style}
               executionContext={this.getExecutionContext()}
+              abortController={this.abortController}
               addUserMessages={(messages) => this.addUserMessages(messages)}
               onRuntimeError={(error) => {
                 this.updateOutput({ error });

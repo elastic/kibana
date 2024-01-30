@@ -45,6 +45,7 @@ export type UnifiedHistogramContainerProps = {
   requestAdapter?: UnifiedHistogramRequestContext['adapter'];
   isChartLoading?: boolean;
   table?: Datatable;
+  abortController?: AbortController;
 } & Pick<
   UnifiedHistogramLayoutProps,
   | 'services'

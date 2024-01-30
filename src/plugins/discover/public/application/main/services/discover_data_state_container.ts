@@ -125,6 +125,8 @@ export interface DiscoverDataStateContainer {
   reset: (savedSearch: SavedSearch) => void;
 
   cancel: () => void;
+
+  getAbortController: () => AbortController;
   /**
    * Available Inspector Adaptor allowing to get details about recent requests to ES
    */
@@ -321,6 +323,10 @@ export function getDataStateContainer({
     abortControllerFetchMore?.abort();
   };
 
+  const getAbortController = () => {
+    return abortController;
+  };
+
   return {
     fetch: fetchQuery,
     fetchMore,
@@ -332,5 +338,6 @@ export function getDataStateContainer({
     inspectorAdapters,
     getInitialFetchStatus,
     cancel,
+    getAbortController,
   };
 }
