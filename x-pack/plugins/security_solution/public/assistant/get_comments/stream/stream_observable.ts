@@ -43,6 +43,8 @@ export const getStreamObservable = ({
     const chunks: string[] = [];
     // Initialize an empty string to store the OpenAI buffer.
     let openAIBuffer: string = '';
+    // Initialize an empty string to store the SSE (langchain) buffer.
+    let sseBuffer: string = '';
 
     // Initialize an empty Uint8Array to store the Bedrock concatenated buffer.
     let bedrockBuffer: Uint8Array = new Uint8Array(0);
@@ -53,6 +55,10 @@ export const getStreamObservable = ({
         .then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
           try {
             if (done) {
+              if (sseBuffer) {
+                const finalChunk = getSSEChunks([sseBuffer])[0];
+                if (finalChunk && finalChunk.length > 0) chunks.push(finalChunk);
+              }
               observer.next({
                 chunks,
                 message: chunks.join(''),
@@ -65,7 +71,7 @@ export const getStreamObservable = ({
             // TODO before merge to main
             // remove log for cloud testing
             // eslint-disable-next-line no-console
-            console.log('CLIENT CHUNK', decoded);
+            console.log('CLIENT CHUNK', JSON.stringify(decoded));
             let nextChunks;
             if (isError) {
               nextChunks = [`${API_ERROR}\n\n${JSON.parse(decoded).message}`];
@@ -80,20 +86,10 @@ export const getStreamObservable = ({
             } else {
               const output = decoded;
               const lines = output.split('\n');
-              nextChunks = lines.reduce((acc: string[], b: string) => {
-                if (b.length) {
-                  try {
-                    const obj = JSON.parse(b);
-                    if (obj.type === 'content') {
-                      return [...acc, obj.payload];
-                    }
-                    return acc;
-                  } catch (e) {
-                    return acc;
-                  }
-                }
-                return acc;
-              }, []);
+              lines[0] = sseBuffer + lines[0];
+              sseBuffer = lines.pop() || '';
+
+              nextChunks = getSSEChunks(lines);
               nextChunks.forEach((chunk: string) => {
                 chunks.push(chunk);
                 observer.next({
@@ -301,6 +297,22 @@ const getOpenAIChunks = (lines: string[]): string[] => {
     });
   return nextChunk;
 };
+
+const getSSEChunks = (lines: string[]): string[] =>
+  lines.reduce((acc: string[], b: string) => {
+    if (b.length) {
+      try {
+        const obj = JSON.parse(b);
+        if (obj.type === 'content' && obj.payload.length > 0) {
+          return [...acc, obj.payload];
+        }
+        return acc;
+      } catch (e) {
+        return acc;
+      }
+    }
+    return acc;
+  }, []);
 
 /**
  * Concatenates two Uint8Array buffers.

@@ -235,6 +235,169 @@ describe('getStreamObservable', () => {
       error: (err) => done(err),
     });
   });
+  it('should emit loading state and chunks for LangChain', (done) => {
+    const chunk1 = `{"payload":"","type":"content"}
+{"payload":"My","type":"content"}
+{"payload":" ","type":"content"}
+{"payload":"new","type":"content"}
+`;
+    const chunk2 = `{"payload":" mes","type":"content"}
+{"payload":"sage","type":"content"}
+`;
+    const completeSubject = new Subject<void>();
+    const expectedStates: PromptObservableState[] = [
+      {
+        chunks: [],
+        loading: true,
+      },
+      {
+        chunks: ['My', ' ', 'new', ' mes', 'sage'],
+        message: 'My',
+        loading: true,
+      },
+      {
+        chunks: ['My', ' ', 'new', ' mes', 'sage'],
+        message: 'My ',
+        loading: true,
+      },
+      {
+        chunks: ['My', ' ', 'new', ' mes', 'sage'],
+        message: 'My new',
+        loading: true,
+      },
+      {
+        chunks: ['My', ' ', 'new', ' mes', 'sage'],
+        message: 'My new mes',
+        loading: true,
+      },
+      {
+        chunks: ['My', ' ', 'new', ' mes', 'sage'],
+        message: 'My new message',
+        loading: true,
+      },
+      {
+        chunks: ['My', ' ', 'new', ' mes', 'sage'],
+        message: 'My new message',
+        loading: false,
+      },
+    ];
+
+    mockReader.read
+      .mockResolvedValueOnce({
+        done: false,
+        value: new Uint8Array(new TextEncoder().encode(chunk1)),
+      })
+      .mockResolvedValueOnce({
+        done: false,
+        value: new Uint8Array(new TextEncoder().encode(chunk2)),
+      })
+      .mockResolvedValueOnce({
+        done: false,
+        value: new Uint8Array(new TextEncoder().encode('')),
+      })
+      .mockResolvedValue({
+        done: true,
+      });
+
+    const source = getStreamObservable({ ...defaultProps, isEnabledLangChain: true });
+    const emittedStates: PromptObservableState[] = [];
+
+    source.subscribe({
+      next: (state) => {
+        return emittedStates.push(state);
+      },
+      complete: () => {
+        expect(emittedStates).toEqual(expectedStates);
+        done();
+
+        completeSubject.subscribe({
+          next: () => {
+            expect(setLoading).toHaveBeenCalledWith(false);
+            expect(typedReader.cancel).toHaveBeenCalled();
+            done();
+          },
+        });
+      },
+      error: (err) => done(err),
+    });
+  });
+  it('should emit loading state and chunks for partial response LangChain', (done) => {
+    const chunk1 = `{"payload":"","type":"content"}
+{"payload":"My","type":"content"}
+{"payload":" ","type":"content"}
+{"payload":"new","type":"content"}
+{"payl`;
+    const chunk2 = `oad":" mes","type":"content"}
+{"payload":"sage","type":"content"}`;
+    const completeSubject = new Subject<void>();
+    const expectedStates: PromptObservableState[] = [
+      { chunks: [], loading: true },
+      {
+        chunks: ['My', ' ', 'new', ' mes', 'sage'],
+        message: 'My',
+        loading: true,
+      },
+      {
+        chunks: ['My', ' ', 'new', ' mes', 'sage'],
+        message: 'My ',
+        loading: true,
+      },
+      {
+        chunks: ['My', ' ', 'new', ' mes', 'sage'],
+        message: 'My new',
+        loading: true,
+      },
+      {
+        chunks: ['My', ' ', 'new', ' mes', 'sage'],
+        message: 'My new mes',
+        loading: true,
+      },
+      {
+        chunks: ['My', ' ', 'new', ' mes', 'sage'],
+        message: 'My new message',
+        loading: false,
+      },
+    ];
+
+    mockReader.read
+      .mockResolvedValueOnce({
+        done: false,
+        value: new Uint8Array(new TextEncoder().encode(chunk1)),
+      })
+      .mockResolvedValueOnce({
+        done: false,
+        value: new Uint8Array(new TextEncoder().encode(chunk2)),
+      })
+      .mockResolvedValueOnce({
+        done: false,
+        value: new Uint8Array(new TextEncoder().encode('')),
+      })
+      .mockResolvedValue({
+        done: true,
+      });
+
+    const source = getStreamObservable({ ...defaultProps, isEnabledLangChain: true });
+    const emittedStates: PromptObservableState[] = [];
+
+    source.subscribe({
+      next: (state) => {
+        return emittedStates.push(state);
+      },
+      complete: () => {
+        expect(emittedStates).toEqual(expectedStates);
+        done();
+
+        completeSubject.subscribe({
+          next: () => {
+            expect(setLoading).toHaveBeenCalledWith(false);
+            expect(typedReader.cancel).toHaveBeenCalled();
+            done();
+          },
+        });
+      },
+      error: (err) => done(err),
+    });
+  });
 
   it('should stream errors when reader contains errors', (done) => {
     const completeSubject = new Subject<void>();
