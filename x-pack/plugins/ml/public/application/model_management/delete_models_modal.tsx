@@ -187,7 +187,7 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
               <p>
                 <FormattedMessage
                   id="xpack.ml.trainedModels.modelsList.deleteModal.warningInferenceMessage"
-                  defaultMessage="Deleting only the trained model will cause failures in the inference {inferenceAPIsCount, plural, one {API} other {APIs}} that {inferenceAPIsCount, plural, one {depends} other {depend}} on the model."
+                  defaultMessage="Deleting only the trained model will cause failures in the inference {inferenceAPIsCount, plural, one {service} other {services}} that {inferenceAPIsCount, plural, one {depends} other {depend}} on the model."
                   values={{ inferenceAPIsCount: inferenceAPIsIDs.length }}
                 />
               </p>
