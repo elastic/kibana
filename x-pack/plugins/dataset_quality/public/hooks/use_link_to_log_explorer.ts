@@ -13,7 +13,7 @@ import { getRouterLinkProps } from '@kbn/router-utils';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
 import { useKibanaContextForPlugin } from '../utils';
 
-export const useLinkToLogExplorer = ({ dataStreamStat }: { dataStreamStat: DataStreamStat }) => {
+export const useLinkToLogsExplorer = ({ dataStreamStat }: { dataStreamStat: DataStreamStat }) => {
   const {
     services: { share },
   } = useKibanaContextForPlugin();
@@ -36,16 +36,16 @@ export const useLinkToLogExplorer = ({ dataStreamStat }: { dataStreamStat: DataS
   const singleDatasetLocator =
     share.url.locators.get<SingleDatasetLocatorParams>(SINGLE_DATASET_LOCATOR_ID);
 
-  const urlToLogExplorer = singleDatasetLocator?.getRedirectUrl(params);
+  const urlToLogsExplorer = singleDatasetLocator?.getRedirectUrl(params);
 
-  const navigateToLogExplorer = () => {
+  const navigateToLogsExplorer = () => {
     singleDatasetLocator?.navigate(params) as Promise<void>;
   };
 
-  const logExplorerLinkProps = getRouterLinkProps({
-    href: urlToLogExplorer,
-    onClick: navigateToLogExplorer,
+  const logsExplorerLinkProps = getRouterLinkProps({
+    href: urlToLogsExplorer,
+    onClick: navigateToLogsExplorer,
   });
 
-  return logExplorerLinkProps;
+  return logsExplorerLinkProps;
 };
