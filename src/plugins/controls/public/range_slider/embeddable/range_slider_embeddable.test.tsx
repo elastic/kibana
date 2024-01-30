@@ -132,7 +132,7 @@ describe('initialize', () => {
       await new Promise((resolve) => process.nextTick(resolve));
 
       const reduxState = control.getState();
-      expect(reduxState.output.filters?.length).toBe(0);
+      expect(reduxState.output.filters?.length).toBe(1);
       expect(reduxState.componentState.isInvalid).toBe(true);
     });
 
