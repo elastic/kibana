@@ -22,6 +22,7 @@ import {
   EuiTextArea,
   htmlIdGenerator,
   PopoverAnchorPosition,
+  toSentenceCase,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -61,6 +62,11 @@ export const strings = {
   getSearchInputPlaceholderForText: () =>
     i18n.translate('unifiedSearch.query.queryBar.searchInputPlaceholderForText', {
       defaultMessage: 'Filter your data',
+    }),
+  getSearchInputPlaceholder: (language: string) =>
+    i18n.translate('unifiedSearch.query.queryBar.searchInputPlaceholder', {
+      defaultMessage: 'Filter your data using {language} syntax',
+      values: { language },
     }),
   getQueryBarComboboxAriaLabel: (pageType: string) =>
     i18n.translate('unifiedSearch.query.queryBar.comboboxAriaLabel', {
@@ -747,7 +753,13 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
   };
 
   getSearchInputPlaceholder = () => {
-    return strings.getSearchInputPlaceholderForText();
+    if (!this.props.query.language || this.props.query.language === 'text') {
+      return strings.getSearchInputPlaceholderForText();
+    }
+    const language =
+      this.props.query.language === 'kuery' ? 'KQL' : toSentenceCase(this.props.query.language);
+
+    return strings.getSearchInputPlaceholder(language);
   };
 
   public render() {
