@@ -91,8 +91,8 @@ export default function AlertDetailsAppSection({
 
   const generateChartTitle = (criterion: MetricExpression) => {
     let equationTitle = '';
-    const equation = criterion.equation ?? (criterion.metrics.length === 2 ? 'A + B' : 'A');
     const symbolResolver: Record<string, string> = {};
+    const equation = criterion.equation ?? criterion.metrics.map((m) => m.name).join(' + ');
 
     criterion.metrics.forEach(
       (metric) =>
@@ -204,7 +204,9 @@ export default function AlertDetailsAppSection({
           <EuiPanel hasBorder hasShadow={false}>
             <EuiToolTip content={generateChartTitle(criterion).tooltip}>
               <EuiTitle size="xs">
-                <h4>{generateChartTitle(criterion).title}</h4>
+                <h4 data-test-subj={`chartTitle-${index}`}>
+                  {generateChartTitle(criterion).title}
+                </h4>
               </EuiTitle>
             </EuiToolTip>
             <EuiText size="s" color="subdued">
