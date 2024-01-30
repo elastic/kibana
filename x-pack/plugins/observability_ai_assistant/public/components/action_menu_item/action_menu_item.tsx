@@ -34,6 +34,13 @@ export function ObservabilityAIAssistantActionMenuItem() {
     return null;
   }
 
+  service.setChatContext({
+    url: {
+      value: window.location.href,
+      description: 'The URL that the user is currently looking at',
+    },
+  });
+
   return (
     <>
       <EuiHeaderLink

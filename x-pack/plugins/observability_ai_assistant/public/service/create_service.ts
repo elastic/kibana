@@ -32,12 +32,7 @@ export function createService({
 
   const registrations: ChatRegistrationRenderFunction[] = [];
 
-  let chatContext: ChatContext = {
-    url: {
-      value: window.location.href,
-      description: 'The URL that the user is currently looking at',
-    },
-  };
+  let chatContext: ChatContext = {};
 
   return {
     isEnabled: () => {
