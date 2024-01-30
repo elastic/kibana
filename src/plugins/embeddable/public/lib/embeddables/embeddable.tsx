@@ -117,6 +117,7 @@ export abstract class Embeddable<
     this.destroyAPI = destroyAPI;
     ({
       uuid: this.uuid,
+      disableTriggers: this.disableTriggers,
       onEdit: this.onEdit,
       viewMode: this.viewMode,
       dataViews: this.dataViews,
@@ -157,6 +158,7 @@ export abstract class Embeddable<
    */
   private destroyAPI;
   public uuid: LegacyEmbeddableAPI['uuid'];
+  public disableTriggers: LegacyEmbeddableAPI['disableTriggers'];
   public onEdit: LegacyEmbeddableAPI['onEdit'];
   public viewMode: LegacyEmbeddableAPI['viewMode'];
   public parentApi: LegacyEmbeddableAPI['parentApi'];

@@ -15,6 +15,7 @@ import {
   isSubPluginAvailable,
   getSubPluginRoutesByCapabilities,
   getField,
+  isDashboardViewPath,
 } from './helpers';
 import type { StartedSubPlugins } from './types';
 import {
@@ -255,5 +256,25 @@ describe('public helpers getField', () => {
     const signalQuery = getField(mockAlertWithParameters, 'signal.rule.query');
     const aadQuery = getField(mockAlertWithParameters, `${ALERT_RULE_PARAMETERS}.query`);
     expect(signalQuery).toEqual(aadQuery);
+  });
+});
+
+describe('isDashboardViewPath', () => {
+  it('returns true for dashboard view path', () => {
+    expect(isDashboardViewPath('/dashboards/59c085c3-394d-49ab-a83a-56a63f38aa5f')).toEqual(true);
+  });
+
+  it('returns true for dashboard edit path', () => {
+    expect(isDashboardViewPath('/dashboards/59c085c3-394d-49ab-a83a-56a63f38aa5f/edit')).toEqual(
+      true
+    );
+  });
+
+  it('returns true for dashboard creation path', () => {
+    expect(isDashboardViewPath('/dashboards/create')).toEqual(true);
+  });
+
+  it('returns false for dashboard listing path', () => {
+    expect(isDashboardViewPath('/dashboards')).toEqual(false);
   });
 });
