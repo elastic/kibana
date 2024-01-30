@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-export { Field, getEditableValue } from './field';
+export interface SettingsCapabilities {
+  spaceSettings: SettingCapability;
+  globalSettings: SettingCapability;
+}
 
-// eslint-disable-next-line import/no-default-export
-export { Field as default } from './field';
+interface SettingCapability {
+  show: boolean;
+  save: boolean;
+}

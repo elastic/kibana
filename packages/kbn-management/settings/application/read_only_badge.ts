@@ -6,11 +6,14 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/src/plugins/advanced_settings'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/advanced_settings',
-  coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/src/plugins/advanced_settings/{public,server}/**/*.{ts,tsx}'],
+import { i18n } from '@kbn/i18n';
+
+export const readOnlyBadge = {
+  text: i18n.translate('management.settings.badge.readOnly.text', {
+    defaultMessage: 'Read only',
+  }),
+  tooltip: i18n.translate('management.settings.badge.readOnly.tooltip', {
+    defaultMessage: 'Unable to save advanced settings',
+  }),
+  iconType: 'glasses',
 };
