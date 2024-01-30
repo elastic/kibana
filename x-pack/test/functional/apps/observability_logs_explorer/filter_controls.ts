@@ -8,7 +8,7 @@ import { FtrProviderContext } from './config';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['observabilityLogExplorer']);
+  const PageObjects = getPageObjects(['observabilityLogsExplorer']);
   const testSubjects = getService('testSubjects');
 
   describe('Filter controls customization', () => {
@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('renders a filter controls section as part of the unified search bar', async () => {
-      await PageObjects.observabilityLogExplorer.navigateTo();
+      await PageObjects.observabilityLogsExplorer.navigateTo();
       await testSubjects.existOrFail('datasetFiltersCustomization', { allowHidden: true });
     });
   });

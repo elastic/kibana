@@ -13,36 +13,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['discover', 'observabilityLogExplorer', 'timePicker']);
+  const PageObjects = getPageObjects(['discover', 'observabilityLogsExplorer', 'timePicker']);
 
   describe('Header menu', () => {
     before(async () => {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await esArchiver.load(
-        'x-pack/test/functional/es_archives/observability_log_explorer/data_streams'
+        'x-pack/test/functional/es_archives/observability_logs_explorer/data_streams'
       );
-      await PageObjects.observabilityLogExplorer.navigateTo();
+      await PageObjects.observabilityLogsExplorer.navigateTo();
     });
 
     after(async () => {
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
       await esArchiver.unload(
-        'x-pack/test/functional/es_archives/observability_log_explorer/data_streams'
+        'x-pack/test/functional/es_archives/observability_logs_explorer/data_streams'
       );
     });
 
     it('should inject the app header menu on the top navbar', async () => {
-      const headerMenu = await PageObjects.observabilityLogExplorer.getHeaderMenu();
+      const headerMenu = await PageObjects.observabilityLogsExplorer.getHeaderMenu();
       expect(await headerMenu.isDisplayed()).to.be(true);
     });
 
     describe('Discover fallback link', () => {
       before(async () => {
-        await PageObjects.observabilityLogExplorer.navigateTo();
+        await PageObjects.observabilityLogsExplorer.navigateTo();
       });
 
       it('should render a button link ', async () => {
-        const discoverLink = await PageObjects.observabilityLogExplorer.getDiscoverFallbackLink();
+        const discoverLink = await PageObjects.observabilityLogsExplorer.getDiscoverFallbackLink();
         expect(await discoverLink.isDisplayed()).to.be(true);
       });
 
@@ -55,9 +55,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const timeConfig = await PageObjects.timePicker.getTimeConfig();
 
         // Set query bar value
-        await PageObjects.observabilityLogExplorer.submitQuery('*favicon*');
+        await PageObjects.observabilityLogsExplorer.submitQuery('*favicon*');
 
-        const discoverLink = await PageObjects.observabilityLogExplorer.getDiscoverFallbackLink();
+        const discoverLink = await PageObjects.observabilityLogsExplorer.getDiscoverFallbackLink();
         discoverLink.click();
 
         await PageObjects.discover.waitForDocTableLoadingComplete();
@@ -79,23 +79,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         await retry.try(async () => {
-          expect(await PageObjects.observabilityLogExplorer.getQueryBarValue()).to.eql('*favicon*');
+          expect(await PageObjects.observabilityLogsExplorer.getQueryBarValue()).to.eql(
+            '*favicon*'
+          );
         });
       });
     });
 
     describe('Add data link', () => {
       before(async () => {
-        await PageObjects.observabilityLogExplorer.navigateTo();
+        await PageObjects.observabilityLogsExplorer.navigateTo();
       });
 
       it('should render a button link ', async () => {
-        const onboardingLink = await PageObjects.observabilityLogExplorer.getOnboardingLink();
+        const onboardingLink = await PageObjects.observabilityLogsExplorer.getOnboardingLink();
         expect(await onboardingLink.isDisplayed()).to.be(true);
       });
 
       it('should navigate to the observability onboarding overview page', async () => {
-        const onboardingLink = await PageObjects.observabilityLogExplorer.getOnboardingLink();
+        const onboardingLink = await PageObjects.observabilityLogsExplorer.getOnboardingLink();
         onboardingLink.click();
 
         await retry.try(async () => {

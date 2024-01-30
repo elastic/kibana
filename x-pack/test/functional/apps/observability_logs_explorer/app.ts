@@ -9,7 +9,7 @@ import { log, timerange } from '@kbn/apm-synthtrace-client';
 import { FtrProviderContext } from './config';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'navigationalSearch', 'observabilityLogExplorer']);
+  const PageObjects = getPageObjects(['common', 'navigationalSearch', 'observabilityLogsExplorer']);
   const testSubjects = getService('testSubjects');
   const synthtrace = getService('logSynthtraceEsClient');
   const dataGrid = getService('dataGrid');
@@ -17,15 +17,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Application', () => {
     it('is shown in the global search', async () => {
       await PageObjects.common.navigateToApp('home');
-      await PageObjects.navigationalSearch.searchFor('log explorer');
+      await PageObjects.navigationalSearch.searchFor('logs explorer');
 
       const results = await PageObjects.navigationalSearch.getDisplayedResults();
       expect(results[0].label).to.eql('Logs Explorer');
     });
 
     it('is shown in the observability side navigation', async () => {
-      await PageObjects.observabilityLogExplorer.navigateTo();
-      await testSubjects.existOrFail('observability-nav-observability-log-explorer-explorer');
+      await PageObjects.observabilityLogsExplorer.navigateTo();
+      await testSubjects.existOrFail('observability-nav-observability-logs-explorer-explorer');
     });
 
     it('should load logs', async () => {
@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const to = '2023-08-03T10:24:14.091Z';
       const COUNT = 5;
       await synthtrace.index(generateLogsData({ from, to, count: COUNT }));
-      await PageObjects.observabilityLogExplorer.navigateTo();
+      await PageObjects.observabilityLogsExplorer.navigateTo();
       const docCount = await dataGrid.getDocCount();
 
       expect(docCount).to.be(COUNT);

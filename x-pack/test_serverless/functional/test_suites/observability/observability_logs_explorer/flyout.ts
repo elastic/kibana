@@ -34,22 +34,22 @@ const docs = [
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['observabilityLogExplorer', 'svlCommonPage']);
+  const PageObjects = getPageObjects(['observabilityLogsExplorer', 'svlCommonPage']);
 
   describe('Flyout content customization', () => {
     let cleanupDataStreamSetup: () => Promise<void>;
 
     before('initialize tests', async () => {
-      cleanupDataStreamSetup = await PageObjects.observabilityLogExplorer.setupDataStream(
+      cleanupDataStreamSetup = await PageObjects.observabilityLogsExplorer.setupDataStream(
         DATASET_NAME,
         NAMESPACE
       );
-      await PageObjects.observabilityLogExplorer.ingestLogEntries(DATA_STREAM_NAME, docs);
+      await PageObjects.observabilityLogsExplorer.ingestLogEntries(DATA_STREAM_NAME, docs);
       await PageObjects.svlCommonPage.login();
     });
 
     beforeEach(async () => {
-      await PageObjects.observabilityLogExplorer.navigateTo({
+      await PageObjects.observabilityLogsExplorer.navigateTo({
         pageState: {
           time: {
             from: new Date(NOW - 60_000).toISOString(),
@@ -69,30 +69,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should mount the flyout customization content', async () => {
       await dataGrid.clickRowToggle();
-      await testSubjects.existOrFail('logExplorerFlyoutDetail');
+      await testSubjects.existOrFail('logsExplorerFlyoutDetail');
     });
 
     it('should display a timestamp badge', async () => {
       await dataGrid.clickRowToggle();
-      await testSubjects.existOrFail('logExplorerFlyoutLogTimestamp');
+      await testSubjects.existOrFail('logsExplorerFlyoutLogTimestamp');
     });
 
     it('should display a log level badge when available', async () => {
       await dataGrid.clickRowToggle();
-      await testSubjects.existOrFail('logExplorerFlyoutLogLevel');
+      await testSubjects.existOrFail('logsExplorerFlyoutLogLevel');
       await dataGrid.closeFlyout();
 
       await dataGrid.clickRowToggle({ rowIndex: 1 });
-      await testSubjects.missingOrFail('logExplorerFlyoutLogLevel');
+      await testSubjects.missingOrFail('logsExplorerFlyoutLogLevel');
     });
 
     it('should display a message code block when available', async () => {
       await dataGrid.clickRowToggle();
-      await testSubjects.existOrFail('logExplorerFlyoutLogMessage');
+      await testSubjects.existOrFail('logsExplorerFlyoutLogMessage');
       await dataGrid.closeFlyout();
 
       await dataGrid.clickRowToggle({ rowIndex: 1 });
-      await testSubjects.missingOrFail('logExplorerFlyoutLogMessage');
+      await testSubjects.missingOrFail('logsExplorerFlyoutLogMessage');
     });
   });
 }

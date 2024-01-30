@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects([
-    'observabilityLogExplorer',
+    'observabilityLogsExplorer',
     'svlCommonNavigation',
     'svlCommonPage',
   ]);
@@ -28,10 +28,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('is shown in the global search', async () => {
-      await PageObjects.observabilityLogExplorer.navigateTo();
+      await PageObjects.observabilityLogsExplorer.navigateTo();
 
       await PageObjects.svlCommonNavigation.search.showSearch();
-      await PageObjects.svlCommonNavigation.search.searchFor('log explorer');
+      await PageObjects.svlCommonNavigation.search.searchFor('logs explorer');
 
       const results = await PageObjects.svlCommonNavigation.search.getDisplayedResults();
       expect(results[0].label).to.eql('Logs Explorer');
@@ -44,7 +44,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const to = '2023-08-03T10:24:14.091Z';
       const COUNT = 5;
       await synthtrace.index(generateLogsData({ from, to, count: COUNT }));
-      await PageObjects.observabilityLogExplorer.navigateTo();
+      await PageObjects.observabilityLogsExplorer.navigateTo();
       const docCount = await dataGrid.getDocCount();
 
       expect(docCount).to.be(COUNT);

@@ -25,14 +25,14 @@ const azureActivityDatasetSelection: DatasetSelectionPlain = {
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'observabilityLogExplorer']);
+  const PageObjects = getPageObjects(['common', 'observabilityLogsExplorer']);
 
   describe('DatasetSelection initialization and update', () => {
     describe('when no dataset selection is given', () => {
       it('should initialize the "All logs" selection', async () => {
-        await PageObjects.observabilityLogExplorer.navigateTo();
+        await PageObjects.observabilityLogsExplorer.navigateTo();
         const datasetSelectionTitle =
-          await PageObjects.observabilityLogExplorer.getDatasetSelectorButtonText();
+          await PageObjects.observabilityLogsExplorer.getDatasetSelectorButtonText();
 
         expect(datasetSelectionTitle).to.be('All logs');
       });
@@ -40,20 +40,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('when a dataset selection is given', () => {
       it('should restore the selection from a valid encoded index', async () => {
-        await PageObjects.observabilityLogExplorer.navigateTo({
+        await PageObjects.observabilityLogsExplorer.navigateTo({
           pageState: {
             datasetSelection: azureActivityDatasetSelection,
           },
         });
 
         const datasetSelectionTitle =
-          await PageObjects.observabilityLogExplorer.getDatasetSelectorButtonText();
+          await PageObjects.observabilityLogsExplorer.getDatasetSelectorButtonText();
 
         expect(datasetSelectionTitle).to.be('[Azure Logs] activitylogs');
       });
 
       it('should fallback to the "All logs" selection and notify the user of an invalid encoded index', async () => {
-        await PageObjects.observabilityLogExplorer.navigateToWithUncheckedState({
+        await PageObjects.observabilityLogsExplorer.navigateToWithUncheckedState({
           pageState: {
             v: 1,
             datasetSelection: {
@@ -63,41 +63,41 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         const datasetSelectionTitle =
-          await PageObjects.observabilityLogExplorer.getDatasetSelectorButtonText();
+          await PageObjects.observabilityLogsExplorer.getDatasetSelectorButtonText();
 
-        await PageObjects.observabilityLogExplorer.assertRestoreFailureToastExist();
+        await PageObjects.observabilityLogsExplorer.assertRestoreFailureToastExist();
         expect(datasetSelectionTitle).to.be('All logs');
       });
     });
 
     describe('when navigating back and forth on the page history', () => {
       it('should decode and restore the selection for the current index', async () => {
-        await PageObjects.observabilityLogExplorer.navigateTo();
+        await PageObjects.observabilityLogsExplorer.navigateTo();
         const allDatasetSelectionTitle =
-          await PageObjects.observabilityLogExplorer.getDatasetSelectorButtonText();
+          await PageObjects.observabilityLogsExplorer.getDatasetSelectorButtonText();
         expect(allDatasetSelectionTitle).to.be('All logs');
 
-        await PageObjects.observabilityLogExplorer.navigateTo({
+        await PageObjects.observabilityLogsExplorer.navigateTo({
           pageState: {
             datasetSelection: azureActivityDatasetSelection,
           },
         });
         const azureDatasetSelectionTitle =
-          await PageObjects.observabilityLogExplorer.getDatasetSelectorButtonText();
+          await PageObjects.observabilityLogsExplorer.getDatasetSelectorButtonText();
         expect(azureDatasetSelectionTitle).to.be('[Azure Logs] activitylogs');
 
         // Go back to previous page selection
         await retry.tryForTime(30 * 1000, async () => {
           await browser.goBack();
           const backNavigationDatasetSelectionTitle =
-            await PageObjects.observabilityLogExplorer.getDatasetSelectorButtonText();
+            await PageObjects.observabilityLogsExplorer.getDatasetSelectorButtonText();
           expect(backNavigationDatasetSelectionTitle).to.be('All logs');
         });
         // Go forward to previous page selection
         await retry.tryForTime(30 * 1000, async () => {
           await browser.goForward();
           const forwardNavigationDatasetSelectionTitle =
-            await PageObjects.observabilityLogExplorer.getDatasetSelectorButtonText();
+            await PageObjects.observabilityLogsExplorer.getDatasetSelectorButtonText();
           expect(forwardNavigationDatasetSelectionTitle).to.be('[Azure Logs] activitylogs');
         });
       });
