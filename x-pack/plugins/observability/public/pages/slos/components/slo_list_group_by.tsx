@@ -27,8 +27,7 @@ export type Item<T> = EuiSelectableOption & {
 
 export function SloGroupBy({ onStateChange, groupBy }: Props) {
   const [isGroupByPopoverOpen, setIsGroupByPopoverOpen] = useState(false);
-  const handleChangeGroupBy = ({ value, label }: { value: GroupByField; label: string }) => {
-    setGroupLabel(label);
+  const handleChangeGroupBy = (value: GroupByField) => {
     onStateChange({
       page: 0,
       groupBy: value,
@@ -36,18 +35,11 @@ export function SloGroupBy({ onStateChange, groupBy }: Props) {
   };
   const groupByOptions: Option[] = [
     {
-      label: i18n.translate('xpack.observability.slo.list.groupBy.sliIndicator', {
-        defaultMessage: 'None',
-      }),
+      label: NONE_LABEL,
       checked: groupBy === 'ungrouped',
       value: 'ungrouped',
       onClick: () => {
-        handleChangeGroupBy({
-          value: 'ungrouped',
-          label: i18n.translate('xpack.observability.slo.list.groupBy.upgrouped', {
-            defaultMessage: 'None',
-          }),
-        });
+        handleChangeGroupBy('ungrouped');
       },
     },
     {
@@ -57,12 +49,7 @@ export function SloGroupBy({ onStateChange, groupBy }: Props) {
       checked: groupBy === 'slo.tags',
       value: 'slo.tags',
       onClick: () => {
-        handleChangeGroupBy({
-          value: 'slo.tags',
-          label: i18n.translate('xpack.observability.slo.list.groupBy.tags', {
-            defaultMessage: 'Tags',
-          }),
-        });
+        handleChangeGroupBy('slo.tags');
       },
     },
     {
@@ -72,12 +59,7 @@ export function SloGroupBy({ onStateChange, groupBy }: Props) {
       checked: groupBy === 'status',
       value: 'status',
       onClick: () => {
-        handleChangeGroupBy({
-          value: 'status',
-          label: i18n.translate('xpack.observability.slo.list.groupBy.status', {
-            defaultMessage: 'Status',
-          }),
-        });
+        handleChangeGroupBy('status');
       },
     },
     {
@@ -87,19 +69,10 @@ export function SloGroupBy({ onStateChange, groupBy }: Props) {
       checked: groupBy === 'slo.indicator.type',
       value: 'slo.indicator.type',
       onClick: () => {
-        handleChangeGroupBy({
-          value: 'slo.indicator.type',
-          label: i18n.translate('xpack.observability.slo.list.groupBy.sliType', {
-            defaultMessage: 'SLI type',
-          }),
-        });
+        handleChangeGroupBy('slo.indicator.type');
       },
     },
   ];
-
-  const [groupLabel, setGroupLabel] = useState(
-    groupByOptions.find((option) => option.value === groupBy)?.label || 'None'
-  );
 
   const items = [
     <EuiPanel paddingSize="s" hasShadow={false} key="group_title_panel">
@@ -121,13 +94,17 @@ export function SloGroupBy({ onStateChange, groupBy }: Props) {
     <SLOContextMenu
       items={items}
       id="groupBy"
-      selected={groupLabel}
+      selected={groupByOptions.find((option) => option.value === groupBy)?.label || NONE_LABEL}
       isPopoverOpen={isGroupByPopoverOpen}
       setIsPopoverOpen={setIsGroupByPopoverOpen}
       label={GROUP_TITLE}
     />
   );
 }
+
+export const NONE_LABEL = i18n.translate('xpack.observability.slo.list.groupBy.sliIndicator', {
+  defaultMessage: 'None',
+});
 
 export const GROUP_TITLE = i18n.translate('xpack.observability.slo.groupPopover.group.title', {
   defaultMessage: 'Group by',
