@@ -50,7 +50,10 @@ export const findBenchmarkRuleHandler = async (
   const sortedCspBenchmarkRules = getSortedCspBenchmarkRulesTemplates(cspBenchmarkRules);
 
   return {
-    items: sortedCspBenchmarkRules,
+    items:
+      options.sortField === 'metadata.benchmark.rule_number'
+        ? sortedCspBenchmarkRules
+        : cspBenchmarkRules,
     total: cspCspBenchmarkRulesSo.total,
     page: options.page,
     perPage: options.perPage,
