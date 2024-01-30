@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { ALL_VALUE } from '@kbn/slo-schema';
 
 import { SloSelector } from './slo_selector';
 import type { EmbeddableSloProps, SloAlertsEmbeddableInput, SloItem } from './types';
@@ -41,7 +42,7 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
 
   const onConfirmClick = () => onCreate({ slos: selectedSlos, showAllGroupByInstances });
 
-  const hasGroupBy = selectedSlos?.some((slo) => slo.instanceId !== '*');
+  const hasGroupBy = selectedSlos?.some((slo) => slo.instanceId !== ALL_VALUE);
 
   return (
     <EuiModal
