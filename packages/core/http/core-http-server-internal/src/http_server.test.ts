@@ -14,6 +14,7 @@ import { omit } from 'lodash';
 import { join } from 'path';
 import { ByteSizeValue, schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { createTestEnv } from '@kbn/config-mocks';
 import type {
   KibanaRequest,
   KibanaResponseFactory,
@@ -99,7 +100,7 @@ beforeEach(() => {
   } as HttpConfig;
   configWithSSL$ = of(configWithSSL);
 
-  server = new HttpServer(loggingService, 'tests', of(config.shutdownTimeout));
+  server = new HttpServer(loggingService, 'tests', of(config.shutdownTimeout), createTestEnv());
 });
 
 afterEach(async () => {

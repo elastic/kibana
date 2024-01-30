@@ -48,6 +48,7 @@ import { performance } from 'perf_hooks';
 import { isBoom } from '@hapi/boom';
 import { identity } from 'lodash';
 import { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
+import { Env } from '@kbn/config';
 import { HttpConfig } from './http_config';
 import { adoptToHapiAuthFormat } from './lifecycle/auth';
 import { adoptToHapiOnPreAuth } from './lifecycle/on_pre_auth';
@@ -185,7 +186,8 @@ export class HttpServer {
   constructor(
     private readonly logger: LoggerFactory,
     private readonly name: string,
-    private readonly shutdownTimeout$: Observable<Duration>
+    private readonly shutdownTimeout$: Observable<Duration>,
+    private readonly env: Env
   ) {
     this.authState = new AuthStateStorage(() => this.authRegistered);
     this.authRequestHeaders = new AuthHeadersStorage();
@@ -269,7 +271,11 @@ export class HttpServer {
     this.setupResponseLogging();
     this.setupGracefulShutdownHandlers();
 
-    const staticAssets = new StaticAssets(basePathService, config.cdn);
+    const staticAssets = new StaticAssets(
+      basePathService,
+      config.cdn,
+      this.env.packageInfo.buildSha.slice(0, 12)
+    );
 
     return {
       registerRouter: this.registerRouter.bind(this),

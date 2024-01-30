@@ -14,6 +14,7 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { Router } from '@kbn/core-http-router-server-internal';
 import { HttpServer, HttpConfig } from '@kbn/core-http-server-internal';
+import { createTestEnv } from '@kbn/config-mocks';
 
 describe('Http server', () => {
   let server: HttpServer;
@@ -43,7 +44,7 @@ describe('Http server', () => {
       shutdownTimeout: moment.duration(5, 's'),
     } as any;
 
-    server = new HttpServer(loggingService, 'tests', of(config.shutdownTimeout));
+    server = new HttpServer(loggingService, 'tests', of(config.shutdownTimeout), createTestEnv());
   });
 
   describe('Graceful shutdown', () => {

@@ -20,6 +20,7 @@ import {
   externalUrlConfig,
 } from '@kbn/core-http-server-internal';
 import { isServerTLS, flattenCertificateChain, fetchPeerCertificate } from './tls_utils';
+import { createTestEnv } from '@kbn/config-mocks';
 
 const CSP_CONFIG = cspConfig.schema.validate({});
 const EXTERNAL_URL_CONFIG = externalUrlConfig.schema.validate({});
@@ -36,7 +37,7 @@ describe('HttpServer - TLS config', () => {
   beforeEach(() => {
     const loggingService = loggingSystemMock.create();
     logger = loggingSystemMock.createLogger();
-    server = new HttpServer(loggingService, 'tests', of(duration('1s')));
+    server = new HttpServer(loggingService, 'tests', of(duration('1s')), createTestEnv());
   });
 
   it('supports dynamic reloading of the TLS configuration', async () => {
