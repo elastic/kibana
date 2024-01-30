@@ -27,6 +27,7 @@ export interface PercenWidgetDataValueMap {
 export interface PercentWidgetDeps {
   title: ReactNode;
   dataValueMap: Record<string, PercenWidgetDataValueMap>;
+  dataViewId: string | null;
   widgetKey: string;
   indexPattern?: IndexPattern;
   globalFilter: GlobalFilter;
@@ -43,6 +44,7 @@ interface FilterButtons {
 export const PercentWidget = ({
   title,
   dataValueMap,
+  dataViewId,
   widgetKey,
   indexPattern,
   globalFilter,
@@ -84,6 +86,7 @@ export const PercentWidget = ({
       if (!dataValueMap[groupedByValue].shouldHideFilter) {
         result.filterForButtons.push(
           getFilterForValueButton({
+            dataViewId,
             field: dataValueMap[groupedByValue].fieldName,
             filterManager,
             size: 'xs',
@@ -96,6 +99,7 @@ export const PercentWidget = ({
         );
         result.filterOutButtons.push(
           getFilterOutValueButton({
+            dataViewId,
             field: dataValueMap[groupedByValue].fieldName,
             filterManager,
             size: 'xs',
@@ -110,7 +114,7 @@ export const PercentWidget = ({
     });
 
     return result;
-  }, [dataValueMap, filterManager, getFilterForValueButton, getFilterOutValueButton]);
+  }, [dataValueMap, dataViewId, filterManager, getFilterForValueButton, getFilterOutValueButton]);
 
   return (
     <div css={styles.container}>

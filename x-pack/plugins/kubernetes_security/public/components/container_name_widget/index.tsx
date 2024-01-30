@@ -40,6 +40,7 @@ export interface ContainerNameArrayDataValue {
 }
 
 export interface ContainerNameWidgetDeps {
+  dataViewId: string | null;
   widgetKey: string;
   indexPattern?: IndexPattern;
   globalFilter: GlobalFilter;
@@ -57,6 +58,7 @@ interface CopyButtons {
 }
 
 export const ContainerNameWidget = ({
+  dataViewId,
   widgetKey,
   indexPattern,
   globalFilter,
@@ -109,6 +111,7 @@ export const ContainerNameWidget = ({
           ?.map((aggsData) => {
             return aggsData?.buckets.map((aggData) => {
               return getFilterForValueButton({
+                dataViewId,
                 field: CONTAINER_IMAGE_NAME,
                 filterManager,
                 size: 'xs',
@@ -127,6 +130,7 @@ export const ContainerNameWidget = ({
           ?.map((aggsData) => {
             return aggsData?.buckets.map((aggData) => {
               return getFilterOutValueButton({
+                dataViewId,
                 field: CONTAINER_IMAGE_NAME,
                 filterManager,
                 size: 'xs',
@@ -141,7 +145,7 @@ export const ContainerNameWidget = ({
           .flat() || [],
     };
     return result;
-  }, [data, getFilterForValueButton, getFilterOutValueButton, filterManager]);
+  }, [data?.pages, getFilterForValueButton, dataViewId, filterManager, getFilterOutValueButton]);
 
   const copyToClipboardButtons = useMemo((): CopyButtons => {
     const result: CopyButtons = {

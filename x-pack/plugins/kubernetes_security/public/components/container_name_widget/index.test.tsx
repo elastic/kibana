@@ -59,6 +59,7 @@ const MOCK_DATA = {
   ],
   pageParams: [undefined],
 };
+const MOCK_DATA_VIEW_ID = 'dataViewId';
 
 jest.mock('../../hooks/use_filter', () => ({
   useSetFilter: () => ({
@@ -78,6 +79,7 @@ describe('ContainerNameWidget component', () => {
   const render: () => ReturnType<AppContextTestRender['render']> = () =>
     (renderResult = mockedContext.render(
       <ContainerNameWidget
+        dataViewId={MOCK_DATA_VIEW_ID}
         widgetKey="containerNameSessions"
         globalFilter={GLOBAL_FILTER}
         groupedBy={CONTAINER_IMAGE_NAME}
