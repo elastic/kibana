@@ -7,8 +7,8 @@
 
 import { IToasts } from '@kbn/core/public';
 import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
+import { DataStreamDetails } from '../../../../common/data_streams_stats';
 import { DataStreamType } from '../../../../common/types';
-import { DataStreamDetails } from '../../../../common/data_streams_stats/data_stream_details';
 import { dataStreamPartsToIndexName } from '../../../../common/utils';
 import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
 import { getDefaultTimeRange } from '../../../utils';

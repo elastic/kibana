@@ -6,11 +6,11 @@
  */
 
 import { DoneInvokeEvent } from 'xstate';
-import { DataStreamDetails } from '../../../../common/data_streams_stats/data_stream_details';
 import { Direction, SortField } from '../../../hooks';
 import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
 import {
   DataStreamDegradedDocsStatServiceResponse,
+  DataStreamDetails,
   DataStreamStatServiceResponse,
 } from '../../../../common/data_streams_stats';
 import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';

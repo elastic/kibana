@@ -8,12 +8,12 @@
 import React from 'react';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import { DataStreamDetails } from '../../../common/data_streams_stats';
 import {
   flyoutDatasetCreatedOnText,
   flyoutDatasetDetailsText,
   flyoutDatasetLastActivityText,
 } from '../../../common/translations';
-import { DataStreamDetails } from '../../../common/data_streams_stats';
 import { FieldsList, FieldsListLoading } from './fields_list';
 
 interface DatasetSummaryProps {
