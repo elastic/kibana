@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "7.17.17",
+  "version": "7.17.18",
   "branch": "7.17",
   "types": "./kibana.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
@@ -67,7 +67,7 @@
   },
   "engines": {
     "node": "20.10.0",
-    "yarn": "^1.21.1"
+    "yarn": "^1.22.19"
   },
   "resolutions": {
     "**/@types/node": "20.10.6",
@@ -84,6 +84,7 @@
     "**/react-syntax-highlighter": "^15.3.1",
     "**/recursive-readdir/minimatch": "^3.1.2",
     "**/remark-parse/trim": "1.0.1",
+    "**/sharp": "0.32.6",
     "**/typescript": "4.7.4",
     "**/underscore": "^1.13.1",
     "globby/fast-glob": "^3.2.11",
@@ -276,7 +277,7 @@
     "leaflet.heat": "0.2.0",
     "less": "^4.2.0",
     "load-json-file": "^6.2.0",
-    "loader-utils": "^2.0.3",
+    "loader-utils": "^2.0.4",
     "lodash": "^4.17.21",
     "lru-cache": "^4.1.5",
     "lz-string": "^1.4.4",
@@ -613,7 +614,6 @@
     "@types/selenium-webdriver": "^4.1.21",
     "@types/semver": "^7",
     "@types/set-value": "^2.0.0",
-    "@types/sharp": "^0.30.4",
     "@types/sinon": "^7.0.13",
     "@types/source-map-support": "^0.5.3",
     "@types/stats-lite": "^2.2.0",
@@ -755,7 +755,6 @@
     "license-checker": "^25.0.1",
     "listr": "^0.14.1",
     "lmdb": "^2.9.2",
-    "loader-utils": "^2.0.4",
     "marge": "^1.0.1",
     "micromatch": "3.1.10",
     "minimist": "^1.2.6",
@@ -792,7 +791,7 @@
     "regenerate": "^1.4.0",
     "resolve": "^1.7.1",
     "rxjs-marbles": "^5.0.6",
-    "sass-embedded": "^1.69.5",
+    "sass-embedded": "^1.70.0",
     "sass-loader": "^10.5.1",
     "sass-resources-loader": "^2.0.1",
     "selenium-webdriver": "^4.16.0",
@@ -834,5 +833,6 @@
     "xmlbuilder": "13.0.2",
     "yargs": "^15.4.1",
     "zlib": "^1.0.5"
-  }
+  },
+  "packageManager": "yarn@1.22.21"
 }
