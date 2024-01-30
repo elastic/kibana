@@ -6,11 +6,18 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { getFieldAsString, supportedSchemas } from './supported_schemas';
+import type { ExperimentalFeatures } from '../../../../../../common';
+import { getFieldAsString, getSupportedSchemas } from './supported_schemas';
 import type { ResolverEntityIndex } from '../../../../../../common/endpoint/types';
 
-export function resolverEntity(hits: Array<estypes.SearchHit<unknown>>) {
+const toArray = <T>(input: T | T[]) => ([] as T[]).concat(input);
+
+export function resolverEntity(
+  hits: Array<estypes.SearchHit<unknown>>,
+  experimentalFeatures: ExperimentalFeatures | undefined
+) {
   const responseBody: ResolverEntityIndex = [];
+  const supportedSchemas = getSupportedSchemas(experimentalFeatures);
   for (const hit of hits) {
     for (const supportedSchema of supportedSchemas) {
       let foundSchema = true;
@@ -20,7 +27,12 @@ export function resolverEntity(hits: Array<estypes.SearchHit<unknown>>) {
         const fieldValue = getFieldAsString(hit._source, constraint.field);
         // track that all the constraints are true, if one of them is false then this schema is not valid so mark it
         // that we did not find the schema
-        foundSchema = foundSchema && fieldValue?.toLowerCase() === constraint.value.toLowerCase();
+
+        foundSchema =
+          foundSchema &&
+          toArray(constraint.value).some(
+            (constraintValue) => constraintValue.toLowerCase() === fieldValue?.toLowerCase()
+          );
       }
 
       if (foundSchema && id !== undefined && id !== '') {

@@ -16,6 +16,7 @@ import { ReactWrapper } from 'enzyme';
 import RuleEdit from './rule_edit';
 import { useKibana } from '../../../common/lib/kibana';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 jest.mock('../../../common/lib/kibana');
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -186,15 +187,17 @@ describe('rule_edit', () => {
     actionTypeRegistry.has.mockReturnValue(true);
 
     wrapper = mountWithIntl(
-      <RuleEdit
-        onClose={() => {}}
-        initialRule={rule}
-        onSave={() => {
-          return new Promise<void>(() => {});
-        }}
-        actionTypeRegistry={actionTypeRegistry}
-        ruleTypeRegistry={ruleTypeRegistry}
-      />
+      <QueryClientProvider client={new QueryClient()}>
+        <RuleEdit
+          onClose={() => {}}
+          initialRule={rule}
+          onSave={() => {
+            return new Promise<void>(() => {});
+          }}
+          actionTypeRegistry={actionTypeRegistry}
+          ruleTypeRegistry={ruleTypeRegistry}
+        />
+      </QueryClientProvider>
     );
     // Wait for active space to resolve before requesting the component to update
     await act(async () => {

@@ -11,6 +11,13 @@ describe('formatAlertEvaluationValue', () => {
   it('returns - when there is no evaluationValue passed', () => {
     expect(formatAlertEvaluationValue('apm.transaction_error_rate', undefined)).toBe('-');
   });
+  it('returns - when there is null evaluationValue passed', () => {
+    // @ts-expect-error
+    expect(formatAlertEvaluationValue('apm.transaction_error_rate', null)).toBe('-');
+  });
+  it('returns the evaluation value when the value is 0', () => {
+    expect(formatAlertEvaluationValue('.es-query', 0)).toBe(0);
+  });
   it('returns the evaluation value when ruleTypeId in unknown aka unformatted', () => {
     expect(formatAlertEvaluationValue('unknown.rule.type', 2000)).toBe(2000);
   });

@@ -7,6 +7,7 @@
 
 import { FeatureCollection } from 'geojson';
 import { i18n } from '@kbn/i18n';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { Query } from '@kbn/es-query';
 import { ISearchSource } from '@kbn/data-plugin/public';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
@@ -19,7 +20,6 @@ import {
   ESDistanceSourceDescriptor,
   VectorSourceRequestMeta,
 } from '../../../../../common/descriptor_types';
-import { PropertiesMap } from '../../../../../common/elasticsearch_util';
 import { isValidStringConfig } from '../../../util/valid_string_config';
 import { IJoinSource } from '../types';
 import type { IESAggSource, ESAggsSourceSyncMeta } from '../../es_agg_source';
@@ -27,6 +27,7 @@ import { IField } from '../../../fields/field';
 import { mergeExecutionContext } from '../../execution_context_utils';
 import { processDistanceResponse } from './process_distance_response';
 import { isSpatialSourceComplete } from '../is_spatial_source_complete';
+import { getJoinMetricsRequestName } from '../i18n_utils';
 
 export const DEFAULT_WITHIN_DISTANCE = 5;
 
@@ -80,14 +81,13 @@ export class ESDistanceSource extends AbstractESAggSource implements IJoinSource
     });
   }
 
-  async getPropertiesMap(
+  async getJoinMetrics(
     requestMeta: VectorSourceRequestMeta,
-    leftSourceName: string,
-    leftFieldName: string,
+    layerName: string,
     registerCancelCallback: (callback: () => void) => void,
     inspectorAdapters: Adapters,
     featureCollection?: FeatureCollection
-  ): Promise<PropertiesMap> {
+  ) {
     if (featureCollection === undefined) {
       throw new Error(
         i18n.translate('xpack.maps.esDistanceSource.noFeatureCollectionMsg', {
@@ -97,7 +97,10 @@ export class ESDistanceSource extends AbstractESAggSource implements IJoinSource
     }
 
     if (!this.hasCompleteConfig()) {
-      return new Map<string, BucketProperties>();
+      return {
+        joinMetrics: new Map<string, BucketProperties>(),
+        warnings: [],
+      };
     }
 
     const distance = `${this._descriptor.distance}km`;
@@ -119,7 +122,10 @@ export class ESDistanceSource extends AbstractESAggSource implements IJoinSource
     }
 
     if (!hasFilters) {
-      return new Map<string, BucketProperties>();
+      return {
+        joinMetrics: new Map<string, BucketProperties>(),
+        warnings: [],
+      };
     }
 
     const indexPattern = await this.getIndexPattern();
@@ -133,31 +139,27 @@ export class ESDistanceSource extends AbstractESAggSource implements IJoinSource
         aggs: this.getValueAggsDsl(indexPattern),
       },
     });
+    const warnings: SearchResponseWarning[] = [];
     const rawEsData = await this._runEsQuery({
       requestId: this.getId(),
-      requestName: i18n.translate('xpack.maps.distanceSource.requestName', {
-        defaultMessage: '{leftSourceName} within distance join request',
-        values: { leftSourceName },
-      }),
+      requestName: getJoinMetricsRequestName(layerName),
       searchSource,
       registerCancelCallback,
-      requestDescription: i18n.translate('xpack.maps.distanceSource.requestDescription', {
-        defaultMessage:
-          'Get metrics from data view: {dataViewName}, geospatial field: {geoFieldName}',
-        values: {
-          dataViewName: indexPattern.getName(),
-          geoFieldName: this._descriptor.geoField,
-        },
-      }),
       searchSessionId: requestMeta.searchSessionId,
       executionContext: mergeExecutionContext(
         { description: 'es_distance_source:distance_join_request' },
         requestMeta.executionContext
       ),
       requestsAdapter: inspectorAdapters.requests,
+      onWarning: (warning: SearchResponseWarning) => {
+        warnings.push(warning);
+      },
     });
 
-    return processDistanceResponse(rawEsData, this.getAggKey(AGG_TYPE.COUNT));
+    return {
+      joinMetrics: processDistanceResponse(rawEsData, this.getAggKey(AGG_TYPE.COUNT)),
+      warnings,
+    };
   }
 
   isFilterByMapBounds(): boolean {

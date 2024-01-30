@@ -74,13 +74,13 @@ describe('when using EffectedPolicySelect component', () => {
 
     const selectGlobalPolicy = () => {
       act(() => {
-        fireEvent.click(renderResult.getByTestId('globalPolicy'));
+        fireEvent.click(renderResult.getByTestId('test-global'));
       });
     };
 
     const selectPerPolicy = () => {
       act(() => {
-        fireEvent.click(renderResult.getByTestId('perPolicy'));
+        fireEvent.click(renderResult.getByTestId('test-perPolicy'));
       });
     };
 
@@ -142,7 +142,8 @@ describe('when using EffectedPolicySelect component', () => {
     });
 
     it('should maintain policies selection even if global was checked, and user switched back to per policy', () => {
-      render();
+      const { debug } = render();
+      debug(undefined, 999999);
 
       selectPerPolicy();
       clickOnPolicy();

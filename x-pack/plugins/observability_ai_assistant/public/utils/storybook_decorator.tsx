@@ -4,63 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ComponentType } from 'react';
-import { Observable } from 'rxjs';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { Serializable } from '@kbn/utility-types';
-import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
-import { ObservabilityAIAssistantProvider } from '../context/observability_ai_assistant_provider';
-import { ObservabilityAIAssistantAPIClient } from '../api';
-import type { Message } from '../../common';
-import type {
-  ObservabilityAIAssistantChatService,
-  ObservabilityAIAssistantService,
-  PendingMessage,
-} from '../types';
-import { buildFunctionElasticsearch, buildFunctionServiceSummary } from './builders';
+import React, { ComponentType } from 'react';
 import { ObservabilityAIAssistantChatServiceProvider } from '../context/observability_ai_assistant_chat_service_provider';
-
-const chatService: ObservabilityAIAssistantChatService = {
-  chat: (options: { messages: Message[]; connectorId: string }) => new Observable<PendingMessage>(),
-  getContexts: () => [],
-  getFunctions: () => [buildFunctionElasticsearch(), buildFunctionServiceSummary()],
-  executeFunction: async ({}: {
-    name: string;
-    args: string | undefined;
-    messages: Message[];
-    signal: AbortSignal;
-  }): Promise<{ content?: Serializable; data?: Serializable }> => ({}),
-  renderFunction: (name: string, args: string | undefined, response: {}) => (
-    <div>Hello! {name}</div>
-  ),
-  hasFunction: () => true,
-  hasRenderFunction: () => true,
-};
-
-const service: ObservabilityAIAssistantService = {
-  isEnabled: () => true,
-  start: async () => {
-    return chatService;
-  },
-  callApi: {} as ObservabilityAIAssistantAPIClient,
-  getCurrentUser: async (): Promise<AuthenticatedUser> => ({
-    username: 'user',
-    roles: [],
-    enabled: true,
-    authentication_realm: { name: 'foo', type: '' },
-    lookup_realm: { name: 'foo', type: '' },
-    authentication_provider: { name: '', type: '' },
-    authentication_type: '',
-    elastic_cloud_user: false,
-  }),
-  getLicense: () => new Observable(),
-  getLicenseManagementLocator: () =>
-    ({
-      url: {},
-      navigate: () => {},
-    } as unknown as SharePluginStart),
-};
+import { ObservabilityAIAssistantProvider } from '../context/observability_ai_assistant_provider';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+import { mockChatService, mockService } from '../mock';
 
 export function KibanaReactStorybookDecorator(Story: ComponentType) {
   return (
@@ -76,8 +25,8 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
         },
       }}
     >
-      <ObservabilityAIAssistantProvider value={service}>
-        <ObservabilityAIAssistantChatServiceProvider value={chatService}>
+      <ObservabilityAIAssistantProvider value={mockService}>
+        <ObservabilityAIAssistantChatServiceProvider value={mockChatService}>
           <Story />
         </ObservabilityAIAssistantChatServiceProvider>
       </ObservabilityAIAssistantProvider>

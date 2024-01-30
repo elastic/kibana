@@ -83,6 +83,7 @@ describe('TaskPollingLifecycle', () => {
         max_attempts: 20,
       },
       metrics_reset_interval: 3000,
+      claim_strategy: 'default',
     },
     taskStore: mockTaskStore,
     logger: taskManagerLogger,

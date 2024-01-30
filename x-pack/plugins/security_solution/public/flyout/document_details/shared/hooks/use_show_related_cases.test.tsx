@@ -7,13 +7,32 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 
-import { useGetUserCasesPermissions } from '../../../../common/lib/kibana';
+import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 import { useShowRelatedCases } from './use_show_related_cases';
-jest.mock('../../../../common/lib/kibana');
+
+const mockedUseKibana = mockUseKibana();
+const mockCanUseCases = jest.fn();
+
+jest.mock('../../../../common/lib/kibana/kibana_react', () => {
+  const original = jest.requireActual('../../../../common/lib/kibana/kibana_react');
+
+  return {
+    ...original,
+    useKibana: () => ({
+      ...mockedUseKibana,
+      services: {
+        ...mockedUseKibana.services,
+        cases: {
+          helpers: { canUseCases: mockCanUseCases },
+        },
+      },
+    }),
+  };
+});
 
 describe('useShowRelatedCases', () => {
   it(`should return false if user doesn't have cases read privilege`, () => {
-    (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
+    mockCanUseCases.mockReturnValue({
       all: false,
       create: false,
       read: false,
@@ -28,7 +47,7 @@ describe('useShowRelatedCases', () => {
   });
 
   it('should return true if user has cases read privilege', () => {
-    (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
+    mockCanUseCases.mockReturnValue({
       all: false,
       create: false,
       read: true,

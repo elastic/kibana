@@ -71,6 +71,7 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends React.Com
   }
 
   protected onSearchChange = (value: string | number | boolean) => {
+    this.setState({ isLoading: true });
     this.updateSuggestions(`${value}`);
   };
 

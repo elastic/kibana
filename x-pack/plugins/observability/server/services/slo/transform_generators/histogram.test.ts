@@ -30,6 +30,7 @@ describe('Histogram Transform Generator', () => {
       });
       expect(() => generator.getTransformParams(anSLO)).toThrow(/Invalid KQL: foo:/);
     });
+
     it('throws when the total filter is invalid', () => {
       const anSLO = createSLO({
         indicator: createHistogramIndicator({
@@ -42,6 +43,7 @@ describe('Histogram Transform Generator', () => {
       });
       expect(() => generator.getTransformParams(anSLO)).toThrow(/Invalid KQL: foo:/);
     });
+
     it('throws when the query_filter is invalid', () => {
       const anSLO = createSLO({
         indicator: createHistogramIndicator({ filter: '{ kql.query: invalid' }),
@@ -51,32 +53,20 @@ describe('Histogram Transform Generator', () => {
   });
 
   it('returns the expected transform params with every specified indicator params', async () => {
-    const anSLO = createSLO({ indicator: createHistogramIndicator() });
+    const anSLO = createSLO({ id: 'irrelevant', indicator: createHistogramIndicator() });
     const transform = generator.getTransformParams(anSLO);
 
-    expect(transform).toMatchSnapshot({
-      transform_id: expect.any(String),
-      source: { runtime_mappings: { 'slo.id': { script: { source: expect.any(String) } } } },
-    });
-    expect(transform.transform_id).toEqual(`slo-${anSLO.id}-${anSLO.revision}`);
-    expect(transform.source.runtime_mappings!['slo.id']).toMatchObject({
-      script: { source: `emit('${anSLO.id}')` },
-    });
-    expect(transform.source.runtime_mappings!['slo.revision']).toMatchObject({
-      script: { source: `emit(${anSLO.revision})` },
-    });
+    expect(transform).toMatchSnapshot();
   });
 
   it('returns the expected transform params for timeslices slo', async () => {
     const anSLO = createSLOWithTimeslicesBudgetingMethod({
+      id: 'irrelevant',
       indicator: createHistogramIndicator(),
     });
     const transform = generator.getTransformParams(anSLO);
 
-    expect(transform).toMatchSnapshot({
-      transform_id: expect.any(String),
-      source: { runtime_mappings: { 'slo.id': { script: { source: expect.any(String) } } } },
-    });
+    expect(transform).toMatchSnapshot();
   });
 
   it('filters the source using the kql query', async () => {

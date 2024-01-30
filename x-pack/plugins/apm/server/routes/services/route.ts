@@ -24,6 +24,7 @@ import { mergeWith, uniq } from 'lodash';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
 import { ServiceAnomalyTimeseries } from '../../../common/anomaly_detection/service_anomaly_timeseries';
 import { offsetRt } from '../../../common/comparison_rt';
+import { instancesSortFieldRt } from '../../../common/instances';
 import { latencyAggregationTypeRt } from '../../../common/latency_aggregation_types';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import { getAnomalyTimeseries } from '../../lib/anomaly_detection/get_anomaly_timeseries';
@@ -107,7 +108,10 @@ const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
   params: t.type({
     query: t.intersection([
-      t.partial({ serviceGroup: t.string }),
+      t.partial({
+        searchQuery: t.string,
+        serviceGroup: t.string,
+      }),
       t.intersection([
         probabilityRt,
         t.intersection([
@@ -133,6 +137,7 @@ const servicesRoute = createApmServerRoute({
     } = resources;
 
     const {
+      searchQuery,
       environment,
       kuery,
       start,
@@ -175,6 +180,7 @@ const servicesRoute = createApmServerRoute({
       documentType,
       rollupInterval,
       useDurationSummary,
+      searchQuery,
     });
   },
 });
@@ -368,14 +374,20 @@ const serviceNodeMetadataRoute = createApmServerRoute({
       serviceName: t.string,
       serviceNodeName: t.string,
     }),
-    query: t.intersection([kueryRt, rangeRt, environmentRt]),
+    query: t.intersection([
+      kueryRt,
+      rangeRt,
+      environmentRt,
+      serviceTransactionDataSourceRt,
+    ]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<ServiceNodeMetadataResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName, serviceNodeName } = params.path;
-    const { kuery, start, end, environment } = params.query;
+    const { kuery, start, end, environment, documentType, rollupInterval } =
+      params.query;
 
     return getServiceNodeMetadata({
       kuery,
@@ -385,6 +397,8 @@ const serviceNodeMetadataRoute = createApmServerRoute({
       start,
       end,
       environment,
+      documentType,
+      rollupInterval,
     });
   },
 });
@@ -605,6 +619,8 @@ const serviceInstancesMainStatisticsRoute = createApmServerRoute({
       t.type({
         latencyAggregationType: latencyAggregationTypeRt,
         transactionType: t.string,
+        sortField: instancesSortFieldRt,
+        sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
       }),
       offsetRt,
       environmentRt,
@@ -630,6 +646,8 @@ const serviceInstancesMainStatisticsRoute = createApmServerRoute({
       offset,
       start,
       end,
+      sortField,
+      sortDirection,
     } = params.query;
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
@@ -640,33 +658,24 @@ const serviceInstancesMainStatisticsRoute = createApmServerRoute({
       end,
     });
 
+    const commonParams = {
+      environment,
+      kuery,
+      latencyAggregationType,
+      serviceName,
+      apmEventClient,
+      transactionType,
+      searchAggregatedTransactions,
+      start,
+      end,
+      sortField,
+      sortDirection,
+    };
+
     const [currentPeriod, previousPeriod] = await Promise.all([
-      getServiceInstancesMainStatistics({
-        environment,
-        kuery,
-        latencyAggregationType,
-        serviceName,
-        apmEventClient,
-        transactionType,
-        searchAggregatedTransactions,
-        start,
-        end,
-      }),
+      getServiceInstancesMainStatistics(commonParams),
       ...(offset
-        ? [
-            getServiceInstancesMainStatistics({
-              environment,
-              kuery,
-              latencyAggregationType,
-              serviceName,
-              apmEventClient,
-              transactionType,
-              searchAggregatedTransactions,
-              start,
-              end,
-              offset,
-            }),
-          ]
+        ? [getServiceInstancesMainStatistics({ ...commonParams, offset })]
         : []),
     ]);
 

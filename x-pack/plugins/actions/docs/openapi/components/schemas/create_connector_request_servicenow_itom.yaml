@@ -16,10 +16,12 @@ properties:
     description: The type of connector.
     enum:
       - .servicenow-itom
-    example: .servicenow-itom
+    examples:
+      - .servicenow-itom
   name:
     type: string
     description: The display name for the connector.
-    example: my-connector
+    examples:
+      - my-connector
   secrets:
     $ref: 'secrets_properties_servicenow.yaml'

@@ -46,7 +46,7 @@ export const MiniHistogram: FC<MiniHistogramProps> = ({
   const { charts } = useAiopsAppContext();
 
   const euiTheme = useEuiTheme();
-  const defaultChartTheme = charts.theme.useChartsTheme();
+  const chartBaseTheme = charts.theme.useChartsBaseTheme();
 
   const miniHistogramChartTheme: PartialTheme = {
     chartMargins: {
@@ -107,7 +107,8 @@ export const MiniHistogram: FC<MiniHistogramProps> = ({
       <Chart>
         <Tooltip type={TooltipType.None} />
         <Settings
-          theme={[miniHistogramChartTheme, defaultChartTheme]}
+          theme={[miniHistogramChartTheme]}
+          baseTheme={chartBaseTheme}
           showLegend={false}
           locale={i18n.getLocale()}
         />

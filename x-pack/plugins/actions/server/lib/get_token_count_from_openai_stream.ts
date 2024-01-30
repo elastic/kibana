@@ -9,20 +9,25 @@ import { encode } from 'gpt-tokenizer';
 import { isEmpty, omitBy } from 'lodash';
 import { Readable } from 'stream';
 import { finished } from 'stream/promises';
-import { CreateChatCompletionRequest } from 'openai';
+import type OpenAI from 'openai';
+import { Logger } from '@kbn/logging';
 
 export async function getTokenCountFromOpenAIStream({
   responseStream,
   body,
+  logger,
 }: {
   responseStream: Readable;
   body: string;
+  logger: Logger;
 }): Promise<{
   total: number;
   prompt: number;
   completion: number;
 }> {
-  const chatCompletionRequest = JSON.parse(body) as CreateChatCompletionRequest;
+  const chatCompletionRequest = JSON.parse(
+    body
+  ) as OpenAI.ChatCompletionCreateParams.ChatCompletionCreateParamsStreaming;
 
   // per https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
   const tokensFromMessages = encode(
@@ -30,9 +35,9 @@ export async function getTokenCountFromOpenAIStream({
       .map(
         (msg) =>
           `<|start|>${msg.role}\n${msg.content}\n${
-            msg.name
+            'name' in msg
               ? msg.name
-              : msg.function_call
+              : 'function_call' in msg && msg.function_call
               ? msg.function_call.name + '\n' + msg.function_call.arguments
               : ''
           }<|end|>`
@@ -65,8 +70,8 @@ export async function getTokenCountFromOpenAIStream({
 
   try {
     await finished(responseStream);
-  } catch {
-    // no need to handle this explicitly
+  } catch (e) {
+    logger.error('An error occurred while calculating streaming response tokens');
   }
 
   const response = responseBody

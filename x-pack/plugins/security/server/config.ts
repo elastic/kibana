@@ -16,7 +16,7 @@ import { config as coreConfig } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { getLogsPath } from '@kbn/utils';
 
-import type { AuthenticationProvider } from '../common/model';
+import type { AuthenticationProvider } from '../common';
 
 export type ConfigType = ReturnType<typeof createConfig>;
 type RawConfigType = TypeOf<typeof ConfigSchema>;
@@ -301,7 +301,6 @@ export const ConfigSchema = schema.object({
       )
     ),
   }),
-  enabled: schema.boolean({ defaultValue: true }),
 
   // Setting only allowed in the Serverless offering
   ui: offeringBasedSchema({

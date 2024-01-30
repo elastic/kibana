@@ -8,7 +8,6 @@
 import * as rt from 'io-ts';
 import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { TimeUnitChar } from '../utils/formatters/duration';
-import { CUSTOM_AGGREGATOR } from './constants';
 
 export const ThresholdFormatterTypeRT = rt.keyof({
   abbreviatedNumber: null,
@@ -84,7 +83,6 @@ export interface CustomThresholdExpressionMetric {
 }
 
 export interface CustomMetricExpressionParams extends BaseMetricExpressionParams {
-  aggType: typeof CUSTOM_AGGREGATOR;
   metrics: CustomThresholdExpressionMetric[];
   equation?: string;
   label?: string;
@@ -108,6 +106,11 @@ export enum InfraFormatterType {
   bits = 'bits',
   percent = 'percent',
 }
+
+// Custom threshold alert types
+
+// Alert fields['kibana.alert.group] type
+export type GroupBy = Array<{ field: string; value: string }>;
 
 /*
  * Utils

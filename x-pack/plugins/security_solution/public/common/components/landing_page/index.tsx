@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import { useKibana } from '../../lib/kibana';
+import React, { memo, useMemo } from 'react';
+import { useSourcererDataView } from '../../containers/sourcerer';
+import { getOnboardingComponent } from './onboarding';
 
 export const LandingPageComponent = memo(() => {
-  const { getComponent$ } = useKibana().services;
-  const GetStartedComponent = useObservable(getComponent$('getStarted'));
-  return <>{GetStartedComponent}</>;
+  const { indicesExist } = useSourcererDataView();
+  const OnBoarding = useMemo(() => getOnboardingComponent(), []);
+  return <OnBoarding indicesExist={indicesExist} />;
 });
 
 LandingPageComponent.displayName = 'LandingPageComponent';

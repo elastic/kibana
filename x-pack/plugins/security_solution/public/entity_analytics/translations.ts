@@ -59,7 +59,7 @@ export const RISK_SCORE_MODULE_STATUS_OFF = i18n.translate(
 export const ENTITY_RISK_SCORING = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.entityRiskScoring',
   {
-    defaultMessage: 'Entity risk scoring',
+    defaultMessage: 'Entity risk score',
   }
 );
 
@@ -70,10 +70,10 @@ export const USEFUL_LINKS = i18n.translate(
   }
 );
 
-export const EA_DOCS_DASHBOARD = i18n.translate(
+export const EA_DASHBOARD_LINK = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.eaDocsDashboard',
   {
-    defaultMessage: 'Entity Analytics documentation',
+    defaultMessage: 'Entity Analytics dashboard',
   }
 );
 
@@ -88,6 +88,20 @@ export const EA_DOCS_RISK_USERS = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.eaDocsUsers',
   {
     defaultMessage: 'User risk score',
+  }
+);
+
+export const EA_DOCS_ENTITY_RISK_SCORE = i18n.translate(
+  'xpack.securitySolution.riskScore.riskScorePreview.eaDocsEntities',
+  {
+    defaultMessage: 'How is the risk score calculated?',
+  }
+);
+
+export const PREVIEW_MISSING_PERMISSIONS_TITLE = i18n.translate(
+  'xpack.securitySolution.riskScore.riskScorePreview.missingPermissionsCallout.title',
+  {
+    defaultMessage: 'Insifficient index privileges to preview data',
   }
 );
 
@@ -272,5 +286,19 @@ export const NEED_TO_HAVE = i18n.translate(
   'xpack.securitySolution.riskScore.errors.privileges.needToHave',
   {
     defaultMessage: 'You need to have:',
+  }
+);
+
+export const RISK_SCORE_MODULE_TURNED_ON = i18n.translate(
+  'xpack.securitySolution.riskScore.moduleTurnedOn',
+  {
+    defaultMessage: 'Entity risk score has been turned on',
+  }
+);
+
+export const RISK_SCORE_MODULE_TURNED_OFF = i18n.translate(
+  'xpack.securitySolution.riskScore.moduleTurnedOff',
+  {
+    defaultMessage: 'Entity risk score has been turned off',
   }
 );

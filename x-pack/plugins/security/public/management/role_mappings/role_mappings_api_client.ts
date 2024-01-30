@@ -7,7 +7,7 @@
 
 import type { HttpStart } from '@kbn/core/public';
 
-import type { RoleMapping } from '../../../common/model';
+import type { RoleMapping } from '../../../common';
 
 export interface CheckRoleMappingFeaturesResponse {
   canManageRoleMappings: boolean;

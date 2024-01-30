@@ -12,6 +12,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from 're
 import { useForm as useHookForm, FormProvider } from 'react-hook-form';
 import { isEmpty, find, pickBy, isNumber } from 'lodash';
 
+import { QUERY_TIMEOUT } from '../../../common/constants';
 import {
   containsDynamicQuery,
   replaceParamsQuery,
@@ -50,6 +51,7 @@ interface DefaultLiveQueryFormFields {
   savedQueryId?: string | null;
   ecs_mapping?: ECSMapping;
   packId?: string;
+  timeout?: number;
 }
 
 type FormType = 'simple' | 'steps';
@@ -152,7 +154,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           alert_ids: values.alertIds,
           pack_id: queryType === 'pack' && values?.packId?.length ? values?.packId[0] : undefined,
           ecs_mapping: values.ecs_mapping,
-          timeout: values.timeout,
+          ...(queryType === 'query' ? { timeout: values.timeout } : {}),
         },
         (value) => !isEmpty(value) || isNumber(value)
       ) as unknown as LiveQueryFormFields;
@@ -245,11 +247,11 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         setValue('agentSelection', defaultValue.agentSelection);
       }
 
-      if (defaultValue?.alertIds?.length) {
+      if (defaultValue.alertIds?.length) {
         setValue('alertIds', defaultValue.alertIds);
       }
 
-      if (defaultValue?.packId && canRunPacks) {
+      if (defaultValue.packId && canRunPacks) {
         setValue('queryType', 'pack');
 
         if (!isPackDataFetched) return;
@@ -261,10 +263,11 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         return;
       }
 
-      if (defaultValue?.query && canRunSingleQuery) {
+      if (defaultValue.query && canRunSingleQuery) {
         setValue('query', defaultValue.query);
         setValue('savedQueryId', defaultValue.savedQueryId);
         setValue('ecs_mapping', defaultValue.ecs_mapping ?? {});
+        setValue('timeout', defaultValue.timeout ?? QUERY_TIMEOUT.DEFAULT);
 
         return;
       }

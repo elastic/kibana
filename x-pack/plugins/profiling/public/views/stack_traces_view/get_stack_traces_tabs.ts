@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiPageHeaderContentProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import { TopNType } from '@kbn/profiling-utils';
@@ -18,7 +17,7 @@ export function getStackTracesTabs({
   profilingRouter,
 }: TypeOf<ProfilingRoutes, '/stacktraces/{topNType}'> & {
   profilingRouter: StatefulProfilingRouter;
-}): Required<EuiPageHeaderContentProps>['tabs'] {
+}) {
   return [
     {
       label: i18n.translate('xpack.profiling.stackTracesView.threadsTabLabel', {

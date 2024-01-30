@@ -10,14 +10,15 @@ import {
   kqlQuery,
   rangeQuery,
   termQuery,
+  wildcardQuery,
 } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   ERROR_CULPRIT,
   ERROR_EXC_HANDLED,
   ERROR_EXC_MESSAGE,
   ERROR_EXC_TYPE,
   ERROR_GROUP_ID,
+  ERROR_GROUP_NAME,
   ERROR_LOG_MESSAGE,
   SERVICE_NAME,
   TRANSACTION_NAME,
@@ -26,16 +27,21 @@ import {
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getErrorName } from '../../../lib/helpers/get_error_name';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { ApmDocumentType } from '../../../../common/document_type';
+import { RollupInterval } from '../../../../common/rollup';
 
-export type ErrorGroupMainStatisticsResponse = Array<{
-  groupId: string;
-  name: string;
-  lastSeen: number;
-  occurrences: number;
-  culprit: string | undefined;
-  handled: boolean | undefined;
-  type: string | undefined;
-}>;
+export interface ErrorGroupMainStatisticsResponse {
+  errorGroups: Array<{
+    groupId: string;
+    name: string;
+    lastSeen: number;
+    occurrences: number;
+    culprit: string | undefined;
+    handled: boolean | undefined;
+    type: string | undefined;
+  }>;
+  maxCountExceeded: boolean;
+}
 
 export async function getErrorGroupMainStatistics({
   kuery,
@@ -49,6 +55,7 @@ export async function getErrorGroupMainStatistics({
   maxNumberOfErrorGroups = 500,
   transactionName,
   transactionType,
+  searchQuery,
 }: {
   kuery: string;
   serviceName: string;
@@ -61,6 +68,7 @@ export async function getErrorGroupMainStatistics({
   maxNumberOfErrorGroups?: number;
   transactionName?: string;
   transactionType?: string;
+  searchQuery?: string;
 }): Promise<ErrorGroupMainStatisticsResponse> {
   // sort buckets by last occurrence of error
   const sortByLatestOccurrence = sortField === 'lastSeen';
@@ -71,11 +79,29 @@ export async function getErrorGroupMainStatistics({
     ? { [maxTimestampAggKey]: sortDirection }
     : { _count: sortDirection };
 
+  const shouldQuery = searchQuery
+    ? {
+        should: [
+          ERROR_LOG_MESSAGE,
+          ERROR_EXC_MESSAGE,
+          ERROR_GROUP_NAME,
+          ERROR_EXC_TYPE,
+          ERROR_CULPRIT,
+        ].flatMap((field) => wildcardQuery(field, searchQuery)),
+        minimum_should_match: 1,
+      }
+    : {};
+
   const response = await apmEventClient.search(
     'get_error_group_main_statistics',
     {
       apm: {
-        events: [ProcessorEvent.error],
+        sources: [
+          {
+            documentType: ApmDocumentType.ErrorEvent,
+            rollupInterval: RollupInterval.None,
+          },
+        ],
       },
       body: {
         track_total_hits: false,
@@ -90,6 +116,7 @@ export async function getErrorGroupMainStatistics({
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
             ],
+            ...shouldQuery,
           },
         },
         aggs: {
@@ -127,17 +154,27 @@ export async function getErrorGroupMainStatistics({
     }
   );
 
-  return (
-    response.aggregations?.error_groups.buckets.map((bucket) => ({
-      groupId: bucket.key as string,
-      name: getErrorName(bucket.sample.hits.hits[0]._source),
-      lastSeen: new Date(
-        bucket.sample.hits.hits[0]?._source['@timestamp']
-      ).getTime(),
-      occurrences: bucket.doc_count,
-      culprit: bucket.sample.hits.hits[0]?._source.error.culprit,
-      handled: bucket.sample.hits.hits[0]?._source.error.exception?.[0].handled,
-      type: bucket.sample.hits.hits[0]?._source.error.exception?.[0].type,
-    })) ?? []
-  );
+  const maxCountExceeded =
+    (response.aggregations?.error_groups.sum_other_doc_count ?? 0) > 0;
+
+  const errorGroups =
+    response.aggregations?.error_groups.buckets.map((bucket) => {
+      return {
+        groupId: bucket.key as string,
+        name: getErrorName(bucket.sample.hits.hits[0]._source),
+        lastSeen: new Date(
+          bucket.sample.hits.hits[0]._source['@timestamp']
+        ).getTime(),
+        occurrences: bucket.doc_count,
+        culprit: bucket.sample.hits.hits[0]._source.error.culprit,
+        handled:
+          bucket.sample.hits.hits[0]._source.error.exception?.[0].handled,
+        type: bucket.sample.hits.hits[0]._source.error.exception?.[0].type,
+      };
+    }) ?? [];
+
+  return {
+    errorGroups,
+    maxCountExceeded,
+  };
 }

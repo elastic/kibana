@@ -1,0 +1,124 @@
+{
+  "id": "@kbn/content-management-table-list-view-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/content-management-table-list-view-common",
+        "id": "def-common.UserContentCommonSchema",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserContentCommonSchema",
+        "description": [],
+        "path": "packages/content-management/table_list_view_common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-table-list-view-common",
+            "id": "def-common.UserContentCommonSchema.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/content-management/table_list_view_common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-table-list-view-common",
+            "id": "def-common.UserContentCommonSchema.updatedAt",
+            "type": "string",
+            "tags": [],
+            "label": "updatedAt",
+            "description": [],
+            "path": "packages/content-management/table_list_view_common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-table-list-view-common",
+            "id": "def-common.UserContentCommonSchema.managed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/content-management/table_list_view_common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-table-list-view-common",
+            "id": "def-common.UserContentCommonSchema.references",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-content-editor",
+                "scope": "common",
+                "docId": "kibKbnContentManagementContentEditorPluginApi",
+                "section": "def-common.SavedObjectsReference",
+                "text": "SavedObjectsReference"
+              },
+              "[]"
+            ],
+            "path": "packages/content-management/table_list_view_common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-table-list-view-common",
+            "id": "def-common.UserContentCommonSchema.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "packages/content-management/table_list_view_common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-management-table-list-view-common",
+            "id": "def-common.UserContentCommonSchema.attributes",
+            "type": "Object",
+            "tags": [],
+            "label": "attributes",
+            "description": [],
+            "signature": [
+              "{ title: string; description?: string | undefined; }"
+            ],
+            "path": "packages/content-management/table_list_view_common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

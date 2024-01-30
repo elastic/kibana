@@ -15,7 +15,7 @@ import { PopoverItems } from '../../../../../common/components/popover_items';
 import { useUiSetting$ } from '../../../../../common/lib/kibana';
 import { hasUserCRUDPermission } from '../../../../../common/utils/privileges';
 import { IntegrationsPopover } from '../../../../../detections/components/rules/related_integrations/integrations_popover';
-import { SeverityBadge } from '../../../../../detections/components/rules/severity_badge';
+import { SeverityBadge } from '../../../../../common/components/severity_badge';
 import { useUserData } from '../../../../../detections/components/user_info';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import type { Rule } from '../../../../rule_management/logic';

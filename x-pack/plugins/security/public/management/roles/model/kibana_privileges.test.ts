@@ -7,7 +7,7 @@
 
 import { KibanaPrivilege } from './kibana_privilege';
 import { KibanaPrivileges } from './kibana_privileges';
-import type { RoleKibanaPrivilege } from '../../../../common/model';
+import type { RoleKibanaPrivilege } from '../../../../common';
 import { kibanaFeatures } from '../__fixtures__/kibana_features';
 import { createRawKibanaPrivileges } from '../__fixtures__/kibana_privileges';
 

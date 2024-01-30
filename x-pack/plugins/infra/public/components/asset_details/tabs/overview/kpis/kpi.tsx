@@ -5,30 +5,31 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { TimeRange } from '@kbn/es-query';
+import type { LensConfig, LensDataviewDataset } from '@kbn/lens-embeddable-utils/config_builder';
+import { useDataView } from '../../../../../hooks/use_data_view';
+import { METRICS_TOOLTIP } from '../../../../../common/visualizations';
 import { LensChart, TooltipContent } from '../../../../lens';
-import { AVERAGE_SUBTITLE, type KPIChartProps } from '../../../../../common/visualizations';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
 import { useLoadingStateContext } from '../../../hooks/use_loading_state';
 
 export const Kpi = ({
   id,
-  title,
-  layers,
-  toolTip,
   height,
-  dataView,
   assetName,
   dateRange,
-}: KPIChartProps & {
+  ...chartProps
+}: LensConfig & {
+  id: string;
   height: number;
   dataView?: DataView;
   assetName: string;
   dateRange: TimeRange;
 }) => {
   const { searchSessionId } = useLoadingStateContext();
+  const { dataView } = useDataView({ index: (chartProps.dataset as LensDataviewDataset)?.index });
+
   const filters = useMemo(() => {
     return [
       buildCombinedHostsFilter({
@@ -39,20 +40,22 @@ export const Kpi = ({
     ];
   }, [dataView, assetName]);
 
-  const tooltipContent = useMemo(() => <TooltipContent description={toolTip} />, [toolTip]);
+  const tooltipContent = useMemo(
+    () =>
+      id in METRICS_TOOLTIP ? (
+        <TooltipContent description={METRICS_TOOLTIP[id as keyof typeof METRICS_TOOLTIP]} />
+      ) : undefined,
+    [id]
+  );
 
   return (
     <LensChart
+      {...chartProps}
       id={`infraAssetDetailsKPI${id}`}
-      dataView={dataView}
       dateRange={dateRange}
-      layers={layers}
       height={height}
       filters={filters}
-      title={title}
-      subtitle={AVERAGE_SUBTITLE}
       toolTip={tooltipContent}
-      visualizationType="lnsMetric"
       searchSessionId={searchSessionId}
       disableTriggers
       hidePanelTitles

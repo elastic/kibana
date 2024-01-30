@@ -70,6 +70,7 @@ const EcsRequired = rt.type({
   '@timestamp': schemaDate,
   'ecs.version': schemaString,
 });
+// prettier-ignore
 const EcsOptional = rt.partial({
   'agent.build.original': schemaString,
   'agent.ephemeral_id': schemaString,
@@ -308,7 +309,6 @@ const EcsOptional = rt.partial({
   'faas.execution': schemaString,
   'faas.id': schemaString,
   'faas.name': schemaString,
-  'faas.trigger': schemaUnknown,
   'faas.version': schemaString,
   'file.accessed': schemaDate,
   'file.attributes': schemaStringArray,

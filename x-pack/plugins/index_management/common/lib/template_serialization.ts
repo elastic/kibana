@@ -74,7 +74,7 @@ export function deserializeTemplate(
     indexPatterns: indexPatterns.sort(),
     template,
     ilmPolicy: settings?.index?.lifecycle,
-    composedOf,
+    composedOf: composedOf ?? [],
     dataStream,
     allowAutoCreate,
     _meta,

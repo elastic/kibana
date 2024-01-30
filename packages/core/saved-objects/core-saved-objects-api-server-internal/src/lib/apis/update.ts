@@ -106,7 +106,7 @@ export const executeUpdate = async <T>(
     preflightDocResult,
   });
 
-  const existingNamespaces = preflightDocNSResult?.savedObjectNamespaces ?? [];
+  const existingNamespaces = preflightDocNSResult.savedObjectNamespaces ?? [];
   const authorizationResult = await securityExtension?.authorizeUpdate({
     namespace,
     object: { type, id, existingNamespaces },

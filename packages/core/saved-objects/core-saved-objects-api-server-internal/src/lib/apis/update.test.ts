@@ -45,7 +45,7 @@ import {
   updateSuccess,
 } from '../../test_helpers/repository.test.common';
 
-describe('SavedObjectsRepository', () => {
+describe('#update', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let repository: SavedObjectsRepository;
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
@@ -95,7 +95,7 @@ describe('SavedObjectsRepository', () => {
     mockGetCurrentTime.mockReturnValue(mockTimestamp);
   });
 
-  describe('#update', () => {
+  describe('performUpdate', () => {
     const id = 'logstash-*';
     const type = 'index-pattern';
     const attributes = { title: 'Testing' };

@@ -33,6 +33,7 @@ describe('createGetAlertIndicesAliasFn', () => {
     licensing: licensingMock.createSetup(),
     minimumScheduleInterval: { value: '1m', enforce: false },
     inMemoryMetrics,
+    latestRuleVersion: 1,
   };
   const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
   registry.register({

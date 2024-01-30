@@ -33,7 +33,7 @@ function ExploratoryViewEmbeddable(props: ExploratoryEmbeddableComponentProps) {
 export function getExploratoryViewEmbeddable(
   services: CoreStart & ExploratoryViewPublicPluginsStart
 ) {
-  const { lens, dataViews: dataViewsService, uiSettings } = services;
+  const { lens, dataViews: dataViewsService, theme } = services;
 
   const dataViewCache: Record<string, DataView> = {};
 
@@ -70,7 +70,7 @@ export function getExploratoryViewEmbeddable(
 
     const series = attributes[0];
 
-    const isDarkMode = uiSettings?.get('theme:darkMode');
+    const isDarkMode = theme?.getTheme().darkMode ?? false;
 
     const { data: lensHelper, loading: lensLoading } = useFetcher(async () => {
       if (lenStateHelperPromise) {

@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import type { JobParamsDownloadCSV } from '@kbn/reporting-export-types-csv-common';
 import supertest from 'supertest';
-import { JobParamsDownloadCSV } from '@kbn/reporting-plugin/server/export_types/csv_searchsource_immediate/types';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const getMockJobParams = (obj: object) => {

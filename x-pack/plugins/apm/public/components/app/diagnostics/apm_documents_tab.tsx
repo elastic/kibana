@@ -13,20 +13,23 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { useState, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { orderBy } from 'lodash';
-import { useApmParams } from '../../../hooks/use_apm_params';
+import React, { useMemo, useState } from 'react';
 import { asBigNumber, asInteger } from '../../../../common/utils/formatters';
-import { APM_STATIC_DATA_VIEW_ID } from '../../../../common/data_view_constants';
 import type { ApmEvent } from '../../../../server/routes/diagnostics/bundle/get_apm_events';
-import { useDiagnosticsContext } from './context/use_diagnostics';
+import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { SearchBar } from '../../shared/search_bar/search_bar';
+import { useDiagnosticsContext } from './context/use_diagnostics';
 
 export function DiagnosticsApmDocuments() {
   const { diagnosticsBundle, isImported } = useDiagnosticsContext();
   const { discover } = useKibana<ApmPluginStartDeps>().services;
+  const { dataView } = useAdHocApmDataView();
+
   const [sortField, setSortField] = useState<keyof ApmEvent>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const {
@@ -91,30 +94,32 @@ export function DiagnosticsApmDocuments() {
     },
     {
       name: 'Actions',
-      actions: [
-        {
-          name: 'View',
-          description: 'View in Discover',
-          type: 'icon',
-          icon: 'discoverApp',
-          onClick: async (item) => {
-            await discover?.locator?.navigate({
-              query: {
-                language: 'kuery',
-                query: item.kuery,
+      actions: dataView
+        ? [
+            {
+              name: 'View',
+              description: 'View in Discover',
+              type: 'icon',
+              icon: 'discoverApp',
+              onClick: async (item) => {
+                await discover?.locator?.navigate({
+                  query: {
+                    language: 'kuery',
+                    query: item.kuery,
+                  },
+                  dataViewId: dataView?.id ?? '',
+                  timeRange:
+                    rangeTo && rangeFrom
+                      ? {
+                          to: rangeTo,
+                          from: rangeFrom,
+                        }
+                      : undefined,
+                });
               },
-              dataViewId: APM_STATIC_DATA_VIEW_ID,
-              timeRange:
-                rangeTo && rangeFrom
-                  ? {
-                      to: rangeTo,
-                      from: rangeFrom,
-                    }
-                  : undefined,
-            });
-          },
-        },
-      ],
+            },
+          ]
+        : [],
     },
   ];
 
@@ -123,13 +128,37 @@ export function DiagnosticsApmDocuments() {
       {isImported && diagnosticsBundle ? (
         <>
           <EuiBadge>
-            From: {new Date(diagnosticsBundle.params.start).toISOString()}
+            {i18n.translate(
+              'xpack.apm.diagnosticsApmDocuments.from:BadgeLabel',
+              {
+                defaultMessage: 'From: {date}',
+                values: {
+                  date: new Date(diagnosticsBundle.params.start).toISOString(),
+                },
+              }
+            )}
           </EuiBadge>
           <EuiBadge>
-            To: {new Date(diagnosticsBundle.params.end).toISOString()}
+            {i18n.translate('xpack.apm.diagnosticsApmDocuments.to:BadgeLabel', {
+              defaultMessage: 'To: {date}',
+              values: {
+                date: new Date(diagnosticsBundle.params.end).toISOString(),
+              },
+            })}
           </EuiBadge>
           <EuiBadge>
-            Filter: {diagnosticsBundle?.params.kuery ?? <em>Empty</em>}
+            {i18n.translate(
+              'xpack.apm.diagnosticsApmDocuments.filter:BadgeLabel',
+              { defaultMessage: 'Filter:' }
+            )}
+            {diagnosticsBundle?.params.kuery ?? (
+              <em>
+                {i18n.translate(
+                  'xpack.apm.diagnosticsApmDocuments.em.emptyLabel',
+                  { defaultMessage: 'Empty' }
+                )}
+              </em>
+            )}
           </EuiBadge>
           <EuiSpacer />
         </>
@@ -183,7 +212,13 @@ function IntervalDocCount({
         <EuiText
           css={{ fontStyle: 'italic', fontSize: '80%', display: 'inline' }}
         >
-          ({asBigNumber(interval.eventDocCount)} events)
+          {i18n.translate('xpack.apm.intervalDocCount.TextLabel', {
+            defaultMessage:
+              '({docCount} {docCount, plural, one {event} other {events}})',
+            values: {
+              docCount: asBigNumber(interval.eventDocCount),
+            },
+          })}
         </EuiText>
       </div>
     </EuiToolTip>

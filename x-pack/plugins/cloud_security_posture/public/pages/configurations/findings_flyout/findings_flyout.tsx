@@ -35,9 +35,9 @@ import { TableTab } from './table_tab';
 import { JsonTab } from './json_tab';
 import { OverviewTab } from './overview_tab';
 import { RuleTab } from './rule_tab';
-import type { BenchmarkId } from '../../../../common/types';
+import type { BenchmarkId } from '../../../../common/types_old';
 import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
-import { BenchmarkName } from '../../../../common/types';
+import { BenchmarkName } from '../../../../common/types_old';
 import { FINDINGS_FLYOUT } from '../test_subjects';
 import { createDetectionRuleFromFinding } from '../utils/create_detection_rule_from_finding';
 
@@ -100,7 +100,7 @@ export const CisKubernetesIcons = ({
   <EuiFlexGroup gutterSize="s" alignItems="center">
     <EuiFlexItem grow={false}>
       <EuiToolTip content="Center for Internet Security">
-        <EuiIcon type={cisLogoIcon} size="xxl" />
+        <EuiIcon type={cisLogoIcon} size="xl" />
       </EuiToolTip>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>

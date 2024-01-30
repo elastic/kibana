@@ -91,7 +91,7 @@ export const buildDataViewMock = ({
     metaFields: ['_index', '_score'],
     fields: dataViewFields,
     getName: () => name,
-    getComputedFields: () => ({ docvalueFields: [], scriptFields: {}, storedFields: ['*'] }),
+    getComputedFields: () => ({ docvalueFields: [], scriptFields: {} }),
     getSourceFiltering: () => ({}),
     getFieldByName: jest.fn((fieldName: string) => dataViewFields.getByName(fieldName)),
     timeFieldName: timeFieldName || '',

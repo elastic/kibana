@@ -112,117 +112,123 @@ export function MetricRowWithAgg({
   const isFieldInvalid = get(errors, ['metrics', name, 'field']) != null || !field;
 
   return (
-    <>
-      <EuiFlexGroup gutterSize="xs" alignItems="flexEnd">
-        <EuiFlexItem grow>
-          <EuiPopover
-            button={
-              <EuiFormRow
-                fullWidth
-                label={i18n.translate(
-                  'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.aggregationLabel',
-                  { defaultMessage: 'Aggregation {name}', values: { name } }
-                )}
-              >
-                <EuiExpression
-                  data-test-subj="aggregationName"
-                  description={aggregationTypes[aggType].text}
-                  value={
-                    aggType === Aggregators.COUNT ? filter || DEFAULT_COUNT_FILTER_TITLE : field
-                  }
-                  isActive={aggTypePopoverOpen}
-                  display="columns"
-                  onClick={() => {
-                    setAggTypePopoverOpen(true);
-                  }}
-                  isInvalid={aggType !== Aggregators.COUNT && !field}
-                />
-              </EuiFormRow>
-            }
-            isOpen={aggTypePopoverOpen}
-            closePopover={() => {
-              setAggTypePopoverOpen(false);
-            }}
-            display="block"
-            ownFocus
-            anchorPosition={'downLeft'}
-            repositionOnScroll
-          >
-            <div>
-              <ClosablePopoverTitle onClose={() => setAggTypePopoverOpen(false)}>
-                <FormattedMessage
-                  id="xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.aggregationLabel"
-                  defaultMessage="Aggregation {name}"
-                  values={{ name }}
-                />
-              </ClosablePopoverTitle>
+    <EuiFlexGroup gutterSize="xs" alignItems="flexEnd">
+      <EuiFlexItem grow>
+        <EuiPopover
+          button={
+            <EuiFormRow
+              fullWidth
+              label={
+                <EuiFlexGroup gutterSize="s" alignItems="center">
+                  <EuiFlexItem grow={false} css={{ paddingTop: 2, paddingBottom: 2 }}>
+                    {i18n.translate(
+                      'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.aggregationLabel',
+                      { defaultMessage: 'Aggregation {name}', values: { name } }
+                    )}
+                  </EuiFlexItem>
+                  {!disableDelete && (
+                    <EuiFlexItem grow={false}>
+                      <MetricRowControls onDelete={handleDelete} disableDelete={disableDelete} />
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+              }
+            >
+              <EuiExpression
+                data-test-subj="aggregationName"
+                description={aggregationTypes[aggType].text}
+                value={aggType === Aggregators.COUNT ? filter || DEFAULT_COUNT_FILTER_TITLE : field}
+                isActive={aggTypePopoverOpen}
+                display="columns"
+                onClick={() => {
+                  setAggTypePopoverOpen(true);
+                }}
+                isInvalid={aggType !== Aggregators.COUNT && !field}
+              />
+            </EuiFormRow>
+          }
+          isOpen={aggTypePopoverOpen}
+          closePopover={() => {
+            setAggTypePopoverOpen(false);
+          }}
+          display="block"
+          ownFocus
+          anchorPosition={'downLeft'}
+          repositionOnScroll
+        >
+          <div>
+            <ClosablePopoverTitle onClose={() => setAggTypePopoverOpen(false)}>
+              <FormattedMessage
+                id="xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.aggregationLabel"
+                defaultMessage="Aggregation {name}"
+                values={{ name }}
+              />
+            </ClosablePopoverTitle>
 
-              <EuiFlexGroup gutterSize="l" alignItems="flexEnd">
-                <EuiFlexItem grow>
+            <EuiFlexGroup gutterSize="l" alignItems="flexEnd">
+              <EuiFlexItem grow>
+                <EuiFormRow
+                  label={i18n.translate(
+                    'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.aggregationType',
+                    { defaultMessage: 'Aggregation type' }
+                  )}
+                >
+                  <EuiSelect
+                    data-test-subj="aggregationTypeSelect"
+                    id="aggTypeField"
+                    value={aggType}
+                    fullWidth
+                    onChange={(e) => {
+                      handleAggChange(e.target.value);
+                    }}
+                    options={Object.values(aggregationTypes).map(({ text, value }) => {
+                      return {
+                        text,
+                        value,
+                      };
+                    })}
+                    isInvalid={isAggInvalid}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem style={{ minWidth: 300 }}>
+                {aggType === Aggregators.COUNT ? (
                   <EuiFormRow
                     label={i18n.translate(
-                      'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.aggregationType',
-                      { defaultMessage: 'Aggregation type' }
+                      'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.filterLabel',
+                      { defaultMessage: 'KQL Filter {name}', values: { name } }
                     )}
                   >
-                    <EuiSelect
-                      data-test-subj="aggregationTypeSelect"
-                      id="aggTypeField"
-                      value={aggType}
-                      fullWidth
-                      onChange={(e) => {
-                        handleAggChange(e.target.value);
-                      }}
-                      options={Object.values(aggregationTypes).map(({ text, value }) => {
-                        return {
-                          text,
-                          value,
-                        };
-                      })}
-                      isInvalid={isAggInvalid}
+                    <RuleFlyoutKueryBar
+                      placeholder={' '}
+                      derivedIndexPattern={dataView}
+                      onChange={handleFilterChange}
+                      onSubmit={handleFilterChange}
+                      value={filter}
                     />
                   </EuiFormRow>
-                </EuiFlexItem>
-                <EuiFlexItem style={{ minWidth: 300 }}>
-                  {aggType === Aggregators.COUNT ? (
-                    <EuiFormRow
-                      label={i18n.translate(
-                        'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.filterLabel',
-                        { defaultMessage: 'KQL Filter {name}', values: { name } }
-                      )}
-                    >
-                      <RuleFlyoutKueryBar
-                        placeholder={' '}
-                        derivedIndexPattern={dataView}
-                        onChange={handleFilterChange}
-                        onSubmit={handleFilterChange}
-                        value={filter}
-                      />
-                    </EuiFormRow>
-                  ) : (
-                    <EuiFormRow
-                      label={i18n.translate(
-                        'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.fieldLabel',
-                        { defaultMessage: 'Field name' }
-                      )}
-                    >
-                      <EuiComboBox
-                        fullWidth
-                        isInvalid={isFieldInvalid}
-                        singleSelection={{ asPlainText: true }}
-                        options={fieldOptions}
-                        selectedOptions={field ? [{ label: field }] : []}
-                        onChange={handleFieldChange}
-                      />
-                    </EuiFormRow>
-                  )}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </div>
-          </EuiPopover>
-        </EuiFlexItem>
-        <MetricRowControls onDelete={handleDelete} disableDelete={disableDelete} />
-      </EuiFlexGroup>
-    </>
+                ) : (
+                  <EuiFormRow
+                    label={i18n.translate(
+                      'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.fieldLabel',
+                      { defaultMessage: 'Field name' }
+                    )}
+                  >
+                    <EuiComboBox
+                      fullWidth
+                      isInvalid={isFieldInvalid}
+                      singleSelection={{ asPlainText: true }}
+                      options={fieldOptions}
+                      selectedOptions={field ? [{ label: field }] : []}
+                      onChange={handleFieldChange}
+                    />
+                  </EuiFormRow>
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
+        </EuiPopover>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

@@ -40,8 +40,9 @@ describe('FilesTable', () => {
     expect(await screen.findByTestId('cases-files-table-filename')).toBeInTheDocument();
     expect(await screen.findByTestId('cases-files-table-filetype')).toBeInTheDocument();
     expect(await screen.findByTestId('cases-files-table-date-added')).toBeInTheDocument();
-    expect(await screen.findByTestId('cases-files-download-button')).toBeInTheDocument();
-    expect(await screen.findByTestId('cases-files-delete-button')).toBeInTheDocument();
+    expect(
+      await screen.findByTestId(`cases-files-actions-popover-button-${basicFileMock.id}`)
+    ).toBeInTheDocument();
   });
 
   it('renders loading state', async () => {
@@ -132,8 +133,12 @@ describe('FilesTable', () => {
   it('download button renders correctly', async () => {
     appMockRender.render(<FilesTable {...defaultProps} />);
 
+    userEvent.click(
+      await screen.findByTestId(`cases-files-actions-popover-button-${basicFileMock.id}`)
+    );
+
     await waitFor(() => {
-      expect(appMockRender.getFilesClient().getDownloadHref).toBeCalledTimes(1);
+      expect(appMockRender.getFilesClient().getDownloadHref).toBeCalled();
     });
 
     await waitFor(() => {
@@ -149,16 +154,9 @@ describe('FilesTable', () => {
   it('delete button renders correctly', async () => {
     appMockRender.render(<FilesTable {...defaultProps} />);
 
-    await waitFor(() => {
-      expect(appMockRender.getFilesClient().getDownloadHref).toBeCalledTimes(1);
-    });
-
-    await waitFor(() => {
-      expect(appMockRender.getFilesClient().getDownloadHref).toHaveBeenCalledWith({
-        fileKind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
-        id: basicFileMock.id,
-      });
-    });
+    userEvent.click(
+      await screen.findByTestId(`cases-files-actions-popover-button-${basicFileMock.id}`)
+    );
 
     expect(await screen.findByTestId('cases-files-delete-button')).toBeInTheDocument();
   });
@@ -166,24 +164,38 @@ describe('FilesTable', () => {
   it('clicking delete button opens deletion modal', async () => {
     appMockRender.render(<FilesTable {...defaultProps} />);
 
-    await waitFor(() => {
-      expect(appMockRender.getFilesClient().getDownloadHref).toBeCalledTimes(1);
-    });
+    userEvent.click(
+      await screen.findByTestId(`cases-files-actions-popover-button-${basicFileMock.id}`)
+    );
 
-    await waitFor(() => {
-      expect(appMockRender.getFilesClient().getDownloadHref).toHaveBeenCalledWith({
-        fileKind: constructFileKindIdByOwner(mockedTestProvidersOwner[0]),
-        id: basicFileMock.id,
-      });
-    });
-
-    const deleteButton = await screen.findByTestId('cases-files-delete-button');
-
-    expect(deleteButton).toBeInTheDocument();
-
-    userEvent.click(deleteButton);
+    userEvent.click(await screen.findByTestId('cases-files-delete-button'));
 
     expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
+  });
+
+  it('clicking the copy file hash button rerenders the popover correctly', async () => {
+    appMockRender.render(<FilesTable {...defaultProps} />);
+
+    const popoverButton = await screen.findByTestId(
+      `cases-files-actions-popover-button-${basicFileMock.id}`
+    );
+
+    expect(popoverButton).toBeInTheDocument();
+    userEvent.click(popoverButton);
+
+    expect(
+      await screen.findByTestId(`cases-files-popover-${basicFileMock.id}`)
+    ).toBeInTheDocument();
+
+    const copyFileHashButton = await screen.findByTestId('cases-files-copy-hash-button');
+
+    expect(copyFileHashButton).toBeInTheDocument();
+
+    userEvent.click(copyFileHashButton);
+
+    expect(await screen.findByTestId('cases-files-copy-md5-hash-button')).toBeInTheDocument();
+    expect(await screen.findByTestId('cases-files-copy-sha1-hash-button')).toBeInTheDocument();
+    expect(await screen.findByTestId('cases-files-copy-sha256-hash-button')).toBeInTheDocument();
   });
 
   it('go to next page calls onTableChange with correct values', async () => {

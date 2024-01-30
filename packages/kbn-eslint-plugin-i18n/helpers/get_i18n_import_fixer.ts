@@ -10,10 +10,10 @@ import { SourceCode } from 'eslint';
 
 export function getI18nImportFixer({
   sourceCode,
-  mode,
+  translationFunction,
 }: {
   sourceCode: SourceCode;
-  mode: 'i18n.translate' | 'FormattedMessage';
+  translationFunction: 'i18n.translate' | 'FormattedMessage';
 }) {
   let existingI18nImportLineIndex = -1;
   let i18nImportLineToBeAdded = '';
@@ -27,7 +27,7 @@ export function getI18nImportFixer({
    *
    * */
 
-  if (mode === 'i18n.translate') {
+  if (translationFunction === 'i18n.translate') {
     existingI18nImportLineIndex = sourceCode.lines.findIndex((l) => l.includes("from '@kbn/i18n'"));
 
     const i18nImportLineInSource = sourceCode.lines[existingI18nImportLineIndex];
@@ -46,7 +46,7 @@ export function getI18nImportFixer({
     }
   }
 
-  if (mode === 'FormattedMessage') {
+  if (translationFunction === 'FormattedMessage') {
     existingI18nImportLineIndex = sourceCode.lines.findIndex((l) =>
       l.includes("from '@kbn/i18n-react'")
     );
@@ -83,21 +83,27 @@ export function getI18nImportFixer({
     return {
       i18nImportLine: i18nImportLineToBeAdded,
       rangeToAddI18nImportLine: [start, end] as [number, number],
-      mode: 'replace',
+      replaceMode: 'replace',
     };
   }
 
   // If the file doesn't have an import line for the translation package yet, we need to add it.
   // Pretty safe bet to add it underneath the import line for React.
-  const lineIndex = sourceCode.lines.findIndex((l) => l.includes("from 'react'"));
+  let lineIndex = sourceCode.lines.findIndex((l) => l.includes("from 'react'") || l.includes('*/'));
+
+  if (lineIndex === -1) {
+    lineIndex = 0;
+  }
+
   const targetLine = sourceCode.lines[lineIndex];
 
+  // `getIndexFromLoc` is 0-based, so we need to add 1 to the line index.
   const start = sourceCode.getIndexFromLoc({ line: lineIndex + 1, column: 0 });
   const end = start + targetLine.length;
 
   return {
     i18nImportLine: i18nImportLineToBeAdded,
     rangeToAddI18nImportLine: [start, end] as [number, number],
-    mode: 'insert',
+    replaceMode: 'insert',
   };
 }

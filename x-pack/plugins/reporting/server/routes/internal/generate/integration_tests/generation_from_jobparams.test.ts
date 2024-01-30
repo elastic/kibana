@@ -5,27 +5,29 @@
  * 2.0.
  */
 
+import { BehaviorSubject } from 'rxjs';
+import supertest from 'supertest';
+import rison from '@kbn/rison';
+
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import rison from '@kbn/rison';
+import { PdfExportType } from '@kbn/reporting-export-types-pdf';
+import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
-import { BehaviorSubject } from 'rxjs';
-import supertest from 'supertest';
+
 import { ReportingCore } from '../../../..';
 import { INTERNAL_ROUTES } from '../../../../../common/constants';
-import { PdfExportType } from '../../../../export_types/printable_pdf_v2';
 import { ReportingStore } from '../../../../lib';
 import { ExportTypesRegistry } from '../../../../lib/export_types_registry';
 import { Report } from '../../../../lib/store';
 import { reportingMock } from '../../../../mocks';
 import {
-  createMockConfigSchema,
   createMockPluginSetup,
   createMockPluginStart,
   createMockReportingCore,
 } from '../../../../test_helpers';
-import type { ReportingRequestHandlerContext } from '../../../../types';
+import { ReportingRequestHandlerContext } from '../../../../types';
 import { registerGenerationRoutesInternal } from '../generate_from_jobparams';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;

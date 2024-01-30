@@ -24,6 +24,7 @@ const AGENT_VERSION_BUILD_FILE = 'x-pack/plugins/fleet/target/agent_versions_lis
 
 // Endpoint maintained by the web-team and hosted on the elastic website
 const PRODUCT_VERSIONS_URL = 'https://www.elastic.co/api/product_versions';
+const MAX_REQUEST_TIMEOUT = 60 * 1000; // Only attempt to fetch product versions for one minute total
 
 // Cache available versions in memory for 1 hour
 const CACHE_DURATION = 1000 * 60 * 60;
@@ -87,11 +88,12 @@ export const getAvailableVersions = async ({
     .filter((v: any) => semverGte(v, MINIMUM_SUPPORTED_VERSION))
     .sort((a: any, b: any) => (semverGt(a, b) ? -1 : 1));
 
-  // If the current stack version isn't included in the list of available versions, add it
-  // at the front of the array
-  const hasCurrentVersion = availableVersions.some((v) => v === kibanaVersion);
-  if (includeCurrentVersion && !hasCurrentVersion) {
-    availableVersions = [kibanaVersion, ...availableVersions];
+  // if api versions are empty (air gapped or API not available), we add current kibana version, as the build file might not contain the latest released version
+  if (
+    includeCurrentVersion ||
+    (apiVersions.length === 0 && !config?.internal?.onlyAllowAgentUpgradeToKnownVersions)
+  ) {
+    availableVersions = uniq([kibanaVersion, ...availableVersions]);
   }
 
   // Allow upgrading to the current stack version if this override flag is provided via `kibana.yml`.
@@ -110,6 +112,11 @@ export const getAvailableVersions = async ({
 };
 
 async function fetchAgentVersionsFromApi() {
+  // If the airgapped flag is set, do not attempt to reach out to the product versions API
+  if (appContextService.getConfig()?.isAirGapped) {
+    return [];
+  }
+
   const logger = appContextService.getLogger();
 
   const options = {
@@ -118,21 +125,29 @@ async function fetchAgentVersionsFromApi() {
     },
   };
 
-  const response = await pRetry(() => fetch(PRODUCT_VERSIONS_URL, options), { retries: 1 });
-  const rawBody = await response.text();
+  try {
+    const response = await pRetry(() => fetch(PRODUCT_VERSIONS_URL, options), {
+      retries: 1,
+      maxRetryTime: MAX_REQUEST_TIMEOUT,
+    });
+    const rawBody = await response.text();
 
-  // We need to handle non-200 responses gracefully here to support airgapped environments where
-  // Kibana doesn't have internet access to query this API
-  if (response.status >= 400) {
-    logger.debug(`Status code ${response.status} received from versions API: ${rawBody}`);
+    // We need to handle non-200 responses gracefully here to support airgapped environments where
+    // Kibana doesn't have internet access to query this API
+    if (response.status >= 400) {
+      logger.debug(`Status code ${response.status} received from versions API: ${rawBody}`);
+      return [];
+    }
+
+    const jsonBody = JSON.parse(rawBody);
+
+    const versions: string[] = (jsonBody.length ? jsonBody[0] : [])
+      .filter((item: any) => item?.title?.includes('Elastic Agent'))
+      .map((item: any) => item?.version_number);
+
+    return versions;
+  } catch (error) {
+    logger.debug(`Error fetching available versions from API: ${error.message}`);
     return [];
   }
-
-  const jsonBody = JSON.parse(rawBody);
-
-  const versions: string[] = (jsonBody.length ? jsonBody[0] : [])
-    .filter((item: any) => item?.title?.includes('Elastic Agent'))
-    .map((item: any) => item?.version_number);
-
-  return versions;
 }

@@ -1,6 +1,0 @@
-# This file is not picked up by anything automatically
-# It is used by being passed as an argument to runbld, when automatic processing of junit reports is not desired
-profiles:
-- ".*": # Match any job
-    tests:
-      junit-filename-pattern: false

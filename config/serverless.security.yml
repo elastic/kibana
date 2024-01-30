@@ -4,10 +4,8 @@
 enterpriseSearch.enabled: false
 xpack.apm.enabled: false
 xpack.infra.enabled: false
-xpack.observabilityLogExplorer.enabled: false
+xpack.observabilityLogsExplorer.enabled: false
 xpack.observability.enabled: false
-xpack.uptime.enabled: false
-xpack.legacy_uptime.enabled: false
 
 ## Cloud settings
 xpack.cloud.serverless.project_type: security
@@ -18,6 +16,7 @@ xpack.securitySolutionServerless.productTypes:
   [
     { product_line: 'security', product_tier: 'complete' },
     { product_line: 'endpoint', product_tier: 'complete' },
+    { product_line: 'cloud', product_tier: 'complete' },
   ]
 
 xpack.securitySolution.offeringSettings: {
@@ -67,3 +66,6 @@ xpack.ml.ad.enabled: true
 xpack.ml.dfa.enabled: true
 xpack.ml.nlp.enabled: false
 xpack.ml.compatibleModuleType: 'security'
+
+# Disable the embedded Dev Console
+console.ui.embeddedEnabled: false

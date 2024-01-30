@@ -8,6 +8,7 @@
 import createContainer from 'constate';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useMemo } from 'react';
+import { IdFormat } from '../../../../../../common/http_api/latest';
 import { useLogAnalysisModule } from '../../log_analysis_module';
 import { useLogAnalysisModuleConfiguration } from '../../log_analysis_module_configuration';
 import { useLogAnalysisModuleDefinition } from '../../log_analysis_module_definition';
@@ -19,12 +20,14 @@ export const useLogEntryCategoriesModule = ({
   indexPattern,
   logViewId,
   spaceId,
+  idFormat,
   timestampField,
   runtimeMappings,
 }: {
   indexPattern: string;
   logViewId: string;
   spaceId: string;
+  idFormat: IdFormat;
   timestampField: string;
   runtimeMappings: estypes.MappingRuntimeFields;
 }) => {
@@ -41,6 +44,7 @@ export const useLogEntryCategoriesModule = ({
 
   const logAnalysisModule = useLogAnalysisModule({
     moduleDescriptor: logEntryCategoriesModule,
+    idFormat,
     sourceConfiguration,
   });
 
@@ -51,6 +55,7 @@ export const useLogEntryCategoriesModule = ({
 
   const { fetchModuleDefinition, getIsJobDefinitionOutdated } = useLogAnalysisModuleDefinition({
     sourceConfiguration,
+    idFormat,
     moduleDescriptor: logEntryCategoriesModule,
   });
 

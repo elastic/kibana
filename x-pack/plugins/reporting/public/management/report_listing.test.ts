@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { Observable } from 'rxjs';
 import { act } from 'react-dom/test-utils';
+import type { Observable } from 'rxjs';
 
 import type { ILicense } from '@kbn/licensing-plugin/public';
-import type { IlmPolicyMigrationStatus } from '../../common/types';
+import { IlmPolicyMigrationStatus } from '@kbn/reporting-common/types';
 
 import { ListingProps as Props } from '.';
-
-import { setup, TestBed, TestDependencies, mockJobs } from './__test__';
+import { mockJobs } from '../../common/test';
 import { Job } from '../lib/job';
+import { TestBed, TestDependencies, setup } from './__test__';
 import { mockConfig } from './__test__/report_listing.test.helpers';
 
 describe('ReportListing', () => {

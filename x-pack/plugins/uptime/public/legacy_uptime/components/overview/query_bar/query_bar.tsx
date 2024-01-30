@@ -8,7 +8,6 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexItem } from '@elastic/eui';
-import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SyntaxType, useQueryBar } from './use_query_bar';
 import { KQL_PLACE_HOLDER, SIMPLE_SEARCH_PLACEHOLDER } from './translations';
@@ -38,15 +37,9 @@ export const QueryBar = () => {
 
   const {
     appName,
-    notifications,
-    http,
-    docLinks,
-    uiSettings,
-    data,
-    dataViews,
-    unifiedSearch,
-    storage,
-    usageCollection,
+    unifiedSearch: {
+      ui: { QueryStringInput },
+    },
   } = services;
   const { query, setQuery, submitImmediately } = useQueryBar();
 
@@ -94,17 +87,6 @@ export const QueryBar = () => {
         }
         isInvalid={isInValid()}
         appName={appName}
-        deps={{
-          unifiedSearch,
-          notifications,
-          http,
-          docLinks,
-          uiSettings,
-          data,
-          dataViews,
-          storage,
-          usageCollection,
-        }}
       />
     </EuiFlexItem>
   );

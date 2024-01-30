@@ -13,7 +13,7 @@ import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { ElasticsearchService } from './elasticsearch_service';
-import type { SecurityLicense, SecurityLicenseFeatures } from '../../common/licensing';
+import type { SecurityLicense, SecurityLicenseFeatures } from '../../common';
 import { licenseMock } from '../../common/licensing/index.mock';
 
 describe('ElasticsearchService', () => {

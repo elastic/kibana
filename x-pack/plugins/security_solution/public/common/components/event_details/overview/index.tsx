@@ -28,9 +28,9 @@ import {
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
 import { OverviewCardWithActions, OverviewCard } from './overview_card';
 import { StatusPopoverButton } from './status_popover_button';
-import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
+import { SeverityBadge } from '../../severity_badge';
 import { useThrottledResizeObserver } from '../../utils';
-import { isNotNull } from '../../../../timelines/store/timeline/helpers';
+import { isNotNull } from '../../../../timelines/store/helpers';
 
 export const NotGrowingFlexGroup = euiStyled(EuiFlexGroup)`
   flex-grow: 0;

@@ -16,6 +16,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlSearchNavigation = getService('svlSearchNavigation');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
+  const settings = getPageObject('settings');
 
   describe('persistable attachment', () => {
     before(async () => {
@@ -33,13 +34,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
         );
 
+        await settings.refreshDataViewFieldList('default:all-data', { ignoreMissing: true });
+
         await svlSearchNavigation.navigateToLandingPage();
 
         await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'dashboards' });
 
         await dashboard.clickNewDashboard();
 
-        await lens.createAndAddLensFromDashboard({});
+        await lens.createAndAddLensFromDashboard({ ignoreTimeFilter: true });
       });
 
       after(async () => {

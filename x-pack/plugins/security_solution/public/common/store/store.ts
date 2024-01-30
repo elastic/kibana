@@ -24,7 +24,6 @@ import { BehaviorSubject, pluck } from 'rxjs';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import reduceReducers from 'reduce-reducers';
-import { dataTableSelectors } from '@kbn/securitysolution-data-table';
 import { initialGroupingState } from './grouping/reducer';
 import type { GroupState } from './grouping/types';
 import {
@@ -35,9 +34,9 @@ import {
 } from '../../../common/constants';
 import { telemetryMiddleware } from '../lib/telemetry';
 import { appSelectors } from './app';
-import { timelineSelectors } from '../../timelines/store/timeline';
-import * as timelineActions from '../../timelines/store/timeline/actions';
-import type { TimelineModel } from '../../timelines/store/timeline/model';
+import { timelineSelectors } from '../../timelines/store';
+import * as timelineActions from '../../timelines/store/actions';
+import type { TimelineModel } from '../../timelines/store/model';
 import { inputsSelectors } from './inputs';
 import type { SubPluginsInitReducer } from './reducer';
 import { createInitialState, createReducer } from './reducer';
@@ -45,7 +44,7 @@ import { createRootEpic } from './epic';
 import type { AppAction } from './actions';
 import type { Immutable } from '../../../common/endpoint/types';
 import type { State } from './types';
-import type { TimelineEpicDependencies, TimelineState } from '../../timelines/store/timeline/types';
+import type { TimelineEpicDependencies, TimelineState } from '../../timelines/store/types';
 import type { KibanaDataView, SourcererModel, SourcererDataView } from './sourcerer/model';
 import { initDataView } from './sourcerer/model';
 import type { AppObservableLibs, StartedSubPlugins, StartPlugins } from '../../types';
@@ -55,6 +54,7 @@ import type { AnalyzerState } from '../../resolver/types';
 import { resolverMiddlewareFactory } from '../../resolver/store/middleware';
 import { dataAccessLayerFactory } from '../../resolver/data_access_layer/factory';
 import { sourcererActions } from './sourcerer';
+import { createMiddlewares } from './middlewares';
 
 let store: Store<State, Action> | null = null;
 
@@ -169,6 +169,7 @@ export const createStoreFactory = async (
 
   return createStore(initialState, rootReducer, libs$.pipe(pluck('kibana')), storage, [
     ...(subPlugins.management.store.middleware ?? []),
+    ...(subPlugins.explore.store.middleware ?? []),
     ...[resolverMiddlewareFactory(dataAccessLayerFactory(coreStart)) ?? []],
   ]);
 };
@@ -277,8 +278,6 @@ export const createStore = (
     selectNotesByIdSelector: appSelectors.selectNotesByIdSelector,
     timelineByIdSelector: timelineSelectors.timelineByIdSelector,
     timelineTimeRangeSelector: inputsSelectors.timelineTimeRangeSelector,
-    tableByIdSelector: dataTableSelectors.tableByIdSelector,
-    storage,
   };
 
   const epicMiddleware = createEpicMiddleware<Action, Action, State, typeof middlewareDependencies>(
@@ -288,6 +287,7 @@ export const createStore = (
   );
 
   const middlewareEnhancer = applyMiddleware(
+    ...createMiddlewares(storage),
     epicMiddleware,
     telemetryMiddleware,
     ...(additionalMiddleware ?? [])

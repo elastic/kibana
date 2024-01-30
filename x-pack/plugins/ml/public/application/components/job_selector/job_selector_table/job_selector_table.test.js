@@ -11,6 +11,9 @@ import { fireEvent, render } from '@testing-library/react'; // eslint-disable-li
 import { JobSelectorTable } from './job_selector_table';
 
 jest.mock('../../../contexts/kibana');
+jest.mock('../../node_available_warning', () => {
+  return { MlNodeAvailableWarningShared: () => <div /> };
+});
 
 const props = {
   ganttBarWidth: 299,

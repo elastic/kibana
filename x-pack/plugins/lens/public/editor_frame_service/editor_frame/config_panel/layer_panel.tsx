@@ -95,7 +95,7 @@ export function LayerPanel(
     indexPatternService?: IndexPatternServiceAPI;
     getUserMessages?: UserMessagesGetter;
     displayLayerSettings: boolean;
-    setIsInlineFlyoutFooterVisible?: (status: boolean) => void;
+    setIsInlineFlyoutVisible?: (status: boolean) => void;
   }
 ) {
   const [activeDimension, setActiveDimension] = useState<ActiveDimensionState>(
@@ -139,7 +139,7 @@ export function LayerPanel(
   useEffect(() => {
     // is undefined when the dimension panel is closed
     const activeDimensionId = activeDimension.activeId;
-    props?.setIsInlineFlyoutFooterVisible?.(!Boolean(activeDimensionId));
+    props?.setIsInlineFlyoutVisible?.(!Boolean(activeDimensionId));
   }, [activeDimension.activeId, activeVisualization.id, props]);
 
   const panelRef = useRef<HTMLDivElement | null>(null);
@@ -394,6 +394,7 @@ export function LayerPanel(
               )}
             </EuiFlexGroup>
             {props.indexPatternService &&
+              !isTextBasedLanguage &&
               (layerDatasource || activeVisualization.LayerPanelComponent) && (
                 <EuiSpacer size="s" />
               )}
@@ -680,7 +681,7 @@ export function LayerPanel(
             setPanelSettingsOpen(false);
             return true;
           }}
-          isInlineEditing={Boolean(props?.setIsInlineFlyoutFooterVisible)}
+          isInlineEditing={Boolean(props?.setIsInlineFlyoutVisible)}
         >
           <div id={layerId}>
             <div className="lnsIndexPatternDimensionEditor--padded">
@@ -749,7 +750,7 @@ export function LayerPanel(
         isOpen={isDimensionPanelOpen}
         isFullscreen={isFullscreen}
         groupLabel={activeGroup?.dimensionEditorGroupLabel ?? (activeGroup?.groupLabel || '')}
-        isInlineEditing={Boolean(props?.setIsInlineFlyoutFooterVisible)}
+        isInlineEditing={Boolean(props?.setIsInlineFlyoutVisible)}
         handleClose={() => {
           if (layerDatasource) {
             if (layerDatasource.updateStateOnCloseDimension) {
@@ -828,7 +829,7 @@ export function LayerPanel(
                         addLayer: props.addLayer,
                         removeLayer: props.onRemoveLayer,
                         panelRef,
-                        isInlineEditing: Boolean(props?.setIsInlineFlyoutFooterVisible),
+                        isInlineEditing: Boolean(props?.setIsInlineFlyoutVisible),
                       }}
                     />
                   </div>

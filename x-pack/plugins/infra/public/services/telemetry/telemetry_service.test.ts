@@ -172,6 +172,8 @@ describe('TelemetryService', () => {
 
       telemetry.reportHostsViewTotalHostCountRetrieved({
         total: 300,
+        with_filters: true,
+        with_query: false,
       });
 
       expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
@@ -179,6 +181,8 @@ describe('TelemetryService', () => {
         InfraTelemetryEventTypes.HOST_VIEW_TOTAL_HOST_COUNT_RETRIEVED,
         {
           total: 300,
+          with_filters: true,
+          with_query: false,
         }
       );
     });

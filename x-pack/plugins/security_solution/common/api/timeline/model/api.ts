@@ -441,10 +441,16 @@ export const TimelineResponseType = runtimeTypes.type({
   }),
 });
 
-export const TimelineErrorResponseType = runtimeTypes.type({
-  status_code: runtimeTypes.number,
-  message: runtimeTypes.string,
-});
+export const TimelineErrorResponseType = runtimeTypes.union([
+  runtimeTypes.type({
+    status_code: runtimeTypes.number,
+    message: runtimeTypes.string,
+  }),
+  runtimeTypes.type({
+    statusCode: runtimeTypes.number,
+    message: runtimeTypes.string,
+  }),
+]);
 
 export type TimelineErrorResponse = runtimeTypes.TypeOf<typeof TimelineErrorResponseType>;
 export type TimelineResponse = runtimeTypes.TypeOf<typeof TimelineResponseType>;

@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import type { User } from '../../../../../common/model';
+import type { User } from '../../../../../common';
 import type { UserAPIClient } from '../../user_api_client';
 
 interface Props {

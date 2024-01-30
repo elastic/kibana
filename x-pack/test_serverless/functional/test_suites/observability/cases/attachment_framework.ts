@@ -100,7 +100,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('embeddablePanelAction-embeddable_addToExistingCase');
 
         // verify that solution filter is not visible
-        await testSubjects.missingOrFail('solution-filter-popover-button');
+        await testSubjects.missingOrFail('options-filter-popover-button-owner');
 
         await testSubjects.click(`cases-table-row-select-${theCase.id}`);
 

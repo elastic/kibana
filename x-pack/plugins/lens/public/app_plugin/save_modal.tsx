@@ -24,6 +24,7 @@ export interface Props {
   savingToLibraryPermitted?: boolean;
 
   originatingApp?: string;
+  getOriginatingPath?: (dashboardId: string) => string;
   allowByValueEmbeddables: boolean;
 
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
@@ -35,14 +36,17 @@ export interface Props {
 
   getAppNameFromId: () => string | undefined;
   returnToOriginSwitchLabel?: string;
-
+  returnToOrigin?: boolean;
   onClose: () => void;
   onSave: (props: SaveProps, options: { saveToLibrary: boolean }) => void;
+
+  managed: boolean;
 }
 
 export const SaveModal = (props: Props) => {
   const {
     originatingApp,
+    getOriginatingPath,
     savingToLibraryPermitted,
     savedObjectsTagging,
     tagsIds,
@@ -54,10 +58,12 @@ export const SaveModal = (props: Props) => {
     getAppNameFromId,
     onClose,
     onSave,
+    returnToOrigin,
+    managed,
   } = props;
 
   // Use the modal with return-to-origin features if we're in an app's edit flow or if by-value embeddables are disabled
-  if (originatingApp || !allowByValueEmbeddables) {
+  if ((originatingApp || !allowByValueEmbeddables) && returnToOrigin !== false) {
     return (
       <TagEnhancedSavedObjectSaveModalOrigin
         savedObjectsTagging={savedObjectsTagging}
@@ -100,6 +106,15 @@ export const SaveModal = (props: Props) => {
         defaultMessage: 'Lens visualization',
       })}
       data-test-subj="lnsApp_saveModalDashboard"
+      getOriginatingPath={getOriginatingPath}
+      mustCopyOnSaveMessage={
+        managed
+          ? i18n.translate('xpack.lens.app.mustCopyOnSave', {
+              defaultMessage:
+                'This visualization is managed by Elastic. Changes here must be saved to a new visualization.',
+            })
+          : undefined
+      }
     />
   );
 };

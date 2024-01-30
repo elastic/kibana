@@ -47,8 +47,10 @@ describe('NewVisModal', () => {
       title: 'Vis with alias Url',
       stage: 'production',
       group: VisGroups.PROMOTED,
-      aliasApp: 'otherApp',
-      aliasPath: '#/aliasUrl',
+      alias: {
+        app: 'otherApp',
+        path: '#/aliasUrl',
+      },
     },
     {
       name: 'visWithSearch',
@@ -181,7 +183,7 @@ describe('NewVisModal', () => {
       );
     });
 
-    it('closes and redirects properly if visualization with aliasPath and originatingApp in props', () => {
+    it('closes and redirects properly if visualization with alias.path and originatingApp in props', () => {
       const onClose = jest.fn();
       const navigateToApp = jest.fn();
       const stateTransfer = embeddablePluginMock.createStartContract().getStateTransfer();

@@ -16,4 +16,3 @@ export {
   DISABLE_BFETCH,
   BFETCH_ROUTE_VERSION_LATEST,
 } from './constants';
-export { BfetchRequestError } from './bfetch_error';

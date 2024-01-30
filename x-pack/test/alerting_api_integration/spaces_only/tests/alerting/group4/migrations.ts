@@ -11,6 +11,7 @@ import type { RawRule, RawRuleAction } from '@kbn/alerting-plugin/server/types';
 import { FILEBEAT_7X_INDICATOR_PATH } from '@kbn/alerting-plugin/server/saved_objects/migrations';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { getUrlPrefix } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -284,7 +285,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         {
           name: 'param:alert_0',
           id: '1a4ed6ae-3c89-44b2-999d-db554144504c',
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
         },
       ]);
     });

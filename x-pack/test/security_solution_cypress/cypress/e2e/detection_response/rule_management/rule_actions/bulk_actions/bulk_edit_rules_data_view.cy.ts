@@ -39,7 +39,11 @@ import { login } from '../../../../../tasks/login';
 import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 
 import { createRule } from '../../../../../tasks/api_calls/rules';
-import { deleteAlertsAndRules, deleteDataView, postDataView } from '../../../../../tasks/common';
+import {
+  deleteAlertsAndRules,
+  deleteDataView,
+  postDataView,
+} from '../../../../../tasks/api_calls/common';
 
 import {
   getEqlRule,

@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { IExternalUrl } from '@kbn/core-http-browser';
-import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import {
   IContainer,
   EmbeddableInput,

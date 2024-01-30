@@ -31,6 +31,7 @@ import {
   TooltipProps,
   TooltipValue,
   Tooltip,
+  LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
@@ -160,6 +161,7 @@ export interface SwimlaneProps {
   showYAxis?: boolean;
   yAxisWidth?: HeatmapStyle['yAxisLabel']['width'];
   chartsService: ChartsPluginStart;
+  onRenderComplete?: () => void;
 }
 
 /**
@@ -187,6 +189,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   showLegend = true,
   'data-test-subj': dataTestSubj,
   yAxisWidth,
+  onRenderComplete,
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
 
@@ -407,6 +410,10 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
 
   const noSwimLaneData = !isLoading && !showSwimlane && !!noDataWarning;
 
+  if (noSwimLaneData) {
+    onRenderComplete?.();
+  }
+
   // A resize observer is required to compute the bucket span based on the chart width to fetch the data accordingly
   return (
     <EuiResizeObserver onResize={resizeHandler}>
@@ -443,8 +450,9 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                     <Chart className={'mlSwimLaneContainer'} ref={chartRef}>
                       <Tooltip {...tooltipOptions} />
                       <Settings
-                        // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
                         theme={themeOverrides}
+                        // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+                        baseTheme={LEGACY_LIGHT_THEME}
                         onElementClick={onElementClick}
                         onPointerUpdate={handleCursorUpdate}
                         showLegend={showLegend}
@@ -453,6 +461,11 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                         debugState={window._echDebugStateFlag ?? false}
                         onBrushEnd={onBrushEnd as BrushEndListener}
                         locale={i18n.getLocale()}
+                        onRenderChange={(isRendered) => {
+                          if (isRendered && onRenderComplete) {
+                            onRenderComplete();
+                          }
+                        }}
                       />
 
                       <Heatmap

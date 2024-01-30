@@ -1,0 +1,65 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ManageSLO Disable disables the slo when enabled 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      "slo-irrelevant-1",
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": undefined,
+    },
+  ],
+}
+`;
+
+exports[`ManageSLO Disable disables the slo when enabled 2`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      "slo-summary-irrelevant-1",
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": undefined,
+    },
+  ],
+}
+`;
+
+exports[`ManageSLO Enable enables the slo when disabled 1`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      "slo-irrelevant-1",
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": undefined,
+    },
+  ],
+}
+`;
+
+exports[`ManageSLO Enable enables the slo when disabled 2`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      "slo-summary-irrelevant-1",
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": undefined,
+    },
+  ],
+}
+`;

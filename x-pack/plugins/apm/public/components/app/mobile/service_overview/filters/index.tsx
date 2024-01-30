@@ -59,7 +59,7 @@ const MOBILE_FILTERS: Array<{ key: MobileFilter['key']; label: string }> = [
 
 export function MobileFilters() {
   const history = useHistory();
-  const { isSmall, isLarge } = useBreakpoints();
+  const { isLarge } = useBreakpoints();
   const { serviceName } = useApmServiceContext();
 
   const {
@@ -77,7 +77,8 @@ export function MobileFilters() {
   } = useAnyOfApmParams(
     '/mobile-services/{serviceName}/overview',
     '/mobile-services/{serviceName}/transactions',
-    '/mobile-services/{serviceName}/transactions/view'
+    '/mobile-services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/errors-and-crashes'
   );
 
   const filters = { netConnectionType, device, osVersion, appVersion };
@@ -135,7 +136,7 @@ export function MobileFilters() {
           >
             <EuiSelect
               data-test-subj="apmMobileFiltersSelect"
-              fullWidth={isSmall}
+              fullWidth
               isLoading={status === FETCH_STATUS.LOADING}
               prepend={label}
               options={toSelectOptions(selectOptions)}

@@ -33,6 +33,7 @@ import {
   Chart,
   CurveType,
   CustomAnnotationTooltip,
+  LEGACY_LIGHT_THEME,
   LineAnnotation,
   LineAnnotationDatum,
   LineAnnotationEvent,
@@ -419,7 +420,6 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                               annotations.lines[0].datum.modelSnapshot
                             );
                           }}
-                          // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
                           theme={{
                             lineSeriesStyle: {
                               point: {
@@ -427,6 +427,8 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                               },
                             },
                           }}
+                          // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+                          baseTheme={LEGACY_LIGHT_THEME}
                           locale={i18n.getLocale()}
                         />
                         <Axis

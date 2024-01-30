@@ -11,7 +11,7 @@ import { SavedObject } from '@kbn/core/server';
 import {
   SyntheticsMonitor,
   ConfigKey,
-  DataStream,
+  MonitorTypeEnum,
   ScheduleUnit,
   SourceType,
 } from '../../../common/runtime_types/monitor_management';
@@ -44,8 +44,8 @@ const testConfig: SavedObject<SyntheticsMonitor> = {
   updated_at: '2011-10-05T14:48:00.000Z',
   id,
   attributes: {
-    ...DEFAULT_FIELDS[DataStream.BROWSER],
-    [ConfigKey.MONITOR_TYPE]: DataStream.HTTP,
+    ...DEFAULT_FIELDS[MonitorTypeEnum.BROWSER],
+    [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.HTTP,
     [ConfigKey.LOCATIONS]: [
       {
         id: 'us_central',

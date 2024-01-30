@@ -50,13 +50,15 @@ const agentConfigurationRoute = createApmServerRoute({
     throwNotFoundIfAgentConfigNotAvailable(resources.featureFlags);
 
     const apmIndices = await resources.getApmIndices();
-    const internalESClient = await createInternalESClientWithResources(
-      resources
-    );
-    const configurations = await listConfigurations(
+    const [internalESClient, apmEventClient] = await Promise.all([
+      createInternalESClientWithResources(resources),
+      getApmEventClient(resources),
+    ]);
+    const configurations = await listConfigurations({
       internalESClient,
-      apmIndices
-    );
+      apmIndices,
+      apmEventClient,
+    });
 
     return { configurations };
   },
@@ -75,14 +77,14 @@ const getSingleAgentConfigurationRoute = createApmServerRoute({
     const { params, logger } = resources;
     const { name, environment } = params.query;
     const service = { name, environment };
-    const apmIndices = await resources.getApmIndices();
-    const internalESClient = await createInternalESClientWithResources(
-      resources
-    );
+    const [internalESClient, apmEventClient] = await Promise.all([
+      createInternalESClientWithResources(resources),
+      getApmEventClient(resources),
+    ]);
     const exactConfig = await findExactConfiguration({
       service,
       internalESClient,
-      apmIndices,
+      apmEventClient,
     });
 
     if (!exactConfig) {
@@ -114,13 +116,14 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
     const { params, logger, core, telemetryUsageCounter } = resources;
     const { service } = params.body;
     const apmIndices = await resources.getApmIndices();
-    const internalESClient = await createInternalESClientWithResources(
-      resources
-    );
+    const [internalESClient, apmEventClient] = await Promise.all([
+      createInternalESClientWithResources(resources),
+      getApmEventClient(resources),
+    ]);
     const exactConfig = await findExactConfiguration({
       service,
       internalESClient,
-      apmIndices,
+      apmEventClient,
     });
     if (!exactConfig) {
       logger.info(
@@ -171,16 +174,17 @@ const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
     const { params, logger, core, telemetryUsageCounter } = resources;
     const { body, query } = params;
     const apmIndices = await resources.getApmIndices();
-    const internalESClient = await createInternalESClientWithResources(
-      resources
-    );
+    const [internalESClient, apmEventClient] = await Promise.all([
+      createInternalESClientWithResources(resources),
+      getApmEventClient(resources),
+    ]);
 
     // if the config already exists, it is fetched and updated
     // this is to avoid creating two configs with identical service params
     const exactConfig = await findExactConfiguration({
       service: body.service,
       internalESClient,
-      apmIndices,
+      apmEventClient,
     });
 
     // if the config exists ?overwrite=true is required

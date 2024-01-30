@@ -34,7 +34,7 @@ import { extractErrorProperties } from '@kbn/ml-error-utils';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import { useMlApiContext, useMlKibana } from '../../../contexts/kibana';
 import { getPipelineConfig } from '../get_pipeline_config';
 import { isValidJson } from '../../../../../common/util/validation_utils';

@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useState, useRef } from 'react';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 import {
   MapEmbeddable,
@@ -32,12 +33,14 @@ function EmbeddedMapComponent({
   end,
   kuery = '',
   filters,
+  dataView,
 }: {
   selectedMap: MapTypes;
   start: string;
   end: string;
   kuery?: string;
   filters: Filter[];
+  dataView?: DataView;
 }) {
   const [error, setError] = useState<boolean>();
 
@@ -127,8 +130,12 @@ function EmbeddedMapComponent({
 
   useEffect(() => {
     const setLayerList = async () => {
-      if (embeddable && !isErrorEmbeddable(embeddable)) {
-        const layerList = await getLayerList({ selectedMap, maps });
+      if (embeddable && !isErrorEmbeddable(embeddable) && dataView?.id) {
+        const layerList = await getLayerList({
+          selectedMap,
+          maps,
+          dataViewId: dataView.id,
+        });
         await Promise.all([
           embeddable.setLayerList(layerList),
           embeddable.reload(),
@@ -137,7 +144,7 @@ function EmbeddedMapComponent({
     };
 
     setLayerList();
-  }, [embeddable, selectedMap, maps]);
+  }, [embeddable, selectedMap, maps, dataView]);
 
   useEffect(() => {
     if (embeddable) {

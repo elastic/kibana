@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-export { riskScorePreviewRoute } from './risk_score_preview_route';
-export { riskEngineInitRoute } from './risk_engine_init_route';
-export { riskEngineEnableRoute } from './risk_engine_enable_route';
-export { riskEngineDisableRoute } from './risk_engine_disable_route';
-export { riskEngineStatusRoute } from './risk_engine_status_route';
+export { riskEngineInitRoute } from './init';
+export { riskEngineEnableRoute } from './enable';
+export { riskEngineDisableRoute } from './disable';
+export { riskEngineStatusRoute } from './status';
+export { riskEnginePrivilegesRoute } from './privileges';
+export { riskEngineSettingsRoute } from './settings';

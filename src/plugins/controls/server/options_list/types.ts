@@ -19,7 +19,7 @@ export interface EsBucket {
 
 export interface OptionsListValidationAggregationBuilder {
   buildAggregation: (req: OptionsListRequestBody) => unknown;
-  parse: (response: SearchResponse) => string[];
+  parse: (response: SearchResponse, req: OptionsListRequestBody) => string[];
 }
 
 export interface OptionsListSuggestionAggregationBuilder {

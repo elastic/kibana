@@ -779,12 +779,11 @@ export class SearchSource {
     const metaFields = getConfig(UI_SETTINGS.META_FIELDS) ?? [];
 
     // get some special field types from the index pattern
-    const { docvalueFields, scriptFields, storedFields, runtimeFields } = index
+    const { docvalueFields, scriptFields, runtimeFields } = index
       ? index.getComputedFields()
       : {
           docvalueFields: [],
           scriptFields: {},
-          storedFields: ['*'],
           runtimeFields: {},
         };
     const fieldListProvided = !!body.fields;
@@ -798,7 +797,7 @@ export class SearchSource {
           ...scriptFields,
         }
       : {};
-    body.stored_fields = storedFields;
+    body.stored_fields = ['*'];
     body.runtime_mappings = runtimeFields || {};
 
     // apply source filters from index pattern if specified by the user

@@ -7,8 +7,10 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
-
-import type { UserProfileGetCurrentParams, UserProfileServiceStart } from './user_profile_service';
+import type {
+  UserProfileGetCurrentParams,
+  UserProfileServiceStart,
+} from '@kbn/security-plugin-types-server';
 
 export interface UserSettingServiceStart {
   /**

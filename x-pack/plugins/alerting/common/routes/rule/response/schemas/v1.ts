@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { rRuleResponseSchemaV1 } from '../../../r_rule';
+import { alertsFilterQuerySchemaV1 } from '../../../alerts_filter_query';
 import {
   ruleNotifyWhen as ruleNotifyWhenV1,
   ruleExecutionStatusValues as ruleExecutionStatusValuesV1,
@@ -40,18 +41,7 @@ const actionFrequencySchema = schema.object({
 });
 
 const actionAlertsFilterSchema = schema.object({
-  query: schema.maybe(
-    schema.object({
-      kql: schema.string(),
-      filters: schema.arrayOf(
-        schema.object({
-          query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-          meta: schema.recordOf(schema.string(), schema.any()),
-          state$: schema.maybe(schema.object({ store: schema.string() })),
-        })
-      ),
-    })
-  ),
+  query: schema.maybe(alertsFilterQuerySchemaV1),
   timeframe: schema.maybe(
     schema.object({
       days: schema.arrayOf(
@@ -192,6 +182,10 @@ export const ruleSnoozeScheduleSchema = schema.object({
   skipRecurrences: schema.maybe(schema.arrayOf(schema.string())),
 });
 
+export const notificationDelaySchema = schema.object({
+  active: schema.number(),
+});
+
 export const ruleResponseSchema = schema.object({
   id: schema.string(),
   enabled: schema.boolean(),
@@ -224,6 +218,7 @@ export const ruleResponseSchema = schema.object({
   revision: schema.number(),
   running: schema.maybe(schema.nullable(schema.boolean())),
   view_in_app_relative_url: schema.maybe(schema.nullable(schema.string())),
+  notification_delay: schema.maybe(notificationDelaySchema),
 });
 
 export const scheduleIdsSchema = schema.maybe(schema.arrayOf(schema.string()));

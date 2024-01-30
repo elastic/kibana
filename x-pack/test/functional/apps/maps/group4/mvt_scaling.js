@@ -55,7 +55,7 @@ export default function ({ getPageObjects, getService }) {
           hasLabels: 'false',
           index: 'geo_shapes*',
           requestBody:
-            '(fields:!(prop1),query:(bool:(filter:!(),must:!(),must_not:!(),should:!())),runtime_mappings:(),size:10001)',
+            '(fields:!(prop1),query:(bool:(filter:!((exists:(field:geometry))),must:!(),must_not:!(),should:!())),runtime_mappings:(),size:10001)',
         });
       });
 

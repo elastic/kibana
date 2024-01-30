@@ -19,7 +19,7 @@ export const getRuleForAlertTesting = (
   ruleId = 'rule-1',
   enabled = true
 ): QueryRuleCreateProps => ({
-  name: 'Signal Testing Query',
+  name: 'Alert Testing Query',
   description: 'Tests a simple query',
   enabled,
   risk_score: 1,

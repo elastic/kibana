@@ -46,7 +46,7 @@ import {
 } from '../../../../../common/api/detection_engine/signals_migration/mocks';
 
 // eslint-disable-next-line no-restricted-imports
-import type { LegacyRuleNotificationAlertType } from '../../rule_actions_legacy';
+import type { LegacyRuleNotificationRuleType } from '../../rule_actions_legacy';
 import type { RuleAlertType, RuleParams } from '../../rule_schema';
 import { getQueryRuleParams } from '../../rule_schema/mocks';
 
@@ -506,6 +506,11 @@ export const getSignalsMigrationStatusRequest = () =>
     query: getSignalsMigrationStatusSchemaMock(),
   });
 
+export const getMockUserProfiles = () => [
+  { uid: 'default-test-assignee-id-1', enabled: true, user: { username: 'user1' }, data: {} },
+  { uid: 'default-test-assignee-id-2', enabled: true, user: { username: 'user2' }, data: {} },
+];
+
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
@@ -515,7 +520,7 @@ export const legacyGetNotificationResult = ({
 }: {
   id?: string;
   ruleId?: string;
-} = {}): LegacyRuleNotificationAlertType => ({
+} = {}): LegacyRuleNotificationRuleType => ({
   id,
   name: 'Notification for Rule Test',
   tags: [],
@@ -562,7 +567,7 @@ export const legacyGetNotificationResult = ({
  */
 export const legacyGetFindNotificationsResultWithSingleHit = (
   ruleId = '123'
-): FindHit<LegacyRuleNotificationAlertType> => ({
+): FindHit<LegacyRuleNotificationRuleType> => ({
   page: 1,
   perPage: 1,
   total: 1,

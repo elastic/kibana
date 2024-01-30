@@ -5,7 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import type { CspSetupStatus } from '@kbn/cloud-security-posture-plugin/common/types';
+import type { CspSetupStatus } from '@kbn/cloud-security-posture-plugin/common/types_old';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import {
   FINDINGS_INDEX_DEFAULT_NS,

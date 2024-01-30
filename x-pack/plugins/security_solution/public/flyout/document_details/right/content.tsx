@@ -11,7 +11,6 @@ import { FLYOUT_BODY_TEST_ID } from './test_ids';
 import type { RightPanelPaths } from '.';
 import type { RightPanelTabsType } from './tabs';
 import { FlyoutBody } from '../../shared/components/flyout_body';
-import {} from './tabs';
 
 export interface PanelContentProps {
   /**

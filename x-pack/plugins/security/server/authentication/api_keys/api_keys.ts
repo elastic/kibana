@@ -9,33 +9,30 @@
 
 import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
-
-import { getFakeKibanaRequest } from './fake_kibana_request';
-import type { SecurityLicense } from '../../../common/licensing';
-import { transformPrivilegesToElasticsearchPrivileges, validateKibanaPrivileges } from '../../lib';
 import type {
+  APIKeys as APIKeysType,
   CreateAPIKeyParams,
   CreateAPIKeyResult,
-  CreateCrossClusterAPIKeyParams,
   CreateRestAPIKeyParams,
   CreateRestAPIKeyWithKibanaPrivilegesParams,
-  UpdateAPIKeyParams,
-  UpdateAPIKeyResult,
-} from '../../routes/api_keys';
+  GrantAPIKeyResult,
+  InvalidateAPIKeyResult,
+  InvalidateAPIKeysParams,
+  ValidateAPIKeyParams,
+} from '@kbn/security-plugin-types-server';
+
+import { getFakeKibanaRequest } from './fake_kibana_request';
+import type { SecurityLicense } from '../../../common';
+import { transformPrivilegesToElasticsearchPrivileges, validateKibanaPrivileges } from '../../lib';
+import type { UpdateAPIKeyParams, UpdateAPIKeyResult } from '../../routes/api_keys';
 import {
   BasicHTTPAuthorizationHeaderCredentials,
   HTTPAuthorizationHeader,
 } from '../http_authentication';
 
-export type {
-  CreateAPIKeyParams,
-  CreateAPIKeyResult,
-  CreateRestAPIKeyParams,
-  CreateRestAPIKeyWithKibanaPrivilegesParams,
-  CreateCrossClusterAPIKeyParams,
-  UpdateAPIKeyParams,
-  UpdateAPIKeyResult,
-};
+export type { UpdateAPIKeyParams, UpdateAPIKeyResult };
+
+const ELASTICSEARCH_CLIENT_AUTHENTICATION_HEADER = 'es-client-authentication';
 
 /**
  * Represents the options to create an APIKey class instance that will be
@@ -63,75 +60,9 @@ type GrantAPIKeyParams =
     };
 
 /**
- * Represents the params for invalidating multiple API keys
- */
-export interface InvalidateAPIKeysParams {
-  ids: string[];
-}
-
-export interface GrantAPIKeyResult {
-  /**
-   * Unique id for this API key
-   */
-  id: string;
-  /**
-   * Name for this API key
-   */
-  name: string;
-  /**
-   * Generated API key
-   */
-  api_key: string;
-}
-
-/**
- * The return value when invalidating an API key in Elasticsearch.
- */
-export interface InvalidateAPIKeyResult {
-  /**
-   * The IDs of the API keys that were invalidated as part of the request.
-   */
-  invalidated_api_keys: string[];
-  /**
-   * The IDs of the API keys that were already invalidated.
-   */
-  previously_invalidated_api_keys: string[];
-  /**
-   * The number of errors that were encountered when invalidating the API keys.
-   */
-  error_count: number;
-  /**
-   * Details about these errors. This field is not present in the response when error_count is 0.
-   */
-  error_details?: Array<{
-    type?: string;
-    reason?: string;
-    caused_by?: {
-      type?: string;
-      reason?: string;
-    };
-  }>;
-}
-
-/**
- * Represents the parameters for validating API Key credentials.
- */
-export interface ValidateAPIKeyParams {
-  /**
-   * Unique id for this API key
-   */
-  id: string;
-
-  /**
-   * Generated API Key (secret)
-   */
-  api_key: string;
-}
-
-/**
  * Class responsible for managing Elasticsearch API keys.
  */
-export class APIKeys {
+export class APIKeys implements APIKeysType {
   private readonly logger: Logger;
   private readonly clusterClient: IClusterClient;
   private readonly license: SecurityLicense;
@@ -182,7 +113,7 @@ export class APIKeys {
   }
 
   /**
-   * Determines if Cross-Cluster API Keys are enabled in Elasticsearch.
+   * Determines if cross-cluster API Keys are enabled in Elasticsearch.
    */
   async areCrossClusterAPIKeysEnabled(): Promise<boolean> {
     if (!this.license.isEnabled()) {
@@ -192,14 +123,14 @@ export class APIKeys {
     const id = 'kibana-api-key-service-test';
 
     this.logger.debug(
-      `Testing if Cross-Cluster API Keys are enabled by attempting to update a non-existant key: ${id}`
+      `Testing if cross-cluster API Keys are enabled by attempting to update a non-existant key: ${id}`
     );
 
     try {
       await this.clusterClient.asInternalUser.transport.request({
         method: 'PUT',
         path: `/_security/cross_cluster/api_key/${id}`,
-        body: {}, // We are sending an empty request body and expect a validation error if Update Cross-Cluster API key endpoint is available.
+        body: {}, // We are sending an empty request body and expect a validation error if Update cross-cluster API key endpoint is available.
       });
       return false;
     } catch (error) {
@@ -212,7 +143,7 @@ export class APIKeys {
    *
    * Returns newly created API key or `null` if API keys are disabled.
    *
-   * User needs `manage_api_key` privilege to create REST API keys and `manage_security` for Cross-Cluster API keys.
+   * User needs `manage_api_key` privilege to create REST API keys and `manage_security` for cross-cluster API keys.
    *
    * @param request Request instance.
    * @param createParams The params to create an API key
@@ -268,7 +199,7 @@ export class APIKeys {
    *
    * Returns `updated`, `true` if the update was successful, `false` if there was nothing to update
    *
-   * User needs `manage_api_key` privilege to update REST API keys and `manage_security` for Cross-Cluster API keys.
+   * User needs `manage_api_key` privilege to update REST API keys and `manage_security` for cross-cluster API keys.
    *
    * @param request Request instance.
    * @param updateParams The params to edit an API key
@@ -340,6 +271,13 @@ export class APIKeys {
         `Unable to grant an API Key, request does not contain an authorization header`
       );
     }
+
+    // Try to extract optional Elasticsearch client credentials (currently only used by JWT).
+    const clientAuthorizationHeader = HTTPAuthorizationHeader.parseFromRequest(
+      request,
+      ELASTICSEARCH_CLIENT_AUTHENTICATION_HEADER
+    );
+
     const { expiration, metadata, name } = createParams;
 
     const roleDescriptors =
@@ -352,7 +290,8 @@ export class APIKeys {
 
     const params = this.getGrantParams(
       { expiration, metadata, name, role_descriptors: roleDescriptors },
-      authorizationHeader
+      authorizationHeader,
+      clientAuthorizationHeader
     );
 
     // User needs `manage_api_key` or `grant_api_key` privilege to use this API
@@ -470,13 +409,22 @@ export class APIKeys {
 
   private getGrantParams(
     createParams: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams,
-    authorizationHeader: HTTPAuthorizationHeader
+    authorizationHeader: HTTPAuthorizationHeader,
+    clientAuthorizationHeader: HTTPAuthorizationHeader | null
   ): GrantAPIKeyParams {
     if (authorizationHeader.scheme.toLowerCase() === 'bearer') {
       return {
         api_key: createParams,
         grant_type: 'access_token',
         access_token: authorizationHeader.credentials,
+        ...(clientAuthorizationHeader
+          ? {
+              client_authentication: {
+                scheme: clientAuthorizationHeader.scheme,
+                value: clientAuthorizationHeader.credentials,
+              },
+            }
+          : {}),
       };
     }
 

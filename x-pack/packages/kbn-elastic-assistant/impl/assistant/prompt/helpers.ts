@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { transformRawData } from '@kbn/elastic-assistant-common';
+
 import type { Message } from '../../assistant_context/types';
 import { SYSTEM_PROMPT_CONTEXT_NON_I18N } from '../../content/prompts/system/translations';
-
-import { transformRawData } from '../../data_anonymization/transform_raw_data';
 import { getAnonymizedValue as defaultGetAnonymizedValue } from '../get_anonymized_value';
 import type { SelectedPromptContext } from '../prompt_context/types';
 import type { Prompt } from '../types';
@@ -60,10 +60,12 @@ export async function getCombinedMessage({
     .sort()
     .map((id) => {
       const promptContext = transformRawData({
+        allow: selectedPromptContexts[id].allow,
+        allowReplacement: selectedPromptContexts[id].allowReplacement,
         currentReplacements,
         getAnonymizedValue,
         onNewReplacements,
-        selectedPromptContext: selectedPromptContexts[id],
+        rawData: selectedPromptContexts[id].rawData,
       });
 
       return `${SYSTEM_PROMPT_CONTEXT_NON_I18N(promptContext)}`;
