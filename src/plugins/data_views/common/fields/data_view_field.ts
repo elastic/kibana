@@ -69,6 +69,10 @@ export class DataViewField implements DataViewFieldBase {
     this.spec.count = count;
   }
 
+  public get meta() {
+    return this.spec.meta;
+  }
+
   /**
    * Returns runtime field definition or undefined if field is not runtime field.
    */

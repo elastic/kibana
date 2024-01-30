@@ -458,6 +458,8 @@ export type FieldSpec = DataViewFieldBase & {
    * Name of parent field for composite runtime field subfields.
    */
   parentName?: string;
+
+  meta: estypes.Metadata;
 };
 
 export type DataViewFieldMap = Record<string, FieldSpec>;

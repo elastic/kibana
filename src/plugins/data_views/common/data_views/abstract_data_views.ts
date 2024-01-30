@@ -24,6 +24,7 @@ import type {
   RuntimeField,
 } from '../types';
 import { removeFieldAttrs } from './utils';
+import { metaUnitsToFormatter } from './meta_units_to_formatter';
 
 import type { DataViewAttributes, FieldAttrs, FieldAttrSet } from '..';
 
@@ -249,6 +250,26 @@ export abstract class AbstractDataView {
     const fieldFormat = this.getFormatterForFieldNoDefault(field.name);
     if (fieldFormat) {
       return fieldFormat;
+    }
+
+    if (field?.meta?.unit && field.meta.unit.length > 0) {
+      const fmt = metaUnitsToFormatter[field.meta.unit[0]];
+      if (fmt) {
+        return this.fieldFormats.getInstance(fmt.id, fmt.params);
+      }
+      /*
+      const unit =
+        field.meta.unit.length === 1
+          ? field.meta.unit[0]
+          : field.meta.unit.reduce(function (a, b) {
+              return a === b ? a : NaN;
+            });
+      const hasConsistentFormatter = (field.meta.unit.length = console.log(
+        'GETTING FORMATTER',
+        field.name,
+        field.meta.unit
+      ));
+      */
     }
 
     return this.fieldFormats.getDefaultInstance(
