@@ -115,8 +115,8 @@ export default function ({ getService }: FtrProviderContext) {
       );
     });
     const localLoc = {
-      id: 'localhost',
-      label: 'Local Synthetics Service',
+      id: 'dev',
+      label: 'Dev Service',
       geo: {
         lat: 0,
         lon: 0,

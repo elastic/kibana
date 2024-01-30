@@ -309,11 +309,11 @@ const getInvalidLocationError = (
         invalidPublic.length > 0
           ? ` Elastic managed Location(s) '${invalidPublic.join(
               '|'
-            )}'  not found. ${availablePublicMsg}`
+            )}' not found. ${availablePublicMsg}`
           : '',
       invalidPrivateLocation:
         invalidPrivate.length > 0
-          ? ` Private Location(s) '${invalidPrivate.join('|')}'  not found. ${availablePrivateMsg}`
+          ? ` Private Location(s) '${invalidPrivate.join('|')}' not found. ${availablePrivateMsg}`
           : '',
     },
   });

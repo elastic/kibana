@@ -73,7 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('adds test monitor', async () => {
       const monitor = {
         type: 'http',
-        locations: ['localhost'],
+        locations: ['dev'],
         url: 'https://www.google.com',
       };
       const { body: result, rawBody } = await addMonitorAPI(monitor);
@@ -115,7 +115,7 @@ export default function ({ getService }: FtrProviderContext) {
         400
       );
       expect(message).eql(
-        "Invalid locations specified. Elastic managed Location(s) 'mars'  not found. Available locations are 'localhost'"
+        "Invalid locations specified. Elastic managed Location(s) 'mars' not found. Available locations are 'dev'"
       );
     });
 
@@ -141,13 +141,13 @@ export default function ({ getService }: FtrProviderContext) {
         400
       );
       expect(result.message).eql(
-        "Invalid locations specified. Elastic managed Location(s) 'mars'  not found. Available locations are 'localhost' Private Location(s) 'moon'  not found. No private location available to use."
+        "Invalid locations specified. Elastic managed Location(s) 'mars' not found. Available locations are 'dev' Private Location(s) 'moon' not found. No private location available to use."
       );
     });
 
     const localLoc = {
-      id: 'localhost',
-      label: 'Local Synthetics Service',
+      id: 'dev',
+      label: 'Dev Service',
       geo: {
         lat: 0,
         lon: 0,

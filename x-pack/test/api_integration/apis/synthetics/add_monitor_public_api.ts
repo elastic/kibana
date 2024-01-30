@@ -47,7 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('return error if invalid location specified', async () => {
       const { message } = await addMonitorAPI({ type: 'http', locations: ['mars'] }, 400);
       expect(message).eql(
-        "Invalid locations specified. Elastic managed Location(s) 'mars'  not found. Available locations are 'localhost'"
+        "Invalid locations specified. Elastic managed Location(s) 'mars' not found. Available locations are 'dev'"
       );
     });
 
@@ -71,13 +71,13 @@ export default function ({ getService }: FtrProviderContext) {
         400
       );
       expect(result.message).eql(
-        "Invalid locations specified. Elastic managed Location(s) 'mars'  not found. Available locations are 'localhost' Private Location(s) 'moon'  not found. No private location available to use."
+        "Invalid locations specified. Elastic managed Location(s) 'mars' not found. Available locations are 'dev' Private Location(s) 'moon' not found. No private location available to use."
       );
     });
 
     const localLoc = {
-      id: 'localhost',
-      label: 'Local Synthetics Service',
+      id: 'dev',
+      label: 'Dev Service',
       geo: {
         lat: 0,
         lon: 0,
@@ -91,7 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { message, attributes } = await addMonitorAPI(
           {
             type: 'http',
-            locations: ['localhost'],
+            locations: ['dev'],
           },
           400
         );
@@ -107,7 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('base http monitor', async () => {
         const monitor = {
           type: 'http',
-          locations: ['localhost'],
+          locations: ['dev'],
           url: 'https://www.google.com',
         };
         const { body: result } = await addMonitorAPI(monitor);
@@ -129,7 +129,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('base tcp monitor', async () => {
         const monitor = {
           type: 'tcp',
-          locations: ['localhost'],
+          locations: ['dev'],
           host: 'https://www.google.com/',
         };
         const { body: result } = await addMonitorAPI(monitor);
@@ -151,7 +151,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('base icmp monitor', async () => {
         const monitor = {
           type: 'icmp',
-          locations: ['localhost'],
+          locations: ['dev'],
           host: 'https://8.8.8.8',
         };
         const { body: result } = await addMonitorAPI(monitor);
@@ -173,7 +173,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('empty browser monitor', async () => {
         const monitor = {
           type: 'browser',
-          locations: ['localhost'],
+          locations: ['dev'],
           name: 'simple journey',
         };
         const result = await addMonitorAPI(monitor, 400);
@@ -192,7 +192,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('base browser monitor', async () => {
         const monitor = {
           type: 'browser',
-          locations: ['localhost'],
+          locations: ['dev'],
           name: 'simple journey',
           'source.inline.script': 'step("simple journey", async () => {});',
         };
@@ -210,7 +210,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('base browser monitor with inline_script', async () => {
         const monitor = {
           type: 'browser',
-          locations: ['localhost'],
+          locations: ['dev'],
           name: 'simple journey inline_script',
           inline_script: 'step("simple journey", async () => {});',
         };
