@@ -21,7 +21,6 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
-  FLEET_SYSTEM_COMPONENT_TEMPLATES,
 } from '../../../constants';
 import { ElasticsearchAssetType } from '../../../types';
 import type {
@@ -244,7 +243,7 @@ async function deleteIndexTemplate(esClient: ElasticsearchClient, name: string):
 
 async function deleteComponentTemplate(esClient: ElasticsearchClient, name: string): Promise<void> {
   // '*' shouldn't ever appear here, but it still would delete all templates
-  if (name && name !== '*' && !FLEET_SYSTEM_COMPONENT_TEMPLATES.includes(name)) {
+  if (name && name !== '*') {
     try {
       await esClient.cluster.deleteComponentTemplate({ name }, { ignore: [404] });
     } catch (error) {
