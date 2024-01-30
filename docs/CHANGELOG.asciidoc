@@ -980,7 +980,7 @@ Alerting::
 APM::
 * Adds KQL filtering in APM rules ({kibana-pull}163825[#163825]).
 * Make service group saved objects exportable ({kibana-pull}163569[#163569]).
-* Added ability to manage Cross-Cluster API keys ({kibana-pull}162363[#162363]).
+* Added ability to manage cross-cluster API keys ({kibana-pull}162363[#162363]).
 * Enable Trace Explorer by default ({kibana-pull}162308[#162308]).
 * Adds error.grouping_name to group alerts in Error Count rule ({kibana-pull}161810[#161810]).
 * Adds query to check for overflow bucket in service groups ({kibana-pull}159990[#159990]).
