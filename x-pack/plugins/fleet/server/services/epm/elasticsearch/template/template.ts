@@ -933,12 +933,8 @@ const getDataStreams = async (
 const rolloverDataStream = (dataStreamName: string, esClient: ElasticsearchClient) => {
   try {
     // Do no wrap rollovers in retryTransientEsErrors since it is not idempotent
-    return esClient.transport.request({
-      method: 'POST',
-      path: `/${dataStreamName}/_rollover`,
-      querystring: {
-        lazy: true,
-      },
+    return esClient.indices.rollover({
+      alias: dataStreamName,
     });
   } catch (error) {
     throw new PackageESError(

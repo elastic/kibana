@@ -63,6 +63,46 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.apiHasDisableTriggers",
+        "type": "Function",
+        "tags": [],
+        "label": "apiHasDisableTriggers",
+        "description": [],
+        "signature": [
+          "(api: unknown) => api is ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasDisableTriggers",
+            "text": "HasDisableTriggers"
+          }
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/has_disable_triggers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.apiHasDisableTriggers.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "api",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/has_disable_triggers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.apiHasParentApi",
         "type": "Function",
         "tags": [],
@@ -193,7 +233,7 @@
         "label": "apiIsOfType",
         "description": [],
         "signature": [
-          "<T extends string = string>(api: unknown, typeToCheck: string) => api is ",
+          "<T extends string = string>(api: unknown, typeToCheck: T) => api is ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -225,12 +265,12 @@
           {
             "parentPluginId": "@kbn/presentation-publishing",
             "id": "def-common.apiIsOfType.$2",
-            "type": "string",
+            "type": "Uncategorized",
             "tags": [],
             "label": "typeToCheck",
             "description": [],
             "signature": [
-              "string"
+              "T"
             ],
             "path": "packages/presentation/presentation_publishing/interfaces/has_type.ts",
             "deprecated": false,
@@ -1981,6 +2021,31 @@
               "unknown"
             ],
             "path": "packages/presentation/presentation_publishing/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.HasDisableTriggers",
+        "type": "Interface",
+        "tags": [],
+        "label": "HasDisableTriggers",
+        "description": [],
+        "path": "packages/presentation/presentation_publishing/interfaces/has_disable_triggers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.HasDisableTriggers.disableTriggers",
+            "type": "boolean",
+            "tags": [],
+            "label": "disableTriggers",
+            "description": [],
+            "path": "packages/presentation/presentation_publishing/interfaces/has_disable_triggers.ts",
             "deprecated": false,
             "trackAdoption": false
           }
