@@ -10,6 +10,7 @@ import { isLeft } from 'fp-ts/lib/Either';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 
 import { omit } from 'lodash';
+import { AlertConfigSchema } from '../../../common/runtime_types/monitor_management/alert_config';
 import { CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
 import { flattenAndFormatObject } from '../../synthetics_service/project_monitor/normalizers/common_fields';
 import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
@@ -107,6 +108,20 @@ export function validateMonitor(monitorFields: MonitorFields): ValidationResult 
       details: '',
       payload: monitorFields,
     };
+  }
+
+  const alert = monitorFields.alert;
+  if (alert) {
+    try {
+      AlertConfigSchema.validate(alert);
+    } catch (e) {
+      return {
+        valid: false,
+        reason: 'Invalid alert configuration',
+        details: e.message,
+        payload: monitorFields,
+      };
+    }
   }
 
   if (!ALLOWED_SCHEDULES_IN_MINUTES.includes(monitorFields[ConfigKey.SCHEDULE].number)) {

@@ -448,6 +448,41 @@ describe('validateMonitor', () => {
         payload: testMonitor,
       });
     });
+
+    it('when parsed from serialized JSON for alert', () => {
+      const testMonitor = getJsonPayload() as MonitorFields;
+
+      const result = validateMonitor({
+        ...testMonitor,
+        alert: {},
+      });
+
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Invalid alert configuration',
+        details: '[status.enabled]: expected value of type [boolean] but got [undefined]',
+        payload: testMonitor,
+      });
+    });
+    it('when parsed from serialized JSON for alert invalid key', () => {
+      const testMonitor = getJsonPayload() as MonitorFields;
+
+      const result = validateMonitor({
+        ...testMonitor,
+        alert: {
+          // @ts-ignore
+          invalidKey: 'invalid',
+          enabled: true,
+        },
+      });
+
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Invalid alert configuration',
+        details: '[status.enabled]: expected value of type [boolean] but got [undefined]',
+        payload: testMonitor,
+      });
+    });
   });
 
   describe('Project Monitor', () => {
