@@ -28,7 +28,7 @@ export type ValueClickContext = EmbeddableApiContext & {
     timeFieldName?: string;
     negate?: boolean;
   };
-}
+};
 
 export type MultiValueClickContext = EmbeddableApiContext & {
   data: {
@@ -43,7 +43,7 @@ export type MultiValueClickContext = EmbeddableApiContext & {
     timeFieldName?: string;
     negate?: boolean;
   };
-}
+};
 
 export type CellValueContext = EmbeddableApiContext & {
   data: Array<{
@@ -51,7 +51,7 @@ export type CellValueContext = EmbeddableApiContext & {
     eventId?: string;
     columnMeta?: DatatableColumnMeta;
   }>;
-}
+};
 
 export type RangeSelectContext = EmbeddableApiContext & {
   data: {
@@ -60,7 +60,7 @@ export type RangeSelectContext = EmbeddableApiContext & {
     range: number[];
     timeFieldName?: string;
   };
-}
+};
 
 export type ChartActionContext =
   | ValueClickContext

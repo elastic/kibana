@@ -38,4 +38,4 @@ export type RowClickContext = EmbeddableApiContext & {
      */
     columns?: string[];
   };
-}
+};
