@@ -109,4 +109,6 @@ export const getEntityData = (
 const displayNumber = (num: number) => num.toFixed(2);
 
 export const LENS_VISUALIZATION_HEIGHT = 126; //  Static height in pixels specified by design
+export const LENS_VISUALIZATION_MIN_WIDTH = 160; // Lens visualization min-width in pixels
+export const SUMMARY_TABLE_MIN_WIDTH = 180; // Summary table min-width in pixels
 export const LAST_30_DAYS = { from: 'now-30d', to: 'now' };
