@@ -22,7 +22,6 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
       monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
     }),
   },
-  writeAccess: true,
   handler: async ({
     request,
     response,

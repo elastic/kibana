@@ -27,7 +27,6 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       }),
     },
   },
-  writeAccess: true,
   handler: async (routeContext): Promise<any> => {
     const { request, response, server } = routeContext;
     // usually id is auto generated, but this is useful for testing

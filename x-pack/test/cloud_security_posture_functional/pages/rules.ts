@@ -27,8 +27,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'findings',
   ]);
 
-  describe('Cloud Posture Dashboard Page', function () {
-    this.tags(['cloud_security_posture_compliance_dashboard']);
+  describe('Cloud Posture Rules Page', function () {
+    this.tags(['cloud_security_posture_rules_page']);
     let rule: typeof pageObjects.rule;
 
     let agentPolicyId: string;
@@ -59,7 +59,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       await rule.waitForPluginInitialized();
       await rule.navigateToRulePage('cis_k8s', '1.0.1');
-      await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     afterEach(async () => {
@@ -137,6 +136,47 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await rule.rulePage.clickFilterButton('disabled');
         await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await rule.rulePage.getEnableRulesRowSwitchButton()) > 1).to.be(true);
+      });
+    });
+
+    describe('Rules Page - CIS Section & Rule Number filters', () => {
+      it('Table should only show result that has the same section as in the Section filter', async () => {
+        await rule.rulePage.clickFilterPopover('section');
+        await rule.rulePage.clickFilterPopOverOption('etcd');
+        await rule.rulePage.clickFilterPopOverOption('Scheduler');
+        expect((await rule.rulePage.getEnableRulesRowSwitchButton()) < 10).to.be(true);
+      });
+
+      it('Table should only show result that has the same section as in the Rule number filter', async () => {
+        await rule.rulePage.clickFilterPopover('ruleNumber');
+        await rule.rulePage.clickFilterPopOverOption('1.1.1');
+        await rule.rulePage.clickFilterPopOverOption('1.1.2');
+        expect((await rule.rulePage.getEnableRulesRowSwitchButton()) === 2).to.be(true);
+      });
+
+      it('Table should only show result that passes both Section and Rule number filter', async () => {
+        await rule.rulePage.clickFilterPopover('section');
+        await rule.rulePage.clickFilterPopOverOption('Control-Plane-Node-Configuration-Files');
+        await rule.rulePage.clickFilterPopover('section');
+        await rule.rulePage.clickFilterPopover('ruleNumber');
+        await rule.rulePage.clickFilterPopOverOption('1.1.5');
+        expect((await rule.rulePage.getEnableRulesRowSwitchButton()) === 1).to.be(true);
+      });
+    });
+
+    describe('Rules Page - Flyout', () => {
+      it('Users are able to Enable/Disable Rule from Switch on Rule Flyout', async () => {
+        await rule.rulePage.clickRulesNames(0);
+        await rule.rulePage.clickFlyoutEnableSwitchButton();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        expect((await rule.rulePage.getEnableSwitchButtonState()) === 'false').to.be(true);
+      });
+      it('Users are able to Enable/Disable Rule from Take Action on Rule Flyout', async () => {
+        await rule.rulePage.clickRulesNames(0);
+        await rule.rulePage.clickTakeActionButton();
+        await rule.rulePage.clickTakeActionButtonOption('enable');
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        expect((await rule.rulePage.getEnableSwitchButtonState()) === 'true').to.be(true);
       });
     });
   });

@@ -60,7 +60,7 @@ export const AutomaticCrawlScheduler: React.FC = () => {
   return (
     <>
       <EuiSpacer />
-      <EuiTitle size="m">
+      <EuiTitle size="s">
         <h2>
           {i18n.translate('xpack.enterpriseSearch.automaticCrawlSchedule.title', {
             defaultMessage: 'Crawl frequency',

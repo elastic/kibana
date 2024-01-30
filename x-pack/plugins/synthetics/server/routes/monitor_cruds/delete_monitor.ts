@@ -45,7 +45,6 @@ export const deleteSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory<
       }),
     },
   },
-  writeAccess: true,
   handler: async (routeContext): Promise<any> => {
     const { request, response } = routeContext;
 

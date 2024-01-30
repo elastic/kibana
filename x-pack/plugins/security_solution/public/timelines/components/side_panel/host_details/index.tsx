@@ -15,7 +15,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { AssetCriticalitySelector } from '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import {
@@ -69,7 +69,7 @@ interface HostDetailsProps {
 export const HostDetailsPanel: React.FC<HostDetailsProps> = React.memo(
   ({ contextID, scopeId, expandedHost, handleOnHostClosed, isDraggable, isFlyoutView }) => {
     const { hostName } = expandedHost;
-
+    const entity = useMemo(() => ({ name: hostName, type: 'host' as const }), [hostName]);
     if (!hostName) {
       return null;
     }
@@ -83,7 +83,7 @@ export const HostDetailsPanel: React.FC<HostDetailsProps> = React.memo(
           <EuiSpacer size="m" />
           <ExpandableHostDetailsPageLink hostName={hostName} />
           <EuiHorizontalRule />
-          <AssetCriticalitySelector entity={{ type: 'host', name: hostName }} />
+          <AssetCriticalitySelector entity={entity} />
           <ExpandableHostDetails contextID={contextID} scopeId={scopeId} hostName={hostName} />
         </StyledEuiFlyoutBody>
       </>
@@ -111,6 +111,7 @@ export const HostDetailsPanel: React.FC<HostDetailsProps> = React.memo(
           <ExpandableHostDetailsPageLink hostName={hostName} />
         </StyledEuiFlexButtonWrapper>
         <EuiSpacer size="m" />
+        <AssetCriticalitySelector entity={entity} />
         <StyledPanelContent>
           <ExpandableHostDetails
             contextID={contextID}
