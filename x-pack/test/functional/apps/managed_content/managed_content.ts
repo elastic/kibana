@@ -9,7 +9,14 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visChart', 'timePicker', 'lens', 'common', 'discover']);
+  const PageObjects = getPageObjects([
+    'visChart',
+    'timePicker',
+    'lens',
+    'common',
+    'discover',
+    'maps',
+  ]);
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
@@ -93,6 +100,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.visChart.waitForVisualization();
 
       await expectManagedContentSignifiers(false, 'visualizeSaveButton');
+    });
+
+    it('maps', async () => {
+      await PageObjects.common.navigateToActualUrl(
+        'maps',
+        'map/managed-d7ab-46eb-a807-8fed28ed8566'
+      );
+      await PageObjects.maps.waitForLayerAddPanelClosed();
+
+      await expectManagedContentSignifiers(true, 'mapSaveButton');
+
+      await PageObjects.common.navigateToActualUrl(
+        'maps',
+        'map/unmanaged-d7ab-46eb-a807-8fed28ed8566'
+      );
+      await PageObjects.maps.waitForLayerAddPanelClosed();
+
+      await expectManagedContentSignifiers(false, 'mapSaveButton');
     });
   });
 }
