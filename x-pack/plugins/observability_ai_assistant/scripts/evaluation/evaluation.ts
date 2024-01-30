@@ -167,7 +167,9 @@ function runEvaluations() {
             result.scores.forEach((score) => {
               output.push([
                 score.criterion,
-                String(score.score), // score.score === 0 ? chalk.redBright('failed') : chalk.greenBright('passed'),
+                score.score < 1
+                  ? chalk.redBright(String(score.score))
+                  : chalk.greenBright(String(score.score)),
                 score.reasoning,
               ]);
             });
@@ -219,7 +221,7 @@ function runEvaluations() {
           return new Promise((resolve, reject) => {
             mocha.run((failures: any) => {
               if (failures) {
-                log.write(table.table(failedScenarios, tableConfig)); // .sort((a, b) => a[1].localeCompare(b[1]))
+                log.write(table.table(failedScenarios, tableConfig));
                 reject(new Error(`Some tests failed`));
                 return;
               }
