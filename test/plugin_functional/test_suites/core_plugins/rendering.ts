@@ -270,6 +270,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.index_management.enableIndexStats (any)',
         'xpack.index_management.editableIndexSettings (any)',
         'xpack.index_management.enableDataStreamsStorageColumn (any)',
+        'xpack.index_management.enableEmbeddedConsole (boolean)',
         'xpack.infra.sources.default.fields.message (array)',
         /**
          * Feature flags bellow are conditional based on traditional/serverless offering
@@ -330,7 +331,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observability.unsafe.alertDetails.observability.enabled (boolean)',
         'xpack.observability.unsafe.thresholdRule.enabled (any)', // conditional, is actually a boolean
         'xpack.observability_onboarding.ui.enabled (boolean)',
-        'xpack.observabilityLogExplorer.navigation.showAppLink (any)', // conditional, is actually a boolean
+        'xpack.observabilityLogsExplorer.navigation.showAppLink (any)', // conditional, is actually a boolean
       ];
       // We don't assert that actualExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large
       // arrays are hard to grok. Instead, we take the difference between the two arrays and assert them separately, that way it's
