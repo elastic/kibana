@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { cloneDeep, identity, omit, pick, pickBy } from 'lodash';
+import { cloneDeep, identity, omit, pickBy } from 'lodash';
 import { BehaviorSubject, combineLatestWith, distinctUntilChanged, map, Subject } from 'rxjs';
 import { v4 } from 'uuid';
 
@@ -14,7 +14,6 @@ import {
   CONTROL_GROUP_TYPE,
   getDefaultControlGroupInput,
   getDefaultControlGroupPersistableInput,
-  persistableControlGroupInputKeys,
 } from '@kbn/controls-plugin/common';
 import {
   ControlGroupContainerFactory,
