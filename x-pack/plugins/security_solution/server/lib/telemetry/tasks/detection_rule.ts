@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { cloneDeep } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import {
   LIST_DETECTION_RULE_EXCEPTION,
@@ -121,13 +122,22 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
           incrementBy: detectionRuleExceptionsJson.length,
         });
 
-        const batches = batchTelemetryRecords(detectionRuleExceptionsJson, maxTelemetryBatch);
+        const batches = batchTelemetryRecords(
+          cloneDeep(detectionRuleExceptionsJson),
+          maxTelemetryBatch
+        );
         for (const batch of batches) {
           await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch);
         }
         await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
           createTaskMetric(taskName, true, startTime),
         ]);
+
+        tlog(
+          logger,
+          `Task: ${taskId} executed.  Processed ${detectionRuleExceptionsJson.length} exceptions`
+        );
+
         return detectionRuleExceptionsJson.length;
       } catch (err) {
         await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
