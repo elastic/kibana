@@ -702,16 +702,6 @@ Object {
       "required": false,
       "type": "keyword",
     },
-    "host.risk.calculated_level": Object {
-      "array": false,
-      "required": false,
-      "type": "keyword",
-    },
-    "host.risk.calculated_score_norm": Object {
-      "array": false,
-      "required": false,
-      "type": "float",
-    },
     "kibana.alert.action_group": Object {
       "array": false,
       "required": false,
@@ -1725,16 +1715,6 @@ Object {
       "array": false,
       "required": false,
       "type": "keyword",
-    },
-    "user.risk.calculated_level": Object {
-      "array": false,
-      "required": false,
-      "type": "keyword",
-    },
-    "user.risk.calculated_score_norm": Object {
-      "array": false,
-      "required": false,
-      "type": "float",
     },
   },
 }
@@ -1769,16 +1749,6 @@ Object {
       "required": false,
       "type": "keyword",
     },
-    "host.risk.calculated_level": Object {
-      "array": false,
-      "required": false,
-      "type": "keyword",
-    },
-    "host.risk.calculated_score_norm": Object {
-      "array": false,
-      "required": false,
-      "type": "float",
-    },
     "kibana.alert.action_group": Object {
       "array": false,
       "required": false,
@@ -2792,16 +2762,6 @@ Object {
       "array": false,
       "required": false,
       "type": "keyword",
-    },
-    "user.risk.calculated_level": Object {
-      "array": false,
-      "required": false,
-      "type": "keyword",
-    },
-    "user.risk.calculated_score_norm": Object {
-      "array": false,
-      "required": false,
-      "type": "float",
     },
   },
 }
@@ -2836,16 +2796,6 @@ Object {
       "required": false,
       "type": "keyword",
     },
-    "host.risk.calculated_level": Object {
-      "array": false,
-      "required": false,
-      "type": "keyword",
-    },
-    "host.risk.calculated_score_norm": Object {
-      "array": false,
-      "required": false,
-      "type": "float",
-    },
     "kibana.alert.action_group": Object {
       "array": false,
       "required": false,
@@ -3859,16 +3809,6 @@ Object {
       "array": false,
       "required": false,
       "type": "keyword",
-    },
-    "user.risk.calculated_level": Object {
-      "array": false,
-      "required": false,
-      "type": "keyword",
-    },
-    "user.risk.calculated_score_norm": Object {
-      "array": false,
-      "required": false,
-      "type": "float",
     },
   },
 }
@@ -3903,16 +3843,6 @@ Object {
       "required": false,
       "type": "keyword",
     },
-    "host.risk.calculated_level": Object {
-      "array": false,
-      "required": false,
-      "type": "keyword",
-    },
-    "host.risk.calculated_score_norm": Object {
-      "array": false,
-      "required": false,
-      "type": "float",
-    },
     "kibana.alert.action_group": Object {
       "array": false,
       "required": false,
@@ -4926,16 +4856,6 @@ Object {
       "array": false,
       "required": false,
       "type": "keyword",
-    },
-    "user.risk.calculated_level": Object {
-      "array": false,
-      "required": false,
-      "type": "keyword",
-    },
-    "user.risk.calculated_score_norm": Object {
-      "array": false,
-      "required": false,
-      "type": "float",
     },
   },
 }
@@ -4970,16 +4890,6 @@ Object {
       "required": false,
       "type": "keyword",
     },
-    "host.risk.calculated_level": Object {
-      "array": false,
-      "required": false,
-      "type": "keyword",
-    },
-    "host.risk.calculated_score_norm": Object {
-      "array": false,
-      "required": false,
-      "type": "float",
-    },
     "kibana.alert.action_group": Object {
       "array": false,
       "required": false,
@@ -5993,16 +5903,6 @@ Object {
       "array": false,
       "required": false,
       "type": "keyword",
-    },
-    "user.risk.calculated_level": Object {
-      "array": false,
-      "required": false,
-      "type": "keyword",
-    },
-    "user.risk.calculated_score_norm": Object {
-      "array": false,
-      "required": false,
-      "type": "float",
     },
   },
 }
@@ -6043,16 +5943,6 @@ Object {
       "required": false,
       "type": "keyword",
     },
-    "host.risk.calculated_level": Object {
-      "array": false,
-      "required": false,
-      "type": "keyword",
-    },
-    "host.risk.calculated_score_norm": Object {
-      "array": false,
-      "required": false,
-      "type": "float",
-    },
     "kibana.alert.action_group": Object {
       "array": false,
       "required": false,
@@ -7066,16 +6956,6 @@ Object {
       "array": false,
       "required": false,
       "type": "keyword",
-    },
-    "user.risk.calculated_level": Object {
-      "array": false,
-      "required": false,
-      "type": "keyword",
-    },
-    "user.risk.calculated_score_norm": Object {
-      "array": false,
-      "required": false,
-      "type": "float",
     },
   },
 }
@@ -7110,16 +6990,6 @@ Object {
       "required": false,
       "type": "keyword",
     },
-    "host.risk.calculated_level": Object {
-      "array": false,
-      "required": false,
-      "type": "keyword",
-    },
-    "host.risk.calculated_score_norm": Object {
-      "array": false,
-      "required": false,
-      "type": "float",
-    },
     "kibana.alert.action_group": Object {
       "array": false,
       "required": false,
@@ -8133,16 +8003,6 @@ Object {
       "array": false,
       "required": false,
       "type": "keyword",
-    },
-    "user.risk.calculated_level": Object {
-      "array": false,
-      "required": false,
-      "type": "keyword",
-    },
-    "user.risk.calculated_score_norm": Object {
-      "array": false,
-      "required": false,
-      "type": "float",
     },
   },
 }
@@ -8177,16 +8037,6 @@ Object {
       "required": false,
       "type": "keyword",
     },
-    "host.risk.calculated_level": Object {
-      "array": false,
-      "required": false,
-      "type": "keyword",
-    },
-    "host.risk.calculated_score_norm": Object {
-      "array": false,
-      "required": false,
-      "type": "float",
-    },
     "kibana.alert.action_group": Object {
       "array": false,
       "required": false,
@@ -9200,16 +9050,6 @@ Object {
       "array": false,
       "required": false,
       "type": "keyword",
-    },
-    "user.risk.calculated_level": Object {
-      "array": false,
-      "required": false,
-      "type": "keyword",
-    },
-    "user.risk.calculated_score_norm": Object {
-      "array": false,
-      "required": false,
-      "type": "float",
     },
   },
 }
