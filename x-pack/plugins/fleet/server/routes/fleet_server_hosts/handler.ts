@@ -10,7 +10,7 @@ import type { RequestHandler, SavedObjectsClientContract } from '@kbn/core/serve
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isEqual } from 'lodash';
 
-import { DEFAULT_FLEET_SERVER_HOST_ID } from '../../constants';
+import { SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID } from '../../constants';
 
 import { defaultFleetErrorHandler, FleetServerHostUnauthorizedError } from '../../errors';
 import { agentPolicyService, appContextService } from '../../services';
@@ -53,7 +53,7 @@ async function getDefaultFleetServerHostUrls(soClient: SavedObjectsClientContrac
   const res = await listFleetServerHosts(soClient);
   const fleetServerHosts = res.items;
   return fleetServerHosts.find(
-    (fleetServerHost) => fleetServerHost.id === DEFAULT_FLEET_SERVER_HOST_ID // TODO: is this correct? locally default fs host has id "docker"
+    (fleetServerHost) => fleetServerHost.id === SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID
   );
 }
 

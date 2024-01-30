@@ -118,7 +118,7 @@ export function useFleetServerHostsForm(
   onSuccess: () => void
 ) {
   const [isLoading, setIsLoading] = useState(false);
-  const { notifications } = useStartServices();
+  const { notifications, cloud } = useStartServices();
   const { confirm } = useConfirmModal();
   const isPreconfigured = fleetServerHost?.is_preconfigured ?? false;
 
@@ -132,7 +132,7 @@ export function useFleetServerHostsForm(
     'hostUrls',
     fleetServerHost?.host_urls || [],
     validateFleetServerHosts,
-    isPreconfigured
+    isPreconfigured || cloud?.isServerlessEnabled
   );
   const proxyIdInput = useInput(fleetServerHost?.proxy_id ?? '', () => undefined, isPreconfigured);
 

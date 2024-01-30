@@ -14,7 +14,7 @@ import { useTheme } from 'styled-components';
 
 import type { FleetServerHost } from '../../../types';
 import { useStartServices } from '../../../hooks';
-import { DEFAULT_FLEET_SERVER_HOST_ID } from '../../../../../../common/constants';
+import { SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID } from '../../../../../../common/constants';
 
 interface FleetServerHostSelectProps {
   selectedFleetServerHost?: FleetServerHost;
@@ -39,7 +39,7 @@ export const FleetServerHostSelect: React.FunctionComponent<FleetServerHostSelec
           if (!isServerless) {
             return true;
           }
-          return fleetServerHost.id === DEFAULT_FLEET_SERVER_HOST_ID; // TODO: is this correct? locally default fs host has id "docker"
+          return fleetServerHost.id === SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID;
         })
         .map((fleetServerHost) => {
           return {
