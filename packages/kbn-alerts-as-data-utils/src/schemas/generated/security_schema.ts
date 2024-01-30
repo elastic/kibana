@@ -123,8 +123,6 @@ const SecurityAlertOptional = rt.partial({
   'event.action': schemaString,
   'event.kind': schemaString,
   'host.asset.criticality': schemaString,
-  'host.risk.calculated_level': schemaString,
-  'host.risk.calculated_score_norm': schemaNumber,
   'kibana.alert.action_group': schemaString,
   'kibana.alert.ancestors.rule': schemaString,
   'kibana.alert.building_block_type': schemaString,
@@ -208,8 +206,6 @@ const SecurityAlertOptional = rt.partial({
   'kibana.version': schemaString,
   tags: schemaStringArray,
   'user.asset.criticality': schemaString,
-  'user.risk.calculated_level': schemaString,
-  'user.risk.calculated_score_norm': schemaNumber,
 });
 
 // prettier-ignore
