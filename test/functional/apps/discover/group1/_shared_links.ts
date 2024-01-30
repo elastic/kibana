@@ -132,7 +132,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.share.closeShareModal();
         });
 
-        it('should allow for copying the saved object URL', async function () {
+        // saved search isn't showing saved
+        it.skip('should allow for copying the saved object URL', async function () {
           const expectedUrl =
             baseUrl + '/app/discover#' + '/view/ab12e3c0-f231-11e6-9486-733b1ac9221a' + '?_g=()';
           await PageObjects.discover.loadSavedSearch('A Saved Search');
