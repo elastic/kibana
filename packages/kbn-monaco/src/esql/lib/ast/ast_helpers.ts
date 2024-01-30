@@ -100,7 +100,7 @@ export function createLiteralString(token: Token): ESQLLiteral {
   };
 }
 
-function isMissingText(text: string) {
+export function isMissingText(text: string) {
   return /<missing /.test(text);
 }
 
