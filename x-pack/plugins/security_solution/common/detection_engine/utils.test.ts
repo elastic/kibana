@@ -23,7 +23,7 @@ import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
 
 import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
-import { SuppressibleAlertRules } from './constants';
+import { SUPPRESSIBLE_ALERT_RULES } from './constants';
 
 describe('#hasLargeValueList', () => {
   test('it returns false if empty array', () => {
@@ -226,7 +226,7 @@ describe('normalizeMachineLearningJobIds', () => {
 describe('Alert Suppression Rules', () => {
   describe('isSuppressibleAlertRule', () => {
     test('should return true for a suppressible rule type', () => {
-      const suppressibleRules: Type[] = Object.values(SuppressibleAlertRules);
+      const suppressibleRules: Type[] = Object.values(SUPPRESSIBLE_ALERT_RULES);
       suppressibleRules.forEach((rule) => {
         const result = isSuppressibleAlertRule(rule);
         expect(result).toBe(true);
@@ -242,7 +242,7 @@ describe('Alert Suppression Rules', () => {
 
   describe('isSuppressionRuleConfiguredWithDuration', () => {
     test('should return true for a suppressible rule type', () => {
-      const suppressibleRules: Type[] = Object.values(SuppressibleAlertRules);
+      const suppressibleRules: Type[] = Object.values(SUPPRESSIBLE_ALERT_RULES);
       suppressibleRules.forEach((rule) => {
         const result = isSuppressionRuleConfiguredWithDuration(rule);
         expect(result).toBe(true);
