@@ -12,7 +12,7 @@ import type { ResponseActionAlerts } from './types';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import type { RuleResponseEndpointAction } from '../../../../common/api/detection_engine/model/rule_response_actions';
 
-export const endpointResponseAction = (
+export const endpointResponseAction = async (
   responseAction: RuleResponseEndpointAction,
   endpointAppContextService: EndpointAppContextService,
   { alerts }: ResponseActionAlerts
