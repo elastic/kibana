@@ -17,17 +17,22 @@ export const endpointResponseAction = async (
   endpointAppContextService: EndpointAppContextService,
   { alerts }: ResponseActionAlerts
 ): Promise<void> => {
-  const logger = endpointAppContextService.createLogger('EndpointAutomatedRespActions');
+  const logger = endpointAppContextService.createLogger(
+    'ruleExecution',
+    'automatedResponseActions'
+  );
   const ruleId = alerts[0][ALERT_RULE_UUID];
   const ruleName = alerts[0][ALERT_RULE_NAME];
-  const logMsgPrefix = `Rule [${ruleName}][${ruleId}] Automated Response Actions:`;
+  const logMsgPrefix = `Rule [${ruleName}][${ruleId}]:`;
   const { comment, command } = responseAction.params;
   const commonData = { comment, command };
   const agentIds = uniq(map(alerts, 'agent.id'));
   const alertIds = map(alerts, '_id');
   const errors: string[] = [];
-  const responseActionsClient =
-    endpointAppContextService.getInternalResponseActionsClient('endpoint');
+  const responseActionsClient = endpointAppContextService.getInternalResponseActionsClient({
+    agentType: 'endpoint',
+    username: 'unknown',
+  });
   const hosts = alerts.reduce<Record<string, string>>((acc, alert) => {
     if (alert.agent?.name && !acc[alert.agent.id]) {
       acc[alert.agent.id] = alert.agent.name;

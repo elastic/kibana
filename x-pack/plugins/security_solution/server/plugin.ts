@@ -592,7 +592,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       featureUsageService,
       experimentalFeatures: config.experimentalFeatures,
       messageSigningService: plugins.fleet?.messageSigningService,
-      // FIXME:PT remove this and use new method of EndpointAppServices
+      // TODO:PT remove this and use new method of EndpointAppServices
       actionCreateService: actionCreateService(
         core.elasticsearch.client.asInternalUser,
         this.endpointContext
