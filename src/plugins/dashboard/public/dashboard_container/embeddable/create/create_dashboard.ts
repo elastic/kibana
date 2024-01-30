@@ -458,7 +458,7 @@ export const initializeDashboard = async ({
   untilDashboardReady().then((dashboard) => {
     // subscription that handles the unsaved changes badge
     dashboard.integrationSubscriptions.add(
-      dashboard.unsavedChanges
+      dashboard.hasUnsavedChanges
         .pipe(
           combineLatestWith(
             dashboard.controlGroup?.unsavedChanges.pipe(

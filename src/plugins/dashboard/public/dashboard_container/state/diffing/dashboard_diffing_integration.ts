@@ -100,7 +100,7 @@ export function startDiffingDashboardState(
                 if (observer.closed) return;
                 const validUnsavedChanges = omit(unsavedChanges, keysNotConsideredUnsavedChanges);
                 const hasChanges = Object.keys(validUnsavedChanges).length > 0;
-                this.unsavedChanges.next(hasChanges);
+                this.hasUnsavedChanges.next(hasChanges);
 
                 if (creationOptions?.useSessionStorageIntegration) {
                   this.backupUnsavedChanges.next(

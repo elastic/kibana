@@ -114,7 +114,7 @@ export class DashboardContainer
   public diffingSubscription: Subscription = new Subscription();
   public controlGroup?: ControlGroupContainer;
 
-  public unsavedChanges: BehaviorSubject<boolean>;
+  public hasUnsavedChanges: BehaviorSubject<boolean>;
   public backupUnsavedChanges: BehaviorSubject<Partial<SavedDashboardInput> | undefined>;
 
   public searchSessionId?: string;
@@ -177,7 +177,7 @@ export class DashboardContainer
     this.dashboardCreationStartTime = dashboardCreationStartTime;
 
     // start diffing dashboard state
-    this.unsavedChanges = new BehaviorSubject(false);
+    this.hasUnsavedChanges = new BehaviorSubject(false);
     this.backupUnsavedChanges = new BehaviorSubject<Partial<DashboardContainerInput> | undefined>(
       undefined
     );
