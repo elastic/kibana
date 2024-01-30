@@ -59,7 +59,7 @@ import { AuthStateStorage } from './auth_state_storage';
 import { AuthHeadersStorage } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
 import { getEcsResponseLog } from './logging';
-import { StaticAssets, type InternalStaticAssets } from './static_assets';
+import { StaticAssets, type InternalStaticAssets } from './static_assets/static_assets';
 
 /**
  * Adds ELU timings for the executed function to the current's context transaction

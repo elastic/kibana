@@ -6,20 +6,26 @@
  * Side Public License, v 1.
  */
 
-import type { BasePath } from './base_path_service';
-import { CdnConfig } from './cdn_config';
+import type { BasePath } from '../base_path_service';
+import { CdnConfig } from '../cdn_config';
 
 export interface InternalStaticAssets {
   getHrefBase(): string;
   getPluginAssetHref(pluginName: string, assetPath: string): string;
 }
 
+import { suffixValueToPathname, suffixValueToURLPathname } from './suffix_value_to_pathname';
+
 export class StaticAssets implements InternalStaticAssets {
   private readonly assetsHrefBase: string;
 
-  constructor(basePath: BasePath, cdnConfig: CdnConfig) {
-    const hrefToUse = cdnConfig.baseHref ?? basePath.serverBasePath;
-    this.assetsHrefBase = hrefToUse.endsWith('/') ? hrefToUse.slice(0, -1) : hrefToUse;
+  constructor(basePath: BasePath, cdnConfig: CdnConfig, shaDigest: string) {
+    const cdnBaseHref = cdnConfig.baseHref;
+    if (cdnBaseHref) {
+      this.assetsHrefBase = suffixValueToURLPathname(cdnBaseHref, shaDigest);
+    } else {
+      this.assetsHrefBase = suffixValueToPathname(basePath.serverBasePath, shaDigest);
+    }
   }
 
   /**

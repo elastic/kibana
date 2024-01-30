@@ -14,7 +14,7 @@ export interface Input {
 }
 
 export class CdnConfig {
-  private url: undefined | URL;
+  private readonly url: undefined | URL;
   constructor(url?: string) {
     if (url) {
       this.url = new URL(url); // This will throw for invalid URLs
@@ -22,7 +22,7 @@ export class CdnConfig {
   }
 
   public get host(): undefined | string {
-    return this.url?.host ?? undefined;
+    return this.url?.host;
   }
 
   public get baseHref(): undefined | string {

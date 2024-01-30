@@ -18,7 +18,7 @@ import type {
 } from '@kbn/core-http-server';
 import type { HttpServerSetup } from './http_server';
 import type { ExternalUrlConfig } from './external_url';
-import type { InternalStaticAssets } from './static_assets';
+import type { InternalStaticAssets } from './static_assets/static_assets';
 
 /** @internal */
 export interface InternalHttpServicePreboot
