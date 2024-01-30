@@ -82,7 +82,7 @@ A dataset containing records with a very large amount of parts as the one from t
 [float]
 ==== Reduce the precision
 
-Some machine generated datasets are stored with more decimals that are strictly necessary. For reference, the GeoJSON RFC 7946 https://datatracker.ietf.org/doc/html/rfc7946#section-11.2[coordinate precision section] specifies six digits to be a common default to around 10 centimeters on the ground. The file uploader in the Maps application will automatically reduce the precision to 6 decimals but for big datasets it is better to do this before uploading.
+Some machine generated datasets are stored with more decimals than are strictly necessary. For reference, the GeoJSON RFC 7946 https://datatracker.ietf.org/doc/html/rfc7946#section-11.2[coordinate precision section] specifies six digits to be a common default to around 10 centimeters on the ground. The file uploader in the Maps application will automatically reduce the precision to 6 decimals but for big datasets it is better to do this before uploading.
 
 `ogr2ogr` generates GeoJSON files with 7 decimal degrees when requesting `RFC7946` compliant files but using the `COORDINATE_PRECISION` https://gdal.org/drivers/vector/geojson.html#layer-creation-options[GeoJSON layer creation option] it can be downsized even more if that is OK for the usage of the data.
 
