@@ -58,8 +58,16 @@ export const useDatasetQualityTable = () => {
         return;
       }
 
+      if (isDatasetQualityPageIdle) {
+        service.send({
+          type: 'OPEN_FLYOUT',
+          dataset: selectedDataset,
+        });
+        return;
+      }
+
       service.send({
-        type: isDatasetQualityPageIdle ? 'OPEN_FLYOUT' : 'SELECT_NEW_DATASET',
+        type: 'SELECT_NEW_DATASET',
         dataset: selectedDataset,
       });
     },

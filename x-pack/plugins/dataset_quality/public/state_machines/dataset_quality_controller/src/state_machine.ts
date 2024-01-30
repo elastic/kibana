@@ -25,6 +25,7 @@ import {
   fetchDatasetDetailsFailedNotifier,
   fetchDatasetStatsFailedNotifier,
   fetchDegradedStatsFailedNotifier,
+  noDatasetSelected,
 } from './notifications';
 
 export const createPureDatasetQualityControllerStateMachine = (
@@ -208,7 +209,13 @@ export const createDatasetQualityControllerStateMachine = ({
         });
       },
       loadDataStreamDetails: (context) => {
-        const { type, name: dataset, namespace } = context.flyout.dataset as FlyoutDataset;
+        if (!context.flyout.dataset) {
+          fetchDatasetDetailsFailedNotifier(toasts, new Error(noDatasetSelected));
+
+          return Promise.resolve({});
+        }
+
+        const { type, name: dataset, namespace } = context.flyout.dataset;
 
         return dataStreamStatsClient.getDataStreamDetails({
           dataStream: dataStreamPartsToIndexName({

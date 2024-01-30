@@ -95,7 +95,7 @@ export type DatasetQualityControllerTypeState =
       context: DefaultDatasetQualityStateContext;
     }
   | {
-      value: 'degradedDocs.loaded';
+      value: 'datasets.loaded';
       context: DefaultDatasetQualityStateContext;
     };
 
@@ -107,7 +107,11 @@ export type DatasetQualityControllerEvent =
       criteria: TableCriteria;
     }
   | {
-      type: 'OPEN_FLYOUT' | 'SELECT_NEW_DATASET';
+      type: 'OPEN_FLYOUT';
+      dataset: FlyoutDataset;
+    }
+  | {
+      type: 'SELECT_NEW_DATASET';
       dataset: FlyoutDataset;
     }
   | {

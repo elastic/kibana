@@ -34,3 +34,10 @@ export const fetchDegradedStatsFailedNotifier = (toasts: IToasts, error: Error) 
     text: error.message,
   });
 };
+
+export const noDatasetSelected = i18n.translate(
+  'xpack.datasetQuality.fetchDatasetDetailsFailed.noDatasetSelected',
+  {
+    defaultMessage: 'No dataset have been selected',
+  }
+);
