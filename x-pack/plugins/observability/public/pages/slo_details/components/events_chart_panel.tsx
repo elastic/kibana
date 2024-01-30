@@ -6,10 +6,14 @@
  */
 
 import {
+  AnnotationDomainType,
+  AreaSeries,
   Axis,
   BarSeries,
   Chart,
+  LineAnnotation,
   Position,
+  RectAnnotation,
   ScaleType,
   Settings,
   Tooltip,
@@ -28,11 +32,13 @@ import {
 import numeral from '@elastic/numeral';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React, { useRef } from 'react';
+import { max, min } from 'lodash';
 import { useGetPreviewData } from '../../../hooks/slo/use_get_preview_data';
 import { useKibana } from '../../../utils/kibana_react';
+import { COMPARATOR_MAPPING } from '../../slo_edit/constants';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -45,7 +51,8 @@ export interface Props {
 export function EventsChartPanel({ slo, range }: Props) {
   const { charts, uiSettings } = useKibana().services;
   const { euiTheme } = useEuiTheme();
-  const { isLoading, data } = useGetPreviewData(true, slo.indicator, range);
+  const filter = slo.instanceId !== ALL_VALUE ? `${slo.groupBy}: "${slo.instanceId}"` : '';
+  const { isLoading, data } = useGetPreviewData(true, slo.indicator, range, slo.objective, filter);
   const baseTheme = charts.theme.useChartsBaseTheme();
   const chartRef = useRef(null);
   const handleCursorUpdate = useActiveCursor(charts.activeCursor, chartRef, {
@@ -54,19 +61,87 @@ export function EventsChartPanel({ slo, range }: Props) {
 
   const dateFormat = uiSettings.get('dateFormat');
 
+  const title =
+    slo.indicator.type !== 'sli.metric.timeslice' ? (
+      <EuiTitle size="xs">
+        <h2>
+          {i18n.translate('xpack.observability.slo.sloDetails.eventsChartPanel.title', {
+            defaultMessage: 'Good vs bad events',
+          })}
+        </h2>
+      </EuiTitle>
+    ) : (
+      <EuiTitle size="xs">
+        <h2>
+          {i18n.translate('xpack.observability.slo.sloDetails.eventsChartPanel.timesliceTitle', {
+            defaultMessage: 'Timeslice metric',
+          })}
+        </h2>
+      </EuiTitle>
+    );
+  const threshold =
+    slo.indicator.type === 'sli.metric.timeslice'
+      ? slo.indicator.params.metric.threshold
+      : undefined;
+  const yAxisNumberFormat = slo.indicator.type === 'sli.metric.timeslice' ? '0,0[.00]' : '0,0';
+
+  const values = (data || []).map((row) => {
+    if (slo.indicator.type === 'sli.metric.timeslice') {
+      return row.sliValue;
+    } else {
+      return row?.events?.total || 0;
+    }
+  });
+  const maxValue = max(values);
+  const minValue = min(values);
+  const domain = {
+    fit: true,
+    min:
+      threshold != null && minValue != null && threshold < minValue ? threshold : minValue || NaN,
+    max:
+      threshold != null && maxValue != null && threshold > maxValue ? threshold : maxValue || NaN,
+  };
+
+  const annotation =
+    slo.indicator.type === 'sli.metric.timeslice' && threshold ? (
+      <>
+        <LineAnnotation
+          id="thresholdAnnotation"
+          domainType={AnnotationDomainType.YDomain}
+          dataValues={[{ dataValue: threshold }]}
+          style={{
+            line: {
+              strokeWidth: 2,
+              stroke: euiTheme.colors.warning || '#000',
+              opacity: 1,
+            },
+          }}
+          marker={<span>{threshold}</span>}
+          markerPosition="right"
+        />
+        <RectAnnotation
+          dataValues={[
+            {
+              coordinates: ['GT', 'GTE'].includes(slo.indicator.params.metric.comparator)
+                ? {
+                    y0: threshold,
+                    y1: maxValue,
+                  }
+                : { y0: minValue, y1: threshold },
+              details: `${COMPARATOR_MAPPING[slo.indicator.params.metric.comparator]} ${threshold}`,
+            },
+          ]}
+          id="thresholdShade"
+          style={{ fill: euiTheme.colors.warning || '#000', opacity: 0.1 }}
+        />
+      </>
+    ) : null;
+
   return (
     <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="eventsChartPanel">
       <EuiFlexGroup direction="column" gutterSize="l">
         <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem>
-            <EuiTitle size="xs">
-              <h2>
-                {i18n.translate('xpack.observability.slo.sloDetails.eventsChartPanel.title', {
-                  defaultMessage: 'Good vs bad events',
-                })}
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
+          <EuiFlexItem>{title}</EuiFlexItem>
           <EuiFlexItem>
             <EuiText color="subdued" size="s">
               {i18n.translate('xpack.observability.slo.sloDetails.eventsChartPanel.duration', {
@@ -84,7 +159,7 @@ export function EventsChartPanel({ slo, range }: Props) {
               <Tooltip type={TooltipType.VerticalCursor} />
               <Settings
                 baseTheme={baseTheme}
-                showLegend
+                showLegend={slo.indicator.type !== 'sli.metric.timeslice'}
                 showLegendExtra={false}
                 legendPosition={Position.Left}
                 noResults={
@@ -98,6 +173,7 @@ export function EventsChartPanel({ slo, range }: Props) {
                 pointerUpdateTrigger={'x'}
                 locale={i18n.getLocale()}
               />
+              {annotation}
 
               <Axis
                 id="bottom"
@@ -108,54 +184,71 @@ export function EventsChartPanel({ slo, range }: Props) {
               <Axis
                 id="left"
                 position={Position.Left}
-                tickFormat={(d) => numeral(d).format('0,0')}
+                tickFormat={(d) => numeral(d).format(yAxisNumberFormat)}
+                domain={domain}
               />
 
-              <BarSeries
-                id={i18n.translate(
-                  'xpack.observability.slo.sloDetails.eventsChartPanel.goodEventsLabel',
-                  { defaultMessage: 'Good events' }
-                )}
-                color={euiTheme.colors.success}
-                barSeriesStyle={{
-                  rect: { fill: euiTheme.colors.success },
-                  displayValue: { fill: euiTheme.colors.success },
-                }}
-                xScaleType={ScaleType.Time}
-                yScaleType={ScaleType.Linear}
-                xAccessor="key"
-                yAccessors={['value']}
-                stackAccessors={[0]}
-                data={
-                  data?.map((datum) => ({
-                    key: new Date(datum.date).getTime(),
-                    value: datum.events?.good,
-                  })) ?? []
-                }
-              />
+              {slo.indicator.type !== 'sli.metric.timeslice' ? (
+                <>
+                  <BarSeries
+                    id={i18n.translate(
+                      'xpack.observability.slo.sloDetails.eventsChartPanel.goodEventsLabel',
+                      { defaultMessage: 'Good events' }
+                    )}
+                    color={euiTheme.colors.success}
+                    barSeriesStyle={{
+                      rect: { fill: euiTheme.colors.success },
+                      displayValue: { fill: euiTheme.colors.success },
+                    }}
+                    xScaleType={ScaleType.Time}
+                    yScaleType={ScaleType.Linear}
+                    xAccessor="key"
+                    yAccessors={['value']}
+                    stackAccessors={[0]}
+                    data={
+                      data?.map((datum) => ({
+                        key: new Date(datum.date).getTime(),
+                        value: datum.events?.good,
+                      })) ?? []
+                    }
+                  />
 
-              <BarSeries
-                id={i18n.translate(
-                  'xpack.observability.slo.sloDetails.eventsChartPanel.badEventsLabel',
-                  { defaultMessage: 'Bad events' }
-                )}
-                color={euiTheme.colors.danger}
-                barSeriesStyle={{
-                  rect: { fill: euiTheme.colors.danger },
-                  displayValue: { fill: euiTheme.colors.danger },
-                }}
-                xScaleType={ScaleType.Time}
-                yScaleType={ScaleType.Linear}
-                xAccessor="key"
-                yAccessors={['value']}
-                stackAccessors={[0]}
-                data={
-                  data?.map((datum) => ({
-                    key: new Date(datum.date).getTime(),
-                    value: datum.events?.bad,
-                  })) ?? []
-                }
-              />
+                  <BarSeries
+                    id={i18n.translate(
+                      'xpack.observability.slo.sloDetails.eventsChartPanel.badEventsLabel',
+                      { defaultMessage: 'Bad events' }
+                    )}
+                    color={euiTheme.colors.danger}
+                    barSeriesStyle={{
+                      rect: { fill: euiTheme.colors.danger },
+                      displayValue: { fill: euiTheme.colors.danger },
+                    }}
+                    xScaleType={ScaleType.Time}
+                    yScaleType={ScaleType.Linear}
+                    xAccessor="key"
+                    yAccessors={['value']}
+                    stackAccessors={[0]}
+                    data={
+                      data?.map((datum) => ({
+                        key: new Date(datum.date).getTime(),
+                        value: datum.events?.bad,
+                      })) ?? []
+                    }
+                  />
+                </>
+              ) : (
+                <AreaSeries
+                  id="Metric"
+                  xScaleType={ScaleType.Time}
+                  yScaleType={ScaleType.Linear}
+                  xAccessor="date"
+                  yAccessors={['value']}
+                  data={(data ?? []).map((datum) => ({
+                    date: new Date(datum.date).getTime(),
+                    value: datum.sliValue >= 0 ? datum.sliValue : null,
+                  }))}
+                />
+              )}
             </Chart>
           )}
         </EuiFlexItem>

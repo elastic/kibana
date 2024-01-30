@@ -9,6 +9,9 @@
 import { getTopNavBadges } from './get_top_nav_badges';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { savedSearchMock } from '../../../../__mocks__/saved_search';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 const stateContainer = getDiscoverStateMock({ isTimeBased: true });
 
@@ -38,6 +41,41 @@ describe('getTopNavBadges()', function () {
         },
       ]
     `);
+  });
+
+  describe('managed saved search', () => {
+    const stateContainerWithManagedSavedSearch = getDiscoverStateMock({
+      savedSearch: { ...savedSearchMock, managed: true },
+    });
+
+    test('should return the managed badge when managed saved search', () => {
+      const topNavBadges = getTopNavBadges({
+        hasUnsavedChanges: false,
+        services: discoverServiceMock,
+        stateContainer: stateContainerWithManagedSavedSearch,
+        topNavCustomization: undefined,
+      });
+
+      expect(topNavBadges).toHaveLength(1);
+      expect(topNavBadges[0].badgeText).toEqual('Managed');
+    });
+
+    test('should not show save in unsaved changed badge', () => {
+      const topNavBadges = getTopNavBadges({
+        hasUnsavedChanges: true,
+        services: discoverServiceMock,
+        stateContainer: stateContainerWithManagedSavedSearch,
+        topNavCustomization: undefined,
+      });
+
+      expect(topNavBadges).toHaveLength(2);
+      const unsavedChangesBadge = topNavBadges[0];
+      expect(unsavedChangesBadge.badgeText).toEqual('Unsaved changes');
+
+      render(unsavedChangesBadge.renderCustomBadge!({ badgeText: 'Unsaved changes' }));
+      userEvent.click(screen.getByRole('button')); // open menu
+      expect(screen.queryByText('Save')).toBeNull();
+    });
   });
 
   test('should not return the unsaved changes badge when disabled in customization', () => {

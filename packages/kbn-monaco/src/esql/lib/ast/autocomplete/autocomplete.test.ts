@@ -317,6 +317,13 @@ describe('autocomplete', () => {
     testSuggestions('from index', suggestedIndexes, 6 /* index index in from */);
   });
 
+  describe('show', () => {
+    testSuggestions('show ', ['functions', 'info']);
+    for (const fn of ['functions', 'info']) {
+      testSuggestions(`show ${fn} `, ['|']);
+    }
+  });
+
   describe('where', () => {
     const allEvalFns = getFunctionSignaturesByReturnType('where', 'any', {
       evalMath: true,
@@ -342,7 +349,22 @@ describe('autocomplete', () => {
       ...getFieldNamesByType('string'),
       ...getFunctionSignaturesByReturnType('where', 'string', { evalMath: true }),
     ]);
+    testSuggestions('from a | where stringField =~ ', [
+      ...getFieldNamesByType('string'),
+      ...getFunctionSignaturesByReturnType('where', 'string', { evalMath: true }),
+    ]);
     testSuggestions('from a | where stringField >= stringField ', [
+      ...getFunctionSignaturesByReturnType(
+        'where',
+        'boolean',
+        {
+          builtin: true,
+        },
+        ['boolean']
+      ),
+      '|',
+    ]);
+    testSuggestions('from a | where stringField =~ stringField ', [
       ...getFunctionSignaturesByReturnType(
         'where',
         'boolean',
@@ -608,6 +630,10 @@ describe('autocomplete', () => {
       ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
       'a',
     ]);
+    testSuggestions('from a | eval a=stringField =~ ', [
+      ...getFieldNamesByType('string'),
+      ...getFunctionSignaturesByReturnType('eval', 'string', { evalMath: true }),
+    ]);
     testSuggestions(
       'from a | eval a=round()',
       [
@@ -617,6 +643,19 @@ describe('autocomplete', () => {
         ]),
       ],
       '('
+    );
+    testSuggestions(
+      'from a | eval a=raund()', // note the typo in round
+      [],
+      '('
+    );
+    testSuggestions(
+      'from a | eval a=raund(', // note the typo in round
+      []
+    );
+    testSuggestions(
+      'from a | eval raund(', // note the typo in round
+      []
     );
     testSuggestions('from a | eval a=round(numberField) ', [
       ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true }, ['number']),
