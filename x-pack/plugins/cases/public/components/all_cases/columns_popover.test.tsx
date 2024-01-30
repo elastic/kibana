@@ -8,6 +8,7 @@
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
@@ -35,12 +36,11 @@ for (let i = 0; i < 500; i++) {
 
       userEvent.click(await screen.findByTestId('column-selection-popover-button'));
 
-      expect(await screen.findByTestId('column-selection-popover')).toBeInTheDocument();
-      expect(
-        await screen.findByTestId(`column-selection-switch-${selectedColumns[0].field}`)
-      ).toHaveAttribute('aria-checked', selectedColumns[0].isChecked.toString());
+      await waitForEuiPopoverOpen();
 
-      selectedColumns.slice(1).forEach(({ field, name, isChecked }) => {
+      expect(await screen.findByTestId('column-selection-popover')).toBeInTheDocument();
+
+      selectedColumns.forEach(({ field, name, isChecked }) => {
         expect(screen.getByTestId(`column-selection-switch-${field}`)).toHaveAttribute(
           'aria-checked',
           isChecked.toString()
@@ -136,6 +136,7 @@ for (let i = 0; i < 500; i++) {
       );
 
       userEvent.click(await screen.findByTestId('column-selection-popover-button'));
+      await waitForEuiPopoverOpen();
       userEvent.paste(await screen.findByTestId('column-selection-popover-search'), 'Title');
 
       expect(await screen.findByTestId('column-selection-switch-title')).toBeInTheDocument();
@@ -154,6 +155,7 @@ for (let i = 0; i < 500; i++) {
       );
 
       userEvent.click(await screen.findByTestId('column-selection-popover-button'));
+      await waitForEuiPopoverOpen();
       userEvent.paste(await screen.findByTestId('column-selection-popover-search'), 'Category');
 
       await waitFor(() => {
@@ -185,6 +187,9 @@ for (let i = 0; i < 500; i++) {
       );
 
       userEvent.click(await screen.findByTestId('column-selection-popover-button'));
+
+      await waitForEuiPopoverOpen();
+
       userEvent.paste(await screen.findByTestId('column-selection-popover-search'), 'Foobar');
 
       expect(await screen.findByTestId('column-selection-popover-show-all-button')).toBeDisabled();
