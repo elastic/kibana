@@ -80,9 +80,9 @@ export const RulesTable = ({
     pageSizeOptions: [10, 25, 100],
   };
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const sorting: EuiTableSortingType<any> = {
+  const sorting: EuiTableSortingType<CspBenchmarkRulesWithStates> = {
     sort: {
-      field: 'metadata.benchmark.rule_number',
+      field: 'metadata.benchmark.rule_number' as keyof CspBenchmarkRulesWithStates,
       direction: sortDirection,
     },
   };
@@ -92,7 +92,6 @@ export const RulesTable = ({
     sort: sortOrder,
   }: Criteria<CspBenchmarkRulesWithStates>) => {
     if (!pagination) return;
-    // setPagination({ page: pagination.index, perPage: pagination.size });
     if (pagination) setPagination({ page: pagination.index, perPage: pagination.size });
     if (sortOrder) {
       setSortDirection(sortOrder.direction);
