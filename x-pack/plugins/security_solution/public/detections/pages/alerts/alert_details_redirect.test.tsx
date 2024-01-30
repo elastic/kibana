@@ -15,7 +15,7 @@ import {
   TestProviders,
 } from '../../../common/mock';
 import { createStore } from '../../../common/store';
-import { kibanaObservable } from '@kbn/timelines-plugin/public/mock';
+import { kibanaMock } from '@kbn/timelines-plugin/public/mock';
 import { ALERTS_PATH, ALERT_DETAILS_REDIRECT_PATH } from '../../../../common/constants';
 import { mockHistory } from '../../../common/utils/route/mocks';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
@@ -38,7 +38,7 @@ const mockPathname = `${ALERT_DETAILS_REDIRECT_PATH}/${testAlertId}`;
 
 describe('AlertDetailsRedirect', () => {
   const { storage } = createSecuritySolutionStorageMock();
-  const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaMock, storage);
   afterEach(() => {
     mockHistory.replace.mockClear();
   });

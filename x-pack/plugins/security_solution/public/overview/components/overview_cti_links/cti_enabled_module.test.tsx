@@ -16,7 +16,7 @@ import type { State } from '../../../common/store';
 import { createStore } from '../../../common/store';
 import {
   createSecuritySolutionStorageMock,
-  kibanaObservable,
+  kibanaMock,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
 } from '../../../common/mock';
@@ -41,11 +41,11 @@ describe('CtiEnabledModule', () => {
   const state: State = mockGlobalState;
 
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaMock, storage);
 
   beforeEach(() => {
     const myState = cloneDeep(state);
-    store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaMock, storage);
   });
 
   it('renders CtiWithEvents when there are events', () => {

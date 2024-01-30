@@ -15,7 +15,7 @@ import {
   TestProviders,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
-  kibanaObservable,
+  kibanaMock,
   createSecuritySolutionStorageMock,
 } from '../../../common/mock';
 import { TabNavigation } from '../../../common/components/navigation/tab_navigation';
@@ -87,7 +87,7 @@ const mockHistory = {
 const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
 const myState: State = mockGlobalState;
 const { storage } = createSecuritySolutionStorageMock();
-const myStore = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+const myStore = createStore(myState, SUB_PLUGINS_REDUCER, kibanaMock, storage);
 
 describe('Hosts - rendering', () => {
   beforeEach(() => {

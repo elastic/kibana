@@ -16,7 +16,7 @@ import {
   TestProviders,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
-  kibanaObservable,
+  kibanaMock,
   createSecuritySolutionStorageMock,
 } from '../../../common/mock';
 import type { State } from '../../../common/store';
@@ -230,7 +230,7 @@ describe('Network page - rendering', () => {
     });
     const myState: State = mockGlobalState;
     const { storage } = createSecuritySolutionStorageMock();
-    const myStore = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    const myStore = createStore(myState, SUB_PLUGINS_REDUCER, kibanaMock, storage);
     const wrapper = mount(
       <TestProviders store={myStore}>
         <Router history={mockHistory}>

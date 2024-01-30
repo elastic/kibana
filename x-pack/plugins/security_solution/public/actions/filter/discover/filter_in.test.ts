@@ -7,7 +7,7 @@
 
 import {
   createSecuritySolutionStorageMock,
-  kibanaObservable,
+  kibanaMock,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
 } from '../../../common/mock';
@@ -31,7 +31,7 @@ jest.mock('@kbn/ui-actions-plugin/public', () => ({
 }));
 
 const { storage } = createSecuritySolutionStorageMock();
-const mockStore = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+const mockStore = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaMock, storage);
 
 describe('createFilterInDiscoverCellActionFactory', () => {
   const createFilterInCellAction = createFilterInDiscoverCellActionFactory({

@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 import {
   createSecuritySolutionStorageMock,
-  kibanaObservable,
+  kibanaMock,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
   TestProviders,
@@ -38,7 +38,7 @@ const mockState = {
 };
 
 const { storage } = createSecuritySolutionStorageMock();
-const mockStore = createStore(mockState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+const mockStore = createStore(mockState, SUB_PLUGINS_REDUCER, kibanaMock, storage);
 
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   <TestProviders store={mockStore}>{children}</TestProviders>

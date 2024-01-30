@@ -30,7 +30,7 @@ import type { StartPlugins, StartServices } from '../../../types';
 import { depsStartMock } from './dependencies_start_mock';
 import type { MiddlewareActionSpyHelper } from '../../store/test_utils';
 import { createSpyMiddleware } from '../../store/test_utils';
-import { kibanaObservable } from '../test_providers';
+import { kibanaMock } from '../test_providers';
 import type { State } from '../../store';
 import { createStore } from '../../store';
 import { AppRootProvider } from './app_root_provider';
@@ -214,7 +214,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
   const store = createStore(
     mockGlobalState,
     storeReducer,
-    kibanaObservable,
+    kibanaMock,
     storage,
     // @ts-expect-error ts upgrade v4.7.4
     [...managementMiddlewareFactory(coreStart, depsStart), middlewareSpy.actionSpyMiddleware]

@@ -14,7 +14,7 @@ import {
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
-  kibanaObservable,
+  kibanaMock,
   createSecuritySolutionStorageMock,
 } from '../../../../common/mock';
 import type { State } from '../../../../common/store';
@@ -31,10 +31,10 @@ describe('IP Overview Component', () => {
   const state: State = mockGlobalState;
 
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaMock, storage);
 
   beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaMock, storage);
   });
 
   describe('rendering', () => {

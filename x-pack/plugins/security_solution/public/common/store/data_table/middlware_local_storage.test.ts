@@ -11,7 +11,7 @@ import {
   SUB_PLUGINS_REDUCER,
   defaultHeaders,
   createSecuritySolutionStorageMock,
-  kibanaObservable,
+  kibanaMock,
 } from '../../mock';
 
 import type { State } from '..';
@@ -39,10 +39,10 @@ const addTableInStorageMock = addTableInStorage as jest.Mock;
 describe('DataTable localStorage middleware', () => {
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaMock, storage);
 
   beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaMock, storage);
   });
 
   it('should call the storage method with the most recent table state', () => {

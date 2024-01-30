@@ -10,7 +10,7 @@ import {
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
   TestProviders,
-  kibanaObservable,
+  kibanaMock,
   createSecuritySolutionStorageMock,
 } from '../../common/mock';
 import { useTimelineDataFilters } from './use_timeline_data_filters';
@@ -47,7 +47,7 @@ const store = createStore(
     },
   },
   SUB_PLUGINS_REDUCER,
-  kibanaObservable,
+  kibanaMock,
   storage
 );
 

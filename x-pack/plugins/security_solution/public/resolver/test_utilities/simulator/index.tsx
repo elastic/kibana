@@ -23,7 +23,7 @@ import { EMPTY_RESOLVER } from '../../store/helpers';
 import type { State } from '../../../common/store/types';
 import {
   createSecuritySolutionStorageMock,
-  kibanaObservable,
+  kibanaMock,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
 } from '../../../common/mock';
@@ -121,7 +121,7 @@ export class Simulator {
         },
       },
       SUB_PLUGINS_REDUCER,
-      kibanaObservable,
+      kibanaMock,
       storage,
       [resolverMiddlewareFactory(dataAccessLayer), this.spyMiddleware.middleware]
     );

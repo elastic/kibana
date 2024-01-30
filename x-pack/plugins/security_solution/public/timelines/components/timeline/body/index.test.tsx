@@ -18,7 +18,7 @@ import { Direction } from '../../../../../common/search_strategy';
 import {
   createSecuritySolutionStorageMock,
   defaultHeaders,
-  kibanaObservable,
+  kibanaMock,
   mockGlobalState,
   mockTimelineData,
   SUB_PLUGINS_REDUCER,
@@ -318,7 +318,7 @@ describe('Body', () => {
         },
       };
 
-      const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaMock, storage);
       const wrapper = await getWrapper(<StatefulBody {...props} />, { store });
 
       headersJustTimestamp.forEach(() => {
@@ -394,7 +394,7 @@ describe('Body', () => {
         },
       };
 
-      const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaMock, storage);
 
       const Proxy = (proxyProps: Props) => <StatefulBody {...proxyProps} />;
 

@@ -25,7 +25,7 @@ import {
 } from '../../../detections/components/user_info';
 import {
   createSecuritySolutionStorageMock,
-  kibanaObservable,
+  kibanaMock,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
   mockSourcererState,
@@ -160,7 +160,7 @@ describe('Sourcerer Hooks', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaMock, storage);
     mockUseUserInfo.mockImplementation(() => userInfoState);
   });
   it('initializes loading default and timeline index patterns', async () => {
@@ -206,7 +206,7 @@ describe('Sourcerer Hooks', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
-      kibanaObservable,
+      kibanaMock,
       storage
     );
     await act(async () => {
@@ -308,7 +308,7 @@ describe('Sourcerer Hooks', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
-      kibanaObservable,
+      kibanaMock,
       storage
     );
     await act(async () => {
@@ -344,7 +344,7 @@ describe('Sourcerer Hooks', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
-      kibanaObservable,
+      kibanaMock,
       storage
     );
     await act(async () => {
@@ -388,7 +388,7 @@ describe('Sourcerer Hooks', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
-      kibanaObservable,
+      kibanaMock,
       storage
     );
     await act(async () => {
@@ -463,7 +463,7 @@ describe('Sourcerer Hooks', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
-      kibanaObservable,
+      kibanaMock,
       storage
     );
     await act(async () => {
@@ -521,7 +521,7 @@ describe('Sourcerer Hooks', () => {
           },
         },
         SUB_PLUGINS_REDUCER,
-        kibanaObservable,
+        kibanaMock,
         storage
       );
       await act(async () => {
@@ -562,7 +562,7 @@ describe('Sourcerer Hooks', () => {
           },
         },
         SUB_PLUGINS_REDUCER,
-        kibanaObservable,
+        kibanaMock,
         storage
       );
       await act(async () => {
@@ -604,7 +604,7 @@ describe('Sourcerer Hooks', () => {
           },
         },
         SUB_PLUGINS_REDUCER,
-        kibanaObservable,
+        kibanaMock,
         storage
       );
       await act(async () => {
@@ -650,7 +650,7 @@ describe('Sourcerer Hooks', () => {
           },
         },
         SUB_PLUGINS_REDUCER,
-        kibanaObservable,
+        kibanaMock,
         storage
       );
       await act(async () => {
@@ -698,7 +698,7 @@ describe('Sourcerer Hooks', () => {
             },
           },
           SUB_PLUGINS_REDUCER,
-          kibanaObservable,
+          kibanaMock,
           storage
         );
         const { result, rerender, waitForNextUpdate } = renderHook<

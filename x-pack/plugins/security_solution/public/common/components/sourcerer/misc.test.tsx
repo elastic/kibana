@@ -15,7 +15,7 @@ import { Sourcerer } from '.';
 import { sourcererActions, sourcererModel } from '../../store/sourcerer';
 import {
   createSecuritySolutionStorageMock,
-  kibanaObservable,
+  kibanaMock,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
   TestProviders,
@@ -107,7 +107,7 @@ describe('No data', () => {
       pollForSignalIndex: pollForSignalIndexMock,
       signalIndexNeedsInit: false,
     });
-    store = createStore(mockNoIndicesState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(mockNoIndicesState, SUB_PLUGINS_REDUCER, kibanaMock, storage);
     jest.clearAllMocks();
   });
 
@@ -185,7 +185,7 @@ describe('Update available', () => {
       ...sourcererDataView,
       activePatterns: ['myFakebeat-*'],
     });
-    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaMock, storage);
 
     render(
       <TestProviders store={store}>
@@ -314,7 +314,7 @@ describe('Update available for timeline template', () => {
       ...sourcererDataView,
       activePatterns: ['myFakebeat-*'],
     });
-    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaMock, storage);
 
     render(
       <TestProviders store={store}>
@@ -404,7 +404,7 @@ describe('Missing index patterns', () => {
     });
     const state3 = cloneDeep(state2);
     state3.timeline.timelineById[TimelineId.active].timelineType = TimelineType.default;
-    store = createStore(state3, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(state3, SUB_PLUGINS_REDUCER, kibanaMock, storage);
 
     render(
       <TestProviders store={store}>
@@ -435,7 +435,7 @@ describe('Missing index patterns', () => {
       ...sourcererDataView,
       activePatterns: ['myFakebeat-*'],
     });
-    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaMock, storage);
 
     render(
       <TestProviders store={store}>
@@ -506,7 +506,7 @@ describe('Sourcerer integration tests', () => {
       ...sourcererDataView,
       activePatterns: ['myFakebeat-*'],
     });
-    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaMock, storage);
     jest.clearAllMocks();
   });
 

@@ -14,7 +14,7 @@ import { Sourcerer } from '.';
 import { sourcererActions, sourcererModel } from '../../store/sourcerer';
 import {
   createSecuritySolutionStorageMock,
-  kibanaObservable,
+  kibanaMock,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
   TestProviders,
@@ -93,7 +93,7 @@ describe('Sourcerer component', () => {
   let wrapper: ReactWrapper;
   beforeEach(() => {
     jest.clearAllMocks();
-    store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaMock, storage);
     (useSourcererDataView as jest.Mock).mockReturnValue(sourcererDataView);
     (useSignalHelpers as jest.Mock).mockReturnValue({ signalIndexNeedsInit: false });
   });
@@ -205,7 +205,7 @@ describe('Sourcerer component', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
-      kibanaObservable,
+      kibanaMock,
       storage
     );
     wrapper = mount(
@@ -255,7 +255,7 @@ describe('Sourcerer component', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
-      kibanaObservable,
+      kibanaMock,
       storage
     );
     wrapper = mount(
@@ -306,7 +306,7 @@ describe('Sourcerer component', () => {
       },
     };
 
-    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaMock, storage);
     wrapper = mount(
       <TestProviders store={store}>
         <Sourcerer {...defaultProps} />
@@ -351,7 +351,7 @@ describe('Sourcerer component', () => {
       },
     };
 
-    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaMock, storage);
     const { getByTestId, queryByTitle, queryAllByTestId } = render(
       <TestProviders store={store}>
         <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
@@ -396,7 +396,7 @@ describe('Sourcerer component', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
-      kibanaObservable,
+      kibanaMock,
       storage
     );
     wrapper = mount(
@@ -453,7 +453,7 @@ describe('Sourcerer component', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
-      kibanaObservable,
+      kibanaMock,
       storage
     );
 
@@ -521,7 +521,7 @@ describe('Sourcerer component', () => {
         },
       },
       SUB_PLUGINS_REDUCER,
-      kibanaObservable,
+      kibanaMock,
       storage
     );
     wrapper = mount(
@@ -572,7 +572,7 @@ describe('Sourcerer component', () => {
       },
     };
 
-    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaMock, storage);
     const el = render(
       <TestProviders store={store}>
         <Sourcerer scope={sourcererModel.SourcererScopeName.timeline} />
@@ -620,7 +620,7 @@ describe('Sourcerer component', () => {
       },
     };
 
-    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(state2, SUB_PLUGINS_REDUCER, kibanaMock, storage);
     wrapper = mount(
       <TestProviders store={store}>
         <Sourcerer {...defaultProps} />

@@ -12,7 +12,7 @@ import useResizeObserver from 'use-resize-observer/polyfilled';
 import '../../../../common/mock/match_media';
 import {
   createSecuritySolutionStorageMock,
-  kibanaObservable,
+  kibanaMock,
   mockGlobalState,
   mockIndexPattern,
   SUB_PLUGINS_REDUCER,
@@ -85,7 +85,7 @@ const myStore = createStore(
     },
   },
   SUB_PLUGINS_REDUCER,
-  kibanaObservable,
+  kibanaMock,
   storage
 );
 

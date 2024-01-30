@@ -14,7 +14,7 @@ import {
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
-  kibanaObservable,
+  kibanaMock,
   createSecuritySolutionStorageMock,
 } from '../../../common/mock';
 
@@ -67,14 +67,14 @@ describe('OverviewHost', () => {
   const state: State = mockGlobalState;
 
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaMock, storage);
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
     const myState = cloneDeep(state);
     useHostOverviewMock.mockReturnValue([false, MOCKED_RESPONSE]);
-    store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaMock, storage);
   });
 
   test('it renders the expected widget title', () => {

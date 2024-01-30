@@ -13,7 +13,7 @@ import { FilterManager } from '@kbn/data-plugin/public';
 
 import {
   createSecuritySolutionStorageMock,
-  kibanaObservable,
+  kibanaMock,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
   TestProviders,
@@ -359,7 +359,7 @@ describe('HomePage', () => {
         },
       };
 
-      const mockStore = createStore(mockstate, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      const mockStore = createStore(mockstate, SUB_PLUGINS_REDUCER, kibanaMock, storage);
 
       render(
         <TestProviders store={mockStore}>
@@ -513,7 +513,7 @@ describe('HomePage', () => {
       };
 
       const { storage } = createSecuritySolutionStorageMock();
-      const mockStore = createStore(mockstate, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      const mockStore = createStore(mockstate, SUB_PLUGINS_REDUCER, kibanaMock, storage);
 
       const TestComponent = () => (
         <TestProviders store={mockStore}>
@@ -570,7 +570,7 @@ describe('HomePage', () => {
       };
 
       const { storage } = createSecuritySolutionStorageMock();
-      const mockStore = createStore(mockstate, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      const mockStore = createStore(mockstate, SUB_PLUGINS_REDUCER, kibanaMock, storage);
 
       const TestComponent = () => (
         <TestProviders store={mockStore}>
@@ -630,7 +630,7 @@ describe('HomePage', () => {
 
     it('it keeps timeline visibility and selected tab state in URL', async () => {
       const { storage } = createSecuritySolutionStorageMock();
-      const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaMock, storage);
 
       mockUseInitializeUrlParam(URL_PARAM_KEY.timeline, {
         id: 'testSavedTimelineId',
@@ -661,7 +661,7 @@ describe('HomePage', () => {
 
     it('it updates URL when timeline store changes', async () => {
       const { storage } = createSecuritySolutionStorageMock();
-      const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaMock, storage);
       const savedObjectId = 'testTimelineId';
 
       mockUseInitializeUrlParam(URL_PARAM_KEY.timeline, {

@@ -13,7 +13,7 @@ import { Sourcerer } from '.';
 import { sourcererModel } from '../../store/sourcerer';
 import {
   createSecuritySolutionStorageMock,
-  kibanaObservable,
+  kibanaMock,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
   TestProviders,
@@ -68,7 +68,7 @@ const sourcererDataView = {
 
 describe('timeline sourcerer', () => {
   const { storage } = createSecuritySolutionStorageMock();
-  store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaMock, storage);
   const testProps = {
     scope: sourcererModel.SourcererScopeName.timeline,
   };
@@ -169,7 +169,7 @@ describe('timeline sourcerer', () => {
       state2,
       SUB_PLUGINS_REDUCER,
 
-      kibanaObservable,
+      kibanaMock,
       storage
     );
 

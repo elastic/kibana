@@ -12,7 +12,7 @@ import { act, render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { DEFAULT_DETECTION_PAGE_FILTERS } from '../../../../common/constants';
 import {
   createSecuritySolutionStorageMock,
-  kibanaObservable,
+  kibanaMock,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
   TestProviders,
@@ -92,7 +92,7 @@ const state = mockGlobalState;
 const { storage } = createSecuritySolutionStorageMock();
 
 const getStoreWithCustomState = (newState: typeof state = state) => {
-  return createStore(newState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  return createStore(newState, SUB_PLUGINS_REDUCER, kibanaMock, storage);
 };
 
 const TestComponent: FC<

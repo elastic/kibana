@@ -8,7 +8,7 @@
 import { createStore } from '../../store';
 import {
   createSecuritySolutionStorageMock,
-  kibanaObservable,
+  kibanaMock,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
   TestProviders,
@@ -46,7 +46,7 @@ describe('useVisualizationResponse', () => {
   };
 
   const { storage } = createSecuritySolutionStorageMock();
-  const mockStore = createStore(mockState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  const mockStore = createStore(mockState, SUB_PLUGINS_REDUCER, kibanaMock, storage);
   const visualizationId = 'testId';
   beforeEach(() => {
     jest.clearAllMocks();

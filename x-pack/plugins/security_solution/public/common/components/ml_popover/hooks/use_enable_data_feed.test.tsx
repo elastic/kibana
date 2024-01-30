@@ -9,7 +9,7 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { useEnableDataFeed } from './use_enable_data_feed';
 import {
   createSecuritySolutionStorageMock,
-  kibanaObservable,
+  kibanaMock,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
   TestProviders,
@@ -23,7 +23,7 @@ import { ML_JOB_TELEMETRY_STATUS } from '../../../lib/telemetry';
 
 const state: State = mockGlobalState;
 const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaMock, storage);
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <TestProviders store={store}>{children}</TestProviders>

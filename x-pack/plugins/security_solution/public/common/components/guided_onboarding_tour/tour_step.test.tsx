@@ -13,7 +13,7 @@ import { useTourContext } from './tour';
 import { mockGlobalState, SUB_PLUGINS_REDUCER, TestProviders } from '../../mock';
 import { TimelineId } from '../../../../common/types';
 import { createStore } from '../../store';
-import { kibanaObservable } from '@kbn/timelines-plugin/public/mock';
+import { kibanaMock } from '@kbn/timelines-plugin/public/mock';
 import { createSecuritySolutionStorageMock } from '@kbn/timelines-plugin/public/mock/mock_local_storage';
 
 jest.mock('./tour');
@@ -257,7 +257,7 @@ describe('SecurityTourStep', () => {
       },
     };
     const { storage } = createSecuritySolutionStorageMock();
-    const mockStore = createStore(mockstate, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    const mockStore = createStore(mockstate, SUB_PLUGINS_REDUCER, kibanaMock, storage);
 
     render(
       <TestProviders store={mockStore}>

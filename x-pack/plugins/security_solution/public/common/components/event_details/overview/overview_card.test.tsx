@@ -10,7 +10,7 @@ import { act, render } from '@testing-library/react';
 import { OverviewCardWithActions } from './overview_card';
 import {
   createSecuritySolutionStorageMock,
-  kibanaObservable,
+  kibanaMock,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
   TestProviders,
@@ -35,7 +35,7 @@ const state: State = {
 };
 
 const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaMock, storage);
 
 const props = {
   title: 'Severity',

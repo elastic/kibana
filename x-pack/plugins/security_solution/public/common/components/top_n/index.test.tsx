@@ -15,7 +15,7 @@ import {
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
-  kibanaObservable,
+  kibanaMock,
   createSecuritySolutionStorageMock,
   mockIndexPattern,
 } from '../../mock';
@@ -150,7 +150,7 @@ const state: State = {
 };
 
 const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaMock, storage);
 
 const testProps = {
   browserFields: mockBrowserFields,

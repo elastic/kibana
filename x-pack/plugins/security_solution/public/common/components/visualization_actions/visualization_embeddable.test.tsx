@@ -14,7 +14,7 @@ import * as inputActions from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
 import {
   createSecuritySolutionStorageMock,
-  kibanaObservable,
+  kibanaMock,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
   TestProviders,
@@ -40,7 +40,7 @@ const state: State = {
   ...mockGlobalState,
 };
 const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaMock, storage);
 
 describe('VisualizationEmbeddable', () => {
   describe('when isDonut = false', () => {
@@ -121,7 +121,7 @@ describe('VisualizationEmbeddable', () => {
         },
       },
     };
-    const mockStore = createStore(mockState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    const mockStore = createStore(mockState, SUB_PLUGINS_REDUCER, kibanaMock, storage);
 
     beforeEach(() => {
       jest.clearAllMocks();
