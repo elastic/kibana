@@ -40,10 +40,6 @@ function getCallbackMocks() {
             { name: 'geoPointField', type: 'geo_point' },
             { name: 'any#Char$ field', type: 'number' },
             { name: 'kubernetes.something.something', type: 'number' },
-            {
-              name: `listField`,
-              type: `list`,
-            },
             { name: '@timestamp', type: 'date' },
           ]
     ),
@@ -67,6 +63,7 @@ function getCallbackMocks() {
         enrichFields: ['otherField', 'yetAnotherField'],
       },
     ]),
+    getMetaFields: jest.fn(async () => ['_id', '_source']),
   };
 }
 
@@ -106,7 +103,7 @@ function getFieldName(
   return useNestedFunction ? nestedFunctions[typeString] : `${typeString}Field`;
 }
 
-function getMultiValue(type: 'string[]' | 'number[]' | 'boolean[]' | 'any[]') {
+function getMultiValue(type: string) {
   if (/string|any/.test(type)) {
     return `["a", "b", "c"]`;
   }
@@ -156,9 +153,9 @@ function getFieldMapping(
         ...rest,
       };
     }
-    if (['string[]', 'number[]', 'boolean[]', 'any[]'].includes(typeString)) {
+    if (/[]$/.test(typeString)) {
       return {
-        name: getMultiValue(typeString as 'string[]' | 'number[]' | 'boolean[]' | 'any[]'),
+        name: getMultiValue(typeString),
         type,
         ...rest,
       };
@@ -262,6 +259,9 @@ describe('validation logic', () => {
     testErrorsAndWarnings(`from index [metadata _id]`, []);
 
     testErrorsAndWarnings(`from index [METADATA _id, _source]`, []);
+    testErrorsAndWarnings(`from index [METADATA _id, _source2]`, [
+      'Metadata field [_source2] is not available. Available metadata fields are: [_id, _source]',
+    ]);
     testErrorsAndWarnings(`from index [metadata _id, _source] [METADATA _id2]`, [
       'SyntaxError: expected {<EOF>, PIPE} but found "["',
     ]);
@@ -286,6 +286,8 @@ describe('validation logic', () => {
     testErrorsAndWarnings(`from *:indexes [METADATA _id]`, []);
     testErrorsAndWarnings('from .secretIndex', []);
     testErrorsAndWarnings('from my-index', []);
+    testErrorsAndWarnings('from numberField', ['Unknown index [numberField]']);
+    testErrorsAndWarnings('from policy', ['Unknown index [policy]']);
   });
 
   describe('row', () => {
@@ -307,6 +309,10 @@ describe('validation logic', () => {
       'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, LP, NOT, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found ","',
       "SyntaxError: extraneous input ')' expecting <EOF>",
     ]);
+    for (const bool of ['true', 'false']) {
+      testErrorsAndWarnings(`row a=NOT ${bool}`, []);
+      testErrorsAndWarnings(`row NOT ${bool}`, []);
+    }
 
     testErrorsAndWarnings('row var = 1 in (1, 2, 3)', []);
     testErrorsAndWarnings('row var = 5 in (1, 2, 3)', []);
@@ -498,6 +504,19 @@ describe('validation logic', () => {
       "SyntaxError: token recognition error at: 'a'",
       "SyntaxError: token recognition error at: 'h'",
     ]);
+    testErrorsAndWarnings('show numberField', [
+      "SyntaxError: token recognition error at: 'n'",
+      "SyntaxError: token recognition error at: 'u'",
+      "SyntaxError: token recognition error at: 'm'",
+      "SyntaxError: token recognition error at: 'b'",
+      "SyntaxError: token recognition error at: 'e'",
+      "SyntaxError: token recognition error at: 'r'",
+      "SyntaxError: token recognition error at: 'Fi'",
+      "SyntaxError: token recognition error at: 'e'",
+      "SyntaxError: token recognition error at: 'l'",
+      "SyntaxError: token recognition error at: 'd'",
+      'SyntaxError: expected {SHOW} but found "<EOF>"',
+    ]);
   });
 
   describe('limit', () => {
@@ -619,20 +638,16 @@ describe('validation logic', () => {
     testErrorsAndWarnings('from a | mv_expand ', [
       "SyntaxError: missing {UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} at '<EOF>'",
     ]);
-    testErrorsAndWarnings('from a | mv_expand stringField', [
-      'MV_EXPAND only supports list type values, found [stringField] of type string',
-    ]);
+    for (const type of ['string', 'number', 'date', 'boolean', 'ip']) {
+      testErrorsAndWarnings(`from a | mv_expand ${type}Field`, []);
+    }
 
-    testErrorsAndWarnings(`from a | mv_expand listField`, []);
-
-    testErrorsAndWarnings('from a | mv_expand listField, b', [
+    testErrorsAndWarnings('from a | mv_expand numberField, b', [
       "SyntaxError: token recognition error at: ','",
       "SyntaxError: extraneous input 'b' expecting <EOF>",
     ]);
 
-    testErrorsAndWarnings('row a = "a" | mv_expand a', [
-      'MV_EXPAND only supports list type values, found [a] of type string',
-    ]);
+    testErrorsAndWarnings('row a = "a" | mv_expand a', []);
     testErrorsAndWarnings('row a = [1, 2, 3] | mv_expand a', []);
   });
 
