@@ -34,7 +34,6 @@ export const OptionsListControl = ({
 
   const error = optionsList.select((state) => state.componentState.error);
   const isPopoverOpen = optionsList.select((state) => state.componentState.popoverOpen);
-  const validSelections = optionsList.select((state) => state.componentState.validSelections);
   const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
   const fieldSpec = optionsList.select((state) => state.componentState.field);
 
@@ -90,11 +89,14 @@ export const OptionsListControl = ({
     [loadMoreSubject]
   );
 
-  const { hasSelections, selectionDisplayNode, selectedOptionsCount } = useMemo(() => {
-    const delimiter = OptionsListStrings.control.getSeparator(fieldSpec?.type);
+  const delimiter = useMemo(
+    () => OptionsListStrings.control.getSeparator(fieldSpec?.type),
+    [fieldSpec?.type]
+  );
 
+  const { hasSelections, selectionDisplayNode, selectedOptionsCount } = useMemo(() => {
     return {
-      hasSelections: !isEmpty(validSelections) || !isEmpty(invalidSelections),
+      hasSelections: !isEmpty(selectedOptions),
       selectedOptionsCount: selectedOptions?.length,
       selectionDisplayNode: (
         <>
@@ -113,31 +115,27 @@ export const OptionsListControl = ({
             </span>
           ) : (
             <>
-              {validSelections?.length ? (
-                <span className="optionsList__filter">
-                  {validSelections.map((value) => fieldFormatter(value)).join(delimiter)}
-                </span>
-              ) : null}
-              {validSelections?.length && invalidSelections?.length ? delimiter : null}
-              {invalidSelections?.length ? (
-                <span className="optionsList__filter optionsList__filterInvalid">
-                  {invalidSelections.map((value) => fieldFormatter(value)).join(delimiter)}
-                </span>
-              ) : null}
+              {selectedOptions?.length
+                ? selectedOptions.map((value: string, i, { length }) => {
+                    const text = `${fieldFormatter(value)}${i + 1 === length ? '' : delimiter} `;
+                    const isInvalid = invalidSelections?.includes(value);
+                    return (
+                      <span
+                        className={`optionsList__filter ${
+                          isInvalid ? 'optionsList__filterInvalid' : ''
+                        }`}
+                      >
+                        {text}
+                      </span>
+                    );
+                  })
+                : null}
             </>
           )}
         </>
       ),
     };
-  }, [
-    exclude,
-    existsSelected,
-    fieldSpec?.type,
-    invalidSelections,
-    validSelections,
-    selectedOptions?.length,
-    fieldFormatter,
-  ]);
+  }, [selectedOptions, exclude, existsSelected, fieldFormatter, delimiter, invalidSelections]);
 
   const button = (
     <EuiFilterButton
@@ -153,6 +151,14 @@ export const OptionsListControl = ({
       isSelected={isPopoverOpen}
       numActiveFilters={selectedOptionsCount}
       hasActiveFilters={Boolean(selectedOptionsCount)}
+      aria-label={`${selectedOptions
+        ?.map((value) => {
+          const isInvalid = invalidSelections?.includes(value);
+          return `${
+            isInvalid ? OptionsListStrings.popover.getInvalidSelectionScreenReaderText() + ' ' : ''
+          }${fieldFormatter(value)}`;
+        })
+        .join(delimiter)}`}
     >
       {hasSelections || existsSelected
         ? selectionDisplayNode

@@ -142,17 +142,17 @@ export class OptionsListEmbeddable
 
   private initialize = async () => {
     const { selectedOptions: initialSelectedOptions } = this.getInput();
-    if (!initialSelectedOptions) this.setInitializationFinished();
+    if (initialSelectedOptions) {
+      const filters = await this.buildFilter();
+      this.dispatch.publishFilters(filters);
+    }
+    this.setInitializationFinished();
 
     this.dispatch.setAllowExpensiveQueries(
       await this.optionsListService.getAllowExpensiveQueries()
     );
 
     this.runOptionsListQuery().then(async () => {
-      if (initialSelectedOptions) {
-        await this.buildFilter();
-        this.setInitializationFinished();
-      }
       this.setupSubscriptions();
     });
   };
@@ -362,12 +362,9 @@ export class OptionsListEmbeddable
         });
       }
 
-      // publish filter
-      const newFilters = await this.buildFilter();
       batch(() => {
         this.dispatch.setErrorMessage(undefined);
         this.dispatch.setLoading(false);
-        this.dispatch.publishFilters(newFilters);
       });
     } else {
       batch(() => {
