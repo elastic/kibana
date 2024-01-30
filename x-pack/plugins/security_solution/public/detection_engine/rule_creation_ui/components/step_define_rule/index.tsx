@@ -88,7 +88,7 @@ import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common
 import { DurationInput } from '../duration_input';
 import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../common/detection_engine/constants';
 import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useAlertSuppression } from '../../../rule_management/hooks/use_alert_suppression';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -178,6 +178,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   thresholdFields,
   enableThresholdSuppression,
 }) => {
+  const { isSuppressionEnabled: isAlertSuppressionEnabled } = useAlertSuppression(ruleType);
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
@@ -185,10 +186,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const license = useLicense();
 
   const esqlQueryRef = useRef<DefineStepRule['queryBar'] | undefined>(undefined);
-
-  const isAlertSuppressionForIndicatorMatchRuleEnabled = useIsExperimentalFeatureEnabled(
-    'alertSuppressionForIndicatorMatchRuleEnabled'
-  );
 
   const isAlertSuppressionLicenseValid = license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION);
 
@@ -812,11 +809,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     }),
     [isUpdateView, mlCapabilities]
   );
-
-  const isAlertSuppressionEnabled =
-    isQueryRule(ruleType) ||
-    isThresholdRule ||
-    (isAlertSuppressionForIndicatorMatchRuleEnabled && isThreatMatchRule(ruleType));
 
   return (
     <>
