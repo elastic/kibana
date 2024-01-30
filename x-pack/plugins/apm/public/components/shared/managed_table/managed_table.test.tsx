@@ -7,11 +7,6 @@
 
 import { shouldfetchServer } from '.';
 
-interface Person {
-  name: string;
-  age: number;
-}
-
 describe('ManagedTable', () => {
   describe('shouldfetchServer', () => {
     it('returns true if maxCountExceeded is true', () => {
