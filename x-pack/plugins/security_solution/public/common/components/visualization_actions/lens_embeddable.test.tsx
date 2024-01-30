@@ -65,7 +65,7 @@ describe('LensEmbeddable', () => {
         queries: [
           {
             id: 'testId',
-            inspect: { dsl: [], response: [] },
+            inspect: { dsl: [], response: ['{"mockResponse": "mockResponse"}'] },
             isInspected: false,
             loading: false,
             selectedInspectIndex: 0,
@@ -127,5 +127,11 @@ describe('LensEmbeddable', () => {
   it('should not sync highlight state between visualizations', () => {
     expect(mockEmbeddableComponent.mock.calls[0][0].syncTooltips).toEqual(false);
     expect(mockEmbeddableComponent.mock.calls[0][0].syncCursor).toEqual(false);
+  });
+
+  it('should not render Panel settings action', () => {
+    expect(
+      mockEmbeddableComponent.mock.calls[0][0].disabledActions.includes('ACTION_CUSTOMIZE_PANEL')
+    ).toBeTruthy();
   });
 });

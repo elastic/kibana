@@ -92,7 +92,7 @@ how the test suite is executed & extra options regarding parallelism, retrying e
 ### How is the Threat Intelligence code loaded in Kibana?
 
 The Threat Intelligence plugin is loaded lazily within the [security_solution](https://github.com/elastic/kibana/tree/main/x-pack/plugins/security_solution) plugin,
-from `x-pack/plugins/security_solution/public/threat_intelligence` owned by the Protections Experience Team.
+from `x-pack/plugins/security_solution/public/threat_intelligence` owned by the Threat Hunting Investigations Team.
 
 ## QA and demo for implemented features
 

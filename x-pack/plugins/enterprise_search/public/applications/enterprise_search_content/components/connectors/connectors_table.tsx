@@ -20,7 +20,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { Connector } from '@kbn/search-connectors';
+import { Connector, ConnectorStatus } from '@kbn/search-connectors';
 
 import { Meta } from '../../../../../common/types/pagination';
 
@@ -41,6 +41,7 @@ interface ConnectorsTableProps {
   items: ConnectorViewItem[];
   meta?: Meta;
   onChange: (criteria: CriteriaWithPagination<Connector>) => void;
+  onDelete: (connectorName: string, connectorId: string, indexName: string | null) => void;
 }
 export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
   items,
@@ -53,6 +54,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
   },
   onChange,
   isLoading,
+  onDelete,
 }) => {
   const { navigateToUrl } = useValues(KibanaLogic);
   const columns: Array<EuiBasicTableColumn<ConnectorViewItem>> = [
@@ -114,14 +116,31 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
           defaultMessage: 'Ingestion status',
         }
       ),
-      render: (connector: Connector) => {
-        const label = connectorStatusToText(connector.status);
-        return <EuiBadge color={connectorStatusToColor(connector.status)}>{label}</EuiBadge>;
+      render: (connectorStatus: ConnectorStatus) => {
+        const label = connectorStatusToText(connectorStatus);
+        return <EuiBadge color={connectorStatusToColor(connectorStatus)}>{label}</EuiBadge>;
       },
       truncateText: true,
     },
     {
       actions: [
+        {
+          description: 'Delete this connector',
+          icon: 'trash',
+          isPrimary: false,
+          name: (connector) =>
+            i18n.translate(
+              'xpack.enterpriseSearch.content.connectors.connectorTable.column.actions.deleteIndex',
+              {
+                defaultMessage: 'Delete connector {connectorName}',
+                values: { connectorName: connector.name },
+              }
+            ),
+          onClick: (connector) => {
+            onDelete(connector.name, connector.id, connector.index_name);
+          },
+          type: 'icon',
+        },
         {
           description: i18n.translate(
             'xpack.enterpriseSearch.content.connectors.connectorTable.columns.actions.viewIndex',

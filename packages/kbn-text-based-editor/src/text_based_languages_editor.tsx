@@ -39,8 +39,7 @@ import {
   EuiOutsideClickDetector,
   EuiToolTip,
 } from '@elastic/eui';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
-import type { CodeEditorProps } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
 
 import {
   textBasedLanguagedEditorStyles,

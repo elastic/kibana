@@ -15,6 +15,7 @@ export interface FunctionDefinition {
   alias?: string[];
   description: string;
   supportedCommands: string[];
+  supportedOptions?: string[];
   signatures: Array<{
     params: Array<{
       name: string;
@@ -45,6 +46,7 @@ export interface CommandBaseDefinition {
       optional?: boolean;
       innerType?: string;
       values?: string[];
+      valueDescriptions?: string[];
       literalOnly?: boolean;
       wildcards?: boolean;
     }>;
@@ -55,13 +57,19 @@ export interface CommandOptionsDefinition extends CommandBaseDefinition {
   wrapped?: string[];
   optional: boolean;
   skipCommonValidation?: boolean;
-  validate?: (option: ESQLCommandOption) => ESQLMessage[];
+  validate?: (option: ESQLCommandOption, command: ESQLCommand) => ESQLMessage[];
+}
+
+export interface CommandModeDefinition extends CommandBaseDefinition {
+  name: string;
+  description: string;
 }
 
 export interface CommandDefinition extends CommandBaseDefinition {
   options: CommandOptionsDefinition[];
   examples: string[];
   validate?: (option: ESQLCommand) => ESQLMessage[];
+  modes: CommandModeDefinition[];
 }
 
 export interface Literals {

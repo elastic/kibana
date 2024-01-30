@@ -35,7 +35,8 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
     | 'dependencies'
     | 'errors-and-crashes'
     | 'service-map'
-    | 'alerts';
+    | 'alerts'
+    | 'dashboards';
   hidden?: boolean;
 };
 
@@ -231,11 +232,24 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
         path: { serviceName },
         query,
       }),
-      append: <TechnicalPreviewBadge icon="beaker" />,
       label: i18n.translate('xpack.apm.mobileServiceDetails.alertsTabLabel', {
         defaultMessage: 'Alerts',
       }),
       hidden: !(isAlertingAvailable && canReadAlerts),
+    },
+    {
+      key: 'dashboards',
+      href: router.link('/mobile-services/{serviceName}/dashboards', {
+        path: { serviceName },
+        query,
+      }),
+      append: <TechnicalPreviewBadge icon="beaker" />,
+      label: i18n.translate(
+        'xpack.apm.mobileServiceDetails.dashboardsTabLabel',
+        {
+          defaultMessage: 'Dashboards',
+        }
+      ),
     },
   ];
 

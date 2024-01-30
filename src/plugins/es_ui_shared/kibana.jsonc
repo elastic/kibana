@@ -7,8 +7,7 @@
     "server": true,
     "browser": true,
     "requiredBundles": [
-      "dataViews",
-      "kibanaReact"
+      "dataViews"
     ],
     "extraPublicDirs": [
       "static/validators/string",

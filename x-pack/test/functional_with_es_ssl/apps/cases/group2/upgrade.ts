@@ -340,7 +340,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const link = await testSubjects.find('case-table-column-external');
         const upToDate = await testSubjects.find('case-table-column-external-upToDate');
 
-        expect(await link.getVisibleText()).equal('ROC-526\n(opens in a new tab or window)');
+        expect(await link.getVisibleText()).equal('ROC-526');
         expect(await upToDate.getVisibleText()).equal('is up to date');
       });
 

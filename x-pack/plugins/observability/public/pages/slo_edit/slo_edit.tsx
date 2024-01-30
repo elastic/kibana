@@ -10,6 +10,7 @@ import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
+import { createHtmlPortalNode, OutPortal } from 'react-reverse-portal';
 import { paths } from '../../../common/locators/paths';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -17,9 +18,10 @@ import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { useLicense } from '../../hooks/use_license';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
 import { useFetchSloGlobalDiagnosis } from '../../hooks/slo/use_fetch_global_diagnosis';
-import { FeedbackButton } from '../../components/slo/feedback_button/feedback_button';
 import { SloEditForm } from './components/slo_edit_form';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
+
+export const InspectSLOPortalNode = createHtmlPortalNode();
 
 export function SloEditPage() {
   const {
@@ -76,7 +78,7 @@ export function SloEditPage() {
           : i18n.translate('xpack.observability.sloCreatePageTitle', {
               defaultMessage: 'Create new SLO',
             }),
-        rightSideItems: [<FeedbackButton />],
+        rightSideItems: [<OutPortal node={InspectSLOPortalNode} />],
         bottomBorder: false,
       }}
       data-test-subj="slosEditPage"

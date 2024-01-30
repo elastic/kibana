@@ -10,6 +10,7 @@ export * from './create_rule_with_exception_entries';
 export * from './create_rule_saved_object';
 export * from './create_rule_with_auth';
 export * from './create_non_security_rule';
+export * from './check_investigation_field_in_so';
 export * from './downgrade_immutable_rule';
 export * from './delete_all_rules';
 export * from './delete_rule';

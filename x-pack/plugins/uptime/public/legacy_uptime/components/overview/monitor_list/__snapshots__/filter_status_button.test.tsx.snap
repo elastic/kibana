@@ -10,15 +10,11 @@ exports[`FilterStatusButton renders without errors for valid props 1`] = `
     class="euiButtonEmpty__content emotion-euiButtonDisplayContent-euiFilterButton__content"
   >
     <span
-      class="eui-textTruncate euiButtonEmpty__text euiFilterButton__text emotion-euiFilterButton__text"
+      class="euiFilterButton__text emotion-euiFilterButton__text"
+      data-text="Up"
+      title="Up"
     >
-      <span
-        class="euiFilterButton__textShift emotion-euiFilterButton__textShift"
-        data-text="Up"
-        title="Up"
-      >
-        Up
-      </span>
+      Up
     </span>
   </span>
 </button>

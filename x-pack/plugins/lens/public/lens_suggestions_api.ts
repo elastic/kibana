@@ -25,6 +25,7 @@ export const suggestionsApi = ({
   visualizationMap,
   excludedVisualizations,
 }: SuggestionsApi) => {
+  const initialContext = context;
   if (!datasourceMap || !visualizationMap || !dataView.id) return undefined;
   const datasourceStates = {
     formBased: {
@@ -37,9 +38,8 @@ export const suggestionsApi = ({
       isLoading: false,
       state: {
         layers: {},
-        fieldList: [],
         indexPatternRefs: [],
-        initialContext: context,
+        initialContext,
       },
     },
   };
@@ -89,5 +89,6 @@ export const suggestionsApi = ({
   // until we separate the text based suggestions logic from the dataview one,
   // we want to sort XY first
   const sortXYFirst = suggestionsList.sort((a, b) => (a.visualizationId === 'lnsXY' ? -1 : 1));
+
   return sortXYFirst;
 };

@@ -46,7 +46,7 @@ import {
   GroupByOptions,
 } from '../../../../detections/pages/detection_engine/rules/types';
 import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
-import { stepActionsDefaultValue } from '../../../../detections/components/rules/step_rule_actions';
+import { stepActionsDefaultValue } from '../../../rule_creation/components/step_rule_actions';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
 
 export const getTimeTypeValue = (time: string): { unit: Unit; value: number } => {

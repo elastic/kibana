@@ -37,8 +37,9 @@ export const AppRootProvider = memo<{
   queryClient: QueryClient;
   children: ReactNode | ReactNode[];
 }>(({ store, history, coreStart, depsStart: { data }, queryClient, startServices, children }) => {
-  const { uiSettings } = coreStart;
-  const isDarkMode = useObservable<boolean>(uiSettings.get$('theme:darkMode'));
+  const { theme: themeStart } = coreStart;
+  const theme = useObservable(themeStart.theme$, themeStart.getTheme());
+  const isDarkMode = theme.darkMode;
 
   return (
     <Provider store={store}>

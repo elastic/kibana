@@ -11,8 +11,7 @@ import type {
 } from '../../../../../../common/search_strategy/security_solution/users/managed_details';
 import { ManagedUserDatasetKey } from '../../../../../../common/search_strategy/security_solution/users/managed_details';
 import { RiskSeverity } from '../../../../../../common/search_strategy';
-import { mockAnomalies } from '../../../../../common/components/ml/mock';
-import type { ManagedUserData, ObservedUserData } from '../types';
+import type { ManagedUserData } from '../types';
 
 const userRiskScore = {
   '@timestamp': '123456',
@@ -42,43 +41,7 @@ export const mockRiskScoreState = {
   isAuthorized: true,
   isDeprecated: false,
   loading: false,
-};
-
-const anomaly = mockAnomalies.anomalies[0];
-
-export const observedUserDetails = {
-  user: {
-    id: ['1234', '321'],
-    domain: ['test domain', 'another test domain'],
-  },
-  host: {
-    ip: ['10.0.0.1', '127.0.0.1'],
-    os: {
-      name: ['testOs'],
-      family: ['testFamily'],
-    },
-  },
-};
-
-export const mockObservedUser: ObservedUserData = {
-  details: observedUserDetails,
-  isLoading: false,
-  firstSeen: {
-    isLoading: false,
-    date: '2023-02-23T20:03:17.489Z',
-  },
-  lastSeen: {
-    isLoading: false,
-    date: '2023-02-23T20:03:17.489Z',
-  },
-  anomalies: {
-    isLoading: false,
-    anomalies: {
-      anomalies: [anomaly],
-      interval: '',
-    },
-    jobNameById: { [anomaly.jobId]: 'job_name' },
-  },
+  error: undefined,
 };
 
 export const mockOktaUserFields: ManagedUserFields = {
