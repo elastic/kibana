@@ -8,6 +8,8 @@
 :frontmatter-tags-content-type: [how-to] 
 :frontmatter-tags-user-goals: [configure]
 
+preview::[]
+
 The SentinelOne connector communicates with SentinelOne Management Console via REST API.
 
 [float]
@@ -26,11 +28,12 @@ image::management/connectors/images/sentinelone-connector.png[SentinelOne connec
 
 SentinelOne connectors have the following configuration properties:
 
-URL::        The SentinelOne tenant URL. If you are using the <<action-settings,`xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
-API Token::  A SentinelOne API token created by the user.
+API token::  A SentinelOne API token created by the user.
+URL:: The SentinelOne tenant URL. If you are using the <<action-settings,`xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
+
 
 [float]
 [[sentinelone-action-parameters]]
 === Test connectors
 
-Currently we don't provide a way to test the SentinelOne connector.
+At this time, you cannot test the SentinelOne connector.
