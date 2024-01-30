@@ -19,7 +19,7 @@ import { getMockArtifacts } from './mocks';
 import { InvalidInternalManifestError } from '../../services/artifacts/errors';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-describe('task', () => {
+describe('Endpoint artifact packager task', () => {
   const MOCK_TASK_INSTANCE = {
     id: `${ManifestTaskConstants.TYPE}:1.0.0`,
     runAt: new Date(),

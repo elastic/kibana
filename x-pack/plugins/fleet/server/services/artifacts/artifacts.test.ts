@@ -328,8 +328,28 @@ describe('When using the artifacts services', () => {
         newArtifact,
       ]);
 
-      expect(responseErrors).toEqual([new Error('error')]);
-      expect(artifacts).toBeUndefined();
+      expect(responseErrors).toEqual([
+        new Error(
+          'Create of artifact id [undefined] returned: result [undefined], status [400], reason [{"reason":"error"}]'
+        ),
+      ]);
+      expect(artifacts).toEqual([
+        {
+          body: 'eJyrVkrNKynKTC1WsoqOrQUAJxkFKQ==',
+          compressionAlgorithm: 'zlib',
+          created: expect.any(String),
+          decodedSha256: 'd801aa1fb',
+          decodedSize: 14,
+          encodedSha256: 'd29238d40',
+          encodedSize: 22,
+          encryptionAlgorithm: 'none',
+          id: 'endpoint:trustlist-v1-d801aa1fb',
+          identifier: 'trustlist-v1',
+          packageName: 'endpoint',
+          relative_url: '/api/fleet/artifacts/trustlist-v1/d801aa1fb',
+          type: 'trustlist',
+        },
+      ]);
     });
   });
 
