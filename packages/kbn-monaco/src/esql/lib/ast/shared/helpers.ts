@@ -7,15 +7,25 @@
  */
 
 import type { monaco } from '../../../../monaco_imports';
+import { AutocompleteCommandDefinition } from '../autocomplete/types';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { builtinFunctions } from '../definitions/builtin';
 import { commandDefinitions } from '../definitions/commands';
 import { evalFunctionsDefinitions } from '../definitions/functions';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { chronoLiterals, timeLiterals } from '../definitions/literals';
-import { byOption, metadataOption, asOption, onOption, withOption } from '../definitions/options';
+import {
+  byOption,
+  metadataOption,
+  asOption,
+  onOption,
+  withOption,
+  appendSeparatorOption,
+} from '../definitions/options';
+import { ccqMode } from '../definitions/settings';
 import {
   CommandDefinition,
+  CommandModeDefinition,
   CommandOptionsDefinition,
   FunctionDefinition,
   SignatureArgType,
@@ -23,6 +33,7 @@ import {
 import {
   ESQLAstItem,
   ESQLColumn,
+  ESQLCommandMode,
   ESQLCommandOption,
   ESQLFunction,
   ESQLLiteral,
@@ -33,28 +44,35 @@ import {
 import { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import { removeMarkerArgFromArgsList } from './context';
 
+function isSingleItem(arg: ESQLAstItem): arg is ESQLSingleAstItem {
+  return arg && !Array.isArray(arg);
+}
+
+export function isSettingItem(arg: ESQLAstItem): arg is ESQLCommandMode {
+  return isSingleItem(arg) && arg.type === 'mode';
+}
 export function isFunctionItem(arg: ESQLAstItem): arg is ESQLFunction {
-  return arg && !Array.isArray(arg) && arg.type === 'function';
+  return isSingleItem(arg) && arg.type === 'function';
 }
 
 export function isOptionItem(arg: ESQLAstItem): arg is ESQLCommandOption {
-  return !Array.isArray(arg) && arg.type === 'option';
+  return isSingleItem(arg) && arg.type === 'option';
 }
 
 export function isSourceItem(arg: ESQLAstItem): arg is ESQLSource {
-  return arg && !Array.isArray(arg) && arg.type === 'source';
+  return isSingleItem(arg) && arg.type === 'source';
 }
 
 export function isColumnItem(arg: ESQLAstItem): arg is ESQLColumn {
-  return arg && !Array.isArray(arg) && arg.type === 'column';
+  return isSingleItem(arg) && arg.type === 'column';
 }
 
 export function isLiteralItem(arg: ESQLAstItem): arg is ESQLLiteral {
-  return arg && !Array.isArray(arg) && arg.type === 'literal';
+  return isSingleItem(arg) && arg.type === 'literal';
 }
 
 export function isTimeIntervalItem(arg: ESQLAstItem): arg is ESQLTimeInterval {
-  return arg && !Array.isArray(arg) && arg.type === 'timeInterval';
+  return isSingleItem(arg) && arg.type === 'timeInterval';
 }
 
 export function isAssignment(arg: ESQLAstItem): arg is ESQLFunction {
@@ -72,6 +90,23 @@ export function isExpression(arg: ESQLAstItem): arg is ESQLFunction {
 
 export function isIncompleteItem(arg: ESQLAstItem): boolean {
   return !arg || (!Array.isArray(arg) && arg.incomplete);
+}
+
+export function isMathFunction(char: string) {
+  // compare last char for all math functions
+  // limit only to 2 chars operators
+  return builtinFunctions
+    .filter(({ name }) => name.length < 3)
+    .map(({ name }) => name[name.length - 1])
+    .some((op) => char === op);
+}
+
+export function isComma(char: string) {
+  return char === ',';
+}
+
+export function isSourceCommand({ label }: AutocompleteCommandDefinition) {
+  return ['from', 'row', 'show'].includes(String(label));
 }
 
 // From Monaco position to linear offset
@@ -110,7 +145,8 @@ type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';
 
 export function isSupportedFunction(
   name: string,
-  parentCommand?: string
+  parentCommand?: string,
+  option?: string
 ): { supported: boolean; reason: ReasonTypes | undefined } {
   if (!parentCommand) {
     return {
@@ -119,7 +155,11 @@ export function isSupportedFunction(
     };
   }
   const fn = buildFunctionLookup().get(name);
-  const isSupported = Boolean(fn?.supportedCommands.includes(parentCommand));
+  const isSupported = Boolean(
+    option == null
+      ? fn?.supportedCommands.includes(parentCommand)
+      : fn?.supportedOptions?.includes(option)
+  );
   return {
     supported: isSupported,
     reason: isSupported ? undefined : fn ? 'unsupportedFunction' : 'unknownFunction',
@@ -151,21 +191,14 @@ export function getAllCommands() {
   return Array.from(buildCommandLookup().values());
 }
 
-export function getCommandOption(name: CommandOptionsDefinition['name']) {
-  switch (name) {
-    case 'by':
-      return byOption;
-    case 'metadata':
-      return metadataOption;
-    case 'as':
-      return asOption;
-    case 'on':
-      return onOption;
-    case 'with':
-      return withOption;
-    default:
-      return;
-  }
+export function getCommandOption(optionName: CommandOptionsDefinition['name']) {
+  return [byOption, metadataOption, asOption, onOption, withOption, appendSeparatorOption].find(
+    ({ name }) => name === optionName
+  );
+}
+
+export function getCommandMode(settingName: CommandModeDefinition['name']) {
+  return [ccqMode].find(({ name }) => name === settingName);
 }
 
 function compareLiteralType(argTypes: string, item: ESQLLiteral) {

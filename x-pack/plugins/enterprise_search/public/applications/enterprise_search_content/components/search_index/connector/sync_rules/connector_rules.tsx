@@ -72,11 +72,11 @@ export const ConnectorSyncRules: React.FC = () => {
               <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="s">
-                    <h3>
+                    <h2>
                       {i18n.translate('xpack.enterpriseSearch.index.connector.syncRules.title', {
                         defaultMessage: 'Sync rules ',
                       })}
-                    </h3>
+                    </h2>
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
