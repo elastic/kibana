@@ -54,7 +54,7 @@ function splitIntoCommands(query: string) {
 }
 
 function replaceSingleQuotesWithDoubleQuotes(command: string) {
-  const regex = /(?<!\\)'/g;
+  const regex = /'(?=(?:[^"]*"[^"]*")*[^"]*$)/g;
   return command.replace(regex, '"');
 }
 
@@ -117,14 +117,16 @@ export function correctCommonEsqlMistakes(content: string, log: Logger) {
               formattedCommand = replaceFunctionsinSortWithStats(formattedCommand);
               break;
             }
+            break;
 
           case 'KEEP':
-            if (array.length < index + 1) {
+            if (array.length > index + 1) {
               if (array[index + 1].match(/^([A-Za-z]+)/)?.[1] === 'SORT') {
                 formattedCommand = verifySortColumnInKeep(formattedCommand, array[index + 1]);
                 break;
               }
             }
+            break;
         }
         return formattedCommand;
       })
