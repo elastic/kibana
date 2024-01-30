@@ -82,7 +82,7 @@ describe('<AgentEnrollmentFlyout />', () => {
       isLoadingServiceToken: false,
       generateServiceToken: jest.fn(),
       fleetServerHostForm: {
-        saveFleetServerHost: jest.fn(),
+        submitForm: jest.fn(),
         fleetServerHost: 'https://test.server:8220',
         setFleetServerHost: jest.fn(),
         error: '',
