@@ -14,7 +14,7 @@ Object {
       "valueInBytes": 262144000,
     },
     "scroll": Object {
-      "duration": "auto",
+      "duration": "30s",
       "size": 500,
       "strategy": "pit",
     },
@@ -77,7 +77,7 @@ Object {
       "valueInBytes": 262144000,
     },
     "scroll": Object {
-      "duration": "auto",
+      "duration": "30s",
       "size": 500,
       "strategy": "pit",
     },
