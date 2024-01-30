@@ -126,7 +126,6 @@ export const addTimelineToStore = ({
 }: AddTimelineParams): TimelineById => {
   if (shouldResetActiveTimelineContext(id, timelineById[id], timeline)) {
     activeTimeline.setActivePage(0);
-    activeTimeline.setExpandedDetail({});
   }
   return {
     ...timelineById,
