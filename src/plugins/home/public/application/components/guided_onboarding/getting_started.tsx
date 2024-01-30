@@ -10,7 +10,6 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { parse } from 'query-string';
 import {
   EuiButton,
-  EuiLink,
   EuiLoadingSpinner,
   EuiPageTemplate,
   EuiSpacer,
@@ -45,12 +44,6 @@ const gettingStartedBreadcrumb = i18n.translate('home.breadcrumbs.gettingStarted
 });
 const title = i18n.translate('home.guidedOnboarding.gettingStarted.useCaseSelectionTitle', {
   defaultMessage: 'What would you like to do first?',
-});
-const subtitle = i18n.translate('home.guidedOnboarding.gettingStarted.useCaseSelectionSubtitle', {
-  defaultMessage: `Filter by solution to see related use cases`,
-});
-const skipText = i18n.translate('home.guidedOnboarding.gettingStarted.skip.buttonLabel', {
-  defaultMessage: `I’d like to explore on my own.`,
 });
 
 export const GettingStarted = () => {
@@ -128,16 +121,6 @@ export const GettingStarted = () => {
     localStorage.setItem(KEY_ENABLE_WELCOME, JSON.stringify(false));
   }, []);
 
-  const onSkip = async () => {
-    try {
-      await guidedOnboardingService?.skipGuidedOnboarding();
-    } catch (error) {
-      // if the state update fails, it's safe to ignore the error
-    }
-    trackUiMetric(METRIC_TYPE.CLICK, 'guided_onboarding__skipped');
-    application.navigateToApp('home');
-  };
-
   const activateGuide = useCallback(
     async (guideId: GuideId, guideState?: GuideState) => {
       try {
@@ -164,7 +147,7 @@ export const GettingStarted = () => {
   if (isLoading) {
     return (
       <KibanaPageTemplate.EmptyPrompt
-        title={<EuiLoadingSpinner size="xl" />}
+        title={<EuiLoadingSpinner size="l" />}
         body={
           <EuiText color="subdued">
             {i18n.translate('home.guidedOnboarding.gettingStarted.loadingIndicator', {
@@ -262,20 +245,11 @@ export const GettingStarted = () => {
           <h1>{title}</h1>
         </EuiTitle>
         <EuiSpacer size="l" />
-        <EuiText size="m" textAlign="center">
-          <p>{subtitle}</p>
-        </EuiText>
         <EuiSpacer size="l" />
         {setGuideFilters}
         <EuiSpacer size="xxl" />
         {setGuideCards}
         <EuiSpacer size="xxl" />
-        <div className="eui-textCenter">
-          {/* data-test-subj used for FS tracking */}
-          <EuiLink onClick={onSkip} data-test-subj="onboarding--skipGuideLink">
-            {skipText}
-          </EuiLink>
-        </div>
       </EuiPageTemplate.Section>
     </KibanaPageTemplate>
   );
