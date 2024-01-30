@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { CdnConfig } from './cdn';
+import { CdnConfig } from './cdn_config';
 
 describe('CdnConfig', () => {
   const PKG_INFO = { packageInfo: { buildSha: 'a816c7fae954ed02b0705fb4388ad6c88def41db' } };
-  const getCdnConfig = (url: string, suffixSHADigestToPath = false) =>
-    CdnConfig.from({ url, suffixSHADigestToPath }, PKG_INFO);
+  const getCdnConfig = (url: string, suffixSHADigestToURLPath = false) =>
+    CdnConfig.from({ url, suffixSHADigestToURLPath }, PKG_INFO);
 
   it.each([
     ['https://cdn.elastic.co', 'cdn.elastic.co'],
@@ -68,7 +68,7 @@ describe('CdnConfig', () => {
     );
     expect(
       CdnConfig.from(
-        { url: 'https://foo.bar:9999/cool-path', suffixSHADigestToPath: true },
+        { url: 'https://foo.bar:9999/cool-path', suffixSHADigestToURLPath: true },
         { packageInfo: { buildSha: '123' } }
       ).baseHref
     ).toEqual('https://foo.bar:9999/cool-path/123');

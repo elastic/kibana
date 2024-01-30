@@ -8,7 +8,7 @@
 
 import { StaticAssets } from './static_assets';
 import { BasePath } from './base_path_service';
-import { CdnConfig } from './cdn';
+import { CdnConfig } from './cdn_config';
 
 describe('StaticAssets', () => {
   let basePath: BasePath;

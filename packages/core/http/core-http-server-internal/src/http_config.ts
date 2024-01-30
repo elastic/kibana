@@ -24,7 +24,7 @@ import {
   securityResponseHeadersSchema,
   parseRawSecurityResponseHeadersConfig,
 } from './security_response_headers_config';
-import { CdnConfig } from './cdn';
+import { CdnConfig } from './cdn_config';
 
 const validBasePathRegex = /^\/.*[^\/]$/;
 
@@ -61,9 +61,9 @@ const configSchema = schema.object(
     }),
     cdn: schema.object({
       url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
-      suffixSHADigestToPath: offeringBasedSchema({
+      suffixSHADigestToURLPath: offeringBasedSchema({
         traditional: schema.never(),
-        serverless: schema.boolean({ defaultValue: true }),
+        serverless: schema.boolean({ defaultValue: false }), // TODO change default to true once fully supported
       }),
     }),
     cors: schema.object(

@@ -14,7 +14,7 @@ interface PackageInfo {
 }
 export interface Input {
   url?: string;
-  suffixSHADigestToPath: boolean;
+  suffixSHADigestToURLPath: boolean;
 }
 
 /**
@@ -70,6 +70,6 @@ export class CdnConfig {
   }
 
   public static from(input: Input, pkgInfo: PackageInfo) {
-    return new CdnConfig(input.url, input.suffixSHADigestToPath, pkgInfo);
+    return new CdnConfig(input.url, input.suffixSHADigestToURLPath, pkgInfo);
   }
 }
