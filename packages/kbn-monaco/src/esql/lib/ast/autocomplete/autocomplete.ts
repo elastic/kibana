@@ -21,11 +21,14 @@ import {
   isAssignment,
   isAssignmentComplete,
   isColumnItem,
+  isComma,
   isFunctionItem,
   isIncompleteItem,
   isLiteralItem,
+  isMathFunction,
   isOptionItem,
   isRestartingExpression,
+  isSourceCommand,
   isSettingItem,
   isSourceItem,
   isTimeIntervalItem,
@@ -116,17 +119,6 @@ function getFinalSuggestions({ comma }: { comma?: boolean } = { comma: true }) {
   return finalSuggestions;
 }
 
-function isMathFunction(char: string) {
-  return ['+', '-', '*', '/', '%', '='].some((op) => char === op);
-}
-
-function isComma(char: string) {
-  return char === ',';
-}
-
-function isSourceCommand({ label }: AutocompleteCommandDefinition) {
-  return ['from', 'row', 'show'].includes(String(label));
-}
 /**
  * This function count the number of unclosed brackets in order to
  * locally fix the queryString to generate a valid AST

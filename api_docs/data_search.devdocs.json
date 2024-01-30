@@ -31992,6 +31992,21 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.ESQL_ASYNC_SEARCH_STRATEGY",
+        "type": "string",
+        "tags": [],
+        "label": "ESQL_ASYNC_SEARCH_STRATEGY",
+        "description": [],
+        "signature": [
+          "\"esql_async\""
+        ],
+        "path": "src/plugins/data/common/search/strategies/esql_search/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.ESQL_SEARCH_STRATEGY",
         "type": "string",
         "tags": [],
