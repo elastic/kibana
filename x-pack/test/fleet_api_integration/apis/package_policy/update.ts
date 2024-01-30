@@ -763,7 +763,6 @@ export default function (providerContext: FtrProviderContext) {
           { id: 'logs-somedataset-2.0.0', type: 'ingest_pipeline' },
           { id: 'logs-somedataset', type: 'index_template' },
           { id: 'logs-somedataset@package', type: 'component_template' },
-          { id: 'ecs@mappings', type: 'component_template' },
           { id: 'logs-somedataset@custom', type: 'component_template' },
         ]);
 
