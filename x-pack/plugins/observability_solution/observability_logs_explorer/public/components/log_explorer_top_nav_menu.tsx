@@ -68,6 +68,8 @@ const ServerlessTopNav = () => {
             <VerticalRule />
             <FeedbackLink />
             <VerticalRule />
+            <AlertsPopover />
+            <VerticalRule />
             {ObservabilityAIAssistantActionMenuItem ? (
               <ObservabilityAIAssistantActionMenuItem />
             ) : null}
