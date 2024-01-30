@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { ReactNode } from 'react';
-import { EuiText, EuiFlexItem, EuiFlexGrid, useIsWithinBreakpoints } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiText } from '@elastic/eui';
 
 export interface AlertSummaryField {
   label: ReactNode | string;
@@ -16,23 +17,16 @@ interface AlertSummaryProps {
 }
 
 export function AlertSummary({ alertSummaryFields }: AlertSummaryProps) {
-  const isMobile = useIsWithinBreakpoints(['xs', 's']);
   return (
-    <EuiFlexGrid
-      responsive={false}
-      data-test-subj="alert-summary-container"
-      style={{
-        gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(5, 1fr)',
-      }}
-    >
+    <EuiFlexGroup data-test-subj="alert-summary-container" gutterSize="xl">
       {alertSummaryFields?.map((field, idx) => {
         return (
-          <EuiFlexItem key={idx}>
+          <EuiFlexItem key={idx} grow={false}>
             <EuiText color="subdued">{field.label}</EuiText>
             <EuiText>{field.value}</EuiText>
           </EuiFlexItem>
         );
       })}
-    </EuiFlexGrid>
+    </EuiFlexGroup>
   );
 }

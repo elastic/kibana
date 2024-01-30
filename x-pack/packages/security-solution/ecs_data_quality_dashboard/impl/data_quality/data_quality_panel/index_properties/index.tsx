@@ -44,7 +44,7 @@ import { useAddToNewCase } from '../../use_add_to_new_case';
 import { useMappings } from '../../use_mappings';
 import { useUnallowedValues } from '../../use_unallowed_values';
 import { useDataQualityContext } from '../data_quality_context';
-import { getSizeInBytes } from '../../helpers';
+import { getSizeInBytes, postResult } from '../../helpers';
 
 const EMPTY_MARKDOWN_COMMENTS: string[] = [];
 
@@ -104,7 +104,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
   updatePatternRollup,
 }) => {
   const { error: mappingsError, indexes, loading: loadingMappings } = useMappings(indexName);
-  const { telemetryEvents, isILMAvailable } = useDataQualityContext();
+  const { telemetryEvents, isILMAvailable, httpFetch, toasts } = useDataQualityContext();
 
   const requestItems = useMemo(
     () =>
@@ -249,7 +249,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
               })
             : EMPTY_MARKDOWN_COMMENTS;
 
-        updatePatternRollup({
+        const updatedRollup = {
           ...patternRollup,
           results: {
             ...patternRollup.results,
@@ -264,10 +264,11 @@ const IndexPropertiesComponent: React.FC<Props> = ({
               sameFamily: indexSameFamily,
             },
           },
-        });
+        };
+        updatePatternRollup(updatedRollup);
 
         if (indexId && requestTime != null && requestTime > 0 && partitionedFieldMetadata) {
-          telemetryEvents.reportDataQualityIndexChecked?.({
+          const checkMetadata = {
             batchId: uuidv4(),
             ecsVersion: EcsVersion,
             errorCount: error ? 1 : 0,
@@ -276,7 +277,10 @@ const IndexPropertiesComponent: React.FC<Props> = ({
             indexName,
             isCheckAll: false,
             numberOfDocuments: docsCount,
+            numberOfFields: partitionedFieldMetadata.all.length,
             numberOfIncompatibleFields: indexIncompatible,
+            numberOfEcsFields: partitionedFieldMetadata.ecsCompliant.length,
+            numberOfCustomFields: partitionedFieldMetadata.custom.length,
             numberOfIndices: 1,
             numberOfIndicesChecked: 1,
             numberOfSameFamily: indexSameFamily,
@@ -289,7 +293,11 @@ const IndexPropertiesComponent: React.FC<Props> = ({
             unallowedValueFields: getIncompatibleValuesFields(
               partitionedFieldMetadata.incompatible
             ),
-          });
+          };
+          telemetryEvents.reportDataQualityIndexChecked?.(checkMetadata);
+
+          const result = { meta: checkMetadata, rollup: updatedRollup };
+          postResult({ result, httpFetch, toasts, abortController: new AbortController() });
         }
       }
     }
@@ -297,6 +305,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
     docsCount,
     formatBytes,
     formatNumber,
+    httpFetch,
     ilmPhase,
     indexId,
     indexName,
@@ -309,6 +318,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
     patternRollup,
     requestTime,
     telemetryEvents,
+    toasts,
     unallowedValuesError,
     updatePatternRollup,
   ]);

@@ -26,6 +26,7 @@ import {
   RISK_ENGINE_STATUS_URL,
   RISK_ENGINE_PRIVILEGES_URL,
 } from '@kbn/security-solution-plugin/common/constants';
+import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import {
   createRule,
   waitForAlertsToBePresent,
@@ -112,6 +113,17 @@ export const createAndSyncRuleAndAlertsFactory =
     await waitForRuleSuccess({ supertest, log, id, namespace });
     await waitForAlertsToBePresent(supertest, log, alerts, [id], namespace);
   };
+
+export const getLatestRiskScoreIndexMapping: (
+  es: Client
+) => Promise<MappingTypeMapping | undefined> = async (es: Client) => {
+  const riskScoreLatestIndex = 'risk-score.risk-score-latest-default';
+  return (
+    await es.indices.get({
+      index: riskScoreLatestIndex,
+    })
+  )[riskScoreLatestIndex]?.mappings;
+};
 
 export const deleteRiskScoreIndices = async ({
   log,

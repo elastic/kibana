@@ -498,7 +498,7 @@ export function alertingServiceProvider(
         job_id: [...new Set(requestedAnomalies.map((h) => h._source.job_id))][0],
         is_interim: requestedAnomalies.some((h) => h._source.is_interim),
         anomaly_timestamp: timestamp,
-        anomaly_score: topAnomaly._source[getScoreFields(resultType, useInitialScore)],
+        anomaly_score: [topAnomaly._source[getScoreFields(resultType, useInitialScore)]],
         top_records: v.record_results.top_record_hits.hits.hits.map((h) => {
           const { actual, typical } = getTypicalAndActualValues(h._source);
           return pick<RecordAnomalyAlertDoc>(
@@ -1015,7 +1015,7 @@ export function alertingServiceProvider(
           'xpack.ml.alertTypes.anomalyDetectionAlertingRule.recoveredReason',
           {
             defaultMessage:
-              'No anomalies have been found in the concecutive bucket after the alert was triggered.',
+              'No anomalies have been found in the consecutive bucket after the alert was triggered.',
           }
         );
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export { GetCapabilitiesResponse } from './impl/schemas/capabilities/get_capabilities_route.gen';
+
 export { defaultAssistantFeatures } from './impl/capabilities';
 export type { AssistantFeatures } from './impl/capabilities';
 
