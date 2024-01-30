@@ -300,7 +300,7 @@ const getInvalidLocationError = (
   const availablePrivateMsg =
     allPrivateLocations.length === 0
       ? 'No private location available to use.'
-      : `Available private locations are '${allPrivateLocations.map((l) => l.id).join('|')}'`;
+      : `Available private locations are '${allPrivateLocations.map((l) => l.label).join('|')}'`;
 
   return i18n.translate('xpack.synthetics.projectMonitorApi.validation.invalidLocations', {
     defaultMessage: 'Invalid locations specified.{invalidPublicLocation}{invalidPrivateLocation}',
