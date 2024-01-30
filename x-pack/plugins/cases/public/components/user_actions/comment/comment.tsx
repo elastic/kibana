@@ -162,7 +162,6 @@ const getCreateCommentUserAction = ({
   onRuleDetailsClick,
   alertData,
   onShowAlertDetails,
-  actionsNavigation,
 }: {
   userAction: SnakeToCamelCase<CommentUserAction>;
   comment: AttachmentUI;
@@ -210,7 +209,6 @@ const getCreateCommentUserAction = ({
         userProfiles,
         userAction,
         comment,
-        actionsNavigation,
       });
 
       return actionBuilder.build();
@@ -267,7 +265,6 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
   handleDeleteComment,
   handleManageQuote,
   handleOutlineComment,
-  actionsNavigation,
   caseConnectors,
 }) => ({
   build: () => {
@@ -313,7 +310,6 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
         handleSaveComment,
         handleDeleteComment,
         handleManageQuote,
-        actionsNavigation,
         caseConnectors,
       });
 

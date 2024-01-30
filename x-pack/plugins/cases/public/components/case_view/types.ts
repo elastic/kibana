@@ -12,7 +12,6 @@ import type { UseFetchAlertData } from '../../../common/ui';
 
 export interface CaseViewBaseProps {
   onComponentInitialized?: () => void;
-  actionsNavigation?: CasesNavigation<string, 'configurable'>;
   ruleDetailsNavigation?: CasesNavigation<string | null | undefined, 'configurable'>;
   showAlertDetails?: (alertId: string, index: string) => void;
   useFetchAlertData: UseFetchAlertData;

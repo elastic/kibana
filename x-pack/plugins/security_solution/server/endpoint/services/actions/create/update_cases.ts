@@ -28,16 +28,13 @@ export const updateCases = async ({
   createActionPayload: CreateActionPayload;
   endpointData: SimplifiedEndpointData[];
 }): Promise<void> => {
-  console.log(1111);
   if (!casesClient) {
     return;
   }
   // convert any alert IDs into cases
   let caseIDs: string[] = createActionPayload.case_ids?.slice() || [];
-  console.log(caseIDs);
 
   if (createActionPayload.alert_ids && createActionPayload.alert_ids.length > 0) {
-    console.log('3333');
     const newIDs: string[][] = await Promise.all(
       createActionPayload.alert_ids.map(async (alertID: string) => {
         const cases: GetRelatedCasesByAlertResponse = await casesClient.cases.getCasesByAlertID({
@@ -55,7 +52,6 @@ export const updateCases = async ({
 
   // Update all cases with a comment
   if (caseIDs.length > 0) {
-    console.log({ endpointData });
     const targets = endpointData.map((endpoint: SimplifiedEndpointData) => ({
       hostname: endpoint.host.hostname,
       endpointId: endpoint.agent.id,
@@ -72,7 +68,6 @@ export const updateCases = async ({
       owner: APP_ID,
     })) as BulkCreateArgs['attachments'];
 
-    console.log('5', caseIDs);
     await Promise.all(
       caseIDs.map((caseId) =>
         casesClient.attachments.bulkCreate({

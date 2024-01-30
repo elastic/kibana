@@ -37,7 +37,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     onComponentInitialized,
     refreshRef,
     ruleDetailsNavigation,
-    actionsNavigation,
     showAlertDetails,
     useFetchAlertData,
   }) => {
@@ -127,7 +126,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
             <CaseViewActivity
               ruleDetailsNavigation={ruleDetailsNavigation}
               caseData={caseData}
-              actionsNavigation={actionsNavigation}
               showAlertDetails={showAlertDetails}
               useFetchAlertData={useFetchAlertData}
             />

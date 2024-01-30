@@ -33,7 +33,6 @@ const CaseViewLazy: React.FC<CaseViewProps> = lazy(() => import('../case_view'))
 
 const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   onComponentInitialized,
-  actionsNavigation,
   ruleDetailsNavigation,
   showAlertDetails,
   useFetchAlertData,
@@ -82,7 +81,6 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
           <Suspense fallback={<EuiLoadingSpinner />}>
             <CaseViewLazy
               onComponentInitialized={onComponentInitialized}
-              actionsNavigation={actionsNavigation}
               ruleDetailsNavigation={ruleDetailsNavigation}
               showAlertDetails={showAlertDetails}
               useFetchAlertData={useFetchAlertData}

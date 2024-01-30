@@ -83,7 +83,6 @@ export const UserActionsList = React.memo(
     data: caseData,
     casesConfiguration,
     getRuleDetailsHref,
-    actionsNavigation,
     onRuleDetailsClick,
     onShowAlertDetails,
     loadingAlertData,
@@ -151,7 +150,6 @@ export const UserActionsList = React.memo(
           handleSaveComment,
           handleManageQuote,
           onShowAlertDetails,
-          actionsNavigation,
           getRuleDetailsHref,
           onRuleDetailsClick,
         });
@@ -179,7 +177,6 @@ export const UserActionsList = React.memo(
       handleSaveComment,
       handleManageQuote,
       onShowAlertDetails,
-      actionsNavigation,
       getRuleDetailsHref,
       onRuleDetailsClick,
     ]);

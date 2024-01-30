@@ -44,13 +44,11 @@ import { CustomFields } from './custom_fields';
 export const CaseViewActivity = ({
   ruleDetailsNavigation,
   caseData,
-  actionsNavigation,
   showAlertDetails,
   useFetchAlertData,
 }: {
   ruleDetailsNavigation?: CasesNavigation<string | null | undefined, 'configurable'>;
   caseData: CaseUI;
-  actionsNavigation?: CasesNavigation<string, 'configurable'>;
   showAlertDetails?: (alertId: string, index: string) => void;
   useFetchAlertData: UseFetchAlertData;
 }) => {
@@ -211,7 +209,6 @@ export const CaseViewActivity = ({
                 caseConnectors={caseConnectors}
                 data={caseData}
                 casesConfiguration={casesConfiguration}
-                actionsNavigation={actionsNavigation}
                 onShowAlertDetails={showAlertDetails}
                 onUpdateField={onUpdateField}
                 statusActionButton={

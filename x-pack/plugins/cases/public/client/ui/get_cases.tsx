@@ -29,7 +29,6 @@ export const getCasesLazy = ({
   permissions,
   basePath,
   onComponentInitialized,
-  actionsNavigation,
   ruleDetailsNavigation,
   showAlertDetails,
   useFetchAlertData,
@@ -53,7 +52,6 @@ export const getCasesLazy = ({
     <Suspense fallback={<EuiLoadingSpinner />}>
       <CasesRoutesLazy
         onComponentInitialized={onComponentInitialized}
-        actionsNavigation={actionsNavigation}
         ruleDetailsNavigation={ruleDetailsNavigation}
         showAlertDetails={showAlertDetails}
         useFetchAlertData={useFetchAlertData}

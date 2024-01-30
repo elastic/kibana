@@ -45,10 +45,6 @@ export const alertsHit = [
 
 export const caseViewProps: CaseViewProps = {
   onComponentInitialized: jest.fn(),
-  actionsNavigation: {
-    href: jest.fn(),
-    onClick: jest.fn(),
-  },
   ruleDetailsNavigation: {
     href: jest.fn(),
     onClick: jest.fn(),

@@ -6,10 +6,13 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { useKibana } from '../../../common/lib/kibana';
-import * as i18n from '../translations';
+import { generatePath } from 'react-router-dom';
+// eslint-disable-next-line import/no-nodejs-modules
+import querystring from 'querystring';
+
 import { LinkAnchor } from '../../links';
-import type { ActionsNavigation } from '../types';
+import * as i18n from '../translations';
+import { useKibana, useNavigation } from '../../../common/lib/kibana';
 
 interface EndpointInfo {
   endpointId: string;
@@ -20,48 +23,54 @@ interface EndpointInfo {
 interface Props {
   type: string;
   endpoints: EndpointInfo[];
-  href?: ActionsNavigation['href'];
-  onClick?: ActionsNavigation['onClick'];
 }
 
-const HostIsolationCommentEventComponent: React.FC<Props> = ({
-  type,
-  endpoints,
-  href,
-  onClick,
-}) => {
-  const endpointDetailsHref = href ? href(endpoints[0].endpointId) : '';
-  const getUrlForApp = useKibana().services.application.getUrlForApp;
+import { isEmpty } from 'lodash/fp';
 
-  const onLinkClick = useCallback(
-    (ev) => {
-      ev.preventDefault();
-      if (onClick) onClick(endpoints[0].endpointId, ev);
-    },
-    [onClick, endpoints]
-  );
+export const appendSearch = (search?: string) =>
+  isEmpty(search) ? '' : `${search?.startsWith('?') ? search : `?${search}`}`;
+
+const getDetails = (queryParams: { selected_endpoint: string; show: string }): string => {
+  const urlQueryParams = querystring.stringify(queryParams);
+
+  return `${generatePath('/administration/:tabName(endpoints)', {
+    tabName: 'endpoints',
+  })}${appendSearch(urlQueryParams)}`;
+};
+
+const HostIsolationCommentEventComponent: React.FC<Props> = ({ type, endpoints }) => {
+  const { getAppUrl, navigateTo } = useNavigation('security');
+
+  const endpointDetailsHref = getAppUrl({
+    path: getDetails({
+      selected_endpoint: endpoints[0].endpointId,
+      show: 'activity_log',
+    }),
+  });
+  const getUrlForApp = useKibana().services.application.getUrlForApp;
 
   const hostsDetailsHref = getUrlForApp('security', {
     path: `/hosts/name/${endpoints[0].hostname}`,
   });
 
-  return endpoints[0]?.type === 'sentinel_one' ? (
+  const actionText = type === 'isolate' ? `${i18n.ISOLATED_HOST} ` : `${i18n.RELEASED_HOST} `;
+
+  const linkHref = endpoints[0]?.type === 'sentinel_one' ? hostsDetailsHref : endpointDetailsHref;
+
+  const onLinkClick = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      return navigateTo({ url: linkHref });
+    },
+    [navigateTo, linkHref]
+  );
+
+  return (
     <>
-      {type === 'isolate' ? `${i18n.ISOLATED_HOST} ` : `${i18n.RELEASED_HOST} `}
-      <LinkAnchor
-        // onClick={onLinkClick}
-        href={hostsDetailsHref}
-        data-test-subj={`actions-link-${endpoints[0].endpointId}`}
-      >
-        {endpoints[0].hostname}
-      </LinkAnchor>
-    </>
-  ) : (
-    <>
-      {type === 'isolate' ? `${i18n.ISOLATED_HOST} ` : `${i18n.RELEASED_HOST} `}
+      {actionText}
       <LinkAnchor
         onClick={onLinkClick}
-        href={endpointDetailsHref}
+        href={linkHref}
         data-test-subj={`actions-link-${endpoints[0].endpointId}`}
       >
         {endpoints[0].hostname}
