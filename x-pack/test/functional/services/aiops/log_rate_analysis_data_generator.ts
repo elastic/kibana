@@ -226,7 +226,9 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
     public async generateData(dataGenerator: LogRateAnalysisDataGenerator) {
       switch (dataGenerator) {
         case 'kibana_sample_data_logs':
-          // will be added via UI
+          await esArchiver.loadIfNeeded(
+            'test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb'
+          );
           break;
 
         case 'farequote_with_spike':
@@ -330,7 +332,9 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
     public async removeGeneratedData(dataGenerator: LogRateAnalysisDataGenerator) {
       switch (dataGenerator) {
         case 'kibana_sample_data_logs':
-          // do not remove
+          await esArchiver.unload(
+            'test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb'
+          );
           break;
 
         case 'farequote_with_spike':

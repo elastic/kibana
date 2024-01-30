@@ -33,12 +33,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await aiops.logRateAnalysisPage.navigateToDataViewSelection();
 
       await ml.testExecution.logTestStep(`${testData.suiteTitle} loads the log rate analysis page`);
-      await ml.jobSourceSelection.selectSourceForLogRateAnalysis(
-        testData.sourceIndexOrSavedSearch,
-        testData.sourceIndexOrSavedSearch === 'Kibana Sample Data Logs'
-          ? testData.dataGenerator
-          : undefined
-      );
+      await ml.jobSourceSelection.selectSourceForLogRateAnalysis(testData.sourceIndexOrSavedSearch);
     });
 
     it(`${testData.suiteTitle} displays index details`, async () => {
@@ -188,23 +183,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             'group'
           );
 
-          // The Kibana Sample Data Logs are somewhat randomized, so in rare cases there might
-          // be additional results, that's why we just test for the first group in this case.
-          if (testData.dataGenerator === 'kibana_sample_data_logs') {
-            expect(actualAnalysisGroupsTable[0]).to.be.eql(
-              expectedAnalysisGroupsTable[0],
-              `Expected analysis groups table to be ${JSON.stringify(
-                expectedAnalysisGroupsTable[0]
-              )}, got ${JSON.stringify(actualAnalysisGroupsTable[0])}`
-            );
-          } else {
-            expect(actualAnalysisGroupsTable).to.be.eql(
-              expectedAnalysisGroupsTable,
-              `Expected analysis groups table to be ${JSON.stringify(
-                expectedAnalysisGroupsTable
-              )}, got ${JSON.stringify(actualAnalysisGroupsTable)}`
-            );
-          }
+          expect(actualAnalysisGroupsTable).to.be.eql(
+            expectedAnalysisGroupsTable,
+            `Expected analysis groups table to be ${JSON.stringify(
+              expectedAnalysisGroupsTable
+            )}, got ${JSON.stringify(actualAnalysisGroupsTable)}`
+          );
         }
       });
 
@@ -298,31 +282,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
           await ml.testResources.setKibanaTimeZoneToUTC();
 
-          if (testData.dataGenerator === 'kibana_sample_data_logs') {
-            await PageObjects.security.login('elastic', 'changeme', {
-              expectSuccess: true,
-            });
-
-            await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-              useActualUrl: true,
-            });
-            await PageObjects.header.waitUntilLoadingHasFinished();
-            await PageObjects.home.addSampleDataSet('logs');
-            await PageObjects.header.waitUntilLoadingHasFinished();
-          } else {
-            await ml.securityUI.loginAsMlPowerUser();
-            await ml.testResources.createDataViewIfNeeded(
-              testData.sourceIndexOrSavedSearch,
-              '@timestamp'
-            );
-          }
+          await ml.securityUI.loginAsMlPowerUser();
+          await ml.testResources.createDataViewIfNeeded(
+            testData.sourceIndexOrSavedSearch,
+            '@timestamp'
+          );
         });
 
         after(async () => {
           await elasticChart.setNewChartUiDebugFlag(false);
-          if (testData.dataGenerator !== 'kibana_sample_data_logs') {
-            await ml.testResources.deleteDataViewByTitle(testData.sourceIndexOrSavedSearch);
-          }
           await aiops.logRateAnalysisDataGenerator.removeGeneratedData(testData.dataGenerator);
         });
 
