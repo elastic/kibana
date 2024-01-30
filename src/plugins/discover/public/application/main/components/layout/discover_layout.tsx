@@ -241,7 +241,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   ]);
 
   const isLoading =
-    stateContainer.dataState.data$.documents$.value.fetchStatus === FetchStatus.LOADING;
+    stateContainer.dataState.data$.documents$.value.fetchStatus === FetchStatus.LOADING ||
+    stateContainer.dataState.data$.main$.value.fetchStatus === FetchStatus.LOADING;
 
   const onCancelClick = () => {
     stateContainer.dataState.cancel();

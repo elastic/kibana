@@ -317,7 +317,8 @@ export function getDataStateContainer({
   };
 
   const cancel = () => {
-    abortController.abort();
+    abortController?.abort();
+    abortControllerFetchMore?.abort();
   };
 
   return {
