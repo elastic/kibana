@@ -26,11 +26,14 @@ export const internalConsole = {
 };
 
 // internalConsole.info.apply(console, [`***** process.env.NODE_ENV: ${process.env.NODE_ENV}`]);
+internalConsole.info.apply(console, [`***** process.env.isDevProc: ${process.env.isDevProc}`]);
 
 // Only override console if running in production mode
-if (!isDevMode) {
-  // internalConsole.info.apply(console, [`***** OVERRIDING CONSOLE!`]);
-  // internalConsole.info.apply(console, [`***** process.env.NODE_ENV: ${process.env.NODE_ENV}`]);
+if (process.env.isDevProc) {
+  // !isDevMode) {
+  internalConsole.info.apply(console, [`***** OVERRIDING CONSOLE!`]);
+  internalConsole.info.apply(console, [`***** process.env.NODE_ENV: ${process.env.NODE_ENV}`]);
+
   console.info = function (...args) {
     const cleanedArgs = args.map(function (arg) {
       if (typeof arg !== 'string') return arg;
