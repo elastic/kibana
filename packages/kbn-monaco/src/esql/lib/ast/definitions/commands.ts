@@ -272,7 +272,7 @@ export const commandDefinitions: CommandDefinition[] = [
     modes: [],
     signature: {
       multipleParams: false,
-      params: [{ name: 'column', type: 'column', innerType: 'list' }],
+      params: [{ name: 'column', type: 'column', innerType: 'any' }],
     },
   },
   {
