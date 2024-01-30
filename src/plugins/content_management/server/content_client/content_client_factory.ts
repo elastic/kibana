@@ -15,30 +15,32 @@ import { ContentClient } from './content_client';
 export const getContentClientFactory =
   ({ contentRegistry }: { contentRegistry: ContentRegistry }) =>
   (contentTypeId: string) => {
-    return {
-      getForRequest({
-        requestHandlerContext,
+    const getForRequest = ({
+      requestHandlerContext,
+      version,
+    }: {
+      requestHandlerContext: RequestHandlerContext;
+      version?: Version;
+    }) => {
+      const storageContext = getStorageContext({
+        contentTypeId,
         version,
-      }: {
-        requestHandlerContext: RequestHandlerContext;
-        version?: Version;
-      }) {
-        const storageContext = getStorageContext({
-          contentTypeId,
-          version,
-          ctx: {
-            contentRegistry,
-            requestHandlerContext,
-            getTransformsFactory: getServiceObjectTransformFactory,
-          },
-        });
+        ctx: {
+          contentRegistry,
+          requestHandlerContext,
+          getTransformsFactory: getServiceObjectTransformFactory,
+        },
+      });
 
-        const crudInstance = contentRegistry.getCrud(contentTypeId);
+      const crudInstance = contentRegistry.getCrud(contentTypeId);
 
-        return ContentClient.create(contentTypeId, {
-          storageContext,
-          crudInstance,
-        });
-      },
+      return ContentClient.create(contentTypeId, {
+        storageContext,
+        crudInstance,
+      });
+    };
+
+    return {
+      getForRequest,
     };
   };

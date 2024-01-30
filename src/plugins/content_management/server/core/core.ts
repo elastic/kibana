@@ -16,7 +16,7 @@ import { ContentCrud } from './crud';
 import { EventBus } from './event_bus';
 import { ContentRegistry } from './registry';
 
-export interface GetContentClientForRequestDeps {
+export interface GetContentClientForRequestDependencies {
   contentTypeId: string;
   requestHandlerContext: RequestHandlerContext;
   version?: Version;
@@ -35,7 +35,7 @@ export interface CoreApi {
   /** Content management event bus */
   eventBus: EventBus;
   contentClient: {
-    getForRequest(deps: GetContentClientForRequestDeps): IContentClient;
+    getForRequest(deps: GetContentClientForRequestDependencies): IContentClient;
   };
 }
 
@@ -65,24 +65,23 @@ export class Core {
   setup(): CoreSetup {
     this.setupEventStream();
 
-    return {
-      contentRegistry: this.contentRegistry,
-      api: {
-        register: this.contentRegistry.register.bind(this.contentRegistry),
-        crud: this.contentRegistry.getCrud.bind(this.contentRegistry),
-        eventBus: this.eventBus,
-        contentClient: {
-          getForRequest: ({
-            contentTypeId,
-            requestHandlerContext,
-            version,
-          }: GetContentClientForRequestDeps) => {
-            return getContentClientFactory({ contentRegistry: this.contentRegistry })(
-              contentTypeId
-            ).getForRequest({ requestHandlerContext, version });
-          },
+    const coreApi: CoreApi = {
+      register: this.contentRegistry.register.bind(this.contentRegistry),
+      crud: this.contentRegistry.getCrud.bind(this.contentRegistry),
+      eventBus: this.eventBus,
+      contentClient: {
+        getForRequest: ({ contentTypeId, requestHandlerContext, version }) => {
+          const clientFactory = getContentClientFactory({ contentRegistry: this.contentRegistry });
+          const clientForContentTypeId = clientFactory(contentTypeId);
+
+          return clientForContentTypeId.getForRequest({ requestHandlerContext, version });
         },
       },
+    };
+
+    return {
+      contentRegistry: this.contentRegistry,
+      api: coreApi,
     };
   }
 
