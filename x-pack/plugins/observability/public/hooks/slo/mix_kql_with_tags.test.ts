@@ -47,9 +47,8 @@ describe('mixKqlWithTags', () => {
       included: ['production'],
       excluded: ['dev'],
     };
-    
     const kqlQueryMixedValue = mixKqlWithTags(query, tags);
-    expect(kqlQueryMixedValue).toBe('slo.tags: (production) and not slo.tags: (dev)'); 
+    expect(kqlQueryMixedValue).toBe('slo.tags: (production) and not slo.tags: (dev)');
   });
 
   it('mixes empty query with empty tags', async () => {
@@ -58,9 +57,9 @@ describe('mixKqlWithTags', () => {
       included: [],
       excluded: [],
     };
-    
+
     const kqlQueryMixedValue = mixKqlWithTags(query, tags);
-    expect(kqlQueryMixedValue).toBe(''); 
+    expect(kqlQueryMixedValue).toBe('');
   });
 
   it('mixes empty query with undefined tags', async () => {
@@ -69,20 +68,20 @@ describe('mixKqlWithTags', () => {
       included: undefined,
       excluded: undefined,
     };
-    
+
     const kqlQueryMixedValue = mixKqlWithTags(query, tags);
-    expect(kqlQueryMixedValue).toBe(''); 
+    expect(kqlQueryMixedValue).toBe('');
   });
-  
+
   it('mixes query with multiple included tags', async () => {
     const query = 'something';
     const tags = {
       included: ['production', 'staging'],
       excluded: [],
     };
-    
+
     const kqlQueryMixedValue = mixKqlWithTags(query, tags);
-    expect(kqlQueryMixedValue).toBe('something and slo.tags: (production or staging)'); 
+    expect(kqlQueryMixedValue).toBe('something and slo.tags: (production or staging)');
   });
 
   it('mixes query with multiple excluded tags', async () => {
@@ -91,9 +90,9 @@ describe('mixKqlWithTags', () => {
       included: [],
       excluded: ['dev', 'production'],
     };
-    
+
     const kqlQueryMixedValue = mixKqlWithTags(query, tags);
-    expect(kqlQueryMixedValue).toBe('something and not slo.tags: (dev or production)'); 
+    expect(kqlQueryMixedValue).toBe('something and not slo.tags: (dev or production)');
   });
 
   it('mixes query with multiple included and multiple excluded tags', async () => {
@@ -102,8 +101,10 @@ describe('mixKqlWithTags', () => {
       included: ['production', 'staging'],
       excluded: ['dev', 'pre', 'qa'],
     };
-    
+
     const kqlQueryMixedValue = mixKqlWithTags(query, tags);
-    expect(kqlQueryMixedValue).toBe('something and slo.tags: (production or staging) and not slo.tags: (dev or pre or qa)'); 
-  })
+    expect(kqlQueryMixedValue).toBe(
+      'something and slo.tags: (production or staging) and not slo.tags: (dev or pre or qa)'
+    );
+  });
 });
