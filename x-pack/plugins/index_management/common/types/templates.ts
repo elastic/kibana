@@ -88,6 +88,7 @@ export interface TemplateListItem {
   ilmPolicy?: {
     name: string;
   };
+  composedOf?: string[];
   _kbnMeta: {
     type: TemplateType;
     hasDatastream: boolean;

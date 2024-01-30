@@ -109,6 +109,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
       ],
       box: {
         incremental: true,
+        'data-test-subj': 'componentTemplatesSearch',
       },
       filters: [
         {

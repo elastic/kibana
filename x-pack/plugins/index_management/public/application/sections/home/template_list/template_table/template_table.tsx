@@ -81,7 +81,9 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
         defaultMessage: 'Components',
       }),
       truncateText: true,
-      sortable: true,
+      sortable: (template) => {
+        return template.composedOf?.length;
+      },
       render: (composedOf: string[] = [], item: TemplateListItem) =>
         composedOf.length === 0 ? (
           <span>0</span>

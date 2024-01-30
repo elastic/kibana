@@ -78,6 +78,26 @@ describe('Index Templates tab', () => {
       expect(exists('templateTable')).toBe(true);
       expect(exists('legacyTemplateTable')).toBe(false);
     });
+
+    test('Components column renders a link to Component templates', async () => {
+      httpRequestsMockHelpers.setLoadTemplatesResponse({
+        templates: [
+          fixtures.getComposableTemplate({
+            name: 'Test',
+            composedOf: ['component1', 'component2'],
+          }),
+        ],
+        legacyTemplates: [],
+      });
+
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
+      const { exists, component } = testBed;
+      component.update();
+
+      expect(exists('componentTemplatesLink')).toBe(true);
+    });
   });
 
   describe('when there are index templates', () => {
