@@ -69,6 +69,7 @@ const AssetDetailsUrlStateRT = rt.partial({
   processSearch: rt.string,
   metadataSearch: rt.string,
   logsSearch: rt.string,
+  profilingSearch: rt.string,
 });
 
 const AssetDetailsUrlRT = rt.union([AssetDetailsUrlStateRT, rt.null]);
