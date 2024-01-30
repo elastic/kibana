@@ -78,7 +78,7 @@ export function registerBundleRoutes({
     registerRouteForBundle(router, {
       publicPath: `${serverBasePath}/${buildSha}/bundles/plugin/${id}/${version}/`,
       routePath: `/${buildSha}/bundles/plugin/${id}/${version}/`,
-      bundlesPath: publicTargetDir,
+      bundlesPath: [publicTargetDir, `/${buildSha}/${publicTargetDir}`],
       fileHashCache,
       isDist,
     });

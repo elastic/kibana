@@ -267,9 +267,15 @@ export class CoreAppsService {
   // After the package is built and bootstrap extracts files to bazel-bin,
   // assets are exposed at the root of the package and in the package's node_modules dir
   private registerStaticDirs(core: InternalCoreSetup | InternalCorePreboot) {
-    core.http.registerStaticDir(
-      `/${this.env.packageInfo.buildShaShort}/ui/{path*}`,
-      fromRoot('node_modules/@kbn/core-apps-server-internal/assets')
-    );
+    /**
+     * Serve UI from sha and no sha scoped paths to allow time to migrate
+     * Eventually we only want to serve from the sha scoped path
+     */
+    [`/${this.env.packageInfo.buildShaShort}/ui/{path*}`, '/ui/{path*}'].forEach((path) => {
+      core.http.registerStaticDir(
+        path,
+        fromRoot('node_modules/@kbn/core-apps-server-internal/assets')
+      );
+    });
   }
 }
