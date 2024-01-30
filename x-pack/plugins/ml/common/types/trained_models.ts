@@ -113,12 +113,47 @@ export type TrainedModelConfigResponse = estypes.MlTrainedModelConfig & {
   version: string;
   inference_config?: Record<string, any>;
   indices?: Array<Record<IndexName, IndicesIndexState | null>>;
+  inference_apis?: InferenceAPIConfigResponse[];
 };
 
 export interface PipelineDefinition {
   processors?: Array<Record<string, any>>;
   description?: string;
 }
+
+export type InferenceServiceSettings =
+  | {
+      service: 'elser';
+      service_settings: {
+        num_allocations: number;
+        num_threads: number;
+        model_version: string;
+      };
+    }
+  | {
+      service: 'openai';
+      service_settings: {
+        api_key: string;
+        organization_id: string;
+        url: string;
+      };
+    }
+  | {
+      service: 'hugging_face';
+      service_settings: {
+        api_key: string;
+        url: string;
+      };
+    };
+
+export type InferenceAPIConfigResponse = {
+  // Refers to a deployment id
+  model_id: string;
+  task_type: 'sparse_embedding' | 'text_embedding';
+  task_settings: {
+    model?: string;
+  };
+} & InferenceServiceSettings;
 
 export interface ModelPipelines {
   model_id: string;

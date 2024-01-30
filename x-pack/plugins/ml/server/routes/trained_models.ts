@@ -6,6 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { groupBy } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import type { ErrorType } from '@kbn/ml-error-utils';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
@@ -30,6 +31,7 @@ import {
   modelDownloadsQuery,
 } from './schemas/inference_schema';
 import {
+  InferenceAPIConfigResponse,
   PipelineDefinition,
   type TrainedModelConfigResponse,
 } from '../../common/types/trained_models';
@@ -103,6 +105,31 @@ export function trainedModelsRoutes(
           // model_type is missing
           // @ts-ignore
           const result = resp.trained_model_configs as TrainedModelConfigResponse[];
+
+          try {
+            // Check if model is used by an inference service
+            const { models } = await client.asCurrentUser.transport.request<{
+              models: InferenceAPIConfigResponse[];
+            }>({
+              method: 'GET',
+              path: `/_inference/_all`,
+            });
+
+            const inferenceAPIMap = groupBy(
+              models,
+              (model) => model.service === 'elser' && model.service_settings.model_version
+            );
+
+            for (const model of result) {
+              if (model.model_id in inferenceAPIMap) {
+                model.inference_apis = inferenceAPIMap[model.model_id];
+              }
+            }
+          } catch (e) {
+            mlLog.warn('Unable to retrieve inference API information');
+            mlLog.debug(e);
+          }
+
           try {
             if (withPipelines) {
               // Also need to retrieve the list of deployment IDs from stats
@@ -287,12 +314,13 @@ export function trainedModelsRoutes(
           },
         },
       },
-      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
+      routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
         try {
           const { modelId } = request.params;
           const body = await mlClient.getTrainedModelsStats({
             ...(modelId ? { model_id: modelId } : {}),
           });
+
           return response.ok({
             body,
           });
