@@ -65,7 +65,7 @@ export class InputControlDeprecationBadge implements Action<EmbeddableApiContext
   }
 
   public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {
-    return isApiCompatible(embeddable);
+    return isApiCompatible(embeddable) && embeddable.getVis().type.name === INPUT_CONTROL_VIS_TYPE;
   }
 
   public subscribeToCompatibilityChanges(
