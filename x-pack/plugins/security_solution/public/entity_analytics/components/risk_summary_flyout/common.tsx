@@ -8,7 +8,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { sum } from 'lodash/fp';
+import { sumBy } from 'lodash/fp';
 
 import type {
   HostRiskScore,
@@ -60,7 +60,11 @@ export const buildColumns: () => Array<EuiBasicTableColumn<TableItem>> = () => [
     dataType: 'number',
     align: 'right',
     render: (score: number) => displayNumber(score),
-    footer: (props) => displayNumber(sum(props.items.map((i) => i.score))),
+    footer: (props) => (
+      <span data-test-subj="risk-summary-result-score">
+        {displayNumber(sumBy((i) => i.score, props.items))}
+      </span>
+    ),
   },
   {
     field: 'count',
@@ -75,7 +79,9 @@ export const buildColumns: () => Array<EuiBasicTableColumn<TableItem>> = () => [
     sortable: true,
     dataType: 'number',
     align: 'right',
-    footer: (props) => sum(props.items.map((i) => i.count)),
+    footer: (props) => (
+      <span data-test-subj="risk-summary-result-count">{sumBy((i) => i.count, props.items)}</span>
+    ),
   },
 ];
 
