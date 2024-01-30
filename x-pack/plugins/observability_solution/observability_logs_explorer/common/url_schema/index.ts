@@ -6,7 +6,7 @@
  */
 
 export {
-  OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY,
+  OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY,
   OBSERVABILITY_DATASET_QUALITY_URL_STATE_KEY,
 } from './common';
 export * as logExplorerUrlSchemaV1 from './url_schema_v1';

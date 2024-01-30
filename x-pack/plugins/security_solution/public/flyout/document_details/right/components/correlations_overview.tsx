@@ -38,6 +38,7 @@ export const CorrelationsOverview: React.FC = () => {
     indexName,
     getFieldsData,
     scopeId,
+    isPreview,
   } = useRightPanelContext();
   const { openLeftPanel } = useExpandableFlyoutApi();
 
@@ -56,10 +57,16 @@ export const CorrelationsOverview: React.FC = () => {
     });
   }, [eventId, openLeftPanel, indexName, scopeId]);
 
-  const { show: showAlertsByAncestry, indices } = useShowRelatedAlertsByAncestry({
+  const {
+    show: showAlertsByAncestry,
+    documentId,
+    indices,
+  } = useShowRelatedAlertsByAncestry({
     getFieldsData,
     dataAsNestedObject,
     dataFormattedForFieldBrowser,
+    eventId,
+    isPreview,
   });
   const { show: showSameSourceAlerts, originalEventId } = useShowRelatedAlertsBySameSourceEvent({
     getFieldsData,
@@ -111,8 +118,8 @@ export const CorrelationsOverview: React.FC = () => {
           {showAlertsBySession && entityId && (
             <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} />
           )}
-          {showAlertsByAncestry && indices && (
-            <RelatedAlertsByAncestry documentId={eventId} indices={indices} scopeId={scopeId} />
+          {showAlertsByAncestry && documentId && indices && (
+            <RelatedAlertsByAncestry documentId={documentId} indices={indices} scopeId={scopeId} />
           )}
         </EuiFlexGroup>
       ) : (

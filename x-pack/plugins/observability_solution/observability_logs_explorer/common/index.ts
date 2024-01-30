@@ -11,7 +11,7 @@ export {
   AllDatasetsLocatorDefinition,
 } from './locators';
 export {
-  OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY,
+  OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY,
   OBSERVABILITY_DATASET_QUALITY_URL_STATE_KEY,
   logExplorerUrlSchemaV1,
   datasetQualityUrlSchemaV1,
