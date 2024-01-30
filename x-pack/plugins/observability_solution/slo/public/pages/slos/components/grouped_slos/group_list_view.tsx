@@ -35,13 +35,13 @@ import { SLOView } from '../toggle_slo_view';
 
 interface Props {
   group: string;
-  kqlQuery: string;
+  kqlQuery?: string;
   sloView: SLOView;
-  sort: string;
-  direction: SortDirection;
+  sort?: string;
+  direction?: SortDirection;
   groupBy: string;
-  summary: GroupSummary;
-  filters: Filter[];
+  summary?: GroupSummary;
+  filters?: Filter[];
 }
 
 export function GroupListView({
@@ -93,7 +93,7 @@ export function GroupListView({
     setPage(pageNumber);
   };
 
-  const worstSLI = useSloFormattedSLIValue(summary.worst.sliValue);
+  const worstSLI = useSloFormattedSLIValue(summary?.worst.sliValue);
 
   return (
     <>
@@ -111,19 +111,19 @@ export function GroupListView({
                     </EuiTitle>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiText color="subdued">({summary.total})</EuiText>
+                    <EuiText color="subdued">({summary?.total})</EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               }
               extraAction={
                 <EuiFlexGroup alignItems="center">
-                  {summary.violated > 0 && (
+                  {summary!.violated > 0 && (
                     <EuiFlexItem grow={false}>
                       <EuiBadge color="danger">
                         {i18n.translate('xpack.slo.group.totalViolated', {
                           defaultMessage: '{total} Violated',
                           values: {
-                            total: summary.violated,
+                            total: summary?.violated,
                           },
                         })}
                       </EuiBadge>
@@ -134,7 +134,7 @@ export function GroupListView({
                       {i18n.translate('xpack.slo.group.totalHealthy', {
                         defaultMessage: '{total} Healthy',
                         values: {
-                          total: summary.healthy,
+                          total: summary?.healthy,
                         },
                       })}
                     </EuiBadge>
@@ -147,7 +147,7 @@ export function GroupListView({
                             {i18n.translate('xpack.slo.group.totalSloViolatedTooltip', {
                               defaultMessage: 'SLO: {name}',
                               values: {
-                                name: summary.worst.slo?.name,
+                                name: summary?.worst.slo?.name,
                               },
                             })}
                           </EuiText>
@@ -155,7 +155,7 @@ export function GroupListView({
                             {i18n.translate('xpack.slo.group.totalSloViolatedTooltip.instance', {
                               defaultMessage: 'Instance: {instance}',
                               values: {
-                                instance: summary.worst.slo?.instanceId,
+                                instance: summary?.worst.slo?.instanceId,
                               },
                             })}
                           </EuiText>
@@ -165,14 +165,14 @@ export function GroupListView({
                       <EuiLink
                         data-test-subj="o11yGroupListViewLink"
                         href={basePath.prepend(
-                          paths.sloDetails(summary.worst.slo?.id, summary.worst.slo?.instanceId)
+                          paths.sloDetails(summary!.worst.slo?.id, summary!.worst.slo?.instanceId)
                         )}
                       >
                         {i18n.translate('xpack.slo.group.worstPerforming', {
                           defaultMessage: 'Worst performing: ',
                         })}
                         <EuiTextColor
-                          color={summary.worst.status !== 'HEALTHY' ? 'danger' : undefined}
+                          color={summary?.worst.status !== 'HEALTHY' ? 'danger' : undefined}
                         >
                           <strong>{worstSLI}</strong>
                         </EuiTextColor>

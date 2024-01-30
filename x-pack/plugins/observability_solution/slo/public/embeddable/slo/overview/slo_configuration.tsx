@@ -23,22 +23,34 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import { SloSelector } from '../alerts/slo_selector';
-import type { EmbeddableSloProps } from './types';
+import type { EmbeddableSloProps, SloEmbeddableInput } from './types';
+import { SloGroupConfiguration } from './slo_group_configuration';
+import { OverviewModeSelector } from './overview_mode_selector';
 
 interface SloConfigurationProps {
+  initialInput?: Partial<SloEmbeddableInput>;
   onCreate: (props: EmbeddableSloProps) => void;
   onCancel: () => void;
 }
 
-export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) {
+export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfigurationProps) {
   const [selectedSlo, setSelectedSlo] = useState<EmbeddableSloProps>();
   const [showAllGroupByInstances, setShowAllGroupByInstances] = useState(false);
+  const [overviewMode, setOverviewMode] = useState(initialInput?.overviewMode ?? 'single');
+  const [selectedGroups, setSelectedGroups] = useState();
+  const [selectedGroupBy, setSelectedGroupBy] = useState();
+  const [selectedSloView, setSelectedSloView] = useState();
 
+  // TODO  create a separate onCreate function for single vs group SLOs sending the appropriate params
   const onConfirmClick = () =>
     onCreate({
       showAllGroupByInstances,
       sloId: selectedSlo?.sloId,
       sloInstanceId: selectedSlo?.sloInstanceId,
+      overviewMode,
+      groups: selectedGroups,
+      groupBy: selectedGroupBy,
+      sloView: selectedSloView,
     });
   const [hasError, setHasError] = useState(false);
 
@@ -53,17 +65,34 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
       </EuiModalHeader>
       <EuiModalBody>
         <EuiFlexGroup>
-          <EuiFlexItem grow>
-            <SloSelector
-              singleSelection={true}
-              hasError={hasError}
-              onSelected={(slo) => {
-                setHasError(slo === undefined);
-                if (slo && 'id' in slo) {
-                  setSelectedSlo({ sloId: slo.id, sloInstanceId: slo.instanceId });
-                }
-              }}
-            />
+          <EuiFlexItem>
+            <OverviewModeSelector value={overviewMode} onChange={setOverviewMode} />
+            <EuiSpacer size="m" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            {overviewMode === 'groups' ? (
+              <SloGroupConfiguration
+                onSelected={({ sloView, groupBy, groups }) => {
+                  console.log(groupBy, '!!groupBy');
+                  setSelectedGroupBy(groupBy);
+                  setSelectedGroups(groups);
+                  setSelectedSloView(sloView);
+                }}
+              />
+            ) : (
+              <SloSelector
+                singleSelection={true}
+                hasError={hasError}
+                onSelected={(slo) => {
+                  setHasError(slo === undefined);
+                  if (slo && 'id' in slo) {
+                    setSelectedSlo({ sloId: slo.id, sloInstanceId: slo.instanceId });
+                  }
+                }}
+              />
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
         {selectedSlo?.sloInstanceId !== ALL_VALUE && (
@@ -91,7 +120,7 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
 
         <EuiButton
           data-test-subj="sloConfirmButton"
-          isDisabled={!selectedSlo || hasError}
+          // isDisabled={!selectedSlo || hasError}
           onClick={onConfirmClick}
           fill
         >
