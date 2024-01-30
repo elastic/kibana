@@ -24,6 +24,7 @@ import {
   PublishesWritablePanelDescription,
   PublishesWritablePanelTitle,
   PublishesPhaseEvents,
+  PublishesSavedObjectId,
 } from '@kbn/presentation-publishing';
 import { Observable } from 'rxjs';
 import { EmbeddableInput } from '../../../common/types';
@@ -54,7 +55,8 @@ export type LegacyEmbeddableAPI = HasType &
   PublishesWritablePanelDescription &
   Partial<CanLinkToLibrary & CanUnlinkFromLibrary> &
   HasParentApi<DefaultPresentationPanelApi['parentApi']> &
-  EmbeddableHasTimeRange;
+  EmbeddableHasTimeRange &
+  PublishesSavedObjectId;
 
 export interface EmbeddableAppContext {
   /**

@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { PhaseEvent, PhaseEventType } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
 import { isNil } from 'lodash';
-import { BehaviorSubject, map, Subscription, distinct } from 'rxjs';
+import { BehaviorSubject, map, Subscription, distinct, combineLatest, distinctUntilChanged } from 'rxjs';
 import { embeddableStart } from '../../../kibana_services';
 import { isFilterableEmbeddable } from '../../filterable_embeddable';
 import {
@@ -135,6 +135,21 @@ export const legacyEmbeddableToApi = (
   const defaultPanelTitle = outputKeyToSubject<string>('defaultTitle');
   const disabledActionIds = inputKeyToSubject<string[] | undefined>('disabledActions');
 
+  function getSavedObjectId(input: { savedObjectId?: string }, output: { savedObjectId?: string }) {
+    return output.savedObjectId ?? input.savedObjectId;
+  }
+  const savedObjectId = new BehaviorSubject<string | undefined>(getSavedObjectId(embeddable.getInput() as { savedObjectId?: string }, embeddable.getOutput()));
+  subscriptions.add(
+    combineLatest([embeddable.getInput$(), embeddable.getOutput$()]).pipe(
+      map(([input, output]) => {
+        return getSavedObjectId(input as { savedObjectId?: string }, output);
+      }),
+      distinctUntilChanged()
+    ).subscribe((nextSavedObjectId => {
+      savedObjectId.next(nextSavedObjectId);
+    }))
+  );
+
   const blockingError = new BehaviorSubject<ErrorLike | undefined>(undefined);
   subscriptions.add(
     embeddable.getOutput$().subscribe({
@@ -238,6 +253,8 @@ export const legacyEmbeddableToApi = (
 
       canUnlinkFromLibrary: () => canUnlinkLegacyEmbeddable(embeddable),
       unlinkFromLibrary: () => unlinkLegacyEmbeddable(embeddable),
+
+      savedObjectId,
     },
     destroyAPI: () => {
       subscriptions.unsubscribe();
