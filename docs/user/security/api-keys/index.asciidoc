@@ -9,9 +9,9 @@ For example, if you extract data from an {es} cluster on a daily basis, you migh
 
 You can use {kib} to manage your different API keys:
 
-* Personal API key: allows external services to access the Elastic Stack on behalf of a user.
-* Cross-Cluster API key: allows remote clusters to connect to your local cluster.
-* Managed API key: created and managed by Kibana to correctly run background tasks.
+* User API key: allows external services to access the Elastic Stack on behalf of a user.
+* Cross-cluster API key: allows other clusters to connect to this cluster.
+* Managed API key: created and managed by Kibana to run background tasks.
 
 To manage API keys, open the main menu, then click *Stack Management > Security > API Keys*.
 
@@ -24,7 +24,7 @@ image:images/api-keys.png["API Keys UI"]
 
 * To use API keys in {kib}, you must have the `manage_security`, `manage_api_key`, or the `manage_own_api_key` cluster privileges.
 * To delete API keys, you must have the `manage_api_key` or `manage_own_api_key` privileges.
-* To create or update a *personal API key*, you must have the `manage_api_key` or the `manage_own_api_key` privilege.
+* To create or update a *user API key*, you must have the `manage_api_key` or the `manage_own_api_key` privilege.
 * To create or update a *cross-cluster API key*, you must have the `manage_security` privilege and an Enterprise license.
 * To have a read-only view on the API keys, you must have access to the page and the `read_security` cluster privilege.
 
@@ -40,7 +40,7 @@ To create an API key, open the main menu, then click *Stack Management > Securit
 image:images/create-ccr-api-key.png["Create API Key UI"]
 
 
-Refer to the {ref}/security-api-create-api-key.html[create API key] documentation to learn more about creating personal API keys.
+Refer to the {ref}/security-api-create-api-key.html[create API key] documentation to learn more about creating user API keys.
 
 Refer to the {ref}/security-api-create-cross-cluster-api-key.html[create cross-cluster API key] documentation to learn more about creating cross-cluster API keys.
 
@@ -50,7 +50,7 @@ Refer to the {ref}/security-api-create-cross-cluster-api-key.html[create cross-c
 
 To update an API key, open the main menu, click *Stack Management > Security > API Keys*, and then click on the name of the key. You cannot update the name or the type of API key.
 
-Refer to the {ref}/security-api-update-api-key.html[update API key] documentation to learn more about updating personal API keys.
+Refer to the {ref}/security-api-update-api-key.html[update API key] documentation to learn more about updating user API keys.
 
 Refer to the {ref}/security-api-update-cross-cluster-api-key.html[update cross-cluster API key] documentation to learn more about updating cross-cluster API keys.
 

@@ -10,6 +10,7 @@ import type {
   LayoutParams,
   PerformanceMetrics as ScreenshotMetrics,
 } from '@kbn/screenshotting-plugin/common';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { JOB_STATUS } from './constants';
 import type { LocatorParams } from './url';
 
@@ -58,11 +59,12 @@ export interface ReportOutput extends TaskRunResult {
  * @deprecated
  */
 export interface BaseParams {
-  layout?: LayoutParams;
+  browserTimezone: string; // to format dates in the user's time zone
   objectType: string;
   title: string;
-  browserTimezone: string; // to format dates in the user's time zone
   version: string; // to handle any state migrations
+  layout?: LayoutParams; // png & pdf only
+  pagingStrategy?: 'pit' | 'scroll'; // csv only
 }
 
 /**
@@ -81,6 +83,11 @@ export interface BasePayload extends BaseParams {
   spaceId?: string;
   isDeprecated?: boolean;
 }
+
+/**
+ * Timestamp metrics about the task lifecycle
+ */
+export type TaskInstanceFields = Pick<ConcreteTaskInstance, 'startedAt' | 'retryAt'>;
 
 export type JobId = string;
 
