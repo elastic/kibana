@@ -14,10 +14,7 @@ function buildFullProfilingKuery(assetName: string, profilingSearch?: string) {
   const defaultKuery = `${HOST_FIELD} : "${assetName}"`;
   const customKuery = profilingSearch?.trim() ?? '';
 
-  if (customKuery !== '') {
-    return `${defaultKuery} and ${customKuery}`;
-  }
-  return defaultKuery;
+    return customKuery !== '' ? `${defaultKuery} and ${customKuery}` : defaultKuery;
 }
 export function useProfilingKuery() {
   const { asset } = useAssetDetailsRenderPropsContext();
