@@ -7,6 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { Datatable, DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 import { Trigger, RowClickContext } from '@kbn/ui-actions-plugin/public';
 import { BooleanRelation } from '@kbn/es-query';
@@ -16,8 +17,7 @@ export interface EmbeddableContext<T extends IEmbeddable = IEmbeddable> {
   embeddable: T;
 }
 
-export interface ValueClickContext<T extends IEmbeddable = IEmbeddable> {
-  embeddable?: T;
+export type ValueClickContext = EmbeddableApiContext & {
   data: {
     data: Array<{
       table: Pick<Datatable, 'rows' | 'columns'>;
@@ -30,8 +30,7 @@ export interface ValueClickContext<T extends IEmbeddable = IEmbeddable> {
   };
 }
 
-export interface MultiValueClickContext<T extends IEmbeddable = IEmbeddable> {
-  embeddable?: T;
+export type MultiValueClickContext = EmbeddableApiContext & {
   data: {
     data: Array<{
       table: Pick<Datatable, 'rows' | 'columns'>;
@@ -46,8 +45,7 @@ export interface MultiValueClickContext<T extends IEmbeddable = IEmbeddable> {
   };
 }
 
-export interface CellValueContext<T extends IEmbeddable = IEmbeddable> {
-  embeddable: T;
+export type CellValueContext = EmbeddableApiContext & {
   data: Array<{
     value?: any;
     eventId?: string;
@@ -55,8 +53,7 @@ export interface CellValueContext<T extends IEmbeddable = IEmbeddable> {
   }>;
 }
 
-export interface RangeSelectContext<T extends IEmbeddable = IEmbeddable> {
-  embeddable?: T;
+export type RangeSelectContext = EmbeddableApiContext & {
   data: {
     table: Datatable;
     column: number;
@@ -65,10 +62,10 @@ export interface RangeSelectContext<T extends IEmbeddable = IEmbeddable> {
   };
 }
 
-export type ChartActionContext<T extends IEmbeddable = IEmbeddable> =
-  | ValueClickContext<T>
-  | MultiValueClickContext<T>
-  | RangeSelectContext<T>
+export type ChartActionContext =
+  | ValueClickContext
+  | MultiValueClickContext
+  | RangeSelectContext
   | RowClickContext;
 
 export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
