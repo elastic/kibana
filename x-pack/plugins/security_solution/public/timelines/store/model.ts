@@ -134,9 +134,9 @@ export interface TimelineModel {
   isSelectAllChecked: boolean;
   isLoading: boolean;
   selectAll: boolean;
-  /* discover saved search Id */
+  /* discover discover view Id */
   savedSearchId: string | null;
-  /* local saved search object, it's not sent to the server */
+  /* local discover view object, it's not sent to the server */
   savedSearch: SavedSearch | null;
   isDiscoverSavedSearchLoaded?: boolean;
   isDataProviderVisible: boolean;

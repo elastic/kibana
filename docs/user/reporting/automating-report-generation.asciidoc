@@ -26,7 +26,7 @@ To create the POST URL for CSV reports:
 
 . Open the main menu, then click *Discover*.
 
-. Open the saved search you want to share.
+. Open the discover view you want to share.
 
 . In the toolbar, click *Share > CSV Reports > Copy POST URL*.
 
@@ -56,7 +56,7 @@ If you experience issues with the deprecated report URLs after you upgrade {kib}
 
 * *Dashboard* reports:  `/api/reporting/generate/dashboard/<dashboard-id>`
 * *Visualize Library* reports:  `/api/reporting/generate/visualization/<visualization-id>`
-* *Discover* saved search reports: `/api/reporting/generate/search/<saved-search-id>`
+* *Discover* discover view reports: `/api/reporting/generate/search/<saved-search-id>`
 
 IMPORTANT:
 In earlier {kib} versions, you could use the `&sync` parameter to append to report URLs that held the request open until the document was fully generated. The `&sync` parameter is now unsupported. If you use the `&sync` parameter in Watcher, you must update the parameter.

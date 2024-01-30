@@ -13,7 +13,7 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const editedDescription = 'Edited description';
 
-  describe('outlier detection saved search creation', function () {
+  describe('outlier detection discover view creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote_small');
       await ml.testResources.createDataViewIfNeeded('ft_farequote_small', '@timestamp');
@@ -51,7 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
         suiteTitle: 'with lucene query',
         jobType: 'outlier_detection',
         jobId: `fq_saved_search_2_${dateNow}`,
-        jobDescription: 'Outlier detection job based on a saved search with lucene query',
+        jobDescription: 'Outlier detection job based on a discover view with lucene query',
         source: 'ft_farequote_lucene',
         get destinationIndex(): string {
           return `user-${this.jobId}`;
@@ -128,7 +128,7 @@ export default function ({ getService }: FtrProviderContext) {
         suiteTitle: 'with kuery query',
         jobType: 'outlier_detection',
         jobId: `fq_saved_search_3_${dateNow}`,
-        jobDescription: 'Outlier detection job based on a saved search with kuery query',
+        jobDescription: 'Outlier detection job based on a discover view with kuery query',
         source: 'ft_farequote_kuery',
         get destinationIndex(): string {
           return `user-${this.jobId}`;
@@ -205,7 +205,7 @@ export default function ({ getService }: FtrProviderContext) {
         suiteTitle: 'with filter and kuery query',
         jobType: 'outlier_detection',
         jobId: `fq_saved_search_4_${dateNow}`,
-        jobDescription: 'Outlier detection job based on a saved search with filter and kuery query',
+        jobDescription: 'Outlier detection job based on a discover view with filter and kuery query',
         source: 'ft_farequote_filter_and_kuery',
         get destinationIndex(): string {
           return `user-${this.jobId}`;
@@ -283,7 +283,7 @@ export default function ({ getService }: FtrProviderContext) {
         jobType: 'outlier_detection',
         jobId: `fq_saved_search_5_${dateNow}`,
         jobDescription:
-          'Outlier detection job based on a saved search with filter and lucene query',
+          'Outlier detection job based on a discover view with filter and lucene query',
         source: 'ft_farequote_filter_and_lucene',
         get destinationIndex(): string {
           return `user-${this.jobId}`;

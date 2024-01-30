@@ -10,7 +10,7 @@ import { getSavedSearchUrl, getSavedSearchFullPathUrl } from './saved_searches_u
 
 describe('saved_searches_url', () => {
   describe('getSavedSearchUrl', () => {
-    test('should return valid saved search url', () => {
+    test('should return valid discover view url', () => {
       expect(getSavedSearchUrl()).toBe('#/');
       expect(getSavedSearchUrl('id')).toBe('#/view/id');
     });

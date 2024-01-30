@@ -28,7 +28,7 @@ export const DataSourceContext = React.createContext<DataSourceContextValue>(
 );
 
 /**
- * Context provider that resolves current data view and the saved search from the URL state.
+ * Context provider that resolves current data view and the discover view from the URL state.
  *
  * @param children
  * @constructor
@@ -60,7 +60,7 @@ export const DataSourceContextProvider: FC = ({ children }) => {
   );
 
   /**
-   * Resolve data view or saved search if exist in the URL.
+   * Resolve data view or discover view if exist in the URL.
    */
   const resolveDataSource = useCallback(async () => {
     if (dataViewId === '') {
@@ -118,7 +118,7 @@ export const DataSourceContextProvider: FC = ({ children }) => {
           <h2>
             <FormattedMessage
               id="xpack.ml.dataSourceContext.errorTitle"
-              defaultMessage="Unable to fetch data view or saved search"
+              defaultMessage="Unable to fetch data view or discover view"
             />
           </h2>
         }

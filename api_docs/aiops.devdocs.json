@@ -798,7 +798,7 @@
             "tags": [],
             "label": "savedSearch",
             "description": [
-              "The saved search to analyze."
+              "The discover view to analyze."
             ],
             "signature": [
               {
@@ -897,7 +897,7 @@
             "tags": [],
             "label": "savedSearch",
             "description": [
-              "The saved search to analyze."
+              "The discover view to analyze."
             ],
             "signature": [
               {
@@ -996,7 +996,7 @@
             "tags": [],
             "label": "savedSearch",
             "description": [
-              "The saved search to analyze."
+              "The discover view to analyze."
             ],
             "signature": [
               {

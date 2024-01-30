@@ -9,6 +9,6 @@ import { i18n } from '@kbn/i18n';
 
 export const GET_TIMELINE_DISCOVER_SAVED_SEARCH_TITLE = (title: string) =>
   i18n.translate('xpack.securitySolution.timelines.discoverInTimeline.savedSearchTitle', {
-    defaultMessage: 'Saved search for timeline - {title}',
+    defaultMessage: 'Discover view for timeline - {title}',
     values: { title },
   });

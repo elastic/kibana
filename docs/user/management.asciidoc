@@ -85,7 +85,7 @@ You can add and remove remote clusters, and check their connectivity.
 
 | <<reporting-getting-started, Reporting>>
 | Monitor the generation of reports&mdash;PDF, PNG, and CSV&mdash;and download reports that you previously generated.
-A report can contain a dashboard, visualization, saved search, or Canvas workpad.
+A report can contain a dashboard, visualization, discover view, or Canvas workpad.
 
 | Machine Learning Jobs
 | View, export, and import your <<xpack-ml-anomalies,{anomaly-detect}>> and
@@ -147,7 +147,7 @@ These include dashboards, visualizations, maps, data views, Canvas workpads, and
 |Create, manage, and assign tags to your saved objects.
 
 | <<search-sessions, Search Sessions>>
-| Manage your saved search sessions, groups of queries that run in the background.
+| Manage your discover view sessions, groups of queries that run in the background.
 Search sessions are useful when your queries take longer than usual to process,
 for example, when you have a large volume of data or when the performance of your storage location is slow.
 

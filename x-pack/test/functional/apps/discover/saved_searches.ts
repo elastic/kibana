@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Customize time range', () => {
-      it('should be possible to customize time range for saved searches on dashboards', async () => {
+      it('should be possible to customize time range for discover viewes on dashboards', async () => {
         await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.clickNewDashboard();
         await dashboardAddPanel.clickOpenAddPanel();
@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    it(`should unselect saved search when navigating to a 'new'`, async function () {
+    it(`should unselect discover view when navigating to a 'new'`, async function () {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.selectIndexPattern('ecommerce');
       await filterBar.addFilter({ field: 'category', operation: 'is', value: `Men's Shoes` });

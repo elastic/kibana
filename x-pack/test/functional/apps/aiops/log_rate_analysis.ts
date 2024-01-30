@@ -27,7 +27,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await elasticChart.setNewChartUiDebugFlag(true);
 
       await ml.testExecution.logTestStep(
-        `${testData.suiteTitle} loads the saved search selection page`
+        `${testData.suiteTitle} loads the discover view selection page`
       );
       await aiops.logRateAnalysisPage.navigateToDataViewSelection();
 

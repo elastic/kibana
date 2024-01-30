@@ -35,7 +35,7 @@ function buildRange(timeWindowSize, timeWindowUnit, timeField) {
 watch.input.search.request.body.query
  */
 function buildQuery(timeWindowSize, timeWindowUnit, timeField) {
-  //TODO: This is where a saved search would be applied
+  //TODO: This is where a discover view would be applied
   return {
     bool: {
       filter: {

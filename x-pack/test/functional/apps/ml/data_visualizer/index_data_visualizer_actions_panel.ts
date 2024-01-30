@@ -51,7 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.navigation.navigateToMl();
         await ml.navigation.navigateToDataVisualizer();
 
-        await ml.testExecution.logTestStep('loads the saved search selection page');
+        await ml.testExecution.logTestStep('loads the discover view selection page');
         await ml.dataVisualizer.navigateToDataViewSelection();
 
         await ml.testExecution.logTestStep('loads the index data visualizer page');
@@ -83,7 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.navigation.navigateToMl();
         await ml.navigation.navigateToDataVisualizer();
 
-        await ml.testExecution.logTestStep('loads the saved search selection page');
+        await ml.testExecution.logTestStep('loads the discover view selection page');
         await ml.dataVisualizer.navigateToDataViewSelection();
 
         await ml.testExecution.logTestStep('loads the index data visualizer page');

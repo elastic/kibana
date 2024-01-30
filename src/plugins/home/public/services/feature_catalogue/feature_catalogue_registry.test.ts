@@ -16,7 +16,7 @@ import {
 const DASHBOARD_FEATURE: FeatureCatalogueEntry = {
   id: 'dashboard',
   title: 'Dashboard',
-  description: 'Display and share a collection of visualizations and saved searches.',
+  description: 'Display and share a collection of visualizations and discover viewes.',
   icon: 'dashboardApp',
   path: `/app/kibana#dashboard`,
   showOnHomePage: true,

@@ -36,7 +36,7 @@ export function extractReferences({
     searchSourceReferences.forEach((r) => updatedReferences.push(r));
   }
 
-  // Extract saved search
+  // Extract discover view
   if (updatedAttributes.savedSearchId) {
     updatedReferences.push({
       name: 'search_0',
@@ -77,7 +77,7 @@ export function injectReferences(savedObject: VisSavedObject, references: SavedO
       (reference) => reference.name === savedObject.savedSearchRefName
     );
     if (!savedSearchReference) {
-      throw new Error(`Could not find saved search reference "${savedObject.savedSearchRefName}"`);
+      throw new Error(`Could not find discover view reference "${savedObject.savedSearchRefName}"`);
     }
     savedObject.savedSearchId = savedSearchReference.id;
     delete savedObject.savedSearchRefName;

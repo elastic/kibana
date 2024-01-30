@@ -175,7 +175,7 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
     });
   });
 
-  it('shows the error callout when clicking a saved search using a remote data view', async () => {
+  it('shows the error callout when clicking a discover view using a remote data view', async () => {
     // prepare
     render(
       <IntlProvider locale="en">
@@ -203,13 +203,13 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
     ).toBeInTheDocument();
     expect(
       screen.queryByText(
-        `The saved search 'the-remote-saved-search-title' uses the data view 'my_remote_cluster:index-pattern-title'.`
+        `The discover view 'the-remote-saved-search-title' uses the data view 'my_remote_cluster:index-pattern-title'.`
       )
     ).toBeInTheDocument();
     expect(mockNavigateToPath).toHaveBeenCalledTimes(0);
   });
 
-  it('calls navigateToPath for a saved search using a plain data view ', async () => {
+  it('calls navigateToPath for a discover view using a plain data view ', async () => {
     // prepare
     render(
       <IntlProvider locale="en">

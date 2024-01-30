@@ -1215,7 +1215,7 @@ export class DataRecognizer {
     }
   }
 
-  // check the kibana saved searches JSON in the module to see if they contain INDEX_PATTERN_ID
+  // check the kibana discover viewes JSON in the module to see if they contain INDEX_PATTERN_ID
   // which needs replacement
   private _doSavedObjectsContainIndexPatternId(moduleConfig: Module) {
     if (moduleConfig.kibana) {

@@ -38,7 +38,7 @@ export default ({ getService }: FtrProviderContext) => {
       version: '8.7.0',
       ...params,
     };
-    log.info(`sending request for saved search: ${job.locatorParams[0].params.savedSearchId}`);
+    log.info(`sending request for discover view: ${job.locatorParams[0].params.savedSearchId}`);
     const jobParams = rison.encode(job);
     return await supertest
       .post(`/api/reporting/generate/csv_v2`)
@@ -139,7 +139,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('query stored in the saved search', () => {
+      describe('query stored in the discover view', () => {
         let response: request.Response;
         let job: ReportApiJSON;
         let path: string;

@@ -188,8 +188,8 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
       queryLanguage: SearchQueryLanguage;
       filters: Filter[];
     }) => {
-      // When the user loads a saved search and then clears or modifies the query
-      // we should remove the saved search and replace it with the index pattern id
+      // When the user loads a discover view and then clears or modifies the query
+      // we should remove the discover view and replace it with the index pattern id
       if (selectedSavedSearch !== null) {
         setSelectedSavedSearch(null);
       }

@@ -118,7 +118,7 @@ With PATH_TO_CONFIG and other options as follows.
     Group | PATH_TO_CONFIG
     ----- | --------------
     creation - index pattern | `test/functional/apps/transform/creation/index_pattern/config.ts`
-    creation - runtime mappings, saved searches | `test/functional/apps/transform/creation/runtime_mappings_saved_search/config.ts`
+    creation - runtime mappings, discover viewes | `test/functional/apps/transform/creation/runtime_mappings_saved_search/config.ts`
     edit, clone | `test/functional/apps/transform/edit_clone/config.ts`
     feature controls | `test/functional/apps/transform/feature_controls/config.ts`
     permissions | `test/functional/apps/transform/permissions/config.ts`
@@ -129,7 +129,7 @@ With PATH_TO_CONFIG and other options as follows.
     Group | PATH_TO_CONFIG
     ----- | --------------
     creation - index pattern | `test/functional_basic/apps/transform/creation/index_pattern/config.ts`
-    creation - runtime mappings, saved searches | `test/functional_basic/apps/transform/creation/runtime_mappings_saved_search/config.ts`
+    creation - runtime mappings, discover viewes | `test/functional_basic/apps/transform/creation/runtime_mappings_saved_search/config.ts`
     edit, clone | `test/functional_basic/apps/transform/edit_clone/config.ts`
     feature controls | `test/functional_basic/apps/transform/feature_controls/config.ts`
     permissions | `test/functional_basic/apps/transform/permissions/config.ts`

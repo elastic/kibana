@@ -155,7 +155,7 @@ export default function ({
         await unloadEcommerce();
       });
 
-      it('downloads a PDF file with saved search given EuiDataGrid enabled', async function () {
+      it('downloads a PDF file with discover view given EuiDataGrid enabled', async function () {
         await kibanaServer.uiSettings.update({ 'doc_table:legacy': false });
         this.timeout(300000);
         await PageObjects.dashboard.navigateToApp();

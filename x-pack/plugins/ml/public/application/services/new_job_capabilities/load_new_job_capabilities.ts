@@ -35,15 +35,15 @@ export function loadNewJobCapabilities(
         await serviceToUse.initializeFromDataVIew(dataView);
         resolve(serviceToUse.newJobCaps);
       } else if (savedSearchId !== undefined) {
-        // saved search is being used
-        // load the data view from the saved search
+        // discover view is being used
+        // load the data view from the discover view
         const { dataView } = await getDataViewAndSavedSearchCallback({
           savedSearchService,
           dataViewsService,
         })(savedSearchId);
         if (dataView === null) {
           // eslint-disable-next-line no-console
-          console.error('Cannot retrieve data view from saved search');
+          console.error('Cannot retrieve data view from discover view');
           reject();
           return;
         }

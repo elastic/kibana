@@ -137,13 +137,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await dataGrid.getCurrentSampleSizeValue()).to.be(DEFAULT_SAMPLE_SIZE);
       await goToLastPageAndCheckFooterMessage(DEFAULT_SAMPLE_SIZE);
 
-      // load the saved search again
+      // load the discover view again
       await PageObjects.discover.loadSavedSearch(SAVED_SEARCH_NAME);
       await dataGrid.clickGridSettings();
       expect(await dataGrid.getCurrentSampleSizeValue()).to.be(CUSTOM_SAMPLE_SIZE_FOR_SAVED_SEARCH);
       await goToLastPageAndCheckFooterMessage(CUSTOM_SAMPLE_SIZE_FOR_SAVED_SEARCH);
 
-      // load another saved search without a custom sample size
+      // load another discover view without a custom sample size
       await PageObjects.discover.loadSavedSearch('A Saved Search');
       await dataGrid.clickGridSettings();
       expect(await dataGrid.getCurrentSampleSizeValue()).to.be(DEFAULT_SAMPLE_SIZE);

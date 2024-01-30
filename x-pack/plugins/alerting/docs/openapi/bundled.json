@@ -4209,7 +4209,7 @@
       },
       "create_siem_saved_query_rule_request": {
         "title": "Create saved query rule request",
-        "description": "A rule that searches the defined indices and creates an alert when a document matches the saved search.\n",
+        "description": "A rule that searches the defined indices and creates an alert when a document matches the discover view.\n",
         "type": "object",
         "required": [
           "consumer",

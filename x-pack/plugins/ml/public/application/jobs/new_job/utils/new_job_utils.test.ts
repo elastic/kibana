@@ -56,7 +56,7 @@ describe('createSearchItems', () => {
     });
   });
 
-  test('should match saved search with kuery and condition', () => {
+  test('should match discover view with kuery and condition', () => {
     const savedSearch = getSavedSearchMock({
       highlightAll: true,
       version: true,
@@ -82,7 +82,7 @@ describe('createSearchItems', () => {
     });
   });
 
-  test('should match saved search with kuery and not condition', () => {
+  test('should match discover view with kuery and not condition', () => {
     const savedSearch = getSavedSearchMock({
       highlightAll: true,
       version: true,
@@ -119,7 +119,7 @@ describe('createSearchItems', () => {
     });
   });
 
-  test('should match saved search with kuery and condition and not condition', () => {
+  test('should match discover view with kuery and condition and not condition', () => {
     const savedSearch = getSavedSearchMock({
       highlightAll: true,
       version: true,
@@ -149,7 +149,7 @@ describe('createSearchItems', () => {
     });
   });
 
-  test('should match saved search with kuery and filter', () => {
+  test('should match discover view with kuery and filter', () => {
     const savedSearch = getSavedSearchMock({
       highlightAll: true,
       version: true,

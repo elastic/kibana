@@ -121,8 +121,8 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
       queryLanguage: SearchQueryLanguage;
       filters: Filter[];
     }) => {
-      // When the user loads saved search and then clear or modify the query
-      // we should remove the saved search and replace it with the index pattern id
+      // When the user loads discover view and then clear or modify the query
+      // we should remove the discover view and replace it with the index pattern id
       if (selectedSavedSearch !== null) {
         setSelectedSavedSearch(null);
       }

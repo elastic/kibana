@@ -122,7 +122,7 @@ export function resolveDataView(
   const ownDataView = savedSearch?.searchSource.getField('index');
 
   if (ownDataView && !stateVal) {
-    // the given saved search has its own data view, and no data view was specified in the URL
+    // the given discover view has its own data view, and no data view was specified in the URL
     return ownDataView;
   }
 
@@ -136,7 +136,7 @@ export function resolveDataView(
     });
 
     if (ownDataView) {
-      // the given data view in the URL was not found, but the saved search has its own data view
+      // the given data view in the URL was not found, but the discover view has its own data view
       toastNotifications.addWarning({
         title: warningTitle,
         text: i18n.translate('discover.showingSavedDataViewWarningDescription', {

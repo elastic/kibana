@@ -11,7 +11,7 @@ import type { TimeRange, RefreshInterval } from '@kbn/data-plugin/common';
 import { savedSearchMock, savedSearchMockWithTimeField } from '../../__mocks__/saved_search';
 import { restoreStateFromSavedSearch } from './restore_from_saved_search';
 
-describe('discover restore state from saved search', () => {
+describe('discover restore state from discover view', () => {
   let timefilterMock: TimefilterContract;
   const timeRange: TimeRange = {
     from: 'now-30m',

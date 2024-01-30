@@ -913,7 +913,7 @@
         "desc"
       ]
     ],
-    "title": "Bytes and kuery in saved search with filter",
+    "title": "Bytes and kuery in discover view with filter",
     "version": 1
   },
   "coreMigrationVersion": "8.0.1",
@@ -2094,7 +2094,7 @@
         "desc"
       ]
     ],
-    "title": "Rendering Test: saved search",
+    "title": "Rendering Test: discover view",
     "version": 1
   },
   "coreMigrationVersion": "8.0.1",
@@ -2728,7 +2728,7 @@
     "description": "",
     "panelsJSON": "[{\"version\":\"8.6.0\",\"type\":\"search\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15,\"i\":\"3d2c7037-b0af-4b9f-810f-75de6278acf2\"},\"panelIndex\":\"3d2c7037-b0af-4b9f-810f-75de6278acf2\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_3d2c7037-b0af-4b9f-810f-75de6278acf2\"}]",
     "timeFrom": "2018-04-09T23:43:13.577Z",
-    "title": "timeslider and saved search",
+    "title": "timeslider and discover view",
     "timeTo": "2018-04-14T00:40:42.233Z",
     "version": 1
   },

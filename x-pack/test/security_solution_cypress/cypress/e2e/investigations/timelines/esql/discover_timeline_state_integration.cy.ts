@@ -174,8 +174,8 @@ describe(
       });
     });
 
-    describe('Discover saved search state for ESQL tab', () => {
-      it('should save esql tab saved search with `Security Solution` tag', () => {
+    describe('Discover discover view state for ESQL tab', () => {
+      it('should save esql tab discover view with `Security Solution` tag', () => {
         const timelineSuffix = Date.now();
         const timelineName = `SavedObject timeline-${timelineSuffix}`;
         addDiscoverEsqlQuery(esqlQuery);
@@ -192,11 +192,11 @@ describe(
         cy.get(BASIC_TABLE_LOADING).should('not.exist');
         cy.get(SAVED_OBJECTS_ROW_TITLES).should(
           'contain.text',
-          `Saved search for timeline - ${timelineName}`
+          `Discover view for timeline - ${timelineName}`
         );
       });
 
-      it('should rename the saved search on timeline rename', () => {
+      it('should rename the discover view on timeline rename', () => {
         const initialTimelineSuffix = Date.now();
         const initialTimelineName = `Timeline-${initialTimelineSuffix}`;
         addDiscoverEsqlQuery(esqlQuery);
@@ -216,14 +216,14 @@ describe(
         cy.get(BASIC_TABLE_LOADING).should('not.exist');
         cy.get(SAVED_OBJECTS_ROW_TITLES).should(
           'contain.text',
-          `Saved search for timeline - ${renamedTimelineName}`
+          `Discover view for timeline - ${renamedTimelineName}`
         );
       });
     });
 
     // Issue for enabling below tests: https://github.com/elastic/kibana/issues/165913
     context.skip('Advanced Settings', () => {
-      it('rows per page in saved search should be according to the user selected number of pages', () => {});
+      it('rows per page in discover view should be according to the user selected number of pages', () => {});
       it('rows per page in new search should be according to the value selected in advanced settings', () => {});
     });
   }

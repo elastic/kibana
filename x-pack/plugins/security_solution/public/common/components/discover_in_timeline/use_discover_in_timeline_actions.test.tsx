@@ -118,7 +118,7 @@ const customFilter = {
 
 const originalSavedSearchMock = {
   id: 'the-saved-search-id',
-  title: 'A saved search',
+  title: 'A discover view',
   breakdownField: 'customBreakDownField',
   searchSource: createSearchSourceMock({
     index: dataViewMock,
@@ -156,7 +156,7 @@ describe('useDiscoverInTimelineActions', () => {
     jest.clearAllMocks();
   });
   describe('getAppStateFromSavedSearch', () => {
-    it('should reach out to discover to convert app state from saved search', async () => {
+    it('should reach out to discover to convert app state from discover view', async () => {
       const { result, waitFor } = renderTestHook();
       const { appState } = result.current.getAppStateFromSavedSearch(savedSearchMock);
       await waitFor(() => {
@@ -230,7 +230,7 @@ describe('useDiscoverInTimelineActions', () => {
     });
   });
   describe('updateSavedSearch', () => {
-    it('should add defaults to the savedSearch before updating saved search', async () => {
+    it('should add defaults to the savedSearch before updating discover view', async () => {
       const { result } = renderTestHook();
       await act(async () => {
         await result.current.updateSavedSearch(savedSearchMock, TimelineId.active);
@@ -251,7 +251,7 @@ describe('useDiscoverInTimelineActions', () => {
         })
       );
     });
-    it('should initialize saved search when it is not set on the timeline model yet', async () => {
+    it('should initialize discover view when it is not set on the timeline model yet', async () => {
       const localMockState: State = {
         ...mockGlobalState,
         timeline: {
@@ -283,7 +283,7 @@ describe('useDiscoverInTimelineActions', () => {
       );
     });
 
-    it('should update saved search when it has changes', async () => {
+    it('should update discover view when it has changes', async () => {
       const changedSavedSearchMock = { ...savedSearchMock, title: 'changed' };
       const localMockState: State = {
         ...mockGlobalState,
@@ -317,6 +317,6 @@ describe('useDiscoverInTimelineActions', () => {
       );
     });
 
-    it('should raise appropriate notification in case of any error in saving discover saved search', () => {});
+    it('should raise appropriate notification in case of any error in saving discover discover view', () => {});
   });
 });

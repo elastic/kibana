@@ -47,7 +47,7 @@ let mockServices: Services;
 let mockSavedSearch: SavedObject<SavedSearchAttributes>;
 let mockDataView: DataView;
 
-// mock search source belonging to the saved search
+// mock search source belonging to the discover view
 let mockSearchSource: SearchSource;
 
 // mock params containing the discover app locator
@@ -133,7 +133,7 @@ test('with search source using columns when DOC_HIDE_TIME_COLUMN_SETTING is true
   expect(columns).toEqual(['response', 'url', 'clientip', 'machine.os', 'tags']);
 });
 
-test('with saved search containing ["_source"]', async () => {
+test('with discover view containing ["_source"]', async () => {
   mockSavedSearch.attributes.columns = ['_source'];
 
   const provider = columnsFromLocatorFactory(mockServices);

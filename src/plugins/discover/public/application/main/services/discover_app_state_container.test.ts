@@ -89,7 +89,7 @@ describe('Test discover app state container', () => {
 
     const localSavedSearchMock = {
       id: 'the-saved-search-id',
-      title: 'A saved search',
+      title: 'A discover view',
       breakdownField: 'customBreakDownField',
       searchSource: createSearchSourceMock({
         index: dataViewMock,
@@ -130,7 +130,7 @@ describe('Test discover app state container', () => {
         .mockReturnValue(defaultQuery);
       const newSavedSearchMock = {
         id: 'new-saved-search-id',
-        title: 'A saved search',
+        title: 'A discover view',
         searchSource: createSearchSourceMock({
           index: dataViewMock,
           filter: [customFilter],

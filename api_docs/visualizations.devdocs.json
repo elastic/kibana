@@ -2735,7 +2735,7 @@
             "tags": [],
             "label": "linked",
             "description": [
-              "\nFlag to determine if visualiztion is linked to the saved search"
+              "\nFlag to determine if visualiztion is linked to the discover view"
             ],
             "path": "src/plugins/visualizations/public/visualize_app/types.ts",
             "deprecated": false,
@@ -5202,7 +5202,7 @@
             "tags": [],
             "label": "requiresSearch",
             "description": [
-              "\nThe flag is necessary for aggregation based visualizations.\nWhen \"true\", an additional step on the vis creation wizard will be provided\nwith the selection of a search source - an index pattern or a saved search."
+              "\nThe flag is necessary for aggregation based visualizations.\nWhen \"true\", an additional step on the vis creation wizard will be provided\nwith the selection of a search source - an index pattern or a discover view."
             ],
             "signature": [
               "boolean | undefined"

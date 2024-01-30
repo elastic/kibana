@@ -340,7 +340,7 @@
     "kibanaSavedObjectMeta": {
       "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
     },
-    "description": "saved search panel with custom time range that does not intersect with dashboard time range",
+    "description": "discover view panel with custom time range that does not intersect with dashboard time range",
     "refreshInterval": {
       "pause": true,
       "value": 0

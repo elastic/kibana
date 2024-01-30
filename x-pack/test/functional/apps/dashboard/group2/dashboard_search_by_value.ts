@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'timePicker', 'discover']);
 
-  describe('saved searches by value', () => {
+  describe('discover viewes by value', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/dashboard/current/data');
@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(rows.length).to.be.above(0);
     };
 
-    it('should allow cloning a by ref saved search embeddable to a by value embeddable', async () => {
+    it('should allow cloning a by ref discover view embeddable to a by value embeddable', async () => {
       await addSearchEmbeddableToDashboard();
       let panels = await testSubjects.findAll(`embeddablePanel`);
       expect(panels.length).to.be(1);
@@ -84,7 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ).to.be(false);
     });
 
-    it('should allow unlinking a by ref saved search embeddable from library', async () => {
+    it('should allow unlinking a by ref discover view embeddable from library', async () => {
       await addSearchEmbeddableToDashboard();
       let panels = await testSubjects.findAll(`embeddablePanel`);
       expect(panels.length).to.be(1);

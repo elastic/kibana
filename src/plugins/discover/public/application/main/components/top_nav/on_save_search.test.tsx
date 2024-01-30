@@ -90,7 +90,7 @@ describe('onSaveSearch', () => {
     expect(saveModal?.props.tags).toEqual(['tag1', 'tag2']);
   });
 
-  it('should update the saved search tags', async () => {
+  it('should update the discover view tags', async () => {
     let saveModal: ReactElement | undefined;
     jest.spyOn(savedObjectsPlugin, 'showSaveModal').mockImplementationOnce((modal) => {
       saveModal = modal;

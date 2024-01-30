@@ -31,7 +31,7 @@ export class SearchEmbeddableFactory
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
   public readonly savedObjectMetaData = {
     name: i18n.translate('discover.savedSearch.savedObjectName', {
-      defaultMessage: 'Saved search',
+      defaultMessage: 'Discover view',
     }),
     type: 'search',
     getIconForSavedObject: () => 'discoverApp',

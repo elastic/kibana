@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await filterBar.hasFilter('extension.raw', 'png')).to.be(true);
     });
 
-    it('should save breakdown field in saved search', async () => {
+    it('should save breakdown field in discover view', async () => {
       await filterBar.removeFilter('extension.raw');
       await PageObjects.discover.saveSearch('with breakdown');
 

@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.unset('timepicker:timeDefaults');
     });
 
-    it('unmapped fields exist on a new saved search', async () => {
+    it('unmapped fields exist on a new discover view', async () => {
       const expectedHitCount = '4';
       await retry.try(async function () {
         expect(await PageObjects.discover.getHitCount()).to.be(expectedHitCount);
@@ -62,7 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.unifiedFieldList.toggleSidebarSection('unmapped');
     });
 
-    it('unmapped fields exist on an existing saved search', async () => {
+    it('unmapped fields exist on an existing discover view', async () => {
       await PageObjects.discover.loadSavedSearch('Existing Saved Search');
       const expectedHitCount = '4';
       await retry.try(async function () {

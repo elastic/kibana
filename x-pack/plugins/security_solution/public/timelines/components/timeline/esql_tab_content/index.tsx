@@ -124,7 +124,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
 
   useEffect(() => {
     if (isFetching) return; // no-op is fetch is in progress
-    if (isDiscoverSavedSearchLoaded) return; // no-op if saved search has been already loaded
+    if (isDiscoverSavedSearchLoaded) return; // no-op if discover view has been already loaded
     if (!savedSearchById) {
       // nothing to restore if savedSearchById is null
       if (status === 'draft') {
@@ -188,7 +188,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     const latestState = getCombinedDiscoverSavedSearchState();
     const index = latestState?.searchSource.getField('index');
     /* when a new timeline is loaded, a new discover instance is loaded which first emits
-     * discover's initial state which is then updated in the saved search. We want to avoid that.*/
+     * discover's initial state which is then updated in the discover view. We want to avoid that.*/
     if (!index) return;
     if (!latestState || combinedDiscoverSavedSearchStateRef.current === latestState) return;
     if (isEqualWith(latestState, savedSearchById, savedSearchComparator)) return;
@@ -250,7 +250,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       const hasESQLURlState = urlAppState?.query && 'esql' in urlAppState.query;
 
       /*
-       * Url state should NOT apply if there is already a saved search being loaded
+       * Url state should NOT apply if there is already a discover view being loaded
        * */
       const shouldApplyESQLUrlState = !savedSearchAppState?.appState && hasESQLURlState;
 

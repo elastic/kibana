@@ -51,7 +51,7 @@ export const SearchSelection: FC<SearchSelectionProps> = ({
           noItemsMessage={i18n.translate(
             'xpack.transform.newTransform.searchSelection.notFoundLabel',
             {
-              defaultMessage: 'No matching indices or saved searches found.',
+              defaultMessage: 'No matching indices or discover viewes found.',
             }
           )}
           savedObjectMetaData={[
@@ -61,7 +61,7 @@ export const SearchSelection: FC<SearchSelectionProps> = ({
               name: i18n.translate(
                 'xpack.transform.newTransform.searchSelection.savedObjectType.search',
                 {
-                  defaultMessage: 'Saved search',
+                  defaultMessage: 'Discover view',
                 }
               ),
             },

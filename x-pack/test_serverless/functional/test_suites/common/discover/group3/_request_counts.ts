@@ -135,7 +135,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('should send 2 requests for saved search changes', async () => {
+      it('should send 2 requests for discover view changes', async () => {
         await setQuery(query1);
         await queryBar.clickQuerySubmitButton();
         await PageObjects.timePicker.setAbsoluteRange(
@@ -143,25 +143,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Sep 23, 2015 @ 00:00:00.000'
         );
         await waitForLoadingToFinish();
-        // TODO: Check why the request happens 4 times in case of opening a saved search
+        // TODO: Check why the request happens 4 times in case of opening a discover view
         // https://github.com/elastic/kibana/issues/165192
-        // creating the saved search
+        // creating the discover view
         await expectSearches(type, savedSearchesRequests ?? 2, async () => {
           await PageObjects.discover.saveSearch(savedSearch);
         });
-        // resetting the saved search
+        // resetting the discover view
         await setQuery(query2);
         await queryBar.clickQuerySubmitButton();
         await waitForLoadingToFinish();
         await expectSearches(type, 2, async () => {
           await PageObjects.discover.revertUnsavedChanges();
         });
-        // clearing the saved search
+        // clearing the discover view
         await expectSearches('ese', 2, async () => {
           await testSubjects.click('discoverNewButton');
           await waitForLoadingToFinish();
         });
-        // loading the saved search
+        // loading the discover view
         // TODO: https://github.com/elastic/kibana/issues/165192
         await expectSearches(type, savedSearchesRequests ?? 2, async () => {
           await PageObjects.discover.loadSavedSearch(savedSearch);

@@ -17,7 +17,7 @@ Search Sessions will enable Kibana applications and solutions to start a group o
 At its core, search sessions are enabled via several new APIs, that:
 - Start a session, associating multiple search requests with a single entity
 - Store the session (and continue search requests in the background)
-- Restore the saved search session
+- Restore the discover view session
 
 ```ts
 const searchService = dataPluginStart.search;
@@ -98,7 +98,7 @@ export enum SearchSessionStatus {
 
 The saved object created for a search session will be scoped to a single space, and will be a `hidden` saved object
 (so that it doesn't show in the management listings). We will provide a separate interface for users to manage their own
-saved search sessions (which will use the `list`, `expire`, and `extend` methods described below, which will be restricted
+discover view sessions (which will use the `list`, `expire`, and `extend` methods described below, which will be restricted
 per-user).
 
 ```ts

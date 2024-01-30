@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'timePicker', 'discover']);
 
-  describe('discover saved search embeddable', () => {
+  describe('discover discover view embeddable', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/dashboard/current/data');
@@ -103,7 +103,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await cell.getVisibleText()).to.be('Sep 22, 2015 @ 23:50:13.253');
     });
 
-    it('should render duplicate saved search embeddables', async () => {
+    it('should render duplicate discover view embeddables', async () => {
       await addSearchEmbeddableToDashboard();
       await addSearchEmbeddableToDashboard();
       const [firstGridCell, secondGridCell] = await dataGrid.getAllCellElements();
@@ -129,7 +129,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    it('should replace a panel with a saved search', async () => {
+    it('should replace a panel with a discover view', async () => {
       await dashboardAddPanel.addVisualization('Rendering Test: datatable');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();

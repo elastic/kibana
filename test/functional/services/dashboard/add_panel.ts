@@ -195,7 +195,7 @@ export class DashboardAddPanelService extends FtrService {
     if (filter) {
       await this.filterEmbeddableNames(filter.replace('-', ' '));
     }
-    await this.savedObjectsFinder.waitForFilter('Saved search', 'visualization');
+    await this.savedObjectsFinder.waitForFilter('Discover view', 'visualization');
     let morePages = true;
     while (morePages) {
       searchList.push(await this.addEveryEmbeddableOnCurrentPage());

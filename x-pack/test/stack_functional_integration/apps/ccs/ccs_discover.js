@@ -179,7 +179,7 @@ export default ({ getService, getPageObjects }) => {
       });
     });
 
-    it('should reload the saved search with persisted query to show the initial hit count', async function () {
+    it('should reload the discover view with persisted query to show the initial hit count', async function () {
       await PageObjects.discover.selectIndexPattern(
         'ftr-remote:makelogs工程-*,local:makelogs工程-*'
       );

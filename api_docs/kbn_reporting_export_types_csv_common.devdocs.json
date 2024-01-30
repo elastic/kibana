@@ -425,7 +425,7 @@
         "tags": [],
         "label": "JobParamsCsvFromSavedObject",
         "description": [
-          "\nMakes title optional, as it can be derived from the saved search object"
+          "\nMakes title optional, as it can be derived from the discover view object"
         ],
         "signature": [
           "CsvFromSavedObjectBase & Omit<",

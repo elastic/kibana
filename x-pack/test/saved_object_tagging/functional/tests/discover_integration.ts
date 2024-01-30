@@ -108,7 +108,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
       });
 
-      it('allows to select tags for a new saved search', async () => {
+      it('allows to select tags for a new discover view', async () => {
         await PageObjects.discover.saveSearch('My New Search', undefined, {
           tags: ['tag-1', 'tag-2'],
         });
@@ -122,7 +122,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const searchName = 'search-with-new-tag';
         // preventing an occasional flakiness when the saved object wasn't set and the form can't be submitted
         await retry.waitFor(
-          `saved search title is set to ${searchName} and save button is clickable`,
+          `discover view title is set to ${searchName} and save button is clickable`,
           async () => {
             const saveButton = await testSubjects.find('confirmSaveSavedObjectButton');
             await testSubjects.setValue('savedObjectTitle', searchName);
@@ -161,7 +161,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
       });
 
-      it('allows to select tags for an existing saved search', async () => {
+      it('allows to select tags for an existing discover view', async () => {
         await PageObjects.discover.loadSavedSearch('A Saved Search');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.saveSearch('A Saved Search', undefined, {

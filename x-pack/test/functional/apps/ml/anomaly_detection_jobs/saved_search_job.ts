@@ -16,7 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
       suiteTitle: 'with filter',
       jobSource: 'ft_farequote_filter',
       jobId: `fq_saved_search_1_${Date.now()}`,
-      jobDescription: 'Create multi metric job based on a saved search with filter',
+      jobDescription: 'Create multi metric job based on a discover view with filter',
       jobGroups: ['automated', 'farequote', 'multi-metric', 'saved-search'],
       aggAndFieldIdentifiers: ['Mean(responsetime)'],
       splitField: 'airline',
@@ -66,7 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
       suiteTitle: 'with lucene query',
       jobSource: 'ft_farequote_lucene',
       jobId: `fq_saved_search_2_${Date.now()}`,
-      jobDescription: 'Create multi metric job based on a saved search with lucene query',
+      jobDescription: 'Create multi metric job based on a discover view with lucene query',
       jobGroups: ['automated', 'farequote', 'multi-metric', 'saved-search'],
       aggAndFieldIdentifiers: ['Mean(responsetime)'],
       splitField: 'airline',
@@ -116,7 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
       suiteTitle: 'with kuery query',
       jobSource: 'ft_farequote_kuery',
       jobId: `fq_saved_search_3_${Date.now()}`,
-      jobDescription: 'Create multi metric job based on a saved search with kuery query',
+      jobDescription: 'Create multi metric job based on a discover view with kuery query',
       jobGroups: ['automated', 'farequote', 'multi-metric', 'saved-search'],
       aggAndFieldIdentifiers: ['Mean(responsetime)'],
       splitField: 'airline',
@@ -167,7 +167,7 @@ export default function ({ getService }: FtrProviderContext) {
       jobSource: 'ft_farequote_filter_and_lucene',
       jobId: `fq_saved_search_4_${Date.now()}`,
       jobDescription:
-        'Create multi metric job based on a saved search with filter and lucene query',
+        'Create multi metric job based on a discover view with filter and lucene query',
       jobGroups: ['automated', 'farequote', 'multi-metric', 'saved-search'],
       aggAndFieldIdentifiers: ['Mean(responsetime)'],
       splitField: 'airline',
@@ -217,7 +217,7 @@ export default function ({ getService }: FtrProviderContext) {
       suiteTitle: 'with filter and kuery query',
       jobSource: 'ft_farequote_filter_and_kuery',
       jobId: `fq_saved_search_5_${Date.now()}`,
-      jobDescription: 'Create multi metric job based on a saved search with filter and kuery query',
+      jobDescription: 'Create multi metric job based on a discover view with filter and kuery query',
       jobGroups: ['automated', 'farequote', 'multi-metric', 'saved-search'],
       aggAndFieldIdentifiers: ['Mean(responsetime)'],
       splitField: 'airline',
@@ -265,7 +265,7 @@ export default function ({ getService }: FtrProviderContext) {
     },
   ];
 
-  describe('saved search', function () {
+  describe('discover view', function () {
     this.tags(['ml']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');

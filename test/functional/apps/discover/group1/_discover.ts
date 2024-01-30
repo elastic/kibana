@@ -126,7 +126,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(isVisible).to.be(false);
       });
 
-      it('should reload the saved search with persisted query to show the initial hit count', async function () {
+      it('should reload the discover view with persisted query to show the initial hit count', async function () {
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         // apply query some changes

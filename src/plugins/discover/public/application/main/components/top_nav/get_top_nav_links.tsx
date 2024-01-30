@@ -186,7 +186,7 @@ export const getTopNavLinks = ({
           isTextBased,
           locatorParams: [{ id: locator.id, params }],
           ...searchSourceSharingData,
-          // CSV reports can be generated without a saved search so we provide a fallback title
+          // CSV reports can be generated without a discover view so we provide a fallback title
           title:
             savedSearch.title ||
             i18n.translate('discover.localMenu.fallbackReportTitle', {

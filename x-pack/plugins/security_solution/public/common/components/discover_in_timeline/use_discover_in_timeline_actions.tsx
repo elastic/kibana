@@ -146,7 +146,7 @@ export const useDiscoverInTimelineActions = (
     async (savedSearch: SavedSearch, savedSearchOption: SaveSavedSearchOptions) => {
       if (!discoverStateContainer) {
         // eslint-disable-next-line no-console
-        console.log(`Saved search is not open since state container is null`);
+        console.log(`Discover view is not open since state container is null`);
         return;
       }
       if (!savedSearch) return;
@@ -182,7 +182,7 @@ export const useDiscoverInTimelineActions = (
         savedSearch.timeRange ?? discoverDataService.query.timefilter.timefilter.getTime();
       savedSearch.tags = ['security-solution-default'];
 
-      // If there is already a saved search, only update the local state
+      // If there is already a discover view, only update the local state
       if (savedSearchId) {
         savedSearch.id = savedSearchId;
         if (!timelineRef.current.savedSearch) {
@@ -203,9 +203,9 @@ export const useDiscoverInTimelineActions = (
           );
         }
       } else {
-        // If no saved search exists. Create a new saved search instance and associate it with the timeline.
+        // If no discover view exists. Create a new discover view instance and associate it with the timeline.
         try {
-          // Make sure we're not creating a saved search while a previous creation call is in progress
+          // Make sure we're not creating a discover view while a previous creation call is in progress
           if (status !== 'idle') {
             return;
           }
@@ -229,7 +229,7 @@ export const useDiscoverInTimelineActions = (
                 savedSearchId: response.id,
               })
             );
-            // Also save the timeline, this will only happen once, in case there is no saved search id yet
+            // Also save the timeline, this will only happen once, in case there is no discover view id yet
             dispatch(timelineActions.saveTimeline({ id: TimelineId.active, saveAsNew: false }));
           }
         } catch (err) {

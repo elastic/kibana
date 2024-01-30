@@ -51,11 +51,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await pieChart.expectPieSliceCount(10);
     });
 
-    it('Saved search updated when time picker changes', async () => {
+    it('Discover view updated when time picker changes', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardVisualizations.createAndAddSavedSearch({
-        name: 'saved search',
+        name: 'discover view',
         fields: ['bytes', 'agent'],
       });
 
@@ -89,10 +89,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.clickNewDashboard();
       log.debug('Clicked new dashboard');
       await dashboardVisualizations.createAndAddSavedSearch({
-        name: 'saved search',
+        name: 'discover view',
         fields: ['bytes', 'agent'],
       });
-      log.debug('added saved search');
+      log.debug('added discover view');
       const currentUrl = await browser.getCurrentUrl();
       const kibanaBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));
       const urlQuery =

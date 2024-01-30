@@ -48,7 +48,7 @@ export function buildSavedObject(
   savedObject.getDisplayName = () => esType;
 
   // NOTE: this.type (not set in this file, but somewhere else) is the sub type, e.g. 'area' or
-  // 'data table', while esType is the more generic type - e.g. 'visualization' or 'saved search'.
+  // 'data table', while esType is the more generic type - e.g. 'visualization' or 'discover view'.
   savedObject.getEsType = () => esType;
 
   /**

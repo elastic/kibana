@@ -55,7 +55,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const TEST_PASSWORD = config.get('servers.kibana.password');
 
     before('initialize saved object archive', async () => {
-      // add test saved search object
+      // add test discover view object
       await kibanaServer.importExport.load(savedObjectsArchive);
     });
 

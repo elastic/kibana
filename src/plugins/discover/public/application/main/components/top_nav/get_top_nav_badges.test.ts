@@ -43,12 +43,12 @@ describe('getTopNavBadges()', function () {
     `);
   });
 
-  describe('managed saved search', () => {
+  describe('managed discover view', () => {
     const stateContainerWithManagedSavedSearch = getDiscoverStateMock({
       savedSearch: { ...savedSearchMock, managed: true },
     });
 
-    test('should return the managed badge when managed saved search', () => {
+    test('should return the managed badge when managed discover view', () => {
       const topNavBadges = getTopNavBadges({
         hasUnsavedChanges: false,
         services: discoverServiceMock,

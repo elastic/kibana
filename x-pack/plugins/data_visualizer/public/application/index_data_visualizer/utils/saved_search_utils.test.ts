@@ -292,7 +292,7 @@ describe('createMergedEsQuery()', () => {
 });
 
 describe('getEsQueryFromSavedSearch()', () => {
-  it('return undefined if saved search is not provided', () => {
+  it('return undefined if discover view is not provided', () => {
     expect(
       getEsQueryFromSavedSearch({
         dataView: mockDataView,
@@ -301,7 +301,7 @@ describe('getEsQueryFromSavedSearch()', () => {
       })
     ).toEqual(undefined);
   });
-  it('return search data from saved search if neither query nor filter is provided ', () => {
+  it('return search data from discover view if neither query nor filter is provided ', () => {
     expect(
       getEsQueryFromSavedSearch({
         dataView: mockDataView,
@@ -349,7 +349,7 @@ describe('getEsQueryFromSavedSearch()', () => {
       searchString: 'responsetime > 49',
     });
   });
-  it('should override original saved search with the provided query ', () => {
+  it('should override original discover view with the provided query ', () => {
     expect(
       getEsQueryFromSavedSearch({
         dataView: mockDataView,
@@ -399,7 +399,7 @@ describe('getEsQueryFromSavedSearch()', () => {
     });
   });
 
-  it('should override original saved search with the provided filters ', () => {
+  it('should override original discover view with the provided filters ', () => {
     expect(
       getEsQueryFromSavedSearch({
         dataView: mockDataView,

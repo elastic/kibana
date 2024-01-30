@@ -86,7 +86,7 @@ test(`retrieves title from DiscoverAppLocatorParams`, async () => {
   expect(title).toBe(testTitle);
 });
 
-test(`retrieves title from saved search contents`, async () => {
+test(`retrieves title from discover view contents`, async () => {
   const testTitle = 'Test Title from Saved Search Contents';
   mockSavedSearch = {
     ...defaultSavedSearch,
@@ -98,7 +98,7 @@ test(`retrieves title from saved search contents`, async () => {
   expect(title).toBe(testTitle);
 });
 
-test(`throws error if DiscoverAppLocatorParams do not contain a saved search ID`, async () => {
+test(`throws error if DiscoverAppLocatorParams do not contain a discover view ID`, async () => {
   const testFn = async () => {
     mockPayload = [{ params: { dataViewId: 'not-yet-supported' } }];
     const provider = titleFromLocatorFactory(mockServices);
@@ -106,6 +106,6 @@ test(`throws error if DiscoverAppLocatorParams do not contain a saved search ID`
   };
 
   expect(testFn).rejects.toEqual(
-    new Error('DiscoverAppLocatorParams must contain a saved search reference')
+    new Error('DiscoverAppLocatorParams must contain a discover view reference')
   );
 });

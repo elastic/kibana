@@ -15,13 +15,13 @@ export default function ({ getService }: FtrProviderContext) {
   const editedDescription = 'Edited description';
 
   // FLAKY: https://github.com/elastic/kibana/issues/147020
-  describe.skip('classification saved search creation', function () {
+  describe.skip('classification discover view creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote_small');
       await ml.testResources.createDataViewIfNeeded('ft_farequote_small', '@timestamp');
       await ml.testResources.createSavedSearchFarequoteLuceneIfNeeded('ft_farequote_small');
       await ml.testResources.createSavedSearchFarequoteKueryIfNeeded('ft_farequote_small');
-      // Need to use the saved searches with filters that match multiple airlines
+      // Need to use the discover viewes with filters that match multiple airlines
       await ml.testResources.createSavedSearchFarequoteFilterTwoAndLuceneIfNeeded(
         'ft_farequote_small'
       );
@@ -78,7 +78,7 @@ export default function ({ getService }: FtrProviderContext) {
         suiteTitle: 'with lucene query',
         jobType: 'classification',
         jobId: `fq_saved_search_2_${dateNow}`,
-        jobDescription: 'Classification job based on a saved search with lucene query',
+        jobDescription: 'Classification job based on a discover view with lucene query',
         source: 'ft_farequote_lucene',
         get destinationIndex(): string {
           return `user-${this.jobId}`;
@@ -178,7 +178,7 @@ export default function ({ getService }: FtrProviderContext) {
         suiteTitle: 'with kuery query',
         jobType: 'classification',
         jobId: `fq_saved_search_3_${dateNow}`,
-        jobDescription: 'Classification job based on a saved search with kuery query',
+        jobDescription: 'Classification job based on a discover view with kuery query',
         source: 'ft_farequote_kuery',
         get destinationIndex(): string {
           return `user-${this.jobId}`;
@@ -278,7 +278,7 @@ export default function ({ getService }: FtrProviderContext) {
         suiteTitle: 'with filter and lucene query',
         jobType: 'classification',
         jobId: `fq_saved_search_4_${dateNow}`,
-        jobDescription: 'Classification job based on a saved search with filter and lucene query',
+        jobDescription: 'Classification job based on a discover view with filter and lucene query',
         source: 'ft_farequote_filter_two_and_lucene',
         get destinationIndex(): string {
           return `user-${this.jobId}`;
@@ -371,7 +371,7 @@ export default function ({ getService }: FtrProviderContext) {
         suiteTitle: 'with filter and kuery query',
         jobType: 'classification',
         jobId: `fq_saved_search_5_${dateNow}`,
-        jobDescription: 'Classification job based on a saved search with filter and kuery query',
+        jobDescription: 'Classification job based on a discover view with filter and kuery query',
         source: 'ft_farequote_filter_two_and_kuery',
         get destinationIndex(): string {
           return `user-${this.jobId}`;

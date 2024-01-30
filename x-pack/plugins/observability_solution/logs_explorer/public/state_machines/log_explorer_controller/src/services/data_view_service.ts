@@ -20,7 +20,7 @@ export const createAndSetDataView =
      * We can't fully rely on the url update of the index param to create and restore the data view
      * due to a race condition where Discover, when initializing its internal logic,
      * check the value the index params before it gets updated in the line above.
-     * In case the index param does not exist, it then create a internal saved search and set the current data view
+     * In case the index param does not exist, it then create a internal discover view and set the current data view
      * to the existing one or the default logs-*.
      * We set explicitly the data view here to be used when restoring the data view on the initial load.
      */

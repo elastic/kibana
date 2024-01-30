@@ -1,3 +1,3 @@
-# Saved search
+# Discover view
 
-Contains the saved search saved object definition and helpers.
+Contains the discover view saved object definition and helpers.

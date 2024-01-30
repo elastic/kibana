@@ -66,7 +66,7 @@ export interface DocTableProps {
    */
   isPlainRecord?: boolean;
   /**
-   * Saved search id
+   * Discover view id
    */
   savedSearchId?: string;
   /**

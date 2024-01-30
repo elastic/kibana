@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const from = 'Sep 22, 2015 @ 00:00:00.000';
   const to = 'Sep 23, 2015 @ 00:00:00.000';
 
-  describe('dashboard saved search embeddable', () => {
+  describe('dashboard discover view embeddable', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/dashboard/current/data');
@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(marks.length).to.be(0);
     });
 
-    it('view action leads to a saved search', async function () {
+    it('view action leads to a discover view', async function () {
       await filterBar.removeAllFilters();
       await PageObjects.dashboard.saveDashboard('Dashboard With Saved Search');
       await PageObjects.dashboard.clickCancelOutOfEditMode(false);
@@ -91,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.discover.waitForDiscoverAppOnScreen();
       expect(await PageObjects.discover.getSavedSearchTitle()).to.equal(
-        'Rendering Test: saved search'
+        'Rendering Test: discover view'
       );
     });
 

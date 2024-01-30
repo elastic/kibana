@@ -352,7 +352,7 @@ Object {
     });
   });
 
-  it('should apply search source migrations within saved search', () => {
+  it('should apply search source migrations within discover view', () => {
     const savedSearch = {
       attributes: {
         kibanaSavedObjectMeta: {
@@ -387,7 +387,7 @@ Object {
     });
   });
 
-  it('should not apply search source migrations within saved search when searchSourceJSON is not an object', () => {
+  it('should not apply search source migrations within discover view when searchSourceJSON is not an object', () => {
     const savedSearch = {
       attributes: {
         kibanaSavedObjectMeta: {

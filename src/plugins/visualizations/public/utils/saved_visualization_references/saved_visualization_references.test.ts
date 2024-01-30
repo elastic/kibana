@@ -170,14 +170,14 @@ describe('injectReferences', () => {
     `);
   });
 
-  test(`fails when it can't find the saved search reference in the array`, () => {
+  test(`fails when it can't find the discover view reference in the array`, () => {
     const context = {
       id: '1',
       savedSearchRefName: 'search_0',
       title: 'test',
     } as VisSavedObject;
     expect(() => injectReferences(context, [])).toThrowErrorMatchingInlineSnapshot(
-      `"Could not find saved search reference \\"search_0\\""`
+      `"Could not find discover view reference \\"search_0\\""`
     );
   });
 

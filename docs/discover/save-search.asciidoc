@@ -1,9 +1,9 @@
 [[save-open-search]]
 == Save a search for reuse
 
-A saved search is a convenient way to reuse a search
+A discover view is a convenient way to reuse a search
 that you've created in *Discover*.
-Saved searches are good for adding search results to a dashboard,
+Discover view are good for adding search results to a dashboard,
 and can also serve as a foundation for building visualizations.
 
 [role="xpack"]
@@ -18,18 +18,18 @@ image::discover/images/read-only-badge.png[Example of Discover's read only acces
 [float]
 === Save a search
 
-By default, a saved search stores the query text, filters, and
+By default, a discover view stores the query text, filters, and
 current view of *Discover*, including the columns and sort order in the document table, and the {data-source}.
 
 . Once you've created a search worth saving, click *Save* in the toolbar.
 . Enter a name for the search.
 . Optionally store <<managing-tags,tags>> and the time range with the search.
 . Click *Save*.
-. To reload your search results in *Discover*, click *Open* in the toolbar, and select the saved search.
+. To reload your search results in *Discover*, click *Open* in the toolbar, and select the discover view.
 +
-If the saved search is associated with a different {data-source} than is currently
-selected, opening the saved search changes the selected {data-source}. The query language
-used for the saved search is also automatically selected.
+If the discover view is associated with a different {data-source} than is currently
+selected, opening the discover view changes the selected {data-source}. The query language
+used for the discover view is also automatically selected.
 
 [float]
 === Duplicate a search
@@ -46,5 +46,5 @@ used for the saved search is also automatically selected.
 . Open the main menu, and then click *Dashboard*.
 . Open or create the dashboard, then click *Edit*.
 . Click *Add from library*.
-. From the *Types* dropdown, select *Saved search*.
-. Select the saved search that you want to visualize, then click *X* to close the list.
+. From the *Types* dropdown, select *Discover view*.
+. Select the discover view that you want to visualize, then click *X* to close the list.

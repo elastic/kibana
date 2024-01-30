@@ -95,7 +95,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('saved search object edit menu', () => {
+    describe('discover view object edit menu', () => {
       const searchName = 'my search';
 
       before(async () => {
@@ -119,7 +119,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(panelCount).to.be(1);
       });
 
-      it('opens a saved search when edit link is clicked', async () => {
+      it('opens a discover view when edit link is clicked', async () => {
         await dashboardPanelActions.openContextMenu();
         await dashboardPanelActions.clickEdit();
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -127,7 +127,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(queryName).to.be(searchName);
       });
 
-      it('deletes the saved search when delete link is clicked', async () => {
+      it('deletes the discover view when delete link is clicked', async () => {
         await PageObjects.header.clickDashboard();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await dashboardPanelActions.removePanel();

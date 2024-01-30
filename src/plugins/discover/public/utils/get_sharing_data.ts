@@ -56,7 +56,7 @@ export async function getSharingData(
   searchSource.removeField('aggs');
   searchSource.removeField('size');
 
-  // Columns that the user has selected in the saved search
+  // Columns that the user has selected in the discover view
   let columns = state.columns || [];
 
   if (columns && columns.length > 0) {

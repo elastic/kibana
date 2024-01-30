@@ -14,7 +14,7 @@ import { dataViewAdHoc } from './data_view_complex';
 
 export const savedSearchMock = {
   id: 'the-saved-search-id',
-  title: 'A saved search',
+  title: 'A discover view',
   searchSource: createSearchSourceMock({ index: dataViewMock }),
 } as unknown as SavedSearch;
 

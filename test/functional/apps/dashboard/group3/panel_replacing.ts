@@ -68,8 +68,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(panelTitles[0]).to.be(AREA_CHART_VIS_NAME);
     });
 
-    it('replaced panel with saved search', async () => {
-      const replacedSearch = 'replaced saved search';
+    it('replaced panel with discover view', async () => {
+      const replacedSearch = 'replaced discover view';
       await dashboardVisualizations.createSavedSearch({
         name: replacedSearch,
         fields: ['bytes', 'agent'],
@@ -80,7 +80,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.switchToEditMode();
       }
       await dashboardPanelActions.replacePanelByTitle(AREA_CHART_VIS_NAME);
-      await dashboardReplacePanel.replaceEmbeddable(replacedSearch, 'Saved search');
+      await dashboardReplacePanel.replaceEmbeddable(replacedSearch, 'Discover view');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
       const panelTitles = await PageObjects.dashboard.getPanelTitles();

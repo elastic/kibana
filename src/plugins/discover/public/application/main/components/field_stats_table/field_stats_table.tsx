@@ -74,15 +74,15 @@ export interface FieldStatisticsTableProps {
    */
   dataView: DataView;
   /**
-   * Saved search description
+   * Discover view description
    */
   searchDescription?: string;
   /**
-   * Saved search title
+   * Discover view title
    */
   searchTitle?: string;
   /**
-   * Optional saved search
+   * Optional discover view
    */
   savedSearch?: SavedSearch;
   /**

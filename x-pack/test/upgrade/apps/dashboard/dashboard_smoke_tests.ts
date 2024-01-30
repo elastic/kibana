@@ -58,7 +58,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await PageObjects.home.launchSampleDashboard('flights');
           await PageObjects.header.waitUntilLoadingHasFinished();
           await renderable.waitForRender();
-          log.debug('Checking saved searches rendered');
+          log.debug('Checking discover viewes rendered');
           await dashboardExpect.savedSearchRowCount(49);
           log.debug('Checking input controls rendered');
           if (semver.lt(process.env.ORIGINAL_VERSION!, '8.6.0-SNAPSHOT')) {

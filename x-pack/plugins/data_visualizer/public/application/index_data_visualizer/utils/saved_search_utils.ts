@@ -29,7 +29,7 @@ import { isSavedSearchSavedObject, SavedSearchSavedObject } from '../../../../co
 
 /**
  * Parse the stringified searchSourceJSON
- * from a saved search or saved search object
+ * from a discover view or discover view object
  */
 export function getQueryFromSavedSearchObject(savedSearch: SavedSearchSavedObject | SavedSearch) {
   if (!isSavedSearchSavedObject(savedSearch)) {
@@ -47,12 +47,12 @@ export function getQueryFromSavedSearchObject(savedSearch: SavedSearchSavedObjec
         })
       : undefined;
 
-  // Remove indexRefName because saved search might no longer be relevant
+  // Remove indexRefName because discover view might no longer be relevant
   // if user modifies the query or filter
-  // after opening a saved search
+  // after opening a discover view
   if (parsed && Array.isArray(parsed.filter)) {
     parsed.filter.forEach((f) => {
-      // @ts-expect-error indexRefName does appear in meta for newly created saved search
+      // @ts-expect-error indexRefName does appear in meta for newly created discover view
       f.meta.indexRefName = undefined;
     });
   }
@@ -113,7 +113,7 @@ function getSavedSearchSource(savedSearch: SavedSearch) {
 }
 
 /**
- * Extract query data from the saved search object
+ * Extract query data from the discover view object
  * with overrides from the provided query data and/or filters
  */
 export function getEsQueryFromSavedSearch({
@@ -138,9 +138,9 @@ export function getEsQueryFromSavedSearch({
 
   const savedSearchSource = getSavedSearchSource(savedSearch);
 
-  // If saved search has a search source with nested parent
-  // e.g. a search coming from Dashboard saved search embeddable
-  // which already combines both the saved search's original query/filters and the Dashboard's
+  // If discover view has a search source with nested parent
+  // e.g. a search coming from Dashboard discover view embeddable
+  // which already combines both the discover view's original query/filters and the Dashboard's
   // then no need to process any further
   if (savedSearchSource && savedSearchSource.getParent() !== undefined && userQuery) {
     // Flattened query from search source may contain a clause that narrows the time range
@@ -162,7 +162,7 @@ export function getEsQueryFromSavedSearch({
     };
   }
 
-  // If no saved search available, use user's query and filters
+  // If no discover view available, use user's query and filters
   if (!savedSearch && userQuery) {
     if (filterManager && userFilters) filterManager.addFilters(userFilters);
 
@@ -180,8 +180,8 @@ export function getEsQueryFromSavedSearch({
     };
   }
 
-  // If saved search available, merge saved search with the latest user query or filters
-  // which might differ from extracted saved search data
+  // If discover view available, merge discover view with the latest user query or filters
+  // which might differ from extracted discover view data
   if (savedSearchSource) {
     const globalFilters = filterManager?.getGlobalFilters();
     // FIXME: Add support for AggregateQuery type #150091

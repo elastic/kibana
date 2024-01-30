@@ -36,7 +36,7 @@ interface CsvFromSavedObjectBase {
 }
 
 /**
- * Makes title optional, as it can be derived from the saved search object
+ * Makes title optional, as it can be derived from the discover view object
  */
 export type JobParamsCsvFromSavedObject = CsvFromSavedObjectBase &
   Omit<BaseParamsV2, 'title'> & { title?: string };

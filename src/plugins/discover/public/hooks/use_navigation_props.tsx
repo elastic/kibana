@@ -47,7 +47,7 @@ const getStateParams = ({
     query = data.query.queryString.getQuery();
     timeRange = data.query.timefilter.timefilter.getTime();
   } else if (isEmbeddableView && filters?.length) {
-    // applied from saved search embeddable
+    // applied from discover view embeddable
     appliedFilters = filters;
   }
 

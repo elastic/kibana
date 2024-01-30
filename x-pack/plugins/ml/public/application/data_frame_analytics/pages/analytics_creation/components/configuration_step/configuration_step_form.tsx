@@ -605,7 +605,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
               {savedSearchQuery !== null && (
                 <EuiText>
                   {i18n.translate('xpack.ml.dataframe.analytics.create.savedSearchLabel', {
-                    defaultMessage: 'Saved search',
+                    defaultMessage: 'Discover view',
                   })}
                 </EuiText>
               )}

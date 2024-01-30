@@ -91,7 +91,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
   const { selectedSavedSearch, selectedDataView: dataView, combinedQuery } = useDataSource();
   const pageTitle = selectedSavedSearch
     ? i18n.translate('xpack.ml.newJob.recognize.savedSearchPageTitle', {
-        defaultMessage: 'saved search {savedSearchTitle}',
+        defaultMessage: 'discover view {savedSearchTitle}',
         values: { savedSearchTitle: selectedSavedSearch.title ?? '' },
       })
     : i18n.translate('xpack.ml.newJob.recognize.dataViewPageTitle', {
@@ -307,7 +307,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
             <EuiText size="s">
               <FormattedMessage
                 id="xpack.ml.newJob.recognize.usingSavedSearchDescription"
-                defaultMessage="Using a saved search will mean the query used in the datafeeds will be different from the default ones we supply in the {moduleId} module."
+                defaultMessage="Using a discover view will mean the query used in the datafeeds will be different from the default ones we supply in the {moduleId} module."
                 values={{ moduleId }}
               />
             </EuiText>

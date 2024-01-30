@@ -122,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardExpect.tsvbTopNValuesExist(['-', '-']);
       });
 
-      it('saved search is filtered', async () => {
+      it('discover view is filtered', async () => {
         await dashboardExpect.savedSearchRowsMissing();
       });
 
@@ -183,7 +183,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardExpect.tsvbTopNValuesExist(['-', '-']);
       });
 
-      it('saved search is filtered', async () => {
+      it('discover view is filtered', async () => {
         await dashboardExpect.savedSearchRowsMissing();
       });
 
@@ -243,7 +243,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardExpect.tsvbMarkdownWithValuesExists(['7,209.286']);
       });
 
-      it('saved searches', async () => {
+      it('discover viewes', async () => {
         await dashboardExpect.savedSearchRowsExist();
       });
 
@@ -322,7 +322,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await pieChart.expectPieSliceCount(5);
       });
 
-      it('Pie chart linked to saved search filters data', async () => {
+      it('Pie chart linked to discover view filters data', async () => {
         await dashboardAddPanel.addVisualization(
           'Filter Test: animals: linked to search with filter'
         );
@@ -330,7 +330,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await pieChart.expectSliceCountForAllPies(7);
       });
 
-      it('Pie chart linked to saved search filters shows no data with conflicting dashboard query', async () => {
+      it('Pie chart linked to discover view filters shows no data with conflicting dashboard query', async () => {
         await elasticChart.setNewChartUiDebugFlag(true);
         await queryBar.setQuery('weightLbs<40');
         await queryBar.submitQuery();

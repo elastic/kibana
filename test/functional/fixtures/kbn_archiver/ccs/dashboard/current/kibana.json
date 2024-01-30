@@ -913,7 +913,7 @@
         "desc"
       ]
     ],
-    "title": "Bytes and kuery in saved search with filter",
+    "title": "Bytes and kuery in discover view with filter",
     "version": 1
   },
   "coreMigrationVersion": "8.0.1",
@@ -2094,7 +2094,7 @@
         "desc"
       ]
     ],
-    "title": "Rendering Test: saved search",
+    "title": "Rendering Test: discover view",
     "version": 1
   },
   "coreMigrationVersion": "8.0.1",

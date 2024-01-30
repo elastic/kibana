@@ -64,7 +64,7 @@ export const getTopNavBadges = ({
       data: getManagedContentBadge(
         i18n.translate('discover.topNav.managedContentLabel', {
           defaultMessage:
-            'This saved search is managed by Elastic. Changes here must be saved to a new saved search.',
+            'This discover view is managed by Elastic. Changes here must be saved to a new discover view.',
         })
       ),
       order: 101,

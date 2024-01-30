@@ -36,7 +36,7 @@ describe('useLinkedSearchUpdates', () => {
     expect(mockServices.toastNotifications.addSuccess).not.toHaveBeenCalled();
   });
 
-  it('should subscribe on unlinkFromSavedSearch event if vis is based on saved search', () => {
+  it('should subscribe on unlinkFromSavedSearch event if vis is based on discover view', () => {
     const mockAppState = {
       transitions: {
         unlinkSavedSearch: jest.fn(),

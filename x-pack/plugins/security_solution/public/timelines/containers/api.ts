@@ -152,7 +152,7 @@ const patchTimeline = async ({
       });
     }
   } catch (e) {
-    return Promise.reject(new Error(`Failed to copy saved search: ${timeline.savedSearchId}`));
+    return Promise.reject(new Error(`Failed to copy discover view: ${timeline.savedSearchId}`));
   }
 
   try {
@@ -187,7 +187,7 @@ export const copyTimeline = async ({
     if (timeline.savedSearchId && savedSearch) {
       const { savedSearch: savedSearchService } = KibanaServices.get();
       const savedSearchCopy = { ...savedSearch };
-      // delete the id and change the title to make sure we can copy the saved search
+      // delete the id and change the title to make sure we can copy the discover view
       delete savedSearchCopy.id;
       newSavedSearchId = await savedSearchService.save(savedSearchCopy, {
         onTitleDuplicate: () => ({}),
@@ -195,7 +195,7 @@ export const copyTimeline = async ({
       });
     }
   } catch (e) {
-    return Promise.reject(new Error(`Failed to copy saved search: ${timeline.savedSearchId}`));
+    return Promise.reject(new Error(`Failed to copy discover view: ${timeline.savedSearchId}`));
   }
 
   try {

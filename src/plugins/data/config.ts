@@ -31,7 +31,7 @@ export const searchSessionsConfigSchema = schema.object({
   defaultExpiration: schema.duration({ defaultValue: '7d' }),
   management: schema.object({
     /**
-     * maxSessions controls how many saved search sessions we load on the management screen.
+     * maxSessions controls how many discover view sessions we load on the management screen.
      */
     maxSessions: schema.number({ defaultValue: 100 }),
     /**
@@ -57,7 +57,7 @@ export const searchConfigSchema = schema.object({
      */
     waitForCompletion: schema.duration({ defaultValue: '200ms' }),
     /**
-     *  How long the async search needs to be available after each search poll. Ongoing async searches and any saved search results are deleted after this period.
+     *  How long the async search needs to be available after each search poll. Ongoing async searches and any discover view results are deleted after this period.
      *  (see es async_search's `keep_alive`)
      *  Note: This is applicable to the searches before the search session is saved.
      *  After search session is saved `keep_alive` is extended using `data.search.sessions.defaultExpiration` config

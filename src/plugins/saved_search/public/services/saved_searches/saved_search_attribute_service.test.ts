@@ -82,12 +82,12 @@ jest.spyOn(mockServices.contentManagement, 'get').mockImplementation(async ({ id
 }));
 
 describe('getSavedSearchAttributeService', () => {
-  it('should return saved search attribute service', () => {
+  it('should return discover view attribute service', () => {
     const savedSearchAttributeService = getSavedSearchAttributeService(mockServices);
     expect(savedSearchAttributeService).toBeDefined();
   });
 
-  it('should call saveSearchSavedObject when wrapAttributes is called with a by ref saved search', async () => {
+  it('should call saveSearchSavedObject when wrapAttributes is called with a by ref discover view', async () => {
     const savedSearchAttributeService = getSavedSearchAttributeService(mockServices);
     const savedObjectId = 'saved-object-id';
     const input: SearchByReferenceInput = {
@@ -121,7 +121,7 @@ describe('getSavedSearchAttributeService', () => {
     );
   });
 
-  it('should call getSearchSavedObject when unwrapAttributes is called with a by ref saved search', async () => {
+  it('should call getSearchSavedObject when unwrapAttributes is called with a by ref discover view', async () => {
     const savedSearchAttributeService = getSavedSearchAttributeService(mockServices);
     const savedObjectId = 'saved-object-id';
     const input: SearchByReferenceInput = {
@@ -149,7 +149,7 @@ describe('getSavedSearchAttributeService', () => {
   });
 
   describe('toSavedSearch', () => {
-    it('should convert attributes to saved search', async () => {
+    it('should convert attributes to discover view', async () => {
       const savedSearchAttributeService = getSavedSearchAttributeService(mockServices);
       const savedObjectId = 'saved-object-id';
       const attributes: SavedSearchByValueAttributes = {

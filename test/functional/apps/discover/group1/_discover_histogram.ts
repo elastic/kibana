@@ -189,13 +189,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(canvasExists).to.be(true);
       });
     });
-    it('should allow hiding the histogram, persisted in saved search', async () => {
+    it('should allow hiding the histogram, persisted in discover view', async () => {
       const from = 'Jan 1, 2010 @ 00:00:00.000';
       const to = 'Mar 21, 2019 @ 00:00:00.000';
       const savedSearch = 'persisted hidden histogram';
       await prepareTest({ from, to });
 
-      // close chart for saved search
+      // close chart for discover view
       await PageObjects.discover.toggleChartVisibility();
       let canvasExists: boolean;
       await retry.try(async () => {
@@ -211,13 +211,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.clickNewSearchButton();
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      // load saved search
+      // load discover view
       await PageObjects.discover.loadSavedSearch(savedSearch);
       await PageObjects.header.waitUntilLoadingHasFinished();
       canvasExists = await elasticChart.canvasExists();
       expect(canvasExists).to.be(false);
 
-      // open chart for saved search
+      // open chart for discover view
       await PageObjects.discover.toggleChartVisibility();
       await retry.waitFor(`Discover histogram to be displayed`, async () => {
         canvasExists = await elasticChart.canvasExists();
@@ -232,7 +232,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.clickNewSearchButton();
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      // load saved search
+      // load discover view
       await PageObjects.discover.loadSavedSearch(savedSearch);
       await PageObjects.header.waitUntilLoadingHasFinished();
       canvasExists = await elasticChart.canvasExists();
@@ -296,7 +296,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.discover.isChartVisible()).to.be(true);
     });
 
-    it('should reset all histogram state when resetting the saved search', async () => {
+    it('should reset all histogram state when resetting the discover view', async () => {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.timePicker.setDefaultAbsoluteRange();

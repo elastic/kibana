@@ -115,7 +115,7 @@ describe('getVisualizationInstance', () => {
     expect(vis).toBe(newVisObj);
   });
 
-  test('should create saved search instance if vis based on saved search id', async () => {
+  test('should create discover view instance if vis based on discover view id', async () => {
     visMock.data.savedSearchId = 'saved_search_id';
     const { savedSearch } = await getVisualizationInstance(mockServices, 'saved_vis_id');
 

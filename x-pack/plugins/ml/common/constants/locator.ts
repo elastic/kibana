@@ -28,7 +28,7 @@ export const ML_PAGES = {
   DATA_VISUALIZER: 'datavisualizer',
   /**
    * Page: Data Visualizer
-   * Open data visualizer by selecting a Kibana data view or saved search
+   * Open data visualizer by selecting a Kibana data view or discover view
    */
   DATA_VISUALIZER_INDEX_SELECT: 'datavisualizer_index_select',
   /**

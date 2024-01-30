@@ -31,7 +31,7 @@ describe('savedSearchComparator', () => {
     managed: false,
   };
 
-  it('should result true when saved search is same', () => {
+  it('should result true when discover view is same', () => {
     const result = savedSearchComparator(mockSavedSearch, { ...mockSavedSearch });
     expect(result).toBe(true);
   });

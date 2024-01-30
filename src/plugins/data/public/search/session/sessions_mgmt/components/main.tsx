@@ -40,7 +40,7 @@ export function SearchSessionsMgmtMain({ documentation, ...tableProps }: Props) 
         description={
           <FormattedMessage
             id="data.mgmt.searchSessions.main.sectionDescription"
-            defaultMessage="Manage your saved search sessions."
+            defaultMessage="Manage your discover view sessions."
           />
         }
         bottomBorder

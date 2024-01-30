@@ -22,7 +22,7 @@ export const queryFromLocatorFactory = (services: LocatorServicesDeps) => {
   ): Promise<Query | AggregateQuery | undefined> => {
     return params.query;
 
-    // TODO: support query from saved search
+    // TODO: support query from discover view
   };
 
   return queryFromLocator;

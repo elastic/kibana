@@ -63,7 +63,7 @@ export function createScenarios(
   };
 
   const openSavedSearch = async (title: string) => {
-    log.debug(`Opening saved search: ${title}`);
+    log.debug(`Opening discover view: ${title}`);
     await PageObjects.common.navigateToApp('discover');
     await PageObjects.discover.loadSavedSearch(title);
   };

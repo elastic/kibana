@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'settings', 'header', 'savedObjects']);
 
   // in 6.4.0 bug the Saved Search conflict would be resolved and get imported but the visualization
-  // that referenced the saved search was not imported.( https://github.com/elastic/kibana/issues/22238)
+  // that referenced the discover view was not imported.( https://github.com/elastic/kibana/issues/22238)
 
   describe('mgmt saved objects', function describeIndexTests() {
     before(async () => {

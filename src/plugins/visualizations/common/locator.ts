@@ -52,17 +52,17 @@ export type VisualizeLocatorParams = {
   vis?: SavedVisState;
 
   /**
-   * Whether this visualization is linked a saved search.
+   * Whether this visualization is linked a discover view.
    */
   linked?: boolean;
 
   /**
-   * The saved search used as the source of the visualization.
+   * The discover view used as the source of the visualization.
    */
   savedSearchId?: string;
 
   /**
-   * The saved search used as the source of the visualization.
+   * The discover view used as the source of the visualization.
    */
   indexPattern?: string;
 };

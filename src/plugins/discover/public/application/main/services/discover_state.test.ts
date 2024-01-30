@@ -215,7 +215,7 @@ describe('Test discover state with overridden state storage', () => {
 });
 
 describe('Test discover initial state sort handling', () => {
-  test('Non-empty sort in URL should not be overwritten by saved search sort', async () => {
+  test('Non-empty sort in URL should not be overwritten by discover view sort', async () => {
     const savedSearch = {
       ...savedSearchMockWithTimeField,
       ...{ sort: [['bytes', 'desc']] },
@@ -226,7 +226,7 @@ describe('Test discover initial state sort handling', () => {
     expect(state.appState.getState().sort).toEqual([['timestamp', 'desc']]);
     unsubscribe();
   });
-  test('Empty URL should use saved search sort for state', async () => {
+  test('Empty URL should use discover view sort for state', async () => {
     const nextSavedSearch = { ...savedSearchMock, ...{ sort: [['bytes', 'desc']] as SortOrder[] } };
     const { state } = await getState('/', { savedSearch: nextSavedSearch });
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
@@ -275,11 +275,11 @@ describe('Test createSearchSessionRestorationDataProvider', () => {
   });
 
   describe('session name', () => {
-    test('No persisted saved search returns default name', async () => {
+    test('No persisted discover view returns default name', async () => {
       expect(await searchSessionInfoProvider.getName()).toBe('Discover');
     });
 
-    test('Saved Search with a title returns saved search title', async () => {
+    test('Saved Search with a title returns discover view title', async () => {
       mockSavedSearch = { id: 'id', title: 'Name' } as unknown as SavedSearch;
       expect(await searchSessionInfoProvider.getName()).toBe('Name');
     });
@@ -369,7 +369,7 @@ describe('Test discover state actions', () => {
             searchSourceJSON:
               '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
           },
-          title: 'The saved search that will save the world',
+          title: 'The discover view that will save the world',
           sort: [],
           columns: ['test123'],
           description: 'description',
@@ -578,7 +578,7 @@ describe('Test discover state actions', () => {
     expect(state.savedSearchState.getHasChanged$().getValue()).toBe(false);
 
     state.savedSearchState.load = jest.fn().mockReturnValue(savedSearchMockWithTimeField);
-    // unsetting the previous index else this is considered as update to the persisted saved search
+    // unsetting the previous index else this is considered as update to the persisted discover view
     state.appState.set({ index: undefined });
     await state.actions.loadSavedSearch({ savedSearchId: 'the-saved-search-id-with-timefield' });
     expect(state.savedSearchState.getState().searchSource.getField('index')?.id).toBe(
@@ -586,7 +586,7 @@ describe('Test discover state actions', () => {
     );
     expect(state.savedSearchState.getHasChanged$().getValue()).toBe(false);
 
-    // switch back to the previous savedSearch, but not cleaning up appState index, so it's considered as update to the persisted saved search
+    // switch back to the previous savedSearch, but not cleaning up appState index, so it's considered as update to the persisted discover view
     state.appState.isEmptyURL = jest.fn().mockReturnValue(false);
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
     expect(state.savedSearchState.getState().searchSource.getField('index')?.id).toBe(
@@ -594,7 +594,7 @@ describe('Test discover state actions', () => {
     );
     expect(state.savedSearchState.getHasChanged$().getValue()).toBe(true);
   });
-  test('loadSavedSearch generating a new saved search, updated by ad-hoc data view', async () => {
+  test('loadSavedSearch generating a new discover view, updated by ad-hoc data view', async () => {
     const { state } = await getState('/');
     const dataViewSpecMock = {
       id: 'mock-id',
@@ -765,7 +765,7 @@ describe('Test discover state actions', () => {
   });
   test('undoSavedSearchChanges - when changing data views', async () => {
     const { state, getCurrentUrl } = await getState('/', { savedSearch: savedSearchMock });
-    // Load a given persisted saved search
+    // Load a given persisted discover view
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
     const unsubscribe = state.actions.initializeAndSync();
     await new Promise(process.nextTick);
@@ -785,7 +785,7 @@ describe('Test discover state actions', () => {
     });
     expect(state.internalState.getState().dataView?.id).toBe(dataViewComplexMock.id!);
 
-    // Undo all changes to the saved search, this should trigger a fetch, again
+    // Undo all changes to the discover view, this should trigger a fetch, again
     await state.actions.undoSavedSearchChanges();
     await new Promise(process.nextTick);
     expect(getCurrentUrl()).toBe(initialUrlState);

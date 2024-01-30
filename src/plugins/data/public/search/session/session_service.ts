@@ -430,7 +430,7 @@ export class SessionService {
   }
 
   /**
-   * Is restoring the older saved searches
+   * Is restoring the older discover viewes
    */
   public isRestore() {
     return this.state.get().isRestore;
@@ -449,7 +449,7 @@ export class SessionService {
   }
 
   /**
-   * Restore previously saved search session
+   * Restore previously discover view session
    * @param sessionId
    */
   public restore(sessionId: string) {

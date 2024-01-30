@@ -588,10 +588,10 @@ For area, line, and bar charts, press Shift, then click the series in the legend
 
 [discrete]
 [[is-it-possible-to-use-saved-serches-in-lens]]
-.*How do I visualize saved searches?*
+.*How do I visualize discover viewes?*
 [%collapsible]
 ====
-Visualizing saved searches in unsupported.
+Visualizing discover viewes in unsupported.
 ====
 
 [discrete]

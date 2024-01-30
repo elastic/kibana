@@ -12,7 +12,7 @@ import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/common';
 import { APP_ICON } from '../../common';
 
 function getDiscoverPathForSampleDataset(objId: string) {
-  // TODO: remove the time range from the URL query when saved search objects start supporting time range configuration
+  // TODO: remove the time range from the URL query when discover view objects start supporting time range configuration
   // https://github.com/elastic/kibana/issues/9761
   return `${getSavedSearchFullPathUrl(objId)}?_g=(time:(from:now-7d,to:now))`;
 }

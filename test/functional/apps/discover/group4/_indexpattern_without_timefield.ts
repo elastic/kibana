@@ -115,7 +115,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(url).to.contain(`refreshInterval:(pause:!t,value:${autoRefreshInterval * 1000})`);
     });
 
-    it('should allow switching from a saved search with a time field to a saved search without a time field', async () => {
+    it('should allow switching from a discover view with a time field to a discover view without a time field', async () => {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.selectIndexPattern('with-timefield');
       await PageObjects.header.waitUntilLoadingHasFinished();

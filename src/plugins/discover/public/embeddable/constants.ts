@@ -15,7 +15,7 @@ export const SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID =
 
 export const SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER: Trigger = {
   id: SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
-  title: 'Discover saved searches embeddable cell actions',
+  title: 'Discover discover viewes embeddable cell actions',
   description:
-    'This trigger is used to replace the cell actions for Discover saved search embeddable grid.',
+    'This trigger is used to replace the cell actions for Discover discover view embeddable grid.',
 } as const;

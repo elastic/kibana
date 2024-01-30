@@ -130,7 +130,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(isSuccessful).to.be(true);
       });
 
-      it('should import saved objects linked to saved searches', async function () {
+      it('should import saved objects linked to discover viewes', async function () {
         await PageObjects.savedObjects.importFile(
           path.join(__dirname, 'exports', '_import_objects_saved_search.ndjson')
         );
@@ -144,11 +144,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.savedObjects.clickImportDone();
 
         const objects = await PageObjects.savedObjects.getRowTitles();
-        const isSavedObjectImported = objects.includes('saved object connected to saved search');
+        const isSavedObjectImported = objects.includes('saved object connected to discover view');
         expect(isSavedObjectImported).to.be(true);
       });
 
-      it('should not import saved objects linked to saved searches when saved search does not exist', async function () {
+      it('should not import saved objects linked to discover viewes when discover view does not exist', async function () {
         await PageObjects.savedObjects.importFile(
           path.join(__dirname, 'exports', '_import_objects_connected_to_saved_search.ndjson')
         );
@@ -156,11 +156,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.savedObjects.clickImportDone();
 
         const objects = await PageObjects.savedObjects.getRowTitles();
-        const isSavedObjectImported = objects.includes('saved object connected to saved search');
+        const isSavedObjectImported = objects.includes('saved object connected to discover view');
         expect(isSavedObjectImported).to.be(false);
       });
 
-      it('should not import saved objects linked to saved searches when saved search index pattern does not exist', async function () {
+      it('should not import saved objects linked to discover viewes when discover view index pattern does not exist', async function () {
         await PageObjects.savedObjects.clickCheckboxByTitle('logstash-*');
         await PageObjects.savedObjects.clickDelete();
 
@@ -173,7 +173,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.savedObjects.clickImportDone();
 
         const objects = await PageObjects.savedObjects.getRowTitles();
-        const isSavedObjectImported = objects.includes('saved object connected to saved search');
+        const isSavedObjectImported = objects.includes('saved object connected to discover view');
         expect(isSavedObjectImported).to.be(false);
       });
 

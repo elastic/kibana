@@ -66,7 +66,7 @@ export interface SavedSearch {
   isTextBasedQuery?: boolean;
   usesAdHocDataView?: boolean;
 
-  // for restoring time range with a saved search
+  // for restoring time range with a discover view
   timeRestore?: boolean;
   timeRange?: TimeRange;
   refreshInterval?: RefreshInterval;
@@ -74,7 +74,7 @@ export interface SavedSearch {
   rowsPerPage?: number;
   sampleSize?: number;
   breakdownField?: string;
-  // Whether or not this saved search is managed by the system
+  // Whether or not this discover view is managed by the system
   managed: boolean;
   references?: SavedObjectReference[];
   sharingSavedObjectProps?: {

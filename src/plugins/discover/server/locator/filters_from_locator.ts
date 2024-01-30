@@ -46,7 +46,7 @@ export const filtersFromLocatorFactory = (services: LocatorServicesDeps) => {
 
     return filters;
 
-    // TODO: support extracting filters from saved search
+    // TODO: support extracting filters from discover view
   };
 
   return filtersFromLocator;

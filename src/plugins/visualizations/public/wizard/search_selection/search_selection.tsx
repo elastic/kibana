@@ -53,7 +53,7 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
             noItemsMessage={i18n.translate(
               'visualizations.newVisWizard.searchSelection.notFoundLabel',
               {
-                defaultMessage: 'No matching indices or saved searches found.',
+                defaultMessage: 'No matching indices or discover viewes found.',
               }
             )}
             savedObjectMetaData={[
@@ -63,10 +63,10 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
                 name: i18n.translate(
                   'visualizations.newVisWizard.searchSelection.savedObjectType.search',
                   {
-                    defaultMessage: 'Saved search',
+                    defaultMessage: 'Discover view',
                   }
                 ),
-                // ignore the saved searches that have text-based languages queries
+                // ignore the discover viewes that have text-based languages queries
                 includeFields: ['isTextBasedQuery', 'usesAdHocDataView'],
                 showSavedObject,
               },

@@ -12,7 +12,7 @@ import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 
 describe('visualize_embeddable_factory', () => {
   const factory = new VisualizeEmbeddableFactory({} as VisualizeEmbeddableFactoryDeps);
-  test('extract saved search references for search source state and not store them in state', () => {
+  test('extract discover view references for search source state and not store them in state', () => {
     const { state, references } = factory.extract({
       savedVis: {
         type: 'area',

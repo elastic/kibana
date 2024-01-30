@@ -91,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await reporting.teardownEcommerce();
       });
 
-      it('Download CSV export of a saved search panel', async function () {
+      it('Download CSV export of a discover view panel', async function () {
         await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard - 3 Day Period');
         await clickActionsMenu('EcommerceData');
         await clickDownloadCsv();
@@ -100,7 +100,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expectSnapshot(csvFile).toMatch();
       });
 
-      it('Downloads a filtered CSV export of a saved search panel', async function () {
+      it('Downloads a filtered CSV export of a discover view panel', async function () {
         await PageObjects.dashboard.loadSavedDashboard('Ecom Dashboard - 3 Day Period');
 
         // add a filter
@@ -113,7 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expectSnapshot(csvFile).toMatch();
       });
 
-      it('Downloads a saved search panel with a custom time range that does not intersect with dashboard time range', async function () {
+      it('Downloads a discover view panel with a custom time range that does not intersect with dashboard time range', async function () {
         await PageObjects.dashboard.loadSavedDashboard(
           'Ecom Dashboard - 3 Day Period - custom time range'
         );
@@ -163,7 +163,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.unsetTime();
       });
 
-      it('Downloads filtered Discover saved search report', async () => {
+      it('Downloads filtered Discover discover view report', async () => {
         await clickActionsMenu(TEST_SEARCH_TITLE.replace(/ /g, ''));
         await clickDownloadCsv();
 
@@ -196,7 +196,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esArchiver.unload('x-pack/test/functional/es_archives/reporting/hugedata');
       });
 
-      it('Download CSV export of a saved search panel', async () => {
+      it('Download CSV export of a discover view panel', async () => {
         await clickActionsMenu('namessearch');
         await clickDownloadCsv();
 

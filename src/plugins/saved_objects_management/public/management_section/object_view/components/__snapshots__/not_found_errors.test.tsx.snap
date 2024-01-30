@@ -25,7 +25,7 @@ exports[`NotFoundErrors component renders correctly for index-pattern type 1`] =
       The data view associated with this object no longer exists.
     </div>
     <div>
-      If you know what this error means, you can use the 
+      If you know what this error means, you can use the
       <a
         aria-label="Saved objects APIs"
         class="euiLink emotion-euiLink-primary"
@@ -77,7 +77,7 @@ exports[`NotFoundErrors component renders correctly for index-pattern-field type
       A field associated with this object no longer exists in the data view.
     </div>
     <div>
-      If you know what this error means, you can use the 
+      If you know what this error means, you can use the
       <a
         aria-label="Saved objects APIs"
         class="euiLink emotion-euiLink-primary"
@@ -126,10 +126,10 @@ exports[`NotFoundErrors component renders correctly for search type 1`] = `
     class="euiText emotion-euiText-s-euiTextColor-default"
   >
     <div>
-      The saved search associated with this object no longer exists.
+      The discover view associated with this object no longer exists.
     </div>
     <div>
-      If you know what this error means, you can use the 
+      If you know what this error means, you can use the
       <a
         aria-label="Saved objects APIs"
         class="euiLink emotion-euiLink-primary"
@@ -179,7 +179,7 @@ exports[`NotFoundErrors component renders correctly for unknown type 1`] = `
   >
     <div />
     <div>
-      If you know what this error means, you can use the 
+      If you know what this error means, you can use the
       <a
         aria-label="Saved objects APIs"
         class="euiLink emotion-euiLink-primary"

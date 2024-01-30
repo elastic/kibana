@@ -143,7 +143,7 @@ export const StepDefineSummary: FC<Props> = ({
         {searchItems.savedSearch !== undefined && searchItems.savedSearch.id !== undefined && (
           <EuiFormRow
             label={i18n.translate('xpack.transform.stepDefineSummary.savedSearchLabel', {
-              defaultMessage: 'Saved search',
+              defaultMessage: 'Discover view',
             })}
           >
             <span>{searchItems.savedSearch.title}</span>

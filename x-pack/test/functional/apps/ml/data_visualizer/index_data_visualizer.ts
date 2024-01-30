@@ -24,7 +24,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   function runTests(testData: TestData) {
     it(`${testData.suiteTitle} loads the source data in the data visualizer`, async () => {
       await ml.testExecution.logTestStep(
-        `${testData.suiteTitle} loads the saved search selection page`
+        `${testData.suiteTitle} loads the discover view selection page`
       );
       await ml.dataVisualizer.navigateToDataViewSelection();
 
@@ -173,7 +173,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
       runTests(farequoteDataViewTestData);
 
-      // Run tests on farequote KQL saved search.
+      // Run tests on farequote KQL discover view.
       it(`${farequoteKQLSearchTestData.suiteTitle} loads the data visualizer selector page`, async () => {
         // Only navigate back to the data visualizer selector page before running next tests,
         // to ensure the time picker isn't set back to the default (last 15 minutes).
@@ -182,7 +182,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
       runTests(farequoteKQLSearchTestData);
 
-      // Run tests on farequote lucene saved search.
+      // Run tests on farequote lucene discover view.
       it(`${farequoteLuceneSearchTestData.suiteTitle} loads the data visualizer selector page`, async () => {
         // Only navigate back to the data visualizer selector page before running next tests,
         // to ensure the time picker isn't set back to the default (last 15 minutes).
@@ -221,7 +221,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
       it(`${testData.suiteTitle} loads lens charts`, async () => {
         await ml.testExecution.logTestStep(
-          `${testData.suiteTitle} loads the saved search selection page`
+          `${testData.suiteTitle} loads the discover view selection page`
         );
         await ml.dataVisualizer.navigateToDataViewSelection();
 

@@ -186,7 +186,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(+second).to.equal(+first * 2);
     });
 
-    it('should open saved search by navigation to context from embeddable', async () => {
+    it('should open discover view by navigation to context from embeddable', async () => {
       // navigate to context view
       await dataGrid.clickRowToggle({ rowIndex: 0 });
       const [, surrDocs] = await dataGrid.getRowActions({ rowIndex: 0 });
@@ -200,7 +200,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
       await PageObjects.context.waitUntilContextLoadingHasFinished();
 
-      // open saved search
+      // open discover view
       await testSubjects.click('~breadcrumb & ~first');
       await PageObjects.header.waitUntilLoadingHasFinished();
 

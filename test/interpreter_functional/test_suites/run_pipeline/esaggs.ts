@@ -93,7 +93,7 @@ export default function ({
       });
     });
 
-    describe('loads a saved search', () => {
+    describe('loads a discover view', () => {
       before(async () => {
         await kibanaServer.importExport.load(
           'test/functional/fixtures/kbn_archiver/saved_search.json'
@@ -111,7 +111,7 @@ export default function ({
         aggs={aggCount id="1" enabled=true schema="metric"}
       `;
 
-      it('correctly applies filter from saved search', async () => {
+      it('correctly applies filter from discover view', async () => {
         const result = await expectExpression('esaggs_saved_searches', expression).getResponse();
         expect(getCell(result, 0, 0)).to.be(119);
       });

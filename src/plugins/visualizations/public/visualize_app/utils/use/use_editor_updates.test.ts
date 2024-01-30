@@ -253,7 +253,7 @@ describe('useEditorUpdates', () => {
     });
 
     describe('handle linked search changes', () => {
-      test('should update saved search id in saved instance', () => {
+      test('should update discover view id in saved instance', () => {
         // @ts-expect-error 4.3.5 upgrade
         savedVisInstance.savedSearch = {
           id: 'saved_search_id',
@@ -283,7 +283,7 @@ describe('useEditorUpdates', () => {
         expect(savedVisInstance.vis.data.savedSearchId).toEqual('saved_search_id');
       });
 
-      test('should remove saved search id from vis instance', () => {
+      test('should remove discover view id from vis instance', () => {
         // @ts-expect-error
         savedVisInstance.savedVis = {
           savedSearchId: 'saved_search_id',

@@ -7,7 +7,7 @@
  */
 
 /**
- * 1. Fixes fullscreen mode for saved searches on Dashboard. Otherwise, sibling grids can obscure the grid in fullscreen mode.
+ * 1. Fixes fullscreen mode for discover viewes on Dashboard. Otherwise, sibling grids can obscure the grid in fullscreen mode.
  * "euiDataGrid__restrictBody" is set to body element when a grid is in fullscreen
  * https://github.com/elastic/kibana/issues/134032
  */

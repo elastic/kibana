@@ -25,7 +25,7 @@ export const RollupBetaWarning = () => (
       <FormattedMessage
         id="indexPatternEditor.rollupDataView.warning.textParagraphOne"
         defaultMessage="Kibana has beta support for data views based on rollups. You might encounter
-issues using these in saved searches, visualizations, and dashboards. They
+issues using these in discover viewes, visualizations, and dashboards. They
 are not supported in some advanced features, such as Timelion, and Machine Learning."
       />
     </p>

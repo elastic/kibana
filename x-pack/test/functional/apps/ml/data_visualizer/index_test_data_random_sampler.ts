@@ -106,7 +106,7 @@ export const farequoteDataViewTestData: TestData = {
 };
 
 export const farequoteKQLSearchTestData: TestData = {
-  suiteTitle: 'KQL saved search',
+  suiteTitle: 'KQL discover view',
   isSavedSearch: true,
   sourceIndexOrSavedSearch: 'ft_farequote_kuery',
   fieldNameFilters: ['@version'],
@@ -203,7 +203,7 @@ export const farequoteKQLSearchTestData: TestData = {
 };
 
 export const farequoteKQLFiltersSearchTestData: TestData = {
-  suiteTitle: 'KQL saved search and filters',
+  suiteTitle: 'KQL discover view and filters',
   isSavedSearch: true,
   sourceIndexOrSavedSearch: 'ft_farequote_filter_and_kuery',
   fieldNameFilters: ['@version'],
@@ -302,7 +302,7 @@ export const farequoteKQLFiltersSearchTestData: TestData = {
 };
 
 export const farequoteLuceneSearchTestData: TestData = {
-  suiteTitle: 'lucene saved search',
+  suiteTitle: 'lucene discover view',
   isSavedSearch: true,
   sourceIndexOrSavedSearch: 'ft_farequote_lucene',
   fieldNameFilters: ['@version.keyword', 'type'],
@@ -399,7 +399,7 @@ export const farequoteLuceneSearchTestData: TestData = {
 };
 
 export const farequoteLuceneFiltersSearchTestData: TestData = {
-  suiteTitle: 'lucene saved search and filter',
+  suiteTitle: 'lucene discover view and filter',
   isSavedSearch: true,
   sourceIndexOrSavedSearch: 'ft_farequote_filter_and_lucene',
   fieldNameFilters: ['@version.keyword', 'type'],

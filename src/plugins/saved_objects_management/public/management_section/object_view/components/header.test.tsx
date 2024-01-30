@@ -44,10 +44,10 @@ describe('Intro component', () => {
   });
 
   it('displays correct title if one is provided', () => {
-    let mounted = mountHeader({ ...defaultProps, title: 'my saved search' });
-    expect(mounted.find('h1').text()).toMatchInlineSnapshot(`"Inspect my saved search"`);
-    mounted = mountHeader({ ...defaultProps, title: 'my other saved search' });
-    expect(mounted.find('h1').text()).toMatchInlineSnapshot(`"Inspect my other saved search"`);
+    let mounted = mountHeader({ ...defaultProps, title: 'my discover view' });
+    expect(mounted.find('h1').text()).toMatchInlineSnapshot(`"Inspect my discover view"`);
+    mounted = mountHeader({ ...defaultProps, title: 'my other discover view' });
+    expect(mounted.find('h1').text()).toMatchInlineSnapshot(`"Inspect my other discover view"`);
   });
 
   it('only displays delete button if canDelete is true', () => {

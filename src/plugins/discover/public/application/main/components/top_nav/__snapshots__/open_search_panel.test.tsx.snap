@@ -35,7 +35,7 @@ exports[`OpenSearchPanel render 1`] = `
         Array [
           Object {
             "getIconForSavedObject": [Function],
-            "name": "Saved search",
+            "name": "Discover view",
             "type": "search",
           },
         ]

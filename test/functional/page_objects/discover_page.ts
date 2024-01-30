@@ -52,7 +52,7 @@ export class DiscoverPageObject extends FtrService {
     await this.clickSaveSearchButton();
     // preventing an occasional flakiness when the saved object wasn't set and the form can't be submitted
     await this.retry.waitFor(
-      `saved search title is set to ${searchName} and save button is clickable`,
+      `discover view title is set to ${searchName} and save button is clickable`,
       async () => {
         const saveButton = await this.testSubjects.find('confirmSaveSavedObjectButton');
         await this.testSubjects.setValue('savedObjectTitle', searchName);
@@ -77,12 +77,12 @@ export class DiscoverPageObject extends FtrService {
 
     await this.testSubjects.click('confirmSaveSavedObjectButton');
     await this.header.waitUntilLoadingHasFinished();
-    // LeeDr - this additional checking for the saved search name was an attempt
+    // LeeDr - this additional checking for the discover view name was an attempt
     // to cause this method to wait for the reloading of the page to complete so
     // that the next action wouldn't have to retry.  But it doesn't really solve
     // that issue.  But it does typically take about 3 retries to
     // complete with the expected searchName.
-    await this.retry.waitFor(`saved search was persisted with name ${searchName}`, async () => {
+    await this.retry.waitFor(`discover view was persisted with name ${searchName}`, async () => {
       return (await this.getCurrentQueryName()) === searchName;
     });
   }
@@ -126,7 +126,7 @@ export class DiscoverPageObject extends FtrService {
 
     // We need this try loop here because previous actions in Discover like
     // saving a search cause reloading of the page and the "Open" menu item goes stale.
-    await this.retry.waitFor('saved search panel is opened', async () => {
+    await this.retry.waitFor('discover view panel is opened', async () => {
       await this.clickLoadSavedSearchButton();
       await this.header.waitUntilLoadingHasFinished();
       isOpen = await this.testSubjects.exists('loadSearchForm');

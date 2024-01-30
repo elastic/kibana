@@ -118,8 +118,8 @@ export const getSavedSearch = async (savedSearchId: string, deps: GetSavedSearch
 };
 
 /**
- * Returns a new saved search
- * Used when e.g. Discover is opened without a saved search id
+ * Returns a new discover view
+ * Used when e.g. Discover is opened without a discover view id
  * @param search
  */
 export const getNewSavedSearch = ({

@@ -17,7 +17,7 @@ import { DiscoverAppLocatorParams } from '../../common';
 export const titleFromLocatorFactory = (services: LocatorServicesDeps) => {
   /**
    * Allows consumers to derive a title of a search in Disocver from DiscoverAppLocatorParams.
-   * For now, this assumes the DiscoverAppLocatorParams contain a reference to a saved search. In the future,
+   * For now, this assumes the DiscoverAppLocatorParams contain a reference to a discover view. In the future,
    * the params may only contain a reference to a DataView
    *
    * @public
@@ -33,13 +33,13 @@ export const titleFromLocatorFactory = (services: LocatorServicesDeps) => {
     }
 
     if (!savedSearchId) {
-      throw new Error(`DiscoverAppLocatorParams must contain a saved search reference`);
+      throw new Error(`DiscoverAppLocatorParams must contain a discover view reference`);
     }
 
     const { savedObjects } = services;
     const searchObject: SavedObject<{ title?: string }> = await savedObjects.get(
       'search',
-      savedSearchId // assumes params contains saved search reference
+      savedSearchId // assumes params contains discover view reference
     );
 
     return (

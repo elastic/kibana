@@ -132,7 +132,7 @@ describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
     cy.get(TIMELINE_STATUS).should('not.exist');
 
     // Offsetting the extra save that is happening in the background
-    // for the saved search object.
+    // for the discover view object.
     cy.get(LOADING_INDICATOR).should('be.visible');
     cy.get(LOADING_INDICATOR).should('not.exist');
 
@@ -154,7 +154,7 @@ describe('Timelines', { tags: ['@ess', '@serverless'] }, (): void => {
     addNameToTimelineAndSave('First');
 
     // Offsetting the extra save that is happening in the background
-    // for the saved search object.
+    // for the discover view object.
     cy.get(LOADING_INDICATOR).should('be.visible');
     cy.get(LOADING_INDICATOR).should('not.exist');
 

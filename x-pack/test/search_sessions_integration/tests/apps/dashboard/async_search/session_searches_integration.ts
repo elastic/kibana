@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await searchSessions.deleteAllSearchSessions();
     });
 
-    it('until session is saved search keepAlive is short, when it is saved, keepAlive is extended and search is saved into the session saved object, when session is extended, searches are also extended', async () => {
+    it('until session is discover view keepAlive is short, when it is saved, keepAlive is extended and search is saved into the session saved object, when session is extended, searches are also extended', async () => {
       await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
       await PageObjects.dashboard.waitForRenderComplete();
       await searchSessions.expectState('completed');

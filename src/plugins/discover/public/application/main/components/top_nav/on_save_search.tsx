@@ -251,7 +251,7 @@ const SaveSearchObjectModal: React.FC<{
         label={
           <FormattedMessage
             id="discover.topNav.saveModal.storeTimeWithSearchToggleLabel"
-            defaultMessage="Store time with saved search"
+            defaultMessage="Store time with discover view"
           />
         }
       />
@@ -274,7 +274,7 @@ const SaveSearchObjectModal: React.FC<{
       initialCopyOnSave={initialCopyOnSave}
       description={description}
       objectType={i18n.translate('discover.localMenu.saveSaveSearchObjectType', {
-        defaultMessage: 'search',
+        defaultMessage: 'Discover view',
       })}
       showDescription={true}
       options={options}
@@ -284,7 +284,7 @@ const SaveSearchObjectModal: React.FC<{
         managed
           ? i18n.translate('discover.localMenu.mustCopyOnSave', {
               defaultMessage:
-                'This saved search is managed by Elastic. Changes here must be saved to a new saved search.',
+                'This discover view is managed by Elastic. Changes here must be saved to a new discover view.',
             })
           : undefined
       }

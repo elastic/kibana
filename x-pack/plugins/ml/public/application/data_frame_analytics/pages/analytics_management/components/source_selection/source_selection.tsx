@@ -43,7 +43,7 @@ export const SourceSelection: FC = () => {
     savedObject?: SavedObjectCommon
   ) => {
     // Kibana data views including `:` are cross-cluster search indices
-    // and are not supported by Data Frame Analytics yet. For saved searches
+    // and are not supported by Data Frame Analytics yet. For discover viewes
     // and data views that use cross-cluster search we intercept
     // the selection before redirecting and show an error callout instead.
     let dataViewName = '';
@@ -58,13 +58,13 @@ export const SourceSelection: FC = () => {
         })(id);
         dataViewName = dataViewAndSavedSearch.dataView?.title ?? '';
       } catch (error) {
-        // an unexpected error has occurred. This could be caused by a saved search for which the data view no longer exists.
+        // an unexpected error has occurred. This could be caused by a discover view for which the data view no longer exists.
         toastNotificationService.displayErrorToast(
           error,
           i18n.translate(
             'xpack.ml.dataFrame.analytics.create.searchSelection.errorGettingDataViewTitle',
             {
-              defaultMessage: 'Error loading data view used by the saved search',
+              defaultMessage: 'Error loading data view used by the discover view',
             }
           )
         );
@@ -79,7 +79,7 @@ export const SourceSelection: FC = () => {
           i18n.translate(
             'xpack.ml.dataFrame.analytics.create.searchSelection.CcsErrorCallOutBody',
             {
-              defaultMessage: `The saved search '{savedSearchTitle}' uses the data view '{dataViewName}'.`,
+              defaultMessage: `The discover view '{savedSearchTitle}' uses the data view '{dataViewName}'.`,
               values: {
                 savedSearchTitle: getNestedProperty(savedObject, 'attributes.title'),
                 dataViewName,
@@ -128,7 +128,7 @@ export const SourceSelection: FC = () => {
             noItemsMessage={i18n.translate(
               'xpack.ml.dataFrame.analytics.create.searchSelection.notFoundLabel',
               {
-                defaultMessage: 'No matching indices or saved searches found.',
+                defaultMessage: 'No matching indices or discover viewes found.',
               }
             )}
             savedObjectMetaData={[
@@ -138,7 +138,7 @@ export const SourceSelection: FC = () => {
                 name: i18n.translate(
                   'xpack.ml.dataFrame.analytics.create.searchSelection.savedObjectType.search',
                   {
-                    defaultMessage: 'Saved search',
+                    defaultMessage: 'Discover view',
                   }
                 ),
               },

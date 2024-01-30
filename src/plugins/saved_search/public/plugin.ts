@@ -37,13 +37,13 @@ import {
 } from './services/saved_searches';
 
 /**
- * Saved search plugin public Setup contract
+ * Discover view plugin public Setup contract
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SavedSearchPublicPluginSetup {}
 
 /**
- * Saved search plugin public Setup contract
+ * Discover view plugin public Setup contract
  */
 export interface SavedSearchPublicPluginStart {
   get: (savedSearchId: string) => ReturnType<typeof getSavedSearch>;
@@ -63,7 +63,7 @@ export interface SavedSearchPublicPluginStart {
 }
 
 /**
- * Saved search plugin public Setup contract
+ * Discover view plugin public Setup contract
  */
 export interface SavedSearchPublicSetupDependencies {
   contentManagement: ContentManagementPublicSetup;
@@ -71,7 +71,7 @@ export interface SavedSearchPublicSetupDependencies {
 }
 
 /**
- * Saved search plugin public Setup contract
+ * Discover view plugin public Setup contract
  */
 export interface SavedSearchPublicStartDependencies {
   data: DataPublicPluginStart;
@@ -100,7 +100,7 @@ export class SavedSearchPublicPlugin
         latest: LATEST_VERSION,
       },
       name: i18n.translate('savedSearch.contentManagementType', {
-        defaultMessage: 'Saved search',
+        defaultMessage: 'Discover view',
       }),
     });
 

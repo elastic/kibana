@@ -207,7 +207,7 @@ export class SavedSearchEmbeddable
     const description = input.hidePanelTitles ? '' : input.description ?? savedSearch.description;
     const savedObjectId = (input as SearchByReferenceInput).savedObjectId;
     const locatorParams = getDiscoverLocatorParams({ input, savedSearch });
-    // We need to use a redirect URL if this is a by value saved search using
+    // We need to use a redirect URL if this is a by value discover view using
     // an ad hoc data view to ensure the data view spec gets encoded in the URL
     const useRedirect = !savedObjectId && !dataView?.isPersisted();
     const editUrl = useRedirect

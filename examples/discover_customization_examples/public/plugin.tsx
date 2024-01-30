@@ -134,9 +134,9 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                                 onClick: () => alert('Make a copy clicked'),
                               },
                               {
-                                name: 'Manage saved searches',
+                                name: 'Manage discover viewes',
                                 icon: 'gear',
-                                onClick: () => alert('Manage saved searches clicked'),
+                                onClick: () => alert('Manage discover viewes clicked'),
                               },
                             ],
                           },

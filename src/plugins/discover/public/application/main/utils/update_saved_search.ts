@@ -14,8 +14,8 @@ import type { DiscoverServices } from '../../../build_services';
 import type { DiscoverGlobalStateContainer } from '../services/discover_global_state_container';
 
 /**
- * Updates the saved search with a given data view & Appstate
- * Is executed on every change of those, for making sure the saved search is
+ * Updates the discover view with a given data view & Appstate
+ * Is executed on every change of those, for making sure the discover view is
  * up to date before fetching data and persisting or sharing
  * @param savedSearch
  * @param dataView

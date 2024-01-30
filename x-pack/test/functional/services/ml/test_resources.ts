@@ -187,7 +187,7 @@ export function MachineLearningTestResourcesProvider(
     },
 
     async createSavedSearch(title: string, body: object): Promise<string> {
-      log.debug(`Creating saved search with title '${title}'`);
+      log.debug(`Creating discover view with title '${title}'`);
 
       const { body: createResponse, status } = await supertest
         .post(`/api/saved_objects/${SavedObjectType.SEARCH}`)
@@ -218,7 +218,7 @@ export function MachineLearningTestResourcesProvider(
       const title = savedSearch.requestBody.attributes.title;
       const savedSearchId = await this.getSavedSearchId(title);
       if (savedSearchId !== undefined) {
-        log.debug(`Saved search with title '${title}' already exists. Nothing to create.`);
+        log.debug(`Discover view with title '${title}' already exists. Nothing to create.`);
         return savedSearchId;
       } else {
         const body = await this.updateSavedSearchRequestBody(
@@ -233,7 +233,7 @@ export function MachineLearningTestResourcesProvider(
       const dataViewId = await this.getDataViewId(dataViewTitle);
       if (dataViewId === undefined) {
         throw new Error(
-          `Index pattern '${dataViewTitle}' to base saved search on does not exist. `
+          `Index pattern '${dataViewTitle}' to base discover view on does not exist. `
         );
       }
 
@@ -351,11 +351,11 @@ export function MachineLearningTestResourcesProvider(
     },
 
     async deleteSavedSearchByTitle(title: string) {
-      log.debug(`Deleting saved search with title '${title}'...`);
+      log.debug(`Deleting discover view with title '${title}'...`);
 
       const savedSearchId = await this.getSavedSearchId(title);
       if (savedSearchId === undefined) {
-        log.debug(`Saved search with title '${title}' does not exists. Nothing to delete.`);
+        log.debug(`Discover view with title '${title}' does not exists. Nothing to delete.`);
         return;
       } else {
         await this.deleteSavedSearchById(savedSearchId);

@@ -94,7 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    it('allows creation of a new field and use it in a saved search', async function () {
+    it('allows creation of a new field and use it in a discover view', async function () {
       const fieldName = '_runtimefield-saved-search';
       await createRuntimeField(fieldName);
       await PageObjects.unifiedFieldList.clickFieldListItemAdd(fieldName);

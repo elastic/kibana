@@ -31,20 +31,20 @@ function prepareTest(savedSearch: SavedSearch, path: string) {
 }
 describe('test useUrl when the url is changed to /', () => {
   test('loadSavedSearch is not triggered when the url is e.g. /new', () => {
-    // the switch to loading the new saved search is taken care in the main route
+    // the switch to loading the new discover view is taken care in the main route
     const { load } = prepareTest(savedSearchMockWithTimeFieldNew, '/new');
     expect(load).toHaveBeenCalledTimes(0);
   });
-  test('loadSavedSearch is not triggered when a persisted saved search is pre-selected', () => {
-    // the switch to loading the new saved search is taken care in the main route
+  test('loadSavedSearch is not triggered when a persisted discover view is pre-selected', () => {
+    // the switch to loading the new discover view is taken care in the main route
     const { load } = prepareTest(savedSearchMockWithTimeField, '/');
     expect(load).toHaveBeenCalledTimes(0);
   });
-  test('loadSavedSearch is triggered when a new saved search is pre-selected', () => {
+  test('loadSavedSearch is triggered when a new discover view is pre-selected', () => {
     const { load } = prepareTest(savedSearchMockWithTimeFieldNew, '/');
     expect(load).toHaveBeenCalledTimes(1);
   });
-  test('loadSavedSearch is triggered when a new saved search is pre-selected with an active profile', () => {
+  test('loadSavedSearch is triggered when a new discover view is pre-selected with an active profile', () => {
     const { load } = prepareTest(savedSearchMockWithTimeFieldNew, addProfile('', 'test'));
     expect(load).toHaveBeenCalledTimes(1);
   });

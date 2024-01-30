@@ -59,7 +59,7 @@ export interface TimelinePersistInput {
   templateTimelineVersion?: number | null;
   title?: string;
   updated?: number;
-  /* used to saved discover Saved search Id */
+  /* used to saved discover Discover view Id */
   savedSearchId?: string | null;
 }
 

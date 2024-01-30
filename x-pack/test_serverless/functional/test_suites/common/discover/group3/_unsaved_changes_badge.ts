@@ -8,8 +8,8 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-const SAVED_SEARCH_NAME = 'test saved search';
-const SAVED_SEARCH_WITH_FILTERS_NAME = 'test saved search with filters';
+const SAVED_SEARCH_NAME = 'test discover view';
+const SAVED_SEARCH_WITH_FILTERS_NAME = 'test discover view with filters';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.waitUntilSearchingHasFinished();
     });
 
-    it('should not show the badge initially nor after changes to a draft saved search', async () => {
+    it('should not show the badge initially nor after changes to a draft discover view', async () => {
       await testSubjects.missingOrFail('unsavedChangesBadge');
 
       await PageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.missingOrFail('unsavedChangesBadge');
     });
 
-    it('should show the badge only after changes to a persisted saved search', async () => {
+    it('should show the badge only after changes to a persisted discover view', async () => {
       await PageObjects.discover.saveSearch(SAVED_SEARCH_NAME);
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.missingOrFail('unsavedChangesBadge');
     });
 
-    it('should not show a badge after loading a saved search, only after changes', async () => {
+    it('should not show a badge after loading a discover view, only after changes', async () => {
       await PageObjects.discover.loadSavedSearch(SAVED_SEARCH_NAME);
 
       await testSubjects.missingOrFail('unsavedChangesBadge');

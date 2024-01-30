@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'timePicker', 'discover']);
 
-  describe('discover saved search embeddable', () => {
+  describe('discover discover view embeddable', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/dashboard/current/data');
@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
     };
 
-    it('should allow removing the dashboard panel after the underlying saved search has been deleted', async () => {
+    it('should allow removing the dashboard panel after the underlying discover view has been deleted', async () => {
       const searchTitle = 'TempSearch';
       const searchId = '90943e30-9a47-11e8-b64d-95841ca0b247';
       await kibanaServer.savedObjects.create({
@@ -90,7 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ],
       });
       await addSearchEmbeddableToDashboard(searchTitle);
-      await PageObjects.dashboard.saveDashboard('Dashboard with deleted saved search', {
+      await PageObjects.dashboard.saveDashboard('Dashboard with deleted discover view', {
         waitDialogIsClosed: true,
         exitFromEditMode: false,
       });

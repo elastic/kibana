@@ -22,7 +22,7 @@ import { getKibanaContext } from './expressions/kibana_context';
 import { getSavedSearch } from '../common/service/get_saved_searches';
 
 /**
- * Saved search plugin server Setup contract
+ * Discover view plugin server Setup contract
  */
 export interface SavedSearchPublicSetupDependencies {
   data: DataPluginSetup;

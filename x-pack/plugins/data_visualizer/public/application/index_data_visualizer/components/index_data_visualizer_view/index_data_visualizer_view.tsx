@@ -207,8 +207,8 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       queryLanguage: SearchQueryLanguage;
       filters: Filter[];
     }) => {
-      // When the user loads saved search and then clears or modifies the query
-      // we should remove the saved search and replace it with the index pattern id
+      // When the user loads discover view and then clears or modifies the query
+      // we should remove the discover view and replace it with the index pattern id
       if (currentSavedSearch !== null) {
         setCurrentSavedSearch(null);
       }

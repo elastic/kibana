@@ -46,7 +46,7 @@ export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<Disco
    */
   hasChanged: () => boolean;
   /**
-   * Initializes the state by the given saved search and starts syncing the state with the URL
+   * Initializes the state by the given discover view and starts syncing the state with the URL
    * @param currentSavedSearch
    */
   initAndSync: (currentSavedSearch: SavedSearch) => () => void;
@@ -76,7 +76,7 @@ export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<Disco
   update: (newPartial: DiscoverAppState, replace?: boolean) => void;
 
   /*
-   * Get updated AppState when given a saved search
+   * Get updated AppState when given a discover view
    *
    * */
   getAppStateFromSavedSearch: (newSavedSearch: SavedSearch) => DiscoverAppState;

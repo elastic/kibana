@@ -20,7 +20,7 @@ export const DISCOVER_APP_LOCATOR = 'DISCOVER_APP_LOCATOR';
 
 export interface DiscoverAppLocatorParams extends SerializableRecord {
   /**
-   * Optionally set saved search ID.
+   * Optionally set discover view ID.
    */
   savedSearchId?: string;
 

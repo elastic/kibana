@@ -116,7 +116,7 @@ it('rewrites ftr reports with minimal changes', async () => {
            ‹/system-out›
            ‹skipped/›
          ‹/testcase›
-         ‹testcase name="machine learning anomaly detection saved search  with lucene query job creation opens the advanced section" classname="Firefox XPack UI Functional Tests.x-pack/test/functional/apps/machine_learning/anomaly_detection/saved_search_job·ts" time="6.040"›
+         ‹testcase name="machine learning anomaly detection discover view  with lucene query job creation opens the advanced section" classname="Firefox XPack UI Functional Tests.x-pack/test/functional/apps/machine_learning/anomaly_detection/saved_search_job·ts" time="6.040"›
     -      ‹system-out›‹![CDATA[[00:21:57]         └-: machine learning...]]›‹/system-out›
     -      ‹failure›‹![CDATA[{ NoSuchSessionError: Tried to run command without establishing a connection
     +      ‹system-out›[00:21:57]         └-: machine learning...‹/system-out›

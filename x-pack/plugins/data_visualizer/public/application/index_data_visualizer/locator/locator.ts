@@ -18,7 +18,7 @@ export const DATA_VISUALIZER_APP_LOCATOR = 'DATA_VISUALIZER_APP_LOCATOR';
 
 export interface IndexDataVisualizerLocatorParams extends SerializableRecord {
   /**
-   * Optionally set saved search ID.
+   * Optionally set discover view ID.
    */
   savedSearchId?: string;
 

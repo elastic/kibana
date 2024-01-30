@@ -139,7 +139,7 @@ describe('rollupUsageCollectorHelpers', () => {
       expect(result).toStrictEqual([]);
     });
 
-    it('Returns the saved search if exists', async () => {
+    it('Returns the discover view if exists', async () => {
       const result = await fetchRollupSavedSearches(
         mockIndex,
         getMockCallCluster(defaultMockRollupSavedSearchSavedObjects),

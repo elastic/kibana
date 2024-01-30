@@ -39,7 +39,7 @@ export const useSearchItems = (defaultSavedObjectId: string | undefined) => {
     }
 
     try {
-      // If data view already found, no need to get saved search
+      // If data view already found, no need to get discover view
       if (!fetchedDataView) {
         fetchedSavedSearch = await appDeps.savedSearch.get(id);
       }
@@ -51,7 +51,7 @@ export const useSearchItems = (defaultSavedObjectId: string | undefined) => {
       if (!isDataView(fetchedDataView) && fetchedSavedSearch === undefined) {
         setError(
           i18n.translate('xpack.transform.searchItems.errorInitializationTitle', {
-            defaultMessage: `An error occurred initializing the Kibana data view or saved search.`,
+            defaultMessage: `An error occurred initializing the Kibana data view or discover view.`,
           })
         );
         return;

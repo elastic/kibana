@@ -116,7 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
     await ml.navigation.navigateToDataVisualizer();
 
     await ml.testExecution.logTestStep(
-      `${testData.suiteTitle} loads the saved search selection page`
+      `${testData.suiteTitle} loads the discover view selection page`
     );
     await ml.dataVisualizer.navigateToDataViewSelection();
 

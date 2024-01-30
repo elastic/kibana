@@ -33,80 +33,80 @@ export interface UpdateParams {
    */
   nextDataView?: DataView | undefined;
   /**
-   * The next AppState that should be used for updating the saved search
+   * The next AppState that should be used for updating the discover view
    */
   nextState?: DiscoverAppState | undefined;
   /**
-   * use filter and query services to update the saved search
+   * use filter and query services to update the discover view
    */
   useFilterAndQueryServices?: boolean;
 }
 
 /**
- * Container for the saved search state, allowing to load, update and persist the saved search
- * Can also be used to track changes to the saved search
+ * Container for the discover view state, allowing to load, update and persist the discover view
+ * Can also be used to track changes to the discover view
  * It centralizes functionality that was spread across the Discover main codebase
- * There are 2 hooks to access the state of the saved search in React components:
+ * There are 2 hooks to access the state of the discover view in React components:
  * - useSavedSearch for the current state, that's updated on every relevant state change
- * - useSavedSearchInitial for the persisted or initial state, just updated when the saved search is peristed or loaded
+ * - useSavedSearchInitial for the persisted or initial state, just updated when the discover view is peristed or loaded
  */
 export interface DiscoverSavedSearchContainer {
   /**
-   * Get an BehaviorSubject which contains the current state of the current saved search
+   * Get an BehaviorSubject which contains the current state of the current discover view
    * All modifications are applied to this state
    */
   getCurrent$: () => BehaviorSubject<SavedSearch>;
   /**
-   * Get the id of the current saved search
+   * Get the id of the current discover view
    */
   getId: () => string | undefined;
   /**
-   * Get an BehaviorSubject which contains the initial state of the current saved search
-   * This is set when a saved search is loaded or a new saved search is initialized
+   * Get an BehaviorSubject which contains the initial state of the current discover view
+   * This is set when a discover view is loaded or a new discover view is initialized
    */
   getInitial$: () => BehaviorSubject<SavedSearch>;
   /**
-   * Get the title of the current saved search
+   * Get the title of the current discover view
    */
   getTitle: () => string | undefined;
   /**
-   * Get an BehaviorSubject containing the state if there have been changes to the initial state of the saved search
-   * Can be used to track if the saved search has been modified and displayed in the UI
+   * Get an BehaviorSubject containing the state if there have been changes to the initial state of the discover view
+   * Can be used to track if the discover view has been modified and displayed in the UI
    */
   getHasChanged$: () => BehaviorSubject<boolean>;
   /**
-   * Get the current state of the saved search
+   * Get the current state of the discover view
    */
   getState: () => SavedSearch;
   /**
-   * Load a saved search by the given id
-   * Resets the initial and current state of the saved search
+   * Load a discover view by the given id
+   * Resets the initial and current state of the discover view
    * @param id
    * @param dataView
    */
   load: (id: string, dataView?: DataView) => Promise<SavedSearch>;
   /**
-   * Initialize a new saved search
-   * Resets the initial and current state of the saved search
+   * Initialize a new discover view
+   * Resets the initial and current state of the discover view
    * @param dataView
    */
   new: (dataView?: DataView) => Promise<SavedSearch>;
   /**
-   * Persist the given saved search
-   * Resets the initial and current state of the saved search
+   * Persist the given discover view
+   * Resets the initial and current state of the discover view
    */
   persist: (
     savedSearch: SavedSearch,
     saveOptions?: SavedObjectSaveOpts
   ) => Promise<{ id: string | undefined } | undefined>;
   /**
-   * Set the persisted & current state of the saved search
-   * Happens when a saved search is loaded or a new one is created
+   * Set the persisted & current state of the discover view
+   * Happens when a discover view is loaded or a new one is created
    * @param savedSearch
    */
   set: (savedSearch: SavedSearch) => SavedSearch;
   /**
-   * Updates the current state of the saved search
+   * Updates the current state of the discover view
    * @param params
    */
   update: (params: UpdateParams) => SavedSearch;
@@ -225,7 +225,7 @@ export function getSavedSearchContainer({
 }
 
 /**
- * Copies a saved search object, due to the stateful nature of searchSource it has to be copied with a dedicated function
+ * Copies a discover view object, due to the stateful nature of searchSource it has to be copied with a dedicated function
  * @param savedSearch
  */
 export function copySavedSearch(savedSearch: SavedSearch): SavedSearch {
@@ -254,7 +254,7 @@ export function isEqualSavedSearch(savedSearchPrev: SavedSearch, savedSearchNext
     ...Object.keys(nextSavedSearchWithoutSearchSource),
   ] as Array<keyof Omit<SavedSearch, 'searchSource'>>);
 
-  // at least one change in saved search attributes
+  // at least one change in discover view attributes
   const hasChangesInSavedSearch = [...keys].some((key) => {
     if (
       ['usesAdHocDataView', 'hideChart'].includes(key) &&

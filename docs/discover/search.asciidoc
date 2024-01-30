@@ -93,9 +93,9 @@ status:[400 TO 499] AND (extension:php OR extension:html)
 
 [[save-open-search]]
 === Save a search
-A saved search persists your current view of Discover for later retrieval and reuse. You can reload a saved search into Discover, add it to a dashboard, and use it as the basis for a visualization.
+A discover view persists your current view of Discover for later retrieval and reuse. You can reload a discover view into Discover, add it to a dashboard, and use it as the basis for a visualization.
 
-A saved search includes the query text, filters, and optionally, the time filter. A saved search also includes the selected columns in the document table, the sort order, and the current index pattern.
+A discover view includes the query text, filters, and optionally, the time filter. A discover view also includes the selected columns in the document table, the sort order, and the current index pattern.
 
 [role="xpack"]
 [[discover-read-only-access]]
@@ -113,18 +113,18 @@ To save the current search:
 . Click *Save* in the toolbar.
 . Enter a name for the search and click *Save*.
 
-To import, export, and delete saved searches, open the main menu,
+To import, export, and delete discover viewes, open the main menu,
 then click *Stack Management > Saved Objects*.
 
-==== Open a saved search
-To load a saved search into Discover:
+==== Open a discover view
+To load a discover view into Discover:
 
 . Click *Open* in the toolbar.
 . Select the search you want to open.
 
-If the saved search is associated with a different index pattern than is currently
-selected, opening the saved search changes the selected index pattern. The query language
-used for the saved search will also be automatically selected.
+If the discover view is associated with a different index pattern than is currently
+selected, opening the discover view changes the selected index pattern. The query language
+used for the discover view will also be automatically selected.
 
 [[save-load-delete-query]]
 === Save a query
@@ -134,7 +134,7 @@ A saved query is a portable collection of query text and filters that you can re
 * View the results of the same query in multiple apps
 * Share your query
 
-Saved queries don't include information specific to Discover, such as the currently selected columns in the document table, the sort order, and the index pattern. If you want to save your current view of Discover for later retrieval and reuse, create a <<save-open-search, saved search>> instead.
+Saved queries don't include information specific to Discover, such as the currently selected columns in the document table, the sort order, and the index pattern. If you want to save your current view of Discover for later retrieval and reuse, create a <<save-open-search, discover view>> instead.
 
 [role="xpack"]
 ==== Read-only access

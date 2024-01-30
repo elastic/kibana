@@ -51,7 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('add a saved search', async () => {
+    it('add a discover view', async () => {
       await dashboardAddPanel.addSavedSearch('[Flights] Flight Log');
       await a11y.testAppSnapshot();
     });

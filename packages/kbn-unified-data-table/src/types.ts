@@ -13,7 +13,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 /**
- * User configurable state of data grid, persisted in saved search
+ * User configurable state of data grid, persisted in discover view
  */
 export interface UnifiedDataTableSettings {
   columns?: Record<string, UnifiedDataTableSettingsColumn>;

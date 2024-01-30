@@ -33,7 +33,7 @@ function normalizeFilter(savedSearchFilterTmp?: FilterResponse) {
 }
 
 /*
- * Combine the time range filter from the job request body with any filters that have been saved into the saved search object
+ * Combine the time range filter from the job request body with any filters that have been saved into the discover view object
  * NOTE: if the filters that were saved into the search are NOT an array, it may be a function, and can not be supported.
  */
 const getFilters = (
@@ -82,7 +82,7 @@ const getFilters = (
 };
 
 /*
- * Pick the query from the job request body vs any query that has been saved into the saved search object.
+ * Pick the query from the job request body vs any query that has been saved into the discover view object.
  */
 const getQuery = (searchSource: SearchSource, params: DiscoverAppLocatorParams) => {
   let query: Query | AggregateQuery | undefined;

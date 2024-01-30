@@ -17,7 +17,7 @@ describe('saved_searches_utils', () => {
     test('should convert attributes into SavedSearch', () => {
       const attributes: SavedSearchAttributes = {
         kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
-        title: 'saved search',
+        title: 'discover view',
         sort: [],
         columns: ['a', 'b'],
         description: 'foo',
@@ -87,7 +87,7 @@ describe('saved_searches_utils', () => {
           ],
           "timeRange": undefined,
           "timeRestore": undefined,
-          "title": "saved search",
+          "title": "discover view",
           "usesAdHocDataView": false,
           "viewMode": undefined,
         }

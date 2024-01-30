@@ -159,7 +159,7 @@ export interface EditorRenderProps {
   uiState: PersistedState;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   /**
-   * Flag to determine if visualiztion is linked to the saved search
+   * Flag to determine if visualiztion is linked to the discover view
    */
   linked: boolean;
 }

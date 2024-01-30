@@ -36,7 +36,7 @@ const localStorage = new Storage(window.localStorage);
 export interface DataDriftDetectionAppStateProps {
   /** The data view to analyze. */
   dataView: DataView;
-  /** The saved search to analyze. */
+  /** The discover view to analyze. */
   savedSearch: SavedSearch | null;
 }
 
@@ -57,7 +57,7 @@ export const DataDriftDetectionAppState: FC<DataDriftDetectionAppStateProps> = (
   savedSearch,
 }) => {
   if (!(dataView || savedSearch)) {
-    throw Error('No data view or saved search available.');
+    throw Error('No data view or discover view available.');
   }
 
   const coreStart = getCoreStart();

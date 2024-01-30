@@ -30,7 +30,7 @@ export const getColumns = async (
     services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE),
   ]);
 
-  // Add/adjust columns from the saved search attributes and UI Settings
+  // Add/adjust columns from the discover view attributes and UI Settings
   let columns: string[] | undefined;
   let columnsNext: string[] | undefined;
   let timeFieldName: string | undefined;

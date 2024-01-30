@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export const farequoteKQLFiltersSearchTestData = {
-  suiteTitle: 'KQL saved search and filters',
+  suiteTitle: 'KQL discover view and filters',
   isSavedSearch: true,
   dateTimeField: '@timestamp',
   sourceIndexOrSavedSearch: 'ft_farequote_filter_and_kuery',
@@ -121,7 +121,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it(`${farequoteKQLFiltersSearchTestData.suiteTitle} loads the source data in data drift`, async () => {
         await ml.testExecution.logTestStep(
-          `${farequoteKQLFiltersSearchTestData.suiteTitle} loads the data drift index or saved search select page`
+          `${farequoteKQLFiltersSearchTestData.suiteTitle} loads the data drift index or discover view select page`
         );
         await ml.navigation.navigateToDataDrift();
 
@@ -154,7 +154,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await ml.navigation.navigateToMl();
         await elasticChart.setNewChartUiDebugFlag(true);
         await ml.testExecution.logTestStep(
-          `${dataViewCreationTestData.suiteTitle} loads the saved search selection page`
+          `${dataViewCreationTestData.suiteTitle} loads the discover view selection page`
         );
         await ml.navigation.navigateToDataDrift();
       });

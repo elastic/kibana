@@ -1806,7 +1806,7 @@
         "tags": [],
         "label": "UnifiedDataTableSettings",
         "description": [
-          "\nUser configurable state of data grid, persisted in saved search"
+          "\nUser configurable state of data grid, persisted in discover view"
         ],
         "path": "packages/kbn-unified-data-table/src/types.ts",
         "deprecated": false,

@@ -50,7 +50,7 @@ image::images/search-session-awhile.png[Search Session indicator displaying the 
 Once you save a search session, you can start a new search,
 navigate to a different application, or close the browser.
 
-. To view your saved searches, open the main menu, and then click
+. To view your discover viewes, open the main menu, and then click
 *Stack Management > Search Sessions*.
 For a saved or completed session, you can also open this view from the search sessions popup.
 

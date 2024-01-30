@@ -24,8 +24,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'visChart',
   ]);
 
-  describe('saved search visualizations from visualize app', function describeIndexTests() {
-    describe('linked saved searched', () => {
+  describe('discover view visualizations from visualize app', function describeIndexTests() {
+    describe('linked discover viewed', () => {
       const savedSearchName = 'vis_saved_search';
       let discoverSavedSearchUrlPath: string;
 
@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.unsetTime();
       });
 
-      it('should create a visualization from a saved search', async () => {
+      it('should create a visualization from a discover view', async () => {
         await PageObjects.visualize.navigateToNewAggBasedVisualization();
         await PageObjects.visualize.clickDataTable();
         await PageObjects.visualize.clickSavedSearch(savedSearchName);
@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('should have a valid link to the saved search from the visualization', async () => {
+      it('should have a valid link to the discover view from the visualization', async () => {
         await testSubjects.click('showUnlinkSavedSearchPopover');
         await testSubjects.click('viewSavedSearch');
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
       });
 
-      it('should respect the time filter when linked to a saved search', async () => {
+      it('should respect the time filter when linked to a discover view', async () => {
         await PageObjects.timePicker.setAbsoluteRange(
           'Sep 19, 2015 @ 06:31:44.000',
           'Sep 21, 2015 @ 10:00:00.000'
@@ -82,7 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('should allow adding filters while having a linked saved search', async () => {
+      it('should allow adding filters while having a linked discover view', async () => {
         await filterBar.addFilter({
           field: 'bytes',
           operation: 'is between',
@@ -101,11 +101,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const data = await PageObjects.visChart.getTableVisContent();
           return data[0][0] === '707';
         });
-        // The filter on the saved search should now be in the editor
+        // The filter on the discover view should now be in the editor
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
 
         // Disabling this filter should now result in different values, since
-        // the visualization should not be linked anymore with the saved search.
+        // the visualization should not be linked anymore with the discover view.
         await filterBar.toggleFilterEnabled('extension.raw');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.waitFor('wait for count to equal 1,293', async () => {

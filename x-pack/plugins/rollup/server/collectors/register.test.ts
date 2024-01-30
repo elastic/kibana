@@ -39,7 +39,7 @@ describe('registerRollupUsageCollector', () => {
           total: {
             type: 'long',
             _meta: {
-              description: 'Counts all the rollup saved searches',
+              description: 'Counts all the rollup discover viewes',
             },
           },
         },
@@ -49,14 +49,14 @@ describe('registerRollupUsageCollector', () => {
               type: 'long',
               _meta: {
                 description:
-                  'Counts all the visualizations that are based on rollup saved searches',
+                  'Counts all the visualizations that are based on rollup discover viewes',
               },
             },
             lens_total: {
               type: 'long',
               _meta: {
                 description:
-                  'Counts all the lens visualizations that are based on rollup saved searches',
+                  'Counts all the lens visualizations that are based on rollup discover viewes',
               },
             },
           },

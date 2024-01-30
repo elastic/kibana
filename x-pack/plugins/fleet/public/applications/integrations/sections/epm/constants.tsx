@@ -48,7 +48,7 @@ export const AssetTitleMap: Record<DisplayedAssetType, string> = {
     defaultMessage: 'Component templates',
   }),
   search: i18n.translate('xpack.fleet.epm.assetTitles.savedSearches', {
-    defaultMessage: 'Saved searches',
+    defaultMessage: 'Discover view',
   }),
   visualization: i18n.translate('xpack.fleet.epm.assetTitles.visualizations', {
     defaultMessage: 'Visualizations',

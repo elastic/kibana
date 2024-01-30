@@ -20,7 +20,7 @@ import { useMlKibana } from '../../../../../contexts/kibana';
 import { useDataSource } from '../../../../../contexts/ml';
 
 // `undefined` is used for a non-initialized state
-// `null` is set if no saved search is used
+// `null` is set if no discover view is used
 export type SavedSearchQuery = Record<string, any> | null | undefined;
 export type SavedSearchQueryStr =
   | string

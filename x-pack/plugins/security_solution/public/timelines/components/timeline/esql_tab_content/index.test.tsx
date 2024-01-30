@@ -29,9 +29,9 @@ describe('Discover Tab Content', () => {
   });
 
   // issue for enabling below tests: https://github.com/elastic/kibana/issues/165913
-  it.skip('should load saved search when a saved timeline is restored', () => {});
+  it.skip('should load discover view when a saved timeline is restored', () => {});
   it.skip('should reset the discover state when new timeline is created', () => {});
-  it.skip('should update saved search if timeline title and description are updated', () => {});
-  it.skip('should should not update saved search if the fetched saved search is same as discover updated saved search', () => {});
-  it.skip('should update saved search if discover time is update', () => {});
+  it.skip('should update discover view if timeline title and description are updated', () => {});
+  it.skip('should should not update discover view if the fetched discover view is same as discover updated discover view', () => {});
+  it.skip('should update discover view if discover time is update', () => {});
 });

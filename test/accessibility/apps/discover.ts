@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('a11y test on load saved search panel', async () => {
+    it('a11y test on load discover view panel', async () => {
       await PageObjects.discover.openLoadSavedSearchPanel();
       await a11y.testAppSnapshot();
       await PageObjects.discover.closeLoadSavedSearchPanel();

@@ -143,7 +143,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.waitForRenderComplete();
     });
 
-    it('adding saved searches', async () => {
+    it('adding discover viewes', async () => {
       const visAndSearchNames = visNames.concat(
         await dashboardAddPanel.addEverySavedSearch('"Rendering Test"')
       );

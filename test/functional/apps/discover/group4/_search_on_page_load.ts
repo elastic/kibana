@@ -141,7 +141,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await PageObjects.unifiedFieldList.doesSidebarShowFields()).to.be(true);
       });
 
-      it('should reset state after opening a saved search and pressing New', async function () {
+      it('should reset state after opening a discover view and pressing New', async function () {
         await PageObjects.discover.loadSavedSearch(savedSearchName);
         await PageObjects.header.waitUntilLoadingHasFinished();
 

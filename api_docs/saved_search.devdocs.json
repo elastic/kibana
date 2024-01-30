@@ -424,7 +424,7 @@
       "tags": [],
       "label": "SavedSearchPublicPluginStart",
       "description": [
-        "\nSaved search plugin public Setup contract"
+        "\nDiscover view plugin public Setup contract"
       ],
       "path": "src/plugins/saved_search/public/plugin.ts",
       "deprecated": false,

@@ -441,7 +441,7 @@
       ]
     ],
     "timeRestore": false,
-    "title": "A saved search with match_phrase filter and no columns selected",
+    "title": "A discover view with match_phrase filter and no columns selected",
     "usesAdHocDataView": false
   },
   "coreMigrationVersion": "8.7.0",
@@ -496,7 +496,7 @@
       "to": "2015-11-01T01:39:01.782Z"
     },
     "timeRestore": true,
-    "title": "A saved search with the time stored and a query",
+    "title": "A discover view with the time stored and a query",
     "usesAdHocDataView": false
   },
   "coreMigrationVersion": "8.7.0",
@@ -538,7 +538,7 @@
       ]
     ],
     "timeRestore": false,
-    "title": "A saved search with a query",
+    "title": "A discover view with a query",
     "usesAdHocDataView": false
   },
   "coreMigrationVersion": "8.7.0",

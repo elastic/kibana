@@ -44,7 +44,7 @@ describe('getSavedSearch', () => {
     );
   });
 
-  test('should find saved search', async () => {
+  test('should find discover view', async () => {
     getSavedSrch = jest.fn().mockReturnValue({
       item: {
         attributes: {
@@ -151,7 +151,7 @@ describe('getSavedSearch', () => {
     `);
   });
 
-  test('should find saved search with sql mode', async () => {
+  test('should find discover view with sql mode', async () => {
     getSavedSrch = jest.fn().mockReturnValue({
       item: {
         attributes: {

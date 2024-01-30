@@ -8,7 +8,7 @@
 experimental[] Copy saved objects between spaces.
 
 It also allows you to automatically copy related objects, so when you copy a `dashboard`, this can automatically copy over the
-associated visualizations, {data-sources}, and saved searches, as required.
+associated visualizations, {data-sources}, and discover viewes, as required.
 
 You can request to overwrite any objects that already exist in the target space if they share an ID, or you can use the
 <<spaces-api-resolve-copy-saved-objects-conflicts, Resolve copy saved objects conflicts API>> to do this on a per-object basis.

@@ -104,7 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await renderable.waitForRender();
         log.debug('Checking charts rendered');
         await elasticChart.waitForRenderComplete('xyVisChart');
-        log.debug('Checking saved searches rendered');
+        log.debug('Checking discover viewes rendered');
         await dashboardExpect.savedSearchRowCount(10);
         log.debug('Checking input controls rendered');
         await dashboardExpect.controlCount(3);

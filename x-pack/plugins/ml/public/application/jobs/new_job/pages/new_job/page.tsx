@@ -146,8 +146,8 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     }
 
     if (dataSourceContext.selectedSavedSearch !== null) {
-      // Jobs created from saved searches cannot be cloned in the wizard as the
-      // ML job config holds no reference to the saved search ID.
+      // Jobs created from discover viewes cannot be cloned in the wizard as the
+      // ML job config holds no reference to the discover view ID.
       jobCreator.createdBy = null;
     }
 

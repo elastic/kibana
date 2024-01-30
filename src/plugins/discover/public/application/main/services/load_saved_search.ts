@@ -34,7 +34,7 @@ interface LoadSavedSearchDeps {
 }
 
 /**
- * Loading persisted saved searches or existing ones and updating services accordingly
+ * Loading persisted discover viewes or existing ones and updating services accordingly
  * @param params
  * @param deps
  */
@@ -48,7 +48,7 @@ export const loadSavedSearch = async (
   const appStateExists = !appStateContainer.isEmptyURL();
   const appState = appStateExists ? appStateContainer.getState() : undefined;
 
-  // Loading the saved search or creating a new one
+  // Loading the discover view or creating a new one
   let nextSavedSearch = savedSearchId
     ? await savedSearchContainer.load(savedSearchId)
     : await savedSearchContainer.new(
@@ -59,17 +59,17 @@ export const loadSavedSearch = async (
   services.filterManager.setAppFilters([]);
   services.data.query.queryString.clearQuery();
 
-  // reset appState in case a saved search with id is loaded and
-  // the url is empty so the saved search is loaded in a clean
+  // reset appState in case a discover view with id is loaded and
+  // the url is empty so the discover view is loaded in a clean
   // state else it might be updated by the previous app state
   if (!appStateExists) {
     appStateContainer.set({});
   }
 
-  // Update saved search by a given app state (in URL)
+  // Update discover view by a given app state (in URL)
   if (appState) {
     if (savedSearchId && appState.index) {
-      // This is for the case appState is overwriting the loaded saved search data view
+      // This is for the case appState is overwriting the loaded discover view data view
       const savedSearchDataViewId = nextSavedSearch.searchSource.getField('index')?.id;
       const stateDataView = await getStateDataView(params, {
         services,
@@ -88,7 +88,7 @@ export const loadSavedSearch = async (
     });
   }
 
-  // Update app state container with the next state derived from the next saved search
+  // Update app state container with the next state derived from the next discover view
   const nextAppState = getInitialState(undefined, nextSavedSearch, services);
   const mergedAppState = appState
     ? { ...nextAppState, ...cleanupUrlState({ ...appState }, services.uiSettings) }
@@ -96,14 +96,14 @@ export const loadSavedSearch = async (
 
   appStateContainer.resetToState(mergedAppState);
 
-  // Update all other services and state containers by the next saved search
+  // Update all other services and state containers by the next discover view
   updateBySavedSearch(nextSavedSearch, deps);
 
   return nextSavedSearch;
 };
 
 /**
- * Update services and state containers based on the given saved search
+ * Update services and state containers based on the given discover view
  * @param savedSearch
  * @param deps
  */
@@ -140,7 +140,7 @@ function updateBySavedSearch(savedSearch: SavedSearch, deps: LoadSavedSearchDeps
 // Get the data view to actually use. There are several conditions to consider which data view is used
 // 1. If a data view is passed in, use that
 // 2. If an appState with index set is passed in, use the data view from that
-// 3. If a saved search is passed in, use the data view from that
+// 3. If a discover view is passed in, use the data view from that
 // And provide a fallback data view if 2. or 3. don't exist, were deleted or invalid
 const getStateDataView = async (
   params: LoadParams,

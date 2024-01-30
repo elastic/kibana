@@ -21,12 +21,12 @@ describe('DiscoverSavedSearchContainer', () => {
   const globalStateContainer = getDiscoverGlobalStateContainer(createKbnUrlStateStorage());
 
   describe('getTitle', () => {
-    it('returns undefined for new saved searches', () => {
+    it('returns undefined for new discover viewes', () => {
       const container = getSavedSearchContainer({ services, globalStateContainer });
       expect(container.getTitle()).toBe(undefined);
     });
 
-    it('returns the title of a persisted saved searches', () => {
+    it('returns the title of a persisted discover viewes', () => {
       const container = getSavedSearchContainer({ services, globalStateContainer });
       container.set(savedSearch);
       expect(container.getTitle()).toBe(savedSearch.title);
@@ -34,7 +34,7 @@ describe('DiscoverSavedSearchContainer', () => {
   });
 
   describe('set', () => {
-    it('should update the current and initial state of the saved search', () => {
+    it('should update the current and initial state of the discover view', () => {
       const container = getSavedSearchContainer({ services, globalStateContainer });
       const newSavedSearch: SavedSearch = { ...savedSearch, title: 'New title' };
       const result = container.set(newSavedSearch);
@@ -57,7 +57,7 @@ describe('DiscoverSavedSearchContainer', () => {
   });
 
   describe('new', () => {
-    it('should create a new saved search', async () => {
+    it('should create a new discover view', async () => {
       const container = getSavedSearchContainer({ services, globalStateContainer });
       const result = await container.new(dataViewMock);
 
@@ -70,7 +70,7 @@ describe('DiscoverSavedSearchContainer', () => {
       );
     });
 
-    it('should create a new saved search with provided DataView', async () => {
+    it('should create a new discover view with provided DataView', async () => {
       const container = getSavedSearchContainer({ services, globalStateContainer });
       const result = await container.new(dataViewMock);
       expect(result.title).toBeUndefined();
@@ -86,7 +86,7 @@ describe('DiscoverSavedSearchContainer', () => {
       .mockReturnValue(savedSearchMock.searchSource);
     discoverServiceMock.savedSearch.get = jest.fn().mockReturnValue(savedSearchMock);
 
-    it('loads a saved search', async () => {
+    it('loads a discover view', async () => {
       const savedSearchContainer = getSavedSearchContainer({
         services: discoverServiceMock,
         globalStateContainer,
@@ -101,14 +101,14 @@ describe('DiscoverSavedSearchContainer', () => {
   describe('persist', () => {
     const saveOptions = { confirmOverwrite: false };
 
-    it('calls saveSavedSearch with the given saved search and save options', async () => {
+    it('calls saveSavedSearch with the given discover view and save options', async () => {
       const savedSearchContainer = getSavedSearchContainer({
         services: discoverServiceMock,
         globalStateContainer,
       });
       const savedSearchToPersist = {
         ...savedSearchMockWithTimeField,
-        title: 'My updated saved search',
+        title: 'My updated discover view',
       };
 
       await savedSearchContainer.persist(savedSearchToPersist, saveOptions);
@@ -118,8 +118,8 @@ describe('DiscoverSavedSearchContainer', () => {
       );
     });
 
-    it('sets the initial and current saved search to the persisted saved search', async () => {
-      const title = 'My updated saved search';
+    it('sets the initial and current discover view to the persisted discover view', async () => {
+      const title = 'My updated discover view';
       const persistedSavedSearch = {
         ...savedSearch,
         title,
@@ -145,7 +145,7 @@ describe('DiscoverSavedSearchContainer', () => {
       });
       const savedSearchToPersist = {
         ...savedSearchMockWithTimeField,
-        title: 'My updated saved search',
+        title: 'My updated discover view',
       };
 
       await savedSearchContainer.persist(savedSearchToPersist, saveOptions);
@@ -164,7 +164,7 @@ describe('DiscoverSavedSearchContainer', () => {
       });
       const savedSearchToPersist = {
         ...savedSearchMockWithTimeField,
-        title: 'My updated saved search',
+        title: 'My updated discover view',
         timeRestore: true,
       };
       await savedSearchContainer.persist(savedSearchToPersist, saveOptions);
@@ -177,7 +177,7 @@ describe('DiscoverSavedSearchContainer', () => {
       });
     });
 
-    it('Error thrown on persistence layer bubbling up, no changes to the initial saved search ', async () => {
+    it('Error thrown on persistence layer bubbling up, no changes to the initial discover view ', async () => {
       discoverServiceMock.savedSearch.save = jest.fn().mockImplementation(() => {
         throw new Error('oh-noes');
       });
@@ -196,13 +196,13 @@ describe('DiscoverSavedSearchContainer', () => {
       }
       expect(savedSearchContainer.getHasChanged$().getValue()).toBe(true);
       expect(savedSearchContainer.getInitial$().getValue().title).not.toBe(
-        'My updated saved search'
+        'My updated discover view'
       );
     });
   });
 
   describe('update', () => {
-    it('updates a saved search by app state providing hideChart', async () => {
+    it('updates a discover view by app state providing hideChart', async () => {
       const savedSearchContainer = getSavedSearchContainer({
         services: discoverServiceMock,
         globalStateContainer,
@@ -217,7 +217,7 @@ describe('DiscoverSavedSearchContainer', () => {
       savedSearchContainer.update({ nextState: { hideChart: true } });
       expect(savedSearchContainer.getHasChanged$().getValue()).toBe(false);
     });
-    it('updates a saved search by data view', async () => {
+    it('updates a discover view by data view', async () => {
       const savedSearchContainer = getSavedSearchContainer({
         services: discoverServiceMock,
         globalStateContainer,

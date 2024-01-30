@@ -246,7 +246,7 @@ describe('useSavedVisInstance', () => {
       expect(toastNotifications.addWarning).toHaveBeenCalled();
     });
 
-    test("should throw error if index pattern or saved search id doesn't exist in search params", async () => {
+    test("should throw error if index pattern or discover view id doesn't exist in search params", async () => {
       mockServices.history.location = {
         ...mockServices.history.location,
         search: '?type=area',

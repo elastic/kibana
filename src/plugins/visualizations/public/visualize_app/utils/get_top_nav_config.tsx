@@ -301,7 +301,7 @@ export const getTopNavConfig = (
               },
             }),
             run: async () => {
-              // lens doesn't support saved searches, should unlink before transition
+              // lens doesn't support discover viewes, should unlink before transition
               if (eventEmitter && visInstance.vis.data.savedSearchId) {
                 eventEmitter.emit('unlinkFromSavedSearch', false);
               }

@@ -65,7 +65,7 @@ export const getKibanaContextFn = (
         types: ['string', 'null'],
         default: null,
         help: i18n.translate('savedSearch.kibana_context.savedSearchId.help', {
-          defaultMessage: 'Specify saved search ID to be used for queries and filters',
+          defaultMessage: 'Specify discover view ID to be used for queries and filters',
         }),
       },
     },

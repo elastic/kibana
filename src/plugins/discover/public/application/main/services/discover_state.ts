@@ -79,15 +79,15 @@ interface DiscoverStateContainerParams {
 
 export interface LoadParams {
   /**
-   * the id of the saved search to load, if undefined, a new saved search will be created
+   * the id of the discover view to load, if undefined, a new discover view will be created
    */
   savedSearchId?: string;
   /**
-   * the data view to use, if undefined, the saved search's data view will be used
+   * the data view to use, if undefined, the discover view's data view will be used
    */
   dataView?: DataView;
   /**
-   * the data view spec to use, if undefined, the saved search's data view will be used
+   * the data view spec to use, if undefined, the discover view's data view will be used
    */
   dataViewSpec?: DataViewSpec;
 }
@@ -110,7 +110,7 @@ export interface DiscoverStateContainer {
    */
   internalState: DiscoverInternalStateContainer;
   /**
-   * State of saved search, the saved object of Discover
+   * State of discover view, the saved object of Discover
    */
   savedSearchState: DiscoverSavedSearchContainer;
   /**
@@ -131,7 +131,7 @@ export interface DiscoverStateContainer {
   actions: {
     /**
      * Triggers fetching of new data from Elasticsearch
-     * If initial is true, when SEARCH_ON_PAGE_LOAD_SETTING is set to false and it's a new saved search no fetch is triggered
+     * If initial is true, when SEARCH_ON_PAGE_LOAD_SETTING is set to false and it's a new discover view no fetch is triggered
      * @param initial
      */
     fetchData: (initial?: boolean) => void;
@@ -144,8 +144,8 @@ export interface DiscoverStateContainer {
      */
     loadDataViewList: () => Promise<void>;
     /**
-     * Load a saved search by id or create a new one that's not persisted yet
-     * @param LoadParams - optional parameters to load a saved search
+     * Load a discover view by id or create a new one that's not persisted yet
+     * @param LoadParams - optional parameters to load a discover view
      */
     loadSavedSearch: (param?: LoadParams) => Promise<SavedSearch | undefined>;
     /**
@@ -165,7 +165,7 @@ export interface DiscoverStateContainer {
      */
     onDataViewEdited: (dataView: DataView) => Promise<void>;
     /**
-     * Triggered when a saved search is opened in the savedObject finder
+     * Triggered when a discover view is opened in the savedObject finder
      * @param savedSearchId
      */
     onOpenSavedSearch: (savedSearchId: string) => void;
@@ -189,11 +189,11 @@ export interface DiscoverStateContainer {
      */
     setDataView: (dataView: DataView) => void;
     /**
-     * Undo changes made to the saved search, e.g. when the user triggers the "Reset search" button
+     * Undo changes made to the discover view, e.g. when the user triggers the "Reset search" button
      */
     undoSavedSearchChanges: () => Promise<SavedSearch>;
     /**
-     * When saving a saved search with an ad hoc data view, a new id needs to be generated for the data view
+     * When saving a discover view with an ad hoc data view, a new id needs to be generated for the data view
      * This is to prevent duplicate ids messing with our system
      */
     updateAdHocDataViewId: () => Promise<DataView | undefined>;
@@ -292,7 +292,7 @@ export function getDiscoverStateContainer({
   };
 
   /**
-   * When saving a saved search with an ad hoc data view, a new id needs to be generated for the data view
+   * When saving a discover view with an ad hoc data view, a new id needs to be generated for the data view
    * This is to prevent duplicate ids messing with our system
    */
   const updateAdHocDataViewId = async () => {
@@ -315,7 +315,7 @@ export function getDiscoverStateContainer({
     addLog('[discoverState] onOpenSavedSearch', newSavedSearchId);
     const currentSavedSearch = savedSearchContainer.getState();
     if (currentSavedSearch.id && currentSavedSearch.id === newSavedSearchId) {
-      addLog('[discoverState] undo changes since saved search did not change');
+      addLog('[discoverState] undo changes since discover view did not change');
       await undoSavedSearchChanges();
     } else {
       addLog('[discoverState] onOpenSavedSearch open view URL');
@@ -383,7 +383,7 @@ export function getDiscoverStateContainer({
     // start subscribing to dataStateContainer, triggering data fetching
     const unsubscribeData = dataStateContainer.subscribe();
 
-    // updates saved search when query or filters change, triggers data fetching
+    // updates discover view when query or filters change, triggers data fetching
     const filterUnsubscribe = merge(services.filterManager.getFetches$()).subscribe(() => {
       savedSearchContainer.update({
         nextDataView: internalStateContainer.getState().dataView,
@@ -455,7 +455,7 @@ export function getDiscoverStateContainer({
     });
   };
   /**
-   * Undo all changes to the current saved search
+   * Undo all changes to the current discover view
    */
   const undoSavedSearchChanges = async () => {
     addLog('undoSavedSearchChanges');
@@ -467,7 +467,7 @@ export function getDiscoverStateContainer({
     });
     const newAppState = getDefaultAppState(nextSavedSearch, services);
 
-    // a saved search can't have global (pinned) filters so we can reset global filters state
+    // a discover view can't have global (pinned) filters so we can reset global filters state
     const globalFilters = globalStateContainer.get()?.filters;
     if (globalFilters) {
       await globalStateContainer.set({

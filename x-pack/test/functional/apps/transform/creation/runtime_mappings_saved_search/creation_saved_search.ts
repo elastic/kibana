@@ -39,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
     const testDataList: Array<PivotTransformTestData | LatestTransformTestData> = [
       {
         type: 'pivot',
-        suiteTitle: 'batch transform with terms groups and avg agg with saved search filter',
+        suiteTitle: 'batch transform with terms groups and avg agg with discover view filter',
         source: 'ft_farequote_filter',
         groupByEntries: [
           {
@@ -55,7 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
         ],
         transformId: `fq_1_${Date.now()}`,
         transformDescription:
-          'farequote batch transform with groups terms(airline) and aggregation avg(responsetime.avg) with saved search filter',
+          'farequote batch transform with groups terms(airline) and aggregation avg(responsetime.avg) with discover view filter',
         get destinationIndex(): string {
           return `user-${this.transformId}`;
         },
@@ -79,7 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
       } as PivotTransformTestData,
       {
         type: 'latest',
-        suiteTitle: 'batch transform with unique term and sort by time with saved search filter',
+        suiteTitle: 'batch transform with unique term and sort by time with discover view filter',
         source: 'ft_farequote_filter',
         uniqueKeys: [
           {
@@ -93,7 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
         transformId: `fq_2_${Date.now()}`,
         transformDescription:
-          'farequote batch transform with airline unique key and sort by timestamp with saved search filter',
+          'farequote batch transform with airline unique key and sort by timestamp with discover view filter',
         get destinationIndex(): string {
           return `user-latest-${this.transformId}`;
         },

@@ -36,7 +36,7 @@ export interface DataSourceContextProviderProps {
 }
 
 /**
- * Context provider that resolves current data view and the saved search
+ * Context provider that resolves current data view and the discover view
  *
  * @param children
  * @constructor
@@ -57,7 +57,7 @@ export const DataSourceContextProvider: FC<DataSourceContextProviderProps> = ({
   } = useAiopsAppContext();
 
   /**
-   * Resolve data view or saved search if exists.
+   * Resolve data view or discover view if exists.
    */
   const resolveDataSource = useCallback(async (): Promise<DataViewAndSavedSearch> => {
     const dataViewAndSavedSearch: DataViewAndSavedSearch = {
@@ -104,7 +104,7 @@ export const DataSourceContextProvider: FC<DataSourceContextProviderProps> = ({
           <h2>
             <FormattedMessage
               id="xpack.aiops.dataSourceContext.errorTitle"
-              defaultMessage="Unable to fetch data view or saved search"
+              defaultMessage="Unable to fetch data view or discover view"
             />
           </h2>
         }

@@ -35,14 +35,14 @@ const embeddableConfig = {
   executeTriggerActions,
 };
 
-describe('view saved search action', () => {
-  it('is compatible when embeddable is of type saved search, in view mode && appropriate permissions are set', async () => {
+describe('view discover view action', () => {
+  it('is compatible when embeddable is of type discover view, in view mode && appropriate permissions are set', async () => {
     const action = new ViewSavedSearchAction(applicationMock, services.locator);
     const embeddable = new SavedSearchEmbeddable(embeddableConfig, searchInput);
     expect(await action.isCompatible({ embeddable, trigger })).toBe(true);
   });
 
-  it('is not compatible when embeddable not of type saved search', async () => {
+  it('is not compatible when embeddable not of type discover view', async () => {
     const action = new ViewSavedSearchAction(applicationMock, services.locator);
     const embeddable = new ContactCardEmbeddable(
       {
@@ -74,7 +74,7 @@ describe('view saved search action', () => {
     ).toBe(false);
   });
 
-  it('execute navigates to a saved search', async () => {
+  it('execute navigates to a discover view', async () => {
     const action = new ViewSavedSearchAction(applicationMock, services.locator);
     const embeddable = new SavedSearchEmbeddable(embeddableConfig, searchInput);
     await new Promise((resolve) => setTimeout(resolve, 0));

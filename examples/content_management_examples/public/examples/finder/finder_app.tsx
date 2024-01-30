@@ -35,7 +35,7 @@ export const FinderApp = (props: {
             {
               type: `search`,
               getIconForSavedObject: () => 'discoverApp',
-              name: 'Saved search',
+              name: 'Discover view',
             },
             {
               type: 'index-pattern',

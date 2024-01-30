@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.discover.isChartVisible()).to.be(false);
     });
 
-    it('persists hidden chart option on the saved search ', async function () {
+    it('persists hidden chart option on the discover view ', async function () {
       const savedSearchTitle = 'chart hidden';
       await PageObjects.discover.saveSearch(savedSearchTitle);
 

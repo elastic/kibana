@@ -180,8 +180,8 @@ Discover::
 * Improves search for field names by handling spaces like wildcards ({kibana-pull}168381[#168381]).
 * Updates mapping conflict popover with types list ({kibana-pull}169855[#169855]).
 * On search source error, show 'view details' action that opens request in inspector ({kibana-pull}170790[#170790]).
-* Adds an Unsaved changes label when in an unsaved state of saved search ({kibana-pull}169548[#169548]).
-* Allows changing the current sample size and saving it with a saved search ({kibana-pull}157269[#157269]).
+* Adds an Unsaved changes label when in an unsaved state of discover view ({kibana-pull}169548[#169548]).
+* Allows changing the current sample size and saving it with a discover view ({kibana-pull}157269[#157269]).
 * Adds new sparse vector and dense vector icons ({kibana-pull}169493[#169493]).
 * Adds `sparse_vector` field support ({kibana-pull}168186[#168186]).
 Elastic Security::
@@ -621,12 +621,12 @@ Machine Learning::
 * Trained model testing: only show indices with supported fields ({kibana-pull}166490[#166490]).
 * Alerts as data integration for Anomaly Detection rule type ({kibana-pull}166349[#166349]).
 * Data Frame Analytics Trained models: adds the ability to reindex after pipeline creation ({kibana-pull}166312[#166312]).
-* Adds Create a data view button to index or saved search selector in ML pages and Transforms management ({kibana-pull}166668[#166668]).
+* Adds Create a data view button to index or discover view selector in ML pages and Transforms management ({kibana-pull}166668[#166668]).
 * Improvements to UX of adding ML embeddables to a dashboard ({kibana-pull}165714[#165714]).
 * AIOps: Supports text fields in log rate analysis ({kibana-pull}165124[#165124]).
 * Data Frame Analytics creation wizard: adds ability to add custom URLs to jobs ({kibana-pull}164520[#164520]).
 Management::
-* Adds Create a data view button to index or saved search selector in ML pages and Transforms management ({kibana-pull}166668[#166668]).
+* Adds Create a data view button to index or discover view selector in ML pages and Transforms management ({kibana-pull}166668[#166668]).
 * Improve loading behavior of Transforms list if stats request is slow or is not available ({kibana-pull}166320[#166320]).
 * Adds support for PATCH requests in Console ({kibana-pull}165634[#165634]).
 * Improves autocomplete to suggest knn in search query ({kibana-pull}165531[#165531]).
@@ -740,7 +740,7 @@ For the Elastic Security 8.10.3 release information, refer to {security-guide}/r
 Dashboard::
 * Fixes an error the panel descriptions weren't retrieved from the right method ({kibana-pull}166825[#166825]).
 Discover::
-* Soften saved search content management response `sort` schema ({kibana-pull}166886[#166886]).
+* Soften discover view content management response `sort` schema ({kibana-pull}166886[#166886]).
 Elastic Security::
 For the Elastic Security 8.10.3 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Enterprise Search::
@@ -750,7 +750,7 @@ Fleet::
 * Increase package install max timeout limit and add concurrency control to rollovers ({kibana-pull}166775[#166775]).
 * Fixes bulk action dropdown ({kibana-pull}166475[#166475]).
 Machine Learning::
-* AIOps: Fixes render loop when using a saved search ({kibana-pull}166934[#166934]).
+* AIOps: Fixes render loop when using a discover view ({kibana-pull}166934[#166934]).
 Monitoring::
 * Convert node roles into array ({kibana-pull}167628[#167628]).
 Observability::
@@ -2049,7 +2049,7 @@ Discover::
 * Adds the ability to allow wildcards in field search {kibana-pull}155540[#155540]
 * Adds a loading indicator during Discover table updates {kibana-pull}155505[#155505]
 * Adds drag & drop capabilities for adding columns to the table {kibana-pull}153538[#153538]
-* Adds a progress indicator when a saved search embeddable is updating {kibana-pull}152342[#152342]
+* Adds a progress indicator when a discover view embeddable is updating {kibana-pull}152342[#152342]
 * Adds inline data fetching errors {kibana-pull}152311[#152311]
 * Adds a loading indicator for the classic table embeddable {kibana-pull}152072[#152072]
 * Adds the ability to suppress "Missing index" toasts {kibana-pull}149625[#149625]
@@ -2176,7 +2176,7 @@ Discover::
 * Adds the ability to exclude counter fields from Breakdown options {kibana-pull}155532[#155532]
 * Adds the ability to skip requests for the time series metric counter field {kibana-pull}154319[#154319]
 * Fixes KQL autocomplete suggestions, which now support IP-type fields when the `autocomplete:valueSuggestionMethod advanced setting is set to terms_enum {kibana-pull}154111[#154111]
-* Fixes an issue where saved search "Manage searches" button was unable to apply the "search" type filter {kibana-pull}152565[#152565]
+* Fixes an issue where discover view "Manage searches" button was unable to apply the "search" type filter {kibana-pull}152565[#152565]
 
 Elastic Security::
 For the Elastic Security 8.8.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
@@ -2288,7 +2288,7 @@ Dashboard::
 Improves controls flyout performance for data views with a large number of fields {kibana-pull}154004[#154004]
 
 Discover::
-Fixes aborted request handling in the saved search embeddable {kibana-pull}153822[#153822]
+Fixes aborted request handling in the discover view embeddable {kibana-pull}153822[#153822]
 
 Elastic Security::
 For the Elastic Security 8.7.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
@@ -3350,8 +3350,8 @@ APM::
 * AWS lambda metrics api {kibana-pull}139041[#139041]
 
 Discover::
-* Adds support for storing time with saved searches {kibana-pull}138377[#138377]
-* Enables tags for saved searches {kibana-pull}136162[#136162]
+* Adds support for storing time with discover viewes {kibana-pull}138377[#138377]
+* Enables tags for discover viewes {kibana-pull}136162[#136162]
 
 Elastic Security::
 For the Elastic Security 8.5.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
@@ -3521,7 +3521,7 @@ Fixes pinned filters that backed up in Session Storage {kibana-pull}142262[#1422
 Discover::
 * Adds support for line breaks in Document explorer {kibana-pull}139449[#139449]
 * Cancelled request errors for embeddables are now hidden {kibana-pull}137690[#137690]
-* Fixes legacy sort saved search stored in Dashboard saved objects {kibana-pull}137488[#137488]
+* Fixes legacy sort discover view stored in Dashboard saved objects {kibana-pull}137488[#137488]
 * Fixes column width handling {kibana-pull}137445[#137445]
 
 Elastic Security::
@@ -3628,8 +3628,8 @@ Cases::
 Fixes an issue where the recent cases widget shows cases from other solutions {kibana-pull}141221[#141221]
 
 Discover::
-* Fixes scrolling prevented by saved search embeddable on touch devices {kibana-pull}141718[#141718]
-* Fixes columns management for saved search embeddable {kibana-pull}140799[#140799]
+* Fixes scrolling prevented by discover view embeddable on touch devices {kibana-pull}141718[#141718]
+* Fixes columns management for discover view embeddable {kibana-pull}140799[#140799]
 
 Elastic Security::
 For the Elastic Security 8.4.3 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
@@ -3678,7 +3678,7 @@ Connectors::
 The connectors table now uses "compatibility" rather than "availability" {kibana-pull}139024[#139024]
 
 Discover::
-Fixes saved search embeddable rendering {kibana-pull}140264[#140264]
+Fixes discover view embeddable rendering {kibana-pull}140264[#140264]
 
 Elastic Security::
 For the Elastic Security 8.4.2 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
@@ -4097,7 +4097,7 @@ Lens & Visualizations::
 * Fixes internal links in *Vega* {kibana-pull}135890[#135890]
 * Do not set non-unique id for legend action popovers in *Lens* {kibana-pull}135656[#135656]
 * Fixes non-editable Lens panel when using prefix wildcard in *Lens* {kibana-pull}135654[#135654]
-* Removes saved search references from all places on unlink in *Visualize* {kibana-pull}135628[#135628]
+* Removes discover view references from all places on unlink in *Visualize* {kibana-pull}135628[#135628]
 * Fix multi-field top values for Heatmap visualizations in *Lens* {kibana-pull}135581[#135581]
 * Fixes styling issues in *Lens* {kibana-pull}135406[#135406]
 * Show badge for read-only in *Lens* {kibana-pull}135313[#135313]
@@ -4114,7 +4114,7 @@ Lens & Visualizations::
 
 Machine Learning::
 * Lock the delete annotation button on click {kibana-pull}137306[#137306]
-* Fixes globally pinned filters in Data visualizer and query search bar not clearing properly for saved searches {kibana-pull}136897[#136897]
+* Fixes globally pinned filters in Data visualizer and query search bar not clearing properly for discover viewes {kibana-pull}136897[#136897]
 * Fixes overflow in start datafeed modal {kibana-pull}136292[#136292]
 * Fixes error in categorization wizard summary step {kibana-pull}134228[#134228]
 * Fixes flaky job selection on the Anomaly Explorer page {kibana-pull}137596[#137596]
@@ -4658,7 +4658,7 @@ Machine Learning::
 * Adds recognized modules links for Index data visualizer {kibana-pull}131342[#131342]
 * Anomaly Detection: Adds View in Maps item to Actions menu in the anomalies table {kibana-pull}131284[#131284]
 * Adding v3 modules for Security_Linux and Security_Windows and Deprecating v1 + v2 {kibana-pull}131166[#131166]
-* Data Frame Analytics creation wizard: add support for filters in saved searches {kibana-pull}130744[#130744]
+* Data Frame Analytics creation wizard: add support for filters in discover viewes {kibana-pull}130744[#130744]
 * Edit job selection on data frame analytics results and map pages {kibana-pull}130419[#130419]
 * Resizable/Collapsible Top Influencers section {kibana-pull}130018[#130018]
 
@@ -5206,7 +5206,7 @@ Machine Learning::
 * Fixes Single Metric Viewer chart failing to load if no points during calendar event {kibana-pull}130000[#130000]
 * Fixes Single Metric Viewer for jobs that haven't been run {kibana-pull}129063[#129063]
 * Fix outlier detection results exploration color legend display {kibana-pull}129058[#129058]
-* Fixes new anomaly detection job from saved search with no query filter {kibana-pull}129022[#129022]
+* Fixes new anomaly detection job from discover view with no query filter {kibana-pull}129022[#129022]
 * Fixes data frame analytics map saved object sync warning {kibana-pull}128876[#128876]
 * Adds error toast to Data visualizer when using unpopulated time field {kibana-pull}127196[#127196]
 
@@ -5642,7 +5642,7 @@ Lens & Visualizations::
 * AggConfigs: Make base id check more stable {kibana-pull}123367[#123367]
 * TSVB fix flickering {kibana-pull}122921[#122921]
 * Hide tooltips while dragging dimensions in *Lens* {kibana-pull}122198[#122198]
-* Make sure saved search id is carried over to saved object {kibana-pull}121082[#121082]
+* Make sure discover view id is carried over to saved object {kibana-pull}121082[#121082]
 * Paginate through index patterns {kibana-pull}120972[#120972]
 * Show generic error for invalid time shift string in *Lens* {kibana-pull}120077[#120077]
 * Improves column type detection in table for alignment in *Lens* {kibana-pull}120007[#120007]

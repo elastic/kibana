@@ -505,7 +505,7 @@ describe('copyTimeline', () => {
     });
   });
 
-  it('creates a new saved search when a saved search object is passed', async () => {
+  it('creates a new discover view when a discover view object is passed', async () => {
     await api.copyTimeline({
       timelineId: 'test',
       timeline: {
@@ -523,7 +523,7 @@ describe('copyTimeline', () => {
       })
     );
 
-    // The new saved search id is sent to the server
+    // The new discover view id is sent to the server
     expect(postMock).toHaveBeenCalledWith(
       TIMELINE_COPY_URL,
       expect.objectContaining({
@@ -544,7 +544,7 @@ describe('copyTimeline', () => {
       savedSearch: mockSavedSearch,
     });
 
-    // The new saved search id is sent to the server
+    // The new discover view id is sent to the server
     expect(postMock).toHaveBeenCalledWith(
       TIMELINE_COPY_URL,
       expect.objectContaining({
@@ -553,7 +553,7 @@ describe('copyTimeline', () => {
     );
   });
 
-  it('does not save a saved search for timelines without `savedSearchId`', async () => {
+  it('does not save a discover view for timelines without `savedSearchId`', async () => {
     jest.clearAllMocks();
 
     await api.copyTimeline({

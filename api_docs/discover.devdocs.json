@@ -713,7 +713,7 @@
             "tags": [],
             "label": "savedSearchState",
             "description": [
-              "\nState of saved search, the saved object of Discover"
+              "\nState of discover view, the saved object of Discover"
             ],
             "signature": [
               "DiscoverSavedSearchContainer"
@@ -2457,7 +2457,7 @@
             "tags": [],
             "label": "savedSearchId",
             "description": [
-              "\nOptionally set saved search ID."
+              "\nOptionally set discover view ID."
             ],
             "signature": [
               "string | undefined"

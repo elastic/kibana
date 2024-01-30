@@ -67,7 +67,7 @@ export const TRANSFORM_REACT_QUERY_KEYS = {
 // - dest index: monitor (applied to df-*)
 // - cluster: monitor, read_pipeline
 //
-// Note that users with kibana_admin can see all Kibana data views and saved searches
+// Note that users with kibana_admin can see all Kibana data views and discover viewes
 // in the source selection modal when creating a transform, but the wizard will trigger
 // error callouts when there are no sufficient privileges to read the actual source indices.
 

@@ -86,7 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.existOrFail('unifiedDataTableFooter');
     });
 
-    it('should render exact number of rows which where configured in the saved search or in settings', async () => {
+    it('should render exact number of rows which where configured in the discover view or in settings', async () => {
       await kibanaServer.uiSettings.update({
         ...defaultSettings,
         'discover:sampleSize': 12,
@@ -113,10 +113,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect((await dataGrid.getDocTableRows()).length).to.be(6); // as in settings
       await dataGrid.checkCurrentRowsPerPageToBe(6);
 
-      // open the saved search
+      // open the discover view
       await PageObjects.discover.loadSavedSearch(savedSearchTitle);
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      expect((await dataGrid.getDocTableRows()).length).to.be(10); // as in the saved search
+      expect((await dataGrid.getDocTableRows()).length).to.be(10); // as in the discover view
       await dataGrid.checkCurrentRowsPerPageToBe(10);
     });
   });

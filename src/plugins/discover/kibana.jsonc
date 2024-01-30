@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/discover-plugin",
   "owner": "@elastic/kibana-data-discovery",
-  "description": "This plugin contains the Discover application and the saved search embeddable.",
+  "description": "This plugin contains the Discover application and the discover view embeddable.",
   "plugin": {
     "id": "discover",
     "server": true,

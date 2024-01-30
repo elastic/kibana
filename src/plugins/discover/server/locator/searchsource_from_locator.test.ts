@@ -47,7 +47,7 @@ let mockServices: Services;
 let mockSavedSearch: SavedObject<SavedSearchAttributes>;
 let mockDataView: DataView;
 
-// mock search source belonging to the saved search
+// mock search source belonging to the discover view
 let mockSearchSource: SearchSource;
 
 // mock params containing the discover app locator
@@ -98,7 +98,7 @@ beforeEach(() => {
   });
 });
 
-test('with saved search containing a filter', async () => {
+test('with discover view containing a filter', async () => {
   const testFilter = {
     meta: { index: 'logstash-*' },
     query: { term: { host: 'elastic.co' } },
@@ -122,8 +122,8 @@ test('with locator params containing a filter', async () => {
   expect(searchSource.getSerializedFields().filter).toEqual([testFilter]);
 });
 
-test('with saved search and locator params both containing a filter', async () => {
-  // search source belonging to the saved search
+test('with discover view and locator params both containing a filter', async () => {
+  // search source belonging to the discover view
   mockSearchSource.setField('filter', {
     meta: { index: 'logstash-*' },
     query: { term: { host: 'elastic.co' } },
@@ -170,7 +170,7 @@ test('with locator params containing a timeRange', async () => {
   ]);
 });
 
-test('with saved search containing ["_source"]', async () => {
+test('with discover view containing ["_source"]', async () => {
   mockSavedSearch.attributes.columns = ['_source'];
 
   const provider = searchSourceFromLocatorFactory(mockServices);

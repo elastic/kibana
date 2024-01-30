@@ -128,10 +128,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('panel interactions', async () => {
-      describe('saved search', async () => {
+      describe('discover view', async () => {
         before(async () => {
           await dashboard.navigateToApp();
-          await dashboard.loadSavedDashboard('timeslider and saved search');
+          await dashboard.loadSavedDashboard('timeslider and discover view');
           await dashboard.waitForRenderComplete();
         });
 

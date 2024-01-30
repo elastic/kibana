@@ -163,7 +163,7 @@ export interface VisTypeDefinition<TVisParams> {
   /**
    * The flag is necessary for aggregation based visualizations.
    * When "true", an additional step on the vis creation wizard will be provided
-   * with the selection of a search source - an index pattern or a saved search.
+   * with the selection of a search source - an index pattern or a discover view.
    */
   readonly requiresSearch?: boolean;
   /**

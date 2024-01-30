@@ -17,7 +17,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     junit: {
       ...transformConfig.get('junit'),
       reportName:
-        'Chrome X-Pack UI Functional Tests Basic License - transform - creation - runtime mappings & saved search',
+        'Chrome X-Pack UI Functional Tests Basic License - transform - creation - runtime mappings & discover view',
     },
   };
 }

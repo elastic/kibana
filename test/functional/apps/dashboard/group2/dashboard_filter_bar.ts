@@ -193,7 +193,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('saved search filtering', function () {
+    describe('discover view filtering', function () {
       before(async () => {
         await filterBar.ensureFieldEditorModalIsClosed();
         await PageObjects.dashboard.gotoDashboardLandingPage();

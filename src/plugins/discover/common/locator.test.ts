@@ -38,7 +38,7 @@ beforeEach(() => {
 });
 
 describe('Discover url generator', () => {
-  test('can create a link to Discover with no state and no saved search', async () => {
+  test('can create a link to Discover with no state and no discover view', async () => {
     const { locator } = await setup();
     const { app, path } = await locator.getLocation({});
     const { _a, _g } = getStatesFromKbnUrl(path, ['_a', '_g']);
@@ -48,7 +48,7 @@ describe('Discover url generator', () => {
     expect(_g).toEqual(undefined);
   });
 
-  test('can create a link to a saved search in Discover', async () => {
+  test('can create a link to a discover view in Discover', async () => {
     const { locator } = await setup();
     const { path } = await locator.getLocation({ savedSearchId });
     const { _a, _g } = getStatesFromKbnUrl(path, ['_a', '_g']);

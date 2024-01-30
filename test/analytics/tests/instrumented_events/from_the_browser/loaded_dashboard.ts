@@ -98,10 +98,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       /**
-       * Saved search embeddable
+       * Discover view embeddable
        */
 
-      it('emits when saved search is added', async () => {
+      it('emits when discover view is added', async () => {
         await dashboardAddPanel.addSavedSearch(SAVED_SEARCH_PANEL_TITLE);
         const event = await checkEmitsOnce();
 
@@ -110,12 +110,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(event.properties.value2).to.be(1);
       });
 
-      it('emits on saved search refreshed', async () => {
+      it('emits on discover view refreshed', async () => {
         await queryBar.clickQuerySubmitButton();
         await checkEmitsOnce();
       });
 
-      it("doesn't emit when removing saved search panel", async () => {
+      it("doesn't emit when removing discover view panel", async () => {
         await dashboardPanelActions.removePanelByTitle(SAVED_SEARCH_PANEL_TITLE);
         await checkDoesNotEmit();
       });

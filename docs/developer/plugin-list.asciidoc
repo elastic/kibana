@@ -95,7 +95,7 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 
 
 |{kib-repo}blob/{branch}/src/plugins/discover/README.md[discover]
-|Contains the Discover application and the saved search embeddable.
+|Contains the Discover application and the discover view embeddable.
 
 
 |{kib-repo}blob/{branch}/src/plugins/embeddable/README.md[embeddable]
@@ -300,7 +300,7 @@ oss plugins.
 
 
 |{kib-repo}blob/{branch}/src/plugins/saved_search/README.md[savedSearch]
-|Contains the saved search saved object definition and helpers.
+|Contains the discover view saved object definition and helpers.
 
 
 |{kib-repo}blob/{branch}/src/plugins/screenshot_mode/README.md[screenshotMode]

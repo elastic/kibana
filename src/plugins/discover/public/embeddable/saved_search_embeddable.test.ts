@@ -75,7 +75,7 @@ const createSearchFnMock = (nrOfHits: number) => {
 
 const dataViewMock = buildDataViewMock({ name: 'the-data-view', fields: deepMockedFields });
 
-describe('saved search embeddable', () => {
+describe('discover view embeddable', () => {
   let mountpoint: HTMLDivElement;
   let servicesMock: jest.Mocked<DiscoverServices>;
 
@@ -97,7 +97,7 @@ describe('saved search embeddable', () => {
     const searchSource = createSearchSourceMock({ index: dataView }, undefined, searchMock);
     const savedSearch = {
       id: 'mock-id',
-      title: 'saved search',
+      title: 'discover view',
       sort: [['message', 'asc']] as Array<[string, string]>,
       searchSource,
       viewMode: viewModeMockValue,
@@ -206,7 +206,7 @@ describe('saved search embeddable', () => {
     expect(executeTriggerActions).toHaveBeenCalled();
   });
 
-  it('should render saved search embeddable when successfully loading data', async () => {
+  it('should render discover view embeddable when successfully loading data', async () => {
     // mock return data
     const { search, resolveSearch } = createSearchFnMock(1);
     const { embeddable } = createEmbeddable({ searchMock: search });
@@ -235,7 +235,7 @@ describe('saved search embeddable', () => {
     expect(loadedOutput.error).toBe(undefined);
   });
 
-  it('should render saved search embeddable when empty data is returned', async () => {
+  it('should render discover view embeddable when empty data is returned', async () => {
     // mock return data
     const { search, resolveSearch } = createSearchFnMock(0);
     const { embeddable } = createEmbeddable({ searchMock: search });
@@ -358,14 +358,14 @@ describe('saved search embeddable', () => {
     expect(search).toHaveBeenCalledTimes(1);
   });
 
-  it('should not reload and fetch when a input title matches the saved search title', async () => {
+  it('should not reload and fetch when a input title matches the discover view title', async () => {
     const search = jest.fn().mockReturnValue(getSearchResponse(1));
     const { embeddable } = createEmbeddable({ searchMock: search });
     embeddable.reload = jest.fn();
     await waitOneTick();
     embeddable.render(mountpoint);
     await waitOneTick();
-    embeddable.updateOutput({ title: 'saved search' });
+    embeddable.updateOutput({ title: 'discover view' });
     await waitOneTick();
 
     expect(embeddable.reload).toHaveBeenCalledTimes(0);
@@ -428,19 +428,19 @@ describe('saved search embeddable', () => {
       expect(editUrl).toBe('/base/mock-url');
     };
 
-    it('should correctly output edit link params for by reference saved search', async () => {
+    it('should correctly output edit link params for by reference discover view', async () => {
       await runEditLinkTest();
     });
 
-    it('should correctly output edit link params for by reference saved search with ad hoc data view', async () => {
+    it('should correctly output edit link params for by reference discover view with ad hoc data view', async () => {
       await runEditLinkTest(dataViewAdHoc);
     });
 
-    it('should correctly output edit link params for by value saved search', async () => {
+    it('should correctly output edit link params for by value discover view', async () => {
       await runEditLinkTest(undefined, true);
     });
 
-    it('should correctly output edit link params for by value saved search with ad hoc data view', async () => {
+    it('should correctly output edit link params for by value discover view with ad hoc data view', async () => {
       jest
         .spyOn(servicesMock.locator, 'getRedirectUrl')
         .mockClear()

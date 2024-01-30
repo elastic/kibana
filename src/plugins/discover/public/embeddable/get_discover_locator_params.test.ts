@@ -11,7 +11,7 @@ import { getDiscoverLocatorParams } from './get_discover_locator_params';
 import type { SearchInput } from './types';
 
 describe('getDiscoverLocatorParams', () => {
-  it('should return saved search id if input has savedObjectId', () => {
+  it('should return discover view id if input has savedObjectId', () => {
     const input = { savedObjectId: 'savedObjectId' } as SearchInput;
     expect(getDiscoverLocatorParams({ input, savedSearch: savedSearchMock })).toEqual({
       savedSearchId: 'savedObjectId',

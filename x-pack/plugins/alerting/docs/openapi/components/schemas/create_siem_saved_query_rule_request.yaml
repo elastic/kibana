@@ -1,6 +1,6 @@
 title: Create saved query rule request
-description: > 
-  A rule that searches the defined indices and creates an alert when a document matches the saved search.
+description: >
+  A rule that searches the defined indices and creates an alert when a document matches the discover view.
 type: object
 required:
   - consumer
@@ -35,4 +35,3 @@ properties:
     $ref: 'tags.yaml'
   throttle:
     $ref: 'throttle.yaml'
- 

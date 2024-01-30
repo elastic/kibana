@@ -47,7 +47,7 @@ const localStorage = new Storage(window.localStorage);
 export interface ChangePointDetectionAppStateProps {
   /** The data view to analyze. */
   dataView: DataView;
-  /** The saved search to analyze. */
+  /** The discover view to analyze. */
   savedSearch: SavedSearch | null;
   /** App dependencies */
   appDependencies: AiopsAppDependencies;
