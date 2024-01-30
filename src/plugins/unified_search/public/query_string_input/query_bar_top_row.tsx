@@ -34,6 +34,7 @@ import {
   EuiSuperUpdateButton,
   EuiToolTip,
   EuiButton,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TimeHistoryContract, getQueryLog } from '@kbn/data-plugin/public';
@@ -507,13 +508,54 @@ export const QueryBarTopRow = React.memo(
       return <EuiFlexItem className={wrapperClasses}>{component}</EuiFlexItem>;
     }
 
+    function renderCancelButton() {
+      const buttonLabelCancel = strings.getCancelQueryLabel();
+
+      if (submitButtonIconOnly) {
+        return (
+          <EuiButtonIcon
+            iconType="cross"
+            aria-label={buttonLabelCancel}
+            onClick={onClickCancelButton}
+            size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
+            data-test-subj="queryCancelButton"
+            // @ts-expect-error Need to fix expecting `children` in EUI
+            toolTipProps={{
+              content: buttonLabelCancel,
+              delay: 'long',
+              position: 'bottom',
+            }}
+          >
+            {buttonLabelCancel}
+          </EuiButtonIcon>
+        );
+      }
+
+      return (
+        <EuiButton
+          iconType="cross"
+          aria-label={buttonLabelCancel}
+          onClick={onClickCancelButton}
+          size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
+          data-test-subj="queryCancelButton"
+          // @ts-expect-error Need to fix expecting `children` in EUI
+          toolTipProps={{
+            content: buttonLabelCancel,
+            delay: 'long',
+            position: 'bottom',
+          }}
+        >
+          {buttonLabelCancel}
+        </EuiButton>
+      );
+    }
+
     function renderUpdateButton() {
       if (!shouldRenderUpdatebutton() && !shouldRenderDatePicker()) {
         return null;
       }
       const buttonLabelUpdate = strings.getNeedsUpdatingLabel();
       const buttonLabelRefresh = strings.getRefreshQueryLabel();
-      const buttonLabelCancel = strings.getCancelQueryLabel();
       const buttonLabelRun = strings.getRunQueryLabel();
 
       const iconDirty = Boolean(isQueryLangSelected) ? 'play' : 'kqlFunction';
@@ -523,24 +565,7 @@ export const QueryBarTopRow = React.memo(
         React.cloneElement(props.customSubmitButton, { onClick: onClickSubmitButton })
       ) : (
         <EuiFlexItem grow={false}>
-          {props.isLoading && propsOnCancel && (
-            <EuiButton
-              iconType="cross"
-              aria-label={buttonLabelCancel}
-              onClick={onClickCancelButton}
-              size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
-              data-test-subj="queryCancelButton"
-              value={buttonLabelCancel}
-              // @ts-expect-error Need to fix expecting `children` in EUI
-              toolTipProps={{
-                content: buttonLabelCancel,
-                delay: 'long',
-                position: 'bottom',
-              }}
-            >
-              {buttonLabelCancel}
-            </EuiButton>
-          )}
+          {props.isLoading && propsOnCancel && renderCancelButton()}
           {(!props.isLoading || !propsOnCancel) && (
             <EuiSuperUpdateButton
               iconType={props.isDirty ? iconDirty : 'refresh'}
