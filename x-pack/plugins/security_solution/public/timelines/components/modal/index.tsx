@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import { StatefulTimeline } from '../timeline';
 import type { TimelineId } from '../../../../common/types/timeline';
 import { defaultRowRenderers } from '../timeline/body/renderers';
 import { DefaultCellRenderer } from '../timeline/cell_rendering/default_cell_renderer';
-import { EuiPortal } from './custom_portal';
+import { CustomEuiPortal } from './custom_portal';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { inputsSelectors } from '../../../common/store/selectors';
 import { usePaneStyles, OverflowHiddenGlobalStyles } from './index.styles';
@@ -48,9 +48,11 @@ export const TimelineModal = React.memo<TimelineModalProps>(({ timelineId, visib
     'timeline-portal-overlay-mask--hidden': !visible,
   });
 
+  const sibling: HTMLDivElement | null = useMemo(() => (!visible ? ref?.current : null), [visible]);
+
   return (
     <div data-test-subj="timeline-portal-ref" ref={ref}>
-      <EuiPortal insert={{ sibling: !visible ? ref?.current : null, position: 'after' }}>
+      <CustomEuiPortal sibling={sibling}>
         <div data-test-subj="timeline-portal-overlay-mask" className={wrapperClassName}>
           <div
             aria-label={TIMELINE_DESCRIPTION}
@@ -64,7 +66,7 @@ export const TimelineModal = React.memo<TimelineModalProps>(({ timelineId, visib
             />
           </div>
         </div>
-      </EuiPortal>
+      </CustomEuiPortal>
       {visible && <OverflowHiddenGlobalStyles />}
     </div>
   );
