@@ -12,6 +12,7 @@ enum:
   - .opsgenie
   - .pagerduty
   - .resilient
+  - .sentinelone
   - .servicenow
   - .servicenow-itom
   - .servicenow-sir
