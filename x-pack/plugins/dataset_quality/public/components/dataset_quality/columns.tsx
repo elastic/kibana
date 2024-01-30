@@ -115,7 +115,7 @@ export const getDatasetQualityTableColumns = ({
   fieldFormats: FieldFormatsStart;
   selectedDataset?: FlyoutDataset;
   loadingDegradedStats?: boolean;
-  openFlyout: (selectedDataset: DataStreamStat) => void;
+  openFlyout: (selectedDataset: FlyoutDataset) => void;
 }): Array<EuiBasicTableColumn<DataStreamStat>> => {
   return [
     {
@@ -127,7 +127,7 @@ export const getDatasetQualityTableColumns = ({
           <EuiButtonIcon
             size="m"
             color="text"
-            onClick={() => openFlyout(dataStreamStat)}
+            onClick={() => openFlyout(dataStreamStat as FlyoutDataset)}
             iconType={isExpanded ? 'minimize' : 'expand'}
             title={!isExpanded ? expandDatasetAriaLabel : collapseDatasetAriaLabel}
             aria-label={!isExpanded ? expandDatasetAriaLabel : collapseDatasetAriaLabel}

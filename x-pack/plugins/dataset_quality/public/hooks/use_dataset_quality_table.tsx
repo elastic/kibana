@@ -49,7 +49,7 @@ export const useDatasetQualityTable = () => {
 
   const closeFlyout = useCallback(() => service.send({ type: 'CLOSE_FLYOUT' }), [service]);
   const openFlyout = useCallback(
-    (selectedDataset: DataStreamStat) => {
+    (selectedDataset: FlyoutDataset) => {
       if (flyout?.dataset?.rawName === selectedDataset.rawName) {
         service.send({
           type: 'CLOSE_FLYOUT',
@@ -60,7 +60,7 @@ export const useDatasetQualityTable = () => {
 
       service.send({
         type: isDatasetQualityPageIdle ? 'OPEN_FLYOUT' : 'SELECT_NEW_DATASET',
-        dataset: selectedDataset as FlyoutDataset,
+        dataset: selectedDataset,
       });
     },
     [flyout?.dataset?.rawName, isDatasetQualityPageIdle, service]

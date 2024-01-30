@@ -93,6 +93,10 @@ export type DatasetQualityControllerTypeState =
   | {
       value: 'degradedDocs.fetching';
       context: DefaultDatasetQualityStateContext;
+    }
+  | {
+      value: 'degradedDocs.loaded';
+      context: DefaultDatasetQualityStateContext;
     };
 
 export type DatasetQualityControllerContext = DatasetQualityControllerTypeState['context'];
