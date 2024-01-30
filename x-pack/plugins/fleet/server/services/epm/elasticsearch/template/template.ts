@@ -25,7 +25,7 @@ import type {
 import { appContextService } from '../../..';
 import { getRegistryDataStreamAssetBaseName } from '../../../../../common/services';
 import {
-  FLEET_ECS_MAPPINGS_COMPONENT_TEMPLATE_NAME,
+  STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
   FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
   FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME,
   STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
@@ -114,7 +114,7 @@ export function getTemplate({
   template.composed_of = [
     ...esBaseComponents,
     ...(template.composed_of || []),
-    FLEET_ECS_MAPPINGS_COMPONENT_TEMPLATE_NAME,
+    STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
     FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
     ...(appContextService.getConfig()?.agentIdVerificationEnabled
       ? [FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME]
