@@ -73,8 +73,8 @@ import type {
 } from './lib/detection_engine/rule_types/types';
 // eslint-disable-next-line no-restricted-imports
 import {
-  legacyIsNotificationAlertExecutor,
-  legacyRulesNotificationAlertType,
+  isLegacyNotificationRuleExecutor,
+  legacyRulesNotificationRuleType,
 } from './lib/detection_engine/rule_actions_legacy';
 import {
   createSecurityRuleTypeWrapper,
@@ -183,6 +183,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     if (experimentalFeatures.riskScoringPersistence) {
       registerRiskScoringTask({
+        experimentalFeatures,
         getStartServices: core.getStartServices,
         kibanaVersion: pluginContext.env.packageInfo.version,
         logger: this.logger,
@@ -211,6 +212,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.endpointAppContextService.setup({
       securitySolutionRequestContextFactory: requestContextFactory,
       cloud: plugins.cloud,
+      loggerFactory: this.pluginContext.logger,
     });
 
     initUsageCollectors({
@@ -352,9 +354,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
 
     if (plugins.alerting != null) {
-      const ruleNotificationType = legacyRulesNotificationAlertType({ logger });
+      const ruleNotificationType = legacyRulesNotificationRuleType({ logger });
 
-      if (legacyIsNotificationAlertExecutor(ruleNotificationType)) {
+      if (isLegacyNotificationRuleExecutor(ruleNotificationType)) {
         plugins.alerting.registerType(ruleNotificationType);
       }
     }
@@ -512,6 +514,10 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     // Assistant Tool and Feature Registration
     plugins.elasticAssistant.registerTools(APP_UI_ID, getAssistantTools());
+    plugins.elasticAssistant.registerFeatures(APP_UI_ID, {
+      assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
+      assistantStreamingEnabled: config.experimentalFeatures.assistantStreamingEnabled,
+    });
 
     if (this.lists && plugins.taskManager && plugins.fleet) {
       // Exceptions, Artifacts and Manifests start

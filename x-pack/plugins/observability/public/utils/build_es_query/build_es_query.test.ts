@@ -37,6 +37,6 @@ describe('buildEsQuery', () => {
   ];
 
   test.each(testData)('should generate correct es query for %j', ({ kuery, timeRange }) => {
-    expect(buildEsQuery(timeRange, kuery)).toMatchSnapshot();
+    expect(buildEsQuery({ timeRange, kuery })).toMatchSnapshot();
   });
 });

@@ -6,21 +6,21 @@
  */
 
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { pick } from 'lodash';
-import { filter, lastValueFrom, map, tap, toArray } from 'rxjs';
+import { pick, remove } from 'lodash';
+import { filter, lastValueFrom, map, toArray } from 'rxjs';
 import { format, parse, UrlObject } from 'url';
 import { Message, MessageRole } from '../../common';
 import {
-  ChatCompletionErrorCode,
-  ConversationCompletionError,
+  ChatCompletionChunkEvent,
+  ChatCompletionErrorEvent,
   ConversationCreateEvent,
   MessageAddEvent,
   StreamingChatResponseEvent,
   StreamingChatResponseEventType,
 } from '../../common/conversation_complete';
 import { FunctionDefinition } from '../../common/types';
-import { concatenateOpenAiChunks } from '../../common/utils/concatenate_openai_chunks';
-import { processOpenAiStream } from '../../common/utils/process_openai_stream';
+import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
+import { throwSerializedChatCompletionErrors } from '../../common/utils/throw_serialized_chat_completion_errors';
 import { APIReturnType, ObservabilityAIAssistantAPIClientRequestParamsOf } from '../../public';
 import { getAssistantSetupMessage } from '../../public/service/get_assistant_setup_message';
 import { streamIntoObservable } from '../../server/service/util/stream_into_observable';
@@ -29,7 +29,7 @@ import { EvaluationResult } from './types';
 type InnerMessage = Message['message'];
 type StringOrMessageList = string | InnerMessage[];
 
-interface ChatClient {
+export interface ChatClient {
   chat: (message: StringOrMessageList) => Promise<InnerMessage>;
   complete: (
     ...args: [StringOrMessageList] | [string, InnerMessage[]]
@@ -39,6 +39,8 @@ interface ChatClient {
     {}: { conversationId?: string; messages: InnerMessage[] },
     criteria: string[]
   ) => Promise<EvaluationResult>;
+  getResults: () => EvaluationResult[];
+  onResult: (cb: (result: EvaluationResult) => void) => () => void;
 }
 
 export class KibanaClient {
@@ -72,11 +74,9 @@ export class KibanaClient {
   createChatClient({
     connectorId,
     persist,
-    title,
   }: {
     connectorId: string;
     persist: boolean;
-    title?: string;
   }): ChatClient {
     function getMessages(message: string | Array<Message['message']>): Array<Message['message']> {
       if (typeof message === 'string') {
@@ -103,6 +103,11 @@ export class KibanaClient {
       return { functionDefinitions, contextDefinitions };
     }
 
+    const onResultCallbacks: Array<{
+      callback: (result: EvaluationResult) => void;
+      unregister: () => void;
+    }> = [];
+
     async function chat({
       messages,
       functions,
@@ -124,18 +129,23 @@ export class KibanaClient {
           await that.axios.post(
             that.getUrl({
               pathname: '/internal/observability_ai_assistant/chat',
-              query: { stream: true },
             }),
             params,
             { responseType: 'stream' }
           )
         ).data
-      ).pipe(processOpenAiStream(), concatenateOpenAiChunks());
+      ).pipe(
+        map((line) => JSON.parse(line) as ChatCompletionChunkEvent | ChatCompletionErrorEvent),
+        throwSerializedChatCompletionErrors(),
+        concatenateChatCompletionChunks()
+      );
 
-      const receivedMessage = await lastValueFrom(stream$);
+      const message = await lastValueFrom(stream$);
 
-      return receivedMessage.message;
+      return message.message;
     }
+
+    const results: EvaluationResult[] = [];
 
     return {
       chat: async (message) => {
@@ -172,21 +182,13 @@ export class KibanaClient {
                 messages,
                 connectorId,
                 persist,
-                title,
               },
               { responseType: 'stream' }
             )
           ).data
         ).pipe(
           map((line) => JSON.parse(line) as StreamingChatResponseEvent),
-          tap((event) => {
-            if (event.type === StreamingChatResponseEventType.ConversationCompletionError) {
-              throw new ConversationCompletionError(
-                event.error.code ?? ChatCompletionErrorCode.InternalError,
-                event.error.message
-              );
-            }
-          }),
+          throwSerializedChatCompletionErrors(),
           filter(
             (event): event is MessageAddEvent | ConversationCreateEvent =>
               event.type === StreamingChatResponseEventType.MessageAdd ||
@@ -287,14 +289,17 @@ export class KibanaClient {
           functionCall: 'scores',
         });
 
-        return {
+        const scoredCriteria = (
+          JSON.parse(message.function_call!.arguments!) as {
+            criteria: Array<{ index: number; score: number; reasoning: string }>;
+          }
+        ).criteria;
+
+        const result: EvaluationResult = {
           conversationId,
           messages,
-          scores: (
-            JSON.parse(message.function_call.arguments) as {
-              criteria: Array<{ index: number; score: number; reasoning: string }>;
-            }
-          ).criteria.map(({ index, score, reasoning }) => {
+          passed: scoredCriteria.every(({ score }) => score >= 1),
+          scores: scoredCriteria.map(({ index, score, reasoning }) => {
             return {
               criterion: criteria[index],
               score,
@@ -302,6 +307,22 @@ export class KibanaClient {
             };
           }),
         };
+
+        results.push(result);
+
+        onResultCallbacks.forEach(({ callback }) => {
+          callback(result);
+        });
+
+        return result;
+      },
+      getResults: () => results,
+      onResult: (callback) => {
+        const unregister = () => {
+          remove(onResultCallbacks, { callback });
+        };
+        onResultCallbacks.push({ callback, unregister });
+        return unregister;
       },
     };
   }

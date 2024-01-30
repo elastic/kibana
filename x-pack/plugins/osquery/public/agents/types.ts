@@ -30,6 +30,7 @@ export interface AgentSelection {
   allAgentsSelected: boolean;
   platformsSelected: string[];
   policiesSelected: string[];
+  offlineAgentsSelected?: boolean;
 }
 
 interface BaseGroupOption {

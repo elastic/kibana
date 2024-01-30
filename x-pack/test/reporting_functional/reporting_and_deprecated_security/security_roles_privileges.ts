@@ -16,8 +16,7 @@ const CANVAS_TITLE = 'The Very Cool Workpad for PDF Tests';
 export default function ({ getService }: FtrProviderContext) {
   const reportingFunctional = getService('reportingFunctional');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/172599
-  describe.skip('Security with `reporting_user` built-in role', () => {
+  describe('Security with `reporting_user` built-in role', () => {
     before(async () => {
       await reportingFunctional.initEcommerce();
     });

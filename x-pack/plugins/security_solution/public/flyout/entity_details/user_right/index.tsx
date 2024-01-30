@@ -7,24 +7,25 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useKibana } from '../../../common/lib/kibana/kibana_react';
+import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
 import { useManagedUser } from '../../../timelines/components/side_panel/new_user_detail/hooks/use_managed_user';
-import { useObservedUser } from '../../../timelines/components/side_panel/new_user_detail/hooks/use_observed_user';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { UsersType } from '../../../explore/users/store/model';
 import { getCriteriaFromUsersType } from '../../../common/components/ml/criteria/get_criteria_from_users_type';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anomaly_table_provider';
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
-import { useRiskScore } from '../../../explore/containers/risk_score';
 import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { UserPanelContent } from './content';
 import { UserPanelHeader } from './header';
-import { UserDetailsPanelKey } from '../user_detais_left';
-import type { UserDetailsLeftPanelTab } from '../user_detais_left/tabs';
+import { UserDetailsPanelKey } from '../user_details_left';
+import { useObservedUser } from './hooks/use_observed_user';
+import type { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 
 export interface UserPanelProps extends Record<string, unknown> {
   contextID: string;
@@ -46,6 +47,7 @@ const FIRST_RECORD_PAGINATION = {
 };
 
 export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPanelProps) => {
+  const { telemetry } = useKibana().services;
   const userNameFilterQuery = useMemo(
     () => (userName ? buildUserNamesFilter([userName]) : undefined),
     [userName]
@@ -77,15 +79,17 @@ export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPan
     setQuery,
   });
 
-  const { openLeftPanel } = useExpandableFlyoutContext();
+  const { openLeftPanel } = useExpandableFlyoutApi();
   const openPanelTab = useCallback(
-    (tab?: UserDetailsLeftPanelTab) => {
+    (tab?: EntityDetailsLeftPanelTab) => {
+      telemetry.reportRiskInputsExpandedFlyoutOpened({
+        entity: 'user',
+      });
+
       openLeftPanel({
         id: UserDetailsPanelKey,
         params: {
-          riskInputs: {
-            alertIds: userRiskData?.user.risk.inputs?.map(({ id }) => id) ?? [],
-          },
+          isRiskScoreExist: !!userRiskData?.user?.risk,
           user: {
             name: userName,
             email,
@@ -94,7 +98,7 @@ export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPan
         path: tab ? { tab } : undefined,
       });
     },
-    [email, openLeftPanel, userName, userRiskData?.user.risk.inputs]
+    [telemetry, email, openLeftPanel, userName, userRiskData]
   );
 
   const openPanelFirstTab = useCallback(() => openPanelTab(), [openPanelTab]);
@@ -136,6 +140,7 @@ export const UserPanel = ({ contextID, scopeId, userName, isDraggable }: UserPan
               managedUser={managedUser}
             />
             <UserPanelContent
+              userName={userName}
               managedUser={managedUser}
               observedUser={observedUserWithAnomalies}
               riskScoreState={riskScoreState}

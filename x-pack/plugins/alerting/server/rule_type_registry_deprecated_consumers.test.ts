@@ -16,6 +16,7 @@ describe('rule_type_registry_deprecated_consumers', () => {
       expect(Object.keys(ruleTypeIdWithValidLegacyConsumers)).toMatchInlineSnapshot(`
         Array [
           "example.always-firing",
+          "example.people-in-space",
           "transform_health",
           ".index-threshold",
           ".geo-containment",

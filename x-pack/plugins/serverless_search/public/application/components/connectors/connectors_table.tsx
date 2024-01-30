@@ -45,7 +45,7 @@ import {
 import { useConnectors } from '../../hooks/api/use_connectors';
 import { useConnectorTypes } from '../../hooks/api/use_connector_types';
 import { useKibanaServices } from '../../hooks/use_kibana';
-import { EDIT_CONNECTOR_PATH } from '../connectors_router';
+import { EDIT_CONNECTOR_PATH } from '../../constants';
 import { DeleteConnectorModal } from './delete_connector_modal';
 
 export const ConnectorsTable: React.FC = () => {

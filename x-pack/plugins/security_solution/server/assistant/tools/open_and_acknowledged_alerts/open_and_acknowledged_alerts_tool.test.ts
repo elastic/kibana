@@ -24,7 +24,7 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
   const replacements = { key: 'value' };
   const request = {
     body: {
-      assistantLangChain: false,
+      isEnabledKnowledgeBase: false,
       alertsIndexPattern: '.alerts-security.alerts-default',
       allow: ['@timestamp', 'cloud.availability_zone', 'user.name'],
       allowReplacement: ['user.name'],
@@ -32,11 +32,11 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
       size: 20,
     },
   } as unknown as KibanaRequest<unknown, unknown, RequestBody>;
-  const assistantLangChain = true;
+  const isEnabledKnowledgeBase = true;
   const chain = {} as unknown as RetrievalQAChain;
   const modelExists = true;
   const rest = {
-    assistantLangChain,
+    isEnabledKnowledgeBase,
     esClient,
     chain,
     modelExists,
@@ -60,7 +60,7 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
     it('returns false when the request is missing required anonymization parameters', () => {
       const requestMissingAnonymizationParams = {
         body: {
-          assistantLangChain: false,
+          isEnabledKnowledgeBase: false,
           alertsIndexPattern: '.alerts-security.alerts-default',
           size: 20,
         },
@@ -174,8 +174,8 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
                         range: {
                           '@timestamp': {
                             format: 'strict_date_optional_time',
-                            gte: 'now-1d/d',
-                            lte: 'now/d',
+                            gte: 'now-24h',
+                            lte: 'now',
                           },
                         },
                       },

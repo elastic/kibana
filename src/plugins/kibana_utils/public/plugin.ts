@@ -6,13 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { History } from 'history';
-import { setVersion } from './set_version';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 
-export interface KibanaUtilsPublicSetup {
-  setVersion: (history: Pick<History, 'location' | 'replace'>) => void;
-}
+export type KibanaUtilsPublicSetup = undefined;
 
 export type KibanaUtilsPublicStart = undefined;
 
@@ -31,16 +27,8 @@ export class KibanaUtilsPublicPlugin
       KibanaUtilsPublicStartDependencies
     >
 {
-  private readonly version: string;
-
-  constructor(initializerContext: PluginInitializerContext) {
-    this.version = initializerContext.env.packageInfo.version;
-  }
-
   public setup(_core: CoreSetup): KibanaUtilsPublicSetup {
-    return {
-      setVersion: this.setVersion,
-    };
+    return undefined;
   }
 
   public start(_core: CoreStart): KibanaUtilsPublicStart {
@@ -48,8 +36,4 @@ export class KibanaUtilsPublicPlugin
   }
 
   public stop() {}
-
-  private setVersion = (history: Pick<History, 'location' | 'replace'>) => {
-    setVersion(history, this.version);
-  };
 }

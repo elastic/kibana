@@ -17,8 +17,13 @@ import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
 import { ContentTabIds } from '../../types';
 import { ErrorPrompt } from './error_prompt';
 import { ProfilingLinks } from './profiling_links';
+import { EmptyDataPrompt } from './empty_data_prompt';
 
-export function Flamegraph() {
+interface Props {
+  kuery: string;
+}
+
+export function Flamegraph({ kuery }: Props) {
   const { services } = useKibanaContextForPlugin();
   const { asset } = useAssetDetailsRenderPropsContext();
   const { activeTabId } = useTabSwitcherContext();
@@ -30,14 +35,7 @@ export function Flamegraph() {
     defaultMessage: 'Go to Universal Profiling Flamegraph',
   });
 
-  const params = useMemo(
-    () => ({
-      hostname: asset.name,
-      from,
-      to,
-    }),
-    [asset.name, from, to]
-  );
+  const params = useMemo(() => ({ kuery, from, to }), [from, kuery, to]);
   const { error, loading, response } = useProfilingFlamegraphData({
     isActive: activeTabId === ContentTabIds.PROFILING,
     params,
@@ -45,6 +43,10 @@ export function Flamegraph() {
 
   if (error !== null) {
     return <ErrorPrompt />;
+  }
+
+  if (!loading && response?.TotalSamples === 0) {
+    return <EmptyDataPrompt />;
   }
 
   return (

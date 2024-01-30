@@ -67,7 +67,7 @@ export function ExpressionChart({
   timeRange,
   timeFieldName,
 }: Props) {
-  const { charts, uiSettings } = useKibana().services;
+  const { charts, uiSettings, theme } = useKibana().services;
   const { isLoading, data } = useExpressionChartData(
     expression,
     derivedIndexPattern,
@@ -90,7 +90,7 @@ export function ExpressionChart({
     return <NoDataState />;
   }
 
-  const isDarkMode = uiSettings?.get('theme:darkMode') || false;
+  const isDarkMode = theme?.getTheme().darkMode ?? false;
   const firstSeries = first(first(data.pages)!.series);
   // Creating a custom series where the ID is changed to 0
   // so that we can get a proper domain

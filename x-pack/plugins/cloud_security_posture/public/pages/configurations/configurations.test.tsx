@@ -26,7 +26,6 @@ import { render } from '@testing-library/react';
 import { expectIdsInDoc } from '../../test/utils';
 import { PACKAGE_NOT_INSTALLED_TEST_SUBJECT } from '../../components/cloud_posture_page';
 import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
-import { useCloudPostureTable } from '../../common/hooks/use_cloud_posture_table';
 
 jest.mock('../../common/api/use_latest_findings_data_view');
 jest.mock('../../common/api/use_setup_status_api');
@@ -34,7 +33,6 @@ jest.mock('../../common/api/use_license_management_locator_api');
 jest.mock('../../common/hooks/use_subscription_status');
 jest.mock('../../common/navigation/use_navigate_to_cis_integration_policies');
 jest.mock('../../common/navigation/use_csp_integration_link');
-jest.mock('../../common/hooks/use_cloud_posture_table');
 
 const chance = new Chance();
 
@@ -54,13 +52,6 @@ beforeEach(() => {
       data: true,
     })
   );
-
-  (useCloudPostureTable as jest.Mock).mockImplementation(() => ({
-    getRowsFromPages: jest.fn(),
-    columnsLocalStorageKey: 'test',
-    filters: [],
-    sort: [],
-  }));
 });
 
 const renderFindingsPage = () => {

@@ -18,6 +18,7 @@ import {
   EuiPanel,
   EuiScreenReaderLive,
   EuiSelectable,
+  EuiSelectableOption,
   EuiText,
   EuiTextColor,
   EuiTitle,
@@ -31,8 +32,12 @@ import { MlModel, MlModelDeploymentState } from '../../../../../../../common/typ
 
 import { LicenseBadge } from './license_badge';
 import { ModelSelectLogic } from './model_select_logic';
-import { ModelSelectOption, ModelSelectOptionProps } from './model_select_option';
+import { ModelSelectOption } from './model_select_option';
 import { normalizeModelName } from './utils';
+
+type EuiSelectableOptionWithMlModelData = EuiSelectableOption & {
+  data: MlModel;
+};
 
 export const DeployModelButton: React.FC<{
   onClick: () => void;
@@ -297,33 +302,37 @@ export const ModelSelect: React.FC = () => {
   const maxVisibleOptions = 4.5;
   const [listHeight, setListHeight] = useState(maxVisibleOptions * rowHeight);
 
-  const getModelSelectOptionProps = (models: MlModel[]): ModelSelectOptionProps[] =>
+  const getModelSelectOptionProps = (models: MlModel[]): EuiSelectableOptionWithMlModelData[] =>
     (models ?? []).map((model) => ({
-      ...model,
       label: model.modelId,
       checked: model.modelId === modelID ? 'on' : undefined,
+      data: { ...model },
     }));
 
-  const onChange = (options: ModelSelectOptionProps[]) => {
+  const onChange = (options: EuiSelectableOptionWithMlModelData[]) => {
     const selectedModelOption = options.find((option) => option.checked === 'on');
 
     setInferencePipelineConfiguration({
       ...configuration,
       inferenceConfig: undefined,
-      modelID: selectedModelOption?.modelId ?? '',
-      isModelPlaceholderSelected: selectedModelOption?.isPlaceholder ?? false,
+      modelID: selectedModelOption?.data.modelId ?? '',
+      isModelPlaceholderSelected: selectedModelOption?.data.isPlaceholder ?? false,
       fieldMappings: undefined,
       pipelineName: isPipelineNameUserSupplied
         ? pipelineName
-        : indexName + '-' + normalizeModelName(selectedModelOption?.modelId ?? ''),
+        : indexName + '-' + normalizeModelName(selectedModelOption?.data.modelId ?? ''),
     });
   };
 
-  const onSearchChange = (_: string, matchingOptions: ModelSelectOptionProps[]) => {
+  const onSearchChange = (_: string, matchingOptions: EuiSelectableOptionWithMlModelData[]) => {
     setListHeight(Math.min(maxVisibleOptions, matchingOptions.length) * rowHeight);
   };
 
-  const renderOption = (option: ModelSelectOptionProps) => <ModelSelectOption {...option} />;
+  const renderOption = (option: EuiSelectableOptionWithMlModelData) => {
+    const { data, ...optionExclData } = option;
+    const flattenedOption = { ...optionExclData, ...data };
+    return <ModelSelectOption {...flattenedOption} />;
+  };
 
   return (
     <EuiFlexGroup>

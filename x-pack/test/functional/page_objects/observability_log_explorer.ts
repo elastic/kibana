@@ -8,10 +8,10 @@ import expect from '@kbn/expect';
 import {
   OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY,
   urlSchemaV1,
-} from '@kbn/observability-log-explorer-plugin/common';
+} from '@kbn/observability-logs-explorer-plugin/common';
 import rison from '@kbn/rison';
 import querystring from 'querystring';
-import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export interface IntegrationPackage {

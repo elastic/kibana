@@ -6,15 +6,13 @@
  * Side Public License, v 1.
  */
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import classNames from 'classnames';
 import {
-  EuiButtonEmpty,
   EuiCheckbox,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiCopy,
   EuiDataGridCellValueElementProps,
-  EuiNotificationBadge,
+  EuiDataGridToolbarControl,
   EuiPopover,
   EuiFlexGroup,
   EuiFlexItem,
@@ -183,33 +181,20 @@ export function DataTableDocumentToolbarBtn({
       isOpen={isSelectionPopoverOpen}
       panelPaddingSize="none"
       button={
-        <EuiButtonEmpty
-          size="xs"
-          color="text"
+        <EuiDataGridToolbarControl
           iconType="documents"
           onClick={toggleSelectionToolbar}
           data-selected-documents={selectedDocs.length}
           data-test-subj="dscGridSelectionBtn"
           isSelected={isFilterActive}
-          className={classNames({
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            euiDataGrid__controlBtn: true,
-            'euiDataGrid__controlBtn--active': isFilterActive,
-          })}
+          badgeContent={selectedDocs.length}
         >
-          <EuiFlexGroup responsive={false} direction="row" alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <FormattedMessage
-                id="unifiedDataTable.selectedRowsButtonLabel"
-                defaultMessage="Selected"
-                description="Selected documents"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiNotificationBadge color="subdued">{selectedDocs.length}</EuiNotificationBadge>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiButtonEmpty>
+          <FormattedMessage
+            id="unifiedDataTable.selectedRowsButtonLabel"
+            defaultMessage="Selected"
+            description="Selected documents"
+          />
+        </EuiDataGridToolbarControl>
       }
     >
       {isSelectionPopoverOpen && <EuiContextMenuPanel items={getMenuItems()} />}

@@ -37,7 +37,6 @@ export const useSendMessages = (): UseSendMessages => {
     assistantStreamingEnabled,
     defaultAllow,
     defaultAllowReplacement,
-    ragOnAlerts,
     knowledgeBase,
   } = useAssistantContext();
   const [isLoading, setIsLoading] = useState(false);
@@ -48,15 +47,14 @@ export const useSendMessages = (): UseSendMessages => {
 
       try {
         return await fetchConnectorExecuteAction({
-          alerts: knowledgeBase.alerts, // settings toggle
+          isEnabledRAGAlerts: knowledgeBase.isEnabledRAGAlerts, // settings toggle
           alertsIndexPattern,
           allow: defaultAllow,
           allowReplacement: defaultAllowReplacement,
           apiConfig,
-          assistantLangChain: knowledgeBase.assistantLangChain,
+          isEnabledKnowledgeBase: knowledgeBase.isEnabledKnowledgeBase,
           assistantStreamingEnabled,
           http,
-          ragOnAlerts, // feature flag
           replacements,
           messages,
           size: knowledgeBase.latestAlerts,
@@ -71,10 +69,9 @@ export const useSendMessages = (): UseSendMessages => {
       assistantStreamingEnabled,
       defaultAllow,
       defaultAllowReplacement,
-      knowledgeBase.alerts,
-      knowledgeBase.assistantLangChain,
+      knowledgeBase.isEnabledRAGAlerts,
+      knowledgeBase.isEnabledKnowledgeBase,
       knowledgeBase.latestAlerts,
-      ragOnAlerts,
     ]
   );
 

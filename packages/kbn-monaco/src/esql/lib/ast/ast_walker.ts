@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { ParserRuleContext } from 'antlr4ts/ParserRuleContext';
 import {
   ArithmeticBinaryContext,
   ArithmeticUnaryContext,
@@ -36,8 +37,8 @@ import {
   LogicalBinaryContext,
   LogicalInContext,
   LogicalNotContext,
-  type MetadataContext,
-  type MvExpandCommandContext,
+  MetadataContext,
+  MvExpandCommandContext,
   NullLiteralContext,
   NumericArrayLiteralContext,
   NumericValueContext,
@@ -49,13 +50,13 @@ import {
   QualifiedIntegerLiteralContext,
   RegexBooleanExpressionContext,
   type RenameClauseContext,
-  SourceIdentifierContext,
   type StatsCommandContext,
   StringArrayLiteralContext,
   StringContext,
   StringLiteralContext,
   type ValueExpressionContext,
   ValueExpressionDefaultContext,
+  FromIdentifierContext,
 } from '../../antlr/esql_parser';
 import {
   createSource,
@@ -71,6 +72,10 @@ import {
   sanifyIdentifierString,
   computeLocationExtends,
   createColumnStar,
+  wrapIdentifierAsArray,
+  createPolicy,
+  createSettingTuple,
+  createLiteralString,
 } from './ast_helpers';
 import { getPosition } from './ast_position_utils';
 import type {
@@ -82,15 +87,22 @@ import type {
 } from './types';
 
 export function collectAllSourceIdentifiers(ctx: FromCommandContext): ESQLAstItem[] {
-  return ctx.getRuleContexts(SourceIdentifierContext).map((sourceCtx) => createSource(sourceCtx));
+  return ctx.getRuleContexts(FromIdentifierContext).map((sourceCtx) => createSource(sourceCtx));
 }
 
-export function collectAllColumnIdentifiers(
+function extractIdentifiers(
   ctx: KeepCommandContext | DropCommandContext | MvExpandCommandContext | MetadataContext
-): ESQLAstItem[] {
-  const identifiers = (
-    Array.isArray(ctx.sourceIdentifier()) ? ctx.sourceIdentifier() : [ctx.sourceIdentifier()]
-  ) as SourceIdentifierContext[];
+) {
+  if (ctx instanceof MetadataContext) {
+    return wrapIdentifierAsArray(ctx.fromIdentifier());
+  }
+  if (ctx instanceof MvExpandCommandContext) {
+    return wrapIdentifierAsArray(ctx.qualifiedName());
+  }
+  return wrapIdentifierAsArray(ctx.qualifiedNamePattern());
+}
+
+function makeColumnsOutOfIdentifiers(identifiers: ParserRuleContext[]) {
   const args: ESQLColumn[] =
     identifiers
       .filter((child) => child.text)
@@ -100,18 +112,40 @@ export function collectAllColumnIdentifiers(
   return args;
 }
 
+export function collectAllColumnIdentifiers(
+  ctx: KeepCommandContext | DropCommandContext | MvExpandCommandContext | MetadataContext
+): ESQLAstItem[] {
+  const identifiers = extractIdentifiers(ctx);
+  return makeColumnsOutOfIdentifiers(identifiers);
+}
+
 export function getPolicyName(ctx: EnrichCommandContext) {
-  if (!ctx._policyName) {
+  if (!ctx._policyName || (ctx._policyName.text && /<missing /.test(ctx._policyName.text))) {
     return [];
   }
-  return [createSource(ctx._policyName, 'policy')];
+  return [createPolicy(ctx._policyName)];
+}
+
+export function getPolicySettings(ctx: EnrichCommandContext) {
+  if (!ctx.setting() || !ctx.setting().length) {
+    return [];
+  }
+  return ctx.setting().map((setting) => {
+    const node = createSettingTuple(setting);
+    if (setting._name?.text && setting._value?.text) {
+      node.args.push(createLiteralString(setting._value)!);
+      return node;
+    }
+    // incomplete setting
+    return node;
+  });
 }
 
 export function getMatchField(ctx: EnrichCommandContext) {
   if (!ctx._matchField) {
     return [];
   }
-  const identifier = ctx.sourceIdentifier(1);
+  const identifier = ctx.qualifiedNamePattern();
   if (identifier) {
     const fn = createOption(ctx.ON()!.text.toLowerCase(), ctx);
     if (identifier.text) {
@@ -459,16 +493,12 @@ export function collectAllFieldsStatements(ctx: FieldsContext | undefined): ESQL
   return ast;
 }
 
-export function visitByOption(ctx: StatsCommandContext) {
-  if (!ctx.BY()) {
+export function visitByOption(ctx: StatsCommandContext, expr: FieldsContext | undefined) {
+  if (!ctx.BY() || !expr) {
     return [];
   }
   const option = createOption(ctx.BY()!.text.toLowerCase(), ctx);
-  for (const qnCtx of ctx.grouping()?.qualifiedName() || []) {
-    if (qnCtx?.text?.length) {
-      option.args.push(createColumn(qnCtx));
-    }
-  }
+  option.args.push(...collectAllFieldsStatements(expr));
   return [option];
 }
 

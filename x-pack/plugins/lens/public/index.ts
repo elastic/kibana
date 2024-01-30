@@ -7,6 +7,7 @@
 
 import { LensPlugin } from './plugin';
 
+export { apiHasLensConfig } from './embeddable/interfaces/has_lens_config';
 export type {
   EmbeddableComponentProps,
   EmbeddableComponent,
@@ -106,7 +107,10 @@ export type {
   ReferenceLineLayerConfig,
 } from '@kbn/expression-xy-plugin/common';
 
+export type { InlineEditLensEmbeddableContext } from './trigger_actions/open_lens_config/in_app_embeddable_edit/types';
+
 export type {
+  HasLensConfig,
   LensEmbeddableInput,
   LensSavedObjectAttributes,
   Embeddable,

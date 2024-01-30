@@ -80,9 +80,6 @@ test('generates metric chart config', async () => {
           "test": Object {},
         },
         "datasourceStates": Object {
-          "formBased": Object {
-            "layers": Object {},
-          },
           "textBased": Object {
             "layers": Object {
               "layer_0": Object {

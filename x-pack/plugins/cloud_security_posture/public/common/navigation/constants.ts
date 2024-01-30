@@ -63,7 +63,7 @@ export const cloudPosturePages: Record<CspPage, CspPageNavigationItem> = {
 export const benchmarksNavigation: Record<CspBenchmarksPage, CspPageNavigationItem> = {
   rules: {
     name: NAV_ITEMS_NAMES.RULES,
-    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/benchmarks/:packagePolicyId/:policyId/rules`,
+    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/benchmarks/:benchmarkId/:benchmarkVersion/rules`,
     id: 'cloud_security_posture-benchmarks-rules',
   },
 };

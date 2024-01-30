@@ -24,9 +24,9 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
       const CLOUD_REGION = ['eu-central-1', 'us-east-1', 'area-51'];
 
       const CLUSTER = [
-        { clusterId: generateShortId(), clusterName: 'synth-cluster-1' },
-        { clusterId: generateShortId(), clusterName: 'synth-cluster-2' },
-        { clusterId: generateShortId(), clusterName: 'synth-cluster-3' },
+        { clusterId: generateShortId(), clusterName: 'synth-cluster-1', namespace: 'default' },
+        { clusterId: generateShortId(), clusterName: 'synth-cluster-2', namespace: 'production' },
+        { clusterId: generateShortId(), clusterName: 'synth-cluster-3', namespace: 'kube' },
       ];
 
       const SERVICE_NAMES = Array(3)
@@ -37,7 +37,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
         .interval('1m')
         .rate(1)
         .generator((timestamp) => {
-          return Array(20)
+          return Array(3)
             .fill(0)
             .map(() => {
               const index = Math.floor(Math.random() * 3);
@@ -48,10 +48,138 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
                 .service(SERVICE_NAMES[index])
                 .defaults({
                   'trace.id': generateShortId(),
-                  'agent.name': 'synth-agent',
+                  'agent.name': 'nodejs',
+                  'orchestrator.cluster.name': CLUSTER[index].clusterName,
+                  'orchestrator.cluster.id': CLUSTER[index].clusterId,
+                  'orchestrator.namespace': CLUSTER[index].namespace,
+                  'container.name': `${SERVICE_NAMES[index]}-${generateShortId()}`,
+                  'orchestrator.resource.id': generateShortId(),
+                  'cloud.provider': CLOUD_PROVIDERS[Math.floor(Math.random() * 3)],
+                  'cloud.region': CLOUD_REGION[index],
+                  'cloud.availability_zone': `${CLOUD_REGION[index]}a`,
+                  'cloud.project.id': generateShortId(),
+                  'cloud.instance.id': generateShortId(),
+                  'log.file.path': `/logs/${generateLongId()}/error.txt`,
+                })
+                .timestamp(timestamp);
+            });
+        });
+
+      const logsWithNoLogLevel = range
+        .interval('1m')
+        .rate(1)
+        .generator((timestamp) => {
+          return Array(3)
+            .fill(0)
+            .map(() => {
+              const index = Math.floor(Math.random() * 3);
+              return log
+                .create()
+                .service(SERVICE_NAMES[index])
+                .defaults({
+                  'trace.id': generateShortId(),
+                  'error.message': MESSAGE_LOG_LEVELS[index].message,
+                  'agent.name': 'nodejs',
                   'orchestrator.cluster.name': CLUSTER[index].clusterName,
                   'orchestrator.cluster.id': CLUSTER[index].clusterId,
                   'orchestrator.resource.id': generateShortId(),
+                  'orchestrator.namespace': CLUSTER[index].namespace,
+                  'container.name': `${SERVICE_NAMES[index]}-${generateShortId()}`,
+                  'cloud.provider': CLOUD_PROVIDERS[Math.floor(Math.random() * 3)],
+                  'cloud.region': CLOUD_REGION[index],
+                  'cloud.availability_zone': `${CLOUD_REGION[index]}a`,
+                  'cloud.project.id': generateShortId(),
+                  'cloud.instance.id': generateShortId(),
+                  'log.file.path': `/logs/${generateLongId()}/error.txt`,
+                })
+                .timestamp(timestamp);
+            });
+        });
+
+      const logsWithErrorMessage = range
+        .interval('1m')
+        .rate(1)
+        .generator((timestamp) => {
+          return Array(3)
+            .fill(0)
+            .map(() => {
+              const index = Math.floor(Math.random() * 3);
+              return log
+                .create()
+                .logLevel(MESSAGE_LOG_LEVELS[index].level)
+                .service(SERVICE_NAMES[index])
+                .defaults({
+                  'trace.id': generateShortId(),
+                  'error.message': MESSAGE_LOG_LEVELS[index].message,
+                  'agent.name': 'nodejs',
+                  'orchestrator.cluster.name': CLUSTER[index].clusterName,
+                  'orchestrator.cluster.id': CLUSTER[index].clusterId,
+                  'orchestrator.resource.id': generateShortId(),
+                  'orchestrator.namespace': CLUSTER[index].namespace,
+                  'container.name': `${SERVICE_NAMES[index]}-${generateShortId()}`,
+                  'cloud.provider': CLOUD_PROVIDERS[Math.floor(Math.random() * 3)],
+                  'cloud.region': CLOUD_REGION[index],
+                  'cloud.availability_zone': `${CLOUD_REGION[index]}a`,
+                  'cloud.project.id': generateShortId(),
+                  'cloud.instance.id': generateShortId(),
+                  'log.file.path': `/logs/${generateLongId()}/error.txt`,
+                })
+                .timestamp(timestamp);
+            });
+        });
+
+      const logsWithEventMessage = range
+        .interval('1m')
+        .rate(1)
+        .generator((timestamp) => {
+          return Array(3)
+            .fill(0)
+            .map(() => {
+              const index = Math.floor(Math.random() * 3);
+              return log
+                .create()
+                .logLevel(MESSAGE_LOG_LEVELS[index].level)
+                .service(SERVICE_NAMES[index])
+                .defaults({
+                  'trace.id': generateShortId(),
+                  'event.original': MESSAGE_LOG_LEVELS[index].message,
+                  'agent.name': 'nodejs',
+                  'orchestrator.cluster.name': CLUSTER[index].clusterName,
+                  'orchestrator.cluster.id': CLUSTER[index].clusterId,
+                  'orchestrator.resource.id': generateShortId(),
+                  'orchestrator.namespace': CLUSTER[index].namespace,
+                  'container.name': `${SERVICE_NAMES[index]}-${generateShortId()}`,
+                  'cloud.provider': CLOUD_PROVIDERS[Math.floor(Math.random() * 3)],
+                  'cloud.region': CLOUD_REGION[index],
+                  'cloud.availability_zone': `${CLOUD_REGION[index]}a`,
+                  'cloud.project.id': generateShortId(),
+                  'cloud.instance.id': generateShortId(),
+                  'log.file.path': `/logs/${generateLongId()}/error.txt`,
+                })
+                .timestamp(timestamp);
+            });
+        });
+
+      const logsWithNoMessage = range
+        .interval('1m')
+        .rate(1)
+        .generator((timestamp) => {
+          return Array(3)
+            .fill(0)
+            .map(() => {
+              const index = Math.floor(Math.random() * 3);
+              return log
+                .create()
+                .logLevel(MESSAGE_LOG_LEVELS[index].level)
+                .service(SERVICE_NAMES[index])
+                .defaults({
+                  'trace.id': generateShortId(),
+                  'agent.name': 'nodejs',
+                  'orchestrator.cluster.name': CLUSTER[index].clusterName,
+                  'orchestrator.cluster.id': CLUSTER[index].clusterId,
+                  'orchestrator.resource.id': generateShortId(),
+                  'orchestrator.namespace': CLUSTER[index].namespace,
+                  'container.name': `${SERVICE_NAMES[index]}-${generateShortId()}`,
                   'cloud.provider': CLOUD_PROVIDERS[Math.floor(Math.random() * 3)],
                   'cloud.region': CLOUD_REGION[index],
                   'cloud.availability_zone': `${CLOUD_REGION[index]}a`,
@@ -65,7 +193,13 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
 
       return withClient(
         logsEsClient,
-        logger.perf('generating_logs', () => logs)
+        logger.perf('generating_logs', () => [
+          logs,
+          logsWithNoLogLevel,
+          logsWithErrorMessage,
+          logsWithEventMessage,
+          logsWithNoMessage,
+        ])
       );
     },
   };

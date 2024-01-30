@@ -77,6 +77,10 @@ export class DashboardAddPanelService extends FtrService {
     await this.testSubjects.click(`createNew-${type}`);
   }
 
+  async clickAddNewPanelFromUIActionLink(type: string) {
+    await this.testSubjects.click(`create-action-${type}`);
+  }
+
   async addEveryEmbeddableOnCurrentPage() {
     this.log.debug('addEveryEmbeddableOnCurrentPage');
     const itemList = await this.testSubjects.find('savedObjectsFinderTable');

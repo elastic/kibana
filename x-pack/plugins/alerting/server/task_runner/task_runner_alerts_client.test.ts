@@ -424,19 +424,43 @@ describe('Task Runner', () => {
         expect(call.services.alertsClient?.setAlertData).toBeTruthy();
         expect(call.services.scopedClusterClient).toBeTruthy();
         expect(call.services).toBeTruthy();
-        expect(logger.debug).toHaveBeenCalledTimes(6);
-        expect(logger.debug).nthCalledWith(1, `Initializing resources for AlertsService`);
-        expect(logger.debug).nthCalledWith(2, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
+        expect(logger.debug).toHaveBeenCalledTimes(useDataStreamForAlerts ? 9 : 10);
+
+        let debugCall = 1;
+        expect(logger.debug).nthCalledWith(debugCall++, `Initializing resources for AlertsService`);
         expect(logger.debug).nthCalledWith(
-          3,
+          debugCall++,
+          'executing rule test:1 at 1970-01-01T00:00:00.000Z'
+        );
+
+        if (!useDataStreamForAlerts) {
+          expect(logger.debug).nthCalledWith(
+            debugCall++,
+            'Installing ILM policy .alerts-ilm-policy'
+          );
+        }
+        expect(logger.debug).nthCalledWith(
+          debugCall++,
+          'Installing component template .alerts-framework-mappings'
+        );
+        expect(logger.debug).nthCalledWith(
+          debugCall++,
+          'Installing component template .alerts-legacy-alert-mappings'
+        );
+        expect(logger.debug).nthCalledWith(
+          debugCall++,
+          'Installing component template .alerts-ecs-mappings'
+        );
+        expect(logger.debug).nthCalledWith(
+          debugCall++,
           'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}'
         );
         expect(logger.debug).nthCalledWith(
-          4,
+          debugCall++,
           'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":0,"new":0,"recovered":0,"ignored":0}}'
         );
         expect(logger.debug).nthCalledWith(
-          5,
+          debugCall++,
           'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
         );
         expect(

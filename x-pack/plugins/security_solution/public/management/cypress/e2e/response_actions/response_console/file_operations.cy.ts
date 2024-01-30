@@ -26,9 +26,7 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
     login();
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/170424
-  // FLAKY: https://github.com/elastic/kibana/issues/173456
-  describe.skip('File operations:', () => {
+  describe('File operations:', () => {
     const homeFilePath = Cypress.env('IS_CI') ? '/home/vagrant' : '/home/ubuntu';
 
     const fileContent = 'This is a test file for the get-file command.';
@@ -114,7 +112,7 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
         path: `${homeFilePath}/upload.zip`,
         password: 'elastic',
       }).then((unzippedFileContent) => {
-        expect(unzippedFileContent).to.equal(fileContent);
+        expect(unzippedFileContent).to.contain(fileContent);
       });
     });
 

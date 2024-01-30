@@ -421,6 +421,19 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                   "visible": true,
                 },
               },
+              "bulletGraph": Object {
+                "angularTickLabelPadding": 10,
+                "barBackground": "#343741",
+                "border": "#EDF0F5",
+                "colorBands": Array [
+                  "#D9C6EF",
+                  "#AA87D1",
+                ],
+                "fallbackBandColor": "#98A2B3",
+                "minHeight": 64,
+                "nonFiniteText": "N/A",
+                "textColor": "#343741",
+              },
               "chartMargins": Object {
                 "bottom": 0,
                 "left": 0,
@@ -740,7 +753,7 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
               "tooltip": Object {
                 "defaultDotColor": "black",
                 "maxTableHeight": 120,
-                "maxWidth": 260,
+                "maxWidth": 500,
               },
             }
           }
@@ -1324,6 +1337,19 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                   "visible": true,
                 },
               },
+              "bulletGraph": Object {
+                "angularTickLabelPadding": 10,
+                "barBackground": "#343741",
+                "border": "#EDF0F5",
+                "colorBands": Array [
+                  "#D9C6EF",
+                  "#AA87D1",
+                ],
+                "fallbackBandColor": "#98A2B3",
+                "minHeight": 64,
+                "nonFiniteText": "N/A",
+                "textColor": "#343741",
+              },
               "chartMargins": Object {
                 "bottom": 0,
                 "left": 0,
@@ -1643,7 +1669,7 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
               "tooltip": Object {
                 "defaultDotColor": "black",
                 "maxTableHeight": 120,
-                "maxWidth": 260,
+                "maxWidth": 500,
               },
             }
           }
@@ -2287,6 +2313,19 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                   "visible": true,
                 },
               },
+              "bulletGraph": Object {
+                "angularTickLabelPadding": 10,
+                "barBackground": "#343741",
+                "border": "#EDF0F5",
+                "colorBands": Array [
+                  "#D9C6EF",
+                  "#AA87D1",
+                ],
+                "fallbackBandColor": "#98A2B3",
+                "minHeight": 64,
+                "nonFiniteText": "N/A",
+                "textColor": "#343741",
+              },
               "chartMargins": Object {
                 "bottom": 0,
                 "left": 0,
@@ -2606,7 +2645,7 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
               "tooltip": Object {
                 "defaultDotColor": "black",
                 "maxTableHeight": 120,
-                "maxWidth": 260,
+                "maxWidth": 500,
               },
             }
           }
@@ -3252,6 +3291,19 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                   "visible": true,
                 },
               },
+              "bulletGraph": Object {
+                "angularTickLabelPadding": 10,
+                "barBackground": "#343741",
+                "border": "#EDF0F5",
+                "colorBands": Array [
+                  "#D9C6EF",
+                  "#AA87D1",
+                ],
+                "fallbackBandColor": "#98A2B3",
+                "minHeight": 64,
+                "nonFiniteText": "N/A",
+                "textColor": "#343741",
+              },
               "chartMargins": Object {
                 "bottom": 0,
                 "left": 0,
@@ -3571,7 +3623,7 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
               "tooltip": Object {
                 "defaultDotColor": "black",
                 "maxTableHeight": 120,
-                "maxWidth": 260,
+                "maxWidth": 500,
               },
             }
           }
@@ -4155,6 +4207,19 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                   "visible": true,
                 },
               },
+              "bulletGraph": Object {
+                "angularTickLabelPadding": 10,
+                "barBackground": "#343741",
+                "border": "#EDF0F5",
+                "colorBands": Array [
+                  "#D9C6EF",
+                  "#AA87D1",
+                ],
+                "fallbackBandColor": "#98A2B3",
+                "minHeight": 64,
+                "nonFiniteText": "N/A",
+                "textColor": "#343741",
+              },
               "chartMargins": Object {
                 "bottom": 0,
                 "left": 0,
@@ -4474,7 +4539,7 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
               "tooltip": Object {
                 "defaultDotColor": "black",
                 "maxTableHeight": 120,
-                "maxWidth": 260,
+                "maxWidth": 500,
               },
             }
           }
@@ -5013,6 +5078,19 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                   "visible": true,
                 },
               },
+              "bulletGraph": Object {
+                "angularTickLabelPadding": 10,
+                "barBackground": "#343741",
+                "border": "#EDF0F5",
+                "colorBands": Array [
+                  "#D9C6EF",
+                  "#AA87D1",
+                ],
+                "fallbackBandColor": "#98A2B3",
+                "minHeight": 64,
+                "nonFiniteText": "N/A",
+                "textColor": "#343741",
+              },
               "chartMargins": Object {
                 "bottom": 0,
                 "left": 0,
@@ -5332,7 +5410,7 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
               "tooltip": Object {
                 "defaultDotColor": "black",
                 "maxTableHeight": 120,
-                "maxWidth": 260,
+                "maxWidth": 500,
               },
             }
           }

@@ -42,7 +42,8 @@ export class Job {
   public readonly isDeprecated: ReportPayload['isDeprecated'];
   public readonly spaceId: ReportPayload['spaceId'];
   public readonly browserTimezone?: ReportPayload['browserTimezone'];
-  public readonly layout: ReportPayload['layout'];
+  public readonly layout: ReportPayload['layout']; // png & pdf only
+  public readonly pagingStrategy: ReportPayload['pagingStrategy']; // csv only
   public readonly version: ReportPayload['version'];
 
   public readonly jobtype: ReportSource['jobtype'];
@@ -81,6 +82,7 @@ export class Job {
     this.objectType = report.payload.objectType;
     this.title = report.payload.title;
     this.layout = report.payload.layout;
+    this.pagingStrategy = report.payload.pagingStrategy;
     this.version = report.payload.version;
     this.created_by = report.created_by;
     this.created_at = report.created_at;

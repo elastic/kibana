@@ -181,7 +181,7 @@ export interface CnvmStatistics {
   highCount: number | undefined;
   mediumCount: number | undefined;
   resourcesScanned: number | undefined;
-  cloudRegions: number | undefined;
+  cloudAccounts: number | undefined;
 }
 
 export interface CnvmDashboardData {

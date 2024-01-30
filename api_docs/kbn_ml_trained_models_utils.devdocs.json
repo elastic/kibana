@@ -436,7 +436,7 @@
         "label": "TrainedModelType",
         "description": [],
         "signature": [
-          "\"pytorch\" | \"tree_ensemble\" | \"lang_ident\""
+          "\"tree_ensemble\" | \"lang_ident\" | \"pytorch\""
         ],
         "path": "x-pack/packages/ml/trained_models_utils/src/constants/trained_models.ts",
         "deprecated": false,

@@ -22,7 +22,7 @@ describe('AlertCountsTool', () => {
   const replacements = { key: 'value' };
   const request = {
     body: {
-      assistantLangChain: false,
+      isEnabledKnowledgeBase: false,
       alertsIndexPattern: '.alerts-security.alerts-default',
       allow: ['@timestamp', 'cloud.availability_zone', 'user.name'],
       allowReplacement: ['user.name'],
@@ -30,11 +30,11 @@ describe('AlertCountsTool', () => {
       size: 20,
     },
   } as unknown as KibanaRequest<unknown, unknown, RequestBody>;
-  const assistantLangChain = true;
+  const isEnabledKnowledgeBase = true;
   const chain = {} as unknown as RetrievalQAChain;
   const modelExists = true;
   const rest = {
-    assistantLangChain,
+    isEnabledKnowledgeBase,
     chain,
     modelExists,
   };
@@ -57,7 +57,7 @@ describe('AlertCountsTool', () => {
     it('returns false when the request is missing required anonymization parameters', () => {
       const requestMissingAnonymizationParams = {
         body: {
-          assistantLangChain: false,
+          isEnabledKnowledgeBase: false,
           alertsIndexPattern: '.alerts-security.alerts-default',
           size: 20,
         },
@@ -96,18 +96,64 @@ describe('AlertCountsTool', () => {
       await tool.func('');
 
       expect(esClient.search).toHaveBeenCalledWith({
-        aggs: { statusBySeverity: { terms: { field: 'kibana.alert.severity' } } },
+        aggs: {
+          kibanaAlertSeverity: {
+            terms: {
+              field: 'kibana.alert.severity',
+            },
+            aggs: {
+              kibanaAlertWorkflowStatus: {
+                terms: {
+                  field: 'kibana.alert.workflow_status',
+                },
+              },
+            },
+          },
+        },
         index: ['alerts-index'],
         query: {
           bool: {
             filter: [
               {
                 bool: {
-                  filter: [{ match_phrase: { 'kibana.alert.workflow_status': 'open' } }],
-                  must_not: [{ exists: { field: 'kibana.alert.building_block_type' } }],
+                  filter: [
+                    {
+                      bool: {
+                        should: [
+                          {
+                            match_phrase: {
+                              'kibana.alert.workflow_status': 'open',
+                            },
+                          },
+                          {
+                            match_phrase: {
+                              'kibana.alert.workflow_status': 'acknowledged',
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  ],
+                  should: [],
+                  must: [],
+                  must_not: [
+                    {
+                      exists: {
+                        field: 'kibana.alert.building_block_type',
+                      },
+                    },
+                  ],
                 },
               },
-              { range: { '@timestamp': { gte: 'now/d', lte: 'now/d' } } },
+              {
+                range: {
+                  '@timestamp': {
+                    gte: 'now-24h',
+                    lte: 'now',
+                  },
+                },
+              },
             ],
           },
         },

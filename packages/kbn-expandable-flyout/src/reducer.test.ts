@@ -7,8 +7,19 @@
  */
 
 import { FlyoutPanelProps } from './types';
-import { initialState, reducer, State } from './reducer';
-import { Action, ActionType } from './actions';
+import { reducer } from './reducer';
+import { initialState, State } from './state';
+import {
+  closeLeftPanelAction,
+  closePanelsAction,
+  closePreviewPanelAction,
+  closeRightPanelAction,
+  openLeftPanelAction,
+  openPanelsAction,
+  openPreviewPanelAction,
+  openRightPanelAction,
+  previousPreviewPanelAction,
+} from './actions';
 
 const rightPanel1: FlyoutPanelProps = {
   id: 'right1',
@@ -39,14 +50,11 @@ describe('reducer', () => {
   describe('should handle openFlyout action', () => {
     it('should add panels to empty state', () => {
       const state: State = initialState;
-      const action: Action = {
-        type: ActionType.openFlyout,
-        payload: {
-          right: rightPanel1,
-          left: leftPanel1,
-          preview: previewPanel1,
-        },
-      };
+      const action = openPanelsAction({
+        right: rightPanel1,
+        left: leftPanel1,
+        preview: previewPanel1,
+      });
       const newState: State = reducer(state, action);
 
       expect(newState).toEqual({
@@ -62,14 +70,11 @@ describe('reducer', () => {
         right: rightPanel1,
         preview: [previewPanel1, { id: 'preview' }],
       };
-      const action: Action = {
-        type: ActionType.openFlyout,
-        payload: {
-          right: rightPanel2,
-          left: leftPanel2,
-          preview: previewPanel2,
-        },
-      };
+      const action = openPanelsAction({
+        right: rightPanel2,
+        left: leftPanel2,
+        preview: previewPanel2,
+      });
       const newState: State = reducer(state, action);
 
       expect(newState).toEqual({
@@ -85,12 +90,9 @@ describe('reducer', () => {
         right: rightPanel1,
         preview: [previewPanel1],
       };
-      const action: Action = {
-        type: ActionType.openFlyout,
-        payload: {
-          right: rightPanel2,
-        },
-      };
+      const action = openPanelsAction({
+        right: rightPanel2,
+      });
       const newState: State = reducer(state, action);
 
       expect(newState).toEqual({
@@ -104,10 +106,7 @@ describe('reducer', () => {
   describe('should handle openRightPanel action', () => {
     it('should add right panel to empty state', () => {
       const state: State = initialState;
-      const action: Action = {
-        type: ActionType.openRightPanel,
-        payload: rightPanel1,
-      };
+      const action = openRightPanelAction(rightPanel1);
       const newState: State = reducer(state, action);
 
       expect(newState).toEqual({
@@ -123,10 +122,7 @@ describe('reducer', () => {
         right: rightPanel1,
         preview: [previewPanel1],
       };
-      const action: Action = {
-        type: ActionType.openRightPanel,
-        payload: rightPanel2,
-      };
+      const action = openRightPanelAction(rightPanel2);
       const newState: State = reducer(state, action);
 
       expect(newState).toEqual({
@@ -140,10 +136,7 @@ describe('reducer', () => {
   describe('should handle openLeftPanel action', () => {
     it('should add left panel to empty state', () => {
       const state: State = initialState;
-      const action: Action = {
-        type: ActionType.openLeftPanel,
-        payload: leftPanel1,
-      };
+      const action = openLeftPanelAction(leftPanel1);
       const newState: State = reducer(state, action);
 
       expect(newState).toEqual({
@@ -159,10 +152,7 @@ describe('reducer', () => {
         right: rightPanel1,
         preview: [previewPanel1],
       };
-      const action: Action = {
-        type: ActionType.openLeftPanel,
-        payload: leftPanel2,
-      };
+      const action = openLeftPanelAction(leftPanel2);
       const newState: State = reducer(state, action);
 
       expect(newState).toEqual({
@@ -176,10 +166,7 @@ describe('reducer', () => {
   describe('should handle openPreviewPanel action', () => {
     it('should add preview panel to empty state', () => {
       const state: State = initialState;
-      const action: Action = {
-        type: ActionType.openPreviewPanel,
-        payload: previewPanel1,
-      };
+      const action = openPreviewPanelAction(previewPanel1);
       const newState: State = reducer(state, action);
 
       expect(newState).toEqual({
@@ -195,10 +182,7 @@ describe('reducer', () => {
         right: rightPanel1,
         preview: [previewPanel1],
       };
-      const action: Action = {
-        type: ActionType.openPreviewPanel,
-        payload: previewPanel2,
-      };
+      const action = openPreviewPanelAction(previewPanel2);
       const newState: State = reducer(state, action);
 
       expect(newState).toEqual({
@@ -212,9 +196,7 @@ describe('reducer', () => {
   describe('should handle closeRightPanel action', () => {
     it('should return empty state when removing right panel from empty state', () => {
       const state: State = initialState;
-      const action: Action = {
-        type: ActionType.closeRightPanel,
-      };
+      const action = closeRightPanelAction();
       const newState: State = reducer(state, action);
 
       expect(newState).toEqual(state);
@@ -226,9 +208,7 @@ describe('reducer', () => {
         right: undefined,
         preview: [previewPanel1],
       };
-      const action: Action = {
-        type: ActionType.closeRightPanel,
-      };
+      const action = closeRightPanelAction();
       const newState: State = reducer(state, action);
 
       expect(newState).toEqual(state);
@@ -240,9 +220,8 @@ describe('reducer', () => {
         right: rightPanel1,
         preview: [previewPanel1],
       };
-      const action: Action = {
-        type: ActionType.closeRightPanel,
-      };
+      const action = closeRightPanelAction();
+
       const newState: State = reducer(state, action);
 
       expect(newState).toEqual({
@@ -256,9 +235,7 @@ describe('reducer', () => {
   describe('should handle closeLeftPanel action', () => {
     it('should return empty state when removing left panel on empty state', () => {
       const state: State = initialState;
-      const action: Action = {
-        type: ActionType.closeLeftPanel,
-      };
+      const action = closeLeftPanelAction();
       const newState: State = reducer(state, action);
 
       expect(newState).toEqual(state);
@@ -270,9 +247,7 @@ describe('reducer', () => {
         right: rightPanel1,
         preview: [],
       };
-      const action: Action = {
-        type: ActionType.closeLeftPanel,
-      };
+      const action = closeLeftPanelAction();
       const newState: State = reducer(state, action);
 
       expect(newState).toEqual(state);
@@ -284,9 +259,7 @@ describe('reducer', () => {
         right: rightPanel1,
         preview: [previewPanel1],
       };
-      const action: Action = {
-        type: ActionType.closeLeftPanel,
-      };
+      const action = closeLeftPanelAction();
       const newState: State = reducer(state, action);
 
       expect(newState).toEqual({
@@ -300,9 +273,7 @@ describe('reducer', () => {
   describe('should handle closePreviewPanel action', () => {
     it('should return empty state when removing preview panel on empty state', () => {
       const state: State = initialState;
-      const action: Action = {
-        type: ActionType.closePreviewPanel,
-      };
+      const action = closePreviewPanelAction();
       const newState: State = reducer(state, action);
 
       expect(newState).toEqual(state);
@@ -314,9 +285,7 @@ describe('reducer', () => {
         right: rightPanel1,
         preview: [],
       };
-      const action: Action = {
-        type: ActionType.closePreviewPanel,
-      };
+      const action = closePreviewPanelAction();
       const newState: State = reducer(state, action);
 
       expect(newState).toEqual(state);
@@ -328,9 +297,7 @@ describe('reducer', () => {
         right: leftPanel1,
         preview: [previewPanel1, previewPanel2],
       };
-      const action: Action = {
-        type: ActionType.closePreviewPanel,
-      };
+      const action = closePreviewPanelAction();
       const newState: State = reducer(state, action);
 
       expect(newState).toEqual({
@@ -344,9 +311,7 @@ describe('reducer', () => {
   describe('should handle previousPreviewPanel action', () => {
     it('should return empty state when previous preview panel on an empty state', () => {
       const state: State = initialState;
-      const action: Action = {
-        type: ActionType.previousPreviewPanel,
-      };
+      const action = previousPreviewPanelAction();
       const newState: State = reducer(state, action);
 
       expect(newState).toEqual(state);
@@ -358,9 +323,7 @@ describe('reducer', () => {
         right: rightPanel1,
         preview: [],
       };
-      const action: Action = {
-        type: ActionType.previousPreviewPanel,
-      };
+      const action = previousPreviewPanelAction();
       const newState: State = reducer(state, action);
 
       expect(newState).toEqual(state);
@@ -372,9 +335,7 @@ describe('reducer', () => {
         right: rightPanel1,
         preview: [previewPanel1, previewPanel2],
       };
-      const action: Action = {
-        type: ActionType.previousPreviewPanel,
-      };
+      const action = previousPreviewPanelAction();
       const newState: State = reducer(state, action);
 
       expect(newState).toEqual({
@@ -388,9 +349,7 @@ describe('reducer', () => {
   describe('should handle closeFlyout action', () => {
     it('should return empty state when closing flyout on an empty state', () => {
       const state: State = initialState;
-      const action: Action = {
-        type: ActionType.closeFlyout,
-      };
+      const action = closePanelsAction();
       const newState: State = reducer(state, action);
 
       expect(newState).toEqual(initialState);
@@ -402,9 +361,7 @@ describe('reducer', () => {
         right: rightPanel1,
         preview: [previewPanel1],
       };
-      const action: Action = {
-        type: ActionType.closeFlyout,
-      };
+      const action = closePanelsAction();
       const newState: State = reducer(state, action);
 
       expect(newState).toEqual({

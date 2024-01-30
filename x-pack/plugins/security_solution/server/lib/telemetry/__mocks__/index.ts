@@ -16,6 +16,7 @@ import { stubEndpointAlertResponse, stubProcessTree, stubFetchTimelineEvents } f
 import { stubEndpointMetricsResponse } from './metrics';
 import { prebuiltRuleAlertsResponse } from './prebuilt_rule_alerts';
 import type { ESClusterInfo, ESLicense } from '../types';
+import { stubFleetAgentResponse } from './fleet_agent_response';
 
 export const createMockTelemetryEventsSender = (
   enableTelemetry?: boolean,
@@ -81,7 +82,7 @@ export const createMockTelemetryReceiver = (
     fetchClusterInfo: jest.fn().mockReturnValue(stubClusterInfo),
     fetchLicenseInfo: jest.fn().mockReturnValue(stubLicenseInfo),
     copyLicenseFields: jest.fn(),
-    fetchFleetAgents: jest.fn(),
+    fetchFleetAgents: jest.fn().mockReturnValue(stubFleetAgentResponse),
     openPointInTime: jest.fn().mockReturnValue(Promise.resolve('test-pit-id')),
     getAlertsIndex: jest.fn().mockReturnValue('alerts-*'),
     fetchDiagnosticAlertsBatch: jest.fn().mockReturnValue(diagnosticsAlert ?? jest.fn()),

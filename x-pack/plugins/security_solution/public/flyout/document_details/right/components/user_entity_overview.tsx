@@ -18,24 +18,26 @@ import {
 import { css } from '@emotion/css';
 import { getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { LeftPanelInsightsTab, DocumentDetailsLeftPanelKey } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import { useRightPanelContext } from '../context';
 import type { DescriptionList } from '../../../../../common/utility_types';
+import { getField } from '../../shared/utils';
+import { CellActions } from './cell_actions';
 import {
   FirstLastSeen,
   FirstLastSeenType,
 } from '../../../../common/components/first_last_seen/first_last_seen';
 import { buildUserNamesFilter, RiskScoreEntity } from '../../../../../common/search_strategy';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
-import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/field_renderers';
 import { DescriptionListStyled } from '../../../../common/components/page';
 import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
-import { RiskScoreLevel } from '../../../../explore/components/risk_score/severity/common';
+import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { useRiskScore } from '../../../../explore/containers/risk_score';
+import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
+
 import {
   USER_DOMAIN,
   LAST_SEEN,
@@ -53,7 +55,6 @@ import { useObservedUserDetails } from '../../../../explore/users/containers/use
 import { RiskScoreDocTooltip } from '../../../../overview/components/common';
 
 const USER_ICON = 'user';
-const CONTEXT_ID = `flyout-user-entity-overview`;
 
 export interface UserEntityOverviewProps {
   /**
@@ -67,7 +68,7 @@ export interface UserEntityOverviewProps {
  */
 export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName }) => {
   const { eventId, indexName, scopeId } = useRightPanelContext();
-  const { openLeftPanel } = useExpandableFlyoutContext();
+  const { openLeftPanel } = useExpandableFlyoutApi();
   const goToEntitiesTab = useCallback(() => {
     openLeftPanel({
       id: DocumentDetailsLeftPanelKey,
@@ -112,21 +113,24 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
     timerange,
   });
 
+  const userDomainValue = useMemo(
+    () => getField(getOr([], 'user.domain', userDetails)),
+    [userDetails]
+  );
   const userDomain: DescriptionList[] = useMemo(
     () => [
       {
         title: USER_DOMAIN,
-        description: (
-          <DefaultFieldRenderer
-            rowItems={getOr([], 'user.domain', userDetails)}
-            attrName={'domain'}
-            idPrefix={CONTEXT_ID}
-            isDraggable={false}
-          />
+        description: userDomainValue ? (
+          <CellActions field={'user.domain'} value={userDomainValue}>
+            {userDomainValue}
+          </CellActions>
+        ) : (
+          getEmptyTagValue()
         ),
       },
     ],
-    [userDetails]
+    [userDomainValue]
   );
 
   const userLastSeen: DescriptionList[] = useMemo(

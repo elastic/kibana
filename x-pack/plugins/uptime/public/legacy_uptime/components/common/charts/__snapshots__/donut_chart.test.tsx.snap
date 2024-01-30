@@ -204,6 +204,19 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 "visible": true,
               },
             },
+            "bulletGraph": Object {
+              "angularTickLabelPadding": 10,
+              "barBackground": "#343741",
+              "border": "#EDF0F5",
+              "colorBands": Array [
+                "#D9C6EF",
+                "#AA87D1",
+              ],
+              "fallbackBandColor": "#98A2B3",
+              "minHeight": 64,
+              "nonFiniteText": "N/A",
+              "textColor": "#343741",
+            },
             "chartMargins": Object {
               "bottom": 0,
               "left": 0,
@@ -523,7 +536,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
             "tooltip": Object {
               "defaultDotColor": "black",
               "maxTableHeight": 120,
-              "maxWidth": 260,
+              "maxWidth": 500,
             },
           }
         }

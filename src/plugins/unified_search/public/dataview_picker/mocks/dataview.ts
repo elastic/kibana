@@ -121,3 +121,10 @@ export const buildDataViewMock = ({
 };
 
 export const dataViewMock = buildDataViewMock({ name: 'the-data-view', fields });
+export const dataViewMockWithTimefield = buildDataViewMock({
+  timeFieldName: '@timestamp',
+  name: 'the-data-view-with-timefield',
+  fields,
+});
+
+export const dataViewMockList = [dataViewMock, dataViewMockWithTimefield];

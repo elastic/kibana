@@ -50,9 +50,7 @@
           "\nA pure component of an entire page that can be displayed when Kibana \"has no data\", specifically for Analytics."
         ],
         "signature": [
-          "({ kibanaGuideDocLink, onDataViewCreated, allowAdHocDataView, showPlainSpinner, prependBasePath, pageFlavor, }: ",
-          "Props",
-          ") => JSX.Element"
+          "({ onDataViewCreated, allowAdHocDataView, showPlainSpinner, ...services }: React.PropsWithChildren<AnalyticsNoDataPageProps>) => JSX.Element"
         ],
         "path": "packages/shared-ux/page/analytics_no_data/impl/src/analytics_no_data_page.component.tsx",
         "deprecated": false,
@@ -61,12 +59,12 @@
           {
             "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
             "id": "def-public.AnalyticsNoDataPage.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
-            "label": "{\n  kibanaGuideDocLink,\n  onDataViewCreated,\n  allowAdHocDataView,\n  showPlainSpinner,\n  prependBasePath,\n  pageFlavor = 'kibana',\n}",
+            "label": "{\n  onDataViewCreated,\n  allowAdHocDataView,\n  showPlainSpinner,\n  ...services\n}",
             "description": [],
             "signature": [
-              "Props"
+              "React.PropsWithChildren<AnalyticsNoDataPageProps>"
             ],
             "path": "packages/shared-ux/page/analytics_no_data/impl/src/analytics_no_data_page.component.tsx",
             "deprecated": false,
@@ -150,6 +148,69 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
+        "id": "def-public.getHasApiKeys$",
+        "type": "Function",
+        "tags": [],
+        "label": "getHasApiKeys$",
+        "description": [],
+        "signature": [
+          "({ get, }: { get: <T>(path: string) => Promise<T>; }) => ",
+          "Observable",
+          "<",
+          "HasApiKeysResponse",
+          ">"
+        ],
+        "path": "packages/shared-ux/page/analytics_no_data/impl/lib/get_has_api_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
+            "id": "def-public.getHasApiKeys$.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  get,\n}",
+            "description": [],
+            "path": "packages/shared-ux/page/analytics_no_data/impl/lib/get_has_api_keys.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
+                "id": "def-public.getHasApiKeys$.$1.get",
+                "type": "Function",
+                "tags": [],
+                "label": "get",
+                "description": [],
+                "signature": [
+                  "<T>(path: string) => Promise<T>"
+                ],
+                "path": "packages/shared-ux/page/analytics_no_data/impl/lib/get_has_api_keys.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/shared-ux-page-analytics-no-data",
+                    "id": "def-public.getHasApiKeys$.$1.get.$1",
+                    "type": "string",
+                    "tags": [],
+                    "label": "path",
+                    "description": [],
+                    "path": "packages/shared-ux/page/analytics_no_data/types/index.d.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ]
           }
         ],
         "returnComment": [],
