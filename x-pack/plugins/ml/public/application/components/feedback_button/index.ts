@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-import { getDataTestSubjectSelector } from '../../helpers/common';
-
-export const USER_PANEL_HEADER = getDataTestSubjectSelector('user-panel-header');
+export { FeedBackButton } from './feedback_button';
