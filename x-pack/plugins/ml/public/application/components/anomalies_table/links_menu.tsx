@@ -366,7 +366,13 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     };
 
     const generateLogRateAnalysisUrl = async () => {
-      if (props.anomaly.source.function_description !== 'count') {
+      if (
+        props.anomaly.source.function_description !== 'count' ||
+        // Disable link for datafeeds that use aggregations
+        // and define a non-standard summary count field name
+        (job.analysis_config.summary_count_field_name !== undefined &&
+          job.analysis_config.summary_count_field_name !== 'doc_count')
+      ) {
         if (!unmounted) {
           setOpenInLogRateAnalysisUrl(undefined);
         }
