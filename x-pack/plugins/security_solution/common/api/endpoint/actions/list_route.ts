@@ -9,6 +9,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import {
+  RESPONSE_ACTION_AGENT_TYPE,
   RESPONSE_ACTION_API_COMMANDS_NAMES,
   RESPONSE_ACTION_STATUS,
   RESPONSE_ACTION_TYPE,
@@ -26,12 +27,25 @@ const statusesSchema = schema.oneOf(RESPONSE_ACTION_STATUS.map((status) => schem
 // @ts-expect-error TS2769: No overload matches this call
 const typesSchema = schema.oneOf(RESPONSE_ACTION_TYPE.map((type) => schema.literal(type)));
 
+const agentTypesSchema = schema.oneOf(
+  // @ts-expect-error TS2769: No overload matches this call
+  RESPONSE_ACTION_AGENT_TYPE.map((agentType) => schema.literal(agentType))
+);
+
 export const EndpointActionListRequestSchema = {
   query: schema.object({
     agentIds: schema.maybe(
       schema.oneOf([
         schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
         schema.string({ minLength: 1 }),
+      ])
+    ),
+    agentTypes: schema.maybe(
+      schema.oneOf([
+        schema.arrayOf(agentTypesSchema, {
+          minSize: 1,
+        }),
+        agentTypesSchema,
       ])
     ),
     commands: schema.maybe(

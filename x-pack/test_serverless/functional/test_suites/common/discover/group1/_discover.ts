@@ -150,7 +150,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('query #2, which has an empty time range', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/173292
+    // FLAKY: https://github.com/elastic/kibana/issues/173784
+    describe.skip('query #2, which has an empty time range', () => {
       const fromTime = 'Jun 11, 1999 @ 09:22:11.000';
       const toTime = 'Jun 12, 1999 @ 11:21:04.000';
 
