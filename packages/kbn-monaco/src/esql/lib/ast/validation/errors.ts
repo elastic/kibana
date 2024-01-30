@@ -67,7 +67,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       return {
         message: i18n.translate('monaco.esql.validation.noNestedArgumentSupport', {
           defaultMessage:
-            "Aggregate function's parameters must be an attribute or literal; found [{name}] of type [{argType}]",
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [{name}] of type [{argType}]",
           values: { name: out.name, argType: out.argType },
         }),
       };
@@ -104,12 +104,23 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           },
         }),
       };
-    case 'unsupportedFunction':
+    case 'unsupportedFunctionForCommand':
       return {
-        message: i18n.translate('monaco.esql.validation.unsupportedFunction', {
+        message: i18n.translate('monaco.esql.validation.unsupportedFunctionForCommand', {
           defaultMessage: '{command} does not support function {name}',
           values: {
             command: out.command,
+            name: out.name,
+          },
+        }),
+      };
+    case 'unsupportedFunctionForCommandOption':
+      return {
+        message: i18n.translate('monaco.esql.validation.unsupportedFunctionforCommandOption', {
+          defaultMessage: '{command} {option} does not support function {name}',
+          values: {
+            command: out.command,
+            option: out.option,
             name: out.name,
           },
         }),
@@ -182,6 +193,31 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           },
         }),
         type: 'warning',
+      };
+    case 'unsupportedSetting':
+      return {
+        message: i18n.translate('monaco.esql.validation.unsupportedSetting', {
+          defaultMessage: 'Unsupported setting [{setting}], expected [{expected}]',
+          values: {
+            setting: out.setting,
+            expected: out.expected,
+          },
+        }),
+        type: 'error',
+      };
+    case 'unsupportedSettingCommandValue':
+      return {
+        message: i18n.translate('monaco.esql.validation.unsupportedSettingValue', {
+          defaultMessage:
+            'Unrecognized value [{value}], {command} [{setting}] needs to be one of [{expected}]',
+          values: {
+            setting: out.setting,
+            expected: out.expected,
+            value: out.value,
+            command: out.command,
+          },
+        }),
+        type: 'error',
       };
   }
   return { message: '' };

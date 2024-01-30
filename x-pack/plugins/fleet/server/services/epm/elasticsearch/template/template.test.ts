@@ -1611,14 +1611,7 @@ describe('EPM template', () => {
         },
       ]);
 
-      expect(esClient.transport.request).toHaveBeenCalledWith(
-        expect.objectContaining({
-          path: '/test.prefix1-default/_rollover',
-          querystring: {
-            lazy: true,
-          },
-        })
-      );
+      expect(esClient.indices.rollover).toHaveBeenCalled();
     });
     it('should skip rollover on expected error when flag is on', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
