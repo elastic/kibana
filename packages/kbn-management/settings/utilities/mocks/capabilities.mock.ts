@@ -6,4 +6,15 @@
  * Side Public License, v 1.
  */
 
-export { Form } from './form';
+import { SettingsCapabilities } from '@kbn/management-settings-types';
+
+export const getSettingsCapabilitiesMock = (): SettingsCapabilities => ({
+  spaceSettings: {
+    show: true,
+    save: true,
+  },
+  globalSettings: {
+    show: true,
+    save: true,
+  },
+});

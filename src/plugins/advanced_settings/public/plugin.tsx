@@ -9,9 +9,19 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, Plugin } from '@kbn/core/public';
 import { SectionRegistry } from '@kbn/management-settings-section-registry';
+import ReactDOM from 'react-dom';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import React from 'react';
+import { withSuspense } from '@kbn/shared-ux-utility';
 import { AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup } from './types';
 
 const { setup: sectionRegistrySetup, start: sectionRegistryStart } = new SectionRegistry();
+
+const LazyKibanaSettingsApplication = React.lazy(async () => ({
+  default: (await import('@kbn/management-settings-application')).KibanaSettingsApplication,
+}));
+
+const KibanaSettingsApplication = withSuspense(LazyKibanaSettingsApplication);
 
 const title = i18n.translate('advancedSettings.advancedSettingsLabel', {
   defaultMessage: 'Advanced Settings',
@@ -30,16 +40,21 @@ export class AdvancedSettingsPlugin
       id: 'settings',
       title,
       order: 3,
-      async mount(params) {
-        const { mountManagementSection } = await import(
-          './management_app/mount_management_section'
+      async mount({ element, setBreadcrumbs, history }) {
+        const [coreStart] = await core.getStartServices();
+        setBreadcrumbs([{ text: title }]);
+
+        ReactDOM.render(
+          <KibanaRenderContextProvider {...coreStart}>
+            <KibanaSettingsApplication
+              {...{ ...coreStart, history, sectionRegistry: sectionRegistryStart }}
+            />
+          </KibanaRenderContextProvider>,
+          element
         );
-        return mountManagementSection(
-          core.getStartServices,
-          params,
-          sectionRegistryStart,
-          usageCollection
-        );
+        return () => {
+          ReactDOM.unmountComponentAtNode(element);
+        };
       },
     });
 
