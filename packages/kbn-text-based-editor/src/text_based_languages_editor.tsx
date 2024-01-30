@@ -163,7 +163,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const language = getAggregateQueryMode(query);
   const queryString: string = query[language] ?? '';
   const kibana = useKibana<TextBasedEditorDeps>();
-  const { dataViews, expressions, indexManagementApiService, application } = kibana.services;
+  const { dataViews, expressions, indexManagementApiService, application, uiSettings } =
+    kibana.services;
   const [code, setCode] = useState(queryString ?? '');
   const [codeOneLiner, setCodeOneLiner] = useState('');
   // To make server side errors less "sticky", register the state of the code when submitting
@@ -341,6 +342,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         }
         return [];
       },
+      getMetaFields: async () => uiSettings?.get('metaFields') || [],
       getPolicies: async () => {
         const { data: policies, error } =
           (await indexManagementApiService?.getAllEnrichPolicies()) || {};
@@ -350,7 +352,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         return policies.map(({ type, query: policyQuery, ...rest }) => rest);
       },
     }),
-    [dataViews, expressions, indexManagementApiService, esqlFieldsCache, memoizedFieldsFromESQL]
+    [
+      dataViews,
+      expressions,
+      indexManagementApiService,
+      esqlFieldsCache,
+      memoizedFieldsFromESQL,
+      uiSettings,
+    ]
   );
 
   const queryValidation = useCallback(
