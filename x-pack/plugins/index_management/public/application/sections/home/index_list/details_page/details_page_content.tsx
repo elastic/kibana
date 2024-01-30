@@ -58,9 +58,7 @@ const defaultTabs: IndexDetailsTab[] = [
     name: (
       <FormattedMessage id="xpack.idxMgmt.indexDetails.settingsTitle" defaultMessage="Settings" />
     ),
-    renderTabContent: ({ index }) => (
-      <DetailsPageSettings indexName={index.name} isIndexOpen={index.status === INDEX_OPEN} />
-    ),
+    renderTabContent: ({ index }) => <DetailsPageSettings indexName={index.name} />,
     order: 30,
   },
 ];

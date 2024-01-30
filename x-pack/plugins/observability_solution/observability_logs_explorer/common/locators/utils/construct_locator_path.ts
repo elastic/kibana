@@ -16,8 +16,8 @@ import {
   availableControlsPanels,
   DatasetSelectionPlain,
 } from '@kbn/logs-explorer-plugin/common';
-import { OBSERVABILITY_LOG_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
-import { OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY, urlSchemaV1 } from '../../url_schema';
+import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
+import { OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY, urlSchemaV1 } from '../../url_schema';
 import { deepCompactObject } from '../../utils/deep_compact_object';
 
 type ControlsPageState = NonNullable<urlSchemaV1.UrlSchema['controls']>;
@@ -49,14 +49,14 @@ export const constructLocatorPath = async (params: LocatorPathConstructionParams
   );
 
   const path = setStateToKbnUrl(
-    OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY,
+    OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY,
     pageState,
     { useHash, storeInHashQuery: false },
     '/'
   );
 
   return {
-    app: OBSERVABILITY_LOG_EXPLORER_APP_ID,
+    app: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
     path,
     state: {
       ...(origin ? { origin } : {}),
