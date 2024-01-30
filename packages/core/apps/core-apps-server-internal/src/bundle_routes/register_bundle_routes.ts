@@ -37,29 +37,29 @@ export function registerBundleRoutes({
   uiPlugins: UiPlugins;
   packageInfo: PackageInfo;
 }) {
-  const { dist: isDist, buildNum } = packageInfo;
+  const { dist: isDist, buildShaShort: buildSha } = packageInfo;
   // rather than calculate the fileHash on every request, we
   // provide a cache object to `resolveDynamicAssetResponse()` that
   // will store the most recently used hashes.
   const fileHashCache = new FileHashCache();
 
   registerRouteForBundle(router, {
-    publicPath: `${serverBasePath}/${buildNum}/bundles/kbn-ui-shared-deps-npm/`,
-    routePath: `/${buildNum}/bundles/kbn-ui-shared-deps-npm/`,
+    publicPath: `${serverBasePath}/${buildSha}/bundles/kbn-ui-shared-deps-npm/`,
+    routePath: `/${buildSha}/bundles/kbn-ui-shared-deps-npm/`,
     bundlesPath: UiSharedDepsNpm.distDir,
     fileHashCache,
     isDist,
   });
   registerRouteForBundle(router, {
-    publicPath: `${serverBasePath}/${buildNum}/bundles/kbn-ui-shared-deps-src/`,
-    routePath: `/${buildNum}/bundles/kbn-ui-shared-deps-src/`,
+    publicPath: `${serverBasePath}/${buildSha}/bundles/kbn-ui-shared-deps-src/`,
+    routePath: `/${buildSha}/bundles/kbn-ui-shared-deps-src/`,
     bundlesPath: UiSharedDepsSrcDistDir,
     fileHashCache,
     isDist,
   });
   registerRouteForBundle(router, {
-    publicPath: `${serverBasePath}/${buildNum}/bundles/core/`,
-    routePath: `/${buildNum}/bundles/core/`,
+    publicPath: `${serverBasePath}/${buildSha}/bundles/core/`,
+    routePath: `/${buildSha}/bundles/core/`,
     bundlesPath: isDist
       ? fromRoot('node_modules/@kbn/core/target/public')
       : fromRoot('src/core/target/public'),
@@ -67,8 +67,8 @@ export function registerBundleRoutes({
     isDist,
   });
   registerRouteForBundle(router, {
-    publicPath: `${serverBasePath}/${buildNum}/bundles/kbn-monaco/`,
-    routePath: `/${buildNum}/bundles/kbn-monaco/`,
+    publicPath: `${serverBasePath}/${buildSha}/bundles/kbn-monaco/`,
+    routePath: `/${buildSha}/bundles/kbn-monaco/`,
     bundlesPath: KbnMonaco.bundleDir,
     fileHashCache,
     isDist,
@@ -76,8 +76,8 @@ export function registerBundleRoutes({
 
   [...uiPlugins.internal.entries()].forEach(([id, { publicTargetDir, version }]) => {
     registerRouteForBundle(router, {
-      publicPath: `${serverBasePath}/${buildNum}/bundles/plugin/${id}/${version}/`,
-      routePath: `/${buildNum}/bundles/plugin/${id}/${version}/`,
+      publicPath: `${serverBasePath}/${buildSha}/bundles/plugin/${id}/${version}/`,
+      routePath: `/${buildSha}/bundles/plugin/${id}/${version}/`,
       bundlesPath: publicTargetDir,
       fileHashCache,
       isDist,

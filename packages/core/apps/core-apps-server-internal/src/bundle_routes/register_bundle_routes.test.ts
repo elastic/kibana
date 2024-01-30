@@ -16,7 +16,8 @@ import { FileHashCache } from './file_hash_cache';
 
 const createPackageInfo = (parts: Partial<PackageInfo> = {}): PackageInfo => ({
   buildNum: 42,
-  buildSha: 'sha',
+  buildSha: 'shasha',
+  buildShaShort: 'sha',
   dist: true,
   branch: 'master',
   version: '8.0.0',
@@ -64,32 +65,32 @@ describe('registerBundleRoutes', () => {
       fileHashCache: expect.any(FileHashCache),
       isDist: true,
       bundlesPath: 'uiSharedDepsSrcDistDir',
-      publicPath: '/server-base-path/42/bundles/kbn-ui-shared-deps-src/',
-      routePath: '/42/bundles/kbn-ui-shared-deps-src/',
+      publicPath: '/server-base-path/sha/bundles/kbn-ui-shared-deps-src/',
+      routePath: '/sha/bundles/kbn-ui-shared-deps-src/',
     });
 
     expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
       fileHashCache: expect.any(FileHashCache),
       isDist: true,
       bundlesPath: 'uiSharedDepsNpmDistDir',
-      publicPath: '/server-base-path/42/bundles/kbn-ui-shared-deps-npm/',
-      routePath: '/42/bundles/kbn-ui-shared-deps-npm/',
+      publicPath: '/server-base-path/sha/bundles/kbn-ui-shared-deps-npm/',
+      routePath: '/sha/bundles/kbn-ui-shared-deps-npm/',
     });
 
     expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
       fileHashCache: expect.any(FileHashCache),
       isDist: true,
       bundlesPath: expect.stringMatching(/\/@kbn\/core\/target\/public$/),
-      publicPath: '/server-base-path/42/bundles/core/',
-      routePath: '/42/bundles/core/',
+      publicPath: '/server-base-path/sha/bundles/core/',
+      routePath: '/sha/bundles/core/',
     });
 
     expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
       fileHashCache: expect.any(FileHashCache),
       isDist: true,
       bundlesPath: 'kbnMonacoBundleDir',
-      publicPath: '/server-base-path/42/bundles/kbn-monaco/',
-      routePath: '/42/bundles/kbn-monaco/',
+      publicPath: '/server-base-path/sha/bundles/kbn-monaco/',
+      routePath: '/sha/bundles/kbn-monaco/',
     });
   });
 
@@ -107,16 +108,16 @@ describe('registerBundleRoutes', () => {
       fileHashCache: expect.any(FileHashCache),
       isDist: true,
       bundlesPath: '/plugins/plugin-a/public-target-dir',
-      publicPath: '/server-base-path/42/bundles/plugin/plugin-a/8.0.0/',
-      routePath: '/42/bundles/plugin/plugin-a/8.0.0/',
+      publicPath: '/server-base-path/sha/bundles/plugin/plugin-a/8.0.0/',
+      routePath: '/sha/bundles/plugin/plugin-a/8.0.0/',
     });
 
     expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
       fileHashCache: expect.any(FileHashCache),
       isDist: true,
       bundlesPath: '/plugins/plugin-b/public-target-dir',
-      publicPath: '/server-base-path/42/bundles/plugin/plugin-b/8.0.0/',
-      routePath: '/42/bundles/plugin/plugin-b/8.0.0/',
+      publicPath: '/server-base-path/sha/bundles/plugin/plugin-b/8.0.0/',
+      routePath: '/sha/bundles/plugin/plugin-b/8.0.0/',
     });
   });
 });

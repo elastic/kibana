@@ -274,7 +274,7 @@ export class HttpServer {
     const staticAssets = new StaticAssets(
       basePathService,
       config.cdn,
-      this.env.packageInfo.buildSha.slice(0, 12)
+      this.env.packageInfo.buildShaShort
     );
 
     return {
