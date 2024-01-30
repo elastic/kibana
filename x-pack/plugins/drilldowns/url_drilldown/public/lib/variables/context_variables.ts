@@ -51,12 +51,12 @@ export interface ContextValues {
   panel: PanelValues;
 }
 
-export const getContextScopeValues = (actionContext: ChartActionContext): ContextValues => {
-  if (!actionContext.embeddable)
+export const getContextScopeValues = (context: ChartActionContext): ContextValues => {
+  if (!context.embeddable)
     throw new Error(
       "UrlDrilldown [getContextScope] can't build scope because embeddable object is missing in context"
     );
-  const api = actionContext.embeddable as HasUniqueId & Partial<PublishesPanelTitle & PublishesSavedObjectId & PublishesLocalUnifiedSearch & PublishesDataViews>;
+  const api = context.embeddable as HasUniqueId & Partial<PublishesPanelTitle & PublishesSavedObjectId & PublishesLocalUnifiedSearch & PublishesDataViews>;
   const dataViewIds = api.dataViews?.value
     ? api.dataViews?.value.map((dataView) => dataView.id).filter(Boolean) as string[]
     : [];
