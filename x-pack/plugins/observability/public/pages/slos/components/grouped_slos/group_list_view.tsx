@@ -60,6 +60,12 @@ export function GroupListView({
   }
 
   const [page, setPage] = useState(0);
+  const [accordionState, setAccordionState] = useState<'open' | 'closed'>('closed');
+  const onToggle = (isOpen: boolean) => {
+    const newState = isOpen ? 'open' : 'closed';
+    setAccordionState(newState);
+  };
+  const isAccordionOpen = accordionState === 'open';
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const {
     isLoading,
@@ -108,6 +114,8 @@ export function GroupListView({
       <EuiFlexGroup>
         <EuiFlexItem>
           <MemoEuiAccordion
+            forceState={accordionState}
+            onToggle={onToggle}
             buttonContent={
               <EuiFlexGroup alignItems="center" responsive={false}>
                 <EuiFlexItem>
@@ -136,25 +144,27 @@ export function GroupListView({
             id={group}
             initialIsOpen={false}
           >
-            <>
-              <EuiSpacer size="m" />
-              <SlosView
-                sloList={results}
-                loading={isLoading || isRefetching}
-                error={isError}
-                isCompact={isCompact}
-                sloView={sloView}
-                group={group}
-              />
-              <EuiSpacer size="m" />
-              <EuiTablePagination
-                pageCount={Math.ceil(total / itemsPerPage)}
-                activePage={page}
-                onChangePage={handlePageClick}
-                itemsPerPage={itemsPerPage}
-                onChangeItemsPerPage={(perPage) => setItemsPerPage(perPage)}
-              />
-            </>
+            {isAccordionOpen && (
+              <>
+                <EuiSpacer size="m" />
+                <SlosView
+                  sloList={results}
+                  loading={isLoading || isRefetching}
+                  error={isError}
+                  isCompact={isCompact}
+                  sloView={sloView}
+                  group={group}
+                />
+                <EuiSpacer size="m" />
+                <EuiTablePagination
+                  pageCount={Math.ceil(total / itemsPerPage)}
+                  activePage={page}
+                  onChangePage={handlePageClick}
+                  itemsPerPage={itemsPerPage}
+                  onChangeItemsPerPage={(perPage) => setItemsPerPage(perPage)}
+                />
+              </>
+            )}
           </MemoEuiAccordion>
         </EuiFlexItem>
       </EuiFlexGroup>
