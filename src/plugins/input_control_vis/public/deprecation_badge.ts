@@ -18,18 +18,20 @@ import {
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { apiHasVisualizeConfig, HasVisualizeConfig } from '@kbn/visualizations-plugin/public';
 
-export const ACTION_DEPRECATION_BADGE = 'ACTION_INPUT_CONTROL_DEPRECATION_BADGE';
+import { INPUT_CONTROL_VIS_TYPE } from './input_control_vis_type';
 
-export type InputControlDeprecationActionApi = CanAccessViewMode & HasVisualizeConfig;
+const ACTION_DEPRECATION_BADGE = 'ACTION_INPUT_CONTROL_DEPRECATION_BADGE';
 
-export const isApiCompatible = (api: unknown | null): api is InputControlDeprecationActionApi =>
+type InputControlDeprecationActionApi = CanAccessViewMode & HasVisualizeConfig;
+
+const isApiCompatible = (api: unknown | null): api is InputControlDeprecationActionApi =>
   Boolean(apiCanAccessViewMode(api) && apiHasVisualizeConfig(api));
 
 const compatibilityCheck = (api: EmbeddableApiContext['embeddable']) => {
   if (
     isApiCompatible(api) &&
     getInheritedViewMode(api) === ViewMode.EDIT &&
-    api.getVis().type.name === 'input_control_vis'
+    api.getVis().type.name === INPUT_CONTROL_VIS_TYPE
   )
     return true;
 
