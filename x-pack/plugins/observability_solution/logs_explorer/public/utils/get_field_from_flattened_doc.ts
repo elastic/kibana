@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LogDocument } from '@kbn/logs-explorer-plugin/common/document';
+import { LogDocument } from '../../common/document';
 
 type Field = keyof LogDocument['flattened'];
 
