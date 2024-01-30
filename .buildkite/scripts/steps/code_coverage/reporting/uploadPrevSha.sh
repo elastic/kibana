@@ -9,4 +9,7 @@ collectPrevious() {
 }
 collectPrevious
 
+# TODO: Safe to remove this after 2024-03-01
+gsutil cp previous.txt gs://elastic-kibana-coverage-live/previous_pointer/
+
 gsutil cp previous.txt gs://elastic-kibana-coverage-live/previous_pointer/
