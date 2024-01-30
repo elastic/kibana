@@ -10,7 +10,6 @@ import type {
   MatrixHistogramOption,
   MatrixHistogramConfigs,
 } from '../../../components/matrix_histogram/types';
-import { MatrixHistogramType } from '../../../components/matrix_histogram/types';
 
 export const anomaliesStackByOptions: MatrixHistogramOption[] = [
   {
@@ -25,7 +24,6 @@ export const histogramConfigs: MatrixHistogramConfigs = {
   defaultStackByOption:
     anomaliesStackByOptions.find((o) => o.text === DEFAULT_STACK_BY) ?? anomaliesStackByOptions[0],
   hideHistogramIfEmpty: true,
-  histogramType: MatrixHistogramType.anomalies,
   stackByOptions: anomaliesStackByOptions,
   subtitle: undefined,
   title: i18n.ANOMALIES_TITLE,

@@ -26,7 +26,7 @@ import { chartDefaultSettings, useThemes } from '../../../common/components/char
 import { useTimeZone } from '../../../common/lib/kibana';
 import { histogramDateTimeFormatter } from '../../../common/components/utils';
 import { HeaderSection } from '../../../common/components/header_section';
-import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
+import { InspectButtonContainer } from '../../../common/components/inspect';
 import * as translations from './translations';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import type {
@@ -36,7 +36,6 @@ import type {
 } from '../../../../common/search_strategy';
 import { isUserRiskScore } from '../../../../common/search_strategy';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import { getRiskScoreOverTimeAreaAttributes } from '../../lens_attributes/risk_score_over_time_area';
 
@@ -99,7 +98,6 @@ const RiskScoreOverTimeComponent: React.FC<RiskScoreOverTimeProps> = ({
     [riskScore]
   );
   const spaceId = useSpaceId();
-  const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
   const timerange = useMemo(
     () => ({
       from,
@@ -119,17 +117,12 @@ const RiskScoreOverTimeComponent: React.FC<RiskScoreOverTimeProps> = ({
               toggleStatus={toggleStatus}
             />
           </EuiFlexItem>
-          {toggleStatus && !isChartEmbeddablesEnabled && (
-            <EuiFlexItem grow={false}>
-              <InspectButton queryId={queryId} title={title} />
-            </EuiFlexItem>
-          )}
         </EuiFlexGroup>
 
         {toggleStatus && (
           <EuiFlexGroup gutterSize="none" direction="column">
             <EuiFlexItem grow={1}>
-              {isChartEmbeddablesEnabled && spaceId ? (
+              {spaceId ? (
                 <VisualizationEmbeddable
                   applyGlobalQueriesAndFilters={false}
                   timerange={timerange}
