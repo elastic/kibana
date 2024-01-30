@@ -6,8 +6,15 @@
  */
 
 import axios from 'axios';
-import { RuleType } from '@kbn/alerting-plugin/server';
+import {
+  DEFAULT_AAD_CONFIG,
+  RuleType,
+  RuleTypeParams,
+  RuleTypeState,
+  AlertsClientError,
+} from '@kbn/alerting-plugin/server';
 import { schema } from '@kbn/config-schema';
+import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
 import { Operator, Craft, ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 
 interface PeopleInSpace {
@@ -16,6 +23,18 @@ interface PeopleInSpace {
     name: string;
   }>;
   number: number;
+}
+
+interface Params extends RuleTypeParams {
+  outerSpaceCapacity: number;
+  craft: string;
+  op: string;
+}
+interface State extends RuleTypeState {
+  peopleInSpace: number;
+}
+interface AlertState {
+  craft: string;
 }
 
 function getOperator(op: string) {
@@ -40,14 +59,15 @@ function getCraftFilter(craft: string) {
     craft === Craft.OuterSpace ? true : craft === person.craft;
 }
 
-export const alertType: RuleType<
-  { outerSpaceCapacity: number; craft: string; op: string },
+export const ruleType: RuleType<
+  Params,
   never,
-  { peopleInSpace: number },
-  { craft: string },
+  State,
+  AlertState,
   never,
   'default',
-  'hasLandedBackOnEarth'
+  'hasLandedBackOnEarth',
+  DefaultAlert
 > = {
   id: 'example.people-in-space',
   name: 'People In Space Right Now',
@@ -60,6 +80,10 @@ export const alertType: RuleType<
     name: 'Has landed back on Earth',
   },
   async executor({ services, params }) {
+    const { alertsClient } = services;
+    if (!alertsClient) {
+      throw new AlertsClientError();
+    }
     const { outerSpaceCapacity, craft: craftToTriggerBy, op } = params;
 
     const response = await axios.get<PeopleInSpace>('http://api.open-notify.org/astros.json');
@@ -71,7 +95,7 @@ export const alertType: RuleType<
 
     if (getOperator(op)(peopleInCraft.length, outerSpaceCapacity)) {
       peopleInCraft.forEach(({ craft, name }) => {
-        services.alertFactory.create(name).replaceState({ craft }).scheduleActions('default');
+        alertsClient.report({ id: name, actionGroup: 'default', state: { craft } });
       });
     }
 
@@ -86,6 +110,7 @@ export const alertType: RuleType<
   getViewInAppRelativeUrl({ rule }) {
     return `/app/${ALERTING_EXAMPLE_APP_ID}/astros/${rule.id}`;
   },
+  alerts: DEFAULT_AAD_CONFIG,
   validate: {
     params: schema.object({
       outerSpaceCapacity: schema.number(),

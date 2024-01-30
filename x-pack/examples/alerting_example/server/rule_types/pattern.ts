@@ -10,7 +10,11 @@ import {
   RuleType as BaseRuleType,
   RuleTypeState,
   RuleExecutorOptions as BaseRuleExecutorOptions,
+  DEFAULT_AAD_CONFIG,
+  AlertsClientError,
 } from '@kbn/alerting-plugin/server';
+import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
+import { RecoveredActionGroupId } from '@kbn/alerting-plugin/common';
 
 type Params = TypeOf<typeof Params>;
 const Params = schema.object(
@@ -41,10 +45,19 @@ interface State extends RuleTypeState {
   runs?: number;
 }
 
-type RuleExecutorOptions = BaseRuleExecutorOptions<Params, State, {}, {}, 'default'>;
+type RuleExecutorOptions = BaseRuleExecutorOptions<Params, State, {}, {}, 'default', DefaultAlert>;
 
-type RuleType = BaseRuleType<Params, never, State, {}, {}, 'default'>;
-export const alertType: RuleType = getPatternRuleType();
+type RuleType = BaseRuleType<
+  Params,
+  never,
+  State,
+  {},
+  {},
+  'default',
+  RecoveredActionGroupId,
+  DefaultAlert
+>;
+export const ruleType: RuleType = getPatternRuleType();
 
 function getPatternRuleType(): RuleType {
   return {
@@ -57,6 +70,7 @@ function getPatternRuleType(): RuleType {
     minimumLicenseRequired: 'basic',
     isExportable: true,
     executor,
+    alerts: DEFAULT_AAD_CONFIG,
     validate: {
       params: Params,
     },
@@ -65,6 +79,10 @@ function getPatternRuleType(): RuleType {
 
 async function executor(options: RuleExecutorOptions): Promise<{ state: State }> {
   const { services, state, params } = options;
+  const { alertsClient } = services;
+  if (!alertsClient) {
+    throw new AlertsClientError();
+  }
 
   if (state.runs == null) {
     state.runs = 0;
@@ -96,7 +114,7 @@ async function executor(options: RuleExecutorOptions): Promise<{ state: State }>
     switch (action) {
       case 'a':
         const context = { patternIndex, action, pattern, runs };
-        services.alertFactory.create(instance).scheduleActions('default', context);
+        alertsClient.report({ id: instance, actionGroup: 'default', context });
         break;
       case '-':
         break;

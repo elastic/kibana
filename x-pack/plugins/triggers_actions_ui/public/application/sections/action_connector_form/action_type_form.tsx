@@ -99,6 +99,7 @@ export type ActionTypeFormProps = {
   ruleTypeId?: string;
   hasFieldsForAAD?: boolean;
   disableErrorMessages?: boolean;
+  isSystemAction?: boolean;
 } & Pick<
   ActionAccordionFormProps,
   | 'defaultActionGroupId'
@@ -151,6 +152,7 @@ export const ActionTypeForm = ({
   ruleTypeId,
   hasFieldsForAAD,
   disableErrorMessages,
+  isSystemAction,
 }: ActionTypeFormProps) => {
   const {
     application: { capabilities },
@@ -408,7 +410,8 @@ export const ActionTypeForm = ({
     />
   );
 
-  const actionTypeRegistered = actionTypeRegistry.get(actionConnector.actionTypeId);
+  const actionTypeRegistered =
+    actionConnector && actionTypeRegistry.get(actionConnector.actionTypeId);
   if (!actionTypeRegistered) return null;
   const allowGroupConnector = (actionTypeRegistered?.subtype ?? []).map((atr) => atr.id);
 
@@ -426,9 +429,10 @@ export const ActionTypeForm = ({
     actionGroups &&
     selectedActionGroup &&
     setActionGroupIdByIndex &&
+    !isSystemAction &&
     !actionItem.frequency?.summary;
 
-  const showActionAlertsFilter = hasFieldsForAAD;
+  const showActionAlertsFilter = hasFieldsForAAD && !isSystemAction;
 
   const accordionContent = checkEnabledResult.isEnabled ? (
     <>
@@ -436,48 +440,52 @@ export const ActionTypeForm = ({
         color="subdued"
         style={{ borderBottom: `1px solid ${euiTheme.colors.lightShade}` }}
       >
-        <EuiFormRow
-          fullWidth
-          label={
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.actionTypeForm.actionIdLabel"
-              defaultMessage="{connectorInstance} connector"
-              values={{
-                connectorInstance: actionTypesIndex
-                  ? actionTypesIndex[actionConnector.actionTypeId].name
-                  : actionConnector.actionTypeId,
-              }}
-            />
-          }
-          labelAppend={
-            canSave &&
-            actionTypesIndex &&
-            actionTypesIndex[actionConnector.actionTypeId].enabledInConfig ? (
-              <EuiButtonEmpty
-                size="xs"
-                data-test-subj={`addNewActionConnectorButton-${actionItem.actionTypeId}`}
-                onClick={onAddConnector}
-              >
+        {!isSystemAction && (
+          <>
+            <EuiFormRow
+              fullWidth
+              label={
                 <FormattedMessage
-                  defaultMessage="Add connector"
-                  id="xpack.triggersActionsUI.sections.actionTypeForm.addNewConnectorEmptyButton"
+                  id="xpack.triggersActionsUI.sections.actionTypeForm.actionIdLabel"
+                  defaultMessage="{connectorInstance} connector"
+                  values={{
+                    connectorInstance: actionTypesIndex
+                      ? actionTypesIndex[actionConnector.actionTypeId].name
+                      : actionConnector.actionTypeId,
+                  }}
                 />
-              </EuiButtonEmpty>
-            ) : null
-          }
-        >
-          <ConnectorsSelection
-            allowGroupConnector={allowGroupConnector}
-            actionItem={actionItem}
-            accordionIndex={index}
-            actionTypesIndex={actionTypesIndex}
-            actionTypeRegistered={actionTypeRegistered}
-            connectors={connectors}
-            onConnectorSelected={onConnectorSelected}
-          />
-        </EuiFormRow>
-        <EuiSpacer size="xl" />
-        {!hideNotifyWhen && actionNotifyWhen}
+              }
+              labelAppend={
+                canSave &&
+                actionTypesIndex &&
+                actionTypesIndex[actionConnector.actionTypeId].enabledInConfig ? (
+                  <EuiButtonEmpty
+                    size="xs"
+                    data-test-subj={`addNewActionConnectorButton-${actionItem.actionTypeId}`}
+                    onClick={onAddConnector}
+                  >
+                    <FormattedMessage
+                      defaultMessage="Add connector"
+                      id="xpack.triggersActionsUI.sections.actionTypeForm.addNewConnectorEmptyButton"
+                    />
+                  </EuiButtonEmpty>
+                ) : null
+              }
+            >
+              <ConnectorsSelection
+                allowGroupConnector={allowGroupConnector}
+                actionItem={actionItem}
+                accordionIndex={index}
+                actionTypesIndex={actionTypesIndex}
+                actionTypeRegistered={actionTypeRegistered}
+                connectors={connectors}
+                onConnectorSelected={onConnectorSelected}
+              />
+            </EuiFormRow>
+            <EuiSpacer size="xl" />
+          </>
+        )}
+        {!hideNotifyWhen && !isSystemAction && actionNotifyWhen}
         {showSelectActionGroup && (
           <>
             {!hideNotifyWhen && <EuiSpacer size="s" />}
