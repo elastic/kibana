@@ -7,6 +7,7 @@
  */
 
 import type { monaco } from '../../../../monaco_imports';
+import { AutocompleteCommandDefinition } from '../autocomplete/types';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { builtinFunctions } from '../definitions/builtin';
 import { commandDefinitions } from '../definitions/commands';
@@ -89,6 +90,23 @@ export function isExpression(arg: ESQLAstItem): arg is ESQLFunction {
 
 export function isIncompleteItem(arg: ESQLAstItem): boolean {
   return !arg || (!Array.isArray(arg) && arg.incomplete);
+}
+
+export function isMathFunction(char: string) {
+  // compare last char for all math functions
+  // limit only to 2 chars operators
+  return builtinFunctions
+    .filter(({ name }) => name.length < 3)
+    .map(({ name }) => name[name.length - 1])
+    .some((op) => char === op);
+}
+
+export function isComma(char: string) {
+  return char === ',';
+}
+
+export function isSourceCommand({ label }: AutocompleteCommandDefinition) {
+  return ['from', 'row', 'show'].includes(String(label));
 }
 
 // From Monaco position to linear offset
