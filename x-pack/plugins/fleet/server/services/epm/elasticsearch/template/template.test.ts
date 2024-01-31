@@ -1446,7 +1446,6 @@ describe('EPM template', () => {
       properties: {
         group: {
           type: 'object',
-	  properties: undefined,
           dynamic: true,
         },
       },
