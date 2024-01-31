@@ -44,6 +44,7 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
   const [canDelete, setCanDelete] = useState(false);
   const [hasManagedJob, setHasManagedJob] = useState(false);
   const [deleteUserAnnotations, setDeleteUserAnnotations] = useState(false);
+  const [deleteAlertingRules, setDeleteAlertingRules] = useState(false);
 
   useEffect(() => {
     if (typeof setShowFunction === 'function') {
@@ -74,18 +75,21 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
     setDeleting(true);
     deleteJobs(
       jobIds.map((id) => ({ id })),
-      deleteUserAnnotations
+      deleteUserAnnotations,
+      deleteAlertingRules
     );
 
     setTimeout(() => {
       closeModal();
       refreshJobs();
     }, DELETING_JOBS_REFRESH_INTERVAL_MS);
-  }, [jobIds, deleteUserAnnotations, closeModal, refreshJobs]);
+  }, [jobIds, deleteUserAnnotations, deleteAlertingRules, closeModal, refreshJobs]);
 
   if (modalVisible === false || jobIds.length === 0) {
     return null;
   }
+
+  const hasAlertingRules = true;
 
   if (canDelete) {
     return (
@@ -150,6 +154,21 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
                     onChange={(e) => setDeleteUserAnnotations(e.target.checked)}
                     data-test-subj="mlDeleteJobConfirmModalDeleteAnnotationsSwitch"
                   />
+                  {hasAlertingRules ? (
+                    <>
+                      <EuiSpacer size={'s'} />
+                      <EuiSwitch
+                        label={i18n.translate(
+                          'xpack.ml.jobsList.resetJobModal.deleteAlertingRules',
+                          {
+                            defaultMessage: 'Delete alerting rules',
+                          }
+                        )}
+                        checked={deleteAlertingRules}
+                        onChange={(e) => setDeleteAlertingRules(e.target.checked)}
+                      />
+                    </>
+                  ) : null}
                 </EuiText>
               </>
             )}
