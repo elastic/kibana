@@ -704,7 +704,9 @@ When user opens the Rule Updates table
 Then all X rules available for upgrade should be displayed in the table
 When user opens the rule preview for the 1st rule
 Then the preview should open
-And all properties of the new version of the 1st rule should be displayed in the correct tab and section of the preview (see examples of rule properties above)
+And the "Update" tab should be active
+When user selects the "Overview" tab
+Then all properties of the new version of the 1st rule should be displayed in the correct tab and section of the preview (see examples of rule properties above)
 When user selects the 2nd rule in the table
 Then the preview should be updated
 And all properties of the new version of the 2nd rule should be displayed in the correct tab and section of the preview (see examples of rule properties above)
@@ -731,6 +733,145 @@ And the Investigation Guide tab should NOT be displayed
 ### Rule upgrade workflow: filtering, sorting, pagination
 
 TODO: add scenarios https://github.com/elastic/kibana/issues/166215
+
+### Rule upgrade workflow: viewing rule changes before upgrading
+
+#### **Scenario: User can see changes in a side-by-side view**
+
+**Automation**: 1 Cypress e2e test
+
+```Gherkin
+Given X prebuilt rules are installed in Kibana
+And for Y of these rules new versions are available
+When user opens the Rule Updates table and selects a rule
+Then the upgrade preview should open
+And rule changes should be displayed in a two-column view
+And correct rule version numbers should be displayed in their respective columns
+When the user selects another rule without closing the preview
+Then the preview should display the changes for the newly selected rule
+```
+
+#### **Scenario: User can see precisely how property values would change after upgrade**
+
+**Automation**: 1 UI component-level test
+
+```Gherkin
+Given a rule preview with rule changes is open
+Then each line of <column> that was <change_type> should have <bg_color> background
+And marked with <line_badge> badge
+And each changed word in <column> should be highlighted with <accent_color>
+
+Examples:
+| change_type | column       | bg_color         | accent_color         | line_badge |
+| updated     | Base version | removed_bg_color | removed_accent_color | -          |
+| updated     | Update       | added_bg_color   | added_accent_color   | +          |
+| removed     | Base version | removed_bg_color | none                 | -          |
+| removed     | Update       | none             | none                 | none       |
+| added       | Base version | none             | none                 | none       |
+| added       | Update       | added_bg_color   | none                 | +          |
+```
+
+#### **Scenario: Rule actions and exception lists should not be shown as modified**
+
+**Automation**: 1 UI component-level test
+
+```Gherkin
+Given a prebuilt rule is installed in Kibana
+And this rule doesn't have any actions or an exception list
+And a user has set up actions and an exception list for this rule
+And this rule has an update available
+And the update doesn't define any actions or an exception list
+When a user opens the upgrade preview for this rule
+Then the preview should open
+And there should not be any modifications to rule's actions or exception list
+```
+
+#### **Scenario: Stateful properties should not be included in preview**
+
+**Automation**: 1 Cypress E2E test
+
+```Gherkin
+Given a prebuilt rule is installed in Kibana
+And this rule is disabled by default
+And a user has enabled this rule
+And this rule executed at least once
+And this rule has an update available
+When user opens the upgrade preview
+Then the preview should open
+And there should not be any changes related to "execution_summary" and "enabled" properties
+```
+
+#### **Scenario: Technical properties should not be included in preview**
+
+**Automation**: 1 UI component-level test
+
+```Gherkin
+Given a prebuilt rule is installed in Kibana
+And this rule has an update available
+When a user opens the upgrade preview
+Then the preview should open
+And there should not be any changes related to <technical_property> properties
+
+Examples:
+| technical_property |
+| revision           |
+| updated_at         |
+| updated_by         |
+| created_at         |
+| created_by         |
+```
+
+#### **Scenario: Properties with semantically equal values should not be shown as modified**
+
+**Automation**: 1 UI component-level test
+
+```Gherkin
+Given a prebuilt rule is installed in Kibana
+And this rule has an update available
+And the update has properties with different, but semantically equal values
+When a user opens the upgrade preview
+Then the preview should open
+And there should not be any changes to properties with semantically equal values
+
+Duration examples:
+| 1h       |
+| 60m      |
+| 3600s    |
+
+Empty value examples:
+| no value  |
+| ''        |
+| []        |
+| undefined |
+| null      |
+```
+
+#### **Scenario: Unchanged sections of a rule should be hidden by default**
+
+**Automation**: 1 UI component-level test
+
+```Gherkin
+Given a prebuilt rule is installed in Kibana
+And this rule has an update available
+When a user opens the upgrade preview
+Then the preview should open
+And only the sections of the diff that have changes should be visible
+And unchanged sections should be hidden behind a button with a number of unchanged lines
+When a user clicks on the hidden section button
+Then the section should expand and show the unchanged properties
+```
+
+#### **Scenario: Properties should be sorted alphabetically**
+
+**Automation**: 1 UI component-level test
+
+Given a prebuilt rule is installed in Kibana
+And this rule has an update available
+When a user opens the upgrade preview
+Then the preview should open
+And visible properties should be sorted alphabetically
+When a user expands all hidden sections
+Then all properties of the rule should be sorted alphabetically
 
 ### Rule upgrade workflow: misc cases
 
