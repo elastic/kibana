@@ -176,7 +176,6 @@ export const useTimelineEventsHandler = ({
       clearSignalsState();
 
       if (id === TimelineId.active) {
-        activeTimeline.setExpandedDetail({});
         activeTimeline.setActivePage(newActivePage);
       }
       setActivePage(newActivePage);
@@ -245,7 +244,6 @@ export const useTimelineEventsHandler = ({
                     refreshedAt: Date.now(),
                   };
                   if (id === TimelineId.active) {
-                    activeTimeline.setExpandedDetail({});
                     activeTimeline.setPageName(pageName);
                     if (request.language === 'eql') {
                       activeTimeline.setEqlRequest(request as TimelineEqlRequestOptionsInput);
