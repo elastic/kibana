@@ -704,6 +704,16 @@ describe('autocomplete', () => {
     ]);
     testSuggestions('from index | EVAL stringField not ', ['like $0', 'rlike $0', 'in $0']);
     testSuggestions('from index | EVAL stringField NOT ', ['like $0', 'rlike $0', 'in $0']);
+    testSuggestions('from index | EVAL numberField in ', ['( $0 )']);
+    testSuggestions(
+      'from index | EVAL numberField in ( )',
+      [
+        ...getFieldNamesByType('number').filter((name) => name !== 'numberField'),
+        ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }),
+      ],
+      '('
+    );
+    testSuggestions('from index | EVAL numberField not in ', ['( $0 )']);
     testSuggestions('from index | EVAL not ', [
       ...getFieldNamesByType('boolean'),
       ...getFunctionSignaturesByReturnType('eval', 'boolean', { evalMath: true }),
