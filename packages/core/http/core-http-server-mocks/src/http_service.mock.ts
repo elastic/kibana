@@ -87,8 +87,11 @@ const createInternalStaticAssetsMock = (
   basePath: BasePathMocked,
   cdnUrl: undefined | string = undefined
 ): InternalStaticAssetsMocked => ({
-  getHrefBase: jest.fn(() => cdnUrl ?? basePath.serverBasePath),
+  getHrefBase: jest.fn().mockReturnValue(cdnUrl ?? basePath.serverBasePath),
   getPluginAssetHref: jest.fn().mockReturnValue(cdnUrl ?? basePath.serverBasePath),
+  getPluginServerPath: jest.fn((v, _) => v),
+  prependServerPath: jest.fn((v) => v),
+  appendPathToPublicUrl: jest.fn((v) => v),
 });
 
 const createAuthMock = () => {
