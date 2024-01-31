@@ -1108,7 +1108,7 @@ class TimeseriesChartIntl extends Component {
     // Add x axis.
     const timeBuckets = this.context?.services?.mlServices?.mlUtilsService?.mlTimeBuckets
       ? this.context.services.mlServices.mlUtilsService.mlTimeBuckets.getTimeBucketsFromCache()
-      : getTimeBucketsFromCache(); // TODO - move everything to service
+      : getTimeBucketsFromCache();
     timeBuckets.setInterval('auto');
     timeBuckets.setBounds(bounds);
     const xAxisTickFormat = timeBuckets.getScaledDateFormat();

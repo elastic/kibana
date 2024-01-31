@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EuiLoadingChart, EuiResizeObserver, EuiText } from '@elastic/eui';
+import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
+import { EuiResizeObserver } from '@elastic/eui';
 import { Observable } from 'rxjs';
 import { throttle } from 'lodash';
 import { MlJob } from '@elastic/elasticsearch/lib/api/types';
@@ -73,7 +73,6 @@ export const EmbeddableSingleMetricViewerContainer: FC<
   const [selectedJob, setSelectedJob] = useState<MlJob | undefined>();
   const [autoZoomDuration, setAutoZoomDuration] = useState<number | undefined>();
 
-  const isExplorerLoading = false;
   const { mlApiServices, mlTimeSeriesExplorer } = services[2];
   const { data, bounds, lastRefresh } = useSingleMetricViwerInputResolver(
     embeddableInput,
@@ -117,21 +116,14 @@ export const EmbeddableSingleMetricViewerContainer: FC<
   const resizeHandler = useCallback(
     throttle((e: { width: number; height: number }) => {
       // Keep previous container height so it doesn't change the page layout
-      if (!isExplorerLoading) {
-        containerHeightRef.current = e.height;
-      }
+      containerHeightRef.current = e.height;
 
       if (Math.abs(chartWidth - e.width) > 20) {
         setChartWidth(e.width);
       }
     }, RESIZE_THROTTLE_TIME_MS),
-    [!isExplorerLoading, chartWidth]
+    [chartWidth]
   );
-
-  const containerHeight = useMemo(() => {
-    // Persists container height during loading to prevent page from jumping
-    return isExplorerLoading ? containerHeightRef.current : undefined;
-  }, [isExplorerLoading]);
 
   const appStateHandler = useCallback(
     (action: string, payload?: any) => {
@@ -178,29 +170,11 @@ export const EmbeddableSingleMetricViewerContainer: FC<
             overflowY: 'auto',
             overflowX: 'hidden',
             padding: '8px',
-            height: containerHeight,
           }}
           data-test-subj={`mlSingleMetricViewer_${embeddableContext.id}`}
           ref={resizeRef}
           className="ml-time-series-explorer"
         >
-          {isExplorerLoading && (
-            <EuiText
-              textAlign={'center'}
-              style={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%,-50%)',
-              }}
-            >
-              <EuiLoadingChart
-                size="xl"
-                mono={true}
-                data-test-subj="mlAnomalySingleMetricViewerLoadingIndicator"
-              />
-            </EuiText>
-          )}
           {data !== undefined && autoZoomDuration !== undefined && (
             <TimeSeriesExplorerEmbeddableChart
               chartWidth={chartWidth}

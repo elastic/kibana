@@ -50,7 +50,6 @@ export class SingleMetricViewerEmbeddable extends Embeddable<
     public services: [CoreStart, MlDependencies, SingleMetricViewerServices],
     parent?: IContainer
   ) {
-    // super(initialInput, services[2].anomalyDetectorService, services[1].data.dataViews, parent);
     super(initialInput, {} as AnomalyChartsEmbeddableOutput, parent);
   }
 
@@ -86,9 +85,10 @@ export class SingleMetricViewerEmbeddable extends Embeddable<
       showFrozenDataTierChoice: false,
     };
 
+    const { mlTimeBuckets, mlTimeSeriesExplorer } = this.services[2];
     const mlUtilsService = {
-      mlTimeBuckets: this.services[2].mlTimeBuckets,
-      mlTimeSeriesExplorer: this.services[2].mlTimeSeriesExplorer,
+      mlTimeBuckets,
+      mlTimeSeriesExplorer,
     };
 
     ReactDOM.render(

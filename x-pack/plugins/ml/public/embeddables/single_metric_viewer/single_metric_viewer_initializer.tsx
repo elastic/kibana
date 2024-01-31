@@ -28,7 +28,6 @@ import {
   type TimeseriesexplorerActionType,
 } from '../../application/timeseriesexplorer/timeseriesexplorer_constants';
 
-export const MAX_ANOMALY_CHARTS_ALLOWED = 50;
 export interface SingleMetricViewerInitializerProps {
   bounds: TimeRangeBounds;
   defaultTitle: string;

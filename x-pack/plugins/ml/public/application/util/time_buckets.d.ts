@@ -33,7 +33,7 @@ export declare class TimeBuckets {
   public setBounds(bounds: TimeRangeBounds): void;
   public getBounds(): { min: any; max: any };
   public getInterval(): TimeBucketsInterval;
-  public getIntervalToNearestMultiple(divisorSecs: any): TimeBucketsInterval; // TODO
+  public getIntervalToNearestMultiple(divisorSecs: any): TimeBucketsInterval;
   public getScaledDateFormat(): string;
 }
 
