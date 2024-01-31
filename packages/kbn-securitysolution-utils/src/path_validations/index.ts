@@ -106,14 +106,14 @@ export const validateWildcardInput = (value?: string): string | undefined => {
   }
 };
 
-export const validateWildcardWithWrongOperator = ({
+export const hasWildcardAndInvalidOperator = ({
   operator,
   value,
 }: {
   operator: EntryTypes | TrustedAppEntryTypes;
-  value: string;
+  value: TrustedAppEntryTypes.value | EntryTypes.value;
 }): boolean => {
-  if (operator !== EntryTypes.wildcard && validateWildcardInput(value)) {
+  if (operator !== 'wildcard' && validateWildcardInput(value)) {
     return true;
   } else {
     return false;

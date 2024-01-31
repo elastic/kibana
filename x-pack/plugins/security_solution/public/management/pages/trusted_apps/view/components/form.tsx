@@ -22,13 +22,13 @@ import {
 import type { AllConditionEntryFields, EntryTypes } from '@kbn/securitysolution-utils';
 import {
   hasSimpleExecutableName,
+  hasWildcardAndInvalidOperator,
   isPathValid,
   ConditionEntryField,
   OperatingSystem,
 } from '@kbn/securitysolution-utils';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { WildCardWithWrongOperatorWarning } from '@kbn/securitysolution-exception-list-components/src/wildcard_with_wrong_operator_warning';
 import type {
   TrustedAppConditionEntry,
   NewTrustedApp,
@@ -152,12 +152,20 @@ const validateValues = (values: ArtifactFormComponentProps['item']): ValidationR
         type: entry.type as EntryTypes,
         value: (entry as TrustedAppConditionEntry).value,
       });
-      addResultToValidation(
-        validation,
-        'entries',
-        'warnings',
-        WildCardWithWrongOperatorWarning({ index })
-      );
+
+      if (
+        hasWildcardAndInvalidOperator({
+          operator: entry.type as EntryTypes,
+          value: (entry as TrustedAppConditionEntry).value,
+        })
+      ) {
+        addResultToValidation(
+          validation,
+          'entries',
+          'warnings',
+          INPUT_ERRORS.wildcardWithWrongOperatorWarning(index)
+        );
+      }
 
       if (!entry.field || !(entry as TrustedAppConditionEntry).value.trim()) {
         isValid = false;
