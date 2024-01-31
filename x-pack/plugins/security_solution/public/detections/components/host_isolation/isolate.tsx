@@ -8,6 +8,7 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import { useHostIsolation } from '../../containers/detection_engine/alerts/use_host_isolation';
 import { CASES_ASSOCIATED_WITH_ALERT, RETURN_TO_ALERT_DETAILS } from './translations';
 import type { EndpointIsolatedFormProps } from '../../../common/components/endpoint/host_isolation';
@@ -22,12 +23,14 @@ export const IsolateHost = React.memo(
     endpointId,
     hostName,
     casesInfo,
+    agentType,
     cancelCallback,
     successCallback,
   }: {
     endpointId: string;
     hostName: string;
     casesInfo: CasesFromAlertsResponse;
+    agentType: ResponseActionAgentType;
     cancelCallback: () => void;
     successCallback?: () => void;
   }) => {
@@ -42,6 +45,7 @@ export const IsolateHost = React.memo(
       endpointId,
       comment,
       caseIds,
+      agentType,
     });
 
     const confirmHostIsolation = useCallback(async () => {

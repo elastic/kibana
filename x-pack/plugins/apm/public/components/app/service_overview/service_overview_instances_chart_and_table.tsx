@@ -6,7 +6,6 @@
  */
 
 import { EuiFlexItem, EuiPanel } from '@elastic/eui';
-import { orderBy } from 'lodash';
 import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
@@ -25,6 +24,7 @@ import {
   TableOptions,
 } from './service_overview_instances_table';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import { InstancesSortField } from '../../../../common/instances';
 
 interface ServiceOverviewInstancesChartAndTableProps {
   chartHeight: number;
@@ -47,14 +47,6 @@ const INITIAL_STATE_DETAILED_STATISTICS: ApiResponseDetailedStats = {
   currentPeriod: {},
   previousPeriod: {},
 };
-
-export type SortField =
-  | 'serviceNodeName'
-  | 'latency'
-  | 'throughput'
-  | 'errorRate'
-  | 'cpuUsage'
-  | 'memoryUsage';
 
 export type SortDirection = 'asc' | 'desc';
 export const PAGE_SIZE = 5;
@@ -122,6 +114,8 @@ export function ServiceOverviewInstancesChartAndTable({
                 comparisonEnabled && isTimeComparison(offset)
                   ? offset
                   : undefined,
+              sortField: tableOptions.sort.field,
+              sortDirection: tableOptions.sort.direction,
             },
           },
         }
@@ -152,6 +146,7 @@ export function ServiceOverviewInstancesChartAndTable({
       offset,
       // not used, but needed to trigger an update when comparison feature is disabled/enabled by user
       comparisonEnabled,
+      tableOptions.sort,
     ]
   );
 
@@ -162,19 +157,10 @@ export function ServiceOverviewInstancesChartAndTable({
     currentPeriodItemsCount,
   } = mainStatsData;
 
-  const currentPeriodOrderedItems = orderBy(
-    // need top-level sortable fields for the managed table
-    currentPeriodItems.map((item) => ({
-      ...item,
-      latency: item.latency ?? 0,
-      throughput: item.throughput ?? 0,
-      errorRate: item.errorRate ?? 0,
-      cpuUsage: item.cpuUsage ?? 0,
-      memoryUsage: item.memoryUsage ?? 0,
-    })),
-    field,
-    direction
-  ).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
+  const currentPageItems = currentPeriodItems.slice(
+    pageIndex * PAGE_SIZE,
+    (pageIndex + 1) * PAGE_SIZE
+  );
 
   const {
     data: detailedStatsData = INITIAL_STATE_DETAILED_STATISTICS,
@@ -208,7 +194,7 @@ export function ServiceOverviewInstancesChartAndTable({
               numBuckets: 20,
               transactionType,
               serviceNodeIds: JSON.stringify(
-                currentPeriodOrderedItems.map((item) => item.serviceNodeName)
+                currentPageItems.map((item) => item.serviceNodeName)
               ),
               offset:
                 comparisonEnabled && isTimeComparison(offset)
@@ -238,7 +224,7 @@ export function ServiceOverviewInstancesChartAndTable({
       <EuiFlexItem grow={7}>
         <EuiPanel hasBorder={true}>
           <ServiceOverviewInstancesTable
-            mainStatsItems={currentPeriodOrderedItems}
+            mainStatsItems={currentPageItems}
             mainStatsStatus={mainStatsStatus}
             mainStatsItemCount={currentPeriodItemsCount}
             detailedStatsLoading={isPending(detailedStatsStatus)}
@@ -252,7 +238,7 @@ export function ServiceOverviewInstancesChartAndTable({
                 pageIndex: newTableOptions.page?.index ?? 0,
                 sort: newTableOptions.sort
                   ? {
-                      field: newTableOptions.sort.field as SortField,
+                      field: newTableOptions.sort.field as InstancesSortField,
                       direction: newTableOptions.sort.direction,
                     }
                   : DEFAULT_SORT,
