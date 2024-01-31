@@ -497,8 +497,8 @@ export class ManifestManager {
 
       return [];
     } catch (err) {
-      this.logger.debug(
-        `Attempted to delete [${artifactIds.length}] outdated artifacts failed with: ${err.message}`
+      this.logger.error(
+        `Attempted to delete [${artifactIds.length}] outdated artifacts failed with: ${err.message}\n${e.stack}`
       );
       return [err];
     }
