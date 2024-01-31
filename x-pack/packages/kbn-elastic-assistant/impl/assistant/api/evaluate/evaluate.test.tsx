@@ -7,17 +7,16 @@
 
 import { postEvaluation } from './evaluate';
 import { HttpSetup } from '@kbn/core-http-browser';
-import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 
 jest.mock('@kbn/core-http-browser');
 
 const mockHttp = {
-  post: jest.fn(),
+  fetch: jest.fn(),
 } as unknown as HttpSetup;
 
 describe('postEvaluation', () => {
   it('calls the knowledge base API when correct resource path', async () => {
-    (mockHttp.post as jest.Mock).mockResolvedValue({ success: true });
+    (mockHttp.fetch as jest.Mock).mockResolvedValue({ success: true });
     const testProps = {
       http: mockHttp,
       evalParams: {
@@ -36,7 +35,8 @@ describe('postEvaluation', () => {
 
     await postEvaluation(testProps);
 
-    expect(mockHttp.post).toHaveBeenCalledWith('/internal/elastic_assistant/evaluate', {
+    expect(mockHttp.fetch).toHaveBeenCalledWith('/internal/elastic_assistant/evaluate', {
+      method: 'POST',
       body: '{"dataset":{},"evalPrompt":"evalPrompt"}',
       headers: { 'Content-Type': 'application/json' },
       query: {
@@ -50,12 +50,11 @@ describe('postEvaluation', () => {
         runName: 'Test Run Name',
       },
       signal: undefined,
-      version: API_VERSIONS.internal.v1,
     });
   });
   it('returns error when error is an error', async () => {
     const error = 'simulated error';
-    (mockHttp.post as jest.Mock).mockImplementation(() => {
+    (mockHttp.fetch as jest.Mock).mockImplementation(() => {
       throw new Error(error);
     });
 

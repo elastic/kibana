@@ -47,7 +47,8 @@ export const postEvaluation = async ({
       runName: evalParams?.runName,
     };
 
-    return await http.post<PostEvaluateResponse>(path, {
+    const response = await http.fetch(path, {
+      method: 'POST',
       body: JSON.stringify({
         dataset: JSON.parse(evalParams?.dataset ?? '[]'),
         evalPrompt: evalParams?.evalPrompt ?? '',
@@ -57,8 +58,9 @@ export const postEvaluation = async ({
       },
       query,
       signal,
-      version: API_VERSIONS.internal.v1,
     });
+
+    return response as PostEvaluateResponse;
   } catch (error) {
     return error as IHttpFetchError;
   }
@@ -85,7 +87,8 @@ export const getEvaluation = async ({
   try {
     const path = `/internal/elastic_assistant/evaluate`;
 
-    return await http.get<GetEvaluateResponse>(path, {
+    return await http.fetch<GetEvaluateResponse>(path, {
+      method: 'GET',
       signal,
       version: API_VERSIONS.internal.v1,
     });
