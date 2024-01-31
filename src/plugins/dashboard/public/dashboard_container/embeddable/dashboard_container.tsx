@@ -10,8 +10,8 @@ import { omit } from 'lodash';
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
-import { BehaviorSubject, combineLatest, Subject, Subscription } from 'rxjs';
-import { map, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { BehaviorSubject, Subject, Subscription } from 'rxjs';
+import { map, distinctUntilChanged } from 'rxjs/operators';
 import deepEqual from 'fast-deep-equal';
 import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import type { KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
@@ -48,7 +48,7 @@ import { placePanel } from '../component/panel_placement';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
 import { DashboardExternallyAccessibleApi } from '../external_api/dashboard_api';
 import { dashboardContainerReducers } from '../state/dashboard_container_reducers';
-import { startDiffingDashboardState } from '../state/diffing/dashboard_diffing_integration';
+import { getDiffingMiddleware } from '../state/diffing/dashboard_diffing_integration';
 import {
   DashboardPublicState,
   DashboardReduxState,
@@ -70,7 +70,6 @@ import {
   dashboardTypeDisplayLowercase,
   dashboardTypeDisplayName,
 } from './dashboard_container_factory';
-import { SavedDashboardInput } from '../../services/dashboard_content_management/types';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -113,14 +112,12 @@ export class DashboardContainer
   public getState: DashboardReduxEmbeddableTools['getState'];
   public dispatch: DashboardReduxEmbeddableTools['dispatch'];
   public onStateChange: DashboardReduxEmbeddableTools['onStateChange'];
+  public anyReducerRun: Subject<null> = new Subject();
 
   public integrationSubscriptions: Subscription = new Subscription();
   public publishingSubscription: Subscription = new Subscription();
   public diffingSubscription: Subscription = new Subscription();
   public controlGroup?: ControlGroupContainer;
-
-  public hasUnsavedChanges: BehaviorSubject<boolean>;
-  public backupUnsavedChanges: BehaviorSubject<Partial<SavedDashboardInput> | undefined>;
 
   public searchSessionId?: string;
   public locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
@@ -186,11 +183,7 @@ export class DashboardContainer
     this.dashboardCreationStartTime = dashboardCreationStartTime;
 
     // start diffing dashboard state
-    this.hasUnsavedChanges = new BehaviorSubject(false);
-    this.backupUnsavedChanges = new BehaviorSubject<Partial<DashboardContainerInput> | undefined>(
-      undefined
-    );
-    const diffingMiddleware = startDiffingDashboardState.bind(this)(creationOptions);
+    const diffingMiddleware = getDiffingMiddleware.bind(this)();
 
     // build redux embeddable tools
     const reduxTools = reduxToolsPackage.createReduxEmbeddableTools<
@@ -223,7 +216,7 @@ export class DashboardContainer
         this.expandedPanelId.next(this.getExpandedPanelId());
       })
     );
-    this.trackReactEmbeddableUnsavedChanges();
+    this.startAuditingReactEmbeddableChildren();
   }
 
   public getAppContext() {
@@ -461,7 +454,7 @@ export class DashboardContainer
       if (timeRange) timeFilterService.setTime(timeRange);
       if (refreshInterval) timeFilterService.setRefreshInterval(refreshInterval);
     }
-    this.resetAllReactEmbeddableStates();
+    this.resetAllReactEmbeddables();
   }
 
   public navigateToDashboard = async (
@@ -654,42 +647,19 @@ export class DashboardContainer
     }
   }
 
-  public reactEmbeddableUnsavedChanges: BehaviorSubject<
-    Array<{ childId: string; unsavedChanges: object | undefined }>
-  > = new BehaviorSubject<Array<{ childId: string; unsavedChanges: object | undefined }>>([]);
+  public startAuditingReactEmbeddableChildren = () => {
+    const auditChildren = () => {
+      const currentChildren = this.reactEmbeddableChildren.value;
+      let panelsChanged = false;
+      for (const panelId of Object.keys(currentChildren)) {
+        if (!this.getInput().panels[panelId]) {
+          delete currentChildren[panelId];
+          panelsChanged = true;
+        }
+      }
+      if (panelsChanged) this.reactEmbeddableChildren.next(currentChildren);
+    };
 
-  public trackReactEmbeddableUnsavedChanges = () => {
-    this.publishingSubscription.add(
-      this.reactEmbeddableChildren
-        .pipe(
-          map((children) => Object.keys(children)),
-          distinctUntilChanged(deepEqual),
-
-          // children may change, so make sure we subscribe/unsubscribe with switchMap
-          switchMap((newChildIds: string[]) => {
-            if (newChildIds.length === 0) {
-              this.reactEmbeddableUnsavedChanges.next([]);
-              this.dispatch.setReactEmbeddablesHaveUnsavedChanges(false);
-            }
-            return combineLatest(
-              newChildIds.map((childId) =>
-                this.reactEmbeddableChildren.value[childId].unsavedChanges.pipe(
-                  map((unsavedChanges) => {
-                    return { childId, unsavedChanges };
-                  })
-                )
-              )
-            );
-          })
-        )
-        .subscribe((allUnsavedChanges) => {
-          this.reactEmbeddableUnsavedChanges.next(allUnsavedChanges);
-          const anyUnsavedChanges = allUnsavedChanges.some(
-            ({ unsavedChanges }) => unsavedChanges !== undefined
-          );
-          this.dispatch.setReactEmbeddablesHaveUnsavedChanges(anyUnsavedChanges);
-        })
-    );
     // audit children when panels change
     this.publishingSubscription.add(
       this.getInput$()
@@ -697,24 +667,12 @@ export class DashboardContainer
           map(() => Object.keys(this.getInput().panels)),
           distinctUntilChanged(deepEqual)
         )
-        .subscribe(() => this.auditChildren())
+        .subscribe(() => auditChildren())
     );
-    this.auditChildren();
+    auditChildren();
   };
 
-  public auditChildren = () => {
-    const currentChildren = this.reactEmbeddableChildren.value;
-    let panelsChanged = false;
-    for (const panelId of Object.keys(currentChildren)) {
-      if (!this.getInput().panels[panelId]) {
-        delete currentChildren[panelId];
-        panelsChanged = true;
-      }
-    }
-    if (panelsChanged) this.reactEmbeddableChildren.next(currentChildren);
-  };
-
-  public resetAllReactEmbeddableStates = () => {
+  public resetAllReactEmbeddables = () => {
     let resetChangedPanelCount = false;
     const currentChildren = this.reactEmbeddableChildren.value;
     for (const panelId of Object.keys(currentChildren)) {
