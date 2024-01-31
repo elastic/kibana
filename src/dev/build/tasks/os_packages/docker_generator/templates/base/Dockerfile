@@ -133,6 +133,7 @@ RUN echo '--diagnostic-dir=./data' >> config/node.options
 {{^opensslLegacyProvider}}
 RUN sed 's/\(--openssl-legacy-provider\)/#\1/' -i config/node.options
 {{/opensslLegacyProvider}}
+
 {{#fips}}
 # OpenSSL requires specific versions that are FIPS certified. Further, the FIPS modules
 # need to be compiled on the machine to pass its own self validation on startup.
