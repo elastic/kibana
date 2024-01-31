@@ -57,8 +57,11 @@ export function joinByKey(
     merge({}, a, b)
 ) {
   const keys = castArray(key);
+  // Create a map to quickly query the index of the group.
   const map = new Map();
   return items.reduce<Array<Record<string, any>>>((prev, current) => {
+    // The key of the map is a stable JSON string of the values from given keys.
+    // We need stable JSON string to support plain object values.
     const stableKey = stableStringify(keys.map((k) => current[k]));
 
     if (map.has(stableKey)) {
