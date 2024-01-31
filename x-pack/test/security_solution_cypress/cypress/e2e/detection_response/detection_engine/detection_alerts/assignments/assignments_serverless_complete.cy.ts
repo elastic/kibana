@@ -10,7 +10,7 @@ import { getNewRule } from '../../../../../objects/rule';
 import { refreshAlertPageFilter, selectFirstPageAlerts } from '../../../../../tasks/alerts';
 import { createRule } from '../../../../../tasks/api_calls/rules';
 import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
-import { login } from '../../../../../tasks/login';
+import { activateUser, login } from '../../../../../tasks/login';
 import { ALERTS_URL } from '../../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
 import {
@@ -21,7 +21,7 @@ import {
 } from '../../../../../tasks/alert_assignments';
 
 // FLAKY: https://github.com/elastic/kibana/issues/172557
-describe.skip(
+describe(
   'Alert user assignment - Serverless Complete',
   {
     tags: ['@serverless'],
@@ -38,13 +38,15 @@ describe.skip(
     before(() => {
       cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
 
-      // Login into accounts so that they got activated and visible in user profiles list
-      login(ROLES.t1_analyst);
-      login(ROLES.t2_analyst);
-      login(ROLES.t3_analyst);
-      login(ROLES.soc_manager);
-      login(ROLES.detections_admin);
-      login(ROLES.platform_engineer);
+      login();
+
+      // Activate accounts so that they got visible in user profiles list
+      activateUser(ROLES.t1_analyst);
+      activateUser(ROLES.t2_analyst);
+      activateUser(ROLES.t3_analyst);
+      activateUser(ROLES.soc_manager);
+      activateUser(ROLES.detections_admin);
+      activateUser(ROLES.platform_engineer);
     });
 
     after(() => {
