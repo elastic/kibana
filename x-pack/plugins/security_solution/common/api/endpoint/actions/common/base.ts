@@ -43,10 +43,12 @@ export const BaseActionRequestSchema = {
   ),
   comment: schema.maybe(schema.string()),
   parameters: schema.maybe(schema.object({})),
-  agent_type: schema.oneOf(
-    // @ts-expect-error TS2769: No overload matches this call
-    RESPONSE_ACTION_AGENT_TYPE.map((agentType) => schema.literal(agentType)),
-    { defaultValue: 'endpoint' }
+  agent_type: schema.maybe(
+    schema.oneOf(
+      // @ts-expect-error TS2769: No overload matches this call
+      RESPONSE_ACTION_AGENT_TYPE.map((agentType) => schema.literal(agentType)),
+      { defaultValue: 'endpoint' }
+    )
   ),
 };
 
