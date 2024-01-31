@@ -26,6 +26,7 @@ import {
   SEARCH_INDEX_INDEX_MAPPING_PATH,
   SEARCH_INDEX_PATH,
   SEARCH_INDEX_PIPELINES_PATH,
+  SEARCH_INDEX_TAB_PATH,
 } from '../../../routes';
 import { isConnectorIndex, isCrawlerIndex } from '../../../utils/indices';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
@@ -33,6 +34,7 @@ import { KibanaLogic } from '../../../../shared/kibana';
 import { generateNavLink } from '../../../../shared/layout';
 
 import './indices_nav.scss';
+import { SearchIndexTabId } from '../search_index';
 
 export const useIndicesNav = () => {
   const isIndexRoute = !!useRouteMatch(SEARCH_INDEX_PATH);
@@ -43,7 +45,11 @@ export const useIndicesNav = () => {
     productFeatures: { hasDefaultIngestPipeline },
   } = useValues(KibanaLogic);
 
+  console.log('HEREEEEEE', isIndexRoute, indexName);
+
   if (!indexName || !isIndexRoute) return undefined;
+
+  console.log('HEREEEEEE 22222');
 
   const defaultNavItems: Array<EuiSideNavItemType<unknown>> = [
     {
@@ -75,8 +81,9 @@ export const useIndicesNav = () => {
         defaultMessage: 'Documents',
       }),
       ...generateNavLink({
-        to: generateEncodedPath(SEARCH_INDEX_DOCUMENTS_PATH, {
+        to: generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
           indexName,
+          tabId: SearchIndexTabId.DOCUMENTS,
         }),
       }),
     },
@@ -87,8 +94,9 @@ export const useIndicesNav = () => {
         defaultMessage: 'Index mappings',
       }),
       ...generateNavLink({
-        to: generateEncodedPath(SEARCH_INDEX_INDEX_MAPPING_PATH, {
+        to: generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
           indexName,
+          tabId: SearchIndexTabId.INDEX_MAPPINGS,
         }),
       }),
     },
@@ -105,8 +113,9 @@ export const useIndicesNav = () => {
         }
       ),
       ...generateNavLink({
-        to: generateEncodedPath(SEARCH_INDEX_CONNECTORS_CONFIGURATION_PATH, {
+        to: generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
           indexName,
+          tabId: SearchIndexTabId.CONFIGURATION,
         }),
       }),
     },
@@ -122,8 +131,9 @@ export const useIndicesNav = () => {
               }
             ),
             ...generateNavLink({
-              to: generateEncodedPath(SEARCH_INDEX_CONNECTORS_SYNC_RULES_PATH, {
+              to: generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
                 indexName,
+                tabId: SearchIndexTabId.SYNC_RULES,
               }),
             }),
           },
@@ -136,8 +146,9 @@ export const useIndicesNav = () => {
         defaultMessage: 'Scheduling',
       }),
       ...generateNavLink({
-        to: generateEncodedPath(SEARCH_INDEX_CONNECTORS_SCHEDULING_PATH, {
+        to: generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
           indexName,
+          tabId: SearchIndexTabId.SCHEDULING,
         }),
       }),
     },
@@ -154,8 +165,9 @@ export const useIndicesNav = () => {
         }
       ),
       ...generateNavLink({
-        to: generateEncodedPath(SEARCH_INDEX_CRAWLER_DOMAIN_MANAGEMENT_PATH, {
+        to: generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
           indexName,
+          tabId: SearchIndexTabId.DOMAIN_MANAGEMENT,
         }),
       }),
     },
@@ -169,8 +181,9 @@ export const useIndicesNav = () => {
         }
       ),
       ...generateNavLink({
-        to: generateEncodedPath(SEARCH_INDEX_CRAWLER_CONFIGURATION_PATH, {
+        to: generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
           indexName,
+          tabId: SearchIndexTabId.CRAWLER_CONFIGURATION,
         }),
       }),
     },
@@ -184,8 +197,9 @@ export const useIndicesNav = () => {
         }
       ),
       ...generateNavLink({
-        to: generateEncodedPath(SEARCH_INDEX_CRAWLER_SCHEDULING_PATH, {
+        to: generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
           indexName,
+          tabId: SearchIndexTabId.SCHEDULING,
         }),
       }),
     },
@@ -199,8 +213,9 @@ export const useIndicesNav = () => {
         defaultMessage: 'Pipelines',
       }),
       ...generateNavLink({
-        to: generateEncodedPath(SEARCH_INDEX_PIPELINES_PATH, {
+        to: generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
           indexName,
+          tabId: SearchIndexTabId.PIPELINES,
         }),
       }),
     },
