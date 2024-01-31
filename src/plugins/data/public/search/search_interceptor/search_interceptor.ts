@@ -51,6 +51,7 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { AbortError, KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 import { BfetchRequestError } from '@kbn/bfetch-error';
 import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
+import { toPartialResponse } from '@kbn/search-response-warnings';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
   IAsyncSearchOptions,
@@ -479,6 +480,8 @@ export class SearchInterceptor {
    * @returns `Observable` emitting the search response or an error.
    */
   public search({ id, ...request }: IKibanaSearchRequest, options: IAsyncSearchOptions = {}) {
+    let lastResponse: IKibanaSearchResponse | null = null;
+
     const searchOptions = {
       ...options,
     };
@@ -507,8 +510,16 @@ export class SearchInterceptor {
         );
 
         return response$.pipe(
+          tap((response) => {
+            lastResponse = response;
+          }),
           takeUntil(aborted$),
           catchError((e) => {
+            // If we aborted (search:timeout advanced setting) and there was a partial response, return it instead of just erroring out
+            if (searchAbortController.isTimeout() && lastResponse) {
+              this.handleSearchError(e, request?.params?.body ?? {}, searchOptions, true);
+              return of(toPartialResponse(lastResponse));
+            }
             return throwError(
               this.handleSearchError(
                 e,
