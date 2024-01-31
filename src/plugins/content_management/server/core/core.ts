@@ -71,10 +71,14 @@ export class Core {
       eventBus: this.eventBus,
       contentClient: {
         getForRequest: ({ contentTypeId, requestHandlerContext, version }) => {
+          const contentDefinition = this.contentRegistry.getDefinition(contentTypeId);
           const clientFactory = getContentClientFactory({ contentRegistry: this.contentRegistry });
-          const clientForContentTypeId = clientFactory(contentTypeId);
+          const contentClient = clientFactory(contentTypeId);
 
-          return clientForContentTypeId.getForRequest({ requestHandlerContext, version });
+          return contentClient.getForRequest({
+            requestHandlerContext,
+            version: version ?? contentDefinition.version.latest,
+          });
         },
       },
     };

@@ -10,11 +10,10 @@ import { omit } from 'lodash';
 
 import type { ContentManagementServiceDefinitionVersioned, Version } from '@kbn/object-versioning';
 import { schema } from '@kbn/config-schema';
-import { validate } from '../../utils';
+import { validate, getServiceObjectTransformFactory } from '../../utils';
 import { ContentRegistry } from '../../core/registry';
 import { createMockedStorage } from '../../core/mocks';
 import { EventBus } from '../../core/event_bus';
-import { getServiceObjectTransformFactory } from '../services_transforms_factory';
 import { deleteProc } from './delete';
 
 const storageContextGetTransforms = jest.fn();

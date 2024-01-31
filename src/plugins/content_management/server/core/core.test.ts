@@ -849,6 +849,111 @@ describe('Content Core', () => {
         });
       });
 
+      describe('contentClient', () => {
+        test('should return a ClientContent instance for a specific request', () => {
+          const { coreSetup, cleanUp } = setup({ registerFooType: true });
+
+          const {
+            api: { contentClient },
+          } = coreSetup;
+
+          const client = contentClient.getForRequest({
+            requestHandlerContext: {} as any,
+            contentTypeId: FOO_CONTENT_ID,
+          });
+
+          expect(client).toBeInstanceOf(ContentClient);
+
+          cleanUp();
+        });
+
+        test('should automatically set the content version to the latest version if not provided', async () => {
+          const storage = createMockedStorage();
+          const latestVersion = 7;
+
+          const { coreSetup, cleanUp } = setup({
+            registerFooType: true,
+            latestVersion,
+            storage,
+          });
+
+          const requestHandlerContext = {} as any;
+          const client = coreSetup.api.contentClient.getForRequest({
+            requestHandlerContext,
+            contentTypeId: FOO_CONTENT_ID,
+          });
+
+          const options = { foo: 'bar' };
+          await client.get('1234', options);
+
+          const storageContext = {
+            requestHandlerContext,
+            utils: { getTransforms: expect.any(Function) },
+            version: {
+              latest: latestVersion,
+              request: latestVersion, // Request version should be set to the latest version
+            },
+          };
+
+          expect(storage.get).toHaveBeenCalledWith(storageContext, '1234', options);
+
+          cleanUp();
+        });
+
+        test('should pass the provided content version', async () => {
+          const storage = createMockedStorage();
+          const latestVersion = 7;
+          const requestVersion = 2;
+
+          const { coreSetup, cleanUp } = setup({
+            registerFooType: true,
+            latestVersion,
+            storage,
+          });
+
+          const requestHandlerContext = {} as any;
+
+          const client = coreSetup.api.contentClient.getForRequest({
+            requestHandlerContext,
+            contentTypeId: FOO_CONTENT_ID,
+            version: requestVersion,
+          });
+
+          await client.get('1234');
+
+          const storageContext = {
+            requestHandlerContext,
+            utils: { getTransforms: expect.any(Function) },
+            version: {
+              latest: latestVersion,
+              request: requestVersion, // The requested version should be used
+            },
+          };
+
+          expect(storage.get).toHaveBeenCalledWith(storageContext, '1234', undefined);
+
+          cleanUp();
+        });
+
+        test('should throw if the contentTypeId is not registered', () => {
+          const { coreSetup, cleanUp } = setup();
+
+          const {
+            api: { contentClient },
+          } = coreSetup;
+
+          expect(() => {
+            contentClient.getForRequest({
+              requestHandlerContext: {} as any,
+              contentTypeId: FOO_CONTENT_ID,
+            });
+          }).toThrowError('Content [foo] is not registered.');
+
+          cleanUp();
+        });
+      });
+    });
+
       describe('eventStream', () => {
         test('stores "delete" events', async () => {
           const { fooContentCrud, ctx, eventStream } = setup({ registerFooType: true });

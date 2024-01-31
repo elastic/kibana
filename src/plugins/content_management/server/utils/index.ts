@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { getStorageContext } from './utils';
+export { getStorageContext, validate } from './utils';
 
 export { getServiceObjectTransformFactory } from './services_transforms_factory';
