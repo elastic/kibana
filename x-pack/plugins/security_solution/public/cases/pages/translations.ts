@@ -11,16 +11,16 @@ export const PAGE_TITLE = i18n.translate('xpack.securitySolution.cases.pageTitle
   defaultMessage: 'Cases',
 });
 
-export const ISOLATED_HOST = i18n.translate('xpack.cases.caseView.isolatedHost', {
+export const ISOLATED_HOST = i18n.translate('xpack.securitySolution.caseView.isolatedHost', {
   defaultMessage: 'submitted isolate request on host',
 });
 
-export const RELEASED_HOST = i18n.translate('xpack.cases.caseView.releasedHost', {
+export const RELEASED_HOST = i18n.translate('xpack.securitySolution.caseView.releasedHost', {
   defaultMessage: 'submitted release request on host',
 });
 
 export const OTHER_ENDPOINTS = (endpoints: number): string =>
-  i18n.translate('xpack.cases.caseView.otherEndpoints', {
+  i18n.translate('xpack.securitySolution.caseView.otherEndpoints', {
     values: { endpoints },
     defaultMessage: ` and {endpoints} {endpoints, plural, =1 {other} other {others}}`,
   });
