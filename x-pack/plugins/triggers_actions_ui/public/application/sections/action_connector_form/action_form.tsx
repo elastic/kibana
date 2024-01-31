@@ -18,12 +18,15 @@ import {
   EuiKeyPadMenuItem,
   EuiToolTip,
   EuiLink,
+  EuiEmptyPrompt,
+  EuiText,
 } from '@elastic/eui';
 import {
   ActionGroup,
   RuleActionAlertsFilterProperty,
   RuleActionFrequency,
   RuleActionParam,
+  RuleActionTypes,
 } from '@kbn/alerting-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 import { betaBadgeProps } from './beta_badge_props';
@@ -152,9 +155,13 @@ export const ActionForm = ({
     (async () => {
       try {
         setIsLoadingActionTypes(true);
-        const registeredActionTypes = (await loadActionTypes({ http, featureId })).sort((a, b) =>
-          a.name.localeCompare(b.name)
-        );
+        const registeredActionTypes = (
+          await loadActionTypes({
+            http,
+            featureId,
+            includeSystemActions: ruleTypeId?.startsWith('example.'),
+          })
+        ).sort((a, b) => a.name.localeCompare(b.name));
         const index: ActionTypeIndex = {};
         for (const actionTypeItem of registeredActionTypes) {
           index[actionTypeItem.id] = actionTypeItem;
@@ -240,49 +247,49 @@ export const ActionForm = ({
     }
     setIsAddActionPanelOpen(false);
     const allowGroupConnector = (actionTypeModel?.subtype ?? []).map((atm) => atm.id);
+    const isSystemAction = Boolean(
+      actionTypesIndex && actionTypesIndex[actionTypeModel.id]?.isSystemActionType
+    );
     let actionTypeConnectors = connectors.filter(
       (field) => field.actionTypeId === actionTypeModel.id
     );
 
-    if (actionTypeConnectors.length > 0) {
-      actions.push({
-        id: '',
-        actionTypeId: actionTypeModel.id,
-        group: defaultActionGroupId,
-        params: {},
-        frequency: defaultRuleFrequency,
-        uuid: uuidv4(),
-      });
-      setActionIdByIndex(actionTypeConnectors[0].id, actions.length - 1);
-    } else {
+    const actionToPush = isSystemAction
+      ? {
+          id: '',
+          actionTypeId: actionTypeModel.id,
+          params: {},
+          uuid: uuidv4(),
+          type: RuleActionTypes.SYSTEM,
+        }
+      : {
+          id: '',
+          actionTypeId: actionTypeModel.id,
+          group: defaultActionGroupId,
+          params: {},
+          frequency: defaultRuleFrequency,
+          uuid: uuidv4(),
+          type: RuleActionTypes.DEFAULT,
+        };
+
+    if (actionTypeConnectors.length === 0) {
       actionTypeConnectors = connectors.filter((field) =>
         allowGroupConnector.includes(field.actionTypeId)
       );
       if (actionTypeConnectors.length > 0) {
-        actions.push({
-          id: '',
-          actionTypeId: actionTypeConnectors[0].actionTypeId,
-          group: defaultActionGroupId,
-          params: {},
-          frequency: DEFAULT_FREQUENCY,
-          uuid: uuidv4(),
-        });
+        // If a connector was successfully found, update the actionTypeId
+        actions.push({ ...actionToPush, actionTypeId: actionTypeConnectors[0].actionTypeId });
         setActionIdByIndex(actionTypeConnectors[0].id, actions.length - 1);
+      } else {
+        // if no connectors exists or all connectors is already assigned an action under current alert
+        // set actionType as id to be able to create new connector within the alert form
+        actions.push(actionToPush);
+        setActionIdByIndex(actions.length.toString(), actions.length - 1);
+        setEmptyActionsIds([...emptyActionsIds, actions.length.toString()]);
       }
-    }
-
-    if (actionTypeConnectors.length === 0) {
-      // if no connectors exists or all connectors is already assigned an action under current alert
-      // set actionType as id to be able to create new connector within the alert form
-      actions.push({
-        id: '',
-        actionTypeId: actionTypeModel.id,
-        group: defaultActionGroupId,
-        params: {},
-        frequency: defaultRuleFrequency,
-      });
-      setActionIdByIndex(actions.length.toString(), actions.length - 1);
-      setEmptyActionsIds([...emptyActionsIds, actions.length.toString()]);
+    } else {
+      actions.push(actionToPush);
+      setActionIdByIndex(actionTypeConnectors[0].id, actions.length - 1);
     }
   }
 
@@ -371,8 +378,25 @@ export const ActionForm = ({
       )}
       {actionTypesIndex &&
         actions.map((actionItem: RuleAction, index: number) => {
+          const isSystemAction = Boolean(
+            actionTypesIndex[actionItem.actionTypeId]?.isSystemActionType
+          );
           const actionConnector = connectors.find((field) => field.id === actionItem.id);
-          // connectors doesn't exists
+          if (isSystemAction && !actionConnector) {
+            return (
+              <EuiEmptyPrompt
+                title={
+                  <EuiText color="danger">
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.actionForm.unableToLoadSystemActionConnectorTitle"
+                      defaultMessage="Unable to load connector"
+                    />
+                  </EuiText>
+                }
+              />
+            );
+          }
+          // If connector does not exist
           if (!actionConnector) {
             return (
               <AddConnectorInline
@@ -437,6 +461,7 @@ export const ActionForm = ({
             <ActionTypeForm
               actionItem={actionItem}
               actionConnector={actionConnector}
+              isSystemAction={isSystemAction}
               index={index}
               key={`action-form-action-at-${actionItem.uuid}`}
               setActionUseAlertDataForTemplate={setActionUseAlertDataForTemplate}

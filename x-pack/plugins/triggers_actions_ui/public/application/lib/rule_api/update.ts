@@ -7,6 +7,7 @@
 import { HttpSetup } from '@kbn/core/public';
 import { pick } from 'lodash';
 import { RewriteResponseCase, AsApiContract } from '@kbn/actions-plugin/common';
+import { SanitizedDefaultRuleAction } from '@kbn/alerting-plugin/common';
 import { BASE_ALERTING_API_PATH } from '../../constants';
 import { Rule, RuleUpdates } from '../../../types';
 import { transformRule } from './common_transformations';
@@ -17,23 +18,27 @@ type RuleUpdatesBody = Pick<
 >;
 const rewriteBodyRequest: RewriteResponseCase<RuleUpdatesBody> = ({ actions, ...res }): any => ({
   ...res,
-  actions: actions.map(
-    ({ group, id, params, frequency, uuid, alertsFilter, useAlertDataForTemplate }) => ({
+  actions: actions.map((action) => {
+    const { group, id, params, frequency, uuid, alertsFilter, useAlertDataForTemplate } =
+      action as SanitizedDefaultRuleAction;
+    return {
       group,
       id,
       params,
-      frequency: {
-        notify_when: frequency!.notifyWhen,
-        throttle: frequency!.throttle,
-        summary: frequency!.summary,
-      },
+      frequency: frequency
+        ? {
+            notify_when: frequency!.notifyWhen,
+            throttle: frequency!.throttle,
+            summary: frequency!.summary,
+          }
+        : undefined,
       alerts_filter: alertsFilter,
       ...(typeof useAlertDataForTemplate !== 'undefined'
         ? { use_alert_data_for_template: useAlertDataForTemplate }
         : {}),
       ...(uuid && { uuid }),
-    })
-  ),
+    };
+  }),
 });
 
 export async function updateRule({

@@ -69,6 +69,8 @@ export const rewriteRule = ({
       if (type === RuleActionTypes.SYSTEM) {
         return {
           ...action,
+          id,
+          params,
           connector_type_id: actionTypeId,
           ...(typeof useAlertDataForTemplate !== 'undefined'
             ? { use_alert_data_for_template: useAlertDataForTemplate }

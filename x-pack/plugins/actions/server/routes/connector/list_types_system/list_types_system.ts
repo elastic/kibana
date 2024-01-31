@@ -13,17 +13,17 @@ import {
 } from '../../../../common/routes/connector/apis/connector_types';
 import { transformListTypesResponseV1 } from './transforms';
 import { ActionsRequestHandlerContext } from '../../../types';
-import { BASE_ACTION_API_PATH } from '../../../../common';
+import { INTERNAL_BASE_ACTION_API_PATH } from '../../../../common';
 import { ILicenseState } from '../../../lib';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 
-export const listTypesRoute = (
+export const listTypesSystemRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
   router.get(
     {
-      path: `${BASE_ACTION_API_PATH}/connector_types`,
+      path: `${INTERNAL_BASE_ACTION_API_PATH}/connector_types_with_system`,
       validate: {
         query: connectorTypesQuerySchemaV1,
       },
@@ -37,6 +37,7 @@ export const listTypesRoute = (
 
         const connectorTypes = await actionsClient.listTypes({
           featureId: query?.feature_id,
+          includeSystemActionTypes: true,
         });
 
         const responseBody: ConnectorTypesResponseV1[] =

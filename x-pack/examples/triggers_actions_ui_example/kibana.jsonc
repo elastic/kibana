@@ -4,7 +4,7 @@
   "owner": "@elastic/response-ops",
   "plugin": {
     "id": "triggersActionsUiExample",
-    "server": false,
+    "server": true,
     "browser": true,
     "requiredPlugins": [
       "triggersActionsUi",
@@ -12,10 +12,9 @@
       "alerting",
       "developerExamples",
       "kibanaReact",
-      "cases"
+      "cases",
+      "actions"
     ],
-    "optionalPlugins": [
-      "spaces"
-    ],
+    "optionalPlugins": ["spaces"]
   }
 }

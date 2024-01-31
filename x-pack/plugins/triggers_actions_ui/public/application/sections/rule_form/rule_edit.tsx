@@ -7,7 +7,7 @@
 
 import React, { useReducer, useState, useEffect, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
+import { RuleNotifyWhen, SanitizedRuleAction } from '@kbn/alerting-plugin/common';
 import {
   EuiTitle,
   EuiFlyoutHeader,
@@ -58,6 +58,14 @@ const defaultUpdateRuleErrorMessage = i18n.translate(
   }
 );
 
+// Separate function for determining if an untyped action has a group property or not, which helps determine if
+// it is a default action or a system action. Consolidated here to deal with type definition complexity
+const actionHasDefinedGroup = (action: SanitizedRuleAction) => {
+  if (!('group' in action)) return false;
+  // If the group property is present, ensure that it isn't null or undefined
+  return Boolean(action.group);
+};
+
 const cloneAndMigrateRule = (initialRule: Rule) => {
   const clonedRule = cloneDeep(omit(initialRule, 'notifyWhen', 'throttle'));
 
@@ -73,10 +81,15 @@ const cloneAndMigrateRule = (initialRule: Rule) => {
             initialRule.notifyWhen === RuleNotifyWhen.THROTTLE ? initialRule.throttle! : null,
         }
       : { summary: false, notifyWhen: RuleNotifyWhen.THROTTLE, throttle: initialRule.throttle! };
-    clonedRule.actions = clonedRule.actions.map((action) => ({
-      ...action,
-      frequency,
-    }));
+    clonedRule.actions = clonedRule.actions.map((action: SanitizedRuleAction) => {
+      if (actionHasDefinedGroup(action as SanitizedRuleAction)) {
+        return {
+          ...action,
+          frequency,
+        } as SanitizedRuleAction;
+      }
+      return action as SanitizedRuleAction;
+    });
   }
   return clonedRule;
 };
