@@ -134,79 +134,79 @@ export const postEvaluateRoute = (
           // Default ELSER model
           const elserId = await getElser(request, (await context.core).savedObjects.getClient());
 
-        // Skeleton request from route to pass to the agents
-        // params will be passed to the actions executor
-        const skeletonRequest: KibanaRequest<unknown, unknown, RequestBody> = {
-          ...request,
-          body: {
-            alertsIndexPattern: '',
-            allow: [],
-            allowReplacement: [],
-            params: {
-              subAction: 'invokeAI',
-              subActionParams: {
-                messages: [],
+          // Skeleton request from route to pass to the agents
+          // params will be passed to the actions executor
+          const skeletonRequest: KibanaRequest<unknown, unknown, RequestBody> = {
+            ...request,
+            body: {
+              alertsIndexPattern: '',
+              allow: [],
+              allowReplacement: [],
+              params: {
+                subAction: 'invokeAI',
+                subActionParams: {
+                  messages: [],
+                },
               },
+              // does not matter in conjunction with invokeAI
+              llmType: 'openai',
+              replacements: {},
+              size: DEFAULT_SIZE,
+              isEnabledKnowledgeBase: true,
+              isEnabledRAGAlerts: true,
             },
-            // does not matter in conjunction with invokeAI
-            llmType: 'openai',
-            replacements: {},
-            size: DEFAULT_SIZE,
-            isEnabledKnowledgeBase: true,
-            isEnabledRAGAlerts: true,
-          },
-        };
+          };
 
-        // Create an array of executor functions to call in batches
-        // One for each connector/model + agent combination
-        // Hoist `langChainMessages` so they can be batched by dataset.input in the evaluator
-        const agents: AgentExecutorEvaluatorWithMetadata[] = [];
-        connectorIds.forEach((connectorId) => {
-          agentNames.forEach((agentName) => {
-            logger.info(`Creating agent: ${connectorId} + ${agentName}`);
-            const llmType = getLlmType(connectorId, connectors);
-            const connectorName =
-              getConnectorName(connectorId, connectors) ?? '[unknown connector]';
-            const detailedRunName = `${runName} - ${connectorName} + ${agentName}`;
-            agents.push({
-              agentEvaluator: async (langChainMessages, exampleId) => {
-                const evalResult = await AGENT_EXECUTOR_MAP[agentName]({
-                  actions,
-                  isEnabledKnowledgeBase: true,
-                  assistantTools,
-                  connectorId,
-                  esClient,
-                  elserId,
-                  isStream: false,
-                  langChainMessages,
-                  llmType,
-                  logger,
-                  request: skeletonRequest,
-                  kbResource: ESQL_RESOURCE,
-                  telemetry,
-                  traceOptions: {
-                    exampleId,
-                    projectName,
-                    runName: detailedRunName,
-                    evaluationId,
-                    tags: [
-                      'security-assistant-prediction',
-                      ...(connectorName != null ? [connectorName] : []),
-                      runName,
-                    ],
-                    tracers: getLangSmithTracer(detailedRunName, exampleId, logger),
-                  },
-                });
-                return evalResult.body;
-              },
-              metadata: {
-                connectorName,
-                runName: detailedRunName,
-              },
+          // Create an array of executor functions to call in batches
+          // One for each connector/model + agent combination
+          // Hoist `langChainMessages` so they can be batched by dataset.input in the evaluator
+          const agents: AgentExecutorEvaluatorWithMetadata[] = [];
+          connectorIds.forEach((connectorId) => {
+            agentNames.forEach((agentName) => {
+              logger.info(`Creating agent: ${connectorId} + ${agentName}`);
+              const llmType = getLlmType(connectorId, connectors);
+              const connectorName =
+                getConnectorName(connectorId, connectors) ?? '[unknown connector]';
+              const detailedRunName = `${runName} - ${connectorName} + ${agentName}`;
+              agents.push({
+                agentEvaluator: async (langChainMessages, exampleId) => {
+                  const evalResult = await AGENT_EXECUTOR_MAP[agentName]({
+                    actions,
+                    isEnabledKnowledgeBase: true,
+                    assistantTools,
+                    connectorId,
+                    esClient,
+                    elserId,
+                    isStream: false,
+                    langChainMessages,
+                    llmType,
+                    logger,
+                    request: skeletonRequest,
+                    kbResource: ESQL_RESOURCE,
+                    telemetry,
+                    traceOptions: {
+                      exampleId,
+                      projectName,
+                      runName: detailedRunName,
+                      evaluationId,
+                      tags: [
+                        'security-assistant-prediction',
+                        ...(connectorName != null ? [connectorName] : []),
+                        runName,
+                      ],
+                      tracers: getLangSmithTracer(detailedRunName, exampleId, logger),
+                    },
+                  });
+                  return evalResult.body;
+                },
+                metadata: {
+                  connectorName,
+                  runName: detailedRunName,
+                },
+              });
             });
           });
-        });
-        logger.info(`Agents created: ${agents.length}`);
+          logger.info(`Agents created: ${agents.length}`);
 
           // Evaluator Model is optional to support just running predictions
           const evaluatorModel =
