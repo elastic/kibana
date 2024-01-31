@@ -11,7 +11,7 @@ import type { ESQLCallbacks } from '../ast/shared/types';
 import { monaco } from '../../../monaco_imports';
 import type { ESQLWorker } from '../../worker/esql_worker';
 import { suggest } from '../ast/autocomplete/autocomplete';
-import { getHoverItem } from '../ast/hover';
+import { getHoverItem } from '../ast/hover/hover';
 import { getSignatureHelp } from '../ast/signature';
 import type { ESQLMessage } from '../ast/types';
 import { validateAst } from '../ast/validation/validation';

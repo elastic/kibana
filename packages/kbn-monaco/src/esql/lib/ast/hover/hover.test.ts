@@ -11,7 +11,7 @@ import { CharStreams } from 'antlr4ts';
 import { getParser, ROOT_STATEMENT } from '../../antlr_facade';
 import { ESQLErrorListener } from '../../monaco/esql_error_listener';
 import { AstListener } from '../ast_factory';
-import { getHoverItem } from '.';
+import { getHoverItem } from './hover';
 import { getFunctionDefinition } from '../shared/helpers';
 import { getFunctionSignatures } from '../definitions/helpers';
 
