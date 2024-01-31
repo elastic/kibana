@@ -659,14 +659,11 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertTransformIdInputExists() {
-      await testSubjects.existOrFail('stepDetailsFormTransformIdInput');
+      await testSubjects.existOrFail('transformIdInput');
     },
 
     async assertTransformIdValue(expectedValue: string) {
-      const actualTransformId = await testSubjects.getAttribute(
-        'stepDetailsFormTransformIdInput',
-        'value'
-      );
+      const actualTransformId = await testSubjects.getAttribute('transformIdInput', 'value');
       expect(actualTransformId).to.eql(
         expectedValue,
         `Transform id input text should be '${expectedValue}' (got '${actualTransformId}')`
@@ -674,7 +671,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async setTransformId(transformId: string) {
-      await ml.commonUI.setValueWithChecks('stepDetailsFormTransformIdInput', transformId, {
+      await ml.commonUI.setValueWithChecks('transformIdInput', transformId, {
         clearWithKeyboard: true,
         enforceDataTestSubj: true,
       });
@@ -682,12 +679,12 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertTransformDescriptionInputExists() {
-      await testSubjects.existOrFail('stepDetailsFormDescriptionInput');
+      await testSubjects.existOrFail('transformDescriptionInput');
     },
 
     async assertTransformDescriptionValue(expectedValue: string) {
       const actualTransformDescription = await testSubjects.getAttribute(
-        'stepDetailsFormDescriptionInput',
+        'transformDescriptionInput',
         'value'
       );
       expect(actualTransformDescription).to.eql(
@@ -697,52 +694,19 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async setTransformDescription(transformDescription: string) {
-      await ml.commonUI.setValueWithChecks(
-        'stepDetailsFormDescriptionInput',
-        transformDescription,
-        {
-          clearWithKeyboard: true,
-        }
-      );
+      await ml.commonUI.setValueWithChecks('transformDescriptionInput', transformDescription, {
+        clearWithKeyboard: true,
+      });
       await this.assertTransformDescriptionValue(transformDescription);
     },
 
-    async getDestIndexSameAsIdSwitchCheckState(): Promise<boolean> {
-      const state = await testSubjects.getAttribute(
-        'mlCreationWizardUtilsJobIdAsDestIndexNameSwitch',
-        'aria-checked'
-      );
-      return state === 'true';
-    },
-
-    async assertDestIndexSameAsIdCheckState(expectedCheckState: boolean) {
-      const actualCheckState = await this.getDestIndexSameAsIdSwitchCheckState();
-      expect(actualCheckState).to.eql(
-        expectedCheckState,
-        `Destination index same as job id check state should be '${expectedCheckState}' (got '${actualCheckState}')`
-      );
-    },
-
-    async assertDestIndexSameAsIdSwitchExists() {
-      await testSubjects.existOrFail(`mlCreationWizardUtilsJobIdAsDestIndexNameSwitch`, {
-        allowHidden: true,
-      });
-    },
-
-    async setDestIndexSameAsIdCheckState(checkState: boolean) {
-      if ((await this.getDestIndexSameAsIdSwitchCheckState()) !== checkState) {
-        await testSubjects.click('mlCreationWizardUtilsJobIdAsDestIndexNameSwitch');
-      }
-      await this.assertDestIndexSameAsIdCheckState(checkState);
-    },
-
     async assertDestinationIndexInputExists() {
-      await testSubjects.existOrFail('mlCreationWizardUtilsDestinationIndexInput');
+      await testSubjects.existOrFail('transformDestinationIndexInput');
     },
 
     async assertDestinationIndexValue(expectedValue: string) {
       const actualDestinationIndex = await testSubjects.getAttribute(
-        'mlCreationWizardUtilsDestinationIndexInput',
+        'transformDestinationIndexInput',
         'value'
       );
       expect(actualDestinationIndex).to.eql(
@@ -752,23 +716,20 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async setDestinationIndex(destinationIndex: string) {
-      await ml.commonUI.setValueWithChecks(
-        'mlCreationWizardUtilsDestinationIndexInput',
-        destinationIndex,
-        {
-          clearWithKeyboard: true,
-        }
-      );
+      await ml.commonUI.setValueWithChecks('transformDestinationIndexInput', destinationIndex, {
+        clearWithKeyboard: true,
+      });
       await this.assertDestinationIndexValue(destinationIndex);
     },
 
     async assertCreateDataViewSwitchExists() {
-      await testSubjects.existOrFail(`mlCreateDataViewSwitch`, { allowHidden: true });
+      await testSubjects.existOrFail(`transformCreateDataViewSwitch`, { allowHidden: true });
     },
 
     async assertCreateDataViewSwitchCheckState(expectedCheckState: boolean) {
       const actualCheckState =
-        (await testSubjects.getAttribute('mlCreateDataViewSwitch', 'aria-checked')) === 'true';
+        (await testSubjects.getAttribute('transformCreateDataViewSwitch', 'aria-checked')) ===
+        'true';
       expect(actualCheckState).to.eql(
         expectedCheckState,
         `Create data view switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
@@ -776,11 +737,14 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertDataViewTimeFieldInputExists() {
-      await testSubjects.existOrFail(`mlDataViewTimeFieldSelect`);
+      await testSubjects.existOrFail(`transformDataViewTimeFieldSelect`);
     },
 
     async assertDataViewTimeFieldValue(expectedValue: string) {
-      const actualValue = await testSubjects.getAttribute(`mlDataViewTimeFieldSelect`, 'value');
+      const actualValue = await testSubjects.getAttribute(
+        `transformDataViewTimeFieldSelect`,
+        'value'
+      );
       expect(actualValue).to.eql(
         expectedValue,
         `Data view time field should be ${expectedValue}, got ${actualValue}`
@@ -788,7 +752,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async setDataViewTimeField(fieldName: string) {
-      const selectControl = await testSubjects.find('mlDataViewTimeFieldSelect');
+      const selectControl = await testSubjects.find('transformDataViewTimeFieldSelect');
       await selectControl.type(fieldName);
       await this.assertDataViewTimeFieldValue(fieldName);
     },
@@ -875,14 +839,14 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertRetentionPolicyMaxAgeInputExists() {
-      await testSubjects.existOrFail(`stepDetailsFormRetentionPolicyMaxAgeInput`, {
+      await testSubjects.existOrFail(`transformRetentionPolicyMaxAgeInput`, {
         allowHidden: true,
       });
     },
 
     async assertRetentionsPolicyMaxAgeValue(expectedValue: string) {
       const actualValue = await testSubjects.getAttribute(
-        'stepDetailsFormRetentionPolicyMaxAgeInput',
+        'transformRetentionPolicyMaxAgeInput',
         'value'
       );
       expect(actualValue).to.eql(

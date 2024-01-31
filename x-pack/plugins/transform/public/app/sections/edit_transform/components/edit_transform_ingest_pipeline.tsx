@@ -10,12 +10,13 @@ import React, { type FC } from 'react';
 import { useEuiTheme, EuiComboBox, EuiFormRow, EuiSkeletonRectangle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { useFormField } from '@kbn/ml-form-utils/use_form_field';
-import { FormTextInput } from '@kbn/ml-form-utils/components/form_text_input';
 
 import { useGetEsIngestPipelines } from '../../../hooks';
 
-import { editTransformFlyoutSlice } from '../state_management/edit_transform_flyout_state';
+import { useEditTransformFlyoutActions } from '../state_management/edit_transform_flyout_state';
+import { useFormField } from '../state_management/selectors/form_field';
+
+import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
 
 const ingestPipelineLabel = i18n.translate(
   'xpack.transform.transformList.editFlyoutFormDestinationIngestPipelineLabel',
@@ -26,7 +27,8 @@ const ingestPipelineLabel = i18n.translate(
 
 export const EditTransformIngestPipeline: FC = () => {
   const { euiTheme } = useEuiTheme();
-  const { errors, value } = useFormField(editTransformFlyoutSlice, 'destinationIngestPipeline');
+  const { errorMessages, value } = useFormField('destinationIngestPipeline');
+  const { setFormField } = useEditTransformFlyoutActions();
 
   const { data: esIngestPipelinesData, isLoading } = useGetEsIngestPipelines();
   const ingestPipelineNames = esIngestPipelinesData?.map(({ name }) => name) ?? [];
@@ -37,7 +39,11 @@ export const EditTransformIngestPipeline: FC = () => {
         // If the list of ingest pipelines is not available
         // gracefully defaults to text input
         ingestPipelineNames.length > 0 || isLoading ? (
-          <EuiFormRow label={ingestPipelineLabel} isInvalid={errors.length > 0} error={errors}>
+          <EuiFormRow
+            label={ingestPipelineLabel}
+            isInvalid={errorMessages.length > 0}
+            error={errorMessages}
+          >
             <EuiSkeletonRectangle
               width="100%"
               height={euiTheme.size.xxl}
@@ -62,17 +68,13 @@ export const EditTransformIngestPipeline: FC = () => {
                 options={ingestPipelineNames.map((label: string) => ({ label }))}
                 selectedOptions={[{ label: value }]}
                 onChange={(o) =>
-                  editTransformFlyoutSlice.actions.setFormField({
-                    field: 'destinationIngestPipeline',
-                    value: o[0]?.label ?? '',
-                  })
+                  setFormField({ field: 'destinationIngestPipeline', value: o[0]?.label ?? '' })
                 }
               />
             </EuiSkeletonRectangle>
           </EuiFormRow>
         ) : (
-          <FormTextInput
-            slice={editTransformFlyoutSlice}
+          <EditTransformFlyoutFormTextInput
             field="destinationIngestPipeline"
             label={ingestPipelineLabel}
           />

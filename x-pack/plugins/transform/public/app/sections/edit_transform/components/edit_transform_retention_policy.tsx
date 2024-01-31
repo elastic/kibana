@@ -6,14 +6,11 @@
  */
 
 import React, { useEffect, useMemo, type FC } from 'react';
-import { useDispatch } from 'react-redux';
 
 import { EuiFormRow, EuiSelect, EuiSpacer, EuiSwitch } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { FormTextInput } from '@kbn/ml-form-utils/components/form_text_input';
-import { useFormSections } from '@kbn/ml-form-utils/use_form_sections';
 
 import type { PostTransformsPreviewRequestSchema } from '../../../../../common/api_schemas/transforms';
 import { isLatestTransform, isPivotTransform } from '../../../../../common/types/transform';
@@ -24,20 +21,23 @@ import { useGetTransformsPreview } from '../../../hooks';
 import { ToastNotificationText } from '../../../components';
 
 import {
+  useEditTransformFlyoutActions,
   useEditTransformFlyoutContext,
-  editTransformFlyoutSlice,
 } from '../state_management/edit_transform_flyout_state';
+import { useFormSections } from '../state_management/selectors/form_sections';
 import { useRetentionPolicyField } from '../state_management/selectors/retention_policy_field';
 
+import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
+
 export const EditTransformRetentionPolicy: FC = () => {
-  const dispatch = useDispatch();
   const { i18n: i18nStart, theme } = useAppDependencies();
 
   const toastNotifications = useToastNotifications();
 
   const { config, dataViewId } = useEditTransformFlyoutContext();
-  const formSections = useFormSections(editTransformFlyoutSlice.name);
+  const formSections = useFormSections();
   const retentionPolicyField = useRetentionPolicyField();
+  const { setFormField, setFormSection } = useEditTransformFlyoutActions();
 
   const previewRequest: PostTransformsPreviewRequestSchema = useMemo(() => {
     return {
@@ -106,12 +106,10 @@ export const EditTransformRetentionPolicy: FC = () => {
           )}
           checked={formSections.retentionPolicy.enabled}
           onChange={(e) =>
-            dispatch(
-              editTransformFlyoutSlice.actions.setFormSection({
-                section: 'retentionPolicy',
-                enabled: e.target.checked,
-              })
-            )
+            setFormSection({
+              section: 'retentionPolicy',
+              enabled: e.target.checked,
+            })
           }
           disabled={!isRetentionPolicyAvailable}
           data-test-subj="transformEditRetentionPolicySwitch"
@@ -152,12 +150,7 @@ export const EditTransformRetentionPolicy: FC = () => {
                   options={retentionDateFieldOptions}
                   value={retentionPolicyField.value}
                   onChange={(e) =>
-                    dispatch(
-                      editTransformFlyoutSlice.actions.setFormField({
-                        field: 'retentionPolicyField',
-                        value: e.target.value,
-                      })
-                    )
+                    setFormField({ field: 'retentionPolicyField', value: e.target.value })
                   }
                   hasNoInitialSelection={
                     !retentionDateFieldOptions
@@ -167,8 +160,7 @@ export const EditTransformRetentionPolicy: FC = () => {
                 />
               </EuiFormRow>
             ) : (
-              <FormTextInput
-                slice={editTransformFlyoutSlice}
+              <EditTransformFlyoutFormTextInput
                 field="retentionPolicyField"
                 label={i18n.translate(
                   'xpack.transform.transformList.editFlyoutFormRetentionPolicyFieldLabel',
@@ -179,8 +171,7 @@ export const EditTransformRetentionPolicy: FC = () => {
               />
             )
           }
-          <FormTextInput
-            slice={editTransformFlyoutSlice}
+          <EditTransformFlyoutFormTextInput
             field="retentionPolicyMaxAge"
             label={i18n.translate(
               'xpack.transform.transformList.editFlyoutFormRetentionPolicyMaxAgeLabel',
