@@ -14,7 +14,7 @@ import { EuiSideNavItemType, EuiText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { IndexViewLogic } from '../../../enterprise_search_content/components/search_index/index_view_logic';
+import { IndexViewLogic } from '../index_view_logic';
 import {
   SEARCH_INDEX_CONNECTORS_CONFIGURATION_PATH,
   SEARCH_INDEX_CONNECTORS_SCHEDULING_PATH,
@@ -26,11 +26,11 @@ import {
   SEARCH_INDEX_INDEX_MAPPING_PATH,
   SEARCH_INDEX_PATH,
   SEARCH_INDEX_PIPELINES_PATH,
-} from '../../../enterprise_search_content/routes';
-import { isConnectorIndex, isCrawlerIndex } from '../../../enterprise_search_content/utils/indices';
-import { generateEncodedPath } from '../../../shared/encode_path_params';
-import { KibanaLogic } from '../../../shared/kibana';
-import { generateNavLink } from '../../../shared/layout';
+} from '../../../routes';
+import { isConnectorIndex, isCrawlerIndex } from '../../../utils/indices';
+import { generateEncodedPath } from '../../../../shared/encode_path_params';
+import { KibanaLogic } from '../../../../shared/kibana';
+import { generateNavLink } from '../../../../shared/layout';
 
 import './indices_nav.scss';
 

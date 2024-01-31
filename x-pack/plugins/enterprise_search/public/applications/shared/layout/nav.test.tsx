@@ -9,7 +9,7 @@ jest.mock('./nav_link_helpers', () => ({
   generateNavLink: jest.fn(({ to, items }) => ({ href: to, items })),
 }));
 
-jest.mock('../../enterprise_search_overview/components/indices/indices_nav', () => ({
+jest.mock('../../enterprise_search_content/components/search_index/indices/indices_nav', () => ({
   useIndicesNav: () => [],
 }));
 

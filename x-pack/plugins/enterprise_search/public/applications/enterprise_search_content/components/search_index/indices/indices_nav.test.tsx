@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { setMockValues } from '../../../__mocks__/kea_logic';
-import { mockUseRouteMatch, mockUseParams } from '../../../__mocks__/react_router';
+import { setMockValues } from '../../../../__mocks__/kea_logic';
+import { mockUseRouteMatch, mockUseParams } from '../../../../__mocks__/react_router';
 
 import { shallow } from 'enzyme';
 
-import { mockIndexNameValues } from '../../../enterprise_search_content/components/search_index/_mocks_/index_name_logic.mock';
+import { mockIndexNameValues } from '../_mocks_/index_name_logic.mock';
 
 jest.mock('../../../shared/layout', () => ({
   generateNavLink: jest.fn(({ to }) => ({ href: to })),
 }));
 jest.mock('../../../enterprise_search_content/utils/indices');
 
-import { isConnectorIndex, isCrawlerIndex } from '../../../enterprise_search_content/utils/indices';
+import { isConnectorIndex, isCrawlerIndex } from '../../../utils/indices';
 
 import { useIndicesNav } from './indices_nav';
 

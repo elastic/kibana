@@ -30,7 +30,7 @@ import {
   SEARCH_INDICES_PATH,
   SETTINGS_PATH,
 } from '../../enterprise_search_content/routes';
-import { useIndicesNav } from '../../enterprise_search_overview/components/indices/indices_nav';
+import { useIndicesNav } from '../../enterprise_search_content/components/search_index/indices/indices_nav';
 import { KibanaLogic } from '../kibana';
 
 import { generateNavLink } from './nav_link_helpers';
