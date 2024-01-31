@@ -95,6 +95,7 @@ export const TimelineModalHeader = React.memo<FlyoutHeaderPanelProps>(({ timelin
       }),
     [browserFields, dataProviders, esQueryConfig, filters, indexPattern, kqlMode, kqlQueryObj]
   );
+  const isInspectDisabled = !isDataInTimeline || combinedQueries?.filterQuery === undefined;
 
   const closeTimeline = useCallback(() => {
     createHistoryEntry();
@@ -154,7 +155,7 @@ export const TimelineModalHeader = React.memo<FlyoutHeaderPanelProps>(({ timelin
               <InspectButton
                 queryId={`${timelineId}-${activeTab}`}
                 inputId={InputsModelId.timeline}
-                isDisabled={!isDataInTimeline || combinedQueries?.filterQuery === undefined}
+                isDisabled={isInspectDisabled}
               />
             </EuiFlexItem>
             {userCasesPermissions.create && userCasesPermissions.read ? (
