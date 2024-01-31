@@ -7,7 +7,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { isDeepEqual } from 'react-use/lib/util';
+import isDeepEqual from 'react-use/lib/misc/isDeepEqual';
 
 import { IngestPipelineParams } from '@kbn/search-connectors';
 
