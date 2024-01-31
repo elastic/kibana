@@ -11,7 +11,11 @@ import { createMemoryStorage } from '../core/mocks';
 import { ContentClient } from './content_client';
 
 describe('ContentClient', () => {
-  const setup = (contentTypeId = 'foo') => {
+  const setup = ({
+    contentTypeId = 'foo',
+  }: {
+    contentTypeId?: string;
+  } = {}) => {
     const storage = createMemoryStorage();
     const eventBus = new EventBus();
     const crudInstance = new ContentCrud<any>(contentTypeId, storage, { eventBus });
@@ -33,8 +37,18 @@ describe('ContentClient', () => {
     });
 
     test('should have contentTypeId', () => {
-      const { contentClient } = setup('hellooo');
+      const { contentClient } = setup({ contentTypeId: 'hellooo' });
       expect(contentClient.contentTypeId).toBe('hellooo');
+    });
+
+    test('should throw if crudInstance is not an instance of ContentCrud', () => {
+      const expectToThrow = () => {
+        ContentClient.create('foo', {
+          crudInstance: {} as any,
+          storageContext: {} as any,
+        });
+      };
+      expect(expectToThrow).toThrowError('Crud instance missing or not an instance of ContentCrud');
     });
   });
 

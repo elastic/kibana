@@ -5,7 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ContentCrud, StorageContext } from '../core';
+import type { StorageContext } from '../core';
+import { ContentCrud } from '../core/crud';
 
 type CrudGetParameters = Parameters<ContentCrud['get']>;
 type ClientGetParameters = [CrudGetParameters[1], CrudGetParameters[2]?];
@@ -30,6 +31,10 @@ export class ContentClient implements IContentClient {
   constructor(token: symbol, public contentTypeId: string, private readonly ctx: Context) {
     if (token !== secretToken) {
       throw new Error('Use ContentClient.create() instead');
+    }
+
+    if (ctx.crudInstance instanceof ContentCrud === false) {
+      throw new Error('Crud instance missing or not an instance of ContentCrud');
     }
   }
 
