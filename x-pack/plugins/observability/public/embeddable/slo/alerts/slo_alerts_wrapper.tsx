@@ -14,6 +14,7 @@ import { IEmbeddable, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { Subject } from 'rxjs';
 import styled from 'styled-components';
+import { SloIncludedCount } from './components/slo_included_count';
 import { SloAlertsSummary } from './components/slo_alerts_summary';
 import { SloAlertsTable } from './components/slo_alerts_table';
 import type { SloItem } from './types';
@@ -120,11 +121,17 @@ export function SloAlertsWrapper({
             }}
             data-test-subj="o11ySloAlertsWrapperSlOsIncludedLink"
           >
-            {i18n.translate('xpack.observability.sloAlertsWrapper.sLOsIncludedFlexItemLabel', {
-              defaultMessage:
-                '{numOfSlos, number} {numOfSlos, plural, one {SLO} other {SLOs}} included',
-              values: { numOfSlos: slos.length },
-            })}
+            {showAllGroupByInstances ? (
+              <SloIncludedCount slos={slos} />
+            ) : (
+              i18n.translate('xpack.observability.sloAlertsWrapper.sLOsIncludedFlexItemLabel', {
+                defaultMessage:
+                  '{numOfSlos, number} {numOfSlos, plural, one {SLO} other {SLOs}}{instances} included',
+                values: {
+                  numOfSlos: slos.length,
+                },
+              })
+            )}
           </EuiLink>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
