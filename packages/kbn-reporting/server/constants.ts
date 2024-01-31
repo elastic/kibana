@@ -12,7 +12,13 @@ export const PLUGIN_ID = 'reporting';
  * Storage
  */
 
-export const REPORTING_SYSTEM_INDEX = '.reporting';
+// The name of the Reporting data stream is given to query across all data stored by Reporting. The data
+// stream is an alias, automatically configured in the Kibana plugin of Elasticsearch, pointing to an unknown
+// number of backing indices.
+export const REPORTING_DATA_STREAM = '.kibana-reporting';
+
+// Pattern to search for historical reports
+export const REPORTING_DATA_STREAM_WILDCARD = '.reporting-*,.kibana-reporting*';
 
 /*
  * Telemetry

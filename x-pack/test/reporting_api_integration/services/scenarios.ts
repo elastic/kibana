@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import type { LoadActionPerfOptions } from '@kbn/es-archiver';
+import { INTERNAL_ROUTES } from '@kbn/reporting-common';
+import type { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import type { JobParamsPDFDeprecated } from '@kbn/reporting-export-types-pdf-common';
 import type { JobParamsPNGV2 } from '@kbn/reporting-export-types-png-common';
-import type { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
+import { REPORTING_DATA_STREAM_WILDCARD } from '@kbn/reporting-server';
 import rison from '@kbn/rison';
-import { LoadActionPerfOptions } from '@kbn/es-archiver';
-import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 function removeWhitespace(str: string) {
@@ -211,7 +212,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     // ignores 409 errs and keeps retrying
     await retry.tryForTime(5000, async () => {
       await esSupertest
-        .post('/.reporting*/_delete_by_query')
+        .post(`/${REPORTING_DATA_STREAM_WILDCARD}/_delete_by_query`)
         .send({ query: { match_all: {} } })
         .expect(200);
     });
@@ -248,7 +249,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       'index.lifecycle.name': null,
     };
     await esSupertest
-      .put('/.reporting*/_settings')
+      .put(`/${REPORTING_DATA_STREAM_WILDCARD}/_settings`)
       .send({
         settings,
       })

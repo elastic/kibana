@@ -8,22 +8,13 @@
 import { DeprecationsDetails, GetDeprecationsContext } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { ILM_POLICY_NAME, INTERNAL_ROUTES } from '@kbn/reporting-common';
-import { ReportingCore } from '../core';
+import { REPORTING_DATA_STREAM_WILDCARD } from '@kbn/reporting-server';
 import { deprecations } from '../lib/deprecations';
 
-interface ExtraDependencies {
-  reportingCore: ReportingCore;
-}
-
-export const getDeprecationsInfo = async (
-  { esClient }: GetDeprecationsContext,
-  { reportingCore }: ExtraDependencies
-): Promise<DeprecationsDetails[]> => {
-  const store = await reportingCore.getStore();
-  const indexPattern = store.getReportingIndexPattern();
-
+export const getDeprecationsInfo = async ({
+  esClient,
+}: GetDeprecationsContext): Promise<DeprecationsDetails[]> => {
   const migrationStatus = await deprecations.checkIlmMigrationStatus({
-    reportingCore,
     elasticsearchClient: esClient.asInternalUser,
   });
 
@@ -35,10 +26,10 @@ export const getDeprecationsInfo = async (
         }),
         level: 'warning',
         message: i18n.translate('xpack.reporting.deprecations.migrateIndexIlmPolicyActionMessage', {
-          defaultMessage: `New reporting indices will be managed by the "{reportingIlmPolicy}" provisioned ILM policy. You must edit this policy to manage the report lifecycle. This change targets all indices prefixed with "{indexPattern}".`,
+          defaultMessage: `New reporting indices will be managed by the "{reportingIlmPolicy}" provisioned ILM policy. You must edit this policy to manage the report lifecycle. This change targets the hidden system index pattern "{indexPattern}".`,
           values: {
             reportingIlmPolicy: ILM_POLICY_NAME,
-            indexPattern,
+            indexPattern: REPORTING_DATA_STREAM_WILDCARD,
           },
         }),
         correctiveActions: {

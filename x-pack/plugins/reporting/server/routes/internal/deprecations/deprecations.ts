@@ -7,6 +7,7 @@
 import { errors } from '@elastic/elasticsearch';
 import type { Logger, RequestHandler } from '@kbn/core/server';
 import { ILM_POLICY_NAME, INTERNAL_ROUTES } from '@kbn/reporting-common';
+import { REPORTING_DATA_STREAM_WILDCARD } from '@kbn/reporting-server';
 import type { IlmPolicyStatusResponse } from '@kbn/reporting-common/url';
 import type { ReportingCore } from '../../../core';
 import { IlmPolicyManager } from '../../../lib';
@@ -24,15 +25,13 @@ const getAuthzWrapper =
 
       const { elasticsearch } = await ctx.core;
 
-      const store = await reporting.getStore();
-
       try {
         const body = await elasticsearch.client.asCurrentUser.security.hasPrivileges({
           body: {
             index: [
               {
                 privileges: ['manage'], // required to do anything with the reporting indices
-                names: [store.getReportingIndexPattern()],
+                names: [REPORTING_DATA_STREAM_WILDCARD],
                 allow_restricted_indices: true,
               },
             ],
@@ -70,7 +69,6 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
       } = await core;
       const checkIlmMigrationStatus = () => {
         return deprecations.checkIlmMigrationStatus({
-          reportingCore: reporting,
           // We want to make the current status visible to all reporting users
           elasticsearchClient: scopedClient.asInternalUser,
         });
@@ -106,7 +104,6 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
     authzWrapper(async ({ core }, req, res) => {
       const counters = getCounters(req.route.method, migrateApiPath, reporting.getUsageCounter());
 
-      const store = await reporting.getStore();
       const {
         client: { asCurrentUser: client },
       } = (await core).elasticsearch;
@@ -125,12 +122,10 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
         return res.customError({ statusCode: e?.statusCode ?? 500, body: { message: e.message } });
       }
 
-      const indexPattern = store.getReportingIndexPattern();
-
       // Second we migrate all of the existing indices to be managed by the reporting ILM policy
       try {
         await client.indices.putSettings({
-          index: indexPattern,
+          index: REPORTING_DATA_STREAM_WILDCARD,
           body: {
             index: {
               lifecycle: {
