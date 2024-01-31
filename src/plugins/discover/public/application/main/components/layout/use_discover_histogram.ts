@@ -14,7 +14,7 @@ import {
   UnifiedHistogramState,
 } from '@kbn/unified-histogram-plugin/public';
 import { isEqual } from 'lodash';
-import { useCallback, useEffect, useRef, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   debounceTime,
   distinctUntilChanged,
@@ -27,6 +27,7 @@ import {
 } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getUiActions } from '../../../../kibana_services';
@@ -37,6 +38,8 @@ import type { DiscoverStateContainer } from '../../services/discover_state';
 import { addLog } from '../../../../utils/add_log';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import type { DiscoverAppState } from '../../services/discover_app_state_container';
+import type { DataDocumentsMsg } from '../../services/discover_data_state_container';
+import { RecordRawType } from '../../services/discover_data_state_container';
 
 export interface UseDiscoverHistogramProps {
   stateContainer: DiscoverStateContainer;
@@ -219,17 +222,20 @@ export const useDiscoverHistogram = ({
     [stateContainer]
   );
 
+  const [initialTextBasedProps] = useState(() =>
+    getUnifiedHistogramPropsForTextBased({
+      documentsValue: savedSearchData$.documents$.getValue(),
+      stateContainer,
+    })
+  );
+
   const {
     dataView: textBasedDataView,
     query: textBasedQuery,
     externalVisContext: textBasedExternalVisContext,
-    columns,
-  } = useObservable(textBasedFetchComplete$, {
-    dataView: stateContainer.internalState.getState().dataView!,
-    query: stateContainer.appState.getState().query!,
-    externalVisContext: stateContainer.appState.getState().visContext,
-    columns: savedSearchData$.documents$.getValue().textBasedQueryColumns ?? [],
-  });
+    columns: textBasedColumns,
+    table: textBasedTable,
+  } = useObservable(textBasedFetchComplete$, initialTextBasedProps);
 
   useEffect(() => {
     if (!isPlainRecord) {
@@ -347,7 +353,8 @@ export const useDiscoverHistogram = ({
     filters: filtersMemoized,
     timeRange: timeRangeMemoized,
     relativeTimeRange,
-    columns,
+    columns: isPlainRecord ? textBasedColumns : undefined,
+    table: isPlainRecord ? textBasedTable : undefined,
     onFilter: histogramCustomization?.onFilter,
     onBrushEnd: histogramCustomization?.onBrushEnd,
     withDefaultActions: histogramCustomization?.withDefaultActions,
@@ -430,13 +437,13 @@ const createAppStateObservable = (state$: Observable<DiscoverAppState>) => {
 const createFetchCompleteObservable = (stateContainer: DiscoverStateContainer) => {
   return stateContainer.dataState.data$.documents$.pipe(
     distinctUntilChanged((prev, curr) => prev.fetchStatus === curr.fetchStatus),
-    filter(({ fetchStatus }) => fetchStatus === FetchStatus.COMPLETE),
-    map(({ textBasedQueryColumns }) => ({
-      dataView: stateContainer.internalState.getState().dataView!,
-      query: stateContainer.appState.getState().query!,
-      externalVisContext: stateContainer.appState.getState().visContext,
-      columns: textBasedQueryColumns ?? [],
-    }))
+    filter(({ fetchStatus }) => [FetchStatus.COMPLETE, FetchStatus.ERROR].includes(fetchStatus)),
+    map((documentsValue) => {
+      return getUnifiedHistogramPropsForTextBased({
+        documentsValue,
+        stateContainer,
+      });
+    })
   );
 };
 
@@ -453,3 +460,33 @@ const createCurrentSuggestionObservable = (state$: Observable<UnifiedHistogramSt
     distinctUntilChanged(isEqual)
   );
 };
+
+const EMPTY_TEXT_BASED_COLUMNS: DatatableColumn[] = [];
+function getUnifiedHistogramPropsForTextBased({
+  documentsValue,
+  stateContainer,
+}: {
+  documentsValue: DataDocumentsMsg | undefined;
+  stateContainer: DiscoverStateContainer;
+}) {
+  const columns = documentsValue?.textBasedQueryColumns || EMPTY_TEXT_BASED_COLUMNS;
+  const result = documentsValue?.result;
+  const nextProps = {
+    dataView: stateContainer.internalState.getState().dataView!,
+    query: stateContainer.appState.getState().query!,
+    externalVisContext: stateContainer.appState.getState().visContext,
+    columns,
+    table:
+      result && documentsValue?.recordRawType === RecordRawType.PLAIN
+        ? {
+            type: 'datatable' as 'datatable',
+            rows: result.map((r) => r.raw),
+            columns,
+          }
+        : undefined,
+  };
+
+  addLog('[UnifiedHistogram] delayed next props for text-based', nextProps);
+
+  return nextProps;
+}

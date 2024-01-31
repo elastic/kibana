@@ -6,15 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { UnifiedHistogramContainer } from '@kbn/unified-histogram-plugin/public';
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
-import { Datatable } from '@kbn/expressions-plugin/common';
 import { useDiscoverHistogram } from './use_discover_histogram';
 import { type DiscoverMainContentProps, DiscoverMainContent } from './discover_main_content';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
-import { FetchStatus } from '../../../types';
 
 export interface DiscoverHistogramLayoutProps extends DiscoverMainContentProps {
   container: HTMLElement | null;
@@ -43,7 +41,6 @@ export const DiscoverHistogramLayout = ({
     isPlainRecord,
   });
 
-  const datatable = useObservable(dataState.data$.documents$);
   const renderCustomChartToggleActions = useCallback(
     () =>
       React.isValidElement(panelsToggle)
@@ -51,20 +48,6 @@ export const DiscoverHistogramLayout = ({
         : panelsToggle,
     [panelsToggle]
   );
-
-  const table: Datatable | undefined = useMemo(() => {
-    if (
-      isPlainRecord &&
-      datatable &&
-      [FetchStatus.PARTIAL, FetchStatus.COMPLETE].includes(datatable.fetchStatus)
-    ) {
-      return {
-        type: 'datatable' as 'datatable',
-        rows: datatable.result!.map((r) => r.raw),
-        columns: datatable.textBasedQueryColumns || [],
-      };
-    }
-  }, [datatable, isPlainRecord]);
 
   // Initialized when the first search has been requested or
   // when in text-based mode since search sessions are not supported
@@ -77,7 +60,6 @@ export const DiscoverHistogramLayout = ({
       {...unifiedHistogramProps}
       searchSessionId={searchSessionId}
       requestAdapter={dataState.inspectorAdapters.requests}
-      table={table}
       container={container}
       css={histogramLayoutCss}
       renderCustomChartToggleActions={renderCustomChartToggleActions}
