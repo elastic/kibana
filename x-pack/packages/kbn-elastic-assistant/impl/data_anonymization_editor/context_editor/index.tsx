@@ -7,7 +7,7 @@
 
 import { EuiInMemoryTable } from '@elastic/eui';
 import type { EuiSearchBarProps, EuiTableSelectionType } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useRef } from 'react';
 
 import { getColumns } from './get_columns';
 import { getRows } from './get_rows';
@@ -59,11 +59,21 @@ const ContextEditorComponent: React.FC<Props> = ({
   rawData,
   pageSize = DEFAULT_PAGE_SIZE,
 }) => {
+  const isAllSelected = useRef(false); // Must be a ref and not state in order not to re-render `selectionValue`, which fires `onSelectionChange` twice
   const [selected, setSelection] = useState<ContextEditorRow[]>([]);
   const selectionValue: EuiTableSelectionType<ContextEditorRow> = useMemo(
     () => ({
       selectable: () => true,
-      onSelectionChange: (newSelection) => setSelection(newSelection),
+      onSelectionChange: (newSelection) => {
+        if (isAllSelected.current === true) {
+          // If passed every possible row (including non-visible ones), EuiInMemoryTable
+          // will fire `onSelectionChange` with only the visible rows - we need to
+          // ignore this call when that happens and continue to pass all rows
+          isAllSelected.current = false;
+        } else {
+          setSelection(newSelection);
+        }
+      },
       selected,
     }),
     [selected]
@@ -82,6 +92,7 @@ const ContextEditorComponent: React.FC<Props> = ({
   );
 
   const onSelectAll = useCallback(() => {
+    isAllSelected.current = true;
     setSelection(rows);
   }, [rows]);
 
@@ -103,7 +114,7 @@ const ContextEditorComponent: React.FC<Props> = ({
         totalFields={rows.length}
       />
     ),
-    [onListUpdated, onReset, onSelectAll, rawData, rows.length, selected]
+    [onListUpdated, onReset, onSelectAll, rawData, rows, selected]
   );
 
   return (
