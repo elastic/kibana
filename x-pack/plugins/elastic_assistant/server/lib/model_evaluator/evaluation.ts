@@ -14,8 +14,8 @@ import { Logger } from '@kbn/core/server';
 import { ToolingLog } from '@kbn/tooling-log';
 import { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import { RunCollectorCallbackHandler } from '@langchain/core/tracers/run_collector';
+import { Dataset } from '@kbn/elastic-assistant-common';
 import { AgentExecutorEvaluatorWithMetadata } from '../langchain/executors/types';
-import { Dataset } from '../../schemas/evaluate/post_evaluate';
 import { callAgentWithRetry, getMessageFromLangChainResponse } from './utils';
 import { ResponseBody } from '../langchain/types';
 import { isLangSmithEnabled, writeLangSmithFeedback } from '../../routes/evaluate/utils';
@@ -104,7 +104,6 @@ export const performEvaluation = async ({
     const chunk = requestChunks.shift() ?? [];
     const chunkNumber = totalChunks - requestChunks.length;
     logger.info(`Prediction request chunk: ${chunkNumber} of ${totalChunks}`);
-    logger.debug(chunk);
 
     // Note, order is kept between chunk and dataset, and is preserved w/ Promise.allSettled
     const chunkResults = await Promise.allSettled(chunk.map((r) => r.request()));
