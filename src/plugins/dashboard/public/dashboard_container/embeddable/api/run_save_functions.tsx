@@ -13,7 +13,8 @@ import { batch } from 'react-redux';
 import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 
-import { DashboardContainerInput } from '../../../../common';
+import { EmbeddableInput, isReferenceOrValueEmbeddable } from '@kbn/embeddable-plugin/public';
+import { DashboardContainerInput, DashboardPanelMap } from '../../../../common';
 import { DASHBOARD_CONTENT_ID, SAVED_OBJECT_POST_TIME } from '../../../dashboard_constants';
 import {
   SaveDashboardReturn,
@@ -198,6 +199,16 @@ export async function runClone(this: DashboardContainer) {
         newTitle = `${baseTitle} (${copyCount})`;
       }
 
+      let stateToSave: DashboardContainerInput & {
+        controlGroupInput?: PersistableControlGroupInput;
+      } = currentState;
+      if (this.controlGroup) {
+        stateToSave = {
+          ...stateToSave,
+          controlGroupInput: this.controlGroup.getPersistableInput(),
+        };
+      }
+
       const isManaged = this.getState().componentState.managed;
       const newPanels = await (async () => {
         if (!isManaged) return currentState.panels;
@@ -223,22 +234,13 @@ export async function runClone(this: DashboardContainer) {
         return unlinkedPanels;
       })();
 
-      let stateToSave: DashboardContainerInput & {
-        controlGroupInput?: PersistableControlGroupInput;
-      } = currentState;
-      if (this.controlGroup) {
-        stateToSave = {
-          ...stateToSave,
-          controlGroupInput: this.controlGroup.getPersistableInput(),
-        };
-      }
-
       const saveResult = await saveDashboardState({
         saveOptions: {
           saveAsCopy: true,
         },
         currentState: {
           ...stateToSave,
+          panels: newPanels,
           title: newTitle,
         },
       });
