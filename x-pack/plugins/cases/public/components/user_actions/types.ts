@@ -34,6 +34,7 @@ export interface UserActionTreeProps {
   data: CaseUI;
   casesConfiguration: CasesConfigurationUI;
   getRuleDetailsHref?: RuleDetailsNavigation['href'];
+  actionsNavigation?: ActionsNavigation;
   onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
   onShowAlertDetails?: (alertId: string, index: string) => void;
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
@@ -69,6 +70,7 @@ export interface UserActionBuilderArgs {
   loadingCommentIds: string[];
   loadingAlertData: boolean;
   alertData: Record<string, unknown>;
+  actionsNavigation?: ActionsNavigation;
   handleOutlineComment: (id: string) => void;
   handleManageMarkdownEditId: (id: string) => void;
   handleSaveComment: ({ id, version }: { id: string; version: string }, content: string) => void;
@@ -86,6 +88,7 @@ export type UserActionBuilder = (args: UserActionBuilderArgs) => {
 export type UserActionBuilderMap = Record<SupportedUserActionTypes, UserActionBuilder>;
 
 export type RuleDetailsNavigation = CasesNavigation<string | null | undefined, 'configurable'>;
+export type ActionsNavigation = CasesNavigation<string, 'configurable'>;
 
 interface Signal {
   rule: {

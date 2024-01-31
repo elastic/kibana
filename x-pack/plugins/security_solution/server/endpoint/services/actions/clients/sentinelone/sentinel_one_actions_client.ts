@@ -17,7 +17,6 @@ import type {
   SentinelOneGetAgentsResponse,
   SentinelOneGetAgentsParams,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
-import type { CreateActionPayload } from '../../create/types';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type { SentinelOneConnectorExecuteOptions } from './types';
 import { stringify } from '../../../../utils/stringify';
@@ -41,13 +40,13 @@ export type SentinelOneActionsClientOptions = ResponseActionsClientOptions & {
 export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   protected readonly agentType: ResponseActionAgentType = 'sentinel_one';
   private readonly connectorActionsClient: ActionsClient;
-  private readonly actionsClientOptions: ResponseActionsClientOptions;
+  private readonly username: string;
   private readonly getConnector: () => Promise<ConnectorWithExtraFindData>;
 
   constructor({ connectorActions, ...options }: SentinelOneActionsClientOptions) {
     super(options);
     this.connectorActionsClient = connectorActions;
-    this.actionsClientOptions = options;
+    this.username = options.username;
 
     this.getConnector = once(async () => {
       let connectorList: ConnectorWithExtraFindData[] = [];
@@ -200,16 +199,17 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       },
     });
 
-    const createPayload: CreateActionPayload = {
-      ...options,
-      command: commandName,
-      user: { username: this.actionsClientOptions.username },
-    };
     try {
+      const createPayload = {
+        ...options,
+        command: commandName,
+        user: { username: this.username },
+      };
       const agentId = options.endpoint_ids[0];
       await updateCases({
         casesClient: this.options.casesClient,
         endpointData: [
+          // TODO: my current understanding is that we might include only one S1 host at a time
           {
             host: {
               hostname: actionRequestDoc.EndpointActions.data.hosts?.[agentId].name as string,
@@ -223,8 +223,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         createActionPayload: createPayload,
       });
     } catch (err) {
-      // failures during update of cases should not cause the response action to fail. Just log error
-      this.log.warn(`failed to update cases: ${err.message}\n${stringify(err)}`);
+      // TODO add log error
     }
 
     return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);

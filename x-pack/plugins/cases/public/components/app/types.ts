@@ -12,6 +12,7 @@ import type { CasesTimelineIntegration } from '../timeline_context';
 
 export interface CasesRoutesProps {
   onComponentInitialized?: () => void;
+  actionsNavigation?: CasesNavigation<string, 'configurable'>;
   ruleDetailsNavigation?: CasesNavigation<string | null | undefined, 'configurable'>;
   showAlertDetails?: (alertId: string, index: string) => void;
   useFetchAlertData: UseFetchAlertData;

@@ -33,6 +33,7 @@ import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { CaseDetailsRefreshContext } from '../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
+import { getEndpointDetailsPath } from '../../management/common/routing';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useInsertTimeline } from '../components/use_insert_timeline';
 import * as timelineMarkdownPlugin from '../../common/components/markdown_editor/plugins/timeline';
@@ -54,7 +55,7 @@ const TimelineDetailsPanel = () => {
 
 const CaseContainerComponent: React.FC = () => {
   const { cases } = useKibana().services;
-  const { navigateTo } = useNavigation();
+  const { getAppUrl, navigateTo } = useNavigation();
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const dispatch = useDispatch();
   const { formatUrl: detectionsFormatUrl, search: detectionsUrlSearch } = useFormatUrl(
@@ -100,6 +101,13 @@ const CaseContainerComponent: React.FC = () => {
     [dispatch, isSecurityFlyoutEnabled, openFlyout]
   );
 
+  const endpointDetailsHref = (endpointId: string) =>
+    getAppUrl({
+      path: getEndpointDetailsPath({
+        name: 'endpointActivityLog',
+        selected_endpoint: endpointId,
+      }),
+    });
   // TO-DO: onComponentInitialized not needed after removing the expandedEvent state from timeline
   const onComponentInitialized = useCallback(() => {
     dispatch(
@@ -144,6 +152,20 @@ const CaseContainerComponent: React.FC = () => {
           },
           refreshRef,
           onComponentInitialized,
+          actionsNavigation: {
+            href: endpointDetailsHref,
+            onClick: (endpointId: string, e) => {
+              if (e) {
+                e.preventDefault();
+              }
+              return navigateTo({
+                path: getEndpointDetailsPath({
+                  name: 'endpointActivityLog',
+                  selected_endpoint: endpointId,
+                }),
+              });
+            },
+          },
           ruleDetailsNavigation: {
             href: getDetectionsRuleDetailsHref,
             onClick: async (ruleId: string | null | undefined, e) => {
