@@ -9,9 +9,15 @@ import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
 import { getFlattenedObject } from '@kbn/std';
 import type { Filter, AggregateQuery, Query, TimeRange } from '@kbn/es-query';
-import type { HasUniqueId, PublishesPanelTitle, PublishesSavedObjectId, PublishesLocalUnifiedSearch, PublishesDataViews } from '@kbn/presentation-publishing';
+import type {
+  EmbeddableApiContext,
+  HasUniqueId,
+  PublishesPanelTitle,
+  PublishesSavedObjectId,
+  PublishesLocalUnifiedSearch,
+  PublishesDataViews,
+} from '@kbn/presentation-publishing';
 import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
-import type { ChartActionContext } from '@kbn/embeddable-plugin/public';
 import { txtValue } from './i18n';
 import { deleteUndefinedKeys } from './util';
 import type { ActionFactoryContext } from '../url_drilldown';
@@ -24,7 +30,7 @@ interface PanelValues {
   /**
    * ID of the api panel.
    */
-  id: string;
+  id?: string;
 
   /**
    * Title of the api panel.
@@ -51,14 +57,20 @@ export interface ContextValues {
   panel: PanelValues;
 }
 
-export const getContextScopeValues = (context: ChartActionContext): ContextValues => {
+export const getContextScopeValues = (context: Partial<EmbeddableApiContext>): ContextValues => {
   if (!context.embeddable)
     throw new Error(
       "UrlDrilldown [getContextScope] can't build scope because embeddable object is missing in context"
     );
-  const api = context.embeddable as HasUniqueId & Partial<PublishesPanelTitle & PublishesSavedObjectId & PublishesLocalUnifiedSearch & PublishesDataViews>;
+  const api = context.embeddable as Partial<
+    HasUniqueId &
+      PublishesPanelTitle &
+      PublishesSavedObjectId &
+      PublishesLocalUnifiedSearch &
+      PublishesDataViews
+  >;
   const dataViewIds = api.dataViews?.value
-    ? api.dataViews?.value.map((dataView) => dataView.id).filter(Boolean) as string[]
+    ? (api.dataViews?.value.map((dataView) => dataView.id).filter(Boolean) as string[])
     : [];
 
   return {
@@ -71,7 +83,7 @@ export const getContextScopeValues = (context: ChartActionContext): ContextValue
       filters: api.localFilters?.value,
       indexPatternIds: dataViewIds.length > 1 ? dataViewIds : undefined,
       indexPatternId: dataViewIds.length === 1 ? dataViewIds[0] : undefined,
-    })
+    }),
   };
 };
 

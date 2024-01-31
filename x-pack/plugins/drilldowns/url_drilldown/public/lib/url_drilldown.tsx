@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { IExternalUrl, ThemeServiceStart } from '@kbn/core/public';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import {
   ChartActionContext,
   CONTEXT_MENU_TRIGGER,
@@ -51,9 +52,8 @@ export type UrlTrigger =
   | typeof CONTEXT_MENU_TRIGGER
   | typeof IMAGE_CLICK_TRIGGER;
 
-export interface ActionFactoryContext extends BaseActionFactoryContext {
-  embeddable?: EmbeddableWithQueryInput;
-}
+export type ActionFactoryContext = Partial<EmbeddableApiContext> & BaseActionFactoryContext;
+
 export type CollectConfigProps = CollectConfigPropsBase<Config, ActionFactoryContext>;
 
 const URL_DRILLDOWN = 'URL_DRILLDOWN';
@@ -170,7 +170,10 @@ export class UrlDrilldown implements Drilldown<Config, ChartActionContext, Actio
     return url;
   }
 
-  public readonly getHref = async (config: Config, context: ChartActionContext): Promise<string> => {
+  public readonly getHref = async (
+    config: Config,
+    context: ChartActionContext
+  ): Promise<string> => {
     const url = await this.buildUrl(config, context);
     const validUrl = this.deps.externalUrl.validateUrl(url);
     if (!validUrl) {

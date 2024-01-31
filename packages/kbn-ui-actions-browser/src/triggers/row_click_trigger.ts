@@ -23,7 +23,7 @@ export const rowClickTrigger: Trigger = {
   }),
 };
 
-export type RowClickContext = EmbeddableApiContext & {
+export type RowClickContext = Partial<EmbeddableApiContext> & {
   data: {
     /**
      * Row index, starting from 0, where user clicked.

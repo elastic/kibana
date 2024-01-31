@@ -17,7 +17,7 @@ export interface EmbeddableContext<T extends IEmbeddable = IEmbeddable> {
   embeddable: T;
 }
 
-export type ValueClickContext = EmbeddableApiContext & {
+export type ValueClickContext = Partial<EmbeddableApiContext> & {
   data: {
     data: Array<{
       table: Pick<Datatable, 'rows' | 'columns'>;
@@ -30,7 +30,7 @@ export type ValueClickContext = EmbeddableApiContext & {
   };
 };
 
-export type MultiValueClickContext = EmbeddableApiContext & {
+export type MultiValueClickContext = Partial<EmbeddableApiContext> & {
   data: {
     data: Array<{
       table: Pick<Datatable, 'rows' | 'columns'>;
@@ -45,7 +45,7 @@ export type MultiValueClickContext = EmbeddableApiContext & {
   };
 };
 
-export type CellValueContext = EmbeddableApiContext & {
+export type CellValueContext = Partial<EmbeddableApiContext> & {
   data: Array<{
     value?: any;
     eventId?: string;
@@ -53,7 +53,7 @@ export type CellValueContext = EmbeddableApiContext & {
   }>;
 };
 
-export type RangeSelectContext = EmbeddableApiContext & {
+export type RangeSelectContext = Partial<EmbeddableApiContext> & {
   data: {
     table: Datatable;
     column: number;

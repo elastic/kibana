@@ -5,148 +5,38 @@
  * 2.0.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { getContextScopeValues } from './context_variables';
-import { TestEmbeddable } from '../test/data';
 
 describe('getContextScopeValues()', () => {
-  test('returns only ID for empty embeddable', () => {
-    const embeddable = new TestEmbeddable(
-      {
-        id: 'test',
-      },
-      {}
-    );
-    const vars = getContextScopeValues({ embeddable });
-
-    expect(vars).toEqual({
-      panel: {
-        id: 'test',
-      },
+  test('excludes undefined values', () => {
+    const embeddableApi = {};
+    expect(getContextScopeValues({ embeddable: embeddableApi })).toEqual({
+      panel: {},
     });
   });
 
-  test('returns title as specified in input', () => {
-    const embeddable = new TestEmbeddable(
-      {
-        id: 'test',
-        title: 'title1',
-      },
-      {}
-    );
-    const vars = getContextScopeValues({ embeddable });
-
-    expect(vars).toEqual({
-      panel: {
-        id: 'test',
-        title: 'title1',
-      },
-    });
-  });
-
-  test('returns output title if input and output titles are specified', () => {
-    const embeddable = new TestEmbeddable(
-      {
-        id: 'test',
-        title: 'title1',
-      },
-      {
-        title: 'title2',
-      }
-    );
-    const vars = getContextScopeValues({ embeddable });
-
-    expect(vars).toEqual({
-      panel: {
-        id: 'test',
-        title: 'title2',
-      },
-    });
-  });
-
-  test('returns title from output if title in input is missing', () => {
-    const embeddable = new TestEmbeddable(
-      {
-        id: 'test',
-      },
-      {
-        title: 'title2',
-      }
-    );
-    const vars = getContextScopeValues({ embeddable });
-
-    expect(vars).toEqual({
-      panel: {
-        id: 'test',
-        title: 'title2',
-      },
-    });
-  });
-
-  test('returns saved object ID from output', () => {
-    const embeddable = new TestEmbeddable(
-      {
-        id: 'test',
-        savedObjectId: '5678',
-      },
-      {
-        savedObjectId: '1234',
-      }
-    );
-    const vars = getContextScopeValues({ embeddable });
-
-    expect(vars).toEqual({
-      panel: {
-        id: 'test',
-        savedObjectId: '1234',
-      },
-    });
-  });
-
-  test('returns saved object ID from input if it is not set on output', () => {
-    const embeddable = new TestEmbeddable(
-      {
-        id: 'test',
-        savedObjectId: '5678',
-      },
-      {}
-    );
-    const vars = getContextScopeValues({ embeddable });
-
-    expect(vars).toEqual({
-      panel: {
-        id: 'test',
-        savedObjectId: '5678',
-      },
-    });
-  });
-
-  test('returns query, timeRange and filters from input', () => {
-    const embeddable = new TestEmbeddable(
-      {
-        id: 'test',
-        query: {
-          language: 'C++',
-          query: 'std::cout << 123;',
-        },
-        timeRange: {
-          from: 'FROM',
-          to: 'TO',
-        },
-        filters: [
-          {
-            meta: {
-              alias: 'asdf',
-              disabled: false,
-              negate: false,
-            },
+  test('returns values when provided', () => {
+    const embeddableApi = {
+      localFilters: new BehaviorSubject([
+        {
+          meta: {
+            alias: 'asdf',
+            disabled: false,
+            negate: false,
           },
-        ],
-      },
-      {}
-    );
-    const vars = getContextScopeValues({ embeddable });
-
-    expect(vars).toEqual({
+        },
+      ]),
+      localQuery: new BehaviorSubject({
+        language: 'C++',
+        query: 'std::cout << 123;',
+      }),
+      localTimeRange: new BehaviorSubject({ from: 'FROM', to: 'TO' }),
+      panelTitle: new BehaviorSubject('title1'),
+      savedObjectId: new BehaviorSubject('1234'),
+      uuid: 'test',
+    };
+    expect(getContextScopeValues({ embeddable: embeddableApi })).toEqual({
       panel: {
         id: 'test',
         query: {
@@ -166,46 +56,32 @@ describe('getContextScopeValues()', () => {
             },
           },
         ],
+        savedObjectId: '1234',
+        title: 'title1',
       },
     });
   });
 
   test('returns a single index pattern from output', () => {
-    const embeddable = new TestEmbeddable(
-      {
-        id: 'test',
-      },
-      {
-        indexPatterns: [{ id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' }],
-      }
-    );
-    const vars = getContextScopeValues({ embeddable });
-
-    expect(vars).toEqual({
+    const embeddableApi = {
+      dataViews: new BehaviorSubject([{ id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' }]),
+    };
+    expect(getContextScopeValues({ embeddable: embeddableApi })).toEqual({
       panel: {
-        id: 'test',
         indexPatternId: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
       },
     });
   });
 
   test('returns multiple index patterns from output', () => {
-    const embeddable = new TestEmbeddable(
-      {
-        id: 'test',
-      },
-      {
-        indexPatterns: [
-          { id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' },
-          { id: 'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy' },
-        ],
-      }
-    );
-    const vars = getContextScopeValues({ embeddable });
-
-    expect(vars).toEqual({
+    const embeddableApi = {
+      dataViews: new BehaviorSubject([
+        { id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' },
+        { id: 'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy' },
+      ]),
+    };
+    expect(getContextScopeValues({ embeddable: embeddableApi })).toEqual({
       panel: {
-        id: 'test',
         indexPatternIds: [
           'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
           'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy',
