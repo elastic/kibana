@@ -73,7 +73,7 @@ it('correctly determines attribute properties', () => {
           'attr#2',
           { key: 'attr#4', dangerouslyExposeValue: true },
         ]),
-        attributesToIncludeInAAD: new Set(['attr#3', 'attr#4']),
+        attributesToIncludeInAAD: new Set(['attr#3']),
       },
       {
         shouldBeEncrypted: [true, true, false, true],
@@ -113,4 +113,20 @@ it('correctly determines attribute properties', () => {
       );
     }
   }
+});
+
+it('throws when the same attributes are included in AAD and encrypted', () => {
+  const registration = {
+    type: 'some-type',
+    attributesToEncrypt: new Set(['attr#1', 'attr#3', 'attr#5', 'attr#7']),
+    attributesToIncludeInAAD: new Set(['attr#1', 'attr#2', 'attr#4', 'attr#7']),
+  };
+
+  expect(() => {
+    new EncryptedSavedObjectAttributesDefinition(registration);
+  }).toThrow(
+    new Error(
+      `Invalid EncryptedSavedObjectTypeRegistration for type 'some-type'. attributesToIncludeInAAD must not contain any values in attributesToEncrypt: attr#1,attr#7`
+    )
+  );
 });

@@ -18,6 +18,23 @@ export class EncryptedSavedObjectAttributesDefinition {
   private readonly attributesToStrip: ReadonlySet<string>;
 
   constructor(typeRegistration: EncryptedSavedObjectTypeRegistration) {
+    if (typeRegistration.attributesToIncludeInAAD) {
+      const invalidAttributeKeys = new Array<string>();
+      typeRegistration.attributesToEncrypt.forEach((attribute) => {
+        const attributeKey = typeof attribute !== 'string' ? attribute.key : attribute;
+        if (typeRegistration.attributesToIncludeInAAD?.has(attributeKey)) {
+          invalidAttributeKeys.push(attributeKey);
+        }
+      });
+
+      if (invalidAttributeKeys.length > 0) {
+        throw new Error(
+          `Invalid EncryptedSavedObjectTypeRegistration for type '${typeRegistration.type}'. ` +
+            `attributesToIncludeInAAD must not contain any values in attributesToEncrypt: ${invalidAttributeKeys}`
+        );
+      }
+    }
+
     const attributesToEncrypt = new Set<string>();
     const attributesToStrip = new Set<string>();
     for (const attribute of typeRegistration.attributesToEncrypt) {
