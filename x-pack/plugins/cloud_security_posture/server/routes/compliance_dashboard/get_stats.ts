@@ -10,7 +10,7 @@ import type { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsear
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/core/server';
 import { calculatePostureScore } from '../../../common/utils/helpers';
-import type { ComplianceDashboardData } from '../../../common/types';
+import type { ComplianceDashboardData } from '../../../common/types_old';
 
 export interface FindingsEvaluationsQueryResult {
   failed_findings: {

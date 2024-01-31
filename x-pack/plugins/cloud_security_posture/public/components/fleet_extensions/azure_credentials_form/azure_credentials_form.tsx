@@ -29,7 +29,7 @@ import {
   AzureOptions,
   getAzureCredentialsFormManualOptions,
 } from './get_azure_credentials_form_options';
-import { AzureCredentialsType } from '../../../../common/types';
+import { AzureCredentialsType } from '../../../../common/types_old';
 import { SetupFormat, useAzureCredentialsForm } from './hooks';
 import { getPosturePolicy, NewPackagePolicyPostureInput } from '../utils';
 import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';

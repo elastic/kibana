@@ -21,7 +21,6 @@ import { ExecutionContext } from '@kbn/expressions-plugin/common';
 import moment from 'moment';
 import { ESCalendarInterval, ESFixedInterval, roundDateToESInterval } from '@elastic/charts';
 import { Adapters } from '@kbn/inspector-plugin/common';
-import { SerializableRecord } from '@kbn/utility-types';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { i18n } from '@kbn/i18n';
 import { handleRequest } from './handle_request';
@@ -71,7 +70,7 @@ export const requestEventAnnotations = (
     abortSignal,
     getSearchSessionId,
     getExecutionContext,
-  }: ExecutionContext<Adapters, SerializableRecord>,
+  }: ExecutionContext<Adapters>,
   getStartDependencies: () => Promise<FetchEventAnnotationsStartDependencies>
 ) => {
   return defer(async () => {

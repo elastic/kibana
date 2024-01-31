@@ -6,22 +6,23 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiDescriptionList } from '@elastic/eui';
+import { EuiCodeBlock, EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css, euiStyled } from '@kbn/kibana-react-plugin/common';
 import { map } from 'lodash';
+import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';
+import {
+  isExecuteAction,
+  isGetFileAction,
+  isUploadAction,
+} from '../../../../../common/endpoint/service/response_actions/type_guards';
 import { EndpointUploadActionResult } from '../../endpoint_upload_action_result';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { OUTPUT_MESSAGES } from '../translations';
-import { getUiCommand } from './hooks';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { ResponseActionFileDownloadLink } from '../../response_action_file_download_link';
 import { ExecuteActionHostResponse } from '../../endpoint_execute_action';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 
-import type {
-  ResponseActionUploadOutputContent,
-  ResponseActionUploadParameters,
-} from '../../../../../common/endpoint/types';
 import { type ActionDetails, type MaybeImmutable } from '../../../../../common/endpoint/types';
 
 const emptyValue = getEmptyValue();
@@ -80,12 +81,6 @@ const StyledEuiFlexGroup = euiStyled(EuiFlexGroup).attrs({
   overflow-y: auto;
 `;
 
-const isUploadAction = (
-  action: MaybeImmutable<ActionDetails>
-): action is ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters> => {
-  return action.command === 'upload';
-};
-
 const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-subj'?: string }>(
   ({ action, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
@@ -96,7 +91,8 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
       canAccessEndpointActionsLogManagement,
     } = useUserPrivileges().endpointPrivileges;
 
-    const { command, isCompleted, isExpired, wasSuccessful, errors } = action;
+    const { command: _command, isCompleted, isExpired, wasSuccessful, errors } = action;
+    const command = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[_command];
 
     if (errors?.length) {
       return (
@@ -121,7 +117,7 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
       return <>{OUTPUT_MESSAGES.hasFailed(command)}</>;
     }
 
-    if (command === 'get-file') {
+    if (isGetFileAction(action)) {
       return (
         <>
           {OUTPUT_MESSAGES.wasSuccessful(command)}
@@ -135,7 +131,7 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
       );
     }
 
-    if (command === 'execute') {
+    if (isExecuteAction(action)) {
       return (
         <EuiFlexGroup direction="column" data-test-subj={getTestId('executeDetails')}>
           {action.agents.map((agentId) => (
@@ -194,7 +190,7 @@ export const ActionsLogExpandedTray = memo<{
     [parameters]
   );
 
-  const command = getUiCommand(_command);
+  const command = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[_command];
 
   const dataList = useMemo(
     () =>

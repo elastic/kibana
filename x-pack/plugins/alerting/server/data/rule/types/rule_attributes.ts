@@ -142,6 +142,10 @@ interface RuleMetaAttributes {
   versionApiKeyLastmodified?: string;
 }
 
+interface NotificationDelayAttributes {
+  active: number;
+}
+
 export interface RuleAttributes {
   name: string;
   tags: string[];
@@ -174,4 +178,5 @@ export interface RuleAttributes {
   nextRun?: string | null;
   revision: number;
   running?: boolean | null;
+  notificationDelay?: NotificationDelayAttributes;
 }

@@ -6,7 +6,11 @@
  */
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RulesClient, ConstructorOptions } from '../rules_client';
-import { savedObjectsClientMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
+} from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
@@ -41,6 +45,7 @@ import {
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { migrateLegacyActions } from '../lib';
 import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 jest.mock('../lib/siem_legacy_actions/migrate_legacy_actions', () => {
   return {
@@ -93,6 +98,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   isSystemAction: jest.fn(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
+  uiSettings: uiSettingsServiceMock.createStartContract(),
 };
 
 beforeEach(() => {
@@ -188,6 +194,11 @@ describe('bulkEnableRules', () => {
       ]),
       { overwrite: true }
     );
+
+    expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
+
+    expect(taskManager.bulkEnable).toHaveBeenCalledTimes(1);
+    expect(taskManager.bulkEnable).toHaveBeenCalledWith(['id1', 'id2']);
 
     expect(result).toStrictEqual({
       errors: [],
@@ -563,45 +574,34 @@ describe('bulkEnableRules', () => {
     test('should schedule task when scheduledTaskId is defined but task with that ID does not', async () => {
       // One rule gets the task successfully, one rule doesn't so only one task should be scheduled
       taskManager.get.mockRejectedValueOnce(new Error('Failed to get task!'));
-      taskManager.schedule.mockResolvedValueOnce({
-        id: 'id1',
-        taskType: 'alerting:fakeType',
-        scheduledAt: new Date(),
-        attempts: 1,
-        status: TaskStatus.Idle,
-        runAt: new Date(),
-        startedAt: null,
-        retryAt: null,
-        state: {},
-        params: {},
-        ownerId: null,
-      });
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [enabledRuleForBulkOps1, enabledRuleForBulkOps2],
       });
 
       const result = await rulesClient.bulkEnableRules({ ids: ['id1', 'id2'] });
 
-      expect(taskManager.schedule).toHaveBeenCalledTimes(1);
-      expect(taskManager.schedule).toHaveBeenCalledWith({
-        id: 'id1',
-        taskType: `alerting:fakeType`,
-        params: {
-          alertId: 'id1',
-          spaceId: 'default',
-          consumer: 'fakeConsumer',
+      expect(taskManager.bulkSchedule).toHaveBeenCalledTimes(1);
+      expect(taskManager.bulkSchedule).toHaveBeenCalledWith([
+        {
+          id: 'id1',
+          taskType: `alerting:fakeType`,
+          params: {
+            alertId: 'id1',
+            spaceId: 'default',
+            consumer: 'fakeConsumer',
+          },
+          schedule: {
+            interval: '5m',
+          },
+          enabled: false,
+          state: {
+            alertInstances: {},
+            alertTypeState: {},
+            previousStartedAt: null,
+          },
+          scope: ['alerting'],
         },
-        schedule: {
-          interval: '5m',
-        },
-        enabled: true,
-        state: {
-          alertInstances: {},
-          alertTypeState: {},
-          previousStartedAt: null,
-        },
-        scope: ['alerting'],
-      });
+      ]);
 
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
@@ -647,44 +647,33 @@ describe('bulkEnableRules', () => {
             };
           },
         });
-      taskManager.schedule.mockResolvedValueOnce({
-        id: 'id1',
-        taskType: 'alerting:fakeType',
-        scheduledAt: new Date(),
-        attempts: 1,
-        status: TaskStatus.Idle,
-        runAt: new Date(),
-        startedAt: null,
-        retryAt: null,
-        state: {},
-        params: {},
-        ownerId: null,
-      });
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [enabledRuleForBulkOps1, enabledRuleForBulkOps2],
       });
       const result = await rulesClient.bulkEnableRules({ ids: ['id1', 'id2'] });
 
-      expect(taskManager.schedule).toHaveBeenCalledTimes(1);
-      expect(taskManager.schedule).toHaveBeenCalledWith({
-        id: 'id1',
-        taskType: `alerting:fakeType`,
-        params: {
-          alertId: 'id1',
-          spaceId: 'default',
-          consumer: 'fakeConsumer',
+      expect(taskManager.bulkSchedule).toHaveBeenCalledTimes(1);
+      expect(taskManager.bulkSchedule).toHaveBeenCalledWith([
+        {
+          id: 'id1',
+          taskType: `alerting:fakeType`,
+          params: {
+            alertId: 'id1',
+            spaceId: 'default',
+            consumer: 'fakeConsumer',
+          },
+          schedule: {
+            interval: '5m',
+          },
+          enabled: false,
+          state: {
+            alertInstances: {},
+            alertTypeState: {},
+            previousStartedAt: null,
+          },
+          scope: ['alerting'],
         },
-        schedule: {
-          interval: '5m',
-        },
-        enabled: true,
-        state: {
-          alertInstances: {},
-          alertTypeState: {},
-          previousStartedAt: null,
-        },
-        scope: ['alerting'],
-      });
+      ]);
 
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
@@ -730,19 +719,6 @@ describe('bulkEnableRules', () => {
         ownerId: null,
         enabled: false,
       });
-      taskManager.schedule.mockResolvedValueOnce({
-        id: 'id1',
-        taskType: 'alerting:fakeType',
-        scheduledAt: new Date(),
-        attempts: 1,
-        status: TaskStatus.Idle,
-        runAt: new Date(),
-        startedAt: null,
-        retryAt: null,
-        state: {},
-        params: {},
-        ownerId: null,
-      });
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [enabledRuleForBulkOps1, enabledRuleForBulkOps2],
       });
@@ -751,26 +727,28 @@ describe('bulkEnableRules', () => {
 
       expect(taskManager.removeIfExists).toHaveBeenCalledTimes(1);
       expect(taskManager.removeIfExists).toHaveBeenCalledWith('id1');
-      expect(taskManager.schedule).toHaveBeenCalledTimes(1);
-      expect(taskManager.schedule).toHaveBeenCalledWith({
-        id: 'id1',
-        taskType: `alerting:fakeType`,
-        params: {
-          alertId: 'id1',
-          spaceId: 'default',
-          consumer: 'fakeConsumer',
+      expect(taskManager.bulkSchedule).toHaveBeenCalledTimes(1);
+      expect(taskManager.bulkSchedule).toHaveBeenCalledWith([
+        {
+          id: 'id1',
+          taskType: `alerting:fakeType`,
+          params: {
+            alertId: 'id1',
+            spaceId: 'default',
+            consumer: 'fakeConsumer',
+          },
+          schedule: {
+            interval: '5m',
+          },
+          enabled: false,
+          state: {
+            alertInstances: {},
+            alertTypeState: {},
+            previousStartedAt: null,
+          },
+          scope: ['alerting'],
         },
-        schedule: {
-          interval: '5m',
-        },
-        enabled: true,
-        state: {
-          alertInstances: {},
-          alertTypeState: {},
-          previousStartedAt: null,
-        },
-        scope: ['alerting'],
-      });
+      ]);
 
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
@@ -813,12 +791,12 @@ describe('bulkEnableRules', () => {
       expect(auditLogger.log.mock.calls[0][0]?.event?.action).toEqual('rule_enable');
       expect(auditLogger.log.mock.calls[0][0]?.event?.outcome).toEqual('unknown');
       expect(auditLogger.log.mock.calls[0][0]?.kibana).toEqual({
-        saved_object: { id: 'id1', type: 'alert' },
+        saved_object: { id: 'id1', type: RULE_SAVED_OBJECT_TYPE },
       });
       expect(auditLogger.log.mock.calls[1][0]?.event?.action).toEqual('rule_enable');
       expect(auditLogger.log.mock.calls[1][0]?.event?.outcome).toEqual('unknown');
       expect(auditLogger.log.mock.calls[1][0]?.kibana).toEqual({
-        saved_object: { id: 'id2', type: 'alert' },
+        saved_object: { id: 'id2', type: RULE_SAVED_OBJECT_TYPE },
       });
     });
 

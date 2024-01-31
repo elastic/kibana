@@ -12,8 +12,8 @@ import type {
   RiskCategoryRiskWeight,
   RiskWeight,
   RiskWeights,
-} from '../../../../common/risk_engine';
-import { RiskCategories, RiskWeightTypes } from '../../../../common/risk_engine';
+} from '../../../../common/entity_analytics/risk_engine';
+import { RiskCategories, RiskWeightTypes } from '../../../../common/entity_analytics/risk_engine';
 
 const RISK_CATEGORIES = Object.values(RiskCategories);
 
@@ -54,7 +54,7 @@ const getWeightForIdentifierType = (weight: RiskWeight, identifierType: Identifi
 };
 
 export const buildCategoryScoreDeclarations = (): string => {
-  return RISK_CATEGORIES.map((riskCategory) => `results['${riskCategory}_score'] = 0;`).join('');
+  return RISK_CATEGORIES.map((riskCategory) => `results['${riskCategory}_score'] = 0.0;`).join('');
 };
 
 export const buildCategoryCountDeclarations = (): string => {

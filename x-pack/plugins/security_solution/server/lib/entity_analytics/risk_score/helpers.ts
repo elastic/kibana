@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { AfterKey, AfterKeys, IdentifierType } from '../../../../common/risk_engine';
+import type {
+  AfterKey,
+  AfterKeys,
+  IdentifierType,
+} from '../../../../common/entity_analytics/risk_engine';
 import type { CalculateAndPersistScoresResponse } from '../types';
 
 export const getFieldForIdentifierAgg = (identifierType: IdentifierType): string =>

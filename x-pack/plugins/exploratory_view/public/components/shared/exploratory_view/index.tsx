@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+
 import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,
@@ -17,7 +17,7 @@ import {
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useBreadcrumbs, useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { ExploratoryView } from './exploratory_view';
-import { ExploratoryViewPublicPluginsStart } from '../../../plugin';
+import { useKibana } from './hooks/use_kibana';
 import { DataViewContextProvider } from './hooks/use_app_data_view';
 import { UrlStorageContextProvider } from './hooks/use_series_storage';
 import { RefreshButton } from './header/refresh_button';
@@ -39,7 +39,7 @@ export function ExploratoryViewPage({
 }: ExploratoryViewPageProps) {
   const {
     services: { uiSettings, notifications, observabilityShared },
-  } = useKibana<ExploratoryViewPublicPluginsStart>();
+  } = useKibana();
 
   const history = useHistory();
 

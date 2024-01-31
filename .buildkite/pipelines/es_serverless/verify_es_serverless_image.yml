@@ -56,8 +56,8 @@ steps:
             - exit_status: '*'
               limit: 1
 
-      - command: .buildkite/scripts/steps/functional/security_serverless.sh
-        label: 'Serverless Security Cypress Tests'
+      - command: .buildkite/scripts/steps/functional/security_serverless_entity_analytics.sh
+        label: 'Serverless Entity Analytics - Security Solution Cypress Tests'
         if: "build.env('SKIP_CYPRESS') != '1' && build.env('SKIP_CYPRESS') != 'true'"
         agents:
           queue: n2-4-spot

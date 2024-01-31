@@ -22,7 +22,7 @@ import {
 } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SharePluginStart } from '@kbn/share-plugin/server';
-import type { FieldMap } from '@kbn/alerts-as-data-utils';
+import type { DefaultAlert, FieldMap } from '@kbn/alerts-as-data-utils';
 import { Alert } from '@kbn/alerts-as-data-utils';
 import { Filter } from '@kbn/es-query';
 import { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
@@ -61,6 +61,7 @@ import {
   AlertsFilter,
   AlertsFilterTimeframe,
   RuleAlertData,
+  NotificationDelay,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { RulesSettingsFlappingProperties } from '../common/rules_settings';
@@ -210,6 +211,12 @@ interface ComponentTemplateSpec {
 export type FormatAlert<AlertData extends RuleAlertData> = (
   alert: Partial<AlertData>
 ) => Partial<AlertData>;
+
+export const DEFAULT_AAD_CONFIG: IRuleTypeAlerts<DefaultAlert> = {
+  context: `default`,
+  mappings: { fieldMap: {} },
+  shouldWrite: true,
+};
 
 export interface IRuleTypeAlerts<AlertData extends RuleAlertData = never> {
   /**
@@ -405,6 +412,7 @@ export type PublicRuleResultService = PublicLastRunSetters;
 
 export interface RawRuleLastRun extends SavedObjectAttributes, RuleLastRun {}
 export interface RawRuleMonitoring extends SavedObjectAttributes, RuleMonitoring {}
+export interface RawNotificationDelay extends SavedObjectAttributes, NotificationDelay {}
 
 export interface RawRuleAlertsFilter extends AlertsFilter {
   query?: {
@@ -481,6 +489,7 @@ export interface RawRule {
   nextRun?: string | null;
   revision: number;
   running?: boolean | null;
+  notificationDelay?: RawNotificationDelay;
 }
 
 export type { DataStreamAdapter } from './alerts_service/lib/data_stream_adapter';

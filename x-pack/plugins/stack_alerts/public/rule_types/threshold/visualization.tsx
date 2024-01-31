@@ -18,6 +18,7 @@ import {
   ScaleType,
   Settings,
   niceTimeFormatter,
+  PartialTheme,
 } from '@elastic/charts';
 import moment from 'moment-timezone';
 import {
@@ -41,7 +42,7 @@ import {
 } from './index_threshold_api';
 import { IndexThresholdRuleParams } from './types';
 
-const customTheme = () => {
+const chartThemeOverrides = (): PartialTheme => {
   return {
     lineSeriesStyle: {
       line: {
@@ -182,7 +183,6 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
   if (!charts || !uiSettings || !dataFieldsFormats) {
     return null;
   }
-  const chartsTheme = charts.theme.useChartsTheme();
   const chartsBaseTheme = charts.theme.useChartsBaseTheme();
 
   const domain = getDomain(alertInterval, startVisualizationAt);
@@ -265,7 +265,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
         {alertVisualizationDataKeys.length ? (
           <Chart size={['100%', 200]} renderer="canvas">
             <Settings
-              theme={[customTheme(), chartsTheme]}
+              theme={[chartThemeOverrides()]}
               baseTheme={chartsBaseTheme}
               xDomain={domain}
               showLegend={!!termField}

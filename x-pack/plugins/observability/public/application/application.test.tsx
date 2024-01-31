@@ -15,7 +15,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { ConfigSchema, ObservabilityPublicPluginsStart } from '../plugin';
 import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
 import { renderApp } from '.';
-import { mockObservabilityAIAssistantService } from '@kbn/observability-ai-assistant-plugin/public';
+import { mockService } from '@kbn/observability-ai-assistant-plugin/public/mock';
 
 describe('renderApp', () => {
   const originalConsole = global.console;
@@ -51,7 +51,7 @@ describe('renderApp', () => {
       },
     },
     usageCollection: { reportUiCounter: noop },
-    observabilityAIAssistant: { service: mockObservabilityAIAssistantService },
+    observabilityAIAssistant: { service: mockService },
   } as unknown as ObservabilityPublicPluginsStart;
 
   const core = {

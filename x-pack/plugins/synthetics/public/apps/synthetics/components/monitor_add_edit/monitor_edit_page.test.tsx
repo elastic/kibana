@@ -8,7 +8,6 @@
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { mockGlobals } from '../../utils/testing';
 import { render } from '../../utils/testing/rtl_helpers';
 import { MonitorEditPage } from './monitor_edit_page';
 import { useMonitorName } from '../../hooks/use_monitor_name';
@@ -20,31 +19,12 @@ import {
   PROFILES_MAP,
 } from '../../../../../common/constants/monitor_defaults';
 
-mockGlobals();
-
 jest.mock('@kbn/observability-shared-plugin/public');
 
 jest.mock('../../hooks/use_monitor_name', () => ({
   ...jest.requireActual('../../hooks/use_monitor_name'),
   useMonitorName: jest.fn().mockReturnValue({ nameAlreadyExists: false }),
 }));
-
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
-  return {
-    ...original,
-    // Mocking CodeEditor, which uses React Monaco under the hood
-    CodeEditor: (props: any) => (
-      <input
-        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
-        data-currentvalue={props.value}
-        onChange={(e: any) => {
-          props.onChange(e.jsonContent);
-        }}
-      />
-    ),
-  };
-});
 
 describe('MonitorEditPage', () => {
   const { FETCH_STATUS } = observabilitySharedPublic;

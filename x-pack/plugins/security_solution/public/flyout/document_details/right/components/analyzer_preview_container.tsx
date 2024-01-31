@@ -14,7 +14,7 @@ import { useStartTransaction } from '../../../../common/lib/apm/use_start_transa
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { getScopedActions } from '../../../../helpers';
-import { setActiveTabTimeline } from '../../../../timelines/store/timeline/actions';
+import { setActiveTabTimeline } from '../../../../timelines/store/actions';
 import { useRightPanelContext } from '../context';
 import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { AnalyzerPreview } from './analyzer_preview';

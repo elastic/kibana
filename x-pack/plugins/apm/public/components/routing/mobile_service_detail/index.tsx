@@ -26,7 +26,7 @@ import { ErrorGroupDetails } from '../../app/mobile/errors_and_crashes_group_det
 import { CrashGroupDetails } from '../../app/mobile/errors_and_crashes_group_details/crash_group_details';
 import { MobileErrorCrashesOverview } from '../../app/mobile/errors_and_crashes_overview';
 import { ServiceDependencies } from '../../app/service_dependencies';
-
+import { ServiceDashboards } from '../../app/service_dashboards';
 export function page({
   title,
   tabKey,
@@ -267,6 +267,20 @@ export const mobileServiceDetailRoute = {
         params: t.partial({
           query: t.partial({
             alertStatus: t.string,
+          }),
+        }),
+      },
+      '/mobile-services/{serviceName}/dashboards': {
+        ...page({
+          tabKey: 'dashboards',
+          title: i18n.translate('xpack.apm.views.dashboard.title', {
+            defaultMessage: 'Dashboards',
+          }),
+          element: <ServiceDashboards />,
+        }),
+        params: t.partial({
+          query: t.partial({
+            dashboardId: t.string,
           }),
         }),
       },

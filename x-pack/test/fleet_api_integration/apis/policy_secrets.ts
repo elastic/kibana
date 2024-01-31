@@ -461,6 +461,8 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('Should return output secrets if policy uses output with secrets', async () => {
+      // Output secrets require at least one Fleet server on 8.12.0 or higher (and none under 8.12.0).
+      await createFleetServerAgent(fleetServerAgentPolicyId, 'server_1', '8.12.0');
       const outputWithSecret = await createOutputWithSecret();
 
       const { body: agentPolicyResponse } = await supertest

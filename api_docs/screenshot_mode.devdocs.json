@@ -55,26 +55,26 @@
       }
     ],
     "objects": [],
-    "setup": {
+    "start": {
       "parentPluginId": "screenshotMode",
-      "id": "def-public.ScreenshotModePluginStart",
+      "id": "def-public.ScreenshotModePublicStart",
       "type": "Type",
       "tags": [],
-      "label": "ScreenshotModePluginStart",
+      "label": "ScreenshotModePublicStart",
       "description": [],
       "signature": [
         {
           "pluginId": "screenshotMode",
           "scope": "public",
           "docId": "kibScreenshotModePluginApi",
-          "section": "def-public.ScreenshotModePluginSetup",
-          "text": "ScreenshotModePluginSetup"
+          "section": "def-public.ScreenshotModePublicSetup",
+          "text": "ScreenshotModePublicSetup"
         }
       ],
       "path": "src/plugins/screenshot_mode/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "lifecycle": "setup",
+      "lifecycle": "start",
       "initialIsOpen": true
     }
   },
@@ -157,26 +157,26 @@
     "objects": [],
     "setup": {
       "parentPluginId": "screenshotMode",
-      "id": "def-server.ScreenshotModePluginSetup",
+      "id": "def-server.ScreenshotModeServerSetup",
       "type": "Interface",
       "tags": [],
-      "label": "ScreenshotModePluginSetup",
+      "label": "ScreenshotModeServerSetup",
       "description": [],
       "signature": [
         {
           "pluginId": "screenshotMode",
           "scope": "server",
           "docId": "kibScreenshotModePluginApi",
-          "section": "def-server.ScreenshotModePluginSetup",
-          "text": "ScreenshotModePluginSetup"
+          "section": "def-server.ScreenshotModeServerSetup",
+          "text": "ScreenshotModeServerSetup"
         },
         " extends ",
         {
           "pluginId": "screenshotMode",
           "scope": "server",
           "docId": "kibScreenshotModePluginApi",
-          "section": "def-server.ScreenshotModePluginStart",
-          "text": "ScreenshotModePluginStart"
+          "section": "def-server.ScreenshotModeServerStart",
+          "text": "ScreenshotModeServerStart"
         }
       ],
       "path": "src/plugins/screenshot_mode/server/types.ts",
@@ -185,7 +185,7 @@
       "children": [
         {
           "parentPluginId": "screenshotMode",
-          "id": "def-server.ScreenshotModePluginSetup.setScreenshotContext",
+          "id": "def-server.ScreenshotModeServerSetup.setScreenshotContext",
           "type": "Function",
           "tags": [],
           "label": "setScreenshotContext",
@@ -201,7 +201,7 @@
           "children": [
             {
               "parentPluginId": "screenshotMode",
-              "id": "def-server.ScreenshotModePluginSetup.setScreenshotContext.$1",
+              "id": "def-server.ScreenshotModeServerSetup.setScreenshotContext.$1",
               "type": "string",
               "tags": [],
               "label": "key",
@@ -218,7 +218,7 @@
             },
             {
               "parentPluginId": "screenshotMode",
-              "id": "def-server.ScreenshotModePluginSetup.setScreenshotContext.$2",
+              "id": "def-server.ScreenshotModeServerSetup.setScreenshotContext.$2",
               "type": "Uncategorized",
               "tags": [],
               "label": "value",
@@ -238,7 +238,7 @@
         },
         {
           "parentPluginId": "screenshotMode",
-          "id": "def-server.ScreenshotModePluginSetup.setScreenshotModeEnabled",
+          "id": "def-server.ScreenshotModeServerSetup.setScreenshotModeEnabled",
           "type": "Function",
           "tags": [],
           "label": "setScreenshotModeEnabled",
@@ -260,10 +260,10 @@
     },
     "start": {
       "parentPluginId": "screenshotMode",
-      "id": "def-server.ScreenshotModePluginStart",
+      "id": "def-server.ScreenshotModeServerStart",
       "type": "Interface",
       "tags": [],
-      "label": "ScreenshotModePluginStart",
+      "label": "ScreenshotModeServerStart",
       "description": [],
       "path": "src/plugins/screenshot_mode/server/types.ts",
       "deprecated": false,
@@ -271,7 +271,7 @@
       "children": [
         {
           "parentPluginId": "screenshotMode",
-          "id": "def-server.ScreenshotModePluginStart.isScreenshotMode",
+          "id": "def-server.ScreenshotModeServerStart.isScreenshotMode",
           "type": "Function",
           "tags": [],
           "label": "isScreenshotMode",
@@ -295,7 +295,7 @@
           "children": [
             {
               "parentPluginId": "screenshotMode",
-              "id": "def-server.ScreenshotModePluginStart.isScreenshotMode.$1",
+              "id": "def-server.ScreenshotModeServerStart.isScreenshotMode.$1",
               "type": "Object",
               "tags": [],
               "label": "request",

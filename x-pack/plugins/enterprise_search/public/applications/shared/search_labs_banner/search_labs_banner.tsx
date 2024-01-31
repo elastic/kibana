@@ -12,20 +12,20 @@ import { css } from '@emotion/react';
 import { useValues } from 'kea';
 
 import {
-  EuiImage,
-  EuiCallOut,
   EuiSpacer,
   EuiText,
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
+  EuiPanel,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import searchLabsLogo from '../../../assets/images/search_labs_logo.svg';
 import { HttpLogic } from '../http';
+
+import { SearchLabsLogo } from './search_labs_logo';
 
 export const SearchLabsBanner: React.FC = () => {
   const { http } = useValues(HttpLogic);
@@ -33,19 +33,19 @@ export const SearchLabsBanner: React.FC = () => {
     '/plugins/enterpriseSearch/assets/images/search_labs_banner_background.svg'
   );
   return (
-    <EuiCallOut
+    <EuiPanel
+      hasBorder
+      hasShadow
       color="success"
       css={css`
         background-image: url(${backgroundImagePath});
         background-repeat: no-repeat;
       `}
     >
-      <EuiImage
-        alt={i18n.translate('xpack.enterpriseSearch.shared.searchLabsBanner.logoAltLabel', {
+      <SearchLabsLogo
+        aria-label={i18n.translate('xpack.enterpriseSearch.shared.searchLabsBanner.logoAltLabel', {
           defaultMessage: 'Elastic Search Labs',
         })}
-        src={searchLabsLogo}
-        size="original"
       />
       <EuiSpacer size="s" />
       <EuiTitle>
@@ -96,6 +96,6 @@ export const SearchLabsBanner: React.FC = () => {
           </span>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiCallOut>
+    </EuiPanel>
   );
 };

@@ -24,10 +24,36 @@ function isUpperCase(val: string) {
   return /^[A-Z]+$/.test(val);
 }
 
-export function cleanString(str: string) {
+export function geti18nIdentifierFromString(str: string) {
   return str
+    .trim()
     .replace(/```\w*```/g, '')
+    .replace(/[\'\"]+/g, '')
     .replace(/\s+/g, ' ')
-    .replace(/[^a-zA-Z\s]*/g, '')
-    .trim();
+    .split(' ')
+    .filter((_, i) => i <= 3)
+    .map(upperCaseFirstLetter)
+    .map((word, index) => (index === 0 ? word.toLowerCase() : word))
+    .join('')
+    .replace(/[^a-zA-Z\s]*/g, '');
+}
+
+export function getTranslatableValueFromString(str: string) {
+  const strTrimmed = str.trim();
+
+  if (strTrimmed.length === 1) {
+    return '';
+  }
+
+  // Markdown
+  if (strTrimmed.replace(/```\w*```/g, '').length === 0) {
+    return '';
+  }
+
+  // Special characters, numbers, and white spaces
+  if (strTrimmed.replace(/[!\@\#\$\%\^\&\*\(\)\_\+\{\}\|]|[0-9]|\s+/g, '').length === 0) {
+    return '';
+  }
+
+  return strTrimmed;
 }

@@ -66,8 +66,6 @@ export function createResourceNamesMap() {
   };
 }
 
-export const ELSER_MODEL_ID = '.elser_model_2';
-
 export const INDEX_QUEUED_DOCUMENTS_TASK_ID = 'observabilityAIAssistant:indexQueuedDocumentsTask';
 
 export const INDEX_QUEUED_DOCUMENTS_TASK_TYPE = INDEX_QUEUED_DOCUMENTS_TASK_ID + 'Type';
@@ -84,6 +82,7 @@ type KnowledgeBaseEntryRequest = { id: string; labels?: Record<string, string> }
 export class ObservabilityAIAssistantService {
   private readonly core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
   private readonly logger: Logger;
+  private readonly getModelId: () => Promise<string>;
   private kbService?: KnowledgeBaseService;
 
   private readonly resourceNames: ObservabilityAIAssistantResourceNames = createResourceNamesMap();
@@ -94,13 +93,16 @@ export class ObservabilityAIAssistantService {
     logger,
     core,
     taskManager,
+    getModelId,
   }: {
     logger: Logger;
     core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
     taskManager: TaskManagerSetupContract;
+    getModelId: () => Promise<string>;
   }) {
     this.core = core;
     this.logger = logger;
+    this.getModelId = getModelId;
 
     taskManager.registerTaskDefinitions({
       [INDEX_QUEUED_DOCUMENTS_TASK_TYPE]: {
@@ -132,6 +134,8 @@ export class ObservabilityAIAssistantService {
     try {
       const [coreStart, pluginsStart] = await this.core.getStartServices();
 
+      const elserModelId = await this.getModelId();
+
       const esClient = coreStart.elasticsearch.client.asInternalUser;
 
       await esClient.cluster.putComponentTemplate({
@@ -153,7 +157,7 @@ export class ObservabilityAIAssistantService {
           },
           mappings: {
             _meta: {
-              model: ELSER_MODEL_ID,
+              model: elserModelId,
             },
           },
         },
@@ -186,7 +190,7 @@ export class ObservabilityAIAssistantService {
         processors: [
           {
             inference: {
-              model_id: ELSER_MODEL_ID,
+              model_id: elserModelId,
               target_field: 'ml',
               field_map: {
                 text: 'text_field',
@@ -237,6 +241,7 @@ export class ObservabilityAIAssistantService {
         esClient,
         resources: this.resourceNames,
         taskManagerStart: pluginsStart.taskManager,
+        getModelId: this.getModelId,
       });
 
       this.logger.info('Successfully set up index assets');
@@ -277,7 +282,10 @@ export class ObservabilityAIAssistantService {
     return new ObservabilityAIAssistantClient({
       actionsClient: await plugins.actions.getActionsClientWithRequest(request),
       namespace: spaceId,
-      esClient: coreStart.elasticsearch.client.asInternalUser,
+      esClient: {
+        asInternalUser: coreStart.elasticsearch.client.asInternalUser,
+        asCurrentUser: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
+      },
       resources: this.resourceNames,
       logger: this.logger,
       user: {
@@ -312,7 +320,10 @@ export class ObservabilityAIAssistantService {
     };
     await Promise.all(
       this.registrations.map((fn) =>
-        fn({ signal, registerContext, registerFunction, resources, client })
+        fn({ signal, registerContext, registerFunction, resources, client }).catch((error) => {
+          this.logger.error(`Error registering functions`);
+          this.logger.error(error);
+        })
       )
     );
 

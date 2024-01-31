@@ -7,7 +7,7 @@
 
 import type { BulkOperationContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { IdentifierType, RiskScore } from '../../../../common/risk_engine';
+import type { IdentifierType, RiskScore } from '../../../../common/entity_analytics/risk_engine';
 
 interface WriterBulkResponse {
   errors: string[];

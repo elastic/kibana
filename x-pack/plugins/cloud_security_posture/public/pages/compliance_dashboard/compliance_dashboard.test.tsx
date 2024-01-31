@@ -36,7 +36,7 @@ import {
   BaseCspSetupStatus,
   ComplianceDashboardDataV2,
   CspStatusCode,
-} from '../../../common/types';
+} from '../../../common/types_old';
 
 jest.mock('../../common/api/use_setup_status_api');
 jest.mock('../../common/api/use_stats_api');

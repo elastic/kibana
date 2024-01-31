@@ -40,17 +40,22 @@ import { CategorizationExamplesLoader } from '../results_loader';
 import { getNewJobDefaults } from '../../../../services/ml_server_info';
 import { isCcsIndexPattern } from '../../../../util/index_utils';
 
+type DetectorType =
+  | ML_JOB_AGGREGATION.COUNT
+  | ML_JOB_AGGREGATION.HIGH_COUNT
+  | ML_JOB_AGGREGATION.RARE;
+
 export class CategorizationJobCreator extends JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.CATEGORIZATION;
   private _createCountDetector: () => void = () => {};
+  private _createHighCountDetector: () => void = () => {};
   private _createRareDetector: () => void = () => {};
   private _examplesLoader: CategorizationExamplesLoader;
   private _categoryFieldExamples: CategoryFieldExample[] = [];
   private _validationChecks: FieldExampleCheck[] = [];
   private _overallValidStatus: CATEGORY_EXAMPLES_VALIDATION_STATUS =
     CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID;
-  private _detectorType: ML_JOB_AGGREGATION.COUNT | ML_JOB_AGGREGATION.RARE =
-    ML_JOB_AGGREGATION.COUNT;
+  private _detectorType: DetectorType = ML_JOB_AGGREGATION.COUNT;
   private _categorizationAnalyzer: CategorizationAnalyzer = {};
   private _defaultCategorizationAnalyzer: CategorizationAnalyzer;
   private _partitionFieldName: string | null = null;
@@ -67,15 +72,19 @@ export class CategorizationJobCreator extends JobCreator {
 
   public setDefaultDetectorProperties(
     count: Aggregation | null,
+    highCount: Aggregation | null,
     rare: Aggregation | null,
     eventRate: Field | null
   ) {
-    if (count === null || rare === null || eventRate === null) {
+    if (count === null || highCount === null || rare === null || eventRate === null) {
       throw Error('event_rate field or count or rare aggregations missing');
     }
 
     this._createCountDetector = () => {
       this._createDetector(count, eventRate);
+    };
+    this._createHighCountDetector = () => {
+      this._createDetector(highCount, eventRate);
     };
     this._createRareDetector = () => {
       this._createDetector(rare, eventRate);
@@ -93,11 +102,14 @@ export class CategorizationJobCreator extends JobCreator {
     this._addDetector(dtr, agg, mlCategory);
   }
 
-  public setDetectorType(type: ML_JOB_AGGREGATION.COUNT | ML_JOB_AGGREGATION.RARE) {
+  public setDetectorType(type: DetectorType) {
     this._detectorType = type;
     this.removeAllDetectors();
     if (type === ML_JOB_AGGREGATION.COUNT) {
       this._createCountDetector();
+      this.bucketSpan = DEFAULT_BUCKET_SPAN;
+    } else if (type === ML_JOB_AGGREGATION.HIGH_COUNT) {
+      this._createHighCountDetector();
       this.bucketSpan = DEFAULT_BUCKET_SPAN;
     } else {
       this._createRareDetector();
@@ -246,10 +258,14 @@ export class CategorizationJobCreator extends JobCreator {
 
     const dtr = detectors[0];
     if (dtr !== undefined && dtr.agg !== null && dtr.field !== null) {
-      const detectorType =
-        dtr.agg.id === ML_JOB_AGGREGATION.COUNT
-          ? ML_JOB_AGGREGATION.COUNT
-          : ML_JOB_AGGREGATION.RARE;
+      let detectorType: DetectorType;
+      if (dtr.agg.id === ML_JOB_AGGREGATION.COUNT) {
+        detectorType = ML_JOB_AGGREGATION.COUNT;
+      } else if (dtr.agg.id === ML_JOB_AGGREGATION.HIGH_COUNT) {
+        detectorType = ML_JOB_AGGREGATION.HIGH_COUNT;
+      } else {
+        detectorType = ML_JOB_AGGREGATION.RARE;
+      }
 
       const bs = job.analysis_config.bucket_span!;
       this.setDetectorType(detectorType);

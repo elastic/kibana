@@ -36,6 +36,7 @@ import type {
   LanguageDefinitionSnippetArguments,
 } from '@kbn/search-api-panels';
 import { useLocation } from 'react-router-dom';
+import { CloudDetailsPanel, PipelinePanel } from '@kbn/search-api-panels';
 import { docLinks } from '../../../common/doc_links';
 import { useKibanaServices } from '../hooks/use_kibana';
 import { useAssetBasePath } from '../hooks/use_asset_base_path';
@@ -52,14 +53,11 @@ import { ApiKeyPanel } from './api_key/api_key';
 import { ConnectorsCallout } from './connectors_callout';
 import { ConnectorIngestionPanel } from './connectors_ingestion';
 import { PipelineButtonOverview } from './pipeline_button_overview';
-import { PipelinePanel } from './pipeline_panel';
-import { CloudDetailsPanel } from './overview/cloud_details';
 
 export const ElasticsearchOverview = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageDefinition>(javaDefinition);
   const [clientApiKey, setClientApiKey] = useState<string>(API_KEY_PLACEHOLDER);
-  const { application, cloud, http, user, share } = useKibanaServices();
-
+  const { application, cloud, http, user, share, console: consolePlugin } = useKibanaServices();
   const { elasticsearchURL, cloudId } = useMemo(() => {
     return {
       elasticsearchURL: cloud?.elasticsearchUrl ?? ELASTICSEARCH_URL_PLACEHOLDER,
@@ -67,11 +65,6 @@ export const ElasticsearchOverview = () => {
     };
   }, [cloud]);
   const assetBasePath = useAssetBasePath();
-  const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
-    url: elasticsearchURL,
-    apiKey: clientApiKey,
-    cloudId,
-  };
   const { hash } = useLocation();
   useEffect(() => {
     if (hash) {
@@ -82,6 +75,16 @@ export const ElasticsearchOverview = () => {
       }
     }
   }, [hash]);
+  const embeddableConsole = useMemo(
+    () => consolePlugin?.renderEmbeddableConsole?.() ?? <></>,
+    [consolePlugin]
+  );
+
+  const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
+    url: elasticsearchURL,
+    apiKey: clientApiKey,
+    cloudId,
+  };
 
   return (
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchOverviewPage">
@@ -311,7 +314,13 @@ export const ElasticsearchOverview = () => {
               }}
             />
           }
-          leftPanelContent={<PipelinePanel />}
+          leftPanelContent={
+            <PipelinePanel
+              clusterImage={`${assetBasePath}/cluster.svg`}
+              cutImage={`${assetBasePath}/cut.svg`}
+              reporterImage={`${assetBasePath}/reporter.svg`}
+            />
+          }
           links={[]}
           title={i18n.translate('xpack.serverlessSearch.pipeline.title', {
             defaultMessage: 'Transform and enrich your data',
@@ -336,6 +345,7 @@ export const ElasticsearchOverview = () => {
           links={[]}
           overviewPanelProps={{ color: 'transparent', hasShadow: false }}
         />
+        {embeddableConsole}
       </EuiPageTemplate.Section>
     </EuiPageTemplate>
   );
@@ -421,6 +431,7 @@ const OverviewFooter = () => {
               </EuiFlexGroup>
             }
             href={docLinks.gettingStartedSearch}
+            target="_blank"
           />
         </EuiFlexItem>
       </EuiFlexGroup>

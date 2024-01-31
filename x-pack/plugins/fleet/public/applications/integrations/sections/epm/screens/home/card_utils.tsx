@@ -75,7 +75,7 @@ export const mapToCard = ({
 
   let isUnverified = false;
 
-  const version = 'version' in item ? item.version || '' : '';
+  let version = 'version' in item ? item.version || '' : '';
 
   let isUpdateAvailable = false;
   let isReauthorizationRequired = false;
@@ -84,9 +84,8 @@ export const mapToCard = ({
       ? addBasePath(item.uiInternalPath)
       : item.uiExternalLink || getAbsolutePath(item.uiInternalPath);
   } else {
-    let urlVersion = item.version;
     if (item?.installationInfo?.version) {
-      urlVersion = item.installationInfo.version || item.version;
+      version = item.installationInfo.version || item.version;
       isUnverified = isPackageUnverified(item, packageVerificationKeyId);
       isUpdateAvailable = isPackageUpdatable(item);
 
@@ -94,7 +93,7 @@ export const mapToCard = ({
     }
 
     const url = getHref('integration_details_overview', {
-      pkgkey: `${item.name}-${urlVersion}`,
+      pkgkey: `${item.name}-${version}`,
       ...(item.integration ? { integration: item.integration } : {}),
     });
 

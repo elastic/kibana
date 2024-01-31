@@ -24,7 +24,7 @@ import styled from 'styled-components';
 import type { EuiTheme } from '@kbn/react-kibana-context-styled';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { timelineActions } from '../../../store/timeline';
+import { timelineActions } from '../../../store';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,

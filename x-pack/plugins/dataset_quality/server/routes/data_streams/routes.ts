@@ -7,20 +7,26 @@
 
 import * as t from 'io-ts';
 import { keyBy, merge, values } from 'lodash';
-import { DataStreamStat } from '../../types/data_stream';
-import { dataStreamTypesRt, rangeRt } from '../../types/default_api_types';
-import { Integration } from '../../types/integration';
+import Boom from '@hapi/boom';
+import {
+  DataStreamDetails,
+  DataStreamStat,
+  DegradedDocs,
+  Integration,
+} from '../../../common/api_types';
+import { rangeRt, typeRt } from '../../types/default_api_types';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
+import { getDataStreamDetails } from './get_data_stream_details';
 import { getDataStreams } from './get_data_streams';
 import { getDataStreamsStats } from './get_data_streams_stats';
-import { getMalformedDocsPaginated } from './get_malformed_docs';
-import { MalformedDocs } from '../../../common/api_types';
+import { getDegradedDocsPaginated } from './get_degraded_docs';
+import { getIntegrations } from './get_integrations';
 
 const statsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/stats',
   params: t.type({
     query: t.intersection([
-      dataStreamTypesRt,
+      typeRt,
       t.partial({
         datasetQuery: t.string,
       }),
@@ -41,7 +47,6 @@ const statsRoute = createDatasetQualityServerRoute({
 
     const fleetPluginStart = await plugins.fleet.start();
     const packageClient = fleetPluginStart.packageService.asInternalUser;
-    const packages = await packageClient.getPackages();
 
     const [dataStreams, dataStreamsStats] = await Promise.all([
       getDataStreams({
@@ -52,32 +57,21 @@ const statsRoute = createDatasetQualityServerRoute({
       getDataStreamsStats({ esClient, ...params.query }),
     ]);
 
-    const installedPackages = dataStreams.items.map((item) => item.integration);
-
-    const integrations = packages
-      .filter((pkg) => installedPackages.includes(pkg.name))
-      .map((p) => ({
-        name: p.name,
-        title: p.title,
-        version: p.version,
-        icons: p.icons,
-      }));
-
     return {
       dataStreamsStats: values(
         merge(keyBy(dataStreams.items, 'name'), keyBy(dataStreamsStats.items, 'name'))
       ),
-      integrations,
+      integrations: await getIntegrations({ packageClient, dataStreams: dataStreams.items }),
     };
   },
 });
 
-const malformedDocsRoute = createDatasetQualityServerRoute({
-  endpoint: 'GET /internal/dataset_quality/data_streams/malformed_docs',
+const degradedDocsRoute = createDatasetQualityServerRoute({
+  endpoint: 'GET /internal/dataset_quality/data_streams/degraded_docs',
   params: t.type({
     query: t.intersection([
       rangeRt,
-      dataStreamTypesRt,
+      typeRt,
       t.partial({
         datasetQuery: t.string,
       }),
@@ -87,25 +81,58 @@ const malformedDocsRoute = createDatasetQualityServerRoute({
     tags: [],
   },
   async handler(resources): Promise<{
-    malformedDocs: MalformedDocs[];
+    degradedDocs: DegradedDocs[];
   }> {
     const { context, params } = resources;
     const coreContext = await context.core;
 
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-    const malformedDocs = await getMalformedDocsPaginated({
+    const degradedDocs = await getDegradedDocsPaginated({
       esClient,
       ...params.query,
     });
 
     return {
-      malformedDocs,
+      degradedDocs,
     };
+  },
+});
+
+const dataStreamDetailsRoute = createDatasetQualityServerRoute({
+  endpoint: 'GET /internal/dataset_quality/data_streams/{dataStream}/details',
+  params: t.type({
+    path: t.type({
+      dataStream: t.string,
+    }),
+  }),
+  options: {
+    tags: [],
+  },
+  async handler(resources): Promise<DataStreamDetails> {
+    const { context, params } = resources;
+    const { dataStream } = params.path;
+    const coreContext = await context.core;
+
+    // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+    try {
+      return await getDataStreamDetails({ esClient, dataStream });
+    } catch (e) {
+      if (e) {
+        if (e?.message?.indexOf('index_not_found_exception') > -1) {
+          throw Boom.notFound(`Data stream "${dataStream}" not found.`);
+        }
+      }
+
+      throw e;
+    }
   },
 });
 
 export const dataStreamsRouteRepository = {
   ...statsRoute,
-  ...malformedDocsRoute,
+  ...degradedDocsRoute,
+  ...dataStreamDetailsRoute,
 };

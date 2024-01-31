@@ -12,9 +12,9 @@ import { TestProviders } from '../../../common/mock';
 import {
   managedUserDetails,
   mockManagedUserData,
-  mockObservedUser,
 } from '../../../timelines/components/side_panel/new_user_detail/__mocks__';
 import { UserPanelHeader } from './header';
+import { mockObservedUser } from './mocks';
 
 const mockProps = {
   userName: 'test',
@@ -24,7 +24,7 @@ const mockProps = {
 
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
 
-describe('UserDetailsContent', () => {
+describe('UserPanelHeader', () => {
   it('renders', () => {
     const { getByTestId } = render(
       <TestProviders>

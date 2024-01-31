@@ -55,8 +55,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await aiops.logPatternAnalysisPage.assertLogPatternAnalysisPageExists();
 
       await aiops.logPatternAnalysisPage.clickUseFullDataButton(totalDocCount);
+      await aiops.logPatternAnalysisPage.setRandomSamplingOption('aiopsRandomSamplerOptionOff');
       await aiops.logPatternAnalysisPage.selectCategoryField(selectedField);
       await aiops.logPatternAnalysisPage.clickRunButton();
+
       await aiops.logPatternAnalysisPage.assertTotalCategoriesFound(3);
       await aiops.logPatternAnalysisPage.assertCategoryTableRows(3);
 
@@ -82,6 +84,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await aiops.logPatternAnalysisPage.assertLogPatternAnalysisPageExists();
 
       await aiops.logPatternAnalysisPage.clickUseFullDataButton(totalDocCount);
+      await aiops.logPatternAnalysisPage.setRandomSamplingOption('aiopsRandomSamplerOptionOff');
       await aiops.logPatternAnalysisPage.selectCategoryField(selectedField);
       await aiops.logPatternAnalysisPage.clickRunButton();
       await aiops.logPatternAnalysisPage.assertTotalCategoriesFound(3);

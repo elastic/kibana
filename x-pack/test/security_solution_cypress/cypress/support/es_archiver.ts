@@ -18,7 +18,7 @@ export const esArchiver = (
 ): EsArchiver => {
   const log = new ToolingLog({ level: 'verbose', writeTo: process.stdout });
 
-  const isSnapshotServerless = config.env.IS_SERVERLESS;
+  const isServerless = config.env.IS_SERVERLESS;
   const isCloudServerless = config.env.CLOUD_SERVERLESS;
 
   const serverlessCloudUser = {
@@ -27,7 +27,7 @@ export const esArchiver = (
   };
 
   let authOverride;
-  if (!isSnapshotServerless) {
+  if (isServerless) {
     authOverride = isCloudServerless ? serverlessCloudUser : systemIndicesSuperuser;
   }
 

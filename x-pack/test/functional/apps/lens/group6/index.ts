@@ -80,8 +80,9 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     loadTestFile(require.resolve('./inspector')); // 1m 19s
     loadTestFile(require.resolve('./error_handling')); // 1m 8s
     loadTestFile(require.resolve('./lens_tagging')); // 1m 9s
+    loadTestFile(require.resolve('./workspace_size'));
+    // keep these last in the group in this order because they are messing with the default saved objects
     loadTestFile(require.resolve('./lens_reporting')); // 3m
-    // keep these two last in the group in this order because they are messing with the default saved objects
     loadTestFile(require.resolve('./rollup')); // 1m 30s
     loadTestFile(require.resolve('./no_data')); // 36s
   });

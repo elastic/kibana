@@ -7,6 +7,7 @@
 
 /** By default, these fields are allowed to be sent to the assistant */
 export const DEFAULT_ALLOW = [
+  '_id',
   '@timestamp',
   'cloud.availability_zone',
   'cloud.provider',
@@ -28,6 +29,7 @@ export const DEFAULT_ALLOW = [
   'host.risk.calculated_level',
   'host.risk.calculated_score_norm',
   'kibana.alert.last_detected',
+  'kibana.alert.risk_score',
   'kibana.alert.rule.description',
   'kibana.alert.rule.name',
   'kibana.alert.rule.references',
@@ -42,6 +44,7 @@ export const DEFAULT_ALLOW = [
   'kibana.alert.rule.threat.technique.subtechnique.name',
   'kibana.alert.rule.threat.technique.subtechnique.reference',
   'kibana.alert.severity',
+  'kibana.alert.workflow_status',
   'process.args',
   'process.command_line',
   'process.executable',
@@ -73,6 +76,7 @@ export const DEFAULT_ALLOW = [
 
 /** By default, these fields will be anonymized */
 export const DEFAULT_ALLOW_REPLACEMENT = [
+  '_id', // the document's _id is replaced with an anonymized value
   'cloud.availability_zone',
   'cloud.provider',
   'cloud.region',

@@ -116,7 +116,7 @@ jest.mock(
   }
 );
 jest.mock('../../../../detections/components/alerts_table/actions');
-jest.mock('../../../../explore/containers/risk_score', () => {
+jest.mock('../../../../entity_analytics/api/hooks/use_risk_score', () => {
   return {
     useRiskScore: jest.fn().mockReturnValue({
       loading: true,

@@ -54,7 +54,7 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
           const { body } = await supertestWithoutAuth
             .get('/internal/security/me')
             .set(svlCommonApi.getInternalRequestHeader())
-            .set('Cookie', `sid=${browserCookies[0].value}`);
+            .set({ Cookie: `sid=${browserCookies[0].value}` });
 
           const userData = await svlUserManager.getUserData(role);
           // email returned from API call must match the email for the specified role

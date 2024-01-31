@@ -22,6 +22,7 @@ import { CommonInfraProviders, CoreProviders } from './common_providers';
 import { prepareMountElement } from './common_styles';
 import { SourceProvider } from '../containers/metrics_source';
 import { PluginConfigProvider } from '../containers/plugin_config_context';
+import type { KibanaEnvContext } from '../hooks/use_kibana';
 
 export const METRICS_APP_DATA_TEST_SUBJ = 'infraMetricsPage';
 
@@ -30,7 +31,8 @@ export const renderApp = (
   plugins: InfraClientStartDeps,
   pluginStart: InfraClientStartExports,
   pluginConfig: InfraPublicConfig,
-  { element, history, setHeaderActionMenu, theme$ }: AppMountParameters
+  { element, history, setHeaderActionMenu, theme$ }: AppMountParameters,
+  kibanaEnvironment: KibanaEnvContext
 ) => {
   const storage = new Storage(window.localStorage);
 
@@ -46,6 +48,7 @@ export const renderApp = (
       setHeaderActionMenu={setHeaderActionMenu}
       storage={storage}
       theme$={theme$}
+      kibanaEnvironment={kibanaEnvironment}
     />,
     element
   );
@@ -66,6 +69,7 @@ const MetricsApp: React.FC<{
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   storage: Storage;
   theme$: AppMountParameters['theme$'];
+  kibanaEnvironment: KibanaEnvContext;
 }> = ({
   core,
   history,
@@ -75,11 +79,18 @@ const MetricsApp: React.FC<{
   setHeaderActionMenu,
   storage,
   theme$,
+  kibanaEnvironment,
 }) => {
   const uiCapabilities = core.application.capabilities;
 
   return (
-    <CoreProviders core={core} pluginStart={pluginStart} plugins={plugins} theme$={theme$}>
+    <CoreProviders
+      core={core}
+      pluginStart={pluginStart}
+      plugins={plugins}
+      theme$={theme$}
+      kibanaEnvironment={kibanaEnvironment}
+    >
       <CommonInfraProviders
         appName="Metrics UI"
         setHeaderActionMenu={setHeaderActionMenu}

@@ -81,6 +81,7 @@ import {
   migratePackagePolicyToV81102,
   migratePackagePolicyEvictionsFromV81102,
 } from './migrations/security_solution/to_v8_11_0_2';
+import { settingsV1 } from './model_versions/v1';
 
 /*
  * Saved object types and mappings
@@ -104,12 +105,16 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         has_seen_add_data_notice: { type: 'boolean', index: false },
         prerelease_integrations_enabled: { type: 'boolean' },
         secret_storage_requirements_met: { type: 'boolean' },
+        output_secret_storage_requirements_met: { type: 'boolean' },
       },
     },
     migrations: {
       '7.10.0': migrateSettingsToV7100,
       '7.13.0': migrateSettingsToV7130,
       '8.6.0': migrateSettingsToV860,
+    },
+    modelVersions: {
+      1: settingsV1,
     },
   },
   [AGENT_POLICY_SAVED_OBJECT_TYPE]: {

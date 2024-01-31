@@ -51,7 +51,7 @@ export const OutputHealth: React.FunctionComponent<Props> = ({ output, showBadge
         iconType="error"
         data-test-subj="outputHealthDegradedCallout"
       >
-        <p>
+        <p className="eui-textBreakWord">
           {i18n.translate('xpack.fleet.output.calloutText', {
             defaultMessage: 'Unable to connect to "{name}" at {host}.',
             values: {
@@ -59,7 +59,7 @@ export const OutputHealth: React.FunctionComponent<Props> = ({ output, showBadge
               host: output.hosts?.join(',') ?? '',
             },
           })}
-        </p>{' '}
+        </p>
         <p>
           {i18n.translate('xpack.fleet.output.calloutPromptText', {
             defaultMessage: 'Please check the details are correct.',

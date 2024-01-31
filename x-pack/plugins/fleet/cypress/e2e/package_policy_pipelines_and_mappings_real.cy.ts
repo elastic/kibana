@@ -100,7 +100,7 @@ describe('Input package create and edit package policy', () => {
     editPackagePolicyandShowAdvanced(INPUT_TEST_PACKAGE, packagePolicyName);
     cy.getBySel(POLICY_EDITOR.EDIT_MAPPINGS_BTN).click();
     cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
-    cy.get('body').should('contain', `logs-${datasetName}@custom`);
+    cy.get('body').should('contain', `logs${datasetName}@custom`);
   });
 });
 

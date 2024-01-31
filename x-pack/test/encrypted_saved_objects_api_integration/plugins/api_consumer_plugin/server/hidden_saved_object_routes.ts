@@ -34,7 +34,7 @@ export function registerHiddenSORoutes(
         });
       } catch (err) {
         if (encryptedSavedObjects.isEncryptionError(err)) {
-          return response.badRequest({ body: 'Failed to encrypt attributes' });
+          return response.badRequest({ body: 'Failed to decrypt attributes' });
         }
 
         return response.customError({ body: err, statusCode: 500 });

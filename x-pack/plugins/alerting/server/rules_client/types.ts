@@ -11,6 +11,7 @@ import {
   SavedObjectsClientContract,
   PluginInitializerContext,
   ISavedObjectsRepository,
+  UiSettingsServiceStart,
 } from '@kbn/core/server';
 import { ActionsClient, ActionsAuthorization } from '@kbn/actions-plugin/server';
 import {
@@ -84,6 +85,7 @@ export interface RulesClientContext {
   readonly getAlertIndicesAlias: GetAlertIndicesAlias;
   readonly alertsService: AlertsService | null;
   readonly isSystemAction: (actionId: string) => boolean;
+  readonly uiSettings: UiSettingsServiceStart;
 }
 
 export type NormalizedAlertAction = DistributiveOmit<RuleAction, 'actionTypeId'>;

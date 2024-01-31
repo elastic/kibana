@@ -19,7 +19,7 @@ import { withApmSpan } from '../../utils/with_apm_span';
 import { getMlJobsWithAPMGroup } from '../../lib/anomaly_detection/get_ml_jobs_with_apm_group';
 import { MlClient } from '../../lib/helpers/get_ml_client';
 import { apmMlAnomalyQuery } from '../../lib/anomaly_detection/apm_ml_anomaly_query';
-import { ApmMlDetectorType } from '../../../common/anomaly_detection/apm_ml_detectors';
+import { AnomalyDetectorType } from '../../../common/anomaly_detection/apm_ml_detectors';
 
 export const DEFAULT_ANOMALIES: ServiceAnomaliesResponse = {
   mlJobIds: [],
@@ -52,7 +52,7 @@ export async function getServiceAnomalies({
           bool: {
             filter: [
               ...apmMlAnomalyQuery({
-                detectorTypes: [ApmMlDetectorType.txLatency],
+                detectorTypes: [AnomalyDetectorType.txLatency],
               }),
               ...rangeQuery(
                 Math.min(end - 30 * 60 * 1000, start),

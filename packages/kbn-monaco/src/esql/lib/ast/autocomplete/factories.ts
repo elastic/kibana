@@ -16,6 +16,7 @@ import {
   FunctionDefinition,
   CommandDefinition,
   CommandOptionsDefinition,
+  CommandModeDefinition,
 } from '../definitions/types';
 import { getCommandDefinition } from '../shared/helpers';
 import { buildDocumentation, buildFunctionDocumentation } from './documentation_util';
@@ -26,6 +27,13 @@ export const TRIGGER_SUGGESTION_COMMAND = {
   title: 'Trigger Suggestion Dialog',
   id: 'editor.action.triggerSuggest',
 };
+
+function getSafeInsertText(text: string, { dashSupported }: { dashSupported?: boolean } = {}) {
+  if (dashSupported) {
+    return /[^a-zA-Z\d_\.@-]/.test(text) ? `\`${text}\`` : text;
+  }
+  return /[^a-zA-Z\d_\.@]/.test(text) ? `\`${text}\`` : text;
+}
 
 export function getAutocompleteFunctionDefinition(fn: FunctionDefinition) {
   const fullSignatures = getFunctionSignatures(fn);
@@ -43,10 +51,11 @@ export function getAutocompleteFunctionDefinition(fn: FunctionDefinition) {
 }
 
 export function getAutocompleteBuiltinDefinition(fn: FunctionDefinition) {
+  const hasArgs = fn.signatures.some(({ params }) => params.length);
   return {
     label: fn.name,
-    insertText: `${fn.name} $0`,
-    insertTextRules: 4, // monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+    insertText: hasArgs ? `${fn.name} $0` : fn.name,
+    ...(hasArgs ? { insertTextRules: 4 } : {}), // monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
     kind: 11,
     detail: fn.description,
     documentation: {
@@ -66,11 +75,14 @@ export const isCompatibleFunctionName = (fnName: string, command: string) => {
 
 export const getCompatibleFunctionDefinition = (
   command: string,
+  option: string | undefined,
   returnTypes?: string[],
   ignored: string[] = []
 ): AutocompleteCommandDefinition[] => {
   const fnSupportedByCommand = allFunctions.filter(
-    ({ name, supportedCommands }) => supportedCommands.includes(command) && !ignored.includes(name)
+    ({ name, supportedCommands, supportedOptions }) =>
+      (option ? supportedOptions?.includes(option) : supportedCommands.includes(command)) &&
+      !ignored.includes(name)
   );
   if (!returnTypes) {
     return fnSupportedByCommand.map(getAutocompleteFunctionDefinition);
@@ -104,7 +116,7 @@ export function getAutocompleteCommandDefinition(
 export const buildFieldsDefinitions = (fields: string[]): AutocompleteCommandDefinition[] =>
   fields.map((label) => ({
     label,
-    insertText: label,
+    insertText: getSafeInsertText(label),
     kind: 4,
     detail: i18n.translate('monaco.esql.autocomplete.fieldDefinition', {
       defaultMessage: `Field specified by the input table`,
@@ -115,7 +127,7 @@ export const buildFieldsDefinitions = (fields: string[]): AutocompleteCommandDef
 export const buildVariablesDefinitions = (variables: string[]): AutocompleteCommandDefinition[] =>
   variables.map((label) => ({
     label,
-    insertText: /[^a-zA-Z\d]/.test(label) ? `\`${label}\`` : label,
+    insertText: getSafeInsertText(label),
     kind: 4,
     detail: i18n.translate('monaco.esql.autocomplete.variableDefinition', {
       defaultMessage: `Variable specified by the user within the ES|QL query`,
@@ -126,7 +138,7 @@ export const buildVariablesDefinitions = (variables: string[]): AutocompleteComm
 export const buildSourcesDefinitions = (sources: string[]): AutocompleteCommandDefinition[] =>
   sources.map((label) => ({
     label,
-    insertText: label,
+    insertText: getSafeInsertText(label, { dashSupported: true }),
     kind: 21,
     detail: i18n.translate('monaco.esql.autocomplete.sourceDefinition', {
       defaultMessage: `Input table`,
@@ -167,7 +179,7 @@ export const buildPoliciesDefinitions = (
 ): AutocompleteCommandDefinition[] =>
   policies.map(({ name: label, sourceIndices }) => ({
     label,
-    insertText: label,
+    insertText: getSafeInsertText(label, { dashSupported: true }),
     kind: 5,
     detail: i18n.translate('monaco.esql.autocomplete.policyDefinition', {
       defaultMessage: `Policy defined on {count, plural, one {index} other {indices}}: {indices}`,
@@ -209,6 +221,44 @@ export const buildOptionDefinition = (option: CommandOptionsDefinition) => {
     completeItem.insertTextRules = 4; // monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
   }
   return completeItem;
+};
+
+export const buildSettingDefinitions = (
+  setting: CommandModeDefinition
+): AutocompleteCommandDefinition[] => {
+  // for now there's just a single setting with one argument
+  return setting.signature.params.flatMap(({ values, valueDescriptions }) => {
+    return values!.map((value, i) => {
+      const completeItem: AutocompleteCommandDefinition = {
+        label: `${setting.name}:${value}`,
+        insertText: `${setting.name}:${value}`,
+        kind: 21,
+        detail: valueDescriptions
+          ? `${setting.description} - ${valueDescriptions[i]}`
+          : setting.description,
+        sortText: 'D',
+      };
+      return completeItem;
+    });
+  });
+};
+
+export const buildSettingValueDefinitions = (
+  setting: CommandModeDefinition
+): AutocompleteCommandDefinition[] => {
+  // for now there's just a single setting with one argument
+  return setting.signature.params.flatMap(({ values, valueDescriptions }) => {
+    return values!.map((value, i) => {
+      const completeItem: AutocompleteCommandDefinition = {
+        label: value,
+        insertText: value,
+        kind: 21,
+        detail: valueDescriptions ? valueDescriptions[i] : setting.description,
+        sortText: 'D',
+      };
+      return completeItem;
+    });
+  });
 };
 
 export const buildNoPoliciesAvailableDefinition = (): AutocompleteCommandDefinition => ({

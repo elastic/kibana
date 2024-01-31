@@ -9,6 +9,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 
 import { CONNECTORS_INDEX } from '@kbn/search-connectors';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { isIndexNotFoundException } from '@kbn/search-connectors/utils/identify_exceptions';
 
 interface Telemetry {
   native: {
@@ -18,6 +19,15 @@ interface Telemetry {
     total: number;
   };
 }
+
+const defaultTelemetryMetrics: Telemetry = {
+  native: {
+    total: 0,
+  },
+  clients: {
+    total: 0,
+  },
+};
 
 /**
  * Register the telemetry collector
@@ -46,53 +56,60 @@ export const registerTelemetryUsageCollector = (usageCollection: UsageCollection
  * Fetch the aggregated telemetry metrics
  */
 
+// @ts-ignore
 export const fetchTelemetryMetrics = async (client: ElasticsearchClient): Promise<Telemetry> => {
-  const [nativeCountResponse, clientsCountResponse] = await Promise.all([
-    client.count({
-      index: CONNECTORS_INDEX,
-      query: {
-        bool: {
-          filter: [
-            {
-              term: {
-                is_native: true,
-              },
-            },
-          ],
-          must_not: [
-            {
-              term: {
-                service_type: {
-                  value: 'elastic-crawler',
+  try {
+    const [nativeCountResponse, clientsCountResponse] = await Promise.all([
+      client.count({
+        index: CONNECTORS_INDEX,
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  is_native: true,
                 },
               },
-            },
-          ],
-        },
-      },
-    }),
-    client.count({
-      index: CONNECTORS_INDEX,
-      query: {
-        bool: {
-          filter: [
-            {
-              term: {
-                is_native: false,
+            ],
+            must_not: [
+              {
+                term: {
+                  service_type: {
+                    value: 'elastic-crawler',
+                  },
+                },
               },
-            },
-          ],
+            ],
+          },
         },
-      },
-    }),
-  ]);
+      }),
+      client.count({
+        index: CONNECTORS_INDEX,
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  is_native: false,
+                },
+              },
+            ],
+          },
+        },
+      }),
+    ]);
 
-  return {
-    native: {
-      total: nativeCountResponse.count,
-    },
-    clients: {
-      total: clientsCountResponse.count,
-    },
-  } as Telemetry;
+    return {
+      native: {
+        total: nativeCountResponse.count,
+      },
+      clients: {
+        total: clientsCountResponse.count,
+      },
+    } as Telemetry;
+  } catch (error) {
+    if (isIndexNotFoundException(error)) {
+      return defaultTelemetryMetrics;
+    }
+  }
 };

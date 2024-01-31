@@ -15,6 +15,7 @@ import { ChunkSizeField, MaxSnapshotsField, MaxRestoreField } from './common';
 
 interface Props {
   repository: GCSRepository;
+  isManagedRepository?: boolean;
   updateRepositorySettings: (
     updatedSettings: Partial<Repository['settings']>,
     replaceSettings?: boolean
@@ -24,6 +25,7 @@ interface Props {
 
 export const GCSSettings: React.FunctionComponent<Props> = ({
   repository,
+  isManagedRepository,
   updateRepositorySettings,
   settingErrors,
 }) => {
@@ -89,6 +91,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
               });
             }}
             data-test-subj="clientInput"
+            disabled={isManagedRepository}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -133,6 +136,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
               });
             }}
             data-test-subj="bucketInput"
+            disabled={isManagedRepository}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -177,6 +181,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
               });
             }}
             data-test-subj="basePathInput"
+            disabled={isManagedRepository}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>

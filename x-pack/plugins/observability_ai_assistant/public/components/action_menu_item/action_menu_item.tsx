@@ -48,7 +48,7 @@ export function ObservabilityAIAssistantActionMenuItem() {
             {!isOpen || chatService.value ? (
               <AssistantAvatar size="xs" />
             ) : (
-              <EuiLoadingSpinner size="s" />
+              <EuiLoadingSpinner size="m" />
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

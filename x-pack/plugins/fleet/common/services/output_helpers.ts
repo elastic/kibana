@@ -28,9 +28,9 @@ export function getAllowedOutputTypeForPolicy(agentPolicy: AgentPolicy) {
     agentPolicy.package_policies &&
     agentPolicy.package_policies.some(
       (p) =>
-        p.package?.name === FLEET_APM_PACKAGE ||
         p.package?.name === FLEET_SERVER_PACKAGE ||
-        p.package?.name === FLEET_SYNTHETICS_PACKAGE
+        p.package?.name === FLEET_SYNTHETICS_PACKAGE ||
+        p.package?.name === FLEET_APM_PACKAGE
     );
 
   if (isRestrictedToSameClusterES) {
@@ -52,7 +52,10 @@ export function outputYmlIncludesReservedPerformanceKey(
   const parsedYml = safeLoad(configYml);
 
   if (!isObject(parsedYml)) {
-    return RESERVED_CONFIG_YML_KEYS.some((key) => parsedYml.includes(key));
+    if (typeof parsedYml === 'string') {
+      return RESERVED_CONFIG_YML_KEYS.some((key) => parsedYml.includes(key));
+    }
+    return false;
   }
 
   const flattenedYml = isObject(parsedYml) ? getFlattenedObject(parsedYml) : {};

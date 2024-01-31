@@ -19,6 +19,7 @@ import {
   RecursivePartial,
   ScaleType,
   Settings,
+  LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 
@@ -127,8 +128,9 @@ export const DecisionPathChart = ({
         size={{ height: DECISION_PATH_MARGIN + decisionPathData.length * DECISION_PATH_ROW_HEIGHT }}
       >
         <Settings
-          // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
           theme={theme}
+          // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+          baseTheme={LEGACY_LIGHT_THEME}
           rotation={90}
           locale={i18n.getLocale()}
         />

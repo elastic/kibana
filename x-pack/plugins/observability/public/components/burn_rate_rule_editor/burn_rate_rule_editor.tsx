@@ -33,16 +33,15 @@ type Props = Pick<
 
 export function BurnRateRuleEditor(props: Props) {
   const { setRuleParams, ruleParams, errors } = props;
-  const { isLoading: loadingInitialSlo, data: initialSlo } = useFetchSloDetails({
+  const { data: initialSlo } = useFetchSloDetails({
     sloId: ruleParams?.sloId,
   });
 
   const [selectedSlo, setSelectedSlo] = useState<SLOResponse | undefined>(undefined);
 
   useEffect(() => {
-    const hasInitialSlo = !loadingInitialSlo && initialSlo !== undefined;
-    setSelectedSlo(hasInitialSlo ? initialSlo : undefined);
-  }, [loadingInitialSlo, initialSlo, setRuleParams]);
+    setSelectedSlo(initialSlo);
+  }, [initialSlo]);
 
   const onSelectedSlo = (slo: SLOResponse | undefined) => {
     setSelectedSlo(slo);
@@ -111,7 +110,7 @@ export function BurnRateRuleEditor(props: Props) {
             size="s"
             title={i18n.translate('xpack.observability.slo.rules.groupByMessage', {
               defaultMessage:
-                'The SLO you selected has been created with a partition on "{groupByField}". This rule will monitor and generate an alert for every instance found in the partition field.',
+                'The SLO you selected has been created with a group-by on "{groupByField}". This rule will monitor and generate an alert for every instance found in the group-by field.',
               values: { groupByField: selectedSlo.groupBy },
             })}
           />

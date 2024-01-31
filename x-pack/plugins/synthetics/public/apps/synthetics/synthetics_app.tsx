@@ -14,7 +14,6 @@ import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-pl
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
-import { ObservabilityAIAssistantProvider } from '@kbn/observability-ai-assistant-plugin/public';
 import { SyntheticsDataViewContextProvider } from './contexts/synthetics_data_view_context';
 import { SyntheticsAppProps } from './contexts';
 
@@ -91,6 +90,7 @@ const Application = (props: SyntheticsAppProps) => {
                 triggersActionsUi: startPlugins.triggersActionsUi,
                 observability: startPlugins.observability,
                 observabilityShared: startPlugins.observabilityShared,
+                observabilityAIAssistant: startPlugins.observabilityAIAssistant,
                 exploratoryView: startPlugins.exploratoryView,
                 cases: startPlugins.cases,
                 spaces: startPlugins.spaces,
@@ -98,35 +98,31 @@ const Application = (props: SyntheticsAppProps) => {
               }}
             >
               <SyntheticsDataViewContextProvider dataViews={startPlugins.dataViews}>
-                <ObservabilityAIAssistantProvider
-                  value={startPlugins.observabilityAIAssistant.service}
-                >
-                  <Router history={appMountParameters.history}>
-                    <EuiThemeProvider darkMode={darkMode}>
-                      <SyntheticsRefreshContextProvider>
-                        <SyntheticsSettingsContextProvider {...props}>
-                          <SyntheticsThemeContextProvider darkMode={darkMode}>
-                            <SyntheticsStartupPluginsContextProvider {...startPlugins}>
-                              <div className={APP_WRAPPER_CLASS} data-test-subj="syntheticsApp">
-                                <RedirectAppLinks
-                                  coreStart={{
-                                    application: core.application,
-                                  }}
-                                >
-                                  <InspectorContextProvider>
-                                    <PageRouter />
-                                    <ActionMenu appMountParameters={appMountParameters} />
-                                    <TestNowModeFlyoutContainer />
-                                  </InspectorContextProvider>
-                                </RedirectAppLinks>
-                              </div>
-                            </SyntheticsStartupPluginsContextProvider>
-                          </SyntheticsThemeContextProvider>
-                        </SyntheticsSettingsContextProvider>
-                      </SyntheticsRefreshContextProvider>
-                    </EuiThemeProvider>
-                  </Router>
-                </ObservabilityAIAssistantProvider>
+                <Router history={appMountParameters.history}>
+                  <EuiThemeProvider darkMode={darkMode}>
+                    <SyntheticsRefreshContextProvider>
+                      <SyntheticsSettingsContextProvider {...props}>
+                        <SyntheticsThemeContextProvider darkMode={darkMode}>
+                          <SyntheticsStartupPluginsContextProvider {...startPlugins}>
+                            <div className={APP_WRAPPER_CLASS} data-test-subj="syntheticsApp">
+                              <RedirectAppLinks
+                                coreStart={{
+                                  application: core.application,
+                                }}
+                              >
+                                <InspectorContextProvider>
+                                  <PageRouter />
+                                  <ActionMenu appMountParameters={appMountParameters} />
+                                  <TestNowModeFlyoutContainer />
+                                </InspectorContextProvider>
+                              </RedirectAppLinks>
+                            </div>
+                          </SyntheticsStartupPluginsContextProvider>
+                        </SyntheticsThemeContextProvider>
+                      </SyntheticsSettingsContextProvider>
+                    </SyntheticsRefreshContextProvider>
+                  </EuiThemeProvider>
+                </Router>
               </SyntheticsDataViewContextProvider>
             </KibanaContextProvider>
           </ReduxProvider>

@@ -29,7 +29,7 @@ export function useCreateKnowledgeBaseEntry() {
     {
       entry: Omit<
         KnowledgeBaseEntry,
-        '@timestamp' | 'confidence' | 'is_correction' | 'public' | 'labels' | 'role'
+        '@timestamp' | 'confidence' | 'is_correction' | 'public' | 'labels' | 'role' | 'doc_id'
       >;
     }
   >(

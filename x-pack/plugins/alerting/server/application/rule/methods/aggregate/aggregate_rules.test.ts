@@ -10,6 +10,7 @@ import {
   savedObjectsClientMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
@@ -27,6 +28,7 @@ import { RecoveredActionGroup } from '../../../../../common';
 import { DefaultRuleAggregationResult } from '../../../../routes/rule/apis/aggregate/types';
 import { defaultRuleAggregationFactory } from '.';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -62,6 +64,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   alertsService: null,
   maxScheduledPerMinute: 1000,
   internalSavedObjectsRepository,
+  uiSettings: uiSettingsServiceMock.createStartContract(),
 };
 
 beforeEach(() => {
@@ -291,7 +294,7 @@ describe('aggregate()', () => {
         filter: undefined,
         page: 1,
         perPage: 0,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         aggs: {
           status: {
             terms: { field: 'alert.attributes.executionStatus.status' },
@@ -352,7 +355,7 @@ describe('aggregate()', () => {
         ]),
         page: 1,
         perPage: 0,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         aggs: {
           status: {
             terms: { field: 'alert.attributes.executionStatus.status' },

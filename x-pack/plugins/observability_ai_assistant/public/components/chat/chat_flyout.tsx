@@ -11,10 +11,8 @@ import React, { useState } from 'react';
 import type { Message } from '../../../common/types';
 import { useCurrentUser } from '../../hooks/use_current_user';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
-import { useKibana } from '../../hooks/use_kibana';
 import { useKnowledgeBase } from '../../hooks/use_knowledge_base';
 import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
-import { getConnectorsManagementHref } from '../../utils/get_connectors_management_href';
 import { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
 import { ChatBody } from './chat_body';
 
@@ -40,9 +38,6 @@ export function ChatFlyout({
   onClose: () => void;
 }) {
   const { euiTheme } = useEuiTheme();
-  const {
-    services: { http },
-  } = useKibana();
 
   const currentUser = useCurrentUser();
 
@@ -53,6 +48,12 @@ export function ChatFlyout({
   const knowledgeBase = useKnowledgeBase();
 
   const [conversationId, setConversationId] = useState<string | undefined>(undefined);
+
+  const conversationsHeaderClassName = css`
+    padding-top: 12px;
+    padding-bottom: 12px;
+    border-bottom: solid 1px ${euiTheme.border.color};
+  `;
 
   return isOpen ? (
     <EuiFlyout onClose={onClose}>
@@ -67,7 +68,7 @@ export function ChatFlyout({
             hasShadow={false}
             hasBorder={false}
             borderRadius="none"
-            css={{ borderBottom: `solid 1px ${euiTheme.border.color}` }}
+            className={conversationsHeaderClassName}
           >
             {conversationId ? (
               <EuiLink
@@ -98,7 +99,6 @@ export function ChatFlyout({
             initialTitle={initialTitle}
             initialMessages={initialMessages}
             currentUser={currentUser}
-            connectorsManagementHref={getConnectorsManagementHref(http)}
             knowledgeBase={knowledgeBase}
             startedFrom={startedFrom}
             onConversationUpdate={(conversation) => {

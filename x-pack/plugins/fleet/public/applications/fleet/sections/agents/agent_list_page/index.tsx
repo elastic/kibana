@@ -4,35 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { differenceBy, isEqual } from 'lodash';
 import type { EuiBasicTable } from '@elastic/eui';
 import { EuiSpacer, EuiPortal } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
-import { agentStatusesToSummary } from '../../../../../../common/services';
+import type { Agent } from '../../../types';
 
-import type { Agent, AgentPolicy, SimplifiedAgentStatus } from '../../../types';
 import {
-  usePagination,
-  useGetAgentPolicies,
-  sendGetAgents,
-  sendGetAgentStatus,
-  useUrlParams,
   useBreadcrumbs,
   useStartServices,
   useFlyoutContext,
-  sendGetAgentTags,
   useFleetServerStandalone,
-  sendGetAgentPolicies,
 } from '../../../hooks';
 import { AgentEnrollmentFlyout, UninstallCommandFlyout } from '../../../components';
-import {
-  AgentStatusKueryHelper,
-  ExperimentalFeaturesService,
-  policyHasFleetServer,
-} from '../../../services';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../constants';
+import { policyHasFleetServer } from '../../../services';
+import { SO_SEARCH_LIMIT } from '../../../constants';
 import {
   AgentReassignAgentPolicyModal,
   AgentUnenrollAgentModal,
@@ -45,40 +32,62 @@ import { useFleetServerUnhealthy } from '../hooks/use_fleet_server_unhealthy';
 
 import { AgentRequestDiagnosticsModal } from '../components/agent_request_diagnostics_modal';
 
-import { AgentTableHeader } from './components/table_header';
 import type { SelectionMode } from './components/types';
+
+import { AgentTableHeader } from './components/table_header';
 import { SearchAndFilterBar } from './components/search_and_filter_bar';
 import { TagsAddRemove } from './components/tags_add_remove';
 import { AgentActivityFlyout, AgentSoftLimitCallout } from './components';
 import { TableRowActions } from './components/table_row_actions';
 import { AgentListTable } from './components/agent_list_table';
-import { getKuery } from './utils/get_kuery';
-import { useAgentSoftLimit, useMissingEncryptionKeyCallout } from './hooks';
-
-const REFRESH_INTERVAL_MS = 30000;
+import { useAgentSoftLimit, useMissingEncryptionKeyCallout, useFetchAgentsData } from './hooks';
 
 export const AgentListPage: React.FunctionComponent<{}> = () => {
-  const { displayAgentMetrics } = ExperimentalFeaturesService.get();
-
-  const { notifications, cloud } = useStartServices();
+  const { cloud } = useStartServices();
   useBreadcrumbs('agent_list');
-  const defaultKuery: string = (useUrlParams().urlParams.kuery as string) || '';
-
-  // Agent data states
-  const [showUpgradeable, setShowUpgradeable] = useState<boolean>(false);
 
   // Table and search states
-  const [draftKuery, setDraftKuery] = useState<string>(defaultKuery);
-  const [search, setSearch] = useState<string>(defaultKuery);
-  const [selectionMode, setSelectionMode] = useState<SelectionMode>('manual');
   const [selectedAgents, setSelectedAgents] = useState<Agent[]>([]);
+  const [selectionMode, setSelectionMode] = useState<SelectionMode>('manual');
   const tableRef = useRef<EuiBasicTable<Agent>>(null);
-  const { pagination, pageSizeOptions, setPagination } = usePagination();
-  const [sortField, setSortField] = useState<keyof Agent>('enrolled_at');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
-  const VERSION_FIELD = 'local_metadata.elastic.agent.version';
-  const HOSTNAME_FIELD = 'local_metadata.host.hostname';
+  const {
+    allTags,
+    agentsOnCurrentPage,
+    agentsStatus,
+    isLoading,
+    shownAgents,
+    inactiveShownAgents,
+    totalInactiveAgents,
+    totalManagedAgentIds,
+    inactiveManagedAgentIds,
+    managedAgentsOnCurrentPage,
+    showUpgradeable,
+    setShowUpgradeable,
+    search,
+    setSearch,
+    selectedAgentPolicies,
+    setSelectedAgentPolicies,
+    sortField,
+    setSortField,
+    sortOrder,
+    setSortOrder,
+    selectedStatus,
+    setSelectedStatus,
+    selectedTags,
+    setSelectedTags,
+    agentPolicies,
+    agentPoliciesRequest,
+    agentPoliciesIndexedById,
+    pagination,
+    pageSizeOptions,
+    setPagination,
+    kuery,
+    draftKuery,
+    setDraftKuery,
+    fetchData,
+    currentRequestRef,
+  } = useFetchAgentsData();
 
   const onSubmitSearch = useCallback(
     (newKuery: string) => {
@@ -90,19 +99,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     },
     [setSearch, pagination, setPagination]
   );
-
-  // Policies state for filtering
-  const [selectedAgentPolicies, setSelectedAgentPolicies] = useState<string[]>([]);
-
-  // Status for filtering
-  const [selectedStatus, setSelectedStatus] = useState<string[]>([
-    'healthy',
-    'unhealthy',
-    'updating',
-    'offline',
-  ]);
-
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const isUsingFilter = !!(
     search.trim() ||
@@ -119,7 +115,14 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     setSelectedStatus([]);
     setSelectedTags([]);
     setShowUpgradeable(false);
-  }, [setSearch, setDraftKuery, setSelectedAgentPolicies, setSelectedStatus, setShowUpgradeable]);
+  }, [
+    setDraftKuery,
+    setSearch,
+    setSelectedAgentPolicies,
+    setSelectedStatus,
+    setSelectedTags,
+    setShowUpgradeable,
+  ]);
 
   // Agent enrollment flyout state
   const [enrollmentFlyout, setEnrollmentFlyoutState] = useState<{
@@ -128,9 +131,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   }>({
     isOpen: false,
   });
-
   const [isAgentActivityFlyoutOpen, setAgentActivityFlyoutOpen] = useState(false);
-
   const flyoutContext = useFlyoutContext();
 
   // Agent actions states
@@ -146,6 +147,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [agentToRequestDiagnostics, setAgentToRequestDiagnostics] = useState<Agent | undefined>(
     undefined
   );
+  const [showAgentActivityTour, setShowAgentActivityTour] = useState({ isOpen: false });
 
   const onTableChange = ({
     page,
@@ -167,35 +169,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const showInactive = useMemo(() => {
     return selectedStatus.some((status) => status === 'inactive' || status === 'unenrolled');
   }, [selectedStatus]);
-
-  // filters kuery
-  const kuery = useMemo(() => {
-    return getKuery({
-      search,
-      selectedAgentPolicies,
-      selectedTags,
-      selectedStatus,
-    });
-  }, [search, selectedAgentPolicies, selectedStatus, selectedTags]);
-
-  const [agentsOnCurrentPage, setAgentsOnCurrentPage] = useState<Agent[]>([]);
-  const [agentsStatus, setAgentsStatus] = useState<
-    { [key in SimplifiedAgentStatus]: number } | undefined
-  >();
-  const [allTags, setAllTags] = useState<string[]>();
-  const [isLoading, setIsLoading] = useState(false);
-  const [shownAgents, setShownAgents] = useState(0);
-  const [inactiveShownAgents, setInactiveShownAgents] = useState(0);
-  const [totalInactiveAgents, setTotalInactiveAgents] = useState(0);
-  const [totalManagedAgentIds, setTotalManagedAgentIds] = useState<string[]>([]);
-  const [managedAgentsOnCurrentPage, setManagedAgentsOnCurrentPage] = useState(0);
-  const [showAgentActivityTour, setShowAgentActivityTour] = useState({ isOpen: false });
-  const getSortFieldForAPI = (field: keyof Agent): string => {
-    if ([VERSION_FIELD, HOSTNAME_FIELD].includes(field as string)) {
-      return `${field}.keyword`;
-    }
-    return field;
-  };
 
   const renderActions = (agent: Agent) => {
     const agentPolicy =
@@ -222,179 +195,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       />
     );
   };
-
-  const isLoadingVar = useRef<boolean>(false);
-
-  // Request to fetch agents and agent status
-  const currentRequestRef = useRef<number>(0);
-  const fetchData = useCallback(
-    ({ refreshTags = false }: { refreshTags?: boolean } = {}) => {
-      async function fetchDataAsync() {
-        // skipping refresh if previous request is in progress
-        if (isLoadingVar.current) {
-          return;
-        }
-        currentRequestRef.current++;
-        const currentRequest = currentRequestRef.current;
-        isLoadingVar.current = true;
-
-        try {
-          setIsLoading(true);
-          const [
-            agentsResponse,
-            totalInactiveAgentsResponse,
-            managedAgentPoliciesResponse,
-            agentTagsResponse,
-          ] = await Promise.all([
-            sendGetAgents({
-              page: pagination.currentPage,
-              perPage: pagination.pageSize,
-              kuery: kuery && kuery !== '' ? kuery : undefined,
-              sortField: getSortFieldForAPI(sortField),
-              sortOrder,
-              showInactive,
-              showUpgradeable,
-              getStatusSummary: true,
-              withMetrics: displayAgentMetrics,
-            }),
-            sendGetAgentStatus({
-              kuery: AgentStatusKueryHelper.buildKueryForInactiveAgents(),
-            }),
-            sendGetAgentPolicies({
-              kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`,
-              perPage: SO_SEARCH_LIMIT,
-              full: false,
-            }),
-            sendGetAgentTags({
-              kuery: kuery && kuery !== '' ? kuery : undefined,
-              showInactive,
-            }),
-          ]);
-          isLoadingVar.current = false;
-          // Return if a newer request has been triggered
-          if (currentRequestRef.current !== currentRequest) {
-            return;
-          }
-          if (agentsResponse.error) {
-            throw agentsResponse.error;
-          }
-          if (!agentsResponse.data) {
-            throw new Error('Invalid GET /agents response');
-          }
-          if (!totalInactiveAgentsResponse.data) {
-            throw new Error('Invalid GET /agents_status response');
-          }
-          if (managedAgentPoliciesResponse.error) {
-            throw new Error(managedAgentPoliciesResponse.error.message);
-          }
-          if (agentTagsResponse.error) {
-            throw agentTagsResponse.error;
-          }
-          if (!agentTagsResponse.data) {
-            throw new Error('Invalid GET /agent/tags response');
-          }
-
-          const statusSummary = agentsResponse.data.statusSummary;
-          if (!statusSummary) {
-            throw new Error('Invalid GET /agents response - no status summary');
-          }
-          setAgentsStatus(agentStatusesToSummary(statusSummary));
-
-          const newAllTags = agentTagsResponse.data.items;
-          // We only want to update the list of available tags if
-          // - We haven't set any tags yet
-          // - We've received the "refreshTags" flag which will force a refresh of the tags list when an agent is unenrolled
-          // - Tags are modified (add, remove, edit)
-          if (!allTags || refreshTags || !isEqual(newAllTags, allTags)) {
-            setAllTags(newAllTags);
-          }
-
-          setAgentsOnCurrentPage(agentsResponse.data.items);
-          setShownAgents(agentsResponse.data.total);
-          setTotalInactiveAgents(totalInactiveAgentsResponse.data.results.inactive || 0);
-          setInactiveShownAgents(
-            showInactive ? totalInactiveAgentsResponse.data.results.inactive || 0 : 0
-          );
-
-          const managedAgentPolicies = managedAgentPoliciesResponse.data?.items ?? [];
-          if (managedAgentPolicies.length === 0) {
-            setTotalManagedAgentIds([]);
-            setManagedAgentsOnCurrentPage(0);
-          } else {
-            // Find all the agents that have managed policies and are not unenrolled
-            const policiesKuery = managedAgentPolicies
-              .map((policy) => `policy_id:"${policy.id}"`)
-              .join(' or ');
-            const response = await sendGetAgents({
-              kuery: `NOT (status:unenrolled) and ${policiesKuery}`,
-              perPage: SO_SEARCH_LIMIT,
-              showInactive: true,
-            });
-            if (response.error) {
-              throw new Error(response.error.message);
-            }
-            const allManagedAgents = response.data?.items ?? [];
-            const allManagedAgentIds = allManagedAgents?.map((agent) => agent.id);
-            setTotalManagedAgentIds(allManagedAgentIds);
-
-            setManagedAgentsOnCurrentPage(
-              agentsResponse.data.items
-                .map((agent) => agent.id)
-                .filter((agentId) => allManagedAgentIds.includes(agentId)).length
-            );
-          }
-        } catch (error) {
-          notifications.toasts.addError(error, {
-            title: i18n.translate('xpack.fleet.agentList.errorFetchingDataTitle', {
-              defaultMessage: 'Error fetching agents',
-            }),
-          });
-        }
-        setIsLoading(false);
-      }
-      fetchDataAsync();
-    },
-    [
-      pagination.currentPage,
-      pagination.pageSize,
-      kuery,
-      sortField,
-      sortOrder,
-      showInactive,
-      showUpgradeable,
-      displayAgentMetrics,
-      allTags,
-      notifications.toasts,
-    ]
-  );
-
-  // Send request to get agent list and status
-  useEffect(() => {
-    fetchData();
-    const interval = setInterval(() => {
-      fetchData();
-    }, REFRESH_INTERVAL_MS);
-
-    return () => clearInterval(interval);
-  }, [fetchData]);
-
-  const agentPoliciesRequest = useGetAgentPolicies({
-    page: 1,
-    perPage: SO_SEARCH_LIMIT,
-    full: true,
-  });
-
-  const agentPolicies = useMemo(
-    () => (agentPoliciesRequest.data ? agentPoliciesRequest.data.items : []),
-    [agentPoliciesRequest]
-  );
-  const agentPoliciesIndexedById = useMemo(() => {
-    return agentPolicies.reduce((acc, agentPolicy) => {
-      acc[agentPolicy.id] = agentPolicy;
-
-      return acc;
-    }, {} as { [k: string]: AgentPolicy });
-  }, [agentPolicies]);
 
   const isAgentSelectable = useCallback(
     (agent: Agent) => {
@@ -606,6 +406,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         inactiveShownAgents={inactiveShownAgents}
         totalInactiveAgents={totalInactiveAgents}
         totalManagedAgentIds={totalManagedAgentIds}
+        inactiveManagedAgentIds={inactiveManagedAgentIds}
         selectionMode={selectionMode}
         currentQuery={kuery}
         selectedAgents={selectedAgents}

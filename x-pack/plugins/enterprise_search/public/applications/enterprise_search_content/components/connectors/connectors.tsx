@@ -24,6 +24,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { INGESTION_METHOD_IDS } from '../../../../../common/constants';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
+import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { handlePageChange } from '../../../shared/table_pagination';
 import {
@@ -34,6 +35,8 @@ import {
 } from '../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../layout';
 import { SelectConnector } from '../new_index/select_connector/select_connector';
+
+import { CannotConnect } from '../search_index/components/cannot_connect';
 
 import { ConnectorStats } from './connector_stats';
 import { ConnectorsLogic } from './connectors_logic';
@@ -52,6 +55,7 @@ export interface ConnectorsProps {
 export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
   const { fetchConnectors, onPaginate, setIsFirstRequest } = useActions(ConnectorsLogic);
   const { data, isLoading, searchParams, isEmpty, connectors } = useValues(ConnectorsLogic);
+  const { errorConnectingMessage } = useValues(HttpLogic);
   const [searchQuery, setSearchValue] = useState('');
 
   useEffect(() => {
@@ -116,12 +120,13 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
               >
                 {i18n.translate(
                   'xpack.enterpriseSearch.connectors.newConnectorsClientButtonLabel',
-                  { defaultMessage: 'New Connectors Client' }
+                  { defaultMessage: 'New Connector Client' }
                 )}
               </EuiButton>,
             ]
           : [
               <EuiButton
+                disabled={Boolean(errorConnectingMessage)}
                 key="newCrawler"
                 color="primary"
                 iconType="plusInCircle"
@@ -141,6 +146,12 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
             ],
       }}
     >
+      {Boolean(errorConnectingMessage) && (
+        <>
+          <CannotConnect />
+          <EuiSpacer />
+        </>
+      )}
       <ConnectorStats isCrawler={isCrawler} />
       <EuiSpacer />
 

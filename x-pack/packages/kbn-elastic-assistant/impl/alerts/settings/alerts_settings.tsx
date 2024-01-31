@@ -40,7 +40,7 @@ const AlertsSettingsComponent = ({ knowledgeBase, setUpdatedKnowledgeBaseSetting
     (event: EuiSwitchEvent) => {
       setUpdatedKnowledgeBaseSettings({
         ...knowledgeBase,
-        alerts: event.target.checked,
+        isEnabledRAGAlerts: event.target.checked,
       });
     },
     [knowledgeBase, setUpdatedKnowledgeBaseSettings]
@@ -58,7 +58,7 @@ const AlertsSettingsComponent = ({ knowledgeBase, setUpdatedKnowledgeBaseSetting
         `}
       >
         <EuiSwitch
-          checked={knowledgeBase.alerts}
+          checked={knowledgeBase.isEnabledRAGAlerts}
           compressed
           data-test-subj="alertsSwitch"
           label={i18n.ALERTS_LABEL}
@@ -70,12 +70,6 @@ const AlertsSettingsComponent = ({ knowledgeBase, setUpdatedKnowledgeBaseSetting
       <EuiSpacer size="xs" />
 
       <EuiFlexGroup direction="column" gutterSize="none">
-        <EuiFlexItem grow={false}>
-          <EuiText color="subdued" size="xs">
-            <span>{i18n.ASK_QUESTIONS_ABOUT}</span>
-          </EuiText>
-        </EuiFlexItem>
-
         <EuiFlexItem
           css={css`
             width: ${RANGE_CONTAINER_WIDTH}px;
@@ -87,7 +81,7 @@ const AlertsSettingsComponent = ({ knowledgeBase, setUpdatedKnowledgeBaseSetting
             aria-label={i18n.ALERTS_RANGE}
             compressed
             data-test-subj="alertsRange"
-            disabled={!knowledgeBase.alerts}
+            disabled={!knowledgeBase.isEnabledRAGAlerts}
             id={inputRangeSliderId}
             max={MAX_LATEST_ALERTS}
             min={MIN_LATEST_ALERTS}
@@ -106,7 +100,19 @@ const AlertsSettingsComponent = ({ knowledgeBase, setUpdatedKnowledgeBaseSetting
 
         <EuiFlexItem grow={false}>
           <EuiText color="subdued" size="xs">
-            <span>{i18n.LATEST_AND_RISKIEST_OPEN_ALERTS}</span>
+            <span>{i18n.LATEST_AND_RISKIEST_OPEN_ALERTS(knowledgeBase.latestAlerts)}</span>
+          </EuiText>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiText color="subdued" size="xs">
+            <span>{i18n.YOUR_ANONYMIZATION_SETTINGS}</span>
+          </EuiText>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiText color="subdued" size="xs">
+            <span>{i18n.SELECT_FEWER_ALERTS}</span>
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -22,7 +22,7 @@ import { isEmpty } from 'lodash';
 import moment from 'moment';
 import React, { Fragment } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useChartTheme, FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
+import { useChartThemes, FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { SectionContainer } from '../section_container';
 import { getDataHandler } from '../../../../../context/has_data_context/data_handler';
 import { useHasData } from '../../../../../hooks/use_has_data';
@@ -55,7 +55,7 @@ function getColorPerItem(series?: LogsFetchDataResponse['series']) {
 
 export function LogsSection({ bucketSize }: Props) {
   const history = useHistory();
-  const chartTheme = useChartTheme();
+  const chartThemes = useChartThemes();
   const { forceUpdate, hasDataMap } = useHasData();
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, lastUpdated } =
     useDatePickerContext();
@@ -138,7 +138,7 @@ export function LogsSection({ bucketSize }: Props) {
       <ChartContainer isInitialLoad={isLoading && !data}>
         <Settings
           onBrushEnd={(event) => onBrushEnd({ x: (event as XYBrushEvent).x, history })}
-          theme={chartTheme}
+          {...chartThemes}
           showLegend
           legendPosition={Position.Right}
           xDomain={{ min, max }}

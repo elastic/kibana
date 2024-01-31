@@ -18,6 +18,7 @@ import {
 import { validateSystemActions } from '../../../../lib/validate_system_actions';
 import { RuleActionTypes, RuleDefaultAction, RuleSystemAction } from '../../../../../common';
 import { isSystemAction } from '../../../../../common/system_actions/is_system_action';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { BulkActionSkipResult } from '../../../../../common/bulk_edit';
 import { RuleTypeRegistry } from '../../../../types';
 import {
@@ -294,7 +295,7 @@ async function bulkEditRulesOcc<Params extends RuleParams>(
     await context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RuleAttributes>(
       {
         filter,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         perPage: 100,
         ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
       }
@@ -653,7 +654,7 @@ async function getUpdatedAttributesFromOperations<Params extends RuleParams>({
       case 'actions': {
         const updatedOperation = {
           ...operation,
-          value: addGeneratedActionValues(operation.value),
+          value: await addGeneratedActionValues(operation.value, context),
         };
 
         const systemActions = operation.value.filter(

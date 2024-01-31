@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-// Please also add new aliases to test/scripts/jenkins_storybook.sh
+// Please also add new aliases to .buildkite/scripts/steps/storybooks/build_and_upload.ts
 //
 // If you wish for your Storybook to be built and included in CI, also add your
 // alias to .buildkite/scripts/steps/storybooks/build_and_upload.ts
@@ -45,7 +45,7 @@ export const storybookAliases = {
   infra: 'x-pack/plugins/infra/.storybook',
   kibana_react: 'src/plugins/kibana_react/.storybook',
   lists: 'x-pack/plugins/lists/.storybook',
-  log_explorer: 'x-pack/plugins/log_explorer/.storybook',
+  logs_explorer: 'x-pack/plugins/observability_solution/logs_explorer/.storybook',
   management: 'packages/kbn-management/storybook/config',
   observability: 'x-pack/plugins/observability/.storybook',
   observability_ai_assistant: 'x-pack/plugins/observability_ai_assistant/.storybook',

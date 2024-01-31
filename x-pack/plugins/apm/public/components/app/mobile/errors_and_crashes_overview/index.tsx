@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { Tabs, MobileErrorTabIds } from './tabs/tabs';
 import { useApmParams } from '../../../../hooks/use_apm_params';
@@ -18,7 +18,6 @@ export function MobileErrorCrashesOverview() {
   const history = useHistory();
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
-      <EuiSpacer size="m" />
       <EuiFlexItem grow={false}>
         <Tabs
           onTabClick={(nextTab) => {

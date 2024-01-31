@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import {
-  EuiFieldSearch,
   EuiButtonIcon,
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiToolTip,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 
-import { OptionsListStrings } from './options_list_strings';
+import { getCompatibleSearchTechniques } from '../../../common/options_list/suggestions_searching';
 import { useOptionsList } from '../embeddable/options_list_embeddable';
 import { OptionsListPopoverSortingButton } from './options_list_popover_sorting_button';
-import { OPTIONS_LIST_DEFAULT_SEARCH_TECHNIQUE } from '../../../common/options_list/types';
+import { OptionsListStrings } from './options_list_strings';
 
 interface OptionsListPopoverProps {
   showOnlySelected: boolean;
@@ -38,20 +38,29 @@ export const OptionsListPopoverActionBar = ({
 
   const totalCardinality =
     optionsList.select((state) => state.componentState.totalCardinality) ?? 0;
-  const searchString = optionsList.select((state) => state.componentState.searchString);
   const fieldSpec = optionsList.select((state) => state.componentState.field);
+  const searchString = optionsList.select((state) => state.componentState.searchString);
   const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
-
-  const hideSort = optionsList.select((state) => state.explicitInput.hideSort);
-  const searchTechnique = optionsList.select((state) => state.explicitInput.searchTechnique);
-
   const allowExpensiveQueries = optionsList.select(
     (state) => state.componentState.allowExpensiveQueries
   );
 
+  const hideSort = optionsList.select((state) => state.explicitInput.hideSort);
+  const searchTechnique = optionsList.select((state) => state.explicitInput.searchTechnique);
+
+  const compatibleSearchTechniques = useMemo(() => {
+    if (!fieldSpec) return [];
+    return getCompatibleSearchTechniques(fieldSpec.type);
+  }, [fieldSpec]);
+
+  const defaultSearchTechnique = useMemo(
+    () => searchTechnique ?? compatibleSearchTechniques[0],
+    [searchTechnique, compatibleSearchTechniques]
+  );
+
   return (
     <div className="optionsList__actions">
-      {fieldSpec?.type !== 'date' && (
+      {compatibleSearchTechniques.length > 0 && (
         <EuiFormRow className="optionsList__searchRow" fullWidth>
           <EuiFieldSearch
             isInvalid={!searchString.valid}
@@ -61,9 +70,9 @@ export const OptionsListPopoverActionBar = ({
             onChange={(event) => updateSearchString(event.target.value)}
             value={searchString.value}
             data-test-subj="optionsList-control-search-input"
-            placeholder={OptionsListStrings.popover.searchPlaceholder[
-              searchTechnique ?? OPTIONS_LIST_DEFAULT_SEARCH_TECHNIQUE
-            ].getPlaceholderText()}
+            placeholder={OptionsListStrings.popover.getSearchPlaceholder(
+              allowExpensiveQueries ? defaultSearchTechnique : 'exact'
+            )}
           />
         </EuiFormRow>
       )}

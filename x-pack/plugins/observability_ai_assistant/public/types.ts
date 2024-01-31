@@ -6,7 +6,14 @@
  */
 
 import type { AnalyticsServiceStart } from '@kbn/core/public';
-import type { FeaturesPluginStart, FeaturesPluginSetup } from '@kbn/features-plugin/public';
+import type {
+  DataViewsPublicPluginSetup,
+  DataViewsPublicPluginStart,
+} from '@kbn/data-views-plugin/public';
+import type { FeaturesPluginSetup, FeaturesPluginStart } from '@kbn/features-plugin/public';
+import type { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
+import type { ILicense, LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
 import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
@@ -16,32 +23,30 @@ import type {
   SecurityPluginSetup,
   SecurityPluginStart,
 } from '@kbn/security-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { WithSuspenseExtendedDeps } from '@kbn/shared-ux-utility';
 import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { ForwardRefExoticComponent, RefAttributes } from 'react';
 import type { Observable } from 'rxjs';
-import type { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
-import type {
-  DataViewsPublicPluginSetup,
-  DataViewsPublicPluginStart,
-} from '@kbn/data-views-plugin/public';
-import type { LicensingPluginStart, ILicense } from '@kbn/licensing-plugin/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { StreamingChatResponseEventWithoutError } from '../common/conversation_complete';
 import type {
   ContextDefinition,
   FunctionDefinition,
   FunctionResponse,
   Message,
+  PendingMessage,
 } from '../common/types';
 import type { ObservabilityAIAssistantAPIClient } from './api';
-import type { PendingMessage } from '../common/types';
-import type { StreamingChatResponseEvent } from '../common/conversation_complete';
+import type { InsightProps } from './components/insight/insight';
 import type { UseGenAIConnectorsResult } from './hooks/use_genai_connectors';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
 export type { CreateChatCompletionResponseChunk } from '../common/types';
+export type { PendingMessage };
 
 export interface ObservabilityAIAssistantChatService {
   analytics: AnalyticsServiceStart;
@@ -49,14 +54,15 @@ export interface ObservabilityAIAssistantChatService {
     messages: Message[];
     connectorId: string;
     function?: 'none' | 'auto';
-  }) => Observable<PendingMessage>;
+    signal: AbortSignal;
+  }) => Observable<StreamingChatResponseEventWithoutError>;
   complete: (options: {
     messages: Message[];
     connectorId: string;
     persist: boolean;
     conversationId?: string;
     signal: AbortSignal;
-  }) => Observable<StreamingChatResponseEvent>;
+  }) => Observable<StreamingChatResponseEventWithoutError>;
   getContexts: () => ContextDefinition[];
   getFunctions: (options?: { contexts?: string[]; filter?: string }) => FunctionDefinition[];
   hasFunction: (name: string) => boolean;
@@ -92,12 +98,8 @@ export type ChatRegistrationRenderFunction = ({}: {
   registerRenderFunction: RegisterRenderFunctionDefinition;
 }) => Promise<void>;
 
-export interface ObservabilityAIAssistantPluginStart {
-  service: ObservabilityAIAssistantService;
-  useGenAIConnectors: () => UseGenAIConnectorsResult;
-}
+export interface ConfigSchema {}
 
-export interface ObservabilityAIAssistantPluginSetup {}
 export interface ObservabilityAIAssistantPluginSetupDependencies {
   dataViews: DataViewsPublicPluginSetup;
   features: FeaturesPluginSetup;
@@ -105,7 +107,9 @@ export interface ObservabilityAIAssistantPluginSetupDependencies {
   observabilityShared: ObservabilitySharedPluginSetup;
   security: SecurityPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  ml: MlPluginSetup;
 }
+
 export interface ObservabilityAIAssistantPluginStartDependencies {
   dataViews: DataViewsPublicPluginStart;
   features: FeaturesPluginStart;
@@ -115,8 +119,17 @@ export interface ObservabilityAIAssistantPluginStartDependencies {
   security: SecurityPluginStart;
   share: SharePluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  ml: MlPluginStart;
 }
 
-export interface ConfigSchema {}
+export interface ObservabilityAIAssistantPluginSetup {}
 
-export type { PendingMessage };
+export interface ObservabilityAIAssistantPluginStart {
+  service: ObservabilityAIAssistantService;
+  ObservabilityAIAssistantContextualInsight: React.ForwardRefExoticComponent<InsightProps> | null;
+  ObservabilityAIAssistantActionMenuItem: ForwardRefExoticComponent<
+    Pick<RefAttributes<{}> & WithSuspenseExtendedDeps, 'css' | 'key' | 'analytics'> &
+      RefAttributes<{}>
+  > | null;
+  useGenAIConnectors: () => UseGenAIConnectorsResult;
+}

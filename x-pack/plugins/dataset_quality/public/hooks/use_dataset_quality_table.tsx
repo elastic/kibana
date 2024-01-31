@@ -10,7 +10,7 @@ import { find, orderBy } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
 import { tableSummaryAllText, tableSummaryOfText } from '../../common/translations';
-import { getDatasetQualitTableColumns } from '../components/dataset_quality/columns';
+import { getDatasetQualityTableColumns } from '../components/dataset_quality/columns';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { getDefaultTimeRange, useKibanaContextForPlugin } from '../utils';
 
@@ -20,6 +20,7 @@ type DIRECTION = 'asc' | 'desc';
 type SORT_FIELD = keyof DataStreamStat;
 
 const sortingOverrides: Partial<{ [key in SORT_FIELD]: SORT_FIELD }> = {
+  ['title']: 'name',
   ['size']: 'sizeBytes',
 };
 
@@ -27,6 +28,7 @@ export const useDatasetQualityTable = () => {
   const {
     services: { fieldFormats },
   } = useKibanaContextForPlugin();
+  const [selectedDataset, setSelectedDataset] = useState<DataStreamStat>();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [sortField, setSortField] = useState<SORT_FIELD>(DEFAULT_SORT_FIELD);
@@ -36,9 +38,9 @@ export const useDatasetQualityTable = () => {
 
   const { dataStreamsStatsServiceClient: client } = useDatasetQualityContext();
   const { data = [], loading } = useFetcher(async () => client.getDataStreamsStats(), []);
-  const { data: malformedStats = [], loading: loadingMalformedStats } = useFetcher(
+  const { data: degradedStats = [], loading: loadingDegradedStats } = useFetcher(
     async () =>
-      client.getDataStreamsMalformedStats({
+      client.getDataStreamsDegradedStats({
         start: defaultTimeRange.from,
         end: defaultTimeRange.to,
       }),
@@ -46,8 +48,14 @@ export const useDatasetQualityTable = () => {
   );
 
   const columns = useMemo(
-    () => getDatasetQualitTableColumns({ fieldFormats, loadingMalformedStats }),
-    [fieldFormats, loadingMalformedStats]
+    () =>
+      getDatasetQualityTableColumns({
+        fieldFormats,
+        selectedDataset,
+        setSelectedDataset,
+        loadingDegradedStats,
+      }),
+    [fieldFormats, loadingDegradedStats, selectedDataset, setSelectedDataset]
   );
 
   const pagination = {
@@ -77,18 +85,18 @@ export const useDatasetQualityTable = () => {
   const renderedItems = useMemo(() => {
     const overridenSortingField = sortingOverrides[sortField] || sortField;
     const mergedData = data.map((dataStream) => {
-      const malformedDocs = find(malformedStats, { dataset: dataStream.name });
+      const degradedDocs = find(degradedStats, { dataset: dataStream.rawName });
 
       return {
         ...dataStream,
-        malformedDocs: malformedDocs?.percentage,
+        degradedDocs: degradedDocs?.percentage,
       };
     });
 
     const sortedItems = orderBy(mergedData, overridenSortingField, sortDirection);
 
     return sortedItems.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
-  }, [data, malformedStats, sortField, sortDirection, pageIndex, pageSize]);
+  }, [data, degradedStats, sortField, sortDirection, pageIndex, pageSize]);
 
   const resultsCount = useMemo(() => {
     const startNumberItemsOnPage = pageSize * pageIndex + (renderedItems.length ? 1 : 0);
@@ -106,6 +114,8 @@ export const useDatasetQualityTable = () => {
     );
   }, [data.length, pageIndex, pageSize, renderedItems.length]);
 
+  const closeFlyout = useCallback(() => setSelectedDataset(undefined), []);
+
   return {
     sort,
     onTableChange,
@@ -114,5 +124,7 @@ export const useDatasetQualityTable = () => {
     columns,
     loading,
     resultsCount,
+    closeFlyout,
+    selectedDataset,
   };
 };

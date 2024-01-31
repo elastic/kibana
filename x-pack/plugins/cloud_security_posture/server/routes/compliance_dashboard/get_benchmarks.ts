@@ -13,7 +13,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/core/server';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
-import type { BenchmarkData } from '../../../common/types';
+import type { BenchmarkData } from '../../../common/types_old';
 import {
   failedFindingsAggQuery,
   BenchmarkVersionQueryResult,
