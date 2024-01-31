@@ -10,6 +10,7 @@ import { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { IRouter, RequestHandler, StartServicesAccessor } from '@kbn/core/server';
 import { FullValidationConfig } from '@kbn/core-http-server';
+import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { INITIAL_REST_VERSION_INTERNAL as version } from '../../constants';
 import { IndexPatternsFetcher } from '../../fetcher';
 import type {
@@ -116,6 +117,44 @@ export const validate: FullValidationConfig<any, any, any> = {
 const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, IBody> =
   (isRollupsEnabled) => async (context, request, response) => {
     const { asCurrentUser } = (await context.core).elasticsearch.client;
+    if (request.query.type === 'esql') {
+      try {
+        const fields = await asCurrentUser.transport.request(
+          {
+            method: 'POST',
+            path: '/_query',
+            body: {
+              // query: 'FROM kibana*',
+              query: `${request.query.pattern} | LIMIT 0`,
+            },
+          },
+          { headers: { 'elastic-api-version': '1' } }
+        );
+
+        return response.ok({
+          body: {
+            fields: fields.columns.map((fld) => {
+              return {
+                name: fld.name,
+                type: castEsToKbnFieldTypeName(fld.type),
+                esTypes: [fld.type],
+                searchable: true,
+                aggregatable: true,
+                readFromDocValues: false,
+              };
+            }),
+            indices: [],
+          },
+        });
+      } catch (error) {
+        return response.ok({
+          body: {
+            fields: [],
+            indices: [],
+          },
+        });
+      }
+    }
     const indexPatterns = new IndexPatternsFetcher(asCurrentUser, undefined, isRollupsEnabled());
     const {
       pattern,
