@@ -124,9 +124,16 @@ export interface DiscoverDataStateContainer {
    */
   reset: (savedSearch: SavedSearch) => void;
 
+  /**
+   * cancels the running queries
+   */
   cancel: () => void;
 
+  /**
+   * gets active AbortController for running queries
+   */
   getAbortController: () => AbortController;
+
   /**
    * Available Inspector Adaptor allowing to get details about recent requests to ES
    */

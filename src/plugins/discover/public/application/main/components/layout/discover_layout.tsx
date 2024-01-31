@@ -46,6 +46,7 @@ import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
 import { ESQLTechPreviewCallout } from './esql_tech_preview_callout';
 import { PanelsToggle, PanelsToggleProps } from '../../../../components/panels_toggle';
+import { sendErrorMsg } from '../../hooks/use_saved_search_messages';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
@@ -246,8 +247,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   const onCancelClick = useCallback(() => {
     stateContainer.dataState.cancel();
-    sendErrorMsg(stateContainer.dataState.data$.documents$);
-    sendErrorMsg(stateContainer.dataState.data$.main$);
+    sendErrorMsg(stateContainer.dataState.data$.documents$, new Error('cancel'));
+    sendErrorMsg(stateContainer.dataState.data$.main$, new Error('cancel'));
   }, [stateContainer.dataState]);
 
   return (
