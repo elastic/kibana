@@ -1456,7 +1456,7 @@ describe('EPM template', () => {
             path_match: 'group.*.value',
             mapping: {
               time_series_metric: 'gauge',
-              type: 'double'
+              type: 'double',
             },
           },
         },
@@ -1465,7 +1465,7 @@ describe('EPM template', () => {
             path_match: 'group.*.histogram',
             match_mapping_type: '*',
             mapping: {
-              type: 'histogram'
+              type: 'histogram',
             },
           },
         },
