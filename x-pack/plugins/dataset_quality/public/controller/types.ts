@@ -6,6 +6,7 @@
  */
 
 import { Observable } from 'rxjs';
+import { DataStreamStat } from '../../common/data_streams_stats';
 import { Direction } from '../hooks';
 import { DatasetQualityControllerStateService } from '../state_machines/dataset_quality_controller';
 
@@ -23,20 +24,10 @@ export interface DatasetQualityTableOptions {
   };
 }
 
-export interface DatasetQualityFlyoutOptions {
-  dataset?: {
-    rawName: string;
-    type: string;
-    name: string;
-    namespace: string;
-    title: string;
-    integration?: {
-      name: string;
-      title: string;
-      version: string;
-    };
-  };
-}
+export type DatasetQualityFlyoutOptions = Omit<
+  DataStreamStat,
+  'size' | 'sizeBytes' | 'lastActivity' | 'degradedDocs'
+>;
 
 export interface DatasetQualityPublicState {
   table: DatasetQualityTableOptions;

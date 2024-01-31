@@ -9,7 +9,7 @@ import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
 import { DatasetQualityPluginStart } from '@kbn/dataset-quality-plugin/public';
 import { DatasetQualityController } from '@kbn/dataset-quality-plugin/public/controller';
-import { OBSERVABILITY_LOG_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
+import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { useActor } from '@xstate/react';
@@ -30,7 +30,7 @@ export interface DatasetQualityRouteProps {
 export const DatasetQualityRoute = () => {
   const { services } = useKibanaContextForPlugin();
   const { datasetQuality, serverless, chrome, notifications } = services;
-  const logExplorerLinkProps = useLinkProps({ app: OBSERVABILITY_LOG_EXPLORER_APP_ID });
+  const logExplorerLinkProps = useLinkProps({ app: OBSERVABILITY_LOGS_EXPLORER_APP_ID });
 
   useBreadcrumbs(
     [
