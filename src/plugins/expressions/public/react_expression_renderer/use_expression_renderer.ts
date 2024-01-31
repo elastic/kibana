@@ -79,10 +79,13 @@ export function useExpressionRenderer(
   // will call done() in LayoutEffect when done with rendering custom error state
   const errorRenderHandlerRef = useRef<IInterpreterRenderHandlers | null>(null);
 
-  if (abortController?.signal)
-    abortController.signal.onabort = () => {
-      expressionLoaderRef.current?.cancel();
-    };
+  useEffect(() => {
+    if (abortController?.signal)
+      abortController.signal.onabort = () => {
+        expressionLoaderRef.current?.cancel();
+      };
+  }, [abortController]);
+
   /* eslint-disable react-hooks/exhaustive-deps */
   // OK to ignore react-hooks/exhaustive-deps because options update is handled by calling .update()
   useEffect(() => {
