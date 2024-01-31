@@ -180,6 +180,7 @@ export const OptionsListControl = ({
           }${fieldFormatter(value)}`;
         })
         .join(delimiter)}`}
+      textProps={{ className: 'optionsList--selectionText' }}
     >
       {hasSelections || existsSelected
         ? selectionDisplayNode

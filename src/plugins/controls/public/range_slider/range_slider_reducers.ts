@@ -24,7 +24,15 @@ export const rangeSliderReducers = {
     state: WritableDraft<RangeSliderReduxState>,
     action: PayloadAction<RangeValue>
   ) => {
-    state.explicitInput.value = action.payload;
+    const [minSelection, maxSelection]: RangeValue = action.payload;
+    if (
+      minSelection === String(state.componentState.min) &&
+      maxSelection === String(state.componentState.max)
+    ) {
+      state.explicitInput.value = undefined;
+    } else {
+      state.explicitInput.value = action.payload;
+    }
   },
   setField: (
     state: WritableDraft<RangeSliderReduxState>,

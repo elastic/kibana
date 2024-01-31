@@ -185,15 +185,14 @@
                 "section": "def-public.AppStartUIPluginDependencies",
                 "text": "AppStartUIPluginDependencies"
               },
-              ") => { renderEmbeddableConsole: (props: ",
+              ") => ",
               {
                 "pluginId": "console",
                 "scope": "public",
                 "docId": "kibConsolePluginApi",
-                "section": "def-public.EmbeddableConsoleProps",
-                "text": "EmbeddableConsoleProps"
-              },
-              ") => React.ReactElement<any, string | React.JSXElementConstructor<any>> | null; } | { renderEmbeddableConsole?: undefined; }"
+                "section": "def-public.ConsolePluginStart",
+                "text": "ConsolePluginStart"
+              }
             ],
             "path": "src/plugins/console/public/plugin.ts",
             "deprecated": false,
