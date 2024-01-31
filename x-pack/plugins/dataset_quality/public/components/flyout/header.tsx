@@ -17,11 +17,11 @@ import {
 import { css } from '@emotion/react';
 import React from 'react';
 import { flyoutOpenInLogExplorerText } from '../../../common/translations';
-import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
 import { useLinkToLogExplorer } from '../../hooks';
+import { FlyoutDataset } from '../../state_machines/dataset_quality_controller';
 import { IntegrationIcon } from '../common';
 
-export function Header({ dataStreamStat }: { dataStreamStat: DataStreamStat }) {
+export function Header({ dataStreamStat }: { dataStreamStat: FlyoutDataset }) {
   const { integration, title } = dataStreamStat;
   const euiShadow = useEuiShadow('s');
   const { euiTheme } = useEuiTheme();

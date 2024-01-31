@@ -19,7 +19,6 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 import { processTopValues } from './utils';
 import { buildAggregationWithSamplingOption } from './build_random_sampler_agg';
-import { SAMPLER_TOP_TERMS_THRESHOLD } from './constants';
 import type {
   Aggs,
   Field,
@@ -71,7 +70,6 @@ export const fetchStringFieldsStats = (
   fields: Field[],
   options: ISearchOptions
 ): Observable<StringFieldStats[] | FieldStatsError> => {
-  const { samplerShardSize } = params;
   const request: estypes.SearchRequest = getStringFieldStatsRequest(params, fields);
 
   return dataSearch
@@ -94,9 +92,6 @@ export const fetchStringFieldsStats = (
           const safeFieldName = field.safeFieldName;
 
           const topAggsPath = [...aggsPath, `${safeFieldName}_top`];
-          if (samplerShardSize < 1 && field.cardinality >= SAMPLER_TOP_TERMS_THRESHOLD) {
-            topAggsPath.push('top');
-          }
 
           const fieldAgg = get(aggregations, [...topAggsPath], {});
 

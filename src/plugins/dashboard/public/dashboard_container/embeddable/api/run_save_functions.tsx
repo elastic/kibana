@@ -6,20 +6,24 @@
  * Side Public License, v 1.
  */
 
+import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import React from 'react';
 import { batch } from 'react-redux';
-import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 
+import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { EmbeddableInput, isReferenceOrValueEmbeddable } from '@kbn/embeddable-plugin/public';
+
+import { DashboardContainerInput } from '../../../../common';
 import { DASHBOARD_CONTENT_ID, SAVED_OBJECT_POST_TIME } from '../../../dashboard_constants';
-import { DashboardSaveOptions, DashboardStateFromSaveModal } from '../../types';
-import { DashboardSaveModal } from './overlays/save_modal';
-import { DashboardContainer } from '../dashboard_container';
+import {
+  SaveDashboardReturn,
+  SavedDashboardInput,
+} from '../../../services/dashboard_content_management/types';
 import { pluginServices } from '../../../services/plugin_services';
-import { DashboardContainerInput, DashboardPanelMap } from '../../../../common';
-import { SaveDashboardReturn } from '../../../services/dashboard_content_management/types';
+import { DashboardSaveOptions, DashboardStateFromSaveModal } from '../../types';
+import { DashboardContainer } from '../dashboard_container';
 import { extractTitleAndCount } from './lib/extract_title_and_count';
+import { DashboardSaveModal } from './overlays/save_modal';
 
 export function runSaveAs(this: DashboardContainer) {
   const {
@@ -78,10 +82,17 @@ export function runSaveAs(this: DashboardContainer) {
         // do not save if title is duplicate and is unconfirmed
         return {};
       }
-      const stateToSave: DashboardContainerInput = {
+
+      const lastSavedInput: DashboardContainerInput = {
         ...currentState,
         ...stateFromSaveModal,
       };
+      let stateToSave: SavedDashboardInput = lastSavedInput;
+      let persistableControlGroupInput: PersistableControlGroupInput | undefined;
+      if (this.controlGroup) {
+        persistableControlGroupInput = this.controlGroup.getPersistableInput();
+        stateToSave = { ...stateToSave, controlGroupInput: persistableControlGroupInput };
+      }
       const beforeAddTime = window.performance.now();
       const saveResult = await saveDashboardState({
         currentState: stateToSave,
@@ -101,7 +112,10 @@ export function runSaveAs(this: DashboardContainer) {
       if (saveResult.id) {
         batch(() => {
           this.dispatch.setStateFromSaveModal(stateFromSaveModal);
-          this.dispatch.setLastSavedInput(stateToSave);
+          this.dispatch.setLastSavedInput(lastSavedInput);
+          if (this.controlGroup && persistableControlGroupInput) {
+            this.controlGroup.dispatch.setLastSavedInput(persistableControlGroupInput);
+          }
         });
       }
       resolve(saveResult);
@@ -139,12 +153,23 @@ export async function runQuickSave(this: DashboardContainer) {
 
   if (managed) return;
 
+  let stateToSave: SavedDashboardInput = currentState;
+  let persistableControlGroupInput: PersistableControlGroupInput | undefined;
+  if (this.controlGroup) {
+    persistableControlGroupInput = this.controlGroup.getPersistableInput();
+    stateToSave = { ...stateToSave, controlGroupInput: persistableControlGroupInput };
+  }
+
   const saveResult = await saveDashboardState({
     lastSavedId,
-    currentState,
+    currentState: stateToSave,
     saveOptions: {},
   });
+
   this.dispatch.setLastSavedInput(currentState);
+  if (this.controlGroup && persistableControlGroupInput) {
+    this.controlGroup.dispatch.setLastSavedInput(persistableControlGroupInput);
+  }
 
   return saveResult;
 }
@@ -198,13 +223,22 @@ export async function runClone(this: DashboardContainer) {
         return unlinkedPanels;
       })();
 
+      let stateToSave: DashboardContainerInput & {
+        controlGroupInput?: PersistableControlGroupInput;
+      } = currentState;
+      if (this.controlGroup) {
+        stateToSave = {
+          ...stateToSave,
+          controlGroupInput: this.controlGroup.getPersistableInput(),
+        };
+      }
+
       const saveResult = await saveDashboardState({
         saveOptions: {
           saveAsCopy: true,
         },
         currentState: {
-          ...currentState,
-          panels: newPanels,
+          ...stateToSave,
           title: newTitle,
         },
       });
