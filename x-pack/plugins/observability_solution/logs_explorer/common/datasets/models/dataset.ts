@@ -74,7 +74,7 @@ export class Dataset {
 
   public static createAllLogsDataset() {
     return new Dataset({
-      name: 'logs-*-*' as IndexPattern,
+      name: 'remote_cluster:logs-*-*' as IndexPattern,
       title: 'All logs',
       iconType: 'pagesSelect',
     });
