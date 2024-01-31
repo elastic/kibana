@@ -8,7 +8,7 @@
 
 import { useEffect, useState } from 'react';
 import { DISCOVER_ESQL_LOCATOR } from '@kbn/deeplinks-analytics';
-import { DiscoverEsqlLocatorParams } from '@kbn/discover-plugin/common';
+import { DiscoverESQLLocatorParams } from '@kbn/discover-plugin/common';
 
 import { NavigateToAppFn, LocatorClient } from '@kbn/shared-ux-prompt-no-data-views-types';
 
@@ -23,7 +23,7 @@ export const useOnTryESQL = ({ locatorClient, navigateToApp }: UseOnTryEsqlParam
   useEffect(() => {
     (async () => {
       const location = await locatorClient
-        ?.get<DiscoverEsqlLocatorParams>(DISCOVER_ESQL_LOCATOR)
+        ?.get<DiscoverESQLLocatorParams>(DISCOVER_ESQL_LOCATOR)
         ?.getLocation({});
 
       if (!location) {

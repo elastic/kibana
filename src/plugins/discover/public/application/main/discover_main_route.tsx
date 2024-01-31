@@ -148,10 +148,10 @@ export function DiscoverMainRoute({
   }, [data.dataViews, savedSearchId, stateContainer.appState]);
 
   const loadSavedSearch = useCallback(
-    async (nextDataView?: DataView, tryingEsql?: boolean) => {
+    async (nextDataView?: DataView) => {
       const loadSavedSearchStartTime = window.performance.now();
       setLoading(true);
-      if (!nextDataView && !tryingEsql && !(await checkData())) {
+      if (!nextDataView && !(await checkData())) {
         setLoading(false);
         return;
       }

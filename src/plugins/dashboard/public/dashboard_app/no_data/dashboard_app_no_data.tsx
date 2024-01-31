@@ -80,6 +80,7 @@ export const isDashboardAppInNoDataState = async () => {
   } = pluginServices.getServices();
 
   const hasUserDataView = await dataViews.hasData.hasUserDataView().catch(() => false);
+
   if (hasUserDataView) return false;
 
   // consider has data if there is an incoming embeddable

@@ -6,29 +6,27 @@
  * Side Public License, v 1.
  */
 
-import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { DISCOVER_ESQL_LOCATOR } from '@kbn/deeplinks-analytics';
 import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
 
-export type DiscoverEsqlLocatorParams = SerializableRecord;
+export type DiscoverESQLLocatorParams = SerializableRecord;
 
-export interface DiscoverEsqlLocatorDependencies {
+export interface DiscoverESQLLocatorDependencies {
   discoverAppLocator: LocatorPublic<SerializableRecord>;
   getIndices: (options: {
     showAllIndices: boolean;
     pattern: string;
     isRollupIndex: () => boolean;
   }) => Promise<Array<{ name: string }>>;
-  createDataViewSpec: (title: string) => Promise<DataViewSpec>;
 }
 
-export type DiscoverEsqlLocator = LocatorPublic<DiscoverEsqlLocatorParams>;
+export type DiscoverESQLLocator = LocatorPublic<DiscoverESQLLocatorParams>;
 
-export class DiscoverEsqlLocatorDefinition implements LocatorDefinition<DiscoverEsqlLocatorParams> {
+export class DiscoverESQLLocatorDefinition implements LocatorDefinition<DiscoverESQLLocatorParams> {
   public readonly id = DISCOVER_ESQL_LOCATOR;
 
-  constructor(protected readonly deps: DiscoverEsqlLocatorDependencies) {}
+  constructor(protected readonly deps: DiscoverESQLLocatorDependencies) {}
 
   public readonly getLocation = async () => {
     const { discoverAppLocator, getIndices } = this.deps;

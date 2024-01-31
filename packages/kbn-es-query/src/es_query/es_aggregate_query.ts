@@ -31,7 +31,7 @@ export function isOfAggregateQueryType(
  */
 export function isOfEsqlQueryType(
   query?: AggregateQuery | Query | { [key: string]: any }
-): query is AggregateQuery {
+): query is { esql: string } {
   return Boolean(query && 'esql' in query && !('sql' in query));
 }
 

@@ -71,7 +71,7 @@ import {
 import {
   DiscoverAppLocator,
   DiscoverAppLocatorDefinition,
-  DiscoverEsqlLocatorDefinition,
+  DiscoverESQLLocatorDefinition,
 } from '../common';
 import type { RegisterCustomizationProfile } from './customizations';
 import {
@@ -409,7 +409,7 @@ export class DiscoverPlugin
 
     if (plugins.share && this.locator && isEsqlEnabled) {
       plugins.share?.url.locators.create(
-        new DiscoverEsqlLocatorDefinition({
+        new DiscoverESQLLocatorDefinition({
           discoverAppLocator: this.locator,
           getIndices: plugins.dataViews.getIndices,
           createDataViewSpec: async (title: string) => {
