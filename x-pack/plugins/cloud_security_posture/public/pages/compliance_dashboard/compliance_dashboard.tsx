@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { UseQueryResult } from '@tanstack/react-query';
 import { EuiEmptyPrompt, EuiIcon, EuiLink, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { Route, Routes } from '@kbn/shared-ux-router';
-import { Redirect, useHistory } from 'react-router-dom';
+import { Redirect, useHistory, useLocation } from 'react-router-dom';
 import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
 import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
 import type {
@@ -44,10 +43,7 @@ import { SummarySection } from './dashboard_sections/summary_section';
 import { BenchmarksSection } from './dashboard_sections/benchmarks_section';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../../common/constants';
 import { cloudPosturePages, cspIntegrationDocsNavigation } from '../../common/navigation/constants';
-import {
-  LOCAL_STORAGE_COMPLIANCE_DASHBOARD_SELECTED_TAB_KEY,
-  NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS,
-} from '../../common/constants';
+import { NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS } from '../../common/constants';
 
 const POSTURE_TYPE_CSPM = CSPM_POLICY_TEMPLATE;
 const POSTURE_TYPE_KSPM = KSPM_POLICY_TEMPLATE;
@@ -126,20 +122,6 @@ const getNotInstalledConfig = (
 };
 
 const KIBANA_HEADERS_HEIGHT = 265;
-
-const DashboardTabRedirecter = ({
-  lastTabSelected,
-}: {
-  lastTabSelected?: PosturePolicyTemplate;
-}) => {
-  const redirectToCSPMDashboardTab = lastTabSelected === POSTURE_TYPE_CSPM;
-
-  if (!lastTabSelected || redirectToCSPMDashboardTab) {
-    return <Redirect to={{ pathname: cloudPosturePages.cspm_dashboard.path }} />;
-  }
-
-  return <Redirect to={{ pathname: cloudPosturePages.kspm_dashboard.path }} />;
-};
 
 const IntegrationPostureDashboard = ({
   complianceData,
@@ -306,12 +288,6 @@ const TabContent = ({
     <CloudPosturePage query={getDashboardData}>
       <div data-test-subj={dataTestSubj}>
         <Routes>
-          <Route
-            exact
-            path={cloudPosturePages.dashboard.path}
-            render={() => <DashboardTabRedirecter lastTabSelected={selectedPostureTypeTab} />}
-          />
-
           <Route path={cloudPosturePages.cspm_dashboard.path}>
             <IntegrationPostureDashboard
               dashboardType={policyTemplate}
@@ -340,35 +316,45 @@ const TabContent = ({
 export const ComplianceDashboard = () => {
   const { data: getSetupStatus } = useCspSetupStatusApi();
   const isCloudSecurityPostureInstalled = !!getSetupStatus?.installedPackageVersion;
-  const [selectedTabLocalStorage, setSelectedTabLocalStorage] =
-    useLocalStorage<PosturePolicyTemplate>(LOCAL_STORAGE_COMPLIANCE_DASHBOARD_SELECTED_TAB_KEY);
   const getCspmDashboardData = useCspmStatsApi({
     enabled: isCloudSecurityPostureInstalled,
   });
   const getKspmDashboardData = useKspmStatsApi({
     enabled: isCloudSecurityPostureInstalled,
   });
+  const [selectedTab, setSelectedTab] = useState<PosturePolicyTemplate | undefined>(undefined);
 
+  const location = useLocation();
   const history = useHistory();
 
-  useEffect(() => {
-    if (selectedTabLocalStorage) {
-      return;
+  const currentTabUrlState: PosturePolicyTemplate | undefined = useMemo(() => {
+    if (location.pathname === cloudPosturePages.kspm_dashboard.path) {
+      return POSTURE_TYPE_KSPM;
     }
 
+    if (location.pathname === cloudPosturePages.cspm_dashboard.path) {
+      return POSTURE_TYPE_CSPM;
+    }
+
+    return undefined;
+  }, [location.pathname]);
+
+  useEffect(() => {
     const preferredDashboard = getDefaultTab(
       getSetupStatus,
       getCspmDashboardData.data,
       getKspmDashboardData.data
     );
-    setSelectedTabLocalStorage(preferredDashboard);
+
+    const tab = !currentTabUrlState ? preferredDashboard : currentTabUrlState;
+    setSelectedTab(tab);
   }, [
     getCspmDashboardData.data,
-    selectedTabLocalStorage,
-    setSelectedTabLocalStorage,
-    getCspmDashboardData.data?.stats.totalFindings,
+    currentTabUrlState,
+    setSelectedTab,
+    getCspmDashboardData.data?.stats?.totalFindings,
     getKspmDashboardData.data,
-    getKspmDashboardData.data?.stats.totalFindings,
+    getKspmDashboardData.data?.stats?.totalFindings,
     getSetupStatus,
     getSetupStatus?.cspm?.status,
     getSetupStatus?.kspm?.status,
@@ -379,7 +365,7 @@ export const ComplianceDashboard = () => {
       postureType: PosturePolicyTemplate,
       path: string
     ) => {
-      setSelectedTabLocalStorage(postureType);
+      setSelectedTab(postureType);
       history.push({ pathname: path });
     };
 
@@ -390,41 +376,33 @@ export const ComplianceDashboard = () => {
               defaultMessage: 'Cloud',
             }),
             'data-test-subj': CLOUD_DASHBOARD_TAB,
-            isSelected: selectedTabLocalStorage === POSTURE_TYPE_CSPM,
+            isSelected: selectedTab === POSTURE_TYPE_CSPM,
             onClick: () => {
               navigateToPostureTypeDashboardTab(
                 POSTURE_TYPE_CSPM,
                 cloudPosturePages.cspm_dashboard.path
               );
             },
-            content: (
-              <TabContent selectedPostureTypeTab={selectedTabLocalStorage || POSTURE_TYPE_CSPM} />
-            ),
+            content: <TabContent selectedPostureTypeTab={selectedTab || POSTURE_TYPE_CSPM} />,
           },
           {
             label: i18n.translate('xpack.csp.dashboardTabs.kubernetesTab.tabTitle', {
               defaultMessage: 'Kubernetes',
             }),
             'data-test-subj': KUBERNETES_DASHBOARD_TAB,
-            isSelected: selectedTabLocalStorage === POSTURE_TYPE_KSPM,
+            isSelected: selectedTab === POSTURE_TYPE_KSPM,
             onClick: () => {
               navigateToPostureTypeDashboardTab(
                 POSTURE_TYPE_KSPM,
                 cloudPosturePages.kspm_dashboard.path
               );
             },
-            content: (
-              <TabContent selectedPostureTypeTab={selectedTabLocalStorage || POSTURE_TYPE_KSPM} />
-            ),
+            content: <TabContent selectedPostureTypeTab={selectedTab || POSTURE_TYPE_KSPM} />,
           },
         ]
       : [];
-  }, [
-    isCloudSecurityPostureInstalled,
-    selectedTabLocalStorage,
-    setSelectedTabLocalStorage,
-    history,
-  ]);
+  }, [isCloudSecurityPostureInstalled, selectedTab, history]);
+
   return (
     <CloudPosturePage>
       <EuiPageHeader
