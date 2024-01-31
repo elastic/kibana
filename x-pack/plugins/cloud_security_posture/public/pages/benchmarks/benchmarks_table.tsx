@@ -251,10 +251,13 @@ export const BenchmarksTable = ({
     return <ErrorMessageComponent error={error} />;
   }
 
+  const benchmarksSorted = benchmarks.sort((benchmarkDataA, benchmarkDataB) =>
+    benchmarkDataA.id.localeCompare(benchmarkDataB.id)
+  );
   return (
     <EuiBasicTable
       data-test-subj={rest['data-test-subj']}
-      items={benchmarks}
+      items={benchmarksSorted}
       columns={BENCHMARKS_TABLE_COLUMNS}
       itemId={(item) => [item.id, item.version].join('/')}
       pagination={pagination}
