@@ -8,6 +8,12 @@
 
 import type { ESQLCallbacks } from './types';
 import type { ESQLRealField } from '../validation/types';
+import { ESQLAst } from '../types';
+
+export function buildQueryUntilPreviousCommand(ast: ESQLAst, queryString: string) {
+  const prevCommand = ast[Math.max(ast.length - 2, 0)];
+  return prevCommand ? queryString.substring(0, prevCommand.location.max + 1) : queryString;
+}
 
 export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQLCallbacks) {
   const cacheFields = new Map<string, ESQLRealField>();
