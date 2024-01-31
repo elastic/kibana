@@ -703,8 +703,21 @@ export class FleetPlugin
   }
 
   private async initializeUninstallTokens() {
-    await this.generateUninstallTokens();
-    this.validateUninstallTokens();
+    try {
+      await this.generateUninstallTokens();
+    } catch (error) {
+      appContextService
+        .getLogger()
+        .error('Error happened during uninstall token generation.', { error: { message: error } });
+    }
+
+    try {
+      await this.validateUninstallTokens();
+    } catch (error) {
+      appContextService
+        .getLogger()
+        .error('Error happened during uninstall token validation.', { error: { message: error } });
+    }
   }
 
   private async generateUninstallTokens() {
@@ -724,24 +737,18 @@ export class FleetPlugin
     }
   }
 
-  private validateUninstallTokens() {
+  private async validateUninstallTokens() {
     const logger = appContextService.getLogger();
-    const uninstallTokenService = appContextService.getUninstallTokenService();
-
     logger.debug('Validating uninstall tokens');
-    uninstallTokenService
-      ?.checkTokenValidityForAllPolicies()
-      .catch((error) => {
-        logger.error('Error happened during uninstall token validation.', {
-          error: { message: error },
-        });
-      })
-      .then((unintallTokenValidationError) => {
-        if (unintallTokenValidationError) {
-          logger.warn(unintallTokenValidationError.error);
-        } else {
-          logger.debug('Uninstall tokens validation successful.');
-        }
-      });
+
+    const unintallTokenValidationError = await appContextService
+      .getUninstallTokenService()
+      ?.checkTokenValidityForAllPolicies();
+
+    if (unintallTokenValidationError) {
+      logger.warn(unintallTokenValidationError.error);
+    } else {
+      logger.debug('Uninstall tokens validation successful.');
+    }
   }
 }
