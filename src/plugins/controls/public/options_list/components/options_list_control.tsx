@@ -152,6 +152,7 @@ export const OptionsListControl = ({
       isSelected={isPopoverOpen}
       numActiveFilters={validSelectionsCount}
       hasActiveFilters={Boolean(validSelectionsCount)}
+      textProps={{ className: 'optionsList--selectionText' }}
     >
       {hasSelections || existsSelected
         ? selectionDisplayNode

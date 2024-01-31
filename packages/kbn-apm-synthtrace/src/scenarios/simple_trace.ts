@@ -62,7 +62,10 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
             .failure()
             .errors(
               instance
-                .error({ message: '[ResponseError] index_not_found_exception' })
+                .error({
+                  message: '[ResponseError] index_not_found_exception',
+                  type: 'ResponseError',
+                })
                 .timestamp(timestamp + 50)
             )
         );
