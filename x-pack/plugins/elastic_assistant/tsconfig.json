@@ -35,7 +35,6 @@
     "@kbn/core-analytics-server",
     "@kbn/elastic-assistant-common",
     "@kbn/core-http-router-server-mocks",
-    "@kbn/zod-helpers",
   ],
   "exclude": [
     "target/**/*",
