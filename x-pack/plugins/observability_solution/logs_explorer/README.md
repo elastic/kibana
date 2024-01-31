@@ -1,10 +1,10 @@
-# Log Explorer
+# Logs Explorer
 
-This plugin is home to the `<LogExplorer />` component and related types. It implements several of the underlying concepts that the [Observability Log Explorer app](../observability_solution/observability_logs_explorer) builds upon.
+This plugin is home to the `<LogExplorer />` component and related types. It implements several of the underlying concepts that the [Observability Logs Explorer app](../observability_solution/observability_logs_explorer) builds upon.
 
 ## Developing the `<LogExplorer />` component
 
-⚠ The Log Explorer is in early stages of development, so the following partly describes the current situation and partly the intended future scenario.
+⚠ The Logs Explorer is in early stages of development, so the following partly describes the current situation and partly the intended future scenario.
 
 ### Dependencies
 
@@ -20,11 +20,11 @@ While not fully realized yet, the dependency graph would roughly resemble the fo
 ```mermaid
 flowchart TD
 
-obs_log_explorer_app(Observability Log Explorer app)
+obs_log_explorer_app(Observability Logs Explorer app)
 obs_apps(Other Observability apps)
-obs_log_explorer_component(Observability Log Explorer component)
+obs_log_explorer_component(Observability Logs Explorer component)
 other_apps(Other non-Observability apps)
-log_explorer_component(Log Explorer component)
+log_explorer_component(Logs Explorer component)
 platform(Kibana Platform)
 discover(Discover Main container)
 fleet(Fleet / EPM)
@@ -47,7 +47,7 @@ When designing the API we face two conflicting goals:
 - It should be easy to consume by any non-observability app. This means...
   - its API needs to be relatively stable and straightforward.
   - it should not perform any page-wide changes that could interfere with consuming app's page state (such as URL changes).
-- It should be extensible so the Observability Log Explorer can build on top of this.
+- It should be extensible so the Observability Logs Explorer can build on top of this.
 
 In its current state the `<LogExplorer />` achieves neither goal. To resolve the tension in the future we could export two variants with different sets of properties.
 
