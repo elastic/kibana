@@ -241,14 +241,14 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   ]);
 
   const isLoading =
-    stateContainer.dataState.data$.documents$.value.fetchStatus === FetchStatus.LOADING ||
-    stateContainer.dataState.data$.main$.value.fetchStatus === FetchStatus.LOADING;
+    documentState.fetchStatus === FetchStatus.LOADING ||
+    documentState.fetchStatus === FetchStatus.PARTIAL;
 
-  const onCancelClick = () => {
+  const onCancelClick = useCallback(() => {
     stateContainer.dataState.cancel();
-    stateContainer.dataState.data$.documents$.next({ fetchStatus: FetchStatus.ERROR });
-    stateContainer.dataState.data$.main$.next({ fetchStatus: FetchStatus.ERROR });
-  };
+    sendErrorMsg(stateContainer.dataState.data$.documents$);
+    sendErrorMsg(stateContainer.dataState.data$.main$);
+  }, [stateContainer.dataState]);
 
   return (
     <EuiPage

@@ -519,12 +519,8 @@ export const QueryBarTopRow = React.memo(
             onClick={onClickCancelButton}
             size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
             data-test-subj="queryCancelButton"
-            // @ts-expect-error Need to fix expecting `children` in EUI
-            toolTipProps={{
-              content: buttonLabelCancel,
-              delay: 'long',
-              position: 'bottom',
-            }}
+            color="danger"
+            display="base"
           >
             {buttonLabelCancel}
           </EuiButtonIcon>
@@ -538,12 +534,7 @@ export const QueryBarTopRow = React.memo(
           onClick={onClickCancelButton}
           size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
           data-test-subj="queryCancelButton"
-          // @ts-expect-error Need to fix expecting `children` in EUI
-          toolTipProps={{
-            content: buttonLabelCancel,
-            delay: 'long',
-            position: 'bottom',
-          }}
+          color="danger"
         >
           {buttonLabelCancel}
         </EuiButton>
