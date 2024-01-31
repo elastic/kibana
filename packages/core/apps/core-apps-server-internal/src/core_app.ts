@@ -272,6 +272,10 @@ export class CoreAppsService {
   // After the package is built and bootstrap extracts files to bazel-bin,
   // assets are exposed at the root of the package and in the package's node_modules dir
   private registerStaticDirs(core: InternalCoreSetup | InternalCorePreboot) {
+    /**
+     * Serve UI from sha-scoped and not-sha-scoped paths to allow time for plugin code to migrate
+     * Eventually we only want to serve from the sha scoped path
+     */
     [core.http.staticAssets.prependServerPath('/ui/{path*}'), '/ui/{path*}'].forEach((path) => {
       core.http.registerStaticDir(
         path,
