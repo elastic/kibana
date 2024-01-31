@@ -130,4 +130,29 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
         },
       ],
     },
+    {
+      name: 'st_centroid',
+      description: i18n.translate('monaco.esql.definitions.stCentroidDoc', {
+        defaultMessage: 'Returns the count of distinct values in a field.',
+      }),
+      supportedCommands: ['stats'],
+      signatures: [
+        {
+          params: [{ name: 'column', type: 'cartesian_point', noNestingFunctions: true }],
+          returnType: 'number',
+          examples: [
+            `from index | stats result = st_centroid(cartesian_field)`,
+            `from index | stats st_centroid(cartesian_field)`,
+          ],
+        },
+        {
+          params: [{ name: 'column', type: 'geo_point', noNestingFunctions: true }],
+          returnType: 'number',
+          examples: [
+            `from index | stats result = st_centroid(geo_field)`,
+            `from index | stats st_centroid(geo_field)`,
+          ],
+        },
+      ],
+    },
   ]);

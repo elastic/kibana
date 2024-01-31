@@ -34,7 +34,7 @@ jest.mock(
   '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver'
 );
 const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
-
+const eventId = 'event-id';
 const dataAsNestedObject = mockDataAsNestedObject;
 const dataFormattedForFieldBrowser = mockDataFormattedForFieldBrowser;
 
@@ -54,10 +54,16 @@ describe('useShowRelatedAlertsByAncestry', () => {
         getFieldsData,
         dataAsNestedObject,
         dataFormattedForFieldBrowser,
+        eventId,
+        isPreview: false,
       })
     );
 
-    expect(hookResult.result.current).toEqual({ show: false, indices: ['rule-parameters-index'] });
+    expect(hookResult.result.current).toEqual({
+      show: false,
+      documentId: 'event-id',
+      indices: ['rule-parameters-index'],
+    });
   });
 
   it(`should return false if feature isn't enabled`, () => {
@@ -69,11 +75,14 @@ describe('useShowRelatedAlertsByAncestry', () => {
         getFieldsData,
         dataAsNestedObject,
         dataFormattedForFieldBrowser,
+        eventId,
+        isPreview: false,
       })
     );
 
     expect(hookResult.result.current).toEqual({
       show: false,
+      documentId: 'event-id',
       indices: ['rule-parameters-index'],
     });
   });
@@ -87,11 +96,58 @@ describe('useShowRelatedAlertsByAncestry', () => {
         getFieldsData,
         dataAsNestedObject,
         dataFormattedForFieldBrowser,
+        eventId,
+        isPreview: false,
       })
     );
 
     expect(hookResult.result.current).toEqual({
       show: false,
+      documentId: 'event-id',
+      indices: ['rule-parameters-index'],
+    });
+  });
+
+  it('should return true and event id as document id by default ', () => {
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+    (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
+    licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
+    const getFieldsData = () => 'ancestors-id';
+    hookResult = renderHook(() =>
+      useShowRelatedAlertsByAncestry({
+        getFieldsData,
+        dataAsNestedObject,
+        dataFormattedForFieldBrowser,
+        eventId,
+        isPreview: false,
+      })
+    );
+
+    expect(hookResult.result.current).toEqual({
+      show: true,
+      documentId: 'event-id',
+      indices: ['rule-parameters-index'],
+    });
+  });
+
+  it('should return true and ancestor id as document id if flyout is open in preview', () => {
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+    (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
+    licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
+    const getFieldsData = () => 'ancestors-id';
+    hookResult = renderHook(() =>
+      useShowRelatedAlertsByAncestry({
+        getFieldsData,
+        dataAsNestedObject,
+        dataFormattedForFieldBrowser,
+        eventId,
+        isPreview: true,
+      })
+    );
+
+    expect(hookResult.result.current).toEqual({
+      show: true,
+      documentId: 'ancestors-id',
       indices: ['rule-parameters-index'],
     });
   });

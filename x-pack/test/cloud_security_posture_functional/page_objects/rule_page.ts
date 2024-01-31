@@ -20,6 +20,11 @@ export const RULES_CLEAR_ALL_RULES_SELECTION = 'clear-rules-selection-button';
 export const RULES_ROWS_ENABLE_SWITCH_BUTTON = 'rules-row-enable-switch-button';
 export const RULES_DISABLED_FILTER = 'rules-disabled-filter';
 export const RULES_ENABLED_FILTER = 'rules-enabled-filter';
+export const CIS_SECTION_FILTER = 'options-filter-popover-button-cis-section-multi-select-filter';
+export const RULE_NUMBER_FILTER = 'options-filter-popover-button-rule-number-multi-select-filter';
+export const RULE_NUMBER_FILTER_SEARCH_FIELD = 'rule-number-search-input';
+export const RULES_FLYOUT_SWITCH_BUTTON = 'rule-flyout-switch-button';
+export const TAKE_ACTION_BUTTON = 'csp:take_action';
 
 export function RulePagePageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -86,6 +91,54 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
       const enableRulesRowSwitch = await testSubjects.findAll(RULES_ROWS_ENABLE_SWITCH_BUTTON);
       return await enableRulesRowSwitch.length;
     },
+
+    clickFilterPopover: async (filterType: 'section' | 'ruleNumber') => {
+      const filterPopoverButton =
+        (await filterType) === 'section'
+          ? await testSubjects.find(CIS_SECTION_FILTER)
+          : await testSubjects.find(RULE_NUMBER_FILTER);
+
+      await filterPopoverButton.click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+
+    clickFilterPopOverOption: async (value: string) => {
+      const chosenValue = await testSubjects.find('options-filter-popover-item-' + value);
+      await chosenValue.click();
+    },
+
+    filterTextInput: async (selector: string, value: string) => {
+      const textField = await testSubjects.find(selector);
+      await textField.type(value);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+
+    clickRulesNames: async (index: number) => {
+      const rulesNames = await testSubjects.findAll('csp_rules_table_row_item_name');
+      await rulesNames[index].click();
+    },
+
+    clickFlyoutEnableSwitchButton: async () => {
+      const rulesFlyoutEnableSwitchButton = await testSubjects.find(RULES_FLYOUT_SWITCH_BUTTON);
+      await rulesFlyoutEnableSwitchButton.click();
+    },
+
+    getEnableSwitchButtonState: async () => {
+      const rulesFlyoutEnableSwitchButton = await testSubjects.find(RULES_FLYOUT_SWITCH_BUTTON);
+      return await rulesFlyoutEnableSwitchButton.getAttribute('aria-checked');
+    },
+
+    clickTakeActionButton: async () => {
+      const takeActionButton = await testSubjects.find(TAKE_ACTION_BUTTON);
+      await takeActionButton.click();
+    },
+
+    clickTakeActionButtonOption: async (action: 'enable' | 'disable') => {
+      const takeActionOption = await testSubjects.find(
+        action + '-benchmark-rule-take-action-button'
+      );
+      await takeActionOption.click();
+    },
   };
 
   const navigateToRulePage = async (benchmarkCisId: string, benchmarkCisVersion: string) => {
@@ -94,6 +147,7 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
       `cloud_security_posture/benchmarks/${benchmarkCisId}/${benchmarkCisVersion}/rules`,
       { shouldUseHashForSubUrl: false }
     );
+    await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
   return {

@@ -93,7 +93,7 @@ export async function fetchTerms2CategoriesCounts(
           params,
           [{ fieldName: term.fieldName, fieldValue: term.fieldValue }],
           category.fieldName,
-          { key: `${category.key}`, count: category.doc_count, examples: [] },
+          { key: `${category.key}`, count: category.doc_count, examples: [], regex: '' },
           from,
           to
         ) as estypes.MsearchMultisearchBody
@@ -121,7 +121,7 @@ export async function fetchTerms2CategoriesCounts(
             fieldValue,
           })),
           category.fieldName,
-          { key: `${category.key}`, count: category.doc_count, examples: [] },
+          { key: `${category.key}`, count: category.doc_count, examples: [], regex: '' },
           from,
           to
         ) as estypes.MsearchMultisearchBody
