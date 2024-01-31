@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-// Imports
 import { updateCases } from './update_cases';
 import type { CasesClient } from '@kbn/cases-plugin/server';
+import type { CreateActionPayload } from './types';
 
-// Mocks
 jest.mock('@kbn/cases-plugin/server');
 const mockCasesClient = {
   cases: {
@@ -24,14 +23,20 @@ describe('updateCases', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
+  const getDefaultPayload = () =>
+    ({
+      command: 'isolate',
+      comment: 'Isolating host',
+      action_id: '123',
+      endpoint_ids: ['abc123'],
+    } as CreateActionPayload);
 
   it('should return early if casesClient is undefined', async () => {
     await updateCases({
       casesClient: undefined,
       createActionPayload: {
-        action_id: '123',
-        command: 'isolate',
-        comment: 'Isolating host',
+        ...getDefaultPayload(),
+        alert_ids: ['alert1'],
       },
       endpointData: [
         {
@@ -56,10 +61,8 @@ describe('updateCases', () => {
     await updateCases({
       casesClient: mockCasesClient,
       createActionPayload: {
-        action_id: '123',
+        ...getDefaultPayload(),
         alert_ids: ['alert1'],
-        command: 'isolate',
-        comment: 'Isolating host',
       },
       endpointData: [
         {
@@ -88,11 +91,7 @@ describe('updateCases', () => {
   it('should handle no alert IDs', async () => {
     await updateCases({
       casesClient: mockCasesClient,
-      createActionPayload: {
-        action_id: '123',
-        command: 'isolate',
-        comment: 'Isolating host',
-      },
+      createActionPayload: getDefaultPayload(),
       endpointData: [
         {
           agent: {
@@ -135,8 +134,8 @@ describe('updateCases', () => {
       await updateCases({
         casesClient: mockCasesClient,
         createActionPayload: {
-          action_id: '123',
           case_ids: caseIds,
+          ...getDefaultPayload(),
         },
         endpointData,
       });
@@ -150,8 +149,8 @@ describe('updateCases', () => {
             externalReferenceAttachmentTypeId: 'endpoint',
             externalReferenceId: '123',
             externalReferenceMetadata: {
-              command: undefined,
-              comment: 'No comment provided',
+              command: 'isolate',
+              comment: 'Isolating host',
               targets: [
                 { endpointId: 'agent1', hostname: 'host1', type: 'endpoint' },
                 {
@@ -169,8 +168,8 @@ describe('updateCases', () => {
             externalReferenceAttachmentTypeId: 'endpoint',
             externalReferenceId: '123',
             externalReferenceMetadata: {
-              command: undefined,
-              comment: 'No comment provided',
+              command: 'isolate',
+              comment: 'Isolating host',
               targets: [
                 { endpointId: 'agent1', hostname: 'host1', type: 'endpoint' },
                 {

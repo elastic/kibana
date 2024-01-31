@@ -14,7 +14,8 @@ describe('AttachmentContent', () => {
   it('renders markdown content when comment exists', () => {
     const props = {
       externalReferenceMetadata: {
-        comment: 'Some **markdown** content',
+        comment: 'Some comment',
+        command: 'isolate',
         targets: [
           {
             endpointId: 'endpoint-1',
@@ -32,6 +33,7 @@ describe('AttachmentContent', () => {
     const props = {
       externalReferenceMetadata: {
         comment: '',
+        command: 'isolate',
       },
     };
     const wrapper = shallow(<AttachmentContent {...props} />);
@@ -42,8 +44,10 @@ describe('AttachmentContent', () => {
     const props = {
       externalReferenceMetadata: {
         comment: '   ',
+        command: 'isolate',
       },
     };
+
     const wrapper = shallow(<AttachmentContent {...props} />);
     expect(wrapper.type()).toBeNull();
   });

@@ -26,7 +26,11 @@ export const ContentWrapper = styled.div`
   -webkit-box-orient: vertical;
 `;
 
-const AttachmentContent = (props: IExternalReferenceMetaDataProps) => {
+const AttachmentContent = (props: {
+  externalReferenceMetadata: {
+    comment: IExternalReferenceMetaDataProps['externalReferenceMetadata']['comment'];
+  };
+}) => {
   const {
     externalReferenceMetadata: { comment },
   } = props;
@@ -37,6 +41,5 @@ const AttachmentContent = (props: IExternalReferenceMetaDataProps) => {
     </ContentWrapper>
   ) : null;
 };
-
 // eslint-disable-next-line import/no-default-export
 export { AttachmentContent as default };

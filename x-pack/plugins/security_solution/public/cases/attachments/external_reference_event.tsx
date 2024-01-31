@@ -14,7 +14,12 @@ import { getEndpointDetailsPath } from '../../management/common/routing';
 
 import { ISOLATED_HOST, OTHER_ENDPOINTS, RELEASED_HOST } from '../pages/translations';
 
-const AttachmentContent = (props: IExternalReferenceMetaDataProps) => {
+const AttachmentContent = (props: {
+  externalReferenceMetadata: {
+    command: IExternalReferenceMetaDataProps['externalReferenceMetadata']['command'];
+    targets: IExternalReferenceMetaDataProps['externalReferenceMetadata']['targets'];
+  };
+}) => {
   const {
     externalReferenceMetadata: { command, targets },
   } = props;
