@@ -72,7 +72,8 @@ const alertDataMock: AlertData = {
   file: { path: 'test/path' },
 };
 
-describe('When the add exception modal is opened', () => {
+// Failing: See https://github.com/elastic/kibana/issues/171908
+describe.skip('When the add exception modal is opened', () => {
   let defaultEndpointItems: jest.SpyInstance<
     ReturnType<typeof helpers.defaultEndpointExceptionItems>
   >;

@@ -25,6 +25,7 @@ import {
   isAgentUpgradeable,
   AGENT_UPGRADE_COOLDOWN_IN_MIN,
   isAgentUpgrading,
+  differsOnlyInPatch,
 } from '../../../common/services';
 import { getMaxVersion } from '../../../common/services/get_min_max_version';
 import { getAgentById } from '../../services/agents';
@@ -192,9 +193,13 @@ export const checkKibanaVersion = (version: string, kibanaVersion: string, force
   if (!versionToUpgradeNumber)
     throw new Error(`version to upgrade ${versionToUpgradeNumber} is not valid`);
 
-  if (!force && semverGt(versionToUpgradeNumber, kibanaVersionNumber)) {
+  if (
+    !force &&
+    semverGt(versionToUpgradeNumber, kibanaVersionNumber) &&
+    !differsOnlyInPatch(versionToUpgradeNumber, kibanaVersionNumber)
+  ) {
     throw new Error(
-      `cannot upgrade agent to ${versionToUpgradeNumber} because it is higher than the installed kibana version ${kibanaVersionNumber}`
+      `Cannot upgrade agent to ${versionToUpgradeNumber} because it is higher than the installed kibana version ${kibanaVersionNumber}`
     );
   }
 
@@ -212,7 +217,7 @@ export const checkKibanaVersion = (version: string, kibanaVersion: string, force
 };
 
 // Check the installed fleet server version
-const checkFleetServerVersion = (
+export const checkFleetServerVersion = (
   versionToUpgradeNumber: string,
   fleetServerAgents: Agent[],
   force = false
@@ -227,7 +232,11 @@ const checkFleetServerVersion = (
     return;
   }
 
-  if (!force && semverGt(versionToUpgradeNumber, maxFleetServerVersion)) {
+  if (
+    !force &&
+    semverGt(versionToUpgradeNumber, maxFleetServerVersion) &&
+    !differsOnlyInPatch(versionToUpgradeNumber, maxFleetServerVersion)
+  ) {
     throw new Error(
       `cannot upgrade agent to ${versionToUpgradeNumber} because it is higher than the latest fleet server version ${maxFleetServerVersion}`
     );
