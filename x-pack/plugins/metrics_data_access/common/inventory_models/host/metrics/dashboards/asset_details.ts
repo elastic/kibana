@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { DataView } from '@kbn/data-views-plugin/common';
-import type { XYVisualOptions } from '@kbn/lens-embeddable-utils';
 import { createDashboardModel } from '../../../create_dashboard_model';
 import {
   createBasicCharts,
@@ -21,76 +19,52 @@ import {
 
 export const assetDetails = {
   get: ({
-    metricsDataView,
-    logsDataView,
+    metricsDataViewId,
+    logsDataViewId,
   }: {
-    metricsDataView?: DataView;
-    logsDataView?: DataView;
+    metricsDataViewId?: string;
+    logsDataViewId?: string;
   }) => {
-    const commonVisualOptions: XYVisualOptions = {
-      showDottedLine: true,
-      missingValues: 'Linear',
-    };
-
-    const legend: XYVisualOptions = {
-      legend: {
-        isVisible: true,
-        position: 'bottom',
+    const { cpuUsage, memoryUsage } = createBasicCharts({
+      chartType: 'xy',
+      fromFormulas: ['cpuUsage', 'memoryUsage'],
+      chartConfig: {
+        yBounds: {
+          mode: 'custom',
+          lowerBound: 0,
+          upperBound: 1,
+        },
       },
-    };
-
-    const { cpuUsage, memoryUsage, normalizedLoad1m } = createBasicCharts({
-      visualizationType: 'lnsXY',
-      formulaIds: ['cpuUsage', 'memoryUsage', 'normalizedLoad1m'],
-      dataView: metricsDataView,
-      visualOptions: commonVisualOptions,
+      dataViewId: metricsDataViewId,
     });
 
+    const { normalizedLoad1m } = createBasicCharts({
+      chartType: 'xy',
+      fromFormulas: ['normalizedLoad1m'],
+      dataViewId: metricsDataViewId,
+    });
+    normalizedLoad1m.layers.push({ type: 'reference', yAxis: [{ value: '1' }] });
+
     const { logRate } = createBasicCharts({
-      visualizationType: 'lnsXY',
-      formulaIds: ['logRate'],
-      dataView: logsDataView,
-      visualOptions: commonVisualOptions,
+      chartType: 'xy',
+      fromFormulas: ['logRate'],
+      dataViewId: logsDataViewId,
     });
 
     return createDashboardModel({
       charts: [
         cpuUsage,
-        {
-          ...cpuUsageBreakdown.get({ dataView: metricsDataView }),
-          visualOptions: { ...commonVisualOptions, ...legend },
-        },
+        cpuUsageBreakdown.get({ dataViewId: metricsDataViewId }),
         memoryUsage,
-        {
-          ...memoryUsageBreakdown.get({ dataView: metricsDataView }),
-          visualOptions: { ...commonVisualOptions, ...legend },
-        },
+        memoryUsageBreakdown.get({ dataViewId: metricsDataViewId }),
         normalizedLoad1m,
-        {
-          ...loadBreakdown.get({ dataView: metricsDataView }),
-          visualOptions: { ...commonVisualOptions, ...legend },
-        },
+        loadBreakdown.get({ dataViewId: metricsDataViewId }),
         logRate,
-        {
-          ...diskSpaceUsageAvailable.get({ dataView: metricsDataView }),
-          visualOptions: { ...commonVisualOptions, ...legend },
-        },
-        {
-          ...diskUsageByMountPoint.get({ dataView: metricsDataView }),
-          visualOptions: { ...commonVisualOptions, ...legend },
-        },
-        {
-          ...diskThroughputReadWrite.get({ dataView: metricsDataView }),
-          visualOptions: { ...commonVisualOptions, ...legend },
-        },
-        {
-          ...diskIOReadWrite.get({ dataView: metricsDataView }),
-          visualOptions: { ...commonVisualOptions, ...legend },
-        },
-        {
-          ...rxTx.get({ dataView: metricsDataView }),
-          visualOptions: { ...commonVisualOptions, ...legend },
-        },
+        diskSpaceUsageAvailable.get({ dataViewId: metricsDataViewId }),
+        diskUsageByMountPoint.get({ dataViewId: metricsDataViewId }),
+        diskThroughputReadWrite.get({ dataViewId: metricsDataViewId }),
+        diskIOReadWrite.get({ dataViewId: metricsDataViewId }),
+        rxTx.get({ dataViewId: metricsDataViewId }),
       ],
     });
   },

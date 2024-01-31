@@ -12,7 +12,7 @@ import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline
 import { SaveTimelineModal } from './save_timeline_modal';
 import * as i18n from './translations';
 
-jest.mock('../../timeline/properties/use_create_timeline', () => ({
+jest.mock('../../../hooks/use_create_timeline', () => ({
   useCreateTimeline: jest.fn(),
 }));
 

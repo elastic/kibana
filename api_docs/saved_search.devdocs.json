@@ -140,6 +140,20 @@
             "path": "src/plugins/saved_search/public/services/saved_searches/saved_search_attribute_service.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedSearch",
+            "id": "def-public.SavedSearchUnwrapMetaInfo.managed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/saved_search/public/services/saved_searches/saved_search_attribute_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -710,7 +724,7 @@
             "section": "def-common.ISearchSource",
             "text": "ISearchSource"
           },
-          ") => ",
+          ", managed: boolean) => ",
           {
             "pluginId": "savedSearch",
             "scope": "common",
@@ -783,6 +797,21 @@
                 "section": "def-common.ISearchSource",
                 "text": "ISearchSource"
               }
+            ],
+            "path": "src/plugins/saved_search/common/saved_searches_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "savedSearch",
+            "id": "def-common.fromSavedSearchAttributes.$5",
+            "type": "boolean",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "signature": [
+              "boolean"
             ],
             "path": "src/plugins/saved_search/common/saved_searches_utils.ts",
             "deprecated": false,
@@ -1563,6 +1592,17 @@
             "signature": [
               "string | undefined"
             ],
+            "path": "src/plugins/saved_search/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedSearch",
+            "id": "def-common.SavedSearch.managed",
+            "type": "boolean",
+            "tags": [],
+            "label": "managed",
+            "description": [],
             "path": "src/plugins/saved_search/common/types.ts",
             "deprecated": false,
             "trackAdoption": false

@@ -76,6 +76,8 @@ export const RulesContainer = () => {
     search: '',
     page: 0,
     perPage: pageSize || 10,
+    sortField: 'metadata.benchmark.rule_number',
+    sortOrder: 'asc',
   });
 
   const { data, status, error } = useFindCspBenchmarkRule(
@@ -85,6 +87,8 @@ export const RulesContainer = () => {
       search: rulesQuery.search,
       page: 1,
       perPage: MAX_ITEMS_PER_PAGE,
+      sortField: 'metadata.benchmark.rule_number',
+      sortOrder: 'asc',
     },
     params.benchmarkId,
     params.benchmarkVersion
@@ -95,6 +99,8 @@ export const RulesContainer = () => {
     {
       page: 1,
       perPage: MAX_ITEMS_PER_PAGE,
+      sortField: 'metadata.benchmark.rule_number',
+      sortOrder: 'asc',
     },
     params.benchmarkId,
     params.benchmarkVersion
@@ -130,7 +136,6 @@ export const RulesContainer = () => {
   }, [data, rulesStates?.data]);
 
   const mutedRulesCount = rulesWithStates.filter((rule) => rule.state === 'muted').length;
-  console.log(mutedRulesCount);
 
   const filteredRulesWithStates: CspBenchmarkRulesWithStates[] = useMemo(() => {
     if (enabledDisabledItemsFilter === 'disabled')
