@@ -32,7 +32,7 @@ import {
 export const createPureDatasetQualityControllerStateMachine = (
   initialContext: DatasetQualityControllerContext
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVszoIoFdUAbAS3QE8BhAewDt0AnaoosBgOggyx1gGIAqgAVkAQQAqAUQD640QCEAMjMoAlAJJSNogNoAGALqJQAB2qwyJOsZAAPRAFoA7AEZ2AJhcBmVwFYAnL4+-gBsLk4ANCDkji6h7CH+7u5eABxeel5evu4ALAC++VFomNh4hKQUNPRMLGyc3GWw7ABmOADGABYktFB8EHRg7D0AbtQA1kMlPOXEZFR0jMysHFylvK0d3b0Io9TtGFa0+gYnNmYW6Ec29ggOIb7sqf7+LrmvuVmpLnlRMXfufweFy+XIuVJ6EIhXIpPSpApFEDTMoEOZVRa1FYNdboZptdBdHp9NhMDgmIgYFrUBgAW3YyJwqMqCxqy3qaxmeK2RN2tDGByudBOZyQIAulmsotuLyc7F8cV8qRyTgeISVf1ijycvhCelyuT0Lj0TlyThe-kKxUajIq82qSzqqzAUAYqAgkGQ+y5BO2fQGtCGe0m9Ots2Z9sx7OdrvdEE97W9hJ2ewFR2FhnO5gltBuiCN7i1hrhyT0pb07g1CBS7jlTlSEIhkP8TjSTktSNDTLtGLZTpdbo9Xs2PqJfBJ1PY5Mp1LpDLD3dZjs40YHcaH+KTUF5-MOQsMItMWcFOaljicNb0oRbpf17hCXnckWiiDyIXYmVS7j1egCULSqXbOcu3RRcsRaIhyGofB0D4ABlSRlEocRpAAOUkAB1aQxDkeDxAPMUj2uU8EFyCEnn8LwQWhVJdSyXJKx1VInnPMFoVce960AztbRAh0wIgqCYMoRQAHl4OkAAxRQAE0RIEPCM1FcVj1zO4Ww8EJPB+Lx9XhLTKyhIFIU-OFXihFs20RICeJZPj6nAyDoOHTd+kGYY+QmKZuLRWzIw4BzBOc31t32Xdjn3RTD0uIjQFudIgTNGjSyCJwm1SStzxrNVcl8XwfweG8LSs7zwx7JcAqcjdfTHBhSUnCl0CpWkQxxYDfN7VoBMq7lkw81M91OSKCOiyVYsQb43D1QFFUSSj-DhBjnieXxUtSqFTPeLjWpsiMOoq9B2CIahVz4YSxJkKTZPk-DlJiuwXwedg6xCOtvDvHSHxCSslVlRUTQCfwDXvdwtpmNrdvKrqDvaI7sAgPgRKESQUMkmS5IUowlMI0b7qrVx33lTxS0CcsXC+58EESN8VW+VLDUSF4vEKRFaGod14FFayfIhlZMxGk8xruMmgTvLSUl0mEXErBwfDcGEMjVfxUlcdxvl8UGUR2sqsQ5Jo+ezVSHBcOJgVlgIUtCcJpdV3ICZVIJoRyA0meK7bue19lQ0TX19ZU4infYZskhowJ9QeCsKYcJjvhSZXnlyvLlY1m13dAz2cWaI7V19u7bkVR4KJbQJwTyCiI-+BwKMDlVm1IpJIU+ZP514vzl37WN4w5qKDeIo2v3fK8Mj1GFgaff43keTwshe154X1bwm-Bj2+xjQcEyCokc5x25cmhdhTU8QI8kyLIx5fT4noycJH11bU1sXrW05X1dO8O47Yy3gXcdBW30jhHwlRq00pWYIGkYTPHSICSELsrRu1Kk-Tqjl0Cf0Nj8Nwotjbi1IpLKWFNSJuDyokFUaRKKXhcA-VOdl-JQw3r0FBxFTRvh+DlYOXg2JOG1AZQIgd7wwnLIfCERVYFg0flQxBgUs4fyxvzVSxtSL70-EHcsysCzk3+C2NwdZcqhHeCxHwFD4FiP2uwGG5hID0MFm8WUbE8rJFeBwtWGUTZeEBt4E0xtDTM3yEAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVszoIoFdUAbAS3QE8BhAewDt0AnaoosBgOggyx1nYDMcAYwAWJWlADEEOmHbiAbtQDWctJmx5CpCjXpMWbTt019B6UeKgJF1IRhJ0A2gAYAuq7eJQAB2qwyR1pvEAAPRABaADYAVnYADgBORIBGABZUtIBmLPiUgCY0gBoQckj8xPZ8lJi0lPiXKKi0-KyXeLSAX06S9R4tYjIqOkZmVg4uDV4BYTEJSTYmDh8iDH5qBgBbdj7NAkHdEYNx4yn0M1mrG1ole3Qgz08QvwD7uhDwhGSAdnYYlMSMXiMXy31iUWBJTKCAiNXY3xiURcaTSLhSLm+aW+yUS3V6Jhw+x0w30YyMk36fCI1FQEEgkgAqgAFZAAQQAKgBRAD67NZACEADI8ygAJQAklyJaynkgQC9Au85Z8QfF2C1WqksmDvoV8lDIgDfvF4lFvjVWkkIfEsniQLtCdohnpRoYJmAoAxaZBkHYLhY5lIZLQ5LZVDsCQNiS7juSPV66RBfUJ-ZYJNdbg5nO5Zb5-IrgsrEOj8nFvmj2vl8i4ay59aVEK18n9vib2jWoolvrlvnaHVHnUcye7Pd6k36ZgGrAsGEt2Cs1httv2iYPSW7OPGx8nU4GM3Ys7RHu5nvm3oXQJ8Irr2C5Ema2siWlEsqCDQhClFb7lq6iYveXxNPtI1XQ51xOfgiHIah8HQSQAGVOWFSh2W5AA5TkAHVuTZPlEPZXN5TPIIPkQNIGgSRIshqZpTRcHJigbBBETVeJdTqZpzUA+JgLOUCSVdCCoJguDKEFAB5RDuQAMUFABNcSGQIk85QVc9SJhbsqiiaoCiyFEOl098mkqRp4mrJIUiabtex6e0QKdMDBKMSDoNgyc0yDWR5BuFQ1Acg4BNjDhXJEjy91sO4HhzFS81eEiiwQG1KmxOiXBibVGkSeJ311ZsITSGIYnS2IawyXj+n4mNhwEYT3PMTyZznBd0HWLYIz4xygpq0L6sudNIsPY8vFU4ilUvRA8hSW8WkBU0qIBdp3yBSpgXLcsmnaRJyrslcuuqjdevQdhqTHSQxMknlZIUpTCLUhKJo-WJ4VNVsUlfF9snyKJ3zWv42MK5JURffIKr2fah0OurjqEalsAgSRxKZTk0Jk+TFOUka4oLDTQWm9KCnRO9iuqH6mM7L8wTycs0U7ZJbTtWhqDpeA5T2wKDvGU94vGsJDU7bTdNaAyWhSd8Im1fKUgRb5dRrbKslxXaAujSGTgpUxuZxxLYXeyjMkyHI8kKcX8mBKoQRqSyzSieowcdDm1fJSNdysLX1MSkE0nYLtEjNztajSWJ62hCJWL0tikiK4q2PtgcnOC05KROmlE3dh6+YQcjm1bJEzYRdo8kScWu3YaiwWo+pOPaOOqqdkcEx9P1095q8ChcW9727Mrn1fb533SOJqhyZpX1SBolfxTrHfAuNR0THdwrd0aeYvTOg+9rFqkBQp6JyfumMKLJ4TaaXQSRGXGlriHZ4b7cJ1OtOV+1x7A4SNobVbIEaJDxBtUqb6LQkg2gqI0BmU9Ko32ciFaGLc15t2qILFIekRZGSYuRaaxVyzVGRFZNoXRlbT1VrfWqbljoNUDHAjSWIvwFEBmbLInFZYxGMoCH2n1qxVgBBPa+M9oGkLCo-SAVDErIPIuqcyvs6xsVLGTaE3Zppf3-M0LsR9bIQPBnwxOR12Cw38MI5+HtHrpF+JxEmFRpZvRYUxc0lRFZ1G1HUdEKRujdCAA */
   createMachine<
     DatasetQualityControllerContext,
     DatasetQualityControllerEvent,
@@ -60,12 +60,13 @@ export const createPureDatasetQualityControllerStateMachine = (
                 },
               },
             },
-            loaded: {},
-          },
-          on: {
-            UPDATE_TABLE_CRITERIA: {
-              target: 'datasets.loaded',
-              actions: ['storeTableOptions'],
+            loaded: {
+              on: {
+                UPDATE_TABLE_CRITERIA: {
+                  target: 'loaded',
+                  actions: ['storeTableOptions'],
+                },
+              },
             },
           },
         },
