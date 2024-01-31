@@ -86,20 +86,6 @@ function replaceAsKeywordWithAssignments(command: string) {
   });
 }
 
-function replaceFunctionsinSortWithStats(command: string) {
-  if (command.match(/[a-zA-Z_]+\([^\)]*\)(\.[^\)]*\))?/g)) {
-    const sortFunction = command.match(/[a-zA-Z_]+\([^\)]*\)(\.[^\)]*\))?/g)?.[0];
-    return (
-      'STATS sort_key = ' +
-      sortFunction +
-      '\n| ' +
-      command.replaceAll(/[a-zA-Z_]+\([^\)]*\)(\.[^\)]*\))?/g, 'sort_key')
-    );
-  } else {
-    return command;
-  }
-}
-
 function isValidColumnName(column: string) {
   return column.match(/^`.*`$/) || column.match(/^[@A-Za-z\._\-]+$/);
 }
@@ -181,10 +167,6 @@ export function correctCommonEsqlMistakes(content: string, log: Logger) {
 
         case 'STATS':
           formattedCommand = replaceAsKeywordWithAssignments(formattedCommand);
-          break;
-
-        case 'SORT':
-          formattedCommand = replaceFunctionsinSortWithStats(formattedCommand);
           break;
 
         case 'KEEP':
