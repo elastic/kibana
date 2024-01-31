@@ -339,7 +339,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   }
 
   const hasButtonAddFieldToolbarStyle = buttonAddFieldVariant === 'toolbar';
-  const buttonAddFieldCommonProps: Partial<EuiButtonProps> = {
+  const buttonAddFieldCommonProps: Partial<Omit<EuiButtonProps, 'type'>> = {
     size: 's',
     iconType: 'indexOpen',
     'data-test-subj':

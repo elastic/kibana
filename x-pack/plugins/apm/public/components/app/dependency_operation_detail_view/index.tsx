@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { omit, orderBy } from 'lodash';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
-import type { DependencySpan } from '../../../../server/routes/dependencies/get_top_dependency_spans';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
@@ -17,13 +16,12 @@ import { useDependencyDetailOperationsBreadcrumb } from '../../../hooks/use_depe
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { DependencyMetricCharts } from '../../shared/dependency_metric_charts';
-import { DetailViewHeader } from './detail_view_header';
 import { ResettingHeightRetainer } from '../../shared/height_retainer/resetting_height_container';
 import { push, replace } from '../../shared/links/url_helpers';
-import { SortFunction } from '../../shared/managed_table';
 import { useWaterfallFetcher } from '../transaction_details/use_waterfall_fetcher';
 import { WaterfallWithSummary } from '../transaction_details/waterfall_with_summary';
 import { DependencyOperationDistributionChart } from './dependency_operation_distribution_chart';
+import { DetailViewHeader } from './detail_view_header';
 import { maybeRedirectToAvailableSpanSample } from './maybe_redirect_to_available_span_sample';
 
 export function DependencyOperationDetailView() {
@@ -86,25 +84,15 @@ export function DependencyOperationDetailView() {
     ]
   );
 
-  const getSortedSamples: SortFunction<DependencySpan> = (
-    items,
-    localSortField,
-    localSortDirection
-  ) => {
-    return orderBy(items, localSortField, localSortDirection);
-  };
-
   const samples = useMemo(() => {
     return (
-      getSortedSamples(
-        spanFetch.data?.spans ?? [],
-        sortField,
-        sortDirection
-      ).map((span) => ({
-        spanId: span.spanId,
-        traceId: span.traceId,
-        transactionId: span.transactionId,
-      })) || []
+      orderBy(spanFetch.data?.spans ?? [], sortField, sortDirection).map(
+        (span) => ({
+          spanId: span.spanId,
+          traceId: span.traceId,
+          transactionId: span.transactionId,
+        })
+      ) || []
     );
   }, [spanFetch.data?.spans, sortField, sortDirection]);
 
