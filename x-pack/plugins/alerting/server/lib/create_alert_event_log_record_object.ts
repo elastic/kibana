@@ -44,7 +44,6 @@ interface CreateAlertEventLogRecordParams {
   };
   maintenanceWindowIds?: string[];
   ruleRevision?: number;
-  alertCreationDelay?: boolean;
 }
 
 export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecordParams): Event {
@@ -65,7 +64,6 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
     alertSummary,
     maintenanceWindowIds,
     ruleRevision,
-    alertCreationDelay,
   } = params;
   const alerting =
     params.instanceId || group || alertSummary
@@ -100,7 +98,6 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
         ...(flapping !== undefined ? { flapping } : {}),
         ...(maintenanceWindowIds ? { maintenance_window_ids: maintenanceWindowIds } : {}),
         ...(alertUuid ? { uuid: alertUuid } : {}),
-        ...(alertCreationDelay !== undefined ? { alert_creation_delay: alertCreationDelay } : {}),
         rule: {
           revision: ruleRevision,
           rule_type_id: ruleType.id,
