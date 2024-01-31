@@ -83,9 +83,7 @@ export const exportRulesRoute = (
               ? await getExportByObjectIds(
                   rulesClient,
                   exceptionsClient,
-                  savedObjectsClient,
-                  request.body.objects,
-                  logger,
+                  request.body.objects.map((obj) => obj.rule_id),
                   actionsExporter,
                   request,
                   actionsClient

@@ -6,24 +6,20 @@
  */
 
 import { chunk } from 'lodash';
-
 import { transformDataToNdjson } from '@kbn/securitysolution-utils';
-
-import type { ISavedObjectsExporter, KibanaRequest, Logger } from '@kbn/core/server';
+import type { ISavedObjectsExporter, KibanaRequest } from '@kbn/core/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
-import type { RulesClient, RuleExecutorServices } from '@kbn/alerting-plugin/server';
-
+import type { RulesClient, PartialRule } from '@kbn/alerting-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import { getExportDetailsNdjson } from './get_export_details_ndjson';
-
+import { internalRuleToAPIResponse } from '../../normalization/rule_converters';
+import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
+import type { RuleParams } from '../../../rule_schema';
 import { hasValidRuleType } from '../../../rule_schema';
 import { findRules } from '../search/find_rules';
 import { transformRuleToExportableFormat } from '../../utils/utils';
 import { getRuleExceptionsForExport } from './get_export_rule_exceptions';
+import { getExportDetailsNdjson } from './get_export_details_ndjson';
 import { getRuleActionConnectorsForExport } from './get_export_rule_action_connectors';
-
-import { internalRuleToAPIResponse } from '../../normalization/rule_converters';
-import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 
 interface ExportSuccessRule {
   statusCode: 200;
@@ -44,9 +40,7 @@ export interface RulesErrors {
 export const getExportByObjectIds = async (
   rulesClient: RulesClient,
   exceptionsClient: ExceptionListClient | undefined,
-  savedObjectsClient: RuleExecutorServices['savedObjectsClient'],
-  objects: Array<{ rule_id: string }>,
-  logger: Logger,
+  ruleIds: string[],
   actionsExporter: ISavedObjectsExporter,
   request: KibanaRequest,
   actionsClient: ActionsClient
@@ -56,12 +50,7 @@ export const getExportByObjectIds = async (
   exceptionLists: string | null;
   actionConnectors: string;
 }> => {
-  const rulesAndErrors = await getRulesFromObjects(
-    rulesClient,
-    savedObjectsClient,
-    objects,
-    logger
-  );
+  const rulesAndErrors = await getRulesFromObjects(rulesClient, ruleIds);
   const { rules, missingRules } = rulesAndErrors;
 
   // Retrieve exceptions
@@ -93,58 +82,62 @@ export const getExportByObjectIds = async (
   };
 };
 
-export const getRulesFromObjects = async (
+const getRulesFromObjects = async (
   rulesClient: RulesClient,
-  savedObjectsClient: RuleExecutorServices['savedObjectsClient'],
-  objects: Array<{ rule_id: string }>,
-  logger: Logger
+  ruleIds: string[]
 ): Promise<RulesErrors> => {
-  // If we put more than 1024 ids in one block like "alert.attributes.tags: (id1 OR id2 OR ... OR id1100)"
-  // then the KQL -> ES DSL query generator still puts them all in the same "should" array, but ES defaults
-  // to limiting the length of "should" arrays to 1024. By chunking the array into blocks of 1024 ids,
-  // we can force the KQL -> ES DSL query generator into grouping them in blocks of 1024.
-  // The generated KQL query here looks like
-  // "alert.attributes.tags: (id1 OR id2 OR ... OR id1024) OR alert.attributes.tags: (...) ..."
-  const chunkedObjects = chunk(objects, 1024);
-  const filter = chunkedObjects
-    .map((chunkedArray) => {
-      const joinedIds = chunkedArray.map((object) => object.rule_id).join(' OR ');
-      return `alert.attributes.params.ruleId: (${joinedIds})`;
-    })
-    .join(' OR ');
-  const rules = await findRules({
-    rulesClient,
-    filter,
-    page: 1,
-    fields: undefined,
-    perPage: 10000,
-    sortField: undefined,
-    sortOrder: undefined,
-  });
+  // It's important to avoid too many clauses in the request otherwise ES will fail to process the request
+  // with `too_many_clauses` error (see https://github.com/elastic/kibana/issues/170015). The clauses limit
+  // used to be set via `indices.query.bool.max_clause_count` but it's an option anymore. The limit is [calculated
+  // dynamically](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-settings.html) based
+  // on available CPU and memory but the minimum value is 1024.
+  // 1024 chunk size helps to solve the problem and use the maximum safe number of clauses.
+  const CHUNK_SIZE = 1024;
+  const processChunk = async (ids: string[]) => {
+    const rulesResult = await findRules({
+      rulesClient,
+      filter: `alert.attributes.params.ruleId: (${ids.join(' OR ')})`,
+      page: 1,
+      fields: undefined,
+      perPage: CHUNK_SIZE,
+      sortField: undefined,
+      sortOrder: undefined,
+    });
+    const rulesMap = new Map<string, PartialRule<RuleParams>>();
 
-  const alertsAndErrors = objects.map(({ rule_id: ruleId }) => {
-    const matchingRule = rules.data.find((rule) => rule.params.ruleId === ruleId);
-    if (
-      matchingRule != null &&
-      hasValidRuleType(matchingRule) &&
-      matchingRule.params.immutable !== true
-    ) {
-      return {
-        statusCode: 200,
-        rule: transformRuleToExportableFormat(internalRuleToAPIResponse(matchingRule)),
-      };
-    } else {
-      return {
-        statusCode: 404,
-        missingRuleId: { rule_id: ruleId },
-      };
+    for (const rule of rulesResult.data) {
+      rulesMap.set(rule.params.ruleId, rule);
     }
-  });
 
-  const missingRules = alertsAndErrors.filter(
+    const rulesAndErrors = ids.map((ruleId) => {
+      const matchingRule = rulesMap.get(ruleId);
+
+      return matchingRule != null &&
+        hasValidRuleType(matchingRule) &&
+        matchingRule.params.immutable !== true
+        ? {
+            statusCode: 200,
+            rule: transformRuleToExportableFormat(internalRuleToAPIResponse(matchingRule)),
+          }
+        : {
+            statusCode: 404,
+            missingRuleId: { rule_id: ruleId },
+          };
+    });
+
+    return rulesAndErrors;
+  };
+
+  const ruleIdChunks = chunk(ruleIds, CHUNK_SIZE);
+  // We expect all rules to be processed here to avoid any situation when export of some rules failed silently.
+  // If some error happens it just bubbles up as is and processed in the upstream code.
+  const rulesAndErrorsChunks = await Promise.all(ruleIdChunks.map(processChunk));
+  const rulesAndErrors = rulesAndErrorsChunks.flat();
+
+  const missingRules = rulesAndErrors.filter(
     (resp) => resp.statusCode === 404
   ) as ExportFailedRule[];
-  const exportedRules = alertsAndErrors.filter(
+  const exportedRules = rulesAndErrors.filter(
     (resp) => resp.statusCode === 200
   ) as ExportSuccessRule[];
 
