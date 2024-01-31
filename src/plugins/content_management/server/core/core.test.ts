@@ -7,8 +7,12 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+
+import { until } from '../event_stream/tests/util';
+import { setupEventStreamService } from '../event_stream/tests/setup_event_stream_service';
+import { ContentClient } from '../content_client/content_client';
 import { Core } from './core';
-import { createMemoryStorage } from './mocks';
+import { createMemoryStorage, createMockedStorage } from './mocks';
 import { ContentRegistry } from './registry';
 import type { ContentCrud } from './crud';
 import type {
@@ -31,19 +35,21 @@ import type {
   SearchItemSuccess,
   SearchItemError,
 } from './event_types';
-import { ContentTypeDefinition, StorageContext } from './types';
-import { until } from '../event_stream/tests/util';
-import { setupEventStreamService } from '../event_stream/tests/setup_event_stream_service';
+import { ContentStorage, ContentTypeDefinition, StorageContext } from './types';
 
 const logger = loggingSystemMock.createLogger();
 
 const FOO_CONTENT_ID = 'foo';
 
-const setup = ({ registerFooType = false }: { registerFooType?: boolean } = {}) => {
+const setup = ({
+  registerFooType = false,
+  storage = createMockedStorage(),
+  latestVersion = 2,
+}: { registerFooType?: boolean; storage?: ContentStorage; latestVersion?: number } = {}) => {
   const ctx: StorageContext = {
     requestHandlerContext: {} as any,
     version: {
-      latest: 1,
+      latest: latestVersion,
       request: 1,
     },
     utils: {
@@ -60,9 +66,9 @@ const setup = ({ registerFooType = false }: { registerFooType?: boolean } = {}) 
 
   const contentDefinition: ContentTypeDefinition = {
     id: FOO_CONTENT_ID,
-    storage: createMemoryStorage(),
+    storage,
     version: {
-      latest: 2,
+      latest: latestVersion,
     },
   };
   const cleanUp = () => {
@@ -94,7 +100,12 @@ describe('Content Core', () => {
       const { coreSetup, cleanUp } = setup();
 
       expect(coreSetup.contentRegistry).toBeInstanceOf(ContentRegistry);
-      expect(Object.keys(coreSetup.api).sort()).toEqual(['crud', 'eventBus', 'register']);
+      expect(Object.keys(coreSetup.api).sort()).toEqual([
+        'contentClient',
+        'crud',
+        'eventBus',
+        'register',
+      ]);
 
       cleanUp();
     });
