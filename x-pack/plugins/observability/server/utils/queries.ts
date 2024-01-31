@@ -31,6 +31,27 @@ export function termQuery<T extends string>(
   return [{ term: { [field]: value } }];
 }
 
+export function wildcardQuery<T extends string>(
+  field: T,
+  value: string | undefined,
+  opts = { leadingWildcard: true }
+): QueryDslQueryContainer[] {
+  if (isUndefinedOrNull(value)) {
+    return [];
+  }
+
+  return [
+    {
+      wildcard: {
+        [field]: {
+          value: opts.leadingWildcard ? `*${value}*` : `${value}*`,
+          case_insensitive: true,
+        },
+      },
+    },
+  ];
+}
+
 export function termsQuery(
   field: string,
   ...values: Array<string | boolean | undefined | number | null>

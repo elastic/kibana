@@ -11,14 +11,12 @@ import type {
   Middleware,
   Dispatch,
   PreloadedState,
-  CombinedState,
   AnyAction,
   Reducer,
 } from 'redux';
 import { applyMiddleware, createStore as createReduxStore } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
 import type { EnhancerOptions } from 'redux-devtools-extension';
-import { createEpicMiddleware } from 'redux-observable';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, pluck } from 'rxjs';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -33,18 +31,14 @@ import {
   SERVER_APP_ID,
 } from '../../../common/constants';
 import { telemetryMiddleware } from '../lib/telemetry';
-import { appSelectors } from './app';
-import { timelineSelectors } from '../../timelines/store';
 import * as timelineActions from '../../timelines/store/actions';
 import type { TimelineModel } from '../../timelines/store/model';
-import { inputsSelectors } from './inputs';
 import type { SubPluginsInitReducer } from './reducer';
 import { createInitialState, createReducer } from './reducer';
-import { createRootEpic } from './epic';
 import type { AppAction } from './actions';
 import type { Immutable } from '../../../common/endpoint/types';
 import type { State } from './types';
-import type { TimelineEpicDependencies, TimelineState } from '../../timelines/store/types';
+import type { TimelineState } from '../../timelines/store/types';
 import type { KibanaDataView, SourcererModel, SourcererDataView } from './sourcerer/model';
 import { initDataView } from './sourcerer/model';
 import type { AppObservableLibs, StartedSubPlugins, StartPlugins } from '../../types';
@@ -255,7 +249,7 @@ const stateSanitizer = (state: State) => {
 export const createStore = (
   state: State,
   pluginsReducer: SubPluginsInitReducer,
-  kibana: Observable<CoreStart>,
+  kibana$: Observable<CoreStart>,
   storage: Storage,
   additionalMiddleware?: Array<Middleware<{}, State, Dispatch<AppAction | Immutable<AppAction>>>>
 ): Store<State, Action> => {
@@ -272,23 +266,18 @@ export const createStore = (
 
   const composeEnhancers = composeWithDevTools(enhancerOptions);
 
-  const middlewareDependencies: TimelineEpicDependencies<State> = {
-    kibana$: kibana,
-    selectAllTimelineQuery: inputsSelectors.globalQueryByIdSelector,
-    selectNotesByIdSelector: appSelectors.selectNotesByIdSelector,
-    timelineByIdSelector: timelineSelectors.timelineByIdSelector,
-    timelineTimeRangeSelector: inputsSelectors.timelineTimeRangeSelector,
-  };
-
-  const epicMiddleware = createEpicMiddleware<Action, Action, State, typeof middlewareDependencies>(
-    {
-      dependencies: middlewareDependencies,
-    }
-  );
+  // TODO: Once `createStore` does not use redux-observable, we will not need to pass a
+  // kibana observable anymore. Then we can remove this `any` cast and replace kibana$
+  // with a regular kibana instance.
+  // I'm not doing it in this PR, as this will have an impact on literally hundreds of test files.
+  // A separate PR will be created to clean this up.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const kibanaObsv = kibana$ as any;
+  const kibana =
+    'source' in kibanaObsv ? kibanaObsv.source._value.kibana : kibanaObsv._value.kibana;
 
   const middlewareEnhancer = applyMiddleware(
-    ...createMiddlewares(storage),
-    epicMiddleware,
+    ...createMiddlewares(kibana, storage),
     telemetryMiddleware,
     ...(additionalMiddleware ?? [])
   );
@@ -298,8 +287,6 @@ export const createStore = (
     state as PreloadedState<State>,
     composeEnhancers(middlewareEnhancer)
   );
-
-  epicMiddleware.run(createRootEpic<CombinedState<State>>());
 
   return store;
 };
