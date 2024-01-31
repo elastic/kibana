@@ -11,15 +11,16 @@ import { useParams } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
-import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
+import { EuiTabbedContentTab } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { ErrorStatePrompt } from '../../../shared/error_state';
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
-import { SEARCH_INDEX_PATH, SEARCH_INDEX_TAB_PATH } from '../../routes';
+import { SEARCH_INDEX_CONNECTORS_CONFIGURATION_PATH, SEARCH_INDEX_CONNECTORS_SCHEDULING_PATH, SEARCH_INDEX_CONNECTORS_SYNC_RULES_PATH, SEARCH_INDEX_CRAWLER_CONFIGURATION_PATH, SEARCH_INDEX_CRAWLER_DOMAIN_MANAGEMENT_PATH, SEARCH_INDEX_CRAWLER_SCHEDULING_PATH, SEARCH_INDEX_DOCUMENTS_PATH, SEARCH_INDEX_INDEX_MAPPING_PATH, SEARCH_INDEX_PATH, SEARCH_INDEX_PIPELINES_PATH, SEARCH_INDEX_TAB_PATH } from '../../routes';
 
 import { isConnectorIndex, isCrawlerIndex } from '../../utils/indices';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
@@ -63,6 +64,8 @@ export const SearchIndex: React.FC = () => {
   const { tabId = SearchIndexTabId.OVERVIEW } = useParams<{
     tabId?: string;
   }>();
+
+  console.log('tabid: ', tabId);
 
   const { indexName } = useValues(IndexNameLogic);
   const { errorConnectingMessage } = useValues(HttpLogic);
@@ -238,7 +241,25 @@ export const SearchIndex: React.FC = () => {
       ) : (
         <>
           {indexName === index?.name && (
-            <EuiTabbedContent tabs={tabs} selectedTab={selectedTab} onTabClick={onTabClick} />
+            // <EuiTabbedContent tabs={tabs} selectedTab={selectedTab} onTabClick={onTabClick} />
+            <Routes>
+              <Route
+                exact
+                path={`${SEARCH_INDEX_PATH}/${SearchIndexTabId.OVERVIEW}`}
+                component={SearchIndexOverview}
+              />
+              <Route path={SEARCH_INDEX_DOCUMENTS_PATH} component={SearchIndexDocuments} />
+              <Route path={SEARCH_INDEX_INDEX_MAPPING_PATH} component={SearchIndexIndexMappings} />
+              <Route path={SEARCH_INDEX_CONNECTORS_CONFIGURATION_PATH} component={ConnectorConfiguration} />
+              <Route path={SEARCH_INDEX_CONNECTORS_SYNC_RULES_PATH} component={ConnectorSyncRules} />
+              <Route path={SEARCH_INDEX_CONNECTORS_SCHEDULING_PATH} component={ConnectorSchedulingComponent} />
+              <Route path={SEARCH_INDEX_CRAWLER_DOMAIN_MANAGEMENT_PATH} component={SearchIndexDomainManagement} />
+              <Route path={SEARCH_INDEX_CRAWLER_CONFIGURATION_PATH} component={CrawlerConfiguration} />
+              <Route path={SEARCH_INDEX_CRAWLER_SCHEDULING_PATH} component={AutomaticCrawlScheduler} />
+              <Route path={SEARCH_INDEX_PIPELINES_PATH} component={SearchIndexPipelines} />
+              <Route path={`${SEARCH_INDEX_PATH}`} component={SearchIndexOverview}
+              />          
+            </Routes>
           )}
           {isCrawlerIndex(index) && <CrawlCustomSettingsFlyout />}
         </>
