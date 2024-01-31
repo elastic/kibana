@@ -257,9 +257,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await toasts.getToastCount()).to.be(0);
     } else {
       expect(await toasts.getToastCount()).to.be(1);
-      expect((await toasts.getToastContent(1)).startsWith('Displayed documents may vary')).to.be(
-        true
-      );
+      expect(
+        (await toasts.getToastContentByIndex(1)).startsWith('Displayed documents may vary')
+      ).to.be(true);
     }
     expect(await filterBar.getFilterCount()).to.be(0);
     expect(await queryBar.getQueryString()).to.equal('');
@@ -520,7 +520,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await clickViewInApp(RULE_NAME);
 
       expect(await toasts.getToastCount()).to.be.equal(1);
-      const content = await toasts.getToastContent(1);
+      const content = await toasts.getToastContentByIndex(1);
       expect(content).to.equal(
         `Error fetching search source\nCould not locate that data view (id: ${sourceDataViewId}), click here to re-create it`
       );

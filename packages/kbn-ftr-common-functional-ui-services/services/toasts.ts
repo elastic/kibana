@@ -139,7 +139,7 @@ export class ToastsService extends FtrService {
     ).findByCssSelector(`.euiToast:nth-child(${index})`);
   }
 
-  public async getToastContent(index: number): Promise<string> {
+  public async getToastContentByIndex(index: number): Promise<string> {
     return await (await this.getToastElementByIndex(index)).getVisibleText();
   }
 
