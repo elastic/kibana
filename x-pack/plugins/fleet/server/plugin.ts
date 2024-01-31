@@ -746,7 +746,7 @@ export class FleetPlugin
       ?.checkTokenValidityForAllPolicies();
 
     if (unintallTokenValidationError) {
-      logger.warn(unintallTokenValidationError.error);
+      logger.warn(unintallTokenValidationError.error.message);
     } else {
       logger.debug('Uninstall tokens validation successful.');
     }
