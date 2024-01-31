@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { RESERVED_CONFIG_YML_KEYS } from '../../common/constants';
+
 import {
   getSpecificSelectorId,
   SETTINGS_CONFIRM_MODAL_BTN,
@@ -32,11 +34,14 @@ import {
 } from '../screens/fleet_outputs';
 
 import { login } from '../tasks/login';
-
 import { visit } from '../tasks/common';
 
 export const fillYamlConfigBox = (query: string) => {
   cy.get('[data-test-subj="kibanaCodeEditor"] textarea').type(query, { force: true });
+};
+
+export const clearYamlConfigBox = () => {
+  cy.get('[data-test-subj="kibanaCodeEditor"] textarea').clear({ force: true });
 };
 
 describe('Outputs', () => {
@@ -46,16 +51,38 @@ describe('Outputs', () => {
 
   describe('Elasticsearch', () => {
     describe('Preset input', () => {
+      afterEach(() => {
+        clearYamlConfigBox();
+        cy.getBySel(SETTINGS_OUTPUTS.PRESET_INPUT).select('balanced');
+      });
+
       it('is set to balanced by default', () => {
         selectESOutput();
 
         cy.getBySel(SETTINGS_OUTPUTS.PRESET_INPUT).should('have.value', 'balanced');
       });
 
-      it('forces custom when reserved key is included in config YAML box', () => {
+      for (const keyword of RESERVED_CONFIG_YML_KEYS) {
+        it(`forces custom when reserved key ${keyword} is included in config YAML box`, () => {
+          selectESOutput();
+
+          fillYamlConfigBox(`${keyword}: value`);
+
+          cy.getBySel(SETTINGS_OUTPUTS.PRESET_INPUT)
+            .should('have.value', 'custom')
+            .should('be.disabled');
+        });
+      }
+
+      it('handles expanded syntax for reserved keys', () => {
         selectESOutput();
 
-        fillYamlConfigBox('bulk_max_size: 1000');
+        fillYamlConfigBox(`
+queue:
+  mem:
+    flush:
+      min_events: 100
+          `);
 
         cy.getBySel(SETTINGS_OUTPUTS.PRESET_INPUT)
           .should('have.value', 'custom')
@@ -565,6 +592,36 @@ describe('Outputs', () => {
         cy.getBySel(SETTINGS_OUTPUTS.TYPE_INPUT).should('have.value', 'logstash');
         cy.getBySel(kafkaOutputFormValues.name.selector).should('have.value', 'kafka_to_logstash');
       });
+    });
+  });
+
+  describe('Outputs List', () => {
+    beforeEach(() => {
+      cy.intercept('/api/fleet/outputs', {
+        items: [
+          {
+            id: 'fleet-default-output',
+            name: 'default',
+            type: 'elasticsearch',
+            is_default: true,
+            is_default_monitoring: true,
+          },
+          {
+            id: 'internal-fleet-output',
+            name: 'internal output',
+            type: 'elasticsearch',
+            is_default: false,
+            is_default_monitoring: false,
+            is_internal: true,
+          },
+        ],
+      });
+
+      cy.visit('/app/fleet/settings');
+    });
+
+    it('should not display internal outputs', () => {
+      cy.getBySel(SETTINGS_OUTPUTS.TABLE).should('not.contain', 'internal output');
     });
   });
 });
