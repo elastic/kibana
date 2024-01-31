@@ -63,62 +63,40 @@ describe('apm', () => {
       timerange(moment().subtract(15, 'minutes'), moment())
         .interval('1m')
         .rate(10)
-        .generator((timestamp) =>
-          aiAssistantService
-            .transaction('getReco')
-            .timestamp(timestamp)
-            .duration(50)
-            .outcome('success')
-        )
-    );
-
-    await synthtraceEsClients.apmSynthtraceEsClient.index(
-      timerange(moment().subtract(15, 'minutes'), moment())
-        .interval('1m')
-        .rate(10)
-        .generator((timestamp) =>
-          aiAssistantService
-            .transaction('removeReco')
-            .timestamp(timestamp)
-            .duration(50)
-            .failure()
-            .errors(
-              aiAssistantService
-                .error({ message: 'ERROR removeReco not suported', type: 'My Type' })
-                .timestamp(timestamp)
-            )
-        )
-    );
-
-    await synthtraceEsClients.apmSynthtraceEsClient.index(
-      timerange(moment().subtract(15, 'minutes'), moment())
-        .interval('1m')
-        .rate(10)
-        .generator((timestamp) =>
-          aiAssistantService
-            .transaction('GET /api_v1')
-            .timestamp(timestamp)
-            .duration(50)
-            .outcome('success')
-        )
-    );
-
-    await synthtraceEsClients.apmSynthtraceEsClient.index(
-      timerange(moment().subtract(15, 'minutes'), moment())
-        .interval('1m')
-        .rate(10)
-        .generator((timestamp) =>
-          aiAssistantServicePython
-            .transaction('GET /api_v2')
-            .timestamp(timestamp)
-            .duration(50)
-            .failure()
-            .errors(
-              aiAssistantServicePython
-                .error({ message: 'ERROR api_v2 not supported', type: 'My Type' })
-                .timestamp(timestamp)
-            )
-        )
+        .generator((timestamp) => {
+          return [
+            aiAssistantService
+              .transaction('getReco')
+              .timestamp(timestamp)
+              .duration(50)
+              .outcome('success'),
+            aiAssistantService
+              .transaction('removeReco')
+              .timestamp(timestamp)
+              .duration(50)
+              .failure()
+              .errors(
+                aiAssistantService
+                  .error({ message: 'ERROR removeReco not suported', type: 'My Type' })
+                  .timestamp(timestamp)
+              ),
+            aiAssistantService
+              .transaction('GET /api_v1')
+              .timestamp(timestamp)
+              .duration(50)
+              .outcome('success'),
+            aiAssistantServicePython
+              .transaction('GET /api_v2')
+              .timestamp(timestamp)
+              .duration(50)
+              .failure()
+              .errors(
+                aiAssistantServicePython
+                  .error({ message: 'ERROR api_v2 not supported', type: 'My Type' })
+                  .timestamp(timestamp)
+              ),
+          ];
+        })
     );
   });
 
