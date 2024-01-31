@@ -785,6 +785,21 @@ describe('autocomplete', () => {
       ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }),
       'a', // @TODO remove this
     ]);
+    testSuggestions('from a | eval a=round(numberField)+ ', [
+      ...getFieldNamesByType('number'),
+      ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }),
+      'a', // @TODO remove this
+    ]);
+    testSuggestions('from a | eval a=numberField+ ', [
+      ...getFieldNamesByType('number'),
+      ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }),
+      'a', // @TODO remove this
+    ]);
+    testSuggestions('from a | eval a=`any#Char$Field`+ ', [
+      ...getFieldNamesByType('number'),
+      ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }),
+      'a', // @TODO remove this
+    ]);
     testSuggestions(
       'from a | stats avg(numberField) by stringField | eval ',
       [

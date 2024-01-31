@@ -172,7 +172,7 @@ export async function suggest(
     (context.triggerKind === 0 && unclosedRoundBrackets === 0) ||
     (context.triggerCharacter === ' ' &&
       // make this more robust
-      (isMathFunction(innerText[offset - 2]) || isComma(innerText[offset - 2])))
+      (isMathFunction(innerText, offset) || isComma(innerText[offset - 2])))
   ) {
     finalText = `${innerText.substring(0, offset)}${EDITOR_MARKER}${innerText.substring(offset)}`;
   }
@@ -436,6 +436,9 @@ function isFunctionArgComplete(
     return cleanedArgs.length >= def.params.filter(({ optional }) => !optional).length;
   });
   if (!argLengthCheck) {
+    return { complete: false, reason: 'fewArgs' };
+  }
+  if (fnDefinition.name === 'in' && Array.isArray(arg.args[1]) && !arg.args[1].length) {
     return { complete: false, reason: 'fewArgs' };
   }
   const hasCorrectTypes = fnDefinition.signatures.some((def) => {
@@ -890,10 +893,7 @@ async function getBuiltinFunctionNextArgument(
 
     if (isFnComplete.reason === 'fewArgs') {
       const fnDef = getFunctionDefinition(nodeArg.name);
-      if (
-        fnDef &&
-        fnDef.signatures.every(({ params }) => params.some(({ type }) => isArrayType(type)))
-      ) {
+      if (fnDef?.signatures.every(({ params }) => params.some(({ type }) => isArrayType(type)))) {
         suggestions.push(listCompleteItem);
       } else {
         const finalType = nestedType || nodeArgType || 'any';

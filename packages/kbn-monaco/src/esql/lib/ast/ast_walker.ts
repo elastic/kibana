@@ -207,14 +207,15 @@ function visitLogicalAndsOrs(ctx: LogicalBinaryContext) {
 function visitLogicalIns(ctx: LogicalInContext) {
   const fn = createFunction(ctx.NOT() ? 'not_in' : 'in', ctx);
   const [left, ...list] = ctx.valueExpression();
-  const values = list.map((ve) => visitValueExpression(ve));
   const leftArg = visitValueExpression(left);
   if (leftArg) {
     fn.args.push(...(Array.isArray(leftArg) ? leftArg : [leftArg]));
+    const values = list.map((ve) => visitValueExpression(ve));
     const listArgs = values
       .filter(nonNullable)
       .flatMap((arg) => (Array.isArray(arg) ? arg.filter(nonNullable) : arg));
-    if (listArgs.length) {
+    // distinguish between missing brackets (missing text error) and an empty list
+    if (!isMissingText(ctx.text)) {
       fn.args.push(listArgs);
     }
   }
@@ -249,6 +250,9 @@ function getComparisonName(ctx: ComparisonOperatorContext) {
 }
 
 function visitValueExpression(ctx: ValueExpressionContext) {
+  if (isMissingText(ctx.text)) {
+    return [];
+  }
   if (ctx instanceof ValueExpressionDefaultContext) {
     return visitOperatorExpression(ctx.operatorExpression());
   }
