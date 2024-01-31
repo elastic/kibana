@@ -245,13 +245,7 @@
               " | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
               "LayoutSelectorDictionary",
               "> | undefined; zoom?: number | undefined; } | undefined; pagingStrategy: ",
-              {
-                "pluginId": "@kbn/generate-csv",
-                "scope": "server",
-                "docId": "kibKbnGenerateCsvPluginApi",
-                "section": "def-server.CsvPagingStrategy",
-                "text": "CsvPagingStrategy"
-              },
+              "CsvPagingStrategy",
               "; }>"
             ],
             "path": "packages/kbn-reporting/export_types/csv/csv_searchsource.ts",
@@ -979,7 +973,7 @@
                 "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any>) => Promise<{ title: string; objectType: string; isDeprecated: boolean; version: string; layout?: { id?: ",
+              "<unknown, unknown, unknown, any>) => Promise<{ title: string; objectType: \"search\"; pagingStrategy: \"scroll\" | \"pit\"; version: string; layout?: { id?: ",
               {
                 "pluginId": "screenshotting",
                 "scope": "common",
@@ -999,7 +993,7 @@
                 "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              ">[]; browserTimezone: string; pagingStrategy?: \"scroll\" | \"pit\" | undefined; }>"
+              ">[]; browserTimezone: string; }>"
             ],
             "path": "packages/kbn-reporting/export_types/csv/csv_v2.ts",
             "deprecated": false,
@@ -1120,7 +1114,7 @@
               {
                 "parentPluginId": "@kbn/reporting-export-types-csv",
                 "id": "def-server.CsvV2ExportType.runTask.$2",
-                "type": "CompoundType",
+                "type": "Object",
                 "tags": [],
                 "label": "job",
                 "description": [],
