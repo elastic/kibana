@@ -14,7 +14,11 @@ import type {
 } from '@kbn/usage-collection-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type {
+  EmbeddableSetup,
+  EmbeddableStart,
+  SavedObjectEmbeddableInput,
+} from '@kbn/embeddable-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
@@ -64,6 +68,8 @@ import {
 } from '@kbn/content-management-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import { registerSavedObjectToPanelMethod } from '@kbn/embeddable-plugin/public';
+import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
@@ -117,7 +123,11 @@ import { visualizeTSVBAction } from './trigger_actions/visualize_tsvb_actions';
 import { visualizeAggBasedVisAction } from './trigger_actions/visualize_agg_based_vis_actions';
 import { visualizeDashboardVisualizePanelction } from './trigger_actions/dashboard_visualize_panel_actions';
 
-import type { LensEmbeddableInput } from './embeddable';
+import type {
+  LensByValueInput,
+  LensEmbeddableInput,
+  LensSavedObjectAttributes,
+} from './embeddable';
 import { EmbeddableFactory, LensEmbeddableStartServices } from './embeddable/embeddable_factory';
 import { EmbeddableComponent, getEmbeddableComponent } from './embeddable/embeddable_component';
 import { getSaveModalComponent } from './app_plugin/shared/saved_modal_lazy';
@@ -717,3 +727,20 @@ export class LensPlugin {
 
   stop() {}
 }
+
+registerSavedObjectToPanelMethod('lens', (savedObject) => {
+  if (!savedObject.managed) {
+    return { savedObjectId: savedObject.id } as SavedObjectEmbeddableInput;
+  }
+
+  const { attributes, references } = savedObject as SavedObjectCommon<LensSavedObjectAttributes>;
+
+  const panel: Partial<LensByValueInput> = {
+    attributes: {
+      ...attributes,
+      references,
+    },
+  };
+
+  return panel;
+});

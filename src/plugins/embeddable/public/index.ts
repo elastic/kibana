@@ -94,6 +94,7 @@ export type {
 export type { EnhancementRegistryDefinition } from './types';
 export type { EmbeddableComponentFactory } from './registry/types';
 export { CreateEmbeddableComponent } from './registry/create_embeddable_component';
+export { registerSavedObjectToPanelMethod } from './registry/saved_object_to_panel_methods';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new EmbeddablePublicPlugin(initializerContext);

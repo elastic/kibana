@@ -32,6 +32,7 @@ import {
   SavedObjectEmbeddableInput,
   EmbeddableFactoryNotFoundError,
 } from '../lib';
+import { savedObjectToPanel } from '../registry/saved_object_to_panel_methods';
 
 type FactoryMap = { [key: string]: EmbeddableFactory };
 
@@ -101,12 +102,30 @@ export const AddPanelFlyout = ({
         throw new EmbeddableFactoryNotFoundError(type);
       }
 
-      const embeddable = await container.addNewEmbeddable<SavedObjectEmbeddableInput>(
-        factoryForSavedObjectType.type,
-        { savedObjectId: id },
-        savedObject.attributes
-      );
-      onAddPanel?.(embeddable.id);
+      let embeddableId: string;
+
+      if (savedObjectToPanel[type]) {
+        // this panel type has a custom method for converting saved objects to panels
+        const panel = savedObjectToPanel[type](savedObject);
+
+        const { id: _embeddableId } = await container.addNewEmbeddable(
+          factoryForSavedObjectType.type,
+          panel,
+          savedObject.attributes
+        );
+
+        embeddableId = _embeddableId;
+      } else {
+        const { id: _embeddableId } = await container.addNewEmbeddable<SavedObjectEmbeddableInput>(
+          factoryForSavedObjectType.type,
+          { savedObjectId: id },
+          savedObject.attributes
+        );
+
+        embeddableId = _embeddableId;
+      }
+
+      onAddPanel?.(embeddableId);
 
       showSuccessToast(name);
       runAddTelemetry(container.type, factoryForSavedObjectType, savedObject);
