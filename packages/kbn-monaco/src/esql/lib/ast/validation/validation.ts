@@ -60,6 +60,7 @@ import {
   retrievePolicies,
   retrievePoliciesFields,
   retrieveMetadataFields,
+  retrieveFieldsFromStringSources,
 } from './resources';
 
 function validateFunctionLiteralArg(
@@ -794,6 +795,21 @@ export async function validateAst(
   if (availablePolicies.size && ast.filter(({ name }) => name === 'enrich')) {
     const fieldsFromPoliciesMap = await retrievePoliciesFields(ast, availablePolicies, callbacks);
     fieldsFromPoliciesMap.forEach((value, key) => availableFields.set(key, value));
+  }
+
+  if (ast.some(({ name }) => ['grok', 'dissect'].includes(name))) {
+    const fieldsFromGrokOrDissect = await retrieveFieldsFromStringSources(
+      queryString,
+      ast,
+      callbacks
+    );
+    fieldsFromGrokOrDissect.forEach((value, key) => {
+      // if the field is already present, do not overwrite it
+      // Note: this can also overlap with some variables
+      if (!availableFields.has(key)) {
+        availableFields.set(key, value);
+      }
+    });
   }
 
   const variables = collectVariables(ast, availableFields);
