@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
-import { NoDataViewsPromptComponent, useOnTryEsql } from '@kbn/shared-ux-prompt-no-data-views';
+import { NoDataViewsPromptComponent, useOnTryESQL } from '@kbn/shared-ux-prompt-no-data-views';
 import { IndexPatternManagmentContext } from '../../types';
 import { IndexPatternTableItem } from '../types';
 import { getListBreadcrumbs } from '../breadcrumbs';
@@ -99,7 +99,7 @@ export const IndexPatternTable = ({
         config: { defaultDataView: uiSettings.get('defaultIndex') },
       })
   );
-  const onTryEsql = useOnTryEsql({
+  const onTryESQL = useOnTryESQL({
     locatorClient: share?.url.locators,
     navigateToApp: application?.navigateToApp,
   });
@@ -363,7 +363,7 @@ export const IndexPatternTable = ({
           canCreateNewDataView={application.capabilities.indexPatterns.save as boolean}
           dataViewsDocLink={docLinks.links.indexPatterns.introduction}
           emptyPromptColor={'subdued'}
-          onTryEsql={onTryEsql}
+          onTryESQL={onTryESQL}
         />
       </>
     );

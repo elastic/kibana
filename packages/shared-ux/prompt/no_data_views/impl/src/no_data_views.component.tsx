@@ -27,7 +27,7 @@ export const NoDataViewsPrompt = ({
   onClickCreate,
   canCreateNewDataView,
   dataViewsDocLink,
-  onTryEsql,
+  onTryESQL,
   emptyPromptColor = 'plain',
 }: NoDataViewsPromptComponentProps) => {
   const title = canCreateNewDataView ? (
@@ -80,7 +80,7 @@ export const NoDataViewsPrompt = ({
   );
 
   const icon = <Illustration />;
-  const actions = <NoDataButtonLink {...{ onClickCreate, canCreateNewDataView, onTryEsql }} />;
+  const actions = <NoDataButtonLink {...{ onClickCreate, canCreateNewDataView, onTryESQL }} />;
 
   return (
     <EuiEmptyPrompt

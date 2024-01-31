@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { useOnTryEsql, type UseOnTryEsqlParams } from './use_on_try_esql';
+export { useOnTryESQL, type UseOnTryEsqlParams } from './use_on_try_esql';

@@ -17,8 +17,8 @@ export interface UseOnTryEsqlParams {
   navigateToApp: NavigateToAppFn;
 }
 
-export const useOnTryEsql = ({ locatorClient, navigateToApp }: UseOnTryEsqlParams) => {
-  const [onTryEsql, setOnTryEsql] = useState<(() => void) | undefined>();
+export const useOnTryESQL = ({ locatorClient, navigateToApp }: UseOnTryEsqlParams) => {
+  const [onTryESQL, setOnTryEsql] = useState<(() => void) | undefined>();
 
   useEffect(() => {
     (async () => {
@@ -32,9 +32,11 @@ export const useOnTryEsql = ({ locatorClient, navigateToApp }: UseOnTryEsqlParam
 
       const { app, path, state } = location;
 
-      setOnTryEsql(() => () => navigateToApp(app, { path, state }));
+      setOnTryEsql(() => () => {
+        navigateToApp(app, { path, state });
+      });
     })();
   }, [locatorClient, navigateToApp]);
 
-  return onTryEsql;
+  return onTryESQL;
 };

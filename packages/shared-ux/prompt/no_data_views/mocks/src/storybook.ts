@@ -51,10 +51,10 @@ export class StorybookMock extends AbstractStorybookMock<
 
   getServices(params: Params): NoDataViewsPromptServices {
     const { canCreateNewDataView, dataViewsDocLink, canTryEsql } = params;
-    let onTryEsql;
+    let onTryESQL;
 
     if (canTryEsql !== false) {
-      onTryEsql = action('onTryEsql');
+      onTryESQL = action('onTryESQL');
     }
 
     return {
@@ -64,7 +64,7 @@ export class StorybookMock extends AbstractStorybookMock<
         action('openDataViewEditor')(options);
         return () => {};
       },
-      onTryEsql,
+      onTryESQL,
     };
   }
 }

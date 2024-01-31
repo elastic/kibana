@@ -14,7 +14,7 @@ import React from 'react';
 interface NoDataButtonProps {
   onClickCreate: (() => void) | undefined;
   canCreateNewDataView: boolean;
-  onTryEsql?: () => void;
+  onTryESQL?: () => void;
 }
 
 const createDataViewText = i18n.translate('sharedUXPackages.noDataViewsPrompt.addDataViewText', {
@@ -24,9 +24,9 @@ const createDataViewText = i18n.translate('sharedUXPackages.noDataViewsPrompt.ad
 export const NoDataButtonLink = ({
   onClickCreate,
   canCreateNewDataView,
-  onTryEsql,
+  onTryESQL,
 }: NoDataButtonProps) => {
-  if (!onTryEsql && !canCreateNewDataView) {
+  if (!onTryESQL && !canCreateNewDataView) {
     return null;
   }
 
@@ -43,15 +43,15 @@ export const NoDataButtonLink = ({
           {createDataViewText}
         </EuiButton>
       )}
-      {canCreateNewDataView && onTryEsql && <EuiSpacer />}
-      {onTryEsql && (
+      {canCreateNewDataView && onTryESQL && <EuiSpacer />}
+      {onTryESQL && (
         <EuiText size="xs" color={'subdued'}>
           <FormattedMessage
             id="sharedUXPackages.no_data_views.esqlMessage"
             defaultMessage="Alternatively, you can query your data directly using ES|QL (technical preview)."
           />
           <EuiSpacer size={'s'} />
-          <EuiButton color="success" onClick={onTryEsql} size="s">
+          <EuiButton color="success" onClick={onTryESQL} size="s">
             <FormattedMessage
               id="sharedUXPackages.no_data_views.esqlButtonLabel"
               defaultMessage="Try ES|QL"
