@@ -482,7 +482,7 @@ registerSavedObjectToPanelMethod(CONTENT_ID, (_savedObject) => {
   const visState = savedObject.attributes.visState;
 
   // not sure if visState actually is ever undefined, but following the type
-  if (savedObject.managed || !visState) {
+  if (!savedObject.managed || !visState) {
     const input: Pick<SavedObjectEmbeddableInput, 'savedObjectId'> = {
       savedObjectId: savedObject.id,
     };
