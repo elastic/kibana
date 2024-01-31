@@ -46,7 +46,7 @@ const CustomFlyoutContent = ({
     <>
       <EuiSpacer size="m" />
       <EuiFlexGroup direction="column">
-        {/* Apply custom Log Explorer detail */}
+        {/* Apply custom Logs Explorer detail */}
         {renderCustomizedContent(flyoutContentProps)}
       </EuiFlexGroup>
     </>
