@@ -40,7 +40,6 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
       body: PrivateLocationSchema,
     },
   },
-  writeAccess: true,
   handler: async ({ response, request, savedObjectsClient, syntheticsMonitorClient }) => {
     const location = request.body as PrivateLocationObject;
 

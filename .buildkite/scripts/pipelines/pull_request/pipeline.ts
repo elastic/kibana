@@ -88,7 +88,10 @@ const uploadPipeline = (pipelineContent: string | object) => {
     }
 
     if (
-      (await doAnyChangesMatch([/^x-pack\/plugins\/observability_onboarding/])) ||
+      (await doAnyChangesMatch([
+        /^x-pack\/plugins\/observability_onboarding/,
+        /^x-pack\/plugins\/fleet/,
+      ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
       pipeline.push(
@@ -262,6 +265,47 @@ const uploadPipeline = (pipelineContent: string | object) => {
     ) {
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/security_solution/investigations.yml')
+      );
+    }
+
+    if (
+      (await doAnyChangesMatch([
+        /^package.json/,
+        /^src\/plugins\/data/,
+        /^src\/plugins\/kibana_utils/,
+        /^src\/plugins\/inspector/,
+        /^src\/plugins\/data_views/,
+        /^src\/core/,
+        /^packages\/kbn-securitysolution-.*/,
+        /^packages\/kbn-es-query/,
+        /^packages\/kbn-securitysolution-io-ts-list-types/,
+        /^packages\/kbn-i18n-react/,
+        /^packages\/kbn-i18n/,
+        /^packages\/shared-ux/,
+        /^packages\/kbn-doc-links/,
+        /^packages\/kbn-securitysolution-io-ts-list-types/,
+        /^x-pack\/plugins\/threat_intelligence/,
+        /^x-pack\/packages\/security-solution/,
+        /^x-pack\/test\/threat_intelligence_cypress/,
+        /^x-pack\/plugins\/cases/,
+        /^x-pack\/plugins\/timelines/,
+        /^x-pack\/plugins\/triggers_actions_ui/,
+        /^x-pack\/plugins\/rule_registry/,
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+    ) {
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/threat_intelligence.yml')
+      );
+    }
+
+    if (
+      ((await doAnyChangesMatch([/^x-pack\/plugins\/osquery/, /^x-pack\/test\/osquery_cypress/])) ||
+        GITHUB_PR_LABELS.includes('ci:all-cypress-suites')) &&
+      !GITHUB_PR_LABELS.includes('ci:skip-cypress-osquery')
+    ) {
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/security_solution/osquery_cypress.yml')
       );
     }
 

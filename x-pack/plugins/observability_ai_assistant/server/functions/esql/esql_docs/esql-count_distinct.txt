@@ -1,10 +1,13 @@
 COUNT_DISTINCT
 
-The approximate number of distinct values.
-FROM hosts
-| STATS COUNT_DISTINCT(ip0), COUNT_DISTINCT(ip1)
-Can take any field type as input and the result is always a long not matter
-the input type.Counts are approximateeditComputing exact counts requires loading values into a set and returning its
+Syntax
+COUNT_DISTINCT(column[, precision])
+Parameters
+column
+Column for which to count the number of distinct values.
+precision
+Precision. Refer to Counts are approximate.
+DescriptionReturns the approximate number of distinct values.Counts are approximateeditComputing exact counts requires loading values into a set and returning its
 size. This doesn’t scale when working on high-cardinality sets and/or large
 values as the required memory usage and the need to communicate those
 per-shard sets between nodes would utilize too many resources of the cluster.This COUNT_DISTINCT function is based on the
@@ -22,7 +25,15 @@ on the dataset in question. In general, most datasets show consistently good
 accuracy. Also note that even with a threshold as low as 100, the error
 remains very low (1-6% as seen in the above graph) even when counting millions of items.The HyperLogLog++ algorithm depends on the leading zeros of hashed
 values, the exact distributions of hashes in a dataset can affect the
-accuracy of the cardinality.Precision is configurableeditThe COUNT_DISTINCT function takes an optional second parameter to configure the
-precision discussed previously.
+accuracy of the cardinality.The COUNT_DISTINCT function takes an optional second parameter to configure the
+precision.Supported typesCan take any field type as input.Examples
+```esql
+FROM hosts
+| STATS COUNT_DISTINCT(ip0), COUNT_DISTINCT(ip1)
+```
+
+With the optional second parameter to configure the precision:
+```esql
 FROM hosts
 | STATS COUNT_DISTINCT(ip0, 80000), COUNT_DISTINCT(ip1, 5)
+```

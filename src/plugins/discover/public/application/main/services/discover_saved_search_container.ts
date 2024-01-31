@@ -318,7 +318,9 @@ function getSearchSourceFieldValueForComparison(
   searchSourceFieldName: keyof SearchSourceFields
 ) {
   if (searchSourceFieldName === 'index') {
-    return searchSource.getField('index')?.id;
+    const query = searchSource.getField('query');
+    // ad-hoc data view id can change, so we rather compare the ES|QL query itself here
+    return query && 'esql' in query ? query.esql : searchSource.getField('index')?.id;
   }
 
   if (searchSourceFieldName === 'filter') {
