@@ -10,7 +10,7 @@ fi
 source .buildkite/scripts/steps/artifacts/env.sh
 
 GIT_ABBREV_COMMIT=${BUILDKITE_COMMIT:0:12}
-KIBANA_IMAGE_TAG="git-$GIT_ABBREV_COMMIT"
+KIBANA_IMAGE_TAG="sec-sol-qg-$GIT_ABBREV_COMMIT"
 
 
 KIBANA_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless"

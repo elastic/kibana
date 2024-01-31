@@ -35,7 +35,7 @@ else
           "region_id": "aws-eu-west-1",
           "overrides": {
             "kibana": {
-              "docker_image" : "docker.elastic.co/kibana-ci/kibana-serverless:git-'$KBN_COMMIT_HASH'"
+              "docker_image" : "docker.elastic.co/kibana-ci/kibana-serverless:sec-sol-qg-'$KBN_COMMIT_HASH'"
               }
             }
           }' | jq '.')

@@ -112,11 +112,11 @@ async function createSecurityProject(
   if (process.env.OVERRIDE_KIBANA && process.env.OVERRIDE_KIBANA === '1') {
     const kibanaOverrideImage = `${process.env.BUILDKITE_COMMIT?.substring(0, 12)}`;
     log.info(
-      `Overriding Kibana image in the MKI with docker.elastic.co/kibana-ci/kibana-serverless:git-${kibanaOverrideImage}`
+      `Overriding Kibana image in the MKI with docker.elastic.co/kibana-ci/kibana-serverless:sec-sol-qg-${kibanaOverrideImage}`
     );
     body.overrides = {
       kibana: {
-        docker_image: `docker.elastic.co/kibana-ci/kibana-serverless:git-${kibanaOverrideImage}`,
+        docker_image: `docker.elastic.co/kibana-ci/kibana-serverless:sec-sol-qg-${kibanaOverrideImage}`,
       },
     };
   }
