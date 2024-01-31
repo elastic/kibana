@@ -13,6 +13,7 @@ import { MessageRole, type Message } from '../../common';
 import {
   ConversationCreateEvent,
   ConversationUpdateEvent,
+  isTokenLimitReachedError,
   StreamingChatResponseEventType,
 } from '../../common/conversation_complete';
 import { getAssistantSetupMessage } from '../service/get_assistant_setup_message';
@@ -101,12 +102,7 @@ export function useChat({
         setChatState(ChatState.Error);
       }
 
-      const tokenLimitRegex =
-        /This model's maximum context length is (\d+) tokens\. However, your messages resulted in (\d+) tokens/g;
-      const tokenLimitRegexResult = tokenLimitRegex.exec(error.message);
-      if (tokenLimitRegexResult) {
-        const [, tokenLimit, tokenCount] = tokenLimitRegexResult;
-
+      if (isTokenLimitReachedError(error)) {
         setMessages((msgs) => [
           ...msgs,
           {
@@ -115,7 +111,7 @@ export function useChat({
               content: i18n.translate('xpack.observabilityAiAssistant.tokenLimitError', {
                 defaultMessage:
                   'The conversation has exceeded the token limit. The maximum token limit is **{tokenLimit}**, but the current conversation has **{tokenCount}** tokens. Please start a new conversation to continue.',
-                values: { tokenLimit, tokenCount },
+                values: { tokenLimit: error.meta?.tokenLimit, tokenCount: error.meta?.tokenCount },
               }),
               role: MessageRole.Assistant,
             },
