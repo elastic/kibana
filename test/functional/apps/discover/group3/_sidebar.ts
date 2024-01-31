@@ -95,42 +95,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('should show sidebar correctly in text-based view', async function () {
+      it('should show filters by type in text-based view', async function () {
         await kibanaServer.uiSettings.update({ 'discover:enableESQL': true });
         await browser.refresh();
 
-        await PageObjects.discover.selectTextBaseLang();
-        await monacoEditor.setCodeEditorValue('from logstash-* | limit 1000 | sort @timestamp ');
-        await testSubjects.click('querySubmitButton');
-        await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
-
-        expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '76 available fields. 6 empty fields.'
-        );
-      });
-
-      it('should show filter by type correctly in text-based view', async function () {
-        await kibanaServer.uiSettings.update({ 'discover:enableESQL': true });
-        await browser.refresh();
-
-        await PageObjects.discover.selectTextBaseLang();
-        await monacoEditor.setCodeEditorValue('from logstash-* | limit 1000 | sort @timestamp ');
-        await testSubjects.click('querySubmitButton');
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
-
         await PageObjects.unifiedFieldList.openSidebarFieldFilter();
-        const options = await find.allByCssSelector('[data-test-subj*="typeFilter"]');
-        expect(options).to.have.length(3);
-        await testSubjects.click('typeFilter-number');
+        let options = await find.allByCssSelector('[data-test-subj*="typeFilter"]');
+        expect(options).to.have.length(6);
         await PageObjects.unifiedFieldList.closeSidebarFieldFilter();
-        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        await PageObjects.discover.selectTextBaseLang();
+
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+        await PageObjects.unifiedFieldList.openSidebarFieldFilter();
+        options = await find.allByCssSelector('[data-test-subj*="typeFilter"]');
+        expect(options).to.have.length(3);
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '4 available fields. 2 empty fields.'
+          '82 available fields.'
         );
+
+        await testSubjects.click('typeFilter-number');
+
+        await retry.waitFor('updates', async () => {
+          return (
+            (await PageObjects.unifiedFieldList.getSidebarAriaDescription()) ===
+            '6 available fields.'
+          );
+        });
       });
     });
 
@@ -429,20 +422,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         await PageObjects.discover.selectTextBaseLang();
-        await monacoEditor.setCodeEditorValue('from logstash-* | limit 1000 | sort @timestamp ');
-        await testSubjects.click('querySubmitButton');
-        await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '76 available fields. 6 empty fields.'
+          '82 available fields.'
         );
 
         await PageObjects.unifiedFieldList.clickFieldListItemRemove('extension');
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '76 available fields. 6 empty fields.'
+          '82 available fields.'
         );
 
         const testQuery = `from logstash-* | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
