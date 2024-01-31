@@ -46,6 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
     let icmpProjectMonitors: ProjectMonitorsRequest;
 
     let testPolicyId = '';
+    const testPolicyName = 'Fleet test server policy' + Date.now();
 
     const setUniqueIds = (request: ProjectMonitorsRequest) => {
       return {
@@ -86,7 +87,6 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
       await testPrivateLocations.installSyntheticsPackage();
 
-      const testPolicyName = 'Fleet test server policy' + Date.now();
       const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
       testPolicyId = apiResponse.body.item.id;
       await testPrivateLocations.setTestLocations([testPolicyId]);
@@ -2010,7 +2010,7 @@ export default function ({ getService }: FtrProviderContext) {
           failedMonitors: [
             {
               details:
-                "Invalid locations specified. Elastic managed Location(s) 'does not exist'  not found. Available locations are 'localhost'",
+                "Invalid locations specified. Elastic managed Location(s) 'does not exist' not found. Available locations are 'dev'",
               id: httpProjectMonitors.monitors[1].id,
               payload: {
                 'check.request': {
@@ -2088,7 +2088,7 @@ export default function ({ getService }: FtrProviderContext) {
           createdMonitors: [],
           failedMonitors: [
             {
-              details: `Invalid locations specified. Private Location(s) 'does not exist'  not found. Available private locations are '${testPolicyId}'`,
+              details: `Invalid locations specified. Private Location(s) 'does not exist' not found. Available private locations are 'Test private location 0'`,
               id: httpProjectMonitors.monitors[1].id,
               payload: {
                 'check.request': {

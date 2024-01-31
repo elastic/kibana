@@ -304,7 +304,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(res.status).to.eql(400);
 
         expect(res.body.message).to.eql(
-          "Invalid locations specified. Private Location(s) 'policy-id'  not found. No private location available to use."
+          "Invalid locations specified. Private Location(s) 'policy-id' not found. No private location available to use."
         );
 
         const response = await supertestAPI

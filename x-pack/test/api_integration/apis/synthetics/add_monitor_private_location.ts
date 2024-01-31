@@ -37,6 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
     const supertestWithoutAuth = getService('supertestWithoutAuth');
 
     let testFleetPolicyID: string;
+    const testPolicyName = 'Fleet test server policy' + Date.now();
 
     let _httpMonitorJson: HTTPFields;
     let httpMonitorJson: HTTPFields;
@@ -66,8 +67,6 @@ export default function ({ getService }: FtrProviderContext) {
     beforeEach(() => {
       httpMonitorJson = _httpMonitorJson;
     });
-
-    const testPolicyName = 'Fleet test server policy' + Date.now();
 
     it('adds a test fleet policy', async () => {
       const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
@@ -132,7 +131,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(apiResponse.body).eql({
         statusCode: 400,
         error: 'Bad Request',
-        message: `Invalid locations specified. Private Location(s) 'invalidLocation'  not found. Available private locations are '${testFleetPolicyID}'`,
+        message: `Invalid locations specified. Private Location(s) 'invalidLocation' not found. Available private locations are '${testPolicyName}'`,
       });
 
       const apiGetResponse = await supertestAPI

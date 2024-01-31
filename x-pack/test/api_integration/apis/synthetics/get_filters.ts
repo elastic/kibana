@@ -11,8 +11,8 @@ import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export const LOCAL_LOCATION = {
-  id: 'localhost',
-  label: 'Local Synthetics Service',
+  id: 'dev',
+  label: 'Dev Service',
   geo: {
     lat: 0,
     lon: 0,
@@ -69,7 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
           { label: 'apm', count: 1 },
           { label: 'synthetics', count: 1 },
         ],
-        locations: [{ label: 'localhost', count: 1 }],
+        locations: [{ label: 'dev', count: 1 }],
         projects: [],
         schedules: [{ label: '3', count: 1 }],
       });

@@ -40,7 +40,7 @@
     "id": "default",
     "label": "Default"
   },
-  "locations": ["localhost"],
+  "locations": ["dev"],
   "name": "Test HTTP Monitor 03",
   "namespace": "testnamespace",
   "origin": "ui",
