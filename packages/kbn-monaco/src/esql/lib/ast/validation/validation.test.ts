@@ -779,6 +779,30 @@ describe('validation logic', () => {
         `Argument of [${op}] must be [number], found value [stringField] type [string]`,
       ]);
     }
+    testErrorsAndWarnings(`from a | where numberField =~ 0`, [
+      'Argument of [=~] must be [string], found value [numberField] type [number]',
+      'Argument of [=~] must be [string], found value [0] type [number]',
+    ]);
+    testErrorsAndWarnings(`from a | where NOT numberField =~ 0`, [
+      'Argument of [=~] must be [string], found value [numberField] type [number]',
+      'Argument of [=~] must be [string], found value [0] type [number]',
+    ]);
+    testErrorsAndWarnings(`from a | where (numberField =~ 0)`, [
+      'Argument of [=~] must be [string], found value [numberField] type [number]',
+      'Argument of [=~] must be [string], found value [0] type [number]',
+    ]);
+    testErrorsAndWarnings(`from a | where (NOT (numberField =~ 0))`, [
+      'Argument of [=~] must be [string], found value [numberField] type [number]',
+      'Argument of [=~] must be [string], found value [0] type [number]',
+    ]);
+    testErrorsAndWarnings(`from a | where 1 =~ 0`, [
+      'Argument of [=~] must be [string], found value [1] type [number]',
+      'Argument of [=~] must be [string], found value [0] type [number]',
+    ]);
+    testErrorsAndWarnings(`from a | eval stringField =~ 0`, [
+      `Argument of [=~] must be [string], found value [0] type [number]`,
+    ]);
+
     for (const op of ['like', 'rlike']) {
       testErrorsAndWarnings(`from a | where stringField ${op} "?a"`, []);
       testErrorsAndWarnings(`from a | where stringField NOT ${op} "?a"`, []);
