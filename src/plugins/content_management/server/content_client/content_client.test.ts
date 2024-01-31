@@ -213,5 +213,50 @@ describe('ContentClient', () => {
         });
       });
     });
+
+    describe('search()', () => {
+      test('should find an item', async () => {
+        const { contentClient } = setup();
+
+        await contentClient.create({ title: 'hello' });
+
+        const res = await contentClient.search({ text: 'hello' });
+
+        expect(res.result).toEqual({
+          hits: [
+            {
+              id: expect.any(String),
+              title: 'hello',
+            },
+          ],
+          pagination: {
+            cursor: '',
+            total: 1,
+          },
+        });
+      });
+
+      test('should pass the options to the storage', async () => {
+        const { contentClient } = setup();
+        await contentClient.create({ title: 'hello' });
+
+        const options = { forwardInResponse: { option1: 'foo' } };
+        const res = await contentClient.search({ text: 'hello' }, options);
+
+        expect(res.result).toEqual({
+          hits: [
+            {
+              id: expect.any(String),
+              title: 'hello',
+              options: { option1: 'foo' }, // the options have correctly been passed to the storage
+            },
+          ],
+          pagination: {
+            cursor: '',
+            total: 1,
+          },
+        });
+      });
+    });
   });
 });

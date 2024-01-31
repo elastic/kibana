@@ -36,11 +36,18 @@ export type DeleteParameters<T = unknown> = [
   CrudDeleteParameters<T>[2]?
 ];
 
+type CrudSearchParameters<T = unknown> = Parameters<ContentCrud<T>['search']>;
+export type SearchParameters<T = unknown> = [
+  CrudSearchParameters<T>[1],
+  CrudSearchParameters<T>[2]?
+];
+
 export interface IContentClient<T = unknown> {
   contentTypeId: string;
   get(...params: GetParameters): ReturnType<ContentCrud<T>['get']>;
+  bulkGet(...params: BulkGetParameters): ReturnType<ContentCrud<T>['bulkGet']>;
   create(...params: CreateParameters): ReturnType<ContentCrud<T>['create']>;
   update(...params: UpdateParameters): ReturnType<ContentCrud<T>['update']>;
   delete(...params: DeleteParameters): ReturnType<ContentCrud<T>['delete']>;
-  bulkGet(...params: BulkGetParameters): ReturnType<ContentCrud<T>['bulkGet']>;
+  search(...params: SearchParameters): ReturnType<ContentCrud<T>['search']>;
 }

@@ -173,7 +173,7 @@ class InMemoryStorage implements ContentStorage<any> {
   async search(
     ctx: StorageContext,
     query: { text: string },
-    { errorToThrow }: { errorToThrow?: string } = {}
+    { errorToThrow, forwardInResponse }: { errorToThrow?: string; forwardInResponse?: object } = {}
   ) {
     // This allows us to test that proper error events are thrown when the storage layer op fails
     if (errorToThrow) {
@@ -195,7 +195,7 @@ class InMemoryStorage implements ContentStorage<any> {
       return title.match(rgx);
     });
     return {
-      hits,
+      hits: forwardInResponse ? hits.map((hit) => ({ ...hit, options: forwardInResponse })) : hits,
       pagination: {
         total: hits.length,
         cursor: '',

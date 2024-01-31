@@ -50,4 +50,8 @@ export class ContentClient<T = unknown> implements IContentClient<T> {
   delete(id: string, options?: object) {
     return this.ctx.crudInstance.delete(this.ctx.storageContext, id, options);
   }
+
+  search(query: object, options?: object) {
+    return this.ctx.crudInstance.search(this.ctx.storageContext, query, options);
+  }
 }
