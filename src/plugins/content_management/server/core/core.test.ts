@@ -43,7 +43,7 @@ const FOO_CONTENT_ID = 'foo';
 
 const setup = ({
   registerFooType = false,
-  storage = createMockedStorage(),
+  storage = createMemoryStorage(),
   latestVersion = 2,
 }: { registerFooType?: boolean; storage?: ContentStorage; latestVersion?: number } = {}) => {
   const ctx: StorageContext = {
@@ -965,38 +965,37 @@ describe('Content Core', () => {
       });
     });
 
-      describe('eventStream', () => {
-        test('stores "delete" events', async () => {
-          const { fooContentCrud, ctx, eventStream } = setup({ registerFooType: true });
+    describe('eventStream', () => {
+      test('stores "delete" events', async () => {
+        const { fooContentCrud, ctx, eventStream } = setup({ registerFooType: true });
 
-          await fooContentCrud!.create(ctx, { title: 'Hello' }, { id: '1234' });
-          await fooContentCrud!.delete(ctx, '1234');
+        await fooContentCrud!.create(ctx, { title: 'Hello' }, { id: '1234' });
+        await fooContentCrud!.delete(ctx, '1234');
 
-          const findEvent = async () => {
-            const tail = await eventStream.tail();
+        const findEvent = async () => {
+          const tail = await eventStream.tail();
 
-            for (const event of tail) {
-              if (
-                event.predicate[0] === 'delete' &&
-                event.object &&
-                event.object[0] === 'foo' &&
-                event.object[1] === '1234'
-              ) {
-                return event;
-              }
+          for (const event of tail) {
+            if (
+              event.predicate[0] === 'delete' &&
+              event.object &&
+              event.object[0] === 'foo' &&
+              event.object[1] === '1234'
+            ) {
+              return event;
             }
+          }
 
-            return null;
-          };
+          return null;
+        };
 
-          await until(async () => !!(await findEvent()), 100);
+        await until(async () => !!(await findEvent()), 100);
 
-          const event = await findEvent();
+        const event = await findEvent();
 
-          expect(event).toMatchObject({
-            predicate: ['delete'],
-            object: ['foo', '1234'],
-          });
+        expect(event).toMatchObject({
+          predicate: ['delete'],
+          object: ['foo', '1234'],
         });
       });
     });
