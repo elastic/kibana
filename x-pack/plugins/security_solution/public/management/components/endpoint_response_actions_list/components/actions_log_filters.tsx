@@ -83,10 +83,10 @@ export const ActionsLogFilters = memo(
           />
           {responseActionsEnabled && (
             <ActionsLogFilter
-              filterName={'type'}
-              typeFilters={{
+              filterName={'types'}
+              typesFilters={{
                 agentTypes: { onChangeFilterOptions: onChangeAgentTypesFilter },
-                type: { onChangeFilterOptions: onChangeTypeFilter },
+                actionTypes: { onChangeFilterOptions: onChangeTypeFilter },
               }}
               isFlyout={isFlyout}
               data-test-subj={dataTestSubj}

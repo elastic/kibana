@@ -147,12 +147,24 @@ export const isActionType = (type: string): type is typeof RESPONSE_ACTION_TYPE[
   RESPONSE_ACTION_TYPE.includes(type as typeof RESPONSE_ACTION_TYPE[number]);
 
 export type FilterName = keyof typeof FILTER_NAMES;
+// maps filter name to a function that updates the query state
+export type TypesFilters = {
+  [k in Extract<FilterName, 'agentTypes' | 'actionTypes'>]: {
+    onChangeFilterOptions: (selectedOptions: string[]) => void;
+  };
+};
+
+export type ActionsLogPopupFilters = Extract<
+  FilterName,
+  'actions' | 'hosts' | 'statuses' | 'types'
+>;
+
 export const useActionsLogFilter = ({
   filterName,
   isFlyout,
   searchString,
 }: {
-  filterName: FilterName;
+  filterName: ActionsLogPopupFilters;
   isFlyout: boolean;
   searchString: string;
 }): {
@@ -182,7 +194,7 @@ export const useActionsLogFilter = ({
   } = useActionHistoryUrlParams();
   const isStatusesFilter = filterName === 'statuses';
   const isHostsFilter = filterName === 'hosts';
-  const isTypeFilter = filterName === 'type';
+  const isTypesFilter = filterName === 'types';
   const { data: endpointsList, isFetching } = useGetEndpointsList({
     searchString,
     selectedAgentIds: selectedAgentIdsFromUrl,
@@ -201,7 +213,7 @@ export const useActionsLogFilter = ({
 
   // filter options
   const [items, setItems] = useState<FilterItems>(
-    isTypeFilter
+    isTypesFilter
       ? [...RESPONSE_ACTION_AGENT_TYPE, ...RESPONSE_ACTION_TYPE].map((type) => ({
           key: type,
           label: isAgentType(type) ? getAgentTypeName(type) : getTypeDisplayName(type),

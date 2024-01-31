@@ -389,7 +389,7 @@ describe('Response actions history page', () => {
     });
 
     it('should read and set action type filter values using `types` URL params', () => {
-      const filterPrefix = 'type-filter';
+      const filterPrefix = 'types-filter';
 
       reactTestingLibrary.act(() => {
         history.push(`${MANAGEMENT_PATH}/response_actions_history?types=automated,manual`);
@@ -416,7 +416,7 @@ describe('Response actions history page', () => {
     });
 
     it('should read and set agent type filter values using `agentTypes` URL params', () => {
-      const filterPrefix = 'type-filter';
+      const filterPrefix = 'types-filter';
       reactTestingLibrary.act(() => {
         history.push(`${MANAGEMENT_PATH}/response_actions_history?agentTypes=endpoint`);
       });
@@ -566,7 +566,7 @@ describe('Response actions history page', () => {
     });
 
     it('should set selected action type to URL params using `types`', () => {
-      const filterPrefix = 'type-filter';
+      const filterPrefix = 'types-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
       userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
@@ -583,7 +583,7 @@ describe('Response actions history page', () => {
     });
 
     it('should set selected action type filter options to URL params using `agentTypes`', () => {
-      const filterPrefix = 'type-filter';
+      const filterPrefix = 'types-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
       userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
@@ -666,7 +666,7 @@ describe('Response actions history page', () => {
     });
 
     it('should clear all selected options on `types` filter', () => {
-      const filterPrefix = 'type-filter';
+      const filterPrefix = 'types-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
       userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));

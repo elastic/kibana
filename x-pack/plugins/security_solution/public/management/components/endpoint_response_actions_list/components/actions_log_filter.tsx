@@ -15,7 +15,8 @@ import {
 import { ActionsLogFilterPopover } from './actions_log_filter_popover';
 import {
   type FilterItems,
-  type FilterName,
+  type TypesFilters,
+  type ActionsLogPopupFilters,
   useActionsLogFilter,
   isAgentType,
   isActionType,
@@ -24,23 +25,16 @@ import { ClearAllButton } from './clear_all_button';
 import { UX_MESSAGES } from '../translations';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
-// maps filter name to a function that updates the query state
-type TypeFilters = {
-  [k in Extract<FilterName, 'agentTypes' | 'type'>]: {
-    onChangeFilterOptions: (selectedOptions: string[]) => void;
-  };
-};
-
 export const ActionsLogFilter = memo(
   ({
     filterName,
-    typeFilters,
+    typesFilters,
     isFlyout,
     onChangeFilterOptions,
     'data-test-subj': dataTestSubj,
   }: {
-    filterName: FilterName;
-    typeFilters?: TypeFilters;
+    filterName: ActionsLogPopupFilters;
+    typesFilters?: TypesFilters;
     isFlyout: boolean;
     onChangeFilterOptions?: (selectedOptions: string[]) => void;
     'data-test-subj'?: string;
@@ -107,7 +101,7 @@ export const ActionsLogFilter = memo(
     }, [areHostsSelectedOnMount, shouldPinSelectedHosts, items]);
 
     const isSearchable = useMemo(
-      () => filterName !== 'statuses' && filterName !== 'type',
+      () => filterName !== 'statuses' && filterName !== 'types',
       [filterName]
     );
 
@@ -158,7 +152,7 @@ export const ActionsLogFilter = memo(
             setUrlHostsFilters(selectedItems.join());
           } else if (filterName === 'statuses') {
             setUrlStatusesFilters(selectedItems.join());
-          } else if (filterName === 'type') {
+          } else if (filterName === 'types') {
             setUrlTypesFilters({
               agentTypes: groupedSelectedTypeFilterOptions.agentTypes.join(),
               actionTypes: groupedSelectedTypeFilterOptions.actionTypes.join(),
@@ -170,9 +164,13 @@ export const ActionsLogFilter = memo(
         }
 
         // update overall query state
-        if (typeFilters && typeof onChangeFilterOptions === 'undefined') {
-          typeFilters.agentTypes.onChangeFilterOptions(groupedSelectedTypeFilterOptions.agentTypes);
-          typeFilters.type.onChangeFilterOptions(groupedSelectedTypeFilterOptions.actionTypes);
+        if (typesFilters && typeof onChangeFilterOptions === 'undefined') {
+          typesFilters.agentTypes.onChangeFilterOptions(
+            groupedSelectedTypeFilterOptions.agentTypes
+          );
+          typesFilters.actionTypes.onChangeFilterOptions(
+            groupedSelectedTypeFilterOptions.actionTypes
+          );
         } else {
           if (typeof onChangeFilterOptions !== 'undefined') {
             onChangeFilterOptions(selectedItems);
@@ -180,7 +178,7 @@ export const ActionsLogFilter = memo(
         }
       },
       [
-        typeFilters,
+        typesFilters,
         setItems,
         isFlyout,
         onChangeFilterOptions,
@@ -212,15 +210,15 @@ export const ActionsLogFilter = memo(
           setUrlHostsFilters('');
         } else if (filterName === 'statuses') {
           setUrlStatusesFilters('');
-        } else if (filterName === 'type') {
+        } else if (filterName === 'types') {
           setUrlTypesFilters({ agentTypes: '', actionTypes: '' });
         }
       }
 
       // update query state for flyout filters
-      if (typeFilters && typeof onChangeFilterOptions === 'undefined') {
-        typeFilters.agentTypes.onChangeFilterOptions([]);
-        typeFilters.type.onChangeFilterOptions([]);
+      if (typesFilters && typeof onChangeFilterOptions === 'undefined') {
+        typesFilters.agentTypes.onChangeFilterOptions([]);
+        typesFilters.actionTypes.onChangeFilterOptions([]);
       } else {
         if (typeof onChangeFilterOptions !== 'undefined') {
           onChangeFilterOptions([]);
@@ -230,7 +228,7 @@ export const ActionsLogFilter = memo(
       setItems,
       items,
       isFlyout,
-      typeFilters,
+      typesFilters,
       onChangeFilterOptions,
       filterName,
       setUrlActionsFilters,

@@ -25,7 +25,7 @@ const commandsSchema = schema.oneOf(
 // @ts-expect-error TS2769: No overload matches this call
 const statusesSchema = schema.oneOf(RESPONSE_ACTION_STATUS.map((status) => schema.literal(status)));
 // @ts-expect-error TS2769: No overload matches this call
-const typesSchema = schema.oneOf(RESPONSE_ACTION_TYPE.map((type) => schema.literal(type)));
+const actionTypesSchema = schema.oneOf(RESPONSE_ACTION_TYPE.map((type) => schema.literal(type)));
 
 const agentTypesSchema = schema.oneOf(
   // @ts-expect-error TS2769: No overload matches this call
@@ -86,8 +86,12 @@ export const EndpointActionListRequestSchema = {
         }),
       ])
     ),
+    // action types
     types: schema.maybe(
-      schema.oneOf([schema.arrayOf(typesSchema, { minSize: 1, maxSize: 2 }), typesSchema])
+      schema.oneOf([
+        schema.arrayOf(actionTypesSchema, { minSize: 1, maxSize: 2 }),
+        actionTypesSchema,
+      ])
     ),
   }),
 };
