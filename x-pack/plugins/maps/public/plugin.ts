@@ -262,8 +262,8 @@ export class MapsPlugin
 }
 
 registerSavedObjectToPanelMethod(CONTENT_ID, (savedObject) => {
-  if (savedObject.managed) {
-    return { id: savedObject.id } as SavedObjectEmbeddableInput;
+  if (!savedObject.managed) {
+    return { savedObjectId: savedObject.id } as SavedObjectEmbeddableInput;
   }
 
   return {

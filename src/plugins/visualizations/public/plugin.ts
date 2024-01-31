@@ -119,12 +119,13 @@ import {
 } from './services';
 import { VisualizeConstants } from '../common/constants';
 import { EditInLensAction } from './actions/edit_in_lens_action';
-import { ListingViewRegistry } from './types';
+import { ListingViewRegistry, SerializedVis } from './types';
 import {
   LATEST_VERSION,
   CONTENT_ID,
   VisualizationSavedObjectAttributes,
 } from '../common/content_management';
+import { SerializedVisData } from '../common';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -489,7 +490,20 @@ registerSavedObjectToPanelMethod(CONTENT_ID, (_savedObject) => {
     return input;
   }
 
+  // data is not always defined, so I added a default value since the extract
+  // routine in the embeddable factory expects it to be there
+  const savedVis = JSON.parse(visState) as Omit<SerializedVis, 'data'> & {
+    data?: SerializedVisData;
+  };
+
+  if (!savedVis.data) {
+    savedVis.data = {
+      searchSource: {},
+      aggs: [],
+    };
+  }
+
   return {
-    savedVis: JSON.parse(visState),
+    savedVis,
   } as Partial<VisualizeInput>;
 });
