@@ -811,7 +811,6 @@ export const RuleForm = ({
           </EuiFormRow>
         </EuiFlexItem>
       )}
-
       {shouldShowConsumerSelect && (
         <>
           <EuiSpacer size="m" />
