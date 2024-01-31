@@ -90,23 +90,3 @@ export const loginWithUser = (user: User): void => {
 export const logout = (): void => {
   cy.visit(LOGOUT_URL);
 };
-
-export const activateUser = (role?: SecurityRoleName): void => {
-  const user = role
-    ? {
-        username: role,
-        password: 'changeme',
-      }
-    : defaultUser;
-
-  cy.request({
-    url: `${Cypress.env('ELASTICSEARCH_URL')}/_security/profile/_activate`,
-    method: 'POST',
-    body: {
-      grant_type: 'password',
-      username: user.username,
-      password: user.password,
-    },
-    headers: API_HEADERS,
-  });
-};
