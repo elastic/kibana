@@ -1258,7 +1258,7 @@ export default function (providerContext: FtrProviderContext) {
       let expectedAssets: Array<{ type: string; id: string }> = [];
       beforeEach(async function () {
         packagePolicyIds = [];
-        expectedAssets = [{ id: 'ecs@mappings', type: 'component_template' }];
+        expectedAssets = [];
         const { body: agentPolicyResponse } = await supertest
           .post(`/api/fleet/agent_policies`)
           .set('kbn-xsrf', 'xxxx')

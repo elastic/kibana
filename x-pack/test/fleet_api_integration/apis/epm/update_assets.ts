@@ -453,10 +453,6 @@ export default function (providerContext: FtrProviderContext) {
             type: 'component_template',
           },
           {
-            id: 'ecs@mappings',
-            type: 'component_template',
-          },
-          {
             id: 'logs-all_assets.test_logs2',
             type: 'index_template',
           },
