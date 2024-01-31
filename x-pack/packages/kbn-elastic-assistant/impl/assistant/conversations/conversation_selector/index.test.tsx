@@ -75,7 +75,10 @@ describe('Conversation selector', () => {
     );
     fireEvent.click(getByTestId('comboBoxSearchInput'));
     fireEvent.click(getByTestId(`convo-option-${alertConvo.id}`));
-    expect(onConversationSelected).toHaveBeenCalledWith(alertConvo.id, alertConvo.title);
+    expect(onConversationSelected).toHaveBeenCalledWith({
+      cId: alertConvo.id,
+      cTitle: alertConvo.title,
+    });
   });
   it('On clear input, clears selected options', () => {
     const { getByPlaceholderText, queryByPlaceholderText, getByTestId, queryByTestId } = render(
@@ -103,7 +106,10 @@ describe('Conversation selector', () => {
       code: 'Enter',
       charCode: 13,
     });
-    expect(onConversationSelected).toHaveBeenCalledWith(customOption, customOption);
+    expect(onConversationSelected).toHaveBeenCalledWith({
+      cId: customOption,
+      cTitle: customOption,
+    });
   });
 
   it('Only custom options can be deleted', () => {
@@ -157,7 +163,10 @@ describe('Conversation selector', () => {
     fireEvent.click(
       within(getByTestId(`convo-option-${customConvo.id}`)).getByTestId('delete-option')
     );
-    expect(onConversationSelected).toHaveBeenCalledWith(welcomeConvo.id, welcomeConvo.title);
+    expect(onConversationSelected).toHaveBeenCalledWith({
+      cId: welcomeConvo.id,
+      cTitle: welcomeConvo.title,
+    });
   });
 
   it('Left arrow selects first conversation', () => {
@@ -175,7 +184,10 @@ describe('Conversation selector', () => {
       code: 'ArrowLeft',
       charCode: 27,
     });
-    expect(onConversationSelected).toHaveBeenCalledWith(alertConvo.id, alertConvo.title);
+    expect(onConversationSelected).toHaveBeenCalledWith({
+      cId: alertConvo.id,
+      cTitle: alertConvo.title,
+    });
   });
 
   it('Right arrow selects last conversation', () => {
@@ -191,7 +203,10 @@ describe('Conversation selector', () => {
       code: 'ArrowRight',
       charCode: 26,
     });
-    expect(onConversationSelected).toHaveBeenCalledWith(customConvo.id, customConvo.title);
+    expect(onConversationSelected).toHaveBeenCalledWith({
+      cId: customConvo.id,
+      cTitle: customConvo.title,
+    });
   });
 
   it('Right arrow does nothing when ctrlKey is false', () => {

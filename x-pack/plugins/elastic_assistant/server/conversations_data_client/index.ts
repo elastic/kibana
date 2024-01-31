@@ -28,11 +28,6 @@ import { getConversation } from './get_conversation';
 import { deleteConversation } from './delete_conversation';
 import { appendConversationMessages } from './append_conversation_messages';
 
-export enum OpenAiProviderType {
-  OpenAi = 'OpenAI',
-  AzureAi = 'Azure OpenAI',
-}
-
 export interface AIAssistantConversationsDataClientParams {
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
   kibanaVersion: string;
@@ -188,11 +183,12 @@ export class AIAssistantConversationsDataClient {
    */
   public createConversation = async (
     conversation: ConversationCreateProps
-  ): Promise<ConversationResponse> => {
+  ): Promise<ConversationResponse | null> => {
     const { currentUser } = this;
     const esClient = await this.options.elasticsearchClientPromise;
     return createConversation({
       esClient,
+      logger: this.options.logger,
       conversationIndex: this.indexTemplateAndPattern.alias,
       spaceId: this.spaceId,
       user: { id: currentUser?.profile_uid, name: currentUser?.username },
@@ -241,6 +237,8 @@ export class AIAssistantConversationsDataClient {
       esClient,
       conversationIndex: this.indexTemplateAndPattern.alias,
       id,
+      logger: this.options.logger,
+      user: { id: this.currentUser?.profile_uid, name: this.currentUser?.username },
     });
   };
 }

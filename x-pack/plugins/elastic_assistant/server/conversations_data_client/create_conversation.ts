@@ -6,15 +6,18 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import {
   ConversationCreateProps,
   ConversationResponse,
+  MessageRole,
+  Provider,
   Reader,
   Replacement,
   UUID,
 } from '../schemas/conversations/common_attributes.gen';
+import { getConversation } from './get_conversation';
 
 export interface CreateMessageSchema {
   '@timestamp'?: string;
@@ -26,7 +29,7 @@ export interface CreateMessageSchema {
     content: string;
     reader?: Reader;
     replacements?: Replacement;
-    role: 'user' | 'assistant' | 'system';
+    role: MessageRole;
     is_error?: boolean;
     presentation?: {
       delay?: number;
@@ -41,7 +44,7 @@ export interface CreateMessageSchema {
     connector_id?: string;
     connector_type_title?: string;
     default_system_prompt_id?: string;
-    provider?: 'OpenAI' | 'Azure OpenAI';
+    provider?: Provider;
     model?: string;
   };
   is_default?: boolean;
@@ -57,6 +60,7 @@ export interface CreateMessageSchema {
 
 export interface CreateConversationParams {
   esClient: ElasticsearchClient;
+  logger: Logger;
   conversationIndex: string;
   spaceId: string;
   user: { id?: UUID; name?: string };
@@ -69,21 +73,30 @@ export const createConversation = async ({
   spaceId,
   user,
   conversation,
-}: CreateConversationParams): Promise<ConversationResponse> => {
+  logger,
+}: CreateConversationParams): Promise<ConversationResponse | null> => {
   const createdAt = new Date().toISOString();
   const body = transformToCreateScheme(createdAt, spaceId, user, conversation);
+  try {
+    const response = await esClient.create({
+      body,
+      id: uuidv4(),
+      index: conversationIndex,
+      refresh: 'wait_for',
+    });
 
-  const response = await esClient.create({
-    body,
-    id: uuidv4(),
-    index: conversationIndex,
-    refresh: 'wait_for',
-  });
-
-  return {
-    ...transform(body),
-    id: response._id,
-  };
+    const createdConversation = await getConversation({
+      esClient,
+      conversationIndex,
+      id: response._id,
+      logger,
+      user,
+    });
+    return createdConversation;
+  } catch (err) {
+    logger.warn(`Error creating conversation: ${err} with title: ${conversation.title}`);
+    throw err;
+  }
 };
 
 export const transformToCreateScheme = (
@@ -98,7 +111,7 @@ export const transformToCreateScheme = (
     messages,
     replacements,
   }: ConversationCreateProps
-) => {
+): CreateMessageSchema => {
   return {
     '@timestamp': createdAt,
     created_at: createdAt,
@@ -131,37 +144,3 @@ export const transformToCreateScheme = (
     namespace: spaceId,
   };
 };
-
-function transform(conversationSchema: CreateMessageSchema): Omit<ConversationResponse, 'id'> {
-  return {
-    timestamp: conversationSchema['@timestamp'],
-    createdAt: conversationSchema.created_at,
-    user: conversationSchema.user,
-    title: conversationSchema.title,
-    apiConfig: {
-      connectorId: conversationSchema.api_config?.connector_id,
-      connectorTypeTitle: conversationSchema.api_config?.connector_type_title,
-      defaultSystemPromptId: conversationSchema.api_config?.default_system_prompt_id,
-      model: conversationSchema.api_config?.model,
-      provider: conversationSchema.api_config?.provider as 'OpenAI' | 'Azure OpenAI' | undefined,
-    },
-    excludeFromLastConversationStorage: conversationSchema.exclude_from_last_conversation_storage,
-    isDefault: conversationSchema.is_default,
-    messages: conversationSchema.messages?.map((message) => ({
-      timestamp: message['@timestamp'],
-      content: message.content,
-      isError: message.is_error,
-      presentation: message.presentation,
-      reader: message.reader,
-      replacements: message.replacements as Replacement,
-      role: message.role,
-      traceData: {
-        traceId: message.trace_data?.trace_id,
-        transactionId: message.trace_data?.transaction_id,
-      },
-    })),
-    updatedAt: conversationSchema.updated_at,
-    replacements: conversationSchema.replacements as Replacement,
-    namespace: conversationSchema.namespace,
-  };
-}

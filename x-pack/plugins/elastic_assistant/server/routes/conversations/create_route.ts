@@ -59,6 +59,13 @@ export const createConversationRoute = (router: ElasticAssistantPluginRouter): v
             });
           }
           const createdConversation = await dataClient?.createConversation(request.body);
+
+          if (createdConversation == null) {
+            return assistantResponse.error({
+              body: `conversation with title: "${request.body.title}" was not created`,
+              statusCode: 400,
+            });
+          }
           return response.ok({
             body: ConversationResponse.parse(createdConversation),
           });

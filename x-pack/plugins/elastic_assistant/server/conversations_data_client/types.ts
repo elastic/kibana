@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+import {
+  MessageRole,
+  Provider,
+  Reader,
+  Replacement,
+} from '../schemas/conversations/common_attributes.gen';
+
 export interface SearchEsConversationSchema {
   id: string;
   '@timestamp': string;
@@ -13,9 +20,9 @@ export interface SearchEsConversationSchema {
   messages?: Array<{
     '@timestamp': string;
     content: string;
-    reader?: string | undefined;
-    replacements?: unknown;
-    role: 'user' | 'assistant' | 'system';
+    reader?: Reader;
+    replacements?: Replacement;
+    role: MessageRole;
     is_error?: boolean;
     presentation?: {
       delay?: number;
@@ -30,12 +37,12 @@ export interface SearchEsConversationSchema {
     connector_id?: string;
     connector_type_title?: string;
     default_system_prompt_id?: string;
-    provider?: 'OpenAI' | 'Azure OpenAI';
+    provider?: Provider;
     model?: string;
   };
   is_default?: boolean;
   exclude_from_last_conversation_storage?: boolean;
-  replacements?: unknown;
+  replacements?: Replacement;
   user?: {
     id?: string;
     name?: string;

@@ -5,20 +5,25 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { getConversation } from './get_conversation';
+import { UUID } from '../schemas/conversations/common_attributes.gen';
 
 export interface DeleteConversationParams {
   esClient: ElasticsearchClient;
   conversationIndex: string;
   id: string;
+  logger: Logger;
+  user: { id?: UUID; name?: string };
 }
 export const deleteConversation = async ({
   esClient,
   conversationIndex,
   id,
+  logger,
+  user,
 }: DeleteConversationParams): Promise<string | null> => {
-  const conversation = await getConversation(esClient, conversationIndex, id);
+  const conversation = await getConversation({ esClient, conversationIndex, id, logger, user });
   if (conversation !== null) {
     const response = await esClient.deleteByQuery({
       body: {

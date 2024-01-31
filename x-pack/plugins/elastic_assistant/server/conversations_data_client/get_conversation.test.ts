@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getConversation } from './get_conversation';
 import { estypes } from '@elastic/elasticsearch';
 import { SearchEsConversationSchema } from './types';
 import { ConversationResponse } from '../schemas/conversations/common_attributes.gen';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 export const getConversationResponseMock = (): ConversationResponse => ({
   createdAt: '2020-04-20T15:25:31.830Z',
@@ -83,8 +85,10 @@ export const getSearchConversationMock =
   });
 
 describe('getConversation', () => {
+  let loggerMock: Logger;
   beforeEach(() => {
     jest.clearAllMocks();
+    loggerMock = loggingSystemMock.createLogger();
   });
 
   afterEach(() => {
@@ -95,11 +99,13 @@ describe('getConversation', () => {
     const data = getSearchConversationMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.search.mockResponse(data);
-    const conversation = await getConversation(
+    const conversation = await getConversation({
       esClient,
-      '.kibana-elastic-ai-assistant-conversations',
-      '1'
-    );
+      conversationIndex: '.kibana-elastic-ai-assistant-conversations',
+      id: '1',
+      logger: loggerMock,
+      user: { name: 'test' },
+    });
     const expected = getConversationResponseMock();
     expect(conversation).toEqual(expected);
   });
@@ -109,11 +115,13 @@ describe('getConversation', () => {
     data.hits.hits = [];
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.search.mockResponse(data);
-    const conversation = await getConversation(
+    const conversation = await getConversation({
       esClient,
-      '.kibana-elastic-ai-assistant-conversations',
-      '1'
-    );
+      conversationIndex: '.kibana-elastic-ai-assistant-conversations',
+      id: '1',
+      logger: loggerMock,
+      user: { name: 'test' },
+    });
     expect(conversation).toEqual(null);
   });
 });

@@ -49,6 +49,10 @@ export const getConversationResponseMock = (): ConversationResponse => ({
   isDefault: false,
   updatedAt: '2020-04-20T15:25:31.830Z',
   timestamp: '2020-04-20T15:25:31.830Z',
+  user: {
+    id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+    name: 'elastic',
+  },
 });
 
 jest.mock('./get_conversation', () => ({
@@ -77,7 +81,11 @@ describe('updateConversation', () => {
       logger: loggerMock.create(),
       conversationIndex: 'index-1',
       existingConversation,
-      conversation,
+      conversationUpdateProps: conversation,
+      user: {
+        id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+        name: 'elastic',
+      },
     });
     const expected: ConversationResponse = {
       ...getConversationResponseMock(),
@@ -98,7 +106,11 @@ describe('updateConversation', () => {
       logger: loggerMock.create(),
       conversationIndex: 'index-1',
       existingConversation,
-      conversation,
+      conversationUpdateProps: conversation,
+      user: {
+        id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+        name: 'elastic',
+      },
     });
     expect(updatedList).toEqual(null);
   });
@@ -115,7 +127,11 @@ describe('updateConversation', () => {
         logger: loggerMock.create(),
         conversationIndex: 'index-1',
         existingConversation,
-        conversation,
+        conversationUpdateProps: conversation,
+        user: {
+          id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+          name: 'elastic',
+        },
       })
     ).rejects.toThrow('No conversation has been updated');
   });

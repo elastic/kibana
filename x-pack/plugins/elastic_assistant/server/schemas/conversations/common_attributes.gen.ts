@@ -83,6 +83,22 @@ export type Reader = z.infer<typeof Reader>;
 export const Reader = z.object({}).catchall(z.unknown());
 
 /**
+ * Provider
+ */
+export type Provider = z.infer<typeof Provider>;
+export const Provider = z.enum(['OpenAI', 'Azure OpenAI']);
+export type ProviderEnum = typeof Provider.enum;
+export const ProviderEnum = Provider.enum;
+
+/**
+ * Message role.
+ */
+export type MessageRole = z.infer<typeof MessageRole>;
+export const MessageRole = z.enum(['system', 'user', 'assistant']);
+export type MessageRoleEnum = typeof MessageRole.enum;
+export const MessageRoleEnum = MessageRole.enum;
+
+/**
  * AI assistant conversation message.
  */
 export type Message = z.infer<typeof Message>;
@@ -99,7 +115,7 @@ export const Message = z.object({
   /**
    * Message role.
    */
-  role: z.enum(['system', 'user', 'assistant']),
+  role: MessageRole,
   /**
    * The timestamp message was sent or received.
    */
@@ -135,7 +151,7 @@ export const ApiConfig = z.object({
   /**
    * Provider
    */
-  provider: z.enum(['OpenAI', 'Azure OpenAI']).optional(),
+  provider: Provider.optional(),
   /**
    * model
    */

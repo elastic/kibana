@@ -11,6 +11,14 @@ import {
   ConversationCreateProps,
   ConversationResponse,
 } from '../schemas/conversations/common_attributes.gen';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { estypes } from '@elastic/elasticsearch';
+import { SearchEsConversationSchema } from './types';
+import { getConversation } from './get_conversation';
+
+jest.mock('./get_conversation', () => ({
+  getConversation: jest.fn(),
+}));
 
 export const getCreateConversationMock = (): ConversationCreateProps => ({
   title: 'test',
@@ -52,9 +60,58 @@ export const getConversationResponseMock = (): ConversationResponse => ({
   },
 });
 
+export const getSearchConversationMock =
+  (): estypes.SearchResponse<SearchEsConversationSchema> => ({
+    _scroll_id: '123',
+    _shards: {
+      failed: 0,
+      skipped: 0,
+      successful: 0,
+      total: 0,
+    },
+    hits: {
+      hits: [
+        {
+          _id: '1',
+          _index: '',
+          _score: 0,
+          _source: {
+            '@timestamp': '2020-04-20T15:25:31.830Z',
+            created_at: '2020-04-20T15:25:31.830Z',
+            title: 'title-1',
+            updated_at: '2020-04-20T15:25:31.830Z',
+            messages: [],
+            id: '1',
+            namespace: 'default',
+            is_default: true,
+            exclude_from_last_conversation_storage: false,
+            api_config: {
+              connector_id: 'c1',
+              connector_type_title: 'title-c-1',
+              default_system_prompt_id: 'prompt-1',
+              model: 'test',
+              provider: 'Azure OpenAI',
+            },
+            user: {
+              id: '1111',
+              name: 'elastic',
+            },
+            replacements: undefined,
+          },
+        },
+      ],
+      max_score: 0,
+      total: 1,
+    },
+    timed_out: false,
+    took: 10,
+  });
+
 describe('createConversation', () => {
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   beforeEach(() => {
     jest.clearAllMocks();
+    logger = loggingSystemMock.createLogger();
   });
 
   afterEach(() => {
@@ -73,6 +130,10 @@ describe('createConversation', () => {
 
   test('it returns a conversation as expected with the id changed out for the elastic id', async () => {
     const conversation = getCreateConversationMock();
+    (getConversation as unknown as jest.Mock).mockResolvedValueOnce({
+      ...getConversationResponseMock(),
+      id: 'elastic-id-123',
+    });
 
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.create.mockResponse(
@@ -85,6 +146,7 @@ describe('createConversation', () => {
       spaceId: 'test',
       user: { name: 'test' },
       conversation,
+      logger,
     });
 
     const expected: ConversationResponse = {
@@ -100,6 +162,12 @@ describe('createConversation', () => {
       ...getCreateConversationMock(),
       title: 'test new title',
     };
+    (getConversation as unknown as jest.Mock).mockResolvedValueOnce({
+      ...getConversationResponseMock(),
+      id: 'elastic-id-123',
+      title: 'test new title',
+    });
+
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.create.mockResponse(
       // @ts-expect-error not full response interface
@@ -111,6 +179,7 @@ describe('createConversation', () => {
       spaceId: 'test',
       user: { name: 'test' },
       conversation,
+      logger,
     });
 
     const expected: ConversationResponse = {
@@ -123,6 +192,8 @@ describe('createConversation', () => {
 
   test('It calls "esClient" with body, id, and conversationIndex', async () => {
     const conversation = getCreateConversationMock();
+    (getConversation as unknown as jest.Mock).mockResolvedValueOnce(getConversationResponseMock());
+
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     await createConversation({
       esClient,
@@ -130,6 +201,7 @@ describe('createConversation', () => {
       spaceId: 'test',
       user: { name: 'test' },
       conversation,
+      logger,
     });
 
     expect(esClient.create).toBeCalled();
@@ -137,6 +209,11 @@ describe('createConversation', () => {
 
   test('It returns an auto-generated id if id is sent in undefined', async () => {
     const conversation = getCreateConversationMock();
+    (getConversation as unknown as jest.Mock).mockResolvedValueOnce({
+      ...getConversationResponseMock(),
+      id: 'elastic-id-123',
+    });
+
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.create.mockResponse(
       // @ts-expect-error not full response interface
@@ -148,6 +225,7 @@ describe('createConversation', () => {
       spaceId: 'test',
       user: { name: 'test' },
       conversation,
+      logger,
     });
 
     const expected: ConversationResponse = {

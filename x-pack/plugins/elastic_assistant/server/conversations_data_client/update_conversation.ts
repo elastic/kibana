@@ -12,6 +12,8 @@ import {
   Reader,
   ConversationUpdateProps,
   UUID,
+  Provider,
+  MessageRole,
 } from '../schemas/conversations/common_attributes.gen';
 import { getConversation } from './get_conversation';
 
@@ -23,7 +25,7 @@ export interface UpdateConversationSchema {
     content: string;
     reader?: Reader;
     replacements?: Replacement;
-    role: 'user' | 'assistant' | 'system';
+    role: MessageRole;
     is_error?: boolean;
     presentation?: {
       delay?: number;
@@ -38,7 +40,7 @@ export interface UpdateConversationSchema {
     connector_id?: string;
     connector_type_title?: string;
     default_system_prompt_id?: string;
-    provider?: 'OpenAI' | 'Azure OpenAI';
+    provider?: Provider;
     model?: string;
   };
   exclude_from_last_conversation_storage?: boolean;

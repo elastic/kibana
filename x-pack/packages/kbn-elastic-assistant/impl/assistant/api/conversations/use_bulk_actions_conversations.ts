@@ -119,7 +119,7 @@ export const bulkChangeConversations = (
     body: JSON.stringify({
       update: conversationsToUpdate,
       create: conversationsToCreate,
-      delete: conversationsActions.delete?.ids,
+      delete: conversationsActions.delete,
     }),
   });
 };

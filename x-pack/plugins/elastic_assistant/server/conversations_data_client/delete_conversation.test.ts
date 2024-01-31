@@ -9,6 +9,7 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { DeleteConversationParams, deleteConversation } from './delete_conversation';
 import { getConversation } from './get_conversation';
 import { ConversationResponse } from '../schemas/conversations/common_attributes.gen';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 jest.mock('./get_conversation', () => ({
   getConversation: jest.fn(),
@@ -33,12 +34,21 @@ export const getConversationResponseMock = (): ConversationResponse => ({
   isDefault: false,
   updatedAt: Date.now().toLocaleString(),
   timestamp: Date.now().toLocaleString(),
+  user: {
+    id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+    name: 'elastic',
+  },
 });
 
 export const getDeleteConversationOptionsMock = (): DeleteConversationParams => ({
   esClient: elasticsearchClientMock.createScopedClusterClient().asCurrentUser,
   id: 'test',
-  conversationIndex: '',
+  conversationIndex: '.kibana-elastic-ai-assistant-conversations',
+  logger: loggingSystemMock.createLogger(),
+  user: {
+    id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+    name: 'elastic',
+  },
 });
 
 describe('deleteConversation', () => {

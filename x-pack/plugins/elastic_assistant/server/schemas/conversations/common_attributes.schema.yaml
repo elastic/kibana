@@ -58,6 +58,21 @@ components:
       type: object
       additionalProperties: true
 
+    Provider:
+      type: string
+      description: Provider
+      enum:
+        - OpenAI
+        - Azure OpenAI
+
+    MessageRole:
+      type: string
+      description: Message role.
+      enum:
+        - system 
+        - user
+        - assistant
+
     Message:
       type: object
       description: AI assistant conversation message.
@@ -75,12 +90,8 @@ components:
         replacements:
           $ref: '#/components/schemas/Replacement'
         role:
-          type: string
+          $ref: '#/components/schemas/MessageRole'
           description: Message role.
-          enum:
-            - system 
-            - user
-            - assistant
         timestamp:
           $ref: '#/components/schemas/NonEmptyString'
           description: The timestamp message was sent or received.         
@@ -107,11 +118,8 @@ components:
           type: string
           description: defaultSystemPromptId
         provider:
-          type: string
+          $ref: '#/components/schemas/Provider'
           description: Provider
-          enum:
-            - OpenAI
-            - Azure OpenAI
         model:
           type: string
           description: model 

@@ -50,7 +50,7 @@ export const deleteConversationRoute = (router: ElasticAssistantPluginRouter) =>
           }
           await dataClient?.deleteConversation(id);
 
-          return response.ok();
+          return response.ok({ body: {} });
         } catch (err) {
           const error = transformError(err);
           return assistantResponse.error({
