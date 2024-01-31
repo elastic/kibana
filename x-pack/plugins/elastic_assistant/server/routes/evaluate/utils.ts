@@ -12,11 +12,7 @@ import type { Logger } from '@kbn/core/server';
 import type { Run } from 'langsmith/schemas';
 import { ToolingLog } from '@kbn/tooling-log';
 import { LangChainTracer } from 'langchain/callbacks';
-<<<<<<< HEAD
-import { Dataset } from '../../schemas/evaluate/post_evaluate_route.gen';
-=======
 import { Dataset } from '@kbn/elastic-assistant-common';
->>>>>>> upstream/main
 
 /**
  * Returns the LangChain `llmType` for the given connectorId/connectors

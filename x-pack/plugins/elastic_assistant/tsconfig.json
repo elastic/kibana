@@ -34,7 +34,6 @@
     "@kbn/core-analytics-server",
     "@kbn/elastic-assistant-common",
     "@kbn/core-http-router-server-mocks",
-<<<<<<< HEAD
     "@kbn/data-stream-adapter",
     "@kbn/alerts-as-data-utils",
     "@kbn/core-saved-objects-utils-server",
@@ -47,9 +46,7 @@
     "@kbn/zod-helpers",
     "@kbn/core-saved-objects-server",
     "@kbn/spaces-plugin",
-=======
     "@kbn/zod-helpers",
->>>>>>> upstream/main
   ],
   "exclude": [
     "target/**/*",

@@ -15,14 +15,10 @@ import {
   getFormattedMessageContent,
   getOptionalRequestParams,
   hasParsableResponse,
-<<<<<<< HEAD:x-pack/packages/kbn-elastic-assistant/impl/assistant/api/index.tsx
 } from '../helpers';
-import { PerformEvaluationParams } from '../settings/evaluation_settings/use_perform_evaluation';
+import { PerformEvaluationParams } from './evaluate/use_perform_evaluation';
 
 export * from './conversations';
-=======
-} from './helpers';
->>>>>>> upstream/main:x-pack/packages/kbn-elastic-assistant/impl/assistant/api.tsx
 
 export interface FetchConnectorExecuteAction {
   isEnabledRAGAlerts: boolean;
@@ -348,7 +344,6 @@ export const deleteKnowledgeBase = async ({
     return error as IHttpFetchError;
   }
 };
-<<<<<<< HEAD:x-pack/packages/kbn-elastic-assistant/impl/assistant/api/index.tsx
 
 export interface PostEvaluationParams {
   http: HttpSetup;
@@ -408,5 +403,3 @@ export const postEvaluation = async ({
     return error as IHttpFetchError;
   }
 };
-=======
->>>>>>> upstream/main:x-pack/packages/kbn-elastic-assistant/impl/assistant/api.tsx

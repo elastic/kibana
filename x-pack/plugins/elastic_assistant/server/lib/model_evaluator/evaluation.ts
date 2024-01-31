@@ -16,7 +16,6 @@ import { Dataset } from '@kbn/elastic-assistant-common';
 import { AgentExecutorEvaluatorWithMetadata } from '../langchain/executors/types';
 import { callAgentWithRetry, getMessageFromLangChainResponse } from './utils';
 import { isLangSmithEnabled, writeLangSmithFeedback } from '../../routes/evaluate/utils';
-import { Dataset } from '../../schemas/evaluate/post_evaluate_route.gen';
 import { ResponseBody } from '../langchain/types';
 
 export interface PerformEvaluationParams {

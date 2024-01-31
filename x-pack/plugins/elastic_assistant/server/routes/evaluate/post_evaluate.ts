@@ -9,9 +9,6 @@ import { type IKibanaResponse, IRouter, KibanaRequest } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { v4 as uuidv4 } from 'uuid';
 
-<<<<<<< HEAD
-import { ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION } from '@kbn/elastic-assistant-common';
-=======
 import {
   API_VERSIONS,
   INTERNAL_API_ACCESS,
@@ -19,7 +16,6 @@ import {
   PostEvaluateRequestQuery,
   PostEvaluateResponse,
 } from '@kbn/elastic-assistant-common';
->>>>>>> upstream/main
 import { ESQL_RESOURCE } from '../knowledge_base/constants';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
@@ -33,26 +29,14 @@ import {
 } from '../../lib/model_evaluator/output_index/utils';
 import { fetchLangSmithDataset, getConnectorName, getLangSmithTracer, getLlmType } from './utils';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
-<<<<<<< HEAD
-import {
-  EvaluateRequestBody,
-  EvaluateRequestQuery,
-} from '../../schemas/evaluate/post_evaluate_route.gen';
-import { buildRouteValidationWithZod } from '../route_validation';
-import { ExecuteConnectorRequestBody } from '../../schemas/actions_connector/post_actions_connector_execute_route.gen';
 
 /**
  * To support additional Agent Executors from the UI, add them to this map
  * and reference your specific AgentExecutor function
  */
-const AGENT_EXECUTOR_MAP: Record<string, AgentExecutor> = {
-  DefaultAgentExecutor: callAgentExecutor,
-  OpenAIFunctionsExecutor: callOpenAIFunctionsExecutor,
-};
-=======
 import { buildRouteValidationWithZod } from '../../schemas/common';
 import { AGENT_EXECUTOR_MAP } from '../../lib/langchain/executors';
->>>>>>> upstream/main
+import { ExecuteConnectorRequestBody } from '../../schemas/actions_connector/post_actions_connector_execute_route.gen';
 
 const DEFAULT_SIZE = 20;
 
@@ -62,31 +46,15 @@ export const postEvaluateRoute = (
 ) => {
   router.versioned
     .post({
-<<<<<<< HEAD
-      access: 'internal',
-      path: EVALUATE,
-
-=======
       access: INTERNAL_API_ACCESS,
       path: EVALUATE,
->>>>>>> upstream/main
+
       options: {
         tags: ['access:elasticAssistant'],
       },
     })
     .addVersion(
       {
-<<<<<<< HEAD
-        version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
-        validate: {
-          request: {
-            body: buildRouteValidationWithZod(EvaluateRequestBody),
-            query: buildRouteValidationWithZod(EvaluateRequestQuery),
-          },
-        },
-      },
-      async (context, request, response) => {
-=======
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
@@ -101,7 +69,6 @@ export const postEvaluateRoute = (
         },
       },
       async (context, request, response): Promise<IKibanaResponse<PostEvaluateResponse>> => {
->>>>>>> upstream/main
         const assistantContext = await context.elasticAssistant;
         const logger = assistantContext.logger;
         const telemetry = assistantContext.telemetry;
@@ -175,11 +142,7 @@ export const postEvaluateRoute = (
 
           // Skeleton request from route to pass to the agents
           // params will be passed to the actions executor
-<<<<<<< HEAD
           const skeletonRequest: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody> = {
-=======
-          const skeletonRequest: KibanaRequest<unknown, unknown, RequestBody> = {
->>>>>>> upstream/main
             ...request,
             body: {
               alertsIndexPattern: '',

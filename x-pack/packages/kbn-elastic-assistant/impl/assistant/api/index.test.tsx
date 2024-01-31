@@ -13,6 +13,7 @@ import {
   fetchConnectorExecuteAction,
   FetchConnectorExecuteAction,
   getKnowledgeBaseStatus,
+  postEvaluation,
   postKnowledgeBase,
 } from '.';
 import type { Conversation, Message } from '../../assistant_context/types';
