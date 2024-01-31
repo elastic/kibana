@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import type { Version } from '@kbn/object-versioning';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 import { MSearchIn, MSearchQuery } from '../../../common';
-import { validate, getServiceObjectTransformFactory } from '../../utils';
+import { validate, disableTransformsCache } from '../../utils';
 import { ContentRegistry } from '../../core/registry';
 import { createMockedStorage } from '../../core/mocks';
 import { EventBus } from '../../core/event_bus';
 import { MSearchService } from '../../core/msearch';
 import { mSearch } from './msearch';
 
+disableTransformsCache();
 const storageContextGetTransforms = jest.fn();
 const spy = () => storageContextGetTransforms;
 
@@ -150,8 +150,6 @@ describe('RPC -> mSearch()', () => {
       const ctx: any = {
         contentRegistry,
         requestHandlerContext,
-        getTransformsFactory: (contentTypeId: string, version: Version) =>
-          getServiceObjectTransformFactory(contentTypeId, version, { cacheEnabled: false }),
         mSearchService,
       };
 
