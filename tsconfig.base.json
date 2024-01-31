@@ -760,6 +760,8 @@
       "@kbn/eso-model-version-example/*": ["examples/eso_model_version_example/*"],
       "@kbn/eso-plugin": ["x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin"],
       "@kbn/eso-plugin/*": ["x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin/*"],
+      "@kbn/esql-utils": ["packages/kbn-esql-utils"],
+      "@kbn/esql-utils/*": ["packages/kbn-esql-utils/*"],
       "@kbn/event-annotation-common": ["packages/kbn-event-annotation-common"],
       "@kbn/event-annotation-common/*": ["packages/kbn-event-annotation-common/*"],
       "@kbn/event-annotation-components": ["packages/kbn-event-annotation-components"],
