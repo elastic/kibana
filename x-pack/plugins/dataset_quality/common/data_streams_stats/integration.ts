@@ -10,7 +10,7 @@ import { IntegrationType } from './types';
 export class Integration {
   name: IntegrationType['name'];
   title: string;
-  version: IntegrationType['version'];
+  version: string;
   icons?: IntegrationType['icons'];
 
   private constructor(integration: Integration) {

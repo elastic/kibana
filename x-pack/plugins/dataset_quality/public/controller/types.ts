@@ -24,10 +24,14 @@ export interface DatasetQualityTableOptions {
   };
 }
 
-export type DatasetQualityFlyoutOptions = Omit<
+type FlyoutOptions = Omit<
   DataStreamStat,
-  'size' | 'sizeBytes' | 'lastActivity' | 'degradedDocs'
+  'type' | 'size' | 'sizeBytes' | 'lastActivity' | 'degradedDocs'
 >;
+
+export interface DatasetQualityFlyoutOptions {
+  dataset?: FlyoutOptions & { type: string };
+}
 
 export interface DatasetQualityPublicState {
   table: DatasetQualityTableOptions;
