@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { UseQueryResult } from '@tanstack/react-query';
 import { EuiEmptyPrompt, EuiIcon, EuiLink, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -322,7 +322,6 @@ export const ComplianceDashboard = () => {
   const getKspmDashboardData = useKspmStatsApi({
     enabled: isCloudSecurityPostureInstalled,
   });
-  const [selectedTab, setSelectedTab] = useState<PosturePolicyTemplate | undefined>(undefined);
 
   const location = useLocation();
   const history = useHistory();
@@ -339,33 +338,23 @@ export const ComplianceDashboard = () => {
     return undefined;
   }, [location.pathname]);
 
-  useEffect(() => {
-    const preferredDashboard = getDefaultTab(
+  const selectTabUrlState = useMemo(() => {
+    const currentOnboardingDashboard = getDefaultTab(
       getSetupStatus,
       getCspmDashboardData.data,
       getKspmDashboardData.data
     );
 
-    const tab = !currentTabUrlState ? preferredDashboard : currentTabUrlState;
-    setSelectedTab(tab);
-  }, [
-    getCspmDashboardData.data,
-    currentTabUrlState,
-    setSelectedTab,
-    getCspmDashboardData.data?.stats?.totalFindings,
-    getKspmDashboardData.data,
-    getKspmDashboardData.data?.stats?.totalFindings,
-    getSetupStatus,
-    getSetupStatus?.cspm?.status,
-    getSetupStatus?.kspm?.status,
-  ]);
+    // if the url state is not set, use the preferred dashboard based on cspm or kspm status
+    // otherwise use the url state to determine the current tab
+    return !currentTabUrlState ? currentOnboardingDashboard : currentTabUrlState;
+  }, [currentTabUrlState, getCspmDashboardData.data, getKspmDashboardData.data, getSetupStatus]);
 
   const tabs = useMemo(() => {
     const navigateToPostureTypeDashboardTab = (
       postureType: PosturePolicyTemplate,
       path: string
     ) => {
-      setSelectedTab(postureType);
       history.push({ pathname: path });
     };
 
@@ -376,32 +365,32 @@ export const ComplianceDashboard = () => {
               defaultMessage: 'Cloud',
             }),
             'data-test-subj': CLOUD_DASHBOARD_TAB,
-            isSelected: selectedTab === POSTURE_TYPE_CSPM,
+            isSelected: selectTabUrlState === POSTURE_TYPE_CSPM,
             onClick: () => {
               navigateToPostureTypeDashboardTab(
                 POSTURE_TYPE_CSPM,
                 cloudPosturePages.cspm_dashboard.path
               );
             },
-            content: <TabContent selectedPostureTypeTab={selectedTab || POSTURE_TYPE_CSPM} />,
+            content: <TabContent selectedPostureTypeTab={selectTabUrlState || POSTURE_TYPE_CSPM} />,
           },
           {
             label: i18n.translate('xpack.csp.dashboardTabs.kubernetesTab.tabTitle', {
               defaultMessage: 'Kubernetes',
             }),
             'data-test-subj': KUBERNETES_DASHBOARD_TAB,
-            isSelected: selectedTab === POSTURE_TYPE_KSPM,
+            isSelected: selectTabUrlState === POSTURE_TYPE_KSPM,
             onClick: () => {
               navigateToPostureTypeDashboardTab(
                 POSTURE_TYPE_KSPM,
                 cloudPosturePages.kspm_dashboard.path
               );
             },
-            content: <TabContent selectedPostureTypeTab={selectedTab || POSTURE_TYPE_KSPM} />,
+            content: <TabContent selectedPostureTypeTab={selectTabUrlState || POSTURE_TYPE_KSPM} />,
           },
         ]
       : [];
-  }, [isCloudSecurityPostureInstalled, selectedTab, history]);
+  }, [isCloudSecurityPostureInstalled, selectTabUrlState, history]);
 
   return (
     <CloudPosturePage>
