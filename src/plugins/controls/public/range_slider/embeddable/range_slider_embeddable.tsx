@@ -12,7 +12,7 @@ import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
 import { lastValueFrom, Subscription, merge, switchMap } from 'rxjs';
-import { distinctUntilChanged, map, skip } from 'rxjs/operators';
+import { distinctUntilChanged, map } from 'rxjs/operators';
 
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
@@ -172,7 +172,6 @@ export class RangeSliderEmbeddable
     this.subscriptions.add(
       merge(dataFetchPipe, valueChangePipe)
         .pipe(
-          skip(1),
           switchMap(async () => {
             try {
               await this.runRangeSliderQuery();
@@ -187,9 +186,8 @@ export class RangeSliderEmbeddable
 
     // publish filters when input changes
     this.subscriptions.add(
-      this.getInput$()
+      valueChangePipe
         .pipe(
-          distinctUntilChanged((a, b) => isEqual(a.value ?? ['', ''], b.value ?? ['', ''])),
           switchMap(async () => {
             const rangeFilter = await this.buildFilter();
             this.dispatch.publishFilters(rangeFilter);
