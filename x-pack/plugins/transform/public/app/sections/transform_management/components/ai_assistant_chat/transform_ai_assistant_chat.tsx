@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { useAppDependencies } from '../../../../app_dependencies';
 
 const explainProcessMessageTitle = i18n.translate('xpack.transform.aiAssistantFlyout.title', {
-  defaultMessage: 'Create Transforms with Elastic AI Assitant',
+  defaultMessage: 'Create or manage transforms with Elastic AI Assitant',
 });
 
 const helpCreateTransformCommand = i18n.translate('xpack.transform.aiAssistantFlyout.command', {
@@ -50,9 +50,9 @@ export const TransformElasticAssistantChat = ({ command = helpCreateTransformCom
                 title={explainProcessMessageTitle}
                 messages={explainProcessMessages}
               />
+              <EuiSpacer size="s" />
             </EuiFlexItem>
           </EuiFlexItem>
-          <EuiSpacer size="m" />
         </EuiFlexGroup>
       ) : null}
     </>
