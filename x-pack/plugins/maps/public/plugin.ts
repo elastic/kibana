@@ -25,7 +25,12 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { VisualizationsSetup, VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import {
+  EmbeddableSetup,
+  EmbeddableStart,
+  registerSavedObjectToPanelMethod,
+  SavedObjectEmbeddableInput,
+} from '@kbn/embeddable-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
@@ -47,6 +52,7 @@ import type {
 } from '@kbn/content-management-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 
+import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import {
   createRegionMapFn,
   GEOHASH_GRID,
@@ -82,7 +88,8 @@ import { MapInspectorView } from './inspector/map_adapter/map_inspector_view';
 import { VectorTileInspectorView } from './inspector/vector_tile_adapter/vector_tile_inspector_view';
 
 import { setupLensChoroplethChart } from './lens';
-import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
+import { CONTENT_ID, LATEST_VERSION, MapAttributes } from '../common/content_management';
+import { savedObjectToEmbeddableAttributes } from './map_attribute_service';
 
 export interface MapsPluginSetupDependencies {
   cloud?: CloudSetup;
@@ -253,3 +260,13 @@ export class MapsPlugin
     };
   }
 }
+
+registerSavedObjectToPanelMethod(CONTENT_ID, (savedObject) => {
+  if (savedObject.managed) {
+    return { id: savedObject.id } as SavedObjectEmbeddableInput;
+  }
+
+  return {
+    attributes: savedObjectToEmbeddableAttributes(savedObject as SavedObjectCommon<MapAttributes>),
+  };
+});

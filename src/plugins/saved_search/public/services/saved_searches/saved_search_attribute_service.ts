@@ -9,6 +9,8 @@
 import type { AttributeService, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
+import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
+import { SavedSearchAttributes } from '../../../common';
 import type {
   SavedSearch,
   SavedSearchByValueAttributes,
@@ -41,6 +43,13 @@ export type SavedSearchAttributeService = AttributeService<
   SavedSearchUnwrapMetaInfo
 >;
 
+export const savedObjectToEmbeddableAttributes = (
+  savedObject: SavedObjectCommon<SavedSearchAttributes>
+) => ({
+  ...savedObject.attributes,
+  references: savedObject.references,
+});
+
 export function getSavedSearchAttributeService(
   services: SavedSearchesServiceDeps & {
     embeddable: EmbeddableStart;
@@ -67,10 +76,7 @@ export function getSavedSearchAttributeService(
       const so = await getSearchSavedObject(savedObjectId, createGetSavedSearchDeps(services));
 
       return {
-        attributes: {
-          ...so.item.attributes,
-          references: so.item.references,
-        },
+        attributes: savedObjectToEmbeddableAttributes(so.item),
         metaInfo: {
           sharingSavedObjectProps: so.meta,
           managed: so.item.managed,

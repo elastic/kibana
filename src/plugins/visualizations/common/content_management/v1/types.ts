@@ -50,6 +50,7 @@ export interface VisualizationSavedObject {
   attributes: VisualizationSavedObjectAttributes;
   references: Reference[];
   namespaces?: string[];
+  managed: boolean;
   originId?: string;
   error?: {
     error: string;

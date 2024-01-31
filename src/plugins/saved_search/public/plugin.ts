@@ -17,7 +17,12 @@ import type {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import type { SOWithMetadata } from '@kbn/content-management-utils';
-import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import {
+  EmbeddableStart,
+  registerSavedObjectToPanelMethod,
+  SavedObjectEmbeddableInput,
+} from '@kbn/embeddable-plugin/public';
+import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import {
   getSavedSearch,
   saveSavedSearch,
@@ -35,6 +40,7 @@ import {
   getSavedSearchAttributeService,
   toSavedSearch,
 } from './services/saved_searches';
+import { savedObjectToEmbeddableAttributes } from './services/saved_searches/saved_search_attribute_service';
 
 /**
  * Saved search plugin public Setup contract
@@ -147,3 +153,15 @@ export class SavedSearchPublicPlugin
     };
   }
 }
+
+registerSavedObjectToPanelMethod(SavedSearchType, (savedObject) => {
+  if (savedObject.managed) {
+    return { id: savedObject.id } as SavedObjectEmbeddableInput;
+  }
+
+  return {
+    attributes: savedObjectToEmbeddableAttributes(
+      savedObject as SavedObjectCommon<SavedSearchAttributes>
+    ),
+  };
+});

@@ -47,7 +47,12 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import {
+  EmbeddableSetup,
+  EmbeddableStart,
+  registerSavedObjectToPanelMethod,
+  SavedObjectEmbeddableInput,
+} from '@kbn/embeddable-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
@@ -65,6 +70,7 @@ import {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
+import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisualizeServices } from './visualize_app/types';
 import {
@@ -83,6 +89,7 @@ import {
   createVisEmbeddableFromObject,
   VISUALIZE_EMBEDDABLE_TYPE,
   VisualizeEmbeddableFactory,
+  VisualizeInput,
 } from './embeddable';
 import {
   setUISettings,
@@ -113,7 +120,11 @@ import {
 import { VisualizeConstants } from '../common/constants';
 import { EditInLensAction } from './actions/edit_in_lens_action';
 import { ListingViewRegistry } from './types';
-import { LATEST_VERSION, CONTENT_ID } from '../common/content_management';
+import {
+  LATEST_VERSION,
+  CONTENT_ID,
+  VisualizationSavedObjectAttributes,
+} from '../common/content_management';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -464,3 +475,21 @@ export class VisualizationsPlugin
     }
   }
 }
+
+registerSavedObjectToPanelMethod(CONTENT_ID, (_savedObject) => {
+  const savedObject = _savedObject as SavedObjectCommon<VisualizationSavedObjectAttributes>;
+
+  const visState = savedObject.attributes.visState;
+
+  // not sure if visState actually is ever undefined, but following the type
+  if (savedObject.managed || !visState) {
+    const input: Pick<SavedObjectEmbeddableInput, 'savedObjectId'> = {
+      savedObjectId: savedObject.id,
+    };
+    return input;
+  }
+
+  return {
+    savedVis: JSON.parse(visState),
+  } as Partial<VisualizeInput>;
+});

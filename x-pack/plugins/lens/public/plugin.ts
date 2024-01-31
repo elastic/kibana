@@ -123,11 +123,7 @@ import { visualizeTSVBAction } from './trigger_actions/visualize_tsvb_actions';
 import { visualizeAggBasedVisAction } from './trigger_actions/visualize_agg_based_vis_actions';
 import { visualizeDashboardVisualizePanelction } from './trigger_actions/dashboard_visualize_panel_actions';
 
-import type {
-  LensByValueInput,
-  LensEmbeddableInput,
-  LensSavedObjectAttributes,
-} from './embeddable';
+import type { LensByValueInput, LensEmbeddableInput } from './embeddable';
 import { EmbeddableFactory, LensEmbeddableStartServices } from './embeddable/embeddable_factory';
 import { EmbeddableComponent, getEmbeddableComponent } from './embeddable/embeddable_component';
 import { getSaveModalComponent } from './app_plugin/shared/saved_modal_lazy';
@@ -140,8 +136,13 @@ import { ChartInfoApi } from './chart_info_api';
 import { type LensAppLocator, LensAppLocatorDefinition } from '../common/locator/locator';
 import { downloadCsvShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
 
-import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
+import {
+  CONTENT_ID,
+  LATEST_VERSION,
+  LensSavedObjectAttributes,
+} from '../common/content_management';
 import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
+import { savedObjectToEmbeddableAttributes } from './lens_attribute_service';
 
 export type { SaveProps } from './app_plugin';
 
@@ -728,18 +729,15 @@ export class LensPlugin {
   stop() {}
 }
 
-registerSavedObjectToPanelMethod('lens', (savedObject) => {
+registerSavedObjectToPanelMethod(CONTENT_ID, (savedObject) => {
   if (!savedObject.managed) {
     return { savedObjectId: savedObject.id } as SavedObjectEmbeddableInput;
   }
 
-  const { attributes, references } = savedObject as SavedObjectCommon<LensSavedObjectAttributes>;
-
   const panel: Partial<LensByValueInput> = {
-    attributes: {
-      ...attributes,
-      references,
-    },
+    attributes: savedObjectToEmbeddableAttributes(
+      savedObject as SavedObjectCommon<LensSavedObjectAttributes>
+    ),
   };
 
   return panel;
