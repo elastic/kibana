@@ -7,6 +7,7 @@
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SearchAggregatedTransactionSetting } from '../../../../common/aggregated_transactions';
 import {
   TRANSACTION_DURATION,
@@ -90,13 +91,12 @@ export async function getSearchTransactionsEvents({
   }
 }
 
-export function getDurationFieldForTransactions(
+export function isSummaryFieldSupportedByDocType(
   typeOrSearchAgggregatedTransactions:
     | ApmDocumentType.ServiceTransactionMetric
     | ApmDocumentType.TransactionMetric
     | ApmDocumentType.TransactionEvent
-    | boolean,
-  useDurationSummaryField?: boolean
+    | boolean
 ) {
   let type: ApmDocumentType;
 
@@ -108,10 +108,20 @@ export function getDurationFieldForTransactions(
     type = typeOrSearchAgggregatedTransactions;
   }
 
-  if (
+  return (
     type === ApmDocumentType.ServiceTransactionMetric ||
     type === ApmDocumentType.TransactionMetric
-  ) {
+  );
+}
+export function getDurationFieldForTransactions(
+  typeOrSearchAgggregatedTransactions:
+    | ApmDocumentType.ServiceTransactionMetric
+    | ApmDocumentType.TransactionMetric
+    | ApmDocumentType.TransactionEvent
+    | boolean,
+  useDurationSummaryField?: boolean
+) {
+  if (isSummaryFieldSupportedByDocType(typeOrSearchAgggregatedTransactions)) {
     if (useDurationSummaryField) {
       return TRANSACTION_DURATION_SUMMARY;
     }
@@ -162,4 +172,19 @@ export function isRootTransaction(searchAggregatedTransactions: boolean) {
           },
         },
       };
+}
+
+export function getDurationLegacyFilter(): QueryDslQueryContainer {
+  return {
+    bool: {
+      must: [
+        {
+          bool: {
+            filter: [{ exists: { field: TRANSACTION_DURATION_HISTOGRAM } }],
+            must_not: [{ exists: { field: TRANSACTION_DURATION_SUMMARY } }],
+          },
+        },
+      ],
+    },
+  };
 }

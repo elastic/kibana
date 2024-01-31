@@ -12,24 +12,33 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiSkeletonRectangle,
   EuiToolTip,
+  EuiButtonIcon,
+  EuiText,
 } from '@elastic/eui';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
-import { PackageIcon } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
+import { css } from '@emotion/react';
 import {
   DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
   POOR_QUALITY_MINIMUM_PERCENTAGE,
 } from '../../../common/constants';
 import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
-import loggingIcon from '../../icons/logging.svg';
-import { LogExplorerLink } from '../log_explorer_link';
 import { QualityIndicator, QualityPercentageIndicator } from '../quality_indicator';
+import { IntegrationIcon } from '../common';
+import { useLinkToLogExplorer } from '../../hooks';
 
+const expandDatasetAriaLabel = i18n.translate('xpack.datasetQuality.expandLabel', {
+  defaultMessage: 'Expand',
+});
+const collapseDatasetAriaLabel = i18n.translate('xpack.datasetQuality.collapseLabel', {
+  defaultMessage: 'Collapse',
+});
 const nameColumnName = i18n.translate('xpack.datasetQuality.nameColumnName', {
   defaultMessage: 'Dataset Name',
 });
@@ -96,14 +105,41 @@ const degradedDocsColumnTooltip = (
   />
 );
 
-export const getDatasetQualitTableColumns = ({
+export const getDatasetQualityTableColumns = ({
   fieldFormats,
+  selectedDataset,
+  setSelectedDataset,
   loadingDegradedStats,
 }: {
   fieldFormats: FieldFormatsStart;
+  selectedDataset?: DataStreamStat;
   loadingDegradedStats?: boolean;
+  setSelectedDataset: Dispatch<SetStateAction<DataStreamStat | undefined>>;
 }): Array<EuiBasicTableColumn<DataStreamStat>> => {
   return [
+    {
+      name: '',
+      render: (dataStreamStat: DataStreamStat) => {
+        const isExpanded = dataStreamStat === selectedDataset;
+
+        return (
+          <EuiButtonIcon
+            size="m"
+            color="text"
+            onClick={() => setSelectedDataset(isExpanded ? undefined : dataStreamStat)}
+            iconType={isExpanded ? 'minimize' : 'expand'}
+            title={!isExpanded ? expandDatasetAriaLabel : collapseDatasetAriaLabel}
+            aria-label={!isExpanded ? expandDatasetAriaLabel : collapseDatasetAriaLabel}
+          />
+        );
+      },
+      width: '40px',
+      css: css`
+        &.euiTableCellContent {
+          padding: 0;
+        }
+      `,
+    },
     {
       name: nameColumnName,
       field: 'title',
@@ -114,19 +150,9 @@ export const getDatasetQualitTableColumns = ({
         return (
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              {integration ? (
-                <PackageIcon
-                  packageName={integration.name}
-                  version={integration.version!}
-                  icons={integration.icons}
-                  size="m"
-                  tryApi
-                />
-              ) : (
-                <EuiIcon type={loggingIcon} size="m" />
-              )}
+              <IntegrationIcon integration={integration} />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>{title}</EuiFlexItem>
+            <EuiText size="s">{title}</EuiText>
           </EuiFlexGroup>
         );
       },
@@ -186,4 +212,16 @@ export const getDatasetQualitTableColumns = ({
       width: '100px',
     },
   ];
+};
+
+const LogExplorerLink = ({
+  dataStreamStat,
+  title,
+}: {
+  dataStreamStat: DataStreamStat;
+  title: string;
+}) => {
+  const logExplorerLinkProps = useLinkToLogExplorer({ dataStreamStat });
+
+  return <EuiLink {...logExplorerLinkProps}>{title}</EuiLink>;
 };

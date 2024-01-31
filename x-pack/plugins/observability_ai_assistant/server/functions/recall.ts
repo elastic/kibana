@@ -13,10 +13,8 @@ import { last, omit } from 'lodash';
 import { lastValueFrom } from 'rxjs';
 import { FunctionRegistrationParameters } from '.';
 import { MessageRole, type Message } from '../../common/types';
-import { concatenateOpenAiChunks } from '../../common/utils/concatenate_openai_chunks';
-import { processOpenAiStream } from '../../common/utils/process_openai_stream';
+import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
 import type { ObservabilityAIAssistantClient } from '../service/client';
-import { streamIntoObservable } from '../service/util/stream_into_observable';
 
 export function registerRecallFunction({
   client,
@@ -249,7 +247,7 @@ async function scoreSuggestions({
   };
 
   const response = await lastValueFrom(
-    streamIntoObservable(
+    (
       await client.chat({
         connectorId,
         messages: [extendedSystemMessage, newUserMessage],
@@ -257,7 +255,7 @@ async function scoreSuggestions({
         functionCall: 'score',
         signal,
       })
-    ).pipe(processOpenAiStream(), concatenateOpenAiChunks())
+    ).pipe(concatenateChatCompletionChunks())
   );
   const scoreFunctionRequest = decodeOrThrow(scoreFunctionRequestRt)(response);
   const { scores } = decodeOrThrow(jsonRt.pipe(scoreFunctionArgumentsRt))(

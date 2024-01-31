@@ -85,7 +85,7 @@ export const waitForTableToLoad = () => {
 
 export const waitForTabToBeLoaded = (tabId: string) => {
   recurse(
-    () => cy.get(tabId).should('be.visible').click(),
+    () => cy.get(tabId).click(),
     ($el) => expect($el).to.have.class('euiTab-isSelected'),
     {
       delay: 500,
