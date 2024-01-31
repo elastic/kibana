@@ -24,7 +24,11 @@ import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
 import chroma from 'chroma-js';
-import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
+import type {
+  EventAnnotationConfig,
+  PointInTimeEventAnnotationConfig,
+  RangeEventAnnotationConfig,
+} from '@kbn/event-annotation-common';
 import { TimeRange } from '@kbn/es-query';
 import moment from 'moment';
 import {
@@ -36,7 +40,7 @@ import { useKibana } from '../../../../utils/kibana_react';
 import { MetricExpression } from '../../types';
 import { AggMap, PainlessTinyMathParser } from './painless_tinymath_parser';
 
-interface RuleConditionChartPros {
+interface RuleConditionChartProps {
   metricExpression: MetricExpression;
   dataView?: DataView;
   filterQuery?: string;
@@ -44,7 +48,7 @@ interface RuleConditionChartPros {
   error?: IErrorObject;
   timeRange: TimeRange;
   annotation?: {
-    timestamp?: string;
+    timestamp: string;
     endTimestamp?: string;
   };
 }
@@ -66,7 +70,7 @@ export function RuleConditionChart({
   error,
   annotation,
   timeRange,
-}: RuleConditionChartPros) {
+}: RuleConditionChartProps) {
   const {
     services: { lens },
   } = useKibana();
@@ -182,44 +186,46 @@ export function RuleConditionChart({
 
     const annotations: EventAnnotationConfig[] = [];
 
-    if (annotation.endTimestamp) {
-      annotations.push({
-        label: `Alert`,
-        type: 'manual',
-        key: {
-          type: 'range',
-          timestamp: annotation.timestamp,
-          endTimestamp: annotation.endTimestamp,
-        },
-        color: chroma(transparentize('#F04E981A', 0.2)).hex().toUpperCase(),
-        id: uuidv4(),
-      } as EventAnnotationConfig);
-    } else {
-      annotations.push(
-        {
-          label: `Alert`,
-          type: 'manual',
-          key: {
-            type: 'point_in_time',
-            timestamp: annotation.timestamp,
-          },
-          color: euiTheme.colors.danger,
-          icon: 'alert',
-          id: uuidv4(),
-        } as EventAnnotationConfig,
-        {
-          label: `Active Alert`,
-          type: 'manual',
-          key: {
-            type: 'range',
-            timestamp: annotation.timestamp,
-            endTimestamp: moment().toISOString(),
-          },
-          color: chroma(transparentize('#F04E981A', 0.2)).hex().toUpperCase(),
-          id: uuidv4(),
-        } as EventAnnotationConfig
-      );
-    }
+    const alertStartAnnotation: PointInTimeEventAnnotationConfig = {
+      label: 'Alert',
+      type: 'manual',
+      key: {
+        type: 'point_in_time',
+        timestamp: annotation.timestamp,
+      },
+      color: euiTheme.colors.danger,
+      icon: 'alert',
+      id: uuidv4(),
+    };
+
+    const activeAlertRangeAnnotation: RangeEventAnnotationConfig = {
+      label: 'Active Alert',
+      type: 'manual',
+      key: {
+        type: 'range',
+        timestamp: annotation.timestamp,
+        endTimestamp: moment().toISOString(),
+      },
+      color: chroma(transparentize('#F04E981A', 0.2)).hex().toUpperCase(),
+      id: uuidv4(),
+    };
+
+    const recoveredAlertRangeAnnotation: RangeEventAnnotationConfig = {
+      label: 'Alert duration',
+      type: 'manual',
+      key: {
+        type: 'range',
+        timestamp: annotation.timestamp,
+        endTimestamp: annotation.endTimestamp ?? '',
+      },
+      color: chroma(transparentize('#F04E981A', 1)).hex().toUpperCase(),
+      id: uuidv4(),
+    };
+
+    annotations.push(alertStartAnnotation);
+    annotations.push(
+      annotation.endTimestamp ? recoveredAlertRangeAnnotation : activeAlertRangeAnnotation
+    );
 
     const alertAnnotationLayer = new XYByValueAnnotationsLayer({
       annotations,
