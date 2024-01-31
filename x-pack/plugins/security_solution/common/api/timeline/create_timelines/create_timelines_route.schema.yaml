@@ -31,9 +31,10 @@ paths:
                 [status, timelineId, templateTimelineId, templateTimelineVersion, timelineType, version, timeline]
               properties:
                 status:
-                  allOf:
-                  $ref: '../model/components.schema.yaml#/components/schemas/TimelineStatus'
                   nullable: true
+                  type: string
+                  allOf:
+                   - $ref: '../model/components.schema.yaml#/components/schemas/TimelineStatus'
                 timelineId:
                   type: string
                   nullable: true
@@ -44,9 +45,10 @@ paths:
                   type: number
                   nullable: true
                 timelineType:
-                  allOf:
-                  $ref: '../model/components.schema.yaml#/components/schemas/TimelineType'
                   nullable: true
+                  type: string
+                  allOf:
+                   - $ref: '../model/components.schema.yaml#/components/schemas/TimelineType'
                 version:
                   type: string
                   nullable: true

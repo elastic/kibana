@@ -36,9 +36,10 @@ paths:
                   type: number
                   nullable: true
                 timelineType:
-                  allOf:
-                  $ref: '../model/components.schema.yaml#/components/schemas/TimelineType'
                   nullable: true
+                  type: object
+                  allOf:
+                   - $ref: '../model/components.schema.yaml#/components/schemas/TimelineType'
       responses:
         200:
           description: Indicates the favorite status was successfully updated.

@@ -6,7 +6,8 @@
 {{~/if~}}
 
 {{~#if $ref~}}
-  {{~#if (eq x-lazy true)}}z.lazy(() => {{referenceName}}){{~else~}}{{referenceName}}{{~/if~}}
+  {{referenceName}}
+  {{!-- {{~#if (eq x-lazy true)}}z.lazy(() => {{referenceName}}){{~else~}}{{referenceName}}{{~/if~}} --}}
   {{~#if nullable}}.nullable(){{/if~}}
   {{~#if (eq requiredBool false)}}.optional(){{/if~}}
   {{~#if (defined default)}}.default({{{toJSON default}}}){{/if~}}
