@@ -174,7 +174,7 @@ export const CreateDockerContexts: Task = {
 };
 
 export const CreateDockerFIPS: Task = {
-  description: 'Create Docker Ubuntu and UBI images with FIPS',
+  description: 'Creating Docker FIPS images',
 
   async run(config, log, build) {
     await runDockerGenerator(config, log, build, {
@@ -187,6 +187,15 @@ export const CreateDockerFIPS: Task = {
 
     await runDockerGenerator(config, log, build, {
       architecture: 'x64',
+      baseImage: 'ubuntu',
+      context: false,
+      image: true,
+      dockerBuildDate,
+      fips: true,
+    });
+
+    await runDockerGenerator(config, log, build, {
+      architecture: 'aarch64',
       baseImage: 'ubuntu',
       context: false,
       image: true,
