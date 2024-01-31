@@ -34,8 +34,10 @@ export function AlertingFlyout(props: Props) {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo, optional: true });
 
-  const environment =
-    'environment' in query ? query.environment : ENVIRONMENT_ALL.value;
+  const queryEnvironment =
+    'environment' in query ? query.environment : undefined;
+  const environment = queryEnvironment || ENVIRONMENT_ALL.value;
+
   const transactionType =
     'transactionType' in query ? query.transactionType : undefined;
   const transactionName =
