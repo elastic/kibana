@@ -27,6 +27,7 @@ export type LinkId =
   | 'nodesOverview'
   | 'nodes'
   | 'memoryUsage'
+  | 'esqlDataVisualizer'
   | 'dataVisualizer'
   | 'fileUpload'
   | 'indexDataVisualizer'

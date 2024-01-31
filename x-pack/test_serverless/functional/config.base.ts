@@ -60,8 +60,8 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         observability: {
           pathname: '/app/observability',
         },
-        observabilityLogExplorer: {
-          pathname: '/app/observability-log-explorer',
+        observabilityLogsExplorer: {
+          pathname: '/app/observability-logs-explorer',
         },
         management: {
           pathname: '/app/management',
