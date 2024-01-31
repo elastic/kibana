@@ -10,17 +10,6 @@ import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { useGroupTakeActionsItems } from '.';
 
-jest.mock('../../../../common/store', () => ({
-  inputsSelectors: {
-    globalQuery: jest.fn(),
-  },
-  inputsModel: {},
-}));
-
-jest.mock('../../../../common/hooks/use_selector', () => ({
-  useDeepEqualSelector: () => jest.fn(),
-}));
-
 describe('useGroupTakeActionsItems', () => {
   const wrapperContainer: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
     <TestProviders>{children}</TestProviders>
