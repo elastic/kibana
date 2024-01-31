@@ -422,7 +422,7 @@ export async function pickTestGroupRunOrder() {
         ? {
             label: 'Jest Tests',
             command: getRequiredEnv('JEST_UNIT_SCRIPT'),
-            parallelism: 10,
+            parallelism: 25,
             timeout_in_minutes: 120,
             key: 'jest',
             agents: {
