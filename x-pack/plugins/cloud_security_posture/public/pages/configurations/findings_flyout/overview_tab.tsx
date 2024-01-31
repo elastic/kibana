@@ -20,6 +20,8 @@ import type { EuiDescriptionListProps, EuiAccordionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
+import { generatePath } from 'react-router-dom';
+import { benchmarksNavigation } from '../../../common/navigation/constants';
 import { truthy } from '../../../../common/utils/helpers';
 import { CSP_MOMENT_FORMAT } from '../../../common/constants';
 import {
@@ -36,12 +38,12 @@ import { FindingsDetectionRuleCounter } from './findings_detection_rule_counter'
 type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &
   Pick<EuiDescriptionListProps, 'listItems'>;
 
-const getDetailsList = (data: CspFinding, discoverIndexLink: string | undefined) => [
+const getDetailsList = (data: CspFinding, discoverIndexLink?: string, ruleFlyoutLink: string) => [
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTitle', {
       defaultMessage: 'Rule Name',
     }),
-    description: data.rule.name,
+    description: <EuiLink href={ruleFlyoutLink}>{data.rule.name}</EuiLink>,
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.alertsTitle', {
@@ -161,10 +163,16 @@ const getEvidenceList = ({ result }: CspFinding) =>
   ].filter(truthy);
 
 export const OverviewTab = ({ data }: { data: CspFinding }) => {
-  const {
-    services: { discover },
-  } = useKibana();
+  const { discover, application } = useKibana().services;
   const latestFindingsDataView = useLatestFindingsDataView(LATEST_FINDINGS_INDEX_PATTERN);
+
+  const ruleFlyoutLink = application?.getUrlForApp('security', {
+    path: generatePath(benchmarksNavigation.rules.path, {
+      benchmarkVersion: data.rule.benchmark.version.split('v')[1], // removing the v from the version
+      benchmarkId: data.rule.benchmark.id,
+      ruleId: data.rule.id,
+    }),
+  });
 
   const discoverIndexLink = useMemo(
     () =>
@@ -185,7 +193,7 @@ export const OverviewTab = ({ data }: { data: CspFinding }) => {
             defaultMessage: 'Details',
           }),
           id: 'detailsAccordion',
-          listItems: getDetailsList(data, discoverIndexLink),
+          listItems: getDetailsList(data, discoverIndexLink, ruleFlyoutLink),
         },
         {
           initialIsOpen: true,
@@ -206,7 +214,7 @@ export const OverviewTab = ({ data }: { data: CspFinding }) => {
             listItems: getEvidenceList(data),
           },
       ].filter(truthy),
-    [data, discoverIndexLink, hasEvidence]
+    [data, discoverIndexLink, hasEvidence, ruleFlyoutLink]
   );
 
   return (

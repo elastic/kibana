@@ -125,27 +125,12 @@ export const RuleFlyout = ({ onClose, rule, refetchRulesStates }: RuleFlyoutProp
   );
 };
 
-const RuleOverviewTab = ({
-  rule,
-  ruleData,
-  switchRuleStates,
-}: {
-  rule: CspBenchmarkRuleMetadata;
-  ruleData: CspBenchmarkRulesWithStates;
-  switchRuleStates: () => Promise<void>;
-}) => (
-  <EuiFlexGroup direction="column">
-    <EuiFlexItem>
-      <EuiDescriptionList
-        listItems={[...ruleState(ruleData, switchRuleStates), ...getRuleList(rule)]}
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
-
-const ruleState = (rule: CspBenchmarkRulesWithStates, switchRuleStates: () => Promise<void>) => [
+const getRuleStateSwitch = (
+  rule: CspBenchmarkRulesWithStates,
+  switchRuleStates: () => Promise<void>
+) => [
   {
-    title: i18n.translate('xpack.csp.rules.rulesFlyout.ruleState', {
+    title: i18n.translate('xpack.csp.rules.rulesFlyout.ruleStateSwitchTitle', {
       defaultMessage: 'Enabled',
     }),
     description: (
@@ -161,3 +146,21 @@ const ruleState = (rule: CspBenchmarkRulesWithStates, switchRuleStates: () => Pr
     ),
   },
 ];
+
+const RuleOverviewTab = ({
+  rule,
+  ruleData,
+  switchRuleStates,
+}: {
+  rule: CspBenchmarkRuleMetadata;
+  ruleData: CspBenchmarkRulesWithStates;
+  switchRuleStates: () => Promise<void>;
+}) => (
+  <EuiFlexGroup direction="column">
+    <EuiFlexItem>
+      <EuiDescriptionList
+        listItems={[...getRuleStateSwitch(ruleData, switchRuleStates), ...getRuleList(rule)]}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
