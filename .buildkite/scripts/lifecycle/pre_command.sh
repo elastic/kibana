@@ -41,10 +41,12 @@ if [[ -x "$(command -v gcloud)" ]]; then
   gcloud config get-value core/account
 else
   echo "gcloud not found, checking config paths"
-  ls -la $HOME/.config/gcloud
-  ls -la $HOME/.config/gcloud/legacy_credentials
+  ls -la $HOME/.config/gcloud || echo "$HOME/.config/gcloud not found"
+  ls -la $HOME/.config/gcloud/legacy_credentials || echo "$HOME/.config/gcloud/legacy_credentials not found"
   if [[ -f "$HOME/.config/gcloud/configurations/config_default" ]]; then
     cat $HOME/.config/gcloud/configurations/config_default
+  else
+    echo "$HOME/.config/gcloud/configurations/config_default not found"
   fi
 fi
 
