@@ -623,6 +623,7 @@ export interface DocLinks {
     readonly integrations: string;
     readonly integrationsBeats: string;
     readonly integrationsConnectorClient: string;
+    readonly integrationsConnectorClientAvailableConnectors: string;
     readonly integrationsConnectorClientRunFromSource: string;
     readonly integrationsConnectorClientRunWithDocker: string;
     readonly integrationsLogstash: string;
