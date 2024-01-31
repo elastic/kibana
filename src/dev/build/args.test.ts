@@ -312,3 +312,43 @@ it('limits packages if --all-platforms passed with --skip-docker-ubuntu', () => 
     }
   `);
 });
+
+it('builds docker fips images if --docker-fips-images is passed', () => {
+  expect(readCliArgs(['node', 'scripts/build', '--docker-fips-images'])).toMatchInlineSnapshot(`
+    Object {
+      "buildOptions": Object {
+        "buildCanvasShareableRuntime": true,
+        "createArchives": true,
+        "createCdnAssets": true,
+        "createDebPackage": false,
+        "createDockerCloud": false,
+        "createDockerContexts": true,
+        "createDockerFIPS": true,
+        "createDockerServerless": false,
+        "createDockerUBI": false,
+        "createDockerUbuntu": false,
+        "createGenericFolders": true,
+        "createPlatformFolders": true,
+        "createRpmPackage": false,
+        "dockerContextUseLocalArtifact": null,
+        "dockerCrossCompile": false,
+        "dockerNamespace": null,
+        "dockerPush": false,
+        "dockerTag": null,
+        "dockerTagQualifier": null,
+        "downloadCloudDependencies": true,
+        "downloadFreshNode": true,
+        "eprRegistry": "snapshot",
+        "initialize": true,
+        "isRelease": false,
+        "targetAllPlatforms": false,
+        "versionQualifier": "",
+        "withExamplePlugins": false,
+        "withTestPlugins": false,
+      },
+      "log": <ToolingLog>,
+      "showHelp": false,
+      "unknownFlags": Array [],
+    }
+  `);
+});
