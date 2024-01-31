@@ -44,6 +44,8 @@ export const getDefaultControlGroupInput = (): Omit<ControlGroupInput, 'id'> => 
   defaultControlGrow: DEFAULT_CONTROL_GROW,
   controlStyle: DEFAULT_CONTROL_STYLE,
   chainingSystem: 'HIERARCHICAL',
+  showApplySelections: false,
+  showSelectionReset: false,
   ignoreParentSettings: {
     ignoreFilters: false,
     ignoreQuery: false,
