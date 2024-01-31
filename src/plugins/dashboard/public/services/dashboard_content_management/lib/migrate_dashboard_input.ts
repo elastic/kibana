@@ -14,6 +14,7 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import { DashboardContainerInput, DashboardPanelState } from '../../../../common';
 import { type DashboardEmbeddableService } from '../../embeddable/types';
+import { SavedDashboardInput } from '../types';
 
 /**
  * Run Dashboard migrations clientside. We pre-emptively run all migrations for all content on this Dashboard so that
@@ -22,7 +23,7 @@ import { type DashboardEmbeddableService } from '../../embeddable/types';
  * get skipped at Embeddable create time - unless states with older versions are saved in the URL or session storage.
  */
 export const migrateDashboardInput = (
-  dashboardInput: DashboardContainerInput,
+  dashboardInput: SavedDashboardInput,
   embeddable: DashboardEmbeddableService
 ) => {
   let anyMigrationRun = false;

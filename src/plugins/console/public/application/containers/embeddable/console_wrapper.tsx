@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Observable } from 'rxjs';
 import {
   HttpSetup,
@@ -20,6 +20,7 @@ import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { ObjectStorageClient } from '../../../../common/types';
 
 import * as localStorageObjectClient from '../../../lib/local_storage_object_client';
+import { loadActiveApi } from '../../../lib/kb';
 import {
   getAutocompleteInfo,
   AutocompleteInfo,
@@ -43,6 +44,7 @@ import {
   RequestContextProvider,
 } from '../../contexts';
 import { Main } from '../main';
+import { EditorContentSpinner } from '../../components';
 
 interface ConsoleDependencies {
   I18nContext: I18nStart['Context'];
@@ -60,10 +62,10 @@ interface ConsoleDependencies {
   trackUiMetric: MetricsTracker;
 }
 
-const loadDependencies = ({
+const loadDependencies = async ({
   core,
   usageCollection,
-}: EmbeddableConsoleDependencies): ConsoleDependencies => {
+}: EmbeddableConsoleDependencies): Promise<ConsoleDependencies> => {
   const {
     docLinks: { DOC_LINK_VERSION, links },
     http,
@@ -74,6 +76,7 @@ const loadDependencies = ({
   const trackUiMetric = createUsageTracker(usageCollection);
   trackUiMetric.load('opened_remote_app');
 
+  await loadActiveApi(core.http);
   const autocompleteInfo = getAutocompleteInfo();
   const storage = createStorage({
     engine: window.localStorage,
@@ -105,13 +108,21 @@ const loadDependencies = ({
 };
 
 export const ConsoleWrapper = (props: EmbeddableConsoleDependencies): React.ReactElement => {
-  const dependencies = useMemo(() => loadDependencies(props), [props]);
+  const [dependencies, setDependencies] = useState<ConsoleDependencies | null>(null);
+  useEffect(() => {
+    loadDependencies(props).then(setDependencies);
+  }, [setDependencies, props]);
   useEffect(() => {
     return () => {
-      dependencies.autocompleteInfo.clearSubscriptions();
+      if (dependencies) {
+        dependencies.autocompleteInfo.clearSubscriptions();
+      }
     };
   }, [dependencies]);
 
+  if (!dependencies) {
+    return <EditorContentSpinner />;
+  }
   const {
     I18nContext,
     autocompleteInfo,

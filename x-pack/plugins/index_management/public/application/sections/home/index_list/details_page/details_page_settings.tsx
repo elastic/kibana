@@ -16,8 +16,7 @@ import { DetailsPageSettingsContent } from './details_page_settings_content';
 
 export const DetailsPageSettings: FunctionComponent<{
   indexName: string;
-  isIndexOpen: boolean;
-}> = ({ indexName, isIndexOpen }) => {
+}> = ({ indexName }) => {
   const { isLoading, data, error, resendRequest } = useLoadIndexSettings(indexName);
 
   useEffect(() => {
@@ -79,7 +78,6 @@ export const DetailsPageSettings: FunctionComponent<{
   }
   return (
     <DetailsPageSettingsContent
-      isIndexOpen={isIndexOpen}
       data={data}
       indexName={indexName}
       reloadIndexSettings={resendRequest}
