@@ -91,12 +91,27 @@ describe('StaticAssets', () => {
   });
 
   describe('#getPluginServerPath()', () => {
-    it('provides fallback to server base path', () => {
+    it('provides the path plugin assets can use for server routes', () => {
       cdnConfig = CdnConfig.from();
       staticAssets = new StaticAssets(basePath, cdnConfig, '1234');
       expect(staticAssets.getPluginServerPath('myPlugin', '/fun/times')).toEqual(
         '/1234/plugins/myPlugin/assets/fun/times'
       );
+    });
+  });
+  describe('#appendPathToPublicUrl()', () => {
+    it('with a CDN it appends as expected', () => {
+      cdnConfig = CdnConfig.from({ url: 'http://cdn.example.com/cool?123=true' });
+      staticAssets = new StaticAssets(basePath, cdnConfig, '');
+      expect(staticAssets.appendPathToPublicUrl('beans')).toEqual(
+        'http://cdn.example.com/cool/beans?123=true'
+      );
+    });
+
+    it('without a CDN it appends as expected', () => {
+      cdnConfig = CdnConfig.from();
+      staticAssets = new StaticAssets(basePath, cdnConfig, '');
+      expect(staticAssets.appendPathToPublicUrl('/cool/beans')).toEqual('/base-path/cool/beans');
     });
   });
 });

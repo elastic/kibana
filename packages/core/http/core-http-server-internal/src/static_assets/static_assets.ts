@@ -9,7 +9,7 @@
 import type { BasePath } from '../base_path_service';
 import { CdnConfig } from '../cdn_config';
 import {
-  suffixValueToPathname,
+  suffixPathnameToPathname,
   suffixPathnameToURLPathname,
   removeSurroundingSlashes,
 } from './util';
@@ -55,7 +55,7 @@ export class StaticAssets implements InternalStaticAssets {
       this.assetsHrefBase = suffixPathnameToURLPathname(cdnBaseHref, shaDigest);
     } else {
       this.hasCdnHost = false;
-      this.assetsHrefBase = suffixValueToPathname(basePath.serverBasePath, shaDigest);
+      this.assetsHrefBase = suffixPathnameToPathname(basePath.serverBasePath, shaDigest);
     }
     this.assetsServerPathBase = `/${shaDigest}`;
   }
@@ -82,11 +82,10 @@ export class StaticAssets implements InternalStaticAssets {
   }
 
   public appendPathToPublicUrl(pathname: string): string {
-    pathname = removeSurroundingSlashes(pathname);
     if (this.hasCdnHost) {
       return suffixPathnameToURLPathname(this.assetsHrefBase, pathname);
     }
-    return suffixValueToPathname(this.assetsHrefBase, pathname);
+    return suffixPathnameToPathname(this.assetsHrefBase, pathname);
   }
 
   public getPluginServerPath(pluginName: string, assetPath: string): string {

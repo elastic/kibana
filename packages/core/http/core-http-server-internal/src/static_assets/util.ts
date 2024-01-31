@@ -26,7 +26,7 @@ export function removeSurroundingSlashes(pathname: string): string {
 
 export function suffixPathnameToURLPathname(urlString: string, pathname: string): string {
   const url = new URL(urlString);
-  url.pathname = suffixValueToPathname(url.pathname, pathname);
+  url.pathname = suffixPathnameToPathname(url.pathname, pathname);
   return format(url);
 }
 
@@ -34,8 +34,12 @@ export function suffixPathnameToURLPathname(urlString: string, pathname: string)
  * Appends a value to pathname. Pathname is assumed to come from URL.pathname
  * Also do some quality control on the path to ensure that it matches URL.pathname.
  */
-export function suffixValueToPathname(pathnameA: string, pathnameB: string): string {
-  return isEmptyPathname(pathnameA)
-    ? `/${removeSurroundingSlashes(pathnameB)}`
-    : `/${removeSurroundingSlashes(pathnameA)}/${removeSurroundingSlashes(pathnameB)}`;
+export function suffixPathnameToPathname(pathnameA: string, pathnameB: string): string {
+  if (isEmptyPathname(pathnameA)) {
+    return `/${removeSurroundingSlashes(pathnameB)}`;
+  }
+  if (isEmptyPathname(pathnameB)) {
+    return `/${removeSurroundingSlashes(pathnameA)}`;
+  }
+  return `/${removeSurroundingSlashes(pathnameA)}/${removeSurroundingSlashes(pathnameB)}`;
 }
