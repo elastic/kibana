@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export interface DataStreamDetails {
-  createdOn?: number;
-}
+import { CommonObservabilityDatasetQualityContext } from './types';
+
+export const DEFAULT_CONTEXT: CommonObservabilityDatasetQualityContext = {
+  initialDatasetQualityState: {},
+};
