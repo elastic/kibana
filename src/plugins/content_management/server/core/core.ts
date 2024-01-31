@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Logger } from '@kbn/core/server';
+import type { Logger, KibanaRequest } from '@kbn/core/server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { Version } from '@kbn/object-versioning';
 
@@ -19,6 +19,7 @@ import { ContentRegistry } from './registry';
 export interface GetContentClientForRequestDependencies {
   contentTypeId: string;
   requestHandlerContext: RequestHandlerContext;
+  request: KibanaRequest;
   version?: Version;
 }
 
@@ -66,13 +67,14 @@ export class Core {
     this.setupEventStream();
 
     const contentClient: CoreApi['contentClient'] = {
-      getForRequest: ({ contentTypeId, requestHandlerContext, version }) => {
+      getForRequest: ({ contentTypeId, requestHandlerContext, request, version }) => {
         const contentDefinition = this.contentRegistry.getDefinition(contentTypeId);
         const clientFactory = getContentClientFactory({ contentRegistry: this.contentRegistry });
         const client = clientFactory(contentTypeId);
 
         return client.getForRequest({
           requestHandlerContext,
+          request,
           version: version ?? contentDefinition.version.latest,
         });
       },

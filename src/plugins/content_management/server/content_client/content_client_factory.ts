@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { Version } from '@kbn/object-versioning';
 
 import type { ContentRegistry } from '../core';
@@ -20,6 +21,7 @@ export const getContentClientFactory =
       version,
     }: {
       requestHandlerContext: RequestHandlerContext;
+      request: KibanaRequest;
       version?: Version;
     }) => {
       const storageContext = getStorageContext({

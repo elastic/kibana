@@ -870,6 +870,7 @@ describe('Content Core', () => {
 
           const client = contentClient.getForRequest({
             requestHandlerContext: {} as any,
+            request: {} as any,
             contentTypeId: FOO_CONTENT_ID,
           });
 
@@ -891,6 +892,7 @@ describe('Content Core', () => {
           const requestHandlerContext = {} as any;
           const client = coreSetup.api.contentClient.getForRequest({
             requestHandlerContext,
+            request: {} as any,
             contentTypeId: FOO_CONTENT_ID,
           });
 
@@ -926,6 +928,7 @@ describe('Content Core', () => {
 
           const client = coreSetup.api.contentClient.getForRequest({
             requestHandlerContext,
+            request: {} as any,
             contentTypeId: FOO_CONTENT_ID,
             version: requestVersion,
           });
@@ -956,6 +959,7 @@ describe('Content Core', () => {
           expect(() => {
             contentClient.getForRequest({
               requestHandlerContext: {} as any,
+              request: {} as any,
               contentTypeId: FOO_CONTENT_ID,
             });
           }).toThrowError('Content [foo] is not registered.');
