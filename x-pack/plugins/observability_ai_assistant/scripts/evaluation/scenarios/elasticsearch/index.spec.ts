@@ -86,13 +86,13 @@ describe('elasticsearch functions', () => {
           'Returns the index refresh stats',
         ]);
 
-        after(async () => {
-          await esClient.indices.delete({
-            index: 'kb',
-          });
-        });
-
         expect(result.passed).to.be(true);
+      });
+
+      after(async () => {
+        await esClient.indices.delete({
+          index: 'kb',
+        });
       });
     });
 
