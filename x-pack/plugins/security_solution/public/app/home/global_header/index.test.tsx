@@ -24,7 +24,7 @@ import {
 } from '../../../common/mock';
 import { TimelineId } from '../../../../common/types/timeline';
 import { createStore } from '../../../common/store';
-import { kibanaMock } from '@kbn/timelines-plugin/public/mock';
+import { kibanaMock } from '../../../common/mock/test_providers';
 import { sourcererPaths } from '../../../common/containers/sourcerer';
 
 jest.mock('react-router-dom', () => {

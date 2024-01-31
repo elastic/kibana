@@ -15,7 +15,7 @@ import {
   TestProviders,
 } from '../../../common/mock';
 import { createStore } from '../../../common/store';
-import { kibanaMock } from '@kbn/timelines-plugin/public/mock';
+import { kibanaMock } from '../../../common/mock/test_providers';
 import { ALERTS_PATH, ALERT_DETAILS_REDIRECT_PATH } from '../../../../common/constants';
 import { mockHistory } from '../../../common/utils/route/mocks';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';

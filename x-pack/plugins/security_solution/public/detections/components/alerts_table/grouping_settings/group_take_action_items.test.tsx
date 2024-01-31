@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { TestProviders } from '@kbn/timelines-plugin/public/mock';
 import { act, renderHook } from '@testing-library/react-hooks';
 import React from 'react';
+import { TestProviders } from '../../../../common/mock';
 import { useGroupTakeActionsItems } from '.';
 
 jest.mock('../../../../common/store', () => ({

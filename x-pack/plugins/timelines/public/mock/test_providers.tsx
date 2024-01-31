@@ -14,16 +14,13 @@ import { Store } from 'redux';
 import { ThemeProvider } from 'styled-components';
 
 import { configureStore } from '@reduxjs/toolkit';
-import { createKibanaContextProviderMock, createStartServicesMock } from './kibana_react.mock';
+import { createKibanaContextProviderMock } from './kibana_react.mock';
 import { timelineReducer } from '../store/timeline/reducer';
 
 interface Props {
   children: React.ReactNode;
   store?: Store;
 }
-
-// TODO: can this be imported from somewhere else?
-export const kibanaMock = createStartServicesMock();
 
 interface State {
   timelineById: Record<string, unknown>;

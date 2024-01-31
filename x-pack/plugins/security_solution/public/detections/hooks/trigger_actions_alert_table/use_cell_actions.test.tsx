@@ -28,7 +28,7 @@ import React from 'react';
 import { makeAction } from '../../../common/components/cell_actions/mocks';
 import { VIEW_SELECTION } from '../../../../common/constants';
 import { createStore } from '../../../common/store';
-import { createStartServicesMock } from '@kbn/timelines-plugin/public/mock';
+import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 
 const useCellActions = getUseCellActionsHook(TableId.test);
 

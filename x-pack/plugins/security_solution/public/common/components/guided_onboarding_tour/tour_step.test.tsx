@@ -13,7 +13,7 @@ import { useTourContext } from './tour';
 import { mockGlobalState, SUB_PLUGINS_REDUCER, TestProviders } from '../../mock';
 import { TimelineId } from '../../../../common/types';
 import { createStore } from '../../store';
-import { kibanaMock } from '@kbn/timelines-plugin/public/mock';
+import { kibanaMock } from '../../mock/test_providers';
 import { createSecuritySolutionStorageMock } from '@kbn/timelines-plugin/public/mock/mock_local_storage';
 
 jest.mock('./tour');
