@@ -7,7 +7,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { internalConsole } from '@kbn/security-hardening';
+import { kibanaConsole } from '@kbn/security-hardening';
 
 /**
  * Create custom logger until we have a proper logging solution: https://github.com/elastic/kibana/issues/33796
@@ -17,20 +17,13 @@ export function createLogger(isDev: boolean): Logger {
   // TODO: Replace with a core logger once we implement it in https://github.com/elastic/kibana/issues/33796
   // For now, it logs only in dev mode
   const logger: Logger = {
-    // eslint-disable-next-line no-console
-    fatal: (...args) => (isDev ? console.error(...args) : void 0),
-    // eslint-disable-next-line no-console
-    error: (...args) => (isDev ? console.error(...args) : void 0),
-    // eslint-disable-next-line no-console
-    warn: (...args) => (isDev ? console.warn(...args) : void 0),
-    // // eslint-disable-next-line no-console
-    info: (...args) => (isDev ? internalConsole.info(...args) : void 0),
-    // eslint-disable-next-line no-console
-    debug: (...args) => (isDev ? console.debug(...args) : void 0),
-    // eslint-disable-next-line no-console
-    trace: (...args) => (isDev ? console.trace(...args) : void 0),
-    // // eslint-disable-next-line no-console
-    log: (...args) => (isDev ? internalConsole.log(...args) : void 0),
+    fatal: (...args) => (isDev ? kibanaConsole.error(...args) : void 0),
+    error: (...args) => (isDev ? kibanaConsole.error(...args) : void 0),
+    warn: (...args) => (isDev ? kibanaConsole.warn(...args) : void 0),
+    info: (...args) => (isDev ? kibanaConsole.info(...args) : void 0),
+    debug: (...args) => (isDev ? kibanaConsole.debug(...args) : void 0),
+    trace: (...args) => (isDev ? kibanaConsole.trace(...args) : void 0),
+    log: (...args) => (isDev ? kibanaConsole.log(...args) : void 0),
     isLevelEnabled: () => true,
     get: () => logger,
   };

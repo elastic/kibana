@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { internalConsole as internalConsole } from './console';
+export { kibanaConsole } from './console';

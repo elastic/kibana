@@ -6,17 +6,13 @@
  * Side Public License, v 1.
  */
 
-// import { isDevMode } from '@kbn/xstate-utils';
-
 /* eslint-disable no-console */
 
 // From https://www.ascii-code.com/characters/control-characters,
 // but explicitly allowing the range \u0008-\u000F (line breaks, tabs, etc.)
 const CONTROL_CHAR_REGEXP = new RegExp('[\\u0000-\\u0007\\u0010-\\u001F]', 'g');
 
-// export const isDevMode = () => process.env.NODE_ENV !== 'production';
-
-export const internalConsole = {
+export const kibanaConsole = {
   debug: console.debug.bind(console),
   error: console.error.bind(console),
   info: console.info.bind(console),
@@ -25,38 +21,41 @@ export const internalConsole = {
   warn: console.warn.bind(console),
 };
 
-// internalConsole.info.apply(console, [`***** process.env.NODE_ENV: ${process.env.NODE_ENV}`]);
-internalConsole.info.apply(console, [`***** process.env.isDevProc: ${process.env.isDevProc}`]);
+function callWithSanitizedArgs(func: Function, ...args: any[]) {
+  const cleanedArgs = args.map(function (arg) {
+    if (typeof arg !== 'string') return arg;
+    return escapeControlChars(arg);
+  });
+  func.apply(console, cleanedArgs);
+}
 
-// Only override console if running in production mode
-if (process.env.isDevProc) {
-  // !isDevMode) {
-  internalConsole.info.apply(console, [`***** OVERRIDING CONSOLE!`]);
-  internalConsole.info.apply(console, [`***** process.env.NODE_ENV: ${process.env.NODE_ENV}`]);
+if (process.env.NODE_ENV === 'production') {
+  console.debug = function (...args) {
+    callWithSanitizedArgs(kibanaConsole.debug, ...args);
+  };
+
+  console.error = function (...args) {
+    callWithSanitizedArgs(kibanaConsole.error, ...args);
+  };
 
   console.info = function (...args) {
-    const cleanedArgs = args.map(function (arg) {
-      if (typeof arg !== 'string') return arg;
-      return escapeControlChars(arg);
-    });
-    internalConsole.info.apply(console, cleanedArgs);
+    callWithSanitizedArgs(kibanaConsole.info, ...args);
   };
 
   console.log = function (...args) {
-    const cleanedArgs = args.map(function (arg) {
-      if (typeof arg !== 'string') return arg;
-      return escapeControlChars(arg);
-    });
-    internalConsole.log.apply(console, cleanedArgs);
+    callWithSanitizedArgs(kibanaConsole.log, ...args);
+  };
+
+  console.trace = function (...args) {
+    callWithSanitizedArgs(kibanaConsole.trace, ...args);
+  };
+
+  console.warn = function (...args) {
+    callWithSanitizedArgs(kibanaConsole.warn, ...args);
   };
 }
 
 function escapeControlChars(input: string) {
-  // typings may be wrong, there's scenarios where the message is not a plain string (e.g error stacks from the ES client)
-  // if (typeof input !== 'string') {
-  //   input = String(input);
-  // }
-
   return input.replace(
     CONTROL_CHAR_REGEXP,
     // Escaping control chars via JSON.stringify to maintain consistency with `meta` and the JSON layout.
