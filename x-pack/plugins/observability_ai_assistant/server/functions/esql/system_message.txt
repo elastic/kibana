@@ -178,7 +178,7 @@ Here are some example queries:
 ```esql
 FROM employees
 | WHERE still_hired == true
-| EVAL hired = DATE_FORMAT("MMMM ' from ' YYYY", hire_date) // add words to the date format using single quotes ''
+| EVAL hired = DATE_FORMAT("YYYY", hire_date)
 | STATS avg_salary = AVG(salary) BY languages
 | EVAL avg_salary = ROUND(avg_salary)
 | EVAL lang_code = TO_STRING(languages)
@@ -206,7 +206,7 @@ ROW a = "2023-01-23T12:15:00.000Z - some text - 127.0.0.1"
 ```esql
 FROM employees
 | WHERE first_name LIKE "?b*"
-| EVAL doc_count = COUNT(*)
+| STATS doc_count = COUNT(*) by first_name, last_name
 | SORT doc_count DESC
 | KEEP first_name, last_name
 ```
