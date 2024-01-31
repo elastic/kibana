@@ -69,7 +69,7 @@ export const getContextScopeValues = (context: Partial<EmbeddableApiContext>): C
       PublishesSavedObjectId &
       PublishesLocalUnifiedSearch &
       PublishesDataViews & 
-      HasParentApi
+      HasParentApi<Partial<PublishesLocalUnifiedSearch>>
   >;
   const dataViewIds = api.dataViews?.value
     ? (api.dataViews?.value.map((dataView) => dataView.id).filter(Boolean) as string[])

@@ -589,4 +589,12 @@ export class DashboardContainer
   public setFocusedPanelId = (id: string | undefined) => {
     this.dispatch.setFocusedPanelId(id);
   };
+
+  public getFilters() {
+    return this.getInput().filters;
+  }
+
+  public getQuery(): Query | undefined {
+    return this.getInput().query;
+  }
 }
