@@ -61,7 +61,7 @@ const mockEmbeddableApi = {
     localFilters: new BehaviorSubject([]),
     localQuery: new BehaviorSubject({ query: 'test', language: 'kuery' }),
     localTimeRange: new BehaviorSubject({ from: 'now-15m', to: 'now' }),
-  }
+  },
 };
 
 const mockNavigateToUrl = jest.fn(() => Promise.resolve());
