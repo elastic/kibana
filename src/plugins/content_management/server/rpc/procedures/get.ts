@@ -8,20 +8,21 @@
 
 import { rpcSchemas } from '../../../common/schemas';
 import type { GetIn } from '../../../common';
-import { getStorageContext } from '../../utils';
+import { getContentClientFactory } from '../../content_client';
 import type { ProcedureDefinition } from '../rpc_service';
 import type { Context } from '../types';
 
 export const get: ProcedureDefinition<Context, GetIn<string>> = {
   schemas: rpcSchemas.get,
   fn: async (ctx, { contentTypeId, id, version, options }) => {
-    const storageContext = getStorageContext({
-      contentTypeId,
-      version,
-      ctx,
+    const clientFactory = getContentClientFactory({
+      contentRegistry: ctx.contentRegistry,
     });
+    const { getForRequest } = clientFactory(contentTypeId);
 
-    const crudInstance = ctx.contentRegistry.getCrud(contentTypeId);
-    return crudInstance.get(storageContext, id, options);
+    return getForRequest({
+      ...ctx,
+      version,
+    }).get(id, options);
   },
 };

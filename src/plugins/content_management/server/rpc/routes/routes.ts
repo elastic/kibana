@@ -12,7 +12,6 @@ import { LISTING_LIMIT_SETTING, PER_PAGE_SETTING } from '@kbn/saved-objects-sett
 import { ProcedureName } from '../../../common';
 import type { ContentRegistry } from '../../core';
 import { MSearchService } from '../../core/msearch';
-import { getServiceObjectTransformFactory } from '../../utils';
 
 import type { RpcService } from '../rpc_service';
 import type { Context as RpcContext } from '../types';
@@ -56,7 +55,7 @@ export function initRpcRoutes(
         const context: RpcContext = {
           contentRegistry,
           requestHandlerContext,
-          getTransformsFactory: getServiceObjectTransformFactory,
+          request,
           mSearchService: new MSearchService({
             getSavedObjectsClient: async () =>
               (await requestHandlerContext.core).savedObjects.client,

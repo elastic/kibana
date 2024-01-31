@@ -7,20 +7,21 @@
  */
 import { rpcSchemas } from '../../../common/schemas';
 import type { DeleteIn } from '../../../common';
-import { getStorageContext } from '../../utils';
+import { getContentClientFactory } from '../../content_client';
 import type { ProcedureDefinition } from '../rpc_service';
 import type { Context } from '../types';
 
 export const deleteProc: ProcedureDefinition<Context, DeleteIn<string>> = {
   schemas: rpcSchemas.delete,
   fn: async (ctx, { contentTypeId, id, version, options }) => {
-    const storageContext = getStorageContext({
-      contentTypeId,
-      version,
-      ctx,
+    const clientFactory = getContentClientFactory({
+      contentRegistry: ctx.contentRegistry,
     });
+    const { getForRequest } = clientFactory(contentTypeId);
 
-    const crudInstance = ctx.contentRegistry.getCrud(contentTypeId);
-    return crudInstance.delete(storageContext, id, options);
+    return getForRequest({
+      ...ctx,
+      version,
+    }).delete(id, options);
   },
 };

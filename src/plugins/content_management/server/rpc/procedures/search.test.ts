@@ -8,15 +8,16 @@
 
 import { omit } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import type { ContentManagementServiceDefinitionVersioned, Version } from '@kbn/object-versioning';
+import type { ContentManagementServiceDefinitionVersioned } from '@kbn/object-versioning';
 
 import type { SearchQuery } from '../../../common';
-import { validate, getServiceObjectTransformFactory } from '../../utils';
+import { validate, disableTransformsCache } from '../../utils';
 import { ContentRegistry } from '../../core/registry';
 import { createMockedStorage } from '../../core/mocks';
 import { EventBus } from '../../core/event_bus';
 import { search } from './search';
 
+disableTransformsCache();
 const storageContextGetTransforms = jest.fn();
 const spy = () => storageContextGetTransforms;
 
@@ -176,8 +177,6 @@ describe('RPC -> search()', () => {
       const ctx: any = {
         contentRegistry,
         requestHandlerContext,
-        getTransformsFactory: (contentTypeId: string, version: Version) =>
-          getServiceObjectTransformFactory(contentTypeId, version, { cacheEnabled: false }),
       };
 
       return { ctx, storage };

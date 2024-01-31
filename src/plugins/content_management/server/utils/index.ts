@@ -8,4 +8,7 @@
 
 export { getStorageContext, validate } from './utils';
 
-export { getServiceObjectTransformFactory } from './services_transforms_factory';
+export {
+  getServiceObjectTransformFactory,
+  disableCache as disableTransformsCache,
+} from './services_transforms_factory';

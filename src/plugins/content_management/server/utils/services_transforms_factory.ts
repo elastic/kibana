@@ -15,6 +15,13 @@ import {
 } from '@kbn/object-versioning';
 import type { StorageContextGetTransformFn } from '../core';
 
+let isCacheEnabled = true;
+
+// This is used in tests to disable the cache
+export const disableCache = () => {
+  isCacheEnabled = false;
+};
+
 /**
  * We keep a cache of compiled service definition to avoid unnecessary recompile on every request.
  */
@@ -32,15 +39,11 @@ const compiledCache = new LRUCache<string, { [path: string]: ObjectMigrationDefi
  * @returns A "getContentManagmentServicesTransforms()"
  */
 export const getServiceObjectTransformFactory =
-  (
-    contentTypeId: string,
-    _requestVersion: Version,
-    { cacheEnabled = true }: { cacheEnabled?: boolean } = {}
-  ): StorageContextGetTransformFn =>
+  (contentTypeId: string, _requestVersion: Version): StorageContextGetTransformFn =>
   (definitions: ContentManagementServiceDefinitionVersioned, requestVersionOverride?: Version) => {
     const requestVersion = requestVersionOverride ?? _requestVersion;
 
-    if (cacheEnabled) {
+    if (isCacheEnabled) {
       const compiledFromCache = compiledCache.get(contentTypeId);
 
       if (compiledFromCache) {
@@ -54,7 +57,7 @@ export const getServiceObjectTransformFactory =
 
     const compiled = compileServiceDefinitions(definitions);
 
-    if (cacheEnabled) {
+    if (isCacheEnabled) {
       compiledCache.set(contentTypeId, compiled);
     }
 

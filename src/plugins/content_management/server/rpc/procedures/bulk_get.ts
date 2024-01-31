@@ -8,21 +8,22 @@
 
 import { rpcSchemas } from '../../../common/schemas';
 import type { BulkGetIn } from '../../../common';
-import { getStorageContext } from '../../utils';
 import type { ProcedureDefinition } from '../rpc_service';
 import type { Context } from '../types';
 import { BulkGetResponse } from '../../core/crud';
+import { getContentClientFactory } from '../../content_client';
 
 export const bulkGet: ProcedureDefinition<Context, BulkGetIn<string>, BulkGetResponse> = {
   schemas: rpcSchemas.bulkGet,
   fn: async (ctx, { contentTypeId, version, ids, options }) => {
-    const storageContext = getStorageContext({
-      contentTypeId,
-      version,
-      ctx,
+    const clientFactory = getContentClientFactory({
+      contentRegistry: ctx.contentRegistry,
     });
+    const { getForRequest } = clientFactory(contentTypeId);
 
-    const crudInstance = ctx.contentRegistry.getCrud(contentTypeId);
-    return crudInstance.bulkGet(storageContext, ids, options);
+    return getForRequest({
+      ...ctx,
+      version,
+    }).bulkGet(ids, options);
   },
 };

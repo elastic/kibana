@@ -7,19 +7,21 @@
  */
 import { rpcSchemas } from '../../../common/schemas';
 import type { UpdateIn } from '../../../common';
-import { getStorageContext } from '../../utils';
+import { getContentClientFactory } from '../../content_client';
 import type { ProcedureDefinition } from '../rpc_service';
 import type { Context } from '../types';
 
 export const update: ProcedureDefinition<Context, UpdateIn<string>> = {
   schemas: rpcSchemas.update,
   fn: async (ctx, { contentTypeId, id, version, data, options }) => {
-    const storageContext = getStorageContext({
-      contentTypeId,
-      version,
-      ctx,
+    const clientFactory = getContentClientFactory({
+      contentRegistry: ctx.contentRegistry,
     });
-    const crudInstance = ctx.contentRegistry.getCrud(contentTypeId);
-    return crudInstance.update(storageContext, id, data, options);
+    const { getForRequest } = clientFactory(contentTypeId);
+
+    return getForRequest({
+      ...ctx,
+      version,
+    }).update(id, data, options);
   },
 };
