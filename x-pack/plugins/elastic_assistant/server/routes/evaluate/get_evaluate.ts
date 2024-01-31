@@ -5,31 +5,26 @@
  * 2.0.
  */
 
-import { IKibanaResponse, IRouter } from '@kbn/core/server';
+import { type IKibanaResponse, IRouter } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import {
   API_VERSIONS,
-  GetCapabilitiesResponse,
   INTERNAL_API_ACCESS,
+  GetEvaluateResponse,
 } from '@kbn/elastic-assistant-common';
-import { CAPABILITIES } from '../../../common/constants';
-import { ElasticAssistantRequestHandlerContext } from '../../types';
-
 import { buildResponse } from '../../lib/build_response';
+import { ElasticAssistantRequestHandlerContext } from '../../types';
+import { EVALUATE } from '../../../common/constants';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
 import { buildRouteValidationWithZod } from '../../schemas/common';
+import { AGENT_EXECUTOR_MAP } from '../../lib/langchain/executors';
 
-/**
- * Get the assistant capabilities for the requesting plugin
- *
- * @param router IRouter for registering routes
- */
-export const getCapabilitiesRoute = (router: IRouter<ElasticAssistantRequestHandlerContext>) => {
+export const getEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandlerContext>) => {
   router.versioned
     .get({
       access: INTERNAL_API_ACCESS,
-      path: CAPABILITIES,
+      path: EVALUATE,
       options: {
         tags: ['access:elasticAssistant'],
       },
@@ -40,29 +35,35 @@ export const getCapabilitiesRoute = (router: IRouter<ElasticAssistantRequestHand
         validate: {
           response: {
             200: {
-              body: buildRouteValidationWithZod(GetCapabilitiesResponse),
+              body: buildRouteValidationWithZod(GetEvaluateResponse),
             },
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<GetCapabilitiesResponse>> => {
-        const resp = buildResponse(response);
+      async (context, request, response): Promise<IKibanaResponse<GetEvaluateResponse>> => {
         const assistantContext = await context.elasticAssistant;
         const logger = assistantContext.logger;
 
-        try {
-          const pluginName = getPluginNameFromRequest({
-            request,
-            defaultPluginName: DEFAULT_PLUGIN_NAME,
-            logger,
-          });
-          const registeredFeatures = assistantContext.getRegisteredFeatures(pluginName);
+        // Validate evaluation feature is enabled
+        const pluginName = getPluginNameFromRequest({
+          request,
+          defaultPluginName: DEFAULT_PLUGIN_NAME,
+          logger,
+        });
+        const registeredFeatures = assistantContext.getRegisteredFeatures(pluginName);
+        if (!registeredFeatures.assistantModelEvaluation) {
+          return response.notFound();
+        }
 
-          return response.ok({ body: registeredFeatures });
+        try {
+          return response.ok({ body: { agentExecutors: Object.keys(AGENT_EXECUTOR_MAP) } });
         } catch (err) {
+          logger.error(err);
           const error = transformError(err);
+
+          const resp = buildResponse(response);
           return resp.error({
-            body: error.message,
+            body: { error: error.message },
             statusCode: error.statusCode,
           });
         }
