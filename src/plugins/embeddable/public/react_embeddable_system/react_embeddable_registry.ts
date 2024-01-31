@@ -35,7 +35,7 @@ export const getReactEmbeddableFactory = <
 ): ReactEmbeddableFactory<StateType, ApiType> => {
   if (registry[key] === undefined)
     throw new Error(
-      i18n.translate('embeddable.reactEmbeddable.factoryNotFoundError', {
+      i18n.translate('embeddableApi.reactEmbeddable.factoryNotFoundError', {
         defaultMessage: 'No embeddable factory found for type: {key}',
         values: { key },
       })
