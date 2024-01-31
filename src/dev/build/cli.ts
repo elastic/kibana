@@ -39,6 +39,7 @@ if (showHelp) {
         --rpm                                {dim Only build the rpm packages}
         --deb                                {dim Only build the deb packages}
         --docker-images                      {dim Only build the Docker images}
+        --docker-fips-images                 {dim Build the Docker FIPS images}
         --docker-context-use-local-artifact  {dim Use a local artifact when building the Docker context}
         --docker-cross-compile               {dim Produce arm64 and amd64 Docker images}
         --docker-contexts                    {dim Only build the Docker build contexts}
