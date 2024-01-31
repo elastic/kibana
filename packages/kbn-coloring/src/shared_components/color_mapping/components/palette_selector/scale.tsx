@@ -91,7 +91,7 @@ export function ScaleMode({ getPaletteFn }: { getPaletteFn: ReturnType<typeof ge
                 defaultMessage: `Switching to a categorical mode will discard all your custom color changes`,
               })
             : i18n.translate('coloring.colorMapping.colorChangesModal.sequentialModeDescription', {
-                defaultMessage: `Switching to a sequential mode will discard all your custom color changes`,
+                defaultMessage: `Switching to a gradient mode will discard all your custom color changes`,
               })}
         </p>
       </EuiConfirmModal>
@@ -118,7 +118,7 @@ export function ScaleMode({ getPaletteFn }: { getPaletteFn: ReturnType<typeof ge
             },
             {
               id: `gradient`,
-              label: i18n.translate('coloring.colorMapping.paletteSelector.sequentialLabel', {
+              label: i18n.translate('coloring.colorMapping.paletteSelector.gradientLabel', {
                 defaultMessage: `Gradient`,
               }),
               iconType: 'gradient',

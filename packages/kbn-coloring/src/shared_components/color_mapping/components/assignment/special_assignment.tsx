@@ -33,7 +33,6 @@ export function SpecialAssignment({
   return (
     <ColorSwatch
       forType="specialAssignment"
-      canPickColor={true}
       colorMode={{ type: 'categorical' }}
       assignmentColor={assignmentColor}
       getPaletteFn={getPaletteFn}

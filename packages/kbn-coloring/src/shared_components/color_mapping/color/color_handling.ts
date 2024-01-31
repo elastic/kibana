@@ -8,10 +8,11 @@
 import chroma from 'chroma-js';
 import { ColorMapping } from '../config';
 import { changeAlpha, combineColors, getValidColor } from './color_math';
-import { getPalette } from '../palettes';
+import { getPalette, NeutralPalette } from '../palettes';
 import { ColorMappingInputData } from '../categorical_color_mapping';
 import { ruleMatch } from './rule_matching';
 import { GradientColorMode } from '../config/types';
+import { DEFAULT_NEUTRAL_PALETTE_INDEX } from '../config/default_color_mapping';
 
 export function getAssignmentColor(
   colorMode: ColorMapping.Config['colorMode'],
@@ -144,16 +145,25 @@ export function getColorFactory(
       );
     }
     // if the rule doesn't match anymore let's use the special assignment color
+    // return getColor(
+    //   // TODO: the specialAssignment[0] position is arbitrary, we should fix it better
+    //   specialAssignments[0].color.type === 'loop'
+    //     ? {
+    //         type: 'loop',
+    //         // this is a catch all and should not be reached
+    //         colorIndex: 0,
+    //         paletteId,
+    //       }
+    //     : specialAssignments[0].color,
+    //   getPaletteFn,
+    //   isDarkMode
+    // );
     return getColor(
-      // TODO: the specialAssignment[0] position is arbitrary, we should fix it better
-      specialAssignments[0].color.type === 'loop'
-        ? {
-            type: 'loop',
-            // this is a catch all and should not be reached
-            colorIndex: 0,
-            paletteId,
-          }
-        : specialAssignments[0].color,
+      {
+        type: 'categorical',
+        paletteId: NeutralPalette.id,
+        colorIndex: DEFAULT_NEUTRAL_PALETTE_INDEX,
+      },
       getPaletteFn,
       isDarkMode
     );

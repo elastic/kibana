@@ -7,8 +7,7 @@
  */
 
 import type { ColorMapping } from '.';
-import { MAX_ASSIGNABLE_COLORS } from '../components/container/container';
-import { getPalette, NeutralPalette } from '../palettes';
+import { getPalette } from '../palettes';
 
 export function updateAssignmentsPalette(
   assignments: ColorMapping.Config['assignments'],
@@ -18,7 +17,6 @@ export function updateAssignmentsPalette(
   preserveColorChanges: boolean
 ): ColorMapping.Config['assignments'] {
   const palette = getPaletteFn(paletteId);
-  const maxColors = palette.type === 'categorical' ? palette.colorCount : MAX_ASSIGNABLE_COLORS;
   return assignments.map(({ rule, color, touched }, index) => {
     if (preserveColorChanges && touched) {
       return { rule, color, touched };
@@ -27,8 +25,8 @@ export function updateAssignmentsPalette(
         colorMode.type === 'categorical'
           ? {
               type: 'categorical',
-              paletteId: index < maxColors ? paletteId : NeutralPalette.id,
-              colorIndex: index < maxColors ? index : 0,
+              paletteId,
+              colorIndex: index % palette.colorCount,
             }
           : { type: 'gradient' };
       return {

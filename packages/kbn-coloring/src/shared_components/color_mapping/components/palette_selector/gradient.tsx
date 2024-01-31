@@ -6,73 +6,61 @@
  * Side Public License, v 1.
  */
 
-import {
-  euiCanAnimate,
-  euiFocusRing,
-  EuiIcon,
-  euiShadowSmall,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
 import React from 'react';
-import { useDispatch } from 'react-redux';
-
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
+import { useDispatch } from 'react-redux';
 import { changeAlpha } from '../../color/color_math';
-
 import { ColorMapping } from '../../config';
-import { ColorSwatch } from '../color_picker/color_swatch';
 import { getPalette } from '../../palettes';
-
-import { addGradientColorStep, updateGradientColorStep } from '../../state/color_mapping';
-import { colorPickerVisibility } from '../../state/ui';
 import { getGradientColorScale } from '../../color/color_handling';
+import { AddStop } from './gradient_add_stop';
+import { ColorSwatch } from '../color_picker/color_swatch';
+import { updateGradientColorStep } from '../../state/color_mapping';
 
 export function Gradient({
   paletteId,
   colorMode,
   getPaletteFn,
   isDarkMode,
-  assignmentsSize,
 }: {
   paletteId: string;
   isDarkMode: boolean;
   colorMode: ColorMapping.Config['colorMode'];
   getPaletteFn: ReturnType<typeof getPalette>;
-  assignmentsSize: number;
 }) {
+  const dispatch = useDispatch();
   if (colorMode.type === 'categorical') {
     return null;
   }
+
   const currentPalette = getPaletteFn(paletteId);
   const gradientColorScale = getGradientColorScale(colorMode, getPaletteFn, isDarkMode);
 
-  const topMostColorStop =
+  const startStepColor =
     colorMode.sort === 'asc'
       ? colorMode.steps.length === 1
         ? undefined
         : colorMode.steps.at(-1)
       : colorMode.steps.at(0);
-  const topMostColorStopIndex =
+  const startStepIndex =
     colorMode.sort === 'asc'
       ? colorMode.steps.length === 1
         ? NaN
         : colorMode.steps.length - 1
       : 0;
 
-  const bottomMostColorStop =
+  const endStepColor =
     colorMode.sort === 'asc'
       ? colorMode.steps.at(0)
       : colorMode.steps.length === 1
       ? undefined
       : colorMode.steps.at(-1);
-  const bottomMostColorStopIndex =
+  const endStepIndex =
     colorMode.sort === 'asc' ? 0 : colorMode.steps.length === 1 ? NaN : colorMode.steps.length - 1;
 
-  const middleMostColorSep = colorMode.steps.length === 3 ? colorMode.steps[1] : undefined;
-  const middleMostColorStopIndex = colorMode.steps.length === 3 ? 1 : NaN;
+  const middleStepColor = colorMode.steps.length === 3 ? colorMode.steps[1] : undefined;
+  const middleStepIndex = colorMode.steps.length === 3 ? 1 : NaN;
 
   return (
     <div
@@ -87,7 +75,6 @@ export function Gradient({
       `}
     >
       <div
-        className="gradientLine"
         css={css`
           position: absolute;
           left: 6px;
@@ -107,21 +94,26 @@ export function Gradient({
       />
 
       <div
-        className="gradientStop"
         css={css`
           position: absolute;
           left: 0;
           top: 6px;
         `}
       >
-        {topMostColorStop ? (
-          <ColorStop
+        {startStepColor ? (
+          <ColorSwatch
+            forType="gradient"
             colorMode={colorMode}
-            step={topMostColorStop}
-            index={topMostColorStopIndex}
-            currentPalette={currentPalette}
+            assignmentColor={startStepColor}
             getPaletteFn={getPaletteFn}
+            index={startStepIndex}
+            palette={currentPalette}
+            total={colorMode.steps.length}
+            swatchShape="round"
             isDarkMode={isDarkMode}
+            onColorChange={(color) => {
+              dispatch(updateGradientColorStep({ index: startStepIndex, color }));
+            }}
           />
         ) : (
           <AddStop colorMode={colorMode} currentPalette={currentPalette} at={1} />
@@ -137,14 +129,20 @@ export function Gradient({
           top: 6px;
         `}
       >
-        {middleMostColorSep ? (
-          <ColorStop
+        {middleStepColor ? (
+          <ColorSwatch
+            forType="gradient"
             colorMode={colorMode}
-            step={middleMostColorSep}
-            index={middleMostColorStopIndex}
-            currentPalette={currentPalette}
+            assignmentColor={middleStepColor}
             getPaletteFn={getPaletteFn}
+            index={middleStepIndex}
+            palette={currentPalette}
+            total={colorMode.steps.length}
+            swatchShape="round"
             isDarkMode={isDarkMode}
+            onColorChange={(color) => {
+              dispatch(updateGradientColorStep({ index: middleStepIndex, color }));
+            }}
           />
         ) : colorMode.steps.length === 2 ? (
           <AddStop colorMode={colorMode} currentPalette={currentPalette} at={1} />
@@ -159,146 +157,25 @@ export function Gradient({
           right: 0;
         `}
       >
-        {bottomMostColorStop ? (
-          <ColorStop
+        {endStepColor ? (
+          <ColorSwatch
+            forType="gradient"
             colorMode={colorMode}
-            step={bottomMostColorStop}
-            index={bottomMostColorStopIndex}
-            currentPalette={currentPalette}
+            assignmentColor={endStepColor}
             getPaletteFn={getPaletteFn}
+            index={endStepIndex}
+            palette={currentPalette}
+            total={colorMode.steps.length}
+            swatchShape="round"
             isDarkMode={isDarkMode}
+            onColorChange={(color) => {
+              dispatch(updateGradientColorStep({ index: endStepIndex, color }));
+            }}
           />
         ) : (
           <AddStop colorMode={colorMode} currentPalette={currentPalette} at={1} />
         )}
       </div>
     </div>
-  );
-}
-
-function AddStop({
-  colorMode,
-  currentPalette,
-  at,
-}: {
-  colorMode: {
-    type: 'gradient';
-    steps: Array<(ColorMapping.CategoricalColor | ColorMapping.ColorCode) & { touched: boolean }>;
-  };
-  currentPalette: ColorMapping.CategoricalPalette;
-  at: number;
-}) {
-  const euiTheme = useEuiTheme();
-  const dispatch = useDispatch();
-  return (
-    <EuiToolTip
-      position="top"
-      content={i18n.translate('coloring.colorMapping.container.invertGradientButtonLabel', {
-        defaultMessage: 'Add gradient stop',
-      })}
-    >
-      <button
-        css={css`
-          position: relative;
-          border-radius: 50%;
-          width: 17px;
-          height: 17px;
-          padding: 0 0.5px;
-          ${euiFocusRing(euiTheme)};
-          opacity: 0;
-          ${euiCanAnimate} {
-            transition: opacity ${euiTheme.euiTheme.animation.fast} ease-in;
-          }
-        `}
-        onClick={() => {
-          dispatch(
-            addGradientColorStep({
-              color: {
-                type: 'categorical',
-                // TODO assign the next available color or a better one
-                colorIndex: colorMode.steps.length,
-                paletteId: currentPalette.id,
-              },
-              at,
-            })
-          );
-          dispatch(
-            colorPickerVisibility({
-              index: at,
-              type: 'gradient',
-              visible: true,
-            })
-          );
-        }}
-      >
-        <div
-          css={css`
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
-            transition: 200ms background-color;
-            background-color: lightgrey;
-            &:hover {
-              background-color: #696f7d;
-            }
-            ${euiShadowSmall(euiTheme)}
-          `}
-        >
-          <EuiIcon
-            type="plus"
-            css={css`
-              position: absolute;
-              top: 0.5px;
-              left: 0;
-              transition: 200ms fill;
-              &:hover {
-                fill: white;
-              }
-            `}
-            color={'#696f7d'}
-          />
-        </div>
-      </button>
-    </EuiToolTip>
-  );
-}
-
-function ColorStop({
-  colorMode,
-  step,
-  index,
-  currentPalette,
-  getPaletteFn,
-  isDarkMode,
-}: {
-  colorMode: ColorMapping.GradientColorMode;
-  step: ColorMapping.CategoricalColor | ColorMapping.ColorCode;
-  index: number;
-  currentPalette: ColorMapping.CategoricalPalette;
-  getPaletteFn: ReturnType<typeof getPalette>;
-  isDarkMode: boolean;
-}) {
-  const dispatch = useDispatch();
-  return (
-    <ColorSwatch
-      canPickColor={true}
-      colorMode={colorMode}
-      assignmentColor={step}
-      getPaletteFn={getPaletteFn}
-      index={index}
-      palette={currentPalette}
-      total={colorMode.steps.length}
-      swatchShape="round"
-      isDarkMode={isDarkMode}
-      onColorChange={(color) => {
-        dispatch(
-          updateGradientColorStep({
-            index,
-            color,
-          })
-        );
-      }}
-      forType="gradient"
-    />
   );
 }
