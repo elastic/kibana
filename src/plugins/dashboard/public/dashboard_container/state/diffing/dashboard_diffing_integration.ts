@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { omit } from 'lodash';
+import { cloneDeep, omit } from 'lodash';
 import { AnyAction, Middleware } from 'redux';
 import { debounceTime, Observable, startWith, Subject, switchMap } from 'rxjs';
 
@@ -201,7 +201,9 @@ function updateUnsavedChangesState(
   unsavedChanges: Partial<DashboardContainerInput>
 ) {
   // dispatch has unsaved changes state
-  const hasChanges = Object.keys(omit(unsavedChanges, keysNotConsideredUnsavedChanges)).length > 0;
+  const hasChanges =
+    Object.keys(omit(unsavedChanges, keysNotConsideredUnsavedChanges)).length > 0 ||
+    this.getState().componentState.reactEmbeddablesHaveUnsavedChangs;
   if (this.getState().componentState.hasUnsavedChanges !== hasChanges) {
     this.dispatch.setHasUnsavedChanges(hasChanges);
   }
@@ -212,6 +214,29 @@ function backupUnsavedChanges(
   unsavedChanges: Partial<DashboardContainerInput>
 ) {
   const { dashboardBackup } = pluginServices.getServices();
+
+  // apply all unsaved state from react embeddables to the unsaved changes object.
+  let hasAnyReactEmbeddableUnsavedChanges = false;
+  const currentPanels = cloneDeep(unsavedChanges.panels ?? this.getInput().panels);
+  for (const { childId, unsavedChanges: childUnsavedChanges } of this.reactEmbeddableUnsavedChanges
+    .value) {
+    if (!childUnsavedChanges) continue;
+    const panelStateToBackup = {
+      ...currentPanels[childId],
+      ...(unsavedChanges.panels?.[childId] ?? {}),
+      explicitInput: {
+        ...currentPanels[childId]?.explicitInput,
+        ...(unsavedChanges.panels?.[childId]?.explicitInput ?? {}),
+        ...childUnsavedChanges,
+      },
+    };
+    hasAnyReactEmbeddableUnsavedChanges = true;
+    currentPanels[childId] = panelStateToBackup;
+  }
+  if (hasAnyReactEmbeddableUnsavedChanges) {
+    unsavedChanges.panels = currentPanels;
+  }
+
   dashboardBackup.setState(
     this.getDashboardSavedObjectId(),
     omit(unsavedChanges, keysToOmitFromSessionStorage)

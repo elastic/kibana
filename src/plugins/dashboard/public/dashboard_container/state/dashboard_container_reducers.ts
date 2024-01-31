@@ -119,6 +119,13 @@ export const dashboardContainerReducers = {
   // ------------------------------------------------------------------------------
   // Unsaved Changes Reducers
   // ------------------------------------------------------------------------------
+  setReactEmbeddablesHaveUnsavedChanges: (
+    state: DashboardReduxState,
+    action: PayloadAction<DashboardPublicState['reactEmbeddablesHaveUnsavedChangs']>
+  ) => {
+    state.componentState.reactEmbeddablesHaveUnsavedChangs = action.payload;
+  },
+
   setHasUnsavedChanges: (
     state: DashboardReduxState,
     action: PayloadAction<DashboardPublicState['hasUnsavedChanges']>

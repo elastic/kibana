@@ -15,7 +15,11 @@ import {
   getDefaultControlGroupInput,
 } from '@kbn/controls-plugin/common';
 import { TimeRange } from '@kbn/es-query';
-import { isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
+import {
+  isErrorEmbeddable,
+  reactEmbeddableRegistryHasKey,
+  ViewMode,
+} from '@kbn/embeddable-plugin/public';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { type ControlGroupContainer, ControlGroupOutput } from '@kbn/controls-plugin/public';
 import { GlobalQueryStateFromUrl, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
@@ -337,6 +341,9 @@ export const initializeDashboard = async ({
               [newPanelState.explicitInput.id]: newPanelState,
             },
           });
+          if (reactEmbeddableRegistryHasKey(incomingEmbeddable.type)) {
+            return { id: embeddableId };
+          }
 
           return await container.untilEmbeddableLoaded(embeddableId);
         })();

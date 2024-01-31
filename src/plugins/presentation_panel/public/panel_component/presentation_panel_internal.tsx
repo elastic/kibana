@@ -47,27 +47,25 @@ export const PresentationPanelInternal = <
     if (apiHasParentApi(api) && apiPublishesViewMode(api.parentApi)) return api.parentApi.viewMode;
   })();
 
-  const {
-    rawViewMode,
+  const [
+    dataLoading,
     blockingError,
     panelTitle,
-    dataLoading,
     hidePanelTitle,
     panelDescription,
     defaultPanelTitle,
+    rawViewMode,
     parentHidePanelTitle,
-  } = useBatchedPublishingSubjects({
-    dataLoading: api?.dataLoading,
-    blockingError: api?.blockingError,
-
-    panelTitle: api?.panelTitle,
-    hidePanelTitle: api?.hidePanelTitle,
-    panelDescription: api?.panelDescription,
-    defaultPanelTitle: api?.defaultPanelTitle,
-
-    rawViewMode: viewModeSubject,
-    parentHidePanelTitle: api?.parentApi?.hidePanelTitle,
-  });
+  ] = useBatchedPublishingSubjects(
+    api?.dataLoading,
+    api?.blockingError,
+    api?.panelTitle,
+    api?.hidePanelTitle,
+    api?.panelDescription,
+    api?.defaultPanelTitle,
+    viewModeSubject,
+    api?.parentApi?.hidePanelTitle
+  );
   const viewMode = rawViewMode ?? 'view';
 
   const [initialLoadComplete, setInitialLoadComplete] = useState(!dataLoading);

@@ -6,19 +6,48 @@
  * Side Public License, v 1.
  */
 
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { reactEmbeddableRegistryHasKey } from '@kbn/embeddable-plugin/public';
+import { SerializedPanelState } from '@kbn/presentation-containers';
+import { showSaveModal } from '@kbn/saved-objects-plugin/public';
+import { cloneDeep } from 'lodash';
 import React from 'react';
 import { batch } from 'react-redux';
-import { showSaveModal } from '@kbn/saved-objects-plugin/public';
-
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { DASHBOARD_CONTENT_ID, SAVED_OBJECT_POST_TIME } from '../../../dashboard_constants';
-import { DashboardSaveOptions, DashboardStateFromSaveModal } from '../../types';
-import { DashboardSaveModal } from './overlays/save_modal';
-import { DashboardContainer } from '../dashboard_container';
-import { pluginServices } from '../../../services/plugin_services';
 import { DashboardContainerInput } from '../../../../common';
+import { DASHBOARD_CONTENT_ID, SAVED_OBJECT_POST_TIME } from '../../../dashboard_constants';
 import { SaveDashboardReturn } from '../../../services/dashboard_content_management/types';
+import { pluginServices } from '../../../services/plugin_services';
+import { DashboardSaveOptions, DashboardStateFromSaveModal } from '../../types';
+import { DashboardContainer } from '../dashboard_container';
 import { extractTitleAndCount } from './lib/extract_title_and_count';
+import { DashboardSaveModal } from './overlays/save_modal';
+
+const serializeAllPanelState = async (
+  dashboard: DashboardContainer
+): Promise<DashboardContainerInput['panels']> => {
+  const reactEmbeddableSavePromises: Array<
+    Promise<{ serializedState: SerializedPanelState; uuid: string }>
+  > = [];
+  const panels = cloneDeep(dashboard.getInput().panels);
+  for (const [uuid, panel] of Object.entries(panels)) {
+    if (!reactEmbeddableRegistryHasKey(panel.type)) continue;
+    const api = dashboard.reactEmbeddableChildren.value[uuid];
+    if (api) {
+      reactEmbeddableSavePromises.push(
+        new Promise((resolve) => {
+          api.serializeState().then((serializedState) => {
+            resolve({ serializedState, uuid });
+          });
+        })
+      );
+    }
+  }
+  const saveResults = await Promise.all(reactEmbeddableSavePromises);
+  for (const { serializedState, uuid } of saveResults) {
+    panels[uuid].explicitInput = { ...serializedState.rawState, id: uuid };
+  }
+  return panels;
+};
 
 export function runSaveAs(this: DashboardContainer) {
   const {
@@ -77,11 +106,14 @@ export function runSaveAs(this: DashboardContainer) {
         // do not save if title is duplicate and is unconfirmed
         return {};
       }
+      const nextPanels = await serializeAllPanelState(this);
       const stateToSave: DashboardContainerInput = {
         ...currentState,
+        panels: nextPanels,
         ...stateFromSaveModal,
       };
       const beforeAddTime = window.performance.now();
+
       const saveResult = await saveDashboardState({
         currentState: stateToSave,
         saveOptions,
@@ -101,6 +133,7 @@ export function runSaveAs(this: DashboardContainer) {
         batch(() => {
           this.dispatch.setStateFromSaveModal(stateFromSaveModal);
           this.dispatch.setLastSavedInput(stateToSave);
+          this.lastSavedState.next();
         });
       }
       resolve(saveResult);
@@ -132,11 +165,14 @@ export async function runQuickSave(this: DashboardContainer) {
   } = pluginServices.getServices();
 
   const {
-    explicitInput: currentState,
+    explicitInput,
     componentState: { lastSavedId, managed },
   } = this.getState();
 
   if (managed) return;
+
+  const nextPanels = await serializeAllPanelState(this);
+  const currentState = { ...explicitInput, panels: nextPanels };
 
   const saveResult = await saveDashboardState({
     lastSavedId,
@@ -144,6 +180,7 @@ export async function runQuickSave(this: DashboardContainer) {
     saveOptions: {},
   });
   this.dispatch.setLastSavedInput(currentState);
+  this.lastSavedState.next();
 
   return saveResult;
 }

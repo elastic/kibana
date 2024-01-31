@@ -48,6 +48,8 @@ export interface DashboardPublicState {
   scrollToPanelId?: string;
   highlightPanelId?: string;
   focusedPanelId?: string;
+
+  reactEmbeddablesHaveUnsavedChangs?: boolean;
 }
 
 export interface DashboardRenderPerformanceStats {

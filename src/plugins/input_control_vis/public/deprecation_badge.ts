@@ -41,6 +41,7 @@ export class InputControlDeprecationBadge implements Action<DeprecationBadgeActi
   }
 
   public async isCompatible({ embeddable }: DeprecationBadgeActionContext) {
+    if (!embeddable?.getInput) return false;
     return (
       embeddable.getInput().viewMode === ViewMode.EDIT &&
       embeddable.getInput()?.savedVis?.type === 'input_control_vis'

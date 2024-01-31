@@ -1,0 +1,96 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import { getLastSavedStateSubjectForChild } from '@kbn/presentation-containers';
+import { PublishingSubject } from '@kbn/presentation-publishing';
+import { useCallback, useEffect, useMemo } from 'react';
+import { BehaviorSubject, combineLatest } from 'rxjs';
+import { combineLatestWith, debounceTime, map } from 'rxjs/operators';
+import { useReactEmbeddableParentContext } from './react_embeddable_parenting';
+import { EmbeddableStateComparators, ReactEmbeddableFactory } from './types';
+
+const defaultComparator = <T>(a: T, b: T) => a === b;
+
+export const useReactEmbeddableUnsavedChanges = <StateType extends object = object>(
+  uuid: string,
+  factory: ReactEmbeddableFactory<StateType>,
+  comparators: EmbeddableStateComparators<StateType>
+) => {
+  // set up unsaved changes subject
+  const unsavedChanges = useMemo(
+    () => new BehaviorSubject<Partial<StateType> | undefined>(undefined),
+    []
+  );
+
+  const { parentApi } = useReactEmbeddableParentContext() ?? {};
+  const lastSavedStateSubject = useMemo(
+    () => getLastSavedStateSubjectForChild<StateType>(parentApi, uuid, factory.deserializeState),
+    [factory.deserializeState, parentApi, uuid]
+  );
+
+  const { comparatorSubjects, comparatorKeys } = useMemo(() => {
+    const subjects: Array<PublishingSubject<unknown>> = [];
+    const keys: Array<keyof StateType> = [];
+    for (const key of Object.keys(comparators) as Array<keyof StateType>) {
+      subjects.push(comparators[key][0] as PublishingSubject<unknown>);
+      keys.push(key);
+    }
+    return { comparatorKeys: keys, comparatorSubjects: subjects };
+    // disable exhaustive deps because the comparators must be static
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!lastSavedStateSubject) return;
+    // subscribe to last saved state subject and all state comparators
+    const subscription = combineLatest(comparatorSubjects)
+      .pipe(
+        debounceTime(100),
+        map((latestStates) =>
+          comparatorKeys.reduce((acc, key, index) => {
+            acc[key] = latestStates[index] as StateType[typeof key];
+            return acc;
+          }, {} as Partial<StateType>)
+        ),
+        combineLatestWith(lastSavedStateSubject)
+      )
+      .subscribe(([latestStates, lastSavedState]) => {
+        if (!lastSavedState) {
+          unsavedChanges.next(latestStates);
+          return;
+        }
+        const latestChanges: Partial<StateType> = {};
+        for (const key of comparatorKeys) {
+          const comparator = comparators[key]?.[2] ?? defaultComparator;
+          if (!comparator(lastSavedState[key], latestStates[key], lastSavedState, latestStates)) {
+            latestChanges[key] = latestStates[key];
+          }
+        }
+        if (Object.keys(latestChanges).length > 0) {
+          unsavedChanges.next(latestChanges);
+        } else {
+          unsavedChanges.next(undefined);
+        }
+      });
+    return () => subscription.unsubscribe();
+    // disable exhaustive deps because the comparators must be static
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const resetUnsavedChanges = useCallback(() => {
+    const lastSaved = lastSavedStateSubject?.getValue();
+    for (const key of comparatorKeys) {
+      comparators[key][1](lastSaved?.[key] as StateType[typeof key]);
+    }
+
+    // disable exhaustive deps because the comparators must be static
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return { unsavedChanges, resetUnsavedChanges };
+};
