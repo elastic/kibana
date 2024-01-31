@@ -32,6 +32,7 @@
     "@kbn/core-lifecycle-server-mocks",
     "@kbn/core-ui-settings-server",
     "@kbn/monaco",
+    "@kbn/core-http-server-internal",
   ],
   "exclude": [
     "target/**/*",
