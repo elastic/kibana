@@ -791,6 +791,9 @@ class TimeseriesChartIntl extends Component {
       .append('circle')
       .attr('r', LINE_CHART_ANOMALY_RADIUS)
       .on('click', function (d) {
+        d3.event.preventDefault();
+        if (d.anomalyScore === undefined) return;
+
         const anomalyTime = d.date.getTime();
 
         // The table items could be aggregated, so we have to find the item
@@ -1916,42 +1919,43 @@ class TimeseriesChartIntl extends Component {
     this.rootNode = componentNode;
   }
 
-  render() {
-    const that = this;
-    function closePopover() {
-      that.setState({ popoverData: null, popoverCoords: [0, 0] });
-    }
+  closePopover() {
+    this.setState({ popoverData: null, popoverCoords: [0, 0] });
+  }
 
+  render() {
     return (
       <>
-        <div
-          style={{
-            position: 'absolute',
-            marginLeft: that.state.popoverCoords[0],
-            marginTop: that.state.popoverCoords[1],
-            display: that.state.popoverData === null ? 'none' : 'block',
-          }}
-        >
-          <EuiPopover
-            isOpen={this.state.popoverData !== null}
-            closePopover={closePopover}
-            panelPaddingSize="none"
-            anchorPosition="upLeft"
+        {this.state.popoverData !== null && (
+          <div
+            style={{
+              position: 'absolute',
+              marginLeft: this.state.popoverCoords[0],
+              marginTop: this.state.popoverCoords[1],
+            }}
           >
-            {that.state.popoverData !== null && (
+            <EuiPopover
+              isOpen={true}
+              closePopover={() => {
+                console.log('closePopover');
+                this.closePopover();
+              }}
+              panelPaddingSize="none"
+              anchorPosition="upLeft"
+            >
               <LinksMenuUI
-                anomaly={that.state.popoverData}
-                bounds={that.props.bounds}
+                anomaly={this.state.popoverData}
+                bounds={this.props.bounds}
                 showMapsLink={false}
                 showViewSeriesLink={false}
-                isAggregatedData={that.props.tableData.interval !== 'second'}
-                interval={that.props.tableData.interval}
-                onItemClick={closePopover}
-                sourceIndicesWithGeoFields={that.props.sourceIndicesWithGeoFields}
+                isAggregatedData={this.props.tableData.interval !== 'second'}
+                interval={this.props.tableData.interval}
+                onItemClick={() => this.closePopover()}
+                sourceIndicesWithGeoFields={this.props.sourceIndicesWithGeoFields}
               />
-            )}
-          </EuiPopover>
-        </div>
+            </EuiPopover>
+          </div>
+        )}
         <div className="ml-timeseries-chart-react" ref={this.setRef.bind(this)} />
       </>
     );
