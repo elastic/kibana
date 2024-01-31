@@ -9,17 +9,17 @@ import { postEvaluateRoute } from './post_evaluate';
 import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { getPostEvaluateRequest } from '../../__mocks__/request';
-import {
-  PostEvaluateBodyInputs,
-  PostEvaluatePathQueryInputs,
-} from '../../schemas/evaluate/post_evaluate';
+import type {
+  PostEvaluateRequestBodyInput,
+  PostEvaluateRequestQueryInput,
+} from '@kbn/elastic-assistant-common';
 
-const defaultBody: PostEvaluateBodyInputs = {
+const defaultBody: PostEvaluateRequestBodyInput = {
   dataset: undefined,
   evalPrompt: undefined,
 };
 
-const defaultQueryParams: PostEvaluatePathQueryInputs = {
+const defaultQueryParams: PostEvaluateRequestQueryInput = {
   agents: 'agents',
   datasetName: undefined,
   evaluationType: undefined,
