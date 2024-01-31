@@ -8,7 +8,6 @@
 import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { CoreKibanaRequest } from '@kbn/core/server';
 import { CASES_CONNECTOR_SUB_ACTION } from './constants';
 import type { CasesConnectorConfig, CasesConnectorRunParams, CasesConnectorSecrets } from './types';
 import { CasesConnectorRunParamsSchema } from './schema';
@@ -26,7 +25,10 @@ import { fullJitterBackoffFactory } from './full_jitter_backoff';
 
 interface CasesConnectorParams {
   connectorParams: ServiceParams<CasesConnectorConfig, CasesConnectorSecrets>;
-  casesParams: { getCasesClient: (request: KibanaRequest) => Promise<CasesClient> };
+  casesParams: {
+    getCasesClient: (request: KibanaRequest) => Promise<CasesClient>;
+    getSpaceId: (request?: KibanaRequest) => string;
+  };
 }
 
 export class CasesConnector extends SubActionConnector<
@@ -36,7 +38,6 @@ export class CasesConnector extends SubActionConnector<
   private readonly casesOracleService: CasesOracleService;
   private readonly casesService: CasesService;
   private readonly retryService: CaseConnectorRetryService;
-  private readonly kibanaRequest: KibanaRequest;
   private readonly casesParams: CasesConnectorParams['casesParams'];
 
   constructor({ connectorParams, casesParams }: CasesConnectorParams) {
@@ -44,12 +45,7 @@ export class CasesConnector extends SubActionConnector<
 
     this.casesOracleService = new CasesOracleService({
       logger: this.logger,
-      /**
-       * TODO: Think about permissions etc.
-       * Should we use our own savedObjectsClient as we do
-       * in the cases client? Should we so the createInternalRepository?
-       */
-      unsecuredSavedObjectsClient: this.savedObjectsClient,
+      savedObjectsClient: this.savedObjectsClient,
     });
 
     this.casesService = new CasesService();
@@ -59,12 +55,6 @@ export class CasesConnector extends SubActionConnector<
      */
     const backOffFactory = fullJitterBackoffFactory({ baseDelay: 5, maxBackoffTime: 2000 });
     this.retryService = new CaseConnectorRetryService(this.logger, backOffFactory);
-
-    /**
-     * TODO: Get request from the actions framework.
-     * Should be set in the SubActionConnector's constructor
-     */
-    this.kibanaRequest = CoreKibanaRequest.from({ path: '/', headers: {} });
 
     this.casesParams = casesParams;
 
@@ -89,22 +79,30 @@ export class CasesConnector extends SubActionConnector<
   }
 
   public async run(params: CasesConnectorRunParams) {
-    /**
-     * TODO: Tell the task manager to not retry on non
-     * retryable errors
-     */
+    if (!this.kibanaRequest) {
+      const error = new CasesConnectorError('Kibana request is not defined', 400);
+      this.handleError(error);
+    }
+
     await this.retryService.retryWithBackoff(() => this._run(params));
   }
 
   private async _run(params: CasesConnectorRunParams) {
     try {
-      const casesClient = await this.casesParams.getCasesClient(this.kibanaRequest);
+      /**
+       * The case connector will throw an error if the Kibana request
+       * is not define before executing the _run method
+       */
+      const kibanaRequest = this.kibanaRequest as KibanaRequest;
+      const casesClient = await this.casesParams.getCasesClient(kibanaRequest);
+      const spaceId = this.casesParams.getSpaceId(kibanaRequest);
 
       const connectorExecutor = new CasesConnectorExecutor({
         logger: this.logger,
         casesOracleService: this.casesOracleService,
         casesService: this.casesService,
         casesClient,
+        spaceId,
       });
 
       this.logDebugCurrentState('start', '[CasesConnector][_run] Executing case connector', params);
@@ -117,25 +115,7 @@ export class CasesConnector extends SubActionConnector<
         params
       );
     } catch (error) {
-      if (isCasesConnectorError(error)) {
-        this.logError(error);
-        throw error;
-      }
-
-      if (isCasesClientError(error)) {
-        const caseConnectorError = new CasesConnectorError(
-          error.message,
-          error.boomify().output.statusCode
-        );
-
-        this.logError(caseConnectorError);
-        throw caseConnectorError;
-      }
-
-      const caseConnectorError = new CasesConnectorError(error.message, 500);
-      this.logError(caseConnectorError);
-
-      throw caseConnectorError;
+      this.handleError(error);
     } finally {
       this.logDebugCurrentState(
         'end',
@@ -143,6 +123,28 @@ export class CasesConnector extends SubActionConnector<
         params
       );
     }
+  }
+
+  private handleError(error: Error) {
+    if (isCasesConnectorError(error)) {
+      this.logError(error);
+      throw error;
+    }
+
+    if (isCasesClientError(error)) {
+      const caseConnectorError = new CasesConnectorError(
+        error.message,
+        error.boomify().output.statusCode
+      );
+
+      this.logError(caseConnectorError);
+      throw caseConnectorError;
+    }
+
+    const caseConnectorError = new CasesConnectorError(error.message, 500);
+    this.logError(caseConnectorError);
+
+    throw caseConnectorError;
   }
 
   private logDebugCurrentState(state: string, message: string, params: CasesConnectorRunParams) {
@@ -163,7 +165,7 @@ export class CasesConnector extends SubActionConnector<
 
   private logError(error: CasesConnectorError) {
     this.logger.error(
-      `[CasesConnector][_run] Execution of case connector failed. Message: ${error.message}. Status code: ${error.statusCode}`,
+      `[CasesConnector][run] Execution of case connector failed. Message: ${error.message}. Status code: ${error.statusCode}`,
       {
         error: {
           stack_trace: error.stack,

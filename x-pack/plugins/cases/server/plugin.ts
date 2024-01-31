@@ -20,7 +20,7 @@ import type {
   PluginSetupContract as ActionsPluginSetup,
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
   PluginStartContract as FeaturesPluginStart,
   PluginSetupContract as FeaturesPluginSetup,
@@ -35,6 +35,7 @@ import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-
 import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { APP_ID } from '../common/constants';
 import {
   createCaseCommentSavedObjectType,
@@ -72,6 +73,7 @@ export interface PluginsSetup {
   licensing: LicensingPluginSetup;
   taskManager?: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
+  spaces?: SpacesPluginSetup;
 }
 
 export interface PluginsStart {
@@ -184,7 +186,15 @@ export class CasePlugin {
       return this.getCasesClientWithRequest(coreStart)(request);
     };
 
-    registerConnectorTypes({ actions: plugins.actions, getCasesClient });
+    const getSpaceId = (request?: KibanaRequest) => {
+      if (!request) {
+        return DEFAULT_SPACE_ID;
+      }
+
+      return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+    };
+
+    registerConnectorTypes({ actions: plugins.actions, getCasesClient, getSpaceId });
 
     return {
       attachmentFramework: {

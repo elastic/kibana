@@ -25,13 +25,7 @@ const GroupingSchema = schema.arrayOf(schema.string(), { minSize: 0, maxSize: 1 
 const RuleSchema = schema.object({
   id: schema.string(),
   name: schema.string(),
-  /**
-   * TODO: Verify limits
-   */
-  tags: schema.arrayOf(schema.string({ minLength: 1, maxLength: 50 }), {
-    minSize: 0,
-    maxSize: 10,
-  }),
+  tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
   ruleUrl: schema.nullable(schema.string()),
 });
 

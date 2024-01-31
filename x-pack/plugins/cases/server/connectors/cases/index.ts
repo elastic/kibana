@@ -16,10 +16,12 @@ import type { CasesClient } from '../../client';
 
 interface GetCasesConnectorTypeArgs {
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>;
+  getSpaceId: (request?: KibanaRequest) => string;
 }
 
 export const getCasesConnectorType = ({
   getCasesClient,
+  getSpaceId,
 }: GetCasesConnectorTypeArgs): SubActionConnectorType<
   CasesConnectorConfig,
   CasesConnectorSecrets
@@ -27,7 +29,7 @@ export const getCasesConnectorType = ({
   id: CASES_CONNECTOR_ID,
   name: CASES_CONNECTOR_TITLE,
   getService: (params) =>
-    new CasesConnector({ casesParams: { getCasesClient }, connectorParams: params }),
+    new CasesConnector({ casesParams: { getCasesClient, getSpaceId }, connectorParams: params }),
   schema: {
     config: CasesConnectorConfigSchema,
     secrets: CasesConnectorSecretsSchema,

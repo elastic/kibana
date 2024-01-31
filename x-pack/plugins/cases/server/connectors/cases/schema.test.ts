@@ -75,28 +75,6 @@ describe('CasesConnectorRunParamsSchema', () => {
       ).not.toThrow();
     });
 
-    it('does not accept more than 10 tags', () => {
-      const params = getParams();
-
-      expect(() =>
-        CasesConnectorRunParamsSchema.validate({
-          ...params,
-          rule: { ...params.rule, tags: Array(11).fill('test') },
-        })
-      ).toThrow();
-    });
-
-    it('does not accept a tag that is more than 50 characters', () => {
-      const params = getParams();
-
-      expect(() =>
-        CasesConnectorRunParamsSchema.validate({
-          ...params,
-          rule: { ...params.rule, tags: ['x'.repeat(51)] },
-        })
-      ).toThrow();
-    });
-
     it('does not accept an empty tag', () => {
       const params = getParams();
 
