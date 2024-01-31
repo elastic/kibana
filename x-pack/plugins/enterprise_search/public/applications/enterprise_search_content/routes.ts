@@ -25,6 +25,16 @@ export const NEW_INDEX_SELECT_CONNECTOR_NATIVE_PATH = `${NEW_INDEX_PATH}/select_
 export const NEW_INDEX_SELECT_CONNECTOR_CLIENTS_PATH = `${NEW_INDEX_PATH}/select_connector?filter=connector_clients`;
 
 export const SEARCH_INDEX_PATH = `${SEARCH_INDICES_PATH}/:indexName`;
+export const SEARCH_INDEX_DOCUMENTS_PATH = `${SEARCH_INDEX_PATH}/documents`;
+export const SEARCH_INDEX_INDEX_MAPPING_PATH = `${SEARCH_INDEX_PATH}/index_mappings`;
+export const SEARCH_INDEX_CONNECTORS_CONFIGURATION_PATH = `${SEARCH_INDEX_PATH}/configuration`;
+export const SEARCH_INDEX_CONNECTORS_SYNC_RULES_PATH = `${SEARCH_INDEX_PATH}/sync_rules`;
+export const SEARCH_INDEX_CONNECTORS_SCHEDULING_PATH = `${SEARCH_INDEX_PATH}/scheduling`;
+export const SEARCH_INDEX_CRAWLER_DOMAIN_MANAGEMENT_PATH = `${SEARCH_INDEX_PATH}/domain_management`;
+export const SEARCH_INDEX_CRAWLER_CONFIGURATION_PATH = `${SEARCH_INDEX_PATH}/crawler_configuration`;
+export const SEARCH_INDEX_CRAWLER_SCHEDULING_PATH = `${SEARCH_INDEX_PATH}/scheduling`;
+export const SEARCH_INDEX_PIPELINES_PATH = `${SEARCH_INDEX_PATH}/pipelines`;
+
 export const SEARCH_INDEX_TAB_PATH = `${SEARCH_INDEX_PATH}/:tabId`;
 export const SEARCH_INDEX_TAB_DETAIL_PATH = `${SEARCH_INDEX_TAB_PATH}/:detailId`;
 export const SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH = `${SEARCH_INDEX_PATH}/domain_management/:domainId`;

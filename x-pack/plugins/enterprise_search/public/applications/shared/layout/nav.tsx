@@ -30,12 +30,14 @@ import {
   SEARCH_INDICES_PATH,
   SETTINGS_PATH,
 } from '../../enterprise_search_content/routes';
+import { useIndicesNav } from '../../enterprise_search_overview/components/indices/indices_nav';
 import { KibanaLogic } from '../kibana';
 
 import { generateNavLink } from './nav_link_helpers';
 
 export const useEnterpriseSearchNav = () => {
   const { isSidebarEnabled, productAccess, productFeatures } = useValues(KibanaLogic);
+  const indicesNavItems = useIndicesNav();
   if (!isSidebarEnabled) return undefined;
 
   const navItems: Array<EuiSideNavItemType<unknown>> = [
@@ -66,6 +68,7 @@ export const useEnterpriseSearchNav = () => {
             shouldNotCreateHref: true,
             shouldShowActiveForSubroutes: true,
             to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + SEARCH_INDICES_PATH,
+            items: indicesNavItems,
           }),
         },
         {
