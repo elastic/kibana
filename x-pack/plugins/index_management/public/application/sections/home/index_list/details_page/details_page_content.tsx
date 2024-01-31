@@ -89,7 +89,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
   navigateToIndicesList,
 }) => {
   const {
-    config: { enableIndexStats, enableEmbeddedConsole },
+    config: { enableIndexStats },
     plugins: { console: consolePlugin },
     services: { extensionsService },
   } = useAppContext();
@@ -178,7 +178,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
       >
         <DetailsPageTab tabs={tabs} tab={tab} index={index} />
       </div>
-      {(enableEmbeddedConsole && consolePlugin?.renderEmbeddableConsole?.()) ?? <></>}
+      {consolePlugin?.renderEmbeddableConsole?.() ?? <></>}
     </>
   );
 };

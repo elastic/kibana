@@ -85,6 +85,7 @@ export class SavedMap {
   private readonly _store: MapStore;
   private _tags: string[] = [];
   private _defaultLayerWizard: string;
+  private _managed: boolean;
 
   constructor({
     defaultLayers = [],
@@ -114,6 +115,7 @@ export class SavedMap {
     this._stateTransfer = stateTransfer;
     this._store = createMapStore();
     this._defaultLayerWizard = defaultLayerWizard || '';
+    this._managed = false;
   }
 
   public getStore() {
@@ -137,6 +139,7 @@ export class SavedMap {
       if (metaInfo?.sharingSavedObjectProps) {
         this._sharingSavedObjectProps = metaInfo.sharingSavedObjectProps;
       }
+      this._managed = Boolean(metaInfo?.managed);
       const savedObjectsTagging = getSavedObjectsTagging();
       if (savedObjectsTagging && references && references.length) {
         this._tags = savedObjectsTagging.ui.getTagIdsFromReferences(references);
@@ -428,6 +431,10 @@ export class SavedMap {
 
   public getSharingSavedObjectProps(): SharingSavedObjectProps | null {
     return this._sharingSavedObjectProps;
+  }
+
+  public isManaged(): boolean {
+    return this._managed;
   }
 
   public isByValue(): boolean {
