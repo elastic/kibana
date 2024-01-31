@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ReportingCore } from '../../core';
 
 export interface DeprecationsDependencies {
   reportingCore: ReportingCore;
   elasticsearchClient: ElasticsearchClient;
+  logger: Logger;
 }

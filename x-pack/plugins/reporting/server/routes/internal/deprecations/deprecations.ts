@@ -74,6 +74,7 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
           reportingCore: reporting,
           // We want to make the current status visible to all reporting users
           elasticsearchClient: scopedClient.asInternalUser,
+          logger,
         });
       };
 
@@ -114,6 +115,7 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
 
       const scopedIlmPolicyManager = IlmPolicyManager.create({
         client,
+        logger,
       });
 
       // First we ensure that the reporting ILM policy exists in the cluster

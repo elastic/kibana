@@ -125,7 +125,7 @@ export class ReportingStore {
 
   private async getIlmPolicyManager() {
     const client = await this.getClient();
-    return IlmPolicyManager.create({ client });
+    return IlmPolicyManager.create({ client, logger: this.logger });
   }
 
   private async createIndex(indexName: string) {
