@@ -92,17 +92,11 @@ import { registerSavedObjects, registerEncryptedSavedObjects } from './saved_obj
 import { registerRoutes } from './routes';
 
 import type { ExternalCallback, FleetRequestHandlerContext } from './types';
-import type {
-  ESIndexPatternService,
-  AgentService,
-  AgentPolicyServiceInterface,
-  PackageService,
-} from './services';
+import type { AgentService, AgentPolicyServiceInterface, PackageService } from './services';
 import { FleetUsageSender } from './services';
 import {
   appContextService,
   licenseService,
-  ESIndexPatternSavedObjectService,
   agentPolicyService,
   packagePolicyService,
   AgentServiceImpl,
@@ -206,7 +200,6 @@ export interface FleetStartContract {
   authz: {
     fromRequest(request: KibanaRequest): Promise<FleetAuthz>;
   };
-  esIndexPatternService: ESIndexPatternService;
   packageService: PackageService;
   agentService: AgentService;
   /**
@@ -610,7 +603,6 @@ export class FleetPlugin
         fromRequest: getAuthzFromRequest,
       },
       fleetSetupCompleted: () => fleetSetupPromise,
-      esIndexPatternService: new ESIndexPatternSavedObjectService(),
       packageService: this.setupPackageService(
         core.elasticsearch.client.asInternalUser,
         internalSoClient
