@@ -7,6 +7,20 @@
  */
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
+// uses browser sha256 method with fallback if unavailable
+async function sha256(str: string) {
+  if (crypto.subtle) {
+    const enc = new TextEncoder();
+    const hash = await crypto.subtle.digest('SHA-256', enc.encode(str));
+    return Array.from(new Uint8Array(hash))
+      .map((v) => v.toString(16).padStart(2, '0'))
+      .join('');
+  } else {
+    const { sha256: sha256fn } = await import('./sha256');
+    return sha256fn(str);
+  }
+}
+
 // Some applications need to have a dataview to work properly with ES|QL queries
 // This is a helper to create one. The id is constructed from the indexpattern.
 // As there are no runtime fields or field formatters or default time fields
@@ -18,6 +32,7 @@ export async function getESQLAdHocDataview(
 ) {
   return await dataViewsService.create({
     title: indexPattern,
-    id: `esql-${indexPattern}`,
+    id: await sha256(indexPattern),
+    type: 'esql',
   });
 }
