@@ -51,6 +51,7 @@ import {
 import { registerCspmUsageCollector } from './lib/telemetry/collectors/register';
 import { CloudSecurityPostureConfig } from './config';
 import { CspBenchmarkRule, CspSettings } from '../common/types/latest';
+import { updateCspDataViews } from './update_data_views/update_data_views';
 
 export class CspPlugin
   implements
@@ -166,7 +167,7 @@ export class CspPlugin
           soClient: SavedObjectsClientContract
         ): Promise<PackagePolicy> => {
           if (isCspPackage(packagePolicy.package?.name)) {
-            await this.initialize(core, plugins.taskManager);
+            await this.initialize(core, plugins);
             await onPackagePolicyPostCreateCallback(this.logger, packagePolicy, soClient);
 
             return packagePolicy;
@@ -205,12 +206,18 @@ export class CspPlugin
   /**
    * Initialization is idempotent and required for (re)creating indices and transforms.
    */
-  async initialize(core: CoreStart, taskManager: TaskManagerStartContract): Promise<void> {
+  async initialize(core: CoreStart, plugins: CspServerPluginStartDeps): Promise<void> {
     this.logger.debug('initialize');
     const esClient = core.elasticsearch.client.asInternalUser;
+    const savedObjectsClient = core.savedObjects.createInternalRepository();
+    const dataViewsService = await plugins.dataViews.dataViewsServiceFactory(
+      savedObjectsClient,
+      esClient
+    );
     await initializeCspIndices(esClient, this.config, this.logger);
     await initializeCspTransforms(esClient, this.logger);
-    await scheduleFindingsStatsTask(taskManager, this.logger);
+    await updateCspDataViews(dataViewsService, this.logger);
+    await scheduleFindingsStatsTask(plugins.taskManager, this.logger);
     this.#isInitialized = true;
   }
 

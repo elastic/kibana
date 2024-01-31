@@ -6,6 +6,7 @@
  */
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type {
+  DataViewsServerPluginStart,
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
@@ -61,6 +62,7 @@ export interface CspServerPluginStartDeps {
   taskManager: TaskManagerStartContract;
   security: SecurityPluginStart;
   licensing: LicensingPluginStart;
+  dataViews: DataViewsServerPluginStart;
 }
 
 export type CspServerPluginStartServices = Promise<
