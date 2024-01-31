@@ -24,6 +24,7 @@ function createCoreContext({ production = false }: { production?: boolean } = {}
         branch: 'branch',
         buildNum: 100,
         buildSha: 'buildSha',
+        buildShaShort: 'buildShaShort',
         dist: false,
         buildDate: new Date('2023-05-15T23:12:09.000Z'),
         buildFlavor: 'traditional',
