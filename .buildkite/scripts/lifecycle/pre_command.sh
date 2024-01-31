@@ -37,8 +37,9 @@ if [[ "$(curl -is metadata.google.internal || true)" ]]; then
 fi
 
 # Check if we have gcloud, if yes, check which account, if not, check the config paths
+echo '--- GCloud Info'
 if [[ -x "$(command -v gcloud)" ]]; then
-  gcloud config get-value core/account
+  echo "gcloud account: $(gcloud config get-value core/account)"
 else
   echo "gcloud not found, checking config paths"
   ls -la $HOME/.config/gcloud || echo "$HOME/.config/gcloud not found"
