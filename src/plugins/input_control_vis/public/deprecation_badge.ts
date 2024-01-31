@@ -28,14 +28,11 @@ const isApiCompatible = (api: unknown | null): api is InputControlDeprecationAct
   Boolean(apiCanAccessViewMode(api) && apiHasVisualizeConfig(api));
 
 const compatibilityCheck = (api: EmbeddableApiContext['embeddable']) => {
-  if (
+  return (
     isApiCompatible(api) &&
     getInheritedViewMode(api) === ViewMode.EDIT &&
     api.getVis().type.name === INPUT_CONTROL_VIS_TYPE
-  )
-    return true;
-
-  return false;
+  );
 };
 
 export class InputControlDeprecationBadge implements Action<EmbeddableApiContext> {
