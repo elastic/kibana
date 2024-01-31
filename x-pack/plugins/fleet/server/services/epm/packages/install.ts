@@ -46,6 +46,7 @@ import {
   AUTO_UPGRADE_POLICIES_PACKAGES,
   CUSTOM_INTEGRATION_PACKAGE_SPEC_VERSION,
   DATASET_VAR_NAME,
+  GENERIC_DATASET_NAME,
 } from '../../../../common/constants';
 import {
   FleetError,
@@ -986,7 +987,9 @@ export async function createInstallation(options: {
 }) {
   const { savedObjectsClient, packageInfo, installSource, verificationResult } = options;
   const { name: pkgName, version: pkgVersion } = packageInfo;
-  const toSaveESIndexPatterns = generateESIndexPatterns(packageInfo.data_streams);
+  const toSaveESIndexPatterns = generateESIndexPatterns(
+    getNormalizedDataStreams(packageInfo, GENERIC_DATASET_NAME)
+  );
 
   // For "stack-aligned" packages, default the `keep_policies_up_to_date` setting to true. For all other
   // packages, default it to undefined. Use undefined rather than false to allow us to differentiate
