@@ -425,14 +425,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '82 available fields.'
+          '74 available fields. 8 empty fields.'
         );
 
         await PageObjects.unifiedFieldList.clickFieldListItemRemove('extension');
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '82 available fields.'
+          '74 available fields. 8 empty fields.'
         );
 
         const testQuery = `from logstash-* | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
