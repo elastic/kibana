@@ -6,13 +6,15 @@
  * Side Public License, v 1.
  */
 
-export const capabilitiesProvider = () => ({
+import { AdvancedSettingsConfig } from './config';
+
+export const capabilitiesProvider = (config: AdvancedSettingsConfig) => ({
   globalSettings: {
-    show: true,
+    show: config.globalSettingsEnabled,
     save: true,
   },
   advancedSettings: {
-    show: true,
+    show: config.advancedSettingsEnabled,
     save: true,
   },
 });
