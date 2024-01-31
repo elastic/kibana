@@ -473,6 +473,36 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.Dataset",
+        "type": "Type",
+        "tags": [],
+        "label": "Dataset",
+        "description": [],
+        "signature": [
+          "{ input: string; reference: string; id?: string | undefined; prediction?: string | undefined; tags?: string[] | undefined; }[]"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.DatasetItem",
+        "type": "Type",
+        "tags": [],
+        "label": "DatasetItem",
+        "description": [],
+        "signature": [
+          "{ input: string; reference: string; id?: string | undefined; prediction?: string | undefined; tags?: string[] | undefined; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.GetCapabilitiesResponse",
         "type": "Type",
         "tags": [],
@@ -485,9 +515,251 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.GetEvaluateResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "GetEvaluateResponse",
+        "description": [],
+        "signature": [
+          "{ agentExecutors: string[]; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/get_evaluate_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.INTERNAL_API_ACCESS",
+        "type": "string",
+        "tags": [],
+        "label": "INTERNAL_API_ACCESS",
+        "description": [],
+        "signature": [
+          "\"internal\""
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.OutputIndex",
+        "type": "Type",
+        "tags": [],
+        "label": "OutputIndex",
+        "description": [],
+        "signature": [
+          "string"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.PostEvaluateBody",
+        "type": "Type",
+        "tags": [],
+        "label": "PostEvaluateBody",
+        "description": [],
+        "signature": [
+          "{ dataset?: { input: string; reference: string; id?: string | undefined; prediction?: string | undefined; tags?: string[] | undefined; }[] | undefined; evalPrompt?: string | undefined; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.PostEvaluateRequestBody",
+        "type": "Type",
+        "tags": [],
+        "label": "PostEvaluateRequestBody",
+        "description": [],
+        "signature": [
+          "{ dataset?: { input: string; reference: string; id?: string | undefined; prediction?: string | undefined; tags?: string[] | undefined; }[] | undefined; evalPrompt?: string | undefined; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.PostEvaluateRequestBodyInput",
+        "type": "Type",
+        "tags": [],
+        "label": "PostEvaluateRequestBodyInput",
+        "description": [],
+        "signature": [
+          "{ dataset?: { input: string; reference: string; id?: string | undefined; prediction?: string | undefined; tags?: string[] | undefined; }[] | undefined; evalPrompt?: string | undefined; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.PostEvaluateRequestQuery",
+        "type": "Type",
+        "tags": [],
+        "label": "PostEvaluateRequestQuery",
+        "description": [],
+        "signature": [
+          "{ agents: string; models: string; outputIndex: string; datasetName?: string | undefined; evaluationType?: string | undefined; evalModel?: string | undefined; projectName?: string | undefined; runName?: string | undefined; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.PostEvaluateRequestQueryInput",
+        "type": "Type",
+        "tags": [],
+        "label": "PostEvaluateRequestQueryInput",
+        "description": [],
+        "signature": [
+          "{ agents: string; models: string; outputIndex: string; datasetName?: string | undefined; evaluationType?: string | undefined; evalModel?: string | undefined; projectName?: string | undefined; runName?: string | undefined; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.PostEvaluateResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "PostEvaluateResponse",
+        "description": [],
+        "signature": [
+          "{ success: boolean; evaluationId: string; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.PUBLIC_API_ACCESS",
+        "type": "string",
+        "tags": [],
+        "label": "PUBLIC_API_ACCESS",
+        "description": [],
+        "signature": [
+          "\"public\""
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.API_VERSIONS",
+        "type": "Object",
+        "tags": [],
+        "label": "API_VERSIONS",
+        "description": [],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant-common",
+            "id": "def-common.API_VERSIONS.public",
+            "type": "Object",
+            "tags": [],
+            "label": "public",
+            "description": [],
+            "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/elastic-assistant-common",
+                "id": "def-common.API_VERSIONS.public.v1",
+                "type": "string",
+                "tags": [],
+                "label": "v1",
+                "description": [],
+                "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant-common",
+            "id": "def-common.API_VERSIONS.internal",
+            "type": "Object",
+            "tags": [],
+            "label": "internal",
+            "description": [],
+            "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/elastic-assistant-common",
+                "id": "def-common.API_VERSIONS.internal.v1",
+                "type": "string",
+                "tags": [],
+                "label": "v1",
+                "description": [],
+                "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.Dataset",
+        "type": "Object",
+        "tags": [],
+        "label": "Dataset",
+        "description": [],
+        "signature": [
+          "Zod.ZodDefault<Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodOptional<Zod.ZodString>; input: Zod.ZodString; prediction: Zod.ZodOptional<Zod.ZodString>; reference: Zod.ZodString; tags: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { input: string; reference: string; id?: string | undefined; prediction?: string | undefined; tags?: string[] | undefined; }, { input: string; reference: string; id?: string | undefined; prediction?: string | undefined; tags?: string[] | undefined; }>, \"many\">>"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.DatasetItem",
+        "type": "Object",
+        "tags": [],
+        "label": "DatasetItem",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ id: Zod.ZodOptional<Zod.ZodString>; input: Zod.ZodString; prediction: Zod.ZodOptional<Zod.ZodString>; reference: Zod.ZodString; tags: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { input: string; reference: string; id?: string | undefined; prediction?: string | undefined; tags?: string[] | undefined; }, { input: string; reference: string; id?: string | undefined; prediction?: string | undefined; tags?: string[] | undefined; }>"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.defaultAssistantFeatures",
@@ -516,6 +788,96 @@
           "Zod.ZodObject<{ assistantModelEvaluation: Zod.ZodBoolean; assistantStreamingEnabled: Zod.ZodBoolean; }, \"strip\", Zod.ZodTypeAny, { assistantModelEvaluation: boolean; assistantStreamingEnabled: boolean; }, { assistantModelEvaluation: boolean; assistantStreamingEnabled: boolean; }>"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/capabilities/get_capabilities_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.GetEvaluateResponse",
+        "type": "Object",
+        "tags": [],
+        "label": "GetEvaluateResponse",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ agentExecutors: Zod.ZodArray<Zod.ZodString, \"many\">; }, \"strip\", Zod.ZodTypeAny, { agentExecutors: string[]; }, { agentExecutors: string[]; }>"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/get_evaluate_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.OutputIndex",
+        "type": "Object",
+        "tags": [],
+        "label": "OutputIndex",
+        "description": [],
+        "signature": [
+          "Zod.ZodString"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.PostEvaluateBody",
+        "type": "Object",
+        "tags": [],
+        "label": "PostEvaluateBody",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ dataset: Zod.ZodOptional<Zod.ZodDefault<Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodOptional<Zod.ZodString>; input: Zod.ZodString; prediction: Zod.ZodOptional<Zod.ZodString>; reference: Zod.ZodString; tags: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { input: string; reference: string; id?: string | undefined; prediction?: string | undefined; tags?: string[] | undefined; }, { input: string; reference: string; id?: string | undefined; prediction?: string | undefined; tags?: string[] | undefined; }>, \"many\">>>; evalPrompt: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { dataset?: { input: string; reference: string; id?: string | undefined; prediction?: string | undefined; tags?: string[] | undefined; }[] | undefined; evalPrompt?: string | undefined; }, { dataset?: { input: string; reference: string; id?: string | undefined; prediction?: string | undefined; tags?: string[] | undefined; }[] | undefined; evalPrompt?: string | undefined; }>"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.PostEvaluateRequestBody",
+        "type": "Object",
+        "tags": [],
+        "label": "PostEvaluateRequestBody",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ dataset: Zod.ZodOptional<Zod.ZodDefault<Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodOptional<Zod.ZodString>; input: Zod.ZodString; prediction: Zod.ZodOptional<Zod.ZodString>; reference: Zod.ZodString; tags: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { input: string; reference: string; id?: string | undefined; prediction?: string | undefined; tags?: string[] | undefined; }, { input: string; reference: string; id?: string | undefined; prediction?: string | undefined; tags?: string[] | undefined; }>, \"many\">>>; evalPrompt: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { dataset?: { input: string; reference: string; id?: string | undefined; prediction?: string | undefined; tags?: string[] | undefined; }[] | undefined; evalPrompt?: string | undefined; }, { dataset?: { input: string; reference: string; id?: string | undefined; prediction?: string | undefined; tags?: string[] | undefined; }[] | undefined; evalPrompt?: string | undefined; }>"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.PostEvaluateRequestQuery",
+        "type": "Object",
+        "tags": [],
+        "label": "PostEvaluateRequestQuery",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ agents: Zod.ZodString; datasetName: Zod.ZodOptional<Zod.ZodString>; evaluationType: Zod.ZodOptional<Zod.ZodString>; evalModel: Zod.ZodOptional<Zod.ZodString>; models: Zod.ZodString; outputIndex: Zod.ZodString; projectName: Zod.ZodOptional<Zod.ZodString>; runName: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { agents: string; models: string; outputIndex: string; datasetName?: string | undefined; evaluationType?: string | undefined; evalModel?: string | undefined; projectName?: string | undefined; runName?: string | undefined; }, { agents: string; models: string; outputIndex: string; datasetName?: string | undefined; evaluationType?: string | undefined; evalModel?: string | undefined; projectName?: string | undefined; runName?: string | undefined; }>"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.PostEvaluateResponse",
+        "type": "Object",
+        "tags": [],
+        "label": "PostEvaluateResponse",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ evaluationId: Zod.ZodString; success: Zod.ZodBoolean; }, \"strip\", Zod.ZodTypeAny, { success: boolean; evaluationId: string; }, { success: boolean; evaluationId: string; }>"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/evaluation/post_evaluate_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

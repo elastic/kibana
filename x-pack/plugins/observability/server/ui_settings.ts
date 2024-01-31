@@ -298,8 +298,8 @@ export const uiSettings: Record<string, UiSettings> = {
       },
     }),
     schema: schema.boolean(),
-    value: false,
-    requiresPageReload: false,
+    value: true,
+    requiresPageReload: true,
     type: 'boolean',
   },
   [apmAWSLambdaPriceFactor]: {
