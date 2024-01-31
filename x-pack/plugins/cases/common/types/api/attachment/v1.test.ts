@@ -101,7 +101,6 @@ describe('Attachments', () => {
               {
                 hostname: 'host1',
                 endpointId: '001',
-                type: 'sentinel_one',
               },
             ],
             type: 'isolate',

@@ -34,7 +34,6 @@ export interface AttachmentRequestAttributes {
     targets: Array<{
       hostname: string;
       endpointId: string;
-      type?: string;
     }>;
     type: string;
   };

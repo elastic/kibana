@@ -119,7 +119,6 @@ export const ActionsAttachmentPayloadRt = rt.strict({
       rt.strict({
         hostname: rt.string,
         endpointId: rt.string,
-        type: rt.union([rt.string, rt.undefined]),
       })
     ),
     type: rt.string,

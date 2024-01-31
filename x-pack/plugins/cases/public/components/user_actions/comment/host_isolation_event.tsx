@@ -6,7 +6,6 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { useKibana } from '../../../common/lib/kibana';
 import * as i18n from '../translations';
 import { LinkAnchor } from '../../links';
 import type { ActionsNavigation } from '../types';
@@ -14,7 +13,6 @@ import type { ActionsNavigation } from '../types';
 interface EndpointInfo {
   endpointId: string;
   hostname: string;
-  type?: string;
 }
 
 interface Props {
@@ -31,7 +29,6 @@ const HostIsolationCommentEventComponent: React.FC<Props> = ({
   onClick,
 }) => {
   const endpointDetailsHref = href ? href(endpoints[0].endpointId) : '';
-  const getUrlForApp = useKibana().services.application.getUrlForApp;
 
   const onLinkClick = useCallback(
     (ev) => {
@@ -41,22 +38,7 @@ const HostIsolationCommentEventComponent: React.FC<Props> = ({
     [onClick, endpoints]
   );
 
-  const hostsDetailsHref = getUrlForApp('security', {
-    path: `/hosts/name/${endpoints[0].hostname}`,
-  });
-
-  return endpoints[0]?.type === 'sentinel_one' ? (
-    <>
-      {type === 'isolate' ? `${i18n.ISOLATED_HOST} ` : `${i18n.RELEASED_HOST} `}
-      <LinkAnchor
-        // onClick={onLinkClick}
-        href={hostsDetailsHref}
-        data-test-subj={`actions-link-${endpoints[0].endpointId}`}
-      >
-        {endpoints[0].hostname}
-      </LinkAnchor>
-    </>
-  ) : (
+  return (
     <>
       {type === 'isolate' ? `${i18n.ISOLATED_HOST} ` : `${i18n.RELEASED_HOST} `}
       <LinkAnchor
