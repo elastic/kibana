@@ -14,7 +14,7 @@ export interface ExistingJobsAndGroups {
   groupIds: string[];
 }
 
-export declare interface JobService {
+declare interface JobService {
   jobs: CombinedJob[];
   createResultsUrlForJobs: (jobs: any[], target: string, timeRange?: TimeRange) => string;
   tempJobCloningObjects: {
@@ -46,7 +46,4 @@ export declare interface JobService {
   detectorsByJob: Record<string, any>;
 }
 
-const mlJobService: JobService;
-
-export { mlJobService, JobService };
-export type MlJobService = typeof mlJobService;
+export const mlJobService: JobService;

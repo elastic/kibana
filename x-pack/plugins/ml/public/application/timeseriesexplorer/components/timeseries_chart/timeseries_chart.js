@@ -805,7 +805,7 @@ class TimeseriesChartIntl extends Component {
       });
 
     // Render cross symbols for any multi-bucket anomalies.
-    const multiBucketMarkers = d3
+    const multiBucketMarkers = chartElement
       .select('.focus-chart-markers')
       .selectAll('.multi-bucket')
       .data(
@@ -834,7 +834,7 @@ class TimeseriesChartIntl extends Component {
       .attr('class', (d) => `anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore).id}`);
 
     // Add rectangular markers for any scheduled events.
-    const scheduledEventMarkers = d3
+    const scheduledEventMarkers = chartElement
       .select('.focus-chart-markers')
       .selectAll('.scheduled-event-marker')
       .data(data.filter((d) => d.scheduledEvents !== undefined));
@@ -875,7 +875,7 @@ class TimeseriesChartIntl extends Component {
         .attr('d', this.focusValuesLine(focusForecastData))
         .classed('hidden', !showForecast);
 
-      const forecastDots = d3
+      const forecastDots = chartElement
         .select('.focus-chart-markers.forecast')
         .selectAll('.metric-value')
         .data(focusForecastData);
@@ -1817,12 +1817,13 @@ class TimeseriesChartIntl extends Component {
       anomalyTime,
       focusAggregationInterval
     );
+    const chartElement = d3.select(this.rootNode);
 
     // Render an additional highlighted anomaly marker on the focus chart.
     // TODO - plot anomaly markers for cases where there is an anomaly due
     // to the absence of data and model plot is enabled.
     if (markerToSelect !== undefined) {
-      const selectedMarker = d3
+      const selectedMarker = chartElement
         .select('.focus-chart-markers')
         .selectAll('.focus-chart-highlighted-marker')
         .data([markerToSelect]);
@@ -1853,7 +1854,6 @@ class TimeseriesChartIntl extends Component {
 
       // Display the chart tooltip for this marker.
       // Note the values of the record and marker may differ depending on the levels of aggregation.
-      const chartElement = d3.select(this.rootNode);
       const anomalyMarker = chartElement.selectAll(
         '.focus-chart-markers .anomaly-marker.highlighted'
       );
