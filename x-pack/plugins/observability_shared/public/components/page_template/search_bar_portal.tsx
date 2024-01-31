@@ -28,7 +28,7 @@ export function SearchBarPortal({ children, containerRef }: Props) {
         if (mainContent.childNodes?.[0]) {
           mainContent.insertBefore(element, mainContent.childNodes?.[0]);
         }
-      }, 100);
+      }, 10);
     }
 
     return () => {
