@@ -269,12 +269,6 @@ export function AssignmentsConfig({
                             'coloring.colorMapping.container.mapCurrentValuesButtonLabel',
                             {
                               defaultMessage: 'Add all unsassigned terms',
-                              values: {
-                                termsCount:
-                                  unmatchingCategories.length > 0
-                                    ? `(${unmatchingCategories.length})`
-                                    : '',
-                              },
                             }
                           )}
                         </EuiFlexItem>
@@ -301,12 +295,6 @@ export function AssignmentsConfig({
                         'coloring.colorMapping.container.clearAllAssignmentsButtonLabel',
                         {
                           defaultMessage: 'Clear all assignments',
-                          values: {
-                            termsCount:
-                              unmatchingCategories.length > 0
-                                ? `(${unmatchingCategories.length})`
-                                : '',
-                          },
                         }
                       )}
                     </EuiContextMenuItem>,
