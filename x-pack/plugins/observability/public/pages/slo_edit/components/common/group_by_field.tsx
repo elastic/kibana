@@ -11,10 +11,10 @@ import { EuiCallOut, EuiIconTip } from '@elastic/eui';
 import React from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { useFormContext } from 'react-hook-form';
+import { OptionalText } from './optional_text';
 import { useFetchGroupByCardinality } from '../../../../hooks/slo/use_fetch_group_by_cardinality';
 import { CreateSLOForm } from '../../types';
 import { IndexFieldSelector } from './index_field_selector';
-import { OptionalText } from './query_builder';
 
 export function GroupByField({ dataView, isLoading }: { dataView?: DataView; isLoading: boolean }) {
   const { watch } = useFormContext<CreateSLOForm>();
