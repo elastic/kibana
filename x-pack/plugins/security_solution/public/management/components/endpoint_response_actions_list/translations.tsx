@@ -203,9 +203,17 @@ export const FILTER_NAMES = Object.freeze({
   users: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.users', {
     defaultMessage: 'Filter by username',
   }),
-  types: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.types', {
-    defaultMessage: 'Types',
-  }),
+  // TODO: change it to just a value instead of a function
+  //  when responseActionsSentinelOneV1Enabled is enabled/removed
+  types: (suffix: string) =>
+    i18n.translate('xpack.securitySolution.responseActionsList.list.filter.types', {
+      defaultMessage: `Type{suffix}`,
+      values: { suffix },
+    }),
+  // replace above with:
+  // types: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.types', {
+  //   defaultMessage: 'Types',
+  // }),
 });
 
 export const ARIA_LABELS = Object.freeze({

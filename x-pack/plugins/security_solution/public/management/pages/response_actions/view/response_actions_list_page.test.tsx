@@ -416,6 +416,9 @@ describe('Response actions history page', () => {
     });
 
     it('should read and set agent type filter values using `agentTypes` URL params', () => {
+      mockedContext.setExperimentalFlag({
+        responseActionsSentinelOneV1Enabled: true,
+      });
       const filterPrefix = 'types-filter';
       reactTestingLibrary.act(() => {
         history.push(`${MANAGEMENT_PATH}/response_actions_history?agentTypes=endpoint`);
@@ -582,7 +585,10 @@ describe('Response actions history page', () => {
       expect(history.location.search).toEqual('?types=automated%2Cmanual');
     });
 
-    it('should set selected action type filter options to URL params using `agentTypes`', () => {
+    it('should set selected agent type filter options to URL params using `agentTypes`', () => {
+      mockedContext.setExperimentalFlag({
+        responseActionsSentinelOneV1Enabled: true,
+      });
       const filterPrefix = 'types-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;
@@ -665,7 +671,30 @@ describe('Response actions history page', () => {
       expect(history.location.search).toEqual('');
     });
 
-    it('should clear all selected options on `types` filter', () => {
+    it('should clear `actionTypes` selected options on `types` filter', () => {
+      const filterPrefix = 'types-filter';
+      render();
+      const { getAllByTestId, getByTestId } = renderResult;
+      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
+
+      allFilterOptions.forEach((option) => {
+        option.style.pointerEvents = 'all';
+        userEvent.click(option);
+      });
+
+      expect(history.location.search).toEqual('?types=automated%2Cmanual');
+
+      const clearAllButton = getByTestId(`${testPrefix}-${filterPrefix}-clearAllButton`);
+      clearAllButton.style.pointerEvents = 'all';
+      userEvent.click(clearAllButton);
+      expect(history.location.search).toEqual('');
+    });
+
+    it('should clear `agentTypes` and `actionTypes` selected options on `types` filter', () => {
+      mockedContext.setExperimentalFlag({
+        responseActionsSentinelOneV1Enabled: true,
+      });
       const filterPrefix = 'types-filter';
       render();
       const { getAllByTestId, getByTestId } = renderResult;

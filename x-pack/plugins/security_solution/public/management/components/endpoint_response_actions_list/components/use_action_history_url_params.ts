@@ -46,6 +46,9 @@ interface ActionsLogFiltersFromUrlParams {
   setUrlStatusesFilters: (statuses: UrlParamsActionsLogFilters['statuses']) => void;
   setUrlUsersFilters: (users: UrlParamsActionsLogFilters['users']) => void;
   setUrlWithOutputs: (outputs: UrlParamsActionsLogFilters['withOutputs']) => void;
+  // TODO: erase this function
+  // once we enable and remove responseActionsSentinelOneV1Enabled
+  setUrlTypeFilters: (actionTypes: UrlParamsActionsLogFilters['types']) => void;
   setUrlTypesFilters: ({
     agentTypes,
     actionTypes,
@@ -231,6 +234,21 @@ export const useActionHistoryUrlParams = (): ActionsLogFiltersFromUrlParams => {
     [history, location, toUrlParams, urlParams]
   );
 
+  // TODO: erase this function
+  //  once we enable responseActionsSentinelOneV1Enabled
+  const setUrlTypeFilters = useCallback(
+    (actionTypes: string) => {
+      history.push({
+        ...location,
+        search: toUrlParams({
+          ...urlParams,
+          types: actionTypes.length ? actionTypes : undefined,
+        }),
+      });
+    },
+    [history, location, toUrlParams, urlParams]
+  );
+
   const setUrlUsersFilters = useCallback(
     (users: string) => {
       history.push({
@@ -275,6 +293,7 @@ export const useActionHistoryUrlParams = (): ActionsLogFiltersFromUrlParams => {
     setUrlWithOutputs,
     setUrlStatusesFilters,
     setUrlUsersFilters,
+    setUrlTypeFilters,
     setUrlTypesFilters,
   };
 };

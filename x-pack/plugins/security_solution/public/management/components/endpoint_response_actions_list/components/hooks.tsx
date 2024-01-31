@@ -10,6 +10,7 @@ import type {
   DurationRange,
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { getAgentTypeName } from '../../../../common/translations';
 import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
 import {
@@ -159,6 +160,39 @@ export type ActionsLogPopupFilters = Extract<
   'actions' | 'hosts' | 'statuses' | 'types'
 >;
 
+/**
+ *
+ * @param isSentinelOneV1Enabled
+ * @param isFlyout
+ * @param agentTypes
+ * @param types
+ * @returns FilterItems
+ * @description
+ * sets the initial state of the types filter options
+ */
+const getTypesFilterInitialState = (
+  isSentinelOneV1Enabled: boolean,
+  isFlyout: boolean,
+  agentTypes?: string[],
+  types?: string[]
+): FilterItems => {
+  const typesFilterOptions = isSentinelOneV1Enabled
+    ? [...RESPONSE_ACTION_AGENT_TYPE, ...RESPONSE_ACTION_TYPE]
+    : RESPONSE_ACTION_TYPE;
+
+  return typesFilterOptions.map((type) => ({
+    key: type,
+    label: isAgentType(type) ? getAgentTypeName(type) : getTypeDisplayName(type),
+    checked:
+      !isFlyout &&
+      ((isSentinelOneV1Enabled && isAgentType(type) && agentTypes?.includes(type)) ||
+        (isActionType(type) && types?.includes(type)))
+        ? 'on'
+        : undefined,
+    'data-test-subj': `types-filter-option`,
+  }));
+};
+
 export const useActionsLogFilter = ({
   filterName,
   isFlyout,
@@ -180,7 +214,13 @@ export const useActionsLogFilter = ({
   setUrlHostsFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlHostsFilters'];
   setUrlStatusesFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlStatusesFilters'];
   setUrlTypesFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlTypesFilters'];
+  // TODO: remove this when `responseActionsSentinelOneV1Enabled` is enabled and removed
+  setUrlTypeFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlTypeFilters'];
 } => {
+  const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
+    'responseActionsSentinelOneV1Enabled'
+  );
+
   const {
     agentTypes = [],
     commands,
@@ -191,6 +231,7 @@ export const useActionsLogFilter = ({
     setUrlHostsFilters,
     setUrlStatusesFilters,
     setUrlTypesFilters,
+    setUrlTypeFilters,
   } = useActionHistoryUrlParams();
   const isStatusesFilter = filterName === 'statuses';
   const isHostsFilter = filterName === 'hosts';
@@ -214,17 +255,7 @@ export const useActionsLogFilter = ({
   // filter options
   const [items, setItems] = useState<FilterItems>(
     isTypesFilter
-      ? [...RESPONSE_ACTION_AGENT_TYPE, ...RESPONSE_ACTION_TYPE].map((type) => ({
-          key: type,
-          label: isAgentType(type) ? getAgentTypeName(type) : getTypeDisplayName(type),
-          checked:
-            !isFlyout &&
-            ((isAgentType(type) && agentTypes?.includes(type)) ||
-              (isActionType(type) && types?.includes(type)))
-              ? 'on'
-              : undefined,
-          'data-test-subj': `${filterName}-filter-option`,
-        }))
+      ? getTypesFilterInitialState(isSentinelOneV1Enabled, isFlyout, agentTypes, types)
       : isStatusesFilter
       ? RESPONSE_ACTION_STATUS.map((statusName) => ({
           key: statusName,
@@ -300,6 +331,7 @@ export const useActionsLogFilter = ({
     setUrlActionsFilters,
     setUrlHostsFilters,
     setUrlStatusesFilters,
+    setUrlTypeFilters,
     setUrlTypesFilters,
   };
 };

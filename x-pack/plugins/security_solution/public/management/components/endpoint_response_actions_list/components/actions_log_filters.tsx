@@ -58,6 +58,11 @@ export const ActionsLogFilters = memo(
     const responseActionsEnabled = useIsExperimentalFeatureEnabled(
       'endpointResponseActionsEnabled'
     );
+
+    const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
+      'responseActionsSentinelOneV1Enabled'
+    );
+
     const filters = useMemo(() => {
       return (
         <>
@@ -81,22 +86,32 @@ export const ActionsLogFilters = memo(
             onChangeFilterOptions={onChangeStatusesFilter}
             data-test-subj={dataTestSubj}
           />
-          {responseActionsEnabled && (
-            <ActionsLogFilter
-              filterName={'types'}
-              typesFilters={{
-                agentTypes: { onChangeFilterOptions: onChangeAgentTypesFilter },
-                actionTypes: { onChangeFilterOptions: onChangeTypeFilter },
-              }}
-              isFlyout={isFlyout}
-              data-test-subj={dataTestSubj}
-            />
-          )}
+          {isSentinelOneV1Enabled
+            ? responseActionsEnabled && (
+                <ActionsLogFilter
+                  filterName={'types'}
+                  typesFilters={{
+                    agentTypes: { onChangeFilterOptions: onChangeAgentTypesFilter },
+                    actionTypes: { onChangeFilterOptions: onChangeTypeFilter },
+                  }}
+                  isFlyout={isFlyout}
+                  data-test-subj={dataTestSubj}
+                />
+              )
+            : responseActionsEnabled && (
+                <ActionsLogFilter
+                  filterName={'types'}
+                  onChangeFilterOptions={onChangeTypeFilter}
+                  isFlyout={isFlyout}
+                  data-test-subj={dataTestSubj}
+                />
+              )}
         </>
       );
     }, [
       showHostsFilter,
       isFlyout,
+      isSentinelOneV1Enabled,
       onChangeHostsFilter,
       dataTestSubj,
       onChangeCommandsFilter,
