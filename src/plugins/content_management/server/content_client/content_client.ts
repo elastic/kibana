@@ -7,14 +7,7 @@
  */
 import type { StorageContext } from '../core';
 import { ContentCrud } from '../core/crud';
-
-type CrudGetParameters = Parameters<ContentCrud['get']>;
-type ClientGetParameters = [CrudGetParameters[1], CrudGetParameters[2]?];
-
-export interface IContentClient<T = unknown> {
-  contentTypeId: string;
-  get(...params: ClientGetParameters): ReturnType<ContentCrud<T>['get']>;
-}
+import type { IContentClient } from './types';
 
 interface Context<T = unknown> {
   crudInstance: ContentCrud<T>;
@@ -40,5 +33,17 @@ export class ContentClient<T = unknown> implements IContentClient<T> {
 
   get(id: string, options: object) {
     return this.ctx.crudInstance.get(this.ctx.storageContext, id, options);
+  }
+
+  create(data: object, options?: object) {
+    return this.ctx.crudInstance.create(this.ctx.storageContext, data, options);
+  }
+
+  update(id: string, data: object, options?: object) {
+    return this.ctx.crudInstance.update(this.ctx.storageContext, id, data, options);
+  }
+
+  delete(id: string, options?: object) {
+    return this.ctx.crudInstance.delete(this.ctx.storageContext, id, options);
   }
 }

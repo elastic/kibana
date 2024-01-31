@@ -64,7 +64,11 @@ class InMemoryStorage implements ContentStorage<any> {
   async create(
     ctx: StorageContext,
     data: Omit<FooContent, 'id'>,
-    { id: _id, errorToThrow }: { id?: string; errorToThrow?: string } = {}
+    {
+      id: _id,
+      forwardInResponse,
+      errorToThrow,
+    }: { id?: string; errorToThrow?: string; forwardInResponse?: object } = {}
   ) {
     // This allows us to test that proper error events are thrown when the storage layer op fails
     if (errorToThrow) {
@@ -80,6 +84,16 @@ class InMemoryStorage implements ContentStorage<any> {
     };
 
     this.db.set(id, content);
+
+    if (forwardInResponse) {
+      // We add this so we can test that options are passed down to the storage layer
+      return {
+        item: {
+          ...content,
+          options: forwardInResponse,
+        },
+      };
+    }
 
     return {
       item: content,

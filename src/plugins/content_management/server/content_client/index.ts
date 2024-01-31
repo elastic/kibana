@@ -8,4 +8,4 @@
 
 export { getContentClientFactory } from './content_client_factory';
 
-export type { IContentClient } from './content_client';
+export type { IContentClient } from './types';

@@ -53,7 +53,31 @@ describe('ContentClient', () => {
   });
 
   describe('Crud', () => {
+    describe('create()', () => {
+      test('should create an item', async () => {
+        const { contentClient } = setup();
+        const itemCreated = await contentClient.create({ foo: 'bar' });
+        const { id } = itemCreated.result.item;
+        const res = await contentClient.get(id);
+        expect(res.result.item).toEqual({ foo: 'bar', id });
+      });
+
+      test('should pass the options to the storage', async () => {
+        const { contentClient } = setup();
+
+        const options = { forwardInResponse: { option1: 'foo' } };
+        const res = await contentClient.create({ field1: 123 }, options);
+        expect(res.result.item).toEqual({
+          field1: 123,
+          id: expect.any(String),
+          options: { option1: 'foo' }, // the options have correctly been passed to the storage
+        });
+      });
+    });
+
     describe('get()', () => {
+      // Note: we test the client get() method in multiple other tests for
+      // the "create()" and "update()" methods, no need for extended tests here.
       test('should return undefined if no item was found', async () => {
         const { contentClient } = setup();
         const res = await contentClient.get('hello');
@@ -66,7 +90,73 @@ describe('ContentClient', () => {
         const options = { forwardInResponse: { foo: 'bar' } };
         const res = await contentClient.get('hello', options);
 
-        expect(res.result.item).toEqual({ options: { foo: 'bar' } });
+        expect(res.result.item).toEqual({
+          // the options have correctly been passed to the storage
+          options: { foo: 'bar' },
+        });
+      });
+    });
+
+    describe('update()', () => {
+      test('should update an item', async () => {
+        const { contentClient } = setup();
+        const itemCreated = await contentClient.create({ foo: 'bar' });
+        const { id } = itemCreated.result.item;
+
+        await contentClient.update(id, { foo: 'changed' });
+
+        const res = await contentClient.get(id);
+        expect(res.result.item).toEqual({ foo: 'changed', id });
+      });
+
+      test('should pass the options to the storage', async () => {
+        const { contentClient } = setup();
+        const itemCreated = await contentClient.create({ field1: 'bar' });
+        const { id } = itemCreated.result.item;
+
+        const options = { forwardInResponse: { option1: 'foo' } };
+        const res = await contentClient.update(id, { field1: 'changed' }, options);
+
+        expect(res.result.item).toEqual({
+          field1: 'changed',
+          id,
+          options: { option1: 'foo' }, // the options have correctly been passed to the storage
+        });
+      });
+    });
+
+    describe('delete()', () => {
+      test('should delete an item', async () => {
+        const { contentClient } = setup();
+        const itemCreated = await contentClient.create({ foo: 'bar' });
+        const { id } = itemCreated.result.item;
+
+        {
+          const res = await contentClient.get(id);
+          expect(res.result.item).not.toBeUndefined();
+        }
+
+        await contentClient.delete(id);
+
+        {
+          const res = await contentClient.get(id);
+          expect(res.result.item).toBeUndefined();
+        }
+      });
+
+      test('should pass the options to the storage', async () => {
+        const { contentClient } = setup();
+        const itemCreated = await contentClient.create({ field1: 'bar' });
+        const { id } = itemCreated.result.item;
+
+        const options = { forwardInResponse: { option1: 'foo' } };
+
+        const res = await contentClient.delete(id, options);
+
+        expect(res.result).toEqual({
+          success: true,
+          options: { option1: 'foo' }, // the options have correctly been passed to the storage
+        });
       });
     });
   });
