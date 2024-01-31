@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { badRequest } from '@hapi/boom';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { DataStreamDetails } from '../../../../common/api_types';
 import { dataStreamService } from '../../../services';
@@ -16,15 +17,12 @@ export async function getDataStreamDetails(args: {
   const { esClient, dataStream } = args;
 
   if (!dataStream?.trim()) {
-    throw new Error(`Data Stream name cannot be empty. Received value "${dataStream}"`);
+    throw badRequest(`Data Stream name cannot be empty. Received value "${dataStream}"`);
   }
 
   const indexSettings = await dataStreamService.getDataSteamIndexSettings(esClient, dataStream);
 
   const indexesList = Object.values(indexSettings);
-  if (indexesList.length < 1) {
-    throw new Error('index_not_found_exception');
-  }
 
   const indexCreationDate = indexesList
     .map((index) => Number(index.settings?.index?.creation_date))
