@@ -27,29 +27,19 @@ describe('apm', () => {
 
     await synthtraceEsClients.apmSynthtraceEsClient.clean();
 
-    await synthtraceEsClients.apmSynthtraceEsClient.index(
-      timerange(moment().subtract(15, 'minutes'), moment())
-        .interval('1m')
-        .rate(10)
-        .generator(
-          serviceMap({
-            services: [
-              { 'ai-assistant-service-front': 'go' },
-              { 'ai-assistant-service-back': 'python' },
-            ],
-            environment: 'test',
-            definePaths([main, reco]) {
-              return [
-                [
-                  [main, 'fetchReco'],
-                  [reco, 'GET /api'],
-                ],
-                [reco],
-              ];
-            },
-          })
-        )
-    );
+    const serviceMapCallback = serviceMap({
+      services: [{ 'ai-assistant-service-front': 'go' }, { 'ai-assistant-service-back': 'python' }],
+      environment: 'test',
+      definePaths([main, reco]) {
+        return [
+          [
+            [main, 'fetchReco'],
+            [reco, 'GET /api'],
+          ],
+          [reco],
+        ];
+      },
+    });
 
     const aiAssistantService = apm
       .service('ai-assistant-service', 'test', 'go')
@@ -65,6 +55,7 @@ describe('apm', () => {
         .rate(10)
         .generator((timestamp) => {
           return [
+            ...serviceMapCallback(timestamp),
             aiAssistantService
               .transaction('getReco')
               .timestamp(timestamp)
