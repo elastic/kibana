@@ -9,14 +9,16 @@ import type { RequestHandlerContext } from '@kbn/core-http-request-handler-conte
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { Version } from '@kbn/object-versioning';
 
+import type { MSearchIn, MSearchOut } from '../../common';
 import type { ContentRegistry } from '../core';
+import { MSearchService } from '../core/msearch';
 import { getServiceObjectTransformFactory, getStorageContext } from '../utils';
 import { ContentClient } from './content_client';
 
 export const getContentClientFactory =
   ({ contentRegistry }: { contentRegistry: ContentRegistry }) =>
   (contentTypeId: string) => {
-    const getForRequest = ({
+    const getForRequest = <T = unknown>({
       requestHandlerContext,
       version,
     }: {
@@ -34,9 +36,9 @@ export const getContentClientFactory =
         },
       });
 
-      const crudInstance = contentRegistry.getCrud(contentTypeId);
+      const crudInstance = contentRegistry.getCrud<T>(contentTypeId);
 
-      return ContentClient.create(contentTypeId, {
+      return ContentClient.create<T>(contentTypeId, {
         storageContext,
         crudInstance,
       });
@@ -44,5 +46,50 @@ export const getContentClientFactory =
 
     return {
       getForRequest,
+    };
+  };
+
+export const getMSearchClientFactory =
+  ({
+    contentRegistry,
+    mSearchService,
+  }: {
+    contentRegistry: ContentRegistry;
+    mSearchService: MSearchService;
+  }) =>
+  ({
+    requestHandlerContext,
+  }: {
+    requestHandlerContext: RequestHandlerContext;
+    request: KibanaRequest;
+  }) => {
+    const msearch = async ({ contentTypes, query }: MSearchIn): Promise<MSearchOut> => {
+      const contentTypesWithStorageContext = contentTypes.map(({ contentTypeId, version }) => {
+        const storageContext = getStorageContext({
+          contentTypeId,
+          version,
+          ctx: {
+            contentRegistry,
+            requestHandlerContext,
+            getTransformsFactory: getServiceObjectTransformFactory,
+          },
+        });
+
+        return {
+          contentTypeId,
+          ctx: storageContext,
+        };
+      });
+
+      const result = await mSearchService.search(contentTypesWithStorageContext, query);
+
+      return {
+        contentTypes,
+        result,
+      };
+    };
+
+    return {
+      msearch,
     };
   };

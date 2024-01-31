@@ -868,11 +868,12 @@ describe('Content Core', () => {
             api: { contentClient },
           } = coreSetup;
 
-          const client = contentClient.getForRequest({
-            requestHandlerContext: {} as any,
-            request: {} as any,
-            contentTypeId: FOO_CONTENT_ID,
-          });
+          const client = contentClient
+            .getForRequest({
+              requestHandlerContext: {} as any,
+              request: {} as any,
+            })
+            .for(FOO_CONTENT_ID);
 
           expect(client).toBeInstanceOf(ContentClient);
 
@@ -890,11 +891,12 @@ describe('Content Core', () => {
           });
 
           const requestHandlerContext = {} as any;
-          const client = coreSetup.api.contentClient.getForRequest({
-            requestHandlerContext,
-            request: {} as any,
-            contentTypeId: FOO_CONTENT_ID,
-          });
+          const client = coreSetup.api.contentClient
+            .getForRequest({
+              requestHandlerContext,
+              request: {} as any,
+            })
+            .for(FOO_CONTENT_ID);
 
           const options = { foo: 'bar' };
           await client.get('1234', options);
@@ -926,12 +928,12 @@ describe('Content Core', () => {
 
           const requestHandlerContext = {} as any;
 
-          const client = coreSetup.api.contentClient.getForRequest({
-            requestHandlerContext,
-            request: {} as any,
-            contentTypeId: FOO_CONTENT_ID,
-            version: requestVersion,
-          });
+          const client = coreSetup.api.contentClient
+            .getForRequest({
+              requestHandlerContext,
+              request: {} as any,
+            })
+            .for(FOO_CONTENT_ID, requestVersion);
 
           await client.get('1234');
 
@@ -957,11 +959,12 @@ describe('Content Core', () => {
           } = coreSetup;
 
           expect(() => {
-            contentClient.getForRequest({
-              requestHandlerContext: {} as any,
-              request: {} as any,
-              contentTypeId: FOO_CONTENT_ID,
-            });
+            contentClient
+              .getForRequest({
+                requestHandlerContext: {} as any,
+                request: {} as any,
+              })
+              .for(FOO_CONTENT_ID);
           }).toThrowError('Content [foo] is not registered.');
 
           cleanUp();

@@ -9,18 +9,23 @@
 import type { Logger, KibanaRequest } from '@kbn/core/server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { Version } from '@kbn/object-versioning';
+import { LISTING_LIMIT_SETTING, PER_PAGE_SETTING } from '@kbn/saved-objects-settings';
 
-import { getContentClientFactory, IContentClient } from '../content_client';
+import type { MSearchIn, MSearchOut } from '../../common';
+import {
+  getContentClientFactory,
+  getMSearchClientFactory,
+  IContentClient,
+} from '../content_client';
 import { EventStreamService } from '../event_stream';
 import { ContentCrud } from './crud';
 import { EventBus } from './event_bus';
 import { ContentRegistry } from './registry';
+import { MSearchService } from './msearch';
 
 export interface GetContentClientForRequestDependencies {
-  contentTypeId: string;
   requestHandlerContext: RequestHandlerContext;
   request: KibanaRequest;
-  version?: Version;
 }
 
 export interface CoreApi {
@@ -36,7 +41,10 @@ export interface CoreApi {
   /** Content management event bus */
   eventBus: EventBus;
   contentClient: {
-    getForRequest(deps: GetContentClientForRequestDependencies): IContentClient;
+    getForRequest(deps: GetContentClientForRequestDependencies): {
+      for: <T = unknown>(contentTypeId: string, version?: Version) => IContentClient<T>;
+      msearch(args: MSearchIn): Promise<MSearchOut>;
+    };
   };
 }
 
@@ -66,25 +74,13 @@ export class Core {
   setup(): CoreSetup {
     this.setupEventStream();
 
-    const contentClient: CoreApi['contentClient'] = {
-      getForRequest: ({ contentTypeId, requestHandlerContext, request, version }) => {
-        const contentDefinition = this.contentRegistry.getDefinition(contentTypeId);
-        const clientFactory = getContentClientFactory({ contentRegistry: this.contentRegistry });
-        const client = clientFactory(contentTypeId);
-
-        return client.getForRequest({
-          requestHandlerContext,
-          request,
-          version: version ?? contentDefinition.version.latest,
-        });
-      },
-    };
-
     const coreApi: CoreApi = {
       register: this.contentRegistry.register.bind(this.contentRegistry),
       crud: this.contentRegistry.getCrud.bind(this.contentRegistry),
       eventBus: this.eventBus,
-      contentClient,
+      contentClient: {
+        getForRequest: this.getContentClientForRequest.bind(this),
+      },
     };
 
     return {
@@ -109,5 +105,51 @@ export class Core {
         });
       });
     }
+  }
+
+  private getContentClientForRequest({
+    requestHandlerContext,
+    request,
+  }: {
+    request: KibanaRequest;
+    requestHandlerContext: RequestHandlerContext;
+  }) {
+    /** Handler to return a ContentClient for a specific content type Id and request version */
+    const forFn = <T = unknown>(contentTypeId: string, version?: Version) => {
+      const contentDefinition = this.contentRegistry.getDefinition(contentTypeId);
+      const clientFactory = getContentClientFactory({
+        contentRegistry: this.contentRegistry,
+      });
+      const client = clientFactory(contentTypeId);
+
+      return client.getForRequest<T>({
+        requestHandlerContext,
+        request,
+        version: version ?? contentDefinition.version.latest,
+      });
+    };
+
+    const mSearchService = new MSearchService({
+      getSavedObjectsClient: async () => (await requestHandlerContext.core).savedObjects.client,
+      contentRegistry: this.contentRegistry,
+      getConfig: {
+        listingLimit: async () =>
+          (await requestHandlerContext.core).uiSettings.client.get(LISTING_LIMIT_SETTING),
+        perPage: async () =>
+          (await requestHandlerContext.core).uiSettings.client.get(PER_PAGE_SETTING),
+      },
+    });
+
+    const msearchClientFactory = getMSearchClientFactory({
+      contentRegistry: this.contentRegistry,
+      mSearchService,
+    });
+
+    const msearchClient = msearchClientFactory({ requestHandlerContext, request });
+
+    return {
+      for: forFn,
+      msearch: msearchClient.msearch,
+    };
   }
 }

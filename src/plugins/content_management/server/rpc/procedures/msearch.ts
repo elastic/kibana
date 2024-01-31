@@ -14,7 +14,7 @@ import type { Context } from '../types';
 
 export const mSearch: ProcedureDefinition<Context, MSearchIn, MSearchOut> = {
   schemas: rpcSchemas.mSearch,
-  fn: async (ctx, { contentTypes: contentTypes, query }) => {
+  fn: async (ctx, { contentTypes, query }) => {
     const contentTypesWithStorageContext = contentTypes.map(({ contentTypeId, version }) => {
       const storageContext = getStorageContext({
         contentTypeId,

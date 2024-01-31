@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { getContentClientFactory } from './content_client_factory';
+export { getContentClientFactory, getMSearchClientFactory } from './content_client_factory';
 
 export type { IContentClient } from './types';
