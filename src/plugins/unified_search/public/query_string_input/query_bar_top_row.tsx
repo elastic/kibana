@@ -163,6 +163,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   onTextLangQuerySubmit: (query?: Query | AggregateQuery) => void;
   onTextLangQueryChange: (query: AggregateQuery) => void;
   submitOnBlur?: boolean;
+  renderQueryInputAppend?: () => React.ReactNode;
 }
 
 export const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -702,6 +703,7 @@ export const QueryBarTopRow = React.memo(
                   ? renderTextLangEditor()
                   : null}
               </EuiFlexItem>
+              {props.renderQueryInputAppend?.()}
               {shouldShowDatePickerAsBadge() && props.filterBar}
               {renderUpdateButton()}
             </EuiFlexGroup>

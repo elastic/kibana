@@ -10,15 +10,17 @@ import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type OpenAI from 'openai';
 import { decode, encode } from 'gpt-tokenizer';
-import { compact, isEmpty, last, merge, omit, pick, take } from 'lodash';
-import { isObservable, lastValueFrom } from 'rxjs';
-import { PassThrough, Readable } from 'stream';
+import { compact, isEmpty, last, merge, noop, omit, pick, take } from 'lodash';
+import type OpenAI from 'openai';
+import { filter, isObservable, lastValueFrom, Observable, shareReplay, toArray } from 'rxjs';
+import { Readable } from 'stream';
 import { v4 } from 'uuid';
 import {
-  ConversationNotFoundError,
-  isChatCompletionError,
+  ChatCompletionChunkEvent,
+  ChatCompletionErrorEvent,
+  createConversationNotFoundError,
+  MessageAddEvent,
   StreamingChatResponseEventType,
   type StreamingChatResponseEvent,
 } from '../../../common/conversation_complete';
@@ -32,7 +34,8 @@ import {
   type KnowledgeBaseEntry,
   type Message,
 } from '../../../common/types';
-import { concatenateOpenAiChunks } from '../../../common/utils/concatenate_openai_chunks';
+import { concatenateChatCompletionChunks } from '../../../common/utils/concatenate_chat_completion_chunks';
+import { emitWithConcatenatedMessage } from '../../../common/utils/emit_with_concatenated_message';
 import { processOpenAiStream } from '../../../common/utils/process_openai_stream';
 import type { ChatFunctionClient } from '../chat_function_client';
 import {
@@ -43,7 +46,6 @@ import {
 import type { ObservabilityAIAssistantResourceNames } from '../types';
 import { getAccessQuery } from '../util/get_access_query';
 import { streamIntoObservable } from '../util/stream_into_observable';
-import { handleLlmResponse } from './handle_llm_response';
 
 export class ObservabilityAIAssistantClient {
   constructor(
@@ -120,7 +122,7 @@ export class ObservabilityAIAssistantClient {
     });
   };
 
-  complete = async (
+  complete = (
     params: {
       messages: Message[];
       connectorId: string;
@@ -128,294 +130,289 @@ export class ObservabilityAIAssistantClient {
       functionClient: ChatFunctionClient;
       persist: boolean;
     } & ({ conversationId: string } | { title?: string })
-  ) => {
-    const stream = new PassThrough();
+  ): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
+    return new Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>>(
+      (subscriber) => {
+        const { messages, connectorId, signal, functionClient, persist } = params;
 
-    const { messages, connectorId, signal, functionClient, persist } = params;
+        let conversationId: string = '';
+        let title: string = '';
+        if ('conversationId' in params) {
+          conversationId = params.conversationId;
+        }
 
-    let conversationId: string = '';
-    let title: string = '';
-    if ('conversationId' in params) {
-      conversationId = params.conversationId;
-    }
+        if ('title' in params) {
+          title = params.title || '';
+        }
 
-    if ('title' in params) {
-      title = params.title || '';
-    }
+        let numFunctionsCalled: number = 0;
 
-    function write(event: StreamingChatResponseEvent) {
-      if (stream.destroyed) {
-        return Promise.resolve();
-      }
+        const MAX_FUNCTION_CALLS = 5;
+        const MAX_FUNCTION_RESPONSE_TOKEN_COUNT = 4000;
 
-      return new Promise<void>((resolve, reject) => {
-        stream.write(`${JSON.stringify(event)}\n`, 'utf-8', (err) => {
-          if (err) {
-            reject(err);
+        const next = async (nextMessages: Message[]): Promise<void> => {
+          const lastMessage = last(nextMessages);
+
+          const isUserMessage = lastMessage?.message.role === MessageRole.User;
+
+          const isUserMessageWithoutFunctionResponse = isUserMessage && !lastMessage?.message.name;
+
+          const recallFirst =
+            isUserMessageWithoutFunctionResponse && functionClient.hasFunction('recall');
+
+          const isAssistantMessageWithFunctionRequest =
+            lastMessage?.message.role === MessageRole.Assistant &&
+            !!lastMessage?.message.function_call?.name;
+
+          if (recallFirst) {
+            const addedMessage = {
+              '@timestamp': new Date().toISOString(),
+              message: {
+                role: MessageRole.Assistant,
+                content: '',
+                function_call: {
+                  name: 'recall',
+                  arguments: JSON.stringify({
+                    queries: [],
+                    contexts: [],
+                  }),
+                  trigger: MessageRole.Assistant as const,
+                },
+              },
+            };
+
+            subscriber.next({
+              type: StreamingChatResponseEventType.MessageAdd,
+              id: v4(),
+              message: addedMessage,
+            });
+
+            return await next(nextMessages.concat(addedMessage));
+          } else if (isUserMessage) {
+            const response$ = (
+              await this.chat({
+                messages: nextMessages,
+                connectorId,
+                signal,
+                functions:
+                  numFunctionsCalled >= MAX_FUNCTION_CALLS
+                    ? []
+                    : functionClient
+                        .getFunctions()
+                        .map((fn) => pick(fn.definition, 'name', 'description', 'parameters')),
+              })
+            ).pipe(emitWithConcatenatedMessage(), shareReplay());
+
+            response$.subscribe({
+              next: (val) => subscriber.next(val),
+              // we handle the error below
+              error: noop,
+            });
+
+            const emittedMessageEvents = await lastValueFrom(
+              response$.pipe(
+                filter(
+                  (event): event is MessageAddEvent =>
+                    event.type === StreamingChatResponseEventType.MessageAdd
+                ),
+                toArray()
+              )
+            );
+
+            return await next(
+              nextMessages.concat(emittedMessageEvents.map((event) => event.message))
+            );
+          }
+
+          if (isAssistantMessageWithFunctionRequest) {
+            const functionResponse =
+              numFunctionsCalled >= MAX_FUNCTION_CALLS
+                ? {
+                    content: {
+                      error: {},
+                      message: 'Function limit exceeded, ask the user what to do next',
+                    },
+                  }
+                : await functionClient
+                    .executeFunction({
+                      connectorId,
+                      name: lastMessage.message.function_call!.name,
+                      messages: nextMessages,
+                      args: lastMessage.message.function_call!.arguments,
+                      signal,
+                    })
+                    .then((response) => {
+                      if (isObservable(response)) {
+                        return response;
+                      }
+
+                      const encoded = encode(JSON.stringify(response.content || {}));
+
+                      if (encoded.length <= MAX_FUNCTION_RESPONSE_TOKEN_COUNT) {
+                        return response;
+                      }
+
+                      return {
+                        data: response.data,
+                        content: {
+                          message:
+                            'Function response exceeded the maximum length allowed and was truncated',
+                          truncated: decode(take(encoded, MAX_FUNCTION_RESPONSE_TOKEN_COUNT)),
+                        },
+                      };
+                    })
+                    .catch((error): FunctionResponse => {
+                      return {
+                        content: {
+                          message: error.toString(),
+                          error,
+                        },
+                      };
+                    });
+
+            numFunctionsCalled++;
+
+            if (signal.aborted) {
+              return;
+            }
+
+            const functionResponseIsObservable = isObservable(functionResponse);
+
+            const functionResponseMessage = {
+              '@timestamp': new Date().toISOString(),
+              message: {
+                name: lastMessage.message.function_call!.name,
+                ...(functionResponseIsObservable
+                  ? { content: '{}' }
+                  : {
+                      content: JSON.stringify(functionResponse.content || {}),
+                      data: functionResponse.data
+                        ? JSON.stringify(functionResponse.data)
+                        : undefined,
+                    }),
+                role: MessageRole.User,
+              },
+            };
+
+            nextMessages = nextMessages.concat(functionResponseMessage);
+
+            subscriber.next({
+              type: StreamingChatResponseEventType.MessageAdd,
+              message: functionResponseMessage,
+              id: v4(),
+            });
+
+            if (functionResponseIsObservable) {
+              const shared = functionResponse.pipe(shareReplay());
+
+              shared.subscribe({
+                next: (val) => subscriber.next(val),
+                // we handle the error below
+                error: noop,
+              });
+
+              const messageEvents = await lastValueFrom(
+                shared.pipe(
+                  filter(
+                    (event): event is MessageAddEvent =>
+                      event.type === StreamingChatResponseEventType.MessageAdd
+                  ),
+                  toArray()
+                )
+              );
+
+              return await next(nextMessages.concat(messageEvents.map((event) => event.message)));
+            }
+            return await next(nextMessages);
+          }
+
+          if (!persist) {
+            subscriber.complete();
             return;
           }
-          resolve();
-        });
-      });
-    }
 
-    function fail(error: Error) {
-      const code = isChatCompletionError(error) ? error.code : undefined;
-      write({
-        type: StreamingChatResponseEventType.ConversationCompletionError,
-        error: {
-          message: error.message,
-          stack: error.stack,
-          code,
-        },
-      }).finally(() => {
-        stream.end();
-      });
-    }
+          // store the updated conversation and close the stream
+          if (conversationId) {
+            const conversation = await this.getConversationWithMetaFields(conversationId);
+            if (!conversation) {
+              throw createConversationNotFoundError();
+            }
 
-    let numFunctionsCalled: number = 0;
+            if (signal.aborted) {
+              return;
+            }
 
-    const MAX_FUNCTION_CALLS = 3;
-    const MAX_FUNCTION_RESPONSE_TOKEN_COUNT = 4000;
-
-    const next = async (nextMessages: Message[]): Promise<void> => {
-      const lastMessage = last(nextMessages);
-
-      const isUserMessage = lastMessage?.message.role === MessageRole.User;
-
-      const isUserMessageWithoutFunctionResponse = isUserMessage && !lastMessage?.message.name;
-
-      const recallFirst =
-        isUserMessageWithoutFunctionResponse && functionClient.hasFunction('recall');
-
-      const isAssistantMessageWithFunctionRequest =
-        lastMessage?.message.role === MessageRole.Assistant &&
-        !!lastMessage?.message.function_call?.name;
-
-      if (recallFirst) {
-        const addedMessage = {
-          '@timestamp': new Date().toISOString(),
-          message: {
-            role: MessageRole.Assistant,
-            content: '',
-            function_call: {
-              name: 'recall',
-              arguments: JSON.stringify({
-                queries: [],
-                contexts: [],
-              }),
-              trigger: MessageRole.Assistant as const,
-            },
-          },
-        };
-        await write({
-          type: StreamingChatResponseEventType.MessageAdd,
-          id: v4(),
-          message: addedMessage,
-        });
-        return await next(nextMessages.concat(addedMessage));
-      } else if (isUserMessage) {
-        const { message } = await handleLlmResponse({
-          signal,
-          write,
-          source$: streamIntoObservable(
-            await this.chat({
-              messages: nextMessages,
-              connectorId,
-              stream: true,
-              signal,
-              functions:
-                numFunctionsCalled >= MAX_FUNCTION_CALLS
-                  ? []
-                  : functionClient
-                      .getFunctions()
-                      .map((fn) => pick(fn.definition, 'name', 'description', 'parameters')),
-            })
-          ).pipe(processOpenAiStream()),
-        });
-        return await next(nextMessages.concat({ message, '@timestamp': new Date().toISOString() }));
-      }
-
-      if (isAssistantMessageWithFunctionRequest) {
-        const functionResponse =
-          numFunctionsCalled >= MAX_FUNCTION_CALLS
-            ? {
-                content: {
-                  error: {},
-                  message: 'Function limit exceeded, ask the user what to do next',
-                },
-              }
-            : await functionClient
-                .executeFunction({
-                  connectorId,
-                  name: lastMessage.message.function_call!.name,
-                  messages: nextMessages,
-                  args: lastMessage.message.function_call!.arguments,
-                  signal,
-                })
-                .then((response) => {
-                  if (isObservable(response)) {
-                    return response;
-                  }
-
-                  const encoded = encode(JSON.stringify(response.content || {}));
-
-                  if (encoded.length <= MAX_FUNCTION_RESPONSE_TOKEN_COUNT) {
-                    return response;
-                  }
-
-                  return {
-                    data: response.data,
-                    content: {
-                      message:
-                        'Function response exceeded the maximum length allowed and was truncated',
-                      truncated: decode(take(encoded, MAX_FUNCTION_RESPONSE_TOKEN_COUNT)),
-                    },
-                  };
-                })
-                .catch((error): FunctionResponse => {
-                  return {
-                    content: {
-                      message: error.toString(),
-                      error,
-                    },
-                  };
-                });
-
-        numFunctionsCalled++;
-
-        if (signal.aborted) {
-          return;
-        }
-
-        const functionResponseIsObservable = isObservable(functionResponse);
-
-        const functionResponseMessage = {
-          '@timestamp': new Date().toISOString(),
-          message: {
-            name: lastMessage.message.function_call!.name,
-            ...(functionResponseIsObservable
-              ? { content: '{}' }
-              : {
-                  content: JSON.stringify(functionResponse.content || {}),
-                  data: functionResponse.data ? JSON.stringify(functionResponse.data) : undefined,
-                }),
-            role: MessageRole.User,
-          },
-        };
-
-        nextMessages = nextMessages.concat(functionResponseMessage);
-        await write({
-          type: StreamingChatResponseEventType.MessageAdd,
-          message: functionResponseMessage,
-          id: v4(),
-        });
-
-        if (functionResponseIsObservable) {
-          const { message } = await handleLlmResponse({
-            signal,
-            write,
-            source$: functionResponse,
-          });
-          return await next(
-            nextMessages.concat({ '@timestamp': new Date().toISOString(), message })
-          );
-        }
-        return await next(nextMessages);
-      }
-
-      if (!persist) {
-        stream.end();
-        return;
-      }
-
-      // store the updated conversation and close the stream
-      if (conversationId) {
-        const conversation = await this.getConversationWithMetaFields(conversationId);
-        if (!conversation) {
-          throw new ConversationNotFoundError();
-        }
-
-        if (signal.aborted) {
-          return;
-        }
-
-        const updatedConversation = await this.update(
-          merge({}, omit(conversation._source, 'messages'), { messages: nextMessages })
-        );
-        await write({
-          type: StreamingChatResponseEventType.ConversationUpdate,
-          conversation: updatedConversation.conversation,
-        });
-      } else {
-        const generatedTitle = await titlePromise;
-        if (signal.aborted) {
-          return;
-        }
-
-        const conversation = await this.create({
-          '@timestamp': new Date().toISOString(),
-          conversation: {
-            title: generatedTitle || title || 'New conversation',
-          },
-          messages: nextMessages,
-          labels: {},
-          numeric_labels: {},
-          public: false,
-        });
-        await write({
-          type: StreamingChatResponseEventType.ConversationCreate,
-          conversation: conversation.conversation,
-        });
-      }
-
-      stream.end();
-    };
-
-    next(messages).catch((error) => {
-      if (!signal.aborted) {
-        this.dependencies.logger.error(error);
-      }
-      fail(error);
-    });
-
-    const titlePromise =
-      !conversationId && !title && persist
-        ? this.getGeneratedTitle({
-            messages,
-            connectorId,
-            signal,
-          }).catch((error) => {
-            this.dependencies.logger.error(
-              'Could not generate title, falling back to default title'
+            const updatedConversation = await this.update(
+              merge({}, omit(conversation._source, 'messages'), { messages: nextMessages })
             );
+            subscriber.next({
+              type: StreamingChatResponseEventType.ConversationUpdate,
+              conversation: updatedConversation.conversation,
+            });
+          } else {
+            const generatedTitle = await titlePromise;
+            if (signal.aborted) {
+              return;
+            }
+
+            const conversation = await this.create({
+              '@timestamp': new Date().toISOString(),
+              conversation: {
+                title: generatedTitle || title || 'New conversation',
+              },
+              messages: nextMessages,
+              labels: {},
+              numeric_labels: {},
+              public: false,
+            });
+
+            subscriber.next({
+              type: StreamingChatResponseEventType.ConversationCreate,
+              conversation: conversation.conversation,
+            });
+          }
+
+          subscriber.complete();
+        };
+
+        next(messages).catch((error) => {
+          if (!signal.aborted) {
             this.dependencies.logger.error(error);
-            return Promise.resolve(undefined);
-          })
-        : Promise.resolve(undefined);
+          }
+          subscriber.error(error);
+        });
 
-    signal.addEventListener('abort', () => {
-      stream.end();
-    });
-
-    return stream;
+        const titlePromise =
+          !conversationId && !title && persist
+            ? this.getGeneratedTitle({
+                messages,
+                connectorId,
+                signal,
+              }).catch((error) => {
+                this.dependencies.logger.error(
+                  'Could not generate title, falling back to default title'
+                );
+                this.dependencies.logger.error(error);
+                return Promise.resolve(undefined);
+              })
+            : Promise.resolve(undefined);
+      }
+    ).pipe(shareReplay());
   };
 
-  chat = async <TStream extends boolean | undefined = true>({
+  chat = async ({
     messages,
     connectorId,
     functions,
     functionCall,
-    stream = true,
     signal,
   }: {
     messages: Message[];
     connectorId: string;
     functions?: Array<{ name: string; description: string; parameters: CompatibleJSONSchema }>;
     functionCall?: string;
-    stream?: TStream;
     signal: AbortSignal;
-  }): Promise<TStream extends false ? OpenAI.ChatCompletion : Readable> => {
+  }): Promise<Observable<ChatCompletionChunkEvent>> => {
     const messagesForOpenAI: Array<
       Omit<OpenAI.ChatCompletionMessageParam, 'role'> & {
         role: MessageRole;
@@ -442,7 +439,7 @@ export class ObservabilityAIAssistantClient {
 
     const request: Omit<OpenAI.ChatCompletionCreateParams, 'model'> & { model?: string } = {
       messages: messagesForOpenAI as OpenAI.ChatCompletionCreateParams['messages'],
-      ...(stream ? { stream: true } : {}),
+      stream: true,
       ...(!!functions?.length ? { functions: functionsForOpenAI } : {}),
       temperature: 0,
       function_call: functionCall ? { name: functionCall } : undefined,
@@ -454,10 +451,10 @@ export class ObservabilityAIAssistantClient {
     const executeResult = await this.dependencies.actionsClient.execute({
       actionId: connectorId,
       params: {
-        subAction: stream ? 'stream' : 'run',
+        subAction: 'stream',
         subActionParams: {
           body: JSON.stringify(request),
-          ...(stream ? { stream: true } : {}),
+          stream: true,
         },
       },
     });
@@ -466,15 +463,11 @@ export class ObservabilityAIAssistantClient {
       throw internal(`${executeResult?.message} - ${executeResult?.serviceMessage}`);
     }
 
-    const response = stream
-      ? (executeResult.data as Readable)
-      : (executeResult.data as OpenAI.ChatCompletion);
+    const response = executeResult.data as Readable;
 
-    if (response instanceof Readable) {
-      signal.addEventListener('abort', () => response.destroy());
-    }
+    signal.addEventListener('abort', () => response.destroy());
 
-    return response as any;
+    return streamIntoObservable(response).pipe(processOpenAiStream(), shareReplay());
   };
 
   find = async (options?: { query?: string }): Promise<{ conversations: Conversation[] }> => {
@@ -534,7 +527,7 @@ export class ObservabilityAIAssistantClient {
     connectorId: string;
     signal: AbortSignal;
   }) => {
-    const stream = await this.chat({
+    const response$ = await this.chat({
       messages: [
         {
           '@timestamp': new Date().toISOString(),
@@ -547,13 +540,10 @@ export class ObservabilityAIAssistantClient {
         },
       ],
       connectorId,
-      stream: true,
       signal,
     });
 
-    const response = await lastValueFrom(
-      streamIntoObservable(stream).pipe(processOpenAiStream(), concatenateOpenAiChunks())
-    );
+    const response = await lastValueFrom(response$.pipe(concatenateChatCompletionChunks()));
 
     const input = response.message?.content || '';
 

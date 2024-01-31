@@ -16,8 +16,8 @@ import React from 'react';
 import { Subject } from 'rxjs';
 import { MessageRole } from '../../common';
 import {
-  StreamingChatResponseEvent,
   StreamingChatResponseEventType,
+  StreamingChatResponseEventWithoutError,
 } from '../../common/conversation_complete';
 import { ObservabilityAIAssistantProvider } from '../context/observability_ai_assistant_provider';
 import { EMPTY_CONVERSATION_TITLE } from '../i18n';
@@ -275,7 +275,7 @@ describe('useConversation', () => {
   });
 
   describe('when chat completes', () => {
-    const subject: Subject<StreamingChatResponseEvent> = new Subject();
+    const subject: Subject<StreamingChatResponseEventWithoutError> = new Subject();
     let onConversationUpdate: jest.Mock;
     const expectedMessages = [
       {

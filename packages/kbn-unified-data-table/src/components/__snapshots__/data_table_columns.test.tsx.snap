@@ -1,5 +1,112 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Data table columns Textbased languages grid columns returns columns in correct format when column customisation is provided 1`] = `
+Array [
+  Object {
+    "actions": Object {
+      "additional": Array [
+        Object {
+          "data-test-subj": "gridCopyColumnNameToClipBoardButton",
+          "iconProps": Object {
+            "size": "m",
+          },
+          "iconType": "copyClipboard",
+          "label": <FormattedMessage
+            defaultMessage="Copy name"
+            id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
+            values={Object {}}
+          />,
+          "onClick": [Function],
+          "size": "xs",
+        },
+        Object {
+          "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
+          "iconProps": Object {
+            "size": "m",
+          },
+          "iconType": "copyClipboard",
+          "label": <FormattedMessage
+            defaultMessage="Copy column"
+            id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
+            values={Object {}}
+          />,
+          "onClick": [Function],
+          "size": "xs",
+        },
+      ],
+      "showHide": Object {
+        "iconType": "cross",
+        "label": "Remove column",
+      },
+      "showMoveLeft": true,
+      "showMoveRight": true,
+    },
+    "cellActions": Array [
+      [Function],
+      [Function],
+      [Function],
+    ],
+    "display": <span>
+      test
+    </span>,
+    "displayAsText": "extension",
+    "id": "extension",
+    "isSortable": true,
+    "schema": "string",
+    "visibleCellActions": undefined,
+  },
+  Object {
+    "actions": Object {
+      "additional": Array [
+        Object {
+          "data-test-subj": "gridCopyColumnNameToClipBoardButton",
+          "iconProps": Object {
+            "size": "m",
+          },
+          "iconType": "copyClipboard",
+          "label": <FormattedMessage
+            defaultMessage="Copy name"
+            id="unifiedDataTable.grid.copyColumnNameToClipBoardButton"
+            values={Object {}}
+          />,
+          "onClick": [Function],
+          "size": "xs",
+        },
+        Object {
+          "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
+          "iconProps": Object {
+            "size": "m",
+          },
+          "iconType": "copyClipboard",
+          "label": <FormattedMessage
+            defaultMessage="Copy column"
+            id="unifiedDataTable.grid.copyColumnValuesToClipBoardButton"
+            values={Object {}}
+          />,
+          "onClick": [Function],
+          "size": "xs",
+        },
+      ],
+      "showHide": Object {
+        "iconType": "cross",
+        "label": "Remove column",
+      },
+      "showMoveLeft": true,
+      "showMoveRight": true,
+    },
+    "cellActions": Array [
+      [Function],
+    ],
+    "display": undefined,
+    "displayAsText": "message",
+    "id": "message",
+    "isSortable": true,
+    "schema": "string",
+    "visibleCellActions": undefined,
+  },
+]
+`;
+
 exports[`Data table columns column tokens returns eui grid columns with tokens 1`] = `
 Array [
   Object {
