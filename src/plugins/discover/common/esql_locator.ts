@@ -9,16 +9,14 @@
 import { DISCOVER_ESQL_LOCATOR } from '@kbn/deeplinks-analytics';
 import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
+import { getIndexForESQLQuery } from '@kbn/esql-utils';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 export type DiscoverESQLLocatorParams = SerializableRecord;
 
 export interface DiscoverESQLLocatorDependencies {
   discoverAppLocator: LocatorPublic<SerializableRecord>;
-  getIndices: (options: {
-    showAllIndices: boolean;
-    pattern: string;
-    isRollupIndex: () => boolean;
-  }) => Promise<Array<{ name: string }>>;
+  getIndices: DataViewsPublicPluginStart['getIndices'];
 }
 
 export type DiscoverESQLLocator = LocatorPublic<DiscoverESQLLocatorParams>;
@@ -31,26 +29,8 @@ export class DiscoverESQLLocatorDefinition implements LocatorDefinition<Discover
   public readonly getLocation = async () => {
     const { discoverAppLocator, getIndices } = this.deps;
 
-    const getIndicesList = async () => {
-      const indices = await getIndices({
-        showAllIndices: false,
-        pattern: '*',
-        isRollupIndex: () => false,
-      });
-      return indices.filter((index) => !index.name.startsWith('.')).map((index) => index.name);
-    };
-
-    const indices = await getIndicesList();
-    let esql = `from * | limit 10`;
-
-    if (indices.length > 0) {
-      let indexName = indices[0];
-
-      if (indices.find((index) => index.startsWith('logs'))) {
-        indexName = 'logs*';
-      }
-      esql = `from ${indexName} | limit 10`;
-    }
+    const indexName = await getIndexForESQLQuery({ dataViews: { getIndices } });
+    const esql = `from ${indexName ?? '*'} | limit 10`;
 
     const params = {
       query: { esql },

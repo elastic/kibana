@@ -12,6 +12,7 @@ import type {
   IEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { getESQLAdHocDataview, getIndexForESQLQuery } from '@kbn/esql-utils';
 import type { Datasource, Visualization } from '../../types';
 import type { LensPluginStartDependencies } from '../../plugin';
 import { fetchDataFromAggregateQuery } from '../../datasources/text_based/fetch_data_from_aggregate_query';
@@ -54,27 +55,9 @@ export async function executeCreateAction({
   });
 
   const getFallbackDataView = async () => {
-    const getIndicesList = async () => {
-      const indices = await deps.dataViews.getIndices({
-        showAllIndices: false,
-        pattern: '*',
-        isRollupIndex: () => false,
-      });
-      return indices.filter((index) => !index.name.startsWith('.')).map((index) => index.name);
-    };
-
-    const indices = await getIndicesList();
-    let indexName = indices[0];
-    if (indices.length > 0) {
-      if (indices.find((index) => index.startsWith('logs'))) {
-        indexName = 'logs*';
-      }
-    }
-
+    const indexName = await getIndexForESQLQuery({ dataViews: deps.dataViews });
     if (!indexName) return null;
-
-    const dataView = await deps.dataViews.create({ title: indexName });
-
+    const dataView = await getESQLAdHocDataview(indexName, deps.dataViews);
     return dataView;
   };
 
