@@ -82,7 +82,7 @@ export const AddInferencePipelineContent = ({ onClose }: AddInferencePipelineFly
   const { ingestionMethod } = useValues(IndexViewLogic);
   const {
     createErrors,
-    supportedMLModels,
+    selectableModels,
     isLoading,
     addInferencePipelineModal: { step },
   } = useValues(MLInferenceLogic);
@@ -103,7 +103,7 @@ export const AddInferencePipelineContent = ({ onClose }: AddInferencePipelineFly
       </EuiFlyoutBody>
     );
   }
-  if (supportedMLModels.length === 0) {
+  if (selectableModels.length === 0) {
     return <NoModelsPanel />;
   }
 

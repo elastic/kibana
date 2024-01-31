@@ -10,15 +10,15 @@ import { kea, MakeLogicType } from 'kea';
 import { HttpError, Status } from '../../../../../../../common/types/api';
 import { MlModel } from '../../../../../../../common/types/ml';
 import { getErrorsFromHttpResponse } from '../../../../../shared/flash_messages/handle_api_errors';
-import {
-  CachedFetchModelsApiLogic,
-  CachedFetchModlesApiLogicActions,
-} from '../../../../api/ml_models/cached_fetch_models_api_logic';
+// import {
+//   CachedFetchModelsApiLogic,
+//   CachedFetchModlesApiLogicActions,
+// } from '../../../../api/ml_models/cached_fetch_models_api_logic';
 import {
   CreateModelApiLogic,
   CreateModelApiLogicActions,
 } from '../../../../api/ml_models/create_model_api_logic';
-import { FetchModelsApiResponse } from '../../../../api/ml_models/fetch_models_api_logic';
+// import { FetchModelsApiResponse } from '../../../../api/ml_models/fetch_models_api_logic';
 import {
   StartModelApiLogic,
   StartModelApiLogicActions,
@@ -37,17 +37,17 @@ export interface ModelSelectActions {
   createModelError: CreateModelApiLogicActions['apiError'];
   createModelMakeRequest: CreateModelApiLogicActions['makeRequest'];
   createModelSuccess: CreateModelApiLogicActions['apiSuccess'];
-  fetchModels: () => void;
-  fetchModelsError: CachedFetchModlesApiLogicActions['apiError'];
-  fetchModelsMakeRequest: CachedFetchModlesApiLogicActions['makeRequest'];
-  fetchModelsSuccess: CachedFetchModlesApiLogicActions['apiSuccess'];
+  // fetchModels: () => void;
+  // fetchModelsError: CachedFetchModlesApiLogicActions['apiError'];
+  // fetchModelsMakeRequest: CachedFetchModlesApiLogicActions['makeRequest'];
+  // fetchModelsSuccess: CachedFetchModlesApiLogicActions['apiSuccess'];
   setInferencePipelineConfiguration: MLInferenceProcessorsActions['setInferencePipelineConfiguration'];
   setInferencePipelineConfigurationFromMLInferenceLogic: MLInferenceProcessorsActions['setInferencePipelineConfiguration'];
   startModel: (modelId: string) => { modelId: string };
   startModelError: CreateModelApiLogicActions['apiError'];
   startModelMakeRequest: StartModelApiLogicActions['makeRequest'];
   startModelSuccess: StartModelApiLogicActions['apiSuccess'];
-  startPollingModels: CachedFetchModlesApiLogicActions['startPolling'];
+  // startPollingModels: CachedFetchModlesApiLogicActions['startPolling'];
 }
 
 export interface ModelSelectValues {
@@ -59,12 +59,14 @@ export interface ModelSelectValues {
   ingestionMethod: string;
   ingestionMethodFromIndexViewLogic: string;
   isLoading: boolean;
-  isInitialLoading: boolean;
+  isModelsInitialLoadingFromMLInferenceLogic: boolean;
   modelStateChangeError: string | undefined;
-  modelsData: FetchModelsApiResponse | undefined;
-  modelsStatus: Status;
+  // modelsData: FetchModelsApiResponse | undefined;
+  // modelsStatus: Status;
   selectableModels: MlModel[];
+  selectableModelsFromMLInferenceLogic: MlModel[];
   selectedModel: MlModel | undefined;
+  selectedModelFromMLInferenceLogic: MlModel | undefined;
   startModelError: HttpError | undefined;
   startModelStatus: Status;
 }
@@ -72,19 +74,19 @@ export interface ModelSelectValues {
 export const ModelSelectLogic = kea<MakeLogicType<ModelSelectValues, ModelSelectActions>>({
   actions: {
     createModel: (modelId: string) => ({ modelId }),
-    fetchModels: true,
+    // fetchModels: true,
     setInferencePipelineConfiguration: (configuration) => ({ configuration }),
     startModel: (modelId: string) => ({ modelId }),
   },
   connect: {
     actions: [
-      CachedFetchModelsApiLogic,
-      [
-        'makeRequest as fetchModelsMakeRequest',
-        'apiSuccess as fetchModelsSuccess',
-        'apiError as fetchModelsError',
-        'startPolling as startPollingModels',
-      ],
+      // CachedFetchModelsApiLogic,
+      // [
+      //   'makeRequest as fetchModelsMakeRequest',
+      //   'apiSuccess as fetchModelsSuccess',
+      //   'apiError as fetchModelsError',
+      //   'startPolling as startPollingModels',
+      // ],
       CreateModelApiLogic,
       [
         'makeRequest as createModelMakeRequest',
@@ -104,35 +106,35 @@ export const ModelSelectLogic = kea<MakeLogicType<ModelSelectValues, ModelSelect
       ],
     ],
     values: [
-      CachedFetchModelsApiLogic,
-      ['modelsData', 'status as modelsStatus', 'isInitialLoading'],
+      // CachedFetchModelsApiLogic,
+      // ['modelsData', 'status as modelsStatus', 'isInitialLoading'],
       CreateModelApiLogic,
       ['status as createModelStatus', 'error as createModelError'],
       IndexViewLogic,
       ['ingestionMethod as ingestionMethodFromIndexViewLogic'],
       MLInferenceLogic,
-      ['addInferencePipelineModal as addInferencePipelineModalFromMLInferenceLogic'],
+      [
+        'addInferencePipelineModal as addInferencePipelineModalFromMLInferenceLogic',
+        'isModelsInitialLoading as isModelsInitialLoadingFromMLInferenceLogic',
+        'selectableModels as selectableModelsFromMLInferenceLogic',
+        'selectedModel as selectedModelFromMLInferenceLogic',
+      ],
       StartModelApiLogic,
       ['status as startModelStatus', 'error as startModelError'],
     ],
   },
-  events: ({ actions }) => ({
-    afterMount: () => {
-      actions.startPollingModels();
-    },
-  }),
   listeners: ({ actions }) => ({
     createModel: ({ modelId }) => {
       actions.createModelMakeRequest({ modelId });
     },
     createModelSuccess: (response) => {
-      actions.startPollingModels();
+      // actions.startPollingModels();
       // The create action succeeded, so the model is no longer a placeholder
       actions.clearModelPlaceholderFlagFromMLInferenceLogic(response.modelId);
     },
-    fetchModels: () => {
-      actions.fetchModelsMakeRequest({});
-    },
+    // fetchModels: () => {
+    //   actions.fetchModelsMakeRequest({});
+    // },
     setInferencePipelineConfiguration: ({ configuration }) => {
       actions.setInferencePipelineConfigurationFromMLInferenceLogic(configuration);
     },
@@ -140,7 +142,7 @@ export const ModelSelectLogic = kea<MakeLogicType<ModelSelectValues, ModelSelect
       actions.startModelMakeRequest({ modelId });
     },
     startModelSuccess: () => {
-      actions.startPollingModels();
+      // actions.startPollingModels();
     },
   }),
   path: ['enterprise_search', 'content', 'model_select_logic'],
@@ -167,16 +169,27 @@ export const ModelSelectLogic = kea<MakeLogicType<ModelSelectValues, ModelSelect
       },
     ],
     selectableModels: [
-      () => [selectors.modelsData],
-      (response: FetchModelsApiResponse) => response ?? [],
+      () => [selectors.selectableModelsFromMLInferenceLogic],
+      (selectableModels) => selectableModels, // Pass-through
     ],
     selectedModel: [
-      () => [selectors.selectableModels, selectors.addInferencePipelineModal],
-      (
-        models: MlModel[],
-        addInferencePipelineModal: MLInferenceProcessorsValues['addInferencePipelineModal']
-      ) => models.find((m) => m.modelId === addInferencePipelineModal.configuration.modelID),
+      () => [selectors.selectedModelFromMLInferenceLogic],
+      (selectedModel) => selectedModel, // Pass-through
     ],
-    isLoading: [() => [selectors.isInitialLoading], (isInitialLoading) => isInitialLoading],
+    // selectableModels: [
+    //   () => [selectors.modelsData],
+    //   (response: FetchModelsApiResponse) => response ?? [],
+    // ],
+    // selectedModel: [
+    //   () => [selectors.selectableModels, selectors.addInferencePipelineModal],
+    //   (
+    //     models: MlModel[],
+    //     addInferencePipelineModal: MLInferenceProcessorsValues['addInferencePipelineModal']
+    //   ) => models.find((m) => m.modelId === addInferencePipelineModal.configuration.modelID),
+    // ],
+    isLoading: [
+      () => [selectors.isModelsInitialLoadingFromMLInferenceLogic],
+      (isModelsInitialLoading) => isModelsInitialLoading, // Pass-through
+    ],
   }),
 });

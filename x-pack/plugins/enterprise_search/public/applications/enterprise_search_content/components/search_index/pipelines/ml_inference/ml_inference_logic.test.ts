@@ -57,11 +57,14 @@ const DEFAULT_VALUES: MLInferenceProcessorsValues = {
   mlInferencePipeline: undefined,
   mlInferencePipelineProcessors: undefined,
   mlInferencePipelinesData: undefined,
-  mlModelsData: null,
-  mlModelsStatus: 0,
-  selectedMLModel: null,
+  // mlModelsData: null,
+  // mlModelsStatus: 0,
+  modelsData: undefined,
+  modelsStatus: 0,
+  selectableModels: [],
+  selectedModel: undefined,
   sourceFields: undefined,
-  supportedMLModels: [],
+  // supportedMLModels: [],
 };
 
 describe('MlInferenceLogic', () => {
