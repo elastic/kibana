@@ -45,7 +45,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.unsetTime();
     });
 
-    describe('Customize time range', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/104578
+    describe.skip('Customize time range', () => {
       it('should be possible to customize time range for saved searches on dashboards', async () => {
         await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.clickNewDashboard();

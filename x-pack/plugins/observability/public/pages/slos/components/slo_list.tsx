@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTablePagination } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTablePagination } from '@elastic/eui';
 import { useIsMutating } from '@tanstack/react-query';
 import React from 'react';
-import { CreateSloBtn } from './common/create_slo_btn';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
 import { SearchState, useUrlSearchState } from '../hooks/use_url_search_state';
 import { SlosView } from './slos_view';
-import { SloListSearchBar } from './slo_list_search_bar';
 import { ToggleSLOView } from './toggle_slo_view';
 
 export function SloList() {
@@ -48,23 +46,6 @@ export function SloList() {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="sloList">
-      <EuiFlexItem grow>
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem grow={true}>
-            <SloListSearchBar
-              query={kqlQuery}
-              filters={filters}
-              loading={isLoading || isCreatingSlo || isCloningSlo || isUpdatingSlo || isDeletingSlo}
-              onStateChange={onStateChange}
-              initialState={state}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <CreateSloBtn />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiSpacer size="xs" />
       <EuiFlexItem grow={false}>
         <ToggleSLOView
           sloList={sloList}

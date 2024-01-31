@@ -9,8 +9,7 @@ import React from 'react';
 import { ComponentStory } from '@storybook/react';
 
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
-import { SloListSearchBar as Component, Props } from './slo_list_search_bar';
-import { DEFAULT_STATE } from '../hooks/use_url_search_state';
+import { SloListSearchBar as Component } from './slo_list_search_bar';
 
 export default {
   component: Component,
@@ -18,13 +17,6 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = (props: Props) => <Component {...props} />;
-
-const defaultProps: Props = {
-  loading: false,
-  onStateChange: () => {},
-  initialState: DEFAULT_STATE,
-};
+const Template: ComponentStory<typeof Component> = () => <Component />;
 
 export const SloListSearchBar = Template.bind({});
-SloListSearchBar.args = defaultProps;
