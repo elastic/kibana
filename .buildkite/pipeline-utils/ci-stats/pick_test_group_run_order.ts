@@ -12,7 +12,7 @@ import * as globby from 'globby';
 import minimatch from 'minimatch';
 import { load as loadYaml } from 'js-yaml';
 
-import { BuildkiteClient, BuildkiteStep } from '../buildkite';
+import { BuildkiteClient } from '../buildkite';
 import { CiStatsClient, TestGroupRunOrderResponse } from './client';
 
 import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
@@ -231,16 +231,16 @@ export async function pickTestGroupRunOrder() {
     throw new Error(`invalid JEST_CONFIGS_RETRY_COUNT: ${process.env.JEST_CONFIGS_RETRY_COUNT}`);
   }
 
-  const FTR_CONFIGS_DEPS =
-    process.env.FTR_CONFIGS_DEPS !== undefined
-      ? process.env.FTR_CONFIGS_DEPS.split(',')
-          .map((t) => t.trim())
-          .filter(Boolean)
-      : ['build'];
+  // const FTR_CONFIGS_DEPS =
+  //   process.env.FTR_CONFIGS_DEPS !== undefined
+  //     ? process.env.FTR_CONFIGS_DEPS.split(',')
+  //         .map((t) => t.trim())
+  //         .filter(Boolean)
+  //     : ['build'];
 
-  const FTR_EXTRA_ARGS: Record<string, string> = process.env.FTR_EXTRA_ARGS
-    ? { FTR_EXTRA_ARGS: process.env.FTR_EXTRA_ARGS }
-    : {};
+  // const FTR_EXTRA_ARGS: Record<string, string> = process.env.FTR_EXTRA_ARGS
+  //   ? { FTR_EXTRA_ARGS: process.env.FTR_EXTRA_ARGS }
+  //   : {};
 
   const { defaultQueue, ftrConfigsByQueue } = getEnabledFtrConfigs(FTR_CONFIG_PATTERNS);
 
