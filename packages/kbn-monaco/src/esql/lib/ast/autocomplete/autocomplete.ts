@@ -999,7 +999,8 @@ async function getFieldsOrFunctionsSuggestions(
     ...rest,
     kind,
     sortText: String.fromCharCode(97 - kind),
-    command: TRIGGER_SUGGESTION_COMMAND,
+    // do not trigger an automatic suggestion again if it's not a function
+    command: kind === 1 ? TRIGGER_SUGGESTION_COMMAND : undefined,
   }));
 }
 
