@@ -1140,7 +1140,8 @@ export const updateEsAssetReferences = async (
 export const optimisticallyAddEsAssetReferences = async (
   savedObjectsClient: SavedObjectsClientContract,
   pkgName: string,
-  assetsToAdd: EsAssetReference[]
+  assetsToAdd: EsAssetReference[],
+  esIndexPatterns?: Record<string, string>
 ): Promise<EsAssetReference[]> => {
   const addEsAssets = async () => {
     // TODO: Should this be replaced by a `get()` call from epm/get.ts?
@@ -1158,6 +1159,12 @@ export const optimisticallyAddEsAssetReferences = async (
       ({ type, id }) => `${type}-${id}`
     );
 
+    const deduplicatedIndexPatterns = Object.assign(
+      {},
+      so.attributes.es_index_patterns ?? {},
+      esIndexPatterns
+    );
+
     auditLoggingService.writeCustomSoAuditLog({
       action: 'update',
       id: pkgName,
@@ -1171,6 +1178,7 @@ export const optimisticallyAddEsAssetReferences = async (
       pkgName,
       {
         installed_es: deduplicatedAssets,
+        es_index_patterns: deduplicatedIndexPatterns,
       },
       {
         version: so.version,
@@ -1347,7 +1355,7 @@ export async function installAssetsForInputPackagePolicy(opts: {
       );
     } else {
       logger.info(
-        `Data stream ${dataStream.name} already exists, skipping index template creation for ${packagePolicy.id}`
+        `Data stream for dataset ${datasetName} already exists, skipping index template creation for ${packagePolicy.id}`
       );
       return;
     }
@@ -1414,6 +1422,14 @@ export async function installAssetsForInputPackagePolicy(opts: {
     logger,
     onlyForDataStreams: [dataStream],
   });
+
+  // Upate ES index patterns
+  await optimisticallyAddEsAssetReferences(
+    soClient,
+    installedPkgWithAssets.installation.name,
+    [],
+    generateESIndexPatterns([dataStream])
+  );
 }
 
 interface NoPkgArgs {
