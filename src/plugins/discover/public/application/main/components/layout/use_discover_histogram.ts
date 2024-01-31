@@ -27,6 +27,7 @@ import {
 import useObservable from 'react-use/lib/useObservable';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getUiActions } from '../../../../kibana_services';
@@ -224,7 +225,7 @@ export const useDiscoverHistogram = ({
   const [initialTextBasedProps] = useState(() =>
     getUnifiedHistogramPropsForTextBased({
       documentsValue: savedSearchData$.documents$.getValue(),
-      stateContainer,
+      savedSearch: stateContainer.savedSearchState.getState(),
     })
   );
 
@@ -345,6 +346,13 @@ export const useDiscoverHistogram = ({
     [stateContainer]
   );
 
+  // console.log({
+  //   textBasedQuery,
+  //   textBasedExternalVisContextJSON,
+  //   textBasedColumns,
+  //   textBasedTable,
+  // });
+
   return {
     ref,
     getCreationOptions,
@@ -436,15 +444,26 @@ const createAppStateObservable = (state$: Observable<DiscoverAppState>) => {
 };
 
 const createFetchCompleteObservable = (stateContainer: DiscoverStateContainer) => {
-  return stateContainer.dataState.data$.documents$.pipe(
-    distinctUntilChanged((prev, curr) => prev.fetchStatus === curr.fetchStatus),
-    filter(({ fetchStatus }) => [FetchStatus.COMPLETE, FetchStatus.ERROR].includes(fetchStatus)),
-    map((documentsValue) => {
-      return getUnifiedHistogramPropsForTextBased({
-        documentsValue,
-        stateContainer,
-      });
-    })
+  return merge(
+    stateContainer.savedSearchState.getCurrent$().pipe(
+      distinctUntilChanged((prev, curr) => prev.visContextJSON === curr.visContextJSON),
+      map((savedSearch) => {
+        return getUnifiedHistogramPropsForTextBased({
+          documentsValue: stateContainer.dataState.data$.documents$.getValue(),
+          savedSearch,
+        });
+      })
+    ),
+    stateContainer.dataState.data$.documents$.pipe(
+      distinctUntilChanged((prev, curr) => prev.fetchStatus === curr.fetchStatus),
+      filter(({ fetchStatus }) => [FetchStatus.COMPLETE, FetchStatus.ERROR].includes(fetchStatus)),
+      map((documentsValue) => {
+        return getUnifiedHistogramPropsForTextBased({
+          documentsValue,
+          savedSearch: stateContainer.savedSearchState.getState(),
+        });
+      })
+    )
   );
 };
 
@@ -465,17 +484,18 @@ const createCurrentSuggestionObservable = (state$: Observable<UnifiedHistogramSt
 const EMPTY_TEXT_BASED_COLUMNS: DatatableColumn[] = [];
 function getUnifiedHistogramPropsForTextBased({
   documentsValue,
-  stateContainer,
+  savedSearch,
 }: {
   documentsValue: DataDocumentsMsg | undefined;
-  stateContainer: DiscoverStateContainer;
+  savedSearch: SavedSearch;
 }) {
   const columns = documentsValue?.textBasedQueryColumns || EMPTY_TEXT_BASED_COLUMNS;
   const result = documentsValue?.result;
+
   const nextProps = {
-    dataView: stateContainer.internalState.getState().dataView!,
-    query: stateContainer.appState.getState().query!,
-    externalVisContextJSON: stateContainer.savedSearchState.getState().visContextJSON,
+    dataView: savedSearch.searchSource.getField('index'),
+    query: savedSearch.searchSource.getField('query'),
+    externalVisContextJSON: savedSearch.visContextJSON,
     columns,
     table:
       result && documentsValue?.recordRawType === RecordRawType.PLAIN
