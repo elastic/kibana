@@ -33,6 +33,12 @@ const singleDatasetSelectionPayloadRT = rt.intersection([
   }),
 ]);
 
+const dataViewSelectionPayloadRT = rt.type({
+  dataView: rt.type({
+    id: rt.string,
+  }),
+});
+
 const unresolvedDatasetSelectionPayloadRT = rt.intersection([
   integrationNameRT,
   rt.type({
@@ -45,6 +51,11 @@ export const singleDatasetSelectionPlainRT = rt.type({
   selection: singleDatasetSelectionPayloadRT,
 });
 
+export const dataViewSelectionPlainRT = rt.type({
+  selectionType: rt.literal('dataView'),
+  selection: dataViewSelectionPayloadRT,
+});
+
 export const unresolvedDatasetSelectionPlainRT = rt.type({
   selectionType: rt.literal('unresolved'),
   selection: unresolvedDatasetSelectionPayloadRT,
@@ -52,11 +63,13 @@ export const unresolvedDatasetSelectionPlainRT = rt.type({
 
 export const datasetSelectionPlainRT = rt.union([
   allDatasetSelectionPlainRT,
+  dataViewSelectionPlainRT,
   singleDatasetSelectionPlainRT,
   unresolvedDatasetSelectionPlainRT,
 ]);
 
 export type SingleDatasetSelectionPayload = rt.TypeOf<typeof singleDatasetSelectionPayloadRT>;
+export type DataViewSelectionPayload = rt.TypeOf<typeof dataViewSelectionPayloadRT>;
 export type UnresolvedDatasetSelectionPayload = rt.TypeOf<
   typeof unresolvedDatasetSelectionPayloadRT
 >;

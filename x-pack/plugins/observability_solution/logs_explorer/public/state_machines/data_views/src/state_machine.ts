@@ -9,7 +9,7 @@ import { DataViewListItem, DataViewsPublicPluginStart } from '@kbn/data-views-pl
 import { isError } from 'lodash';
 import { assign, createMachine } from 'xstate';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
-import { parseDataViewListItem } from '../../../utils/parse_data_view_list_item';
+import { ExplorerDataView } from '../../../../common/data_views/models/explorer_data_view';
 import { createComparatorByField } from '../../../utils/comparator_by_field';
 import { createDefaultContext } from './defaults';
 import type {
@@ -148,16 +148,16 @@ export const createDataViewsStateMachine = ({
           ? Promise.resolve(context.cache.get(searchParams))
           : dataViews
               .getIdsWithTitle()
-              .then((views) => views.map(parseDataViewListItem))
+              .then((views) => views.map(ExplorerDataView.create))
               .then((views) => searchDataViews(views, searchParams));
       },
     },
   });
 
-const searchDataViews = (dataViews: DataViewListItem[], search: DataViewsSearchParams) => {
+const searchDataViews = (dataViews: ExplorerDataView[], search: DataViewsSearchParams) => {
   const { name, sortOrder } = search;
 
   return dataViews
     .filter((dataView) => Boolean(dataView.name?.includes(name ?? '')))
-    .sort(createComparatorByField<DataViewListItem>('name', sortOrder));
+    .sort(createComparatorByField('name', sortOrder));
 };

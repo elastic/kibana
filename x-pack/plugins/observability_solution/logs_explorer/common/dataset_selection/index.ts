@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { AllDatasetSelection } from './all_dataset_selection';
+import { DataViewSelection } from './data_view_selection';
 import { SingleDatasetSelection } from './single_dataset_selection';
 import { UnresolvedDatasetSelection } from './unresolved_dataset_selection';
 
 export type DatasetSelection =
   | AllDatasetSelection
+  | DataViewSelection
   | SingleDatasetSelection
   | UnresolvedDatasetSelection;
 export type DatasetSelectionChange = (datasetSelection: DatasetSelection) => void;
-export type DataViewSelection = (dataView: DataViewListItem) => void;
 
 export const isDatasetSelection = (input: any): input is DatasetSelection => {
   return (
     input instanceof AllDatasetSelection ||
+    input instanceof DataViewSelection ||
     input instanceof SingleDatasetSelection ||
     input instanceof UnresolvedDatasetSelection
   );
