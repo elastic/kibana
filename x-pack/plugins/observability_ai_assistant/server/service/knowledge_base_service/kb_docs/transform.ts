@@ -102,6 +102,13 @@ export function addTransformDocsToKb({
         }
       }
       \`\`\`
+
+      Set 'unattended: true' to accomplish the following:
+        1) All possible failures are treated as retryable and are being retried indefinitely
+        2) Retryable failures are being retried indefinitely
+        3) Destination index creation is skipped and the destination index is only created when the transform starts indexing to it
+
+      Set 'unattended: false, num_failure_retries: -1' to achieve infinite retries but not retrying all failures so there will be classes of error that the transform will not retry automatically on
       `,
         `Elasticsearch aggregations can be used in pivot transforms through the pivot parameter.
 
@@ -114,27 +121,14 @@ export function addTransformDocsToKb({
     {
       id: 'transform_requirements',
       texts: [
-        `There can only be either 'pivot' or 'latest' parameter in a transform. If both are specified, the transform will fail.
+        dedent(`There can only be either 'pivot' or 'latest' parameter in a transform. If both are specified, the transform will fail.
 
         Creating, editing, and cloning transform requires the following privileges:
 
         * cluster: manage_transform (the transform_admin built-in role grants this privilege)
         * source indices: read, view_index_metadata
         * destination index: read, create_index, index. If a retention_policy is configured, the delete privilege is also required.
-      `,
-      ],
-    },
-    {
-      id: 'transform_put',
-      texts: [
-        `There can only be either 'pivot' or 'latest' parameter in a transform. If both are specified, the transform will fail.
-
-        Creating, editing, and cloning transform requires the following privileges:
-
-        * cluster: manage_transform (the transform_admin built-in role grants this privilege)
-        * source indices: read, view_index_metadata
-        * destination index: read, create_index, index. If a retention_policy is configured, the delete privilege is also required.
-      `,
+      `),
       ],
     },
   ]);

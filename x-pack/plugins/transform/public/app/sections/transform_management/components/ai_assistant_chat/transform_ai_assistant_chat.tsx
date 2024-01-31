@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { type Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { useAppDependencies } from '../../../../app_dependencies';
+
 const explainProcessMessageTitle = i18n.translate('xpack.transform.aiAssistantFlyout.title', {
-  defaultMessage: 'Use Elastic AI Assitant to create Transforms',
+  defaultMessage: 'Create Transforms with Elastic AI Assitant',
 });
 
 const helpCreateTransformCommand = i18n.translate('xpack.transform.aiAssistantFlyout.command', {
   defaultMessage: `You are a helpful assistant who's knowledgeable in Elasticsearch transforms. Introduce yourself to the user in one sentence, include that you can help them with creating Transforms.`,
 });
 
-const TransformElasticAssistantChat = ({ command = helpCreateTransformCommand }) => {
+export const TransformElasticAssistantChat = ({ command = helpCreateTransformCommand }) => {
   const { observabilityAIAssistant } = useAppDependencies();
   const explainProcessMessages = useMemo<Message[] | undefined>(() => {
     if (!command) {
@@ -50,6 +52,7 @@ const TransformElasticAssistantChat = ({ command = helpCreateTransformCommand })
               />
             </EuiFlexItem>
           </EuiFlexItem>
+          <EuiSpacer size="m" />
         </EuiFlexGroup>
       ) : null}
     </>

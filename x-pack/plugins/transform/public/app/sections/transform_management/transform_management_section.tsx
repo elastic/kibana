@@ -51,7 +51,6 @@ import {
 } from '../../../alerting/transform_alerting_flyout';
 import { TransformElasticAssistantChat } from './components/ai_assistant_chat';
 
-
 const ErrorMessageCallout: FC<{
   text: JSX.Element;
   errorMessage: IHttpFetchError<unknown> | null;
