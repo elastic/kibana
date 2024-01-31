@@ -7,7 +7,7 @@
 
 import { IToasts } from '@kbn/core/public';
 import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
-import { find } from 'lodash';
+import { mergeDegradedStatsIntoDataStreams } from '../../../utils/merge_degraded_docs_into_datastreams';
 import { DataStreamDetails } from '../../../../common/data_streams_stats';
 import { DataStreamType } from '../../../../common/types';
 import { dataStreamPartsToIndexName } from '../../../../common/utils';
@@ -181,16 +181,10 @@ export const createPureDatasetQualityControllerStateMachine = (
         storeDatasets: assign((context, _event) => {
           return context.dataStreamStats && context.degradedDocStats
             ? {
-                datasets: context.dataStreamStats?.map((dataStream) => {
-                  const degradedDocs = find(context.degradedDocStats, {
-                    dataset: dataStream.rawName,
-                  });
-
-                  return {
-                    ...dataStream,
-                    degradedDocs: degradedDocs?.percentage,
-                  };
-                }),
+                datasets: mergeDegradedStatsIntoDataStreams(
+                  context.dataStreamStats,
+                  context.degradedDocStats
+                ),
               }
             : context.dataStreamStats
             ? { datasets: context.dataStreamStats }
