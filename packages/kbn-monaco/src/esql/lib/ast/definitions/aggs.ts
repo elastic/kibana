@@ -135,6 +135,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
     },
     {
       name: 'st_centroid',
+      type: 'agg',
       description: i18n.translate('monaco.esql.definitions.stCentroidDoc', {
         defaultMessage: 'Returns the count of distinct values in a field.',
       }),
