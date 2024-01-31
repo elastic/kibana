@@ -356,9 +356,9 @@ packages/kbn-ecs @elastic/kibana-core @elastic/security-threat-hunting-investiga
 x-pack/packages/security-solution/ecs_data_quality_dashboard @elastic/security-threat-hunting-investigations
 x-pack/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-investigations
 packages/kbn-elastic-agent-utils @elastic/obs-ux-logs-team
-x-pack/packages/kbn-elastic-assistant @elastic/security-solution
-x-pack/packages/kbn-elastic-assistant-common @elastic/security-solution
-x-pack/plugins/elastic_assistant @elastic/security-solution
+x-pack/packages/kbn-elastic-assistant @elastic/security-generative-ai
+x-pack/packages/kbn-elastic-assistant-common @elastic/security-generative-ai
+x-pack/plugins/elastic_assistant @elastic/security-generative-ai
 test/plugin_functional/plugins/elasticsearch_client_plugin @elastic/kibana-core
 x-pack/test/plugin_api_integration/plugins/elasticsearch_client @elastic/kibana-core
 x-pack/plugins/embeddable_enhanced @elastic/kibana-presentation
@@ -462,7 +462,7 @@ x-pack/plugins/index_lifecycle_management @elastic/platform-deployment-managemen
 x-pack/plugins/index_management @elastic/platform-deployment-management
 test/plugin_functional/plugins/index_patterns @elastic/kibana-data-discovery
 x-pack/packages/kbn-infra-forge @elastic/obs-ux-management-team
-x-pack/plugins/infra @elastic/infra-monitoring-ui @elastic/obs-ux-logs-team @elastic/obs-ux-infra_services-team
+x-pack/plugins/infra @elastic/obs-ux-logs-team @elastic/obs-ux-infra_services-team
 x-pack/plugins/ingest_pipelines @elastic/platform-deployment-management
 src/plugins/input_control_vis @elastic/kibana-presentation
 src/plugins/inspector @elastic/kibana-presentation
@@ -807,7 +807,7 @@ packages/kbn-text-based-editor @elastic/kibana-visualizations
 src/plugins/text_based_languages @elastic/kibana-visualizations
 x-pack/examples/third_party_lens_navigation_prompt @elastic/kibana-visualizations
 x-pack/examples/third_party_vis_lens_example @elastic/kibana-visualizations
-x-pack/plugins/threat_intelligence @elastic/protections-experience
+x-pack/plugins/threat_intelligence @elastic/security-threat-hunting-investigations
 x-pack/plugins/timelines @elastic/security-threat-hunting-investigations
 packages/kbn-timelion-grammar @elastic/kibana-visualizations
 packages/kbn-tinymath @elastic/kibana-visualizations
@@ -1042,9 +1042,9 @@ packages/kbn-monaco/src/esql @elastic/kibana-visualizations
 /x-pack/plugins/infra/public/common @elastic/obs-ux-infra_services-team
 /x-pack/plugins/infra/public/observability_logs @elastic/obs-ux-logs-team
 /x-pack/plugins/infra/public/services @elastic/obs-ux-infra_services-team
-/x-pack/test/functional/apps/infra @elastic/infra-monitoring-ui @elastic/obs-ux-infra_services-team
-/x-pack/test/functional/apps/infra/logs @elastic/infra-monitoring-ui @elastic/obs-ux-logs-team
-/x-pack/test/api_integration/apis/infra @elastic/infra-monitoring-ui @elastic/obs-ux-infra_services-team
+/x-pack/test/functional/apps/infra @elastic/obs-ux-infra_services-team
+/x-pack/test/functional/apps/infra/logs @elastic/obs-ux-logs-team
+/x-pack/test/api_integration/apis/infra @elastic/obs-ux-infra_services-team
 
 # Observability UX management team
 x-pack/packages/observability/alert_details @elastic/obs-ux-management-team
@@ -1056,7 +1056,7 @@ x-pack/plugins/infra/server/lib/alerting @elastic/obs-ux-management-team
 /x-pack/test/functional/apps/monitoring @elastic/obs-ux-infra_services-team @elastic/stack-monitoring
 /x-pack/test/api_integration/apis/monitoring @elastic/obs-ux-infra_services-team @elastic/stack-monitoring
 /x-pack/test/api_integration/apis/monitoring_collection @elastic/obs-ux-infra_services-team @elastic/stack-monitoring
-/x-pack/test_serverless/functional/test_suites/observability/observability_log_explorer @elastic/obs-ux-logs-team
+/x-pack/test_serverless/functional/test_suites/observability/observability_logs_explorer @elastic/obs-ux-logs-team
 
 # Fleet
 /fleet_packages.json @elastic/fleet
@@ -1087,7 +1087,7 @@ x-pack/plugins/infra/server/lib/alerting @elastic/obs-ux-management-team
 
 # Logs
 /x-pack/test/api_integration/apis/logs_ui @elastic/obs-ux-logs-team
-/x-pack/test/functional/apps/observability_log_explorer @elastic/obs-ux-logs-team
+/x-pack/test/functional/apps/observability_logs_explorer @elastic/obs-ux-logs-team
 
 # Observability onboarding tour
 /x-pack/plugins/observability_shared/public/components/tour @elastic/platform-onboarding
@@ -1264,8 +1264,9 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/plugins/security_solution_ess/ @elastic/security-solution
 /x-pack/plugins/security_solution_serverless/ @elastic/security-solution
 
-# AI assistant in Security Solution tests
-/x-pack/test/security_solution_cypress/cypress/e2e/ai_assistant @elastic/security-threat-hunting-investigations @elastic/security-detection-rule-management
+# AI Assistant in Security Solution
+/x-pack/plugins/security_solution/public/assistant @elastic/security-generative-ai
+/x-pack/test/security_solution_cypress/cypress/e2e/ai_assistant @elastic/security-generative-ai
 
 # Security Solution cross teams ownership
 /x-pack/test/security_solution_cypress/cypress/fixtures @elastic/security-detections-response @elastic/security-threat-hunting
@@ -1370,10 +1371,15 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/plugins/security_solution/server/search_strategy/security_solution/factory/network @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/server/search_strategy/security_solution/factory/users @elastic/security-threat-hunting-explore
 
-## Explore owner connectors
-/x-pack/plugins/stack_connectors/public/connector_types/openai @elastic/security-threat-hunting-explore
-/x-pack/plugins/stack_connectors/server/connector_types/openai @elastic/security-threat-hunting-explore
-/x-pack/plugins/stack_connectors/common/openai @elastic/security-threat-hunting-explore
+## Generative AI owner connectors
+# OpenAI
+/x-pack/plugins/stack_connectors/public/connector_types/openai @elastic/security-generative-ai @elastic/obs-knowledge-team
+/x-pack/plugins/stack_connectors/server/connector_types/openai @elastic/security-generative-ai @elastic/obs-knowledge-team
+/x-pack/plugins/stack_connectors/common/openai @elastic/security-generative-ai @elastic/obs-knowledge-team
+# Bedrock
+/x-pack/plugins/stack_connectors/public/connector_types/bedrock @elastic/security-generative-ai
+/x-pack/plugins/stack_connectors/server/connector_types/bedrock @elastic/security-generative-ai
+/x-pack/plugins/stack_connectors/common/bedrock @elastic/security-generative-ai
 
 ## Defend Workflows owner connectors
 /x-pack/plugins/stack_connectors/public/connector_types/sentinelone @elastic/security-defend-workflows

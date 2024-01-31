@@ -15,6 +15,7 @@ import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 
+import type { LensProps } from '@kbn/cases-plugin/public/types';
 import type { InputsModelId } from '../../store/inputs/constants';
 import type { SourcererScopeName } from '../../store/sourcerer/model';
 import type { Status } from '../../../../common/api/detection_engine';
@@ -61,6 +62,7 @@ export interface VisualizationActionsProps {
   timerange: { from: string; to: string };
   title: React.ReactNode;
   withActions?: VisualizationContextMenuActions[];
+  casesAttachmentMetadata?: LensProps['metadata'];
 }
 
 export interface EmbeddableData {
@@ -100,6 +102,11 @@ export interface LensEmbeddableComponentProps {
    * Disable the on click filter for the visualization.
    */
   disableOnClickFilter?: boolean;
+
+  /**
+   * Metadata for cases Attachable visualization.
+   */
+  casesAttachmentMetadata?: LensProps['metadata'];
 }
 
 export enum RequestStatus {

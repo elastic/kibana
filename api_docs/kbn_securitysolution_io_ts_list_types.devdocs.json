@@ -4454,6 +4454,21 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
+        "id": "def-common.ListOperatorType",
+        "type": "Type",
+        "tags": [],
+        "label": "ListOperatorType",
+        "description": [],
+        "signature": [
+          "\"match\" | \"wildcard\" | \"nested\" | \"list\" | \"exists\" | \"match_any\""
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-list-types/src/common/list_operator/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
         "id": "def-common.ListSchema",
         "type": "Type",
         "tags": [],
@@ -9977,6 +9992,22 @@
         "signature": [
           "KeyofC",
           "<{ excluded: null; included: null; }>"
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-list-types/src/common/list_operator/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
+        "id": "def-common.listOperatorType",
+        "type": "Object",
+        "tags": [],
+        "label": "listOperatorType",
+        "description": [],
+        "signature": [
+          "KeyofC",
+          "<{ nested: null; match: null; match_any: null; wildcard: null; exists: null; list: null; }>"
         ],
         "path": "packages/kbn-securitysolution-io-ts-list-types/src/common/list_operator/index.ts",
         "deprecated": false,
