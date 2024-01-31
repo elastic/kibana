@@ -16,17 +16,17 @@ export function MachineLearningJobSourceSelectionProvider({ getService }: FtrPro
       await testSubjects.existOrFail(`savedObjectTitle${sourceName}`);
     },
 
-    async filterSourceSelection(sourceName: string, dataTestSubjPostFix?: string) {
+    async filterSourceSelection(sourceName: string) {
       await testSubjects.setValue('savedObjectFinderSearchInput', sourceName, {
         clearWithKeyboard: true,
       });
-      await this.assertSourceListContainsEntry(dataTestSubjPostFix ?? sourceName);
+      await this.assertSourceListContainsEntry(sourceName);
     },
 
-    async selectSource(sourceName: string, nextPageSubj: string, dataTestSubjPostFix?: string) {
-      await this.filterSourceSelection(sourceName, dataTestSubjPostFix);
+    async selectSource(sourceName: string, nextPageSubj: string) {
+      await this.filterSourceSelection(sourceName);
       await retry.tryForTime(30 * 1000, async () => {
-        const dataTestSubj = `savedObjectTitle${dataTestSubjPostFix ?? sourceName}`;
+        const dataTestSubj = `savedObjectTitle${sourceName}`;
         await testSubjects.clickWhenNotDisabledWithoutRetry(dataTestSubj);
         await testSubjects.existOrFail(nextPageSubj, { timeout: 10 * 1000 });
       });
@@ -48,8 +48,8 @@ export function MachineLearningJobSourceSelectionProvider({ getService }: FtrPro
       await this.selectSource(sourceName, 'dataVisualizerIndexPage');
     },
 
-    async selectSourceForLogRateAnalysis(sourceName: string, dataTestSubjPostFix?: string) {
-      await this.selectSource(sourceName, 'aiopsLogRateAnalysisPage', dataTestSubjPostFix);
+    async selectSourceForLogRateAnalysis(sourceName: string) {
+      await this.selectSource(sourceName, 'aiopsLogRateAnalysisPage');
     },
 
     async selectSourceForChangePointDetection(sourceName: string) {
