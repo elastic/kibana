@@ -8,7 +8,6 @@
 
 import { EuiEmptyPromptProps } from '@elastic/eui';
 import type { ILocatorClient } from '@kbn/share-plugin/common/url_service';
-import type { DataView } from '@kbn/data-views-plugin/common';
 
 /**
  * TODO: `DataView` is a class exported by `src/plugins/data_views/public`.  Since this service
