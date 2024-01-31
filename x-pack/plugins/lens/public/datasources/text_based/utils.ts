@@ -7,7 +7,7 @@
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import {
   type AggregateQuery,
   getIndexPatternFromSQLQuery,
@@ -16,9 +16,9 @@ import {
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { generateId } from '../../id_generator';
 import { fetchDataFromAggregateQuery } from './fetch_data_from_aggregate_query';
-
 import type { IndexPatternRef, TextBasedPrivateState, TextBasedLayerColumn } from './types';
 import type { DataViewsState } from '../../state_management';
+import { addColumnsToCache } from './fieldlist_cache';
 
 export const MAX_NUM_OF_COLUMNS = 5;
 
@@ -86,12 +86,10 @@ export async function getStateFromAggregateQuery(
   // get the id of the dataview
   let dataViewId = indexPatternRefs.find((r) => r.title === indexPattern)?.id ?? '';
   let columnsFromQuery: DatatableColumn[] = [];
-  let allColumns: TextBasedLayerColumn[] = [];
   let timeFieldName;
   try {
-    const dataView = await dataViews.create({
-      title: indexPattern,
-    });
+    const dataView = await getESQLAdHocDataview(indexPattern, dataViews);
+
     if (dataView && dataView.id) {
       if (dataView?.fields?.getByName('@timestamp')?.type === 'date') {
         dataView.timeFieldName = '@timestamp';
@@ -109,7 +107,7 @@ export async function getStateFromAggregateQuery(
     timeFieldName = dataView.timeFieldName;
     const table = await fetchDataFromAggregateQuery(query, dataView, data, expressions);
     columnsFromQuery = table?.columns ?? [];
-    allColumns = getAllColumns(state.layers[newLayerId].allColumns, columnsFromQuery);
+    addColumnsToCache(query, columnsFromQuery);
   } catch (e) {
     errors.push(e);
   }
@@ -120,7 +118,6 @@ export async function getStateFromAggregateQuery(
         index: dataViewId,
         query,
         columns: state.layers[newLayerId].columns ?? [],
-        allColumns,
         timeField: timeFieldName,
         errors,
       },
@@ -129,7 +126,6 @@ export async function getStateFromAggregateQuery(
 
   return {
     ...tempState,
-    fieldList: columnsFromQuery ?? [],
     indexPatternRefs,
     initialContext: context,
   };

@@ -11,9 +11,8 @@ processing. This source command is then followed by one or more
 processing commands, which can transform the data returned by the
 previous command.
 
-ES|QL is not Elasticsearch SQL, nor is it anything like SQL. SQL
-commands are not available in ES|QL. Make sure you write a query
-using ONLY commands specified in this conversation.
+Make sure you write a query using ONLY commands specified in this
+conversation.
 
 # Syntax
 
@@ -168,6 +167,7 @@ one or more aggregated values over the grouped rows. This commands only
 
 Here are some example queries:
 
+```esql
 FROM employees
 | WHERE still_hired == true
 | EVAL hired = DATE_FORMAT("YYYY", hire_date)
@@ -179,34 +179,48 @@ FROM employees
 | KEEP avg_salary, lang
 | SORT avg_salary ASC
 | LIMIT 3
+```
 
+```esql
 FROM employees
   | EVAL trunk_worked_seconds = avg_worked_seconds / 100000000 * 100000000
   | STATS c = count(languages.long) BY languages.long, trunk_worked_seconds
   | SORT c desc, languages.long, trunk_worked_seconds
+```
 
+```esql
 ROW a = "2023-01-23T12:15:00.000Z - some text - 127.0.0.1"
 | DISSECT a "%{date} - %{msg} - %{ip}"
 | KEEP date, msg, ip
 | EVAL date = TO_DATETIME(date)
+```
 
+```esql
 FROM employees
 | WHERE first_name LIKE "?b*"
 | KEEP first_name, last_name
+```
 
+```esql
 FROM employees
 | WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
 | EVAL bucket = AUTO_BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
 | STATS AVG(salary) BY bucket
 | SORT bucket
+```
 
+```esql
 ROW a = 1, b = "two", c = null
+```
 
+```esql
 FROM employees
 | EVAL is_recent_hire = CASE(hire_date <= "2023-01-01T00:00:00Z", 1, 0)
 | STATS total_recent_hires = SUM(is_recent_hire), total_hires = COUNT(*) BY country
 | EVAL recent_hiring_rate = total_recent_hires / total_hires
+```
 
+```esql
 FROM logs-*
 | WHERE @timestamp <= NOW() - 24 hours
 // divide data in 1 hour buckets
@@ -217,4 +231,4 @@ FROM logs-*
 | STATS total_events = COUNT(*), total_failures = SUM(is_5xx) BY host.hostname, bucket
 | EVAL failure_rate_per_host = total_failures / total_events
 | DROP total_events, total_failures
-
+```

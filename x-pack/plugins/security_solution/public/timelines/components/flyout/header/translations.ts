@@ -14,15 +14,3 @@ export const CLOSE_TIMELINE_OR_TEMPLATE = (isTimeline: boolean) =>
       isTimeline,
     },
   });
-
-export const TIMELINE_TOGGLE_BUTTON_ARIA_LABEL = ({
-  isOpen,
-  title,
-}: {
-  isOpen: boolean;
-  title: string;
-}) =>
-  i18n.translate('xpack.securitySolution.timeline.properties.timelineToggleButtonAriaLabel', {
-    values: { isOpen, title },
-    defaultMessage: '{isOpen, select, false {Open} true {Close} other {Toggle}} timeline {title}',
-  });

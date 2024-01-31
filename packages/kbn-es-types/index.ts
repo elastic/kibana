@@ -22,4 +22,5 @@ export type {
   ESQLColumn,
   ESQLRow,
   ESQLSearchReponse,
+  ESQLSearchParams,
 } from './src';

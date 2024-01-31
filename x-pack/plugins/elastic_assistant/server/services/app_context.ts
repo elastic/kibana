@@ -6,11 +6,14 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { AssistantTool } from '../types';
+import { defaultAssistantFeatures, AssistantFeatures } from '@kbn/elastic-assistant-common';
+import { AssistantTool } from '../types';
 
 export type PluginName = string;
 export type RegisteredToolsStorage = Map<PluginName, Set<AssistantTool>>;
+export type RegisteredFeaturesStorage = Map<PluginName, AssistantFeatures>;
 export type GetRegisteredTools = (pluginName: string) => AssistantTool[];
+export type GetRegisteredFeatures = (pluginName: string) => AssistantFeatures;
 export interface ElasticAssistantAppContext {
   logger: Logger;
 }
@@ -23,6 +26,7 @@ export interface ElasticAssistantAppContext {
 class AppContextService {
   private logger: Logger | undefined;
   private registeredTools: RegisteredToolsStorage = new Map<PluginName, Set<AssistantTool>>();
+  private registeredFeatures: RegisteredFeaturesStorage = new Map<PluginName, AssistantFeatures>();
 
   public start(appContext: ElasticAssistantAppContext) {
     this.logger = appContext.logger;
@@ -30,6 +34,7 @@ class AppContextService {
 
   public stop() {
     this.registeredTools.clear();
+    this.registeredFeatures.clear();
   }
 
   /**
@@ -44,7 +49,7 @@ class AppContextService {
     this.logger?.debug(`tools: ${tools.map((tool) => tool.name).join(', ')}`);
 
     if (!this.registeredTools.has(pluginName)) {
-      this.logger?.debug('plugin has no tools, making new set');
+      this.logger?.debug('plugin has no tools, initializing...');
       this.registeredTools.set(pluginName, new Set<AssistantTool>());
     }
     tools.forEach((tool) => this.registeredTools.get(pluginName)?.add(tool));
@@ -63,6 +68,51 @@ class AppContextService {
     this.logger?.debug(`tools: ${tools.map((tool) => tool.name).join(', ')}`);
 
     return tools;
+  }
+
+  /**
+   * Register features to be used by the Elastic Assistant
+   *
+   * @param pluginName
+   * @param features
+   */
+  public registerFeatures(pluginName: string, features: Partial<AssistantFeatures>) {
+    this.logger?.debug('AppContextService:registerFeatures');
+    this.logger?.debug(`pluginName: ${pluginName}`);
+    this.logger?.debug(
+      `features: ${Object.entries(features)
+        .map(([feature, enabled]) => `${feature}:${enabled}`)
+        .join(', ')}`
+    );
+
+    if (!this.registeredFeatures.has(pluginName)) {
+      this.logger?.debug('plugin has no features, initializing...');
+      this.registeredFeatures.set(pluginName, defaultAssistantFeatures);
+    }
+
+    const registeredFeatures = this.registeredFeatures.get(pluginName);
+    if (registeredFeatures != null) {
+      this.registeredFeatures.set(pluginName, { ...registeredFeatures, ...features });
+    }
+  }
+
+  /**
+   * Get the registered features
+   *
+   * @param pluginName
+   */
+  public getRegisteredFeatures(pluginName: string): AssistantFeatures {
+    const features = this.registeredFeatures?.get(pluginName) ?? defaultAssistantFeatures;
+
+    this.logger?.debug('AppContextService:getRegisteredFeatures');
+    this.logger?.debug(`pluginName: ${pluginName}`);
+    this.logger?.debug(
+      `features: ${Object.entries(features)
+        .map(([feature, enabled]) => `${feature}:${enabled}`)
+        .join(', ')}`
+    );
+
+    return features;
   }
 }
 
