@@ -148,7 +148,13 @@ export class LensVisService {
   }) => {
     const suggestionContextSelectedPreviously = this.state$.getValue().currentSuggestionContext;
 
-    console.log('recalculating chart', queryParams.query, externalVisContext, table);
+    console.log(
+      'recalculating chart',
+      queryParams.query,
+      externalVisContext?.suggestionType,
+      externalVisContext?.attributes.state.query,
+      table
+    );
 
     const allSuggestions = this.getAllSuggestions({ queryParams });
 
@@ -615,15 +621,14 @@ export class LensVisService {
         suggestionType === externalVisContext?.suggestionType &&
         isSuggestionAndVisContextCompatible(suggestion, externalVisContext)
       ) {
-        // console.log('using the external lens attributes');
+        console.log('using the external lens attributes');
         // using the external lens attributes
-        shouldUpdateVisContextDueToIncompatibleSuggestion = false;
         lensAttributesContext = externalVisContext;
       } else {
-        // console.log('external vis is not compatible with the current suggestion');
-        // console.log('query', currentQuery, externalVisContext.attributes?.state?.query);
-        // console.log('timeInterval', timeInterval, externalVisContext?.requestData?.timeInterval);
-        // console.log('suggestionType', suggestionType, externalVisContext?.suggestionType);
+        console.log('external vis is not compatible with the current suggestion');
+        console.log('query', currentQuery, externalVisContext.attributes?.state?.query);
+        console.log('timeInterval', timeInterval, externalVisContext?.requestData?.timeInterval);
+        console.log('suggestionType', suggestionType, externalVisContext?.suggestionType);
         // external vis is not compatible with the current suggestion
         shouldUpdateVisContextDueToIncompatibleSuggestion = true;
       }
@@ -674,7 +679,6 @@ export class LensVisService {
         visualizationType: suggestion ? suggestion.visualizationId : 'lnsXY',
       } as TypedLensByValueInput['attributes'];
 
-      shouldUpdateVisContextDueToIncompatibleSuggestion = false;
       lensAttributesContext = {
         attributes,
         requestData,
