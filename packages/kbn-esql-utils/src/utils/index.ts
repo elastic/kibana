@@ -32,7 +32,6 @@ export async function getESQLAdHocDataview(
 ) {
   return await dataViewsService.create({
     title: indexPattern,
-    id: await sha256(indexPattern),
-    type: 'esql',
+    id: await sha256(`esql-${indexPattern}`),
   });
 }

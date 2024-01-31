@@ -12,7 +12,6 @@ import { catchError, tap } from 'rxjs/operators';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { firstValueFrom, from } from 'rxjs';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
-import { ESQL_TYPE } from '@kbn/data-views-plugin/common';
 import { IAsyncSearchRequestParams } from '../..';
 import { getKbnSearchError, KbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
@@ -171,7 +170,7 @@ export const enhancedEsSearchStrategyProvider = (
      */
     search: (request, options: IAsyncSearchOptions, deps) => {
       logger.debug(`search ${JSON.stringify(request.params) || request.id}`);
-      if (request.indexType && request.indexType !== 'rollup' && request.indexType !== ESQL_TYPE) {
+      if (request.indexType && request.indexType !== 'rollup') {
         throw new KbnSearchError('Unknown indexType', 400);
       }
 

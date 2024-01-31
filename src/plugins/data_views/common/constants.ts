@@ -69,9 +69,3 @@ export const FIELDS_PATH = '/internal/data_views/fields';
  * @public
  */
 export const EXISTING_INDICES_PATH = '/internal/data_views/_existing_indices';
-
-/**
- * ESQL type constant
- */
-
-export const ESQL_TYPE = 'esql';
