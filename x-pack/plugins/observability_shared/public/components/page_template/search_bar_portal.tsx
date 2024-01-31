@@ -18,7 +18,7 @@ export function SearchBarPortal({ children, containerRef }: Props) {
   const portalNode = useMemo(() => createHtmlPortalNode(), []);
 
   useEffect(() => {
-    if (containerRef?.current) {
+    if (containerRef?.current && children) {
       setTimeout(() => {
         const mainContent = containerRef?.current?.querySelector('main');
         if (!mainContent) return;
@@ -34,7 +34,9 @@ export function SearchBarPortal({ children, containerRef }: Props) {
     return () => {
       portalNode.unmount();
     };
-  }, [portalNode, containerRef]);
+  }, [portalNode, containerRef, children]);
+
+  if (!children) return null;
 
   return (
     <InPortal node={portalNode}>
