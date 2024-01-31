@@ -24,11 +24,13 @@ import {
   EuiPopoverTitle,
   EuiFilterButton,
   EuiSearchBar,
+  EuiSelectableOption,
 } from '@elastic/eui';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
 import { Pipeline } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
+import { fuzzyMatch } from '../../lib/utils';
 
 export interface Props {
   pipelines: Pipeline[];
@@ -48,6 +50,7 @@ export const deprecatedPipelineBadge = {
   }),
 };
 
+
 export const PipelineTable: FunctionComponent<Props> = ({
   pipelines,
   onReloadClick,
@@ -55,16 +58,20 @@ export const PipelineTable: FunctionComponent<Props> = ({
   onClonePipelineClick,
   onDeletePipelineClick,
 }) => {
-  const [query, setQuery] = useState('is:isManaged -is:deprecated');
+  // In order to have the filters detached from the search bar, we will keep the filters and the
+  // search bar state separated. The search bar will be responsible for updating the search state
+  // and the filters will be responsible for updating the query state.
+  const [search, setSearch] = useState('');
+  const [query, setQuery] = useState('-is:Deprecated');
+  // By default, we want to show all the pipelines that are not deprecated.
+  const [filterOptions, setFilterOptions] = useState([
+    { label: 'Managed' },
+    { label: 'Deprecated', checked: 'off' },
+  ]);
+
   const { history } = useKibana().services;
   const [selection, setSelection] = useState<Pipeline[]>([]);
   const [showPopover, setShowPopover] = useState(false);
-
-  const handleOnChange: EuiSearchBarProps['onChange'] = ({ queryText, error }) => {
-    if (!error) {
-      setQuery(queryText);
-    }
-  };
 
   const createMenuItems = [
     /**
@@ -89,31 +96,44 @@ export const PipelineTable: FunctionComponent<Props> = ({
     },
   ];
 
+  const handleOnChange: EuiSearchBarProps['onChange'] = ({ queryText, error }) => {
+    if (!error) {
+      setSearch(queryText);
+    }
+  };
+
+  // We need to filter the pipelines based on the search bar and the filter query.
   const filteredPipelines = useMemo(() => {
-    let result = pipelines ?? [];
+    const parsedQuery = EuiSearchBar.Query.parse(query);
+    const deprecatedClause = parsedQuery.getIsClause('Deprecated');
+    const managedClause = parsedQuery.getIsClause('Managed');
 
-    console.log(query);
+    return (pipelines || [])
+      .filter((pipeline) => {
+        if (
+          (deprecatedClause?.match === 'must_not' && pipeline.deprecated) ||
+          (managedClause?.match === 'must_not' && pipeline.isManaged) ||
+          (managedClause?.match === 'must' && !pipeline.isManaged) ||
+          (deprecatedClause?.match === 'must' && !pipeline.deprecated)
+        ) {
+          return false;
+        }
 
-    const queryObject = EuiSearchBar.Query.parse(query);
-    console.log(queryObject);
+        if (search.trim() === '') {
+          return true;
+        }
 
-    console.log(pipelines);
-
-    // When the query includes 'is:deprecated', we want to show deprecated pipelines.
-    // Otherwise hide them all since they wont be supported in the future.
-    // if (query.includes('is:deprecated')) {
-      // result = result.filter((item) => item?.deprecated);
-    // } else {
-      // result = result.filter((item) => !item?.deprecated);
-    // }
-
-    return result;
-  }, [pipelines, query]);
-
-  const [filterOptions, setFilterOptions] = useState([
-    { label: 'Managed', checked: 'on' },
-    { label: 'Deprecated', checked: 'off' },
-  ]);
+        return fuzzyMatch(search, pipeline.name);
+      })
+      .sort((a, b) => {
+        if (a.name < b.name) {
+          return -1;
+        } else if (a.name > b.name) {
+          return 1;
+        }
+        return 0;
+      });
+  }, [pipelines, query, search]);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const onButtonClick = () => {
@@ -217,12 +237,12 @@ export const PipelineTable: FunctionComponent<Props> = ({
       box: {
         incremental: true,
       },
-      query,
+      query: search,
       onChange: handleOnChange,
       filters: [
         {
           type: 'custom_component',
-          component: ({ query, onChange }) => {
+          component: ({ query }) => {
             return (
               <EuiFilterGroup>
                 <EuiPopover
@@ -240,7 +260,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
                         compressed: true,
                     }}
                     aria-label="Filters"
-                    options={filterOptions}
+                    options={filterOptions as EuiSelectableOption[]}
                     onChange={(newOptions) => {
                       // Set new options for current state
                       setFilterOptions(newOptions);
@@ -258,7 +278,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
                         return acc;
                       }, query);
 
-                      onChange?.(newQuery);
+                      setQuery(newQuery.text);
                     }}
                     noMatchesMessage="No filters found"
                   >

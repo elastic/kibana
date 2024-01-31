@@ -29,3 +29,16 @@ export const parseJson = (jsonString: string, renderAsArray: boolean = true): ob
 
   return parsedJSON;
 };
+
+/**
+ * Copied from https://stackoverflow.com/a/9310752
+ */
+function escapeRegExp(text: string) {
+  return text.replace(/[-\[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+}
+
+export const fuzzyMatch = (searchValue: string, text: string) => {
+  const pattern = `.*${searchValue.split('').map(escapeRegExp).join('.*')}.*`;
+  const regex = new RegExp(pattern);
+  return regex.test(text);
+}
