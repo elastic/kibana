@@ -59,10 +59,10 @@ interface VisualizeESQLProps {
   query: string;
   /** Actions handler */
   onActionClick: ChatActionClickHandler;
-  /** Optional, initial ES|QL Lens chart attributes
+  /** Optional, overwritten ES|QL Lens chart attributes
    * If not given, the embeddable gets them from the suggestions api
    */
-  initialInput?: unknown;
+  userOverrides?: unknown;
   /** Optional, should be passed if the embeddable is rendered in a flyout
    * If not given, the inline editing push flyout won't open
    * The code will be significantly improved,
@@ -84,7 +84,7 @@ export function VisualizeESQL({
   columns,
   query,
   onActionClick,
-  initialInput,
+  userOverrides,
   chatFlyoutSecondSlotHandler,
   preferredChartType,
 }: VisualizeESQLProps) {
@@ -102,7 +102,7 @@ export function VisualizeESQL({
 
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [lensInput, setLensInput] = useState<TypedLensByValueInput | undefined>(
-    initialInput as TypedLensByValueInput
+    userOverrides as TypedLensByValueInput
   );
   const [lensLoadEvent, setLensLoadEvent] = useState<
     InlineEditLensEmbeddableContext['lensEvent'] | null
@@ -191,7 +191,7 @@ export function VisualizeESQL({
           };
           onActionClick({
             type: ChatActionClickType.updateVisualization,
-            newInput,
+            userOverrides: newInput,
             query,
           });
           chatFlyoutSecondSlotHandler?.setVisibility?.(false);
@@ -202,7 +202,7 @@ export function VisualizeESQL({
         onCancel: () => {
           onActionClick({
             type: ChatActionClickType.updateVisualization,
-            newInput: lensInput,
+            userOverrides: lensInput,
             query,
           });
           chatFlyoutSecondSlotHandler?.setVisibility?.(false);
@@ -313,7 +313,7 @@ export function registerVisualizeQueryRenderFunction({
   registerRenderFunction(
     'visualize_query',
     ({
-      arguments: { query, newInput, intention },
+      arguments: { query, userOverrides, intention },
       response,
       onActionClick,
       chatFlyoutSecondSlotHandler,
@@ -369,7 +369,7 @@ export function registerVisualizeQueryRenderFunction({
           columns={content}
           query={query}
           onActionClick={onActionClick}
-          initialInput={newInput}
+          userOverrides={userOverrides}
           chatFlyoutSecondSlotHandler={chatFlyoutSecondSlotHandler}
           preferredChartType={preferredChartType}
         />
