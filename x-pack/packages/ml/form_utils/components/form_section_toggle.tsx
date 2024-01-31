@@ -28,13 +28,12 @@ export const FormSectionToggle = <FF extends string, FS extends string, VN exten
   const dispatch = useDispatch();
   const { enabled: checked } = useFormSection(slice, section);
   const upperCaseSection = capitalizeFirstLetter(section as string);
-  const name = `${slice.name}${upperCaseSection}`;
 
   return (
     <>
       <EuiFormRow helpText={helpText}>
         <EuiSwitch
-          name={name}
+          name={`${slice.name}${upperCaseSection}`}
           label={label}
           checked={checked && !disabled}
           onChange={(e) =>
@@ -46,7 +45,7 @@ export const FormSectionToggle = <FF extends string, FS extends string, VN exten
             )
           }
           disabled={disabled}
-          data-test-subj={name}
+          data-test-subj={`${slice.name}${upperCaseSection}Switch`}
         />
       </EuiFormRow>
       {!disabled && checked ? children : null}
