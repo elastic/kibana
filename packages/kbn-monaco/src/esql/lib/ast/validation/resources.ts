@@ -105,6 +105,5 @@ export async function retrieveFieldsFromStringSources(
     return new Map();
   }
   const customQuery = buildQueryForFieldsForStringSources(queryString, commands);
-  console.log({ customQuery });
   return await getFieldsByTypeHelper(customQuery, callbacks).getFieldsMap();
 }
