@@ -32,6 +32,8 @@ export async function getServiceNodeIds({
         transactionType: 'request',
         environment: 'ENVIRONMENT_ALL',
         kuery: '',
+        sortField: 'throughput',
+        sortDirection: 'desc',
       },
     },
   });
