@@ -68,10 +68,9 @@ export const ActionsLogFilter = memo(
       numFilters,
       setAreHostsSelectedOnMount,
       setUrlActionsFilters,
-      setUrlAgentTypesFilters,
       setUrlHostsFilters,
       setUrlStatusesFilters,
-      setUrlTypeFilters,
+      setUrlTypesFilters,
     } = useActionsLogFilter({
       filterName,
       isFlyout,
@@ -161,8 +160,10 @@ export const ActionsLogFilter = memo(
           } else if (filterName === 'statuses') {
             setUrlStatusesFilters(selectedItems.join());
           } else if (filterName === 'type') {
-            setUrlAgentTypesFilters(groupedSelectedTypeFilterOptions.agentTypes.join());
-            setUrlTypeFilters(groupedSelectedTypeFilterOptions.actionTypes.join());
+            setUrlTypesFilters({
+              agentTypes: groupedSelectedTypeFilterOptions.agentTypes.join(),
+              actionTypes: groupedSelectedTypeFilterOptions.actionTypes.join(),
+            });
           }
           // reset shouldPinSelectedHosts, setAreHostsSelectedOnMount
           shouldPinSelectedHosts(false);
@@ -188,10 +189,9 @@ export const ActionsLogFilter = memo(
         shouldPinSelectedHosts,
         setAreHostsSelectedOnMount,
         setUrlActionsFilters,
-        setUrlAgentTypesFilters,
         setUrlHostsFilters,
         setUrlStatusesFilters,
-        setUrlTypeFilters,
+        setUrlTypesFilters,
       ]
     );
 
@@ -214,8 +214,7 @@ export const ActionsLogFilter = memo(
         } else if (filterName === 'statuses') {
           setUrlStatusesFilters('');
         } else if (filterName === 'type') {
-          setUrlAgentTypesFilters('');
-          setUrlTypeFilters('');
+          setUrlTypesFilters({ agentTypes: '', actionTypes: '' });
         }
       }
 
@@ -238,8 +237,7 @@ export const ActionsLogFilter = memo(
       setUrlActionsFilters,
       setUrlHostsFilters,
       setUrlStatusesFilters,
-      setUrlAgentTypesFilters,
-      setUrlTypeFilters,
+      setUrlTypesFilters,
     ]);
 
     return (

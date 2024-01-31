@@ -167,10 +167,9 @@ export const useActionsLogFilter = ({
   numFilters: number;
   setAreHostsSelectedOnMount: (value: React.SetStateAction<boolean>) => void;
   setUrlActionsFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlActionsFilters'];
-  setUrlAgentTypesFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlAgentTypesFilters'];
   setUrlHostsFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlHostsFilters'];
   setUrlStatusesFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlStatusesFilters'];
-  setUrlTypeFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlTypeFilters'];
+  setUrlTypesFilters: ReturnType<typeof useActionHistoryUrlParams>['setUrlTypesFilters'];
 } => {
   const {
     agentTypes = [],
@@ -179,10 +178,9 @@ export const useActionsLogFilter = ({
     hosts: selectedAgentIdsFromUrl,
     types = [],
     setUrlActionsFilters,
-    setUrlAgentTypesFilters,
     setUrlHostsFilters,
     setUrlStatusesFilters,
-    setUrlTypeFilters,
+    setUrlTypesFilters,
   } = useActionHistoryUrlParams();
   const isStatusesFilter = filterName === 'statuses';
   const isHostsFilter = filterName === 'hosts';
@@ -290,10 +288,9 @@ export const useActionsLogFilter = ({
     numFilters,
     setAreHostsSelectedOnMount,
     setUrlActionsFilters,
-    setUrlAgentTypesFilters,
     setUrlHostsFilters,
     setUrlStatusesFilters,
-    setUrlTypeFilters,
+    setUrlTypesFilters,
   };
 };
 
