@@ -13,6 +13,7 @@ import { useKibanaContextForPluginProvider } from '../../utils';
 import { DatasetQualityStartDeps } from '../../types';
 import { Header } from './header';
 import { Table } from './table';
+import { SummaryPanel } from './summary_panel/summary_panel';
 
 export interface CreateDatasetQualityArgs {
   core: CoreStart;
@@ -46,6 +47,9 @@ function DatasetQuality() {
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
         <Header />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <SummaryPanel />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <Table />

@@ -83,3 +83,77 @@ export const flyoutIntegrationNameText = i18n.translate(
     defaultMessage: 'Name',
   }
 );
+
+/*
+Summary Panel
+*/
+
+export const summaryPanelLast24hText = i18n.translate(
+  'xpack.datasetQuality.summaryPanelLast24hText',
+  {
+    defaultMessage: 'Last 24h',
+  }
+);
+
+export const summaryPanelQualityText = i18n.translate(
+  'xpack.datasetQuality.summaryPanelQualityText',
+  {
+    defaultMessage: 'Datasets Quality',
+  }
+);
+
+export const summaryPanelQualityTooltipText = i18n.translate(
+  'xpack.datasetQuality.summaryPanelQualityTooltipText',
+  {
+    defaultMessage: 'Quality is based on the percentage of malformed docs in a dataset.',
+  }
+);
+
+export const summaryPanelQualityPoorText = i18n.translate(
+  'xpack.datasetQuality.summaryPanelQualityPoorText',
+  {
+    defaultMessage: 'Poor',
+  }
+);
+
+export const summaryPanelQualityDegradedText = i18n.translate(
+  'xpack.datasetQuality.summaryPanelQualityDegradedText',
+  {
+    defaultMessage: 'Degraded',
+  }
+);
+
+export const summaryPanelQualityGoodText = i18n.translate(
+  'xpack.datasetQuality.summaryPanelQualityGoodText',
+  {
+    defaultMessage: 'Good',
+  }
+);
+
+export const summaryPanelActiveDatasetsText = i18n.translate(
+  'xpack.datasetQuality.summaryPanelActiveDatasetsText',
+  {
+    defaultMessage: 'Active Datasets',
+  }
+);
+
+export const summaryPanelActiveDatasetsTooltipText = i18n.translate(
+  'xpack.datasetQuality.summaryPanelQualityTooltipText',
+  {
+    defaultMessage: 'The number of datasets with activity in the last 24 hours.',
+  }
+);
+
+export const summaryPanelEstimatedDataText = i18n.translate(
+  'xpack.datasetQuality.summaryPanelEstimatedDataText',
+  {
+    defaultMessage: 'Estimated Data',
+  }
+);
+
+export const summaryPanelEstimatedDataTooltipText = i18n.translate(
+  'xpack.datasetQuality.summaryPanelEstimatedDataTooltipText',
+  {
+    defaultMessage: 'The approximate amount of data stored in the last 24 hours.',
+  }
+);

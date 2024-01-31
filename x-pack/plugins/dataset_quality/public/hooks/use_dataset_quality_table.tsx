@@ -39,11 +39,7 @@ export const useDatasetQualityTable = () => {
   const { dataStreamsStatsServiceClient: client } = useDatasetQualityContext();
   const { data = [], loading } = useFetcher(async () => client.getDataStreamsStats(), []);
   const { data: degradedStats = [], loading: loadingDegradedStats } = useFetcher(
-    async () =>
-      client.getDataStreamsDegradedStats({
-        start: defaultTimeRange.from,
-        end: defaultTimeRange.to,
-      }),
+    async () => client.getDataStreamsDegradedStats({}),
     []
   );
 
