@@ -40,8 +40,8 @@ export function toESFormat(customLink: CustomLink): CustomLinkES {
   return { label, url, ...ESFilters };
 }
 
-export function splitFilterValueByComma(filterValue: Filter['value']) {
-  return filterValue
+export function splitFilterValueByComma(searchQuery: Filter['value']) {
+  return searchQuery
     .split(',')
     .map((v) => v.trim())
     .filter((v) => v);
