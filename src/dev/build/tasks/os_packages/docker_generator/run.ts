@@ -36,6 +36,7 @@ export async function runDockerGenerator(
     cloud?: boolean;
     serverless?: boolean;
     dockerBuildDate?: string;
+    fips?: boolean;
   }
 ) {
   let baseImageName = '';
@@ -47,6 +48,7 @@ export async function runDockerGenerator(
   if (flags.ironbank) imageFlavor += '-ironbank';
   if (flags.cloud) imageFlavor += '-cloud';
   if (flags.serverless) imageFlavor += '-serverless';
+  if (flags.fips) imageFlavor += '-fips';
 
   // General docker var config
   const license = 'Elastic License';
