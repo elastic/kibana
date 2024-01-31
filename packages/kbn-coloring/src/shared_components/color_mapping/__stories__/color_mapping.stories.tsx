@@ -81,47 +81,9 @@ export const Default = Template.bind({});
 Default.args = {
   model: {
     ...DEFAULT_COLOR_MAPPING_CONFIG,
-    // colorMode: {
-    //   type: 'gradient',
-    //   steps: [
-    //     {
-    //       type: 'categorical',
-    //       colorIndex: 0,
-    //       paletteId: DEFAULT_COLOR_MAPPING_CONFIG.paletteId,
-    //       touched: false,
-    //     },
-    //     {
-    //       type: 'categorical',
-    //       colorIndex: 1,
-    //       paletteId: DEFAULT_COLOR_MAPPING_CONFIG.paletteId,
-    //       touched: false,
-    //     },
-    //     {
-    //       type: 'categorical',
-    //       colorIndex: 2,
-    //       paletteId: DEFAULT_COLOR_MAPPING_CONFIG.paletteId,
-    //       touched: false,
-    //     },
-    //   ],
-    //   sort: 'asc',
-    // },
+
     colorMode: {
       type: 'categorical',
-      // sort: 'asc',
-      // steps: [
-      //   {
-      //     paletteId: DEFAULT_COLOR_MAPPING_CONFIG.paletteId,
-      //     type: 'categorical',
-      //     colorIndex: 0,
-      //     touched: false,
-      //   },
-      //   {
-      //     paletteId: DEFAULT_COLOR_MAPPING_CONFIG.paletteId,
-      //     type: 'categorical',
-      //     colorIndex: 3,
-      //     touched: false,
-      //   },
-      // ],
     },
     specialAssignments: [
       {
@@ -134,55 +96,7 @@ Default.args = {
         touched: false,
       },
     ],
-    assignments: [
-      // {
-      //   rule: {
-      //     type: 'matchExactly',
-      //     values: ['this is', 'a multi-line combobox that is very long and that will be truncated'],
-      //   },
-      //   color: {
-      //     type: 'cate',
-      //   },
-      //   touched: false,
-      // },
-      // {
-      //   rule: {
-      //     type: 'matchExactly',
-      //     values: ['b', ['double', 'value']],
-      //   },
-      //   color: {
-      //     type: 'gradient',
-      //   },
-      //   touched: false,
-      // },
-      // {
-      //   rule: {
-      //     type: 'matchExactly',
-      //     values: ['c'],
-      //   },
-      //   color: {
-      //     type: 'gradient',
-      //   },
-      //   touched: false,
-      // },
-      // {
-      //   rule: {
-      //     type: 'matchExactly',
-      //     values: [
-      //       'this is',
-      //       'a multi-line wrap',
-      //       'combo box',
-      //       'test combo',
-      //       '3 lines',
-      //       ['double', 'value'],
-      //     ],
-      //   },
-      //   color: {
-      //     type: 'gradient',
-      //   },
-      //   touched: false,
-      // },
-    ],
+    assignments: [],
   },
   isDarkMode: false,
   data: {
