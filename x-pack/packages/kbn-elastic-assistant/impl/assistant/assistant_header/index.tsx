@@ -31,7 +31,7 @@ interface OwnProps {
   docLinks: Omit<DocLinksStart, 'links'>;
   isDisabled: boolean;
   isSettingsModalVisible: boolean;
-  onConversationSelected: (cId: string) => void;
+  onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle?: string }) => void;
   onConversationDeleted: (conversationId: string) => void;
   onToggleShowAnonymizedValues: (e: EuiSwitchEvent) => void;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
@@ -90,7 +90,7 @@ export const AssistantHeader: React.FC<Props> = ({
             selectedConversation={currentConversation}
             onChange={(updatedConversation) => {
               setCurrentConversation(updatedConversation);
-              onConversationSelected(updatedConversation.id);
+              onConversationSelected({ cId: updatedConversation.id });
             }}
             title={title}
           />

@@ -33,7 +33,7 @@ interface Props {
   defaultConnectorId?: string;
   defaultProvider?: OpenAiProviderType;
   selectedConversationId: string | undefined;
-  onConversationSelected: (conversationId: string, title?: string) => void;
+  onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle?: string }) => void;
   onConversationDeleted: (conversationId: string) => void;
   shouldDisableKeyboardShortcut?: () => boolean;
   isDisabled?: boolean;
@@ -114,7 +114,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
           };
           cId = (await createConversation(newConversation))?.id;
         }
-        onConversationSelected(cId ?? DEFAULT_CONVERSATION_TITLE);
+        onConversationSelected({ cId: cId ?? DEFAULT_CONVERSATION_TITLE });
       },
       [
         allSystemPrompts,
@@ -131,7 +131,10 @@ export const ConversationSelector: React.FC<Props> = React.memo(
         onConversationDeleted(cId);
         if (selectedConversationId === cId) {
           const prevConversationId = getPreviousConversationId(conversationIds, cId);
-          onConversationSelected(prevConversationId, conversations[prevConversationId].title);
+          onConversationSelected({
+            cId: prevConversationId,
+            cTitle: conversations[prevConversationId].title,
+          });
         }
       },
       [
@@ -148,7 +151,8 @@ export const ConversationSelector: React.FC<Props> = React.memo(
         if (newOptions.length === 0 || !newOptions?.[0].id) {
           setSelectedOptions([]);
         } else if (conversationOptions.findIndex((o) => o.id === newOptions?.[0].id) !== -1) {
-          await onConversationSelected(newOptions?.[0].id, newOptions?.[0].label);
+          const { id, label } = newOptions?.[0];
+          await onConversationSelected({ cId: id, cTitle: label });
         }
       },
       [conversationOptions, onConversationSelected]
@@ -156,11 +160,11 @@ export const ConversationSelector: React.FC<Props> = React.memo(
 
     const onLeftArrowClick = useCallback(() => {
       const prevId = getPreviousConversationId(conversationIds, selectedConversationId);
-      onConversationSelected(prevId, conversations[prevId].title);
+      onConversationSelected({ cId: prevId, cTitle: conversations[prevId].title });
     }, [conversationIds, selectedConversationId, onConversationSelected, conversations]);
     const onRightArrowClick = useCallback(() => {
       const nextId = getNextConversationId(conversationIds, selectedConversationId);
-      onConversationSelected(nextId, conversations[nextId].title);
+      onConversationSelected({ cId: nextId, cTitle: conversations[nextId].title });
     }, [conversationIds, selectedConversationId, onConversationSelected, conversations]);
 
     // Register keyboard listener for quick conversation switching

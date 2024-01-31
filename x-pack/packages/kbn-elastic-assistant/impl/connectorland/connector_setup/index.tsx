@@ -39,7 +39,7 @@ const SkipEuiText = styled(EuiText)`
 export interface ConnectorSetupProps {
   conversation?: Conversation;
   onSetupComplete?: () => void;
-  onConversationUpdate: (cId: string, cTitle?: string) => Promise<void>;
+  onConversationUpdate: ({ cId, cTitle }: { cId: string; cTitle?: string }) => Promise<void>;
 }
 
 export const useConnectorSetup = ({
@@ -190,7 +190,7 @@ export const useConnectorSetup = ({
       });
 
       if (!isHttpFetchError(updatedConversation)) {
-        onConversationUpdate(updatedConversation.id, updatedConversation.title);
+        onConversationUpdate({ cId: updatedConversation.id, cTitle: updatedConversation.title });
 
         refetchConnectors?.();
         setIsConnectorModalVisible(false);

@@ -4,20 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import type { Conversation } from '@kbn/elastic-assistant';
 import {
   AssistantProvider as ElasticAssistantProvider,
   bulkChangeConversations,
+  mergeBaseWithPersistedConversations,
+  useFetchCurrentUserConversations,
 } from '@kbn/elastic-assistant';
 
+import type { FetchConversationsResponse } from '@kbn/elastic-assistant/impl/assistant/api';
 import { useBasePath, useKibana } from '../common/lib/kibana';
 import { useAssistantTelemetry } from './use_assistant_telemetry';
 import { getComments } from './get_comments';
 import { LOCAL_STORAGE_KEY, augmentMessageCodeBlocks } from './helpers';
-import { useBaseConversations, useConversationStore } from './use_conversation_store';
+import { useBaseConversations } from './use_conversation_store';
 import { DEFAULT_ALLOW, DEFAULT_ALLOW_REPLACEMENT } from './content/anonymization';
 import { PROMPT_CONTEXTS } from './content/prompt_contexts';
 import { BASE_SECURITY_QUICK_PROMPTS } from './content/quick_prompts';
@@ -44,7 +47,16 @@ export const AssistantProvider: React.FC = ({ children }) => {
   const basePath = useBasePath();
 
   const baseConversations = useBaseConversations();
-  const userConversations = useConversationStore();
+  const onFetchedConversations = useCallback(
+    (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
+      mergeBaseWithPersistedConversations({}, conversationsData),
+    []
+  );
+  const {
+    data: conversationsData,
+    isLoading,
+    isError,
+  } = useFetchCurrentUserConversations({ http, onFetch: onFetchedConversations });
   const assistantAvailability = useAssistantAvailability();
   const assistantTelemetry = useAssistantTelemetry();
 
@@ -62,7 +74,10 @@ export const AssistantProvider: React.FC = ({ children }) => {
   useEffect(() => {
     const migrateConversationsFromLocalStorage = async () => {
       if (
-        Object.keys(userConversations).length > 0 &&
+        !isLoading &&
+        !isError &&
+        conversationsData &&
+        Object.keys(conversationsData).length === 0 &&
         conversations &&
         Object.keys(conversations).length > 0
       ) {
@@ -82,7 +97,7 @@ export const AssistantProvider: React.FC = ({ children }) => {
       }
     };
     migrateConversationsFromLocalStorage();
-  }, [conversations, http, storage, userConversations]);
+  }, [conversations, conversationsData, http, isError, isLoading, storage]);
 
   return (
     <ElasticAssistantProvider

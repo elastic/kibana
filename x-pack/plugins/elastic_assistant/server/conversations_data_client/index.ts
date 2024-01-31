@@ -115,7 +115,13 @@ export class AIAssistantConversationsDataClient {
 
   public getConversation = async (id: string): Promise<ConversationResponse | null> => {
     const esClient = await this.options.elasticsearchClientPromise;
-    return getConversation(esClient, this.indexTemplateAndPattern.alias, id);
+    return getConversation({
+      esClient,
+      logger: this.options.logger,
+      conversationIndex: this.indexTemplateAndPattern.alias,
+      id,
+      user: { id: this.currentUser?.profile_uid, name: this.currentUser?.username },
+    });
   };
 
   /**
@@ -126,19 +132,19 @@ export class AIAssistantConversationsDataClient {
    * @returns The conversation updated
    */
   public appendConversationMessages = async (
-    conversation: ConversationResponse,
+    existingConversation: ConversationResponse,
     messages: Message[]
   ): Promise<ConversationResponse | null> => {
     const { currentUser } = this;
     const esClient = await this.options.elasticsearchClientPromise;
-    return appendConversationMessages(
+    return appendConversationMessages({
       esClient,
-      this.options.logger,
-      this.indexTemplateAndPattern.alias,
-      currentUser?.profile_uid ?? '',
-      conversation,
-      messages
-    );
+      logger: this.options.logger,
+      conversationIndex: this.indexTemplateAndPattern.alias,
+      user: { id: currentUser?.profile_uid, name: currentUser?.username },
+      existingConversation,
+      messages,
+    });
   };
 
   public findConversations = async ({
@@ -199,6 +205,7 @@ export class AIAssistantConversationsDataClient {
    * See {@link https://www.elastic.co/guide/en/elasticsearch/reference/current/optimistic-concurrency-control.html}
    * for more information around optimistic concurrency control.
    * @param options
+   * @param options.conversationUpdateProps
    * @param options.id id of the conversation to replace the conversation container data with.
    * @param options.title The new tilet, or "undefined" if this should not be updated.
    * @param options.messages The new messages, or "undefined" if this should not be updated.
@@ -207,7 +214,7 @@ export class AIAssistantConversationsDataClient {
    */
   public updateConversation = async (
     existingConversation: ConversationResponse,
-    updatedProps: ConversationUpdateProps,
+    conversationUpdateProps: ConversationUpdateProps,
     isPatch?: boolean
   ): Promise<ConversationResponse | null> => {
     const esClient = await this.options.elasticsearchClientPromise;
@@ -216,8 +223,9 @@ export class AIAssistantConversationsDataClient {
       logger: this.options.logger,
       conversationIndex: this.indexTemplateAndPattern.alias,
       existingConversation,
-      conversation: updatedProps,
+      conversationUpdateProps,
       isPatch,
+      user: { id: this.currentUser?.profile_uid, name: this.currentUser?.username },
     });
   };
 
@@ -227,7 +235,7 @@ export class AIAssistantConversationsDataClient {
    * @param options.id The id of the conversation to delete
    * @returns The conversation deleted if found, otherwise null
    */
-  public deleteConversation = async (id: string): Promise<void> => {
+  public deleteConversation = async (id: string) => {
     const esClient = await this.options.elasticsearchClientPromise;
     await deleteConversation({
       esClient,

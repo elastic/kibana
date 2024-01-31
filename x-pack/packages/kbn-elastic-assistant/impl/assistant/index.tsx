@@ -31,13 +31,16 @@ import { css } from '@emotion/react';
 
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { merge } from 'lodash';
 import { useChatSend } from './chat_send/use_chat_send';
 import { ChatSend } from './chat_send';
 import { BlockBotCallToAction } from './block_bot/cta';
 import { AssistantHeader } from './assistant_header';
 import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
-import { getDefaultConnector, getBlockBotConversation } from './helpers';
+import {
+  getDefaultConnector,
+  getBlockBotConversation,
+  mergeBaseWithPersistedConversations,
+} from './helpers';
 
 import { useAssistantContext } from '../assistant_context';
 import { ContextPills } from './context_pills';
@@ -108,26 +111,8 @@ const AssistantComponent: React.FC<Props> = ({
   );
 
   const onFetchedConversations = useCallback(
-    (conversationsData: FetchConversationsResponse): Record<string, Conversation> => {
-      const userConversations = (conversationsData?.data ?? []).reduce<
-        Record<string, Conversation>
-      >((transformed, conversation) => {
-        transformed[conversation.id] = conversation;
-        return transformed;
-      }, {});
-      return merge(
-        userConversations,
-        Object.keys(baseConversations)
-          .filter(
-            (baseId) =>
-              (conversationsData?.data ?? []).find((c) => c.title === baseId) === undefined
-          )
-          .reduce<Record<string, Conversation>>((transformed, conversation) => {
-            transformed[conversation] = baseConversations[conversation];
-            return transformed;
-          }, {})
-      );
-    },
+    (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
+      mergeBaseWithPersistedConversations(baseConversations, conversationsData),
     [baseConversations]
   );
   const {
@@ -312,7 +297,7 @@ const AssistantComponent: React.FC<Props> = ({
   );
 
   const handleOnConversationSelected = useCallback(
-    async (cId: string, cTitle?: string) => {
+    async ({ cId, cTitle }: { cId: string; cTitle?: string }) => {
       if (conversations[cId] === undefined && cId) {
         const updatedConv = await refetchResults();
         if (updatedConv) {
@@ -559,6 +544,21 @@ const AssistantComponent: React.FC<Props> = ({
     [assistantTelemetry, selectedConversationId]
   );
 
+  const refetchConversationsState = useCallback(async () => {
+    const refetchedConversations = await refetchResults();
+    if (refetchedConversations && refetchedConversations[selectedConversationId]) {
+      setCurrentConversation(refetchedConversations[selectedConversationId]);
+    } else if (refetchedConversations) {
+      const createdSelectedConversation = Object.values(refetchedConversations).find(
+        (c) => c.title === selectedConversationId
+      );
+      if (createdSelectedConversation) {
+        setCurrentConversation(createdSelectedConversation);
+        setSelectedConversationId(createdSelectedConversation.id);
+      }
+    }
+  }, [refetchResults, selectedConversationId]);
+
   return getWrapper(
     <>
       <EuiModalHeader
@@ -583,20 +583,7 @@ const AssistantComponent: React.FC<Props> = ({
             title={title}
             conversations={conversations}
             onConversationDeleted={handleOnConversationDeleted}
-            refetchConversationsState={async () => {
-              const refetchedConversations = await refetchResults();
-              if (refetchedConversations && refetchedConversations[selectedConversationId]) {
-                setCurrentConversation(refetchedConversations[selectedConversationId]);
-              } else if (refetchedConversations) {
-                const createdSelectedConversation = Object.values(refetchedConversations).find(
-                  (c) => c.title === selectedConversationId
-                );
-                if (createdSelectedConversation) {
-                  setCurrentConversation(createdSelectedConversation);
-                  setSelectedConversationId(createdSelectedConversation.id);
-                }
-              }
-            }}
+            refetchConversationsState={refetchConversationsState}
           />
         )}
 

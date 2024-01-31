@@ -14,11 +14,11 @@ import { ConversationRole } from '../../assistant_context/types';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { WELCOME_CONVERSATION } from './sample_conversations';
 import {
-  appendConversationMessagesApi as _appendConversationMessagesApi,
-  deleteConversationApi,
+  appendConversationMessages as _appendConversationMessagesApi,
+  deleteConversation,
   getConversationById as _getConversationById,
-  updateConversationApi,
-  createConversationApi as _createConversationApi,
+  updateConversation,
+  createConversation as _createConversationApi,
 } from '../api/conversations';
 
 jest.mock('../api/conversations');
@@ -42,7 +42,7 @@ const mockConvo = {
 
 const appendConversationMessagesApi = _appendConversationMessagesApi as jest.Mock;
 const getConversationById = _getConversationById as jest.Mock;
-const createConversationApi = _createConversationApi as jest.Mock;
+const createConversation = _createConversationApi as jest.Mock;
 
 describe('useConversation', () => {
   let httpMock: ReturnType<typeof httpServiceMock.createSetupContract>;
@@ -114,7 +114,7 @@ describe('useConversation', () => {
         ),
       });
       await waitForNextUpdate();
-      createConversationApi.mockResolvedValue(mockConvo);
+      createConversation.mockResolvedValue(mockConvo);
 
       const createResult = await result.current.createConversation({
         id: mockConvo.id,
@@ -138,7 +138,7 @@ describe('useConversation', () => {
 
       await result.current.deleteConversation('new-convo');
 
-      expect(deleteConversationApi).toHaveBeenCalledWith({
+      expect(deleteConversation).toHaveBeenCalledWith({
         http: httpMock,
         id: 'new-convo',
       });
@@ -159,7 +159,7 @@ describe('useConversation', () => {
         apiConfig: mockConvo.apiConfig,
       });
 
-      expect(createConversationApi).toHaveBeenCalledWith({
+      expect(createConversation).toHaveBeenCalledWith({
         http: httpMock,
         conversation: { ...WELCOME_CONVERSATION, apiConfig: mockConvo.apiConfig, id: '' },
       });
@@ -186,7 +186,7 @@ describe('useConversation', () => {
         },
       });
 
-      expect(updateConversationApi).toHaveBeenCalledWith({
+      expect(updateConversation).toHaveBeenCalledWith({
         http: httpMock,
         conversationId: welcomeConvo.id,
         replacements: {

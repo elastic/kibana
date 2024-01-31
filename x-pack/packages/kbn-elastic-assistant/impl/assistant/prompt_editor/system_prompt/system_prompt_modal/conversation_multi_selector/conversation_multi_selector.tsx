@@ -33,7 +33,6 @@ export const ConversationMultiSelector: React.FC<Props> = React.memo(
     const options = useMemo<EuiComboBoxOptionOption[]>(
       () =>
         conversations.map((conversation) => ({
-          // id: conversation.id
           label: conversation.title ?? '',
           'data-test-subj': TEST_IDS.CONVERSATIONS_MULTISELECTOR_OPTION(conversation.id),
         })),

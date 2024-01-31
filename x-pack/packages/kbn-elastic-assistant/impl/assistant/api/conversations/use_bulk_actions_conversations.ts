@@ -69,54 +69,57 @@ export interface ConversationsBulkActions {
   };
 }
 
+const transformCreateActions = (
+  createActions: Record<string, Conversation>,
+  conversationIdsToDelete?: string[]
+) =>
+  Object.keys(createActions).reduce((conversationsToCreate: Conversation[], conversationId) => {
+    if (createActions && !conversationIdsToDelete?.includes(conversationId)) {
+      conversationsToCreate.push(createActions[conversationId]);
+    }
+    return conversationsToCreate;
+  }, []);
+
+const transformUpdateActions = (
+  updateActions: Record<string, ConversationUpdateParams>,
+  conversationIdsToDelete?: string[]
+) =>
+  Object.keys(updateActions).reduce(
+    (conversationsToUpdate: ConversationUpdateParams[], conversationId) => {
+      if (updateActions && !conversationIdsToDelete?.includes(conversationId)) {
+        conversationsToUpdate.push({
+          id: conversationId,
+          ...updateActions[conversationId],
+        });
+      }
+      return conversationsToUpdate;
+    },
+    []
+  );
+
 export const bulkChangeConversations = (
   http: HttpSetup,
   conversationsActions: ConversationsBulkActions
 ) => {
-  const conversationIdsToDelete = conversationsActions.delete?.ids.filter(
-    (cId) => !(conversationsActions.create ?? {})[cId] && !(conversationsActions.update ?? {})[cId]
-  );
+  // transform conversations disctionary to array of Conversations to create
+  // filter marked as deleted
+  const conversationsToCreate = conversationsActions.create
+    ? transformCreateActions(conversationsActions.create, conversationsActions.delete?.ids)
+    : undefined;
+
+  // transform conversations disctionary to array of Conversations to update
+  // filter marked as deleted
+  const conversationsToUpdate = conversationsActions.update
+    ? transformUpdateActions(conversationsActions.update, conversationsActions.delete?.ids)
+    : undefined;
+
   return http.fetch<BulkActionResponse>(ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION, {
     method: 'POST',
     version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
     body: JSON.stringify({
-      update: conversationsActions.update
-        ? Object.keys(conversationsActions.update).reduce(
-            (conversationsToUpdate: ConversationUpdateParams[], conversationId) => {
-              if (
-                conversationsActions.update &&
-                !conversationsActions.delete?.ids.includes(conversationId)
-              ) {
-                conversationsToUpdate.push({
-                  id: conversationId,
-                  ...conversationsActions.update[conversationId],
-                });
-              }
-              return conversationsToUpdate;
-            },
-            []
-          )
-        : undefined,
-      create: conversationsActions.create
-        ? Object.keys(conversationsActions.create).reduce(
-            (conversationsToCreate: Conversation[], conversationId: string) => {
-              if (
-                conversationsActions.create &&
-                !conversationsActions.delete?.ids.includes(conversationId)
-              ) {
-                conversationsToCreate.push(conversationsActions.create[conversationId]);
-              }
-              return conversationsToCreate;
-            },
-            []
-          )
-        : undefined,
-      delete:
-        conversationIdsToDelete && conversationIdsToDelete.length > 0
-          ? {
-              ids: conversationIdsToDelete,
-            }
-          : undefined,
+      update: conversationsToUpdate,
+      create: conversationsToCreate,
+      delete: conversationsActions.delete?.ids,
     }),
   });
 };

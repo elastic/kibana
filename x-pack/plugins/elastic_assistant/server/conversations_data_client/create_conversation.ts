@@ -11,7 +11,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import {
   ConversationCreateProps,
   ConversationResponse,
-  Message,
+  Reader,
   Replacement,
   UUID,
 } from '../schemas/conversations/common_attributes.gen';
@@ -24,8 +24,8 @@ export interface CreateMessageSchema {
   messages?: Array<{
     '@timestamp': string;
     content: string;
-    reader?: string | undefined;
-    replacements?: unknown;
+    reader?: Reader;
+    replacements?: Replacement;
     role: 'user' | 'assistant' | 'system';
     is_error?: boolean;
     presentation?: {
@@ -46,8 +46,8 @@ export interface CreateMessageSchema {
   };
   is_default?: boolean;
   exclude_from_last_conversation_storage?: boolean;
-  replacements?: unknown;
-  user?: {
+  replacements?: Replacement;
+  user: {
     id?: string;
     name?: string;
   };
@@ -81,8 +81,8 @@ export const createConversation = async ({
   });
 
   return {
-    id: response._id,
     ...transform(body),
+    id: response._id,
   };
 };
 
@@ -132,8 +132,8 @@ export const transformToCreateScheme = (
   };
 };
 
-function transform(conversationSchema: CreateMessageSchema): ConversationResponse {
-  const response: ConversationResponse = {
+function transform(conversationSchema: CreateMessageSchema): Omit<ConversationResponse, 'id'> {
+  return {
     timestamp: conversationSchema['@timestamp'],
     createdAt: conversationSchema.created_at,
     user: conversationSchema.user,
@@ -143,7 +143,7 @@ function transform(conversationSchema: CreateMessageSchema): ConversationRespons
       connectorTypeTitle: conversationSchema.api_config?.connector_type_title,
       defaultSystemPromptId: conversationSchema.api_config?.default_system_prompt_id,
       model: conversationSchema.api_config?.model,
-      provider: conversationSchema.api_config?.provider,
+      provider: conversationSchema.api_config?.provider as 'OpenAI' | 'Azure OpenAI' | undefined,
     },
     excludeFromLastConversationStorage: conversationSchema.exclude_from_last_conversation_storage,
     isDefault: conversationSchema.is_default,
@@ -153,16 +153,15 @@ function transform(conversationSchema: CreateMessageSchema): ConversationRespons
       isError: message.is_error,
       presentation: message.presentation,
       reader: message.reader,
-      replacements: message.replacements as Replacement[],
-      role: message.role as Message['role'],
+      replacements: message.replacements as Replacement,
+      role: message.role,
       traceData: {
         traceId: message.trace_data?.trace_id,
         transactionId: message.trace_data?.transaction_id,
       },
     })),
     updatedAt: conversationSchema.updated_at,
-    replacements: conversationSchema.replacements as Replacement[],
+    replacements: conversationSchema.replacements as Replacement,
     namespace: conversationSchema.namespace,
   };
-  return response;
 }

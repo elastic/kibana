@@ -13,11 +13,11 @@ import { Conversation, Message } from '../../assistant_context/types';
 import * as i18n from './translations';
 import { getDefaultSystemPrompt } from './helpers';
 import {
-  appendConversationMessagesApi,
-  createConversationApi,
-  deleteConversationApi,
+  appendConversationMessages,
+  createConversation as createConversationApi,
+  deleteConversation as deleteConversationApi,
   getConversationById,
-  updateConversationApi,
+  updateConversation,
 } from '../api/conversations';
 import { WELCOME_CONVERSATION } from './sample_conversations';
 
@@ -105,7 +105,7 @@ export const useConversation = (): UseConversation => {
       }
       if (prevConversation != null) {
         messages = prevConversation.messages.slice(0, prevConversation.messages.length - 1);
-        await updateConversationApi({
+        await updateConversation({
           http,
           conversationId,
           messages,
@@ -130,7 +130,7 @@ export const useConversation = (): UseConversation => {
         const message = messages[messages.length - 1];
         const updatedMessages = message ? [{ ...message, content }] : [];
 
-        await appendConversationMessagesApi({
+        await appendConversationMessages({
           http,
           conversationId,
           messages: updatedMessages,
@@ -152,7 +152,7 @@ export const useConversation = (): UseConversation => {
         isEnabledRAGAlerts,
       });
 
-      const res = await appendConversationMessagesApi({
+      const res = await appendConversationMessages({
         http,
         conversationId,
         messages: [message],
@@ -181,7 +181,7 @@ export const useConversation = (): UseConversation => {
           ...replacements,
         };
 
-        await updateConversationApi({
+        await updateConversation({
           http,
           conversationId,
           replacements: allReplacements,
@@ -204,7 +204,7 @@ export const useConversation = (): UseConversation => {
         conversation: prevConversation,
       })?.id;
 
-      await updateConversationApi({
+      await updateConversation({
         http,
         conversationId,
         apiConfig: {
@@ -286,7 +286,7 @@ export const useConversation = (): UseConversation => {
           },
         });
       } else {
-        return updateConversationApi({
+        return updateConversation({
           http,
           conversationId: conversation.id,
           apiConfig,

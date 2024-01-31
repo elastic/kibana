@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
 } from '@kbn/elastic-assistant-common';
 import { ElasticAssistantPluginRouter } from '../../types';
-import { ConversationResponse } from '../../schemas/conversations/common_attributes.gen';
 import { buildResponse } from '../utils';
 import { DeleteConversationRequestParams } from '../../schemas/conversations/crud_conversation_route.gen';
 import { buildRouteValidationWithZod } from '../route_validation';
@@ -35,7 +33,7 @@ export const deleteConversationRoute = (router: ElasticAssistantPluginRouter) =>
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<ConversationResponse>> => {
+      async (context, request, response) => {
         const assistantResponse = buildResponse(response);
         try {
           const { id } = request.params;
@@ -52,7 +50,7 @@ export const deleteConversationRoute = (router: ElasticAssistantPluginRouter) =>
           }
           await dataClient?.deleteConversation(id);
 
-          return response.ok({ body: {} });
+          return response.ok();
         } catch (err) {
           const error = transformError(err);
           return assistantResponse.error({

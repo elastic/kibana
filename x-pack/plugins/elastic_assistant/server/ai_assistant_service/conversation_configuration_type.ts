@@ -75,7 +75,7 @@ export const conversationsFieldMap: FieldMap = {
     required: false,
   },
   'messages.reader': {
-    type: 'keyword',
+    type: 'object',
     array: false,
     required: false,
   },

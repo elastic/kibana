@@ -54,6 +54,10 @@ components:
       type: object
       additionalProperties: true
 
+    Reader:
+      type: object
+      additionalProperties: true
+
     Message:
       type: object
       description: AI assistant conversation message.
@@ -66,12 +70,10 @@ components:
           type: string
           description: Message content.
         reader:
-          type: string
+          $ref: '#/components/schemas/Reader'
           description: Message content.
         replacements:
-          type: array
-          items:
-            $ref: '#/components/schemas/Replacement'
+          $ref: '#/components/schemas/Replacement'
         role:
           type: string
           description: Message role.
@@ -136,6 +138,13 @@ components:
 
     ConversationResponse:
       type: object
+      required:
+        - id
+        - title
+        - createdAt
+        - user
+        - namespace
+        - apiConfig
       properties:
         id:
           oneOf:
@@ -153,9 +162,7 @@ components:
           description: The last time conversation was updated.
           type: string
         replacements:
-          type: array
-          items:
-            $ref: '#/components/schemas/Replacement'
+          $ref: '#/components/schemas/Replacement'
         user:
           $ref: '#/components/schemas/User'
         messages:
@@ -200,9 +207,7 @@ components:
           description: excludeFromLastConversationStorage.
           type: boolean
         replacements:
-          type: array
-          items:
-            $ref: '#/components/schemas/Replacement'
+          $ref: '#/components/schemas/Replacement'
 
     ConversationCreateProps:
       type: object
@@ -227,9 +232,7 @@ components:
           description: excludeFromLastConversationStorage.
           type: boolean
         replacements:
-          type: array
-          items:
-            $ref: '#/components/schemas/Replacement'
+          $ref: '#/components/schemas/Replacement'
     
     ConversationMessageCreateProps:
       type: object

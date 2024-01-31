@@ -79,6 +79,9 @@ export const TraceData = z.object({
 export type Replacement = z.infer<typeof Replacement>;
 export const Replacement = z.object({}).catchall(z.unknown());
 
+export type Reader = z.infer<typeof Reader>;
+export const Reader = z.object({}).catchall(z.unknown());
+
 /**
  * AI assistant conversation message.
  */
@@ -91,8 +94,8 @@ export const Message = z.object({
   /**
    * Message content.
    */
-  reader: z.string().optional(),
-  replacements: z.array(Replacement).optional(),
+  reader: Reader.optional(),
+  replacements: Replacement.optional(),
   /**
    * Message role.
    */
@@ -152,11 +155,11 @@ export const ErrorSchema = z
 
 export type ConversationResponse = z.infer<typeof ConversationResponse>;
 export const ConversationResponse = z.object({
-  id: z.union([UUID, NonEmptyString]).optional(),
+  id: z.union([UUID, NonEmptyString]),
   /**
    * The conversation title.
    */
-  title: z.string().optional(),
+  title: z.string(),
   timestamp: NonEmptyString.optional(),
   /**
    * The last time conversation was updated.
@@ -165,9 +168,9 @@ export const ConversationResponse = z.object({
   /**
    * The last time conversation was updated.
    */
-  createdAt: z.string().optional(),
-  replacements: z.array(Replacement).optional(),
-  user: User.optional(),
+  createdAt: z.string(),
+  replacements: Replacement.optional(),
+  user: User,
   /**
    * The conversation messages.
    */
@@ -175,7 +178,7 @@ export const ConversationResponse = z.object({
   /**
    * LLM API configuration.
    */
-  apiConfig: ApiConfig.optional(),
+  apiConfig: ApiConfig,
   /**
    * Is default conversation.
    */
@@ -187,7 +190,7 @@ export const ConversationResponse = z.object({
   /**
    * Kibana space
    */
-  namespace: z.string().optional(),
+  namespace: z.string(),
 });
 
 export type ConversationUpdateProps = z.infer<typeof ConversationUpdateProps>;
@@ -209,7 +212,7 @@ export const ConversationUpdateProps = z.object({
    * excludeFromLastConversationStorage.
    */
   excludeFromLastConversationStorage: z.boolean().optional(),
-  replacements: z.array(Replacement).optional(),
+  replacements: Replacement.optional(),
 });
 
 export type ConversationCreateProps = z.infer<typeof ConversationCreateProps>;
@@ -234,7 +237,7 @@ export const ConversationCreateProps = z.object({
    * excludeFromLastConversationStorage.
    */
   excludeFromLastConversationStorage: z.boolean().optional(),
-  replacements: z.array(Replacement).optional(),
+  replacements: Replacement.optional(),
 });
 
 export type ConversationMessageCreateProps = z.infer<typeof ConversationMessageCreateProps>;

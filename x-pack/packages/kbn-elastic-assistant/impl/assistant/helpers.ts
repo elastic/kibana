@@ -6,7 +6,8 @@
  */
 
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
-import { FetchConnectorExecuteResponse } from './api';
+import { merge } from 'lodash/fp';
+import { FetchConnectorExecuteResponse, FetchConversationsResponse } from './api';
 import { Conversation } from '../..';
 import type { Message } from '../assistant_context/types';
 import { enterpriseMessaging, WELCOME_CONVERSATION } from './use_conversation/sample_conversations';
@@ -32,6 +33,30 @@ export const getMessageFromRawResponse = (rawResponse: FetchConnectorExecuteResp
       isError: true,
     };
   }
+};
+
+export const mergeBaseWithPersistedConversations = (
+  baseConversations: Record<string, Conversation>,
+  conversationsData: FetchConversationsResponse
+): Record<string, Conversation> => {
+  const userConversations = (conversationsData?.data ?? []).reduce<Record<string, Conversation>>(
+    (transformed, conversation) => {
+      transformed[conversation.id] = conversation;
+      return transformed;
+    },
+    {}
+  );
+  return merge(
+    userConversations,
+    Object.keys(baseConversations)
+      .filter(
+        (baseId) => (conversationsData?.data ?? []).find((c) => c.title === baseId) === undefined
+      )
+      .reduce<Record<string, Conversation>>((transformed, conversation) => {
+        transformed[conversation] = baseConversations[conversation];
+        return transformed;
+      }, {})
+  );
 };
 
 export const getBlockBotConversation = (

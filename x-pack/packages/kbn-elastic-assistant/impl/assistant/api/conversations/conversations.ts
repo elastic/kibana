@@ -64,7 +64,7 @@ export interface PostConversationParams {
  *
  * @returns {Promise<PostConversationResponse | IHttpFetchError>}
  */
-export const createConversationApi = async ({
+export const createConversation = async ({
   http,
   conversation,
   signal,
@@ -102,7 +102,7 @@ export interface DeleteConversationResponse {
  *
  * @returns {Promise<DeleteConversationResponse | IHttpFetchError>}
  */
-export const deleteConversationApi = async ({
+export const deleteConversation = async ({
   http,
   id,
   signal,
@@ -146,7 +146,7 @@ export interface PutConversationMessageParams {
  *
  * @returns {Promise<Conversation | IHttpFetchError>}
  */
-export const updateConversationApi = async ({
+export const updateConversation = async ({
   http,
   title,
   conversationId,
@@ -188,7 +188,7 @@ export const updateConversationApi = async ({
  *
  * @returns {Promise<Conversation | IHttpFetchError>}
  */
-export const appendConversationMessagesApi = async ({
+export const appendConversationMessages = async ({
   http,
   conversationId,
   messages,

@@ -14,14 +14,23 @@ import {
 } from '../schemas/conversations/common_attributes.gen';
 import { getConversation } from './get_conversation';
 
-export const appendConversationMessages = async (
-  esClient: ElasticsearchClient,
-  logger: Logger,
-  conversationIndex: string,
-  userId: UUID,
-  existingConversation: ConversationResponse,
-  messages: Message[]
-): Promise<ConversationResponse | null> => {
+export interface AppendConversationMessagesParams {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  conversationIndex: string;
+  user: { id?: UUID; name?: string };
+  existingConversation: ConversationResponse;
+  messages: Message[];
+}
+
+export const appendConversationMessages = async ({
+  esClient,
+  logger,
+  conversationIndex,
+  user,
+  existingConversation,
+  messages,
+}: AppendConversationMessagesParams): Promise<ConversationResponse | null> => {
   const updatedAt = new Date().toISOString();
 
   const params = transformToUpdateScheme(updatedAt, [
@@ -71,18 +80,21 @@ export const appendConversationMessages = async (
       );
       return null;
     }
+
+    const updatedConversation = await getConversation({
+      esClient,
+      conversationIndex,
+      id: existingConversation.id,
+      logger,
+      user,
+    });
+    return updatedConversation;
   } catch (err) {
     logger.warn(
       `Error appending conversation messages: ${err} for conversation by ID: ${existingConversation.id}`
     );
     throw err;
   }
-  const updatedConversation = await getConversation(
-    esClient,
-    conversationIndex,
-    existingConversation.id ?? ''
-  );
-  return updatedConversation;
 };
 
 export const transformToUpdateScheme = (updatedAt: string, messages: Message[]) => {

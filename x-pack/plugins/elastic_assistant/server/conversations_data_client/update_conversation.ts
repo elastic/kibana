@@ -8,7 +8,10 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   ConversationResponse,
+  Replacement,
+  Reader,
   ConversationUpdateProps,
+  UUID,
 } from '../schemas/conversations/common_attributes.gen';
 import { getConversation } from './get_conversation';
 
@@ -18,8 +21,8 @@ export interface UpdateConversationSchema {
   messages?: Array<{
     '@timestamp': string;
     content: string;
-    reader?: string | undefined;
-    replacements?: unknown;
+    reader?: Reader;
+    replacements?: Replacement;
     role: 'user' | 'assistant' | 'system';
     is_error?: boolean;
     presentation?: {
@@ -39,16 +42,17 @@ export interface UpdateConversationSchema {
     model?: string;
   };
   exclude_from_last_conversation_storage?: boolean;
-  replacements?: unknown;
+  replacements?: Replacement;
   updated_at?: string;
 }
 
 export interface UpdateConversationParams {
   esClient: ElasticsearchClient;
   logger: Logger;
+  user: { id?: UUID; name?: string };
   conversationIndex: string;
   existingConversation: ConversationResponse;
-  conversation: ConversationUpdateProps;
+  conversationUpdateProps: ConversationUpdateProps;
   isPatch?: boolean;
 }
 
@@ -57,11 +61,12 @@ export const updateConversation = async ({
   logger,
   conversationIndex,
   existingConversation,
-  conversation,
+  conversationUpdateProps,
   isPatch,
+  user,
 }: UpdateConversationParams): Promise<ConversationResponse | null> => {
   const updatedAt = new Date().toISOString();
-  const params = transformToUpdateScheme(updatedAt, conversation);
+  const params = transformToUpdateScheme(updatedAt, conversationUpdateProps);
 
   try {
     const response = await esClient.updateByQuery({
@@ -69,7 +74,7 @@ export const updateConversation = async ({
       index: conversationIndex,
       query: {
         ids: {
-          values: [existingConversation.id ?? ''],
+          values: [existingConversation.id],
         },
       },
       refresh: true,
@@ -140,16 +145,19 @@ export const updateConversation = async ({
     if (!response.updated && response.updated === 0) {
       throw Error('No conversation has been updated');
     }
+
+    const updatedConversation = await getConversation({
+      esClient,
+      conversationIndex,
+      id: existingConversation.id,
+      logger,
+      user,
+    });
+    return updatedConversation;
   } catch (err) {
     logger.warn(`Error updating conversation: ${err} by ID: ${existingConversation.id}`);
     throw err;
   }
-  const updatedConversation = await getConversation(
-    esClient,
-    conversationIndex,
-    existingConversation.id ?? ''
-  );
-  return updatedConversation;
 };
 
 export const transformToUpdateScheme = (

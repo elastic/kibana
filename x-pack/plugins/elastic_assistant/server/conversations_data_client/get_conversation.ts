@@ -5,16 +5,24 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import { ConversationResponse } from '../schemas/conversations/common_attributes.gen';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { ConversationResponse, UUID } from '../schemas/conversations/common_attributes.gen';
 import { SearchEsConversationSchema } from './types';
 import { transformESToConversations } from './transforms';
 
-export const getConversation = async (
-  esClient: ElasticsearchClient,
-  conversationIndex: string,
-  id: string
-): Promise<ConversationResponse | null> => {
+export interface GetConversationParams {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  conversationIndex: string;
+  id: string;
+  user: { id?: UUID; name?: string };
+}
+
+export const getConversation = async ({
+  esClient,
+  conversationIndex,
+  id,
+}: GetConversationParams): Promise<ConversationResponse | null> => {
   const response = await esClient.search<SearchEsConversationSchema>({
     body: {
       query: {

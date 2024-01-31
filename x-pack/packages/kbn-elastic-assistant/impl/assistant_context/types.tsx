@@ -65,7 +65,8 @@ export interface Conversation {
   id: string;
   title: string;
   messages: Message[];
-  updatedAt?: string;
+  updatedAt?: Date;
+  createdAt?: Date;
   replacements?: Record<string, string>;
   isDefault?: boolean;
   excludeFromLastConversationStorage?: boolean;

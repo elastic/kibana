@@ -46,11 +46,10 @@ export const createConversationRoute = (router: ElasticAssistantPluginRouter): v
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
           const currentUser = ctx.elasticAssistant.getCurrentUser();
 
-          const additionalFilter = `title:${request.body.title}`;
           const result = await dataClient?.findConversations({
             perPage: 100,
             page: 1,
-            filter: `user.id:${currentUser?.profile_uid}${additionalFilter}`,
+            filter: `user.id:${currentUser?.profile_uid} AND title:${request.body.title}`,
             fields: ['title'],
           });
           if (result?.data != null && result.data.length > 0) {

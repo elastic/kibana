@@ -65,7 +65,7 @@ interface Props {
   ) => void;
   onSave: () => Promise<void>;
   selectedConversation: Conversation;
-  onConversationSelected: (cId: string) => void;
+  onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle?: string }) => void;
   conversations: Record<string, Conversation>;
 }
 
@@ -150,7 +150,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
         conversationSettings[defaultSelectedConversation.id] == null;
       const newSelectedConversationId: string | undefined = Object.keys(conversationSettings)[0];
       if (isSelectedConversationDeleted && newSelectedConversationId != null) {
-        onConversationSelected(newSelectedConversationId);
+        onConversationSelected({ cId: newSelectedConversationId });
       }
       await saveSettings();
       await onSave();
