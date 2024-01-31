@@ -16,6 +16,7 @@ import {
   SavedObjectReference,
   Logger,
 } from '@kbn/core/server';
+import type { ObjectType } from '@kbn/config-schema';
 import { ActionTypeRegistry } from './action_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { ActionsClient } from './actions_client';
@@ -156,6 +157,12 @@ export interface ActionType<
   getKibanaPrivileges?: (args?: { params?: Params }) => string[];
   renderParameterTemplates?: RenderParameterTemplates<Params>;
   executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
+  schemas?: {
+    params?: {
+      type: 'config-schema';
+      schema: ObjectType;
+    };
+  };
 }
 
 export interface RawAction extends Record<string, unknown> {

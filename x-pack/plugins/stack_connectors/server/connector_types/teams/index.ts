@@ -80,6 +80,12 @@ export function getConnectorType(): TeamsConnectorType {
         schema: ParamsSchema,
       },
     },
+    schemas: {
+      params: {
+        type: 'config-schema',
+        schema: schema.object({}, { defaultValue: {} }),
+      },
+    },
     executor: teamsExecutor,
   };
 }

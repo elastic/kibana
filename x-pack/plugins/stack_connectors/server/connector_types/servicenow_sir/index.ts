@@ -91,6 +91,12 @@ export function getServiceNowSIRConnectorType(): ServiceNowConnectorType<
         schema: ExecutorParamsSchemaSIR,
       },
     },
+    schemas: {
+      params: {
+        type: 'config-schema',
+        schema: ExternalIncidentServiceConfigurationSchema,
+      },
+    },
     executor: curry(executor)({
       actionTypeId: ServiceNowSIRConnectorTypeId,
       createService: createExternalService,

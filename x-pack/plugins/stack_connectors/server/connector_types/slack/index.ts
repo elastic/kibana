@@ -88,6 +88,12 @@ export function getConnectorType({
         schema: ParamsSchema,
       },
     },
+    schemas: {
+      params: {
+        type: 'config-schema',
+        schema: schema.object({}, { defaultValue: {} }),
+      },
+    },
     renderParameterTemplates,
     executor,
   };

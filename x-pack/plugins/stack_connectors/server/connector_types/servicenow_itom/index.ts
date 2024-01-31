@@ -77,6 +77,12 @@ export function getServiceNowITOMConnectorType(): ServiceNowConnectorType<
         schema: ExecutorParamsSchemaITOM,
       },
     },
+    schemas: {
+      params: {
+        type: 'config-schema',
+        schema: ExternalIncidentServiceConfigurationBaseSchema,
+      },
+    },
     executor: curry(executorITOM)({
       actionTypeId: ServiceNowITOMConnectorTypeId,
       createService: createExternalService,

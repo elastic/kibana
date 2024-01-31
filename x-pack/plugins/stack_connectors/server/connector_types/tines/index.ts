@@ -25,6 +25,12 @@ export const getTinesConnectorType = (): SubActionConnectorType<TinesConfig, Tin
     config: TinesConfigSchema,
     secrets: TinesSecretsSchema,
   },
+  schemas: {
+    params: {
+      type: 'config-schema',
+      schema: TinesConfigSchema,
+    },
+  },
   validators: [{ type: ValidatorType.CONFIG, validator: urlAllowListValidator('url') }],
   supportedFeatureIds: [SecurityConnectorFeatureId],
   minimumLicenseRequired: 'gold' as const,
