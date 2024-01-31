@@ -9,7 +9,6 @@ import { CustomFieldTypes } from '../../../common/types/domain';
 import {
   validateCustomFieldTypesInRequest,
   validateOptionalCustomFieldsInRequest,
-  validateRequiredCustomFieldsInRequest,
 } from './validators';
 
 describe('validators', () => {
@@ -71,61 +70,6 @@ describe('validators', () => {
           originalCustomFields: [],
         })
       ).not.toThrow();
-    });
-  });
-
-  describe('validateRequiredCustomFieldsInRequest', () => {
-    it('does not throw an error for not required custom fields', () => {
-      expect(() =>
-        validateRequiredCustomFieldsInRequest({
-          requestCustomFields: [
-            { key: '1', required: false, label: 'label 1' },
-            { key: '2', required: false, label: 'label 2' },
-          ],
-        })
-      ).not.toThrow();
-    });
-
-    it('does not throw an error for required custom fields with default values', () => {
-      expect(() =>
-        validateRequiredCustomFieldsInRequest({
-          requestCustomFields: [
-            { key: '1', required: true, defaultValue: false, label: 'label 1' },
-            { key: '2', required: true, defaultValue: 'foobar', label: 'label 2' },
-          ],
-        })
-      ).not.toThrow();
-    });
-
-    it('does not throw an error for other falsy defaultValues (0)', () => {
-      expect(() =>
-        validateRequiredCustomFieldsInRequest({
-          // @ts-ignore intended
-          requestCustomFields: [{ key: '1', required: true, defaultValue: 0 }],
-        })
-      ).not.toThrow();
-    });
-
-    it('does not throw an error for other falsy defaultValues (empty string)', () => {
-      expect(() =>
-        validateRequiredCustomFieldsInRequest({
-          requestCustomFields: [{ key: '1', required: true, defaultValue: '', label: 'label' }],
-        })
-      ).not.toThrow();
-    });
-
-    it('throws an error with the keys of required customFields missing a default value', () => {
-      expect(() =>
-        validateRequiredCustomFieldsInRequest({
-          requestCustomFields: [
-            { key: '1', required: true, defaultValue: null, label: 'label 1' },
-            { key: '2', required: true, label: 'label 2' },
-            { key: '3', required: false, label: 'label 3' },
-          ],
-        })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"The following required custom fields are missing the default value: \\"label 1\\", \\"label 2\\""`
-      );
     });
   });
 

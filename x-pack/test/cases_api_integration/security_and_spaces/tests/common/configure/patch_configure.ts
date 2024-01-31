@@ -60,7 +60,7 @@ export default ({ getService }: FtrProviderContext): void => {
           key: 'text_field',
           label: '#1',
           type: CustomFieldTypes.TEXT,
-          required: false,
+          required: true,
         },
         {
           key: 'toggle_field',

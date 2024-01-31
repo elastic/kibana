@@ -14,6 +14,7 @@ import { schema } from './schema';
 import { FormFields } from './form_fields';
 import type { CustomFieldConfiguration } from '../../../common/types/domain';
 import { CustomFieldTypes } from '../../../common/types/domain';
+import { customFieldSerializer } from './utils';
 
 export interface CustomFieldFormState {
   isValid: boolean | undefined;
@@ -37,6 +38,7 @@ const FormComponent: React.FC<Props> = ({ onChange, initialValue }) => {
     },
     options: { stripEmptyFields: false },
     schema,
+    serializer: customFieldSerializer,
   });
 
   const { submit, isValid, isSubmitting } = form;

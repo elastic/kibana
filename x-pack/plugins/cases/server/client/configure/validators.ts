@@ -40,43 +40,6 @@ export const validateCustomFieldTypesInRequest = ({
 };
 
 /**
- * Throws an error if any required custom field is missing the default value.
- */
-export const validateRequiredCustomFieldsInRequest = ({
-  requestCustomFields,
-}: {
-  requestCustomFields?: Array<{
-    key: string;
-    required: boolean;
-    defaultValue?: string | boolean | null;
-    label: string;
-  }>;
-}) => {
-  if (!Array.isArray(requestCustomFields)) {
-    return;
-  }
-
-  const invalidFields: string[] = [];
-
-  requestCustomFields.forEach((requestField) => {
-    if (
-      requestField.required &&
-      (requestField.defaultValue === undefined || requestField.defaultValue === null)
-    ) {
-      invalidFields.push(`"${requestField.label}"`);
-    }
-  });
-
-  if (invalidFields.length > 0) {
-    throw Boom.badRequest(
-      `The following required custom fields are missing the default value: ${invalidFields.join(
-        ', '
-      )}`
-    );
-  }
-};
-
-/**
  * Throws an error if any optional custom field defines a default value.
  */
 export const validateOptionalCustomFieldsInRequest = ({

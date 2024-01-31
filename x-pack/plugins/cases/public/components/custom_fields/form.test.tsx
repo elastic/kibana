@@ -94,6 +94,86 @@ describe('CustomFieldsForm ', () => {
     });
   });
 
+  it('serializes the data correctly if required is selected and the text default value is not filled', async () => {
+    let formState: CustomFieldFormState;
+
+    const onChangeState = (state: CustomFieldFormState) => (formState = state);
+
+    appMockRender.render(<CustomFieldsForm onChange={onChangeState} initialValue={null} />);
+
+    await waitFor(() => {
+      expect(formState).not.toBeUndefined();
+    });
+
+    userEvent.paste(await screen.findByTestId('custom-field-label-input'), 'Summary');
+    userEvent.click(await screen.findByTestId('text-custom-field-required'));
+
+    await act(async () => {
+      const { data } = await formState!.submit();
+
+      expect(data).toEqual({
+        key: expect.anything(),
+        label: 'Summary',
+        required: true,
+        type: 'text',
+      });
+    });
+  });
+
+  it('serializes the data correctly if required is selected and the text default value is an empty string', async () => {
+    let formState: CustomFieldFormState;
+
+    const onChangeState = (state: CustomFieldFormState) => (formState = state);
+
+    appMockRender.render(<CustomFieldsForm onChange={onChangeState} initialValue={null} />);
+
+    await waitFor(() => {
+      expect(formState).not.toBeUndefined();
+    });
+
+    userEvent.paste(await screen.findByTestId('custom-field-label-input'), 'Summary');
+    userEvent.click(await screen.findByTestId('text-custom-field-required'));
+    userEvent.paste(await screen.findByTestId('text-custom-field-default-value'), ' ');
+
+    await act(async () => {
+      const { data } = await formState!.submit();
+
+      expect(data).toEqual({
+        key: expect.anything(),
+        label: 'Summary',
+        required: true,
+        type: 'text',
+      });
+    });
+  });
+
+  it('serializes the data correctly if the initial default value is null', async () => {
+    let formState: CustomFieldFormState;
+
+    const onChangeState = (state: CustomFieldFormState) => (formState = state);
+
+    appMockRender.render(<CustomFieldsForm onChange={onChangeState} initialValue={null} />);
+
+    await waitFor(() => {
+      expect(formState).not.toBeUndefined();
+    });
+
+    userEvent.paste(await screen.findByTestId('custom-field-label-input'), 'Summary');
+    userEvent.click(await screen.findByTestId('text-custom-field-required'));
+    userEvent.paste(await screen.findByTestId('text-custom-field-default-value'), ' ');
+
+    await act(async () => {
+      const { data } = await formState!.submit();
+
+      expect(data).toEqual({
+        key: expect.anything(),
+        label: 'Summary',
+        required: true,
+        type: 'text',
+      });
+    });
+  });
+
   it('serializes the data correctly if required is not selected', async () => {
     let formState: CustomFieldFormState;
 

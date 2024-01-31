@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { isEmptyString } from '@kbn/es-ui-shared-plugin/static/validators/string';
+import type { CustomFieldConfiguration } from '../../../common/types/domain';
+
 export const addOrReplaceCustomField = <T extends { key: string }>(
   customFields: T[],
   customFieldToAdd: T
@@ -24,4 +27,18 @@ export const addOrReplaceCustomField = <T extends { key: string }>(
 
     return customFieldToAdd;
   });
+};
+
+export const customFieldSerializer = (
+  field: CustomFieldConfiguration
+): CustomFieldConfiguration => {
+  const { defaultValue, ...otherProperties } = field;
+
+  return {
+    ...otherProperties,
+    ...(!isEmptyString(String(defaultValue)) &&
+      defaultValue !== undefined && {
+        defaultValue,
+      }),
+  } as CustomFieldConfiguration;
 };
