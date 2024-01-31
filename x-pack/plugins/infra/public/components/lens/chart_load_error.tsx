@@ -7,10 +7,9 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 
-export const ChartLoadError = () => {
+export const ChartLoadError = ({ error }: { error: Error }) => {
   return (
     <EuiFlexGroup
       css={css`
@@ -27,10 +26,7 @@ export const ChartLoadError = () => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="s" textAlign="center">
-          <FormattedMessage
-            id="xpack.infra.errorOnLoadingLensDependencies"
-            defaultMessage="There was an error trying to load Lens Plugin."
-          />
+          {error.message}
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>

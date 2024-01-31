@@ -7,6 +7,7 @@
  */
 
 import type { monaco } from '../../../../monaco_imports';
+import { AutocompleteCommandDefinition } from '../autocomplete/types';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { builtinFunctions } from '../definitions/builtin';
 import { commandDefinitions } from '../definitions/commands';
@@ -91,6 +92,23 @@ export function isIncompleteItem(arg: ESQLAstItem): boolean {
   return !arg || (!Array.isArray(arg) && arg.incomplete);
 }
 
+export function isMathFunction(char: string) {
+  // compare last char for all math functions
+  // limit only to 2 chars operators
+  return builtinFunctions
+    .filter(({ name }) => name.length < 3)
+    .map(({ name }) => name[name.length - 1])
+    .some((op) => char === op);
+}
+
+export function isComma(char: string) {
+  return char === ',';
+}
+
+export function isSourceCommand({ label }: AutocompleteCommandDefinition) {
+  return ['from', 'row', 'show'].includes(String(label));
+}
+
 // From Monaco position to linear offset
 export function monacoPositionToOffset(expression: string, position: monaco.Position): number {
   const lines = expression.split(/\n/);
@@ -127,7 +145,8 @@ type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';
 
 export function isSupportedFunction(
   name: string,
-  parentCommand?: string
+  parentCommand?: string,
+  option?: string
 ): { supported: boolean; reason: ReasonTypes | undefined } {
   if (!parentCommand) {
     return {
@@ -136,7 +155,11 @@ export function isSupportedFunction(
     };
   }
   const fn = buildFunctionLookup().get(name);
-  const isSupported = Boolean(fn?.supportedCommands.includes(parentCommand));
+  const isSupported = Boolean(
+    option == null
+      ? fn?.supportedCommands.includes(parentCommand)
+      : fn?.supportedOptions?.includes(option)
+  );
   return {
     supported: isSupported,
     reason: isSupported ? undefined : fn ? 'unsupportedFunction' : 'unknownFunction',

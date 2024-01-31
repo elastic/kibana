@@ -1841,7 +1841,15 @@
             "label": "isEuiSwitchChecked",
             "description": [],
             "signature": [
-              "(selector: string) => Promise<boolean>"
+              "(selector: string | ",
+              {
+                "pluginId": "@kbn/ftr-common-functional-ui-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                "section": "def-common.WebElementWrapper",
+                "text": "WebElementWrapper"
+              },
+              ") => Promise<boolean>"
             ],
             "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
             "deprecated": false,
@@ -1850,12 +1858,19 @@
               {
                 "parentPluginId": "@kbn/ftr-common-functional-ui-services",
                 "id": "def-common.TestSubjects.isEuiSwitchChecked.$1",
-                "type": "string",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "selector",
                 "description": [],
                 "signature": [
-                  "string"
+                  "string | ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.WebElementWrapper",
+                    "text": "WebElementWrapper"
+                  }
                 ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
