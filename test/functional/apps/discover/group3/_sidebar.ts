@@ -100,7 +100,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.refresh();
 
         await PageObjects.discover.selectTextBaseLang();
-        await monacoEditor.setCodeEditorValue('from logstash-* | limit 100 | sort @timestamp');
+        await monacoEditor.setCodeEditorValue('from logstash-* | limit 10 | sort @timestamp ');
+        await testSubjects.click('querySubmitButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
@@ -114,7 +115,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.refresh();
 
         await PageObjects.discover.selectTextBaseLang();
-        await monacoEditor.setCodeEditorValue('from logstash-* | limit 100 | sort @timestamp');
+        await monacoEditor.setCodeEditorValue('from logstash-* | limit 10 | sort @timestamp ');
+        await testSubjects.click('querySubmitButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         await PageObjects.unifiedFieldList.openSidebarFieldFilter();
@@ -426,7 +429,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         await PageObjects.discover.selectTextBaseLang();
-        await monacoEditor.setCodeEditorValue('from logstash-* | limit 100 | sort @timestamp');
+        await monacoEditor.setCodeEditorValue('from logstash-* | limit 10 | sort @timestamp ');
+        await testSubjects.click('querySubmitButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
