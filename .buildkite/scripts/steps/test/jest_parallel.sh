@@ -3,7 +3,7 @@
 set -euo pipefail
 
 source "$(dirname "$0")/../../common/util.sh"
-export JOB=${BUILDKITE_PARALLEL_JOB:-0}
+export JOB=0
 
 # a jest failure will result in the script returning an exit code of 10
 exitCode=0
