@@ -594,4 +594,34 @@ queue:
       });
     });
   });
+
+  describe('Outputs List', () => {
+    beforeEach(() => {
+      cy.intercept('/api/fleet/outputs', {
+        items: [
+          {
+            id: 'fleet-default-output',
+            name: 'default',
+            type: 'elasticsearch',
+            is_default: true,
+            is_default_monitoring: true,
+          },
+          {
+            id: 'internal-fleet-output',
+            name: 'internal output',
+            type: 'elasticsearch',
+            is_default: false,
+            is_default_monitoring: false,
+            is_internal: true,
+          },
+        ],
+      });
+
+      cy.visit('/app/fleet/settings');
+    });
+
+    it('should not display internal outputs', () => {
+      cy.getBySel(SETTINGS_OUTPUTS.TABLE).should('not.contain', 'internal output');
+    });
+  });
 });

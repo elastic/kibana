@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-import { Subject } from 'rxjs';
+import { CommonObservabilityDatasetQualityContext } from './types';
 
-export const dispatcherTimelinePersistQueue = new Subject();
+export const DEFAULT_CONTEXT: CommonObservabilityDatasetQualityContext = {
+  initialDatasetQualityState: {},
+};
