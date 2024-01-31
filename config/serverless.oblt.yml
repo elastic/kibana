@@ -63,10 +63,8 @@ xpack.fleet.internal.registry.excludePackages: [
     'profiler_agent',
   ]
 
-## Required for force installation of APM Package
+## Required for force installation of integration packages
 xpack.fleet.packages:
-  - name: apm
-    version: latest
   # fleet_server package installed to publish agent metrics
   - name: fleet_server
     version: latest
@@ -86,3 +84,6 @@ xpack.ml.ad.enabled: true
 xpack.ml.dfa.enabled: false
 xpack.ml.nlp.enabled: false
 xpack.ml.compatibleModuleType: 'observability'
+
+# Disable the embedded Dev Console
+console.ui.embeddedEnabled: false

@@ -19,12 +19,37 @@ import {
   ElasticAssistantPluginStartDependencies,
   ElasticAssistantRequestHandlerContext,
 } from './types';
+<<<<<<< HEAD
 import { AIAssistantService } from './ai_assistant_service';
 import { assistantPromptsType, assistantAnonimizationFieldsType } from './saved_object';
 import { RequestContextFactory } from './routes/request_context_factory';
 import { PLUGIN_ID } from '../common/constants';
 import { registerRoutes } from './routes/register_routes';
 import { appContextService } from './services/app_context';
+=======
+import {
+  deleteKnowledgeBaseRoute,
+  getKnowledgeBaseStatusRoute,
+  postActionsConnectorExecuteRoute,
+  postEvaluateRoute,
+  postKnowledgeBaseRoute,
+} from './routes';
+import {
+  appContextService,
+  GetRegisteredFeatures,
+  GetRegisteredTools,
+} from './services/app_context';
+import { getCapabilitiesRoute } from './routes/capabilities/get_capabilities_route';
+import { getEvaluateRoute } from './routes/evaluate/get_evaluate';
+
+interface CreateRouteHandlerContextParams {
+  core: CoreSetup<ElasticAssistantPluginStart, unknown>;
+  logger: Logger;
+  getRegisteredFeatures: GetRegisteredFeatures;
+  getRegisteredTools: GetRegisteredTools;
+  telemetry: AnalyticsServiceSetup;
+}
+>>>>>>> upstream/main
 
 export class ElasticAssistantPlugin
   implements
@@ -83,6 +108,20 @@ export class ElasticAssistantPlugin
     // this.assistantService registerKBTask
     registerRoutes(router, this.logger, plugins);
 
+<<<<<<< HEAD
+=======
+    // Knowledge Base
+    deleteKnowledgeBaseRoute(router);
+    getKnowledgeBaseStatusRoute(router, getElserId);
+    postKnowledgeBaseRoute(router, getElserId);
+    // Actions Connector Execute (LLM Wrapper)
+    postActionsConnectorExecuteRoute(router, getElserId);
+    // Evaluate
+    postEvaluateRoute(router, getElserId);
+    getEvaluateRoute(router);
+    // Capabilities
+    getCapabilitiesRoute(router);
+>>>>>>> upstream/main
     return {
       actions: plugins.actions,
       getRegisteredFeatures: (pluginName: string) => {

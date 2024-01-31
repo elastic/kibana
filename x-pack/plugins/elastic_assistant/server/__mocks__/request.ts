@@ -7,6 +7,7 @@
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { CAPABILITIES, EVALUATE, KNOWLEDGE_BASE } from '../../common/constants';
 import {
+<<<<<<< HEAD
   EvaluateRequestBodyInput,
   EvaluateRequestQueryInput,
 } from '../schemas/evaluate/post_evaluate_route.gen';
@@ -27,6 +28,11 @@ import {
   ConversationCreateProps,
   ConversationUpdateProps,
 } from '../schemas/conversations/common_attributes.gen';
+=======
+  PostEvaluateRequestBodyInput,
+  PostEvaluateRequestQueryInput,
+} from '@kbn/elastic-assistant-common';
+>>>>>>> upstream/main
 
 export const requestMock = {
   create: httpServerMock.createKibanaRequest,
@@ -63,8 +69,13 @@ export const getPostEvaluateRequest = ({
   body,
   query,
 }: {
+<<<<<<< HEAD
   body: EvaluateRequestBodyInput;
   query: EvaluateRequestQueryInput;
+=======
+  body: PostEvaluateRequestBodyInput;
+  query: PostEvaluateRequestQueryInput;
+>>>>>>> upstream/main
 }) =>
   requestMock.create({
     body,
