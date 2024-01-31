@@ -11,6 +11,7 @@ import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { compressToEncodedURIComponent } from 'lz-string';
@@ -18,16 +19,32 @@ import { compressToEncodedURIComponent } from 'lz-string';
 export interface TryInConsoleButtonProps {
   request: string;
   application?: ApplicationStart;
+  consolePlugin?: ConsolePluginStart;
   sharePlugin: SharePluginStart;
 }
 export const TryInConsoleButton = ({
   request,
   application,
+  consolePlugin,
   sharePlugin,
 }: TryInConsoleButtonProps) => {
   const { url } = sharePlugin;
   const canShowDevtools = !!application?.capabilities?.dev_tools?.show;
   if (!canShowDevtools || !url) return null;
+  if (consolePlugin && consolePlugin?.isEmbeddedConsoleAvailable?.()) {
+    return (
+      <EuiButtonEmpty
+        iconType="popout"
+        size="s"
+        onClick={() => consolePlugin?.openEmbeddedConsole?.()}
+      >
+        <FormattedMessage
+          id="searchApiPanels.welcomeBanner.tryInConsoleButton"
+          defaultMessage="Try in Console"
+        />
+      </EuiButtonEmpty>
+    );
+  }
 
   const devToolsDataUri = compressToEncodedURIComponent(request);
   const consolePreviewLink = url.locators.get('CONSOLE_APP_LOCATOR')?.useUrl(
