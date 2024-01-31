@@ -438,6 +438,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
                   },
                   isEnabledKnowledgeBase: false,
                   isEnabledRAGAlerts: false,
+                  llmType: 'bedrock',
                 })
                 .pipe(passThrough);
               const responseBuffer: Uint8Array[] = [];
