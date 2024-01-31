@@ -24,7 +24,10 @@ export const getSortedCspBenchmarkRulesTemplates = (cspBenchmarkRules: CspBenchm
     if (versionA !== null && versionB !== null) {
       return semverCompare(versionA, versionB);
     } else {
-      return String(ruleNumberA).localeCompare(String(ruleNumberB));
+      return String(ruleNumberA).localeCompare(String(ruleNumberB), undefined, {
+        numeric: true,
+        sensitivity: 'base',
+      });
     }
   });
 };
