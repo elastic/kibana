@@ -70,14 +70,14 @@ export function defineGetApiKeysRoutes({
           .filter(({ invalidated }) => !invalidated)
           .map((key) => {
             if (!key.name) {
-              key.name = '';
+              key.name = key.id;
             }
             return key;
           });
 
         return response.ok<GetAPIKeysResult>({
           body: {
-            // @ts-expect-error Elasticsearch client types do not know about Cross-Cluster API keys yet.
+            // @ts-expect-error Elasticsearch client types do not know about cross-cluster API keys yet.
             apiKeys: validKeys,
             canManageCrossClusterApiKeys:
               clusterPrivileges.manage_security && areCrossClusterApiKeysEnabled,
