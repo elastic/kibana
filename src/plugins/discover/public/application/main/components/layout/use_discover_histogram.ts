@@ -8,12 +8,9 @@
 
 import { useQuerySubscriber } from '@kbn/unified-field-list/src/hooks/use_query_subscriber';
 import {
-  ExternalVisContext,
   UnifiedHistogramApi,
   UnifiedHistogramFetchStatus,
   UnifiedHistogramState,
-  fromExternalVisContextJSONString,
-  toExternalVisContextJSONString,
 } from '@kbn/unified-histogram-plugin/public';
 import { isEqual } from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -234,7 +231,7 @@ export const useDiscoverHistogram = ({
   const {
     dataView: textBasedDataView,
     query: textBasedQuery,
-    externalVisContext: textBasedExternalVisContext,
+    externalVisContextJSON: textBasedExternalVisContextJSON,
     columns: textBasedColumns,
     table: textBasedTable,
   } = useObservable(textBasedFetchComplete$, initialTextBasedProps);
@@ -338,11 +335,11 @@ export const useDiscoverHistogram = ({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const timeRangeMemoized = useMemo(() => timeRange, [timeRange?.from, timeRange?.to]);
 
-  const onVisContextChanged = useCallback(
-    (nextVisContext: ExternalVisContext | undefined) => {
-      console.log('got new vis context from histogram', nextVisContext);
+  const onVisContextJSONChanged = useCallback(
+    (nextVisContextJSON: string | undefined) => {
+      console.log('got new vis context from histogram', nextVisContextJSON);
       stateContainer.savedSearchState.updateVisContext({
-        nextVisContextJSON: toExternalVisContextJSONString(nextVisContext),
+        nextVisContextJSON,
       });
     },
     [stateContainer]
@@ -364,8 +361,8 @@ export const useDiscoverHistogram = ({
     withDefaultActions: histogramCustomization?.withDefaultActions,
     disabledActions: histogramCustomization?.disabledActions,
     isChartLoading: isSuggestionLoading,
-    externalVisContext: isPlainRecord ? textBasedExternalVisContext : undefined, // visContext should be in sync with current query
-    onVisContextChanged: isPlainRecord ? onVisContextChanged : undefined,
+    externalVisContextJSON: isPlainRecord ? textBasedExternalVisContextJSON : undefined, // visContextJSON should be in sync with current query
+    onVisContextJSONChanged: isPlainRecord ? onVisContextJSONChanged : undefined,
   };
 };
 
@@ -478,10 +475,7 @@ function getUnifiedHistogramPropsForTextBased({
   const nextProps = {
     dataView: stateContainer.internalState.getState().dataView!,
     query: stateContainer.appState.getState().query!,
-    // TODO: pass JSON string instead
-    externalVisContext: fromExternalVisContextJSONString(
-      stateContainer.savedSearchState.getState().visContextJSON
-    ),
+    externalVisContextJSON: stateContainer.savedSearchState.getState().visContextJSON,
     columns,
     table:
       result && documentsValue?.recordRawType === RecordRawType.PLAIN

@@ -11,7 +11,6 @@ import { Subject } from 'rxjs';
 import { pick } from 'lodash';
 import useMount from 'react-use/lib/useMount';
 import { LensSuggestionsApi } from '@kbn/lens-plugin/public';
-import type { Datatable } from '@kbn/expressions-plugin/common';
 import { UnifiedHistogramLayout, UnifiedHistogramLayoutProps } from '../layout';
 import type { UnifiedHistogramInputMessage, UnifiedHistogramRequestContext } from '../types';
 import {
@@ -22,7 +21,7 @@ import {
 import { useStateProps } from './hooks/use_state_props';
 import { useStateSelector } from './utils/use_state_selector';
 import { topPanelHeightSelector } from './utils/state_selectors';
-import { getStableVisContext } from '../utils/external_vis_context';
+import { toExternalVisContextJSONString } from '../utils/external_vis_context';
 import { removeTablesFromLensAttributes } from '../utils/lens_vis_from_table';
 
 type LayoutProps = Pick<
@@ -46,7 +45,7 @@ export type UnifiedHistogramContainerProps = {
   searchSessionId?: UnifiedHistogramRequestContext['searchSessionId'];
   requestAdapter?: UnifiedHistogramRequestContext['adapter'];
   isChartLoading?: boolean;
-  table?: Datatable;
+  onVisContextJSONChanged: (nextVisContextJSON: string | undefined) => void;
 } & Pick<
   UnifiedHistogramLayoutProps,
   | 'services'
@@ -57,13 +56,13 @@ export type UnifiedHistogramContainerProps = {
   | 'timeRange'
   | 'relativeTimeRange'
   | 'columns'
+  | 'table'
   | 'container'
   | 'renderCustomChartToggleActions'
   | 'children'
   | 'onBrushEnd'
   | 'onFilter'
-  | 'externalVisContext'
-  | 'onVisContextChanged'
+  | 'externalVisContextJSON'
   | 'withDefaultActions'
   | 'disabledActions'
 >;
@@ -89,7 +88,7 @@ export type UnifiedHistogramApi = {
 export const UnifiedHistogramContainer = forwardRef<
   UnifiedHistogramApi,
   UnifiedHistogramContainerProps
->(({ onVisContextChanged, ...containerProps }, ref) => {
+>(({ onVisContextJSONChanged, ...containerProps }, ref) => {
   const [layoutProps, setLayoutProps] = useState<LayoutProps>();
   const [stateService, setStateService] = useState<UnifiedHistogramStateService>();
   const [lensSuggestionsApi, setLensSuggestionsApi] = useState<LensSuggestionsApi>();
@@ -141,22 +140,23 @@ export const UnifiedHistogramContainer = forwardRef<
     requestAdapter,
   });
 
-  const handleVisContextChange: typeof onVisContextChanged | undefined = useMemo(() => {
-    if (!onVisContextChanged) {
-      return undefined;
-    }
+  const handleVisContextChange: UnifiedHistogramLayoutProps['onVisContextChanged'] | undefined =
+    useMemo(() => {
+      if (!onVisContextJSONChanged) {
+        return undefined;
+      }
 
-    return (visContext) => {
-      // console.log('updating vis context', visContext);
-      const lightweightVisContext = visContext
-        ? {
-            ...visContext,
-            attributes: removeTablesFromLensAttributes(visContext?.attributes),
-          }
-        : undefined;
-      onVisContextChanged(getStableVisContext(lightweightVisContext));
-    };
-  }, [onVisContextChanged]);
+      return (visContext) => {
+        // console.log('updating vis context', visContext);
+        const lightweightVisContext = visContext
+          ? {
+              ...visContext,
+              attributes: removeTablesFromLensAttributes(visContext?.attributes),
+            }
+          : undefined;
+        onVisContextJSONChanged(toExternalVisContextJSONString(lightweightVisContext));
+      };
+    }, [onVisContextJSONChanged]);
 
   // Don't render anything until the container is initialized
   if (!layoutProps || !lensSuggestionsApi || !api) {

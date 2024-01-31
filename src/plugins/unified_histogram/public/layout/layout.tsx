@@ -7,7 +7,7 @@
  */
 
 import { EuiSpacer, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
-import React, { PropsWithChildren, ReactElement, useEffect, useState } from 'react';
+import React, { PropsWithChildren, ReactElement, useEffect, useMemo, useState } from 'react';
 import { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
@@ -42,6 +42,7 @@ import type {
 import { UnifiedHistogramSuggestionType } from '../types';
 import { LensVisService } from '../services/lens_vis_service';
 import { useRequestParams } from '../hooks/use_request_params';
+import { fromExternalVisContextJSONString } from '../utils/external_vis_context';
 
 const ChartMemoized = React.memo(Chart);
 
@@ -71,7 +72,7 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
   /**
    * The external custom Lens vis
    */
-  externalVisContext?: ExternalVisContext;
+  externalVisContextJSON?: string;
   /**
    * Flag that indicates that a text based language is used
    */
@@ -199,7 +200,7 @@ export const UnifiedHistogramLayout = ({
   dataView,
   query: originalQuery,
   filters: originalFilters,
-  externalVisContext,
+  externalVisContextJSON,
   isChartLoading,
   isPlainRecord,
   timeRange: originalTimeRange,
@@ -245,9 +246,14 @@ export const UnifiedHistogramLayout = ({
     lensVisService.currentSuggestionContext$
   );
 
+  const externalVisContext = useMemo(
+    () => fromExternalVisContextJSONString(externalVisContextJSON),
+    [externalVisContextJSON]
+  );
+
   useEffect(() => {
     if (isChartLoading) {
-      // console.log('chart is loading', requestParams.query, externalVisContext);
+      // console.log('chart is loading', requestParams.query, externalVisContextJSON);
       return;
     }
 
