@@ -72,6 +72,11 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
     before(async () => {
       await esTestIndexTool.destroy();
       await esTestIndexTool.setup();
+      await es.deleteByQuery({
+        index: [alertsAsDataIndex, alwaysFiringAlertsAsDataIndex],
+        query: { match_all: {} },
+        conflicts: 'proceed',
+      });
     });
     afterEach(() => objectRemover.removeAll());
     after(async () => {

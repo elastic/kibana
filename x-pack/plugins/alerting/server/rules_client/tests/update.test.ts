@@ -370,12 +370,12 @@ describe('update()', () => {
             },
           },
         ],
-        "createdAt": 2019-02-12T21:01:22.479Z,
-        "enabled": true,
-        "id": "1",
         "alertDelay": Object {
           "active": 5,
         },
+        "createdAt": 2019-02-12T21:01:22.479Z,
+        "enabled": true,
+        "id": "1",
         "notifyWhen": "onActiveAlert",
         "params": Object {
           "bar": true,
@@ -431,6 +431,9 @@ describe('update()', () => {
             "uuid": "102",
           },
         ],
+        "alertDelay": Object {
+          "active": 10,
+        },
         "alertTypeId": "myType",
         "apiKey": null,
         "apiKeyCreatedByUser": null,
@@ -445,9 +448,6 @@ describe('update()', () => {
           "versionApiKeyLastmodified": "v7.10.0",
         },
         "name": "abc",
-        "alertDelay": Object {
-          "active": 10,
-        },
         "notifyWhen": "onActiveAlert",
         "params": Object {
           "bar": true,

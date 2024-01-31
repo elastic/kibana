@@ -142,10 +142,10 @@ describe('updateRuleRoute', () => {
                 "uuid": "1234-5678",
               },
             ],
-            "name": "abc",
             "alertDelay": Object {
               "active": 10,
             },
+            "name": "abc",
             "notifyWhen": "onActionGroupChange",
             "params": Object {
               "otherField": false,

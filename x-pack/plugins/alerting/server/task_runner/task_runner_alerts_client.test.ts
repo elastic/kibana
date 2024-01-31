@@ -302,6 +302,7 @@ describe('Task Runner', () => {
           ruleType: ruleTypeWithAlerts,
           namespace: 'default',
           rule: {
+            alertDelay: 0,
             consumer: 'bar',
             executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             id: '1',
@@ -800,6 +801,7 @@ describe('Task Runner', () => {
 
       expect(alertsClientToUse.processAlerts).toHaveBeenCalledWith({
         notifyOnActionGroupChange: false,
+        alertDelay: 0,
         flappingSettings: {
           enabled: true,
           lookBackWindow: 20,
