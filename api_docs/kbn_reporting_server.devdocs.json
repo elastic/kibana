@@ -124,9 +124,7 @@
                 "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any>) => Promise<Omit<",
-              "BasePayload",
-              ", \"spaceId\" | \"headers\">>"
+              "<unknown, unknown, unknown, any>) => Promise<Omit<TaskPayloadType, \"spaceId\" | \"headers\">>"
             ],
             "path": "packages/kbn-reporting/server/export_type.ts",
             "deprecated": false,
