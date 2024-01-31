@@ -74,7 +74,7 @@ export const DiscoverLinkForUnknownState = React.memo(() => (
   <EuiHeaderLink
     color="primary"
     iconType="discoverApp"
-    data-test-subj="logExplorerDiscoverFallbackLink"
+    data-test-subj="logsExplorerDiscoverFallbackLink"
     disabled
   >
     {discoverLinkTitle}
@@ -105,7 +105,7 @@ export const DiscoverLink = React.memo(
         {...discoverLinkProps}
         color="primary"
         iconType="discoverApp"
-        data-test-subj="logExplorerDiscoverFallbackLink"
+        data-test-subj="logsExplorerDiscoverFallbackLink"
       >
         {discoverLinkTitle}
       </EuiHeaderLink>
