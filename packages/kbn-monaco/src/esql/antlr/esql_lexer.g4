@@ -138,6 +138,7 @@ RP : ')';
 TRUE : T R U E;
 
 EQ  : '==';
+CIEQ : '=~';
 NEQ : '!=';
 LT  : '<';
 LTE : '<=';
