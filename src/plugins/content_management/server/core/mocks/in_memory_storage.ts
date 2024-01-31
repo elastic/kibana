@@ -190,8 +190,8 @@ class InMemoryStorage implements ContentStorage<any> {
   }
 }
 
-export const createMemoryStorage = () => {
-  return new InMemoryStorage();
+export const createMemoryStorage = (): ContentStorage<FooContent> => {
+  return new InMemoryStorage() as ContentStorage<FooContent>;
 };
 
 export const createMockedStorage = (): jest.Mocked<ContentStorage> => ({

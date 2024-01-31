@@ -11,24 +11,24 @@ import { ContentCrud } from '../core/crud';
 type CrudGetParameters = Parameters<ContentCrud['get']>;
 type ClientGetParameters = [CrudGetParameters[1], CrudGetParameters[2]?];
 
-export interface IContentClient {
+export interface IContentClient<T = unknown> {
   contentTypeId: string;
-  get(...params: ClientGetParameters): ReturnType<ContentCrud['get']>;
+  get(...params: ClientGetParameters): ReturnType<ContentCrud<T>['get']>;
 }
 
-interface Context {
-  crudInstance: ContentCrud;
+interface Context<T = unknown> {
+  crudInstance: ContentCrud<T>;
   storageContext: StorageContext;
 }
 
 const secretToken = Symbol('secretToken');
 
-export class ContentClient implements IContentClient {
-  static create(contentTypeId: string, ctx: Context): IContentClient {
-    return new ContentClient(secretToken, contentTypeId, ctx);
+export class ContentClient<T = unknown> implements IContentClient<T> {
+  static create<T = unknown>(contentTypeId: string, ctx: Context<T>): IContentClient<T> {
+    return new ContentClient<T>(secretToken, contentTypeId, ctx);
   }
 
-  constructor(token: symbol, public contentTypeId: string, private readonly ctx: Context) {
+  constructor(token: symbol, public contentTypeId: string, private readonly ctx: Context<T>) {
     if (token !== secretToken) {
       throw new Error('Use ContentClient.create() instead');
     }

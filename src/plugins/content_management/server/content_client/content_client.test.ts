@@ -7,7 +7,7 @@
  */
 import { ContentCrud } from '../core/crud';
 import { EventBus } from '../core/event_bus';
-import { createMemoryStorage } from '../core/mocks';
+import { createMemoryStorage, type FooContent } from '../core/mocks';
 import { ContentClient } from './content_client';
 
 describe('ContentClient', () => {
@@ -18,7 +18,7 @@ describe('ContentClient', () => {
   } = {}) => {
     const storage = createMemoryStorage();
     const eventBus = new EventBus();
-    const crudInstance = new ContentCrud<any>(contentTypeId, storage, { eventBus });
+    const crudInstance = new ContentCrud<FooContent>(contentTypeId, storage, { eventBus });
 
     const contentClient = ContentClient.create(contentTypeId, {
       crudInstance,
@@ -54,10 +54,9 @@ describe('ContentClient', () => {
 
   describe('Crud', () => {
     describe('get()', () => {
-      test('get()', async () => {
+      test('should return undefined if no item was found', async () => {
         const { contentClient } = setup();
         const res = await contentClient.get('hello');
-        console.log(JSON.stringify(res, null, 2));
         expect(res.result.item).toBeUndefined();
       });
 
