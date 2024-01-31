@@ -16,8 +16,8 @@ import { httpResourcesMock } from '@kbn/core-http-resources-server-mocks';
 import { PluginType } from '@kbn/core-base-common';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
-import { CoreAppsService } from './core_app';
 import { of } from 'rxjs';
+import { CoreAppsService } from './core_app';
 
 const emptyPlugins = (): UiPlugins => ({
   internal: new Map(),
@@ -146,7 +146,7 @@ describe('CoreApp', () => {
         uiPlugins: prebootUIPlugins,
         router: expect.any(Object),
         packageInfo: coreContext.env.packageInfo,
-        serverBasePath: internalCorePreboot.http.basePath.serverBasePath,
+        staticAssets: expect.any(Object),
       });
     });
 
@@ -245,7 +245,23 @@ describe('CoreApp', () => {
       uiPlugins,
       router: expect.any(Object),
       packageInfo: coreContext.env.packageInfo,
-      serverBasePath: internalCoreSetup.http.basePath.serverBasePath,
+      staticAssets: expect.any(Object),
     });
+  });
+
+  it('registers SHA-scoped and non-SHA-scoped UI bundle routes', async () => {
+    const uiPlugins = emptyPlugins();
+    internalCoreSetup.http.staticAssets.prependServerPath.mockReturnValue('/some-path');
+    await coreApp.setup(internalCoreSetup, uiPlugins);
+
+    expect(internalCoreSetup.http.registerStaticDir).toHaveBeenCalledTimes(2);
+    expect(internalCoreSetup.http.registerStaticDir).toHaveBeenCalledWith(
+      '/some-path',
+      expect.any(String)
+    );
+    expect(internalCoreSetup.http.registerStaticDir).toHaveBeenCalledWith(
+      '/ui/{path*}',
+      expect.any(String)
+    );
   });
 });
