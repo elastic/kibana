@@ -6,39 +6,25 @@
  */
 
 import React from 'react';
-import { EuiAvatar, EuiMarkdownFormat } from '@elastic/eui';
-import styled from 'styled-components';
+import { EuiAvatar } from '@elastic/eui';
 import type { ExternalReferenceAttachmentType } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import { CASE_ATTACHMENT_ENDPOINT_TYPE_ID } from '../../../common/constants';
-import { getLazyExternalContent } from './lazy_external_reference_content';
+import { getLazyExternalChildrenContent } from './lazy_external_reference_children_content';
 import type { IExternalReferenceMetaDataProps } from './lazy_external_reference_content';
-
-const ContentWrapper = styled.div`
-  padding: ${({ theme }) => `${theme.eui.euiSizeM} ${theme.eui.euiSizeL}`};
-  text-overflow: ellipsis;
-  word-break: break-word;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-`;
+import { getLazyExternalEventContent } from './lazy_external_reference_content';
 
 export const getExternalReferenceAttachmentEndpointRegular =
   (): ExternalReferenceAttachmentType => ({
     id: CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
     displayName: 'Endpoint',
     // icon: 'empty',
-    getAttachmentViewObject: (props) => {
+    getAttachmentViewObject: (props: IExternalReferenceMetaDataProps) => {
       const iconType = props.externalReferenceMetadata.command === 'isolate' ? 'lock' : 'lockOpen';
       return {
         type: 'regular',
-        event: getLazyExternalContent(props),
+        event: getLazyExternalEventContent(props),
         timelineAvatar: <EuiAvatar name="endpoint" color="subdued" iconType={iconType} />,
-        children: ({ externalReferenceMetadata }: IExternalReferenceMetaDataProps) => {
-          return externalReferenceMetadata.comment.trim().length > 0 ? (
-            <ContentWrapper>
-              <EuiMarkdownFormat grow={true}>{externalReferenceMetadata.comment}</EuiMarkdownFormat>
-            </ContentWrapper>
-          ) : null;
-        },
+        children: getLazyExternalChildrenContent(props),
       };
     },
   });

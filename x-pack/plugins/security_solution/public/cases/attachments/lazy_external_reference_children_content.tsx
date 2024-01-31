@@ -20,9 +20,9 @@ export interface IExternalReferenceMetaDataProps {
   };
 }
 
-const AttachmentContent = lazy(() => import('./external_reference_event'));
+const AttachmentContent = lazy(() => import('./external_reference_children'));
 
-export const getLazyExternalEventContent = (props: IExternalReferenceMetaDataProps) => {
+export const getLazyExternalChildrenContent = (props: IExternalReferenceMetaDataProps) => {
   return (
     <Suspense fallback={null}>
       <AttachmentContent {...props} />
