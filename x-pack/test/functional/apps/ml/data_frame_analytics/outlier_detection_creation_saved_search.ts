@@ -205,7 +205,8 @@ export default function ({ getService }: FtrProviderContext) {
         suiteTitle: 'with filter and kuery query',
         jobType: 'outlier_detection',
         jobId: `fq_saved_search_4_${dateNow}`,
-        jobDescription: 'Outlier detection job based on a discover view with filter and kuery query',
+        jobDescription:
+          'Outlier detection job based on a discover view with filter and kuery query',
         source: 'ft_farequote_filter_and_kuery',
         get destinationIndex(): string {
           return `user-${this.jobId}`;

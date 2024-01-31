@@ -217,7 +217,8 @@ export default function ({ getService }: FtrProviderContext) {
       suiteTitle: 'with filter and kuery query',
       jobSource: 'ft_farequote_filter_and_kuery',
       jobId: `fq_saved_search_5_${Date.now()}`,
-      jobDescription: 'Create multi metric job based on a discover view with filter and kuery query',
+      jobDescription:
+        'Create multi metric job based on a discover view with filter and kuery query',
       jobGroups: ['automated', 'farequote', 'multi-metric', 'saved-search'],
       aggAndFieldIdentifiers: ['Mean(responsetime)'],
       splitField: 'airline',
