@@ -13,13 +13,9 @@ import { transformRule } from './common_transformations';
 
 type RuleUpdatesBody = Pick<
   RuleUpdates,
-  'name' | 'tags' | 'schedule' | 'actions' | 'params' | 'throttle' | 'notifyWhen' | 'alertDelay'
+  'name' | 'tags' | 'schedule' | 'actions' | 'params' | 'throttle' | 'notifyWhen'
 >;
-const rewriteBodyRequest: RewriteResponseCase<RuleUpdatesBody> = ({
-  actions,
-  alertDelay,
-  ...res
-}): any => ({
+const rewriteBodyRequest: RewriteResponseCase<RuleUpdatesBody> = ({ actions, ...res }): any => ({
   ...res,
   actions: actions.map(
     ({ group, id, params, frequency, uuid, alertsFilter, useAlertDataForTemplate }) => ({
@@ -38,7 +34,6 @@ const rewriteBodyRequest: RewriteResponseCase<RuleUpdatesBody> = ({
       ...(uuid && { uuid }),
     })
   ),
-  ...(alertDelay ? { alert_delay: alertDelay } : {}),
 });
 
 export async function updateRule({
@@ -47,16 +42,14 @@ export async function updateRule({
   id,
 }: {
   http: HttpSetup;
-  rule: Pick<RuleUpdates, 'name' | 'tags' | 'schedule' | 'params' | 'actions' | 'alertDelay'>;
+  rule: Pick<RuleUpdates, 'name' | 'tags' | 'schedule' | 'params' | 'actions'>;
   id: string;
 }): Promise<Rule> {
   const res = await http.put<AsApiContract<Rule>>(
     `${BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(id)}`,
     {
       body: JSON.stringify(
-        rewriteBodyRequest(
-          pick(rule, ['name', 'tags', 'schedule', 'params', 'actions', 'alertDelay'])
-        )
+        rewriteBodyRequest(pick(rule, ['name', 'tags', 'schedule', 'params', 'actions']))
       ),
     }
   );

@@ -27,9 +27,6 @@ describe('updateRule', () => {
       apiKey: null,
       apiKeyOwner: null,
       revision: 0,
-      alertDelay: {
-        active: 10,
-      },
     };
     const resolvedValue: Rule = {
       ...ruleToUpdate,
@@ -54,7 +51,7 @@ describe('updateRule', () => {
       Array [
         "/api/alerting/rule/12%2F3",
         Object {
-          "body": "{\\"name\\":\\"test\\",\\"tags\\":[\\"foo\\"],\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"params\\":{},\\"actions\\":[],\\"alert_delay\\":{\\"active\\":10}}",
+          "body": "{\\"name\\":\\"test\\",\\"tags\\":[\\"foo\\"],\\"schedule\\":{\\"interval\\":\\"1m\\"},\\"params\\":{},\\"actions\\":[]}",
         },
       ]
     `);
