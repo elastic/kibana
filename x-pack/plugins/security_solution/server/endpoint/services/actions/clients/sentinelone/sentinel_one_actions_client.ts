@@ -17,6 +17,7 @@ import type {
   SentinelOneGetAgentsResponse,
   SentinelOneGetAgentsParams,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
+import type { CreateActionPayload } from '../../create/types';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type { SentinelOneConnectorExecuteOptions } from './types';
 import { stringify } from '../../../../utils/stringify';
@@ -185,7 +186,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     await this.validateRequest(options);
     await this.sendAction(command, { uuid: options.endpoint_ids[0] });
 
-    const commandName = getCommandName(SUB_ACTION.ISOLATE_HOST);
+    const commandName = getCommandName(command);
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions = {
       ...options,
       command: commandName,
@@ -199,17 +200,18 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       },
     });
 
+    const createPayload: CreateActionPayload = {
+      ...options,
+      command: commandName,
+      action_id: actionRequestDoc.EndpointActions.action_id,
+      user: { username: this.actionsClientOptions.username },
+    };
+
     try {
-      const createPayload = {
-        ...options,
-        command: commandName,
-        user: { username: this.actionsClientOptions.username },
-      };
       const agentId = options.endpoint_ids[0];
       await updateCases({
         casesClient: this.options.casesClient,
         endpointData: [
-          // TODO: my current understanding is that we might include only one S1 host at a time
           {
             host: {
               hostname: actionRequestDoc.EndpointActions.data.hosts?.[agentId].name as string,
@@ -223,6 +225,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         createActionPayload: createPayload,
       });
     } catch (err) {
+      // failures during update of cases should not cause the response action to fail. Just log error
       this.log.warn(`failed to update cases: ${err.message}\n${stringify(err)}`);
     }
 

@@ -6,10 +6,11 @@
  */
 
 import type { GetRelatedCasesByAlertResponse } from '@kbn/cases-plugin/common';
-import { AttachmentType } from '@kbn/cases-plugin/common';
+import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/common';
 import type { CasesClient } from '@kbn/cases-plugin/server';
-import type { BulkCreateArgs } from '@kbn/cases-plugin/server/client/attachments/types';
 import { i18n } from '@kbn/i18n';
+import type { CaseAttachments } from '@kbn/cases-plugin/public';
+import { CASE_ATTACHMENT_ENDPOINT_TYPE_ID } from '../../../../../common/constants';
 import { APP_ID } from '../../../../../common';
 import type { HostMetadataInterface } from '../../../../../common/endpoint/types';
 import type { CreateActionPayload } from './types';
@@ -28,16 +29,13 @@ export const updateCases = async ({
   createActionPayload: CreateActionPayload;
   endpointData: SimplifiedEndpointData[];
 }): Promise<void> => {
-  console.log(1111);
   if (!casesClient) {
     return;
   }
   // convert any alert IDs into cases
   let caseIDs: string[] = createActionPayload.case_ids?.slice() || [];
-  console.log(caseIDs);
 
   if (createActionPayload.alert_ids && createActionPayload.alert_ids.length > 0) {
-    console.log('3333');
     const newIDs: string[][] = await Promise.all(
       createActionPayload.alert_ids.map(async (alertID: string) => {
         const cases: GetRelatedCasesByAlertResponse = await casesClient.cases.getCasesByAlertID({
@@ -55,7 +53,6 @@ export const updateCases = async ({
 
   // Update all cases with a comment
   if (caseIDs.length > 0) {
-    console.log({ endpointData });
     const targets = endpointData.map((endpoint: SimplifiedEndpointData) => ({
       hostname: endpoint.host.hostname,
       endpointId: endpoint.agent.id,
@@ -63,16 +60,20 @@ export const updateCases = async ({
     }));
 
     const attachments = caseIDs.map(() => ({
-      type: AttachmentType.actions,
-      comment: createActionPayload.comment || EMPTY_COMMENT,
-      actions: {
+      type: AttachmentType.externalReference,
+      externalReferenceId: createActionPayload.action_id,
+      externalReferenceStorage: {
+        type: ExternalReferenceStorageType.elasticSearchDoc,
+      },
+      externalReferenceAttachmentTypeId: CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
+      externalReferenceMetadata: {
         targets,
-        type: createActionPayload.command,
+        command: createActionPayload.command,
+        comment: createActionPayload.comment || EMPTY_COMMENT,
       },
       owner: APP_ID,
-    })) as BulkCreateArgs['attachments'];
+    })) as CaseAttachments;
 
-    console.log('5', caseIDs);
     await Promise.all(
       caseIDs.map((caseId) =>
         casesClient.attachments.bulkCreate({
@@ -83,7 +84,6 @@ export const updateCases = async ({
     );
   }
 };
-
 export const EMPTY_COMMENT = i18n.translate(
   'xpack.securitySolution.endpoint.updateCases.emptyComment',
   {

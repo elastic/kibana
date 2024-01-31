@@ -57,6 +57,7 @@ import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public'
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { CasesUiSetup } from '@kbn/cases-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -93,6 +94,7 @@ export interface SetupPlugins {
   triggersActionsUi: TriggersActionsSetup;
   usageCollection?: UsageCollectionSetup;
   ml?: MlPluginSetup;
+  cases?: CasesUiSetup;
 }
 
 /**
@@ -200,6 +202,7 @@ export interface AppObservableLibs {
 export type InspectResponse = Inspect & { response: string[] };
 
 export const CASES_SUB_PLUGIN_KEY = 'cases';
+
 export interface SubPlugins {
   [CASES_SUB_PLUGIN_KEY]: Cases;
   alerts: Detections;

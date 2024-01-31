@@ -22,6 +22,7 @@ export type CreateActionPayload = TypeOf<typeof ResponseActionBodySchema> & {
   rule_name?: string;
   error?: string;
   hosts?: Record<string, { name: string }>;
+  action_id?: string;
 };
 
 export interface CreateActionMetadata {

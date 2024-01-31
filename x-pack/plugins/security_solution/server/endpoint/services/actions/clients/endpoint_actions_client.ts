@@ -80,12 +80,11 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       .getActionCreateService()
       .createAction(createPayload, agentIds.valid);
 
-    console.log({ agentsIdsHosts: agentIds.hosts, createPayload });
     try {
       await updateCases({
         casesClient: this.options.casesClient,
         endpointData: agentIds.hosts,
-        createActionPayload: createPayload,
+        createActionPayload: { ...createPayload, action_id: response.id },
       });
     } catch (err) {
       // failures during update of cases should not cause the response action to fail. Just log error

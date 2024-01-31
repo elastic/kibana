@@ -73,7 +73,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the ability to send Response actions to SentinelOne
    */
-  responseActionsSentinelOneV1Enabled: false,
+  responseActionsSentinelOneV1Enabled: true,
 
   /**
    * Enables top charts on Alerts Page

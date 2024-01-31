@@ -42,11 +42,13 @@ import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified-search-plugin/server';
 import type { ElasticAssistantPluginStart } from '@kbn/elastic-assistant-plugin/server';
+import type { CasesSetup } from '@kbn/cases-plugin/server';
 import type { AppFeaturesService } from './lib/app_features_service/app_features_service';
 import type { ExperimentalFeatures } from '../common';
 
 export interface SecuritySolutionPluginSetupDependencies {
   alerting: AlertingPluginSetup;
+  cases: CasesSetup;
   cloud: CloudSetup;
   data: DataPluginSetup;
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;

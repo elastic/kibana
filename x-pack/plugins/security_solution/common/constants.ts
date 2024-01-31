@@ -8,6 +8,7 @@
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import type { AddOptionsListControlProps } from '@kbn/controls-plugin/public';
 import * as i18n from './translations';
+
 export { SecurityPageName } from '@kbn/security-solution-navigation';
 
 /**
@@ -338,12 +339,12 @@ export const ALERTS_AS_DATA_FIND_URL = `${ALERTS_AS_DATA_URL}/find` as const;
 export const UNAUTHENTICATED_USER = 'Unauthenticated' as const;
 
 /**
-  Licensing requirements
+ Licensing requirements
  */
 export const MINIMUM_ML_LICENSE = 'platinum' as const;
 
 /**
-  Machine Learning constants
+ Machine Learning constants
  */
 export const ML_GROUP_ID = 'security' as const;
 export const LEGACY_ML_GROUP_ID = 'siem' as const;
@@ -519,3 +520,8 @@ export const DEFAULT_ALERT_TAGS_VALUE = [
  * Max length for the comments within security solution
  */
 export const MAX_COMMENT_LENGTH = 30000 as const;
+
+/**
+ * Cases external attachment IDs
+ */
+export const CASE_ATTACHMENT_ENDPOINT_TYPE_ID = 'endpoint' as const;
