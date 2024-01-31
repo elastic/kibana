@@ -144,20 +144,6 @@ export function getColorFactory(
         assignments.length
       );
     }
-    // if the rule doesn't match anymore let's use the special assignment color
-    // return getColor(
-    //   // TODO: the specialAssignment[0] position is arbitrary, we should fix it better
-    //   specialAssignments[0].color.type === 'loop'
-    //     ? {
-    //         type: 'loop',
-    //         // this is a catch all and should not be reached
-    //         colorIndex: 0,
-    //         paletteId,
-    //       }
-    //     : specialAssignments[0].color,
-    //   getPaletteFn,
-    //   isDarkMode
-    // );
     return getColor(
       {
         type: 'categorical',
