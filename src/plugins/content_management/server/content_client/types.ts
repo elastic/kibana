@@ -11,6 +11,12 @@ import { ContentCrud } from '../core/crud';
 type CrudGetParameters<T = unknown> = Parameters<ContentCrud<T>['get']>;
 export type GetParameters<T = unknown> = [CrudGetParameters<T>[1], CrudGetParameters<T>[2]?];
 
+type CrudBulkGetParameters<T = unknown> = Parameters<ContentCrud<T>['bulkGet']>;
+export type BulkGetParameters<T = unknown> = [
+  CrudBulkGetParameters<T>[1],
+  CrudBulkGetParameters<T>[2]?
+];
+
 type CrudCreateParameters<T = unknown> = Parameters<ContentCrud<T>['create']>;
 export type CreateParameters<T = unknown> = [
   CrudCreateParameters<T>[1],
@@ -36,4 +42,5 @@ export interface IContentClient<T = unknown> {
   create(...params: CreateParameters): ReturnType<ContentCrud<T>['create']>;
   update(...params: UpdateParameters): ReturnType<ContentCrud<T>['update']>;
   delete(...params: DeleteParameters): ReturnType<ContentCrud<T>['delete']>;
+  bulkGet(...params: BulkGetParameters): ReturnType<ContentCrud<T>['bulkGet']>;
 }

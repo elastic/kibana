@@ -35,6 +35,10 @@ export class ContentClient<T = unknown> implements IContentClient<T> {
     return this.ctx.crudInstance.get(this.ctx.storageContext, id, options);
   }
 
+  bulkGet(ids: string[], options: object) {
+    return this.ctx.crudInstance.bulkGet(this.ctx.storageContext, ids, options);
+  }
+
   create(data: object, options?: object) {
     return this.ctx.crudInstance.create(this.ctx.storageContext, data, options);
   }

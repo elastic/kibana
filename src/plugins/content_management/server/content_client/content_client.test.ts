@@ -97,6 +97,60 @@ describe('ContentClient', () => {
       });
     });
 
+    describe('bulkGet()', () => {
+      test('should return multiple items', async () => {
+        const { contentClient } = setup();
+
+        const item1 = await contentClient.create({ name: 'item1' });
+        const item2 = await contentClient.create({ name: 'item2' });
+        const ids = [item1.result.item.id, item2.result.item.id];
+
+        const res = await contentClient.bulkGet(ids);
+        expect(res.result.hits).toEqual([
+          {
+            item: {
+              name: 'item1',
+              id: expect.any(String),
+            },
+          },
+          {
+            item: {
+              name: 'item2',
+              id: expect.any(String),
+            },
+          },
+        ]);
+      });
+
+      test('should pass the options to the storage', async () => {
+        const { contentClient } = setup();
+
+        const item1 = await contentClient.create({ name: 'item1' });
+        const item2 = await contentClient.create({ name: 'item2' });
+        const ids = [item1.result.item.id, item2.result.item.id];
+
+        const options = { forwardInResponse: { foo: 'bar' } };
+        const res = await contentClient.bulkGet(ids, options);
+
+        expect(res.result.hits).toEqual([
+          {
+            item: {
+              name: 'item1',
+              id: expect.any(String),
+              options: { foo: 'bar' }, // the options have correctly been passed to the storage
+            },
+          },
+          {
+            item: {
+              name: 'item2',
+              id: expect.any(String),
+              options: { foo: 'bar' }, // the options have correctly been passed to the storage
+            },
+          },
+        ]);
+      });
+    });
+
     describe('update()', () => {
       test('should update an item', async () => {
         const { contentClient } = setup();
