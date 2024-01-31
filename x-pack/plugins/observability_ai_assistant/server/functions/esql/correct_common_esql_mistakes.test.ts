@@ -58,12 +58,10 @@ describe('correctCommonEsqlMistakes', () => {
     );
     expectQuery(
       `FROM nyc_taxis
-    | WHERE DATE_EXTRACT('hour', dropoff_datetime) >= 6 
-    | EVAL date = DATE_FORMAT("hh:mm a, 'of' d MMMM yyyy", dropoff_datetime)
+    | WHERE DATE_EXTRACT('hour', "hh:mm a, 'of' d MMMM yyyy") >= 6 AND DATE_EXTRACT('hour', dropoff_datetime) < 10
     | LIMIT 10`,
       `FROM nyc_taxis
-    | WHERE DATE_EXTRACT("hour", dropoff_datetime) >= 6 
-    | EVAL date = DATE_FORMAT("hh:mm a, 'of' d MMMM yyyy", dropoff_datetime)
+    | WHERE DATE_EXTRACT("hour", "hh:mm a, 'of' d MMMM yyyy") >= 6 AND DATE_EXTRACT("hour", dropoff_datetime) < 10
     | LIMIT 10`
     );
   });
@@ -71,14 +69,14 @@ describe('correctCommonEsqlMistakes', () => {
   it(`verifies if the SORT key is in KEEP, and if it's not, it will include it`, () => {
     expectQuery(
       'FROM logs-* \n| KEEP date \n| SORT @timestamp DESC',
-      'FROM logs-* \n| KEEP date, @timestamp \n| SORT @timestamp DESC'
+      'FROM logs-*\n| KEEP date, @timestamp\n| SORT @timestamp DESC'
     );
   });
 
   it(`if a formula is used in SORT, it will include a previous STATS command creating the alias for the formula and will use the alias in SORT`, () => {
     expectQuery(
       'FROM logs-* \n| SORT COUNT(*) DESC \n| LIMIT 10',
-      'FROM logs-* \n| STATS sort_key = COUNT(*) \n| SORT sort_key DESC \n| LIMIT 10'
+      'FROM logs-*\n| STATS sort_key = COUNT(*)\n| SORT sort_key DESC\n| LIMIT 10'
     );
   });
 });

@@ -74,7 +74,7 @@ function replaceFunctionsinSortWithStats(command: string) {
       'STATS sort_key = ' +
       sortFunction +
       '\n| ' +
-      command.replaceAll(/[a-zA-Z_]+\([^\)]*\)(\.[^\)]*\))?/g, 'sort_key ')
+      command.replaceAll(/[a-zA-Z_]+\([^\)]*\)(\.[^\)]*\))?/g, 'sort_key')
     );
   } else {
     return command;
