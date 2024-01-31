@@ -10,7 +10,7 @@ import ReactDOM from 'react-dom';
 import { EuiPanel } from '@elastic/eui';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 export interface Props {
-  children: ReactNode;
+  children?: ReactNode;
   containerRef: React.RefObject<HTMLDivElement>;
 }
 

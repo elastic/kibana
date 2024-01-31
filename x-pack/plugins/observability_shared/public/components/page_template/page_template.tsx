@@ -221,7 +221,11 @@ export function ObservabilityPageTemplate({
                       alignment={pageTemplateProps.isEmptyState ? 'center' : 'top'}
                       {...pageSectionProps}
                     >
-                      <SearchBarPortal containerRef={containerRef}>{topSearchBar}</SearchBarPortal>
+                      {topSearchBar && (
+                        <SearchBarPortal containerRef={containerRef}>
+                          {topSearchBar}
+                        </SearchBarPortal>
+                      )}
                       {children}
                     </KibanaPageTemplate.Section>
                   </KibanaErrorBoundary>
