@@ -68,11 +68,13 @@ export const EntitiesOverview: React.FC = () => {
         {userName || hostName ? (
           <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
             {userName && (
-              <EuiFlexItem>
-                <UserEntityOverview userName={userName} />
-              </EuiFlexItem>
+              <>
+                <EuiFlexItem>
+                  <UserEntityOverview userName={userName} />
+                </EuiFlexItem>
+                <EuiSpacer size="s" />
+              </>
             )}
-            <EuiSpacer size="s" />
             {hostName && (
               <EuiFlexItem>
                 <HostEntityOverview hostName={hostName} />

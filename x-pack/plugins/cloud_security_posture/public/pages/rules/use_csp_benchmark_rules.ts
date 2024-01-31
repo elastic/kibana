@@ -18,12 +18,12 @@ import {
 
 export type RulesQuery = Pick<
   FindCspBenchmarkRuleRequest,
-  'section' | 'search' | 'page' | 'perPage' | 'ruleNumber'
+  'section' | 'search' | 'page' | 'perPage' | 'ruleNumber' | 'sortField' | 'sortOrder'
 >;
 export type RulesQueryResult = ReturnType<typeof useFindCspBenchmarkRule>;
 
 export const useFindCspBenchmarkRule = (
-  { search, page, perPage, section, ruleNumber }: RulesQuery,
+  { search, page, perPage, section, ruleNumber, sortField, sortOrder }: RulesQuery,
   benchmarkId: string,
   benchmarkVersion?: string
 ) => {
@@ -32,12 +32,32 @@ export const useFindCspBenchmarkRule = (
   return useQuery(
     [
       CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
-      { section, search, page, perPage, benchmarkId, benchmarkVersion, ruleNumber },
+      {
+        section,
+        search,
+        page,
+        perPage,
+        benchmarkId,
+        benchmarkVersion,
+        ruleNumber,
+        sortField,
+        sortOrder,
+      },
     ],
     () => {
       return http.get<FindCspBenchmarkRuleResponse>(FIND_CSP_BENCHMARK_RULE_ROUTE_PATH, {
-        query: { benchmarkId, page, perPage, search, section, benchmarkVersion, ruleNumber },
-        version: '2',
+        query: {
+          benchmarkId,
+          page,
+          perPage,
+          search,
+          section,
+          benchmarkVersion,
+          ruleNumber,
+          sortField,
+          sortOrder,
+        },
+        version: '3',
       });
     }
   );

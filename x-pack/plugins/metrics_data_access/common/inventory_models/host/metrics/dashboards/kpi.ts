@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
-import type { MetricLayerOptions } from '@kbn/lens-embeddable-utils';
+import type { LensMetricConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import { createDashboardModel } from '../../../create_dashboard_model';
 import { createBasicCharts } from '../charts';
 
@@ -16,95 +15,28 @@ const AVERAGE = i18n.translate('xpack.metricsData.assetDetails.overview.kpi.subt
 
 export const kpi = {
   get: ({
-    metricsDataView,
+    metricsDataViewId,
     options,
   }: {
-    metricsDataView?: DataView;
-    options?: MetricLayerOptions;
+    metricsDataViewId?: string;
+    options?: Pick<LensMetricConfig, 'subtitle' | 'seriesColor'>;
   }) => {
     const { cpuUsage, diskUsage, memoryUsage, normalizedLoad1m } = createBasicCharts({
-      visualizationType: 'lnsMetric',
-      formulaIds: ['cpuUsage', 'diskUsage', 'memoryUsage', 'normalizedLoad1m'],
-      layerOptions: {
-        showTrendLine: true,
-        subtitle: AVERAGE,
-        ...options,
+      chartType: 'metric',
+      fromFormulas: ['cpuUsage', 'diskUsage', 'memoryUsage', 'normalizedLoad1m'],
+      chartConfig: {
+        trendLine: true,
+        subtitle: options?.subtitle ?? AVERAGE,
+        seriesColor: options?.seriesColor,
       },
-      dataView: metricsDataView,
+      dataViewId: metricsDataViewId,
     });
 
     return createDashboardModel({
-      charts: [
-        {
-          ...cpuUsage,
-          layers: {
-            ...cpuUsage.layers,
-            data: {
-              ...cpuUsage.layers.data,
-              format: cpuUsage.layers.data.format
-                ? {
-                    ...cpuUsage.layers.data.format,
-                    params: {
-                      decimals: 1,
-                    },
-                  }
-                : undefined,
-            },
-          },
-        },
-        {
-          ...normalizedLoad1m,
-          layers: {
-            ...normalizedLoad1m.layers,
-            data: {
-              ...normalizedLoad1m.layers.data,
-              format: normalizedLoad1m.layers.data.format
-                ? {
-                    ...normalizedLoad1m.layers.data.format,
-                    params: {
-                      decimals: 1,
-                    },
-                  }
-                : undefined,
-            },
-          },
-        },
-
-        {
-          ...memoryUsage,
-          layers: {
-            ...memoryUsage.layers,
-            data: {
-              ...memoryUsage.layers.data,
-              format: memoryUsage.layers.data.format
-                ? {
-                    ...memoryUsage.layers.data.format,
-                    params: {
-                      decimals: 1,
-                    },
-                  }
-                : undefined,
-            },
-          },
-        },
-        {
-          ...diskUsage,
-          layers: {
-            ...diskUsage.layers,
-            data: {
-              ...diskUsage.layers.data,
-              format: diskUsage.layers.data.format
-                ? {
-                    ...diskUsage.layers.data.format,
-                    params: {
-                      decimals: 1,
-                    },
-                  }
-                : undefined,
-            },
-          },
-        },
-      ],
+      charts: [cpuUsage, diskUsage, memoryUsage, normalizedLoad1m].map((p) => ({
+        ...p,
+        decimals: 1,
+      })),
     });
   },
 };

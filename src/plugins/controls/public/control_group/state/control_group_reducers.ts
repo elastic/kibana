@@ -10,9 +10,15 @@ import { PayloadAction } from '@reduxjs/toolkit';
 import { WritableDraft } from 'immer/dist/types/types-external';
 
 import { ControlWidth } from '../../types';
-import { ControlGroupInput, ControlGroupReduxState } from '../types';
+import { ControlGroupComponentState, ControlGroupInput, ControlGroupReduxState } from '../types';
 
 export const controlGroupReducers = {
+  setLastSavedInput: (
+    state: WritableDraft<ControlGroupReduxState>,
+    action: PayloadAction<ControlGroupComponentState['lastSavedInput']>
+  ) => {
+    state.componentState.lastSavedInput = action.payload;
+  },
   setControlStyle: (
     state: WritableDraft<ControlGroupReduxState>,
     action: PayloadAction<ControlGroupInput['controlStyle']>

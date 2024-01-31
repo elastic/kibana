@@ -34,7 +34,7 @@ import { Footer, footerHeight } from '../footer';
 import { calculateTotalPages } from '../helpers';
 import { TimelineRefetch } from '../refetch_timeline';
 import type { RowRenderer, ToggleDetailPanel } from '../../../../../common/types/timeline';
-import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
+import { TimelineTabs } from '../../../../../common/types/timeline';
 import { requiredFieldsForActions } from '../../../../detections/components/alerts_table/default_config';
 import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
 import { SuperDatePicker } from '../../../../common/components/super_date_picker';
@@ -48,7 +48,6 @@ import { useEqlEventsCountPortal } from '../../../../common/hooks/use_timeline_e
 import type { TimelineModel } from '../../../store/model';
 import { TimelineDatePickerLock } from '../date_picker_lock';
 import { useTimelineFullScreen } from '../../../../common/containers/use_full_screen';
-import { activeTimeline } from '../../../containers/active_timeline_context';
 import { DetailsPanel } from '../../side_panel';
 import { EqlQueryBarTimeline } from '../query_bar/eql';
 import { getDefaultControlColumn } from '../body/control_columns';
@@ -213,15 +212,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
 
   const handleOnPanelClosed = useCallback(() => {
     onEventClosed({ tabType: TimelineTabs.eql, id: timelineId });
-
-    if (
-      expandedDetail[TimelineTabs.eql]?.panelView &&
-      timelineId === TimelineId.active &&
-      showExpandedDetails
-    ) {
-      activeTimeline.toggleExpandedDetail({});
-    }
-  }, [onEventClosed, timelineId, expandedDetail, showExpandedDetails]);
+  }, [onEventClosed, timelineId]);
 
   useEffect(() => {
     dispatch(

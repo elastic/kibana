@@ -10,6 +10,7 @@ import { FindSLOResponse } from '@kbn/slo-schema';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { buildQueryFromFilters, Filter } from '@kbn/es-query';
+import { SearchState } from '../../pages/slos/hooks/use_url_search_state';
 import { useCreateDataView } from '../use_create_data_view';
 import {
   DEFAULT_SLO_PAGE_SIZE,
@@ -18,6 +19,7 @@ import {
 
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
+import { mixKqlWithTags } from './mix_kql_with_tags';
 
 interface SLOListParams {
   kqlQuery?: string;
@@ -27,6 +29,7 @@ interface SLOListParams {
   perPage?: number;
   filters?: Filter[];
   lastRefresh?: number;
+  tags?: SearchState['tags'];
 }
 
 export interface UseFetchSloListResponse {
@@ -46,6 +49,7 @@ export function useFetchSloList({
   perPage = DEFAULT_SLO_PAGE_SIZE,
   filters: filterDSL = [],
   lastRefresh,
+  tags,
 }: SLOListParams = {}): UseFetchSloListResponse {
   const {
     http,
@@ -69,9 +73,13 @@ export function useFetchSloList({
     }
   }, [filterDSL, dataView]);
 
+  const kqlQueryValue = useMemo(() => {
+    return mixKqlWithTags(kqlQuery, tags);
+  }, [kqlQuery, tags]);
+
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
     queryKey: sloKeys.list({
-      kqlQuery,
+      kqlQuery: kqlQueryValue,
       page,
       perPage,
       sortBy,
@@ -82,7 +90,7 @@ export function useFetchSloList({
     queryFn: async ({ signal }) => {
       return await http.get<FindSLOResponse>(`/api/observability/slos`, {
         query: {
-          ...(kqlQuery && { kqlQuery }),
+          ...(kqlQueryValue && { kqlQuery: kqlQueryValue }),
           ...(sortBy && { sortBy }),
           ...(sortDirection && { sortDirection }),
           ...(page && { page }),

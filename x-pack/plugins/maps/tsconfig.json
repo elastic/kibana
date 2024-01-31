@@ -83,6 +83,8 @@
     "@kbn/es-types",
     "@kbn/data-service",
     "@kbn/code-editor",
+    "@kbn/managed-content-badge",
+    "@kbn/presentation-publishing",
   ],
   "exclude": [
     "target/**/*",
