@@ -42,9 +42,6 @@ export const OptionsListControl = ({
   const isPopoverOpen = optionsList.select((state) => state.componentState.popoverOpen);
   const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
   const fieldSpec = optionsList.select((state) => state.componentState.field);
-  const showInvalidSelectionWarning = optionsList.select(
-    (state) => state.componentState.showInvalidSelectionWarning
-  );
 
   const id = optionsList.select((state) => state.explicitInput.id);
   const exclude = optionsList.select((state) => state.explicitInput.exclude);
@@ -196,7 +193,7 @@ export const OptionsListControl = ({
         'optionsList--filterGroupSingle': controlStyle !== 'twoLine',
       })}
     >
-      <EuiTourStep
+      {/* <EuiTourStep
         anchorPosition="downCenter"
         isStepOpen={showInvalidSelectionWarning}
         title={OptionsListStrings.control.getInvalidSelectionWarningTitle()}
@@ -225,28 +222,28 @@ export const OptionsListControl = ({
           optionsList.dispatch.setInvalidSelectionWarningOpen(false);
         }}
         onFinish={() => {}}
+      > */}
+      <EuiInputPopover
+        ownFocus
+        input={button}
+        hasArrow={false}
+        repositionOnScroll
+        isOpen={isPopoverOpen}
+        panelPaddingSize="none"
+        panelMinWidth={MIN_POPOVER_WIDTH}
+        className="optionsList__inputButtonOverride"
+        initialFocus={'[data-test-subj=optionsList-control-search-input]'}
+        closePopover={() => optionsList.dispatch.setPopoverOpen(false)}
+        panelClassName="optionsList__popoverOverride"
+        panelProps={{ 'aria-label': OptionsListStrings.popover.getAriaLabel(fieldName) }}
       >
-        <EuiInputPopover
-          ownFocus
-          input={button}
-          hasArrow={false}
-          repositionOnScroll
-          isOpen={isPopoverOpen}
-          panelPaddingSize="none"
-          panelMinWidth={MIN_POPOVER_WIDTH}
-          className="optionsList__inputButtonOverride"
-          initialFocus={'[data-test-subj=optionsList-control-search-input]'}
-          closePopover={() => optionsList.dispatch.setPopoverOpen(false)}
-          panelClassName="optionsList__popoverOverride"
-          panelProps={{ 'aria-label': OptionsListStrings.popover.getAriaLabel(fieldName) }}
-        >
-          <OptionsListPopover
-            isLoading={debouncedLoading}
-            updateSearchString={updateSearchString}
-            loadMoreSuggestions={loadMoreSuggestions}
-          />
-        </EuiInputPopover>
-      </EuiTourStep>
+        <OptionsListPopover
+          isLoading={debouncedLoading}
+          updateSearchString={updateSearchString}
+          loadMoreSuggestions={loadMoreSuggestions}
+        />
+      </EuiInputPopover>
+      {/* </EuiTourStep> */}
     </EuiFilterGroup>
   );
 };

@@ -11,7 +11,7 @@ import { get, isEmpty, isEqual } from 'lodash';
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
-import { lastValueFrom, Subscription, merge, switchMap } from 'rxjs';
+import { lastValueFrom, Subscription, merge, switchMap, BehaviorSubject } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
@@ -101,6 +101,7 @@ export class RangeSliderEmbeddable
   public dispatch: RangeSliderReduxEmbeddableTools['dispatch'];
   public onStateChange: RangeSliderReduxEmbeddableTools['onStateChange'];
 
+  public invalidSelections$: BehaviorSubject<string | undefined>;
   private cleanupStateTools: () => void;
 
   constructor(
@@ -131,6 +132,9 @@ export class RangeSliderEmbeddable
     this.dispatch = reduxEmbeddableTools.dispatch;
     this.onStateChange = reduxEmbeddableTools.onStateChange;
     this.cleanupStateTools = reduxEmbeddableTools.cleanup;
+
+    this.invalidSelections$ = new BehaviorSubject(undefined);
+
     this.initialize();
   }
 

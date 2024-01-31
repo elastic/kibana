@@ -10,7 +10,7 @@ import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { isEmpty, isEqual } from 'lodash';
-import { merge, Subject, Subscription, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, merge, Subject, Subscription, switchMap, tap } from 'rxjs';
 import React, { createContext, useContext } from 'react';
 import { debounceTime, map, distinctUntilChanged, skip } from 'rxjs/operators';
 
@@ -106,6 +106,7 @@ export class OptionsListEmbeddable
   public dispatch: OptionsListReduxEmbeddableTools['dispatch'];
   public onStateChange: OptionsListReduxEmbeddableTools['onStateChange'];
 
+  public invalidSelections$: BehaviorSubject<string | undefined>;
   private cleanupStateTools: () => void;
 
   constructor(
@@ -135,12 +136,13 @@ export class OptionsListEmbeddable
       reducers: optionsListReducers,
       initialComponentState: getDefaultComponentState(),
     });
-
     this.select = reduxEmbeddableTools.select;
     this.getState = reduxEmbeddableTools.getState;
     this.dispatch = reduxEmbeddableTools.dispatch;
     this.cleanupStateTools = reduxEmbeddableTools.cleanup;
     this.onStateChange = reduxEmbeddableTools.onStateChange;
+
+    this.invalidSelections$ = new BehaviorSubject<string | undefined>(undefined);
 
     this.initialize();
   }
@@ -353,6 +355,7 @@ export class OptionsListEmbeddable
           validSelections: selectedOptions,
           totalCardinality,
         });
+        this.invalidSelections$.next(undefined);
       } else {
         const valid: string[] = [];
         const invalid: string[] = [];
@@ -360,6 +363,7 @@ export class OptionsListEmbeddable
           if (invalidSelections?.includes(String(selectedOption))) invalid.push(selectedOption);
           else valid.push(selectedOption);
         }
+        this.invalidSelections$.next(this.id);
         this.dispatch.updateQueryResults({
           availableOptions: suggestions,
           invalidSelections: invalid,

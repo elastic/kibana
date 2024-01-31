@@ -7,6 +7,7 @@
  */
 
 import { ReactNode } from 'react';
+import { BehaviorSubject } from 'rxjs';
 
 import { Filter } from '@kbn/es-query';
 import {
@@ -48,6 +49,8 @@ export type ControlEmbeddable<
 
 export interface IClearableControl extends ControlEmbeddable {
   clearSelections: () => void;
+  invalidSelections$: BehaviorSubject<string | undefined>; // THIOS SHOULDN'T BE HERE LOL
+  // need to create a different type - ICanBeInvalidControl ??? idk
 }
 
 export const isClearableControl = (control: ControlEmbeddable): control is IClearableControl => {

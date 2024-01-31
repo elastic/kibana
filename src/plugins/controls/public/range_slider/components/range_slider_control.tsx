@@ -142,7 +142,7 @@ export const RangeSliderControl: FC = () => {
     <ControlError error={error} />
   ) : (
     <>
-      <EuiTourStep
+      {/* <EuiTourStep
         anchorPosition="downCenter"
         isStepOpen={showInvalidSelectionWarning}
         title={RangeSliderStrings.control.getInvalidRangeWarningTitle()}
@@ -171,49 +171,49 @@ export const RangeSliderControl: FC = () => {
           rangeSlider.dispatch.setInvalidRangeWarningOpen(false);
         }}
         onFinish={() => {}}
-      >
-        <span className="rangeSliderAnchor__button" data-test-subj={`range-slider-control-${id}`}>
-          <EuiDualRange
-            ref={rangeSliderRef}
-            id={id}
-            fullWidth
-            showTicks
-            ticks={ticks}
-            levels={levels}
-            min={displayedMin}
-            max={displayedMax}
-            isLoading={isLoading}
-            inputPopoverProps={{
-              panelMinWidth: MIN_POPOVER_WIDTH,
-            }}
-            onMouseUp={() => {
-              // when the pin is dropped (on mouse up), cancel any pending debounced changes and force the change
-              // in value to happen instantly (which, in turn, will re-calculate the min/max for the slider due to
-              // the `useEffect` above.
-              debouncedOnChange.cancel();
-              rangeSlider.dispatch.setSelectedRange(displayedValue);
-            }}
-            readOnly={disablePopover}
-            showInput={'inputWithPopover'}
-            data-test-subj="rangeSlider__slider"
-            minInputProps={getCommonInputProps({
-              inputValue: displayedValue[0],
-              testSubj: 'lowerBoundFieldNumber',
-              placeholder: String(min ?? -Infinity),
-            })}
-            maxInputProps={getCommonInputProps({
-              inputValue: displayedValue[1],
-              testSubj: 'upperBoundFieldNumber',
-              placeholder: String(max ?? Infinity),
-            })}
-            value={[displayedValue[0] || displayedMin, displayedValue[1] || displayedMax]}
-            onChange={([minSelection, maxSelection]: [number | string, number | string]) => {
-              setDisplayedValue([String(minSelection), String(maxSelection)]);
-              debouncedOnChange([String(minSelection), String(maxSelection)]);
-            }}
-          />
-        </span>
-      </EuiTourStep>
+      > */}
+      <span className="rangeSliderAnchor__button" data-test-subj={`range-slider-control-${id}`}>
+        <EuiDualRange
+          ref={rangeSliderRef}
+          id={id}
+          fullWidth
+          showTicks
+          ticks={ticks}
+          levels={levels}
+          min={displayedMin}
+          max={displayedMax}
+          isLoading={isLoading}
+          inputPopoverProps={{
+            panelMinWidth: MIN_POPOVER_WIDTH,
+          }}
+          onMouseUp={() => {
+            // when the pin is dropped (on mouse up), cancel any pending debounced changes and force the change
+            // in value to happen instantly (which, in turn, will re-calculate the min/max for the slider due to
+            // the `useEffect` above.
+            debouncedOnChange.cancel();
+            rangeSlider.dispatch.setSelectedRange(displayedValue);
+          }}
+          readOnly={disablePopover}
+          showInput={'inputWithPopover'}
+          data-test-subj="rangeSlider__slider"
+          minInputProps={getCommonInputProps({
+            inputValue: displayedValue[0],
+            testSubj: 'lowerBoundFieldNumber',
+            placeholder: String(min ?? -Infinity),
+          })}
+          maxInputProps={getCommonInputProps({
+            inputValue: displayedValue[1],
+            testSubj: 'upperBoundFieldNumber',
+            placeholder: String(max ?? Infinity),
+          })}
+          value={[displayedValue[0] || displayedMin, displayedValue[1] || displayedMax]}
+          onChange={([minSelection, maxSelection]: [number | string, number | string]) => {
+            setDisplayedValue([String(minSelection), String(maxSelection)]);
+            debouncedOnChange([String(minSelection), String(maxSelection)]);
+          }}
+        />
+      </span>
+      {/* </EuiTourStep> */}
     </>
   );
 };

@@ -26,9 +26,9 @@ import {
   LayoutMeasuringStrategy,
 } from '@dnd-kit/core';
 import classNames from 'classnames';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { TypedUseSelectorHook, useSelector } from 'react-redux';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTourStep } from '@elastic/eui';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
@@ -47,6 +47,33 @@ export const ControlGroup = () => {
   const viewMode = contextSelect((state) => state.explicitInput.viewMode);
   const controlStyle = contextSelect((state) => state.explicitInput.controlStyle);
   const showAddButton = contextSelect((state) => state.componentState.showAddButton);
+  const invalidSelectionsControlId = contextSelect(
+    (state) => state.componentState.invalidSelectionsControlId
+  );
+
+  useEffect(() => {
+    console.log('HEREEE', invalidSelectionsControlId);
+  }, [invalidSelectionsControlId]);
+
+  // const tourStep = useMemo(() => {
+  //   return (
+  //     <EuiTourStep
+  //       anchor={`#controlFrame--${invalidSelectionsControlId}`}
+  //       content={'this is some content'}
+  //       isStepOpen={Boolean(invalidSelectionsControlId)}
+  //       minWidth={300}
+  //       onFinish={() => {}}
+  //       step={1}
+  //       stepsTotal={1}
+  //       repositionOnScroll
+  //       maxWidth={300}
+  //       panelPaddingSize="m"
+  //       display="block"
+  //       title="React ref as anchor location"
+  //       anchorPosition="downCenter"
+  //     />
+  //   );
+  // }, [invalidSelectionsControlId]);
 
   const isEditable = viewMode === ViewMode.EDIT;
 
@@ -117,6 +144,21 @@ export const ControlGroup = () => {
             alignItems="center"
             data-test-subj="controls-group"
           >
+            <EuiTourStep
+              anchor={`#controlFrame--${invalidSelectionsControlId}`}
+              content={'this is some content'}
+              isStepOpen={Boolean(invalidSelectionsControlId)}
+              minWidth={300}
+              onFinish={() => {}}
+              step={1}
+              stepsTotal={1}
+              repositionOnScroll
+              maxWidth={300}
+              panelPaddingSize="m"
+              display="block"
+              title="React ref as anchor location"
+              anchorPosition="downCenter"
+            />
             <EuiFlexItem>
               <DndContext
                 onDragStart={({ active }) => setDraggingId(active.id)}
