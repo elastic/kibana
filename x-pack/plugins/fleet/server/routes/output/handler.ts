@@ -177,7 +177,9 @@ async function validateOutputServerless(
   }
   const type = output.type || originalOutput?.type;
   if (type === outputType.Elasticsearch && !isEqual(output.hosts, defaultOutput.hosts)) {
-    throw Boom.badRequest('Elasticsearch output host must equal default output host in serverless');
+    throw Boom.badRequest(
+      `Elasticsearch output host must have default URL in serverless: ${defaultOutput.hosts}`
+    );
   }
 }
 

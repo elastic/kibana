@@ -36,20 +36,20 @@ async function checkFleetServerHostsWriteAPIsAllowed(
     return;
   }
 
-  const defaultFleetServerHost = await getDefaultFleetServerHostUrls(soClient);
+  const defaultFleetServerHost = await getDefaultFleetServerHost(soClient);
   if (
     defaultFleetServerHost === undefined ||
     !isEqual(hostUrls, defaultFleetServerHost.host_urls)
   ) {
     throw new FleetServerHostUnauthorizedError(
-      `Fleet server host must have default URL${
+      `Fleet server host must have default URL in serverless${
         defaultFleetServerHost ? ': ' + defaultFleetServerHost.host_urls : ''
       }`
     );
   }
 }
 
-async function getDefaultFleetServerHostUrls(soClient: SavedObjectsClientContract) {
+async function getDefaultFleetServerHost(soClient: SavedObjectsClientContract) {
   const res = await listFleetServerHosts(soClient);
   const fleetServerHosts = res.items;
   return fleetServerHosts.find(
