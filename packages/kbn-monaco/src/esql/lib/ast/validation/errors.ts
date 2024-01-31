@@ -67,7 +67,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       return {
         message: i18n.translate('monaco.esql.validation.noNestedArgumentSupport', {
           defaultMessage:
-            "Aggregate function's parameters must be an attribute or literal; found [{name}] of type [{argType}]",
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [{name}] of type [{argType}]",
           values: { name: out.name, argType: out.argType },
         }),
       };
@@ -104,12 +104,23 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           },
         }),
       };
-    case 'unsupportedFunction':
+    case 'unsupportedFunctionForCommand':
       return {
-        message: i18n.translate('monaco.esql.validation.unsupportedFunction', {
+        message: i18n.translate('monaco.esql.validation.unsupportedFunctionForCommand', {
           defaultMessage: '{command} does not support function {name}',
           values: {
             command: out.command,
+            name: out.name,
+          },
+        }),
+      };
+    case 'unsupportedFunctionForCommandOption':
+      return {
+        message: i18n.translate('monaco.esql.validation.unsupportedFunctionforCommandOption', {
+          defaultMessage: '{command} {option} does not support function {name}',
+          values: {
+            command: out.command,
+            option: out.option,
             name: out.name,
           },
         }),

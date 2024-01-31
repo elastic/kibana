@@ -83,6 +83,7 @@ import type { ExperimentalFeatures } from '../common/experimental_features';
 import type { DeepLinksFormatter } from './common/links/deep_links';
 import type { SetComponents, GetComponents$ } from './contract_components';
 import type { ConfigSettings } from '../common/config_settings';
+import type { OnboardingPageService } from './app/components/onboarding/onboarding_page_service';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -149,6 +150,7 @@ export interface ContractStartServices {
   extraRoutes$: Observable<RouteProps[]>;
   getComponents$: GetComponents$;
   upselling: UpsellingService;
+  onboarding: OnboardingPageService;
 }
 
 export type StartServices = CoreStart &
@@ -188,6 +190,7 @@ export interface PluginStart {
   setComponents: SetComponents;
   getBreadcrumbsNav$: () => Observable<BreadcrumbsNav>;
   getUpselling: () => UpsellingService;
+  setOnboardingPageSettings: OnboardingPageService;
 }
 
 export interface AppObservableLibs {
