@@ -50,7 +50,6 @@ export const deprecatedPipelineBadge = {
   }),
 };
 
-
 export const PipelineTable: FunctionComponent<Props> = ({
   pipelines,
   onReloadClick,
@@ -242,7 +241,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
       filters: [
         {
           type: 'custom_component',
-          component: ({ query }) => {
+          component: ({ query: filterQuery }) => {
             return (
               <EuiFilterGroup>
                 <EuiPopover
@@ -257,7 +256,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
                     searchable
                     searchProps={{
                       placeholder: 'Filter list',
-                        compressed: true,
+                      compressed: true,
                     }}
                     aria-label="Filters"
                     options={filterOptions as EuiSelectableOption[]}
@@ -268,23 +267,23 @@ export const PipelineTable: FunctionComponent<Props> = ({
                       // Update current query
                       const newQuery = newOptions.reduce((acc, option) => {
                         if (option.checked === 'on') {
-                          acc = acc.addMustIsClause(option.label)
-                        } else if  (option.checked === 'off') {
+                          acc = acc.addMustIsClause(option.label);
+                        } else if (option.checked === 'off') {
                           acc = acc.addMustNotIsClause(option.label);
                         } else {
                           acc = acc.removeIsClause(option.label);
                         }
 
                         return acc;
-                      }, query);
+                      }, filterQuery);
 
                       setQuery(newQuery.text);
                     }}
                     noMatchesMessage="No filters found"
                   >
-                    {(list, search) => (
+                    {(list, searchText) => (
                       <div style={{ width: 300 }}>
-                        <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
+                        <EuiPopoverTitle paddingSize="s">{searchText}</EuiPopoverTitle>
                         {list}
                       </div>
                     )}
@@ -293,7 +292,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
               </EuiFilterGroup>
             );
           },
-        }
+        },
       ],
     },
     pagination: {

@@ -41,4 +41,4 @@ export const fuzzyMatch = (searchValue: string, text: string) => {
   const pattern = `.*${searchValue.split('').map(escapeRegExp).join('.*')}.*`;
   const regex = new RegExp(pattern);
   return regex.test(text);
-}
+};
