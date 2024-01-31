@@ -27,7 +27,6 @@ export class ReportingPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly share = this.ctx.getPageObject('share');
   private readonly timePicker = this.ctx.getPageObject('timePicker');
-  private readonly toasts = this.ctx.getService('toasts');
 
   async forceSharedItemsContainerSize({ width }: { width: number }) {
     await this.browser.execute(`
@@ -117,7 +116,8 @@ export class ReportingPageObject extends FtrService {
 
   async canReportBeCreated() {
     await this.clickGenerateReportButton();
-    return await this.toasts.checkForReportingToasts();
+    const success = await this.checkForReportingToasts();
+    return success;
   }
 
   async checkUsePrintLayout() {
@@ -136,6 +136,20 @@ export class ReportingPageObject extends FtrService {
 
   async toggleReportMode() {
     await this.testSubjects.click('reportModeToggle');
+  }
+
+  async checkForReportingToasts() {
+    this.log.debug('Reporting:checkForReportingToasts');
+    const isToastPresent = await this.testSubjects.exists('completeReportSuccess', {
+      allowHidden: true,
+      timeout: 90000,
+    });
+    // Close toast so it doesn't obscure the UI.
+    if (isToastPresent) {
+      await this.testSubjects.click('completeReportSuccess > toastCloseButton');
+    }
+
+    return isToastPresent;
   }
 
   // set the time picker to a range matching 720 documents when using the

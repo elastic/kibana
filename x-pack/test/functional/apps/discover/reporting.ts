@@ -309,7 +309,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       afterEach(async () => {
-        await toasts.checkForReportingToasts();
+        await PageObjects.reporting.checkForReportingToasts();
       });
 
       it('generates a report with data', async () => {
