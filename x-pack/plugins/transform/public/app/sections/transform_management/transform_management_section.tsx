@@ -224,8 +224,6 @@ export const TransformManagement: FC = (props) => {
   return (
     <>
       <TransformElasticAssistantChat />
-
-      <EuiSpacer size="s" />
       <EuiPageTemplate.Header
         pageTitle={
           <span data-test-subj="transformAppTitle">
