@@ -36,6 +36,8 @@ describe('Severity form field', () => {
     },
     selectedColumns: [],
     onSelectedColumnsChange: jest.fn(),
+    onClearFilters: jest.fn(),
+    showClearFiltersButton: false,
   };
 
   beforeEach(() => {
@@ -82,6 +84,7 @@ describe('Severity form field', () => {
 
   it('renders showing cases correctly when no cases available', async () => {
     const updatedProps = {
+      ...props,
       totalCases: 0,
       selectedCases: [],
       deselectCases,
@@ -90,9 +93,8 @@ describe('Severity form field', () => {
         pageIndex: 1,
         totalItemCount: 0,
       },
-      selectedColumns: [],
-      onSelectedColumnsChange: jest.fn(),
     };
+
     appMockRender.render(<CasesTableUtilityBar {...updatedProps} />);
     expect(screen.getByText('Showing 0 of 0 cases')).toBeInTheDocument();
   });

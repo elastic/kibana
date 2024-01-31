@@ -63,6 +63,7 @@ export function useAllCasesState(isModalView: boolean = false): UseAllCasesState
     [localStorageState, urlState, isModalView, setLocalStorageState, setUrlState]
   );
 
+  // use of useEffect because setUrlState calls history.push
   useEffect(() => {
     if (
       !isStateLoadedFromLocalStorage.current &&
@@ -157,14 +158,14 @@ const useAllCasesLocalStorage = (): [
   const { appId } = useCasesContext();
 
   const [state, setState] = useLocalStorage<AllCasesTableState>(
-    getQueryParamsLocalStorageKey(appId),
+    getAllCasesTableStateLocalStorageKey(appId),
     { queryParams: DEFAULT_QUERY_PARAMS, filterOptions: DEFAULT_FILTER_OPTIONS }
   );
 
   return [state, setState];
 };
 
-const getQueryParamsLocalStorageKey = (appId: string) => {
+const getAllCasesTableStateLocalStorageKey = (appId: string) => {
   const key = LOCAL_STORAGE_KEYS.casesTableState;
   return `${appId}.${key}`;
 };
