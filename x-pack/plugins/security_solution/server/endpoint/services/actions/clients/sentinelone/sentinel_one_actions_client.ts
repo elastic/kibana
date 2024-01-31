@@ -40,13 +40,13 @@ export type SentinelOneActionsClientOptions = ResponseActionsClientOptions & {
 export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   protected readonly agentType: ResponseActionAgentType = 'sentinel_one';
   private readonly connectorActionsClient: ActionsClient;
-  private readonly username: string;
+  private readonly actionsClientOptions: ResponseActionsClientOptions;
   private readonly getConnector: () => Promise<ConnectorWithExtraFindData>;
 
   constructor({ connectorActions, ...options }: SentinelOneActionsClientOptions) {
     super(options);
     this.connectorActionsClient = connectorActions;
-    this.username = options.username;
+    this.actionsClientOptions = options;
 
     this.getConnector = once(async () => {
       let connectorList: ConnectorWithExtraFindData[] = [];
@@ -203,7 +203,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       const createPayload = {
         ...options,
         command: commandName,
-        user: { username: this.username },
+        user: { username: this.actionsClientOptions.username },
       };
       const agentId = options.endpoint_ids[0];
       await updateCases({
@@ -223,7 +223,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         createActionPayload: createPayload,
       });
     } catch (err) {
-      // TODO add log error
+      this.log.warn(`failed to update cases: ${err.message}\n${stringify(err)}`);
     }
 
     return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
