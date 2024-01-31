@@ -10,6 +10,7 @@ import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
 import { Tool } from '@langchain/core/tools';
 
 import { streamFactory } from '@kbn/ml-response-stream/server';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { ActionsClientChatOpenAI } from '../llm/openai';
 import { ActionsClientLlm } from '../llm/actions_client_llm';
@@ -59,6 +60,9 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     llmType,
     logger,
     streaming: isStream,
+    // prevents the agent from retrying on failure
+    // failure could be due to bad connector, we should deliver that result to the client asap
+    maxRetries: 0,
   });
 
   const pastMessages = langChainMessages.slice(0, -1); // all but the last message
@@ -130,30 +134,56 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
       responseWithHeaders,
     } = streamFactory<{ type: string; payload: string }>(request.headers, logger, false, false);
 
-    executor.stream(
-      {
-        input: latestMessage[0].content,
-        chat_history: [],
-      },
-      {
-        callbacks: [
-          {
-            handleLLMNewToken(payload) {
-              push({ payload, type: 'content' });
+    const handleStreamEnd = (finalResponse: string) => {
+      // @yuliia this would be a good place for pushing the response to the chat history
+      streamEnd();
+    };
+
+    executor
+      .stream(
+        {
+          input: latestMessage[0].content,
+          chat_history: [],
+        },
+        {
+          callbacks: [
+            {
+              handleLLMNewToken(payload) {
+                push({ payload, type: 'content' });
+              },
+              handleLLMEnd(llmResult) {
+                handleStreamEnd(llmResult.generations[0][0].text);
+              },
             },
-            handleLLMEnd(llmResult) {
-              // @yuliia this could be a good place for pushing the response to the chat history
-              // the full response is under llmResult.generations[0][0].text
-              streamEnd();
-            },
-          },
-          apmTracer,
-          ...(traceOptions?.tracers ?? []),
-        ],
-        runName: DEFAULT_AGENT_EXECUTOR_ID,
-        tags: traceOptions?.tags ?? [],
-      }
-    );
+            apmTracer,
+            ...(traceOptions?.tracers ?? []),
+          ],
+          runName: DEFAULT_AGENT_EXECUTOR_ID,
+          tags: traceOptions?.tags ?? [],
+        }
+      )
+      .catch((err) => {
+        // if I throw an error here, it crashes the server. Not sure how to get around that.
+        // If I put await on this function the error works properly, but when there is not an error
+        // it waits for the entire stream to complete before resolving
+        const error = transformError(err);
+        logger.error(`Error streaming from LangChain: ${error.message}`);
+        const errorMessages = [
+          `An error occurred while streaming from LangChain:\n\n`,
+          error.message,
+          // add extra error message for known Azure Functions error
+          ...(error.message.includes(`Unrecognized request argument supplied: functions`)
+            ? [
+                '\n\nFunction support with Azure OpenAI API was added in 2023-07-01-preview. Update the API version of the Azure OpenAI connector in use',
+              ]
+            : []),
+        ];
+
+        errorMessages.forEach((payload) => {
+          push({ payload, type: 'content' });
+        });
+        handleStreamEnd(errorMessages.join());
+      });
 
     // TODO before merge to main
     // figure out how to pass trace_data and replacements @spong @macri @yuliia

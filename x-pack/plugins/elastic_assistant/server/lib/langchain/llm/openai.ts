@@ -29,6 +29,7 @@ interface ActionsClientChatOpenAIParams {
   request: KibanaRequest<unknown, unknown, RequestBody>;
   streaming?: boolean;
   traceId?: string;
+  maxRetries?: number;
 }
 
 /**
@@ -63,8 +64,12 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     llmType,
     logger,
     request,
+    maxRetries,
   }: ActionsClientChatOpenAIParams) {
     super({
+      maxRetries,
+      streaming: true,
+      // these have to be initialized, but are not actually used since we override the openai client with the actions client
       azureOpenAIApiKey: 'nothing',
       azureOpenAIApiDeploymentName: 'nothing',
       azureOpenAIApiInstanceName: 'nothing',
@@ -127,9 +132,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
       const actionResult = await actionsClient.execute(requestBody);
 
       if (actionResult.status === 'error') {
-        throw new Error(
-          `${LLM_TYPE}: action result status is error: ${actionResult?.message} - ${actionResult?.serviceMessage}`
-        );
+        throw new Error(`${LLM_TYPE}: ${actionResult?.message} - ${actionResult?.serviceMessage}`);
       }
 
       // cast typing as this is the contract of the actions client
