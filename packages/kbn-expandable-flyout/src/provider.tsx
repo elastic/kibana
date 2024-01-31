@@ -28,13 +28,15 @@ const UrlSynchronizer = () => {
 
   const history = useHistory();
 
-  const urlStorage = useMemo(() => {
-    return createKbnUrlStateStorage({
-      history,
-      useHash: false,
-      useHashQuery: false,
-    });
-  }, [history]);
+  const urlStorage = useMemo(
+    () =>
+      createKbnUrlStateStorage({
+        history,
+        useHash: false,
+        useHashQuery: false,
+      }),
+    [history]
+  );
 
   useEffect(() => {
     const currentValue = urlStorage.get<State>(EXPANDABLE_FLYOUT_URL_KEY);
@@ -44,15 +46,11 @@ const UrlSynchronizer = () => {
       dispatch(urlChangedAction({ ...currentValue, preview: currentValue?.preview[0] }));
     }
 
-    return urlStorage
-      .change$<State>(EXPANDABLE_FLYOUT_URL_KEY)
-      .subscribe((value) => {
-        if (!value) {
-          return;
-        }
-        dispatch(urlChangedAction({ ...value, preview: value?.preview[0] }));
-      })
-      .unsubscribe();
+    const subscription = urlStorage.change$<State>(EXPANDABLE_FLYOUT_URL_KEY).subscribe((value) => {
+      dispatch(urlChangedAction({ ...value, preview: value?.preview?.[0] }));
+    });
+
+    return () => subscription.unsubscribe();
   }, [dispatch, urlStorage]);
 
   useEffect(() => {
