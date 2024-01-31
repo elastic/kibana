@@ -100,13 +100,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.refresh();
 
         await PageObjects.discover.selectTextBaseLang();
-        await monacoEditor.setCodeEditorValue('from logstash-* | limit 10 | sort @timestamp ');
+        await monacoEditor.setCodeEditorValue('from logstash-* | limit 1000 | sort @timestamp ');
         await testSubjects.click('querySubmitButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '74 available fields. 8 empty fields.'
+          '76 available fields. 6 empty fields.'
         );
       });
 
@@ -115,7 +115,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.refresh();
 
         await PageObjects.discover.selectTextBaseLang();
-        await monacoEditor.setCodeEditorValue('from logstash-* | limit 10 | sort @timestamp ');
+        await monacoEditor.setCodeEditorValue('from logstash-* | limit 1000 | sort @timestamp ');
         await testSubjects.click('querySubmitButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
@@ -129,7 +129,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '2 available fields. 4 empty fields.'
+          '4 available fields. 2 empty fields.'
         );
       });
     });
@@ -429,20 +429,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         await PageObjects.discover.selectTextBaseLang();
-        await monacoEditor.setCodeEditorValue('from logstash-* | limit 10 | sort @timestamp ');
+        await monacoEditor.setCodeEditorValue('from logstash-* | limit 1000 | sort @timestamp ');
         await testSubjects.click('querySubmitButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '74 available fields. 8 empty fields.'
+          '76 available fields. 6 empty fields.'
         );
 
         await PageObjects.unifiedFieldList.clickFieldListItemRemove('extension');
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '74 available fields. 8 empty fields.'
+          '76 available fields. 6 empty fields.'
         );
 
         const testQuery = `from logstash-* | limit 10 | stats countB = count(bytes) by geo.dest | sort countB`;
