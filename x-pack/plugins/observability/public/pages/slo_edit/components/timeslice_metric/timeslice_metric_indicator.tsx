@@ -179,6 +179,7 @@ export function TimesliceMetricIndicatorTypeForm() {
           thresholdDirection={['GT', 'GTE'].includes(comparator) ? 'above' : 'below'}
           thresholdColor={euiTheme.colors.warning}
           thresholdMessage={`${COMPARATOR_MAPPING[comparator]} ${threshold}`}
+          ignoreMoreThan100
         />
       </EuiFlexGroup>
     </>

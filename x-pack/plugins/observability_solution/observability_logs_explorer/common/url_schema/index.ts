@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY } from './common';
+export { OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY } from './common';
 export * as urlSchemaV1 from './url_schema_v1';
