@@ -82,6 +82,12 @@ export function getActionType(): TorqActionType {
         schema: ParamsSchema,
       },
     },
+    schemas: {
+      params: {
+        type: 'config-schema',
+        schema: schema.object(configSchemaProps),
+      },
+    },
     renderParameterTemplates,
     executor: curry(executor)(),
   };
