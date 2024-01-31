@@ -352,6 +352,16 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
           },
         ],
       },
+      '5': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              is_internal: { type: 'boolean', index: false },
+            },
+          },
+        ],
+      },
     },
     migrations: {
       '7.13.0': migrateOutputToV7130,
