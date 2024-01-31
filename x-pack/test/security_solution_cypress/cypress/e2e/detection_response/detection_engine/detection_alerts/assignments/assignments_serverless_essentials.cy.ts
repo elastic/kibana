@@ -20,7 +20,6 @@ import {
   loadPageAs,
 } from '../../../../../tasks/alert_assignments';
 
-// FLAKY: https://github.com/elastic/kibana/issues/172520
 describe(
   'Alert user assignment - Serverless Essentials',
   {
