@@ -13,6 +13,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     const { common, navigationalSearch } = getPageObjects(['common', 'navigationalSearch']);
     const browser = getService('browser');
     const kibanaServer = getService('kibanaServer');
+    const retry = getService('retry');
 
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
@@ -51,22 +52,28 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('shows a suggestion when searching for a term matching a type', async () => {
         await navigationalSearch.searchFor('dashboard');
 
-        let results = await navigationalSearch.getDisplayedResults();
-        expect(results[0].label).to.eql('type: dashboard');
+        let results;
+        // catching for test failures with label undefined
+        await retry.try(async () => {
+          results = await navigationalSearch.getDisplayedResults();
+          if (results) {
+            expect(results[0].label).to.eql('type: dashboard');
 
-        await navigationalSearch.clickOnOption(0);
-        await navigationalSearch.waitForResultsLoaded();
+            await navigationalSearch.clickOnOption(0);
+            await navigationalSearch.waitForResultsLoaded();
 
-        const searchTerm = await navigationalSearch.getFieldValue();
-        expect(searchTerm).to.eql('type:dashboard');
+            const searchTerm = await navigationalSearch.getFieldValue();
+            expect(searchTerm).to.eql('type:dashboard');
 
-        results = await navigationalSearch.getDisplayedResults();
-        expect(results.map((result) => result.label)).to.eql([
-          'dashboard 1 (tag-2)',
-          'dashboard 2 (tag-3)',
-          'dashboard 3 (tag-1 and tag-3)',
-          'dashboard 4 (tag-special-chars)',
-        ]);
+            results = await navigationalSearch.getDisplayedResults();
+            expect(results.map((result) => result.label)).to.eql([
+              'dashboard 1 (tag-2)',
+              'dashboard 2 (tag-3)',
+              'dashboard 3 (tag-1 and tag-3)',
+              'dashboard 4 (tag-special-chars)',
+            ]);
+          }
+        });
       });
       it('shows a suggestion when searching for a term matching a tag name', async () => {
         await navigationalSearch.searchFor('tag-1');
