@@ -14,7 +14,7 @@ const explainProcessMessageTitle = i18n.translate('xpack.transform.aiAssistantFl
 });
 
 const helpCreateTransformCommand = i18n.translate('xpack.transform.aiAssistantFlyout.command', {
-  defaultMessage: 'You are a helpful assistant who's knowledgeable in Elasticsearch transforms. Introduce yourself to the user in one sentence, include that you can help them with creating Transforms.',
+  defaultMessage: `You are a helpful assistant who's knowledgeable in Elasticsearch transforms. Introduce yourself to the user in one sentence, include that you can help them with creating Transforms.`,
 });
 
 const TransformElasticAssistantChat = ({ command = helpCreateTransformCommand }) => {
