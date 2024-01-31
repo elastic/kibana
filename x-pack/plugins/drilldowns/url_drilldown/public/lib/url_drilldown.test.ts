@@ -57,9 +57,11 @@ const mockDataPoints = [
 ];
 
 const mockEmbeddableApi = {
-  localFilters: new BehaviorSubject([]),
-  localQuery: new BehaviorSubject({ query: 'test', language: 'kuery' }),
-  localTimeRange: new BehaviorSubject({ from: 'now-15m', to: 'now' }),
+  parentApi: {
+    localFilters: new BehaviorSubject([]),
+    localQuery: new BehaviorSubject({ query: 'test', language: 'kuery' }),
+    localTimeRange: new BehaviorSubject({ from: 'now-15m', to: 'now' }),
+  }
 };
 
 const mockNavigateToUrl = jest.fn(() => Promise.resolve());
@@ -289,20 +291,22 @@ describe('UrlDrilldown', () => {
         { id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' },
         { id: 'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy' },
       ]),
-      localFilters: new BehaviorSubject([
-        {
-          meta: {
-            alias: 'asdf',
-            disabled: false,
-            negate: false,
+      parentApi: {
+        localFilters: new BehaviorSubject([
+          {
+            meta: {
+              alias: 'asdf',
+              disabled: false,
+              negate: false,
+            },
           },
-        },
-      ]),
-      localQuery: new BehaviorSubject({
-        language: 'C++',
-        query: 'std::cout << 123;',
-      }),
-      localTimeRange: new BehaviorSubject({ from: 'FROM', to: 'TO' }),
+        ]),
+        localQuery: new BehaviorSubject({
+          language: 'C++',
+          query: 'std::cout << 123;',
+        }),
+        localTimeRange: new BehaviorSubject({ from: 'FROM', to: 'TO' }),
+      },
       panelTitle: new BehaviorSubject('The Title'),
       savedObjectId: new BehaviorSubject('SAVED_OBJECT_ID'),
       uuid: 'the-id',

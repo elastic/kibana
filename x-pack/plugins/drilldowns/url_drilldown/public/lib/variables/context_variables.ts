@@ -11,6 +11,7 @@ import { getFlattenedObject } from '@kbn/std';
 import type { Filter, AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import type {
   EmbeddableApiContext,
+  HasParentApi,
   HasUniqueId,
   PublishesPanelTitle,
   PublishesSavedObjectId,
@@ -67,7 +68,8 @@ export const getContextScopeValues = (context: Partial<EmbeddableApiContext>): C
       PublishesPanelTitle &
       PublishesSavedObjectId &
       PublishesLocalUnifiedSearch &
-      PublishesDataViews
+      PublishesDataViews & 
+      HasParentApi
   >;
   const dataViewIds = api.dataViews?.value
     ? (api.dataViews?.value.map((dataView) => dataView.id).filter(Boolean) as string[])
@@ -78,9 +80,9 @@ export const getContextScopeValues = (context: Partial<EmbeddableApiContext>): C
       id: api.uuid,
       title: api.panelTitle?.value ?? api.defaultPanelTitle?.value,
       savedObjectId: api.savedObjectId?.value,
-      query: api.localQuery?.value,
-      timeRange: api.localTimeRange?.value,
-      filters: api.localFilters?.value,
+      query: api.parentApi?.localQuery?.value,
+      timeRange: api.localTimeRange?.value ?? api.parentApi?.localTimeRange?.value,
+      filters: api.parentApi?.localFilters?.value,
       indexPatternIds: dataViewIds.length > 1 ? dataViewIds : undefined,
       indexPatternId: dataViewIds.length === 1 ? dataViewIds[0] : undefined,
     }),
