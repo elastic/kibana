@@ -22,6 +22,7 @@ import { SettingsTabs } from '@kbn/management-settings-types/tab';
 import { EmptyState } from './empty_state';
 import { i18nTexts } from './i18n_texts';
 import { Tab } from './tab';
+import { readOnlyBadge } from './read_only_badge';
 import { useScopeFields } from './hooks/use_scope_fields';
 import { QueryInput, QueryInputProps } from './query_input';
 import { useServices } from './services';
@@ -53,7 +54,8 @@ function getQueryParam(url: string) {
  * Component for displaying the {@link SettingsApplication} component.
  */
 export const SettingsApplication = () => {
-  const { addUrlToHistory } = useServices();
+  const { addUrlToHistory, getSections, getToastsService, getCapabilities, setBadge } =
+    useServices();
 
   const queryParam = getQueryParam(window.location.href);
   const [query, setQuery] = useState<Query>(Query.parse(queryParam));
@@ -68,7 +70,17 @@ export const SettingsApplication = () => {
   const [spaceAllFields, globalAllFields] = useScopeFields();
   const [spaceFilteredFields, globalFilteredFields] = useScopeFields(query);
 
-  const globalSettingsEnabled = globalAllFields.length > 0;
+  const {
+    spaceSettings: { save: canSaveSpaceSettings },
+    globalSettings: { save: canSaveGlobalSettings, show: canShowGlobalSettings },
+  } = getCapabilities();
+  if (!canSaveSpaceSettings || (!canSaveGlobalSettings && canShowGlobalSettings)) {
+    setBadge(readOnlyBadge);
+  }
+
+  // Only enabled the Global settings tab if there are any global settings
+  // and if global settings can be shown
+  const globalTabEnabled = globalAllFields.length > 0 && canShowGlobalSettings;
 
   const tabs: SettingsTabs = {
     [SPACE_SETTINGS_TAB_ID]: {
@@ -77,16 +89,19 @@ export const SettingsApplication = () => {
       categoryCounts: getCategoryCounts(spaceAllFields),
       callOutTitle: i18nTexts.spaceCalloutTitle,
       callOutText: i18nTexts.spaceCalloutText,
+      sections: getSections('namespace'),
+      isSavingEnabled: canSaveSpaceSettings,
     },
   };
-  // Only add a Global settings tab if there are any global settings
-  if (globalSettingsEnabled) {
+  if (globalTabEnabled) {
     tabs[GLOBAL_SETTINGS_TAB_ID] = {
       name: i18nTexts.globalTabTitle,
       fields: globalFilteredFields,
       categoryCounts: getCategoryCounts(globalAllFields),
       callOutTitle: i18nTexts.globalCalloutTitle,
       callOutText: i18nTexts.globalCalloutText,
+      sections: getSections('global'),
+      isSavingEnabled: canSaveGlobalSettings,
     };
   }
 
@@ -110,7 +125,7 @@ export const SettingsApplication = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      {globalSettingsEnabled && (
+      {globalTabEnabled && (
         <>
           <EuiTabs>
             {Object.keys(tabs).map((id) => (
@@ -130,13 +145,31 @@ export const SettingsApplication = () => {
       )}
       <EuiSpacer size="xl" />
       {selectedTab.fields.length ? (
-        <Form
-          fields={selectedTab.fields}
-          categoryCounts={selectedTab.categoryCounts}
-          isSavingEnabled={true}
-          onClearQuery={() => onQueryChange()}
-          scope={selectedTabId === SPACE_SETTINGS_TAB_ID ? 'namespace' : 'global'}
-        />
+        <>
+          <Form
+            fields={selectedTab.fields}
+            categoryCounts={selectedTab.categoryCounts}
+            isSavingEnabled={selectedTab.isSavingEnabled}
+            onClearQuery={() => onQueryChange()}
+            scope={selectedTabId === SPACE_SETTINGS_TAB_ID ? 'namespace' : 'global'}
+          />
+          <EuiSpacer size="l" />
+          {selectedTab.sections.length > 0 &&
+            selectedTab.sections.map(({ Component, queryMatch }, index) => {
+              if (queryMatch(query.text)) {
+                return (
+                  <Component
+                    key={`component-${index}`}
+                    toasts={getToastsService()}
+                    enableSaving={{
+                      global: canSaveGlobalSettings,
+                      namespace: canSaveSpaceSettings,
+                    }}
+                  />
+                );
+              }
+            })}
+        </>
       ) : (
         <EmptyState {...{ queryText: query?.text, onClearQuery: () => onQueryChange() }} />
       )}

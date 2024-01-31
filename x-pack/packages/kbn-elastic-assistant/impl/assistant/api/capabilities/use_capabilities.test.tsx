@@ -11,11 +11,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import React from 'react';
 import { useCapabilities, UseCapabilitiesParams } from './use_capabilities';
+import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 
 const statusResponse = { assistantModelEvaluation: true, assistantStreamingEnabled: false };
 
 const http = {
-  fetch: jest.fn().mockResolvedValue(statusResponse),
+  get: jest.fn().mockResolvedValue(statusResponse),
 };
 const toasts = {
   addError: jest.fn(),
@@ -36,14 +37,10 @@ describe('useFetchRelatedCases', () => {
       wrapper: createWrapper(),
     });
 
-    expect(defaultProps.http.fetch).toHaveBeenCalledWith(
-      '/internal/elastic_assistant/capabilities',
-      {
-        method: 'GET',
-        version: '1',
-        signal: new AbortController().signal,
-      }
-    );
+    expect(defaultProps.http.get).toHaveBeenCalledWith('/internal/elastic_assistant/capabilities', {
+      version: API_VERSIONS.internal.v1,
+      signal: new AbortController().signal,
+    });
     expect(toasts.addError).not.toHaveBeenCalled();
   });
 });
