@@ -15,6 +15,7 @@ import { registerEsqlFunction } from './esql';
 import { registerGetDatasetInfoFunction } from './get_dataset_info';
 import { registerLensFunction } from './lens';
 import { registerKibanaFunction } from './kibana';
+import { registerTransformFunction } from './transform';
 
 export type FunctionRegistrationParameters = Omit<
   Parameters<ChatRegistrationFunction>[0],
@@ -57,7 +58,7 @@ export const registerFunctions: ChatRegistrationFunction = async ({
         Note that ES|QL (the Elasticsearch query language, which is NOT Elasticsearch SQL, but a new piped language) is the preferred query language.
 
         Use the "get_dataset_info" function if it is not clear what fields or indices the user means, or if you want to get more information about the mappings.
-        
+
         If the user asks about a query, or ES|QL, always call the "esql" function. DO NOT UNDER ANY CIRCUMSTANCES generate ES|QL queries or explain anything about the ES|QL query language yourself.
         Even if the "recall" function was used before that, follow it up with the "esql" function. If a query fails, do not attempt to correct it yourself. Again you should call the "esql" function,
         even if it has been called before.
@@ -76,6 +77,7 @@ export const registerFunctions: ChatRegistrationFunction = async ({
       registerSummarizationFunction(registrationParameters);
       registerRecallFunction(registrationParameters);
       registerLensFunction(registrationParameters);
+      registerTransformFunction(registrationParameters);
     } else {
       description += `You do not have a working memory. Don't try to recall information via the "recall" function.  If the user expects you to remember the previous conversations, tell them they can set up the knowledge base. A banner is available at the top of the conversation to set this up.`;
     }
