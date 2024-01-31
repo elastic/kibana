@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { LogExplorerPublicStateUpdate } from '@kbn/logs-explorer-plugin/public';
+import { LogsExplorerPublicStateUpdate } from '@kbn/logs-explorer-plugin/public';
 import * as rt from 'io-ts';
 import { deepCompactObject, urlSchemaV1 } from '../../../../common';
 
 export const getStateFromUrlValue = (
   urlValue: urlSchemaV1.UrlSchema
-): LogExplorerPublicStateUpdate =>
-  deepCompactObject<LogExplorerPublicStateUpdate>({
+): LogsExplorerPublicStateUpdate =>
+  deepCompactObject<LogsExplorerPublicStateUpdate>({
     chart: {
       breakdownField: urlValue.breakdownField,
     },
@@ -31,7 +31,7 @@ export const getStateFromUrlValue = (
     time: urlValue.time,
   });
 
-export const getUrlValueFromState = (state: LogExplorerPublicStateUpdate): urlSchemaV1.UrlSchema =>
+export const getUrlValueFromState = (state: LogsExplorerPublicStateUpdate): urlSchemaV1.UrlSchema =>
   deepCompactObject<urlSchemaV1.UrlSchema>({
     breakdownField: state.chart?.breakdownField,
     columns: state.grid?.columns,
@@ -47,7 +47,7 @@ export const getUrlValueFromState = (state: LogExplorerPublicStateUpdate): urlSc
   });
 
 const stateFromUrlSchemaRT = new rt.Type<
-  LogExplorerPublicStateUpdate,
+  LogsExplorerPublicStateUpdate,
   urlSchemaV1.UrlSchema,
   urlSchemaV1.UrlSchema
 >(

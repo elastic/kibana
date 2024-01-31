@@ -11,14 +11,14 @@ import {
   LogsExplorerLocatorParams,
   LOGS_EXPLORER_LOCATOR_ID,
 } from '@kbn/deeplinks-observability/locators';
-import { LogExplorerLocatorDependencies } from './types';
+import { LogsExplorerLocatorDependencies } from './types';
 
-export type LogExplorerLocator = LocatorPublic<LogsExplorerLocatorParams>;
+export type LogsExplorerLocator = LocatorPublic<LogsExplorerLocatorParams>;
 
-export class LogExplorerLocatorDefinition implements LocatorDefinition<LogsExplorerLocatorParams> {
+export class LogsExplorerLocatorDefinition implements LocatorDefinition<LogsExplorerLocatorParams> {
   public readonly id = LOGS_EXPLORER_LOCATOR_ID;
 
-  constructor(protected readonly deps: LogExplorerLocatorDependencies) {}
+  constructor(protected readonly deps: LogsExplorerLocatorDependencies) {}
 
   public readonly getLocation = (params: LogsExplorerLocatorParams) => {
     const { dataset } = params;

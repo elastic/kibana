@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export * from './log_explorer';
+import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { LocatorPublic } from '@kbn/share-plugin/common';
+
+export interface LogsExplorerLocatorDependencies {
+  discoverAppLocator?: LocatorPublic<DiscoverAppLocatorParams>;
+}

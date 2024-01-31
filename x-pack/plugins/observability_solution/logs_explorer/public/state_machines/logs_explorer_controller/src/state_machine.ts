@@ -34,24 +34,24 @@ import {
   updateTimefilterFromContext,
 } from './services/timefilter_service';
 import {
-  LogExplorerControllerContext,
-  LogExplorerControllerEvent,
-  LogExplorerControllerTypeState,
+  LogsExplorerControllerContext,
+  LogsExplorerControllerEvent,
+  LogsExplorerControllerTypeState,
 } from './types';
 
-export const createPureLogExplorerControllerStateMachine = (
-  initialContext: LogExplorerControllerContext
+export const createPureLogsExplorerControllerStateMachine = (
+  initialContext: LogsExplorerControllerContext
 ) =>
   /** @xstate-layout N4IgpgJg5mDOIC5QBkD2UCiAPADgG1QCcxCBhVAOwBdDU88SA6AVwoEt2q2BDPNgL0gBiAEoZSGAJIA1DABEA+gGUAKgEEVGBaQDyAOXWS9GEQG0ADAF1EoHKlhsulGyCyIAtACYAbIwDsAIzmAJwAzH4ArAA0IACeiJ5+AByMwZ6hnokALD6e5kneAL6FMWiYuATEZJQ0dAyEjByOPHz8HFBy3FTc0mxgAO5CEJRgjRQAbqgA1qNl2PhEJOTUtPRMTVy8Au2d3b0DCByTAMZdbJQWlpcudg5OFC5uCAGejObentFxiBHBwYyeLIBX5JfLeX7BCLFUroeaVJY1Vb1MbNLZtCgdLo9PqDEi0Br4LoAMyIAFtGHMKotqis6utOC1thjdtiDkdUKd7pdrkgQLdms5eU9sowAqEkn8IuLIUDvN4YvEEFksqE3hFQaEglkperPNCQJSFlVlrU1g0Noz0VATasAArcChgPCwIYjMaTGYU2FU42Iunmhlo9o2uj2x3Ow4TDlnC5WHm2ewCh5Cjy+YLeJJ+cGfTMS96fBWIJJJAKMULa8wZbzmPyfbxZfWG+E003Ii1BjEhvBhp0uvFERiEqgkwjkpvUrttwOtYN+7sO3uRk4xijcqw3RP3R4JPyqgJZDM14sygJywsIXf-TV+LLBEIFXc5Rveo0I2lmlGbVrCMQSGRaORJCUXRZBEBQ1FtW1lHUTR4z5TdzmTUBhVCdNRX3QEQmSbUknPCJAn8IJawiTxgm1dIoRKA0X2bSd6VRb8IFEcQpFkBQAEUAFUTAATWgjQMDg-ktxTBBMIiRhiyzcUpSzSJz0fRhvACPws0rEsIgietn3KV8WyReivwESBGAgLFYDAKglCdMBjnuRhxi2MyuAxayGDsxChGQIDND0BQVB0bQAAk1D0ABxDAlCEhDBWQxAyN8W8wkCJIfDSIFzzlLJ0KyfIwmVAIklCUIdLhCc5ynBjjIgUzzMstzbPsxy+Gc9oGo8yghE4205AEhRevUJQMBUZQMGQcQVEkfRoruRDtwQB9RXBVCIn3cwQnBc8S1VcEVQ0yIPgCAJSp9N9W0My0TOc7gLKsmyOooBynLOVz7vuIQBrUIaRqG8bSEm-QFDEVQdDEBQADE1EkZBOLEGak3m8FS1COUAmCNS5Wvc80hSYtPFS4rvDvJJNJOvS6IDKrBBq67bva+y2AgBgup6vrPu+0a-oBvR4ZEuLnh8FJCaK6t8drcstrFJSIj24EDs8I6ydoiqLrRK66ru9yGaZsAPo0L7hs5iapr84GArByHodhwT115YS5tE4FwUYFUifMdJlQid2sklnaZfFOWtIV46qPHX130qozqdq7o6bexCWBwVrmSxfZBmGR13WmWYaPKiPVcYmObvq+PKET5PMT2HEl2jLk41thNZti1xEEK4qlKBPIUfVHJQmxtCIVS9MvewopQ9z8PzspqP1djkutYT5gk5eyvWVxQh8UHPBiTJL1dOV-Pp8ummNfpxfl5c1e05rzlELXaw7ZipCW+edMUi9kIwh77xNXPIJITeGkfKy0ayniVnnKen5j6MGOHOMKtAl6wBYOwac1UhBGEkJNNQ3kABaWhdAGBEDoZACgwpEO6uBW0kheYO35nmAEgI0afGVAHXC3xnjlgkrlSUwQmHuzHjCfeECDJHzVjVWB754GoEQY0HWet1AKGkJIDAAB1BQ3UBryBoc3J4LwDwAk1Ojcih5wh-ylNlIqljEj4wopRQRZVJ4iKgWImBcCEE4CQYzZmGi+oEJUEQkhtpQpjSig3eCTdn66JRn4VImRqx+DCLwzIAQzFkRdvuDMqk-D5FvHY6iQjHH+mcYXCRpopEyKXhXLsPZnSukzuyT0YczpOPbCUtx0iPHlxXtUhcEZ2S31jFcMJ9sdGt3RuYN4GRAShG-r-dhKkMzSzvFpXcRNEgh3sadfSRTWnVVcZI9xSDKndLnDUvsG8BxDhHGOCezSdmoOjqU1Y5TOnHMvj08MsAb4rnvhuCJ80VJpKSNqLIoJ+FpBvH-QIEl1rlhJumImaRKJUQoKgCAcAXBNO2WaP5CNRLuBvIREI4QviKgSf4CUwQSYkQPOkMi4DCkflYLs6muK+YvxyH-bwMT8Z-D5fyv4Aj8kOLuR+FlOxU44jZbQl+7hSye01AWdhyoJnYV+DM7UMzUoMtFZHS0s53xnOlaMhAXgJlZCzEHJK-KCgKX3GWFSt57zcvLHqceBTdUF2qsayJPwSKpA+JWBWvwgTanPKhV4CteEkTlCEHIwQdXYr1S42m89GoypGb6hA1ZVQo2UujasmMVJ4QIoENIGZgS5MSImimxS9mps1umsuzVGYrzPs3TN81Ah7hybC3aeQ-CZV+ACJhqUf5BoKDWlWojC4NvbY9LxYAfUAu1DyksCSSb1nMAeNhioso5TyuWIERUSrupFUmr10c52l0em8iVVcBjLsdqeGJwJULig3WRIq-dspVgjcCI8B4p2HzrY89piCn382rBM9MXdg1kX3KS1unxX0oyBO+9U6M8lYtrSykyTy6AvKOSgqmkBIMv3rCkWDQbgQIbDfMlGKQxTZlPGkfhwHIF4fEeBzpi7yO6KlP8UiylbzZLyPjP+R6lLdwVms9jZ6tm4YefhnjRyL4GtNEax+-zHZYQBH8EInxNLrsHfMt2bxKygt+HKP4nxijFCAA */
   createMachine<
-    LogExplorerControllerContext,
-    LogExplorerControllerEvent,
-    LogExplorerControllerTypeState
+    LogsExplorerControllerContext,
+    LogsExplorerControllerEvent,
+    LogsExplorerControllerTypeState
   >(
     {
       context: initialContext,
       predictableActionArguments: true,
-      id: 'LogExplorerController',
+      id: 'LogsExplorerController',
       initial: 'uninitialized',
       states: {
         uninitialized: {
@@ -252,20 +252,20 @@ export const createPureLogExplorerControllerStateMachine = (
     }
   );
 
-export interface LogExplorerControllerStateMachineDependencies {
+export interface LogsExplorerControllerStateMachineDependencies {
   datasetsClient: IDatasetsClient;
-  initialContext?: LogExplorerControllerContext;
+  initialContext?: LogsExplorerControllerContext;
   query: QueryStart;
   toasts: IToasts;
 }
 
-export const createLogExplorerControllerStateMachine = ({
+export const createLogsExplorerControllerStateMachine = ({
   datasetsClient,
   initialContext = DEFAULT_CONTEXT,
   query,
   toasts,
-}: LogExplorerControllerStateMachineDependencies) =>
-  createPureLogExplorerControllerStateMachine(initialContext).withConfig({
+}: LogsExplorerControllerStateMachineDependencies) =>
+  createPureLogsExplorerControllerStateMachine(initialContext).withConfig({
     actions: {
       notifyCreateDataViewFailed: createCreateDataViewFailedNotifier(toasts),
       notifyDatasetSelectionRestoreFailed: createDatasetSelectionRestoreFailedNotifier(toasts),
@@ -282,17 +282,17 @@ export const createLogExplorerControllerStateMachine = ({
     },
   });
 
-export const initializeLogExplorerControllerStateService = (
-  deps: LogExplorerControllerStateMachineDependencies
+export const initializeLogsExplorerControllerStateService = (
+  deps: LogsExplorerControllerStateMachineDependencies
 ) => {
-  const machine = createLogExplorerControllerStateMachine(deps);
+  const machine = createLogsExplorerControllerStateMachine(deps);
   return interpret(machine).start();
 };
 
-export type LogExplorerControllerStateService = InterpreterFrom<
-  typeof createLogExplorerControllerStateMachine
+export type LogsExplorerControllerStateService = InterpreterFrom<
+  typeof createLogsExplorerControllerStateMachine
 >;
 
-export type LogExplorerControllerStateMachine = ReturnType<
-  typeof createLogExplorerControllerStateMachine
+export type LogsExplorerControllerStateMachine = ReturnType<
+  typeof createLogsExplorerControllerStateMachine
 >;
