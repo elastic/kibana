@@ -131,7 +131,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(apiResponse.body).eql({
         statusCode: 400,
         error: 'Bad Request',
-        message: `Invalid locations specified. Private Location(s) 'invalidLocation' not found. Available private locations are '${testPolicyName}'`,
+        message: `Invalid locations specified. Private Location(s) 'invalidLocation' not found. Available private locations are 'Test private location 0'`,
       });
 
       const apiGetResponse = await supertestAPI
