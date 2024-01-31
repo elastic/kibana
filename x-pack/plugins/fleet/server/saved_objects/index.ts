@@ -632,6 +632,18 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         proxy_id: { type: 'keyword' },
       },
     },
+    modelVersions: {
+      '1': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              is_internal: { type: 'boolean', index: false },
+            },
+          },
+        ],
+      },
+    }
   },
   [FLEET_PROXY_SAVED_OBJECT_TYPE]: {
     name: FLEET_PROXY_SAVED_OBJECT_TYPE,
