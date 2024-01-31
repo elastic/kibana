@@ -151,9 +151,10 @@ export const Benchmarks = () => {
   });
 
   const queryResult = useCspBenchmarkIntegrationsV2();
+  const lowerCaseQueryName = query.name.toLowerCase();
   const benchmarkResult =
     queryResult.data?.items.filter((obj) =>
-      getBenchmarkCisName(obj.id)?.toLowerCase().includes(query.name.toLowerCase())
+      getBenchmarkCisName(obj.id)?.toLowerCase().includes(lowerCaseQueryName)
     ) || [];
   const totalItemCount = queryResult.data?.items.length || 0;
 
