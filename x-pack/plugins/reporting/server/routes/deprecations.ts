@@ -104,7 +104,7 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
       } = elasticsearch;
 
       const scopedIlmPolicyManager = IlmPolicyManager.create({
-        client,
+        client, logger
       });
 
       // First we ensure that the reporting ILM policy exists in the cluster

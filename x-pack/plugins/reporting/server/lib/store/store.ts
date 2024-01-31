@@ -103,7 +103,7 @@ export class ReportingStore {
   private async getIlmPolicyManager() {
     if (!this.ilmPolicyManager) {
       const client = await this.getClient();
-      this.ilmPolicyManager = IlmPolicyManager.create({ client });
+      this.ilmPolicyManager = IlmPolicyManager.create({ client, logger: this.logger });
     }
 
     return this.ilmPolicyManager;

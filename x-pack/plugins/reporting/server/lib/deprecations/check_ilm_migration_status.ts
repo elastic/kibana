@@ -16,8 +16,9 @@ import type { DeprecationsDependencies } from './types';
 export const checkIlmMigrationStatus = async ({
   reportingCore,
   elasticsearchClient,
+  logger,
 }: DeprecationsDependencies): Promise<IlmPolicyMigrationStatus> => {
-  const ilmPolicyManager = IlmPolicyManager.create({ client: elasticsearchClient });
+  const ilmPolicyManager = IlmPolicyManager.create({ client: elasticsearchClient, logger });
   if (!(await ilmPolicyManager.doesIlmPolicyExist())) {
     return 'policy-not-found';
   }
