@@ -9,7 +9,14 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['timePicker', 'lens', 'common', 'discover', 'maps']);
+  const PageObjects = getPageObjects([
+    'visChart',
+    'timePicker',
+    'lens',
+    'common',
+    'discover',
+    'maps',
+  ]);
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
@@ -75,6 +82,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.discover.waitForDiscoverAppOnScreen();
 
       await expectManagedContentSignifiers(false, 'discoverSaveButton');
+    });
+
+    it('visualize', async () => {
+      await PageObjects.common.navigateToActualUrl(
+        'visualize',
+        'edit/managed-feb9-4ba6-9538-1b8f67fb4f57'
+      );
+      await PageObjects.visChart.waitForVisualization();
+
+      await expectManagedContentSignifiers(true, 'visualizeSaveButton');
+
+      await PageObjects.common.navigateToActualUrl(
+        'visualize',
+        'edit/unmanaged-feb9-4ba6-9538-1b8f67fb4f57'
+      );
+      await PageObjects.visChart.waitForVisualization();
+
+      await expectManagedContentSignifiers(false, 'visualizeSaveButton');
     });
 
     it('maps', async () => {

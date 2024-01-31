@@ -9,6 +9,8 @@ import type { EuiDataGridColumn } from '@elastic/eui';
 import {
   ALERT_HOST_CRITICALITY,
   ALERT_USER_CRITICALITY,
+  ALERT_HOST_RISK_SCORE_CALCULATED_LEVEL,
+  ALERT_USER_RISK_SCORE_CALCULATED_LEVEL,
 } from '../../../../common/field_maps/field_names';
 import type { LicenseService } from '../../../../common/license';
 import type { ColumnHeaderOptions } from '../../../../common/types';
@@ -64,7 +66,7 @@ const getBaseColumns = (
     isPlatinumPlus
       ? {
           columnHeaderType: defaultColumnHeaderType,
-          id: 'host.risk.calculated_level',
+          id: ALERT_HOST_RISK_SCORE_CALCULATED_LEVEL,
         }
       : null,
     {
@@ -74,7 +76,7 @@ const getBaseColumns = (
     isPlatinumPlus
       ? {
           columnHeaderType: defaultColumnHeaderType,
-          id: 'user.risk.calculated_level',
+          id: ALERT_USER_RISK_SCORE_CALCULATED_LEVEL,
         }
       : null,
     isPlatinumPlus
