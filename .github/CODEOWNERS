@@ -530,6 +530,7 @@ x-pack/packages/maps/vector_tile_utils @elastic/kibana-gis
 x-pack/plugins/metrics_data_access @elastic/obs-knowledge-team
 x-pack/packages/ml/agg_utils @elastic/ml-ui
 x-pack/packages/ml/anomaly_utils @elastic/ml-ui
+x-pack/packages/ml/cancellable_search @elastic/ml-ui
 x-pack/packages/ml/category_validator @elastic/ml-ui
 x-pack/packages/ml/chi2test @elastic/ml-ui
 x-pack/packages/ml/creation_wizard_utils @elastic/ml-ui
