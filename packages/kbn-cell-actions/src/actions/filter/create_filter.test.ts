@@ -28,6 +28,7 @@ describe('createFilter', () => {
         params: {
           query,
         },
+        index: dataViewId,
       },
       query: {
         match_phrase: {
@@ -52,6 +53,7 @@ describe('createFilter', () => {
         params: {
           query,
         },
+        index: dataViewId,
       },
       query: {
         match_phrase: {
@@ -74,13 +76,14 @@ describe('createFilter', () => {
         relation: 'AND',
         key: field,
         negate,
+        index: dataViewId,
         params: [
           {
-            meta: { type: 'phrase', key: field, params: { query: value } },
+            meta: { type: 'phrase', key: field, params: { query: value }, index: dataViewId },
             query: { match_phrase: { [field]: { query: value } } },
           },
           {
-            meta: { type: 'phrase', key: field, params: { query: value2 } },
+            meta: { type: 'phrase', key: field, params: { query: value2 }, index: dataViewId },
             query: { match_phrase: { [field]: { query: value2 } } },
           },
         ],
@@ -98,6 +101,7 @@ describe('createFilter', () => {
           },
         },
         meta: {
+          index: dataViewId,
           key: field,
           negate: false,
           type: 'exists',
@@ -117,6 +121,7 @@ describe('createFilter', () => {
           },
         },
         meta: {
+          index: dataViewId,
           key: field,
           negate: true,
           type: 'exists',
