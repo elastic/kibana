@@ -149,7 +149,7 @@ export function generateMappings(
   isIndexModeTimeSeries = false
 ): IndexTemplateMappings {
   const dynamicTemplates: Array<Record<string, Properties>> = [];
-  const dynamicTemplateNames: Record<string, int> = {};
+  const dynamicTemplateNames: Record<string, number> = {};
   const runtimeFields: RuntimeFields = {};
 
   const { properties } = _generateMappings(
