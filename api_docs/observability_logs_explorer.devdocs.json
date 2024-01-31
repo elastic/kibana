@@ -396,10 +396,10 @@
     "misc": [
       {
         "parentPluginId": "observabilityLogsExplorer",
-        "id": "def-common.OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY",
+        "id": "def-common.OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY",
         "type": "string",
         "tags": [],
-        "label": "OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY",
+        "label": "OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY",
         "description": [],
         "signature": [
           "\"pageState\""
