@@ -22,6 +22,7 @@ export const getNoDataViewsPromptServicesMock = (
     canCreateNewDataView: canCreateNewDataView || true,
     dataViewsDocLink: dataViewsDocLink || 'some/link',
     openDataViewEditor: jest.fn(),
+    onTryESQL: jest.fn(),
   };
 
   return services;
