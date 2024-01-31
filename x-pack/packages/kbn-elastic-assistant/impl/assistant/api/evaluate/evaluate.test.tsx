@@ -15,7 +15,7 @@ const mockHttp = {
   post: jest.fn(),
 } as unknown as HttpSetup;
 
-describe.skip('postEvaluation', () => {
+describe('postEvaluation', () => {
   it('calls the knowledge base API when correct resource path', async () => {
     (mockHttp.post as jest.Mock).mockResolvedValue({ success: true });
     const testProps = {
