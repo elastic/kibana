@@ -484,26 +484,26 @@ describe('autocomplete', () => {
       const subExpressions = [
         '',
         `${command} stringField |`,
-        `${command} stringField "a-pattern" |`,
-        `dissect stringField "a-pattern" append_separator = ":" |`,
+        `${command} stringField "%{pattern}" |`,
+        `dissect stringField "%{pattern}" append_separator = ":" |`,
       ];
       if (command === 'grok') {
-        subExpressions.push(`dissect stringField "a-pattern" |`);
+        subExpressions.push(`dissect stringField "%{pattern}" |`);
       }
       for (const subExpression of subExpressions) {
         testSuggestions(`from a | ${subExpression} ${command} `, getFieldNamesByType('string'));
-        testSuggestions(`from a | ${subExpression} ${command} stringField `, ['"a-pattern"']);
+        testSuggestions(`from a | ${subExpression} ${command} stringField `, ['"%{pattern}"']);
         testSuggestions(
-          `from a | ${subExpression} ${command} stringField "a-pattern" `,
+          `from a | ${subExpression} ${command} stringField "%{pattern}" `,
           (command === 'dissect' ? ['append_separator = $0'] : []).concat(['|'])
         );
         if (command === 'dissect') {
           testSuggestions(
-            `from a | ${subExpression} ${command} stringField "a-pattern" append_separator = `,
+            `from a | ${subExpression} ${command} stringField "%{pattern}" append_separator = `,
             ['":"', '";"']
           );
           testSuggestions(
-            `from a | ${subExpression} ${command} stringField "a-pattern" append_separator = ":" `,
+            `from a | ${subExpression} ${command} stringField "%{pattern}" append_separator = ":" `,
             ['|']
           );
         }

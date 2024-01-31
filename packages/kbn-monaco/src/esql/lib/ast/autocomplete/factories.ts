@@ -311,7 +311,7 @@ export function getCompatibleLiterals(commandName: string, types: string[], name
       if (/pattern/.test(names[index])) {
         suggestions.push(
           ...buildConstantsDefinitions(
-            ['"a-pattern"'],
+            ['"%{pattern}"'],
             i18n.translate('monaco.esql.autocomplete.aPatternString', {
               defaultMessage: 'A pattern string',
             })
