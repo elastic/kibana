@@ -498,7 +498,10 @@ async function getExpressionSuggestionsByType(
   // A new expression is considered either
   // * just after a command name => i.e. ... | STATS <here>
   // * or after a comma => i.e. STATS fieldA, <here>
-  const isNewExpression = isRestartingExpression(innerText) || argIndex === 0;
+  const isNewExpression =
+    isRestartingExpression(innerText) ||
+    (argIndex === 0 && (!isFunctionItem(nodeArg) || !nodeArg?.args.length));
+
   // the not function is a special operator that can be used in different ways,
   // and not all these are mapped within the AST data structure: in particular
   // <COMMAND> <field> NOT <here>
@@ -1140,6 +1143,12 @@ async function getListArgsSuggestions(
   if (node && isFunctionItem(node)) {
     const fieldsMap: Map<string, ESQLRealField> = await getFieldsMaps();
     const anyVariables = collectVariables(commands, fieldsMap);
+    // extract the current node from the variables inferred
+    anyVariables.forEach((values, key) => {
+      if (values.some((v) => v.location === node.location)) {
+        anyVariables.delete(key);
+      }
+    });
     const [firstArg] = node.args;
     if (isColumnItem(firstArg)) {
       const argType = extractFinalTypeFromArg(firstArg, {
