@@ -9,9 +9,9 @@ import React from 'react';
 import { EuiAvatar } from '@elastic/eui';
 import type { ExternalReferenceAttachmentType } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import { CASE_ATTACHMENT_ENDPOINT_TYPE_ID } from '../../../common/constants';
-import { getLazyExternalChildrenContent } from './lazy_external_reference_children_content';
 import type { IExternalReferenceMetaDataProps } from './lazy_external_reference_content';
 import { getLazyExternalEventContent } from './lazy_external_reference_content';
+import { getLazyExternalChildrenContent } from './lazy_external_reference_children_content';
 
 export const getExternalReferenceAttachmentEndpointRegular =
   (): ExternalReferenceAttachmentType => ({
@@ -24,7 +24,7 @@ export const getExternalReferenceAttachmentEndpointRegular =
         type: 'regular',
         event: getLazyExternalEventContent(props),
         timelineAvatar: <EuiAvatar name="endpoint" color="subdued" iconType={iconType} />,
-        children: getLazyExternalChildrenContent(props),
+        children: getLazyExternalChildrenContent,
       };
     },
   });
