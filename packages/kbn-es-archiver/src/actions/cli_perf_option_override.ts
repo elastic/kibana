@@ -10,21 +10,13 @@ import { createFlagError } from '@kbn/dev-cli-errors';
 import { Flags } from '@kbn/dev-cli-runner';
 import { EsArchiver } from '../es_archiver';
 
-const isStringOptRequested = (opt: string | boolean | string[] | undefined) =>
-  typeof opt === 'string' && opt !== '';
+type StringOption = string | boolean | string[] | undefined;
+const isStringOptRequested = (opt: StringOption) => typeof opt === 'string' && opt !== '';
 
-const protect = (
-  batchSize: string | boolean | string[] | undefined,
-  concurrency: string | boolean | string[] | undefined
-) =>
-  [batchSize, concurrency].forEach((x): void => {
-    if (Number.isNaN(parseInt(x as string, 10))) {
-      throw createFlagError(
-        `invalid argument, please use a number for --batch-size & for --concurrency.
-Provided: --batch-size: [ ${batchSize || 'n/a'} ], --concurrency: [ ${concurrency || 'n/a'} ]`
-      );
-    }
-  });
+const protect = (x: StringOption) => {
+  if (Number.isNaN(parseInt(x as string, 10)))
+    throw createFlagError('invalid argument, please use a number');
+};
 
 export const cliPerfOptionOverride = async (
   useCreate: boolean,
@@ -36,8 +28,6 @@ export const cliPerfOptionOverride = async (
   const batchSize = flags['batch-size'];
   const concurrency = flags.concurrency;
 
-  protect(batchSize, concurrency);
-
   const batchRequested = isStringOptRequested(batchSize);
   const concurrencyRequested = isStringOptRequested(concurrency);
 
@@ -45,14 +35,12 @@ export const cliPerfOptionOverride = async (
     await esArchiver.load(path, {
       useCreate,
       docsOnly,
-      performance: {
-        batchSize: parseInt(batchSize as string, 10),
-      },
     });
     return;
   }
 
   if (batchRequested && !concurrencyRequested) {
+    protect(batchSize);
     await esArchiver.load(path, {
       useCreate,
       docsOnly,
@@ -63,6 +51,7 @@ export const cliPerfOptionOverride = async (
     return;
   }
   if (concurrencyRequested && !batchRequested) {
+    protect(concurrency);
     await esArchiver.load(path, {
       useCreate,
       docsOnly,
@@ -74,6 +63,7 @@ export const cliPerfOptionOverride = async (
   }
 
   if (batchRequested && concurrencyRequested) {
+    [batchSize, concurrency].forEach(protect);
     await esArchiver.load(path, {
       useCreate,
       docsOnly,
