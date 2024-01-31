@@ -38,7 +38,8 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const browser = getService('browser');
 
-  describe('custom urls', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/164224
+  describe.skip('custom urls', function () {
     const dfaJobId = `fq_regression_${Date.now()}`;
     const generateDestinationIndex = (analyticsId: string) => `user-${analyticsId}`;
     let testDashboardId: string | null = null;
