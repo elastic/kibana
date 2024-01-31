@@ -9,7 +9,7 @@ Geospatial fields in {es} have certain restrictions that need to be addressed be
 [float]
 ==== Convert to GeoJSON or Shapefile
 
-With https://gdal.org/programs/ogr2ogr.html[ogr2ogr] (part of the https://gdal.org[GDAL/OGR] suite) it is pretty straight forward to convert datasets from dozens of formats into a GeoJSON or Esri Shapefile. For example, converting a GPX file can be achieved with the following commands:
+Use https://gdal.org/programs/ogr2ogr.html[ogr2ogr] (part of the https://gdal.org[GDAL/OGR] suite) to convert datasets into a GeoJSON or Esri Shapefile. For example, use the following commands to convert a GPX file into JSON:
 
 [source,sh]
 ----
@@ -26,11 +26,11 @@ $ ogr2ogr -f "GeoJSON" "routes.geo.json" "fells_loop.gpx" "routes"
 ----
 
 [float]
-==== Set up the correct coordinate reference system (CRS)
+==== Convert to WGS84 Coordinate Reference System
 
-{es} only supports WGS84 Coordinate Reference System. Also with `ogr2ogr`, converting from one coordinate system to WGS84 is usually supported but it depends on the source CRS.
+{es} only supports WGS84 Coordinate Reference System. Use `ogr2ogr` to convert from other coordinate systems to WGS84.
 
-On the following example, `ogr2ogr` transform a shapefile from https://epsg.org/crs_4269/NAD83.html[NAD83] to https://epsg.org/crs_4326/WGS-84.html[WGS84]. The input CRS is detected automatically thanks to the `.prj` sidecar file in the source dataset.
+On the following example, `ogr2ogr` transforms a shapefile from https://epsg.org/crs_4269/NAD83.html[NAD83] to https://epsg.org/crs_4326/WGS-84.html[WGS84]. The input CRS is detected automatically thanks to the `.prj` sidecar file in the source dataset.
 
 [source,sh]
 ----
@@ -171,13 +171,13 @@ $ du -h cb_2018_us_county_5m*.geo.json
 [float]
 ==== Fixing incorrect geometries
 
-The Maps application expects valid GeoJSON or Shapefile datasets. Apart from the mentioned CRS requirement, also geometries inside the dataset need to be valid. Both `ogr2ogr` and `mapshaper` have options to try to fix invalid geometries:
+The Maps application expects valid GeoJSON or Shapefile datasets. Apart from the mentioned CRS requirement, geometries need to be valid. Both `ogr2ogr` and `mapshaper` have options to try to fix invalid geometries:
 
 * OGR https://gdal.org/programs/ogr2ogr.html#cmdoption-ogr2ogr-makevalid[`-makevalid`] option
 * Mapshaper https://github.com/mbloch/mapshaper/wiki/Command-Reference#-clean[`-clean`] command
 
 
 [float]
-==== Conclusion
+==== And so much more
 
-Both tools are excellent geospatial ETL (Extract Transform and Load) utilities that can do much more than viewed here. Reading the documentation in detail is worth investment to improve the quality of the datasets by removing unwanted fields, refining data types, validating value domains, etc. Finally, being command line utilities, both can be automated and added to QA pipelines.
+`ogr2ogr` and `mapshaper` are excellent geospatial ETL (Extract Transform and Load) utilities that can do much more than viewed here. Reading the documentation in detail is worth investment to improve the quality of the datasets by removing unwanted fields, refining data types, validating value domains, etc. Finally, being command line utilities, both can be automated and added to QA pipelines.
