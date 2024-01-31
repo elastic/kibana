@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { ManageEpicTimelineId } from './manage_timeline_id';
-
-export const myEpicTimelineId = new ManageEpicTimelineId();
+export * from './state_machine';
+export * from './types';
+export * from './defaults';

@@ -166,6 +166,17 @@ export function isSupportedFunction(
   };
 }
 
+export function getAllFunctions(options?: {
+  type: Array<FunctionDefinition['type']> | FunctionDefinition['type'];
+}) {
+  const fns = buildFunctionLookup();
+  if (!options?.type) {
+    return Array.from(fns.values());
+  }
+  const types = new Set(Array.isArray(options.type) ? options.type : [options.type]);
+  return Array.from(fns.values()).filter((fn) => types.has(fn.type));
+}
+
 export function getFunctionDefinition(name: string) {
   return buildFunctionLookup().get(name.toLowerCase());
 }
@@ -481,4 +492,11 @@ export function getLastCharFromTrimmed(text: string) {
 
 export function isRestartingExpression(text: string) {
   return getLastCharFromTrimmed(text) === ',';
+}
+
+export function shouldBeQuotedText(
+  text: string,
+  { dashSupported }: { dashSupported?: boolean } = {}
+) {
+  return dashSupported ? /[^a-zA-Z\d_\.@-]/.test(text) : /[^a-zA-Z\d_\.@]/.test(text);
 }
