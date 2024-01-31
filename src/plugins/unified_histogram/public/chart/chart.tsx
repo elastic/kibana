@@ -46,6 +46,7 @@ import { useRefetch } from './hooks/use_refetch';
 import { useEditVisualization } from './hooks/use_edit_visualization';
 import { LensVisService } from '../services/lens_vis_service';
 import type { UseRequestParamsResult } from '../hooks/use_request_params';
+import { removeTablesFromLensAttributes } from '../utils/lens_vis_from_table';
 
 export interface ChartProps {
   isChartAvailable: boolean;
@@ -401,7 +402,11 @@ export function Chart({
       )}
       {canSaveVisualization && isSaveModalVisible && lensAttributesContext.attributes && (
         <LensSaveModalComponent
-          initialInput={lensAttributesContext.attributes as unknown as LensEmbeddableInput}
+          initialInput={
+            removeTablesFromLensAttributes(
+              lensAttributesContext.attributes
+            ) as unknown as LensEmbeddableInput
+          }
           onSave={() => {}}
           onClose={() => setIsSaveModalVisible(false)}
           isSaveable={false}

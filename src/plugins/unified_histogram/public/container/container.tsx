@@ -11,6 +11,7 @@ import { Subject } from 'rxjs';
 import { pick } from 'lodash';
 import useMount from 'react-use/lib/useMount';
 import { LensSuggestionsApi } from '@kbn/lens-plugin/public';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import { UnifiedHistogramLayout, UnifiedHistogramLayoutProps } from '../layout';
 import type { UnifiedHistogramInputMessage, UnifiedHistogramRequestContext } from '../types';
 import {
@@ -22,6 +23,7 @@ import { useStateProps } from './hooks/use_state_props';
 import { useStateSelector } from './utils/use_state_selector';
 import { topPanelHeightSelector } from './utils/state_selectors';
 import { getStableVisContext } from '../utils/external_vis_context';
+import { removeTablesFromLensAttributes } from '../utils/lens_vis_from_table';
 
 type LayoutProps = Pick<
   UnifiedHistogramLayoutProps,
@@ -44,6 +46,7 @@ export type UnifiedHistogramContainerProps = {
   searchSessionId?: UnifiedHistogramRequestContext['searchSessionId'];
   requestAdapter?: UnifiedHistogramRequestContext['adapter'];
   isChartLoading?: boolean;
+  table?: Datatable;
 } & Pick<
   UnifiedHistogramLayoutProps,
   | 'services'
@@ -145,7 +148,13 @@ export const UnifiedHistogramContainer = forwardRef<
 
     return (visContext) => {
       // console.log('updating vis context', visContext);
-      onVisContextChanged(getStableVisContext(visContext));
+      const lightweightVisContext = visContext
+        ? {
+            ...visContext,
+            attributes: removeTablesFromLensAttributes(visContext?.attributes),
+          }
+        : undefined;
+      onVisContextChanged(getStableVisContext(lightweightVisContext));
     };
   }, [onVisContextChanged]);
 

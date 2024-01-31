@@ -28,7 +28,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { XYConfiguration } from '@kbn/visualizations-plugin/common';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type {
   ExternalVisContext,
@@ -39,13 +39,13 @@ import { UnifiedHistogramSuggestionType } from '../types';
 import { isSuggestionAndVisContextCompatible } from '../utils/external_vis_context';
 import { computeInterval } from '../utils/compute_interval';
 import { fieldSupportsBreakdown } from '../utils/field_supports_breakdown';
+import { shouldDisplayHistogram } from '../layout/helpers';
+import { updateTablesInLensAttributes } from '../utils/lens_vis_from_table';
 
 const stateSelectorFactory =
   <S>(state$: Observable<S>) =>
   <R>(selector: (state: S) => R, equalityFn?: (arg0: R, arg1: R) => boolean) =>
     state$.pipe(map(selector), distinctUntilChanged(equalityFn));
-
-const TRANSFORMATIONAL_COMMANDS = ['stats', 'project', 'keep'];
 
 export enum LensVisServiceStatus {
   'initial' = 'initial',
@@ -91,6 +91,7 @@ export class LensVisService {
         chartTitle: string | undefined;
         timeInterval: string | undefined;
         breakdownField: DataViewField | undefined;
+        table: Datatable | undefined;
         onSuggestionContextChange?: (
           suggestionContext: UnifiedHistogramSuggestionContext | undefined
         ) => void;
@@ -130,6 +131,7 @@ export class LensVisService {
     chartTitle,
     timeInterval,
     breakdownField,
+    table,
     onSuggestionContextChange,
     onVisContextChanged,
   }: {
@@ -138,6 +140,7 @@ export class LensVisService {
     chartTitle: string | undefined;
     timeInterval: string | undefined;
     breakdownField: DataViewField | undefined;
+    table?: Datatable;
     onSuggestionContextChange?: (
       suggestionContext: UnifiedHistogramSuggestionContext | undefined
     ) => void;
@@ -145,7 +148,7 @@ export class LensVisService {
   }) => {
     const suggestionContextSelectedPreviously = this.state$.getValue().currentSuggestionContext;
 
-    // console.log('recalculating chart', queryParams.query, externalVisContext);
+    // console.log('recalculating chart', queryParams.query, externalVisContext, table);
 
     const allSuggestions = this.getAllSuggestions({ queryParams });
 
@@ -169,6 +172,7 @@ export class LensVisService {
       chartTitle,
       timeInterval,
       breakdownField,
+      table,
     });
 
     // console.log('service lensAttributesState', lensAttributesState);
@@ -202,6 +206,7 @@ export class LensVisService {
       chartTitle,
       timeInterval,
       breakdownField,
+      table,
       onVisContextChanged,
     };
   };
@@ -220,6 +225,7 @@ export class LensVisService {
       chartTitle,
       timeInterval,
       breakdownField,
+      table,
       onSuggestionContextChange,
       onVisContextChanged,
     } = this.prevUpdateContext;
@@ -231,7 +237,10 @@ export class LensVisService {
       chartTitle,
       timeInterval,
       breakdownField,
+      table,
     });
+
+    // console.log('lensAttributes after editing', lensAttributesState);
 
     this.state$.next({
       ...this.state$.getValue(),
@@ -480,17 +489,8 @@ export class LensVisService {
       getAggregateQueryMode(query) === 'esql' &&
       timeRange
     ) {
-      let queryHasTransformationalCommands = false;
-      if ('esql' in query) {
-        TRANSFORMATIONAL_COMMANDS.forEach((command: string) => {
-          if (query.esql.toLowerCase().includes(command)) {
-            queryHasTransformationalCommands = true;
-            return;
-          }
-        });
-      }
-
-      if (queryHasTransformationalCommands) return undefined;
+      const isOnHistogramMode = shouldDisplayHistogram(query);
+      if (!isOnHistogramMode) return undefined;
 
       const interval = computeInterval(timeRange, this.services.data);
       const esqlQuery = this.getESQLHistogramQuery({ dataView, query, timeRange, interval });
@@ -566,6 +566,7 @@ export class LensVisService {
     chartTitle,
     timeInterval,
     breakdownField,
+    table,
   }: {
     currentSuggestionContext: UnifiedHistogramSuggestionContext;
     externalVisContext: ExternalVisContext | undefined;
@@ -573,6 +574,7 @@ export class LensVisService {
     chartTitle: string | undefined;
     timeInterval: string | undefined;
     breakdownField: DataViewField | undefined;
+    table: Datatable | undefined;
   }): {
     shouldUpdateVisContextDueToIncompatibleSuggestion: boolean;
     lensAttributesContext: UnifiedHistogramLensAttributesContext | undefined;
@@ -583,7 +585,7 @@ export class LensVisService {
     if (!suggestion || !suggestion.datasourceId) {
       return {
         shouldUpdateVisContextDueToIncompatibleSuggestion: false,
-        lensAttributesContext: undefined,
+        lensAttributesContext: undefined, // TODO: should it be synced to Discover state too?
       };
     }
 
@@ -604,6 +606,7 @@ export class LensVisService {
         : query;
 
     let shouldUpdateVisContextDueToIncompatibleSuggestion = false;
+    let lensAttributesContext: UnifiedHistogramLensAttributesContext | undefined;
 
     if (externalVisContext?.attributes) {
       if (
@@ -614,10 +617,8 @@ export class LensVisService {
       ) {
         // console.log('using the external lens attributes');
         // using the external lens attributes
-        return {
-          shouldUpdateVisContextDueToIncompatibleSuggestion: false,
-          lensAttributesContext: externalVisContext,
-        };
+        shouldUpdateVisContextDueToIncompatibleSuggestion = false;
+        lensAttributesContext = externalVisContext;
       } else {
         // console.log('external vis is not compatible with the current suggestion');
         // console.log('query', currentQuery, externalVisContext.attributes?.state?.query);
@@ -628,57 +629,78 @@ export class LensVisService {
       }
     }
 
-    const suggestionDatasourceState = Object.assign({}, suggestion.datasourceState);
-    const suggestionVisualizationState = Object.assign({}, suggestion.visualizationState);
-    const datasourceStates = {
-      [suggestion.datasourceId]: {
-        ...suggestionDatasourceState,
-      },
-    };
-    const visualization = suggestionVisualizationState;
+    if (!lensAttributesContext) {
+      const suggestionDatasourceState = Object.assign({}, suggestion.datasourceState);
+      const suggestionVisualizationState = Object.assign({}, suggestion.visualizationState);
+      const datasourceStates = {
+        [suggestion.datasourceId]: {
+          ...suggestionDatasourceState,
+        },
+      };
+      const visualization = suggestionVisualizationState;
 
-    const attributes = {
-      title:
-        chartTitle ??
-        suggestion?.title ??
-        i18n.translate('unifiedHistogram.lensTitle', {
-          defaultMessage: 'Edit visualization',
-        }),
-      references: [
-        {
-          id: dataView.id ?? '',
-          name: 'indexpattern-datasource-current-indexpattern',
-          type: 'index-pattern',
-        },
-        {
-          id: dataView.id ?? '',
-          name: 'indexpattern-datasource-layer-unifiedHistogram',
-          type: 'index-pattern',
-        },
-      ],
-      state: {
-        datasourceStates,
-        filters,
-        query: currentQuery,
-        visualization,
-        ...(dataView &&
-          dataView.id &&
-          !dataView.isPersisted() && {
-            adHocDataViews: {
-              [dataView.id]: dataView.toMinimalSpec(),
-            },
+      const attributes = {
+        title:
+          chartTitle ??
+          suggestion?.title ??
+          i18n.translate('unifiedHistogram.lensTitle', {
+            defaultMessage: 'Edit visualization',
           }),
-      },
-      visualizationType: suggestion ? suggestion.visualizationId : 'lnsXY',
-    } as TypedLensByValueInput['attributes'];
+        references: [
+          {
+            id: dataView.id ?? '',
+            name: 'indexpattern-datasource-current-indexpattern',
+            type: 'index-pattern',
+          },
+          {
+            id: dataView.id ?? '',
+            name: 'indexpattern-datasource-layer-unifiedHistogram',
+            type: 'index-pattern',
+          },
+        ],
+        state: {
+          datasourceStates,
+          filters,
+          query: currentQuery,
+          visualization,
+          ...(dataView &&
+            dataView.id &&
+            !dataView.isPersisted() && {
+              adHocDataViews: {
+                [dataView.id]: dataView.toMinimalSpec(),
+              },
+            }),
+        },
+        visualizationType: suggestion ? suggestion.visualizationId : 'lnsXY',
+      } as TypedLensByValueInput['attributes'];
 
-    return {
-      shouldUpdateVisContextDueToIncompatibleSuggestion,
-      lensAttributesContext: {
+      shouldUpdateVisContextDueToIncompatibleSuggestion = false;
+      lensAttributesContext = {
         attributes,
         requestData,
         suggestionType,
-      },
+      };
+    }
+
+    if (
+      query &&
+      isOfAggregateQueryType(query) &&
+      suggestionType === UnifiedHistogramSuggestionType.supportedLensSuggestion &&
+      table &&
+      lensAttributesContext?.attributes
+    ) {
+      lensAttributesContext = {
+        ...lensAttributesContext,
+        attributes: updateTablesInLensAttributes({
+          attributes: lensAttributesContext.attributes,
+          table,
+        }),
+      };
+    }
+
+    return {
+      shouldUpdateVisContextDueToIncompatibleSuggestion,
+      lensAttributesContext,
     };
   };
 }

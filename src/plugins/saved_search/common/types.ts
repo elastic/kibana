@@ -77,6 +77,8 @@ export interface SavedSearch {
   breakdownField?: string;
   visContextJSON?: string;
 
+  // Whether or not this saved search is managed by the system
+  managed: boolean;
   references?: SavedObjectReference[];
   sharingSavedObjectProps?: {
     outcome?: SavedObjectsResolveResponse['outcome'];

@@ -46,6 +46,7 @@ export interface ExpressionWrapperProps {
   executionContext?: KibanaExecutionContext;
   lensInspector: LensInspector;
   noPadding?: boolean;
+  shouldUseSizeTransitionVeil?: boolean;
 }
 
 export function ExpressionWrapper({
@@ -71,6 +72,7 @@ export function ExpressionWrapper({
   executionContext,
   lensInspector,
   noPadding,
+  shouldUseSizeTransitionVeil,
 }: ExpressionWrapperProps) {
   if (!expression) return null;
   return (
@@ -92,7 +94,7 @@ export function ExpressionWrapper({
           syncTooltips={syncTooltips}
           syncCursor={syncCursor}
           executionContext={executionContext}
-          shouldUseSizeTransitionVeil={true}
+          shouldUseSizeTransitionVeil={shouldUseSizeTransitionVeil ?? true}
           renderError={(errorMessage, error) => {
             const messages = getOriginalRequestErrorMessages(error || null);
             addUserMessages(messages);

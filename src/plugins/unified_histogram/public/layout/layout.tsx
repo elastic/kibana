@@ -12,7 +12,7 @@ import { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type {
   EmbeddableComponentProps,
@@ -20,7 +20,7 @@ import type {
   LensEmbeddableOutput,
   LensSuggestionsApi,
 } from '@kbn/lens-plugin/public';
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import {
   ResizableLayout,
   ResizableLayoutDirection,
@@ -189,6 +189,8 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    * Allows users to enable/disable default actions
    */
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
+
+  table?: Datatable;
 }
 
 export const UnifiedHistogramLayout = ({
@@ -217,6 +219,7 @@ export const UnifiedHistogramLayout = ({
   disabledActions,
   lensSuggestionsApi,
   input$,
+  table,
   onTopPanelHeightChange,
   onChartHiddenChange,
   onTimeIntervalChange,
@@ -261,6 +264,7 @@ export const UnifiedHistogramLayout = ({
       chartTitle: originalChart?.title,
       timeInterval: originalChart?.timeInterval,
       breakdownField: breakdown?.field,
+      table,
       onSuggestionContextChange,
       onVisContextChanged: isPlainRecord ? onVisContextChanged : undefined,
     });
@@ -278,6 +282,7 @@ export const UnifiedHistogramLayout = ({
     onSuggestionContextChange,
     onVisContextChanged,
     isChartLoading,
+    table,
   ]);
 
   const chart =

@@ -12,7 +12,8 @@ export const fromSavedSearchAttributes = (
   id: string | undefined,
   attributes: SavedSearchAttributes,
   tags: string[] | undefined,
-  searchSource: SavedSearch['searchSource']
+  searchSource: SavedSearch['searchSource'],
+  managed: boolean
 ): SavedSearch => ({
   id,
   searchSource,
@@ -35,4 +36,5 @@ export const fromSavedSearchAttributes = (
   sampleSize: attributes.sampleSize,
   breakdownField: attributes.breakdownField,
   visContextJSON: attributes.visContextJSON,
+  managed,
 });
