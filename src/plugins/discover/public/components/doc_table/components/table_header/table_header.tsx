@@ -18,7 +18,7 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 
 interface Props {
   columns: string[];
-  dataView: DataView;
+  dataView: DataView | undefined;
   onChangeSortOrder?: (sortOrder: SortOrder[]) => void;
   onMoveColumn?: (name: string, index: number) => void;
   onRemoveColumn?: (name: string) => void;
@@ -52,8 +52,8 @@ export function TableHeader({
           <TableHeaderColumn
             key={`${col.name}-${index}`}
             {...col}
-            customLabel={dataView.getFieldByName(col.name)?.customLabel}
-            isTimeColumn={dataView.timeFieldName === col.name}
+            customLabel={dataView?.getFieldByName(col.name)?.customLabel}
+            isTimeColumn={dataView?.timeFieldName === col.name}
             sortOrder={
               sortOrder.length
                 ? sortOrder

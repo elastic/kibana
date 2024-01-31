@@ -347,7 +347,7 @@ function DiscoverDocumentsComponent({
             <FormattedMessage id="discover.documentsAriaLabel" defaultMessage="Documents" />
           </h2>
         </EuiScreenReaderOnly>
-        {isLegacy && (
+        {isLegacy && dataView && (
           <>
             {rows && rows.length > 0 && (
               <>

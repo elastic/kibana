@@ -91,7 +91,7 @@ function getTopLevelObjectPairs(
   row: EsHitRecord,
   columnId: string,
   dataView?: DataView,
-  shouldShowFieldHandler: ShouldShowFieldInTableHandler
+  shouldShowFieldHandler?: ShouldShowFieldInTableHandler
 ) {
   const innerColumns = getInnerColumns(row.fields as Record<string, unknown[]>, columnId);
   // Put the most important fields first
@@ -103,9 +103,10 @@ function getTopLevelObjectPairs(
     const displayKey = dataView?.fields.getByName
       ? dataView.fields.getByName(key)?.displayName
       : undefined;
-    const formatter = subField
-      ? dataView?.getFormatterForField(subField)
-      : { convert: (v: unknown, ...rest: unknown[]) => String(v) };
+    const formatter =
+      subField && dataView
+        ? dataView.getFormatterForField(subField)
+        : { convert: (v: unknown, ...rest: unknown[]) => String(v) };
     const formatted = values
       .map((val: unknown) =>
         formatter.convert(val, 'html', {
@@ -115,7 +116,7 @@ function getTopLevelObjectPairs(
       )
       .join(', ');
     const pairs = highlights[key] ? highlightPairs : sourcePairs;
-    if (displayKey) {
+    if (displayKey && shouldShowFieldHandler) {
       if (shouldShowFieldHandler(displayKey)) {
         pairs.push([displayKey, formatted, key]);
       }

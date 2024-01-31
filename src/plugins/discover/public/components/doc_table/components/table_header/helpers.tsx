@@ -45,7 +45,7 @@ export function getTimeColumn(timeFieldName: string): ColumnProps {
  */
 export function getDisplayedColumns(
   columns: string[],
-  dataView: DataView,
+  dataView: DataView | undefined,
   hideTimeField: boolean,
   isShortDots: boolean
 ) {

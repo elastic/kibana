@@ -272,11 +272,12 @@ export function getEuiGridColumns({
 
 export function hasSourceTimeFieldValue(
   columns: string[],
-  dataView: DataView,
+  dataView: DataView | undefined,
   columnTypes: DataTableColumnTypes | undefined,
   showTimeCol: boolean,
   isPlainRecord: boolean
 ) {
+  if (!dataView) return false;
   const timeFieldName = dataView.timeFieldName;
   if (!isPlainRecord || !columns.includes('_source') || !timeFieldName || !columnTypes) {
     return showTimeCol;
