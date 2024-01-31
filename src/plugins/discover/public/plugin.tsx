@@ -412,10 +412,6 @@ export class DiscoverPlugin
         new DiscoverESQLLocatorDefinition({
           discoverAppLocator: this.locator,
           getIndices: plugins.dataViews.getIndices,
-          createDataViewSpec: async (title: string) => {
-            const dataView = await plugins.dataViews.create({ title });
-            return dataView?.toSpec();
-          },
         })
       );
     }
