@@ -8,7 +8,11 @@
 
 import type { BasePath } from '../base_path_service';
 import { CdnConfig } from '../cdn_config';
-import { suffixValueToPathname, suffixValueToURLPathname, removeLeadSlashes } from './util';
+import {
+  suffixValueToPathname,
+  suffixPathnameToURLPathname,
+  removeSurroundingSlashes,
+} from './util';
 
 export interface InternalStaticAssets {
   getHrefBase(): string;
@@ -26,18 +30,31 @@ export interface InternalStaticAssets {
   /**
    * Similar to getPluginServerPath, but not plugin-scoped
    */
-  prependServerPath(path: string): string;
+  prependServerPath(pathname: string): string;
+
+  /**
+   * Will append the given path segment to the configured public path.
+   *
+   * @note This could return a path or full URL depending on whether a CDN is configured.
+   */
+  appendPathToPublicUrl(pathname: string): string;
 }
 
+/**
+ * Convention is for trailing slashes in pathnames are stripped.
+ */
 export class StaticAssets implements InternalStaticAssets {
   private readonly assetsHrefBase: string;
   private readonly assetsServerPathBase: string;
+  private readonly hasCdnHost: boolean;
 
   constructor(basePath: BasePath, cdnConfig: CdnConfig, shaDigest: string) {
     const cdnBaseHref = cdnConfig.baseHref;
     if (cdnBaseHref) {
-      this.assetsHrefBase = suffixValueToURLPathname(cdnBaseHref, shaDigest);
+      this.hasCdnHost = true;
+      this.assetsHrefBase = suffixPathnameToURLPathname(cdnBaseHref, shaDigest);
     } else {
+      this.hasCdnHost = false;
       this.assetsHrefBase = suffixValueToPathname(basePath.serverBasePath, shaDigest);
     }
     this.assetsServerPathBase = `/${shaDigest}`;
@@ -47,23 +64,33 @@ export class StaticAssets implements InternalStaticAssets {
    * Returns a href (hypertext reference) intended to be used as the base for constructing
    * other hrefs to static assets.
    */
-  getHrefBase(): string {
+  public getHrefBase(): string {
     return this.assetsHrefBase;
   }
 
-  getPluginAssetHref(pluginName: string, assetPath: string): string {
+  public getPluginAssetHref(pluginName: string, assetPath: string): string {
     if (assetPath.startsWith('/')) {
       assetPath = assetPath.slice(1);
     }
-    return `${this.assetsHrefBase}/plugins/${pluginName}/assets/${removeLeadSlashes(assetPath)}`;
+    return `${this.assetsHrefBase}/plugins/${pluginName}/assets/${removeSurroundingSlashes(
+      assetPath
+    )}`;
   }
 
-  prependServerPath(path: string): string {
-    return `${this.assetsServerPathBase}/${removeLeadSlashes(path)}`;
+  public prependServerPath(path: string): string {
+    return `${this.assetsServerPathBase}/${removeSurroundingSlashes(path)}`;
   }
 
-  getPluginServerPath(pluginName: string, assetPath: string): string {
-    return `${this.assetsServerPathBase}/plugins/${pluginName}/assets/${removeLeadSlashes(
+  public appendPathToPublicUrl(pathname: string): string {
+    pathname = removeSurroundingSlashes(pathname);
+    if (this.hasCdnHost) {
+      return suffixPathnameToURLPathname(this.assetsHrefBase, pathname);
+    }
+    return suffixValueToPathname(this.assetsHrefBase, pathname);
+  }
+
+  public getPluginServerPath(pluginName: string, assetPath: string): string {
+    return `${this.assetsServerPathBase}/plugins/${pluginName}/assets/${removeSurroundingSlashes(
       assetPath
     )}`;
   }

@@ -12,21 +12,21 @@ function isEmptyPathname(pathname: string): boolean {
   return !pathname || pathname === '/';
 }
 
-/**
- * Ensure only a single leading slash and a no trailing slash
- * @note Safe to use with full URLs or paths
- */
-function normalizeTrailingSlashes(string: string): string {
-  return string.replace(/\/+$/, '');
+function removeTailSlashes(pathname: string): string {
+  return pathname.replace(/\/+$/, '');
 }
 
-export function removeLeadSlashes(string: string): string {
-  return string.replace(/^\/+/, '');
+function removeLeadSlashes(pathname: string): string {
+  return pathname.replace(/^\/+/, '');
 }
 
-export function suffixValueToURLPathname(urlString: string, value: string): string {
+export function removeSurroundingSlashes(pathname: string): string {
+  return removeLeadSlashes(removeTailSlashes(pathname));
+}
+
+export function suffixPathnameToURLPathname(urlString: string, pathname: string): string {
   const url = new URL(urlString);
-  url.pathname = suffixValueToPathname(url.pathname, value);
+  url.pathname = suffixValueToPathname(url.pathname, pathname);
   return format(url);
 }
 
@@ -34,6 +34,8 @@ export function suffixValueToURLPathname(urlString: string, value: string): stri
  * Appends a value to pathname. Pathname is assumed to come from URL.pathname
  * Also do some quality control on the path to ensure that it matches URL.pathname.
  */
-export function suffixValueToPathname(pathname: string, value: string): string {
-  return normalizeTrailingSlashes(isEmptyPathname(pathname) ? `/${value}` : `${pathname}/${value}`);
+export function suffixValueToPathname(pathnameA: string, pathnameB: string): string {
+  return isEmptyPathname(pathnameA)
+    ? `/${removeSurroundingSlashes(pathnameB)}`
+    : `/${removeSurroundingSlashes(pathnameA)}/${removeSurroundingSlashes(pathnameB)}`;
 }

@@ -13,6 +13,7 @@ import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import type { InternalPluginInfo, UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { registerBundleRoutes } from './register_bundle_routes';
 import { FileHashCache } from './file_hash_cache';
+import { BasePath, StaticAssets } from '@kbn/core-http-server-internal';
 
 const createPackageInfo = (parts: Partial<PackageInfo> = {}): PackageInfo => ({
   buildNum: 42,
@@ -42,9 +43,12 @@ const createUiPlugins = (...ids: string[]): UiPlugins => ({
 
 describe('registerBundleRoutes', () => {
   let router: ReturnType<typeof httpServiceMock.createRouter>;
+  let staticAssets: StaticAssets;
 
   beforeEach(() => {
     router = httpServiceMock.createRouter();
+    const basePath = httpServiceMock.createBasePath('/server-base-path') as unknown as BasePath;
+    staticAssets = new StaticAssets(basePath, {} as any, 'sha');
   });
 
   afterEach(() => {
@@ -54,7 +58,7 @@ describe('registerBundleRoutes', () => {
   it('registers core and shared-dep bundles', () => {
     registerBundleRoutes({
       router,
-      serverBasePath: '/server-base-path',
+      staticAssets,
       packageInfo: createPackageInfo(),
       uiPlugins: createUiPlugins(),
     });
@@ -97,7 +101,7 @@ describe('registerBundleRoutes', () => {
   it('registers plugin bundles', () => {
     registerBundleRoutes({
       router,
-      serverBasePath: '/server-base-path',
+      staticAssets,
       packageInfo: createPackageInfo(),
       uiPlugins: createUiPlugins('plugin-a', 'plugin-b'),
     });

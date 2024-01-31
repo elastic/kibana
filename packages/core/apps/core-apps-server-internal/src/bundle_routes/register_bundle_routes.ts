@@ -13,6 +13,7 @@ import { distDir as UiSharedDepsSrcDistDir } from '@kbn/ui-shared-deps-src';
 import * as KbnMonaco from '@kbn/monaco/server';
 import type { IRouter } from '@kbn/core-http-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
+import { InternalStaticAssets } from '@kbn/core-http-server-internal';
 import { FileHashCache } from './file_hash_cache';
 import { registerRouteForBundle } from './bundles_route';
 
@@ -28,56 +29,61 @@ import { registerRouteForBundle } from './bundles_route';
  */
 export function registerBundleRoutes({
   router,
-  serverBasePath,
   uiPlugins,
   packageInfo,
+  staticAssets,
 }: {
   router: IRouter;
-  serverBasePath: string;
   uiPlugins: UiPlugins;
   packageInfo: PackageInfo;
+  staticAssets: InternalStaticAssets;
 }) {
-  const { dist: isDist, buildShaShort: buildSha } = packageInfo;
+  const { dist: isDist } = packageInfo;
   // rather than calculate the fileHash on every request, we
   // provide a cache object to `resolveDynamicAssetResponse()` that
   // will store the most recently used hashes.
   const fileHashCache = new FileHashCache();
 
+  const sharedNpmDepsPath = '/bundles/kbn-ui-shared-deps-npm/';
   registerRouteForBundle(router, {
-    publicPath: `${serverBasePath}/${buildSha}/bundles/kbn-ui-shared-deps-npm/`,
-    routePath: `/${buildSha}/bundles/kbn-ui-shared-deps-npm/`,
+    publicPath: staticAssets.appendPathToPublicUrl(sharedNpmDepsPath) + '/',
+    routePath: staticAssets.prependServerPath(sharedNpmDepsPath) + '/',
     bundlesPath: UiSharedDepsNpm.distDir,
     fileHashCache,
     isDist,
   });
+  const sharedDepsPath = '/bundles/kbn-ui-shared-deps-src/';
   registerRouteForBundle(router, {
-    publicPath: `${serverBasePath}/${buildSha}/bundles/kbn-ui-shared-deps-src/`,
-    routePath: `/${buildSha}/bundles/kbn-ui-shared-deps-src/`,
+    publicPath: staticAssets.appendPathToPublicUrl(sharedDepsPath) + '/',
+    routePath: staticAssets.prependServerPath(sharedDepsPath) + '/',
     bundlesPath: UiSharedDepsSrcDistDir,
     fileHashCache,
     isDist,
   });
+  const coreBundlePath = '/bundles/core/';
   registerRouteForBundle(router, {
-    publicPath: `${serverBasePath}/${buildSha}/bundles/core/`,
-    routePath: `/${buildSha}/bundles/core/`,
+    publicPath: staticAssets.appendPathToPublicUrl(coreBundlePath) + '/',
+    routePath: staticAssets.prependServerPath(coreBundlePath) + '/',
     bundlesPath: isDist
       ? fromRoot('node_modules/@kbn/core/target/public')
       : fromRoot('src/core/target/public'),
     fileHashCache,
     isDist,
   });
+  const monacoEditorPath = '/bundles/kbn-monaco/';
   registerRouteForBundle(router, {
-    publicPath: `${serverBasePath}/${buildSha}/bundles/kbn-monaco/`,
-    routePath: `/${buildSha}/bundles/kbn-monaco/`,
+    publicPath: staticAssets.appendPathToPublicUrl(monacoEditorPath) + '/',
+    routePath: staticAssets.prependServerPath(monacoEditorPath) + '/',
     bundlesPath: KbnMonaco.bundleDir,
     fileHashCache,
     isDist,
   });
 
   [...uiPlugins.internal.entries()].forEach(([id, { publicTargetDir, version }]) => {
+    const pluginBundlesPath = `/bundles/plugin/${id}/${version}/`;
     registerRouteForBundle(router, {
-      publicPath: `${serverBasePath}/${buildSha}/bundles/plugin/${id}/${version}/`,
-      routePath: `/${buildSha}/bundles/plugin/${id}/${version}/`,
+      publicPath: staticAssets.appendPathToPublicUrl(pluginBundlesPath) + '/',
+      routePath: staticAssets.prependServerPath(pluginBundlesPath) + '/',
       bundlesPath: publicTargetDir,
       fileHashCache,
       isDist,
