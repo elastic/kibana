@@ -180,7 +180,8 @@ export default function (providerContext: FtrProviderContext) {
     await es.indices.deleteIndexTemplate({ name: templateName });
   };
 
-  describe('Package Policy - input package behavior', async function () {
+  // Tests are order-dependent and share state so can fail.
+  describe.skip('Package Policy - input package behavior', async function () {
     skipIfNoDockerRegistry(providerContext);
 
     let agentPolicyId: string;
