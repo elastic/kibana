@@ -89,11 +89,7 @@ import {
 import { registerEncryptedSavedObjects, registerSavedObjects } from './saved_objects';
 import { registerRoutes } from './routes';
 
-import type {
-  ExternalCallback,
-  ExternalCallbackAgentPolicy,
-  FleetRequestHandlerContext,
-} from './types';
+import type { ExternalCallback, FleetRequestHandlerContext } from './types';
 import type {
   AgentPolicyServiceInterface,
   AgentService,
@@ -220,7 +216,7 @@ export interface FleetStartContract {
    * Register callbacks for inclusion in fleet API processing
    * @param args
    */
-  registerExternalCallback: (...args: ExternalCallback | ExternalCallbackAgentPolicy) => void;
+  registerExternalCallback: (...args: ExternalCallback) => void;
 
   /**
    * Create a Fleet Artifact Client instance
@@ -629,10 +625,7 @@ export class FleetPlugin
         bumpRevision: agentPolicyService.bumpRevision.bind(agentPolicyService),
       },
       packagePolicyService,
-      registerExternalCallback: (
-        type: ExternalCallback[0] | ExternalCallbackAgentPolicy[0],
-        callback: ExternalCallback[1] | ExternalCallbackAgentPolicy[1]
-      ) => {
+      registerExternalCallback: (type: ExternalCallback[0], callback: ExternalCallback[1]) => {
         return appContextService.addExternalCallback(type, callback);
       },
       createArtifactsClient(packageName: string) {

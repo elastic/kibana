@@ -81,16 +81,6 @@ export type ExternalCallbackPostDelete = [
 ];
 export type ExternalCallbackUpdate = ['packagePolicyUpdate', PutPackagePolicyUpdateCallback];
 
-/**
- * Callbacks supported by the Fleet plugin
- */
-export type ExternalCallback =
-  | ExternalCallbackCreate
-  | ExternalCallbackPostCreate
-  | ExternalCallbackDelete
-  | ExternalCallbackPostDelete
-  | ExternalCallbackUpdate;
-
 export type ExternalCallbackAgentPolicyCreate = [
   'agentPolicyCreate',
   PostAgentPolicyCreateCallback
@@ -100,10 +90,16 @@ export type ExternalCallbackAgentPolicyUpdate = [
   PostAgentPolicyUpdateCallback
 ];
 
-export type ExternalCallbackAgentPolicy =
+/**
+ * Callbacks supported by the Fleet plugin
+ */
+export type ExternalCallback =
+  | ExternalCallbackCreate
+  | ExternalCallbackPostCreate
+  | ExternalCallbackDelete
+  | ExternalCallbackPostDelete
+  | ExternalCallbackUpdate
   | ExternalCallbackAgentPolicyCreate
   | ExternalCallbackAgentPolicyUpdate;
 
-export type ExternalCallbackType = ExternalCallback | ExternalCallbackAgentPolicy;
-
-export type ExternalCallbacksStorage = Map<ExternalCallbackType[0], Set<ExternalCallbackType[1]>>;
+export type ExternalCallbacksStorage = Map<ExternalCallback[0], Set<ExternalCallback[1]>>;

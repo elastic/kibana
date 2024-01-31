@@ -44,9 +44,9 @@ import type {
   FullAgentPolicy,
   ListWithKuery,
   NewPackagePolicy,
-  ExternalCallbackAgentPolicy,
   PostAgentPolicyCreateCallback,
   PostAgentPolicyUpdateCallback,
+  ExternalCallback,
 } from '../types';
 import {
   getAllowedOutputTypeForPolicy,
@@ -238,7 +238,7 @@ class AgentPolicyService {
   }
 
   public async runExternalCallbacks(
-    externalCallbackType: ExternalCallbackAgentPolicy[0],
+    externalCallbackType: ExternalCallback[0],
     agentPolicy: NewAgentPolicy | Partial<AgentPolicy>
   ): Promise<NewAgentPolicy | Partial<AgentPolicy>> {
     const logger = appContextService.getLogger();
@@ -559,8 +559,14 @@ class AgentPolicyService {
     if (!existingAgentPolicy) {
       throw new AgentPolicyNotFoundError('Agent policy not found');
     }
-
-    await this.runExternalCallbacks('agentPolicyUpdate', agentPolicy);
+    try {
+      await this.runExternalCallbacks('agentPolicyUpdate', agentPolicy);
+    } catch (error) {
+      logger.error(`Error running external callbacks for agentPolicyUpdate`);
+      if (error.apiPassThrough) {
+        throw error;
+      }
+    }
     this.checkTamperProtectionLicense(agentPolicy);
     await this.checkForValidUninstallToken(agentPolicy, id);
 

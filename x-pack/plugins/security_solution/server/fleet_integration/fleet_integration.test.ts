@@ -31,7 +31,7 @@ import {
   getPackagePolicyPostCreateCallback,
   getPackagePolicyUpdateCallback,
 } from './fleet_integration';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { ALL_APP_FEATURE_KEYS, AppFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import { requestContextMock } from '../lib/detection_engine/routes/__mocks__';
 import { requestContextFactoryMock } from '../request_context_factory.mock';
@@ -52,7 +52,10 @@ import { getMockArtifacts, toArtifactRecords } from '../endpoint/lib/artifacts/m
 import { Manifest } from '../endpoint/lib/artifacts';
 import type { NewPackagePolicy, PackagePolicy } from '@kbn/fleet-plugin/common/types/models';
 import type { ManifestSchema } from '../../common/endpoint/schema/manifest';
-import type { PostDeletePackagePoliciesResponse } from '@kbn/fleet-plugin/common';
+import type {
+  GetAgentPoliciesResponseItem,
+  PostDeletePackagePoliciesResponse,
+} from '@kbn/fleet-plugin/common';
 import { createMockPolicyData } from '../endpoint/services/feature_usage/mocks';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../common/endpoint/service/artifacts/constants';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
@@ -60,6 +63,7 @@ import { disableProtections } from '../../common/endpoint/models/policy_config_h
 import type { AppFeaturesService } from '../lib/app_features_service/app_features_service';
 import { createAppFeaturesServiceMock } from '../lib/app_features_service/mocks';
 import * as moment from 'moment';
+import type { PostAgentPolicyCreateCallback } from '@kbn/fleet-plugin/server/types';
 
 jest.mock('uuid', () => ({
   v4: (): string => 'NEW_UUID',
@@ -399,7 +403,7 @@ describe('ingest_integration tests ', () => {
       policyConfig.is_protected = true;
 
       await expect(() => callback(policyConfig)).rejects.toThrow(
-        'Agent Tamper Protection requires Complete Endpoint Security tier'
+        'Agent Tamper Protection is not allowed in current environment'
       );
     });
     it('AppFeature disabled - returns agent policy if higher tier features are turned off in the policy', async () => {
@@ -443,58 +447,50 @@ describe('ingest_integration tests ', () => {
   });
 
   describe('agent policy create callback', () => {
-    it('AppFeature disabled - returns an error if higher tier features are turned on in the policy', async () => {
-      const logger = loggingSystemMock.create().get('ingest_integration.test');
+    let logger: Logger;
+    let callback: PostAgentPolicyCreateCallback;
+    let policyConfig: GetAgentPoliciesResponseItem;
 
+    beforeEach(() => {
+      logger = loggingSystemMock.create().get('ingest_integration.test');
+      callback = getAgentPolicyCreateCallback(logger, appFeaturesService);
+      policyConfig = generator.generateAgentPolicy();
+    });
+
+    it('AppFeature disabled - returns an error if higher tier features are turned on in the policy', async () => {
       appFeaturesService = createAppFeaturesServiceMock(
         ALL_APP_FEATURE_KEYS.filter(
           (key) => key !== AppFeatureSecurityKey.endpointAgentTamperProtection
         )
       );
-      const callback = getAgentPolicyCreateCallback(logger, appFeaturesService);
-
-      const policyConfig = generator.generateAgentPolicy();
+      callback = getAgentPolicyCreateCallback(logger, appFeaturesService);
       policyConfig.is_protected = true;
 
       await expect(() => callback(policyConfig)).rejects.toThrow(
-        'Agent Tamper Protection requires Complete Endpoint Security tier'
+        'Agent Tamper Protection is not allowed in current environment'
       );
     });
 
     it('AppFeature disabled - returns agent policy if higher tier features are turned off in the policy', async () => {
-      const logger = loggingSystemMock.create().get('ingest_integration.test');
-
       appFeaturesService = createAppFeaturesServiceMock(
         ALL_APP_FEATURE_KEYS.filter(
           (key) => key !== AppFeatureSecurityKey.endpointAgentTamperProtection
         )
       );
-      const callback = getAgentPolicyCreateCallback(logger, appFeaturesService);
-
-      const policyConfig = generator.generateAgentPolicy();
-
+      callback = getAgentPolicyCreateCallback(logger, appFeaturesService);
       const updatedPolicyConfig = await callback(policyConfig);
 
       expect(updatedPolicyConfig).toEqual(policyConfig);
     });
+
     it('AppFeature enabled - returns agent policy if higher tier features are turned on in the policy', async () => {
-      const logger = loggingSystemMock.create().get('ingest_integration.test');
-
-      const callback = getAgentPolicyCreateCallback(logger, appFeaturesService);
-
-      const policyConfig = generator.generateAgentPolicy();
       policyConfig.is_protected = true;
-
       const updatedPolicyConfig = await callback(policyConfig);
 
       expect(updatedPolicyConfig).toEqual(policyConfig);
     });
+
     it('AppFeature enabled - returns agent policy if higher tier features are turned off in the policy', async () => {
-      const logger = loggingSystemMock.create().get('ingest_integration.test');
-
-      const callback = getAgentPolicyCreateCallback(logger, appFeaturesService);
-      const policyConfig = generator.generateAgentPolicy();
-
       const updatedPolicyConfig = await callback(policyConfig);
 
       expect(updatedPolicyConfig).toEqual(policyConfig);

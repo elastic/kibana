@@ -42,7 +42,6 @@ import type {
   PostPackagePolicyPostDeleteCallback,
   PostPackagePolicyPostCreateCallback,
   PutPackagePolicyUpdateCallback,
-  ExternalCallbackAgentPolicy,
   PostAgentPolicyCreateCallback,
   PostAgentPolicyUpdateCallback,
 } from '../types';
@@ -237,17 +236,14 @@ class AppContextService {
     return this.kibanaInstanceId;
   }
 
-  public addExternalCallback(
-    type: ExternalCallback[0] | ExternalCallbackAgentPolicy[0],
-    callback: ExternalCallback[1] | ExternalCallbackAgentPolicy[1]
-  ) {
+  public addExternalCallback(type: ExternalCallback[0], callback: ExternalCallback[1]) {
     if (!this.externalCallbacks.has(type)) {
       this.externalCallbacks.set(type, new Set());
     }
     this.externalCallbacks.get(type)!.add(callback);
   }
 
-  public getExternalCallbacks<T extends ExternalCallback[0] | ExternalCallbackAgentPolicy[0]>(
+  public getExternalCallbacks<T extends ExternalCallback[0]>(
     type: T
   ):
     | Set<

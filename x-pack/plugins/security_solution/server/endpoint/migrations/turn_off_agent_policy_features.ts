@@ -30,7 +30,7 @@ export const turnOffAgentPolicyFeatures = async (
   }
 
   log.info(
-    `App feature [${AppFeatureSecurityKey.endpointAgentTamperProtection}] is disabled. Checking endpoint integration policies for compliance`
+    `App feature [${AppFeatureSecurityKey.endpointAgentTamperProtection}] is disabled. Checking fleet agent policies for compliance`
   );
 
   const { agentPolicy: agentPolicyService, internalSoClient } = fleetServices;
@@ -76,9 +76,12 @@ export const turnOffAgentPolicyFeatures = async (
     });
 
     if (policyUpdateErrors.length > 0) {
-      logger.error(`Done. ${policyUpdateErrors.length} out of ${updates.length}`);
-      policyUpdateErrors.forEach((e) =>
-        logger.error(`Policy [${e.id}] failed to update due to error: ${e.error}`)
+      logger.error(
+        `Done - ${policyUpdateErrors.length} out of ${
+          updates.length
+        } were successful. Errors encountered:\n${policyUpdateErrors
+          .map((e) => `Policy [${e.id}] failed to update due to error: ${e.error}`)
+          .join('\n')}`
       );
     } else {
       logger.info(`Done. All updates applied successfully`);

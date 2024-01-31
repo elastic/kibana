@@ -292,6 +292,18 @@ export const getPackagePolicyPostCreateCallback = (
   };
 };
 
+const throwAgentTamperProtectionUnavailableError = (logger: Logger): void => {
+  const agentTamperProtectionUnavailableError: Error & {
+    statusCode?: number;
+    apiPassThrough?: boolean;
+  } = new Error('Agent Tamper Protection is not allowed in current environment');
+  // Agent Policy Service will check for apiPassThrough and rethrow. Route handler will check for statusCode and overwrite.
+  agentTamperProtectionUnavailableError.statusCode = 403;
+  agentTamperProtectionUnavailableError.apiPassThrough = true;
+  logger.error('Agent Tamper Protection requires Complete Endpoint Security tier');
+  throw agentTamperProtectionUnavailableError;
+};
+
 export const getAgentPolicyCreateCallback = (
   logger: Logger,
   appFeatures: AppFeaturesService
@@ -301,9 +313,7 @@ export const getAgentPolicyCreateCallback = (
       agentPolicy.is_protected &&
       !appFeatures.isEnabled(AppFeatureSecurityKey.endpointAgentTamperProtection)
     ) {
-      const error = new Error('Agent Tamper Protection requires Complete Endpoint Security tier');
-      logger.error(error);
-      throw error;
+      throwAgentTamperProtectionUnavailableError(logger);
     }
     return agentPolicy;
   };
@@ -318,9 +328,7 @@ export const getAgentPolicyUpdateCallback = (
       agentPolicy.is_protected &&
       !appFeatures.isEnabled(AppFeatureSecurityKey.endpointAgentTamperProtection)
     ) {
-      const error = new Error('Agent Tamper Protection requires Complete Endpoint Security tier');
-      logger.error(error);
-      throw error;
+      throwAgentTamperProtectionUnavailableError(logger);
     }
     return agentPolicy;
   };

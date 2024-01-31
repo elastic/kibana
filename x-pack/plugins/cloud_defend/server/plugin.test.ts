@@ -25,7 +25,11 @@ import { CloudDefendPlugin } from './plugin';
 import { CloudDefendPluginStartDeps } from './types';
 import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 import { PackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
-import { FleetStartContract, PostPackagePolicyPostCreateCallback } from '@kbn/fleet-plugin/server';
+import {
+  ExternalCallback,
+  FleetStartContract,
+  PostPackagePolicyPostCreateCallback,
+} from '@kbn/fleet-plugin/server';
 import { INTEGRATION_PACKAGE_NAME } from '../common/constants';
 import Chance from 'chance';
 import type { AwaitedProperties } from '@kbn/utility-types';
@@ -38,7 +42,6 @@ import {
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import * as onPackagePolicyPostCreateCallback from './lib/fleet_util';
-import { ExternalCallbackType } from '@kbn/fleet-plugin/server/types';
 
 const chance = new Chance();
 
@@ -60,7 +63,7 @@ const createMockFleetStartContract = (): DeeplyMockedKeys<FleetStartContract> =>
     // @ts-expect-error 2322
     packageService: createMockPackageService(),
     agentPolicyService: createMockAgentPolicyService(),
-    registerExternalCallback: jest.fn((..._: ExternalCallbackType) => {}),
+    registerExternalCallback: jest.fn((..._: ExternalCallback) => {}),
     packagePolicyService: createPackagePolicyServiceMock(),
     createArtifactsClient: jest.fn().mockReturnValue(createArtifactsClientMock()),
   };
