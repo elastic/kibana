@@ -61,11 +61,12 @@ export const useSearch = (
         query: aiopsListState?.searchString,
       };
       if (
-        aiopsListState?.searchString !== '' &&
+        (aiopsListState.searchString !== '' ||
+          (Array.isArray(aiopsListState.filters) && aiopsListState.filters.length > 0)) &&
         (isDefaultSearchQuery(searchQuery) || searchQuery === undefined) &&
         isQuery(query)
       ) {
-        searchQuery = createMergedEsQuery(query, [], dataView, uiSettings);
+        searchQuery = createMergedEsQuery(query, aiopsListState.filters, dataView, uiSettings);
       }
 
       return {
