@@ -167,7 +167,7 @@ export class ServiceAPIClient {
   }
 
   async syncMonitors(data: ServiceData) {
-    console.log('DEBUG: license info', data.license.type);
+    console.log('DEBUG: license info', data?.license?.type);
     try {
       return (await this.callAPI('PUT', { ...data, endpoint: 'sync' })).pushErrors;
     } catch (e) {
