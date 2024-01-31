@@ -150,12 +150,10 @@ export type FilterName = keyof typeof FILTER_NAMES;
 export const useActionsLogFilter = ({
   filterName,
   isFlyout,
-  isPopoverOpen,
   searchString,
 }: {
   filterName: FilterName;
   isFlyout: boolean;
-  isPopoverOpen: boolean;
   searchString: string;
 }): {
   areHostsSelectedOnMount: boolean;

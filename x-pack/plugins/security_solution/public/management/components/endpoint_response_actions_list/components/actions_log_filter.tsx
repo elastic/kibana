@@ -74,7 +74,6 @@ export const ActionsLogFilter = memo(
     } = useActionsLogFilter({
       filterName,
       isFlyout,
-      isPopoverOpen,
       searchString,
     });
 
