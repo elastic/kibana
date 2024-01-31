@@ -218,7 +218,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
             },
             agent: {
               id: agentId,
-              type: options.agent_type,
+              type: options.agent_type || 'endpoint',
             },
           },
         ],

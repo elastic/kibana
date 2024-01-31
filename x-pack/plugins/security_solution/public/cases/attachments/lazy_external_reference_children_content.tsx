@@ -6,19 +6,7 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import type { ResponseActionAgentType } from '../../../common/endpoint/service/response_actions/constants';
-
-export interface IExternalReferenceMetaDataProps {
-  externalReferenceMetadata: {
-    comment: string;
-    command: string;
-    targets: Array<{
-      endpointId: string;
-      hostname: string;
-      type: ResponseActionAgentType;
-    }>;
-  };
-}
+import type { IExternalReferenceMetaDataProps } from './types';
 
 const AttachmentContent = lazy(() => import('./external_reference_children'));
 

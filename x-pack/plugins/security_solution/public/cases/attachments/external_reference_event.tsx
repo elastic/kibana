@@ -9,8 +9,8 @@ import { EuiLink } from '@elastic/eui';
 import { useNavigation } from '@kbn/security-solution-navigation/src/navigation';
 import React, { useCallback } from 'react';
 
+import type { IExternalReferenceMetaDataProps } from './types';
 import { getEndpointDetailsPath } from '../../management/common/routing';
-import type { IExternalReferenceMetaDataProps } from './lazy_external_reference_content';
 
 import { ISOLATED_HOST, OTHER_ENDPOINTS, RELEASED_HOST } from '../pages/translations';
 

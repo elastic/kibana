@@ -16,7 +16,7 @@ import type {
   PluginSetupContract as AlertingPluginSetup,
   PluginStartContract as AlertingPluginStart,
 } from '@kbn/alerting-plugin/server';
-import type { CasesStart } from '@kbn/cases-plugin/server';
+import type { CasesStart, CasesSetup } from '@kbn/cases-plugin/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { IEventLogClientService, IEventLogService } from '@kbn/event-log-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
@@ -42,7 +42,6 @@ import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified-search-plugin/server';
 import type { ElasticAssistantPluginStart } from '@kbn/elastic-assistant-plugin/server';
-import type { CasesSetup } from '@kbn/cases-plugin/server';
 import type { AppFeaturesService } from './lib/app_features_service/app_features_service';
 import type { ExperimentalFeatures } from '../common';
 

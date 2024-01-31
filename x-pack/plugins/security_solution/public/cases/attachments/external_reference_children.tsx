@@ -16,7 +16,7 @@ import React from 'react';
 
 import styled from 'styled-components';
 import { EuiMarkdownFormat } from '@elastic/eui';
-import type { IExternalReferenceMetaDataProps } from './lazy_external_reference_content';
+import type { IExternalReferenceMetaDataProps } from './types';
 
 export const ContentWrapper = styled.div`
   padding: ${({ theme }) => `${theme.eui.euiSizeM} ${theme.eui.euiSizeL}`};

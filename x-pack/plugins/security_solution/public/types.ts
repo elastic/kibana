@@ -25,7 +25,7 @@ import type {
   TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import type { CasesUiStart } from '@kbn/cases-plugin/public';
+import type { CasesUiStart, CasesUiSetup } from '@kbn/cases-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { SessionViewStart } from '@kbn/session-view-plugin/public';
@@ -57,7 +57,6 @@ import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public'
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
-import type { CasesUiSetup } from '@kbn/cases-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
