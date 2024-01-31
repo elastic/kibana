@@ -68,6 +68,7 @@ export const RulesTable = ({
   refetchRulesStates,
   selectedRules,
   setSelectedRules,
+  onRuleClick,
 }: RulesTableProps) => {
   const { euiTheme } = useEuiTheme();
   const euiPagination: EuiBasicTableProps<CspBenchmarkRulesWithStates>['pagination'] = {
@@ -125,6 +126,7 @@ export const RulesTable = ({
         setIsAllRulesSelectedThisPage,
         isAllRulesSelectedThisPage,
         isCurrentPageRulesASubset,
+        onRuleClick,
       }),
     [
       setSelectedRuleId,
@@ -134,6 +136,7 @@ export const RulesTable = ({
       setSelectedRules,
       items,
       isAllRulesSelectedThisPage,
+      onRuleClick,
     ]
   );
 
@@ -163,6 +166,7 @@ const getColumns = ({
   items,
   isAllRulesSelectedThisPage,
   isCurrentPageRulesASubset,
+  onRuleClick,
 }: GetColumnProps): Array<EuiTableFieldDataColumnType<CspBenchmarkRulesWithStates>> => [
   {
     field: 'action',
@@ -237,7 +241,8 @@ const getColumns = ({
         title={name}
         onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
           e.stopPropagation();
-          setSelectedRuleId(rule.metadata.id);
+          // setSelectedRuleId(rule.metadata.id);
+          onRuleClick(rule.metadata.id);
         }}
         data-test-subj={TEST_SUBJECTS.CSP_RULES_TABLE_ROW_ITEM_NAME}
       >

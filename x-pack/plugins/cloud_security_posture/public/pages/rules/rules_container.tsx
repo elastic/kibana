@@ -7,7 +7,8 @@
 import React, { useState, useMemo } from 'react';
 import compareVersions from 'compare-versions';
 import { EuiSpacer } from '@elastic/eui';
-import { useParams } from 'react-router-dom';
+import { useParams, useHistory, generatePath } from 'react-router-dom';
+import { benchmarksNavigation } from '../../common/navigation/constants';
 import { buildRuleKey } from '../../../common/utils/rules_states';
 import { extractErrorMessage } from '../../../common/utils/helpers';
 import { RulesTable } from './rules_table';
@@ -66,9 +67,29 @@ const MAX_ITEMS_PER_PAGE = 10000;
 
 export const RulesContainer = () => {
   const params = useParams<PageUrlParams>();
+  const history = useHistory();
   const [selectedRuleId, setSelectedRuleId] = useState<string | null>(null);
   const [enabledDisabledItemsFilter, setEnabledDisabledItemsFilter] = useState('no-filter');
   const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_RULES_KEY);
+
+  const onRuleClick = (ruleId: string) => {
+    history.push(
+      generatePath(benchmarksNavigation.rules.path, {
+        benchmarkVersion: params.benchmarkVersion,
+        benchmarkId: params.benchmarkId,
+        ruleId,
+      })
+    );
+  };
+
+  const onFlyoutClose = () => {
+    history.push(
+      generatePath(benchmarksNavigation.rules.path, {
+        benchmarkVersion: params.benchmarkVersion,
+        benchmarkId: params.benchmarkId,
+      })
+    );
+  };
 
   const [rulesQuery, setRulesQuery] = useState<RulesQuery>({
     section: undefined,
@@ -175,13 +196,12 @@ export const RulesContainer = () => {
   const rulesFlyoutData: CspBenchmarkRulesWithStates = {
     ...{
       state:
-        filteredRulesStates.find(
-          (filteredRuleState) => filteredRuleState.rule_id === selectedRuleId
-        )?.muted === true
+        filteredRulesStates.find((filteredRuleState) => filteredRuleState.rule_id === params.ruleId)
+          ?.muted === true
           ? 'muted'
           : 'unmuted',
     },
-    ...{ metadata: rulesPageData.rules_map.get(selectedRuleId!)?.metadata! },
+    ...{ metadata: rulesPageData.rules_map.get(params.ruleId!)?.metadata! },
   };
 
   return (
@@ -226,14 +246,15 @@ export const RulesContainer = () => {
         }}
         setSelectedRuleId={setSelectedRuleId}
         selectedRuleId={selectedRuleId}
+        onRuleClick={onRuleClick}
         refetchRulesStates={rulesStates.refetch}
         selectedRules={selectedRules}
         setSelectedRules={setSelectedRules}
       />
-      {selectedRuleId && (
+      {params.ruleId && rulesFlyoutData.metadata && (
         <RuleFlyout
           rule={rulesFlyoutData}
-          onClose={() => setSelectedRuleId(null)}
+          onClose={onFlyoutClose}
           refetchRulesStates={rulesStates.refetch}
         />
       )}

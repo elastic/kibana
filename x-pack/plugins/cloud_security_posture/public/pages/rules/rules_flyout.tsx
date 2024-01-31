@@ -73,6 +73,7 @@ export const RuleFlyout = ({ onClose, rule, refetchRulesStates }: RuleFlyoutProp
       await refetchRulesStates();
     }
   };
+
   return (
     <EuiFlyout
       ownFocus={false}
