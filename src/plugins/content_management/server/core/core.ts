@@ -65,22 +65,24 @@ export class Core {
   setup(): CoreSetup {
     this.setupEventStream();
 
+    const contentClient: CoreApi['contentClient'] = {
+      getForRequest: ({ contentTypeId, requestHandlerContext, version }) => {
+        const contentDefinition = this.contentRegistry.getDefinition(contentTypeId);
+        const clientFactory = getContentClientFactory({ contentRegistry: this.contentRegistry });
+        const client = clientFactory(contentTypeId);
+
+        return client.getForRequest({
+          requestHandlerContext,
+          version: version ?? contentDefinition.version.latest,
+        });
+      },
+    };
+
     const coreApi: CoreApi = {
       register: this.contentRegistry.register.bind(this.contentRegistry),
       crud: this.contentRegistry.getCrud.bind(this.contentRegistry),
       eventBus: this.eventBus,
-      contentClient: {
-        getForRequest: ({ contentTypeId, requestHandlerContext, version }) => {
-          const contentDefinition = this.contentRegistry.getDefinition(contentTypeId);
-          const clientFactory = getContentClientFactory({ contentRegistry: this.contentRegistry });
-          const contentClient = clientFactory(contentTypeId);
-
-          return contentClient.getForRequest({
-            requestHandlerContext,
-            version: version ?? contentDefinition.version.latest,
-          });
-        },
-      },
+      contentClient,
     };
 
     return {
