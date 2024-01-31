@@ -8,7 +8,7 @@
 import type { EncryptedSavedObjectTypeRegistration } from './encrypted_saved_objects_service';
 
 /**
- * Represents the definition of the attributes of the specific saved object that are supposed to ßbe
+ * Represents the definition of the attributes of the specific saved object that are supposed to be
  * encrypted. The definition also dictates which attributes should be included in AAD and/or
  * stripped from response.
  */
