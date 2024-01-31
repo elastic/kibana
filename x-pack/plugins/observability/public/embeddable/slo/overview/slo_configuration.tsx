@@ -65,7 +65,7 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-        {selectedSlo?.sloInstanceId !== '*' && (
+        {selectedSlo?.sloInstanceId !== ALL_VALUE && (
           <>
             <EuiSpacer />
             <EuiSwitch
