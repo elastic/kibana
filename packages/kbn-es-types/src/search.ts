@@ -678,5 +678,5 @@ export interface ESQLSearchParams {
   query: string;
   filter?: unknown;
   locale?: string;
-  dropNulls?: boolean;
+  dropNullColumns?: boolean;
 }

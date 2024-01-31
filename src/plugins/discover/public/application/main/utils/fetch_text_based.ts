@@ -41,7 +41,7 @@ export function fetchTextBased(
     time: timeRange,
     dataView,
     inputQuery,
-    dropNulls: true,
+    dropNullColumns: true,
   })
     .then((ast) => {
       if (ast) {

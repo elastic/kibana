@@ -22,12 +22,16 @@ import { IKibanaSearchRequest, IKibanaSearchResponse, pollSearch } from '../../.
 import { toAsyncKibanaSearchResponse } from './response_utils';
 import { SearchConfigSchema } from '../../../../config';
 
+interface ESQLQueryRequest extends SqlQueryRequest {
+  body?: SqlQueryRequest['body'] & { dropNullColumns?: boolean };
+}
+
 export const esqlAsyncSearchStrategyProvider = (
   searchConfig: SearchConfigSchema,
   logger: Logger,
   useInternalUser: boolean = false
 ): ISearchStrategy<
-  IKibanaSearchRequest<SqlQueryRequest['body']>,
+  IKibanaSearchRequest<ESQLQueryRequest['body']>,
   IKibanaSearchResponse<SqlGetAsyncResponse>
 > => {
   function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
@@ -46,13 +50,15 @@ export const esqlAsyncSearchStrategyProvider = (
   }
 
   function asyncSearch(
-    { id, ...request }: IKibanaSearchRequest<SqlQueryRequest['body']>,
+    { id, ...request }: IKibanaSearchRequest<ESQLQueryRequest['body']>,
     options: IAsyncSearchOptions,
     { esClient, uiSettingsClient }: SearchStrategyDependencies
   ) {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
 
     const search = async () => {
+      const { dropNullColumns, ...requestParams } = request.params ?? {};
+      const queryParams = dropNullColumns ? '?drop_null_columns' : '';
       const params = id
         ? {
             ...getCommonDefaultAsyncGetParams(searchConfig, options),
@@ -63,15 +69,19 @@ export const esqlAsyncSearchStrategyProvider = (
           }
         : {
             ...(await getCommonDefaultAsyncSubmitParams(searchConfig, options)),
-            ...request.params,
+            ...requestParams,
           };
       const { body, headers, meta } = id
         ? await client.transport.request<SqlGetAsyncResponse>(
-            { method: 'GET', path: `/_query/async/${id}`, querystring: { ...params } },
+            {
+              method: 'GET',
+              path: `/_query/async/${id}${queryParams}`,
+              querystring: { ...params },
+            },
             { ...options.transport, signal: options.abortSignal, meta: true }
           )
         : await client.transport.request<SqlGetAsyncResponse>(
-            { method: 'POST', path: `/_query/async`, body: params },
+            { method: 'POST', path: `/_query/async${queryParams}`, body: params },
             { ...options.transport, signal: options.abortSignal, meta: true }
           );
 

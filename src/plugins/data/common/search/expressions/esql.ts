@@ -43,7 +43,7 @@ interface Arguments {
   // timezone?: string;
   timeField?: string;
   locale?: string;
-  dropNulls?: boolean;
+  dropNullColumns?: boolean;
 }
 
 export type EsqlExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -126,8 +126,8 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           defaultMessage: 'The locale to use.',
         }),
       },
-      dropNulls: {
-        aliases: ['dropNulls'],
+      dropNullColumns: {
+        aliases: ['dropNullColumns'],
         types: ['boolean'],
         help: i18n.translate('data.search.essql.dropNull.help', {
           defaultMessage: 'If true adds all_columns in a separate property',
@@ -136,7 +136,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
     },
     fn(
       input,
-      { query, /* timezone, */ timeField, locale, dropNulls },
+      { query, /* timezone, */ timeField, locale, dropNullColumns },
       { abortSignal, inspectorAdapters, getKibanaRequest }
     ) {
       return defer(() =>
@@ -157,7 +157,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             query,
             // time_zone: timezone,
             locale,
-            dropNulls,
+            dropNullColumns,
           };
           if (input) {
             const esQueryConfigs = getEsQueryConfig(
