@@ -221,7 +221,7 @@ export function runCli() {
           --concurrency      number of bulk requests made by the api
         `,
       },
-      async run({ flags, esArchiver, statsMeta }) {
+      async run({ flags, esArchiver, statsMeta, log }) {
         const [path] = flags._;
         if (!path) {
           throw createFlagError('missing [path] argument');
@@ -242,7 +242,7 @@ export function runCli() {
           throw createFlagError('--docs-only does not take a value');
         }
 
-        await cliPerfOptionOverride(useCreate, docsOnly, path, flags, esArchiver);
+        await cliPerfOptionOverride(useCreate, docsOnly, path, flags, esArchiver, log);
       },
     })
     .command({

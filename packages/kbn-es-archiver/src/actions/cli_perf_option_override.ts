@@ -8,6 +8,7 @@
 
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { Flags } from '@kbn/dev-cli-runner';
+import { ToolingLog } from '@kbn/tooling-log';
 import { EsArchiver } from '../es_archiver';
 
 type StringOption = string | boolean | string[] | undefined;
@@ -23,7 +24,8 @@ export const cliPerfOptionOverride = async (
   docsOnly: boolean,
   path: string,
   flags: Flags,
-  esArchiver: EsArchiver
+  esArchiver: EsArchiver,
+  log: ToolingLog
 ): Promise<void> => {
   const batchSize = flags['batch-size'];
   const concurrency = flags.concurrency;
@@ -32,6 +34,7 @@ export const cliPerfOptionOverride = async (
   const concurrencyRequested = isStringOptRequested(concurrency);
 
   if (!batchRequested && !concurrencyRequested) {
+    log.debug('No performance option override requested.');
     await esArchiver.load(path, {
       useCreate,
       docsOnly,
@@ -40,6 +43,7 @@ export const cliPerfOptionOverride = async (
   }
 
   if (batchRequested && !concurrencyRequested) {
+    log.debug('Performance option override requested; batch size only');
     protect(batchSize);
     await esArchiver.load(path, {
       useCreate,
@@ -51,6 +55,7 @@ export const cliPerfOptionOverride = async (
     return;
   }
   if (concurrencyRequested && !batchRequested) {
+    log.debug('Performance option override requested; concurrency only');
     protect(concurrency);
     await esArchiver.load(path, {
       useCreate,
@@ -63,6 +68,7 @@ export const cliPerfOptionOverride = async (
   }
 
   if (batchRequested && concurrencyRequested) {
+    log.debug('Performance option override requested; batch size and concurrency');
     [batchSize, concurrency].forEach(protect);
     await esArchiver.load(path, {
       useCreate,
