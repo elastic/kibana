@@ -21,7 +21,7 @@ export const dataTiersUiSettingsConfig: Record<string, UiSettingsParams> = {
     type: 'string',
     description: i18n.translate('dataViews.advancedSettings.dataTiersText', {
       defaultMessage:
-        'Exclude fields from specified tiers (such as data_frozen) for faster performance.',
+        'Exclude fields from specified tiers (such as data_frozen) for faster performance. Comma delimit to exclude multiple tiers - data_warm,data_cold',
     }),
     schema: schema.string(),
   },
