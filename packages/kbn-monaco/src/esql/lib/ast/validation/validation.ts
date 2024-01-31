@@ -51,7 +51,7 @@ import type {
   ESQLSingleAstItem,
   ESQLSource,
 } from '../types';
-import { getMessageFromId, createMessage } from './errors';
+import { getMessageFromId } from './errors';
 import type { ESQLRealField, ESQLVariable, ReferenceMaps, ValidationResult } from './types';
 import type { ESQLCallbacks } from '../shared/types';
 import {
@@ -325,11 +325,9 @@ function validateFunction(
   }
   // check if the definition has some warning to show:
   if (fnDefinition.warning) {
-    const message = fnDefinition.warning(
-      ...(astFunction.args.filter((arg) => !Array.isArray(arg)) as ESQLSingleAstItem[])
-    );
-    if (message) {
-      messages.push(createMessage('warning', message, astFunction.location));
+    const payloads = fnDefinition.warning(astFunction);
+    if (payloads.length) {
+      messages.push(...payloads);
     }
   }
   // at this point we're sure that at least one signature is matching
