@@ -56,6 +56,11 @@ export interface ReportOutput extends TaskRunResult {
 }
 
 /**
+ * @see also {@link packages/kbn-reporting/common/types.ts}
+ */
+export type CsvPagingStrategy = 'pit' | 'scroll';
+
+/**
  * @deprecated
  */
 export interface BaseParams {
@@ -64,7 +69,7 @@ export interface BaseParams {
   title: string;
   version: string; // to handle any state migrations
   layout?: LayoutParams; // png & pdf only
-  pagingStrategy?: 'pit' | 'scroll'; // csv only
+  pagingStrategy?: CsvPagingStrategy; // csv only
 }
 
 /**

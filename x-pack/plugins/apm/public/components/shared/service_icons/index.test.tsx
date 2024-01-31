@@ -52,6 +52,14 @@ function Wrapper({ children }: { children?: ReactNode }) {
 }
 
 describe('ServiceIcons', () => {
+  beforeAll(() => {
+    // Mocks console.warn so it won't polute tests output when testing the api throwing error
+    jest.spyOn(console, 'warn').mockImplementation(() => null);
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
   describe('icons', () => {
     it('Shows loading spinner while fetching data', () => {
       jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
