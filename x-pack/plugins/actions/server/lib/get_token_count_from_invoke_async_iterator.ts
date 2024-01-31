@@ -94,6 +94,7 @@ const parseOpenAIStream: StreamParser = async (streamIterable, logger) => {
     }
   } catch (e) {
     logger.error('An error occurred while calculating streaming response tokens');
+    logger.error(e);
   }
   return responseBody;
 };

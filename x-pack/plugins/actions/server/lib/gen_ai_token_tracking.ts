@@ -47,6 +47,7 @@ export const getGenAiTokenTracking = async ({
   if (validatedParams.subAction === 'invokeAsyncIterator' && actionTypeId === '.gen-ai') {
     try {
       const data = result.data as Array<Stream<ChatCompletionChunk>>;
+      // the async interator is teed in the subaction response, double check that it has two streams
       if (data.length === 2) {
         const { total, prompt, completion } = await getTokenCountFromInvokeAsyncIterator({
           streamIterable: data[1],
@@ -121,11 +122,7 @@ export const getGenAiTokenTracking = async ({
     };
     if (data.usage == null) {
       logger.error('Response did not contain usage object');
-      return {
-        total_tokens: 0,
-        prompt_tokens: 0,
-        completion_tokens: 0,
-      };
+      return null;
     }
     return {
       total_tokens: data.usage?.total_tokens ?? 0,

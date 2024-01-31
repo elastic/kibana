@@ -83,14 +83,11 @@ export const fetchConnectorExecuteAction = async ({
   const llmType = llmTypeDictionary[apiConfig.connectorTypeTitle ?? 'OpenAI'];
 
   const isStream =
-    // TODO before merge to main
-    // remove hard coded true, doing this for cloud testing
-    true ||
-    (assistantStreamingEnabled &&
-      (llmType === 'openai' ||
-        // TODO add streaming support for bedrock with langchain on
-        // tracked here: https://github.com/elastic/security-team/issues/7363
-        (llmType === 'bedrock' && !isEnabledRAGAlerts && !isEnabledKnowledgeBase)));
+    assistantStreamingEnabled &&
+    (llmType === 'openai' ||
+      // TODO add streaming support for bedrock with langchain on
+      // tracked here: https://github.com/elastic/security-team/issues/7363
+      (llmType === 'bedrock' && !isEnabledRAGAlerts && !isEnabledKnowledgeBase));
 
   const optionalRequestParams = getOptionalRequestParams({
     isEnabledRAGAlerts,
@@ -126,9 +123,10 @@ export const fetchConnectorExecuteAction = async ({
 
   try {
     if (isStream) {
-      const response = await http.post(
+      const response = await http.fetch(
         `/internal/elastic_assistant/actions/connector/${apiConfig?.connectorId}/_execute`,
         {
+          method: 'POST',
           body: JSON.stringify(requestBody),
           signal,
           asResponse: true,
