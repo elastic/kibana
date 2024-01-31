@@ -48,7 +48,7 @@ export async function validateOutputForPolicy(
   soClient: SavedObjectsClientContract,
   newData: Partial<AgentPolicySOAttributes>,
   existingData: Partial<AgentPolicySOAttributes> = {},
-  allowedOutputTypeForPolicy = Object.values(outputType)
+  allowedOutputTypeForPolicy: string[] = Object.values(outputType)
 ) {
   if (
     newData.data_output_id === existingData.data_output_id &&
