@@ -15,7 +15,7 @@ import {
   getThreatRuleParams,
   getThresholdRuleParams,
 } from '../../rule_schema/mocks';
-import {
+import type {
   AlertSuppressionDuration,
   PatchRuleRequestBody,
   AlertSuppressionMissingFieldsStrategy,
