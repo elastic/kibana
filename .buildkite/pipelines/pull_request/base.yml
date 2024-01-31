@@ -32,18 +32,18 @@ steps:
 
   # - wait
 
-  # - command: .buildkite/scripts/steps/ci_stats_ready.sh
-  #   label: Mark CI Stats as ready
-  #   agents:
-  #     queue: kibana-default
-  #   timeout_in_minutes: 10
-  #   depends_on:
-  #     - build
-  #     - build_api_docs
-  #   retry:
-  #     automatic:
-  #       - exit_status: '*'
-  #         limit: 1
+  - command: .buildkite/scripts/steps/ci_stats_ready.sh
+    label: Mark CI Stats as ready
+    agents:
+      queue: kibana-default
+    timeout_in_minutes: 10
+    depends_on:
+      - build
+      - build_api_docs
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
 
   - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
     label: 'Pick Test Group Run Order'
@@ -52,6 +52,9 @@ steps:
     timeout_in_minutes: 10
     env:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
+      JEST_UNIT_CONFIG_PATTERNS: 'x-pack/plugins/security_solution/public/common'
+      JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
+      FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
     retry:
       automatic:
         - exit_status: '*'
