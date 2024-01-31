@@ -6,15 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { omit } from 'lodash';
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 
-import {
-  getDefaultControlGroupInput,
-  persistableControlGroupInputIsEqual,
-} from '@kbn/controls-plugin/common';
 import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import type { KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
 import { RefreshInterval } from '@kbn/data-plugin/public';
@@ -31,11 +28,11 @@ import {
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { PanelPackage } from '@kbn/presentation-containers';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 
-import { PanelPackage } from '@kbn/presentation-containers';
 import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE } from '../..';
 import { DashboardContainerInput, DashboardPanelState } from '../../../common';
 import { DASHBOARD_APP_ID, DASHBOARD_LOADED_EVENT } from '../../dashboard_constants';
@@ -68,6 +65,7 @@ import {
   dashboardTypeDisplayLowercase,
   dashboardTypeDisplayName,
 } from './dashboard_container_factory';
+import { SavedDashboardInput } from '../../services/dashboard_content_management/types';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -115,6 +113,9 @@ export class DashboardContainer
   public publishingSubscription: Subscription = new Subscription();
   public diffingSubscription: Subscription = new Subscription();
   public controlGroup?: ControlGroupContainer;
+
+  public hasUnsavedChanges: BehaviorSubject<boolean>;
+  public backupUnsavedChanges: BehaviorSubject<Partial<SavedDashboardInput> | undefined>;
 
   public searchSessionId?: string;
   public locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
@@ -176,6 +177,10 @@ export class DashboardContainer
     this.dashboardCreationStartTime = dashboardCreationStartTime;
 
     // start diffing dashboard state
+    this.hasUnsavedChanges = new BehaviorSubject(false);
+    this.backupUnsavedChanges = new BehaviorSubject<Partial<DashboardContainerInput> | undefined>(
+      undefined
+    );
     const diffingMiddleware = startDiffingDashboardState.bind(this)(creationOptions);
 
     // build redux embeddable tools
@@ -188,7 +193,6 @@ export class DashboardContainer
       additionalMiddleware: [diffingMiddleware],
       initialComponentState,
     });
-
     this.onStateChange = reduxTools.onStateChange;
     this.cleanupStateTools = reduxTools.cleanup;
     this.getState = reduxTools.getState;
@@ -411,18 +415,12 @@ export class DashboardContainer
     const {
       explicitInput: { timeRange, refreshInterval },
       componentState: {
-        lastSavedInput: {
-          controlGroupInput: lastSavedControlGroupInput,
-          timeRestore: lastSavedTimeRestore,
-        },
+        lastSavedInput: { timeRestore: lastSavedTimeRestore },
       },
     } = this.getState();
 
-    if (
-      this.controlGroup &&
-      !persistableControlGroupInputIsEqual(this.controlGroup.getInput(), lastSavedControlGroupInput)
-    ) {
-      this.controlGroup.updateInput(lastSavedControlGroupInput ?? getDefaultControlGroupInput());
+    if (this.controlGroup) {
+      this.controlGroup.resetToLastSavedState();
     }
 
     // if we are using the unified search integration, we need to force reset the time picker.
@@ -476,8 +474,15 @@ export class DashboardContainer
     this.searchSessionId = searchSessionId;
 
     batch(() => {
-      this.dispatch.setLastSavedInput(loadDashboardReturn?.dashboardInput);
+      this.dispatch.setLastSavedInput(
+        omit(loadDashboardReturn?.dashboardInput, 'controlGroupInput')
+      );
       this.dispatch.setManaged(loadDashboardReturn?.managed);
+      if (this.controlGroup && loadDashboardReturn?.dashboardInput.controlGroupInput) {
+        this.controlGroup.dispatch.setLastSavedInput(
+          loadDashboardReturn?.dashboardInput.controlGroupInput
+        );
+      }
       this.dispatch.setAnimatePanelTransforms(false); // prevents panels from animating on navigate.
       this.dispatch.setLastSavedId(newSavedObjectId);
     });

@@ -40,7 +40,7 @@ const ServerlessTopNav = () => {
   const { ObservabilityAIAssistantActionMenuItem } = services.observabilityAIAssistant;
 
   return (
-    <EuiHeader data-test-subj="logExplorerHeaderMenu" css={{ boxShadow: 'none' }}>
+    <EuiHeader data-test-subj="logsExplorerHeaderMenu" css={{ boxShadow: 'none' }}>
       <EuiHeaderSection>
         <EuiHeaderSectionItem>
           <LogExplorerTabs services={services} selectedTab="log-explorer" />
@@ -106,7 +106,7 @@ const StatefulTopNav = () => {
       chrome.setBreadcrumbsAppendExtension({
         content: toMountPoint(
           <EuiHeaderSection
-            data-test-subj="logExplorerHeaderMenu"
+            data-test-subj="logsExplorerHeaderMenu"
             css={css`
               margin-left: ${euiThemeVars.euiSizeM};
             `}
@@ -138,7 +138,7 @@ const StatefulTopNav = () => {
 
   return (
     <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme.theme$}>
-      <EuiHeaderSection data-test-subj="logExplorerHeaderMenu">
+      <EuiHeaderSection data-test-subj="logsExplorerHeaderMenu">
         <EuiHeaderSectionItem>
           <EuiHeaderLinks gutterSize="xs">
             <ConnectedDiscoverLink />
