@@ -9,6 +9,7 @@ import React, { useEffect } from 'react';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
 import { i18n } from '@kbn/i18n';
+import { FeedbackButton } from './components/common/feedback_button';
 import { CreateSloBtn } from './components/common/create_slo_btn';
 import { SloListSearchBar } from './components/slo_list_search_bar';
 import { useKibana } from '../../utils/kibana_react';
@@ -56,7 +57,7 @@ export function SlosPage() {
         pageTitle: i18n.translate('xpack.observability.slos.heading', {
           defaultMessage: 'SLOs',
         }),
-        rightSideItems: [<CreateSloBtn />],
+        rightSideItems: [<CreateSloBtn />, <FeedbackButton />],
         bottomBorder: false,
       }}
       topSearchBar={<SloListSearchBar />}
