@@ -135,7 +135,7 @@ describe('Turn Off Agent Policy Features Migration', () => {
       });
 
       expect(logger.info).toHaveBeenCalledWith(
-        'App feature [endpoint_agent_tamper_protection] is disabled. Checking endpoint integration policies for compliance'
+        'App feature [endpoint_agent_tamper_protection] is disabled. Checking fleet agent policies for compliance'
       );
 
       expect(logger.info).toHaveBeenCalledWith(
@@ -155,9 +155,10 @@ describe('Turn Off Agent Policy Features Migration', () => {
       });
       await callTurnOffAgentPolicyFeatures();
 
-      expect(logger.error).toHaveBeenCalledWith(`Done. 1 out of 5`);
       expect(logger.error).toHaveBeenCalledWith(
-        `Policy [${bulkUpdateResponse![0].id}] failed to update due to error: Error: oh noo`
+        `Done - 1 out of 5 were successful. Errors encountered:\nPolicy [${
+          bulkUpdateResponse![0].id
+        }] failed to update due to error: Error: oh noo`
       );
 
       expect(fleetServices.agentPolicy.bumpRevision as jest.Mock).toHaveBeenCalledTimes(5);
