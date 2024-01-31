@@ -49,13 +49,8 @@ import {
   getAlertRuleManageContext,
   TransformAlertFlyoutWrapper,
 } from '../../../alerting/transform_alerting_flyout';
+import { TransformElasticAssistantChat } from './components/ai_assistant_chat';
 
-const explainProcessMessageTitle = i18n.translate(
-  'xpack.infra.hostFlyout.explainProcessMessageTitle',
-  {
-    defaultMessage: 'Use AI to create Transforms',
-  }
-);
 
 const ErrorMessageCallout: FC<{
   text: JSX.Element;
@@ -85,11 +80,6 @@ export const TransformManagement: FC = (props) => {
   const { esTransform } = useDocumentationLinks();
   const { showNodeInfo } = useEnabledFeatures();
   const { dataViewEditor } = useAppDependencies();
-
-  // @TODO: remove
-  console.log(`--@@TransformManagement props`, props);
-  // const test = useAssistantContext();
-  // console.log(`--@@TransformManagement useAssistantContext`, test);
 
   const deleteTransforms = useDeleteTransforms();
 
@@ -234,8 +224,9 @@ export const TransformManagement: FC = (props) => {
 
   return (
     <>
-      {/* <AssistantOverlay /> */}
+      <TransformElasticAssistantChat />
 
+      <EuiSpacer size="s" />
       <EuiPageTemplate.Header
         pageTitle={
           <span data-test-subj="transformAppTitle">

@@ -29,6 +29,7 @@ import type { ElasticAssistantPluginStart } from '@kbn/elastic-assistant-plugin/
 import type { PluginStart as SecuritySolutionPluginStart } from '@kbn/security-solution-plugin/public';
 
 import type { ActionTypeRegistryContract } from '@kbn/actions-plugin/server/types';
+import type { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { registerFeature } from './register_feature';
 import { getTransformHealthRuleType } from './alerting';
 
@@ -52,6 +53,7 @@ export interface PluginsDependencies {
   elasticAssistant: ElasticAssistantPluginStart;
   actionTypeRegistry: ActionTypeRegistryContract;
   securitySolution: SecuritySolutionPluginStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPluginStart;
 }
 
 export class TransformUiPlugin {
