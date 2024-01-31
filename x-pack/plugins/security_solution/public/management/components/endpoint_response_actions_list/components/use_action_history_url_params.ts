@@ -7,6 +7,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 
+import type { ResponseActionType } from '../../../../../common/endpoint/service/response_actions/constants';
 import {
   type ConsoleResponseActionCommands,
   RESPONSE_ACTION_API_COMMANDS_NAMES,
@@ -16,7 +17,7 @@ import {
   type ResponseActionStatus,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import { useUrlParams } from '../../../hooks/use_url_params';
-import { DEFAULT_DATE_RANGE_OPTIONS, isAgentType } from './hooks';
+import { DEFAULT_DATE_RANGE_OPTIONS, isActionType, isAgentType } from './hooks';
 
 interface UrlParamsActionsLogFilters {
   agentTypes: string;
@@ -110,7 +111,17 @@ export const actionsLogFiltersFromUrlParams = (
     : [];
 
   const urlHosts = urlParams.hosts ? String(urlParams.hosts).split(',').sort() : [];
-  const urlTypes = urlParams.types ? String(urlParams.types).split(',').sort() : [];
+  const urlTypes = urlParams.types
+    ? (String(urlParams.types).split(',') as ResponseActionType[]).reduce<ResponseActionType[]>(
+        (acc, curr) => {
+          if (isActionType(curr)) {
+            acc.push(curr);
+          }
+          return acc.sort();
+        },
+        []
+      )
+    : [];
 
   const urlWithOutputs = urlParams.withOutputs
     ? String(urlParams.withOutputs).split(',').sort()

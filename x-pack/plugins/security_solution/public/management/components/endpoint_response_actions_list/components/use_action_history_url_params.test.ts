@@ -5,17 +5,56 @@
  * 2.0.
  */
 import { actionsLogFiltersFromUrlParams } from './use_action_history_url_params';
-import type { ConsoleResponseActionCommands } from '../../../../../common/endpoint/service/response_actions/constants';
-import { CONSOLE_RESPONSE_ACTION_COMMANDS } from '../../../../../common/endpoint/service/response_actions/constants';
+
+import {
+  CONSOLE_RESPONSE_ACTION_COMMANDS,
+  RESPONSE_ACTION_AGENT_TYPE,
+  RESPONSE_ACTION_TYPE,
+  type ConsoleResponseActionCommands,
+  type ResponseActionAgentType,
+  type ResponseActionType,
+} from '../../../../../common/endpoint/service/response_actions/constants';
 
 describe('#actionsLogFiltersFromUrlParams', () => {
-  const getConsoleCommandsAsString = (): string => {
-    return [...CONSOLE_RESPONSE_ACTION_COMMANDS].sort().join(',');
-  };
-
   const getConsoleCommandsAsArray = (): ConsoleResponseActionCommands[] => {
     return [...CONSOLE_RESPONSE_ACTION_COMMANDS].sort();
   };
+
+  const getActionTypesAsArray = (): ResponseActionType[] => {
+    return [...RESPONSE_ACTION_TYPE].sort();
+  };
+
+  const getAgentTypesAsArray = (): ResponseActionAgentType[] => {
+    return [...RESPONSE_ACTION_AGENT_TYPE].sort();
+  };
+
+  it('should not use invalid `agentType` values from URL params', () => {
+    expect(actionsLogFiltersFromUrlParams({ agentTypes: 'asa,was' })).toEqual({});
+  });
+
+  it('should use valid `agentTypes` values from URL params', () => {
+    expect(
+      actionsLogFiltersFromUrlParams({
+        agentTypes: getAgentTypesAsArray().join(),
+      })
+    ).toEqual({
+      agentTypes: getAgentTypesAsArray(),
+    });
+  });
+
+  it('should not use invalid `types` values from URL params', () => {
+    expect(actionsLogFiltersFromUrlParams({ types: 'asa,was' })).toEqual({});
+  });
+
+  it('should use valid `types` values from URL params', () => {
+    expect(
+      actionsLogFiltersFromUrlParams({
+        types: getActionTypesAsArray().join(),
+      })
+    ).toEqual({
+      types: getActionTypesAsArray(),
+    });
+  });
 
   it('should not use invalid command values from URL params', () => {
     expect(actionsLogFiltersFromUrlParams({ commands: 'asa,was' })).toEqual({});
@@ -24,7 +63,7 @@ describe('#actionsLogFiltersFromUrlParams', () => {
   it('should use valid command values from URL params', () => {
     expect(
       actionsLogFiltersFromUrlParams({
-        commands: getConsoleCommandsAsString(),
+        commands: getConsoleCommandsAsArray().join(),
       })
     ).toEqual({
       commands: getConsoleCommandsAsArray(),
@@ -48,7 +87,7 @@ describe('#actionsLogFiltersFromUrlParams', () => {
   it('should use valid command and status along with given host, user and date values from URL params', () => {
     expect(
       actionsLogFiltersFromUrlParams({
-        commands: getConsoleCommandsAsString(),
+        commands: getConsoleCommandsAsArray().join(),
         statuses: 'successful,pending,failed',
         hosts: 'host-1,host-2',
         users: 'user-1,user-2',
