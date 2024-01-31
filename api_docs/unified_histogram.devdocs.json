@@ -466,9 +466,17 @@
             "section": "def-common.RequestAdapter",
             "text": "RequestAdapter"
           },
-          " | undefined; isChartLoading?: boolean | undefined; } & Pick<",
+          " | undefined; isChartLoading?: boolean | undefined; table?: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          " | undefined; } & Pick<",
           "UnifiedHistogramLayoutProps",
-          ", \"children\" | \"className\" | \"query\" | \"filters\" | \"columns\" | \"container\" | \"onBrushEnd\" | \"disabledActions\" | \"timeRange\" | \"services\" | \"dataView\" | \"relativeTimeRange\" | \"renderCustomChartToggleActions\" | \"onFilter\" | \"withDefaultActions\"> & ",
+          ", \"className\" | \"children\" | \"query\" | \"filters\" | \"columns\" | \"container\" | \"onBrushEnd\" | \"disabledActions\" | \"timeRange\" | \"services\" | \"dataView\" | \"relativeTimeRange\" | \"renderCustomChartToggleActions\" | \"onFilter\" | \"withDefaultActions\"> & ",
           {
             "pluginId": "@kbn/shared-ux-utility",
             "scope": "common",
@@ -1242,9 +1250,17 @@
             "section": "def-common.RequestAdapter",
             "text": "RequestAdapter"
           },
-          " | undefined; isChartLoading?: boolean | undefined; } & Pick<",
+          " | undefined; isChartLoading?: boolean | undefined; table?: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          " | undefined; } & Pick<",
           "UnifiedHistogramLayoutProps",
-          ", \"children\" | \"className\" | \"query\" | \"filters\" | \"columns\" | \"container\" | \"onBrushEnd\" | \"disabledActions\" | \"timeRange\" | \"services\" | \"dataView\" | \"relativeTimeRange\" | \"renderCustomChartToggleActions\" | \"onFilter\" | \"withDefaultActions\">"
+          ", \"className\" | \"children\" | \"query\" | \"filters\" | \"columns\" | \"container\" | \"onBrushEnd\" | \"disabledActions\" | \"timeRange\" | \"services\" | \"dataView\" | \"relativeTimeRange\" | \"renderCustomChartToggleActions\" | \"onFilter\" | \"withDefaultActions\">"
         ],
         "path": "src/plugins/unified_histogram/public/container/container.tsx",
         "deprecated": false,

@@ -83,7 +83,7 @@ const InitializingContent = React.memo(() => (
       title={
         <FormattedMessage
           id="xpack.observabilityLogsExplorer.InitializingTitle"
-          defaultMessage="Initializing the Log Explorer"
+          defaultMessage="Initializing the Logs Explorer"
         />
       }
     />
