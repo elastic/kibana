@@ -505,8 +505,8 @@ export class EmbedModal extends Component<EmbedModalProps, State> {
     ) : undefined;
 
     return (
-      <EuiModal maxWidth={false} onClose={this.props.onClose}>
-        <I18nProvider>
+      <I18nProvider>
+        <EuiModal maxWidth={false} onClose={this.props.onClose}>
           <EuiModalHeader>
             <EuiModalHeaderTitle>{`Embed this ${this.props.objectType}`}</EuiModalHeaderTitle>
           </EuiModalHeader>
@@ -583,8 +583,8 @@ export class EmbedModal extends Component<EmbedModalProps, State> {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiModalFooter>
-        </I18nProvider>
-      </EuiModal>
+        </EuiModal>
+      </I18nProvider>
     );
   }
 }
