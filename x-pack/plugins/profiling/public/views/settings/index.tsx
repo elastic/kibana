@@ -210,7 +210,7 @@ export function Settings() {
                       {...{
                         links: docLinks.links.management,
                         showDanger: (message: string) => notifications.toasts.addDanger(message),
-                        validateChange: async (key: string, value: any) =>
+                        validateChange: (key: string, value: any) =>
                           settings.client.validateValue(key, value),
                       }}
                     >
