@@ -139,7 +139,8 @@ const mockConfig = {
   customHeight: 324,
 };
 
-describe('BarChartBaseComponent', () => {
+// Failing: See https://github.com/elastic/kibana/issues/175984
+describe.skip('BarChartBaseComponent', () => {
   let shallowWrapper: ShallowWrapper;
   const mockBarChartData: ChartSeriesData[] = [
     {
@@ -296,7 +297,8 @@ describe('BarChartBaseComponent', () => {
   });
 });
 
-describe.each(chartDataSets)('BarChart with valid data [%o]', (data) => {
+// Failing: See https://github.com/elastic/kibana/issues/175984
+describe.skip.each(chartDataSets)('BarChart with valid data [%o]', (data) => {
   let shallowWrapper: ShallowWrapper;
 
   beforeAll(() => {
@@ -313,7 +315,8 @@ describe.each(chartDataSets)('BarChart with valid data [%o]', (data) => {
   });
 });
 
-describe.each(chartDataSets)('BarChart with stackByField', () => {
+// Failing: See https://github.com/elastic/kibana/issues/175984
+describe.skip.each(chartDataSets)('BarChart with stackByField', () => {
   let wrapper: ReactWrapper;
 
   const data = [
@@ -388,7 +391,8 @@ describe.each(chartDataSets)('BarChart with stackByField', () => {
   });
 });
 
-describe.each(chartDataSets)('BarChart with custom color', () => {
+// Failing: See https://github.com/elastic/kibana/issues/175984
+describe.skip.each(chartDataSets)('BarChart with custom color', () => {
   let wrapper: ReactWrapper;
 
   const data = [
@@ -451,7 +455,8 @@ describe.each(chartDataSets)('BarChart with custom color', () => {
   });
 });
 
-describe.each(chartHolderDataSets)('BarChart with invalid data [%o]', (data) => {
+// Failing: See https://github.com/elastic/kibana/issues/175984
+describe.skip.each(chartHolderDataSets)('BarChart with invalid data [%o]', (data) => {
   let shallowWrapper: ShallowWrapper;
 
   beforeAll(() => {

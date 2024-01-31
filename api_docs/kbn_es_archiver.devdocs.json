@@ -435,7 +435,15 @@
               "\nJust like load, but skips any existing index\n"
             ],
             "signature": [
-              "(name: string) => Promise<Record<string, ",
+              "(name: string, performance?: ",
+              {
+                "pluginId": "@kbn/es-archiver",
+                "scope": "common",
+                "docId": "kibKbnEsArchiverPluginApi",
+                "section": "def-common.LoadActionPerfOptions",
+                "text": "LoadActionPerfOptions"
+              },
+              " | undefined) => Promise<Record<string, ",
               "IndexStats",
               ">>"
             ],
@@ -457,6 +465,28 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/es-archiver",
+                "id": "def-common.EsArchiver.loadIfNeeded.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "performance",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/es-archiver",
+                    "scope": "common",
+                    "docId": "kibKbnEsArchiverPluginApi",
+                    "section": "def-common.LoadActionPerfOptions",
+                    "text": "LoadActionPerfOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-es-archiver/src/es_archiver.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
