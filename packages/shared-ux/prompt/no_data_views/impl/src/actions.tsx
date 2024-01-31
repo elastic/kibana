@@ -38,7 +38,6 @@ export const NoDataButtonLink = ({
           iconType="plusInCircle"
           fill={true}
           data-test-subj="createDataViewButton"
-          size="s"
         >
           {createDataViewText}
         </EuiButton>
