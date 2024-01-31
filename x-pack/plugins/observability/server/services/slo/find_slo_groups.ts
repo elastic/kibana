@@ -13,6 +13,7 @@ import {
   DEFAULT_SLO_GROUPS_PAGE_SIZE,
 } from '../../../common/slo/constants';
 import { Status } from '../../domain/models';
+import { getElastichsearchQueryOrThrow } from './transform_generators';
 
 const DEFAULT_PAGE = 1;
 const MAX_PER_PAGE = 5000;
@@ -73,12 +74,25 @@ export class FindSLOGroups {
   public async execute(params: FindSLOGroupsParams): Promise<FindSLOGroupsResponse> {
     const pagination = toPagination(params);
     const groupBy = params.groupBy;
+    const kqlQuery = params.kqlQuery ?? '';
+    const filters = params.filters ?? '';
+    let parsedFilters: any = {};
+
+    try {
+      parsedFilters = JSON.parse(filters);
+    } catch (e) {
+      console.error(`Failed to parse filters: ${e.message}`);
+    }
     const response = await this.esClient.search<unknown, GroupAggregationsResponse>({
       index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
       size: 0,
       query: {
         bool: {
-          filter: [{ term: { spaceId: this.spaceId } }],
+          filter: [
+            { term: { spaceId: this.spaceId } },
+            getElastichsearchQueryOrThrow(kqlQuery),
+            ...(parsedFilters.filter ?? []),
+          ],
         },
       },
       body: {
@@ -176,7 +190,6 @@ export class FindSLOGroups {
           },
         ];
       }, [] as Array<Record<'group' | 'groupBy' | 'summary', any>>) ?? [];
-
     return findSLOGroupsResponseSchema.encode({
       page: pagination.page,
       perPage: pagination.perPage,

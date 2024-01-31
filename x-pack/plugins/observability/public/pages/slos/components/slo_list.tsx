@@ -105,16 +105,14 @@ export function SloList() {
         </>
       )}
       {groupBy !== 'ungrouped' && (
-        <>
-          <GroupView
-            sloView={view}
-            groupBy={groupBy}
-            isCompact={isCompact}
-            kqlQuery={kqlQuery}
-            sort={state.sort.by}
-            direction={state.sort.direction}
-          />
-        </>
+        <GroupView
+          sloView={view}
+          groupBy={groupBy}
+          isCompact={isCompact}
+          kqlQuery={kqlQuery}
+          sort={state.sort.by}
+          direction={state.sort.direction}
+        />
       )}
     </EuiFlexGroup>
   );

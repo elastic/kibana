@@ -19,6 +19,7 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
+import { Filter } from '@kbn/es-query';
 import { useFetchSloList } from '../../../../hooks/slo/use_fetch_slo_list';
 import { SlosView } from '../slos_view';
 import type { SortDirection } from '../slo_list_search_bar';
@@ -41,6 +42,7 @@ interface Props {
     total: number;
     violated: number;
   };
+  filters: Filter[];
 }
 
 export function GroupListView({
@@ -52,8 +54,9 @@ export function GroupListView({
   direction,
   groupBy,
   summary,
+  filters,
 }: Props) {
-  const query = kqlQuery ? `"${groupBy}": ${group} and ${kqlQuery}` : `"${groupBy}": ${group}`;
+  const query = kqlQuery ? `"${groupBy}": (${group}) and ${kqlQuery}` : `"${groupBy}": ${group}`;
   let groupName = group.toLowerCase();
   if (groupBy === 'slo.indicator.type') {
     groupName = SLI_OPTIONS.find((option) => option.value === group)?.text ?? group;
@@ -78,6 +81,7 @@ export function GroupListView({
     sortDirection: direction,
     perPage: itemsPerPage,
     page: page + 1,
+    filters,
   });
   const { results = [], total = 0 } = sloList ?? {};
 
@@ -110,65 +114,68 @@ export function GroupListView({
   const totalViolated = getTotalViolated();
 
   return (
-    <EuiPanel hasBorder={true}>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <MemoEuiAccordion
-            forceState={accordionState}
-            onToggle={onToggle}
-            buttonContent={
-              <EuiFlexGroup alignItems="center" responsive={false}>
-                <EuiFlexItem>
-                  <EuiTitle size="xs">
-                    <h3>{groupName}</h3>
-                  </EuiTitle>
-                </EuiFlexItem>
-                {totalViolated && (
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color={summary.violated > 0 ? 'danger' : 'success'}>
-                      {totalViolated}
-                    </EuiBadge>
+    <>
+      <EuiPanel hasBorder={true} data-test-subj="sloGroupViewPanel">
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <MemoEuiAccordion
+              forceState={accordionState}
+              onToggle={onToggle}
+              buttonContent={
+                <EuiFlexGroup alignItems="center" responsive={false}>
+                  <EuiFlexItem>
+                    <EuiTitle size="xs">
+                      <h3>{groupName}</h3>
+                    </EuiTitle>
                   </EuiFlexItem>
-                )}
-                <EuiText size="s">
-                  {i18n.translate('xpack.observability.slo.group.worstPerforming', {
-                    defaultMessage: 'Worst performing',
-                  })}
-                  {': '}
-                  <EuiTextColor color={summary.worst.status !== 'HEALTHY' ? 'danger' : undefined}>
-                    <strong>{worstSLI}</strong>
-                  </EuiTextColor>
-                </EuiText>
-              </EuiFlexGroup>
-            }
-            id={group}
-            initialIsOpen={false}
-          >
-            {isAccordionOpen && (
-              <>
-                <EuiSpacer size="m" />
-                <SlosView
-                  sloList={results}
-                  loading={isLoading || isRefetching}
-                  error={isError}
-                  isCompact={isCompact}
-                  sloView={sloView}
-                  group={group}
-                />
-                <EuiSpacer size="m" />
-                <EuiTablePagination
-                  pageCount={Math.ceil(total / itemsPerPage)}
-                  activePage={page}
-                  onChangePage={handlePageClick}
-                  itemsPerPage={itemsPerPage}
-                  onChangeItemsPerPage={(perPage) => setItemsPerPage(perPage)}
-                />
-              </>
-            )}
-          </MemoEuiAccordion>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+                  {totalViolated && (
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color={summary.violated > 0 ? 'danger' : 'success'}>
+                        {totalViolated}
+                      </EuiBadge>
+                    </EuiFlexItem>
+                  )}
+                  <EuiText size="s">
+                    {i18n.translate('xpack.observability.slo.group.worstPerforming', {
+                      defaultMessage: 'Worst performing',
+                    })}
+                    {': '}
+                    <EuiTextColor color={summary.worst.status !== 'HEALTHY' ? 'danger' : undefined}>
+                      <strong>{worstSLI}</strong>
+                    </EuiTextColor>
+                  </EuiText>
+                </EuiFlexGroup>
+              }
+              id={group}
+              initialIsOpen={false}
+            >
+              {isAccordionOpen && (
+                <>
+                  <EuiSpacer size="m" />
+                  <SlosView
+                    sloList={results}
+                    loading={isLoading || isRefetching}
+                    error={isError}
+                    isCompact={isCompact}
+                    sloView={sloView}
+                    group={group}
+                  />
+                  <EuiSpacer size="m" />
+                  <EuiTablePagination
+                    pageCount={Math.ceil(total / itemsPerPage)}
+                    activePage={page}
+                    onChangePage={handlePageClick}
+                    itemsPerPage={itemsPerPage}
+                    onChangeItemsPerPage={(perPage) => setItemsPerPage(perPage)}
+                  />
+                </>
+              )}
+            </MemoEuiAccordion>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+      <EuiSpacer size="m" />
+    </>
   );
 }
 
