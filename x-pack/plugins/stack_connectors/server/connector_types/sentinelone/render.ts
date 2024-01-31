@@ -16,6 +16,7 @@ interface Context {
 }
 
 export const renderParameterTemplates = (
+  logger: Logger,
   params: ExecutorParams,
   variables: Record<string, unknown>
 ) => {

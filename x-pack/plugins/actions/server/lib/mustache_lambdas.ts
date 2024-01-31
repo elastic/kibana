@@ -8,6 +8,7 @@
 import * as tinymath from '@kbn/tinymath';
 import { parse as hjsonParse } from 'hjson';
 import moment from 'moment-timezone';
+import { Logger } from '@kbn/core/server';
 
 import { formatNumber } from './number_formatter';
 
@@ -16,96 +17,111 @@ type Variables = Record<string, unknown>;
 const DefaultDateTimeZone = 'UTC';
 const DefaultDateFormat = 'YYYY-MM-DD hh:mma';
 
-export function getMustacheLambdas(): Variables {
-  return getLambdas();
+export function getMustacheLambdas(logger: Logger): Variables {
+  return getLambdas(logger);
 }
 
 const TimeZoneSet = new Set(moment.tz.names());
 
 type RenderFn = (text: string) => string;
 
-function getLambdas() {
+function getLambdas(logger: Logger) {
   return {
     EvalMath: () =>
       // mustache invokes lamdas with `this` set to the current "view" (variables)
       function (this: Variables, text: string, render: RenderFn) {
-        return evalMath(this, render(text.trim()));
+        return evalMath(this, render(text.trim()), logger);
       },
     ParseHjson: () =>
       function (text: string, render: RenderFn) {
-        return parseHjson(render(text.trim()));
+        return parseHjson(render(text.trim()), logger);
       },
     FormatDate: () =>
       function (text: string, render: RenderFn) {
         const dateString = render(text.trim()).trim();
-        return formatDate(dateString);
+        return formatDate(dateString, logger);
       },
     FormatNumber: () =>
       function (text: string, render: RenderFn) {
         const numberString = render(text.trim()).trim();
-        return formatNumber(numberString);
+        return formatNumber(logger, numberString);
       },
   };
 }
 
-function evalMath(vars: Variables, o: unknown): string {
+function evalMath(vars: Variables, o: unknown, logger: Logger): string {
   const expr = `${o}`;
   try {
     const result = tinymath.evaluate(expr, vars);
     return `${result}`;
   } catch (err) {
-    throw new Error(`error evaluating tinymath expression "${expr}": ${err.message}`);
+    logger.error(
+      `mustache render error: error evaluating tinymath expression "${expr}": ${err.message}`
+    );
+    return '';
   }
 }
 
-function parseHjson(o: unknown): string {
+function parseHjson(o: unknown, logger: Logger): string {
   const hjsonObject = `${o}`;
   let object: unknown;
 
   try {
     object = hjsonParse(hjsonObject);
   } catch (err) {
-    throw new Error(`error parsing Hjson "${hjsonObject}": ${err.message}`);
+    logger.error(`mustache render error: error parsing Hjson "${hjsonObject}": ${err.message}`);
+    return '';
   }
 
   return JSON.stringify(object);
 }
 
-function formatDate(dateString: unknown): string {
+function formatDate(dateString: unknown, logger: Logger): string {
   const { date, timeZone, format } = splitDateString(`${dateString}`);
 
   if (date === '') {
-    throw new Error(`date is empty`);
+    logger.error(`mustache render error: error parsing date - value is empty`);
+    return '';
   }
 
   if (isNaN(new Date(date).valueOf())) {
-    throw new Error(`invalid date "${date}"`);
+    logger.error(`mustache render error: invalid date "${date}"`);
+    return '';
   }
 
   let mDate: moment.Moment;
   try {
     mDate = moment(date);
     if (!mDate.isValid()) {
-      throw new Error(`date is invalid`);
+      logger.error(`mustache render error: invalid date "${date}"`);
+      return '';
     }
   } catch (err) {
-    throw new Error(`error evaluating moment date "${date}": ${err.message}`);
+    logger.error(`mustache render error: error evaluating moment date "${date}": ${err.message}`);
+    return '';
   }
 
   if (!TimeZoneSet.has(timeZone)) {
-    throw new Error(`unknown timeZone value "${timeZone}"`);
+    logger.error(`mustache render error: unknown timeZone value "${timeZone}"`);
+    return '';
   }
 
   try {
     mDate.tz(timeZone);
   } catch (err) {
-    throw new Error(`error evaluating moment timeZone "${timeZone}": ${err.message}`);
+    logger.error(
+      `mustache render error: error evaluating moment timeZone "${timeZone}": ${err.message}`
+    );
+    return '';
   }
 
   try {
     return mDate.format(format);
   } catch (err) {
-    throw new Error(`error evaluating moment format "${format}": ${err.message}`);
+    logger.error(
+      `mustache render error: error evaluating moment format "${format}": ${err.message}`
+    );
+    return '';
   }
 }
 

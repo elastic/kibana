@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Logger } from '@kbn/core/server';
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import { AADAlert } from '@kbn/alerts-as-data-utils';
 import { mapKeys, snakeCase } from 'lodash/fp';
@@ -17,6 +18,7 @@ import {
 } from '../types';
 
 export interface TransformActionParamsOptions {
+  logger: Logger;
   actionsPlugin: ActionsPluginStartContract;
   alertId: string;
   alertType: string;
@@ -59,6 +61,7 @@ interface SummarizedAlertsWithAll {
 }
 
 export function transformActionParams({
+  logger,
   actionsPlugin,
   alertId,
   alertType,
@@ -119,11 +122,13 @@ export function transformActionParams({
     actionTypeId,
     actionId,
     actionParams,
-    variables
+    variables,
+    logger
   );
 }
 
 export function transformSummaryActionParams({
+  logger,
   alerts,
   rule,
   ruleTypeId,
@@ -135,6 +140,7 @@ export function transformSummaryActionParams({
   ruleUrl,
   kibanaBaseUrl,
 }: {
+  logger: Logger;
   alerts: SummarizedAlertsWithAll;
   rule: SanitizedRule<RuleTypeParams>;
   ruleTypeId: string;
@@ -192,6 +198,7 @@ export function transformSummaryActionParams({
     actionTypeId,
     actionId,
     actionParams,
-    variables
+    variables,
+    logger
   );
 }

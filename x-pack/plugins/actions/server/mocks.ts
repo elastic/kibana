@@ -59,7 +59,14 @@ export function renderActionParameterTemplatesDefault<RecordType>(
   params: Record<string, unknown>,
   variables: Record<string, unknown>
 ) {
-  return renderActionParameterTemplates(undefined, actionTypeId, actionId, params, variables);
+  return renderActionParameterTemplates(
+    undefined,
+    actionTypeId,
+    actionId,
+    params,
+    variables,
+    logger
+  );
 }
 
 const createServicesMock = () => {

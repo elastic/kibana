@@ -155,7 +155,8 @@ export interface PluginStartContract {
     actionTypeId: string,
     actionId: string,
     params: Params,
-    variables: Record<string, unknown>
+    variables: Record<string, unknown>,
+    logger: Logger
   ): Params;
 }
 
@@ -747,12 +748,13 @@ export function renderActionParameterTemplates<Params extends ActionTypeParams =
   actionTypeId: string,
   actionId: string,
   params: Params,
-  variables: Record<string, unknown>
+  variables: Record<string, unknown>,
+  logger: Logger
 ): Params {
   const actionType = actionTypeRegistry?.get(actionTypeId);
   if (actionType?.renderParameterTemplates) {
-    return actionType.renderParameterTemplates(params, variables, actionId) as Params;
+    return actionType.renderParameterTemplates(logger, params, variables, actionId) as Params;
   } else {
-    return renderMustacheObject(params, variables);
+    return renderMustacheObject(logger, params, variables);
   }
 }
