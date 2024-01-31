@@ -149,7 +149,7 @@ export function generateMappings(
   isIndexModeTimeSeries = false
 ): IndexTemplateMappings {
   const dynamicTemplates: Array<Record<string, Properties>> = [];
-  const dynamicTemplateNames: Record<string,int> = {};
+  const dynamicTemplateNames: Record<string, int> = {};
   const runtimeFields: RuntimeFields = {};
 
   const { properties } = _generateMappings(
@@ -191,7 +191,7 @@ export function generateMappings(
         }
 
         const size = dynamicTemplates.push({ [name]: dynamicTemplate });
-        dynamicTemplateNames[name] = size-1;
+        dynamicTemplateNames[name] = size - 1;
       },
       addRuntimeField: (runtimeField: { path: string; properties: Properties }) => {
         runtimeFields[`${runtimeField.path}`] = runtimeField.properties;
