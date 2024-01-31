@@ -1,20 +1,21 @@
 #!/bin/bash
 echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
 
+KIBANA_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless"
+KIBANA_CURRENT_COMMIT=${KIBANA_BASE_IMAGE}:sec-sol-qg-${BUILDKITE_COMMIT:0:12}
+KIBANA_LATEST=${KIBANA_BASE_IMAGE}:latest
+
 if [ "$KIBANA_CURRENT" = "1" ]; then
-    docker pull docker.elastic.co/kibana-ci/kibana-serverless:sec-sol-qg-${BUILDKITE_COMMIT:0:12}
-    build_date=$(docker inspect docker.elastic.co/kibana-ci/kibana-serverless:sec-sol-qg-${BUILDKITE_COMMIT:0:12} | jq -r '.[0].Config.Labels."org.label-schema.build-date"')
-    vcs_ref=$(docker inspect docker.elastic.co/kibana-ci/kibana-serverless:sec-sol-qg-${BUILDKITE_COMMIT:0:12} | jq -r '.[0].Config.Labels."org.label-schema.vcs-ref"')
-    vcs_url=$(docker inspect docker.elastic.co/kibana-ci/kibana-serverless:sec-sol-qg-${BUILDKITE_COMMIT:0:12} | jq -r '.[0].Config.Labels."org.label-schema.vcs-url"')
-    version=$(docker inspect docker.elastic.co/kibana-ci/kibana-serverless:sec-sol-qg-${BUILDKITE_COMMIT:0:12} | jq -r '.[0].Config.Labels."org.label-schema.version"')
-   
+    KBN_IMAGE=${KIBANA_CURRENT_COMMIT}
 else
-    docker pull docker.elastic.co/kibana-ci/kibana-serverless:latest
-    build_date=$(docker inspect docker.elastic.co/kibana-ci/kibana-serverless:latest | jq -r '.[0].Config.Labels."org.label-schema.build-date"')
-    vcs_ref=$(docker inspect docker.elastic.co/kibana-ci/kibana-serverless:latest | jq -r '.[0].Config.Labels."org.label-schema.vcs-ref"')
-    vcs_url=$(docker inspect docker.elastic.co/kibana-ci/kibana-serverless:latest | jq -r '.[0].Config.Labels."org.label-schema.vcs-url"')
-    version=$(docker inspect docker.elastic.co/kibana-ci/kibana-serverless:latest | jq -r '.[0].Config.Labels."org.label-schema.version"')
+    KBN_IMAGE=${KIBANA_LATEST}
 fi
+
+docker pull ${KBN_IMAGE}
+build_date=$(docker inspect ${KBN_IMAGE} | jq -r '.[0].Config.Labels."org.label-schema.build-date"')
+vcs_ref=$(docker inspect ${KBN_IMAGE} | jq -r '.[0].Config.Labels."org.label-schema.vcs-ref"')
+vcs_url=$(docker inspect ${KBN_IMAGE} | jq -r '.[0].Config.Labels."org.label-schema.vcs-url"')
+version=$(docker inspect ${KBN_IMAGE} | jq -r '.[0].Config.Labels."org.label-schema.version"')   
 
 markdown_text="""
     # Kibana Container Metadata
