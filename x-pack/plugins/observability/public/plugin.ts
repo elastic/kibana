@@ -90,6 +90,7 @@ import {
   ObservabilityRuleTypeRegistry,
 } from './rules/create_observability_rule_type_registry';
 import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
+import { getCreateSLOFlyoutLazy } from './get_create_slo_flyout';
 
 export interface ConfigSchema {
   unsafe: {
@@ -463,6 +464,11 @@ export class Plugin
     return {
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
       useRulesLink: createUseRulesLink(),
+      getCreateSLOFlyout: (props) => {
+        return getCreateSLOFlyoutLazy({
+          ...props,
+        });
+      },
     };
   }
 }

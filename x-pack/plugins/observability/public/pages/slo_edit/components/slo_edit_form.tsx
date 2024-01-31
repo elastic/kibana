@@ -20,7 +20,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { InspectSLOPortal } from './common/inspect_slo_portal';
 import { EquivalentApiRequest } from './common/equivalent_api_request';
-import { BurnRateRuleFlyout } from '../../slos/components/common/burn_rate_rule_flyout';
+// import { BurnRateRuleFlyout } from '../../slos/components/common/burn_rate_rule_flyout';
 import { paths } from '../../../../common/locators/paths';
 import { useCreateSlo } from '../../../hooks/slo/use_create_slo';
 import { useFetchRulesForSlo } from '../../../hooks/slo/use_fetch_rules_for_slo';
@@ -55,7 +55,6 @@ export function SloEditForm({ slo }: Props) {
     application: { navigateToUrl },
     http: { basePath },
   } = useKibana().services;
-
   const isEditMode = slo !== undefined;
   const { data: rules, isInitialLoading } = useFetchRulesForSlo({
     sloIds: slo?.id ? [slo.id] : undefined,
@@ -244,11 +243,11 @@ export function SloEditForm({ slo }: Props) {
         <InspectSLOPortal trigger={trigger} getValues={getValues} slo={slo} />
       </FormProvider>
 
-      <BurnRateRuleFlyout
+      {/* <BurnRateRuleFlyout
         slo={slo as GetSLOResponse}
         isAddRuleFlyoutOpen={isAddRuleFlyoutOpen}
         canChangeTrigger={false}
-      />
+      /> */}
     </>
   );
 }

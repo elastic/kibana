@@ -11,6 +11,7 @@ import {
   EuiHeaderLinks,
   EuiHeaderSection,
   EuiHeaderSectionItem,
+  EuiHeaderLink,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
@@ -64,6 +65,7 @@ const ServerlessTopNav = () => {
         <EuiHeaderSectionItem>
           <EuiHeaderLinks gutterSize="xs">
             <ConnectedDiscoverLink />
+            <EuiHeaderLink>Create SLO</EuiHeaderLink>
             <VerticalRule />
             <FeedbackLink />
             <VerticalRule />
@@ -84,13 +86,14 @@ const StatefulTopNav = () => {
   const {
     services: {
       appParams: { setHeaderActionMenu },
+      observability: { getCreateSLOFlyout: CreateSloFlyout },
       observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
       chrome,
       i18n,
       theme,
     },
   } = useKibanaContextForPlugin();
-
+  const [isCreateFlyoutOpen, setCreateSLOFlyoutOpen] = useState(false);
   /**
    * Since the breadcrumbsAppendExtension might be set only during a plugin start (e.g. search session)
    * we retrieve the latest valid extension in order to restore it once we unmount the beta badge.
@@ -121,6 +124,9 @@ const StatefulTopNav = () => {
               />
             </EuiHeaderSectionItem>
             <EuiHeaderSectionItem>
+              <EuiHeaderLink>Create SLO</EuiHeaderLink>
+            </EuiHeaderSectionItem>
+            <EuiHeaderSectionItem>
               <FeedbackLink />
             </EuiHeaderSectionItem>
           </EuiHeaderSection>,
@@ -137,20 +143,30 @@ const StatefulTopNav = () => {
   }, [chrome, i18n, previousAppendExtension, theme]);
 
   return (
-    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme.theme$}>
-      <EuiHeaderSection data-test-subj="logsExplorerHeaderMenu">
-        <EuiHeaderSectionItem>
-          <EuiHeaderLinks gutterSize="xs">
-            <ConnectedDiscoverLink />
-            <VerticalRule />
-            {ObservabilityAIAssistantActionMenuItem ? (
-              <ObservabilityAIAssistantActionMenuItem />
-            ) : null}
-            <ConnectedOnboardingLink />
-          </EuiHeaderLinks>
-        </EuiHeaderSectionItem>
-      </EuiHeaderSection>
-    </HeaderMenuPortal>
+    <>
+      <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme.theme$}>
+        <EuiHeaderSection data-test-subj="logsExplorerHeaderMenu">
+          <EuiHeaderSectionItem>
+            <EuiHeaderLinks gutterSize="xs">
+              <ConnectedDiscoverLink />
+              <VerticalRule />
+              {ObservabilityAIAssistantActionMenuItem ? (
+                <ObservabilityAIAssistantActionMenuItem />
+              ) : null}
+              <ConnectedOnboardingLink />
+              <EuiHeaderLink
+                onClick={() => {
+                  setCreateSLOFlyoutOpen(true);
+                }}
+              >
+                Create SLO
+              </EuiHeaderLink>
+            </EuiHeaderLinks>
+          </EuiHeaderSectionItem>
+        </EuiHeaderSection>
+      </HeaderMenuPortal>
+      {isCreateFlyoutOpen && <CreateSloFlyout />}
+    </>
   );
 };
 

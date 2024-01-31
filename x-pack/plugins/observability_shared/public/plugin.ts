@@ -16,6 +16,7 @@ import type {
 } from '@kbn/share-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { BehaviorSubject } from 'rxjs';
+import type { ObservabilityPublicPluginsStart } from '@kbn/observability-plugin/public';
 import { createLazyObservabilityPageTemplate } from './components/page_template';
 import { createNavigationRegistry } from './components/page_template/helpers/navigation_registry';
 import {
@@ -31,7 +32,6 @@ import {
   TopNFunctionsLocatorDefinition,
 } from './locators/profiling/topn_functions_locator';
 import { updateGlobalNavigation } from './services/update_global_navigation';
-
 export interface ObservabilitySharedSetup {
   share: SharePluginSetup;
 }
@@ -43,6 +43,7 @@ export interface ObservabilitySharedStart {
   setIsSidebarEnabled: (isEnabled: boolean) => void;
   embeddable: EmbeddableStart;
   share: SharePluginStart;
+  observability: ObservabilityPublicPluginsStart;
 }
 
 export type ObservabilitySharedPluginSetup = ReturnType<ObservabilitySharedPlugin['setup']>;
