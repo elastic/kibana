@@ -357,7 +357,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
           {
             type: 'mappings_addition',
             addedMappings: {
-              is_internal: { type: 'keyword', index: false },
+              is_internal: { type: 'boolean', index: false },
             },
           },
         ],
