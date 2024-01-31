@@ -457,7 +457,7 @@ export class LinkModal extends Component<LinkModalProps, State> {
                   },
                   {
                     id: ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT,
-                    disabled: this.isNotSaved(),
+                    disabled: this.props.objectId === undefined || this.props.objectId === '',
                     label: this.renderWithIconTip(
                       <FormattedMessage
                         id="share.urlModal.savedObjectLabel"

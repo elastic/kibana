@@ -483,7 +483,7 @@ export class EmbedModal extends Component<EmbedModalProps, State> {
       },
       {
         id: 'savedObject',
-        disabled: this.isNotSaved(),
+        disabled: this.props.objectId === undefined || this.props.objectId === '',
         label: this.renderWithIconTip(
           <FormattedMessage id="share.urlPanel.savedObjectLabel" defaultMessage="Saved object" />,
           <FormattedMessage

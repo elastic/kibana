@@ -104,9 +104,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(appState).to.contain('filters');
         }
         // saved objects are not available when unsaved
-        // else {
-        //   expect(sharedUrl).to.not.contain('appState');
-        // }
+        else {
+          expect(sharedUrl).to.not.contain('appState');
+        }
       });
 
       it('unpinned filters should be removed from app state when dashboard is saved', async () => {
