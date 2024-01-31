@@ -43,7 +43,7 @@ export interface NoDataViewsPromptServices {
   /** A link to information about Data Views in Kibana */
   dataViewsDocLink: string;
   /** Get a handler for trying ES|QL */
-  onTryEsql: (() => void) | undefined;
+  onTryESQL: (() => void) | undefined;
 }
 
 export type NavigateToAppFn = (appId: string, options?: { path?: string; state?: unknown }) => void;
@@ -88,7 +88,7 @@ export interface NoDataViewsPromptComponentProps {
   /** Click handler for create button. **/
   onClickCreate?: () => void;
   /** Handler for someone wanting to try ES|QL. */
-  onTryEsql?: () => void;
+  onTryESQL?: () => void;
 }
 
 // TODO: https://github.com/elastic/kibana/issues/127695
@@ -97,4 +97,6 @@ export interface NoDataViewsPromptProps {
   allowAdHocDataView?: boolean;
   /** Handler for successfully creating a new data view. */
   onDataViewCreated: (dataView: unknown) => void;
+  /** Handler for when try ES|QL is clicked and user has been navigated to try ES|QL in discover. */
+  onESQLNavigationComplete?: () => void;
 }

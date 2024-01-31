@@ -21,9 +21,8 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { isOfEsqlQueryType } from '@kbn/es-query';
 import { useUrl } from './hooks/use_url';
-import { useSingleton } from './hooks/use_singleton';
+import { useDiscoverStateContainer } from './hooks/use_discover_state_container';
 import { MainHistoryLocationState } from '../../../common';
-import { DiscoverStateContainer, getDiscoverStateContainer } from './services/discover_state';
 import { DiscoverMainApp } from './discover_main_app';
 import { setBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
@@ -70,14 +69,13 @@ export function DiscoverMainRoute({
     share,
   } = services;
   const { id: savedSearchId } = useParams<DiscoverLandingParams>();
-  const stateContainer = useSingleton<DiscoverStateContainer>(() =>
-    getDiscoverStateContainer({
-      history,
-      services,
-      customizationContext,
-      stateStorageContainer,
-    })
-  );
+  const [stateContainer, { reset: resetStateContainer }] = useDiscoverStateContainer({
+    history,
+    services,
+    customizationContext,
+    stateStorageContainer,
+  });
+
   const { customizationService, isInitialized: isCustomizationServiceInitialized } =
     useDiscoverCustomizationService({
       customizationCallbacks,
@@ -150,10 +148,10 @@ export function DiscoverMainRoute({
   }, [data.dataViews, savedSearchId, stateContainer.appState]);
 
   const loadSavedSearch = useCallback(
-    async (nextDataView?: DataView) => {
+    async (nextDataView?: DataView, tryingEsql?: boolean) => {
       const loadSavedSearchStartTime = window.performance.now();
       setLoading(true);
-      if (!nextDataView && !(await checkData())) {
+      if (!nextDataView && !tryingEsql && !(await checkData())) {
         setLoading(false);
         return;
       }
@@ -259,6 +257,10 @@ export function DiscoverMainRoute({
     [loadSavedSearch]
   );
 
+  const onESQLNavigationComplete = useCallback(async () => {
+    resetStateContainer();
+  }, [resetStateContainer]);
+
   const noDataDependencies = useMemo(
     () => ({
       coreStart: core,
@@ -305,7 +307,10 @@ export function DiscoverMainRoute({
 
       return (
         <AnalyticsNoDataPageKibanaProvider {...noDataDependencies}>
-          <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} />
+          <AnalyticsNoDataPage
+            onDataViewCreated={onDataViewCreated}
+            onESQLNavigationComplete={onESQLNavigationComplete}
+          />
         </AnalyticsNoDataPageKibanaProvider>
       );
     }
@@ -320,6 +325,7 @@ export function DiscoverMainRoute({
     loadingIndicator,
     noDataDependencies,
     onDataViewCreated,
+    onESQLNavigationComplete,
     showNoDataPage,
     stateContainer,
   ]);
