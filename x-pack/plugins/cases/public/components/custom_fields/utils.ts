@@ -6,6 +6,7 @@
  */
 
 import { isEmptyString } from '@kbn/es-ui-shared-plugin/static/validators/string';
+import { isString } from 'lodash';
 import type { CustomFieldConfiguration } from '../../../common/types/domain';
 
 export const addOrReplaceCustomField = <T extends { key: string }>(
@@ -34,11 +35,9 @@ export const customFieldSerializer = (
 ): CustomFieldConfiguration => {
   const { defaultValue, ...otherProperties } = field;
 
-  return {
-    ...otherProperties,
-    ...(!isEmptyString(String(defaultValue)) &&
-      defaultValue !== undefined && {
-        defaultValue,
-      }),
-  } as CustomFieldConfiguration;
+  if (defaultValue === undefined || (isString(defaultValue) && isEmptyString(defaultValue))) {
+    return otherProperties;
+  }
+
+  return field;
 };
