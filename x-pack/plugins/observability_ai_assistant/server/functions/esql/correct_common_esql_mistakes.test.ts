@@ -71,12 +71,27 @@ describe('correctCommonEsqlMistakes', () => {
       'FROM logs-* \n| KEEP date \n| SORT @timestamp DESC',
       'FROM logs-*\n| KEEP date, @timestamp\n| SORT @timestamp DESC'
     );
+
+    expectQuery(
+      `FROM logs-* | KEEP date, whatever | EVAL my_truncated_date_field = DATE_TRUNC(1 year, date) | SORT @timestamp, my_truncated_date_field DESC`,
+      'FROM logs-*\n| KEEP date, whatever, @timestamp\n| EVAL my_truncated_date_field = DATE_TRUNC(1 year, date)\n| SORT @timestamp, my_truncated_date_field DESC'
+    );
+
+    expectQuery(
+      `FROM logs-* | KEEP date, whatever | RENAME whatever AS forever | SORT forever DESC`,
+      `FROM logs-*\n| KEEP date, whatever\n| RENAME whatever AS forever\n| SORT forever DESC`
+    );
   });
 
   it(`if a formula is used in SORT, it will include a previous STATS command creating the alias for the formula and will use the alias in SORT`, () => {
     expectQuery(
       'FROM logs-* \n| SORT COUNT(*) DESC \n| LIMIT 10',
       'FROM logs-*\n| STATS sort_key = COUNT(*)\n| SORT sort_key DESC\n| LIMIT 10'
+    );
+
+    expectQuery(
+      'FROM logs-* \n| KEEP my_field\n| SORT COUNT(*) DESC \n| LIMIT 10',
+      'FROM logs-*\n| KEEP my_field\n| STATS sort_key = COUNT(*)\n| SORT sort_key DESC\n| LIMIT 10'
     );
   });
 });
