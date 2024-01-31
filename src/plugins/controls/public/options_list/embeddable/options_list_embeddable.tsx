@@ -41,6 +41,7 @@ import { ControlsDataViewsService } from '../../services/data_views/types';
 import { ControlsOptionsListService } from '../../services/options_list/types';
 import { MIN_OPTIONS_LIST_REQUEST_SIZE, OptionsListReduxState } from '../types';
 import { getDefaultComponentState, optionsListReducers } from '../options_list_reducers';
+import { ControlsStorageService } from '../../services/storage/types';
 
 const diffDataFetchProps = (
   last?: OptionsListDataFetchProps,
@@ -90,6 +91,7 @@ export class OptionsListEmbeddable
   // Controls services
   private dataViewsService: ControlsDataViewsService;
   private optionsListService: ControlsOptionsListService;
+  private storageService: ControlsStorageService;
 
   // Internal data fetching state for this input control.
   private typeaheadSubject: Subject<string> = new Subject<string>();
@@ -115,8 +117,11 @@ export class OptionsListEmbeddable
     super(input, output, parent);
 
     // Destructure controls services
-    ({ dataViews: this.dataViewsService, optionsList: this.optionsListService } =
-      pluginServices.getServices());
+    ({
+      dataViews: this.dataViewsService,
+      optionsList: this.optionsListService,
+      storage: this.storageService,
+    } = pluginServices.getServices());
 
     this.typeaheadSubject = new Subject<string>();
     this.loadMoreSubject = new Subject<number>();
@@ -324,6 +329,7 @@ export class OptionsListEmbeddable
         },
         this.abortController.signal
       );
+
       if (this.optionsListService.optionsListResponseWasFailure(response)) {
         if (response.error === 'aborted') {
           // This prevents an aborted request (which can happen, for example, when a user types a search string too quickly)
@@ -403,6 +409,13 @@ export class OptionsListEmbeddable
     newFilter.meta.key = field?.name;
     if (exclude) newFilter.meta.negate = true;
     return [newFilter];
+  };
+
+  public canShowInvalidSelectionsWarning = () =>
+    this.storageService.getShowInvalidSelectionWarning() ?? true;
+
+  public supressInvalidSelectionsWarning = () => {
+    this.storageService.setShowInvalidSelectionWarning(false);
   };
 
   public clearSelections() {

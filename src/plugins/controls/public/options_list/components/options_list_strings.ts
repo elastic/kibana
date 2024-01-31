@@ -33,6 +33,19 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.control.excludeExists', {
         defaultMessage: 'DOES NOT',
       }),
+    getInvalidSelectionWarningTitle: () =>
+      i18n.translate('controls.optionsList.control.invalidSelectionWarningTitle', {
+        defaultMessage: 'You have invalid selections',
+      }),
+    getInvalidSelectionWarningContent: () =>
+      i18n.translate('controls.optionsList.control.invalidSelectionWarningMessage', {
+        defaultMessage:
+          'To increase Dashboard performance, invalid selections in Controls are no longer ignored. Please remove invalid selections to see complete results.',
+      }),
+    getInvalidSelectionWarningDismissButton: () =>
+      i18n.translate('controls.optionsList.control.invalidSelectionWarningConfirmButton', {
+        defaultMessage: 'Do not show again',
+      }),
   },
   editor: {
     getSelectionOptionsTitle: () =>
@@ -43,7 +56,7 @@ export const OptionsListStrings = {
       multi: {
         getLabel: () =>
           i18n.translate('controls.optionsList.editor.multiSelectLabel', {
-            defaultMessage: 'Allow  multiple selections',
+            defaultMessage: 'Allow multiple selections',
           }),
       },
       single: {

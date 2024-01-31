@@ -40,6 +40,7 @@ import { IClearableControl } from '../../types';
 import { RangeSliderControl } from '../components/range_slider_control';
 import { getDefaultComponentState, rangeSliderReducers } from '../range_slider_reducers';
 import { RangeSliderReduxState } from '../types';
+import { ControlsStorageService } from '../../services/storage/types';
 
 const diffDataFetchProps = (
   current?: RangeSliderDataFetchProps,
@@ -88,6 +89,7 @@ export class RangeSliderEmbeddable
   // Controls services
   private dataService: ControlsDataService;
   private dataViewsService: ControlsDataViewsService;
+  private storageService: ControlsStorageService;
 
   // Internal data fetching state for this input control.
   private dataView?: DataView;
@@ -110,7 +112,11 @@ export class RangeSliderEmbeddable
     super(input, output, parent); // get filters for initial output...
 
     // Destructure controls services
-    ({ data: this.dataService, dataViews: this.dataViewsService } = pluginServices.getServices());
+    ({
+      data: this.dataService,
+      dataViews: this.dataViewsService,
+      storage: this.storageService,
+    } = pluginServices.getServices());
 
     const reduxEmbeddableTools = reduxToolsPackage.createReduxEmbeddableTools<
       RangeSliderReduxState,
@@ -389,6 +395,13 @@ export class RangeSliderEmbeddable
       const docCount = typeof total === 'number' ? total : total?.value;
       this.dispatch.setIsInvalid(!docCount);
     }
+  };
+
+  public canShowInvalidSelectionsWarning = () =>
+    this.storageService.getShowInvalidSelectionWarning() ?? true;
+
+  public supressInvalidSelectionsWarning = () => {
+    this.storageService.setShowInvalidSelectionWarning(false);
   };
 
   public clearSelections() {

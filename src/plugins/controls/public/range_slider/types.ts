@@ -19,6 +19,7 @@ export interface RangeSliderComponentState {
   max?: number;
   error?: string;
   isInvalid?: boolean;
+  showInvalidRangeWarning?: boolean;
 }
 
 // public only - redux embeddable state type
