@@ -12,6 +12,8 @@ import {
   UnifiedHistogramApi,
   UnifiedHistogramFetchStatus,
   UnifiedHistogramState,
+  fromExternalVisContextJSONString,
+  toExternalVisContextJSONString,
 } from '@kbn/unified-histogram-plugin/public';
 import { isEqual } from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -337,12 +339,10 @@ export const useDiscoverHistogram = ({
   const timeRangeMemoized = useMemo(() => timeRange, [timeRange?.from, timeRange?.to]);
 
   const onVisContextChanged = useCallback(
-    (newVisContext: ExternalVisContext | undefined) => {
-      console.log('got new vis context from histogram', newVisContext);
-      stateContainer.internalState.transitions.setVisContext(newVisContext);
-      stateContainer.savedSearchState.update({
-        nextDataView: stateContainer.internalState.getState().dataView,
-        nextState: stateContainer.appState.getState(),
+    (nextVisContext: ExternalVisContext | undefined) => {
+      console.log('got new vis context from histogram', nextVisContext);
+      stateContainer.savedSearchState.updateVisContext({
+        nextVisContextJSON: toExternalVisContextJSONString(nextVisContext),
       });
     },
     [stateContainer]
@@ -478,7 +478,10 @@ function getUnifiedHistogramPropsForTextBased({
   const nextProps = {
     dataView: stateContainer.internalState.getState().dataView!,
     query: stateContainer.appState.getState().query!,
-    externalVisContext: stateContainer.internalState.getState().visContext,
+    // TODO: pass JSON string instead
+    externalVisContext: fromExternalVisContextJSONString(
+      stateContainer.savedSearchState.getState().visContextJSON
+    ),
     columns,
     table:
       result && documentsValue?.recordRawType === RecordRawType.PLAIN

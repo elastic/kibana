@@ -120,9 +120,6 @@ function updateBySavedSearch(savedSearch: SavedSearch, deps: LoadSavedSearchDeps
     'loaded visContextJSON',
     savedSearch.visContextJSON ? JSON.parse(savedSearch.visContextJSON) : undefined
   );
-  internalStateContainer.transitions.setVisContext(
-    fromExternalVisContextJSONString(savedSearch.visContextJSON)
-  );
 
   // Finally notify dataStateContainer, data.query and filterManager about new derived state
   dataStateContainer.reset(savedSearch);

@@ -13,7 +13,6 @@ import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 import { isEqual, isFunction } from 'lodash';
-import { DiscoverInternalStateContainer } from './discover_internal_state_container';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 import { updateSavedSearch } from '../utils/update_saved_search';
 import { addLog } from '../../../utils/add_log';
@@ -33,10 +32,6 @@ export interface UpdateParams {
    * The next data view to be used
    */
   nextDataView?: DataView | undefined;
-  /**
-   * Discover's internal state container
-   */
-  internalStateContainer?: DiscoverInternalStateContainer;
   /**
    * The next AppState that should be used for updating the saved search
    */
@@ -115,16 +110,19 @@ export interface DiscoverSavedSearchContainer {
    * @param params
    */
   update: (params: UpdateParams) => SavedSearch;
+  /**
+   * Updates the current value of visContextJSON in saved search
+   * @param params
+   */
+  updateVisContext: (params: { nextVisContextJSON: string | undefined }) => void;
 }
 
 export function getSavedSearchContainer({
   services,
   globalStateContainer,
-  internalStateContainer,
 }: {
   services: DiscoverServices;
   globalStateContainer: DiscoverGlobalStateContainer;
-  internalStateContainer: DiscoverInternalStateContainer;
 }): DiscoverSavedSearchContainer {
   const initialSavedSearch = services.savedSearch.getNew();
   const savedSearchInitial$ = new BehaviorSubject(initialSavedSearch);
@@ -155,7 +153,6 @@ export function getSavedSearchContainer({
       dataView,
       state: newAppState,
       globalStateContainer,
-      internalStateContainer,
       services,
     });
     return set(nextSavedSearchToSet);
@@ -166,7 +163,6 @@ export function getSavedSearchContainer({
     updateSavedSearch({
       savedSearch: nextSavedSearch,
       globalStateContainer,
-      internalStateContainer,
       services,
       useFilterAndQueryServices: true,
     });
@@ -178,6 +174,15 @@ export function getSavedSearchContainer({
     }
     return { id };
   };
+
+  const assignNextSavedSearch = ({ nextSavedSearch }: { nextSavedSearch: SavedSearch }) => {
+    const hasChanged = !isEqualSavedSearch(savedSearchInitial$.getValue(), nextSavedSearch);
+    hasChanged$.next(hasChanged);
+    savedSearchCurrent$.next(nextSavedSearch);
+
+    addLog('[savedSearch] assignNextSavedSearch done', nextSavedSearch);
+  };
+
   const update = ({ nextDataView, nextState, useFilterAndQueryServices }: UpdateParams) => {
     addLog('[savedSearch] update', { nextDataView, nextState });
 
@@ -191,17 +196,26 @@ export function getSavedSearchContainer({
       dataView,
       state: nextState || {},
       globalStateContainer,
-      internalStateContainer,
       services,
       useFilterAndQueryServices,
     });
 
-    const hasChanged = !isEqualSavedSearch(savedSearchInitial$.getValue(), nextSavedSearch);
-    hasChanged$.next(hasChanged);
-    savedSearchCurrent$.next(nextSavedSearch);
+    assignNextSavedSearch({ nextSavedSearch });
 
     addLog('[savedSearch] update done', nextSavedSearch);
     return nextSavedSearch;
+  };
+
+  const updateVisContext = ({ nextVisContextJSON }: { nextVisContextJSON: string | undefined }) => {
+    const previousSavedSearch = getState();
+    const nextSavedSearch: SavedSearch = {
+      ...previousSavedSearch,
+      visContextJSON: nextVisContextJSON,
+    };
+
+    assignNextSavedSearch({ nextSavedSearch });
+
+    addLog('[savedSearch] updateVisContext done', nextSavedSearch);
   };
 
   const load = async (id: string, dataView: DataView | undefined): Promise<SavedSearch> => {
@@ -231,6 +245,7 @@ export function getSavedSearchContainer({
     persist,
     set,
     update,
+    updateVisContext,
   };
 }
 
