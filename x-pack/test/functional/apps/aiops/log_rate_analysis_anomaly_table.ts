@@ -7,9 +7,12 @@
 
 import expect from '@kbn/expect';
 
-import type { LogRateAnalysisType } from '@kbn/aiops-utils';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
+import type { LogRateAnalysisType } from '@kbn/aiops-utils';
 import type { Datafeed, Job } from '@kbn/ml-plugin/server/shared';
+
+import { isDefaultSearchQuery } from '@kbn/aiops-plugin/public/application/url_state/common';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -18,11 +21,12 @@ import type { LogRateAnalysisDataGenerator } from '../../services/aiops/log_rate
 function getJobWithDataFeed(
   detectorFunction: string,
   detectorField?: string,
-  partitionFieldName?: string
+  partitionFieldName?: string,
+  query: QueryDslQueryContainer = { match_all: {} }
 ) {
   const postFix = `${detectorFunction}${detectorField ? `_${detectorField}` : ''}${
     partitionFieldName ? `_${partitionFieldName}` : ''
-  }`;
+  }${!isDefaultSearchQuery(query) ? '_with_query' : ''}`;
   const jobId = `fq_lra_${postFix}`;
 
   // @ts-expect-error not full interface
@@ -53,7 +57,7 @@ function getJobWithDataFeed(
     datafeed_id: `datafeed-fq_lra_${postFix}`,
     indices: ['ft_farequote'],
     job_id: jobId,
-    query: { bool: { must: [{ match_all: {} }] } },
+    query,
   };
 
   return { jobConfig, datafeedConfig };
@@ -68,6 +72,7 @@ interface TestData {
   entitySelectionValue?: string;
   expected: {
     anomalyTableLogRateAnalysisButtonAvailable: boolean;
+    totalDocCount?: number;
     analysisResults?: Array<{
       fieldName: string;
       fieldValue: string;
@@ -79,12 +84,14 @@ interface TestData {
 }
 
 const testData: TestData[] = [
+  // Single metric job, should find AAL with log rate analysis
   {
     ...getJobWithDataFeed('count'),
     analysisType: 'spike',
     dataGenerator: 'farequote_with_spike',
     expected: {
       anomalyTableLogRateAnalysisButtonAvailable: true,
+      totalDocCount: 7869,
       analysisResults: [
         {
           fieldName: 'airline',
@@ -96,6 +103,7 @@ const testData: TestData[] = [
       ],
     },
   },
+  // Multi metric job, should filter by AAL, no significant results
   {
     ...getJobWithDataFeed('high_count', undefined, 'airline'),
     analysisType: 'spike',
@@ -104,8 +112,32 @@ const testData: TestData[] = [
     entitySelectionValue: 'AAL',
     expected: {
       anomalyTableLogRateAnalysisButtonAvailable: true,
+      totalDocCount: 910,
     },
   },
+  // Single metric job with datafeed query filter, no significant results
+  {
+    ...getJobWithDataFeed('count', undefined, undefined, {
+      bool: {
+        must: [
+          {
+            term: {
+              airline: {
+                value: 'AAL',
+              },
+            },
+          },
+        ],
+      },
+    }),
+    analysisType: 'spike',
+    dataGenerator: 'farequote_with_spike',
+    expected: {
+      anomalyTableLogRateAnalysisButtonAvailable: true,
+      totalDocCount: 910,
+    },
+  },
+  // Single metric job with non-count detector, link should not be available
   {
     ...getJobWithDataFeed('mean', 'responsetime'),
     analysisType: 'spike',
@@ -200,6 +232,10 @@ export default function ({ getService }: FtrProviderContext) {
               await ml.anomaliesTable.assertAnomalyActionsMenuButtonEnabled(0, true);
               await ml.anomaliesTable.assertAnomalyActionLogRateAnalysisButtonExists(0);
               await ml.anomaliesTable.ensureAnomalyActionLogRateAnalysisButtonClicked(0);
+
+              if (expected.totalDocCount !== undefined) {
+                await aiops.logPatternAnalysisPage.assertTotalDocumentCount(expected.totalDocCount);
+              }
             });
 
             const shouldHaveResults = expected.analysisResults !== undefined;
