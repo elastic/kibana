@@ -69,3 +69,5 @@ export const FIELDS_PATH = '/internal/data_views/fields';
  * @public
  */
 export const EXISTING_INDICES_PATH = '/internal/data_views/_existing_indices';
+
+export const DATA_VIEWS_FIELDS_EXCLUDED_TIERS = 'data_views:fields_excluded_data_tiers';
