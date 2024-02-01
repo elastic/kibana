@@ -120,9 +120,9 @@ export class Core {
       const clientFactory = getContentClientFactory({
         contentRegistry: this.contentRegistry,
       });
-      const client = clientFactory(contentTypeId);
+      const contentClient = clientFactory(contentTypeId);
 
-      return client.getForRequest<T>({
+      return contentClient.getForRequest<T>({
         requestHandlerContext,
         request,
         version: version ?? contentDefinition.version.latest,

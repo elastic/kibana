@@ -19,11 +19,11 @@ export const bulkGet: ProcedureDefinition<Context, BulkGetIn<string>, BulkGetRes
     const clientFactory = getContentClientFactory({
       contentRegistry: ctx.contentRegistry,
     });
-    const { getForRequest } = clientFactory(contentTypeId);
-
-    return getForRequest({
+    const client = clientFactory(contentTypeId).getForRequest({
       ...ctx,
       version,
-    }).bulkGet(ids, options);
+    });
+
+    return client.bulkGet(ids, options);
   },
 };

@@ -48,6 +48,8 @@ describe('ContentClient', () => {
           storageContext: {} as any,
         });
       };
+      // With this test and runtime check we can rely on all the existing tests of the Content Crud.
+      // e.g. the tests about events being dispatched, etc.
       expect(expectToThrow).toThrowError('Crud instance missing or not an instance of ContentCrud');
     });
   });

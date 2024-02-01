@@ -17,11 +17,11 @@ export const update: ProcedureDefinition<Context, UpdateIn<string>> = {
     const clientFactory = getContentClientFactory({
       contentRegistry: ctx.contentRegistry,
     });
-    const { getForRequest } = clientFactory(contentTypeId);
-
-    return getForRequest({
+    const client = clientFactory(contentTypeId).getForRequest({
       ...ctx,
       version,
-    }).update(id, data, options);
+    });
+
+    return client.update(id, data, options);
   },
 };

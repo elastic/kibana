@@ -18,11 +18,11 @@ export const get: ProcedureDefinition<Context, GetIn<string>> = {
     const clientFactory = getContentClientFactory({
       contentRegistry: ctx.contentRegistry,
     });
-    const { getForRequest } = clientFactory(contentTypeId);
-
-    return getForRequest({
+    const client = clientFactory(contentTypeId).getForRequest({
       ...ctx,
       version,
-    }).get(id, options);
+    });
+
+    return client.get(id, options);
   },
 };

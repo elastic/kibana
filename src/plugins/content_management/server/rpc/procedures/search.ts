@@ -18,11 +18,11 @@ export const search: ProcedureDefinition<Context, SearchIn<string>> = {
     const clientFactory = getContentClientFactory({
       contentRegistry: ctx.contentRegistry,
     });
-    const { getForRequest } = clientFactory(contentTypeId);
-
-    return getForRequest({
+    const client = clientFactory(contentTypeId).getForRequest({
       ...ctx,
       version,
-    }).search(query, options);
+    });
+
+    return client.search(query, options);
   },
 };

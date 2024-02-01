@@ -19,7 +19,8 @@ export const mSearch: ProcedureDefinition<Context, MSearchIn, MSearchOut> = {
       contentRegistry: ctx.contentRegistry,
       mSearchService: ctx.mSearchService,
     });
+    const mSearchClient = clientFactory(ctx);
 
-    return clientFactory(ctx).msearch({ contentTypes, query });
+    return mSearchClient.msearch({ contentTypes, query });
   },
 };

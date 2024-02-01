@@ -17,11 +17,11 @@ export const deleteProc: ProcedureDefinition<Context, DeleteIn<string>> = {
     const clientFactory = getContentClientFactory({
       contentRegistry: ctx.contentRegistry,
     });
-    const { getForRequest } = clientFactory(contentTypeId);
-
-    return getForRequest({
+    const client = clientFactory(contentTypeId).getForRequest({
       ...ctx,
       version,
-    }).delete(id, options);
+    });
+
+    return client.delete(id, options);
   },
 };
