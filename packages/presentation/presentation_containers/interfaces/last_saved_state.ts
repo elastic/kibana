@@ -29,6 +29,7 @@ export const getLastSavedStateSubjectForChild = <StateType extends unknown = unk
   childId: string,
   deserializer?: (state: SerializedPanelState) => StateType
 ): PublishingSubject<StateType | undefined> | undefined => {
+  if (!parentApi) return;
   const fetchUnsavedChanges = (): StateType | undefined => {
     if (!apiPublishesLastSavedState(parentApi)) return;
     const rawLastSavedState = parentApi.getLastSavedStateForChild(childId);

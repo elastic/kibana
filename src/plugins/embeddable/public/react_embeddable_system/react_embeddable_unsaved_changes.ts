@@ -10,23 +10,51 @@ import { getLastSavedStateSubjectForChild } from '@kbn/presentation-containers';
 import { PublishingSubject } from '@kbn/presentation-publishing';
 import { useCallback, useEffect, useMemo } from 'react';
 import { BehaviorSubject, combineLatest } from 'rxjs';
-import { combineLatestWith, debounceTime, map } from 'rxjs/operators';
-import { useReactEmbeddableParentContext } from './react_embeddable_parenting';
+import { combineLatestWith, debounceTime, map, skip } from 'rxjs/operators';
+import { useReactEmbeddableParentContext } from './react_embeddable_api';
 import { EmbeddableStateComparators, ReactEmbeddableFactory } from './types';
 
 const defaultComparator = <T>(a: T, b: T) => a === b;
+
+const getInitialValuesFromComparators = <StateType extends object = object>(
+  comparators: EmbeddableStateComparators<StateType>,
+  comparatorKeys: Array<keyof StateType>
+) => {
+  const initialValues: Partial<StateType> = {};
+  for (const key of comparatorKeys) {
+    initialValues[key] = comparators[key][0]?.value;
+  }
+  return initialValues;
+};
+
+const runComparators = <StateType extends object = object>(
+  comparators: EmbeddableStateComparators<StateType>,
+  comparatorKeys: Array<keyof StateType>,
+  lastSavedState: StateType | undefined,
+  latestState: Partial<StateType>
+) => {
+  if (!lastSavedState) {
+    // if the parent API provides last saved state, but it's empty for this panel, all of our latest state is unsaved.
+    return latestState;
+  }
+  const latestChanges: Partial<StateType> = {};
+  for (const key of comparatorKeys) {
+    const comparator = comparators[key]?.[2] ?? defaultComparator;
+    if (!comparator(lastSavedState?.[key], latestState[key], lastSavedState, latestState)) {
+      latestChanges[key] = latestState[key];
+    }
+  }
+  if (Object.keys(latestChanges).length > 0) {
+    return latestChanges;
+  }
+  return;
+};
 
 export const useReactEmbeddableUnsavedChanges = <StateType extends object = object>(
   uuid: string,
   factory: ReactEmbeddableFactory<StateType>,
   comparators: EmbeddableStateComparators<StateType>
 ) => {
-  // set up unsaved changes subject
-  const unsavedChanges = useMemo(
-    () => new BehaviorSubject<Partial<StateType> | undefined>(undefined),
-    []
-  );
-
   const { parentApi } = useReactEmbeddableParentContext() ?? {};
   const lastSavedStateSubject = useMemo(
     () => getLastSavedStateSubjectForChild<StateType>(parentApi, uuid, factory.deserializeState),
@@ -45,11 +73,33 @@ export const useReactEmbeddableUnsavedChanges = <StateType extends object = obje
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /**
+   * set up unsaved changes subject, running an initial diff. If the parent API cannot provide
+   * last saved state, we return undefined.
+   */
+  const unsavedChanges = useMemo(
+    () =>
+      new BehaviorSubject<Partial<StateType> | undefined>(
+        lastSavedStateSubject
+          ? runComparators(
+              comparators,
+              comparatorKeys,
+              lastSavedStateSubject?.getValue(),
+              getInitialValuesFromComparators(comparators, comparatorKeys)
+            )
+          : undefined
+      ),
+    // disable exhaustive deps because the comparators must be static
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
   useEffect(() => {
     if (!lastSavedStateSubject) return;
     // subscribe to last saved state subject and all state comparators
     const subscription = combineLatest(comparatorSubjects)
       .pipe(
+        skip(1), // initial unsaved changes will be built in initializer.
         debounceTime(100),
         map((latestStates) =>
           comparatorKeys.reduce((acc, key, index) => {
@@ -60,22 +110,9 @@ export const useReactEmbeddableUnsavedChanges = <StateType extends object = obje
         combineLatestWith(lastSavedStateSubject)
       )
       .subscribe(([latestStates, lastSavedState]) => {
-        if (!lastSavedState) {
-          unsavedChanges.next(latestStates);
-          return;
-        }
-        const latestChanges: Partial<StateType> = {};
-        for (const key of comparatorKeys) {
-          const comparator = comparators[key]?.[2] ?? defaultComparator;
-          if (!comparator(lastSavedState[key], latestStates[key], lastSavedState, latestStates)) {
-            latestChanges[key] = latestStates[key];
-          }
-        }
-        if (Object.keys(latestChanges).length > 0) {
-          unsavedChanges.next(latestChanges);
-        } else {
-          unsavedChanges.next(undefined);
-        }
+        unsavedChanges.next(
+          runComparators(comparators, comparatorKeys, lastSavedState, latestStates)
+        );
       });
     return () => subscription.unsubscribe();
     // disable exhaustive deps because the comparators must be static

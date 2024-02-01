@@ -26,7 +26,9 @@ export const registerReactEmbeddableFactory = <
 ) => {
   registry[key] = factory;
 };
+
 export const reactEmbeddableRegistryHasKey = (key: string) => registry[key] !== undefined;
+
 export const getReactEmbeddableFactory = <
   StateType extends unknown = unknown,
   ApiType extends DefaultEmbeddableApi = DefaultEmbeddableApi

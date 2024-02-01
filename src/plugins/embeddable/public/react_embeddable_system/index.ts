@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-export { useReactEmbeddableApiHandle, initializeReactEmbeddableUuid } from './react_embeddable_api';
-export { useReactEmbeddableUnsavedChanges } from './react_embeddable_unsaved_changes';
 export {
+  useReactEmbeddableApiHandle,
+  initializeReactEmbeddableUuid,
   ReactEmbeddableParentContext,
   useReactEmbeddableParentApi,
-} from './react_embeddable_parenting';
+} from './react_embeddable_api';
+export { useReactEmbeddableUnsavedChanges } from './react_embeddable_unsaved_changes';
 export {
   reactEmbeddableRegistryHasKey,
   RegisterReactEmbeddable,

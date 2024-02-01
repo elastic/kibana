@@ -109,7 +109,6 @@ export {
   useReactEmbeddableParentApi,
   useReactEmbeddableUnsavedChanges,
   initializeReactEmbeddableUuid,
-  diffReactEmbeddableTitles,
   initializeReactEmbeddableTitles,
   serializeReactEmbeddableTitles,
 } from './react_embeddable_system';

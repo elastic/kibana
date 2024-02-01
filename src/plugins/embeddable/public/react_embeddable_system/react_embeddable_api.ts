@@ -6,13 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
-import { useImperativeHandle, useMemo } from 'react';
+import { apiIsPresentationContainer, PresentationContainer } from '@kbn/presentation-containers';
+import { createContext, useContext, useImperativeHandle, useMemo } from 'react';
 import { v4 as generateId } from 'uuid';
-import { useReactEmbeddableParentContext } from './react_embeddable_parenting';
 import { DefaultEmbeddableApi } from './types';
-
-type RegisterEmbeddableApi = Omit<DefaultEmbeddableApi, 'parent'>;
 
 /**
  * Pushes any API to the passed in ref. Note that any API passed in will not be rebuilt on
@@ -20,10 +17,9 @@ type RegisterEmbeddableApi = Omit<DefaultEmbeddableApi, 'parent'>;
  * and publishing subjects to allow other components to listen to changes.
  */
 export const useReactEmbeddableApiHandle = <
-  ApiType extends DefaultEmbeddableApi = DefaultEmbeddableApi,
-  RegisterApiType extends RegisterEmbeddableApi = RegisterEmbeddableApi
+  ApiType extends DefaultEmbeddableApi = DefaultEmbeddableApi
 >(
-  apiToRegister: RegisterApiType,
+  apiToRegister: Omit<ApiType, 'parent'>,
   ref: React.ForwardedRef<ApiType>,
   uuid: string
 ) => {
@@ -58,3 +54,21 @@ export const useReactEmbeddableApiHandle = <
 };
 
 export const initializeReactEmbeddableUuid = (maybeId?: string) => maybeId ?? generateId();
+
+/**
+ * Parenting
+ */
+interface ReactEmbeddableParentContext {
+  parentApi?: PresentationContainer;
+}
+
+export const ReactEmbeddableParentContext = createContext<ReactEmbeddableParentContext | null>(
+  null
+);
+export const useReactEmbeddableParentApi = (): unknown | null => {
+  return useContext<ReactEmbeddableParentContext | null>(ReactEmbeddableParentContext)?.parentApi;
+};
+
+export const useReactEmbeddableParentContext = (): ReactEmbeddableParentContext | null => {
+  return useContext<ReactEmbeddableParentContext | null>(ReactEmbeddableParentContext);
+};
