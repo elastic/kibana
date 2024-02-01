@@ -23,7 +23,7 @@ export const FleetServerHostsSection: React.FunctionComponent<FleetServerHostsSe
   fleetServerHosts,
   deleteFleetServerHost,
 }) => {
-  const { docLinks } = useStartServices();
+  const { docLinks, cloud } = useStartServices();
   const { getHref } = useLink();
 
   return (
@@ -61,7 +61,11 @@ export const FleetServerHostsSection: React.FunctionComponent<FleetServerHostsSe
       <EuiSpacer size="s" />
       <EuiButtonEmpty
         iconType="plusInCircle"
-        href={getHref('settings_create_fleet_server_hosts')}
+        href={getHref(
+          cloud?.isServerlessEnabled
+            ? 'settings_quick_create_fleet_server_hosts'
+            : 'settings_create_fleet_server_hosts'
+        )}
         data-test-subj="settings.fleetServerHosts.addFleetServerHostBtn"
       >
         <FormattedMessage

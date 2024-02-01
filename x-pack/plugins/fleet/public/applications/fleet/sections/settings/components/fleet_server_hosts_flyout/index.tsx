@@ -40,17 +40,19 @@ import { useFleetServerHostsForm } from './use_fleet_server_host_form';
 export interface FleetServerHostsFlyoutProps {
   onClose: () => void;
   fleetServerHost?: FleetServerHost;
+  defaultFleetServerHost?: FleetServerHost;
   proxies: FleetProxy[];
 }
 
 export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFlyoutProps> = ({
   onClose,
   fleetServerHost,
+  defaultFleetServerHost,
   proxies,
 }) => {
   const { docLinks } = useStartServices();
 
-  const form = useFleetServerHostsForm(fleetServerHost, onClose);
+  const form = useFleetServerHostsForm(fleetServerHost, onClose, defaultFleetServerHost);
   const { inputs } = form;
 
   const proxiesOptions = useMemo(
@@ -78,22 +80,24 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiCallOut
-          size="m"
-          color="warning"
-          iconType="warning"
-          title={
+        {fleetServerHost && (
+          <EuiCallOut
+            size="m"
+            color="warning"
+            iconType="warning"
+            title={
+              <FormattedMessage
+                id="xpack.fleet.settings.fleetServerHostsFlyout.warningCalloutTitle"
+                defaultMessage="Changing these settings can break your agent connections"
+              />
+            }
+          >
             <FormattedMessage
-              id="xpack.fleet.settings.fleetServerHostsFlyout.warningCalloutTitle"
-              defaultMessage="Changing these settings can break your agent connections"
+              id="xpack.fleet.settings.fleetServerHostsFlyout.warningCalloutDescription"
+              defaultMessage="Invalid settings can break the connection between Elastic Agent and Fleet Server. If this happens, you will need to re-enroll your agents."
             />
-          }
-        >
-          <FormattedMessage
-            id="xpack.fleet.settings.fleetServerHostsFlyout.warningCalloutDescription"
-            defaultMessage="Invalid settings can break the connection between Elastic Agent and Fleet Server. If this happens, you will need to re-enroll your agents."
-          />
-        </EuiCallOut>
+          </EuiCallOut>
+        )}
         <EuiSpacer size="m" />
         <EuiForm onSubmit={form.submit}>
           <TextInput
@@ -120,29 +124,33 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
             }
           >
             <>
-              <EuiText color="subdued" size="relative">
-                <FormattedMessage
-                  id="xpack.fleet.settings.fleetServerHostsFlyout.description"
-                  defaultMessage="Specify multiple URLs to scale out your deployment and provide automatic failover. If multiple URLs exist, Fleet shows the first provided URL for enrollment purposes. Enrolled Elastic Agents will connect to the URLs in round robin order until they connect successfully. For more information, see the {link} ."
-                  values={{
-                    link: (
-                      <EuiLink
-                        href={docLinks.links.fleet.settingsFleetServerHostSettings}
-                        target="_blank"
-                        external
-                      >
-                        <FormattedMessage
-                          id="xpack.fleet.settings.fleetServerHostsFlyout.userGuideLink"
-                          defaultMessage="Fleet and Elastic Agent Guide"
-                        />
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </EuiText>
-              <EuiSpacer size="m" />
+              {fleetServerHost && (
+                <>
+                  <EuiText color="subdued" size="relative">
+                    <FormattedMessage
+                      id="xpack.fleet.settings.fleetServerHostsFlyout.description"
+                      defaultMessage="Specify multiple URLs to scale out your deployment and provide automatic failover. If multiple URLs exist, Fleet shows the first provided URL for enrollment purposes. Enrolled Elastic Agents will connect to the URLs in round robin order until they connect successfully. For more information, see the {link} ."
+                      values={{
+                        link: (
+                          <EuiLink
+                            href={docLinks.links.fleet.settingsFleetServerHostSettings}
+                            target="_blank"
+                            external
+                          >
+                            <FormattedMessage
+                              id="xpack.fleet.settings.fleetServerHostsFlyout.userGuideLink"
+                              defaultMessage="Fleet and Elastic Agent Guide"
+                            />
+                          </EuiLink>
+                        ),
+                      }}
+                    />
+                  </EuiText>
+                  <EuiSpacer size="m" />
+                </>
+              )}
               <MultiRowInput
-                {...form.inputs.hostUrlsInput.props}
+                {...inputs.hostUrlsInput.props}
                 id="fleet-server-inputs"
                 placeholder={i18n.translate(
                   'xpack.fleet.settings.fleetServerHostsFlyout.fleetServerHostsInputPlaceholder',

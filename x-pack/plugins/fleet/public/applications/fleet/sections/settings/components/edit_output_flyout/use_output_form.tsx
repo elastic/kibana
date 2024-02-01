@@ -210,9 +210,9 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
   );
   // ES output's host URL is restricted to default in serverless
   const isServerless = cloud?.isServerlessEnabled;
-  const elasticsearchUrlDefaultValue = isServerless
-    ? defaultOuput?.hosts || []
-    : output?.hosts ?? [];
+  // Set the hosts to default for new ES output in serverless.
+  const elasticsearchUrlDefaultValue =
+    isServerless && !output?.hosts ? defaultOuput?.hosts || [] : output?.hosts || [];
   const elasticsearchUrlDisabled = isServerless || isDisabled('hosts');
   const elasticsearchUrlInput = useComboInput(
     'esHostsComboxBox',
