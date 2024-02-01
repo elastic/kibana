@@ -53,7 +53,6 @@ export function PromptEditorNaturalLanguage({
 
     if (textarea) {
       textarea.focus();
-      textarea.select();
     }
   }, [handleResizeTextArea]);
 

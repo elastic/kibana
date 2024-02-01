@@ -36,6 +36,7 @@ import {
   hasWildcard,
   hasCCSSource,
   isSettingItem,
+  isAssignment,
 } from '../shared/helpers';
 import { collectVariables } from '../shared/variables';
 import type {
@@ -50,7 +51,7 @@ import type {
   ESQLSingleAstItem,
   ESQLSource,
 } from '../types';
-import { getMessageFromId, createMessage } from './errors';
+import { getMessageFromId } from './errors';
 import type { ESQLRealField, ESQLVariable, ReferenceMaps, ValidationResult } from './types';
 import type { ESQLCallbacks } from '../shared/types';
 import {
@@ -129,7 +130,18 @@ function validateNestedFunctionArg(
     // no need to check the reason here, it is checked already above
     isSupportedFunction(actualArg.name, parentCommand).supported
   ) {
+    // The isSupported check ensure the definition exists
     const argFn = getFunctionDefinition(actualArg.name)!;
+
+    if ('noNestingFunctions' in argDef && argDef.noNestingFunctions) {
+      messages.push(
+        getMessageFromId({
+          messageId: 'noNestedArgumentSupport',
+          values: { name: actualArg.text, argType: argFn.signatures[0].returnType },
+          locations: actualArg.location,
+        })
+      );
+    }
     if (!isEqualType(actualArg, argDef, references, parentCommand)) {
       messages.push(
         getMessageFromId({
@@ -143,16 +155,6 @@ function validateNestedFunctionArg(
           locations: actualArg.location,
         })
       );
-    } else {
-      if ('noNestingFunctions' in argDef && argDef.noNestingFunctions) {
-        messages.push(
-          getMessageFromId({
-            messageId: 'noNestedArgumentSupport',
-            values: { name: actualArg.text, argType: argFn.signatures[0].returnType },
-            locations: actualArg.location,
-          })
-        );
-      }
     }
   }
   return messages;
@@ -222,15 +224,25 @@ function validateFunction(
   astFunction: ESQLFunction,
   parentCommand: string,
   parentOption: string | undefined,
-  references: ReferenceMaps
+  references: ReferenceMaps,
+  isNested?: boolean
 ): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
 
   if (astFunction.incomplete) {
     return messages;
   }
+  const fnDefinition = getFunctionDefinition(astFunction.name)!;
+  const supportNestedFunctions =
+    fnDefinition?.signatures.some(({ params }) =>
+      params.some(({ noNestingFunctions }) => !noNestingFunctions)
+    ) || true;
 
-  const isFnSupported = isSupportedFunction(astFunction.name, parentCommand, parentOption);
+  const isFnSupported = isSupportedFunction(
+    astFunction.name,
+    isNested && !supportNestedFunctions ? 'eval' : parentCommand,
+    parentOption
+  );
 
   if (!isFnSupported.supported) {
     if (isFnSupported.reason === 'unknownFunction') {
@@ -244,7 +256,8 @@ function validateFunction(
         })
       );
     }
-    if (isFnSupported.reason === 'unsupportedFunction') {
+    // for nested functions skip this check and make the nested check fail later on
+    if (isFnSupported.reason === 'unsupportedFunction' && !isNested) {
       messages.push(
         parentOption
           ? getMessageFromId({
@@ -263,9 +276,10 @@ function validateFunction(
             })
       );
     }
-    return messages;
+    if (messages.length) {
+      return messages;
+    }
   }
-  const fnDefinition = getFunctionDefinition(astFunction.name)!;
   const matchingSignatures = fnDefinition.signatures.filter((def) => {
     if (def.infiniteParams && astFunction.args.length > 0) {
       return true;
@@ -297,17 +311,23 @@ function validateFunction(
     const wrappedArray = Array.isArray(arg) ? arg : [arg];
     for (const subArg of wrappedArray) {
       if (isFunctionItem(subArg)) {
-        messages.push(...validateFunction(subArg, parentCommand, parentOption, references));
+        messages.push(
+          ...validateFunction(
+            subArg,
+            parentCommand,
+            parentOption,
+            references,
+            isNested || !isAssignment(astFunction)
+          )
+        );
       }
     }
   }
   // check if the definition has some warning to show:
   if (fnDefinition.warning) {
-    const message = fnDefinition.warning(
-      ...(astFunction.args.filter((arg) => !Array.isArray(arg)) as ESQLSingleAstItem[])
-    );
-    if (message) {
-      messages.push(createMessage('warning', message, astFunction.location));
+    const payloads = fnDefinition.warning(astFunction);
+    if (payloads.length) {
+      messages.push(...payloads);
     }
   }
   // at this point we're sure that at least one signature is matching
@@ -322,6 +342,7 @@ function validateFunction(
         // few lines above
         return;
       }
+      // if the arg is an array of values, check each element
       if (Array.isArray(outerArg) && isArrayType(argDef.type)) {
         const extractedType = extractSingleType(argDef.type);
         const everyArgInListMessages = outerArg

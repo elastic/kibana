@@ -20,7 +20,7 @@ import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import type { Query, BoolQuery } from '@kbn/es-query';
 import { useKibana } from '../../../utils/kibana_react';
 import { ObservabilityAlertSearchbarWithUrlSync } from '../../../components/alert_search_bar/alert_search_bar_with_url_sync';
-import { observabilityFeatureId } from '../../../../common';
+import { RULE_DETAILS_ALERTS_TABLE_CONFIG_ID } from '../../../constants';
 import {
   RULE_DETAILS_ALERTS_TAB,
   RULE_DETAILS_EXECUTION_TAB,
@@ -69,20 +69,6 @@ export function RuleDetailsTabs({
 
   const tabs: EuiTabbedContentTab[] = [
     {
-      id: RULE_DETAILS_EXECUTION_TAB,
-      name: i18n.translate('xpack.observability.ruleDetails.rule.eventLogTabText', {
-        defaultMessage: 'Execution history',
-      }),
-      'data-test-subj': 'eventLogListTab',
-      content: (
-        <EuiFlexGroup style={{ minHeight: 600 }} direction={'column'}>
-          <EuiFlexItem>
-            {rule && ruleType ? <RuleEventLogList ruleId={rule.id} ruleType={ruleType} /> : null}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-    },
-    {
       id: RULE_DETAILS_ALERTS_TAB,
       name: i18n.translate('xpack.observability.ruleDetails.rule.alertsTabText', {
         defaultMessage: 'Alerts',
@@ -105,7 +91,7 @@ export function RuleDetailsTabs({
               {esQuery && featureIds && (
                 <AlertsStateTable
                   alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
-                  configurationId={observabilityFeatureId}
+                  configurationId={RULE_DETAILS_ALERTS_TABLE_CONFIG_ID}
                   id={RULE_DETAILS_PAGE_ID}
                   featureIds={featureIds}
                   query={esQuery}
@@ -115,6 +101,20 @@ export function RuleDetailsTabs({
             </EuiFlexItem>
           </EuiFlexGroup>
         </>
+      ),
+    },
+    {
+      id: RULE_DETAILS_EXECUTION_TAB,
+      name: i18n.translate('xpack.observability.ruleDetails.rule.eventLogTabText', {
+        defaultMessage: 'Execution history',
+      }),
+      'data-test-subj': 'eventLogListTab',
+      content: (
+        <EuiFlexGroup style={{ minHeight: 600 }} direction={'column'}>
+          <EuiFlexItem>
+            {rule && ruleType ? <RuleEventLogList ruleId={rule.id} ruleType={ruleType} /> : null}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ),
     },
   ];

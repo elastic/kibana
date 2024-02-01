@@ -22,6 +22,7 @@ import {
   createConversationNotFoundError,
   MessageAddEvent,
   StreamingChatResponseEventType,
+  createTokenLimitReachedError,
   type StreamingChatResponseEvent,
 } from '../../../common/conversation_complete';
 import {
@@ -147,7 +148,7 @@ export class ObservabilityAIAssistantClient {
 
         let numFunctionsCalled: number = 0;
 
-        const MAX_FUNCTION_CALLS = 3;
+        const MAX_FUNCTION_CALLS = 5;
         const MAX_FUNCTION_RESPONSE_TOKEN_COUNT = 4000;
 
         const next = async (nextMessages: Message[]): Promise<void> => {
@@ -458,6 +459,17 @@ export class ObservabilityAIAssistantClient {
         },
       },
     });
+
+    if (executeResult.status === 'error' && executeResult?.serviceMessage) {
+      const tokenLimitRegex =
+        /This model's maximum context length is (\d+) tokens\. However, your messages resulted in (\d+) tokens/g;
+      const tokenLimitRegexResult = tokenLimitRegex.exec(executeResult.serviceMessage);
+
+      if (tokenLimitRegexResult) {
+        const [, tokenLimit, tokenCount] = tokenLimitRegexResult;
+        throw createTokenLimitReachedError(parseInt(tokenLimit, 10), parseInt(tokenCount, 10));
+      }
+    }
 
     if (executeResult.status === 'error') {
       throw internal(`${executeResult?.message} - ${executeResult?.serviceMessage}`);

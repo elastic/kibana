@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
-
 export interface ChartArgs {
-  dataView?: DataView;
+  dataViewId?: string;
 }
