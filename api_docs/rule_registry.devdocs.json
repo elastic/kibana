@@ -2033,7 +2033,7 @@
             "section": "def-server.RuleExecutorOptions",
             "text": "RuleExecutorOptions"
           },
-          "<TParams, TState, Record<string, any>, { [x: string]: unknown; }, \"default\", never>) => Promise<{ state: TState; }>; id: string; name: string; category: string; validate: { params: ",
+          "<TParams, TState, Record<string, any>, { [x: string]: unknown; }, \"default\", never>) => Promise<{ state: TState; }>; id: string; name: string; validate: { params: ",
           "RuleTypeParamsValidator",
           "<TParams>; }; cancelAlertsOnRuleTimeout?: boolean | undefined; alerts?: ",
           {
@@ -2059,7 +2059,7 @@
             "section": "def-common.ActionGroup",
             "text": "ActionGroup"
           },
-          "<\"default\">[]; defaultActionGroupId: \"default\"; producer: string; actionVariables?: { context?: ",
+          "<\"default\">[]; defaultActionGroupId: \"default\"; category: string; producer: string; actionVariables?: { context?: ",
           {
             "pluginId": "@kbn/alerting-types",
             "scope": "common",
