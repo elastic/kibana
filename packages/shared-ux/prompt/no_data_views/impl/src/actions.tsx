@@ -50,7 +50,7 @@ export const NoDataButtonLink = ({
             defaultMessage="Alternatively, you can query your data directly using ES|QL (technical preview)."
           />
           <EuiSpacer size={'s'} />
-          <EuiButton color="success" onClick={onTryESQL} size="s">
+          <EuiButton color="success" onClick={onTryESQL} size="s" data-test-subj="tryESQLLink">
             <FormattedMessage
               id="sharedUXPackages.no_data_views.esqlButtonLabel"
               defaultMessage="Try ES|QL"
