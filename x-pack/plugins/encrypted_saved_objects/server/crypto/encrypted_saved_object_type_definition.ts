@@ -82,4 +82,20 @@ export class EncryptedSavedObjectAttributesDefinition {
   public shouldBeStripped(attributeName: string) {
     return this.attributesToStrip.has(attributeName);
   }
+
+  /**
+   * Collects all attributes (both keys and values) that should contribute to AAD.
+   * @param attributes Attributes of the saved object
+   */
+  public collectAttributesForAAD(attributes: Record<string, unknown>) {
+    const aadAttributes: Record<string, unknown> = {};
+    if (this.attributesToIncludeInAAD) {
+      for (const attributeKey of this.attributesToIncludeInAAD) {
+        if (!this.shouldBeEncrypted(attributeKey) && Object.hasOwn(attributes, attributeKey)) {
+          aadAttributes[attributeKey] = attributes[attributeKey];
+        }
+      }
+    }
+    return aadAttributes;
+  }
 }

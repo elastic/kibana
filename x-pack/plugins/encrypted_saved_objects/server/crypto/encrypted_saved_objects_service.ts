@@ -600,12 +600,8 @@ export class EncryptedSavedObjectsService {
     attributes: Record<string, unknown>
   ) {
     // Collect all attributes (both keys and values) that should contribute to AAD.
-    const attributesAAD: Record<string, unknown> = {};
-    for (const [attributeKey, attributeValue] of Object.entries(attributes)) {
-      if (typeDefinition.shouldBeIncludedInAAD(attributeKey)) {
-        attributesAAD[attributeKey] = attributeValue;
-      }
-    }
+    const attributesAAD: Record<string, unknown> =
+      typeDefinition.collectAttributesForAAD(attributes);
 
     if (Object.keys(attributesAAD).length === 0) {
       this.options.logger.debug(
@@ -615,6 +611,7 @@ export class EncryptedSavedObjectsService {
       );
     }
 
+    // Always add the descriptor to the AAD.
     return stringify([...descriptorToArray(descriptor), attributesAAD]);
   }
 

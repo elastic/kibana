@@ -594,19 +594,19 @@ describe('#encryptAttributes', () => {
     });
   });
 
-  it('does not include specified attributes to AAD', async () => {
+  it('only includes specified attributes in AAD', async () => {
     const knownType1attributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three' };
     service.registerType({
       type: 'known-type-1',
       attributesToEncrypt: new Set(['attrThree']),
-      attributesToIncludeInAAD: new Set(['attrOne', 'attrTwo', 'attrThree']),
+      attributesToIncludeInAAD: new Set(['attrOne', 'attrTwo']),
     });
 
     const knownType2attributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three' };
     service.registerType({
       type: 'known-type-2',
       attributesToEncrypt: new Set(['attrThree']),
-      attributesToIncludeInAAD: new Set(['attrOne', 'attrThree']),
+      attributesToIncludeInAAD: new Set(['attrOne']),
     });
 
     await expect(
