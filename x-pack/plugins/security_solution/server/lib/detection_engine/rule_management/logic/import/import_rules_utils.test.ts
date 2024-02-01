@@ -16,11 +16,11 @@ import {
 } from '../../../routes/__mocks__/request_responses';
 
 import { createRules } from '../crud/create_rules';
-import { patchRules } from '../crud/patch_rules';
+import { updateRules } from '../crud/update_rules';
 import { importRules } from './import_rules_utils';
 
 jest.mock('../crud/create_rules');
-jest.mock('../crud/patch_rules');
+jest.mock('../crud/update_rules');
 
 describe('importRules', () => {
   const mlAuthz = {
@@ -84,7 +84,7 @@ describe('importRules', () => {
 
     expect(result).toEqual([{ rule_id: 'rule-1', status_code: 200 }]);
     expect(createRules).toHaveBeenCalled();
-    expect(patchRules).not.toHaveBeenCalled();
+    expect(updateRules).not.toHaveBeenCalled();
   });
 
   it('reports error if "overwriteRules" is "false" and matching rule found', async () => {
@@ -106,10 +106,10 @@ describe('importRules', () => {
       },
     ]);
     expect(createRules).not.toHaveBeenCalled();
-    expect(patchRules).not.toHaveBeenCalled();
+    expect(updateRules).not.toHaveBeenCalled();
   });
 
-  it('patches rule if "overwriteRules" is "true" and matching rule found', async () => {
+  it('updates rule if "overwriteRules" is "true" and matching rule found', async () => {
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
     const result = await importRules({
@@ -129,7 +129,7 @@ describe('importRules', () => {
 
     expect(result).toEqual([{ rule_id: 'rule-1', status_code: 200 }]);
     expect(createRules).not.toHaveBeenCalled();
-    expect(patchRules).toHaveBeenCalled();
+    expect(updateRules).toHaveBeenCalled();
   });
 
   it('reports error if rulesClient throws', async () => {
@@ -154,7 +154,7 @@ describe('importRules', () => {
       },
     ]);
     expect(createRules).not.toHaveBeenCalled();
-    expect(patchRules).not.toHaveBeenCalled();
+    expect(updateRules).not.toHaveBeenCalled();
   });
 
   it('reports error if "createRules" throws', async () => {
@@ -180,8 +180,8 @@ describe('importRules', () => {
     ]);
   });
 
-  it('reports error if "patchRules" throws', async () => {
-    (patchRules as jest.Mock).mockRejectedValue(new Error('error patching rule'));
+  it('reports error if "updateRules" throws', async () => {
+    (updateRules as jest.Mock).mockRejectedValue(new Error('import rule error'));
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
     const result = await importRules({
@@ -196,7 +196,7 @@ describe('importRules', () => {
     expect(result).toEqual([
       {
         error: {
-          message: 'error patching rule',
+          message: 'import rule error',
           status_code: 400,
         },
         rule_id: 'rule-1',
