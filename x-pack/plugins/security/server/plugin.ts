@@ -255,7 +255,6 @@ export class SecurityPlugin
       elasticsearch: core.elasticsearch,
       config,
       license,
-      buildNumber: this.initializerContext.env.packageInfo.buildNum,
       customBranding: core.customBranding,
     });
 
