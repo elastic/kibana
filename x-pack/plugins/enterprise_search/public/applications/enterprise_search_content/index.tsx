@@ -20,10 +20,14 @@ import { HttpLogic } from '../shared/http';
 import { KibanaLogic } from '../shared/kibana';
 import { VersionMismatchPage } from '../shared/version_mismatch';
 
+import { AIPlayground } from './components/ai_playground';
+import { ConnectorDetailRouter } from './components/connector_detail/connector_detail_router';
+import { Connectors } from './components/connectors/connectors';
 import { ConnectorsRouter } from './components/connectors/connectors_router';
 import { CrawlersRouter } from './components/connectors/crawlers_router';
 import { NotFound } from './components/not_found';
 import { SearchIndicesRouter } from './components/search_indices';
+import { Settings } from './components/settings';
 import {
   CONNECTORS_PATH,
   CRAWLERS_PATH,
@@ -31,6 +35,7 @@ import {
   ROOT_PATH,
   SEARCH_INDICES_PATH,
   SETUP_GUIDE_PATH,
+  AI_PLAYGROUND_PATH,
 } from './routes';
 
 export const EnterpriseSearchContent: React.FC<InitialAppData> = (props) => {
@@ -81,6 +86,12 @@ export const EnterpriseSearchContentConfigured: React.FC<Required<InitialAppData
       </Route>
       <Route path={CRAWLERS_PATH}>
         <CrawlersRouter />
+      </Route>
+      <Route path={SETTINGS_PATH}>
+        <Settings />
+      </Route>
+      <Route path={AI_PLAYGROUND_PATH}>
+        <AIPlayground />
       </Route>
       <Route>
         <NotFound />
