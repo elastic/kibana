@@ -79,9 +79,9 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
           `[data-test-subj=${testSubjectSelectors.datasetQualityExpandButton}]`
         );
         expect(expanderButtons.length).to.be.greaterThan(0);
-      });
 
-      await expanderButtons[testDatasetRowIndex].click(); // Click "Open"
+        await expanderButtons[testDatasetRowIndex].click(); // Click "Open"
+      });
     },
 
     async getFlyoutElementsByText(selector: string, text: string) {

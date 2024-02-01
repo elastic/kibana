@@ -105,7 +105,7 @@ export function createLogRecord(
   cloudProvider: string,
   cloudRegion: string,
   isMalformed = false
-) {
+): ReturnType<typeof log.create> {
   return log
     .create()
     .dataset(dataset)

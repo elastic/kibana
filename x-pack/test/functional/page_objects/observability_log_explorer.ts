@@ -263,7 +263,7 @@ export function ObservabilityLogsExplorerPageObject({
     async navigateToDatasetQuality({
       pageState,
     }: {
-      pageState?: urlSchemaV1.UrlSchema;
+      pageState?: logExplorerUrlSchemaV1.UrlSchema;
     } = {}) {
       const queryStringParams = '';
 
