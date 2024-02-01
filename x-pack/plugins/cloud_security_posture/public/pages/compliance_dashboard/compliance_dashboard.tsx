@@ -201,7 +201,7 @@ export const getDefaultTab = (
   const installedPolicyTemplatesKspm = pluginStatus?.kspm?.status;
   let preferredDashboard: PosturePolicyTemplate = POSTURE_TYPE_CSPM;
 
-  if (!getCspmDashboardData.data || !pluginStatus) {
+  if (!cspmStats || !pluginStatus) {
     return;
   }
   // cspm has findings
