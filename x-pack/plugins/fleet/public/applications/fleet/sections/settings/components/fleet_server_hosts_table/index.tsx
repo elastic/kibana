@@ -152,5 +152,5 @@ export const FleetServerHostsTable: React.FunctionComponent<FleetServerHostsTabl
     ];
   }, [getHref, deleteFleetServerHost]);
 
-  return <EuiBasicTable columns={columns} items={fleetServerHosts} />;
+  return <EuiBasicTable columns={columns} items={fleetServerHosts} data-test-subj="settingsFleetServerHostsTable" />;
 };
