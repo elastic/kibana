@@ -12,7 +12,7 @@ import { ConnectorsAPISyncJobResponse } from '..';
 import { ConnectorSyncJob } from '../types/connectors';
 import { Paginate } from '../types/pagination';
 
-export const fetchSyncJobsByConnectorId = async (
+export const fetchSyncJobs = async (
   client: ElasticsearchClient,
   connectorId?: string,
   from: number = 0,

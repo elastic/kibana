@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { fetchSyncJobsByConnectorId } from './fetch_sync_jobs';
+import { fetchSyncJobs } from './fetch_sync_jobs';
 
 describe('fetchSyncJobs lib', () => {
   const mockClient = {
@@ -18,15 +18,13 @@ describe('fetchSyncJobs lib', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  describe('fetch sync jobs by connector id', () => {
-    it('should fetch sync jobs by connector id', async () => {
+  describe('fetch sync jobs', () => {
+    it('should fetch sync jobs', async () => {
       mockClient.transport.request.mockImplementationOnce(() => ({
         count: 22,
         results: [],
       }));
-      await expect(
-        fetchSyncJobsByConnectorId(mockClient as any, 'id', 0, 10, 'content')
-      ).resolves.toEqual({
+      await expect(fetchSyncJobs(mockClient as any, 'id', 0, 10, 'content')).resolves.toEqual({
         _meta: {
           page: {
             from: 0,
