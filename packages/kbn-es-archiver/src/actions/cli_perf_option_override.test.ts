@@ -18,5 +18,8 @@ describe('esArchiver: cli perf option override', () => {
       const throws = () => parseNumberFlag('adfabas');
       expect(throws).toThrow();
     });
+    it(`should return a number if the flag can be parsed`, () => {
+      expect(parseNumberFlag('3')).toBe(3);
+    });
   });
 });
