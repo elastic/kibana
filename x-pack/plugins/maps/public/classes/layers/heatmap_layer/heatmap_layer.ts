@@ -238,9 +238,7 @@ export class HeatmapLayer extends AbstractLayer {
 
   getIndexPatternIds() {
     const source = this.getSource();
-    return hasESSourceMethod(source, 'getIndexPatternId')
-      ? [source.getIndexPatternId()]
-      : [];
+    return hasESSourceMethod(source, 'getIndexPatternId') ? [source.getIndexPatternId()] : [];
   }
 
   getQueryableIndexPatternIds() {
