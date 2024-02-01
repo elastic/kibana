@@ -12,13 +12,6 @@ import { ConnectorsAPISyncJobResponse } from '..';
 import { ConnectorSyncJob } from '../types/connectors';
 import { Paginate } from '../types/pagination';
 
-interface Query {
-  from: number;
-  size: number;
-  connector_id?: string;
-  job_type?: string;
-}
-
 export const fetchSyncJobsByConnectorId = async (
   client: ElasticsearchClient,
   connectorId?: string,
@@ -26,23 +19,20 @@ export const fetchSyncJobsByConnectorId = async (
   size: number = 100,
   syncJobType: 'content' | 'access_control' | 'all' = 'all'
 ): Promise<Paginate<ConnectorSyncJob>> => {
-  const body: Query = {
-    from,
-    size,
-  };
-  if (typeof connectorId !== 'undefined') {
-    body.connector_id = connectorId;
+  let querystring = `from=${from}&size=${size}`;
+  if (connectorId) {
+    querystring += `&connector_id=${connectorId}`;
   }
   if (syncJobType === 'content') {
-    body.job_type = 'full,incremental';
+    querystring += '&job_type=full,incremental';
   } else if (syncJobType === 'access_control') {
-    body.job_type = 'access_control';
+    querystring += '&job_type=access_control';
   }
 
   const result = await client.transport.request<ConnectorsAPISyncJobResponse>({
     method: 'GET',
     path: `/_connector/_sync_job`,
-    body,
+    querystring,
   });
 
   return {

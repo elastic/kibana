@@ -40,12 +40,7 @@ describe('fetchSyncJobs lib', () => {
       expect(mockClient.transport.request).toHaveBeenCalledWith({
         method: 'GET',
         path: '/_connector/_sync_job',
-        body: {
-          from: 0,
-          size: 10,
-          connector_id: 'id',
-          job_type: 'full,incremental',
-        },
+        querystring: 'from=0&size=10&connector_id=id&job_type=full,incremental',
       });
     });
   });
