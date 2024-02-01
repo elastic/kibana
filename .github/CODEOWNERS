@@ -1088,7 +1088,9 @@ x-pack/plugins/infra/server/lib/alerting @elastic/obs-ux-management-team
 
 # Logs
 /x-pack/test/api_integration/apis/logs_ui @elastic/obs-ux-logs-team
+/x-pack/test/dataset_quality_api_integration @elastic/obs-ux-logs-team
 /x-pack/test/functional/apps/observability_logs_explorer @elastic/obs-ux-logs-team
+/x-pack/test/functional/apps/dataset_quality @elastic/obs-ux-logs-team
 
 # Observability onboarding tour
 /x-pack/plugins/observability_shared/public/components/tour @elastic/platform-onboarding
