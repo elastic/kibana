@@ -417,6 +417,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     [language, esqlCallbacks]
   );
 
+  const codeActionProvider = useMemo(
+    () => (language === 'esql' ? ESQLLang.getCodeActionProvider?.(esqlCallbacks) : undefined),
+    [language, esqlCallbacks]
+  );
+
   const onErrorClick = useCallback(({ startLineNumber, startColumn }: MonacoMessage) => {
     if (!editor1.current) {
       return;
@@ -541,6 +546,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       vertical: 'auto',
     },
     overviewRulerBorder: false,
+    // this becomes confusing with multiple markers, so quick fixes
+    // will be proposed only within the tooltip
+    lightbulb: {
+      enabled: false,
+    },
     readOnly:
       isLoading ||
       isDisabled ||
@@ -776,6 +786,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                           return hoverProvider?.provideHover(model, position, token);
                         },
                       }}
+                      codeActions={codeActionProvider}
                       onChange={onQueryUpdate}
                       editorDidMount={(editor) => {
                         editor1.current = editor;

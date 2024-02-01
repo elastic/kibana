@@ -130,4 +130,7 @@ module.exports = {
   globals: {
     structuredClone: {},
   },
+
+  testResultsProcessor:
+    '<rootDir>/packages/kbn-test/src/jest/result_processors/logging_result_processor.js',
 };

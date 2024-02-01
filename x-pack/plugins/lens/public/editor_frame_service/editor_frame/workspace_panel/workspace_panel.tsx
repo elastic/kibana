@@ -781,6 +781,7 @@ export const VisualizationWrapper = ({
         onRender$={onRenderHandler}
         inspectorAdapters={lensInspector.adapters}
         executionContext={executionContext}
+        shouldUseSizeTransitionVeil={true}
         renderMode="edit"
         renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
           const errorsFromRequest = getOriginalRequestErrorMessages(error || null);
