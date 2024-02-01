@@ -17,14 +17,15 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { docLinks } from '../../../shared/doc_links';
 import { KibanaLogic } from '../../../shared/kibana';
-import { isConnectorIndex /* , isCrawlerIndex */ } from '../../utils/indices';
+import { isConnectorIndex } from '../../utils/indices';
+
+import { ConvertConnectorLogic } from '../search_index/connector/native_connector_configuration/convert_connector_logic';
+import { ConnectorTotalStats } from '../search_index/connector_total_stats';
+import { SyncJobs } from '../search_index/sync_jobs/sync_jobs';
 
 import { ConvertConnectorModal } from '../shared/convert_connector_modal/convert_connector_modal';
 
-import { ConvertConnectorLogic } from './connector/native_connector_configuration/convert_connector_logic';
-import { ConnectorTotalStats } from './connector_total_stats';
 import { OverviewLogic } from './overview.logic';
-import { SyncJobs } from './sync_jobs/sync_jobs';
 
 export const ConnectorDetailOverview: React.FC = () => {
   const { indexData } = useValues(OverviewLogic);
@@ -97,17 +98,7 @@ export const ConnectorDetailOverview: React.FC = () => {
           <EuiSpacer />
         </>
       )}
-      {
-        // isCrawlerIndex(indexData) && <CrawlerTotalStats />
-      }
       {isConnectorIndex(indexData) && <ConnectorTotalStats />}
-      {/* isCrawlerIndex(indexData) && (
-        <>
-          <EuiSpacer />
-          <CrawlRequestsPanel />
-          <CrawlDetailsFlyout />
-        </>
-      ) */}
       {isConnectorIndex(indexData) && (
         <>
           <EuiSpacer />

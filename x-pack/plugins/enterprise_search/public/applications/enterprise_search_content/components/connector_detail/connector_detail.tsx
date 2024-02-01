@@ -20,11 +20,11 @@ import { ConnectorSchedulingComponent } from '../search_index/connector/connecto
 import { ConnectorSyncRules } from '../search_index/connector/sync_rules/connector_rules';
 import { SearchIndexDocuments } from '../search_index/documents';
 import { SearchIndexIndexMappings } from '../search_index/index_mappings';
+import { SearchIndexPipelines } from '../search_index/pipelines/pipelines';
 import { baseBreadcrumbs } from '../search_indices';
 
 import { ConnectorViewLogic } from './connector_view_logic';
 import { ConnectorDetailOverview } from './overview';
-import { SearchIndexPipelines } from './pipelines/pipelines';
 
 export enum ConnectorDetailTabId {
   // all indices
