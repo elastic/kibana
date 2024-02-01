@@ -184,6 +184,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
       );
     });
+
     it('prevents duplicate name of monitor', async () => {
       const monitor = {
         type: 'http',
