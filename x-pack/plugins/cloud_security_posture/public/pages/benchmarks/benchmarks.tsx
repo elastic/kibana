@@ -131,7 +131,7 @@ const BenchmarkSearchField = ({
           isLoading={isLoading}
           placeholder={i18n.translate(
             'xpack.csp.benchmarks.benchmarkSearchField.searchPlaceholder',
-            { defaultMessage: 'Search by benchmark Name' }
+            { defaultMessage: 'Search by Benchmark Name' }
           )}
           incremental
         />
@@ -151,9 +151,11 @@ export const Benchmarks = () => {
   });
 
   const queryResult = useCspBenchmarkIntegrationsV2();
+  const lowerCaseQueryName = query.name.toLowerCase();
   const benchmarkResult =
-    queryResult.data?.items.filter((obj) => getBenchmarkCisName(obj.id)?.includes(query.name)) ||
-    [];
+    queryResult.data?.items.filter((obj) =>
+      getBenchmarkCisName(obj.id)?.toLowerCase().includes(lowerCaseQueryName)
+    ) || [];
   const totalItemCount = queryResult.data?.items.length || 0;
 
   // Check if we have any CSP Integration or not
