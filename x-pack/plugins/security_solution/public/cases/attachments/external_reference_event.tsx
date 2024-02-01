@@ -7,7 +7,7 @@
 
 import { EuiLink } from '@elastic/eui';
 import { useNavigation } from '@kbn/security-solution-navigation/src/navigation';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import type { IExternalReferenceMetaDataProps } from './types';
 import { getEndpointDetailsPath } from '../../management/common/routing';
@@ -37,12 +37,17 @@ const AttachmentContent = (props: {
     path: `/hosts/name/${targets[0].hostname}`,
   });
 
-  const actionText = command === 'isolate' ? `${ISOLATED_HOST} ` : `${RELEASED_HOST} `;
+  const actionText = useMemo(() => {
+    return command === 'isolate' ? `${ISOLATED_HOST} ` : `${RELEASED_HOST} `;
+  }, [command]);
 
-  const linkHref = targets[0].type === 'sentinel_one' ? hostsDetailsHref : endpointDetailsHref;
+  const linkHref = useMemo(
+    () => (targets[0].type === 'sentinel_one' ? hostsDetailsHref : endpointDetailsHref),
+    [endpointDetailsHref, hostsDetailsHref, targets]
+  );
 
   const onLinkClick = useCallback(
-    (ev) => {
+    (ev: React.MouseEvent<HTMLAnchorElement>) => {
       ev.preventDefault();
       return navigateTo({ url: linkHref });
     },

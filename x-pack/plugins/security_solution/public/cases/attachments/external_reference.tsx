@@ -7,10 +7,7 @@
 
 import React from 'react';
 import { EuiAvatar } from '@elastic/eui';
-import type {
-  ExternalReferenceAttachmentType,
-  ExternalReferenceAttachmentViewProps,
-} from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import type { ExternalReferenceAttachmentType } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import { getLazyExternalChildrenContent } from './lazy_external_reference_children_content';
 import { CASE_ATTACHMENT_ENDPOINT_TYPE_ID } from '../../../common/constants';
 import { getLazyExternalEventContent } from './lazy_external_reference_content';
@@ -21,11 +18,11 @@ export const getExternalReferenceAttachmentEndpointRegular =
     id: CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
     displayName: 'Endpoint',
     // @ts-expect-error: TS2322 figure out types for children lazyExotic
-    getAttachmentViewObject: (props: ExternalReferenceAttachmentViewProps) => {
+    getAttachmentViewObject: (props: IExternalReferenceMetaDataProps) => {
       const iconType = props.externalReferenceMetadata?.command === 'isolate' ? 'lock' : 'lockOpen';
       return {
         type: 'regular',
-        event: getLazyExternalEventContent(props as unknown as IExternalReferenceMetaDataProps),
+        event: getLazyExternalEventContent(props),
         timelineAvatar: (
           <EuiAvatar name="endpoint" color="subdued" iconType={iconType} aria-label={iconType} />
         ),

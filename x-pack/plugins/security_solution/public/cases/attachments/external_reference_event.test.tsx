@@ -63,4 +63,20 @@ describe('AttachmentContent', () => {
 
     expect(mockNavigateTo).toHaveBeenCalled();
   });
+  it('builds endpoint details URL correctly', () => {
+    const mockGetAppUrl = jest.fn().mockReturnValue('http://app.url');
+    (mockUseNavigation as jest.Mock).mockReturnValue({
+      getAppUrl: mockGetAppUrl,
+    });
+
+    shallow(<AttachmentContent {...defaultProps} />);
+
+    expect(mockGetAppUrl).toHaveBeenNthCalledWith(1, {
+      path: '/administration/endpoints?selected_endpoint=endpoint-1&show=activity_log',
+    });
+    expect(mockGetAppUrl).toHaveBeenNthCalledWith(2, {
+      path: '/hosts/name/host-1',
+      appId: 'security',
+    });
+  });
 });
