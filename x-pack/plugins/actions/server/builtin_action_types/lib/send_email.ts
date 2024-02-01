@@ -81,7 +81,7 @@ async function sendEmailWithExchange(
 
   const tokenResult = await requestOAuthClientCredentialsToken(
     oauthTokenUrl ??
-     `${configurationUtilities.getMicrosoftExchangeUrl()}/${tenantId}/oauth2/v2.0/token`,
+      `${configurationUtilities.getMicrosoftExchangeUrl()}/${tenantId}/oauth2/v2.0/token`,
     logger,
     {
       scope: configurationUtilities.getMicrosoftGraphApiScope(),
