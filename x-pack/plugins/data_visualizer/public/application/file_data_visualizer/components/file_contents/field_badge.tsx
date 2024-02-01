@@ -18,7 +18,6 @@ interface Props {
 }
 
 export const FieldBadge: FC<Props> = ({ type, value, name }) => {
-  // @ts-expect-error euiColorLightShade does exist, the types are wrong
   const { euiColorLightestShade, euiColorLightShade } = useCurrentEuiTheme();
   const supportedType = getSupportedFieldType(type);
   return (
