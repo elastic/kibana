@@ -353,7 +353,7 @@ describe('BedrockConnector', () => {
         expect(connector.getResponseErrorMessage(err)).toEqual(
           `API Error: The requested operation is not recognized by the service.
 
-The Kibana Connector in use may need to be reconfigured with an updated [Amazon Bedrock endpoint](https://docs.aws.amazon.com/bedrock/latest/APIReference/welcome.html#endpoints), like \`bedrock-runtime\`.`
+The Kibana Connector in use may need to be reconfigured with an updated Amazon Bedrock endpoint, like \`bedrock-runtime\`.`
         );
       });
     });

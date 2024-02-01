@@ -96,7 +96,7 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
       // Leave space in the string below, \n is not being rendered in the UI
       return `API Error: ${error.response.data.message}
 
-The Kibana Connector in use may need to be reconfigured with an updated [Amazon Bedrock endpoint](https://docs.aws.amazon.com/bedrock/latest/APIReference/welcome.html#endpoints), like \`bedrock-runtime\`.`;
+The Kibana Connector in use may need to be reconfigured with an updated Amazon Bedrock endpoint, like \`bedrock-runtime\`.`;
     }
     if (error.response.status === 401) {
       return `Unauthorized API Error${
