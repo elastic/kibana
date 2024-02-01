@@ -22,7 +22,7 @@ import { LogExplorerTabs } from '@kbn/discover-plugin/public';
 import React, { useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { filter, take } from 'rxjs';
-import { betaBadgeDescription, betaBadgeTitle } from '../../common/translations';
+import { betaBadgeDescription, betaBadgeTitle, createSLoLabel } from '../../common/translations';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 import { ConnectedDiscoverLink } from './discover_link';
 import { FeedbackLink } from './feedback_link';
@@ -89,7 +89,7 @@ const StatefulTopNav = () => {
       observability: { getCreateSLOFlyout: CreateSloFlyout },
       observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
       chrome,
-      i18n,
+      i18n: i18nStart,
       theme,
     },
   } = useKibanaContextForPlugin();
@@ -124,13 +124,10 @@ const StatefulTopNav = () => {
               />
             </EuiHeaderSectionItem>
             <EuiHeaderSectionItem>
-              <EuiHeaderLink>Create SLO</EuiHeaderLink>
-            </EuiHeaderSectionItem>
-            <EuiHeaderSectionItem>
               <FeedbackLink />
             </EuiHeaderSectionItem>
           </EuiHeaderSection>,
-          { theme, i18n }
+          { theme, i18n: i18nStart }
         ),
       });
     }
@@ -140,7 +137,7 @@ const StatefulTopNav = () => {
         chrome.setBreadcrumbsAppendExtension(previousAppendExtension);
       }
     };
-  }, [chrome, i18n, previousAppendExtension, theme]);
+  }, [chrome, i18nStart, previousAppendExtension, theme]);
 
   return (
     <>
@@ -148,24 +145,37 @@ const StatefulTopNav = () => {
         <EuiHeaderSection data-test-subj="logsExplorerHeaderMenu">
           <EuiHeaderSectionItem>
             <EuiHeaderLinks gutterSize="xs">
+              <EuiHeaderLink
+                onClick={() => {
+                  setCreateSLOFlyoutOpen(true);
+                }}
+                iconType="visGauge"
+              >
+                {createSLoLabel}
+              </EuiHeaderLink>
               <ConnectedDiscoverLink />
               <VerticalRule />
               {ObservabilityAIAssistantActionMenuItem ? (
                 <ObservabilityAIAssistantActionMenuItem />
               ) : null}
               <ConnectedOnboardingLink />
-              <EuiHeaderLink
-                onClick={() => {
-                  setCreateSLOFlyoutOpen(true);
-                }}
-              >
-                Create SLO
-              </EuiHeaderLink>
             </EuiHeaderLinks>
           </EuiHeaderSectionItem>
         </EuiHeaderSection>
       </HeaderMenuPortal>
-      {isCreateFlyoutOpen && <CreateSloFlyout />}
+      {isCreateFlyoutOpen && (
+        <CreateSloFlyout
+          onClose={() => setCreateSLOFlyoutOpen(false)}
+          initialValues={{
+            indicator: {
+              type: 'sli.kql.custom',
+              params: {
+                index: 'logs-*',
+              },
+            },
+          }}
+        />
+      )}
     </>
   );
 };

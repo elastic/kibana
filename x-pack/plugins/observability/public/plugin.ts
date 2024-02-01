@@ -69,6 +69,7 @@ import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/publ
 import { firstValueFrom } from 'rxjs';
 
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import { getCreateSLOFlyoutLazy } from './pages/slo_edit/shared_flyout/get_create_slo_flyout';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -90,7 +91,6 @@ import {
   ObservabilityRuleTypeRegistry,
 } from './rules/create_observability_rule_type_registry';
 import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
-import { getCreateSLOFlyoutLazy } from './get_create_slo_flyout';
 
 export interface ConfigSchema {
   unsafe: {
@@ -460,15 +460,22 @@ export class Plugin
       deepLinks: this.deepLinks,
       updater$: this.appUpdater$,
     });
+    const kibanaVersion = this.initContext.env.packageInfo.version;
+    const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
 
     return {
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
       useRulesLink: createUseRulesLink(),
-      getCreateSLOFlyout: (props) => {
-        return getCreateSLOFlyoutLazy({
-          ...props,
-        });
-      },
+      getCreateSLOFlyout: getCreateSLOFlyoutLazy({
+        config,
+        core: coreStart,
+        isDev: this.initContext.env.mode.dev,
+        kibanaVersion,
+        observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
+        ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
+        plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
+        isServerless: !!pluginsStart.serverless,
+      }),
     };
   }
 }

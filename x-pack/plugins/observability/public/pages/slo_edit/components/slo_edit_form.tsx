@@ -18,9 +18,10 @@ import { i18n } from '@kbn/i18n';
 import type { GetSLOResponse } from '@kbn/slo-schema';
 import React, { useCallback, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
+import { RecursivePartial } from '@kbn/utility-types';
+import { BurnRateRuleFlyout } from '../../slos/components/common/burn_rate_rule_flyout';
 import { InspectSLOPortal } from './common/inspect_slo_portal';
 import { EquivalentApiRequest } from './common/equivalent_api_request';
-// import { BurnRateRuleFlyout } from '../../slos/components/common/burn_rate_rule_flyout';
 import { paths } from '../../../../common/locators/paths';
 import { useCreateSlo } from '../../../hooks/slo/use_create_slo';
 import { useFetchRulesForSlo } from '../../../hooks/slo/use_fetch_rules_for_slo';
@@ -46,11 +47,12 @@ import { SloEditFormObjectiveSection } from './slo_edit_form_objective_section';
 
 export interface Props {
   slo?: GetSLOResponse;
+  initialValues?: RecursivePartial<CreateSLOForm>;
 }
 
 export const maxWidth = 775;
 
-export function SloEditForm({ slo }: Props) {
+export function SloEditForm({ slo, initialValues }: Props) {
   const {
     application: { navigateToUrl },
     http: { basePath },
@@ -60,7 +62,7 @@ export function SloEditForm({ slo }: Props) {
     sloIds: slo?.id ? [slo.id] : undefined,
   });
 
-  const sloFormValuesFromUrlState = useParseUrlState();
+  const sloFormValuesFromUrlState = useParseUrlState() ?? (initialValues as CreateSLOForm);
   const sloFormValuesFromSloResponse = transformSloResponseToCreateSloForm(slo);
 
   const isAddRuleFlyoutOpen = useAddRuleFlyoutState(isEditMode);
@@ -243,11 +245,11 @@ export function SloEditForm({ slo }: Props) {
         <InspectSLOPortal trigger={trigger} getValues={getValues} slo={slo} />
       </FormProvider>
 
-      {/* <BurnRateRuleFlyout
+      <BurnRateRuleFlyout
         slo={slo as GetSLOResponse}
         isAddRuleFlyoutOpen={isAddRuleFlyoutOpen}
         canChangeTrigger={false}
-      /> */}
+      />
     </>
   );
 }

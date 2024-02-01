@@ -7,10 +7,9 @@
 
 import { lazy } from 'react';
 import React, { Suspense } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import { EuiLoadingSpinnerSize } from '@elastic/eui/src/components/loading/loading_spinner';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiLoadingSpinnerProps } from '@elastic/eui';
 
-function CenterJustifiedSpinner({ size }) {
+function CenterJustifiedSpinner({ size }: { size: EuiLoadingSpinnerProps['size'] }) {
   return (
     <EuiFlexGroup data-test-subj="centerJustifiedSpinner" justifyContent="center">
       <EuiFlexItem grow={false}>
@@ -22,7 +21,7 @@ function CenterJustifiedSpinner({ size }) {
 
 function suspendedComponentWithProps<T = unknown>(
   ComponentToSuspend: React.ComponentType<T>,
-  size?: EuiLoadingSpinnerSize
+  size?: EuiLoadingSpinnerProps['size']
 ) {
   return (props: T) => (
     <Suspense fallback={<CenterJustifiedSpinner size={size ?? 'm'} />}>

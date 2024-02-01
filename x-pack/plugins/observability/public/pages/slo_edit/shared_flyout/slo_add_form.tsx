@@ -4,21 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import React from 'react';
 import { EuiTitle, EuiFlyoutHeader, EuiFlyout, EuiFlyoutBody, EuiPortal } from '@elastic/eui';
+import { RecursivePartial } from '@kbn/utility-types';
+import { CreateSLOForm } from '../types';
+import { SloEditForm } from '../components/slo_edit_form';
 
-import { SloEditForm } from './pages/slo_edit/components/slo_edit_form';
-
-function SloAddForm() {
+function SloAddFormFlyout({
+  onClose,
+  initialValues,
+}: {
+  onClose: () => void;
+  initialValues?: RecursivePartial<CreateSLOForm>;
+}) {
   return (
     <EuiPortal>
       <EuiFlyout
-        onClose={() => {}}
+        onClose={onClose}
         aria-labelledby="flyoutRuleAddTitle"
-        size="m"
+        size="l"
         maxWidth={620}
         ownFocus
       >
@@ -33,11 +39,12 @@ function SloAddForm() {
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <SloEditForm />
+          <SloEditForm initialValues={initialValues} />
         </EuiFlyoutBody>
       </EuiFlyout>
     </EuiPortal>
   );
 }
 
-export { SloAddForm as default };
+// eslint-disable-next-line import/no-default-export
+export default SloAddFormFlyout;

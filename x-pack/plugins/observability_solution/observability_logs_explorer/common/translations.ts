@@ -53,3 +53,7 @@ export const feedbackLinkTitle = i18n.translate(
     defaultMessage: 'Give feedback',
   }
 );
+
+export const createSLoLabel = i18n.translate('xpack.observabilityLogsExplorer.createSlo', {
+  defaultMessage: 'Create SLO',
+});
