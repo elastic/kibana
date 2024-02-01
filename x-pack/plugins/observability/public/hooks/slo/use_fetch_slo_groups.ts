@@ -22,6 +22,7 @@ interface SLOGroupsParams {
   groupBy?: string;
   kqlQuery?: string;
   tagsFilter?: SearchState['tagsFilter'];
+  statusFilter?: SearchState['statusFilter'];
   filters?: Filter[];
 }
 
@@ -39,6 +40,7 @@ export function useFetchSloGroups({
   groupBy = 'ungrouped',
   kqlQuery = '',
   tagsFilter,
+  statusFilter,
   filters: filterDSL = [],
 }: SLOGroupsParams = {}): UseFetchSloGroupsResponse {
   const {
@@ -53,14 +55,22 @@ export function useFetchSloGroups({
   const filters = useMemo(() => {
     try {
       return JSON.stringify(
-        buildQueryFromFilters([...filterDSL, ...(tagsFilter ? [tagsFilter] : [])], dataView, {
-          ignoreFilterIfFieldNotInIndex: true,
-        })
+        buildQueryFromFilters(
+          [
+            ...filterDSL,
+            ...(tagsFilter ? [tagsFilter] : []),
+            ...(statusFilter ? [statusFilter] : []),
+          ],
+          dataView,
+          {
+            ignoreFilterIfFieldNotInIndex: true,
+          }
+        )
       );
     } catch (e) {
       return '';
     }
-  }, [filterDSL, dataView, tagsFilter]);
+  }, [filterDSL, tagsFilter, statusFilter, dataView]);
 
   const { data, isLoading, isSuccess, isError, isRefetching } = useQuery({
     queryKey: sloKeys.group({ page, perPage, groupBy, kqlQuery, filters }),
