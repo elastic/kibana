@@ -45,13 +45,9 @@ export const useIndicesNav = () => {
     productFeatures: { hasDefaultIngestPipeline },
   } = useValues(KibanaLogic);
 
-  console.log('HEREEEEEE', isIndexRoute, indexName);
-
   if (!indexName || !isIndexRoute) return undefined;
 
-  console.log('HEREEEEEE 22222');
-
-  const defaultNavItems: Array<EuiSideNavItemType<unknown>> = [
+  const navItems: Array<EuiSideNavItemType<unknown>> = [
     {
       'data-test-subj': 'IndexLabel',
       id: 'indexName',
@@ -61,171 +57,172 @@ export const useIndicesNav = () => {
           <div className="eui-textTruncate">{indexName.toUpperCase()}</div>
         </EuiText>
       ),
-    },
-    {
-      'data-test-subj': 'IndexOverviewLink',
-      id: 'overview',
-      name: i18n.translate('xpack.enterpriseSearch.nav.searchIndicesTitle.nav.overviewTitle', {
-        defaultMessage: 'Overview',
-      }),
-      ...generateNavLink({
-        to: generateEncodedPath(SEARCH_INDEX_PATH, {
-          indexName,
-        }),
-      }),
-    },
-    {
-      'data-test-subj': 'IndexDocumentsLink',
-      id: 'documents',
-      name: i18n.translate('xpack.enterpriseSearch.nav.searchIndicesTitle.nav.documentsTitle', {
-        defaultMessage: 'Documents',
-      }),
-      ...generateNavLink({
-        to: generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
-          indexName,
-          tabId: SearchIndexTabId.DOCUMENTS,
-        }),
-      }),
-    },
-    {
-      'data-test-subj': 'IndexIndexMappingsLink',
-      id: 'index_mappings',
-      name: i18n.translate('xpack.enterpriseSearch.nav.searchIndicesTitle.nav.indexMappingsTitle', {
-        defaultMessage: 'Index mappings',
-      }),
-      ...generateNavLink({
-        to: generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
-          indexName,
-          tabId: SearchIndexTabId.INDEX_MAPPINGS,
-        }),
-      }),
-    },
-  ];
-
-  const connectorsNavItems: Array<EuiSideNavItemType<unknown>> = [
-    {
-      'data-test-subj': 'IndexConnectorsConfigurationLink',
-      id: 'connectors_configuration',
-      name: i18n.translate(
-        'xpack.enterpriseSearch.nav.searchIndicesTitle.nav.connectorsConfigurationLabel',
+      items: [
         {
-          defaultMessage: 'Configuration',
-        }
-      ),
-      ...generateNavLink({
-        to: generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
-          indexName,
-          tabId: SearchIndexTabId.CONFIGURATION,
-        }),
-      }),
-    },
-    ...(hasFilteringFeature
-      ? [
-          {
-            'data-test-subj': 'IndexSyncRulesLink',
-            id: 'syncRules',
-            name: i18n.translate(
-              'xpack.enterpriseSearch.nav.searchIndicesTitle.nav.syncRulesLabel',
-              {
-                defaultMessage: 'Sync rules',
-              }
-            ),
-            ...generateNavLink({
-              to: generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
-                indexName,
-                tabId: SearchIndexTabId.SYNC_RULES,
-              }),
+          'data-test-subj': 'IndexOverviewLink',
+          id: 'overview',
+          name: i18n.translate('xpack.enterpriseSearch.nav.searchIndicesTitle.nav.overviewTitle', {
+            defaultMessage: 'Overview',
+          }),
+          ...generateNavLink({
+            to: generateEncodedPath(SEARCH_INDEX_PATH, {
+              indexName,
             }),
-          },
-        ]
-      : []),
-    {
-      'data-test-subj': 'IndexSchedulingLink',
-      id: 'scheduling',
-      name: i18n.translate('xpack.enterpriseSearch.nav.searchIndicesTitle.nav.schedulingTitle', {
-        defaultMessage: 'Scheduling',
-      }),
-      ...generateNavLink({
-        to: generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
-          indexName,
-          tabId: SearchIndexTabId.SCHEDULING,
-        }),
-      }),
-    },
-  ];
-
-  const crawlersNavItems: Array<EuiSideNavItemType<unknown>> = [
-    {
-      'data-test-subj': 'IndexDomainManagementLink',
-      id: 'domain_management',
-      name: i18n.translate(
-        'xpack.enterpriseSearch.nav.searchIndicesTitle.nav.domainManagementLabel',
+          }),
+        },
         {
-          defaultMessage: 'Manage Domains',
-        }
-      ),
-      ...generateNavLink({
-        to: generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
-          indexName,
-          tabId: SearchIndexTabId.DOMAIN_MANAGEMENT,
-        }),
-      }),
-    },
-    {
-      'data-test-subj': 'IndexCrawlerConfigurationLink',
-      id: 'crawler_configuration',
-      name: i18n.translate(
-        'xpack.enterpriseSearch.nav.searchIndicesTitle.nav.crawlerConfigurationLabel',
+          'data-test-subj': 'IndexDocumentsLink',
+          id: 'documents',
+          name: i18n.translate('xpack.enterpriseSearch.nav.searchIndicesTitle.nav.documentsTitle', {
+            defaultMessage: 'Documents',
+          }),
+          ...generateNavLink({
+            to: generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
+              indexName,
+              tabId: SearchIndexTabId.DOCUMENTS,
+            }),
+          }),
+        },
         {
-          defaultMessage: 'Configuration',
-        }
-      ),
-      ...generateNavLink({
-        to: generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
-          indexName,
-          tabId: SearchIndexTabId.CRAWLER_CONFIGURATION,
-        }),
-      }),
+          'data-test-subj': 'IndexIndexMappingsLink',
+          id: 'index_mappings',
+          name: i18n.translate('xpack.enterpriseSearch.nav.searchIndicesTitle.nav.indexMappingsTitle', {
+            defaultMessage: 'Index mappings',
+          }),
+          ...generateNavLink({
+            to: generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
+              indexName,
+              tabId: SearchIndexTabId.INDEX_MAPPINGS,
+            }),
+          }),
+        },
+        ...(isConnectorIndex(index)
+          ? [
+              {
+                'data-test-subj': 'IndexConnectorsConfigurationLink',
+                id: 'connectors_configuration',
+                name: i18n.translate(
+                  'xpack.enterpriseSearch.nav.searchIndicesTitle.nav.connectorsConfigurationLabel',
+                  {
+                    defaultMessage: 'Configuration',
+                  }
+                ),
+                ...generateNavLink({
+                  to: generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
+                    indexName,
+                    tabId: SearchIndexTabId.CONFIGURATION,
+                  }),
+                }),
+              },
+              ...(hasFilteringFeature
+                ? [
+                    {
+                      'data-test-subj': 'IndexSyncRulesLink',
+                      id: 'syncRules',
+                      name: i18n.translate(
+                        'xpack.enterpriseSearch.nav.searchIndicesTitle.nav.syncRulesLabel',
+                        {
+                          defaultMessage: 'Sync rules',
+                        }
+                      ),
+                      ...generateNavLink({
+                        to: generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
+                          indexName,
+                          tabId: SearchIndexTabId.SYNC_RULES,
+                        }),
+                      }),
+                    },
+                  ]
+                : []),
+              {
+                'data-test-subj': 'IndexSchedulingLink',
+                id: 'scheduling',
+                name: i18n.translate('xpack.enterpriseSearch.nav.searchIndicesTitle.nav.schedulingTitle', {
+                  defaultMessage: 'Scheduling',
+                }),
+                ...generateNavLink({
+                  to: generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
+                    indexName,
+                    tabId: SearchIndexTabId.SCHEDULING,
+                  }),
+                }),
+              },
+            ]
+          : []
+        ),
+        ...(isCrawlerIndex(index)
+          ? [
+              {
+                'data-test-subj': 'IndexDomainManagementLink',
+                id: 'domain_management',
+                name: i18n.translate(
+                  'xpack.enterpriseSearch.nav.searchIndicesTitle.nav.domainManagementLabel',
+                  {
+                    defaultMessage: 'Manage Domains',
+                  }
+                ),
+                ...generateNavLink({
+                  to: generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
+                    indexName,
+                    tabId: SearchIndexTabId.DOMAIN_MANAGEMENT,
+                  }),
+                }),
+              },
+              {
+                'data-test-subj': 'IndexCrawlerConfigurationLink',
+                id: 'crawler_configuration',
+                name: i18n.translate(
+                  'xpack.enterpriseSearch.nav.searchIndicesTitle.nav.crawlerConfigurationLabel',
+                  {
+                    defaultMessage: 'Configuration',
+                  }
+                ),
+                ...generateNavLink({
+                  to: generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
+                    indexName,
+                    tabId: SearchIndexTabId.CRAWLER_CONFIGURATION,
+                  }),
+                }),
+              },
+              {
+                'data-test-subj': 'IndexCrawlerSchedulingLink',
+                id: 'crawler_scheduling',
+                name: i18n.translate(
+                  'xpack.enterpriseSearch.nav.searchIndicesTitle.nav.crawlerSchedulingLabel',
+                  {
+                    defaultMessage: 'Scheduling',
+                  }
+                ),
+                ...generateNavLink({
+                  to: generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
+                    indexName,
+                    tabId: SearchIndexTabId.SCHEDULING,
+                  }),
+                }),
+              },
+            ]
+          : []
+        ),
+        ...(hasDefaultIngestPipeline
+          ? [
+              {
+                'data-test-subj': 'IndexPipelineLink',
+                id: 'pipelines',
+                name: i18n.translate('xpack.enterpriseSearch.nav.searchIndicesTitle.nav.pipelinesLabel', {
+                  defaultMessage: 'Pipelines',
+                }),
+                ...generateNavLink({
+                  to: generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
+                    indexName,
+                    tabId: SearchIndexTabId.PIPELINES,
+                  }),
+                }),
+              },
+            ]
+          : []
+        ),
+      ],
     },
-    {
-      'data-test-subj': 'IndexCrawlerSchedulingLink',
-      id: 'crawler_scheduling',
-      name: i18n.translate(
-        'xpack.enterpriseSearch.nav.searchIndicesTitle.nav.crawlerSchedulingLabel',
-        {
-          defaultMessage: 'Scheduling',
-        }
-      ),
-      ...generateNavLink({
-        to: generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
-          indexName,
-          tabId: SearchIndexTabId.SCHEDULING,
-        }),
-      }),
-    },
-  ];
-
-  const pipelineNavItems: Array<EuiSideNavItemType<unknown>> = [
-    {
-      'data-test-subj': 'IndexPipelineLink',
-      id: 'pipelines',
-      name: i18n.translate('xpack.enterpriseSearch.nav.searchIndicesTitle.nav.pipelinesLabel', {
-        defaultMessage: 'Pipelines',
-      }),
-      ...generateNavLink({
-        to: generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
-          indexName,
-          tabId: SearchIndexTabId.PIPELINES,
-        }),
-      }),
-    },
-  ];
-
-  const navItems: Array<EuiSideNavItemType<unknown>> = [
-    ...defaultNavItems,
-    ...(isConnectorIndex(index) ? connectorsNavItems : []),
-    ...(isCrawlerIndex(index) ? crawlersNavItems : []),
-    ...(hasDefaultIngestPipeline ? pipelineNavItems : []),
   ];
 
   return navItems;

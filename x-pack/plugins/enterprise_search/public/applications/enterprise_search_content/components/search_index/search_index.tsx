@@ -248,15 +248,15 @@ export const SearchIndex: React.FC = () => {
                 path={`${SEARCH_INDEX_PATH}/${SearchIndexTabId.OVERVIEW}`}
                 component={SearchIndexOverview}
               />
-              <Route path={SEARCH_INDEX_DOCUMENTS_PATH} component={SearchIndexDocuments} />
-              <Route path={SEARCH_INDEX_INDEX_MAPPING_PATH} component={SearchIndexIndexMappings} />
-              <Route path={SEARCH_INDEX_CONNECTORS_CONFIGURATION_PATH} component={ConnectorConfiguration} />
-              <Route path={SEARCH_INDEX_CONNECTORS_SYNC_RULES_PATH} component={ConnectorSyncRules} />
-              <Route path={SEARCH_INDEX_CONNECTORS_SCHEDULING_PATH} component={ConnectorSchedulingComponent} />
-              <Route path={SEARCH_INDEX_CRAWLER_DOMAIN_MANAGEMENT_PATH} component={SearchIndexDomainManagement} />
-              <Route path={SEARCH_INDEX_CRAWLER_CONFIGURATION_PATH} component={CrawlerConfiguration} />
-              <Route path={SEARCH_INDEX_CRAWLER_SCHEDULING_PATH} component={AutomaticCrawlScheduler} />
-              <Route path={SEARCH_INDEX_PIPELINES_PATH} component={SearchIndexPipelines} />
+              <Route path={`${SEARCH_INDEX_PATH}/${SearchIndexTabId.DOCUMENTS}`} component={SearchIndexDocuments} />
+              <Route path={`${SEARCH_INDEX_PATH}/${SearchIndexTabId.INDEX_MAPPINGS}`} component={SearchIndexIndexMappings} />
+              <Route path={`${SEARCH_INDEX_PATH}/${SearchIndexTabId.CONFIGURATION}`} component={ConnectorConfiguration} />
+              <Route path={`${SEARCH_INDEX_PATH}/${SearchIndexTabId.SYNC_RULES}`} component={ConnectorSyncRules} />
+              <Route path={`${SEARCH_INDEX_PATH}/${SearchIndexTabId.SCHEDULING}`} component={ConnectorSchedulingComponent} />
+              <Route path={`${SEARCH_INDEX_PATH}/${SearchIndexTabId.DOMAIN_MANAGEMENT}`} component={SearchIndexDomainManagement} />
+              <Route path={`${SEARCH_INDEX_PATH}/${SearchIndexTabId.CRAWLER_CONFIGURATION}`} component={CrawlerConfiguration} />
+              <Route path={`${SEARCH_INDEX_PATH}/${SearchIndexTabId.SCHEDULING}`} component={AutomaticCrawlScheduler} />
+              <Route path={`${SEARCH_INDEX_PATH}/${SearchIndexTabId.PIPELINES}`} component={SearchIndexPipelines} />
               <Route path={`${SEARCH_INDEX_PATH}`} component={SearchIndexOverview}
               />          
             </Routes>
