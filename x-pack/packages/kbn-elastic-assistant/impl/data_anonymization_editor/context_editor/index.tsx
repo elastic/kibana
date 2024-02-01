@@ -7,7 +7,7 @@
 
 import { EuiInMemoryTable } from '@elastic/eui';
 import type { EuiSearchBarProps, EuiTableSelectionType } from '@elastic/eui';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useState, useRef } from 'react';
 
 import { getColumns } from './get_columns';
 import { getRows } from './get_rows';
@@ -59,16 +59,25 @@ const ContextEditorComponent: React.FC<Props> = ({
   rawData,
   pageSize = DEFAULT_PAGE_SIZE,
 }) => {
+  const isAllSelected = useRef(false); // Must be a ref and not state in order not to re-render `selectionValue`, which fires `onSelectionChange` twice
   const [selected, setSelection] = useState<ContextEditorRow[]>([]);
   const selectionValue: EuiTableSelectionType<ContextEditorRow> = useMemo(
     () => ({
       selectable: () => true,
-      onSelectionChange: (newSelection) => setSelection(newSelection),
-      initialSelected: [],
+      onSelectionChange: (newSelection) => {
+        if (isAllSelected.current === true) {
+          // If passed every possible row (including non-visible ones), EuiInMemoryTable
+          // will fire `onSelectionChange` with only the visible rows - we need to
+          // ignore this call when that happens and continue to pass all rows
+          isAllSelected.current = false;
+        } else {
+          setSelection(newSelection);
+        }
+      },
+      selected,
     }),
-    []
+    [selected]
   );
-  const tableRef = useRef<EuiInMemoryTable<ContextEditorRow> | null>(null);
 
   const columns = useMemo(() => getColumns({ onListUpdated, rawData }), [onListUpdated, rawData]);
 
@@ -83,9 +92,8 @@ const ContextEditorComponent: React.FC<Props> = ({
   );
 
   const onSelectAll = useCallback(() => {
-    tableRef.current?.setSelection(rows); // updates selection in the EuiInMemoryTable
-
-    setTimeout(() => setSelection(rows), 0); // updates selection in the component state
+    isAllSelected.current = true;
+    setSelection(rows);
   }, [rows]);
 
   const pagination = useMemo(() => {
@@ -106,7 +114,7 @@ const ContextEditorComponent: React.FC<Props> = ({
         totalFields={rows.length}
       />
     ),
-    [onListUpdated, onReset, onSelectAll, rawData, rows.length, selected]
+    [onListUpdated, onReset, onSelectAll, rawData, rows, selected]
   );
 
   return (
@@ -120,7 +128,6 @@ const ContextEditorComponent: React.FC<Props> = ({
       itemId={FIELDS.FIELD}
       items={rows}
       pagination={pagination}
-      ref={tableRef}
       search={search}
       selection={selectionValue}
       sorting={defaultSort}
