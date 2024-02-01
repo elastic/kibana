@@ -52,7 +52,7 @@ export const AlertsSummaryContent = ({
     <>
       <CollapsibleSection
         title={AlertsSectionTitle}
-        collapsible={true}
+        collapsible
         data-test-subj="infraAssetDetailsAlertsCollapsible"
         id="alerts"
         extraAction={

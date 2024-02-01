@@ -49,7 +49,7 @@ export const MetricsSection = ({ assetName, metricsDataView, logsDataView, dateR
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      <Section title={MetricsSectionTitle} collapsible={true}>
+      <Section title={MetricsSectionTitle} collapsible>
         <MetricsGrid
           assetName={assetName}
           dateRange={dateRange}
@@ -92,7 +92,7 @@ export const MetricsSectionCompact = ({
   );
 
   return (
-    <Section title={MetricsSectionTitle} collapsible={true}>
+    <Section title={MetricsSectionTitle} collapsible>
       <MetricsGrid
         assetName={assetName}
         dateRange={dateRange}
