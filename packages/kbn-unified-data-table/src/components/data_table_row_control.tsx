@@ -11,6 +11,3 @@ import React from 'react';
 export const DataTableRowControl = ({ children }: { children: React.ReactNode }) => {
   return <span className="unifiedDataTable__rowControl">{children}</span>;
 };
-
-// eslint-disable-next-line import/no-default-export
-export default DataTableRowControl;

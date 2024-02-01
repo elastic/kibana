@@ -6,11 +6,11 @@
  */
 
 import { ControlColumnsProps } from '@kbn/unified-data-table';
-import { OPEN_DETAILS } from '@kbn/unified-data-table/src/components/data_table_columns';
+import { OPEN_DETAILS } from '@kbn/unified-data-table';
 import React, { ComponentClass } from 'react';
 import { EuiButtonIcon, EuiDataGridCellValueElementProps, EuiToolTip } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
-import DataTableRowControl from '@kbn/unified-data-table/src/components/data_table_row_control';
+import { DataTableRowControl } from '@kbn/unified-data-table';
 import {
   malformedDocButtonLabelWhenNotPresent,
   malformedDocButtonLabelWhenPresent,

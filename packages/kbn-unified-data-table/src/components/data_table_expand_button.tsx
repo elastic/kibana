@@ -11,7 +11,7 @@ import { EuiButtonIcon, EuiDataGridCellValueElementProps, EuiToolTip } from '@el
 import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { UnifiedDataTableContext } from '../table_context';
-import DataTableRowControl from './data_table_row_control';
+import { DataTableRowControl } from './data_table_row_control';
 
 /**
  * Button to expand a given row
