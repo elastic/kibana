@@ -121,9 +121,7 @@ export const validateRequiredCustomFields = ({
   }
 
   const requiredCustomFields = customFieldsConfiguration.filter(
-    (customField) =>
-      customField.required &&
-      (customField.defaultValue === undefined || customField.defaultValue === null)
+    (customField) => customField.required
   );
 
   if (!requiredCustomFields.length) {
@@ -133,14 +131,19 @@ export const validateRequiredCustomFields = ({
   const missingRequiredCustomFields = differenceWith(
     requiredCustomFields,
     requestCustomFields ?? [],
-    (requiredVal, requestedVal) => requiredVal.key === requestedVal.key
-  ).map((e) => `"${e.label}"`);
+    (configuration, request) => configuration.key === request.key
+  ) // missing custom field and missing defaultValue -> error
+    .filter(
+      (customField) => customField.defaultValue === undefined || customField.defaultValue === null
+    )
+    .map((e) => `"${e.label}"`);
 
   requiredCustomFields.forEach((requiredField) => {
     const found = requestCustomFields?.find(
       (requestField) => requestField.key === requiredField.key
     );
 
+    // required custom fields cannot be set to null
     if (found && found.value === null) {
       missingRequiredCustomFields.push(`"${requiredField.label}"`);
     }

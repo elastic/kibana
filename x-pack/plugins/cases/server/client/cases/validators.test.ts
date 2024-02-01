@@ -426,6 +426,7 @@ describe('validators', () => {
           type: CustomFieldTypes.TOGGLE,
           label: 'foo',
           required: true,
+          defaultValue: null,
         },
         {
           key: 'third_key',
@@ -445,7 +446,34 @@ describe('validators', () => {
       );
     });
 
-    it('throws if required custom fields(without default) have null value', () => {
+    it('throws if required custom fields with default have null value', () => {
+      const requestCustomFields: CaseCustomFields = [
+        {
+          key: 'second_key',
+          type: CustomFieldTypes.TOGGLE,
+          value: null,
+        },
+      ];
+      const customFieldsConfiguration: CustomFieldsConfiguration = [
+        {
+          key: 'second_key',
+          type: CustomFieldTypes.TOGGLE,
+          label: 'missing field 2',
+          required: true,
+          defaultValue: true,
+        },
+      ];
+      expect(() =>
+        validateRequiredCustomFields({
+          requestCustomFields,
+          customFieldsConfiguration,
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Missing required custom fields without default value configured: \\"missing field 2\\""`
+      );
+    });
+
+    it('throws if required custom fields without default have null value', () => {
       const requestCustomFields: CaseCustomFields = [
         {
           key: 'second_key',
@@ -493,6 +521,7 @@ describe('validators', () => {
           type: CustomFieldTypes.TEXT,
           label: 'missing field 1',
           required: true,
+          defaultValue: null,
         },
         {
           key: 'second_key',
