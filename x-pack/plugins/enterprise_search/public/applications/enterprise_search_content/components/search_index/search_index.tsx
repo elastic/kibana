@@ -11,18 +11,14 @@ import { useParams } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
-import { EuiTabbedContentTab } from '@elastic/eui';
-
-import { i18n } from '@kbn/i18n';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { ErrorStatePrompt } from '../../../shared/error_state';
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
-import { SEARCH_INDEX_CONNECTORS_CONFIGURATION_PATH, SEARCH_INDEX_CONNECTORS_SCHEDULING_PATH, SEARCH_INDEX_CONNECTORS_SYNC_RULES_PATH, SEARCH_INDEX_CRAWLER_CONFIGURATION_PATH, SEARCH_INDEX_CRAWLER_DOMAIN_MANAGEMENT_PATH, SEARCH_INDEX_CRAWLER_SCHEDULING_PATH, SEARCH_INDEX_DOCUMENTS_PATH, SEARCH_INDEX_INDEX_MAPPING_PATH, SEARCH_INDEX_PATH, SEARCH_INDEX_PIPELINES_PATH, SEARCH_INDEX_TAB_PATH } from '../../routes';
+import { SEARCH_INDEX_PATH } from '../../routes';
 
-import { isConnectorIndex, isCrawlerIndex } from '../../utils/indices';
+import { isCrawlerIndex } from '../../utils/indices';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 import { baseBreadcrumbs } from '../search_indices';
@@ -59,13 +55,11 @@ export enum SearchIndexTabId {
 }
 
 export const SearchIndex: React.FC = () => {
-  const { hasFilteringFeature, index, isInitialLoading } = useValues(IndexViewLogic);
+  const { index, isInitialLoading } = useValues(IndexViewLogic);
 
   const { tabId = SearchIndexTabId.OVERVIEW } = useParams<{
     tabId?: string;
   }>();
-
-  console.log('tabid: ', tabId);
 
   const { indexName } = useValues(IndexNameLogic);
   const { errorConnectingMessage } = useValues(HttpLogic);
@@ -79,7 +73,6 @@ export const SearchIndex: React.FC = () => {
     config,
     guidedOnboarding,
     productAccess: { hasAppSearchAccess },
-    productFeatures: { hasDefaultIngestPipeline },
   } = useValues(KibanaLogic);
 
   useEffect(() => {
@@ -115,115 +108,6 @@ export const SearchIndex: React.FC = () => {
     return () => subscription?.unsubscribe();
   }, [guidedOnboarding, index?.count]);
 
-  const ALL_INDICES_TABS: EuiTabbedContentTab[] = [
-    {
-      content: <SearchIndexOverview />,
-      'data-test-subj': 'entSearchContent-index-overview-tab',
-      id: SearchIndexTabId.OVERVIEW,
-      name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.overviewTabLabel', {
-        defaultMessage: 'Overview',
-      }),
-    },
-    {
-      content: <SearchIndexDocuments />,
-      id: SearchIndexTabId.DOCUMENTS,
-      name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.documentsTabLabel', {
-        defaultMessage: 'Documents',
-      }),
-    },
-    {
-      content: <SearchIndexIndexMappings />,
-      id: SearchIndexTabId.INDEX_MAPPINGS,
-      name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.indexMappingsTabLabel', {
-        defaultMessage: 'Index mappings',
-      }),
-    },
-  ];
-
-  const CONNECTOR_TABS: EuiTabbedContentTab[] = [
-    {
-      content: <ConnectorConfiguration />,
-      id: SearchIndexTabId.CONFIGURATION,
-      name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.configurationTabLabel', {
-        defaultMessage: 'Configuration',
-      }),
-    },
-    ...(hasFilteringFeature
-      ? [
-          {
-            content: <ConnectorSyncRules />,
-            id: SearchIndexTabId.SYNC_RULES,
-            name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.syncRulesTabLabel', {
-              defaultMessage: 'Sync rules',
-            }),
-          },
-        ]
-      : []),
-    {
-      content: <ConnectorSchedulingComponent />,
-      id: SearchIndexTabId.SCHEDULING,
-      name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.schedulingTabLabel', {
-        defaultMessage: 'Scheduling',
-      }),
-    },
-  ];
-
-  const CRAWLER_TABS: EuiTabbedContentTab[] = [
-    {
-      content: <SearchIndexDomainManagement />,
-      id: SearchIndexTabId.DOMAIN_MANAGEMENT,
-      name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.domainManagementTabLabel', {
-        defaultMessage: 'Manage Domains',
-      }),
-    },
-    {
-      content: <CrawlerConfiguration />,
-      id: SearchIndexTabId.CRAWLER_CONFIGURATION,
-      name: i18n.translate(
-        'xpack.enterpriseSearch.content.searchIndex.crawlerConfigurationTabLabel',
-        {
-          defaultMessage: 'Configuration',
-        }
-      ),
-    },
-    {
-      content: <AutomaticCrawlScheduler />,
-      'data-test-subj': 'entSearchContent-index-crawler-scheduler-tab',
-      id: SearchIndexTabId.SCHEDULING,
-      name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.schedulingTabLabel', {
-        defaultMessage: 'Scheduling',
-      }),
-    },
-  ];
-
-  const PIPELINES_TAB: EuiTabbedContentTab = {
-    content: <SearchIndexPipelines />,
-    id: SearchIndexTabId.PIPELINES,
-    name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.pipelinesTabLabel', {
-      defaultMessage: 'Pipelines',
-    }),
-  };
-
-  const tabs: EuiTabbedContentTab[] = [
-    ...ALL_INDICES_TABS,
-    ...(isConnectorIndex(index) ? CONNECTOR_TABS : []),
-    ...(isCrawlerIndex(index) ? CRAWLER_TABS : []),
-    ...(hasDefaultIngestPipeline ? [PIPELINES_TAB] : []),
-  ];
-
-  const selectedTab = tabs.find((tab) => tab.id === tabId);
-
-  const onTabClick = (tab: EuiTabbedContentTab) => {
-    KibanaLogic.values.navigateToUrl(
-      generateEncodedPath(
-        tab.id === SearchIndexTabId.OVERVIEW ? SEARCH_INDEX_PATH : SEARCH_INDEX_TAB_PATH,
-        {
-          indexName,
-          tabId: tab.id,
-        }
-      )
-    );
-  };
   return (
     <EnterpriseSearchContentPageTemplate
       pageChrome={[...baseBreadcrumbs, indexName]}
@@ -248,17 +132,43 @@ export const SearchIndex: React.FC = () => {
                 path={`${SEARCH_INDEX_PATH}/${SearchIndexTabId.OVERVIEW}`}
                 component={SearchIndexOverview}
               />
-              <Route path={`${SEARCH_INDEX_PATH}/${SearchIndexTabId.DOCUMENTS}`} component={SearchIndexDocuments} />
-              <Route path={`${SEARCH_INDEX_PATH}/${SearchIndexTabId.INDEX_MAPPINGS}`} component={SearchIndexIndexMappings} />
-              <Route path={`${SEARCH_INDEX_PATH}/${SearchIndexTabId.CONFIGURATION}`} component={ConnectorConfiguration} />
-              <Route path={`${SEARCH_INDEX_PATH}/${SearchIndexTabId.SYNC_RULES}`} component={ConnectorSyncRules} />
-              <Route path={`${SEARCH_INDEX_PATH}/${SearchIndexTabId.SCHEDULING}`} component={ConnectorSchedulingComponent} />
-              <Route path={`${SEARCH_INDEX_PATH}/${SearchIndexTabId.DOMAIN_MANAGEMENT}`} component={SearchIndexDomainManagement} />
-              <Route path={`${SEARCH_INDEX_PATH}/${SearchIndexTabId.CRAWLER_CONFIGURATION}`} component={CrawlerConfiguration} />
-              <Route path={`${SEARCH_INDEX_PATH}/${SearchIndexTabId.SCHEDULING}`} component={AutomaticCrawlScheduler} />
-              <Route path={`${SEARCH_INDEX_PATH}/${SearchIndexTabId.PIPELINES}`} component={SearchIndexPipelines} />
-              <Route path={`${SEARCH_INDEX_PATH}`} component={SearchIndexOverview}
-              />          
+              <Route
+                path={`${SEARCH_INDEX_PATH}/${SearchIndexTabId.DOCUMENTS}`}
+                component={SearchIndexDocuments}
+              />
+              <Route
+                path={`${SEARCH_INDEX_PATH}/${SearchIndexTabId.INDEX_MAPPINGS}`}
+                component={SearchIndexIndexMappings}
+              />
+              <Route
+                path={`${SEARCH_INDEX_PATH}/${SearchIndexTabId.CONFIGURATION}`}
+                component={ConnectorConfiguration}
+              />
+              <Route
+                path={`${SEARCH_INDEX_PATH}/${SearchIndexTabId.SYNC_RULES}`}
+                component={ConnectorSyncRules}
+              />
+              <Route
+                path={`${SEARCH_INDEX_PATH}/${SearchIndexTabId.SCHEDULING}`}
+                component={ConnectorSchedulingComponent}
+              />
+              <Route
+                path={`${SEARCH_INDEX_PATH}/${SearchIndexTabId.DOMAIN_MANAGEMENT}`}
+                component={SearchIndexDomainManagement}
+              />
+              <Route
+                path={`${SEARCH_INDEX_PATH}/${SearchIndexTabId.CRAWLER_CONFIGURATION}`}
+                component={CrawlerConfiguration}
+              />
+              <Route
+                path={`${SEARCH_INDEX_PATH}/${SearchIndexTabId.SCHEDULING}`}
+                component={AutomaticCrawlScheduler}
+              />
+              <Route
+                path={`${SEARCH_INDEX_PATH}/${SearchIndexTabId.PIPELINES}`}
+                component={SearchIndexPipelines}
+              />
+              <Route path={`${SEARCH_INDEX_PATH}`} component={SearchIndexOverview} />
             </Routes>
           )}
           {isCrawlerIndex(index) && <CrawlCustomSettingsFlyout />}

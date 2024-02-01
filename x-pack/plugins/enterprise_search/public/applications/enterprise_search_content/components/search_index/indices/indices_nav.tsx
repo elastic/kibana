@@ -14,24 +14,12 @@ import { EuiSideNavItemType, EuiText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { IndexViewLogic } from '../index_view_logic';
-import {
-  SEARCH_INDEX_CONNECTORS_CONFIGURATION_PATH,
-  SEARCH_INDEX_CONNECTORS_SCHEDULING_PATH,
-  SEARCH_INDEX_CONNECTORS_SYNC_RULES_PATH,
-  SEARCH_INDEX_CRAWLER_CONFIGURATION_PATH,
-  SEARCH_INDEX_CRAWLER_DOMAIN_MANAGEMENT_PATH,
-  SEARCH_INDEX_CRAWLER_SCHEDULING_PATH,
-  SEARCH_INDEX_DOCUMENTS_PATH,
-  SEARCH_INDEX_INDEX_MAPPING_PATH,
-  SEARCH_INDEX_PATH,
-  SEARCH_INDEX_PIPELINES_PATH,
-  SEARCH_INDEX_TAB_PATH,
-} from '../../../routes';
-import { isConnectorIndex, isCrawlerIndex } from '../../../utils/indices';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../../shared/kibana';
 import { generateNavLink } from '../../../../shared/layout';
+import { SEARCH_INDEX_PATH, SEARCH_INDEX_TAB_PATH } from '../../../routes';
+import { isConnectorIndex, isCrawlerIndex } from '../../../utils/indices';
+import { IndexViewLogic } from '../index_view_logic';
 
 import './indices_nav.scss';
 import { SearchIndexTabId } from '../search_index';
@@ -86,9 +74,12 @@ export const useIndicesNav = () => {
         {
           'data-test-subj': 'IndexIndexMappingsLink',
           id: 'index_mappings',
-          name: i18n.translate('xpack.enterpriseSearch.nav.searchIndicesTitle.nav.indexMappingsTitle', {
-            defaultMessage: 'Index mappings',
-          }),
+          name: i18n.translate(
+            'xpack.enterpriseSearch.nav.searchIndicesTitle.nav.indexMappingsTitle',
+            {
+              defaultMessage: 'Index mappings',
+            }
+          ),
           ...generateNavLink({
             to: generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
               indexName,
@@ -137,9 +128,12 @@ export const useIndicesNav = () => {
               {
                 'data-test-subj': 'IndexSchedulingLink',
                 id: 'scheduling',
-                name: i18n.translate('xpack.enterpriseSearch.nav.searchIndicesTitle.nav.schedulingTitle', {
-                  defaultMessage: 'Scheduling',
-                }),
+                name: i18n.translate(
+                  'xpack.enterpriseSearch.nav.searchIndicesTitle.nav.schedulingTitle',
+                  {
+                    defaultMessage: 'Scheduling',
+                  }
+                ),
                 ...generateNavLink({
                   to: generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
                     indexName,
@@ -148,8 +142,7 @@ export const useIndicesNav = () => {
                 }),
               },
             ]
-          : []
-        ),
+          : []),
         ...(isCrawlerIndex(index)
           ? [
               {
@@ -201,16 +194,18 @@ export const useIndicesNav = () => {
                 }),
               },
             ]
-          : []
-        ),
+          : []),
         ...(hasDefaultIngestPipeline
           ? [
               {
                 'data-test-subj': 'IndexPipelineLink',
                 id: 'pipelines',
-                name: i18n.translate('xpack.enterpriseSearch.nav.searchIndicesTitle.nav.pipelinesLabel', {
-                  defaultMessage: 'Pipelines',
-                }),
+                name: i18n.translate(
+                  'xpack.enterpriseSearch.nav.searchIndicesTitle.nav.pipelinesLabel',
+                  {
+                    defaultMessage: 'Pipelines',
+                  }
+                ),
                 ...generateNavLink({
                   to: generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
                     indexName,
@@ -219,8 +214,7 @@ export const useIndicesNav = () => {
                 }),
               },
             ]
-          : []
-        ),
+          : []),
       ],
     },
   ];

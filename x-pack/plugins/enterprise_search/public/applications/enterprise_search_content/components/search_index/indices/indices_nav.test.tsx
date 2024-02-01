@@ -10,14 +10,14 @@ import { mockUseRouteMatch, mockUseParams } from '../../../../__mocks__/react_ro
 
 import { shallow } from 'enzyme';
 
+import { isConnectorIndex, isCrawlerIndex } from '../../../utils/indices';
+
 import { mockIndexNameValues } from '../_mocks_/index_name_logic.mock';
 
 jest.mock('../../../../shared/layout', () => ({
   generateNavLink: jest.fn(({ to }) => ({ href: to })),
 }));
 jest.mock('../../../utils/indices');
-
-import { isConnectorIndex, isCrawlerIndex } from '../../../utils/indices';
 
 import { useIndicesNav } from './indices_nav';
 
@@ -99,9 +99,9 @@ describe('useIndicesNav', () => {
         href: '/search_indices/index-name/pipelines',
         'data-test-subj': 'IndexPipelineLink',
       };
-      const baseNavWithPipelines = BASE_NAV.map(navItem => ({
+      const baseNavWithPipelines = BASE_NAV.map((navItem) => ({
         ...navItem,
-        items: [...navItem.items, pipelineItem]
+        items: [...navItem.items, pipelineItem],
       }));
 
       expect(useIndicesNav()).toEqual(baseNavWithPipelines);
@@ -123,11 +123,11 @@ describe('useIndicesNav', () => {
           name: 'Scheduling',
           href: '/search_indices/index-name/scheduling',
         };
-        const baseNavWithConnectors = BASE_NAV.map(navItem => ({
+        const baseNavWithConnectors = BASE_NAV.map((navItem) => ({
           ...navItem,
-          items: [...navItem.items, configuration, scheduling]
+          items: [...navItem.items, configuration, scheduling],
         }));
-        
+
         expect(useIndicesNav()).toEqual(baseNavWithConnectors);
       });
 
@@ -153,9 +153,9 @@ describe('useIndicesNav', () => {
           name: 'Scheduling',
           href: '/search_indices/index-name/scheduling',
         };
-        const baseNavWithConnectors = BASE_NAV.map(navItem => ({
+        const baseNavWithConnectors = BASE_NAV.map((navItem) => ({
           ...navItem,
-          items: [...navItem.items, configuration, syncRules, scheduling]
+          items: [...navItem.items, configuration, syncRules, scheduling],
         }));
 
         expect(useIndicesNav()).toEqual(baseNavWithConnectors);
@@ -184,9 +184,9 @@ describe('useIndicesNav', () => {
           name: 'Scheduling',
           href: '/search_indices/index-name/scheduling',
         };
-        const baseNavWithCrawlers = BASE_NAV.map(navItem => ({
+        const baseNavWithCrawlers = BASE_NAV.map((navItem) => ({
           ...navItem,
-          items: [...navItem.items, domainManagement, configuration, scheduling]
+          items: [...navItem.items, domainManagement, configuration, scheduling],
         }));
 
         expect(useIndicesNav()).toEqual(baseNavWithCrawlers);
