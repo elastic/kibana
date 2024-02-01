@@ -221,7 +221,7 @@ export function runCli() {
           --concurrency      number of bulk requests made by the api
         `,
       },
-      async run({ flags, esArchiver, statsMeta, log }) {
+      async run({ flags, esArchiver, statsMeta }) {
         const [path] = flags._;
         if (!path) {
           throw createFlagError('missing [path] argument');
