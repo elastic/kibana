@@ -15,19 +15,21 @@ import {
 } from '../shared/resources_helpers';
 import { getAllFunctions, isSourceItem, shouldBeQuotedText } from '../shared/helpers';
 import { ESQLCallbacks } from '../shared/types';
-import { AstProviderFn, ESQLAst } from '../types';
+import { AstProviderFn, ESQLAst, ESQLCommand } from '../types';
 import { buildQueryForFieldsFromSource } from '../validation/helpers';
 
 type GetSourceFn = () => Promise<string[]>;
 type GetFieldsByTypeFn = (type: string | string[], ignored?: string[]) => Promise<string[]>;
 type GetPoliciesFn = () => Promise<string[]>;
 type GetPolicyFieldsFn = (name: string) => Promise<string[]>;
+type GetMetaFieldsFn = () => Promise<string[]>;
 
 interface Callbacks {
   getSources: GetSourceFn;
   getFieldsByType: GetFieldsByTypeFn;
   getPolicies: GetPoliciesFn;
   getPolicyFields: GetPolicyFieldsFn;
+  getMetaFields: GetMetaFieldsFn;
 }
 
 function getFieldsByTypeRetriever(queryString: string, resourceRetriever?: ESQLCallbacks) {
@@ -61,6 +63,19 @@ function getSourcesRetriever(resourceRetriever?: ESQLCallbacks) {
     const list = (await helper()) || [];
     // hide indexes that start with .
     return list.filter(({ hidden }) => !hidden).map(({ name }) => name);
+  };
+}
+
+export function getMetaFieldsRetriever(
+  queryString: string,
+  commands: ESQLCommand[],
+  callbacks?: ESQLCallbacks
+) {
+  return async () => {
+    if (!callbacks || !callbacks.getMetaFields) {
+      return [];
+    }
+    return await callbacks.getMetaFields();
   };
 }
 
@@ -264,6 +279,18 @@ async function getSpellingActionForFunctions(
   );
 }
 
+async function getSpellingActionForMetadata(
+  error: monaco.editor.IMarkerData,
+  uri: monaco.Uri,
+  queryString: string,
+  ast: ESQLAst,
+  { getMetaFields }: Callbacks
+) {
+  const errorText = queryString.substring(error.startColumn - 1, error.endColumn - 1);
+  const possibleMetafields = await getSpellingPossibilities(getMetaFields, errorText);
+  return wrapIntoSpellingChangeAction(error, uri, possibleMetafields);
+}
+
 function wrapIntoSpellingChangeAction(
   error: monaco.editor.IMarkerData,
   uri: monaco.Uri,
@@ -310,12 +337,14 @@ export async function getActions(
   const { getFieldsByType } = getFieldsByTypeRetriever(queryForFields, resourceRetriever);
   const getSources = getSourcesRetriever(resourceRetriever);
   const { getPolicies, getPolicyFields } = getPolicyRetriever(resourceRetriever);
+  const getMetaFields = getMetaFieldsRetriever(innerText, ast, resourceRetriever);
 
   const callbacks = {
     getFieldsByType,
     getSources,
     getPolicies,
     getPolicyFields,
+    getMetaFields,
   };
 
   // Markers are sent only on hover and are limited to the hovered area
@@ -359,6 +388,16 @@ export async function getActions(
           ast
         );
         actions.push(...fnsSpellChanges);
+        break;
+      case 'unknownMetadataField':
+        const metadataSpellChanges = await getSpellingActionForMetadata(
+          error,
+          model.uri,
+          innerText,
+          ast,
+          callbacks
+        );
+        actions.push(...metadataSpellChanges);
         break;
       case 'wrongQuotes':
         // it is a syntax error, so location won't be helpful here
