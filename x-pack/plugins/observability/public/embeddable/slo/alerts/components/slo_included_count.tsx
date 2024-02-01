@@ -26,7 +26,7 @@ export function SloIncludedCount({ slos }: { slos: SloItem[] }) {
           'xpack.observability.sloAlertsWrapper.sLOsIncludedFlexItemLabel',
           {
             defaultMessage: ' ({count, number} {count, plural, one {Instance} other {Instances}})',
-            values: { count: sloList?.results.length ?? 0 },
+            values: { count: sloList?.total ?? 0 },
           }
         ),
       }}
