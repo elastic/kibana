@@ -26,6 +26,7 @@ import type { Props } from './top_n';
 import { StatefulTopN } from '.';
 import { TimelineId } from '../../../../common/types/timeline';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { detectionAlertsTables } from './helpers';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -354,84 +355,24 @@ describe('StatefulTopN', () => {
     });
   });
 
-  /**
-   * Note: This suite was previously looping over `detectionAlertsTables`, which when combined with the
-   * mounting of TestProviders and the `await waitFor`, jest would sometimes fail with the following error
-   * on CI with no evidence pointing towards this suite:
-   *
-   * Error: The `document` global was defined when React was initialized, but is not defined anymore. This can happen in
-   * a test environment if a component schedules an update from an asynchronous callback, but the test has already
-   * finished running. To solve this, you can either unmount the component at the end of your test (and ensure that any
-   * asynchronous operations get canceled in `componentWillUnmount`), or you can change the test itself to be asynchronous.
-   *
-   * Please see https://github.com/elastic/kibana/pull/176005#issuecomment-1919959743 for more context.
-   **/
   describe('rendering in alerts context', () => {
-    test(`defaults to the 'Alert events' option when rendering in TableId.alertsOnAlertsPage`, async () => {
-      const wrapper = mount(
-        <TestProviders store={store}>
-          <StatefulTopN
-            {...{
-              ...testProps,
-              scopeId: TableId.alertsOnAlertsPage,
-            }}
-          />
-        </TestProviders>
-      );
-      await waitFor(() => {
-        const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
-        expect(props.defaultView).toEqual('alert');
-      });
-    });
-
-    test(`defaults to the 'Alert events' option when rendering in TableId.alertsOnRuleDetailsPage`, async () => {
-      const wrapper = mount(
-        <TestProviders store={store}>
-          <StatefulTopN
-            {...{
-              ...testProps,
-              scopeId: TableId.alertsOnRuleDetailsPage,
-            }}
-          />
-        </TestProviders>
-      );
-      await waitFor(() => {
-        const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
-        expect(props.defaultView).toEqual('alert');
-      });
-    });
-
-    test(`defaults to the 'Alert events' option when rendering in TableId.alertsOnCasePage`, async () => {
-      const wrapper = mount(
-        <TestProviders store={store}>
-          <StatefulTopN
-            {...{
-              ...testProps,
-              scopeId: TableId.alertsOnCasePage,
-            }}
-          />
-        </TestProviders>
-      );
-      await waitFor(() => {
-        const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
-        expect(props.defaultView).toEqual('alert');
-      });
-    });
-
-    test(`defaults to the 'Alert events' option when rendering in TimelineId.casePage`, async () => {
-      const wrapper = mount(
-        <TestProviders store={store}>
-          <StatefulTopN
-            {...{
-              ...testProps,
-              scopeId: TimelineId.casePage,
-            }}
-          />
-        </TestProviders>
-      );
-      await waitFor(() => {
-        const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
-        expect(props.defaultView).toEqual('alert');
+    detectionAlertsTables.forEach((tableId) => {
+      test(`defaults to the 'Alert events' option when rendering in Alerts`, async () => {
+        const wrapper = mount(
+          <TestProviders store={store}>
+            <StatefulTopN
+              {...{
+                ...testProps,
+                scopeId: tableId,
+              }}
+            />
+          </TestProviders>
+        );
+        await waitFor(() => {
+          const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
+          expect(props.defaultView).toEqual('alert');
+        });
+        wrapper.unmount();
       });
     });
   });
