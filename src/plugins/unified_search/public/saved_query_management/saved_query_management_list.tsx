@@ -482,9 +482,15 @@ export const SavedQueryManagementList = ({
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 position="top"
-                content={i18n.translate('unifiedSearch.search.searchBar.savedQueryDelete', {
-                  defaultMessage: 'Delete query',
-                })}
+                content={
+                  selectedSavedQuery
+                    ? i18n.translate('unifiedSearch.search.searchBar.savedQueryDelete', {
+                        defaultMessage: 'Delete query',
+                      })
+                    : i18n.translate('unifiedSearch.search.searchBar.savedQuerySelectionRequired', {
+                        defaultMessage: 'You need to select a query first',
+                      })
+                }
               >
                 <EuiButtonIcon
                   display="base"
@@ -506,26 +512,36 @@ export const SavedQueryManagementList = ({
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
-            <EuiButton
-              size="s"
-              fill
-              onClick={handleLoad}
-              disabled={!selectedSavedQuery}
-              aria-label={i18n.translate(
-                'unifiedSearch.search.searchBar.savedQueryPopoverApplyFilterSetLabel',
-                {
-                  defaultMessage: 'Load query',
-                }
-              )}
-              data-test-subj="saved-query-management-apply-changes-button"
+            <EuiToolTip
+              position="top"
+              content={
+                !selectedSavedQuery &&
+                i18n.translate('unifiedSearch.search.searchBar.savedQuerySelectionRequired', {
+                  defaultMessage: 'You need to select a query first',
+                })
+              }
             >
-              {i18n.translate(
-                'unifiedSearch.search.searchBar.savedQueryPopoverApplyFilterSetLabel',
-                {
-                  defaultMessage: 'Load query',
-                }
-              )}
-            </EuiButton>
+              <EuiButton
+                size="s"
+                fill
+                onClick={handleLoad}
+                disabled={!selectedSavedQuery}
+                aria-label={i18n.translate(
+                  'unifiedSearch.search.searchBar.savedQueryPopoverApplyFilterSetLabel',
+                  {
+                    defaultMessage: 'Load query',
+                  }
+                )}
+                data-test-subj="saved-query-management-apply-changes-button"
+              >
+                {i18n.translate(
+                  'unifiedSearch.search.searchBar.savedQueryPopoverApplyFilterSetLabel',
+                  {
+                    defaultMessage: 'Load query',
+                  }
+                )}
+              </EuiButton>
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPopoverFooter>
