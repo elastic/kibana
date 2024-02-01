@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import { loadPage } from '../../tasks/common';
-import { login } from '../../tasks/login';
-import { visitPolicyDetailsPage } from '../../screens/policy_details';
-import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import { APP_POLICIES_PATH } from '../../../../../common/constants';
+import type { IndexedFleetEndpointPolicyResponse } from '../../../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
+import { login } from '../../../../tasks/login';
+import { loadPage } from '../../../../tasks/common';
+import { APP_POLICIES_PATH } from '../../../../../../../common/constants';
 
 describe(
-  'When displaying the Policy Details in Security Essentials PLI',
+  'When displaying the Policy Details in Endpoint Essentials PLI',
   {
     tags: ['@serverless'],
     env: {
       ftrConfig: {
-        productTypes: [{ product_line: 'security', product_tier: 'essentials' }],
+        productTypes: [
+          { product_line: 'security', product_tier: 'essentials' },
+          { product_line: 'endpoint', product_tier: 'essentials' },
+        ],
       },
     },
   },
@@ -47,12 +49,6 @@ describe(
       login();
     });
 
-    it('should display upselling section for protections', () => {
-      visitPolicyDetailsPage(policyId);
-      cy.getByTestSubj('endpointPolicy-protectionsLockedCard', { timeout: 60000 })
-        .should('exist')
-        .and('be.visible');
-    });
     it('should display upselling section for protection updates', () => {
       loadPage(`${APP_POLICIES_PATH}/${policyId}/protectionUpdates`);
       [
