@@ -138,20 +138,28 @@ export const validateRequiredCustomFields = ({
     )
     .map((e) => `"${e.label}"`);
 
-  requiredCustomFields.forEach((requiredField) => {
-    const found = requestCustomFields?.find(
-      (requestField) => requestField.key === requiredField.key
-    );
-
-    // required custom fields cannot be set to null
-    if (found && found.value === null) {
-      missingRequiredCustomFields.push(`"${requiredField.label}"`);
-    }
-  });
-
   if (missingRequiredCustomFields.length) {
     throw Boom.badRequest(
       `Missing required custom fields without default value configured: ${missingRequiredCustomFields.join(
+        ', '
+      )}`
+    );
+  }
+
+  const nullRequiredCustomFields = requiredCustomFields
+    .filter((requiredField) => {
+      const found = requestCustomFields?.find(
+        (requestField) => requestField.key === requiredField.key
+      );
+
+      // required custom fields cannot be set to null
+      return found && found.value === null;
+    })
+    .map((e) => `"${e.label}"`);
+
+  if (nullRequiredCustomFields.length) {
+    throw Boom.badRequest(
+      `Invalid value "null" supplied for the following required custom fields: ${nullRequiredCustomFields.join(
         ', '
       )}`
     );

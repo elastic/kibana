@@ -469,7 +469,7 @@ describe('validators', () => {
           customFieldsConfiguration,
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Missing required custom fields without default value configured: \\"missing field 2\\""`
+        `"Invalid value \\"null\\" supplied for the following required custom fields: \\"missing field 2\\""`
       );
     });
 
@@ -495,7 +495,7 @@ describe('validators', () => {
           customFieldsConfiguration,
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Missing required custom fields without default value configured: \\"missing field 2\\""`
+        `"Invalid value \\"null\\" supplied for the following required custom fields: \\"missing field 2\\""`
       );
     });
 
