@@ -35,7 +35,6 @@ export interface CreateDocsResponse<T extends ImportDoc> {
 export interface ImportFactoryOptions {
   excludeLinesPattern?: string;
   multilineStartPattern?: string;
-  importConfig: ImportConfig;
 }
 
 export interface IImporter {
