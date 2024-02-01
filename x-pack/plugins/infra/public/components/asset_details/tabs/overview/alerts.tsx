@@ -48,36 +48,34 @@ export const AlertsSummaryContent = ({
     [assetName, dateRange]
   );
 
-  const ExtraActions = () => (
-    <EuiFlexGroup alignItems="center" responsive={false}>
-      {featureFlags.inventoryThresholdAlertRuleEnabled && (
-        <EuiFlexItem grow={false}>
-          <LinkToAlertsRule
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleAlertFlyout();
-            }}
-          />
-        </EuiFlexItem>
-      )}
-      <EuiFlexItem grow={false}>
-        <LinkToAlertsPage
-          assetName={assetName}
-          queryField={`${assetType}.name`}
-          dateRange={dateRange}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-
   return (
     <>
       <CollapsibleSection
         title={AlertsSectionTitle}
-        shouldCollapse={true}
+        collapsible={true}
         data-test-subj="infraAssetDetailsAlertsCollapsible"
         id="alerts"
-        extraAction={<ExtraActions />}
+        extraAction={
+          <EuiFlexGroup alignItems="center" responsive={false}>
+            {featureFlags.inventoryThresholdAlertRuleEnabled && (
+              <EuiFlexItem grow={false}>
+                <LinkToAlertsRule
+                  onClick={(e) => {
+                    // e.stopPropagation();
+                    toggleAlertFlyout();
+                  }}
+                />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <LinkToAlertsPage
+                assetName={assetName}
+                queryField={`${assetType}.name`}
+                dateRange={dateRange}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
       >
         <MemoAlertSummaryWidget alertsQuery={alertsEsQueryByStatus} dateRange={dateRange} />
       </CollapsibleSection>

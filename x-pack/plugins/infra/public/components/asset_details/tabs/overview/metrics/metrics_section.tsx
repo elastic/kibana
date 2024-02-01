@@ -49,7 +49,7 @@ export const MetricsSection = ({ assetName, metricsDataView, logsDataView, dateR
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      <Section title={MetricsSectionTitle} shouldCollapse={true}>
+      <Section title={MetricsSectionTitle} collapsible={true}>
         <MetricsGrid
           assetName={assetName}
           dateRange={dateRange}
@@ -92,7 +92,7 @@ export const MetricsSectionCompact = ({
   );
 
   return (
-    <Section title={MetricsSectionTitle} shouldCollapse={true}>
+    <Section title={MetricsSectionTitle} collapsible={true}>
       <MetricsGrid
         assetName={assetName}
         dateRange={dateRange}
@@ -107,12 +107,12 @@ export const MetricsSectionCompact = ({
 const Section = ({
   title,
   dependsOn = [],
-  shouldCollapse = false,
+  collapsible = false,
   children,
 }: {
   title: React.FunctionComponent;
   dependsOn?: string[];
-  shouldCollapse?: boolean;
+  collapsible?: boolean;
   children: React.ReactNode;
 }) => {
   const { metadata } = useMetadataStateContext();
@@ -127,10 +127,8 @@ const Section = ({
   return shouldRender ? (
     <CollapsibleSection
       title={title}
-      shouldCollapse={shouldCollapse}
-      data-test-subj={
-        shouldCollapse ? 'infraAssetDetailsMetricsCollapsible' : 'infraAssetDetailsMetricsSection'
-      }
+      collapsible={collapsible}
+      data-test-subj={`infraAssetDetailsMetrics${collapsible ? 'Collapsible' : 'Section'}`}
       id="metrics"
     >
       {children}
