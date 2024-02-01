@@ -25,8 +25,6 @@ import { sendEmailGraphApi } from './send_email_graph_api';
 // an email "service" which doesn't actually send, just returns what it would send
 export const JSON_TRANSPORT_SERVICE = '__json';
 // The value is the resource identifier (Application ID URI) of the resource you want, affixed with the .default suffix. For Microsoft Graph, the value is https://graph.microsoft.com/.default. This value informs the Microsoft identity platform endpoint that of all the application permissions you have configured for your app in the app registration portal, it should issue a token for the ones associated with the resource you want to use.
-export const GRAPH_API_OAUTH_SCOPE = 'https://graph.microsoft.com/.default';
-export const EXCHANGE_ONLINE_SERVER_HOST = 'https://login.microsoftonline.com';
 
 export interface SendEmailOptions {
   connectorId: string;
@@ -94,8 +92,7 @@ export async function sendEmailWithExchange(
 
   let tokenUrl = oauthTokenUrl;
   if (!tokenUrl) {
-    const exchangeUrl =
-      configurationUtilities.getMicrosoftExchangeUrl() ?? EXCHANGE_ONLINE_SERVER_HOST;
+    const exchangeUrl = configurationUtilities.getMicrosoftExchangeUrl();
     tokenUrl = `${exchangeUrl}/${tenantId}/oauth2/v2.0/token`;
   }
 
@@ -112,7 +109,7 @@ export async function sendEmailWithExchange(
         clientSecret: clientSecret as string,
       },
     },
-    oAuthScope: configurationUtilities.getMicrosoftGraphApiScope() ?? GRAPH_API_OAUTH_SCOPE,
+    oAuthScope: configurationUtilities.getMicrosoftGraphApiScope(),
     tokenUrl,
     connectorTokenClient,
   });
@@ -155,7 +152,6 @@ export async function sendEmailWithExchange(
       options,
       headers,
       messageHTML,
-      graphApiUrl: configurationUtilities.getMicrosoftGraphApiUrl(),
     },
     logger,
     configurationUtilities,

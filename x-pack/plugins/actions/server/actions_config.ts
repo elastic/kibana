@@ -47,9 +47,9 @@ export interface ActionsConfigurationUtilities {
   getProxySettings: () => undefined | ProxySettings;
   getResponseSettings: () => ResponseSettings;
   getCustomHostSettings: (targetUrl: string) => CustomHostSettings | undefined;
-  getMicrosoftGraphApiUrl: () => undefined | string;
-  getMicrosoftGraphApiScope: () => undefined | string;
-  getMicrosoftExchangeUrl: () => undefined | string;
+  getMicrosoftGraphApiUrl: () => string;
+  getMicrosoftGraphApiScope: () => string;
+  getMicrosoftExchangeUrl: () => string;
   getMaxAttempts: ({
     actionTypeMaxAttempts,
     actionTypeId,
@@ -129,15 +129,15 @@ function getProxySettingsFromConfig(config: ActionsConfig): undefined | ProxySet
   };
 }
 
-function getMicrosoftGraphApiUrlFromConfig(config: ActionsConfig): undefined | string {
+function getMicrosoftGraphApiUrlFromConfig(config: ActionsConfig): string {
   return config.microsoftGraphApiUrl;
 }
 
-function getMicrosoftGraphApiScopeFromConfig(config: ActionsConfig): undefined | string {
+function getMicrosoftGraphApiScopeFromConfig(config: ActionsConfig): string {
   return config.microsoftGraphApiScope;
 }
 
-function getMicrosoftExchangeUrlFromConfig(config: ActionsConfig): undefined | string {
+function getMicrosoftExchangeUrlFromConfig(config: ActionsConfig): string {
   return config.microsoftExchangeUrl;
 }
 
