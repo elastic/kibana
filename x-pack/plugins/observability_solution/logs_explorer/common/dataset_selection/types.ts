@@ -7,6 +7,7 @@
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import * as rt from 'io-ts';
 import { datasetRT } from '../datasets';
+import { explorerDataViewRT } from '../data_views/types';
 
 export const allDatasetSelectionPlainRT = rt.type({
   selectionType: rt.literal('all'),
@@ -33,10 +34,8 @@ const singleDatasetSelectionPayloadRT = rt.intersection([
   }),
 ]);
 
-const dataViewSelectionPayloadRT = rt.type({
-  dataView: rt.type({
-    id: rt.string,
-  }),
+const explorerDataViewSelectionPayloadRT = rt.type({
+  dataView: explorerDataViewRT,
 });
 
 const unresolvedDatasetSelectionPayloadRT = rt.intersection([
@@ -51,9 +50,9 @@ export const singleDatasetSelectionPlainRT = rt.type({
   selection: singleDatasetSelectionPayloadRT,
 });
 
-export const dataViewSelectionPlainRT = rt.type({
-  selectionType: rt.literal('dataView'),
-  selection: dataViewSelectionPayloadRT,
+export const explorerDataViewSelectionPlainRT = rt.type({
+  selectionType: rt.literal('explorerDataView'),
+  selection: explorerDataViewSelectionPayloadRT,
 });
 
 export const unresolvedDatasetSelectionPlainRT = rt.type({
@@ -63,13 +62,13 @@ export const unresolvedDatasetSelectionPlainRT = rt.type({
 
 export const datasetSelectionPlainRT = rt.union([
   allDatasetSelectionPlainRT,
-  dataViewSelectionPlainRT,
+  explorerDataViewSelectionPlainRT,
   singleDatasetSelectionPlainRT,
   unresolvedDatasetSelectionPlainRT,
 ]);
 
 export type SingleDatasetSelectionPayload = rt.TypeOf<typeof singleDatasetSelectionPayloadRT>;
-export type DataViewSelectionPayload = rt.TypeOf<typeof dataViewSelectionPayloadRT>;
+export type ExplorerDataViewSelectionPayload = rt.TypeOf<typeof explorerDataViewSelectionPayloadRT>;
 export type UnresolvedDatasetSelectionPayload = rt.TypeOf<
   typeof unresolvedDatasetSelectionPayloadRT
 >;

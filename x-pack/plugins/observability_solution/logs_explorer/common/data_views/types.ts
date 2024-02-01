@@ -15,7 +15,7 @@ export const explorerDataViewRT = rt.exact(
   rt.intersection([
     rt.type({
       id: rt.string,
-      name: rt.union([rt.string, rt.undefined]),
+      name: rt.string,
       title: rt.string,
       dataType: dataTypeRT,
     }),
@@ -26,5 +26,4 @@ export const explorerDataViewRT = rt.exact(
   ])
 );
 
-export type ExplorerDataViewId = `explorer-dataview-${string}`;
 export type ExplorerDataViewType = rt.TypeOf<typeof explorerDataViewRT>;

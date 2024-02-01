@@ -10,10 +10,11 @@ import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import type {
   DatasetSelection,
   DatasetSelectionChange,
-  DataViewSelection,
+  ExplorerDataViewSelection,
 } from '../../../common/dataset_selection';
 import { SortOrder } from '../../../common/latest';
 import { Dataset, Integration, IntegrationId } from '../../../common/datasets';
+import { ExplorerDataView } from '../../../common/data_views/models/explorer_data_view';
 import { LoadDatasets, ReloadDatasets, SearchDatasets } from '../../hooks/use_datasets';
 import {
   LoadMoreIntegrations,
@@ -37,7 +38,7 @@ export interface DatasetSelectorProps {
   /* The current selection instance */
   datasetSelection: DatasetSelection;
   /* The available data views list */
-  dataViews: DataViewListItem[] | null;
+  dataViews: ExplorerDataView[] | null;
   /* Any error occurred to show when the user preview the data views */
   dataViewsError: Error | null;
   /* url props to navigate to discover ES|QL */
@@ -56,7 +57,7 @@ export interface DatasetSelectorProps {
   /* Triggered when retrying to load the data views */
   onDataViewsReload: ReloadDataViews;
   /* Triggered when selecting a data view */
-  onDataViewSelection: DataViewSelection;
+  onDataViewSelection: ExplorerDataViewSelection;
   /* Triggered when the data views tab is selected */
   onDataViewsTabClick: LoadDataViews;
   /* Triggered when we reach the bottom of the integration list and want to load more */

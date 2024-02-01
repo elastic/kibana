@@ -24,7 +24,7 @@ import {
 } from './constants';
 import { useDatasetSelector } from './state_machine/use_dataset_selector';
 import { DatasetsPopover } from './sub_components/datasets_popover';
-import { DataViewsPanelTitle } from './sub_components/data_views_panel_title';
+import { ExplorerDataViewMenuItem } from './sub_components/explorer_data_view_menu_item';
 import { SearchControls } from './sub_components/search_controls';
 import { ESQLButton, SelectorFooter, ShowAllLogsButton } from './sub_components/selector_footer';
 import { DatasetSelectorProps } from './types';
@@ -164,7 +164,7 @@ export function DatasetSelector({
 
     return dataViews.map((dataView) => ({
       'data-test-subj': getDataViewTestSubj(dataView.title),
-      name: dataView.name,
+      name: <ExplorerDataViewMenuItem dataView={dataView} />,
       onClick: () => selectDataView(dataView),
     }));
   }, [dataViews, dataViewsError, isLoadingDataViews, selectDataView, onDataViewsReload]);
@@ -268,7 +268,7 @@ export function DatasetSelector({
         panels={[
           {
             id: DATA_VIEWS_PANEL_ID,
-            title: <DataViewsPanelTitle />,
+            title: dataViewsLabel,
             width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
             items: dataViewsItems,
           },
