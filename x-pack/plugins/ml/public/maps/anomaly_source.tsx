@@ -326,11 +326,6 @@ export class AnomalySource implements IVectorSource {
     return [];
   }
 
-  getQueryableIndexPatternIds(): string[] {
-    // IGNORE: This is only relevant if your source is backed by an index-pattern
-    return [];
-  }
-
   isFilterByMapBounds(): boolean {
     // Only implement if you can query this data with a bounding-box
     return false;
