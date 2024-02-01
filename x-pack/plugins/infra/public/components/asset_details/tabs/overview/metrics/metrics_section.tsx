@@ -131,7 +131,7 @@ const Section = ({
       data-test-subj={
         shouldCollapse ? 'infraAssetDetailsMetricsCollapsible' : 'infraAssetDetailsMetricsSection'
       }
-      id={'metrics'}
+      id="metrics"
     >
       {children}
     </CollapsibleSection>

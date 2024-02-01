@@ -6,7 +6,7 @@
  */
 
 import { EuiAccordion, EuiFlexGroup, EuiFlexItem, useGeneratedHtmlId } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 export type SectionTriggerValue = 'closed' | 'open';
 
@@ -18,7 +18,6 @@ export const CollapsibleSection = ({
   shouldCollapse,
   ['data-test-subj']: dataTestSubj,
   id,
-  initialTriggerValue,
 }: {
   title: React.FunctionComponent;
   closedSectionContent?: React.ReactNode;
@@ -28,13 +27,8 @@ export const CollapsibleSection = ({
   shouldCollapse: boolean;
   ['data-test-subj']: string;
   id: string;
-  initialTriggerValue?: SectionTriggerValue;
 }) => {
   const [trigger, setTrigger] = useState<SectionTriggerValue>('open');
-
-  useEffect(() => {
-    setTrigger(initialTriggerValue ?? 'open');
-  }, [initialTriggerValue]);
 
   const Title = title;
   const ButtonContent = () =>

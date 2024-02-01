@@ -4,15 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
-import { EuiLoadingSpinner } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { usePluginConfig } from '../../../../containers/plugin_config_context';
 import type { AlertsEsQuery } from '../../../../common/alerts/types';
 import { createAlertsEsQuery } from '../../../../common/alerts/create_alerts_es_query';
@@ -25,9 +23,7 @@ import { useBoolean } from '../../../../hooks/use_boolean';
 import { ALERT_STATUS_ALL } from '../../../../common/alerts/constants';
 import { AlertsSectionTitle } from '../../components/section_titles';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
-import { CollapsibleSection, type SectionTriggerValue } from './section/collapsible_section';
-import { AlertsClosedContent } from './alerts_closed_content';
-import { useAlertsCount } from '../../../../hooks/use_alerts_count';
+import { CollapsibleSection } from './section/collapsible_section';
 
 export const AlertsSummaryContent = ({
   assetName,
@@ -41,8 +37,6 @@ export const AlertsSummaryContent = ({
   const { featureFlags } = usePluginConfig();
   const [isAlertFlyoutVisible, { toggle: toggleAlertFlyout }] = useBoolean(false);
   const { overrides } = useAssetDetailsRenderPropsContext();
-  const [isAlertSectionOpen, setIsAlertSectionOpen] = useState<SectionTriggerValue>('open');
-  const [activeAlertsCount, setActiveAlertsCount] = useState<number | undefined>(undefined);
 
   const alertsEsQueryByStatus = useMemo(
     () =>
@@ -82,17 +76,10 @@ export const AlertsSummaryContent = ({
         title={AlertsSectionTitle}
         shouldCollapse={true}
         data-test-subj="infraAssetDetailsAlertsCollapsible"
-        id={'alerts'}
+        id="alerts"
         extraAction={<ExtraActions />}
-        closedSectionContent={<AlertsClosedContent activeAlertCount={activeAlertsCount} />}
-        initialTriggerValue={isAlertSectionOpen}
       >
-        <MemoAlertSummaryWidget
-          setIsAlertSectionOpen={setIsAlertSectionOpen}
-          setActiveAlertsCount={setActiveAlertsCount}
-          alertsQuery={alertsEsQueryByStatus}
-          dateRange={dateRange}
-        />
+        <MemoAlertSummaryWidget alertsQuery={alertsEsQueryByStatus} dateRange={dateRange} />
       </CollapsibleSection>
 
       {featureFlags.inventoryThresholdAlertRuleEnabled && (
@@ -111,17 +98,10 @@ export const AlertsSummaryContent = ({
 interface MemoAlertSummaryWidgetProps {
   alertsQuery: AlertsEsQuery;
   dateRange: TimeRange;
-  setIsAlertSectionOpen: (value: SectionTriggerValue) => void;
-  setActiveAlertsCount: (value: number) => void;
 }
 
 const MemoAlertSummaryWidget = React.memo(
-  ({
-    alertsQuery,
-    dateRange,
-    setIsAlertSectionOpen,
-    setActiveAlertsCount,
-  }: MemoAlertSummaryWidgetProps) => {
+  ({ alertsQuery, dateRange }: MemoAlertSummaryWidgetProps) => {
     const { services } = useKibanaContextForPlugin();
 
     const summaryTimeRange = useSummaryTimeRange(dateRange);
@@ -133,39 +113,12 @@ const MemoAlertSummaryWidget = React.memo(
       baseTheme: charts.theme.useChartsBaseTheme(),
     };
 
-    const { alertsCount, loading, error } = useAlertsCount({
-      featureIds: infraAlertFeatureIds,
-      query: alertsQuery,
-    });
-
-    if (loading) {
-      return <EuiLoadingSpinner />;
-    }
-
-    const hasActiveAlerts =
-      typeof alertsCount?.activeAlertCount === 'number' && alertsCount?.activeAlertCount > 0;
-
-    if (error) {
-      return (
-        <div>
-          {i18n.translate('xpack.infra.assetDetails.activeAlertsContent.countError', {
-            defaultMessage:
-              'The active alert count was not retrieved correctly, try reloading the page.',
-          })}
-        </div>
-      );
-    }
-
     return (
       <AlertSummaryWidget
         chartProps={chartProps}
         featureIds={infraAlertFeatureIds}
         filter={alertsQuery}
         timeRange={summaryTimeRange}
-        onLoaded={() => {
-          setIsAlertSectionOpen(hasActiveAlerts ? 'open' : 'closed');
-          setActiveAlertsCount(alertsCount?.activeAlertCount ?? 0);
-        }}
         fullSize
         hideChart
       />
