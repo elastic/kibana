@@ -136,7 +136,7 @@ const RuleOverviewTab = ({
   <EuiFlexGroup direction="column">
     <EuiFlexItem>
       <EuiDescriptionList
-        listItems={[...ruleState(ruleData, switchRuleStates), ...getRuleList(rule)]}
+        listItems={[...ruleState(ruleData, switchRuleStates), ...getRuleList(rule, ruleData.state)]}
       />
     </EuiFlexItem>
   </EuiFlexGroup>
