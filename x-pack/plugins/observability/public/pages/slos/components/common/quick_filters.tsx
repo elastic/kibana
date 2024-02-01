@@ -64,6 +64,7 @@ export function QuickFilters({ initialState: { tagsFilter, statusFilter }, onSta
             exclude: statusFilter?.meta.negate,
             selectedOptions: getSelectedOptions(statusFilter),
             existsSelected: Boolean(statusFilter?.query?.exists.field === 'status'),
+            placeholder: ALL_LABEL,
           });
           await builder.addOptionsListControl(initialInput, {
             dataViewId: dataView.id!,
@@ -75,6 +76,7 @@ export function QuickFilters({ initialState: { tagsFilter, statusFilter }, onSta
             selectedOptions: getSelectedOptions(tagsFilter),
             exclude: statusFilter?.meta.negate,
             existsSelected: Boolean(tagsFilter?.query?.exists.field === 'slo.tags'),
+            placeholder: ALL_LABEL,
           });
           return {
             initialInput: {
@@ -118,4 +120,8 @@ const TAGS_LABEL = i18n.translate('xpack.observability.slo.list.tags', {
 
 const STATUS_LABEL = i18n.translate('xpack.observability.slo.list.status', {
   defaultMessage: 'Status',
+});
+
+const ALL_LABEL = i18n.translate('xpack.observability.slo.list.all', {
+  defaultMessage: 'All',
 });
