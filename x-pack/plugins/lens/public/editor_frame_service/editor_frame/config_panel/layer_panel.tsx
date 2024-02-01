@@ -363,8 +363,13 @@ export function LayerPanel(
 
   return (
     <>
-      <section tabIndex={-1} ref={registerLayerRef} className="lnsLayerPanel">
-        <EuiPanel data-test-subj={`lns-layerPanel-${layerIndex}`} paddingSize="none">
+      <section
+        tabIndex={-1}
+        ref={registerLayerRef}
+        className="lnsLayerPanel"
+        data-test-subj={`lns-layerPanel-${layerIndex}`}
+      >
+        <EuiPanel paddingSize="none">
           <header className="lnsLayerPanel__layerHeader">
             <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
               <EuiFlexItem grow className="lnsLayerPanel__layerSettingsWrapper">
