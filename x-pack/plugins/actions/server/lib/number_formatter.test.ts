@@ -28,17 +28,23 @@ describe('formatNumber()', () => {
     expect(formatNumber(logger, 'nope;;')).toEqual(`invalid number: 'nope'`);
     expect(logger.error).toHaveBeenCalledWith(`mustache render error: invalid number: 'nope'`);
 
-    expect(formatNumber(logger, '1;; nah')).toEqual(`invalid options: missing colon in option: 'nah'`);
+    expect(formatNumber(logger, '1;; nah')).toEqual(
+      `invalid options: missing colon in option: 'nah'`
+    );
     expect(logger.error).toHaveBeenCalledWith(
       `mustache render error: invalid options: missing colon in option: 'nah'`
     );
 
-    expect(formatNumber(logger, '1;; minimumIntegerDigits: N.O.')).toEqual('error formatting number: minimumIntegerDigits value is out of range.');
+    expect(formatNumber(logger, '1;; minimumIntegerDigits: N.O.')).toEqual(
+      'error formatting number: minimumIntegerDigits value is out of range.'
+    );
     expect(logger.error).toHaveBeenCalledWith(
       `mustache render error: error formatting number: minimumIntegerDigits value is out of range.`
     );
 
-    expect(formatNumber(logger, '1;; compactDisplay: uhuh')).toEqual('error formatting number: Value uhuh out of range for Intl.NumberFormat options property compactDisplay');
+    expect(formatNumber(logger, '1;; compactDisplay: uhuh')).toEqual(
+      'error formatting number: Value uhuh out of range for Intl.NumberFormat options property compactDisplay'
+    );
     expect(logger.error).toHaveBeenCalledWith(
       `mustache render error: error formatting number: Value uhuh out of range for Intl.NumberFormat options property compactDisplay`
     );

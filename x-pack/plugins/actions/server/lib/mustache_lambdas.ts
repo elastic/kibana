@@ -55,7 +55,10 @@ function evalMath(vars: Variables, o: unknown, logger: Logger): string {
     const result = tinymath.evaluate(expr, vars);
     return `${result}`;
   } catch (err) {
-    return logAndReturnErr(logger, `error evaluating tinymath expression "${expr}": ${err.message}`);
+    return logAndReturnErr(
+      logger,
+      `error evaluating tinymath expression "${expr}": ${err.message}`
+    );
   }
 }
 
@@ -100,7 +103,10 @@ function formatDate(dateString: unknown, logger: Logger): string {
   try {
     mDate.tz(timeZone);
   } catch (err) {
-    return logAndReturnErr(logger, `error evaluating moment timeZone "${timeZone}": ${err.message}`);
+    return logAndReturnErr(
+      logger,
+      `error evaluating moment timeZone "${timeZone}": ${err.message}`
+    );
   }
 
   try {
