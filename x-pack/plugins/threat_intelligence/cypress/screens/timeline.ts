@@ -22,7 +22,7 @@ export const INDICATORS_TABLE_CELL_TIMELINE_BUTTON = `[data-test-subj="${CELL_TI
 export const TIMELINE_DATA_PROVIDERS_WRAPPER = `[data-test-subj="dataProviders"]`;
 export const TIMELINE_DRAGGABLE_ITEM = `[data-test-subj="providerContainer"]`;
 export const TIMELINE_AND_OR_BADGE = `[data-test-subj="and-or-badge"]`;
-export const CLOSE_TIMELINE_BTN = '[data-test-subj="close-timeline"]';
+export const CLOSE_TIMELINE_BTN = '[data-test-subj="timeline-modal-header-close-button"]';
 export const FLYOUT_OVERVIEW_TAB_TABLE_ROW_TIMELINE_BUTTON = `[data-test-subj="${INDICATORS_FLYOUT_OVERVIEW_TABLE}${VALUE_ACTION_TIMELINE_BUTTON_TEST_ID}"]`;
 export const FLYOUT_OVERVIEW_TAB_BLOCKS_TIMELINE_BUTTON = `[data-test-subj="${INDICATORS_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS}${VALUE_ACTION_TIMELINE_BUTTON_TEST_ID}"]`;
 export const FLYOUT_INVESTIGATE_IN_TIMELINE_ITEM = `[data-test-subj="${INDICATOR_FLYOUT_TAKE_ACTION_INVESTIGATE_IN_TIMELINE_TEST_ID}"]`;
