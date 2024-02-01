@@ -23,6 +23,7 @@ export type ConditionResult = InventoryMetricConditions & {
   currentValue: number;
   isNoData: boolean;
   isError: boolean;
+  hostName: string;
   context: AdditionalContext;
 };
 
@@ -84,6 +85,7 @@ export const evaluateCondition = async ({
       isNoData: value === null,
       isError: value === undefined,
       currentValue: value.value,
+      hostName: value?.host?.name,
       context: {
         cloud: value.cloud,
         host: value.host,

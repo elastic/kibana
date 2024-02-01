@@ -126,6 +126,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         try {
           const { fromKueryExpression } = await import('@kbn/es-query');
           fromKueryExpression(params.filterQueryText);
+          console.log('params.filterQueryText', params.filterQueryText);
         } catch (e) {
           logger.error(e.message);
           const actionGroupId = FIRED_ACTIONS.id; // Change this to an Error action group when able
@@ -135,6 +136,9 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
             getAlertStartedDate(UNGROUPED_FACTORY_KEY) ?? startedAt.toISOString();
           const alertUuid = getAlertUuid(UNGROUPED_FACTORY_KEY);
 
+          console.log('this run');
+          console.log('this run');
+          console.log('alert', alert);
           alert.scheduleActions(actionGroupId, {
             alertDetailsUrl: await getAlertUrl(
               alertUuid,
@@ -155,6 +159,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
               nodeType,
               timestamp: indexedStartedAt,
               spaceId,
+              hostName: 'factory',
             }),
           });
 
@@ -292,6 +297,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
               nodeType,
               timestamp: indexedStartedAt,
               spaceId,
+              hostName: results[0][group].hostName,
             }),
             ...additionalContext,
           };
@@ -329,6 +335,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
             nodeType,
             timestamp: indexedStartedAt,
             spaceId,
+            hostName: additionalContext?.host?.name,
           }),
           originalAlertState: translateActionGroupToAlertState(originalActionGroup),
           originalAlertStateWasALERT: originalActionGroup === FIRED_ACTIONS_ID,

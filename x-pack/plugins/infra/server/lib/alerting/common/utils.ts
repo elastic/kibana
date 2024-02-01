@@ -126,12 +126,14 @@ export const getViewInInventoryAppUrl = ({
   nodeType,
   spaceId,
   timestamp,
+  hostName,
 }: {
   basePath: IBasePath;
   criteria: InventoryMetricConditions[];
   nodeType: string;
   spaceId: string;
   timestamp: string;
+  hostName: string;
 }) => {
   const { metric, customMetric } = criteria[0];
 
@@ -142,6 +144,7 @@ export const getViewInInventoryAppUrl = ({
     [`${ALERT_RULE_PARAMETERS}.criteria.customMetric.field`]: [customMetric?.field],
     [`${ALERT_RULE_PARAMETERS}.nodeType`]: [nodeType],
     [TIMESTAMP]: timestamp,
+    [HOST_NAME]: hostName,
   };
 
   return addSpaceIdToPath(

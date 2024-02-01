@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
+import { ALERT_RULE_PARAMETERS, ALERT_START, TIMESTAMP } from '@kbn/rule-data-utils';
 import { encode } from '@kbn/rison';
 import { stringify } from 'query-string';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 
 export const flatAlertRuleParams = (params: {}, pKey = ''): Record<string, unknown[]> => {
   return Object.entries(params).reduce((acc, [key, field]) => {
@@ -28,6 +29,7 @@ export const flatAlertRuleParams = (params: {}, pKey = ''): Record<string, unkno
 export const getInventoryViewInAppUrl = (
   fields: ParsedTechnicalFields & Record<string, any>
 ): string => {
+  // console.log('fields', fields);
   let inventoryFields = fields;
 
   /* Temporary Solution -> https://github.com/elastic/kibana/issues/137033
@@ -46,37 +48,58 @@ export const getInventoryViewInAppUrl = (
   }
 
   const nodeTypeField = `${ALERT_RULE_PARAMETERS}.nodeType`;
-  const nodeType = inventoryFields[nodeTypeField];
+  const nodeType = inventoryFields[nodeTypeField] as InventoryItemType;
+  // console.log('inventoryFields', inventoryFields['host.name']);
+  // console.log('inventoryFields all', inventoryFields);
   let inventoryViewInAppUrl = '/app/metrics/link-to/inventory?';
 
   if (nodeType) {
-    const linkToParams: Record<string, any> = {
-      nodeType: inventoryFields[nodeTypeField][0],
-      timestamp: Date.parse(inventoryFields[TIMESTAMP]),
-      customMetric: '',
-    };
-    // We always pick the first criteria metric for the URL
-    const criteriaMetric = inventoryFields[`${ALERT_RULE_PARAMETERS}.criteria.metric`][0];
-    if (criteriaMetric === 'custom') {
-      const criteriaCustomMetricId =
-        inventoryFields[`${ALERT_RULE_PARAMETERS}.criteria.customMetric.id`][0];
-      const criteriaCustomMetricAggregation =
-        inventoryFields[`${ALERT_RULE_PARAMETERS}.criteria.customMetric.aggregation`][0];
-      const criteriaCustomMetricField =
-        inventoryFields[`${ALERT_RULE_PARAMETERS}.criteria.customMetric.field`][0];
+    if (nodeType.includes('host') && inventoryFields['host.name']) {
+      const timestamp = Date.parse(inventoryFields[TIMESTAMP]); //#TODO re-think: do we want timestamp or kibana.alert.start
+      const fifteenMinutesInMilliseconds = 15 * 60 * 1000;
 
-      const customMetric = encode({
-        id: criteriaCustomMetricId,
-        type: 'custom',
-        field: criteriaCustomMetricField,
-        aggregation: criteriaCustomMetricAggregation,
-      });
-      linkToParams.customMetric = customMetric;
-      linkToParams.metric = customMetric;
+      const queryParams = {
+        from: timestamp,
+        to: timestamp + fifteenMinutesInMilliseconds,
+      };
+
+      const encodedParams = encode(stringify(queryParams));
+
+      inventoryViewInAppUrl = `/app/metrics/link-to/host-detail/${inventoryFields['host.name']}?${encodedParams}`;
+      console.log('inventoryViewInAppUrl', inventoryViewInAppUrl);
     } else {
-      linkToParams.metric = encode({ type: criteriaMetric });
+      const linkToParams: Record<string, any> = {
+        nodeType: inventoryFields[nodeTypeField][0],
+        timestamp: Date.parse(inventoryFields[TIMESTAMP]),
+        customMetric: '',
+      };
+
+      // We always pick the first criteria metric for the URL
+      const criteriaMetric = inventoryFields[`${ALERT_RULE_PARAMETERS}.criteria.metric`][0];
+      if (criteriaMetric === 'custom') {
+        const criteriaCustomMetricId =
+          inventoryFields[`${ALERT_RULE_PARAMETERS}.criteria.customMetric.id`][0];
+        const criteriaCustomMetricAggregation =
+          inventoryFields[`${ALERT_RULE_PARAMETERS}.criteria.customMetric.aggregation`][0];
+        const criteriaCustomMetricField =
+          inventoryFields[`${ALERT_RULE_PARAMETERS}.criteria.customMetric.field`][0];
+
+        const customMetric = encode({
+          id: criteriaCustomMetricId,
+          type: 'custom',
+          field: criteriaCustomMetricField,
+          aggregation: criteriaCustomMetricAggregation,
+        });
+        linkToParams.customMetric = customMetric;
+        linkToParams.metric = customMetric;
+      } else {
+        linkToParams.metric = encode({ type: criteriaMetric });
+      }
+      inventoryViewInAppUrl += stringify(linkToParams);
     }
-    inventoryViewInAppUrl += stringify(linkToParams);
   }
+
+  console.log(inventoryViewInAppUrl);
+
   return inventoryViewInAppUrl;
 };
