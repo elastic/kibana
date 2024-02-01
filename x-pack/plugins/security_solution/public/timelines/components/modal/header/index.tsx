@@ -120,7 +120,7 @@ export const TimelineModalHeader = React.memo<FlyoutHeaderPanelProps>(({ timelin
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              <AddToFavoritesButton timelineId={timelineId} />
+              <AddToFavoritesButton timelineId={timelineId} isPartOfGuidedTour />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText
