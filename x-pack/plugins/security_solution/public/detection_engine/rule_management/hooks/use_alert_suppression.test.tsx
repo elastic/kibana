@@ -10,7 +10,7 @@ import * as useIsExperimentalFeatureEnabledMock from '../../../common/hooks/use_
 import { useAlertSuppression } from './use_alert_suppression';
 
 describe('useAlertSuppression', () => {
-  it('should return the correct isSuppressionEnabled value if rule Type exists in SuppressibleAlertRules and Feature Flag is enabled', () => {
+  it('should return the correct isSuppressionEnabled value if rule Type exists in SUPPRESSIBLE_ALERT_RULES and Feature Flag is enabled', () => {
     jest
       .spyOn(useIsExperimentalFeatureEnabledMock, 'useIsExperimentalFeatureEnabled')
       .mockImplementation((featureFlagName: string) => {
@@ -20,7 +20,7 @@ describe('useAlertSuppression', () => {
 
     expect(result.current.isSuppressionEnabled).toBe(true);
   });
-  it('should return the correct isSuppressionEnabled value if rule Type exists in SuppressibleAlertRules and Feature Flag is disabled', () => {
+  it('should return the correct isSuppressionEnabled value if rule Type exists in SUPPRESSIBLE_ALERT_RULES and Feature Flag is disabled', () => {
     jest
       .spyOn(useIsExperimentalFeatureEnabledMock, 'useIsExperimentalFeatureEnabled')
       .mockImplementation((featureFlagName: string) => {
@@ -31,7 +31,7 @@ describe('useAlertSuppression', () => {
     expect(result.current.isSuppressionEnabled).toBe(false);
   });
 
-  it('should return the correct isSuppressionEnabled value if rule Type exists in SuppressibleAlertRules', () => {
+  it('should return the correct isSuppressionEnabled value if rule Type exists in SUPPRESSIBLE_ALERT_RULES', () => {
     const { result } = renderHook(() => useAlertSuppression('query'));
 
     expect(result.current.isSuppressionEnabled).toBe(true);

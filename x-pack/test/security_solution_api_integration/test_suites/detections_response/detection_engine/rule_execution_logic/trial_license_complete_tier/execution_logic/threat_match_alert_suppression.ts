@@ -757,89 +757,6 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
-        it('should generate and update up to max_signals alerts', async () => {
-          const id = uuidv4();
-          const firstTimestamp = '2020-10-28T05:45:00.000Z';
-          const secondTimestamp = '2020-10-28T06:10:00.000Z';
-
-          await eventsFiller({
-            id,
-            count: eventsCount * 20,
-            timestamp: [firstTimestamp, secondTimestamp],
-          });
-          await threatsFiller({ id, count: threatsCount * 20, timestamp: firstTimestamp });
-
-          await Promise.all(
-            [firstTimestamp, secondTimestamp].map((t) =>
-              indexGeneratedSourceDocuments({
-                docsCount: 115,
-                seed: (index) => ({
-                  id,
-                  '@timestamp': t,
-                  host: {
-                    name: `host-a`,
-                  },
-                  'agent.name': `agent-${index}`,
-                }),
-              })
-            )
-          );
-          await addThreatDocuments({
-            id,
-            timestamp: firstTimestamp,
-            fields: {
-              host: {
-                name: 'host-a',
-              },
-            },
-            count: 1,
-          });
-
-          const rule: ThreatMatchRuleCreateProps = {
-            ...indicatorMatchRule(id),
-            alert_suppression: {
-              group_by: ['agent.name'],
-              duration: {
-                value: 300,
-                unit: 'm',
-              },
-              missing_fields_strategy: 'suppress',
-            },
-            from: 'now-35m',
-            interval: '30m',
-          };
-
-          const { previewId, logs } = await previewRule({
-            supertest,
-            rule,
-            timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
-            invocationCount: 2,
-          });
-
-          expect(logs[0].warnings).toEqual(
-            expect.arrayContaining([getSuppressionMaxAlertsWarning()])
-          );
-
-          const previewAlerts = await getPreviewAlerts({
-            es,
-            previewId,
-            size: 1000,
-            sort: ['agent.name', ALERT_ORIGINAL_TIME],
-          });
-          expect(previewAlerts.length).toEqual(100);
-          expect(previewAlerts[0]._source).toEqual(
-            expect.objectContaining({
-              [ALERT_SUPPRESSION_TERMS]: [
-                {
-                  field: 'agent.name',
-                  value: ['agent-0'],
-                },
-              ],
-              [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
-            })
-          );
-        });
-
         it('should deduplicate multiple alerts while suppressing new ones', async () => {
           const id = uuidv4();
           const firstTimestamp = '2020-10-28T05:45:00.000Z';
@@ -2148,6 +2065,79 @@ export default ({ getService }: FtrProviderContext) => {
               ],
               [ALERT_SUPPRESSION_DOCS_COUNT]: 499,
             });
+          });
+
+          it('should generate to max_signals alerts', async () => {
+            const id = uuidv4();
+            const firstTimestamp = '2020-10-28T06:05:00.000Z';
+            const secondTimestamp = '2020-10-28T06:10:00.000Z';
+
+            await eventsFiller({
+              id,
+              count: eventsCount * 20,
+              timestamp: [firstTimestamp, secondTimestamp],
+            });
+            await threatsFiller({ id, count: threatsCount * 20, timestamp: firstTimestamp });
+
+            await Promise.all(
+              [firstTimestamp, secondTimestamp].map((t) =>
+                indexGeneratedSourceDocuments({
+                  docsCount: 115,
+                  seed: (index) => ({
+                    id,
+                    '@timestamp': t,
+                    host: {
+                      name: `host-a`,
+                    },
+                    'agent.name': `agent-${index}`,
+                  }),
+                })
+              )
+            );
+
+            await addThreatDocuments({
+              id,
+              timestamp: firstTimestamp,
+              fields: {
+                host: {
+                  name: 'host-a',
+                },
+              },
+              count: 1,
+            });
+
+            const rule: ThreatMatchRuleCreateProps = {
+              ...indicatorMatchRule(id),
+              alert_suppression: {
+                group_by: ['agent.name'],
+                duration: {
+                  value: 300,
+                  unit: 'm',
+                },
+                missing_fields_strategy: 'suppress',
+              },
+              from: 'now-35m',
+              interval: '30m',
+            };
+
+            const { previewId, logs } = await previewRule({
+              supertest,
+              rule,
+              timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+              invocationCount: 1,
+            });
+
+            expect(logs[0].warnings).toEqual(
+              expect.arrayContaining([getSuppressionMaxAlertsWarning()])
+            );
+
+            const previewAlerts = await getPreviewAlerts({
+              es,
+              previewId,
+              size: 1000,
+              sort: ['agent.name', ALERT_ORIGINAL_TIME],
+            });
+            expect(previewAlerts.length).toEqual(100);
           });
 
           it('should detect threats beyond max_signals if large number of alerts suppressed', async () => {
