@@ -30,27 +30,28 @@ import {
   EuiTitle,
   EuiTextColor,
 } from '@elastic/eui';
-import { TimeSeriesExplorerHelpPopover } from './timeseriesexplorer_help_popover';
+import { TimeSeriesExplorerHelpPopover } from '../timeseriesexplorer_help_popover';
 
 import {
   isModelPlotEnabled,
   isModelPlotChartableForDetector,
   isSourceDataChartableForDetector,
-} from '../../../common/util/job_utils';
+} from '../../../../common/util/job_utils';
 
-import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
-import { TimeseriesexplorerNoChartData } from './components/timeseriesexplorer_no_chart_data';
+import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
+import { TimeseriesexplorerNoChartData } from '../components/timeseriesexplorer_no_chart_data';
 
 import {
   APP_STATE_ACTION,
   CHARTS_POINT_TARGET,
   TIME_FIELD_NAME,
-} from './timeseriesexplorer_constants';
-import { getControlsForDetector } from './get_controls_for_detector';
-import { TimeSeriesChartWithTooltips } from './components/timeseries_chart/timeseries_chart_with_tooltip';
+} from '../timeseriesexplorer_constants';
+import { getControlsForDetector } from '../get_controls_for_detector';
+import { TimeSeriesChartWithTooltips } from '../components/timeseries_chart/timeseries_chart_with_tooltip';
 import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils';
-import { isMetricDetector } from './get_function_description';
-import { TimeseriesexplorerChartDataError } from './components/timeseriesexplorer_chart_data_error';
+import { isMetricDetector } from '../get_function_description';
+import { TimeseriesexplorerChartDataError } from '../components/timeseriesexplorer_chart_data_error';
+import { TimeseriesExplorerCheckbox } from './timeseriesexplorer_checkbox';
 
 // Used to indicate the chart is being plotted across
 // all partition field values, where the cardinality of the field cannot be
@@ -870,29 +871,25 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
               </EuiFlexGroup>
               <EuiFlexGroup style={{ float: 'right' }}>
                 {showModelBoundsCheckbox && (
-                  <EuiFlexItem grow={false}>
-                    <EuiCheckbox
-                      id="toggleModelBoundsCheckbox"
-                      label={i18n.translate('xpack.ml.timeSeriesExplorer.showModelBoundsLabel', {
-                        defaultMessage: 'show model bounds',
-                      })}
-                      checked={showModelBounds}
-                      onChange={this.toggleShowModelBoundsHandler}
-                    />
-                  </EuiFlexItem>
+                  <TimeseriesExplorerCheckbox
+                    id="toggleModelBoundsCheckbox"
+                    label={i18n.translate('xpack.ml.timeSeriesExplorer.showModelBoundsLabel', {
+                      defaultMessage: 'show model bounds',
+                    })}
+                    checked={showModelBounds}
+                    onChange={this.toggleShowModelBoundsHandler}
+                  />
                 )}
 
                 {showAnnotationsCheckbox && (
-                  <EuiFlexItem grow={false}>
-                    <EuiCheckbox
-                      id="toggleAnnotationsCheckbox"
-                      label={i18n.translate('xpack.ml.timeSeriesExplorer.annotationsLabel', {
-                        defaultMessage: 'annotations',
-                      })}
-                      checked={showAnnotations}
-                      onChange={this.toggleShowAnnotationsHandler}
-                    />
-                  </EuiFlexItem>
+                  <TimeseriesExplorerCheckbox
+                    id="toggleAnnotationsCheckbox"
+                    label={i18n.translate('xpack.ml.timeSeriesExplorer.annotationsLabel', {
+                      defaultMessage: 'annotations',
+                    })}
+                    checked={showAnnotations}
+                    onChange={this.toggleShowAnnotationsHandler}
+                  />
                 )}
 
                 {showForecastCheckbox && (
