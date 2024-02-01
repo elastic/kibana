@@ -67,18 +67,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Rules Page - Bulk Action buttons', () => {
-      // it('It should disable both Enable and Disable options when there are no rules selected', async () => {
-      //   await rule.rulePage.toggleBulkActionButton();
-      //   expect(
-      //     (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_ENABLE)) ===
-      //       'true'
-      //   ).to.be(true);
-      //   expect(
-      //     (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_DISABLE)) ===
-      //       'true'
-      //   ).to.be(true);
-      // });
-
       it('It should disable Enable option when there are all rules selected are already enabled ', async () => {
         await rule.rulePage.clickSelectAllRules();
         await rule.rulePage.toggleBulkActionButton();
@@ -90,6 +78,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_DISABLE)) ===
             'true'
         ).to.be(false);
+      });
+
+      it('It should disable both Enable and Disable options when there are no rules selected', async () => {
+        await rule.rulePage.toggleBulkActionButton();
+        expect(
+          (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_ENABLE)) ===
+            'true'
+        ).to.be(true);
+        expect(
+          (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_DISABLE)) ===
+            'true'
+        ).to.be(true);
       });
 
       it('It should disable Disable option when there are all rules selected are already Disabled', async () => {
