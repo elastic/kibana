@@ -126,7 +126,7 @@ export function SloAlertsWrapper({
             ) : (
               i18n.translate('xpack.observability.sloAlertsWrapper.sLOsIncludedFlexItemLabel', {
                 defaultMessage:
-                  '{numOfSlos, number} {numOfSlos, plural, one {SLO} other {SLOs}}{instances} included',
+                  '{numOfSlos, number} {numOfSlos, plural, one {SLO} other {SLOs}} included',
                 values: {
                   numOfSlos: slos.length,
                 },

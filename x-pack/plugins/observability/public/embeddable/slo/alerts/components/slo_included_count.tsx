@@ -18,12 +18,12 @@ export function SloIncludedCount({ slos }: { slos: SloItem[] }) {
 
   return (
     <FormattedMessage
-      id="xpack.observability.sloAlertsWrapper.sLOsIncludedFlexItemLabel"
+      id="xpack.observability.sloAlertsWrapper.sLOsIncludedFlexItemLabel.withInstances"
       defaultMessage="{numOfSlos, number} {numOfSlos, plural, one {SLO} other {SLOs}}{instances} included"
       values={{
         numOfSlos: slos.length,
         instances: i18n.translate(
-          'xpack.observability.sloAlertsWrapper.sLOsIncludedFlexItemLabel',
+          'xpack.observability.sloAlertsWrapper.sLOsIncludedFlexItemLabel.instancesCount',
           {
             defaultMessage: ' ({count, number} {count, plural, one {Instance} other {Instances}})',
             values: { count: sloList?.total ?? 0 },
