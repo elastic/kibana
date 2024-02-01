@@ -62,8 +62,8 @@ import {
   IndexPatternArray,
   DataViewId,
   RuleFilterArray,
-  SavedQueryId,
   AlertSuppression,
+  SavedQueryId,
   KqlQueryLanguage,
 } from './common_attributes.gen';
 import { RuleExecutionSummary } from '../../rule_monitoring/model/execution_summary.gen';
