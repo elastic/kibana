@@ -11,9 +11,14 @@ import {
 } from '@kbn/deeplinks-observability';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
+import { FlyoutDataset } from '../state_machines/dataset_quality_controller';
 import { useKibanaContextForPlugin } from '../utils';
 
-export const useLinkToLogExplorer = ({ dataStreamStat }: { dataStreamStat: DataStreamStat }) => {
+export const useLinkToLogExplorer = ({
+  dataStreamStat,
+}: {
+  dataStreamStat: DataStreamStat | FlyoutDataset;
+}) => {
   const {
     services: { share },
   } = useKibanaContextForPlugin();
