@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { transformActionParams, transformSummaryActionParams } from './transform_action_params';
 import {
   actionsMock,
@@ -16,7 +15,6 @@ import { mockAAD } from './fixtures';
 
 const actionsPlugin = actionsMock.createStart();
 const actionTypeId = 'test-actionTypeId';
-const logger = loggingSystemMock.createLogger();
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -36,7 +34,6 @@ describe('transformActionParams', () => {
       message: 'Value "{{rule.params.foo}}" exists',
     };
     const result = transformActionParams({
-      logger,
       actionsPlugin,
       actionTypeId,
       actionParams,
@@ -75,7 +72,6 @@ describe('transformActionParams', () => {
       message2: 'This message "{{context.value2}}" is missing',
     };
     const result = transformActionParams({
-      logger,
       actionsPlugin,
       actionTypeId,
       actionParams,
@@ -107,7 +103,6 @@ describe('transformActionParams', () => {
       message: 'Value "{{context.foo}}" exists',
     };
     const result = transformActionParams({
-      logger,
       actionsPlugin,
       actionTypeId,
       actionParams,
@@ -138,7 +133,6 @@ describe('transformActionParams', () => {
       message: 'Value "{{state.bar}}" exists',
     };
     const result = transformActionParams({
-      logger,
       actionsPlugin,
       actionTypeId,
       actionParams,
@@ -169,7 +163,6 @@ describe('transformActionParams', () => {
       message: 'Value "{{alertId}}" exists',
     };
     const result = transformActionParams({
-      logger,
       actionsPlugin,
       actionTypeId,
       actionParams,
@@ -200,7 +193,6 @@ describe('transformActionParams', () => {
       message: 'Value "{{alertName}}" exists',
     };
     const result = transformActionParams({
-      logger,
       actionsPlugin,
       actionTypeId,
       actionParams,
@@ -231,7 +223,6 @@ describe('transformActionParams', () => {
       message: 'Value "{{tags}}" exists',
     };
     const result = transformActionParams({
-      logger,
       actionsPlugin,
       actionTypeId,
       actionParams,
@@ -262,7 +253,6 @@ describe('transformActionParams', () => {
       message: 'Value "{{tags}}" is undefined and renders as empty string',
     };
     const result = transformActionParams({
-      logger,
       actionsPlugin,
       actionTypeId,
       actionParams,
@@ -292,7 +282,6 @@ describe('transformActionParams', () => {
       message: 'Value "{{tags}}" is an empty array and renders as empty string',
     };
     const result = transformActionParams({
-      logger,
       actionsPlugin,
       actionTypeId,
       actionParams,
@@ -323,7 +312,6 @@ describe('transformActionParams', () => {
       message: 'Value "{{spaceId}}" exists',
     };
     const result = transformActionParams({
-      logger,
       actionsPlugin,
       actionTypeId,
       actionParams,
@@ -354,7 +342,6 @@ describe('transformActionParams', () => {
       message: 'Value "{{alertInstanceId}}" exists',
     };
     const result = transformActionParams({
-      logger,
       actionsPlugin,
       actionTypeId,
       actionParams,
@@ -385,7 +372,6 @@ describe('transformActionParams', () => {
       message: 'Value "{{alertActionGroup}}" exists',
     };
     const result = transformActionParams({
-      logger,
       actionsPlugin,
       actionTypeId,
       actionParams,
@@ -416,7 +402,6 @@ describe('transformActionParams', () => {
       message: 'Value "{{alertActionGroupName}}" exists',
     };
     const result = transformActionParams({
-      logger,
       actionsPlugin,
       actionTypeId,
       actionParams,
@@ -447,7 +432,6 @@ describe('transformActionParams', () => {
       message: 'Value "{{rule.id}}", "{{rule.name}}", "{{rule.spaceId}}" and "{{rule.tags}}" exist',
     };
     const result = transformActionParams({
-      logger,
       actionsPlugin,
       actionTypeId,
       actionParams,
@@ -479,7 +463,6 @@ describe('transformActionParams', () => {
         'Value "{{alert.id}}", "{{alert.actionGroup}}", "{{alert.uuid}}" and "{{alert.actionGroupName}}" exist',
     };
     const result = transformActionParams({
-      logger,
       actionsPlugin,
       actionTypeId,
       actionParams,
@@ -511,7 +494,6 @@ describe('transformActionParams', () => {
     };
     const dateBefore = Date.now();
     const result = transformActionParams({
-      logger,
       actionsPlugin,
       actionTypeId,
       actionParams,
@@ -544,7 +526,6 @@ describe('transformActionParams', () => {
       },
     };
     const result = transformActionParams({
-      logger,
       actionsPlugin,
       actionTypeId,
       actionParams,
@@ -579,7 +560,6 @@ describe('transformActionParams', () => {
       },
     };
     const result = transformActionParams({
-      logger,
       actionsPlugin,
       actionTypeId,
       actionParams,
@@ -614,7 +594,6 @@ describe('transformActionParams', () => {
       message: 'Value "{{alert.flapping}}" exists',
     };
     const result = transformActionParams({
-      logger,
       actionsPlugin,
       actionTypeId,
       actionParams,
@@ -841,7 +820,7 @@ describe('transformSummaryActionParams', () => {
         'Value "{{rule.id}}", "{{rule.name}}", "{{rule.spaceId}}", "{{rule.type}}", "{{rule.url}}" and "{{rule.tags}}" exist',
     };
 
-    const result = transformSummaryActionParams({ ...params, logger, actionParams });
+    const result = transformSummaryActionParams({ ...params, actionParams });
     expect(result).toMatchInlineSnapshot(`
         Object {
           "message": "Value \\"1\\", \\"test-rule\\", \\"space-id\\", \\"rule-type-id\\", \\"http://ruleurl\\" and \\"test-tag\\" exist",
@@ -855,7 +834,7 @@ describe('transformSummaryActionParams', () => {
         'Value "{{context.alerts}}", "{{context.results_link}}" and "{{context.rule}}" exist',
     };
 
-    const result = transformSummaryActionParams({ ...params, logger, actionParams });
+    const result = transformSummaryActionParams({ ...params, actionParams });
     expect(result).toMatchInlineSnapshot(`
       Object {
         "message": "Value \\"{\\"@timestamp\\":\\"2022-12-07T15:38:43.472Z\\",\\"event\\":{\\"kind\\":\\"signal\\",\\"action\\":\\"active\\"},\\"kibana\\":{\\"version\\":\\"8.7.0\\",\\"space_ids\\":[\\"default\\"],\\"alert\\":{\\"instance\\":{\\"id\\":\\"*\\"},\\"uuid\\":\\"2d3e8fe5-3e8b-4361-916e-9eaab0bf2084\\",\\"status\\":\\"active\\",\\"workflow_status\\":\\"open\\",\\"reason\\":\\"system.cpu is 90% in the last 1 min for all hosts. Alert when > 50%.\\",\\"time_range\\":{\\"gte\\":\\"2022-01-01T12:00:00.000Z\\"},\\"start\\":\\"2022-12-07T15:23:13.488Z\\",\\"duration\\":{\\"us\\":100000},\\"flapping\\":false,\\"rule\\":{\\"category\\":\\"Metric threshold\\",\\"consumer\\":\\"alerts\\",\\"execution\\":{\\"uuid\\":\\"c35db7cc-5bf7-46ea-b43f-b251613a5b72\\"},\\"name\\":\\"test-rule\\",\\"producer\\":\\"infrastructure\\",\\"revision\\":0,\\"rule_type_id\\":\\"metrics.alert.threshold\\",\\"uuid\\":\\"0de91960-7643-11ed-b719-bb9db8582cb6\\",\\"tags\\":[]}}}}\\", \\"http://ruleurl\\" and \\"{\\"foo\\":\\"bar\\",\\"foo_bar\\":true,\\"name\\":\\"test-rule\\",\\"id\\":\\"1\\"}\\" exist",
@@ -868,7 +847,7 @@ describe('transformSummaryActionParams', () => {
       message: 'Value "{{state.signals_count}}" exists',
     };
 
-    const result = transformSummaryActionParams({ ...params, logger, actionParams });
+    const result = transformSummaryActionParams({ ...params, actionParams });
     expect(result).toMatchInlineSnapshot(`
         Object {
           "message": "Value \\"1\\" exists",
@@ -883,7 +862,7 @@ describe('transformSummaryActionParams', () => {
         'Alert Name: {{#alerts.new.data}} {{kibana.alert.rule.name}} {{/alerts.new.data}}',
     };
 
-    const result = transformSummaryActionParams({ ...params, logger, actionParams });
+    const result = transformSummaryActionParams({ ...params, actionParams });
     expect(result).toMatchInlineSnapshot(`
         Object {
           "message": "New: 1 Ongoing: 0 Recovered: 0 Alert Name:  test-rule ",
@@ -896,7 +875,7 @@ describe('transformSummaryActionParams', () => {
       message: 'Value: {{kibanaBaseUrl}}',
     };
 
-    const result = transformSummaryActionParams({ ...params, logger, actionParams });
+    const result = transformSummaryActionParams({ ...params, actionParams });
     expect(result).toMatchInlineSnapshot(`
         Object {
           "message": "Value: http://kibanaurl",
@@ -909,7 +888,7 @@ describe('transformSummaryActionParams', () => {
       message: '{{date}}',
     };
     const dateBefore = Date.now();
-    const result = transformSummaryActionParams({ ...params, logger, actionParams });
+    const result = transformSummaryActionParams({ ...params, actionParams });
     const dateAfter = Date.now();
     const dateVariable = new Date(`${result.message}`).valueOf();
 
@@ -922,7 +901,7 @@ describe('transformSummaryActionParams', () => {
       message: 'Value: {{alertId}}',
     };
 
-    const result = transformSummaryActionParams({ ...params, logger, actionParams });
+    const result = transformSummaryActionParams({ ...params, actionParams });
     expect(result).toMatchInlineSnapshot(`
         Object {
           "message": "Value: 1",
@@ -935,7 +914,7 @@ describe('transformSummaryActionParams', () => {
       message: 'Value: {{alertName}}',
     };
 
-    const result = transformSummaryActionParams({ ...params, logger, actionParams });
+    const result = transformSummaryActionParams({ ...params, actionParams });
     expect(result).toMatchInlineSnapshot(`
         Object {
           "message": "Value: test-rule",
@@ -948,7 +927,7 @@ describe('transformSummaryActionParams', () => {
       message: 'Value: {{spaceId}}',
     };
 
-    const result = transformSummaryActionParams({ ...params, logger, actionParams });
+    const result = transformSummaryActionParams({ ...params, actionParams });
     expect(result).toMatchInlineSnapshot(`
       Object {
         "message": "Value: space-id",
@@ -961,7 +940,7 @@ describe('transformSummaryActionParams', () => {
       message: 'Value: {{tags}}',
     };
 
-    const result = transformSummaryActionParams({ ...params, logger, actionParams });
+    const result = transformSummaryActionParams({ ...params, actionParams });
     expect(result).toMatchInlineSnapshot(`
       Object {
         "message": "Value: test-tag",
@@ -974,7 +953,7 @@ describe('transformSummaryActionParams', () => {
       message: 'Value: {{params}}',
     };
 
-    const result = transformSummaryActionParams({ ...params, logger, actionParams });
+    const result = transformSummaryActionParams({ ...params, actionParams });
     expect(result).toMatchInlineSnapshot(`
       Object {
         "message": "Value: {\\"foo\\":\\"bar\\",\\"fooBar\\":true}",
@@ -987,7 +966,7 @@ describe('transformSummaryActionParams', () => {
       message: 'Value: {{alertInstanceId}}',
     };
 
-    const result = transformSummaryActionParams({ ...params, logger, actionParams });
+    const result = transformSummaryActionParams({ ...params, actionParams });
     expect(result).toMatchInlineSnapshot(`
       Object {
         "message": "Value: 1",
@@ -1000,7 +979,7 @@ describe('transformSummaryActionParams', () => {
       message: 'Value: {{alertActionGroup}}',
     };
 
-    const result = transformSummaryActionParams({ ...params, logger, actionParams });
+    const result = transformSummaryActionParams({ ...params, actionParams });
     expect(result).toMatchInlineSnapshot(`
       Object {
         "message": "Value: default",
@@ -1013,7 +992,7 @@ describe('transformSummaryActionParams', () => {
       message: 'Value: {{alertActionGroupName}}',
     };
 
-    const result = transformSummaryActionParams({ ...params, logger, actionParams });
+    const result = transformSummaryActionParams({ ...params, actionParams });
     expect(result).toMatchInlineSnapshot(`
       Object {
         "message": "Value: Default",
@@ -1027,7 +1006,7 @@ describe('transformSummaryActionParams', () => {
         'Value "{{alert.id}}", "{{alert.uuid}}", "{{alert.actionGroup}}", "{{alert.actionGroupName}}", and "{{alert.flapping}}" exist',
     };
 
-    const result = transformSummaryActionParams({ ...params, logger, actionParams });
+    const result = transformSummaryActionParams({ ...params, actionParams });
     expect(result).toMatchInlineSnapshot(`
       Object {
         "message": "Value \\"1\\", \\"1\\", \\"default\\", \\"Default\\", and \\"false\\" exist",

@@ -155,8 +155,7 @@ export interface PluginStartContract {
     actionTypeId: string,
     actionId: string,
     params: Params,
-    variables: Record<string, unknown>,
-    logger: Logger
+    variables: Record<string, unknown>
   ): Params;
 }
 
@@ -586,7 +585,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       getUnsecuredActionsClient,
       inMemoryConnectors: this.inMemoryConnectors,
       renderActionParameterTemplates: (...args) =>
-        renderActionParameterTemplates(actionTypeRegistry, ...args),
+        renderActionParameterTemplates(this.logger, actionTypeRegistry, ...args),
     };
   }
 
@@ -744,12 +743,12 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
 }
 
 export function renderActionParameterTemplates<Params extends ActionTypeParams = ActionTypeParams>(
+  logger: Logger,
   actionTypeRegistry: ActionTypeRegistry | undefined,
   actionTypeId: string,
   actionId: string,
   params: Params,
-  variables: Record<string, unknown>,
-  logger: Logger
+  variables: Record<string, unknown>
 ): Params {
   const actionType = actionTypeRegistry?.get(actionTypeId);
   if (actionType?.renderParameterTemplates) {

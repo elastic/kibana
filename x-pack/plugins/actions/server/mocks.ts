@@ -60,12 +60,12 @@ export function renderActionParameterTemplatesDefault<RecordType>(
   variables: Record<string, unknown>
 ) {
   return renderActionParameterTemplates(
+    logger,
     undefined,
     actionTypeId,
     actionId,
     params,
-    variables,
-    logger
+    variables
   );
 }
 

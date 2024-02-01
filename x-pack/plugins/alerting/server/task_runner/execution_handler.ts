@@ -264,7 +264,6 @@ export class ExecutionHandler<
               ruleUrl,
               ruleName: this.rule.name,
               actionParams: transformSummaryActionParams({
-                logger,
                 alerts: summarizedAlerts,
                 rule: this.rule,
                 ruleTypeId: this.ruleType.id,
@@ -301,7 +300,6 @@ export class ExecutionHandler<
           const ruleUrl = this.buildRuleUrl(spaceId);
           const executableAlert = alert!;
           const transformActionParamsOptions: TransformActionParamsOptions = {
-            logger,
             actionsPlugin,
             alertId: ruleId,
             alertType: this.ruleType.id,
