@@ -89,13 +89,10 @@ export function MachineLearningStackManagementJobsProvider({
       });
 
       // check and close success toast
-      const resultToast = await toasts.getToastElementByIndex(1);
-      const titleElement = await testSubjects.findDescendant('euiToastHeader', resultToast);
-      const title: string = await titleElement.getVisibleText();
+      const title = await toasts.getToastTitleByIndex(1);
       expect(title).to.match(/^\d+ item[s]? synchronized$/);
 
-      const dismissButton = await testSubjects.findDescendant('toastCloseButton', resultToast);
-      await dismissButton.click();
+      await toasts.dismissToastByIndex(1);
     },
 
     async assertADJobRowSpaces(adJobId: string, expectedSpaces: string[]) {
@@ -281,13 +278,10 @@ export function MachineLearningStackManagementJobsProvider({
       });
 
       // check and close success toast
-      const resultToast = await toasts.getToastElementByIndex(1);
-      const titleElement = await testSubjects.findDescendant('euiToastHeader', resultToast);
-      const title: string = await titleElement.getVisibleText();
+      const title = await toasts.getToastTitleByIndex(1);
       expect(title).to.match(/^\d+ job[s]? successfully imported$/);
 
-      const dismissButton = await testSubjects.findDescendant('toastCloseButton', resultToast);
-      await dismissButton.click();
+      await toasts.dismissToastByIndex(1);
 
       // check that the flyout is closed
       await testSubjects.missingOrFail('mlJobMgmtImportJobsFlyout', { timeout: 60 * 1000 });
@@ -349,9 +343,7 @@ export function MachineLearningStackManagementJobsProvider({
       });
 
       // check and close success toast
-      const resultToast = await toasts.getToastElementByIndex(1);
-      const titleElement = await testSubjects.findDescendant('euiToastHeader', resultToast);
-      const title: string = await titleElement.getVisibleText();
+      const title = await toasts.getToastTitleByIndex(1);
       expect(title).to.match(/^Your file is downloading in the background$/);
 
       await toasts.dismissAllToastsWithChecks();
