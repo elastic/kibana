@@ -32,12 +32,13 @@ import {
 import numeral from '@elastic/numeral';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, rollingTimeWindowTypeSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { max, min } from 'lodash';
 import moment from 'moment';
 import React, { useRef } from 'react';
-import { max, min } from 'lodash';
 import { useGetPreviewData } from '../../../hooks/slo/use_get_preview_data';
 import { useKibana } from '../../../utils/kibana_react';
+import { toDurationAdverbLabel, toDurationLabel } from '../../../utils/slo/labels';
 import { COMPARATOR_MAPPING } from '../../slo_edit/constants';
 
 export interface Props {
@@ -144,9 +145,12 @@ export function EventsChartPanel({ slo, range }: Props) {
           <EuiFlexItem>{title}</EuiFlexItem>
           <EuiFlexItem>
             <EuiText color="subdued" size="s">
-              {i18n.translate('xpack.observability.slo.sloDetails.eventsChartPanel.duration', {
-                defaultMessage: 'Last 24h',
-              })}
+              {rollingTimeWindowTypeSchema.is(slo.timeWindow.type)
+                ? i18n.translate('xpack.observability.slo.sloDetails.eventsChartPanel.duration', {
+                    defaultMessage: 'Last {duration}',
+                    values: { duration: toDurationLabel(slo.timeWindow.duration) },
+                  })
+                : toDurationAdverbLabel(slo.timeWindow.duration)}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>

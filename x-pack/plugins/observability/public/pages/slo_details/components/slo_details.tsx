@@ -28,6 +28,7 @@ import { EventsChartPanel } from './events_chart_panel';
 import { Overview } from './overview/overview';
 import { SliChartPanel } from './sli_chart_panel';
 import { SloDetailsAlerts } from './slo_detail_alerts';
+import { toDuration, toMinutes } from '../../../utils/slo/duration';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -102,8 +103,10 @@ export function SloDetails({ slo, isAutoRefreshing }: Props) {
       historicalSummary.instanceId === (slo.instanceId ?? ALL_VALUE)
   );
 
+  const sloDurationInMinutes = toMinutes(toDuration(slo.timeWindow.duration));
+
   const [range, setRange] = useState({
-    start: new Date().getTime() - DAY_IN_MILLISECONDS,
+    start: new Date().getTime() - sloDurationInMinutes * 60 * 1000,
     end: new Date().getTime(),
   });
 
@@ -111,7 +114,10 @@ export function SloDetails({ slo, isAutoRefreshing }: Props) {
     let intervalId: any;
     if (isAutoRefreshing) {
       intervalId = setInterval(() => {
-        setRange({ start: new Date().getTime() - DAY_IN_MILLISECONDS, end: new Date().getTime() });
+        setRange({
+          start: new Date().getTime() - sloDurationInMinutes * 60 * 1000,
+          end: new Date().getTime(),
+        });
       }, 60 * 1000);
     }
 
