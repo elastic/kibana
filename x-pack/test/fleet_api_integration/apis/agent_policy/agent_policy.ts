@@ -1199,7 +1199,7 @@ export default function (providerContext: FtrProviderContext) {
               namespace: 'default',
             })
             .expect(200);
-          await generateAgent(providerContext, 'healhty', `agent-inactive-1`, policyWithAgents.id);
+          await generateAgent(providerContext, 'healhty', 'agent-healthy-1', policyWithAgents.id);
           const { body } = await supertest
             .post('/api/fleet/agent_policies/delete')
             .set('kbn-xsrf', 'xxx')
@@ -1210,7 +1210,7 @@ export default function (providerContext: FtrProviderContext) {
             'Cannot delete an agent policy that is assigned to any active or inactive agents'
           );
           await supertest
-            .delete(`/api/fleet/agents/${policyWithAgents.id}`)
+            .delete(`/api/fleet/agents/agent-healthy-1`)
             .set('kbn-xsrf', 'xx')
             .expect(200);
         });
@@ -1229,7 +1229,7 @@ export default function (providerContext: FtrProviderContext) {
           await generateAgent(
             providerContext,
             'inactive',
-            `agent-inactive-1`,
+            'agent-inactive-1',
             policyWithInactiveAgents.id
           );
 
@@ -1243,7 +1243,7 @@ export default function (providerContext: FtrProviderContext) {
             'Cannot delete an agent policy that is assigned to any active or inactive agents'
           );
           await supertest
-            .delete(`/api/fleet/agents/${policyWithInactiveAgents.id}`)
+            .delete(`/api/fleet/agents/agent-inactive-1`)
             .set('kbn-xsrf', 'xx')
             .expect(200);
         });
