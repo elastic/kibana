@@ -338,7 +338,7 @@ export const useDiscoverHistogram = ({
 
   const onVisContextJSONChanged = useCallback(
     (nextVisContextJSON: string | undefined) => {
-      console.log('got new vis context from histogram', nextVisContextJSON);
+      // console.log('got new vis context from histogram', nextVisContextJSON);
       stateContainer.savedSearchState.updateVisContext({
         nextVisContextJSON,
       });

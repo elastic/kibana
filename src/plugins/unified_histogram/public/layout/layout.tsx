@@ -266,47 +266,47 @@ export const UnifiedHistogramLayout = ({
       return;
     }
 
-    if (prevUpdateDeps.current) {
-      const currentUpdateDeps = [
-        lensVisService,
-        dataView,
-        requestParams.query,
-        requestParams.filters,
-        originalTimeRange,
-        originalChart,
-        isPlainRecord,
-        columns,
-        breakdown,
-        externalVisContext,
-        onSuggestionContextChange,
-        onVisContextChanged,
-        isChartLoading,
-        table,
-      ];
-
-      currentUpdateDeps.forEach((dep, index) => {
-        if (dep !== prevUpdateDeps.current![index]) {
-          console.log('dep updated', index, dep, prevUpdateDeps.current![index]);
-        }
-      });
-    }
-
-    prevUpdateDeps.current = [
-      lensVisService,
-      dataView,
-      requestParams.query,
-      requestParams.filters,
-      originalTimeRange,
-      originalChart,
-      isPlainRecord,
-      columns,
-      breakdown,
-      externalVisContext,
-      onSuggestionContextChange,
-      onVisContextChanged,
-      isChartLoading,
-      table,
-    ];
+    // if (prevUpdateDeps.current) {
+    //   const currentUpdateDeps = [
+    //     lensVisService,
+    //     dataView,
+    //     requestParams.query,
+    //     requestParams.filters,
+    //     originalTimeRange,
+    //     originalChart,
+    //     isPlainRecord,
+    //     columns,
+    //     breakdown,
+    //     externalVisContext,
+    //     onSuggestionContextChange,
+    //     onVisContextChanged,
+    //     isChartLoading,
+    //     table,
+    //   ];
+    //
+    //   currentUpdateDeps.forEach((dep, index) => {
+    //     if (dep !== prevUpdateDeps.current![index]) {
+    //       console.log('dep updated', index, dep, prevUpdateDeps.current![index]);
+    //     }
+    //   });
+    // }
+    //
+    // prevUpdateDeps.current = [
+    //   lensVisService,
+    //   dataView,
+    //   requestParams.query,
+    //   requestParams.filters,
+    //   originalTimeRange,
+    //   originalChart,
+    //   isPlainRecord,
+    //   columns,
+    //   breakdown,
+    //   externalVisContext,
+    //   onSuggestionContextChange,
+    //   onVisContextChanged,
+    //   isChartLoading,
+    //   table,
+    // ];
 
     lensVisService.update({
       externalVisContext,
