@@ -5,11 +5,17 @@
  * 2.0.
  */
 
+import type { StartServicesAccessor } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { StartPlugins } from '../../../../plugin';
 import { ENTITY_STORE_INIT_URL } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-export const entityStoreInitRoute = (router: SecuritySolutionPluginRouter) => {
+import { TASK_MANAGER_UNAVAILABLE_ERROR } from '../../risk_engine/routes/translations';
+export const entityStoreInitRoute = (
+  router: SecuritySolutionPluginRouter,
+  getStartServices: StartServicesAccessor<StartPlugins>
+) => {
   router.versioned
     .post({
       access: 'internal',
@@ -25,9 +31,19 @@ export const entityStoreInitRoute = (router: SecuritySolutionPluginRouter) => {
         const siemResponse = buildSiemResponse(response);
         const securitySolution = await context.securitySolution;
         const entityStoreDataClient = securitySolution.getEntityStoreDataClient();
+        const [_, { taskManager }] = await getStartServices();
 
         try {
-          await entityStoreDataClient.init();
+          if (!taskManager) {
+            return siemResponse.error({
+              statusCode: 400,
+              body: TASK_MANAGER_UNAVAILABLE_ERROR,
+            });
+          }
+
+          await entityStoreDataClient.init({
+            taskManager,
+          });
 
           return response.ok({
             body: {

@@ -181,6 +181,6 @@ export const initRoutes = (
   }
 
   if (config.experimentalFeatures.entityStoreEnabled) {
-    entityStoreInitRoute(router);
+    entityStoreInitRoute(router, getStartServices);
   }
 };

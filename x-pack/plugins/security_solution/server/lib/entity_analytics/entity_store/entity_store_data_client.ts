@@ -6,9 +6,11 @@
  */
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { getEntityStoreIndex } from '../../../../common/entity_analytics/entity_store';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import { entityStoreFieldMap } from './constants';
+import { startEntityStoreTask } from './tasks';
 
 interface EntityStoreClientOpts {
   logger: Logger;
@@ -21,7 +23,7 @@ export class EntityStoreDataClient {
   /**
    * It creates the entity store index or update mappings if index exists
    */
-  public async init() {
+  public async init({ taskManager }: { taskManager: TaskManagerStartContract }) {
     await createOrUpdateIndex({
       esClient: this.options.esClient,
       logger: this.options.logger,
@@ -29,6 +31,12 @@ export class EntityStoreDataClient {
         index: getEntityStoreIndex(this.options.namespace),
         mappings: mappingFromFieldMap(entityStoreFieldMap, 'strict'),
       },
+    });
+
+    await startEntityStoreTask({
+      logger: this.options.logger,
+      namespace: this.options.namespace,
+      taskManager,
     });
   }
 }

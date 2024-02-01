@@ -108,6 +108,7 @@ import {
 
 import { AppFeaturesService } from './lib/app_features_service/app_features_service';
 import { registerRiskScoringTask } from './lib/entity_analytics/risk_score/tasks/risk_scoring_task';
+import { registerEntityStoreTask } from './lib/entity_analytics/entity_store/tasks/entity_store_task';
 import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
 import {
   latestRiskScoreIndexPattern,
@@ -191,6 +192,15 @@ export class Plugin implements ISecuritySolutionPlugin {
         telemetry: core.analytics,
       });
     }
+
+    registerEntityStoreTask({
+      experimentalFeatures,
+      getStartServices: core.getStartServices,
+      kibanaVersion: pluginContext.env.packageInfo.version,
+      logger: this.logger,
+      taskManager: plugins.taskManager,
+      telemetry: core.analytics,
+    });
 
     const requestContextFactory = new RequestContextFactory({
       config,
