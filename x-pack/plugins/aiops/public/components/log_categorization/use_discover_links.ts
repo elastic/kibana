@@ -56,10 +56,7 @@ export function useDiscoverLinks() {
       },
     });
 
-    let path = basePath.get();
-    path += '/app/discover#/';
-    path += '?_g=' + _g;
-    path += '&_a=' + encodeURIComponent(_a);
+    const path = `${basePath.get()}/app/discover#/?_g=${_g}&_a=${encodeURIComponent(_a)}`;
     window.open(path, '_blank');
   };
 
