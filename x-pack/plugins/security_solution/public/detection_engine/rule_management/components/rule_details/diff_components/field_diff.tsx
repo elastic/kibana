@@ -12,9 +12,11 @@ import React from 'react';
 import { DiffView } from '../json_diff/diff_view';
 import { DiffMethod } from '../json_diff/mark_edits';
 import { RuleDiffPanelWrapper } from './panel_wrapper';
+import type { FormattedFieldDiff } from '../../../model/rule_details/rule_field_diff';
+import { fieldToDisplayNameMap } from './translations';
 
 export interface FieldDiffComponentProps {
-  ruleDiffs: Array<{ currentVersion: unknown; targetVersion: unknown; fieldName: string }>;
+  ruleDiffs: FormattedFieldDiff[];
   fieldName: string;
 }
 
@@ -26,40 +28,36 @@ const sortAndStringifyJson = (jsObject: unknown): string => {
 };
 
 export const FieldDiffComponent = ({ ruleDiffs, fieldName }: FieldDiffComponentProps) => {
-  console.log('here: ', ruleDiffs);
   return (
     <RuleDiffPanelWrapper fieldName={fieldName}>
-      {ruleDiffs.length === 1 ? (
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <DiffView
-            oldSource={sortAndStringifyJson(ruleDiffs[0].currentVersion)}
-            newSource={sortAndStringifyJson(ruleDiffs[0].targetVersion)}
-            diffMethod={DiffMethod.WORDS}
-          />
-        </EuiFlexGroup>
-      ) : (
-        ruleDiffs.map(({ currentVersion, targetVersion, fieldName: specificFieldName }) => {
-          const formattedCurrentVersion = sortAndStringifyJson(currentVersion);
-          const formattedTargetVersion = sortAndStringifyJson(targetVersion);
-          return (
-            <EuiFlexGroup key={specificFieldName} justifyContent="spaceBetween">
-              {formattedCurrentVersion !== formattedTargetVersion ? (
-                <EuiFlexGroup direction="column">
-                  <EuiTitle size="xxxs">
-                    <h4>{startCase(camelCase(specificFieldName))}</h4>
-                  </EuiTitle>
-                  <DiffView
-                    oldSource={formattedCurrentVersion}
-                    newSource={formattedTargetVersion}
-                    diffMethod={DiffMethod.WORDS}
-                  />
-                  <EuiHorizontalRule margin="s" size="full" />
-                </EuiFlexGroup>
+      {ruleDiffs.map(({ currentVersion, targetVersion, fieldName: specificFieldName }) => {
+        const shouldShowSubtitles = ruleDiffs.length > 1;
+        const formattedCurrentVersion = sortAndStringifyJson(currentVersion);
+        const formattedTargetVersion = sortAndStringifyJson(targetVersion);
+        if (formattedCurrentVersion === formattedTargetVersion) {
+          return null;
+        }
+        return (
+          <EuiFlexGroup key={specificFieldName} justifyContent="spaceBetween">
+            <EuiFlexGroup direction="column">
+              {shouldShowSubtitles ? (
+                <EuiTitle size="xxxs">
+                  <h4>
+                    {fieldToDisplayNameMap[specificFieldName] ??
+                      startCase(camelCase(specificFieldName))}
+                  </h4>
+                </EuiTitle>
               ) : null}
+              <DiffView
+                oldSource={formattedCurrentVersion}
+                newSource={formattedTargetVersion}
+                diffMethod={DiffMethod.WORDS}
+              />
+              {shouldShowSubtitles ? <EuiHorizontalRule margin="s" size="full" /> : null}
             </EuiFlexGroup>
-          );
-        })
-      )}
+          </EuiFlexGroup>
+        );
+      })}
     </RuleDiffPanelWrapper>
   );
 };

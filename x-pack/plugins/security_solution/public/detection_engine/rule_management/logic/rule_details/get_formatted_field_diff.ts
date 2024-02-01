@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { AllFieldsDiff } from '../../../../../common/api/detection_engine';
+import type { RuleFieldsDiff } from '../../../../../common/api/detection_engine';
 import type { FormattedFieldDiff } from '../../model/rule_details/rule_field_diff';
 
 export const getFormattedFieldDiff = (
-  fieldName: keyof AllFieldsDiff,
-  fields: AllFieldsDiff
+  fieldName: keyof RuleFieldsDiff,
+  fields: Partial<RuleFieldsDiff>
 ): FormattedFieldDiff[] => {
   switch (fieldName) {
     case 'data_source':
@@ -45,49 +45,11 @@ export const getFormattedFieldDiff = (
         },
       ];
     case 'eql_query':
-      return [
-        {
-          fieldName: 'query',
-          currentVersion: fields[fieldName].current_version.query,
-          targetVersion: fields[fieldName].target_version.query,
-        },
-        {
-          fieldName: 'filters',
-          currentVersion: fields[fieldName].current_version.filters,
-          targetVersion: fields[fieldName].target_version.filters,
-        },
-        {
-          fieldName: 'language',
-          currentVersion: fields[fieldName].current_version.language,
-          targetVersion: fields[fieldName].target_version.language,
-        },
-      ];
     case 'kql_query':
-      return [
-        {
-          fieldName: 'query',
-          currentVersion: fields[fieldName].current_version.query,
-          targetVersion: fields[fieldName].target_version.query,
-        },
-        {
-          fieldName: 'filters',
-          currentVersion: fields[fieldName].current_version.filters,
-          targetVersion: fields[fieldName].target_version.filters,
-        },
-        {
-          fieldName: 'language',
-          currentVersion: fields[fieldName].current_version.language,
-          targetVersion: fields[fieldName].target_version.language,
-        },
-        {
-          fieldName: 'type',
-          currentVersion: fields[fieldName].current_version.type,
-          targetVersion: fields[fieldName].target_version.type,
-        },
-      ];
     case 'threshold':
     case 'threat_query':
     case 'esql_query':
+      // TODO: This doesn't work if current version has a different number of fields or different fields than target version
       const currentVersionSubfields = Object.keys(fields[fieldName].current_version);
       const subfieldsToReturn = [];
       for (let i = 0; i < currentVersionSubfields.length; i++) {
@@ -103,8 +65,8 @@ export const getFormattedFieldDiff = (
       return [
         {
           fieldName,
-          currentVersion: fields[fieldName].current_version,
-          targetVersion: fields[fieldName].target_version,
+          currentVersion: fields[fieldName].current_version ?? '',
+          targetVersion: fields[fieldName].target_version ?? '',
         },
       ];
   }

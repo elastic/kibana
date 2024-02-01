@@ -32,13 +32,13 @@ export const RuleDiffHeaderBar = () => {
         <EuiFlexGroup alignItems="baseline" gutterSize="xs">
           <EuiIconTip
             color="subdued"
-            content={i18n.BASE_VERSION_DESCRIPTION}
+            content={i18n.CURRENT_VERSION_DESCRIPTION}
             type="iInCircle"
             size="m"
             display="block"
           />
           <EuiTitle size="xxs">
-            <h6>{i18n.BASE_VERSION}</h6>
+            <h6>{i18n.CURRENT_VERSION}</h6>
           </EuiTitle>
         </EuiFlexGroup>
         <EuiFlexGroup alignItems="baseline" gutterSize="xs">

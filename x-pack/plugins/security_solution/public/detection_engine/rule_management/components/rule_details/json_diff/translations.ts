@@ -31,6 +31,20 @@ export const BASE_VERSION_DESCRIPTION = i18n.translate(
   }
 );
 
+export const CURRENT_VERSION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.currentVersionLabel',
+  {
+    defaultMessage: 'Current',
+  }
+);
+
+export const CURRENT_VERSION_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.currentVersionDescriptionLabel',
+  {
+    defaultMessage: 'Shows currently installed rule',
+  }
+);
+
 export const UPDATED_VERSION = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.updatedVersionLabel',
   {

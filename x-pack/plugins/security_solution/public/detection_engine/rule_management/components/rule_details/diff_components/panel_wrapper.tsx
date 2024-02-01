@@ -9,6 +9,7 @@ import { EuiAccordion, EuiSplitPanel, EuiTitle, useEuiTheme } from '@elastic/eui
 import { camelCase, startCase } from 'lodash';
 import { css } from '@emotion/css';
 import React from 'react';
+import { fieldToDisplayNameMap } from './translations';
 
 interface RuleDiffPanelWrapperProps {
   fieldName: string;
@@ -31,8 +32,7 @@ export const RuleDiffPanelWrapper = ({ fieldName, children }: RuleDiffPanelWrapp
         id={fieldName}
         buttonContent={
           <EuiTitle size="xs">
-            {/* TODO: replace with i18n translations */}
-            <h5>{startCase(camelCase(fieldName))}</h5>
+            <h5>{fieldToDisplayNameMap[fieldName] ?? startCase(camelCase(fieldName))}</h5>
           </EuiTitle>
         }
       >

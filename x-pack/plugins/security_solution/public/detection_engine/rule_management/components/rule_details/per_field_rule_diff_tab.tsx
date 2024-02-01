@@ -12,22 +12,19 @@ import { UPGRADE_FIELD_ORDER } from './constants';
 import { RuleDiffHeaderBar, RuleDiffSection } from './diff_components';
 import { getSectionedFieldDiffs } from './helpers';
 import type { RuleFieldDiff } from '../../model/rule_details/rule_field_diff';
+import * as i18n from './translations';
 
 interface PerFieldRuleDiffTabProps {
   ruleDiff: PartialRuleDiff;
 }
 
 export const PerFieldRuleDiffTab = ({ ruleDiff }: PerFieldRuleDiffTabProps) => {
-  console.log(ruleDiff);
-
   const fieldsToRender = useMemo(() => {
     const fields: RuleFieldDiff[] = [];
-    for (const field in ruleDiff.fields) {
-      if (Object.hasOwn(ruleDiff.fields, field)) {
-        const typedField = field as keyof RuleFieldsDiff;
-        const formattedDiffs = getFormattedFieldDiff(typedField, ruleDiff.fields);
-        fields.push({ formattedDiffs, fieldName: typedField });
-      }
+    for (const field of Object.keys(ruleDiff.fields)) {
+      const typedField = field as keyof RuleFieldsDiff;
+      const formattedDiffs = getFormattedFieldDiff(typedField, ruleDiff.fields);
+      fields.push({ formattedDiffs, fieldName: typedField });
     }
     const sortedFields = fields.sort(
       (a, b) => UPGRADE_FIELD_ORDER.indexOf(a.fieldName) - UPGRADE_FIELD_ORDER.indexOf(b.fieldName)
@@ -43,14 +40,18 @@ export const PerFieldRuleDiffTab = ({ ruleDiff }: PerFieldRuleDiffTabProps) => {
   return (
     <>
       <RuleDiffHeaderBar />
-      {aboutFields.length !== 0 && <RuleDiffSection title={'About'} fields={aboutFields} />}
+      {aboutFields.length !== 0 && (
+        <RuleDiffSection title={i18n.ABOUT_SECTION_LABEL} fields={aboutFields} />
+      )}
       {definitionFields.length !== 0 && (
-        <RuleDiffSection title={'Description'} fields={definitionFields} />
+        <RuleDiffSection title={i18n.DEFINITION_SECTION_LABEL} fields={definitionFields} />
       )}
       {scheduleFields.length !== 0 && (
-        <RuleDiffSection title={'Schedule'} fields={scheduleFields} />
+        <RuleDiffSection title={i18n.SCHEDULE_SECTION_LABEL} fields={scheduleFields} />
       )}
-      {setupFields.length !== 0 && <RuleDiffSection title={'Setup'} fields={setupFields} />}
+      {setupFields.length !== 0 && (
+        <RuleDiffSection title={i18n.SETUP_GUIDE_SECTION_LABEL} fields={setupFields} />
+      )}
     </>
   );
 };
