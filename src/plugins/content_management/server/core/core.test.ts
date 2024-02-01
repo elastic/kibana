@@ -185,6 +185,52 @@ describe('Content Core', () => {
 
           cleanUp();
         });
+
+        test('should return a contentClient when registering', async () => {
+          const storage = createMockedStorage();
+          const latestVersion = 11;
+
+          const { coreSetup, cleanUp, contentDefinition } = setup({ latestVersion, storage });
+
+          const { contentClient } = coreSetup.api.register(contentDefinition);
+
+          {
+            const client = contentClient.getForRequest({
+              requestHandlerContext: {} as any,
+              request: {} as any,
+              version: 2,
+            });
+
+            await client.get('1234');
+            expect(storage.get).toHaveBeenCalledTimes(1);
+
+            const [storageContext] = storage.get.mock.calls[0];
+            expect(storageContext.version).toEqual({
+              latest: latestVersion,
+              request: 2, // version passed in the request should be used
+            });
+          }
+
+          storage.get.mockReset();
+
+          {
+            // If no request version is passed, the latest version should be used
+            const client = contentClient.getForRequest({
+              requestHandlerContext: {} as any,
+              request: {} as any,
+            });
+
+            await client.get('1234');
+
+            const [storageContext] = storage.get.mock.calls[0];
+            expect(storageContext.version).toEqual({
+              latest: latestVersion,
+              request: latestVersion, // latest version should be used
+            });
+          }
+
+          cleanUp();
+        });
       });
 
       describe('crud()', () => {

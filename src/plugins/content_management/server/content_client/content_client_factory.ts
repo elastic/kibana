@@ -26,9 +26,11 @@ export const getContentClientFactory =
       request: KibanaRequest;
       version?: Version;
     }) => {
+      const contentDefinition = contentRegistry.getDefinition(contentTypeId);
+
       const storageContext = getStorageContext({
         contentTypeId,
-        version,
+        version: version ?? contentDefinition.version.latest,
         ctx: {
           contentRegistry,
           requestHandlerContext,
