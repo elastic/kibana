@@ -107,7 +107,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('should Not allow editing an Exception with deleted ValueList', async () => {
       await createListsIndex(supertest, log);
 
-      const valueListId = 'value-list-id';
+      const valueListId = 'value-list-id.txt';
       await importFile(supertest, log, 'keyword', ['suricata-sensor-amsterdam'], valueListId);
       const rule: QueryRuleCreateProps = {
         ...getSimpleRule(),
