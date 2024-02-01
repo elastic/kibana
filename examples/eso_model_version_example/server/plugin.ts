@@ -135,7 +135,7 @@ export class EsoModelVersionExample implements Plugin<void, void> {
         2: plugins.encryptedSavedObjects.createModelVersion({
           modelVersion: {
             changes: [
-              // Version 2 adds a new attribute aadField2 which is included in AAD, we're not going to back fill it. During a
+              // Version 2 adds a new attribute aadField2 which is included in AAD, we're not going to backfill it. During a
               // zero-downtime upgrade, the previous version of Kibana will not know to include it in AAD based on the wrapped
               // model version 1 definition. We need to keep it empty in this version, but can backfill it in the next version
               // safely.
