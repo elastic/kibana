@@ -10,22 +10,19 @@ import { merge } from 'lodash';
 import { getUpdateValue } from './get_update_value';
 import type { State } from './form_slice';
 
-// Takes in the form configuration and returns a request object suitable to be sent to the
-// transform update API endpoint by iterating over `getUpdateValue()`.
-// Once a user hits the update button, this function takes care of extracting the information
-// necessary to create the update request. They take into account whether a field needs to
-// be included at all in the request (for example, if it hadn't been changed).
-// The code is also able to identify relationships/dependencies between form fields.
-// For example, if the `pipeline` field was changed, it's necessary to make the `index`
-// field part of the request, otherwise the update would fail.
+// Takes in the form state and returns an object suitable for example to be sent
+// to an API endpoint by iterating over `getUpdateValue()`. The function takes care
+// of extracting the information from the form state to create the object. It takes
+// into account whether a field needs to be included at all in the object (for example,
+// if it hadn't been changed). The code is also able to identify relationships/dependencies
+// between form fields.
 export const applyFormStateToConfig = <FF extends string, FS extends string, VN extends string, C>(
   config: C,
   formFields: State<FF, FS, VN>['formFields'],
   formSections: State<FF, FS, VN>['formSections'],
   extendOriginalConfig = false
 ): C =>
-  // Iterates over all form fields and only if necessary applies them to
-  // the request object used for updating the transform.
+  // Iterates over all form fields and only if necessary applies them to the final object.
   (Object.keys(formFields) as FF[]).reduce(
     (updateConfig, field) =>
       merge({ ...updateConfig }, getUpdateValue(field, config, formFields, formSections)),

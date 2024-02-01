@@ -39,7 +39,7 @@ export const FormTextArea = <FF extends string, FS extends string, VN extends st
           typeof placeHolder === 'string'
             ? placeHolder
             : placeHolder === true
-            ? i18n.translate('xpack.transform.transformList.editFlyoutFormPlaceholderText', {
+            ? i18n.translate('xpack.ml.formUtils.formTextAreaPlaceholderText', {
                 defaultMessage: 'Default: {defaultValue}',
                 values: { defaultValue },
               })

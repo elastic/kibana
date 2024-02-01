@@ -7,10 +7,10 @@
 
 // Note on the form validation and input components used:
 // All inputs use `EuiFieldText` which means all form values will be treated as strings.
-// This means we cast other formats like numbers coming from the transform config to strings,
-// then revalidate them and cast them again to number before submitting a transform update.
+// This means we cast other formats like numbers coming from the config to strings,
+// then revalidate them and cast them again to number before submitting an update.
 // We do this so we have fine grained control over field validation and the option to
-// cast to special values like `null` for disabling `docs_per_second`.
+// cast to special values like `null`.
 export const valueParsers = {
   defaultParser: (v: string) => v,
   nullableNumberParser: (v: string) => (v === '' ? null : +v),
