@@ -32,9 +32,10 @@ export const SLO_SUMMARY_DESTINATION_INDEX_PATTERN = `.slo-observability.summary
 export const getSLOTransformId = (sloId: string, sloRevision: number) =>
   `slo-${sloId}-${sloRevision}`;
 
-export const DEFAULT_SLO_PAGE_SIZE = 25;
 export const getSLOSummaryTransformId = (sloId: string, sloRevision: number) =>
   `slo-summary-${sloId}-${sloRevision}`;
 
 export const getSLOSummaryPipelineId = (sloId: string, sloRevision: number) =>
   `.slo-observability.summary.pipeline-${sloId}-${sloRevision}`;
+
+export const DEFAULT_SLO_PAGE_SIZE = 25;

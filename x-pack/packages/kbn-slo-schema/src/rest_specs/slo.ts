@@ -245,6 +245,10 @@ const getSLOInstancesResponseSchema = t.type({
   instances: t.array(t.string),
 });
 
+const getSLOHealthParamsSchema = t.type({
+  path: t.type({ id: t.string }),
+});
+
 type SLOResponse = t.OutputOf<typeof sloResponseSchema>;
 type SLOWithSummaryResponse = t.OutputOf<typeof sloWithSummaryResponseSchema>;
 
@@ -323,6 +327,7 @@ export {
   getSLOBurnRatesResponseSchema,
   getSLOInstancesParamsSchema,
   getSLOInstancesResponseSchema,
+  getSLOHealthParamsSchema,
 };
 export type {
   BudgetingMethod,

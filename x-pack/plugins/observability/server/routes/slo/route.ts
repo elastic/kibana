@@ -16,6 +16,7 @@ import {
   findSLOParamsSchema,
   getPreviewDataParamsSchema,
   getSLOBurnRatesParamsSchema,
+  getSLOHealthParamsSchema,
   getSLOInstancesParamsSchema,
   getSLOParamsSchema,
   manageSLOParamsSchema,
@@ -32,6 +33,7 @@ import {
   DeleteSLOInstances,
   FindSLO,
   GetSLO,
+  GetSloHealth,
   KibanaSavedObjectsSLORepository,
   UpdateSLO,
 } from '../../services/slo';
@@ -500,6 +502,26 @@ const getSloBurnRates = createObservabilityServerRoute({
   },
 });
 
+const getSloHealth = createObservabilityServerRoute({
+  endpoint: 'GET /internal/observability/slos/{id}/_health',
+  options: {
+    tags: ['access:slo_read'],
+    access: 'internal',
+  },
+  params: getSLOHealthParamsSchema,
+  handler: async ({ context, params, logger }) => {
+    await assertPlatinumLicense(context);
+
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const soClient = (await context.core).savedObjects.client;
+    const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
+    const service = new GetSloHealth(esClient, repository);
+
+    const sloId = params.path.id;
+    return await service.execute(sloId);
+  },
+});
+
 const getPreviewData = createObservabilityServerRoute({
   endpoint: 'POST /internal/observability/slos/_preview',
   options: {
@@ -533,4 +555,5 @@ export const sloRouteRepository = {
   ...getPreviewData,
   ...getSLOInstancesRoute,
   ...resetSLORoute,
+  ...getSloHealth,
 };
