@@ -71,11 +71,7 @@ export const ObservabilityLogExplorerApp = ({
           <Router history={appParams.history}>
             <Routes>
               <Route path="/" exact={true} render={() => <ObservabilityLogExplorerMainRoute />} />
-              <Route
-                path="/dataset-quality"
-                exact={true}
-                render={() => <DatasetQualityRoute core={core} />}
-              />
+              <Route path="/dataset-quality" exact={true} render={() => <DatasetQualityRoute />} />
             </Routes>
           </Router>
         </KbnUrlStateStorageFromRouterProvider>

@@ -401,6 +401,24 @@ export class CsvGenerator {
       }
     }
 
+    if (this.csvRowCount === 0) {
+      if (warnings.length > 0) {
+        /*
+         * Add the errors into the CSV content. This makes error messages more
+         * discoverable. When the export was automated or triggered by an API
+         * call or is automated, the user doesn't necesssarily go through the
+         * Kibana UI to download the export and might not otherwise see the
+         * error message.
+         */
+        logger.info('CSV export content was empty. Adding error messages to CSV export content.');
+        // join the string array and putting double quotes around each item
+        // add a leading newline so the first message is not treated as a header
+        builder.tryAppend('\n"' + warnings.join('"\n"') + '"');
+      } else {
+        logger.info('CSV export content was empty. No error messages.');
+      }
+    }
+
     return {
       content_type: CONTENT_TYPE_CSV,
       csv_contains_formulas: this.csvContainsFormulas && !escapeFormulaValues,
