@@ -230,7 +230,7 @@ export default function ({ getService }: FtrProviderContext) {
               value: 'container-0',
             },
           ]);
-
+        expect(resp.hits.hits[0]._source).property('kibana.alert.evaluation.threshold').eql([0.2]);
         expect(resp.hits.hits[0]._source)
           .property('kibana.alert.rule.parameters')
           .eql({
