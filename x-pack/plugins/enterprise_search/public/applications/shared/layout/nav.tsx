@@ -26,6 +26,7 @@ import {
 import { SEARCH_APPLICATIONS_PATH, SearchApplicationViewTabs } from '../../applications/routes';
 import { useIndicesNav } from '../../enterprise_search_content/components/search_index/indices/indices_nav';
 import {
+  AI_PLAYGROUND_PATH,
   CONNECTORS_PATH,
   CRAWLERS_PATH,
   SEARCH_INDICES_PATH,
@@ -90,6 +91,32 @@ export const useEnterpriseSearchNav = () => {
             shouldNotCreateHref: true,
             shouldShowActiveForSubroutes: true,
             to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + CRAWLERS_PATH,
+          }),
+        },
+        ...(productFeatures.hasDefaultIngestPipeline
+          ? [
+              {
+                id: 'settings',
+                name: i18n.translate('xpack.enterpriseSearch.nav.contentSettingsTitle', {
+                  defaultMessage: 'Settings',
+                }),
+                ...generateNavLink({
+                  shouldNotCreateHref: true,
+                  shouldShowActiveForSubroutes: true,
+                  to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + SETTINGS_PATH,
+                }),
+              },
+            ]
+          : []),
+        {
+          id: 'ai-playground',
+          name: i18n.translate('xpack.enterpriseSearch.nav.aiPlaygroundTitle', {
+            defaultMessage: 'AI Playground',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            shouldShowActiveForSubroutes: true,
+            to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + AI_PLAYGROUND_PATH,
           }),
         },
       ],
