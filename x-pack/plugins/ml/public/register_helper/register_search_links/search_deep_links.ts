@@ -263,6 +263,17 @@ function createDeepLinks(
       };
     },
 
+    getESQLDataVisualizerDeepLink: (): AppDeepLink<LinkId> => {
+      return {
+        id: 'indexDataVisualizer',
+        title: i18n.translate('xpack.ml.deepLink.esqlDataVisualizer', {
+          defaultMessage: 'ES|QL Data Visualizer',
+        }),
+        path: `/${ML_PAGES.DATA_VISUALIZER_ESQL}`,
+        navLinkStatus: getNavStatus(true),
+      };
+    },
+
     getDataDriftDeepLink: (): AppDeepLink<LinkId> => {
       return {
         id: 'dataDrift',

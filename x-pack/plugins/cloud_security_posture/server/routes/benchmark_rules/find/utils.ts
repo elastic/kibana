@@ -13,7 +13,10 @@ import { getBenchmarkFromPackagePolicy } from '../../../../common/utils/helpers'
 
 import type { CspBenchmarkRule } from '../../../../common/types/latest';
 
-export const getSortedCspBenchmarkRulesTemplates = (cspBenchmarkRules: CspBenchmarkRule[]) => {
+export const getSortedCspBenchmarkRulesTemplates = (
+  cspBenchmarkRules: CspBenchmarkRule[],
+  sortDirection: 'asc' | 'desc'
+) => {
   return cspBenchmarkRules.slice().sort((a, b) => {
     const ruleNumberA = a?.metadata?.benchmark?.rule_number;
     const ruleNumberB = b?.metadata?.benchmark?.rule_number;
@@ -22,12 +25,19 @@ export const getSortedCspBenchmarkRulesTemplates = (cspBenchmarkRules: CspBenchm
     const versionB = semverValid(ruleNumberB);
 
     if (versionA !== null && versionB !== null) {
-      return semverCompare(versionA, versionB);
+      return sortDirection === 'asc'
+        ? semverCompare(versionA, versionB)
+        : semverCompare(versionB, versionA);
     } else {
-      return String(ruleNumberA).localeCompare(String(ruleNumberB), undefined, {
-        numeric: true,
-        sensitivity: 'base',
-      });
+      return sortDirection === 'asc'
+        ? String(ruleNumberA).localeCompare(String(ruleNumberB), undefined, {
+            numeric: true,
+            sensitivity: 'base',
+          })
+        : String(ruleNumberB).localeCompare(String(ruleNumberA), undefined, {
+            numeric: true,
+            sensitivity: 'base',
+          });
     }
   });
 };
