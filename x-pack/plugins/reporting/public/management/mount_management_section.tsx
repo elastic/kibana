@@ -17,9 +17,12 @@ import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import type { ClientConfigType } from '@kbn/reporting-public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import {
+  InternalApiClientProvider,
+  type ReportingAPIClient,
+} from '@kbn/reporting-api-client/reporting_api_client';
 import { ReportListing } from '.';
 import { PolicyStatusContextProvider } from '../lib/default_status_context';
-import { InternalApiClientProvider, type ReportingAPIClient } from '../lib/reporting_api_client';
 import type { KibanaContext } from '../types';
 
 export async function mountManagementSection(

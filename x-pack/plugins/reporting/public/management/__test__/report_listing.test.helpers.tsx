@@ -25,12 +25,15 @@ import type { ILicense } from '@kbn/licensing-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
+import {
+  InternalApiClientProvider,
+  ReportingAPIClient,
+} from '@kbn/reporting-api-client/reporting_api_client';
 import { mockJobs } from '../../../common/test';
 
 import { KibanaContextProvider } from '../../shared_imports';
 
 import { IlmPolicyStatusContextProvider } from '../../lib/ilm_policy_status_context';
-import { InternalApiClientProvider, ReportingAPIClient } from '../../lib/reporting_api_client';
 import { Job } from '../../lib/job';
 
 import { ListingProps as Props, ReportListing } from '..';

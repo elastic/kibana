@@ -13,7 +13,7 @@ import { ReportApiJSON } from '@kbn/reporting-common/types';
 
 import { JobSummary } from '../types';
 import { Job } from './job';
-import { ReportingAPIClient } from './reporting_api_client';
+import { ReportingAPIClient } from '@kbn/reporting-api-client/reporting_api_client';
 import { ReportingNotifierStreamHandler } from './stream_handler';
 
 Object.defineProperty(window, 'sessionStorage', {

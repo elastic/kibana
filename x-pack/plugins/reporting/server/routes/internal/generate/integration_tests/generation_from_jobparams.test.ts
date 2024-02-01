@@ -19,7 +19,7 @@ import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counter
 import { ReportingCore } from '../../../..';
 import { INTERNAL_ROUTES } from '../../../../../common/constants';
 import { ReportingStore } from '../../../../lib';
-import { ExportTypesRegistry } from '../../../../lib/export_types_registry';
+import { ExportTypesRegistry } from '@kbn/reporting-common/export_types_registry';
 import { Report } from '../../../../lib/store';
 import { reportingMock } from '../../../../mocks';
 import {

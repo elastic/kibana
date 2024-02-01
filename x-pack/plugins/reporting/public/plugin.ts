@@ -33,14 +33,16 @@ import type { ClientConfigType } from '@kbn/reporting-public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
+import { ReportingAPIClient } from '@kbn/reporting-api-client/reporting_api_client';
+import {
+  getSharedComponents,
+  reportingScreenshotShareProvider,
+  reportingCsvShareProvider,
+} from '@kbn/reporting-share';
 import type { ReportingSetup, ReportingStart } from '.';
-import { ReportingAPIClient } from './lib/reporting_api_client';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
 import { getGeneralErrorToast } from './notifier';
 import { ReportingCsvPanelAction } from './panel_actions/get_csv_panel_action';
-import { reportingCsvShareProvider } from './share_context_menu/register_csv_reporting';
-import { reportingScreenshotShareProvider } from './share_context_menu/register_pdf_png_reporting';
-import { getSharedComponents } from './shared';
 import type { JobSummarySet } from './types';
 
 function getStored(): JobId[] {

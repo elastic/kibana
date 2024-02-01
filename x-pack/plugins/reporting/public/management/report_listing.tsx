@@ -7,8 +7,8 @@
 
 import React from 'react';
 
+import { useInternalApiClient } from '@kbn/reporting-api-client/reporting_api_client';
 import { ListingProps as Props } from '.';
-import { useInternalApiClient } from '../lib/reporting_api_client';
 import { useKibana } from '../shared_imports';
 
 import './report_listing.scss';

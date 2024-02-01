@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart } from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { JOB_STATUS } from '@kbn/reporting-common';
 import type { JobId, ReportOutput, ReportSource, TaskRunResult } from '@kbn/reporting-common/types';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
 
 /*
  * Notifier Toasts
@@ -32,16 +29,4 @@ export interface JobSummary {
 export interface JobSummarySet {
   completed: JobSummary[];
   failed: JobSummary[];
-}
-
-/* Services received through useKibana context
- * @internal
- */
-export interface KibanaContext {
-  http: CoreSetup['http'];
-  application: CoreStart['application'];
-  uiSettings: CoreStart['uiSettings'];
-  docLinks: CoreStart['docLinks'];
-  data: DataPublicPluginStart;
-  share: SharePluginStart;
 }

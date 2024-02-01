@@ -14,7 +14,7 @@ import { PDF_REPORT_TYPE, PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types
 import { PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
 
 import type { ReportingCore, ReportingInternalStart } from './core';
-import { ExportTypesRegistry } from './lib/export_types_registry';
+import { ExportTypesRegistry } from '@kbn/reporting-common/export_types_registry';
 import { ReportingPlugin } from './plugin';
 import { createMockPluginSetup, createMockPluginStart } from './test_helpers';
 import type { ReportingSetupDeps } from './types';

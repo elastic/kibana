@@ -9,7 +9,7 @@ import type { ApplicationStart, ToastsStart } from '@kbn/core/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ClientConfigType } from '@kbn/reporting-public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { ReportingAPIClient } from '../lib/reporting_api_client';
+import type { ReportingAPIClient } from '@kbn/reporting-api-client/reporting_api_client';
 
 export interface ListingProps {
   apiClient: ReportingAPIClient;
