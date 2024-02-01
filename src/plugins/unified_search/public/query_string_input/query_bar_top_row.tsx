@@ -519,7 +519,7 @@ export const QueryBarTopRow = React.memo(
             onClick={onClickCancelButton}
             size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
             data-test-subj="queryCancelButton"
-            color="danger"
+            color="text"
             display="base"
           >
             {buttonLabelCancel}
