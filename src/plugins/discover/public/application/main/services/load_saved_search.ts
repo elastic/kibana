@@ -115,10 +115,6 @@ function updateBySavedSearch(savedSearch: SavedSearch, deps: LoadSavedSearchDeps
   if (!savedSearchDataView.isPersisted()) {
     internalStateContainer.transitions.appendAdHocDataViews(savedSearchDataView);
   }
-  console.log(
-    'loaded visContextJSON',
-    savedSearch.visContextJSON ? JSON.parse(savedSearch.visContextJSON) : undefined
-  );
 
   // Finally notify dataStateContainer, data.query and filterManager about new derived state
   dataStateContainer.reset(savedSearch);
