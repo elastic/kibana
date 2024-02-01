@@ -224,7 +224,13 @@ export class CsvGenerator {
   public async generateData(): Promise<TaskRunResult> {
     const logger = this.logger;
     const [settings, searchSource] = await Promise.all([
-      getExportSettings(this.clients.uiSettings, this.config, this.job.browserTimezone, logger),
+      getExportSettings(
+        this.clients.uiSettings,
+        this.taskInstanceFields,
+        this.config,
+        this.job.browserTimezone,
+        logger
+      ),
       this.dependencies.searchSourceStart.create(this.job.searchSource),
     ]);
 
@@ -255,21 +261,11 @@ export class CsvGenerator {
     let cursor: SearchCursor;
     if (this.job.pagingStrategy === 'scroll') {
       // Optional strategy: scan-and-scroll
-      cursor = new SearchCursorScroll(
-        indexPatternTitle,
-        { ...settings, taskInstanceFields: this.taskInstanceFields },
-        this.clients,
-        this.logger
-      );
+      cursor = new SearchCursorScroll(indexPatternTitle, settings, this.clients, this.logger);
       logger.debug('Using search strategy: scroll');
     } else {
       // Default strategy: point-in-time
-      cursor = new SearchCursorPit(
-        indexPatternTitle,
-        { ...settings, taskInstanceFields: this.taskInstanceFields },
-        this.clients,
-        this.logger
-      );
+      cursor = new SearchCursorPit(indexPatternTitle, settings, this.clients, this.logger);
       logger.debug('Using search strategy: pit');
     }
     await cursor.initialize();

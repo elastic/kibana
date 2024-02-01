@@ -27,6 +27,7 @@ import { getExportSettings } from './get_export_settings';
 describe('getExportSettings', () => {
   let uiSettingsClient: IUiSettingsClient;
   let config: ReportingConfigType['csv'];
+  let taskInstanceFields: TaskInstanceFields;
   const logger = loggingSystemMock.createLogger();
 
   beforeEach(() => {
@@ -39,6 +40,8 @@ describe('getExportSettings', () => {
       maxConcurrentShardRequests: 5,
       enablePanelActionDownload: true,
     };
+
+    taskInstanceFields = { startedAt: null, retryAt: null };
 
     uiSettingsClient = uiSettingsServiceMock
       .createStartContract()
@@ -55,12 +58,13 @@ describe('getExportSettings', () => {
           return false;
       }
 
-      return 'helo world';
+      return 'hello world';
     });
   });
 
   test('getExportSettings: returns the expected result', async () => {
-    expect(await getExportSettings(uiSettingsClient, config, '', logger)).toMatchInlineSnapshot(`
+    expect(await getExportSettings(uiSettingsClient, taskInstanceFields, config, '', logger))
+      .toMatchInlineSnapshot(`
       Object {
         "bom": "",
         "checkForFormulas": true,
@@ -75,6 +79,10 @@ describe('getExportSettings', () => {
           "strategy": "pit",
         },
         "separator": ",",
+        "taskInstanceFields": Object {
+          "retryAt": null,
+          "startedAt": null,
+        },
         "timezone": "UTC",
       }
     `);
@@ -83,7 +91,9 @@ describe('getExportSettings', () => {
   test('does not add a default scroll strategy', async () => {
     // @ts-expect-error undefined isn't allowed
     config = { ...config, scroll: { strategy: undefined } };
-    expect(await getExportSettings(uiSettingsClient, config, '', logger)).toMatchObject(
+    expect(
+      await getExportSettings(uiSettingsClient, taskInstanceFields, config, '', logger)
+    ).toMatchObject(
       expect.objectContaining({ scroll: expect.objectContaining({ strategy: undefined }) })
     );
   });
@@ -91,7 +101,9 @@ describe('getExportSettings', () => {
   test('passes the scroll=pit strategy through', async () => {
     config = { ...config, scroll: { ...config.scroll, strategy: 'pit' } };
 
-    expect(await getExportSettings(uiSettingsClient, config, '', logger)).toMatchObject(
+    expect(
+      await getExportSettings(uiSettingsClient, taskInstanceFields, config, '', logger)
+    ).toMatchObject(
       expect.objectContaining({ scroll: expect.objectContaining({ strategy: 'pit' }) })
     );
   });
@@ -99,7 +111,9 @@ describe('getExportSettings', () => {
   test('passes the scroll=scroll strategy through', async () => {
     config = { ...config, scroll: { ...config.scroll, strategy: 'scroll' } };
 
-    expect(await getExportSettings(uiSettingsClient, config, '', logger)).toMatchObject(
+    expect(
+      await getExportSettings(uiSettingsClient, taskInstanceFields, config, '', logger)
+    ).toMatchObject(
       expect.objectContaining({
         scroll: expect.objectContaining({
           strategy: 'scroll',
@@ -109,7 +123,13 @@ describe('getExportSettings', () => {
   });
 
   test('escapeValue function', async () => {
-    const { escapeValue } = await getExportSettings(uiSettingsClient, config, '', logger);
+    const { escapeValue } = await getExportSettings(
+      uiSettingsClient,
+      taskInstanceFields,
+      config,
+      '',
+      logger
+    );
     expect(escapeValue(`test`)).toBe(`test`);
     expect(escapeValue(`this is, a test`)).toBe(`"this is, a test"`);
     expect(escapeValue(`"tet"`)).toBe(`"""tet"""`);
@@ -125,7 +145,9 @@ describe('getExportSettings', () => {
     });
 
     expect(
-      await getExportSettings(uiSettingsClient, config, '', logger).then(({ timezone }) => timezone)
+      await getExportSettings(uiSettingsClient, taskInstanceFields, config, '', logger).then(
+        ({ timezone }) => timezone
+      )
     ).toBe(`America/Aruba`);
   });
 
@@ -151,7 +173,13 @@ describe('getExportSettings', () => {
     });
 
     it('returns its specified value when value is not auto', async () => {
-      const { scroll } = await getExportSettings(uiSettingsClient, config, '', logger);
+      const { scroll } = await getExportSettings(
+        uiSettingsClient,
+        taskInstanceFields,
+        config,
+        '',
+        logger
+      );
 
       expect(scroll.duration(mockedTaskInstanceFields)).toBe(config.scroll.duration);
     });
@@ -167,6 +195,7 @@ describe('getExportSettings', () => {
 
       const { scroll } = await getExportSettings(
         uiSettingsClient,
+        taskInstanceFields,
         configWithScrollAutoDuration,
         '',
         logger
@@ -188,6 +217,7 @@ describe('getExportSettings', () => {
 
       const { scroll } = await getExportSettings(
         uiSettingsClient,
+        taskInstanceFields,
         configWithScrollAutoDuration,
         '',
         logger
@@ -213,6 +243,7 @@ describe('getExportSettings', () => {
 
       const { scroll } = await getExportSettings(
         uiSettingsClient,
+        taskInstanceFields,
         configWithScrollAutoDuration,
         '',
         logger

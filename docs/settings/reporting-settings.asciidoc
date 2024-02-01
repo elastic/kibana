@@ -235,7 +235,7 @@ You may need to lower this setting if the default number of documents creates a 
 Amount of {time-units}[time] allowed before {kib} cleans the scroll context during a CSV export. Valid option is either `auto` or {time-units}[time], Defaults to `30s`.
 [NOTE]
 ============
-If search latency in {es} is sufficiently high, such as if you are using {ccs}, you may either need to increase the time setting or set this config value to `auto`. When the config value is set to `auto` the scroll context will be preserved for as long as is possible for, before the csv generation task is terminated for retry.
+If search latency in {es} is sufficiently high, such as if you are using {ccs}, you may either need to increase the time setting or set this config value to `auto`. When the config value is set to `auto` the scroll context will be preserved for as long as is possible, before the report task is terminated due to the limits of `xpack.reporting.queue.timeout`.
 ============
 
 `xpack.reporting.csv.scroll.strategy`::

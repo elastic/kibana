@@ -69,6 +69,7 @@ export class CsvESQLGenerator {
   public async generateData(): Promise<TaskRunResult> {
     const settings = await getExportSettings(
       this.clients.uiSettings,
+      this.taskInstanceFields,
       this.config,
       this.job.browserTimezone,
       this.logger

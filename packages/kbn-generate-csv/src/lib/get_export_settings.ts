@@ -22,6 +22,7 @@ import { CsvPagingStrategy } from '../../types';
 
 export interface CsvExportSettings {
   timezone: string;
+  taskInstanceFields: TaskInstanceFields;
   scroll: {
     strategy?: CsvPagingStrategy;
     size: number;
@@ -42,6 +43,7 @@ export interface CsvExportSettings {
 
 export const getExportSettings = async (
   client: IUiSettingsClient,
+  taskInstanceFields: TaskInstanceFields,
   config: ReportingConfigType['csv'],
   timezone: string | undefined,
   logger: Logger
@@ -78,6 +80,7 @@ export const getExportSettings = async (
 
   return {
     timezone: setTimezone,
+    taskInstanceFields,
     scroll: {
       strategy: config.scroll.strategy as CsvPagingStrategy,
       size: config.scroll.size,
