@@ -12,7 +12,7 @@ export interface UseAlertSuppressionReturn {
   isSuppressionEnabled: boolean;
 }
 
-export const useAlertSuppression = (ruleType?: Type): UseAlertSuppressionReturn => {
+export const useAlertSuppression = (ruleType: Type | undefined): UseAlertSuppressionReturn => {
   const isThreatMatchRuleFFEnabled = useIsExperimentalFeatureEnabled(
     'alertSuppressionForIndicatorMatchRuleEnabled'
   );

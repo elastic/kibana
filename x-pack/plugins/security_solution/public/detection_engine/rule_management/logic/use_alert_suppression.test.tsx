@@ -37,8 +37,8 @@ describe('useAlertSuppression', () => {
     expect(result.current.isSuppressionEnabled).toBe(true);
   });
 
-  it('should return false if rule type is not set', () => {
-    const { result } = renderHook(() => useAlertSuppression());
+  it('should return false if rule type is undefined', () => {
+    const { result } = renderHook(() => useAlertSuppression(undefined));
     expect(result.current.isSuppressionEnabled).toBe(false);
   });
 

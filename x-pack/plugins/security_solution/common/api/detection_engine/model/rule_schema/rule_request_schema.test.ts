@@ -1214,63 +1214,31 @@ describe('rules schema', () => {
   });
 
   describe('alerts suppression', () => {
-    test('should drop suppression fields apart from duration for "threshold" rule type', () => {
-      const payload = {
-        ...getCreateThresholdRulesSchemaMock(),
-        alert_suppression: {
-          group_by: ['host.name'],
-          duration: { value: 5, unit: 'm' },
-          missing_field_strategy: 'suppress',
-        },
-      };
-
-      const result = RuleCreateProps.safeParse(payload);
-      expectParseSuccess(result);
-      expect(result.data).toEqual({
-        ...payload,
-        alert_suppression: {
-          duration: { value: 5, unit: 'm' },
-        },
-      });
-    });
-    test('should validate only suppression duration for "threshold" rule type', () => {
-      const payload = {
-        ...getCreateThresholdRulesSchemaMock(),
-        alert_suppression: {
-          duration: { value: 5, unit: 'm' },
-        },
-      };
-
-      const result = RuleCreateProps.safeParse(payload);
-      expectParseSuccess(result);
-      expect(result.data).toEqual(payload);
-    });
-    test('should throw error if alert suppression duration is absent for "threshold" rule type', () => {
-      const payload = {
-        ...getCreateThresholdRulesSchemaMock(),
-        alert_suppression: {
-          group_by: ['host.name'],
-          missing_field_strategy: 'suppress',
-        },
-      };
-
-      const result = RuleCreateProps.safeParse(payload);
-      expectParseError(result);
-      expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-        `"alert_suppression.duration: Required"`
-      );
-    });
-    // behaviour common for multiple rule types
-    const cases = [{ ruleType: 'threat_match', ruleMock: getCreateThreatMatchRulesSchemaMock() }];
-
-    cases.forEach(({ ruleType, ruleMock }) => {
-      test(`should validate suppression fields for "${ruleType}" rule type`, () => {
+    describe(`alert suppression validation for "threshold" rule type`, () => {
+      test('should drop suppression fields apart from duration for "threshold" rule type', () => {
         const payload = {
-          ...ruleMock,
+          ...getCreateThresholdRulesSchemaMock(),
           alert_suppression: {
-            group_by: ['agent.name'],
+            group_by: ['host.name'],
             duration: { value: 5, unit: 'm' },
-            missing_fields_strategy: 'suppress',
+            missing_field_strategy: 'suppress',
+          },
+        };
+
+        const result = RuleCreateProps.safeParse(payload);
+        expectParseSuccess(result);
+        expect(result.data).toEqual({
+          ...payload,
+          alert_suppression: {
+            duration: { value: 5, unit: 'm' },
+          },
+        });
+      });
+      test('should validate only suppression duration for "threshold" rule type', () => {
+        const payload = {
+          ...getCreateThresholdRulesSchemaMock(),
+          alert_suppression: {
+            duration: { value: 5, unit: 'm' },
           },
         };
 
@@ -1278,57 +1246,97 @@ describe('rules schema', () => {
         expectParseSuccess(result);
         expect(result.data).toEqual(payload);
       });
-
-      test(`should throw error if suppression fields not valid for "${ruleType}" rule`, () => {
+      test('should throw error if alert suppression duration is absent for "threshold" rule type', () => {
         const payload = {
-          ...ruleMock,
+          ...getCreateThresholdRulesSchemaMock(),
           alert_suppression: {
-            group_by: 'not an array',
-            missing_fields_strategy: 'suppress',
+            group_by: ['host.name'],
+            missing_field_strategy: 'suppress',
           },
         };
 
         const result = RuleCreateProps.safeParse(payload);
         expectParseError(result);
-        expect(stringifyZodError(result.error)).toEqual(
-          'alert_suppression.group_by: Expected array, received string'
+        expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+          `"alert_suppression.duration: Required"`
         );
       });
+    });
+    // behaviour common for multiple rule types
+    const cases = [
+      { ruleType: 'threat_match', ruleMock: getCreateThreatMatchRulesSchemaMock() },
+      { ruleType: 'query', ruleMock: getCreateRulesSchemaMock() },
+      { ruleType: 'saved_query', ruleMock: getCreateSavedQueryRulesSchemaMock() },
+    ];
 
-      test(`should throw error if suppression required field is missing for "${ruleType}" rule`, () => {
-        const payload = {
-          ...ruleMock,
-          alert_suppression: {
-            duration: { value: 5, unit: 'm' },
-            missing_fields_strategy: 'suppress',
-          },
-        };
+    cases.forEach(({ ruleType, ruleMock }) => {
+      describe(`alert suppression validation for "${ruleType}" rule type`, () => {
+        test(`should validate suppression fields for "${ruleType}" rule type`, () => {
+          const payload = {
+            ...ruleMock,
+            alert_suppression: {
+              group_by: ['agent.name'],
+              duration: { value: 5, unit: 'm' },
+              missing_fields_strategy: 'suppress',
+            },
+          };
 
-        const result = RuleCreateProps.safeParse(payload);
-        expectParseError(result);
-        expect(stringifyZodError(result.error)).toEqual('alert_suppression.group_by: Required');
-      });
+          const result = RuleCreateProps.safeParse(payload);
+          expectParseSuccess(result);
+          expect(result.data).toEqual(payload);
+        });
 
-      test(`should drop fields that are not in suppression schema for "${ruleType}" rule`, () => {
-        const payload = {
-          ...ruleMock,
-          alert_suppression: {
-            group_by: ['agent.name'],
-            duration: { value: 5, unit: 'm' },
-            missing_fields_strategy: 'suppress',
-            random_field: 1,
-          },
-        };
+        test(`should throw error if suppression fields not valid for "${ruleType}" rule`, () => {
+          const payload = {
+            ...ruleMock,
+            alert_suppression: {
+              group_by: 'not an array',
+              missing_fields_strategy: 'suppress',
+            },
+          };
 
-        const result = RuleCreateProps.safeParse(payload);
-        expectParseSuccess(result);
-        expect(result.data).toEqual({
-          ...ruleMock,
-          alert_suppression: {
-            group_by: ['agent.name'],
-            duration: { value: 5, unit: 'm' },
-            missing_fields_strategy: 'suppress',
-          },
+          const result = RuleCreateProps.safeParse(payload);
+          expectParseError(result);
+          expect(stringifyZodError(result.error)).toEqual(
+            'alert_suppression.group_by: Expected array, received string'
+          );
+        });
+
+        test(`should throw error if suppression required field is missing for "${ruleType}" rule`, () => {
+          const payload = {
+            ...ruleMock,
+            alert_suppression: {
+              duration: { value: 5, unit: 'm' },
+              missing_fields_strategy: 'suppress',
+            },
+          };
+
+          const result = RuleCreateProps.safeParse(payload);
+          expectParseError(result);
+          expect(stringifyZodError(result.error)).toEqual('alert_suppression.group_by: Required');
+        });
+
+        test(`should drop fields that are not in suppression schema for "${ruleType}" rule`, () => {
+          const payload = {
+            ...ruleMock,
+            alert_suppression: {
+              group_by: ['agent.name'],
+              duration: { value: 5, unit: 'm' },
+              missing_fields_strategy: 'suppress',
+              random_field: 1,
+            },
+          };
+
+          const result = RuleCreateProps.safeParse(payload);
+          expectParseSuccess(result);
+          expect(result.data).toEqual({
+            ...ruleMock,
+            alert_suppression: {
+              group_by: ['agent.name'],
+              duration: { value: 5, unit: 'm' },
+              missing_fields_strategy: 'suppress',
+            },
+          });
         });
       });
     });

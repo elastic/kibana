@@ -23,7 +23,6 @@ import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
 
 import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
-import { SUPPRESSIBLE_ALERT_RULES } from './constants';
 
 describe('#hasLargeValueList', () => {
   test('it returns false if empty array', () => {
@@ -223,17 +222,24 @@ describe('normalizeMachineLearningJobIds', () => {
     ]);
   });
 });
+
 describe('Alert Suppression Rules', () => {
   describe('isSuppressibleAlertRule', () => {
     test('should return true for a suppressible rule type', () => {
-      const suppressibleRules: Type[] = Object.values(SUPPRESSIBLE_ALERT_RULES);
-      suppressibleRules.forEach((rule) => {
-        const result = isSuppressibleAlertRule(rule);
-        expect(result).toBe(true);
-      });
+      // Rule types that support alert suppression:
+      expect(isSuppressibleAlertRule('threshold')).toBe(true);
+      expect(isSuppressibleAlertRule('saved_query')).toBe(true);
+      expect(isSuppressibleAlertRule('query')).toBe(true);
+      expect(isSuppressibleAlertRule('threat_match')).toBe(true);
+
+      // Rule types that don't support alert suppression:
+      expect(isSuppressibleAlertRule('eql')).toBe(false);
+      expect(isSuppressibleAlertRule('machine_learning')).toBe(false);
+      expect(isSuppressibleAlertRule('new_terms')).toBe(false);
+      expect(isSuppressibleAlertRule('esql')).toBe(false);
     });
 
-    test('should return false for a non-suppressible rule type', () => {
+    test('should return false for an unknown rule type', () => {
       const ruleType = '123' as Type;
       const result = isSuppressibleAlertRule(ruleType);
       expect(result).toBe(false);
@@ -242,14 +248,20 @@ describe('Alert Suppression Rules', () => {
 
   describe('isSuppressionRuleConfiguredWithDuration', () => {
     test('should return true for a suppressible rule type', () => {
-      const suppressibleRules: Type[] = Object.values(SUPPRESSIBLE_ALERT_RULES);
-      suppressibleRules.forEach((rule) => {
-        const result = isSuppressionRuleConfiguredWithDuration(rule);
-        expect(result).toBe(true);
-      });
+      // Rule types that support alert suppression:
+      expect(isSuppressionRuleConfiguredWithDuration('threshold')).toBe(true);
+      expect(isSuppressionRuleConfiguredWithDuration('saved_query')).toBe(true);
+      expect(isSuppressionRuleConfiguredWithDuration('query')).toBe(true);
+      expect(isSuppressionRuleConfiguredWithDuration('threat_match')).toBe(true);
+
+      // Rule types that don't support alert suppression:
+      expect(isSuppressionRuleConfiguredWithDuration('eql')).toBe(false);
+      expect(isSuppressionRuleConfiguredWithDuration('machine_learning')).toBe(false);
+      expect(isSuppressionRuleConfiguredWithDuration('new_terms')).toBe(false);
+      expect(isSuppressionRuleConfiguredWithDuration('esql')).toBe(false);
     });
 
-    test('should return false for a non-suppressible rule type', () => {
+    test('should return false for an unknown rule type', () => {
       const ruleType = '123' as Type;
       const result = isSuppressionRuleConfiguredWithDuration(ruleType);
       expect(result).toBe(false);
@@ -258,8 +270,16 @@ describe('Alert Suppression Rules', () => {
 
   describe('isSuppressionRuleConfiguredWithGroupBy', () => {
     test('should return true for a suppressible rule type with groupBy', () => {
-      const result = isSuppressionRuleConfiguredWithGroupBy('saved_query');
-      expect(result).toBe(true);
+      // Rule types that support alert suppression groupBy:
+      expect(isSuppressionRuleConfiguredWithGroupBy('saved_query')).toBe(true);
+      expect(isSuppressionRuleConfiguredWithGroupBy('query')).toBe(true);
+      expect(isSuppressionRuleConfiguredWithGroupBy('threat_match')).toBe(true);
+
+      // Rule types that don't support alert suppression:
+      expect(isSuppressionRuleConfiguredWithGroupBy('eql')).toBe(false);
+      expect(isSuppressionRuleConfiguredWithGroupBy('machine_learning')).toBe(false);
+      expect(isSuppressionRuleConfiguredWithGroupBy('new_terms')).toBe(false);
+      expect(isSuppressionRuleConfiguredWithGroupBy('esql')).toBe(false);
     });
 
     test('should return false for a threshold rule type', () => {
@@ -267,7 +287,7 @@ describe('Alert Suppression Rules', () => {
       expect(result).toBe(false);
     });
 
-    test('should return false for a non-suppressible rule type', () => {
+    test('should return false for an unknown rule type', () => {
       const ruleType = '123' as Type;
       const result = isSuppressionRuleConfiguredWithGroupBy(ruleType);
       expect(result).toBe(false);
@@ -276,8 +296,16 @@ describe('Alert Suppression Rules', () => {
 
   describe('isSuppressionRuleConfiguredWithMissingFields', () => {
     test('should return true for a suppressible rule type with missing fields', () => {
-      const result = isSuppressionRuleConfiguredWithMissingFields('query');
-      expect(result).toBe(true);
+      // Rule types that support alert suppression groupBy:
+      expect(isSuppressionRuleConfiguredWithMissingFields('saved_query')).toBe(true);
+      expect(isSuppressionRuleConfiguredWithMissingFields('query')).toBe(true);
+      expect(isSuppressionRuleConfiguredWithMissingFields('threat_match')).toBe(true);
+
+      // Rule types that don't support alert suppression:
+      expect(isSuppressionRuleConfiguredWithMissingFields('eql')).toBe(false);
+      expect(isSuppressionRuleConfiguredWithMissingFields('machine_learning')).toBe(false);
+      expect(isSuppressionRuleConfiguredWithMissingFields('new_terms')).toBe(false);
+      expect(isSuppressionRuleConfiguredWithMissingFields('esql')).toBe(false);
     });
 
     test('should return false for a threshold rule type', () => {
@@ -285,7 +313,7 @@ describe('Alert Suppression Rules', () => {
       expect(result).toBe(false);
     });
 
-    test('should return false for a non-suppressible rule type', () => {
+    test('should return false for an unknown rule type', () => {
       const ruleType = '123' as Type;
       const result = isSuppressionRuleConfiguredWithMissingFields(ruleType);
       expect(result).toBe(false);
