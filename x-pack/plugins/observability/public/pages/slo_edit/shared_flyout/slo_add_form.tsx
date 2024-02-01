@@ -9,6 +9,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { EuiTitle, EuiFlyoutHeader, EuiFlyout, EuiFlyoutBody, EuiPortal } from '@elastic/eui';
 import { RecursivePartial } from '@kbn/utility-types';
+import { merge } from 'lodash';
 import { CreateSLOForm } from '../types';
 import { SloEditForm } from '../components/slo_edit_form';
 
@@ -39,7 +40,28 @@ function SloAddFormFlyout({
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <SloEditForm initialValues={initialValues} />
+          <SloEditForm
+            initialValues={
+              initialValues
+                ? merge(
+                    {
+                      indicator: {
+                        type: 'sli.kql.custom',
+                      },
+                      objective: {
+                        target: 99,
+                      },
+                      timeWindow: {
+                        duration: '30d',
+                        type: 'rolling',
+                      },
+                      budgetingMethod: 'occurrences',
+                    },
+                    { ...initialValues }
+                  )
+                : undefined
+            }
+          />
         </EuiFlyoutBody>
       </EuiFlyout>
     </EuiPortal>

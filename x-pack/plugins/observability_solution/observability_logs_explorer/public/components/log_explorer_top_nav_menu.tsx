@@ -11,7 +11,6 @@ import {
   EuiHeaderLinks,
   EuiHeaderSection,
   EuiHeaderSectionItem,
-  EuiHeaderLink,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
@@ -22,7 +21,8 @@ import { LogExplorerTabs } from '@kbn/discover-plugin/public';
 import React, { useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { filter, take } from 'rxjs';
-import { betaBadgeDescription, betaBadgeTitle, createSLoLabel } from '../../common/translations';
+import { CreateSloLinkForValidState } from './create_slo_link';
+import { betaBadgeDescription, betaBadgeTitle } from '../../common/translations';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 import { ConnectedDiscoverLink } from './discover_link';
 import { FeedbackLink } from './feedback_link';
@@ -65,7 +65,6 @@ const ServerlessTopNav = () => {
         <EuiHeaderSectionItem>
           <EuiHeaderLinks gutterSize="xs">
             <ConnectedDiscoverLink />
-            <EuiHeaderLink>Create SLO</EuiHeaderLink>
             <VerticalRule />
             <FeedbackLink />
             <VerticalRule />
@@ -86,14 +85,13 @@ const StatefulTopNav = () => {
   const {
     services: {
       appParams: { setHeaderActionMenu },
-      observability: { getCreateSLOFlyout: CreateSloFlyout },
+      observability,
       observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
       chrome,
       i18n: i18nStart,
       theme,
     },
   } = useKibanaContextForPlugin();
-  const [isCreateFlyoutOpen, setCreateSLOFlyoutOpen] = useState(false);
   /**
    * Since the breadcrumbsAppendExtension might be set only during a plugin start (e.g. search session)
    * we retrieve the latest valid extension in order to restore it once we unmount the beta badge.
@@ -145,14 +143,7 @@ const StatefulTopNav = () => {
         <EuiHeaderSection data-test-subj="logsExplorerHeaderMenu">
           <EuiHeaderSectionItem>
             <EuiHeaderLinks gutterSize="xs">
-              <EuiHeaderLink
-                onClick={() => {
-                  setCreateSLOFlyoutOpen(true);
-                }}
-                iconType="visGauge"
-              >
-                {createSLoLabel}
-              </EuiHeaderLink>
+              <CreateSloLinkForValidState observability={observability} />
               <ConnectedDiscoverLink />
               <VerticalRule />
               {ObservabilityAIAssistantActionMenuItem ? (
@@ -163,19 +154,6 @@ const StatefulTopNav = () => {
           </EuiHeaderSectionItem>
         </EuiHeaderSection>
       </HeaderMenuPortal>
-      {isCreateFlyoutOpen && (
-        <CreateSloFlyout
-          onClose={() => setCreateSLOFlyoutOpen(false)}
-          initialValues={{
-            indicator: {
-              type: 'sli.kql.custom',
-              params: {
-                index: 'logs-*',
-              },
-            },
-          }}
-        />
-      )}
     </>
   );
 };
