@@ -11,6 +11,7 @@ import { AwaitingControlGroupAPI, ControlGroupRenderer } from '@kbn/controls-plu
 import { ViewMode } from '@kbn/embeddable-plugin/common';
 import styled from 'styled-components';
 import { Filter } from '@kbn/es-query';
+import { isEmpty } from 'lodash';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { SearchState } from '../../hooks/use_url_search_state';
 import { SLO_SUMMARY_DESTINATION_INDEX_NAME } from '../../../../../common/slo/constants';
@@ -92,11 +93,11 @@ export function QuickFilters({ initialState: { tagsFilter, statusFilter }, onSta
   );
 }
 
-const getSelectedOptions = (filter?: Filter) => {
-  if (!filter) {
+export const getSelectedOptions = (filter?: Filter) => {
+  if (isEmpty(filter)) {
     return [];
   }
-  if (filter?.meta.params && Array.isArray(filter?.meta.params)) {
+  if (filter?.meta?.params && Array.isArray(filter?.meta.params)) {
     return filter?.meta.params;
   }
   if (filter?.query?.match_phrase?.status) {
