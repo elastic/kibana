@@ -460,6 +460,8 @@ export class ObservabilityAIAssistantClient {
       },
     });
 
+    this.dependencies.logger.debug(`Received action client response: ${executeResult.status}`);
+
     if (executeResult.status === 'error' && executeResult?.serviceMessage) {
       const tokenLimitRegex =
         /This model's maximum context length is (\d+) tokens\. However, your messages resulted in (\d+) tokens/g;

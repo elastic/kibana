@@ -254,7 +254,9 @@ export function registerEsqlFunction({
 
       return esqlResponse$.pipe(
         emitWithConcatenatedMessage((msg) => {
-          const esqlQuery = msg.message.content.match(/```esql([\s\S]*?)```/)?.[1];
+          const esqlQuery = correctCommonEsqlMistakes(msg.message.content, resources.logger).match(
+            /```esql([\s\S]*?)```/
+          )?.[1];
 
           return {
             ...msg,
