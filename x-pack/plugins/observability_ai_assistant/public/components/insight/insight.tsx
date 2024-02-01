@@ -4,15 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { last } from 'lodash';
+import {
+  EuiButtonIcon,
+  EuiInlineEditText,
+  EuiContextMenu,
+  EuiPopover,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { cloneDeep, last } from 'lodash';
 import React, { useEffect, useRef, useState } from 'react';
 import { MessageRole, type Message } from '../../../common/types';
 import { sendEvent, TELEMETRY } from '../../analytics';
 import { ObservabilityAIAssistantChatServiceProvider } from '../../context/observability_ai_assistant_chat_service_provider';
 import { useAbortableAsync } from '../../hooks/use_abortable_async';
 import { ChatState, useChat } from '../../hooks/use_chat';
-import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
+import { useGenAIConnectors, UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 import { useKibana } from '../../hooks/use_kibana';
 import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
 import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
@@ -21,7 +29,6 @@ import { RegenerateResponseButton } from '../buttons/regenerate_response_button'
 import { StartChatButton } from '../buttons/start_chat_button';
 import { StopGeneratingButton } from '../buttons/stop_generating_button';
 import { ChatFlyout } from '../chat/chat_flyout';
-import { ConnectorSelectorBase } from '../connector_selector/connector_selector_base';
 import { FeedbackButtons } from '../feedback_buttons';
 import { MessagePanel } from '../message_panel/message_panel';
 import { MessageText } from '../message_panel/message_text';
@@ -130,6 +137,9 @@ export interface InsightProps {
 
 export function Insight({ messages, title, dataTestSubj }: InsightProps) {
   const [hasOpened, setHasOpened] = useState(false);
+  const [isEditingPrompt, setEditingPrompt] = useState(false);
+  const [isInsightOpen, setInsightOpen] = useState(false);
+  const [initialMessages, setInitialMessages] = useState(messages);
 
   const connectors = useGenAIConnectors();
 
@@ -148,12 +158,42 @@ export function Insight({ messages, title, dataTestSubj }: InsightProps) {
 
   let children: React.ReactNode = null;
 
-  if (hasOpened && connectors.selectedConnector) {
+  if (hasOpened && isInsightOpen && connectors.selectedConnector && !isEditingPrompt) {
     children = (
       <ChatContent
         title={title}
-        initialMessages={messages}
+        initialMessages={initialMessages}
         connectorId={connectors.selectedConnector}
+      />
+    );
+  } else if (isEditingPrompt) {
+    children = (
+      <EuiInlineEditText
+        inputAriaLabel={i18n.translate('xpack.observabilityAiAssistant.insight.editPromptInput', {
+          defaultMessage: 'Edit conversation',
+        })}
+        defaultValue={
+          last(initialMessages.filter((msg) => msg.message.role === MessageRole.User))?.message
+            .content
+        }
+        size="m"
+        startWithEditOpen={true}
+        onSave={(value: string) => {
+          const clonedMessages = cloneDeep(initialMessages);
+          const message = last(
+            clonedMessages.filter((msg) => msg.message.role === MessageRole.User)
+          );
+          if (!message) return false;
+
+          message.message.content = value;
+          setInitialMessages(clonedMessages);
+          setEditingPrompt(false);
+          return true;
+        }}
+        onCancel={() => {
+          setEditingPrompt(false);
+          setInsightOpen(false);
+        }}
       />
     );
   } else if (!connectors.loading && !connectors.connectors?.length) {
@@ -167,10 +207,21 @@ export function Insight({ messages, title, dataTestSubj }: InsightProps) {
       title={title}
       onToggle={(isOpen) => {
         setHasOpened((prevHasOpened) => prevHasOpened || isOpen);
+        setInsightOpen(isOpen);
       }}
-      controls={<ConnectorSelectorBase {...connectors} />}
+      controls={
+        <ActionsMenu
+          connectors={connectors}
+          onEditPrompt={() => {
+            setEditingPrompt(true);
+            setInsightOpen(true);
+            setHasOpened(true);
+          }}
+        />
+      }
       loading={connectors.loading || chatService.loading}
       dataTestSubj={dataTestSubj}
+      isOpen={isInsightOpen}
     >
       {chatService.value ? (
         <ObservabilityAIAssistantChatServiceProvider value={chatService.value}>
@@ -180,3 +231,77 @@ export function Insight({ messages, title, dataTestSubj }: InsightProps) {
     </InsightBase>
   );
 }
+
+const ActionsMenu = ({
+  connectors,
+  onEditPrompt,
+}: {
+  connectors: UseGenAIConnectorsResult;
+  onEditPrompt: () => void;
+}) => {
+  const [isPopoverOpen, setPopover] = useState(false);
+
+  const onButtonClick = () => {
+    setPopover(!isPopoverOpen);
+  };
+
+  const closePopover = () => {
+    setPopover(false);
+  };
+
+  const panels = [
+    {
+      id: 0,
+      title: 'Actions',
+      items: [
+        {
+          name: `Connectors: ${connectors.selectedConnector}`,
+          icon: 'wrench',
+          panel: 1,
+        },
+        {
+          name: 'Edit prompt',
+          icon: 'documentEdit',
+          onClick: () => {
+            onEditPrompt();
+            closePopover();
+          },
+        },
+      ],
+    },
+    {
+      id: 1,
+      title: 'Connectors',
+      items: connectors.connectors?.map((connector) => {
+        return {
+          name: connector.name,
+          icon: connector.id === connectors.selectedConnector ? 'check' : null,
+          onClick: () => {
+            connectors.selectConnector(connector.id);
+            closePopover();
+          },
+        };
+      }),
+    },
+  ];
+
+  const button = (
+    <EuiButtonIcon
+      data-test-subj="observabilityAiAssistantInsightActionsButtonIcon"
+      iconType="boxesHorizontal"
+      onClick={onButtonClick}
+    />
+  );
+
+  return (
+    <EuiPopover
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      panelPaddingSize="none"
+      anchorPosition="downLeft"
+    >
+      <EuiContextMenu initialPanelId={0} panels={panels} />
+    </EuiPopover>
+  );
+};

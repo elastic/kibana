@@ -30,6 +30,7 @@ export interface InsightBaseProps {
   actions?: Array<{ id: string; label: string; icon?: string; handler: () => void }>;
   onToggle: (isOpen: boolean) => void;
   children: React.ReactNode;
+  isOpen: boolean;
   loading?: boolean;
   dataTestSubj?: string;
 }
@@ -44,6 +45,7 @@ export function InsightBase({
   actions,
   onToggle,
   loading,
+  isOpen,
   dataTestSubj = 'obsAiAssistantInsightButton',
 }: InsightBaseProps) {
   const { euiTheme } = useEuiTheme();
@@ -78,6 +80,7 @@ export function InsightBase({
         }
         isLoading={loading}
         isDisabled={loading}
+        forceState={isOpen ? 'open' : 'closed'}
         extraAction={
           actions?.length || controls ? (
             <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
