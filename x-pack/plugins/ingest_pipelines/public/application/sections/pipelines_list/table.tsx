@@ -152,7 +152,9 @@ export const PipelineTable: FunctionComponent<Props> = ({
       hasActiveFilters={!!filterOptions.find((item) => item.checked === 'on')}
       numActiveFilters={filterOptions.filter((item) => item.checked === 'on').length}
     >
-      Filters
+      {i18n.translate('xpack.ingestPipelines.list.table.filtersButtonLabel', {
+        defaultMessage: 'Filters',
+      })}
     </EuiFilterButton>
   );
 
@@ -255,10 +257,20 @@ export const PipelineTable: FunctionComponent<Props> = ({
                     allowExclusions
                     searchable
                     searchProps={{
-                      placeholder: 'Filter list',
+                      placeholder: i18n.translate(
+                        'xpack.ingestPipelines.list.table.filtersListPlaceholder',
+                        {
+                          defaultMessage: 'Filter list',
+                        }
+                      ),
                       compressed: true,
                     }}
-                    aria-label="Filters"
+                    aria-label={i18n.translate(
+                      'xpack.ingestPipelines.list.table.filtersAriaLabel',
+                      {
+                        defaultMessage: 'Filters',
+                      }
+                    )}
                     options={filterOptions as EuiSelectableOption[]}
                     onChange={(newOptions) => {
                       // Set new options for current state
@@ -279,7 +291,12 @@ export const PipelineTable: FunctionComponent<Props> = ({
 
                       setQuery(newQuery.text);
                     }}
-                    noMatchesMessage="No filters found"
+                    noMatchesMessage={i18n.translate(
+                      'xpack.ingestPipelines.list.table.noFiltersFoundLabel',
+                      {
+                        defaultMessage: 'No filters found',
+                      }
+                    )}
                   >
                     {(list, searchText) => (
                       <div style={{ width: 300 }}>
