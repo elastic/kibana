@@ -9,6 +9,7 @@ import { EuiBadge, EuiDescriptionList } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
+import { RulesDetectionRuleCounter } from '../../rules/rules_detection_rule_counter';
 import { CisKubernetesIcons, CspFlyoutMarkdown } from './findings_flyout';
 
 export const getRuleList = (rule: CspFinding['rule']) => [
@@ -23,6 +24,12 @@ export const getRuleList = (rule: CspFinding['rule']) => [
       defaultMessage: 'Description',
     }),
     description: <CspFlyoutMarkdown>{rule.description}</CspFlyoutMarkdown>,
+  },
+  {
+    title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.AlertsTitle', {
+      defaultMessage: 'Alerts',
+    }),
+    description: <RulesDetectionRuleCounter benchmarkRule={rule} />,
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.tagsTitle', {
