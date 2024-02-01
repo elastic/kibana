@@ -187,6 +187,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         config: { type: 'flattened' },
         config_yaml: { type: 'text' },
         is_preconfigured: { type: 'boolean', index: false },
+        is_internal: { type: 'boolean', index: false },
         ssl: { type: 'binary' },
         proxy_id: { type: 'keyword' },
         shipper: {
@@ -347,6 +348,16 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
                 type: 'keyword',
                 index: false,
               },
+            },
+          },
+        ],
+      },
+      '5': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              is_internal: { type: 'boolean', index: false },
             },
           },
         ],

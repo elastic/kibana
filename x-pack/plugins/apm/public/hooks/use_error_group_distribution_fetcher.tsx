@@ -65,5 +65,8 @@ export function useErrorGroupDistributionFetcher({
     ]
   );
 
-  return { errorDistributionData: data, status };
+  return {
+    errorDistributionData: data,
+    errorDistributionStatus: status,
+  };
 }
