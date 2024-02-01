@@ -22,8 +22,7 @@ import type {
   UnifiedFieldListSidebarContainerApi,
   UnifiedFieldListSidebarContainerProps,
 } from '@kbn/unified-field-list';
-import { FieldsGroupNames, UnifiedFieldListSidebarContainer } from '@kbn/unified-field-list';
-import { i18n } from '@kbn/i18n';
+import { UnifiedFieldListSidebarContainer } from '@kbn/unified-field-list';
 import type { CoreStart } from '@kbn/core/public';
 import type { EuiTheme } from '@kbn/react-kibana-context-styled';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
@@ -50,6 +49,7 @@ import { TimelineResizableLayout } from './resizable_layout';
 import TimelineDataTable from './data_table';
 import { timelineDefaults } from '../../../store/defaults';
 import { timelineActions } from '../../../store';
+import { getFieldsListCreationOptions } from './get_fields_list_creation_options';
 
 const TimelineBodyContainer = styled.div.attrs(({ className = '' }) => ({
   className: `${className}`,
@@ -69,44 +69,6 @@ const DROP_PROPS = {
   },
   order: [1, 0, 0, 0],
   types: ['field_add'] as DropType[],
-};
-
-const getCreationOptions: UnifiedFieldListSidebarContainerProps['getCreationOptions'] = () => {
-  return {
-    originatingApp: 'security_solution',
-    localStorageKeyPrefix: 'securitySolution',
-    timeRangeUpdatesType: 'timefilter',
-    compressed: true,
-    showSidebarToggleButton: true,
-    disablePopularFields: false,
-    buttonAddFieldToWorkspaceProps: {
-      'aria-label': i18n.translate('discover.fieldChooser.discoverField.addFieldTooltip', {
-        defaultMessage: 'Add field as column',
-      }),
-    },
-    buttonRemoveFieldFromWorkspaceProps: {
-      'aria-label': i18n.translate('discover.fieldChooser.discoverField.removeFieldTooltip', {
-        defaultMessage: 'Remove field from table',
-      }),
-    },
-    onOverrideFieldGroupDetails: (groupName) => {
-      if (groupName === FieldsGroupNames.AvailableFields) {
-        return {
-          helpText: i18n.translate('discover.fieldChooser.availableFieldsTooltip', {
-            defaultMessage: 'Fields available for display in the table.',
-          }),
-        };
-      }
-    },
-    dataTestSubj: {
-      fieldListAddFieldButtonTestSubj: 'dataView-add-field_btn',
-      fieldListSidebarDataTestSubj: 'discover-sidebar',
-      fieldListItemStatsDataTestSubj: 'dscFieldStats',
-      fieldListItemDndDataTestSubjPrefix: 'dscFieldListPanelField',
-      fieldListItemPopoverDataTestSubj: 'discoverFieldListPanelPopover',
-      fieldListItemPopoverHeaderDataTestSubjPrefix: 'discoverFieldListPanel',
-    },
-  };
 };
 
 const SidebarPanelFlexGroup = styled(EuiFlexGroup)`
@@ -129,6 +91,7 @@ const SidebarPanelFlexGroup = styled(EuiFlexGroup)`
 `;
 
 export const SAMPLE_SIZE_SETTING = 500;
+export const HIDE_FOR_SIZES = ['xs', 's'];
 
 interface Props {
   columns: ColumnHeaderOptions[];
@@ -354,88 +317,6 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
     onFieldEdited();
   }, [onFieldEdited]);
 
-  const sidebarPanel = useMemo(
-    () => (
-      <SidebarPanelFlexGroup gutterSize="none">
-        <EuiFlexItem>
-          {dataView ? (
-            <UnifiedFieldListSidebarContainer
-              ref={unifiedFieldListContainerRef}
-              showFieldList={true}
-              variant="responsive"
-              getCreationOptions={getCreationOptions}
-              services={fieldListSidebarServices}
-              dataView={dataView}
-              fullWidth
-              allFields={dataView.fields}
-              workspaceSelectedFieldNames={defaultColumns}
-              onAddFieldToWorkspace={onAddFieldToWorkspace}
-              onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
-              onAddFilter={onAddFilter}
-              onFieldEdited={wrappedOnFieldEdited}
-            />
-          ) : null}
-        </EuiFlexItem>
-        <EuiHideFor sizes={['xs', 's']}>
-          <StyledSplitFlexItem grow={false} className="thinBorderSplit" />
-        </EuiHideFor>
-      </SidebarPanelFlexGroup>
-    ),
-    [
-      dataView,
-      defaultColumns,
-      fieldListSidebarServices,
-      onAddFieldToWorkspace,
-      onAddFilter,
-      onRemoveFieldFromWorkspace,
-      wrappedOnFieldEdited,
-    ]
-  );
-
-  const table = useMemo(() => {
-    return (
-      <DataGridMemoized
-        columns={columns}
-        rowRenderers={rowRenderers}
-        timelineId={timelineId}
-        itemsPerPage={itemsPerPage}
-        itemsPerPageOptions={itemsPerPageOptions}
-        sort={sort}
-        events={events}
-        refetch={refetch}
-        onFieldEdited={onFieldEdited}
-        dataLoadingState={dataLoadingState}
-        totalCount={totalCount}
-        onEventClosed={onEventClosed}
-        expandedDetail={expandedDetail}
-        showExpandedDetails={showExpandedDetails}
-        onChangePage={onChangePage}
-        activeTab={activeTab}
-        updatedAt={updatedAt}
-        isTextBasedQuery={isTextBasedQuery}
-      />
-    );
-  }, [
-    activeTab,
-    columns,
-    dataLoadingState,
-    events,
-    expandedDetail,
-    isTextBasedQuery,
-    itemsPerPage,
-    itemsPerPageOptions,
-    onChangePage,
-    onEventClosed,
-    refetch,
-    onFieldEdited,
-    rowRenderers,
-    showExpandedDetails,
-    sort,
-    timelineId,
-    totalCount,
-    updatedAt,
-  ]);
-
   if (!dataView) {
     return null;
   }
@@ -445,7 +326,32 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
       <TimelineResizableLayout
         container={sidebarContainer}
         unifiedFieldListSidebarContainerApi={unifiedFieldListContainerRef.current}
-        sidebarPanel={sidebarPanel}
+        sidebarPanel={
+          <SidebarPanelFlexGroup gutterSize="none">
+            <EuiFlexItem>
+              {dataView ? (
+                <UnifiedFieldListSidebarContainer
+                  ref={unifiedFieldListContainerRef}
+                  showFieldList
+                  variant="responsive"
+                  getCreationOptions={getFieldsListCreationOptions}
+                  services={fieldListSidebarServices}
+                  dataView={dataView}
+                  fullWidth
+                  allFields={dataView.fields}
+                  workspaceSelectedFieldNames={defaultColumns}
+                  onAddFieldToWorkspace={onAddFieldToWorkspace}
+                  onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
+                  onAddFilter={onAddFilter}
+                  onFieldEdited={wrappedOnFieldEdited}
+                />
+              ) : null}
+            </EuiFlexItem>
+            <EuiHideFor sizes={HIDE_FOR_SIZES}>
+              <StyledSplitFlexItem grow={false} className="thinBorderSplit" />
+            </EuiHideFor>
+          </SidebarPanelFlexGroup>
+        }
         mainPanel={
           <StyledPageContentWrapper>
             <StyledMainEuiPanel
@@ -465,7 +371,28 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
                 onDrop={onDropFieldToTable}
               >
                 <DropOverlayWrapper isVisible={isDropAllowed}>
-                  <EventDetailsWidthProvider>{table}</EventDetailsWidthProvider>
+                  <EventDetailsWidthProvider>
+                    <DataGridMemoized
+                      columns={columns}
+                      rowRenderers={rowRenderers}
+                      timelineId={timelineId}
+                      itemsPerPage={itemsPerPage}
+                      itemsPerPageOptions={itemsPerPageOptions}
+                      sort={sort}
+                      events={events}
+                      refetch={refetch}
+                      onFieldEdited={onFieldEdited}
+                      dataLoadingState={dataLoadingState}
+                      totalCount={totalCount}
+                      onEventClosed={onEventClosed}
+                      expandedDetail={expandedDetail}
+                      showExpandedDetails={showExpandedDetails}
+                      onChangePage={onChangePage}
+                      activeTab={activeTab}
+                      updatedAt={updatedAt}
+                      isTextBasedQuery={isTextBasedQuery}
+                    />
+                  </EventDetailsWidthProvider>
                 </DropOverlayWrapper>
               </DragDrop>
             </StyledMainEuiPanel>

@@ -21,6 +21,9 @@ import { of } from 'rxjs';
 
 export const SIDEBAR_WIDTH_KEY = 'timeline:sidebarWidth';
 
+// TODO: This is almost a duplicate of the logic here: src/plugins/discover/public/application/main/components/layout/discover_resizable_layout.tsx
+// Should this layout be a shared package or just an accepted dupe since the <ResizeableLayout /> is already shared?
+
 export const TimelineResizableLayoutComponent = ({
   container,
   sidebarPanel,
@@ -49,7 +52,7 @@ export const TimelineResizableLayoutComponent = ({
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
 
   const isSidebarCollapsed = useObservable(
-    unifiedFieldListSidebarContainerApi?.isSidebarCollapsed$ ?? of(true),
+    unifiedFieldListSidebarContainerApi?.sidebarVisibility.isCollapsed$ ?? of(true),
     true
   );
   const layoutMode =
@@ -63,7 +66,7 @@ export const TimelineResizableLayoutComponent = ({
       <InPortal node={sidebarPanelNode}>{sidebarPanel}</InPortal>
       <InPortal node={mainPanelNode}>{mainPanel}</InPortal>
       <ResizableLayout
-        className="dscPageBody__contents"
+        className="timelineUnifiedComponentsBody__contents"
         mode={layoutMode}
         direction={layoutDirection}
         container={container}
@@ -72,8 +75,8 @@ export const TimelineResizableLayoutComponent = ({
         minFlexPanelSize={minMainPanelWidth}
         fixedPanel={<OutPortal node={sidebarPanelNode} />}
         flexPanel={<OutPortal node={mainPanelNode} />}
-        resizeButtonClassName="dscSidebarResizeButton"
-        data-test-subj="discoverLayout"
+        resizeButtonClassName="timelineSidebarResizeButton"
+        data-test-subj="timelineUnifiedComponentsLayout"
         onFixedPanelSizeChange={setSidebarWidth}
       />
     </>
