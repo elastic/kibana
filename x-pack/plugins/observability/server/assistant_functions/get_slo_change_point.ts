@@ -4,25 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import moment, { Moment } from 'moment';
 import { FromSchema } from 'json-schema-to-ts';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { i18n } from '@kbn/i18n';
 import datemath from '@kbn/datemath';
-import { SLOWithSummaryResponse, indicatorTypesSchema, indicators } from '@kbn/slo-schema';
 import { FunctionRegistrationParameters } from '.';
-// import { ApmDocumentType } from '../../common/document_type';
-// import { ENVIRONMENT_ALL } from '../../common/environment_filter_values';
-// import { RollupInterval } from '../../common/rollup';
-import { ServiceHealthStatus } from '../../common/service_health_status';
-import { lengthToRadians } from '@turf/helpers';
-// import { getApmAlertsClient } from '../lib/helpers/get_apm_alerts_client';
-// import { getMlClient } from '../lib/helpers/get_ml_client';
-// import { getRandomSampler } from '../lib/helpers/get_random_sampler';
-// import { getServicesItems } from '../routes/services/get_services/get_services_items';
-// import { NON_EMPTY_STRING } from '../utils/non_empty_string_ref';
-
 export interface SLOSourceItem {
   name: string;
   sourceIndex: string;
@@ -111,27 +98,17 @@ export function registerGetSLOChangeDetectionFunction({
     async ({ arguments: args }, signal) => {
       const {
         'slo.name': name,
-        shortWindow,
         longWindow,
-        field,
         start,
         end,
         'kibana.alert.start': alertStart,
         metricOperation = 'avg',
       } = args;
-      console.log('aggregationType', metricOperation);
       const params = {
         kqlQuery: `slo.name: "${name}*"`,
-        sortBy: 'status',
-        sortDirection: 'desc',
         page: '1',
         perPage: '25',
       };
-      console.log('start', start);
-      console.log('end', end);
-      console.log('shortWindow', shortWindow);
-      console.log('longWindow', longWindow);
-      console.log('alertStart', alertStart);
       const slos = await sloClient.find.execute(params);
       let absoluteStartTime: string | undefined;
 
@@ -185,8 +162,6 @@ export function registerGetSLOChangeDetectionFunction({
         typeOfChange: result.aggregations?.change_point_request?.type,
         fieldName: result.fieldName,
       }));
-
-      console.log('changes', changes);
 
       return {
         content: {

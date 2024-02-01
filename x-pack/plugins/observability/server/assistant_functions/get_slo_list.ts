@@ -6,26 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse, indicatorTypesSchema, indicators } from '@kbn/slo-schema';
+import { SLOWithSummaryResponse, indicators } from '@kbn/slo-schema';
+import { ALERT_RULE_PRODUCER, ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import { FunctionRegistrationParameters } from '.';
 import { kqlQuery } from '..';
-import {
-  ALERT_RULE_PRODUCER,
-  ALERT_STATUS,
-  ALERT_STATUS_ACTIVE,
-  ALERT_UUID,
-} from '@kbn/rule-data-utils';
-// import { ApmDocumentType } from '../../common/document_type';
-// import { ENVIRONMENT_ALL } from '../../common/environment_filter_values';
-// import { RollupInterval } from '../../common/rollup';
-import { ServiceHealthStatus } from '../../common/service_health_status';
 import { getSLOAlertsClient } from '../lib/rules/slo_burn_rate/lib/get_slo_burn_rate_alerts_client';
-// import { getApmAlertsClient } from '../lib/helpers/get_apm_alerts_client';
-// import { getMlClient } from '../lib/helpers/get_ml_client';
-// import { getRandomSampler } from '../lib/helpers/get_random_sampler';
-// import { getServicesItems } from '../routes/services/get_services/get_services_items';
-// import { NON_EMPTY_STRING } from '../utils/non_empty_string_ref';
-
 export interface SLOListItem {
   name: string;
   type: SLOWithSummaryResponse['indicator']['type'];
@@ -84,15 +69,12 @@ export function registerGetSLOListFunction({
             },
           },
         },
-        // required: ['start', 'end'],
       } as const,
     },
     async ({ arguments: args }, signal) => {
       const { status, 'slo.indicator.type': type, 'slo.name': name } = args;
       const params = {
         kqlQuery: '',
-        sortBy: 'status',
-        sortDirection: 'desc',
         page: '1',
         perPage: '25',
       };
@@ -106,7 +88,6 @@ export function registerGetSLOListFunction({
         params.kqlQuery += `slo.name: "${name}*"`;
       }
       const esFilters = kqlQuery(params.kqlQuery);
-      console.log('params', params);
       const slos = await sloClient.find.execute(params);
       const { request, dependencies } = resources;
       const filteredIds: string[] = [];
@@ -122,10 +103,7 @@ export function registerGetSLOListFunction({
         };
       });
 
-      console.log('kqlQuery(params.kqlQuery', kqlQuery(params.kqlQuery));
-
       const alertsClient = await getSLOAlertsClient({ dependencies, request });
-      console.log('BEEP', kqlQuery(params.kqlQuery));
 
       const alertSearchParams = {
         size: 100,
@@ -134,7 +112,7 @@ export function registerGetSLOListFunction({
           bool: {
             filter: [
               { term: { [ALERT_RULE_PRODUCER]: 'slo' } },
-              { term: { [ALERT_STATUS]: 'active' } },
+              { term: { [ALERT_STATUS]: ALERT_STATUS_ACTIVE } },
               { terms: { 'slo.id': filteredIds } },
             ],
           },
@@ -156,10 +134,6 @@ export function registerGetSLOListFunction({
         };
         return hitWithWindow;
       });
-
-      console.log('formattedAlerts', JSON.stringify(alerts.hits.hits));
-
-      // TODO: Fetch alerts for given SLOs
 
       return {
         content: {
