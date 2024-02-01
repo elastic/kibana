@@ -14,6 +14,17 @@ import { SAVED_QUERY_BASE_URL } from '../../../common/constants';
 const version = '1';
 
 export const createSavedQueryService = (http: HttpStart) => {
+  const isDuplicateTitle = async (title: string, id?: string) => {
+    const response = await http.post<{ isDuplicate: boolean }>(
+      `${SAVED_QUERY_BASE_URL}/_is_duplicate_title`,
+      {
+        body: JSON.stringify({ title, id }),
+        version,
+      }
+    );
+    return response.isDuplicate;
+  };
+
   const createQuery = async (attributes: SavedQueryAttributes, { overwrite = false } = {}) => {
     const savedQuery = await http.post<SavedQuery>(`${SAVED_QUERY_BASE_URL}/_create`, {
       body: JSON.stringify(attributes),
@@ -60,6 +71,7 @@ export const createSavedQueryService = (http: HttpStart) => {
   };
 
   return {
+    isDuplicateTitle,
     createQuery,
     updateQuery,
     findSavedQueries,

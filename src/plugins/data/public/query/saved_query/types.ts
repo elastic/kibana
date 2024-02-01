@@ -17,6 +17,7 @@ export type SavedQueryTimeFilter = TimeRange & {
 export type { SavedQuery, SavedQueryAttributes };
 
 export interface SavedQueryService {
+  isDuplicateTitle: (title: string, id?: string) => Promise<boolean>;
   createQuery: (attributes: SavedQueryAttributes) => Promise<SavedQuery>;
   updateQuery: (id: string, attributes: SavedQueryAttributes) => Promise<SavedQuery>;
   findSavedQueries: (

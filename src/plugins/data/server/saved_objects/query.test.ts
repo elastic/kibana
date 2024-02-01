@@ -24,7 +24,7 @@ describe('saved query model version transformations', () => {
       id: 'some-id',
       type: 'query',
       attributes: {
-        title: 'some title',
+        title: 'Some Title',
         description: 'some description',
         query: { language: 'kuery', query: 'some query' },
       },
@@ -40,7 +40,7 @@ describe('saved query model version transformations', () => {
 
       expect(migrated.attributes).toEqual({
         ...query.attributes,
-        titleKeyword: query.attributes.title,
+        titleKeyword: query.attributes.title.toLowerCase(),
       });
     });
 

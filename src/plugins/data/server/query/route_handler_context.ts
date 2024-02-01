@@ -12,7 +12,7 @@ import type {
   RequestHandlerContext,
   SavedObject,
 } from '@kbn/core/server';
-import { escapeKuery, isFilters, isOfQueryType } from '@kbn/es-query';
+import { escapeQuotes, isFilters, isOfQueryType } from '@kbn/es-query';
 import { omit } from 'lodash';
 import { isQuery, SavedQueryAttributes } from '../../common';
 import { extract, inject } from '../../common/query/filters/persistable_state';
@@ -65,7 +65,7 @@ function extractReferences({
 
   const attributes: InternalSavedQueryAttributes = {
     title: title.trim(),
-    titleKeyword: title.trim(),
+    titleKeyword: title.trim().toLowerCase(),
     description: description.trim(),
     query: {
       ...query,
@@ -95,30 +95,34 @@ function verifySavedQuery({ title, query, filters = [] }: SavedQueryAttributes) 
 export async function registerSavedQueryRouteHandlerContext(context: RequestHandlerContext) {
   const soClient = (await context.core).savedObjects.client;
 
-  const validateSavedQueryTitle = async (attributes: InternalSavedQueryAttributes, id?: string) => {
-    const { savedQueries } = await findSavedQueries({
+  const isDuplicateTitle = async ({ title, id }: { title: string; id?: string }) => {
+    const preparedTitle = title.trim().toLowerCase();
+    const { saved_objects: savedQueries } = await soClient.find<InternalSavedQueryAttributes>({
+      type: 'query',
       page: 1,
       perPage: 1,
-      search: `"${escapeKuery(attributes.title.trim())}"`,
+      filter: `query.attributes.titleKeyword:"${escapeQuotes(preparedTitle)}"`,
     });
     const existingQuery = savedQueries[0];
 
-    if (
+    return Boolean(
       existingQuery &&
-      existingQuery.attributes.title === attributes.title &&
-      (!id || existingQuery.id !== id)
-    ) {
-      throw badRequest(`Query with title "${attributes.title}" already exists`);
+        existingQuery.attributes.titleKeyword === preparedTitle &&
+        (!id || existingQuery.id !== id)
+    );
+  };
+
+  const validateSavedQueryTitle = async (title: string, id?: string) => {
+    if (await isDuplicateTitle({ title, id })) {
+      throw badRequest(`Query with title "${title.trim()}" already exists`);
     }
   };
 
   const createSavedQuery = async (attrs: SavedQueryAttributes): Promise<SavedQueryRestResponse> => {
     verifySavedQuery(attrs);
+    await validateSavedQueryTitle(attrs.title);
 
     const { attributes, references } = extractReferences(attrs);
-
-    await validateSavedQueryTitle(attributes);
-
     const savedObject = await soClient.create<InternalSavedQueryAttributes>('query', attributes, {
       references,
     });
@@ -134,11 +138,9 @@ export async function registerSavedQueryRouteHandlerContext(context: RequestHand
     attrs: SavedQueryAttributes
   ): Promise<SavedQueryRestResponse> => {
     verifySavedQuery(attrs);
+    await validateSavedQueryTitle(attrs.title, id);
 
     const { attributes, references } = extractReferences(attrs);
-
-    await validateSavedQueryTitle(attributes, id);
-
     const savedObject = await soClient.update<InternalSavedQueryAttributes>(
       'query',
       id,
@@ -198,6 +200,7 @@ export async function registerSavedQueryRouteHandlerContext(context: RequestHand
   };
 
   return {
+    isDuplicateTitle,
     create: createSavedQuery,
     update: updateSavedQuery,
     get: getSavedQuery,

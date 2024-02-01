@@ -38,6 +38,37 @@ const version = '1';
 export function registerSavedQueryRoutes({ http }: CoreSetup): void {
   const router = http.createRouter<SavedQueryRouteHandlerContext>();
 
+  router.versioned.post({ path: `${SAVED_QUERY_BASE_URL}/_is_duplicate_title`, access }).addVersion(
+    {
+      version,
+      validate: {
+        request: {
+          body: schema.object({
+            title: schema.string(),
+            id: schema.maybe(schema.string()),
+          }),
+        },
+        response: {
+          200: {
+            body: schema.object({
+              isDuplicate: schema.boolean(),
+            }),
+          },
+        },
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const savedQuery = await context.savedQuery;
+        const isDuplicate = await savedQuery.isDuplicateTitle(request.body);
+        return response.ok({ body: { isDuplicate } });
+      } catch (e) {
+        const err = e.output?.payload ?? e;
+        return reportServerError(response, err);
+      }
+    }
+  );
+
   router.versioned.post({ path: `${SAVED_QUERY_BASE_URL}/_create`, access }).addVersion(
     {
       version,

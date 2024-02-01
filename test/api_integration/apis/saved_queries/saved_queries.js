@@ -194,5 +194,45 @@ export default function ({ getService }) {
         .delete(`${SAVED_QUERY_BASE_URL}/invalid_id`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .expect(404));
+
+    it('should return isDuplicate = true for _is_duplicate_title check with a duplicate title', () =>
+      supertest
+        .post(`${SAVED_QUERY_BASE_URL}/_is_duplicate_title`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .send({ title: 'my title' })
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.isDuplicate).to.be(true);
+        }));
+
+    it('should return isDuplicate = false for _is_duplicate_title check with a duplicate title and matching ID', () =>
+      supertest
+        .post(`${SAVED_QUERY_BASE_URL}/_create`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .send({
+          ...mockSavedQuery,
+          title: 'my title 7',
+        })
+        .expect(200)
+        .then(({ body }) =>
+          supertest
+            .post(`${SAVED_QUERY_BASE_URL}/_is_duplicate_title`)
+            .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+            .send({ title: 'my title 7', id: body.id })
+            .expect(200)
+            .then(({ body }) => {
+              expect(body.isDuplicate).to.be(false);
+            })
+        ));
+
+    it('should return isDuplicate = false for _is_duplicate_title check with a unique title', () =>
+      supertest
+        .post(`${SAVED_QUERY_BASE_URL}/_is_duplicate_title`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .send({ title: 'my unique title' })
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.isDuplicate).to.be(false);
+        }));
   });
 }

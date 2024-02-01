@@ -14,6 +14,7 @@ import { SAVED_QUERY_BASE_URL } from '../../../common/constants';
 const http = httpServiceMock.createStartContract();
 
 const {
+  isDuplicateTitle,
   deleteSavedQuery,
   getSavedQuery,
   findSavedQueries,
@@ -39,6 +40,17 @@ describe('saved query service', () => {
     http.post.mockReset();
     http.get.mockReset();
     http.delete.mockReset();
+  });
+
+  describe('isDuplicateTitle', function () {
+    it('should post the title and ID', async () => {
+      await isDuplicateTitle('foo', 'bar');
+      expect(http.post).toBeCalled();
+      expect(http.post).toHaveBeenCalledWith(`${SAVED_QUERY_BASE_URL}/_is_duplicate_title`, {
+        body: '{"title":"foo","id":"bar"}',
+        version,
+      });
+    });
   });
 
   describe('createQuery', function () {
