@@ -19,3 +19,7 @@ enum Result {
 export interface ConnectorsAPIUpdateResponse {
   result: Result;
 }
+
+export interface ConnectorSecretCreateResponse {
+  id: string;
+}

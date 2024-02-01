@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ConnectorSecretCreateResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { ConnectorSecretCreateResponse } from '../types/connectors_api';
 
 export const createConnectorSecret = async (client: ElasticsearchClient, value: string) => {
   return await client.transport.request<ConnectorSecretCreateResponse>({
