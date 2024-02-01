@@ -43,21 +43,18 @@ export const registerDataStreamQualityMitigationRoute = ({
       },
       async (ctx, req, res) => {
         const { dataStream } = req.params;
-        // const timeRange = {
-        //   start: req.body.time_range.start,
-        //   end: req.body.time_range.end,
-        // };
-        // const checkExecution = await (
-        //   await ctx.datasetQuality
-        // ).dataStreamQualityService.performCheck(checkId, {
-        //   dataStream,
-        //   timeRange,
-        // });
-        // return res.ok<GetDatastreamCheckResponsePayload>({
-        //   body: getDatastreamCheckResponsePayloadRT.encode({
-        //     result: checkExecution,
-        //   }),
-        // });
+        const { type: mitigationId, ...mitigationArgs } = req.body.mitigation;
+
+        const mitigationResult = await (
+          await ctx.datasetQuality
+        ).dataStreamQualityService.applyMitigation(mitigationId, {
+          data_stream: dataStream,
+          ...mitigationArgs,
+        });
+
+        return res.ok<PostDatastreamMitigationResponsePayload>({
+          body: postDatastreamMitigationResponsePayloadRT.encode({}),
+        });
       }
     );
 };

@@ -32,12 +32,16 @@ export type {
   DataStreamQualityCheckArguments,
   DataStreamQualityCheckExecution,
   IgnoredFieldCause,
+  IncreaseIgnoreAboveMitigation,
   Mitigation,
   MitigationForCause,
+  MitigationType,
   QualityProblem,
   QualityProblemCause,
   QualityProblemParams,
   QualityProblemType,
+  RemoveFieldMitigation,
+  TruncateValueMitigation,
 } from './data_stream_quality_checks';
 export type { FetchOptions } from './fetch_options';
 export type { DatasetQualityConfig } from './plugin_config';
@@ -68,4 +72,5 @@ export type {
   APIReturnType,
   GetDatastreamCheckResponsePayload,
   GetDatastreamChecksResponsePayload,
+  PostDatastreamMitigationResponsePayload,
 } from './rest';

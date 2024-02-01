@@ -8,31 +8,59 @@
 import * as rt from 'io-ts';
 import { qualityProblemCauseRT } from './cause';
 
+export const commonMitigationParamsRT = rt.strict({
+  data_stream: rt.string,
+});
+
 export const increaseIgnoreAboveMitigationTypeRT = rt.literal('mapping-increase-ignore-above');
 
-export const increaseIgnoreAboveMitigationRT = rt.strict({
+const increaseIgnoreAboveMitigationParamsRT = rt.strict({
   type: increaseIgnoreAboveMitigationTypeRT,
-  data_stream: rt.string,
   field: rt.string,
   limit: rt.number,
 });
+
+export const increaseIgnoreAboveMitigationRT = rt.intersection([
+  increaseIgnoreAboveMitigationParamsRT,
+  commonMitigationParamsRT,
+]);
+
+export type IncreaseIgnoreAboveMitigation = rt.TypeOf<typeof increaseIgnoreAboveMitigationRT>;
 
 export const truncateValueMitigationTypeRT = rt.literal('pipeline-truncate-value');
 
-export const truncateValueMitigationRT = rt.strict({
+const truncateValueMitigationParamsRT = rt.strict({
   type: truncateValueMitigationTypeRT,
-  data_stream: rt.string,
   field: rt.string,
   limit: rt.number,
 });
 
+export const truncateValueMitigationRT = rt.intersection([
+  truncateValueMitigationParamsRT,
+  commonMitigationParamsRT,
+]);
+
+export type TruncateValueMitigation = rt.TypeOf<typeof truncateValueMitigationRT>;
+
 export const removeFieldMitigationTypeRT = rt.literal('pipeline-remove-field');
 
-export const removeFieldMitigationRT = rt.strict({
+const removeFieldMitigationParamsRT = rt.strict({
   type: removeFieldMitigationTypeRT,
-  data_stream: rt.string,
   field: rt.string,
 });
+
+export const removeFieldMitigationRT = rt.intersection([
+  removeFieldMitigationParamsRT,
+  commonMitigationParamsRT,
+]);
+
+export type RemoveFieldMitigation = rt.TypeOf<typeof removeFieldMitigationRT>;
+
+export const mitigationParamsRT = rt.union([
+  increaseIgnoreAboveMitigationParamsRT,
+  truncateValueMitigationParamsRT,
+  removeFieldMitigationParamsRT,
+]);
 
 export const mitigationRT = rt.union([
   increaseIgnoreAboveMitigationRT,
@@ -41,6 +69,8 @@ export const mitigationRT = rt.union([
 ]);
 
 export type Mitigation = rt.TypeOf<typeof mitigationRT>;
+
+export type MitigationType = Mitigation['type'];
 
 export const mitigationForCauseRT = rt.strict({
   cause: qualityProblemCauseRT,

@@ -6,11 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import {
-  checkTimeRangeRT,
-  mitigationForCauseRT,
-  qualityProblemParamsRT,
-} from '../data_stream_quality_checks';
+import { mitigationParamsRT } from '../data_stream_quality_checks';
 import { DATASET_QUALITY_URL_PREFIX } from './shared';
 
 export const getDataStreamMitigationPath = <DataStream extends string>(dataStream: DataStream) =>
@@ -22,13 +18,10 @@ export const postDatastreamMitigationRequestParamsRT = rt.strict({
 });
 
 export const postDatastreamMitigationRequestPayloadRT = rt.strict({
-  time_range: checkTimeRangeRT,
-  problem: qualityProblemParamsRT,
+  mitigation: mitigationParamsRT,
 });
 
-export const postDatastreamMitigationResponsePayloadRT = rt.strict({
-  causes: rt.array(mitigationForCauseRT),
-});
+export const postDatastreamMitigationResponsePayloadRT = rt.strict({});
 
 export type PostDatastreamMitigationResponsePayload = rt.TypeOf<
   typeof postDatastreamMitigationResponsePayloadRT

@@ -12,11 +12,22 @@ import {
   DataStreamQualityCheckArguments,
   DataStreamQualityCheckDependencies,
 } from './checks';
+import {
+  DataStreamQualityMitigationDependencies,
+  GenericMitigationImplementation,
+  increaseIgnoreAboveMitigation,
+} from './mitigations';
 
 export class DataStreamQualityService {
   private checks: DataStreamQualityCheck[] = [checkForIgnoredFields];
+  private mitigations: Array<GenericMitigationImplementation<any>> = [
+    increaseIgnoreAboveMitigation,
+  ];
 
-  constructor(private readonly dependencies: DataStreamQualityCheckDependencies) {}
+  constructor(
+    private readonly dependencies: DataStreamQualityCheckDependencies &
+      DataStreamQualityMitigationDependencies
+  ) {}
 
   public async getChecks({ dataStream, timeRange }: DataStreamQualityCheckArguments) {
     const { data_streams: dataStreamInfos } =
@@ -58,7 +69,20 @@ export class DataStreamQualityService {
     };
   }
 
-  public async applyMitigation(mitigationParams: Mitigation): Promise<void> {
+  public async applyMitigation(
+    mitigationId: string,
+    mitigationArgs: Omit<Mitigation, 'type'>
+  ): Promise<void> {
+    const [mitigation] = this.mitigations.filter((_mitigation) => _mitigation.id === mitigationId);
+
+    const result = await mitigation
+      .apply(this.dependencies)(mitigationArgs)
+      .catch((err) => ({
+        type: 'error' as const,
+        name: err.name,
+        description: err.message,
+      }));
+
     return;
   }
 }
