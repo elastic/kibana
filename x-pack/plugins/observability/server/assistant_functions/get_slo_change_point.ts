@@ -10,15 +10,6 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { i18n } from '@kbn/i18n';
 import datemath from '@kbn/datemath';
 import { FunctionRegistrationParameters } from '.';
-// import { ApmDocumentType } from '../../common/document_type';
-// import { ENVIRONMENT_ALL } from '../../common/environment_filter_values';
-// import { RollupInterval } from '../../common/rollup';
-// import { getApmAlertsClient } from '../lib/helpers/get_apm_alerts_client';
-// import { getMlClient } from '../lib/helpers/get_ml_client';
-// import { getRandomSampler } from '../lib/helpers/get_random_sampler';
-// import { getServicesItems } from '../routes/services/get_services/get_services_items';
-// import { NON_EMPTY_STRING } from '../utils/non_empty_string_ref';
-
 export interface SLOSourceItem {
   name: string;
   sourceIndex: string;
@@ -107,9 +98,7 @@ export function registerGetSLOChangeDetectionFunction({
     async ({ arguments: args }, signal) => {
       const {
         'slo.name': name,
-        shortWindow,
         longWindow,
-        field,
         start,
         end,
         'kibana.alert.start': alertStart,
@@ -117,8 +106,6 @@ export function registerGetSLOChangeDetectionFunction({
       } = args;
       const params = {
         kqlQuery: `slo.name: "${name}*"`,
-        sortBy: 'status',
-        sortDirection: 'desc',
         page: '1',
         perPage: '25',
       };

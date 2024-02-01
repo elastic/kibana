@@ -8,18 +8,9 @@ import {
   RegisterRenderFunctionDefinition,
   RenderFunction,
 } from '@kbn/observability-ai-assistant-plugin/public/types';
-// import moment from 'moment';
 import React, { useEffect, useState, useRef } from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiText } from '@elastic/eui';
-// import { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
-// import type { TimeRange } from '@kbn/es-query';
-// import { ChangePointAnnotation } from '@kbn/aiops-plugin/public/components/change_point_detection/change_point_detection_context';
-// import { ALERT_GROUP } from '@kbn/rule-data-utils';
-// import { ChangePointType } from '@kbn/aiops-plugin/public';
 import { useKibana } from '../utils/kibana_react';
-// import type { RegisterRenderFunctionDefinition, RenderFunction } from '../types';
 
 import type {
   GetSLOChangePointArguments,
@@ -30,8 +21,6 @@ import { ObservabilityPublicPluginsStart } from '../plugin';
 const fnList = ['avg', 'sum', 'min', 'max'];
 
 interface SLOChangePointChart {
-  alert: CustomThresholdAlert;
-  rule: CustomThresholdRule;
   metricField: string;
   fn?: 'avg' | 'min' | 'max' | 'sum';
   dataView?: DataView;
@@ -39,12 +28,8 @@ interface SLOChangePointChart {
   to?: string;
 }
 
-const emptyState = <></>;
-
 // eslint-disable-next-line import/no-default-export
 export default function SLOChangePointChart({
-  alert,
-  rule,
   metricField,
   from = 'now-24h',
   to = 'now',
@@ -86,43 +71,7 @@ export default function SLOChangePointChart({
     }
   }, [embeddable, embeddableRoot]);
 
-  // return (
-  //   <EuiFlexGroup
-  //     direction="column"
-  //     gutterSize="none"
-  //     data-test-subj="thresholdAlertRelatedEventsSection"
-  //   >
-  //     <EmbeddableChangePointChart
-  //       id={'sloChangePointDetectionChart'}
-  //       dataViewId={dataView.id}
-  //       timeRange={{
-  //         from: 'now-24h',
-  //         to: 'now'
-  //       }}
-  //       fn={'avg'}
-  //       metricField={'latency'}
-  //       emptyState={emptyState}
-  //       // onChange={onChangePointDataChange}
-  //       // lastReloadRequestTime={lastReloadRequestTime}
-  //     />
-  //   </EuiFlexGroup>
-  // );
-  const error = undefined;
-
-  return (
-    <>
-      {error && (
-        <EuiText size="s">
-          <p>
-            {i18n.translate('xpack.observability.serviceOverview.embeddedMap.error', {
-              defaultMessage: 'Could not load map',
-            })}
-          </p>
-        </EuiText>
-      )}
-      {!error && <div data-test-subj="serviceOverviewEmbeddedMap" ref={embeddableRoot} />}
-    </>
-  );
+  return <div data-test-subj="changePointDetectionEmbeddable" ref={embeddableRoot} />;
 }
 
 export function registerSLOChangePointChartFunction({
@@ -140,14 +89,6 @@ export function registerSLOChangePointChartFunction({
     const nonStationaryMetrics = content.changes
       .filter((change) => !Object.keys(change.typeOfChange).includes('stationary'))
       .map((change) => change.fieldName);
-
-    // const groupedSeries = groupBy(response.data, (series) => series.group);
-
-    // const {
-    //   services: { uiSettings },
-    // } = useKibana();
-
-    // const timeZone = getTimeZone(uiSettings);
 
     return nonStationaryMetrics.length ? (
       <div>

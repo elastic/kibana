@@ -7,19 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse, indicators } from '@kbn/slo-schema';
-import { ALERT_RULE_PRODUCER, ALERT_STATUS } from '@kbn/rule-data-utils';
+import { ALERT_RULE_PRODUCER, ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import { FunctionRegistrationParameters } from '.';
 import { kqlQuery } from '..';
-// import { ApmDocumentType } from '../../common/document_type';
-// import { ENVIRONMENT_ALL } from '../../common/environment_filter_values';
-// import { RollupInterval } from '../../common/rollup';
 import { getSLOAlertsClient } from '../lib/rules/slo_burn_rate/lib/get_slo_burn_rate_alerts_client';
-// import { getApmAlertsClient } from '../lib/helpers/get_apm_alerts_client';
-// import { getMlClient } from '../lib/helpers/get_ml_client';
-// import { getRandomSampler } from '../lib/helpers/get_random_sampler';
-// import { getServicesItems } from '../routes/services/get_services/get_services_items';
-// import { NON_EMPTY_STRING } from '../utils/non_empty_string_ref';
-
 export interface SLOListItem {
   name: string;
   type: SLOWithSummaryResponse['indicator']['type'];
@@ -78,15 +69,12 @@ export function registerGetSLOListFunction({
             },
           },
         },
-        // required: ['start', 'end'],
       } as const,
     },
     async ({ arguments: args }, signal) => {
       const { status, 'slo.indicator.type': type, 'slo.name': name } = args;
       const params = {
         kqlQuery: '',
-        sortBy: 'status',
-        sortDirection: 'desc',
         page: '1',
         perPage: '25',
       };
@@ -124,7 +112,7 @@ export function registerGetSLOListFunction({
           bool: {
             filter: [
               { term: { [ALERT_RULE_PRODUCER]: 'slo' } },
-              { term: { [ALERT_STATUS]: 'active' } },
+              { term: { [ALERT_STATUS]: ALERT_STATUS_ACTIVE } },
               { terms: { 'slo.id': filteredIds } },
             ],
           },
@@ -146,7 +134,6 @@ export function registerGetSLOListFunction({
         };
         return hitWithWindow;
       });
-      // TODO: Fetch alerts for given SLOs
 
       return {
         content: {
