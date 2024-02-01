@@ -5,7 +5,7 @@ set -euo pipefail
 source "$(dirname "$0")/../../common/util.sh"
 source .buildkite/scripts/steps/code_coverage/util.sh
 
-export JOB=0
+export JOB=$BUILDKITE_PARALLEL_JOB
 
 # a jest failure will result in the script returning an exit code of 10
 exitCode=0
