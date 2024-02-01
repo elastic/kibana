@@ -35,6 +35,7 @@ export const findBenchmarkRuleHandler = async (
     page: options.page,
     perPage: options.perPage,
     sortField: options.sortField,
+    sortOrder: options.sortOrder,
     fields: options?.fields,
     filter: getBenchmarkFilterQueryV2(benchmarkId, options.benchmarkVersion || '', {
       section: sectionFilter,
@@ -47,10 +48,16 @@ export const findBenchmarkRuleHandler = async (
   );
 
   // Semantic version sorting using semver for valid versions and custom comparison for invalid versions
-  const sortedCspBenchmarkRules = getSortedCspBenchmarkRulesTemplates(cspBenchmarkRules);
+  const sortedCspBenchmarkRules = getSortedCspBenchmarkRulesTemplates(
+    cspBenchmarkRules,
+    options.sortOrder
+  );
 
   return {
-    items: sortedCspBenchmarkRules,
+    items:
+      options.sortField === 'metadata.benchmark.rule_number'
+        ? sortedCspBenchmarkRules
+        : cspBenchmarkRules,
     total: cspCspBenchmarkRulesSo.total,
     page: options.page,
     perPage: options.perPage,

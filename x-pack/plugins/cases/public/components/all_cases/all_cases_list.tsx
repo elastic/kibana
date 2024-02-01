@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
-import type { EuiBasicTable, EuiTableSelectionType } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import type { EuiTableSelectionType } from '@elastic/eui';
 import { EuiProgress } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 import deepEqual from 'react-fast-compare';
@@ -107,11 +107,8 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       [queryParams.sortField, queryParams.sortOrder]
     );
 
-    const tableRef = useRef<EuiBasicTable | null>(null);
-
     const deselectCases = useCallback(() => {
       setSelectedCases([]);
-      tableRef.current?.setSelection([]);
     }, [setSelectedCases]);
 
     const tableOnChangeCallback = useCallback(
@@ -170,7 +167,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const euiBasicTableSelectionProps = useMemo<EuiTableSelectionType<CaseUI>>(
       () => ({
         onSelectionChange: setSelectedCases,
-        initialSelected: selectedCases,
+        selected: selectedCases,
         selectable: () => !isReadOnlyPermissions(permissions),
       }),
       [permissions, selectedCases]
@@ -243,7 +240,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           pagination={pagination}
           selection={euiBasicTableSelectionProps}
           sorting={sorting}
-          tableRef={tableRef}
           tableRowProps={tableRowProps}
         />
       </>

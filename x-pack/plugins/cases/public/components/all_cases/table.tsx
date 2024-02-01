@@ -32,7 +32,7 @@ interface CasesTableProps {
   pagination: Pagination;
   selection: EuiTableSelectionType<CaseUI>;
   sorting: EuiBasicTableProps<CaseUI>['sorting'];
-  tableRef: MutableRefObject<EuiBasicTable | null>;
+  tableRef?: MutableRefObject<EuiBasicTable | null>;
   tableRowProps: EuiBasicTableProps<CaseUI>['rowProps'];
   isLoadingColumns: boolean;
 }
