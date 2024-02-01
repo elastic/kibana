@@ -18,6 +18,7 @@ import {
 
 import { FetchIndexActions, FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
 import { ElasticsearchViewIndex, IngestionMethod, IngestionStatus } from '../../types';
+import { IndexNameActions, IndexNameLogic } from '../search_index/index_name_logic';
 
 export interface ConnectorViewActions {
   fetchConnector: FetchConnectorByIdApiLogicActions['makeRequest'];
@@ -26,6 +27,7 @@ export interface ConnectorViewActions {
   fetchIndex: FetchIndexActions['makeRequest'];
   fetchIndexApiError: FetchIndexActions['apiError'];
   fetchIndexApiSuccess: FetchIndexActions['apiSuccess'];
+  setIndexName: IndexNameActions['setIndexName'];
 }
 
 // TODO UPDATE
@@ -63,6 +65,8 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
   actions: {},
   connect: {
     actions: [
+      IndexNameLogic,
+      ['setIndexName'],
       FetchConnectorByIdApiLogic,
       [
         'makeRequest as fetchConnector',
@@ -85,9 +89,9 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
   },
   listeners: ({ actions, values }) => ({
     fetchConnectorApiSuccess: () => {
-      console.log('debug listener: ', values.indexName);
       if (values.indexName) {
         actions.fetchIndex({ indexName: values.indexName });
+        actions.setIndexName(values.indexName);
       }
     },
   }),
@@ -105,14 +109,12 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
     connector: [
       () => [selectors.connectorData],
       (connectorData) => {
-        console.log('debug connector:', connectorData);
         return connectorData?.connector;
       },
     ],
     indexName: [
       () => [selectors.connector],
       (connector: Connector | undefined) => {
-        console.log('debug: ', connector, connector?.index_name);
         return connector?.index_name || undefined;
       },
     ],

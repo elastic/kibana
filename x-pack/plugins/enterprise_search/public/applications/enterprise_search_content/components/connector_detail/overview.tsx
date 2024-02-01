@@ -23,18 +23,11 @@ import { ConvertConnectorModal } from '../shared/convert_connector_modal/convert
 
 import { ConvertConnectorLogic } from './connector/native_connector_configuration/convert_connector_logic';
 import { ConnectorTotalStats } from './connector_total_stats';
-/*
-import { CrawlDetailsFlyout } from './crawler/crawl_details_flyout/crawl_details_flyout';
-import { CrawlRequestsPanel } from './crawler/crawl_requests_panel/crawl_requests_panel';
-import { CrawlerTotalStats } from './crawler_total_stats';
-*/
-// import { IndexViewLogic } from './index_view_logic';
 import { OverviewLogic } from './overview.logic';
 import { SyncJobs } from './sync_jobs/sync_jobs';
 
 export const ConnectorDetailOverview: React.FC = () => {
   const { indexData } = useValues(OverviewLogic);
-  // const { error } = useValues(IndexViewLogic);
   const error = null;
   const { isCloud } = useValues(KibanaLogic);
   const { showModal } = useActions(ConvertConnectorLogic);
