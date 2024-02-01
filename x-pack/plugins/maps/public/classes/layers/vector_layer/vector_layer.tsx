@@ -386,7 +386,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
 
     this.getValidJoins().forEach((join) => {
       const rightSource = join.getRightJoinSource();
-      if (source.getApplyGlobalQuery() && hasESSourceMethod(rightSource, 'getIndexPatternId')) {
+      if (rightSource.getApplyGlobalQuery() && hasESSourceMethod(rightSource, 'getIndexPatternId')) {
         indexPatternIds.push(rightSource.getIndexPatternId());
       }
     });
