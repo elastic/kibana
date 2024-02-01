@@ -34,31 +34,25 @@ const DEFAULT_LOCALES = ['en-US'];
 export function formatNumber(logger: Logger, numberLocalesOptions: string): string {
   const [numString, localesString, optionsString] = splitNumberLocalesOptions(numberLocalesOptions);
   if (localesString === undefined || optionsString === undefined) {
-    logger.error(
-      `mustache render error: invalid format, missing semicolons: '${numberLocalesOptions}'`
-    );
-    return '';
+    return logAndReturnErr(logger, `invalid format, missing semicolons: '${numberLocalesOptions}'`);
   }
 
   const num = parseFloat(numString);
   if (isNaN(num)) {
-    logger.error(`mustache render error: invalid number: '${numString}'`);
-    return '';
+    return logAndReturnErr(logger, `invalid number: '${numString}'`);
   }
 
   const locales = getLocales(localesString);
 
   const [options, optionsError] = getOptions(optionsString);
   if (optionsError) {
-    logger.error(`mustache render error: invalid options: ${optionsError}`);
-    return '';
+    return logAndReturnErr(logger, `invalid options: ${optionsError}`);
   }
 
   try {
     return new Intl.NumberFormat(locales, options).format(num);
   } catch (err) {
-    logger.error(`mustache render error: error formatting number: ${err.message}`);
-    return '';
+    return logAndReturnErr(logger, `error formatting number: ${err.message}`);
   }
 }
 
@@ -120,4 +114,9 @@ function splitNumberLocalesOptions(
 ): [string, string | undefined, string | undefined] {
   const [num, locales, options] = numberLocalesOptions.split(';', 3);
   return [num.trim(), locales?.trim(), options?.trim()];
+}
+
+function logAndReturnErr(logger: Logger, errMessage: string): string {
+  logger.error(`mustache render error: ${errMessage}`);
+  return errMessage;
 }

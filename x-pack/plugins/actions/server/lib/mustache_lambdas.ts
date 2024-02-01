@@ -55,10 +55,7 @@ function evalMath(vars: Variables, o: unknown, logger: Logger): string {
     const result = tinymath.evaluate(expr, vars);
     return `${result}`;
   } catch (err) {
-    logger.error(
-      `mustache render error: error evaluating tinymath expression "${expr}": ${err.message}`
-    );
-    return '';
+    return logAndReturnErr(logger, `error evaluating tinymath expression "${expr}": ${err.message}`);
   }
 }
 
@@ -69,8 +66,7 @@ function parseHjson(o: unknown, logger: Logger): string {
   try {
     object = hjsonParse(hjsonObject);
   } catch (err) {
-    logger.error(`mustache render error: error parsing Hjson "${hjsonObject}": ${err.message}`);
-    return '';
+    return logAndReturnErr(logger, `error parsing Hjson "${hjsonObject}": ${err.message}`);
   }
 
   return JSON.stringify(object);
@@ -80,48 +76,37 @@ function formatDate(dateString: unknown, logger: Logger): string {
   const { date, timeZone, format } = splitDateString(`${dateString}`);
 
   if (date === '') {
-    logger.error(`mustache render error: error parsing date - value is empty`);
-    return '';
+    return logAndReturnErr(logger, `date is empty`);
   }
 
   if (isNaN(new Date(date).valueOf())) {
-    logger.error(`mustache render error: invalid date "${date}"`);
-    return '';
+    return logAndReturnErr(logger, `invalid date "${date}"`);
   }
 
   let mDate: moment.Moment;
   try {
     mDate = moment(date);
     if (!mDate.isValid()) {
-      logger.error(`mustache render error: invalid date "${date}"`);
-      return '';
+      return logAndReturnErr(logger, `invalid date "${date}"`);
     }
   } catch (err) {
-    logger.error(`mustache render error: error evaluating moment date "${date}": ${err.message}`);
-    return '';
+    return logAndReturnErr(logger, `error evaluating moment date "${date}": ${err.message}`);
   }
 
   if (!TimeZoneSet.has(timeZone)) {
-    logger.error(`mustache render error: unknown timeZone value "${timeZone}"`);
-    return '';
+    return logAndReturnErr(logger, `unknown timeZone value "${timeZone}"`);
   }
 
   try {
     mDate.tz(timeZone);
   } catch (err) {
-    logger.error(
-      `mustache render error: error evaluating moment timeZone "${timeZone}": ${err.message}`
-    );
-    return '';
+    return logAndReturnErr(logger, `error evaluating moment timeZone "${timeZone}": ${err.message}`);
   }
 
   try {
     return mDate.format(format);
   } catch (err) {
-    logger.error(
-      `mustache render error: error evaluating moment format "${format}": ${err.message}`
-    );
-    return '';
+    return logAndReturnErr(logger, `error evaluating moment format "${format}": ${err.message}`);
   }
 }
 
@@ -133,4 +118,9 @@ function splitDateString(dateString: string) {
     timeZone: timeZone || DefaultDateTimeZone,
     format: format || DefaultDateFormat,
   };
+}
+
+function logAndReturnErr(logger: Logger, errMessage: string): string {
+  logger.error(`mustache render error: ${errMessage}`);
+  return errMessage;
 }
