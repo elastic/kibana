@@ -42,8 +42,9 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { DarkModeValue, UserProfileData } from '@kbn/user-profile-components';
 import { UserAvatar, useUpdateUserProfile } from '@kbn/user-profile-components';
 
-import { createImageHandler, getRandomColor, IMAGE_FILE_TYPES, VALID_HEX_COLOR } from './utils';
+import { createImageHandler, getRandomColor, VALID_HEX_COLOR } from './utils';
 import type { AuthenticatedUser } from '../../../common';
+import { IMAGE_FILE_TYPES } from '../../../common/constants';
 import {
   canUserChangeDetails,
   canUserChangePassword,
