@@ -184,6 +184,39 @@ export default function ({ getService }: FtrProviderContext) {
         })
       );
     });
+    it('prevents duplicate name of monitor', async () => {
+      const monitor = {
+        type: 'http',
+        locations: ['dev'],
+        url: 'https://www.google.com',
+      };
+      const { body: result, rawBody } = await addMonitorAPI(monitor);
+      const newMonitorId = rawBody.id;
+
+      expect(result).eql(
+        omitMonitorKeys({
+          ...defaultFields,
+          ...monitor,
+          locations: [localLoc],
+          name: 'https://www.google.com',
+        })
+      );
+
+      const editResult = await editMonitorAPI(
+        newMonitorId,
+        {
+          name: 'updated name',
+        },
+        400
+      );
+
+      expect(editResult).eql({
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'Monitor name must be unique, "updated name" already exists.',
+        attributes: { details: 'Monitor name must be unique, "updated name" already exists.' },
+      });
+    });
 
     let pvtLoc: PrivateLocation;
 

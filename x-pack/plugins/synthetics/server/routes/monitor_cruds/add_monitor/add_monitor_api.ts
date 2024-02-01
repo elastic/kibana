@@ -237,12 +237,13 @@ export class AddEditMonitorAPI {
     } as MonitorFields;
   }
 
-  async validateUniqueMonitorName(name: string) {
+  async validateUniqueMonitorName(name: string, id?: string) {
     const { savedObjectsClient } = this.routeContext;
+    const kqlFilter = getKqlFilter({ field: 'name.keyword', values: name });
     const { total } = await savedObjectsClient.find({
       perPage: 0,
       type: syntheticsMonitorType,
-      filter: getKqlFilter({ field: 'name.keyword', values: name }),
+      filter: id ? `${kqlFilter} and not (id: ${id})` : kqlFilter,
     });
 
     if (total > 0) {

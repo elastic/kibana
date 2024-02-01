@@ -64,6 +64,14 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
       });
     }
     const editMonitorAPI = new AddEditMonitorAPI(routeContext);
+    if (monitor.name) {
+      const nameError = await editMonitorAPI.validateUniqueMonitorName(monitor.name);
+      if (nameError) {
+        return response.badRequest({
+          body: { message: nameError, attributes: { details: nameError } },
+        });
+      }
+    }
 
     try {
       /* Decrypting the previous monitor before editing ensures that all existing fields remain

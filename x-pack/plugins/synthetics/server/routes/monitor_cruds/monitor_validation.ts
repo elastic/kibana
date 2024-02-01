@@ -217,7 +217,7 @@ export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
   // needed for SO AAD
   supportedKeys.push(ConfigKey.PROJECT_ID, ConfigKey.ORIGINAL_SPACE);
 
-  const unsupportedKeys = Object.keys(rawConfig).filter((key) => !supportedKeys.includes(key));
+  let unsupportedKeys = Object.keys(rawConfig).filter((key) => !supportedKeys.includes(key));
 
   const result = omit(rawConfig, unsupportedKeys);
 
@@ -238,6 +238,18 @@ export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
   }
 
   if (unsupportedKeys.length > 0) {
+    unsupportedKeys = unsupportedKeys.map((key) => {
+      if (key === ConfigKey.SOURCE_INLINE && inlineScript) {
+        return 'inline_script';
+      }
+      if (key === ConfigKey.URLS && rawUrl) {
+        return 'url';
+      }
+      if (key === ConfigKey.HOSTS && rawHost) {
+        return 'host';
+      }
+      return key;
+    });
     return {
       formattedConfig,
       errorMessage: i18n.translate('xpack.synthetics.restApi.monitor.invalidMonitorKey', {

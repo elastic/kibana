@@ -30,7 +30,7 @@ import {
   TLSVersion,
   VerificationMode,
 } from '../../../common/runtime_types';
-import { validateMonitor, validateProjectMonitor } from './monitor_validation';
+import { normalizeAPIConfig, validateMonitor, validateProjectMonitor } from './monitor_validation';
 
 describe('validateMonitor', () => {
   let testSchedule;
@@ -208,7 +208,7 @@ describe('validateMonitor', () => {
       expect(result).toMatchObject({
         valid: false,
         reason: 'Monitor type is invalid',
-        details: 'Invalid value "undefined" supplied to "MonitorType"',
+        details: 'Invalid value "undefined" supplied to "type"',
       });
     });
 
@@ -225,7 +225,7 @@ describe('validateMonitor', () => {
       expect(result).toMatchObject({
         valid: false,
         reason: 'Monitor type is invalid',
-        details: 'Invalid value "non-HTTP" supplied to "MonitorType"',
+        details: 'Invalid value "non-HTTP" supplied to "type"',
       });
     });
 
@@ -304,7 +304,7 @@ describe('validateMonitor', () => {
       });
     });
 
-    it('when payload is  not a valid Browser monitor', () => {
+    it('when payload is not a valid Browser monitor', () => {
       const testMonitor = {
         ...testBrowserFields,
         [ConfigKey.SOURCE_INLINE]: 'journey()',
@@ -448,7 +448,6 @@ describe('validateMonitor', () => {
         payload: testMonitor,
       });
     });
-
     it('when parsed from serialized JSON for alert', () => {
       const testMonitor = getJsonPayload() as MonitorFields;
 
@@ -519,6 +518,129 @@ describe('validateMonitor', () => {
         details:
           'Invalid location: "invalid-location". Remove it or replace it with a valid location.',
       });
+    });
+  });
+});
+
+describe('normalizeAPIConfig', () => {
+  it('empty object', function () {
+    const result = normalizeAPIConfig({} as any);
+
+    expect(result).toEqual({
+      errorMessage: 'Invalid value "undefined" supplied to "type"',
+    });
+  });
+
+  it('only type', function () {
+    const result = normalizeAPIConfig({ type: 'http' } as any);
+
+    expect(result).toEqual({
+      formattedConfig: {
+        type: 'http',
+      },
+    });
+  });
+
+  it('urls key mappings', function () {
+    expect(normalizeAPIConfig({ type: 'http', urls: 'https://www.google.com' } as any)).toEqual({
+      formattedConfig: {
+        urls: 'https://www.google.com',
+        type: 'http',
+      },
+    });
+
+    expect(normalizeAPIConfig({ type: 'http', url: 'https://www.google.com' } as any)).toEqual({
+      formattedConfig: {
+        urls: 'https://www.google.com',
+        type: 'http',
+      },
+    });
+
+    expect(normalizeAPIConfig({ type: 'browser', urls: 'https://www.google.com' } as any)).toEqual({
+      errorMessage: 'Invalid monitor key(s) for browser type:  urls',
+      formattedConfig: {
+        type: 'browser',
+      },
+    });
+
+    expect(normalizeAPIConfig({ type: 'browser', url: 'https://www.google.com' } as any)).toEqual({
+      errorMessage: 'Invalid monitor key(s) for browser type:  url',
+      formattedConfig: {
+        type: 'browser',
+      },
+    });
+  });
+
+  it('host key mapping validation', function () {
+    expect(normalizeAPIConfig({ type: 'tcp', hosts: 'https://www.google.com' } as any)).toEqual({
+      formattedConfig: {
+        hosts: 'https://www.google.com',
+        type: 'tcp',
+      },
+    });
+
+    expect(normalizeAPIConfig({ type: 'tcp', host: 'https://www.google.com' } as any)).toEqual({
+      formattedConfig: {
+        hosts: 'https://www.google.com',
+        type: 'tcp',
+      },
+    });
+
+    expect(normalizeAPIConfig({ type: 'browser', hosts: 'https://www.google.com' } as any)).toEqual(
+      {
+        errorMessage: 'Invalid monitor key(s) for browser type:  hosts',
+        formattedConfig: {
+          type: 'browser',
+        },
+      }
+    );
+
+    expect(normalizeAPIConfig({ type: 'browser', host: 'https://www.google.com' } as any)).toEqual({
+      errorMessage: 'Invalid monitor key(s) for browser type:  host',
+      formattedConfig: {
+        type: 'browser',
+      },
+    });
+  });
+
+  it('inline script mapping validation', function () {
+    expect(
+      normalizeAPIConfig({ type: 'tcp', inline_script: 'https://www.google.com' } as any)
+    ).toEqual({
+      errorMessage: 'Invalid monitor key(s) for tcp type:  inline_script',
+      formattedConfig: {
+        type: 'tcp',
+      },
+    });
+
+    expect(
+      normalizeAPIConfig({ type: 'browser', inline_script: 'https://www.google.com' } as any)
+    ).toEqual({
+      formattedConfig: {
+        type: 'browser',
+        'source.inline.script': 'https://www.google.com',
+      },
+    });
+
+    expect(
+      normalizeAPIConfig({ type: 'tcp', 'source.inline.script': 'https://www.google.com' } as any)
+    ).toEqual({
+      errorMessage: 'Invalid monitor key(s) for tcp type:  source.inline.script',
+      formattedConfig: {
+        type: 'tcp',
+      },
+    });
+
+    expect(
+      normalizeAPIConfig({
+        type: 'browser',
+        'source.inline.script': 'https://www.google.com',
+      } as any)
+    ).toEqual({
+      formattedConfig: {
+        type: 'browser',
+        'source.inline.script': 'https://www.google.com',
+      },
     });
   });
 });
