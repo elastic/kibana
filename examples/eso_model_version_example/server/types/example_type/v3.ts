@@ -10,7 +10,7 @@ import { EncryptedSavedObjectTypeRegistration } from '@kbn/encrypted-saved-objec
 
 export const EXAMPLE_SAVED_OBJECT_TYPE = 'eso_model_version_example';
 
-// V3 adds an addition field 'flag2' to an AAD-included attribute
+// V3 adds an additional field 'flag2' to an AAD-included attribute
 export interface EsoModelVersionExampleOptions1 {
   flag1?: boolean;
   flag2?: boolean;
