@@ -43,7 +43,7 @@ describe('ChartConfigPanel', () => {
           currentSuggestionContext: {
             suggestion: currentSuggestionMock,
             type: UnifiedHistogramSuggestionType.supportedLensSuggestion,
-            suggestionDeps: [undefined, undefined, undefined],
+            suggestionDeps: [undefined, undefined, undefined, undefined],
           },
         }}
       />
@@ -71,7 +71,7 @@ describe('ChartConfigPanel', () => {
           currentSuggestionContext: {
             suggestion: currentSuggestionMock,
             type: UnifiedHistogramSuggestionType.localHistogramDefault,
-            suggestionDeps: [undefined, undefined, undefined],
+            suggestionDeps: [undefined, undefined, undefined, undefined],
           },
         }}
       />

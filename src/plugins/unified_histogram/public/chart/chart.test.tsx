@@ -111,7 +111,7 @@ async function mountComponent({
       suggestionContext: {
         type: UnifiedHistogramSuggestionType.supportedLensSuggestion,
         suggestion: currentSuggestion,
-        suggestionDeps: [dataView.id, [], requestParams.query],
+        suggestionDeps: [dataView.id, [], requestParams.query, undefined],
       },
       allSuggestions,
     })

@@ -45,7 +45,7 @@ export type UnifiedHistogramContainerProps = {
   searchSessionId?: UnifiedHistogramRequestContext['searchSessionId'];
   requestAdapter?: UnifiedHistogramRequestContext['adapter'];
   isChartLoading?: boolean;
-  onVisContextJSONChanged: (nextVisContextJSON: string | undefined) => void;
+  onVisContextJSONChanged?: (nextVisContextJSON: string | undefined) => void;
 } & Pick<
   UnifiedHistogramLayoutProps,
   | 'services'

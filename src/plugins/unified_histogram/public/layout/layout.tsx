@@ -7,14 +7,7 @@
  */
 
 import { EuiSpacer, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
-import React, {
-  PropsWithChildren,
-  ReactElement,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { PropsWithChildren, ReactElement, useEffect, useMemo, useState } from 'react';
 import { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
@@ -258,7 +251,7 @@ export const UnifiedHistogramLayout = ({
     [externalVisContextJSON]
   );
 
-  const prevUpdateDeps = useRef<any[]>();
+  // const prevUpdateDeps = useRef<any[]>();
 
   useEffect(() => {
     if (isChartLoading) {

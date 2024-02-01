@@ -47,7 +47,7 @@ const getMockLensAttributes = async () => {
       suggestionContext: {
         type: UnifiedHistogramSuggestionType.supportedLensSuggestion,
         suggestion: currentSuggestionMock,
-        suggestionDeps: [dataViewWithTimefieldMock.id, [], query],
+        suggestionDeps: [dataViewWithTimefieldMock.id, [], query, undefined],
       },
     })
   ).lensAttributesContext;
