@@ -247,8 +247,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   const onCancelClick = useCallback(() => {
     stateContainer.dataState.cancel();
-    sendErrorMsg(stateContainer.dataState.data$.documents$, new Error('cancel'));
-    sendErrorMsg(stateContainer.dataState.data$.main$, new Error('cancel'));
+    sendErrorMsg(stateContainer.dataState.data$.documents$);
+    sendErrorMsg(stateContainer.dataState.data$.main$);
   }, [stateContainer.dataState]);
 
   return (
