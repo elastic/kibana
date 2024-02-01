@@ -121,11 +121,8 @@ describe('saved query route handler context', () => {
         }
       );
       expect(response).toEqual({
-        status: 200,
-        body: {
-          id: 'foo',
-          attributes: savedQueryAttributes,
-        },
+        id: 'foo',
+        attributes: savedQueryAttributes,
       });
     });
 
@@ -157,11 +154,8 @@ describe('saved query route handler context', () => {
       const result = await context.create(savedQueryAttributesWithQueryObject);
 
       expect(result).toEqual({
-        status: 200,
-        body: {
-          id: 'foo',
-          attributes: savedQueryAttributesWithQueryObject,
-        },
+        id: 'foo',
+        attributes: savedQueryAttributesWithQueryObject,
       });
     });
 
@@ -217,20 +211,9 @@ describe('saved query route handler context', () => {
     });
 
     it('should throw an error if the saved query does not have a title', async () => {
-      const response = await context.create({ ...savedQueryAttributes, title: '' });
-      expect(response).toMatchInlineSnapshot(
-        {
-          body: { message: 'Cannot create query without a title' },
-          status: 400,
-        },
-        `
-        Object {
-          "body": Object {
-            "message": "Cannot create query without a title",
-          },
-          "status": 400,
-        }
-      `
+      const response = context.create({ ...savedQueryAttributes, title: '' });
+      expect(response).rejects.toMatchInlineSnapshot(
+        `[Error: Cannot create query without a title]`
       );
     });
   });
@@ -262,11 +245,8 @@ describe('saved query route handler context', () => {
         }
       );
       expect(response).toEqual({
-        status: 200,
-        body: {
-          id: 'foo',
-          attributes: savedQueryAttributes,
-        },
+        id: 'foo',
+        attributes: savedQueryAttributes,
       });
     });
 
@@ -290,20 +270,9 @@ describe('saved query route handler context', () => {
     });
 
     it('should throw an error if the saved query does not have a title', async () => {
-      const response = await context.create({ ...savedQueryAttributes, title: '' });
-      expect(response).toMatchInlineSnapshot(
-        {
-          body: { message: 'Cannot create query without a title' },
-          status: 400,
-        },
-        `
-        Object {
-          "body": Object {
-            "message": "Cannot create query without a title",
-          },
-          "status": 400,
-        }
-      `
+      const response = context.create({ ...savedQueryAttributes, title: '' });
+      expect(response).rejects.toMatchInlineSnapshot(
+        `[Error: Cannot create query without a title]`
       );
     });
   });
