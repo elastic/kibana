@@ -22,13 +22,15 @@ function help() {
   // eslint-disable-next-line no-console
   console.log(dedent`
     usage: es <command> [<args>]
-    usage: es --serverless=<projectType>
 
     Assists with running Elasticsearch for Kibana development
 
     Available commands:
 
       ${availableCommands.join('\n      ')}
+
+    To start serverless instance use '--projectType' flag as shortcut:
+      es --serverless=es
 
     Global options:
 
@@ -50,6 +52,8 @@ export async function run(defaults = {}) {
     let commandName = args[0];
 
     // Converting --serverless flag to command
+    // `es --serverless=<projectType>` is just a shortcut for
+    // `es serverless --projectType=<projectType>`
     if (options.serverless) {
       const projectType: string = options.serverless;
       commandName = 'serverless';
