@@ -52,11 +52,13 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
     toggleBulkActionButton: async () => {
       const bulkActionButtonToBeClicked = await testSubjects.find(RULES_BULK_ACTION_BUTTON);
       await bulkActionButtonToBeClicked.click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
     clickBulkActionOption: async (optionTestId: string) => {
       const bulkActionOption = await testSubjects.find(optionTestId);
       await bulkActionOption.click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
     isBulkActionOptionDisabled: async (optionTestId: string) => {
@@ -67,16 +69,19 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
     clickSelectAllRules: async () => {
       const selectAllRulesButton = await testSubjects.find(RULES_SELECT_ALL_RULES);
       await selectAllRulesButton.click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
     clickClearAllRulesSelection: async () => {
       const clearAllRulesSelectionButton = await testSubjects.find(RULES_CLEAR_ALL_RULES_SELECTION);
       await clearAllRulesSelectionButton.click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
     clickEnableRulesRowSwitchButton: async (index: number) => {
       const enableRulesRowSwitch = await testSubjects.findAll(RULES_ROWS_ENABLE_SWITCH_BUTTON);
       await enableRulesRowSwitch[index].click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
     clickFilterButton: async (filterType: 'enabled' | 'disabled') => {
@@ -85,6 +90,7 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
           ? await testSubjects.find(RULES_ENABLED_FILTER)
           : await testSubjects.find(RULES_DISABLED_FILTER);
       await filterButtonToClick.click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
     getEnableRulesRowSwitchButton: async () => {
@@ -105,6 +111,7 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
     clickFilterPopOverOption: async (value: string) => {
       const chosenValue = await testSubjects.find('options-filter-popover-item-' + value);
       await chosenValue.click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
     filterTextInput: async (selector: string, value: string) => {
@@ -116,11 +123,13 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
     clickRulesNames: async (index: number) => {
       const rulesNames = await testSubjects.findAll('csp_rules_table_row_item_name');
       await rulesNames[index].click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
     clickFlyoutEnableSwitchButton: async () => {
       const rulesFlyoutEnableSwitchButton = await testSubjects.find(RULES_FLYOUT_SWITCH_BUTTON);
       await rulesFlyoutEnableSwitchButton.click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
     getEnableSwitchButtonState: async () => {
@@ -131,6 +140,7 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
     clickTakeActionButton: async () => {
       const takeActionButton = await testSubjects.find(TAKE_ACTION_BUTTON);
       await takeActionButton.click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
     clickTakeActionButtonOption: async (action: 'enable' | 'disable') => {
@@ -138,6 +148,7 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
         action + '-benchmark-rule-take-action-button'
       );
       await takeActionOption.click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     },
   };
 

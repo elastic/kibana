@@ -27,8 +27,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'findings',
   ]);
 
-  // Failing: See https://github.com/elastic/kibana/issues/175905
-  describe.skip('Cloud Posture Rules Page', function () {
+  describe('Cloud Posture Rules Page', function () {
     this.tags(['cloud_security_posture_rules_page']);
     let rule: typeof pageObjects.rule;
 
@@ -67,8 +66,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/175614
-    describe.skip('Rules Page - Bulk Action buttons', () => {
+    describe('Rules Page - Bulk Action buttons', () => {
       it('It should disable both Enable and Disable options when there are no rules selected', async () => {
         await rule.rulePage.toggleBulkActionButton();
         expect(
