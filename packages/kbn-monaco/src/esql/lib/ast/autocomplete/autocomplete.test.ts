@@ -121,8 +121,8 @@ function getFunctionSignaturesByReturnType(
       }
       return true;
     })
-    .map(({ builtin: isBuiltinFn, name, signatures, ...defRest }) =>
-      isBuiltinFn ? `${name} $0` : `${name}($0)`
+    .map(({ type, name, signatures, ...defRest }) =>
+      type === 'builtin' ? `${name} $0` : `${name}($0)`
     );
 }
 
@@ -317,6 +317,13 @@ describe('autocomplete', () => {
     testSuggestions('from index', suggestedIndexes, 6 /* index index in from */);
   });
 
+  describe('show', () => {
+    testSuggestions('show ', ['functions', 'info']);
+    for (const fn of ['functions', 'info']) {
+      testSuggestions(`show ${fn} `, ['|']);
+    }
+  });
+
   describe('where', () => {
     const allEvalFns = getFunctionSignaturesByReturnType('where', 'any', {
       evalMath: true,
@@ -342,7 +349,22 @@ describe('autocomplete', () => {
       ...getFieldNamesByType('string'),
       ...getFunctionSignaturesByReturnType('where', 'string', { evalMath: true }),
     ]);
+    testSuggestions('from a | where stringField =~ ', [
+      ...getFieldNamesByType('string'),
+      ...getFunctionSignaturesByReturnType('where', 'string', { evalMath: true }),
+    ]);
     testSuggestions('from a | where stringField >= stringField ', [
+      ...getFunctionSignaturesByReturnType(
+        'where',
+        'boolean',
+        {
+          builtin: true,
+        },
+        ['boolean']
+      ),
+      '|',
+    ]);
+    testSuggestions('from a | where stringField =~ stringField ', [
       ...getFunctionSignaturesByReturnType(
         'where',
         'boolean',
@@ -447,14 +469,30 @@ describe('autocomplete', () => {
     testSuggestions('from a | stats ', ['var0 =', ...allAggFunctions]);
     testSuggestions('from a | stats a ', ['= $0']);
     testSuggestions('from a | stats a=', [...allAggFunctions]);
-    testSuggestions('from a | stats a=max(b) by ', getFieldNamesByType('any'));
-    testSuggestions('from a | stats a=max(b) BY ', getFieldNamesByType('any'));
+    testSuggestions('from a | stats a=max(b) by ', [
+      ...getFieldNamesByType('any'),
+      ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+      'var0 =',
+    ]);
+    testSuggestions('from a | stats a=max(b) BY ', [
+      ...getFieldNamesByType('any'),
+      ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+      'var0 =',
+    ]);
     testSuggestions('from a | stats a=c by d ', ['|', ',']);
-    testSuggestions('from a | stats a=c by d, ', getFieldNamesByType('any'));
+    testSuggestions('from a | stats a=c by d, ', [
+      ...getFieldNamesByType('any'),
+      ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+      'var0 =',
+    ]);
     testSuggestions('from a | stats a=max(b), ', ['var0 =', ...allAggFunctions]);
     testSuggestions('from a | stats a=min()', getFieldNamesByType('number'), '(');
     testSuggestions('from a | stats a=min(b) ', ['by', '|', ',']);
-    testSuggestions('from a | stats a=min(b) by ', getFieldNamesByType('any'));
+    testSuggestions('from a | stats a=min(b) by ', [
+      ...getFieldNamesByType('any'),
+      ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+      'var0 =',
+    ]);
     testSuggestions('from a | stats a=min(b),', ['var0 =', ...allAggFunctions]);
     testSuggestions('from a | stats var0=min(b),var1=c,', ['var2 =', ...allAggFunctions]);
     testSuggestions('from a | stats a=min(b), b=max()', getFieldNamesByType('number'));
@@ -477,9 +515,31 @@ describe('autocomplete', () => {
       getFieldNamesByType('number'),
       21 /* b column in avg */
     );
+
+    // while nested functions are not suggested, complete them should be possible via suggestions
+    testSuggestions('from a | stats avg(b) by numberField % ', [
+      ...getFieldNamesByType('number'),
+      ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }),
+      '`avg(b)`',
+    ]);
+    testSuggestions('from a | stats avg(b) by var0 = ', [
+      ...getFieldNamesByType('any'),
+      ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+    ]);
+    testSuggestions('from a | stats avg(b) by c, ', [
+      ...getFieldNamesByType('any'),
+      ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+      'var0 =',
+    ]);
+    testSuggestions('from a | stats avg(b) by c, var0 = ', [
+      ...getFieldNamesByType('any'),
+      ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+    ]);
+    testSuggestions('from a | stats avg(b) by numberField % 2 ', ['|', ',']);
   });
 
   describe('enrich', () => {
+    const modes = ['any', 'coordinator', 'remote'];
     for (const prevCommand of [
       '',
       '| enrich other-policy ',
@@ -488,6 +548,18 @@ describe('autocomplete', () => {
     ]) {
       testSuggestions(
         `from a ${prevCommand}| enrich `,
+        policies.map(({ name, suggestedAs }) => suggestedAs || name)
+      );
+      testSuggestions(
+        `from a ${prevCommand}| enrich [`,
+        modes.map((mode) => `ccq.mode:${mode}`),
+        '['
+      );
+      // Not suggesting duplicate setting
+      testSuggestions(`from a ${prevCommand}| enrich [ccq.mode:any] [`, [], '[');
+      testSuggestions(`from a ${prevCommand}| enrich [ccq.mode:`, modes, ':');
+      testSuggestions(
+        `from a ${prevCommand}| enrich [ccq.mode:any] `,
         policies.map(({ name, suggestedAs }) => suggestedAs || name)
       );
       testSuggestions(`from a ${prevCommand}| enrich policy `, ['on', 'with', '|']);
@@ -558,6 +630,10 @@ describe('autocomplete', () => {
       ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
       'a',
     ]);
+    testSuggestions('from a | eval a=stringField =~ ', [
+      ...getFieldNamesByType('string'),
+      ...getFunctionSignaturesByReturnType('eval', 'string', { evalMath: true }),
+    ]);
     testSuggestions(
       'from a | eval a=round()',
       [
@@ -567,6 +643,19 @@ describe('autocomplete', () => {
         ]),
       ],
       '('
+    );
+    testSuggestions(
+      'from a | eval a=raund()', // note the typo in round
+      [],
+      '('
+    );
+    testSuggestions(
+      'from a | eval a=raund(', // note the typo in round
+      []
+    );
+    testSuggestions(
+      'from a | eval raund(', // note the typo in round
+      []
     );
     testSuggestions('from a | eval a=round(numberField) ', [
       ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true }, ['number']),

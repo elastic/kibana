@@ -7,7 +7,10 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
-import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../service/response_actions/constants';
+import {
+  RESPONSE_ACTION_AGENT_TYPE,
+  RESPONSE_ACTION_API_COMMANDS_NAMES,
+} from '../service/response_actions/constants';
 import { createHapiReadableStreamMock } from '../../../server/endpoint/services/actions/mocks';
 import type { HapiReadableStream } from '../../../server/types';
 import { EndpointActionListRequestSchema, UploadActionRequestSchema } from '../../api/endpoint';
@@ -86,6 +89,73 @@ describe('actions schemas', () => {
             .map(() => uuidv4()),
         });
       }).not.toThrow();
+    });
+
+    it('should accept undefined agentTypes ', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({ agentTypes: undefined });
+      }).not.toThrow();
+    });
+
+    it('should not accept empty agentTypes list', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({ agentTypes: [] });
+      }).toThrow();
+    });
+
+    it('should not accept invalid agentTypes list', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({ agentTypes: ['x'] });
+      }).toThrow();
+    });
+
+    it('should not accept invalid string agentTypes ', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({ agentTypes: 'non-agent' });
+      }).toThrow();
+    });
+
+    it('should not accept empty string agentTypes ', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({ agentTypes: '' });
+      }).toThrow();
+    });
+
+    it.each(RESPONSE_ACTION_AGENT_TYPE)('should accept allowed %s agentTypes ', (agentTypes) => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({ agentTypes });
+      }).not.toThrow();
+    });
+
+    it.each(RESPONSE_ACTION_AGENT_TYPE)(
+      'should accept allowed %s agentTypes in a list',
+      (agentTypes) => {
+        expect(() => {
+          EndpointActionListRequestSchema.query.validate({ agentTypes: [agentTypes] });
+        }).not.toThrow();
+      }
+    );
+
+    it('should accept allowed agentTypes in list', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({ agentTypes: RESPONSE_ACTION_AGENT_TYPE });
+      }).not.toThrow();
+    });
+
+    it('should not accept invalid agentTypes in list', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({
+          agentTypes: [...RESPONSE_ACTION_AGENT_TYPE, 'non-agent'],
+        });
+      }).toThrow();
+    });
+
+    it('should not accept `undefined` agentTypes in list', () => {
+      expect(() => {
+        EndpointActionListRequestSchema.query.validate({
+          agentTypes: [undefined],
+        });
+      }).toThrow();
     });
 
     it('should work with all required query params', () => {

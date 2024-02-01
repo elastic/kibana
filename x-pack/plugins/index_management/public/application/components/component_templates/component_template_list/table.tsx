@@ -69,6 +69,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
   }, [componentTemplates, query]);
 
   const tableProps: EuiInMemoryTableProps<ComponentTemplateListItem> = {
+    tableLayout: 'auto',
     itemId: 'name',
     isSelectable: true,
     'data-test-subj': 'componentTemplatesTable',
@@ -189,9 +190,9 @@ export const ComponentTable: FunctionComponent<Props> = ({
           defaultMessage: 'Name',
         }),
         sortable: true,
-        width: '20%',
+        width: '45%',
         render: (name: string, item: ComponentTemplateListItem) => (
-          <>
+          <span>
             <EuiLink
               {...reactRouterNavigate(
                 history,
@@ -212,7 +213,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
             )}
             {item.isManaged && (
               <>
-                &nbsp;
+                {' '}
                 <EuiBadge color="hollow" data-test-subj="isManagedBadge">
                   {i18n.translate('xpack.idxMgmt.componentTemplatesList.table.managedBadgeLabel', {
                     defaultMessage: 'Managed',
@@ -220,7 +221,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
                 </EuiBadge>
               </>
             )}
-          </>
+          </span>
         ),
       },
       {
@@ -252,6 +253,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
           defaultMessage: 'Mappings',
         }),
         truncateText: true,
+        align: 'center',
         sortable: true,
         render: (hasMappings: boolean) => (hasMappings ? <EuiIcon type="check" /> : null),
       },
@@ -261,6 +263,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
           defaultMessage: 'Settings',
         }),
         truncateText: true,
+        align: 'center',
         sortable: true,
         render: (hasSettings: boolean) => (hasSettings ? <EuiIcon type="check" /> : null),
       },
@@ -270,6 +273,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
           defaultMessage: 'Aliases',
         }),
         truncateText: true,
+        align: 'center',
         sortable: true,
         render: (hasAliases: boolean) => (hasAliases ? <EuiIcon type="check" /> : null),
       },

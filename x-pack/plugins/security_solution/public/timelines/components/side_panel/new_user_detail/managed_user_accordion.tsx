@@ -38,6 +38,7 @@ export const ManagedUserAccordion: React.FC<ManagedUserAccordionProps> = ({
 
   return (
     <ExpandablePanel
+      data-test-subj={`managed-user-accordion-${tableType}`}
       header={{
         title,
         iconType: 'arrowStart',

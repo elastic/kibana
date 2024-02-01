@@ -48,11 +48,11 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       name: i18n.translate('xpack.idxMgmt.templateList.table.nameColumnTitle', {
         defaultMessage: 'Name',
       }),
-      truncateText: true,
       sortable: true,
+      width: '30%',
       render: (name: TemplateListItem['name'], item: TemplateListItem) => {
         return (
-          <>
+          <span>
             <EuiLink
               {...reactRouterNavigate(history, getTemplateDetailsLink(name), () =>
                 uiMetricService.trackMetric(METRIC_TYPE.CLICK, UIM_TEMPLATE_SHOW_DETAILS_CLICK)
@@ -60,7 +60,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
               data-test-subj="templateDetailsLink"
             >
               {name}
-            </EuiLink>
+            </EuiLink>{' '}
             {item.deprecated && (
               <>
                 &nbsp;
@@ -69,7 +69,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
             )}
             &nbsp;
             <TemplateTypeIndicator templateType={item._kbnMeta.type} />
-          </>
+          </span>
         );
       },
     },
@@ -78,8 +78,8 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       name: i18n.translate('xpack.idxMgmt.templateList.table.indexPatternsColumnTitle', {
         defaultMessage: 'Index patterns',
       }),
-      truncateText: true,
       sortable: true,
+      width: '20%',
       render: (indexPatterns: string[]) => <strong>{indexPatterns.join(', ')}</strong>,
     },
     {
@@ -89,12 +89,15 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       }),
       truncateText: true,
       sortable: true,
+      width: '20%',
       render: (composedOf: string[] = []) => <span>{composedOf.join(', ')}</span>,
     },
     {
       name: i18n.translate('xpack.idxMgmt.templateList.table.dataStreamColumnTitle', {
         defaultMessage: 'Data stream',
       }),
+      width: '90px',
+      align: 'center',
       truncateText: true,
       render: (template: TemplateListItem) =>
         template._kbnMeta.hasDatastream ? <EuiIcon type="check" /> : null,

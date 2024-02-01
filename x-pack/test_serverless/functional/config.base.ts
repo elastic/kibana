@@ -60,8 +60,8 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         observability: {
           pathname: '/app/observability',
         },
-        observabilityLogExplorer: {
-          pathname: '/app/observability-log-explorer',
+        observabilityLogsExplorer: {
+          pathname: '/app/observability-logs-explorer',
         },
         management: {
           pathname: '/app/management',
@@ -106,6 +106,9 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         searchProfiler: {
           pathname: '/app/dev_tools',
           hash: '/searchprofiler',
+        },
+        maintenanceWindows: {
+          pathname: '/app/management/insightsAndAlerting/maintenanceWindows',
         },
       },
       // choose where screenshots should be saved
