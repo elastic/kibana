@@ -29,6 +29,7 @@ import type {
   PostAgentPolicyCreateCallback,
   PostAgentPolicyUpdateCallback,
 } from '@kbn/fleet-plugin/server/types';
+import { validatePolicyAgainstAppFeatures } from './handlers/validate_policy_against_app_features';
 import { validateEndpointPackagePolicy } from './handlers/validate_endpoint_package_policy';
 import {
   isPolicySetToEventCollectionOnly,
@@ -110,6 +111,7 @@ export const getPackagePolicyCreateCallback = (
     }
 
     if (newPackagePolicy?.inputs) {
+      validatePolicyAgainstAppFeatures(newPackagePolicy.inputs, appFeatures);
       validateEndpointPackagePolicy(newPackagePolicy.inputs);
     }
     // Optional endpoint integration configuration
@@ -214,6 +216,9 @@ export const getPackagePolicyUpdateCallback = (
       licenseService,
       logger
     );
+
+    // Validate that Endpoint Security policy uses only enabled App Features
+    validatePolicyAgainstAppFeatures(endpointIntegrationData.inputs, appFeatures);
 
     validateEndpointPackagePolicy(endpointIntegrationData.inputs);
 
