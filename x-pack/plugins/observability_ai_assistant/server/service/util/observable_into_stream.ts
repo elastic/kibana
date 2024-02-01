@@ -29,6 +29,7 @@ export function observableIntoStream(
           message: error.message,
           stack: error.stack,
           code: isChatCompletionError(error) ? error.code : undefined,
+          meta: error.meta,
         },
         type: StreamingChatResponseEventType.ChatCompletionError,
       };
