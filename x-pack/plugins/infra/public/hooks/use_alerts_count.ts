@@ -28,7 +28,7 @@ interface FetchAlertsCountParams {
   signal: AbortSignal;
 }
 
-interface AlertsCount {
+export interface AlertsCount {
   activeAlertCount: number;
   recoveredAlertCount: number;
 }

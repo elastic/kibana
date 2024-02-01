@@ -11,8 +11,6 @@ import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
-import { EuiLoadingSpinner } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { usePluginConfig } from '../../../../containers/plugin_config_context';
 import type { AlertsEsQuery } from '../../../../common/alerts/types';
 import { createAlertsEsQuery } from '../../../../common/alerts/create_alerts_es_query';
@@ -27,7 +25,7 @@ import { AlertsSectionTitle } from '../../components/section_titles';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { CollapsibleSection, type SectionTriggerValue } from './section/collapsible_section';
 import { AlertsClosedContent } from './alerts_closed_content';
-import { useAlertsCount } from '../../../../hooks/use_alerts_count';
+import { type AlertsCount } from '../../../../hooks/use_alerts_count';
 
 export const AlertsSummaryContent = ({
   assetName,
@@ -133,28 +131,13 @@ const MemoAlertSummaryWidget = React.memo(
       baseTheme: charts.theme.useChartsBaseTheme(),
     };
 
-    const { alertsCount, loading, error } = useAlertsCount({
-      featureIds: infraAlertFeatureIds,
-      query: alertsQuery,
-    });
+    const getAlertsCount = (alertsCount: AlertsCount) => {
+      const hasActiveAlerts =
+        typeof alertsCount?.activeAlertCount === 'number' && alertsCount?.activeAlertCount > 0;
 
-    if (loading) {
-      return <EuiLoadingSpinner />;
-    }
-
-    const hasActiveAlerts =
-      typeof alertsCount?.activeAlertCount === 'number' && alertsCount?.activeAlertCount > 0;
-
-    if (error) {
-      return (
-        <div>
-          {i18n.translate('xpack.infra.assetDetails.activeAlertsContent.countError', {
-            defaultMessage:
-              'The active alert count was not retrieved correctly, try reloading the page.',
-          })}
-        </div>
-      );
-    }
+      setIsAlertSectionOpen(hasActiveAlerts ? 'open' : 'closed');
+      setActiveAlertsCount(alertsCount?.activeAlertCount ?? 0);
+    };
 
     return (
       <AlertSummaryWidget
@@ -162,10 +145,7 @@ const MemoAlertSummaryWidget = React.memo(
         featureIds={infraAlertFeatureIds}
         filter={alertsQuery}
         timeRange={summaryTimeRange}
-        onLoaded={() => {
-          setIsAlertSectionOpen(hasActiveAlerts ? 'open' : 'closed');
-          setActiveAlertsCount(alertsCount?.activeAlertCount ?? 0);
-        }}
+        getAlertsCount={(alertsCount) => getAlertsCount(alertsCount)}
         fullSize
         hideChart
       />

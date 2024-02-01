@@ -30,6 +30,11 @@ export interface ChartProps {
   onBrushEnd?: BrushEndListener;
 }
 
+interface AlertsCount {
+  activeAlertCount: number;
+  recoveredAlertCount: number;
+}
+
 export interface AlertSummaryWidgetProps {
   featureIds?: ValidFeatureId[];
   filter?: estypes.QueryDslQueryContainer;
@@ -39,4 +44,5 @@ export interface AlertSummaryWidgetProps {
   chartProps: ChartProps;
   hideChart?: boolean;
   onLoaded?: () => void;
+  getAlertsCount?: (alertsCount: AlertsCount) => void;
 }
