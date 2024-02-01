@@ -8,11 +8,9 @@
 
 import { IlmPolicyStatusResponse } from '@kbn/reporting-common/types';
 import { INTERNAL_ROUTES } from '@kbn/reporting-plugin/common/constants';
-import {
-  useKibana,
-  useRequest,
-  UseRequestResponse,
-} from '@kbn/reporting-plugin/public/shared_imports';
+import { useRequest } from '@kbn/es-ui-shared-plugin/public';
+import type { UseRequestResponse } from '@kbn/es-ui-shared-plugin/public';
+import { useKibana } from '.';
 
 export const useCheckIlmPolicyStatus = (): UseRequestResponse<IlmPolicyStatusResponse> => {
   const {

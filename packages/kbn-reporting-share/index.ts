@@ -7,3 +7,5 @@
  */
 
 export { getSharedComponents } from './shared';
+export { reportingScreenshotShareProvider } from './share_context_menu/register_pdf_png_reporting';
+export { reportingCsvShareProvider } from './share_context_menu/register_csv_reporting';
