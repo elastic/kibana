@@ -67,6 +67,7 @@ export const casesMutationsKeys = {
 
 const DEFAULT_SEARCH_FIELDS = ['title', 'description'];
 
+// TODO: Remove reporters. Move searchFields to API.
 export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   search: '',
   searchFields: DEFAULT_SEARCH_FIELDS,

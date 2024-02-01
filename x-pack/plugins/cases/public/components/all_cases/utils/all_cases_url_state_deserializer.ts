@@ -8,7 +8,7 @@
 import { isEmpty } from 'lodash';
 import { CustomFieldTypes } from '../../../../common/types/domain';
 import type { QueryParams, FilterOptions } from '../../../../common/ui';
-import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from '../../../containers/constants';
+import { DEFAULT_CASES_TABLE_STATE } from '../../../containers/constants';
 import type { AllCasesURLQueryParams, AllCasesURLState } from '../types';
 import { sanitizeState } from './sanitize_state';
 
@@ -20,15 +20,19 @@ type UrlQueryParams = Omit<QueryParams, 'page' | 'perPage'> & {
 export const allCasesUrlStateDeserializer = (
   urlParamsMap: AllCasesURLQueryParams
 ): AllCasesURLState => {
-  const { customFields, ...filterOptionsWithoutCustomFields } = DEFAULT_FILTER_OPTIONS;
+  const { customFields, ...filterOptionsWithoutCustomFields } =
+    DEFAULT_CASES_TABLE_STATE.filterOptions;
 
   const queryParams: Partial<UrlQueryParams> & Record<string, string | string[]> = {};
   const filterOptions: Partial<FilterOptions> & Record<string, string | string[]> = {};
   const customFieldsParams: FilterOptions['customFields'] = {};
 
   for (const [key, values] of Object.entries(urlParamsMap)) {
-    if (Object.hasOwn(DEFAULT_QUERY_PARAMS, key)) {
-      queryParams[key] = parseValue(values, DEFAULT_QUERY_PARAMS[key as keyof QueryParams]);
+    if (Object.hasOwn(DEFAULT_CASES_TABLE_STATE.queryParams, key)) {
+      queryParams[key] = parseValue(
+        values,
+        DEFAULT_CASES_TABLE_STATE.queryParams[key as keyof QueryParams]
+      );
     }
 
     if (Object.hasOwn(filterOptionsWithoutCustomFields, key)) {
@@ -48,18 +52,19 @@ export const allCasesUrlStateDeserializer = (
     }
   }
 
-  const { page, perPage, sortOrder, ...restQueryParams } = queryParams;
+  const { page, perPage, ...restQueryParams } = queryParams;
 
   const queryParamsParsed: Partial<QueryParams> = {
     ...restQueryParams,
   };
 
   if (page) {
-    queryParamsParsed.page = stringToInteger(page) ?? DEFAULT_QUERY_PARAMS.page;
+    queryParamsParsed.page = stringToInteger(page) ?? DEFAULT_CASES_TABLE_STATE.queryParams.page;
   }
 
   if (perPage) {
-    queryParamsParsed.perPage = stringToInteger(perPage) ?? DEFAULT_QUERY_PARAMS.perPage;
+    queryParamsParsed.perPage =
+      stringToInteger(perPage) ?? DEFAULT_CASES_TABLE_STATE.queryParams.perPage;
   }
 
   const state = {

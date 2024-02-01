@@ -6,29 +6,32 @@
  */
 
 import React from 'react';
-import { useHistory } from 'react-router-dom';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react-hooks';
 
 import { TestProviders } from '../../common/mock';
 import { useAllCasesState } from './use_all_cases_state';
 import { DEFAULT_CASES_TABLE_STATE, DEFAULT_TABLE_LIMIT } from '../../containers/constants';
 import { SortFieldCase } from '../../containers/types';
 import { stringifyUrlParams } from './utils/stringify_url_params';
+import { CaseStatuses } from '@kbn/cases-components';
+import { url as urlUtils } from '@kbn/kibana-utils-plugin/common';
+import { CaseSeverity } from '../../../common';
 
 const mockLocation = { search: '' };
+const mockPush = jest.fn();
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useLocation: jest.fn().mockImplementation(() => {
     return mockLocation;
   }),
-  useHistory: jest.fn().mockReturnValue({
+  useHistory: jest.fn().mockImplementation(() => ({
     replace: jest.fn(),
-    push: jest.fn(),
+    push: mockPush,
     location: {
       search: '',
     },
-  }),
+  })),
 }));
 
 const LS_KEY = 'testAppId.cases.list.state';
@@ -43,7 +46,7 @@ describe('useAllCasesQueryParams', () => {
     jest.clearAllMocks();
   });
 
-  it('calls setState with default values on first run', () => {
+  it('returns default state with empty URL and local storage', () => {
     const { result } = renderHook(() => useAllCasesState(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
@@ -119,7 +122,7 @@ describe('useAllCasesQueryParams', () => {
 
   it('takes into account legacy url filter option "all"', () => {
     const nonDefaultUrlParams = new URLSearchParams();
-    nonDefaultUrlParams.append('severity', 'foo');
+    nonDefaultUrlParams.append('severity', 'all');
     nonDefaultUrlParams.append('status', 'all');
     nonDefaultUrlParams.append('status', 'open');
     nonDefaultUrlParams.append('severity', 'low');
@@ -148,7 +151,7 @@ describe('useAllCasesQueryParams', () => {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
-    expect(useHistory().push).toHaveBeenCalledWith({
+    expect(mockPush).toHaveBeenCalledWith({
       search: 'foo=bar&page=1&perPage=10&sortField=createdAt&sortOrder=desc&severity=&status=',
     });
   });
@@ -190,6 +193,169 @@ describe('useAllCasesQueryParams', () => {
     });
 
     expect(result.current.filterOptions).toMatchObject({ severity: ['high'], status: ['open'] });
+  });
+
+  it('loads the URL from the local storage when the URL is empty on first run', async () => {
+    const existingLocalStorageValues = {
+      queryParams: {
+        ...DEFAULT_CASES_TABLE_STATE.queryParams,
+        perPage: DEFAULT_CASES_TABLE_STATE.queryParams.perPage + 20,
+      },
+      filterOptions: DEFAULT_CASES_TABLE_STATE.filterOptions,
+    };
+
+    localStorage.setItem(LS_KEY, JSON.stringify(existingLocalStorageValues));
+
+    renderHook(() => useAllCasesState(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    expect(mockPush).toHaveBeenCalledWith({
+      search: urlUtils.encodeUriQuery('page=1&perPage=30&sortField=createdAt&sortOrder=desc'),
+    });
+  });
+
+  it('loads the state from the URL correctly', () => {
+    mockLocation.search = urlUtils.encodeUriQuery('status=in-progress&severity=high');
+
+    const { result } = renderHook(() => useAllCasesState(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    expect(result.current.queryParams).toStrictEqual(DEFAULT_CASES_TABLE_STATE.queryParams);
+    expect(result.current.filterOptions).toStrictEqual({
+      ...DEFAULT_CASES_TABLE_STATE.filterOptions,
+      status: [CaseStatuses['in-progress']],
+      severity: [CaseSeverity.HIGH],
+    });
+  });
+
+  it('loads the state from the local storage if they URL is empty correctly', () => {
+    const existingLocalStorageValues = {
+      queryParams: {
+        ...DEFAULT_CASES_TABLE_STATE.queryParams,
+        perPage: DEFAULT_CASES_TABLE_STATE.queryParams.perPage + 20,
+      },
+      filterOptions: DEFAULT_CASES_TABLE_STATE.filterOptions,
+    };
+
+    localStorage.setItem(LS_KEY, JSON.stringify(existingLocalStorageValues));
+
+    const { result } = renderHook(() => useAllCasesState(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    expect(result.current.queryParams).toStrictEqual({
+      ...DEFAULT_CASES_TABLE_STATE.queryParams,
+      perPage: DEFAULT_CASES_TABLE_STATE.queryParams.perPage + 20,
+    });
+    expect(result.current.filterOptions).toStrictEqual(DEFAULT_CASES_TABLE_STATE.filterOptions);
+  });
+
+  it('updates the query params correctly', () => {
+    const { result } = renderHook(() => useAllCasesState(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    act(() => {
+      result.current.setQueryParams({
+        perPage: DEFAULT_CASES_TABLE_STATE.queryParams.perPage + 20,
+      });
+    });
+
+    expect(result.current.queryParams).toStrictEqual({
+      ...DEFAULT_CASES_TABLE_STATE.queryParams,
+      perPage: DEFAULT_CASES_TABLE_STATE.queryParams.perPage + 20,
+    });
+    expect(result.current.filterOptions).toStrictEqual(DEFAULT_CASES_TABLE_STATE.filterOptions);
+  });
+
+  it('updates URL when updating the query params', () => {
+    const { result } = renderHook(() => useAllCasesState(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    act(() => {
+      result.current.setQueryParams({
+        perPage: DEFAULT_CASES_TABLE_STATE.queryParams.perPage + 20,
+      });
+    });
+
+    expect(mockPush).toHaveBeenCalledWith({
+      search: urlUtils.encodeUriQuery('page=1&perPage=30&sortField=createdAt&sortOrder=desc'),
+    });
+  });
+
+  it('updates the local storage when updating the query params', () => {
+    const { result } = renderHook(() => useAllCasesState(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    act(() => {
+      result.current.setQueryParams({
+        perPage: DEFAULT_CASES_TABLE_STATE.queryParams.perPage + 20,
+      });
+    });
+
+    const localStorageState = JSON.parse(localStorage.getItem(LS_KEY) ?? '{}');
+    expect(localStorageState).toEqual({
+      ...DEFAULT_CASES_TABLE_STATE,
+      queryParams: {
+        ...DEFAULT_CASES_TABLE_STATE.queryParams,
+        perPage: DEFAULT_CASES_TABLE_STATE.queryParams.perPage + 20,
+      },
+    });
+  });
+
+  it('updates the filter options correctly', () => {
+    const { result } = renderHook(() => useAllCasesState(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    act(() => {
+      result.current.setFilterOptions({ status: [CaseStatuses.closed] });
+    });
+
+    expect(result.current.queryParams).toStrictEqual(DEFAULT_CASES_TABLE_STATE.queryParams);
+    expect(result.current.filterOptions).toStrictEqual({
+      ...DEFAULT_CASES_TABLE_STATE.filterOptions,
+      status: [CaseStatuses.closed],
+    });
+  });
+
+  it('updates the URL when updating the filter options', () => {
+    const { result } = renderHook(() => useAllCasesState(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    act(() => {
+      result.current.setFilterOptions({ status: [CaseStatuses.closed] });
+    });
+
+    expect(mockPush).toHaveBeenCalledWith({
+      search: urlUtils.encodeUriQuery(
+        'page=1&perPage=10&sortField=createdAt&sortOrder=desc&status=closed'
+      ),
+    });
+  });
+
+  it('updates the local storage when updating the filter options', () => {
+    const { result } = renderHook(() => useAllCasesState(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    act(() => {
+      result.current.setFilterOptions({ status: [CaseStatuses.closed] });
+    });
+
+    const localStorageState = JSON.parse(localStorage.getItem(LS_KEY) ?? '{}');
+    expect(localStorageState).toEqual({
+      ...DEFAULT_CASES_TABLE_STATE,
+      filterOptions: {
+        ...DEFAULT_CASES_TABLE_STATE.filterOptions,
+        status: [CaseStatuses.closed],
+      },
+    });
   });
 
   describe('validation', () => {
@@ -246,6 +412,126 @@ describe('useAllCasesQueryParams', () => {
       });
 
       expect(result.current.queryParams).toMatchObject({ sortOrder: 'desc' });
+    });
+  });
+
+  describe('Modal', () => {
+    it('returns default state with empty URL and local storage', () => {
+      const { result } = renderHook(() => useAllCasesState(true), {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      });
+
+      expect(result.current.queryParams).toStrictEqual(DEFAULT_CASES_TABLE_STATE.queryParams);
+      expect(result.current.filterOptions).toStrictEqual(DEFAULT_CASES_TABLE_STATE.filterOptions);
+    });
+
+    it('updates the query params correctly', () => {
+      const { result } = renderHook(() => useAllCasesState(true), {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      });
+
+      act(() => {
+        result.current.setQueryParams({
+          perPage: DEFAULT_CASES_TABLE_STATE.queryParams.perPage + 20,
+        });
+      });
+
+      expect(result.current.queryParams).toStrictEqual({
+        ...DEFAULT_CASES_TABLE_STATE.queryParams,
+        perPage: DEFAULT_CASES_TABLE_STATE.queryParams.perPage + 20,
+      });
+      expect(result.current.filterOptions).toStrictEqual(DEFAULT_CASES_TABLE_STATE.filterOptions);
+    });
+
+    it('updates the filter options correctly', () => {
+      const { result } = renderHook(() => useAllCasesState(true), {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      });
+
+      act(() => {
+        result.current.setFilterOptions({ status: [CaseStatuses.closed] });
+      });
+
+      expect(result.current.queryParams).toStrictEqual(DEFAULT_CASES_TABLE_STATE.queryParams);
+      expect(result.current.filterOptions).toStrictEqual({
+        ...DEFAULT_CASES_TABLE_STATE.filterOptions,
+        status: [CaseStatuses.closed],
+      });
+    });
+
+    it('does not update the URL when changing the state of the table', () => {
+      const { result } = renderHook(() => useAllCasesState(true), {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      });
+
+      act(() => {
+        result.current.setQueryParams({ perPage: 20 });
+      });
+
+      expect(mockPush).not.toHaveBeenCalled();
+    });
+
+    it('does not update the local storage when changing the state of the table', () => {
+      const { result } = renderHook(() => useAllCasesState(true), {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      });
+
+      act(() => {
+        result.current.setQueryParams({
+          perPage: DEFAULT_CASES_TABLE_STATE.queryParams.perPage + 20,
+        });
+      });
+
+      const localStorageState = JSON.parse(localStorage.getItem(LS_KEY) ?? '{}');
+      expect(localStorageState).toEqual(DEFAULT_CASES_TABLE_STATE);
+    });
+
+    it('does not load the URL from the local storage when the URL is empty on first run', () => {
+      const existingLocalStorageValues = {
+        queryParams: {
+          ...DEFAULT_CASES_TABLE_STATE.queryParams,
+          perPage: DEFAULT_CASES_TABLE_STATE.queryParams.perPage + 20,
+        },
+        filterOptions: DEFAULT_CASES_TABLE_STATE.filterOptions,
+      };
+
+      localStorage.setItem(LS_KEY, JSON.stringify(existingLocalStorageValues));
+
+      renderHook(() => useAllCasesState(true), {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      });
+
+      expect(mockPush).not.toHaveBeenCalled();
+    });
+
+    it('does not load the state from the URL', () => {
+      mockLocation.search = 'status=in-progress&severity=high';
+
+      const { result } = renderHook(() => useAllCasesState(true), {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      });
+
+      expect(result.current.queryParams).toStrictEqual(DEFAULT_CASES_TABLE_STATE.queryParams);
+      expect(result.current.filterOptions).toStrictEqual(DEFAULT_CASES_TABLE_STATE.filterOptions);
+    });
+
+    it('does not load the state from the local storage', () => {
+      const existingLocalStorageValues = {
+        queryParams: {
+          ...DEFAULT_CASES_TABLE_STATE.queryParams,
+          perPage: DEFAULT_CASES_TABLE_STATE.queryParams.perPage + 20,
+        },
+        filterOptions: DEFAULT_CASES_TABLE_STATE.filterOptions,
+      };
+
+      localStorage.setItem(LS_KEY, JSON.stringify(existingLocalStorageValues));
+
+      const { result } = renderHook(() => useAllCasesState(true), {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      });
+
+      expect(result.current.queryParams).toStrictEqual(DEFAULT_CASES_TABLE_STATE.queryParams);
+      expect(result.current.filterOptions).toStrictEqual(DEFAULT_CASES_TABLE_STATE.filterOptions);
     });
   });
 });

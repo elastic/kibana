@@ -5,12 +5,47 @@
  * 2.0.
  */
 
-import { DEFAULT_QUERY_PARAMS } from '../../../containers/constants';
+import { DEFAULT_CASES_TABLE_STATE } from '../../../containers/constants';
+import type { AllCasesURLQueryParams } from '../types';
 
 import { allCasesUrlStateDeserializer } from './all_cases_url_state_deserializer';
 import { parseUrlParams } from './parse_url_params';
 
 describe('allCasesUrlStateDeserializer', () => {
+  const defaultMap = Object.fromEntries(
+    Object.entries({
+      ...DEFAULT_CASES_TABLE_STATE.filterOptions,
+      ...DEFAULT_CASES_TABLE_STATE.queryParams,
+    }).map(([key, value]) => [key, Array.isArray(value) ? value : [value]])
+  ) as AllCasesURLQueryParams;
+
+  it('parses defaults correctly', () => {
+    expect(allCasesUrlStateDeserializer(defaultMap)).toMatchInlineSnapshot(`
+      Object {
+        "filterOptions": Object {
+          "assignees": Array [],
+          "category": Array [],
+          "owner": Array [],
+          "reporters": Array [],
+          "search": "",
+          "searchFields": Array [
+            "title",
+            "description",
+          ],
+          "severity": Array [],
+          "status": Array [],
+          "tags": Array [],
+        },
+        "queryParams": Object {
+          "page": 1,
+          "perPage": 10,
+          "sortField": "createdAt",
+          "sortOrder": "desc",
+        },
+      }
+    `);
+  });
+
   it('parses string with invalid format correctly', () => {
     const url = 'invalid-format in this url';
 
@@ -92,10 +127,10 @@ describe('allCasesUrlStateDeserializer', () => {
 
     expect(
       allCasesUrlStateDeserializer(parseUrlParams(new URLSearchParams(url))).queryParams.page
-    ).toBe(DEFAULT_QUERY_PARAMS.page);
+    ).toBe(DEFAULT_CASES_TABLE_STATE.queryParams.page);
     expect(
       allCasesUrlStateDeserializer(parseUrlParams(new URLSearchParams(url))).queryParams.perPage
-    ).toBe(DEFAULT_QUERY_PARAMS.perPage);
+    ).toBe(DEFAULT_CASES_TABLE_STATE.queryParams.perPage);
   });
 
   it('does not return the page and perPage if they are not defined', () => {
@@ -116,14 +151,6 @@ describe('allCasesUrlStateDeserializer', () => {
     expect(
       allCasesUrlStateDeserializer(parseUrlParams(new URLSearchParams(url))).queryParams.sortOrder
     ).toBe('asc');
-  });
-
-  it('sets the sortOrder to the default value if it is invalid', () => {
-    const url = 'sortOrder=invalid';
-
-    expect(
-      allCasesUrlStateDeserializer(parseUrlParams(new URLSearchParams(url))).queryParams.sortOrder
-    ).toBe('desc');
   });
 
   it('ignores the customFields keyword in the URL', () => {
