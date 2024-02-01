@@ -105,7 +105,7 @@ const getEventScopeFromRowClickTriggerContext = (
     if (!column) {
       // This should never happe, but in case it does we log data necessary for debugging.
       // eslint-disable-next-line no-console
-      console.error(data, api.panelTitle ? `Embeddable [${api.panelTitle.value}]` : null);
+      console.error(data, api?.panelTitle ? `Embeddable [${api.panelTitle.value}]` : null);
       throw new Error('Could not find a datatable column.');
     }
     values.push(row[columnId]);
