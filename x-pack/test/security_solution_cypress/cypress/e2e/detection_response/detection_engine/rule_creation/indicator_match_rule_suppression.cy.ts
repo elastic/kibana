@@ -58,12 +58,12 @@ describe(
       deleteAlertsAndRules();
       login();
       visit(CREATE_RULE_URL);
+
+      selectIndicatorMatchType();
+      fillDefineIndicatorMatchRule(rule);
     });
 
     it('creates rule with per rule execution suppression', () => {
-      selectIndicatorMatchType();
-      fillDefineIndicatorMatchRule(rule);
-
       // selecting only suppression fields, the rest options would be default
       fillAlertSuppressionFields(SUPPRESS_BY_FIELDS);
       continueFromDefineStep();
@@ -97,9 +97,6 @@ describe(
 
     it('creates rule rule with time interval suppression', () => {
       const expectedSuppressByFields = SUPPRESS_BY_FIELDS.slice(0, 1);
-
-      selectIndicatorMatchType();
-      fillDefineIndicatorMatchRule(rule);
 
       // fill suppress by fields and select non-default suppression options
       fillAlertSuppressionFields(expectedSuppressByFields);

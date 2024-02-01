@@ -29,6 +29,7 @@ import { CREATE_RULE_URL } from '../../../../urls/navigation';
 import { TOOLTIP } from '../../../../screens/common';
 import { ruleDetailsUrl } from '../../../../urls/rule_details';
 import { getDetails } from '../../../../tasks/rule_details';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 
 const SUPPRESS_BY_FIELDS = ['myhash.mysha256', 'source.ip.keyword'];
 
@@ -40,6 +41,7 @@ describe(
   () => {
     describe('Create rule form', () => {
       beforeEach(() => {
+        deleteAlertsAndRules();
         login();
         visit(CREATE_RULE_URL);
         startBasicLicense();

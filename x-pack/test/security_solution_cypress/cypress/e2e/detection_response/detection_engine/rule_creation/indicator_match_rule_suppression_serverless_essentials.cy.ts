@@ -56,7 +56,6 @@ describe(
     });
 
     it('creates rule with per rule execution suppression for essentials license', () => {
-      login();
       visit(CREATE_RULE_URL);
       selectIndicatorMatchType();
       fillDefineIndicatorMatchRule(rule);
