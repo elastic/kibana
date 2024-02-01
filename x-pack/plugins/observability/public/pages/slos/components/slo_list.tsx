@@ -15,7 +15,16 @@ import { ToggleSLOView } from './toggle_slo_view';
 
 export function SloList() {
   const { state, store: storeState } = useUrlSearchState();
-  const { view, page, perPage, kqlQuery, filters, compact: isCompact, tags } = state;
+  const {
+    view,
+    page,
+    perPage,
+    kqlQuery,
+    filters,
+    compact: isCompact,
+    tagsFilter,
+    statusFilter,
+  } = state;
 
   const {
     isLoading,
@@ -23,7 +32,8 @@ export function SloList() {
     isError,
     data: sloList,
   } = useFetchSloList({
-    tags,
+    tagsFilter,
+    statusFilter,
     perPage,
     filters,
     page: page + 1,
