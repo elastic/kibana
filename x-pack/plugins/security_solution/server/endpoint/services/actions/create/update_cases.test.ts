@@ -23,6 +23,8 @@ describe('updateCases', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
+  const caseIds = ['case1', 'case2'];
+
   const getDefaultPayload = () =>
     ({
       command: 'isolate',
@@ -30,6 +32,21 @@ describe('updateCases', () => {
       action_id: '123',
       endpoint_ids: ['abc123'],
     } as CreateActionPayload);
+
+  it('updates cases when casesClient and caseIDs provided', async () => {
+    (mockCasesClient.cases.getCasesByAlertID as jest.Mock).mockResolvedValue(caseIds);
+
+    await updateCases({
+      casesClient: mockCasesClient,
+      createActionPayload: {
+        ...getDefaultPayload(),
+        case_ids: caseIds,
+      },
+      endpointData: [],
+    });
+
+    expect(mockCasesClient.attachments.bulkCreate).toHaveBeenCalledTimes(2);
+  });
 
   it('should return early if casesClient is undefined', async () => {
     await updateCases({
@@ -54,7 +71,15 @@ describe('updateCases', () => {
     expect(mockCasesClient.cases.getCasesByAlertID).not.toHaveBeenCalled();
     expect(mockCasesClient.attachments.bulkCreate).not.toHaveBeenCalled();
   });
+  it('does not update if no case IDs', async () => {
+    await updateCases({
+      casesClient: mockCasesClient,
+      createActionPayload: getDefaultPayload(),
+      endpointData: [],
+    });
 
+    expect(mockCasesClient.attachments.bulkCreate).not.toHaveBeenCalled();
+  });
   it('should get cases by alert IDs and update them', async () => {
     (mockCasesClient.cases.getCasesByAlertID as jest.Mock).mockResolvedValueOnce([{ id: 'case1' }]);
 
@@ -108,83 +133,81 @@ describe('updateCases', () => {
     expect(mockCasesClient.cases.getCasesByAlertID).not.toHaveBeenCalled();
     expect(mockCasesClient.attachments.bulkCreate).not.toHaveBeenCalled();
   });
-  describe('attachments', () => {
-    it('creates expected attachments for each case', async () => {
-      const caseIds = ['case1', 'case2'];
-      const endpointData = [
-        {
-          agent: {
-            id: 'agent1',
-            type: 'endpoint',
-          },
-          host: {
-            hostname: 'host1',
-          },
-        },
-        {
-          agent: {
-            id: 'agent2',
-            type: 'endpoint',
-          },
-          host: {
-            hostname: 'host2',
-          },
-        },
-      ];
-      await updateCases({
-        casesClient: mockCasesClient,
-        createActionPayload: {
-          case_ids: caseIds,
-          ...getDefaultPayload(),
-        },
-        endpointData,
-      });
 
-      expect(mockCasesClient.attachments.bulkCreate).toHaveBeenCalledTimes(2);
+  it('creates expected attachments for each case', async () => {
+    const endpointData = [
+      {
+        agent: {
+          id: 'agent1',
+          type: 'endpoint',
+        },
+        host: {
+          hostname: 'host1',
+        },
+      },
+      {
+        agent: {
+          id: 'agent2',
+          type: 'endpoint',
+        },
+        host: {
+          hostname: 'host2',
+        },
+      },
+    ];
+    await updateCases({
+      casesClient: mockCasesClient,
+      createActionPayload: {
+        case_ids: caseIds,
+        ...getDefaultPayload(),
+      },
+      endpointData,
+    });
 
-      expect(mockCasesClient.attachments.bulkCreate).toHaveBeenNthCalledWith(2, {
-        caseId: 'case2',
-        attachments: [
-          {
-            externalReferenceAttachmentTypeId: 'endpoint',
-            externalReferenceId: '123',
-            externalReferenceMetadata: {
-              command: 'isolate',
-              comment: 'Isolating host',
-              targets: [
-                { endpointId: 'agent1', hostname: 'host1', type: 'endpoint' },
-                {
-                  endpointId: 'agent2',
-                  hostname: 'host2',
-                  type: 'endpoint',
-                },
-              ],
-            },
-            externalReferenceStorage: { type: 'elasticSearchDoc' },
-            owner: 'securitySolution',
-            type: 'externalReference',
+    expect(mockCasesClient.attachments.bulkCreate).toHaveBeenCalledTimes(2);
+
+    expect(mockCasesClient.attachments.bulkCreate).toHaveBeenNthCalledWith(2, {
+      caseId: 'case2',
+      attachments: [
+        {
+          externalReferenceAttachmentTypeId: 'endpoint',
+          externalReferenceId: '123',
+          externalReferenceMetadata: {
+            command: 'isolate',
+            comment: 'Isolating host',
+            targets: [
+              { endpointId: 'agent1', hostname: 'host1', type: 'endpoint' },
+              {
+                endpointId: 'agent2',
+                hostname: 'host2',
+                type: 'endpoint',
+              },
+            ],
           },
-          {
-            externalReferenceAttachmentTypeId: 'endpoint',
-            externalReferenceId: '123',
-            externalReferenceMetadata: {
-              command: 'isolate',
-              comment: 'Isolating host',
-              targets: [
-                { endpointId: 'agent1', hostname: 'host1', type: 'endpoint' },
-                {
-                  endpointId: 'agent2',
-                  hostname: 'host2',
-                  type: 'endpoint',
-                },
-              ],
-            },
-            externalReferenceStorage: { type: 'elasticSearchDoc' },
-            owner: 'securitySolution',
-            type: 'externalReference',
+          externalReferenceStorage: { type: 'elasticSearchDoc' },
+          owner: 'securitySolution',
+          type: 'externalReference',
+        },
+        {
+          externalReferenceAttachmentTypeId: 'endpoint',
+          externalReferenceId: '123',
+          externalReferenceMetadata: {
+            command: 'isolate',
+            comment: 'Isolating host',
+            targets: [
+              { endpointId: 'agent1', hostname: 'host1', type: 'endpoint' },
+              {
+                endpointId: 'agent2',
+                hostname: 'host2',
+                type: 'endpoint',
+              },
+            ],
           },
-        ],
-      });
+          externalReferenceStorage: { type: 'elasticSearchDoc' },
+          owner: 'securitySolution',
+          type: 'externalReference',
+        },
+      ],
     });
   });
 });
