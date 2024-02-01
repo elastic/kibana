@@ -205,8 +205,8 @@ export function runCli() {
           $ node scripts/es_archiver load my_test_data --config ../config.js
 
         Example with Performance Option Override:
-          Load the [my_test_data] snapshot override the default of 5000 for
-          the batch size, and the default of 4 for the concurrency.
+          Load the [my_test_data] snapshot and override the default for
+          the batch size, and the default for the concurrency.
 
           $ node scripts/es_archiver load my_test_data --config ../config.js --batch-size 300 --concurrency 2
 
