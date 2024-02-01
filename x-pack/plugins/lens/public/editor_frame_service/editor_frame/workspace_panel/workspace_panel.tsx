@@ -93,6 +93,7 @@ export interface WorkspacePanelProps {
   lensInspector: LensInspector;
   getUserMessages: UserMessagesGetter;
   addUserMessages: AddUserMessages;
+  abortController?: AbortController;
 }
 
 interface WorkspaceState {
@@ -146,6 +147,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   lensInspector,
   getUserMessages,
   addUserMessages,
+  abortController,
 }: Omit<WorkspacePanelProps, 'getSuggestionForField'> & {
   suggestionForDraggedField: Suggestion | undefined;
 }) {
@@ -608,6 +610,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           visualizationRenderStartTime.current = performance.now();
         }}
         displayOptions={displayOptions}
+        abortController={abortController}
       />
     );
   };
@@ -705,6 +708,7 @@ export const VisualizationWrapper = ({
   onData$,
   onComponentRendered,
   displayOptions,
+  abortController,
 }: {
   expression: string | null | undefined;
   lensInspector: LensInspector;
@@ -719,6 +723,7 @@ export const VisualizationWrapper = ({
   onData$: (data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => void;
   onComponentRendered: () => void;
   displayOptions: VisualizationDisplayOptions | undefined;
+  abortController?: AbortController;
 }) => {
   useEffect(() => {
     onComponentRendered();
@@ -775,6 +780,7 @@ export const VisualizationWrapper = ({
         expression={expression!}
         searchContext={searchContext}
         searchSessionId={searchSessionId}
+        abortController={abortController}
         onEvent={onEvent}
         hasCompatibleActions={hasCompatibleActions}
         onData$={onData$}

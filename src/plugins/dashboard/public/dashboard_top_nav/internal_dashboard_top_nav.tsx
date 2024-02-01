@@ -118,6 +118,13 @@ export function InternalDashboardTopNav({
     return getDashboardTitle(title, viewMode, !lastSavedId);
   }, [title, viewMode, lastSavedId]);
 
+  const [isLoading, setIsLoading] = useState(false);
+  useEffect(() => {
+    const subscription = dashboard.getOutput$().subscribe((output) => {
+      setIsLoading(Object.values(output.embeddableLoaded).some((v) => !v) ?? true);
+    });
+    return () => subscription.unsubscribe();
+  }, [dashboard]);
   /**
    * focus on the top header when title or view mode is changed
    */
@@ -324,6 +331,8 @@ export function InternalDashboardTopNav({
         query={query}
         badges={badges}
         screenTitle={title}
+        isLoading={isLoading}
+        onCancel={() => dashboard.cancel()}
         useDefaultBehaviors={true}
         savedQueryId={savedQueryId}
         indexPatterns={allDataViews}

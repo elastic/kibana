@@ -547,6 +547,14 @@ export function App({
     visualizationState: visualization,
   });
 
+  // todo: this should happen whenever we are about to start new query
+  const abortController = new AbortController();
+  const onCancel = () => {
+    abortController.abort();
+  };
+
+  // todo: isLoading is always false
+
   return (
     <>
       <div className="lnsApp" data-test-subj="lnsApp" role="main">
@@ -584,6 +592,8 @@ export function App({
           onTextBasedSavedAndExit={onTextBasedSavedAndExit}
           getUserMessages={getUserMessages}
           shortUrlService={shortUrlService}
+          onCancel={onCancel}
+          isLoading={isLoading}
         />
         {getLegacyUrlConflictCallout()}
         {(!isLoading || persistedDoc) && (
@@ -666,6 +676,7 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   addUserMessages,
   lensInspector,
   indexPatternService,
+  abortController,
 }: {
   editorFrame: EditorFrameInstance;
   lensInspector: LensInspector;
@@ -673,6 +684,7 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   getUserMessages: UserMessagesGetter;
   addUserMessages: AddUserMessages;
   indexPatternService: IndexPatternServiceAPI;
+  abortController?: AbortController;
 }) {
   const { EditorFrameContainer } = editorFrame;
   return (
@@ -682,6 +694,7 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
       addUserMessages={addUserMessages}
       lensInspector={lensInspector}
       indexPatternService={indexPatternService}
+      abortController={abortController}
     />
   );
 });
