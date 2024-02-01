@@ -32,7 +32,11 @@ describe('sendEmailGraphApi', () => {
       status: 202,
     });
     await sendEmailGraphApi(
-      { options: getSendEmailOptions(), messageHTML: 'test1', headers: {} },
+      {
+        options: getSendEmailOptions(),
+        messageHTML: 'test1',
+        headers: {},
+      },
       logger,
       configurationUtilities
     );
@@ -207,12 +211,12 @@ describe('sendEmailGraphApi', () => {
     axiosInstanceMock.mockReturnValueOnce({
       status: 202,
     });
+    configurationUtilities.getMicrosoftGraphApiUrl.mockReturnValueOnce('https://test');
     await sendEmailGraphApi(
       {
         options: getSendEmailOptions(),
         messageHTML: 'test3',
         headers: {},
-        graphApiUrl: 'https://test',
       },
       logger,
       configurationUtilities

@@ -39,7 +39,9 @@ export interface ActionsConfigurationUtilities {
   getProxySettings: () => undefined | ProxySettings;
   getResponseSettings: () => ResponseSettings;
   getCustomHostSettings: (targetUrl: string) => CustomHostSettings | undefined;
-  getMicrosoftGraphApiUrl: () => undefined | string;
+  getMicrosoftGraphApiUrl: () => string;
+  getMicrosoftGraphApiScope: () => string;
+  getMicrosoftExchangeUrl: () => string;
   validateEmailAddresses(
     addresses: string[],
     options?: ValidateEmailAddressesOptions
@@ -110,8 +112,16 @@ function getProxySettingsFromConfig(config: ActionsConfig): undefined | ProxySet
   };
 }
 
-function getMicrosoftGraphApiUrlFromConfig(config: ActionsConfig): undefined | string {
+function getMicrosoftGraphApiUrlFromConfig(config: ActionsConfig): string {
   return config.microsoftGraphApiUrl;
+}
+
+function getMicrosoftGraphApiScopeFromConfig(config: ActionsConfig): string {
+  return config.microsoftGraphApiScope;
+}
+
+function getMicrosoftExchangeUrlFromConfig(config: ActionsConfig): string {
+  return config.microsoftExchangeUrl;
 }
 
 function arrayAsSet<T>(arr: T[] | undefined): Set<T> | undefined {
@@ -192,6 +202,8 @@ export function getActionsConfigurationUtilities(
     },
     getCustomHostSettings: (targetUrl: string) => getCustomHostSettings(config, targetUrl),
     getMicrosoftGraphApiUrl: () => getMicrosoftGraphApiUrlFromConfig(config),
+    getMicrosoftGraphApiScope: () => getMicrosoftGraphApiScopeFromConfig(config),
+    getMicrosoftExchangeUrl: () => getMicrosoftExchangeUrlFromConfig(config),
     validateEmailAddresses: (addresses: string[], options: ValidateEmailAddressesOptions) =>
       validatedEmailCurried(addresses, options),
   };

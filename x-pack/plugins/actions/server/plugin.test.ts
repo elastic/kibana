@@ -23,7 +23,12 @@ import {
   ActionsPluginsStart,
   PluginSetupContract,
 } from './plugin';
-import { AlertHistoryEsIndexConnectorId } from '../common';
+import {
+  AlertHistoryEsIndexConnectorId,
+  DEFAULT_MICROSOFT_EXCHANGE_URL,
+  DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+  DEFAULT_MICROSOFT_GRAPH_API_URL,
+} from '../common';
 
 describe('Actions Plugin', () => {
   describe('setup()', () => {
@@ -49,6 +54,9 @@ describe('Actions Plugin', () => {
           idleInterval: schema.duration().validate('1h'),
           pageSize: 100,
         },
+        microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
+        microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+        microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -213,6 +221,9 @@ describe('Actions Plugin', () => {
             idleInterval: schema.duration().validate('1h'),
             pageSize: 100,
           },
+          microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
+          microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+          microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
           ...overrides,
         };
       }
@@ -275,6 +286,9 @@ describe('Actions Plugin', () => {
           idleInterval: schema.duration().validate('1h'),
           pageSize: 100,
         },
+        microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
+        microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+        microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -348,6 +362,9 @@ describe('Actions Plugin', () => {
             idleInterval: schema.duration().validate('1h'),
             pageSize: 100,
           },
+          microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
+          microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+          microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
           ...overrides,
         };
       }

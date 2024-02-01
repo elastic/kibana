@@ -36,6 +36,9 @@ describe('config validation', () => {
         "maxResponseContentLength": ByteSizeValue {
           "valueInBytes": 1048576,
         },
+        "microsoftExchangeUrl": "https://login.microsoftonline.com",
+        "microsoftGraphApiScope": "https://graph.microsoft.com/.default",
+        "microsoftGraphApiUrl": "https://graph.microsoft.com/v1.0",
         "preconfigured": Object {},
         "preconfiguredAlertHistoryEsIndex": false,
         "proxyRejectUnauthorizedCertificates": true,
@@ -77,6 +80,9 @@ describe('config validation', () => {
         "maxResponseContentLength": ByteSizeValue {
           "valueInBytes": 1048576,
         },
+        "microsoftExchangeUrl": "https://login.microsoftonline.com",
+        "microsoftGraphApiScope": "https://graph.microsoft.com/.default",
+        "microsoftGraphApiUrl": "https://graph.microsoft.com/v1.0",
         "preconfigured": Object {
           "mySlack1": Object {
             "actionTypeId": ".slack",
@@ -159,7 +165,7 @@ describe('config validation', () => {
     expect(mockLogger.warn.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "The confgurations xpack.actions.proxyBypassHosts and xpack.actions.proxyOnlyHosts can not be used at the same time. The configuration xpack.actions.proxyOnlyHosts will be ignored.",
+          "The configurations xpack.actions.proxyBypassHosts and xpack.actions.proxyOnlyHosts can not be used at the same time. The configuration xpack.actions.proxyOnlyHosts will be ignored.",
         ],
       ]
     `);
@@ -203,6 +209,9 @@ describe('config validation', () => {
         "maxResponseContentLength": ByteSizeValue {
           "valueInBytes": 1048576,
         },
+        "microsoftExchangeUrl": "https://login.microsoftonline.com",
+        "microsoftGraphApiScope": "https://graph.microsoft.com/.default",
+        "microsoftGraphApiUrl": "https://graph.microsoft.com/v1.0",
         "preconfigured": Object {},
         "preconfiguredAlertHistoryEsIndex": false,
         "proxyRejectUnauthorizedCertificates": true,
