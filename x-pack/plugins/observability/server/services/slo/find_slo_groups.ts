@@ -7,6 +7,7 @@
 import { FindSLOGroupsParams, FindSLOGroupsResponse, Pagination } from '@kbn/slo-schema';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { findSLOGroupsResponseSchema } from '@kbn/slo-schema';
+import { Logger } from '@kbn/core/server';
 import { IllegalArgumentError } from '../../errors';
 import {
   SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
@@ -70,7 +71,11 @@ interface GroupAggregationsResponse {
 }
 
 export class FindSLOGroups {
-  constructor(private esClient: ElasticsearchClient, private spaceId: string) {}
+  constructor(
+    private esClient: ElasticsearchClient,
+    private logger: Logger,
+    private spaceId: string
+  ) {}
   public async execute(params: FindSLOGroupsParams): Promise<FindSLOGroupsResponse> {
     const pagination = toPagination(params);
     const groupBy = params.groupBy;
@@ -81,7 +86,7 @@ export class FindSLOGroups {
     try {
       parsedFilters = JSON.parse(filters);
     } catch (e) {
-      console.error(`Failed to parse filters: ${e.message}`);
+      this.logger.error(`Failed to parse filters: ${e.message}`);
     }
     const response = await this.esClient.search<unknown, GroupAggregationsResponse>({
       index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
