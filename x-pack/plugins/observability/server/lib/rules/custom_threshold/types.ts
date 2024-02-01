@@ -14,6 +14,8 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { Alert } from '@kbn/alerting-plugin/server';
 import { TypeOf } from '@kbn/config-schema';
+import { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { CustomMetricExpressionParams } from '../../../../common/custom_threshold_rule/types';
 import { FIRED_ACTIONS_ID, NO_DATA_ACTIONS_ID, FIRED_ACTION, NO_DATA_ACTION } from './constants';
 import { MissingGroupsRecord } from './lib/check_missing_group';
 import { AdditionalContext } from './utils';
@@ -28,13 +30,22 @@ export enum AlertStates {
 
 // Executor types
 export type SearchConfigurationType = TypeOf<typeof searchConfigurationSchema>;
+export type RuleTypeParams = Record<string, unknown>;
 
-export type CustomThresholdRuleParams = Record<string, any>;
+export interface CustomThresholdRuleTypeParams extends RuleTypeParams {
+  criteria: CustomMetricExpressionParams[];
+  // Index will be a data view spec after extracting references
+  searchConfiguration: Omit<SearchConfigurationType, 'index'> & { index: DataViewSpec };
+  groupBy?: string | string[];
+  alertOnNoData: boolean;
+  alertOnGroupDisappear?: boolean;
+}
+
 export type CustomThresholdRuleTypeState = RuleTypeState & {
   lastRunTimestamp?: number;
   missingGroups?: Array<string | MissingGroupsRecord>;
   groupBy?: string | string[];
-  searchConfiguration?: SearchConfigurationType;
+  searchConfiguration?: Omit<SearchConfigurationType, 'index'> & { index: DataViewSpec };
 };
 export type CustomThresholdAlertState = AlertState; // no specific instance state used
 export type CustomThresholdAlertContext = AlertContext & {
@@ -64,6 +75,7 @@ export type CustomThresholdAlertFactory = (
   actionGroup: CustomThresholdActionGroup,
   additionalContext?: AdditionalContext | null,
   evaluationValues?: Array<number | null>,
+  threshold?: Array<number | null>,
   group?: Group
 ) => CustomThresholdAlert;
 

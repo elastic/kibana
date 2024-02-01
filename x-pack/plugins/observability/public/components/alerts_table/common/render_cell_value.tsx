@@ -100,11 +100,12 @@ export const getRenderCellValue = ({
       case ALERT_SEVERITY:
         return <AlertSeverityBadge severityLevel={value ?? undefined} />;
       case ALERT_EVALUATION_VALUE:
-        const values = getMappedNonEcsValue({
+        const valuesField = getMappedNonEcsValue({
           data,
           fieldName: ALERT_EVALUATION_VALUES,
         });
-        return values ? values : value;
+        const values = getRenderValue(valuesField);
+        return valuesField ? values : value;
       case ALERT_REASON:
         const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
         const alert = parseAlert(observabilityRuleTypeRegistry)(dataFieldEs);
