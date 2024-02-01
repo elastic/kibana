@@ -6,3 +6,5 @@
  */
 
 export * from './embeddable';
+
+export { type HasLensConfig, apiHasLensConfig } from './interfaces/has_lens_config';
