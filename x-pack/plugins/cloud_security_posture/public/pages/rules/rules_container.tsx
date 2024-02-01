@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { useState, useMemo } from 'react';
+import compareVersions from 'compare-versions';
 import { EuiSpacer } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 import { buildRuleKey } from '../../../common/utils/rules_states';
@@ -76,6 +77,8 @@ export const RulesContainer = () => {
     search: '',
     page: 0,
     perPage: pageSize || 10,
+    sortField: 'metadata.benchmark.rule_number',
+    sortOrder: 'asc',
   });
 
   const { data, status, error } = useFindCspBenchmarkRule(
@@ -85,6 +88,8 @@ export const RulesContainer = () => {
       search: rulesQuery.search,
       page: 1,
       perPage: MAX_ITEMS_PER_PAGE,
+      sortField: 'metadata.benchmark.rule_number',
+      sortOrder: rulesQuery.sortOrder,
     },
     params.benchmarkId,
     params.benchmarkVersion
@@ -95,6 +100,8 @@ export const RulesContainer = () => {
     {
       page: 1,
       perPage: MAX_ITEMS_PER_PAGE,
+      sortField: 'metadata.benchmark.rule_number',
+      sortOrder: 'asc',
     },
     params.benchmarkId,
     params.benchmarkVersion
@@ -117,7 +124,7 @@ export const RulesContainer = () => {
         const rulesKey = buildRuleKey(
           rule.metadata.benchmark.id,
           rule.metadata.benchmark.version,
-          /* Since Packages are automatically upgraded, we can be sure that rule_number will Always exist */
+          /* Rule number always exists* from 8.7 */
           rule.metadata.benchmark.rule_number!
         );
 
@@ -147,7 +154,7 @@ export const RulesContainer = () => {
   const cleanedSectionList = [...new Set(sectionList)].sort((a, b) => {
     return a.localeCompare(b, 'en', { sensitivity: 'base' });
   });
-  const cleanedRuleNumberList = [...new Set(ruleNumberList)];
+  const cleanedRuleNumberList = [...new Set(ruleNumberList)].sort(compareVersions);
 
   const rulesPageData = useMemo(
     () => getRulesPage(filteredRulesWithStates, status, error, rulesQuery),
@@ -199,6 +206,9 @@ export const RulesContainer = () => {
       />
       <EuiSpacer />
       <RulesTable
+        onSortChange={(value) =>
+          setRulesQuery((currentQuery) => ({ ...currentQuery, sortOrder: value }))
+        }
         rules_page={rulesPageData.rules_page}
         total={rulesPageData.total}
         error={rulesPageData.error}

@@ -20,6 +20,7 @@ import { useUrlState } from '@kbn/ml-url-state';
 import './_index.scss';
 
 import { useStorage } from '@kbn/ml-local-storage';
+import { ML_PAGES } from '../../../locator';
 import { Dictionary } from '../../../../common/types/common';
 import { IdBadges } from './id_badges';
 import {
@@ -29,6 +30,7 @@ import {
 } from './job_selector_flyout';
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 import { ML_APPLY_TIME_RANGE_CONFIG } from '../../../../common/types/storage';
+import { FeedBackButton } from '../feedback_button';
 
 interface GroupObj {
   groupId: string;
@@ -182,6 +184,15 @@ export function JobSelector({ dateFormatTz, singleSelection, timeseriesOnly }: J
                 defaultMessage: 'Edit job selection',
               })}
             </EuiButtonEmpty>
+          </EuiFlexItem>
+
+          <EuiFlexItem />
+
+          <EuiFlexItem grow={false}>
+            <FeedBackButton
+              jobIds={selectedIds}
+              page={singleSelection ? ML_PAGES.SINGLE_METRIC_VIEWER : ML_PAGES.ANOMALY_EXPLORER}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule margin="s" />

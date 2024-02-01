@@ -13,12 +13,7 @@ export { startServersCli, startServers } from './src/functional_tests/start_serv
 
 // @internal
 export { runTestsCli, runTests } from './src/functional_tests/run_tests';
-export {
-  SamlSessionManager,
-  type SamlSessionManagerOptions,
-  type HostOptions,
-  readRolesFromResource,
-} from './src/auth';
+export { SamlSessionManager, type SamlSessionManagerOptions, type HostOptions } from './src/auth';
 export { runElasticsearch, runKibanaServer } from './src/functional_tests/lib';
 export { getKibanaCliArg, getKibanaCliLoggers } from './src/functional_tests/lib/kibana_cli_args';
 

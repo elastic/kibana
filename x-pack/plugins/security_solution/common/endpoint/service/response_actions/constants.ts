@@ -97,7 +97,7 @@ export const RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL: Record<
   upload: 'writeFileOperations',
 });
 
-export const RESPONSE_ACTION_API_COMMANDS_TO_CONSOLE_COMMAND_MAP = Object.freeze<
+export const RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP = Object.freeze<
   Record<ResponseActionsApiCommandNames, ConsoleResponseActionCommands>
 >({
   isolate: 'isolate',
@@ -105,6 +105,19 @@ export const RESPONSE_ACTION_API_COMMANDS_TO_CONSOLE_COMMAND_MAP = Object.freeze
   execute: 'execute',
   'get-file': 'get-file',
   'running-processes': 'processes',
+  'kill-process': 'kill-process',
+  'suspend-process': 'suspend-process',
+  upload: 'upload',
+});
+
+export const RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP = Object.freeze<
+  Record<ConsoleResponseActionCommands, ResponseActionsApiCommandNames>
+>({
+  isolate: 'isolate',
+  release: 'unisolate',
+  execute: 'execute',
+  'get-file': 'get-file',
+  processes: 'running-processes',
   'kill-process': 'kill-process',
   'suspend-process': 'suspend-process',
   upload: 'upload',
