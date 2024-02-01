@@ -133,10 +133,18 @@ export class ToastsService extends FtrService {
 
     return isToastPresent;
   }
+
   public async getToastElementByIndex(index: number): Promise<WebElementWrapper> {
     return await (
       await this.getGlobalToastList()
     ).findByCssSelector(`.euiToast:nth-child(${index})`);
+  }
+
+  public async getToastTitleByIndex(index: number): Promise<string> {
+    const resultToast = await this.getToastElementByIndex(index);
+    const titleElement = await this.testSubjects.findDescendant('euiToastHeader', resultToast);
+    const title: string = await titleElement.getVisibleText();
+    return title;
   }
 
   public async getToastContentByIndex(index: number): Promise<string> {
