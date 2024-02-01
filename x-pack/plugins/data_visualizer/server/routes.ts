@@ -8,6 +8,7 @@
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { StartDeps } from './types';
+import { wrapError } from './error_wrapper';
 
 /**
  * Routes for the file upload.
@@ -52,8 +53,7 @@ export function routes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger)
 
           return response.ok({ body });
         } catch (e) {
-          logger.warn(`Unable to check import permission, error: ${e.message}`);
-          return response.ok({ body: { hasImportPermission: false } });
+          return response.customError(wrapError(e));
         }
       }
     );

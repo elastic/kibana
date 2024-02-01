@@ -10,10 +10,10 @@ import React, { FC, useEffect, useState } from 'react';
 
 import { EuiTitle, EuiSpacer, EuiHorizontalRule } from '@elastic/eui';
 
-import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import { EDITOR_MODE, JsonEditor } from '../json_editor';
 import { useDataVisualizerKibana } from '../../../kibana_context';
-import { GrokHighlighter } from './text_parser';
+import { useGrokHighlighter } from './use_text_parser';
 
 interface Props {
   data: string;
@@ -35,6 +35,7 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines, semiStruc
     mode = EDITOR_MODE.JSON;
   }
   const [highlightedLines, setHighlightedLines] = useState<JSX.Element[] | null>(null);
+  const grokHighlighter = useGrokHighlighter();
 
   const {
     services: { http },
@@ -50,17 +51,18 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines, semiStruc
     }
     const { grokPattern, multilineStartPattern, excludeLinesPattern, mappings, ecsCompatibility } =
       semiStructureTextData;
-    const textParser = new GrokHighlighter(
-      http,
+
+    grokHighlighter(
+      data,
+      grokPattern,
       mappings,
       ecsCompatibility,
       multilineStartPattern,
       excludeLinesPattern
-    );
-    textParser.createDocs(data, grokPattern).then((docs) => {
+    ).then((docs) => {
       setHighlightedLines(docs);
     });
-  }, [http, format, data, semiStructureTextData]);
+  }, [http, format, data, semiStructureTextData, grokHighlighter]);
 
   const formattedData = limitByNumberOfLines(data, numberOfLines);
 

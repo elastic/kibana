@@ -5,36 +5,49 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FieldIcon } from '@kbn/react-field';
 import React, { FC } from 'react';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { FieldIcon } from '@kbn/react-field';
+import { getSupportedFieldType } from '../../../common/components/fields_stats_grid/get_field_names';
+import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 
 interface Props {
   type: string;
   value: string;
+  name: string;
 }
 
-const border = `1px solid #c5c5c5`;
-const background = '#eaeaea';
-
-export const FieldBadge: FC<Props> = ({ type, value }) => {
+export const FieldBadge: FC<Props> = ({ type, value, name }) => {
+  // @ts-expect-error euiColorLightShade does exist, the types are wrong
+  const { euiColorLightestShade, euiColorLightShade } = useCurrentEuiTheme();
+  const supportedType = getSupportedFieldType(type);
   return (
-    <EuiBadge
-      color={background}
-      css={{
-        marginRight: '2px',
-        marginTop: '-4px',
-        border,
-        padding: '0px 6px',
-        cursor: 'pointer',
-      }}
-    >
-      <EuiFlexGroup gutterSize="none">
-        <EuiFlexItem grow={false}>
-          <FieldIcon type={type} css={{ marginRight: '2px', marginTop: '1px', border }} />
-        </EuiFlexItem>
-        <EuiFlexItem>{value}</EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiBadge>
+    <EuiToolTip title={name} content={`Type: ${supportedType}`}>
+      <EuiBadge
+        css={{
+          marginRight: '2px',
+          marginTop: '-4px',
+          padding: '0px 4px',
+          cursor: 'pointer',
+          pointerEvents: 'none',
+          border: `1px solid ${euiColorLightShade}`,
+          backgroundColor: euiColorLightestShade,
+        }}
+      >
+        <EuiFlexGroup gutterSize="none">
+          <EuiFlexItem grow={false}>
+            <FieldIcon
+              type={supportedType}
+              css={{
+                marginRight: '2px',
+                marginTop: '1px',
+                border: `1px solid ${euiColorLightShade}`,
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>{value}</EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiBadge>
+    </EuiToolTip>
   );
 };
