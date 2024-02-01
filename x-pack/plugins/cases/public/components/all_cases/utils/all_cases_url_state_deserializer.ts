@@ -8,10 +8,9 @@
 import { isEmpty } from 'lodash';
 import { CustomFieldTypes } from '../../../../common/types/domain';
 import type { QueryParams, FilterOptions } from '../../../../common/ui';
-import { SORT_ORDER_VALUES } from '../../../../common/ui';
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from '../../../containers/constants';
 import type { AllCasesURLQueryParams, AllCasesURLState } from '../types';
-import { CASES_TABLE_PER_PAGE_VALUES } from '../types';
+import { sanitizeState } from './sanitize_state';
 
 type UrlQueryParams = Omit<QueryParams, 'page' | 'perPage'> & {
   page: string;
@@ -56,26 +55,14 @@ export const allCasesUrlStateDeserializer = (
   };
 
   if (page) {
-    const pageAsNumber = stringToInteger(page) ?? DEFAULT_QUERY_PARAMS.page;
-    queryParamsParsed.page = pageAsNumber;
+    queryParamsParsed.page = stringToInteger(page) ?? DEFAULT_QUERY_PARAMS.page;
   }
 
   if (perPage) {
-    const perPageAsNumber = stringToInteger(perPage) ?? DEFAULT_QUERY_PARAMS.perPage;
-
-    queryParamsParsed.perPage = Math.min(
-      perPageAsNumber,
-      CASES_TABLE_PER_PAGE_VALUES[CASES_TABLE_PER_PAGE_VALUES.length - 1]
-    );
+    queryParamsParsed.perPage = stringToInteger(perPage) ?? DEFAULT_QUERY_PARAMS.perPage;
   }
 
-  if (sortOrder) {
-    queryParamsParsed.sortOrder = SORT_ORDER_VALUES.includes(sortOrder)
-      ? sortOrder
-      : DEFAULT_QUERY_PARAMS.sortOrder;
-  }
-
-  return {
+  const state = {
     queryParams: queryParamsParsed,
     filterOptions: {
       ...filterOptions,
@@ -84,6 +71,8 @@ export const allCasesUrlStateDeserializer = (
       }),
     },
   };
+
+  return sanitizeState(state);
 };
 
 const stringToInteger = (value: string): number | undefined => {

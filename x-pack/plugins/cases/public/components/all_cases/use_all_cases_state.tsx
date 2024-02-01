@@ -26,6 +26,7 @@ import { allCasesUrlStateDeserializer } from './utils/all_cases_url_state_deseri
 import { allCasesUrlStateSerializer } from './utils/all_cases_url_state_serializer';
 import { parseUrlParams } from './utils/parse_url_params';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { sanitizeState } from './utils/sanitize_state';
 
 interface UseAllCasesStateReturn {
   filterOptions: FilterOptions;
@@ -96,11 +97,11 @@ export function useAllCasesState(isModalView: boolean = false): UseAllCasesState
 
 const useAllCasesUrlState = (): [AllCasesURLState, (updated: AllCasesTableState) => void] => {
   const history = useHistory();
-  const { search } = useLocation();
+  const location = useLocation();
 
   const urlParams = useMemo(
-    () => parseUrlParams(new URLSearchParams(decodeURIComponent(search))),
-    [search]
+    () => parseUrlParams(new URLSearchParams(decodeURIComponent(location.search))),
+    [location.search]
   );
 
   const parsedUrlParams = useMemo(() => allCasesUrlStateDeserializer(urlParams), [urlParams]);
@@ -110,10 +111,11 @@ const useAllCasesUrlState = (): [AllCasesURLState, (updated: AllCasesTableState)
       const updatedQuery = allCasesUrlStateSerializer(updated);
 
       history.push({
+        ...location,
         search: urlUtils.encodeUriQuery(stringifyUrlParams(updatedQuery)),
       });
     },
-    [history]
+    [history, location]
   );
 
   return [parsedUrlParams, updateQueryParams];
@@ -162,7 +164,18 @@ const useAllCasesLocalStorage = (): [
     { queryParams: DEFAULT_QUERY_PARAMS, filterOptions: DEFAULT_FILTER_OPTIONS }
   );
 
-  return [state, setState];
+  const sanitizedState = sanitizeState(state);
+
+  return [
+    {
+      queryParams: { ...DEFAULT_CASES_TABLE_STATE.queryParams, ...sanitizedState.queryParams },
+      filterOptions: {
+        ...DEFAULT_CASES_TABLE_STATE.filterOptions,
+        ...sanitizedState.filterOptions,
+      },
+    },
+    setState,
+  ];
 };
 
 const getAllCasesTableStateLocalStorageKey = (appId: string) => {
