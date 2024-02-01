@@ -51,7 +51,7 @@ import type {
   ESQLSingleAstItem,
   ESQLSource,
 } from '../types';
-import { getMessageFromId, createMessage } from './errors';
+import { getMessageFromId } from './errors';
 import type { ESQLRealField, ESQLVariable, ReferenceMaps, ValidationResult } from './types';
 import type { ESQLCallbacks } from '../shared/types';
 import {
@@ -59,6 +59,8 @@ import {
   retrieveFields,
   retrievePolicies,
   retrievePoliciesFields,
+  retrieveMetadataFields,
+  retrieveFieldsFromStringSources,
 } from './resources';
 
 function validateFunctionLiteralArg(
@@ -325,11 +327,9 @@ function validateFunction(
   }
   // check if the definition has some warning to show:
   if (fnDefinition.warning) {
-    const message = fnDefinition.warning(
-      ...(astFunction.args.filter((arg) => !Array.isArray(arg)) as ESQLSingleAstItem[])
-    );
-    if (message) {
-      messages.push(createMessage('warning', message, astFunction.location));
+    const payloads = fnDefinition.warning(astFunction);
+    if (payloads.length) {
+      messages.push(...payloads);
     }
   }
   // at this point we're sure that at least one signature is matching
@@ -393,11 +393,6 @@ function validateFunction(
           return validateFn(astFunction, actualArg, argDef, references, parentCommand);
         });
         failingSignature.push(...argValidationMessages);
-
-        if (isSourceItem(actualArg)) {
-          // something went wrong with the AST translation
-          throw new Error('Source should not allowed as function argument');
-        }
       }
     });
     if (failingSignature.length) {
@@ -487,48 +482,16 @@ function validateOption(
   }
   // use dedicate validate fn if provided
   if (optionDef.validate) {
-    messages.push(...optionDef.validate(option, command));
+    messages.push(...optionDef.validate(option, command, referenceMaps.metadataFields));
   }
   if (!optionDef.skipCommonValidation) {
-    option.args.forEach((arg, index) => {
+    option.args.forEach((arg) => {
       if (!Array.isArray(arg)) {
         if (!optionDef.signature.multipleParams) {
-          const argDef = optionDef.signature.params[index];
-          if (!isEqualType(arg, argDef, referenceMaps, command.name)) {
-            const value = 'value' in arg ? arg.value : arg.name;
-            messages.push(
-              getMessageFromId({
-                messageId: 'wrongArgumentType',
-                values: {
-                  name: option.name,
-                  argType: argDef.type,
-                  value,
-                  givenType: arg.type,
-                },
-                locations: arg.location,
-              })
-            );
-          }
           if (isColumnItem(arg)) {
             messages.push(...validateColumnForCommand(arg, command.name, referenceMaps));
           }
         } else {
-          const argDef = optionDef.signature.params[0];
-          if (!isEqualType(arg, argDef, referenceMaps, command.name)) {
-            const value = 'value' in arg ? arg.value : arg.name;
-            messages.push(
-              getMessageFromId({
-                messageId: 'wrongArgumentType',
-                values: {
-                  name: argDef.name,
-                  argType: argDef.type,
-                  value,
-                  givenType: arg.type,
-                },
-                locations: arg.location,
-              })
-            );
-          }
           if (isColumnItem(arg)) {
             messages.push(...validateColumnForCommand(arg, command.name, referenceMaps));
           }
@@ -553,55 +516,40 @@ function validateSource(
     return messages;
   }
   const commandDef = getCommandDefinition(commandName);
-  if (commandDef.signature.params.every(({ type }) => type !== source.type)) {
-    const firstArg = commandDef.signature.params[0];
-    messages.push(
-      getMessageFromId({
-        messageId: 'wrongArgumentType',
-        values: {
-          name: firstArg.name,
-          argType: firstArg.type,
-          value: source.name,
-          givenType: source.type,
-        },
-        locations: source.location,
-      })
-    );
-  } else {
-    // give up on validate if CCS for now
-    const hasCCS = hasCCSSource(source.name);
-    if (!hasCCS) {
-      const isWildcardAndNotSupported =
-        hasWildcard(source.name) && !commandDef.signature.params.some(({ wildcards }) => wildcards);
-      if (isWildcardAndNotSupported) {
+  // give up on validate if CCS for now
+  const hasCCS = hasCCSSource(source.name);
+  if (!hasCCS) {
+    const isWildcardAndNotSupported =
+      hasWildcard(source.name) && !commandDef.signature.params.some(({ wildcards }) => wildcards);
+    if (isWildcardAndNotSupported) {
+      messages.push(
+        getMessageFromId({
+          messageId: 'wildcardNotSupportedForCommand',
+          values: { command: commandName.toUpperCase(), value: source.name },
+          locations: source.location,
+        })
+      );
+    } else {
+      if (source.sourceType === 'index' && !sourceExists(source.name, sources)) {
         messages.push(
           getMessageFromId({
-            messageId: 'wildcardNotSupportedForCommand',
-            values: { command: commandName.toUpperCase(), value: source.name },
+            messageId: 'unknownIndex',
+            values: { name: source.name },
             locations: source.location,
           })
         );
-      } else {
-        if (source.sourceType === 'index' && !sourceExists(source.name, sources)) {
-          messages.push(
-            getMessageFromId({
-              messageId: 'unknownIndex',
-              values: { name: source.name },
-              locations: source.location,
-            })
-          );
-        } else if (source.sourceType === 'policy' && !policies.has(source.name)) {
-          messages.push(
-            getMessageFromId({
-              messageId: 'unknownPolicy',
-              values: { name: source.name },
-              locations: source.location,
-            })
-          );
-        }
+      } else if (source.sourceType === 'policy' && !policies.has(source.name)) {
+        messages.push(
+          getMessageFromId({
+            messageId: 'unknownPolicy',
+            values: { name: source.name },
+            locations: source.location,
+          })
+        );
       }
     }
   }
+
   return messages;
 }
 
@@ -612,9 +560,6 @@ function validateColumnForCommand(
 ): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
 
-  if (['from', 'show', 'limit'].includes(commandName)) {
-    return messages;
-  }
   if (commandName === 'row') {
     if (!references.variables.has(column.name)) {
       messages.push(
@@ -638,11 +583,10 @@ function validateColumnForCommand(
       if (columnParamsWithInnerTypes.length) {
         // this should be guaranteed by the columnCheck above
         const columnRef = getColumnHit(nameHit, references)!;
-        if (
-          columnParamsWithInnerTypes.every(({ innerType }) => {
-            return innerType !== columnRef.type;
-          })
-        ) {
+        const hasSomeWrongInnerTypes = columnParamsWithInnerTypes.every(({ innerType }) => {
+          return innerType !== 'any' && innerType !== columnRef.type;
+        });
+        if (hasSomeWrongInnerTypes) {
           const supportedTypes = columnParamsWithInnerTypes.map(({ innerType }) => innerType);
 
           messages.push(
@@ -835,18 +779,35 @@ export async function validateAst(
 
   const { ast, errors } = await astProvider(queryString);
 
-  const [sources, availableFields, availablePolicies] = await Promise.all([
+  const [sources, availableFields, availablePolicies, availableMetadataFields] = await Promise.all([
     // retrieve the list of available sources
     retrieveSources(ast, callbacks),
     // retrieve available fields (if a source command has been defined)
     retrieveFields(queryString, ast, callbacks),
     // retrieve available policies (if an enrich command has been defined)
     retrievePolicies(ast, callbacks),
+    // retrieve available metadata fields
+    retrieveMetadataFields(callbacks),
   ]);
 
   if (availablePolicies.size && ast.filter(({ name }) => name === 'enrich')) {
     const fieldsFromPoliciesMap = await retrievePoliciesFields(ast, availablePolicies, callbacks);
     fieldsFromPoliciesMap.forEach((value, key) => availableFields.set(key, value));
+  }
+
+  if (ast.some(({ name }) => ['grok', 'dissect'].includes(name))) {
+    const fieldsFromGrokOrDissect = await retrieveFieldsFromStringSources(
+      queryString,
+      ast,
+      callbacks
+    );
+    fieldsFromGrokOrDissect.forEach((value, key) => {
+      // if the field is already present, do not overwrite it
+      // Note: this can also overlap with some variables
+      if (!availableFields.has(key)) {
+        availableFields.set(key, value);
+      }
+    });
   }
 
   const variables = collectVariables(ast, availableFields);
@@ -860,6 +821,7 @@ export async function validateAst(
       fields: availableFields,
       policies: availablePolicies,
       variables,
+      metadataFields: availableMetadataFields,
     });
     messages.push(...commandMessages);
   }
