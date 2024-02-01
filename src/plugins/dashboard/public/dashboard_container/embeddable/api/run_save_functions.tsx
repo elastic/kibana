@@ -185,7 +185,7 @@ export async function runQuickSave(this: DashboardContainer) {
   if (managed) return;
 
   const nextPanels = await serializeAllPanelState(this);
-  let stateToSave = { ...currentState, panels: nextPanels };
+  let stateToSave: SavedDashboardInput = { ...currentState, panels: nextPanels };
   let persistableControlGroupInput: PersistableControlGroupInput | undefined;
   if (this.controlGroup) {
     persistableControlGroupInput = this.controlGroup.getPersistableInput();
