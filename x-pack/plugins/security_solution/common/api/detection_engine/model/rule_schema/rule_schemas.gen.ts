@@ -62,8 +62,8 @@ import {
   IndexPatternArray,
   DataViewId,
   RuleFilterArray,
-  SavedQueryId,
   AlertSuppression,
+  SavedQueryId,
   KqlQueryLanguage,
 } from './common_attributes.gen';
 import { RuleExecutionSummary } from '../../rule_monitoring/model/execution_summary.gen';
@@ -219,6 +219,7 @@ export const EqlOptionalFields = z.object({
   event_category_override: EventCategoryOverride.optional(),
   tiebreaker_field: TiebreakerField.optional(),
   timestamp_field: TimestampField.optional(),
+  alert_suppression: AlertSuppression.optional(),
 });
 
 export type EqlRuleCreateFields = z.infer<typeof EqlRuleCreateFields>;
