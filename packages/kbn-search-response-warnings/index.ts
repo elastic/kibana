@@ -20,5 +20,4 @@ export {
 
 export { extractWarnings } from './src/extract_warnings';
 export { handleWarnings } from './src/handle_warnings';
-export { toPartialResponse } from './src/to_partial_response';
 export { hasUnsupportedDownsampledAggregationFailure } from './src/has_unsupported_downsampled_aggregation_failure';

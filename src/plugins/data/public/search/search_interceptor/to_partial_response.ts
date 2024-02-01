@@ -7,8 +7,8 @@
  */
 
 import { ClusterStatistics, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { ClusterDetails } from '@kbn/es-types';
+import { IEsSearchResponse } from '../../../common';
 
 export function toPartialResponse(response: IEsSearchResponse): IEsSearchResponse {
   const { rawResponse } = response;

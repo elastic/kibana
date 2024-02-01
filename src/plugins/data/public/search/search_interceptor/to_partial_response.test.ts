@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { toPartialResponse } from '..';
+import { toPartialResponse } from './to_partial_response';
 
 describe('toPartialResponse', () => {
   it('should transform a non-CCS response', () => {
