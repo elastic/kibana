@@ -11,13 +11,7 @@ import classNames from 'classnames';
 import { debounce, isEmpty } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import {
-  EuiButtonEmpty,
-  EuiFilterButton,
-  EuiFilterGroup,
-  EuiInputPopover,
-  EuiTourStep,
-} from '@elastic/eui';
+import { EuiFilterButton, EuiFilterGroup, EuiInputPopover } from '@elastic/eui';
 
 import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../types';
 import { OptionsListStrings } from './options_list_strings';

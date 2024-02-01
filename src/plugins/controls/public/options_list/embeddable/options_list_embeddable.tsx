@@ -35,7 +35,7 @@ import {
   OptionsListEmbeddableInput,
 } from '../..';
 import { pluginServices } from '../../services';
-import { IClearableControl } from '../../types';
+import { IValidatableControl, IClearableControl } from '../../types';
 import { OptionsListControl } from '../components/options_list_control';
 import { ControlsDataViewsService } from '../../services/data_views/types';
 import { ControlsOptionsListService } from '../../services/options_list/types';
@@ -80,7 +80,7 @@ type OptionsListReduxEmbeddableTools = ReduxEmbeddableTools<
 
 export class OptionsListEmbeddable
   extends Embeddable<OptionsListEmbeddableInput, ControlOutput>
-  implements IClearableControl
+  implements IClearableControl, IValidatableControl
 {
   public readonly type = OPTIONS_LIST_CONTROL;
   public deferEmbeddableLoad = true;
@@ -106,7 +106,7 @@ export class OptionsListEmbeddable
   public dispatch: OptionsListReduxEmbeddableTools['dispatch'];
   public onStateChange: OptionsListReduxEmbeddableTools['onStateChange'];
 
-  public invalidSelections$: BehaviorSubject<string | undefined>;
+  public hasInvalidSelections$: BehaviorSubject<boolean>;
   private cleanupStateTools: () => void;
 
   constructor(
@@ -142,7 +142,7 @@ export class OptionsListEmbeddable
     this.cleanupStateTools = reduxEmbeddableTools.cleanup;
     this.onStateChange = reduxEmbeddableTools.onStateChange;
 
-    this.invalidSelections$ = new BehaviorSubject<string | undefined>(undefined);
+    this.hasInvalidSelections$ = new BehaviorSubject<boolean>(false);
 
     this.initialize();
   }
@@ -355,7 +355,7 @@ export class OptionsListEmbeddable
           validSelections: selectedOptions,
           totalCardinality,
         });
-        this.invalidSelections$.next(undefined);
+        this.hasInvalidSelections$.next(false);
       } else {
         const valid: string[] = [];
         const invalid: string[] = [];
@@ -363,7 +363,7 @@ export class OptionsListEmbeddable
           if (invalidSelections?.includes(String(selectedOption))) invalid.push(selectedOption);
           else valid.push(selectedOption);
         }
-        this.invalidSelections$.next(this.id);
+        this.hasInvalidSelections$.next(true);
         this.dispatch.updateQueryResults({
           availableOptions: suggestions,
           invalidSelections: invalid,

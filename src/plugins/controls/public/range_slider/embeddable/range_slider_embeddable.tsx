@@ -36,7 +36,7 @@ import {
 import { pluginServices } from '../../services';
 import { ControlsDataService } from '../../services/data/types';
 import { ControlsDataViewsService } from '../../services/data_views/types';
-import { IClearableControl } from '../../types';
+import { IValidatableControl, IClearableControl } from '../../types';
 import { RangeSliderControl } from '../components/range_slider_control';
 import { getDefaultComponentState, rangeSliderReducers } from '../range_slider_reducers';
 import { RangeSliderReduxState } from '../types';
@@ -78,7 +78,7 @@ type RangeSliderReduxEmbeddableTools = ReduxEmbeddableTools<
 
 export class RangeSliderEmbeddable
   extends Embeddable<RangeSliderEmbeddableInput, ControlOutput>
-  implements IClearableControl
+  implements IClearableControl, IValidatableControl
 {
   public readonly type = RANGE_SLIDER_CONTROL;
   public deferEmbeddableLoad = true;
@@ -101,7 +101,7 @@ export class RangeSliderEmbeddable
   public dispatch: RangeSliderReduxEmbeddableTools['dispatch'];
   public onStateChange: RangeSliderReduxEmbeddableTools['onStateChange'];
 
-  public invalidSelections$: BehaviorSubject<string | undefined>;
+  public hasInvalidSelections$: BehaviorSubject<boolean>;
   private cleanupStateTools: () => void;
 
   constructor(
@@ -133,7 +133,7 @@ export class RangeSliderEmbeddable
     this.onStateChange = reduxEmbeddableTools.onStateChange;
     this.cleanupStateTools = reduxEmbeddableTools.cleanup;
 
-    this.invalidSelections$ = new BehaviorSubject(undefined);
+    this.hasInvalidSelections$ = new BehaviorSubject<boolean>(false);
 
     this.initialize();
   }

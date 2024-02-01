@@ -10,8 +10,8 @@ import { isEqual, pick } from 'lodash';
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider, TypedUseSelectorHook, useSelector } from 'react-redux';
-import { BehaviorSubject, combineLatest, merge, Subject, Subscription, zip, mergeMap } from 'rxjs';
-import { debounceTime, distinctUntilChanged, filter, map, skip } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, merge, Observable, Subject, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs/operators';
 
 import { OverlayRef } from '@kbn/core/public';
 import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
@@ -24,7 +24,7 @@ import {
   persistableControlGroupInputKeys,
 } from '../../../common';
 import { pluginServices } from '../../services';
-import { ControlEmbeddable, ControlInput, ControlOutput, isClearableControl } from '../../types';
+import { ControlEmbeddable, ControlInput, ControlOutput, isValidatableControl } from '../../types';
 import { ControlGroup } from '../component/control_group_component';
 import { openAddDataControlFlyout } from '../editor/open_add_data_control_flyout';
 import { openEditControlGroupFlyout } from '../editor/open_edit_control_group_flyout';
@@ -197,26 +197,26 @@ export class ControlGroupContainer extends Container<
       })
     );
 
-    const arrayOfBehaviorSubjects: Array<BehaviorSubject<string | undefined>> =
-      this.getChildIds().map((childId) => {
+    const hasInvalidSelections$: { [id: string]: BehaviorSubject<boolean> } =
+      this.getChildIds().reduce((previous, childId) => {
         const child = this.getChild(childId);
-        if (isClearableControl(child)) {
-          return child.invalidSelections$;
+        if (isValidatableControl(child)) {
+          return { ...previous, [childId]: child.hasInvalidSelections$ };
         }
-        return new BehaviorSubject<string | undefined>(undefined);
-      });
+        return previous;
+      }, {});
     this.subscriptions.add(
-      combineLatest(arrayOfBehaviorSubjects)
+      combineLatest(hasInvalidSelections$)
         .pipe(
           debounceTime(100),
-          map((stuff) => {
-            return stuff.filter((a) => a !== undefined);
+          map((hasInvalidSelections) => {
+            return Object.keys(hasInvalidSelections).filter((id) => hasInvalidSelections[id]);
           }),
           distinctUntilChanged((a, b) => isEqual(a, b))
         )
-        .subscribe((childHasInvalidSelection) => {
-          if (childHasInvalidSelection.length > 0) {
-            this.dispatch.setInvalidSelectionsControlId(childHasInvalidSelection[0]);
+        .subscribe((childrenWithInvalidSelections) => {
+          if (childrenWithInvalidSelections.length > 0) {
+            this.dispatch.setInvalidSelectionsControlId(childrenWithInvalidSelections[0]);
           } else {
             this.dispatch.setInvalidSelectionsControlId(undefined);
           }
