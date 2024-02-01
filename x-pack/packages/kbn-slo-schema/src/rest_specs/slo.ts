@@ -249,6 +249,21 @@ const getSLOHealthParamsSchema = t.type({
   path: t.type({ id: t.string }),
 });
 
+const greenHealthSchema = t.literal('green');
+const redHealthSchema = t.literal('red');
+const healthSchema = t.union([greenHealthSchema, redHealthSchema]);
+
+const getSLOHealthResponseSchema = t.type({
+  health: healthSchema,
+  details: t.type({
+    rollupTransformHealth: healthSchema,
+    summaryTransformHealth: healthSchema,
+    summaryIngestPipelineHealth: healthSchema,
+    summaryDocumentUpdatedAt: healthSchema,
+    lastRollupDocumentIngestedAt: healthSchema,
+  }),
+});
+
 type SLOResponse = t.OutputOf<typeof sloResponseSchema>;
 type SLOWithSummaryResponse = t.OutputOf<typeof sloWithSummaryResponseSchema>;
 
@@ -302,6 +317,8 @@ type TimesclieMetricPercentileMetric = t.OutputOf<typeof timesliceMetricPercenti
 type HistogramIndicator = t.OutputOf<typeof histogramIndicatorSchema>;
 type KQLCustomIndicator = t.OutputOf<typeof kqlCustomIndicatorSchema>;
 
+type GetSLOHealthResponse = t.OutputOf<typeof getSLOHealthResponseSchema>;
+
 export {
   createSLOParamsSchema,
   deleteSLOParamsSchema,
@@ -328,6 +345,7 @@ export {
   getSLOInstancesParamsSchema,
   getSLOInstancesResponseSchema,
   getSLOHealthParamsSchema,
+  getSLOHealthResponseSchema,
 };
 export type {
   BudgetingMethod,
@@ -370,4 +388,5 @@ export type {
   HistogramIndicator,
   KQLCustomIndicator,
   TimeWindow,
+  GetSLOHealthResponse,
 };

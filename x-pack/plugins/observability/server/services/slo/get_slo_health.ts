@@ -7,6 +7,7 @@ import {
   SLO_RESOURCES_VERSION,
   SLO_SUMMARY_INDEX_TEMPLATE_PATTERN,
 } from '@kbn/observability-plugin/common/slo/constants';
+import { GetSLOHealthResponse } from '@kbn/slo-schema';
 import { SLO } from '../../domain/models';
 import { SLORepository } from './slo_repository';
 
@@ -16,14 +17,14 @@ const RED = 'red';
 export class GetSloHealth {
   constructor(private esClient: ElasticsearchClient, private sloRepository: SLORepository) {}
 
-  public async execute(sloId: string) {
+  public async execute(sloId: string): Promise<GetSLOHealthResponse> {
     const slo = await this.sloRepository.findById(sloId);
 
-    const transformHealth = await this.getRollupTransformHealth(slo);
+    const rollupTransformHealth = await this.getRollupTransformHealth(slo);
     const summaryTransformHealth = await this.getSummaryTransformHealth(slo);
     const summaryIngestPipelineHealth = await this.getIngestPipelineHealth(slo);
     const overallHealth =
-      transformHealth === GREEN &&
+      rollupTransformHealth === GREEN &&
       summaryTransformHealth === GREEN &&
       summaryIngestPipelineHealth === GREEN
         ? GREEN
@@ -39,7 +40,7 @@ export class GetSloHealth {
       size: 1,
     });
     // @ts-ignore
-    const summaryUpdatedAt = summaryDoc.hits.hits[0]?._source?.summaryUpdatedAt;
+    const summaryDocumentUpdatedAt = summaryDoc.hits.hits[0]?._source?.summaryUpdatedAt;
 
     const rollupDocument = await this.esClient.search({
       index: SLO_DESTINATION_INDEX_PATTERN,
@@ -62,10 +63,10 @@ export class GetSloHealth {
     return {
       health: overallHealth,
       details: {
-        rollupTransform: transformHealth,
-        summaryTransform: summaryTransformHealth,
-        summaryIngestPipeline: summaryIngestPipelineHealth,
-        summaryDocumentUpdatedAt: summaryUpdatedAt,
+        rollupTransformHealth,
+        summaryTransformHealth,
+        summaryIngestPipelineHealth,
+        summaryDocumentUpdatedAt,
         lastRollupDocumentIngestedAt,
       },
     };
