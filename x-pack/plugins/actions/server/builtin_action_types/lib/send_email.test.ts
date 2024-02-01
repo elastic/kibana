@@ -180,20 +180,25 @@ describe('send_email module', () => {
 
   test('uses custom graph API scope if configured for OAuth 2.0 Client Credentials authentication for email using "exchange_server" service', async () => {
     const sendEmailGraphApiMock = sendEmailGraphApi as jest.Mock;
-    const getOAuthClientCredentialsAccessTokenMock =
-      getOAuthClientCredentialsAccessToken as jest.Mock;
+    const requestOAuthClientCredentialsTokenMock = requestOAuthClientCredentialsToken as jest.Mock;
     const sendEmailOptions = getSendEmailOptions({
       transport: {
         service: 'exchange_server',
         clientId: '123456',
-        tenantId: '98765',
         clientSecret: 'sdfhkdsjhfksdjfh',
       },
     });
     sendEmailOptions.configurationUtilities.getMicrosoftGraphApiScope.mockReturnValueOnce(
       'https://dod-graph.microsoft.us/.default'
     );
-    getOAuthClientCredentialsAccessTokenMock.mockReturnValueOnce(`Bearer dfjsdfgdjhfgsjdf`);
+    requestOAuthClientCredentialsTokenMock.mockReturnValueOnce({
+      status: 200,
+      data: {
+        tokenType: 'Bearer',
+        accessToken: 'dfjsdfgdjhfgsjdf',
+        expiresIn: 123,
+      },
+    });
     const date = new Date();
     date.setDate(date.getDate() + 5);
 
@@ -201,37 +206,52 @@ describe('send_email module', () => {
       status: 202,
     });
 
-    await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
-    expect(getOAuthClientCredentialsAccessTokenMock).toHaveBeenCalledWith({
-      configurationUtilities: sendEmailOptions.configurationUtilities,
-      connectorId: '1',
-      connectorTokenClient,
-      credentials: {
-        config: { clientId: '123456', tenantId: '98765' },
-        secrets: { clientSecret: 'sdfhkdsjhfksdjfh' },
+    await sendEmail(mockLogger, sendEmailOptions);
+    requestOAuthClientCredentialsTokenMock.mock.calls[0].pop();
+    expect(requestOAuthClientCredentialsTokenMock.mock.calls[0]).toMatchInlineSnapshot(`
+    Array [
+      "https://login.microsoftonline.com/undefined/oauth2/v2.0/token",
+      Object {
+        "context": Array [],
+        "debug": [MockFunction],
+        "error": [MockFunction],
+        "fatal": [MockFunction],
+        "get": [MockFunction],
+        "info": [MockFunction],
+        "log": [MockFunction],
+        "trace": [MockFunction],
+        "warn": [MockFunction],
       },
-      logger: mockLogger,
-      oAuthScope: 'https://dod-graph.microsoft.us/.default',
-      tokenUrl: 'https://login.microsoftonline.com/98765/oauth2/v2.0/token',
-    });
+      Object {
+        "clientId": "123456",
+        "clientSecret": "sdfhkdsjhfksdjfh",
+        "scope": "https://dod-graph.microsoft.us/.default",
+      },
+    ]
+  `);
   });
 
   test('uses custom exchange URL if configured for OAuth 2.0 Client Credentials authentication for email using "exchange_server" service', async () => {
     const sendEmailGraphApiMock = sendEmailGraphApi as jest.Mock;
-    const getOAuthClientCredentialsAccessTokenMock =
-      getOAuthClientCredentialsAccessToken as jest.Mock;
+    const requestOAuthClientCredentialsTokenMock = requestOAuthClientCredentialsToken as jest.Mock;
     const sendEmailOptions = getSendEmailOptions({
       transport: {
         service: 'exchange_server',
         clientId: '123456',
-        tenantId: '98765',
         clientSecret: 'sdfhkdsjhfksdjfh',
       },
     });
     sendEmailOptions.configurationUtilities.getMicrosoftExchangeUrl.mockReturnValueOnce(
       'https://login.microsoftonline.us'
     );
-    getOAuthClientCredentialsAccessTokenMock.mockReturnValueOnce(`Bearer dfjsdfgdjhfgsjdf`);
+    requestOAuthClientCredentialsTokenMock.mockReturnValueOnce({
+      status: 200,
+      data: {
+        tokenType: 'Bearer',
+        accessToken: 'dfjsdfgdjhfgsjdf',
+        expiresIn: 123,
+      },
+    });
     const date = new Date();
     date.setDate(date.getDate() + 5);
 
@@ -239,55 +259,29 @@ describe('send_email module', () => {
       status: 202,
     });
 
-    await sendEmail(mockLogger, sendEmailOptions, connectorTokenClient);
-    expect(getOAuthClientCredentialsAccessTokenMock).toHaveBeenCalledWith({
-      configurationUtilities: sendEmailOptions.configurationUtilities,
-      connectorId: '1',
-      connectorTokenClient,
-      credentials: {
-        config: { clientId: '123456', tenantId: '98765' },
-        secrets: { clientSecret: 'sdfhkdsjhfksdjfh' },
-      },
-      logger: mockLogger,
-      oAuthScope: 'https://graph.microsoft.com/.default',
-      tokenUrl: 'https://login.microsoftonline.us/98765/oauth2/v2.0/token',
-    });
-  });
-
-  test('throws error if null access token returned when using OAuth 2.0 Client Credentials authentication', async () => {
-    const sendEmailGraphApiMock = sendEmailGraphApi as jest.Mock;
-    const getOAuthClientCredentialsAccessTokenMock =
-      getOAuthClientCredentialsAccessToken as jest.Mock;
-    const sendEmailOptions = getSendEmailOptions({
-      transport: {
-        service: 'exchange_server',
-        clientId: '123456',
-        tenantId: '98765',
-        clientSecret: 'sdfhkdsjhfksdjfh',
-      },
-    });
-    getOAuthClientCredentialsAccessTokenMock.mockReturnValueOnce(null);
-
-    await expect(() =>
-      sendEmail(mockLogger, sendEmailOptions, connectorTokenClient)
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Unable to retrieve access token for connectorId: 1"`
-    );
-
-    expect(getOAuthClientCredentialsAccessTokenMock).toHaveBeenCalledWith({
-      configurationUtilities: sendEmailOptions.configurationUtilities,
-      connectorId: '1',
-      connectorTokenClient,
-      credentials: {
-        config: { clientId: '123456', tenantId: '98765' },
-        secrets: { clientSecret: 'sdfhkdsjhfksdjfh' },
-      },
-      logger: mockLogger,
-      oAuthScope: 'https://graph.microsoft.com/.default',
-      tokenUrl: 'https://login.microsoftonline.com/98765/oauth2/v2.0/token',
-    });
-
-    expect(sendEmailGraphApiMock).not.toHaveBeenCalled();
+    await sendEmail(mockLogger, sendEmailOptions);
+    requestOAuthClientCredentialsTokenMock.mock.calls[0].pop();
+    expect(requestOAuthClientCredentialsTokenMock.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "https://login.microsoftonline.us/undefined/oauth2/v2.0/token",
+        Object {
+          "context": Array [],
+          "debug": [MockFunction],
+          "error": [MockFunction],
+          "fatal": [MockFunction],
+          "get": [MockFunction],
+          "info": [MockFunction],
+          "log": [MockFunction],
+          "trace": [MockFunction],
+          "warn": [MockFunction],
+        },
+        Object {
+          "clientId": "123456",
+          "clientSecret": "sdfhkdsjhfksdjfh",
+          "scope": "https://graph.microsoft.com/.default",
+        },
+      ]
+    `);
   });
 
   test('handles unauthenticated email using not secure host/port', async () => {

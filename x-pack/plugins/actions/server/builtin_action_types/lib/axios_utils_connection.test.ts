@@ -23,6 +23,11 @@ import {
   ActionsConfigurationUtilities,
   getActionsConfigurationUtilities,
 } from '../../actions_config';
+import {
+  DEFAULT_MICROSOFT_GRAPH_API_URL,
+  DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+  DEFAULT_MICROSOFT_EXCHANGE_URL,
+} from '../../../common';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
@@ -271,6 +276,9 @@ const BaseActionsConfig: ActionsConfig = {
     idleInterval: schema.duration().validate('1h'),
     pageSize: 100,
   },
+  microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
+  microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+  microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
 };
 
 function getACUfromConfig(config: Partial<ActionsConfig> = {}): ActionsConfigurationUtilities {

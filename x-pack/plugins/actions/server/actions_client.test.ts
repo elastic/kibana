@@ -37,6 +37,11 @@ import { actionsAuthorizationMock } from './authorization/actions_authorization.
 import { trackLegacyRBACExemption } from './lib/track_legacy_rbac_exemption';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '../../../../src/core/server/elasticsearch/client/mocks';
+import {
+  DEFAULT_MICROSOFT_GRAPH_API_URL,
+  DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+  DEFAULT_MICROSOFT_EXCHANGE_URL,
+} from '../common';
 
 jest.mock('../../../../src/core/server/saved_objects/service/lib/utils', () => ({
   SavedObjectsUtils: {
@@ -456,6 +461,9 @@ describe('create()', () => {
         idleInterval: schema.duration().validate('1h'),
         pageSize: 100,
       },
+      microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
+      microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+      microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
       ssl: {
         verificationMode: 'full',
         proxyVerificationMode: 'full',
