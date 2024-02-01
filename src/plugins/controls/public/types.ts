@@ -55,16 +55,6 @@ export const isClearableControl = (control: ControlEmbeddable): control is IClea
   return Boolean((control as IClearableControl).clearSelections);
 };
 
-export interface IValidatableControl extends ControlEmbeddable {
-  hasInvalidSelections$: BehaviorSubject<boolean>;
-}
-
-export const isValidatableControl = (
-  control: ControlEmbeddable
-): control is IValidatableControl => {
-  return Boolean((control as IValidatableControl).hasInvalidSelections$);
-};
-
 /**
  * Control embeddable editor types
  */

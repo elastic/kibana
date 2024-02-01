@@ -10,8 +10,8 @@ import { isEqual, pick } from 'lodash';
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider, TypedUseSelectorHook, useSelector } from 'react-redux';
-import { BehaviorSubject, combineLatest, merge, Observable, Subject, Subscription } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs/operators';
+import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged, skip } from 'rxjs/operators';
 
 import { OverlayRef } from '@kbn/core/public';
 import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
@@ -24,7 +24,7 @@ import {
   persistableControlGroupInputKeys,
 } from '../../../common';
 import { pluginServices } from '../../services';
-import { ControlEmbeddable, ControlInput, ControlOutput, isValidatableControl } from '../../types';
+import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
 import { ControlGroup } from '../component/control_group_component';
 import { openAddDataControlFlyout } from '../editor/open_add_data_control_flyout';
 import { openEditControlGroupFlyout } from '../editor/open_edit_control_group_flyout';
@@ -91,6 +91,8 @@ export class ControlGroupContainer extends Container<
   private recalculateFilters$: Subject<null>;
   private relevantDataViewId?: string;
   private lastUsedDataViewId?: string;
+  private invalidSelectionsState: { [childId: string]: boolean };
+
   public diffingSubscription: Subscription = new Subscription();
 
   // state management
@@ -153,6 +155,10 @@ export class ControlGroupContainer extends Container<
 
     this.store = reduxEmbeddableTools.store;
 
+    this.invalidSelectionsState = this.getChildIds().reduce((prev, id) => {
+      return { ...prev, [id]: false };
+    }, {});
+
     // when all children are ready setup subscriptions
     this.untilAllChildrenReady().then(() => {
       this.recalculateDataViews();
@@ -163,6 +169,16 @@ export class ControlGroupContainer extends Container<
 
     this.fieldFilterPredicate = fieldFilterPredicate;
   }
+
+  public reportInvalidSelections = ({
+    id,
+    hasInvalidSelections,
+  }: {
+    id: string;
+    hasInvalidSelections: boolean;
+  }) => {
+    this.invalidSelectionsState = { ...this.invalidSelectionsState, [id]: hasInvalidSelections };
+  };
 
   private setupSubscriptions = () => {
     /**
@@ -197,24 +213,15 @@ export class ControlGroupContainer extends Container<
       })
     );
 
-    const hasInvalidSelections$: { [id: string]: BehaviorSubject<boolean> } =
-      this.getChildIds().reduce((previous, childId) => {
-        const child = this.getChild(childId);
-        if (isValidatableControl(child)) {
-          return { ...previous, [childId]: child.hasInvalidSelections$ };
-        }
-        return previous;
-      }, {});
     this.subscriptions.add(
-      combineLatest(hasInvalidSelections$)
-        .pipe(
-          debounceTime(100),
-          map((hasInvalidSelections) => {
-            return Object.keys(hasInvalidSelections).filter((id) => hasInvalidSelections[id]);
-          }),
-          distinctUntilChanged((a, b) => isEqual(a, b))
-        )
-        .subscribe((childrenWithInvalidSelections) => {
+      this.getAnyChildOutputChange$()
+        .pipe(debounceTime(100))
+        .subscribe(() => {
+          const childrenWithInvalidSelections = cachedChildEmbeddableOrder(
+            this.getInput().panels
+          ).idsInOrder.filter((childId) => {
+            return this.invalidSelectionsState[childId];
+          });
           if (childrenWithInvalidSelections.length > 0) {
             this.dispatch.setInvalidSelectionsControlId(childrenWithInvalidSelections[0]);
           } else {
@@ -227,7 +234,9 @@ export class ControlGroupContainer extends Container<
      * debounce output recalculation
      */
     this.subscriptions.add(
-      this.recalculateFilters$.pipe(debounceTime(10)).subscribe(() => this.recalculateFilters())
+      this.recalculateFilters$.pipe(debounceTime(10)).subscribe(() => {
+        this.recalculateFilters();
+      })
     );
   };
 
@@ -317,6 +326,7 @@ export class ControlGroupContainer extends Container<
         timeslice = childOutput.timeslice;
       }
     });
+
     // if filters are different, publish them
     if (
       !compareFilters(this.output.filters ?? [], allFilters ?? [], COMPARE_ALL_OPTIONS) ||

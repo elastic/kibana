@@ -78,7 +78,7 @@ type RangeSliderReduxEmbeddableTools = ReduxEmbeddableTools<
 
 export class RangeSliderEmbeddable
   extends Embeddable<RangeSliderEmbeddableInput, ControlOutput>
-  implements IClearableControl, IValidatableControl
+  implements IClearableControl
 {
   public readonly type = RANGE_SLIDER_CONTROL;
   public deferEmbeddableLoad = true;
@@ -101,7 +101,6 @@ export class RangeSliderEmbeddable
   public dispatch: RangeSliderReduxEmbeddableTools['dispatch'];
   public onStateChange: RangeSliderReduxEmbeddableTools['onStateChange'];
 
-  public hasInvalidSelections$: BehaviorSubject<boolean>;
   private cleanupStateTools: () => void;
 
   constructor(
@@ -132,8 +131,6 @@ export class RangeSliderEmbeddable
     this.dispatch = reduxEmbeddableTools.dispatch;
     this.onStateChange = reduxEmbeddableTools.onStateChange;
     this.cleanupStateTools = reduxEmbeddableTools.cleanup;
-
-    this.hasInvalidSelections$ = new BehaviorSubject<boolean>(false);
 
     this.initialize();
   }
