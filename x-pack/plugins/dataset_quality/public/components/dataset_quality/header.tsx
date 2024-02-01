@@ -9,6 +9,8 @@ import { EuiPageHeader } from '@elastic/eui';
 import React from 'react';
 import { datasetQualityAppTitle } from '../../../common/translations';
 
-export function Header() {
+// Allow for lazy loading
+// eslint-disable-next-line import/no-default-export
+export default function Header() {
   return <EuiPageHeader bottomBorder pageTitle={datasetQualityAppTitle} />;
 }

@@ -8,17 +8,12 @@
 import { IKibanaResponse, IRouter } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import {
-  API_VERSIONS,
-  GetCapabilitiesResponse,
-  INTERNAL_API_ACCESS,
-} from '@kbn/elastic-assistant-common';
+import type { GetCapabilitiesResponse } from '@kbn/elastic-assistant-common';
 import { CAPABILITIES } from '../../../common/constants';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
 
 import { buildResponse } from '../../lib/build_response';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
-import { buildRouteValidationWithZod } from '../../schemas/common';
 
 /**
  * Get the assistant capabilities for the requesting plugin
@@ -28,7 +23,7 @@ import { buildRouteValidationWithZod } from '../../schemas/common';
 export const getCapabilitiesRoute = (router: IRouter<ElasticAssistantRequestHandlerContext>) => {
   router.versioned
     .get({
-      access: INTERNAL_API_ACCESS,
+      access: 'internal',
       path: CAPABILITIES,
       options: {
         tags: ['access:elasticAssistant'],
@@ -36,14 +31,8 @@ export const getCapabilitiesRoute = (router: IRouter<ElasticAssistantRequestHand
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v1,
-        validate: {
-          response: {
-            200: {
-              body: buildRouteValidationWithZod(GetCapabilitiesResponse),
-            },
-          },
-        },
+        version: '1',
+        validate: {},
       },
       async (context, request, response): Promise<IKibanaResponse<GetCapabilitiesResponse>> => {
         const resp = buildResponse(response);
