@@ -59,10 +59,6 @@ export interface ISource {
   isTimeAware(): Promise<boolean>;
   getImmutableProperties(dataFilters: DataFilters): Promise<ImmutableSourceProperty[]>;
   getAttributionProvider(): (() => Promise<Attribution[]>) | null;
-  /*
-   * Returns true when source implements IESSource interface
-   */
-  isESSource(): boolean;
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null;
   supportsFitToBounds(): Promise<boolean>;
   cloneDescriptor(): AbstractSourceDescriptor;
@@ -144,10 +140,6 @@ export class AbstractSource implements ISource {
 
   getQueryableIndexPatternIds(): string[] {
     return [];
-  }
-
-  isESSource(): boolean {
-    return false;
   }
 
   // Returns function used to format value
