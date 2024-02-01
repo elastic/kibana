@@ -38,7 +38,6 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       }),
     },
   },
-  writeAccess: true,
   handler: async ({ savedObjectsClient, request, server, response }) => {
     try {
       const { id: _spaceId } = (await server.spaces?.spacesService.getActiveSpace(request)) ?? {

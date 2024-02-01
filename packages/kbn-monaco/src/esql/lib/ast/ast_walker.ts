@@ -76,6 +76,7 @@ import {
   createPolicy,
   createSettingTuple,
   createLiteralString,
+  isMissingText,
 } from './ast_helpers';
 import { getPosition } from './ast_position_utils';
 import type {
@@ -206,11 +207,16 @@ function visitLogicalAndsOrs(ctx: LogicalBinaryContext) {
 function visitLogicalIns(ctx: LogicalInContext) {
   const fn = createFunction(ctx.NOT() ? 'not_in' : 'in', ctx);
   const [left, ...list] = ctx.valueExpression();
-  const values = [visitValueExpression(left), list.map((ve) => visitValueExpression(ve))];
-  for (const arg of values) {
-    if (arg) {
-      const filteredArgs = Array.isArray(arg) ? arg.filter(nonNullable) : [arg];
-      fn.args.push(filteredArgs);
+  const leftArg = visitValueExpression(left);
+  if (leftArg) {
+    fn.args.push(...(Array.isArray(leftArg) ? leftArg : [leftArg]));
+    const values = list.map((ve) => visitValueExpression(ve));
+    const listArgs = values
+      .filter(nonNullable)
+      .flatMap((arg) => (Array.isArray(arg) ? arg.filter(nonNullable) : arg));
+    // distinguish between missing brackets (missing text error) and an empty list
+    if (!isMissingText(ctx.text)) {
+      fn.args.push(listArgs);
     }
   }
   // update the location of the assign based on arguments
@@ -233,6 +239,7 @@ function getMathOperation(ctx: ArithmeticBinaryContext) {
 function getComparisonName(ctx: ComparisonOperatorContext) {
   return (
     ctx.EQ()?.text ||
+    ctx.CIEQ()?.text ||
     ctx.NEQ()?.text ||
     ctx.LT()?.text ||
     ctx.LTE()?.text ||
@@ -243,6 +250,9 @@ function getComparisonName(ctx: ComparisonOperatorContext) {
 }
 
 function visitValueExpression(ctx: ValueExpressionContext) {
+  if (isMissingText(ctx.text)) {
+    return [];
+  }
   if (ctx instanceof ValueExpressionDefaultContext) {
     return visitOperatorExpression(ctx.operatorExpression());
   }
@@ -537,16 +547,18 @@ export function visitDissect(ctx: DissectCommandContext) {
   const pattern = ctx.string().tryGetToken(esql_parser.STRING, 0);
   return [
     visitPrimaryExpression(ctx.primaryExpression()),
-    createLiteral('string', pattern),
-    ...visitDissectOptions(ctx.commandOptions()),
+    ...(pattern && !isMissingText(pattern.text)
+      ? [createLiteral('string', pattern), ...visitDissectOptions(ctx.commandOptions())]
+      : []),
   ].filter(nonNullable);
 }
 
 export function visitGrok(ctx: GrokCommandContext) {
   const pattern = ctx.string().tryGetToken(esql_parser.STRING, 0);
-  return [visitPrimaryExpression(ctx.primaryExpression()), createLiteral('string', pattern)].filter(
-    nonNullable
-  );
+  return [
+    visitPrimaryExpression(ctx.primaryExpression()),
+    ...(pattern && !isMissingText(pattern.text) ? [createLiteral('string', pattern)] : []),
+  ].filter(nonNullable);
 }
 
 function visitDissectOptions(ctx: CommandOptionsContext | undefined) {

@@ -37,7 +37,6 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       body: schema.oneOf([ParamsObjectSchema, schema.arrayOf(ParamsObjectSchema)]),
     },
   },
-  writeAccess: true,
   handler: async ({ request, response, server, savedObjectsClient }) => {
     try {
       const { id: spaceId } = (await server.spaces?.spacesService.getActiveSpace(request)) ?? {
