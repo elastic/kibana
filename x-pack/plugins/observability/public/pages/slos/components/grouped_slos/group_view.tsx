@@ -27,14 +27,14 @@ export function GroupView({ isCompact, kqlQuery, sloView, sort, direction, group
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(DEFAULT_SLO_GROUPS_PAGE_SIZE);
   const { state } = useUrlSearchState();
-  const { tags, filters } = state;
+  const { tagsFilter, filters } = state;
 
   const { data, isLoading, isError } = useFetchSloGroups({
     perPage,
     page: page + 1,
     groupBy,
     kqlQuery,
-    tags,
+    tagsFilter,
     filters,
   });
   const { results = [], total = 0 } = data ?? {};

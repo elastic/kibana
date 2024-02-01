@@ -56,7 +56,7 @@ export function ToggleSLOView({
   const pageSize = sloList?.perPage ?? 0;
   const pageIndex = sloList?.page ?? 1;
 
-  const rangeStart = (total === 0 ? 0 : pageSize * (pageIndex - 1)) + 1;
+  const rangeStart = total === 0 ? 0 : pageSize * (pageIndex - 1) + 1;
   const rangeEnd = Math.min(total, pageSize * (pageIndex - 1) + pageSize);
 
   return (

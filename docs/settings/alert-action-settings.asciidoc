@@ -142,6 +142,15 @@ A list of action types that are enabled. It defaults to `["*"]`, enabling all ty
 +
 Disabled action types will not appear as an option when creating new connectors, but existing connectors and actions of that type will remain in {kib} and will not function.
 
+`xpack.actions.microsoftExchangeUrl`::
+The URL for the Microsoft Azure Active Directory endpoint to use for MS Exchange email authentication. Default: `https://login.microsoftonline.com`.
+
+`xpack.actions.microsoftGraphApiUrl`::
+The URL for the Microsoft Graph API endpoint to use for MS Exchange email authentication. Default: `https://graph.microsoft.com/v1.0`.
+
+`xpack.actions.microsoftGraphApiScope`::
+The URL for the Microsoft Graph API scope endpoint to use for MS Exchange email authentication. Default: `https://graph.microsoft.com/.default`.
+
 `xpack.actions.proxyUrl` {ess-icon}::
 Specifies the proxy URL to use, if using a proxy for actions. By default, no proxy is used.
 +
