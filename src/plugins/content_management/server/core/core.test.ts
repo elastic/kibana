@@ -37,6 +37,22 @@ import type {
 } from './event_types';
 import { ContentStorage, ContentTypeDefinition, StorageContext } from './types';
 
+const spyMsearch = jest.fn();
+const getmSearchSpy = () => spyMsearch;
+
+jest.mock('./msearch', () => {
+  const original = jest.requireActual('./msearch');
+  class MSearchService {
+    search(...args: any[]) {
+      getmSearchSpy()(...args);
+    }
+  }
+  return {
+    ...original,
+    MSearchService,
+  };
+});
+
 const logger = loggingSystemMock.createLogger();
 
 const FOO_CONTENT_ID = 'foo';
@@ -861,113 +877,203 @@ describe('Content Core', () => {
       });
 
       describe('contentClient', () => {
-        test('should return a ClientContent instance for a specific request', () => {
-          const { coreSetup, cleanUp } = setup({ registerFooType: true });
+        describe('single content type', () => {
+          test('should return a ClientContent instance for a specific request', () => {
+            const { coreSetup, cleanUp } = setup({ registerFooType: true });
 
-          const {
-            api: { contentClient },
-          } = coreSetup;
+            const {
+              api: { contentClient },
+            } = coreSetup;
 
-          const client = contentClient
-            .getForRequest({
-              requestHandlerContext: {} as any,
-              request: {} as any,
-            })
-            .for(FOO_CONTENT_ID);
-
-          expect(client).toBeInstanceOf(ContentClient);
-
-          cleanUp();
-        });
-
-        test('should automatically set the content version to the latest version if not provided', async () => {
-          const storage = createMockedStorage();
-          const latestVersion = 7;
-
-          const { coreSetup, cleanUp } = setup({
-            registerFooType: true,
-            latestVersion,
-            storage,
-          });
-
-          const requestHandlerContext = {} as any;
-          const client = coreSetup.api.contentClient
-            .getForRequest({
-              requestHandlerContext,
-              request: {} as any,
-            })
-            .for(FOO_CONTENT_ID);
-
-          const options = { foo: 'bar' };
-          await client.get('1234', options);
-
-          const storageContext = {
-            requestHandlerContext,
-            utils: { getTransforms: expect.any(Function) },
-            version: {
-              latest: latestVersion,
-              request: latestVersion, // Request version should be set to the latest version
-            },
-          };
-
-          expect(storage.get).toHaveBeenCalledWith(storageContext, '1234', options);
-
-          cleanUp();
-        });
-
-        test('should pass the provided content version', async () => {
-          const storage = createMockedStorage();
-          const latestVersion = 7;
-          const requestVersion = 2;
-
-          const { coreSetup, cleanUp } = setup({
-            registerFooType: true,
-            latestVersion,
-            storage,
-          });
-
-          const requestHandlerContext = {} as any;
-
-          const client = coreSetup.api.contentClient
-            .getForRequest({
-              requestHandlerContext,
-              request: {} as any,
-            })
-            .for(FOO_CONTENT_ID, requestVersion);
-
-          await client.get('1234');
-
-          const storageContext = {
-            requestHandlerContext,
-            utils: { getTransforms: expect.any(Function) },
-            version: {
-              latest: latestVersion,
-              request: requestVersion, // The requested version should be used
-            },
-          };
-
-          expect(storage.get).toHaveBeenCalledWith(storageContext, '1234', undefined);
-
-          cleanUp();
-        });
-
-        test('should throw if the contentTypeId is not registered', () => {
-          const { coreSetup, cleanUp } = setup();
-
-          const {
-            api: { contentClient },
-          } = coreSetup;
-
-          expect(() => {
-            contentClient
+            const client = contentClient
               .getForRequest({
                 requestHandlerContext: {} as any,
                 request: {} as any,
               })
               .for(FOO_CONTENT_ID);
-          }).toThrowError('Content [foo] is not registered.');
 
-          cleanUp();
+            expect(client).toBeInstanceOf(ContentClient);
+
+            cleanUp();
+          });
+
+          test('should automatically set the content version to the latest version if not provided', async () => {
+            const storage = createMockedStorage();
+            const latestVersion = 7;
+
+            const { coreSetup, cleanUp } = setup({
+              registerFooType: true,
+              latestVersion,
+              storage,
+            });
+
+            const requestHandlerContext = {} as any;
+            const client = coreSetup.api.contentClient
+              .getForRequest({
+                requestHandlerContext,
+                request: {} as any,
+              })
+              .for(FOO_CONTENT_ID);
+
+            const options = { foo: 'bar' };
+            await client.get('1234', options);
+
+            const storageContext = {
+              requestHandlerContext,
+              utils: { getTransforms: expect.any(Function) },
+              version: {
+                latest: latestVersion,
+                request: latestVersion, // Request version should be set to the latest version
+              },
+            };
+
+            expect(storage.get).toHaveBeenCalledWith(storageContext, '1234', options);
+
+            cleanUp();
+          });
+
+          test('should pass the provided content version', async () => {
+            const storage = createMockedStorage();
+            const latestVersion = 7;
+            const requestVersion = 2;
+
+            const { coreSetup, cleanUp } = setup({
+              registerFooType: true,
+              latestVersion,
+              storage,
+            });
+
+            const requestHandlerContext = {} as any;
+
+            const client = coreSetup.api.contentClient
+              .getForRequest({
+                requestHandlerContext,
+                request: {} as any,
+              })
+              .for(FOO_CONTENT_ID, requestVersion);
+
+            await client.get('1234');
+
+            const storageContext = {
+              requestHandlerContext,
+              utils: { getTransforms: expect.any(Function) },
+              version: {
+                latest: latestVersion,
+                request: requestVersion, // The requested version should be used
+              },
+            };
+
+            expect(storage.get).toHaveBeenCalledWith(storageContext, '1234', undefined);
+
+            cleanUp();
+          });
+
+          test('should throw if the contentTypeId is not registered', () => {
+            const { coreSetup, cleanUp } = setup();
+
+            const {
+              api: { contentClient },
+            } = coreSetup;
+
+            expect(() => {
+              contentClient
+                .getForRequest({
+                  requestHandlerContext: {} as any,
+                  request: {} as any,
+                })
+                .for(FOO_CONTENT_ID);
+            }).toThrowError('Content [foo] is not registered.');
+
+            cleanUp();
+          });
+        });
+
+        describe('multiple content types', () => {
+          const storage = createMockedStorage();
+
+          beforeEach(() => {
+            spyMsearch.mockReset();
+          });
+
+          test('should automatically set the content version to the latest version if not provided', async () => {
+            const { coreSetup, cleanUp } = setup();
+
+            coreSetup.api.register({
+              id: 'foo',
+              storage,
+              version: {
+                latest: 9, // Needs to be automatically passed to the mSearch service
+              },
+            });
+
+            coreSetup.api.register({
+              id: 'bar',
+              storage,
+              version: {
+                latest: 11, // Needs to be automatically passed to the mSearch service
+              },
+            });
+
+            const client = coreSetup.api.contentClient.getForRequest({
+              requestHandlerContext: {} as any,
+              request: {} as any,
+            });
+
+            await client.msearch({
+              // We don't pass the version here
+              contentTypes: [{ contentTypeId: 'foo' }, { contentTypeId: 'bar' }],
+              query: { text: 'Hello' },
+            });
+
+            const [contentTypes] = spyMsearch.mock.calls[0];
+            expect(contentTypes[0].contentTypeId).toBe('foo');
+            expect(contentTypes[0].ctx.version).toEqual({ latest: 9, request: 9 });
+
+            expect(contentTypes[1].contentTypeId).toBe('bar');
+            expect(contentTypes[1].ctx.version).toEqual({ latest: 11, request: 11 });
+
+            cleanUp();
+          });
+
+          test('should use the request version if provided', async () => {
+            const { coreSetup, cleanUp } = setup();
+
+            coreSetup.api.register({
+              id: 'foo',
+              storage,
+              version: {
+                latest: 9, // Needs to be automatically passed to the mSearch service
+              },
+            });
+
+            coreSetup.api.register({
+              id: 'bar',
+              storage,
+              version: {
+                latest: 11, // Needs to be automatically passed to the mSearch service
+              },
+            });
+
+            const client = coreSetup.api.contentClient.getForRequest({
+              requestHandlerContext: {} as any,
+              request: {} as any,
+            });
+
+            await client.msearch({
+              // We don't pass the version here
+              contentTypes: [
+                { contentTypeId: 'foo', version: 2 },
+                { contentTypeId: 'bar', version: 3 },
+              ],
+              query: { text: 'Hello' },
+            });
+
+            const [contentTypes] = spyMsearch.mock.calls[0];
+            expect(contentTypes[0].ctx.version).toEqual({ latest: 9, request: 2 });
+            expect(contentTypes[1].ctx.version).toEqual({ latest: 11, request: 3 });
+
+            cleanUp();
+          });
         });
       });
     });

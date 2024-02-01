@@ -65,9 +65,11 @@ export const getMSearchClientFactory =
   }) => {
     const msearch = async ({ contentTypes, query }: MSearchIn): Promise<MSearchOut> => {
       const contentTypesWithStorageContext = contentTypes.map(({ contentTypeId, version }) => {
+        const contentDefinition = contentRegistry.getDefinition(contentTypeId);
+
         const storageContext = getStorageContext({
           contentTypeId,
-          version,
+          version: version ?? contentDefinition.version.latest,
           ctx: {
             contentRegistry,
             requestHandlerContext,
