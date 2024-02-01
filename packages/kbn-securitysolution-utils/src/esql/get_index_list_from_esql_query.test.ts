@@ -7,7 +7,7 @@
  */
 
 import { getIndexListFromEsqlQuery } from './get_index_list_from_esql_query';
-import { getIndexPatternFromESQLQuery } from '@kbn/es-query';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 
 jest.mock('@kbn/es-query', () => {
   return {
