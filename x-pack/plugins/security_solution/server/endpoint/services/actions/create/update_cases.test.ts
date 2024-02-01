@@ -56,7 +56,7 @@ describe('updateCases', () => {
   });
 
   it('should get cases by alert IDs and update them', async () => {
-    mockCasesClient.cases.getCasesByAlertID.mockResolvedValueOnce([{ id: 'case1' }]);
+    (mockCasesClient.cases.getCasesByAlertID as jest.Mock).mockResolvedValueOnce([{ id: 'case1' }]);
 
     await updateCases({
       casesClient: mockCasesClient,

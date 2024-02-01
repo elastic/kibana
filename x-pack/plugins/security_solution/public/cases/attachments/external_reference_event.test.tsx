@@ -21,7 +21,7 @@ describe('AttachmentContent', () => {
   const mockNavigateTo = jest.fn();
 
   const mockUseNavigation = useNavigation as jest.Mocked<typeof useNavigation>;
-  mockUseNavigation.mockReturnValue({
+  (mockUseNavigation as jest.Mock).mockReturnValue({
     getAppUrl: jest.fn(),
     navigateTo: mockNavigateTo,
   });
@@ -33,7 +33,7 @@ describe('AttachmentContent', () => {
         {
           endpointId: 'endpoint-1',
           hostname: 'host-1',
-          type: 'endpoint',
+          type: 'endpoint' as const,
         },
       ],
     },
