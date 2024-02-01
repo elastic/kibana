@@ -193,14 +193,5 @@ export const CreateDockerFIPS: Task = {
       dockerBuildDate,
       fips: true,
     });
-
-    await runDockerGenerator(config, log, build, {
-      architecture: 'aarch64',
-      baseImage: 'ubuntu',
-      context: false,
-      image: true,
-      dockerBuildDate,
-      fips: true,
-    });
   },
 };

@@ -53,8 +53,7 @@ if is_pr_with_label "ci:build-fips-images"; then
     --skip-cdn-assets \
     --skip-docker-contexts \
     --docker-fips-images \
-    --docker-tag-qualifier="$GIT_COMMIT" \
-    --docker-cross-compile
+    --docker-tag-qualifier="$GIT_COMMIT"
 
   docker logout docker.elastic.co
 fi
