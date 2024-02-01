@@ -198,4 +198,21 @@ describe('allCasesUrlStateDeserializer', () => {
       }
     `);
   });
+
+  it('parses none assignees correctly', () => {
+    const url = 'assignees=none&assignees=elastic';
+
+    expect(allCasesUrlStateDeserializer(parseUrlParams(new URLSearchParams(url))))
+      .toMatchInlineSnapshot(`
+      Object {
+        "filterOptions": Object {
+          "assignees": Array [
+            null,
+            "elastic",
+          ],
+        },
+        "queryParams": Object {},
+      }
+    `);
+  });
 });

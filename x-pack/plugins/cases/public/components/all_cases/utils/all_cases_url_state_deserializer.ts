@@ -6,6 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
+import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../../../common/constants';
 import { CustomFieldTypes } from '../../../../common/types/domain';
 import type { QueryParams, FilterOptions } from '../../../../common/ui';
 import { DEFAULT_CASES_TABLE_STATE } from '../../../containers/constants';
@@ -54,9 +55,14 @@ export const allCasesUrlStateDeserializer = (
   }
 
   const { page, perPage, ...restQueryParams } = queryParams;
+  const { assignees, ...restFilterOptions } = filterOptions;
 
   const queryParamsParsed: Partial<QueryParams> = {
     ...restQueryParams,
+  };
+
+  const filterOptionsParsed: Partial<FilterOptions> = {
+    ...restFilterOptions,
   };
 
   if (page) {
@@ -68,10 +74,16 @@ export const allCasesUrlStateDeserializer = (
       stringToInteger(perPage) ?? DEFAULT_CASES_TABLE_STATE.queryParams.perPage;
   }
 
+  if (assignees) {
+    filterOptionsParsed.assignees = assignees.map((assignee) =>
+      assignee === NO_ASSIGNEES_FILTERING_KEYWORD ? null : assignee
+    );
+  }
+
   const state = {
     queryParams: queryParamsParsed,
     filterOptions: {
-      ...filterOptions,
+      ...filterOptionsParsed,
       ...(!isEmpty(customFieldsParams) && {
         customFields: customFieldsParams,
       }),

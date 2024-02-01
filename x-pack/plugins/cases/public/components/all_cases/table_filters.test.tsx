@@ -23,7 +23,7 @@ import { useGetCategories } from '../../containers/use_get_categories';
 import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { getCaseConfigure } from '../../containers/configure/api';
-import { CUSTOM_FIELD_KEY_PREFIX } from './table_filter_config/use_custom_fields_filter_config';
+import { CUSTOM_FIELD_KEY_PREFIX } from './constants';
 
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/use_get_categories');

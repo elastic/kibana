@@ -181,4 +181,35 @@ describe('allCasesUrlStateSerializer', () => {
       }
     `);
   });
+
+  it('converts null assignees correctly', () => {
+    expect(
+      allCasesUrlStateSerializer({
+        filterOptions: {
+          ...DEFAULT_FILTER_OPTIONS,
+          assignees: [null, 'elastic'],
+        },
+        queryParams: DEFAULT_QUERY_PARAMS,
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "assignees": Array [
+          "none",
+          "elastic",
+        ],
+        "page": Array [
+          "1",
+        ],
+        "perPage": Array [
+          "10",
+        ],
+        "sortField": Array [
+          "createdAt",
+        ],
+        "sortOrder": Array [
+          "desc",
+        ],
+      }
+    `);
+  });
 });

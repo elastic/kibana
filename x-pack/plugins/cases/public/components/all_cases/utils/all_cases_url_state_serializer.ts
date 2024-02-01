@@ -6,6 +6,7 @@
  */
 
 import { isEmpty, pick } from 'lodash';
+import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../../../common/constants';
 import { CUSTOM_FIELD_KEY_PREFIX } from '../constants';
 import type { AllCasesURLQueryParams, AllCasesTableState } from '../types';
 
@@ -29,6 +30,9 @@ export const allCasesUrlStateSerializer = (state: AllCasesTableState): AllCasesU
     page: state.queryParams.page.toString(),
     perPage: state.queryParams.perPage.toString(),
     ...supportedFilterOptions,
+    assignees: supportedFilterOptions.assignees.map((assignee) =>
+      assignee === null ? NO_ASSIGNEES_FILTERING_KEYWORD : assignee
+    ),
     ...customFieldsAsQueryParams,
   };
 
