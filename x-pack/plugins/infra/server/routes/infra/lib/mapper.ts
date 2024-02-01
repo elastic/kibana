@@ -20,10 +20,12 @@ import {
   HostsMetricsSearchValueRT,
 } from './types';
 import { METADATA_AGGREGATION_NAME } from './constants';
+import { HostAlertsResponse } from './host/get_hosts_alerts_count';
 
 export const mapToApiResponse = (
   params: GetInfraMetricsRequestBodyPayload,
-  buckets?: HostsMetricsSearchBucket[] | undefined
+  buckets?: HostsMetricsSearchBucket[] | undefined,
+  alertsCountResponse?: HostAlertsResponse
 ): GetInfraMetricsResponsePayload => {
   if (!buckets) {
     return {
@@ -39,9 +41,14 @@ export const mapToApiResponse = (
     return { name: bucket.key as string, metrics, metadata };
   });
 
+  const mergedHostWithAlertsCount = hosts.map((itm) => ({
+    ...alertsCountResponse?.find((item) => item.name === itm.name),
+    ...itm,
+  }));
+
   return {
     type: params.type,
-    nodes: hosts,
+    nodes: mergedHostWithAlertsCount,
   };
 };
 
