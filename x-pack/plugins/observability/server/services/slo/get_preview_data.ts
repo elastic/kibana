@@ -86,6 +86,10 @@ export class GetPreviewData {
           date_histogram: {
             field: '@timestamp',
             fixed_interval: options.interval,
+            extended_bounds: {
+              min: options.range.start,
+              max: options.range.end,
+            },
           },
           aggs: {
             _good: {
@@ -172,6 +176,10 @@ export class GetPreviewData {
           date_histogram: {
             field: '@timestamp',
             fixed_interval: options.interval,
+            extended_bounds: {
+              min: options.range.start,
+              max: options.range.end,
+            },
           },
           aggs: {
             good: {
@@ -233,6 +241,10 @@ export class GetPreviewData {
           date_histogram: {
             field: timestampField,
             fixed_interval: options.interval,
+            extended_bounds: {
+              min: options.range.start,
+              max: options.range.end,
+            },
           },
           aggs: {
             ...getHistogramIndicatorAggregations.execute({
@@ -284,6 +296,10 @@ export class GetPreviewData {
           date_histogram: {
             field: timestampField,
             fixed_interval: options.interval,
+            extended_bounds: {
+              min: options.range.start,
+              max: options.range.end,
+            },
           },
           aggs: {
             ...getCustomMetricIndicatorAggregation.execute({
@@ -337,6 +353,10 @@ export class GetPreviewData {
           date_histogram: {
             field: timestampField,
             fixed_interval: options.interval,
+            extended_bounds: {
+              min: options.range.start,
+              max: options.range.end,
+            },
           },
           aggs: {
             ...getCustomMetricIndicatorAggregation.execute('metric'),
@@ -376,6 +396,10 @@ export class GetPreviewData {
           date_histogram: {
             field: timestampField,
             fixed_interval: options.interval,
+            extended_bounds: {
+              min: options.range.start,
+              max: options.range.end,
+            },
           },
           aggs: {
             good: { filter: goodQuery },
@@ -402,12 +426,21 @@ export class GetPreviewData {
 
   public async execute(params: GetPreviewDataParams): Promise<GetPreviewDataResponse> {
     try {
-      const bucketSize = Math.max(
-        calculateAuto
-          .near(100, moment.duration(params.range.end - params.range.start, 'ms'))
-          ?.asMinutes() ?? 0,
-        1
-      );
+      // If the time range is 24h or less, then we want to use a 1m bucket for the
+      // Timeslice metric so that the chart is as close to the evaluation as possible.
+      // Otherwise due to how the statistics work, the values might not look like
+      // they've breached the threshold.
+      const bucketSize =
+        params.indicator.type === 'sli.metric.timeslice' &&
+        params.range.end - params.range.start <= 86_400_000 &&
+        params.objective?.timesliceWindow
+          ? params.objective.timesliceWindow.asMinutes()
+          : Math.max(
+              calculateAuto
+                .near(100, moment.duration(params.range.end - params.range.start, 'ms'))
+                ?.asMinutes() ?? 0,
+              1
+            );
       const options: Options = {
         range: params.range,
         interval: `${bucketSize}m`,
