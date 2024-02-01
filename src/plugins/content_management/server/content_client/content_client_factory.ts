@@ -47,6 +47,9 @@ export const getContentClientFactory =
     };
 
     return {
+      /**
+       * Client getter to interact with the registered content type.
+       */
       getForRequest,
     };
   };

@@ -49,7 +49,13 @@ export class ContentRegistry {
     this.types.set(contentType.id, contentType);
 
     const contentClient = getContentClientFactory({ contentRegistry: this })(contentType.id);
-    return { contentClient };
+
+    return {
+      /**
+       * Client getters to interact with the registered content type.
+       */
+      contentClient,
+    };
   }
 
   getContentType(id: string): ContentType {

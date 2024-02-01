@@ -40,7 +40,9 @@ export interface CoreApi {
   crud: <T = unknown>(contentType: string) => ContentCrud<T>;
   /** Content management event bus */
   eventBus: EventBus;
+  /** Client getters to interact with registered content types. */
   contentClient: {
+    /** Client getter to interact with registered content types for the current HTTP request. */
     getForRequest(deps: GetContentClientForRequestDependencies): {
       for: <T = unknown>(contentTypeId: string, version?: Version) => IContentClient<T>;
       msearch(args: MSearchIn): Promise<MSearchOut>;
