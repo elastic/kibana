@@ -17,7 +17,11 @@ import type {
   DataViewsServerPluginStartDependencies,
 } from '../../types';
 import type { FieldDescriptorRestResponse } from '../route_types';
-import { FIELDS_FOR_WILDCARD_PATH as path } from '../../../common/constants';
+import {
+  FIELDS_FOR_WILDCARD_PATH as path,
+  DATA_VIEWS_FIELDS_EXCLUDED_TIERS,
+} from '../../../common/constants';
+import { getIndexFilterDsl } from './utils';
 
 /**
  * Accepts one of the following:
@@ -115,8 +119,13 @@ export const validate: FullValidationConfig<any, any, any> = {
 
 const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, IBody> =
   (isRollupsEnabled) => async (context, request, response) => {
-    const { asCurrentUser } = (await context.core).elasticsearch.client;
+    const core = await context.core;
+    const { asCurrentUser } = core.elasticsearch.client;
+    const excludedTiers = await core.uiSettings.client.get<string>(
+      DATA_VIEWS_FIELDS_EXCLUDED_TIERS
+    );
     const indexPatterns = new IndexPatternsFetcher(asCurrentUser, undefined, isRollupsEnabled());
+
     const {
       pattern,
       meta_fields: metaFields,
@@ -149,7 +158,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
           allow_no_indices: allowNoIndex || false,
           includeUnmapped,
         },
-        indexFilter,
+        indexFilter: getIndexFilterDsl({ indexFilter, excludedTiers }),
         allowHidden,
         ...(parsedFields.length > 0 ? { fields: parsedFields } : {}),
       });

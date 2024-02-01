@@ -14,6 +14,7 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { switchMap } from 'rxjs';
+import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import type {
   VisualizeServices,
   VisualizeAppState,
@@ -63,7 +64,11 @@ const TopNav = ({
   const { services } = useKibana<VisualizeServices>();
   const { TopNavMenu } = services.navigation.ui;
   const { setHeaderActionMenu, visualizeCapabilities } = services;
-  const { embeddableHandler, vis } = visInstance;
+  const {
+    embeddableHandler,
+    vis,
+    savedVis: { managed },
+  } = visInstance;
   const [inspectorSession, setInspectorSession] = useState<OverlayRef>();
   const [navigateToLens, setNavigateToLens] = useState(false);
   const [displayEditInLensItem, setDisplayEditInLensItem] = useState(false);
@@ -315,6 +320,18 @@ const TopNav = ({
       showDatePicker={showDatePicker()}
       showFilterBar={showFilterBar}
       showQueryInput={showQueryInput}
+      badges={
+        managed
+          ? [
+              getManagedContentBadge(
+                i18n.translate('visualizations.managedBadgeTooltip', {
+                  defaultMessage:
+                    'This visualization is managed by Elastic. Changes made here must be saved to a new visualization.',
+                })
+              ),
+            ]
+          : undefined
+      }
       saveQueryMenuVisibility={
         services.visualizeCapabilities.saveQuery ? 'allowed_by_app_privilege' : 'globally_managed'
       }
