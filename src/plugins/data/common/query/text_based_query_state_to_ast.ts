@@ -20,7 +20,6 @@ import {
 interface Args extends QueryState {
   timeFieldName?: string;
   inputQuery?: Query;
-  dropNullColumns?: boolean;
 }
 
 /**
@@ -35,7 +34,6 @@ export function textBasedQueryStateToExpressionAst({
   inputQuery,
   time,
   timeFieldName,
-  dropNullColumns,
 }: Args) {
   const kibana = buildExpressionFunction<ExpressionFunctionKibana>('kibana', {});
   let q;
@@ -53,7 +51,7 @@ export function textBasedQueryStateToExpressionAst({
     const mode = getAggregateQueryMode(query);
     for (const esMode of ['sql', 'esql']) {
       if (mode === esMode && esMode in query) {
-        const essql = aggregateQueryToAst(query, timeFieldName, dropNullColumns);
+        const essql = aggregateQueryToAst(query, timeFieldName);
 
         if (essql) {
           ast.chain.push(essql);

@@ -43,7 +43,6 @@ interface Arguments {
   // timezone?: string;
   timeField?: string;
   locale?: string;
-  dropNullColumns?: boolean;
 }
 
 export type EsqlExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -126,17 +125,10 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           defaultMessage: 'The locale to use.',
         }),
       },
-      dropNullColumns: {
-        aliases: ['dropNullColumns'],
-        types: ['boolean'],
-        help: i18n.translate('data.search.essql.dropNull.help', {
-          defaultMessage: 'If true adds all_columns in a separate property',
-        }),
-      },
     },
     fn(
       input,
-      { query, /* timezone, */ timeField, locale, dropNullColumns },
+      { query, /* timezone, */ timeField, locale },
       { abortSignal, inspectorAdapters, getKibanaRequest }
     ) {
       return defer(() =>
@@ -202,10 +194,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           return search<
             IKibanaSearchRequest<ESQLSearchParams>,
             IKibanaSearchResponse<ESQLSearchReponse>
-          >(
-            { params: { ...params, dropNullColumns } },
-            { abortSignal, strategy: ESQL_ASYNC_SEARCH_STRATEGY }
-          ).pipe(
+          >({ params }, { abortSignal, strategy: ESQL_ASYNC_SEARCH_STRATEGY }).pipe(
             catchError((error) => {
               if (!error.attributes) {
                 error.message = `Unexpected error from Elasticsearch: ${error.message}`;

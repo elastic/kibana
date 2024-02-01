@@ -22,16 +22,12 @@ import { IKibanaSearchRequest, IKibanaSearchResponse, pollSearch } from '../../.
 import { toAsyncKibanaSearchResponse } from './response_utils';
 import { SearchConfigSchema } from '../../../../config';
 
-interface ESQLQueryRequest extends SqlQueryRequest {
-  body?: SqlQueryRequest['body'] & { dropNullColumns?: boolean };
-}
-
 export const esqlAsyncSearchStrategyProvider = (
   searchConfig: SearchConfigSchema,
   logger: Logger,
   useInternalUser: boolean = false
 ): ISearchStrategy<
-  IKibanaSearchRequest<ESQLQueryRequest['body']>,
+  IKibanaSearchRequest<SqlQueryRequest['body']>,
   IKibanaSearchResponse<SqlGetAsyncResponse>
 > => {
   function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
@@ -50,14 +46,14 @@ export const esqlAsyncSearchStrategyProvider = (
   }
 
   function asyncSearch(
-    { id, ...request }: IKibanaSearchRequest<ESQLQueryRequest['body']>,
+    { id, ...request }: IKibanaSearchRequest<SqlQueryRequest['body']>,
     options: IAsyncSearchOptions,
     { esClient, uiSettingsClient }: SearchStrategyDependencies
   ) {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
 
     const search = async () => {
-      const { dropNullColumns, ...requestParams } = request.params ?? {};
+      const { ...requestParams } = request.params ?? {};
       const params = id
         ? {
             ...getCommonDefaultAsyncGetParams(searchConfig, options),
@@ -84,7 +80,7 @@ export const esqlAsyncSearchStrategyProvider = (
               method: 'POST',
               path: `/_query/async`,
               body: params,
-              querystring: dropNullColumns ? 'drop_null_columns' : '',
+              querystring: 'drop_null_columns',
             },
             { ...options.transport, signal: options.abortSignal, meta: true }
           );

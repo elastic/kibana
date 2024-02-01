@@ -13,8 +13,7 @@ import { EsqlExpressionFunctionDefinition } from './esql';
 
 export const aggregateQueryToAst = (
   query: AggregateQuery,
-  timeField?: string,
-  dropNullColumns?: boolean
+  timeField?: string
 ): undefined | ExpressionAstFunction => {
   if ('sql' in query) {
     return buildExpressionFunction<EssqlExpressionFunctionDefinition>('essql', {
@@ -27,7 +26,6 @@ export const aggregateQueryToAst = (
       query: query.esql,
       timeField,
       locale: i18n.getLocale(),
-      dropNullColumns,
     }).toAst();
   }
 };
