@@ -15,6 +15,7 @@ import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { resultDocument } from './results.mock';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ResultDocument } from '../../schemas/result';
+import type { CheckIndicesPrivilegesParam } from './privileges';
 
 const searchResponse = {
   aggregations: {
@@ -32,11 +33,12 @@ const searchResponse = {
   Record<string, { buckets: LatestAggResponseBucket[] }>
 >;
 
-const mockCheckIndicesPrivileges = jest
-  .fn()
-  .mockResolvedValue({ [resultDocument.indexName]: true });
+const mockCheckIndicesPrivileges = jest.fn(({ indices }: CheckIndicesPrivilegesParam) =>
+  Promise.resolve(Object.fromEntries(indices.map((index) => [index, true])))
+);
 jest.mock('./privileges', () => ({
-  checkIndicesPrivileges: (params: unknown) => mockCheckIndicesPrivileges(params),
+  checkIndicesPrivileges: (params: CheckIndicesPrivilegesParam) =>
+    mockCheckIndicesPrivileges(params),
 }));
 
 describe('getResultsRoute route', () => {
@@ -59,7 +61,7 @@ describe('getResultsRoute route', () => {
 
       ({ context } = requestContextMock.createTools());
 
-      context.core.elasticsearch.client.asCurrentUser.indices.get.mockResolvedValue({
+      context.core.elasticsearch.client.asInternalUser.indices.get.mockResolvedValue({
         [resultDocument.indexName]: {},
       });
 
@@ -126,28 +128,69 @@ describe('getResultsRoute route', () => {
 
       context.core.elasticsearch.client.asInternalUser.search.mockResolvedValue(searchResponse);
 
-      context.core.elasticsearch.client.asCurrentUser.indices.get.mockResolvedValue({
+      context.core.elasticsearch.client.asInternalUser.indices.get.mockResolvedValue({
         [resultDocument.indexName]: {},
       });
 
       getResultsRoute(server.router, logger);
     });
 
-    it('should authorize pattern', async () => {
-      const mockGetIndices = context.core.elasticsearch.client.asCurrentUser.indices.get;
+    it('should authorize indices from pattern', async () => {
+      const mockGetIndices = context.core.elasticsearch.client.asInternalUser.indices.get;
       mockGetIndices.mockResolvedValueOnce({ [resultDocument.indexName]: {} });
 
       const response = await server.inject(req, requestContextMock.convertContext(context));
-      expect(mockGetIndices).toHaveBeenCalledWith({ index: 'logs-*' });
+      expect(mockGetIndices).toHaveBeenCalledWith({ index: 'logs-*', features: 'aliases' });
+      expect(mockCheckIndicesPrivileges).toHaveBeenCalledWith(
+        expect.objectContaining({ indices: [resultDocument.indexName] })
+      );
       expect(context.core.elasticsearch.client.asInternalUser.search).toHaveBeenCalled();
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual([resultDocument]);
     });
 
-    it('should not search unauthorized pattern', async () => {
-      const mockGetIndices = context.core.elasticsearch.client.asCurrentUser.indices.get;
-      mockGetIndices.mockResolvedValueOnce({}); // empty object means no index is authorized
+    it('should authorize data streams from pattern', async () => {
+      const dataStreamName = 'test_data_stream_name';
+      const resultIndexNameTwo = `${resultDocument.indexName}_2`;
+      const resultIndexNameThree = `${resultDocument.indexName}_3`;
+      const mockGetIndices = context.core.elasticsearch.client.asInternalUser.indices.get;
+      mockGetIndices.mockResolvedValueOnce({
+        [resultDocument.indexName]: {},
+        [resultIndexNameTwo]: { data_stream: dataStreamName },
+        [resultIndexNameThree]: { data_stream: dataStreamName },
+      });
+
+      const response = await server.inject(req, requestContextMock.convertContext(context));
+
+      expect(mockGetIndices).toHaveBeenCalledWith({ index: 'logs-*', features: 'aliases' });
+      expect(mockCheckIndicesPrivileges).toHaveBeenCalledWith(
+        expect.objectContaining({ indices: [resultDocument.indexName, dataStreamName] })
+      );
+      expect(context.core.elasticsearch.client.asInternalUser.search).toHaveBeenCalledWith({
+        index: expect.any(String),
+        ...getQuery([resultDocument.indexName, resultIndexNameTwo, resultIndexNameThree]),
+      });
+
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual([resultDocument]);
+    });
+
+    it('should not search unknown indices', async () => {
+      const mockGetIndices = context.core.elasticsearch.client.asInternalUser.indices.get;
+      mockGetIndices.mockResolvedValueOnce({}); // empty object means no index is found
+
+      const response = await server.inject(req, requestContextMock.convertContext(context));
+
+      expect(mockCheckIndicesPrivileges).not.toHaveBeenCalled();
+      expect(context.core.elasticsearch.client.asInternalUser.search).not.toHaveBeenCalled();
+
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual([]);
+    });
+
+    it('should not search unauthorized indices', async () => {
+      mockCheckIndicesPrivileges.mockResolvedValueOnce({}); // empty object means no index is authorized
 
       const response = await server.inject(req, requestContextMock.convertContext(context));
       expect(context.core.elasticsearch.client.asInternalUser.search).not.toHaveBeenCalled();
@@ -156,10 +199,19 @@ describe('getResultsRoute route', () => {
       expect(response.body).toEqual([]);
     });
 
-    it('handles pattern authorization error', async () => {
+    it('handles index discovery error', async () => {
       const errorMessage = 'Error!';
-      const mockGetIndices = context.core.elasticsearch.client.asCurrentUser.indices.get;
+      const mockGetIndices = context.core.elasticsearch.client.asInternalUser.indices.get;
       mockGetIndices.mockRejectedValueOnce({ message: errorMessage });
+
+      const response = await server.inject(req, requestContextMock.convertContext(context));
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({ message: errorMessage, status_code: 500 });
+    });
+
+    it('handles index authorization error', async () => {
+      const errorMessage = 'Error!';
+      mockCheckIndicesPrivileges.mockRejectedValueOnce({ message: errorMessage });
 
       const response = await server.inject(req, requestContextMock.convertContext(context));
       expect(response.status).toEqual(500);

@@ -11,17 +11,16 @@ import { requestMock } from '../../__mocks__/request';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { postResultsRoute } from './post_results';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
-import type {
-  SecurityHasPrivilegesResponse,
-  WriteResponseBase,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { WriteResponseBase } from '@elastic/elasticsearch/lib/api/types';
 import { resultDocument } from './results.mock';
+import type { CheckIndicesPrivilegesParam } from './privileges';
 
-const mockCheckIndicesPrivileges = jest
-  .fn()
-  .mockResolvedValue({ [resultDocument.indexName]: true });
+const mockCheckIndicesPrivileges = jest.fn(({ indices }: CheckIndicesPrivilegesParam) =>
+  Promise.resolve(Object.fromEntries(indices.map((index) => [index, true])))
+);
 jest.mock('./privileges', () => ({
-  checkIndicesPrivileges: (params: unknown) => mockCheckIndicesPrivileges(params),
+  checkIndicesPrivileges: (params: CheckIndicesPrivilegesParam) =>
+    mockCheckIndicesPrivileges(params),
 }));
 
 describe('postResultsRoute route', () => {
@@ -44,10 +43,9 @@ describe('postResultsRoute route', () => {
 
       ({ context } = requestContextMock.createTools());
 
-      context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockResolvedValue({
-        has_all_requested: true,
-      } as unknown as SecurityHasPrivilegesResponse);
-
+      context.core.elasticsearch.client.asInternalUser.indices.get.mockResolvedValue({
+        [resultDocument.indexName]: {},
+      });
       postResultsRoute(server.router, logger);
     });
 
@@ -90,7 +88,7 @@ describe('postResultsRoute route', () => {
     });
   });
 
-  describe('request pattern authorization', () => {
+  describe('request index authorization', () => {
     let server: ReturnType<typeof serverMock.create>;
     let { context } = requestContextMock.createTools();
     let logger: MockedLogger;
@@ -109,6 +107,9 @@ describe('postResultsRoute route', () => {
 
       ({ context } = requestContextMock.createTools());
 
+      context.core.elasticsearch.client.asInternalUser.indices.get.mockResolvedValue({
+        [resultDocument.indexName]: {},
+      });
       context.core.elasticsearch.client.asInternalUser.index.mockResolvedValueOnce({
         result: 'created',
       } as WriteResponseBase);
@@ -116,7 +117,7 @@ describe('postResultsRoute route', () => {
       postResultsRoute(server.router, logger);
     });
 
-    it('should authorize pattern', async () => {
+    it('should authorize index', async () => {
       const response = await server.inject(req, requestContextMock.convertContext(context));
       expect(mockCheckIndicesPrivileges).toHaveBeenCalledWith({
         client: context.core.elasticsearch.client,
@@ -127,7 +128,24 @@ describe('postResultsRoute route', () => {
       expect(response.body).toEqual({ result: 'created' });
     });
 
-    it('should not index unauthorized pattern', async () => {
+    it('should authorize data stream', async () => {
+      const dataStreamName = 'test_data_stream_name';
+      context.core.elasticsearch.client.asInternalUser.indices.get.mockResolvedValue({
+        [resultDocument.indexName]: { data_stream: dataStreamName },
+      });
+      mockCheckIndicesPrivileges.mockResolvedValueOnce({ [dataStreamName]: true });
+
+      const response = await server.inject(req, requestContextMock.convertContext(context));
+      expect(mockCheckIndicesPrivileges).toHaveBeenCalledWith({
+        client: context.core.elasticsearch.client,
+        indices: [dataStreamName],
+      });
+      expect(context.core.elasticsearch.client.asInternalUser.index).toHaveBeenCalled();
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({ result: 'created' });
+    });
+
+    it('should not index unauthorized index', async () => {
       mockCheckIndicesPrivileges.mockResolvedValueOnce({ [resultDocument.indexName]: false });
 
       const response = await server.inject(req, requestContextMock.convertContext(context));
@@ -141,7 +159,7 @@ describe('postResultsRoute route', () => {
       expect(response.body).toEqual({ result: 'noop' });
     });
 
-    it('handles pattern authorization error', async () => {
+    it('handles index authorization error', async () => {
       const errorMessage = 'Error!';
       mockCheckIndicesPrivileges.mockRejectedValueOnce(Error(errorMessage));
 

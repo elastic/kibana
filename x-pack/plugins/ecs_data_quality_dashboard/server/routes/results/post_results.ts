@@ -48,11 +48,24 @@ export const postResultsRoute = (
 
         try {
           const { client } = services.core.elasticsearch;
-
-          // Confirm user has authorization for the indexName payload
           const { indexName } = request.body;
-          const hadIndexPrivileges = await checkIndicesPrivileges({ client, indices: [indexName] });
-          if (!hadIndexPrivileges[indexName]) {
+
+          // Confirm index exists and get the data stream name if it's a data stream
+          const indicesResponse = await client.asInternalUser.indices.get({
+            index: indexName,
+            features: 'aliases',
+          });
+          if (!indicesResponse[indexName]) {
+            return response.ok({ body: { result: 'noop' } });
+          }
+          const indexOrDataStream = indicesResponse[indexName].data_stream ?? indexName;
+
+          // Confirm user has authorization for the index name or data stream
+          const hasIndexPrivileges = await checkIndicesPrivileges({
+            client,
+            indices: [indexOrDataStream],
+          });
+          if (!hasIndexPrivileges[indexOrDataStream]) {
             return response.ok({ body: { result: 'noop' } });
           }
 

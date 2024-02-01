@@ -64,20 +64,58 @@ export const getResultsRoute = (
         }
 
         try {
+          const { client } = services.core.elasticsearch;
           const { pattern } = request.query;
 
-          // Get authorized indices
-          const { client } = services.core.elasticsearch;
-          const indicesResponse = await client.asCurrentUser.indices.get({ index: pattern });
-          const indices = Object.keys(indicesResponse);
+          // Discover all indices for the pattern using internal user
+          const indicesResponse = await client.asInternalUser.indices.get({
+            index: pattern,
+            features: 'aliases', // omit 'settings' and 'mappings' to reduce response size
+          });
 
-          const hadIndexPrivileges = await checkIndicesPrivileges({ client, indices });
-          const authorizedIndexNames = indices.filter((indexName) => hadIndexPrivileges[indexName]);
+          // map data streams to their backing indices and collect indices to authorize
+          const indicesToAuthorize: string[] = [];
+          const dataStreamIndices: Record<string, string[]> = {};
+          Object.entries(indicesResponse).forEach(([indexName, { data_stream: dataStream }]) => {
+            if (dataStream) {
+              if (!dataStreamIndices[dataStream]) {
+                dataStreamIndices[dataStream] = [];
+              }
+              dataStreamIndices[dataStream].push(indexName);
+            } else {
+              indicesToAuthorize.push(indexName);
+            }
+          });
+          indicesToAuthorize.push(...Object.keys(dataStreamIndices));
+          if (indicesToAuthorize.length === 0) {
+            return response.ok({ body: [] });
+          }
+
+          // check privileges for indices or data streams
+          const hasIndexPrivileges = await checkIndicesPrivileges({
+            client,
+            indices: indicesToAuthorize,
+          });
+
+          // filter out unauthorized indices, and expand data streams backing indices
+          const authorizedIndexNames = Object.entries(hasIndexPrivileges).reduce<string[]>(
+            (acc, [indexName, authorized]) => {
+              if (authorized) {
+                if (dataStreamIndices[indexName]) {
+                  acc.push(...dataStreamIndices[indexName]);
+                } else {
+                  acc.push(indexName);
+                }
+              }
+              return acc;
+            },
+            []
+          );
           if (authorizedIndexNames.length === 0) {
             return response.ok({ body: [] });
           }
 
-          // Get the latest result of each pattern
+          // Get the latest result for each indexName
           const query = { index, ...getQuery(authorizedIndexNames) };
           const { aggregations } = await client.asInternalUser.search<
             ResultDocument,
