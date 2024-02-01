@@ -27,6 +27,7 @@ import { allCasesUrlStateSerializer } from './utils/all_cases_url_state_serializ
 import { parseUrlParams } from './utils/parse_url_params';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { sanitizeState } from './utils/sanitize_state';
+import { CUSTOM_FIELD_KEY_PREFIX } from './constants';
 
 interface UseAllCasesStateReturn {
   filterOptions: FilterOptions;
@@ -99,23 +100,28 @@ const useAllCasesUrlState = (): [AllCasesURLState, (updated: AllCasesTableState)
   const history = useHistory();
   const location = useLocation();
 
-  const urlParams = useMemo(
-    () => parseUrlParams(new URLSearchParams(decodeURIComponent(location.search))),
-    [location.search]
+  const urlParams = parseUrlParams(new URLSearchParams(decodeURIComponent(location.search)));
+  const parsedUrlParams = allCasesUrlStateDeserializer(urlParams);
+  const nonAllCasesStateUrlParams = parseNonCasesStateUrlParams(
+    decodeURIComponent(location.search)
   );
-
-  const parsedUrlParams = useMemo(() => allCasesUrlStateDeserializer(urlParams), [urlParams]);
 
   const updateQueryParams = useCallback(
     (updated: AllCasesTableState) => {
       const updatedQuery = allCasesUrlStateSerializer(updated);
+      const allCasesStateSearch = urlUtils.encodeUriQuery(stringifyUrlParams(updatedQuery));
+      // is assumed that url from other solution are already encoded
+      const nonAllCasesStateSearch = nonAllCasesStateUrlParams.toString();
+      const search = isEmpty(nonAllCasesStateSearch)
+        ? allCasesStateSearch
+        : `${allCasesStateSearch}${urlUtils.encodeUriQuery('&')}${nonAllCasesStateSearch}`;
 
       history.push({
         ...location,
-        search: urlUtils.encodeUriQuery(stringifyUrlParams(updatedQuery)),
+        search,
       });
     },
-    [history, location]
+    [history, location, nonAllCasesStateUrlParams]
   );
 
   return [parsedUrlParams, updateQueryParams];
@@ -181,4 +187,24 @@ const useAllCasesLocalStorage = (): [
 const getAllCasesTableStateLocalStorageKey = (appId: string) => {
   const key = LOCAL_STORAGE_KEYS.casesTableState;
   return `${appId}.${key}`;
+};
+
+const parseNonCasesStateUrlParams = (url: string): URLSearchParams => {
+  const urlParamsWithoutAllCasesState = new URLSearchParams(url);
+
+  const allCasesValidStateKeys = Object.keys({
+    ...DEFAULT_CASES_TABLE_STATE.filterOptions,
+    ...DEFAULT_CASES_TABLE_STATE.queryParams,
+  });
+
+  // delete will remove all occurrences of the key
+  allCasesValidStateKeys.forEach((key) => urlParamsWithoutAllCasesState.delete(key));
+
+  urlParamsWithoutAllCasesState.forEach((_, key) => {
+    if (key.includes(CUSTOM_FIELD_KEY_PREFIX)) {
+      urlParamsWithoutAllCasesState.delete(key);
+    }
+  });
+
+  return urlParamsWithoutAllCasesState;
 };

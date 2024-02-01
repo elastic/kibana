@@ -16,6 +16,9 @@ import { stringifyUrlParams } from './utils/stringify_url_params';
 import { CaseStatuses } from '@kbn/cases-components';
 import { url as urlUtils } from '@kbn/kibana-utils-plugin/common';
 import { CaseSeverity } from '../../../common';
+import type { AllCasesTableState } from './types';
+import { CustomFieldTypes } from '../../../common/types/domain';
+import { waitFor } from '@testing-library/react';
 
 const mockLocation = { search: '' };
 const mockPush = jest.fn();
@@ -139,20 +142,72 @@ describe('useAllCasesQueryParams', () => {
     });
   });
 
-  // TODO: Fix it
-  it.skip('preserves other url parameters', () => {
-    const nonDefaultUrlParams = {
-      foo: 'bar',
-    };
-
-    mockLocation.search = stringifyUrlParams(nonDefaultUrlParams);
+  it('preserves non cases state url parameters', () => {
+    mockLocation.search = `foo=bar&foo=baz&test=my-test`;
 
     renderHook(() => useAllCasesState(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
     expect(mockPush).toHaveBeenCalledWith({
-      search: 'foo=bar&page=1&perPage=10&sortField=createdAt&sortOrder=desc&severity=&status=',
+      search: `${urlUtils.encodeUriQuery(
+        'page=1&perPage=10&sortField=createdAt&sortOrder=desc&'
+      )}foo=bar&foo=baz&test=my-test`,
+    });
+  });
+
+  it('does not preserve cases state in the url when clearing filters', async () => {
+    const defaultStateWithValues: AllCasesTableState = {
+      filterOptions: {
+        search: 'my search',
+        searchFields: ['title'],
+        severity: [CaseSeverity.MEDIUM],
+        assignees: ['elastic'],
+        reporters: [],
+        status: [CaseStatuses.closed],
+        tags: ['test-tag'],
+        owner: ['cases'],
+        category: ['test-category'],
+        customFields: {
+          testCustomField: { options: ['foo'], type: CustomFieldTypes.TEXT },
+        },
+      },
+      queryParams: {
+        page: DEFAULT_CASES_TABLE_STATE.queryParams.page + 10,
+        perPage: DEFAULT_CASES_TABLE_STATE.queryParams.perPage + 50,
+        sortField: SortFieldCase.closedAt,
+        sortOrder: 'asc',
+      },
+    };
+
+    const { result } = renderHook(() => useAllCasesState(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    act(() => {
+      result.current.setFilterOptions(defaultStateWithValues.filterOptions);
+    });
+
+    act(() => {
+      result.current.setQueryParams(defaultStateWithValues.queryParams);
+    });
+
+    await waitFor(() => {
+      expect(result.current.queryParams).toStrictEqual(defaultStateWithValues.queryParams);
+      expect(result.current.filterOptions).toStrictEqual(defaultStateWithValues.filterOptions);
+    });
+
+    act(() => {
+      result.current.setFilterOptions(DEFAULT_CASES_TABLE_STATE.filterOptions);
+    });
+
+    act(() => {
+      result.current.setQueryParams(DEFAULT_CASES_TABLE_STATE.queryParams);
+    });
+
+    await waitFor(() => {
+      expect(result.current.queryParams).toStrictEqual(DEFAULT_CASES_TABLE_STATE.queryParams);
+      expect(result.current.filterOptions).toStrictEqual(DEFAULT_CASES_TABLE_STATE.filterOptions);
     });
   });
 

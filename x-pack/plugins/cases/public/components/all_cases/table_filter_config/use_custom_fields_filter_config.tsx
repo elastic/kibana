@@ -11,8 +11,7 @@ import { builderMap as customFieldsBuilder } from '../../custom_fields/builder';
 import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
 import type { FilterChangeHandler, FilterConfig, FilterConfigRenderParams } from './types';
 import { MultiSelectFilter } from '../multi_select_filter';
-
-export const CUSTOM_FIELD_KEY_PREFIX = 'cf_';
+import { CUSTOM_FIELD_KEY_PREFIX } from '../constants';
 
 interface CustomFieldFilterOptionFactoryProps {
   buttonLabel: string;

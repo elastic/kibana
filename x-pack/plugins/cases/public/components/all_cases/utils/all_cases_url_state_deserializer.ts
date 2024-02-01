@@ -9,6 +9,7 @@ import { isEmpty } from 'lodash';
 import { CustomFieldTypes } from '../../../../common/types/domain';
 import type { QueryParams, FilterOptions } from '../../../../common/ui';
 import { DEFAULT_CASES_TABLE_STATE } from '../../../containers/constants';
+import { CUSTOM_FIELD_KEY_PREFIX } from '../constants';
 import type { AllCasesURLQueryParams, AllCasesURLState } from '../types';
 import { sanitizeState } from './sanitize_state';
 
@@ -43,7 +44,7 @@ export const allCasesUrlStateDeserializer = (
     }
 
     if (isCustomField(key)) {
-      const keyWithoutPrefix = key.replace('cf_', '');
+      const keyWithoutPrefix = key.replace(CUSTOM_FIELD_KEY_PREFIX, '');
       customFieldsParams[keyWithoutPrefix] = {
         // TOOD: Add the correct type or remove the need for type
         type: CustomFieldTypes.TEXT,
@@ -95,4 +96,4 @@ const parseValue = (values: string[], defaultValue: unknown): string | string[] 
   return Array.isArray(defaultValue) ? valuesAsArray : valuesAsArray[0] ?? '';
 };
 
-const isCustomField = (key: string): boolean => key.startsWith('cf_');
+const isCustomField = (key: string): boolean => key.startsWith(CUSTOM_FIELD_KEY_PREFIX);

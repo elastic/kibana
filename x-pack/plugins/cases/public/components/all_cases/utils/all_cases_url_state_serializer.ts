@@ -6,6 +6,7 @@
  */
 
 import { isEmpty, pick } from 'lodash';
+import { CUSTOM_FIELD_KEY_PREFIX } from '../constants';
 import type { AllCasesURLQueryParams, AllCasesTableState } from '../types';
 
 export const allCasesUrlStateSerializer = (state: AllCasesTableState): AllCasesURLQueryParams => {
@@ -19,8 +20,7 @@ export const allCasesUrlStateSerializer = (state: AllCasesTableState): AllCasesU
   ]);
 
   const customFieldsAsQueryParams = Object.entries(state.filterOptions.customFields).reduce(
-    // TODO: make cf a constant
-    (acc, [key, value]) => ({ ...acc, [`cf_${key}`]: value.options }),
+    (acc, [key, value]) => ({ ...acc, [`${CUSTOM_FIELD_KEY_PREFIX}${key}`]: value.options }),
     {}
   );
 
