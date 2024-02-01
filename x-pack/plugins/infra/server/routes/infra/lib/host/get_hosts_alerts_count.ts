@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kqlQuery, termQuery, rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
+import { kqlQuery, termQuery, termsQuery } from '@kbn/observability-plugin/server';
 import {
   ALERT_RULE_PRODUCER,
   ALERT_STATUS,
@@ -35,8 +35,17 @@ export async function getHostsAlertsCount({
   to: string;
   maxNumHosts?: number;
 }): Promise<HostAlertsResponse> {
-  const start = new Date(from).getTime();
-  const end = new Date(to).getTime();
+  const rangeQuery = [
+    {
+      range: {
+        'kibana.alert.time_range': {
+          gte: from,
+          lte: to,
+          format: 'strict_date_optional_time',
+        },
+      },
+    },
+  ];
   const params = {
     size: 0,
     track_total_hits: false,
@@ -46,7 +55,7 @@ export async function getHostsAlertsCount({
           ...termQuery(ALERT_RULE_PRODUCER, 'infrastructure'),
           ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
           ...termsQuery(BUCKET_KEY, ...hostNamesShortList),
-          ...rangeQuery(start, end),
+          ...rangeQuery,
           ...kqlQuery(kuery),
         ],
       },
