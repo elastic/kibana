@@ -807,7 +807,7 @@ describe('bulkCreate', () => {
       expect(customFields).toEqual(theCustomFields);
     });
 
-    it('should not throw an error and fill out missing customFields when they are undefined', async () => {
+    it('fills out missing required custom fields', async () => {
       casesClient.configure.get = jest.fn().mockResolvedValue([
         {
           owner: theCase.owner,
@@ -835,86 +835,20 @@ describe('bulkCreate', () => {
       ]);
     });
 
-    it('should not throw an error and fill out missing customFields when they are null', async () => {
-      casesClient.configure.get = jest.fn().mockResolvedValue([
-        {
-          owner: theCase.owner,
-          customFields: [
-            defaultCustomFieldsConfiguration[0],
-            {
-              ...defaultCustomFieldsConfiguration[1],
-              required: true,
-              defaultValue: true,
-            },
-          ],
-        },
-      ]);
-
-      await expect(
-        bulkCreate(
-          {
-            cases: getCases({
-              customFields: [
-                { ...theCustomFields[0], value: null },
-                { ...theCustomFields[1], value: null },
-              ],
-            }),
-          },
-          clientArgs,
-          casesClient
-        )
-      ).resolves.not.toThrow();
-
-      const customFields =
-        clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0].customFields;
-
-      expect(customFields).toEqual([
-        { key: 'first_key', type: 'text', value: 'default value' },
-        { key: 'second_key', type: 'toggle', value: true },
-      ]);
-    });
-
-    it('should throw an error when required customFields are undefined and missing a default value', async () => {
+    it('throws error when required customFields are null', async () => {
       casesClient.configure.get = jest.fn().mockResolvedValue([
         {
           owner: theCase.owner,
           customFields: [
             {
               ...defaultCustomFieldsConfiguration[0],
-              required: true,
-              defaultValue: undefined,
+              label: 'missing field 1',
             },
             {
               ...defaultCustomFieldsConfiguration[1],
-              required: true,
-            },
-          ],
-        },
-      ]);
-
-      await expect(
-        bulkCreate({ cases: getCases() }, clientArgs, casesClient)
-      ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to bulk create cases: Error: Missing required custom fields without default value configured: \\"label 1\\", \\"label 2\\""`
-      );
-    });
-
-    it('should throw an error when required customFields are null and missing a default value', async () => {
-      casesClient.configure.get = jest.fn().mockResolvedValue([
-        {
-          owner: theCase.owner,
-          customFields: [
-            {
-              key: 'first_key',
-              type: CustomFieldTypes.TEXT,
-              label: 'missing field 1',
-              required: true,
-            },
-            {
-              key: 'second_key',
-              type: CustomFieldTypes.TOGGLE,
               label: 'missing field 2',
               required: true,
+              defaultValue: true,
             },
           ],
         },
@@ -943,6 +877,31 @@ describe('bulkCreate', () => {
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Failed to bulk create cases: Error: Missing required custom fields without default value configured: \\"missing field 1\\", \\"missing field 2\\""`
+      );
+    });
+
+    it('throws error when required customFields are undefined and missing a default value', async () => {
+      casesClient.configure.get = jest.fn().mockResolvedValue([
+        {
+          owner: theCase.owner,
+          customFields: [
+            {
+              ...defaultCustomFieldsConfiguration[0],
+              required: true,
+              defaultValue: undefined,
+            },
+            {
+              ...defaultCustomFieldsConfiguration[1],
+              required: true,
+            },
+          ],
+        },
+      ]);
+
+      await expect(
+        bulkCreate({ cases: getCases() }, clientArgs, casesClient)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to bulk create cases: Error: Missing required custom fields without default value configured: \\"label 1\\", \\"label 2\\""`
       );
     });
 

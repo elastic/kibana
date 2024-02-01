@@ -1217,7 +1217,7 @@ export default ({ getService }: FtrProviderContext): void => {
           ]);
         });
 
-        it('patches required custom fields with null using the default value', async () => {
+        it('400s trying to patch required custom fields with value: null', async () => {
           await createConfiguration(
             supertest,
             getConfigurationRequest({
@@ -1271,7 +1271,7 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           ];
 
-          const patchedCases = await updateCase({
+          await updateCase({
             supertest,
             params: {
               cases: [
@@ -1282,12 +1282,8 @@ export default ({ getService }: FtrProviderContext): void => {
                 },
               ],
             },
+            expectedHttpCode: 400,
           });
-
-          expect(patchedCases[0].customFields).to.eql([
-            { ...patchedCustomFields[0], value: 'default value' },
-            { ...patchedCustomFields[1], value: false },
-          ]);
         });
 
         it('400s when trying to patch a case with a custom field with the wrong type', async () => {

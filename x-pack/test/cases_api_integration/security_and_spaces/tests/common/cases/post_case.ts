@@ -531,7 +531,7 @@ export default ({ getService }: FtrProviderContext): void => {
           ]);
         });
 
-        it('creates a case with required custom fields set to null and default values', async () => {
+        it('400s trying to create a case with required custom fields set to null', async () => {
           const customFieldsConfiguration = [
             {
               key: 'text_custom_field',
@@ -558,7 +558,7 @@ export default ({ getService }: FtrProviderContext): void => {
             })
           );
 
-          const createdCase = await createCase(
+          await createCase(
             supertest,
             getPostCaseRequest({
               customFields: [
@@ -573,21 +573,9 @@ export default ({ getService }: FtrProviderContext): void => {
                   value: null,
                 },
               ],
-            })
+            }),
+            400
           );
-
-          expect(createdCase.customFields).to.eql([
-            {
-              key: customFieldsConfiguration[0].key,
-              type: customFieldsConfiguration[0].type,
-              value: 'default value',
-            },
-            {
-              key: customFieldsConfiguration[1].key,
-              type: customFieldsConfiguration[1].type,
-              value: false,
-            },
-          ]);
         });
 
         it('400s when trying to create case with a custom field with the wrong type', async () => {

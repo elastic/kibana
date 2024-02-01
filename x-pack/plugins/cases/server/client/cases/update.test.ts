@@ -1256,63 +1256,6 @@ describe('update', () => {
       );
     });
 
-    it('updates required custom fields that have value: null', async () => {
-      const customFields = [
-        {
-          key: 'first_key',
-          type: CustomFieldTypes.TEXT as const,
-          value: null,
-        },
-      ];
-
-      clientArgs.services.caseService.patchCases.mockResolvedValue({
-        saved_objects: [{ ...mockCases[0] }],
-      });
-
-      await expect(
-        update(
-          {
-            cases: [
-              {
-                id: mockCases[0].id,
-                version: mockCases[0].version ?? '',
-                customFields,
-              },
-            ],
-          },
-          clientArgs,
-          casesClient
-        )
-      ).resolves.not.toThrow();
-
-      expect(clientArgs.services.caseService.patchCases).toHaveBeenCalledWith(
-        expect.objectContaining({
-          cases: [
-            {
-              caseId: mockCases[0].id,
-              version: mockCases[0].version,
-              originalCase: {
-                ...mockCases[0],
-              },
-              updatedAttributes: {
-                customFields: [
-                  { ...customFields[0], value: 'default value' },
-                  {
-                    key: 'second_key',
-                    type: CustomFieldTypes.TOGGLE as const,
-                    value: null,
-                  },
-                ],
-                updated_at: expect.any(String),
-                updated_by: expect.any(Object),
-              },
-            },
-          ],
-          refresh: false,
-        })
-      );
-    });
-
     it('throws error when the customFields array is too long', async () => {
       const customFields = Array(MAX_CUSTOM_FIELDS_PER_CASE + 1).fill({
         key: 'first_custom_field_key',
@@ -1401,7 +1344,7 @@ describe('update', () => {
       );
     });
 
-    it('throws error when custom fields are missing and they dont have a default value', async () => {
+    it('throws error when required custom fields are null', async () => {
       casesClient.configure.get = jest.fn().mockResolvedValue([
         {
           owner: mockCases[0].attributes.owner,
@@ -1411,12 +1354,14 @@ describe('update', () => {
               type: CustomFieldTypes.TEXT,
               label: 'missing field 1',
               required: true,
+              defaultValue: 'default value',
             },
             {
               key: 'second_key',
               type: CustomFieldTypes.TOGGLE,
               label: 'missing field 2',
-              required: false,
+              required: true,
+              defaultValue: true,
             },
           ],
         },
@@ -1431,6 +1376,11 @@ describe('update', () => {
                 version: mockCases[0].version ?? '',
                 customFields: [
                   {
+                    key: 'first_key',
+                    type: CustomFieldTypes.TEXT,
+                    value: null,
+                  },
+                  {
                     key: 'second_key',
                     type: CustomFieldTypes.TOGGLE,
                     value: null,
@@ -1443,7 +1393,47 @@ describe('update', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: Missing required custom fields without default value configured: \\"missing field 1\\""`
+        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: Missing required custom fields without default value configured: \\"missing field 1\\", \\"missing field 2\\""`
+      );
+    });
+
+    it('throws error when required custom fields are undefined and missing a default value', async () => {
+      casesClient.configure.get = jest.fn().mockResolvedValue([
+        {
+          owner: mockCases[0].attributes.owner,
+          customFields: [
+            {
+              key: 'first_key',
+              type: CustomFieldTypes.TEXT,
+              label: 'missing field 1',
+              required: true,
+            },
+            {
+              key: 'second_key',
+              type: CustomFieldTypes.TOGGLE,
+              label: 'missing field 2',
+              required: true,
+            },
+          ],
+        },
+      ]);
+
+      await expect(
+        update(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                customFields: [],
+              },
+            ],
+          },
+          clientArgs,
+          casesClient
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: All update fields are identical to current version."`
       );
     });
 

@@ -1460,27 +1460,8 @@ describe('utils', () => {
       ).toEqual(customFieldsToTest);
     });
 
-    it('updates null required custom fields to their default value', () => {
-      expect(
-        fillMissingCustomFields({
-          customFields: [
-            customFields[0],
-            customFields[1],
-            { ...customFields[2], value: null },
-            { ...customFields[3], value: null },
-          ],
-          customFieldsConfiguration,
-        })
-      ).toEqual(customFields);
-    });
-
-    it('does not update null required custom fields if default value is null', () => {
-      const customFieldsToTest = [
-        customFields[0],
-        customFields[1],
-        { ...customFields[2], value: null },
-        { ...customFields[3], value: null },
-      ] as CaseCustomFields;
+    it('does not insert missing required custom fields if default value is null', () => {
+      const customFieldsToTest = [customFields[0], customFields[1]] as CaseCustomFields;
 
       expect(
         fillMissingCustomFields({
@@ -1495,13 +1476,8 @@ describe('utils', () => {
       ).toEqual(customFieldsToTest);
     });
 
-    it('does not update null required custom fields if default value is undefined', () => {
-      const customFieldsToTest = [
-        customFields[0],
-        customFields[1],
-        { ...customFields[2], value: null },
-        { ...customFields[3], value: null },
-      ] as CaseCustomFields;
+    it('does not insert missing required custom fields if default value is undefined', () => {
+      const customFieldsToTest = [customFields[0], customFields[1]] as CaseCustomFields;
 
       expect(
         fillMissingCustomFields({
