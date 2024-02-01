@@ -6,14 +6,16 @@
  */
 
 import React, { useCallback, useEffect } from 'react';
-import { BoolQuery, FILTERS, PhraseFilter } from '@kbn/es-query';
-import { ALERT_RULE_PRODUCER, AlertConsumers } from '@kbn/rule-data-utils';
+import { BoolQuery } from '@kbn/es-query';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import { AlertsFeatureIdsFilter } from '../../lib/search_filters';
 import { useKibana } from '../../..';
 import { useAlertSearchBarStateContainer } from './use_alert_search_bar_state_container';
 import { ALERTS_URL_STORAGE_KEY } from './constants';
 import { AlertsSearchBarProps } from './types';
 import AlertsSearchBar from './alerts_search_bar';
 import { buildEsQuery } from '../global_alerts_page/global_alerts_page';
+import { nonNullable } from '../../../../common/utils';
 
 export type UrlSyncedAlertsSearchBarProps = Omit<
   AlertsSearchBarProps,
@@ -23,18 +25,20 @@ export type UrlSyncedAlertsSearchBarProps = Omit<
   onActiveFeatureFiltersChange?: (value: AlertConsumers[]) => void;
 };
 
+/**
+ * An abstraction over AlertsSearchBar that syncs the query state with the url
+ */
 export const UrlSyncedAlertsSearchBar = ({
   onEsQueryChange,
   onActiveFeatureFiltersChange,
   ...rest
 }: UrlSyncedAlertsSearchBarProps) => {
   const {
-    data: {
-      query: {
-        timefilter: { timefilter: timeFilterService },
-      },
-    },
+    data: { query: queryService },
   } = useKibana().services;
+  const {
+    timefilter: { timefilter: timeFilterService },
+  } = queryService;
   const {
     kuery,
     rangeFrom,
@@ -44,24 +48,18 @@ export const UrlSyncedAlertsSearchBar = ({
     onRangeFromChange,
     onRangeToChange,
     onFiltersChange,
+    savedQuery,
+    setSavedQuery,
+    clearSavedQuery,
   } = useAlertSearchBarStateContainer(ALERTS_URL_STORAGE_KEY);
 
   const syncEsQuery = useCallback(() => {
     try {
-      const solutionFilters = filters.filter(
-        (f) =>
-          f.meta.key === ALERT_RULE_PRODUCER &&
-          (f.meta.type === FILTERS.PHRASE || f.meta.type === FILTERS.PHRASES)
-      );
       onActiveFeatureFiltersChange?.([
         ...new Set(
-          solutionFilters
-            .flatMap((f) =>
-              f.meta.type === FILTERS.PHRASES
-                ? (f.meta.params as AlertConsumers[])
-                : [(f as PhraseFilter).meta.params?.query as AlertConsumers]
-            )
-            .filter(Boolean)
+          filters
+            .flatMap((f) => (f as AlertsFeatureIdsFilter).meta.alertsFeatureIds)
+            .filter(nonNullable)
         ),
       ]);
       const newQuery = buildEsQuery({
@@ -74,7 +72,7 @@ export const UrlSyncedAlertsSearchBar = ({
       });
       onEsQueryChange(newQuery);
     } catch (e) {
-      // TODO show message?
+      // TODO show error message?
     }
   }, [filters, kuery, onActiveFeatureFiltersChange, onEsQueryChange, rangeFrom, rangeTo]);
 
@@ -82,8 +80,9 @@ export const UrlSyncedAlertsSearchBar = ({
     syncEsQuery();
   }, [syncEsQuery]);
 
-  const onQueryChange = useCallback<Exclude<AlertsSearchBarProps['onQueryChange'], undefined>>(
+  const onQueryChange = useCallback<NonNullable<AlertsSearchBarProps['onQueryChange']>>(
     ({ query, dateRange }) => {
+      setSavedQuery(undefined);
       timeFilterService.setTime(dateRange);
       onKueryChange(query ?? '');
       onRangeFromChange(dateRange.from);
@@ -91,7 +90,14 @@ export const UrlSyncedAlertsSearchBar = ({
 
       syncEsQuery();
     },
-    [onKueryChange, onRangeFromChange, onRangeToChange, syncEsQuery, timeFilterService]
+    [
+      onKueryChange,
+      onRangeFromChange,
+      onRangeToChange,
+      setSavedQuery,
+      syncEsQuery,
+      timeFilterService,
+    ]
   );
 
   return (
@@ -102,6 +108,9 @@ export const UrlSyncedAlertsSearchBar = ({
       onQuerySubmit={onQueryChange}
       filters={filters}
       onFiltersUpdated={onFiltersChange}
+      savedQuery={savedQuery}
+      onSavedQueryUpdated={setSavedQuery}
+      onClearSavedQuery={clearSavedQuery}
       {...rest}
     />
   );

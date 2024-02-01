@@ -11,7 +11,7 @@ import {
   routeToConnectors,
   routeToRules,
   routeToLogs,
-  routeToAlerts,
+  legacyRouteToAlerts,
 } from '../constants';
 
 export const getAlertingSectionBreadcrumb = (
@@ -60,7 +60,7 @@ export const getAlertingSectionBreadcrumb = (
         }),
         ...(returnHref
           ? {
-              href: `${routeToAlerts}`,
+              href: `${legacyRouteToAlerts}`,
             }
           : {}),
       };

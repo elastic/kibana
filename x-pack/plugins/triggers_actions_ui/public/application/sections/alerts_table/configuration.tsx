@@ -7,10 +7,15 @@
 
 import React from 'react';
 import {
-  ALERT_DURATION,
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUES,
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_REASON,
+  ALERT_RULE_CATEGORY,
+  ALERT_RULE_NAME,
   ALERT_RULE_PRODUCER,
+  ALERT_RULE_TAGS,
+  ALERT_START,
   ALERT_STATUS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
@@ -53,10 +58,59 @@ const columns = [
   },
   {
     columnHeaderType: 'not-filtered',
-    displayAsText: i18n.translate('xpack.triggersActionsUI.alertsTable.durationColumnDescription', {
-      defaultMessage: 'Duration',
+    displayAsText: i18n.translate('xpack.triggersActionsUI.alertsTable.startedColumnDescription', {
+      defaultMessage: 'Started',
     }),
-    id: ALERT_DURATION,
+    id: ALERT_START,
+    initialWidth: 230,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    displayAsText: i18n.translate(
+      'xpack.triggersActionsUI.alertsTable.ruleCategoryColumnDescription',
+      {
+        defaultMessage: 'Rule category',
+      }
+    ),
+    id: ALERT_RULE_CATEGORY,
+    initialWidth: 116,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    displayAsText: i18n.translate('xpack.triggersActionsUI.alertsTable.ruleNameColumnDescription', {
+      defaultMessage: 'Rule name',
+    }),
+    id: ALERT_RULE_NAME,
+    initialWidth: 116,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    displayAsText: i18n.translate('xpack.triggersActionsUI.alertsTable.ruleTagsColumnDescription', {
+      defaultMessage: 'Rule tags',
+    }),
+    id: ALERT_RULE_TAGS,
+    initialWidth: 116,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    displayAsText: i18n.translate(
+      'xpack.triggersActionsUI.alertsTable.evaluationValuesColumnDescription',
+      {
+        defaultMessage: 'Evaluation values',
+      }
+    ),
+    id: ALERT_EVALUATION_VALUES,
+    initialWidth: 116,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    displayAsText: i18n.translate(
+      'xpack.triggersActionsUI.alertsTable.evaluationThresholdColumnDescription',
+      {
+        defaultMessage: 'Evaluation threshold',
+      }
+    ),
+    id: ALERT_EVALUATION_THRESHOLD,
     initialWidth: 116,
   },
   {

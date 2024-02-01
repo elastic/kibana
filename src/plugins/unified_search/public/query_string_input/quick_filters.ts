@@ -6,20 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
-import { ComponentType } from 'react';
 import { Filter } from '@kbn/es-query';
+import { EuiContextMenuPanelItemDescriptor } from '@elastic/eui/src/components/context_menu/context_menu';
 
-export interface QuickFilter {
+type BaseContextMenuItem = Omit<EuiContextMenuPanelItemDescriptor, 'name' | 'title'>;
+
+export interface QuickFilter extends BaseContextMenuItem {
   name: string;
-  icon?: Exclude<EuiIconType, ComponentType>;
-  disabled?: boolean;
   filter: Filter;
 }
 
-export interface QuickFiltersGroup {
+export interface QuickFiltersGroup extends BaseContextMenuItem {
   groupName: string;
-  icon?: Exclude<EuiIconType, ComponentType>;
   items: QuickFiltersMenuItem[];
 }
 

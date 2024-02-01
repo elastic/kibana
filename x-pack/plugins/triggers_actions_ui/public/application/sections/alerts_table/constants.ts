@@ -22,6 +22,7 @@ import {
 interface AlertProducerData {
   displayName: string;
   icon: EuiIconType;
+  subFeatureIds?: AlertConsumers[];
 }
 
 export const observabilityFeatureIds: AlertConsumers[] = [
@@ -39,6 +40,7 @@ export const alertProducersData: Record<AlertConsumers, AlertProducerData> = {
   [AlertConsumers.OBSERVABILITY]: {
     displayName: OBSERVABILITY_DISPLAY_NAME,
     icon: 'logoObservability',
+    subFeatureIds: observabilityFeatureIds,
   },
   [AlertConsumers.APM]: {
     displayName: APM_DISPLAY_NAME,
@@ -66,7 +68,7 @@ export const alertProducersData: Record<AlertConsumers, AlertProducerData> = {
   },
   [AlertConsumers.SIEM]: {
     displayName: SECURITY_DISPLAY_NAME,
-    icon: 'securityApp',
+    icon: 'logoSecurity',
   },
   [AlertConsumers.STACK_ALERTS]: {
     displayName: STACK_MANAGEMENT_DISPLAY_NAME,

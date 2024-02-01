@@ -7,11 +7,13 @@
 
 import { Filter } from '@kbn/es-query';
 import { ValidFeatureId } from '@kbn/rule-data-utils';
-import { QuickFilter } from '@kbn/unified-search-plugin/public/search_bar/search_bar';
+import { SearchBarProps } from '@kbn/unified-search-plugin/public/search_bar/search_bar';
+import { QuickFiltersMenuItem } from '@kbn/unified-search-plugin/public/query_string_input/quick_filters';
 
 export type QueryLanguageType = 'lucene' | 'kuery';
 
-export interface AlertsSearchBarProps {
+export interface AlertsSearchBarProps
+  extends Omit<Partial<SearchBarProps>, 'query' | 'onQueryChange' | 'onQuerySubmit'> {
   appName: string;
   disableQueryLanguageSwitcher?: boolean;
   featureIds: ValidFeatureId[];
@@ -19,7 +21,7 @@ export interface AlertsSearchBarProps {
   rangeTo?: string;
   query?: string;
   filters?: Filter[];
-  quickFilters?: QuickFilter[];
+  quickFilters?: QuickFiltersMenuItem[];
   showFilterBar?: boolean;
   showDatePicker?: boolean;
   showSubmitButton?: boolean;

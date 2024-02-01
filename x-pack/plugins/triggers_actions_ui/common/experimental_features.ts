@@ -13,7 +13,7 @@ export type ExperimentalFeatures = typeof allowedExperimentalValues;
  */
 export const allowedExperimentalValues = Object.freeze({
   rulesListDatagrid: true,
-  internalAlertsTable: false,
+  globalAlertsPage: false,
   ruleTagFilter: true,
   ruleStatusFilter: true,
   rulesDetailLogs: true,

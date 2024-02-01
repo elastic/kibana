@@ -5,8 +5,21 @@
  * 2.0.
  */
 
-import { ALERT_RULE_PRODUCER, AlertConsumers, DefaultAlertFieldName } from '@kbn/rule-data-utils';
-import { FILTERS, PhraseFilter } from '@kbn/es-query';
+import {
+  ALERT_RULE_PRODUCER,
+  ALERT_RULE_TYPE_ID,
+  AlertConsumers,
+  DefaultAlertFieldName,
+} from '@kbn/rule-data-utils';
+import { FILTERS, FilterStateStore, PhraseFilter, PhrasesFilter } from '@kbn/es-query';
+
+const $state = {
+  store: FilterStateStore.APP_STATE,
+};
+
+export type AlertsFeatureIdsFilter = PhrasesFilter & {
+  meta: Pick<PhrasesFilter, 'meta'> & { alertsFeatureIds: AlertConsumers[] };
+};
 
 /**
  * Creates a match_phrase filter without an index pattern
@@ -24,6 +37,7 @@ export const createMatchPhraseFilter = (field: DefaultAlertFieldName, value: unk
       params: { query: value },
       value: undefined,
     },
+    $state,
     query: {
       match_phrase: {
         [field]: value,
@@ -32,7 +46,57 @@ export const createMatchPhraseFilter = (field: DefaultAlertFieldName, value: unk
   } as PhraseFilter);
 
 /**
+ * Creates a match_phrases filter without an index pattern
+ */
+export const createMatchPhrasesFilter = (
+  field: DefaultAlertFieldName,
+  values: unknown[],
+  alias: string | null = null
+) =>
+  ({
+    meta: {
+      field,
+      type: FILTERS.PHRASES,
+      key: field,
+      alias,
+      disabled: false,
+      index: undefined,
+      negate: false,
+      params: values,
+      value: undefined,
+    },
+    $state,
+    query: {
+      bool: {
+        minimum_should_match: 1,
+        should: values.map((v) => ({
+          match_phrase: {
+            [field]: v,
+          },
+        })),
+      },
+    },
+  } as PhrasesFilter);
+
+/**
  * Creates a match_phrase filter targeted to filtering alerts by producer
  */
 export const createRuleProducerFilter = (producer: AlertConsumers) =>
   createMatchPhraseFilter(ALERT_RULE_PRODUCER, producer);
+
+/**
+ * Creates a match_phrase filter targeted to filtering alerts by rule type ids
+ */
+export const createRuleTypesFilter = (
+  featureIds: AlertConsumers[],
+  alias: string,
+  ruleTypeIds: string[]
+) => {
+  const filter = createMatchPhrasesFilter(
+    ALERT_RULE_TYPE_ID,
+    ruleTypeIds,
+    alias
+  ) as AlertsFeatureIdsFilter;
+  filter.meta.alertsFeatureIds = featureIds;
+  return filter;
+};

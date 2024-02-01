@@ -16,8 +16,6 @@ describe('getIsExperimentalFeatureEnabled', () => {
     ExperimentalFeaturesService.init({
       experimentalFeatures: {
         rulesListDatagrid: true,
-        // @ts-expect-error ts upgrade v4.7.4
-        internalAlertsTable: true,
         rulesDetailLogs: true,
         ruleTagFilter: true,
         ruleStatusFilter: true,
@@ -32,10 +30,6 @@ describe('getIsExperimentalFeatureEnabled', () => {
     expect(result).toEqual(true);
 
     result = getIsExperimentalFeatureEnabled('rulesDetailLogs');
-
-    expect(result).toEqual(true);
-
-    result = getIsExperimentalFeatureEnabled('internalAlertsTable');
 
     expect(result).toEqual(true);
 

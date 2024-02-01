@@ -228,12 +228,16 @@ export function QueryBarMenuPanels({
           panels.push({
             id: panelId,
             title: qf.groupName,
-            items: qf.items.map(quickFiltersItemToContextMenuItem),
-          });
+            items: qf.items.map(
+              quickFiltersItemToContextMenuItem
+            ) as EuiContextMenuPanelItemDescriptor[],
+            'data-test-subj': `quick-filters-panel-${panelsCount}`,
+          } as EuiContextMenuPanelDescriptor);
           return {
             name: qf.groupName,
             icon: qf.icon ?? 'filterInCircle',
             panel: panelId,
+            'data-test-subj': `quick-filters-item-${qf.groupName}`,
           };
         } else {
           return {
@@ -242,10 +246,13 @@ export function QueryBarMenuPanels({
             onClick: () => {
               applyQuickFilter(qf.filter);
             },
+            'data-test-subj': `quick-filters-item-${qf.name}`,
           };
         }
       };
-      items = quickFilters.map(quickFiltersItemToContextMenuItem);
+      items = quickFilters.map(
+        quickFiltersItemToContextMenuItem
+      ) as EuiContextMenuPanelItemDescriptor[];
     }
     return {
       items,

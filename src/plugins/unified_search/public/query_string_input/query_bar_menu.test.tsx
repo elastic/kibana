@@ -119,6 +119,7 @@ describe('Querybar Menu component', () => {
           ],
         }),
       },
+      quickFilters: [],
     };
   });
   it('should not render the popover if the openQueryBarMenu prop is false', async () => {
@@ -342,5 +343,50 @@ describe('Querybar Menu component', () => {
     const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
 
     expect(component.find('[data-test-subj="filter-sets-removeAllFilters"]').length).toBeFalsy();
+  });
+
+  it('should render quick filters menu items', async () => {
+    const newProps: QueryBarMenuProps = {
+      ...props,
+      openQueryBarMenu: true,
+      showFilterBar: true,
+      quickFilters: [
+        {
+          name: 'Test quick filter',
+          filter: {
+            meta: {},
+            query: { bool: {} },
+          },
+        },
+      ],
+    };
+    const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
+
+    expect(component.find('[data-test-subj^="quick-filters-item"]').length).toBeTruthy();
+  });
+
+  it('should render nested quick filters menu items', async () => {
+    const newProps: QueryBarMenuProps = {
+      ...props,
+      openQueryBarMenu: true,
+      showFilterBar: true,
+      quickFilters: [
+        {
+          groupName: 'Grouped filters',
+          items: [
+            {
+              name: 'Test quick filter',
+              filter: {
+                meta: {},
+                query: { bool: {} },
+              },
+            },
+          ],
+        },
+      ],
+    };
+    const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
+
+    expect(component.find('[data-test-subj^="quick-filters-item"]').length).toBeTruthy();
   });
 });

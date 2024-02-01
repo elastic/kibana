@@ -37,12 +37,17 @@ import {
   AlertsTableConfigurationRegistryContract,
   RuleTypeRegistryContract,
 } from '../types';
-import { Section, legacyRouteToRuleDetails, routeToConnectors } from './constants';
+import {
+  Section,
+  legacyRouteToRuleDetails,
+  routeToConnectors,
+  legacyRouteToAlerts,
+} from './constants';
 
 import { setDataViewsService } from '../common/lib/data_apis';
 import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
 import { ConnectorProvider } from './context/connector_context';
-import { CONNECTORS_PLUGIN_ID } from '../common/constants';
+import { ALERTS_PLUGIN_ID, CONNECTORS_PLUGIN_ID } from '../common/constants';
 import { queryClient } from './query_client';
 
 const TriggersActionsUIHome = lazy(() => import('./home'));
@@ -86,7 +91,7 @@ export const renderApp = (deps: TriggersAndActionsUiServices) => {
 
 export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
   const { dataViews, theme } = deps;
-  const sections: Section[] = ['rules', 'logs', 'alerts'];
+  const sections: Section[] = ['rules', 'logs'];
   const isDarkMode = theme.getTheme().darkMode;
 
   const sectionsRegex = sections.join('|');
@@ -124,6 +129,14 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
         <Route
           path={ruleDetailsRoute}
           component={suspendedComponentWithProps(RuleDetailsRoute, 'xl')}
+        />
+        <Route
+          exact
+          path={legacyRouteToAlerts}
+          render={() => {
+            navigateToApp(`management/insightsAndAlerting/${ALERTS_PLUGIN_ID}`);
+            return null;
+          }}
         />
         <Route
           exact

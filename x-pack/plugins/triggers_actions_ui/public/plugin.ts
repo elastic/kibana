@@ -78,7 +78,6 @@ import type {
   RuleDefinitionProps,
 } from './types';
 import { TriggersActionsUiConfigType } from '../common/types';
-import { registerAlertsTableConfiguration } from './application/sections/alerts_table/alerts_page/register_alerts_table_configuration';
 import { PLUGIN_ID, CONNECTORS_PLUGIN_ID, ALERTS_PLUGIN_ID } from './common/constants';
 import type { AlertsTableStateProps } from './application/sections/alerts_table/alerts_table_state';
 import { getAlertsTableStateLazy } from './common/get_alerts_table_state';
@@ -246,15 +245,6 @@ export class Plugin
 
     if (plugins.home) {
       plugins.home.featureCatalogue.register({
-        id: ALERTS_PLUGIN_ID,
-        title: alertsFeatureTitle,
-        description: alertsFeatureDescription,
-        icon: 'watchesApp',
-        path: triggersActionsRoute,
-        showOnHomePage: false,
-        category: 'admin',
-      });
-      plugins.home.featureCatalogue.register({
         id: PLUGIN_ID,
         title: featureTitle,
         description: featureDescription,
@@ -273,53 +263,6 @@ export class Plugin
         category: 'admin',
       });
     }
-
-    plugins.management.sections.section.insightsAndAlerting.registerApp({
-      id: ALERTS_PLUGIN_ID,
-      title: alertsFeatureTitle,
-      order: 0,
-      async mount(params: ManagementAppMountParams) {
-        const { renderApp } = await import('./application/alerts_app');
-        const [coreStart, pluginsStart] = (await core.getStartServices()) as [
-          CoreStart,
-          PluginsStart,
-          unknown
-        ];
-        let kibanaFeatures: KibanaFeature[];
-        try {
-          kibanaFeatures = await pluginsStart.features.getFeatures();
-        } catch (err) {
-          kibanaFeatures = [];
-        }
-
-        return renderApp({
-          ...coreStart,
-          actions: plugins.actions,
-          dashboard: pluginsStart.dashboard,
-          data: pluginsStart.data,
-          dataViews: pluginsStart.dataViews,
-          dataViewEditor: pluginsStart.dataViewEditor,
-          charts: pluginsStart.charts,
-          alerting: pluginsStart.alerting,
-          spaces: pluginsStart.spaces,
-          unifiedSearch: pluginsStart.unifiedSearch,
-          isCloud: Boolean(plugins.cloud?.isCloudEnabled),
-          element: params.element,
-          theme$: params.theme$,
-          storage: new Storage(window.localStorage),
-          setBreadcrumbs: params.setBreadcrumbs,
-          history: params.history,
-          actionTypeRegistry,
-          ruleTypeRegistry,
-          alertsTableConfigurationRegistry,
-          kibanaFeatures,
-          licensing: pluginsStart.licensing,
-          expressions: pluginsStart.expressions,
-          isServerless: !!pluginsStart.serverless,
-          fieldFormats: pluginsStart.fieldFormats,
-        });
-      },
-    });
 
     plugins.management.sections.section.insightsAndAlerting.registerApp({
       id: PLUGIN_ID,
@@ -421,10 +364,65 @@ export class Plugin
       },
     });
 
-    if (this.experimentalFeatures.internalAlertsTable) {
-      registerAlertsTableConfiguration({
-        alertsTableConfigurationRegistry: this.alertsTableConfigurationRegistry,
+    if (this.experimentalFeatures.globalAlertsPage) {
+      plugins.management.sections.section.insightsAndAlerting.registerApp({
+        id: ALERTS_PLUGIN_ID,
+        title: alertsFeatureTitle,
+        capabilitiesId: PLUGIN_ID,
+        order: 0,
+        async mount(params: ManagementAppMountParams) {
+          const { renderApp } = await import('./application/alerts_app');
+          const [coreStart, pluginsStart] = (await core.getStartServices()) as [
+            CoreStart,
+            PluginsStart,
+            unknown
+          ];
+          let kibanaFeatures: KibanaFeature[];
+          try {
+            kibanaFeatures = await pluginsStart.features.getFeatures();
+          } catch (err) {
+            kibanaFeatures = [];
+          }
+
+          return renderApp({
+            ...coreStart,
+            actions: plugins.actions,
+            dashboard: pluginsStart.dashboard,
+            data: pluginsStart.data,
+            dataViews: pluginsStart.dataViews,
+            dataViewEditor: pluginsStart.dataViewEditor,
+            charts: pluginsStart.charts,
+            alerting: pluginsStart.alerting,
+            spaces: pluginsStart.spaces,
+            unifiedSearch: pluginsStart.unifiedSearch,
+            isCloud: Boolean(plugins.cloud?.isCloudEnabled),
+            element: params.element,
+            theme$: params.theme$,
+            storage: new Storage(window.localStorage),
+            setBreadcrumbs: params.setBreadcrumbs,
+            history: params.history,
+            actionTypeRegistry,
+            ruleTypeRegistry,
+            alertsTableConfigurationRegistry,
+            kibanaFeatures,
+            licensing: pluginsStart.licensing,
+            expressions: pluginsStart.expressions,
+            isServerless: !!pluginsStart.serverless,
+            fieldFormats: pluginsStart.fieldFormats,
+          });
+        },
       });
+      if (plugins.home) {
+        plugins.home.featureCatalogue.register({
+          id: ALERTS_PLUGIN_ID,
+          title: alertsFeatureTitle,
+          description: alertsFeatureDescription,
+          icon: 'watchesApp',
+          path: triggersActionsRoute,
+          showOnHomePage: false,
+          category: 'admin',
+        });
+      }
     }
 
     return {

@@ -24,7 +24,7 @@ export const routeToHome = `/`;
 export const routeToConnectors = `/connectors`;
 export const routeToRules = `/rules`;
 export const routeToLogs = `/logs`;
-export const routeToAlerts = `/alerts`;
+export const legacyRouteToAlerts = `/alerts`;
 export const legacyRouteToRuleDetails = `/alert/:alertId`;
 
 export const recoveredActionGroupMessage = i18n.translate(

@@ -41,6 +41,7 @@ export function AlertsSearchBar({
   placeholder = SEARCH_BAR_PLACEHOLDER,
   submitOnBlur = false,
   filtersForSuggestions,
+  ...props
 }: AlertsSearchBarProps) {
   const {
     unifiedSearch: {
@@ -118,6 +119,7 @@ export function AlertsSearchBar({
       onQueryChange={onSearchQueryChange}
       suggestionsAbstraction={isSecurity ? undefined : SA_ALERTS}
       filtersForSuggestions={filtersForSuggestions}
+      {...props}
     />
   );
 }
