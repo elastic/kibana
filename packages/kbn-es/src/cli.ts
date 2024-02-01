@@ -50,6 +50,8 @@ export async function run(defaults = {}) {
     let commandName = args[0];
 
     // Converting --serverless flag to command
+    // `es --serverless=<projectType>` is just a shortcut for
+    // `es serverless --project-type=<projectType>`
     if (options.serverless) {
       const projectType: string = options.serverless;
       commandName = 'serverless';
