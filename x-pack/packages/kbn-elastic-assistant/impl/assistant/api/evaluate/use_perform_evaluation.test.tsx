@@ -7,14 +7,15 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { usePerformEvaluation, UsePerformEvaluationParams } from './use_perform_evaluation';
-import { postEvaluation as _postEvaluation } from '../../api';
+import { postEvaluation as _postEvaluation } from './evaluate';
 import { useMutation as _useMutation } from '@tanstack/react-query';
+import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 
 const useMutationMock = _useMutation as jest.Mock;
 const postEvaluationMock = _postEvaluation as jest.Mock;
 
-jest.mock('../../api', () => {
-  const actual = jest.requireActual('../../api');
+jest.mock('./evaluate', () => {
+  const actual = jest.requireActual('./evaluate');
   return {
     ...actual,
     postEvaluation: jest.fn((...args) => actual.postEvaluation(...args)),
@@ -37,7 +38,7 @@ const statusResponse = {
 };
 
 const http = {
-  fetch: jest.fn().mockResolvedValue(statusResponse),
+  post: jest.fn().mockResolvedValue(statusResponse),
 };
 const toasts = {
   addError: jest.fn(),
@@ -53,20 +54,23 @@ describe('usePerformEvaluation', () => {
       const { waitForNextUpdate } = renderHook(() => usePerformEvaluation(defaultProps));
       await waitForNextUpdate();
 
-      expect(defaultProps.http.fetch).toHaveBeenCalledWith('/internal/elastic_assistant/evaluate', {
-        method: 'POST',
+      expect(defaultProps.http.post).toHaveBeenCalledWith('/internal/elastic_assistant/evaluate', {
         body: '{"dataset":[],"evalPrompt":""}',
         headers: {
           'Content-Type': 'application/json',
         },
         query: {
           agents: undefined,
+          datasetName: undefined,
           evalModel: undefined,
           evaluationType: undefined,
           models: undefined,
           outputIndex: undefined,
+          projectName: undefined,
+          runName: undefined,
         },
         signal: undefined,
+        version: API_VERSIONS.internal.v1,
       });
       expect(toasts.addError).not.toHaveBeenCalled();
     });
@@ -82,6 +86,8 @@ describe('usePerformEvaluation', () => {
           evaluationType: ['f', 'e'],
           models: ['h', 'g'],
           outputIndex: 'outputIndex',
+          projectName: 'test project',
+          runName: 'test run',
         });
         return Promise.resolve(res);
       } catch (e) {
@@ -92,20 +98,23 @@ describe('usePerformEvaluation', () => {
       const { waitForNextUpdate } = renderHook(() => usePerformEvaluation(defaultProps));
       await waitForNextUpdate();
 
-      expect(defaultProps.http.fetch).toHaveBeenCalledWith('/internal/elastic_assistant/evaluate', {
-        method: 'POST',
+      expect(defaultProps.http.post).toHaveBeenCalledWith('/internal/elastic_assistant/evaluate', {
         body: '{"dataset":["kewl"],"evalPrompt":"evalPrompt"}',
         headers: {
           'Content-Type': 'application/json',
         },
         query: {
           agents: 'c,d',
+          datasetName: undefined,
           evalModel: 'a,b',
           evaluationType: 'e,f',
           models: 'g,h',
           outputIndex: 'outputIndex',
+          projectName: 'test project',
+          runName: 'test run',
         },
         signal: undefined,
+        version: API_VERSIONS.internal.v1,
       });
     });
   });
