@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin, Logger, PluginInitializerContext } from '@kbn/core/server';
-import { StartDeps, SetupDeps } from './types';
+import type {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  Logger,
+  PluginInitializerContext,
+} from '@kbn/core/server';
+import type { StartDeps, SetupDeps } from './types';
 import { registerWithCustomIntegrations } from './register_custom_integration';
 import { routes } from './routes';
 

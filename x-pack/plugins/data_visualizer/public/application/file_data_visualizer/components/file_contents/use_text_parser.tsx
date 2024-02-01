@@ -8,22 +8,11 @@
 import React, { useMemo } from 'react';
 import type { HttpSetup } from '@kbn/core/public';
 import { EuiText } from '@elastic/eui';
-import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import { FieldBadge } from './field_badge';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import { GrokHighlighter } from './grok_highlighter';
-
-export interface CreateDocsResponse {
-  success: boolean;
-  remainder: number;
-  docs: ImportDocMessage[];
-  error?: any;
-}
-
-export interface ImportDocMessage {
-  message: string;
-}
 
 interface TestGrokPatternResponse {
   matches: Array<{
@@ -38,7 +27,7 @@ export function useGrokHighlighter() {
   } = useDataVisualizerKibana();
   const { euiSizeL } = useCurrentEuiTheme();
 
-  const createDocs = useMemo(
+  const createLines = useMemo(
     () =>
       async (
         text: string,
@@ -53,8 +42,8 @@ export function useGrokHighlighter() {
         const matches = await testGrokPattern(http, lines, grokPattern, ecsCompatibility);
 
         const formattedDocs = lines.map((line, index) => {
-          const match = matches[index];
-          if (match.matched === false) {
+          const { matched, fields } = matches[index];
+          if (matched === false) {
             return (
               <EuiText size="s" css={{ lineHeight: euiSizeL }}>
                 <code>{line}</code>
@@ -62,20 +51,21 @@ export function useGrokHighlighter() {
             );
           }
 
-          const sortedFields = Object.entries(match.fields)
-            .map(([fieldName, [value]]) => {
-              let type = mappings.properties[fieldName]?.type ?? '';
+          const sortedFields = Object.entries(fields)
+            .map(([fieldName, [{ match, offset, length }]]) => {
+              let type = mappings.properties[fieldName]?.type;
 
-              // @ts-expect-error type can be an empty string
-              if (type === '' && fieldName === 'timestamp') {
-                type = mappings.properties['@timestamp']?.type ?? '';
+              if (type === undefined && fieldName === 'timestamp') {
+                // it's possible that the timestamp field is not mapped as `timestamp`
+                // but instead as `@timestamp`
+                type = mappings.properties['@timestamp']?.type;
               }
 
               return {
                 name: fieldName,
-                match: value.match,
-                offset: value.offset,
-                length: value.length,
+                match,
+                offset,
+                length,
                 type,
               };
             })
@@ -83,11 +73,11 @@ export function useGrokHighlighter() {
           // replace the original line with the matched fields
           const message: JSX.Element[] = [];
           let offset = 0;
-          sortedFields.forEach((field) => {
+          for (const field of sortedFields) {
             message.push(<span>{line.substring(offset, field.offset)}</span>);
             message.push(<FieldBadge type={field.type} value={field.match} name={field.name} />);
             offset = field.offset + field.length;
-          });
+          }
           message.push(<span>{line.substring(offset)}</span>);
           return (
             <EuiText size="s" css={{ lineHeight: euiSizeL }}>
@@ -100,7 +90,7 @@ export function useGrokHighlighter() {
     [euiSizeL, http]
   );
 
-  return createDocs;
+  return createLines;
 }
 
 async function testGrokPattern(

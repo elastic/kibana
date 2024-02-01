@@ -13,18 +13,20 @@ import { getSupportedFieldType } from '../../../common/components/fields_stats_g
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 
 interface Props {
-  type: string;
+  type: string | undefined;
   value: string;
   name: string;
 }
 
 export const FieldBadge: FC<Props> = ({ type, value, name }) => {
   const { euiColorLightestShade, euiColorLightShade } = useCurrentEuiTheme();
-  const supportedType = getSupportedFieldType(type);
-  const tooltip = i18n.translate('xpack.dataVisualizer.file.fileContents.fieldBadge.tooltip', {
-    defaultMessage: 'Type: {type}.',
-    values: { type: supportedType },
-  });
+  const supportedType = getSupportedFieldType(type ?? 'unknown');
+  const tooltip = type
+    ? i18n.translate('xpack.dataVisualizer.file.fileContents.fieldBadge.tooltip', {
+        defaultMessage: 'Type: {type}',
+        values: { type: supportedType },
+      })
+    : undefined;
   return (
     <EuiToolTip title={name} content={tooltip}>
       <EuiBadge
