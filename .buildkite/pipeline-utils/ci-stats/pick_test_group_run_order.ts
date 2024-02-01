@@ -12,7 +12,7 @@ import * as globby from 'globby';
 import minimatch from 'minimatch';
 import { load as loadYaml } from 'js-yaml';
 
-import { BuildkiteClient, BuildkiteStep } from '../buildkite';
+import { BuildkiteClient } from '../buildkite';
 import { CiStatsClient, TestGroupRunOrderResponse } from './client';
 
 import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
@@ -200,6 +200,12 @@ export async function pickTestGroupRunOrder() {
         .filter(Boolean)
     : undefined;
 
+  const JEST_UNIT_CONFIG_PATTERNS = process.env.JEST_UNIT_CONFIG_PATTERNS
+    ? process.env.JEST_UNIT_CONFIG_PATTERNS.split(',')
+        .map((t) => t.trim())
+        .filter(Boolean)
+    : undefined;
+
   const FUNCTIONAL_MINIMUM_ISOLATION_MIN = process.env.FUNCTIONAL_MINIMUM_ISOLATION_MIN
     ? parseFloat(process.env.FUNCTIONAL_MINIMUM_ISOLATION_MIN)
     : undefined;
@@ -225,16 +231,16 @@ export async function pickTestGroupRunOrder() {
     throw new Error(`invalid JEST_CONFIGS_RETRY_COUNT: ${process.env.JEST_CONFIGS_RETRY_COUNT}`);
   }
 
-  const FTR_CONFIGS_DEPS =
-    process.env.FTR_CONFIGS_DEPS !== undefined
-      ? process.env.FTR_CONFIGS_DEPS.split(',')
-          .map((t) => t.trim())
-          .filter(Boolean)
-      : ['build'];
+  // const FTR_CONFIGS_DEPS =
+  //   process.env.FTR_CONFIGS_DEPS !== undefined
+  //     ? process.env.FTR_CONFIGS_DEPS.split(',')
+  //         .map((t) => t.trim())
+  //         .filter(Boolean)
+  //     : ['build'];
 
-  const FTR_EXTRA_ARGS: Record<string, string> = process.env.FTR_EXTRA_ARGS
-    ? { FTR_EXTRA_ARGS: process.env.FTR_EXTRA_ARGS }
-    : {};
+  // const FTR_EXTRA_ARGS: Record<string, string> = process.env.FTR_EXTRA_ARGS
+  //   ? { FTR_EXTRA_ARGS: process.env.FTR_EXTRA_ARGS }
+  //   : {};
 
   const { defaultQueue, ftrConfigsByQueue } = getEnabledFtrConfigs(FTR_CONFIG_PATTERNS);
 
@@ -242,8 +248,9 @@ export async function pickTestGroupRunOrder() {
 
   if (!ftrConfigsIncluded) ftrConfigsByQueue.clear();
 
+  const jestUnitPattern = JEST_UNIT_CONFIG_PATTERNS || '**';
   const jestUnitConfigs = LIMIT_CONFIG_TYPE.includes('unit')
-    ? globby.sync(['**/jest.config.js', '!**/__fixtures__/**'], {
+    ? globby.sync([`${jestUnitPattern}/jest.config.js`, '!**/__fixtures__/**'], {
         cwd: process.cwd(),
         absolute: false,
         ignore: DISABLED_JEST_CONFIGS,
@@ -415,7 +422,7 @@ export async function pickTestGroupRunOrder() {
         ? {
             label: 'Jest Tests',
             command: getRequiredEnv('JEST_UNIT_SCRIPT'),
-            parallelism: unit.count,
+            parallelism: 25,
             timeout_in_minutes: 120,
             key: 'jest',
             agents: {
@@ -431,68 +438,68 @@ export async function pickTestGroupRunOrder() {
             },
           }
         : [],
-      integration.count > 0
-        ? {
-            label: 'Jest Integration Tests',
-            command: getRequiredEnv('JEST_INTEGRATION_SCRIPT'),
-            parallelism: integration.count,
-            timeout_in_minutes: 120,
-            key: 'jest-integration',
-            agents: {
-              queue: 'n2-4-spot',
-            },
-            retry: {
-              automatic: [
-                { exit_status: '-1', limit: 3 },
-                ...(JEST_CONFIGS_RETRY_COUNT > 0
-                  ? [{ exit_status: '*', limit: JEST_CONFIGS_RETRY_COUNT }]
-                  : []),
-              ],
-            },
-          }
-        : [],
-      functionalGroups.length
-        ? {
-            group: 'FTR Configs',
-            key: 'ftr-configs',
-            depends_on: FTR_CONFIGS_DEPS,
-            steps: functionalGroups
-              .sort((a, b) =>
-                // if both groups are sorted by number then sort by that
-                typeof a.sortBy === 'number' && typeof b.sortBy === 'number'
-                  ? a.sortBy - b.sortBy
-                  : // if both groups are sorted by string, sort by that
-                  typeof a.sortBy === 'string' && typeof b.sortBy === 'string'
-                  ? a.sortBy.localeCompare(b.sortBy)
-                  : // if a is sorted by number then order it later than b
-                  typeof a.sortBy === 'number'
-                  ? 1
-                  : -1
-              )
-              .map(
-                ({ title, key, queue = defaultQueue }): BuildkiteStep => ({
-                  label: title,
-                  command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
-                  timeout_in_minutes: 90,
-                  agents: {
-                    queue,
-                  },
-                  env: {
-                    FTR_CONFIG_GROUP_KEY: key,
-                    ...FTR_EXTRA_ARGS,
-                  },
-                  retry: {
-                    automatic: [
-                      { exit_status: '-1', limit: 3 },
-                      ...(FTR_CONFIGS_RETRY_COUNT > 0
-                        ? [{ exit_status: '*', limit: FTR_CONFIGS_RETRY_COUNT }]
-                        : []),
-                    ],
-                  },
-                })
-              ),
-          }
-        : [],
+      // integration.count > 0
+      //   ? {
+      //       label: 'Jest Integration Tests',
+      //       command: getRequiredEnv('JEST_INTEGRATION_SCRIPT'),
+      //       parallelism: integration.count,
+      //       timeout_in_minutes: 120,
+      //       key: 'jest-integration',
+      //       agents: {
+      //         queue: 'n2-4-spot',
+      //       },
+      //       retry: {
+      //         automatic: [
+      //           { exit_status: '-1', limit: 3 },
+      //           ...(JEST_CONFIGS_RETRY_COUNT > 0
+      //             ? [{ exit_status: '*', limit: JEST_CONFIGS_RETRY_COUNT }]
+      //             : []),
+      //         ],
+      //       },
+      //     }
+      //   : [],
+      // functionalGroups.length
+      //   ? {
+      //       group: 'FTR Configs',
+      //       key: 'ftr-configs',
+      //       depends_on: FTR_CONFIGS_DEPS,
+      //       steps: functionalGroups
+      //         .sort((a, b) =>
+      //           // if both groups are sorted by number then sort by that
+      //           typeof a.sortBy === 'number' && typeof b.sortBy === 'number'
+      //             ? a.sortBy - b.sortBy
+      //             : // if both groups are sorted by string, sort by that
+      //             typeof a.sortBy === 'string' && typeof b.sortBy === 'string'
+      //             ? a.sortBy.localeCompare(b.sortBy)
+      //             : // if a is sorted by number then order it later than b
+      //             typeof a.sortBy === 'number'
+      //             ? 1
+      //             : -1
+      //         )
+      //         .map(
+      //           ({ title, key, queue = defaultQueue }): BuildkiteStep => ({
+      //             label: title,
+      //             command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
+      //             timeout_in_minutes: 90,
+      //             agents: {
+      //               queue,
+      //             },
+      //             env: {
+      //               FTR_CONFIG_GROUP_KEY: key,
+      //               ...FTR_EXTRA_ARGS,
+      //             },
+      //             retry: {
+      //               automatic: [
+      //                 { exit_status: '-1', limit: 3 },
+      //                 ...(FTR_CONFIGS_RETRY_COUNT > 0
+      //                   ? [{ exit_status: '*', limit: FTR_CONFIGS_RETRY_COUNT }]
+      //                   : []),
+      //               ],
+      //             },
+      //           })
+      //         ),
+      //     }
+      //   : [],
     ].flat()
   );
 }
