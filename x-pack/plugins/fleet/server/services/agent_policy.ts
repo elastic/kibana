@@ -44,6 +44,9 @@ import type {
   FullAgentPolicy,
   ListWithKuery,
   NewPackagePolicy,
+  PostAgentPolicyCreateCallback,
+  PostAgentPolicyUpdateCallback,
+  ExternalCallback,
 } from '../types';
 import {
   getAllowedOutputTypeForPolicy,
@@ -234,6 +237,43 @@ class AgentPolicyService {
     return policyHasSyntheticsIntegration(agentPolicy);
   }
 
+  public async runExternalCallbacks(
+    externalCallbackType: ExternalCallback[0],
+    agentPolicy: NewAgentPolicy | Partial<AgentPolicy>
+  ): Promise<NewAgentPolicy | Partial<AgentPolicy>> {
+    const logger = appContextService.getLogger();
+    logger.debug(`Running external callbacks for ${externalCallbackType}`);
+    try {
+      const externalCallbacks = appContextService.getExternalCallbacks(externalCallbackType);
+      let newAgentPolicy = agentPolicy;
+
+      if (externalCallbacks && externalCallbacks.size > 0) {
+        let updatedNewAgentPolicy = newAgentPolicy;
+        for (const callback of externalCallbacks) {
+          let result;
+          if (externalCallbackType === 'agentPolicyCreate') {
+            result = await (callback as PostAgentPolicyCreateCallback)(
+              newAgentPolicy as NewAgentPolicy
+            );
+            updatedNewAgentPolicy = result;
+          }
+          if (externalCallbackType === 'agentPolicyUpdate') {
+            result = await (callback as PostAgentPolicyUpdateCallback)(
+              newAgentPolicy as Partial<AgentPolicy>
+            );
+            updatedNewAgentPolicy = result;
+          }
+        }
+        newAgentPolicy = updatedNewAgentPolicy;
+      }
+      return newAgentPolicy;
+    } catch (error) {
+      logger.error(`Error running external callbacks for ${externalCallbackType}`);
+      logger.error(error);
+      throw error;
+    }
+  }
+
   public async create(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
@@ -254,7 +294,7 @@ class AgentPolicyService {
       id: options.id,
       savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
     });
-
+    await this.runExternalCallbacks('agentPolicyCreate', agentPolicy);
     this.checkTamperProtectionLicense(agentPolicy);
 
     const logger = appContextService.getLogger();
@@ -519,7 +559,14 @@ class AgentPolicyService {
     if (!existingAgentPolicy) {
       throw new AgentPolicyNotFoundError('Agent policy not found');
     }
-
+    try {
+      await this.runExternalCallbacks('agentPolicyUpdate', agentPolicy);
+    } catch (error) {
+      logger.error(`Error running external callbacks for agentPolicyUpdate`);
+      if (error.apiPassThrough) {
+        throw error;
+      }
+    }
     this.checkTamperProtectionLicense(agentPolicy);
     await this.checkForValidUninstallToken(agentPolicy, id);
 
