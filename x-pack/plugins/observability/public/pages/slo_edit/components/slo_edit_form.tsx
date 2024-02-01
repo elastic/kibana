@@ -145,8 +145,6 @@ export function SloEditForm({ slo, initialValues }: Props) {
     setIsCreateRuleCheckboxChecked(!isCreateRuleCheckboxChecked);
   };
 
-  console.log(formState);
-
   return (
     <>
       <FormProvider {...methods}>
