@@ -1005,15 +1005,13 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         activeVisualization.removeLayer &&
         state.visualization.state
       ) {
-        const updater = layerIds.reduce(
+        const updater = layerIds.reduce<unknown>(
           (acc, layerId) =>
-            // @ts-expect-error upgrade typescript v4.9.5
             activeVisualization.removeLayer ? activeVisualization.removeLayer(acc, layerId) : acc,
           state.visualization.state
         );
 
         state.visualization.state =
-          // @ts-expect-error upgrade typescript v4.9.5
           typeof updater === 'function' ? updater(current(state.visualization.state)) : updater;
       }
 

@@ -57,7 +57,7 @@ const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?:
 
 type PartialVisState = Assign<SerializedVis, { data: Partial<SerializedVisData> }>;
 
-export class Vis<TVisParams = VisParams> {
+export class Vis<TVisParams extends VisParams = VisParams> {
   public readonly type: BaseVisType<TVisParams>;
   public readonly id?: string;
   public title: string = '';
@@ -69,7 +69,6 @@ export class Vis<TVisParams = VisParams> {
 
   constructor(visType: string, visState: SerializedVis<TVisParams> = {} as any) {
     this.type = this.getType(visType);
-    // @ts-expect-error upgrade typescript v4.9.5
     this.params = this.getParams(visState.params);
     this.uiState = new PersistedState(visState.uiState);
     this.id = visState.id;
@@ -192,7 +191,6 @@ export class Vis<TVisParams = VisParams> {
       title: this.title,
       description: this.description,
       type: this.type.name,
-      // @ts-expect-error upgrade typescript v4.9.5
       params: cloneDeep(this.params),
       uiState: this.uiState.toJSON(),
       data: {
