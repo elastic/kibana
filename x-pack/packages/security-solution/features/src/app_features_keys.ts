@@ -50,6 +50,11 @@ export enum AppFeatureSecurityKey {
   endpointProtectionUpdates = 'endpoint_protection_updates',
 
   /**
+   * Enables Agent Tamper Protection
+   */
+  endpointAgentTamperProtection = 'endpoint_agent_tamper_protection',
+
+  /**
    * Enables managing endpoint exceptions on rules and alerts
    */
   endpointExceptions = 'endpointExceptions',

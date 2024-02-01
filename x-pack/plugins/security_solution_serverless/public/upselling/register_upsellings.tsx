@@ -18,6 +18,7 @@ import { UPGRADE_INVESTIGATION_GUIDE } from '@kbn/security-solution-upselling/me
 import { AppFeatureKey } from '@kbn/security-solution-features/keys';
 import type { AppFeatureKeyType } from '@kbn/security-solution-features';
 import {
+  EndpointAgentTamperProtectionLazy,
   EndpointPolicyProtectionsLazy,
   EndpointProtectionUpdatesLazy,
   RuleDetailsEndpointExceptionsLazy,
@@ -130,6 +131,11 @@ export const upsellingSections: UpsellingSections = [
         requiredPLI={AppFeatureKey.osqueryAutomatedResponseActions}
       />
     ),
+  },
+  {
+    id: 'endpoint_agent_tamper_protection',
+    pli: AppFeatureKey.endpointAgentTamperProtection,
+    component: EndpointAgentTamperProtectionLazy,
   },
   {
     id: 'endpointPolicyProtections',
