@@ -900,6 +900,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       integrationsLogstash: `${SERVERLESS_ELASTICSEARCH_DOCS}ingest-data-through-logstash`,
       integrationsBeats: `${SERVERLESS_ELASTICSEARCH_DOCS}ingest-data-through-beats`,
       integrationsConnectorClient: `${SERVERLESS_ELASTICSEARCH_DOCS}ingest-data-through-integrations-connector-client`,
+      integrationsConnectorClientAvailableConnectors: `${SERVERLESS_ELASTICSEARCH_DOCS}ingest-data-through-integrations-connector-client#available-connectors`,
       integrationsConnectorClientRunFromSource: `${SERVERLESS_ELASTICSEARCH_DOCS}ingest-data-through-integrations-connector-client#run-from-source`,
       integrationsConnectorClientRunWithDocker: `${SERVERLESS_ELASTICSEARCH_DOCS}ingest-data-through-integrations-connector-client#run-with-docker`,
       gettingStartedExplore: `${SERVERLESS_ELASTICSEARCH_DOCS}get-started`,

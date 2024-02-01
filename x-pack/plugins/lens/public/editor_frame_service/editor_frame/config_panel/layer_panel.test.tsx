@@ -950,6 +950,7 @@ describe('LayerPanel', () => {
     });
 
     it('should reorder when dropping in the same group', async () => {
+      jest.useFakeTimers();
       mockVisualization.getConfiguration.mockReturnValue({
         groups: [
           {
@@ -997,6 +998,7 @@ describe('LayerPanel', () => {
         .find('[data-test-subj="lnsDragDrop-keyboardHandler"]')
         .at(1)
         .instance();
+      jest.runAllTimers();
       const focusedEl = document.activeElement;
       expect(focusedEl).toEqual(secondButton);
     });
