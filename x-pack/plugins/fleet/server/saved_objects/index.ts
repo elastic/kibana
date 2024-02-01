@@ -643,7 +643,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
           },
         ],
       },
-    }
+    },
   },
   [FLEET_PROXY_SAVED_OBJECT_TYPE]: {
     name: FLEET_PROXY_SAVED_OBJECT_TYPE,
