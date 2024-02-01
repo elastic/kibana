@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { loadPage } from '../../../../tasks/common';
 import { login } from '../../../../tasks/login';
 import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../../../tasks/fleet';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import type { PolicyData } from '../../../../../../../common/endpoint/types';
-
-const getFleetAgentPolicySettingsUrl = (policyId: string) =>
-  `/app/fleet/policies/${policyId}/settings`;
+import {
+  checkForAgentTamperProtectionAvailability,
+  navigateToFleetAgentPolicySettings,
+} from '../../../../screens/fleet/agent_settings';
 
 describe(
   'Agent Policy Settings - Essentials',
@@ -49,14 +49,8 @@ describe(
       });
 
       it('should display upselling section for protections', () => {
-        loadPage(getFleetAgentPolicySettingsUrl(policy.policy_id));
-        cy.getByTestSubj('endpointSecurity-agentTamperProtectionLockedCard-badge');
-        cy.getByTestSubj('endpointSecurity-agentTamperProtectionLockedCard-title');
-        cy.getByTestSubj('endpointPolicy-agentTamperProtectionLockedCard');
-
-        cy.getByTestSubj('tamperProtectionSwitch').should('not.exist');
-        cy.getByTestSubj('tamperMissingIntegrationTooltip').should('not.exist');
-        cy.getByTestSubj('uninstallCommandLink').should('not.exist');
+        navigateToFleetAgentPolicySettings(policy.policy_id);
+        checkForAgentTamperProtectionAvailability(false);
       });
     });
   }
