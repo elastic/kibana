@@ -18,6 +18,14 @@ import {
   EuiLink,
   EuiBadge,
   EuiSearchBarProps,
+
+  EuiSearchBar,
+  EuiPopover,
+  EuiFilterGroup,
+  EuiSelectable,
+  EuiPopoverTitle,
+  EuiFilterButton,
+  EuiSelectableOption,
 } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
 
@@ -25,6 +33,7 @@ import { ComponentTemplateListItem, reactRouterNavigate } from '../shared_import
 import { UIM_COMPONENT_TEMPLATE_DETAILS } from '../constants';
 import { useComponentTemplatesContext } from '../component_templates_context';
 import { DeprecatedBadge } from '../components';
+import { fuzzyMatch } from '../lib';
 
 export interface Props {
   componentTemplates: ComponentTemplateListItem[];
@@ -44,29 +53,84 @@ export const ComponentTable: FunctionComponent<Props> = ({
   history,
 }) => {
   const { trackMetric } = useComponentTemplatesContext();
-  const [query, setQuery] = useState('');
+
+  // In order to have the filters detached from the search bar, we will keep the filters and the
+  // search bar state separated. The search bar will be responsible for updating the search state
+  // and the filters will be responsible for updating the query state.
+  const [search, setSearch] = useState('');
+  const [query, setQuery] = useState('-is:Deprecated');
+  // By default, we want to show all the component templates that are not deprecated.
+  const [filterOptions, setFilterOptions] = useState([
+    { label: 'InUse' },
+    { label: 'Managed' },
+    { label: 'Deprecated', checked: 'off' },
+  ]);
 
   const [selection, setSelection] = useState<ComponentTemplateListItem[]>([]);
 
   const handleOnChange: EuiSearchBarProps['onChange'] = ({ queryText, error }) => {
     if (!error) {
-      setQuery(queryText);
+      setSearch(queryText);
     }
   };
 
   const filteredComponentTemplates = useMemo(() => {
-    let result = componentTemplates ?? [];
+    const parsedQuery = EuiSearchBar.Query.parse(query);
+    const deprecatedClause = parsedQuery.getIsClause('Deprecated');
+    const managedClause = parsedQuery.getIsClause('Managed');
+    const inUseClause = parsedQuery.getIsClause('InUse');
 
-    // When the query includes 'is:isDeprecated', we want to show deprecated component templates.
-    // Otherwise hide them all since they wont be supported in the future.
-    if (query.includes('is:isDeprecated')) {
-      result = result.filter((item) => item.isDeprecated);
-    } else {
-      result = result.filter((item) => !item.isDeprecated);
-    }
+    return (componentTemplates || [])
+      .filter((component) => {
+        if (
+          (deprecatedClause?.match === 'must_not' && component.isDeprecated) ||
+          (deprecatedClause?.match === 'must' && !component.isDeprecated) ||
+          (managedClause?.match === 'must_not' && component.isManaged) ||
+          (managedClause?.match === 'must' && !component.isManaged) ||
+          (inUseClause?.match === 'must_not' && component.usedBy.length >= 1) ||
+          (inUseClause?.match === 'must' && component.usedBy.length === 0)
+        ) {
+          return false;
+        }
 
-    return result;
-  }, [componentTemplates, query]);
+        if (search.trim() === '') {
+          return true;
+        }
+
+        return fuzzyMatch(search, component.name);
+      })
+      .sort((a, b) => {
+        if (a.name < b.name) {
+          return -1;
+        } else if (a.name > b.name) {
+          return 1;
+        }
+        return 0;
+      });
+  }, [componentTemplates, query, search]);
+
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const onButtonClick = () => {
+    setIsPopoverOpen(!isPopoverOpen);
+  };
+  const closePopover = () => {
+    setIsPopoverOpen(false);
+  };
+  const button = (
+    <EuiFilterButton
+      iconType="arrowDown"
+      badgeColor="success"
+      onClick={onButtonClick}
+      isSelected={isPopoverOpen}
+      numFilters={filterOptions.filter((item) => item.checked !== 'off').length}
+      hasActiveFilters={!!filterOptions.find((item) => item.checked === 'on')}
+      numActiveFilters={filterOptions.filter((item) => item.checked === 'on').length}
+    >
+      {i18n.translate('xpack.idxMgmt.componentTemplatesList.table.filtersButtonLabel', {
+        defaultMessage: 'Filters',
+      })}
+    </EuiFilterButton>
+  );
 
   const tableProps: EuiInMemoryTableProps<ComponentTemplateListItem> = {
     tableLayout: 'auto',
@@ -131,52 +195,72 @@ export const ComponentTable: FunctionComponent<Props> = ({
       box: {
         incremental: true,
       },
-      query,
+      query: search,
       onChange: handleOnChange,
       filters: [
         {
-          type: 'is',
-          field: 'isManaged',
-          name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.isManagedFilterLabel', {
-            defaultMessage: 'Managed',
-          }),
-        },
-        {
-          type: 'is',
-          field: 'isDeprecated',
-          name: i18n.translate(
-            'xpack.idxMgmt.componentTemplatesList.table.isDeprecatedFilterLabel',
-            {
-              defaultMessage: 'Deprecated',
-            }
-          ),
-        },
-        {
-          type: 'field_value_toggle_group',
-          field: 'usedBy.length',
-          items: [
-            {
-              value: 1,
-              name: i18n.translate(
-                'xpack.idxMgmt.componentTemplatesList.table.inUseFilterOptionLabel',
-                {
-                  defaultMessage: 'In use',
-                }
-              ),
-              operator: 'gte',
-            },
-            {
-              value: 0,
-              name: i18n.translate(
-                'xpack.idxMgmt.componentTemplatesList.table.notInUseFilterOptionLabel',
-                {
-                  defaultMessage: 'Not in use',
-                }
-              ),
-              operator: 'eq',
-            },
-          ],
-        },
+          type: 'custom_component',
+          component: ({ query: filterQuery }) => {
+            return (
+              <EuiFilterGroup>
+                <EuiPopover
+                  button={button}
+                  isOpen={isPopoverOpen}
+                  closePopover={closePopover}
+                  panelPaddingSize="none"
+                >
+                  <EuiSelectable
+                    allowExclusions
+                    searchable
+                    searchProps={{
+                      placeholder: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.filterListPlaceholder', {
+                        defaultMessage: 'Filter list',
+                      }),
+                      compressed: true,
+                    }}
+                    aria-label={
+                      i18n.translate('xpack.idxMgmt.componentTemplatesList.table.filtersAriaLabel', {
+                        defaultMessage: 'Filters',
+                      })
+                    }
+                    options={filterOptions as EuiSelectableOption[]}
+                    onChange={(newOptions) => {
+                      // Set new options for current state
+                      setFilterOptions(newOptions);
+
+                      // Update current query
+                      const newQuery = newOptions.reduce((acc, option) => {
+                        if (option.checked === 'on') {
+                          acc = acc.addMustIsClause(option.label);
+                        } else if (option.checked === 'off') {
+                          acc = acc.addMustNotIsClause(option.label);
+                        } else {
+                          acc = acc.removeIsClause(option.label);
+                        }
+
+                        return acc;
+                      }, filterQuery);
+
+                      setQuery(newQuery.text);
+                    }}
+                    noMatchesMessage={
+                      i18n.translate('xpack.idxMgmt.componentTemplatesList.table.noFiltersFound', {
+                        defaultMessage: 'No filters found',
+                      })
+                    }
+                  >
+                    {(list, searchText) => (
+                      <div style={{ width: 300 }}>
+                        <EuiPopoverTitle paddingSize="s">{searchText}</EuiPopoverTitle>
+                        {list}
+                      </div>
+                    )}
+                  </EuiSelectable>
+                </EuiPopover>
+              </EuiFilterGroup>
+            );
+          },
+        }
       ],
     },
     pagination: {

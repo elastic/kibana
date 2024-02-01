@@ -10,3 +10,5 @@ export * from './api';
 export * from './request';
 
 export * from './documentation';
+
+export * from './fuzzy_matching';
