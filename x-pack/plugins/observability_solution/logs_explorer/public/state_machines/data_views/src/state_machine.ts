@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataViewListItem, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { isError } from 'lodash';
 import { assign, createMachine } from 'xstate';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
@@ -25,7 +25,7 @@ export const createPureDataViewsStateMachine = (
 ) =>
   createMachine<DataViewsContext, DataViewsEvent, DataViewsTypestate>(
     {
-      /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVA1AlmA7rAHQCuAdjhejqgDY4BekAxADIDyAgsgPrKcAVTjywBJAKIB1AMoBtAAwBdRKAAOAe1g5q6sipAAPRABYAzKaIB2a6bOWArABoQAT0QBaAJzyi9y8YAmAEYADgcAX3DnNExcAmJadVQISihmCF0wIkoAN3UAayyY7DxCIkTk1IRc9QBjDBxdBUVm-Q0tHT0kQxNjSyJPP3lTIICnV0RLTyJ5eUsQ0ftI6IwS+PKklLI0sAAnXfVdolVaDAAzQ4BbImK4soqtqGqyPPrO5tbu9u1GrtAjBAANgcRFMDmcbgQIPsIQCw0WyxAt1KCU2kGyEFoYGY0nEnAASgBhAASfEEwjEUjkSjamh+un0AOsgN8nksgPsgLGEJMHKIgNCgRC9mMC2siOR6we6JwmOx0nY+IEZKEIgkMk+ajpnUZJk8ISIAQCHK540hpgCBoWgOM8lNEtWd1RyRlcpx4lY4kJyv4qspkk1IG+Ou6AMB8gNfkCoXBEwQ9gtM1GgzZ+qC4qiSMdKI2LogRAgYAARupyLUwNIwKhdrUABapSWEd0Ekkqinq6nKL7a366hBBeT2ez8zncuMJ6ZzEX2VNiywO2I56X5wslssVqs1+vbRuwZgGWCYdBZVBnY+7AAUplmAEpmLvc4WV8XS2Ry5Xq3WG9n4oHg73Q0mEIDXDYwwLMexLUBMEeQQcwLE8II0wCYxARCcMpwXNZ7k2VIADFUBwLEIGYfEPS4XhfXbKk-x7BlAKBaDfACSxbDBM0PACUFPGMBMEURMh1ELeBul3WkOgA-5EFMYUrBsOwOIQdwUK4oYRjGLCnVICgqBoegmAgcT6T+HoEDAlkxnmRZYPcIIhxmSx4Q0zMHweVIjJDKSzNtIgQlmKyx0hZThxCHi+OclZFylNFDO7CT6K83ifCNE1AsQFCglBIIbTtCKsyinC8wxLEPMk0zARtUF7Ds01YN44dAj8OFglFBTNKXGKCxfdcPy3b8CpErV4pMgEBztUEVJjRSzEyzxLOaoJWvY9rosqbYCKIyBSoS0y5q4nLarjZT+j8BZnMiIA */
+      /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVA1AlmA7rAHQCuAdjhejqgDY4BekAxADIDyAgsgPrKcAVTjywBJAKIB1AMoBtAAwBdRKAAOAe1g5q6sipAAPRAEYAHAGYip4wCYArABoQAT0Q2AbABYidgL6+nNExcAmJadVQISihmCF0wIkoAN3UAawSg7DxCInDI6IRk9QBjDBxdBUVK-Q0tHT0kQ0Q7GydXBHc7dyIbAE5jd0Gh4f9AjCzQ3IioshiwACd59XmiVVoMADNlgFsiTJCcvJmoQrIU0vrK6sba7XKG0CMEG08bIl6bMwB2RxcTMx8FnMwJBoM8oxA+2yYWmkESEFoYGY0nEnAASgBhAASfEEwjEUjkShqmjuun0Txa3Xk5l68nc9jaiFMNi+71eX3kQNB5ghUMmRzhOARSOk7DRAlxQhEEhk1zUpPqFMQ5nk3msjL+HX67zs5lsfgCkPGBxhkSFIuR4lY4gxkv40oJknlIFuSsaTxsLKIX3MnnMPyZCDsvTsPj5JuhU3NECIEDAACN1ORimBpGBUPNigALaL8whW9HYqX42VE5Q3RX3ZUIL6meREcx2YxdTXtH7Gdmsrk84ER4JRwWx+NJlNpjNZ3OzfOwZgGWCYdAJVAbJfzAAUqvkAEpmDPo-Hh4nk2RU+nMzm85HQi63dWPc0vp33E-TIGtb7vJ5TKHuTz+xMhzTNEABiqA4IiEDMGi1pcLwDqloSt5VuSD7PK87yfG+vztMYXxvJ4AzDMR7i9P4RpkOo8bwI0M4knU96PIgAC07hBqxAGmqQFBUDQ9BMBA9Fkg8TQIK8QYeIaYwDgKwGzEJ7pMWJgxEPILYMjhJjNu8REkUMZFGvuQ4KYxok2H6Pp+gGmnBlynGDrCsbCoiJmoUp5gMkQ7gea+77tCyDZNr01n2bJMZxseY7npOV4yYQrkiU8PxvOYNg0gaQb1myngcj2vahUB+SzGBEGQAlNbiVq1jhuRQA */
       context: initialContext,
       preserveActionOrder: true,
       predictableActionArguments: true,
@@ -58,7 +58,7 @@ export const createPureDataViewsStateMachine = (
                 SORT_DATA_VIEWS: {
                   actions: ['storeSearch', 'searchDataViews'],
                 },
-                SELECT_DATA_VIEW: {
+                SELECT_EXPLORER_DATA_VIEW: {
                   actions: ['navigateToDiscoverDataView'],
                 },
               },
@@ -125,22 +125,13 @@ export const createPureDataViewsStateMachine = (
 export interface DataViewsStateMachineDependencies {
   initialContext?: DefaultDataViewsContext;
   dataViews: DataViewsPublicPluginStart;
-  discover: DiscoverStart;
 }
 
 export const createDataViewsStateMachine = ({
   initialContext,
   dataViews,
-  discover,
 }: DataViewsStateMachineDependencies) =>
   createPureDataViewsStateMachine(initialContext).withConfig({
-    actions: {
-      navigateToDiscoverDataView: (_context, event) => {
-        if (event.type === 'SELECT_DATA_VIEW' && 'dataView' in event) {
-          discover.locator?.navigate({ dataViewId: event.dataView.id });
-        }
-      },
-    },
     services: {
       loadDataViews: (context) => {
         const searchParams = context.search;

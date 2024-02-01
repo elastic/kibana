@@ -26,3 +26,12 @@ export const createAndSetDataView =
      */
     discoverStateContainer.actions.setDataView(dataView);
   };
+
+export const changeDataView =
+  (): InvokeCreator<LogExplorerControllerContext, LogExplorerControllerEvent> =>
+  async (context) => {
+    if (!('discoverStateContainer' in context)) return;
+    const { discoverStateContainer } = context;
+
+    discoverStateContainer.actions.onChangeDataView(context.datasetSelection.toDataviewSpec().id);
+  };

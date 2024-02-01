@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { isEmpty } from 'lodash';
 import { ActionFunction, actions, InvokeCallback } from 'xstate';
+import { isExplorerDataViewSelection } from '../../../../../common/dataset_selection';
 import {
   getChartDisplayOptionsFromDiscoverAppState,
   getDiscoverAppStateFromContext,
@@ -81,3 +83,13 @@ export const updateDiscoverAppStateFromContext: ActionFunction<
 
   context.discoverStateContainer.appState.update(getDiscoverAppStateFromContext(context));
 };
+
+export const redirectToDiscover =
+  (
+    discover: DiscoverStart
+  ): ActionFunction<LogExplorerControllerContext, LogExplorerControllerEvent> =>
+  (context, _event) => {
+    if (isExplorerDataViewSelection(context.datasetSelection)) {
+      discover.locator?.navigate({ dataViewId: context.datasetSelection.selection.dataView.id });
+    }
+  };

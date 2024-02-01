@@ -49,7 +49,6 @@ export function DatasetSelector({
   isLoadingIntegrations,
   isLoadingUncategorized,
   isSearchingIntegrations,
-  onDataViewSelection,
   onDataViewsReload,
   onDataViewsSearch,
   onDataViewsSort,
@@ -78,7 +77,7 @@ export function DatasetSelector({
     searchByName,
     selectAllLogDataset,
     selectDataset,
-    selectDataView,
+    selectExplorerDataView,
     sortByOrder,
     switchToIntegrationsTab,
     switchToUncategorizedTab,
@@ -86,7 +85,6 @@ export function DatasetSelector({
     togglePopover,
   } = useDatasetSelector({
     initialContext: { selection: datasetSelection },
-    onDataViewSelection,
     onDataViewsSearch,
     onDataViewsSort,
     onIntegrationsLoadMore,
@@ -165,9 +163,9 @@ export function DatasetSelector({
     return dataViews.map((dataView) => ({
       'data-test-subj': getDataViewTestSubj(dataView.title),
       name: <ExplorerDataViewMenuItem dataView={dataView} />,
-      onClick: () => selectDataView(dataView),
+      onClick: () => selectExplorerDataView(dataView),
     }));
-  }, [dataViews, dataViewsError, isLoadingDataViews, selectDataView, onDataViewsReload]);
+  }, [dataViews, dataViewsError, isLoadingDataViews, selectExplorerDataView, onDataViewsReload]);
 
   const tabs = [
     {

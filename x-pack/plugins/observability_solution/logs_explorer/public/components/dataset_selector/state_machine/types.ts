@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { ExplorerDataView } from '../../../../common/data_views/models/explorer_data_view';
 import { SearchDataViews } from '../../../hooks/use_data_views';
 import {
   DatasetSelection,
-  DatasetSelectionChange,
-  DataViewSelection,
+  ExplorerDataViewSelection,
+  SelectionChange,
 } from '../../../../common/dataset_selection';
 import { Dataset } from '../../../../common/datasets/models/dataset';
 import { ReloadDatasets, SearchDatasets } from '../../../hooks/use_datasets';
@@ -22,7 +22,7 @@ import type { IHashedCache } from '../../../../common/hashed_cache';
 import { DatasetsSelectorSearchParams, PanelId, TabId } from '../types';
 
 export interface DefaultDatasetsSelectorContext {
-  selection: DatasetSelection;
+  selection: DatasetSelection | ExplorerDataViewSelection;
   tabId: TabId;
   panelId: PanelId;
   searchCache: IHashedCache<PanelId | TabId, DatasetsSelectorSearchParams>;
@@ -103,11 +103,11 @@ export type DatasetsSelectorEvent =
     }
   | {
       type: 'SELECT_DATASET';
-      dataset: Dataset;
+      selection: Dataset;
     }
   | {
-      type: 'SELECT_DATA_VIEW';
-      dataView: DataViewListItem;
+      type: 'SELECT_EXPLORER_DATA_VIEW';
+      selection: ExplorerDataView;
     }
   | {
       type: 'SELECT_ALL_LOGS_DATASET';
@@ -126,7 +126,6 @@ export type DatasetsSelectorEvent =
 
 export interface DatasetsSelectorStateMachineDependencies {
   initialContext?: Partial<DefaultDatasetsSelectorContext>;
-  onDataViewSelection: DataViewSelection;
   onDataViewsSearch: SearchDataViews;
   onDataViewsSort: SearchDataViews;
   onIntegrationsLoadMore: LoadMoreIntegrations;
@@ -135,7 +134,7 @@ export interface DatasetsSelectorStateMachineDependencies {
   onIntegrationsSort: SearchIntegrations;
   onIntegrationsStreamsSearch: SearchIntegrations;
   onIntegrationsStreamsSort: SearchIntegrations;
-  onSelectionChange: DatasetSelectionChange;
+  onSelectionChange: SelectionChange;
   onUncategorizedReload: ReloadDatasets;
   onUncategorizedSearch: SearchDatasets;
   onUncategorizedSort: SearchDatasets;

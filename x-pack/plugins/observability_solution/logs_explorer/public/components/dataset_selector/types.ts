@@ -9,7 +9,7 @@ import { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import type {
   DatasetSelection,
-  DatasetSelectionChange,
+  SelectionChange,
   ExplorerDataViewSelection,
 } from '../../../common/dataset_selection';
 import { SortOrder } from '../../../common/latest';
@@ -36,7 +36,7 @@ export interface DatasetSelectorProps {
   /* Any error occurred to show when the user preview the generic data streams */
   datasetsError: Error | null;
   /* The current selection instance */
-  datasetSelection: DatasetSelection;
+  datasetSelection: DatasetSelection | ExplorerDataViewSelection;
   /* The available data views list */
   dataViews: ExplorerDataView[] | null;
   /* Any error occurred to show when the user preview the data views */
@@ -56,8 +56,6 @@ export interface DatasetSelectorProps {
   isEsqlEnabled: boolean;
   /* Triggered when retrying to load the data views */
   onDataViewsReload: ReloadDataViews;
-  /* Triggered when selecting a data view */
-  onDataViewSelection: ExplorerDataViewSelection;
   /* Triggered when the data views tab is selected */
   onDataViewsTabClick: LoadDataViews;
   /* Triggered when we reach the bottom of the integration list and want to load more */
@@ -78,7 +76,7 @@ export interface DatasetSelectorProps {
   /* Triggered when the uncategorized tab is selected */
   onUncategorizedTabClick: LoadDatasets;
   /* Triggered when the selection is updated */
-  onSelectionChange: DatasetSelectionChange;
+  onSelectionChange: SelectionChange;
 }
 
 export type PanelId = typeof INTEGRATIONS_PANEL_ID | IntegrationId;
@@ -102,4 +100,4 @@ export type ChangePanelHandler = ({ panelId }: { panelId: EuiContextMenuPanelId 
 
 export type DatasetSelectionHandler = (dataset: Dataset) => void;
 
-export type DataViewSelectionHandler = (dataView: DataViewListItem) => void;
+export type ExplorerDataViewSelectionHandler = (dataView: ExplorerDataView) => void;

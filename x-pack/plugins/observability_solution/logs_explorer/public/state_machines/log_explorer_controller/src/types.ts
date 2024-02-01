@@ -10,10 +10,14 @@ import { QueryState, RefreshInterval, TimeRange } from '@kbn/data-plugin/common'
 import { DiscoverAppState, DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import { DoneInvokeEvent } from 'xstate';
 import { ControlPanels, DisplayOptions } from '../../../../common';
-import type { DatasetEncodingError, DatasetSelection } from '../../../../common/dataset_selection';
+import type {
+  DatasetEncodingError,
+  DatasetSelection,
+  ExplorerDataViewSelection,
+} from '../../../../common/dataset_selection';
 
 export interface WithDatasetSelection {
-  datasetSelection: DatasetSelection;
+  datasetSelection: DatasetSelection | ExplorerDataViewSelection;
 }
 
 export interface WithControlPanelGroupAPI {
@@ -160,6 +164,7 @@ export type LogExplorerControllerEvent =
       refreshInterval: RefreshInterval;
     }
   | DoneInvokeEvent<DatasetSelection>
+  | DoneInvokeEvent<ExplorerDataViewSelection>
   | DoneInvokeEvent<ControlPanels>
   | DoneInvokeEvent<ControlGroupAPI>
   | DoneInvokeEvent<DatasetEncodingError>

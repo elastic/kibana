@@ -6,7 +6,11 @@
  */
 
 import { actions, assign, createMachine, raise } from 'xstate';
-import { AllDatasetSelection, SingleDatasetSelection } from '../../../../common/dataset_selection';
+import {
+  AllDatasetSelection,
+  ExplorerDataViewSelection,
+  SingleDatasetSelection,
+} from '../../../../common/dataset_selection';
 import { DATA_VIEWS_TAB_ID, INTEGRATIONS_TAB_ID, UNCATEGORIZED_TAB_ID } from '../constants';
 import { defaultSearch, DEFAULT_CONTEXT } from './defaults';
 import {
@@ -20,7 +24,7 @@ import {
 export const createPureDatasetsSelectorStateMachine = (
   initialContext: Partial<DefaultDatasetsSelectorContext> = DEFAULT_CONTEXT
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVsztgZTABswBjdAewCcA6AB3PoDcwaTDzsIBiAFQHkA4gIAyAUQDaABgC6iUPVgBLdIvIA7OSAAeiAIy6ATAGZqBgBwAWMwHYzdgwE4zD6wBoQAT0RGj16gDYzIwBWKwdJC2CDawMAX1j3NExsXAJiMio6BnJmGgYwNS4AYWE+PAkZTQVlVQ0kbUQbP0kDf0l-IwddSUkXYPcvBH99ah6jNqMzFrMDXSN4xIwsHHwiUgoaeiYWanzC-iExKVl66pV1TR0EO11qI0MLDosLXWsHWYHEUOCAmJ6u3QWBxWawLEBJZapNYZTbZXK7WgFLjlMRFHgAfQAgsJhOjSgI8OjkJieJjyjxjlUODULvUrmZ-H5rLopp0jO1rMEHP5PkMZndOT5JJ1ggy4glwUsUqt0hssts8oi1NRFGp0GAoJQMLVYDxUAAjZEAdQAkjwigAJdH8dEAVQAckUSaIBHwAEomgBaomQ1sxACFKadqec6qArgBaXT+H4GZ4RSS6YIxfwWSRuTx6OaSajWfwGVrRcIRIzixbJFZpdaZLY5HZ7FVqjVa0O6g3Gs2W618IkkzHogBqJtERsJpMDlWDSlDl0QswM1AsrTTDnuSZFFl5+nZufzxmeMSTorBEOlVZh8rrioKjfVmu16jb+uohEUsBUaigJqb99bxQtmL2gIojogACoBojCEG8ghrUs4IN0DimPmoRBP4-hOO0Zi8pytwOMEnRAtEbSzGYJ5SpW0JyrW8INqqd4tjqerPq+76ql+P6MY+yJFG6fA4t26ImvaPAum6JImnw9qEv6fA8PwACy0EgGccF0ogEYFj8yZGBY9yPCELIOLyyYLhhuirjpHSzP45EVlCso1nC9ZKrezYPmoT4vm+H4cQxHmwMioiYm6Xb+gAmui9qYgpFQnDB05qeGGl6T87SkZEYzWJEm6ZkMQKmMEgQEbYjLMnZkIytWsIKgiN70e5rbMd5bGft+-l-ng7oYhF6Lusgohuspqm0slCARrpJhRI8MRvLMSa5YMZjBNpLTptywwuL4FVnlRTm1XRnEBc1rG+e1jW1Hg6CUGAqAALaBZagHAWBEFQZOCU0mGDQIb0yEGKh4wYVMMY4YmozDJyJUGMKeY7ZRjk1VedXKg1v5MQaLVnUdoZXTd92BeUIVhZF0WxcNsGjT9wQsgEwTCpYKbWJyBgmVypjro8q5vHpDjww51WXrRrlo1xnknT57Hnej6h47dD3It16K9f1g0U4lVNXMYzTOO8XQONylis3lK0LsC+jzpMDJLvzVUXjRLn1TjGMsZLbXO7L13y4TkGiGivakuS6tffBXK3GYFncnp7LssCOGTIu4zWC09P6PmtkSqeCOCw717KgArmoJAYBqVCKAAXpAzEduaVo2sJokCOJPCSdJfoTvFKmU99kaOEhpGTIKdhdHmW7tCYJHjFM7TRrMtvntRzl59QhfF3eZeVxA1d4KateCcSpKDsOo7t8HM7qQgcYBOncYMxZRXWEYW6OD8BszEuq4uBYtjz3tSPCzeVeJcoAbyru2ImoUrS9TJnFKkGse4pSmAEKYBF0IFmyvhLcpYLDUFeMnYE7ReaMl-ojIWjsC5F2AaAre4ClYqzdANIaH0u7wPghGb+Zk8z5lmrHem-Q8rbn8NQIq612TrhjPMTOFEBb2yXijFelD16UArmAw0KI-YYgPmSUQFJmEjQQeNOMOC5hxnpq0IqrQtx6SEamF4S5SKOAsCQnOciGwQCWAORQYAADuT4a5dnriJMSEkpJjgDGfJKP1xhm3vn0bknRWRj2TMImGQQ0yhEMLoZxsiDquXcZgTxPi-E707HXHsDonSN3dF6H0p89Hd3goCO4bRIjJ2TjTFakhsICNMYuQIQ8lyzwzuWSqC99rIzcR4rxvjt7BUgcrUmMVYFThDhfYYOZ3hWEyT0FanIsGODuFMecycZhRDLJKeydtF65JvPk1AhSZm0LdD1SKqsmGd30fBdZdxHiBANsCTk7wtxzFuC8NBBskwuEcNk65Ey8lTKKbM1Emi+xHxHBEzWiAR4cycARLky0IiLT0HGBcekZiWFCOyGYMLMjYFlLUagShPzECCsirEAl8SEi0UHeprCL5RlXKMdk5hOhf0mO0LczMmR8OBPhdkjwnFSMuWMmgdL1gMqZVAFl6j-bcp0RigxEYohIQjoEbojgfDhGNoMaM4RcEvALKmEIQQug0tVVRBlqBCCEFZRogO2jdEfIafy6MPx0Lj1TEEdo3Itypj8M4VMDNHjT1BGCNQ5AIBwE0FnGRGw4GrLGhGbhEMMr01hpEeO1BVwhF8HmRMI9ghurIZQfN59C3JiQulFkmVy38JtcMRONabB6RaM8PmSrRl-2bdQNgHBICtsiVcNOJhojpheJZHwHw8pLhweMXwqZzB6Qtk23OKMF2YvGgRW4XaKVZQrXlOMZgq0+AIlC0UpkT2uNcgACx8uegxjIn1OABq8V42CYi8h8EI6OoR0xdL+eOkZu1SGnsOh1F2-62FWBMDentvgcq8heE+543RcLjEkFEVNSHs45LhU7dDj5mq-vfJhi+zNcE03Se0IqcwgS8neBPRMsMxHpjhhO5DLibmow9uLTGp0pYyfgCsttP1NLtFGN0ZwYLlrLQBryRkxjMq2FFYzLJ4maOwoAdJhjsnXatT8hdT2+MHqsbGo4BcwouQxCsJ50U+m7DPsZDGOt9NOifqkwotepdlGb2Yq51T5ghERzZAe5MGFME9NpuYA2HR8KwcfuFujyo7kPKfPFq4pZbjDCBCyZaPn8zPyTFWwE+EpjW2FE2tVZBImfP5cmeN0YI4tGrVarcIi7jxJBN-EFVGLmTtIV10MjL2LEHKxpXSnbIif3uBhaI0YtwgwCDDXw+hy3QvM7m2lHr1DUC9YQNbCEmu+GHZ-Dh+g+16Ajjg47zJjDLU6ZI+IQA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVsztgZTABswBjdAewCcA6AB3PoDcwaTDzsIBiAFQHkA4gIAyAUQDaABgC6iUPVgBLdIvIA7OSACeiACwAmXdQDMANmMB2UwYAcu4wEYH+gDQgAHogdmj5yU9MATmMAVmNjfQcAXyi3NExsXAJiMio6BnJmGgYwNS4AYWE+PAkZTQVlVQ0kD0QbCwtqSX1TSXNAh0lJQIsQtx0EUycmyTNRm2abSOMYuIwsHHwiUgoaeiYWahy8-iExKVkaipV1TU8EGxsHE2ddc11dBwtAyP7EEN0Q6lMLfS6Ohy6QK6eqzEDxBZJZapNYZLJbWi5LglMT5HgAfQAgsJhOiigI8OjkJieJiSjwDuUOJVTjVzjYftQLA4JsZgm1eoFTG9BlMTL1wqNAiEGfowRDEksUqt0htsoi1NRFGp0GAoJQMFVYDxUAAjZEAdQAkjx8gAJdH8dEAVQAcvkSaIBHwAEpGgBaomQlsxACFKUdqSdqqBzgBaBymL6GXSSWMOEK-aySCw8pzGSRM0z6Fr6Z5dexi2Lg+aS5IrNLrTKbbZKlVqjXB7V6w0m82WvhEkmY9EANSNogNhNJ-rKgaUwbOiEi+moBmTwScYWFujT3kzVhzxgevwTIvFpcW5Zhsur8tyddV6s16mbuuohEUsBUaigRvr16bBTNmNtAlE6IAAq-qIwgBvIQZVFOCCdIE1C5h8NhmEEEymDYPK9NcwpskCeatJENgHgkR7QjKVbwrWypXo2Wo6vej7Psqb4fjRt7IvkLp8DiHbokato8E6LokkafC2oSvp8Dw-AALLgSAxxQXSiBhjmXyJtujh3KELKBDyiazkEDjBOp5iRKYRGQlKFawnKCIXlRDY3mod4Pk+L7MdRTmwMioiYi67a+gAmuitqYtJpSHBBE6KaGyn2F8bQEZ8XSWJ8q7aIg1hwfoIRoWEFgMg00TFhKJHSpWcI1gql6OU2dGuYxr7vp5X54K6GJBeirrIKILpyQptKxQgYYadQISGD8eYvEu6UDDYIRqc0KZckMPSWBZZakRVtmUSxXn1Qx7nNbVVR4OglBgKgAC23nmr+-5ASBYFjlFNIhrUMHdPB2aIchgSoX0GUIBY-hNEMvT5X8ljmSVh5QuVNlnnZioOZ+tF6g1R17cGZ0Xdd3klH5AXBaF4X9ZBg0fSELLfCE4y6EmDTjXpITZQm25BJYwJshtZXWaeFHVajrHOQdblMcdaPqLjl03ci7Xop13W9eT0WU+c+iWE0NiBC8HS62hBgs7OwJODOxiXNYRZzMR8P8+RVX2dj6P0eLTXO9L52ywToGiGiXakuSqtvdBDI2N8-31JIIqjN0s2IFY1xoVNP0BC0vN2yeDvnoqACuagkBgapUIoABekB0a2poWlafECQIQk8CJYk+qOkXyRT73hvouvwSyFsCpcHRWGmbTGN8zRmBMbSRpEGdWVnlU59Q+eF1eJflxAld4Ma1c8cSpJ9gOQ6t8Hk5KQghjfNm2axhbRm5RYxhpj3Xy61MBjBD0DOEbDtsL2RJeyMV4FyLlADeFcWyE38haTqpMIpUjVl3OKExvgTDCKYbMeYgSAwGN4K+TwQbAjaPYLkFh57HkATtaqq8wEQK3lAhWSsXQ9T6i9DuSDoJhgZgZKw2ZfhP26HTXBXhvCmDGq0Z4GZ2ZRhmH-SylDtpI1rLQ9elAy6QP1CiP2GID5klEBSdhA1kHDRjNQfByUWi5RaGmew4jrCPAMARHuugKFbURoLC8EB5i9kUGAAA7neKu7Za78UEsJUSw4-Rnxih9MwJsH49FZu0Vko9ExjT+EhWMHxnDFRtgo9xAtHaKm8ZgXxASgk7zbDXTsdoHT11dB6L0p8jGd2goCEwrRPggxBtTBakh0JA1uF8O49Qwh2DMuneRm0EZFOXqU1A5TAnb18jAxWJMwoIPHCHC+QxMwvBBLkroC1ehpgiHBC2zRnAgymONa2JZ-6KI8cU6gCylmVKYcFZWbD27GOgnskwdw0K62BJyVwQzvDXEeJgnuHRWa-ECG42Z2dgFvL8csqBvt-aiAABqASKC6XqAcez9kHDE9WdQRRjSfgzAUHQripiGZra44Q0IW2FB8FMcj8kzP5tgaUVRqBKFfMQHyqIMTYlxPiQkeig6tM4RfCMwQmgZn0EhXWFh7CoTTA0RovRo7AmwnGawSK+WkUFcKqAortH+1lQY8lJiwzjTglcNCnQe7hECM0NMQRMyAmcC0eK6q8kPIKbM-lKwLVMWtVijEuL8WuiJXoo+ZL5U7KGhGca8FLjODdUEPMkY0wdHHrGQ2OCMx3FcdMvmJ4I1kEFagQghAxU6OJXK35bTFWRi+Jgse1gkJtC5D6hm1AdbJgtqMro5Dq2ZxlHW4M1BG3NptXGvFBKk3dhTQaB1mg8FXCMFDZkmt5r9Ofh9Hu4d6j1CBDhXcIbSqzrSPOwVYB3C0HYBdSgEIlktv9pKvEggZXdnbYg9NH0VJAnghmeoU1PX+EGXg4tc42h2HLcaqtPKa1zvNeoagr731UBYN+9Fv7dHAftWm8+GbDDZWgwI4IbJ4M8j+JBseccjWVpiMWNQ5AIBwE0A+gBVBQNUfA-wsGSU6ajE1SI4G48GOcpucCl4prF5yhE7E8MiY4KJRZMlaTnwfVQvCIpgZyn7mCaeXM6gbAOCQA0xSmCkZx55hTI8Yy4RXhAwMEYMw0NbD2DNqpqhyiFQOcdWEa4um7BSdSrJww4cFOxiUzrFTM6hPPOXgACzcuF-5BVqD-Ryk8J4EQeE8lZXOEzyWzOpeC0ozxKMPaiz1HlxVIJx7Rf03F+OCBHjhweGbZwFsGQGHq5l4Bwt9oYxy8+NrQ0GjmOptktouVvBAh5C8cerROiWGkSmKw43rO7Rai7TGEtmvwG2aJ7ubQmidB1tC+a80co8h+EYQEdMCpsn+gze9cMMvHaFpdsWjUPInU9njG683z0vBVfChLowFoIcypcQrZgrCJlaHTHm6WrMopUaAtRGiGG6hh93Bko7vDBCtlj3WsncnhzVQbNkC1kvctDbytToWvE+PRXecniAIhJ0BPS+aIJEovwTIV0XMdRujCO8+ymfzFWJkaK6q4zQGNevBXg3KmY2TjrsGhKdiucOKktcQQXw1tw6c+F-Rw+bmTciGahb4h6nAGZ7mbgVuGl3W6XPya9X8eFLjTPu+C0nhsnpxz7yNuH8MfqI3zgJ1unU9yp26rXcHddeHfu7qPu3NXe640AA */
   createMachine<DatasetsSelectorContext, DatasetsSelectorEvent, DatasetsSelectorTypestate>(
     {
       context: { ...DEFAULT_CONTEXT, ...initialContext },
@@ -132,9 +136,9 @@ export const createPureDatasetsSelectorStateMachine = (
                     SORT_BY_ORDER: {
                       actions: ['storeSearch', 'sortDataViews'],
                     },
-                    SELECT_DATA_VIEW: {
+                    SELECT_EXPLORER_DATA_VIEW: {
                       target: '#closed',
-                      actions: ['selectDataView'],
+                      actions: ['storeExplorerDataViewSelection', 'notifySelectionChanged'],
                     },
                   },
                 },
@@ -154,6 +158,9 @@ export const createPureDatasetsSelectorStateMachine = (
                 SELECT_DATASET: {
                   actions: ['storeSingleSelection', 'notifySelectionChanged'],
                 },
+                SELECT_EXPLORER_DATA_VIEW: {
+                  actions: ['storeExplorerDataViewSelection', 'notifySelectionChanged'],
+                },
               },
             },
             all: {
@@ -161,6 +168,20 @@ export const createPureDatasetsSelectorStateMachine = (
                 SELECT_DATASET: {
                   actions: ['storeSingleSelection', 'notifySelectionChanged'],
                   target: 'single',
+                },
+                SELECT_EXPLORER_DATA_VIEW: {
+                  actions: ['storeExplorerDataViewSelection', 'notifySelectionChanged'],
+                },
+              },
+            },
+            explorerDataView: {
+              on: {
+                SELECT_ALL_LOGS_DATASET: {
+                  actions: ['storeAllSelection', 'notifySelectionChanged'],
+                  target: 'all',
+                },
+                SELECT_DATASET: {
+                  actions: ['storeSingleSelection', 'notifySelectionChanged'],
                 },
               },
             },
@@ -191,7 +212,14 @@ export const createPureDatasetsSelectorStateMachine = (
           selection: AllDatasetSelection.create(),
         })),
         storeSingleSelection: assign((_context, event) =>
-          'dataset' in event ? { selection: SingleDatasetSelection.create(event.dataset) } : {}
+          event.type === 'SELECT_DATASET'
+            ? { selection: SingleDatasetSelection.create(event.selection) }
+            : {}
+        ),
+        storeExplorerDataViewSelection: assign((_context, event) =>
+          event.type === 'SELECT_EXPLORER_DATA_VIEW'
+            ? { selection: ExplorerDataViewSelection.create(event.selection) }
+            : {}
         ),
         retrieveSearchFromCache: assign((context, event) => {
           if (event.type === 'CHANGE_PANEL' && 'panelId' in event) {
@@ -233,7 +261,6 @@ export const createPureDatasetsSelectorStateMachine = (
 
 export const createDatasetsSelectorStateMachine = ({
   initialContext,
-  onDataViewSelection,
   onDataViewsSearch,
   onDataViewsSort,
   onIntegrationsLoadMore,
@@ -255,11 +282,6 @@ export const createDatasetsSelectorStateMachine = ({
       loadMoreIntegrations: onIntegrationsLoadMore,
       relaodIntegrations: onIntegrationsReload,
       reloadUncategorized: onUncategorizedReload,
-      selectDataView: (_context, event) => {
-        if (event.type === 'SELECT_DATA_VIEW' && 'dataView' in event) {
-          return onDataViewSelection(event.dataView);
-        }
-      },
       // Search actions
       searchIntegrations: (_context, event) => {
         if ('search' in event) {

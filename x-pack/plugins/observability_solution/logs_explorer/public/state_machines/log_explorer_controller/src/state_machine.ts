@@ -7,9 +7,13 @@
 
 import { IToasts } from '@kbn/core/public';
 import { QueryStart } from '@kbn/data-plugin/public';
+import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { actions, createMachine, interpret, InterpreterFrom, raise } from 'xstate';
 import { ControlPanelRT } from '../../../../common/control_panels';
-import { isDatasetSelection } from '../../../../common/dataset_selection';
+import {
+  isDatasetSelection,
+  isExplorerDataViewSelection,
+} from '../../../../common/dataset_selection';
 import { IDatasetsClient } from '../../../services/datasets';
 import { DEFAULT_CONTEXT } from './defaults';
 import {
@@ -21,8 +25,9 @@ import {
   subscribeControlGroup,
   updateControlPanels,
 } from './services/control_panels';
-import { createAndSetDataView } from './services/data_view_service';
+import { changeDataView, createAndSetDataView } from './services/data_view_service';
 import {
+  redirectToDiscover,
   subscribeToDiscoverState,
   updateContextFromDiscoverAppState,
   updateDiscoverAppStateFromContext,
@@ -42,7 +47,7 @@ import {
 export const createPureLogExplorerControllerStateMachine = (
   initialContext: LogExplorerControllerContext
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QBkD2UCiAPADgG1QCcxCBhVAOwBdDU88SA6AVwoEt2q2BDPNgL0gBiAEoZSGAJIA1DABEA+gGUAKgEEVGBaQDyAOXWS9GEQG0ADAF1EoHKlhsulGyCyIAtACYAbIwDsAIzmAJwAzH4ArAA0IACeiJ5+AByMwZ6hnokALD6e5kneAL6FMWiYuATEZJQ0dAyEjByOPHz8HFBy3FTc0mxgAO5CEJRgjRQAbqgA1qNl2PhEJOTUtPRMTVy8Au2d3b0DCByTAMZdbJQWlpcudg5OFC5uCAGejObentFxiBHBwYyeLIBX5JfLeX7BCLFUroeaVJY1Vb1MbNLZtCgdLo9PqDEi0Br4LoAMyIAFtGHMKotqis6utOC1thjdtiDkdUKd7pdrkgQLdms5eU9sowAqEkn8IuLIUDvN4YvEEFksqE3hFQaEglkperPNCQJSFlVlrU1g0Noz0VATasAArcChgPCwIYjMaTGYU2FU42Iunmhlo9o2uj2x3Ow4TDlnC5WHm2ewCh5Cjy+YLeJJ+cGfTMS96fBWIJJJAKMULa8wZbzmPyfbxZfWG+E003Ii1BjEhvBhp0uvFERiEqgkwjkpvUrttwOtYN+7sO3uRk4xijcqw3RP3R4JPyqgJZDM14sygJywsIXf-TV+LLBEIFXc5Rveo0I2lmlGbVrCMQSGRaORJCUXRZBEBQ1FtW1lHUTR4z5TdzmTUBhVCdNRX3QEQmSbUknPCJAn8IJawiTxgm1dIoRKA0X2bSd6VRb8IFEcQpFkBQAEUAFUTAATWgjQMDg-ktxTBBMIiRhiyzcUpSzSJz0fRhvACPws0rEsIgietn3KV8WyReivwESBGAgLFYDAKglCdMBjnuRhxi2MyuAxayGDsxChGQIDND0BQVB0bQAAk1D0ABxDAlCEhDBWQxAyN8W8wkCJIfDSIFzzlLJ0KyfIwmVAIklCUIdLhCc5ynBjjIgUzzMstzbPsxy+Gc9oGo8yghE4205AEhRevUJQMBUZQMGQcQVEkfRoruRDtwQB9RXBVCIn3cwQnBc8S1VcEVQ0yIPgCAJSp9N9W0My0TOc7gLKsmyOooBynLOVz7vuIQBrUIaRqG8bSEm-QFDEVQdDEBQADE1EkZBOLEGak3m8FS1COUAmCNS5Wvc80hSYtPFS4rvDvJJNJOvS6IDKrBBq67bva+y2AgBgup6vrPu+0a-oBvR4ZEuLnh8FJCaK6t8drcstrFJSIj24EDs8I6ydoiqLrRK66ru9yGaZsAPo0L7hs5iapr84GArByHodhwT115YS5tE4FwUYFUifMdJlQid2sklnaZfFOWtIV46qPHX130qozqdq7o6bexCWBwVrmSxfZBmGR13WmWYaPKiPVcYmObvq+PKET5PMT2HEl2jLk41thNZti1xEEK4qlKBPIUfVHJQmxtCIVS9MvewopQ9z8PzspqP1djkutYT5gk5eyvWVxQh8UHPBiTJL1dOV-Pp8ummNfpxfl5c1e05rzlELXaw7ZipCW+edMUi9kIwh77xNXPIJITeGkfKy0ayniVnnKen5j6MGOHOMKtAl6wBYOwac1UhBGEkJNNQ3kABaWhdAGBEDoZACgwpEO6uBW0kheYO35nmAEgI0afGVAHXC3xnjlgkrlSUwQmHuzHjCfeECDJHzVjVWB754GoEQY0HWet1AKGkJIDAAB1BQ3UBryBoc3J4LwDwAk1Ojcih5wh-ylNlIqljEj4wopRQRZVJ4iKgWImBcCEE4CQYzZmGi+oEJUEQkhtpQpjSig3eCTdn66JRn4VImRqx+DCLwzIAQzFkRdvuDMqk-D5FvHY6iQjHH+mcYXCRpopEyKXhXLsPZnSukzuyT0YczpOPbCUtx0iPHlxXtUhcEZ2S31jFcMJ9sdGt3RuYN4GRAShG-r-dhKkMzSzvFpXcRNEgh3sadfSRTWnVVcZI9xSDKndLnDUvsG8BxDhHGOCezSdmoOjqU1Y5TOnHMvj08MsAb4rnvhuCJ80VJpKSNqLIoJ+FpBvH-QIEl1rlhJumImaRKJUQoKgCAcAXBNO2WaP5CNRLuBvIREI4QviKgSf4CUwQSYkQPOkMi4DCkflYLs6muK+YvxyH-bwMT8Z-D5fyv4Aj8kOLuR+FlOxU44jZbQl+7hSye01AWdhyoJnYV+DM7UMzUoMtFZHS0s53xnOlaMhAXgJlZCzEHJK-KCgKX3GWFSt57zcvLHqceBTdUF2qsayJPwSKpA+JWBWvwgTanPKhV4CteEkTlCEHIwQdXYr1S42m89GoypGb6hA1ZVQo2UujasmMVJ4QIoENIGZgS5MSImimxS9mps1umsuzVGYrzPs3TN81Ah7hybC3aeQ-CZV+ACJhqUf5BoKDWlWojC4NvbY9LxYAfUAu1DyksCSSb1nMAeNhioso5TyuWIERUSrupFUmr10c52l0em8iVVcBjLsdqeGJwJULig3WRIq-dspVgjcCI8B4p2HzrY89piCn382rBM9MXdg1kX3KS1unxX0oyBO+9U6M8lYtrSykyTy6AvKOSgqmkBIMv3rCkWDQbgQIbDfMlGKQxTZlPGkfhwHIF4fEeBzpi7yO6KlP8UiylbzZLyPjP+R6lLdwVms9jZ6tm4YefhnjRyL4GtNEax+-zHZYQBH8EInxNLrsHfMt2bxKygt+HKP4nxijFCAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBkD2UCiAPADgG1QCcxCBhVAOwBdDU88SA6AVwoEt2q2BDPNgL0gBiAEoZSGAJIA1DABEA+gGUAKgEEVGBaQDyAOXWS9GEQG0ADAF1EoHKlhsulGyCyIAjAA4AzI0-uAJgAWIICAVnN3AHYfb08AGhAATw9Pc0YAgDZMsNyo72ig7xCAXxLEtExcAmIySho6BkJGDkcePn4OKDluKm5pNjAAdyEISjAWigA3VABrCcrsfCIScmpaeiZWrl4BLp6+geGEDhmAY162SgtLG5c7BycKFzcETIBOTL9zIPzvd5+mXM5gCiRSCC8AUYYX+73eYUynh8QSRnjKFXQSxqq3qGyakzau06FG6vX6gxGJFozXwvQAZkQALaMRbVFZ1daNLacdp7EkHcnHU6oC5PG53JAgB5tZyS16ZUHJDxBdzuaEA7LuIq-TLFdEgVnLWprBqbZrbXnEqAmjYABW4FDAeFgo3Gkxm8xZmLZxtxXPNPKJXRtdHtjudJ2mIsu1ysEts9hlzzliG8AV8MQBASzASiMMV4Oi4UYUThYU8QNVnneAQC+sN2I5pvxFqDJJDeDDTpdVKIjFpVAZhGZDfZHZbgY6wb9nYd3cj5xjFHFVnuiaeL1T6ZL1ZBObzabBqXc7wyYSy5kyQTCUWBl-r3qNOM5ZoJOw6wjEEhkWjkkiUuiyCIChqLatrKOomjxlK65XMmoCvO45ZQuEKpavCnwVgkSoIGkniMN45gIu8J5hO4l6ZA+VRPk2eLcoSH4QKI4hSLICgAIoAKomAAmhBGgYNB0obimEI3ukKqhIiuYquWR4IFE7i+J454ImRRThFEdblAaj6NuO9HvgIn4sT+CgqJIACyGAAGKSMgmjARZ1lCbBsoIR4QJQsUQTmAUGmBAWiCZCeBFwkUsRhCEnhBFRWJjjOE4McZTFfqxWjObZ9mOQoYg2WISgABIKEYjnSGoyCuY8cGbmJQRfCil5RIi7y3l42HgueQSMO89XhMhcQBPeOmjr6L5JUZggQIwEBkrAYBUEoTpgGcTyMFMuyzVwJJLQwq1wUIyD-poejmTo2iFWoegAOIYEoVVJrVSmKX4ZG6leFZXp88lKQUjDZFF6G9REnjaRi1H6YlhmWpAM1zQtu0rWtG18FtXSI-tlBCJxtpyAJCh4+oSgYCoygYMg4gWfoD0iR5ELeC9KnuO9KLZEE304aqcQluW8KeFERTeO9cU+s+zbQ0SsNbdw82LctmMUOtm2XDt8tPEIhNqMTpPExTpBU6dBUqDoYgKDZaj2ZxYg0zVonPWqTMs597OZD96ZhBkgReIiLXeOWIs0QZAbJVNcN9LLGNrWwEAMNjuP45r2tk3rBs2+5rgeAzDtvULrNfa7nODYwzMwmmRYUQHkPjRLjFhzLCNq3BLQx2AceE7+GhayTyeU5I1PuNYkrCbbdMnq1BE-PzMVqTWBeFgi6RRIp5ZAr5zVhJXCXV8Hk1S-Dct7VHLca53Se673+i5Xdxum+blvW6uQ9ufBGcQnCUQTyiMTXjks8-TkHtay-ECDFFS+QoibzGuLHeMNprSwjo3Sg-ZuCEAcCSeKtQBRHBGGnF+rwp7-RRCqSeMIKzvB+mhHqeYsgM28ELJCG8Rp6S3tAt8sC64IMPk3HAKC0EQ3ZFgikQhTADzXNVdOiEs6vWZrnZ2HNCw6n+l4a81ZSz81+JAsWdEYGSzgfvSOTczgAAsHRQH2GSbBrpHTujmAsZhUDtFsN0RwhuXCkHGNMeYw4FIFzRjFHGR+CZxF4MQAQj6xCUSkI+P-aIBFrx+WCPkHIeomH8Icf6Jxtd4GuKRoYkxJIvGCkpIQak-Y8D0iZF6NJWiMmtiyfoxBisPEFP5BYnxwpRRwRXIPIJj1RJhKIeRSJcRomc0Uovd4-grxpl1GWTRtFamThSi4g+uSkHMBwGjVp3jhhWImMKT0o0amvjqcs7JqyFYsE2SrUkOyhi+M6bGW4gSYLBNqgEb2jBQiTIYe8f4N4OoeAFqeTIS8fCfARINRh4MMHHImuw85Bj1nXO2rcopQhew0nKYOSpRyFknKWaHRFjSrlbLRdgh5S5uliL6XTD5uRoS3mvG1NIhQKGgoIsowGSJIjvHmUHTJyyzgzmurQDZsAWDsEJcIIwkgLIVUkAALS0LoAwIgdDIAUNddVOMQK2kkLg2qJFfDA2zIpdMmZAVv3PP9QiZYfh-P5vyqGOja7CpfKK1A4rm6x01goaQkgMAAHUFA43bnIQ1dsZGcuCL-EirU4jyVrNzGEeYUQ+B+CeWKqTYX4vhc491ppPXeujrHMN+NVUqHVZq20V1yb3RecPCRHhAjpBBMUH2rVzDmqTT8D+5gYrphmSiOh0LdLVLzTXIVIqxU4AlRsslHYuzOj2TYw59i4VTtDoWjYxa52kpuUuucEYOlUoCT015tLX7Gp6teM1gQGbVitUNce5YpJeAiCCJ1ObRaTtddOj1s750ounC+ZdPYSl9gHEOEcG6-2Cu3TOr1+6F2HpnOByl-jnkXqbSEhAN7TWtQfZapNJ41R+TzERVUmbghlB0hQVAEA4AuDxUHGltNX4AFo56IBrCWIoSkSLkSIqA5129JWnKmuxker9Qi9ozAJ3MORgRALBuO3NArJOFOwdJ5tCB6r4W7f4YIWQcgfR+mkDIAnihqLXiiMTrCtPtnQ8e+AT83miRvD9GI6QIjhG7XEBmLsHOOMk5AXTeH8zQgM3Q4ESJNLyX5mqPMSIBZ9Q+HEELiyQ573DjkhWEXarll8zFwiA7QZec5lRs81Y-ZDQKERLLBKct6Lyxc5GytUVIpfrhp6rbi7mF6lqIofnyGc2ZukajxF0y+W1E1-N9S2vdZ9WAQrdtUTfFZioxS-Mog-U-XEiIWp-j5HPGiH9gcXUIdy-Xdr3DeFdFzYI4Ya3R5Vn+v5k83bmaTO8BQ8iGRwgfMdYNoianWNXbC6127y3mlmO2UU17r8FT4SioiWL5WEuc18l8FS7bIiRH+NkebW6bucLWYrVDqLntDCR68YIsS-JagrCeGbMIKG3i+adlSKo-mqRJ-+xDgHkNud6Rx14xXovo7K-FyrhYKweyUoN5eg2QHZphb+zT0rpo7roHu+dUqWt08QALD+SlcyTJIv4fmPG355gG3mOEFZryBEohdqujnteMF13gfXK3jf03HoNdRxQyLIl7Z8Rgl4B3NToUCAdAvrs66Q96qnoHTTgYDyjqXsQ4sVb2zhIa7MMjFGCPVd+9U6MlCAA */
   createMachine<
     LogExplorerControllerContext,
     LogExplorerControllerEvent,
@@ -127,13 +132,45 @@ export const createPureLogExplorerControllerStateMachine = (
                 },
                 idle: {
                   on: {
-                    UPDATE_DATASET_SELECTION: {
-                      target: 'updatingDataView',
-                      actions: ['storeDatasetSelection'],
-                    },
+                    UPDATE_DATASET_SELECTION: [
+                      {
+                        cond: 'isUpdatingExplorerDataView',
+                        target: 'parsingExplorerDataView',
+                        actions: ['storeDatasetSelection'],
+                      },
+                      {
+                        target: 'updatingDataView',
+                        actions: ['storeDatasetSelection'],
+                      },
+                    ],
                     DATASET_SELECTION_RESTORE_FAILURE: {
                       target: 'updatingDataView',
                       actions: ['notifyDatasetSelectionRestoreFailed'],
+                    },
+                  },
+                },
+                parsingExplorerDataView: {
+                  always: [
+                    {
+                      cond: 'isLogsExplorerDataView',
+                      target: 'changingDataView',
+                    },
+                    {
+                      target: 'idle',
+                      actions: ['redirectToDiscover'],
+                    },
+                  ],
+                },
+                changingDataView: {
+                  invoke: {
+                    src: 'changeDataView',
+                    onDone: {
+                      target: 'idle',
+                      actions: ['notifyDataViewUpdate'],
+                    },
+                    onError: {
+                      target: 'idle',
+                      actions: ['notifyCreateDataViewFailed'],
                     },
                   },
                 },
@@ -248,12 +285,22 @@ export const createPureLogExplorerControllerStateMachine = (
         controlGroupAPIExists: (_context, event) => {
           return 'controlGroupAPI' in event && event.controlGroupAPI != null;
         },
+        isLogsExplorerDataView: (_context, event) => {
+          if ('data' in event && isExplorerDataViewSelection(event.data)) {
+            return event.data.selection.dataView.dataType === 'logs';
+          }
+          return false;
+        },
+        isUpdatingExplorerDataView: (_context, event) => {
+          return 'data' in event && isExplorerDataViewSelection(event.data);
+        },
       },
     }
   );
 
 export interface LogExplorerControllerStateMachineDependencies {
   datasetsClient: IDatasetsClient;
+  discover: DiscoverStart;
   initialContext?: LogExplorerControllerContext;
   query: QueryStart;
   toasts: IToasts;
@@ -261,6 +308,7 @@ export interface LogExplorerControllerStateMachineDependencies {
 
 export const createLogExplorerControllerStateMachine = ({
   datasetsClient,
+  discover,
   initialContext = DEFAULT_CONTEXT,
   query,
   toasts,
@@ -269,9 +317,11 @@ export const createLogExplorerControllerStateMachine = ({
     actions: {
       notifyCreateDataViewFailed: createCreateDataViewFailedNotifier(toasts),
       notifyDatasetSelectionRestoreFailed: createDatasetSelectionRestoreFailedNotifier(toasts),
+      redirectToDiscover: redirectToDiscover(discover),
       updateTimefilterFromContext: updateTimefilterFromContext(query),
     },
     services: {
+      changeDataView: changeDataView(),
       createDataView: createAndSetDataView(),
       initializeControlPanels: initializeControlPanels(),
       subscribeControlGroup: subscribeControlGroup(),

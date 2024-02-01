@@ -15,7 +15,7 @@ import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import {
   AllDatasetSelection,
   DatasetSelection,
-  DatasetSelectionChange,
+  SelectionChange,
 } from '../../../common/dataset_selection';
 import { Dataset, Integration } from '../../../common/datasets';
 import { DatasetSelector } from './dataset_selector';
@@ -59,7 +59,7 @@ const DatasetSelectorTemplate: Story<DatasetSelectorProps> = (args) => {
     }
   };
 
-  const onSelectionChange: DatasetSelectionChange = (newSelection) => {
+  const onSelectionChange: SelectionChange = (newSelection) => {
     setDatasetSelection(newSelection);
   };
 
