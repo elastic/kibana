@@ -20,7 +20,6 @@ export type StaticPage =
   | 'settings_create_outputs'
   | 'settings_create_download_sources'
   | 'settings_create_fleet_server_hosts'
-  | 'settings_quick_create_fleet_server_hosts'
   | 'settings_create_fleet_proxy'
   | 'debug';
 
@@ -79,7 +78,6 @@ export const FLEET_ROUTING_PATHS = {
   data_streams: '/data-streams',
   settings: '/settings',
   settings_create_fleet_server_hosts: '/settings/create-fleet-server-hosts',
-  settings_quick_create_fleet_server_hosts: '/settings/quick-create-fleet-server-hosts',
   settings_edit_fleet_server_hosts: '/settings/fleet-server-hosts/:itemId',
   settings_create_outputs: '/settings/create-outputs',
   settings_edit_outputs: '/settings/outputs/:outputId',
@@ -240,10 +238,6 @@ export const pagePathGetters: {
   settings_create_fleet_server_hosts: () => [
     FLEET_BASE_PATH,
     FLEET_ROUTING_PATHS.settings_create_fleet_server_hosts,
-  ],
-  settings_quick_create_fleet_server_hosts: () => [
-    FLEET_BASE_PATH,
-    FLEET_ROUTING_PATHS.settings_quick_create_fleet_server_hosts,
   ],
   settings_create_fleet_proxy: () => [
     FLEET_BASE_PATH,

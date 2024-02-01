@@ -17,6 +17,7 @@ import {
   useGetFleetServerHosts,
   useFlyoutContext,
   useGetFleetProxies,
+  useStartServices,
 } from '../../hooks';
 import { FLEET_ROUTING_PATHS, pagePathGetters } from '../../constants';
 import { DefaultLayout } from '../../layouts';
@@ -81,6 +82,8 @@ export const SettingsApp = withConfirmModalProvider(() => {
     history,
   ]);
 
+  const { cloud } = useStartServices();
+
   if (
     (outputs.isLoading && outputs.isInitialRequest) ||
     !outputItems ||
@@ -123,18 +126,17 @@ export const SettingsApp = withConfirmModalProvider(() => {
         </Route>
         <Route path={FLEET_ROUTING_PATHS.settings_create_fleet_server_hosts}>
           <EuiPortal>
-            <FleetServerFlyout onClose={onCloseCallback} />
-          </EuiPortal>
-        </Route>
-        <Route path={FLEET_ROUTING_PATHS.settings_quick_create_fleet_server_hosts}>
-          <EuiPortal>
-            <FleetServerHostsFlyout
-              proxies={proxies.data?.items ?? []}
-              onClose={onCloseCallback}
-              defaultFleetServerHost={fleetServerHosts.data?.items.find(
-                (o) => o.id === SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID
-              )}
-            />
+            {cloud?.isServerlessEnabled ? (
+              <FleetServerHostsFlyout
+                proxies={proxies.data?.items ?? []}
+                onClose={onCloseCallback}
+                defaultFleetServerHost={fleetServerHosts.data?.items.find(
+                  (o) => o.id === SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID
+                )}
+              />
+            ) : (
+              <FleetServerFlyout onClose={onCloseCallback} />
+            )}
           </EuiPortal>
         </Route>
         <Route path={FLEET_ROUTING_PATHS.settings_create_outputs}>
