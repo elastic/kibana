@@ -70,7 +70,6 @@ import { DashboardMountContextProps } from './dashboard_app/types';
 import type { FindDashboardsService } from './services/dashboard_content_management/types';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { addPanelMenuTrigger } from './triggers';
-import { registerMarkdownEditorEmbeddable } from './eui_markdown';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -124,8 +123,6 @@ export interface DashboardStart {
 
 export let resolveServicesReady: () => void;
 export const servicesReady = new Promise<void>((resolve) => (resolveServicesReady = resolve));
-
-registerMarkdownEditorEmbeddable();
 
 export class DashboardPlugin
   implements

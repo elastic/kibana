@@ -10,7 +10,7 @@ import { getLastSavedStateSubjectForChild } from '@kbn/presentation-containers';
 import { PublishingSubject } from '@kbn/presentation-publishing';
 import { useCallback, useEffect, useMemo } from 'react';
 import { BehaviorSubject, combineLatest } from 'rxjs';
-import { combineLatestWith, debounceTime, map, skip } from 'rxjs/operators';
+import { combineLatestWith, debounceTime, map } from 'rxjs/operators';
 import { useReactEmbeddableParentContext } from './react_embeddable_api';
 import { EmbeddableStateComparators, ReactEmbeddableFactory } from './types';
 
