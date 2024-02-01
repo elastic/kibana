@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import compareVersions from 'compare-versions';
 import { EuiSpacer } from '@elastic/eui';
 import { useParams, useHistory, generatePath } from 'react-router-dom';
@@ -42,7 +42,10 @@ interface RulesPageData {
 
 export type RulesState = RulesPageData & RulesQuery;
 
-const getRulesPage = (
+const getPage = (data: CspBenchmarkRulesWithStates[], { page, perPage }: RulesQuery) =>
+  data.slice(page * perPage, (page + 1) * perPage);
+
+const getRulesPageData = (
   data: CspBenchmarkRulesWithStates[],
   status: string,
   error: unknown,
@@ -60,9 +63,6 @@ const getRulesPage = (
   };
 };
 
-const getPage = (data: CspBenchmarkRulesWithStates[], { page, perPage }: RulesQuery) =>
-  data.slice(page * perPage, (page + 1) * perPage);
-
 const MAX_ITEMS_PER_PAGE = 10000;
 
 export const RulesContainer = () => {
@@ -71,7 +71,7 @@ export const RulesContainer = () => {
   const [enabledDisabledItemsFilter, setEnabledDisabledItemsFilter] = useState('no-filter');
   const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_RULES_KEY);
 
-  const onRuleClick = (ruleId: string) => {
+  const navToRuleFlyout = (ruleId: string) => {
     history.push(
       generatePath(benchmarksNavigation.rules.path, {
         benchmarkVersion: params.benchmarkVersion,
@@ -81,7 +81,7 @@ export const RulesContainer = () => {
     );
   };
 
-  const onFlyoutClose = () => {
+  const navToRulePage = () => {
     history.push(
       generatePath(benchmarksNavigation.rules.path, {
         benchmarkVersion: params.benchmarkVersion,
@@ -89,6 +89,18 @@ export const RulesContainer = () => {
       })
     );
   };
+
+  // We need to make this call without filters. this way the section list is always full
+  const allRules = useFindCspBenchmarkRule(
+    {
+      page: 1,
+      perPage: MAX_ITEMS_PER_PAGE,
+      sortField: 'metadata.benchmark.rule_number',
+      sortOrder: 'asc',
+    },
+    params.benchmarkId,
+    params.benchmarkVersion
+  );
 
   const [rulesQuery, setRulesQuery] = useState<RulesQuery>({
     section: undefined,
@@ -100,23 +112,34 @@ export const RulesContainer = () => {
     sortOrder: 'asc',
   });
 
+  useEffect(() => {
+    const getPageByRuleId = () => {
+      if (params.ruleId && allRules.data?.items) {
+        const ruleIndex = allRules.data.items.findIndex(
+          (rule) => rule.metadata.id === params.ruleId
+        );
+
+        if (ruleIndex !== -1) {
+          // Calculate the page based on the rule index and page size
+          const rulePage = Math.floor(ruleIndex / pageSize);
+          return rulePage;
+        }
+      }
+      return 0;
+    };
+
+    setRulesQuery({
+      ...rulesQuery,
+      page: getPageByRuleId(),
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allRules.data?.items]);
+
   const { data, status, error } = useFindCspBenchmarkRule(
     {
       section: rulesQuery.section,
       ruleNumber: rulesQuery.ruleNumber,
       search: rulesQuery.search,
-      page: 1,
-      perPage: MAX_ITEMS_PER_PAGE,
-      sortField: 'metadata.benchmark.rule_number',
-      sortOrder: 'asc',
-    },
-    params.benchmarkId,
-    params.benchmarkVersion
-  );
-
-  // We need to make this call again without the filters. this way the section list is always full
-  const allRules = useFindCspBenchmarkRule(
-    {
       page: 1,
       perPage: MAX_ITEMS_PER_PAGE,
       sortField: 'metadata.benchmark.rule_number',
@@ -182,7 +205,7 @@ export const RulesContainer = () => {
   const cleanedRuleNumberList = [...new Set(ruleNumberList)].sort(compareVersions);
 
   const rulesPageData = useMemo(
-    () => getRulesPage(filteredRulesWithStates, status, error, rulesQuery),
+    () => getRulesPageData(filteredRulesWithStates, status, error, rulesQuery),
     [filteredRulesWithStates, status, error, rulesQuery]
   );
 
@@ -244,7 +267,7 @@ export const RulesContainer = () => {
           setRulesQuery((currentQuery) => ({ ...currentQuery, ...paginationQuery }));
         }}
         selectedRuleId={params.ruleId}
-        onRuleClick={onRuleClick}
+        onRuleClick={navToRuleFlyout}
         refetchRulesStates={rulesStates.refetch}
         selectedRules={selectedRules}
         setSelectedRules={setSelectedRules}
@@ -252,7 +275,7 @@ export const RulesContainer = () => {
       {params.ruleId && rulesFlyoutData.metadata && (
         <RuleFlyout
           rule={rulesFlyoutData}
-          onClose={onFlyoutClose}
+          onClose={navToRulePage}
           refetchRulesStates={rulesStates.refetch}
         />
       )}
