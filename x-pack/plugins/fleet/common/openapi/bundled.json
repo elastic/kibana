@@ -1467,6 +1467,14 @@
           "name": "format",
           "description": "Format of response - json or yaml",
           "in": "query"
+        },
+        {
+          "schema": {
+            "type": "boolean"
+          },
+          "name": "prerelease",
+          "description": "Specify if version is prerelease",
+          "in": "query"
         }
       ]
     },
@@ -7663,8 +7671,8 @@
           },
           "namespace": {
             "type": "string",
-            "description": "namespace by default \"default\"",
-            "example": "default"
+            "description": "The package policy namespace. Leave blank to inherit the agent policy's namespace.",
+            "example": "customnamespace"
           },
           "policy_id": {
             "type": "string",
@@ -7928,6 +7936,9 @@
           "is_default_monitoring": {
             "type": "boolean"
           },
+          "is_internal": {
+            "type": "boolean"
+          },
           "name": {
             "type": "string"
           },
@@ -8027,6 +8038,9 @@
             "type": "boolean"
           },
           "is_default_monitoring": {
+            "type": "boolean"
+          },
+          "is_internal": {
             "type": "boolean"
           },
           "name": {
@@ -8252,6 +8266,9 @@
           "is_default_monitoring": {
             "type": "boolean"
           },
+          "is_internal": {
+            "type": "boolean"
+          },
           "name": {
             "type": "string"
           },
@@ -8358,6 +8375,9 @@
           "is_default_monitoring": {
             "type": "boolean"
           },
+          "is_internal": {
+            "type": "boolean"
+          },
           "name": {
             "type": "string"
           },
@@ -8426,6 +8446,9 @@
             "type": "boolean"
           },
           "is_default_monitoring": {
+            "type": "boolean"
+          },
+          "is_internal": {
             "type": "boolean"
           },
           "name": {
@@ -8529,6 +8552,9 @@
             "type": "boolean"
           },
           "is_default_monitoring": {
+            "type": "boolean"
+          },
+          "is_internal": {
             "type": "boolean"
           },
           "name": {
@@ -8732,6 +8758,9 @@
             "type": "boolean"
           },
           "is_default_monitoring": {
+            "type": "boolean"
+          },
+          "is_internal": {
             "type": "boolean"
           },
           "name": {

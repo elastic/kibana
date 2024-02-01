@@ -240,6 +240,14 @@ export function getTopNavConfig({
             <SavedObjectSaveModalDashboard
               {...saveModalProps}
               canSaveByReference={true} // we know here that we have save capabilities.
+              mustCopyOnSaveMessage={
+                savedMap.isManaged()
+                  ? i18n.translate('xpack.maps.topNav.mustCopyOnSaveMessage', {
+                      defaultMessage:
+                        'This map is managed by Elastic. Changes here must be saved to a new map.',
+                    })
+                  : undefined
+              }
               tagOptions={tagSelector}
             />
           );

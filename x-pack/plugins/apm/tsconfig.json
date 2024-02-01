@@ -51,7 +51,6 @@
     "@kbn/charts-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/typed-react-router-config",
-    "@kbn/advanced-settings-plugin",
     "@kbn/core-http-browser",
     "@kbn/server-route-repository",
     "@kbn/datemath",
@@ -110,6 +109,8 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/code-editor",
     "@kbn/shared-svg",
+    "@kbn/shared-ux-utility",
+    "@kbn/management-settings-components-field-row",
   ],
   "exclude": ["target/**/*"]
 }

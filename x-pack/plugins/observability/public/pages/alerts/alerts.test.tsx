@@ -5,27 +5,31 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render, waitFor } from '@testing-library/react';
-import { CoreStart } from '@kbn/core/public';
-import { AppMountParameters } from '@kbn/core/public';
-import { TimeBuckets } from '@kbn/data-plugin/common';
+import { ThemeProvider } from '@emotion/react';
+import { MAINTENANCE_WINDOW_FEATURE_ID } from '@kbn/alerting-plugin/common/maintenance_window';
 import { fetchActiveMaintenanceWindows } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/api';
 import { RUNNING_MAINTENANCE_WINDOW_1 } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/mock';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { TimeBuckets } from '@kbn/data-plugin/common';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { MAINTENANCE_WINDOW_FEATURE_ID } from '@kbn/alerting-plugin/common/maintenance_window';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
-
-import { ObservabilityPublicPluginsStart } from '../../plugin';
-import { AlertsPage } from './alerts';
-import { kibanaStartMock } from '../../utils/kibana_react.mock';
-import * as pluginContext from '../../hooks/use_plugin_context';
-import * as dataContext from '../../hooks/use_has_data';
-import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
-import { ThemeProvider } from '@emotion/react';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { euiDarkVars } from '@kbn/ui-theme';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { render, waitFor } from '@testing-library/react';
+import React from 'react';
+import { useLocation } from 'react-router-dom';
+import * as dataContext from '../../hooks/use_has_data';
+import * as pluginContext from '../../hooks/use_plugin_context';
+import { ObservabilityPublicPluginsStart } from '../../plugin';
+import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
+import { kibanaStartMock } from '../../utils/kibana_react.mock';
+import { AlertsPage } from './alerts';
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: jest.fn(),
+}));
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 mockUseKibanaReturnValue.services.application.capabilities = {
@@ -49,6 +53,8 @@ jest.mock('../../utils/kibana_react', () => ({
   })),
 }));
 
+const useLocationMock = useLocation as jest.Mock;
+
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   __esModule: true,
   useKibana: jest.fn(() => mockUseKibanaReturnValue),
@@ -60,7 +66,6 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   } as unknown as AppMountParameters,
   config: {
     unsafe: {
-      slo: { enabled: false },
       alertDetails: {
         apm: { enabled: false },
         metrics: { enabled: false },
@@ -168,6 +173,7 @@ describe('AlertsPage with all capabilities', () => {
   beforeEach(() => {
     fetchActiveMaintenanceWindowsMock.mockClear();
     useTimeBuckets.mockReturnValue(timeBuckets);
+    useLocationMock.mockReturnValue({ pathname: '/alerts', search: '', state: '', hash: '' });
   });
 
   it('should render an alerts page template', async () => {

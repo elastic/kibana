@@ -23,12 +23,14 @@ import type {
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
-import { asyncForEach } from '@kbn/std';
+import { asyncForEach, asyncMap } from '@kbn/std';
 
 import type {
   AggregationsTermsInclude,
   AggregationsTermsExclude,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
+import { isResponseError } from '@kbn/es-errors';
 
 import { UninstallTokenError } from '../../../../common/errors';
 
@@ -77,14 +79,14 @@ export interface UninstallTokenServiceInterface {
    * @param policyIdFilter a string for partial matching the policyId
    * @param page
    * @param perPage
-   * @param policyIdExcludeFilter
+   * @param excludePolicyIds
    * @returns Uninstall Tokens Metadata Response
    */
   getTokenMetadata(
     policyIdFilter?: string,
     page?: number,
     perPage?: number,
-    policyIdExcludeFilter?: string
+    excludePolicyIds?: string[]
   ): Promise<GetUninstallTokensMetadataResponse>;
 
   /**
@@ -167,23 +169,20 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
   public async getToken(id: string): Promise<UninstallToken | null> {
     const filter = `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.id: "${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}:${id}"`;
 
-    const uninstallTokens = await this.getDecryptedTokens({ filter });
+    const tokenObjects = await this.getDecryptedTokenObjects({ filter });
 
-    return uninstallTokens.length === 1 ? uninstallTokens[0] : null;
+    return tokenObjects.length === 1 ? this.convertTokenObjectToToken(tokenObjects[0]) : null;
   }
 
   public async getTokenMetadata(
     policyIdFilter?: string,
     page = 1,
     perPage = 20,
-    policyIdExcludeFilter?: string
+    excludePolicyIds?: string[]
   ): Promise<GetUninstallTokensMetadataResponse> {
     const includeFilter = policyIdFilter ? `.*${policyIdFilter}.*` : undefined;
 
-    const tokenObjects = await this.getTokenObjectsByIncludeFilter(
-      includeFilter,
-      policyIdExcludeFilter
-    );
+    const tokenObjects = await this.getTokenObjectsByIncludeFilter(includeFilter, excludePolicyIds);
 
     const items: UninstallTokenMetadata[] = tokenObjects
       .slice((page - 1) * perPage, page * perPage)
@@ -202,24 +201,66 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
   }
 
   private async getDecryptedTokensForPolicyIds(policyIds: string[]): Promise<UninstallToken[]> {
+    const tokenObjects = await this.getDecryptedTokenObjectsForPolicyIds(policyIds);
+
+    return tokenObjects.map(this.convertTokenObjectToToken);
+  }
+
+  private async getDecryptedTokenObjectsForPolicyIds(
+    policyIds: string[]
+  ): Promise<Array<SavedObjectsFindResult<UninstallTokenSOAttributes>>> {
     const tokenObjectHits = await this.getTokenObjectsByIncludeFilter(policyIds);
 
     if (tokenObjectHits.length === 0) {
       return [];
     }
 
-    const filter: string = tokenObjectHits
-      .map(({ _id }) => {
-        return `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.id: "${_id}"`;
-      })
-      .join(' or ');
+    const filterEntries: string[] = tokenObjectHits.map(
+      ({ _id }) => `${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}.id: "${_id}"`
+    );
 
-    return this.getDecryptedTokens({ filter });
+    let tokenObjectChunks: Array<Array<SavedObjectsFindResult<UninstallTokenSOAttributes>>> = [];
+
+    try {
+      tokenObjectChunks = await asyncMap(
+        chunk(filterEntries, this.getUninstallTokenVerificationBatchSize()),
+        async (entries) => {
+          const filter = entries.join(' or ');
+          return this.getDecryptedTokenObjects({ filter });
+        }
+      );
+    } catch (error) {
+      if (isResponseError(error) && error.message.includes('too_many_nested_clauses')) {
+        // `too_many_nested_clauses` is considered non-fatal
+        const errorMessage =
+          'Failed to validate uninstall tokens: `too_many_nested_clauses` error received. ' +
+          'Setting/decreasing the value of `xpack.fleet.setup.uninstallTokenVerificationBatchSize` in your kibana.yml should help. ' +
+          `Current value is ${this.getUninstallTokenVerificationBatchSize()}.`;
+
+        appContextService.getLogger().warn(`${errorMessage}: '${error}'`);
+
+        throw new UninstallTokenError(errorMessage);
+      } else {
+        throw error;
+      }
+    }
+
+    return tokenObjectChunks.flat();
   }
 
-  private getDecryptedTokens = async (
+  private getUninstallTokenVerificationBatchSize = () => {
+    /** If `uninstallTokenVerificationBatchSize` is too large, we get an error of `too_many_nested_clauses`.
+     *  Assuming that `max_clause_count` >= 1024, and experiencing that batch size should be less than half
+     *  than `max_clause_count` with our current query, batch size below 512 should be okay on every env.
+     */
+    const config = appContextService.getConfig();
+
+    return config?.setup?.uninstallTokenVerificationBatchSize ?? 500;
+  };
+
+  private async getDecryptedTokenObjects(
     options: Partial<SavedObjectsCreatePointInTimeFinderOptions>
-  ): Promise<UninstallToken[]> => {
+  ): Promise<Array<SavedObjectsFindResult<UninstallTokenSOAttributes>>> {
     const tokensFinder =
       await this.esoClient.createPointInTimeFinderDecryptedAsInternalUser<UninstallTokenSOAttributes>(
         {
@@ -228,34 +269,37 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
           ...options,
         }
       );
-    let tokenObject: Array<SavedObjectsFindResult<UninstallTokenSOAttributes>> = [];
+    let tokenObjects: Array<SavedObjectsFindResult<UninstallTokenSOAttributes>> = [];
 
     for await (const result of tokensFinder.find()) {
-      tokenObject = result.saved_objects;
+      tokenObjects = result.saved_objects;
       break;
     }
     tokensFinder.close();
 
-    const uninstallTokens: UninstallToken[] = tokenObject.map(
-      ({ id: _id, attributes, created_at: createdAt, error }) => {
-        if (error) {
-          throw new UninstallTokenError(`Error when reading Uninstall Token with id '${_id}'.`);
-        }
+    return tokenObjects;
+  }
 
-        this.assertPolicyId(attributes);
-        this.assertToken(attributes);
-        this.assertCreatedAt(createdAt);
+  private convertTokenObjectToToken = ({
+    id: _id,
+    attributes,
+    created_at: createdAt,
+    error,
+  }: SavedObjectsFindResult<UninstallTokenSOAttributes>): UninstallToken => {
+    if (error) {
+      throw new UninstallTokenError(`Error when reading Uninstall Token with id '${_id}'.`);
+    }
 
-        return {
-          id: _id,
-          policy_id: attributes.policy_id,
-          token: attributes.token || attributes.token_plain,
-          created_at: createdAt,
-        };
-      }
-    );
+    this.assertPolicyId(attributes);
+    this.assertToken(attributes);
+    this.assertCreatedAt(createdAt);
 
-    return uninstallTokens;
+    return {
+      id: _id,
+      policy_id: attributes.policy_id,
+      token: attributes.token || attributes.token_plain,
+      created_at: createdAt,
+    };
   };
 
   private async getTokenObjectsByIncludeFilter(
@@ -506,19 +550,40 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
   public async checkTokenValidityForPolicy(
     policyId: string
   ): Promise<UninstallTokenInvalidError | null> {
-    return await this.checkTokenValidity([policyId]);
+    return await this.checkTokenValidityForPolicies([policyId]);
   }
 
   public async checkTokenValidityForAllPolicies(): Promise<UninstallTokenInvalidError | null> {
     const policyIds = await this.getAllPolicyIds();
-    return await this.checkTokenValidity(policyIds);
+    return await this.checkTokenValidityForPolicies(policyIds);
   }
 
-  private async checkTokenValidity(
+  private async checkTokenValidityForPolicies(
     policyIds: string[]
   ): Promise<UninstallTokenInvalidError | null> {
     try {
-      await this.getDecryptedTokensForPolicyIds(policyIds);
+      const tokenObjects = await this.getDecryptedTokenObjectsForPolicyIds(policyIds);
+
+      const numberOfDecryptionErrors = tokenObjects.filter(({ error }) => error).length;
+      if (numberOfDecryptionErrors > 0) {
+        return {
+          error: new UninstallTokenError(
+            `Failed to decrypt ${numberOfDecryptionErrors} of ${tokenObjects.length} Uninstall Token(s)`
+          ),
+        };
+      }
+
+      const numberOfTokensWithMissingData = tokenObjects.filter(
+        ({ attributes, created_at: createdAt }) =>
+          !createdAt || !attributes.policy_id || (!attributes.token && !attributes.token_plain)
+      ).length;
+      if (numberOfTokensWithMissingData > 0) {
+        return {
+          error: new UninstallTokenError(
+            `Failed to validate Uninstall Tokens: ${numberOfTokensWithMissingData} of ${tokenObjects.length} tokens are invalid`
+          ),
+        };
+      }
     } catch (error) {
       if (error instanceof UninstallTokenError) {
         // known errors are considered non-fatal

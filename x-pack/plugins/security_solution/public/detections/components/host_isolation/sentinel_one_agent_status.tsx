@@ -45,7 +45,7 @@ const EuiFlexGroupStyled = styled(EuiFlexGroup)`
 `;
 
 export const SentinelOneAgentStatus = React.memo(
-  ({ agentId, dataTestSubj }: { agentId: string; dataTestSubj?: string }) => {
+  ({ agentId, 'data-test-subj': dataTestSubj }: { agentId: string; 'data-test-subj'?: string }) => {
     const { data, isFetched } = useSentinelOneAgentData({ agentId });
 
     const label = useMemo(() => {

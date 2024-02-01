@@ -62,8 +62,9 @@ export const StorybookContextDecorator: React.FC<StorybookContextDecoratorProps>
       ruleStatusFilter: true,
       rulesDetailLogs: true,
       ruleUseExecutionStatus: false,
-      // @ts-expect-error ts upgrade v4.7.4
       ruleKqlBar: true,
+      isMustacheAutocompleteOn: false,
+      showMustacheAutocompleteSwitch: false,
     },
   });
   return (

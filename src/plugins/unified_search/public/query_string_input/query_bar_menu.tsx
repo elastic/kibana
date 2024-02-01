@@ -72,6 +72,7 @@ export interface QueryBarMenuProps extends WithCloseFilterEditorConfirmModalProp
   buttonProps?: Partial<EuiButtonIconProps>;
   isDisabled?: boolean;
   suggestionsAbstraction?: SuggestionsAbstraction;
+  renderQueryInputAppend?: () => React.ReactNode;
 }
 
 function QueryBarMenuComponent({

@@ -35,7 +35,7 @@ describe('EditAssigneesFlyout', () => {
     jest.clearAllMocks();
     appMock = createAppMockRenderer();
 
-    useBulkGetUserProfilesMock.mockReturnValue({ data: userProfilesMap });
+    useBulkGetUserProfilesMock.mockReturnValue({ data: userProfilesMap, isLoading: false });
     useSuggestUserProfilesMock.mockReturnValue({ data: userProfiles, isLoading: false });
   });
 
