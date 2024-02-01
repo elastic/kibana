@@ -242,7 +242,7 @@ export function runCli() {
           throw createFlagError('--docs-only does not take a value');
         }
 
-        await cliPerfOptionOverride(useCreate, docsOnly, path, flags, esArchiver, log);
+        await cliPerfOptionOverride(useCreate, docsOnly, path, flags, esArchiver);
       },
     })
     .command({

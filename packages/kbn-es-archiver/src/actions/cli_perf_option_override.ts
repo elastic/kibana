@@ -8,15 +8,17 @@
 
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { Flags } from '@kbn/dev-cli-runner';
-import { ToolingLog } from '@kbn/tooling-log';
 import { EsArchiver } from '../es_archiver';
 
 type StringOption = string | boolean | string[] | undefined;
-const isStringOptRequested = (opt: StringOption) => typeof opt === 'string' && opt !== '';
+export const isStringOptProvided = (opt: StringOption) => typeof opt === 'string' && opt !== '';
 
-const protect = (x: StringOption) => {
-  if (Number.isNaN(parseInt(x as string, 10)))
-    throw createFlagError('invalid argument, please use a number');
+export const parseNumberFlag = (x: StringOption): number | undefined => {
+  if (isStringOptProvided(x)) {
+    const parsed = parseInt(x as string, 10);
+    if (Number.isNaN(parsed)) throw createFlagError('invalid argument, please use a number');
+    return parsed;
+  }
 };
 
 export const cliPerfOptionOverride = async (
@@ -24,60 +26,14 @@ export const cliPerfOptionOverride = async (
   docsOnly: boolean,
   path: string,
   flags: Flags,
-  esArchiver: EsArchiver,
-  log: ToolingLog
+  esArchiver: EsArchiver
 ): Promise<void> => {
-  const batchSize = flags['batch-size'];
-  const concurrency = flags.concurrency;
-
-  const batchRequested = isStringOptRequested(batchSize);
-  const concurrencyRequested = isStringOptRequested(concurrency);
-
-  if (!batchRequested && !concurrencyRequested) {
-    log.debug('No performance option override requested.');
-    await esArchiver.load(path, {
-      useCreate,
-      docsOnly,
-    });
-    return;
-  }
-
-  if (batchRequested && !concurrencyRequested) {
-    log.debug('Performance option override requested; batch size only');
-    protect(batchSize);
-    await esArchiver.load(path, {
-      useCreate,
-      docsOnly,
-      performance: {
-        batchSize: parseInt(batchSize as string, 10),
-      },
-    });
-    return;
-  }
-  if (concurrencyRequested && !batchRequested) {
-    log.debug('Performance option override requested; concurrency only');
-    protect(concurrency);
-    await esArchiver.load(path, {
-      useCreate,
-      docsOnly,
-      performance: {
-        concurrency: parseInt(concurrency as string, 10),
-      },
-    });
-    return;
-  }
-
-  if (batchRequested && concurrencyRequested) {
-    log.debug('Performance option override requested; batch size and concurrency');
-    [batchSize, concurrency].forEach(protect);
-    await esArchiver.load(path, {
-      useCreate,
-      docsOnly,
-      performance: {
-        batchSize: parseInt(batchSize as string, 10),
-        concurrency: parseInt(concurrency as string, 10),
-      },
-    });
-    return;
-  }
+  await esArchiver.load(path, {
+    useCreate,
+    docsOnly,
+    performance: {
+      batchSize: parseNumberFlag(flags['batch-size']),
+      concurrency: parseNumberFlag(flags.concurrency),
+    },
+  });
 };
