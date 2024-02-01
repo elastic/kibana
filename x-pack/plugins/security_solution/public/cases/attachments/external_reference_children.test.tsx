@@ -14,7 +14,7 @@ describe('AttachmentContent', () => {
   it('renders markdown content when comment exists', () => {
     const props = {
       externalReferenceMetadata: {
-        comment: 'Some comment',
+        comment: 'Some **markdown** content',
         command: 'isolate',
         targets: [
           {

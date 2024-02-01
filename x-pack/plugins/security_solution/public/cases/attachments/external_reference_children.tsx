@@ -39,9 +39,7 @@ const AttachmentContent = (props: {
     <ContentWrapper>
       <EuiMarkdownFormat grow={true}>{comment}</EuiMarkdownFormat>
     </ContentWrapper>
-  ) : (
-    <></>
-  );
+  ) : null;
 };
 // eslint-disable-next-line import/no-default-export
 export { AttachmentContent as default };
