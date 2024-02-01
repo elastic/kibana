@@ -213,10 +213,8 @@ describe('getCloudFleetServersHosts', () => {
 });
 
 describe('createCloudFleetServerHostIfNeeded', () => {
-  beforeEach(() => {
-    mockedCreateFleetServerHost.mockReset();
-  });
   afterEach(() => {
+    mockedCreateFleetServerHost.mockReset();
     mockedAppContextService.getCloud.mockReset();
   });
   it('should do nothing if there is no cloud fleet server hosts', async () => {
@@ -300,6 +298,9 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
         host_urls: ['http://test-internal.fr'],
       },
     ] as FleetServerHost[]);
+  });
+  afterEach(() => {
+    mockedBulkGetFleetServerHosts.mockReset();
   });
 
   it('should update preconfigured fleet server hosts if is_internal flag changes', async () => {
