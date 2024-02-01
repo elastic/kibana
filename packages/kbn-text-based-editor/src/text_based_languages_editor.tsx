@@ -351,14 +351,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         return policies.map(({ type, query: policyQuery, ...rest }) => rest);
       },
     }),
-    [
-      dataViews,
-      expressions,
-      indexManagementApiService,
-      esqlFieldsCache,
-      memoizedFieldsFromESQL,
-      uiSettings,
-    ]
+    [dataViews, expressions, indexManagementApiService, esqlFieldsCache, memoizedFieldsFromESQL]
   );
 
   const queryValidation = useCallback(
