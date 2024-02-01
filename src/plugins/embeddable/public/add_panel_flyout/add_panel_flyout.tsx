@@ -155,6 +155,14 @@ export const AddPanelFlyout = ({
           noItemsMessage={i18n.translate('embeddableApi.addPanel.noMatchingObjectsMessage', {
             defaultMessage: 'No matching objects found.',
           })}
+          getTooltipText={(item) => {
+            return item.managed
+              ? i18n.translate('embeddableApi.addPanel.managedPanelTooltip', {
+                  defaultMessage:
+                    'This panel is managed by Elastic. It can be added but will be unlinked from the library.',
+                })
+              : undefined;
+          }}
         />
       </EuiFlyoutBody>
     </>
