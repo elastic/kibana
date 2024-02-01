@@ -11,7 +11,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const PageObjects = getPageObjects([
     'common',
     'navigationalSearch',
-    'observabilityLogExplorer',
+    'observabilityLogsExplorer',
     'datasetQuality',
   ]);
 
@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
   describe('Dataset quality home', () => {
     it('dataset quality table exists', async () => {
-      await PageObjects.observabilityLogExplorer.navigateToDatasetQuality();
+      await PageObjects.observabilityLogsExplorer.navigateToDatasetQuality();
       await testSubjects.existOrFail(
         PageObjects.datasetQuality.testSubjectSelectors.datasetQualityTable
       );

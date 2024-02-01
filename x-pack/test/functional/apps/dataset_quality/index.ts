@@ -11,6 +11,6 @@ export default function ({ loadTestFile }: DatasetQualityFtrProviderContext) {
   describe('Observability Log Explorer', function () {
     loadTestFile(require.resolve('./home'));
     loadTestFile(require.resolve('./dataset_quality_table'));
-    loadTestFile(require.resolve('./flyout'));
+    loadTestFile(require.resolve('./dataset_quality_flyout'));
   });
 }

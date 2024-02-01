@@ -268,7 +268,7 @@ export function ObservabilityLogsExplorerPageObject({
       const queryStringParams = '';
 
       return await PageObjects.common.navigateToUrlWithBrowserHistory(
-        'observabilityLogExplorer',
+        'observabilityLogsExplorer',
         '/dataset-quality',
         queryStringParams,
         {

@@ -30,7 +30,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityFlyout: 'datasetQualityFlyout',
     datasetQualityFlyoutBody: 'datasetQualityFlyoutBody',
     datasetQualityFlyoutTitle: 'datasetQualityFlyoutTitle',
-    datasetQualityFlyoutOpenInLogExplorerButton: 'datasetQualityFlyoutOpenInLogExplorerButton',
+    datasetQualityFlyoutOpenInLogsExplorerButton: 'datasetQualityFlyoutOpenInLogsExplorerButton',
     datasetQualityFlyoutFieldValue: 'datasetQualityFlyoutFieldValue',
   };
 
@@ -93,7 +93,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     },
 
     getFlyoutLogsExplorerButton() {
-      return testSubjects.find(testSubjectSelectors.datasetQualityFlyoutOpenInLogExplorerButton);
+      return testSubjects.find(testSubjectSelectors.datasetQualityFlyoutOpenInLogsExplorerButton);
     },
 
     async doestTextExistInFlyout(text: string, elementSelector: string) {

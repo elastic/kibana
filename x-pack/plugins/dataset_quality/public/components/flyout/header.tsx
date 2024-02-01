@@ -59,7 +59,7 @@ export function Header({ dataStreamStat }: { dataStreamStat: FlyoutDataset }) {
               size="s"
               {...logExplorerLinkProps}
               iconType="logoObservability"
-              data-test-subj="datasetQualityFlyoutOpenInLogExplorerButton"
+              data-test-subj="datasetQualityFlyoutOpenInLogsExplorerButton"
             >
               {flyoutOpenInLogExplorerText}
             </EuiButton>

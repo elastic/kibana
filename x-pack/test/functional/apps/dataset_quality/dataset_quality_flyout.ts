@@ -13,7 +13,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const PageObjects = getPageObjects([
     'common',
     'navigationalSearch',
-    'observabilityLogExplorer',
+    'observabilityLogsExplorer',
     'datasetQuality',
   ]);
   const testSubjects = getService('testSubjects');
@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   describe('Dataset quality flyout', () => {
     before(async () => {
       await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
-      await PageObjects.observabilityLogExplorer.navigateToDatasetQuality();
+      await PageObjects.observabilityLogsExplorer.navigateToDatasetQuality();
     });
 
     after(async () => {
@@ -68,17 +68,17 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       const apacheAccessDatasetHumanName = 'Apache access logs';
       const apacheIntegrationId = 'apache';
 
-      await PageObjects.observabilityLogExplorer.navigateTo();
+      await PageObjects.observabilityLogsExplorer.navigateTo();
 
       // Add initial integrations
-      await PageObjects.observabilityLogExplorer.setupInitialIntegrations();
+      await PageObjects.observabilityLogsExplorer.setupInitialIntegrations();
 
       // Index 10 logs for `logs-apache.access` dataset
       await synthtrace.index(
         getLogsForDataset({ to, count: 10, dataset: apacheAccessDatasetName })
       );
 
-      await PageObjects.observabilityLogExplorer.navigateToDatasetQuality();
+      await PageObjects.observabilityLogsExplorer.navigateToDatasetQuality();
 
       await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
 
@@ -98,7 +98,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
       // Confirm dataset selector text in observability logs explorer
       const datasetSelectorText =
-        await PageObjects.observabilityLogExplorer.getDatasetSelectorButtonText();
+        await PageObjects.observabilityLogsExplorer.getDatasetSelectorButtonText();
       expect(datasetSelectorText).to.eql(testDatasetName);
     });
   });

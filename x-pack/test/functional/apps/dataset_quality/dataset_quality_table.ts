@@ -13,7 +13,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const PageObjects = getPageObjects([
     'common',
     'navigationalSearch',
-    'observabilityLogExplorer',
+    'observabilityLogsExplorer',
     'datasetQuality',
   ]);
   const synthtrace = getService('logSynthtraceEsClient');
@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   describe('Dataset quality table', () => {
     before(async () => {
       await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
-      await PageObjects.observabilityLogExplorer.navigateToDatasetQuality();
+      await PageObjects.observabilityLogsExplorer.navigateToDatasetQuality();
     });
 
     after(async () => {
@@ -32,6 +32,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     it('shows the right number of rows in correct order', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
       const datasetNameCol = cols['Dataset Name'];
+      await datasetNameCol.sort('descending');
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
       expect(datasetNameColCellTexts).to.eql([...datasetNames].reverse());
 
@@ -72,17 +73,17 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       const apacheAccessDatasetName = 'apache.access';
       const apacheAccessDatasetHumanName = 'Apache access logs';
 
-      await PageObjects.observabilityLogExplorer.navigateTo();
+      await PageObjects.observabilityLogsExplorer.navigateTo();
 
       // Add initial integrations
-      await PageObjects.observabilityLogExplorer.setupInitialIntegrations();
+      await PageObjects.observabilityLogsExplorer.setupInitialIntegrations();
 
       // Index 10 logs for `logs-apache.access` dataset
       await synthtrace.index(
         getLogsForDataset({ to, count: 10, dataset: apacheAccessDatasetName })
       );
 
-      await PageObjects.observabilityLogExplorer.navigateToDatasetQuality();
+      await PageObjects.observabilityLogsExplorer.navigateToDatasetQuality();
 
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
       const datasetNameCol = cols['Dataset Name'];
@@ -110,7 +111,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
       // Confirm dataset selector text in observability logs explorer
       const datasetSelectorText =
-        await PageObjects.observabilityLogExplorer.getDatasetSelectorButtonText();
+        await PageObjects.observabilityLogsExplorer.getDatasetSelectorButtonText();
       expect(datasetSelectorText).to.eql(datasetName);
     });
   });
