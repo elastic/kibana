@@ -108,9 +108,11 @@ export function jobsProvider(
         })
         .map((rule) => rule.id);
 
-      await rulesClient.bulkDeleteRules({
-        ids: ruleIds,
-      });
+      if (ruleIds.length > 0) {
+        await rulesClient.bulkDeleteRules({
+          ids: ruleIds,
+        });
+      }
     }
 
     for (const jobId of jobIds) {
