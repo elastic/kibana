@@ -99,7 +99,6 @@ export const useReactEmbeddableUnsavedChanges = <StateType extends object = obje
     // subscribe to last saved state subject and all state comparators
     const subscription = combineLatest(comparatorSubjects)
       .pipe(
-        skip(1), // initial unsaved changes will be built in initializer.
         debounceTime(100),
         map((latestStates) =>
           comparatorKeys.reduce((acc, key, index) => {
