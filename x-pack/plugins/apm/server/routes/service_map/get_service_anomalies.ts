@@ -8,9 +8,8 @@
 import Boom from '@hapi/boom';
 import { sortBy, uniqBy } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ESSearchResponse } from '@kbn/es-types';
 import type { MlAnomalyDetectors } from '@kbn/ml-plugin/server';
-import { rangeQuery } from '@kbn/observability-plugin/server';
+import { rangeQuery, wildcardQuery } from '@kbn/observability-plugin/server';
 import { getSeverity, ML_ERRORS } from '../../../common/anomaly_detection';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getServiceHealthStatus } from '../../../common/service_health_status';
@@ -20,6 +19,11 @@ import { getMlJobsWithAPMGroup } from '../../lib/anomaly_detection/get_ml_jobs_w
 import { MlClient } from '../../lib/helpers/get_ml_client';
 import { apmMlAnomalyQuery } from '../../lib/anomaly_detection/apm_ml_anomaly_query';
 import { AnomalyDetectorType } from '../../../common/anomaly_detection/apm_ml_detectors';
+import {
+  anomalySearch,
+  ML_SERVICE_NAME_FIELD,
+  ML_TRANSACTION_TYPE_FIELD,
+} from '../../lib/anomaly_detection/anomaly_search';
 
 export const DEFAULT_ANOMALIES: ServiceAnomaliesResponse = {
   mlJobIds: [],
@@ -34,11 +38,13 @@ export async function getServiceAnomalies({
   environment,
   start,
   end,
+  searchQuery,
 }: {
   mlClient?: MlClient;
   environment: string;
   start: number;
   end: number;
+  searchQuery?: string;
 }) {
   return withApmSpan('get_service_anomalies', async () => {
     if (!mlClient) {
@@ -65,6 +71,7 @@ export async function getServiceAnomalies({
                   by_field_value: defaultTransactionTypes,
                 },
               },
+              ...wildcardQuery(ML_SERVICE_NAME_FIELD, searchQuery),
             ] as estypes.QueryDslQueryContainer[],
           },
         },
@@ -73,7 +80,7 @@ export async function getServiceAnomalies({
             composite: {
               size: 5000,
               sources: [
-                { serviceName: { terms: { field: 'partition_field_value' } } },
+                { serviceName: { terms: { field: ML_SERVICE_NAME_FIELD } } },
                 { jobId: { terms: { field: 'job_id' } } },
               ] as Array<
                 Record<string, estypes.AggregationsCompositeAggregationSource>
@@ -84,7 +91,7 @@ export async function getServiceAnomalies({
                 top_metrics: {
                   metrics: [
                     { field: 'actual' },
-                    { field: 'by_field_value' },
+                    { field: ML_TRANSACTION_TYPE_FIELD },
                     { field: 'result_type' },
                     { field: 'record_score' },
                   ],
@@ -100,20 +107,16 @@ export async function getServiceAnomalies({
     };
 
     const [anomalyResponse, jobIds] = await Promise.all([
-      // pass an empty array of job ids to anomaly search
-      // so any validation is skipped
       withApmSpan('ml_anomaly_search', () =>
-        mlClient.mlSystem.mlAnomalySearch(params, [])
+        anomalySearch(mlClient.mlSystem.mlAnomalySearch, params)
       ),
       getMLJobIds(mlClient.anomalyDetectors, environment),
     ]);
 
-    const typedAnomalyResponse: ESSearchResponse<unknown, typeof params> =
-      anomalyResponse as any;
     const relevantBuckets = uniqBy(
       sortBy(
         // make sure we only return data for jobs that are available in this space
-        typedAnomalyResponse.aggregations?.services.buckets.filter((bucket) =>
+        anomalyResponse.aggregations?.services.buckets.filter((bucket) =>
           jobIds.includes(bucket.key.jobId as string)
         ) ?? [],
         // sort by job ID in case there are multiple jobs for one service to
