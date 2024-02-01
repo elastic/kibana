@@ -311,10 +311,8 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     const dataViewFieldsExistenceUnavailable = dataViewId && fieldsExistenceInfoUnavailable;
     // for textbased queries, rely on the empty fields length
     const textBasedFieldsExistenceUnavailable = !dataViewId && !groupedFields.emptyFields.length;
-    
-    if (
-      dataViewFieldsExistenceUnavailable || textBasedFieldsExistenceUnavailable
-    ) {
+
+    if (dataViewFieldsExistenceUnavailable || textBasedFieldsExistenceUnavailable) {
       delete fieldGroupDefinitions.EmptyFields;
     }
 
