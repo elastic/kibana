@@ -84,7 +84,8 @@ const SCHEMA_SEARCH_BASE = {
 };
 
 export const SCHEMA_SEARCH_V8_8_0 = schema.object(SCHEMA_SEARCH_BASE);
-export const SCHEMA_SEARCH_V8_12_0 = schema.object({
+
+const V8_12_0 = {
   ...SCHEMA_SEARCH_BASE,
   sampleSize: schema.maybe(
     schema.number({
@@ -92,8 +93,11 @@ export const SCHEMA_SEARCH_V8_12_0 = schema.object({
       max: MAX_SAVED_SEARCH_SAMPLE_SIZE,
     })
   ),
-});
-export const SCHEMA_SEARCH_V8_13_0 = schema.object({
-  ...SCHEMA_SEARCH_BASE,
+};
+export const SCHEMA_SEARCH_V8_12_0 = schema.object(V8_12_0);
+
+const V8_13_0 = {
+  ...V8_12_0,
   visContextJSON: schema.maybe(schema.string()),
-});
+};
+export const SCHEMA_SEARCH_V8_13_0 = schema.object(V8_13_0);
