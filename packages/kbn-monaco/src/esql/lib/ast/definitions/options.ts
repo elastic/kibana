@@ -53,6 +53,7 @@ export const metadataOption: CommandOptionsDefinition = {
               },
             }),
             type: 'error',
+            code: 'wrongMetadataArgument',
           });
         }
       }
