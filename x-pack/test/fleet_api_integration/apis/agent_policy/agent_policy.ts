@@ -1187,7 +1187,7 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
-      describe.only('Errors when trying to delete', () => {
+      describe('Errors when trying to delete', () => {
         it('should prevent policies having agents from being deleted', async () => {
           const {
             body: { item: policyWithAgents },
