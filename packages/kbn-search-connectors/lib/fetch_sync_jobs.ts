@@ -19,16 +19,11 @@ export const fetchSyncJobs = async (
   size: number = 100,
   syncJobType: 'content' | 'access_control' | 'all' = 'all'
 ): Promise<Paginate<ConnectorSyncJob>> => {
-  let querystring = `from=${from}&size=${size}`;
-  if (connectorId) {
-    querystring += `&connector_id=${connectorId}`;
-  }
-  if (syncJobType === 'content') {
-    querystring += '&job_type=full,incremental';
-  } else if (syncJobType === 'access_control') {
-    querystring += '&job_type=access_control';
-  }
-
+  const querystring = `from=${from}&size=${size}${
+    connectorId ? '&connector_id=' + connectorId : ''
+  }${syncJobType === 'content' ? '&job_type=full,incremental' : ''}${
+    syncJobType === 'access_control' ? '&job_type=access_control' : ''
+  }`;
   const result = await client.transport.request<ConnectorsAPISyncJobResponse>({
     method: 'GET',
     path: `/_connector/_sync_job`,
