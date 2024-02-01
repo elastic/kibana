@@ -6,37 +6,23 @@
  */
 
 import React, { useEffect, useState } from 'react';
-
 import { useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-// import { generateEncodedPath } from '../../../shared/encode_path_params';
-// import { ErrorStatePrompt } from '../../../shared/error_state';
-// import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
-// import { SEARCH_INDEX_PATH, SEARCH_INDEX_TAB_PATH } from '../../routes';
-
-// import { isConnectorIndex /* isCrawlerIndex */ } from '../../utils/indices';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
+import { ConnectorConfiguration } from '../search_index/connector/connector_configuration';
+import { ConnectorSchedulingComponent } from '../search_index/connector/connector_scheduling';
+import { ConnectorSyncRules } from '../search_index/connector/sync_rules/connector_rules';
+import { SearchIndexDocuments } from '../search_index/documents';
+import { SearchIndexIndexMappings } from '../search_index/index_mappings';
 import { baseBreadcrumbs } from '../search_indices';
 
-// import { getHeaderActions } from './components/header_actions/header_actions';
-import { ConnectorConfiguration } from './connector/connector_configuration';
-import { ConnectorSchedulingComponent } from './connector/connector_scheduling';
-import { ConnectorSyncRules } from './connector/sync_rules/connector_rules';
-// import { CrawlCustomSettingsFlyout } from './crawler/crawl_custom_settings_flyout/crawl_custom_settings_flyout';
-// import { AutomaticCrawlScheduler } from './crawler/automatic_crawl_scheduler/automatic_crawl_scheduler';
-// import { CrawlerConfiguration } from './crawler/crawler_configuration/crawler_configuration';
-// import { SearchIndexDomainManagement } from './crawler/domain_management/domain_management';
-// import { NoConnectorRecord } from './crawler/no_connector_record';
 import { ConnectorViewLogic } from './connector_view_logic';
-import { SearchIndexDocuments } from './documents';
-import { SearchIndexIndexMappings } from './index_mappings';
-// import { IndexNameLogic } from './index_name_logic';
 import { ConnectorDetailOverview } from './overview';
 import { SearchIndexPipelines } from './pipelines/pipelines';
 
@@ -53,7 +39,7 @@ export enum ConnectorDetailTabId {
 }
 
 export const ConnectorDetail: React.FC = () => {
-  const { hasFilteringFeature, isLoading, index } = useValues(ConnectorViewLogic);
+  const { hasFilteringFeature, isLoading, index, connector } = useValues(ConnectorViewLogic);
   const { fetchConnector } = useActions(ConnectorViewLogic);
   useEffect(() => {
     fetchConnector({ connectorId: '6vzqVY0BeXPM5g_EQfu0' });
@@ -70,29 +56,29 @@ export const ConnectorDetail: React.FC = () => {
   const [selectedTabId, setSelectedTabId] = useState<string>(tabId);
   const ALL_INDICES_TABS = [
     {
-      isSelected: selectedTabId === ConnectorDetailTabId.OVERVIEW,
       content: <ConnectorDetailOverview />,
       id: ConnectorDetailTabId.OVERVIEW,
+      isSelected: selectedTabId === ConnectorDetailTabId.OVERVIEW,
       label: i18n.translate('xpack.enterpriseSearch.content.searchIndex.overviewTabLabel', {
         defaultMessage: 'Overview',
       }),
       onClick: () => setSelectedTabId(ConnectorDetailTabId.OVERVIEW),
     },
     {
-      isSelected: selectedTabId === ConnectorDetailTabId.DOCUMENTS,
-      disabled: !index,
       content: <SearchIndexDocuments />,
+      disabled: !index,
       id: ConnectorDetailTabId.DOCUMENTS,
+      isSelected: selectedTabId === ConnectorDetailTabId.DOCUMENTS,
       label: i18n.translate('xpack.enterpriseSearch.content.searchIndex.documentsTabLabel', {
         defaultMessage: 'Documents',
       }),
       onClick: () => setSelectedTabId(ConnectorDetailTabId.DOCUMENTS),
     },
     {
-      isSelected: selectedTabId === ConnectorDetailTabId.INDEX_MAPPINGS,
-      disabled: !index,
       content: <SearchIndexIndexMappings />,
+      disabled: !index,
       id: ConnectorDetailTabId.INDEX_MAPPINGS,
+      isSelected: selectedTabId === ConnectorDetailTabId.INDEX_MAPPINGS,
       label: i18n.translate('xpack.enterpriseSearch.content.searchIndex.indexMappingsTabLabel', {
         defaultMessage: 'Index mappings',
       }),
@@ -102,9 +88,9 @@ export const ConnectorDetail: React.FC = () => {
 
   const CONNECTOR_TABS = [
     {
-      isSelected: selectedTabId === ConnectorDetailTabId.CONFIGURATION,
       content: <ConnectorConfiguration />,
       id: ConnectorDetailTabId.CONFIGURATION,
+      isSelected: selectedTabId === ConnectorDetailTabId.CONFIGURATION,
       label: i18n.translate('xpack.enterpriseSearch.content.searchIndex.configurationTabLabel', {
         defaultMessage: 'Configuration',
       }),
@@ -113,10 +99,10 @@ export const ConnectorDetail: React.FC = () => {
     ...(hasFilteringFeature
       ? [
           {
-            isSelected: selectedTabId === ConnectorDetailTabId.SYNC_RULES,
-            disabled: !index,
             content: <ConnectorSyncRules />,
+            disabled: !index,
             id: ConnectorDetailTabId.SYNC_RULES,
+            isSelected: selectedTabId === ConnectorDetailTabId.SYNC_RULES,
             label: i18n.translate('xpack.enterpriseSearch.content.searchIndex.syncRulesTabLabel', {
               defaultMessage: 'Sync rules',
             }),
@@ -125,10 +111,10 @@ export const ConnectorDetail: React.FC = () => {
         ]
       : []),
     {
-      isSelected: selectedTabId === ConnectorDetailTabId.SCHEDULING,
-      disabled: !index,
       content: <ConnectorSchedulingComponent />,
+      disabled: !index,
       id: ConnectorDetailTabId.SCHEDULING,
+      isSelected: selectedTabId === ConnectorDetailTabId.SCHEDULING,
       label: i18n.translate('xpack.enterpriseSearch.content.searchIndex.schedulingTabLabel', {
         defaultMessage: 'Scheduling',
       }),
@@ -137,10 +123,10 @@ export const ConnectorDetail: React.FC = () => {
   ];
 
   const PIPELINES_TAB = {
-    isSelected: selectedTabId === ConnectorDetailTabId.PIPELINES,
-    disabled: !index,
     content: <SearchIndexPipelines />,
+    disabled: !index,
     id: ConnectorDetailTabId.PIPELINES,
+    isSelected: selectedTabId === ConnectorDetailTabId.PIPELINES,
     label: i18n.translate('xpack.enterpriseSearch.content.searchIndex.pipelinesTabLabel', {
       defaultMessage: 'Pipelines',
     }),
@@ -161,8 +147,6 @@ export const ConnectorDetail: React.FC = () => {
   const tabs: TabMenuItem[] = [
     ...ALL_INDICES_TABS,
     ...CONNECTOR_TABS,
-    // ...(isConnectorIndex(index) ? CONNECTOR_TABS : []),
-    // ...(isCrawlerIndex(index) ? CRAWLER_TABS : []),
     ...(hasDefaultIngestPipeline ? [PIPELINES_TAB] : []),
   ];
 
@@ -170,13 +154,13 @@ export const ConnectorDetail: React.FC = () => {
 
   return (
     <EnterpriseSearchContentPageTemplate
-      pageChrome={[...baseBreadcrumbs, 'TODO CHANGEME']}
+      pageChrome={[...baseBreadcrumbs, connector?.name ?? '...']}
       pageViewTelemetry={tabId}
       isLoading={isLoading}
       pageHeader={{
-        tabs,
-        pageTitle: 'CONNECTOR DETAIL CHANGEME',
+        pageTitle: connector?.name ?? '...',
         rightSideItems: [], // getHeaderActions(index, hasAppSearchAccess),
+        tabs,
       }}
     >
       {selectedTab?.content || null}
