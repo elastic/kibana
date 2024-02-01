@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiDescriptionList, EuiLink } from '@elastic/eui';
+import { EuiBadge, EuiDescriptionList, EuiLink, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { generatePath } from 'react-router-dom';
@@ -19,7 +19,18 @@ export const getRuleList = (rule: CspFinding['rule'], ruleFlyoutLink?: string) =
     title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.nameTitle', {
       defaultMessage: 'Name',
     }),
-    description: ruleFlyoutLink ? <EuiLink href={ruleFlyoutLink}>{rule.name}</EuiLink> : rule.name,
+    description: ruleFlyoutLink ? (
+      <EuiToolTip
+        position="top"
+        content={i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.nameTooltip', {
+          defaultMessage: 'Manage Rule',
+        })}
+      >
+        <EuiLink href={ruleFlyoutLink}>{rule.name}</EuiLink>
+      </EuiToolTip>
+    ) : (
+      rule.name
+    ),
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.descriptionTitle', {

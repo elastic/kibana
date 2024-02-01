@@ -13,6 +13,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import moment from 'moment';
@@ -43,7 +44,16 @@ const getDetailsList = (data: CspFinding, discoverIndexLink?: string, ruleFlyout
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTitle', {
       defaultMessage: 'Rule Name',
     }),
-    description: <EuiLink href={ruleFlyoutLink}>{data.rule.name}</EuiLink>,
+    description: (
+      <EuiToolTip
+        position="top"
+        content={i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTooltip', {
+          defaultMessage: 'Manage Rule',
+        })}
+      >
+        <EuiLink href={ruleFlyoutLink}>{data.rule.name}</EuiLink>
+      </EuiToolTip>
+    ),
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.alertsTitle', {

@@ -68,7 +68,6 @@ const MAX_ITEMS_PER_PAGE = 10000;
 export const RulesContainer = () => {
   const params = useParams<PageUrlParams>();
   const history = useHistory();
-  const [selectedRuleId, setSelectedRuleId] = useState<string | null>(null);
   const [enabledDisabledItemsFilter, setEnabledDisabledItemsFilter] = useState('no-filter');
   const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_RULES_KEY);
 
@@ -244,8 +243,7 @@ export const RulesContainer = () => {
           setPageSize(paginationQuery.perPage);
           setRulesQuery((currentQuery) => ({ ...currentQuery, ...paginationQuery }));
         }}
-        setSelectedRuleId={setSelectedRuleId}
-        selectedRuleId={selectedRuleId}
+        selectedRuleId={params.ruleId}
         onRuleClick={onRuleClick}
         refetchRulesStates={rulesStates.refetch}
         selectedRules={selectedRules}

@@ -31,8 +31,8 @@ type RulesTableProps = Pick<
   'loading' | 'error' | 'rules_page' | 'total' | 'perPage' | 'page'
 > & {
   setPagination(pagination: Pick<RulesState, 'perPage' | 'page'>): void;
-  setSelectedRuleId(id: string | null): void;
-  selectedRuleId: string | null;
+  onRuleClick: (ruleID: string) => void;
+  selectedRuleId?: string;
   refetchRulesStates: () => void;
   selectedRules: CspBenchmarkRulesWithStates[];
   setSelectedRules: (rules: CspBenchmarkRulesWithStates[]) => void;
@@ -40,7 +40,7 @@ type RulesTableProps = Pick<
 
 type GetColumnProps = Pick<
   RulesTableProps,
-  'setSelectedRuleId' | 'refetchRulesStates' | 'selectedRules' | 'setSelectedRules'
+  'onRuleClick' | 'refetchRulesStates' | 'selectedRules' | 'setSelectedRules'
 > & {
   postRequestChangeRulesStates: (
     actionOnRule: 'mute' | 'unmute',
@@ -57,7 +57,6 @@ type GetColumnProps = Pick<
 
 export const RulesTable = ({
   setPagination,
-  setSelectedRuleId,
   perPage: pageSize,
   rules_page: items,
   page,
@@ -117,7 +116,6 @@ export const RulesTable = ({
   const columns = useMemo(
     () =>
       getColumns({
-        setSelectedRuleId,
         refetchRulesStates,
         postRequestChangeRulesStates,
         selectedRules,
@@ -129,7 +127,6 @@ export const RulesTable = ({
         onRuleClick,
       }),
     [
-      setSelectedRuleId,
       refetchRulesStates,
       postRequestChangeRulesStates,
       selectedRules,
@@ -158,7 +155,6 @@ export const RulesTable = ({
 };
 
 const getColumns = ({
-  setSelectedRuleId,
   refetchRulesStates,
   postRequestChangeRulesStates,
   selectedRules,
@@ -241,7 +237,6 @@ const getColumns = ({
         title={name}
         onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
           e.stopPropagation();
-          // setSelectedRuleId(rule.metadata.id);
           onRuleClick(rule.metadata.id);
         }}
         data-test-subj={TEST_SUBJECTS.CSP_RULES_TABLE_ROW_ITEM_NAME}
