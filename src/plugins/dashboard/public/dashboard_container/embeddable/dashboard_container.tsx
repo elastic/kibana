@@ -19,14 +19,17 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import {
   Container,
+  EmbeddableFactoryNotFoundError,
+  isExplicitInputWithAttributes,
   ViewMode,
   type EmbeddableFactory,
   type EmbeddableInput,
   type EmbeddableOutput,
   type IEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { PanelPackage } from '@kbn/presentation-containers';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
@@ -35,7 +38,11 @@ import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-f
 
 import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE } from '../..';
 import { DashboardContainerInput, DashboardPanelState } from '../../../common';
-import { DASHBOARD_APP_ID, DASHBOARD_LOADED_EVENT } from '../../dashboard_constants';
+import {
+  DASHBOARD_APP_ID,
+  DASHBOARD_LOADED_EVENT,
+  DASHBOARD_UI_METRIC_ID,
+} from '../../dashboard_constants';
 import { DashboardAnalyticsService } from '../../services/analytics/types';
 import { DashboardCapabilitiesService } from '../../services/dashboard_capabilities/types';
 import { pluginServices } from '../../services/plugin_services';
@@ -66,6 +73,7 @@ import {
   dashboardTypeDisplayName,
 } from './dashboard_container_factory';
 import { SavedDashboardInput } from '../../services/dashboard_content_management/types';
+import { dashboardReplacePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -140,6 +148,10 @@ export class DashboardContainer
   private chrome;
   private customBranding;
 
+  private trackPanelAddMetric:
+    | ((type: string, eventNames: string | string[], count?: number | undefined) => void)
+    | undefined;
+
   constructor(
     initialInput: DashboardContainerInput,
     reduxToolsPackage: ReduxToolsPackage,
@@ -150,9 +162,9 @@ export class DashboardContainer
     initialComponentState?: DashboardPublicState
   ) {
     const {
+      usageCollection,
       embeddable: { getEmbeddableFactory },
     } = pluginServices.getServices();
-
     super(
       {
         ...initialInput,
@@ -160,6 +172,11 @@ export class DashboardContainer
       { embeddableLoaded: {} },
       getEmbeddableFactory,
       parent
+    );
+
+    this.trackPanelAddMetric = usageCollection.reportUiCounter?.bind(
+      usageCollection,
+      DASHBOARD_UI_METRIC_ID
     );
 
     ({
@@ -389,6 +406,63 @@ export class DashboardContainer
     }
     this.setHighlightPanelId(newId);
     return newId;
+  }
+
+  public async addNewPanel<ApiType extends unknown = unknown>(
+    panelPackage: PanelPackage,
+    silent?: boolean
+  ) {
+    const {
+      notifications: { toasts },
+      embeddable: { getEmbeddableFactory },
+    } = pluginServices.getServices();
+    const embeddableFactory = getEmbeddableFactory(panelPackage.panelType);
+    if (!embeddableFactory) {
+      throw new EmbeddableFactoryNotFoundError(panelPackage.panelType);
+    }
+
+    if (this.trackPanelAddMetric) {
+      this.trackPanelAddMetric(METRIC_TYPE.CLICK, embeddableFactory.type);
+    }
+    const initialInput = panelPackage.initialState as Partial<EmbeddableInput>;
+
+    let explicitInput: Partial<EmbeddableInput>;
+    let attributes: unknown;
+    try {
+      if (initialInput) {
+        explicitInput = initialInput;
+      } else {
+        const explicitInputReturn = await embeddableFactory.getExplicitInput(undefined, this);
+        if (isExplicitInputWithAttributes(explicitInputReturn)) {
+          explicitInput = explicitInputReturn.newInput;
+          attributes = explicitInputReturn.attributes;
+        } else {
+          explicitInput = explicitInputReturn;
+        }
+      }
+    } catch (e) {
+      // error likely means user canceled embeddable creation
+      return;
+    }
+
+    const newEmbeddable = await this.addNewEmbeddable(
+      embeddableFactory.type,
+      explicitInput,
+      attributes
+    );
+
+    if (newEmbeddable) {
+      this.setScrollToPanelId(newEmbeddable.id);
+      this.setHighlightPanelId(newEmbeddable.id);
+
+      if (!silent) {
+        toasts.addSuccess({
+          title: dashboardReplacePanelActionStrings.getSuccessMessage(newEmbeddable.getTitle()),
+          'data-test-subj': 'addEmbeddableToDashboardSuccess',
+        });
+      }
+    }
+    return newEmbeddable as ApiType;
   }
 
   public getDashboardPanelFromId = (panelId: string) => this.getInput().panels[panelId];

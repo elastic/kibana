@@ -16,6 +16,10 @@ export interface PresentationContainer extends Partial<PublishesViewMode> {
   removePanel: (panelId: string) => void;
   canRemovePanels?: () => boolean;
   replacePanel: (idToRemove: string, newPanel: PanelPackage) => Promise<string>;
+  addNewPanel: <ApiType extends unknown = unknown>(
+    panel: PanelPackage,
+    silent?: boolean
+  ) => Promise<ApiType | undefined>;
 }
 
 export const apiIsPresentationContainer = (
