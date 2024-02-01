@@ -49,19 +49,17 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
       dataType: type === 'string' ? type : 'number',
     })),
   }),
-  max: createOperationDefinitionMock('max'),
+  max: createOperationDefinitionMock('max', {}),
   count: createOperationDefinitionMock('count', {
     filterable: true,
     canReduceTimeRange: true,
   }),
   derivative: createOperationDefinitionMock('derivative', { input: 'fullReference' }),
   moving_average: createOperationDefinitionMock('moving_average', {
-    // @ts-expect-error upgrade typescript v4.9.5
     input: 'fullReference',
     operationParams: [{ name: 'window', type: 'number', required: true }],
     filterable: true,
     getErrorMessage: jest.fn(() => ['mock error']),
-    // @ts-expect-error upgrade typescript v4.9.5
     buildColumn: ({ referenceIds }, columnsParams) => ({
       label: 'moving_average',
       dataType: 'number',
