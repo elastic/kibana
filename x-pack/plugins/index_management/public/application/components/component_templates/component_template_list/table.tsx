@@ -18,7 +18,6 @@ import {
   EuiLink,
   EuiBadge,
   EuiSearchBarProps,
-
   EuiSearchBar,
   EuiPopover,
   EuiFilterGroup,
@@ -213,16 +212,20 @@ export const ComponentTable: FunctionComponent<Props> = ({
                     allowExclusions
                     searchable
                     searchProps={{
-                      placeholder: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.filterListPlaceholder', {
-                        defaultMessage: 'Filter list',
-                      }),
+                      placeholder: i18n.translate(
+                        'xpack.idxMgmt.componentTemplatesList.table.filterListPlaceholder',
+                        {
+                          defaultMessage: 'Filter list',
+                        }
+                      ),
                       compressed: true,
                     }}
-                    aria-label={
-                      i18n.translate('xpack.idxMgmt.componentTemplatesList.table.filtersAriaLabel', {
+                    aria-label={i18n.translate(
+                      'xpack.idxMgmt.componentTemplatesList.table.filtersAriaLabel',
+                      {
                         defaultMessage: 'Filters',
-                      })
-                    }
+                      }
+                    )}
                     options={filterOptions as EuiSelectableOption[]}
                     onChange={(newOptions) => {
                       // Set new options for current state
@@ -243,11 +246,12 @@ export const ComponentTable: FunctionComponent<Props> = ({
 
                       setQuery(newQuery.text);
                     }}
-                    noMatchesMessage={
-                      i18n.translate('xpack.idxMgmt.componentTemplatesList.table.noFiltersFound', {
+                    noMatchesMessage={i18n.translate(
+                      'xpack.idxMgmt.componentTemplatesList.table.noFiltersFound',
+                      {
                         defaultMessage: 'No filters found',
-                      })
-                    }
+                      }
+                    )}
                   >
                     {(list, searchText) => (
                       <div style={{ width: 300 }}>
@@ -260,7 +264,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
               </EuiFilterGroup>
             );
           },
-        }
+        },
       ],
     },
     pagination: {
