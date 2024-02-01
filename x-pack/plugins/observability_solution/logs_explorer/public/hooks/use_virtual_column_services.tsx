@@ -11,7 +11,7 @@ import { LogExplorerDiscoverServices } from '../controller';
 export interface UseVirtualColumnServices {
   services: {
     data: LogExplorerDiscoverServices['data'];
-    dataView: DataView;
+    dataView: DataView | undefined;
   };
 }
 
