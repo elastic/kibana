@@ -15,78 +15,59 @@ import type { ReactNode } from 'react';
 import { Component } from 'react';
 import { createPortal } from 'react-dom';
 
-interface InsertPositionsMap {
-  after: InsertPosition;
-  before: InsertPosition;
-}
-
-export const insertPositions: InsertPositionsMap = {
-  after: 'afterend',
-  before: 'beforebegin',
-};
-
-export interface EuiPortalProps {
+export interface CustomEuiPortalProps {
   /**
    * ReactNode to render as this component's content
    */
   children: ReactNode;
-  insert?: { sibling: HTMLElement | null; position: 'before' | 'after' };
-  portalRef?: (ref: HTMLDivElement | null) => void;
+  /**
+   * Sibling is the React node or HTMLElement to insert the portal next to
+   * Position specifies the portal's relative position, either before or after
+   */
+  sibling: HTMLDivElement | null;
 }
 
-export class EuiPortal extends Component<EuiPortalProps> {
+export class CustomEuiPortal extends Component<CustomEuiPortalProps> {
   portalNode: HTMLDivElement | null = null;
 
-  constructor(props: EuiPortalProps) {
+  constructor(props: CustomEuiPortalProps) {
     super(props);
     if (typeof window === 'undefined') return; // Prevent SSR errors
 
-    const { insert } = this.props;
+    const { sibling } = this.props;
 
     this.portalNode = document.createElement('div');
     this.portalNode.dataset.euiportal = 'true';
 
-    if (insert == null || insert.sibling == null) {
+    if (sibling == null) {
       // no insertion defined, append to body
       document.body.appendChild(this.portalNode);
     } else {
       // inserting before or after an element
-      const { sibling, position } = insert;
-      sibling.insertAdjacentElement(insertPositions[position], this.portalNode);
+      sibling.insertAdjacentElement('afterend', this.portalNode);
     }
-  }
-
-  componentDidMount() {
-    this.updatePortalRef(this.portalNode);
   }
 
   componentWillUnmount() {
     if (this.portalNode?.parentNode) {
       this.portalNode.parentNode.removeChild(this.portalNode);
     }
-    this.updatePortalRef(null);
   }
 
-  componentDidUpdate(prevProps: Readonly<EuiPortalProps>): void {
-    if (!deepEqual(prevProps.insert, this.props.insert) && this.portalNode?.parentNode) {
+  componentDidUpdate(prevProps: Readonly<CustomEuiPortalProps>): void {
+    if (!deepEqual(prevProps.sibling, this.props.sibling) && this.portalNode?.parentNode) {
       this.portalNode.parentNode.removeChild(this.portalNode);
     }
 
     if (this.portalNode) {
-      if (this.props.insert == null || this.props.insert.sibling == null) {
+      if (this.props == null || this.props.sibling == null) {
         // no insertion defined, append to body
         document.body.appendChild(this.portalNode);
       } else {
         // inserting before or after an element
-        const { sibling, position } = this.props.insert;
-        sibling.insertAdjacentElement(insertPositions[position], this.portalNode);
+        const { sibling } = this.props;
+        sibling.insertAdjacentElement('afterend', this.portalNode);
       }
-    }
-  }
-
-  updatePortalRef(ref: HTMLDivElement | null) {
-    if (this.props.portalRef) {
-      this.props.portalRef(ref);
     }
   }
 
