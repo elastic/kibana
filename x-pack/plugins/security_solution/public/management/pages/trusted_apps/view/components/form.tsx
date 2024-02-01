@@ -28,7 +28,7 @@ import {
   OperatingSystem,
 } from '@kbn/securitysolution-utils';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-
+import { WildCardWithWrongOperatorWarning } from '@kbn/securitysolution-exception-list-components';
 import type {
   TrustedAppConditionEntry,
   NewTrustedApp,
@@ -94,7 +94,8 @@ const addResultToValidation = (
   validation: ValidationResult,
   field: keyof NewTrustedApp,
   type: 'warnings' | 'errors',
-  resultValue: React.ReactNode
+  resultValue: React.ReactNode,
+  addToFront: boolean | undefined
 ) => {
   if (!validation.result[field]) {
     validation.result[field] = {
@@ -104,8 +105,14 @@ const addResultToValidation = (
     };
   }
   const errorMarkup: React.ReactNode = type === 'warnings' ? <div>{resultValue}</div> : resultValue;
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  validation.result[field]![type].push(errorMarkup);
+
+  if (addToFront) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    validation.result[field]![type].unshift(errorMarkup);
+  } else {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    validation.result[field]![type].push(errorMarkup);
+  }
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   validation.result[field]!.isInvalid = true;
 };
@@ -116,6 +123,7 @@ const validateValues = (values: ArtifactFormComponentProps['item']): ValidationR
     isValid,
     result: {},
   };
+  let showInvalidOperatorWildcardCallout = false;
 
   // Name field
   if (!values.name.trim()) {
@@ -159,6 +167,7 @@ const validateValues = (values: ArtifactFormComponentProps['item']): ValidationR
           value: (entry as TrustedAppConditionEntry).value,
         })
       ) {
+        showInvalidOperatorWildcardCallout = true;
         addResultToValidation(
           validation,
           'entries',
@@ -196,6 +205,15 @@ const validateValues = (values: ArtifactFormComponentProps['item']): ValidationR
     });
   }
 
+  if (showInvalidOperatorWildcardCallout) {
+    addResultToValidation(
+      validation,
+      'entries',
+      'warnings',
+      <WildCardWithWrongOperatorWarning />,
+      true
+    );
+  }
   validation.isValid = isValid;
   return validation;
 };
