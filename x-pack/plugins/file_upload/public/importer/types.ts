@@ -25,10 +25,10 @@ export interface ImportResults {
   error?: any;
 }
 
-export interface CreateDocsResponse {
+export interface CreateDocsResponse<T extends ImportDoc> {
   success: boolean;
   remainder: number;
-  docs: ImportDoc[];
+  docs: T[];
   error?: any;
 }
 
