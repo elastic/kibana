@@ -73,7 +73,7 @@ export const CollapsibleSection = ({
       forceState={trigger}
       onToggle={onToggle}
       data-section-state={trigger}
-      data-test-subj={`${dataTestSubj}Section`}
+      data-test-subj="infraAssetDetailsCollapseExpandSection"
     >
       {children}
     </EuiAccordion>

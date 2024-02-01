@@ -80,17 +80,17 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
 
     // Collapsable sections
     async metadataSectionCollapsibleExist() {
-      return await testSubjects.existOrFail('infraAssetDetailsMetadataSectionExpandButton');
+      return await testSubjects.existOrFail('infraAssetDetailsMetadataCollapsible');
     },
     async alertsSectionCollapsibleExist() {
-      return await testSubjects.existOrFail('infraAssetDetailsAlertsSectionExpandButton');
+      return await testSubjects.existOrFail('infraAssetDetailsAlertsCollapsible');
     },
     async metricsSectionCollapsibleExist() {
-      return await testSubjects.existOrFail('infraAssetDetailsMetricsSectionExpandButton');
+      return await testSubjects.existOrFail('infraAssetDetailsMetricsCollapsible');
     },
 
     async alertsSectionCollapsibleClick() {
-      return await testSubjects.click('infraAssetDetailsAlertsSectionExpandButton');
+      return await testSubjects.click('infraAssetDetailsAlertsCollapsible');
     },
 
     async alertsSectionClosedContentExist() {

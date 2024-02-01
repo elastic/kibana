@@ -26,7 +26,7 @@ import { ALERT_STATUS_ALL } from '../../../../common/alerts/constants';
 import { AlertsSectionTitle } from '../../components/section_titles';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { CollapsibleSection, type SectionTriggerValue } from './section/collapsible_section';
-// import { AlertsClosedContent } from './alerts_closed_content';
+import { AlertsClosedContent } from './alerts_closed_content';
 import { useAlertsCount } from '../../../../hooks/use_alerts_count';
 
 export const AlertsSummaryContent = ({
@@ -42,6 +42,7 @@ export const AlertsSummaryContent = ({
   const [isAlertFlyoutVisible, { toggle: toggleAlertFlyout }] = useBoolean(false);
   const { overrides } = useAssetDetailsRenderPropsContext();
   const [isAlertSectionOpen, setIsAlertSectionOpen] = useState<SectionTriggerValue>('open');
+  const [activeAlertsCount, setActiveAlertsCount] = useState<number | undefined>(undefined);
 
   const alertsEsQueryByStatus = useMemo(
     () =>
@@ -83,21 +84,12 @@ export const AlertsSummaryContent = ({
         data-test-subj="infraAssetDetailsAlertsCollapsible"
         id={'alerts'}
         extraAction={<ExtraActions />}
-        closedSectionContent={
-          isAlertSectionOpen === ('closed' as SectionTriggerValue) ? (
-            <span data-test-subj="infraAssetDetailsAlertsClosedContentNoAlerts">
-              {i18n.translate('xpack.infra.assetDetails.noActiveAlertsContentClosedSection', {
-                defaultMessage: 'No active alerts',
-              })}
-            </span>
-          ) : (
-            <></>
-          )
-        }
+        closedSectionContent={<AlertsClosedContent activeAlertCount={activeAlertsCount} />}
         initialTriggerValue={isAlertSectionOpen}
       >
         <MemoAlertSummaryWidget
           setIsAlertSectionOpen={setIsAlertSectionOpen}
+          setActiveAlertsCount={setActiveAlertsCount}
           alertsQuery={alertsEsQueryByStatus}
           dateRange={dateRange}
         />
@@ -120,10 +112,16 @@ interface MemoAlertSummaryWidgetProps {
   alertsQuery: AlertsEsQuery;
   dateRange: TimeRange;
   setIsAlertSectionOpen: (value: SectionTriggerValue) => void;
+  setActiveAlertsCount: (value: number) => void;
 }
 
 const MemoAlertSummaryWidget = React.memo(
-  ({ alertsQuery, dateRange, setIsAlertSectionOpen }: MemoAlertSummaryWidgetProps) => {
+  ({
+    alertsQuery,
+    dateRange,
+    setIsAlertSectionOpen,
+    setActiveAlertsCount,
+  }: MemoAlertSummaryWidgetProps) => {
     const { services } = useKibanaContextForPlugin();
 
     const summaryTimeRange = useSummaryTimeRange(dateRange);
@@ -166,6 +164,7 @@ const MemoAlertSummaryWidget = React.memo(
         timeRange={summaryTimeRange}
         onLoaded={() => {
           setIsAlertSectionOpen(hasActiveAlerts ? 'open' : 'closed');
+          setActiveAlertsCount(alertsCount?.activeAlertCount ?? 0);
         }}
         fullSize
         hideChart
