@@ -4584,6 +4584,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/esql-utils@link:packages/kbn-esql-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/event-annotation-common@link:packages/kbn-event-annotation-common":
   version "0.0.0"
   uid ""
@@ -5165,6 +5169,10 @@
   uid ""
 
 "@kbn/ml-anomaly-utils@link:x-pack/packages/ml/anomaly_utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/ml-cancellable-search@link:x-pack/packages/ml/cancellable_search":
   version "0.0.0"
   uid ""
 
