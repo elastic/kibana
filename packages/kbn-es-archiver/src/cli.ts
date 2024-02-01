@@ -18,12 +18,10 @@ import readline from 'readline';
 import Fs from 'fs';
 
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { RunWithCommands } from '@kbn/dev-cli-runner';
+import { FlagsReader, RunWithCommands } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { readConfigFile, KbnClient, EsVersion } from '@kbn/test';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
-
-import { cliPerfOptionOverride } from './actions/cli_perf_option_override';
 import { EsArchiver } from './es_archiver';
 
 const resolveConfigPath = (v: string) => Path.resolve(process.cwd(), v);
@@ -242,7 +240,16 @@ export function runCli() {
           throw createFlagError('--docs-only does not take a value');
         }
 
-        await cliPerfOptionOverride(useCreate, docsOnly, path, flags, esArchiver);
+        const flagsReader = new FlagsReader(flags);
+
+        await esArchiver.load(path, {
+          useCreate,
+          docsOnly,
+          performance: {
+            batchSize: flagsReader.number('batch-size'),
+            concurrency: flagsReader.number('concurrency'),
+          },
+        });
       },
     })
     .command({
