@@ -21,6 +21,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
+  const dashboardAddPanel = getService('dashboardAddPanel');
 
   describe('Managed Content', () => {
     before(async () => {
@@ -135,6 +136,34 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.dashboard.waitForRenderComplete();
 
         await testSubjects.missingOrFail('embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION');
+      });
+
+      it('adds managed panels by-value', async () => {
+        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.clickNewDashboard();
+
+        await dashboardAddPanel.addEmbeddables([
+          { name: 'Managed lens vis', type: 'lens' },
+          { name: 'Managed legacy visualization', type: 'visualization' },
+          { name: 'Managed map', type: 'map' },
+          { name: 'Managed saved search', type: 'search' },
+        ]);
+
+        await testSubjects.missingOrFail('embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION');
+
+        await dashboardAddPanel.addEmbeddables([
+          { name: 'Unmanaged lens vis', type: 'lens' },
+          { name: 'Unmanaged legacy visualization', type: 'visualization' },
+          { name: 'Unmanaged map', type: 'map' },
+          { name: 'Unmanaged saved search', type: 'search' },
+        ]);
+
+        const byRefSignifiers = await testSubjects.findAll(
+          'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION'
+        );
+
+        expect(byRefSignifiers.length).to.be(4);
       });
     });
   });
