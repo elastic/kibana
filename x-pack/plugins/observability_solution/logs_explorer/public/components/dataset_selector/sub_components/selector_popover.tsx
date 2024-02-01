@@ -15,29 +15,29 @@ import {
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
-import { DatasetSelection } from '../../../../common/dataset_selection';
+import {
+  DatasetSelection,
+  ExplorerDataViewSelection,
+  isExplorerDataViewSelection,
+} from '../../../../common/dataset_selection';
 import { DATA_VIEW_POPOVER_CONTENT_WIDTH, POPOVER_ID } from '../constants';
 import { getPopoverButtonStyles } from '../utils';
 
 const panelStyle = { width: DATA_VIEW_POPOVER_CONTENT_WIDTH };
-interface DatasetsPopoverProps extends Omit<EuiPopoverProps, 'button'> {
+interface SelectorPopoverProps extends Omit<EuiPopoverProps, 'button'> {
   children: React.ReactNode;
   onClick: () => void;
-  selection: DatasetSelection['selection'];
+  selection: DatasetSelection | ExplorerDataViewSelection;
 }
 
-export const DatasetsPopover = ({
+export const SelectorPopover = ({
   children,
   onClick,
   selection,
   ...props
-}: DatasetsPopoverProps) => {
-  const { iconType, parentIntegration } = selection.dataset;
-  const title = selection.dataset.getFullTitle();
+}: SelectorPopoverProps) => {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
-
   const buttonStyles = getPopoverButtonStyles({ fullWidth: isMobile });
-  const hasIntegration = typeof parentIntegration === 'object';
 
   return (
     <EuiPopover
@@ -53,18 +53,11 @@ export const DatasetsPopover = ({
           fullWidth={isMobile}
           data-test-subj="datasetSelectorPopoverButton"
         >
-          {iconType ? (
-            <EuiIcon type={iconType} />
-          ) : hasIntegration ? (
-            <PackageIcon
-              packageName={parentIntegration.name ?? ''}
-              version={parentIntegration.version ?? '1.0.0'}
-              icons={parentIntegration.icons}
-              size="m"
-              tryApi
-            />
-          ) : null}
-          <span className="eui-textTruncate">{title}</span>
+          {isExplorerDataViewSelection(selection) ? (
+            <ExplorerDataViewPopover explorerDataViewSelection={selection} />
+          ) : (
+            <DatasetPopover datasetSelection={selection} />
+          )}
         </EuiButton>
       }
       panelPaddingSize="none"
@@ -81,5 +74,38 @@ export const DatasetsPopover = ({
         {children}
       </EuiPanel>
     </EuiPopover>
+  );
+};
+
+const ExplorerDataViewPopover = ({
+  explorerDataViewSelection,
+}: {
+  explorerDataViewSelection: ExplorerDataViewSelection;
+}) => {
+  const { name } = explorerDataViewSelection.selection.dataView;
+
+  return <span className="eui-textTruncate">{name}</span>;
+};
+
+const DatasetPopover = ({ datasetSelection }: { datasetSelection: DatasetSelection }) => {
+  const { iconType, parentIntegration } = datasetSelection.selection.dataset;
+  const title = datasetSelection.selection.dataset.getFullTitle();
+  const hasIntegration = typeof parentIntegration === 'object';
+
+  return (
+    <>
+      {iconType ? (
+        <EuiIcon type={iconType} />
+      ) : hasIntegration ? (
+        <PackageIcon
+          packageName={parentIntegration.name ?? ''}
+          version={parentIntegration.version ?? '1.0.0'}
+          icons={parentIntegration.icons}
+          size="m"
+          tryApi
+        />
+      ) : null}
+      <span className="eui-textTruncate">{title}</span>
+    </>
   );
 };

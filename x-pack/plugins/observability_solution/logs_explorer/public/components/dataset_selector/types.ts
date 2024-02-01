@@ -6,7 +6,6 @@
  */
 
 import { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
-import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import type {
   DatasetSelection,
   SelectionChange,

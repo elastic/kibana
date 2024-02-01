@@ -23,7 +23,7 @@ import {
   UNCATEGORIZED_TAB_ID,
 } from './constants';
 import { useDatasetSelector } from './state_machine/use_dataset_selector';
-import { DatasetsPopover } from './sub_components/datasets_popover';
+import { SelectorPopover } from './sub_components/selector_popover';
 import { ExplorerDataViewMenuItem } from './sub_components/explorer_data_view_menu_item';
 import { SearchControls } from './sub_components/search_controls';
 import { ESQLButton, SelectorFooter, ShowAllLogsButton } from './sub_components/selector_footer';
@@ -206,8 +206,8 @@ export function DatasetSelector({
   ));
 
   return (
-    <DatasetsPopover
-      selection={datasetSelection.selection}
+    <SelectorPopover
+      selection={datasetSelection}
       isOpen={isOpen}
       closePopover={closePopover}
       onClick={togglePopover}
@@ -280,7 +280,7 @@ export function DatasetSelector({
         <ShowAllLogsButton isSelected={isAllMode} onClick={selectAllLogDataset} />
         {isEsqlEnabled && <ESQLButton {...discoverEsqlUrlProps} />}
       </SelectorFooter>
-    </DatasetsPopover>
+    </SelectorPopover>
   );
 }
 

@@ -19,7 +19,6 @@ export type SelectionChange = (selection: DatasetSelection | ExplorerDataViewSel
 export const isDatasetSelection = (input: any): input is DatasetSelection => {
   return (
     input instanceof AllDatasetSelection ||
-    input instanceof ExplorerDataViewSelection ||
     input instanceof SingleDatasetSelection ||
     input instanceof UnresolvedDatasetSelection
   );

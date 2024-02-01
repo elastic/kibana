@@ -138,7 +138,7 @@ export type LogExplorerControllerEvent =
     }
   | {
       type: 'UPDATE_DATASET_SELECTION';
-      data: DatasetSelection;
+      data: DatasetSelection | ExplorerDataViewSelection;
     }
   | {
       type: 'DATASET_SELECTION_RESTORE_FAILURE';
@@ -163,8 +163,7 @@ export type LogExplorerControllerEvent =
       type: 'RECEIVE_TIMEFILTER_REFRESH_INTERVAL';
       refreshInterval: RefreshInterval;
     }
-  | DoneInvokeEvent<DatasetSelection>
-  | DoneInvokeEvent<ExplorerDataViewSelection>
+  | DoneInvokeEvent<DatasetSelection | ExplorerDataViewSelection>
   | DoneInvokeEvent<ControlPanels>
   | DoneInvokeEvent<ControlGroupAPI>
   | DoneInvokeEvent<DatasetEncodingError>

@@ -249,7 +249,8 @@ export const createPureLogExplorerControllerStateMachine = (
     {
       actions: {
         storeDatasetSelection: actions.assign((_context, event) =>
-          'data' in event && isDatasetSelection(event.data)
+          'data' in event &&
+          (isDatasetSelection(event.data) || isExplorerDataViewSelection(event.data))
             ? {
                 datasetSelection: event.data,
               }
@@ -285,9 +286,9 @@ export const createPureLogExplorerControllerStateMachine = (
         controlGroupAPIExists: (_context, event) => {
           return 'controlGroupAPI' in event && event.controlGroupAPI != null;
         },
-        isLogsExplorerDataView: (_context, event) => {
-          if ('data' in event && isExplorerDataViewSelection(event.data)) {
-            return event.data.selection.dataView.dataType === 'logs';
+        isLogsExplorerDataView: (context, event) => {
+          if (isExplorerDataViewSelection(context.datasetSelection)) {
+            return context.datasetSelection.selection.dataView.isLogDataType();
           }
           return false;
         },
