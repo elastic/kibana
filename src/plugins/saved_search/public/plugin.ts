@@ -156,7 +156,7 @@ export class SavedSearchPublicPlugin
 
 registerSavedObjectToPanelMethod(SavedSearchType, (savedObject) => {
   if (!savedObject.managed) {
-    return { id: savedObject.id } as SavedObjectEmbeddableInput;
+    return { savedObjectId: savedObject.id } as SavedObjectEmbeddableInput;
   }
 
   return {
