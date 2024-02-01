@@ -697,6 +697,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "host.asset.criticality": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.action_group": Object {
       "array": false,
       "required": false,
@@ -1703,6 +1708,11 @@ Object {
     },
     "tags": Object {
       "array": true,
+      "required": false,
+      "type": "keyword",
+    },
+    "user.asset.criticality": Object {
+      "array": false,
       "required": false,
       "type": "keyword",
     },
@@ -1734,6 +1744,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "host.asset.criticality": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.action_group": Object {
       "array": false,
       "required": false,
@@ -2740,6 +2755,11 @@ Object {
     },
     "tags": Object {
       "array": true,
+      "required": false,
+      "type": "keyword",
+    },
+    "user.asset.criticality": Object {
+      "array": false,
       "required": false,
       "type": "keyword",
     },
@@ -2771,6 +2791,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "host.asset.criticality": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.action_group": Object {
       "array": false,
       "required": false,
@@ -3777,6 +3802,11 @@ Object {
     },
     "tags": Object {
       "array": true,
+      "required": false,
+      "type": "keyword",
+    },
+    "user.asset.criticality": Object {
+      "array": false,
       "required": false,
       "type": "keyword",
     },
@@ -3808,6 +3838,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "host.asset.criticality": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.action_group": Object {
       "array": false,
       "required": false,
@@ -4814,6 +4849,11 @@ Object {
     },
     "tags": Object {
       "array": true,
+      "required": false,
+      "type": "keyword",
+    },
+    "user.asset.criticality": Object {
+      "array": false,
       "required": false,
       "type": "keyword",
     },
@@ -4845,6 +4885,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "host.asset.criticality": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.action_group": Object {
       "array": false,
       "required": false,
@@ -5851,6 +5896,11 @@ Object {
     },
     "tags": Object {
       "array": true,
+      "required": false,
+      "type": "keyword",
+    },
+    "user.asset.criticality": Object {
+      "array": false,
       "required": false,
       "type": "keyword",
     },
@@ -5888,6 +5938,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "host.asset.criticality": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.action_group": Object {
       "array": false,
       "required": false,
@@ -6894,6 +6949,11 @@ Object {
     },
     "tags": Object {
       "array": true,
+      "required": false,
+      "type": "keyword",
+    },
+    "user.asset.criticality": Object {
+      "array": false,
       "required": false,
       "type": "keyword",
     },
@@ -6925,6 +6985,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "host.asset.criticality": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.action_group": Object {
       "array": false,
       "required": false,
@@ -7931,6 +7996,11 @@ Object {
     },
     "tags": Object {
       "array": true,
+      "required": false,
+      "type": "keyword",
+    },
+    "user.asset.criticality": Object {
+      "array": false,
       "required": false,
       "type": "keyword",
     },
@@ -7962,6 +8032,11 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "host.asset.criticality": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.action_group": Object {
       "array": false,
       "required": false,
@@ -8968,6 +9043,11 @@ Object {
     },
     "tags": Object {
       "array": true,
+      "required": false,
+      "type": "keyword",
+    },
+    "user.asset.criticality": Object {
+      "array": false,
       "required": false,
       "type": "keyword",
     },
