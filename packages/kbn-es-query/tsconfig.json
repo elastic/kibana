@@ -15,7 +15,7 @@
   "kbn_references": [
     "@kbn/utility-types",
     "@kbn/i18n",
-    "@kbn/safer-lodash-set",
+    "@kbn/safer-lodash-set"
   ],
   "exclude": [
     "target/**/*",
