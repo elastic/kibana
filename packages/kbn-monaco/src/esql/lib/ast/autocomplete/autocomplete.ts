@@ -38,7 +38,6 @@ import {
 import { collectVariables, excludeVariablesFromCurrentCommand } from '../shared/variables';
 import type {
   AstProviderFn,
-  ESQLAst,
   ESQLAstItem,
   ESQLCommand,
   ESQLCommandMode,
@@ -77,6 +76,7 @@ import {
 import { EDITOR_MARKER } from '../shared/constants';
 import { getAstContext, removeMarkerArgFromArgsList } from '../shared/context';
 import {
+  buildQueryUntilPreviousCommand,
   getFieldsByTypeHelper,
   getPolicyHelper,
   getSourcesHelper,
@@ -193,7 +193,7 @@ export async function suggest(
 
   const astContext = getAstContext(innerText, ast, offset);
   // build the correct query to fetch the list of fields
-  const queryForFields = buildQueryForFields(ast, finalText);
+  const queryForFields = buildQueryUntilPreviousCommand(ast, finalText);
   const { getFieldsByType, getFieldsMap } = getFieldsByTypeRetriever(
     queryForFields,
     resourceRetriever
@@ -276,11 +276,6 @@ export async function suggest(
     );
   }
   return [];
-}
-
-export function buildQueryForFields(ast: ESQLAst, queryString: string) {
-  const prevCommand = ast[Math.max(ast.length - 2, 0)];
-  return prevCommand ? queryString.substring(0, prevCommand.location.max + 1) : queryString;
 }
 
 function getFieldsByTypeRetriever(queryString: string, resourceRetriever?: ESQLCallbacks) {
@@ -907,7 +902,7 @@ async function getBuiltinFunctionNextArgument(
             // technically another boolean value should be suggested, but it is a better experience
             // to actually suggest a wider set of fields/functions
             [
-              finalType === 'boolean' && getFunctionDefinition(nodeArg.name)?.builtin
+              finalType === 'boolean' && getFunctionDefinition(nodeArg.name)?.type === 'builtin'
                 ? 'any'
                 : finalType,
             ],
@@ -1110,7 +1105,7 @@ async function getFunctionArgsSuggestions(
         ? {
             ...suggestion,
             insertText:
-              hasMoreMandatoryArgs && !fnDefinition.builtin
+              hasMoreMandatoryArgs && fnDefinition.type !== 'builtin'
                 ? `${suggestion.insertText},`
                 : suggestion.insertText,
           }
@@ -1120,7 +1115,8 @@ async function getFunctionArgsSuggestions(
 
   return suggestions.map(({ insertText, ...rest }) => ({
     ...rest,
-    insertText: hasMoreMandatoryArgs && !fnDefinition.builtin ? `${insertText},` : insertText,
+    insertText:
+      hasMoreMandatoryArgs && fnDefinition.type !== 'builtin' ? `${insertText},` : insertText,
   }));
 }
 

@@ -124,6 +124,7 @@ export const appendSeparatorOption: CommandOptionsDefinition = {
           },
         }),
         type: 'error',
+        code: 'wrongDissectOptionArgumentType',
       });
     }
     return messages;

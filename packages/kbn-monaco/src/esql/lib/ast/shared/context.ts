@@ -132,7 +132,7 @@ function isNotEnrichClauseAssigment(node: ESQLFunction, command: ESQLCommand) {
   return node.name !== '=' && command.name !== 'enrich';
 }
 function isBuiltinFunction(node: ESQLFunction) {
-  return Boolean(getFunctionDefinition(node.name)?.builtin);
+  return getFunctionDefinition(node.name)?.type === 'builtin';
 }
 
 export function getAstContext(innerText: string, ast: ESQLAst, offset: number) {
