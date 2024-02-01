@@ -72,6 +72,7 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
           localReplacements = { ...localReplacements, ...newReplacements }; // update the local state
 
           onNewReplacements?.(localReplacements); // invoke the callback with the latest replacements
+          return Promise.resolve(localReplacements);
         };
 
         return JSON.stringify(
