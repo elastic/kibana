@@ -335,3 +335,12 @@ export interface SearchListItemByValuesOptions {
   /** The value to search for list items based off. */
   value: unknown[];
 }
+
+/**
+ * ListClient.getImportFilename
+ * {@link ListClient.getImportFilename}
+ */
+export interface GetImportFilename {
+  /** The stream to pull the import from */
+  stream: Readable;
+}
