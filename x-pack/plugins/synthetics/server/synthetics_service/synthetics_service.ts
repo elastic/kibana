@@ -8,6 +8,9 @@
 /* eslint-disable max-classes-per-file */
 
 import { ElasticsearchClient, Logger, SavedObject } from '@kbn/core/server';
+import archiver from 'archiver';
+import { createWriteStream } from 'fs';
+import { readFile, unlink } from 'fs/promises';
 import {
   ConcreteTaskInstance,
   TaskInstance,
@@ -400,7 +403,47 @@ export class SyntheticsService {
         this.locations,
         async (location) => {
           if (bucketsByLocation[location.id].length > perBucket && output) {
-            const locMonitors = bucketsByLocation[location.id].splice(0, PER_PAGE);
+            // [WIP CODE]
+            // TODO: Refactor extract this to a contained function, and encode the monitor
+            // at write time rather than send time
+            const locMonitors: any = await Promise.all(
+              bucketsByLocation[location.id].splice(0, PER_PAGE).map(async (monitorData) => {
+                if (!monitorData?.['source.inline.script']) return monitorData;
+                const outPath = `${monitorData.id}.zip`;
+                await new Promise((resolve, reject) => {
+                  const writeStream = createWriteStream(outPath);
+                  const archive = archiver('zip', {
+                    zlib: { level: 9 },
+                  });
+                  archive.on('error', reject);
+                  writeStream.on('close', resolve);
+                  archive.pipe(writeStream);
+
+                  archive.append(
+                    `import { journey, step } from '@elastic/synthetics';
+
+journey('inline', ({ page, context, browser, params, request }) => {
+  ${monitorData?.['source.inline.script']}
+});
+`,
+                    {
+                      name: 'inline.journey.ts',
+                    }
+                  );
+
+                  archive.finalize();
+                });
+
+                const encoded = await readFile(outPath, 'base64');
+                await unlink(outPath);
+
+                return {
+                  ...monitorData,
+                  'source.project.content': encoded,
+                  'source.inline.script': undefined,
+                };
+              })
+            );
 
             this.logger.debug(
               `${locMonitors.length} monitors will be pushed to synthetics service for location ${location.id}.`
