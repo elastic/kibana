@@ -7,8 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { numberValidator } from '@kbn/ml-agg-utils';
-
-import type { Validator } from './types';
+import type { Validator } from '@kbn/ml-form-utils';
 
 const pageSearchSizeInvalidErrorMessage = i18n.translate(
   'xpack.transform.transformSettingValidations.maxPageSearchSizeInvalidMessage',

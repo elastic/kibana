@@ -8,13 +8,13 @@
 import { merge } from 'lodash';
 
 import { getNestedProperty, setNestedProperty } from '@kbn/ml-nested-property';
+import { valueParsers } from '@kbn/ml-form-utils';
 
 import type { PostTransformsUpdateRequestSchema } from '../../../../../common/api_schemas/update_transforms';
 import type { TransformConfigUnion } from '../../../../../common/types/transform';
 
 import type { FormFields, FormFieldsState } from './form_field';
 import type { FormSectionsState } from './form_section';
-import { valueParsers } from './value_parsers';
 
 // Takes a value from form state and applies it to the structure
 // of the expected final configuration request object.

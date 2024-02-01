@@ -6,12 +6,12 @@
  */
 
 import { getNestedProperty } from '@kbn/ml-nested-property';
+import type { ValueParserName } from '@kbn/ml-form-utils';
 
 import type { TransformConfigUnion } from '../../../../../common/types/transform';
 
 import type { FormSections } from './form_section';
 import type { ValidatorName } from './validators';
-import type { ValueParserName } from './value_parsers';
 
 // The form state defines a flat structure of names for form fields.
 // This is a flat structure regardless of whether the final config object will be nested.

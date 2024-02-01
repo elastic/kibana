@@ -17,4 +17,3 @@ export { retentionPolicyMaxAgeValidator } from './retention_policy_max_age_valid
 export { stringValidator } from './string_validator';
 export { transformSettingsNumberOfRetriesValidator } from './transform_settings_number_of_retries_validator';
 export { transformSettingsPageSearchSizeValidator } from './transform_settings_page_search_size_validator';
-export { transformIdValidator } from './transform_id_validator';
