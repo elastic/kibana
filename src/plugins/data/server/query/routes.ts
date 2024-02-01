@@ -55,12 +55,7 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
     async (context, request, response) => {
       try {
         const savedQuery = await context.savedQuery;
-        const { status, body } = await savedQuery.create(request.body);
-
-        if (status === 400) {
-          return response.badRequest({ body });
-        }
-
+        const body = await savedQuery.create(request.body);
         return response.ok({ body });
       } catch (e) {
         const err = e.output?.payload ?? e;
@@ -88,12 +83,7 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
       const { id } = request.params;
       try {
         const savedQuery = await context.savedQuery;
-        const { status, body } = await savedQuery.update(id, request.body);
-
-        if (status === 400) {
-          return response.badRequest({ body });
-        }
-
+        const body = await savedQuery.update(id, request.body);
         return response.ok({ body });
       } catch (e) {
         const err = e.output?.payload ?? e;

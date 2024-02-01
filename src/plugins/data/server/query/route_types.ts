@@ -117,7 +117,7 @@ type SavedQueryTimeFilterRestResponse = TimeRangeRestResponse & {
   refreshInterval: RefreshIntervalRestResponse;
 };
 
-export interface SavedQueryRestBody {
+export interface SavedQueryRestResponse {
   id: string;
   attributes: {
     filters: FilterRestResponse[];
@@ -127,15 +127,3 @@ export interface SavedQueryRestBody {
     timefilter?: SavedQueryTimeFilterRestResponse | undefined;
   };
 }
-
-export type SavedQueryRestResponse =
-  | {
-      status: 200;
-      body: SavedQueryRestBody;
-    }
-  | {
-      status: 400;
-      body: {
-        message: string;
-      };
-    };

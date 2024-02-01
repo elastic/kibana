@@ -6,12 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { CustomRequestHandlerContext, RequestHandlerContext, SavedObject } from '@kbn/core/server';
+import { badRequest, internal, conflict } from '@hapi/boom';
+import type {
+  CustomRequestHandlerContext,
+  RequestHandlerContext,
+  SavedObject,
+} from '@kbn/core/server';
 import { escapeKuery, isFilters, isOfQueryType } from '@kbn/es-query';
 import { omit } from 'lodash';
 import { isQuery, SavedQueryAttributes } from '../../common';
 import { extract, inject } from '../../common/query/filters/persistable_state';
-import { SavedQueryRestBody, SavedQueryRestResponse } from './route_types';
+import type { SavedQueryRestResponse } from './route_types';
 
 export interface InternalSavedQueryAttributes extends SavedQueryAttributes {
   titleKeyword: string;
@@ -73,26 +78,17 @@ function extractReferences({
   return { attributes, references };
 }
 
-function createBadRequestError(message: string): SavedQueryRestResponse {
-  return {
-    status: 400,
-    body: {
-      message,
-    },
-  };
-}
-
 function verifySavedQuery({ title, query, filters = [] }: SavedQueryAttributes) {
   if (!isQuery(query)) {
-    return createBadRequestError(`Invalid query: ${JSON.stringify(query, null, 2)}`);
+    throw badRequest(`Invalid query: ${JSON.stringify(query, null, 2)}`);
   }
 
   if (!isFilters(filters)) {
-    return createBadRequestError(`Invalid filters: ${JSON.stringify(filters, null, 2)}`);
+    throw badRequest(`Invalid filters: ${JSON.stringify(filters, null, 2)}`);
   }
 
   if (!title.trim().length) {
-    return createBadRequestError('Cannot create query without a title');
+    throw badRequest('Cannot create query without a title');
   }
 }
 
@@ -112,53 +108,36 @@ export async function registerSavedQueryRouteHandlerContext(context: RequestHand
       existingQuery.attributes.title === attributes.title &&
       (!id || existingQuery.id !== id)
     ) {
-      return createBadRequestError(`Query with title "${attributes.title}" already exists`);
+      throw badRequest(`Query with title "${attributes.title}" already exists`);
     }
   };
 
   const createSavedQuery = async (attrs: SavedQueryAttributes): Promise<SavedQueryRestResponse> => {
-    const verifyResult = verifySavedQuery(attrs);
-
-    if (verifyResult) {
-      return verifyResult;
-    }
+    verifySavedQuery(attrs);
 
     const { attributes, references } = extractReferences(attrs);
-    const validateTitleResult = await validateSavedQueryTitle(attributes);
 
-    if (validateTitleResult) {
-      return validateTitleResult;
-    }
+    await validateSavedQueryTitle(attributes);
 
     const savedObject = await soClient.create<InternalSavedQueryAttributes>('query', attributes, {
       references,
     });
 
     // TODO: Handle properly
-    if (savedObject.error) throw new Error(savedObject.error.message);
+    if (savedObject.error) throw internal(savedObject.error.message);
 
-    return {
-      status: 200,
-      body: injectReferences(savedObject),
-    };
+    return injectReferences(savedObject);
   };
 
   const updateSavedQuery = async (
     id: string,
     attrs: SavedQueryAttributes
   ): Promise<SavedQueryRestResponse> => {
-    const verifyResult = verifySavedQuery(attrs);
-
-    if (verifyResult) {
-      return verifyResult;
-    }
+    verifySavedQuery(attrs);
 
     const { attributes, references } = extractReferences(attrs);
-    const validateTitleResult = await validateSavedQueryTitle(attributes, id);
 
-    if (validateTitleResult) {
-      return validateTitleResult;
-    }
+    await validateSavedQueryTitle(attributes, id);
 
     const savedObject = await soClient.update<InternalSavedQueryAttributes>(
       'query',
@@ -170,21 +149,18 @@ export async function registerSavedQueryRouteHandlerContext(context: RequestHand
     );
 
     // TODO: Handle properly
-    if (savedObject.error) throw new Error(savedObject.error.message);
+    if (savedObject.error) throw internal(savedObject.error.message);
 
-    return {
-      status: 200,
-      body: injectReferences({ id, attributes, references }),
-    };
+    return injectReferences({ id, attributes, references });
   };
 
-  const getSavedQuery = async (id: string): Promise<SavedQueryRestBody> => {
+  const getSavedQuery = async (id: string): Promise<SavedQueryRestResponse> => {
     const { saved_object: savedObject, outcome } =
       await soClient.resolve<InternalSavedQueryAttributes>('query', id);
     if (outcome === 'conflict') {
-      throw new Error(`Multiple saved queries found with ID: ${id} (legacy URL alias conflict)`);
+      throw conflict(`Multiple saved queries found with ID: ${id} (legacy URL alias conflict)`);
     } else if (savedObject.error) {
-      throw new Error(savedObject.error.message);
+      throw internal(savedObject.error.message);
     }
     return injectReferences(savedObject);
   };
@@ -200,7 +176,7 @@ export async function registerSavedQueryRouteHandlerContext(context: RequestHand
 
   const findSavedQueries = async ({ page = 1, perPage = 50, search = '' } = {}): Promise<{
     total: number;
-    savedQueries: SavedQueryRestBody[];
+    savedQueries: SavedQueryRestResponse[];
   }> => {
     const { total, saved_objects: savedObjects } =
       await soClient.find<InternalSavedQueryAttributes>({
