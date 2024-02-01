@@ -853,16 +853,18 @@ class AgentPolicyService {
     if (agentPolicy.is_managed && !options?.force) {
       throw new HostedAgentPolicyRestrictionRelatedError(`Cannot delete hosted agent policy ${id}`);
     }
-
+    // Prevent deleting policy when assigned agents are inactive
     const { total } = await getAgentsByKuery(esClient, soClient, {
-      showInactive: false,
+      showInactive: true,
       perPage: 0,
       page: 1,
-      kuery: `${AGENTS_PREFIX}.policy_id:${id}`,
+      kuery: `${AGENTS_PREFIX}.policy_id:${id} and not status: unenrolled`,
     });
 
     if (total > 0) {
-      throw new FleetError('Cannot delete agent policy that is assigned to agent(s)');
+      throw new FleetError(
+        'Cannot delete an agent policy that is assigned to any active or inactive agents'
+      );
     }
 
     const packagePolicies = await packagePolicyService.findAllForAgentPolicy(soClient, id);
