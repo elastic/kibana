@@ -8,7 +8,7 @@
 
 import { EditorError } from '../../../../types';
 import { CharStreams } from 'antlr4ts';
-import { getActions } from '.';
+import { getActions } from './actions';
 import { getParser, ROOT_STATEMENT } from '../../antlr_facade';
 import { ESQLErrorListener } from '../../monaco/esql_error_listener';
 import { AstListener } from '../ast_factory';
@@ -63,6 +63,7 @@ function getCallbackMocks() {
         enrichFields: ['other-field', 'yetAnotherField'],
       },
     ]),
+    getMetaFields: jest.fn(async () => ['_index', '_id', '_source', '_score']),
   };
 }
 
@@ -164,6 +165,32 @@ describe('quick fixes logic', () => {
   });
 
   describe('fixing fields spellchecks', () => {
+    for (const command of ['KEEP', 'DROP', 'EVAL']) {
+      testQuickFixes(`FROM index | ${command} stringField`, []);
+      // strongField => stringField
+      testQuickFixes(`FROM index | ${command} strongField`, ['stringField']);
+      testQuickFixes(`FROM index | ${command} numberField, strongField`, ['stringField']);
+    }
+    testQuickFixes(`FROM index | EVAL round(strongField)`, ['stringField']);
+    testQuickFixes(`FROM index | EVAL var0 = round(strongField)`, ['stringField']);
+    testQuickFixes(`FROM index | WHERE round(strongField) > 0`, ['stringField']);
+    testQuickFixes(`FROM index | WHERE 0 < round(strongField)`, ['stringField']);
+    testQuickFixes(`FROM index | RENAME strongField as newField`, ['stringField']);
+    // This levarage the knowledge of the enrich policy fields to suggest the right field
+    testQuickFixes(`FROM index | ENRICH policy | KEEP yetAnotherField2`, ['yetAnotherField']);
+    testQuickFixes(`FROM index | ENRICH policy ON strongField`, ['stringField']);
+    testQuickFixes(`FROM index | ENRICH policy ON stringField WITH yetAnotherField2`, [
+      'yetAnotherField',
+    ]);
+
+    describe('metafields spellchecks', () => {
+      testQuickFixes(`FROM index [metadata _i_ndex]`, ['_index']);
+      testQuickFixes(`FROM index [metadata _id, _i_ndex]`, ['_index']);
+      testQuickFixes(`FROM index [METADATA _id, _i_ndex]`, ['_index']);
+    });
+  });
+
+  describe('fixing meta fields spellchecks', () => {
     for (const command of ['KEEP', 'DROP', 'EVAL']) {
       testQuickFixes(`FROM index | ${command} stringField`, []);
       // strongField => stringField
