@@ -63,12 +63,6 @@ const getBaseColumns = (
       columnHeaderType: defaultColumnHeaderType,
       id: 'host.name',
     },
-    isPlatinumPlus
-      ? {
-          columnHeaderType: defaultColumnHeaderType,
-          id: ALERT_HOST_RISK_SCORE_CALCULATED_LEVEL,
-        }
-      : null,
     {
       columnHeaderType: defaultColumnHeaderType,
       id: 'user.name',
@@ -76,19 +70,29 @@ const getBaseColumns = (
     isPlatinumPlus
       ? {
           columnHeaderType: defaultColumnHeaderType,
+          id: ALERT_HOST_RISK_SCORE_CALCULATED_LEVEL,
+          displayAsText: i18n.ALERTS_HEADERS_HOST_RISK_LEVEL,
+        }
+      : null,
+    isPlatinumPlus
+      ? {
+          columnHeaderType: defaultColumnHeaderType,
           id: ALERT_USER_RISK_SCORE_CALCULATED_LEVEL,
+          displayAsText: i18n.ALERTS_HEADERS_USER_RISK_LEVEL,
         }
       : null,
     isPlatinumPlus
       ? {
           columnHeaderType: defaultColumnHeaderType,
           id: ALERT_HOST_CRITICALITY,
+          displayAsText: i18n.ALERTS_HEADERS_HOST_CRITICALITY,
         }
       : null,
     isPlatinumPlus
       ? {
           columnHeaderType: defaultColumnHeaderType,
           id: ALERT_USER_CRITICALITY,
+          displayAsText: i18n.ALERTS_HEADERS_USER_CRITICALITY,
         }
       : null,
     {
