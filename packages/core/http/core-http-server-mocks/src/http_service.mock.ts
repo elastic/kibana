@@ -215,6 +215,7 @@ const createSetupContractMock = <
     getServerInfo: internalMock.getServerInfo,
     staticAssets: {
       getPluginAssetHref: jest.fn().mockImplementation((assetPath: string) => assetPath),
+      appendPathToPublicUrl: jest.fn().mockImplementation((pathname: string) => pathname),
     },
   };
 
@@ -230,6 +231,7 @@ const createStartContractMock = () => {
     getServerInfo: jest.fn(),
     staticAssets: {
       getPluginAssetHref: jest.fn().mockImplementation((assetPath: string) => assetPath),
+      appendPathToPublicUrl: jest.fn().mockImplementation((pathname: string) => pathname),
     },
   };
 

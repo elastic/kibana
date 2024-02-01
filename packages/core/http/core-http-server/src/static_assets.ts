@@ -23,4 +23,11 @@ export interface IStaticAssets {
    * ```
    */
   getPluginAssetHref(assetPath: string): string;
+
+  /**
+   * Will return an href, either a path for or full URL with the provided path
+   * appended to the static assets public base path.
+   * @param pathname
+   */
+  appendPathToPublicUrl(pathname: string): string;
 }
