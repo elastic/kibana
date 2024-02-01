@@ -21,6 +21,7 @@ import type {
 } from '../types';
 import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
+import type { ITaskMetricsService } from '../task_metrics.types';
 import {
   addDefaultAdvancedPolicyConfigSettings,
   batchTelemetryRecords,
@@ -29,10 +30,9 @@ import {
   getPreviousDailyTaskTimestamp,
   isPackagePolicyList,
   tlog,
-  createTaskMetric,
 } from '../helpers';
 import type { PolicyData } from '../../../../common/endpoint/types';
-import { TELEMETRY_CHANNEL_ENDPOINT_META, TASK_METRICS_CHANNEL } from '../constants';
+import { TELEMETRY_CHANNEL_ENDPOINT_META } from '../constants';
 
 // Endpoint agent uses this Policy ID while it's installing.
 const DefaultEndpointPolicyIdToIgnore = '00000000-0000-0000-0000-000000000000';
@@ -59,10 +59,11 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
       logger: Logger,
       receiver: ITelemetryReceiver,
       sender: ITelemetryEventsSender,
+      taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
-      const startTime = Date.now();
       const taskName = 'Security Solution Telemetry Endpoint Metrics and Info task';
+      const trace = taskMetricsService.start(taskName);
       try {
         if (!taskExecutionPeriod.last) {
           throw new Error('last execution timestamp is required');
@@ -96,9 +97,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
          */
         if (endpointData.endpointMetrics === undefined) {
           tlog(logger, `no endpoint metrics to report`);
-          await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
-            createTaskMetric(taskName, true, startTime),
-          ]);
+          taskMetricsService.end(trace);
           return 0;
         }
 
@@ -108,9 +107,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
 
         if (endpointMetricsResponse.aggregations === undefined) {
           tlog(logger, `no endpoint metrics to report`);
-          await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
-            createTaskMetric(taskName, true, startTime),
-          ]);
+          taskMetricsService.end(trace);
           return 0;
         }
 
@@ -144,9 +141,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
 
         if (agentsResponse === undefined) {
           tlog(logger, 'no fleet agent information available');
-          await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
-            createTaskMetric(taskName, true, startTime),
-          ]);
+          taskMetricsService.end(trace);
           return 0;
         }
 
@@ -354,21 +349,15 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
           for (const batch of batches) {
             await sender.sendOnDemand(TELEMETRY_CHANNEL_ENDPOINT_META, batch);
           }
-          await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
-            createTaskMetric(taskName, true, startTime),
-          ]);
+          taskMetricsService.end(trace);
           return telemetryPayloads.length;
         } catch (err) {
           logger.warn(`could not complete endpoint alert telemetry task due to ${err?.message}`);
-          await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
-            createTaskMetric(taskName, false, startTime, err.message),
-          ]);
+          taskMetricsService.end(trace, err);
           return 0;
         }
       } catch (err) {
-        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
-          createTaskMetric(taskName, false, startTime, err.message),
-        ]);
+        taskMetricsService.end(trace, err);
         return 0;
       }
     },

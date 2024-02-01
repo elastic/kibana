@@ -7,22 +7,18 @@
 
 import { cloneDeep } from 'lodash';
 import type { Logger } from '@kbn/core/server';
-import {
-  LIST_DETECTION_RULE_EXCEPTION,
-  TELEMETRY_CHANNEL_LISTS,
-  TASK_METRICS_CHANNEL,
-} from '../constants';
+import { LIST_DETECTION_RULE_EXCEPTION, TELEMETRY_CHANNEL_LISTS } from '../constants';
 import {
   batchTelemetryRecords,
   templateExceptionList,
   tlog,
-  createTaskMetric,
   createUsageCounterLabel,
 } from '../helpers';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
 import type { ExceptionListItem, ESClusterInfo, ESLicense, RuleSearchResult } from '../types';
 import type { TaskExecutionPeriod } from '../task';
+import type { ITaskMetricsService } from '../task_metrics.types';
 
 export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: number) {
   return {
@@ -36,14 +32,15 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
       logger: Logger,
       receiver: ITelemetryReceiver,
       sender: ITelemetryEventsSender,
+      taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
       const usageCollector = sender.getTelemetryUsageCluster();
 
       const usageLabelPrefix: string[] = ['security_telemetry', 'detection-rules'];
 
-      const startTime = Date.now();
       const taskName = 'Security Solution Detection Rule Lists Telemetry';
+      const trace = taskMetricsService.start(taskName);
 
       tlog(
         logger,
@@ -71,9 +68,7 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
 
         if (!prebuiltRules) {
           tlog(logger, 'no prebuilt rules found');
-          await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
-            createTaskMetric(taskName, true, startTime),
-          ]);
+          taskMetricsService.end(trace);
           return 0;
         }
 
@@ -129,9 +124,7 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
         for (const batch of batches) {
           await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch);
         }
-        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
-          createTaskMetric(taskName, true, startTime),
-        ]);
+        taskMetricsService.end(trace);
 
         tlog(
           logger,
@@ -140,9 +133,7 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
 
         return detectionRuleExceptionsJson.length;
       } catch (err) {
-        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
-          createTaskMetric(taskName, false, startTime, err.message),
-        ]);
+        taskMetricsService.end(trace, err);
         return 0;
       }
     },

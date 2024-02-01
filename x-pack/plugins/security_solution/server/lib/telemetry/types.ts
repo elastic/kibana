@@ -456,15 +456,6 @@ export interface ValueListIndicatorMatchResponseAggregation {
   };
 }
 
-export interface TaskMetric {
-  name: string;
-  passed: boolean;
-  time_executed_in_ms: number;
-  start_time: number;
-  end_time: number;
-  error_message?: string;
-}
-
 export interface TelemetryConfiguration {
   telemetry_max_buffer_size: number;
   max_security_list_telemetry_batch: number;

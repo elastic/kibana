@@ -27,6 +27,7 @@ import type { SecurityTelemetryTaskConfig } from './task';
 import { SecurityTelemetryTask } from './task';
 import { telemetryConfiguration } from './configuration';
 import type { IAsyncTelemetryEventsSender, QueueConfig } from './async_sender.types';
+import { TaskMetricsService } from './task_metrics';
 
 const usageLabelPrefix: string[] = ['security_telemetry', 'sender'];
 
@@ -122,9 +123,16 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
     this.telemetrySetup = telemetrySetup;
     this.telemetryUsageCounter = telemetryUsageCounter;
     if (taskManager) {
+      const taskMetricsService = new TaskMetricsService(this.logger, this);
       this.telemetryTasks = createTelemetryTaskConfigs().map(
         (config: SecurityTelemetryTaskConfig) => {
-          const task = new SecurityTelemetryTask(config, this.logger, this, telemetryReceiver);
+          const task = new SecurityTelemetryTask(
+            config,
+            this.logger,
+            this,
+            telemetryReceiver,
+            taskMetricsService
+          );
           task.register(taskManager);
           return task;
         }

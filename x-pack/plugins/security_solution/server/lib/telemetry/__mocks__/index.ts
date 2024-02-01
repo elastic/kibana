@@ -14,6 +14,7 @@ import type { TelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver, TelemetryReceiver } from '../receiver';
 import type { SecurityTelemetryTaskConfig } from '../task';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models/package_policy';
+import type { ITaskMetricsService } from '../task_metrics.types';
 import { type IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import { type UsageCounters } from '@kbn/usage-collection-plugin/common/types';
 import { stubEndpointAlertResponse, stubProcessTree, stubFetchTimelineEvents } from './timeline';
@@ -90,6 +91,16 @@ export const createMockUsageCounter = (): jest.Mocked<IUsageCounter> => {
   return {
     incrementCounter: jest.fn((_: UsageCounters.v1.IncrementCounterParams) => {}),
   } as unknown as jest.Mocked<IUsageCounter>;
+};
+
+export const createMockTaskMetrics = (): jest.Mocked<ITaskMetricsService> => {
+  return {
+    incrementCounter: jest.fn((_: UsageCounters.v1.IncrementCounterParams) => {}),
+    start: jest.fn(() => {
+      return { name: 'test-trace', startedAt: 0 };
+    }),
+    end: jest.fn(),
+  } as unknown as jest.Mocked<ITaskMetricsService>;
 };
 
 export const createMockTelemetryReceiver = (

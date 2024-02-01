@@ -12,13 +12,11 @@ import {
   LIST_ENDPOINT_EVENT_FILTER,
   LIST_TRUSTED_APPLICATION,
   TELEMETRY_CHANNEL_LISTS,
-  TASK_METRICS_CHANNEL,
 } from '../constants';
 import type { ESClusterInfo, ESLicense } from '../types';
 import {
   batchTelemetryRecords,
   templateExceptionList,
-  createTaskMetric,
   formatValueListMetaData,
   createUsageCounterLabel,
   tlog,
@@ -26,6 +24,7 @@ import {
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
+import type { ITaskMetricsService } from '../task_metrics.types';
 
 export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number) {
   return {
@@ -39,14 +38,15 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
       logger: Logger,
       receiver: ITelemetryReceiver,
       sender: ITelemetryEventsSender,
+      taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
       const usageCollector = sender.getTelemetryUsageCluster();
 
       const usageLabelPrefix: string[] = ['security_telemetry', 'lists'];
 
-      const startTime = Date.now();
       const taskName = 'Security Solution Lists Telemetry';
+      const trace = taskMetricsService.start(taskName);
       try {
         let trustedApplicationsCount = 0;
         let endpointExceptionsCount = 0;
@@ -153,14 +153,10 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
         if (valueListMetaData?.total_list_count) {
           await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, [valueListMetaData]);
         }
-        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
-          createTaskMetric(taskName, true, startTime),
-        ]);
+        taskMetricsService.end(trace);
         return trustedApplicationsCount + endpointExceptionsCount + endpointEventFiltersCount;
       } catch (err) {
-        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
-          createTaskMetric(taskName, false, startTime, err.message),
-        ]);
+        taskMetricsService.end(trace, err);
         return 0;
       }
     },

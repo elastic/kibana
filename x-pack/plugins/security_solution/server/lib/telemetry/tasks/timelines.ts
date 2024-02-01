@@ -9,8 +9,9 @@ import type { Logger } from '@kbn/core/server';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
-import { TELEMETRY_CHANNEL_TIMELINE, TASK_METRICS_CHANNEL } from '../constants';
-import { createTaskMetric, ranges, TelemetryTimelineFetcher, tlog } from '../helpers';
+import type { ITaskMetricsService } from '../task_metrics.types';
+import { TELEMETRY_CHANNEL_TIMELINE } from '../constants';
+import { ranges, TelemetryTimelineFetcher, tlog } from '../helpers';
 
 export function createTelemetryTimelineTaskConfig() {
   const taskName = 'Security Solution Timeline telemetry';
@@ -26,6 +27,7 @@ export function createTelemetryTimelineTaskConfig() {
       logger: Logger,
       receiver: ITelemetryReceiver,
       sender: ITelemetryEventsSender,
+      taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
       tlog(
@@ -34,6 +36,7 @@ export function createTelemetryTimelineTaskConfig() {
       );
 
       const fetcher = new TelemetryTimelineFetcher(receiver);
+      const trace = taskMetricsService.start(taskName);
 
       try {
         let counter = 0;
@@ -73,15 +76,11 @@ export function createTelemetryTimelineTaskConfig() {
 
         tlog(logger, `sent ${counter} timelines. Concluding timeline task.`);
 
-        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
-          createTaskMetric(taskName, true, fetcher.startTime),
-        ]);
+        taskMetricsService.end(trace);
 
         return counter;
       } catch (err) {
-        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
-          createTaskMetric(taskName, false, fetcher.startTime, err.message),
-        ]);
+        taskMetricsService.end(trace, err);
         return 0;
       }
     },

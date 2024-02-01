@@ -7,7 +7,11 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createTelemetryDetectionRuleListsTaskConfig } from './detection_rule';
-import { createMockTelemetryEventsSender, createMockTelemetryReceiver } from '../__mocks__';
+import {
+  createMockTelemetryEventsSender,
+  createMockTelemetryReceiver,
+  createMockTaskMetrics,
+} from '../__mocks__';
 
 describe('security detection rule task test', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -24,12 +28,14 @@ describe('security detection rule task test', () => {
     const mockTelemetryEventsSender = createMockTelemetryEventsSender();
     const mockTelemetryReceiver = createMockTelemetryReceiver();
     const telemetryDetectionRuleListsTaskConfig = createTelemetryDetectionRuleListsTaskConfig(1);
+    const mockTaskMetrics = createMockTaskMetrics();
 
     await telemetryDetectionRuleListsTaskConfig.runTask(
       'test-id',
       logger,
       mockTelemetryReceiver,
       mockTelemetryEventsSender,
+      mockTaskMetrics,
       testTaskExecutionPeriod
     );
 

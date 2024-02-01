@@ -6,14 +6,14 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { TASK_METRICS_CHANNEL } from '../constants';
 import type { ITelemetryEventsSender } from '../sender';
 import type { TelemetryFilterListArtifact } from '../types';
 import type { ITelemetryReceiver } from '../receiver';
+import type { ITaskMetricsService } from '../task_metrics.types';
 import type { TaskExecutionPeriod } from '../task';
 import { artifactService } from '../artifact';
 import { filterList } from '../filterlists';
-import { createTaskMetric, tlog } from '../helpers';
+import { tlog } from '../helpers';
 
 export function createTelemetryFilterListArtifactTaskConfig() {
   return {
@@ -27,10 +27,11 @@ export function createTelemetryFilterListArtifactTaskConfig() {
       logger: Logger,
       receiver: ITelemetryReceiver,
       sender: ITelemetryEventsSender,
+      taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
-      const startTime = Date.now();
       const taskName = 'Security Solution Telemetry Filter List Artifact Task';
+      const trace = taskMetricsService.start(taskName);
       try {
         const artifactName = 'telemetry-filterlists-v1';
         const artifact = (await artifactService.getArtifact(
@@ -40,16 +41,12 @@ export function createTelemetryFilterListArtifactTaskConfig() {
         filterList.endpointAlerts = artifact.endpoint_alerts;
         filterList.exceptionLists = artifact.exception_lists;
         filterList.prebuiltRulesAlerts = artifact.prebuilt_rules_alerts;
-        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
-          createTaskMetric(taskName, true, startTime),
-        ]);
+        taskMetricsService.end(trace);
         return 0;
       } catch (err) {
         tlog(logger, `Failed to set telemetry filterlist artifact due to ${err.message}`);
         filterList.resetAllToDefault();
-        await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
-          createTaskMetric(taskName, false, startTime, err.message),
-        ]);
+        taskMetricsService.end(trace, err);
         return 0;
       }
     },
