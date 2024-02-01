@@ -9,7 +9,6 @@ import Boom from '@hapi/boom';
 import { SavedObject, SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import { validateSystemActions } from '../../../../lib/validate_system_actions';
-import { parseDuration } from '../../../../../common/parse_duration';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
@@ -28,12 +27,7 @@ import { generateAPIKeyName, apiKeyAsRuleDomainProperties } from '../../../../ru
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { RulesClientContext, NormalizedAlertAction } from '../../../../rules_client/types';
 import { RuleDomain, RuleParams } from '../../types';
-import {
-  getRuleCircuitBreakerErrorMessage,
-  RuleActionTypes,
-  RuleSystemAction,
-  SanitizedRule,
-} from '../../../../types';
+import { RuleActionTypes, RuleSystemAction, SanitizedRule } from '../../../../types';
 import {
   transformRuleAttributesToRuleDomain,
   transformRuleDomainToRuleAttributes,
