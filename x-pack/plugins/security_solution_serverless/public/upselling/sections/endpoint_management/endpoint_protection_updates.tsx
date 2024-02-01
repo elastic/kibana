@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiCard, EuiIcon } from '@elastic/eui';
+import { EuiCard, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
 
@@ -39,23 +39,26 @@ const CardDescription = styled.p`
  */
 export const EndpointProtectionUpdates = memo(() => {
   return (
-    <EuiCard
-      data-test-subj="endpointPolicy-protectionUpdatesLockedCard"
-      isDisabled={true}
-      description={false}
-      icon={<EuiIcon size="xl" type="lock" />}
-      betaBadgeProps={{
-        'data-test-subj': 'endpointPolicy-protectionUpdatesLockedCard-badge',
-        label: BADGE_TEXT,
-      }}
-      title={
-        <h3 data-test-subj="endpointPolicy-protectionUpdatesLockedCard-title">
-          <strong>{CARD_TITLE}</strong>
-        </h3>
-      }
-    >
-      <CardDescription>{CARD_MESSAGE}</CardDescription>
-    </EuiCard>
+    <>
+      <EuiSpacer size="s" />
+      <EuiCard
+        data-test-subj="endpointPolicy-protectionUpdatesLockedCard"
+        isDisabled={true}
+        description={false}
+        icon={<EuiIcon size="xl" type="lock" />}
+        betaBadgeProps={{
+          'data-test-subj': 'endpointPolicy-protectionUpdatesLockedCard-badge',
+          label: BADGE_TEXT,
+        }}
+        title={
+          <h3 data-test-subj="endpointPolicy-protectionUpdatesLockedCard-title">
+            <strong>{CARD_TITLE}</strong>
+          </h3>
+        }
+      >
+        <CardDescription>{CARD_MESSAGE}</CardDescription>
+      </EuiCard>
+    </>
   );
 });
 EndpointProtectionUpdates.displayName = 'EndpointProtectionUpdates';
