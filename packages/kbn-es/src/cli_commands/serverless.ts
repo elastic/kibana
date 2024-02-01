@@ -91,9 +91,17 @@ export const serverless: Command = {
       default: defaults,
     }) as unknown as ServerlessOptions;
 
-    if (!options.projectType || !isServerlessProjectType(options.projectType)) {
+    if (!options.projectType) {
       throw createCliError(
-        `Invalid project type: ${options.projectType}, supported: ${Array.from(
+        `--project-type flag is required and must be a string: ${Array.from(
+          serverlessProjectTypes
+        ).join(' |')}`
+      );
+    }
+
+    if (!isServerlessProjectType(options.projectType)) {
+      throw createCliError(
+        `Invalid projectPype '${options.projectType}', supported values ${Array.from(
           serverlessProjectTypes
         ).join(' |')}`
       );
