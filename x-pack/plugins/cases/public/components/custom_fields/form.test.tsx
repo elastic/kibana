@@ -12,6 +12,7 @@ import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import type { CustomFieldFormState } from './form';
 import { CustomFieldsForm } from './form';
+import type { CustomFieldConfiguration } from '../../../common/types/domain';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import * as i18n from './translations';
 import userEvent from '@testing-library/user-event';
@@ -90,6 +91,100 @@ describe('CustomFieldsForm ', () => {
         required: true,
         type: 'text',
         defaultValue: 'Default value',
+      });
+    });
+  });
+
+  it('serializes the data correctly if required is selected and the text default value is not filled', async () => {
+    let formState: CustomFieldFormState;
+
+    const onChangeState = (state: CustomFieldFormState) => (formState = state);
+
+    appMockRender.render(<CustomFieldsForm onChange={onChangeState} initialValue={null} />);
+
+    await waitFor(() => {
+      expect(formState).not.toBeUndefined();
+    });
+
+    userEvent.paste(await screen.findByTestId('custom-field-label-input'), 'Summary');
+    userEvent.click(await screen.findByTestId('text-custom-field-required'));
+
+    await act(async () => {
+      const { data } = await formState!.submit();
+
+      expect(data).toEqual({
+        key: expect.anything(),
+        label: 'Summary',
+        required: true,
+        type: 'text',
+      });
+    });
+  });
+
+  it('serializes the data correctly if required is selected and the text default value is an empty string', async () => {
+    let formState: CustomFieldFormState;
+
+    const onChangeState = (state: CustomFieldFormState) => (formState = state);
+
+    appMockRender.render(<CustomFieldsForm onChange={onChangeState} initialValue={null} />);
+
+    await waitFor(() => {
+      expect(formState).not.toBeUndefined();
+    });
+
+    userEvent.paste(await screen.findByTestId('custom-field-label-input'), 'Summary');
+    userEvent.click(await screen.findByTestId('text-custom-field-required'));
+    userEvent.paste(await screen.findByTestId('text-custom-field-default-value'), ' ');
+
+    await act(async () => {
+      const { data } = await formState!.submit();
+
+      expect(data).toEqual({
+        key: expect.anything(),
+        label: 'Summary',
+        required: true,
+        type: 'text',
+      });
+    });
+  });
+
+  it('serializes the data correctly if the initial default value is null', async () => {
+    let formState: CustomFieldFormState;
+
+    const onChangeState = (state: CustomFieldFormState) => (formState = state);
+
+    const initialValue = {
+      required: true,
+      type: CustomFieldTypes.TEXT as const,
+      defaultValue: null,
+    };
+
+    appMockRender.render(
+      <CustomFieldsForm
+        onChange={onChangeState}
+        initialValue={
+          {
+            key: 'test_key_1',
+            label: 'Summary',
+            ...initialValue,
+          } as CustomFieldConfiguration
+        }
+      />
+    );
+
+    await waitFor(() => {
+      expect(formState).not.toBeUndefined();
+    });
+
+    userEvent.paste(await screen.findByTestId('custom-field-label-input'), ' New');
+
+    await act(async () => {
+      const { data } = await formState!.submit();
+
+      expect(data).toEqual({
+        key: expect.anything(),
+        label: 'Summary New',
+        ...initialValue,
       });
     });
   });

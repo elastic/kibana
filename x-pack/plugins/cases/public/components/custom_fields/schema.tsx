@@ -46,10 +46,6 @@ export const schema = {
   },
   defaultValue: {
     label: i18n.DEFAULT_VALUE,
-    validations: [
-      {
-        validator: emptyField(i18n.REQUIRED_FIELD(i18n.DEFAULT_VALUE)),
-      },
-    ],
+    validations: [],
   },
 };

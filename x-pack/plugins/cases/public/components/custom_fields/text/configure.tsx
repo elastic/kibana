@@ -15,7 +15,10 @@ import * as i18n from '../translations';
 
 const ConfigureComponent: CustomFieldType<CaseCustomFieldText>['Configure'] = () => {
   const [{ required }] = useFormData<{ required: boolean }>();
-  const config = getTextFieldConfig({ required, label: i18n.DEFAULT_VALUE.toLocaleLowerCase() });
+  const config = getTextFieldConfig({
+    required: false,
+    label: i18n.DEFAULT_VALUE.toLocaleLowerCase(),
+  });
 
   return (
     <>

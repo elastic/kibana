@@ -71,6 +71,12 @@ export default ({ getService }: FtrProviderContext): void => {
             required: true,
             defaultValue: false,
           },
+          {
+            key: 'hello_again',
+            label: 'text',
+            type: CustomFieldTypes.TEXT,
+            required: true,
+          },
         ],
       };
 
