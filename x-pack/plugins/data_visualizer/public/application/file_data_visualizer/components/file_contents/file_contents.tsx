@@ -8,7 +8,7 @@
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FC, useEffect, useState } from 'react';
 
-import { EuiTitle, EuiSpacer, EuiHorizontalRule } from '@elastic/eui';
+import { EuiTitle, EuiSpacer, EuiHorizontalRule, EuiTab, EuiTabs } from '@elastic/eui';
 
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import { EDITOR_MODE, JsonEditor } from '../json_editor';
@@ -19,14 +19,31 @@ interface Props {
   data: string;
   format: string;
   numberOfLines: number;
-  semiStructureTextData: {
-    grokPattern: string | undefined;
-    multilineStartPattern: string | undefined;
-    excludeLinesPattern: string | undefined;
-    sampleStart: string;
-    mappings: FindFileStructureResponse['mappings'];
-    ecsCompatibility: string | undefined;
-  } | null;
+  semiStructureTextData: SemiStructureTextData | null;
+}
+
+interface SemiStructureTextData {
+  grokPattern: string;
+  multilineStartPattern: string;
+  excludeLinesPattern: string | undefined;
+  sampleStart: string;
+  mappings: FindFileStructureResponse['mappings'];
+  ecsCompatibility: string | undefined;
+}
+
+function semiStructureTextDataGuard(
+  semiStructureTextData: SemiStructureTextData | null
+): semiStructureTextData is SemiStructureTextData {
+  return (
+    semiStructureTextData !== null &&
+    semiStructureTextData.grokPattern !== undefined &&
+    semiStructureTextData.multilineStartPattern !== undefined
+  );
+}
+
+enum TABS {
+  PARSED = 'parsed',
+  RAW = 'raw',
 }
 
 export const FileContents: FC<Props> = ({ data, format, numberOfLines, semiStructureTextData }) => {
@@ -34,7 +51,11 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines, semiStruc
   if (format === EDITOR_MODE.JSON) {
     mode = EDITOR_MODE.JSON;
   }
+
+  const showParsedData = semiStructureTextDataGuard(semiStructureTextData);
+
   const [highlightedLines, setHighlightedLines] = useState<JSX.Element[] | null>(null);
+  const [selectedTab, setSelectedTab] = useState<TABS>(showParsedData ? TABS.PARSED : TABS.RAW);
   const grokHighlighter = useGrokHighlighter();
 
   const {
@@ -42,15 +63,11 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines, semiStruc
   } = useDataVisualizerKibana();
 
   useEffect(() => {
-    if (
-      semiStructureTextData === null ||
-      semiStructureTextData.multilineStartPattern === undefined ||
-      semiStructureTextData.grokPattern === undefined
-    ) {
+    if (showParsedData === false) {
       return;
     }
     const { grokPattern, multilineStartPattern, excludeLinesPattern, mappings, ecsCompatibility } =
-      semiStructureTextData;
+      semiStructureTextData!;
 
     grokHighlighter(
       data,
@@ -62,12 +79,12 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines, semiStruc
     ).then((docs) => {
       setHighlightedLines(docs);
     });
-  }, [http, format, data, semiStructureTextData, grokHighlighter]);
+  }, [http, format, data, semiStructureTextData, grokHighlighter, showParsedData]);
 
   const formattedData = limitByNumberOfLines(data, numberOfLines);
 
   return (
-    <React.Fragment>
+    <>
       <EuiTitle size="s">
         <h2>
           <FormattedMessage
@@ -77,19 +94,29 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines, semiStruc
         </h2>
       </EuiTitle>
 
-      <div>
-        <FormattedMessage
-          id="xpack.dataVisualizer.file.fileContents.firstLinesDescription"
-          defaultMessage="First {numberOfLines, plural, zero {# line} one {# line} other {# lines}}"
-          values={{
-            numberOfLines,
-          }}
-        />
-      </div>
+      {showParsedData ? (
+        <EuiTabs>
+          <EuiTab
+            isSelected={selectedTab === TABS.PARSED}
+            onClick={() => setSelectedTab(TABS.PARSED)}
+          >
+            <FormattedMessage
+              id="xpack.dataVisualizer.file.fileContents.tab.parsedTitle"
+              defaultMessage="Highlighted text"
+            />
+          </EuiTab>
+          <EuiTab isSelected={selectedTab === TABS.RAW} onClick={() => setSelectedTab(TABS.RAW)}>
+            <FormattedMessage
+              id="xpack.dataVisualizer.file.fileContents.tab.rawTitle"
+              defaultMessage="Raw text"
+            />
+          </EuiTab>
+        </EuiTabs>
+      ) : null}
 
       <EuiSpacer size="s" />
 
-      {highlightedLines === null ? (
+      {highlightedLines === null || selectedTab === TABS.RAW ? (
         <JsonEditor mode={mode} readOnly={true} value={formattedData} height="200px" />
       ) : (
         <>
@@ -101,7 +128,7 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines, semiStruc
           ))}
         </>
       )}
-    </React.Fragment>
+    </>
   );
 };
 
