@@ -118,7 +118,7 @@ export const ActionsLogFilter = memo(
 
         // compute a selected list of options
         const selectedItems = newOptions.reduce<string[]>((acc, curr) => {
-          if (curr.checked === 'on') {
+          if (curr.checked === 'on' && curr.key) {
             acc.push(curr.key);
           }
           return acc;

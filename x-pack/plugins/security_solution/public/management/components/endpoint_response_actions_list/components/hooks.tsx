@@ -23,8 +23,7 @@ import {
   type ResponseActionStatus,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import type { DateRangePickerValues } from './actions_log_date_range_picker';
-import type { FILTER_NAMES } from '../translations';
-import { FILTER_TYPE_OPTIONS, UX_MESSAGES } from '../translations';
+import { FILTER_NAMES, FILTER_TYPE_OPTIONS, UX_MESSAGES } from '../translations';
 import { ResponseActionStatusBadge } from './response_action_status_badge';
 import { useActionHistoryUrlParams } from './use_action_history_url_params';
 import { useGetEndpointsList } from '../../../hooks/endpoint/use_get_endpoints_list';
@@ -123,10 +122,11 @@ export const useDateRangePicker = (isFlyout: boolean) => {
 };
 
 export type FilterItems = Array<{
-  key: string;
+  key?: string;
   label: string;
-  checked: 'on' | undefined;
-  'data-test-subj': string;
+  isGroupLabel?: boolean;
+  checked?: 'on' | undefined;
+  'data-test-subj'?: string;
 }>;
 
 export const getActionStatus = (status: ResponseActionStatus): string => {
@@ -160,6 +160,9 @@ export type ActionsLogPopupFilters = Extract<
   'actions' | 'hosts' | 'statuses' | 'types'
 >;
 
+// v8.13 onwards
+// for showing agent types and action types in the same filter
+const TypesFilterArray = Object.freeze([...RESPONSE_ACTION_AGENT_TYPE, ...RESPONSE_ACTION_TYPE]);
 /**
  *
  * @param isSentinelOneV1Enabled
@@ -176,12 +179,11 @@ const getTypesFilterInitialState = (
   agentTypes?: string[],
   types?: string[]
 ): FilterItems => {
-  const typesFilterOptions = isSentinelOneV1Enabled
-    ? [...RESPONSE_ACTION_AGENT_TYPE, ...RESPONSE_ACTION_TYPE]
-    : RESPONSE_ACTION_TYPE;
+  const typesFilterOptions = isSentinelOneV1Enabled ? TypesFilterArray : RESPONSE_ACTION_TYPE;
 
-  return typesFilterOptions.map((type) => ({
+  const options: FilterItems = typesFilterOptions.map((type) => ({
     key: type,
+    isGroupLabel: false,
     label: isAgentType(type) ? getAgentTypeName(type) : getTypeDisplayName(type),
     checked:
       !isFlyout &&
@@ -191,6 +193,20 @@ const getTypesFilterInitialState = (
         : undefined,
     'data-test-subj': `types-filter-option`,
   }));
+
+  if (isSentinelOneV1Enabled) {
+    options.splice(2, 0, {
+      label: FILTER_NAMES.actionTypes,
+      isGroupLabel: true,
+    });
+
+    options.splice(0, 0, {
+      label: FILTER_NAMES.agentTypes,
+      isGroupLabel: true,
+    });
+  }
+
+  return options;
 };
 
 export const useActionsLogFilter = ({
