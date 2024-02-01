@@ -48,10 +48,6 @@ export const journey = new Journey({
   //   maxDuration: '10m',
   // },
 }).step('Go to cloud security dashboards Page', async ({ page, kbnUrl }) => {
-  await page.goto(kbnUrl.get(`/app/security/cloud_security_posture/dashboard/cspm`), {
-    waitUntil: 'networkidle',
-    timeout: 0,
-  });
-
+  await page.goto(kbnUrl.get(`/app/security/cloud_security_posture/dashboard/cspm`));
   await page.waitForSelector(subj('csp:dashboard-sections-table-header-score'));
 });
