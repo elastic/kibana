@@ -121,8 +121,8 @@ function getFunctionSignaturesByReturnType(
       }
       return true;
     })
-    .map(({ builtin: isBuiltinFn, name, signatures, ...defRest }) =>
-      isBuiltinFn ? `${name} $0` : `${name}($0)`
+    .map(({ type, name, signatures, ...defRest }) =>
+      type === 'builtin' ? `${name} $0` : `${name}($0)`
     );
 }
 
