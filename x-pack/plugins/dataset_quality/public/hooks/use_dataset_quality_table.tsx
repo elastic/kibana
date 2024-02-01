@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import { find, orderBy } from 'lodash';
-import React, { useCallback, useMemo, useState } from 'react';
+import { useSelector } from '@xstate/react';
+import { orderBy } from 'lodash';
+import React, { useCallback, useMemo } from 'react';
+import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../../common/constants';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
 import { tableSummaryAllText, tableSummaryOfText } from '../../common/translations';
 import { getDatasetQualityTableColumns } from '../components/dataset_quality/columns';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
-import { getDefaultTimeRange, useKibanaContextForPlugin } from '../utils';
+import { FlyoutDataset } from '../state_machines/dataset_quality_controller';
+import { useKibanaContextForPlugin } from '../utils';
 
-const DEFAULT_SORT_FIELD = 'title';
-const DEFAULT_SORT_DIRECTION = 'desc';
-type DIRECTION = 'asc' | 'desc';
-type SORT_FIELD = keyof DataStreamStat;
+export type Direction = 'asc' | 'desc';
+export type SortField = keyof DataStreamStat;
 
-const sortingOverrides: Partial<{ [key in SORT_FIELD]: SORT_FIELD }> = {
+const sortingOverrides: Partial<{ [key in SortField]: SortField }> = {
   ['title']: 'name',
   ['size']: 'sizeBytes',
 };
@@ -28,96 +28,114 @@ export const useDatasetQualityTable = () => {
   const {
     services: { fieldFormats },
   } = useKibanaContextForPlugin();
-  const [selectedDataset, setSelectedDataset] = useState<DataStreamStat>();
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
-  const [sortField, setSortField] = useState<SORT_FIELD>(DEFAULT_SORT_FIELD);
-  const [sortDirection, setSortDirection] = useState<DIRECTION>(DEFAULT_SORT_DIRECTION);
 
-  const defaultTimeRange = getDefaultTimeRange();
+  const { service } = useDatasetQualityContext();
 
-  const { dataStreamsStatsServiceClient: client } = useDatasetQualityContext();
-  const { data = [], loading } = useFetcher(async () => client.getDataStreamsStats(), []);
-  const { data: degradedStats = [], loading: loadingDegradedStats } = useFetcher(
-    async () =>
-      client.getDataStreamsDegradedStats({
-        start: defaultTimeRange.from,
-        end: defaultTimeRange.to,
-      }),
-    []
+  const { page, rowsPerPage, sort } = useSelector(service, (state) => state.context.table);
+
+  const flyout = useSelector(service, (state) => state.context.flyout);
+
+  const loading = useSelector(service, (state) => state.matches('datasets.fetching'));
+  const loadingDegradedStats = useSelector(service, (state) =>
+    state.matches('degradedDocs.fetching')
+  );
+
+  const datasets = useSelector(service, (state) => state.context.datasets);
+
+  const isDatasetQualityPageIdle = useSelector(service, (state) =>
+    state.matches('datasets.loaded.idle')
+  );
+
+  const closeFlyout = useCallback(() => service.send({ type: 'CLOSE_FLYOUT' }), [service]);
+  const openFlyout = useCallback(
+    (selectedDataset: FlyoutDataset) => {
+      if (flyout?.dataset?.rawName === selectedDataset.rawName) {
+        service.send({
+          type: 'CLOSE_FLYOUT',
+        });
+
+        return;
+      }
+
+      if (isDatasetQualityPageIdle) {
+        service.send({
+          type: 'OPEN_FLYOUT',
+          dataset: selectedDataset,
+        });
+        return;
+      }
+
+      service.send({
+        type: 'SELECT_NEW_DATASET',
+        dataset: selectedDataset,
+      });
+    },
+    [flyout?.dataset?.rawName, isDatasetQualityPageIdle, service]
   );
 
   const columns = useMemo(
     () =>
       getDatasetQualityTableColumns({
         fieldFormats,
-        selectedDataset,
-        setSelectedDataset,
+        selectedDataset: flyout?.dataset,
+        openFlyout,
         loadingDegradedStats,
       }),
-    [fieldFormats, loadingDegradedStats, selectedDataset, setSelectedDataset]
+    [flyout?.dataset, fieldFormats, loadingDegradedStats, openFlyout]
   );
 
   const pagination = {
-    pageIndex,
-    pageSize,
-    totalItemCount: data.length,
+    pageIndex: page,
+    pageSize: rowsPerPage,
+    totalItemCount: datasets.length,
     hidePerPageOptions: true,
   };
 
   const onTableChange = useCallback(
     (options: {
       page: { index: number; size: number };
-      sort?: { field: SORT_FIELD; direction: DIRECTION };
+      sort?: { field: SortField; direction: Direction };
     }) => {
-      setPageIndex(options.page.index);
-      setPageSize(options.page.size);
-      setSortField(options.sort?.field || DEFAULT_SORT_FIELD);
-      setSortDirection(options.sort?.direction || DEFAULT_SORT_DIRECTION);
+      service.send({
+        type: 'UPDATE_TABLE_CRITERIA',
+        criteria: {
+          page: options.page.index,
+          rowsPerPage: options.page.size,
+          sort: {
+            field: options.sort?.field || DEFAULT_SORT_FIELD,
+            direction: options.sort?.direction || DEFAULT_SORT_DIRECTION,
+          },
+        },
+      });
     },
-    []
+    [service]
   );
 
-  const sort = {
-    sort: { field: sortField, direction: sortDirection },
-  };
-
   const renderedItems = useMemo(() => {
-    const overridenSortingField = sortingOverrides[sortField] || sortField;
-    const mergedData = data.map((dataStream) => {
-      const degradedDocs = find(degradedStats, { dataset: dataStream.rawName });
+    const overridenSortingField = sortingOverrides[sort.field] || sort.field;
+    const sortedItems = orderBy(datasets, overridenSortingField, sort.direction);
 
-      return {
-        ...dataStream,
-        degradedDocs: degradedDocs?.percentage,
-      };
-    });
-
-    const sortedItems = orderBy(mergedData, overridenSortingField, sortDirection);
-
-    return sortedItems.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
-  }, [data, degradedStats, sortField, sortDirection, pageIndex, pageSize]);
+    return sortedItems.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
+  }, [sort.field, sort.direction, datasets, page, rowsPerPage]);
 
   const resultsCount = useMemo(() => {
-    const startNumberItemsOnPage = pageSize * pageIndex + (renderedItems.length ? 1 : 0);
-    const endNumberItemsOnPage = pageSize * pageIndex + renderedItems.length;
+    const startNumberItemsOnPage = rowsPerPage ?? 1 * page ?? 0 + (renderedItems.length ? 1 : 0);
+    const endNumberItemsOnPage = rowsPerPage * page + renderedItems.length;
 
-    return pageSize === 0 ? (
+    return rowsPerPage === 0 ? (
       <strong>{tableSummaryAllText}</strong>
     ) : (
       <>
         <strong>
           {startNumberItemsOnPage}-{endNumberItemsOnPage}
         </strong>{' '}
-        {tableSummaryOfText} {data.length}
+        {tableSummaryOfText} {datasets.length}
       </>
     );
-  }, [data.length, pageIndex, pageSize, renderedItems.length]);
-
-  const closeFlyout = useCallback(() => setSelectedDataset(undefined), []);
+  }, [rowsPerPage, page, renderedItems.length, datasets.length]);
 
   return {
-    sort,
+    sort: { sort },
     onTableChange,
     pagination,
     renderedItems,
@@ -125,6 +143,6 @@ export const useDatasetQualityTable = () => {
     loading,
     resultsCount,
     closeFlyout,
-    selectedDataset,
+    selectedDataset: flyout?.dataset,
   };
 };
