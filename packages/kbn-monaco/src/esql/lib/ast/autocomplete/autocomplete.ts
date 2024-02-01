@@ -69,7 +69,6 @@ import {
   buildConstantsDefinitions,
   buildVariablesDefinitions,
   buildOptionDefinition,
-  TRIGGER_SUGGESTION_COMMAND,
   buildSettingDefinitions,
   buildSettingValueDefinitions,
 } from './factories';
@@ -994,8 +993,6 @@ async function getFieldsOrFunctionsSuggestions(
     ...rest,
     kind,
     sortText: String.fromCharCode(97 - kind),
-    // do not trigger an automatic suggestion again if it's not a function
-    command: kind === 1 ? TRIGGER_SUGGESTION_COMMAND : undefined,
   }));
 }
 

@@ -44,6 +44,8 @@ export function getAutocompleteFunctionDefinition(fn: FunctionDefinition) {
       value: buildFunctionDocumentation(fullSignatures),
     },
     sortText: 'C',
+    // trigger a suggestion follow up on selection
+    command: TRIGGER_SUGGESTION_COMMAND,
   };
 }
 
