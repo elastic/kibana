@@ -88,6 +88,7 @@ describe('callAgentExecutor', () => {
       actions: mockActions,
       connectorId: mockConnectorId,
       logger: mockLogger,
+      maxRetries: 0,
       request: mockRequest,
       streaming: false,
       llmType: 'openai',
