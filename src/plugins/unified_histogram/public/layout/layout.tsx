@@ -7,11 +7,11 @@
  */
 
 import { EuiSpacer, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
-import React, { PropsWithChildren, ReactElement, useState } from 'react';
+import React, { PropsWithChildren, ReactElement, useMemo, useState } from 'react';
 import { Observable } from 'rxjs';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type {
   EmbeddableComponentProps,
@@ -20,12 +20,13 @@ import type {
   LensSuggestionsApi,
   Suggestion,
 } from '@kbn/lens-plugin/public';
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { AggregateQuery, Filter, isOfAggregateQueryType, Query, TimeRange } from '@kbn/es-query';
 import {
   ResizableLayout,
   ResizableLayoutMode,
   ResizableLayoutDirection,
 } from '@kbn/resizable-layout';
+import { TextBasedPersistedState } from '@kbn/lens-plugin/public/datasources/text_based/types';
 import { Chart, checkChartAvailability } from '../chart';
 import type {
   UnifiedHistogramChartContext,
@@ -38,6 +39,7 @@ import type {
   UnifiedHistogramInput$,
 } from '../types';
 import { useLensSuggestions } from './hooks/use_lens_suggestions';
+import { shouldDisplayHistogram } from './helpers';
 
 const ChartMemoized = React.memo(Chart);
 
@@ -179,6 +181,8 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    * Allows users to enable/disable default actions
    */
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
+
+  table?: Datatable;
 }
 
 export const UnifiedHistogramLayout = ({
@@ -207,6 +211,7 @@ export const UnifiedHistogramLayout = ({
   disabledActions,
   lensSuggestionsApi,
   input$,
+  table,
   onTopPanelHeightChange,
   onChartHiddenChange,
   onTimeIntervalChange,
@@ -236,6 +241,36 @@ export const UnifiedHistogramLayout = ({
     lensSuggestionsApi,
     onSuggestionChange,
   });
+
+  // apply table to current suggestion
+  const usedSuggestion = useMemo(() => {
+    if (
+      currentSuggestion &&
+      table &&
+      query &&
+      isOfAggregateQueryType(query) &&
+      !shouldDisplayHistogram(query)
+    ) {
+      const { layers } = currentSuggestion.datasourceState as TextBasedPersistedState;
+
+      const newState = {
+        ...currentSuggestion,
+        datasourceState: {
+          ...(currentSuggestion.datasourceState as TextBasedPersistedState),
+          layers: {} as Record<string, unknown>,
+        },
+      };
+
+      for (const key of Object.keys(layers)) {
+        const newLayer = { ...layers[key], table };
+        newState.datasourceState.layers[key] = newLayer;
+      }
+
+      return newState;
+    } else {
+      return currentSuggestion;
+    }
+  }, [currentSuggestion, query, table]);
 
   const chart = suggestionUnsupported ? undefined : originalChart;
   const isChartAvailable = checkChartAvailability({ chart, dataView, isPlainRecord });
@@ -283,7 +318,7 @@ export const UnifiedHistogramLayout = ({
           relativeTimeRange={relativeTimeRange}
           request={request}
           hits={hits}
-          currentSuggestion={currentSuggestion}
+          currentSuggestion={usedSuggestion}
           isChartLoading={isChartLoading}
           allSuggestions={allSuggestions}
           isPlainRecord={isPlainRecord}

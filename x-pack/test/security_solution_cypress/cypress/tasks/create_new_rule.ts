@@ -542,7 +542,7 @@ export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRuleCreateProps)
   cy.get(NEW_TERMS_INPUT_AREA).find(INPUT).type(rule.new_terms_fields[0], { delay: 35 });
 
   cy.get(EUI_FILTER_SELECT_ITEM).click();
-  // eslint-disable-next-line cypress/unsafe-to-chain-command
+
   cy.focused().type('{esc}'); // Close combobox dropdown so next inputs can be interacted with
   const historySize = convertHistoryStartToSize(rule.history_window_start);
   const historySizeNumber = historySize.slice(0, historySize.length - 1);
@@ -553,15 +553,16 @@ export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRuleCreateProps)
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 };
 
+export const fillEsqlQueryBar = (query: string) => {
+  // eslint-disable-next-line cypress/no-force
+  cy.get(ESQL_QUERY_BAR_INPUT_AREA).type(query, { force: true });
+};
+
 export const clearEsqlQueryBar = () => {
   // monaco editor under the hood is quite complex in matter to clear it
   // underlying textarea holds just the last character of query displayed in search bar
   // in order to clear it - it requires to select all text within editor and type in it
-  cy.get(ESQL_QUERY_BAR_INPUT_AREA).type(Cypress.platform === 'darwin' ? '{cmd}a' : '{ctrl}a');
-};
-
-export const fillEsqlQueryBar = (query: string) => {
-  cy.get(ESQL_QUERY_BAR_INPUT_AREA).type(query);
+  fillEsqlQueryBar(Cypress.platform === 'darwin' ? '{cmd}a' : '{ctrl}a');
 };
 
 /**

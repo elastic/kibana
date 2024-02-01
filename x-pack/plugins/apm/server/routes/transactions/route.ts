@@ -73,10 +73,11 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
   params: t.type({
     path: t.type({ serviceName: t.string }),
     query: t.intersection([
+      t.partial({ searchQuery: t.string }),
       environmentRt,
-      kueryRt,
       rangeRt,
       t.type({
+        kuery: t.string,
         useDurationSummary: toBooleanRt,
         transactionType: t.string,
         latencyAggregationType: latencyAggregationTypeRt,
@@ -106,6 +107,7 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
         documentType,
         rollupInterval,
         useDurationSummary,
+        searchQuery,
       },
     } = params;
 
@@ -117,6 +119,7 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
       latencyAggregationType,
       start,
       end,
+      searchQuery,
     };
 
     const [serviceTransactionGroups, serviceTransactionGroupsAlerts] =
@@ -134,11 +137,8 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
         }),
       ]);
 
-    const {
-      transactionGroups,
-      maxTransactionGroupsExceeded,
-      transactionOverflowCount,
-    } = serviceTransactionGroups;
+    const { transactionGroups, maxCountExceeded, transactionOverflowCount } =
+      serviceTransactionGroups;
 
     const transactionGroupsWithAlerts = joinByKey(
       [...transactionGroups, ...serviceTransactionGroupsAlerts],
@@ -147,7 +147,7 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
 
     return {
       transactionGroups: transactionGroupsWithAlerts,
-      maxTransactionGroupsExceeded,
+      maxCountExceeded,
       transactionOverflowCount,
       hasActiveAlerts: !!serviceTransactionGroupsAlerts.length,
     };

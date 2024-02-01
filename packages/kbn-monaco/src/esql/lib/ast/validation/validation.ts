@@ -7,8 +7,11 @@
  */
 
 import uniqBy from 'lodash/uniqBy';
-import capitalize from 'lodash/capitalize';
-import { CommandOptionsDefinition, SignatureArgType } from '../definitions/types';
+import {
+  CommandModeDefinition,
+  CommandOptionsDefinition,
+  SignatureArgType,
+} from '../definitions/types';
 import {
   areFieldAndVariableTypesCompatible,
   extractSingleType,
@@ -18,7 +21,6 @@ import {
   getCommandDefinition,
   getFunctionDefinition,
   isArrayType,
-  isAssignment,
   isColumnItem,
   isEqualType,
   isFunctionItem,
@@ -33,6 +35,8 @@ import {
   columnExists,
   hasWildcard,
   hasCCSSource,
+  isSettingItem,
+  isAssignment,
 } from '../shared/helpers';
 import { collectVariables } from '../shared/variables';
 import type {
@@ -40,13 +44,14 @@ import type {
   ESQLAstItem,
   ESQLColumn,
   ESQLCommand,
+  ESQLCommandMode,
   ESQLCommandOption,
   ESQLFunction,
   ESQLMessage,
   ESQLSingleAstItem,
   ESQLSource,
 } from '../types';
-import { getMessageFromId, createMessage } from './errors';
+import { getMessageFromId } from './errors';
 import type { ESQLRealField, ESQLVariable, ReferenceMaps, ValidationResult } from './types';
 import type { ESQLCallbacks } from '../shared/types';
 import {
@@ -54,6 +59,8 @@ import {
   retrieveFields,
   retrievePolicies,
   retrievePoliciesFields,
+  retrieveMetadataFields,
+  retrieveFieldsFromStringSources,
 } from './resources';
 
 function validateFunctionLiteralArg(
@@ -125,7 +132,18 @@ function validateNestedFunctionArg(
     // no need to check the reason here, it is checked already above
     isSupportedFunction(actualArg.name, parentCommand).supported
   ) {
+    // The isSupported check ensure the definition exists
     const argFn = getFunctionDefinition(actualArg.name)!;
+
+    if ('noNestingFunctions' in argDef && argDef.noNestingFunctions) {
+      messages.push(
+        getMessageFromId({
+          messageId: 'noNestedArgumentSupport',
+          values: { name: actualArg.text, argType: argFn.signatures[0].returnType },
+          locations: actualArg.location,
+        })
+      );
+    }
     if (!isEqualType(actualArg, argDef, references, parentCommand)) {
       messages.push(
         getMessageFromId({
@@ -139,16 +157,6 @@ function validateNestedFunctionArg(
           locations: actualArg.location,
         })
       );
-    } else {
-      if ('noNestingFunctions' in argDef && argDef.noNestingFunctions) {
-        messages.push(
-          getMessageFromId({
-            messageId: 'noNestedArgumentSupport',
-            values: { name: actualArg.text, argType: argFn.signatures[0].returnType },
-            locations: actualArg.location,
-          })
-        );
-      }
     }
   }
   return messages;
@@ -217,15 +225,26 @@ function validateFunctionColumnArg(
 function validateFunction(
   astFunction: ESQLFunction,
   parentCommand: string,
-  references: ReferenceMaps
+  parentOption: string | undefined,
+  references: ReferenceMaps,
+  isNested?: boolean
 ): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
 
   if (astFunction.incomplete) {
     return messages;
   }
+  const fnDefinition = getFunctionDefinition(astFunction.name)!;
+  const supportNestedFunctions =
+    fnDefinition?.signatures.some(({ params }) =>
+      params.some(({ noNestingFunctions }) => !noNestingFunctions)
+    ) || true;
 
-  const isFnSupported = isSupportedFunction(astFunction.name, parentCommand);
+  const isFnSupported = isSupportedFunction(
+    astFunction.name,
+    isNested && !supportNestedFunctions ? 'eval' : parentCommand,
+    parentOption
+  );
 
   if (!isFnSupported.supported) {
     if (isFnSupported.reason === 'unknownFunction') {
@@ -239,18 +258,30 @@ function validateFunction(
         })
       );
     }
-    if (isFnSupported.reason === 'unsupportedFunction') {
+    // for nested functions skip this check and make the nested check fail later on
+    if (isFnSupported.reason === 'unsupportedFunction' && !isNested) {
       messages.push(
-        getMessageFromId({
-          messageId: 'unsupportedFunction',
-          values: { name: astFunction.name, command: capitalize(parentCommand) },
-          locations: astFunction.location,
-        })
+        parentOption
+          ? getMessageFromId({
+              messageId: 'unsupportedFunctionForCommandOption',
+              values: {
+                name: astFunction.name,
+                command: parentCommand.toUpperCase(),
+                option: parentOption.toUpperCase(),
+              },
+              locations: astFunction.location,
+            })
+          : getMessageFromId({
+              messageId: 'unsupportedFunctionForCommand',
+              values: { name: astFunction.name, command: parentCommand.toUpperCase() },
+              locations: astFunction.location,
+            })
       );
     }
-    return messages;
+    if (messages.length) {
+      return messages;
+    }
   }
-  const fnDefinition = getFunctionDefinition(astFunction.name)!;
   const matchingSignatures = fnDefinition.signatures.filter((def) => {
     if (def.infiniteParams && astFunction.args.length > 0) {
       return true;
@@ -282,17 +313,23 @@ function validateFunction(
     const wrappedArray = Array.isArray(arg) ? arg : [arg];
     for (const subArg of wrappedArray) {
       if (isFunctionItem(subArg)) {
-        messages.push(...validateFunction(subArg, parentCommand, references));
+        messages.push(
+          ...validateFunction(
+            subArg,
+            parentCommand,
+            parentOption,
+            references,
+            isNested || !isAssignment(astFunction)
+          )
+        );
       }
     }
   }
   // check if the definition has some warning to show:
   if (fnDefinition.warning) {
-    const message = fnDefinition.warning(
-      ...(astFunction.args.filter((arg) => !Array.isArray(arg)) as ESQLSingleAstItem[])
-    );
-    if (message) {
-      messages.push(createMessage('warning', message, astFunction.location));
+    const payloads = fnDefinition.warning(astFunction);
+    if (payloads.length) {
+      messages.push(...payloads);
     }
   }
   // at this point we're sure that at least one signature is matching
@@ -307,6 +344,7 @@ function validateFunction(
         // few lines above
         return;
       }
+      // if the arg is an array of values, check each element
       if (Array.isArray(outerArg) && isArrayType(argDef.type)) {
         const extractedType = extractSingleType(argDef.type);
         const everyArgInListMessages = outerArg
@@ -355,11 +393,6 @@ function validateFunction(
           return validateFn(astFunction, actualArg, argDef, references, parentCommand);
         });
         failingSignature.push(...argValidationMessages);
-
-        if (isSourceItem(actualArg)) {
-          // something went wrong with the AST translation
-          throw new Error('Source should not allowed as function argument');
-        }
       }
     });
     if (failingSignature.length) {
@@ -378,6 +411,54 @@ function validateFunction(
   return uniqBy(messages, ({ location }) => `${location.min}-${location.max}`);
 }
 
+function validateSetting(
+  setting: ESQLCommandMode,
+  settingDef: CommandModeDefinition | undefined,
+  command: ESQLCommand,
+  referenceMaps: ReferenceMaps
+): ESQLMessage[] {
+  const messages: ESQLMessage[] = [];
+  if (setting.incomplete || command.incomplete) {
+    return messages;
+  }
+  if (!settingDef) {
+    const commandDef = getCommandDefinition(command.name);
+    messages.push(
+      getMessageFromId({
+        messageId: 'unsupportedSetting',
+        values: {
+          setting: setting.name,
+          expected: commandDef.modes.map(({ name }) => name).join(', '),
+        },
+        locations: setting.location,
+      })
+    );
+    return messages;
+  }
+  setting.args.forEach((arg, index) => {
+    if (!Array.isArray(arg)) {
+      const argDef = settingDef.signature.params[index];
+      const value = 'value' in arg ? arg.value : arg.name;
+      if (argDef.values && !argDef.values?.includes(String(value).toLowerCase())) {
+        messages.push(
+          getMessageFromId({
+            messageId: 'unsupportedSettingCommandValue',
+            values: {
+              setting: setting.name,
+              command: command.name.toUpperCase(),
+              value: String(value),
+              // for some reason all this enums are uppercase in ES
+              expected: (argDef.values?.join(', ') || argDef.type).toUpperCase(),
+            },
+            locations: arg.location,
+          })
+        );
+      }
+    }
+  });
+  return messages;
+}
+
 function validateOption(
   option: ESQLCommandOption,
   optionDef: CommandOptionsDefinition | undefined,
@@ -393,7 +474,7 @@ function validateOption(
     messages.push(
       getMessageFromId({
         messageId: 'unknownOption',
-        values: { command: command.name, option: option.name },
+        values: { command: command.name.toUpperCase(), option: option.name },
         locations: option.location,
       })
     );
@@ -401,53 +482,21 @@ function validateOption(
   }
   // use dedicate validate fn if provided
   if (optionDef.validate) {
-    messages.push(...optionDef.validate(option));
+    messages.push(...optionDef.validate(option, command, referenceMaps.metadataFields));
   }
   if (!optionDef.skipCommonValidation) {
-    option.args.forEach((arg, index) => {
+    option.args.forEach((arg) => {
       if (!Array.isArray(arg)) {
         if (!optionDef.signature.multipleParams) {
-          const argDef = optionDef.signature.params[index];
-          if (!isEqualType(arg, argDef, referenceMaps, command.name)) {
-            const value = 'value' in arg ? arg.value : arg.name;
-            messages.push(
-              getMessageFromId({
-                messageId: 'wrongArgumentType',
-                values: {
-                  name: option.name,
-                  argType: argDef.type,
-                  value,
-                  givenType: arg.type,
-                },
-                locations: arg.location,
-              })
-            );
-          }
           if (isColumnItem(arg)) {
             messages.push(...validateColumnForCommand(arg, command.name, referenceMaps));
           }
         } else {
-          const argDef = optionDef.signature.params[0];
-          if (!isEqualType(arg, argDef, referenceMaps, command.name)) {
-            const value = 'value' in arg ? arg.value : arg.name;
-            messages.push(
-              getMessageFromId({
-                messageId: 'wrongArgumentType',
-                values: {
-                  name: argDef.name,
-                  argType: argDef.type,
-                  value,
-                  givenType: arg.type,
-                },
-                locations: arg.location,
-              })
-            );
-          }
           if (isColumnItem(arg)) {
             messages.push(...validateColumnForCommand(arg, command.name, referenceMaps));
           }
-          if (isFunctionItem(arg) && isAssignment(arg)) {
-            messages.push(...validateFunction(arg, command.name, referenceMaps));
+          if (isFunctionItem(arg)) {
+            messages.push(...validateFunction(arg, command.name, option.name, referenceMaps));
           }
         }
       }
@@ -467,55 +516,40 @@ function validateSource(
     return messages;
   }
   const commandDef = getCommandDefinition(commandName);
-  if (commandDef.signature.params.every(({ type }) => type !== source.type)) {
-    const firstArg = commandDef.signature.params[0];
-    messages.push(
-      getMessageFromId({
-        messageId: 'wrongArgumentType',
-        values: {
-          name: firstArg.name,
-          argType: firstArg.type,
-          value: source.name,
-          givenType: source.type,
-        },
-        locations: source.location,
-      })
-    );
-  } else {
-    // give up on validate if CCS for now
-    const hasCCS = hasCCSSource(source.name);
-    if (!hasCCS) {
-      const isWildcardAndNotSupported =
-        hasWildcard(source.name) && !commandDef.signature.params.some(({ wildcards }) => wildcards);
-      if (isWildcardAndNotSupported) {
+  // give up on validate if CCS for now
+  const hasCCS = hasCCSSource(source.name);
+  if (!hasCCS) {
+    const isWildcardAndNotSupported =
+      hasWildcard(source.name) && !commandDef.signature.params.some(({ wildcards }) => wildcards);
+    if (isWildcardAndNotSupported) {
+      messages.push(
+        getMessageFromId({
+          messageId: 'wildcardNotSupportedForCommand',
+          values: { command: commandName.toUpperCase(), value: source.name },
+          locations: source.location,
+        })
+      );
+    } else {
+      if (source.sourceType === 'index' && !sourceExists(source.name, sources)) {
         messages.push(
           getMessageFromId({
-            messageId: 'wildcardNotSupportedForCommand',
-            values: { command: commandName, value: source.name },
+            messageId: 'unknownIndex',
+            values: { name: source.name },
             locations: source.location,
           })
         );
-      } else {
-        if (source.sourceType === 'index' && !sourceExists(source.name, sources)) {
-          messages.push(
-            getMessageFromId({
-              messageId: 'unknownIndex',
-              values: { name: source.name },
-              locations: source.location,
-            })
-          );
-        } else if (source.sourceType === 'policy' && !policies.has(source.name)) {
-          messages.push(
-            getMessageFromId({
-              messageId: 'unknownPolicy',
-              values: { name: source.name },
-              locations: source.location,
-            })
-          );
-        }
+      } else if (source.sourceType === 'policy' && !policies.has(source.name)) {
+        messages.push(
+          getMessageFromId({
+            messageId: 'unknownPolicy',
+            values: { name: source.name },
+            locations: source.location,
+          })
+        );
       }
     }
   }
+
   return messages;
 }
 
@@ -526,9 +560,6 @@ function validateColumnForCommand(
 ): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
 
-  if (['from', 'show', 'limit'].includes(commandName)) {
-    return messages;
-  }
   if (commandName === 'row') {
     if (!references.variables.has(column.name)) {
       messages.push(
@@ -552,18 +583,17 @@ function validateColumnForCommand(
       if (columnParamsWithInnerTypes.length) {
         // this should be guaranteed by the columnCheck above
         const columnRef = getColumnHit(nameHit, references)!;
-        if (
-          columnParamsWithInnerTypes.every(({ innerType }) => {
-            return innerType !== columnRef.type;
-          })
-        ) {
+        const hasSomeWrongInnerTypes = columnParamsWithInnerTypes.every(({ innerType }) => {
+          return innerType !== 'any' && innerType !== columnRef.type;
+        });
+        if (hasSomeWrongInnerTypes) {
           const supportedTypes = columnParamsWithInnerTypes.map(({ innerType }) => innerType);
 
           messages.push(
             getMessageFromId({
               messageId: 'unsupportedColumnTypeForCommand',
               values: {
-                command: capitalize(commandName),
+                command: commandName.toUpperCase(),
                 type: supportedTypes.join(', '),
                 typeCount: supportedTypes.length,
                 givenType: columnRef.type,
@@ -582,7 +612,7 @@ function validateColumnForCommand(
           getMessageFromId({
             messageId: 'wildcardNotSupportedForCommand',
             values: {
-              command: commandName,
+              command: commandName.toUpperCase(),
               value: nameHit,
             },
             locations: column.location,
@@ -623,7 +653,18 @@ function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLM
     const wrappedArg = Array.isArray(commandArg) ? commandArg : [commandArg];
     for (const arg of wrappedArg) {
       if (isFunctionItem(arg)) {
-        messages.push(...validateFunction(arg, command.name, references));
+        messages.push(...validateFunction(arg, command.name, undefined, references));
+      }
+
+      if (isSettingItem(arg)) {
+        messages.push(
+          ...validateSetting(
+            arg,
+            commandDef.modes?.find(({ name }) => name === arg.name),
+            command,
+            references
+          )
+        );
       }
 
       if (isOptionItem(arg)) {
@@ -642,7 +683,7 @@ function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLM
             getMessageFromId({
               messageId: 'unknownAggregateFunction',
               values: {
-                command: capitalize(command.name),
+                command: command.name.toUpperCase(),
                 value: (arg as ESQLSingleAstItem).name,
               },
               locations: (arg as ESQLSingleAstItem).location,
@@ -657,7 +698,7 @@ function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLM
           getMessageFromId({
             messageId: 'unsupportedTypeForCommand',
             values: {
-              command: capitalize(command.name),
+              command: command.name.toUpperCase(),
               type: 'date_period',
               value: arg.name,
             },
@@ -738,18 +779,35 @@ export async function validateAst(
 
   const { ast, errors } = await astProvider(queryString);
 
-  const [sources, availableFields, availablePolicies] = await Promise.all([
+  const [sources, availableFields, availablePolicies, availableMetadataFields] = await Promise.all([
     // retrieve the list of available sources
     retrieveSources(ast, callbacks),
     // retrieve available fields (if a source command has been defined)
     retrieveFields(queryString, ast, callbacks),
     // retrieve available policies (if an enrich command has been defined)
     retrievePolicies(ast, callbacks),
+    // retrieve available metadata fields
+    retrieveMetadataFields(callbacks),
   ]);
 
   if (availablePolicies.size && ast.filter(({ name }) => name === 'enrich')) {
     const fieldsFromPoliciesMap = await retrievePoliciesFields(ast, availablePolicies, callbacks);
     fieldsFromPoliciesMap.forEach((value, key) => availableFields.set(key, value));
+  }
+
+  if (ast.some(({ name }) => ['grok', 'dissect'].includes(name))) {
+    const fieldsFromGrokOrDissect = await retrieveFieldsFromStringSources(
+      queryString,
+      ast,
+      callbacks
+    );
+    fieldsFromGrokOrDissect.forEach((value, key) => {
+      // if the field is already present, do not overwrite it
+      // Note: this can also overlap with some variables
+      if (!availableFields.has(key)) {
+        availableFields.set(key, value);
+      }
+    });
   }
 
   const variables = collectVariables(ast, availableFields);
@@ -763,6 +821,7 @@ export async function validateAst(
       fields: availableFields,
       policies: availablePolicies,
       variables,
+      metadataFields: availableMetadataFields,
     });
     messages.push(...commandMessages);
   }

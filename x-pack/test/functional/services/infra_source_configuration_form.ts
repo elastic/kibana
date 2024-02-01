@@ -110,6 +110,26 @@ export function InfraSourceConfigurationFormProvider({
     },
 
     /**
+     * Infra Metrics bottom actions bar
+     */
+    async getSaveButton(): Promise<WebElementWrapper> {
+      return await testSubjects.find('infraBottomBarActionsButton');
+    },
+
+    async saveInfraSettings() {
+      await (await this.getSaveButton()).click();
+
+      await retry.try(async () => {
+        const element = await this.getSaveButton();
+        return !(await element.isDisplayed());
+      });
+    },
+
+    async discardInfraSettingsChanges() {
+      await (await testSubjects.find('infraBottomBarActionsDiscardChangesButton')).click();
+    },
+
+    /**
      * Form
      */
     async getForm(): Promise<WebElementWrapper> {
