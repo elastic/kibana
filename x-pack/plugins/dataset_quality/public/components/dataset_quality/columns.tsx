@@ -125,6 +125,7 @@ export const getDatasetQualityTableColumns = ({
 
         return (
           <EuiButtonIcon
+            data-test-subj="datasetQualityExpandButton"
             size="m"
             color="text"
             onClick={() => openFlyout(dataStreamStat as FlyoutDataset)}
