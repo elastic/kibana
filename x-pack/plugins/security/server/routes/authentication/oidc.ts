@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { RouteDefinitionParams } from '..';
 import { OIDCAuthenticationProvider, OIDCLogin } from '../../authentication';
 import type { ProviderLoginAttempt } from '../../authentication/providers/oidc';
-import { wrapIntoCustomErrorResponse } from '../../errors';
+import { getDetailedErrorMessage, wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 import { ROUTE_TAG_AUTH_FLOW, ROUTE_TAG_CAN_REDIRECT } from '../tags';
 
@@ -271,6 +271,7 @@ export function defineOIDCRoutes({
 
       return response.unauthorized({ body: authenticationResult.error });
     } catch (error) {
+      logger.error(`Failed to perform OIDC login: ${getDetailedErrorMessage(error)}`);
       return response.customError(wrapIntoCustomErrorResponse(error));
     }
   }
