@@ -175,7 +175,7 @@ export class ObservabilityAIAssistantClient {
                   name: 'recall',
                   arguments: JSON.stringify({
                     queries: [],
-                    contexts: [],
+                    categories: [],
                   }),
                   trigger: MessageRole.Assistant as const,
                 },

@@ -42,7 +42,7 @@ export function registerRecallFunction({
           "lens function usage",
           "get_apm_timeseries function usage"    
         ],
-        "contexts": [
+        "categories": [
           "lens",
           "apm"
         ]
