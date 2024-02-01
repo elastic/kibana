@@ -63,7 +63,7 @@ export async function getServiceInstancesTransactionStatistics<
   end,
   serviceNodeIds,
   numBuckets,
-  isComparisonSearch,
+  includeTimeseries,
   offset,
 }: {
   latencyAggregationType: LatencyAggregationType;
@@ -73,7 +73,7 @@ export async function getServiceInstancesTransactionStatistics<
   searchAggregatedTransactions: boolean;
   start: number;
   end: number;
-  isComparisonSearch: T;
+  includeTimeseries: T;
   serviceNodeIds?: string[];
   environment: string;
   kuery: string;
@@ -123,7 +123,7 @@ export async function getServiceInstancesTransactionStatistics<
         ...getBackwardCompatibleDocumentTypeFilter(
           searchAggregatedTransactions
         ),
-        ...(isComparisonSearch && serviceNodeIds
+        ...(serviceNodeIds?.length
           ? [{ terms: { [SERVICE_NODE_NAME]: serviceNodeIds } }]
           : []),
       ],
@@ -136,9 +136,9 @@ export async function getServiceInstancesTransactionStatistics<
         field: SERVICE_NODE_NAME,
         missing: SERVICE_NODE_NAME_MISSING,
         ...(size ? { size } : {}),
-        ...(isComparisonSearch ? { include: serviceNodeIds } : {}),
+        ...(serviceNodeIds?.length ? { include: serviceNodeIds } : {}),
       },
-      aggs: isComparisonSearch
+      aggs: includeTimeseries
         ? {
             timeseries: {
               date_histogram: {
@@ -174,7 +174,7 @@ export async function getServiceInstancesTransactionStatistics<
         const { doc_count: count, key } = serviceNodeBucket;
         const serviceNodeName = String(key);
 
-        // Timeseries is returned when isComparisonSearch is true
+        // Timeseries is returned when includeTimeseries is true
         if ('timeseries' in serviceNodeBucket) {
           const { timeseries } = serviceNodeBucket;
           return {

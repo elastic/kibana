@@ -24,7 +24,7 @@ export const indexBasedRouteFactory = (
   title: i18n.translate('xpack.ml.dataVisualizer.dataView.docTitle', {
     defaultMessage: 'Index Data Visualizer',
   }),
-  render: () => <PageWrapper />,
+  render: () => <PageWrapper esql={false} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('DATA_VISUALIZER_BREADCRUMB', navigateToPath, basePath),
@@ -36,13 +36,34 @@ export const indexBasedRouteFactory = (
   ],
 });
 
-const PageWrapper: FC = () => {
+export const indexESQLBasedRouteFactory = (
+  navigateToPath: NavigateToPath,
+  basePath: string
+): MlRoute => ({
+  id: 'data_view_datavisualizer_esql',
+  path: createPath(ML_PAGES.DATA_VISUALIZER_ESQL),
+  title: i18n.translate('xpack.ml.dataVisualizer.esql.docTitle', {
+    defaultMessage: 'Index Data Visualizer (ES|QL)',
+  }),
+  render: () => <PageWrapper esql={true} />,
+  breadcrumbs: [
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('DATA_VISUALIZER_BREADCRUMB', navigateToPath, basePath),
+    {
+      text: i18n.translate('xpack.ml.dataFrameAnalyticsBreadcrumbs.esqlLabel', {
+        defaultMessage: 'Index Data Visualizer (ES|QL)',
+      }),
+    },
+  ],
+});
+
+const PageWrapper: FC<{ esql: boolean }> = ({ esql }) => {
   const { context } = useRouteResolver('basic', []);
 
   return (
     <PageLoader context={context}>
       <DataSourceContextProvider>
-        <Page />
+        <Page esql={esql} />
       </DataSourceContextProvider>
     </PageLoader>
   );
