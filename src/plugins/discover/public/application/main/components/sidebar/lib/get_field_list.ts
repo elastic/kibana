@@ -74,7 +74,7 @@ export function getTextBasedQueryFieldList(
         type: column.meta?.type ?? 'unknown',
         searchable: false,
         aggregatable: false,
-        empty: Boolean(column?.isNull),
+        isNull: Boolean(column?.isNull),
       })
   );
 }

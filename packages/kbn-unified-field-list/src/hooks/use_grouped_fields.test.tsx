@@ -472,13 +472,13 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     expect(fieldListGroupedProps.fieldsExistInIndex).toBe(true);
   });
 
-  it('should work correctly for text-based queries (no data view) with empty fields', async () => {
+  it('should work correctly for text-based queries (no data view) with isNull fields', async () => {
     const allFieldsEmpty = [...new Array(2)].flatMap((_, index) =>
       allFields.map((field) => {
         return new DataViewField({
           ...field.toSpec(),
           name: `${field.name}${index || ''}`,
-          empty: true,
+          isNull: true,
         });
       })
     );

@@ -309,8 +309,8 @@ export class DataViewField implements DataViewFieldBase {
    * Returns true if field is Empty
    */
 
-  public get empty() {
-    return Boolean(this.spec.empty);
+  public get isNull() {
+    return Boolean(this.spec.isNull);
   }
 
   /**

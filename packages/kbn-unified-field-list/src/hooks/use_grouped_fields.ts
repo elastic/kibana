@@ -157,7 +157,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
           return 'availableFields';
         }
 
-        if (field?.empty) {
+        if (field?.isNull) {
           return 'emptyFields';
         }
         if (dataView?.getFieldByName && !dataView.getFieldByName(field.name)) {

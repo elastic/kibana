@@ -410,7 +410,7 @@ export type FieldSpec = DataViewFieldBase & {
   /**
    * True if field is empty
    */
-  empty?: boolean;
+  isNull?: boolean;
   /**
    * True if can be read from doc values
    */
