@@ -250,7 +250,7 @@ export class DataGridService extends FtrService {
       ? '~docTableExpandToggleColumnAnchor'
       : '~docTableExpandToggleColumn';
 
-    const toggle = await rowColumns[options.columnIndex].findByTestSubject(testSubj);
+    const toggle = await rowColumns[options.columnIndex ?? 0].findByTestSubject(testSubj);
 
     await toggle.scrollIntoViewIfNecessary();
     await toggle.click();
