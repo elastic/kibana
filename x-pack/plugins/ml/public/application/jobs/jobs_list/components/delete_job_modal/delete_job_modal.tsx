@@ -40,9 +40,8 @@ interface Props {
 export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, refreshJobs }) => {
   const [deleting, setDeleting] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [jobIds, setJobIds] = useState<string[]>([]);
+  const [adJobs, setAdJobs] = useState<MlSummaryJob[]>([]);
   const [canDelete, setCanDelete] = useState(false);
-  const [hasManagedJob, setHasManagedJob] = useState(false);
   const [deleteUserAnnotations, setDeleteUserAnnotations] = useState(false);
   const [deleteAlertingRules, setDeleteAlertingRules] = useState(false);
 
@@ -59,12 +58,17 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
   }, []);
 
   const showModal = useCallback((jobs: MlSummaryJob[]) => {
-    setJobIds(jobs.map(({ id }) => id));
-    setHasManagedJob(jobs.some((job) => isManagedJob(job)));
+    setAdJobs(jobs);
     setModalVisible(true);
     setDeleting(false);
     setDeleteUserAnnotations(false);
   }, []);
+
+  const jobIds = adJobs.map(({ id }) => id);
+  const hasManagedJob = adJobs.some((job) => isManagedJob(job));
+  const hasAlertingRules = adJobs.some(
+    (job) => Array.isArray(job.alertingRules) && job.alertingRules.length > 0
+  );
 
   const closeModal = useCallback(() => {
     setModalVisible(false);
@@ -88,8 +92,6 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
   if (modalVisible === false || jobIds.length === 0) {
     return null;
   }
-
-  const hasAlertingRules = true;
 
   if (canDelete) {
     return (
