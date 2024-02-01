@@ -113,10 +113,14 @@ export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
 
   useEffect(() => {
     if (globalState?.time !== undefined) {
-      timefilter.setTime({
-        from: globalState.time.from,
-        to: globalState.time.to,
-      });
+      if (
+        !isEqual({ from: globalState.time.from, to: globalState.time.to }, timefilter.getTime())
+      ) {
+        timefilter.setTime({
+          from: globalState.time.from,
+          to: globalState.time.to,
+        });
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(globalState?.time), timefilter]);
@@ -136,11 +140,14 @@ export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
     });
   }, [dataService, searchQueryLanguage, searchString]);
 
-  const onWindowParametersHandler = (wp?: WindowParameters) => {
-    if (!isEqual(wp, stateFromUrl.wp)) {
-      setUrlState({
-        wp: windowParametersToAppState(wp),
-      });
+  const onWindowParametersHandler = (wp?: WindowParameters, replace = false) => {
+    if (!isEqual(windowParametersToAppState(wp), stateFromUrl.wp)) {
+      setUrlState(
+        {
+          wp: windowParametersToAppState(wp),
+        },
+        replace
+      );
     }
   };
 

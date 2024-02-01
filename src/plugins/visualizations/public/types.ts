@@ -55,6 +55,7 @@ export interface VisSavedObject extends ISavedVis {
   searchSource?: ISearchSource;
   version?: string;
   tags?: string[];
+  managed: boolean;
 }
 
 export interface SaveVisOptions {
