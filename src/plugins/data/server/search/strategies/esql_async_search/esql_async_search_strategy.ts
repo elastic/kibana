@@ -58,7 +58,6 @@ export const esqlAsyncSearchStrategyProvider = (
 
     const search = async () => {
       const { dropNullColumns, ...requestParams } = request.params ?? {};
-      const queryParams = dropNullColumns ? '?drop_null_columns' : '';
       const params = id
         ? {
             ...getCommonDefaultAsyncGetParams(searchConfig, options),
@@ -81,7 +80,12 @@ export const esqlAsyncSearchStrategyProvider = (
             { ...options.transport, signal: options.abortSignal, meta: true }
           )
         : await client.transport.request<SqlGetAsyncResponse>(
-            { method: 'POST', path: `/_query/async${queryParams}`, body: params },
+            {
+              method: 'POST',
+              path: `/_query/async`,
+              body: params,
+              querystring: dropNullColumns ? 'drop_null_columns' : '',
+            },
             { ...options.transport, signal: options.abortSignal, meta: true }
           );
 
