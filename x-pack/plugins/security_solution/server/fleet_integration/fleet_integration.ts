@@ -294,8 +294,8 @@ export const getPackagePolicyPostCreateCallback = (
 
 const throwAgentTamperProtectionUnavailableError = (
   logger: Logger,
-  policyName: string,
-  policyId: string
+  policyName?: string,
+  policyId?: string
 ): void => {
   const agentTamperProtectionUnavailableError: Error & {
     statusCode?: number;
