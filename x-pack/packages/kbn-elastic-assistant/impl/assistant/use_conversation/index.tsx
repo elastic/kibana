@@ -7,7 +7,6 @@
 
 import { useCallback } from 'react';
 
-import { IHttpFetchError, isHttpFetchError } from '@kbn/core-http-browser';
 import { useAssistantContext } from '../../assistant_context';
 import { Conversation, Message } from '../../assistant_context/types';
 import * as i18n from './translations';
@@ -69,7 +68,7 @@ interface UseConversation {
   setApiConfig: ({
     conversation,
     apiConfig,
-  }: SetApiConfigProps) => Promise<Conversation | IHttpFetchError<unknown>>;
+  }: SetApiConfigProps) => Promise<Conversation | undefined>;
   createConversation: (conversation: Conversation) => Promise<Conversation | undefined>;
   getConversation: (conversationId: string) => Promise<Conversation | undefined>;
 }
@@ -84,11 +83,7 @@ export const useConversation = (): UseConversation => {
 
   const getConversation = useCallback(
     async (conversationId: string) => {
-      const currentConversation = await getConversationById({ http, id: conversationId });
-      if (isHttpFetchError(currentConversation)) {
-        return;
-      }
-      return currentConversation;
+      return getConversationById({ http, id: conversationId });
     },
     [http]
   );
@@ -100,9 +95,6 @@ export const useConversation = (): UseConversation => {
     async (conversationId: string) => {
       let messages: Message[] = [];
       const prevConversation = await getConversationById({ http, id: conversationId });
-      if (isHttpFetchError(prevConversation)) {
-        return;
-      }
       if (prevConversation != null) {
         messages = prevConversation.messages.slice(0, prevConversation.messages.length - 1);
         await updateConversation({
@@ -122,9 +114,6 @@ export const useConversation = (): UseConversation => {
   const amendMessage = useCallback(
     async ({ conversationId, content }: AmendMessageProps) => {
       const prevConversation = await getConversationById({ http, id: conversationId });
-      if (isHttpFetchError(prevConversation)) {
-        return;
-      }
       if (prevConversation != null) {
         const { messages } = prevConversation;
         const message = messages[messages.length - 1];
@@ -157,10 +146,7 @@ export const useConversation = (): UseConversation => {
         conversationId,
         messages: [message],
       });
-      if (isHttpFetchError(res)) {
-        return;
-      }
-      return res.messages;
+      return res?.messages;
     },
     [assistantTelemetry, isEnabledKnowledgeBase, isEnabledRAGAlerts, http]
   );
@@ -172,9 +158,6 @@ export const useConversation = (): UseConversation => {
     }: AppendReplacementsProps): Promise<Record<string, string> | undefined> => {
       let allReplacements = replacements;
       const prevConversation = await getConversationById({ http, id: conversationId });
-      if (isHttpFetchError(prevConversation)) {
-        return;
-      }
       if (prevConversation != null) {
         allReplacements = {
           ...prevConversation.replacements,
@@ -196,23 +179,22 @@ export const useConversation = (): UseConversation => {
   const clearConversation = useCallback(
     async (conversationId: string) => {
       const prevConversation = await getConversationById({ http, id: conversationId });
-      if (isHttpFetchError(prevConversation)) {
-        return;
-      }
-      const defaultSystemPromptId = getDefaultSystemPrompt({
-        allSystemPrompts,
-        conversation: prevConversation,
-      })?.id;
+      if (prevConversation) {
+        const defaultSystemPromptId = getDefaultSystemPrompt({
+          allSystemPrompts,
+          conversation: prevConversation,
+        })?.id;
 
-      await updateConversation({
-        http,
-        conversationId,
-        apiConfig: {
-          defaultSystemPromptId,
-        },
-        messages: [],
-        replacements: undefined,
-      });
+        await updateConversation({
+          http,
+          conversationId,
+          apiConfig: {
+            defaultSystemPromptId,
+          },
+          messages: [],
+          replacements: undefined,
+        });
+      }
     },
     [allSystemPrompts, http]
   );
@@ -249,10 +231,7 @@ export const useConversation = (): UseConversation => {
    */
   const createConversation = useCallback(
     async (conversation: Conversation): Promise<Conversation | undefined> => {
-      const response = await createConversationApi({ http, conversation });
-      if (!isHttpFetchError(response)) {
-        return response;
-      }
+      return createConversationApi({ http, conversation });
     },
     [http]
   );

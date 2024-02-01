@@ -6,8 +6,8 @@
  */
 
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
-import { HttpSetup } from '@kbn/core/public';
-import { IHttpFetchError } from '@kbn/core-http-browser';
+import { HttpSetup, IToasts } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import {
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
@@ -17,6 +17,7 @@ import { Conversation, Message } from '../../../assistant_context/types';
 export interface GetConversationByIdParams {
   http: HttpSetup;
   id: string;
+  toasts?: IToasts;
   signal?: AbortSignal | undefined;
 }
 
@@ -26,15 +27,17 @@ export interface GetConversationByIdParams {
  * @param {Object} options - The options object.
  * @param {HttpSetup} options.http - HttpSetup
  * @param {string} options.id - Conversation id.
+ * @param {IToasts} [options.toasts] - IToasts
  * @param {AbortSignal} [options.signal] - AbortSignal
  *
- * @returns {Promise<Conversation | IHttpFetchError>}
+ * @returns {Promise<Conversation | undefined>}
  */
 export const getConversationById = async ({
   http,
   id,
   signal,
-}: GetConversationByIdParams): Promise<Conversation | IHttpFetchError> => {
+  toasts,
+}: GetConversationByIdParams): Promise<Conversation | undefined> => {
   try {
     const response = await http.fetch(`${ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL}/${id}`, {
       method: 'GET',
@@ -44,13 +47,19 @@ export const getConversationById = async ({
 
     return response as Conversation;
   } catch (error) {
-    return error as IHttpFetchError;
+    toasts?.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
+      title: i18n.translate('xpack.elasticAssistant.conversations.getConversationError', {
+        defaultMessage: 'Error fetching conversation by id {id}',
+        values: { id },
+      }),
+    });
   }
 };
 
 export interface PostConversationParams {
   http: HttpSetup;
   conversation: Conversation;
+  toasts?: IToasts;
   signal?: AbortSignal | undefined;
 }
 
@@ -61,14 +70,16 @@ export interface PostConversationParams {
  * @param {HttpSetup} options.http - HttpSetup
  * @param {Conversation} [options.conversation] - Conversation to be added
  * @param {AbortSignal} [options.signal] - AbortSignal
+ * @param {IToasts} [options.toasts] - IToasts
  *
- * @returns {Promise<PostConversationResponse | IHttpFetchError>}
+ * @returns {Promise<PostConversationResponse | undefined>}
  */
 export const createConversation = async ({
   http,
   conversation,
   signal,
-}: PostConversationParams): Promise<Conversation | IHttpFetchError> => {
+  toasts,
+}: PostConversationParams): Promise<Conversation | undefined> => {
   try {
     const response = await http.post(ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL, {
       body: JSON.stringify(conversation),
@@ -78,18 +89,20 @@ export const createConversation = async ({
 
     return response as Conversation;
   } catch (error) {
-    return error as IHttpFetchError;
+    toasts?.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
+      title: i18n.translate('xpack.elasticAssistant.conversations.createConversationError', {
+        defaultMessage: 'Error creating conversation with title {title}',
+        values: { title: conversation.title },
+      }),
+    });
   }
 };
 
 export interface DeleteConversationParams {
   http: HttpSetup;
   id: string;
+  toasts?: IToasts;
   signal?: AbortSignal | undefined;
-}
-
-export interface DeleteConversationResponse {
-  success: boolean;
 }
 
 /**
@@ -99,14 +112,16 @@ export interface DeleteConversationResponse {
  * @param {HttpSetup} options.http - HttpSetup
  * @param {string} [options.id] - Conversation id to be deleted
  * @param {AbortSignal} [options.signal] - AbortSignal
+ * @param {IToasts} [options.toasts] - IToasts
  *
- * @returns {Promise<DeleteConversationResponse | IHttpFetchError>}
+ * @returns {Promise<boolean | undefined>}
  */
 export const deleteConversation = async ({
   http,
   id,
   signal,
-}: DeleteConversationParams): Promise<DeleteConversationResponse | IHttpFetchError> => {
+  toasts,
+}: DeleteConversationParams): Promise<boolean | undefined> => {
   try {
     const response = await http.fetch(`${ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL}/${id}`, {
       method: 'DELETE',
@@ -114,14 +129,20 @@ export const deleteConversation = async ({
       signal,
     });
 
-    return response as DeleteConversationResponse;
+    return response as boolean;
   } catch (error) {
-    return error as IHttpFetchError;
+    toasts?.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
+      title: i18n.translate('xpack.elasticAssistant.conversations.deleteConversationError', {
+        defaultMessage: 'Error deleting conversation by id {id}',
+        values: { id },
+      }),
+    });
   }
 };
 
 export interface PutConversationMessageParams {
   http: HttpSetup;
+  toasts?: IToasts;
   conversationId: string;
   title?: string;
   messages?: Message[];
@@ -133,6 +154,7 @@ export interface PutConversationMessageParams {
     model?: string;
   };
   replacements?: Record<string, string>;
+  excludeFromLastConversationStorage?: boolean;
   signal?: AbortSignal | undefined;
 }
 
@@ -142,19 +164,25 @@ export interface PutConversationMessageParams {
  * @param {PutConversationMessageParams} options - The options object.
  * @param {HttpSetup} options.http - HttpSetup
  * @param {string} [options.title] - Conversation title
+ * @param {boolean} [options.excludeFromLastConversationStorage] - Conversation excludeFromLastConversationStorage
+ * @param {ApiConfig} [options.apiConfig] - Conversation apiConfig
+ * @param {Message[]} [options.messages] - Conversation messages
+ * @param {IToasts} [options.toasts] - IToasts
  * @param {AbortSignal} [options.signal] - AbortSignal
  *
- * @returns {Promise<Conversation | IHttpFetchError>}
+ * @returns {Promise<Conversation | undefined>}
  */
 export const updateConversation = async ({
   http,
+  toasts,
   title,
   conversationId,
   messages,
   apiConfig,
   replacements,
+  excludeFromLastConversationStorage,
   signal,
-}: PutConversationMessageParams): Promise<Conversation | IHttpFetchError> => {
+}: PutConversationMessageParams): Promise<Conversation | undefined> => {
   try {
     const response = await http.fetch(
       `${ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL}/${conversationId}`,
@@ -166,6 +194,7 @@ export const updateConversation = async ({
           messages,
           replacements,
           apiConfig,
+          excludeFromLastConversationStorage,
         }),
         headers: {
           'Content-Type': 'application/json',
@@ -177,7 +206,12 @@ export const updateConversation = async ({
 
     return response as Conversation;
   } catch (error) {
-    return error as IHttpFetchError;
+    toasts?.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
+      title: i18n.translate('xpack.elasticAssistant.conversations.updateConversationError', {
+        defaultMessage: 'Error updating conversation by id {conversationId}',
+        values: { conversationId },
+      }),
+    });
   }
 };
 
@@ -186,14 +220,15 @@ export const updateConversation = async ({
  *
  * @param {PutConversationMessageParams} options - The options object.
  *
- * @returns {Promise<Conversation | IHttpFetchError>}
+ * @returns {Promise<Conversation | undefined>}
  */
 export const appendConversationMessages = async ({
   http,
   conversationId,
   messages,
   signal,
-}: PutConversationMessageParams): Promise<Conversation | IHttpFetchError> => {
+  toasts,
+}: PutConversationMessageParams): Promise<Conversation | undefined> => {
   try {
     const response = await http.fetch(
       `${ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL}/${conversationId}/messages`,
@@ -212,6 +247,11 @@ export const appendConversationMessages = async ({
 
     return response as Conversation;
   } catch (error) {
-    return error as IHttpFetchError;
+    toasts?.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
+      title: i18n.translate('xpack.elasticAssistant.conversations.updateConversationError', {
+        defaultMessage: 'Error updating conversation by id {conversationId}',
+        values: { conversationId },
+      }),
+    });
   }
 };
