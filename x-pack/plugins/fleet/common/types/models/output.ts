@@ -35,6 +35,7 @@ export type OutputPreset = 'custom' | 'balanced' | 'throughput' | 'scale' | 'lat
 interface NewBaseOutput {
   is_default: boolean;
   is_default_monitoring: boolean;
+  is_internal?: boolean;
   is_preconfigured?: boolean;
   name: string;
   type: ValueOf<OutputType>;

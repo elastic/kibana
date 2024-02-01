@@ -51,7 +51,7 @@ import type {
   ESQLSingleAstItem,
   ESQLSource,
 } from '../types';
-import { getMessageFromId, createMessage } from './errors';
+import { getMessageFromId } from './errors';
 import type { ESQLRealField, ESQLVariable, ReferenceMaps, ValidationResult } from './types';
 import type { ESQLCallbacks } from '../shared/types';
 import {
@@ -130,7 +130,18 @@ function validateNestedFunctionArg(
     // no need to check the reason here, it is checked already above
     isSupportedFunction(actualArg.name, parentCommand).supported
   ) {
+    // The isSupported check ensure the definition exists
     const argFn = getFunctionDefinition(actualArg.name)!;
+
+    if ('noNestingFunctions' in argDef && argDef.noNestingFunctions) {
+      messages.push(
+        getMessageFromId({
+          messageId: 'noNestedArgumentSupport',
+          values: { name: actualArg.text, argType: argFn.signatures[0].returnType },
+          locations: actualArg.location,
+        })
+      );
+    }
     if (!isEqualType(actualArg, argDef, references, parentCommand)) {
       messages.push(
         getMessageFromId({
@@ -144,16 +155,6 @@ function validateNestedFunctionArg(
           locations: actualArg.location,
         })
       );
-    } else {
-      if ('noNestingFunctions' in argDef && argDef.noNestingFunctions) {
-        messages.push(
-          getMessageFromId({
-            messageId: 'noNestedArgumentSupport',
-            values: { name: actualArg.text, argType: argFn.signatures[0].returnType },
-            locations: actualArg.location,
-          })
-        );
-      }
     }
   }
   return messages;
@@ -324,11 +325,9 @@ function validateFunction(
   }
   // check if the definition has some warning to show:
   if (fnDefinition.warning) {
-    const message = fnDefinition.warning(
-      ...(astFunction.args.filter((arg) => !Array.isArray(arg)) as ESQLSingleAstItem[])
-    );
-    if (message) {
-      messages.push(createMessage('warning', message, astFunction.location));
+    const payloads = fnDefinition.warning(astFunction);
+    if (payloads.length) {
+      messages.push(...payloads);
     }
   }
   // at this point we're sure that at least one signature is matching
