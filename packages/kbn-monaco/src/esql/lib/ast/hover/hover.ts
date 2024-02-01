@@ -59,7 +59,7 @@ export async function getHoverItem(
             {
               value: `${i18n.translate('monaco.esql.hover.policyIndexes', {
                 defaultMessage: '**Indexes**',
-              })}: ${policyMetadata.sourceIndices}`,
+              })}: ${policyMetadata.sourceIndices.join(', ')}`,
             },
             {
               value: `${i18n.translate('monaco.esql.hover.policyMatchingField', {
@@ -69,7 +69,7 @@ export async function getHoverItem(
             {
               value: `${i18n.translate('monaco.esql.hover.policyEnrichedFields', {
                 defaultMessage: '**Fields**',
-              })}: ${policyMetadata.enrichFields}`,
+              })}: ${policyMetadata.enrichFields.join(', ')}`,
             },
           ],
         };

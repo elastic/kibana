@@ -133,7 +133,7 @@ export const useLatestFindings = (options: UseFindingsOptions) => {
    * the last loaded record to be used as a from parameter to fetch the next chunk of data.
    */
   return useInfiniteQuery(
-    ['csp_findings', { params: options }],
+    ['csp_findings', { params: options }, rulesStates],
     async ({ pageParam }) => {
       const {
         rawResponse: { hits, aggregations },

@@ -52,7 +52,6 @@
     "@kbn/profiling-utils",
     "@kbn/security-plugin",
     "@kbn/shared-ux-utility",
-    "@kbn/core-ui-settings-browser",
     "@kbn/management-settings-components-field-row"
     // add references to other TypeScript projects the plugin depends on
 
