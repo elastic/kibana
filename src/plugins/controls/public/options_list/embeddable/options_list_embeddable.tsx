@@ -363,13 +363,13 @@ export class OptionsListEmbeddable
           if (invalidSelections?.includes(String(selectedOption))) invalid.push(selectedOption);
           else valid.push(selectedOption);
         }
-        this.reportInvalidSelections(true);
         this.dispatch.updateQueryResults({
           availableOptions: suggestions,
           invalidSelections: invalid,
           validSelections: valid,
           totalCardinality,
         });
+        this.reportInvalidSelections(true);
       }
 
       batch(() => {

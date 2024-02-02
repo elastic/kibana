@@ -178,6 +178,15 @@ export class ControlGroupContainer extends Container<
     hasInvalidSelections: boolean;
   }) => {
     this.invalidSelectionsState = { ...this.invalidSelectionsState, [id]: hasInvalidSelections };
+
+    const childrenWithInvalidSelections = cachedChildEmbeddableOrder(
+      this.getInput().panels
+    ).idsInOrder.filter((childId) => {
+      return this.invalidSelectionsState[childId];
+    });
+    this.dispatch.setInvalidSelectionsControlId(
+      childrenWithInvalidSelections.length > 0 ? childrenWithInvalidSelections[0] : undefined
+    );
   };
 
   private setupSubscriptions = () => {
@@ -219,15 +228,6 @@ export class ControlGroupContainer extends Container<
     this.subscriptions.add(
       this.recalculateFilters$.pipe(debounceTime(10)).subscribe(() => {
         this.recalculateFilters();
-        console.log('HERE!!!');
-        const childrenWithInvalidSelections = cachedChildEmbeddableOrder(
-          this.getInput().panels
-        ).idsInOrder.filter((childId) => {
-          return this.invalidSelectionsState[childId];
-        });
-        this.dispatch.setInvalidSelectionsControlId(
-          childrenWithInvalidSelections.length > 0 ? childrenWithInvalidSelections[0] : undefined
-        );
       })
     );
   };

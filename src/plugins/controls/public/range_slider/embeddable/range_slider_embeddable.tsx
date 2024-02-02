@@ -28,6 +28,7 @@ import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 
 import {
+  ControlGroupContainer,
   ControlInput,
   ControlOutput,
   RangeSliderEmbeddableInput,
@@ -82,6 +83,7 @@ export class RangeSliderEmbeddable
 {
   public readonly type = RANGE_SLIDER_CONTROL;
   public deferEmbeddableLoad = true;
+  public parent: ControlGroupContainer;
 
   private subscriptions: Subscription = new Subscription();
   private node?: HTMLElement;
@@ -110,6 +112,7 @@ export class RangeSliderEmbeddable
     parent?: IContainer
   ) {
     super(input, output, parent); // get filters for initial output...
+    this.parent = parent as ControlGroupContainer;
 
     // Destructure controls services
     ({
@@ -393,7 +396,21 @@ export class RangeSliderEmbeddable
 
       const docCount = typeof total === 'number' ? total : total?.value;
       this.dispatch.setIsInvalid(!docCount);
+
+      const {
+        explicitInput: { value },
+      } = this.getState();
+      this.reportInvalidSelections(
+        !value || (value[0] === '' && value[1] === '') ? false : !docCount // don't set the range slider invalid if it has no selections
+      );
     }
+  };
+
+  private reportInvalidSelections = (hasInvalidSelections: boolean) => {
+    this.parent?.reportInvalidSelections({
+      id: this.id,
+      hasInvalidSelections,
+    });
   };
 
   public canShowInvalidSelectionsWarning = () =>
