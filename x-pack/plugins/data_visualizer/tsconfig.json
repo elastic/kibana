@@ -40,6 +40,7 @@
     "@kbn/lens-plugin",
     "@kbn/maps-plugin",
     "@kbn/ml-agg-utils",
+    "@kbn/ml-cancellable-search",
     "@kbn/ml-date-picker",
     "@kbn/ml-is-defined",
     "@kbn/ml-is-populated-object",
@@ -70,8 +71,11 @@
     "@kbn/ml-chi2test",
     "@kbn/field-utils",
     "@kbn/visualization-utils",
+    "@kbn/text-based-languages",
     "@kbn/code-editor",
-    "@kbn/ui-theme"
+    "@kbn/es-types",
+    "@kbn/ui-theme",
+    "@kbn/esql-utils"
   ],
   "exclude": [
     "target/**/*",

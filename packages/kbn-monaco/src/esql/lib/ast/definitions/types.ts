@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { ESQLCommand, ESQLCommandOption, ESQLMessage, ESQLSingleAstItem } from '../types';
+import type { ESQLCommand, ESQLCommandOption, ESQLFunction, ESQLMessage } from '../types';
 
 export interface FunctionDefinition {
-  builtin?: boolean;
+  type: 'builtin' | 'agg' | 'eval';
   ignoreAsSuggestion?: boolean;
   name: string;
   alias?: string[];
@@ -29,7 +29,7 @@ export interface FunctionDefinition {
     returnType: string;
     examples?: string[];
   }>;
-  warning?: (...args: ESQLSingleAstItem[]) => string | undefined;
+  warning?: (fnDef: ESQLFunction) => ESQLMessage[];
 }
 
 export interface CommandBaseDefinition {
@@ -57,7 +57,11 @@ export interface CommandOptionsDefinition extends CommandBaseDefinition {
   wrapped?: string[];
   optional: boolean;
   skipCommonValidation?: boolean;
-  validate?: (option: ESQLCommandOption, command: ESQLCommand) => ESQLMessage[];
+  validate?: (
+    option: ESQLCommandOption,
+    command: ESQLCommand,
+    references?: unknown
+  ) => ESQLMessage[];
 }
 
 export interface CommandModeDefinition extends CommandBaseDefinition {
