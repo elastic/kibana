@@ -9,6 +9,7 @@ import { set } from '@kbn/safer-lodash-set';
 import { constant, get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { UserConfiguredActionConnector, IErrorObject, Rule, RuleAction } from '../../types';
+import { isSystemAction } from '@kbn/alerting-plugin/common';
 
 const filterQueryRequiredError = i18n.translate(
   'xpack.triggersActionsUI.sections.actionTypeForm.error.requiredFilterQuery',
@@ -18,6 +19,7 @@ const filterQueryRequiredError = i18n.translate(
 );
 
 export const validateActionFilterQuery = (actionItem: RuleAction): string | null => {
+  if (isSystemAction(actionItem)) return null;
   const query = actionItem.alertsFilter?.query;
   if (query && !query.kql) {
     return filterQueryRequiredError;
@@ -70,17 +72,17 @@ export function getConnectorWithInvalidatedFields(
   baseConnectorErrors: IErrorObject
 ) {
   Object.keys(configErrors).forEach((errorKey) => {
-    if (configErrors[errorKey].length >= 1 && get(connector.config, errorKey) === undefined) {
+    if (configErrors[errorKey].length && get(connector.config, errorKey) === undefined) {
       set(connector.config, errorKey, null);
     }
   });
   Object.keys(secretsErrors).forEach((errorKey) => {
-    if (secretsErrors[errorKey].length >= 1 && get(connector.secrets, errorKey) === undefined) {
+    if (secretsErrors[errorKey].length && get(connector.secrets, errorKey) === undefined) {
       set(connector.secrets, errorKey, null);
     }
   });
   Object.keys(baseConnectorErrors).forEach((errorKey) => {
-    if (baseConnectorErrors[errorKey].length >= 1 && get(connector, errorKey) === undefined) {
+    if (baseConnectorErrors[errorKey].length && get(connector, errorKey) === undefined) {
       set(connector, errorKey, null);
     }
   });
@@ -94,12 +96,12 @@ export function getRuleWithInvalidatedFields(
   actionsErrors: IErrorObject[]
 ) {
   Object.keys(paramsErrors).forEach((errorKey) => {
-    if (paramsErrors[errorKey].length >= 1 && get(rule.params, errorKey) === undefined) {
+    if (paramsErrors[errorKey].length && get(rule.params, errorKey) === undefined) {
       set(rule.params, errorKey, null);
     }
   });
   Object.keys(baseAlertErrors).forEach((errorKey) => {
-    if (baseAlertErrors[errorKey].length >= 1 && get(rule, errorKey) === undefined) {
+    if (baseAlertErrors[errorKey].length && get(rule, errorKey) === undefined) {
       set(rule, errorKey, null);
     }
   });
@@ -107,7 +109,7 @@ export function getRuleWithInvalidatedFields(
     const actionToValidate = rule.actions.length > index ? rule.actions[index] : null;
     if (actionToValidate) {
       Object.keys(error).forEach((errorKey) => {
-        if (error[errorKey].length >= 1 && get(actionToValidate!.params, errorKey) === undefined) {
+        if (error[errorKey].length && get(actionToValidate!.params, errorKey) === undefined) {
           set(actionToValidate!.params, errorKey, null);
         }
       });

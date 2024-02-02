@@ -11,7 +11,6 @@ import { withSpan } from '@kbn/apm-utils';
 import { validateSystemActions } from '../../../../lib/validate_system_actions';
 import { parseDuration } from '../../../../../common/parse_duration';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import {
   validateRuleTypeParams,

@@ -11,7 +11,6 @@ import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import {
   ActionConnector,
   ActionType,
-  RuleAction,
   GenericValidationResult,
   ActionConnectorMode,
   ActionVariables,
@@ -23,7 +22,12 @@ import { I18nProvider, __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, waitFor, screen } from '@testing-library/react';
 import { DEFAULT_FREQUENCY } from '../../../common/constants';
 import { transformActionVariables } from '../../lib/action_variables';
-import { RuleNotifyWhen, RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
+import {
+  RuleActionTypes,
+  RuleDefaultAction,
+  RuleNotifyWhen,
+  RuleNotifyWhenType,
+} from '@kbn/alerting-plugin/common';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 
 const CUSTOM_NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
@@ -138,6 +142,7 @@ describe('action_type_form', () => {
       getActionTypeForm({
         index: 1,
         actionItem: {
+          type: RuleActionTypes.DEFAULT,
           id: '123',
           actionTypeId: '.pagerduty',
           group: 'recovered',
@@ -192,6 +197,7 @@ describe('action_type_form', () => {
         {getActionTypeForm({
           index: 1,
           actionItem: {
+            type: RuleActionTypes.DEFAULT,
             id: '123',
             actionTypeId: '.pagerduty',
             group: 'recovered',
@@ -241,6 +247,7 @@ describe('action_type_form', () => {
         {getActionTypeForm({
           index: 1,
           actionItem: {
+            type: RuleActionTypes.DEFAULT,
             id: '123',
             actionTypeId: '.pagerduty',
             group: 'recovered',
@@ -290,6 +297,7 @@ describe('action_type_form', () => {
       getActionTypeForm({
         index: 1,
         actionItem: {
+          type: RuleActionTypes.DEFAULT,
           id: '123',
           actionTypeId: '.pagerduty',
           group: 'recovered',
@@ -342,6 +350,7 @@ describe('action_type_form', () => {
       getActionTypeForm({
         index: 1,
         actionItem: {
+          type: RuleActionTypes.DEFAULT,
           id: '123',
           actionTypeId: '.pagerduty',
           group: 'recovered',
@@ -408,6 +417,7 @@ describe('action_type_form', () => {
       group: 'default',
       params: {},
       frequency: DEFAULT_FREQUENCY,
+      type: RuleActionTypes.DEFAULT,
     };
     const wrapper = render(
       <IntlProvider locale="en">
@@ -492,6 +502,7 @@ describe('action_type_form', () => {
           ruleTypeId: 'test',
           setActionParamsProperty,
           actionItem: {
+            type: RuleActionTypes.DEFAULT,
             id: '123',
             actionTypeId: '.pagerduty',
             group: 'recovered',
@@ -547,6 +558,7 @@ describe('action_type_form', () => {
           throttle: null,
           summary: true,
         },
+        type: RuleActionTypes.DEFAULT,
       };
       const wrapper = render(
         <IntlProvider locale="en">
@@ -601,6 +613,7 @@ describe('action_type_form', () => {
           throttle: null,
           summary: false,
         },
+        type: RuleActionTypes.DEFAULT,
       };
       const wrapper = render(
         <IntlProvider locale="en">
@@ -654,7 +667,7 @@ function getActionTypeForm({
 }: {
   index?: number;
   actionConnector?: ActionConnector<Record<string, unknown>, Record<string, unknown>>;
-  actionItem?: RuleAction;
+  actionItem?: RuleDefaultAction;
   defaultActionGroupId?: string;
   connectors?: Array<ActionConnector<Record<string, unknown>, Record<string, unknown>>>;
   actionTypeIndex?: Record<string, ActionType>;
@@ -686,7 +699,7 @@ function getActionTypeForm({
     secrets: {},
   };
 
-  const actionItemDefault: RuleAction = {
+  const actionItemDefault: RuleDefaultAction = {
     id: '123',
     actionTypeId: '.pagerduty',
     group: 'trigger',
@@ -694,6 +707,7 @@ function getActionTypeForm({
       eventAction: 'trigger',
       summary: '2323',
     },
+    type: RuleActionTypes.DEFAULT,
   };
 
   const connectorsDefault = [
@@ -748,6 +762,7 @@ function getActionTypeForm({
     <ActionTypeForm
       actionConnector={actionConnector ?? actionConnectorDefault}
       actionItem={actionItem ?? actionItemDefault}
+      isSystemAction={false}
       connectors={connectors ?? connectorsDefault}
       onAddConnector={onAddConnector ?? jest.fn()}
       onDeleteAction={onDeleteAction ?? jest.fn()}

@@ -18,6 +18,7 @@ import {
   RuleExecutionStatusErrorReasons,
   RuleExecutionStatusWarningReasons,
   ALERTS_FEATURE_ID,
+  RuleActionTypes,
 } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
@@ -203,6 +204,7 @@ describe('rule_details', () => {
               id: uuidv4(),
               params: {},
               actionTypeId: '.server-log',
+              type: RuleActionTypes.DEFAULT,
             },
           ],
         });
@@ -242,12 +244,14 @@ describe('rule_details', () => {
               id: uuidv4(),
               params: {},
               actionTypeId: '.server-log',
+              type: RuleActionTypes.DEFAULT,
             },
             {
               group: 'default',
               id: uuidv4(),
               params: {},
               actionTypeId: '.email',
+              type: RuleActionTypes.DEFAULT,
             },
           ],
         });
@@ -369,6 +373,7 @@ describe('rule_details', () => {
             id: uuidv4(),
             params: {},
             actionTypeId: '.server-log',
+            type: RuleActionTypes.DEFAULT,
           },
         ],
       });
@@ -409,6 +414,7 @@ describe('rule_details', () => {
             id: uuidv4(),
             params: {},
             actionTypeId: '.server-log',
+            type: RuleActionTypes.DEFAULT,
           },
         ],
       });
@@ -523,12 +529,14 @@ describe('rule_details', () => {
             id: 'connector-id-1',
             params: {},
             actionTypeId: '.server-log',
+            type: RuleActionTypes.DEFAULT,
           },
           {
             group: 'default',
             id: 'connector-id-2',
             params: {},
             actionTypeId: '.server-log',
+            type: RuleActionTypes.DEFAULT,
           },
         ],
       });
@@ -559,18 +567,21 @@ describe('rule_details', () => {
             id: 'connector-id-1',
             params: {},
             actionTypeId: '.server-log',
+            type: RuleActionTypes.DEFAULT,
           },
           {
             group: 'default',
             id: 'connector-id-2',
             params: {},
             actionTypeId: '.server-log',
+            type: RuleActionTypes.DEFAULT,
           },
           {
             group: 'default',
             id: 'connector-id-doesnt-exist',
             params: {},
             actionTypeId: '.server-log',
+            type: RuleActionTypes.DEFAULT,
           },
         ],
       });
@@ -601,18 +612,21 @@ describe('rule_details', () => {
             id: 'connector-id-1',
             params: {},
             actionTypeId: '.server-log',
+            type: RuleActionTypes.DEFAULT,
           },
           {
             group: 'default',
             id: 'connector-id-2',
             params: {},
             actionTypeId: '.server-log',
+            type: RuleActionTypes.DEFAULT,
           },
           {
             group: 'default',
             id: 'connector-id-doesnt-exist',
             params: {},
             actionTypeId: '.server-log',
+            type: RuleActionTypes.DEFAULT,
           },
         ],
       });

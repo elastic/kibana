@@ -12,6 +12,8 @@ import {
   RuleActionParam,
   IntervalSchedule,
   RuleActionAlertsFilterProperty,
+  isSystemAction,
+  AlertsFilter,
 } from '@kbn/alerting-plugin/common';
 import { isEmpty } from 'lodash/fp';
 import { Rule, RuleAction } from '../../../types';
@@ -208,6 +210,8 @@ export const ruleReducer = <RulePhase extends InitialRule | Rule>(
         return state;
       } else {
         const oldAction = rule.actions.splice(index, 1)[0];
+        if (isSystemAction(oldAction)) return state;
+
         const updatedAction = {
           ...oldAction,
           frequency: {
@@ -227,25 +231,18 @@ export const ruleReducer = <RulePhase extends InitialRule | Rule>(
     }
     case 'setRuleActionAlertsFilter': {
       const { key, value, index } = action.payload as Payload<
-        keyof RuleAction,
-        SavedObjectAttribute
+        keyof AlertsFilter,
+        RuleActionAlertsFilterProperty
       >;
-      if (
-        index === undefined ||
-        rule.actions[index] == null ||
-        (!!rule.actions[index][key] && isEqual(rule.actions[index][key], value))
-      ) {
+      if (index === undefined || rule.actions[index] == null) {
         return state;
       } else {
         const oldAction = rule.actions.splice(index, 1)[0];
-        const { alertsFilter, ...rest } = oldAction;
-        const updatedAlertsFilter = { ...alertsFilter };
+        if (isSystemAction(oldAction)) return state;
+        if (oldAction.alertsFilter && isEqual(oldAction.alertsFilter[key], value)) return state;
 
-        if (value) {
-          updatedAlertsFilter[key] = value;
-        } else {
-          delete updatedAlertsFilter[key];
-        }
+        const { alertsFilter, ...rest } = oldAction;
+        const updatedAlertsFilter = { ...alertsFilter, [key]: value };
 
         const updatedAction = {
           ...rest,

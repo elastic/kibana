@@ -6,7 +6,7 @@
  */
 import { isObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
+import { RuleNotifyWhen, isSystemAction } from '@kbn/alerting-plugin/common';
 import { formatDuration, parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
 import {
   RuleTypeModel,
@@ -68,6 +68,7 @@ export function validateBaseProperties(
   }
 
   const invalidThrottleActions = ruleObject.actions.filter((a) => {
+    if (isSystemAction(a)) return false;
     if (!a.frequency?.throttle) return false;
     const throttleDuration = parseDuration(a.frequency.throttle);
     const intervalDuration =
@@ -118,7 +119,7 @@ export function getRuleErrors(
 ) {
   const ruleParamsErrors: IErrorObject = ruleTypeModel
     ? ruleTypeModel.validate(rule.params).errors
-    : [];
+    : {};
   const ruleBaseErrors = validateBaseProperties(rule, config).errors as IErrorObject;
   const ruleErrors = {
     ...ruleParamsErrors,

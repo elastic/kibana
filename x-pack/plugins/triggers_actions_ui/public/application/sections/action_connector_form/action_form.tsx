@@ -27,6 +27,8 @@ import {
   RuleActionFrequency,
   RuleActionParam,
   RuleActionTypes,
+  RuleDefaultAction,
+  RuleSystemAction,
 } from '@kbn/alerting-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 import { betaBadgeProps } from './beta_badge_props';
@@ -97,6 +99,26 @@ interface ActiveActionConnectorState {
   actionTypeId: string;
   indices: number[];
 }
+
+const getTypedActionItemProps: (
+  actionItem: RuleAction,
+  isSystemAction: boolean
+) =>
+  | {
+      actionItem: RuleDefaultAction;
+      isSystemAction: false;
+    }
+  | { actionItem: RuleSystemAction; isSystemAction: true } = (actionItem, isSystemAction) => {
+  return isSystemAction
+    ? {
+        actionItem: actionItem as RuleSystemAction,
+        isSystemAction: true,
+      }
+    : {
+        actionItem: actionItem as RuleDefaultAction,
+        isSystemAction: false,
+      };
+};
 
 export const ActionForm = ({
   actions,
@@ -459,9 +481,8 @@ export const ActionForm = ({
 
           return (
             <ActionTypeForm
-              actionItem={actionItem}
+              {...getTypedActionItemProps(actionItem, isSystemAction)}
               actionConnector={actionConnector}
-              isSystemAction={isSystemAction}
               index={index}
               key={`action-form-action-at-${actionItem.uuid}`}
               setActionUseAlertDataForTemplate={setActionUseAlertDataForTemplate}
