@@ -26,13 +26,13 @@ import {
   getSimpleRuleOutput,
   getThresholdRuleForAlertTesting,
   getWebHookAction,
-  getRulesAsNdjson,
   removeServerGeneratedProperties,
   ruleToNdjson,
 } from '../../../utils';
 import { deleteAllRules } from '../../../../../../common/utils/security_solution';
 import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { combineToNdJson } from './combine_to_ndjson';
 
 const getImportRuleBuffer = (connectorId: string) => {
   const rule1 = {
@@ -483,29 +483,6 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('should NOT report a conflict if there is an attempt to import two rules with the same rule_id and overwrite is set to true', async () => {
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import?overwrite=true`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .attach('file', getSimpleRuleAsNdjson(['rule-1', 'rule-1']), 'rules.ndjson')
-          .expect(200);
-
-        expect(body).to.eql({
-          errors: [],
-          success: true,
-          success_count: 1,
-          rules_count: 2,
-          exceptions_errors: [],
-          exceptions_success: true,
-          exceptions_success_count: 0,
-          action_connectors_success: true,
-          action_connectors_success_count: 0,
-          action_connectors_errors: [],
-          action_connectors_warnings: [],
-        });
-      });
-
       it('should report a conflict if there is an attempt to import a rule with a rule_id that already exists', async () => {
         await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
@@ -542,71 +519,6 @@ export default ({ getService }: FtrProviderContext): void => {
           action_connectors_errors: [],
           action_connectors_warnings: [],
         });
-      });
-
-      it('should NOT report a conflict if there is an attempt to import a rule with a rule_id that already exists and overwrite is set to true', async () => {
-        await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import?overwrite=true`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
-          .expect(200);
-
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import?overwrite=true`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
-          .expect(200);
-
-        expect(body).to.eql({
-          errors: [],
-          success: true,
-          success_count: 1,
-          rules_count: 1,
-          exceptions_errors: [],
-          exceptions_success: true,
-          exceptions_success_count: 0,
-          action_connectors_success: true,
-          action_connectors_success_count: 0,
-          action_connectors_errors: [],
-          action_connectors_warnings: [],
-        });
-      });
-
-      it('should overwrite an existing rule if overwrite is set to true', async () => {
-        await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .attach('file', getSimpleRuleAsNdjson(['rule-1']), 'rules.ndjson')
-          .expect(200);
-
-        const simpleRule = getSimpleRule('rule-1');
-        simpleRule.name = 'some other name';
-        const ndjson = ruleToNdjson(simpleRule);
-
-        await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_import?overwrite=true`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .attach('file', ndjson, 'rules.ndjson')
-          .expect(200);
-
-        const { body } = await supertest
-          .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`)
-          .set('elastic-api-version', '2023-10-31')
-          .send()
-          .expect(200);
-
-        const bodyToCompare = removeServerGeneratedProperties(body);
-        const ruleOutput = {
-          ...getSimpleRuleOutput('rule-1'),
-          output_index: '',
-        };
-        ruleOutput.name = 'some other name';
-        ruleOutput.revision = 0;
-        expect(bodyToCompare).to.eql(ruleOutput);
       });
 
       it('should report a conflict if there is an attempt to import a rule with a rule_id that already exists, but still have some successes with other rules', async () => {
@@ -1699,9 +1611,12 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .attach(
             'file',
-            getRulesAsNdjson([
-              { ...getSimpleRule(), investigation_fields: { field_names: ['foo'] } },
-            ]),
+            Buffer.from(
+              combineToNdJson({
+                ...getSimpleRule(),
+                investigation_fields: { field_names: ['foo'] },
+              })
+            ),
             'rules.ndjson'
           )
           .expect('Content-Type', 'application/json; charset=utf-8')
