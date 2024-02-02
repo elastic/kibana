@@ -48,7 +48,8 @@ export function RGBPicker({
     customColorMappingColor.type === 'categorical'
       ? getPaletteFn(customColorMappingColor.paletteId).getColor(
           customColorMappingColor.colorIndex,
-          isDarkMode
+          isDarkMode,
+          false
         )
       : customColorMappingColor.colorCode;
 

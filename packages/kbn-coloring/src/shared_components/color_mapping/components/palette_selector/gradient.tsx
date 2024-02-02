@@ -79,12 +79,11 @@ export function Gradient({
           position: absolute;
           left: 6px;
           right: 6px;
-          height: 6px;
+          height: 8px;
           top: 12px;
-          border-top-left-radius: 6px;
-          border-top-right-radius: 6px;
-          border-bottom-left-radius: 6px;
-          border-bottom-right-radius: 6px;
+          border-start-end-radius: 6px;
+          border-end-end-radius: 6px;
+          background-origin: border-box;
           background-image: linear-gradient(
             to right,
             ${[gradientColorScale(0), gradientColorScale(0.5), gradientColorScale(1)].join(',')}

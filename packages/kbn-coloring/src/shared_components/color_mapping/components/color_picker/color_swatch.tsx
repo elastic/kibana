@@ -94,7 +94,7 @@ export const ColorSwatch = ({
               height: 16px;
               border-radius: 50%;
               top: 8px;
-              border: 3px solid white;
+              border: 3px solid ${euiTheme.euiTheme.colors.emptyShade};
               ${euiShadowSmall(euiTheme)};
               backgroundcolor: ${colorHex};
               cursor: pointer;

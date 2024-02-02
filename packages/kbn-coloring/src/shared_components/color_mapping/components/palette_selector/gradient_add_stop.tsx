@@ -79,10 +79,10 @@ export function AddStop({
               width: 15px;
               height: 15px;
               border-radius: 50%;
-              transition: 200ms background-color;
-              background-color: lightgrey;
+              transition: background-color ${euiTheme.euiTheme.animation.fast} ease-in;
+              background-color: ${euiTheme.euiTheme.colors.emptyShade};
               &:hover {
-                background-color: #696f7d;
+                background-color: ${euiTheme.euiTheme.colors.text};
               }
               ${euiShadowSmall(euiTheme)}
             `}
@@ -93,12 +93,12 @@ export function AddStop({
                 position: absolute;
                 top: 0.5px;
                 left: 0;
-                transition: 200ms fill;
+                transition: fill ${euiTheme.euiTheme.animation.fast} ease-in;
                 &:hover {
-                  fill: white;
+                  fill: ${euiTheme.euiTheme.colors.emptyShade};
                 }
               `}
-              color={'#696f7d'}
+              color={euiTheme.euiTheme.colors.text}
             />
           </div>
         </button>
