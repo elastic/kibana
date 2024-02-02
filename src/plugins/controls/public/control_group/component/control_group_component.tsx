@@ -9,33 +9,34 @@
 import '../control_group.scss';
 
 import {
-  arrayMove,
-  SortableContext,
-  rectSortingStrategy,
-  sortableKeyboardCoordinates,
-} from '@dnd-kit/sortable';
-import {
   closestCenter,
   DndContext,
   DragEndEvent,
   DragOverlay,
   KeyboardSensor,
+  LayoutMeasuringStrategy,
   PointerSensor,
   useSensor,
   useSensors,
-  LayoutMeasuringStrategy,
 } from '@dnd-kit/core';
+import {
+  arrayMove,
+  rectSortingStrategy,
+  SortableContext,
+  sortableKeyboardCoordinates,
+} from '@dnd-kit/sortable';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import classNames from 'classnames';
+import deepEqual from 'fast-deep-equal';
 import React, { useMemo, useState } from 'react';
 import { TypedUseSelectorHook, useSelector } from 'react-redux';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
-import { ControlGroupReduxState } from '../types';
 import { ControlGroupStrings } from '../control_group_strings';
-import { ControlClone, SortableControl } from './control_group_sortable_item';
 import { useControlGroupContainer } from '../embeddable/control_group_container';
+import { ControlGroupReduxState } from '../types';
+import { ControlClone, SortableControl } from './control_group_sortable_item';
 
 const contextSelect = useSelector as TypedUseSelectorHook<ControlGroupReduxState>;
 
@@ -43,6 +44,8 @@ export const ControlGroup = () => {
   const controlGroup = useControlGroupContainer();
 
   // current state
+  const filters = contextSelect((state) => state.output.filters);
+
   const panels = contextSelect((state) => state.explicitInput.panels);
   const viewMode = contextSelect((state) => state.explicitInput.viewMode);
   const controlStyle = contextSelect((state) => state.explicitInput.controlStyle);
@@ -50,7 +53,23 @@ export const ControlGroup = () => {
   const showApplySelections = contextSelect((state) => state.explicitInput.showApplySelections);
 
   const showAddButton = contextSelect((state) => state.componentState.showAddButton);
-  const applyButtonEnabled = contextSelect((state) => state.componentState.applyButtonEnabled);
+  const unpublishedFilters = contextSelect((state) => state.componentState.unpublishedFilters);
+
+  const applyButtonEnabled = useMemo(() => {
+    console.log(filters, unpublishedFilters);
+    return (unpublishedFilters ?? []).length > 0 && !deepEqual(filters, unpublishedFilters);
+  }, [filters, unpublishedFilters]);
+
+  // useEffect(() => {
+  //   console.log('unpublishedFilters', unpublishedFilters);
+  // }, [unpublishedFilters]);
+  // const applyButtonEnabled = contextSelect((state) => state.componentState.applyButtonEnabled); // TODO: REMOVE THIS
+  // const resetButtonEnabled = contextSelect((state) => state.componentState.resetButtonEnabled);
+  // const lastAppliedState = contextSelect((state) => state.componentState.lastAppliedState);
+
+  // const resetButtonEnabled = useMemo(() => {
+  //   return !isEqual(panels, lastAppliedState);
+  // }, [lastAppliedState, panels]);
 
   const isEditable = viewMode === ViewMode.EDIT;
 
@@ -180,12 +199,13 @@ export const ControlGroup = () => {
                     <EuiFlexItem>
                       <EuiButtonIcon
                         size="m"
+                        disabled={false}
                         iconSize="m"
                         display="base"
                         color={'danger'}
                         iconType={'refresh'}
                         aria-label={ControlGroupStrings.management.getAddControlTitle()}
-                        onClick={() => controlGroup.clearSelections()}
+                        onClick={() => controlGroup.resetSelections()}
                       />
                     </EuiFlexItem>
                   )}
@@ -199,7 +219,7 @@ export const ControlGroup = () => {
                         color={'success'}
                         iconType={'check'}
                         aria-label={ControlGroupStrings.management.getAddControlTitle()}
-                        onClick={() => controlGroup.publishFilters()}
+                        onClick={() => controlGroup.publishFilters({ filters: unpublishedFilters })}
                       />
                     </EuiFlexItem>
                   )}

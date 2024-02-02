@@ -9,7 +9,7 @@ import { compareFilters, COMPARE_ALL_OPTIONS, Filter, uniqFilters } from '@kbn/e
 import { isEqual, pick } from 'lodash';
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
-import { Provider, TypedUseSelectorHook, useSelector } from 'react-redux';
+import { batch, Provider, TypedUseSelectorHook, useSelector } from 'react-redux';
 import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, skip } from 'rxjs/operators';
 
@@ -114,6 +114,8 @@ export class ControlGroupContainer extends Container<
 
   public fieldFilterPredicate: FieldFilterPredicate | undefined;
 
+  // public unappliedState$ = BehaviorSubject<
+
   constructor(
     reduxToolsPackage: ReduxToolsPackage,
     initialInput: ControlGroupInput,
@@ -159,8 +161,8 @@ export class ControlGroupContainer extends Container<
     // when all children are ready setup subscriptions
     this.untilAllChildrenReady().then(() => {
       this.recalculateDataViews();
-      this.recalculateFilters();
-      this.publishFilters();
+      const { filters, timeslice } = this.recalculateFilters();
+      this.tryPublishFilters({ filters, timeslice });
       this.setupSubscriptions();
       this.initialized$.next(true);
     });
@@ -179,8 +181,11 @@ export class ControlGroupContainer extends Container<
           distinctUntilChanged((a, b) => controlOrdersAreEqual(a.panels, b.panels))
         )
         .subscribe((input) => {
+          // console.log(' this.getInput$()');
           this.recalculateDataViews();
           this.recalculateFilters$.next(null);
+          // const [ filters, timeslice ] = this.recalculateFilters();
+          // this.tryPublishFilters({ filters, timeslice })
           const childOrderCache = cachedChildEmbeddableOrder(input.panels);
           childOrderCache.idsInOrder.forEach((id) => this.getChild(id)?.refreshInputFromParent());
         })
@@ -223,22 +228,7 @@ export class ControlGroupContainer extends Container<
     this.subscriptions.add(
       this.recalculateFilters$.pipe(debounceTime(10)).subscribe(() => {
         const { filters, timeslice } = this.recalculateFilters();
-        if (
-          !compareFilters(this.output.filters ?? [], filters ?? [], COMPARE_ALL_OPTIONS) ||
-          !isEqual(this.output.timeslice, timeslice)
-        ) {
-          this.currentFilters = filters;
-          this.currentTimeslice = timeslice;
-
-          const autoApplyFilters = !Boolean(this.getState().explicitInput.showApplySelections);
-          if (autoApplyFilters) {
-            this.publishFilters();
-          } else {
-            this.dispatch.setApplyButtonEnabled(true);
-          }
-        } else {
-          this.dispatch.setApplyButtonEnabled(false);
-        }
+        this.tryPublishFilters({ filters, timeslice });
       })
     );
   };
@@ -246,9 +236,17 @@ export class ControlGroupContainer extends Container<
   public resetToLastSavedState() {
     const {
       componentState: { lastSavedInput },
+      explicitInput: { showApplySelections },
     } = this.getState();
-    if (!persistableControlGroupInputIsEqual(this.getPersistableInput(), lastSavedInput)) {
+    if (
+      !persistableControlGroupInputIsEqual(
+        this.getPersistableInput(),
+        lastSavedInput,
+        Boolean(showApplySelections)
+      )
+    ) {
       this.updateInput(lastSavedInput);
+      this.recalculateFilters$.next(null);
     }
   }
 
@@ -264,7 +262,9 @@ export class ControlGroupContainer extends Container<
     this.updateInput(newInput);
     this.untilAllChildrenReady().then(() => {
       this.recalculateDataViews();
-      this.recalculateFilters();
+      const { filters, timeslice } = this.recalculateFilters();
+      // this.publishFilters({ filters, timeslice });
+      this.tryPublishFilters({ filters, timeslice });
       this.setupSubscriptions();
       this.initialized$.next(true);
     });
@@ -319,8 +319,9 @@ export class ControlGroupContainer extends Container<
     this.updateInput({ filters });
   };
 
-  public clearSelections = () => {
-    const panels = this.getState().componentState.lastSavedInput.panels;
+  public resetSelections = () => {
+    // const panels = this.getState().componentState.lastAppliedState ?? {};
+    const panels = this.getState().componentState.lastSavedInput.panels ?? {}; // TODO: MAKE THIS NOT LAST SAVED INPUT
     for (const childId of this.getChildIds()) {
       const child = this.getChild(childId);
       if (isClearableControl(child)) {
@@ -342,13 +343,43 @@ export class ControlGroupContainer extends Container<
     return { filters: allFilters, timeslice };
   };
 
-  public publishFilters = () => {
-    this.updateOutput({
-      filters: uniqFilters(this.currentFilters),
-      timeslice: this.currentTimeslice,
-    });
-    this.onFiltersPublished$.next(this.currentFilters);
-    this.dispatch.setApplyButtonEnabled(false);
+  public tryPublishFilters = ({
+    filters,
+    timeslice,
+  }: {
+    filters: Filter[];
+    timeslice?: [number, number];
+  }) => {
+    // if apply button is not available, just publish right away
+    // otherwise, set some component state `unpublishedFilters`
+    const {
+      explicitInput: { showApplySelections },
+    } = this.getState();
+
+    this.dispatch.setUnpublishedFilters(filters);
+    if (!showApplySelections) {
+      this.publishFilters({ filters, timeslice });
+    }
+  };
+
+  public publishFilters = ({
+    filters,
+    timeslice,
+  }: {
+    filters: Filter[];
+    timeslice?: [number, number];
+  }) => {
+    if (
+      !compareFilters(this.output.filters ?? [], filters ?? [], COMPARE_ALL_OPTIONS) ||
+      !isEqual(this.output.timeslice, timeslice)
+    ) {
+      this.updateOutput({
+        filters: uniqFilters(filters),
+        timeslice,
+      });
+      this.onFiltersPublished$.next(filters);
+      this.dispatch.setUnpublishedFilters([]);
+    }
   };
 
   private recalculateDataViews = () => {

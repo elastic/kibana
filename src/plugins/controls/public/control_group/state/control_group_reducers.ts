@@ -13,12 +13,6 @@ import { ControlWidth } from '../../types';
 import { ControlGroupComponentState, ControlGroupInput, ControlGroupReduxState } from '../types';
 
 export const controlGroupReducers = {
-  setLastSavedInput: (
-    state: WritableDraft<ControlGroupReduxState>,
-    action: PayloadAction<ControlGroupComponentState['lastSavedInput']>
-  ) => {
-    state.componentState.lastSavedInput = action.payload;
-  },
   setControlStyle: (
     state: WritableDraft<ControlGroupReduxState>,
     action: PayloadAction<ControlGroupInput['controlStyle']>
@@ -37,11 +31,30 @@ export const controlGroupReducers = {
   ) => {
     state.componentState.lastSavedInput = action.payload;
   },
-  setApplyButtonEnabled: (
+  setUnpublishedFilters: (
     state: WritableDraft<ControlGroupReduxState>,
-    action: PayloadAction<ControlGroupComponentState['applyButtonEnabled']>
+    action: PayloadAction<ControlGroupComponentState['unpublishedFilters']>
   ) => {
-    state.componentState.applyButtonEnabled = action.payload;
+    state.componentState.unpublishedFilters = action.payload;
+  },
+  // setApplyButtonEnabled: (
+  //   state: WritableDraft<ControlGroupReduxState>,
+  //   action: PayloadAction<ControlGroupComponentState['applyButtonEnabled']>
+  // ) => {
+  //   state.componentState.applyButtonEnabled = action.payload;
+  // },
+  // setLastAppliedState: (
+  //   state: WritableDraft<ControlGroupReduxState>,
+  //   action: PayloadAction<ControlGroupComponentState['lastAppliedState']>
+  // ) => {
+  //   console.log('setLastAppliedState', action.payload);
+  //   state.componentState.lastAppliedState = action.payload;
+  // },
+  setResetButtonEnabled: (
+    state: WritableDraft<ControlGroupReduxState>,
+    action: PayloadAction<ControlGroupComponentState['resetButtonEnabled']>
+  ) => {
+    state.componentState.resetButtonEnabled = action.payload;
   },
   setDefaultControlWidth: (
     state: WritableDraft<ControlGroupReduxState>,

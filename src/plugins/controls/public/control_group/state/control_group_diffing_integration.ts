@@ -42,11 +42,18 @@ export function startDiffingControlGroupState(this: ControlGroupContainer) {
             const {
               explicitInput: currentInput,
               componentState: { lastSavedInput },
+              // output: { filters },
             } = this.getState();
+            // console.log(
+            //   'fastIsEqual(filters ?? [], lastOutputFilters ?? [])',
+            //   fastIsEqual(filters ?? [], lastOutputFilters ?? [])
+            // );
             const hasUnsavedChanges = !persistableControlGroupInputIsEqual(
               currentInput,
-              lastSavedInput
+              lastSavedInput,
+              false // never diff selections for unsaved changes - this will be done differently
             );
+
             this.unsavedChanges.next(hasUnsavedChanges ? this.getPersistableInput() : undefined);
           });
         })

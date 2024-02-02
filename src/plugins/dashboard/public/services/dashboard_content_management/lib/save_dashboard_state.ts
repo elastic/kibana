@@ -40,7 +40,7 @@ export const serializeControlGroupInput = (
   // only save to saved object if control group is not default
   if (
     !controlGroupInput ||
-    persistableControlGroupInputIsEqual(controlGroupInput, getDefaultControlGroupInput())
+    persistableControlGroupInputIsEqual(controlGroupInput, getDefaultControlGroupInput(), true)
   ) {
     return undefined;
   }

@@ -59,48 +59,36 @@ export const getDefaultControlGroupPersistableInput = (): PersistableControlGrou
 
 export const persistableControlGroupInputIsEqual = (
   a: PersistableControlGroupInput | undefined,
-  b: PersistableControlGroupInput | undefined
+  b: PersistableControlGroupInput | undefined,
+  compareSelections?: boolean
 ) => {
-  const defaultInput = getDefaultControlGroupInput();
+  const defaultInput = getDefaultControlGroupPersistableInput();
   const inputA = {
     ...defaultInput,
-    ...pick(a, [
-      'panels',
-      'chainingSystem',
-      'controlStyle',
-      'ignoreParentSettings',
-      'showApplySelections',
-      'showSelectionReset',
-    ]),
+    ...pick(a, persistableControlGroupInputKeys),
   };
   const inputB = {
     ...defaultInput,
-    ...pick(b, [
-      'panels',
-      'chainingSystem',
-      'controlStyle',
-      'ignoreParentSettings',
-      'showApplySelections',
-      'showSelectionReset',
-    ]),
+    ...pick(b, persistableControlGroupInputKeys),
   };
-  if (
-    getPanelsAreEqual(inputA.panels, inputB.panels) &&
+
+  // console.log(inputB);
+
+  return (
+    getPanelsAreEqual(inputA.panels, inputB.panels, compareSelections) &&
     deepEqual(
       omit(inputA, ['panels', 'showApplySelections', 'showSelectionReset']),
       omit(inputB, ['panels', 'showApplySelections', 'showSelectionReset'])
     ) &&
     Boolean(inputA.showApplySelections) === Boolean(inputB.showApplySelections) &&
     Boolean(inputA.showSelectionReset) === Boolean(inputB.showSelectionReset)
-  ) {
-    return true;
-  }
-  return false;
+  );
 };
 
 const getPanelsAreEqual = (
   originalPanels: PersistableControlGroupInput['panels'],
-  newPanels: PersistableControlGroupInput['panels']
+  newPanels: PersistableControlGroupInput['panels'],
+  compareSelections?: boolean
 ) => {
   const originalPanelIds = Object.keys(originalPanels);
   const newPanelIds = Object.keys(newPanels);
@@ -109,12 +97,15 @@ const getPanelsAreEqual = (
     return false;
   }
 
+  // console.log('compareSelections', compareSelections);
+
   for (const panelId of newPanelIds) {
     const newPanelType = newPanels[panelId].type;
     const panelIsEqual = ControlPanelDiffSystems[newPanelType]
       ? ControlPanelDiffSystems[newPanelType].getPanelIsEqual(
           originalPanels[panelId],
-          newPanels[panelId]
+          newPanels[panelId],
+          compareSelections
         )
       : genericControlPanelDiffSystem.getPanelIsEqual(originalPanels[panelId], newPanels[panelId]);
     if (!panelIsEqual) return false;
