@@ -23,11 +23,10 @@ import {
 
 export interface FleetServerHostForm {
   fleetServerHosts: FleetServerHost[];
-  saveFleetServerHost: (host: Omit<FleetServerHost, 'id'>) => Promise<FleetServerHost>;
+  handleSubmitForm: () => Promise<FleetServerHost | undefined>;
   isFleetServerHostSubmitted: boolean;
   fleetServerHost?: FleetServerHost | null;
   setFleetServerHost: React.Dispatch<React.SetStateAction<FleetServerHost | undefined | null>>;
-  validate: () => boolean;
   error?: string;
   inputs: {
     hostUrlsInput: ReturnType<typeof useComboInput>;
@@ -72,38 +71,44 @@ export const useFleetServerHost = (): FleetServerHostForm => {
     }
   }, [fleetServerHosts, setDefaultInputValue]);
 
-  const saveFleetServerHost = useCallback(
-    async (newFleetServerHost: Omit<FleetServerHost, 'id'>) => {
-      setIsFleetServerHostSubmitted(false);
+  const handleSubmitForm = useCallback(async () => {
+    if (!validate()) {
+      return;
+    }
+    setIsFleetServerHostSubmitted(false);
+    const newFleetServerHost = {
+      name: inputs.nameInput.value,
+      host_urls: inputs.hostUrlsInput.value,
+      is_default: inputs.isDefaultInput.value,
+    };
 
-      const res = await sendPostFleetServerHost({
-        name: newFleetServerHost?.name,
-        host_urls: newFleetServerHost?.host_urls,
-        is_default: newFleetServerHost?.is_default,
-      });
-      if (res.error) {
-        throw res.error;
-      }
-      if (!res.data) {
-        throw new Error('No data');
-      }
+    const res = await sendPostFleetServerHost(newFleetServerHost);
+    if (res.error) {
+      throw res.error;
+    }
+    if (!res.data) {
+      throw new Error('No data');
+    }
 
-      await refreshGetFleetServerHosts();
-      setIsFleetServerHostSubmitted(true);
-      setFleetServerHost(res.data.item);
+    await refreshGetFleetServerHosts();
+    setIsFleetServerHostSubmitted(true);
+    setFleetServerHost(res.data.item);
 
-      return res.data.item;
-    },
-    [refreshGetFleetServerHosts]
-  );
+    return res.data.item;
+  }, [
+    validate,
+    refreshGetFleetServerHosts,
+    inputs.nameInput.value,
+    inputs.hostUrlsInput.value,
+    inputs.isDefaultInput.value,
+  ]);
 
   return {
     fleetServerHosts,
-    saveFleetServerHost,
+    handleSubmitForm,
     fleetServerHost,
     isFleetServerHostSubmitted,
     setFleetServerHost,
-    validate,
     inputs,
   };
 };

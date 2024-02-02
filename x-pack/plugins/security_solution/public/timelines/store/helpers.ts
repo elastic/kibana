@@ -44,7 +44,6 @@ import {
 import { activeTimeline } from '../containers/active_timeline_context';
 import type { ResolveTimelineConfig } from '../components/open_timeline/types';
 import { getDisplayValue } from '../components/timeline/data_providers/helpers';
-export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
 interface AddTimelineNoteParams {
   id: string;
@@ -126,7 +125,6 @@ export const addTimelineToStore = ({
 }: AddTimelineParams): TimelineById => {
   if (shouldResetActiveTimelineContext(id, timelineById[id], timeline)) {
     activeTimeline.setActivePage(0);
-    activeTimeline.setExpandedDetail({});
   }
   return {
     ...timelineById,

@@ -11,7 +11,7 @@ import { IKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugi
 import * as Either from 'fp-ts/lib/Either';
 import * as rt from 'io-ts';
 import { InvokeCreator } from 'xstate';
-import { OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY } from '../../../../common';
+import { OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY } from '../../../../common';
 import type { ObservabilityLogExplorerContext, ObservabilityLogExplorerEvent } from './types';
 import * as urlSchemaV1 from './url_schema_v1';
 
@@ -32,7 +32,7 @@ export const updateUrlFromLogExplorerState =
       context.logExplorerState
     );
 
-    urlStateStorageContainer.set(OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY, encodedUrlStateValues, {
+    urlStateStorageContainer.set(OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY, encodedUrlStateValues, {
       replace: true,
     });
   };
@@ -48,7 +48,7 @@ export const initializeFromUrl =
   (_context, _event) =>
   (send) => {
     const urlStateValues =
-      urlStateStorageContainer.get<unknown>(OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY) ?? undefined;
+      urlStateStorageContainer.get<unknown>(OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY) ?? undefined;
 
     // in the future we'll have to more schema versions to the union
     const stateValuesE = rt
