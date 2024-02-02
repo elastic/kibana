@@ -213,29 +213,21 @@ export class ControlGroupContainer extends Container<
       })
     );
 
-    this.subscriptions.add(
-      this.getAnyChildOutputChange$()
-        .pipe(debounceTime(100))
-        .subscribe(() => {
-          const childrenWithInvalidSelections = cachedChildEmbeddableOrder(
-            this.getInput().panels
-          ).idsInOrder.filter((childId) => {
-            return this.invalidSelectionsState[childId];
-          });
-          if (childrenWithInvalidSelections.length > 0) {
-            this.dispatch.setInvalidSelectionsControlId(childrenWithInvalidSelections[0]);
-          } else {
-            this.dispatch.setInvalidSelectionsControlId(undefined);
-          }
-        })
-    );
-
     /**
      * debounce output recalculation
      */
     this.subscriptions.add(
       this.recalculateFilters$.pipe(debounceTime(10)).subscribe(() => {
         this.recalculateFilters();
+        console.log('HERE!!!');
+        const childrenWithInvalidSelections = cachedChildEmbeddableOrder(
+          this.getInput().panels
+        ).idsInOrder.filter((childId) => {
+          return this.invalidSelectionsState[childId];
+        });
+        this.dispatch.setInvalidSelectionsControlId(
+          childrenWithInvalidSelections.length > 0 ? childrenWithInvalidSelections[0] : undefined
+        );
       })
     );
   };
@@ -246,6 +238,7 @@ export class ControlGroupContainer extends Container<
     } = this.getState();
     if (!persistableControlGroupInputIsEqual(this.getPersistableInput(), lastSavedInput)) {
       this.updateInput(lastSavedInput);
+      this.reload(); // this forces the children to update their inputs + perform validation as necessary
     }
   }
 

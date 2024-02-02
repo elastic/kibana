@@ -9,33 +9,33 @@
 import '../control_group.scss';
 
 import {
-  arrayMove,
-  SortableContext,
-  rectSortingStrategy,
-  sortableKeyboardCoordinates,
-} from '@dnd-kit/sortable';
-import {
   closestCenter,
   DndContext,
   DragEndEvent,
   DragOverlay,
   KeyboardSensor,
+  LayoutMeasuringStrategy,
   PointerSensor,
   useSensor,
   useSensors,
-  LayoutMeasuringStrategy,
 } from '@dnd-kit/core';
+import {
+  arrayMove,
+  rectSortingStrategy,
+  SortableContext,
+  sortableKeyboardCoordinates,
+} from '@dnd-kit/sortable';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTourStep } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { useEffect, useMemo, useState } from 'react';
 import { TypedUseSelectorHook, useSelector } from 'react-redux';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTourStep } from '@elastic/eui';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
-import { ControlGroupReduxState } from '../types';
 import { ControlGroupStrings } from '../control_group_strings';
-import { ControlClone, SortableControl } from './control_group_sortable_item';
 import { useControlGroupContainer } from '../embeddable/control_group_container';
+import { ControlGroupReduxState } from '../types';
+import { ControlClone, SortableControl } from './control_group_sortable_item';
 
 const contextSelect = useSelector as TypedUseSelectorHook<ControlGroupReduxState>;
 
@@ -51,29 +51,36 @@ export const ControlGroup = () => {
     (state) => state.componentState.invalidSelectionsControlId
   );
 
+  const [renderTourStep, setRenderTourStep] = useState(false);
   useEffect(() => {
-    console.log('HEREEE', invalidSelectionsControlId);
+    /**
+     * This forces the tour step to get unmounted so that it can attach to the new
+     * control - otherwise, the anchor will remain attached to the old invalid control
+     */
+    setRenderTourStep(false);
+    setTimeout(() => setRenderTourStep(true), 100);
   }, [invalidSelectionsControlId]);
 
-  // const tourStep = useMemo(() => {
-  //   return (
-  //     <EuiTourStep
-  //       anchor={`#controlFrame--${invalidSelectionsControlId}`}
-  //       content={'this is some content'}
-  //       isStepOpen={Boolean(invalidSelectionsControlId)}
-  //       minWidth={300}
-  //       onFinish={() => {}}
-  //       step={1}
-  //       stepsTotal={1}
-  //       repositionOnScroll
-  //       maxWidth={300}
-  //       panelPaddingSize="m"
-  //       display="block"
-  //       title="React ref as anchor location"
-  //       anchorPosition="downCenter"
-  //     />
-  //   );
-  // }, [invalidSelectionsControlId]);
+  const tourStep = useMemo(() => {
+    if (!renderTourStep || !invalidSelectionsControlId) return null;
+    return (
+      <EuiTourStep
+        anchor={`#controlFrame--${invalidSelectionsControlId}`}
+        content={'this is some content'}
+        isStepOpen={Boolean(invalidSelectionsControlId)}
+        minWidth={300}
+        onFinish={() => {}}
+        step={1}
+        stepsTotal={1}
+        repositionOnScroll
+        maxWidth={300}
+        panelPaddingSize="m"
+        display="block"
+        title="React ref as anchor location"
+        anchorPosition="downCenter"
+      />
+    );
+  }, [invalidSelectionsControlId, renderTourStep]);
 
   const isEditable = viewMode === ViewMode.EDIT;
 
@@ -144,21 +151,24 @@ export const ControlGroup = () => {
             alignItems="center"
             data-test-subj="controls-group"
           >
-            <EuiTourStep
-              anchor={`#controlFrame--${invalidSelectionsControlId}`}
-              content={'this is some content'}
-              isStepOpen={Boolean(invalidSelectionsControlId)}
-              minWidth={300}
-              onFinish={() => {}}
-              step={1}
-              stepsTotal={1}
-              repositionOnScroll
-              maxWidth={300}
-              panelPaddingSize="m"
-              display="block"
-              title="React ref as anchor location"
-              anchorPosition="downCenter"
-            />
+            {tourStep}
+            {/* {debouncedInvalidControlId && (
+              <EuiTourStep
+                anchor={`#controlFrame--${debouncedInvalidControlId}`}
+                content={'this is some content'}
+                isStepOpen={Boolean(invalidSelectionsControlId)}
+                minWidth={300}
+                onFinish={() => {}}
+                step={1}
+                stepsTotal={1}
+                repositionOnScroll
+                maxWidth={300}
+                panelPaddingSize="m"
+                display="block"
+                title="React ref as anchor location"
+                anchorPosition="downCenter"
+              />
+            )} */}
             <EuiFlexItem>
               <DndContext
                 onDragStart={({ active }) => setDraggingId(active.id)}
