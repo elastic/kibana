@@ -8,7 +8,8 @@
 import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext, useEffect, useState } from 'react';
-import { useTrackPageview, FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
+import { FeatureFeedbackButton } from '@kbn/feature-feedback-button';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { KibanaEnvironmentContext } from '../../../hooks/use_kibana';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useMetricsExplorerViews } from '../../../hooks/use_metrics_explorer_views';

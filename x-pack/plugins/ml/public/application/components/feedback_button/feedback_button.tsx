@@ -7,13 +7,13 @@
 
 import React, { useState, useEffect, FC, useMemo } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
+import { FeatureFeedbackButton } from '@kbn/feature-feedback-button';
 import { MlPages, ML_PAGES } from '../../../locator';
 import { useMlKibana } from '../../contexts/kibana';
 import { useEnabledFeatures } from '../../contexts/ml';
 
 import { useJobsApiService } from '../../services/ml_api_service/jobs';
 import { useCloudCheck } from '../node_available_warning/hooks';
-import { FeatureFeedbackButton } from './feature_feedback_button';
 
 interface Props {
   jobIds: string[];

@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiGlobalToastList } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
+import { FeatureFeedbackButton } from '@kbn/feature-feedback-button';
 import { KibanaEnvironmentContext } from '../../../../hooks/use_kibana';
 
 const KUBERNETES_TOAST_STORAGE_KEY = 'kubernetesToastKey';
@@ -25,6 +25,9 @@ export const SurveyKubernetes = () => {
     <>
       <FeatureFeedbackButton
         formUrl={KUBERNETES_FEEDBACK_LINK}
+        formConfig={{
+          kibanaVersionQueryParam: 'entry.184582718',
+        }}
         data-test-subj="infra-kubernetes-feedback-link"
         kibanaVersion={kibanaVersion}
         isCloudEnv={isCloudEnv}

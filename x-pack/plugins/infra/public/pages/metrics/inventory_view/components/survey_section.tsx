@@ -6,7 +6,7 @@
  */
 
 import React, { useContext } from 'react';
-import { FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
+import { FeatureFeedbackButton } from '@kbn/feature-feedback-button';
 import { KibanaEnvironmentContext } from '../../../../hooks/use_kibana';
 
 import { useWaffleOptionsContext } from '../hooks/use_waffle_options';

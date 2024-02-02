@@ -7,7 +7,8 @@
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import React, { useContext } from 'react';
-import { useTrackPageview, FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
+import { FeatureFeedbackButton } from '@kbn/feature-feedback-button';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';

@@ -11,7 +11,7 @@ import { ObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import React, { useContext } from 'react';
 import { useLocation } from 'react-router-dom';
-import { FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
+import { FeatureFeedbackButton } from '@kbn/feature-feedback-button';
 import { KibanaEnvironmentContext } from '../../../context/kibana_environment_context/kibana_environment_context';
 import { getPathForFeedback } from '../../../utils/get_path_for_feedback';
 import { EnvironmentsContextProvider } from '../../../context/environments_context/environments_context';
