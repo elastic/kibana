@@ -6,6 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+import { ToolingLog } from '@kbn/tooling-log';
 import type { ChatClient, KibanaClient } from '../kibana_client';
 import type { SynthtraceEsClients } from '../setup_synthtrace';
 
@@ -26,6 +27,7 @@ function createErrorThrowingProxy(name: string): any {
 export let chatClient: ChatClient = createErrorThrowingProxy('ChatClient');
 export let esClient: Client = createErrorThrowingProxy('esClient');
 export let kibanaClient: KibanaClient = createErrorThrowingProxy('kibanaClient');
+export let logger: ToolingLog = createErrorThrowingProxy('logger');
 
 export let synthtraceEsClients: SynthtraceEsClients =
   createErrorThrowingProxy('synthtraceEsClients');
@@ -35,9 +37,11 @@ export const initServices = (services: {
   esClient: Client;
   kibanaClient: KibanaClient;
   synthtraceEsClients: SynthtraceEsClients;
+  logger: ToolingLog;
 }) => {
   chatClient = services.chatClient;
   esClient = services.esClient;
   kibanaClient = services.kibanaClient;
   synthtraceEsClients = services.synthtraceEsClients;
+  logger = services.logger;
 };
