@@ -13,7 +13,6 @@ import styled from 'styled-components';
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 
 import { ActionType } from '@kbn/triggers-actions-ui-plugin/public';
-import { isHttpFetchError } from '@kbn/core-http-browser';
 import { AddConnectorModal } from '../add_connector_modal';
 import { WELCOME_CONVERSATION } from '../../assistant/use_conversation/sample_conversations';
 import { Conversation, Message } from '../../..';
@@ -189,7 +188,7 @@ export const useConnectorSetup = ({
         },
       });
 
-      if (!isHttpFetchError(updatedConversation)) {
+      if (updatedConversation) {
         onConversationUpdate({ cId: updatedConversation.id, cTitle: updatedConversation.title });
 
         refetchConnectors?.();

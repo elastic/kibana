@@ -9,7 +9,6 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { css } from '@emotion/css';
-import { isHttpFetchError } from '@kbn/core-http-browser';
 import { AIConnector, ConnectorSelector } from '../connector_selector';
 import { Conversation } from '../../..';
 import { useLoadConnectors } from '../use_load_connectors';
@@ -119,7 +118,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
             },
           });
 
-          if (!isHttpFetchError(conversation)) {
+          if (conversation) {
             onConnectorSelected(conversation);
           }
         }

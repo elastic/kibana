@@ -48,7 +48,7 @@ export interface BulkActionResponse {
   attributes: BulkActionAttributes;
 }
 
-interface ConversationUpdateParams {
+export interface ConversationUpdateParams {
   id?: string;
   title?: string;
   messages?: Message[];

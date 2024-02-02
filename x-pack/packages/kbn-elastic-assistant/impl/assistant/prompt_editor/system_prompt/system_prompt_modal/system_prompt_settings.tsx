@@ -27,7 +27,7 @@ import * as i18n from './translations';
 import { ConversationMultiSelector } from './conversation_multi_selector/conversation_multi_selector';
 import { SystemPromptSelector } from './system_prompt_selector/system_prompt_selector';
 import { TEST_IDS } from '../../../constants';
-import { ConversationsBulkActions } from '../../../api';
+import { ConversationUpdateParams, ConversationsBulkActions } from '../../../api';
 
 interface Props {
   conversationSettings: Record<string, Conversation>;
@@ -104,6 +104,16 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
     const handleConversationSelectionChange = useCallback(
       (currentPromptConversations: Conversation[]) => {
         const currentPromptConversationIds = currentPromptConversations.map((convo) => convo.id);
+        const getDefaultSystemPromptId = (convo: Conversation) =>
+          currentPromptConversationIds.includes(convo.id)
+            ? selectedSystemPrompt?.id
+            : convo.apiConfig.defaultSystemPromptId === selectedSystemPrompt?.id
+            ? // remove the default System Prompt if it is assigned to a conversation
+              // but that conversation is not in the currentPromptConversationList
+              // This means conversation was removed in the current transaction
+              undefined
+            : //  leave it as it is .. if that conversation was neither added nor removed.
+              convo.apiConfig.defaultSystemPromptId;
 
         if (selectedSystemPrompt != null) {
           setConversationSettings((prev) =>
@@ -119,15 +129,7 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
                 ...convo,
                 apiConfig: {
                   ...convo.apiConfig,
-                  defaultSystemPromptId: currentPromptConversationIds.includes(convo.id)
-                    ? selectedSystemPrompt?.id
-                    : convo.apiConfig.defaultSystemPromptId === selectedSystemPrompt?.id
-                    ? // remove the default System Prompt if it is assigned to a conversation
-                      // but that conversation is not in the currentPromptConversationList
-                      // This means conversation was removed in the current transaction
-                      undefined
-                    : //  leave it as it is .. if that conversation was neither added nor removed.
-                      convo.apiConfig.defaultSystemPromptId,
+                  defaultSystemPromptId: getDefaultSystemPromptId(convo),
                 },
               }))
             )
@@ -135,56 +137,48 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
 
           let updatedConversationsSettingsBulkActions = { ...conversationsSettingsBulkActions };
           Object.values(conversationSettings).forEach((convo) => {
-            if (convo.id !== convo.title) {
-              updatedConversationsSettingsBulkActions = {
-                ...updatedConversationsSettingsBulkActions,
-                update: {
-                  ...(updatedConversationsSettingsBulkActions.update ?? {}),
-                  [convo.id]: {
-                    ...(updatedConversationsSettingsBulkActions.update
-                      ? updatedConversationsSettingsBulkActions.update[convo.id] ?? {}
-                      : {}),
-                    apiConfig: {
-                      ...((updatedConversationsSettingsBulkActions.update
-                        ? updatedConversationsSettingsBulkActions.update[convo.id] ?? {}
-                        : {}
-                      ).apiConfig ?? {}),
-                      defaultSystemPromptId: currentPromptConversationIds.includes(convo.id)
-                        ? selectedSystemPrompt?.id
-                        : convo.apiConfig.defaultSystemPromptId === selectedSystemPrompt?.id
-                        ? // remove the default System Prompt if it is assigned to a conversation
-                          // but that conversation is not in the currentPromptConversationList
-                          // This means conversation was removed in the current transaction
-                          undefined
-                        : //  leave it as it is .. if that conversation was neither added nor removed.
-                          convo.apiConfig.defaultSystemPromptId,
+            const getApiConfig = (
+              operation: Record<string, ConversationUpdateParams> | undefined
+            ) => ({
+              ...((operation ? operation[convo.id] ?? {} : {}).apiConfig ?? {}),
+              defaultSystemPromptId: getDefaultSystemPromptId(convo),
+            });
+            const createOperation =
+              convo.id === convo.title
+                ? {
+                    create: {
+                      ...(updatedConversationsSettingsBulkActions.create ?? {}),
+                      [convo.id]: {
+                        ...convo,
+                        apiConfig: {
+                          ...convo.apiConfig,
+                          defaultSystemPromptId: getDefaultSystemPromptId(convo),
+                        },
+                      },
                     },
-                  },
-                },
-              };
-            } else {
-              updatedConversationsSettingsBulkActions = {
-                ...updatedConversationsSettingsBulkActions,
-                create: {
-                  ...(updatedConversationsSettingsBulkActions.create ?? {}),
-                  [convo.id]: {
-                    ...convo,
-                    apiConfig: {
-                      ...convo.apiConfig,
-                      defaultSystemPromptId: currentPromptConversationIds.includes(convo.id)
-                        ? selectedSystemPrompt?.id
-                        : convo.apiConfig.defaultSystemPromptId === selectedSystemPrompt?.id
-                        ? // remove the default System Prompt if it is assigned to a conversation
-                          // but that conversation is not in the currentPromptConversationList
-                          // This means conversation was removed in the current transaction
-                          undefined
-                        : //  leave it as it is .. if that conversation was neither added nor removed.
-                          convo.apiConfig.defaultSystemPromptId,
+                  }
+                : {};
+
+            const updateOperation =
+              convo.id === convo.title
+                ? {
+                    update: {
+                      ...(updatedConversationsSettingsBulkActions.update ?? {}),
+                      [convo.id]: {
+                        ...(updatedConversationsSettingsBulkActions.update
+                          ? updatedConversationsSettingsBulkActions.update[convo.id] ?? {}
+                          : {}),
+                        apiConfig: getApiConfig(updatedConversationsSettingsBulkActions.update),
+                      },
                     },
-                  },
-                },
-              };
-            }
+                  }
+                : {};
+
+            updatedConversationsSettingsBulkActions = {
+              ...updatedConversationsSettingsBulkActions,
+              ...createOperation,
+              ...updateOperation,
+            };
           });
           setConversationsSettingsBulkActions(updatedConversationsSettingsBulkActions);
         }
