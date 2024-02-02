@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-url-state'],
+import { stateSelector, useSelector } from '../redux';
+
+/**
+ * This hook allows you to access the flyout state, read open panels and previews.
+ */
+export const useExpandableFlyoutState = () => {
+  return useSelector(stateSelector);
 };

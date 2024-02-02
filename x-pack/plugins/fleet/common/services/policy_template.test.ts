@@ -236,7 +236,7 @@ describe('getNormalizedDataStreams', () => {
         title: expect.any(String),
         release: 'ga',
         package: 'nginx',
-        path: 'nginx',
+        path: 'nginx.bar',
         streams: [
           {
             input: 'string',
