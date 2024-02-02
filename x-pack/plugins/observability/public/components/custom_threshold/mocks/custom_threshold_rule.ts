@@ -140,17 +140,17 @@ export const buildCustomThresholdRule = (
           comparator: Comparator.GT,
           metrics: [
             {
-              name: 'C',
+              name: 'CAD',
               aggType: Aggregators.MIN,
               field: 'system.memory.used.pct',
             },
             {
-              name: 'D',
+              name: 'CADE',
               aggType: Aggregators.MIN,
               field: 'system.memory.used.pct',
             },
             {
-              name: 'E',
+              name: 'ADE',
               aggType: Aggregators.MIN,
               field: 'system.memory.used.pct',
             },

@@ -65,6 +65,44 @@ interface AppSectionProps {
   setAlertSummaryFields: React.Dispatch<React.SetStateAction<AlertSummaryField[] | undefined>>;
 }
 
+const CHART_TITLE_LIMIT = 120;
+
+const equationResultText = i18n.translate('xpack.observability.customThreshold.alertChartTitle', {
+  defaultMessage: 'Equation result for ',
+});
+
+const generateChartTitle = (criterion: MetricExpression) => {
+  const metricNameResolver: Record<string, string> = {};
+
+  criterion.metrics.forEach(
+    (metric) =>
+      (metricNameResolver[metric.name] = `${metric.aggType} (${
+        metric.field ? metric.field : metric.filter ? metric.filter : 'all documents'
+      })`)
+  );
+
+  let equation = criterion.equation
+    ? criterion.equation
+    : criterion.metrics.map((m) => m.name).join(' + ');
+
+  Object.keys(metricNameResolver)
+    .sort()
+    .reverse()
+    .forEach((metricName) => {
+      equation = equation.replaceAll(metricName, metricNameResolver[metricName]);
+    });
+
+  const chartTitle =
+    equation.length > CHART_TITLE_LIMIT
+      ? `${equation.substring(0, CHART_TITLE_LIMIT)}...`
+      : equation;
+
+  return {
+    tooltip: `${equationResultText}${equation}`,
+    title: `${equationResultText}${chartTitle}`,
+  };
+};
+
 // eslint-disable-next-line import/no-default-export
 export default function AlertDetailsAppSection({
   alert,
@@ -87,36 +125,6 @@ export default function AlertDetailsAppSection({
   const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
   const groups = alert.fields[ALERT_GROUP];
   const tags = alert.fields[TAGS];
-  const CHART_TITLE_LIMIT = 120;
-
-  const generateChartTitle = (criterion: MetricExpression) => {
-    let equationTitle = '';
-    const symbolResolver: Record<string, string> = {};
-    const equation = criterion.equation
-      ? criterion.equation
-      : criterion.metrics.map((m) => m.name).join(' + ');
-
-    criterion.metrics.forEach(
-      (metric) =>
-        (symbolResolver[metric.name] = `${metric.aggType} (${
-          metric.field ? metric.field : metric.filter ? metric.filter : 'all documents'
-        })`)
-    );
-
-    [...equation].forEach((symbol) =>
-      symbolResolver[symbol] ? (equationTitle += symbolResolver[symbol]) : (equationTitle += symbol)
-    );
-
-    const chartTitle =
-      equationTitle.length > CHART_TITLE_LIMIT
-        ? `${equationTitle.substring(0, CHART_TITLE_LIMIT)}...`
-        : equationTitle;
-
-    return {
-      tooltip: `Equation result for ${equationTitle}`,
-      title: `Equation result for ${chartTitle}`,
-    };
-  };
 
   const annotations = [
     <AlertAnnotation
