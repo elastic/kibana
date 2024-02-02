@@ -17,7 +17,7 @@ export interface FormattedFieldDiff {
   fieldDiffs: FieldDiff[];
 }
 
-export interface RuleFieldDiff {
+export interface FieldsGroupDiff {
   formattedDiffs: FormattedFieldDiff;
-  fieldName: keyof AllFieldsDiff;
+  fieldsGroupName: keyof AllFieldsDiff;
 }

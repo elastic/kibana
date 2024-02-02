@@ -19,7 +19,7 @@ import {
   sortAndStringifyJson,
 } from './get_field_diffs_for_grouped_fields';
 
-export const getFormattedFieldDiff = (
+export const getFormattedFieldDiffGroups = (
   fieldName: keyof AllFieldsDiff,
   fields: Partial<AllFieldsDiff>
 ): FormattedFieldDiff => {
