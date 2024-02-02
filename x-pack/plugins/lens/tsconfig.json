@@ -109,7 +109,8 @@
     "@kbn/text-based-editor",
     "@kbn/managed-content-badge",
     "@kbn/sort-predicates",
-    "@kbn/presentation-publishing"
+    "@kbn/presentation-publishing",
+    "@kbn/saved-objects-finder-plugin"
   ],
   "exclude": ["target/**/*"]
 }
