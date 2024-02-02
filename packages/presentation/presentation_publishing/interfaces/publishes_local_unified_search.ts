@@ -62,16 +62,16 @@ export const apiPublishesWritableLocalUnifiedSearch = (
  * A hook that gets this API's local time range as a reactive variable which will cause re-renders on change.
  */
 export const useLocalTimeRange = (api: Partial<PublishesLocalUnifiedSearch> | undefined) =>
-  useStateFromPublishingSubject<TimeRange | undefined>(api?.localTimeRange);
+  useStateFromPublishingSubject(api?.localTimeRange);
 
 /**
  * A hook that gets this API's local filters as a reactive variable which will cause re-renders on change.
  */
 export const useLocalFilters = (api: Partial<PublishesLocalUnifiedSearch> | undefined) =>
-  useStateFromPublishingSubject<Filter[] | undefined>(api?.localFilters);
+  useStateFromPublishingSubject(api?.localFilters);
 
 /**
  * A hook that gets this API's local query as a reactive variable which will cause re-renders on change.
  */
 export const useLocalQuery = (api: Partial<PublishesLocalUnifiedSearch> | undefined) =>
-  useStateFromPublishingSubject<Query | AggregateQuery | undefined>(api?.localQuery);
+  useStateFromPublishingSubject(api?.localQuery);
