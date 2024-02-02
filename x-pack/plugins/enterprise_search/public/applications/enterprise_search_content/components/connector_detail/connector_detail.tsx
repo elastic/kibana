@@ -13,6 +13,7 @@ import { useActions, useValues } from 'kea';
 import { i18n } from '@kbn/i18n';
 
 import { KibanaLogic } from '../../../shared/kibana';
+import { baseBreadcrumbs } from '../connectors/connectors';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 import { ConnectorConfiguration } from '../search_index/connector/connector_configuration';
@@ -21,7 +22,6 @@ import { ConnectorSyncRules } from '../search_index/connector/sync_rules/connect
 import { SearchIndexDocuments } from '../search_index/documents';
 import { SearchIndexIndexMappings } from '../search_index/index_mappings';
 import { SearchIndexPipelines } from '../search_index/pipelines/pipelines';
-import { baseBreadcrumbs } from '../search_indices';
 
 import { ConnectorViewLogic } from './connector_view_logic';
 import { ConnectorDetailOverview } from './overview';
@@ -39,10 +39,11 @@ export enum ConnectorDetailTabId {
 }
 
 export const ConnectorDetail: React.FC = () => {
+  const connectorId = decodeURIComponent(useParams<{ connectorId: string }>().connectorId);
   const { hasFilteringFeature, isLoading, index, connector } = useValues(ConnectorViewLogic);
   const { fetchConnector } = useActions(ConnectorViewLogic);
   useEffect(() => {
-    fetchConnector({ connectorId: '6vzqVY0BeXPM5g_EQfu0' });
+    fetchConnector({ connectorId });
   }, []);
 
   const { tabId = ConnectorDetailTabId.OVERVIEW } = useParams<{
