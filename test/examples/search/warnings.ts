@@ -9,7 +9,6 @@
 import type { estypes } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import assert from 'assert';
-import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -107,8 +106,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('searchSourceWithOther');
 
       await retry.try(async () => {
-        const allToasts = await find.allByCssSelector(toastsSelector);
-        expect(allToasts.length).to.be(2);
+        expect(await toasts.getToastCount()).to.be(2);
         await testSubjects.click('viewWarningBtn');
       });
 
@@ -155,10 +153,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('searchSourceWithoutOther');
 
       // wait for toasts - toasts appear after the response is rendered
-      let allToasts: WebElementWrapper[] = [];
       await retry.try(async () => {
-        allToasts = await find.allByCssSelector(toastsSelector);
-        expect(allToasts.length).to.be(2);
+        expect(await toasts.getToastCount()).to.be(2);
       });
 
       // warnings tab
