@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect, useCallback } from 'react';
+import React, { FC, useState, useEffect, useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiSpacer,
@@ -64,11 +64,15 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
     setDeleteUserAnnotations(false);
   }, []);
 
-  const jobIds = adJobs.map(({ id }) => id);
-  const hasManagedJob = adJobs.some((job) => isManagedJob(job));
-  const hasAlertingRules = adJobs.some(
-    (job) => Array.isArray(job.alertingRules) && job.alertingRules.length > 0
-  );
+  const { jobIds, hasManagedJob, hasAlertingRules } = useMemo(() => {
+    return {
+      jobIds: adJobs.map(({ id }) => id),
+      hasManagedJob: adJobs.some((job) => isManagedJob(job)),
+      hasAlertingRules: adJobs.some(
+        (job) => Array.isArray(job.alertingRules) && job.alertingRules.length > 0
+      ),
+    };
+  }, [adJobs]);
 
   const closeModal = useCallback(() => {
     setModalVisible(false);
