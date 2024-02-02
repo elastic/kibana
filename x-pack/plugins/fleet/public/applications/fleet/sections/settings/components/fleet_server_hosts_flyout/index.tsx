@@ -50,7 +50,7 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
   defaultFleetServerHost,
   proxies,
 }) => {
-  const { docLinks } = useStartServices();
+  const { docLinks, cloud } = useStartServices();
 
   const form = useFleetServerHostsForm(fleetServerHost, onClose, defaultFleetServerHost);
   const { inputs } = form;
@@ -79,7 +79,7 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
               )}
             </h2>
           </EuiTitle>
-          {fleetServerHost === undefined && (
+          {!fleetServerHost && (
             <>
               <EuiSpacer size="m" />
               <EuiText color="subdued">
@@ -137,7 +137,7 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
             }
           >
             <>
-              {fleetServerHost && (
+              {!cloud?.isServerlessEnabled && (
                 <>
                   <EuiText color="subdued" size="relative">
                     <FormattedMessage

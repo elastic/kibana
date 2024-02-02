@@ -23,47 +23,28 @@ export const OutputFormElasticsearchSection: React.FunctionComponent<Props> = (p
 
   return (
     <>
-      {inputs.elasticsearchUrlInput.props.disabled ? (
-        <>
-          <MultiRowInput
-            data-test-subj="settingsOutputsFlyout.hostUrlInput"
-            label={i18n.translate('xpack.fleet.settings.editOutputFlyout.esHostsInputLabel', {
-              defaultMessage: 'Hosts',
-            })}
-            placeholder={i18n.translate(
-              'xpack.fleet.settings.editOutputFlyout.esHostsInputPlaceholder',
-              {
-                defaultMessage: 'Specify host URL',
-              }
-            )}
-            {...inputs.elasticsearchUrlInput.props}
-            isUrl
-            helpText={
-              inputs.elasticsearchUrlInput.props.disabled && (
-                <FormattedMessage
-                  id="xpack.fleet.settings.editOutputFlyout.serverlessHostUrlsHelpText"
-                  defaultMessage="Custom host URLs are not allowed in serverless."
-                />
-              )
-            }
-          />
-        </>
-      ) : (
-        <MultiRowInput
-          data-test-subj="settingsOutputsFlyout.hostUrlInput"
-          label={i18n.translate('xpack.fleet.settings.editOutputFlyout.esHostsInputLabel', {
-            defaultMessage: 'Hosts',
-          })}
-          placeholder={i18n.translate(
-            'xpack.fleet.settings.editOutputFlyout.esHostsInputPlaceholder',
-            {
-              defaultMessage: 'Specify host URL',
-            }
-          )}
-          {...inputs.elasticsearchUrlInput.props}
-          isUrl
-        />
-      )}
+      <MultiRowInput
+        data-test-subj="settingsOutputsFlyout.hostUrlInput"
+        label={i18n.translate('xpack.fleet.settings.editOutputFlyout.esHostsInputLabel', {
+          defaultMessage: 'Hosts',
+        })}
+        placeholder={i18n.translate(
+          'xpack.fleet.settings.editOutputFlyout.esHostsInputPlaceholder',
+          {
+            defaultMessage: 'Specify host URL',
+          }
+        )}
+        {...inputs.elasticsearchUrlInput.props}
+        isUrl
+        helpText={
+          inputs.elasticsearchUrlInput.props.disabled && (
+            <FormattedMessage
+              id="xpack.fleet.settings.editOutputFlyout.serverlessHostUrlsHelpText"
+              defaultMessage="Custom host URLs are not allowed in serverless."
+            />
+          )
+        }
+      />
       <EuiFormRow
         fullWidth
         label={
