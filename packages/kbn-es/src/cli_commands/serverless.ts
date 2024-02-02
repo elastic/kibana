@@ -101,7 +101,7 @@ export const serverless: Command = {
 
     if (!isServerlessProjectType(options.projectType)) {
       throw createCliError(
-        `Invalid projectPype '${options.projectType}', supported values ${Array.from(
+        `Invalid projectPype '${options.projectType}', supported values: ${Array.from(
           serverlessProjectTypes
         ).join(' |')}`
       );
