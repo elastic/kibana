@@ -46,7 +46,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
-import { checkLicense } from '@kbn/reporting-common/check_license';
+import { checkLicense } from '@kbn/reporting-server/check_license';
 import type { ReportingSetup } from '.';
 import { createConfig } from './config';
 import { ExportTypesRegistry } from './lib';
