@@ -38,7 +38,6 @@ export interface Props {
 const TAB_ID_URL_PARAM = 'tabId';
 const OVERVIEW_TAB_ID = 'overview';
 const ALERTS_TAB_ID = 'alerts';
-const DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
 
 const BURN_RATE_OPTIONS: BurnRateOption[] = [
   {
@@ -103,10 +102,10 @@ export function SloDetails({ slo, isAutoRefreshing }: Props) {
       historicalSummary.instanceId === (slo.instanceId ?? ALL_VALUE)
   );
 
-  const sloDurationInMinutes = toMinutes(toDuration(slo.timeWindow.duration));
+  const sloDurationInMs = toMinutes(toDuration(slo.timeWindow.duration)) * 60 * 1000;
 
   const [range, setRange] = useState({
-    start: new Date().getTime() - sloDurationInMinutes * 60 * 1000,
+    start: new Date().getTime() - sloDurationInMs,
     end: new Date().getTime(),
   });
 
@@ -115,14 +114,14 @@ export function SloDetails({ slo, isAutoRefreshing }: Props) {
     if (isAutoRefreshing) {
       intervalId = setInterval(() => {
         setRange({
-          start: new Date().getTime() - sloDurationInMinutes * 60 * 1000,
+          start: new Date().getTime() - sloDurationInMs,
           end: new Date().getTime(),
         });
       }, 60 * 1000);
     }
 
     return () => clearInterval(intervalId);
-  }, [isAutoRefreshing, sloDurationInMinutes]);
+  }, [isAutoRefreshing, sloDurationInMs]);
 
   const errorBudgetBurnDownData = formatHistoricalData(
     sloHistoricalSummary?.data,
