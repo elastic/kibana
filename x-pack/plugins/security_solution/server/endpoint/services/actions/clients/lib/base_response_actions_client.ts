@@ -12,7 +12,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/common';
 import type { CaseAttachments } from '@kbn/cases-plugin/public/types';
 
-
 import type { EndpointAppContextService } from '../../../../endpoint_app_context_services';
 import { APP_ID } from '../../../../../../common';
 import type {
