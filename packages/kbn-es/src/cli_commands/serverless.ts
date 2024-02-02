@@ -95,7 +95,7 @@ export const serverless: Command = {
       throw createCliError(
         `--projectType flag is required and must be a string: ${Array.from(
           serverlessProjectTypes
-        ).join(' |')}`
+        ).join(' | ')}`
       );
     }
 
