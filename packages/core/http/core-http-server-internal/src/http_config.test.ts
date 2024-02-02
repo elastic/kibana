@@ -17,7 +17,7 @@ const invalidHostnames = ['asdf$%^', '0'];
 let mockHostname = 'kibana-hostname';
 
 jest.mock('node:os', () => {
-  const original = jest.requireActual('os');
+  const original = jest.requireActual('node:os');
 
   return {
     ...original,
