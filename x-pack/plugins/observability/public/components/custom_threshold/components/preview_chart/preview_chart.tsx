@@ -191,6 +191,7 @@ export function PreviewChart({
         id: formatId,
         params: {
           decimals: formatId === LensFieldFormat.PERCENT ? 0 : 2,
+          suffix: isRate(metrics) && formatId === LensFieldFormat.NUMBER ? 'Events' : undefined,
         },
       },
     };
