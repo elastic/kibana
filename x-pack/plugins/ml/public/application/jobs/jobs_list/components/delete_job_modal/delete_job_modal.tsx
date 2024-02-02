@@ -149,7 +149,7 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
                     label={i18n.translate(
                       'xpack.ml.jobsList.deleteJobModal.deleteUserAnnotations',
                       {
-                        defaultMessage: 'Delete annotations.',
+                        defaultMessage: 'Delete annotations',
                       }
                     )}
                     checked={deleteUserAnnotations}
