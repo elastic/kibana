@@ -5,6 +5,8 @@
  * 2.0.
  */
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { testHasEmbeddedConsole } from '../embedded_console';
+
 const TEST_CONNECTOR_NAME = 'my-connector';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects([
@@ -31,12 +33,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorOverviewPageComponentsToExist();
     });
     it('has embedded dev console', async () => {
-      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleControlBarExists();
-      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleToBeClosed();
-      await pageObjects.svlCommonNavigation.devConsole.clickEmbeddedConsoleControlBar();
-      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleToBeOpen();
-      await pageObjects.svlCommonNavigation.devConsole.clickEmbeddedConsoleControlBar();
-      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleToBeClosed();
+      await testHasEmbeddedConsole(pageObjects);
     });
     describe('create and configure connector', async () => {
       it('create connector and confirm connector configuration page is loaded', async () => {
@@ -62,58 +59,60 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlCommonNavigation.sidenav.clickLink({
           deepLinkId: 'serverlessConnectors',
         });
-        browser.refresh();
-        pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorTableToExist();
+        await browser.refresh();
+        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorTableToExist();
       });
     });
     describe('connector table', async () => {
       it('confirm searchBar to exist', async () => {
-        pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectSearchBarToExist();
+        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectSearchBarToExist();
       });
 
       it('searchBar and select, filters connector table', async () => {
-        pageObjects.svlSearchConnectorsPage.connectorOverviewPage.getConnectorFromConnectorTable(
+        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.getConnectorFromConnectorTable(
           TEST_CONNECTOR_NAME
         );
-        pageObjects.svlSearchConnectorsPage.connectorOverviewPage.setSearchBarValue(
+        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.setSearchBarValue(
           TEST_CONNECTOR_NAME
         );
-        pageObjects.svlSearchConnectorsPage.connectorOverviewPage.connectorNameExists(
+        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.connectorNameExists(
           TEST_CONNECTOR_NAME
         );
 
-        pageObjects.svlSearchConnectorsPage.connectorOverviewPage.changeSearchBarTableSelectValue(
+        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.changeSearchBarTableSelectValue(
           'Type'
         );
 
         await testSubjects.click('clearSearchButton');
-        pageObjects.svlSearchConnectorsPage.connectorOverviewPage.setSearchBarValue('confluence');
-        pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorTableToHaveNoItems();
+        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.setSearchBarValue(
+          'confluence'
+        );
+        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorTableToHaveNoItems();
         await testSubjects.click('clearSearchButton');
       });
     });
     describe('delete connector', async () => {
       it('delete connector button exist in table', async () => {
-        pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectDeleteConnectorButtonExist();
+        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectDeleteConnectorButtonExist();
       });
       it('open delete connector modal', async () => {
-        pageObjects.svlSearchConnectorsPage.connectorOverviewPage.openDeleteConnectorModal();
+        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.openDeleteConnectorModal();
       });
       it('delete connector button open modal', async () => {
-        pageObjects.svlSearchConnectorsPage.connectorOverviewPage.confirmDeleteConnectorModalComponentsExists();
+        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.confirmDeleteConnectorModalComponentsExists();
       });
       it('delete connector field is disabled if field name does not match connector name', async () => {
-        pageObjects.svlSearchConnectorsPage.connectorOverviewPage.deleteConnectorIncorrectName(
+        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.deleteConnectorIncorrectName(
           'invalid'
         );
       });
       it('delete connector button deletes connector', async () => {
-        pageObjects.svlSearchConnectorsPage.connectorOverviewPage.deleteConnectorWithCorrectName(
+        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.deleteConnectorWithCorrectName(
           TEST_CONNECTOR_NAME
         );
       });
       it('confirm connector table is disappeared after delete ', async () => {
-        pageObjects.svlSearchConnectorsPage.connectorOverviewPage.confirmConnectorTableIsDisappearedAfterDelete();
+        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.confirmConnectorTableIsDisappearedAfterDelete();
       });
     });
   });

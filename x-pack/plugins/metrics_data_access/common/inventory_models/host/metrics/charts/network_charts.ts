@@ -6,19 +6,23 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { XYChartModel } from '@kbn/lens-embeddable-utils';
+import type { LensConfigWithId } from '../../../types';
 import { formulas } from '../formulas';
 import type { ChartArgs } from './types';
 
 export const rxTx = {
-  get: ({ dataView }: ChartArgs): XYChartModel => ({
+  get: ({ dataViewId }: ChartArgs): LensConfigWithId => ({
     id: 'rxTx',
+    chartType: 'xy',
     title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.network', {
       defaultMessage: 'Network',
     }),
     layers: [
       {
-        data: [
+        seriesType: 'area',
+        type: 'series',
+        xAxis: '@timestamp',
+        yAxis: [
           {
             ...formulas.rx,
             label: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.network.label.rx', {
@@ -32,21 +36,23 @@ export const rxTx = {
             }),
           },
         ],
-        options: {
-          seriesType: 'area',
-        },
-
-        layerType: 'data',
       },
     ],
-    visualOptions: {
-      yLeftExtent: {
-        mode: 'dataBounds',
-        lowerBound: 0,
-        upperBound: 1,
-      },
+    fittingFunction: 'Linear',
+    legend: {
+      show: true,
+      position: 'bottom',
     },
-    visualizationType: 'lnsXY',
-    dataView,
+    axisTitleVisibility: {
+      showXAxisTitle: false,
+      showYAxisTitle: false,
+    },
+    ...(dataViewId
+      ? {
+          dataset: {
+            index: dataViewId,
+          },
+        }
+      : {}),
   }),
 };
