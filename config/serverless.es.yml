@@ -41,6 +41,3 @@ xpack.ml.ad.enabled: false
 xpack.ml.dfa.enabled: false
 xpack.ml.nlp.enabled: true
 xpack.ml.compatibleModuleType: 'search'
-
-# Enable the embedded dev console for index management pages
-xpack.index_management.enableEmbeddedConsole: true

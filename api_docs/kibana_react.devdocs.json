@@ -1080,18 +1080,6 @@
             "path": "x-pack/plugins/license_management/public/application/app_providers.tsx"
           },
           {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
-          },
-          {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
-          },
-          {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
-          },
-          {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx"
           },
@@ -2779,14 +2767,6 @@
           {
             "plugin": "telemetry",
             "path": "src/plugins/telemetry/public/services/telemetry_notifications/render_opt_in_status_notice_banner.tsx"
-          },
-          {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
-          },
-          {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
           },
           {
             "plugin": "maps",
