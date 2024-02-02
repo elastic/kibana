@@ -57,12 +57,17 @@ export type CustomGridColumnsConfiguration = Record<
   (props: CustomGridColumnProps) => EuiDataGridColumn
 >;
 
+export interface ControlColumns {
+  select: EuiDataGridControlColumn;
+  openDetails: EuiDataGridControlColumn;
+}
+
 export interface ControlColumnsProps {
-  leadingControlColumns: EuiDataGridControlColumn[];
-  trailingControlColumns?: EuiDataGridControlColumn[];
+  controlColumns: ControlColumns;
   rows?: DataTableRecord[];
 }
 
-export type CustomControlColumnConfiguration = (
-  props: ControlColumnsProps
-) => Omit<ControlColumnsProps, 'rows'>;
+export type CustomControlColumnConfiguration = (props: ControlColumnsProps) => {
+  leadingControlColumns: EuiDataGridControlColumn[];
+  trailingControlColumns?: EuiDataGridControlColumn[];
+};

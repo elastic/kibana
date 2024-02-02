@@ -6,7 +6,7 @@
  */
 
 import { ControlColumnsProps } from '@kbn/unified-data-table';
-import { OPEN_DETAILS } from '@kbn/unified-data-table';
+import { OPEN_DETAILS, SELECT_ROW } from '@kbn/unified-data-table';
 import React, { ComponentClass } from 'react';
 import { EuiButtonIcon, EuiDataGridCellValueElementProps, EuiToolTip } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
@@ -84,16 +84,12 @@ const Stacktrace = ({ row, rowIndex }: { row: DataTableRecord; rowIndex: number 
 };
 
 export const createCustomControlColumnsConfiguration = ({
-  leadingControlColumns,
-  trailingControlColumns,
+  controlColumns,
   rows,
 }: ControlColumnsProps) => {
-  const customLeadingColumnWithoutOpenDetails = leadingControlColumns.filter(
-    (column) => column.id !== OPEN_DETAILS
-  );
-
-  const openDetails = leadingControlColumns.find((column) => column.id === OPEN_DETAILS);
-  if (openDetails && rows) {
+  const checkBoxColumn = controlColumns[SELECT_ROW];
+  const openDetails = controlColumns[OPEN_DETAILS];
+  if (rows) {
     const ExpandButton =
       openDetails.rowCellRender as ComponentClass<EuiDataGridCellValueElementProps>;
     const actionsColumn = {
@@ -110,13 +106,13 @@ export const createCustomControlColumnsConfiguration = ({
     };
 
     return {
-      leadingControlColumns: customLeadingColumnWithoutOpenDetails,
+      leadingControlColumns: [checkBoxColumn],
       trailingControlColumns: [actionsColumn],
     };
   }
 
   return {
-    leadingControlColumns,
-    trailingControlColumns,
+    leadingControlColumns: [checkBoxColumn, openDetails],
+    trailingControlColumns: [],
   };
 };

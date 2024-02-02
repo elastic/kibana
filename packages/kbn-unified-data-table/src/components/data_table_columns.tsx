@@ -17,7 +17,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { ExpandButton } from './data_table_expand_button';
-import { CustomGridColumnsConfiguration, UnifiedDataTableSettings } from '../types';
+import { ControlColumns, CustomGridColumnsConfiguration, UnifiedDataTableSettings } from '../types';
 import type { ValueToStringConverter, DataTableColumnTypes } from '../types';
 import { buildCellActions } from './default_cell_actions';
 import { getSchemaByKbnType } from './data_table_schema';
@@ -62,6 +62,13 @@ const select = {
     </EuiScreenReaderOnly>
   ),
 };
+
+export function getAllControlColumns(): ControlColumns {
+  return {
+    [SELECT_ROW]: select,
+    [OPEN_DETAILS]: openDetails,
+  };
+}
 
 export function getLeadControlColumns(canSetExpandedDoc: boolean) {
   if (!canSetExpandedDoc) {

@@ -59,6 +59,7 @@ import { convertValueToString } from '../utils/convert_value_to_string';
 import { getRowsPerPageOptions } from '../utils/rows_per_page';
 import { getRenderCellValueFn } from '../utils/get_render_cell_value';
 import {
+  getAllControlColumns,
   getEuiGridColumns,
   getLeadControlColumns,
   getVisibleColumns,
@@ -760,7 +761,7 @@ export const UnifiedDataTable = ({
 
   const canSetExpandedDoc = Boolean(setExpandedDoc && !!renderDocumentView);
 
-  let leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
+  const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
     const internalControlColumns = getLeadControlColumns(canSetExpandedDoc).filter(({ id }) =>
       controlColumnIds.includes(id)
     );
@@ -768,17 +769,16 @@ export const UnifiedDataTable = ({
       ? [...internalControlColumns, ...externalControlColumns]
       : internalControlColumns;
   }, [canSetExpandedDoc, controlColumnIds, externalControlColumns]);
-  let customTrailingControlColumn = trailingControlColumns;
 
-  if (customControlColumnsConfiguration) {
-    const customControlColumns = customControlColumnsConfiguration({
-      leadingControlColumns,
-      trailingControlColumns,
-      rows,
-    });
-    leadingControlColumns = customControlColumns.leadingControlColumns;
-    customTrailingControlColumn = customControlColumns.trailingControlColumns;
-  }
+  const controlColumnsConfig = customControlColumnsConfiguration?.({
+    controlColumns: getAllControlColumns(),
+    rows,
+  });
+
+  const customLeadingControlColumn =
+    controlColumnsConfig?.leadingControlColumns ?? leadingControlColumns;
+  const customTrailingControlColumn =
+    controlColumnsConfig?.trailingControlColumns ?? trailingControlColumns;
 
   const additionalControls = useMemo(() => {
     if (!externalAdditionalControls && !usedSelectedDocs.length) {
@@ -927,7 +927,7 @@ export const UnifiedDataTable = ({
             columns={euiGridColumns}
             columnVisibility={columnsVisibility}
             data-test-subj="docTable"
-            leadingControlColumns={leadingControlColumns}
+            leadingControlColumns={customLeadingControlColumn}
             onColumnResize={onResize}
             pagination={paginationObj}
             renderCellValue={renderCellValue}
