@@ -1936,10 +1936,7 @@ class TimeseriesChartIntl extends Component {
           >
             <EuiPopover
               isOpen={true}
-              closePopover={() => {
-                console.log('closePopover');
-                this.closePopover();
-              }}
+              closePopover={() => this.closePopover()}
               panelPaddingSize="none"
               anchorPosition="upLeft"
             >
