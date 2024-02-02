@@ -11,6 +11,7 @@ import { Controller, FieldPath, useFormContext } from 'react-hook-form';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { useKibana } from '../../../../utils/kibana_react';
 import { CreateSLOForm } from '../../types';
+import { OptionalText } from './optional_text';
 
 export interface Props {
   dataTestSubj: string;
@@ -54,6 +55,7 @@ export function QueryBuilder({
           label
         )
       }
+      labelAppend={!required ? <OptionalText /> : undefined}
       isInvalid={getFieldState(name).invalid}
       fullWidth
     >
@@ -62,14 +64,12 @@ export function QueryBuilder({
         name={name}
         control={control}
         rules={{
-          required: Boolean(required),
+          required: Boolean(required) && Boolean(dataView),
         }}
         render={({ field, fieldState }) => (
           <QueryStringInput
             appName="Observability"
-            bubbleSubmitEvent={false}
             dataTestSubj={dataTestSubj}
-            disableAutoFocus
             disableLanguageSwitcher
             indexPatterns={dataView ? [dataView] : []}
             isDisabled={!dataView}

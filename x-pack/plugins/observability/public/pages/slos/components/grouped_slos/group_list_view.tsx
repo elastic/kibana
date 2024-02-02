@@ -6,11 +6,25 @@
  */
 
 import React, { memo, useState } from 'react';
-import { EuiPanel, EuiAccordion, EuiTablePagination } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiAccordion,
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiTablePagination,
+  EuiText,
+  EuiTextColor,
+  EuiTitle,
+} from '@elastic/eui';
+import { Filter } from '@kbn/es-query';
 import { useFetchSloList } from '../../../../hooks/slo/use_fetch_slo_list';
 import { SlosView } from '../slos_view';
 import type { SortDirection } from '../slo_list_search_bar';
 import { SLI_OPTIONS } from '../../../slo_edit/constants';
+import { useSloFormattedSLIValue } from '../../hooks/use_slo_summary';
 
 interface Props {
   isCompact: boolean;
@@ -20,6 +34,15 @@ interface Props {
   sort: string;
   direction: SortDirection;
   groupBy: string;
+  summary: {
+    worst: {
+      sliValue: number;
+      status: string;
+    };
+    total: number;
+    violated: number;
+  };
+  filters: Filter[];
 }
 
 export function GroupListView({
@@ -30,15 +53,23 @@ export function GroupListView({
   sort,
   direction,
   groupBy,
+  summary,
+  filters,
 }: Props) {
-  const query = kqlQuery ? `"${groupBy}": ${group} and ${kqlQuery}` : `"${groupBy}": ${group}`;
+  const query = kqlQuery ? `"${groupBy}": (${group}) and ${kqlQuery}` : `"${groupBy}": ${group}`;
   let groupName = group.toLowerCase();
   if (groupBy === 'slo.indicator.type') {
     groupName = SLI_OPTIONS.find((option) => option.value === group)?.text ?? group;
   }
 
   const [page, setPage] = useState(0);
-  const ITEMS_PER_PAGE = 10;
+  const [accordionState, setAccordionState] = useState<'open' | 'closed'>('closed');
+  const onToggle = (isOpen: boolean) => {
+    const newState = isOpen ? 'open' : 'closed';
+    setAccordionState(newState);
+  };
+  const isAccordionOpen = accordionState === 'open';
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const {
     isLoading,
     isRefetching,
@@ -48,8 +79,9 @@ export function GroupListView({
     kqlQuery: query,
     sortBy: sort,
     sortDirection: direction,
-    perPage: ITEMS_PER_PAGE,
+    perPage: itemsPerPage,
     page: page + 1,
+    filters,
   });
   const { results = [], total = 0 } = sloList ?? {};
 
@@ -57,31 +89,98 @@ export function GroupListView({
     setPage(pageNumber);
   };
 
-  const groupTitle = `${groupName} (${total})`;
+  const getTotalViolated = () => {
+    if (isNullOrUndefined(summary.violated) || isNullOrUndefined(summary.total)) {
+      return null;
+    }
+    if (summary.violated === 0) {
+      return i18n.translate('xpack.observability.slo.group.totalHealthy', {
+        defaultMessage: '{total} Healthy',
+        values: {
+          total: `${summary.total}/${summary.total}`,
+        },
+      });
+    } else {
+      return i18n.translate('xpack.observability.slo.group.totalViolated', {
+        defaultMessage: '{total} Violated',
+        values: {
+          total: `${summary.violated}/${summary.total}`,
+        },
+      });
+    }
+  };
+
+  const worstSLI = useSloFormattedSLIValue(summary.worst.sliValue);
+  const totalViolated = getTotalViolated();
 
   return (
-    <EuiPanel>
-      <MemoEuiAccordion buttonContent={groupTitle} id={group} initialIsOpen={false}>
-        <>
-          <SlosView
-            sloList={results}
-            loading={isLoading || isRefetching}
-            error={isError}
-            isCompact={isCompact}
-            sloView={sloView}
-            group={group}
-          />
-
-          <EuiTablePagination
-            pageCount={Math.ceil(total / ITEMS_PER_PAGE)}
-            activePage={page}
-            onChangePage={handlePageClick}
-            itemsPerPage={ITEMS_PER_PAGE}
-          />
-        </>
-      </MemoEuiAccordion>
-    </EuiPanel>
+    <>
+      <EuiPanel hasBorder={true} data-test-subj="sloGroupViewPanel">
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <MemoEuiAccordion
+              forceState={accordionState}
+              onToggle={onToggle}
+              buttonContent={
+                <EuiFlexGroup alignItems="center" responsive={false}>
+                  <EuiFlexItem>
+                    <EuiTitle size="xs">
+                      <h3>{groupName}</h3>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  {totalViolated && (
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color={summary.violated > 0 ? 'danger' : 'success'}>
+                        {totalViolated}
+                      </EuiBadge>
+                    </EuiFlexItem>
+                  )}
+                  <EuiText size="s">
+                    {i18n.translate('xpack.observability.slo.group.worstPerforming', {
+                      defaultMessage: 'Worst performing',
+                    })}
+                    {': '}
+                    <EuiTextColor color={summary.worst.status !== 'HEALTHY' ? 'danger' : undefined}>
+                      <strong>{worstSLI}</strong>
+                    </EuiTextColor>
+                  </EuiText>
+                </EuiFlexGroup>
+              }
+              id={group}
+              initialIsOpen={false}
+            >
+              {isAccordionOpen && (
+                <>
+                  <EuiSpacer size="m" />
+                  <SlosView
+                    sloList={results}
+                    loading={isLoading || isRefetching}
+                    error={isError}
+                    isCompact={isCompact}
+                    sloView={sloView}
+                    group={group}
+                  />
+                  <EuiSpacer size="m" />
+                  <EuiTablePagination
+                    pageCount={Math.ceil(total / itemsPerPage)}
+                    activePage={page}
+                    onChangePage={handlePageClick}
+                    itemsPerPage={itemsPerPage}
+                    onChangeItemsPerPage={(perPage) => setItemsPerPage(perPage)}
+                  />
+                </>
+              )}
+            </MemoEuiAccordion>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+      <EuiSpacer size="m" />
+    </>
   );
 }
 
 const MemoEuiAccordion = memo(EuiAccordion);
+
+function isNullOrUndefined(value: any) {
+  return value === undefined || value === null;
+}

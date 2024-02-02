@@ -30,10 +30,8 @@ export interface SearchState {
   groupBy: GroupByField;
   filters: Filter[];
   lastRefresh?: number;
-  tags?: {
-    included?: string[];
-    excluded?: string[];
-  };
+  tagsFilter?: Filter;
+  statusFilter?: Filter;
 }
 
 export const DEFAULT_STATE = {
