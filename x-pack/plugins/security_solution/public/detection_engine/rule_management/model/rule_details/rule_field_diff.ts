@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DiffableAllFields } from '../../../../../common/api/detection_engine';
+import type { AllFieldsDiff } from '../../../../../common/api/detection_engine';
 
 export interface FieldDiff {
   currentVersion: string;
@@ -16,7 +16,8 @@ export interface FormattedFieldDiff {
   shouldShowSubtitles: boolean;
   fieldDiffs: FieldDiff[];
 }
+
 export interface RuleFieldDiff {
-  formattedDiffs: FormattedFieldDiff[];
-  fieldName: keyof DiffableAllFields;
+  formattedDiffs: FormattedFieldDiff;
+  fieldName: keyof AllFieldsDiff;
 }

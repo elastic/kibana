@@ -6,14 +6,10 @@
  */
 
 import stringify from 'json-stable-stringify';
-import type {
-  AllFieldsDiff,
-  RuleFieldDiffsWithKqlQuery,
-  RuleFieldsDiffWithDataSource,
-} from '../../../../../common/api/detection_engine';
-import type { FormattedFieldDiff, FieldDiff } from '../../model/rule_details/rule_field_diff';
+import type { AllFieldsDiff } from '../../../../../../common/api/detection_engine';
+import type { FieldDiff } from '../../../model/rule_details/rule_field_diff';
 
-const sortAndStringifyJson = (fieldValue: unknown): string => {
+export const sortAndStringifyJson = (fieldValue: unknown): string => {
   if (!fieldValue) {
     return 'N/A';
   }
@@ -24,8 +20,8 @@ const sortAndStringifyJson = (fieldValue: unknown): string => {
   return stringify(fieldValue, { space: 2 });
 };
 
-const getFieldDiffsForDataSource = (
-  dataSourceThreeWayDiff: RuleFieldsDiffWithDataSource['data_source']
+export const getFieldDiffsForDataSource = (
+  dataSourceThreeWayDiff: AllFieldsDiff['data_source']
 ): FieldDiff[] => {
   const currentType = sortAndStringifyJson(dataSourceThreeWayDiff.current_version?.type);
   const targetType = sortAndStringifyJson(dataSourceThreeWayDiff.target_version?.type);
@@ -79,8 +75,8 @@ const getFieldDiffsForDataSource = (
   ];
 };
 
-const getFieldDiffsForKqlQuery = (
-  kqlQueryThreeWayDiff: RuleFieldDiffsWithKqlQuery['kql_query']
+export const getFieldDiffsForKqlQuery = (
+  kqlQueryThreeWayDiff: AllFieldsDiff['kql_query']
 ): FieldDiff[] => {
   const currentType = sortAndStringifyJson(kqlQueryThreeWayDiff.current_version?.type);
   const targetType = sortAndStringifyJson(kqlQueryThreeWayDiff.target_version?.type);
@@ -172,7 +168,7 @@ const getFieldDiffsForKqlQuery = (
   ];
 };
 
-const getFieldDiffsForEqlQuery = (eqlQuery: AllFieldsDiff['eql_query']): FieldDiff[] => {
+export const getFieldDiffsForEqlQuery = (eqlQuery: AllFieldsDiff['eql_query']): FieldDiff[] => {
   const currentQuery = sortAndStringifyJson(eqlQuery.current_version?.query);
   const targetQuery = sortAndStringifyJson(eqlQuery.target_version?.query);
 
@@ -200,7 +196,7 @@ const getFieldDiffsForEqlQuery = (eqlQuery: AllFieldsDiff['eql_query']): FieldDi
   ];
 };
 
-const getFieldDiffsForRuleSchedule = (
+export const getFieldDiffsForRuleSchedule = (
   ruleScheduleThreeWayDiff: AllFieldsDiff['rule_schedule']
 ): FieldDiff[] => {
   return [
@@ -231,7 +227,7 @@ const getFieldDiffsForRuleSchedule = (
   ];
 };
 
-const getFieldDiffsForRuleNameOverride = (
+export const getFieldDiffsForRuleNameOverride = (
   ruleNameOverrideThreeWayDiff: AllFieldsDiff['rule_name_override']
 ): FieldDiff[] => {
   const currentFieldName = sortAndStringifyJson(
@@ -253,7 +249,7 @@ const getFieldDiffsForRuleNameOverride = (
   ];
 };
 
-const getFieldDiffsForTimestampOverride = (
+export const getFieldDiffsForTimestampOverride = (
   timestampOverrideThreeWayDiff: AllFieldsDiff['timestamp_override']
 ): FieldDiff[] => {
   const currentFieldName = sortAndStringifyJson(
@@ -291,7 +287,7 @@ const getFieldDiffsForTimestampOverride = (
   ];
 };
 
-const getFieldDiffsForTimelineTemplate = (
+export const getFieldDiffsForTimelineTemplate = (
   timelineTemplateThreeWayDiff: AllFieldsDiff['timeline_template']
 ): FieldDiff[] => {
   const currentTimelineId = sortAndStringifyJson(
@@ -329,7 +325,7 @@ const getFieldDiffsForTimelineTemplate = (
   ];
 };
 
-const getFieldDiffsForBuildingBlock = (
+export const getFieldDiffsForBuildingBlock = (
   buildingBlockThreeWayDiff: AllFieldsDiff['building_block']
 ): FieldDiff[] => {
   const currentType = sortAndStringifyJson(buildingBlockThreeWayDiff.current_version?.type);
@@ -345,76 +341,4 @@ const getFieldDiffsForBuildingBlock = (
         ]
       : []),
   ];
-};
-
-export const getFormattedFieldDiff = (
-  fieldName: keyof AllFieldsDiff,
-  fields: AllFieldsDiff
-): FormattedFieldDiff => {
-  switch (fieldName) {
-    case 'data_source':
-      const dataSourceThreeWayDiff = fields[fieldName];
-      return {
-        shouldShowSubtitles: true,
-        fieldDiffs: getFieldDiffsForDataSource(dataSourceThreeWayDiff),
-      };
-    case 'kql_query':
-      const kqlQueryThreeWayDiff = fields[fieldName];
-      return {
-        shouldShowSubtitles: true,
-        fieldDiffs: getFieldDiffsForKqlQuery(kqlQueryThreeWayDiff),
-      };
-    case 'eql_query':
-      const eqlQueryThreeWayDiff = fields[fieldName];
-      return {
-        shouldShowSubtitles: true,
-        fieldDiffs: getFieldDiffsForEqlQuery(eqlQueryThreeWayDiff),
-      };
-    case 'rule_schedule':
-      const ruleScheduleThreeWayDiff = fields[fieldName];
-      return {
-        shouldShowSubtitles: true,
-        fieldDiffs: getFieldDiffsForRuleSchedule(ruleScheduleThreeWayDiff),
-      };
-    case 'rule_name_override':
-      const ruleNameOverrideThreeWayDiff = fields[fieldName];
-      return {
-        shouldShowSubtitles: true,
-        fieldDiffs: getFieldDiffsForRuleNameOverride(ruleNameOverrideThreeWayDiff),
-      };
-    case 'timestamp_override':
-      const timestampOverrideThreeWayDiff = fields[fieldName];
-      return {
-        shouldShowSubtitles: true,
-        fieldDiffs: getFieldDiffsForTimestampOverride(timestampOverrideThreeWayDiff),
-      };
-    case 'timeline_template':
-      const timelineTemplateThreeWayDiff = fields[fieldName];
-      return {
-        shouldShowSubtitles: true,
-        fieldDiffs: getFieldDiffsForTimelineTemplate(timelineTemplateThreeWayDiff),
-      };
-    case 'building_block':
-      const buildingBlockThreeWayDiff = fields[fieldName];
-      return {
-        shouldShowSubtitles: true,
-        fieldDiffs: getFieldDiffsForBuildingBlock(buildingBlockThreeWayDiff),
-      };
-    default:
-      const currentVersionField = sortAndStringifyJson(fields[fieldName].current_version);
-      const targetVersionField = sortAndStringifyJson(fields[fieldName].target_version);
-      return {
-        shouldShowSubtitles: false,
-        fieldDiffs:
-          currentVersionField !== targetVersionField
-            ? [
-                {
-                  fieldName,
-                  currentVersion: currentVersionField,
-                  targetVersion: targetVersionField,
-                },
-              ]
-            : [],
-      };
-  }
 };
