@@ -20,15 +20,17 @@ import { KibanaLogic } from '../../../shared/kibana';
 import { isConnectorIndex } from '../../utils/indices';
 
 import { ConvertConnectorLogic } from '../search_index/connector/native_connector_configuration/convert_connector_logic';
-import { ConnectorTotalStats } from '../search_index/connector_total_stats';
 import { SyncJobs } from '../search_index/sync_jobs/sync_jobs';
 
 import { ConvertConnectorModal } from '../shared/convert_connector_modal/convert_connector_modal';
 
+import { ConnectorStats } from './connector_stats';
+import { ConnectorViewLogic } from './connector_view_logic';
 import { OverviewLogic } from './overview.logic';
 
 export const ConnectorDetailOverview: React.FC = () => {
   const { indexData } = useValues(OverviewLogic);
+  const { connector } = useValues(ConnectorViewLogic);
   const error = null;
   const { isCloud } = useValues(KibanaLogic);
   const { showModal } = useActions(ConvertConnectorLogic);
@@ -98,7 +100,9 @@ export const ConnectorDetailOverview: React.FC = () => {
           <EuiSpacer />
         </>
       )}
-      {isConnectorIndex(indexData) && <ConnectorTotalStats />}
+      {isConnectorIndex(indexData) && connector && (
+        <ConnectorStats connector={connector} indexData={indexData} />
+      )}
       {isConnectorIndex(indexData) && (
         <>
           <EuiSpacer />
