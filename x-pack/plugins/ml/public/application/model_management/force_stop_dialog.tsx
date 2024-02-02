@@ -114,7 +114,7 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
     selectedDeploymentIds,
   ]);
 
-  const inferenceServicesWarning = useMemo<string[]>(() => {
+  const inferenceServiceIDs = useMemo<string[]>(() => {
     return (model.inference_apis ?? []).map((inference) => inference.model_id);
   }, [model]);
 
@@ -183,14 +183,14 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
         </>
       ) : null}
 
-      {inferenceServicesWarning.length > 0 ? (
+      {inferenceServiceIDs.length > 0 ? (
         <>
           <EuiCallOut
             title={
               <FormattedMessage
                 id="xpack.ml.trainedModels.modelsList.forceStopDialog.inferenceServicesWarning"
                 defaultMessage="The following {inferenceServicesCount, plural, one {deployment is} other {deployments are}} used by _inference API and can not be stopped:"
-                values={{ inferenceServicesCount: inferenceServicesWarning.length }}
+                values={{ inferenceServicesCount: inferenceServiceIDs.length }}
               />
             }
             color="warning"
