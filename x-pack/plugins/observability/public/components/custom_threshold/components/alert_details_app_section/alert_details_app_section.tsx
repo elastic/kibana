@@ -28,6 +28,15 @@ import {
   TAGS,
 } from '@kbn/rule-data-utils';
 import { DataView } from '@kbn/data-views-plugin/common';
+import { v4 as uuidv4 } from 'uuid';
+import chroma from 'chroma-js';
+import type {
+  EventAnnotationConfig,
+  PointInTimeEventAnnotationConfig,
+  RangeEventAnnotationConfig,
+} from '@kbn/event-annotation-common';
+import moment from 'moment';
+import { transparentize, useEuiTheme } from '@elastic/eui';
 import { useLicense } from '../../../../hooks/use_license';
 import { useKibana } from '../../../../utils/kibana_react';
 import { metricValueFormatter } from '../../../../../common/custom_threshold_rule/metric_value_formatter';
@@ -65,6 +74,7 @@ export default function AlertDetailsAppSection({
   const services = useKibana().services;
   const { charts, data } = services;
   const { hasAtLeast } = useLicense();
+  const { euiTheme } = useEuiTheme();
   const hasLogRateAnalysisLicense = hasAtLeast('platinum');
   const [dataView, setDataView] = useState<DataView>();
   const [filterQuery, setFilterQuery] = useState<string>('');
@@ -73,9 +83,51 @@ export default function AlertDetailsAppSection({
   const chartProps = {
     baseTheme: charts.theme.useChartsBaseTheme(),
   };
-  const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
+  const alertStart = alert.fields[ALERT_START];
+  const alertEnd = alert.fields[ALERT_END];
+  const timeRange = getPaddedAlertTimeRange(alertStart!, alertEnd);
   const groups = alert.fields[ALERT_GROUP];
   const tags = alert.fields[TAGS];
+
+  const alertStartAnnotation: PointInTimeEventAnnotationConfig = {
+    label: 'Alert',
+    type: 'manual',
+    key: {
+      type: 'point_in_time',
+      timestamp: alertStart!,
+    },
+    color: euiTheme.colors.danger,
+    icon: 'alert',
+    id: uuidv4(),
+  };
+
+  const activeAlertRangeAnnotation: RangeEventAnnotationConfig = {
+    label: 'Active Alert',
+    type: 'manual',
+    key: {
+      type: 'range',
+      timestamp: alertStart!,
+      endTimestamp: moment().toISOString(),
+    },
+    color: chroma(transparentize('#F04E981A', 0.2)).hex().toUpperCase(),
+    id: uuidv4(),
+  };
+
+  const recoveredAlertRangeAnnotation: RangeEventAnnotationConfig = {
+    label: 'Alert duration',
+    type: 'manual',
+    key: {
+      type: 'range',
+      timestamp: alertStart!,
+      endTimestamp: alertEnd ?? '',
+    },
+    color: chroma(transparentize('#F04E981A', 0.2)).hex().toUpperCase(),
+    id: uuidv4(),
+  };
+
+  const annotations: EventAnnotationConfig[] = [];
+  annotations.push(alertStartAnnotation);
+  annotations.push(alertEnd ? recoveredAlertRangeAnnotation : activeAlertRangeAnnotation);
 
   useEffect(() => {
     const alertSummaryFields = [];
@@ -189,11 +241,10 @@ export default function AlertDetailsAppSection({
                   dataView={dataView}
                   filterQuery={filterQuery}
                   groupBy={ruleParams.groupBy}
-                  annotation={{
-                    timestamp: alert.fields[ALERT_START],
-                    endTimestamp: alert.fields[ALERT_END],
-                  }}
+                  annotations={annotations}
                   timeRange={timeRange}
+                  // For alert details page, the series type needs to be changed to 'bar_stacked' due to https://github.com/elastic/elastic-charts/issues/2323
+                  seriesType={'bar_stacked'}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

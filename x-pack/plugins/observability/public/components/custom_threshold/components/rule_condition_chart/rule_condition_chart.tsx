@@ -5,8 +5,8 @@
  * 2.0.
  */
 import React, { useState, useEffect } from 'react';
-import { EuiEmptyPrompt, transparentize, useEuiTheme } from '@elastic/eui';
-import { FillStyle, OperationType } from '@kbn/lens-plugin/public';
+import { EuiEmptyPrompt, useEuiTheme } from '@elastic/eui';
+import { FillStyle, OperationType, SeriesType } from '@kbn/lens-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useAsync from 'react-use/lib/useAsync';
@@ -22,15 +22,8 @@ import {
 
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { v4 as uuidv4 } from 'uuid';
-import chroma from 'chroma-js';
-import type {
-  EventAnnotationConfig,
-  PointInTimeEventAnnotationConfig,
-  RangeEventAnnotationConfig,
-} from '@kbn/event-annotation-common';
 import { TimeRange } from '@kbn/es-query';
-import moment from 'moment';
+import { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import {
   Aggregators,
   Comparator,
@@ -47,10 +40,8 @@ interface RuleConditionChartProps {
   groupBy?: string | string[];
   error?: IErrorObject;
   timeRange: TimeRange;
-  annotation?: {
-    timestamp: string;
-    endTimestamp?: string;
-  };
+  annotations?: EventAnnotationConfig[];
+  seriesType?: SeriesType;
 }
 
 const getOperationTypeFromRuleAggType = (aggType: AggType): OperationType => {
@@ -68,8 +59,9 @@ export function RuleConditionChart({
   filterQuery,
   groupBy,
   error,
-  annotation,
+  annotations,
   timeRange,
+  seriesType,
 }: RuleConditionChartProps) {
   const {
     services: { lens },
@@ -182,50 +174,7 @@ export function RuleConditionChart({
 
   // Build alert annotation
   useEffect(() => {
-    if (!annotation) return;
-
-    const annotations: EventAnnotationConfig[] = [];
-
-    const alertStartAnnotation: PointInTimeEventAnnotationConfig = {
-      label: 'Alert',
-      type: 'manual',
-      key: {
-        type: 'point_in_time',
-        timestamp: annotation.timestamp,
-      },
-      color: euiTheme.colors.danger,
-      icon: 'alert',
-      id: uuidv4(),
-    };
-
-    const activeAlertRangeAnnotation: RangeEventAnnotationConfig = {
-      label: 'Active Alert',
-      type: 'manual',
-      key: {
-        type: 'range',
-        timestamp: annotation.timestamp,
-        endTimestamp: moment().toISOString(),
-      },
-      color: chroma(transparentize('#F04E981A', 0.2)).hex().toUpperCase(),
-      id: uuidv4(),
-    };
-
-    const recoveredAlertRangeAnnotation: RangeEventAnnotationConfig = {
-      label: 'Alert duration',
-      type: 'manual',
-      key: {
-        type: 'range',
-        timestamp: annotation.timestamp,
-        endTimestamp: annotation.endTimestamp ?? '',
-      },
-      color: chroma(transparentize('#F04E981A', 1)).hex().toUpperCase(),
-      id: uuidv4(),
-    };
-
-    annotations.push(alertStartAnnotation);
-    annotations.push(
-      annotation.endTimestamp ? recoveredAlertRangeAnnotation : activeAlertRangeAnnotation
-    );
+    if (!annotations) return;
 
     const alertAnnotationLayer = new XYByValueAnnotationsLayer({
       annotations,
@@ -234,7 +183,7 @@ export function RuleConditionChart({
     });
 
     setAlertAnnotation(alertAnnotationLayer);
-  }, [euiTheme.colors.danger, dataView, annotation]);
+  }, [euiTheme.colors.danger, dataView, annotations]);
 
   // Build the aggregation map from the metrics
   useEffect(() => {
@@ -303,7 +252,7 @@ export function RuleConditionChart({
           interval: `${timeSize}${timeUnit}`,
         },
       },
-      seriesType: 'bar',
+      seriesType: seriesType ? seriesType : 'bar',
     };
 
     if (groupBy && groupBy?.length) {
@@ -368,6 +317,7 @@ export function RuleConditionChart({
     alertAnnotation,
     timeSize,
     timeUnit,
+    seriesType,
   ]);
 
   if (
