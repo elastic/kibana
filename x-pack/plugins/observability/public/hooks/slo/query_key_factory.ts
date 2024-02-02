@@ -23,6 +23,7 @@ interface SloGroupListFilter {
   groupBy: string;
   kqlQuery: string;
   filters: string;
+  lastRefresh?: number;
 }
 
 export const sloKeys = {

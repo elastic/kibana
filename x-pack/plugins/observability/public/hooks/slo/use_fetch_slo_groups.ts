@@ -24,6 +24,7 @@ interface SLOGroupsParams {
   tagsFilter?: SearchState['tagsFilter'];
   statusFilter?: SearchState['statusFilter'];
   filters?: Filter[];
+  lastRefresh?: number;
 }
 
 interface UseFetchSloGroupsResponse {
@@ -42,6 +43,7 @@ export function useFetchSloGroups({
   tagsFilter,
   statusFilter,
   filters: filterDSL = [],
+  lastRefresh,
 }: SLOGroupsParams = {}): UseFetchSloGroupsResponse {
   const {
     http,
@@ -73,7 +75,7 @@ export function useFetchSloGroups({
   }, [filterDSL, tagsFilter, statusFilter, dataView]);
 
   const { data, isLoading, isSuccess, isError, isRefetching } = useQuery({
-    queryKey: sloKeys.group({ page, perPage, groupBy, kqlQuery, filters }),
+    queryKey: sloKeys.group({ page, perPage, groupBy, kqlQuery, filters, lastRefresh }),
     queryFn: async ({ signal }) => {
       const response = await http.get<FindSLOGroupsResponse>(
         '/internal/api/observability/slos/_groups',

@@ -24,7 +24,7 @@ interface Props {
 
 export function GroupView({ kqlQuery, sloView, sort, direction, groupBy }: Props) {
   const { state, store: storeState } = useUrlSearchState();
-  const { tagsFilter, statusFilter, filters, page, perPage } = state;
+  const { tagsFilter, statusFilter, filters, page, perPage, lastRefresh } = state;
 
   const { data, isLoading, isError } = useFetchSloGroups({
     perPage,
@@ -34,6 +34,7 @@ export function GroupView({ kqlQuery, sloView, sort, direction, groupBy }: Props
     tagsFilter,
     statusFilter,
     filters,
+    lastRefresh,
   });
   const { results = [], total = 0 } = data ?? {};
   const handlePageClick = (pageNumber: number) => {
@@ -59,25 +60,23 @@ export function GroupView({ kqlQuery, sloView, sort, direction, groupBy }: Props
   return (
     <EuiFlexItem data-test-subj="sloGroupView">
       {results &&
-        results.map((result) => {
-          return (
-            <GroupListView
-              groupBy={result.groupBy}
-              key={result.group}
-              sloView={sloView}
-              group={result.group}
-              kqlQuery={kqlQuery}
-              sort={sort}
-              direction={direction}
-              summary={{
-                worst: result.summary.worst,
-                total: result.summary.total,
-                violated: result.summary.violated,
-              }}
-              filters={filters}
-            />
-          );
-        })}
+        results.map((result) => (
+          <GroupListView
+            groupBy={result.groupBy}
+            key={result.group}
+            sloView={sloView}
+            group={result.group}
+            kqlQuery={kqlQuery}
+            sort={sort}
+            direction={direction}
+            summary={{
+              worst: result.summary.worst,
+              total: result.summary.total,
+              violated: result.summary.violated,
+            }}
+            filters={filters}
+          />
+        ))}
 
       {total > 0 ? (
         <EuiFlexItem>
