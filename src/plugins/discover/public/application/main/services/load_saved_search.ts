@@ -121,7 +121,7 @@ export const loadSavedSearch = async (
   updateBySavedSearch(nextSavedSearch, deps);
 
   if (!appState && shouldUpdateWithGlobalFilters) {
-    savedSearchContainer.updateWithGlobalFilters({ savedSearch: nextSavedSearch });
+    savedSearchContainer.updateWithFilterManagerFilters({ savedSearch: nextSavedSearch });
   }
 
   return nextSavedSearch;

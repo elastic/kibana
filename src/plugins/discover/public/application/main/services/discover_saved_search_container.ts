@@ -112,10 +112,10 @@ export interface DiscoverSavedSearchContainer {
    */
   update: (params: UpdateParams) => SavedSearch;
   /**
-   * Adds global filters to saved search filters
+   * Passes filter manager filters to saved search filters
    * @param params
    */
-  updateWithGlobalFilters: (params: { savedSearch: SavedSearch }) => SavedSearch;
+  updateWithFilterManagerFilters: (params: { savedSearch: SavedSearch }) => SavedSearch;
 }
 
 export function getSavedSearchContainer({
@@ -182,21 +182,16 @@ export function getSavedSearchContainer({
     savedSearchCurrent$.next(nextSavedSearch);
   };
 
-  const updateWithGlobalFilters = ({ savedSearch }: { savedSearch: SavedSearch }) => {
+  const updateWithFilterManagerFilters = ({ savedSearch }: { savedSearch: SavedSearch }) => {
     const nextSavedSearch: SavedSearch = {
       ...savedSearch,
     };
-    const globalFilters = globalStateContainer?.get()?.filters;
-    if (globalFilters?.length) {
-      nextSavedSearch.searchSource.setField(
-        'filter',
-        cloneDeep([...globalFilters, ...services.filterManager.getAppFilters()])
-      );
-    }
+
+    nextSavedSearch.searchSource.setField('filter', cloneDeep(services.filterManager.getFilters()));
 
     assignNextSavedSearch({ nextSavedSearch });
 
-    addLog('[savedSearch] updateWithGlobalFilters done', nextSavedSearch);
+    addLog('[savedSearch] updateWithFilterManagerFilters done', nextSavedSearch);
     return nextSavedSearch;
   };
 
@@ -250,7 +245,7 @@ export function getSavedSearchContainer({
     persist,
     set,
     update,
-    updateWithGlobalFilters,
+    updateWithFilterManagerFilters,
   };
 }
 

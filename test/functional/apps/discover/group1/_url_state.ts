@@ -121,7 +121,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.discover.getHitCount()).to.be('11,268');
     });
 
-    it('should merge custom global filters with app filters when opening a saved search', async () => {
+    it('should merge custom global filters with saved search filters', async () => {
       await kibanaServer.uiSettings.update({
         'timepicker:timeDefaults':
           '{  "from": "Sep 18, 2015 @ 19:37:13.000",  "to": "Sep 23, 2015 @ 02:30:09.000"}',
