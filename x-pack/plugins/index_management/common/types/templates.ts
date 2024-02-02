@@ -22,6 +22,7 @@ export interface TemplateSerialized {
     lifecycle?: DataStream['lifecycle'];
   };
   composed_of?: string[];
+  ignore_missing_component_templates?: string[];
   version?: number;
   priority?: number;
   _meta?: { [key: string]: any };
@@ -44,6 +45,7 @@ export interface TemplateDeserialized {
   };
   lifecycle?: DataRetention;
   composedOf?: string[]; // Composable template only
+  ignoreMissingComponentTemplates?: string[];
   version?: number;
   priority?: number; // Composable template only
   allowAutoCreate?: boolean;
