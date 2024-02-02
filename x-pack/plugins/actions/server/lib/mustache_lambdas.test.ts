@@ -70,7 +70,7 @@ describe('mustache lambdas', () => {
       expect(renderMustacheString(logger, template, { timeStamp }, 'none').trim()).toEqual(
         'date is empty'
       );
-      expect(logger.error).toHaveBeenCalledWith(`mustache render error: date is empty`);
+      expect(logger.warn).toHaveBeenCalledWith(`mustache render error: date is empty`);
     });
 
     it('invalid date logs and returns error string', () => {
@@ -82,7 +82,7 @@ describe('mustache lambdas', () => {
       expect(renderMustacheString(logger, template, { timeStamp }, 'none').trim()).toEqual(
         'invalid date "this is not a d4t3"'
       );
-      expect(logger.error).toHaveBeenCalledWith(
+      expect(logger.warn).toHaveBeenCalledWith(
         `mustache render error: invalid date "this is not a d4t3"`
       );
     });
@@ -96,7 +96,7 @@ describe('mustache lambdas', () => {
       expect(renderMustacheString(logger, template, { timeStamp }, 'none').trim()).toEqual(
         'unknown timeZone value "NotATime Zone!"'
       );
-      expect(logger.error).toHaveBeenCalledWith(
+      expect(logger.warn).toHaveBeenCalledWith(
         `mustache render error: unknown timeZone value "NotATime Zone!"`
       );
     });
@@ -150,7 +150,7 @@ describe('mustache lambdas', () => {
       expect(result).toEqual(
         'error evaluating tinymath expression ") 1 ++++ 0 (": Failed to parse expression. Expected "(", function, literal, or whitespace but ")" found.'
       );
-      expect(logger.error).toHaveBeenCalledWith(
+      expect(logger.warn).toHaveBeenCalledWith(
         `mustache render error: error evaluating tinymath expression ") 1 ++++ 0 (": Failed to parse expression. Expected "(", function, literal, or whitespace but ")" found.`
       );
     });
@@ -218,7 +218,7 @@ describe('mustache lambdas', () => {
       expect(result).toEqual(
         `error parsing Hjson \"[1,2,3,,]\": Found a punctuator character ',' when expecting a quoteless string (check your syntax) at line 1,7 >>>1,2,3,,] ...`
       );
-      expect(logger.error).toHaveBeenCalledWith(
+      expect(logger.warn).toHaveBeenCalledWith(
         `mustache render error: error parsing Hjson \"[1,2,3,,]\": Found a punctuator character ',' when expecting a quoteless string (check your syntax) at line 1,7 >>>1,2,3,,] ...`
       );
     });
@@ -243,7 +243,7 @@ describe('mustache lambdas', () => {
       expect(renderMustacheString(logger, template, { num }, 'none')).toEqual(
         `invalid number: 'nope'`
       );
-      expect(logger.error).toHaveBeenCalledWith(`mustache render error: invalid number: 'nope'`);
+      expect(logger.warn).toHaveBeenCalledWith(`mustache render error: invalid number: 'nope'`);
     });
   });
 });

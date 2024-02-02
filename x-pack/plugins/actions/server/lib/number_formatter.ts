@@ -117,6 +117,6 @@ function splitNumberLocalesOptions(
 }
 
 function logAndReturnErr(logger: Logger, errMessage: string): string {
-  logger.error(`mustache render error: ${errMessage}`);
+  logger.warn(`mustache render error: ${errMessage}`);
   return errMessage;
 }
