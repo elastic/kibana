@@ -112,6 +112,37 @@ COPY --from=builder --chown=1000:0 /usr/share/kibana /usr/share/kibana
 COPY --from=builder --chown=0:0 /opt /opt
 {{/cloud}}
 WORKDIR /usr/share/kibana
+{{#fips}}
+
+# OpenSSL requires specific versions that are FIPS certified. Further, the FIPS modules
+# need to be compiled on the machine to pass its own self validation on startup.
+#
+# See:
+# https://github.com/openssl/openssl/blob/openssl-3.0/README-FIPS.md
+# https://www.openssl.org/docs/man3.0/man7/fips_module.html
+
+# Enable FIPS for Kibana only. In the future we can override OS wide with ENV OPENSSL_CONF
+RUN echo '\n--enable-fips' >> config/node.options
+RUN echo '--openssl-config=/usr/share/kibana/openssl-3.0.8/nodejs.cnf' >> config/node.options
+
+# Ideally we would handle this in the builder step, but make is installing over the OS version
+# of OpenSSL and requires linking of many submodules.
+RUN curl --retry 8 -S -L -O https://www.openssl.org/source/openssl-3.0.8.tar.gz
+RUN curl --retry 8 -S -L -O https://www.openssl.org/source/openssl-3.0.8.tar.gz.sha256 
+RUN sha256sum -c openssl-3.0.8.tar.gz.sha256 
+RUN tar -zxf openssl-3.0.8.tar.gz 
+RUN rm -rf openssl-3.0.8.tar* 
+RUN cd /usr/share/kibana/openssl-3.0.8  
+RUN ./Configure enable-fips 
+RUN make -j $(nproc) 
+RUN make install 
+RUN ldconfig /usr/local/lib64/ 
+RUN chown -R 1000:0 /usr/share/kibana/openssl-3.0.8
+
+COPY --chown=1000:0 openssl/nodejs.cnf /usr/share/kibana/openssl-3.0.8/nodejs.cnf
+ENV OPENSSL_MODULES=/usr/local/lib64/ossl-modules
+
+{{/fips}}
 RUN ln -s /usr/share/kibana /opt/kibana
 
 {{! Please notify @elastic/kibana-security if you want to remove or change this environment variable. }}
@@ -133,36 +164,6 @@ RUN echo '--diagnostic-dir=./data' >> config/node.options
 {{^opensslLegacyProvider}}
 RUN sed 's/\(--openssl-legacy-provider\)/#\1/' -i config/node.options
 {{/opensslLegacyProvider}}
-{{#fips}}
-
-# OpenSSL requires specific versions that are FIPS certified. Further, the FIPS modules
-# need to be compiled on the machine to pass its own self validation on startup.
-#
-# See:
-# https://github.com/openssl/openssl/blob/openssl-3.0/README-FIPS.md
-# https://www.openssl.org/docs/man3.0/man7/fips_module.html
-
-# Enable FIPS for Kibana only. In the future we can override OS wide with ENV OPENSSL_CONF
-RUN echo '\n--enable-fips' >> config/node.options
-RUN echo '--openssl-config=/usr/share/kibana/openssl-3.0.8/nodejs.cnf' >> config/node.options
-
-# Ideally we would handle this in the builder step, but make is installing over the OS version
-# of OpenSSL and requires linking of many submodules.
-RUN curl --retry 8 -S -L -O https://www.openssl.org/source/openssl-3.0.8.tar.gz ; \
-  curl --retry 8 -S -L -O https://www.openssl.org/source/openssl-3.0.8.tar.gz.sha256 ; \
-  sha256sum -c openssl-3.0.8.tar.gz.sha256 ; \
-  tar -zxf openssl-3.0.8.tar.gz ; \
-  rm -rf openssl-3.0.8.tar* ; \
-  cd /usr/share/kibana/openssl-3.0.8  ; \
-  ./Configure enable-fips ; \ 
-  make -j $(nproc) ; \
-  make install ; \
-  ldconfig /usr/local/lib64/ ; \
-  chown -R 1000:0 /usr/share/kibana/openssl-3.0.8
-
-COPY --chown=1000:0 openssl/nodejs.cnf /usr/share/kibana/openssl-3.0.8/nodejs.cnf
-ENV OPENSSL_MODULES=/usr/local/lib64/ossl-modules
-{{/fips}}
 
 # Add the launcher/wrapper script. It knows how to interpret environment
 # variables and translate them to Kibana CLI options.
