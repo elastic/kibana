@@ -118,10 +118,7 @@ describe('Enterprise Search - indices search provider', () => {
           {} as any
         )
       );
-      expect(results).toEqual([
-        { ...githubIndex, score: 80 },
-        { ...msftIndex, score: 80 },
-      ]);
+      expect(results).toHaveLength(0);
     });
 
     it('respect maximum results', async () => {

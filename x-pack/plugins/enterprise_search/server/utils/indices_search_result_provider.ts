@@ -20,11 +20,11 @@ import { getIndexData } from '../lib/indices/utils/get_index_data';
 export function getIndicesSearchResultProvider(): GlobalSearchResultProvider {
   return {
     find: ({ term, types, tags }, { aborted$, client, maxResults }) => {
-      if (!client || tags || (types && !types.includes('indices'))) {
+      if (!client || !term || tags || (types && !types.includes('indices'))) {
         return from([[]]);
       }
       const fetchIndices = async (): Promise<GlobalSearchProviderResult[]> => {
-        const { indexNames } = await getIndexData(client, true, false, term);
+        const { indexNames } = await getIndexData(client, false, false, term);
 
         const searchResults: GlobalSearchProviderResult[] = indexNames
           .map((indexName) => {
