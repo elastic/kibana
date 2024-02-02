@@ -112,7 +112,11 @@ export function buildVisualizeQuery(watch, visualizeOptions, kibanaVersion) {
     date_histogram: {
       field: watch.timeField,
       time_zone: visualizeOptions.timezone,
-      min_doc_count: 1,
+      min_doc_count: 0,
+      extended_bounds: {
+        min: visualizeOptions.rangeFrom,
+        max: visualizeOptions.rangeTo,
+      },
     },
   };
 
