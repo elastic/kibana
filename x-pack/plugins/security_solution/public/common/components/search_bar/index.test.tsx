@@ -182,7 +182,7 @@ describe('SearchBarComponent', () => {
   it('calls useUpdateUrlParam when query query changes', async () => {
     const store = createMockStore();
     render(
-      <TestProviders>
+      <TestProviders store={store}>
         <SearchBarComponent {...props} />
       </TestProviders>
     );
@@ -205,7 +205,7 @@ describe('SearchBarComponent', () => {
   it('calls useUpdateUrlParam when filters change', async () => {
     const store = createMockStore();
     render(
-      <TestProviders>
+      <TestProviders store={store}>
         <SearchBarComponent {...props} />
       </TestProviders>
     );
@@ -239,7 +239,7 @@ describe('SearchBarComponent', () => {
   it('calls useUpdateUrlParam when savedQuery changes', async () => {
     const store = createMockStore();
     render(
-      <TestProviders>
+      <TestProviders store={store}>
         <SearchBarComponent {...props} />
       </TestProviders>
     );
@@ -271,7 +271,7 @@ describe('SearchBarComponent', () => {
     it('calls useUpdateUrlParam when global timerange changes', async () => {
       const store = createMockStore();
       render(
-        <TestProviders>
+        <TestProviders store={store}>
           <SearchBarComponent {...props} />
         </TestProviders>
       );
@@ -305,7 +305,7 @@ describe('SearchBarComponent', () => {
     it('calls useUpdateUrlParam when timeline timerange changes', async () => {
       const store = createMockStore();
       render(
-        <TestProviders>
+        <TestProviders store={store}>
           <SearchBarComponent {...props} />
         </TestProviders>
       );

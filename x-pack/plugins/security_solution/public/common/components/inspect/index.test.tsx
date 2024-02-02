@@ -39,7 +39,7 @@ describe('Inspect Button', () => {
     beforeEach(() => {
       const myState = cloneDeep(state);
       myState.inputs = upsertQuery(newQuery);
-      store = createMockStore(state);
+      store = createMockStore(myState);
     });
     test('Eui Empty Button', () => {
       const wrapper = mount(
@@ -145,7 +145,7 @@ describe('Inspect Button', () => {
       const myQuery = cloneDeep(newQuery);
       myQuery.inspect = null;
       myState.inputs = upsertQuery(myQuery);
-      store = createMockStore(state);
+      store = createMockStore(myState);
       const wrapper = mount(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />
@@ -162,7 +162,7 @@ describe('Inspect Button', () => {
         response: ['my response'],
       };
       myState.inputs = upsertQuery(myQuery);
-      store = createMockStore(state);
+      store = createMockStore(myState);
       const wrapper = mount(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />
@@ -179,7 +179,7 @@ describe('Inspect Button', () => {
         response: [],
       };
       myState.inputs = upsertQuery(myQuery);
-      store = createMockStore(state);
+      store = createMockStore(myState);
       const wrapper = mount(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />
@@ -198,7 +198,7 @@ describe('Inspect Button', () => {
         response: ['my response'],
       };
       myState.inputs = upsertQuery(myQuery);
-      store = createMockStore(state);
+      store = createMockStore(myState);
     });
     test('Open Inspect Modal', () => {
       const wrapper = mount(
@@ -243,7 +243,7 @@ describe('Inspect Button', () => {
       };
       myState.inputs = upsertQuery(myQuery);
       myState.inputs.global.queries[0].isInspected = true;
-      store = createMockStore(state);
+      store = createMockStore(myState);
       const wrapper = mount(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />
@@ -262,7 +262,7 @@ describe('Inspect Button', () => {
       };
       myState.inputs = upsertQuery(myQuery);
       myState.inputs.global.queries[0].isInspected = false;
-      store = createMockStore(state);
+      store = createMockStore(myState);
       const wrapper = mount(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />
@@ -281,7 +281,7 @@ describe('Inspect Button', () => {
       };
       myState.inputs = upsertQuery(myQuery);
       myState.inputs.global.queries[0].isInspected = true;
-      store = createMockStore(state);
+      store = createMockStore(myState);
       const wrapper = mount(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />
@@ -300,7 +300,7 @@ describe('Inspect Button', () => {
       };
       myState.inputs = upsertQuery(myQuery);
       myState.inputs.global.queries[0].isInspected = true;
-      store = createMockStore(state);
+      store = createMockStore(myState);
       const wrapper = mount(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />
