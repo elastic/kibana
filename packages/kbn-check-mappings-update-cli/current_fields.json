@@ -524,6 +524,7 @@
     "hosts",
     "is_default",
     "is_default_monitoring",
+    "is_internal",
     "is_preconfigured",
     "key",
     "name",

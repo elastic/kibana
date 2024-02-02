@@ -8,8 +8,10 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import {
+  deleteConnectorById,
+  fetchConnectorById,
   fetchConnectors,
-  fetchSyncJobsByConnectorId,
+  fetchSyncJobs,
   putUpdateNative,
   updateConnectorConfiguration,
   updateConnectorNameAndDescription,
@@ -22,11 +24,14 @@ import {
 
 import { ConnectorStatus, FilteringRule, SyncJobType } from '@kbn/search-connectors';
 import { cancelSyncs } from '@kbn/search-connectors/lib/cancel_syncs';
+import { isResourceNotFoundException } from '@kbn/search-connectors/utils/identify_exceptions';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 import { addConnector } from '../../lib/connectors/add_connector';
 import { startSync } from '../../lib/connectors/start_sync';
+import { deleteAccessControlIndex } from '../../lib/indices/delete_access_control_index';
 import { fetchIndexCounts } from '../../lib/indices/fetch_index_counts';
+import { deleteIndexPipelines } from '../../lib/pipelines/delete_pipelines';
 import { getDefaultPipeline } from '../../lib/pipelines/get_default_pipeline';
 import { updateDefaultPipeline } from '../../lib/pipelines/update_default_pipeline';
 import { updateConnectorPipeline } from '../../lib/pipelines/update_pipeline';
@@ -37,6 +42,7 @@ import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handl
 import {
   isAccessControlDisabledException,
   isExpensiveQueriesNotAllowedException,
+  isIndexNotFoundException,
 } from '../../utils/identify_exceptions';
 
 export function registerConnectorRoutes({ router, log }: RouteDependencies) {
@@ -242,7 +248,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const result = await fetchSyncJobsByConnectorId(
+      const result = await fetchSyncJobs(
         client.asCurrentUser,
         request.params.connectorId,
         request.query.from,
@@ -537,6 +543,68 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
           },
         },
       });
+    })
+  );
+
+  router.delete(
+    {
+      path: '/internal/enterprise_search/connectors/{connectorId}',
+      validate: {
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+        query: schema.object({
+          shouldDeleteIndex: schema.maybe(schema.boolean()),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const { connectorId } = request.params;
+      const { shouldDeleteIndex } = request.query;
+
+      let connectorResponse;
+      let indexNameToDelete;
+      try {
+        if (shouldDeleteIndex) {
+          const connector = await fetchConnectorById(client.asCurrentUser, connectorId);
+          indexNameToDelete = connector?.value.index_name;
+        }
+        connectorResponse = await deleteConnectorById(client.asCurrentUser, connectorId);
+        if (indexNameToDelete) {
+          await deleteIndexPipelines(client, indexNameToDelete);
+          await deleteAccessControlIndex(client, indexNameToDelete);
+          await client.asCurrentUser.indices.delete({ index: indexNameToDelete });
+        }
+      } catch (error) {
+        if (isResourceNotFoundException(error)) {
+          return createError({
+            errorCode: ErrorCode.RESOURCE_NOT_FOUND,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.connectors.resource_not_found_error',
+              {
+                defaultMessage: 'Connector with id {connectorId} is not found.',
+                values: { connectorId },
+              }
+            ),
+            response,
+            statusCode: 404,
+          });
+        }
+
+        if (isIndexNotFoundException(error)) {
+          return createError({
+            errorCode: ErrorCode.INDEX_NOT_FOUND,
+            message: 'Could not find index',
+            response,
+            statusCode: 404,
+          });
+        }
+
+        throw error;
+      }
+
+      return response.ok({ body: connectorResponse });
     })
   );
 }

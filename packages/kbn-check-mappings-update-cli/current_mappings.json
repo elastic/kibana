@@ -1700,6 +1700,10 @@
         "type": "boolean",
         "index": false
       },
+      "is_internal": {
+        "type": "boolean",
+        "index": false
+      },
       "ssl": {
         "type": "binary"
       },

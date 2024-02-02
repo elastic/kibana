@@ -67,7 +67,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       return {
         message: i18n.translate('monaco.esql.validation.noNestedArgumentSupport', {
           defaultMessage:
-            "Aggregate function's parameters must be an attribute or literal; found [{name}] of type [{argType}]",
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [{name}] of type [{argType}]",
           values: { name: out.name, argType: out.argType },
         }),
       };
@@ -232,13 +232,19 @@ export function getMessageFromId<K extends ErrorTypes>({
   locations: ESQLLocation;
 }): ESQLMessage {
   const { message, type = 'error' } = getMessageAndTypeFromId(payload);
-  return createMessage(type, message, locations);
+  return createMessage(type, message, locations, payload.messageId);
 }
 
-export function createMessage(type: 'error' | 'warning', message: string, location: ESQLLocation) {
+export function createMessage(
+  type: 'error' | 'warning',
+  message: string,
+  location: ESQLLocation,
+  messageId: string
+) {
   return {
     type,
     text: message,
     location,
+    code: messageId,
   };
 }

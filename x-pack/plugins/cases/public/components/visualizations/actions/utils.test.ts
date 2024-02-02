@@ -59,6 +59,7 @@ describe('utils', () => {
         Object {
           "persistableStateAttachmentState": Object {
             "attributes": Object {},
+            "metadata": undefined,
             "timeRange": Object {},
           },
           "persistableStateAttachmentTypeId": ".lens",
