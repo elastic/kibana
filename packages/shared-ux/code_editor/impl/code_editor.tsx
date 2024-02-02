@@ -91,6 +91,13 @@ export interface CodeEditorProps {
   languageConfiguration?: monaco.languages.LanguageConfiguration;
 
   /**
+   * CodeAction provider for code actions on markers feedback
+   * Documentation for the provider can be found here:
+   * https://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.CodeActionProvider.html
+   */
+  codeActions?: monaco.languages.CodeActionProvider;
+
+  /**
    * Function called before the editor is mounted in the view
    */
   editorWillMount?: () => void;
@@ -160,6 +167,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   hoverProvider,
   placeholder,
   languageConfiguration,
+  codeActions,
   'aria-label': ariaLabel = i18n.translate('sharedUXPackages.codeEditor.ariaLabel', {
     defaultMessage: 'Code Editor',
   }),
@@ -347,6 +355,10 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         if (languageConfiguration) {
           monaco.languages.setLanguageConfiguration(languageId, languageConfiguration);
         }
+
+        if (codeActions) {
+          monaco.languages.registerCodeActionProvider(languageId, codeActions);
+        }
       });
 
       // Register themes
@@ -364,6 +376,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       suggestionProvider,
       signatureProvider,
       hoverProvider,
+      codeActions,
       languageConfiguration,
     ]
   );

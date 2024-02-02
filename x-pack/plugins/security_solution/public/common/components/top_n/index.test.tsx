@@ -372,6 +372,7 @@ describe('StatefulTopN', () => {
           const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
           expect(props.defaultView).toEqual('alert');
         });
+        wrapper.unmount();
       });
     });
   });
