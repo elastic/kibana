@@ -484,61 +484,80 @@ export default ({ getService }: FtrProviderContext): void => {
           );
         });
 
-        it('400s when creating a case with a missing required custom field', async () => {
+        it('creates a case with missing required custom fields and default values', async () => {
+          const customFieldsConfiguration = [
+            {
+              key: 'text_custom_field',
+              label: 'text',
+              type: CustomFieldTypes.TEXT,
+              required: true,
+              defaultValue: 'default value',
+            },
+            {
+              key: 'toggle_custom_field',
+              label: 'toggle',
+              type: CustomFieldTypes.TOGGLE,
+              defaultValue: false,
+              required: true,
+            },
+          ];
+
           await createConfiguration(
             supertest,
             getConfigurationRequest({
               overrides: {
-                customFields: [
-                  {
-                    key: 'text_custom_field',
-                    label: 'text',
-                    type: CustomFieldTypes.TEXT,
-                    required: false,
-                  },
-                  {
-                    key: 'toggle_custom_field',
-                    label: 'toggle',
-                    type: CustomFieldTypes.TOGGLE,
-                    defaultValue: false,
-                    required: true,
-                  },
-                ],
+                customFields: customFieldsConfiguration,
               },
             })
           );
-          await createCase(
+          const createdCase = await createCase(
             supertest,
             getPostCaseRequest({
-              customFields: [
-                {
-                  key: 'text_custom_field',
-                  type: CustomFieldTypes.TEXT,
-                  value: 'a',
-                },
-              ],
-            }),
-            400
+              customFields: [],
+            })
           );
+
+          expect(createdCase.customFields).to.eql([
+            {
+              key: customFieldsConfiguration[0].key,
+              type: customFieldsConfiguration[0].type,
+              value: 'default value',
+            },
+            {
+              key: customFieldsConfiguration[1].key,
+              type: customFieldsConfiguration[1].type,
+              value: false,
+            },
+          ]);
         });
 
-        it('400s when trying to create case with a required custom field as null', async () => {
+        it('400s trying to create a case with required custom fields set to null', async () => {
+          const customFieldsConfiguration = [
+            {
+              key: 'text_custom_field',
+              label: 'text',
+              type: CustomFieldTypes.TEXT,
+              required: true,
+              defaultValue: 'default value',
+            },
+            {
+              key: 'toggle_custom_field',
+              label: 'toggle',
+              type: CustomFieldTypes.TOGGLE,
+              defaultValue: false,
+              required: true,
+            },
+          ];
+
           await createConfiguration(
             supertest,
             getConfigurationRequest({
               overrides: {
-                customFields: [
-                  {
-                    key: 'text_custom_field',
-                    label: 'text',
-                    type: CustomFieldTypes.TEXT,
-                    defaultValue: 'foobar',
-                    required: true,
-                  },
-                ],
+                customFields: customFieldsConfiguration,
               },
             })
           );
+
           await createCase(
             supertest,
             getPostCaseRequest({
@@ -546,6 +565,11 @@ export default ({ getService }: FtrProviderContext): void => {
                 {
                   key: 'text_custom_field',
                   type: CustomFieldTypes.TEXT,
+                  value: null,
+                },
+                {
+                  key: 'toggle_custom_field',
+                  type: CustomFieldTypes.TOGGLE,
                   value: null,
                 },
               ],

@@ -106,6 +106,7 @@ export const validateCustomFieldKeysAgainstConfiguration = ({
 
 /**
  * Returns a list of required custom fields missing from the request
+ * that don't have a default value configured.
  */
 export const validateRequiredCustomFields = ({
   requestCustomFields,
@@ -130,22 +131,37 @@ export const validateRequiredCustomFields = ({
   const missingRequiredCustomFields = differenceWith(
     requiredCustomFields,
     requestCustomFields ?? [],
-    (requiredVal, requestedVal) => requiredVal.key === requestedVal.key
-  ).map((e) => `"${e.label}"`);
-
-  requiredCustomFields.forEach((requiredField) => {
-    const found = requestCustomFields?.find(
-      (requestField) => requestField.key === requiredField.key
-    );
-
-    if (found && found.value === null) {
-      missingRequiredCustomFields.push(`"${requiredField.label}"`);
-    }
-  });
+    (configuration, request) => configuration.key === request.key
+  ) // missing custom field and missing defaultValue -> error
+    .filter(
+      (customField) => customField.defaultValue === undefined || customField.defaultValue === null
+    )
+    .map((e) => `"${e.label}"`);
 
   if (missingRequiredCustomFields.length) {
     throw Boom.badRequest(
-      `Missing required custom fields: ${missingRequiredCustomFields.join(', ')}`
+      `Missing required custom fields without default value configured: ${missingRequiredCustomFields.join(
+        ', '
+      )}`
+    );
+  }
+
+  const nullRequiredCustomFields = requiredCustomFields
+    .filter((requiredField) => {
+      const found = requestCustomFields?.find(
+        (requestField) => requestField.key === requiredField.key
+      );
+
+      // required custom fields cannot be set to null
+      return found && found.value === null;
+    })
+    .map((e) => `"${e.label}"`);
+
+  if (nullRequiredCustomFields.length) {
+    throw Boom.badRequest(
+      `Invalid value "null" supplied for the following required custom fields: ${nullRequiredCustomFields.join(
+        ', '
+      )}`
     );
   }
 };
