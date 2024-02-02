@@ -420,7 +420,7 @@ export class SyntheticsService {
                   archive.pipe(writeStream);
 
                   archive.append(
-                    `import { journey, step } from '@elastic/synthetics';
+                    `import { journey, step, expect } from '@elastic/synthetics';
 
 journey('inline', ({ page, context, browser, params, request }) => {
   ${monitorData?.['source.inline.script']}
