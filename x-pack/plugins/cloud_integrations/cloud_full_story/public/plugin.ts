@@ -77,7 +77,10 @@ export class CloudFullStoryPlugin implements Plugin {
       ...(pageVarsDebounceTime
         ? { pageVarsDebounceTimeMs: duration(pageVarsDebounceTime).asMilliseconds() }
         : {}),
-      // Load an Elastic-internally audited script. Ideally, it should be hosted on a CDN.
+      /**
+       * FIXME: this should use the {@link IStaticAssets['getPluginAssetHref']}
+       * function. Then we can avoid registering our own endpoint in this plugin.
+       */
       scriptUrl: basePath.prepend(
         `/internal/cloud/${this.initializerContext.env.packageInfo.buildNum}/fullstory.js`
       ),
