@@ -21,9 +21,5 @@
     "@kbn/i18n",
     "@kbn/task-manager-plugin",
     "@kbn/licensing-plugin",
-    "@kbn/reporting-server",
-    "@kbn/reporting-export-types-csv-common",
-    "@kbn/reporting-export-types-pdf-common",
-    "@kbn/reporting-export-types-png-common",
   ]
 }

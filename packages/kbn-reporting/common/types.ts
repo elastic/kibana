@@ -11,9 +11,6 @@ import type {
   PerformanceMetrics as ScreenshotMetrics,
 } from '@kbn/screenshotting-plugin/common';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import { CSV_JOB_TYPE, CSV_JOB_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
-import { PDF_JOB_TYPE, PDF_JOB_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
-import { PNG_JOB_TYPE, PNG_JOB_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
 import type { LocatorParams } from './url';
 import { JOB_STATUS } from './constants';
 
@@ -98,18 +95,6 @@ export interface BasePayload extends BaseParams {
 export type TaskInstanceFields = Pick<ConcreteTaskInstance, 'startedAt' | 'retryAt'>;
 
 export type JobId = string;
-
-export const jobTypes = [
-  CSV_JOB_TYPE,
-  CSV_JOB_TYPE_V2,
-  PDF_JOB_TYPE,
-  PDF_JOB_TYPE_V2,
-  PNG_JOB_TYPE,
-  PNG_JOB_TYPE_V2,
-];
-
-type JobTypeDeclaration = typeof jobTypes;
-export type JobTypes = JobTypeDeclaration[keyof JobTypeDeclaration];
 
 /**
  * Report job parameters, after they are processed in the request handler.

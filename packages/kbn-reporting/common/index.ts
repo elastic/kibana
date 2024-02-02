@@ -12,7 +12,5 @@ export * from './schema_utils';
 
 export { CancellationToken } from './cancellation_token';
 export { buildKibanaPath } from './build_kibana_path';
-export * from './export_types_registry';
-export * from './check_license';
 export { checkLicense } from './license_check';
 export * from './routes';

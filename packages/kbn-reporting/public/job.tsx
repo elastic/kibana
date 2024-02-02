@@ -20,8 +20,8 @@ import type {
   ReportOutput,
   ReportSource,
   TaskRunResult,
-  JobTypes,
 } from '@kbn/reporting-common/types';
+import { JobTypes } from './types';
 
 const { COMPLETED, FAILED, PENDING, PROCESSING, WARNINGS } = JOB_STATUS;
 
