@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  createSecuritySolutionStorageMock,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  TestProviders,
-} from '../../../common/mock';
+import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { renderHook } from '@testing-library/react-hooks';
 import { getUseCellActionsHook } from './use_cell_actions';
@@ -27,8 +22,6 @@ import type { ComponentProps, JSXElementConstructor, PropsWithChildren } from 'r
 import React from 'react';
 import { makeAction } from '../../../common/components/cell_actions/mocks';
 import { VIEW_SELECTION } from '../../../../common/constants';
-import { createStore } from '../../../common/store';
-import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 
 const useCellActions = getUseCellActionsHook(TableId.test);
 
@@ -85,12 +78,10 @@ const mockedStateWithEventRenderedView: typeof mockGlobalState = {
     },
   },
 };
-const kibanaMock = createStartServicesMock();
-const { storage } = createSecuritySolutionStorageMock();
 
 const TestProviderWithCustomStateAndActions = withCustomPropsAndCellActions({
   cellActions: compatibleActions,
-  store: createStore(mockedStateWithEventRenderedView, SUB_PLUGINS_REDUCER, kibanaMock, storage),
+  store: createMockStore(mockedStateWithEventRenderedView),
 });
 
 describe('getUseCellActionsHook', () => {

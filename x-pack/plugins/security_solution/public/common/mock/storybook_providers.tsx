@@ -16,16 +16,11 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 import { CASES_FEATURE_ID } from '../../../common';
-import { createStore } from '../store';
-import { mockGlobalState } from './global_state';
-import { SUB_PLUGINS_REDUCER } from './utils';
-import { createSecuritySolutionStorageMock } from './mock_local_storage';
 import type { StartServices } from '../../types';
 import { ReactQueryClientProvider } from '../containers/query_client/query_client_provider';
+import { createMockStore } from './test_providers';
 
 export const kibanaMock = {} as unknown as StartServices;
-
-const { storage } = createSecuritySolutionStorageMock();
 
 const uiSettings = {
   get: (setting: string) => {
@@ -101,7 +96,7 @@ const KibanaReactContext = createKibanaReactContext(coreMock);
  * To reuse TestProvidersComponent here, we need to remove all references to jest from mocks.
  */
 export const StorybookProviders: React.FC = ({ children }) => {
-  const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaMock, storage);
+  const store = createMockStore();
 
   return (
     <I18nProvider>

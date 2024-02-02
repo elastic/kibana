@@ -17,13 +17,11 @@ import type { GlobalUrlParam } from '../../store/global_url_param';
 import { globalUrlParamActions } from '../../store/global_url_param';
 import { mockHistory } from '../route/mocks';
 import {
+  createMockStore,
   createSecuritySolutionStorageMock,
-  kibanaMock,
   mockGlobalState,
-  SUB_PLUGINS_REDUCER,
   TestProviders,
 } from '../../mock';
-import { createStore } from '../../store';
 import type { LinkInfo } from '../../links';
 import { SecurityPageName } from '../../../app/types';
 
@@ -59,15 +57,10 @@ describe('global query string', () => {
   const { storage } = createSecuritySolutionStorageMock();
 
   const makeStore = (globalUrlParam: GlobalUrlParam) =>
-    createStore(
-      {
-        ...mockGlobalState,
-        globalUrlParam,
-      },
-      SUB_PLUGINS_REDUCER,
-      kibanaMock,
-      storage
-    );
+    createMockStore({
+      ...mockGlobalState,
+      globalUrlParam,
+    });
 
   const makeWrapper = (globalUrlParam?: GlobalUrlParam) => {
     const wrapper = ({ children }: { children: React.ReactElement }) => (
@@ -181,22 +174,17 @@ describe('global query string', () => {
 
   describe('useGlobalQueryString', () => {
     it('returns global query string', () => {
-      const store = createStore(
-        {
-          ...mockGlobalState,
-          globalUrlParam: {
-            testNumber: 123,
-            testObject: { testKey: 321 },
-            testEmptyObject: {},
-            testEmptyArray: [],
-            testNull: null,
-            testEmptyString: '',
-          },
+      const store = createMockStore({
+        ...mockGlobalState,
+        globalUrlParam: {
+          testNumber: 123,
+          testObject: { testKey: 321 },
+          testEmptyObject: {},
+          testEmptyArray: [],
+          testNull: null,
+          testEmptyString: '',
         },
-        SUB_PLUGINS_REDUCER,
-        kibanaMock,
-        storage
-      );
+      });
       const wrapper = ({ children }: { children: React.ReactElement }) => (
         <TestProviders store={store}>{children}</TestProviders>
       );
