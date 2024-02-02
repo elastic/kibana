@@ -49,6 +49,7 @@ import { isBoom } from '@hapi/boom';
 import { identity } from 'lodash';
 import { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
 import { Env } from '@kbn/config';
+import { CoreContext } from '@kbn/core-base-server-internal';
 import { HttpConfig } from './http_config';
 import { adoptToHapiAuthFormat } from './lifecycle/auth';
 import { adoptToHapiOnPreAuth } from './lifecycle/on_pre_auth';
@@ -179,16 +180,20 @@ export class HttpServer {
   private stopped = false;
 
   private readonly log: Logger;
+  private readonly logger: LoggerFactory;
   private readonly authState: AuthStateStorage;
   private readonly authRequestHeaders: AuthHeadersStorage;
   private readonly authResponseHeaders: AuthHeadersStorage;
+  private readonly env: Env;
 
   constructor(
-    private readonly logger: LoggerFactory,
+    private readonly coreContext: CoreContext,
     private readonly name: string,
-    private readonly shutdownTimeout$: Observable<Duration>,
-    private readonly env: Env
+    private readonly shutdownTimeout$: Observable<Duration>
   ) {
+    const { logger, env } = this.coreContext;
+    this.logger = logger;
+    this.env = env;
     this.authState = new AuthStateStorage(() => this.authRegistered);
     this.authRequestHeaders = new AuthHeadersStorage();
     this.authResponseHeaders = new AuthHeadersStorage();

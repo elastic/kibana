@@ -14,7 +14,6 @@ import { omit } from 'lodash';
 import { join } from 'path';
 import { ByteSizeValue, schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { createTestEnv } from '@kbn/config-mocks';
 import type {
   KibanaRequest,
   KibanaResponseFactory,
@@ -31,6 +30,7 @@ import { Readable } from 'stream';
 import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import moment from 'moment';
 import { of, Observable, BehaviorSubject } from 'rxjs';
+import { mockCoreContext } from '@kbn/core-base-server-mocks';
 
 const routerOptions: RouterOptions = {
   isDev: false,
@@ -55,8 +55,9 @@ let config$: Observable<HttpConfig>;
 let configWithSSL: HttpConfig;
 let configWithSSL$: Observable<HttpConfig>;
 
-const loggingService = loggingSystemMock.create();
-const logger = loggingService.get();
+const coreContext = mockCoreContext.create();
+const loggingService = coreContext.logger;
+const logger = coreContext.logger.get();
 const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 
 let certificate: string;
@@ -100,7 +101,7 @@ beforeEach(() => {
   } as HttpConfig;
   configWithSSL$ = of(configWithSSL);
 
-  server = new HttpServer(loggingService, 'tests', of(config.shutdownTimeout), createTestEnv());
+  server = new HttpServer(coreContext, 'tests', of(config.shutdownTimeout));
 });
 
 afterEach(async () => {
