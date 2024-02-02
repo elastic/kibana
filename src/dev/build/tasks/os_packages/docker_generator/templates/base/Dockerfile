@@ -137,8 +137,7 @@ RUN set -e ; \
  ./Configure enable-fips  ; \
  make -j $(nproc)  ; \
  make install  ; \
- ldconfig /usr/local/lib64/  ; \
- chown -R 1000:0 /usr/share/kibana/openssl-3.0.8
+ ldconfig /usr/local/lib64/
 
 COPY --chown=1000:0 openssl/nodejs.cnf /usr/share/kibana/openssl-3.0.8/nodejs.cnf
 ENV OPENSSL_MODULES=/usr/local/lib64/ossl-modules
