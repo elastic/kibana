@@ -130,7 +130,7 @@ RUN echo '--openssl-config=/usr/share/kibana/openssl-3.0.8/nodejs.cnf' >> config
 RUN set -e ; \
  curl --retry 8 -S -L -O https://www.openssl.org/source/openssl-3.0.8.tar.gz ; \
  curl --retry 8 -S -L -O https://www.openssl.org/source/openssl-3.0.8.tar.gz.sha256  ; \
- sha256sum -c openssl-3.0.8.tar.gz.sha256 ; \
+ echo "$(cat openssl-3.0.8.tar.gz.sha256) openssl-3.0.8.tar.gz" | sha256sum -c ; \
  tar -zxf openssl-3.0.8.tar.gz  ; \
  rm -rf openssl-3.0.8.tar*  ; \
  cd /usr/share/kibana/openssl-3.0.8   ; \
