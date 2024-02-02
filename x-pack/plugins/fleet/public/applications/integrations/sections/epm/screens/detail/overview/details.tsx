@@ -29,6 +29,7 @@ import type {
   AssetTypeToParts,
   KibanaAssetType,
   RegistryPolicyTemplate,
+  RegistryPolicyIntegrationTemplate,
 } from '../../../../../types';
 import { entries } from '../../../../../types';
 import { useGetCategoriesQuery } from '../../../../../hooks';
@@ -66,17 +67,20 @@ const Replacements = euiStyled(EuiFlexItem)`
 export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) => {
   const { data: categoriesData, isLoading: isLoadingCategories } = useGetCategoriesQuery();
 
-  const mergedCategories: string[] = useMemo(() => {
-    let allCategories: string[] = [];
+  const mergedCategories: Array<string | undefined> = useMemo(() => {
+    let allCategories: Array<string | undefined> = [];
 
     if (packageInfo?.categories) {
-      allCategories = packageInfo?.categories;
+      allCategories = packageInfo.categories;
     }
-    if (integrationInfo?.categories as any as RegistryPolicyTemplate) {
-      allCategories = uniq([...allCategories, ...integrationInfo.categories]);
+    if ((integrationInfo as RegistryPolicyIntegrationTemplate)?.categories) {
+      allCategories = uniq([
+        ...allCategories,
+        ...((integrationInfo as RegistryPolicyIntegrationTemplate)?.categories || []),
+      ]);
     }
     return allCategories;
-  }, [integrationInfo?.categories, packageInfo?.categories]);
+  }, [integrationInfo, packageInfo?.categories]);
 
   const packageCategories: string[] = useMemo(() => {
     if (!isLoadingCategories && categoriesData?.items) {
