@@ -34,12 +34,12 @@ retry() {
 }
 
 vault_get() {
-  key_path=$1
-  field=$2
+  key_path=${1:-}
+  field=${2:-}
 
   fullPath="$VAULT_PATH_PREFIX/$key_path"
 
-  if [[ -z "${2:-}" || "${2:-}" =~ ^-.* ]]; then
+  if [[ -z "$field" || "$field" =~ ^-.* ]]; then
     retry 5 5 vault read "$fullPath" "${@:2}"
   else
     retry 5 5 vault read -field="$field" "$fullPath" "${@:3}"
