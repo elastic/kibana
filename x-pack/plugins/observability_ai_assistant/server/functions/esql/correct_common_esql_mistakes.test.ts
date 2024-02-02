@@ -56,5 +56,30 @@ describe('correctCommonEsqlMistakes', () => {
     | WHERE DATE_EXTRACT("hour", dropoff_datetime) >= 6 AND DATE_EXTRACT("hour", dropoff_datetime) < 10
     | LIMIT 10`
     );
+    expectQuery(
+      `FROM nyc_taxis
+    | WHERE DATE_EXTRACT('hour', "hh:mm a, 'of' d MMMM yyyy") >= 6 AND DATE_EXTRACT('hour', dropoff_datetime) < 10
+    | LIMIT 10`,
+      `FROM nyc_taxis
+    | WHERE DATE_EXTRACT("hour", "hh:mm a, 'of' d MMMM yyyy") >= 6 AND DATE_EXTRACT("hour", dropoff_datetime) < 10
+    | LIMIT 10`
+    );
+  });
+
+  it(`verifies if the SORT key is in KEEP, and if it's not, it will include it`, () => {
+    expectQuery(
+      'FROM logs-* \n| KEEP date \n| SORT @timestamp DESC',
+      'FROM logs-*\n| KEEP date, @timestamp\n| SORT @timestamp DESC'
+    );
+
+    expectQuery(
+      `FROM logs-* | KEEP date, whatever | EVAL my_truncated_date_field = DATE_TRUNC(1 year, date) | SORT @timestamp, my_truncated_date_field DESC`,
+      'FROM logs-*\n| KEEP date, whatever, @timestamp\n| EVAL my_truncated_date_field = DATE_TRUNC(1 year, date)\n| SORT @timestamp, my_truncated_date_field DESC'
+    );
+
+    expectQuery(
+      `FROM logs-* | KEEP date, whatever | RENAME whatever AS forever | SORT forever DESC`,
+      `FROM logs-*\n| KEEP date, whatever\n| RENAME whatever AS forever\n| SORT forever DESC`
+    );
   });
 });

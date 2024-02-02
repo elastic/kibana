@@ -1,0 +1,98 @@
+{
+  "id": "@kbn/esql-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.getESQLAdHocDataview",
+        "type": "Function",
+        "tags": [],
+        "label": "getESQLAdHocDataview",
+        "description": [],
+        "signature": [
+          "(indexPattern: string, dataViewsService: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "public",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-public.DataViewsServicePublic",
+            "text": "DataViewsServicePublic"
+          },
+          ") => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-esql-utils/src/utils/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getESQLAdHocDataview.$1",
+            "type": "string",
+            "tags": [],
+            "label": "indexPattern",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-esql-utils/src/utils/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getESQLAdHocDataview.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViewsService",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "public",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-public.DataViewsServicePublic",
+                "text": "DataViewsServicePublic"
+              }
+            ],
+            "path": "packages/kbn-esql-utils/src/utils/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
