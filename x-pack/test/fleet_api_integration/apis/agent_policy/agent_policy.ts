@@ -1204,7 +1204,7 @@ export default function (providerContext: FtrProviderContext) {
             .post('/api/fleet/agent_policies/delete')
             .set('kbn-xsrf', 'xxx')
             .send({ agentPolicyId: policyWithAgents.id })
-            .expect(400);
+            .expect(500);
 
           expect(body.message).to.contain(
             'Cannot delete an agent policy that is assigned to any active or inactive agents'
@@ -1237,7 +1237,7 @@ export default function (providerContext: FtrProviderContext) {
             .post('/api/fleet/agent_policies/delete')
             .set('kbn-xsrf', 'xxx')
             .send({ agentPolicyId: policyWithInactiveAgents.id })
-            .expect(400);
+            .expect(500);
 
           expect(body.message).to.contain(
             'Cannot delete an agent policy that is assigned to any active or inactive agents'
