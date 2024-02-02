@@ -127,17 +127,18 @@ RUN echo '--openssl-config=/usr/share/kibana/openssl-3.0.8/nodejs.cnf' >> config
 
 # Ideally we would handle this in the builder step, but make is installing over the OS version
 # of OpenSSL and requires linking of many submodules.
-RUN curl --retry 8 -S -L -O https://www.openssl.org/source/openssl-3.0.8.tar.gz
-RUN curl --retry 8 -S -L -O https://www.openssl.org/source/openssl-3.0.8.tar.gz.sha256 
-RUN sha256sum -c openssl-3.0.8.tar.gz.sha256 
-RUN tar -zxf openssl-3.0.8.tar.gz 
-RUN rm -rf openssl-3.0.8.tar* 
-RUN cd /usr/share/kibana/openssl-3.0.8  
-RUN ./Configure enable-fips 
-RUN make -j $(nproc) 
-RUN make install 
-RUN ldconfig /usr/local/lib64/ 
-RUN chown -R 1000:0 /usr/share/kibana/openssl-3.0.8
+RUN set -e ; \
+ curl --retry 8 -S -L -O https://www.openssl.org/source/openssl-3.0.8.tar.gz ; \
+ curl --retry 8 -S -L -O https://www.openssl.org/source/openssl-3.0.8.tar.gz.sha256  ; \
+ sha256sum -c openssl-3.0.8.tar.gz.sha256 ; \
+ tar -zxf openssl-3.0.8.tar.gz  ; \
+ rm -rf openssl-3.0.8.tar*  ; \
+ cd /usr/share/kibana/openssl-3.0.8   ; \
+ ./Configure enable-fips  ; \
+ make -j $(nproc)  ; \
+ make install  ; \
+ ldconfig /usr/local/lib64/  ; \
+ chown -R 1000:0 /usr/share/kibana/openssl-3.0.8
 
 COPY --chown=1000:0 openssl/nodejs.cnf /usr/share/kibana/openssl-3.0.8/nodejs.cnf
 ENV OPENSSL_MODULES=/usr/local/lib64/ossl-modules
