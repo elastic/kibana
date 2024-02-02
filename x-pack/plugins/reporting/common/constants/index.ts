@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export * from './routes';
+export * from '@kbn/reporting-common/routes';
 export * from './export_types';
 
 // Test Subjects

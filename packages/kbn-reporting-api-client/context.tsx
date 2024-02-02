@@ -7,11 +7,9 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
-import type { FunctionComponent } from 'react';
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, FunctionComponent } from 'react';
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { ReportingAPIClient } from './reporting_api_client';
+import { ReportingAPIClient } from './reporting_api_client';
 
 interface ContextValue {
   http: HttpSetup;
@@ -22,11 +20,8 @@ const InternalApiClientContext = createContext<undefined | ContextValue>(undefin
 
 export const InternalApiClientProvider: FunctionComponent<{
   apiClient: ReportingAPIClient;
-}> = ({ apiClient, children }) => {
-  const {
-    services: { http },
-  } = useKibana();
-
+  http: HttpSetup;
+}> = ({ apiClient, http, children }) => {
   return (
     <InternalApiClientContext.Provider value={{ http, apiClient }}>
       {children}
