@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { ConversationResponse, UUID } from '../schemas/conversations/common_attributes.gen';
+import { ConversationResponse, UUID } from '@kbn/elastic-assistant-common';
 import { SearchEsConversationSchema } from './types';
 import { transformESToConversations } from './transforms';
 

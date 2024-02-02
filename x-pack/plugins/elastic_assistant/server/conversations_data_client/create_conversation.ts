@@ -16,7 +16,7 @@ import {
   Reader,
   Replacement,
   UUID,
-} from '../schemas/conversations/common_attributes.gen';
+} from '@kbn/elastic-assistant-common';
 import { getConversation } from './get_conversation';
 
 export interface CreateMessageSchema {

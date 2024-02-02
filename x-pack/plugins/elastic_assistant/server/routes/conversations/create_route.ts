@@ -10,12 +10,10 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
-} from '@kbn/elastic-assistant-common';
-import { ElasticAssistantPluginRouter } from '../../types';
-import {
   ConversationCreateProps,
   ConversationResponse,
-} from '../../schemas/conversations/common_attributes.gen';
+} from '@kbn/elastic-assistant-common';
+import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import { buildRouteValidationWithZod } from '../route_validation';
 

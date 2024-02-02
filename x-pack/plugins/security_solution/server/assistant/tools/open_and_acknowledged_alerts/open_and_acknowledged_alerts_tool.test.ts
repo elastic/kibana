@@ -14,7 +14,7 @@ import { OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL } from './open_and_acknowledged_alert
 import { MAX_SIZE } from './helpers';
 import type { RetrievalQAChain } from 'langchain/chains';
 import { mockAlertsFieldsApi } from '@kbn/elastic-assistant-plugin/server/__mocks__/alerts';
-import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-plugin/server/schemas/actions_connector/post_actions_connector_execute_route.gen';
+import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
 
 describe('OpenAndAcknowledgedAlertsTool', () => {
   const alertsIndexPattern = 'alerts-index';

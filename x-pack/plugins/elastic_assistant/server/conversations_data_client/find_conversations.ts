@@ -10,9 +10,9 @@ import { ElasticsearchClient } from '@kbn/core/server';
 
 import { estypes } from '@elastic/elasticsearch';
 import { EsQueryConfig, Query, buildEsQuery } from '@kbn/es-query';
+import { FindConversationsResponse } from '@kbn/elastic-assistant-common';
 import { transformESToConversations } from './transforms';
 import { SearchEsConversationSchema } from './types';
-import { FindConversationsResponse } from '../schemas/conversations/find_conversations_route.gen';
 
 interface FindConversationsOptions {
   filter?: string;

@@ -8,7 +8,7 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from './helpers';
-import { ExecuteConnectorRequestBody } from '../schemas/actions_connector/post_actions_connector_execute_route.gen';
+import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
 
 describe('getPluginNameFromRequest', () => {
   const contextRequestHeaderEncoded = encodeURIComponent(

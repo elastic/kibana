@@ -9,7 +9,7 @@ import { KibanaRequest } from '@kbn/core-http-server';
 import type { Message } from '@kbn/elastic-assistant';
 import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from 'langchain/schema';
 
-import { ExecuteConnectorRequestBody } from '../../schemas/actions_connector/post_actions_connector_execute_route.gen';
+import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
 
 export const getLangChainMessage = (
   assistantMessage: Pick<Message, 'content' | 'role'>

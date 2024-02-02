@@ -12,7 +12,7 @@ import {
   ConversationCreateProps,
   ConversationUpdateProps,
   UUID,
-} from '../schemas/conversations/common_attributes.gen';
+} from '@kbn/elastic-assistant-common';
 import { transformToCreateScheme } from './create_conversation';
 import { transformToUpdateScheme } from './update_conversation';
 import { SearchEsConversationSchema } from './types';

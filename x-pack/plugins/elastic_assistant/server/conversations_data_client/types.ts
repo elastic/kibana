@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  MessageRole,
-  Provider,
-  Reader,
-  Replacement,
-} from '../schemas/conversations/common_attributes.gen';
+import { MessageRole, Provider, Reader, Replacement } from '@kbn/elastic-assistant-common';
 
 export interface SearchEsConversationSchema {
   id: string;

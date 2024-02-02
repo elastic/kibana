@@ -12,21 +12,18 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
-} from '@kbn/elastic-assistant-common';
-
-import { CONVERSATIONS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
-import { ElasticAssistantPluginRouter } from '../../types';
-import { buildRouteValidationWithZod } from '../route_validation';
-import { buildResponse } from '../utils';
-import {
   BulkActionSkipResult,
   BulkCrudActionResponse,
   BulkCrudActionResults,
   BulkCrudActionSummary,
   PerformBulkActionRequestBody,
   PerformBulkActionResponse,
-} from '../../schemas/conversations/bulk_crud_conversations_route.gen';
-import { ConversationResponse } from '../../schemas/conversations/common_attributes.gen';
+  ConversationResponse,
+} from '@kbn/elastic-assistant-common';
+import { CONVERSATIONS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
+import { ElasticAssistantPluginRouter } from '../../types';
+import { buildRouteValidationWithZod } from '../route_validation';
+import { buildResponse } from '../utils';
 
 export interface BulkOperationError {
   message: string;

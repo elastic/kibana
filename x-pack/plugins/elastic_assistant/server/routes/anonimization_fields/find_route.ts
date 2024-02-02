@@ -12,13 +12,14 @@ import {
   ELASTIC_AI_ASSISTANT_ANONIMIZATION_FIELDS_URL_FIND,
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
 } from '@kbn/elastic-assistant-common';
-import { ElasticAssistantPluginRouter } from '../../types';
-import { buildRouteValidationWithZod } from '../route_validation';
-import { buildResponse } from '../utils';
+
 import {
   FindAnonimizationFieldsRequestQuery,
   FindAnonimizationFieldsResponse,
-} from '../../schemas/anonimization_fields/find_prompts_route.gen';
+} from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
+import { ElasticAssistantPluginRouter } from '../../types';
+import { buildRouteValidationWithZod } from '../route_validation';
+import { buildResponse } from '../utils';
 
 export const findAnonimizationFieldsRoute = (
   router: ElasticAssistantPluginRouter,

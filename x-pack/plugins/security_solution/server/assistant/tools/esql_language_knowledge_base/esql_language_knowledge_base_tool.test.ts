@@ -10,7 +10,7 @@ import type { DynamicTool } from 'langchain/tools';
 import { ESQL_KNOWLEDGE_BASE_TOOL } from './esql_language_knowledge_base_tool';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-plugin/server/schemas/actions_connector/post_actions_connector_execute_route.gen';
+import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
 
 describe('EsqlLanguageKnowledgeBaseTool', () => {
   const chain = {} as RetrievalQAChain;

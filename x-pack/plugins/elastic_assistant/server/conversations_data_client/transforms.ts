@@ -6,8 +6,8 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
+import { ConversationResponse, Replacement } from '@kbn/elastic-assistant-common';
 import { SearchEsConversationSchema } from './types';
-import { ConversationResponse, Replacement } from '../schemas/conversations/common_attributes.gen';
 
 export const transformESToConversations = (
   response: estypes.SearchResponse<SearchEsConversationSchema>

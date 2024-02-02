@@ -8,7 +8,7 @@
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { getConversationMock, getQueryConversationParams } from './conversations_schema.mock';
 import { estypes } from '@elastic/elasticsearch';
-import { ConversationResponse } from '../schemas/conversations/common_attributes.gen';
+import { ConversationResponse } from '@kbn/elastic-assistant-common';
 
 export const responseMock = {
   create: httpServerMock.createResponseFactory,

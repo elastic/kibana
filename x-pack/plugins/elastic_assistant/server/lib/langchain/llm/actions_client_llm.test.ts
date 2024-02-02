@@ -11,7 +11,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 
 import { ActionsClientLlm } from './actions_client_llm';
 import { mockActionResponse } from '../../../__mocks__/action_result_data';
-import { ExecuteConnectorRequestBody } from '../../../schemas/actions_connector/post_actions_connector_execute_route.gen';
+import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
 
 const connectorId = 'mock-connector-id';
 

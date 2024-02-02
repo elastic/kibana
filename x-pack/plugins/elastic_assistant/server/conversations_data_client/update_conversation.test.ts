@@ -9,10 +9,7 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { loggerMock } from '@kbn/logging-mocks';
 import { updateConversation } from './update_conversation';
 import { getConversation } from './get_conversation';
-import {
-  ConversationResponse,
-  ConversationUpdateProps,
-} from '../schemas/conversations/common_attributes.gen';
+import { ConversationResponse, ConversationUpdateProps } from '@kbn/elastic-assistant-common';
 
 export const getUpdateConversationOptionsMock = (): ConversationUpdateProps => ({
   id: 'test',

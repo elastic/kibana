@@ -8,8 +8,8 @@
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { DeleteConversationParams, deleteConversation } from './delete_conversation';
 import { getConversation } from './get_conversation';
-import { ConversationResponse } from '../schemas/conversations/common_attributes.gen';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { ConversationResponse } from '@kbn/elastic-assistant-common';
 
 jest.mock('./get_conversation', () => ({
   getConversation: jest.fn(),

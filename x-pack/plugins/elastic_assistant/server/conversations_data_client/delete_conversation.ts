@@ -6,8 +6,8 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { UUID } from '@kbn/elastic-assistant-common';
 import { getConversation } from './get_conversation';
-import { UUID } from '../schemas/conversations/common_attributes.gen';
 
 export interface DeleteConversationParams {
   esClient: ElasticsearchClient;

@@ -7,7 +7,11 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION } from '@kbn/elastic-assistant-common';
+import {
+  ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+  CreateKnowledgeBaseRequestParams,
+  CreateKnowledgeBaseResponse,
+} from '@kbn/elastic-assistant-common';
 import { IKibanaResponse, KibanaRequest } from '@kbn/core/server';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantPluginRouter, GetElser } from '../../types';
@@ -16,10 +20,6 @@ import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elas
 import { ESQL_DOCS_LOADED_QUERY, ESQL_RESOURCE, KNOWLEDGE_BASE_INDEX_PATTERN } from './constants';
 import { getKbResource } from './get_kb_resource';
 import { loadESQL } from '../../lib/langchain/content_loaders/esql_loader';
-import {
-  CreateKnowledgeBaseRequestParams,
-  CreateKnowledgeBaseResponse,
-} from '../../schemas/knowledge_base/crud_kb_route.gen';
 import { buildRouteValidationWithZod } from '../route_validation';
 
 /**

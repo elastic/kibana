@@ -12,8 +12,8 @@ import type {
   SavedObjectsType,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
-import { AnonimizationFieldResponse } from '../schemas/anonimization_fields/bulk_crud_anonimization_fields_route.gen';
-import { FindAnonimizationFieldsResponse } from '../schemas/anonimization_fields/find_prompts_route.gen';
+import { AnonimizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import { FindAnonimizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
 
 export const assistantAnonimizationFieldsTypeName = 'elastic-ai-assistant-anonimization-fields';
 

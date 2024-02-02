@@ -12,7 +12,7 @@ import { Logger } from '@kbn/logging';
 import { KibanaRequest } from '@kbn/core-http-server';
 import type { LangChainTracer } from 'langchain/callbacks';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
-import { ExecuteConnectorRequestBody } from '../../../schemas/actions_connector/post_actions_connector_execute_route.gen';
+import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
 import { ResponseBody } from '../types';
 import type { AssistantTool } from '../../../types';
 

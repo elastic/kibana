@@ -8,17 +8,15 @@
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
+  ConversationResponse,
+  AppendConversationMessageRequestBody,
+  AppendConversationMessageRequestParams,
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID_MESSAGES,
 } from '@kbn/elastic-assistant-common';
-import { ConversationResponse } from '../../schemas/conversations/common_attributes.gen';
 import { buildResponse } from '../utils';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildRouteValidationWithZod } from '../route_validation';
-import {
-  AppendConversationMessageRequestBody,
-  AppendConversationMessageRequestParams,
-} from '../../schemas/conversations/crud_conversation_route.gen';
 
 export const appendConversationMessageRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned

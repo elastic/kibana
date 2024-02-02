@@ -12,11 +12,11 @@ import {
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND_USER_CONVERSATIONS,
 } from '@kbn/elastic-assistant-common';
-import { ElasticAssistantPluginRouter } from '../../types';
 import {
   FindConversationsRequestQuery,
   FindConversationsResponse,
-} from '../../schemas/conversations/find_conversations_route.gen';
+} from '@kbn/elastic-assistant-common/impl/schemas/conversations/find_conversations_route.gen';
+import { ElasticAssistantPluginRouter } from '../../types';
 import { buildRouteValidationWithZod } from '../route_validation';
 import { buildResponse } from '../utils';
 

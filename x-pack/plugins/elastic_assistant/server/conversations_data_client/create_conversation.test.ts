@@ -7,14 +7,11 @@
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { createConversation } from './create_conversation';
-import {
-  ConversationCreateProps,
-  ConversationResponse,
-} from '../schemas/conversations/common_attributes.gen';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { estypes } from '@elastic/elasticsearch';
 import { SearchEsConversationSchema } from './types';
 import { getConversation } from './get_conversation';
+import { ConversationCreateProps, ConversationResponse } from '@kbn/elastic-assistant-common';
 
 jest.mock('./get_conversation', () => ({
   getConversation: jest.fn(),

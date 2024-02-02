@@ -15,7 +15,9 @@ import {
   PostEvaluateBody,
   PostEvaluateRequestQuery,
   PostEvaluateResponse,
+  ExecuteConnectorRequestBody,
 } from '@kbn/elastic-assistant-common';
+import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { ESQL_RESOURCE } from '../knowledge_base/constants';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
@@ -34,9 +36,7 @@ import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
  * To support additional Agent Executors from the UI, add them to this map
  * and reference your specific AgentExecutor function
  */
-import { buildRouteValidationWithZod } from '../../schemas/common';
 import { AGENT_EXECUTOR_MAP } from '../../lib/langchain/executors';
-import { ExecuteConnectorRequestBody } from '../../schemas/actions_connector/post_actions_connector_execute_route.gen';
 
 const DEFAULT_SIZE = 20;
 

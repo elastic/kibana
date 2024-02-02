@@ -26,12 +26,11 @@ import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/ser
 import { Tool } from 'langchain/dist/tools/base';
 import { RetrievalQAChain } from 'langchain/chains';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { AssistantFeatures } from '@kbn/elastic-assistant-common';
+import { AssistantFeatures, ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
 import { AIAssistantConversationsDataClient } from './conversations_data_client';
 import { AIAssistantPromptsSOClient } from './saved_object/ai_assistant_prompts_so_client';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
 import { AIAssistantAnonimizationFieldsSOClient } from './saved_object/ai_assistant_anonimization_fields_so_client';
-import { ExecuteConnectorRequestBody } from './schemas/actions_connector/post_actions_connector_execute_route.gen';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;
 

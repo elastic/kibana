@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { PerformBulkActionRequestBody } from '../schemas/conversations/bulk_crud_conversations_route.gen';
 import {
+  AppendConversationMessageRequestBody,
+  PerformBulkActionRequestBody,
   ConversationCreateProps,
   ConversationResponse,
   ConversationUpdateProps,
-} from '../schemas/conversations/common_attributes.gen';
-import { AppendConversationMessageRequestBody } from '../schemas/conversations/crud_conversation_route.gen';
+} from '@kbn/elastic-assistant-common';
 
 export const getCreateConversationSchemaMock = (): ConversationCreateProps => ({
   title: 'Welcome',

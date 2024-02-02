@@ -17,7 +17,7 @@ import { ArrayFromString } from '@kbn/zod-helpers';
  *   version: 2023-10-31
  */
 
-import { AnonimizationFieldResponse } from './bulk_crud_anonimization_fields_route.gen';
+import { AnonimizationFieldResponse } from './bulk_crud_anonymization_fields_route.gen';
 
 export type FindAnonimizationFieldsSortField = z.infer<typeof FindAnonimizationFieldsSortField>;
 export const FindAnonimizationFieldsSortField = z.enum([

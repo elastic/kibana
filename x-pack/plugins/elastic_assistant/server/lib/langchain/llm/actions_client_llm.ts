@@ -11,7 +11,7 @@ import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plu
 import { LLM } from 'langchain/llms/base';
 import { get } from 'lodash/fp';
 
-import { ExecuteConnectorRequestBody } from '../../../schemas/actions_connector/post_actions_connector_execute_route.gen';
+import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
 import { getMessageContentAndRole } from '../helpers';
 
 const LLM_TYPE = 'ActionsClientLlm';

@@ -11,11 +11,11 @@ import {
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
 } from '@kbn/elastic-assistant-common';
-import { ConversationResponse } from '../../schemas/conversations/common_attributes.gen';
+import { ConversationResponse } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
+import { ReadConversationRequestParams } from '@kbn/elastic-assistant-common/impl/schemas/conversations/crud_conversation_route.gen';
 import { buildResponse } from '../utils';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildRouteValidationWithZod } from '../route_validation';
-import { ReadConversationRequestParams } from '../../schemas/conversations/crud_conversation_route.gen';
 
 export const readConversationRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned

@@ -7,6 +7,8 @@
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { CAPABILITIES, EVALUATE, KNOWLEDGE_BASE } from '../../common/constants';
 import {
+  ConversationCreateProps,
+  ConversationUpdateProps,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
@@ -21,10 +23,6 @@ import {
   getCreateConversationSchemaMock,
   getUpdateConversationSchemaMock,
 } from './conversations_schema.mock';
-import {
-  ConversationCreateProps,
-  ConversationUpdateProps,
-} from '../schemas/conversations/common_attributes.gen';
 
 export const requestMock = {
   create: httpServerMock.createKibanaRequest,

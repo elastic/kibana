@@ -9,7 +9,7 @@ import { get } from 'lodash/fp';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { KibanaRequest } from '@kbn/core-http-server';
 import { PassThrough, Readable } from 'stream';
-import { ExecuteConnectorRequestBody } from '../schemas/actions_connector/post_actions_connector_execute_route.gen';
+import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
 
 export interface Props {
   actions: ActionsPluginStart;

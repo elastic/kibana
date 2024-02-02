@@ -9,10 +9,10 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
+  DeleteConversationRequestParams,
 } from '@kbn/elastic-assistant-common';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
-import { DeleteConversationRequestParams } from '../../schemas/conversations/crud_conversation_route.gen';
 import { buildRouteValidationWithZod } from '../route_validation';
 
 export const deleteConversationRoute = (router: ElasticAssistantPluginRouter) => {

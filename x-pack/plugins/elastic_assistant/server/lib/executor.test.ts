@@ -15,7 +15,7 @@ import { executeAction, Props } from './executor';
 import { PassThrough } from 'stream';
 import { KibanaRequest } from '@kbn/core-http-server';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { ExecuteConnectorRequestBody } from '../schemas/actions_connector/post_actions_connector_execute_route.gen';
+import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
 const request = {
   body: {
     params: {},

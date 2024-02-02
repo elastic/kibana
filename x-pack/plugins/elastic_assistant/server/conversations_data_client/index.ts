@@ -11,17 +11,17 @@ import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import { AuthenticatedUser } from '@kbn/security-plugin/server';
 import { estypes } from '@elastic/elasticsearch';
-import { IIndexPatternString } from '../types';
-import { ConversationDataWriter } from './conversations_data_writer';
-import { getIndexTemplateAndPattern } from '../ai_assistant_service/conversation_configuration_type';
-import { createConversation } from './create_conversation';
 import {
   ConversationCreateProps,
   ConversationResponse,
   ConversationUpdateProps,
+  FindConversationsResponse,
   Message,
-} from '../schemas/conversations/common_attributes.gen';
-import { FindConversationsResponse } from '../schemas/conversations/find_conversations_route.gen';
+} from '@kbn/elastic-assistant-common';
+import { IIndexPatternString } from '../types';
+import { ConversationDataWriter } from './conversations_data_writer';
+import { getIndexTemplateAndPattern } from '../ai_assistant_service/conversation_configuration_type';
+import { createConversation } from './create_conversation';
 import { findConversations } from './find_conversations';
 import { updateConversation } from './update_conversation';
 import { getConversation } from './get_conversation';

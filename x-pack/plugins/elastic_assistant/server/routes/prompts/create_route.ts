@@ -8,13 +8,14 @@
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
+  PromptCreateProps,
+  PromptResponse,
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
   ELASTIC_AI_ASSISTANT_PROMPTS_URL,
 } from '@kbn/elastic-assistant-common';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import { buildRouteValidationWithZod } from '../route_validation';
-import { PromptCreateProps, PromptResponse } from '../../schemas/prompts/crud_prompts_route.gen';
 
 export const createPromptRoute = (router: ElasticAssistantPluginRouter): void => {
   router.versioned

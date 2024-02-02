@@ -15,10 +15,6 @@ import {
 } from '@kbn/elastic-assistant-common';
 
 import { SavedObjectError } from '@kbn/core/types';
-import { ANONIMIZATION_FIELDS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
-import { ElasticAssistantPluginRouter } from '../../types';
-import { buildRouteValidationWithZod } from '../route_validation';
-import { buildResponse } from '../utils';
 import {
   AnonimizationFieldResponse,
   BulkActionSkipResult,
@@ -27,7 +23,11 @@ import {
   BulkCrudActionSummary,
   PerformBulkActionRequestBody,
   PerformBulkActionResponse,
-} from '../../schemas/anonimization_fields/bulk_crud_anonimization_fields_route.gen';
+} from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import { ANONIMIZATION_FIELDS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
+import { ElasticAssistantPluginRouter } from '../../types';
+import { buildRouteValidationWithZod } from '../route_validation';
+import { buildResponse } from '../utils';
 
 export interface BulkOperationError {
   message: string;

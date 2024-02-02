@@ -12,8 +12,8 @@ import type {
   SavedObjectsType,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
-import { PromptResponse } from '../schemas/prompts/crud_prompts_route.gen';
-import { FindPromptsResponse } from '../schemas/prompts/find_prompts_route.gen';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
+import { FindPromptsResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/find_prompts_route.gen';
 
 export const assistantPromptsTypeName = 'elastic-ai-assistant-prompts';
 

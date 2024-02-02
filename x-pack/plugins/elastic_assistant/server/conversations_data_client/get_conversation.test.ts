@@ -10,8 +10,8 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { getConversation } from './get_conversation';
 import { estypes } from '@elastic/elasticsearch';
 import { SearchEsConversationSchema } from './types';
-import { ConversationResponse } from '../schemas/conversations/common_attributes.gen';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { ConversationResponse } from '@kbn/elastic-assistant-common';
 
 export const getConversationResponseMock = (): ConversationResponse => ({
   createdAt: '2020-04-20T15:25:31.830Z',

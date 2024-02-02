@@ -9,7 +9,11 @@ import { IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { schema } from '@kbn/config-schema';
-import { ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION } from '@kbn/elastic-assistant-common';
+import {
+  ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+  ExecuteConnectorRequestBody,
+  Message,
+} from '@kbn/elastic-assistant-common';
 import {
   INVOKE_ASSISTANT_ERROR_EVENT,
   INVOKE_ASSISTANT_SUCCESS_EVENT,
@@ -25,9 +29,7 @@ import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
 import { ESQL_RESOURCE } from './knowledge_base/constants';
 import { callAgentExecutor } from '../lib/langchain/execute_custom_llm_chain';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from './helpers';
-import { ExecuteConnectorRequestBody } from '../schemas/actions_connector/post_actions_connector_execute_route.gen';
 import { buildRouteValidationWithZod } from './route_validation';
-import { Message } from '../schemas/conversations/common_attributes.gen';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,

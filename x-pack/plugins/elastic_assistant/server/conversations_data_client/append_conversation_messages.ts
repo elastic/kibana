@@ -7,11 +7,7 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import {
-  ConversationResponse,
-  Message,
-  UUID,
-} from '../schemas/conversations/common_attributes.gen';
+import { ConversationResponse, Message, UUID } from '@kbn/elastic-assistant-common';
 import { getConversation } from './get_conversation';
 
 export interface AppendConversationMessagesParams {

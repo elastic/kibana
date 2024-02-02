@@ -12,13 +12,13 @@ import {
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
   ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND,
 } from '@kbn/elastic-assistant-common';
-import { ElasticAssistantPluginRouter } from '../../types';
-import { buildRouteValidationWithZod } from '../route_validation';
-import { buildResponse } from '../utils';
 import {
   FindPromptsRequestQuery,
   FindPromptsResponse,
-} from '../../schemas/prompts/find_prompts_route.gen';
+} from '@kbn/elastic-assistant-common/impl/schemas/prompts/find_prompts_route.gen';
+import { ElasticAssistantPluginRouter } from '../../types';
+import { buildRouteValidationWithZod } from '../route_validation';
+import { buildResponse } from '../utils';
 
 export const findPromptsRoute = (router: ElasticAssistantPluginRouter, logger: Logger) => {
   router.versioned

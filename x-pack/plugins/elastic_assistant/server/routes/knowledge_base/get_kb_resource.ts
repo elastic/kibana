@@ -6,7 +6,7 @@
  */
 
 import { KibanaRequest } from '@kbn/core/server';
-import { CreateKnowledgeBaseRequestParams } from '../../schemas/knowledge_base/crud_kb_route.gen';
+import { CreateKnowledgeBaseRequestParams } from '@kbn/elastic-assistant-common';
 
 /**
  * Returns the optional resource, e.g. `esql` from the request params, or undefined if it doesn't exist

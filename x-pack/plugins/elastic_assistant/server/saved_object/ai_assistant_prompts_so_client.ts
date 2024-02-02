@@ -12,18 +12,19 @@ import {
 } from '@kbn/core/server';
 
 import {
+  PromptCreateProps,
+  PromptResponse,
+  PromptUpdateProps,
+  SortOrder,
+} from '@kbn/elastic-assistant-common';
+import { FindPromptsResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/find_prompts_route.gen';
+import {
   AssistantPromptSoSchema,
   assistantPromptsTypeName,
   transformSavedObjectToAssistantPrompt,
   transformSavedObjectUpdateToAssistantPrompt,
   transformSavedObjectsToFoundAssistantPrompt,
 } from './elastic_assistant_prompts_type';
-import {
-  PromptCreateProps,
-  PromptResponse,
-  PromptUpdateProps,
-} from '../schemas/prompts/crud_prompts_route.gen';
-import { FindPromptsResponse, SortOrder } from '../schemas/prompts/find_prompts_route.gen';
 
 export interface ConstructorOptions {
   /** User creating, modifying, deleting, or updating the prompts */

@@ -12,7 +12,7 @@ import { omit } from 'lodash/fp';
 
 import { ALERT_COUNTS_TOOL } from './alert_counts_tool';
 import type { RetrievalQAChain } from 'langchain/chains';
-import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-plugin/server/schemas/actions_connector/post_actions_connector_execute_route.gen';
+import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
 
 describe('AlertCountsTool', () => {
   const alertsIndexPattern = 'alerts-index';

@@ -13,21 +13,21 @@ import {
 } from '@kbn/core/server';
 
 import {
+  AnonimizationFieldCreateProps,
+  AnonimizationFieldResponse,
+  AnonimizationFieldUpdateProps,
+} from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import {
+  FindAnonimizationFieldsResponse,
+  SortOrder,
+} from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
+import {
   AssistantAnonimizationFieldSoSchema,
   assistantAnonimizationFieldsTypeName,
   transformSavedObjectToAssistantAnonimizationField,
   transformSavedObjectUpdateToAssistantAnonimizationField,
   transformSavedObjectsToFoundAssistantAnonimizationField,
 } from './elastic_assistant_anonimization_fields_type';
-import {
-  AnonimizationFieldCreateProps,
-  AnonimizationFieldResponse,
-  AnonimizationFieldUpdateProps,
-} from '../schemas/anonimization_fields/bulk_crud_anonimization_fields_route.gen';
-import {
-  FindAnonimizationFieldsResponse,
-  SortOrder,
-} from '../schemas/anonimization_fields/find_prompts_route.gen';
 
 export interface ConstructorOptions {
   /** User creating, modifying, deleting, or updating the anonimization fields */

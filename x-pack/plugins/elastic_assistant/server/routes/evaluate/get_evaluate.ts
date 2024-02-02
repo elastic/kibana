@@ -17,8 +17,8 @@ import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
 import { EVALUATE } from '../../../common/constants';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
-import { buildRouteValidationWithZod } from '../../schemas/common';
 import { AGENT_EXECUTOR_MAP } from '../../lib/langchain/executors';
+import { buildRouteValidationWithZod } from '../route_validation';
 
 export const getEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandlerContext>) => {
   router.versioned

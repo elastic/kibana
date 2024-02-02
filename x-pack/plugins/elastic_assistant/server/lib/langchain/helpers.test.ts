@@ -8,6 +8,7 @@
 import { KibanaRequest } from '@kbn/core-http-server';
 import type { Message } from '@kbn/elastic-assistant';
 import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from 'langchain/schema';
+import { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
 
 import {
   getLangChainMessage,
@@ -16,7 +17,6 @@ import {
   requestHasRequiredAnonymizationParams,
 } from './helpers';
 import { langChainMessages } from '../../__mocks__/lang_chain_messages';
-import { ExecuteConnectorRequestBody } from '../../schemas/actions_connector/post_actions_connector_execute_route.gen';
 
 describe('helpers', () => {
   describe('getLangChainMessage', () => {
