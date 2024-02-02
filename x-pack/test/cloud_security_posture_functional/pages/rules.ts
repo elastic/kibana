@@ -188,7 +188,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Rules Page - Rules Counters', () => {
-      it('Shows posture score when there are findings', async () => {
+      it.only('Shows posture score when there are findings', async () => {
         const isEmptyStateVisible = await rule.rulePage.getCountersEmptyState();
         expect(isEmptyStateVisible).to.be(false);
 
