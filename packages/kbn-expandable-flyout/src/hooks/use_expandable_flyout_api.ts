@@ -6,18 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { createContext, FC, useCallback, useMemo } from 'react';
-import {
-  createDispatchHook,
-  createSelectorHook,
-  Provider as ReduxProvider,
-  ReactReduxContextValue,
-} from 'react-redux';
-import { configureStore } from '@reduxjs/toolkit';
-
-import { reducer } from '../reducer';
-import { initialState, State } from '../state';
-import type { ExpandableFlyoutApi, FlyoutPanelProps } from '../types';
+import { useCallback, useMemo } from 'react';
 import {
   closeLeftPanelAction,
   closePanelsAction,
@@ -29,24 +18,15 @@ import {
   openRightPanelAction,
   previousPreviewPanelAction,
 } from '../actions';
+import { useDispatch } from '../redux';
+import { FlyoutPanelProps, type ExpandableFlyoutApi } from '../types';
 
-export const store = configureStore({
-  reducer,
-  devTools: process.env.NODE_ENV !== 'production',
-  preloadedState: {},
-  enhancers: [],
-});
+export type { ExpandableFlyoutApi };
 
-export const Context = createContext<ReactReduxContextValue<State>>({
-  store,
-  storeState: initialState,
-});
-
-const useDispatch = createDispatchHook(Context);
-const useSelector = createSelectorHook(Context);
-
-export const useFlyoutMemoryState = (): ExpandableFlyoutApi => {
-  const state = useSelector((s) => s);
+/**
+ * This hook allows you to interact with the flyout, open panels and previews etc.
+ */
+export const useExpandableFlyoutApi = () => {
   const dispatch = useDispatch();
 
   const openPanels = useCallback(
@@ -94,7 +74,6 @@ export const useFlyoutMemoryState = (): ExpandableFlyoutApi => {
 
   const api: ExpandableFlyoutApi = useMemo(
     () => ({
-      panels: state,
       openFlyout: openPanels,
       openRightPanel,
       openLeftPanel,
@@ -106,7 +85,6 @@ export const useFlyoutMemoryState = (): ExpandableFlyoutApi => {
       previousPreviewPanel,
     }),
     [
-      state,
       openPanels,
       openRightPanel,
       openLeftPanel,
@@ -120,16 +98,4 @@ export const useFlyoutMemoryState = (): ExpandableFlyoutApi => {
   );
 
   return api;
-};
-
-/**
- * In-memory state provider for the expandable flyout, for cases when we don't want changes to be persisted
- * in the url.
- */
-export const MemoryStateProvider: FC = ({ children }) => {
-  return (
-    <ReduxProvider context={Context} store={store}>
-      {children}
-    </ReduxProvider>
-  );
 };
