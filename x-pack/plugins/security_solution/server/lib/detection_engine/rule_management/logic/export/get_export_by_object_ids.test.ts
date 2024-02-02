@@ -323,4 +323,33 @@ describe('getExportByObjectIds', () => {
       missing_rules_count: 0,
     });
   });
+
+  test('it DOES NOT fail when a rule is not found (rulesClient returns 404)', async () => {
+    const rulesClient = rulesClientMock.create();
+
+    rulesClient.get.mockRejectedValue({ output: { statusCode: 404 } });
+    rulesClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [] }));
+
+    const ruleIds = ['rule-1'];
+    const exports = await getExportByObjectIds(
+      rulesClient,
+      exceptionsClient,
+      ruleIds,
+      exporterMock,
+      requestMock,
+      actionsClient
+    );
+
+    expect(JSON.parse(exports.exportDetails)).toMatchObject({
+      exported_count: 0,
+      exported_rules_count: 0,
+      missing_rules: [{ rule_id: 'rule-1' }],
+      missing_rules_count: 1,
+    });
+    expect(exports).toMatchObject({
+      rulesNdjson: '',
+      exceptionLists: '',
+      actionConnectors: '',
+    });
+  });
 });
