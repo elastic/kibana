@@ -1703,6 +1703,11 @@
   dependencies:
     "@elastic/ecs-helpers" "^2.1.1"
 
+"@elastic/ecs@8.12.0-dev.0":
+  version "8.12.0-dev.0"
+  resolved "https://registry.yarnpkg.com/@elastic/ecs/-/ecs-8.12.0-dev.0.tgz#5c9d329906ff7a539294f4fd4be31af50825d6c8"
+  integrity sha512-u2DUS0jDES6kop2IdW3n/Rtv9VUWiditlHXRTNOiL6/hnsS4/qsp3k1RVy1YPrkhSPW8+u4AMERwJgOhT8BP1w==
+
 "@elastic/elasticsearch-types@npm:@elastic/elasticsearch@^8.2.1":
   version "8.6.0"
   resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-8.6.0.tgz#c474f49808deee64b5bc5b8f938bf78f4468cb94"
@@ -4469,10 +4474,6 @@
   uid ""
 
 "@kbn/ecs-data-quality-dashboard@link:x-pack/packages/security-solution/ecs_data_quality_dashboard":
-  version "0.0.0"
-  uid ""
-
-"@kbn/ecs@link:packages/kbn-ecs":
   version "0.0.0"
   uid ""
 
