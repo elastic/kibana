@@ -92,9 +92,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('Clicking the integrations counter button leads to the integration page', async () => {
         await rule.rulePage.clickIntegrationsEvaluatedButton();
-        await pageObjects.common.waitUntilUrlIncludes(
-          'cloud_security_posture/add-integration/kspm'
-        );
+        await pageObjects.common.waitUntilUrlIncludes('add-integration/kspm');
       });
 
       it('Shows the failed findings counter when there are findings', async () => {
