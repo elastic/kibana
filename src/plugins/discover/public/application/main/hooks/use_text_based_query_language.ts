@@ -87,7 +87,7 @@ export function useTextBasedQueryLanguage({
             if (next.fetchStatus !== FetchStatus.PARTIAL) {
               return;
             }
-            const dataViewObj = stateContainer.internalState.getState().dataView!;
+            const dataViewObj = stateContainer.internalState.getState().dataView;
 
             if (hasResults) {
               // check if state needs to contain column transformation due to a different columns in the resultset
@@ -111,7 +111,9 @@ export function useTextBasedQueryLanguage({
             const queryChanged = query[language] !== prev.current.query;
             // no need to reset index to state if it hasn't changed
             const addDataViewToState = index !== undefined;
-            if (!queryChanged || (!addDataViewToState && !addColumnsToState)) {
+            const changeViewMode =
+              viewMode !== getValidViewMode({ viewMode, isTextBasedQueryMode: true });
+            if (!queryChanged || (!addDataViewToState && !addColumnsToState && !changeViewMode)) {
               sendComplete();
               return;
             }

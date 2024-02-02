@@ -18,7 +18,7 @@ export const FilterInButton = ({ property, value }: { property: string; value: s
   const dataView = serviceContext.dataView;
 
   const onFilterForAction = () => {
-    if (filterManager != null) {
+    if (filterManager != null && dataView) {
       const filter = generateFilters(filterManager, property, [value], '+', dataView);
       filterManager.addFilters(filter);
     }
