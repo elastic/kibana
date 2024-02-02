@@ -245,6 +245,7 @@ export const ControlEditor = ({
           onChange={(settings) => setCustomSettings(settings)}
           initialInput={embeddable?.getInput()}
           fieldType={fieldRegistry[selectedField].field.type}
+          setControlEditorValid={setControlEditorValid}
         />
       </EuiDescribedFormGroup>
     );
