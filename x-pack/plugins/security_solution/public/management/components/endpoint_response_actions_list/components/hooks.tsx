@@ -10,10 +10,6 @@ import type {
   DurationRange,
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
-import {
-  isActionType,
-  isAgentType,
-} from '../../../../../common/endpoint/service/response_actions/type_guards';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { getAgentTypeName } from '../../../../common/translations';
 import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
@@ -157,9 +153,6 @@ export type ActionsLogPopupFilters = Extract<
   'actions' | 'hosts' | 'statuses' | 'types'
 >;
 
-// v8.13 onwards
-// for showing agent types and action types in the same filter
-const TypesFilterArray = Object.freeze([...RESPONSE_ACTION_AGENT_TYPE, ...RESPONSE_ACTION_TYPE]);
 /**
  *
  * @param isSentinelOneV1Enabled
@@ -176,34 +169,47 @@ const getTypesFilterInitialState = (
   agentTypes?: string[],
   types?: string[]
 ): FilterItems => {
-  const typesFilterOptions = isSentinelOneV1Enabled ? TypesFilterArray : RESPONSE_ACTION_TYPE;
-
-  const options: FilterItems = typesFilterOptions.map((type) => ({
-    key: type,
+  const getFilterOptions = ({ key, label, checked }: FilterItems[number]): FilterItems[number] => ({
+    key,
+    label,
     isGroupLabel: false,
-    label: isAgentType(type) ? getAgentTypeName(type) : getTypeDisplayName(type),
-    checked:
-      !isFlyout &&
-      ((isSentinelOneV1Enabled && isAgentType(type) && agentTypes?.includes(type)) ||
-        (isActionType(type) && types?.includes(type)))
-        ? 'on'
-        : undefined,
+    checked,
     'data-test-subj': `types-filter-option`,
-  }));
+  });
 
+  // action types filter options
+  const defaultFilterOptions = RESPONSE_ACTION_TYPE.map((type) =>
+    getFilterOptions({
+      key: type,
+      label: getTypeDisplayName(type),
+      checked: !isFlyout && types?.includes(type) ? 'on' : undefined,
+    })
+  );
+
+  // v8.13 onwards
+  // for showing agent types and action types in the same filter
   if (isSentinelOneV1Enabled) {
-    options.splice(2, 0, {
-      label: FILTER_NAMES.actionTypes,
-      isGroupLabel: true,
-    });
-
-    options.splice(0, 0, {
-      label: FILTER_NAMES.agentTypes,
-      isGroupLabel: true,
-    });
+    return [
+      {
+        label: FILTER_NAMES.agentTypes,
+        isGroupLabel: true,
+      },
+      ...RESPONSE_ACTION_AGENT_TYPE.map((type) =>
+        getFilterOptions({
+          key: type,
+          label: getAgentTypeName(type),
+          checked: !isFlyout && agentTypes?.includes(type) ? 'on' : undefined,
+        })
+      ),
+      {
+        label: FILTER_NAMES.actionTypes,
+        isGroupLabel: true,
+      },
+      ...defaultFilterOptions,
+    ];
   }
 
-  return options;
+  return defaultFilterOptions;
 };
 
 export const useActionsLogFilter = ({
