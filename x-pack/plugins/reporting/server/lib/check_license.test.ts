@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { checkLicense } from '@kbn/reporting-common/check_license';
 import { ILicense } from '@kbn/licensing-plugin/server';
-import { ExportTypesRegistry } from '@kbn/reporting-common/export_types_registry';
+import { checkLicense } from '@kbn/reporting-server/check_license';
+import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 
 describe('check_license', () => {
   let exportTypesRegistry: ExportTypesRegistry;

@@ -2,21 +2,22 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "jest",
-      "node"
-    ]
+    "types": ["jest", "node"]
   },
   "include": [
-    "**/*.ts", "**/share_context_menu/*.ts*", "**/shared/*.ts*"
+    "**/*.ts",
+    "**/share_context_menu/*.ts*",
+    "**/shared/*.ts*",
+    "**/share_context_menu/reporting_panel_content/commponents/*.ts*",
+    "**/share_context_menu/reporting_panel_content/components/error_unsaved_work_panel.tsx",
+    "**/share_context_menu/reporting_panel_content/components/error_url_too_long_panel.tsx",
+    "**/share_context_menu/reporting_panel_content/*.ts*"
   ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/licensing-plugin",
     "@kbn/screenshotting-plugin",
-    "@kbn/reporting-public",
+    "@kbn/reporting-public"
   ]
 }

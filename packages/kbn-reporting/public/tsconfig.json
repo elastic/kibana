@@ -22,5 +22,9 @@
     "@kbn/es-ui-shared-plugin",
     "@kbn/core-http-common",
     "@kbn/i18n",
-    "@kbn/rison",]
+    "@kbn/rison",
+    "@kbn/reporting-export-types-png-common",
+    "@kbn/reporting-export-types-pdf-common",
+    "@kbn/reporting-export-types-csv-common",
+  ]
 }

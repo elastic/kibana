@@ -47,9 +47,9 @@ import type {
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { checkLicense } from '@kbn/reporting-server/check_license';
+import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import type { ReportingSetup } from '.';
 import { createConfig } from './config';
-import { ExportTypesRegistry } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
 import { ExecuteReportTask, ReportTaskParams } from './lib/tasks';

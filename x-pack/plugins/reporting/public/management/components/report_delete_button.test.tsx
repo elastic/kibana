@@ -15,7 +15,7 @@ import {
 } from '@testing-library/react';
 
 import { mockJobs } from '../../../common/test';
-import type { Job } from '../../lib/job';
+import type { Job } from '@kbn/reporting-public/job';
 import { ReportDeleteButton } from './report_delete_button';
 
 describe('ReportDeleteButton', () => {

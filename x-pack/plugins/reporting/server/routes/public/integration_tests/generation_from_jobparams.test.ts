@@ -18,7 +18,7 @@ import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { ReportingCore } from '../../..';
 import { PUBLIC_ROUTES } from '../../../../common/constants';
 import { ReportingStore } from '../../../lib';
-import { ExportTypesRegistry } from '@kbn/reporting-common/export_types_registry';
+import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import { Report } from '../../../lib/store';
 import { reportingMock } from '../../../mocks';
 import {

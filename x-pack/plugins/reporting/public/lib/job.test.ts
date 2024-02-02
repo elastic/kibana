@@ -7,7 +7,7 @@
 
 import { jobTypes } from '../../common/constants';
 import { mockJobs } from '../../common/test';
-import { Job } from './job';
+import { Job } from '@kbn/reporting-public/job';
 
 describe('Job', () => {
   it('should provide a pretty name for all known job types', () => {

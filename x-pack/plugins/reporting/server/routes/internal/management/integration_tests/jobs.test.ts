@@ -24,7 +24,7 @@ import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counter
 import { ReportingCore } from '../../../..';
 import { INTERNAL_ROUTES } from '../../../../../common/constants';
 import { ReportingInternalSetup, ReportingInternalStart } from '../../../../core';
-import { ContentStream, ExportTypesRegistry, getContentStream } from '../../../../lib';
+import { ContentStream, getContentStream } from '../../../../lib';
 import { reportingMock } from '../../../../mocks';
 import {
   createMockPluginSetup,
@@ -33,6 +33,7 @@ import {
 } from '../../../../test_helpers';
 import { ReportingRequestHandlerContext } from '../../../../types';
 import { registerJobInfoRoutesInternal as registerJobInfoRoutes } from '../jobs';
+import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 

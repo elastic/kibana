@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { INTERNAL_ROUTES, PUBLIC_ROUTES } from '@kbn/reporting-plugin/common/constants/routes';
+import { INTERNAL_ROUTES, PUBLIC_ROUTES } from '@kbn/reporting-common';
 import { indexTimestamp } from '@kbn/reporting-plugin/server/lib/store/index_timestamp';
 import {
   AvailableTotal,
