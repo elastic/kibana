@@ -25,6 +25,8 @@ import {
 import { Command } from './types';
 import { createCliError } from '../errors';
 
+const supportedProjectTypesStr = Array.from(serverlessProjectTypes).join(' | ').trim();
+
 export const serverless: Command = {
   description: 'Run Serverless Elasticsearch through Docker',
   usage: 'es serverless [<args>]',
@@ -32,7 +34,7 @@ export const serverless: Command = {
     return dedent`
     Options:
 
-      --projectType       Serverless project type: ${Array.from(serverlessProjectTypes).join(' | ')}
+      --projectType       Serverless project type: ${supportedProjectTypesStr}
       --tag               Image tag of ES serverless to run from ${ES_SERVERLESS_REPO_ELASTICSEARCH}
       --image             Full path of ES serverless image to run, has precedence over tag. [default: ${ES_SERVERLESS_DEFAULT_IMAGE}]
       --background        Start ES serverless without attaching to the first node's logs
@@ -95,17 +97,13 @@ export const serverless: Command = {
 
     if (!options.projectType) {
       throw createCliError(
-        `--projectType flag is required and must be a string: ${Array.from(
-          serverlessProjectTypes
-        ).join(' | ')}`
+        `--projectType flag is required and must be a string: ${supportedProjectTypesStr}`
       );
     }
 
     if (!isServerlessProjectType(options.projectType)) {
       throw createCliError(
-        `Invalid projectPype '${options.projectType}', supported values: ${Array.from(
-          serverlessProjectTypes
-        ).join(' |')}`
+        `Invalid projectPype '${options.projectType}', supported values: ${supportedProjectTypesStr}`
       );
     }
 
