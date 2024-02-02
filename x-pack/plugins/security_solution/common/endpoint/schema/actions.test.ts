@@ -143,9 +143,16 @@ describe('actions schemas', () => {
     });
 
     it('should not accept invalid agentTypes in list', () => {
+      const excludedAgentType =
+        RESPONSE_ACTION_AGENT_TYPE[Math.round(Math.random() * RESPONSE_ACTION_AGENT_TYPE.length)];
+
+      const partialAllowedAgentTypes = RESPONSE_ACTION_AGENT_TYPE.filter(
+        (type) => type !== excludedAgentType
+      );
+
       expect(() => {
         EndpointActionListRequestSchema.query.validate({
-          agentTypes: [...RESPONSE_ACTION_AGENT_TYPE, 'non-agent'],
+          agentTypes: [...partialAllowedAgentTypes, 'non-agent'],
         });
       }).toThrow();
     });
