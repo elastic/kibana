@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types",
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../typings/**/*", "../../../packages/kbn-reporting/common/routes.ts", "../../../packages/kbn-reporting/common/export_types_registry.ts", "../../../packages/kbn-reporting/common/check_license.ts", "../../../packages/kbn-reporting-api-client/reporting_api_client"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../typings/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",
@@ -38,6 +38,7 @@
     "@kbn/reporting-common",
     "@kbn/saved-search-plugin",
     "@kbn/core-http-router-server-internal",
+    "@kbn/reporting-public",
     "@kbn/reporting-server",
     "@kbn/reporting-export-types-csv",
     "@kbn/reporting-export-types-pdf",
@@ -51,6 +52,7 @@
     "@kbn/core-http-request-handler-context-server",
     "@kbn/reporting-public",
     "@kbn/discover-utils",
+    "@kbn/reporting-share"
   ],
   "exclude": [
     "target/**/*",
