@@ -122,18 +122,6 @@ export class ToastsService extends FtrService {
     });
   }
 
-  public async checkForReportingToasts(): Promise<boolean> {
-    this.log.debug('Reporting:checkForReportingToasts');
-    const isToastPresent = await this.testSubjects.exists('completeReportSuccess', {
-      allowHidden: true,
-      timeout: 90000,
-    });
-    // Close toast so it doesn't obscure the UI.
-    if (isToastPresent) await this.testSubjects.click('completeReportSuccess > toastCloseButton');
-
-    return isToastPresent;
-  }
-
   public async getToastElementByIndex(index: number): Promise<WebElementWrapper> {
     return await (
       await this.getGlobalToastList()
