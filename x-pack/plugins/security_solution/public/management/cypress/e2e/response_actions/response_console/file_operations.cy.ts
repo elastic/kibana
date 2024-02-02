@@ -21,8 +21,7 @@ import { enableAllPolicyProtections } from '../../../tasks/endpoint_policy';
 import { createEndpointHost } from '../../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../../tasks/delete_all_endpoint_data';
 
-// Failing: See https://github.com/elastic/kibana/issues/170424
-describe.skip('Response console', { tags: ['@ess', '@serverless'] }, () => {
+describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
   });
@@ -113,7 +112,7 @@ describe.skip('Response console', { tags: ['@ess', '@serverless'] }, () => {
         path: `${homeFilePath}/upload.zip`,
         password: 'elastic',
       }).then((unzippedFileContent) => {
-        expect(unzippedFileContent).to.contain(fileContent);
+        expect(unzippedFileContent).to.equal(fileContent);
       });
     });
 
