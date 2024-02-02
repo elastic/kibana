@@ -16,6 +16,7 @@ import { KibanaLogic } from '../../../shared/kibana';
 import { baseBreadcrumbs } from '../connectors/connectors';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
+import { getHeaderActions } from '../search_index/components/header_actions/header_actions';
 import { ConnectorConfiguration } from '../search_index/connector/connector_configuration';
 import { ConnectorSchedulingComponent } from '../search_index/connector/connector_scheduling';
 import { ConnectorSyncRules } from '../search_index/connector/sync_rules/connector_rules';
@@ -51,6 +52,7 @@ export const ConnectorDetail: React.FC = () => {
   }>();
 
   const {
+    productAccess: { hasAppSearchAccess },
     productFeatures: { hasDefaultIngestPipeline },
   } = useValues(KibanaLogic);
 
@@ -181,7 +183,7 @@ export const ConnectorDetail: React.FC = () => {
       isLoading={isLoading}
       pageHeader={{
         pageTitle: connector?.name ?? '...',
-        rightSideItems: [], // getHeaderActions(index, hasAppSearchAccess),
+        rightSideItems: getHeaderActions(index, hasAppSearchAccess),
         tabs,
       }}
     >
