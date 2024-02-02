@@ -41,8 +41,7 @@
     "@kbn/shared-ux-utility",
     "@kbn/shared-ux-page-analytics-no-data",
     "@kbn/core-http-browser",
-    "@kbn/code-editor",
-    "@kbn/share-plugin",
+    "@kbn/code-editor"
   ],
   "exclude": [
     "target/**/*",

@@ -20,7 +20,6 @@ import { ManagementSetup } from '@kbn/management-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
 
 export interface IndexPatternManagementSetupDependencies {
   management: ManagementSetup;
@@ -37,7 +36,6 @@ export interface IndexPatternManagementStartDependencies {
   spaces?: SpacesPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
-  share: SharePluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
