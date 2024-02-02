@@ -71,6 +71,8 @@ export const serverless: Command = {
     const reportTime = getTimeReporter(log, 'scripts/es serverless');
 
     // replacing --serverless with --projectType when flag is passed from 'scripts/es'
+    // `es --serverless=<projectType>` is just a shortcut for
+    // `es serverless --projectType=<projectType>`
     const argv = process.argv.slice(2);
     if (argv[0].startsWith('--serverless')) {
       const projectTypeArg = argv[0].replace('--serverless', '--projectType');
