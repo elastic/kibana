@@ -33,7 +33,6 @@ export const HostsTable = () => {
     selection,
     selectedItemsCount,
     filterSelectedHosts,
-    refs,
   } = useHostsTableContext();
 
   return (
@@ -43,7 +42,6 @@ export const HostsTable = () => {
         filterSelectedHosts={filterSelectedHosts}
       />
       <EuiBasicTable
-        ref={refs.tableRef}
         data-test-subj={`hostsView-table-${loading ? 'loading' : 'loaded'}`}
         itemId="id"
         isSelectable
