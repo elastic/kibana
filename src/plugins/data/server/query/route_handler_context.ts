@@ -12,7 +12,7 @@ import type {
   RequestHandlerContext,
   SavedObject,
 } from '@kbn/core/server';
-import { escapeQuotes, isFilters, isOfQueryType } from '@kbn/es-query';
+import { escapeKuery, escapeQuotes, isFilters, isOfQueryType } from '@kbn/es-query';
 import { omit } from 'lodash';
 import { isQuery, SavedQueryAttributes } from '../../common';
 import { extract, inject } from '../../common/query/filters/persistable_state';
@@ -180,12 +180,15 @@ export async function registerSavedQueryRouteHandlerContext(context: RequestHand
     total: number;
     savedQueries: SavedQueryRestResponse[];
   }> => {
+    const preparedSearch = escapeKuery(search.trim().toLowerCase()).replaceAll(/\s+/g, '*');
     const { total, saved_objects: savedObjects } =
       await soClient.find<InternalSavedQueryAttributes>({
         type: 'query',
         page,
         perPage,
-        filter: search ? `query.attributes.title:(${search})` : undefined,
+        filter: preparedSearch.length
+          ? `query.attributes.titleKeyword:*${preparedSearch}*`
+          : undefined,
         sortField: 'titleKeyword',
         sortOrder: 'asc',
       });

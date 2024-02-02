@@ -334,13 +334,13 @@ describe('saved query route handler context', () => {
       };
       mockSavedObjectsClient.find.mockResolvedValue(mockResponse);
 
-      const response = await context.find({ search: 'foo' });
+      const response = await context.find({ search: 'Foo And Bar' });
 
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
         type: 'query',
         page: 1,
         perPage: 50,
-        filter: 'query.attributes.title:(foo)',
+        filter: 'query.attributes.titleKeyword:*foo*\\and*bar*',
         sortField: 'titleKeyword',
         sortOrder: 'asc',
       });

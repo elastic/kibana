@@ -44,6 +44,7 @@ describe('saved query service', () => {
 
   describe('isDuplicateTitle', function () {
     it('should post the title and ID', async () => {
+      http.post.mockResolvedValue({ isDuplicate: true });
       await isDuplicateTitle('foo', 'bar');
       expect(http.post).toBeCalled();
       expect(http.post).toHaveBeenCalledWith(`${SAVED_QUERY_BASE_URL}/_is_duplicate_title`, {
