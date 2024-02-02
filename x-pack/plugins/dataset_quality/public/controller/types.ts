@@ -6,36 +6,32 @@
  */
 
 import { Observable } from 'rxjs';
-import { DataStreamStat } from '../../common/data_streams_stats';
-import { Direction } from '../hooks';
-import { DatasetQualityControllerStateService } from '../state_machines/dataset_quality_controller';
+import {
+  DatasetQualityControllerStateService,
+  WithFilters,
+  WithFlyoutOptions,
+  WithTableOptions,
+} from '../state_machines/dataset_quality_controller';
 
 export interface DatasetQualityController {
   state$: Observable<DatasetQualityPublicState>;
   service: DatasetQualityControllerStateService;
 }
 
-export interface DatasetQualityTableOptions {
-  page?: number;
-  rowsPerPage?: number;
-  sort?: {
-    field: string;
-    direction: Direction;
-  };
-}
+type TableSortOptions = Omit<WithTableOptions['table']['sort'], 'field'> & { field: string };
 
-type FlyoutOptions = Omit<
-  DataStreamStat,
-  'type' | 'size' | 'sizeBytes' | 'lastActivity' | 'degradedDocs'
+export type DatasetQualityTableOptions = Partial<
+  Omit<WithTableOptions['table'], 'sort'> & { sort: TableSortOptions }
 >;
 
-export interface DatasetQualityFlyoutOptions {
-  dataset?: FlyoutOptions & { type: string };
-}
+export type DatasetQualityFlyoutOptions = Omit<WithFlyoutOptions['flyout'], 'datasetDetails'>;
+
+export type DatasetQualityFilterOptions = Partial<Omit<WithFilters['filters'], 'timeRange'>>;
 
 export interface DatasetQualityPublicState {
   table: DatasetQualityTableOptions;
   flyout: DatasetQualityFlyoutOptions;
+  filters: DatasetQualityFilterOptions;
 }
 
 export type DatasetQualityPublicStateUpdate = Partial<DatasetQualityPublicState>;
