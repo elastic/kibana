@@ -82,7 +82,8 @@
     "@kbn/ebt-tools",
     "@kbn/shared-ux-utility",
     "@kbn/management-settings-components-field-row",
-    "@kbn/core-ui-settings-browser"
+    "@kbn/core-ui-settings-browser",
+    "@kbn/feature-feedback-button"
   ],
   "exclude": ["target/**/*"]
 }
