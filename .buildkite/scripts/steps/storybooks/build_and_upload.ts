@@ -118,7 +118,7 @@ const upload = () => {
 
     console.log('--- Uploading Storybooks');
     exec(`
-      ./.buildkite/scripts/common/activate_service_account.sh artifacts
+      ./.buildkite/scripts/common/activate_service_account.sh gs://ci-artifacts.kibana.dev
       gsutil -q -m cp -r -z js,css,html,json,map,txt,svg '*' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/${process.env.BUILDKITE_COMMIT}/'
       gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp -z html 'index.html' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/latest/'
     `);

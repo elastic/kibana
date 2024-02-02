@@ -55,6 +55,7 @@ const upload = () => {
     fs.writeFileSync('index.html', html);
     console.log('--- Uploading Webpack Bundle Analyzer reports');
     exec(`
+      .buildkite/scripts/common/activate_service_account.sh gs://ci-artifacts.kibana.dev
       gsutil -q -m cp -r -z html '*' 'gs://${WEBPACK_REPORTS_BUCKET}/${WEBPACK_REPORTS}/${process.env.BUILDKITE_COMMIT}/'
       gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp -z html 'index.html' 'gs://${WEBPACK_REPORTS_BUCKET}/${WEBPACK_REPORTS}/latest/'
     `);

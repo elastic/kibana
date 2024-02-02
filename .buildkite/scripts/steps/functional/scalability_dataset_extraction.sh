@@ -41,6 +41,9 @@ download_artifact kibana-default-plugins.tar.gz "${OUTPUT_DIR}/" --build "${KIBA
 echo "--- Adding commit info"
 echo "${BUILDKITE_COMMIT}" > "${OUTPUT_DIR}/KIBANA_COMMIT_HASH"
 
+echo "--- Activating service-account for gsutil to access gs://kibana-performance"
+.buildkite/scripts/common/activate_service_account.sh gs://kibana-performance
+
 echo "--- Uploading ${OUTPUT_REL} dir to ${GCS_BUCKET}"
 cd "${OUTPUT_DIR}/.."
 gsutil -m cp -r "${BUILD_ID}" "${GCS_BUCKET}"

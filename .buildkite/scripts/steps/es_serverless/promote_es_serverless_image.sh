@@ -84,6 +84,8 @@ if [[ "${PUBLISH_MANIFEST:-}" =~ ^(1|true)$ && "$SOURCE_IMAGE_OR_TAG" =~ ^git-[0
 }
 EOT
 
+  .buildkite/scripts/common/activate_service_account.sh $ES_SERVERLESS_BUCKET
+
   gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" \
     cp $MANIFEST_FILE_NAME "gs://$ES_SERVERLESS_BUCKET/$MANIFEST_FILE_NAME"
   gsutil acl ch -u AllUsers:R "gs://$ES_SERVERLESS_BUCKET/$MANIFEST_FILE_NAME"

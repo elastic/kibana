@@ -4,10 +4,12 @@ set -euo pipefail
 
 source .buildkite/scripts/common/vault_fns.sh
 
-if [[ -z "${1:-}" ]]; then
+ARG0="${1:-}"
+
+if [[ -z "$ARG0" ]]; then
   echo "Usage: $0 <bucket_name|email>"
   exit 1
-elif [[ "$1" == "-" ]]; then
+elif [[ "$ARG0" == "-" ]]; then
   echo "Unsetting impersonation"
   gcloud config unset auth/impersonate_service_account
   exit 0
@@ -28,10 +30,12 @@ fi
 
 # Check if the arg is a service account e-mail or a bucket name
 EMAIL=""
-if [[ "$1" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; then
-  EMAIL="$1"
+if [[ "$ARG0" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; then
+  EMAIL="$ARG0"
+elif [[ "$ARG0" =~ ^gs://* ]]; then
+  BUCKET_NAME="${ARG0:5}"
 else
-  BUCKET_NAME="$1"
+  BUCKET_NAME="$ARG0"
 fi
 
 if [[ -z "$EMAIL" ]]; then
