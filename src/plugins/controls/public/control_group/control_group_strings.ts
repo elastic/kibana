@@ -10,6 +10,28 @@ import { i18n } from '@kbn/i18n';
 import { RANGE_SLIDER_CONTROL } from '../range_slider';
 
 export const ControlGroupStrings = {
+  invalidControlWarning: {
+    getTourStepTitle: (controlType: string) => {
+      switch (controlType) {
+        case RANGE_SLIDER_CONTROL: {
+          return i18n.translate(
+            'controls.controlGroup.invalidControlWarning.tourStepTitle.rangeSlider',
+            {
+              defaultMessage: 'You have selected an invalid range',
+            }
+          );
+        }
+        default: {
+          return i18n.translate(
+            'controls.controlGroup.invalidControlWarning.tourStepTitle.default',
+            {
+              defaultMessage: 'You have invalid selections',
+            }
+          );
+        }
+      }
+    },
+  },
   manageControl: {
     getFlyoutCreateTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.createFlyoutTitle', {

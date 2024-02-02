@@ -187,36 +187,6 @@ export const OptionsListControl = ({
         'optionsList--filterGroupSingle': controlStyle !== 'twoLine',
       })}
     >
-      {/* <EuiTourStep
-        anchorPosition="downCenter"
-        isStepOpen={showInvalidSelectionWarning}
-        title={OptionsListStrings.control.getInvalidSelectionWarningTitle()}
-        content={OptionsListStrings.control.getInvalidSelectionWarningContent()}
-        stepsTotal={1}
-        repositionOnScroll
-        step={1}
-        maxWidth={300}
-        panelPaddingSize="m"
-        display="block"
-        footerAction={
-          <EuiButtonEmpty
-            size="xs"
-            flush="right"
-            color="text"
-            data-test-subj="invalidSelectionsPopoverDismissButton"
-            onClick={() => {
-              optionsList.supressInvalidSelectionsWarning();
-              optionsList.dispatch.setInvalidSelectionWarningOpen(false);
-            }}
-          >
-            {OptionsListStrings.control.getInvalidSelectionWarningDismissButton()}
-          </EuiButtonEmpty>
-        }
-        closePopover={() => {
-          optionsList.dispatch.setInvalidSelectionWarningOpen(false);
-        }}
-        onFinish={() => {}}
-      > */}
       <EuiInputPopover
         ownFocus
         input={button}
@@ -237,7 +207,6 @@ export const OptionsListControl = ({
           loadMoreSuggestions={loadMoreSuggestions}
         />
       </EuiInputPopover>
-      {/* </EuiTourStep> */}
     </EuiFilterGroup>
   );
 };
