@@ -7,10 +7,14 @@
 
 import type { DiffableAllFields } from '../../../../../common/api/detection_engine';
 
-export interface FormattedFieldDiff {
-  currentVersion: unknown;
-  targetVersion: unknown;
+export interface FieldDiff {
+  currentVersion: string;
+  targetVersion: string;
   fieldName: string;
+}
+export interface FormattedFieldDiff {
+  shouldShowSubtitles: boolean;
+  fieldDiffs: FieldDiff[];
 }
 export interface RuleFieldDiff {
   formattedDiffs: FormattedFieldDiff[];

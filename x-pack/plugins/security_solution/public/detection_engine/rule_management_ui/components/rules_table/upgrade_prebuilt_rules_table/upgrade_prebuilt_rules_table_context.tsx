@@ -139,7 +139,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     isLoading,
     isRefetching,
   } = usePrebuiltRulesUpgradeReview({
-    refetchInterval: false, // Disable automatic refetching since request is expensive
+    refetchInterval: 5000,
     keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
   });
 
