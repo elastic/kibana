@@ -69,9 +69,12 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
     <EuiFlexGrid columns={3} direction="row">
       <EuiFlexItem>
         <StatCard
-          title={i18n.translate('xpack.enterpriseSearch.connectorStats.h4.connectorLabel', {
-            defaultMessage: 'Connector',
-          })}
+          title={i18n.translate(
+            'xpack.enterpriseSearch.connectors.connectorStats.h4.connectorLabel',
+            {
+              defaultMessage: 'Connector',
+            }
+          )}
           content={
             <EuiFlexGroup>
               <EuiFlexItem>
@@ -105,12 +108,15 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
                   <EuiFlexItem grow={false}>
                     <EuiText>
                       <p>
-                        {i18n.translate('xpack.enterpriseSearch.connectorStats.p.DocumentsLabel', {
-                          defaultMessage: '{documentAmount} Documents',
-                          values: {
-                            documentAmount: indexData?.total.docs.count ?? '-',
-                          },
-                        })}
+                        {i18n.translate(
+                          'xpack.enterpriseSearch.connectors.connectorStats.p.DocumentsLabel',
+                          {
+                            defaultMessage: '{documentAmount} Documents',
+                            values: {
+                              documentAmount: indexData?.total.docs.count ?? '-',
+                            },
+                          }
+                        )}
                       </p>
                     </EuiText>
                   </EuiFlexItem>
@@ -119,9 +125,12 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
               <EuiFlexItem>
                 <EuiLink>
                   <EuiText textAlign="right">
-                    {i18n.translate('xpack.enterpriseSearch.connectorStats.seeDocumentsTextLabel', {
-                      defaultMessage: 'See documents',
-                    })}
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.connectors.connectorStats.seeDocumentsTextLabel',
+                      {
+                        defaultMessage: 'See documents',
+                      }
+                    )}
                   </EuiText>
                 </EuiLink>
               </EuiFlexItem>
@@ -139,7 +148,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
         //         <EuiFlexItem>
         //           <EuiLink>
         //             <EuiText textAlign="right">
-        //               {i18n.translate('xpack.enterpriseSearch.connectorStats.schedulingLink', {
+        //               {i18n.translate('xpack.enterpriseSearch.connectors.connectorStats.schedulingLink', {
         //                 defaultMessage: 'Scheduling',
         //               })}
         //             </EuiText>
@@ -173,7 +182,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
         //         <EuiFlexItem>
         //           <EuiLink>
         //             <EuiText textAlign="right">
-        //               {i18n.translate('xpack.enterpriseSearch.connectorStats.syncRulesLink', {
+        //               {i18n.translate('xpack.enterpriseSearch.connectors.connectorStats.syncRulesLink', {
         //                 defaultMessage: 'Sync rules',
         //               })}
         //             </EuiText>
@@ -198,7 +207,9 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
                 </EuiFlexItem>
               </EuiFlexGroup>
             ) : (
-              'No index related'
+              i18n.translate('xpack.enterpriseSearch.connectors.connectorStats.noIndex', {
+                defaultMessage: 'No index related',
+              })
             )
           }
           footer={
@@ -206,9 +217,12 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
               <EuiFlexItem>
                 <EuiLink>
                   <EuiText textAlign="right">
-                    {i18n.translate('xpack.enterpriseSearch.connectorStats.configureLink', {
-                      defaultMessage: 'Configure',
-                    })}
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.connectors.connectorStats.configureLink',
+                      {
+                        defaultMessage: 'Configure',
+                      }
+                    )}
                   </EuiText>
                 </EuiLink>
               </EuiFlexItem>
@@ -218,7 +232,9 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
       </EuiFlexItem>
       <EuiFlexItem>
         <StatCard
-          title="Pipelines"
+          title={i18n.translate('xpack.enterpriseSearch.connectors.connectorStats.pipelinesTitle', {
+            defaultMessage: 'Pipelines',
+          })}
           content={
             connector.pipeline ? (
               <EuiFlexGroup>
@@ -227,7 +243,9 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
                 </EuiFlexItem>
               </EuiFlexGroup>
             ) : (
-              'None'
+              i18n.translate('xpack.enterpriseSearch.connectors.connectorStats.noPipelineText', {
+                defaultMessage: 'None',
+              })
             )
           }
           footer={
@@ -235,9 +253,12 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
               <EuiFlexItem>
                 <EuiLink>
                   <EuiText textAlign="right">
-                    {i18n.translate('xpack.enterpriseSearch.connectorStats.configureLink', {
-                      defaultMessage: 'Configure',
-                    })}
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.connectors.connectorStats.configureLink',
+                      {
+                        defaultMessage: 'Configure',
+                      }
+                    )}
                   </EuiText>
                 </EuiLink>
               </EuiFlexItem>

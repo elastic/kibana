@@ -60,9 +60,12 @@ export const ConnectorDetail: React.FC = () => {
       content: <ConnectorDetailOverview />,
       id: ConnectorDetailTabId.OVERVIEW,
       isSelected: selectedTabId === ConnectorDetailTabId.OVERVIEW,
-      label: i18n.translate('xpack.enterpriseSearch.content.searchIndex.overviewTabLabel', {
-        defaultMessage: 'Overview',
-      }),
+      label: i18n.translate(
+        'xpack.enterpriseSearch.content.connectors.connectorDetail.overviewTabLabel',
+        {
+          defaultMessage: 'Overview',
+        }
+      ),
       onClick: () => setSelectedTabId(ConnectorDetailTabId.OVERVIEW),
     },
     {
@@ -70,9 +73,12 @@ export const ConnectorDetail: React.FC = () => {
       disabled: !index,
       id: ConnectorDetailTabId.DOCUMENTS,
       isSelected: selectedTabId === ConnectorDetailTabId.DOCUMENTS,
-      label: i18n.translate('xpack.enterpriseSearch.content.searchIndex.documentsTabLabel', {
-        defaultMessage: 'Documents',
-      }),
+      label: i18n.translate(
+        'xpack.enterpriseSearch.content.connectors.connectorDetail.documentsTabLabel',
+        {
+          defaultMessage: 'Documents',
+        }
+      ),
       onClick: () => setSelectedTabId(ConnectorDetailTabId.DOCUMENTS),
     },
     {
@@ -80,9 +86,12 @@ export const ConnectorDetail: React.FC = () => {
       disabled: !index,
       id: ConnectorDetailTabId.INDEX_MAPPINGS,
       isSelected: selectedTabId === ConnectorDetailTabId.INDEX_MAPPINGS,
-      label: i18n.translate('xpack.enterpriseSearch.content.searchIndex.indexMappingsTabLabel', {
-        defaultMessage: 'Index mappings',
-      }),
+      label: i18n.translate(
+        'xpack.enterpriseSearch.content.connectors.connectorDetail.indexMappingsTabLabel',
+        {
+          defaultMessage: 'Index mappings',
+        }
+      ),
       onClick: () => setSelectedTabId(ConnectorDetailTabId.INDEX_MAPPINGS),
     },
   ];
@@ -92,9 +101,12 @@ export const ConnectorDetail: React.FC = () => {
       content: <ConnectorConfiguration />,
       id: ConnectorDetailTabId.CONFIGURATION,
       isSelected: selectedTabId === ConnectorDetailTabId.CONFIGURATION,
-      label: i18n.translate('xpack.enterpriseSearch.content.searchIndex.configurationTabLabel', {
-        defaultMessage: 'Configuration',
-      }),
+      label: i18n.translate(
+        'xpack.enterpriseSearch.content.connectors.connectorDetail.configurationTabLabel',
+        {
+          defaultMessage: 'Configuration',
+        }
+      ),
       onClick: () => setSelectedTabId(ConnectorDetailTabId.CONFIGURATION),
     },
     ...(hasFilteringFeature
@@ -104,9 +116,12 @@ export const ConnectorDetail: React.FC = () => {
             disabled: !index,
             id: ConnectorDetailTabId.SYNC_RULES,
             isSelected: selectedTabId === ConnectorDetailTabId.SYNC_RULES,
-            label: i18n.translate('xpack.enterpriseSearch.content.searchIndex.syncRulesTabLabel', {
-              defaultMessage: 'Sync rules',
-            }),
+            label: i18n.translate(
+              'xpack.enterpriseSearch.content.connectors.connectorDetail.syncRulesTabLabel',
+              {
+                defaultMessage: 'Sync rules',
+              }
+            ),
             onClick: () => setSelectedTabId(ConnectorDetailTabId.SYNC_RULES),
           },
         ]
@@ -116,9 +131,12 @@ export const ConnectorDetail: React.FC = () => {
       disabled: !index,
       id: ConnectorDetailTabId.SCHEDULING,
       isSelected: selectedTabId === ConnectorDetailTabId.SCHEDULING,
-      label: i18n.translate('xpack.enterpriseSearch.content.searchIndex.schedulingTabLabel', {
-        defaultMessage: 'Scheduling',
-      }),
+      label: i18n.translate(
+        'xpack.enterpriseSearch.content.connectors.connectorDetail.schedulingTabLabel',
+        {
+          defaultMessage: 'Scheduling',
+        }
+      ),
       onClick: () => setSelectedTabId(ConnectorDetailTabId.SCHEDULING),
     },
   ];
@@ -128,9 +146,12 @@ export const ConnectorDetail: React.FC = () => {
     disabled: !index,
     id: ConnectorDetailTabId.PIPELINES,
     isSelected: selectedTabId === ConnectorDetailTabId.PIPELINES,
-    label: i18n.translate('xpack.enterpriseSearch.content.searchIndex.pipelinesTabLabel', {
-      defaultMessage: 'Pipelines',
-    }),
+    label: i18n.translate(
+      'xpack.enterpriseSearch.content.connectors.connectorDetail.pipelinesTabLabel',
+      {
+        defaultMessage: 'Pipelines',
+      }
+    ),
     onClick: () => setSelectedTabId(ConnectorDetailTabId.PIPELINES),
   };
 

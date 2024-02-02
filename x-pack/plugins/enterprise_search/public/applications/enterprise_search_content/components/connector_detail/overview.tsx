@@ -45,7 +45,7 @@ export const ConnectorDetailOverview: React.FC = () => {
             iconType="warning"
             color="danger"
             title={i18n.translate(
-              'xpack.enterpriseSearch.content.searchIndex.connectorErrorCallOut.title',
+              'xpack.enterpriseSearch.content.connectors.overview.connectorErrorCallOut.title',
               {
                 defaultMessage: 'Your connector has reported an error',
               }
@@ -64,7 +64,7 @@ export const ConnectorDetailOverview: React.FC = () => {
             iconType="warning"
             color="warning"
             title={i18n.translate(
-              'xpack.enterpriseSearch.content.searchIndex.nativeCloudCallout.title',
+              'xpack.enterpriseSearch.content.connectors.overview.nativeCloudCallout.title',
               {
                 defaultMessage: 'Native connectors are no longer supported outside Elastic Cloud',
               }
@@ -74,13 +74,13 @@ export const ConnectorDetailOverview: React.FC = () => {
             <EuiText size="s">
               <p>
                 <FormattedMessage
-                  id="xpack.enterpriseSearch.content.searchIndex.nativeCloudCallout.content"
+                  id="xpack.enterpriseSearch.content.connectors.overview.nativeCloudCallout.content"
                   defaultMessage="Convert it to a {link}, to be self-managed on your own infrastructure. Native connectors are available only in your Elastic Cloud deployment."
                   values={{
                     link: (
                       <EuiLink href={docLinks.buildConnector} target="_blank">
                         {i18n.translate(
-                          'xpack.enterpriseSearch.content.searchIndex.nativeCloudCallout.connectorClient',
+                          'xpack.enterpriseSearch.content.connectors.overview.nativeCloudCallout.connectorClient',
                           { defaultMessage: 'connector client' }
                         )}
                       </EuiLink>
@@ -92,7 +92,7 @@ export const ConnectorDetailOverview: React.FC = () => {
             <EuiSpacer size="s" />
             <EuiButton color="warning" fill onClick={() => showModal()}>
               {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.searchIndex.convertConnector.buttonLabel',
+                'xpack.enterpriseSearch.content.indices.connectors.overview.convertConnector.buttonLabel',
                 { defaultMessage: 'Convert connector' }
               )}
             </EuiButton>
