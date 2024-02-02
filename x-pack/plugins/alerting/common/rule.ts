@@ -144,6 +144,7 @@ export interface RuleSystemAction {
   useAlertDataForTemplate?: boolean;
 }
 
+export type RuleActionKey = keyof RuleDefaultAction | keyof RuleSystemAction;
 export type RuleAction = RuleDefaultAction | RuleSystemAction;
 
 export interface RuleLastRun {

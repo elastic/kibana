@@ -15,7 +15,7 @@ import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { ReactWrapper } from 'enzyme';
 import RuleEdit from './rule_edit';
 import { useKibana } from '../../../common/lib/kibana';
-import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { ALERTS_FEATURE_ID, RuleActionTypes } from '@kbn/alerting-plugin/common';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 jest.mock('../../../common/lib/kibana');
 const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -158,6 +158,7 @@ describe('rule_edit', () => {
           group: 'threshold met',
           params: { message: 'Rule [{{ctx.metadata.name}}] has exceeded the threshold' },
           id: '917f5d41-fbc4-4056-a8ad-ac592f7dcee2',
+          type: RuleActionTypes.DEFAULT,
         },
       ],
       tags: [],

@@ -16,6 +16,7 @@ import {
 } from './rule_errors';
 import { Rule, RuleTypeModel } from '../../../types';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
+import { RuleActionTypes } from '@kbn/alerting-plugin/common';
 
 const config = { isUsingSecurity: true, minimumScheduleInterval: { value: '1m', enforce: false } };
 describe('rule_errors', () => {
@@ -124,6 +125,7 @@ describe('rule_errors', () => {
           params: {
             name: 'yes',
           },
+          type: RuleActionTypes.DEFAULT,
         },
       ];
       const result = validateBaseProperties(rule, config);
@@ -193,6 +195,7 @@ describe('rule_errors', () => {
             params: {
               name: 'yes',
             },
+            type: RuleActionTypes.DEFAULT,
           },
           {
             id: '5678',
@@ -201,6 +204,7 @@ describe('rule_errors', () => {
             params: {
               name: 'yes',
             },
+            type: RuleActionTypes.DEFAULT,
           },
         ],
 

@@ -13,6 +13,7 @@ import { ConnectorsSelection } from './connectors_selection';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ActionType, GenericValidationResult } from '../../../types';
 import { EuiFieldText } from '@elastic/eui';
+import { RuleActionTypes } from '@kbn/alerting-plugin/common';
 
 describe('connectors_selection', () => {
   const mockedActionParamsFields = React.lazy(async () => ({
@@ -46,6 +47,7 @@ describe('connectors_selection', () => {
       class: 'test class',
     },
     uuid: '123-456',
+    type: RuleActionTypes.DEFAULT,
   };
 
   const actionTypeIndex: Record<string, ActionType> = {

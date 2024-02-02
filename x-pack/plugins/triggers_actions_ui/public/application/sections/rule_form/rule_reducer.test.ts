@@ -7,6 +7,7 @@
 
 import { ruleReducer } from './rule_reducer';
 import { Rule } from '../../../types';
+import { RuleActionTypes, RuleDefaultAction } from '@kbn/alerting-plugin/common';
 
 describe('rule reducer', () => {
   let initialRule: Rule;
@@ -112,6 +113,7 @@ describe('rule reducer', () => {
       group: 'Rule',
       params: {},
       uuid: '123-456',
+      type: RuleActionTypes.DEFAULT,
     });
     const updatedRule = ruleReducer(
       { rule: initialRule },
@@ -153,6 +155,7 @@ describe('rule reducer', () => {
         testActionParam: 'some value',
       },
       uuid: '123-456',
+      type: RuleActionTypes.DEFAULT,
     });
     const updatedRule = ruleReducer(
       { rule: initialRule },
@@ -175,6 +178,7 @@ describe('rule reducer', () => {
       group: 'Rule',
       params: {},
       uuid: '123-456',
+      type: RuleActionTypes.DEFAULT,
     });
     const updatedRule = ruleReducer(
       { rule: initialRule },
@@ -187,7 +191,7 @@ describe('rule reducer', () => {
         },
       }
     );
-    expect(updatedRule.rule.actions[0].group).toBe('Warning');
+    expect((updatedRule.rule.actions[0] as RuleDefaultAction).group).toBe('Warning');
   });
 
   test('if rule action frequency was updated', () => {
@@ -197,6 +201,7 @@ describe('rule reducer', () => {
       group: 'Rule',
       params: {},
       uuid: '123-456',
+      type: RuleActionTypes.DEFAULT,
     });
     const updatedRule = ruleReducer(
       { rule: initialRule },
@@ -209,6 +214,8 @@ describe('rule reducer', () => {
         },
       }
     );
-    expect(updatedRule.rule.actions[0].frequency?.notifyWhen).toBe('onThrottleInterval');
+    expect((updatedRule.rule.actions[0] as RuleDefaultAction).frequency?.notifyWhen).toBe(
+      'onThrottleInterval'
+    );
   });
 });

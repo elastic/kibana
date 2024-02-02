@@ -16,6 +16,8 @@ import ActionForm from './action_form';
 import { useKibana } from '../../../common/lib/kibana';
 import {
   RecoveredActionGroup,
+  RuleActionTypes,
+  RuleDefaultAction,
   isActionGroupDisabledForActionTypeId,
 } from '@kbn/alerting-plugin/common';
 
@@ -182,7 +184,7 @@ describe('action_form', () => {
   const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
   async function setup(
-    customActions?: RuleAction[],
+    customActions?: RuleDefaultAction[],
     customRecoveredActionGroup?: string,
     isExperimental?: boolean
   ) {
@@ -230,6 +232,7 @@ describe('action_form', () => {
         ? customActions
         : [
             {
+              type: RuleActionTypes.DEFAULT,
               group: 'default',
               id: 'test',
               actionTypeId: newActionType.id,
@@ -242,7 +245,7 @@ describe('action_form', () => {
       muteAll: false,
       enabled: false,
       mutedInstanceIds: [],
-    } as unknown as Rule;
+    } as unknown as Omit<Rule, 'actions'> & { actions: RuleDefaultAction[] };
 
     loadActionTypes.mockResolvedValue([
       {
@@ -442,6 +445,7 @@ describe('action_form', () => {
     it('renders disabled action groups for selected action type', async () => {
       const wrapper = await setup([
         {
+          type: RuleActionTypes.DEFAULT,
           group: 'recovered',
           id: 'test',
           actionTypeId: disabledByActionType.id,
@@ -481,6 +485,7 @@ describe('action_form', () => {
       const wrapper = await setup(
         [
           {
+            type: RuleActionTypes.DEFAULT,
             group: 'iHaveRecovered',
             id: 'test',
             actionTypeId: disabledByActionType.id,
@@ -624,6 +629,7 @@ describe('action_form', () => {
     it('recognizes actions with broken connectors', async () => {
       const wrapper = await setup([
         {
+          type: RuleActionTypes.DEFAULT,
           group: 'default',
           id: 'test',
           actionTypeId: actionType.id,
@@ -632,6 +638,7 @@ describe('action_form', () => {
           },
         },
         {
+          type: RuleActionTypes.DEFAULT,
           group: 'default',
           id: 'connector-doesnt-exist',
           actionTypeId: actionType.id,
@@ -640,6 +647,7 @@ describe('action_form', () => {
           },
         },
         {
+          type: RuleActionTypes.DEFAULT,
           group: 'not the default',
           id: 'connector-doesnt-exist',
           actionTypeId: actionType.id,
