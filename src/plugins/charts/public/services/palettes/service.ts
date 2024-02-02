@@ -29,7 +29,11 @@ export class PaletteService {
         }
         return {
           get: (name: string) => {
-            return this.palettes![name];
+            let paletteName = name;
+            if (name === 'complimentary') {
+              paletteName = 'complementary';
+            }
+            return this.palettes![paletteName];
           },
           getAll: () => {
             return Object.values(this.palettes!);
