@@ -16,7 +16,7 @@ import {
   EuiFlexItem,
   EuiLink,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { generatePath } from 'react-router-dom';
@@ -243,6 +243,12 @@ export const BenchmarksTable = ({
     totalItemCount,
   };
 
+  const benchmarksSorted = useMemo(() => {
+    return [...benchmarks].sort((benchmarkDataA, benchmarkDataB) =>
+      benchmarkDataA.id.localeCompare(benchmarkDataB.id)
+    );
+  }, [benchmarks]);
+
   const onChange = ({ page }: CriteriaWithPagination<Benchmark>) => {
     setQuery({ page: { ...page, index: page.index + 1 } });
   };
@@ -254,7 +260,7 @@ export const BenchmarksTable = ({
   return (
     <EuiBasicTable
       data-test-subj={rest['data-test-subj']}
-      items={benchmarks}
+      items={benchmarksSorted}
       columns={BENCHMARKS_TABLE_COLUMNS}
       itemId={(item) => [item.id, item.version].join('/')}
       pagination={pagination}

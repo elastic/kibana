@@ -18,7 +18,6 @@ import {
 } from './components/test_ids';
 import { type State } from './state';
 import { TestProvider } from './test/provider';
-jest.mock('./context/url_state_provider');
 
 const registeredPanels: Panel[] = [
   {

@@ -28,7 +28,7 @@ import {
 import { isFields, processFields } from '../../fields/field';
 import { generateMappings } from '../template/template';
 import { getESAssetMetadata } from '../meta';
-import { updateEsAssetReferences } from '../../packages/install';
+import { updateEsAssetReferences } from '../../packages/es_assets_reference';
 import { getAssetFromAssetsMap, getPathParts } from '../../archive';
 import {
   ElasticsearchAssetType,
