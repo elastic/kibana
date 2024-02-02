@@ -331,9 +331,12 @@ export function useModelActions({
           canStartStopTrainedModels &&
           (item.state === MODEL_STATE.STARTED || item.state === MODEL_STATE.STARTING) &&
           // Only show the action if there is at least one deployment that is not used by the inference service
-          item.deployment_ids.some(
-            (dId) => !item.inference_apis.some((inference) => inference.model_id === dId)
-          ),
+          (!Array.isArray(item.inference_apis) ||
+            item.deployment_ids.some(
+              (dId) =>
+                Array.isArray(item.inference_apis) &&
+                !item.inference_apis.some((inference) => inference.model_id === dId)
+            )),
         enabled: (item) => !isLoading,
         onClick: async (item) => {
           const requireForceStop = isPopulatedObject(item.pipelines);
