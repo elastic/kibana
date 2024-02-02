@@ -6,39 +6,16 @@
  */
 
 import { getColorMappingTelemetryEvents } from './color_telemetry_helpers';
-import {
-  ColorMapping,
-  EUIAmsterdamColorBlindPalette,
-  ElasticBrandPalette,
-  NeutralPalette,
-} from '@kbn/coloring';
+import { ColorMapping, EUIAmsterdamColorBlindPalette, ElasticBrandPalette } from '@kbn/coloring';
 import faker from 'faker';
-import { DEFAULT_NEUTRAL_PALETTE_INDEX } from '@kbn/coloring/src/shared_components/color_mapping/config/default_color_mapping';
+import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring/src/shared_components/color_mapping/config/default_color_mapping';
 
-export const DEFAULT_COLOR_MAPPING_CONFIG: ColorMapping.Config = {
-  assignmentMode: 'auto',
-  assignments: [],
-  specialAssignments: [
-    {
-      rule: {
-        type: 'other',
-      },
-      color: {
-        type: 'categorical',
-        paletteId: NeutralPalette.id,
-        colorIndex: DEFAULT_NEUTRAL_PALETTE_INDEX,
-      },
-      touched: false,
-    },
-  ],
-  paletteId: EUIAmsterdamColorBlindPalette.id,
-  colorMode: {
-    type: 'categorical',
-  },
-};
-
-const exampleAssignment = (valuesCount = 1, type = 'categorical', overrides = {}) => {
-  const color =
+const exampleAssignment = (
+  valuesCount = 1,
+  type = 'categorical',
+  overrides = {}
+): ColorMapping.Config['assignments'][number] => {
+  const color: ColorMapping.Config['assignments'][number]['color'] =
     type === 'categorical'
       ? {
           type: 'categorical',
@@ -58,11 +35,10 @@ const exampleAssignment = (valuesCount = 1, type = 'categorical', overrides = {}
     color,
     touched: false,
     ...overrides,
-  } as ColorMapping.Config['assignments'][0];
+  };
 };
 
 const MANUAL_COLOR_MAPPING_CONFIG: ColorMapping.Config = {
-  assignmentMode: 'manual',
   assignments: [
     exampleAssignment(4),
     exampleAssignment(),
@@ -129,11 +105,10 @@ describe('color_telemetry_helpers', () => {
       getColorMappingTelemetryEvents(MANUAL_COLOR_MAPPING_CONFIG, MANUAL_COLOR_MAPPING_CONFIG)
     ).toEqual([]);
   });
-  it('settings (default): auto color mapping, unassigned terms neutral, default palette returns correct events', () => {
+  it('settings (default): unassigned terms loop, default palette returns correct events', () => {
     expect(getColorMappingTelemetryEvents(DEFAULT_COLOR_MAPPING_CONFIG)).toEqual([
-      'lens_color_mapping_auto',
       'lens_color_mapping_palette_eui_amsterdam_color_blind',
-      'lens_color_mapping_unassigned_terms_neutral',
+      'lens_color_mapping_unassigned_terms_loop',
     ]);
   });
   it('gradient event when user changed colorMode to gradient', () => {
@@ -158,9 +133,8 @@ describe('color_telemetry_helpers', () => {
       )
     ).toEqual(['lens_color_mapping_gradient']);
   });
-  it('settings: manual mode, custom palette, unassigned terms from palette, 2 colors with 5 terms in total', () => {
+  it('settings: custom palette, unassigned terms from palette, 2 colors with 5 terms in total', () => {
     expect(getColorMappingTelemetryEvents(MANUAL_COLOR_MAPPING_CONFIG)).toEqual([
-      'lens_color_mapping_manual',
       'lens_color_mapping_palette_elastic_brand_2023',
       'lens_color_mapping_unassigned_terms_palette',
       'lens_color_mapping_colors_2_to_4',
@@ -170,7 +144,6 @@ describe('color_telemetry_helpers', () => {
     expect(
       getColorMappingTelemetryEvents(MANUAL_COLOR_MAPPING_CONFIG, DEFAULT_COLOR_MAPPING_CONFIG)
     ).toEqual([
-      'lens_color_mapping_manual',
       'lens_color_mapping_palette_elastic_brand_2023',
       'lens_color_mapping_unassigned_terms_palette',
       'lens_color_mapping_colors_2_to_4',
@@ -254,7 +227,7 @@ describe('color_telemetry_helpers', () => {
   });
 
   describe('unassigned terms', () => {
-    it('unassigned terms changed from neutral to palette', () => {
+    it('unassigned terms changed from loop to palette', () => {
       expect(
         getColorMappingTelemetryEvents(
           {
@@ -265,15 +238,15 @@ describe('color_telemetry_helpers', () => {
         )
       ).toEqual(['lens_color_mapping_unassigned_terms_palette']);
     });
-    it('unassigned terms changed from palette to neutral', () => {
+    it('unassigned terms changed from palette to loop', () => {
       expect(
         getColorMappingTelemetryEvents(DEFAULT_COLOR_MAPPING_CONFIG, {
           ...DEFAULT_COLOR_MAPPING_CONFIG,
           specialAssignments: specialAssignmentsPalette,
         })
-      ).toEqual(['lens_color_mapping_unassigned_terms_neutral']);
+      ).toEqual(['lens_color_mapping_unassigned_terms_loop']);
     });
-    it('unassigned terms changed from neutral to another custom color', () => {
+    it('unassigned terms changed from loop to another custom color', () => {
       expect(
         getColorMappingTelemetryEvents(
           {
