@@ -493,15 +493,15 @@ function getUnifiedHistogramPropsForTextBased({
   const result = documentsValue?.result;
 
   const nextProps = {
-    dataView: savedSearch.searchSource.getField('index'),
+    dataView: savedSearch.searchSource.getField('index')!,
     query: savedSearch.searchSource.getField('query'),
     externalVisContextJSON: savedSearch.visContextJSON,
     columns,
     table:
-      result && documentsValue?.recordRawType === RecordRawType.PLAIN
+      documentsValue?.recordRawType === RecordRawType.PLAIN
         ? {
             type: 'datatable' as 'datatable',
-            rows: result.map((r) => r.raw),
+            rows: (result || []).map((r) => r.raw),
             columns,
           }
         : undefined,
