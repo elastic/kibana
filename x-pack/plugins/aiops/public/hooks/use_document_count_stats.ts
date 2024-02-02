@@ -77,12 +77,12 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
 
   const [documentStatsCache, setDocumentStatsCache] = useState<Record<string, DocumentStats>>({});
 
+  const cacheKey = stringHash(
+    `${JSON.stringify(searchParams)}_${JSON.stringify(searchParamsCompare)}`
+  );
+
   const fetchDocumentCountData = useCallback(async () => {
     if (!searchParams) return;
-
-    const cacheKey = stringHash(
-      `${JSON.stringify(searchParams)}_${JSON.stringify(searchParamsCompare)}`
-    );
 
     if (documentStatsCache[cacheKey]) {
       setDocumentStats(documentStatsCache[cacheKey]);
@@ -172,7 +172,9 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
         displayError(toasts, searchParams!.index, extractErrorProperties(error));
       }
     }
-  }, [data?.search, documentStatsCache, searchParams, searchParamsCompare, toasts]);
+    // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data?.search, documentStatsCache, cacheKey]);
 
   useEffect(
     function getDocumentCountData() {

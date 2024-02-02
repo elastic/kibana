@@ -57,7 +57,7 @@ export const useData = (
   const timeRangeMemoized = useMemo(
     () => timefilter.getActiveBounds(),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [JSON.stringify(timefilter.getActiveBounds())]
+    [lastRefresh]
   );
 
   const fieldStatsRequest: DocumentStatsSearchStrategyParams | undefined = useMemo(() => {
