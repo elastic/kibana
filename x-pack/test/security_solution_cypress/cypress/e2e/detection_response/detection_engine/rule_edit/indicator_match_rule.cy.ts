@@ -48,6 +48,7 @@ describe(
   'Detection rules, Indicator Match, Edit',
   {
     tags: ['@ess', '@serverless'],
+    // alertSuppressionForIndicatorMatchRuleEnabled feature flag is also enabled in a global config
     env: {
       ftrConfig: {
         kbnServerArgs: [
