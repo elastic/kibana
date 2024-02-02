@@ -8,6 +8,7 @@
 
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject } from 'rxjs';
+import { cloneDeep } from 'lodash';
 import { COMPARE_ALL_OPTIONS, FilterCompareOptions } from '@kbn/es-query';
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -110,6 +111,11 @@ export interface DiscoverSavedSearchContainer {
    * @param params
    */
   update: (params: UpdateParams) => SavedSearch;
+  /**
+   * Adds global filters to saved search filters
+   * @param params
+   */
+  updateWithGlobalFilters: (params: { savedSearch: SavedSearch }) => SavedSearch;
 }
 
 export function getSavedSearchContainer({
@@ -169,6 +175,31 @@ export function getSavedSearchContainer({
     }
     return { id };
   };
+
+  const assignNextSavedSearch = ({ nextSavedSearch }: { nextSavedSearch: SavedSearch }) => {
+    const hasChanged = !isEqualSavedSearch(savedSearchInitial$.getValue(), nextSavedSearch);
+    hasChanged$.next(hasChanged);
+    savedSearchCurrent$.next(nextSavedSearch);
+  };
+
+  const updateWithGlobalFilters = ({ savedSearch }: { savedSearch: SavedSearch }) => {
+    const nextSavedSearch: SavedSearch = {
+      ...savedSearch,
+    };
+    const globalFilters = globalStateContainer?.get()?.filters;
+    if (globalFilters?.length) {
+      nextSavedSearch.searchSource.setField(
+        'filter',
+        cloneDeep([...globalFilters, ...services.filterManager.getAppFilters()])
+      );
+    }
+
+    assignNextSavedSearch({ nextSavedSearch });
+
+    addLog('[savedSearch] updateWithGlobalFilters done', nextSavedSearch);
+    return nextSavedSearch;
+  };
+
   const update = ({ nextDataView, nextState, useFilterAndQueryServices }: UpdateParams) => {
     addLog('[savedSearch] update', { nextDataView, nextState });
 
@@ -186,9 +217,7 @@ export function getSavedSearchContainer({
       useFilterAndQueryServices,
     });
 
-    const hasChanged = !isEqualSavedSearch(savedSearchInitial$.getValue(), nextSavedSearch);
-    hasChanged$.next(hasChanged);
-    savedSearchCurrent$.next(nextSavedSearch);
+    assignNextSavedSearch({ nextSavedSearch });
 
     addLog('[savedSearch] update done', nextSavedSearch);
     return nextSavedSearch;
@@ -221,6 +250,7 @@ export function getSavedSearchContainer({
     persist,
     set,
     update,
+    updateWithGlobalFilters,
   };
 }
 

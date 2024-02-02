@@ -207,8 +207,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ];
 
       expect(await dataGrid.getRowsText()).to.eql(filteredRows);
-
       expect(await PageObjects.discover.getHitCount()).to.be(totalHitsForTwoFilters);
+      await testSubjects.existOrFail('unsavedChangesBadge');
 
       await browser.refresh();
 
@@ -216,8 +216,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
       expect(await dataGrid.getRowsText()).to.eql(filteredRows);
-
       expect(await PageObjects.discover.getHitCount()).to.be(totalHitsForTwoFilters);
+      await testSubjects.existOrFail('unsavedChangesBadge');
     });
   });
 }
