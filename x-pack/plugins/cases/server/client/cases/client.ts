@@ -34,6 +34,8 @@ import type { PushParams } from './push';
 import { push } from './push';
 import { update } from './update';
 import { bulkCreate } from './bulk_create';
+import type { UpdateCustomFieldArgs } from './update_custom_field';
+import { updateCustomField } from './update_custom_field';
 
 /**
  * API for interacting with the cases entities.
@@ -96,6 +98,10 @@ export interface CasesSubClient {
    * Retrieves the cases ID and title that have the requested alert attached to them
    */
   getCasesByAlertID(params: CasesByAlertIDParams): Promise<GetRelatedCasesByAlertResponse>;
+  /**
+   * Update custom field with specific customFieldId and CaseId
+   */
+  updateCustomField(params: UpdateCustomFieldArgs): Promise<Cases>;
 }
 
 /**
@@ -122,6 +128,8 @@ export const createCasesSubClient = (
     getCategories: (params: AllCategoriesFindRequest) => getCategories(params, clientArgs),
     getReporters: (params: AllReportersFindRequest) => getReporters(params, clientArgs),
     getCasesByAlertID: (params: CasesByAlertIDParams) => getCasesByAlertID(params, clientArgs),
+    updateCustomField: (params: UpdateCustomFieldArgs) =>
+      updateCustomField(params, clientArgs, casesClient),
   };
 
   return Object.freeze(casesSubClient);

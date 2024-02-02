@@ -41,6 +41,7 @@ import {
   CasesFindResponseRt,
   CasesPatchRequestRt,
   CasesSearchRequestRt,
+  CustomFieldPatchRequestRt,
 } from './v1';
 import { CustomFieldTypes } from '../../domain/custom_field/v1';
 
@@ -828,6 +829,50 @@ describe('CasesPatchRequestRt', () => {
         })
       )
     ).toContain('The length of the field assignees is too long. Array must be of length <= 10.');
+  });
+});
+
+describe('CustomFieldPatchRequestRt', () => {
+  const defaultRequest = {
+    version: 'WzQ3LDFd',
+    customFieldDetails: {
+      type: CustomFieldTypes.TEXT,
+      value: 'this is a text field value',
+    },
+  };
+
+  it('has expected attributes in request', () => {
+    const query = CustomFieldPatchRequestRt.decode(defaultRequest);
+
+    expect(query).toStrictEqual({
+      _tag: 'Right',
+      right: defaultRequest,
+    });
+  });
+
+  it('removes foo:bar attributes from request', () => {
+    const query = CustomFieldPatchRequestRt.decode({ ...defaultRequest, foo: 'bar' });
+
+    expect(query).toStrictEqual({
+      _tag: 'Right',
+      right: defaultRequest,
+    });
+  });
+
+  it(`throws an error when a text customFields is longer than ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH}`, () => {
+    expect(
+      PathReporter.report(
+        CustomFieldPatchRequestRt.decode({
+          version: 'WzQ3LDFd',
+          customFieldDetails: {
+            type: CustomFieldTypes.TEXT,
+            value: '#'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1),
+          },
+        })
+      )
+    ).toContain(
+      `The length of the value is too long. The maximum length is ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH}.`
+    );
   });
 });
 

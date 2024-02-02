@@ -30,7 +30,11 @@ import {
   NonEmptyString,
   paginationSchema,
 } from '../../../schema';
-import { CaseCustomFieldToggleRt, CustomFieldTextTypeRt } from '../../domain';
+import {
+  CaseCustomFieldToggleRt,
+  CustomFieldTextTypeRt,
+  CustomFieldToggleTypeRt,
+} from '../../domain';
 import {
   CaseRt,
   CaseSettingsRt,
@@ -433,6 +437,23 @@ export const CasePatchRequestRt = rt.intersection([
   rt.strict({ id: rt.string, version: rt.string }),
 ]);
 
+/**
+ * Update custom_field
+ */
+export const CustomFieldPatchRequestRt = rt.strict({
+  customFieldDetails: rt.union([
+    rt.strict({
+      type: CustomFieldTextTypeRt,
+      value: rt.union([CaseCustomFieldTextWithValidationValueRt, rt.null]),
+    }),
+    rt.strict({
+      type: CustomFieldToggleTypeRt,
+      value: rt.union([rt.boolean, rt.null]),
+    }),
+  ]),
+  version: rt.string,
+});
+
 export const CasesPatchRequestRt = rt.strict({
   cases: limitedArraySchema({
     codec: CasePatchRequestRt,
@@ -519,3 +540,4 @@ export type GetRelatedCasesByAlertResponse = rt.TypeOf<typeof GetRelatedCasesByA
 export type CaseRequestCustomFields = rt.TypeOf<typeof CustomFieldsRt>;
 export type BulkCreateCasesRequest = rt.TypeOf<typeof BulkCreateCasesRequestRt>;
 export type BulkCreateCasesResponse = rt.TypeOf<typeof BulkCreateCasesResponseRt>;
+export type CustomFieldPatchRequest = rt.TypeOf<typeof CustomFieldPatchRequestRt>;
