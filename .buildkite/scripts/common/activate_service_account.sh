@@ -4,39 +4,66 @@ set -euo pipefail
 
 source .buildkite/scripts/common/vault_fns.sh
 
-ACCOUNT_NAME="${1:-}"
-
-if [[ -z "$ACCOUNT_NAME" ]]; then
-  echo "Usage: $0 <service-account-name-or-id>"
+if [[ -z "${1:-}" ]]; then
+  echo "Usage: $0 <bucket_name|email>"
   exit 1
+elif [[ "$1" == "-" ]]; then
+  echo "Unsetting impersonation"
+  gcloud config unset auth/impersonate_service_account
+  exit 0
 fi
 
-case "$ACCOUNT_NAME" in
-  "coverage")
-    SERVICE_ACCOUNT_ID="kibana-ci-access-coverage"
-    ;;
-  "so-snapshots")
-    SERVICE_ACCOUNT_ID="kibana-ci-access-so-snapshots"
-    ;;
-  "es-snapshots")
-    SERVICE_ACCOUNT_ID="kibana-ci-access-es-snapshots"
-    ;;
-  "perf-stats")
-    SERVICE_ACCOUNT_ID="kibana-ci-access-perf-stats"
-    ;;
-  "artifacts")
-    SERVICE_ACCOUNT_ID="kibana-ci-access-artifacts"
-    ;;
-  "chrome-builds")
-    SERVICE_ACCOUNT_ID="kibana-ci-access-chrome-builds"
-    ;;
-  *)
-    SERVICE_ACCOUNT_ID="$ACCOUNT_NAME"
-    ;;
-esac
+GCLOUD_USER=$(gcloud auth list --filter="status=ACTIVE" --format="value(account)")
+GCLOUD_EMAIL_POSTFIX="elastic-kibana-ci.iam.gserviceaccount.com"
+GCLOUD_SA_PROXY_EMAIL="kibana-ci-sa-proxy@$GCLOUD_EMAIL_POSTFIX"
 
-echo "Getting key for $SERVICE_ACCOUNT_ID"
-KEY="$(vault_get "service-accounts/$SERVICE_ACCOUNT_ID" "key" | base64 -d)"
-gcloud auth activate-service-account "${SERVICE_ACCOUNT_ID}@elastic-kibana-ci.iam.gserviceaccount.com" --key-file <(echo "$KEY")
+if [[ "$GCLOUD_USER" != "$GCLOUD_SA_PROXY_EMAIL" ]]; then
+  if [[ -f "$GOOGLE_APPLICATION_CREDENTIALS" ]]; then
+    echo "Authenticating as service account $GCLOUD_USER using GOOGLE_APPLICATION_CREDENTIALS"
+    gcloud auth activate-service-account --key-file="$GOOGLE_APPLICATION_CREDENTIALS"
+  else
+    echo "Cannot impersonate service accounts without the Service-Agent-Proxy access. Current: $GCLOUD_USER, Proxy: $GCLOUD_SA_PROXY_EMAIL"
+  fi
+fi
 
-echo "Activated service account $SERVICE_ACCOUNT_ID / $SERVICE_ACCOUNT_ID"
+# Check if the arg is a service account e-mail or a bucket name
+EMAIL=""
+if [[ "$1" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; then
+  EMAIL="$1"
+else
+  BUCKET_NAME="$1"
+fi
+
+if [[ -z "$EMAIL" ]]; then
+  case "$BUCKET_NAME" in
+    "elastic-kibana-coverage-live")
+      EMAIL="kibana-ci-access-coverage@$GCLOUD_EMAIL_POSTFIX"
+      ;;
+    "kibana-ci-es-snapshots-daily")
+      EMAIL="kibana-ci-access-es-snapshots@$GCLOUD_EMAIL_POSTFIX"
+      ;;
+    "kibana-so-types-snapshots")
+      EMAIL="kibana-ci-access-so-snapshots@$GCLOUD_EMAIL_POSTFIX"
+      ;;
+    "kibana-performance")
+      EMAIL="kibana-ci-access-perf-stats@$GCLOUD_EMAIL_POSTFIX"
+      ;;
+    "ci-artifacts.kibana.dev")
+      EMAIL="kibana-ci-access-artifacts@$GCLOUD_EMAIL_POSTFIX"
+      ;;
+    "headless_shell_staging")
+      EMAIL="kibana-ci-access-chrome-builds@$GCLOUD_EMAIL_POSTFIX"
+      ;;
+    *)
+      EMAIL="$BUCKET_NAME@$GCLOUD_EMAIL_POSTFIX"
+      ;;
+  esac
+fi
+
+
+echo "Impersonating $EMAIL"
+
+# Activate the service account
+gcloud config set auth/impersonate_service_account "$EMAIL"
+
+echo "Activated service account $EMAIL"
