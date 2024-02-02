@@ -2811,7 +2811,7 @@
       }
     }
   },
-  "elastic-ai-assistant-anonimization-fields": {
+  "elastic-ai-assistant-anonymization-fields": {
     "properties": {
       "id": {
         "type": "keyword"

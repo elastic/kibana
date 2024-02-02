@@ -3,12 +3,12 @@ info:
   title: Bulk Actions API endpoint
   version: '2023-10-31'
 paths:
-  /api/elastic_assistant/anonimization_fields/_bulk_action:
+  /api/elastic_assistant/anonymization_fields/_bulk_action:
     post:
       operationId: PerformBulkAction
       x-codegen-enabled: true
-      summary: Applies a bulk action to multiple anonimization fields
-      description: The bulk action is applied to all anonimization fields that match the filter or to the list of anonimization fields by their IDs.
+      summary: Applies a bulk action to multiple anonymization fields
+      description: The bulk action is applied to all anonymization fields that match the filter or to the list of anonymization fields by their IDs.
       tags:
         - Bulk API
       requestBody:
@@ -22,11 +22,11 @@ paths:
                 create:
                   type: array
                   items:
-                    $ref: '#/components/schemas/AnonimizationFieldCreateProps'
+                    $ref: '#/components/schemas/AnonymizationFieldCreateProps'
                 update:
                   type: array
                   items:
-                    $ref: '#/components/schemas/AnonimizationFieldUpdateProps'
+                    $ref: '#/components/schemas/AnonymizationFieldUpdateProps'
       responses:
         200:
           description: Indicates a successful call.
@@ -53,7 +53,7 @@ components:
     BulkActionSkipReason:
       type: string
       enum:
-        - ANONIMIZATION_FIELD_NOT_MODIFIED
+        - ANONYMIZATION_FIELD_NOT_MODIFIED
 
     BulkActionSkipResult:
       type: object
@@ -68,7 +68,7 @@ components:
         - id
         - skip_reason
 
-    AnonimizationFieldDetailsInError:
+    AnonymizationFieldDetailsInError:
       type: object
       properties:
         id:
@@ -78,7 +78,7 @@ components:
       required:
         - id
 
-    NormalizedAnonimizationFieldError:
+    NormalizedAnonymizationFieldError:
       type: object
       properties:
         message:
@@ -87,16 +87,16 @@ components:
           type: integer
         err_code:
           type: string
-        anonimization_fields:
+        anonymization_fields:
           type: array
           items:
-            $ref: '#/components/schemas/AnonimizationFieldDetailsInError'
+            $ref: '#/components/schemas/AnonymizationFieldDetailsInError'
       required:
         - message
         - status_code
-        - anonimization_fields
+        - anonymization_fields
 
-    AnonimizationFieldResponse:
+    AnonymizationFieldResponse:
       type: object
       required:
         - id
@@ -125,11 +125,11 @@ components:
         updated:
           type: array
           items:
-            $ref: '#/components/schemas/AnonimizationFieldResponse'
+            $ref: '#/components/schemas/AnonymizationFieldResponse'
         created:
           type: array
           items:
-            $ref: '#/components/schemas/AnonimizationFieldResponse'
+            $ref: '#/components/schemas/AnonymizationFieldResponse'
         deleted:
           type: array
           items:
@@ -170,7 +170,7 @@ components:
           type: integer
         message:
           type: string
-        anonimization_fields_count:
+        anonymization_fields_count:
           type: integer
         attributes:
           type: object
@@ -182,7 +182,7 @@ components:
             errors:
               type: array
               items:
-                $ref: '#/components/schemas/NormalizedAnonimizationFieldError'
+                $ref: '#/components/schemas/NormalizedAnonymizationFieldError'
           required:
             - results
             - summary
@@ -196,15 +196,15 @@ components:
       properties:
         query:
           type: string
-          description: Query to filter anonimization fields
+          description: Query to filter anonymization fields
         ids:
           type: array
-          description: Array of anonimization fields IDs
+          description: Array of anonymization fields IDs
           minItems: 1
           items:
             type: string
 
-    AnonimizationFieldCreateProps:
+    AnonymizationFieldCreateProps:
       type: object
       required:
         - fieldId
@@ -216,7 +216,7 @@ components:
         defaultAllowReplacement:
           type: boolean
 
-    AnonimizationFieldUpdateProps:
+    AnonymizationFieldUpdateProps:
       type: object
       required:
         - id

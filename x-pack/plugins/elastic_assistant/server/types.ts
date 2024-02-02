@@ -30,7 +30,7 @@ import { AssistantFeatures, ExecuteConnectorRequestBody } from '@kbn/elastic-ass
 import { AIAssistantConversationsDataClient } from './conversations_data_client';
 import { AIAssistantPromptsSOClient } from './saved_object/ai_assistant_prompts_so_client';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
-import { AIAssistantAnonimizationFieldsSOClient } from './saved_object/ai_assistant_anonimization_fields_so_client';
+import { AIAssistantAnonymizationFieldsSOClient } from './saved_object/ai_assistant_anonymization_fields_so_client';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;
 
@@ -100,7 +100,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   getCurrentUser: () => AuthenticatedUser | null;
   getAIAssistantConversationsDataClient: () => Promise<AIAssistantConversationsDataClient | null>;
   getAIAssistantPromptsSOClient: () => AIAssistantPromptsSOClient;
-  getAIAssistantAnonimizationFieldsSOClient: () => AIAssistantAnonimizationFieldsSOClient;
+  getAIAssistantAnonymizationFieldsSOClient: () => AIAssistantAnonymizationFieldsSOClient;
   telemetry: AnalyticsServiceSetup;
 }
 /**

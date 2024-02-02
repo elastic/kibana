@@ -987,7 +987,7 @@
     "updated_at",
     "updated_by"
   ],
-  "elastic-ai-assistant-anonimization-fields": [
+  "elastic-ai-assistant-anonymization-fields": [
     "created_at",
     "created_by",
     "default_allow",

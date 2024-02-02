@@ -32,7 +32,7 @@ export const createMockClients = () => {
       telemetry: coreMock.createSetup().analytics,
       getAIAssistantConversationsDataClient: conversationsDataClientMock.create(),
       getAIAssistantPromptsSOClient: jest.fn(),
-      getAIAssistantAnonimizationFieldsSOClient: jest.fn(),
+      getAIAssistantAnonymizationFieldsSOClient: jest.fn(),
       getSpaceId: jest.fn(),
       getCurrentUser: jest.fn(),
     },
@@ -96,7 +96,7 @@ const createElasticAssistantRequestContextMock = (
       (() => Promise<AIAssistantConversationsDataClient | null>),
 
     getAIAssistantPromptsSOClient: jest.fn(),
-    getAIAssistantAnonimizationFieldsSOClient: jest.fn(),
+    getAIAssistantAnonymizationFieldsSOClient: jest.fn(),
     getCurrentUser: jest.fn(),
     getServerBasePath: jest.fn(),
     getSpaceId: jest.fn(),

@@ -6,4 +6,4 @@
  */
 
 export * from './elastic_assistant_prompts_type';
-export * from './elastic_assistant_anonimization_fields_type';
+export * from './elastic_assistant_anonymization_fields_type';

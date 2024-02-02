@@ -13,45 +13,45 @@ import {
 } from '@kbn/core/server';
 
 import {
-  AnonimizationFieldCreateProps,
-  AnonimizationFieldResponse,
-  AnonimizationFieldUpdateProps,
+  AnonymizationFieldCreateProps,
+  AnonymizationFieldResponse,
+  AnonymizationFieldUpdateProps,
 } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import {
-  FindAnonimizationFieldsResponse,
+  FindAnonymizationFieldsResponse,
   SortOrder,
 } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
 import {
-  AssistantAnonimizationFieldSoSchema,
-  assistantAnonimizationFieldsTypeName,
-  transformSavedObjectToAssistantAnonimizationField,
-  transformSavedObjectUpdateToAssistantAnonimizationField,
-  transformSavedObjectsToFoundAssistantAnonimizationField,
-} from './elastic_assistant_anonimization_fields_type';
+  AssistantAnonymizationFieldSoSchema,
+  assistantAnonymizationFieldsTypeName,
+  transformSavedObjectToAssistantAnonymizationField,
+  transformSavedObjectUpdateToAssistantAnonymizationField,
+  transformSavedObjectsToFoundAssistantAnonymizationField,
+} from './elastic_assistant_anonymization_fields_type';
 
 export interface ConstructorOptions {
-  /** User creating, modifying, deleting, or updating the anonimization fields */
+  /** User creating, modifying, deleting, or updating the anonymization fields */
   user: string;
-  /** Saved objects client to create, modify, delete, the anonimization fields */
+  /** Saved objects client to create, modify, delete, the anonymization fields */
   savedObjectsClient: SavedObjectsClientContract;
   logger: Logger;
 }
 
 /**
- * Class for use for anonimization fields that are used for AI assistant.
+ * Class for use for anonymization fields that are used for AI assistant.
  */
-export class AIAssistantAnonimizationFieldsSOClient {
-  /** User creating, modifying, deleting, or updating the anonimization fields */
+export class AIAssistantAnonymizationFieldsSOClient {
+  /** User creating, modifying, deleting, or updating the anonymization fields */
   private readonly user: string;
 
-  /** Saved objects client to create, modify, delete, the anonimization fields */
+  /** Saved objects client to create, modify, delete, the anonymization fields */
   private readonly savedObjectsClient: SavedObjectsClientContract;
 
   /**
    * Constructs the assistant client
    * @param options
-   * @param options.user The user associated with the anonimization fields
-   * @param options.savedObjectsClient The saved objects client to create, modify, delete, an AI anonimization fields
+   * @param options.user The user associated with the anonymization fields
+   * @param options.savedObjectsClient The saved objects client to create, modify, delete, an AI anonymization fields
    */
   constructor({ user, savedObjectsClient }: ConstructorOptions) {
     this.user = user;
@@ -59,20 +59,20 @@ export class AIAssistantAnonimizationFieldsSOClient {
   }
 
   /**
-   * Fetch an anonimization field
+   * Fetch an anonymization field
    * @param options
    * @param options.id the "id" of an exception list
    * @returns The found exception list or null if none exists
    */
-  public getAnonimizationField = async (id: string): Promise<AnonimizationFieldResponse | null> => {
+  public getAnonymizationField = async (id: string): Promise<AnonymizationFieldResponse | null> => {
     const { savedObjectsClient } = this;
     if (id != null) {
       try {
-        const savedObject = await savedObjectsClient.get<AssistantAnonimizationFieldSoSchema>(
-          assistantAnonimizationFieldsTypeName,
+        const savedObject = await savedObjectsClient.get<AssistantAnonymizationFieldSoSchema>(
+          assistantAnonymizationFieldsTypeName,
           id
         );
-        return transformSavedObjectToAssistantAnonimizationField({ savedObject });
+        return transformSavedObjectToAssistantAnonymizationField({ savedObject });
       } catch (err) {
         if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
           return null;
@@ -89,11 +89,11 @@ export class AIAssistantAnonimizationFieldsSOClient {
    * This creates an agnostic space endpoint list if it does not exist. This tries to be
    * as fast as possible by ignoring conflict errors and not returning the contents of the
    * list if it already exists.
-   * @returns AssistantAnonimizationFieldSchema if it created the endpoint list, otherwise null if it already exists
+   * @returns AssistantAnonymizationFieldSchema if it created the endpoint list, otherwise null if it already exists
    */
-  public createAnonimizationFields = async (
-    items: AnonimizationFieldCreateProps[]
-  ): Promise<AnonimizationFieldResponse[]> => {
+  public createAnonymizationFields = async (
+    items: AnonymizationFieldCreateProps[]
+  ): Promise<AnonymizationFieldResponse[]> => {
     const { savedObjectsClient, user } = this;
 
     const dateNow = new Date().toISOString();
@@ -109,14 +109,14 @@ export class AIAssistantAnonimizationFieldsSOClient {
             updated_by: user,
             updated_at: dateNow,
           },
-          type: assistantAnonimizationFieldsTypeName,
+          type: assistantAnonymizationFieldsTypeName,
         };
       });
       const savedObjectsBulk =
-        await savedObjectsClient.bulkCreate<AssistantAnonimizationFieldSoSchema>(formattedItems);
+        await savedObjectsClient.bulkCreate<AssistantAnonymizationFieldSoSchema>(formattedItems);
 
       const result = savedObjectsBulk.saved_objects.map((savedObject) =>
-        transformSavedObjectToAssistantAnonimizationField({ savedObject })
+        transformSavedObjectToAssistantAnonymizationField({ savedObject })
       );
       return result;
     } catch (err) {
@@ -147,14 +147,14 @@ export class AIAssistantAnonimizationFieldsSOClient {
    * @param options.type The type of the endpoint list item (Default is "simple")
    * @returns The exception list item updated, otherwise null if not updated
    */
-  public updateAnonimizationFields = async (
-    items: AnonimizationFieldUpdateProps[]
-  ): Promise<AnonimizationFieldResponse[]> => {
+  public updateAnonymizationFields = async (
+    items: AnonymizationFieldUpdateProps[]
+  ): Promise<AnonymizationFieldResponse[]> => {
     const { savedObjectsClient, user } = this;
     const dateNow = new Date().toISOString();
 
     const existingItems = (
-      await this.findAnonimizationFields({
+      await this.findAnonymizationFields({
         page: 1,
         perPage: 1000,
         filter: items.map((updated) => `id:${updated.id}`).join(' OR '),
@@ -163,7 +163,7 @@ export class AIAssistantAnonimizationFieldsSOClient {
     ).data.reduce((res, item) => {
       res[item.id] = item;
       return res;
-    }, {} as Record<string, AnonimizationFieldResponse>);
+    }, {} as Record<string, AnonymizationFieldResponse>);
     const formattedItems = items.map((item) => {
       return {
         attributes: {
@@ -173,35 +173,35 @@ export class AIAssistantAnonimizationFieldsSOClient {
           updated_at: dateNow,
         },
         id: existingItems[item.id].id,
-        type: assistantAnonimizationFieldsTypeName,
+        type: assistantAnonymizationFieldsTypeName,
       };
     });
     const savedObjectsBulk =
-      await savedObjectsClient.bulkUpdate<AssistantAnonimizationFieldSoSchema>(formattedItems);
+      await savedObjectsClient.bulkUpdate<AssistantAnonymizationFieldSoSchema>(formattedItems);
     const result = savedObjectsBulk.saved_objects.map((savedObject) =>
-      transformSavedObjectUpdateToAssistantAnonimizationField({ savedObject })
+      transformSavedObjectUpdateToAssistantAnonymizationField({ savedObject })
     );
     return result;
   };
 
   /**
-   * Delete the anonimization field by id
+   * Delete the anonymization field by id
    * @param options
-   * @param options.id the "id" of the anonimization field
+   * @param options.id the "id" of the anonymization field
    */
-  public deleteAnonimizationFieldsByIds = async (
+  public deleteAnonymizationFieldsByIds = async (
     ids: string[]
   ): Promise<SavedObjectsBulkDeleteStatus[]> => {
     const { savedObjectsClient } = this;
 
     const res = await savedObjectsClient.bulkDelete(
-      ids.map((id) => ({ id, type: assistantAnonimizationFieldsTypeName }))
+      ids.map((id) => ({ id, type: assistantAnonymizationFieldsTypeName }))
     );
     return res.statuses;
   };
 
   /**
-   * Finds anonimization fields given a set of criteria.
+   * Finds anonymization fields given a set of criteria.
    * @param options
    * @param options.filter The filter to apply in the search
    * @param options.perPage How many per page to return
@@ -209,9 +209,9 @@ export class AIAssistantAnonimizationFieldsSOClient {
    * @param options.pit The Point in Time (pit) id if there is one, otherwise "undefined" can be sent in
    * @param options.sortField The sort field string if there is one, otherwise "undefined" can be sent in
    * @param options.sortOrder The sort order of "asc" or "desc", otherwise "undefined" can be sent in
-   * @returns The found anonimization fields or null if nothing is found
+   * @returns The found anonymization fields or null if nothing is found
    */
-  public findAnonimizationFields = async ({
+  public findAnonymizationFields = async ({
     perPage,
     page,
     sortField,
@@ -225,20 +225,20 @@ export class AIAssistantAnonimizationFieldsSOClient {
     sortOrder?: SortOrder;
     filter?: string;
     fields?: string[];
-  }): Promise<FindAnonimizationFieldsResponse> => {
+  }): Promise<FindAnonymizationFieldsResponse> => {
     const { savedObjectsClient } = this;
 
     const savedObjectsFindResponse =
-      await savedObjectsClient.find<AssistantAnonimizationFieldSoSchema>({
+      await savedObjectsClient.find<AssistantAnonymizationFieldSoSchema>({
         filter,
         page,
         perPage,
         sortField,
         sortOrder,
-        type: assistantAnonimizationFieldsTypeName,
+        type: assistantAnonymizationFieldsTypeName,
         fields,
       });
 
-    return transformSavedObjectsToFoundAssistantAnonimizationField({ savedObjectsFindResponse });
+    return transformSavedObjectsToFoundAssistantAnonymizationField({ savedObjectsFindResponse });
   };
 }

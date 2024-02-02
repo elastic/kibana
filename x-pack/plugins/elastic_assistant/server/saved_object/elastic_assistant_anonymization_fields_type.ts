@@ -12,12 +12,12 @@ import type {
   SavedObjectsType,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
-import { AnonimizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
-import { FindAnonimizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
+import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
 
-export const assistantAnonimizationFieldsTypeName = 'elastic-ai-assistant-anonimization-fields';
+export const assistantAnonymizationFieldsTypeName = 'elastic-ai-assistant-anonymization-fields';
 
-export const assistantAnonimizationFieldsTypeMappings: SavedObjectsType['mappings'] = {
+export const assistantAnonymizationFieldsTypeMappings: SavedObjectsType['mappings'] = {
   properties: {
     id: {
       type: 'keyword',
@@ -46,11 +46,11 @@ export const assistantAnonimizationFieldsTypeMappings: SavedObjectsType['mapping
   },
 };
 
-export const transformSavedObjectToAssistantAnonimizationField = ({
+export const transformSavedObjectToAssistantAnonymizationField = ({
   savedObject,
 }: {
-  savedObject: SavedObject<AssistantAnonimizationFieldSoSchema>;
-}): AnonimizationFieldResponse => {
+  savedObject: SavedObject<AssistantAnonymizationFieldSoSchema>;
+}): AnonymizationFieldResponse => {
   const {
     version: _version,
     attributes: {
@@ -79,7 +79,7 @@ export const transformSavedObjectToAssistantAnonimizationField = ({
   };
 };
 
-export interface AssistantAnonimizationFieldSoSchema {
+export interface AssistantAnonymizationFieldSoSchema {
   created_at: string;
   created_by: string;
   field_id: string;
@@ -89,19 +89,19 @@ export interface AssistantAnonimizationFieldSoSchema {
   updated_by: string;
 }
 
-export const assistantAnonimizationFieldsType: SavedObjectsType = {
-  name: assistantAnonimizationFieldsTypeName,
+export const assistantAnonymizationFieldsType: SavedObjectsType = {
+  name: assistantAnonymizationFieldsTypeName,
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX, // todo: generic
   hidden: false,
   namespaceType: 'multiple-isolated',
-  mappings: assistantAnonimizationFieldsTypeMappings,
+  mappings: assistantAnonymizationFieldsTypeMappings,
 };
 
-export const transformSavedObjectUpdateToAssistantAnonimizationField = ({
+export const transformSavedObjectUpdateToAssistantAnonymizationField = ({
   savedObject,
 }: {
-  savedObject: SavedObjectsUpdateResponse<AssistantAnonimizationFieldSoSchema>;
-}): AnonimizationFieldResponse => {
+  savedObject: SavedObjectsUpdateResponse<AssistantAnonymizationFieldSoSchema>;
+}): AnonymizationFieldResponse => {
   const dateNow = new Date().toISOString();
   const {
     version: _version,
@@ -129,14 +129,14 @@ export const transformSavedObjectUpdateToAssistantAnonimizationField = ({
   };
 };
 
-export const transformSavedObjectsToFoundAssistantAnonimizationField = ({
+export const transformSavedObjectsToFoundAssistantAnonymizationField = ({
   savedObjectsFindResponse,
 }: {
-  savedObjectsFindResponse: SavedObjectsFindResponse<AssistantAnonimizationFieldSoSchema>;
-}): FindAnonimizationFieldsResponse => {
+  savedObjectsFindResponse: SavedObjectsFindResponse<AssistantAnonymizationFieldSoSchema>;
+}): FindAnonymizationFieldsResponse => {
   return {
     data: savedObjectsFindResponse.saved_objects.map((savedObject) =>
-      transformSavedObjectToAssistantAnonimizationField({ savedObject })
+      transformSavedObjectToAssistantAnonymizationField({ savedObject })
     ),
     page: savedObjectsFindResponse.page,
     perPage: savedObjectsFindResponse.per_page,

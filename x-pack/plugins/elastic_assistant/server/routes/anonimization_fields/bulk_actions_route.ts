@@ -10,13 +10,13 @@ import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/s
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
-  ELASTIC_AI_ASSISTANT_ANONIMIZATION_FIELDS_URL_BULK_ACTION,
+  ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
 } from '@kbn/elastic-assistant-common';
 
 import { SavedObjectError } from '@kbn/core/types';
 import {
-  AnonimizationFieldResponse,
+  AnonymizationFieldResponse,
   BulkActionSkipResult,
   BulkCrudActionResponse,
   BulkCrudActionResults,
@@ -24,7 +24,7 @@ import {
   PerformBulkActionRequestBody,
   PerformBulkActionResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
-import { ANONIMIZATION_FIELDS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
+import { ANONYMIZATION_FIELDS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildRouteValidationWithZod } from '../route_validation';
 import { buildResponse } from '../utils';
@@ -32,7 +32,7 @@ import { buildResponse } from '../utils';
 export interface BulkOperationError {
   message: string;
   status?: number;
-  anonimizationField: {
+  anonymizationField: {
     id: string;
     name: string;
   };
@@ -50,8 +50,8 @@ const buildBulkResponse = (
     skipped = [],
   }: {
     errors?: SavedObjectError[];
-    updated?: AnonimizationFieldResponse[];
-    created?: AnonimizationFieldResponse[];
+    updated?: AnonymizationFieldResponse[];
+    created?: AnonymizationFieldResponse[];
     deleted?: string[];
     skipped?: BulkActionSkipResult[];
   }
@@ -92,21 +92,21 @@ const buildBulkResponse = (
 
   const responseBody: BulkCrudActionResponse = {
     success: true,
-    anonimization_fields_count: summary.total,
+    anonymization_fields_count: summary.total,
     attributes: { results, summary },
   };
 
   return response.ok({ body: responseBody });
 };
 
-export const bulkActionAnonimizationFieldsRoute = (
+export const bulkActionAnonymizationFieldsRoute = (
   router: ElasticAssistantPluginRouter,
   logger: Logger
 ) => {
   router.versioned
     .post({
       access: 'public',
-      path: ELASTIC_AI_ASSISTANT_ANONIMIZATION_FIELDS_URL_BULK_ACTION,
+      path: ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
       options: {
         tags: ['access:elasticAssistant'],
         timeout: {
@@ -127,9 +127,9 @@ export const bulkActionAnonimizationFieldsRoute = (
         const { body } = request;
         const assistantResponse = buildResponse(response);
 
-        if (body?.update && body.update?.length > ANONIMIZATION_FIELDS_TABLE_MAX_PAGE_SIZE) {
+        if (body?.update && body.update?.length > ANONYMIZATION_FIELDS_TABLE_MAX_PAGE_SIZE) {
           return assistantResponse.error({
-            body: `More than ${ANONIMIZATION_FIELDS_TABLE_MAX_PAGE_SIZE} ids sent for bulk edit action.`,
+            body: `More than ${ANONYMIZATION_FIELDS_TABLE_MAX_PAGE_SIZE} ids sent for bulk edit action.`,
             statusCode: 400,
           });
         }
@@ -141,27 +141,27 @@ export const bulkActionAnonimizationFieldsRoute = (
         request.events.completed$.subscribe(() => abortController.abort());
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant']);
-          const dataClient = await ctx.elasticAssistant.getAIAssistantAnonimizationFieldsSOClient();
+          const dataClient = await ctx.elasticAssistant.getAIAssistantAnonymizationFieldsSOClient();
 
           const docsCreated =
             body.create && body.create.length > 0
-              ? await dataClient.createAnonimizationFields(body.create)
+              ? await dataClient.createAnonymizationFields(body.create)
               : [];
           const docsUpdated =
             body.update && body.update.length > 0
-              ? await dataClient.updateAnonimizationFields(body.update)
+              ? await dataClient.updateAnonymizationFields(body.update)
               : [];
-          const docsDeleted = await dataClient.deleteAnonimizationFieldsByIds(
+          const docsDeleted = await dataClient.deleteAnonymizationFieldsByIds(
             body.delete?.ids ?? []
           );
 
-          const created = await dataClient?.findAnonimizationFields({
+          const created = await dataClient?.findAnonymizationFields({
             page: 1,
             perPage: 1000,
             filter: docsCreated.map((updatedId) => `id:${updatedId}`).join(' OR '),
             fields: ['id'],
           });
-          const updated = await dataClient?.findAnonimizationFields({
+          const updated = await dataClient?.findAnonymizationFields({
             page: 1,
             perPage: 1000,
             filter: docsUpdated.map((updatedId) => `id:${updatedId}`).join(' OR '),
