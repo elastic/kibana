@@ -7,7 +7,7 @@
 
 import React, { ReactNode, useEffect, useMemo } from 'react';
 import ReactDOM from 'react-dom';
-import { EuiPanel } from '@elastic/eui';
+import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 export interface Props {
   children: ReactNode;
@@ -39,6 +39,7 @@ export function SearchBarPortal({ children, containerRef }: Props) {
   return (
     <InPortal node={portalNode}>
       <EuiPanel hasShadow={false} borderRadius="none" hasBorder={true} color="subdued">
+        <EuiSpacer size="s" />
         {children}
       </EuiPanel>
     </InPortal>

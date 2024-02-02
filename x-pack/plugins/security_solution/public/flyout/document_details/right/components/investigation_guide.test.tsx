@@ -16,7 +16,6 @@ import {
   INVESTIGATION_GUIDE_TEST_ID,
 } from './test_ids';
 import { mockContextValue } from '../mocks/mock_context';
-import { mockFlyoutContextValue } from '../../shared/mocks/mock_flyout_context';
 import type { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
@@ -24,6 +23,8 @@ import { LeftPanelInvestigationTab, DocumentDetailsLeftPanelKey } from '../../le
 
 jest.mock('../../shared/hooks/use_investigation_guide');
 jest.mock('@kbn/expandable-flyout', () => ({ useExpandableFlyoutApi: jest.fn() }));
+
+const mockFlyoutContextValue = { openLeftPanel: jest.fn() };
 
 const NO_DATA_MESSAGE = 'Investigation guideThere’s no investigation guide for this rule.';
 const PREVIEW_MESSAGE = 'Investigation guide is not available in alert preview.';
