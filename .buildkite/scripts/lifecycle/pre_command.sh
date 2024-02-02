@@ -151,15 +151,6 @@ export GCS_SA_CDN_QA_EMAIL
 GCS_SA_CDN_QA_BUCKET="$(vault_get gcs-sa-cdn-qa bucket)"
 export GCS_SA_CDN_QA_BUCKET
 
-# Export and activate service account proxy
-GOOGLE_APPLICATION_CREDENTIALS="$(mktemp -d)/kibana-gcloud-service-account.json"
-export GOOGLE_APPLICATION_CREDENTIALS
-vault_get kibana-ci-sa-proxy-key key | base64 -d > "$GOOGLE_APPLICATION_CREDENTIALS"
-if [[ -x "$(command -v gcloud)" ]]; then
-  gcloud auth activate-service-account --key-file="$GOOGLE_APPLICATION_CREDENTIALS"
-fi
-
-
 # Setup Failed Test Reporter Elasticsearch credentials
 {
   TEST_FAILURES_ES_CLOUD_ID=$(vault_get failed_tests_reporter_es cloud_id)
@@ -175,6 +166,14 @@ fi
 BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE="$HOME/.kibana-ci-bazel-remote-cache-local-dev.json"
 export BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE
 vault_get kibana-ci-bazel-remote-cache-local-dev service_account_json > "$BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE"
+
+# Export and activate service account proxy
+GOOGLE_APPLICATION_CREDENTIALS="$(mktemp -d)/kibana-gcloud-service-account.json"
+export GOOGLE_APPLICATION_CREDENTIALS
+vault_get kibana-ci-sa-proxy-key key | base64 -d > "$GOOGLE_APPLICATION_CREDENTIALS"
+if [[ -x "$(command -v gcloud)" ]]; then
+  gcloud auth activate-service-account --key-file="$GOOGLE_APPLICATION_CREDENTIALS"
+fi
 
 PIPELINE_PRE_COMMAND=${PIPELINE_PRE_COMMAND:-".buildkite/scripts/lifecycle/pipelines/$BUILDKITE_PIPELINE_SLUG/pre_command.sh"}
 if [[ -f "$PIPELINE_PRE_COMMAND" ]]; then
