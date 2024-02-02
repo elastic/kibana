@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import type { PartialRuleDiff, RuleFieldsDiff } from '../../../../../common/api/detection_engine';
-import { getFormattedFieldDiff } from '../../logic/rule_details/get_formatted_field_diff';
+import { getFormattedFieldDiff } from './per_field_diff/get_formatted_field_diff';
 import { UPGRADE_FIELD_ORDER } from './constants';
 import { RuleDiffHeaderBar, RuleDiffSection } from './diff_components';
 import { getSectionedFieldDiffs } from './helpers';

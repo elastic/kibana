@@ -14,11 +14,6 @@ import { RuleDiffPanelWrapper } from './panel_wrapper';
 import type { FormattedFieldDiff, FieldDiff } from '../../../model/rule_details/rule_field_diff';
 import { fieldToDisplayNameMap } from './translations';
 
-export interface FieldDiffComponentProps {
-  ruleDiffs: FormattedFieldDiff;
-  fieldName: string;
-}
-
 const SubFieldComponent = ({
   currentVersion,
   targetVersion,
@@ -47,6 +42,11 @@ const SubFieldComponent = ({
     </EuiFlexGroup>
   );
 };
+
+export interface FieldDiffComponentProps {
+  ruleDiffs: FormattedFieldDiff;
+  fieldName: string;
+}
 
 export const FieldGroupDiffComponent = ({
   ruleDiffs,
