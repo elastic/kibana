@@ -29,7 +29,10 @@ function help() {
 
       ${availableCommands.join('\n      ')}
 
-    To start serverless instance use '--projectType' flag as shortcut:
+    To start a serverless instance use the 'serverless' command with
+    '--projectType' flag or use the '--serverless=<ProjectType>'
+    shortcut, for example:
+
       es --serverless=es
 
     Global options:
