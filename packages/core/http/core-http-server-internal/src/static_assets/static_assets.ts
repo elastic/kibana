@@ -40,6 +40,13 @@ export interface InternalStaticAssets {
   prependPublicUrl(pathname: string): string;
 }
 
+/** @internal */
+export interface StaticAssetsParams {
+  basePath: BasePath;
+  cdnConfig: CdnConfig;
+  shaDigest: string;
+}
+
 /**
  * Convention is for trailing slashes in pathnames are stripped.
  */
@@ -48,7 +55,7 @@ export class StaticAssets implements InternalStaticAssets {
   private readonly assetsServerPathBase: string;
   private readonly hasCdnHost: boolean;
 
-  constructor(basePath: BasePath, cdnConfig: CdnConfig, shaDigest: string) {
+  constructor({ basePath, cdnConfig, shaDigest }: StaticAssetsParams) {
     const cdnBaseHref = cdnConfig.baseHref;
     if (cdnBaseHref) {
       this.hasCdnHost = true;

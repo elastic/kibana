@@ -48,7 +48,7 @@ describe('registerBundleRoutes', () => {
   beforeEach(() => {
     router = httpServiceMock.createRouter();
     const basePath = httpServiceMock.createBasePath('/server-base-path') as unknown as BasePath;
-    staticAssets = new StaticAssets(basePath, {} as any, 'sha');
+    staticAssets = new StaticAssets({ basePath, cdnConfig: {} as any, shaDigest: 'sha' });
   });
 
   afterEach(() => {

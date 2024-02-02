@@ -276,11 +276,11 @@ export class HttpServer {
     this.setupResponseLogging();
     this.setupGracefulShutdownHandlers();
 
-    const staticAssets = new StaticAssets(
-      basePathService,
-      config.cdn,
-      this.env.packageInfo.buildShaShort
-    );
+    const staticAssets = new StaticAssets({
+      basePath: basePathService,
+      cdnConfig: config.cdn,
+      shaDigest: this.env.packageInfo.buildShaShort,
+    });
 
     return {
       registerRouter: this.registerRouter.bind(this),
