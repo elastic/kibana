@@ -5540,10 +5540,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-api-client@link:packages/kbn-reporting-api-client":
-  version "0.0.0"
-  uid ""
-
 "@kbn/reporting-common@link:packages/kbn-reporting/common":
   version "0.0.0"
   uid ""

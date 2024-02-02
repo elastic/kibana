@@ -1,5 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/reporting-api-client",
-  "owner": "@elastic/appex-sharedux"
-}

@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core/public';
 import { ILicense } from '@kbn/licensing-plugin/public';
 import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
-import type { ReportingAPIClient } from '@kbn/reporting-api-client/reporting_api_client';
+import type { ReportingAPIClient } from '@kbn/reporting-public/reporting_api_client';
 
 export interface ExportPanelShareOpts {
   apiClient: ReportingAPIClient;

@@ -33,7 +33,7 @@ import type { ClientConfigType } from '@kbn/reporting-public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
-import { ReportingAPIClient } from '@kbn/reporting-api-client/reporting_api_client';
+import { ReportingAPIClient } from '@kbn/reporting-public/reporting_api_client';
 import {
   getSharedComponents,
   reportingScreenshotShareProvider,

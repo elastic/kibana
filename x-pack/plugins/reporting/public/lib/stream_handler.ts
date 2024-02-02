@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, JOB_STATUS } from '@kbn/reporting-common';
 import { JobId } from '@kbn/reporting-common/types';
 
-import { ReportingAPIClient } from '@kbn/reporting-api-client/reporting_api_client';
+import { ReportingAPIClient } from '@kbn/reporting-public/reporting_api_client';
 import {
   getFailureToast,
   getGeneralErrorToast,

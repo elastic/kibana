@@ -7,15 +7,13 @@
 
 import React from 'react';
 
-import { useInternalApiClient } from '@kbn/reporting-api-client/reporting_api_client';
-import { ListingProps as Props } from '.';
-import { useKibana } from '../shared_imports';
-
 import './report_listing.scss';
+import { useInternalApiClient, useKibana } from '@kbn/reporting-public';
 import { ReportListingStateful } from './stateful/report_listing_stateful';
 import { ReportListingDefault } from './default/report_listing_default';
+import { ListingProps } from '.';
 
-export const ReportListing = (props: Props) => {
+export const ReportListing = (props: ListingProps) => {
   const { apiClient } = useInternalApiClient();
   const {
     services: {

@@ -21,7 +21,7 @@ import { BaseParams, JobId, ManagementLinkFn, ReportApiJSON } from '@kbn/reporti
 import rison from '@kbn/rison';
 import moment from 'moment';
 import { stringify } from 'query-string';
-import { Job, add } from '@kbn/reporting-public';
+import { Job, add } from '.';
 
 /*
  * For convenience, apps do not have to provide the browserTimezone and Kibana version.

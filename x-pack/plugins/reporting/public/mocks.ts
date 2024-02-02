@@ -7,7 +7,7 @@
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { getSharedComponents } from '@kbn/reporting-share';
-import { ReportingAPIClient } from '@kbn/reporting-api-client/reporting_api_client';
+import { ReportingAPIClient } from '@kbn/reporting-public/reporting_api_client';
 import { ReportingSetup } from '.';
 
 type Setup = jest.Mocked<ReportingSetup>;

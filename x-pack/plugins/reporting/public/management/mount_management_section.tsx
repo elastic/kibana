@@ -19,11 +19,11 @@ import type { ClientConfigType } from '@kbn/reporting-public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import {
   InternalApiClientProvider,
-  type ReportingAPIClient,
-} from '@kbn/reporting-api-client/reporting_api_client';
+  ReportingAPIClient,
+  KibanaContext,
+} from '@kbn/reporting-public';
 import { ReportListing } from '.';
 import { PolicyStatusContextProvider } from '../lib/default_status_context';
-import type { KibanaContext } from '../types';
 
 export async function mountManagementSection(
   coreStart: CoreStart,
@@ -47,7 +47,7 @@ export async function mountManagementSection(
     <KibanaThemeProvider theme={{ theme$: params.theme$ }}>
       <I18nProvider>
         <KibanaContextProvider services={services}>
-          <InternalApiClientProvider apiClient={apiClient}>
+          <InternalApiClientProvider apiClient={apiClient} http={services.http}>
             <PolicyStatusContextProvider config={config}>
               <ReportListing
                 apiClient={apiClient}

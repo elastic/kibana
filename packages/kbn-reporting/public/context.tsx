@@ -8,7 +8,6 @@
 
 import type { HttpSetup } from '@kbn/core/public';
 import React, { createContext, useContext, FunctionComponent } from 'react';
-
 import { ReportingAPIClient } from './reporting_api_client';
 
 interface ContextValue {
