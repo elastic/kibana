@@ -16,12 +16,7 @@ import {
 import type { GlobalUrlParam } from '../../store/global_url_param';
 import { globalUrlParamActions } from '../../store/global_url_param';
 import { mockHistory } from '../route/mocks';
-import {
-  createMockStore,
-  createSecuritySolutionStorageMock,
-  mockGlobalState,
-  TestProviders,
-} from '../../mock';
+import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import type { LinkInfo } from '../../links';
 import { SecurityPageName } from '../../../app/types';
 
@@ -54,8 +49,6 @@ jest.mock('../../links', () => ({
 }));
 
 describe('global query string', () => {
-  const { storage } = createSecuritySolutionStorageMock();
-
   const makeStore = (globalUrlParam: GlobalUrlParam) =>
     createMockStore({
       ...mockGlobalState,
