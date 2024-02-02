@@ -17,6 +17,7 @@ import {
   EuiModalHeaderTitle,
   EuiFieldText,
   EuiModal,
+  EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { MlJob } from '@elastic/elasticsearch/lib/api/types';
@@ -35,7 +36,7 @@ export interface SingleMetricViewerInitializerProps {
   job: MlJob;
   onCreate: (props: {
     panelTitle: string;
-    functionDescription: string;
+    functionDescription?: string;
     selectedDetectorIndex: number;
     selectedEntities: any;
   }) => void;
@@ -51,7 +52,7 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
   onCancel,
 }) => {
   const [panelTitle, setPanelTitle] = useState<string>(defaultTitle);
-  const [functionDescription, setFunctionDescription] = useState<string>('');
+  const [functionDescription, setFunctionDescription] = useState<string | undefined>();
   const [selectedDetectorIndex, setSelectedDetectorIndex] = useState<number>(0);
   const [selectedEntities, setSelectedEntities] = useState<any>();
 
@@ -75,6 +76,7 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
 
   return (
     <EuiModal
+      maxWidth={false}
       initialFocus="[name=panelTitle]"
       onClose={onCancel}
       data-test-subj={'mlSingleMetricViewerEmbeddableInitializer'}
@@ -108,7 +110,7 @@ export const SingleMetricViewerInitializer: FC<SingleMetricViewerInitializerProp
               isInvalid={!isPanelTitleValid}
             />
           </EuiFormRow>
-
+          <EuiSpacer />
           <SeriesControls
             selectedJobId={job.job_id}
             job={job}

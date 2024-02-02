@@ -179,7 +179,6 @@ export const EmbeddableSingleMetricViewerContainer: FC<
             <TimeSeriesExplorerEmbeddableChart
               chartWidth={chartWidth}
               dataViewsService={services[1].data.dataViews}
-              mlApiServices={mlApiServices}
               toastNotificationService={toastNotificationService}
               appStateHandler={appStateHandler}
               autoZoomDuration={autoZoomDuration}

@@ -70,7 +70,7 @@ const getDefaultFieldConfig = (
 interface SeriesControlsProps {
   appStateHandler: Function;
   bounds: any;
-  functionDescription: string;
+  functionDescription?: string;
   job?: CombinedJob | MlJob;
   selectedDetectorIndex: number;
   selectedEntities: Record<string, any>;
@@ -331,6 +331,7 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
           );
         })}
         <PlotByFunctionControls
+          job={job}
           selectedJobId={selectedJobId}
           selectedDetectorIndex={selectedDetectorIndex}
           selectedEntities={selectedEntities}

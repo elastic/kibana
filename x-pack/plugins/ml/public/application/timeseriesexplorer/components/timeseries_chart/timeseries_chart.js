@@ -720,7 +720,7 @@ class TimeseriesChartIntl extends Component {
     // Get the scaled date format to use for x axis tick labels.
     const timeBuckets = this.context?.services?.mlServices?.mlUtilsService?.mlTimeBuckets
       ? this.context.services.mlServices.mlUtilsService.mlTimeBuckets.getTimeBucketsFromCache()
-      : getTimeBucketsFromCache(); // TODO - move everything to service
+      : getTimeBucketsFromCache();
     timeBuckets.setInterval('auto');
     timeBuckets.setBounds(bounds);
     const xAxisTickFormat = timeBuckets.getScaledDateFormat();

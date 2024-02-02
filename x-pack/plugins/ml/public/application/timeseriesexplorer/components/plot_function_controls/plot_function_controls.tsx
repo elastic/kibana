@@ -9,6 +9,7 @@ import React, { useCallback, useEffect } from 'react';
 import { EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
+import { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import { mlJobService } from '../../../services/job_service';
 import { getFunctionDescription, isMetricDetector } from '../../get_function_description';
 import { useToastNotificationService } from '../../../services/toast_notification_service';
@@ -36,6 +37,7 @@ const plotByFunctionOptions = [
 ];
 export const PlotByFunctionControls = ({
   functionDescription,
+  job,
   setFunctionDescription,
   selectedDetectorIndex,
   selectedJobId,
@@ -43,6 +45,7 @@ export const PlotByFunctionControls = ({
   entityControlsCount,
 }: {
   functionDescription: undefined | string;
+  job?: CombinedJob | MlJob;
   setFunctionDescription: (func: string) => void;
   selectedDetectorIndex: number;
   selectedJobId: string;
@@ -76,7 +79,7 @@ export const PlotByFunctionControls = ({
     if (functionDescription !== undefined) {
       return;
     }
-    const selectedJob = mlJobService.getJob(selectedJobId);
+    const selectedJob = (job ?? mlJobService.getJob(selectedJobId)) as CombinedJob;
     // if no controls, it's okay to fetch
     // if there are series controls, only fetch if user has selected something
     const validEntities =
