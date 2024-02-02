@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'header', 'discover', 'timePicker', 'dashboard']);
@@ -45,8 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.unsetTime();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/104578
-    describe.skip('Customize time range', () => {
+    describe('Customize time range', () => {
       it('should be possible to customize time range for saved searches on dashboards', async () => {
         await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.clickNewDashboard();
@@ -56,6 +56,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await panelActions.customizePanel();
         await dashboardCustomizePanel.enableCustomTimeRange();
+        await retry.waitFor('superDatePickerToggleQuickMenuButton', async () => {
+          return await testSubjects.exists('superDatePickerToggleQuickMenuButton');
+        });
         await dashboardCustomizePanel.openDatePickerQuickMenu();
         await dashboardCustomizePanel.clickCommonlyUsedTimeRange('Last_90 days');
         await dashboardCustomizePanel.clickSaveButton();
