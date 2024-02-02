@@ -175,7 +175,7 @@ export class ObservabilityAIAssistantClient {
                   name: 'recall',
                   arguments: JSON.stringify({
                     queries: [],
-                    contexts: [],
+                    categories: [],
                   }),
                   trigger: MessageRole.Assistant as const,
                 },
@@ -625,16 +625,16 @@ export class ObservabilityAIAssistantClient {
 
   recall = async ({
     queries,
-    contexts,
+    categories,
   }: {
     queries: string[];
-    contexts?: string[];
+    categories?: string[];
   }): Promise<{ entries: RecalledEntry[] }> => {
     return this.dependencies.knowledgeBaseService.recall({
       namespace: this.dependencies.namespace,
       user: this.dependencies.user,
       queries,
-      contexts,
+      categories,
       asCurrentUser: this.dependencies.esClient.asCurrentUser,
     });
   };
