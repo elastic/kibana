@@ -7,20 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SHOW_TOP_VALUES = i18n.translate(
-  'xpack.securitySolution.expandedValue.showTopN.showTopValues',
-  {
-    defaultMessage: 'Show top values',
-  }
-);
-
-export const HIDE_TOP_VALUES = i18n.translate(
-  'xpack.securitySolution.expandedValue.hideTopValues.HideTopValues',
-  {
-    defaultMessage: 'Hide top values',
-  }
-);
-
 export const VIEW_HOST_SUMMARY = i18n.translate(
   'xpack.securitySolution.expandedValue.links.viewHostSummary',
   {

@@ -24,50 +24,6 @@ export type ColumnHeaderType = 'not-filtered' | 'text-filter';
 /** Uniquely identifies a column */
 export type ColumnId = string;
 
-/**
- * A `DataTableCellAction` function accepts `data`, where each row of data is
- * represented as a `TimelineNonEcsData[]`. For example, `data[0]` would
- * contain a `TimelineNonEcsData[]` with the first row of data.
- *
- * A `DataTableCellAction` returns a function that has access to all the
- * `EuiDataGridColumnCellActionProps`, _plus_ access to `data`,
- *  which enables code like the following example to be written:
- *
- * Example:
- * ```
- * ({ data }: { data: TimelineNonEcsData[][] }) => ({ rowIndex, columnId, Component }) => {
- *   const value = getMappedNonEcsValue({
- *     data: data[rowIndex], // access a specific row's values
- *     fieldName: columnId,
- *   });
- *
- *   return (
- *     <Component onClick={() => alert(`row ${rowIndex} col ${columnId} has value ${value}`)} iconType="heart">
- *       {'Love it'}
- *      </Component>
- *   );
- * };
- * ```
- */
-export type DataTableCellAction = ({
-  browserFields,
-  data,
-  ecsData,
-  header,
-  pageSize,
-  scopeId,
-  closeCellPopover,
-}: {
-  browserFields: BrowserFields;
-  /** each row of data is represented as one TimelineNonEcsData[] */
-  data: TimelineNonEcsData[][];
-  ecsData: Ecs[];
-  header?: ColumnHeaderOptions;
-  pageSize: number;
-  scopeId: string;
-  closeCellPopover?: () => void;
-}) => (props: EuiDataGridColumnCellActionProps) => ReactNode;
-
 /** The specification of a column header */
 export type ColumnHeaderOptions = Pick<
   EuiDataGridColumn,

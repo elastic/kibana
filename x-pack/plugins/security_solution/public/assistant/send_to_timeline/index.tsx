@@ -175,7 +175,7 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
                 alias: dataProviders[0].name,
                 key: 'query',
                 value: dataProviders[0].kqlQuery,
-                index: timelineDataViewId,
+                index: timelineDataViewId ?? undefined,
               },
               query: JSON.parse(dataProviders[0].kqlQuery),
             };
