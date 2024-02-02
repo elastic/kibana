@@ -74,4 +74,8 @@ export const alertProducersData: Record<AlertConsumers, AlertProducerData> = {
     displayName: STACK_MANAGEMENT_DISPLAY_NAME,
     icon: 'managementApp',
   },
+  [AlertConsumers.EXAMPLE]: {
+    displayName: 'Example',
+    icon: 'beaker',
+  },
 };

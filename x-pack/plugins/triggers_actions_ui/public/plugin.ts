@@ -412,6 +412,7 @@ export class Plugin
             expressions: pluginsStart.expressions,
             isServerless: !!pluginsStart.serverless,
             fieldFormats: pluginsStart.fieldFormats,
+            lens: pluginsStart.lens,
           });
         },
       });
