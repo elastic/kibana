@@ -6,7 +6,8 @@
  */
 export interface ITaskMetricsService {
   start(name: string): Trace;
-  end(trace: Trace, error?: Error): void;
+  end(trace: Trace, error?: Error): Promise<void>;
+  createTaskMetric(trace: Trace, error?: Error): TaskMetric;
 }
 
 export interface Trace {

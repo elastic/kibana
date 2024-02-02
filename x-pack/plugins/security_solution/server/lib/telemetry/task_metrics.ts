@@ -12,6 +12,7 @@ import { TelemetryChannel } from './types';
 
 export class TaskMetricsService implements ITaskMetricsService {
   private readonly logger: TelemetryLogger;
+  private readonly useLegacySender: boolean = false;
 
   constructor(logger: Logger, private readonly sender: ITelemetryEventsSender) {
     this.logger = newTelemetryLogger(logger.get('telemetry_events'));
@@ -24,15 +25,19 @@ export class TaskMetricsService implements ITaskMetricsService {
     };
   }
 
-  public end(trace: Trace, error?: Error): void {
-    this.logger.l(`Sending metric ${trace.name}...`);
+  public async end(trace: Trace, error?: Error): Promise<void> {
+    this.logger.l(`>>> Sending metric ${trace.name}...`);
 
     const event = this.createTaskMetric(trace, error);
 
-    this.sender.sendAsync(TelemetryChannel.TASK_METRICS, [event]);
+    if (this.useLegacySender) {
+      await this.sender.sendOnDemand(TelemetryChannel.TASK_METRICS, [event]);
+    } else {
+      this.sender.sendAsync(TelemetryChannel.TASK_METRICS, [event]);
+    }
   }
 
-  private createTaskMetric(trace: Trace, error?: Error): TaskMetric {
+  public createTaskMetric(trace: Trace, error?: Error): TaskMetric {
     const finishedAt = performance.now();
     return {
       name: trace.name,
