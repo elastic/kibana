@@ -126,7 +126,6 @@ export function trainedModelsRoutes(
               }
             }
           } catch (e) {
-            mlLog.warn('Unable to retrieve inference API information');
             mlLog.debug(e);
           }
 
