@@ -300,7 +300,6 @@ export const ActionTypeForm = ({
           }
         }
       })();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     },
     !isSystemAction ? [actionItem.group, actionItem.frequency?.summary] : []
   );
