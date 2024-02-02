@@ -17,7 +17,7 @@ export class CdnConfig {
   private readonly url: undefined | URL;
   constructor(url?: string) {
     if (url) {
-      this.url = new URL(url); // This will throw for invalid URLs
+      this.url = new URL(url); // This will throw for invalid URLs, although should be validated before reaching this point
     }
   }
 
