@@ -14,7 +14,6 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiIconProps,
   EuiLink,
   EuiOutsideClickDetector,
@@ -844,36 +843,11 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
                 role="textbox"
                 data-test-subj={this.props.dataTestSubj || 'queryInput'}
                 isInvalid={this.props.isInvalid}
+                isClearable={this.props.isClearable}
+                icon={this.props.iconType}
               >
                 {this.forwardNewValueIfNeeded(this.getQueryString())}
               </EuiTextArea>
-              {/* EUI TODO: This will need to be fixed before the Emotion conversion */}
-              {this.props.iconType ? (
-                <div className="euiFormControlLayoutIcons euiFormControlLayoutIcons--absolute euiFormControlLayoutIcons--left">
-                  <EuiIcon
-                    className="euiFormControlLayoutCustomIcon__icon"
-                    aria-hidden="true"
-                    type={this.props.iconType}
-                  />
-                </div>
-              ) : null}
-              {this.props.isClearable && !this.props.isDisabled && this.props.query.query ? (
-                <div className="euiFormControlLayoutIcons euiFormControlLayoutIcons--absolute euiFormControlLayoutIcons--right">
-                  <button
-                    type="button"
-                    className="euiFormControlLayoutClearButton"
-                    title={strings.getQueryBarClearInputLabel()}
-                    onClick={() => {
-                      this.onQueryStringChange('');
-                      if (this.props.autoSubmit) {
-                        this.onSubmit({ query: '', language: this.props.query.language });
-                      }
-                    }}
-                  >
-                    <EuiIcon className="euiFormControlLayoutClearButton__icon" type="cross" />
-                  </button>
-                </div>
-              ) : null}
             </div>
             <EuiPortal>
               <SuggestionsComponent

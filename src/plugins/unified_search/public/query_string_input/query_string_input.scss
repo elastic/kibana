@@ -15,6 +15,10 @@
   overflow: visible !important; // Override EUI form control
   display: flex;
   flex: 1 1 100%;
+
+  .euiFormControlLayoutIcons {
+    bottom: 14px;
+  }
 }
 
 .kbnQueryBar__textarea {
@@ -46,20 +50,7 @@
     border-bottom-left-radius: 0;
   }
 
-  &--isClearable {
-    @include euiFormControlWithIcon($isIconOptional: false, $side: 'right');
-  }
-
   @include euiFormControlWithIcon($isIconOptional: true);
-
-  ~.euiFormControlLayoutIcons {
-    // By default form control layout icon is vertically centered, but our textarea
-    // can expand to be multi-line, so we position it with padding that matches
-    // the parent textarea padding
-    z-index: $euiZContentMenu + 1;
-    top: $euiSizeM;
-    bottom: unset;
-  }
 
   &--withPrepend {
     border-top-left-radius: 0;
