@@ -29,7 +29,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
 
   // Failing: See https://github.com/elastic/kibana/issues/175905
-  describe.skip('Cloud Posture Rules Page', function () {
+  describe('Cloud Posture Rules Page', function () {
     this.tags(['cloud_security_posture_rules_page']);
     let rule: typeof pageObjects.rule;
     let findings: typeof pageObjects.findings;
