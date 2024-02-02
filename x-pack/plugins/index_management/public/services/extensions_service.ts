@@ -44,6 +44,7 @@ export interface IndicesListColumn {
   label: string;
   order: number;
   render?: (index: Index) => ReactNode;
+  sort?: (index: Index) => any;
 }
 
 export interface ExtensionsSetup {

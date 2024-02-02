@@ -94,7 +94,8 @@ export const getPageOfIndices = createSelector(
     const sortedIndexes = sortTable(
       filteredIndices,
       tableState.sortField,
-      tableState.isSortAscending
+      tableState.isSortAscending,
+      extensionsService
     );
     const { firstItemIndex, lastItemIndex } = pager;
     const pagedIndexes = sortedIndexes.slice(firstItemIndex, lastItemIndex + 1);
