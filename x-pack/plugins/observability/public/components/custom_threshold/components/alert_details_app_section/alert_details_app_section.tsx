@@ -101,33 +101,20 @@ export default function AlertDetailsAppSection({
     id: 'custom_threshold_alert_start_annotation',
   };
 
-  const activeAlertRangeAnnotation: RangeEventAnnotationConfig = {
-    label: 'Active Alert',
+  const alertRangeAnnotation: RangeEventAnnotationConfig = {
+    label: `${alertEnd ? 'Alert duration' : 'Active alert'}`,
     type: 'manual',
     key: {
       type: 'range',
       timestamp: alertStart!,
-      endTimestamp: moment().toISOString(),
+      endTimestamp: alertEnd ?? moment().toISOString(),
     },
     color: chroma(transparentize('#F04E981A', 0.2)).hex().toUpperCase(),
-    id: 'custom_threshold_active_alert_range_annotation',
-  };
-
-  const recoveredAlertRangeAnnotation: RangeEventAnnotationConfig = {
-    label: 'Alert duration',
-    type: 'manual',
-    key: {
-      type: 'range',
-      timestamp: alertStart!,
-      endTimestamp: alertEnd ?? '',
-    },
-    color: chroma(transparentize('#F04E981A', 0.2)).hex().toUpperCase(),
-    id: 'custom_threshold_recovered_alert_range_annotation',
+    id: `custom_threshold_${alertEnd ? 'recovered' : 'active'}_alert_range_annotation`,
   };
 
   const annotations: EventAnnotationConfig[] = [];
-  annotations.push(alertStartAnnotation);
-  annotations.push(alertEnd ? recoveredAlertRangeAnnotation : activeAlertRangeAnnotation);
+  annotations.push(alertStartAnnotation, alertRangeAnnotation);
 
   useEffect(() => {
     const alertSummaryFields = [];
