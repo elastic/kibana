@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { TimeBuckets } from '@kbn/data-plugin/common';
+import moment from 'moment';
 import { FromSchema } from 'json-schema-to-ts';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -104,38 +106,31 @@ export function registerGetSLOChangeDetectionFunction({
         'kibana.alert.start': alertStart,
         metricOperation = 'avg',
       } = args;
-      const params = {
-        kqlQuery: `slo.name: "${name}*"`,
-        page: '1',
-        perPage: '25',
-      };
-      const slos = await sloClient.find.execute(params);
-      let absoluteStartTime: string | undefined;
+      const sloChangePoint = new SLOChangePoint(
+        sloClient,
+        name,
+        start,
+        end,
+        alertStart,
+        longWindow,
+        metricOperation
+      );
+      const slo = await sloChangePoint.getSLO();
+      const { start: absoluteStart, end: absoluteEnd } = sloChangePoint.getAbsoluteStartTime();
 
-      if (alertStart && longWindow) {
-        absoluteStartTime = datemath
-          .parse(`now-${longWindow}`, { forceNow: new Date(alertStart) })
-          ?.toISOString();
-      }
       const esClient = (await resources.context.core).elasticsearch.client.asCurrentUser;
 
-      const mappedItems = slos.results.map((item): SLOSourceItem => {
-        return {
-          name: item.name,
-          sourceIndex: item.indicator.params.index,
-        };
-      });
-      const index = mappedItems[0].sourceIndex;
+      const sourceIndex = slo.indicator.params.index;
       let dataView: DataView;
 
       const dataViewId = (await dataViewsClient.getIdsWithTitle()).find((id) => {
-        return id.title === index;
+        return id.title === sourceIndex;
       })?.id;
       if (dataViewId) {
         dataView = await dataViewsClient.get(dataViewId);
       } else {
         dataView = await dataViewsClient.create({
-          title: mappedItems[0].sourceIndex,
+          title: sourceIndex,
         });
       }
 
@@ -147,12 +142,13 @@ export function registerGetSLOChangeDetectionFunction({
       const results = await Promise.all(
         metricFields.map((fieldName) =>
           getChangePointForField({
-            index: mappedItems[0].sourceIndex,
+            index: sourceIndex,
             field: fieldName,
             esClient,
-            start: start || absoluteStartTime || 'now-24h',
-            end: end || 'now',
+            start: absoluteStart,
+            end: absoluteEnd,
             aggregationType: metricOperation,
+            interval: sloChangePoint.getBucketInterval().expression,
           })
         )
       );
@@ -166,7 +162,7 @@ export function registerGetSLOChangeDetectionFunction({
       return {
         content: {
           changes,
-          observedPeriodStart: start || absoluteStartTime || 'now-24h',
+          observedPeriodStart: start || sloChangePoint.alertWindowStart || 'now-24h',
           observedPeriodEnd: end || 'now',
           metricOperation,
         },
@@ -178,6 +174,86 @@ export function registerGetSLOChangeDetectionFunction({
   );
 }
 
+export class SLOChangePoint {
+  private timeBuckets = new TimeBuckets({
+    'histogram:maxBars': 1000,
+    'histogram:barTarget': 50,
+    dateFormat: 'YYYY-MM-DD',
+    'dateFormat:scaled': [
+      ['', 'HH:mm:ss.SSS'],
+      ['PT1S', 'HH:mm:ss'],
+      ['PT1M', 'HH:mm'],
+      ['PT1H', 'YYYY-MM-DD HH:mm'],
+      ['P1DT', 'YYYY-MM-DD'],
+      ['P1YT', 'YYYY'],
+    ],
+  });
+
+  constructor(
+    private sloClient: FunctionRegistrationParameters['sloClient'],
+    private name: string,
+    private start: string,
+    private end: string,
+    private alertStart: string,
+    private longWindow: string,
+    private metricOperation = 'avg'
+  ) {
+    this.setTimeBounds();
+  }
+
+  public async getSLO() {
+    const params = {
+      kqlQuery: `slo.name: "${this.name}*"`,
+      page: '1',
+      perPage: '1',
+    };
+    const findResponse = await this.sloClient.find.execute(params);
+    return findResponse.results[0];
+  }
+
+  public get alertWindowStart() {
+    if (this.alertStart && this.longWindow) {
+      return datemath
+        .parse(`now-${this.longWindow}`, { forceNow: new Date(this.alertStart) })
+        ?.valueOf();
+    }
+    return null;
+  }
+
+  public getAbsoluteStartTime() {
+    const end = this.end ? datemath.parse(this.end).valueOf() : datemath.parse('now').valueOf();
+    let start;
+    if (this.start) {
+      start = datemath.parse(this.start).valueOf();
+    } else if (this.alertWindowStart) {
+      start = datemath.parse(this.alertWindowStart).valueOf();
+    } else {
+      start = datemath.parse('now-24h').valueOf();
+    }
+    return {
+      start,
+      end,
+    };
+  }
+
+  public getTimeBound() {
+    timeBuckets.getTimeBound();
+  }
+
+  public setTimeBounds() {
+    const absoluteStartTime = this.getAbsoluteStartTime();
+    this.timeBuckets.setBounds({
+      min: moment(absoluteStartTime.start),
+      max: moment(absoluteStartTime.end),
+    });
+    this.timeBuckets.setInterval('auto');
+  }
+
+  public getBucketInterval() {
+    return this.timeBuckets.getInterval();
+  }
+}
+
 async function getChangePointForField({
   index,
   field,
@@ -185,6 +261,7 @@ async function getChangePointForField({
   start,
   end,
   aggregationType,
+  interval,
 }: {
   index: string;
   field: string;
@@ -192,6 +269,7 @@ async function getChangePointForField({
   start: string;
   end: string;
   aggregationType: 'avg' | 'min' | 'max' | 'sum';
+  interval: string;
 }) {
   return new Promise((resolve) => {
     esClient
@@ -199,9 +277,9 @@ async function getChangePointForField({
         index,
         aggregations: {
           over_time: {
-            auto_date_histogram: {
-              field: '@timestamp',
-              buckets: 40,
+            date_histogram: {
+              field: '@timestamp', // adjust to make time field dyanamic based on the data view
+              fixed_interval: interval,
             },
             aggs: {
               function_value: {

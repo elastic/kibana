@@ -7,13 +7,17 @@
 
 import { RegisterRenderFunctionDefinition } from '@kbn/observability-ai-assistant-plugin/public/types';
 import { registerSLOChangePointChartFunction } from './get_embeddable_change_point_chart';
+import type { ObservabilityPublicPluginsStart } from '../plugin';
 
 export async function registerAssistantFunctions({
   registerRenderFunction,
+  embeddablePlugin,
 }: {
   registerRenderFunction: RegisterRenderFunctionDefinition;
+  embeddablePlugin: ObservabilityPublicPluginsStart['embeddable'];
 }) {
   registerSLOChangePointChartFunction({
     registerRenderFunction,
+    embeddablePlugin,
   });
 }

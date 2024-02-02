@@ -21,12 +21,8 @@ import {
   GetSLO,
   FindSLO,
 } from '../services/slo';
-// import { registerGetApmCorrelationsFunction } from './get_apm_correlations';
-// import { registerGetApmDownstreamDependenciesFunction } from './get_apm_downstream_dependencies';
-// import { registerGetApmErrorDocumentFunction } from './get_apm_error_document';
 import { registerGetSLOListFunction } from './get_slo_list';
 import { registerGetSLOChangeDetectionFunction } from './get_slo_change_point';
-// import { registerGetApmTimeseriesFunction } from './get_apm_timeseries';
 
 export interface FunctionRegistrationParameters {
   sloClient: {
@@ -70,14 +66,6 @@ export function registerAssistantFunctions({
       logger,
     };
 
-    // const apmEventClient = await getApmEventClient(observabilityRouteHandlerResources);
-
-    // const hasData = await hasHistoricalAgentData(apmEventClient);
-
-    // if (!hasData) {
-    //   return;
-    // }
-
     const soClient = (await resources.context.core).savedObjects.client;
     const esClient = (await resources.context.core).elasticsearch.client.asCurrentUser;
     const dataViewsClient = await dataViews.dataViewsServiceFactory(soClient, esClient);
@@ -100,10 +88,6 @@ export function registerAssistantFunctions({
 
     registerGetSLOListFunction(parameters);
     registerGetSLOChangeDetectionFunction(parameters);
-    // registerGetApmErrorDocumentFunction(parameters);
-    // registerGetApmDownstreamDependenciesFunction(parameters);
-    // registerGetApmCorrelationsFunction(parameters);
-    // registerGetApmTimeseriesFunction(parameters);
 
     registerContext({
       name: 'slo',

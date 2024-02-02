@@ -10,7 +10,6 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/public/types';
 import React, { useEffect, useState, useRef } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { useKibana } from '../utils/kibana_react';
 
 import type {
   GetSLOChangePointArguments,
@@ -22,6 +21,7 @@ const fnList = ['avg', 'sum', 'min', 'max'];
 
 interface SLOChangePointChart {
   metricField: string;
+  embeddablePlugin: ObservabilityPublicPluginsStart['embeddable'];
   fn?: 'avg' | 'min' | 'max' | 'sum';
   dataView?: DataView;
   from?: string;
@@ -35,9 +35,9 @@ export default function SLOChangePointChart({
   to = 'now',
   dataView,
   fn = 'avg',
+  embeddablePlugin,
 }: SLOChangePointChart) {
   const [embeddable, setEmbeddable] = useState<any>();
-  const { embeddable: embeddablePlugin } = useKibana<ObservabilityPublicPluginsStart>().services;
   const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -76,8 +76,10 @@ export default function SLOChangePointChart({
 
 export function registerSLOChangePointChartFunction({
   registerRenderFunction,
+  embeddablePlugin,
 }: {
   registerRenderFunction: RegisterRenderFunctionDefinition;
+  embeddablePlugin: ObservabilityPublicPluginsStart['embeddable'];
 }) {
   registerRenderFunction('get_slo_change_point', (parameters) => {
     const {
@@ -101,6 +103,7 @@ export function registerSLOChangePointChartFunction({
               to={content.observedPeriodEnd}
               metricField={metric}
               fn={content.metricOperation}
+              embeddablePlugin={embeddablePlugin}
             />
           );
         })}
