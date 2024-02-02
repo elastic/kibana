@@ -5,69 +5,416 @@
  * 2.0.
  */
 
-import type { RuleFieldsDiff } from '../../../../../common/api/detection_engine';
-import type { FormattedFieldDiff } from '../../model/rule_details/rule_field_diff';
+import stringify from 'json-stable-stringify';
+import type {
+  AllFieldsDiff,
+  RuleFieldDiffsWithKqlQuery,
+  RuleFieldsDiffWithDataSource,
+} from '../../../../../common/api/detection_engine';
+import type { FormattedFieldDiff, FieldDiff } from '../../model/rule_details/rule_field_diff';
+
+const sortAndStringifyJson = (fieldValue: unknown): string => {
+  if (!fieldValue) {
+    return 'N/A';
+  }
+
+  if (typeof fieldValue === 'string') {
+    return fieldValue;
+  }
+  return stringify(fieldValue, { space: 2 });
+};
+
+const getFieldDiffsForDataSource = (
+  dataSourceThreeWayDiff: RuleFieldsDiffWithDataSource['data_source']
+): FieldDiff[] => {
+  const currentType = sortAndStringifyJson(dataSourceThreeWayDiff.current_version?.type);
+  const targetType = sortAndStringifyJson(dataSourceThreeWayDiff.target_version?.type);
+
+  const currentIndexPatterns = sortAndStringifyJson(
+    dataSourceThreeWayDiff.current_version?.type === 'index_patterns' &&
+      dataSourceThreeWayDiff.current_version?.index_patterns
+  );
+  const targetIndexPatterns = sortAndStringifyJson(
+    dataSourceThreeWayDiff.target_version?.type === 'index_patterns' &&
+      dataSourceThreeWayDiff.target_version?.index_patterns
+  );
+  const currentDataViewId = sortAndStringifyJson(
+    dataSourceThreeWayDiff.current_version?.type === 'data_view' &&
+      dataSourceThreeWayDiff.current_version?.data_view_id
+  );
+  const targetDataViewId = sortAndStringifyJson(
+    dataSourceThreeWayDiff.target_version?.type === 'data_view' &&
+      dataSourceThreeWayDiff.target_version?.data_view_id
+  );
+
+  const hasTypeChanged = currentType !== targetType;
+  return [
+    ...(hasTypeChanged
+      ? [
+          {
+            fieldName: 'type',
+            currentVersion: currentType,
+            targetVersion: targetType,
+          },
+        ]
+      : []),
+    ...(currentIndexPatterns !== targetIndexPatterns
+      ? [
+          {
+            fieldName: 'index_patterns',
+            currentVersion: currentIndexPatterns,
+            targetVersion: targetIndexPatterns,
+          },
+        ]
+      : []),
+    ...(currentDataViewId !== targetDataViewId
+      ? [
+          {
+            fieldName: 'data_view_id',
+            currentVersion: currentDataViewId,
+            targetVersion: targetDataViewId,
+          },
+        ]
+      : []),
+  ];
+};
+
+const getFieldDiffsForKqlQuery = (
+  kqlQueryThreeWayDiff: RuleFieldDiffsWithKqlQuery['kql_query']
+): FieldDiff[] => {
+  const currentType = sortAndStringifyJson(kqlQueryThreeWayDiff.current_version?.type);
+  const targetType = sortAndStringifyJson(kqlQueryThreeWayDiff.target_version?.type);
+
+  const currentQuery = sortAndStringifyJson(
+    kqlQueryThreeWayDiff.current_version?.type === 'inline_query' &&
+      kqlQueryThreeWayDiff.current_version?.query
+  );
+  const targetQuery = sortAndStringifyJson(
+    kqlQueryThreeWayDiff.target_version?.type === 'inline_query' &&
+      kqlQueryThreeWayDiff.target_version?.query
+  );
+
+  const currentLanguage = sortAndStringifyJson(
+    kqlQueryThreeWayDiff.current_version?.type === 'inline_query' &&
+      kqlQueryThreeWayDiff.current_version?.language
+  );
+  const targetLanguage = sortAndStringifyJson(
+    kqlQueryThreeWayDiff.target_version?.type === 'inline_query' &&
+      kqlQueryThreeWayDiff.target_version?.language
+  );
+
+  const currentFilters = sortAndStringifyJson(
+    kqlQueryThreeWayDiff.current_version?.type === 'inline_query' &&
+      kqlQueryThreeWayDiff.current_version?.filters
+  );
+  const targetFilters = sortAndStringifyJson(
+    kqlQueryThreeWayDiff.target_version?.type === 'inline_query' &&
+      kqlQueryThreeWayDiff.target_version?.filters
+  );
+
+  const currentSavedQueryId = sortAndStringifyJson(
+    kqlQueryThreeWayDiff.current_version?.type === 'saved_query' &&
+      kqlQueryThreeWayDiff.current_version?.saved_query_id
+  );
+  const targetSavedQueryId = sortAndStringifyJson(
+    kqlQueryThreeWayDiff.target_version?.type === 'saved_query' &&
+      kqlQueryThreeWayDiff.target_version?.saved_query_id
+  );
+
+  const hasTypeChanged = currentType !== targetType;
+
+  return [
+    ...(hasTypeChanged
+      ? [
+          {
+            fieldName: 'type',
+            currentVersion: currentType,
+            targetVersion: targetType,
+          },
+        ]
+      : []),
+    ...(currentQuery !== targetQuery
+      ? [
+          {
+            fieldName: 'query',
+            currentVersion: currentQuery,
+            targetVersion: targetQuery,
+          },
+        ]
+      : []),
+    ...(currentLanguage !== targetLanguage
+      ? [
+          {
+            fieldName: 'language',
+            currentVersion: currentLanguage,
+            targetVersion: targetLanguage,
+          },
+        ]
+      : []),
+    ...(currentFilters !== targetFilters
+      ? [
+          {
+            fieldName: 'filters',
+            currentVersion: currentFilters,
+            targetVersion: targetFilters,
+          },
+        ]
+      : []),
+    ...(currentSavedQueryId !== targetSavedQueryId
+      ? [
+          {
+            fieldName: 'saved_query_id',
+            currentVersion: currentSavedQueryId,
+            targetVersion: targetSavedQueryId,
+          },
+        ]
+      : []),
+  ];
+};
+
+const getFieldDiffsForEqlQuery = (eqlQuery: AllFieldsDiff['eql_query']): FieldDiff[] => {
+  const currentQuery = sortAndStringifyJson(eqlQuery.current_version?.query);
+  const targetQuery = sortAndStringifyJson(eqlQuery.target_version?.query);
+
+  const currentFilters = sortAndStringifyJson(eqlQuery.current_version?.filters);
+  const targetFilters = sortAndStringifyJson(eqlQuery.target_version?.filters);
+  return [
+    ...(currentQuery !== targetQuery
+      ? [
+          {
+            fieldName: 'query',
+            currentVersion: currentQuery,
+            targetVersion: targetQuery,
+          },
+        ]
+      : []),
+    ...(currentFilters !== targetFilters
+      ? [
+          {
+            fieldName: 'filters',
+            currentVersion: currentFilters,
+            targetVersion: targetFilters,
+          },
+        ]
+      : []),
+  ];
+};
+
+const getFieldDiffsForRuleSchedule = (
+  ruleScheduleThreeWayDiff: AllFieldsDiff['rule_schedule']
+): FieldDiff[] => {
+  return [
+    ...(ruleScheduleThreeWayDiff.current_version?.interval !==
+    ruleScheduleThreeWayDiff.target_version?.interval
+      ? [
+          {
+            fieldName: 'interval',
+            currentVersion: sortAndStringifyJson(
+              ruleScheduleThreeWayDiff.current_version?.interval
+            ),
+            targetVersion: sortAndStringifyJson(ruleScheduleThreeWayDiff.target_version?.interval),
+          },
+        ]
+      : []),
+    ...(ruleScheduleThreeWayDiff.current_version?.lookback !==
+    ruleScheduleThreeWayDiff.target_version?.lookback
+      ? [
+          {
+            fieldName: 'lookback',
+            currentVersion: sortAndStringifyJson(
+              ruleScheduleThreeWayDiff.current_version?.lookback
+            ),
+            targetVersion: sortAndStringifyJson(ruleScheduleThreeWayDiff.target_version?.lookback),
+          },
+        ]
+      : []),
+  ];
+};
+
+const getFieldDiffsForRuleNameOverride = (
+  ruleNameOverrideThreeWayDiff: AllFieldsDiff['rule_name_override']
+): FieldDiff[] => {
+  const currentFieldName = sortAndStringifyJson(
+    ruleNameOverrideThreeWayDiff.current_version?.field_name
+  );
+  const targetFieldName = sortAndStringifyJson(
+    ruleNameOverrideThreeWayDiff.target_version?.field_name
+  );
+  return [
+    ...(currentFieldName !== targetFieldName
+      ? [
+          {
+            fieldName: 'field_name',
+            currentVersion: currentFieldName,
+            targetVersion: targetFieldName,
+          },
+        ]
+      : []),
+  ];
+};
+
+const getFieldDiffsForTimestampOverride = (
+  timestampOverrideThreeWayDiff: AllFieldsDiff['timestamp_override']
+): FieldDiff[] => {
+  const currentFieldName = sortAndStringifyJson(
+    timestampOverrideThreeWayDiff.current_version?.field_name
+  );
+  const targetFieldName = sortAndStringifyJson(
+    timestampOverrideThreeWayDiff.target_version?.field_name
+  );
+  const currentVersionFallbackDisabled = sortAndStringifyJson(
+    timestampOverrideThreeWayDiff.current_version?.fallback_disabled
+  );
+  const targetVersionFallbackDisabled = sortAndStringifyJson(
+    timestampOverrideThreeWayDiff.target_version?.fallback_disabled
+  );
+
+  return [
+    ...(currentFieldName !== targetFieldName
+      ? [
+          {
+            fieldName: 'field_name',
+            currentVersion: currentFieldName,
+            targetVersion: targetFieldName,
+          },
+        ]
+      : []),
+    ...(currentVersionFallbackDisabled !== targetVersionFallbackDisabled
+      ? [
+          {
+            fieldName: 'fallback_disabled',
+            currentVersion: currentVersionFallbackDisabled,
+            targetVersion: targetVersionFallbackDisabled,
+          },
+        ]
+      : []),
+  ];
+};
+
+const getFieldDiffsForTimelineTemplate = (
+  timelineTemplateThreeWayDiff: AllFieldsDiff['timeline_template']
+): FieldDiff[] => {
+  const currentTimelineId = sortAndStringifyJson(
+    timelineTemplateThreeWayDiff.current_version?.timeline_id
+  );
+  const targetTimelineId = sortAndStringifyJson(
+    timelineTemplateThreeWayDiff.target_version?.timeline_id
+  );
+
+  const currentTimelineTitle = sortAndStringifyJson(
+    timelineTemplateThreeWayDiff.current_version?.timeline_title
+  );
+  const targetTimelineTitle = sortAndStringifyJson(
+    timelineTemplateThreeWayDiff.target_version?.timeline_title
+  );
+  return [
+    ...(currentTimelineId !== targetTimelineId
+      ? [
+          {
+            fieldName: 'timeline_id',
+            currentVersion: currentTimelineId,
+            targetVersion: targetTimelineId,
+          },
+        ]
+      : []),
+    ...(currentTimelineTitle !== targetTimelineTitle
+      ? [
+          {
+            fieldName: 'timeline_title',
+            currentVersion: currentTimelineTitle,
+            targetVersion: targetTimelineTitle,
+          },
+        ]
+      : []),
+  ];
+};
+
+const getFieldDiffsForBuildingBlock = (
+  buildingBlockThreeWayDiff: AllFieldsDiff['building_block']
+): FieldDiff[] => {
+  const currentType = sortAndStringifyJson(buildingBlockThreeWayDiff.current_version?.type);
+  const targetType = sortAndStringifyJson(buildingBlockThreeWayDiff.target_version?.type);
+  return [
+    ...(currentType !== targetType
+      ? [
+          {
+            fieldName: 'type',
+            currentVersion: currentType,
+            targetVersion: targetType,
+          },
+        ]
+      : []),
+  ];
+};
 
 export const getFormattedFieldDiff = (
-  fieldName: keyof RuleFieldsDiff,
-  fields: Partial<RuleFieldsDiff>
-): FormattedFieldDiff[] => {
+  fieldName: keyof AllFieldsDiff,
+  fields: AllFieldsDiff
+): FormattedFieldDiff => {
   switch (fieldName) {
     case 'data_source':
-      const dataSourceObj = fields[fieldName];
-      return [
-        {
-          fieldName: 'type',
-          currentVersion: fields[fieldName].current_version?.type,
-          targetVersion: fields[fieldName].target_version?.type,
-        },
-        {
-          fieldName: 'index_patterns',
-          currentVersion:
-            dataSourceObj.current_version?.type === 'index_patterns'
-              ? dataSourceObj.current_version?.index_patterns
-              : '',
-          targetVersion:
-            dataSourceObj.target_version?.type === 'index_patterns'
-              ? dataSourceObj.target_version?.index_patterns
-              : '',
-        },
-        {
-          fieldName: 'data_view_id',
-          currentVersion:
-            dataSourceObj.current_version?.type === 'data_view'
-              ? dataSourceObj.current_version?.data_view_id
-              : '',
-          targetVersion:
-            dataSourceObj.target_version?.type === 'data_view'
-              ? dataSourceObj.target_version?.data_view_id
-              : '',
-        },
-      ];
-    case 'eql_query':
+      const dataSourceThreeWayDiff = fields[fieldName];
+      return {
+        shouldShowSubtitles: true,
+        fieldDiffs: getFieldDiffsForDataSource(dataSourceThreeWayDiff),
+      };
     case 'kql_query':
-    case 'threshold':
-    case 'threat_query':
-    case 'esql_query':
-      // TODO: This doesn't work if current version has a different number of fields or different fields than target version
-      const currentVersionSubfields = Object.keys(fields[fieldName].current_version);
-      const subfieldsToReturn = [];
-      for (let i = 0; i < currentVersionSubfields.length; i++) {
-        const subfieldName = currentVersionSubfields[i];
-        subfieldsToReturn.push({
-          fieldName: subfieldName,
-          currentVersion: fields[fieldName].current_version[subfieldName],
-          targetVersion: fields[fieldName].target_version[subfieldName],
-        });
-      }
-      return subfieldsToReturn;
+      const kqlQueryThreeWayDiff = fields[fieldName];
+      return {
+        shouldShowSubtitles: true,
+        fieldDiffs: getFieldDiffsForKqlQuery(kqlQueryThreeWayDiff),
+      };
+    case 'eql_query':
+      const eqlQueryThreeWayDiff = fields[fieldName];
+      return {
+        shouldShowSubtitles: true,
+        fieldDiffs: getFieldDiffsForEqlQuery(eqlQueryThreeWayDiff),
+      };
+    case 'rule_schedule':
+      const ruleScheduleThreeWayDiff = fields[fieldName];
+      return {
+        shouldShowSubtitles: true,
+        fieldDiffs: getFieldDiffsForRuleSchedule(ruleScheduleThreeWayDiff),
+      };
+    case 'rule_name_override':
+      const ruleNameOverrideThreeWayDiff = fields[fieldName];
+      return {
+        shouldShowSubtitles: true,
+        fieldDiffs: getFieldDiffsForRuleNameOverride(ruleNameOverrideThreeWayDiff),
+      };
+    case 'timestamp_override':
+      const timestampOverrideThreeWayDiff = fields[fieldName];
+      return {
+        shouldShowSubtitles: true,
+        fieldDiffs: getFieldDiffsForTimestampOverride(timestampOverrideThreeWayDiff),
+      };
+    case 'timeline_template':
+      const timelineTemplateThreeWayDiff = fields[fieldName];
+      return {
+        shouldShowSubtitles: true,
+        fieldDiffs: getFieldDiffsForTimelineTemplate(timelineTemplateThreeWayDiff),
+      };
+    case 'building_block':
+      const buildingBlockThreeWayDiff = fields[fieldName];
+      return {
+        shouldShowSubtitles: true,
+        fieldDiffs: getFieldDiffsForBuildingBlock(buildingBlockThreeWayDiff),
+      };
     default:
-      return [
-        {
-          fieldName,
-          currentVersion: fields[fieldName].current_version ?? '',
-          targetVersion: fields[fieldName].target_version ?? '',
-        },
-      ];
+      const currentVersionField = sortAndStringifyJson(fields[fieldName].current_version);
+      const targetVersionField = sortAndStringifyJson(fields[fieldName].target_version);
+      return {
+        shouldShowSubtitles: false,
+        fieldDiffs:
+          currentVersionField !== targetVersionField
+            ? [
+                {
+                  fieldName,
+                  currentVersion: currentVersionField,
+                  targetVersion: targetVersionField,
+                },
+              ]
+            : [],
+      };
   }
 };
