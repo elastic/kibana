@@ -120,8 +120,7 @@ export class AstListener implements ESQLParserListener {
     if (metadataContext) {
       const option = createOption(metadataContext.METADATA().text.toLowerCase(), metadataContext);
       commandAst.args.push(option);
-      // skip for the moment as there's no easy way to get meta fields right now
-      // option.args.push(...collectAllColumnIdentifiers(metadataContext));
+      option.args.push(...collectAllColumnIdentifiers(metadataContext));
     }
   }
 

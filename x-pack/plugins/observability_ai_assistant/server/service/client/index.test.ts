@@ -1130,7 +1130,7 @@ describe('Observability AI Assistant client', () => {
             role: MessageRole.Assistant,
             function_call: {
               name: 'recall',
-              arguments: JSON.stringify({ queries: [], contexts: [] }),
+              arguments: JSON.stringify({ queries: [], categories: [] }),
               trigger: MessageRole.Assistant,
             },
           },
