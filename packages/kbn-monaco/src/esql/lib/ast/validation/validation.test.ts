@@ -1018,6 +1018,8 @@ describe('validation logic', () => {
               canBeFieldButNotString || isLiteralType ? 'stringField' : 'numberField';
             return { name: nameValue, type, ...rest };
           });
+          // validate will return the minimum number of errors based on the list of signatures
+          // i.e. if a function has 2 signatures, one with 2 args and one with 1, then only 1 error will return
           const expectedErrors = params.map(
             ({ type }, i) =>
               `Argument of [${name}] must be [${type}], found value [${
@@ -1225,6 +1227,12 @@ describe('validation logic', () => {
       'from a | stats avg(numberField), percentile(numberField, 50) BY ipField',
       []
     );
+    for (const op of ['+', '-', '*', '/', '%']) {
+      testErrorsAndWarnings(
+        `from a | stats avg(numberField) ${op} percentile(numberField, 50) BY ipField`,
+        []
+      );
+    }
     testErrorsAndWarnings('from a | stats count(* + 1) BY ipField', [
       'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, LP, NOT, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found "+"',
     ]);

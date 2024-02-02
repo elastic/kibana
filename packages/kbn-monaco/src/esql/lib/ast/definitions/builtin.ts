@@ -19,7 +19,7 @@ function createMathDefinition(
     type: 'builtin',
     name,
     description,
-    supportedCommands: ['eval', 'where', 'row'],
+    supportedCommands: ['eval', 'where', 'row', 'stats'],
     supportedOptions: ['by'],
     signatures: types.map((type) => {
       if (Array.isArray(type)) {
