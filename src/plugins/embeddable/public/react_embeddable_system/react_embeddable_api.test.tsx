@@ -40,8 +40,8 @@ describe('react embeddable api', () => {
       )
     );
 
-    expect(result.current.thisApi.bork()).toEqual('bork');
-    expect(result.current.thisApi.serializeState()).toEqual({ bork: 'borkbork' });
+    expect(result.current.bork()).toEqual('bork');
+    expect(result.current.serializeState()).toEqual({ bork: 'borkbork' });
   });
 
   it('publishes the API into the provided ref', async () => {

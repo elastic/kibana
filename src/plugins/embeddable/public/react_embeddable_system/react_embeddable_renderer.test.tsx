@@ -20,8 +20,11 @@ describe('react embeddable renderer', () => {
     }),
   };
 
-  it('deserializes given state', () => {
+  beforeAll(() => {
     registerReactEmbeddableFactory('test', testEmbeddableFactory);
+  });
+
+  it('deserializes given state', () => {
     render(<ReactEmbeddableRenderer type={'test'} state={{ rawState: { blorp: 'blorp?' } }} />);
     expect(testEmbeddableFactory.deserializeState).toHaveBeenCalledWith({
       rawState: { blorp: 'blorp?' },
@@ -29,7 +32,6 @@ describe('react embeddable renderer', () => {
   });
 
   it('renders the given component once it resolves', () => {
-    registerReactEmbeddableFactory('test', testEmbeddableFactory);
     render(<ReactEmbeddableRenderer type={'test'} state={{ rawState: { blorp: 'blorp?' } }} />);
     waitFor(() => {
       expect(screen.findByText('SUPER TEST COMPONENT')).toBeInTheDocument();

@@ -31,7 +31,6 @@ describe('react embeddable registry', () => {
   });
 
   it('can check if a factory is registered', () => {
-    registerReactEmbeddableFactory('test', testEmbeddableFactory);
     expect(reactEmbeddableRegistryHasKey('test')).toBe(true);
     expect(reactEmbeddableRegistryHasKey('notRegistered')).toBe(false);
   });

@@ -22,7 +22,8 @@ const getInitialValuesFromComparators = <StateType extends object = object>(
 ) => {
   const initialValues: Partial<StateType> = {};
   for (const key of comparatorKeys) {
-    initialValues[key] = comparators[key][0]?.value;
+    const comparatorSubject = comparators[key][0]; // 0th element of tuple is the subject
+    initialValues[key] = comparatorSubject?.value;
   }
   return initialValues;
 };
@@ -39,15 +40,13 @@ const runComparators = <StateType extends object = object>(
   }
   const latestChanges: Partial<StateType> = {};
   for (const key of comparatorKeys) {
-    const comparator = comparators[key]?.[2] ?? defaultComparator;
+    const customComparator = comparators[key]?.[2]; // 2nd element of the tuple is the custom comparator
+    const comparator = customComparator ?? defaultComparator;
     if (!comparator(lastSavedState?.[key], latestState[key], lastSavedState, latestState)) {
       latestChanges[key] = latestState[key];
     }
   }
-  if (Object.keys(latestChanges).length > 0) {
-    return latestChanges;
-  }
-  return;
+  return Object.keys(latestChanges).length > 0 ? latestChanges : undefined;
 };
 
 export const useReactEmbeddableUnsavedChanges = <StateType extends object = object>(
@@ -65,7 +64,8 @@ export const useReactEmbeddableUnsavedChanges = <StateType extends object = obje
     const subjects: Array<PublishingSubject<unknown>> = [];
     const keys: Array<keyof StateType> = [];
     for (const key of Object.keys(comparators) as Array<keyof StateType>) {
-      subjects.push(comparators[key][0] as PublishingSubject<unknown>);
+      const comparatorSubject = comparators[key][0]; // 0th element of tuple is the subject
+      subjects.push(comparatorSubject as PublishingSubject<unknown>);
       keys.push(key);
     }
     return { comparatorKeys: keys, comparatorSubjects: subjects };
@@ -121,7 +121,8 @@ export const useReactEmbeddableUnsavedChanges = <StateType extends object = obje
   const resetUnsavedChanges = useCallback(() => {
     const lastSaved = lastSavedStateSubject?.getValue();
     for (const key of comparatorKeys) {
-      comparators[key][1](lastSaved?.[key] as StateType[typeof key]);
+      const setter = comparators[key][1]; // setter function is the 1st element of the tuple
+      setter(lastSaved?.[key] as StateType[typeof key]);
     }
 
     // disable exhaustive deps because the comparators must be static

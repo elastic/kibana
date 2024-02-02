@@ -87,7 +87,7 @@ const markdownEmbeddableFactory: ReactEmbeddableFactory<
        * Publish the API. This is what gets forwarded to the Actions framework, and to whatever the
        * parent of this embeddable is.
        */
-      const { thisApi } = useReactEmbeddableApiHandle(
+      const thisApi = useReactEmbeddableApiHandle(
         {
           ...titlesApi,
           unsavedChanges,

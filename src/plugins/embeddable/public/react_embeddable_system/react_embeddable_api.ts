@@ -50,7 +50,7 @@ export const useReactEmbeddableApiHandle = <
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useImperativeHandle(ref, () => thisApi, [uuid]);
 
-  return { thisApi, parentApi };
+  return thisApi;
 };
 
 export const initializeReactEmbeddableUuid = (maybeId?: string) => maybeId ?? generateId();

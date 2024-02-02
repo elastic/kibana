@@ -24,6 +24,13 @@ export const registerReactEmbeddableFactory = <
   key: string,
   factory: ReactEmbeddableFactory<StateType, APIType>
 ) => {
+  if (registry[key] !== undefined)
+    throw new Error(
+      i18n.translate('embeddableApi.reactEmbeddable.factoryAlreadyExistsError', {
+        defaultMessage: 'An embeddable factory for for type: {key} is already registered.',
+        values: { key },
+      })
+    );
   registry[key] = factory;
 };
 
