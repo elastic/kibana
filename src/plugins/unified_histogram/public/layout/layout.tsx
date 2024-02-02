@@ -304,7 +304,7 @@ export const UnifiedHistogramLayout = ({
 
   const currentTopPanelHeight = topPanelHeight ?? defaultTopPanelHeight;
   if (!dataView) {
-    return;
+    return null;
   }
 
   return (

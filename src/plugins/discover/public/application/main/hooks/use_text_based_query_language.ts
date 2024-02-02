@@ -110,7 +110,7 @@ export function useTextBasedQueryLanguage({
             const addColumnsToState = !isEqual(nextColumns, prev.current.columns);
             const queryChanged = query[language] !== prev.current.query;
             // no need to reset index to state if it hasn't changed
-            const addDataViewToState = Boolean(dataViewObj?.id !== index);
+            const addDataViewToState = index !== undefined;
             if (!queryChanged || (!addDataViewToState && !addColumnsToState)) {
               sendComplete();
               return;
@@ -121,7 +121,7 @@ export function useTextBasedQueryLanguage({
               prev.current.columns = nextColumns;
             }
             const nextState = {
-              ...(addDataViewToState && { index: dataViewObj?.id }),
+              ...(addDataViewToState && { index: undefined }),
               ...((addColumnsToState || queryChanged) && { columns: nextColumns }),
               ...(viewMode === VIEW_MODE.AGGREGATED_LEVEL && {
                 viewMode: getValidViewMode({ viewMode, isTextBasedQueryMode: true }),
