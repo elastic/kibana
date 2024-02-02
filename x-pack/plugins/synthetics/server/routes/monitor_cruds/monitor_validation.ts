@@ -259,7 +259,7 @@ export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
       formattedConfig[ConfigKey.PLAYWRIGHT_OPTIONS] = rawPlaywrightOptions;
       return {
         formattedConfig,
-        errorMessage: i18n.translate('xpack.synthetics.restApi.monitor.invalidParams', {
+        errorMessage: i18n.translate('xpack.synthetics.restApi.monitor.invalidPlaywrightOptions', {
           defaultMessage: 'Invalid playwright_options: {error}',
           values: { error },
         }),

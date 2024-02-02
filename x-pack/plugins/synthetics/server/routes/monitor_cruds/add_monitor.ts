@@ -123,7 +123,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
 });
 
 export const invalidOriginError = (origin: string) => {
-  return i18n.translate('xpack.synthetics.server.projectMonitors.invalidPublicLocationError', {
+  return i18n.translate('xpack.synthetics.server.projectMonitors.invalidPublicOriginError', {
     defaultMessage: 'Unsupported origin type {origin}, only ui type is supported via API.',
     values: {
       origin,
