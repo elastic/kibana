@@ -14,7 +14,6 @@ export class ToastsService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
   private readonly find = this.ctx.getService('find');
-  private readonly log = this.ctx.getService('log');
   private readonly config = this.ctx.getService('config');
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
   /**
