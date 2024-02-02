@@ -27,7 +27,7 @@ import type { MaybeImmutable } from '../../types';
 function hasAuthFactory(fleetAuthz: FleetAuthz, appFeatureService?: AppFeaturesService) {
   return function hasAuth(
     privilege: keyof typeof ENDPOINT_PRIVILEGES,
-    skipAppFeatureCheck: boolean = true
+    { skipAppFeatureCheck = false }: { skipAppFeatureCheck?: boolean } = {}
   ): boolean {
     if (
       appFeatureService &&
@@ -63,8 +63,8 @@ export const calculateEndpointAuthz = (
   const isEnterpriseLicense = licenseService.isEnterprise();
   const hasEndpointManagementAccess = userRoles.includes('superuser');
 
-  const canWriteSecuritySolution = hasAuth('writeSecuritySolution', true);
-  const canReadSecuritySolution = hasAuth('readSecuritySolution', true);
+  const canWriteSecuritySolution = hasAuth('writeSecuritySolution', { skipAppFeatureCheck: true });
+  const canReadSecuritySolution = hasAuth('readSecuritySolution', { skipAppFeatureCheck: true });
   const canWriteEndpointList = hasAuth('writeEndpointList');
   const canReadEndpointList = hasAuth('readEndpointList');
   const canWritePolicyManagement = hasAuth('writePolicyManagement');
