@@ -157,6 +157,7 @@
     "@kbn/core-plugins-contracts-server",
     "@kbn/dev-utils",
     "@kbn/server-http-tools",
+    "@kbn/core-base-server-mocks",
   ],
   "exclude": [
     "target/**/*",
