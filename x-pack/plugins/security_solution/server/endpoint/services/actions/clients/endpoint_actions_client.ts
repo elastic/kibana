@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { stringify } from '../../../utils/stringify';
 import type { HapiReadableStream } from '../../../../types';
 import type {
   ResponseActionsApiCommandNames,
   ResponseActionAgentType,
 } from '../../../../../common/endpoint/service/response_actions/constants';
-import { updateCases } from '../create/update_cases';
 import type { CreateActionPayload } from '../create/types';
 import type {
   ExecuteActionRequestBody,
@@ -80,16 +78,20 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       .getActionCreateService()
       .createAction(createPayload, agentIds.valid);
 
-    try {
-      await updateCases({
-        casesClient: this.options.casesClient,
-        endpointData: agentIds.hosts,
-        createActionPayload: { ...createPayload, action_id: response.id },
-      });
-    } catch (err) {
-      // failures during update of cases should not cause the response action to fail. Just log error
-      this.log.warn(`failed to update cases: ${err.message}\n${stringify(err)}`);
-    }
+    await this.updateCases({
+      command,
+      comment: options.comment,
+      caseIds: options.case_ids,
+      alertIds: options.alert_ids,
+      action_id: response.id,
+      hosts: options.endpoint_ids.map((hostId) => {
+        return {
+          hostId,
+          type: 'endpoint',
+          hostname: agentIds.hosts.find((host) => host.agent.id === hostId)?.host.hostname ?? '',
+        };
+      }),
+    });
 
     return response as TResponse;
   }

@@ -120,14 +120,17 @@ describe('ResponseActionsClientImpl base class', () => {
         caseIds: ['case-999'],
         alertIds: [KNOWN_ALERT_ID_1, KNOWN_ALERT_ID_2, KNOWN_ALERT_ID_3],
         comment: 'this is a case comment',
+        action_id: 'action-123',
         hosts: [
           {
             hostId: '1-2-3',
             hostname: 'foo-one',
+            type: 'endpoint',
           },
           {
             hostId: '4-5-6',
             hostname: 'foo-two',
+            type: 'sentinel_one',
           },
         ],
       };
@@ -201,76 +204,104 @@ describe('ResponseActionsClientImpl base class', () => {
       expect(casesClient.attachments.bulkCreate).toHaveBeenLastCalledWith({
         attachments: [
           {
-            actions: {
+            externalReferenceAttachmentTypeId: 'endpoint',
+            externalReferenceId: undefined,
+            owner: 'securitySolution',
+            externalReferenceStorage: {
+              type: 'elasticSearchDoc',
+            },
+            type: 'externalReference',
+            externalReferenceMetadata: {
+              command: 'isolate',
+              comment: 'this is a case comment',
               targets: [
                 {
                   endpointId: '1-2-3',
                   hostname: 'foo-one',
+                  type: 'endpoint',
                 },
                 {
                   endpointId: '4-5-6',
                   hostname: 'foo-two',
+                  type: 'sentinel_one',
                 },
               ],
-              type: 'isolate',
             },
-            comment: 'this is a case comment',
-            owner: 'securitySolution',
-            type: 'actions',
           },
           {
-            actions: {
+            externalReferenceAttachmentTypeId: 'endpoint',
+            externalReferenceId: undefined,
+            owner: 'securitySolution',
+            externalReferenceStorage: {
+              type: 'elasticSearchDoc',
+            },
+            type: 'externalReference',
+            externalReferenceMetadata: {
+              command: 'isolate',
+              comment: 'this is a case comment',
               targets: [
                 {
                   endpointId: '1-2-3',
                   hostname: 'foo-one',
+                  type: 'endpoint',
                 },
                 {
                   endpointId: '4-5-6',
                   hostname: 'foo-two',
+                  type: 'sentinel_one',
                 },
               ],
-              type: 'isolate',
             },
-            comment: 'this is a case comment',
-            owner: 'securitySolution',
-            type: 'actions',
           },
           {
-            actions: {
+            externalReferenceAttachmentTypeId: 'endpoint',
+            externalReferenceId: undefined,
+            owner: 'securitySolution',
+            externalReferenceStorage: {
+              type: 'elasticSearchDoc',
+            },
+            type: 'externalReference',
+            externalReferenceMetadata: {
+              command: 'isolate',
+              comment: 'this is a case comment',
               targets: [
                 {
                   endpointId: '1-2-3',
                   hostname: 'foo-one',
+                  type: 'endpoint',
                 },
                 {
                   endpointId: '4-5-6',
                   hostname: 'foo-two',
+                  type: 'sentinel_one',
                 },
               ],
-              type: 'isolate',
             },
-            comment: 'this is a case comment',
-            owner: 'securitySolution',
-            type: 'actions',
           },
           {
-            actions: {
+            externalReferenceAttachmentTypeId: 'endpoint',
+            externalReferenceId: undefined,
+            owner: 'securitySolution',
+            externalReferenceStorage: {
+              type: 'elasticSearchDoc',
+            },
+            type: 'externalReference',
+            externalReferenceMetadata: {
+              command: 'isolate',
+              comment: 'this is a case comment',
               targets: [
                 {
                   endpointId: '1-2-3',
                   hostname: 'foo-one',
+                  type: 'endpoint',
                 },
                 {
                   endpointId: '4-5-6',
                   hostname: 'foo-two',
+                  type: 'sentinel_one',
                 },
               ],
-              type: 'isolate',
             },
-            comment: 'this is a case comment',
-            owner: 'securitySolution',
-            type: 'actions',
           },
         ],
         caseId: 'case-3',

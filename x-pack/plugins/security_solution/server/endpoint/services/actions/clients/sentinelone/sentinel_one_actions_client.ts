@@ -17,7 +17,6 @@ import type {
   SentinelOneGetAgentsResponse,
   SentinelOneGetAgentsParams,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
-import type { CreateActionPayload } from '../../create/types';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type { SentinelOneConnectorExecuteOptions } from './types';
 import { stringify } from '../../../../utils/stringify';
@@ -32,7 +31,6 @@ import type {
   ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
 } from '../lib/base_response_actions_client';
 import { ResponseActionsClientImpl } from '../lib/base_response_actions_client';
-import { updateCases } from '../../create/update_cases';
 
 export type SentinelOneActionsClientOptions = ResponseActionsClientOptions & {
   connectorActions: ActionsClient;
@@ -41,13 +39,11 @@ export type SentinelOneActionsClientOptions = ResponseActionsClientOptions & {
 export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   protected readonly agentType: ResponseActionAgentType = 'sentinel_one';
   private readonly connectorActionsClient: ActionsClient;
-  private readonly actionsClientOptions: ResponseActionsClientOptions;
   private readonly getConnector: () => Promise<ConnectorWithExtraFindData>;
 
   constructor({ connectorActions, ...options }: SentinelOneActionsClientOptions) {
     super(options);
     this.connectorActionsClient = connectorActions;
-    this.actionsClientOptions = options;
 
     this.getConnector = once(async () => {
       let connectorList: ConnectorWithExtraFindData[] = [];
@@ -182,16 +178,14 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     }
   }
 
-  private async handleResponseAction(command: SUB_ACTION, options: IsolationRouteRequestBody) {
+  async isolate(options: IsolationRouteRequestBody): Promise<ActionDetails> {
     await this.validateRequest(options);
-    await this.sendAction(command, { uuid: options.endpoint_ids[0] });
+    await this.sendAction(SUB_ACTION.ISOLATE_HOST, { uuid: options.endpoint_ids[0] });
 
-    const commandName = getCommandName(command);
-    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions = {
+    const actionRequestDoc = await this.writeActionRequestToEndpointIndex({
       ...options,
-      command: commandName,
-    };
-    const actionRequestDoc = await this.writeActionRequestToEndpointIndex(reqIndexOptions);
+      command: 'isolate',
+    });
     await this.writeActionResponseToEndpointIndex({
       actionId: actionRequestDoc.EndpointActions.action_id,
       agentId: actionRequestDoc.agent.id,
@@ -199,55 +193,57 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         command: actionRequestDoc.EndpointActions.data.command,
       },
     });
-
-    const createPayload: CreateActionPayload = {
-      ...options,
-      command: commandName,
+    await this.updateCases({
+      command: 'isolate',
+      caseIds: options.case_ids,
+      alertIds: options.alert_ids,
+      hosts: options.endpoint_ids.map((agentId) => {
+        return {
+          hostId: agentId,
+          hostname: actionRequestDoc.EndpointActions.data.hosts?.[agentId].name ?? '',
+          type: 'sentinel_one'
+        };
+      }),
+      comment: options.comment,
       action_id: actionRequestDoc.EndpointActions.action_id,
-      user: { username: this.actionsClientOptions.username },
-    };
-
-    try {
-      const agentId = options.endpoint_ids[0];
-      await updateCases({
-        casesClient: this.options.casesClient,
-        endpointData: [
-          {
-            host: {
-              hostname: actionRequestDoc.EndpointActions.data.hosts?.[agentId].name as string,
-            },
-            agent: {
-              id: agentId,
-              type: options.agent_type || 'endpoint',
-            },
-          },
-        ],
-        createActionPayload: createPayload,
-      });
-    } catch (err) {
-      // failures during update of cases should not cause the response action to fail. Just log error
-      this.log.warn(`failed to update cases: ${err.message}\n${stringify(err)}`);
-    }
+    });
 
     return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
   }
 
-  async isolate(options: IsolationRouteRequestBody): Promise<ActionDetails> {
-    return this.handleResponseAction(SUB_ACTION.ISOLATE_HOST, options);
-  }
-
   async release(options: IsolationRouteRequestBody): Promise<ActionDetails> {
-    return this.handleResponseAction(SUB_ACTION.RELEASE_HOST, options);
+    await this.validateRequest(options);
+    await this.sendAction(SUB_ACTION.RELEASE_HOST, {
+      uuid: options.endpoint_ids[0],
+    });
+
+    const actionRequestDoc = await this.writeActionRequestToEndpointIndex({
+      ...options,
+      command: 'unisolate',
+    });
+
+    await this.writeActionResponseToEndpointIndex({
+      actionId: actionRequestDoc.EndpointActions.action_id,
+      agentId: actionRequestDoc.agent.id,
+      data: {
+        command: actionRequestDoc.EndpointActions.data.command,
+      },
+    });
+    await this.updateCases({
+      command: 'unisolate',
+      caseIds: options.case_ids,
+      alertIds: options.alert_ids,
+      hosts: options.endpoint_ids.map((agentId) => {
+        return {
+          hostId: agentId,
+          hostname: actionRequestDoc.EndpointActions.data.hosts?.[agentId].name ?? '',
+          type: 'sentinel_one'
+        };
+      }),
+      comment: options.comment,
+      action_id: actionRequestDoc.EndpointActions.action_id,
+    });
+
+    return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
   }
 }
-
-const getCommandName = (command: SUB_ACTION): 'isolate' | 'unisolate' => {
-  switch (command) {
-    case SUB_ACTION.ISOLATE_HOST:
-      return 'isolate';
-    case SUB_ACTION.RELEASE_HOST:
-      return 'unisolate';
-    default:
-      throw new Error('Unsupported action type');
-  }
-};
