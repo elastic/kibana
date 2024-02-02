@@ -134,15 +134,6 @@ export const deleteTimelines = () => {
   });
 };
 
-export const deleteAlertsIndex = () => {
-  rootRequest({
-    method: 'POST',
-    url: '/api/index_management/indices/delete',
-    body: { indices: ['.internal.alerts-security.alerts-default-000001'] },
-    failOnStatusCode: false,
-  });
-};
-
 export const deleteAllCasesItems = () => {
   const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_alerting_cases_\*`;
   rootRequest({

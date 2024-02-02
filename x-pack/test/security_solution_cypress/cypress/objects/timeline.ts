@@ -52,12 +52,6 @@ export const getFavoritedTimeline = (): CompleteTimeline => ({
   filter: getFilter(),
 });
 
-export const getIndicatorMatchTimelineTemplate = (): CompleteTimeline => ({
-  ...getTimeline(),
-  title: 'Generic Threat Match Timeline',
-  templateTimelineId: '495ad7a7-316e-4544-8a0f-9c098daee76e',
-});
-
 export const getTimelineModifiedSourcerer = () => ({
   ...getTimeline(),
   title: 'Auditbeat Timeline',
