@@ -32,6 +32,7 @@ export interface ReferenceMaps {
   variables: Map<string, ESQLVariable[]>;
   fields: Map<string, ESQLRealField>;
   policies: Map<string, ESQLPolicy>;
+  metadataFields: Set<string>;
 }
 
 export interface ValidationErrors {

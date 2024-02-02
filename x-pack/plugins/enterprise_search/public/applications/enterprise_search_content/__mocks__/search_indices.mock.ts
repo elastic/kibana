@@ -33,6 +33,7 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
   {
     connector: {
       api_key_id: null,
+      api_key_secret_id: null,
       configuration: {
         foo: {
           default_value: '',
@@ -159,6 +160,7 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
   {
     connector: {
       api_key_id: null,
+      api_key_secret_id: null,
       configuration: {
         foo: {
           default_value: '',

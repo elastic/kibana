@@ -6,3 +6,4 @@
  */
 
 export const OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY = 'pageState';
+export const OBSERVABILITY_DATASET_QUALITY_URL_STATE_KEY = 'pageState';
