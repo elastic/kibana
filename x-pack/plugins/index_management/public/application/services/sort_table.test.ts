@@ -184,24 +184,24 @@ describe('sortTable', () => {
       { test: 'test3' },
       { test: undefined },
     ] as unknown as Index[];
-    it('ascending direction keeps the original array order', () => {
+    it('ascending', () => {
       const sorted = sortTable(indices, 'test', true);
       expect(sorted).toEqual([
         { test: 'test1' },
         { test: 'test2' },
-        { test: undefined },
-        { test: 'test5' },
         { test: 'test3' },
+        { test: 'test5' },
+        { test: undefined },
         { test: undefined },
       ]);
     });
-    it('descending direction reverts the original array order', () => {
+    it('descending', () => {
       const sorted = sortTable(indices, 'test', false);
       expect(sorted).toEqual([
         { test: undefined },
-        { test: 'test3' },
-        { test: 'test5' },
         { test: undefined },
+        { test: 'test5' },
+        { test: 'test3' },
         { test: 'test2' },
         { test: 'test1' },
       ]);

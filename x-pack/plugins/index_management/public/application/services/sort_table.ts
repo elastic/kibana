@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { sortBy } from 'lodash';
+import { sortBy, get } from 'lodash';
 import { Index } from '../../../common';
 import type { ExtensionsService } from '../../services';
 
@@ -32,16 +32,10 @@ const unitMagnitude = {
 
 type SortFunction = (index: Index) => any;
 
-const stringSort =
-  (fieldName: SortField): SortFunction =>
-  (item) => {
-    return item[fieldName];
-  };
-
 const numericSort =
   (fieldName: SortField): SortFunction =>
   (item) =>
-    +item[fieldName]!;
+    Number(item[fieldName]);
 
 const byteSort =
   (fieldName: SortField): SortFunction =>
@@ -61,15 +55,11 @@ const byteSort =
 
 const getSorters = (extensionsService?: ExtensionsService) => {
   const sorters = {
-    name: stringSort('name'),
-    status: stringSort('status'),
-    health: stringSort('health'),
     primary: numericSort('primary'),
     replica: numericSort('replica'),
     documents: numericSort('documents'),
     size: byteSort('size'),
     primary_size: byteSort('primary_size'),
-    data_stream: stringSort('data_stream'),
   } as any;
   const columns = extensionsService?.columns ?? [];
   for (const column of columns) {
@@ -87,6 +77,10 @@ export const sortTable = (
   extensionsService?: ExtensionsService
 ) => {
   const sorters = getSorters(extensionsService);
-  const sorted = sortBy(array, sorters[sortField]);
+  let sorter = sorters[sortField];
+  if (!sorter) {
+    sorter = (index: Index) => get(index, sortField);
+  }
+  const sorted = sortBy(array, sorter);
   return isSortAscending ? sorted : sorted.reverse();
 };
