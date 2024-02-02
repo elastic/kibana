@@ -206,7 +206,7 @@ const navigationTree: NavigationTreeDefinition = {
       type: 'navGroup',
       id: 'project_settings_project_nav',
       title: i18n.translate('navigation.nav.projectSettings', {
-        defaultMessage: 'Project settings',
+        defaultMessage: 'Management',
       }),
       icon: 'gear',
       breadcrumbStatus: 'hidden',
@@ -214,7 +214,7 @@ const navigationTree: NavigationTreeDefinition = {
         {
           link: 'management',
           title: i18n.translate('navigation.nav.mngt', {
-            defaultMessage: 'Management',
+            defaultMessage: 'Stack Management',
           }),
           renderAs: 'panelOpener',
           children: [

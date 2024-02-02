@@ -599,14 +599,14 @@ const navigationTree: NavigationTreeDefinition = {
     {
       type: 'navGroup',
       id: 'category-project_settings',
-      title: 'Project settings',
+      title: 'Management',
       icon: 'gear',
       breadcrumbStatus: 'hidden',
       children: [
         {
           link: 'management',
           title: i18n.translate('navigation.nav.mngt', {
-            defaultMessage: 'Management',
+            defaultMessage: 'Stack Management',
           }),
           renderAs: 'panelOpener',
           children: [
