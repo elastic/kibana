@@ -6,4 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { getESQLAdHocDataview } from './src';
+export {
+  getESQLAdHocDataview,
+  getIndexPatternFromSQLQuery,
+  getIndexPatternFromESQLQuery,
+  getLimitFromESQLQuery,
+  removeDropCommandsFromESQLQuery,
+} from './src';
