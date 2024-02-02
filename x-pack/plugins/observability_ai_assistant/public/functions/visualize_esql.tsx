@@ -13,7 +13,6 @@ import {
   EuiToolTip,
   EuiButtonIcon,
 } from '@elastic/eui';
-import { getIndexPatternFromESQLQuery } from '@kbn/es-query';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -26,6 +25,7 @@ import type {
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import useAsync from 'react-use/lib/useAsync';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import {
   VisualizeESQLFunctionArguments,
   VisualizeESQLUserIntention,
