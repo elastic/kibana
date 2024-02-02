@@ -136,12 +136,6 @@ const DataQualityComponent: React.FC = () => {
   const { baseTheme, theme } = useThemes();
   const toasts = useToasts();
 
-  const addSuccessToast = useCallback(
-    (toast: { title: string }) => {
-      toasts.addSuccess(toast);
-    },
-    [toasts]
-  );
   const [defaultBytesFormat] = useUiSetting$<string>(DEFAULT_BYTES_FORMAT);
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
   const labelInputId = useGeneratedHtmlId({ prefix: 'labelInput' });
@@ -280,7 +274,6 @@ const DataQualityComponent: React.FC = () => {
           </HeaderPage>
 
           <DataQualityPanel
-            addSuccessToast={addSuccessToast}
             baseTheme={baseTheme}
             canUserCreateAndReadCases={canUserCreateAndReadCases}
             defaultBytesFormat={defaultBytesFormat}
@@ -299,6 +292,7 @@ const DataQualityComponent: React.FC = () => {
             setLastChecked={setLastChecked}
             startDate={startDate}
             theme={theme}
+            toasts={toasts}
           />
         </SecuritySolutionPageWrapper>
       ) : (

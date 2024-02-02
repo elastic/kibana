@@ -66,6 +66,7 @@ export function rateLimitingForkJoin<T>(
 }
 
 export function useOverallStats<TParams extends OverallStatsSearchStrategyParams>(
+  esql = false,
   searchStrategyParams: TParams | undefined,
   lastRefresh: number,
   probability?: number | null

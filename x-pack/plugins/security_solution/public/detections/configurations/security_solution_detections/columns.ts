@@ -9,6 +9,8 @@ import type { EuiDataGridColumn } from '@elastic/eui';
 import {
   ALERT_HOST_CRITICALITY,
   ALERT_USER_CRITICALITY,
+  ALERT_HOST_RISK_SCORE_CALCULATED_LEVEL,
+  ALERT_USER_RISK_SCORE_CALCULATED_LEVEL,
 } from '../../../../common/field_maps/field_names';
 import type { LicenseService } from '../../../../common/license';
 import type { ColumnHeaderOptions } from '../../../../common/types';
@@ -25,6 +27,13 @@ import {
   DEFAULT_TABLE_DATE_COLUMN_MIN_WIDTH,
 } from './translations';
 
+export const assigneesColumn: ColumnHeaderOptions = {
+  columnHeaderType: defaultColumnHeaderType,
+  displayAsText: i18n.ALERTS_HEADERS_ASSIGNEES,
+  id: 'kibana.alert.workflow_assignee_ids',
+  initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH,
+};
+
 const getBaseColumns = (
   license?: LicenseService
 ): Array<
@@ -32,12 +41,6 @@ const getBaseColumns = (
 > => {
   const isPlatinumPlus = license?.isPlatinumPlus?.() ?? false;
   return [
-    {
-      columnHeaderType: defaultColumnHeaderType,
-      displayAsText: i18n.ALERTS_HEADERS_ASSIGNEES,
-      id: 'kibana.alert.workflow_assignee_ids',
-      initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH,
-    },
     {
       columnHeaderType: defaultColumnHeaderType,
       displayAsText: i18n.ALERTS_HEADERS_SEVERITY,
@@ -63,7 +66,7 @@ const getBaseColumns = (
     isPlatinumPlus
       ? {
           columnHeaderType: defaultColumnHeaderType,
-          id: 'host.risk.calculated_level',
+          id: ALERT_HOST_RISK_SCORE_CALCULATED_LEVEL,
         }
       : null,
     {
@@ -73,7 +76,7 @@ const getBaseColumns = (
     isPlatinumPlus
       ? {
           columnHeaderType: defaultColumnHeaderType,
-          id: 'user.risk.calculated_level',
+          id: ALERT_USER_RISK_SCORE_CALCULATED_LEVEL,
         }
       : null,
     isPlatinumPlus
@@ -131,6 +134,7 @@ export const getColumns = (
     initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
     linkField: 'kibana.alert.rule.uuid',
   },
+  assigneesColumn,
   ...getBaseColumns(license),
 ];
 

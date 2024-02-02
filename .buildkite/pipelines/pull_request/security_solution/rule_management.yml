@@ -1,4 +1,4 @@
-steps: 
+steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management.sh
     label: 'Serverless Rule Management - Security Solution Cypress Tests'
     agents:
@@ -7,7 +7,9 @@ steps:
       imageProject: elastic-images-qa
       machineType: n2-standard-4
       preemptible: true
-    depends_on: build
+    depends_on:
+      - build
+      - quick_checks
     timeout_in_minutes: 60
     parallelism: 8
     retry:
@@ -23,7 +25,9 @@ steps:
       imageProject: elastic-images-qa
       machineType: n2-standard-4
       preemptible: true
-    depends_on: build
+    depends_on:
+      - build
+      - quick_checks
     timeout_in_minutes: 60
     parallelism: 4
     retry:
@@ -39,7 +43,9 @@ steps:
       imageProject: elastic-images-qa
       machineType: n2-standard-4
       preemptible: true
-    depends_on: build
+    depends_on:
+      - build
+      - quick_checks
     timeout_in_minutes: 60
     parallelism: 8
     retry:
@@ -55,7 +61,9 @@ steps:
       imageProject: elastic-images-qa
       machineType: n2-standard-4
       preemptible: true
-    depends_on: build
+    depends_on:
+      - build
+      - quick_checks
     timeout_in_minutes: 60
     parallelism: 6
     retry:

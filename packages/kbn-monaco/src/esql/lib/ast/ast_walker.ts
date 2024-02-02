@@ -73,6 +73,10 @@ import {
   computeLocationExtends,
   createColumnStar,
   wrapIdentifierAsArray,
+  createPolicy,
+  createSettingTuple,
+  createLiteralString,
+  isMissingText,
 } from './ast_helpers';
 import { getPosition } from './ast_position_utils';
 import type {
@@ -117,10 +121,25 @@ export function collectAllColumnIdentifiers(
 }
 
 export function getPolicyName(ctx: EnrichCommandContext) {
-  if (!ctx._policyName) {
+  if (!ctx._policyName || (ctx._policyName.text && /<missing /.test(ctx._policyName.text))) {
     return [];
   }
-  return [createSource(ctx._policyName, 'policy')];
+  return [createPolicy(ctx._policyName)];
+}
+
+export function getPolicySettings(ctx: EnrichCommandContext) {
+  if (!ctx.setting() || !ctx.setting().length) {
+    return [];
+  }
+  return ctx.setting().map((setting) => {
+    const node = createSettingTuple(setting);
+    if (setting._name?.text && setting._value?.text) {
+      node.args.push(createLiteralString(setting._value)!);
+      return node;
+    }
+    // incomplete setting
+    return node;
+  });
 }
 
 export function getMatchField(ctx: EnrichCommandContext) {
@@ -188,11 +207,16 @@ function visitLogicalAndsOrs(ctx: LogicalBinaryContext) {
 function visitLogicalIns(ctx: LogicalInContext) {
   const fn = createFunction(ctx.NOT() ? 'not_in' : 'in', ctx);
   const [left, ...list] = ctx.valueExpression();
-  const values = [visitValueExpression(left), list.map((ve) => visitValueExpression(ve))];
-  for (const arg of values) {
-    if (arg) {
-      const filteredArgs = Array.isArray(arg) ? arg.filter(nonNullable) : [arg];
-      fn.args.push(filteredArgs);
+  const leftArg = visitValueExpression(left);
+  if (leftArg) {
+    fn.args.push(...(Array.isArray(leftArg) ? leftArg : [leftArg]));
+    const values = list.map((ve) => visitValueExpression(ve));
+    const listArgs = values
+      .filter(nonNullable)
+      .flatMap((arg) => (Array.isArray(arg) ? arg.filter(nonNullable) : arg));
+    // distinguish between missing brackets (missing text error) and an empty list
+    if (!isMissingText(ctx.text)) {
+      fn.args.push(listArgs);
     }
   }
   // update the location of the assign based on arguments
@@ -215,6 +239,7 @@ function getMathOperation(ctx: ArithmeticBinaryContext) {
 function getComparisonName(ctx: ComparisonOperatorContext) {
   return (
     ctx.EQ()?.text ||
+    ctx.CIEQ()?.text ||
     ctx.NEQ()?.text ||
     ctx.LT()?.text ||
     ctx.LTE()?.text ||
@@ -225,6 +250,9 @@ function getComparisonName(ctx: ComparisonOperatorContext) {
 }
 
 function visitValueExpression(ctx: ValueExpressionContext) {
+  if (isMissingText(ctx.text)) {
+    return [];
+  }
   if (ctx instanceof ValueExpressionDefaultContext) {
     return visitOperatorExpression(ctx.operatorExpression());
   }
@@ -475,16 +503,12 @@ export function collectAllFieldsStatements(ctx: FieldsContext | undefined): ESQL
   return ast;
 }
 
-export function visitByOption(ctx: StatsCommandContext) {
-  if (!ctx.BY()) {
+export function visitByOption(ctx: StatsCommandContext, expr: FieldsContext | undefined) {
+  if (!ctx.BY() || !expr) {
     return [];
   }
   const option = createOption(ctx.BY()!.text.toLowerCase(), ctx);
-  for (const qnCtx of ctx.grouping()?.qualifiedName() || []) {
-    if (qnCtx?.text?.length) {
-      option.args.push(createColumn(qnCtx));
-    }
-  }
+  option.args.push(...collectAllFieldsStatements(expr));
   return [option];
 }
 
@@ -523,16 +547,18 @@ export function visitDissect(ctx: DissectCommandContext) {
   const pattern = ctx.string().tryGetToken(esql_parser.STRING, 0);
   return [
     visitPrimaryExpression(ctx.primaryExpression()),
-    createLiteral('string', pattern),
-    ...visitDissectOptions(ctx.commandOptions()),
+    ...(pattern && !isMissingText(pattern.text)
+      ? [createLiteral('string', pattern), ...visitDissectOptions(ctx.commandOptions())]
+      : []),
   ].filter(nonNullable);
 }
 
 export function visitGrok(ctx: GrokCommandContext) {
   const pattern = ctx.string().tryGetToken(esql_parser.STRING, 0);
-  return [visitPrimaryExpression(ctx.primaryExpression()), createLiteral('string', pattern)].filter(
-    nonNullable
-  );
+  return [
+    visitPrimaryExpression(ctx.primaryExpression()),
+    ...(pattern && !isMissingText(pattern.text) ? [createLiteral('string', pattern)] : []),
+  ].filter(nonNullable);
 }
 
 function visitDissectOptions(ctx: CommandOptionsContext | undefined) {

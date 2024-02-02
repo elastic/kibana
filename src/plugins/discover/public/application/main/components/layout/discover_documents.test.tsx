@@ -112,9 +112,18 @@ describe('Discover documents layout', () => {
     const customCellRenderer = {
       content: () => <span className="custom-renderer-test">Test</span>,
     };
+
+    const customGridColumnsConfiguration = {
+      content: () => ({
+        id: 'content',
+        displayText: <span className="custom-column-test">Column</span>,
+      }),
+    };
+
     const customization: DiscoverCustomization = {
       id: 'data_table',
       customCellRenderer,
+      customGridColumnsConfiguration,
     };
 
     customisationService.set(customization);
@@ -123,5 +132,8 @@ describe('Discover documents layout', () => {
     expect(discoverGridComponent.exists()).toBeTruthy();
 
     expect(discoverGridComponent.prop('externalCustomRenderers')).toEqual(customCellRenderer);
+    expect(discoverGridComponent.prop('customGridColumnsConfiguration')).toEqual(
+      customGridColumnsConfiguration
+    );
   });
 });

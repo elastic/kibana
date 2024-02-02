@@ -13,10 +13,8 @@ import { last, omit } from 'lodash';
 import { lastValueFrom } from 'rxjs';
 import { FunctionRegistrationParameters } from '.';
 import { MessageRole, type Message } from '../../common/types';
-import { concatenateOpenAiChunks } from '../../common/utils/concatenate_openai_chunks';
-import { processOpenAiStream } from '../../common/utils/process_openai_stream';
+import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
 import type { ObservabilityAIAssistantClient } from '../service/client';
-import { streamIntoObservable } from '../service/util/stream_into_observable';
 
 export function registerRecallFunction({
   client,
@@ -44,7 +42,7 @@ export function registerRecallFunction({
           "lens function usage",
           "get_apm_timeseries function usage"    
         ],
-        "contexts": [
+        "categories": [
           "lens",
           "apm"
         ]
@@ -63,22 +61,22 @@ export function registerRecallFunction({
               type: 'string',
             },
           },
-          contexts: {
+          categories: {
             type: 'array',
             additionalItems: false,
             additionalProperties: false,
             description:
-              'Contexts or categories of internal documentation that you want to search for. By default internal documentation will be excluded. Use `apm` to get internal APM documentation, `lens` to get internal Lens documentation, or both.',
+              'Categories of internal documentation that you want to search for. By default internal documentation will be excluded. Use `apm` to get internal APM documentation, `lens` to get internal Lens documentation, or both.',
             items: {
               type: 'string',
               enum: ['apm', 'lens'],
             },
           },
         },
-        required: ['queries', 'contexts'],
+        required: ['queries', 'categories'],
       } as const,
     },
-    async ({ arguments: { queries, contexts }, messages, connectorId }, signal) => {
+    async ({ arguments: { queries, categories }, messages, connectorId }, signal) => {
       const systemMessage = messages.find((message) => message.message.role === MessageRole.System);
 
       if (!systemMessage) {
@@ -93,7 +91,7 @@ export function registerRecallFunction({
         userMessage,
         client,
         signal,
-        contexts,
+        categories,
         queries,
       });
 
@@ -131,13 +129,13 @@ async function retrieveSuggestions({
   userMessage,
   queries,
   client,
-  contexts,
+  categories,
   signal,
 }: {
   userMessage?: Message;
   queries: string[];
   client: ObservabilityAIAssistantClient;
-  contexts: Array<'apm' | 'lens'>;
+  categories: Array<'apm' | 'lens'>;
   signal: AbortSignal;
 }) {
   const queriesWithUserPrompt =
@@ -147,7 +145,7 @@ async function retrieveSuggestions({
 
   const recallResponse = await client.recall({
     queries: queriesWithUserPrompt,
-    contexts,
+    categories,
   });
 
   return recallResponse.entries.map((entry) => omit(entry, 'labels', 'is_correction', 'score'));
@@ -249,7 +247,7 @@ async function scoreSuggestions({
   };
 
   const response = await lastValueFrom(
-    streamIntoObservable(
+    (
       await client.chat({
         connectorId,
         messages: [extendedSystemMessage, newUserMessage],
@@ -257,7 +255,7 @@ async function scoreSuggestions({
         functionCall: 'score',
         signal,
       })
-    ).pipe(processOpenAiStream(), concatenateOpenAiChunks())
+    ).pipe(concatenateChatCompletionChunks())
   );
   const scoreFunctionRequest = decodeOrThrow(scoreFunctionRequestRt)(response);
   const { scores } = decodeOrThrow(jsonRt.pipe(scoreFunctionArgumentsRt))(

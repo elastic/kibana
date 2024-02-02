@@ -17,6 +17,7 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
 
+import { resetIndexUrlParams } from './reset_index_url_params';
 import { renderBadges } from '../../../../lib/render_badges';
 import { Index } from '../../../../../../common';
 import {
@@ -57,9 +58,7 @@ const defaultTabs: IndexDetailsTab[] = [
     name: (
       <FormattedMessage id="xpack.idxMgmt.indexDetails.settingsTitle" defaultMessage="Settings" />
     ),
-    renderTabContent: ({ index }) => (
-      <DetailsPageSettings indexName={index.name} isIndexOpen={index.status === INDEX_OPEN} />
-    ),
+    renderTabContent: ({ index }) => <DetailsPageSettings indexName={index.name} />,
     order: 30,
   },
 ];
@@ -77,6 +76,7 @@ interface Props {
   index: Index;
   tab: IndexDetailsTabId;
   history: RouteComponentProps['history'];
+  search: string;
   fetchIndexDetails: () => Promise<void>;
   navigateToIndicesList: () => void;
 }
@@ -84,11 +84,13 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
   index,
   tab,
   history,
+  search,
   fetchIndexDetails,
   navigateToIndicesList,
 }) => {
   const {
     config: { enableIndexStats },
+    plugins: { console: consolePlugin },
     services: { extensionsService },
   } = useAppContext();
 
@@ -111,9 +113,9 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
 
   const onSectionChange = useCallback(
     (newSection: IndexDetailsTabId) => {
-      return history.push(getIndexDetailsLink(index.name, newSection));
+      return history.push(getIndexDetailsLink(index.name, resetIndexUrlParams(search), newSection));
     },
-    [history, index]
+    [history, index.name, search]
   );
 
   const headerTabs = useMemo<EuiPageHeaderProps['tabs']>(() => {
@@ -176,6 +178,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
       >
         <DetailsPageTab tabs={tabs} tab={tab} index={index} />
       </div>
+      {consolePlugin?.renderEmbeddableConsole?.() ?? <></>}
     </>
   );
 };

@@ -171,7 +171,8 @@ download_artifact() {
   retry 3 1 timeout 3m buildkite-agent artifact download "$@"
 }
 
-if [[ "$VAULT_ADDR" == *"secrets.elastic.co"* ]]; then
+# TODO: remove after https://github.com/elastic/kibana-operations/issues/15 is done
+if [[ "${VAULT_ADDR:-}" == *"secrets.elastic.co"* ]]; then
   VAULT_PATH_PREFIX="secret/kibana-issues/dev"
   VAULT_KV_PREFIX="secret/kibana-issues/dev"
   IS_LEGACY_VAULT_ADDR=true
@@ -180,26 +181,27 @@ else
   VAULT_KV_PREFIX="kv/ci-shared/kibana-deployments"
   IS_LEGACY_VAULT_ADDR=false
 fi
+export IS_LEGACY_VAULT_ADDR
 
 vault_get() {
-  path=$1
+  key_path=$1
   field=$2
 
-  fullPath="$VAULT_PATH_PREFIX/$path"
+  fullPath="$VAULT_PATH_PREFIX/$key_path"
 
-  if [[ -z "${2:-}" ]]; then
-    retry 5 5 vault read "$fullPath"
+  if [[ -z "${2:-}" || "${2:-}" =~ ^-.* ]]; then
+    retry 5 5 vault read "$fullPath" "${@:2}"
   else
-    retry 5 5 vault read -field="$field" "$fullPath"
+    retry 5 5 vault read -field="$field" "$fullPath" "${@:3}"
   fi
 }
 
 vault_set() {
-  path=$1
+  key_path=$1
   shift
   fields=("$@")
 
-  fullPath="$VAULT_PATH_PREFIX/$path"
+  fullPath="$VAULT_PATH_PREFIX/$key_path"
 
   # shellcheck disable=SC2068
   retry 5 5 vault write "$fullPath" ${fields[@]}

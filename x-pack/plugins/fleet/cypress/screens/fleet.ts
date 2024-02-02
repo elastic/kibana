@@ -119,6 +119,7 @@ export const AGENT_BINARY_SOURCES_FLYOUT = {
 export const SETTINGS_OUTPUTS = {
   EDIT_BTN: 'editOutputBtn',
   ADD_BTN: 'addOutputBtn',
+  TABLE: 'settingsOutputsTable',
   NAME_INPUT: 'settingsOutputsFlyout.nameInput',
   TYPE_INPUT: 'settingsOutputsFlyout.typeInput',
   ADD_HOST_ROW_BTN: 'fleetServerHosts.multiRowInput.addRowButton',
@@ -189,6 +190,7 @@ export const SETTINGS_OUTPUTS_KAFKA = {
 export const SETTINGS_FLEET_SERVER_HOSTS = {
   ADD_BUTTON: 'settings.fleetServerHosts.addFleetServerHostBtn',
   EDIT_BUTTON: 'fleetServerHostsTable.edit.btn',
+  TABLE: 'settingsFleetServerHostsTable',
 };
 
 export const AGENT_POLICY_FORM = {

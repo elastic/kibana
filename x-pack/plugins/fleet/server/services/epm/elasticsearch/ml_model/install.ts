@@ -17,7 +17,7 @@ import type { EsAssetReference } from '../../../../../common/types/models';
 
 import { retryTransientEsErrors } from '../retry';
 
-import { updateEsAssetReferences } from '../../packages/install';
+import { updateEsAssetReferences } from '../../packages/es_assets_reference';
 
 interface MlModelInstallation {
   installationName: string;
