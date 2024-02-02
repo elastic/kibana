@@ -38,7 +38,7 @@ import {
 import { canLinkLegacyEmbeddable, linkLegacyEmbeddable } from './link_legacy_embeddable';
 import { canUnlinkLegacyEmbeddable, unlinkLegacyEmbeddable } from './unlink_legacy_embeddable';
 
-export type CommonLegacyInput = EmbeddableInput & { timeRange: TimeRange };
+export type CommonLegacyInput = EmbeddableInput & { savedObjectId?: string; timeRange: TimeRange };
 export type CommonLegacyOutput = EmbeddableOutput & { indexPatterns: DataView[] };
 export type CommonLegacyEmbeddable = IEmbeddable<CommonLegacyInput, CommonLegacyOutput>;
 
@@ -146,13 +146,13 @@ export const legacyEmbeddableToApi = (
     return output.savedObjectId ?? input.savedObjectId;
   }
   const savedObjectId = new BehaviorSubject<string | undefined>(
-    getSavedObjectId(embeddable.getInput() as { savedObjectId?: string }, embeddable.getOutput())
+    getSavedObjectId(embeddable.getInput(), embeddable.getOutput())
   );
   subscriptions.add(
     combineLatest([embeddable.getInput$(), embeddable.getOutput$()])
       .pipe(
         map(([input, output]) => {
-          return getSavedObjectId(input as { savedObjectId?: string }, output);
+          return getSavedObjectId(input, output);
         }),
         distinctUntilChanged()
       )
