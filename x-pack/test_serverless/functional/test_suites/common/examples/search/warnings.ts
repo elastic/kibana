@@ -13,7 +13,6 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'timePicker', 'svlCommonPage']);
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
   const retry = getService('retry');
   const es = getService('es');
   const log = getService('log');
@@ -32,7 +31,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const testIndex = 'sample-01';
     const testRollupIndex = 'sample-01-rollup';
     const testRollupField = 'kubernetes.container.memory.usage.bytes';
-    const toastsSelector = '[data-test-subj=globalToastList] [data-test-subj=euiToastHeader]';
     const shardFailureType = 'unsupported_aggregation_on_downsampled_index';
     const shardFailureReason = `Field [${testRollupField}] of type [aggregate_metric_double] is not supported for aggregation [percentiles]`;
 
