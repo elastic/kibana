@@ -13,14 +13,7 @@ import { SourcererScopeName } from '../../store/sourcerer/model';
 import { Sourcerer } from '.';
 import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
 import { sourcererActions, sourcererModel } from '../../store/sourcerer';
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  TestProviders,
-} from '../../mock';
-import { createStore } from '../../store';
+import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import { sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
 import { useSourcererDataView } from '../../containers/sourcerer';
 
@@ -76,7 +69,6 @@ const { id, patternList } = mockGlobalState.sourcerer.defaultDataView;
 const patternListNoSignals = sortWithExcludesAtEnd(
   patternList.filter((p) => p !== mockGlobalState.sourcerer.signalIndexName)
 );
-let store: ReturnType<typeof createStore>;
 const sourcererDataView = {
   indicesExist: true,
   loading: false,
@@ -108,8 +100,6 @@ describe('Sourcerer integration tests', () => {
     },
   };
 
-  const { storage } = createSecuritySolutionStorageMock();
-
   beforeEach(() => {
     const pollForSignalIndexMock = jest.fn();
     (useSignalHelpers as jest.Mock).mockReturnValue({
@@ -121,13 +111,12 @@ describe('Sourcerer integration tests', () => {
       ...sourcererDataView,
       activePatterns: ['myFakebeat-*'],
     });
-    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     jest.clearAllMocks();
   });
 
   it('Selects a different index pattern', async () => {
     const wrapper = mount(
-      <TestProviders store={store}>
+      <TestProviders store={createMockStore(state)}>
         <Sourcerer {...defaultProps} />
       </TestProviders>
     );
