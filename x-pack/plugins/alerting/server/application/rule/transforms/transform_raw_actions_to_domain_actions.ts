@@ -31,7 +31,7 @@ export const transformRawActionsToDomainActions = ({
     ? injectReferencesIntoActions(ruleId, actions, references || [])
     : [];
 
-  const ruleDomainActions: RuleDomain['actions'] = actionsWithInjectedRefs.map((action) => {
+  const ruleDomainActions = actionsWithInjectedRefs.map((action) => {
     if (isSystemAction(action.id)) {
       return {
         id: action.id,
@@ -39,6 +39,9 @@ export const transformRawActionsToDomainActions = ({
         actionTypeId: action.actionTypeId,
         uuid: action.uuid,
         type: RuleActionTypes.SYSTEM,
+        ...(action.useAlertDataAsTemplate
+          ? { useAlertDataAsTemplate: action.useAlertDataAsTemplate }
+          : {}),
       };
     }
 
@@ -50,6 +53,9 @@ export const transformRawActionsToDomainActions = ({
       uuid: action.uuid,
       ...(action.frequency ? { frequency: action.frequency } : {}),
       ...(action.alertsFilter ? { alertsFilter: action.alertsFilter } : {}),
+      ...(action.useAlertDataAsTemplate
+        ? { useAlertDataAsTemplate: action.useAlertDataAsTemplate }
+        : {}),
       type: RuleActionTypes.DEFAULT,
     };
 

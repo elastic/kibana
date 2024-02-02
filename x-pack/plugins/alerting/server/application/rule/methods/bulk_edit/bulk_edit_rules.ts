@@ -652,14 +652,14 @@ async function getUpdatedAttributesFromOperations<Params extends RuleParams>({
     // the `isAttributesUpdateSkipped` flag to false.
     switch (operation.field) {
       case 'actions': {
+        const systemActions = operation.value.filter(
+          (action): action is RuleSystemAction => action.type === RuleActionTypes.SYSTEM
+        );
+
         const updatedOperation = {
           ...operation,
           value: await addGeneratedActionValues(operation.value, context),
         };
-
-        const systemActions = operation.value.filter(
-          (action): action is RuleSystemAction => action.type === RuleActionTypes.SYSTEM
-        );
 
         await validateSystemActions({
           actionsClient,

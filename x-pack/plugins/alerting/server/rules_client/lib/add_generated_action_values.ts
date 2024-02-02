@@ -31,17 +31,16 @@ export async function addGeneratedActionValues(
     queryStringOptions,
     ignoreFilterIfFieldNotInIndex,
   };
+  const generateDSL = (kql: string, filters: Filter[]) => {
+    try {
+      return JSON.stringify(
+        buildEsQuery(undefined, [{ query: kql, language: 'kuery' }], filters, esQueryConfig)
+      );
+    } catch (e) {
+      throw Boom.badRequest(`Error creating DSL query: invalid KQL`);
+    }
+  };
   return actions.map(({ uuid, alertsFilter, ...action }) => {
-    const generateDSL = (kql: string, filters: Filter[]) => {
-      try {
-        return JSON.stringify(
-          buildEsQuery(undefined, [{ query: kql, language: 'kuery' }], filters, esQueryConfig)
-        );
-      } catch (e) {
-        throw Boom.badRequest(`Error creating DSL query: invalid KQL`);
-      }
-    };
-
     return {
       ...action,
       uuid: uuid || v4(),

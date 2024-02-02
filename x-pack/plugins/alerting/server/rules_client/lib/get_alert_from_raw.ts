@@ -95,6 +95,7 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
     actions,
     snoozeSchedule,
     lastRun,
+    isSnoozedUntil: DoNotUseIsSNoozedUntil,
     ...partialRawRule
   }: Partial<RawRule>,
   references: SavedObjectReference[] | undefined,
@@ -128,14 +129,14 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
     // we currently only support the Interval Schedule type
     // Once we support additional types, this type signature will likely change
     schedule: schedule as IntervalSchedule,
-    actions: actions
+    actions: (actions
       ? transformRawActionsToDomainActions({
           ruleId: id,
           actions,
           references: references || [],
           isSystemAction: context.isSystemAction,
         })
-      : [],
+      : []) as unknown as PartialRule['actions'],
     params: injectReferencesIntoParams(id, ruleType, params, references || []) as Params,
     ...(excludeFromPublicApi ? {} : { snoozeSchedule: snoozeScheduleDates ?? [] }),
     ...(includeSnoozeData && !excludeFromPublicApi
@@ -144,7 +145,7 @@ export function getPartialRuleFromRaw<Params extends RuleTypeParams>(
             snoozeSchedule,
             muteAll: partialRawRule.muteAll ?? false,
           })?.map((s) => s.id),
-          isSnoozedUntil,
+          isSnoozedUntil: isSnoozedUntil as PartialRule['isSnoozedUntil'],
         }
       : {}),
     ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),

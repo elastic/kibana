@@ -131,6 +131,7 @@ export interface RuleActionAttributes {
     throttle: string | null;
   };
   alertsFilter?: AlertsFilterAttributes;
+  useAlertDataAsTemplate?: boolean;
 }
 
 type MappedParamsAttributes = SavedObjectAttributes & {

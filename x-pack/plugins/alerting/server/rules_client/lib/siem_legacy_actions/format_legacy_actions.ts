@@ -9,7 +9,7 @@ import { chunk } from 'lodash';
 import type { SavedObjectsFindOptionsReference, Logger } from '@kbn/core/server';
 import pMap from 'p-map';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-import { RuleAction, Rule } from '../../../types';
+import { RuleAction, Rule, RuleActionTypes, RuleDefaultAction } from '../../../types';
 import type { RuleExecutorServices } from '../../..';
 import { injectReferencesIntoActions } from '../../common';
 import { transformToNotifyWhen } from './transform_to_notify_when';
@@ -99,7 +99,10 @@ export const legacyGetBulkRuleActionsSavedObject = async ({
           legacyRawActions,
           savedObject.references
         ) // remove uuid from action, as this uuid is not persistent
-          .map(({ uuid, ...action }) => action),
+          .map(({ uuid, ...action }) => ({
+            ...action,
+            type: RuleActionTypes.DEFAULT,
+          })) as RuleDefaultAction[],
       };
     } else {
       logger.error(
