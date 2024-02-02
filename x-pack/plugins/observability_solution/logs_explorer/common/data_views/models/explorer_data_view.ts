@@ -75,6 +75,10 @@ export class ExplorerDataView {
   public isLogDataType() {
     return this.dataType === 'logs';
   }
+
+  public isUnknownDataType() {
+    return this.dataType === 'unknown';
+  }
 }
 
 function testAgainstWhitelist(value: string, whitelist: Whitelist) {

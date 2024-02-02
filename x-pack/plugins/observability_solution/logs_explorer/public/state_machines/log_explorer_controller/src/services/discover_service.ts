@@ -88,8 +88,8 @@ export const redirectToDiscover =
   (
     discover: DiscoverStart
   ): ActionFunction<LogExplorerControllerContext, LogExplorerControllerEvent> =>
-  (context, _event) => {
-    if (isExplorerDataViewSelection(context.datasetSelection)) {
-      discover.locator?.navigate({ dataViewId: context.datasetSelection.selection.dataView.id });
+  (_context, event) => {
+    if (event.type === 'UPDATE_DATASET_SELECTION' && isExplorerDataViewSelection(event.data)) {
+      discover.locator?.navigate({ dataViewId: event.data.selection.dataView.id });
     }
   };
