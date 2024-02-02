@@ -152,7 +152,8 @@ export function readFieldCapsResponse(
         timeZone: capsByType[types[0]].meta?.time_zone,
         timeSeriesMetric: timeSeriesMetricType,
         timeSeriesDimension: capsByType[types[0]].time_series_dimension,
-        defaultFormatter: unitsArrayToFormatter(capsByType[types[0]].meta?.unit),
+        defaultFormatter:
+          capsByType[types[0]].meta && unitsArrayToFormatter(capsByType[types[0]].meta?.unit),
       };
       // This is intentionally using a "hash" and a "push" to be highly optimized with very large indexes
       agg.array.push(field);
