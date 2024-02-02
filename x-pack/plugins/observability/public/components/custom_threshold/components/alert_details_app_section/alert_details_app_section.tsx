@@ -52,6 +52,7 @@ import { LogRateAnalysis } from './log_rate_analysis';
 import { Groups } from './groups';
 import { Tags } from './tags';
 import { RuleConditionChart } from '../rule_condition_chart/rule_condition_chart';
+import { getFilterQuery } from './helpers/get_filter_query';
 
 // TODO Use a generic props for app sections https://github.com/elastic/kibana/issues/152690
 export type CustomThresholdRule = Rule<CustomThresholdRuleTypeParams>;
@@ -171,12 +172,8 @@ export default function AlertDetailsAppSection({
   }, [groups, tags, rule, ruleLink, setAlertSummaryFields]);
 
   useEffect(() => {
-    let query = `${(ruleParams.searchConfiguration?.query as Query)?.query as string}`;
-    if (groups) {
-      const groupQueries = groups?.map(({ field, value }) => `${field}: ${value}`).join(' and ');
-      query = query ? `(${query}) and ${groupQueries}` : groupQueries;
-    }
-    setFilterQuery(query);
+    const query = `${(ruleParams.searchConfiguration?.query as Query)?.query as string}`;
+    setFilterQuery(getFilterQuery(query, groups));
   }, [groups, ruleParams.searchConfiguration]);
 
   useEffect(() => {
