@@ -853,7 +853,9 @@ class AgentPolicyService {
     });
 
     if (total > 0) {
-      throw new Error('Cannot delete an agent policy that is assigned to any active or inactive agents');
+      throw new Error(
+        'Cannot delete an agent policy that is assigned to any active or inactive agents'
+      );
     }
 
     const packagePolicies = await packagePolicyService.findAllForAgentPolicy(soClient, id);
