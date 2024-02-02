@@ -198,6 +198,18 @@ export const getSyntheticsMonitorSavedObjectType = (
           defaultMessage: 'Synthetics - Monitor',
         }),
     },
+    modelVersions: {
+      '1': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              config_id: { type: 'keyword' },
+            },
+          },
+        ],
+      },
+    },
   };
 };
 
