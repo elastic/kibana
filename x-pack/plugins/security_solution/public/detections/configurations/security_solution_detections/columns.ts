@@ -34,6 +34,18 @@ export const assigneesColumn: ColumnHeaderOptions = {
   initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH,
 };
 
+export const hostRiskLevelColumn: ColumnHeaderOptions = {
+  columnHeaderType: defaultColumnHeaderType,
+  id: ALERT_HOST_RISK_SCORE_CALCULATED_LEVEL,
+  displayAsText: i18n.ALERTS_HEADERS_HOST_RISK_LEVEL,
+};
+
+export const userRiskLevelColumn: ColumnHeaderOptions = {
+  columnHeaderType: defaultColumnHeaderType,
+  id: ALERT_USER_RISK_SCORE_CALCULATED_LEVEL,
+  displayAsText: i18n.ALERTS_HEADERS_USER_RISK_LEVEL,
+};
+
 const getBaseColumns = (
   license?: LicenseService
 ): Array<
@@ -67,20 +79,8 @@ const getBaseColumns = (
       columnHeaderType: defaultColumnHeaderType,
       id: 'user.name',
     },
-    isPlatinumPlus
-      ? {
-          columnHeaderType: defaultColumnHeaderType,
-          id: ALERT_HOST_RISK_SCORE_CALCULATED_LEVEL,
-          displayAsText: i18n.ALERTS_HEADERS_HOST_RISK_LEVEL,
-        }
-      : null,
-    isPlatinumPlus
-      ? {
-          columnHeaderType: defaultColumnHeaderType,
-          id: ALERT_USER_RISK_SCORE_CALCULATED_LEVEL,
-          displayAsText: i18n.ALERTS_HEADERS_USER_RISK_LEVEL,
-        }
-      : null,
+    isPlatinumPlus ? hostRiskLevelColumn : null,
+    isPlatinumPlus ? userRiskLevelColumn : null,
     isPlatinumPlus
       ? {
           columnHeaderType: defaultColumnHeaderType,

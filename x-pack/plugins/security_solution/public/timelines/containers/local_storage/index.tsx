@@ -18,6 +18,7 @@ import { assigneesColumn } from '../../../detections/configurations/security_sol
 import { ALERTS_TABLE_REGISTRY_CONFIG_IDS, VIEW_SELECTION } from '../../../../common/constants';
 import type { DataTablesStorage } from './types';
 import { useKibana } from '../../../common/lib/kibana';
+import { migrateEntityRiskLevelColumnTitle } from './migrates_risk_level_title';
 
 export const LOCAL_STORAGE_TABLE_KEY = 'securityDataTable';
 const LOCAL_STORAGE_TIMELINE_KEY_LEGACY = 'timelines';
@@ -295,6 +296,7 @@ export const getDataTablesInStorageByIds = (storage: Storage, tableIds: TableIdL
   migrateAlertTableStateToTriggerActionsState(storage, allDataTables);
   migrateTriggerActionsVisibleColumnsAlertTable88xTo89(storage);
   addAssigneesSpecsToSecurityDataTableIfNeeded(storage, allDataTables);
+  migrateEntityRiskLevelColumnTitle(storage, allDataTables);
 
   return tableIds.reduce((acc, tableId) => {
     const tableModel = allDataTables[tableId];
