@@ -17,18 +17,17 @@ import {
 import { i18n } from '@kbn/i18n';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { Fragment, useEffect, useState } from 'react';
-
 import { useLocation } from 'react-router-dom';
+import { BurnRateOption, BurnRates } from '../../../components/slo/burn_rate/burn_rates';
 import { useFetchActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
 import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
-import { BurnRateOption, BurnRates } from '../../../components/slo/burn_rate/burn_rates';
+import { toDuration, toMinutes } from '../../../utils/slo/duration';
 import { ErrorBudgetChartPanel } from './error_budget_chart_panel';
 import { EventsChartPanel } from './events_chart_panel';
 import { Overview } from './overview/overview';
 import { SliChartPanel } from './sli_chart_panel';
 import { SloDetailsAlerts } from './slo_detail_alerts';
-import { toDuration, toMinutes } from '../../../utils/slo/duration';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
