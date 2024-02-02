@@ -405,6 +405,19 @@ export class Plugin
               ]
             : [];
 
+          const aiAssistantLink =
+            !Boolean(pluginsSetup.serverless) && Boolean(pluginsSetup.observabilityAIAssistant)
+              ? [
+                  {
+                    label: i18n.translate('xpack.observability.aiAssistantLinkTitle', {
+                      defaultMessage: 'AI Assistant',
+                    }),
+                    app: 'observabilityAIAssistant',
+                    path: '/conversations/new',
+                  },
+                ]
+              : [];
+
           // Reformat the visible links to be NavigationEntry objects instead of
           // AppDeepLink objects.
           //
@@ -427,7 +440,7 @@ export class Plugin
             {
               label: '',
               sortKey: 100,
-              entries: [...overviewLink, ...otherLinks],
+              entries: [...overviewLink, ...otherLinks, ...aiAssistantLink],
             },
           ];
         })
