@@ -23,7 +23,7 @@ NOTE:
 
 
 |{kib-repo}blob/{branch}/src/plugins/advanced_settings/README.md[advancedSettings]
-|This plugin contains the advanced settings management section
+|This plugin registers the management settings application
 allowing users to configure their advanced settings, also known
 as uiSettings within the code.
 
@@ -648,7 +648,7 @@ using the CURL scripts in the scripts folder.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/logs_explorer/README.md[logsExplorer]
-|This plugin is home to the <LogExplorer /> component and related types. It implements several of the underlying concepts that the Observability Log Explorer app builds upon.
+|This plugin is home to the <LogExplorer /> component and related types. It implements several of the underlying concepts that the Observability Logs Explorer app builds upon.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/logs_shared/README.md[logsShared]

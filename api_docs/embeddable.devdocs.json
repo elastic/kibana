@@ -11988,7 +11988,7 @@
               "\nRenders the embeddable at the given node."
             ],
             "signature": [
-              "(domNode: Element | HTMLElement) => void | N"
+              "(domNode: HTMLElement | Element) => void | N"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
@@ -12002,7 +12002,7 @@
                 "label": "domNode",
                 "description": [],
                 "signature": [
-                  "Element | HTMLElement"
+                  "HTMLElement | Element"
                 ],
                 "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
                 "deprecated": false,
@@ -12032,7 +12032,7 @@
                 "section": "def-common.ErrorLike",
                 "text": "ErrorLike"
               },
-              ", domNode: Element | HTMLElement) => N | (() => void)) | undefined"
+              ", domNode: HTMLElement | Element) => N | (() => void)) | undefined"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
@@ -12067,7 +12067,7 @@
                 "label": "domNode",
                 "description": [],
                 "signature": [
-                  "Element | HTMLElement"
+                  "HTMLElement | Element"
                 ],
                 "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
                 "deprecated": false,

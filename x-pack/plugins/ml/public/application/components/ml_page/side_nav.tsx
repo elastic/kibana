@@ -235,6 +235,16 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             testSubj: 'mlMainTab indexDataVisualizer',
           },
           {
+            id: 'esql_datavisualizer',
+            pathId: ML_PAGES.DATA_VISUALIZER_ESQL,
+            name: i18n.translate('xpack.ml.navMenu.esqlDataVisualizerLinkText', {
+              defaultMessage: 'ES|QL',
+            }),
+            disabled: false,
+            testSubj: 'mlMainTab esqlDataVisualizer',
+          },
+
+          {
             id: 'data_drift',
             pathId: ML_PAGES.DATA_DRIFT_INDEX_SELECT,
             name: i18n.translate('xpack.ml.navMenu.dataComparisonText', {
