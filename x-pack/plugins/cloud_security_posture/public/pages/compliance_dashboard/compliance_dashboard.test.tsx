@@ -784,21 +784,21 @@ describe('getDefaultTab', () => {
     });
   });
 
-  it('returns CSPM tab is plugin status and kspm status is not provided', () => {
+  it('should returns undefined when plugin status and cspm stats is not provided', () => {
     const cspmStats = getStatsMock(1) as ComplianceDashboardDataV2;
 
-    expect(getDefaultTab(undefined, cspmStats, undefined)).toEqual('cspm');
+    expect(getDefaultTab(undefined, cspmStats, undefined)).toEqual(undefined);
   });
 
-  it('returns KSPM tab is plugin status and csp status is not provided', () => {
+  it('should return undefined is plugin status and csp status is not provided ', () => {
     const kspmStats = getStatsMock(1) as ComplianceDashboardDataV2;
 
-    expect(getDefaultTab(undefined, undefined, kspmStats)).toEqual('kspm');
+    expect(getDefaultTab(undefined, undefined, kspmStats)).toEqual(undefined);
   });
 
-  it('returns CSPM tab when only plugins status data is provided', () => {
+  it('should return undefined when  plugins status or cspm stats data is not provided', () => {
     const pluginStatus = getPluginStatusMock('indexed', 'indexed') as BaseCspSetupStatus;
 
-    expect(getDefaultTab(pluginStatus, undefined, undefined)).toEqual('cspm');
+    expect(getDefaultTab(pluginStatus, undefined, undefined)).toEqual(undefined);
   });
 });
