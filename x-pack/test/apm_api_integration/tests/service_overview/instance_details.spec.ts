@@ -56,7 +56,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     const metricOnlyInstance = apm
       .service({ name: 'service1', environment: 'production', agentName: 'java' })
-      .instance('metric-only-production');
+      .instance('multiple-env-service-production');
 
     before(async () => {
       return synthtrace.index([

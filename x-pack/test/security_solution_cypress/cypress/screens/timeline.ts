@@ -26,7 +26,7 @@ export const SELECT_CASE = (id: string) => {
   return `[data-test-subj="cases-table-row-select-${id}"]`;
 };
 
-export const CLOSE_TIMELINE_BTN = '[data-test-subj="close-timeline"]';
+export const CLOSE_TIMELINE_BTN = '[data-test-subj="timeline-modal-header-close-button"]';
 
 export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
 
@@ -177,7 +177,7 @@ export const TIMELINE_FILTER_OPERATOR = '[data-test-subj="filterOperatorList"]';
 export const TIMELINE_FILTER_VALUE =
   '[data-test-subj="filterParamsComboBox phraseParamsComboxBox"]';
 
-export const TIMELINE_FLYOUT = '[data-test-subj="timeline-flyout"]';
+export const TIMELINE_FLYOUT = '[data-test-subj="timeline-container"]';
 
 export const TIMELINE_FLYOUT_HEADER = '[data-test-subj="query-tab-flyout-header"]';
 
@@ -185,7 +185,7 @@ export const TIMELINE_HEADER = '[data-test-subj="timeline-hide-show-container"]'
 
 export const TIMELINE_INSPECT_BUTTON = `${TIMELINE_FLYOUT} [data-test-subj="inspect-empty-button"]`;
 
-export const TIMELINE_PANEL = `[data-test-subj="timeline-flyout-header-panel"]`;
+export const TIMELINE_PANEL = `[data-test-subj="timeline-modal-header-panel"]`;
 
 export const TIMELINE_QUERY = '[data-test-subj="timelineQueryInput"]';
 
@@ -205,7 +205,7 @@ export const TIMELINE_LUCENELANGUAGE_BUTTON = '[data-test-subj="luceneLanguageMe
 
 export const TIMELINE_KQLLANGUAGE_BUTTON = '[data-test-subj="kqlLanguageMenuItem"]';
 
-export const TIMELINE_TITLE = '[data-test-subj="timeline-title"]';
+export const TIMELINE_TITLE = '[data-test-subj="timeline-modal-header-title"]';
 
 export const TIMELINE_TITLE_INPUT = '[data-test-subj="save-timeline-modal-title-input"]';
 
@@ -225,9 +225,9 @@ export const TIMELINE_SAVE_MODAL_SAVE_AS_NEW_SWITCH =
 
 export const TIMELINE_EXIT_FULL_SCREEN_BUTTON = '[data-test-subj="exit-full-screen"]';
 
-export const TIMELINE_FLYOUT_WRAPPER = '[data-test-subj="flyout-pane"]';
+export const TIMELINE_FLYOUT_WRAPPER = '[data-test-subj="timeline-portal-ref"]';
 
-export const TIMELINE_WRAPPER = '[data-test-subj="timeline-wrapper"]';
+export const TIMELINE_WRAPPER = '[data-test-subj="timeline-portal-overlay-mask"]';
 
 export const TIMELINE_FULL_SCREEN_BUTTON = '[data-test-subj="full-screen-active"]';
 
@@ -316,7 +316,7 @@ export const NEW_TIMELINE_ACTION = getDataTestSubjectSelector(
   'timeline-modal-new-timeline-dropdown-button'
 );
 
-export const SAVE_TIMELINE_ACTION = getDataTestSubjectSelector('save-timeline-action');
+export const SAVE_TIMELINE_ACTION = getDataTestSubjectSelector('timeline-modal-save-timeline');
 export const SAVE_TIMELINE_ACTION_BTN = getDataTestSubjectSelector('timeline-modal-save-timeline');
 
 export const SAVE_TIMELINE_TOOLTIP = getDataTestSubjectSelector(
