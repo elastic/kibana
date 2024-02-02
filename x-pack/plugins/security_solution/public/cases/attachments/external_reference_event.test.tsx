@@ -60,7 +60,7 @@ describe('AttachmentContent', () => {
   });
 
   it('navigates on link click', () => {
-    const { getByText, getByTestId } = render(<AttachmentContent {...defaultProps} />);
+    const { getByTestId } = render(<AttachmentContent {...defaultProps} />);
 
     fireEvent.click(getByTestId('actions-link-endpoint-1'));
 
