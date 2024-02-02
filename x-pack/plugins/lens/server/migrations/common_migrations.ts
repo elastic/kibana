@@ -502,7 +502,11 @@ export const commonMigratePartitionChartGroups = (
   }>
 ): LensDocShape850<{
   shape: string;
-  layers: Array<{ primaryGroups?: string[]; secondaryGroups?: string[] }>;
+  layers: Array<{
+    primaryGroups?: string[];
+    secondaryGroups?: string[];
+    [key: string]: unknown; // unknown carryover key/values
+  }>;
 }> => {
   if (
     attributes.state.visualization?.layers &&
@@ -514,7 +518,6 @@ export const commonMigratePartitionChartGroups = (
         ...attributes.state,
         visualization: {
           ...attributes.state.visualization,
-          // @ts-expect-error upgrade typescript v4.9.5
           layers: attributes.state.visualization.layers.map((l) => {
             const groups = l.groups;
 

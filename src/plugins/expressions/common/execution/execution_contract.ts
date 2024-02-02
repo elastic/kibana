@@ -17,17 +17,19 @@ import { ExpressionAstExpression } from '../ast';
  * `ExecutionContract` is a wrapper around `Execution` class. It provides the
  * same functionality but does not expose Expressions plugin internals.
  */
-export class ExecutionContract<Input = unknown, Output = unknown, InspectorAdapters = unknown> {
+export class ExecutionContract<
+  Input = unknown,
+  Output = unknown,
+  InspectorAdapters extends Adapters = object
+> {
   public get isPending(): boolean {
     const { state, result } = this.execution.state.get();
     const finished = state === 'error' || (state === 'result' && !result?.partial);
     return !finished;
   }
 
-  // @ts-expect-error upgrade typescript v4.9.5
   protected readonly execution: Execution<Input, Output, InspectorAdapters>;
 
-  // @ts-expect-error upgrade typescript v4.9.5
   constructor(execution: Execution<Input, Output, InspectorAdapters>) {
     this.execution = execution;
   }
@@ -82,6 +84,5 @@ export class ExecutionContract<Input = unknown, Output = unknown, InspectorAdapt
    * Get Inspector adapters provided to all functions of expression through
    * execution context.
    */
-  // @ts-expect-error upgrade typescript v4.9.5
   inspect = (): Adapters => this.execution.inspectorAdapters;
 }
