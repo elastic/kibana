@@ -152,7 +152,11 @@ export function AssignmentsConfig({
           padding: ${euiThemeVars.euiPanelPaddingModifiers.paddingSmall};
         `}
       >
-        <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="s"
+          data-test-subj="lns-colorMapping-assignmentsList"
+        >
           {assignments.map((assignment, i) => {
             return (
               <Assignment
@@ -174,6 +178,7 @@ export function AssignmentsConfig({
           {assignments.length === 0 && (
             <EuiEmptyPrompt
               paddingSize="s"
+              data-test-subj="lns-colorMapping-assignmentsPrompt"
               body={
                 <EuiText size="s">
                   <p>
@@ -198,7 +203,12 @@ export function AssignmentsConfig({
                     defaultMessage: 'Add assignment',
                   })}
                 </EuiButton>,
-                <EuiButtonEmpty color="primary" size="xs" onClick={onClickAddAllCurrentCategories}>
+                <EuiButtonEmpty
+                  data-test-subj="lns-colorMapping-assignmentsPromptAddAll"
+                  color="primary"
+                  size="xs"
+                  onClick={onClickAddAllCurrentCategories}
+                >
                   {i18n.translate('coloring.colorMapping.container.mapValueButtonLabel', {
                     defaultMessage: 'Add all unassigned terms',
                   })}
