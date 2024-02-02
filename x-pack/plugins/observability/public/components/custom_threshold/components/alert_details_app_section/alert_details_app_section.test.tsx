@@ -143,7 +143,10 @@ describe('AlertDetailsAppSection', () => {
   it('should render annotations', async () => {
     const mockedRuleConditionChart = jest.fn(() => <div data-test-subj="RuleConditionChart" />);
     (RuleConditionChart as jest.Mock).mockImplementation(mockedRuleConditionChart);
-    const alertDetailsAppSectionComponent = renderComponent();
+    const alertDetailsAppSectionComponent = renderComponent(
+      {},
+      { ['kibana.alert.end']: '2023-03-28T14:40:00.000Z' }
+    );
 
     expect(alertDetailsAppSectionComponent.getAllByTestId('RuleConditionChart').length).toBe(3);
     expect(mockedRuleConditionChart.mock.calls[0]).toMatchSnapshot();

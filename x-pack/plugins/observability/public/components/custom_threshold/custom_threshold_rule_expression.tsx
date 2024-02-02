@@ -42,7 +42,7 @@ import { TimeUnitChar } from '../../../common/utils/formatters/duration';
 import { AlertContextMeta, AlertParams, MetricExpression } from './types';
 import { ExpressionRow } from './components/expression_row';
 import { MetricsExplorerFields, GroupBy } from './components/group_by';
-import { RuleConditionChart } from './components/rule_condition_chart/rule_condition_chart';
+import { RuleConditionChart as PreviewChart } from './components/rule_condition_chart/rule_condition_chart';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
@@ -451,7 +451,7 @@ export default function Expressions(props: Props) {
                   )
                 }
               >
-                <RuleConditionChart
+                <PreviewChart
                   metricExpression={e}
                   dataView={dataView}
                   filterQuery={(ruleParams.searchConfiguration?.query as Query)?.query as string}

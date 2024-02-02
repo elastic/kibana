@@ -28,7 +28,6 @@ import {
   TAGS,
 } from '@kbn/rule-data-utils';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { v4 as uuidv4 } from 'uuid';
 import chroma from 'chroma-js';
 import type {
   EventAnnotationConfig,
@@ -99,7 +98,7 @@ export default function AlertDetailsAppSection({
     },
     color: euiTheme.colors.danger,
     icon: 'alert',
-    id: uuidv4(),
+    id: 'custom_threshold_alert_start_annotation',
   };
 
   const activeAlertRangeAnnotation: RangeEventAnnotationConfig = {
@@ -111,7 +110,7 @@ export default function AlertDetailsAppSection({
       endTimestamp: moment().toISOString(),
     },
     color: chroma(transparentize('#F04E981A', 0.2)).hex().toUpperCase(),
-    id: uuidv4(),
+    id: 'custom_threshold_active_alert_range_annotation',
   };
 
   const recoveredAlertRangeAnnotation: RangeEventAnnotationConfig = {
@@ -123,7 +122,7 @@ export default function AlertDetailsAppSection({
       endTimestamp: alertEnd ?? '',
     },
     color: chroma(transparentize('#F04E981A', 0.2)).hex().toUpperCase(),
-    id: uuidv4(),
+    id: 'custom_threshold_recovered_alert_range_annotation',
   };
 
   const annotations: EventAnnotationConfig[] = [];
