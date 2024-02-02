@@ -98,10 +98,11 @@ export const Match: React.FC<{
           );
         }}
         onCreateOption={(label) => {
-          if (selectedOptions.findIndex((option) => option.label.toLowerCase() === label) === -1) {
+          if (selectedOptions.findIndex((option) => option.label === label) === -1) {
             updateValue([...selectedOptions, { label, value: label }].map((d) => d.value));
           }
         }}
+        isCaseSensitive
         isClearable={false}
         compressed
       />
