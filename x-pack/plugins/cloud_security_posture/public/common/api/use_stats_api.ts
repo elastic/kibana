@@ -15,8 +15,8 @@ import {
 } from '../../../common/constants';
 
 // TODO: consolidate both hooks into one hook with a dynamic key
-const getCspmStatsKey = ['csp_cspm_dashboard_stats'];
-const getKspmStatsKey = ['csp_kspm_dashboard_stats'];
+export const getCspmStatsKey = ['csp_cspm_dashboard_stats'];
+export const getKspmStatsKey = ['csp_kspm_dashboard_stats'];
 
 export const getStatsRoute = (policyTemplate: PosturePolicyTemplate) => {
   return STATS_ROUTE_PATH.replace('{policy_template}', policyTemplate);

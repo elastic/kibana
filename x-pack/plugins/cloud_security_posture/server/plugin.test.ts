@@ -32,10 +32,10 @@ import {
   UpdatePackagePolicy,
 } from '@kbn/fleet-plugin/common';
 import {
-  ExternalCallback,
   FleetStartContract,
   PostPackagePolicyPostDeleteCallback,
   PostPackagePolicyPostCreateCallback,
+  ExternalCallback,
 } from '@kbn/fleet-plugin/server';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 import Chance from 'chance';
