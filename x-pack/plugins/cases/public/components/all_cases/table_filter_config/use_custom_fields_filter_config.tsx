@@ -19,6 +19,7 @@ interface CustomFieldFilterOptionFactoryProps {
   fieldKey: string;
   onFilterOptionsChange: FilterChangeHandler;
   type: CustomFieldTypes;
+  isLoading: boolean;
 }
 const customFieldFilterOptionFactory = ({
   buttonLabel,
@@ -26,6 +27,7 @@ const customFieldFilterOptionFactory = ({
   fieldKey,
   onFilterOptionsChange,
   type,
+  isLoading,
 }: CustomFieldFilterOptionFactoryProps) => {
   return {
     key: `${CUSTOM_FIELD_KEY_PREFIX}${fieldKey}`, // this prefix is set in case custom field has the same key as a system field
@@ -70,6 +72,7 @@ const customFieldFilterOptionFactory = ({
             label: option.label,
           }))}
           selectedOptionKeys={filterOptions.customFields[fieldKey]?.options || []}
+          isLoading={isLoading}
         />
       );
     },
@@ -85,6 +88,7 @@ export const useCustomFieldsFilterConfig = ({
 }) => {
   const {
     data: { customFields },
+    isLoading,
   } = useGetCaseConfiguration();
 
   const customFieldsFilterConfig: FilterConfig[] = [];
@@ -105,6 +109,7 @@ export const useCustomFieldsFilterConfig = ({
             fieldKey,
             onFilterOptionsChange,
             type,
+            isLoading,
           })
         );
       }

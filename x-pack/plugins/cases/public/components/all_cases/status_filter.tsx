@@ -73,6 +73,7 @@ export const StatusFilterComponent = ({
       options={options}
       renderOption={renderOption}
       selectedOptionKeys={selectedOptionKeys}
+      isLoading={false}
     />
   );
 };

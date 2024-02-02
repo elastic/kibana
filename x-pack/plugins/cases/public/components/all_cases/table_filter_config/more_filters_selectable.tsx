@@ -28,6 +28,7 @@ export const MoreFiltersSelectable = ({
       options={options}
       selectedOptionKeys={activeFilters}
       transparentBackground={true}
+      isLoading={false}
     />
   );
 };

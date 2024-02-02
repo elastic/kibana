@@ -63,6 +63,7 @@ export const SolutionFilterComponent = ({
       options={options}
       renderOption={renderOption}
       selectedOptionKeys={selectedOptionKeys}
+      isLoading={false}
     />
   );
 };
