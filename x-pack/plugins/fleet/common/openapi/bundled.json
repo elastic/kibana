@@ -5083,6 +5083,9 @@
                   "is_default": {
                     "type": "boolean"
                   },
+                  "is_internal": {
+                    "type": "boolean"
+                  },
                   "host_urls": {
                     "type": "array",
                     "items": {
@@ -5193,6 +5196,9 @@
                     "type": "string"
                   },
                   "is_default": {
+                    "type": "boolean"
+                  },
+                  "is_internal": {
                     "type": "boolean"
                   },
                   "host_urls": {
@@ -8902,6 +8908,9 @@
             "type": "string"
           },
           "is_default": {
+            "type": "boolean"
+          },
+          "is_internal": {
             "type": "boolean"
           },
           "is_preconfigured": {

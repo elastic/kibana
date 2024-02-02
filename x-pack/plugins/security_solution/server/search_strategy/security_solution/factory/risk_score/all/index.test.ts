@@ -69,19 +69,21 @@ export const mockSearchStrategyResponse: IEsSearchResponse<HostRiskScore> = {
 };
 
 const searchMock = jest.fn();
-
+const ALERT_INDEX_PATTERN = '.test-alerts-security.alerts';
+const TEST_SPACE_ID = 'test-default';
 const mockDeps = {
-  esClient: {} as IScopedClusterClient,
-  ruleDataClient: {
-    ...(ruleRegistryMocks.createRuleDataClient('.alerts-security.alerts') as IRuleDataClient),
-    getReader: jest.fn((_options?: { namespace?: string }) => ({
+  esClient: {
+    asCurrentUser: {
       search: searchMock,
-      getDynamicIndexPattern: jest.fn(),
-    })),
+    },
+  } as unknown as IScopedClusterClient,
+  ruleDataClient: {
+    ...(ruleRegistryMocks.createRuleDataClient(ALERT_INDEX_PATTERN) as IRuleDataClient),
   },
   savedObjectsClient: {} as SavedObjectsClientContract,
   endpointContext: createMockEndpointAppContext(),
   request: {} as KibanaRequest,
+  spaceId: TEST_SPACE_ID,
 };
 
 export const mockOptions: RiskScoreRequestOptions = {
@@ -113,6 +115,12 @@ describe('buildRiskScoreQuery search strategy', () => {
     );
 
     expect(get('data[0].alertsCount', result)).toBeUndefined();
+  });
+
+  test('should search alerts on the alerts index pattern', async () => {
+    await riskScore.parse(mockOptions, mockSearchStrategyResponse, mockDeps);
+
+    expect(searchMock.mock.calls[0][0].index).toEqual(`${ALERT_INDEX_PATTERN}${TEST_SPACE_ID}`);
   });
 
   test('should enhance data with alerts count', async () => {

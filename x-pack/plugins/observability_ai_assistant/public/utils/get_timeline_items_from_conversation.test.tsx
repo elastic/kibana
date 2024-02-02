@@ -117,7 +117,7 @@ describe('getTimelineItemsFromConversation', () => {
               role: MessageRole.Assistant,
               function_call: {
                 name: 'recall',
-                arguments: JSON.stringify({ queries: [], contexts: [] }),
+                arguments: JSON.stringify({ queries: [], categories: [] }),
                 trigger: MessageRole.Assistant,
               },
             },
@@ -467,7 +467,7 @@ describe('getTimelineItemsFromConversation', () => {
               role: MessageRole.Assistant,
               function_call: {
                 name: 'recall',
-                arguments: JSON.stringify({ queries: [], contexts: [] }),
+                arguments: JSON.stringify({ queries: [], categories: [] }),
                 trigger: MessageRole.User,
               },
             },
