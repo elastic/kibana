@@ -129,6 +129,18 @@ const CustomGridBody = memo(
 );
 
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
+  const {
+    visibleColumns,
+    onToggleColumn,
+    onResetColumns,
+    updatedAt,
+    browserFields,
+    onChangeVisibleColumns,
+    onColumnResize,
+    showAlertStatusWithFlapping = false,
+    showInspectButton = false,
+  } = props;
+
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const [activeRowClasses, setActiveRowClasses] = useState<
     NonNullable<EuiDataGridStyle['rowClasses']>
@@ -153,7 +165,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   const { data: maintenanceWindows, isLoading: isLoadingMaintenanceWindows } =
     props.maintenanceWindows;
 
-  const { sortingColumns, onSort } = useSorting(onSortChange, sortingFields);
+  const { sortingColumns, onSort } = useSorting(onSortChange, visibleColumns, sortingFields);
 
   const { renderCustomActionsRow, actionsColumnWidth, getSetIsActionLoadingCallback } =
     useActionsColumn({
@@ -205,18 +217,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     pageIndex: activePage,
     pageSize: props.pageSize,
   });
-
-  const {
-    visibleColumns,
-    onToggleColumn,
-    onResetColumns,
-    updatedAt,
-    browserFields,
-    onChangeVisibleColumns,
-    onColumnResize,
-    showAlertStatusWithFlapping = false,
-    showInspectButton = false,
-  } = props;
 
   // TODO when every solution is using this table, we will be able to simplify it by just passing the alert index
   const handleFlyoutAlert = useCallback(
