@@ -122,7 +122,7 @@ export function SloDetails({ slo, isAutoRefreshing }: Props) {
     }
 
     return () => clearInterval(intervalId);
-  }, [isAutoRefreshing]);
+  }, [isAutoRefreshing, sloDurationInMinutes]);
 
   const errorBudgetBurnDownData = formatHistoricalData(
     sloHistoricalSummary?.data,
