@@ -22,6 +22,7 @@ import {
   createConversationNotFoundError,
   MessageAddEvent,
   StreamingChatResponseEventType,
+  createTokenLimitReachedError,
   type StreamingChatResponseEvent,
 } from '../../../common/conversation_complete';
 import {
@@ -174,7 +175,7 @@ export class ObservabilityAIAssistantClient {
                   name: 'recall',
                   arguments: JSON.stringify({
                     queries: [],
-                    contexts: [],
+                    categories: [],
                   }),
                   trigger: MessageRole.Assistant as const,
                 },
@@ -459,6 +460,19 @@ export class ObservabilityAIAssistantClient {
       },
     });
 
+    this.dependencies.logger.debug(`Received action client response: ${executeResult.status}`);
+
+    if (executeResult.status === 'error' && executeResult?.serviceMessage) {
+      const tokenLimitRegex =
+        /This model's maximum context length is (\d+) tokens\. However, your messages resulted in (\d+) tokens/g;
+      const tokenLimitRegexResult = tokenLimitRegex.exec(executeResult.serviceMessage);
+
+      if (tokenLimitRegexResult) {
+        const [, tokenLimit, tokenCount] = tokenLimitRegexResult;
+        throw createTokenLimitReachedError(parseInt(tokenLimit, 10), parseInt(tokenCount, 10));
+      }
+    }
+
     if (executeResult.status === 'error') {
       throw internal(`${executeResult?.message} - ${executeResult?.serviceMessage}`);
     }
@@ -611,16 +625,16 @@ export class ObservabilityAIAssistantClient {
 
   recall = async ({
     queries,
-    contexts,
+    categories,
   }: {
     queries: string[];
-    contexts?: string[];
+    categories?: string[];
   }): Promise<{ entries: RecalledEntry[] }> => {
     return this.dependencies.knowledgeBaseService.recall({
       namespace: this.dependencies.namespace,
       user: this.dependencies.user,
       queries,
-      contexts,
+      categories,
       asCurrentUser: this.dependencies.esClient.asCurrentUser,
     });
   };
