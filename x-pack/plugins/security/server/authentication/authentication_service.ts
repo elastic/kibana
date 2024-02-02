@@ -197,12 +197,13 @@ export class AuthenticationService {
       if (
         preResponse.statusCode >= 400 &&
         canRedirectRequest(request) &&
-        request.route.options.tags.includes(ROUTE_TAG_AUTH_FLOW)
+        (request.route.options.tags.includes(ROUTE_TAG_AUTH_FLOW) || preResponse.statusCode === 401)
       ) {
         if (!isLoginPageAvailable) {
           const customBrandingValue = await customBranding.getBrandingFor(request, {
             unauthenticated: true,
           });
+
           return toolkit.render({
             body: renderUnauthenticatedPage({
               buildNumber,
