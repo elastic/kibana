@@ -33,7 +33,11 @@ import { errorAggregator } from './utils';
 import { AlertWithSuppressionFields870 } from '../../common/schemas/8.7.0';
 
 /**
- * alerts returned from BE have date type coerced to ISO strings
+ * Alerts returned from BE have date type coerced to ISO strings
+ *
+ * We use BackendAlertWithSuppressionFields870 explicitly here as the type instead of
+ * AlertWithSuppressionFieldsLatest since we're reading alerts rather than writing,
+ * so future versions of Kibana may read 8.7.0 version alerts and need to update them
  */
 export type BackendAlertWithSuppressionFields870<T> = Omit<
   AlertWithSuppressionFields870<T>,
@@ -407,7 +411,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                           {
                             terms: {
                               [ALERT_INSTANCE_ID]: filteredDuplicates.map(
-                                (alert) => alert._source['kibana.alert.instance.id']
+                                (alert) => alert._source[ALERT_INSTANCE_ID]
                               ),
                             },
                           },
@@ -436,9 +440,6 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   },
                 };
 
-                // We use BackendAlertWithSuppressionFields870 explicitly here as the type instead of
-                // AlertWithSuppressionFieldsLatest since we're reading alerts rather than writing,
-                // so future versions of Kibana may read 8.7.0 version alerts and need to update them
                 const response = await ruleDataClient
                   .getReader({ namespace: options.spaceId })
                   .search<
