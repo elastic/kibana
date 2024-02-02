@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleFieldDiff } from '../../model/rule_details/rule_field_diff';
+import type { FieldsGroupDiff } from '../../model/rule_details/rule_field_diff';
 import {
   ABOUT_UPGRADE_FIELD_ORDER,
   DEFINITION_UPGRADE_FIELD_ORDER,
@@ -13,19 +13,19 @@ import {
   SETUP_UPGRADE_FIELD_ORDER,
 } from './constants';
 
-export const getSectionedFieldDiffs = (fields: RuleFieldDiff[]) => {
+export const getSectionedFieldDiffs = (fields: FieldsGroupDiff[]) => {
   const aboutFields = [];
   const definitionFields = [];
   const scheduleFields = [];
   const setupFields = [];
   for (const field of fields) {
-    if (ABOUT_UPGRADE_FIELD_ORDER.includes(field.fieldName)) {
+    if (ABOUT_UPGRADE_FIELD_ORDER.includes(field.fieldsGroupName)) {
       aboutFields.push(field);
-    } else if (DEFINITION_UPGRADE_FIELD_ORDER.includes(field.fieldName)) {
+    } else if (DEFINITION_UPGRADE_FIELD_ORDER.includes(field.fieldsGroupName)) {
       definitionFields.push(field);
-    } else if (SCHEDULE_UPGRADE_FIELD_ORDER.includes(field.fieldName)) {
+    } else if (SCHEDULE_UPGRADE_FIELD_ORDER.includes(field.fieldsGroupName)) {
       scheduleFields.push(field);
-    } else if (SETUP_UPGRADE_FIELD_ORDER.includes(field.fieldName)) {
+    } else if (SETUP_UPGRADE_FIELD_ORDER.includes(field.fieldsGroupName)) {
       setupFields.push(field);
     }
   }

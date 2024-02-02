@@ -73,14 +73,3 @@ export interface PartialRuleDiff {
   fields: Partial<RuleFieldsDiff>;
   has_conflict: boolean;
 }
-
-export type RuleFieldDiffsWithKqlQuery =
-  | CustomQueryFieldsDiff
-  | SavedQueryFieldsDiff
-  | ThreatMatchFieldsDiff
-  | ThresholdFieldsDiff
-  | NewTermsFieldsDiff;
-
-export type RuleFieldDiffsWithSavedKqlQuery = NewTermsFieldsDiff;
-
-// export type RuleFieldDiffsWithEqlQuery = EqlFieldsDiff;

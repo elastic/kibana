@@ -45,16 +45,16 @@ const SubFieldComponent = ({
 
 export interface FieldDiffComponentProps {
   ruleDiffs: FormattedFieldDiff;
-  fieldName: string;
+  fieldsGroupName: string;
 }
 
 export const FieldGroupDiffComponent = ({
   ruleDiffs,
-  fieldName: groupFieldName,
+  fieldsGroupName,
 }: FieldDiffComponentProps) => {
   const { fieldDiffs, shouldShowSubtitles } = ruleDiffs;
   return (
-    <RuleDiffPanelWrapper fieldName={groupFieldName}>
+    <RuleDiffPanelWrapper fieldName={fieldsGroupName}>
       {fieldDiffs.map(({ currentVersion, targetVersion, fieldName: specificFieldName }, i) => {
         const shouldShowSeparator = i !== fieldDiffs.length - 1;
         return (

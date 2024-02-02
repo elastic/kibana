@@ -7,15 +7,15 @@
 import { EuiAccordion, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/css';
-import type { RuleFieldDiff } from '../../../model/rule_details/rule_field_diff';
+import type { FieldsGroupDiff } from '../../../model/rule_details/rule_field_diff';
 import { FieldGroupDiffComponent } from './field_diff';
 
 interface RuleDiffSectionProps {
   title: string;
-  fields: RuleFieldDiff[];
+  fieldGroups: FieldsGroupDiff[];
 }
 
-export const RuleDiffSection = ({ title, fields }: RuleDiffSectionProps) => (
+export const RuleDiffSection = ({ title, fieldGroups }: RuleDiffSectionProps) => (
   <>
     <EuiSpacer size="m" />
     <EuiAccordion
@@ -30,11 +30,11 @@ export const RuleDiffSection = ({ title, fields }: RuleDiffSectionProps) => (
         </EuiTitle>
       }
     >
-      {fields.map(({ fieldName, formattedDiffs }) => {
+      {fieldGroups.map(({ fieldsGroupName, formattedDiffs }) => {
         return (
-          <React.Fragment key={fieldName}>
+          <React.Fragment key={fieldsGroupName}>
             <EuiSpacer size="m" />
-            <FieldGroupDiffComponent ruleDiffs={formattedDiffs} fieldName={fieldName} />
+            <FieldGroupDiffComponent ruleDiffs={formattedDiffs} fieldsGroupName={fieldsGroupName} />
           </React.Fragment>
         );
       })}

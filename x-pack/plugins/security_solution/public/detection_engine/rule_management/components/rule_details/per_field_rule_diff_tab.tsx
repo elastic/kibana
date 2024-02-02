@@ -7,11 +7,11 @@
 
 import React, { useMemo } from 'react';
 import type { PartialRuleDiff, RuleFieldsDiff } from '../../../../../common/api/detection_engine';
-import { getFormattedFieldDiff } from './per_field_diff/get_formatted_field_diff';
+import { getFormattedFieldDiffGroups } from './per_field_diff/get_formatted_field_diff';
 import { UPGRADE_FIELD_ORDER } from './constants';
 import { RuleDiffHeaderBar, RuleDiffSection } from './diff_components';
 import { getSectionedFieldDiffs } from './helpers';
-import type { RuleFieldDiff } from '../../model/rule_details/rule_field_diff';
+import type { FieldsGroupDiff } from '../../model/rule_details/rule_field_diff';
 import * as i18n from './translations';
 
 interface PerFieldRuleDiffTabProps {
@@ -20,14 +20,16 @@ interface PerFieldRuleDiffTabProps {
 
 export const PerFieldRuleDiffTab = ({ ruleDiff }: PerFieldRuleDiffTabProps) => {
   const fieldsToRender = useMemo(() => {
-    const fields: RuleFieldDiff[] = [];
+    const fields: FieldsGroupDiff[] = [];
     for (const field of Object.keys(ruleDiff.fields)) {
       const typedField = field as keyof RuleFieldsDiff;
-      const formattedDiffs = getFormattedFieldDiff(typedField, ruleDiff.fields);
-      fields.push({ formattedDiffs, fieldName: typedField });
+      const formattedDiffs = getFormattedFieldDiffGroups(typedField, ruleDiff.fields);
+      fields.push({ formattedDiffs, fieldsGroupName: typedField });
     }
     const sortedFields = fields.sort(
-      (a, b) => UPGRADE_FIELD_ORDER.indexOf(a.fieldName) - UPGRADE_FIELD_ORDER.indexOf(b.fieldName)
+      (a, b) =>
+        UPGRADE_FIELD_ORDER.indexOf(a.fieldsGroupName) -
+        UPGRADE_FIELD_ORDER.indexOf(b.fieldsGroupName)
     );
     return sortedFields;
   }, [ruleDiff.fields]);
@@ -41,16 +43,16 @@ export const PerFieldRuleDiffTab = ({ ruleDiff }: PerFieldRuleDiffTabProps) => {
     <>
       <RuleDiffHeaderBar />
       {aboutFields.length !== 0 && (
-        <RuleDiffSection title={i18n.ABOUT_SECTION_LABEL} fields={aboutFields} />
+        <RuleDiffSection title={i18n.ABOUT_SECTION_LABEL} fieldGroups={aboutFields} />
       )}
       {definitionFields.length !== 0 && (
-        <RuleDiffSection title={i18n.DEFINITION_SECTION_LABEL} fields={definitionFields} />
+        <RuleDiffSection title={i18n.DEFINITION_SECTION_LABEL} fieldGroups={definitionFields} />
       )}
       {scheduleFields.length !== 0 && (
-        <RuleDiffSection title={i18n.SCHEDULE_SECTION_LABEL} fields={scheduleFields} />
+        <RuleDiffSection title={i18n.SCHEDULE_SECTION_LABEL} fieldGroups={scheduleFields} />
       )}
       {setupFields.length !== 0 && (
-        <RuleDiffSection title={i18n.SETUP_GUIDE_SECTION_LABEL} fields={setupFields} />
+        <RuleDiffSection title={i18n.SETUP_GUIDE_SECTION_LABEL} fieldGroups={setupFields} />
       )}
     </>
   );
