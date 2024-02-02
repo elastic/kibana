@@ -204,7 +204,7 @@ export function registerQueryFunction({
                   },
                   intention: {
                     type: 'string',
-                    description: `What the user their intention is.`,
+                    description: `What the user\'s intention is.`,
                     enum: VISUALIZE_ESQL_USER_INTENTIONS,
                   },
                 },

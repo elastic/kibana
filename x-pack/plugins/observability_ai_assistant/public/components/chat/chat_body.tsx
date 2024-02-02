@@ -225,7 +225,6 @@ export function ChatBody({
 
   const handleActionClick: ChatActionClickHandler = (payload) => {
     setStickToBottom(true);
-
     switch (payload.type) {
       case ChatActionClickType.executeEsqlQuery:
         next(
@@ -259,7 +258,7 @@ export function ChatBody({
                 name: 'visualize_query',
                 arguments: JSON.stringify({
                   query: payload.query,
-                  newInput: payload.newInput,
+                  userOverrides: payload.userOverrides,
                   intention: VisualizeESQLUserIntention.visualizeAuto,
                 }),
                 trigger: MessageRole.User,

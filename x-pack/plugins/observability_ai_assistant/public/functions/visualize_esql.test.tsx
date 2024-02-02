@@ -16,7 +16,7 @@ import { VisualizeESQL } from './visualize_esql';
 
 describe('VisualizeESQL', () => {
   function renderComponent(
-    newInput?: unknown,
+    userOverrides?: unknown,
     newLensService?: LensPublicStart,
     setVisibilitySpy?: () => void
   ) {
@@ -57,7 +57,7 @@ describe('VisualizeESQL', () => {
         columns={columns}
         query={'from foo | keep bytes, destination'}
         onActionClick={jest.fn()}
-        initialInput={newInput}
+        userOverrides={userOverrides}
         chatFlyoutSecondSlotHandler={{
           container: document.createElement('div'),
           setVisibility: setVisibilitySpy ?? jest.fn(),

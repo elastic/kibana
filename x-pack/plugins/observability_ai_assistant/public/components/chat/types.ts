@@ -14,7 +14,7 @@ type ChatActionClickPayloadExecuteEsql = ChatActionClickPayloadBase<
   | ChatActionClickType.executeEsqlQuery
   | ChatActionClickType.visualizeEsqlQuery
   | ChatActionClickType.updateVisualization,
-  { query: string; newInput?: TypedLensByValueInput }
+  { query: string; userOverrides?: TypedLensByValueInput }
 >;
 
 type ChatActionClickPayload = ChatActionClickPayloadExecuteEsql;
