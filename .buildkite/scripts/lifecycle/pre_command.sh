@@ -171,9 +171,6 @@ vault_get kibana-ci-bazel-remote-cache-local-dev service_account_json > "$BAZEL_
 GOOGLE_APPLICATION_CREDENTIALS="$(mktemp -d)/kibana-gcloud-service-account.json"
 export GOOGLE_APPLICATION_CREDENTIALS
 vault_get kibana-ci-sa-proxy-key key | base64 -d > "$GOOGLE_APPLICATION_CREDENTIALS"
-if [[ -x "$(command -v gcloud)" ]]; then
-  gcloud auth activate-service-account --key-file="$GOOGLE_APPLICATION_CREDENTIALS"
-fi
 
 PIPELINE_PRE_COMMAND=${PIPELINE_PRE_COMMAND:-".buildkite/scripts/lifecycle/pipelines/$BUILDKITE_PIPELINE_SLUG/pre_command.sh"}
 if [[ -f "$PIPELINE_PRE_COMMAND" ]]; then

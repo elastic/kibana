@@ -19,13 +19,20 @@ GCLOUD_USER=$(gcloud auth list --filter="status=ACTIVE" --format="value(account)
 GCLOUD_EMAIL_POSTFIX="elastic-kibana-ci.iam.gserviceaccount.com"
 GCLOUD_SA_PROXY_EMAIL="kibana-ci-sa-proxy@$GCLOUD_EMAIL_POSTFIX"
 
+
 if [[ "$GCLOUD_USER" != "$GCLOUD_SA_PROXY_EMAIL" ]]; then
-  if [[ -f "$GOOGLE_APPLICATION_CREDENTIALS" ]]; then
-    echo "Authenticating as service account $GCLOUD_USER using GOOGLE_APPLICATION_CREDENTIALS"
-    gcloud auth activate-service-account --key-file="$GOOGLE_APPLICATION_CREDENTIALS"
-  else
-    echo "Cannot impersonate service accounts without the Service-Agent-Proxy access. Current: $GCLOUD_USER, Proxy: $GCLOUD_SA_PROXY_EMAIL"
-  fi
+    if [[ -x "$(command -v gcloud)" ]]; then
+      AUTH_RESULT=$(gcloud auth activate-service-account --key-file="$GOOGLE_APPLICATION_CREDENTIALS" || "FAILURE")
+      if [[ "$AUTH_RESULT" == "FAILURE" ]]; then
+        echo "Failed to activate service account $GCLOUD_SA_PROXY_EMAIL."
+        exit 1
+      else
+        echo "Activated service account $GCLOUD_SA_PROXY_EMAIL"
+      fi
+    else
+      echo "gcloud is not installed, cannot activate service account $GCLOUD_SA_PROXY_EMAIL."
+      exit 1
+    fi
 fi
 
 # Check if the arg is a service account e-mail or a bucket name
