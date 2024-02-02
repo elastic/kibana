@@ -79,11 +79,7 @@ export function AddStop({
               width: 15px;
               height: 15px;
               border-radius: 50%;
-              transition: background-color ${euiTheme.euiTheme.animation.fast} ease-in;
               background-color: ${euiTheme.euiTheme.colors.emptyShade};
-              &:hover {
-                background-color: ${euiTheme.euiTheme.colors.text};
-              }
               ${euiShadowSmall(euiTheme)}
             `}
           >
@@ -93,10 +89,6 @@ export function AddStop({
                 position: absolute;
                 top: 0.5px;
                 left: 0;
-                transition: fill ${euiTheme.euiTheme.animation.fast} ease-in;
-                &:hover {
-                  fill: ${euiTheme.euiTheme.colors.emptyShade};
-                }
               `}
               color={euiTheme.euiTheme.colors.text}
             />
