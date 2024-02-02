@@ -459,6 +459,7 @@ export class Plugin
 
       mod.registerAssistantFunctions({
         registerRenderFunction,
+        embeddablePlugin: pluginsStart.embeddable,
       });
     });
 

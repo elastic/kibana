@@ -11,7 +11,6 @@ import type {
   ChatRegistrationFunction,
   RegisterFunction,
 } from '@kbn/observability-ai-assistant-plugin/server/service/types';
-import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { DataViewsServerPluginStart, DataViewsService } from '@kbn/data-views-plugin/server';
 import type { ObservabilityConfig } from '..';
 import type { ObservabilityRouteHandlerResources } from '../routes/types';
@@ -22,16 +21,8 @@ import {
   GetSLO,
   FindSLO,
 } from '../services/slo';
-import type { RegisterRoutesDependencies } from '../register_routes';
-import { FindSLODefinitions } from '../lib/helpers/create_es_client/create_apm_event_client';
-import { getApmEventClient } from '../lib/helpers/get_apm_event_client';
-import { hasHistoricalAgentData } from '../routes/historical_data/has_historical_agent_data';
-// import { registerGetApmCorrelationsFunction } from './get_apm_correlations';
-// import { registerGetApmDownstreamDependenciesFunction } from './get_apm_downstream_dependencies';
-// import { registerGetApmErrorDocumentFunction } from './get_apm_error_document';
 import { registerGetSLOListFunction } from './get_slo_list';
 import { registerGetSLOChangeDetectionFunction } from './get_slo_change_point';
-// import { registerGetApmTimeseriesFunction } from './get_apm_timeseries';
 
 export interface FunctionRegistrationParameters {
   sloClient: {
@@ -75,14 +66,6 @@ export function registerAssistantFunctions({
       logger,
     };
 
-    // const apmEventClient = await getApmEventClient(observabilityRouteHandlerResources);
-
-    // const hasData = await hasHistoricalAgentData(apmEventClient);
-
-    // if (!hasData) {
-    //   return;
-    // }
-
     const soClient = (await resources.context.core).savedObjects.client;
     const esClient = (await resources.context.core).elasticsearch.client.asCurrentUser;
     const dataViewsClient = await dataViews.dataViewsServiceFactory(soClient, esClient);
@@ -105,10 +88,6 @@ export function registerAssistantFunctions({
 
     registerGetSLOListFunction(parameters);
     registerGetSLOChangeDetectionFunction(parameters);
-    // registerGetApmErrorDocumentFunction(parameters);
-    // registerGetApmDownstreamDependenciesFunction(parameters);
-    // registerGetApmCorrelationsFunction(parameters);
-    // registerGetApmTimeseriesFunction(parameters);
 
     registerContext({
       name: 'slo',
