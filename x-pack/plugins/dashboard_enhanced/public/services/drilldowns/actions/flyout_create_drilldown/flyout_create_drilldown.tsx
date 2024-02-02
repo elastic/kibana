@@ -99,8 +99,6 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableApiContext>
       CONTEXT_MENU_TRIGGER,
     ];
 
-    console.log(embeddable.enhancements.dynamicActions);
-
     const handle = core.overlays.openFlyout(
       toMountPoint(
         <plugins.uiActionsEnhanced.DrilldownManager
