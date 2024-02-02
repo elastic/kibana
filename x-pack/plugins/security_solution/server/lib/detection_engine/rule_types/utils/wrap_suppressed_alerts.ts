@@ -33,9 +33,8 @@ import { buildBulkBody } from '../factories/utils/build_bulk_body';
 import type { BuildReasonMessage } from './reason_formatters';
 
 /**
- * wraps suppressed threshold alerts
- * first, transforms aggregation threshold buckets to hits
- * creates instanceId hash, which is used to search suppressed on time interval alerts
+ * wraps suppressed alerts
+ * creates instanceId hash, which is used to search on time interval alerts
  * populates alert's suppression fields
  */
 export const wrapSuppressedAlerts = ({
