@@ -55,7 +55,7 @@ export const querySavedObjectType: SavedObjectsType = {
           type: 'data_backfill',
           backfillFn: (doc) => {
             return {
-              attributes: { ...doc.attributes, titleKeyword: doc.attributes.title?.toLowerCase() },
+              attributes: { ...doc.attributes, titleKeyword: doc.attributes.title },
             };
           },
         },

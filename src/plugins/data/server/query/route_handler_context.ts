@@ -65,7 +65,7 @@ function extractReferences({
 
   const attributes: InternalSavedQueryAttributes = {
     title: title.trim(),
-    titleKeyword: title.trim().toLowerCase(),
+    titleKeyword: title.trim(),
     description: description.trim(),
     query: {
       ...query,
@@ -96,7 +96,7 @@ export async function registerSavedQueryRouteHandlerContext(context: RequestHand
   const soClient = (await context.core).savedObjects.client;
 
   const isDuplicateTitle = async ({ title, id }: { title: string; id?: string }) => {
-    const preparedTitle = title.trim().toLowerCase();
+    const preparedTitle = title.trim();
     const { saved_objects: savedQueries } = await soClient.find<InternalSavedQueryAttributes>({
       type: 'query',
       page: 1,
@@ -180,15 +180,13 @@ export async function registerSavedQueryRouteHandlerContext(context: RequestHand
     total: number;
     savedQueries: SavedQueryRestResponse[];
   }> => {
-    const preparedSearch = escapeKuery(search.trim().toLowerCase()).replaceAll(/\s+/g, '*');
+    const preparedSearch = escapeKuery(search.trim()).split(/\s+/).join(' AND ');
     const { total, saved_objects: savedObjects } =
       await soClient.find<InternalSavedQueryAttributes>({
         type: 'query',
         page,
         perPage,
-        filter: preparedSearch.length
-          ? `query.attributes.titleKeyword:*${preparedSearch}*`
-          : undefined,
+        filter: preparedSearch.length ? `query.attributes.title:(*${preparedSearch}*)` : undefined,
         sortField: 'titleKeyword',
         sortOrder: 'asc',
       });

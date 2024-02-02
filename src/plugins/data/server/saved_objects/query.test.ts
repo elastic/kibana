@@ -40,7 +40,7 @@ describe('saved query model version transformations', () => {
 
       expect(migrated.attributes).toEqual({
         ...query.attributes,
-        titleKeyword: query.attributes.title.toLowerCase(),
+        titleKeyword: query.attributes.title,
       });
     });
 

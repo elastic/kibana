@@ -340,7 +340,7 @@ describe('saved query route handler context', () => {
         type: 'query',
         page: 1,
         perPage: 50,
-        filter: 'query.attributes.titleKeyword:*foo*\\and*bar*',
+        filter: 'query.attributes.title:(*Foo AND \\And AND Bar*)',
         sortField: 'titleKeyword',
         sortOrder: 'asc',
       });
