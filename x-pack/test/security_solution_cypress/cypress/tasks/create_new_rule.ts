@@ -542,7 +542,7 @@ export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRuleCreateProps)
   cy.get(NEW_TERMS_INPUT_AREA).find(INPUT).type(rule.new_terms_fields[0], { delay: 35 });
 
   cy.get(EUI_FILTER_SELECT_ITEM).click();
-  // eslint-disable-next-line cypress/unsafe-to-chain-command
+
   cy.focused().type('{esc}'); // Close combobox dropdown so next inputs can be interacted with
   const historySize = convertHistoryStartToSize(rule.history_window_start);
   const historySizeNumber = historySize.slice(0, historySize.length - 1);
