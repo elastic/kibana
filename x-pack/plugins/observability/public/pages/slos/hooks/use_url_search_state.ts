@@ -26,7 +26,6 @@ export interface SearchState {
     direction: SortDirection;
   };
   view: SLOView;
-  compact: boolean;
   groupBy: GroupByField;
   filters: Filter[];
   lastRefresh?: number;
@@ -40,7 +39,6 @@ export const DEFAULT_STATE = {
   perPage: DEFAULT_SLO_PAGE_SIZE,
   sort: { by: 'status' as const, direction: 'desc' as const },
   view: 'cardView' as const,
-  compact: true,
   groupBy: 'ungrouped' as const,
   filters: [],
   lastRefresh: 0,

@@ -14,7 +14,6 @@ import { SloGroupListEmpty } from './group_list_empty';
 import type { SortDirection } from '../slo_list_search_bar';
 
 interface Props {
-  isCompact: boolean;
   groupBy: string;
   kqlQuery: string;
   sloView: string;
@@ -22,7 +21,7 @@ interface Props {
   direction: SortDirection;
 }
 
-export function GroupView({ isCompact, kqlQuery, sloView, sort, direction, groupBy }: Props) {
+export function GroupView({ kqlQuery, sloView, sort, direction, groupBy }: Props) {
   const { state, store: storeState } = useUrlSearchState();
   const { tagsFilter, statusFilter, filters, page, perPage } = state;
 
@@ -67,7 +66,6 @@ export function GroupView({ isCompact, kqlQuery, sloView, sort, direction, group
               sloView={sloView}
               group={result.group}
               kqlQuery={kqlQuery}
-              isCompact={isCompact}
               sort={sort}
               direction={direction}
               summary={{

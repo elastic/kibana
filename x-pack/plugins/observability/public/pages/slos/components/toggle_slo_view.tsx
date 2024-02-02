@@ -11,17 +11,13 @@ import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FindSLOResponse } from '@kbn/slo-schema';
 import { SLOSortBy } from './common/sort_by_select';
-import { SLOViewSettings } from './slo_view_settings';
 import { SloGroupBy } from './slo_list_group_by';
 import type { SearchState } from '../hooks/use_url_search_state';
-
-export type SLOView = 'cardView' | 'listView';
+export type SLOView = 'cardView' | 'listView' | 'compactView';
 
 interface Props {
-  onToggleCompactView: () => void;
   onChangeView: (view: SLOView) => void;
   onStateChange: (newState: Partial<SearchState>) => void;
-  isCompact: boolean;
   sloView: SLOView;
   state: SearchState;
   sloList?: FindSLOResponse;
@@ -32,7 +28,7 @@ const toggleButtonsIcons = [
   {
     id: `cardView`,
     label: 'Card View',
-    iconType: 'visGauge',
+    iconType: 'apps',
     'data-test-subj': 'sloCardViewButton',
   },
   {
@@ -41,17 +37,16 @@ const toggleButtonsIcons = [
     iconType: 'list',
     'data-test-subj': 'sloListViewButton',
   },
+  {
+    iconType: 'tableDensityCompact',
+    id: 'compactView',
+    label: i18n.translate('xpack.observability.slo.listView.compactViewLabel', {
+      defaultMessage: 'Compact view',
+    }),
+  },
 ];
 
-export function ToggleSLOView({
-  sloView,
-  onChangeView,
-  onToggleCompactView,
-  onStateChange,
-  isCompact = true,
-  sloList,
-  state,
-}: Props) {
+export function ToggleSLOView({ sloView, onChangeView, onStateChange, sloList, state }: Props) {
   const total = sloList?.total ?? 0;
   const pageSize = sloList?.perPage ?? 0;
   const pageIndex = sloList?.page ?? 1;
@@ -98,9 +93,6 @@ export function ToggleSLOView({
           onChange={(id) => onChangeView(id as SLOView)}
           isIconOnly
         />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <SLOViewSettings toggleCompactView={onToggleCompactView} isCompact={isCompact} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

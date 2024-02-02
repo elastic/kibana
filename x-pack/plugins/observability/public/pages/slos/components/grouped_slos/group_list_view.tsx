@@ -27,7 +27,6 @@ import { SLI_OPTIONS } from '../../../slo_edit/constants';
 import { useSloFormattedSLIValue } from '../../hooks/use_slo_summary';
 
 interface Props {
-  isCompact: boolean;
   group: string;
   kqlQuery: string;
   sloView: string;
@@ -46,7 +45,6 @@ interface Props {
 }
 
 export function GroupListView({
-  isCompact,
   group,
   kqlQuery,
   sloView,
@@ -156,7 +154,6 @@ export function GroupListView({
                     sloList={results}
                     loading={isLoading || isRefetching}
                     error={isError}
-                    isCompact={isCompact}
                     sloView={sloView}
                     group={group}
                   />

@@ -16,17 +16,7 @@ import { GroupView } from './grouped_slos/group_view';
 
 export function SloList() {
   const { state, store: storeState } = useUrlSearchState();
-  const {
-    view,
-    page,
-    perPage,
-    kqlQuery,
-    filters,
-    compact: isCompact,
-    tagsFilter,
-    statusFilter,
-    groupBy,
-  } = state;
+  const { view, page, perPage, kqlQuery, filters, tagsFilter, statusFilter, groupBy } = state;
 
   const {
     isLoading,
@@ -62,9 +52,7 @@ export function SloList() {
           sloList={sloList}
           sloView={view}
           onChangeView={(newView) => onStateChange({ view: newView })}
-          onToggleCompactView={() => onStateChange({ compact: !isCompact })}
           onStateChange={onStateChange}
-          isCompact={isCompact}
           state={state}
           loading={isLoading || isCreatingSlo || isCloningSlo || isUpdatingSlo || isDeletingSlo}
         />
@@ -75,7 +63,6 @@ export function SloList() {
             sloList={results}
             loading={isLoading || isRefetching}
             error={isError}
-            isCompact={isCompact}
             sloView={view}
             group="ungrouped"
           />
@@ -101,7 +88,6 @@ export function SloList() {
         <GroupView
           sloView={view}
           groupBy={groupBy}
-          isCompact={isCompact}
           kqlQuery={kqlQuery}
           sort={state.sort.by}
           direction={state.sort.direction}
