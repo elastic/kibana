@@ -140,6 +140,9 @@ export const getSyntheticsMonitorSavedObjectType = (
         id: {
           type: 'keyword',
         },
+        config_id: {
+          type: 'keyword',
+        },
         tags: {
           type: 'keyword',
           fields: {

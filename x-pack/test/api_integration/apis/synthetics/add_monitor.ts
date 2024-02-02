@@ -110,9 +110,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const apiResponse = await addMonitorAPI(newMonitor, 400);
 
-      expect(apiResponse.message).eql(
-        'Invalid value "invalid-data-steam" supplied to "MonitorType"'
-      );
+      expect(apiResponse.message).eql('Invalid value "invalid-data-steam" supplied to "type"');
     });
     const localLoc = {
       id: 'dev',

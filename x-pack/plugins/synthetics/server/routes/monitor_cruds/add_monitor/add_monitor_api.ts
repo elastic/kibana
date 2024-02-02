@@ -14,7 +14,7 @@ import { parseMonitorLocations } from './utils';
 import { MonitorValidationError } from '../monitor_validation';
 import { getKqlFilter } from '../../common';
 import { deleteMonitor } from '../delete_monitor';
-import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
+import { monitorAttributes, syntheticsMonitorType } from '../../../../common/types/saved_objects';
 import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { ConfigKey } from '../../../../common/constants/monitor_management';
 import {
@@ -189,7 +189,7 @@ export class AddEditMonitorAPI {
     prevLocations?: MonitorFields['locations']
   ) {
     const { savedObjectsClient, syntheticsMonitorClient, request } = this.routeContext;
-    const ui = (request.query as { ui?: boolean }).ui;
+    const ui = Boolean((request.query as { ui?: boolean })?.ui);
     const {
       locations,
       private_locations: privateLocations,
@@ -243,7 +243,7 @@ export class AddEditMonitorAPI {
     const { total } = await savedObjectsClient.find({
       perPage: 0,
       type: syntheticsMonitorType,
-      filter: id ? `${kqlFilter} and not (id: ${id})` : kqlFilter,
+      filter: id ? `${kqlFilter} and not (${monitorAttributes}.config_id: ${id})` : kqlFilter,
     });
 
     if (total > 0) {

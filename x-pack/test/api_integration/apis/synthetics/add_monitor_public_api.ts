@@ -12,6 +12,7 @@ import {
   removeMonitorEmptyValues,
   transformPublicKeys,
 } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/helper';
+import { LOCATION_REQUIRED_ERROR } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/monitor_validation';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { addMonitorAPIHelper, omitMonitorKeys } from './add_monitor';
 
@@ -36,12 +37,12 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should return error for empty monitor', async function () {
       const { message } = await addMonitorAPI({}, 400);
-      expect(message).eql('Invalid value "undefined" supplied to "MonitorType"');
+      expect(message).eql('Invalid value "undefined" supplied to "type"');
     });
 
     it('return error if no location specified', async () => {
       const { message } = await addMonitorAPI({ type: 'http' }, 400);
-      expect(message).eql('At least one location is required, either elastic managed or private.');
+      expect(message).eql(LOCATION_REQUIRED_ERROR);
     });
 
     it('return error if invalid location specified', async () => {
@@ -84,6 +85,19 @@ export default function ({ getService }: FtrProviderContext) {
       },
       isServiceManaged: true,
     };
+
+    it('return error for origin project', async () => {
+      const { message } = await addMonitorAPI(
+        {
+          type: 'http',
+          locations: ['dev'],
+          url: 'https://www.google.com',
+          origin: 'project',
+        },
+        400
+      );
+      expect(message).eql('Unsupported origin type project, only ui type is supported via API.');
+    });
 
     describe('HTTP Monitor', () => {
       const defaultFields = omitBy(DEFAULT_FIELDS.http, removeMonitorEmptyValues);

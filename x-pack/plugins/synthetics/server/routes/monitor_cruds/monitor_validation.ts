@@ -10,6 +10,7 @@ import { isLeft } from 'fp-ts/lib/Either';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 
 import { omit } from 'lodash';
+import { schema } from '@kbn/config-schema';
 import { AlertConfigSchema } from '../../../common/runtime_types/monitor_management/alert_config';
 import { CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
 import { flattenAndFormatObject } from '../../synthetics_service/project_monitor/normalizers/common_fields';
@@ -79,9 +80,7 @@ export function validateMonitor(monitorFields: MonitorFields): ValidationResult 
   if (monitorFields.locations.length === 0) {
     return {
       valid: false,
-      reason: i18n.translate('xpack.synthetics.createMonitor.validation.noLocations', {
-        defaultMessage: 'At least one location is required, either elastic managed or private.',
-      }),
+      reason: LOCATION_REQUIRED_ERROR,
       details: '',
       payload: monitorFields,
     };
@@ -193,6 +192,8 @@ export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
     host: rawHost,
     inline_script: inlineScript,
     custom_heartbeat_id: _customHeartbeatId,
+    params: rawParams,
+    playwright_options: rawPlaywrightOptions,
     ...rawConfig
   } = flattenedConfig;
   if (rawUrl) {
@@ -237,6 +238,36 @@ export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
     };
   }
 
+  if (rawParams) {
+    const { value, error } = validateParams(rawParams);
+    if (error) {
+      formattedConfig[ConfigKey.PARAMS] = rawParams;
+      return {
+        formattedConfig,
+        errorMessage: i18n.translate('xpack.synthetics.restApi.monitor.invalidParams', {
+          defaultMessage: 'Invalid params: {error}',
+          values: { error },
+        }),
+      };
+    }
+    formattedConfig[ConfigKey.PARAMS] = value;
+  }
+
+  if (rawPlaywrightOptions) {
+    const { value, error } = validateJSON(rawPlaywrightOptions);
+    if (error) {
+      formattedConfig[ConfigKey.PLAYWRIGHT_OPTIONS] = rawPlaywrightOptions;
+      return {
+        formattedConfig,
+        errorMessage: i18n.translate('xpack.synthetics.restApi.monitor.invalidParams', {
+          defaultMessage: 'Invalid playwright_options: {error}',
+          values: { error },
+        }),
+      };
+    }
+    formattedConfig[ConfigKey.PLAYWRIGHT_OPTIONS] = value;
+  }
+
   if (unsupportedKeys.length > 0) {
     unsupportedKeys = unsupportedKeys.map((key) => {
       if (key === ConfigKey.SOURCE_INLINE && inlineScript) {
@@ -259,6 +290,40 @@ export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
     };
   }
   return { formattedConfig };
+};
+const RecordSchema = schema.recordOf(schema.string(), schema.string());
+
+const validateParams = (jsonString: string | any) => {
+  if (typeof jsonString === 'string') {
+    try {
+      JSON.parse(jsonString);
+      return { value: jsonString };
+    } catch (e) {
+      return { error: e };
+    }
+  }
+  try {
+    RecordSchema.validate(jsonString);
+    return { value: JSON.stringify(jsonString) };
+  } catch (e) {
+    return { error: e };
+  }
+};
+
+const validateJSON = (jsonString: string | any) => {
+  if (typeof jsonString === 'string') {
+    try {
+      JSON.parse(jsonString);
+      return { value: jsonString };
+    } catch (e) {
+      return { error: e };
+    }
+  }
+  try {
+    return { value: JSON.stringify(jsonString) };
+  } catch (e) {
+    return { error: e };
+  }
 };
 
 export function validateProjectMonitor(
@@ -421,11 +486,10 @@ const INVALID_PUBLIC_LOCATION_ERROR = (location: string) =>
     },
   });
 
-export const getUnsupportedKeysError = (
-  monitor: MonitorFields,
-  unsupportedKeys: string[],
-  version: string
-) =>
-  `The following Heartbeat options are not supported for ${
-    monitor.type
-  }  in ${version}: ${unsupportedKeys.join('|')}. You monitor was not created.`;
+export const LOCATION_REQUIRED_ERROR = i18n.translate(
+  'xpack.synthetics.createMonitor.validation.noLocations',
+  {
+    defaultMessage:
+      'At least one location is required, either elastic managed or private e.g locations: ["us-east"] or private_locations:["test private location"]',
+  }
+);

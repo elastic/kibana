@@ -8,6 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
+import { invalidOriginError } from './add_monitor';
 import { InvalidLocationError } from '../../synthetics_service/project_monitor/normalizers/common_fields';
 import { AddEditMonitorAPI, CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
 import { ELASTIC_MANAGED_LOCATIONS_DISABLED } from './add_monitor_project';
@@ -63,9 +64,21 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         },
       });
     }
+    if (monitor.origin && monitor.origin !== 'ui') {
+      return response.badRequest({
+        body: {
+          message: invalidOriginError(monitor.origin),
+          attributes: {
+            details: invalidOriginError(monitor.origin),
+            payload: monitor,
+          },
+        },
+      });
+    }
+
     const editMonitorAPI = new AddEditMonitorAPI(routeContext);
     if (monitor.name) {
-      const nameError = await editMonitorAPI.validateUniqueMonitorName(monitor.name);
+      const nameError = await editMonitorAPI.validateUniqueMonitorName(monitor.name, monitorId);
       if (nameError) {
         return response.badRequest({
           body: { message: nameError, attributes: { details: nameError } },

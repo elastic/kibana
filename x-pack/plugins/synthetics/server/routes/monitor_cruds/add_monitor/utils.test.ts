@@ -147,6 +147,21 @@ describe('parseMonitorLocations', () => {
     });
   });
 
+  it('should handle same locations with id', function () {
+    const result = parseMonitorLocations(
+      {
+        locations: [],
+        private_locations: [pvtLoc1.id],
+      } as any,
+      [pvtLoc1]
+    );
+
+    expect(result).toEqual({
+      locations: [],
+      privateLocations: [pvtLoc1.id],
+    });
+  });
+
   it('should handle private location removed', function () {
     const result = parseMonitorLocations(
       {

@@ -147,7 +147,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('strips unknown keys from monitor edits', async () => {
-      const newMonitor = httpMonitorJson;
+      const newMonitor = { ...httpMonitorJson, name: 'yet another' };
 
       const savedMonitor = await saveMonitor(newMonitor as MonitorFields);
       const monitorId = savedMonitor[ConfigKey.CONFIG_ID];
@@ -165,7 +165,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const updates: Partial<HTTPFields> = {
         [ConfigKey.URLS]: 'https://modified-host.com',
-        [ConfigKey.NAME]: 'Modified name',
+        [ConfigKey.NAME]: 'Modified name like that',
         [ConfigKey.LOCATIONS]: [LOCAL_LOCATION],
         [ConfigKey.REQUEST_HEADERS_CHECK]: {
           sampleHeader2: 'sampleValue2',
@@ -274,6 +274,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const updates: Partial<HTTPFields> = {
         [ConfigKey.URLS]: 'https://modified-host.com',
+        name: 'test monitor - 12',
       } as Partial<HTTPFields>;
 
       const modifiedMonitor = {

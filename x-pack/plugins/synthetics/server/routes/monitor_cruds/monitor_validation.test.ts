@@ -643,6 +643,99 @@ describe('normalizeAPIConfig', () => {
       },
     });
   });
+
+  it('params key mapping validation', function () {
+    expect(normalizeAPIConfig({ type: 'browser', params: '{}' } as any)).toEqual({
+      formattedConfig: {
+        type: 'browser',
+        params: '{}',
+      },
+    });
+    expect(normalizeAPIConfig({ type: 'browser', params: '{d}' } as any)).toEqual({
+      errorMessage:
+        "Invalid params: SyntaxError: Expected property name or '}' in JSON at position 1",
+      formattedConfig: {
+        type: 'browser',
+        params: '{d}',
+      },
+    });
+    expect(normalizeAPIConfig({ type: 'browser', params: {} } as any)).toEqual({
+      formattedConfig: {
+        type: 'browser',
+        params: '{}',
+      },
+    });
+    expect(normalizeAPIConfig({ type: 'browser', params: { a: [] } } as any)).toEqual({
+      errorMessage: 'Invalid params: Error: [a]: expected value of type [string] but got [Array]',
+      formattedConfig: {
+        type: 'browser',
+        params: { a: [] },
+      },
+    });
+    expect(
+      normalizeAPIConfig({ type: 'browser', params: { username: 'test', pass: 'test' } } as any)
+    ).toEqual({
+      formattedConfig: {
+        type: 'browser',
+        params: '{"username":"test","pass":"test"}',
+      },
+    });
+  });
+  it('playwright_options key mapping validation', function () {
+    expect(normalizeAPIConfig({ type: 'browser', playwright_options: '{}' } as any)).toEqual({
+      formattedConfig: {
+        type: 'browser',
+        playwright_options: '{}',
+      },
+    });
+    expect(normalizeAPIConfig({ type: 'browser', playwright_options: '{d}' } as any)).toEqual({
+      errorMessage:
+        "Invalid playwright_options: SyntaxError: Expected property name or '}' in JSON at position 1",
+      formattedConfig: {
+        playwright_options: '{d}',
+        type: 'browser',
+      },
+    });
+    expect(normalizeAPIConfig({ type: 'browser', playwright_options: {} } as any)).toEqual({
+      formattedConfig: {
+        type: 'browser',
+        playwright_options: '{}',
+      },
+    });
+    expect(normalizeAPIConfig({ type: 'browser', playwright_options: { a: [] } } as any)).toEqual({
+      formattedConfig: {
+        type: 'browser',
+        playwright_options: '{"a":[]}',
+      },
+    });
+    expect(
+      normalizeAPIConfig({
+        type: 'browser',
+        playwright_options: {
+          a: {
+            b: 'c',
+            d: 'e',
+          },
+        },
+      } as any)
+    ).toEqual({
+      formattedConfig: {
+        type: 'browser',
+        playwright_options: '{"a":{"b":"c","d":"e"}}',
+      },
+    });
+    expect(
+      normalizeAPIConfig({
+        type: 'browser',
+        playwright_options: { username: 'test', pass: 'test' },
+      } as any)
+    ).toEqual({
+      formattedConfig: {
+        type: 'browser',
+        playwright_options: '{"username":"test","pass":"test"}',
+      },
+    });
+  });
 });
 
 function getJsonPayload() {

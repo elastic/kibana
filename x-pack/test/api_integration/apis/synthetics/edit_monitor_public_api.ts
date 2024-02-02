@@ -12,6 +12,7 @@ import { removeMonitorEmptyValues } from '@kbn/synthetics-plugin/server/routes/m
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import moment from 'moment';
 import { PrivateLocation } from '@kbn/synthetics-plugin/common/runtime_types';
+import { LOCATION_REQUIRED_ERROR } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/monitor_validation';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { addMonitorAPIHelper, omitMonitorKeys } from './add_monitor';
 import { PrivateLocationTestService } from './services/private_location_test_service';
@@ -161,7 +162,24 @@ export default function ({ getService }: FtrProviderContext) {
       };
       const { message } = await editMonitorAPI(monitorId, monitor, 400);
 
-      expect(message).eql('At least one location is required, either elastic managed or private.');
+      expect(message).eql(LOCATION_REQUIRED_ERROR);
+    });
+
+    it('cannot change origin type', async () => {
+      const monitor = {
+        origin: 'project',
+      };
+      const result = await editMonitorAPI(monitorId, monitor, 400);
+
+      expect(result).eql({
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'Unsupported origin type project, only ui type is supported via API.',
+        attributes: {
+          details: 'Unsupported origin type project, only ui type is supported via API.',
+          payload: { origin: 'project' },
+        },
+      });
     });
 
     const updates: any = {};
@@ -242,6 +260,20 @@ export default function ({ getService }: FtrProviderContext) {
           locations: [localLoc, pvtLoc],
         })
       );
+
+      const { body: result2 } = await editMonitorAPI(monitorId, {
+        locations: [pvtLoc],
+      });
+
+      expect(result2).eql(
+        omitMonitorKeys({
+          ...defaultFields,
+          ...updates,
+          revision: 4,
+          url: 'https://www.google.com',
+          locations: [localLoc, pvtLoc],
+        })
+      );
     });
 
     it('can remove private location from existing monitor', async () => {
@@ -255,7 +287,7 @@ export default function ({ getService }: FtrProviderContext) {
         omitMonitorKeys({
           ...defaultFields,
           ...updates,
-          revision: 4,
+          revision: 5,
           url: 'https://www.google.com',
           locations: [localLoc],
         })
@@ -270,7 +302,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { message } = await editMonitorAPI(monitorId, monitor, 400);
 
-      expect(message).eql('At least one location is required, either elastic managed or private.');
+      expect(message).eql(LOCATION_REQUIRED_ERROR);
     });
   });
 }

@@ -145,8 +145,8 @@ export const getCustomHeartbeatId = (
   return `${monitor.id}-${projectId}-${namespace}`;
 };
 
-export const getMonitorSchedule = (schedule: number | MonitorFields['schedule']) => {
-  if (typeof schedule === 'number') {
+export const getMonitorSchedule = (schedule: number | string | MonitorFields['schedule']) => {
+  if (typeof schedule === 'number' || typeof schedule === 'string') {
     return {
       number: `${schedule}`,
       unit: ScheduleUnit.MINUTES,

@@ -6,6 +6,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import { InvalidLocationError } from '../../synthetics_service/project_monitor/normalizers/common_fields';
 import { AddEditMonitorAPI, CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
 import { SyntheticsRestApiRouteFactory } from '../types';
@@ -39,6 +40,18 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       private_locations: privateLocations,
       ...monitor
     } = request.body as CreateMonitorPayLoad;
+
+    if (request.body.origin && request.body.origin !== 'ui') {
+      return response.badRequest({
+        body: {
+          message: invalidOriginError(request.body.origin),
+          attributes: {
+            details: invalidOriginError(request.body.origin),
+            payload: request.body,
+          },
+        },
+      });
+    }
 
     try {
       const { errorMessage: unsupportedKeysErrors, formattedConfig } = normalizeAPIConfig(
@@ -108,3 +121,12 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
     }
   },
 });
+
+export const invalidOriginError = (origin: string) => {
+  return i18n.translate('xpack.synthetics.server.projectMonitors.invalidPublicLocationError', {
+    defaultMessage: 'Unsupported origin type {origin}, only ui type is supported via API.',
+    values: {
+      origin,
+    },
+  });
+};
