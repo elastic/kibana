@@ -198,7 +198,7 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
           >
             <div>
               <ul>
-                {inferenceServicesWarning.map((deploymentId) => {
+                {inferenceServiceIDs.map((deploymentId) => {
                   return <li key={deploymentId}>{deploymentId}</li>;
                 })}
               </ul>
