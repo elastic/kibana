@@ -20,7 +20,6 @@ import {
   FilterStateStore,
   Query,
 } from '@kbn/es-query';
-import type { ExternalVisContext } from '@kbn/unified-histogram-plugin/public';
 import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { IKbnUrlStateStorage, ISyncStateRef, syncState } from '@kbn/kibana-utils-plugin/public';
 import { isEqual } from 'lodash';
@@ -144,10 +143,6 @@ export interface DiscoverAppState {
    * Breakdown field of chart
    */
   breakdownField?: string;
-  /**
-   * Customization for Lens vis in Histogram area
-   */
-  visContext?: ExternalVisContext;
 }
 
 export const { Provider: DiscoverAppStateProvider, useSelector: useAppStateSelector } =
@@ -182,15 +177,6 @@ export const getDiscoverAppStateContainer = ({
     },
   };
 
-  const enhancedAppContainerFiltered = {
-    ...enhancedAppContainer,
-    // get: () => {
-    //   const state = { ...appStateContainer.getState() };
-    //   delete state.visContext; // don't sync visContext to URL as it can be very long
-    //   return state;
-    // },
-  };
-
   const hasChanged = () => {
     return !isEqualState(initialState, appStateContainer.getState());
   };
@@ -216,7 +202,6 @@ export const getDiscoverAppStateContainer = ({
   const replaceUrlState = async (newPartial: DiscoverAppState = {}, merge = true) => {
     addLog('[appState] replaceUrlState', { newPartial, merge });
     const state = merge ? { ...appStateContainer.getState(), ...newPartial } : newPartial;
-    // delete state.visContext; // don't sync visContext to URL as it can be very long
     await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
   };
 
@@ -224,7 +209,7 @@ export const getDiscoverAppStateContainer = ({
     addLog('[appState] start syncing state with URL');
     return syncState({
       storageKey: APP_STATE_URL_KEY,
-      stateContainer: enhancedAppContainerFiltered,
+      stateContainer: enhancedAppContainer,
       stateStorage,
     });
   };

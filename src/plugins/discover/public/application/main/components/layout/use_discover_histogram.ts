@@ -244,13 +244,11 @@ export const useDiscoverHistogram = ({
     }
 
     const fetchStart = stateContainer.dataState.fetch$.subscribe((value) => {
-      // console.log('fetchStart', value);
       if (!skipRefetch.current) {
         setIsSuggestionLoading(true);
       }
     });
     const fetchComplete = textBasedFetchComplete$.subscribe((value) => {
-      // console.log('fetchComplete', value);
       setIsSuggestionLoading(false);
     });
 
@@ -339,7 +337,6 @@ export const useDiscoverHistogram = ({
 
   const onVisContextJSONChanged = useCallback(
     (nextVisContextJSON: string | undefined) => {
-      // console.log('got new vis context from histogram', nextVisContextJSON);
       stateContainer.savedSearchState.updateVisContext({
         nextVisContextJSON,
       });

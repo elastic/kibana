@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
@@ -139,7 +138,7 @@ export const getTopNavLinks = ({
 
       // Share -> Get links -> Snapshot
       const params: DiscoverAppLocatorParams = {
-        ...omit(appState, 'visContext'), // TODO: Should we make the lens vis sharable? Looks like it's not serializable.
+        ...appState,
         ...(savedSearch.id ? { savedSearchId: savedSearch.id } : {}),
         ...(dataView?.isPersisted()
           ? { dataViewId: dataView?.id }
