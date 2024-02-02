@@ -125,7 +125,7 @@ export function Gradient({
           width: 16px;
           height: 16px;
           left: 50%;
-          top: 6px;
+          top: 8px;
         `}
       >
         {middleStepColor ? (
@@ -151,8 +151,8 @@ export function Gradient({
         css={css`
           position: absolute;
           width: 16px;
-          height: 50%;
-          top: 6px;
+          height: 16px;
+          top: 8px;
           right: 0;
         `}
       >

@@ -42,12 +42,13 @@ export function AddStop({
         })}
       >
         <button
+          id="lnsColorMappingGradientAddButton"
           css={css`
             position: relative;
             border-radius: 50%;
-            width: 17px;
-            height: 17px;
-            padding: 0 0.5px;
+            width: 16px;
+            height: 16px;
+            padding: 0;
             ${euiFocusRing(euiTheme)};
             opacity: 0;
             ${euiCanAnimate} {
@@ -76,19 +77,28 @@ export function AddStop({
         >
           <div
             css={css`
-              width: 15px;
-              height: 15px;
+              width: 16px;
+              height: 16px;
               border-radius: 50%;
               background-color: ${euiTheme.euiTheme.colors.emptyShade};
+              transform-origin: center;
+              transition: transform ${euiTheme.euiTheme.animation.fast} ease-in;
+              &:hover {
+                transform: scale(1.2);
+              }
               ${euiShadowSmall(euiTheme)}
             `}
           >
             <EuiIcon
               type="plus"
+              height={16}
+              width={16}
               css={css`
                 position: absolute;
-                top: 0.5px;
+                top: 0;
                 left: 0;
+                width: 16px;
+                height: 16px;
               `}
               color={euiTheme.euiTheme.colors.text}
             />
