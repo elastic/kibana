@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { type PropsWithChildren } from 'react';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
@@ -23,14 +23,12 @@ jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: () => mockUseIsExperimentalFeatureEnabled,
 }));
 
-jest.mock('@kbn/expandable-flyout/src/context', () => {
-  const original = jest.requireActual('@kbn/expandable-flyout/src/context');
-
+jest.mock('@kbn/expandable-flyout', () => {
   return {
-    ...original,
     useExpandableFlyoutApi: () => ({
       openRightPanel: mockOpenRightPanel,
     }),
+    TestProvider: ({ children }: PropsWithChildren<{}>) => <>{children}</>,
   };
 });
 

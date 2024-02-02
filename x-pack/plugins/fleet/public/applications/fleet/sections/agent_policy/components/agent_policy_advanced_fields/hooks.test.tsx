@@ -11,7 +11,7 @@ import { useLicense } from '../../../../../../hooks/use_license';
 import type { LicenseService } from '../../../../services';
 import type { AgentPolicy } from '../../../../types';
 
-import { useOutputOptions } from './hooks';
+import { useOutputOptions, useFleetServerHostsOptions } from './hooks';
 
 jest.mock('../../../../../../hooks/use_license');
 
@@ -142,6 +142,35 @@ const mockApiCallsWithInternalOutputs = (http: MockedFleetStartServices['http'])
               type: 'elasticsearch',
               is_default: false,
               is_default_monitoring: false,
+              is_internal: true,
+            },
+          ],
+        },
+      };
+    }
+
+    return defaultHttpClientGetImplementation(path);
+  });
+};
+
+const mockApiCallsWithInternalFleetServerHost = (http: MockedFleetStartServices['http']) => {
+  http.get.mockImplementation(async (path) => {
+    if (typeof path !== 'string') {
+      throw new Error('Invalid request');
+    }
+    if (path === '/api/fleet/fleet_server_hosts') {
+      return {
+        data: {
+          items: [
+            {
+              id: 'default-host',
+              name: 'Default',
+              is_default: true,
+            },
+            {
+              id: 'internal-output',
+              name: 'Internal',
+              is_default: false,
               is_internal: true,
             },
           ],
@@ -626,6 +655,33 @@ describe('useOutputOptions', () => {
           "disabled": false,
           "inputDisplay": "Default",
           "value": "default-output",
+        },
+        Object {
+          "disabled": true,
+          "inputDisplay": "Internal",
+          "value": "internal-output",
+        },
+      ]
+    `);
+  });
+});
+
+describe('useFleetServerHostsOptions', () => {
+  it('should not enable internal fleet server hosts', async () => {
+    const testRenderer = createFleetTestRendererMock();
+    mockApiCallsWithInternalFleetServerHost(testRenderer.startServices.http);
+    const { result, waitForNextUpdate } = testRenderer.renderHook(() =>
+      useFleetServerHostsOptions({} as AgentPolicy)
+    );
+    expect(result.current.isLoading).toBeTruthy();
+
+    await waitForNextUpdate();
+    expect(result.current.fleetServerHostsOptions).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "disabled": undefined,
+          "inputDisplay": "Default (currently Default)",
+          "value": "@@##DEFAULT_SELECT##@@",
         },
         Object {
           "disabled": true,
