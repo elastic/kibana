@@ -310,7 +310,10 @@ async function updateAlert<Params extends RuleTypeParams>(
   try {
     updatedObject = await context.unsecuredSavedObjectsClient.create<RawRule>(
       RULE_SAVED_OBJECT_TYPE,
-      { ...createAttributes, actions: transformDomainActionsToRawActions(createAttributes) },
+      {
+        ...createAttributes,
+        actions: transformDomainActionsToRawActions(createAttributes) as RawRule['actions'],
+      },
       {
         id,
         overwrite: true,
@@ -361,6 +364,6 @@ async function updateAlert<Params extends RuleTypeParams>(
       actions: updatedObject.attributes.actions,
       omitGeneratedValues: false,
       isSystemAction: (connectorId: string) => actionsClient.isSystemAction(connectorId),
-    }),
+    }) as PartialRule['actions'],
   };
 }

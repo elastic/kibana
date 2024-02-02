@@ -435,6 +435,7 @@ export interface RawRuleAction {
     throttle: string | null;
   };
   alertsFilter?: RawRuleAlertsFilter;
+  useAlertDataAsTemplate?: boolean;
 }
 
 // note that the `error` property is "null-able", as we're doing a partial

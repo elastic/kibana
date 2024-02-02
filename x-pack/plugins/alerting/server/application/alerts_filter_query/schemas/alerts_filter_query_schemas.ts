@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { filterStateStore } from '../constants';
+import { FilterStateStore } from '@kbn/es-query';
 
 export const alertsFilterQuerySchema = schema.object({
   kql: schema.string(),
@@ -17,8 +17,8 @@ export const alertsFilterQuerySchema = schema.object({
       $state: schema.maybe(
         schema.object({
           store: schema.oneOf([
-            schema.literal(filterStateStore.APP_STATE),
-            schema.literal(filterStateStore.GLOBAL_STATE),
+            schema.literal(FilterStateStore.APP_STATE),
+            schema.literal(FilterStateStore.GLOBAL_STATE),
           ]),
         })
       ),
