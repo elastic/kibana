@@ -320,7 +320,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       afterEach(async () => {
         if (checkForReportingToasts) {
-          await toasts.checkForReportingToasts();
+          await PageObjects.reporting.checkForReportingToasts();
         }
         checkForReportingToasts = true;
       });
