@@ -21,7 +21,7 @@ enum Result {
 export interface ConnectorsAPIUpdateResponse {
   result: Result;
 }
-  
+
 export interface ConnectorsAPISyncJobResponse {
   count: number;
   results: ConnectorSyncJob[];
