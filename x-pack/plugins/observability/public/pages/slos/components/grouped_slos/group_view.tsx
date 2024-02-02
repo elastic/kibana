@@ -24,10 +24,9 @@ interface Props {
 }
 
 export function GroupView({ isCompact, kqlQuery, sloView, sort, direction, groupBy }: Props) {
-  const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(DEFAULT_SLO_GROUPS_PAGE_SIZE);
-  const { state } = useUrlSearchState();
-  const { tagsFilter, statusFilter, filters } = state;
+  const { state, store: storeState } = useUrlSearchState();
+  const { tagsFilter, statusFilter, filters, page } = state;
 
   const { data, isLoading, isError } = useFetchSloGroups({
     perPage,
@@ -40,7 +39,7 @@ export function GroupView({ isCompact, kqlQuery, sloView, sort, direction, group
   });
   const { results = [], total = 0 } = data ?? {};
   const handlePageClick = (pageNumber: number) => {
-    setPage(pageNumber);
+    storeState({ page: pageNumber });
   };
 
   if (isLoading) {
