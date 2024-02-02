@@ -139,6 +139,10 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
       );
       await takeActionOption.click();
     },
+
+    doesElementExist: async (selector: string) => {
+      return await testSubjects.exists(selector);
+    },
   };
 
   const navigateToRulePage = async (benchmarkCisId: string, benchmarkCisVersion: string) => {
