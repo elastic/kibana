@@ -38,6 +38,7 @@ const bodySchema = schema.object({
       id: schema.string(),
       params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
       actionTypeId: schema.maybe(schema.string()),
+      type: schema.oneOf([schema.literal('default'), schema.literal('system')]),
     }),
     { defaultValue: [] }
   ),

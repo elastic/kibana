@@ -38,6 +38,7 @@ import {
   getBulkSnooze,
   getBulkUnsnooze,
   verifySnoozeScheduleLimit,
+  injectReferencesIntoActions,
 } from '../../../../rules_client/common';
 import {
   alertingAuthorizationFilterOpts,
@@ -479,6 +480,12 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
       rule.attributes.actions = migratedActions.resultedActions;
       rule.references = migratedActions.resultedReferences;
     }
+
+    const ruleActions = injectReferencesIntoActions(
+      rule.id,
+      rule.attributes.actions || [],
+      rule.references || []
+    );
 
     const ruleDomain: RuleDomain<Params> = transformRuleAttributesToRuleDomain<Params>(
       rule.attributes,

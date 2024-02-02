@@ -57,7 +57,7 @@ const transformCreateBodyActions = (
         type: RuleActionTypes.DEFAULT,
       };
     }
-  );
+  ) as CreateRuleData['actions'];
 };
 
 export const transformCreateBody = <Params extends RuleParams = never>(

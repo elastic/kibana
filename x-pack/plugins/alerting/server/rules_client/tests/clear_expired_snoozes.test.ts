@@ -76,6 +76,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  isSystemAction: jest.fn(),
 };
 
 describe('clearExpiredSnoozes()', () => {

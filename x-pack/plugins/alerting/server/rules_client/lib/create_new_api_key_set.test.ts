@@ -58,6 +58,7 @@ const rulesClientParams: jest.Mocked<RulesClientContext> = {
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  isSystemAction: jest.fn(),
 };
 
 const username = 'test';

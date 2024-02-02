@@ -14,6 +14,7 @@ import {
   NormalizedAlertActionWithGeneratedValues,
   RulesClientContext,
 } from '..';
+import { RuleActionTypes } from '@kbn/alerting-plugin/common';
 
 export async function addGeneratedActionValues(
   actions: NormalizedAlertAction[] = [],
@@ -40,7 +41,14 @@ export async function addGeneratedActionValues(
       throw Boom.badRequest(`Error creating DSL query: invalid KQL`);
     }
   };
-  return actions.map(({ uuid, alertsFilter, ...action }) => {
+  return actions.map((action) => {
+    if (action.type === RuleActionTypes.SYSTEM) {
+      return {
+        ...action,
+        uuid: action.uuid || v4(),
+      };
+    }
+    const { alertsFilter, uuid } = action;
     return {
       ...action,
       uuid: uuid || v4(),
@@ -57,6 +65,6 @@ export async function addGeneratedActionValues(
             },
           }
         : {}),
-    };
+    } as NormalizedAlertActionWithGeneratedValues;
   });
 }

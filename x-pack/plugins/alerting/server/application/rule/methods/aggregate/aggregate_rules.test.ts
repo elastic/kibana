@@ -65,6 +65,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   maxScheduledPerMinute: 1000,
   internalSavedObjectsRepository,
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  isSystemAction: jest.fn(),
 };
 
 beforeEach(() => {
