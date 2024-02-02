@@ -24,7 +24,6 @@ import { getRuleCircuitBreakerErrorMessage } from '../../../common';
 import {
   getAuthorizationFilter,
   checkAuthorizationAndGetTotal,
-  scheduleTask,
   updateMeta,
   createNewAPIKeySet,
   migrateLegacyActions,

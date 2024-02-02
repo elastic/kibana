@@ -583,6 +583,9 @@ export class FleetPlugin
           }
         );
 
+        // initialize (generate/encrypt/validate) Uninstall Tokens asynchronously
+        this.initializeUninstallTokens();
+
         this.fleetStatus$.next({
           level: ServiceStatusLevels.available,
           summary: 'Fleet is available',
@@ -697,5 +700,55 @@ export class FleetPlugin
     }
 
     return this.logger;
+  }
+
+  private async initializeUninstallTokens() {
+    try {
+      await this.generateUninstallTokens();
+    } catch (error) {
+      appContextService
+        .getLogger()
+        .error('Error happened during uninstall token generation.', { error: { message: error } });
+    }
+
+    try {
+      await this.validateUninstallTokens();
+    } catch (error) {
+      appContextService
+        .getLogger()
+        .error('Error happened during uninstall token validation.', { error: { message: error } });
+    }
+  }
+
+  private async generateUninstallTokens() {
+    const logger = appContextService.getLogger();
+
+    logger.debug('Generating Agent uninstall tokens');
+    if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
+      logger.warn(
+        'xpack.encryptedSavedObjects.encryptionKey is not configured, agent uninstall tokens are being stored in plain text'
+      );
+    }
+    await appContextService.getUninstallTokenService()?.generateTokensForAllPolicies();
+
+    if (appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
+      logger.debug('Checking for and encrypting plain text uninstall tokens');
+      await appContextService.getUninstallTokenService()?.encryptTokens();
+    }
+  }
+
+  private async validateUninstallTokens() {
+    const logger = appContextService.getLogger();
+    logger.debug('Validating uninstall tokens');
+
+    const unintallTokenValidationError = await appContextService
+      .getUninstallTokenService()
+      ?.checkTokenValidityForAllPolicies();
+
+    if (unintallTokenValidationError) {
+      logger.warn(unintallTokenValidationError.error.message);
+    } else {
+      logger.debug('Uninstall tokens validation successful.');
+    }
   }
 }

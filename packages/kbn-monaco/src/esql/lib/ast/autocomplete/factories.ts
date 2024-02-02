@@ -44,6 +44,8 @@ export function getAutocompleteFunctionDefinition(fn: FunctionDefinition) {
       value: buildFunctionDocumentation(fullSignatures),
     },
     sortText: 'C',
+    // trigger a suggestion follow up on selection
+    command: TRIGGER_SUGGESTION_COMMAND,
   };
 }
 
@@ -62,13 +64,6 @@ export function getAutocompleteBuiltinDefinition(fn: FunctionDefinition) {
     command: TRIGGER_SUGGESTION_COMMAND,
   };
 }
-
-export const isCompatibleFunctionName = (fnName: string, command: string) => {
-  const fnSupportedByCommand = allFunctions.filter(({ supportedCommands }) =>
-    supportedCommands.includes(command)
-  );
-  return fnSupportedByCommand.some(({ name }) => name === fnName);
-};
 
 export const getCompatibleFunctionDefinition = (
   command: string,
@@ -205,7 +200,10 @@ export const buildMatchingFieldsDefinition = (
     sortText: 'D',
   }));
 
-export const buildOptionDefinition = (option: CommandOptionsDefinition) => {
+export const buildOptionDefinition = (
+  option: CommandOptionsDefinition,
+  isAssignType: boolean = false
+) => {
   const completeItem: AutocompleteCommandDefinition = {
     label: option.name,
     insertText: option.name,
@@ -216,6 +214,11 @@ export const buildOptionDefinition = (option: CommandOptionsDefinition) => {
   if (option.wrapped) {
     completeItem.insertText = `${option.wrapped[0]}${option.name} $0 ${option.wrapped[1]}`;
     completeItem.insertTextRules = 4; // monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
+  }
+  if (isAssignType) {
+    completeItem.insertText = `${option.name} = $0`;
+    completeItem.insertTextRules = 4; // monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
+    completeItem.command = TRIGGER_SUGGESTION_COMMAND;
   }
   return completeItem;
 };
@@ -305,7 +308,14 @@ export function getCompatibleLiterals(commandName: string, types: string[], name
     if (names) {
       const index = types.indexOf('string');
       if (/pattern/.test(names[index])) {
-        suggestions.push(...buildConstantsDefinitions(['"a-pattern"'], 'A pattern string'));
+        suggestions.push(
+          ...buildConstantsDefinitions(
+            [commandName === 'grok' ? '"%{WORD:firstWord}"' : '"%{firstWord}"'],
+            i18n.translate('monaco.esql.autocomplete.aPatternString', {
+              defaultMessage: 'A pattern string',
+            })
+          )
+        );
       } else {
         suggestions.push(...buildConstantsDefinitions(['string'], ''));
       }

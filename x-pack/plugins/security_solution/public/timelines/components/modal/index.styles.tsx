@@ -19,6 +19,7 @@ import {
 export const usePaneStyles = () => {
   const EuiTheme = useEuiTheme();
   const { euiTheme } = EuiTheme;
+
   return css`
     // euiOverlayMask styles
     position: fixed;
@@ -26,9 +27,6 @@ export const usePaneStyles = () => {
     left: 0;
     right: 0;
     bottom: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     background: ${transparentize(euiTheme.colors.ink, 0.5)};
     z-index: ${euiTheme.levels.flyout};
 
@@ -36,13 +34,12 @@ export const usePaneStyles = () => {
       animation: ${euiAnimFadeIn} ${euiTheme.animation.fast} ease-in;
     }
 
-    &.timeline-wrapper--hidden {
+    &.timeline-portal-overlay-mask--hidden {
       display: none;
     }
 
-    .timeline-flyout {
+    .timeline-container {
       min-width: 150px;
-      height: inherit;
       position: fixed;
       top: var(--euiFixedHeadersOffset, 0);
       right: 0;
@@ -53,15 +50,9 @@ export const usePaneStyles = () => {
         animation: ${euiAnimSlideInUp(euiTheme.size.xxl)} ${euiTheme.animation.normal}
           cubic-bezier(0.39, 0.575, 0.565, 1);
       }
-
-      .timeline-body {
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-      }
     }
 
-    &:not(.timeline-wrapper--full-screen) .timeline-flyout {
+    &:not(.timeline-portal-overlay-mask--full-screen) .timeline-container {
       margin: ${euiTheme.size.m};
       border-radius: ${euiTheme.border.radius.medium};
 
