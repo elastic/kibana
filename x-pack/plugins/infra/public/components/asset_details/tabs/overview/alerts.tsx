@@ -59,12 +59,7 @@ export const AlertsSummaryContent = ({
           <EuiFlexGroup alignItems="center" responsive={false}>
             {featureFlags.inventoryThresholdAlertRuleEnabled && (
               <EuiFlexItem grow={false}>
-                <LinkToAlertsRule
-                  onClick={(e) => {
-                    // e.stopPropagation();
-                    toggleAlertFlyout();
-                  }}
-                />
+                <LinkToAlertsRule onClick={toggleAlertFlyout} />
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false}>

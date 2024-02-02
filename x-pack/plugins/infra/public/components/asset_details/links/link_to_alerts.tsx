@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty } from '@elastic/eui';
 
 export interface LinkToAlertsRuleProps {
-  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onClick?: () => void;
 }
 
 export const LinkToAlertsRule = ({ onClick }: LinkToAlertsRuleProps) => {
