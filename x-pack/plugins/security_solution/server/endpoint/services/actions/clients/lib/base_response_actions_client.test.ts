@@ -205,7 +205,7 @@ describe('ResponseActionsClientImpl base class', () => {
         attachments: [
           {
             externalReferenceAttachmentTypeId: 'endpoint',
-            externalReferenceId: undefined,
+            externalReferenceId: 'action-123',
             owner: 'securitySolution',
             externalReferenceStorage: {
               type: 'elasticSearchDoc',
@@ -230,7 +230,7 @@ describe('ResponseActionsClientImpl base class', () => {
           },
           {
             externalReferenceAttachmentTypeId: 'endpoint',
-            externalReferenceId: undefined,
+            externalReferenceId: 'action-123',
             owner: 'securitySolution',
             externalReferenceStorage: {
               type: 'elasticSearchDoc',
@@ -255,7 +255,7 @@ describe('ResponseActionsClientImpl base class', () => {
           },
           {
             externalReferenceAttachmentTypeId: 'endpoint',
-            externalReferenceId: undefined,
+            externalReferenceId: 'action-123',
             owner: 'securitySolution',
             externalReferenceStorage: {
               type: 'elasticSearchDoc',
@@ -280,7 +280,7 @@ describe('ResponseActionsClientImpl base class', () => {
           },
           {
             externalReferenceAttachmentTypeId: 'endpoint',
-            externalReferenceId: undefined,
+            externalReferenceId: 'action-123',
             owner: 'securitySolution',
             externalReferenceStorage: {
               type: 'elasticSearchDoc',

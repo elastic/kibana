@@ -193,20 +193,17 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     })) as CaseAttachments;
 
     const casesUpdateResponse = await Promise.all(
-      allCases.map((caseId) =>
-        casesClient.attachments
-          .bulkCreate({
+      allCases.map((caseId) => {
+        try {
+          return casesClient.attachments.bulkCreate({
             caseId,
             attachments,
-          })
-          .catch((err) => {
-            // Log any error, BUT: do not fail execution
-            this.log.warn(
-              `Attempt to update case ID [${caseId}] failed: ${err.message}\n${stringify(err)}`
-            );
-            return null;
-          })
-      )
+          });
+        } catch (err) {
+          this.log.warn(`Failed to update case [${caseId}] with attachments: ${err.message}`, err);
+          return null;
+        }
+      })
     );
 
     this.log.debug(`Update to cases done:\n${stringify(casesUpdateResponse)}`);

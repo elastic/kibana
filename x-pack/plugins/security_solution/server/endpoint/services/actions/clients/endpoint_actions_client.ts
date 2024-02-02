@@ -88,7 +88,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
         return {
           hostId,
           type: 'endpoint',
-          hostname: agentIds.hosts.find((host) => host.agent.id === hostId)?.host.hostname ?? '',
+          hostname: response.hosts?.[hostId]?.name ?? '',
         };
       }),
     });
