@@ -74,7 +74,7 @@ export function useAllCasesState(isModalView: boolean = false): UseAllCasesState
       !deepEqual(urlState, localStorageState) &&
       !isModalView
     ) {
-      setUrlState(localStorageState);
+      setUrlState(localStorageState, 'replace');
       isStateLoadedFromLocalStorage.current = true;
     }
   }, [localStorageState, setUrlState, urlState, isModalView]);
@@ -96,7 +96,10 @@ export function useAllCasesState(isModalView: boolean = false): UseAllCasesState
   };
 }
 
-const useAllCasesUrlState = (): [AllCasesURLState, (updated: AllCasesTableState) => void] => {
+const useAllCasesUrlState = (): [
+  AllCasesURLState,
+  (updated: AllCasesTableState, mode?: 'push' | 'replace') => void
+] => {
   const history = useHistory();
   const location = useLocation();
 
@@ -107,7 +110,7 @@ const useAllCasesUrlState = (): [AllCasesURLState, (updated: AllCasesTableState)
   );
 
   const updateQueryParams = useCallback(
-    (updated: AllCasesTableState) => {
+    (updated: AllCasesTableState, mode: 'push' | 'replace' = 'push') => {
       const updatedQuery = allCasesUrlStateSerializer(updated);
       const allCasesStateSearch = urlUtils.encodeUriQuery(stringifyUrlParams(updatedQuery));
       // is assumed that url from other solution are already encoded
@@ -116,7 +119,7 @@ const useAllCasesUrlState = (): [AllCasesURLState, (updated: AllCasesTableState)
         ? allCasesStateSearch
         : `${allCasesStateSearch}${urlUtils.encodeUriQuery('&')}${nonAllCasesStateSearch}`;
 
-      history.push({
+      history[mode]({
         ...location,
         search,
       });

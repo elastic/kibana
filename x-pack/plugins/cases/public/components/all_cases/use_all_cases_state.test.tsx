@@ -22,6 +22,7 @@ import { waitFor } from '@testing-library/react';
 
 const mockLocation = { search: '' };
 const mockPush = jest.fn();
+const mockReplace = jest.fn();
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -29,7 +30,7 @@ jest.mock('react-router-dom', () => ({
     return mockLocation;
   }),
   useHistory: jest.fn().mockImplementation(() => ({
-    replace: jest.fn(),
+    replace: mockReplace,
     push: mockPush,
     location: {
       search: '',
@@ -143,15 +144,19 @@ describe('useAllCasesQueryParams', () => {
   });
 
   it('preserves non cases state url parameters', () => {
-    mockLocation.search = `foo=bar&foo=baz&test=my-test`;
+    mockLocation.search = `status=open&foo=bar&foo=baz&test=my-test`;
 
-    renderHook(() => useAllCasesState(), {
+    const { result } = renderHook(() => useAllCasesState(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    act(() => {
+      result.current.setFilterOptions({ severity: [CaseSeverity.MEDIUM] });
     });
 
     expect(mockPush).toHaveBeenCalledWith({
       search: `${urlUtils.encodeUriQuery(
-        'page=1&perPage=10&sortField=createdAt&sortOrder=desc&'
+        'page=1&perPage=10&sortField=createdAt&sortOrder=desc&severity=medium&status=open&'
       )}foo=bar&foo=baz&test=my-test`,
     });
   });
@@ -265,7 +270,7 @@ describe('useAllCasesQueryParams', () => {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
 
-    expect(mockPush).toHaveBeenCalledWith({
+    expect(mockReplace).toHaveBeenCalledWith({
       search: urlUtils.encodeUriQuery('page=1&perPage=30&sortField=createdAt&sortOrder=desc'),
     });
   });
