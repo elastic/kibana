@@ -63,24 +63,37 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
   return (
     <EuiFlyout maxWidth={FLYOUT_MAX_WIDTH} onClose={onClose}>
       <EuiFlyoutHeader hasBorder={true}>
-        <EuiTitle size="m">
-          <h2>
-            {fleetServerHost ? (
-              <FormattedMessage
-                id="xpack.fleet.settings.fleetServerHostsFlyout.editTitle"
-                defaultMessage="Edit Fleet Server"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.fleet.settings.fleetServerHostsFlyout.addTitle"
-                defaultMessage="Add Fleet Server"
-              />
-            )}
-          </h2>
-        </EuiTitle>
+        <>
+          <EuiTitle size="m">
+            <h2>
+              {fleetServerHost ? (
+                <FormattedMessage
+                  id="xpack.fleet.settings.fleetServerHostsFlyout.editTitle"
+                  defaultMessage="Edit Fleet Server"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.fleet.settings.fleetServerHostsFlyout.addTitle"
+                  defaultMessage="Add Fleet Server"
+                />
+              )}
+            </h2>
+          </EuiTitle>
+          {fleetServerHost === undefined && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiText color="subdued">
+                <FormattedMessage
+                  id="xpack.fleet.settings.fleetServerHostsFlyout.serverlessInfoText"
+                  defaultMessage="You may create another Fleet Server config with a proxy."
+                />
+              </EuiText>
+            </>
+          )}
+        </>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {fleetServerHost ? (
+        {fleetServerHost && (
           <EuiCallOut
             size="m"
             color="warning"
@@ -95,21 +108,6 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
             <FormattedMessage
               id="xpack.fleet.settings.fleetServerHostsFlyout.warningCalloutDescription"
               defaultMessage="Invalid settings can break the connection between Elastic Agent and Fleet Server. If this happens, you will need to re-enroll your agents."
-            />
-          </EuiCallOut>
-        ) : (
-          <EuiCallOut
-            size="m"
-            title={
-              <FormattedMessage
-                id="xpack.fleet.settings.fleetServerHostsFlyout.serverlessCalloutTitle"
-                defaultMessage="You may create another Fleet Server config with a proxy"
-              />
-            }
-          >
-            <FormattedMessage
-              id="xpack.fleet.settings.fleetServerHostsFlyout.serverlessCalloutDescription"
-              defaultMessage="It is not allowed to use a different host URL in serverless."
             />
           </EuiCallOut>
         )}
@@ -174,6 +172,14 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
                   }
                 )}
                 isUrl
+                helpText={
+                  inputs.hostUrlsInput.props.disabled && (
+                    <FormattedMessage
+                      id="xpack.fleet.settings.fleetServerHostsFlyout.serverlessHostUrlsHelpText"
+                      defaultMessage="Custom host URLs are not allowed in serverless."
+                    />
+                  )
+                }
               />
             </>
           </EuiFormRow>
