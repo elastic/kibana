@@ -6,15 +6,14 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 import AttachmentContent from './external_reference_children';
-import { EuiMarkdownFormat } from '@elastic/eui';
 
 describe('AttachmentContent', () => {
   it('renders markdown content when comment exists', () => {
     const props = {
       externalReferenceMetadata: {
-        comment: 'Some **markdown** content',
+        comment: 'Test comment',
         command: 'isolate',
         targets: [
           {
@@ -25,8 +24,8 @@ describe('AttachmentContent', () => {
         ],
       },
     };
-    const wrapper = shallow(<AttachmentContent {...props} />);
-    expect(wrapper.find(EuiMarkdownFormat).prop('children')).toEqual('Some **markdown** content');
+    const { getByText } = render(<AttachmentContent {...props} />);
+    expect(getByText('Test comment')).toBeInTheDocument();
   });
 
   it('does not render when comment is empty', () => {
@@ -36,8 +35,8 @@ describe('AttachmentContent', () => {
         command: 'isolate',
       },
     };
-    const wrapper = shallow(<AttachmentContent {...props} />);
-    expect(wrapper.type()).toBeNull();
+    const { container } = render(<AttachmentContent {...props} />);
+    expect(container.firstChild).toBeNull();
   });
 
   it('does not render when comment is only whitespace', () => {
@@ -48,7 +47,7 @@ describe('AttachmentContent', () => {
       },
     };
 
-    const wrapper = shallow(<AttachmentContent {...props} />);
-    expect(wrapper.type()).toBeNull();
+    const { container } = render(<AttachmentContent {...props} />);
+    expect(container.firstChild).toBeNull();
   });
 });

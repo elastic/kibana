@@ -19,7 +19,7 @@ import { EuiMarkdownFormat } from '@elastic/eui';
 import type { IExternalReferenceMetaDataProps } from './types';
 
 export const ContentWrapper = styled.div`
-  padding: ${({ theme }) => `${theme.eui.euiSizeM} ${theme.eui.euiSizeL}`};
+  padding: ${({ theme }) => `${theme.eui?.euiSizeM} ${theme.eui?.euiSizeL}`};
   text-overflow: ellipsis;
   word-break: break-word;
   display: -webkit-box;

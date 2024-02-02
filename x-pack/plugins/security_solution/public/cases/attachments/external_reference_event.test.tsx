@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render, fireEvent } from '@testing-library/react';
 
 import AttachmentContent from './external_reference_event';
 import { useNavigation } from '@kbn/security-solution-navigation/src/navigation';
@@ -40,36 +40,40 @@ describe('AttachmentContent', () => {
   };
 
   it('renders the expected text based on the command', () => {
-    const component = shallow(<AttachmentContent {...defaultProps} />);
+    const { getByText, getByTestId, rerender } = render(<AttachmentContent {...defaultProps} />);
 
-    expect(component.text()).toContain('submitted isolate request on host host-1');
+    expect(getByText('submitted isolate request on host')).toBeInTheDocument();
+    expect(getByTestId('actions-link-endpoint-1')).toHaveTextContent('host-1');
 
-    component.setProps({
-      externalReferenceMetadata: {
-        ...defaultProps.externalReferenceMetadata,
-        command: 'unisolate',
-      },
-    });
+    rerender(
+      <AttachmentContent
+        {...defaultProps}
+        externalReferenceMetadata={{
+          ...defaultProps.externalReferenceMetadata,
+          command: 'unisolate',
+        }}
+      />
+    );
 
-    expect(component.text()).toContain('submitted release request on host host-1');
+    expect(getByText('submitted release request on host')).toBeInTheDocument();
+    expect(getByTestId('actions-link-endpoint-1')).toHaveTextContent('host-1');
   });
 
   it('navigates on link click', () => {
-    const component = shallow(<AttachmentContent {...defaultProps} />);
+    const { getByText, getByTestId } = render(<AttachmentContent {...defaultProps} />);
 
-    component.find('EuiLink').simulate('click', {
-      preventDefault: jest.fn(),
-    });
+    fireEvent.click(getByTestId('actions-link-endpoint-1'));
 
     expect(mockNavigateTo).toHaveBeenCalled();
   });
+
   it('builds endpoint details URL correctly', () => {
     const mockGetAppUrl = jest.fn().mockReturnValue('http://app.url');
     (mockUseNavigation as jest.Mock).mockReturnValue({
       getAppUrl: mockGetAppUrl,
     });
 
-    shallow(<AttachmentContent {...defaultProps} />);
+    render(<AttachmentContent {...defaultProps} />);
 
     expect(mockGetAppUrl).toHaveBeenNthCalledWith(1, {
       path: '/administration/endpoints?selected_endpoint=endpoint-1&show=activity_log',
