@@ -160,11 +160,9 @@ export function SloDetails({ slo, isAutoRefreshing }: Props) {
                   slo={slo}
                 />
               </EuiFlexItem>
-              {slo.indicator.type !== 'sli.metric.timeslice' ? (
-                <EuiFlexItem>
-                  <EventsChartPanel slo={slo} range={range} />
-                </EuiFlexItem>
-              ) : null}
+              <EuiFlexItem>
+                <EventsChartPanel slo={slo} range={range} />
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexGroup>
         </Fragment>

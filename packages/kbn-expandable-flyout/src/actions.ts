@@ -19,6 +19,7 @@ export enum ActionType {
   closePreviewPanel = 'close_preview_panel',
   previousPreviewPanel = 'previous_preview_panel',
   closeFlyout = 'close_flyout',
+  urlChanged = 'urlChanged',
 }
 
 export const openPanelsAction = createAction<{
@@ -37,3 +38,9 @@ export const closeLeftPanelAction = createAction(ActionType.closeLeftPanel);
 export const closePreviewPanelAction = createAction(ActionType.closePreviewPanel);
 
 export const previousPreviewPanelAction = createAction(ActionType.previousPreviewPanel);
+
+export const urlChangedAction = createAction<{
+  right?: FlyoutPanelProps;
+  left?: FlyoutPanelProps;
+  preview?: FlyoutPanelProps;
+}>(ActionType.urlChanged);
