@@ -11,6 +11,7 @@ import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/
 import { i18n } from '@kbn/i18n';
 import type {
   Datatable,
+  DatatableColumn,
   DatatableColumnType,
   ExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/common';
@@ -237,23 +238,36 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           );
         }),
         map(({ rawResponse: body, warning }) => {
+          const columns =
+            body.columns?.map(({ name, type }) => ({
+              id: name,
+              name,
+              meta: { type: normalizeType(type) },
+            })) ?? [];
           // all_columns in the response means that there is a separation between
           // columns with data and empty columns
           // columns contain only columns with data while all_columns everything
           const hasEmptyColumns =
             body.all_columns && body.all_columns?.length > body.columns.length;
 
-          const lookup = new Set(hasEmptyColumns ? body.columns.map(({ name }) => name) : []);
-          const allColumns =
-            (body.all_columns ?? body.columns)
-              ?.map(({ name, type }) => ({
+          let emptyColumns: DatatableColumn[] = [];
+
+          if (hasEmptyColumns) {
+            const difference =
+              body.all_columns?.filter((col1) => {
+                return !body.columns.some((col2) => {
+                  return col1.name === col2.name;
+                });
+              }) ?? [];
+            emptyColumns =
+              difference?.map(({ name, type }) => ({
                 id: name,
                 name,
                 meta: { type: normalizeType(type) },
-                isNull: hasEmptyColumns ? !lookup.has(name) : false,
-              }))
-              .sort(({ isNull }) => (isNull ? 1 : -1)) ?? [];
-
+                isNull: true,
+              })) ?? [];
+          }
+          const allColumns = [...columns, ...emptyColumns];
           const columnNames = allColumns.map(({ name }) => name);
           const rows = body.values.map((row) => zipObject(columnNames, row));
 
