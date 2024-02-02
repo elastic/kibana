@@ -13,5 +13,14 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/reporting-common",
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/share-plugin",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/core-http-common",
+    "@kbn/i18n",
+    "@kbn/rison",]
 }

@@ -8,10 +8,15 @@
     ]
   },
   "include": [
-    "**/*.ts",
+    "**/*.ts", "**/share_context_menu/*.ts", "**/shared/*.ts"
   ],
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/licensing-plugin",
+    "@kbn/screenshotting-plugin",
+    "@kbn/reporting-public",
+  ]
 }
