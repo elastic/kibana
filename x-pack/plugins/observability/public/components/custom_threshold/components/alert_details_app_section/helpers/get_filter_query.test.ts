@@ -34,6 +34,6 @@ describe('getFilterQuery', () => {
     const query = '';
     const groups = undefined;
 
-    expect(getFilterQuery(query as unknown as string, groups)).toBe('');
+    expect(getFilterQuery(query, groups)).toBe('');
   });
 });
