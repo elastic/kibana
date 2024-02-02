@@ -30,6 +30,7 @@ export interface SLOListParams {
   lastRefresh?: number;
   tagsFilter?: SearchState['tagsFilter'];
   statusFilter?: SearchState['statusFilter'];
+  disabled?: boolean;
 }
 
 export interface UseFetchSloListResponse {
@@ -51,6 +52,7 @@ export function useFetchSloList({
   lastRefresh,
   tagsFilter,
   statusFilter,
+  disabled = false,
 }: SLOListParams = {}): UseFetchSloListResponse {
   const {
     http,
@@ -105,6 +107,7 @@ export function useFetchSloList({
         signal,
       });
     },
+    enabled: !disabled,
     cacheTime: 0,
     refetchOnWindowFocus: false,
     retry: (failureCount, error) => {

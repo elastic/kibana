@@ -64,7 +64,6 @@ export function SloList() {
             loading={isLoading || isRefetching}
             error={isError}
             sloView={view}
-            group="ungrouped"
           />
           {total > 0 ? (
             <EuiFlexItem>

@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
 import { EuiPanel, EuiSelectableOption, EuiText } from '@elastic/eui';
 import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
-
-import { SLOContextMenu, ContextMenuItem } from '../slo_context_menu';
-import type { Option } from '../slo_context_menu';
+import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
 import type { SearchState } from '../../hooks/use_url_search_state';
+import type { Option } from '../slo_context_menu';
+import { ContextMenuItem, SLOContextMenu } from '../slo_context_menu';
 import type { SortField } from '../slo_list_search_bar';
+
 export interface Props {
   onStateChange: (newState: Partial<SearchState>) => void;
-  initialState: SearchState;
-  sortBy: string;
+  state: SearchState;
 }
 
 export type Item<T> = EuiSelectableOption & {
@@ -26,13 +25,14 @@ export type Item<T> = EuiSelectableOption & {
   checked?: EuiSelectableOptionCheckedType;
 };
 
-export function SLOSortBy({ initialState, onStateChange, sortBy }: Props) {
+export function SLOSortBy({ state, onStateChange }: Props) {
   const [isSortByPopoverOpen, setIsSortByPopoverOpen] = useState(false);
+  const sortBy = state.sort.by;
+
   const handleChangeSortBy = ({ value, label }: { value: SortField; label: string }) => {
-    setGroupLabel(label);
     onStateChange({
       page: 0,
-      sort: { by: value, direction: initialState.sort.direction },
+      sort: { by: value, direction: state.sort.direction },
     });
   };
 
@@ -99,9 +99,7 @@ export function SLOSortBy({ initialState, onStateChange, sortBy }: Props) {
     },
   ];
 
-  const [groupLabel, setGroupLabel] = useState(
-    sortByOptions.find((option) => option.value === sortBy)?.label || 'Default'
-  );
+  const groupLabel = sortByOptions.find((option) => option.value === sortBy)?.label || 'Default';
 
   const items = [
     <EuiPanel paddingSize="s" hasShadow={false} key="group_title_panel">

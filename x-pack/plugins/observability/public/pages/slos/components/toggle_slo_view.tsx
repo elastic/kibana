@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FindSLOResponse } from '@kbn/slo-schema';
+import React from 'react';
+import type { SearchState } from '../hooks/use_url_search_state';
 import { SLOSortBy } from './common/sort_by_select';
 import { SloGroupBy } from './slo_list_group_by';
-import type { SearchState } from '../hooks/use_url_search_state';
 export type SLOView = 'cardView' | 'listView' | 'compactView';
 
 interface Props {
@@ -77,10 +77,10 @@ export function ToggleSLOView({ sloView, onChangeView, onStateChange, sloList, s
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <SLOSortBy initialState={state} sortBy={state.sort.by} onStateChange={onStateChange} />
+        <SLOSortBy state={state} onStateChange={onStateChange} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <SloGroupBy onStateChange={onStateChange} groupBy={state.groupBy} />
+        <SloGroupBy state={state} onStateChange={onStateChange} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonGroup

@@ -4,19 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexItem, EuiTablePagination, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexItem, EuiLoadingSpinner, EuiTablePagination } from '@elastic/eui';
 import React from 'react';
-import { GroupListView } from './group_list_view';
 import { useFetchSloGroups } from '../../../../hooks/slo/use_fetch_slo_groups';
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
-import { SloGroupListError } from './group_list_error';
-import { SloGroupListEmpty } from './group_list_empty';
 import type { SortDirection } from '../slo_list_search_bar';
+import { SLOView } from '../toggle_slo_view';
+import { SloGroupListEmpty } from './group_list_empty';
+import { SloGroupListError } from './group_list_error';
+import { GroupListView } from './group_list_view';
 
 interface Props {
   groupBy: string;
   kqlQuery: string;
-  sloView: string;
+  sloView: SLOView;
   sort: string;
   direction: SortDirection;
 }

@@ -4,19 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { EuiPanel, EuiSelectableOption, EuiText } from '@elastic/eui';
+import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { EuiPanel, EuiSelectableOption, EuiText } from '@elastic/eui';
-
-import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
-import { SLOContextMenu, ContextMenuItem } from './slo_context_menu';
-import type { Option } from './slo_context_menu';
 import type { SearchState } from '../hooks/use_url_search_state';
+import type { Option } from './slo_context_menu';
+import { ContextMenuItem, SLOContextMenu } from './slo_context_menu';
 
 export type GroupByField = 'ungrouped' | 'slo.tags' | 'status' | 'slo.indicator.type';
 export interface Props {
   onStateChange: (newState: Partial<SearchState>) => void;
-  groupBy: GroupByField;
+  state: SearchState;
 }
 
 export type Item<T> = EuiSelectableOption & {
@@ -25,8 +24,10 @@ export type Item<T> = EuiSelectableOption & {
   checked?: EuiSelectableOptionCheckedType;
 };
 
-export function SloGroupBy({ onStateChange, groupBy }: Props) {
+export function SloGroupBy({ onStateChange, state }: Props) {
   const [isGroupByPopoverOpen, setIsGroupByPopoverOpen] = useState(false);
+  const groupBy = state.groupBy;
+
   const handleChangeGroupBy = (value: GroupByField) => {
     onStateChange({
       page: 0,

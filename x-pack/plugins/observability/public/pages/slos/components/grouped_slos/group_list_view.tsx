@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import React, { memo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiAccordion,
   EuiBadge,
@@ -20,16 +18,19 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import React, { memo, useState } from 'react';
 import { useFetchSloList } from '../../../../hooks/slo/use_fetch_slo_list';
-import { SlosView } from '../slos_view';
-import type { SortDirection } from '../slo_list_search_bar';
 import { SLI_OPTIONS } from '../../../slo_edit/constants';
 import { useSloFormattedSLIValue } from '../../hooks/use_slo_summary';
+import { SlosView } from '../slos_view';
+import type { SortDirection } from '../slo_list_search_bar';
+import { SLOView } from '../toggle_slo_view';
 
 interface Props {
   group: string;
   kqlQuery: string;
-  sloView: string;
+  sloView: SLOView;
   sort: string;
   direction: SortDirection;
   groupBy: string;
@@ -67,6 +68,7 @@ export function GroupListView({
     setAccordionState(newState);
   };
   const isAccordionOpen = accordionState === 'open';
+
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const {
     isLoading,
@@ -80,6 +82,7 @@ export function GroupListView({
     perPage: itemsPerPage,
     page: page + 1,
     filters,
+    disabled: !isAccordionOpen,
   });
   const { results = [], total = 0 } = sloList ?? {};
 
@@ -155,7 +158,6 @@ export function GroupListView({
                     loading={isLoading || isRefetching}
                     error={isError}
                     sloView={sloView}
-                    group={group}
                   />
                   <EuiSpacer size="m" />
                   <EuiTablePagination
