@@ -177,13 +177,13 @@ export const CreateDockerFIPS: Task = {
   description: 'Creating Docker FIPS images',
 
   async run(config, log, build) {
-    // await runDockerGenerator(config, log, build, {
-    //   architecture: 'x64',
-    //   baseImage: 'ubi',
-    //   context: false,
-    //   image: true,
-    //   fips: true,
-    // });
+    await runDockerGenerator(config, log, build, {
+      architecture: 'x64',
+      baseImage: 'ubi',
+      context: false,
+      image: true,
+      fips: true,
+    });
 
     await runDockerGenerator(config, log, build, {
       architecture: 'x64',
