@@ -24,6 +24,7 @@ import type {
   KibanaPageTemplateKibanaDependencies,
 } from '@kbn/shared-ux-page-kibana-template';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
+import { SearchBarPortal } from './search_bar_portal';
 import { ObservabilityTour } from '../tour';
 import { NavNameWithBadge, hideBadge } from './nav_name_with_badge';
 import { NavNameWithBetaBadge } from './nav_name_with_beta_badge';
@@ -37,6 +38,7 @@ export type WrappedPageTemplateProps = Pick<
   pageSectionProps?: EuiPageSectionProps;
   bottomBar?: React.ReactNode;
   bottomBarProps?: _EuiPageBottomBarProps;
+  topSearchBar?: React.ReactNode;
 };
 
 export interface NavigationEntry {
@@ -102,6 +104,7 @@ export function ObservabilityPageTemplate({
   bottomBarProps,
   pageSectionProps,
   guidedOnboardingApi,
+  topSearchBar,
   ...pageTemplateProps
 }: ObservabilityPageTemplateProps): React.ReactElement | null {
   const sections = useObservable(navigationSections$, []);
@@ -216,6 +219,7 @@ export function ObservabilityPageTemplate({
                     alignment={pageTemplateProps.isEmptyState ? 'center' : 'top'}
                     {...pageSectionProps}
                   >
+                    {topSearchBar && <SearchBarPortal>{topSearchBar}</SearchBarPortal>}
                     {children}
                   </KibanaPageTemplate.Section>
                 </KibanaErrorBoundary>
