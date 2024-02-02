@@ -190,6 +190,7 @@ export const SETTINGS_OUTPUTS_KAFKA = {
 export const SETTINGS_FLEET_SERVER_HOSTS = {
   ADD_BUTTON: 'settings.fleetServerHosts.addFleetServerHostBtn',
   EDIT_BUTTON: 'fleetServerHostsTable.edit.btn',
+  TABLE: 'settingsFleetServerHostsTable',
 };
 
 export const AGENT_POLICY_FORM = {
