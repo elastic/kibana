@@ -7,6 +7,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 
+import {
+  isActionType,
+  isAgentType,
+} from '../../../../../common/endpoint/service/response_actions/type_guards';
 import type { ResponseActionType } from '../../../../../common/endpoint/service/response_actions/constants';
 import {
   type ConsoleResponseActionCommands,
@@ -17,7 +21,7 @@ import {
   type ResponseActionStatus,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import { useUrlParams } from '../../../hooks/use_url_params';
-import { DEFAULT_DATE_RANGE_OPTIONS, isActionType, isAgentType } from './hooks';
+import { DEFAULT_DATE_RANGE_OPTIONS } from './hooks';
 
 interface UrlParamsActionsLogFilters {
   agentTypes: string;

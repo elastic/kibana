@@ -10,6 +10,10 @@ import type {
   DurationRange,
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
+import {
+  isActionType,
+  isAgentType,
+} from '../../../../../common/endpoint/service/response_actions/type_guards';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { getAgentTypeName } from '../../../../common/translations';
 import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
@@ -139,13 +143,6 @@ export const getActionStatus = (status: ResponseActionStatus): string => {
   }
   return '';
 };
-
-// type guards to ensure only the matching string values are attached to the filter type
-export const isAgentType = (type: string): type is typeof RESPONSE_ACTION_AGENT_TYPE[number] =>
-  RESPONSE_ACTION_AGENT_TYPE.includes(type as typeof RESPONSE_ACTION_AGENT_TYPE[number]);
-
-export const isActionType = (type: string): type is typeof RESPONSE_ACTION_TYPE[number] =>
-  RESPONSE_ACTION_TYPE.includes(type as typeof RESPONSE_ACTION_TYPE[number]);
 
 export type FilterName = keyof typeof FILTER_NAMES;
 // maps filter name to a function that updates the query state
