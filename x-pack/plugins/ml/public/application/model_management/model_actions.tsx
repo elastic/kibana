@@ -329,7 +329,11 @@ export function useModelActions({
         available: (item) =>
           item.model_type === TRAINED_MODEL_TYPE.PYTORCH &&
           canStartStopTrainedModels &&
-          (item.state === MODEL_STATE.STARTED || item.state === MODEL_STATE.STARTING),
+          (item.state === MODEL_STATE.STARTED || item.state === MODEL_STATE.STARTING) &&
+          // Only show the action if there is at least one deployment that is not used by the inference service
+          item.deployment_ids.some(
+            (dId) => !item.inference_apis.some((inference) => inference.model_id === dId)
+          ),
         enabled: (item) => !isLoading,
         onClick: async (item) => {
           const requireForceStop = isPopulatedObject(item.pipelines);
