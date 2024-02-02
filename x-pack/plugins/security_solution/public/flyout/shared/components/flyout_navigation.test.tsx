@@ -15,41 +15,37 @@ import {
   EXPAND_DETAILS_BUTTON_TEST_ID,
   HEADER_ACTIONS_TEST_ID,
 } from './test_ids';
+import type { ExpandableFlyoutState } from '@kbn/expandable-flyout';
 import {
-  useExpandableFlyoutContext,
+  useExpandableFlyoutApi,
   type ExpandableFlyoutApi,
-  ExpandableFlyoutProvider,
+  useExpandableFlyoutState,
 } from '@kbn/expandable-flyout';
 
 const expandDetails = jest.fn();
 
 const ExpandableFlyoutTestProviders: FC<PropsWithChildren<{}>> = ({ children }) => {
-  return (
-    <TestProviders>
-      <ExpandableFlyoutProvider>{children}</ExpandableFlyoutProvider>
-    </TestProviders>
-  );
+  return <TestProviders>{children}</TestProviders>;
 };
 
 jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutContext: jest.fn(),
+  useExpandableFlyoutApi: jest.fn(),
+  useExpandableFlyoutState: jest.fn(),
   ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
 }));
 
 const flyoutContextValue = {
-  panels: {},
   closeLeftPanel: jest.fn(),
 } as unknown as ExpandableFlyoutApi;
 
 describe('<FlyoutNavigation />', () => {
   beforeEach(() => {
-    jest.mocked(useExpandableFlyoutContext).mockReturnValue(flyoutContextValue);
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
+    jest.mocked(useExpandableFlyoutState).mockReturnValue({} as unknown as ExpandableFlyoutState);
   });
 
   describe('when flyout is expandable', () => {
     it('should render expand button', () => {
-      jest.mocked(useExpandableFlyoutContext).mockReturnValue(flyoutContextValue);
-
       const { getByTestId, queryByTestId } = render(
         <ExpandableFlyoutTestProviders>
           <FlyoutNavigation flyoutIsExpandable={true} expandDetails={expandDetails} />
@@ -64,10 +60,9 @@ describe('<FlyoutNavigation />', () => {
     });
 
     it('should render collapse button', () => {
-      jest.mocked(useExpandableFlyoutContext).mockReturnValue({
-        ...flyoutContextValue,
-        panels: { left: {} },
-      } as unknown as ExpandableFlyoutApi);
+      jest
+        .mocked(useExpandableFlyoutState)
+        .mockReturnValue({ left: {} } as unknown as ExpandableFlyoutState);
 
       const { getByTestId, queryByTestId } = render(
         <ExpandableFlyoutTestProviders>

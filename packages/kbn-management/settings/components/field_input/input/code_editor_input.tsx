@@ -8,6 +8,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import { SettingType } from '@kbn/management-settings-types';
 import { getFieldInputValue, useUpdate } from '@kbn/management-settings-utilities';
 
@@ -55,6 +56,24 @@ export const CodeEditorInput = ({
     async (newValue: string, onUpdateFn) => {
       const isJsonArray = Array.isArray(JSON.parse(defaultValue || '{}'));
       const parsedValue = newValue || (isJsonArray ? '[]' : '{}');
+
+      // Validate JSON syntax
+      if (field.type === 'json') {
+        try {
+          JSON.parse(parsedValue);
+        } catch (e) {
+          onUpdateFn({
+            type: field.type,
+            unsavedValue: newValue,
+            isInvalid: true,
+            error: i18n.translate('management.settings.field.codeEditorSyntaxErrorMessage', {
+              defaultMessage: 'Invalid JSON syntax',
+            }),
+          });
+          return;
+        }
+      }
+
       const validationResponse = await validateChange(field.id, parsedValue);
       if (validationResponse.successfulValidation && !validationResponse.valid) {
         onUpdateFn({

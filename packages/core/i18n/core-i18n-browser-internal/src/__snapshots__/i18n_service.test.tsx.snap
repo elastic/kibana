@@ -83,6 +83,8 @@ exports[`#start() returns \`Context\` component 1`] = `
           "euiDataGrid.ariaLabel": [Function],
           "euiDataGrid.ariaLabelledBy": [Function],
           "euiDataGrid.screenReaderNotice": "Cell contains interactive content.",
+          "euiDataGridCell.expansionEnterPrompt": "Press the Enter key to expand this cell.",
+          "euiDataGridCell.focusTrapEnterPrompt": "Press the Enter key to interact with this cell's contents.",
           "euiDataGridCell.position": [Function],
           "euiDataGridCellActions.expandButtonTitle": "Click or hit enter to interact with cell content",
           "euiDataGridHeaderCell.actionsPopoverScreenReaderText": "To navigate through the list of column actions, press the Tab or Up and Down arrow keys.",

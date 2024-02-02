@@ -358,10 +358,6 @@
                 "path": "packages/kbn-management/settings/field_definition/get_definition.ts"
               },
               {
-                "plugin": "advancedSettings",
-                "path": "src/plugins/advanced_settings/public/management_app/lib/to_editable_config.ts"
-              },
-              {
                 "plugin": "discover",
                 "path": "src/plugins/discover/server/ui_settings.ts"
               },

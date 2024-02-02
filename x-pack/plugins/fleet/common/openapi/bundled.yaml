@@ -4932,8 +4932,10 @@ components:
           example: my description
         namespace:
           type: string
-          description: namespace by default "default"
-          example: default
+          description: >-
+            The package policy namespace. Leave blank to inherit the agent
+            policy's namespace.
+          example: customnamespace
         policy_id:
           type: string
           description: Agent policy ID where that package policy will be added
@@ -5119,6 +5121,8 @@ components:
           type: boolean
         is_default_monitoring:
           type: boolean
+        is_internal:
+          type: boolean
         name:
           type: string
         type:
@@ -5186,6 +5190,8 @@ components:
         is_default:
           type: boolean
         is_default_monitoring:
+          type: boolean
+        is_internal:
           type: boolean
         name:
           type: string
@@ -5335,6 +5341,8 @@ components:
           type: boolean
         is_default_monitoring:
           type: boolean
+        is_internal:
+          type: boolean
         name:
           type: string
         type:
@@ -5405,6 +5413,8 @@ components:
           type: boolean
         is_default_monitoring:
           type: boolean
+        is_internal:
+          type: boolean
         name:
           type: string
         type:
@@ -5447,6 +5457,8 @@ components:
         is_default:
           type: boolean
         is_default_monitoring:
+          type: boolean
+        is_internal:
           type: boolean
         name:
           type: string
@@ -5517,6 +5529,8 @@ components:
         is_default:
           type: boolean
         is_default_monitoring:
+          type: boolean
+        is_internal:
           type: boolean
         name:
           type: string
@@ -5651,6 +5665,8 @@ components:
         is_default:
           type: boolean
         is_default_monitoring:
+          type: boolean
+        is_internal:
           type: boolean
         name:
           type: string

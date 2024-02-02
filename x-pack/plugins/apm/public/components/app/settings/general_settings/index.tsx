@@ -25,13 +25,14 @@ import {
 import { isEmpty } from 'lodash';
 import React from 'react';
 import {
+  BottomBarActions,
   useEditableSettings,
   useUiTracker,
 } from '@kbn/observability-shared-plugin/public';
 import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
-import { ValueValidation } from '@kbn/core-ui-settings-browser/src/types';
+import { useApmFeatureFlag } from '../../../../hooks/use_apm_feature_flag';
+import { ApmFeatureFlagName } from '../../../../../common/apm_feature_flags';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { BottomBarActions } from '../bottom_bar_actions';
 
 const LazyFieldRow = React.lazy(async () => ({
   default: (await import('@kbn/management-settings-components-field-row'))
@@ -40,24 +41,35 @@ const LazyFieldRow = React.lazy(async () => ({
 
 const FieldRow = withSuspense(LazyFieldRow);
 
-const apmSettingsKeys = [
-  enableComparisonByDefault,
-  defaultApmServiceEnvironment,
-  apmServiceGroupMaxNumberOfServices,
-  enableInspectEsQueries,
-  apmLabsButton,
-  apmAWSLambdaPriceFactor,
-  apmAWSLambdaRequestCostPerMillion,
-  apmEnableServiceMetrics,
-  apmEnableContinuousRollups,
-  enableAgentExplorerView,
-  apmEnableTableSearchBar,
-  apmEnableProfilingIntegration,
-];
+function getApmSettingsKeys(isProfilingIntegrationEnabled: boolean) {
+  const keys = [
+    enableComparisonByDefault,
+    defaultApmServiceEnvironment,
+    apmServiceGroupMaxNumberOfServices,
+    enableInspectEsQueries,
+    apmLabsButton,
+    apmAWSLambdaPriceFactor,
+    apmAWSLambdaRequestCostPerMillion,
+    apmEnableServiceMetrics,
+    apmEnableContinuousRollups,
+    enableAgentExplorerView,
+    apmEnableTableSearchBar,
+  ];
+
+  if (isProfilingIntegrationEnabled) {
+    keys.push(apmEnableProfilingIntegration);
+  }
+
+  return keys;
+}
 
 export function GeneralSettings() {
   const trackApmEvent = useUiTracker({ app: 'apm' });
-  const { docLinks, notifications } = useApmPluginContext().core;
+  const { docLinks, notifications, settings } = useApmPluginContext().core;
+  const isProfilingIntegrationEnabled = useApmFeatureFlag(
+    ApmFeatureFlagName.ProfilingIntegrationAvailable
+  );
+  const apmSettingsKeys = getApmSettingsKeys(isProfilingIntegrationEnabled);
   const {
     fields,
     handleFieldChange,
@@ -88,11 +100,9 @@ export function GeneralSettings() {
     }
   }
 
-  // We don't validate the user input on these settings
-  const settingsValidationResponse: ValueValidation = {
-    successfulValidation: true,
-    valid: true,
-  };
+  const hasInvalidChanges = Object.values(unsavedChanges).some(
+    ({ isInvalid }) => isInvalid
+  );
 
   return (
     <>
@@ -105,7 +115,8 @@ export function GeneralSettings() {
               links: docLinks.links.management,
               showDanger: (message: string) =>
                 notifications.toasts.addDanger(message),
-              validateChange: async () => settingsValidationResponse,
+              validateChange: (key: string, value: any) =>
+                settings.client.validateValue(key, value),
             }}
           >
             <FieldRow
@@ -126,6 +137,8 @@ export function GeneralSettings() {
             defaultMessage: 'Save changes',
           })}
           unsavedChangesCount={Object.keys(unsavedChanges).length}
+          appTestSubj="apm"
+          areChangesInvalid={hasInvalidChanges}
         />
       )}
     </>

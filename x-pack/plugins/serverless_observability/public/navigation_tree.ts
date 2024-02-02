@@ -24,7 +24,7 @@ export const navigationTree: NavigationTreeDefinition = {
           title: i18n.translate('xpack.serverlessObservability.nav.discover', {
             defaultMessage: 'Discover',
           }),
-          link: 'observability-log-explorer',
+          link: 'observability-logs-explorer',
           // avoid duplicate "Discover" breadcrumbs
           breadcrumbStatus: 'hidden',
           renderAs: 'item',
@@ -33,7 +33,7 @@ export const navigationTree: NavigationTreeDefinition = {
               link: 'discover',
               children: [
                 {
-                  link: 'observability-log-explorer',
+                  link: 'observability-logs-explorer',
                 },
               ],
             },
@@ -174,6 +174,27 @@ export const navigationTree: NavigationTreeDefinition = {
               link: 'metrics:hosts',
               getIsActive: ({ pathNameSerialized, prepend }) => {
                 return pathNameSerialized.startsWith(prepend('/app/metrics/hosts'));
+              },
+            },
+          ],
+        },
+        {
+          id: 'synthetics',
+          title: i18n.translate('xpack.serverlessObservability.nav.synthetics', {
+            defaultMessage: 'Synthetics',
+          }),
+          renderAs: 'accordion',
+          children: [
+            {
+              link: 'synthetics:overview',
+              getIsActive: ({ pathNameSerialized, prepend }) => {
+                return pathNameSerialized.startsWith(prepend('/app/synthetics'));
+              },
+            },
+            {
+              link: 'synthetics:management',
+              getIsActive: ({ pathNameSerialized, prepend }) => {
+                return pathNameSerialized.startsWith(prepend('/app/synthetics/monitors'));
               },
             },
           ],
