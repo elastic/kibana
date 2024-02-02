@@ -300,8 +300,8 @@ export const ActionTypeForm = ({
           }
         }
       })();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     !isSystemAction ? [actionItem.group, actionItem.frequency?.summary] : []
   );
 
@@ -383,34 +383,25 @@ export const ActionTypeForm = ({
       throttle={actionThrottle}
       throttleUnit={actionThrottleUnit}
       hasAlertsMappings={hasAlertsMappings}
-      onNotifyWhenChange={useCallback(
-        (notifyWhen) => {
-          setActionFrequencyProperty('notifyWhen', notifyWhen, index);
-        },
-        [setActionFrequencyProperty, index]
-      )}
-      onThrottleChange={useCallback(
-        (throttle: number | null, throttleUnit: string) => {
-          if (throttle) {
-            setActionThrottle(throttle);
-            setActionThrottleUnit(throttleUnit);
-          }
-          setActionFrequencyProperty(
-            'throttle',
-            throttle ? `${throttle}${throttleUnit}` : null,
-            index
-          );
-        },
-        [setActionFrequencyProperty, index]
-      )}
-      onSummaryChange={useCallback(
-        (summary: boolean) => {
-          // use the default message when a user toggles between action frequencies
-          setUseDefaultMessage(true);
-          setActionFrequencyProperty('summary', summary, index);
-        },
-        [setActionFrequencyProperty, index]
-      )}
+      onNotifyWhenChange={(notifyWhen) => {
+        setActionFrequencyProperty('notifyWhen', notifyWhen, index);
+      }}
+      onThrottleChange={(throttle: number | null, throttleUnit: string) => {
+        if (throttle) {
+          setActionThrottle(throttle);
+          setActionThrottleUnit(throttleUnit);
+        }
+        setActionFrequencyProperty(
+          'throttle',
+          throttle ? `${throttle}${throttleUnit}` : null,
+          index
+        );
+      }}
+      onSummaryChange={(summary: boolean) => {
+        // use the default message when a user toggles between action frequencies
+        setUseDefaultMessage(true);
+        setActionFrequencyProperty('summary', summary, index);
+      }}
       showMinimumThrottleWarning={showMinimumThrottleWarning}
       showMinimumThrottleUnitWarning={showMinimumThrottleUnitWarning}
       notifyWhenSelectOptions={notifyWhenSelectOptions}
