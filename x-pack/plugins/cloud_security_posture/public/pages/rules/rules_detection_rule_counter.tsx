@@ -17,13 +17,13 @@ export const RulesDetectionRuleCounter = ({
 }: {
   benchmarkRule: CspBenchmarkRule['metadata'];
 }) => {
-  const createMisconfigurationRuleFn = async (http: HttpSetup) =>
+  const createBenchmarkRuleFn = async (http: HttpSetup) =>
     await createDetectionRuleFromBenchmark(http, benchmarkRule);
 
   return (
     <DetectionRuleCounter
       tags={getFindingsDetectionRuleSearchTags(benchmarkRule)}
-      createRuleFn={createMisconfigurationRuleFn}
+      createRuleFn={createBenchmarkRuleFn}
     />
   );
 };
