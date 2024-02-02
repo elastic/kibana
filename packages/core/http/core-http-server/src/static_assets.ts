@@ -27,6 +27,18 @@ export interface IStaticAssets {
   /**
    * Will return an href, either a path for or full URL with the provided path
    * appended to the static assets public base path.
+   *
+   * Useful for instances were you need to render your own HTML page and link to
+   * certain static assets.
+   *
+   * @example
+   * ```ts
+   * // I want to retrieve the href for Kibana's favicon, requires knowledge of path:
+   * const favIconHref = core.http.statisAssets.appendPathToPublicUrl('/ui/favicons/favicon.svg');
+   * ```
+   *
+   * @note Only use this if you know what you are doing and there is no other option.
+   *       This creates a strong coupling between asset dir structure and your code.
    * @param pathname
    */
   appendPathToPublicUrl(pathname: string): string;
