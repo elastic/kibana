@@ -252,24 +252,9 @@ export abstract class AbstractDataView {
       return fieldFormat;
     }
 
-    if (field?.meta?.unit && field.meta.unit.length > 0) {
-      const fmt = metaUnitsToFormatter[field.meta.unit[0]];
-      if (fmt) {
-        return this.fieldFormats.getInstance(fmt.id, fmt.params);
-      }
-      /*
-      const unit =
-        field.meta.unit.length === 1
-          ? field.meta.unit[0]
-          : field.meta.unit.reduce(function (a, b) {
-              return a === b ? a : NaN;
-            });
-      const hasConsistentFormatter = (field.meta.unit.length = console.log(
-        'GETTING FORMATTER',
-        field.name,
-        field.meta.unit
-      ));
-      */
+    const fmt = field.defaultFormatter ? metaUnitsToFormatter[field.defaultFormatter] : undefined;
+    if (fmt) {
+      return this.fieldFormats.getInstance(fmt.id, fmt.params);
     }
 
     return this.fieldFormats.getDefaultInstance(

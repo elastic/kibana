@@ -459,7 +459,7 @@ export type FieldSpec = DataViewFieldBase & {
    */
   parentName?: string;
 
-  meta: estypes.Metadata;
+  defaultFormatter?: string;
 };
 
 export type DataViewFieldMap = Record<string, FieldSpec>;
