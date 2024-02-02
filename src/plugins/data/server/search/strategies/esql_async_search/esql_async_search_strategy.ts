@@ -53,7 +53,6 @@ export const esqlAsyncSearchStrategyProvider = (
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
 
     const search = async () => {
-      const { ...requestParams } = request.params ?? {};
       const params = id
         ? {
             ...getCommonDefaultAsyncGetParams(searchConfig, options),
@@ -64,7 +63,7 @@ export const esqlAsyncSearchStrategyProvider = (
           }
         : {
             ...(await getCommonDefaultAsyncSubmitParams(searchConfig, options)),
-            ...requestParams,
+            ...request.params,
           };
       const { body, headers, meta } = id
         ? await client.transport.request<SqlGetAsyncResponse>(
