@@ -80,7 +80,7 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {fleetServerHost && (
+        {fleetServerHost ? (
           <EuiCallOut
             size="m"
             color="warning"
@@ -95,6 +95,21 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
             <FormattedMessage
               id="xpack.fleet.settings.fleetServerHostsFlyout.warningCalloutDescription"
               defaultMessage="Invalid settings can break the connection between Elastic Agent and Fleet Server. If this happens, you will need to re-enroll your agents."
+            />
+          </EuiCallOut>
+        ) : (
+          <EuiCallOut
+            size="m"
+            title={
+              <FormattedMessage
+                id="xpack.fleet.settings.fleetServerHostsFlyout.serverlessCalloutTitle"
+                defaultMessage="You may create another Fleet Server config with a proxy"
+              />
+            }
+          >
+            <FormattedMessage
+              id="xpack.fleet.settings.fleetServerHostsFlyout.serverlessCalloutDescription"
+              defaultMessage="It is not allowed to use a different host URL in serverless."
             />
           </EuiCallOut>
         )}

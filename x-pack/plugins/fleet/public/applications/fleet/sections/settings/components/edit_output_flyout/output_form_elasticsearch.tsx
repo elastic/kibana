@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { EuiCallOut, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -23,20 +23,52 @@ export const OutputFormElasticsearchSection: React.FunctionComponent<Props> = (p
 
   return (
     <>
-      <MultiRowInput
-        data-test-subj="settingsOutputsFlyout.hostUrlInput"
-        label={i18n.translate('xpack.fleet.settings.editOutputFlyout.esHostsInputLabel', {
-          defaultMessage: 'Hosts',
-        })}
-        placeholder={i18n.translate(
-          'xpack.fleet.settings.editOutputFlyout.esHostsInputPlaceholder',
-          {
-            defaultMessage: 'Specify host URL',
-          }
-        )}
-        {...inputs.elasticsearchUrlInput.props}
-        isUrl
-      />
+      {inputs.elasticsearchUrlInput.props.disabled ? (
+        <>
+          <EuiFormRow
+            fullWidth
+            label={
+              <FormattedMessage
+                id="xpack.fleet.settings.editOutputFlyout.esHostsServerlessInputLabel"
+                defaultMessage="Hosts"
+              />
+            }
+          >
+            <EuiFieldText
+              fullWidth
+              id={inputs.elasticsearchUrlInput.props.id}
+              disabled={inputs.elasticsearchUrlInput.props.disabled}
+              value={inputs.elasticsearchUrlInput.props.value}
+            />
+          </EuiFormRow>
+          <EuiSpacer size="xs" />
+          <EuiCallOut
+            size="s"
+            title={
+              <FormattedMessage
+                id="xpack.fleet.settings.editOutputFlyout.esHostsServerlessCalloutTitle"
+                defaultMessage="You may not use a custom host URL in serverless."
+              />
+            }
+          />
+          <EuiSpacer size="m" />
+        </>
+      ) : (
+        <MultiRowInput
+          data-test-subj="settingsOutputsFlyout.hostUrlInput"
+          label={i18n.translate('xpack.fleet.settings.editOutputFlyout.esHostsInputLabel', {
+            defaultMessage: 'Hosts',
+          })}
+          placeholder={i18n.translate(
+            'xpack.fleet.settings.editOutputFlyout.esHostsInputPlaceholder',
+            {
+              defaultMessage: 'Specify host URL',
+            }
+          )}
+          {...inputs.elasticsearchUrlInput.props}
+          isUrl
+        />
+      )}
       <EuiFormRow
         fullWidth
         label={
