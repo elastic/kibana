@@ -21,8 +21,7 @@ import { login } from '../../../tasks/login';
 import { createEndpointHost } from '../../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../../tasks/delete_all_endpoint_data';
 
-// Failing: See https://github.com/elastic/kibana/issues/170816
-describe.skip(
+describe(
   'Unenroll agent from fleet changing agent policy when agent tamper protection is enabled but then is switched to a policy with it also enabled',
   { tags: ['@ess'] },
   () => {
