@@ -58,7 +58,6 @@ export function SlosPage() {
           defaultMessage: 'SLOs',
         }),
         rightSideItems: [<CreateSloBtn />, <FeedbackButton />],
-        bottomBorder: false,
       }}
       topSearchBar={<SloListSearchBar />}
     >
