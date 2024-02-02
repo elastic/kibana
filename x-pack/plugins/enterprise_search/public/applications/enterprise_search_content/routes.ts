@@ -36,3 +36,4 @@ export const ML_NOTIFICATIONS_PATH = '/app/ml/notifications';
 export const DEV_TOOLS_CONSOLE_PATH = '/app/dev_tools#/console';
 
 export const CONNECTOR_DETAIL_PATH = `${CONNECTORS_PATH}/:connectorId`;
+export const CONNECTOR_DETAIL_TAB_PATH = `${CONNECTOR_DETAIL_PATH}/:tabId`;

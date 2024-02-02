@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
+import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
+import { CONNECTOR_DETAIL_TAB_PATH } from '../../routes';
 import { baseBreadcrumbs } from '../connectors/connectors';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
@@ -56,45 +58,62 @@ export const ConnectorDetail: React.FC = () => {
     productFeatures: { hasDefaultIngestPipeline },
   } = useValues(KibanaLogic);
 
-  const [selectedTabId, setSelectedTabId] = useState<string>(tabId);
   const ALL_INDICES_TABS = [
     {
       content: <ConnectorDetailOverview />,
       id: ConnectorDetailTabId.OVERVIEW,
-      isSelected: selectedTabId === ConnectorDetailTabId.OVERVIEW,
+      isSelected: tabId === ConnectorDetailTabId.OVERVIEW,
       label: i18n.translate(
         'xpack.enterpriseSearch.content.connectors.connectorDetail.overviewTabLabel',
         {
           defaultMessage: 'Overview',
         }
       ),
-      onClick: () => setSelectedTabId(ConnectorDetailTabId.OVERVIEW),
+      onClick: () =>
+        KibanaLogic.values.navigateToUrl(
+          generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+            connectorId,
+            tabId: ConnectorDetailTabId.OVERVIEW,
+          })
+        ),
     },
     {
       content: <SearchIndexDocuments />,
       disabled: !index,
       id: ConnectorDetailTabId.DOCUMENTS,
-      isSelected: selectedTabId === ConnectorDetailTabId.DOCUMENTS,
+      isSelected: tabId === ConnectorDetailTabId.DOCUMENTS,
       label: i18n.translate(
         'xpack.enterpriseSearch.content.connectors.connectorDetail.documentsTabLabel',
         {
           defaultMessage: 'Documents',
         }
       ),
-      onClick: () => setSelectedTabId(ConnectorDetailTabId.DOCUMENTS),
+      onClick: () =>
+        KibanaLogic.values.navigateToUrl(
+          generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+            connectorId,
+            tabId: ConnectorDetailTabId.DOCUMENTS,
+          })
+        ),
     },
     {
       content: <SearchIndexIndexMappings />,
       disabled: !index,
       id: ConnectorDetailTabId.INDEX_MAPPINGS,
-      isSelected: selectedTabId === ConnectorDetailTabId.INDEX_MAPPINGS,
+      isSelected: tabId === ConnectorDetailTabId.INDEX_MAPPINGS,
       label: i18n.translate(
         'xpack.enterpriseSearch.content.connectors.connectorDetail.indexMappingsTabLabel',
         {
           defaultMessage: 'Index mappings',
         }
       ),
-      onClick: () => setSelectedTabId(ConnectorDetailTabId.INDEX_MAPPINGS),
+      onClick: () =>
+        KibanaLogic.values.navigateToUrl(
+          generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+            connectorId,
+            tabId: ConnectorDetailTabId.INDEX_MAPPINGS,
+          })
+        ),
     },
   ];
 
@@ -102,14 +121,20 @@ export const ConnectorDetail: React.FC = () => {
     {
       content: <ConnectorConfiguration />,
       id: ConnectorDetailTabId.CONFIGURATION,
-      isSelected: selectedTabId === ConnectorDetailTabId.CONFIGURATION,
+      isSelected: tabId === ConnectorDetailTabId.CONFIGURATION,
       label: i18n.translate(
         'xpack.enterpriseSearch.content.connectors.connectorDetail.configurationTabLabel',
         {
           defaultMessage: 'Configuration',
         }
       ),
-      onClick: () => setSelectedTabId(ConnectorDetailTabId.CONFIGURATION),
+      onClick: () =>
+        KibanaLogic.values.navigateToUrl(
+          generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+            connectorId,
+            tabId: ConnectorDetailTabId.CONFIGURATION,
+          })
+        ),
     },
     ...(hasFilteringFeature
       ? [
@@ -117,14 +142,20 @@ export const ConnectorDetail: React.FC = () => {
             content: <ConnectorSyncRules />,
             disabled: !index,
             id: ConnectorDetailTabId.SYNC_RULES,
-            isSelected: selectedTabId === ConnectorDetailTabId.SYNC_RULES,
+            isSelected: tabId === ConnectorDetailTabId.SYNC_RULES,
             label: i18n.translate(
               'xpack.enterpriseSearch.content.connectors.connectorDetail.syncRulesTabLabel',
               {
                 defaultMessage: 'Sync rules',
               }
             ),
-            onClick: () => setSelectedTabId(ConnectorDetailTabId.SYNC_RULES),
+            onClick: () =>
+              KibanaLogic.values.navigateToUrl(
+                generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+                  connectorId,
+                  tabId: ConnectorDetailTabId.SYNC_RULES,
+                })
+              ),
           },
         ]
       : []),
@@ -132,14 +163,20 @@ export const ConnectorDetail: React.FC = () => {
       content: <ConnectorSchedulingComponent />,
       disabled: !index,
       id: ConnectorDetailTabId.SCHEDULING,
-      isSelected: selectedTabId === ConnectorDetailTabId.SCHEDULING,
+      isSelected: tabId === ConnectorDetailTabId.SCHEDULING,
       label: i18n.translate(
         'xpack.enterpriseSearch.content.connectors.connectorDetail.schedulingTabLabel',
         {
           defaultMessage: 'Scheduling',
         }
       ),
-      onClick: () => setSelectedTabId(ConnectorDetailTabId.SCHEDULING),
+      onClick: () =>
+        KibanaLogic.values.navigateToUrl(
+          generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+            connectorId,
+            tabId: ConnectorDetailTabId.SCHEDULING,
+          })
+        ),
     },
   ];
 
@@ -147,14 +184,20 @@ export const ConnectorDetail: React.FC = () => {
     content: <SearchIndexPipelines />,
     disabled: !index,
     id: ConnectorDetailTabId.PIPELINES,
-    isSelected: selectedTabId === ConnectorDetailTabId.PIPELINES,
+    isSelected: tabId === ConnectorDetailTabId.PIPELINES,
     label: i18n.translate(
       'xpack.enterpriseSearch.content.connectors.connectorDetail.pipelinesTabLabel',
       {
         defaultMessage: 'Pipelines',
       }
     ),
-    onClick: () => setSelectedTabId(ConnectorDetailTabId.PIPELINES),
+    onClick: () =>
+      KibanaLogic.values.navigateToUrl(
+        generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+          connectorId,
+          tabId: ConnectorDetailTabId.PIPELINES,
+        })
+      ),
   };
 
   interface TabMenuItem {
@@ -174,7 +217,7 @@ export const ConnectorDetail: React.FC = () => {
     ...(hasDefaultIngestPipeline ? [PIPELINES_TAB] : []),
   ];
 
-  const selectedTab = tabs.find((tab) => tab.id === selectedTabId);
+  const selectedTab = tabs.find((tab) => tab.id === tabId);
 
   return (
     <EnterpriseSearchContentPageTemplate

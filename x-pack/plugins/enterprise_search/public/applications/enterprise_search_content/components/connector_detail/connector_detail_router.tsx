@@ -11,7 +11,7 @@ import { useActions } from 'kea';
 
 import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { CONNECTOR_DETAIL_PATH } from '../../routes';
+import { CONNECTOR_DETAIL_PATH, CONNECTOR_DETAIL_TAB_PATH } from '../../routes';
 
 import { IndexNameLogic } from '../search_index/index_name_logic';
 
@@ -36,6 +36,9 @@ export const ConnectorDetailRouter: React.FC = () => {
   return (
     <Routes>
       <Route path={CONNECTOR_DETAIL_PATH} exact>
+        <ConnectorDetail />
+      </Route>
+      <Route path={CONNECTOR_DETAIL_TAB_PATH}>
         <ConnectorDetail />
       </Route>
     </Routes>

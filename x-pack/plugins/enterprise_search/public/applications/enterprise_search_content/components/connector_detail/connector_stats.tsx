@@ -13,7 +13,6 @@ import {
   EuiFlexItem,
   EuiHealth,
   EuiIcon,
-  EuiLink,
   EuiSplitPanel,
   EuiText,
   EuiTitle,
@@ -25,12 +24,17 @@ import { Connector } from '@kbn/search-connectors';
 
 import { ConnectorIndex } from '../../../../../common/types/indices';
 
+import { generateEncodedPath } from '../../../shared/encode_path_params';
+import { EuiLinkTo } from '../../../shared/react_router_helpers';
+import { CONNECTOR_DETAIL_TAB_PATH } from '../../routes';
 import {
   connectorStatusToColor,
   connectorStatusToText,
 } from '../../utils/connector_status_helpers';
 
 import { CONNECTORS } from '../search_index/connector/constants';
+
+import { ConnectorDetailTabId } from './connector_detail';
 
 export interface ConnectorStatsProps {
   connector: Connector;
@@ -123,7 +127,12 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
                 </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiLink>
+                <EuiLinkTo
+                  to={generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+                    connectorId: connector.id,
+                    tabId: ConnectorDetailTabId.DOCUMENTS,
+                  })}
+                >
                   <EuiText textAlign="right">
                     {i18n.translate(
                       'xpack.enterpriseSearch.connectors.connectorStats.seeDocumentsTextLabel',
@@ -132,7 +141,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
                       }
                     )}
                   </EuiText>
-                </EuiLink>
+                </EuiLinkTo>
               </EuiFlexItem>
             </EuiFlexGroup>
           }
@@ -146,13 +155,13 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
         //     footer={
         //       <EuiFlexGroup>
         //         <EuiFlexItem>
-        //           <EuiLink>
+        //           <EuiLinkTo>
         //             <EuiText textAlign="right">
         //               {i18n.translate('xpack.enterpriseSearch.connectors.connectorStats.schedulingLink', {
         //                 defaultMessage: 'Scheduling',
         //               })}
         //             </EuiText>
-        //           </EuiLink>
+        //           </EuiLinkTo>
         //         </EuiFlexItem>
         //       </EuiFlexGroup>
         //     }
@@ -180,13 +189,13 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
         //     footer={
         //       <EuiFlexGroup>
         //         <EuiFlexItem>
-        //           <EuiLink>
+        //           <EuiLinkTo>
         //             <EuiText textAlign="right">
         //               {i18n.translate('xpack.enterpriseSearch.connectors.connectorStats.syncRulesLink', {
         //                 defaultMessage: 'Sync rules',
         //               })}
         //             </EuiText>
-        //           </EuiLink>
+        //           </EuiLinkTo>
         //         </EuiFlexItem>
         //       </EuiFlexGroup>
         //     }
@@ -215,7 +224,12 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
           footer={
             <EuiFlexGroup>
               <EuiFlexItem>
-                <EuiLink>
+                <EuiLinkTo
+                  to={generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+                    connectorId: connector.id,
+                    tabId: ConnectorDetailTabId.CONFIGURATION,
+                  })}
+                >
                   <EuiText textAlign="right">
                     {i18n.translate(
                       'xpack.enterpriseSearch.connectors.connectorStats.configureLink',
@@ -224,7 +238,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
                       }
                     )}
                   </EuiText>
-                </EuiLink>
+                </EuiLinkTo>
               </EuiFlexItem>
             </EuiFlexGroup>
           }
@@ -251,16 +265,21 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
           footer={
             <EuiFlexGroup>
               <EuiFlexItem>
-                <EuiLink>
+                <EuiLinkTo
+                  to={generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+                    connectorId: connector.id,
+                    tabId: ConnectorDetailTabId.PIPELINES,
+                  })}
+                >
                   <EuiText textAlign="right">
                     {i18n.translate(
-                      'xpack.enterpriseSearch.connectors.connectorStats.configureLink',
+                      'xpack.enterpriseSearch.connectors.connectorStats.managePipelines',
                       {
-                        defaultMessage: 'Configure',
+                        defaultMessage: 'Manage pipelines',
                       }
                     )}
                   </EuiText>
-                </EuiLink>
+                </EuiLinkTo>
               </EuiFlexItem>
             </EuiFlexGroup>
           }
