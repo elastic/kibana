@@ -7,3 +7,5 @@
  */
 
 export type { ClientConfigType } from './types';
+export { Job } from './job';
+export * from './job_completion_notifications';

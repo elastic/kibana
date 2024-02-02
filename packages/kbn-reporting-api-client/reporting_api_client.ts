@@ -14,14 +14,14 @@ import {
   REPORTING_MANAGEMENT_HOME,
   buildKibanaPath,
   getRedirectAppPath,
+  INTERNAL_ROUTES,
+  PUBLIC_ROUTES,
 } from '@kbn/reporting-common';
 import { BaseParams, JobId, ManagementLinkFn, ReportApiJSON } from '@kbn/reporting-common/types';
 import rison from '@kbn/rison';
 import moment from 'moment';
 import { stringify } from 'query-string';
-import { INTERNAL_ROUTES, PUBLIC_ROUTES } from '@kbn/reporting-plugin/common/constants';
-import { add } from '@kbn/reporting-plugin/public/notifier/job_completion_notifications';
-import { Job } from '@kbn/reporting-plugin/public/lib/job';
+import { Job, add } from '@kbn/reporting-public';
 
 /*
  * For convenience, apps do not have to provide the browserTimezone and Kibana version.
