@@ -295,13 +295,13 @@ export class KnowledgeBaseService {
 
   private async recallFromKnowledgeBase({
     queries,
-    contexts,
+    categories,
     namespace,
     user,
     modelId,
   }: {
     queries: string[];
-    contexts?: string[];
+    categories?: string[];
     namespace: string;
     user: { name: string };
     modelId: string;
@@ -321,7 +321,7 @@ export class KnowledgeBaseService {
             user,
             namespace,
           }),
-          ...getCategoryQuery({ contexts }),
+          ...getCategoryQuery({ categories }),
         ],
       },
     };
@@ -424,12 +424,12 @@ export class KnowledgeBaseService {
   recall = async ({
     user,
     queries,
-    contexts,
+    categories,
     namespace,
     asCurrentUser,
   }: {
     queries: string[];
-    contexts?: string[];
+    categories?: string[];
     user: { name: string };
     namespace: string;
     asCurrentUser: ElasticsearchClient;
@@ -442,7 +442,7 @@ export class KnowledgeBaseService {
       this.recallFromKnowledgeBase({
         user,
         queries,
-        contexts,
+        categories,
         namespace,
         modelId,
       }).catch((error) => {
