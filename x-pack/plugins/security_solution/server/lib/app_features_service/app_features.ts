@@ -52,10 +52,10 @@ export class AppFeatures<T extends string = string, S extends string = string> {
 
     this.logger.debug(JSON.stringify(completeAppFeatureConfig));
     this.featuresSetup.registerKibanaFeature(completeAppFeatureConfig);
-    this.addRegisteredApiActions(completeAppFeatureConfig);
+    this.addRegisteredActions(completeAppFeatureConfig);
   }
 
-  private addRegisteredApiActions(config: KibanaFeatureConfig) {
+  private addRegisteredActions(config: KibanaFeatureConfig) {
     const privileges: FeatureKibanaPrivileges[] = [];
 
     // get main privileges
@@ -75,6 +75,7 @@ export class AppFeatures<T extends string = string, S extends string = string> {
       });
     });
 
+    // add the actions from all the registered privileges
     privileges.forEach((privilege) => {
       privilege.api?.forEach((apiAction) => {
         this.registeredActions.add(`api:${apiAction}`);

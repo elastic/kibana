@@ -115,8 +115,14 @@ export class AppFeaturesService {
   }
 
   public registerApiAuthorization(http: HttpServiceSetup) {
-    const APP_FEATURE_TAG_PREFIX = 'appFeature:';
-    const API_ACTION_TAG_PREFIX = `access:${APP_ID}-`; // take only "access:securitySolution-*" api actions
+    // The `securitySolutionAppFeature:` prefix is used for AppFeature based control.
+    // Should be used only by routes that do not need RBAC, only direct appFeature control.
+    const APP_FEATURE_TAG_PREFIX = 'securitySolutionAppFeature:';
+    // The "access:securitySolution-" prefix is used for API action based control.
+    // Should be used by routes that need RBAC, extending the `access:` role privilege check from the security plugin.
+    // An additional check is performed to ensure the privilege has been registered by the appFeature service,
+    // preventing full access (`*`) roles, such as superuser, from bypassing appFeature controls.
+    const API_ACTION_TAG_PREFIX = `access:${APP_ID}-`;
 
     http.registerOnPostAuth((request, response, toolkit) => {
       const tags = request.route.options.tags;
@@ -124,8 +130,6 @@ export class AppFeaturesService {
       const actionTags = tags.filter((tag) => tag.startsWith(API_ACTION_TAG_PREFIX));
 
       if (appFeatureTags.length > 0) {
-        // App feature key based authorization.
-        // This tag is used to check features that do not have RBAC privileges, only needs direct appFeature control.
         const disabled = appFeatureTags.some((tag) => {
           const appFeatureKey = tag.substring(APP_FEATURE_TAG_PREFIX.length) as AppFeatureKeyType;
           return !this.isEnabled(appFeatureKey);
@@ -139,9 +143,6 @@ export class AppFeaturesService {
       }
 
       if (actionTags.length > 0) {
-        // Api action privilege based authorization. RBAC for this tag already done by security plugin.
-        // This check ensures the api action privilege has been registered with the appFeatures service,
-        // preventing full access (`*`) roles such as superuser to bypass RBAC controls for disabled appFeatures.
         const disabled = actionTags.some(
           (tag) => !this.isApiPrivilegeEnabled(tag.substring(API_ACTION_TAG_PREFIX.length))
         );
