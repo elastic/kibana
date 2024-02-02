@@ -27,7 +27,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const monacoEditor = getService('monacoEditor');
   const toasts = getService('toasts');
 
-  describe('handling warnings with search source fetch', function () {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/176102
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/176103
+  describe.skip('handling warnings with search source fetch', function () {
     const dataViewTitle = 'sample-01,sample-01-rollup';
     const fromTime = 'Jun 17, 2022 @ 00:00:00.000';
     const toTime = 'Jun 23, 2022 @ 00:00:00.000';
