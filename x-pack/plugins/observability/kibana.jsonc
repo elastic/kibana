@@ -16,6 +16,7 @@
       "cases",
       "charts",
       "contentManagement",
+      "controls",
       "data",
       "dataViews",
       "dataViewEditor",
@@ -39,7 +40,7 @@
       "visualizations",
       "dashboard",
       "expressions",
-      "logExplorer",
+      "logsExplorer",
       "licensing"
     ],
     "optionalPlugins": [

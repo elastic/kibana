@@ -14,12 +14,13 @@ function createMathDefinition(
   types: Array<string | string[]>,
   description: string,
   warning?: FunctionDefinition['warning']
-) {
+): FunctionDefinition {
   return {
-    builtin: true,
+    type: 'builtin',
     name,
     description,
     supportedCommands: ['eval', 'where', 'row'],
+    supportedOptions: ['by'],
     signatures: types.map((type) => {
       if (Array.isArray(type)) {
         return {
@@ -51,12 +52,13 @@ function createComparisonDefinition(
     description: string;
   },
   warning?: FunctionDefinition['warning']
-) {
+): FunctionDefinition {
   return {
-    builtin: true,
+    type: 'builtin' as const,
     name,
     description,
     supportedCommands: ['eval', 'where', 'row'],
+    supportedOptions: ['by'],
     signatures: [
       {
         params: [
@@ -111,18 +113,28 @@ export const builtinFunctions: FunctionDefinition[] = [
     i18n.translate('monaco.esql.definition.divideDoc', {
       defaultMessage: 'Divide (/)',
     }),
-    (left, right) => {
-      if (right.type === 'literal' && right.literalType === 'number') {
-        return right.value === 0
-          ? i18n.translate('monaco.esql.divide.warning.divideByZero', {
-              defaultMessage: 'Cannot divide by zero: {left}/{right}',
-              values: {
-                left: left.text,
-                right: right.value,
-              },
-            })
-          : undefined;
+    (fnDef) => {
+      const [left, right] = fnDef.args;
+      const messages = [];
+      if (!Array.isArray(left) && !Array.isArray(right)) {
+        if (right.type === 'literal' && right.literalType === 'number') {
+          if (right.value === 0) {
+            messages.push({
+              type: 'warning' as const,
+              code: 'divideByZero',
+              text: i18n.translate('monaco.esql.divide.warning.divideByZero', {
+                defaultMessage: 'Cannot divide by zero: {left}/{right}',
+                values: {
+                  left: left.text,
+                  right: right.value,
+                },
+              }),
+              location: fnDef.location,
+            });
+          }
+        }
       }
+      return messages;
     }
   ),
   createMathDefinition(
@@ -131,18 +143,28 @@ export const builtinFunctions: FunctionDefinition[] = [
     i18n.translate('monaco.esql.definition.moduleDoc', {
       defaultMessage: 'Module (%)',
     }),
-    (left, right) => {
-      if (right.type === 'literal' && right.literalType === 'number') {
-        return right.value === 0
-          ? i18n.translate('monaco.esql.divide.warning.zeroModule', {
-              defaultMessage: 'Module by zero can return null value: {left}/{right}',
-              values: {
-                left: left.text,
-                right: right.value,
-              },
-            })
-          : undefined;
+    (fnDef) => {
+      const [left, right] = fnDef.args;
+      const messages = [];
+      if (!Array.isArray(left) && !Array.isArray(right)) {
+        if (right.type === 'literal' && right.literalType === 'number') {
+          if (right.value === 0) {
+            messages.push({
+              type: 'warning' as const,
+              code: 'moduleByZero',
+              text: i18n.translate('monaco.esql.divide.warning.zeroModule', {
+                defaultMessage: 'Module by zero can return null value: {left}/{right}',
+                values: {
+                  left: left.text,
+                  right: right.value,
+                },
+              }),
+              location: fnDef.location,
+            });
+          }
+        }
       }
+      return messages;
     }
   ),
   ...[
@@ -182,8 +204,15 @@ export const builtinFunctions: FunctionDefinition[] = [
         defaultMessage: 'Greater than or equal to',
       }),
     },
-  ].map((op) => createComparisonDefinition(op)),
+  ].map((op): FunctionDefinition => createComparisonDefinition(op)),
   ...[
+    // new special comparison operator for strings only
+    {
+      name: '=~',
+      description: i18n.translate('monaco.esql.definition.equalToCaseInsensitiveDoc', {
+        defaultMessage: 'Case insensitive equality',
+      }),
+    },
     {
       name: 'like',
       description: i18n.translate('monaco.esql.definition.likeDoc', {
@@ -198,12 +227,13 @@ export const builtinFunctions: FunctionDefinition[] = [
       }),
     },
     { name: 'not_rlike', description: '' },
-  ].map(({ name, description }) => ({
-    builtin: true,
+  ].map<FunctionDefinition>(({ name, description }) => ({
+    type: 'builtin' as const,
     ignoreAsSuggestion: /not/.test(name),
     name,
     description,
     supportedCommands: ['eval', 'where', 'row'],
+    supportedOptions: ['by'],
     signatures: [
       {
         params: [
@@ -223,8 +253,8 @@ export const builtinFunctions: FunctionDefinition[] = [
       }),
     },
     { name: 'not_in', description: '' },
-  ].map(({ name, description }) => ({
-    builtin: true,
+  ].map<FunctionDefinition>(({ name, description }) => ({
+    type: 'builtin',
     ignoreAsSuggestion: /not/.test(name),
     name,
     description,
@@ -274,10 +304,11 @@ export const builtinFunctions: FunctionDefinition[] = [
       }),
     },
   ].map(({ name, description }) => ({
-    builtin: true,
+    type: 'builtin' as const,
     name,
     description,
     supportedCommands: ['eval', 'where', 'row'],
+    supportedOptions: ['by'],
     signatures: [
       {
         params: [
@@ -289,12 +320,13 @@ export const builtinFunctions: FunctionDefinition[] = [
     ],
   })),
   {
-    builtin: true,
+    type: 'builtin' as const,
     name: 'not',
     description: i18n.translate('monaco.esql.definition.notDoc', {
       defaultMessage: 'Not',
     }),
     supportedCommands: ['eval', 'where', 'row'],
+    supportedOptions: ['by'],
     signatures: [
       {
         params: [{ name: 'expression', type: 'boolean' }],
@@ -303,12 +335,13 @@ export const builtinFunctions: FunctionDefinition[] = [
     ],
   },
   {
-    builtin: true,
+    type: 'builtin' as const,
     name: '=',
     description: i18n.translate('monaco.esql.definition.assignDoc', {
       defaultMessage: 'Assign (=)',
     }),
     supportedCommands: ['eval', 'stats', 'row', 'dissect', 'where', 'enrich'],
+    supportedOptions: ['by', 'with'],
     signatures: [
       {
         params: [
@@ -321,6 +354,7 @@ export const builtinFunctions: FunctionDefinition[] = [
   },
   {
     name: 'functions',
+    type: 'builtin',
     description: i18n.translate('monaco.esql.definition.functionsDoc', {
       defaultMessage: 'Show ES|QL avaialble functions with signatures',
     }),
@@ -334,6 +368,7 @@ export const builtinFunctions: FunctionDefinition[] = [
   },
   {
     name: 'info',
+    type: 'builtin',
     description: i18n.translate('monaco.esql.definition.infoDoc', {
       defaultMessage: 'Show information about the current ES node',
     }),

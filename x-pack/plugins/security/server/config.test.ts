@@ -64,7 +64,6 @@ describe('config schema', () => {
           "selector": Object {},
         },
         "cookieName": "sid",
-        "enabled": true,
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "fipsMode": Object {
           "enabled": false,
@@ -122,7 +121,6 @@ describe('config schema', () => {
           "selector": Object {},
         },
         "cookieName": "sid",
-        "enabled": true,
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "fipsMode": Object {
           "enabled": false,
