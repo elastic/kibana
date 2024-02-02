@@ -204,7 +204,7 @@ export type DiffableNewTermsFields = t.TypeOf<typeof DiffableNewTermsFields>;
 export const DiffableNewTermsFields = buildSchema({
   required: {
     type: t.literal('new_terms'),
-    kql_query: RuleKqlQuery, // NOTE: new field
+    kql_query: InlineKqlQuery, // NOTE: new field
     new_terms_fields: NewTermsFields,
     history_window_start: HistoryWindowStart,
   },

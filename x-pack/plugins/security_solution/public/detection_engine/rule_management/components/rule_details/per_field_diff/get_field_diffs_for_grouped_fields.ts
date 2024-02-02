@@ -6,7 +6,10 @@
  */
 
 import stringify from 'json-stable-stringify';
-import type { AllFieldsDiff } from '../../../../../../common/api/detection_engine';
+import type {
+  AllFieldsDiff,
+  RuleFieldsDiffWithKqlQuery,
+} from '../../../../../../common/api/detection_engine';
 import type { FieldDiff } from '../../../model/rule_details/rule_field_diff';
 
 export const sortAndStringifyJson = (fieldValue: unknown): string => {
@@ -76,7 +79,7 @@ export const getFieldDiffsForDataSource = (
 };
 
 export const getFieldDiffsForKqlQuery = (
-  kqlQueryThreeWayDiff: AllFieldsDiff['kql_query']
+  kqlQueryThreeWayDiff: RuleFieldsDiffWithKqlQuery['kql_query']
 ): FieldDiff[] => {
   const currentType = sortAndStringifyJson(kqlQueryThreeWayDiff.current_version?.type);
   const targetType = sortAndStringifyJson(kqlQueryThreeWayDiff.target_version?.type);
