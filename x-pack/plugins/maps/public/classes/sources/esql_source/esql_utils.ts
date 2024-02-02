@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
-import { getIndexPatternFromESQLQuery } from '@kbn/es-query';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { ESQLColumn } from '@kbn/es-types';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 import { getData, getIndexPatternService } from '../../../kibana_services';
