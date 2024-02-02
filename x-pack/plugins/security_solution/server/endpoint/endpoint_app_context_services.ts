@@ -185,7 +185,12 @@ export class EndpointAppContextService {
   public async getEndpointAuthz(request: KibanaRequest): Promise<EndpointAuthz> {
     const fleetAuthz = await this.getFleetAuthzService().fromRequest(request);
     const userRoles = this.security?.authc.getCurrentUser(request)?.roles ?? [];
-    return calculateEndpointAuthz(this.getLicenseService(), fleetAuthz, userRoles);
+    return calculateEndpointAuthz(
+      this.getLicenseService(),
+      fleetAuthz,
+      userRoles,
+      this.startDependencies?.appFeaturesService
+    );
   }
 
   public getEndpointMetadataService(): EndpointMetadataService {
