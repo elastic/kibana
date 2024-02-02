@@ -18,18 +18,19 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RouteComponentProps, withRouter, useLocation } from 'react-router-dom';
-import useObservable from 'react-use/lib/useObservable';
-import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import React, { useMemo, useState } from 'react';
+import { RouteComponentProps, useLocation, withRouter } from 'react-router-dom';
+import useObservable from 'react-use/lib/useObservable';
+
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
+import { NoDataViewsPromptComponent } from '@kbn/shared-ux-prompt-no-data-views';
 import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
-import { NoDataViewsPromptComponent, useOnTryESQL } from '@kbn/shared-ux-prompt-no-data-views';
-import { IndexPatternManagmentContext } from '../../types';
-import { IndexPatternTableItem } from '../types';
+import type { IndexPatternManagmentContext } from '../../types';
 import { getListBreadcrumbs } from '../breadcrumbs';
 import { type RemoveDataViewProps, removeDataView } from '../edit_index_pattern';
+import { IndexPatternTableItem } from '../types';
 import {
   DataViewTableController,
   dataViewTableControllerStateDefaults as defaults,
@@ -87,7 +88,6 @@ export const IndexPatternTable = ({
     overlays,
     docLinks,
     noDataPage,
-    share,
   } = useKibana<IndexPatternManagmentContext>().services;
   const [query, setQuery] = useState('');
   const [showCreateDialog, setShowCreateDialog] = useState<boolean>(showCreateDialogProp);
@@ -99,10 +99,6 @@ export const IndexPatternTable = ({
         config: { defaultDataView: uiSettings.get('defaultIndex') },
       })
   );
-  const onTryESQL = useOnTryESQL({
-    locatorClient: share?.url.locators,
-    navigateToApp: application?.navigateToApp,
-  });
 
   const isLoadingIndexPatterns = useObservable(
     dataViewController.isLoadingIndexPatterns$,
@@ -363,7 +359,6 @@ export const IndexPatternTable = ({
           canCreateNewDataView={application.capabilities.indexPatterns.save as boolean}
           dataViewsDocLink={docLinks.links.indexPatterns.introduction}
           emptyPromptColor={'subdued'}
-          onTryESQL={onTryESQL}
         />
       </>
     );

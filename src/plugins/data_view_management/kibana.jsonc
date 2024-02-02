@@ -19,9 +19,7 @@
       "savedObjectsManagement"
     ],
     "optionalPlugins": [
-      "noDataPage",
-      "spaces",
-      "share"
+      "noDataPage"
     ],
     "requiredBundles": [
       "kibanaReact",

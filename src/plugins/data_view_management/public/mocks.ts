@@ -18,7 +18,6 @@ import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/publi
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/public/mocks';
-import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import {
   IndexPatternManagementSetup,
   IndexPatternManagementStart,
@@ -68,7 +67,6 @@ const createIndexPatternManagmentContext = (): {
   const dataViews = dataViewPluginMocks.createStartContract();
   const unifiedSearch = unifiedSearchPluginMock.createStartContract();
   const savedObjectsManagement = savedObjectsManagementPluginMock.createStartContract();
-  const dataViewEditor = indexPatternEditorPluginMock.createStartContract();
 
   return {
     application,
@@ -82,7 +80,6 @@ const createIndexPatternManagmentContext = (): {
     data,
     dataViews,
     noDataPage: noDataPagePublicMock.createStart(),
-    dataViewEditor,
     unifiedSearch,
     dataViewFieldEditor,
     indexPatternManagementStart: createStartContract(),
@@ -93,7 +90,6 @@ const createIndexPatternManagmentContext = (): {
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     theme,
     savedObjectsManagement,
-    share: sharePluginMock.createStartContract(),
   };
 };
 
