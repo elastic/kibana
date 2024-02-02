@@ -226,6 +226,7 @@ export const useDiscoverHistogram = ({
     getUnifiedHistogramPropsForTextBased({
       documentsValue: savedSearchData$.documents$.getValue(),
       savedSearch: stateContainer.savedSearchState.getState(),
+      stateContainer,
     })
   );
 
@@ -346,13 +347,6 @@ export const useDiscoverHistogram = ({
     [stateContainer]
   );
 
-  // console.log({
-  //   textBasedQuery,
-  //   textBasedExternalVisContextJSON,
-  //   textBasedColumns,
-  //   textBasedTable,
-  // });
-
   return {
     ref,
     getCreationOptions,
@@ -451,6 +445,7 @@ const createFetchCompleteObservable = (stateContainer: DiscoverStateContainer) =
         return getUnifiedHistogramPropsForTextBased({
           documentsValue: stateContainer.dataState.data$.documents$.getValue(),
           savedSearch,
+          stateContainer,
         });
       })
     ),
@@ -461,6 +456,7 @@ const createFetchCompleteObservable = (stateContainer: DiscoverStateContainer) =
         return getUnifiedHistogramPropsForTextBased({
           documentsValue,
           savedSearch: stateContainer.savedSearchState.getState(),
+          stateContainer,
         });
       })
     )
@@ -485,9 +481,11 @@ const EMPTY_TEXT_BASED_COLUMNS: DatatableColumn[] = [];
 function getUnifiedHistogramPropsForTextBased({
   documentsValue,
   savedSearch,
+  stateContainer,
 }: {
   documentsValue: DataDocumentsMsg | undefined;
   savedSearch: SavedSearch;
+  stateContainer: DiscoverStateContainer;
 }) {
   const columns = documentsValue?.textBasedQueryColumns || EMPTY_TEXT_BASED_COLUMNS;
   const result = documentsValue?.result;
@@ -498,7 +496,9 @@ function getUnifiedHistogramPropsForTextBased({
     externalVisContextJSON: savedSearch.visContextJSON,
     columns,
     table:
-      documentsValue?.recordRawType === RecordRawType.PLAIN
+      documentsValue?.recordRawType === RecordRawType.PLAIN &&
+      stateContainer.dataState.data$.main$.getValue().fetchStatus === FetchStatus.COMPLETE &&
+      documentsValue.fetchStatus === FetchStatus.COMPLETE
         ? {
             type: 'datatable' as 'datatable',
             rows: (result || []).map((r) => r.raw),
