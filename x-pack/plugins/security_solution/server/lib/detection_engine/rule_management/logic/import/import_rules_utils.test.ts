@@ -13,6 +13,7 @@ import {
   getRuleMock,
   getEmptyFindResult,
   getFindResultWithSingleHit,
+  getFindResultWithMultiHits,
 } from '../../../routes/__mocks__/request_responses';
 
 import { createRules } from '../crud/create_rules';
@@ -130,6 +131,52 @@ describe('importRules', () => {
     expect(result).toEqual([{ rule_id: 'rule-1', status_code: 200 }]);
     expect(createRules).not.toHaveBeenCalled();
     expect(updateRules).toHaveBeenCalled();
+  });
+
+  /**
+   * Existing rule may have nullable fields set to a value (e.g. `timestamp_override` is set to `some.value`) but
+   * a rule to import doesn't have these fields set (e.g. `timestamp_override` is presented at al in ndjson).
+   * We expect the updated rule won't have such fields preserved (e.g. `timestamp_override` will be removed).
+   *
+   * Unit test is only able to check `updateRules()` receives a proper update object.
+   */
+  it('ensures overwritten rule DOES NOT preserve missed in the imported rule fields when "overwriteRules" is "true" and matching rule found', async () => {
+    const existingRule = getRuleMock(
+      getQueryRuleParams({
+        timestampOverride: 'some.value',
+      })
+    );
+
+    clients.rulesClient.find.mockResolvedValue(
+      getFindResultWithMultiHits({ data: [existingRule] })
+    );
+
+    const result = await importRules({
+      ruleChunks: [
+        [
+          {
+            ...getImportRulesSchemaMock(),
+            rule_id: 'rule-1',
+          },
+        ],
+      ],
+      rulesResponseAcc: [],
+      mlAuthz,
+      overwriteRules: true,
+      rulesClient: context.alerting.getRulesClient(),
+      existingLists: {},
+    });
+
+    expect(result).toEqual([{ rule_id: 'rule-1', status_code: 200 }]);
+    expect(createRules).not.toHaveBeenCalled();
+    expect(updateRules).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ruleUpdate: expect.not.objectContaining({
+          timestamp_override: expect.anything(),
+          timestampOverride: expect.anything(),
+        }),
+      })
+    );
   });
 
   it('reports error if rulesClient throws', async () => {
