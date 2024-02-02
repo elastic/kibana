@@ -2005,6 +2005,46 @@
     "functions": [
       {
         "parentPluginId": "visualizations",
+        "id": "def-public.apiHasVisualizeConfig",
+        "type": "Function",
+        "tags": [],
+        "label": "apiHasVisualizeConfig",
+        "description": [],
+        "signature": [
+          "(api: unknown) => api is ",
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.HasVisualizeConfig",
+            "text": "HasVisualizeConfig"
+          }
+        ],
+        "path": "src/plugins/visualizations/public/embeddable/interfaces/has_visualize_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.apiHasVisualizeConfig.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "api",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/plugins/visualizations/public/embeddable/interfaces/has_visualize_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
         "id": "def-public.getDataViewByIndexPatternId",
         "type": "Function",
         "tags": [],
@@ -4180,6 +4220,17 @@
             "signature": [
               "string[] | undefined"
             ],
+            "path": "src/plugins/visualizations/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisSavedObject.managed",
+            "type": "boolean",
+            "tags": [],
+            "label": "managed",
+            "description": [],
             "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6445,6 +6496,44 @@
       },
       {
         "parentPluginId": "visualizations",
+        "id": "def-public.HasVisualizeConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "HasVisualizeConfig",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasType",
+            "text": "HasType"
+          },
+          "<\"visualization\"> & { getVis: () => ",
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.Vis",
+            "text": "Vis"
+          },
+          "<",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.VisParams",
+            "text": "VisParams"
+          },
+          ">; }"
+        ],
+        "path": "src/plugins/visualizations/public/embeddable/interfaces/has_visualize_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
         "id": "def-public.SAVED_OBJECTS_LIMIT_SETTING",
         "type": "string",
         "tags": [],
@@ -6831,7 +6920,7 @@
             "section": "def-common.ViewMode",
             "text": "ViewMode"
           },
-          ">; getExplicitInput: () => ",
+          ">; disableTriggers: boolean; getExplicitInput: () => ",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -6903,7 +6992,31 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined>; setPanelTitle: (newTitle: string | undefined) => void; isEditingEnabled: () => boolean; setHidePanelTitle: (hide: boolean | undefined) => void; getTypeDisplayName: () => string; setPanelDescription: (newTitle: string | undefined) => void; render: (domNode: HTMLElement) => Promise<void>; readonly isContainer: boolean; reload: () => Promise<void>; getExplicitInputIsEqual: (lastExplicitInput: Partial<",
+          "[] | undefined>; onPhaseChange: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PhaseEvent",
+            "text": "PhaseEvent"
+          },
+          " | undefined>; setPanelTitle: (newTitle: string | undefined) => void; isEditingEnabled: () => boolean; setHidePanelTitle: (hide: boolean | undefined) => void; getTypeDisplayName: () => string; setPanelDescription: (newTitle: string | undefined) => void; render: (domNode: HTMLElement) => Promise<void>; getPersistableInput: () => ",
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.VisualizeInput",
+            "text": "VisualizeInput"
+          },
+          "; readonly isContainer: boolean; reload: () => Promise<void>; getExplicitInputIsEqual: (lastExplicitInput: Partial<",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -6919,7 +7032,7 @@
             "section": "def-common.ErrorLike",
             "text": "ErrorLike"
           },
-          ", domNode: Element | HTMLElement) => any) | undefined; fatalError?: Error | undefined; getEditHref: () => string | undefined; getAppContext: () => ",
+          ", domNode: HTMLElement | Element) => any) | undefined; fatalError?: Error | undefined; getEditHref: () => string | undefined; getAppContext: () => ",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -6979,15 +7092,7 @@
           "VisualizeOutput",
           ">>; getOutput: () => Readonly<",
           "VisualizeOutput",
-          ">; getPersistableInput: () => ",
-          {
-            "pluginId": "visualizations",
-            "scope": "public",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-public.VisualizeInput",
-            "text": "VisualizeInput"
-          },
-          "; getInput: () => Readonly<",
+          ">; getInput: () => Readonly<",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -13011,6 +13116,20 @@
             "path": "src/plugins/visualizations/common/content_management/v1/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.VisualizationSavedObject.managed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/content_management/v1/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -15900,7 +16019,7 @@
         "label": "TimeScaleUnit",
         "description": [],
         "signature": [
-          "\"m\" | \"s\" | \"d\" | \"h\""
+          "\"m\" | \"d\" | \"h\" | \"s\""
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/common.ts",
         "deprecated": false,

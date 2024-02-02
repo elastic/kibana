@@ -8,6 +8,11 @@
 import { ByteSizeValue } from '@kbn/config-schema';
 import { ActionsConfig } from './config';
 import {
+  DEFAULT_MICROSOFT_EXCHANGE_URL,
+  DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+  DEFAULT_MICROSOFT_GRAPH_API_URL,
+} from '../common';
+import {
   getActionsConfigurationUtilities,
   AllowedHosts,
   EnabledActionTypes,
@@ -34,6 +39,9 @@ const defaultActionsConfig: ActionsConfig = {
     verificationMode: 'full',
   },
   enableFooterInEmail: true,
+  microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
+  microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+  microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
 };
 
 describe('ensureUriAllowed', () => {

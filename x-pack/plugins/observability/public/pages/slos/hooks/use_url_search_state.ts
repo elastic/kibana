@@ -28,6 +28,8 @@ export interface SearchState {
   compact: boolean;
   filters: Filter[];
   lastRefresh?: number;
+  tagsFilter?: Filter;
+  statusFilter?: Filter;
 }
 
 export const DEFAULT_STATE = {
