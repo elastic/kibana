@@ -37,7 +37,7 @@ export interface InternalStaticAssets {
    *
    * @note This could return a path or full URL depending on whether a CDN is configured.
    */
-  appendPathToPublicUrl(pathname: string): string;
+  prependPublicUrl(pathname: string): string;
 }
 
 /**
@@ -81,7 +81,7 @@ export class StaticAssets implements InternalStaticAssets {
     return `${this.assetsServerPathBase}/${removeSurroundingSlashes(path)}`;
   }
 
-  public appendPathToPublicUrl(pathname: string): string {
+  public prependPublicUrl(pathname: string): string {
     if (this.hasCdnHost) {
       return suffixPathnameToURLPathname(this.assetsHrefBase, pathname);
     }

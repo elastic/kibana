@@ -91,7 +91,7 @@ const createInternalStaticAssetsMock = (
   getPluginAssetHref: jest.fn().mockReturnValue(cdnUrl ?? basePath.serverBasePath),
   getPluginServerPath: jest.fn((v, _) => v),
   prependServerPath: jest.fn((v) => v),
-  appendPathToPublicUrl: jest.fn((v) => v),
+  prependPublicUrl: jest.fn((v) => v),
 });
 
 const createAuthMock = () => {
@@ -215,7 +215,7 @@ const createSetupContractMock = <
     getServerInfo: internalMock.getServerInfo,
     staticAssets: {
       getPluginAssetHref: jest.fn().mockImplementation((assetPath: string) => assetPath),
-      appendPathToPublicUrl: jest.fn().mockImplementation((pathname: string) => pathname),
+      prependPublicUrl: jest.fn().mockImplementation((pathname: string) => pathname),
     },
   };
 
@@ -231,7 +231,7 @@ const createStartContractMock = () => {
     getServerInfo: jest.fn(),
     staticAssets: {
       getPluginAssetHref: jest.fn().mockImplementation((assetPath: string) => assetPath),
-      appendPathToPublicUrl: jest.fn().mockImplementation((pathname: string) => pathname),
+      prependPublicUrl: jest.fn().mockImplementation((pathname: string) => pathname),
     },
   };
 

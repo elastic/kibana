@@ -99,11 +99,11 @@ describe('StaticAssets', () => {
       );
     });
   });
-  describe('#appendPathToPublicUrl()', () => {
+  describe('#prependPublicUrl()', () => {
     it('with a CDN it appends as expected', () => {
       cdnConfig = CdnConfig.from({ url: 'http://cdn.example.com/cool?123=true' });
       staticAssets = new StaticAssets(basePath, cdnConfig, '');
-      expect(staticAssets.appendPathToPublicUrl('beans')).toEqual(
+      expect(staticAssets.prependPublicUrl('beans')).toEqual(
         'http://cdn.example.com/cool/beans?123=true'
       );
     });
@@ -111,7 +111,7 @@ describe('StaticAssets', () => {
     it('without a CDN it appends as expected', () => {
       cdnConfig = CdnConfig.from();
       staticAssets = new StaticAssets(basePath, cdnConfig, '');
-      expect(staticAssets.appendPathToPublicUrl('/cool/beans')).toEqual('/base-path/cool/beans');
+      expect(staticAssets.prependPublicUrl('/cool/beans')).toEqual('/base-path/cool/beans');
     });
   });
 });

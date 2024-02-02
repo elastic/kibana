@@ -34,12 +34,12 @@ export interface IStaticAssets {
    * @example
    * ```ts
    * // I want to retrieve the href for Kibana's favicon, requires knowledge of path:
-   * const favIconHref = core.http.statisAssets.appendPathToPublicUrl('/ui/favicons/favicon.svg');
+   * const favIconHref = core.http.statisAssets.prependPublicUrl('/ui/favicons/favicon.svg');
    * ```
    *
    * @note Only use this if you know what you are doing and there is no other option.
    *       This creates a strong coupling between asset dir structure and your code.
    * @param pathname
    */
-  appendPathToPublicUrl(pathname: string): string;
+  prependPublicUrl(pathname: string): string;
 }

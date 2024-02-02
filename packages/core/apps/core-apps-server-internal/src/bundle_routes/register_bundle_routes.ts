@@ -46,7 +46,7 @@ export function registerBundleRoutes({
 
   const sharedNpmDepsPath = '/bundles/kbn-ui-shared-deps-npm/';
   registerRouteForBundle(router, {
-    publicPath: staticAssets.appendPathToPublicUrl(sharedNpmDepsPath) + '/',
+    publicPath: staticAssets.prependPublicUrl(sharedNpmDepsPath) + '/',
     routePath: staticAssets.prependServerPath(sharedNpmDepsPath) + '/',
     bundlesPath: UiSharedDepsNpm.distDir,
     fileHashCache,
@@ -54,7 +54,7 @@ export function registerBundleRoutes({
   });
   const sharedDepsPath = '/bundles/kbn-ui-shared-deps-src/';
   registerRouteForBundle(router, {
-    publicPath: staticAssets.appendPathToPublicUrl(sharedDepsPath) + '/',
+    publicPath: staticAssets.prependPublicUrl(sharedDepsPath) + '/',
     routePath: staticAssets.prependServerPath(sharedDepsPath) + '/',
     bundlesPath: UiSharedDepsSrcDistDir,
     fileHashCache,
@@ -62,7 +62,7 @@ export function registerBundleRoutes({
   });
   const coreBundlePath = '/bundles/core/';
   registerRouteForBundle(router, {
-    publicPath: staticAssets.appendPathToPublicUrl(coreBundlePath) + '/',
+    publicPath: staticAssets.prependPublicUrl(coreBundlePath) + '/',
     routePath: staticAssets.prependServerPath(coreBundlePath) + '/',
     bundlesPath: isDist
       ? fromRoot('node_modules/@kbn/core/target/public')
@@ -72,7 +72,7 @@ export function registerBundleRoutes({
   });
   const monacoEditorPath = '/bundles/kbn-monaco/';
   registerRouteForBundle(router, {
-    publicPath: staticAssets.appendPathToPublicUrl(monacoEditorPath) + '/',
+    publicPath: staticAssets.prependPublicUrl(monacoEditorPath) + '/',
     routePath: staticAssets.prependServerPath(monacoEditorPath) + '/',
     bundlesPath: KbnMonaco.bundleDir,
     fileHashCache,
@@ -82,7 +82,7 @@ export function registerBundleRoutes({
   [...uiPlugins.internal.entries()].forEach(([id, { publicTargetDir, version }]) => {
     const pluginBundlesPath = `/bundles/plugin/${id}/${version}/`;
     registerRouteForBundle(router, {
-      publicPath: staticAssets.appendPathToPublicUrl(pluginBundlesPath) + '/',
+      publicPath: staticAssets.prependPublicUrl(pluginBundlesPath) + '/',
       routePath: staticAssets.prependServerPath(pluginBundlesPath) + '/',
       bundlesPath: publicTargetDir,
       fileHashCache,

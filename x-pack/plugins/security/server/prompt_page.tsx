@@ -75,8 +75,8 @@ export function PromptPage({
   const chunks = extractCriticalToChunks(renderToString(content));
   const emotionStyles = constructStyleTagsFromChunks(chunks);
 
-  const uiPublicURL = staticAssets.appendPathToPublicUrl('/ui');
-  const regularBundlePath = staticAssets.appendPathToPublicUrl('/bundles');
+  const uiPublicURL = staticAssets.prependPublicUrl('/ui');
+  const regularBundlePath = staticAssets.prependPublicUrl('/bundles');
   const styleSheetPaths = [
     `${regularBundlePath}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.cssDistFilename}`,
     `${regularBundlePath}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.lightCssDistFilename('v8')}`,
