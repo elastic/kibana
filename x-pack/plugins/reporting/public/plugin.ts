@@ -29,11 +29,10 @@ import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/publ
 
 import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, durationToNumber } from '@kbn/reporting-common';
 import type { JobId } from '@kbn/reporting-common/types';
-import type { ClientConfigType } from '@kbn/reporting-public';
+import { ClientConfigType, ReportingAPIClient } from '@kbn/reporting-public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
-import { ReportingAPIClient } from '@kbn/reporting-public/reporting_api_client';
 import {
   getSharedComponents,
   reportingScreenshotShareProvider,

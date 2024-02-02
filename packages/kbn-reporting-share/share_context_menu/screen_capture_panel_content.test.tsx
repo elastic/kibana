@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
-import { ReportingAPIClient } from '@kbn/reporting-api-client';
+import { ReportingAPIClient } from '@kbn/reporting-public';
 import { ScreenCapturePanelContent } from './screen_capture_panel_content';
 
 const { http, uiSettings, ...coreSetup } = coreMock.createSetup();

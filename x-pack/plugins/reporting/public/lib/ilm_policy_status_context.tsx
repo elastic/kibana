@@ -8,8 +8,7 @@
 import type { FunctionComponent } from 'react';
 import React, { createContext, useContext } from 'react';
 import type { IlmPolicyStatusResponse } from '@kbn/reporting-common/types';
-
-import { useCheckIlmPolicyStatus } from '@kbn/reporting-api-client/hooks';
+import { useCheckIlmPolicyStatus } from '@kbn/reporting-public';
 
 type UseCheckIlmPolicyStatus = ReturnType<typeof useCheckIlmPolicyStatus>;
 

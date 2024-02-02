@@ -14,7 +14,7 @@ import {
   themeServiceMock,
   uiSettingsServiceMock,
 } from '@kbn/core/public/mocks';
-import { ReportingAPIClient } from '@kbn/reporting-api-client';
+import { ReportingAPIClient } from '@kbn/reporting-public';
 import { ReportingPanelContent, ReportingPanelProps as Props } from '.';
 import { ErrorUnsavedWorkPanel } from './components';
 

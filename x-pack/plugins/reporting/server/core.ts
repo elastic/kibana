@@ -46,9 +46,10 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
+import { checkLicense } from '@kbn/reporting-common/check_license';
 import type { ReportingSetup } from '.';
 import { createConfig } from './config';
-import { ExportTypesRegistry, checkLicense } from './lib';
+import { ExportTypesRegistry } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';
 import { ExecuteReportTask, ReportTaskParams } from './lib/tasks';
