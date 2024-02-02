@@ -129,6 +129,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
         });
       });
+
+      it('should show empty fields in text-based view', async function () {
+        await kibanaServer.uiSettings.update({ 'discover:enableESQL': true });
+        await browser.refresh();
+
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+        await PageObjects.discover.selectTextBaseLang();
+
+        const testQuery = `from logstash-* | limit 10 | keep machine.ram_range, bytes `;
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+        await PageObjects.unifiedFieldList.openSidebarFieldFilter();
+
+        expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
+          '2 selected fields. 1 available field. 1 empty field.'
+        );
+      });
     });
 
     describe('search', function () {
