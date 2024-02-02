@@ -8,6 +8,7 @@
 
 import { BehaviorSubject, distinctUntilChanged, map, Observable } from 'rxjs';
 import { isEqual } from 'lodash';
+import { removeDropCommandsFromESQLQuery } from '@kbn/esql-utils';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type {
   CountIndexPatternColumn,
@@ -19,12 +20,7 @@ import type {
   TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
-import {
-  cleanupESQLQueryForLensSuggestions,
-  Filter,
-  getAggregateQueryMode,
-  isOfAggregateQueryType,
-} from '@kbn/es-query';
+import { Filter, getAggregateQueryMode, isOfAggregateQueryType } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { XYConfiguration } from '@kbn/visualizations-plugin/common';
@@ -545,7 +541,7 @@ export class LensVisService {
   }): string => {
     const queryInterval = interval ?? computeInterval(timeRange, this.services.data);
     const language = getAggregateQueryMode(query);
-    const safeQuery = cleanupESQLQueryForLensSuggestions(query[language]);
+    const safeQuery = removeDropCommandsFromESQLQuery(query[language]);
     return `${safeQuery} | EVAL timestamp=DATE_TRUNC(${queryInterval}, ${dataView.timeFieldName}) | stats results = count(*) by timestamp | rename timestamp as \`${dataView.timeFieldName} every ${queryInterval}\``;
   };
 
