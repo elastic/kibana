@@ -5,14 +5,13 @@
  * 2.0.
  */
 import { EuiFlexItem, EuiTablePagination, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
-import React, { useState } from 'react';
+import React from 'react';
 import { GroupListView } from './group_list_view';
 import { useFetchSloGroups } from '../../../../hooks/slo/use_fetch_slo_groups';
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
 import { SloGroupListError } from './group_list_error';
 import { SloGroupListEmpty } from './group_list_empty';
 import type { SortDirection } from '../slo_list_search_bar';
-import { DEFAULT_SLO_GROUPS_PAGE_SIZE } from '../../../../../common/slo/constants';
 
 interface Props {
   isCompact: boolean;
@@ -24,9 +23,8 @@ interface Props {
 }
 
 export function GroupView({ isCompact, kqlQuery, sloView, sort, direction, groupBy }: Props) {
-  const [perPage, setPerPage] = useState(DEFAULT_SLO_GROUPS_PAGE_SIZE);
   const { state, store: storeState } = useUrlSearchState();
-  const { tagsFilter, statusFilter, filters, page } = state;
+  const { tagsFilter, statusFilter, filters, page, perPage } = state;
 
   const { data, isLoading, isError } = useFetchSloGroups({
     perPage,
@@ -92,7 +90,7 @@ export function GroupView({ isCompact, kqlQuery, sloView, sort, direction, group
             itemsPerPage={perPage}
             itemsPerPageOptions={[10, 25, 50, 100]}
             onChangeItemsPerPage={(newPerPage) => {
-              setPerPage(newPerPage);
+              storeState({ perPage: newPerPage });
             }}
           />
         </EuiFlexItem>
