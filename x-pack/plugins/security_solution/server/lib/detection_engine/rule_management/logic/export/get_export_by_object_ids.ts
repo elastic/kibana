@@ -35,38 +35,39 @@ export const getExportByObjectIds = async (
   exportDetails: string;
   exceptionLists: string | null;
   actionConnectors: string;
-}> => {
-  const rulesAndErrors = await fetchRulesByIds(rulesClient, ruleIds);
-  const { rules, missingRuleIds } = rulesAndErrors;
+}> =>
+  withSecuritySpan('getExportByObjectIds', async () => {
+    const rulesAndErrors = await fetchRulesByIds(rulesClient, ruleIds);
+    const { rules, missingRuleIds } = rulesAndErrors;
 
-  // Retrieve exceptions
-  const exceptions = rules.flatMap((rule) => rule.exceptions_list ?? []);
-  const { exportData: exceptionLists, exportDetails: exceptionDetails } =
-    await getRuleExceptionsForExport(exceptions, exceptionsClient);
+    // Retrieve exceptions
+    const exceptions = rules.flatMap((rule) => rule.exceptions_list ?? []);
+    const { exportData: exceptionLists, exportDetails: exceptionDetails } =
+      await getRuleExceptionsForExport(exceptions, exceptionsClient);
 
-  // Retrieve Action-Connectors
-  const { actionConnectors, actionConnectorDetails } = await getRuleActionConnectorsForExport(
-    rules,
-    actionsExporter,
-    request,
-    actionsClient
-  );
+    // Retrieve Action-Connectors
+    const { actionConnectors, actionConnectorDetails } = await getRuleActionConnectorsForExport(
+      rules,
+      actionsExporter,
+      request,
+      actionsClient
+    );
 
-  const rulesNdjson = transformDataToNdjson(rules);
-  const exportDetails = getExportDetailsNdjson(
-    rules,
-    missingRuleIds,
-    exceptionDetails,
-    actionConnectorDetails
-  );
+    const rulesNdjson = transformDataToNdjson(rules);
+    const exportDetails = getExportDetailsNdjson(
+      rules,
+      missingRuleIds,
+      exceptionDetails,
+      actionConnectorDetails
+    );
 
-  return {
-    rulesNdjson,
-    exportDetails,
-    exceptionLists,
-    actionConnectors,
-  };
-};
+    return {
+      rulesNdjson,
+      exportDetails,
+      exceptionLists,
+      actionConnectors,
+    };
+  });
 
 interface FetchRulesResult {
   rules: ExportableRule[];
@@ -76,16 +77,16 @@ interface FetchRulesResult {
 const fetchRulesByIds = async (
   rulesClient: RulesClient,
   ruleIds: string[]
-): Promise<FetchRulesResult> =>
-  withSecuritySpan('fetchRulesByIds', async () => {
-    // It's important to avoid too many clauses in the request otherwise ES will fail to process the request
-    // with `too_many_clauses` error (see https://github.com/elastic/kibana/issues/170015). The clauses limit
-    // used to be set via `indices.query.bool.max_clause_count` but it's an option anymore. The limit is [calculated
-    // dynamically](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-settings.html) based
-    // on available CPU and memory but the minimum value is 1024.
-    // 1024 chunk size helps to solve the problem and use the maximum safe number of clauses.
-    const CHUNK_SIZE = 1024;
-    const processChunk = async (ids: string[]) => {
+): Promise<FetchRulesResult> => {
+  // It's important to avoid too many clauses in the request otherwise ES will fail to process the request
+  // with `too_many_clauses` error (see https://github.com/elastic/kibana/issues/170015). The clauses limit
+  // used to be set via `indices.query.bool.max_clause_count` but it's an option anymore. The limit is [calculated
+  // dynamically](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-settings.html) based
+  // on available CPU and memory but the minimum value is 1024.
+  // 1024 chunk size helps to solve the problem and use the maximum safe number of clauses.
+  const CHUNK_SIZE = 1024;
+  const processChunk = async (ids: string[]) =>
+    withSecuritySpan('processChunk', async () => {
       const rulesResult = await findRules({
         rulesClient,
         filter: `alert.attributes.params.ruleId: (${ids.join(' OR ')})`,
@@ -116,30 +117,32 @@ const fetchRulesByIds = async (
       });
 
       return rulesAndErrors;
-    };
+    });
 
-    const ruleIdChunks = chunk(ruleIds, CHUNK_SIZE);
-    // We expect all rules to be processed here to avoid any situation when export of some rules failed silently.
-    // If some error happens it just bubbles up as is and processed in the upstream code.
-    const rulesAndErrorsChunks = await pMap(ruleIdChunks, processChunk, { concurrency: 2 });
+  const ruleIdChunks = chunk(ruleIds, CHUNK_SIZE);
+  // We expect all rules to be processed here to avoid any situation when export of some rules failed silently.
+  // If some error happens it just bubbles up as is and processed in the upstream code.
+  const rulesAndErrorsChunks = await pMap(ruleIdChunks, processChunk, {
+    concurrency: 2,
+  });
 
-    const missingRuleIds: string[] = [];
-    const rules: ExportableRule[] = [];
+  const missingRuleIds: string[] = [];
+  const rules: ExportableRule[] = [];
 
-    for (const rulesAndErrors of rulesAndErrorsChunks) {
-      for (const response of rulesAndErrors) {
-        if (response.missingRuleId) {
-          missingRuleIds.push(response.missingRuleId);
-        }
+  for (const rulesAndErrors of rulesAndErrorsChunks) {
+    for (const response of rulesAndErrors) {
+      if (response.missingRuleId) {
+        missingRuleIds.push(response.missingRuleId);
+      }
 
-        if (response.rule) {
-          rules.push(response.rule);
-        }
+      if (response.rule) {
+        rules.push(response.rule);
       }
     }
+  }
 
-    return {
-      rules,
-      missingRuleIds,
-    };
-  });
+  return {
+    rules,
+    missingRuleIds,
+  };
+};
