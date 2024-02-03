@@ -152,6 +152,9 @@ export class SavedQueryManagementComponentService extends FtrService {
     }
 
     await this.testSubjects.click('savedQueryFormSaveButton');
+    await this.retry.try(async () => {
+      await this.testSubjects.missingOrFail('saveQueryForm');
+    });
   }
 
   async savedQueryExist(title: string) {
