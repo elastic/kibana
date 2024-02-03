@@ -37,7 +37,7 @@ interface FiltersDetailsProps {
 export function FiltersDetails({ editMode, api }: FiltersDetailsProps) {
   const [queryString, setQueryString] = useState<string>('');
   const [queryLanguage, setQueryLanguage] = useState<'sql' | 'esql' | undefined>();
-  const dataViews = api.dataViews.value ?? [];
+  const dataViews = api.dataViews?.value ?? [];
 
   const filters = useMemo(() => api.localFilters?.value ?? [], [api]);
 
