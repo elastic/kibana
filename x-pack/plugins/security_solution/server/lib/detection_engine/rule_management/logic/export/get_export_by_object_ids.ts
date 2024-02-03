@@ -85,6 +85,9 @@ const fetchRulesByIds = async (
   // on available CPU and memory but the minimum value is 1024.
   // 1024 chunk size helps to solve the problem and use the maximum safe number of clauses.
   const CHUNK_SIZE = 1024;
+  // We need to decouple from the number of existing rules and let the complexity/load depend only on the number of users
+  // exporting rules simultaneously. By using limited parallelization via p-map we trade speed for stability and scalability.
+  const CHUNKS_PROCESSED_IN_PARALLEL = 2;
   const processChunk = async (ids: string[]) =>
     withSecuritySpan('processChunk', async () => {
       const rulesResult = await findRules({
@@ -123,7 +126,7 @@ const fetchRulesByIds = async (
   // We expect all rules to be processed here to avoid any situation when export of some rules failed silently.
   // If some error happens it just bubbles up as is and processed in the upstream code.
   const rulesAndErrorsChunks = await pMap(ruleIdChunks, processChunk, {
-    concurrency: 2,
+    concurrency: CHUNKS_PROCESSED_IN_PARALLEL,
   });
 
   const missingRuleIds: string[] = [];
