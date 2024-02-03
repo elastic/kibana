@@ -413,6 +413,51 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ]);
       });
     });
+
+    describe('default formatter by field meta value', () => {
+      const indexTitle = 'field_formats_management_functional_tests';
+
+      before(async () => {
+        if (await es.indices.exists({ index: indexTitle })) {
+          await es.indices.delete({ index: indexTitle });
+        }
+      });
+
+      it('should apply default formatter by field meta value', async () => {
+        await es.indices.create({
+          index: indexTitle,
+          body: {
+            mappings: {
+              properties: {
+                seconds: { type: 'long', meta: { unit: 's' } },
+              },
+            },
+          },
+        });
+
+        const docResult = await es.index({
+          index: indexTitle,
+          body: { seconds: 1234 },
+          refresh: 'wait_for',
+        });
+
+        const testDocumentId = docResult._id;
+
+        const indexPatternResult = await indexPatterns.create(
+          { title: indexTitle },
+          { override: true }
+        );
+
+        await PageObjects.common.navigateToApp('discover', {
+          hash: `/doc/${indexPatternResult.id}/${indexTitle}?id=${testDocumentId}`,
+        });
+        await testSubjects.exists('doc-hit');
+
+        const renderedValue = await testSubjects.find(`tableDocViewRow-seconds-value`);
+        const text = await renderedValue.getVisibleText();
+        expect(text).to.be('20.57 min');
+      });
+    });
   });
 
   /**
@@ -530,12 +575,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
   }
-
-  describe('default formatter by field meta value', () => {
-    // todo set index mapping
-    // add doc
-    // open discover, look at value
-  });
 }
 
 /**
