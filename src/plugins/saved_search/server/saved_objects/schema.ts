@@ -41,6 +41,7 @@ const SCHEMA_SEARCH_BASE = {
     { defaultValue: {} }
   ),
   rowHeight: schema.maybe(schema.number()),
+  headerRowHeight: schema.maybe(schema.number()),
   rowsPerPage: schema.maybe(schema.number()),
 
   // Chart
