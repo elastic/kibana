@@ -202,6 +202,16 @@ function buildEuiGridColumn({
   return column;
 }
 
+const deserializeHeaderRowHeight = (headerRowHeightLines: number) => {
+  if (headerRowHeightLines === ROWS_HEIGHT_OPTIONS.auto) {
+    return undefined;
+  } else if (headerRowHeightLines === ROWS_HEIGHT_OPTIONS.single) {
+    return 1;
+  }
+
+  return headerRowHeightLines;
+};
+
 export function getEuiGridColumns({
   columns,
   columnsCellActions,
@@ -245,15 +255,7 @@ export function getEuiGridColumns({
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
 }) {
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
-
-  let headerRowHeight: number | undefined;
-  if (headerRowHeightLines === ROWS_HEIGHT_OPTIONS.auto) {
-    headerRowHeight = undefined;
-  } else if (headerRowHeightLines === ROWS_HEIGHT_OPTIONS.single) {
-    headerRowHeight = 1;
-  } else {
-    headerRowHeight = headerRowHeightLines;
-  }
+  const headerRowHeight = deserializeHeaderRowHeight(headerRowHeightLines);
 
   return columns.map((column, columnIndex) =>
     buildEuiGridColumn({

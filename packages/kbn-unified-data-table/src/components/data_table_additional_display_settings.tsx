@@ -44,7 +44,7 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
   onChangeHeaderRowHeightLines,
   maxAllowedSampleSize = DEFAULT_MAX_ALLOWED_SAMPLE_SIZE,
   sampleSize,
-  onChangeSampleSize,
+  onChangeSampleSize = () => {},
 }) => {
   const [activeSampleSize, setActiveSampleSize] = useState<number | ''>(sampleSize);
   const minRangeSampleSize = Math.max(
@@ -53,7 +53,7 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
   ); // flexible: allows to go lower than RANGE_MIN_SAMPLE_SIZE but greater than MIN_ALLOWED_SAMPLE_SIZE
 
   const debouncedOnChangeSampleSize = useMemo(
-    () => debounce(onChangeSampleSize ?? (() => {}), 300, { leading: false, trailing: true }),
+    () => debounce(onChangeSampleSize, 300, { leading: false, trailing: true }),
     [onChangeSampleSize]
   );
 

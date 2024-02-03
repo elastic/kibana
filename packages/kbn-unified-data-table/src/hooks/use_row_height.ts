@@ -20,7 +20,7 @@ import { RowHeightSettingsProps } from '../components/row_height_settings';
 interface UseRowHeightProps {
   storage: Storage;
   consumer: string;
-  key?: string;
+  key: string;
   configRowHeight: number;
   rowHeightState?: number;
   onUpdateRowHeight?: (rowHeight: number) => void;
