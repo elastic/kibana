@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import pMap from 'p-map';
 import { chunk } from 'lodash';
 import { transformDataToNdjson } from '@kbn/securitysolution-utils';
 import type { ISavedObjectsExporter, KibanaRequest } from '@kbn/core/server';
@@ -120,7 +121,7 @@ const fetchRulesByIds = async (
     const ruleIdChunks = chunk(ruleIds, CHUNK_SIZE);
     // We expect all rules to be processed here to avoid any situation when export of some rules failed silently.
     // If some error happens it just bubbles up as is and processed in the upstream code.
-    const rulesAndErrorsChunks = await Promise.all(ruleIdChunks.map(processChunk));
+    const rulesAndErrorsChunks = await pMap(ruleIdChunks, processChunk, { concurrency: 2 });
 
     const missingRuleIds: string[] = [];
     const rules: ExportableRule[] = [];
