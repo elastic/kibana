@@ -530,6 +530,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
   }
+
+  describe('default formatter by field meta value', () => {
+    // todo set index mapping
+    // add doc
+    // open discover, look at value
+  });
 }
 
 /**

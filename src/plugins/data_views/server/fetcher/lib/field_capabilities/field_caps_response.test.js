@@ -48,6 +48,7 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
               'timeSeriesMetric',
               'timeSeriesDimension'
             );
+            console.log('*****', fieldWithoutOptionalKeys);
 
             expect(Object.keys(fieldWithoutOptionalKeys)).toEqual([
               'name',
@@ -57,7 +58,6 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
               'aggregatable',
               'readFromDocValues',
               'metadata_field',
-              'defaultFormatter',
             ]);
           });
         }

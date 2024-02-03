@@ -140,7 +140,10 @@ export function readFieldCapsResponse(
       }
       const esType = types[0];
 
-      const field = {
+      const defaultFormatter =
+        capsByType[types[0]].meta?.unit && unitsArrayToFormatter(capsByType[types[0]].meta?.unit);
+
+      const field: FieldDescriptor = {
         name: fieldName,
         type: castEsToKbnFieldTypeName(esType),
         esTypes: types,
@@ -152,9 +155,12 @@ export function readFieldCapsResponse(
         timeZone: capsByType[types[0]].meta?.time_zone,
         timeSeriesMetric: timeSeriesMetricType,
         timeSeriesDimension: capsByType[types[0]].time_series_dimension,
-        defaultFormatter:
-          capsByType[types[0]].meta?.unit && unitsArrayToFormatter(capsByType[types[0]].meta?.unit),
       };
+
+      if (defaultFormatter) {
+        field.defaultFormatter = defaultFormatter;
+      }
+
       // This is intentionally using a "hash" and a "push" to be highly optimized with very large indexes
       agg.array.push(field);
       agg.hash[fieldName] = field;
