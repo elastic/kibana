@@ -483,8 +483,6 @@ export class ObservabilityAIAssistantClient {
 
     const response$ = adapter.streamIntoObservable(response).pipe(shareReplay());
 
-    this.dependencies.logger.info('Adding response$ listener');
-
     response$.pipe(concatenateChatCompletionChunks(), lastOperator()).subscribe({
       error: (error) => {
         this.dependencies.logger.debug('Error in chat response');

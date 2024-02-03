@@ -5,19 +5,12 @@
  * 2.0.
  */
 
-import { toUtf8 } from '@smithy/util-utf8';
 import { castArray } from 'lodash';
-import { filter, Observable } from 'rxjs';
-import { v4 } from 'uuid';
-import { Builder, Parser } from 'xml2js';
-import {
-  createInternalServerError,
-  StreamingChatResponseEventType,
-  type ChatCompletionChunkEvent,
-} from '../../../../common/conversation_complete';
-import { convertDeserializedXmlWithJsonSchema } from '../../util/convert_deserialized_xml_with_json_schema';
+import { filter } from 'rxjs';
+import { Builder } from 'xml2js';
 import { eventstreamSerdeIntoObservable } from '../../util/eventstream_serde_into_observable';
 import { jsonSchemaToFlatParameters } from '../../util/json_schema_to_flat_parameters';
+import { processBedrockStream } from './process_bedrock_stream';
 import type { LlmApiAdapterFactory } from './types';
 
 function replaceFunctionsWithTools(content: string) {
@@ -211,102 +204,6 @@ export const createBedrockClaudeAdapter: LlmApiAdapterFactory = ({
       filter((value) => {
         return value.chunk.headers?.[':event-type']?.value === 'chunk';
       }),
-      (source) => {
-        return new Observable<ChatCompletionChunkEvent>((subscriber) => {
-          let functionCallsBuffer: string = '';
-          const id = v4();
-          source.subscribe({
-            next: (value) => {
-              const response: {
-                completion: string;
-                stop_reason: string | null;
-                stop: null | string;
-              } = JSON.parse(
-                Buffer.from(JSON.parse(toUtf8(value.chunk.body)).bytes, 'base64').toString('utf-8')
-              );
-
-              let completion = response.completion;
-
-              if (!functionCallsBuffer && completion.includes('<function')) {
-                const [before, after] = completion.split('<function');
-                functionCallsBuffer += `<function${after}`;
-                completion = before;
-              } else if (functionCallsBuffer && response.stop === '</function_calls>') {
-                completion = '';
-                functionCallsBuffer += response.completion + response.stop;
-
-                const parser = new Parser();
-
-                logger.debug(`Parsing xml:
-                
-                ${functionCallsBuffer}`);
-
-                parser
-                  .parseStringPromise(functionCallsBuffer)
-                  .then((val) => {
-                    const invoke = val.function_calls.invoke[0];
-                    const fnName = invoke.tool_name[0];
-                    const parameters: Array<Record<string, string[]>> = invoke.parameters ?? [];
-                    const functionDef = functions?.find((fn) => fn.name === fnName);
-
-                    if (!functionDef) {
-                      throw createInternalServerError(
-                        `Function definition for ${fnName} not found. ${
-                          functions?.length
-                            ? 'Available are: ' + functions?.map((fn) => fn.name).join(', ') + '.'
-                            : 'No functions are available.'
-                        }`
-                      );
-                    }
-
-                    const args = convertDeserializedXmlWithJsonSchema(
-                      parameters,
-                      functionDef.parameters
-                    );
-
-                    subscriber.next({
-                      id,
-                      type: StreamingChatResponseEventType.ChatCompletionChunk,
-                      message: {
-                        content: '',
-                        function_call: {
-                          name: fnName,
-                          arguments: JSON.stringify(args),
-                        },
-                      },
-                    });
-                  })
-                  .catch((err) => {
-                    subscriber.error(err);
-                  });
-
-                functionCallsBuffer = '';
-              } else if (functionCallsBuffer) {
-                completion = '';
-                functionCallsBuffer += response.completion;
-              }
-
-              if (completion.trim()) {
-                const parts = completion.split(' ');
-                parts.forEach((part, index) => {
-                  subscriber.next({
-                    id,
-                    type: StreamingChatResponseEventType.ChatCompletionChunk,
-                    message: {
-                      content: index === parts.length - 1 ? part : part + ' ',
-                    },
-                  });
-                });
-              }
-            },
-            error: (err) => {
-              subscriber.error(err);
-            },
-            complete: () => {
-              subscriber.complete();
-            },
-          });
-        });
-      }
+      processBedrockStream({ logger, functions })
     ),
 });

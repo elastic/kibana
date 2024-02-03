@@ -12,8 +12,12 @@ import { Observable } from 'rxjs';
 import { Readable } from 'stream';
 import { Message } from '@smithy/types';
 
+export interface SmithyChunk {
+  chunk: Message;
+}
+
 export function eventstreamSerdeIntoObservable(readable: Readable) {
-  return new Observable<{ chunk: Message }>((subscriber) => {
+  return new Observable<SmithyChunk>((subscriber) => {
     const marshaller = new EventStreamMarshaller({
       utf8Encoder: toUtf8,
       utf8Decoder: fromUtf8,
@@ -22,7 +26,7 @@ export function eventstreamSerdeIntoObservable(readable: Readable) {
     async function processStream() {
       for await (const chunk of marshaller.deserialize(readable, identity)) {
         if (chunk) {
-          subscriber.next(chunk as { chunk: Message });
+          subscriber.next(chunk as SmithyChunk);
         }
       }
     }
