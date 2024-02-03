@@ -5,25 +5,31 @@
  * 2.0.
  */
 
+import { createParser } from 'eventsource-parser';
+import { Readable } from 'node:stream';
 import { Observable } from 'rxjs';
-import type { Readable } from 'stream';
 
-export function streamIntoObservable(readable: Readable): Observable<any> {
+export function eventsourceStreamIntoObservable(readable: Readable) {
   return new Observable<string>((subscriber) => {
-    const decodedStream = readable;
+    const parser = createParser((event) => {
+      if (event.type === 'event') {
+        subscriber.next(event.data);
+      }
+    });
 
     async function processStream() {
-      for await (const chunk of decodedStream) {
-        subscriber.next(chunk);
+      for await (const chunk of readable) {
+        parser.feed(chunk);
       }
     }
 
-    processStream()
-      .then(() => {
+    processStream().then(
+      () => {
         subscriber.complete();
-      })
-      .catch((error) => {
+      },
+      (error) => {
         subscriber.error(error);
-      });
+      }
+    );
   });
 }

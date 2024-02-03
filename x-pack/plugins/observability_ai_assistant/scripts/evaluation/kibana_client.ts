@@ -10,6 +10,7 @@ import { pick, remove } from 'lodash';
 import { filter, lastValueFrom, map, toArray } from 'rxjs';
 import { format, parse, UrlObject } from 'url';
 import { Message, MessageRole } from '../../common';
+import { isSupportedConnectorType } from '../../common/connectors';
 import {
   ChatCompletionChunkEvent,
   ChatCompletionErrorEvent,
@@ -343,6 +344,8 @@ export class KibanaClient {
       })
     );
 
-    return connectors.data.filter((connector) => connector.connector_type_id === '.gen-ai');
+    return connectors.data.filter((connector) =>
+      isSupportedConnectorType(connector.connector_type_id)
+    );
   }
 }

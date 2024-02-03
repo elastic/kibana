@@ -11,6 +11,7 @@ import dedent from 'dedent';
 import * as t from 'io-ts';
 import { last, omit } from 'lodash';
 import { lastValueFrom } from 'rxjs';
+import { Logger } from '@kbn/logging';
 import { FunctionRegistrationParameters } from '.';
 import { MessageRole, type Message } from '../../common/types';
 import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
@@ -113,6 +114,7 @@ export function registerRecallFunction({
         client,
         connectorId,
         signal,
+        logger: resources.logger,
       });
 
       resources.logger.debug(`Received ${relevantDocuments.length} relevant documents`);
@@ -177,6 +179,7 @@ async function scoreSuggestions({
   client,
   connectorId,
   signal,
+  logger,
 }: {
   suggestions: Awaited<ReturnType<typeof retrieveSuggestions>>;
   systemMessage: Message;
@@ -185,6 +188,7 @@ async function scoreSuggestions({
   client: ObservabilityAIAssistantClient;
   connectorId: string;
   signal: AbortSignal;
+  logger: Logger;
 }) {
   const systemMessageExtension =
     dedent(`You have the function called score available to help you inform the user about how relevant you think a given document is to the conversation.
@@ -257,6 +261,10 @@ async function scoreSuggestions({
       })
     ).pipe(concatenateChatCompletionChunks())
   );
+
+  logger.debug(`Received scoring response`);
+  logger.debug(JSON.stringify(response, null, 2));
+
   const scoreFunctionRequest = decodeOrThrow(scoreFunctionRequestRt)(response);
   const { scores } = decodeOrThrow(jsonRt.pipe(scoreFunctionArgumentsRt))(
     scoreFunctionRequest.message.function_call.arguments

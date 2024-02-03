@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { FindActionResult } from '@kbn/actions-plugin/server';
+import { isSupportedConnectorType } from '../../../common/connectors';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 
 const listConnectorsRoute = createObservabilityAIAssistantServerRoute({
@@ -21,7 +22,7 @@ const listConnectorsRoute = createObservabilityAIAssistantServerRoute({
 
     const connectors = await actionsClient.getAll();
 
-    return connectors.filter((connector) => connector.actionTypeId === '.gen-ai');
+    return connectors.filter((connector) => isSupportedConnectorType(connector.actionTypeId));
   },
 });
 

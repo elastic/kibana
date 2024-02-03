@@ -26,7 +26,7 @@ By default, the tool will look for a Kibana instance running locally (at `http:/
 
 #### Connector
 
-Use `--connectorId` to specify a `.gen-ai` connector to use. If none are given, it will prompt you to select a connector based on the ones that are available. If only a single `.gen-ai` connector is found, it will be used without prompting.
+Use `--connectorId` to specify a `.gen-ai` or `.bedrock` connector to use. If none are given, it will prompt you to select a connector based on the ones that are available. If only a single supported connector is found, it will be used without prompting.
 
 #### Persisting conversations
 

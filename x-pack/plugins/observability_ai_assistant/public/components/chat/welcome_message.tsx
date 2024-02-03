@@ -25,6 +25,7 @@ import { Disclaimer } from './disclaimer';
 import { WelcomeMessageConnectors } from './welcome_message_connectors';
 import { WelcomeMessageKnowledgeBase } from './welcome_message_knowledge_base';
 import { useKibana } from '../../hooks/use_kibana';
+import { isSupportedConnectorType } from '../../../common/connectors';
 
 const fullHeightClassName = css`
   height: 100%;
@@ -68,7 +69,7 @@ export function WelcomeMessage({
   const onConnectorCreated = (createdConnector: ActionConnector) => {
     setConnectorFlyoutOpen(false);
 
-    if (createdConnector.actionTypeId === '.gen-ai') {
+    if (isSupportedConnectorType(createdConnector.actionTypeId)) {
       connectors.reloadConnectors();
     }
 

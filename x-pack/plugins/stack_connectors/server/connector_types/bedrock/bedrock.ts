@@ -26,7 +26,11 @@ import type {
   InvokeAIActionResponse,
   StreamActionParams,
 } from '../../../common/bedrock/types';
-import { SUB_ACTION, DEFAULT_TOKEN_LIMIT } from '../../../common/bedrock/constants';
+import {
+  SUB_ACTION,
+  DEFAULT_TOKEN_LIMIT,
+  DEFAULT_BEDROCK_MODEL,
+} from '../../../common/bedrock/constants';
 import {
   DashboardActionParams,
   DashboardActionResponse,
@@ -224,9 +228,14 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
    * @param messages An array of messages to be sent to the API
    * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
    */
-  public async invokeStream({ messages, model }: InvokeAIActionParams): Promise<IncomingMessage> {
+  public async invokeStream({
+    messages,
+    model,
+    stopSequences,
+    temperature,
+  }: InvokeAIActionParams): Promise<IncomingMessage> {
     const res = (await this.streamApi({
-      body: JSON.stringify(formatBedrockBody({ messages })),
+      body: JSON.stringify(formatBedrockBody({ messages, model, stopSequences, temperature })),
       model,
     })) as unknown as IncomingMessage;
     return res;
@@ -241,20 +250,43 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
     messages,
     model,
   }: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
-    const res = await this.runApi({ body: JSON.stringify(formatBedrockBody({ messages })), model });
+    const res = await this.runApi({
+      body: JSON.stringify(formatBedrockBody({ messages, model })),
+      model,
+    });
     return { message: res.completion.trim() };
   }
 }
 
 const formatBedrockBody = ({
+  model = DEFAULT_BEDROCK_MODEL,
   messages,
+  stopSequences = ['\n\nHuman:'],
+  temperature = 0.5,
 }: {
+  model?: string;
   messages: Array<{ role: string; content: string }>;
+  stopSequences?: string[];
+  temperature?: number;
 }) => {
   const combinedMessages = messages.reduce((acc: string, message) => {
     const { role, content } = message;
-    // Bedrock only has Assistant and Human, so 'system' and 'user' will be converted to Human
-    const bedrockRole = role === 'assistant' ? '\n\nAssistant:' : '\n\nHuman:';
+    const [, , modelName, majorVersion, minorVersion] =
+      (model || '').match(/(\w+)\.(.*)-v(\d+)(?::(\d+))?/) || [];
+    // Claude only has Assistant and Human, so 'user' will be converted to Human
+    let bedrockRole: string;
+
+    if (
+      role === 'system' &&
+      modelName === 'claude' &&
+      Number(majorVersion) >= 2 &&
+      Number(minorVersion) >= 1
+    ) {
+      bedrockRole = '';
+    } else {
+      bedrockRole = role === 'assistant' ? '\n\nAssistant:' : '\n\nHuman:';
+    }
+
     return `${acc}${bedrockRole}${content}`;
   }, '');
 
@@ -262,8 +294,8 @@ const formatBedrockBody = ({
     // end prompt in "Assistant:" to avoid the model starting its message with "Assistant:"
     prompt: `${combinedMessages} \n\nAssistant:`,
     max_tokens_to_sample: DEFAULT_TOKEN_LIMIT,
-    temperature: 0.5,
+    temperature,
     // prevent model from talking to itself
-    stop_sequences: ['\n\nHuman:'],
+    stop_sequences: stopSequences,
   };
 };

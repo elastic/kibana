@@ -110,6 +110,7 @@ export function registerEsqlFunction({
             type: 'boolean',
           },
         },
+        required: ['switch'],
       } as const,
     },
     async ({ messages, connectorId }, signal) => {
@@ -126,27 +127,32 @@ export function registerEsqlFunction({
       const source$ = (
         await client.chat({
           connectorId,
-          messages: withEsqlSystemMessage(
-            `Use the classify_esql function to classify the user's request
-            and get more information about specific functions and commands
-            you think are candidates for answering the question.
-            
+          messages: withEsqlSystemMessage().concat({
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.User,
+              content: `Use the classify_esql function to classify the user's request
+              in the user message before this.
+              and get more information about specific functions and commands
+              you think are candidates for answering the question.
               
-            Examples for functions and commands:
-            Do you need to group data? Request \`STATS\`.
-            Extract data? Request \`DISSECT\` AND \`GROK\`.
-            Convert a column based on a set of conditionals? Request \`EVAL\` and \`CASE\`.
-
-            Examples for determining whether the user wants to execute a query:
-            - "Show me the avg of x"
-            - "Give me the results of y"
-            - "Display the sum of z"
-
-            Examples for determining whether the user does not want to execute a query:
-            - "I want a query that ..."
-            - "... Just show me the query"
-            - "Create a query that ..."`
-          ),
+                
+              Examples for functions and commands:
+              Do you need to group data? Request \`STATS\`.
+              Extract data? Request \`DISSECT\` AND \`GROK\`.
+              Convert a column based on a set of conditionals? Request \`EVAL\` and \`CASE\`.
+  
+              Examples for determining whether the user wants to execute a query:
+              - "Show me the avg of x"
+              - "Give me the results of y"
+              - "Display the sum of z"
+  
+              Examples for determining whether the user does not want to execute a query:
+              - "I want a query that ..."
+              - "... Just show me the query"
+              - "Create a query that ..."`,
+            },
+          }),
           signal,
           functions: [
             {
@@ -154,6 +160,9 @@ export function registerEsqlFunction({
               description: `Use this function to determine:
               - what ES|QL functions and commands are candidates for answering the user's question
               - whether the user has requested a query, and if so, it they want it to be executed, or just shown.
+
+              All parameters are required. Make sure the functions and commands you request are available in the
+              system message.
               `,
               parameters: {
                 type: 'object',
@@ -187,6 +196,10 @@ export function registerEsqlFunction({
       ).pipe(concatenateChatCompletionChunks());
 
       const response = await lastValueFrom(source$);
+
+      if (!response.message.function_call.arguments) {
+        throw new Error('LLM did not call classify_esql function');
+      }
 
       const args = JSON.parse(response.message.function_call.arguments) as {
         commands: string[];
