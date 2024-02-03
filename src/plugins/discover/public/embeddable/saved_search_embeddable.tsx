@@ -599,8 +599,8 @@ export class SavedSearchEmbeddable
     searchProps.sort = this.getSort(this.input.sort || savedSearch.sort, searchProps?.dataView);
     searchProps.sharedItemTitle = this.panelTitleInternal;
     searchProps.searchTitle = this.panelTitleInternal;
-    searchProps.rowHeightState = this.input.rowHeight || savedSearch.rowHeight;
-    searchProps.headerRowHeightState = this.input.headerRowHeight || savedSearch.headerRowHeight;
+    searchProps.rowHeightState = this.input.rowHeight ?? savedSearch.rowHeight;
+    searchProps.headerRowHeightState = this.input.headerRowHeight ?? savedSearch.headerRowHeight;
     searchProps.rowsPerPageState =
       this.input.rowsPerPage ||
       savedSearch.rowsPerPage ||
