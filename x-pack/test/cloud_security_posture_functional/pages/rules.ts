@@ -64,6 +64,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await rule.waitForPluginInitialized();
       await findings.index.add(k8sFindingsMock);
       await rule.navigateToRulePage('cis_k8s', '1.0.1');
+      await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     afterEach(async () => {
