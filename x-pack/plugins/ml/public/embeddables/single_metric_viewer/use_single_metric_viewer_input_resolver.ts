@@ -15,7 +15,8 @@ import type { TimeRangeBounds } from '../../application/util/time_buckets';
 export function useSingleMetricViwerInputResolver(
   embeddableInput: Observable<SingleMetricViewerEmbeddableInput>,
   refresh: Observable<any>,
-  timefilter: TimefilterContract
+  timefilter: TimefilterContract,
+  onRenderComplete: () => void
 ) {
   const [data, setData] = useState<any>();
   const [bounds, setBounds] = useState<TimeRangeBounds | undefined>();
@@ -27,10 +28,12 @@ export function useSingleMetricViwerInputResolver(
         if (input !== undefined) {
           setData(input[0]);
           if (timefilter !== undefined) {
-            const currentBounds = timefilter.getBounds();
+            const { timeRange } = input[0];
+            const currentBounds = timefilter.calculateBounds(timeRange);
             setBounds(currentBounds);
             setLastRefresh(Date.now());
           }
+          onRenderComplete();
         }
       }
     );

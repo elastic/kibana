@@ -112,6 +112,11 @@ export interface SingleMetricViewerEmbeddableCustomInput {
   panelTitle: string;
   selectedDetectorIndex: number;
   selectedEntities: MlEntityField[];
+  // Embeddable inputs which are not included in the default interface
+  filters: Filter[];
+  query: Query;
+  refreshConfig: RefreshInterval;
+  timeRange: TimeRange;
 }
 
 export type SingleMetricViewerEmbeddableInput = EmbeddableInput &

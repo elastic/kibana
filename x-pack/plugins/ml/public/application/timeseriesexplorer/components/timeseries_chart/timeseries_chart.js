@@ -984,7 +984,7 @@ class TimeseriesChartIntl extends Component {
     const chartElement = d3.select(this.rootNode);
     chartElement.selectAll('.focus-zoom a').on('click', function () {
       d3.event.preventDefault();
-      setZoomInterval(chartElement.select(this).attr('data-ms'));
+      setZoomInterval(this.getAttribute('data-ms'));
     });
   }
 

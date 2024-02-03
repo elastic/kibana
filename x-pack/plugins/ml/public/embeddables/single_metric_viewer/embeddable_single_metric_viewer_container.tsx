@@ -77,7 +77,8 @@ export const EmbeddableSingleMetricViewerContainer: FC<
   const { data, bounds, lastRefresh } = useSingleMetricViwerInputResolver(
     embeddableInput,
     refresh,
-    services[1].data.query.timefilter.timefilter
+    services[1].data.query.timefilter.timefilter,
+    onRenderComplete
   );
   const selectedJobId = data?.jobIds[0];
   const previousRefresh = usePrevious(lastRefresh ?? 0);
