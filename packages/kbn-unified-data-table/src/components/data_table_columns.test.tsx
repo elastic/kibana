@@ -38,6 +38,7 @@ describe('Data table columns', function () {
         isPlainRecord: false,
         valueToStringConverter: dataTableContextMock.valueToStringConverter,
         rowsCount: 100,
+        headerRowHeightLines: 5,
         services: {
           uiSettings: servicesMock.uiSettings,
           toastNotifications: servicesMock.toastNotifications,
@@ -59,6 +60,7 @@ describe('Data table columns', function () {
         isPlainRecord: false,
         valueToStringConverter: dataTableContextMock.valueToStringConverter,
         rowsCount: 100,
+        headerRowHeightLines: 5,
         services: {
           uiSettings: servicesMock.uiSettings,
           toastNotifications: servicesMock.toastNotifications,
@@ -80,6 +82,7 @@ describe('Data table columns', function () {
         isPlainRecord: true,
         valueToStringConverter: dataTableContextMock.valueToStringConverter,
         rowsCount: 100,
+        headerRowHeightLines: 5,
         services: {
           uiSettings: servicesMock.uiSettings,
           toastNotifications: servicesMock.toastNotifications,
@@ -256,6 +259,7 @@ describe('Data table columns', function () {
         isPlainRecord: false,
         valueToStringConverter: dataTableContextMock.valueToStringConverter,
         rowsCount: 100,
+        headerRowHeightLines: 5,
         services: {
           uiSettings: servicesMock.uiSettings,
           toastNotifications: servicesMock.toastNotifications,
@@ -282,6 +286,7 @@ describe('Data table columns', function () {
         isPlainRecord: false,
         valueToStringConverter: dataTableContextMock.valueToStringConverter,
         rowsCount: 100,
+        headerRowHeightLines: 5,
         services: {
           uiSettings: servicesMock.uiSettings,
           toastNotifications: servicesMock.toastNotifications,
@@ -310,6 +315,7 @@ describe('Data table columns', function () {
         isPlainRecord: true,
         valueToStringConverter: dataTableContextMock.valueToStringConverter,
         rowsCount: 100,
+        headerRowHeightLines: 5,
         services: {
           uiSettings: servicesMock.uiSettings,
           toastNotifications: servicesMock.toastNotifications,
@@ -339,6 +345,7 @@ describe('Data table columns', function () {
         isPlainRecord: true,
         valueToStringConverter: dataTableContextMock.valueToStringConverter,
         rowsCount: 100,
+        headerRowHeightLines: 5,
         services: {
           uiSettings: servicesMock.uiSettings,
           toastNotifications: servicesMock.toastNotifications,
@@ -363,6 +370,7 @@ describe('Data table columns', function () {
         isPlainRecord: true,
         valueToStringConverter: dataTableContextMock.valueToStringConverter,
         rowsCount: 100,
+        headerRowHeightLines: 5,
         services: {
           uiSettings: servicesMock.uiSettings,
           toastNotifications: servicesMock.toastNotifications,
@@ -387,6 +395,7 @@ describe('Data table columns', function () {
         isPlainRecord: true,
         valueToStringConverter: dataTableContextMock.valueToStringConverter,
         rowsCount: 100,
+        headerRowHeightLines: 5,
         services: {
           uiSettings: servicesMock.uiSettings,
           toastNotifications: servicesMock.toastNotifications,

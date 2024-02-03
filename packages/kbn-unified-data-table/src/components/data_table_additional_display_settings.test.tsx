@@ -24,6 +24,10 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
         <UnifiedDataTableAdditionalDisplaySettings
           sampleSize={10}
           onChangeSampleSize={onChangeSampleSizeMock}
+          rowHeight="custom"
+          rowHeightLines={10}
+          headerRowHeight="custom"
+          headerRowHeightLines={5}
         />
       );
       const input = findTestSubject(component, 'unifiedDataTableSampleSizeInput').last();
@@ -56,6 +60,10 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
           maxAllowedSampleSize={500}
           sampleSize={50}
           onChangeSampleSize={onChangeSampleSizeMock}
+          rowHeight="custom"
+          rowHeightLines={10}
+          headerRowHeight="custom"
+          headerRowHeightLines={5}
         />
       );
       const input = findTestSubject(component, 'unifiedDataTableSampleSizeInput').last();
@@ -86,6 +94,10 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
         <UnifiedDataTableAdditionalDisplaySettings
           sampleSize={200}
           onChangeSampleSize={onChangeSampleSizeMock}
+          rowHeight="custom"
+          rowHeightLines={10}
+          headerRowHeight="custom"
+          headerRowHeightLines={5}
         />
       );
 
