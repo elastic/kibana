@@ -6,6 +6,7 @@
  */
 
 import {
+  AppMountParameters,
   AppNavLinkStatus,
   CoreSetup,
   CoreStart,
@@ -13,7 +14,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import { OBSERVABILITY_LOG_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
+import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
 import {
   AllDatasetsLocatorDefinition,
   ObservabilityLogExplorerLocators,
@@ -28,7 +29,6 @@ import type {
   ObservabilityLogExplorerSetupDeps,
   ObservabilityLogExplorerStartDeps,
 } from './types';
-
 export class ObservabilityLogExplorerPlugin
   implements Plugin<ObservabilityLogExplorerPluginSetup, ObservabilityLogExplorerPluginStart>
 {
@@ -47,7 +47,7 @@ export class ObservabilityLogExplorerPlugin
     const useHash = core.uiSettings.get('state:storeInSessionStorage');
 
     core.application.register({
-      id: OBSERVABILITY_LOG_EXPLORER_APP_ID,
+      id: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
       title: logExplorerAppTitle,
       category: DEFAULT_APP_CATEGORIES.observability,
       euiIconType: 'logoLogging',
@@ -68,6 +68,21 @@ export class ObservabilityLogExplorerPlugin
           ownPluginStart,
           appMountParams
         );
+      },
+    });
+
+    // App used solely to redirect from "/app/observability-log-explorer" to "/app/observability-logs-explorer"
+    core.application.register({
+      id: 'observability-log-explorer',
+      title: logExplorerAppTitle,
+      navLinkStatus: AppNavLinkStatus.hidden,
+      mount: async (appMountParams: AppMountParameters) => {
+        const [coreStart] = await core.getStartServices();
+        const { renderObservabilityLogExplorerRedirect } = await import(
+          './applications/redirect_to_observability_logs_explorer'
+        );
+
+        return renderObservabilityLogExplorerRedirect(coreStart, appMountParams);
       },
     });
 
