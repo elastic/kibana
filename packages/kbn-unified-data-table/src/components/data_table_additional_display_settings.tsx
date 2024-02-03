@@ -101,7 +101,7 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
           })}
           onChangeRowHeight={onChangeHeaderRowHeight}
           onChangeRowHeightLines={onChangeHeaderRowHeightLines}
-          data-test-subj="unifiedDataTableHeaderHeightSettings"
+          data-test-subj="unifiedDataTableHeaderRowHeightSettings"
           maxRowHeight={5}
         />
       )}
@@ -114,7 +114,7 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
           })}
           onChangeRowHeight={onChangeRowHeight}
           onChangeRowHeightLines={onChangeRowHeightLines}
-          data-test-subj="unifiedDataTableHeightSettings"
+          data-test-subj="unifiedDataTableRowHeightSettings"
         />
       )}
       {onChangeSampleSize && (

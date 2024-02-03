@@ -72,6 +72,7 @@ export function RowHeightSettings(props: RowHeightSettingsProps) {
               const newMode = optionId.replace(idPrefix, '') as RowHeightSettingsProps['rowHeight'];
               onChangeRowHeight(newMode);
             }}
+            data-test-subj={`${dataTestSubj}_rowHeightButtonGroup`}
           />
           {rowHeight === 'custom' ? (
             <>
