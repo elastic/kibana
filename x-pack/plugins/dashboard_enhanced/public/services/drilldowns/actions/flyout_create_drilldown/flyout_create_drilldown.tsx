@@ -8,21 +8,29 @@
 import {
   apiHasDynamicActions,
   embeddableEnhancedDrilldownGrouping,
-  type HasDynamicActions
+  type HasDynamicActions,
 } from '@kbn/embeddable-enhanced-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import { tracksOverlays, type TracksOverlays } from '@kbn/presentation-containers';
+import {
+  tracksOverlays,
+  type PresentationContainer,
+  type TracksOverlays,
+} from '@kbn/presentation-containers';
 import {
   apiCanAccessViewMode,
   apiHasParentApi,
   apiHasSupportedTriggers,
   apiIsOfType,
-  getInheritedViewMode, type CanAccessViewMode,
+  getInheritedViewMode,
+  type CanAccessViewMode,
   type EmbeddableApiContext,
-  type HasParentApi, type HasSupportedTriggers, type HasType
+  type HasUniqueId,
+  type HasParentApi,
+  type HasSupportedTriggers,
+  type HasType,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import React from 'react';
@@ -36,10 +44,16 @@ export interface OpenFlyoutAddDrilldownParams {
 }
 
 export type FlyoutCreateDrilldownActionApi = CanAccessViewMode &
-HasDynamicActions & HasParentApi<HasType & Partial<TracksOverlays>> & HasSupportedTriggers;
+  HasDynamicActions &
+  HasParentApi<HasType & Partial<PresentationContainer & TracksOverlays>> &
+  HasSupportedTriggers &
+  Partial<HasUniqueId>;
 
 const isApiCompatible = (api: unknown | null): api is FlyoutCreateDrilldownActionApi =>
-  apiHasDynamicActions(api) && apiHasParentApi(api) && apiCanAccessViewMode(api) && apiHasSupportedTriggers(api);
+  apiHasDynamicActions(api) &&
+  apiHasParentApi(api) &&
+  apiCanAccessViewMode(api) &&
+  apiHasSupportedTriggers(api);
 
 export class FlyoutCreateDrilldownAction implements Action<EmbeddableApiContext> {
   public readonly type = OPEN_FLYOUT_ADD_DRILLDOWN;
@@ -61,12 +75,13 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableApiContext>
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) return false;
-    if (getInheritedViewMode(embeddable) !== 'edit' || !apiIsOfType(embeddable.parentApi, 'dashboard')) return false;
-    
-    const supportedTriggers = [
-      CONTEXT_MENU_TRIGGER,
-      ...embeddable.supportedTriggers(),
-    ];
+    if (
+      getInheritedViewMode(embeddable) !== 'edit' ||
+      !apiIsOfType(embeddable.parentApi, 'dashboard')
+    )
+      return false;
+
+    const supportedTriggers = [CONTEXT_MENU_TRIGGER, ...embeddable.supportedTriggers()];
 
     /**
      * Check if there is an intersection between all registered drilldowns possible triggers that they could be attached to
@@ -115,6 +130,9 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableApiContext>
       {
         ownFocus: true,
         'data-test-subj': 'createDrilldownFlyout',
+        onClose: (overlayRef) => {
+          close();
+        },
       }
     );
 

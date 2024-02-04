@@ -16,5 +16,7 @@ export const getMockPresentationContainer = (): PresentationContainer => {
     replacePanel: jest.fn(),
     lastSavedState: new Subject<void>(),
     getLastSavedStateForChild: jest.fn(),
+    getChildIds: jest.fn(),
+    getChild: jest.fn(),
   };
 };
