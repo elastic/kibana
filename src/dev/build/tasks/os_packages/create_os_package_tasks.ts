@@ -137,6 +137,20 @@ export const CreateDockerCloud: Task = {
   },
 };
 
+export const CreateDockerFIPS: Task = {
+  description: 'Creating Docker FIPS image',
+
+  async run(config, log, build) {
+    await runDockerGenerator(config, log, build, {
+      architecture: 'x64',
+      baseImage: 'ubi',
+      context: false,
+      image: true,
+      fips: true,
+    });
+  },
+};
+
 export const CreateDockerContexts: Task = {
   description: 'Creating Docker build contexts',
 
@@ -170,27 +184,10 @@ export const CreateDockerContexts: Task = {
       context: true,
       image: false,
     });
-  },
-};
-
-export const CreateDockerFIPS: Task = {
-  description: 'Creating Docker FIPS images',
-
-  async run(config, log, build) {
     await runDockerGenerator(config, log, build, {
-      architecture: 'x64',
       baseImage: 'ubi',
-      context: false,
-      image: true,
-      fips: true,
-    });
-
-    await runDockerGenerator(config, log, build, {
-      architecture: 'x64',
-      baseImage: 'ubuntu',
-      context: false,
-      image: true,
-      dockerBuildDate,
+      context: true,
+      image: false,
       fips: true,
     });
   },

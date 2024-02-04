@@ -54,6 +54,9 @@ export async function bundleDockerFiles(config: Config, log: ToolingLog, scope: 
       await write(resolve(dockerFilesBuildDir, template), output);
     }
   }
+  if (scope.fips) {
+    await copyAll(resolve(scope.dockerBuildDir, 'openssl'), resolve(dockerFilesBuildDir, 'openssl'));
+  }
 
   // Compress dockerfiles dir created inside
   // docker build dir as output it as a target

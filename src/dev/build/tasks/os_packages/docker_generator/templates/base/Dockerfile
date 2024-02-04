@@ -122,7 +122,7 @@ WORKDIR /usr/share/kibana
 # https://www.openssl.org/docs/man3.0/man7/fips_module.html
 
 # Enable FIPS for Kibana only. In the future we can override OS wide with ENV OPENSSL_CONF
-RUN echo '\n--enable-fips' >> config/node.options
+RUN echo -e '\n--enable-fips' >> config/node.options
 RUN echo '--openssl-config=/usr/share/kibana/openssl-3.0.8/nodejs.cnf' >> config/node.options
 
 # Ideally we would handle this in the builder step, but make is installing over the OS version
@@ -159,7 +159,7 @@ COPY --chown=1000:0 config/serverless.es.yml /usr/share/kibana/config/serverless
 COPY --chown=1000:0 config/serverless.oblt.yml /usr/share/kibana/config/serverless.oblt.yml
 COPY --chown=1000:0 config/serverless.security.yml /usr/share/kibana/config/serverless.security.yml
 # Supportability enhancement: enable capturing heap snapshots. See https://nodejs.org/api/cli.html#--heapsnapshot-signalsignal
-RUN echo '\n--heapsnapshot-signal=SIGUSR2' >> config/node.options
+RUN echo -e '\n--heapsnapshot-signal=SIGUSR2' >> config/node.options
 RUN echo '--diagnostic-dir=./data' >> config/node.options
 {{/serverless}}
 {{^opensslLegacyProvider}}

@@ -164,14 +164,14 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await run(Tasks.CreateDockerServerless);
   }
 
+  if (options.createDockerFIPS) {
+    // control w/ --docker-fips-image
+    await run(Tasks.CreateDockerFIPS);
+  }
+
   if (options.createDockerContexts) {
     // control w/ --skip-docker-contexts
     await run(Tasks.CreateDockerContexts);
-  }
-
-  if (options.createDockerFIPS) {
-    // control w/ --docker-fips-images
-    await run(Tasks.CreateDockerFIPS);
   }
 
   /**
