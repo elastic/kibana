@@ -11,19 +11,16 @@ import { I18nProvider } from '@kbn/i18n-react';
 import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { Store } from 'redux';
-import { BehaviorSubject } from 'rxjs';
 import { ThemeProvider } from 'styled-components';
 
 import { configureStore } from '@reduxjs/toolkit';
-import { createKibanaContextProviderMock, createStartServicesMock } from './kibana_react.mock';
+import { createKibanaContextProviderMock } from './kibana_react.mock';
 import { timelineReducer } from '../store/timeline/reducer';
 
 interface Props {
   children: React.ReactNode;
   store?: Store;
 }
-
-export const kibanaObservable = new BehaviorSubject(createStartServicesMock());
 
 interface State {
   timelineById: Record<string, unknown>;
