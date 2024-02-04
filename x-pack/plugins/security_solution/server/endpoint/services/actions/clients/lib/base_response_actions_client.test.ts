@@ -311,7 +311,7 @@ describe('ResponseActionsClientImpl base class', () => {
     it('should not error if update to a case fails', async () => {
       (casesClient.attachments.bulkCreate as jest.Mock).mockImplementation(async (options) => {
         if (options.caseId === 'case-2') {
-          throw new Error('update filed to case-2');
+          throw new Error('update failed to case-2');
         }
       });
       await baseClassMock.updateCases(updateCasesOptions);
