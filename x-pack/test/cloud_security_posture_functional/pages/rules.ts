@@ -71,6 +71,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('Rules Page - Bulk Action buttons', () => {
       it('It should disable both Enable and Disable options when there are no rules selected', async () => {
         await rule.rulePage.toggleBulkActionButton();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect(
           (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_ENABLE)) ===
             'true'
