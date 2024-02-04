@@ -19,7 +19,7 @@ export function eventsourceStreamIntoObservable(readable: Readable) {
 
     async function processStream() {
       for await (const chunk of readable) {
-        parser.feed(chunk);
+        parser.feed(chunk.toString());
       }
     }
 

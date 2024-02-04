@@ -111,7 +111,7 @@ export class LlmProxy {
               }),
               next: (msg) => {
                 const chunk = createOpenAiChunk(msg);
-                return write(`data: ${JSON.stringify(chunk)}\n`);
+                return write(`data: ${JSON.stringify(chunk)}\n\n`);
               },
               rawWrite: (chunk: string) => {
                 return write(chunk);

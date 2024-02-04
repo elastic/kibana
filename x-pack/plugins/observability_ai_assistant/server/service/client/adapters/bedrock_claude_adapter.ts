@@ -6,9 +6,13 @@
  */
 
 import { castArray } from 'lodash';
-import { filter } from 'rxjs';
+import { filter, tap } from 'rxjs';
 import { Builder } from 'xml2js';
-import { eventstreamSerdeIntoObservable } from '../../util/eventstream_serde_into_observable';
+import { createInternalServerError } from '../../../../common/conversation_complete';
+import {
+  BedrockChunkMember,
+  eventstreamSerdeIntoObservable,
+} from '../../util/eventstream_serde_into_observable';
 import { jsonSchemaToFlatParameters } from '../../util/json_schema_to_flat_parameters';
 import { processBedrockStream } from './process_bedrock_stream';
 import type { LlmApiAdapterFactory } from './types';
@@ -201,8 +205,13 @@ export const createBedrockClaudeAdapter: LlmApiAdapterFactory = ({
   },
   streamIntoObservable: (readable) =>
     eventstreamSerdeIntoObservable(readable).pipe(
-      filter((value) => {
-        return value.chunk.headers?.[':event-type']?.value === 'chunk';
+      tap((value) => {
+        if ('modelStreamErrorException' in value) {
+          throw createInternalServerError(value.modelStreamErrorException.originalMessage);
+        }
+      }),
+      filter((value): value is BedrockChunkMember => {
+        return 'chunk' in value && value.chunk?.headers?.[':event-type']?.value === 'chunk';
       }),
       processBedrockStream({ logger, functions })
     ),

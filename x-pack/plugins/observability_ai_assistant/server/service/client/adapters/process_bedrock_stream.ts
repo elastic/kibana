@@ -16,7 +16,7 @@ import {
   createInternalServerError,
   StreamingChatResponseEventType,
 } from '../../../../common/conversation_complete';
-import type { SmithyChunk } from '../../util/eventstream_serde_into_observable';
+import type { BedrockChunkMember } from '../../util/eventstream_serde_into_observable';
 import { convertDeserializedXmlWithJsonSchema } from '../../util/convert_deserialized_xml_with_json_schema';
 
 async function parseFunctionCallXml({
@@ -59,12 +59,12 @@ export function processBedrockStream({
   logger: Logger;
   functions?: Array<{ name: string; description: string; parameters: JSONSchema }>;
 }) {
-  return (source: Observable<SmithyChunk>) =>
+  return (source: Observable<BedrockChunkMember>) =>
     new Observable<ChatCompletionChunkEvent>((subscriber) => {
       let functionCallsBuffer: string = '';
       const id = v4();
 
-      async function handleNext(value: SmithyChunk) {
+      async function handleNext(value: BedrockChunkMember) {
         const response: {
           completion: string;
           stop_reason: string | null;

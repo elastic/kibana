@@ -104,7 +104,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const chunk = JSON.stringify(createOpenAiChunk('Hello'));
 
       await simulator.rawWrite(`data: ${chunk.substring(0, 10)}`);
-      await simulator.rawWrite(`${chunk.substring(10)}\n`);
+      await simulator.rawWrite(`${chunk.substring(10)}\n\n`);
       await simulator.complete();
 
       await new Promise<void>((resolve) => passThrough.on('end', () => resolve()));

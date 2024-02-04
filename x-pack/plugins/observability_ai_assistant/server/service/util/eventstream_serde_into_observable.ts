@@ -12,12 +12,24 @@ import { Observable } from 'rxjs';
 import { Readable } from 'stream';
 import { Message } from '@smithy/types';
 
-export interface SmithyChunk {
+interface ModelStreamErrorException {
+  name: 'ModelStreamErrorException';
+  originalStatusCode?: number;
+  originalMessage?: string;
+}
+
+export interface BedrockChunkMember {
   chunk: Message;
 }
 
+export interface ModelStreamErrorExceptionMember {
+  modelStreamErrorException: ModelStreamErrorException;
+}
+
+export type BedrockStreamMember = BedrockChunkMember | ModelStreamErrorExceptionMember;
+
 export function eventstreamSerdeIntoObservable(readable: Readable) {
-  return new Observable<SmithyChunk>((subscriber) => {
+  return new Observable<BedrockStreamMember>((subscriber) => {
     const marshaller = new EventStreamMarshaller({
       utf8Encoder: toUtf8,
       utf8Decoder: fromUtf8,
@@ -26,7 +38,7 @@ export function eventstreamSerdeIntoObservable(readable: Readable) {
     async function processStream() {
       for await (const chunk of marshaller.deserialize(readable, identity)) {
         if (chunk) {
-          subscriber.next(chunk as SmithyChunk);
+          subscriber.next(chunk as BedrockStreamMember);
         }
       }
     }

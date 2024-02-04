@@ -129,7 +129,14 @@ export function createConversationNotFoundError() {
   );
 }
 
-export function createInternalServerError(originalErrorMessage: string) {
+export function createInternalServerError(
+  originalErrorMessage: string = i18n.translate(
+    'xpack.observabilityAiAssistant.chatCompletionError.internalServerError',
+    {
+      defaultMessage: 'An internal server error occurred',
+    }
+  )
+) {
   return new ChatCompletionError(ChatCompletionErrorCode.InternalError, originalErrorMessage);
 }
 
