@@ -64,7 +64,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await rule.waitForPluginInitialized();
       await findings.index.add(k8sFindingsMock);
       await rule.navigateToRulePage('cis_k8s', '1.0.1');
-      await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     afterEach(async () => {
@@ -190,10 +189,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('Rules Page - Rules Counters', () => {
       it('Shows posture score when there are findings', async () => {
+        await pageObjects.header.waitUntilLoadingHasFinished();
         const isEmptyStateVisible = await rule.rulePage.getCountersEmptyState();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect(isEmptyStateVisible).to.be(false);
 
         const postureScoreCounter = await rule.rulePage.getPostureScoreCounter();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await postureScoreCounter.getVisibleText()).includes('33%')).to.be(true);
       });
 
