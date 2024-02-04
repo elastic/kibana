@@ -143,7 +143,7 @@ export const RulesContainer = () => {
       page: 1,
       perPage: MAX_ITEMS_PER_PAGE,
       sortField: 'metadata.benchmark.rule_number',
-      sortOrder: 'asc',
+      sortOrder: rulesQuery.sortOrder,
     },
     params.benchmarkId,
     params.benchmarkVersion
@@ -256,6 +256,9 @@ export const RulesContainer = () => {
       />
       <EuiSpacer />
       <RulesTable
+        onSortChange={(value) =>
+          setRulesQuery((currentQuery) => ({ ...currentQuery, sortOrder: value }))
+        }
         rules_page={rulesPageData.rules_page}
         total={rulesPageData.total}
         error={rulesPageData.error}
