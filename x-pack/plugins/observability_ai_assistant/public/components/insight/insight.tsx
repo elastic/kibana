@@ -4,14 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiButtonIcon,
-  EuiContextMenu,
-  EuiPopover,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTextArea,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiTextArea } from '@elastic/eui';
 import { cloneDeep, last } from 'lodash';
 import React, { useEffect, useRef, useState } from 'react';
 import { MessageRole, type Message } from '../../../common/types';
@@ -19,7 +12,7 @@ import { sendEvent, TELEMETRY } from '../../analytics';
 import { ObservabilityAIAssistantChatServiceProvider } from '../../context/observability_ai_assistant_chat_service_provider';
 import { useAbortableAsync } from '../../hooks/use_abortable_async';
 import { ChatState, useChat } from '../../hooks/use_chat';
-import { useGenAIConnectors, UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
+import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import { useKibana } from '../../hooks/use_kibana';
 import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
 import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
@@ -33,6 +26,7 @@ import { MessagePanel } from '../message_panel/message_panel';
 import { MessageText } from '../message_panel/message_text';
 import { MissingCredentialsCallout } from '../missing_credentials_callout';
 import { InsightBase } from './insight_base';
+import { ActionsMenu } from './actions_menu';
 
 function ChatContent({
   title: defaultTitle,
@@ -173,80 +167,6 @@ function PromptEdit({
         />
       </EuiFlexItem>
     </EuiFlexGroup>
-  );
-}
-
-function ActionsMenu({
-  connectors,
-  onEditPrompt,
-}: {
-  connectors: UseGenAIConnectorsResult;
-  onEditPrompt: () => void;
-}) {
-  const [isPopoverOpen, setPopover] = useState(false);
-
-  const onButtonClick = () => {
-    setPopover(!isPopoverOpen);
-  };
-
-  const closePopover = () => {
-    setPopover(false);
-  };
-
-  const panels = [
-    {
-      id: 0,
-      title: 'Actions',
-      items: [
-        {
-          name: `Connectors: ${connectors.selectedConnector}`,
-          icon: 'wrench',
-          panel: 1,
-        },
-        {
-          name: 'Edit prompt',
-          icon: 'documentEdit',
-          onClick: () => {
-            onEditPrompt();
-            closePopover();
-          },
-        },
-      ],
-    },
-    {
-      id: 1,
-      title: 'Connectors',
-      items: connectors.connectors?.map((connector) => {
-        return {
-          name: connector.name,
-          icon: connector.id === connectors.selectedConnector ? 'check' : undefined,
-          onClick: () => {
-            connectors.selectConnector(connector.id);
-            closePopover();
-          },
-        };
-      }),
-    },
-  ];
-
-  const button = (
-    <EuiButtonIcon
-      data-test-subj="observabilityAiAssistantInsightActionsButtonIcon"
-      iconType="boxesHorizontal"
-      onClick={onButtonClick}
-    />
-  );
-
-  return (
-    <EuiPopover
-      button={button}
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-      panelPaddingSize="none"
-      anchorPosition="downLeft"
-    >
-      <EuiContextMenu initialPanelId={0} panels={panels} />
-    </EuiPopover>
   );
 }
 
