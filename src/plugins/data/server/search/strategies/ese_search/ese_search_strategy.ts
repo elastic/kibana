@@ -12,7 +12,7 @@ import { catchError, tap } from 'rxjs/operators';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { firstValueFrom, from } from 'rxjs';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
-import { ESQL_TYPE } from '@kbn/data-views-plugin/common';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { IAsyncSearchRequestParams } from '../..';
 import { getKbnSearchError, KbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';

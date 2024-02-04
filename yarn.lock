@@ -4348,6 +4348,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/data-view-utils@link:packages/kbn-data-view-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/data-views-plugin@link:src/plugins/data_views":
   version "0.0.0"
   uid ""

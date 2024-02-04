@@ -20,13 +20,11 @@ export async function getDataViewByTextBasedQueryLang(
   services: DiscoverServices
 ) {
   let indexPatternFromQuery = '';
-  let isEsql = false;
   if ('sql' in query) {
     indexPatternFromQuery = getIndexPatternFromSQLQuery(query.sql);
   }
   if ('esql' in query) {
     indexPatternFromQuery = getIndexPatternFromESQLQuery(query.esql);
-    isEsql = true;
   }
   // we should find a better way to work with ESQL queries which dont need a dataview
   if (!indexPatternFromQuery && currentDataView) return currentDataView;

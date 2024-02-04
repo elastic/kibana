@@ -10,7 +10,6 @@ import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
-import { ESQL_TYPE } from '@kbn/data-views-plugin/common';
 import type { Suggestion } from '../../../types';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import type { LensPluginStartDependencies } from '../../../plugin';
