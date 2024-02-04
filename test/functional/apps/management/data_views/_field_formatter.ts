@@ -444,7 +444,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const testDocumentId = docResult._id;
 
         const indexPatternResult = await indexPatterns.create(
-          { title: indexTitle },
+          { title: `${indexTitle}*` }, // sidesteps field caching when index pattern is reused
           { override: true }
         );
 

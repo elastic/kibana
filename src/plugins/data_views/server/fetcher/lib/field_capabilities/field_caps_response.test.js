@@ -48,7 +48,6 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
               'timeSeriesMetric',
               'timeSeriesDimension'
             );
-            console.log('*****', fieldWithoutOptionalKeys);
 
             expect(Object.keys(fieldWithoutOptionalKeys)).toEqual([
               'name',
@@ -166,6 +165,23 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
         expect(child).not.toHaveProperty('subType');
       });
     });
+
+    it('sets default field formatter', () => {
+      const fields = readFieldCapsResponse({
+        fields: {
+          percent: {
+            long: {
+              type: 'percent',
+              searchable: true,
+              aggregatable: true,
+              meta: {
+                unit: ['s'],
+              },
+            },
+          },
+        },
+      });
+      expect(fields[0].defaultFormatter).toEqual('s');
+    });
   });
-  // todo add test for defaultFormatter
 });
