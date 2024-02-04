@@ -6,13 +6,12 @@
  */
 import {
   EuiButtonIcon,
-  EuiInlineEditText,
   EuiContextMenu,
   EuiPopover,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiTextArea,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { cloneDeep, last } from 'lodash';
 import React, { useEffect, useRef, useState } from 'react';
 import { MessageRole, type Message } from '../../../common/types';
@@ -129,116 +128,61 @@ function ChatContent({
   );
 }
 
-export interface InsightProps {
-  messages: Message[];
-  title: string;
-  dataTestSubj?: string;
-}
-
-export function Insight({ messages, title, dataTestSubj }: InsightProps) {
-  const [hasOpened, setHasOpened] = useState(false);
-  const [isEditingPrompt, setEditingPrompt] = useState(false);
-  const [isInsightOpen, setInsightOpen] = useState(false);
-  const [initialMessages, setInitialMessages] = useState(messages);
-
-  const connectors = useGenAIConnectors();
-
-  const service = useObservabilityAIAssistant();
-
-  const chatService = useAbortableAsync(
-    ({ signal }) => {
-      return service.start({ signal });
-    },
-    [service]
-  );
-
-  const {
-    services: { http },
-  } = useKibana();
-
-  let children: React.ReactNode = null;
-
-  if (hasOpened && isInsightOpen && connectors.selectedConnector && !isEditingPrompt) {
-    children = (
-      <ChatContent
-        title={title}
-        initialMessages={initialMessages}
-        connectorId={connectors.selectedConnector}
-      />
-    );
-  } else if (isEditingPrompt) {
-    children = (
-      <EuiInlineEditText
-        inputAriaLabel={i18n.translate('xpack.observabilityAiAssistant.insight.editPromptInput', {
-          defaultMessage: 'Edit conversation',
-        })}
-        defaultValue={
-          last(initialMessages.filter((msg) => msg.message.role === MessageRole.User))?.message
-            .content
-        }
-        size="m"
-        startWithEditOpen={true}
-        onSave={(value: string) => {
-          const clonedMessages = cloneDeep(initialMessages);
-          const message = last(
-            clonedMessages.filter((msg) => msg.message.role === MessageRole.User)
-          );
-          if (!message) return false;
-
-          message.message.content = value;
-          setInitialMessages(clonedMessages);
-          setEditingPrompt(false);
-          return true;
-        }}
-        onCancel={() => {
-          setEditingPrompt(false);
-          setInsightOpen(false);
-        }}
-      />
-    );
-  } else if (!connectors.loading && !connectors.connectors?.length) {
-    children = (
-      <MissingCredentialsCallout connectorsManagementHref={getConnectorsManagementHref(http!)} />
-    );
-  }
+function PromptEdit({
+  initialPrompt,
+  onSend,
+  onCancel,
+}: {
+  initialPrompt: string;
+  onSend: (updatedPrompt: string) => void;
+  onCancel: () => void;
+}) {
+  const [prompt, setPrompt] = useState(initialPrompt);
 
   return (
-    <InsightBase
-      title={title}
-      onToggle={(isOpen) => {
-        setHasOpened((prevHasOpened) => prevHasOpened || isOpen);
-        setInsightOpen(isOpen);
-      }}
-      controls={
-        <ActionsMenu
-          connectors={connectors}
-          onEditPrompt={() => {
-            setEditingPrompt(true);
-            setInsightOpen(true);
-            setHasOpened(true);
+    <EuiFlexGroup alignItems={'center'}>
+      <EuiFlexItem grow={true}>
+        <EuiTextArea
+          data-test-subj="observabilityAiAssistantInsightEditPromptTextArea"
+          fullWidth={true}
+          defaultValue={prompt}
+          onChange={(ev) => {
+            setPrompt(ev.target.value);
           }}
         />
-      }
-      loading={connectors.loading || chatService.loading}
-      dataTestSubj={dataTestSubj}
-      isOpen={isInsightOpen}
-    >
-      {chatService.value ? (
-        <ObservabilityAIAssistantChatServiceProvider value={chatService.value}>
-          {children}
-        </ObservabilityAIAssistantChatServiceProvider>
-      ) : null}
-    </InsightBase>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          data-test-subj="observabilityAiAssistantInsightSendEditPromptButtonIcon"
+          iconType="kqlFunction"
+          display="fill"
+          size="m"
+          onClick={() => onSend(prompt)}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          data-test-subj="observabilityAiAssistantInsightCancelEditPromptButtonIcon"
+          iconType="cross"
+          display="base"
+          color="danger"
+          size="m"
+          onClick={() => {
+            onCancel();
+          }}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
 
-const ActionsMenu = ({
+function ActionsMenu({
   connectors,
   onEditPrompt,
 }: {
   connectors: UseGenAIConnectorsResult;
   onEditPrompt: () => void;
-}) => {
+}) {
   const [isPopoverOpen, setPopover] = useState(false);
 
   const onButtonClick = () => {
@@ -275,7 +219,7 @@ const ActionsMenu = ({
       items: connectors.connectors?.map((connector) => {
         return {
           name: connector.name,
-          icon: connector.id === connectors.selectedConnector ? 'check' : null,
+          icon: connector.id === connectors.selectedConnector ? 'check' : undefined,
           onClick: () => {
             connectors.selectConnector(connector.id);
             closePopover();
@@ -304,4 +248,108 @@ const ActionsMenu = ({
       <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>
   );
-};
+}
+
+export interface InsightProps {
+  messages: Message[];
+  title: string;
+  dataTestSubj?: string;
+}
+
+export function Insight({ messages, title, dataTestSubj }: InsightProps) {
+  const [initialMessages, setInitialMessages] = useState(messages);
+  const [isEditingPrompt, setEditingPrompt] = useState(false);
+  const [isInsightOpen, setInsightOpen] = useState(false);
+  const [hasOpened, setHasOpened] = useState(false);
+
+  const connectors = useGenAIConnectors();
+
+  const service = useObservabilityAIAssistant();
+
+  const chatService = useAbortableAsync(
+    ({ signal }) => {
+      return service.start({ signal });
+    },
+    [service]
+  );
+
+  const {
+    services: { http },
+  } = useKibana();
+
+  let children: React.ReactNode = null;
+
+  if (
+    connectors.selectedConnector &&
+    ((!isInsightOpen && hasOpened) || (isInsightOpen && !isEditingPrompt))
+  ) {
+    children = (
+      <ChatContent
+        title={title}
+        initialMessages={initialMessages}
+        connectorId={connectors.selectedConnector}
+      />
+    );
+  } else if (isEditingPrompt) {
+    children = (
+      <PromptEdit
+        initialPrompt={
+          last(messages.filter((msg) => msg.message.role === MessageRole.User))?.message.content ||
+          ''
+        }
+        onSend={(updatedPrompt) => {
+          const clonedMessages = cloneDeep(messages);
+          const message = last(
+            clonedMessages.filter((msg) => msg.message.role === MessageRole.User)
+          );
+          if (!message) return false;
+
+          message.message.content = updatedPrompt;
+          setInitialMessages(clonedMessages);
+          setEditingPrompt(false);
+          return true;
+        }}
+        onCancel={() => {
+          setEditingPrompt(false);
+          setInsightOpen(false);
+          setHasOpened(false);
+        }}
+      />
+    );
+  } else if (!connectors.loading && !connectors.connectors?.length) {
+    children = (
+      <MissingCredentialsCallout connectorsManagementHref={getConnectorsManagementHref(http!)} />
+    );
+  }
+
+  return (
+    <InsightBase
+      title={title}
+      onToggle={(isOpen) => {
+        setHasOpened((prevHasOpened) => {
+          if (isEditingPrompt) return false;
+          return prevHasOpened || isOpen;
+        });
+        setInsightOpen(isOpen);
+      }}
+      controls={
+        <ActionsMenu
+          connectors={connectors}
+          onEditPrompt={() => {
+            setEditingPrompt(true);
+            setInsightOpen(true);
+          }}
+        />
+      }
+      loading={connectors.loading || chatService.loading}
+      dataTestSubj={dataTestSubj}
+      isOpen={isInsightOpen}
+    >
+      {chatService.value ? (
+        <ObservabilityAIAssistantChatServiceProvider value={chatService.value}>
+          {children}
+        </ObservabilityAIAssistantChatServiceProvider>
+      ) : null}
+    </InsightBase>
+  );
+}

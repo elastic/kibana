@@ -87,6 +87,7 @@ Morbi non faucibus massa. Aliquam sed augue in eros ornare luctus sit amet cursu
       }
     />
   ),
+  isOpen: false,
 };
 
 export const Insight = Template.bind({});
