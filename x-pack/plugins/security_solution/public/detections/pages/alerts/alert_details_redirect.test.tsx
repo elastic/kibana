@@ -8,14 +8,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { Router } from '@kbn/shared-ux-router';
 import { AlertDetailsRedirect } from './alert_details_redirect';
-import {
-  createSecuritySolutionStorageMock,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  TestProviders,
-} from '../../../common/mock';
-import { createStore } from '../../../common/store';
-import { kibanaObservable } from '@kbn/timelines-plugin/public/mock';
+import { TestProviders } from '../../../common/mock';
 import { ALERTS_PATH, ALERT_DETAILS_REDIRECT_PATH } from '../../../../common/constants';
 import { mockHistory } from '../../../common/utils/route/mocks';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
@@ -37,8 +30,6 @@ const testTimestamp = '2023-04-20T12:00:00.000Z';
 const mockPathname = `${ALERT_DETAILS_REDIRECT_PATH}/${testAlertId}`;
 
 describe('AlertDetailsRedirect', () => {
-  const { storage } = createSecuritySolutionStorageMock();
-  const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   afterEach(() => {
     mockHistory.replace.mockClear();
   });
@@ -56,7 +47,7 @@ describe('AlertDetailsRedirect', () => {
         },
       };
       render(
-        <TestProviders store={store}>
+        <TestProviders>
           <Router history={historyMock}>
             <AlertDetailsRedirect />
           </Router>
@@ -85,7 +76,7 @@ describe('AlertDetailsRedirect', () => {
         },
       };
       render(
-        <TestProviders store={store}>
+        <TestProviders>
           <Router history={historyMock}>
             <AlertDetailsRedirect />
           </Router>
@@ -113,7 +104,7 @@ describe('AlertDetailsRedirect', () => {
         },
       };
       render(
-        <TestProviders store={store}>
+        <TestProviders>
           <Router history={historyMock}>
             <AlertDetailsRedirect />
           </Router>
@@ -147,7 +138,7 @@ describe('AlertDetailsRedirect', () => {
           },
         };
         render(
-          <TestProviders store={store}>
+          <TestProviders>
             <Router history={historyMock}>
               <AlertDetailsRedirect />
             </Router>
