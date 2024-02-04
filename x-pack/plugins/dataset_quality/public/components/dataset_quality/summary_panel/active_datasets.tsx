@@ -34,7 +34,6 @@ export function ActiveDatasets() {
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
-
         <EuiTitle size="m">
           <h3>9 {tableSummaryOfText} 10</h3>
         </EuiTitle>

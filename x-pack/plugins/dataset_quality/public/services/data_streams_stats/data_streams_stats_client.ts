@@ -12,6 +12,8 @@ import {
   getDataStreamsDegradedDocsStatsResponseRt,
   getDataStreamsStatsResponseRt,
   getDataStreamsDetailsResponseRt,
+  DataStreamsEstimatedDataInBytes,
+  getDataStreamsEstimatedDataInBytesResponseRt,
 } from '../../../common/api_types';
 import { DEFAULT_DATASET_TYPE } from '../../../common/constants';
 import {
@@ -23,6 +25,8 @@ import {
   GetDataStreamsStatsResponse,
   GetDataStreamDetailsParams,
   GetDataStreamDetailsResponse,
+  GetDataStreamsEstimatedDataInBytesParams,
+  GetDataStreamsEstimatedDataInBytesResponse,
 } from '../../../common/data_streams_stats';
 import { DataStreamDetails } from '../../../common/data_streams_stats';
 import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
@@ -99,5 +103,32 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
     )(response);
 
     return dataStreamDetails as DataStreamDetails;
+  }
+
+  public async getDataStreamsEstimatedDataInBytes(
+    params: GetDataStreamsEstimatedDataInBytesParams = { query: { type: DEFAULT_DATASET_TYPE } }
+  ) {
+    const response = await this.http
+      .get<GetDataStreamsEstimatedDataInBytesResponse>(
+        `/internal/dataset_quality/data_streams/estimated_data`,
+        {
+          ...params,
+        }
+      )
+      .catch((error) => {
+        throw new GetDataStreamsStatsError(
+          `Failed to fetch data streams estimated data in bytes": ${error}`
+        );
+      });
+
+    const dataStreamsEstimatedDataInBytes = decodeOrThrow(
+      getDataStreamsEstimatedDataInBytesResponseRt,
+      (message: string) =>
+        new GetDataStreamsStatsError(
+          `Failed to decode data streams estimated data in bytes response: ${message}"`
+        )
+    )(response);
+
+    return dataStreamsEstimatedDataInBytes as DataStreamsEstimatedDataInBytes;
   }
 }

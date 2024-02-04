@@ -8,14 +8,14 @@
 import React from 'react';
 
 import { EuiFlexGroup } from '@elastic/eui';
-import { DatasetsQuality } from './datasets_quality';
+import { DatasetsQualityIndicators } from './datasets_quality_indicators';
 import { ActiveDatasets } from './active_datasets';
 import { EstimatedData } from './estimated_data';
 
 export function SummaryPanel() {
   return (
     <EuiFlexGroup gutterSize="m">
-      <DatasetsQuality />
+      <DatasetsQualityIndicators />
       <EuiFlexGroup gutterSize="m">
         <ActiveDatasets />
         <EstimatedData />

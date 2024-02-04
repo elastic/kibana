@@ -26,7 +26,7 @@ import {
   summaryPanelQualityTooltipText,
 } from '../../../../common/translations';
 
-export function DatasetsQuality() {
+export function DatasetsQualityIndicators() {
   return (
     <EuiPanel hasBorder>
       <EuiFlexGroup direction="column" gutterSize="s">
@@ -54,7 +54,7 @@ export function DatasetsQuality() {
   );
 }
 
-function QualityIndicator({
+const QualityIndicator = ({
   value,
   quality,
   description,
@@ -62,7 +62,7 @@ function QualityIndicator({
   value: string;
   quality: 'success' | 'danger' | 'warning';
   description: string;
-}) {
+}) => {
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiTitle size="m">
@@ -77,7 +77,7 @@ function QualityIndicator({
       </EuiText>
     </EuiFlexGroup>
   );
-}
+};
 
 const VerticalRule = styled.span`
   width: 1px;
