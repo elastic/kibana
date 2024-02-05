@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues } from '../../../../../__mocks__/kea_logic';
+import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -18,16 +18,21 @@ import { PipelineSelect } from './pipeline_select';
 const DEFAULT_VALUES = {
   addInferencePipelineModal: {
     configuration: {
-      pipelineName: '', // TODO: Should this be null?
+      pipelineName: '',
     },
   },
   existingInferencePipelines: [],
+};
+
+const MOCK_ACTIONS = {
+  selectExistingPipeline: jest.fn(),
 };
 
 describe('PipelineSelect', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setMockValues({});
+    setMockActions(MOCK_ACTIONS);
   });
   it('renders pipeline select with no options', () => {
     setMockValues(DEFAULT_VALUES);
@@ -141,5 +146,28 @@ describe('PipelineSelect', () => {
     expect(wrapper.find(EuiSelectable)).toHaveLength(1);
     const selectable = wrapper.find(EuiSelectable);
     expect(selectable.prop('options')[2].checked).toEqual('on');
+  });
+  it('sets pipeline name on selecting a pipeline', () => {
+    setMockValues(DEFAULT_VALUES);
+
+    const wrapper = shallow(<PipelineSelect />);
+    expect(wrapper.find(EuiSelectable)).toHaveLength(1);
+    const selectable = wrapper.find(EuiSelectable);
+    selectable.simulate('change', [
+      {
+        label: 'pipeline_1',
+        pipeline: {
+          pipelineName: 'pipeline_1',
+        },
+      },
+      {
+        checked: 'on',
+        label: 'pipeline_2',
+        pipeline: {
+          pipelineName: 'pipeline_2',
+        },
+      },
+    ]);
+    expect(MOCK_ACTIONS.selectExistingPipeline).toHaveBeenCalledWith('pipeline_2');
   });
 });
