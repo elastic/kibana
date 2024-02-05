@@ -29,48 +29,25 @@ const Wrapper = (props: ConversationListProps) => {
 };
 
 export const ChatHeaderLoading: ComponentStoryObj<typeof Component> = {
-  args: {
-    loading: true,
-  },
+  args: {},
   render: Wrapper,
 };
 
 export const ChatHeaderError: ComponentStoryObj<typeof Component> = {
-  args: {
-    error: new Error(),
-  },
+  args: {},
   render: Wrapper,
 };
 
 export const ChatHeaderLoaded: ComponentStoryObj<typeof Component> = {
   args: {
-    loading: false,
     selected: '',
-    conversations: [
-      {
-        id: '',
-        label: 'New conversation',
-      },
-      {
-        id: 'first',
-        label: 'My first conversation',
-        href: '/my-first-conversation',
-      },
-      {
-        id: 'second',
-        label: 'My second conversation',
-        href: '/my-second-conversation',
-      },
-    ],
   },
   render: Wrapper,
 };
 
 export const ChatHeaderEmpty: ComponentStoryObj<typeof Component> = {
   args: {
-    loading: false,
     selected: '',
-    conversations: [],
   },
   render: Wrapper,
 };

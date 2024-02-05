@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type { ObservabilityLogExplorerLocationState } from '@kbn/deeplinks-observability/locators';
+export type { ObservabilityLogsExplorerLocationState } from '@kbn/deeplinks-observability/locators';
 import { AllDatasetsLocator } from './all_datasets';
 import { SingleDatasetLocator } from './single_dataset';
 
@@ -13,7 +13,7 @@ export * from './single_dataset';
 export * from './all_datasets';
 export * from './utils';
 
-export interface ObservabilityLogExplorerLocators {
+export interface ObservabilityLogsExplorerLocators {
   allDatasetsLocator: AllDatasetsLocator;
   singleDatasetLocator: SingleDatasetLocator;
 }

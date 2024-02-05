@@ -65,7 +65,22 @@ export function EsqlCodeBlock({
                 disabled={actionsDisabled}
               >
                 {i18n.translate('xpack.observabilityAiAssistant.runThisQuery', {
-                  defaultMessage: 'Run this query',
+                  defaultMessage: 'Display results',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="observabilityAiAssistantEsqlCodeBlockVisualizeThisQueryButton"
+                size="xs"
+                iconType="lensApp"
+                onClick={() =>
+                  onActionClick({ type: ChatActionClickType.visualizeEsqlQuery, query: value })
+                }
+                disabled={actionsDisabled}
+              >
+                {i18n.translate('xpack.observabilityAiAssistant.visualizeThisQuery', {
+                  defaultMessage: 'Visualize this query',
                 })}
               </EuiButtonEmpty>
             </EuiFlexItem>
