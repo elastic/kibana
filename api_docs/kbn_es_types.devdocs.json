@@ -237,6 +237,27 @@
           },
           {
             "parentPluginId": "@kbn/es-types",
+            "id": "def-common.ESQLSearchReponse.all_columns",
+            "type": "Array",
+            "tags": [],
+            "label": "all_columns",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-types",
+                "scope": "common",
+                "docId": "kibKbnEsTypesPluginApi",
+                "section": "def-common.ESQLColumn",
+                "text": "ESQLColumn"
+              },
+              "[] | undefined"
+            ],
+            "path": "packages/kbn-es-types/src/search.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-types",
             "id": "def-common.ESQLSearchReponse.values",
             "type": "Array",
             "tags": [],
