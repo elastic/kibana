@@ -139,7 +139,7 @@ export function HeaderActions({ alert, alertStatus, onUntrackAlert }: HeaderActi
               />
             }
           >
-            <div style={{ width: '200px' }}>
+            <div style={{ width: '220px' }}>
               <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
                 <div />
 
