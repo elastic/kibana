@@ -70,7 +70,8 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 request: {
                   params: {
-                    query: 'from logstash-* | keep geo.coordinates | limit 1',
+                    query:
+                      'from logstash-* | keep geo.coordinates, @timestamp | sort @timestamp | limit 1',
                   },
                 },
                 options: {
@@ -88,14 +89,22 @@ export default function ({ getService }: FtrProviderContext) {
               name: 'geo.coordinates',
               type: 'geo_point',
             },
+            {
+              name: '@timestamp',
+              type: 'date',
+            },
           ],
           columns: [
             {
               name: 'geo.coordinates',
               type: 'geo_point',
             },
+            {
+              name: '@timestamp',
+              type: 'date',
+            },
           ],
-          values: [['POINT (-77.846302 40.851206)']],
+          values: [['POINT (-120.9871642 38.68407028)', '2015-09-20T00:00:00.000Z']],
         });
       });
     });
