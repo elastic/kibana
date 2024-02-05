@@ -178,6 +178,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
           })}
         </EuiButton>,
         <EuiPopover
+          key="createPipelinePopover"
           isOpen={showPopover}
           closePopover={() => setShowPopover(false)}
           button={
