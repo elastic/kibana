@@ -580,6 +580,7 @@ export class ObservabilityAIAssistantClient {
           description:
             'Use this function to title the conversation. Do not wrap the title in quotes',
           parameters: {
+            type: 'object',
             properties: {
               title: {
                 type: 'string',

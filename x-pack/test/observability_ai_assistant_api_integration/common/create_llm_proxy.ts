@@ -65,7 +65,8 @@ export class LlmProxy {
           }
         }
 
-        throw new Error('No interceptors found to handle request');
+        response.writeHead(500, 'No interceptors found to handle request: ' + request.url);
+        response.end();
       })
       .listen(port);
   }
@@ -120,11 +121,11 @@ export class LlmProxy {
                 await end();
               },
               complete: async () => {
-                await write('data: [DONE]');
+                await write('data: [DONE]\n\n');
                 await end();
               },
               error: async (error) => {
-                await write(`data: ${JSON.stringify({ error })}`);
+                await write(`data: ${JSON.stringify({ error })}\n\n`);
                 await end();
               },
             };

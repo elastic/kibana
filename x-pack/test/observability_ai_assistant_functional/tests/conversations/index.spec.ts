@@ -148,8 +148,9 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                 const titleInterceptor = proxy.intercept(
                   'title',
                   (body) =>
-                    (JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming)
-                      .messages.length === 1
+                    (
+                      JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming
+                    ).functions?.find((fn) => fn.name === 'title_conversation') !== undefined
                 );
 
                 const conversationInterceptor = proxy.intercept(
