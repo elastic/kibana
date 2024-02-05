@@ -66,8 +66,8 @@ export const calculateEndpointAuthz = (
   const isEnterpriseLicense = licenseService.isEnterprise();
   const hasEndpointManagementAccess = userRoles.includes('superuser');
 
-  const canWriteSecuritySolution = hasAuth('writeSecuritySolution', { action: 'ui:write' });
-  const canReadSecuritySolution = hasAuth('readSecuritySolution', { action: 'ui:read' });
+  const canWriteSecuritySolution = hasAuth('writeSecuritySolution', { action: 'ui:crud' });
+  const canReadSecuritySolution = hasAuth('readSecuritySolution', { action: 'ui:show' });
   const canWriteEndpointList = hasAuth('writeEndpointList');
   const canReadEndpointList = hasAuth('readEndpointList');
   const canWritePolicyManagement = hasAuth('writePolicyManagement');
