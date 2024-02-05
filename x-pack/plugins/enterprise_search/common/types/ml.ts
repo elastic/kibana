@@ -27,7 +27,9 @@ export interface MlModel {
   modelId: string;
   /** Model inference type, e.g. ner, text_classification */
   type: string;
+  /** Type-related tags: model type (e.g. pytorch), inference type, built-in tag */
   types: string[];
+  /** Field names in inference input configuration */
   inputFieldNames: string[];
   title: string;
   description?: string;
