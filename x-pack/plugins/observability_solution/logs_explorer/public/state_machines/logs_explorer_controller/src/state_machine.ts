@@ -25,6 +25,7 @@ import { createAndSetDataView } from './services/data_view_service';
 import {
   subscribeToDiscoverState,
   updateContextFromDiscoverAppState,
+  updateContextFromDiscoverDataState,
   updateDiscoverAppStateFromContext,
 } from './services/discover_service';
 import { validateSelection } from './services/selection_service';
@@ -103,6 +104,7 @@ export const createPureLogsExplorerControllerStateMachine = (
               id: 'timefilterService',
             },
           ],
+          entry: ['resetRows'],
           states: {
             datasetSelection: {
               initial: 'validatingSelection',
@@ -196,6 +198,9 @@ export const createPureLogsExplorerControllerStateMachine = (
             RECEIVE_DISCOVER_APP_STATE: {
               actions: ['updateContextFromDiscoverAppState'],
             },
+            RECEIVE_DISCOVER_DATA_STATE: {
+              actions: ['updateContextFromDiscoverDataState'],
+            },
             RECEIVE_QUERY_STATE: {
               actions: ['updateQueryStateFromQueryServiceState'],
             },
@@ -239,8 +244,12 @@ export const createPureLogsExplorerControllerStateMachine = (
               }
             : {}
         ),
+        resetRows: actions.assign((_context, event) => ({
+          rows: [],
+        })),
         notifyDataViewUpdate: raise('DATA_VIEW_UPDATED'),
         updateContextFromDiscoverAppState,
+        updateContextFromDiscoverDataState,
         updateDiscoverAppStateFromContext,
         updateContextFromTimefilter,
       },

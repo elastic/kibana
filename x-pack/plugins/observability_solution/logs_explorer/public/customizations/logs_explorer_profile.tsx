@@ -89,7 +89,7 @@ export const createLogsExplorerProfileCustomizations =
       id: 'data_table',
       customCellRenderer: createCustomCellRenderer({ data }),
       customGridColumnsConfiguration: createCustomGridColumnsConfiguration(),
-      customControlColumnsConfiguration: createCustomControlColumnsConfiguration,
+      customControlColumnsConfiguration: createCustomControlColumnsConfiguration(service),
     });
 
     /**

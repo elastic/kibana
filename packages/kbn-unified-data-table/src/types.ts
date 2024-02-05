@@ -64,7 +64,6 @@ export interface ControlColumns {
 
 export interface ControlColumnsProps {
   controlColumns: ControlColumns;
-  rows?: DataTableRecord[];
 }
 
 export type CustomControlColumnConfiguration = (props: ControlColumnsProps) => {

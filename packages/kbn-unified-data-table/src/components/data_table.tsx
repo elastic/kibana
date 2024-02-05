@@ -772,7 +772,6 @@ export const UnifiedDataTable = ({
 
   const controlColumnsConfig = customControlColumnsConfiguration?.({
     controlColumns: getAllControlColumns(),
-    rows,
   });
 
   const customLeadingControlColumn =
