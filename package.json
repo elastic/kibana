@@ -832,7 +832,6 @@
     "@kbn/uptime-plugin": "link:x-pack/plugins/uptime",
     "@kbn/url-drilldown-plugin": "link:x-pack/plugins/drilldowns/url_drilldown",
     "@kbn/url-forwarding-plugin": "link:src/plugins/url_forwarding",
-    "@kbn/url-state": "link:packages/kbn-url-state",
     "@kbn/usage-collection-plugin": "link:src/plugins/usage_collection",
     "@kbn/usage-collection-test-plugin": "link:test/plugin_functional/plugins/usage_collection",
     "@kbn/use-tracked-promise": "link:packages/kbn-use-tracked-promise",
