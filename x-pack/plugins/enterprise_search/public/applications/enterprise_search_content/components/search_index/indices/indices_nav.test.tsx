@@ -44,14 +44,14 @@ describe('useIndicesNav', () => {
     const BASE_NAV = [
       {
         id: 'indexName',
-        name: 'index-name',
-        renderItem: expect.any(Function),
+        name: 'INDEX-NAME',
         'data-test-subj': 'IndexLabel',
+        href: '/search_indices/index-name',
         items: [
           {
             id: 'overview',
             name: 'Overview',
-            href: '/search_indices/index-name',
+            href: '/search_indices/index-name/overview',
             'data-test-subj': 'IndexOverviewLink',
           },
           {
@@ -72,19 +72,6 @@ describe('useIndicesNav', () => {
 
     it('always returns an index label, overview, documents, index mapping link', () => {
       expect(useIndicesNav()).toEqual(BASE_NAV);
-    });
-
-    describe('index name label', () => {
-      const renderIndexNameLabel = (indexNameNav: any) => {
-        return shallow(indexNameNav[0].renderItem() as any);
-      };
-
-      it('renders the capitalized index name', () => {
-        const wrapper = renderIndexNameLabel(useIndicesNav());
-        const name = wrapper.find('.eui-textTruncate');
-
-        expect(name.text()).toEqual('INDEX-NAME');
-      });
     });
 
     it('returns pipelines with default navs when hasDefaultIngestPipeline is true', () => {

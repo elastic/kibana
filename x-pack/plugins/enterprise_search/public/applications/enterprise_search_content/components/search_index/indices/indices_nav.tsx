@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { useParams, useRouteMatch } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
-import { EuiSideNavItemType, EuiText } from '@elastic/eui';
+import { EuiSideNavItemType } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -21,7 +20,6 @@ import { SEARCH_INDEX_PATH, SEARCH_INDEX_TAB_PATH } from '../../../routes';
 import { isConnectorIndex, isCrawlerIndex } from '../../../utils/indices';
 import { IndexViewLogic } from '../index_view_logic';
 
-import './indices_nav.scss';
 import { SearchIndexTabId } from '../search_index';
 
 export const useIndicesNav = () => {
@@ -39,12 +37,12 @@ export const useIndicesNav = () => {
     {
       'data-test-subj': 'IndexLabel',
       id: 'indexName',
-      name: indexName,
-      renderItem: () => (
-        <EuiText color="subdued" size="s" className="enterpriseSearchNavIndexLabel">
-          <div className="eui-textTruncate">{indexName.toUpperCase()}</div>
-        </EuiText>
-      ),
+      name: indexName.toUpperCase(),
+      ...generateNavLink({
+        to: generateEncodedPath(SEARCH_INDEX_PATH, {
+          indexName,
+        }),
+      }),
       items: [
         {
           'data-test-subj': 'IndexOverviewLink',
@@ -53,8 +51,9 @@ export const useIndicesNav = () => {
             defaultMessage: 'Overview',
           }),
           ...generateNavLink({
-            to: generateEncodedPath(SEARCH_INDEX_PATH, {
+            to: generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
               indexName,
+              tabId: SearchIndexTabId.OVERVIEW,
             }),
           }),
         },
