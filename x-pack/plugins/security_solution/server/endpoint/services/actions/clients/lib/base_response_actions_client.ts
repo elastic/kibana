@@ -173,28 +173,28 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
     this.log.debug(`Updating cases:\n${stringify(allCases)}`);
 
-    // console.log({ hosts });
-    // Create an attachment for each case that includes info. about the response actions taken against the hosts
-    const attachments: CaseAttachments = allCases.map(() => ({
-      type: AttachmentType.externalReference,
-      externalReferenceId: actionId,
-      externalReferenceStorage: {
-        type: ExternalReferenceStorageType.elasticSearchDoc,
+    const attachments: CaseAttachments = [
+      {
+        type: AttachmentType.externalReference,
+        externalReferenceId: actionId,
+        externalReferenceStorage: {
+          type: ExternalReferenceStorageType.elasticSearchDoc,
+        },
+        externalReferenceAttachmentTypeId: CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
+        externalReferenceMetadata: {
+          targets: hosts.map(({ hostId: endpointId, hostname, agentType }) => {
+            return {
+              endpointId,
+              hostname,
+              agentType,
+            };
+          }),
+          command,
+          comment: comment || EMPTY_COMMENT,
+        },
+        owner: APP_ID,
       },
-      externalReferenceAttachmentTypeId: CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
-      externalReferenceMetadata: {
-        targets: hosts.map(({ hostId: endpointId, hostname, agentType }) => {
-          return {
-            endpointId,
-            hostname,
-            agentType,
-          };
-        }),
-        command,
-        comment: comment || EMPTY_COMMENT,
-      },
-      owner: APP_ID,
-    }));
+    ];
 
     const casesUpdateResponse = await Promise.all(
       allCases.map(async (caseId) => {
