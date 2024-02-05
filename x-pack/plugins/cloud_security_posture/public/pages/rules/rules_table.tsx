@@ -16,6 +16,7 @@ import {
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiTableSortingType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
@@ -36,6 +37,7 @@ type RulesTableProps = Pick<
   refetchRulesStates: () => void;
   selectedRules: CspBenchmarkRulesWithStates[];
   setSelectedRules: (rules: CspBenchmarkRulesWithStates[]) => void;
+  onSortChange: (value: 'asc' | 'desc') => void;
 };
 
 type GetColumnProps = Pick<
@@ -68,6 +70,7 @@ export const RulesTable = ({
   refetchRulesStates,
   selectedRules,
   setSelectedRules,
+  onSortChange,
 }: RulesTableProps) => {
   const { euiTheme } = useEuiTheme();
   const euiPagination: EuiBasicTableProps<CspBenchmarkRulesWithStates>['pagination'] = {
@@ -76,10 +79,24 @@ export const RulesTable = ({
     totalItemCount: total,
     pageSizeOptions: [10, 25, 100],
   };
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const sorting: EuiTableSortingType<CspBenchmarkRulesWithStates> = {
+    sort: {
+      field: 'metadata.benchmark.rule_number' as keyof CspBenchmarkRulesWithStates,
+      direction: sortDirection,
+    },
+  };
 
-  const onTableChange = ({ page: pagination }: Criteria<CspBenchmarkRulesWithStates>) => {
+  const onTableChange = ({
+    page: pagination,
+    sort: sortOrder,
+  }: Criteria<CspBenchmarkRulesWithStates>) => {
     if (!pagination) return;
-    setPagination({ page: pagination.index, perPage: pagination.size });
+    if (pagination) setPagination({ page: pagination.index, perPage: pagination.size });
+    if (sortOrder) {
+      setSortDirection(sortOrder.direction);
+      onSortChange(sortOrder.direction);
+    }
   };
 
   const rowProps = (row: CspBenchmarkRulesWithStates) => ({
@@ -149,6 +166,7 @@ export const RulesTable = ({
         onChange={onTableChange}
         itemId={(v) => v.metadata.id}
         rowProps={rowProps}
+        sorting={sorting}
       />
     </>
   );
@@ -221,7 +239,7 @@ const getColumns = ({
     name: i18n.translate('xpack.csp.rules.rulesTable.ruleNumberColumnLabel', {
       defaultMessage: 'Rule Number',
     }),
-    width: '100px',
+    width: '120px',
     sortable: true,
   },
   {

@@ -28,6 +28,7 @@ import { kibanaFieldFormat } from '../utils';
 import { ExpandedRowFieldHeader } from '../stats_table/components/expanded_row_field_header';
 import { FieldVisStats } from '../../../../../common/types';
 import { ExpandedRowPanel } from '../stats_table/components/field_data_expanded_row/expanded_row_panel';
+import { EMPTY_EXAMPLE } from '../examples_list/examples_list';
 
 interface Props {
   stats: FieldVisStats | undefined;
@@ -115,7 +116,8 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
       >
         {Array.isArray(topValues)
           ? topValues.map((value) => {
-              const fieldValue = value.key_as_string ?? value.key.toString();
+              const fieldValue =
+                value.key_as_string ?? (value.key ? value.key.toString() : EMPTY_EXAMPLE);
               return (
                 <EuiFlexGroup gutterSize="xs" alignItems="center" key={fieldValue}>
                   <EuiFlexItem data-test-subj="dataVisualizerFieldDataTopValueBar">
