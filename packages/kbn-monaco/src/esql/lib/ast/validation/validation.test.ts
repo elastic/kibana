@@ -1292,7 +1292,10 @@ describe('validation logic', () => {
   });
 
   describe('stats', () => {
-    testErrorsAndWarnings('from a | stats ', []);
+    testErrorsAndWarnings('from a | stats ', [
+      'At least one aggregation or grouping expression required in [STATS]',
+    ]);
+    testErrorsAndWarnings('from a | stats by stringField', []);
     testErrorsAndWarnings('from a | stats numberField ', [
       'STATS expects an aggregate function, found [numberField]',
     ]);
