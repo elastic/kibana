@@ -53,12 +53,7 @@ export function Assignment({
   const dispatch = useDispatch();
 
   return (
-    <EuiFlexGroup
-      direction="row"
-      gutterSize="s"
-      alignItems="flexStart"
-      justifyContent="spaceBetween"
-    >
+    <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" justifyContent="spaceBetween">
       <EuiFlexItem grow={0}>
         <ColorSwatch
           forType="assignment"
