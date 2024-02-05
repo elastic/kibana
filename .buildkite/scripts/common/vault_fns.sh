@@ -12,16 +12,6 @@ else
 fi
 export IS_LEGACY_VAULT_ADDR
 
-print_stack() {
-  local i=0
-  local FRAMES=${#BASH_LINENO[@]}
-  for ((i=1; i < FRAMES; i++)); do
-    local frame=${BASH_LINENO[i]}
-    local source=${BASH_SOURCE[i]}
-    echo "  at $source:$frame" >&2
-  done
-}
-
 retry() {
   local retries=$1; shift
   local delay=$1; shift
@@ -34,7 +24,6 @@ retry() {
       return $retry_exit_status
     elif (( attempts == retries )); then
       echo "Failed $attempts retries" >&2
-      print_stack
       return $retry_exit_status
     else
       echo "Retrying $((retries - attempts)) more times..." >&2
