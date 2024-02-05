@@ -27,7 +27,7 @@ import { allCasesUrlStateSerializer } from './utils/all_cases_url_state_serializ
 import { parseUrlParams } from './utils/parse_url_params';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { sanitizeState } from './utils/sanitize_state';
-import { CUSTOM_FIELD_KEY_PREFIX } from './constants';
+import { isFlattenCustomField } from './utils';
 
 interface UseAllCasesStateReturn {
   filterOptions: FilterOptions;
@@ -204,7 +204,7 @@ const parseNonCasesStateUrlParams = (url: string): URLSearchParams => {
   allCasesValidStateKeys.forEach((key) => urlParamsWithoutAllCasesState.delete(key));
 
   urlParamsWithoutAllCasesState.forEach((_, key) => {
-    if (key.includes(CUSTOM_FIELD_KEY_PREFIX)) {
+    if (isFlattenCustomField(key)) {
       urlParamsWithoutAllCasesState.delete(key);
     }
   });

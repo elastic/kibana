@@ -6,8 +6,8 @@
  */
 
 import { isEmpty, pick } from 'lodash';
+import { flattenCustomFieldKey } from '.';
 import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../../../common/constants';
-import { CUSTOM_FIELD_KEY_PREFIX } from '../constants';
 import type { AllCasesURLQueryParams, AllCasesTableState } from '../types';
 
 export const allCasesUrlStateSerializer = (state: AllCasesTableState): AllCasesURLQueryParams => {
@@ -21,7 +21,7 @@ export const allCasesUrlStateSerializer = (state: AllCasesTableState): AllCasesU
   ]);
 
   const customFieldsAsQueryParams = Object.entries(state.filterOptions.customFields).reduce(
-    (acc, [key, value]) => ({ ...acc, [`${CUSTOM_FIELD_KEY_PREFIX}${key}`]: value.options }),
+    (acc, [key, value]) => ({ ...acc, [flattenCustomFieldKey(key)]: value.options }),
     {}
   );
 

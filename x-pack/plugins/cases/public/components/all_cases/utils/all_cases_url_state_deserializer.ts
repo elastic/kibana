@@ -6,11 +6,11 @@
  */
 
 import { isEmpty } from 'lodash';
+import { deflattenCustomFieldKey, isFlattenCustomField } from '.';
 import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../../../common/constants';
 import { CustomFieldTypes } from '../../../../common/types/domain';
 import type { QueryParams, FilterOptions } from '../../../../common/ui';
 import { DEFAULT_CASES_TABLE_STATE } from '../../../containers/constants';
-import { CUSTOM_FIELD_KEY_PREFIX } from '../constants';
 import type { AllCasesURLQueryParams, AllCasesURLState } from '../types';
 import { sanitizeState } from './sanitize_state';
 
@@ -44,11 +44,11 @@ export const allCasesUrlStateDeserializer = (
       );
     }
 
-    if (isCustomField(key)) {
-      const keyWithoutPrefix = key.replace(CUSTOM_FIELD_KEY_PREFIX, '');
+    if (isFlattenCustomField(key)) {
+      const keyWithoutPrefix = deflattenCustomFieldKey(key);
       customFieldsParams[keyWithoutPrefix] = {
         // TOOD: Add the correct type or remove the need for type
-        type: CustomFieldTypes.TEXT,
+        type: CustomFieldTypes.TOGGLE,
         options: values,
       };
     }
@@ -107,5 +107,3 @@ const parseValue = (values: string[], defaultValue: unknown): string | string[] 
   const valuesAsArray = Array.from(values.values());
   return Array.isArray(defaultValue) ? valuesAsArray : valuesAsArray[0] ?? '';
 };
-
-const isCustomField = (key: string): boolean => key.startsWith(CUSTOM_FIELD_KEY_PREFIX);

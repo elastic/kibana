@@ -9,11 +9,12 @@ import type { SetStateAction } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { merge, isEqual, isEmpty } from 'lodash';
-import type { FilterOptions } from '../../../../common/ui';
+import type { CasesConfigurationUI, FilterOptions } from '../../../../common/ui';
 import { LOCAL_STORAGE_KEYS } from '../../../../common/constants';
 import type { FilterConfig, FilterConfigState } from './types';
 import { useCustomFieldsFilterConfig } from './use_custom_fields_filter_config';
 import { useCasesContext } from '../../cases_context/use_cases_context';
+import { deflattenCustomFieldKey, isFlattenCustomField } from '../utils';
 
 const mergeSystemAndCustomFieldConfigs = ({
   systemFilterConfig,
@@ -38,10 +39,23 @@ const shouldBeActive = ({
   filter: FilterConfigState;
   filterOptions: FilterOptions;
 }) => {
+  if (isFlattenCustomField(filter.key)) {
+    return (
+      !filter.isActive &&
+      !isEmpty(filterOptions.customFields[deflattenCustomFieldKey(filter.key)]?.options)
+    );
+  }
+
   return !filter.isActive && !isEmpty(filterOptions[filter.key as keyof FilterOptions]);
 };
 
-const useActiveByFilterKeyState = ({ filterOptions }: { filterOptions: FilterOptions }) => {
+const useActiveByFilterKeyState = ({
+  filterOptions,
+  customFields,
+}: {
+  filterOptions: FilterOptions;
+  customFields: CasesConfigurationUI['customFields'];
+}) => {
   const { appId } = useCasesContext();
   const [activeByFilterKey, setActiveByFilterKey] = useLocalStorage<FilterConfigState[]>(
     `${appId}.${LOCAL_STORAGE_KEYS.casesTableFiltersConfig}`,
@@ -98,19 +112,29 @@ export const useFilterConfig = ({
   onFilterOptionsChange,
   systemFilterConfig,
   filterOptions,
+  customFields,
+  isLoading,
 }: {
   isSelectorView: boolean;
+  isLoading: boolean;
   onFilterOptionsChange: (params: Partial<FilterOptions>) => void;
   systemFilterConfig: FilterConfig[];
   filterOptions: FilterOptions;
+  customFields: CasesConfigurationUI['customFields'];
 }) => {
   /**
    * Initially we won't save any order, it will use the default config as it is defined in the system.
    * Once the user adds/removes a filter, we start saving the order and the visible state.
    */
-  const [activeByFilterKey, setActiveByFilterKey] = useActiveByFilterKeyState({ filterOptions });
+  const [activeByFilterKey, setActiveByFilterKey] = useActiveByFilterKeyState({
+    filterOptions,
+    customFields,
+  });
+
   const { customFieldsFilterConfig } = useCustomFieldsFilterConfig({
     isSelectorView,
+    customFields,
+    isLoading,
     onFilterOptionsChange,
   });
 
@@ -192,11 +216,14 @@ export const useFilterConfig = ({
       if (a.label < b.label) return -1;
       return a.key > b.key ? 1 : -1;
     });
+
   const source =
     activeByFilterKey && activeByFilterKey.length > 0 ? activeByFilterKey : filterConfigArray;
+
   const activeFilters = source
     .filter((filter) => filter.isActive && filterConfigs.has(filter.key))
     .map((filter) => filterConfigs.get(filter.key)) as FilterConfig[];
+
   const activeFilterKeys = activeFilters.map((filter) => filter.key);
 
   return {

@@ -18,6 +18,7 @@ import type { CurrentUserProfile } from '../types';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { useSystemFilterConfig } from './table_filter_config/use_system_filter_config';
 import { useFilterConfig } from './table_filter_config/use_filter_config';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 
 export interface CasesTableFiltersProps {
   countClosedCases: number | null;
@@ -53,9 +54,13 @@ const CasesTableFiltersComponent = ({
   filterOptions,
 }: CasesTableFiltersProps) => {
   const [search, setSearch] = useState(filterOptions.search);
-  const { data: tags = [] } = useGetTags();
-  const { data: categories = [] } = useGetCategories();
+  const { data: tags = [], isLoading: isLoadingTags } = useGetTags();
+  const { data: categories = [], isLoading: isLoadingCategories } = useGetCategories();
   const { caseAssignmentAuthorized } = useCasesFeatures();
+  const {
+    data: { customFields },
+    isLoading: isLoadingCasesConfiguration,
+  } = useGetCaseConfiguration();
 
   const onFilterOptionsChange = useCallback(
     (partialFilterOptions: Partial<FilterOptions>) => {
@@ -67,6 +72,9 @@ const CasesTableFiltersComponent = ({
     [filterOptions, onFilterChanged]
   );
 
+  const isLoadingFilters =
+    isLoading || isLoadingTags || isLoadingCategories || isLoadingCasesConfiguration;
+
   const { systemFilterConfig } = useSystemFilterConfig({
     availableSolutions,
     caseAssignmentAuthorized,
@@ -76,7 +84,7 @@ const CasesTableFiltersComponent = ({
     countOpenCases,
     currentUserProfile,
     hiddenStatuses,
-    isLoading,
+    isLoading: isLoadingFilters,
     isSelectorView,
     onFilterOptionsChange,
     tags,
@@ -87,7 +95,14 @@ const CasesTableFiltersComponent = ({
     selectableOptions,
     activeSelectableOptionKeys,
     onFilterConfigChange,
-  } = useFilterConfig({ systemFilterConfig, onFilterOptionsChange, isSelectorView, filterOptions });
+  } = useFilterConfig({
+    systemFilterConfig,
+    onFilterOptionsChange,
+    isSelectorView,
+    filterOptions,
+    customFields,
+    isLoading: isLoadingFilters,
+  });
 
   const handleOnSearch = useCallback(
     (newSearch) => {
@@ -147,6 +162,7 @@ const CasesTableFiltersComponent = ({
             options={selectableOptions}
             activeFilters={activeSelectableOptionKeys}
             onChange={onFilterConfigChange}
+            isLoading={isLoadingFilters}
           />
         </EuiFlexItem>
       )}
