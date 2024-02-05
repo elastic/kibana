@@ -103,8 +103,8 @@ describe('Turn Off Agent Policy Features Migration', () => {
         page3Items[0],
       ];
 
-      (fleetServices.agentPolicy.bumpRevision as jest.Mock).mockImplementation(async () => {
-        return bulkUpdateResponse;
+      (fleetServices.agentPolicy.bulkUpdate as jest.Mock).mockImplementation(async () => {
+        return { updatedPolicies: bulkUpdateResponse, failedPolicies: [] };
       });
     });
 
@@ -117,22 +117,19 @@ describe('Turn Off Agent Policy Features Migration', () => {
 
       expect(fleetServices.agentPolicy.list as jest.Mock).toHaveBeenCalledTimes(3);
 
-      const updates = Array.from({ length: 5 }, (_, i) => ({
-        soClient: fleetServices.internalSoClient,
-        esClient,
-        id: bulkUpdateResponse![i].id,
+      expect(fleetServices.agentPolicy.bulkUpdate as jest.Mock).toHaveBeenCalledTimes(1);
+
+      const policiesWithoutProtection = bulkUpdateResponse.map((p) => ({
+        ...p,
+        is_protected: false,
       }));
 
-      expect(fleetServices.agentPolicy.bumpRevision as jest.Mock).toHaveBeenCalledTimes(5);
-      updates.forEach((args, i) => {
-        expect(fleetServices.agentPolicy.bumpRevision as jest.Mock).toHaveBeenNthCalledWith(
-          i + 1,
-          args.soClient,
-          args.esClient,
-          args.id,
-          { removeProtection: true, user: { username: 'elastic' } }
-        );
-      });
+      expect(fleetServices.agentPolicy.bulkUpdate as jest.Mock).toHaveBeenCalledWith(
+        fleetServices.internalSoClient,
+        esClient,
+        policiesWithoutProtection,
+        { removeProtection: true, user: { username: 'elastic' } }
+      );
 
       expect(logger.info).toHaveBeenCalledWith(
         'App feature [endpoint_agent_tamper_protection] is disabled. Checking fleet agent policies for compliance'
@@ -150,18 +147,19 @@ describe('Turn Off Agent Policy Features Migration', () => {
     });
 
     it('should log failures', async () => {
-      (fleetServices.agentPolicy.bumpRevision as jest.Mock).mockImplementationOnce(async () => {
-        throw new Error('oh noo');
+      (fleetServices.agentPolicy.bulkUpdate as jest.Mock).mockImplementationOnce(async () => {
+        return {
+          failedPolicies: [{ agentPolicy: { id: 'test' }, error: 'error' }],
+          updatedPolicies: [],
+        };
       });
       await callTurnOffAgentPolicyFeatures();
 
       expect(logger.error).toHaveBeenCalledWith(
-        `Done - 1 out of 5 were successful. Errors encountered:\nPolicy [${
-          bulkUpdateResponse![0].id
-        }] failed to update due to error: Error: oh noo`
+        `Done. 1 out of 5 failed to update:\n[test]: error`
       );
 
-      expect(fleetServices.agentPolicy.bumpRevision as jest.Mock).toHaveBeenCalledTimes(5);
+      expect(fleetServices.agentPolicy.bulkUpdate as jest.Mock).toHaveBeenCalledTimes(1);
     });
   });
 });

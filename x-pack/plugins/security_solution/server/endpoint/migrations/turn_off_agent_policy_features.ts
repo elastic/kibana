@@ -9,7 +9,6 @@ import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { AgentPolicy } from '@kbn/fleet-plugin/common';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { AppFeatureSecurityKey } from '@kbn/security-solution-features/keys';
-import pMap from 'p-map';
 import type { EndpointInternalFleetServicesInterface } from '../services/fleet';
 import type { AppFeaturesService } from '../../lib/app_features_service/app_features_service';
 
@@ -62,31 +61,31 @@ export const turnOffAgentPolicyFeatures = async (
   } while (hasMoreData);
 
   if (updates.length > 0) {
-    logger.info(`Found ${updates.length} policies that need updates:\n${messages.join('\n')}`);
-    const policyUpdateErrors: Array<{ id: string; error: Error }> = [];
-    await pMap(updates, async (update) => {
-      try {
-        return await agentPolicyService.bumpRevision(internalSoClient, esClient, update.id, {
-          user: { username: 'elastic' } as AuthenticatedUser,
-          removeProtection: true,
-        });
-      } catch (error) {
-        policyUpdateErrors.push({ error, id: update.id });
+    log.info(`Found ${updates.length} policies that need updates:\n${messages.join('\n')}`);
+    const bulkUpdateResponse = await agentPolicyService.bulkUpdate(
+      internalSoClient,
+      esClient,
+      updates,
+      {
+        user: { username: 'elastic' } as AuthenticatedUser,
+        removeProtection: true,
       }
-    });
+    );
 
-    if (policyUpdateErrors.length > 0) {
-      logger.error(
-        `Done - ${policyUpdateErrors.length} out of ${
+    log.debug(`Bulk update response:\n${JSON.stringify(bulkUpdateResponse, null, 2)}`);
+
+    if (bulkUpdateResponse.failedPolicies.length > 0) {
+      log.error(
+        `Done. ${bulkUpdateResponse.failedPolicies.length} out of ${
           updates.length
-        } were successful. Errors encountered:\n${policyUpdateErrors
-          .map((e) => `Policy [${e.id}] failed to update due to error: ${e.error}`)
+        } failed to update:\n${bulkUpdateResponse.failedPolicies
+          .map((p) => `[${p.agentPolicy.id}]: ${p.error}`)
           .join('\n')}`
       );
     } else {
-      logger.info(`Done. All updates applied successfully`);
+      log.info(`Done. All updates applied successfully`);
     }
   } else {
-    logger.info(`Done. Checked ${total} policies and no updates needed`);
+    log.info(`Done. Checked ${total} policies and no updates needed`);
   }
 };

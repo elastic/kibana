@@ -15,6 +15,7 @@ import {
   PackagePolicyRestrictionRelatedError,
   FleetUnauthorizedError,
   HostedAgentPolicyRestrictionRelatedError,
+  FleetError,
 } from '../errors';
 import type {
   AgentPolicy,
@@ -759,6 +760,300 @@ describe('agent policy', () => {
           is_protected: true,
         })
       ).rejects.toThrowError(new Error('Cannot enable Agent Tamper Protection: reason'));
+    });
+  });
+
+  describe('bulkUpdate', () => {
+    describe('checkNameUniquenessBulk', () => {
+      test('should throw if name is not unique', () => {
+        expect(() => {
+          agentPolicyService.checkNameUniquenessBulk(
+            [
+              { id: '1', name: 'first' },
+              { id: '3', name: 'third' },
+              { id: '5', name: 'fourth' },
+            ],
+            [
+              { id: '2', name: 'first' },
+              { id: '4', name: 'fourth' },
+            ]
+          );
+        }).toThrow(
+          `Agent policy names must be unique. The following names are already in use: first, fourth`
+        );
+      });
+      test('should not throw if name is unique', () => {
+        expect(() => {
+          agentPolicyService.checkNameUniquenessBulk(
+            [
+              { id: '1', name: 'first' },
+              { id: '3', name: 'third' },
+            ],
+            [
+              { id: '2', name: 'sixth' },
+              { id: '4', name: 'fourth' },
+              { id: '5', name: 'fifth' },
+            ]
+          );
+        }).not.toThrow();
+      });
+      test('should not throw if own name is not unique', () => {
+        expect(() => {
+          agentPolicyService.checkNameUniquenessBulk(
+            [
+              { id: '1', name: 'first' },
+              { id: '3', name: 'third' },
+            ],
+            [
+              { id: '1', name: 'first' },
+              { id: '4', name: 'fourth' },
+            ]
+          );
+        }).not.toThrow();
+      });
+      test('should not throw if no name is provided', () => {
+        expect(() => {
+          agentPolicyService.checkNameUniquenessBulk(
+            [{ id: '1' }, { id: '3', name: 'third' }],
+            [
+              { id: '2', name: 'first' },
+              { id: '4', name: 'fourth' },
+            ]
+          );
+        }).not.toThrow();
+      });
+    });
+    describe('checkPolicyExistsBulk', () => {
+      test('should throw if policy does not exist', () => {
+        expect(() => {
+          agentPolicyService.checkPolicyExistsBulk(
+            [{ id: '1' }, { id: '3' }, { id: '5' }],
+            [{ id: '2' }, { id: '3' }]
+          );
+        }).toThrow(`Agent policy ids not found: 1, 5`);
+      });
+      test('should not throw if policy exists', () => {
+        expect(() => {
+          agentPolicyService.checkPolicyExistsBulk(
+            [{ id: '1' }, { id: '3' }],
+            [{ id: '1' }, { id: '3' }, { id: '4' }]
+          );
+        }).not.toThrow();
+      });
+    });
+    const findResponse = (attributes?: Record<string, unknown>) => ({
+      total: 1,
+      saved_objects: [
+        {
+          id: 'test-agent-policy-1',
+          attributes: { ...(attributes ?? {}) },
+          references: [],
+          type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+          score: 0,
+        },
+      ],
+      per_page: 1,
+      page: 1,
+    });
+
+    const bulkGetUpdateResponse = () => ({
+      saved_objects: [
+        {
+          id: 'test-agent-policy-1',
+          attributes: {},
+          references: [],
+          type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+        },
+        {
+          id: 'test-agent-policy-2',
+          attributes: {},
+          references: [],
+          type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+        },
+      ],
+    });
+    describe('agent tamper protection', () => {
+      it('should throw FleetUnauthorizedError if is_protected=true with insufficient license', async () => {
+        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
+
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+        soClient.find.mockResolvedValueOnce(findResponse());
+
+        soClient.bulkGet.mockResolvedValueOnce(bulkGetUpdateResponse());
+
+        soClient.bulkUpdate.mockResolvedValueOnce({
+          saved_objects: [],
+        });
+
+        const response = await agentPolicyService.bulkUpdate(
+          soClient,
+          esClient,
+          [{ id: 'test-agent-policy-1', is_protected: true }],
+          {}
+        );
+
+        expect(soClient.bulkUpdate).toHaveBeenCalledWith([]);
+
+        expect(response).toEqual(
+          expect.objectContaining({
+            failedPolicies: expect.arrayContaining([
+              expect.objectContaining({
+                error: expect.any(FleetUnauthorizedError),
+              }),
+            ]),
+          })
+        );
+      });
+      it('should not throw FleetUnauthorizedError if is_protected=false with insufficient license', async () => {
+        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(false);
+
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+        soClient.bulkGet.mockResolvedValueOnce(bulkGetUpdateResponse());
+
+        soClient.find.mockResolvedValueOnce(findResponse());
+
+        soClient.bulkUpdate.mockResolvedValueOnce({
+          saved_objects: [],
+        });
+
+        const response = await agentPolicyService.bulkUpdate(
+          soClient,
+          esClient,
+          [{ id: 'test-agent-policy-1', is_protected: false }],
+          {}
+        );
+
+        expect(soClient.bulkUpdate).toHaveBeenCalledWith(
+          expect.arrayContaining([expect.objectContaining({ id: 'test-agent-policy-1' })])
+        );
+        expect(response).toEqual({ failedPolicies: [], updatedPolicies: [] });
+      });
+
+      it('should throw Error if is_protected=true with invalid uninstall token', async () => {
+        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+
+        mockedAppContextService.getUninstallTokenService.mockReturnValueOnce({
+          checkTokenValidityForPolicy: jest
+            .fn()
+            .mockResolvedValueOnce({ error: new Error('reason') }),
+        } as unknown as UninstallTokenServiceInterface);
+
+        const soClient = getAgentPolicyCreateMock();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+        soClient.find.mockResolvedValueOnce(findResponse());
+
+        soClient.bulkUpdate.mockResolvedValueOnce({
+          saved_objects: [],
+        });
+
+        const response = await agentPolicyService.bulkUpdate(
+          soClient,
+          esClient,
+          [{ id: 'test-agent-policy-1', is_protected: true }],
+          {}
+        );
+
+        expect(soClient.bulkUpdate).toHaveBeenCalledWith([]);
+
+        expect(response).toEqual(
+          expect.objectContaining({
+            failedPolicies: expect.arrayContaining([
+              expect.objectContaining({
+                error: expect.any(FleetError),
+              }),
+            ]),
+          })
+        );
+      });
+
+      it('should throw a HostedAgentRestrictionRelated error if user enables "is_protected" for a managed policy', async () => {
+        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+        soClient.find.mockResolvedValue(findResponse({ is_managed: true }));
+
+        soClient.bulkUpdate.mockResolvedValueOnce({
+          saved_objects: [],
+        });
+
+        const response = await agentPolicyService.bulkUpdate(
+          soClient,
+          esClient,
+          [{ id: 'test-agent-policy-1', is_protected: true }],
+          {}
+        );
+
+        expect(soClient.bulkUpdate).toHaveBeenCalledWith([]);
+
+        expect(response).toEqual(
+          expect.objectContaining({
+            failedPolicies: expect.arrayContaining([
+              expect.objectContaining({
+                error: expect.any(HostedAgentPolicyRestrictionRelatedError),
+              }),
+            ]),
+            updatedPolicies: [],
+          })
+        );
+      });
+    });
+    describe('saved object client', () => {
+      it('calls with provided policy ids', async () => {
+        jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+        soClient.find.mockResolvedValue({
+          total: 2,
+          saved_objects: [
+            {
+              id: 'test-agent-policy-1',
+              attributes: {},
+              references: [],
+              type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+              score: 0,
+            },
+            {
+              id: 'test-agent-policy-2',
+              attributes: {},
+              references: [],
+              type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+              score: 0,
+            },
+          ],
+          per_page: 2,
+          page: 1,
+        });
+
+        soClient.bulkGet.mockResolvedValueOnce(bulkGetUpdateResponse());
+
+        soClient.bulkUpdate.mockResolvedValueOnce(bulkGetUpdateResponse());
+
+        const response = await agentPolicyService.bulkUpdate(
+          soClient,
+          esClient,
+          [{ id: 'test-agent-policy-1' }, { id: 'test-agent-policy-2' }],
+          {}
+        );
+
+        expect(soClient.bulkUpdate).toHaveBeenCalledWith([
+          expect.objectContaining({ id: 'test-agent-policy-1' }),
+          expect.objectContaining({ id: 'test-agent-policy-2' }),
+        ]);
+
+        expect(response).toEqual(
+          expect.objectContaining({
+            failedPolicies: [],
+            updatedPolicies: [{ id: 'test-agent-policy-1' }, { id: 'test-agent-policy-2' }],
+          })
+        );
+      });
     });
   });
 

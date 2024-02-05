@@ -22,6 +22,8 @@ import type { BulkResponseItem } from '@elastic/elasticsearch/lib/api/typesWithB
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
+import type { SavedObjectError } from '@kbn/core-saved-objects-common';
+
 import { policyHasEndpointSecurity } from '../../common/services';
 
 import { populateAssignedAgentsCount } from '../routes/agent_policy/handlers';
@@ -529,6 +531,166 @@ class AgentPolicyService {
       page,
       perPage,
     };
+  }
+
+  public async bulkUpdate(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    agentPolicies: Array<Partial<AgentPolicy> & { id: string }>,
+    options: {
+      user?: AuthenticatedUser;
+      force?: boolean;
+      skipValidation?: boolean;
+      spaceId?: string;
+      authorizationHeader?: HTTPAuthorizationHeader | null;
+      removeProtection?: boolean;
+      bumpRevision?: boolean;
+    }
+  ): Promise<{
+    updatedPolicies: AgentPolicy[] | null;
+    failedPolicies: Array<{ agentPolicy: Partial<AgentPolicy>; error: Error | SavedObjectError }>;
+  }> {
+    const logger = appContextService.getLogger();
+    logger.info(`Starting bulk update of agent policies: ${agentPolicies.map(({ id }) => id)}`);
+
+    const existingAgentPolicies = await this.list(soClient, {
+      perPage: SO_SEARCH_LIMIT,
+      withPackagePolicies: true,
+    });
+
+    this.checkNameUniquenessBulk(agentPolicies, existingAgentPolicies.items);
+    this.checkPolicyExistsBulk(agentPolicies, existingAgentPolicies.items);
+
+    const policiesToUpdate: Array<Partial<AgentPolicy> & { id: string }> = [];
+    const failedPolicies: Array<{
+      agentPolicy: Partial<AgentPolicy>;
+      error: Error | SavedObjectError;
+    }> = [];
+
+    await pMap(agentPolicies, async (agentPolicy) => {
+      try {
+        this.checkTamperProtectionLicense(agentPolicy);
+        await this.checkForValidUninstallToken(agentPolicy, agentPolicy.id);
+        const existingAgentPolicy = existingAgentPolicies.items.find(
+          (i) => i.id === agentPolicy.id
+        );
+        if (!existingAgentPolicy) {
+          throw new AgentPolicyNotFoundError('Agent policy not found'); // This should never happen
+        }
+        if (agentPolicy?.is_protected && !policyHasEndpointSecurity(existingAgentPolicy)) {
+          logger.info(
+            'Agent policy requires Elastic Defend integration to set tamper protection to true'
+          );
+          // force agent policy to be false if elastic defend is not present
+          agentPolicy.is_protected = false;
+        }
+
+        if (existingAgentPolicy.is_managed && !options?.force) {
+          Object.entries(agentPolicy)
+            .filter(([key]) => !KEY_EDITABLE_FOR_MANAGED_POLICIES.includes(key))
+            .forEach(([key, val]) => {
+              if (!isEqual(existingAgentPolicy[key as keyof AgentPolicy], val)) {
+                throw new HostedAgentPolicyRestrictionRelatedError(`Cannot update ${key}`);
+              }
+            });
+        }
+
+        const { monitoring_enabled: monitoringEnabled } = agentPolicy;
+        const packagesToInstall = [];
+        if (!existingAgentPolicy.monitoring_enabled && monitoringEnabled?.length) {
+          packagesToInstall.push(FLEET_ELASTIC_AGENT_PACKAGE);
+        }
+        if (packagesToInstall.length > 0) {
+          await bulkInstallPackages({
+            savedObjectsClient: soClient,
+            esClient,
+            packagesToInstall,
+            spaceId: options?.spaceId || DEFAULT_SPACE_ID,
+            authorizationHeader: options?.authorizationHeader,
+          });
+        }
+        if (
+          existingAgentPolicy.status === agentPolicyStatuses.Inactive &&
+          agentPolicy.status !== agentPolicyStatuses.Active
+        ) {
+          throw new FleetError(
+            `Agent policy ${agentPolicy.id} cannot be updated because it is ${existingAgentPolicy.status}`
+          );
+        }
+
+        if (options.removeProtection) {
+          logger.info(`Setting tamper protection for Agent Policy ${agentPolicy.id} to false`);
+        }
+
+        if (!options.skipValidation) {
+          await validateOutputForPolicy(
+            soClient,
+            agentPolicy,
+            existingAgentPolicy,
+            getAllowedOutputTypeForPolicy(existingAgentPolicy)
+          );
+        }
+
+        policiesToUpdate.push(agentPolicy);
+      } catch (error) {
+        failedPolicies.push({ agentPolicy, error });
+        return;
+      }
+    });
+
+    const { saved_objects: updatedPolicies } = await soClient.bulkUpdate<AgentPolicySOAttributes>(
+      policiesToUpdate.map((agentPolicy) => {
+        const { id: _id, agents: _agents, ...agentPolicyWithoutImmutableFields } = agentPolicy;
+        return {
+          type: SAVED_OBJECT_TYPE,
+          id: agentPolicy.id,
+          attributes: {
+            ...agentPolicyWithoutImmutableFields,
+            ...(options.bumpRevision
+              ? { revision: existingAgentPolicies.items[0].revision + 1 }
+              : {}),
+            ...(options.removeProtection
+              ? { is_protected: false }
+              : { is_protected: agentPolicy.is_protected }),
+            updated_at: new Date().toISOString(),
+            updated_by: options?.user?.username || 'system',
+          },
+        };
+      })
+    );
+
+    if (options.bumpRevision || options.removeProtection) {
+      await this.deployPolicies(
+        soClient,
+        updatedPolicies.map((p) => p.id)
+      );
+    }
+
+    updatedPolicies.forEach((policy) => {
+      if (policy.error) {
+        const hasAlreadyFailed = failedPolicies.some(
+          (failedPolicy) => failedPolicy.agentPolicy.id === policy.id
+        );
+        if (!hasAlreadyFailed) {
+          failedPolicies.push({
+            agentPolicy: agentPolicies.find((p) => p.id === policy.id)!,
+            error: policy.error,
+          });
+        }
+      }
+    });
+
+    const updatedPoliciesSuccess = updatedPolicies
+      .filter((policy) => !policy.error && policy.attributes)
+      .map(
+        (soPolicy) =>
+          ({
+            id: soPolicy.id,
+            ...soPolicy.attributes,
+          } as AgentPolicy)
+      );
+
+    return { updatedPolicies: updatedPoliciesSuccess, failedPolicies };
   }
 
   public async update(
@@ -1301,6 +1463,55 @@ class AgentPolicyService {
       inactivityTimeout: parseInt(inactivityTimeout, 10),
       policyIds: policies.map((policy) => policy.id),
     }));
+  }
+
+  public checkPolicyExistsBulk(
+    agentPolicies: Array<{ id: string }>,
+    existingAgentPolicies: Array<{ id: string }>
+  ) {
+    const notFoundPolicyIds = agentPolicies.reduce((acc: string[], agentPolicy) => {
+      if (
+        !existingAgentPolicies.some(
+          (existingAgentPolicy) => existingAgentPolicy.id === agentPolicy.id
+        )
+      ) {
+        acc.push(agentPolicy.id);
+      }
+      return acc;
+    }, []);
+
+    if (notFoundPolicyIds.length > 0) {
+      throw new AgentPolicyNotFoundError(
+        `Agent policy ids not found: ${notFoundPolicyIds.join(', ')}`
+      );
+    }
+  }
+
+  public checkNameUniquenessBulk(
+    newAgentPolicies: Array<{ id: string; name?: string }>,
+    existingAgentPolicies: Array<{ id: string; name: string }>
+  ): void {
+    const nonUniqueNames = newAgentPolicies.reduce((acc: string[], agentPolicy) => {
+      if (!agentPolicy.name) {
+        return acc;
+      }
+      const foundNonUniqueNames = existingAgentPolicies.filter(
+        (existingAgentPolicy) =>
+          existingAgentPolicy.name === agentPolicy.name && existingAgentPolicy.id !== agentPolicy.id
+      );
+      if (foundNonUniqueNames.length > 0) {
+        acc.push(agentPolicy.name);
+      }
+      return acc;
+    }, []);
+
+    if (nonUniqueNames.length > 0) {
+      throw new AgentPolicyNameExistsError(
+        `Agent policy names must be unique. The following names are already in use: ${nonUniqueNames.join(
+          ', '
+        )}`
+      );
+    }
   }
 
   private checkTamperProtectionLicense(agentPolicy: { is_protected?: boolean }): void {
