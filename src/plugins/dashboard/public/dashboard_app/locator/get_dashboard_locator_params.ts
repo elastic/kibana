@@ -33,9 +33,7 @@ export const getDashboardLocatorParamsFromEmbeddable = (
   // if useCurrentDashboardFilters enabled, then preserve all the filters (pinned, unpinned, and from controls)
   // otherwise preserve only pinned
   const filters = api.localFilters?.value ?? api.parentApi?.localFilters?.value ?? [];
-  params.filters = options.useCurrentFilters
-    ? filters
-    : filters?.filter((f) => isFilterPinned(f));
+  params.filters = options.useCurrentFilters ? filters : filters?.filter((f) => isFilterPinned(f));
 
   return params;
 };
