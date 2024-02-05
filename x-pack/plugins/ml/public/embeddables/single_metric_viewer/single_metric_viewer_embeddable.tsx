@@ -22,7 +22,7 @@ import { EmbeddableSingleMetricViewerContainer } from './embeddable_single_metri
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import type { MlDependencies } from '../../application/app';
 import {
-  ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
+  ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
   SingleMetricViewerEmbeddableInput,
   AnomalyChartsEmbeddableOutput,
   SingleMetricViewerServices,
@@ -43,7 +43,7 @@ export class SingleMetricViewerEmbeddable extends Embeddable<
 > {
   private node?: HTMLElement;
   private reload$ = new Subject<void>();
-  public readonly type: string = ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE;
+  public readonly type: string = ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE;
 
   constructor(
     initialInput: SingleMetricViewerEmbeddableInput,
