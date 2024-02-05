@@ -81,6 +81,7 @@ const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMo
     casesClient,
     endpointService,
     username: 'foo',
+    isAutomated: false,
   };
 };
 

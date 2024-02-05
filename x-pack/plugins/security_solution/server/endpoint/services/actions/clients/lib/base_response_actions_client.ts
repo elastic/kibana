@@ -16,8 +16,8 @@ import { HOST_NOT_ENROLLED, LICENSE_TOO_LOW } from '../../create/validate';
 import type { EndpointAppContextService } from '../../../../endpoint_app_context_services';
 import { APP_ID } from '../../../../../../common';
 import type {
-  ResponseActionsApiCommandNames,
   ResponseActionAgentType,
+  ResponseActionsApiCommandNames,
 } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { getActionDetailsById } from '../../action_details_by_id';
 import { ResponseActionsClientError, ResponseActionsNotSupportedError } from '../errors';
@@ -30,12 +30,16 @@ import {
   ENDPOINT_ACTION_RESPONSES_INDEX,
   ENDPOINT_ACTIONS_INDEX,
 } from '../../../../../../common/endpoint/constants';
-import type { ResponseActionsClient, CommonResponseActionMethodOptions } from './types';
+import type { CommonResponseActionMethodOptions, ResponseActionsClient } from './types';
 import type {
   ActionDetails,
+  EndpointActionDataParameterTypes,
+  EndpointActionResponseDataOutput,
   GetProcessesActionOutputContent,
   KillOrSuspendProcessRequestBody,
   KillProcessActionOutputContent,
+  LogsEndpointAction,
+  LogsEndpointActionResponse,
   ResponseActionExecuteOutputContent,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
@@ -44,19 +48,15 @@ import type {
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
   SuspendProcessActionOutputContent,
-  LogsEndpointAction,
-  EndpointActionDataParameterTypes,
-  LogsEndpointActionResponse,
-  EndpointActionResponseDataOutput,
   WithAllKeys,
 } from '../../../../../../common/endpoint/types';
 import type {
-  IsolationRouteRequestBody,
   ExecuteActionRequestBody,
   GetProcessesRequestBody,
+  IsolationRouteRequestBody,
   ResponseActionGetFileRequestBody,
-  UploadActionApiRequestBody,
   ResponseActionsRequestBody,
+  UploadActionApiRequestBody,
 } from '../../../../../../common/api/endpoint';
 import type { CreateActionPayload } from '../../create/types';
 import { stringify } from '../../../../utils/stringify';
