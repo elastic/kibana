@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { FLEET_AGENT_POLICIES_SCHEMA_VERSION } from '@kbn/fleet-plugin/server/constants';
-import { skipIfNoDockerRegistry } from '../../helpers';
+import { skipIfNoDockerRegistry, generateAgent } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
@@ -1184,6 +1184,68 @@ export default function (providerContext: FtrProviderContext) {
         expect(body).to.eql({
           id: regularPolicy.id,
           name: 'Regular policy',
+        });
+      });
+
+      describe('Errors when trying to delete', () => {
+        it('should prevent policies having agents from being deleted', async () => {
+          const {
+            body: { item: policyWithAgents },
+          } = await supertest
+            .post(`/api/fleet/agent_policies`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: 'Policy with agents',
+              namespace: 'default',
+            })
+            .expect(200);
+          await generateAgent(providerContext, 'healhty', 'agent-healthy-1', policyWithAgents.id);
+          const { body } = await supertest
+            .post('/api/fleet/agent_policies/delete')
+            .set('kbn-xsrf', 'xxx')
+            .send({ agentPolicyId: policyWithAgents.id })
+            .expect(400);
+
+          expect(body.message).to.contain(
+            'Cannot delete an agent policy that is assigned to any active or inactive agents'
+          );
+          await supertest
+            .delete(`/api/fleet/agents/agent-healthy-1`)
+            .set('kbn-xsrf', 'xx')
+            .expect(200);
+        });
+
+        it('should prevent policies having inactive agents from being deleted', async () => {
+          const {
+            body: { item: policyWithInactiveAgents },
+          } = await supertest
+            .post(`/api/fleet/agent_policies`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: 'Policy with inactive agents',
+              namespace: 'default',
+            })
+            .expect(200);
+          await generateAgent(
+            providerContext,
+            'inactive',
+            'agent-inactive-1',
+            policyWithInactiveAgents.id
+          );
+
+          const { body } = await supertest
+            .post('/api/fleet/agent_policies/delete')
+            .set('kbn-xsrf', 'xxx')
+            .send({ agentPolicyId: policyWithInactiveAgents.id })
+            .expect(400);
+
+          expect(body.message).to.contain(
+            'Cannot delete an agent policy that is assigned to any active or inactive agents'
+          );
+          await supertest
+            .delete(`/api/fleet/agents/agent-inactive-1`)
+            .set('kbn-xsrf', 'xx')
+            .expect(200);
         });
       });
     });
