@@ -53,12 +53,10 @@ export const NoDataButtonLink = ({
             values={{
               docsLink: esqlDocLink && (
                 <EuiLink href={esqlDocLink} target="_blank">
-                  {i18n.translate(
-                    'xpack.idxMgmt.mappingsEditor.configuration.indexOptionsdDocumentationLink',
-                    {
-                      defaultMessage: 'Learn more.',
-                    }
-                  )}
+                  <FormattedMessage
+                    id="sharedUXPackages.no_data_views.esqlDocsLink"
+                    defaultMessage="Learn more."
+                  />
                 </EuiLink>
               ),
             }}
