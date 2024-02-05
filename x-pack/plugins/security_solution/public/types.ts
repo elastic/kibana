@@ -53,6 +53,7 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 
 import type { RouteProps } from 'react-router-dom';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
+import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { UpsellingService } from '@kbn/security-solution-upselling/service';
@@ -89,6 +90,7 @@ export interface SetupPlugins {
   cloud?: CloudSetup;
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
+  management: ManagementSetup;
   security: SecurityPluginSetup;
   triggersActionsUi: TriggersActionsSetup;
   usageCollection?: UsageCollectionSetup;

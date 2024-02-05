@@ -6,7 +6,7 @@
  */
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSuperSelect, EuiText } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { Suspense, useCallback, useMemo, useState } from 'react';
 
 import { ActionConnector, ActionType } from '@kbn/triggers-actions-ui-plugin/public';
 
@@ -181,14 +181,17 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
           valueOfSelected={selectedConnectorId ?? ''}
         />
         {isConnectorModalVisible && (
-          <AddConnectorModal
-            actionTypeRegistry={actionTypeRegistry}
-            actionTypes={actionTypes}
-            onClose={() => setIsConnectorModalVisible(false)}
-            onSaveConnector={onSaveConnector}
-            onSelectActionType={(actionType: ActionType) => setSelectedActionType(actionType)}
-            selectedActionType={selectedActionType}
-          />
+          // Crashing management app otherwise
+          <Suspense fallback>
+            <AddConnectorModal
+              actionTypeRegistry={actionTypeRegistry}
+              actionTypes={actionTypes}
+              onClose={() => setIsConnectorModalVisible(false)}
+              onSaveConnector={onSaveConnector}
+              onSelectActionType={(actionType: ActionType) => setSelectedActionType(actionType)}
+              selectedActionType={selectedActionType}
+            />
+          </Suspense>
         )}
       </>
     );

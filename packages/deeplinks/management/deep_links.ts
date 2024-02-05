@@ -29,6 +29,7 @@ export type ManagementAppId = typeof MANAGEMENT_APP_ID;
 export type ManagementId =
   | 'aiAssistantManagementSelection'
   | 'aiAssistantManagementObservability'
+  | 'aiAssistantManagementSecurity'
   | 'api_keys'
   | 'cases'
   | 'cross_cluster_replication'
