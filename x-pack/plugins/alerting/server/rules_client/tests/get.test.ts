@@ -115,11 +115,14 @@ describe('get()', () => {
       Object {
         "actions": Array [
           Object {
+            "actionTypeId": undefined,
             "group": "default",
             "id": "1",
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": undefined,
           },
         ],
         "alertTypeId": "123",
@@ -189,18 +192,24 @@ describe('get()', () => {
       Object {
         "actions": Array [
           Object {
+            "actionTypeId": undefined,
             "group": "default",
             "id": "1",
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": undefined,
           },
           Object {
+            "actionTypeId": undefined,
             "group": "default",
             "id": "preconfigured",
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": undefined,
           },
         ],
         "alertTypeId": "123",
@@ -268,16 +277,22 @@ describe('get()', () => {
       Object {
         "actions": Array [
           Object {
+            "actionTypeId": undefined,
             "group": "default",
             "id": "1",
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": undefined,
           },
           Object {
+            "actionTypeId": undefined,
             "group": "default",
             "id": "system_action-id",
             "params": Object {},
+            "type": "default",
+            "uuid": undefined,
           },
         ],
         "alertTypeId": "123",
@@ -380,11 +395,14 @@ describe('get()', () => {
       Object {
         "actions": Array [
           Object {
+            "actionTypeId": undefined,
             "group": "default",
             "id": "1",
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": undefined,
           },
         ],
         "alertTypeId": "123",
