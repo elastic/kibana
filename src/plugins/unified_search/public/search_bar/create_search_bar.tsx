@@ -234,6 +234,8 @@ export function createSearchBar({
             dateRangeTo={timeRange.to}
             refreshInterval={refreshInterval.value}
             isRefreshPaused={refreshInterval.pause}
+            isLoading={props.isLoading}
+            onCancel={props.onCancel}
             filters={filters}
             query={query}
             onFiltersUpdated={defaultFiltersUpdated(data.query, props.onFiltersUpdated)}
