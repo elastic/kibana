@@ -30,7 +30,7 @@ import {
 import { EmbeddableLoading } from '../common/components/embeddable_loading_fallback';
 
 export const getDefaultSingleMetricViewerPanelTitle = (jobIds: JobId[]) =>
-  i18n.translate('xpack.ml.anomalyChartsEmbeddable.title', {
+  i18n.translate('xpack.ml.singleMetricViewerEmbeddable.title', {
     defaultMessage: 'ML single metric viewer chart for {jobIds}',
     values: { jobIds: jobIds.join(', ') },
   });

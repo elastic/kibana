@@ -699,7 +699,6 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
       contextForecastData,
       dataNotChartable,
       focusAggregationInterval,
-      // focusAnnotationError,
       focusAnnotationData,
       focusChartData,
       focusForecastData,
