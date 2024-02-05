@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { LogExplorerPublicStateUpdate } from '@kbn/logs-explorer-plugin/public';
+import { LogsExplorerPublicStateUpdate } from '@kbn/logs-explorer-plugin/public';
 import * as rt from 'io-ts';
-import { deepCompactObject, logExplorerUrlSchemaV1 } from '../../../../common';
+import { deepCompactObject, logsExplorerUrlSchemaV1 } from '../../../../common';
 
 export const getStateFromUrlValue = (
-  urlValue: logExplorerUrlSchemaV1.UrlSchema
-): LogExplorerPublicStateUpdate =>
-  deepCompactObject<LogExplorerPublicStateUpdate>({
+  urlValue: logsExplorerUrlSchemaV1.UrlSchema
+): LogsExplorerPublicStateUpdate =>
+  deepCompactObject<LogsExplorerPublicStateUpdate>({
     chart: {
       breakdownField: urlValue.breakdownField,
     },
@@ -32,9 +32,9 @@ export const getStateFromUrlValue = (
   });
 
 export const getUrlValueFromState = (
-  state: LogExplorerPublicStateUpdate
-): logExplorerUrlSchemaV1.UrlSchema =>
-  deepCompactObject<logExplorerUrlSchemaV1.UrlSchema>({
+  state: LogsExplorerPublicStateUpdate
+): logsExplorerUrlSchemaV1.UrlSchema =>
+  deepCompactObject<logsExplorerUrlSchemaV1.UrlSchema>({
     breakdownField: state.chart?.breakdownField,
     columns: state.grid?.columns,
     controls: state.controls,
@@ -49,9 +49,9 @@ export const getUrlValueFromState = (
   });
 
 const stateFromUrlSchemaRT = new rt.Type<
-  LogExplorerPublicStateUpdate,
-  logExplorerUrlSchemaV1.UrlSchema,
-  logExplorerUrlSchemaV1.UrlSchema
+  LogsExplorerPublicStateUpdate,
+  logsExplorerUrlSchemaV1.UrlSchema,
+  logsExplorerUrlSchemaV1.UrlSchema
 >(
   'stateFromUrlSchemaRT',
   rt.never.is,
@@ -60,4 +60,4 @@ const stateFromUrlSchemaRT = new rt.Type<
 );
 
 export const stateFromUntrustedUrlRT =
-  logExplorerUrlSchemaV1.urlSchemaRT.pipe(stateFromUrlSchemaRT);
+  logsExplorerUrlSchemaV1.urlSchemaRT.pipe(stateFromUrlSchemaRT);

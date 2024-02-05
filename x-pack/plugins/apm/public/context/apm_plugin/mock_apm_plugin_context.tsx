@@ -132,7 +132,7 @@ const mockPlugin = {
   },
 };
 
-export const observabilityLogExplorerLocatorsMock = {
+export const observabilityLogsExplorerLocatorsMock = {
   allDatasetsLocator: sharePluginMock.createLocator(),
   singleDatasetLocator: sharePluginMock.createLocator(),
 };

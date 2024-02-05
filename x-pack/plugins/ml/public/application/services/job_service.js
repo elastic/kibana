@@ -335,8 +335,8 @@ class JobService {
     return ml.jobs.stopDatafeeds(dIds);
   }
 
-  deleteJobs(jIds, deleteUserAnnotations) {
-    return ml.jobs.deleteJobs(jIds, deleteUserAnnotations);
+  deleteJobs(jIds, deleteUserAnnotations, deleteAlertingRules) {
+    return ml.jobs.deleteJobs(jIds, deleteUserAnnotations, deleteAlertingRules);
   }
 
   closeJobs(jIds) {
