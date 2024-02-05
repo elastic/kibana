@@ -6,11 +6,9 @@
  */
 
 import { getNestedProperty } from '@kbn/ml-nested-property';
+import type { DotObject } from '@kbn/utility-types';
 
 import type { ValueParserName } from './value_parsers';
-
-// The form state defines a flat structure of names for form fields.
-// This is a flat structure regardless of whether the final config object will be nested.
 
 export interface FormField<FF extends string, FS extends string, VN extends string> {
   formFieldName: FF;
@@ -37,19 +35,20 @@ export function createFormFieldsMap<FF extends string, FS extends string, VN ext
   }, {} as Record<FF, FormField<FF, FS, VN>>);
 }
 
-export const initializeFormField = <FF extends string, FS extends string, VN extends string, C>(
+export const createFormField = <FF extends string, FS extends string, VN extends string, C>(
   formFieldName: FF,
-  configFieldName?: string,
+  configFieldName?: keyof DotObject<C>,
   config?: C,
   overloads?: Partial<FormField<FF, FS, VN>>
 ): FormField<FF, FS, VN> => {
   const defaultValue = overloads?.defaultValue !== undefined ? overloads.defaultValue : '';
-  const rawValue = configFieldName && getNestedProperty(config ?? {}, configFieldName, undefined);
+  const rawValue =
+    configFieldName && getNestedProperty(config ?? {}, configFieldName as string, undefined);
   const value = rawValue !== null && rawValue !== undefined ? rawValue.toString() : '';
 
   return {
     formFieldName,
-    configFieldName,
+    configFieldName: configFieldName as string | undefined,
     defaultValue,
     dependsOn: [],
     errors: [],

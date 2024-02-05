@@ -7,6 +7,7 @@
 
 import { isDefined } from '@kbn/ml-is-defined';
 import { getNestedProperty } from '@kbn/ml-nested-property';
+import type { Path } from 'react-hook-form';
 
 // Defining these sections is only necessary for options where a reset/deletion of that part of the
 // configuration is supported by the API.
@@ -25,19 +26,20 @@ export function createFormSectionsMap<FS extends string>(formSections: Array<For
   }, {} as Record<FS, FormSection<FS>>);
 }
 
-export const initializeFormSection = <FS extends string, C>(
+export const createFormSection = <FS extends string, C>(
   formSectionName: FS,
-  configFieldName?: string,
+  configFieldName?: Path<C>,
   config?: C,
   overloads?: Partial<FormSection<FS>>
 ): FormSection<FS> => {
   const defaultEnabled = overloads?.defaultEnabled ?? false;
-  const rawEnabled = configFieldName && getNestedProperty(config ?? {}, configFieldName, undefined);
+  const rawEnabled =
+    configFieldName && getNestedProperty(config ?? {}, configFieldName as string, undefined);
   const enabled = isDefined(rawEnabled) || defaultEnabled;
 
   return {
     formSectionName,
-    configFieldName,
+    configFieldName: configFieldName as string | undefined,
     defaultEnabled,
     enabled,
   };
