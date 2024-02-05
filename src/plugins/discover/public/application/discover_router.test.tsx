@@ -51,7 +51,7 @@ const gatherRoutes = (wrapper: ShallowWrapper) => {
 
 const customizationContext: DiscoverCustomizationContext = {
   displayMode: 'standalone',
-  showLogExplorerTabs: false,
+  showLogsExplorerTabs: false,
 };
 
 const props: DiscoverRoutesProps = {
