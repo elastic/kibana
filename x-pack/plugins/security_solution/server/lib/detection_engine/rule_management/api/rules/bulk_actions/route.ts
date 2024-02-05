@@ -492,9 +492,7 @@ export const performBulkActionRoute = (
               const exported = await getExportByObjectIds(
                 rulesClient,
                 exceptionsClient,
-                savedObjectsClient,
-                rules.map(({ params }) => ({ rule_id: params.ruleId })),
-                logger,
+                rules.map(({ params }) => params.ruleId),
                 exporter,
                 request,
                 actionsClient

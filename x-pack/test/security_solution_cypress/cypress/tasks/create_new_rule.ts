@@ -32,6 +32,8 @@ import { convertHistoryStartToSize, getHumanizedDuration } from '../helpers/rule
 import {
   ABOUT_CONTINUE_BTN,
   ALERT_SUPPRESSION_DURATION_INPUT,
+  ALERT_SUPPRESSION_FIELDS_COMBO_BOX,
+  ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS,
   THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX,
   ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION,
   ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL,
@@ -713,6 +715,11 @@ export const getCustomQueryInvalidationText = () => cy.contains(CUSTOM_QUERY_REQ
  * @param rule The rule to use to fill in everything
  */
 export const fillDefineIndicatorMatchRuleAndContinue = (rule: ThreatMatchRuleCreateProps) => {
+  fillDefineIndicatorMatchRule(rule);
+  continueFromDefineStep();
+};
+
+export const fillDefineIndicatorMatchRule = (rule: ThreatMatchRuleCreateProps) => {
   if (rule.index) {
     fillIndexAndIndicatorIndexPattern(rule.index, rule.threat_index);
   }
@@ -721,6 +728,12 @@ export const fillDefineIndicatorMatchRuleAndContinue = (rule: ThreatMatchRuleCre
     indicatorIndexField: rule.threat_mapping[0].entries[0].value,
   });
   getCustomIndicatorQueryInput().type('{selectall}{enter}*:*');
+};
+
+/**
+ * presses continue on form Define step
+ */
+export const continueFromDefineStep = () => {
   getDefineContinueButton().should('exist').click({ force: true });
 };
 
@@ -824,12 +837,36 @@ export const enablesAndPopulatesThresholdSuppression = (
   cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).should('not.be.checked');
   cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).siblings('label').click();
 
-  cy.get(ALERT_SUPPRESSION_DURATION_INPUT).first().type(`{selectall}${interval}`);
-  cy.get(ALERT_SUPPRESSION_DURATION_INPUT).eq(1).select(timeUnit);
+  setAlertSuppressionDuration(interval, timeUnit);
 
   // rule execution radio option is disabled, per time interval becomes enabled when suppression enabled
   cy.get(ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION).should('be.disabled');
   cy.get(ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL).should('be.enabled').should('be.checked');
+};
+
+export const fillAlertSuppressionFields = (fields: string[]) => {
+  fields.forEach((field) => {
+    cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type(`${field}{enter}`);
+  });
+};
+
+export const selectAlertSuppressionPerInterval = () => {
+  // checkbox is covered by label, force:true is a workaround
+  // click on label not working, likely because it has child components
+  cy.get(ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL).click({ force: true });
+};
+
+export const selectAlertSuppressionPerRuleExecution = () => {
+  cy.get(ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION).siblings('label').click();
+};
+
+export const selectDoNotSuppressForMissingFields = () => {
+  cy.get(ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS).siblings('label').click();
+};
+
+export const setAlertSuppressionDuration = (interval: number, timeUnit: 's' | 'm' | 'h') => {
+  cy.get(ALERT_SUPPRESSION_DURATION_INPUT).first().type(`{selectall}${interval}`);
+  cy.get(ALERT_SUPPRESSION_DURATION_INPUT).eq(1).select(timeUnit);
 };
 
 export const checkLoadQueryDynamically = () => {
