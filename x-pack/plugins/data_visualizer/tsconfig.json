@@ -74,7 +74,8 @@
     "@kbn/text-based-languages",
     "@kbn/code-editor",
     "@kbn/es-types",
-    "@kbn/ui-theme"
+    "@kbn/ui-theme",
+    "@kbn/esql-utils"
   ],
   "exclude": [
     "target/**/*",

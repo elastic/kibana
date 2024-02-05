@@ -457,6 +457,9 @@ preview:[] Enable the APM Trace Explorer feature, that allows you to search and 
 [[observability-infrastructure-profiling-integration]]`observability:enableInfrastructureProfilingIntegration`::
 preview:[] Enables the Profiling view in Host details within Infrastructure.
 
+[[observability-infrastructure-hosts-custom-dashboard]]`observability:enableInfrastructureHostsCustomDashboards`::
+preview:[] Enables option to link custom dashboards in the Host Details view.
+
 [float]
 [[kibana-reporting-settings]]
 ==== Reporting

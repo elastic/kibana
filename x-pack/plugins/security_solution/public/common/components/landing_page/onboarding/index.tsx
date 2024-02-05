@@ -4,12 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React, { lazy, Suspense } from 'react';
+import { EuiLoadingLogo } from '@elastic/eui';
 
-import React from 'react';
+const OnboardingLazy = lazy(() => import('./onboarding_with_settings'));
 
-import { Onboarding } from './lazy';
+const centerLogoStyle = { display: 'flex', margin: 'auto' };
 
-export const getOnboardingComponent = (): React.ComponentType<{ indicesExist?: boolean }> =>
-  function OnBoardingComponent({ indicesExist }: { indicesExist?: boolean }) {
-    return <Onboarding indicesExist={indicesExist} />;
-  };
+export const Onboarding = ({ indicesExist }: { indicesExist?: boolean }) => (
+  <Suspense fallback={<EuiLoadingLogo logo="logoSecurity" size="xl" style={centerLogoStyle} />}>
+    <OnboardingLazy indicesExist={indicesExist} />
+  </Suspense>
+);

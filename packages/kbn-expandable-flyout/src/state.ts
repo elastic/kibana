@@ -21,10 +21,18 @@ export interface State {
    * Panels to render in the preview section
    */
   preview: FlyoutPanelProps[];
+
+  /**
+   * Is the flyout in sync with external storage (eg. url)?
+   * This value can be used in useEffect for example, to control whether we should
+   * call an external state sync method.
+   */
+  needsSync?: boolean;
 }
 
 export const initialState: State = {
   left: undefined,
   right: undefined,
   preview: [],
+  needsSync: false,
 };

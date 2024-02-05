@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { getIndexPatternFromSQLQuery, getIndexPatternFromESQLQuery } from '@kbn/es-query';
+import { getIndexPatternFromSQLQuery, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
