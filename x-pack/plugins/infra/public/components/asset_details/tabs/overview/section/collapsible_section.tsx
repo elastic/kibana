@@ -5,17 +5,22 @@
  * 2.0.
  */
 
-import { EuiAccordion, EuiFlexGroup, EuiFlexItem, useGeneratedHtmlId } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 
-export type SectionTriggerValue = 'closed' | 'open';
+import {
+  EuiAccordion,
+  EuiFlexGroup,
+  EuiFlexItem,
+  useGeneratedHtmlId,
+  type EuiAccordionProps,
+} from '@elastic/eui';
 
 export const CollapsibleSection = ({
   title,
   closedSectionContent,
   extraAction,
   children,
-  shouldCollapse,
+  collapsible,
   ['data-test-subj']: dataTestSubj,
   id,
   initialTriggerValue,
@@ -25,12 +30,12 @@ export const CollapsibleSection = ({
   extraAction?: React.ReactNode;
   dependsOn?: string[];
   children: React.ReactNode;
-  shouldCollapse: boolean;
+  collapsible: boolean;
   ['data-test-subj']: string;
   id: string;
-  initialTriggerValue?: SectionTriggerValue;
+  initialTriggerValue?: EuiAccordionProps['forceState'];
 }) => {
-  const [trigger, setTrigger] = useState<SectionTriggerValue>('open');
+  const [trigger, setTrigger] = useState<EuiAccordionProps['forceState']>('open');
 
   useEffect(() => {
     setTrigger(initialTriggerValue ?? 'open');
@@ -41,9 +46,7 @@ export const CollapsibleSection = ({
     closedSectionContent && trigger === 'closed' ? (
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={false}>
-          <>
-            <Title />
-          </>
+          <Title />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{closedSectionContent}</EuiFlexItem>
       </EuiFlexGroup>
@@ -59,7 +62,7 @@ export const CollapsibleSection = ({
     setTrigger(newState);
   };
 
-  return shouldCollapse ? (
+  return collapsible ? (
     <EuiAccordion
       id={collapsibleSectionAccordionId}
       data-section-id={id}

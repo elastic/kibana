@@ -6,7 +6,7 @@
  */
 import React, { useMemo, useState } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, type EuiAccordionProps } from '@elastic/eui';
 import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
@@ -23,7 +23,7 @@ import { useBoolean } from '../../../../hooks/use_boolean';
 import { ALERT_STATUS_ALL } from '../../../../common/alerts/constants';
 import { AlertsSectionTitle } from '../../components/section_titles';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
-import { CollapsibleSection, type SectionTriggerValue } from './section/collapsible_section';
+import { CollapsibleSection } from './section/collapsible_section';
 import { AlertsClosedContent } from './alerts_closed_content';
 import { type AlertsCount } from '../../../../hooks/use_alerts_count';
 
@@ -39,7 +39,8 @@ export const AlertsSummaryContent = ({
   const { featureFlags } = usePluginConfig();
   const [isAlertFlyoutVisible, { toggle: toggleAlertFlyout }] = useBoolean(false);
   const { overrides } = useAssetDetailsRenderPropsContext();
-  const [isAlertSectionOpen, setIsAlertSectionOpen] = useState<SectionTriggerValue>('open');
+  const [isAlertSectionOpen, setIsAlertSectionOpen] =
+    useState<EuiAccordionProps['forceState']>('open');
   const [activeAlertsCount, setActiveAlertsCount] = useState<number | undefined>(undefined);
 
   const alertsEsQueryByStatus = useMemo(
@@ -52,38 +53,31 @@ export const AlertsSummaryContent = ({
     [assetName, dateRange]
   );
 
-  const ExtraActions = () => (
-    <EuiFlexGroup alignItems="center" responsive={false}>
-      {featureFlags.inventoryThresholdAlertRuleEnabled && (
-        <EuiFlexItem grow={false}>
-          <LinkToAlertsRule
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleAlertFlyout();
-            }}
-          />
-        </EuiFlexItem>
-      )}
-      <EuiFlexItem grow={false}>
-        <LinkToAlertsPage
-          assetName={assetName}
-          queryField={`${assetType}.name`}
-          dateRange={dateRange}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-
   return (
     <>
       <CollapsibleSection
         title={AlertsSectionTitle}
-        shouldCollapse={true}
+        collapsible
         data-test-subj="infraAssetDetailsAlertsCollapsible"
-        id={'alerts'}
-        extraAction={<ExtraActions />}
+        id="alerts"
         closedSectionContent={<AlertsClosedContent activeAlertCount={activeAlertsCount} />}
         initialTriggerValue={isAlertSectionOpen}
+        extraAction={
+          <EuiFlexGroup alignItems="center" responsive={false}>
+            {featureFlags.inventoryThresholdAlertRuleEnabled && (
+              <EuiFlexItem grow={false}>
+                <LinkToAlertsRule onClick={toggleAlertFlyout} />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <LinkToAlertsPage
+                assetName={assetName}
+                queryField={`${assetType}.name`}
+                dateRange={dateRange}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
       >
         <MemoAlertSummaryWidget
           setIsAlertSectionOpen={setIsAlertSectionOpen}
@@ -92,7 +86,6 @@ export const AlertsSummaryContent = ({
           dateRange={dateRange}
         />
       </CollapsibleSection>
-
       {featureFlags.inventoryThresholdAlertRuleEnabled && (
         <AlertFlyout
           filter={`${findInventoryFields(assetType).name}: "${assetName}"`}
@@ -109,7 +102,7 @@ export const AlertsSummaryContent = ({
 interface MemoAlertSummaryWidgetProps {
   alertsQuery: AlertsEsQuery;
   dateRange: TimeRange;
-  setIsAlertSectionOpen: (value: SectionTriggerValue) => void;
+  setIsAlertSectionOpen: (value: EuiAccordionProps['forceState']) => void;
   setActiveAlertsCount: (value: number) => void;
 }
 

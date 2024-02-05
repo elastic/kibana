@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const LOG_EXPLORER_PROFILE_ID = 'logs-explorer';
+export const LOGS_EXPLORER_PROFILE_ID = 'logs-explorer';
 
 // Fields constants
 export const TIMESTAMP_FIELD = '@timestamp';
