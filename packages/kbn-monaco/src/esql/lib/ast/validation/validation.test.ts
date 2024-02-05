@@ -1296,6 +1296,9 @@ describe('validation logic', () => {
       'At least one aggregation or grouping expression required in [STATS]',
     ]);
     testErrorsAndWarnings('from a | stats by stringField', []);
+    testErrorsAndWarnings('from a | stats by ', [
+      'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, LP, NOT, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found "<EOF>"',
+    ]);
     testErrorsAndWarnings('from a | stats numberField ', [
       'STATS expects an aggregate function, found [numberField]',
     ]);
