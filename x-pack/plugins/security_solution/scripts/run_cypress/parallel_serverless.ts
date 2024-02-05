@@ -108,8 +108,8 @@ async function createSecurityProject(
     product_types: productTypes,
   };
 
-  log.info(`Kibana override flag equals to ${process.env.OVERRIDE_KIBANA}!`);
-  if (process.env.OVERRIDE_KIBANA && process.env.OVERRIDE_KIBANA === '1') {
+  log.info(`Kibana override flag equals to ${process.env.KIBANA_MKI_USE_LATEST_COMMIT}!`);
+  if (process.env.KIBANA_MKI_USE_LATEST_COMMIT && process.env.KIBANA_MKI_USE_LATEST_COMMIT === '1') {
     const kibanaOverrideImage = `${process.env.BUILDKITE_COMMIT?.substring(0, 12)}`;
     log.info(
       `Overriding Kibana image in the MKI with docker.elastic.co/kibana-ci/kibana-serverless:sec-sol-qg-${kibanaOverrideImage}`

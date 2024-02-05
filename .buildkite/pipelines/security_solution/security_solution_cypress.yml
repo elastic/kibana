@@ -10,7 +10,7 @@ steps:
         - exit_status: "-1"
           limit: 3
 
-  - command: .buildkite/scripts/pipelines/security_solution_quality_gate/upload_runtime_info.sh
+  - command: .buildkite/scripts/pipelines/security_solution_quality_gate/upload_image_metadata.sh
     label: "Upload runtime info"
     key: upload_runtime_info
     depends_on: build_image

@@ -19,18 +19,10 @@ buildkite-agent meta-data set "${BUILDKITE_JOB_ID}_is_test_execution_step" "true
 mkdir .ftr
 vault_get security-quality-gate/role-users data -format=json > .ftr/role_users.json
 
-file_path=".ftr/role_users.json"
-
-if [ -e "$file_path" ]; then
-    echo "File exists!"
-else
-    echo "File does not exist."
-fi
-
 cd x-pack/test/security_solution_cypress
 set +e
 
-if [ -z "${KIBANA_CURRENT+x}" ] || [ "$KIBANA_CURRENT" = "0" ]; then
+if [ -z "${KIBANA_MKI_USE_LATEST_COMMIT+x}" ] || [ "$KIBANA_MKI_USE_LATEST_COMMIT" = "0" ]; then
     KIBANA_OVERRIDE_FLAG=0
 else
     KIBANA_OVERRIDE_FLAG=1
@@ -39,4 +31,4 @@ fi
 QA_API_KEY=$(vault_get security-solution-quality-gate qa_api_key)
 BK_ANALYTICS_API_KEY=$(vault_get security-solution-quality-gate serverless-sec-sol-cypress-bk-api-key)
 
-OVERRIDE_KIBANA=$KIBANA_OVERRIDE_FLAG BK_ANALYTICS_API_KEY=$BK_ANALYTICS_API_KEY CLOUD_QA_API_KEY=$QA_API_KEY yarn $1; status=$?; yarn junit:merge || :; exit $status
+KIBANA_MKI_USE_LATEST_COMMIT=$KIBANA_OVERRIDE_FLAG BK_ANALYTICS_API_KEY=$BK_ANALYTICS_API_KEY CLOUD_QA_API_KEY=$QA_API_KEY yarn $1; status=$?; yarn junit:merge || :; exit $status
