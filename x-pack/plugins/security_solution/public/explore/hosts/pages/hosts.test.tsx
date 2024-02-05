@@ -11,17 +11,9 @@ import { Router } from '@kbn/shared-ux-router';
 
 import type { Filter } from '@kbn/es-query';
 import '../../../common/mock/match_media';
-import {
-  TestProviders,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  kibanaObservable,
-  createSecuritySolutionStorageMock,
-} from '../../../common/mock';
+import { TestProviders, createMockStore } from '../../../common/mock';
 import { TabNavigation } from '../../../common/components/navigation/tab_navigation';
 import { inputsActions } from '../../../common/store/inputs';
-import type { State } from '../../../common/store';
-import { createStore } from '../../../common/store';
 import { Hosts } from './hosts';
 import { HostsTabs } from './hosts_tabs';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
@@ -85,9 +77,7 @@ const mockHistory = {
   listen: jest.fn(),
 };
 const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
-const myState: State = mockGlobalState;
-const { storage } = createSecuritySolutionStorageMock();
-const myStore = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+const myStore = createMockStore();
 
 describe('Hosts - rendering', () => {
   beforeEach(() => {
