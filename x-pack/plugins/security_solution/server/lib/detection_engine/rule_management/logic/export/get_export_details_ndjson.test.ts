@@ -28,8 +28,8 @@ describe('getExportDetailsNdjson', () => {
   });
 
   test('it exports a correct count given a no rules and a single missing rule', () => {
-    const missingRule = { rule_id: 'rule-1' };
-    const details = getExportDetailsNdjson([], [missingRule]);
+    const missingRuleId = 'rule-1';
+    const details = getExportDetailsNdjson([], [missingRuleId]);
     const reParsed = JSON.parse(details);
     expect(reParsed).toEqual({
       exported_count: 0,
@@ -45,15 +45,15 @@ describe('getExportDetailsNdjson', () => {
     rule2.rule_id = 'some other id';
     rule2.id = 'some other id';
 
-    const missingRule1 = { rule_id: 'rule-1' };
-    const missingRule2 = { rule_id: 'rule-2' };
+    const missingRuleId1 = 'rule-1';
+    const missingRuleId2 = 'rule-2';
 
-    const details = getExportDetailsNdjson([rule1, rule2], [missingRule1, missingRule2]);
+    const details = getExportDetailsNdjson([rule1, rule2], [missingRuleId1, missingRuleId2]);
     const reParsed = JSON.parse(details);
     expect(reParsed).toEqual({
       exported_count: 2,
       exported_rules_count: 2,
-      missing_rules: [missingRule1, missingRule2],
+      missing_rules: [{ rule_id: missingRuleId1 }, { rule_id: missingRuleId2 }],
       missing_rules_count: 2,
     });
   });
