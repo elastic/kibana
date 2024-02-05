@@ -201,11 +201,11 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         return {
           hostId: agentId,
           hostname: actionRequestDoc.EndpointActions.data.hosts?.[agentId].name ?? '',
-          type: 'sentinel_one',
+          agentType: 'sentinel_one',
         };
       }),
       comment: options.comment,
-      action_id: actionRequestDoc.EndpointActions.action_id,
+      actionId: actionRequestDoc.EndpointActions.action_id,
     });
 
     return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
@@ -237,11 +237,11 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         return {
           hostId: agentId,
           hostname: actionRequestDoc.EndpointActions.data.hosts?.[agentId].name ?? '',
-          type: 'sentinel_one',
+          agentType: 'sentinel_one',
         };
       }),
       comment: options.comment,
-      action_id: actionRequestDoc.EndpointActions.action_id,
+      actionId: actionRequestDoc.EndpointActions.action_id,
     });
 
     return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);

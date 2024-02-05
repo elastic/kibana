@@ -120,17 +120,17 @@ describe('ResponseActionsClientImpl base class', () => {
         caseIds: ['case-999'],
         alertIds: [KNOWN_ALERT_ID_1, KNOWN_ALERT_ID_2, KNOWN_ALERT_ID_3],
         comment: 'this is a case comment',
-        action_id: 'action-123',
+        actionId: 'action-123',
         hosts: [
           {
             hostId: '1-2-3',
             hostname: 'foo-one',
-            type: 'endpoint',
+            agentType: 'endpoint',
           },
           {
             hostId: '4-5-6',
             hostname: 'foo-two',
-            type: 'sentinel_one',
+            agentType: 'sentinel_one',
           },
         ],
       };
@@ -218,12 +218,12 @@ describe('ResponseActionsClientImpl base class', () => {
                 {
                   endpointId: '1-2-3',
                   hostname: 'foo-one',
-                  type: 'endpoint',
+                  agentType: 'endpoint',
                 },
                 {
                   endpointId: '4-5-6',
                   hostname: 'foo-two',
-                  type: 'sentinel_one',
+                  agentType: 'sentinel_one',
                 },
               ],
             },
@@ -243,12 +243,12 @@ describe('ResponseActionsClientImpl base class', () => {
                 {
                   endpointId: '1-2-3',
                   hostname: 'foo-one',
-                  type: 'endpoint',
+                  agentType: 'endpoint',
                 },
                 {
                   endpointId: '4-5-6',
                   hostname: 'foo-two',
-                  type: 'sentinel_one',
+                  agentType: 'sentinel_one',
                 },
               ],
             },
@@ -268,12 +268,12 @@ describe('ResponseActionsClientImpl base class', () => {
                 {
                   endpointId: '1-2-3',
                   hostname: 'foo-one',
-                  type: 'endpoint',
+                  agentType: 'endpoint',
                 },
                 {
                   endpointId: '4-5-6',
                   hostname: 'foo-two',
-                  type: 'sentinel_one',
+                  agentType: 'sentinel_one',
                 },
               ],
             },
@@ -293,12 +293,12 @@ describe('ResponseActionsClientImpl base class', () => {
                 {
                   endpointId: '1-2-3',
                   hostname: 'foo-one',
-                  type: 'endpoint',
+                  agentType: 'endpoint',
                 },
                 {
                   endpointId: '4-5-6',
                   hostname: 'foo-two',
-                  type: 'sentinel_one',
+                  agentType: 'sentinel_one',
                 },
               ],
             },

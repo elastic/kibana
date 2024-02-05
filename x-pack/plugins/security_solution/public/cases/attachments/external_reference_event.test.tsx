@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 
-import AttachmentContent from './external_reference_event';
+import AttachmentContentEvent from './external_reference_event';
 import { useNavigation } from '@kbn/security-solution-navigation/src/navigation';
 
 jest.mock('@kbn/security-solution-navigation/src/navigation', () => {
@@ -17,7 +17,7 @@ jest.mock('@kbn/security-solution-navigation/src/navigation', () => {
   };
 });
 
-describe('AttachmentContent', () => {
+describe('AttachmentContentEvent', () => {
   const mockNavigateTo = jest.fn();
 
   const mockUseNavigation = useNavigation as jest.Mocked<typeof useNavigation>;
@@ -33,20 +33,22 @@ describe('AttachmentContent', () => {
         {
           endpointId: 'endpoint-1',
           hostname: 'host-1',
-          type: 'endpoint' as const,
+          agentType: 'endpoint' as const,
         },
       ],
     },
   };
 
   it('renders the expected text based on the command', () => {
-    const { getByText, getByTestId, rerender } = render(<AttachmentContent {...defaultProps} />);
+    const { getByText, getByTestId, rerender } = render(
+      <AttachmentContentEvent {...defaultProps} />
+    );
 
     expect(getByText('submitted isolate request on host')).toBeInTheDocument();
     expect(getByTestId('actions-link-endpoint-1')).toHaveTextContent('host-1');
 
     rerender(
-      <AttachmentContent
+      <AttachmentContentEvent
         {...defaultProps}
         externalReferenceMetadata={{
           ...defaultProps.externalReferenceMetadata,
@@ -60,7 +62,7 @@ describe('AttachmentContent', () => {
   });
 
   it('navigates on link click', () => {
-    const { getByTestId } = render(<AttachmentContent {...defaultProps} />);
+    const { getByTestId } = render(<AttachmentContentEvent {...defaultProps} />);
 
     fireEvent.click(getByTestId('actions-link-endpoint-1'));
 
@@ -73,7 +75,7 @@ describe('AttachmentContent', () => {
       getAppUrl: mockGetAppUrl,
     });
 
-    render(<AttachmentContent {...defaultProps} />);
+    render(<AttachmentContentEvent {...defaultProps} />);
 
     expect(mockGetAppUrl).toHaveBeenNthCalledWith(1, {
       path: '/administration/endpoints?selected_endpoint=endpoint-1&show=activity_log',

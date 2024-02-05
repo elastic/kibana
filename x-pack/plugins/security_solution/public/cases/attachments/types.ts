@@ -14,7 +14,7 @@ export interface IExternalReferenceMetaDataProps {
     targets: Array<{
       endpointId: string;
       hostname: string;
-      type: ResponseActionAgentType;
+      agentType: ResponseActionAgentType;
     }>;
   };
 }

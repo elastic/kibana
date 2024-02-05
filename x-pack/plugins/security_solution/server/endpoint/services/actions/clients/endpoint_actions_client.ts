@@ -34,6 +34,9 @@ import type {
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
   SuspendProcessActionOutputContent,
+  Host,
+  ImmutableObject,
+  HostMetadataInterface,
 } from '../../../../../common/endpoint/types';
 
 export class EndpointActionsClient extends ResponseActionsClientImpl {
@@ -83,12 +86,12 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       comment: options.comment,
       caseIds: options.case_ids,
       alertIds: options.alert_ids,
-      action_id: response.id,
-      hosts: options.endpoint_ids.map((hostId) => {
+      actionId: response.id,
+      hosts: agentIds.hosts.map((endpoint: ImmutableObject<HostMetadataInterface>) => {
         return {
-          hostId,
-          type: 'endpoint',
-          hostname: response.hosts?.[hostId]?.name ?? '',
+          hostId: endpoint.agent.id,
+          agentType: 'endpoint',
+          hostname: endpoint.host.hostname,
         };
       }),
     });

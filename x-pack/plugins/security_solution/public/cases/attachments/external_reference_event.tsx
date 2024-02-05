@@ -14,7 +14,7 @@ import { getEndpointDetailsPath } from '../../management/common/routing';
 
 import { ISOLATED_HOST, OTHER_ENDPOINTS, RELEASED_HOST } from '../pages/translations';
 
-const AttachmentContent = (props: {
+const AttachmentContentEvent = (props: {
   externalReferenceMetadata: {
     command: IExternalReferenceMetaDataProps['externalReferenceMetadata']['command'];
     targets: IExternalReferenceMetaDataProps['externalReferenceMetadata']['targets'];
@@ -42,7 +42,7 @@ const AttachmentContent = (props: {
   }, [command]);
 
   const linkHref = useMemo(
-    () => (targets[0].type === 'sentinel_one' ? hostsDetailsHref : endpointDetailsHref),
+    () => (targets[0].agentType === 'endpoint' ? endpointDetailsHref : hostsDetailsHref),
     [endpointDetailsHref, hostsDetailsHref, targets]
   );
 
@@ -71,4 +71,4 @@ const AttachmentContent = (props: {
 };
 
 // eslint-disable-next-line import/no-default-export
-export { AttachmentContent as default };
+export { AttachmentContentEvent as default };

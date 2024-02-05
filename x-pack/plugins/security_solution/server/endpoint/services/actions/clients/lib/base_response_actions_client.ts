@@ -76,14 +76,15 @@ export interface ResponseActionsClientUpdateCasesOptions {
   hosts: Array<{
     hostname: string;
     hostId: string;
-    type: string;
+    agentType: ResponseActionAgentType;
   }>;
   caseIds?: string[];
   /** If defined, any case that the alert is included in will also receive an update */
   alertIds?: string[];
   /** Comment to include in the Case attachment */
   comment?: string;
-  action_id?: string;
+  /** The id of the action that was taken */
+  actionId: string;
 }
 
 export type ResponseActionsClientWriteActionRequestToEndpointIndexOptions =
@@ -124,7 +125,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     caseIds = [],
     alertIds = [],
     comment = '',
-    action_id: actionId,
+    actionId,
   }: ResponseActionsClientUpdateCasesOptions): Promise<void> {
     if (caseIds.length === 0 && alertIds.length === 0) {
       this.log.debug(`Nothing to do. 'caseIds' and 'alertIds' are empty`);
@@ -172,8 +173,9 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
     this.log.debug(`Updating cases:\n${stringify(allCases)}`);
 
+    // console.log({ hosts });
     // Create an attachment for each case that includes info. about the response actions taken against the hosts
-    const attachments = allCases.map(() => ({
+    const attachments: CaseAttachments = allCases.map(() => ({
       type: AttachmentType.externalReference,
       externalReferenceId: actionId,
       externalReferenceStorage: {
@@ -181,16 +183,18 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       },
       externalReferenceAttachmentTypeId: CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
       externalReferenceMetadata: {
-        targets: hosts.map(({ hostId: endpointId, hostname, type }) => ({
-          endpointId,
-          hostname,
-          type,
-        })),
+        targets: hosts.map(({ hostId: endpointId, hostname, agentType }) => {
+          return {
+            endpointId,
+            hostname,
+            agentType,
+          };
+        }),
         command,
         comment: comment || EMPTY_COMMENT,
       },
       owner: APP_ID,
-    })) as CaseAttachments;
+    }));
 
     const casesUpdateResponse = await Promise.all(
       allCases.map(async (caseId) => {
