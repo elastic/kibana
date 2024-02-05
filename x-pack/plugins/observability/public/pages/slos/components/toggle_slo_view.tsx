@@ -12,14 +12,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { FindSLOResponse } from '@kbn/slo-schema';
 import { SearchState } from '../hooks/use_url_search_state';
 import { SortBySelect } from './common/sort_by_select';
-import { SLOViewSettings } from './slo_view_settings';
 
-export type SLOView = 'cardView' | 'listView';
+export type SLOView = 'cardView' | 'listView' | 'compactView';
 
 interface Props {
-  onToggleCompactView: () => void;
   onChangeView: (view: SLOView) => void;
-  isCompact: boolean;
   sloView: SLOView;
   sloList?: FindSLOResponse;
   loading: boolean;
@@ -31,7 +28,7 @@ const toggleButtonsIcons = [
   {
     id: `cardView`,
     label: 'Card View',
-    iconType: 'visGauge',
+    iconType: 'apps',
     'data-test-subj': 'sloCardViewButton',
   },
   {
@@ -40,13 +37,18 @@ const toggleButtonsIcons = [
     iconType: 'list',
     'data-test-subj': 'sloListViewButton',
   },
+  {
+    iconType: 'tableDensityCompact',
+    id: 'compactView',
+    label: i18n.translate('xpack.observability.slo.listView.compactViewLabel', {
+      defaultMessage: 'Compact view',
+    }),
+  },
 ];
 
 export function ToggleSLOView({
   sloView,
   onChangeView,
-  onToggleCompactView,
-  isCompact = true,
   sloList,
   loading,
   initialState,
@@ -95,9 +97,6 @@ export function ToggleSLOView({
           onChange={(id) => onChangeView(id as SLOView)}
           isIconOnly
         />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <SLOViewSettings toggleCompactView={onToggleCompactView} isCompact={isCompact} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

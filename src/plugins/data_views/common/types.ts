@@ -408,6 +408,10 @@ export type FieldSpec = DataViewFieldBase & {
    */
   aggregatable: boolean;
   /**
+   * True if field is empty
+   */
+  isNull?: boolean;
+  /**
    * True if can be read from doc values
    */
   readFromDocValues?: boolean;
