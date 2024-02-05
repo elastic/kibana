@@ -1,3 +1,18 @@
+env:
+  VERSION: ${BUILDKITE_COMMIT:0:12}
+  DOCKER_IMAGE_TAG: git-${VERSION}
+  DOCKER_IMAGE: docker.elastic.co/kibana-ci/kibana-serverless
+  EMERGENCY_RELEASE_REMOTE_SERVICE_CONFIG: https://raw.githubusercontent.com/elastic/serverless-gitops/main/gen/gpctl/kibana/emergency.yaml
+
 steps:
-  - label: Placeholder
-    command: echo "Hello!"
+  - label: ':label: Create tag'
+    command: .buildkite/scripts/steps/serverless/tag.sh
+    if: build.tag =~ /^deploy-hotfix-.*\$/ && build.branch =~ /^hotfix-.*\$/
+
+  # - label: ':argo: Emergency Release'
+  #   if: build.tag =~ /^deploy-hotfix-.*\$/ && build.branch =~ /^hotfix-.*\$/
+  #   trigger: gpctl-promote
+  #   build:
+  #     env:
+  #       REMOTE_SERVICE_CONFIG: "${EMERGENCY_RELEASE_REMOTE_SERVICE_CONFIG}"
+  #       SERVICE_COMMIT_HASH: "${VERSION}"
