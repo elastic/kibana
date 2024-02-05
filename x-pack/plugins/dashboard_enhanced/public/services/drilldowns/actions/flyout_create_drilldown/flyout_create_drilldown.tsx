@@ -68,6 +68,7 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableContext> {
   }
 
   public async isCompatible(context: EmbeddableContext) {
+    if (!context.embeddable?.getInput) return false;
     const isEditMode = context.embeddable.getInput().viewMode === 'edit';
     return isEditMode && this.isEmbeddableCompatible(context);
   }

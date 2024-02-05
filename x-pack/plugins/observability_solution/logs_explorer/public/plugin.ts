@@ -7,35 +7,37 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { LogExplorerLocatorDefinition, LogExplorerLocators } from '../common/locators';
-import { createLogExplorer } from './components/log_explorer';
-import { createLogExplorerControllerLazyFactory } from './controller/lazy_create_controller';
+import { LogsExplorerLocatorDefinition, LogsExplorerLocators } from '../common/locators';
+import { createLogsExplorer } from './components/logs_explorer';
+import { createLogsExplorerControllerLazyFactory } from './controller/lazy_create_controller';
 import type {
-  LogExplorerPluginSetup,
-  LogExplorerPluginStart,
-  LogExplorerSetupDeps,
-  LogExplorerStartDeps,
+  LogsExplorerPluginSetup,
+  LogsExplorerPluginStart,
+  LogsExplorerSetupDeps,
+  LogsExplorerStartDeps,
 } from './types';
 
-export class LogExplorerPlugin implements Plugin<LogExplorerPluginSetup, LogExplorerPluginStart> {
-  private locators?: LogExplorerLocators;
+export class LogsExplorerPlugin
+  implements Plugin<LogsExplorerPluginSetup, LogsExplorerPluginStart>
+{
+  private locators?: LogsExplorerLocators;
 
   constructor(context: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, plugins: LogExplorerSetupDeps) {
+  public setup(core: CoreSetup, plugins: LogsExplorerSetupDeps) {
     const { share } = plugins;
     const discoverAppLocator =
       share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
 
     // Register Locators
-    const logExplorerLocator = share.url.locators.create(
-      new LogExplorerLocatorDefinition({
+    const logsExplorerLocator = share.url.locators.create(
+      new LogsExplorerLocatorDefinition({
         discoverAppLocator,
       })
     );
 
     this.locators = {
-      logExplorerLocator,
+      logsExplorerLocator,
     };
 
     return {
@@ -43,20 +45,20 @@ export class LogExplorerPlugin implements Plugin<LogExplorerPluginSetup, LogExpl
     };
   }
 
-  public start(core: CoreStart, plugins: LogExplorerStartDeps) {
-    const LogExplorer = createLogExplorer({
+  public start(core: CoreStart, plugins: LogsExplorerStartDeps) {
+    const LogsExplorer = createLogsExplorer({
       core,
       plugins,
     });
 
-    const createLogExplorerController = createLogExplorerControllerLazyFactory({
+    const createLogsExplorerController = createLogsExplorerControllerLazyFactory({
       core,
       plugins,
     });
 
     return {
-      LogExplorer,
-      createLogExplorerController,
+      LogsExplorer,
+      createLogsExplorerController,
     };
   }
 }
