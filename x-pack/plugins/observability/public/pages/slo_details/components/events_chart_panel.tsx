@@ -17,7 +17,7 @@ import {
   ScaleType,
   Settings,
   Tooltip,
-  TooltipType
+  TooltipType,
 } from '@elastic/charts';
 import {
   EuiFlexGroup,
@@ -27,7 +27,7 @@ import {
   EuiPanel,
   EuiText,
   EuiTitle,
-  useEuiTheme
+  useEuiTheme,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
