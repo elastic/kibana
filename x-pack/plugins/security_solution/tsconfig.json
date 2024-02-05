@@ -183,6 +183,7 @@
     "@kbn/stack-connectors-plugin",
     "@kbn/elastic-assistant-common",
     "@kbn/core-elasticsearch-server-mocks",
-    "@kbn/lens-embeddable-utils"
+    "@kbn/lens-embeddable-utils",
+    "@kbn/esql-utils"
   ]
 }

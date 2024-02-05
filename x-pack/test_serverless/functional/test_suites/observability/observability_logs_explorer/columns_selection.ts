@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const to = '2023-12-27T10:25:14.091Z';
   const TEST_TIMEOUT = 10 * 1000; // 10 secs
 
-  const navigateToLogExplorer = () =>
+  const navigateToLogsExplorer = () =>
     PageObjects.observabilityLogsExplorer.navigateTo({
       pageState: {
         time: {
@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await synthtrace.index(generateLogsData({ to }));
       await PageObjects.svlCommonPage.login();
-      await navigateToLogExplorer();
+      await navigateToLogsExplorer();
     });
 
     after(async () => {
@@ -139,7 +139,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('on cell expansion with message field should open regular popover', async () => {
-        await navigateToLogExplorer();
+        await navigateToLogsExplorer();
         await retry.tryForTime(TEST_TIMEOUT, async () => {
           await dataGrid.clickCellExpandButton(3, 4);
           await testSubjects.existOrFail('euiDataGridExpansionPopover');
@@ -160,7 +160,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('virtual column cell actions', async () => {
       beforeEach(async () => {
-        await navigateToLogExplorer();
+        await navigateToLogsExplorer();
       });
       it('should render a popover with cell actions when a chip on content column is clicked', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
