@@ -107,6 +107,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await PageObjects.discover.selectTextBaseLang();
 
+        const testQuery = `from logstash-* | limit 10000`;
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
         await PageObjects.unifiedFieldList.openSidebarFieldFilter();
         options = await find.allByCssSelector('[data-test-subj*="typeFilter"]');
@@ -124,6 +128,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             '6 available fields.'
           );
         });
+      });
+
+      it('should show empty fields in text-based view', async function () {
+        await kibanaServer.uiSettings.update({ 'discover:enableESQL': true });
+        await browser.refresh();
+
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+        await PageObjects.discover.selectTextBaseLang();
+
+        const testQuery = `from logstash-* | limit 10 | keep machine.ram_range, bytes `;
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+        await PageObjects.unifiedFieldList.openSidebarFieldFilter();
+
+        expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
+          '2 selected fields. 1 available field. 1 empty field.'
+        );
       });
     });
 
@@ -422,6 +445,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         await PageObjects.discover.selectTextBaseLang();
+        await monacoEditor.setCodeEditorValue('from logstash-* | limit 10000');
+        await testSubjects.click('querySubmitButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
