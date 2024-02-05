@@ -85,7 +85,7 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
               <EuiText color="subdued">
                 <FormattedMessage
                   id="xpack.fleet.settings.fleetServerHostsFlyout.serverlessInfoText"
-                  defaultMessage="You may create another Fleet Server config with a proxy."
+                  defaultMessage="You may create another Fleet Server definition reachable via a proxy. In context of the serverless project, Fleet Service is managed by Elastic. Creation of a new one is therefore not permitted."
                 />
               </EuiText>
             </>
