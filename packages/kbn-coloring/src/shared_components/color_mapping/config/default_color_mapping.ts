@@ -74,7 +74,7 @@ export function getColorsFromMapping(
         ? Array.from({ length: palette.colorCount }, (d, i) =>
             palette.getColor(i, isDarkMode, true)
           )
-        : getColor(specialAssignments[0].color, getPaletteFn, isDarkMode);
+        : [getColor(specialAssignments[0].color, getPaletteFn, isDarkMode)];
     return [
       ...assignments.map((a) => {
         return a.color.type === 'gradient' ? '' : getColor(a.color, getPaletteFn, isDarkMode);
