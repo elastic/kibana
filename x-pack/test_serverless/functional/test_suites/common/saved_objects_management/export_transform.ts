@@ -28,8 +28,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await esArchiver.load(
           'test/functional/fixtures/es_archiver/saved_objects_management/export_transform'
         );
-        // TODO: Update with valid SAML role
-        await pageObjects.svlCommonPage.loginWithRole('system_indices_superuser');
+        await pageObjects.svlCommonPage.loginAsAdmin();
         await pageObjects.common.navigateToApp('management');
         await testSubjects.click('app-card-objects');
         await pageObjects.savedObjects.waitTableIsLoaded();
@@ -159,8 +158,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await esArchiver.load(
           'test/functional/fixtures/es_archiver/saved_objects_management/nested_export_transform'
         );
-        // TODO: Update with valid SAML role
-        await pageObjects.svlCommonPage.loginWithRole('system_indices_superuser');
+        await pageObjects.svlCommonPage.loginAsAdmin();
         await pageObjects.common.navigateToApp('management');
         await testSubjects.click('app-card-objects');
         await pageObjects.savedObjects.waitTableIsLoaded();
@@ -211,8 +209,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await esArchiver.load(
           'test/functional/fixtures/es_archiver/saved_objects_management/export_exclusion'
         );
-        // TODO: Update with valid SAML role
-        await pageObjects.svlCommonPage.loginWithRole('system_indices_superuser');
+        await pageObjects.svlCommonPage.loginAsAdmin();
         await pageObjects.common.navigateToApp('management');
         await testSubjects.click('app-card-objects');
         await pageObjects.savedObjects.waitTableIsLoaded();

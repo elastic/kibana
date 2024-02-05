@@ -17,8 +17,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Transform List', function () {
     before(async () => {
       await security.testUser.setRoles(['transform_user']);
-      // TODO: Update with valid SAML role
-      await pageObjects.svlCommonPage.loginWithRole('system_indices_superuser');
+      await pageObjects.svlCommonPage.loginAsAdmin();
 
       // For this test to work, make sure there are no pre-existing transform present.
       // For example, solutions might set up transforms automatically.

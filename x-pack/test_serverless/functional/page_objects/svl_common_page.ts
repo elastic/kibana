@@ -70,7 +70,11 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
       }
     },
 
-    async loginWithDefaultRole() {
+    async loginAsAdmin() {
+      await this.loginWithRole('admin');
+    },
+
+    async loginWithPrivilegedRole() {
       await this.loginWithRole(svlUserManager.DEFAULT_ROLE);
     },
 

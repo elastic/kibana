@@ -17,8 +17,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Management landing page', function () {
     this.tags('smoke');
     before(async () => {
-      // TODO: Update with valid SAML role
-      await pageObjects.svlCommonPage.loginWithRole('system_indices_superuser');
+      await pageObjects.svlCommonPage.loginAsAdmin();
       await pageObjects.common.navigateToApp('management');
     });
 

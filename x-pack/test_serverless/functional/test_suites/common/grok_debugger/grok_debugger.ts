@@ -22,8 +22,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // fold. Otherwise it can't be clicked by the browser driver.
       await browser.setWindowSize(1600, 1000);
       await security.testUser.setRoles(['global_devtools_read', 'ingest_pipelines_user']);
-      // TODO: Update with valid SAML role
-      await PageObjects.svlCommonPage.loginWithRole('system_indices_superuser');
+      await PageObjects.svlCommonPage.loginAsAdmin();
       await PageObjects.common.navigateToApp('dev_tools', { hash: '/grokdebugger' });
       await retry.waitFor('Grok Debugger Header to be visible', async () => {
         return testSubjects.isDisplayed('grokDebuggerContainer');

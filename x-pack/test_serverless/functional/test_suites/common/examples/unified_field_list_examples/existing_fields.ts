@@ -65,8 +65,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await kibanaServer.importExport.load(
         'test/api_integration/fixtures/kbn_archiver/index_patterns/constant_keyword.json'
       );
-      // TODO: Update with valid SAML role
-      await PageObjects.svlCommonPage.loginWithRole('system_indices_superuser');
+      await PageObjects.svlCommonPage.loginAsAdmin();
       await PageObjects.common.navigateToApp('unifiedFieldListExamples');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitFor('combobox is ready', async () => {

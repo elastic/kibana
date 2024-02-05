@@ -33,8 +33,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     // TimeoutError: Waiting for element to be located By(css selector, [data-test-subj="apiKeysCreatePromptButton"]) Wait timed out after 10028ms
     this.tags(['failsOnMKI']);
     before(async () => {
-      // TODO: Update with valid SAML role
-      await pageObjects.svlCommonPage.loginWithRole('system_indices_superuser');
+      await pageObjects.svlCommonPage.loginAsAdmin();
     });
 
     after(async () => {

@@ -53,8 +53,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       }
 
       log.debug('Navigating to the enrich policies tab');
-      // TODO: Update with valid SAML role
-      await pageObjects.svlCommonPage.loginWithRole('system_indices_superuser');
+      await pageObjects.svlCommonPage.loginAsAdmin();
       await pageObjects.common.navigateToApp('indexManagement');
 
       // Navigate to the enrich policies tab

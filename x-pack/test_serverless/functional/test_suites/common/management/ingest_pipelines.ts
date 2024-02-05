@@ -29,8 +29,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Ingest Pipelines', function () {
     this.tags('smoke');
     before(async () => {
-      // TODO: Update with valid SAML role
-      await pageObjects.svlCommonPage.loginWithRole('system_indices_superuser');
+      await pageObjects.svlCommonPage.loginAsAdmin();
     });
     beforeEach(async () => {
       await pageObjects.common.navigateToApp('ingestPipelines');

@@ -12,7 +12,7 @@ export default ({ loadTestFile, getPageObject }: FtrProviderContext) => {
   describe('Discover alerting', function () {
     before(async function () {
       // TODO: Update with valid SAML role
-      await svlCommonPage.loginWithRole('system_indices_superuser');
+      await svlCommonPage.loginAsAdmin();
     });
 
     loadTestFile(require.resolve('./search_source_alert'));

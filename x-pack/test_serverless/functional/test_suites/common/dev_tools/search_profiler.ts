@@ -21,8 +21,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('Search Profiler Editor', () => {
     before(async () => {
-      // TODO: Update with valid SAML role
-      await PageObjects.svlCommonPage.loginWithRole('system_indices_superuser');
+      await PageObjects.svlCommonPage.loginAsAdmin();
       await PageObjects.common.navigateToApp('searchProfiler');
       expect(await PageObjects.searchProfiler.editorExists()).to.be(true);
     });

@@ -45,8 +45,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await kibanaServer.uiSettings.update({
         'csv:quoteValues': true,
       });
-      // TODO: Update with valid SAML role
-      await pageObjects.svlCommonPage.loginWithRole('system_indices_superuser');
+      await pageObjects.svlCommonPage.loginAsAdmin();
       await pageObjects.common.navigateToApp('settings');
     });
 

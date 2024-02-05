@@ -14,8 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Field formats example', function () {
     before(async () => {
-      // TODO: Update with valid SAML role
-      await PageObjects.svlCommonPage.loginWithRole('system_indices_superuser');
+      await PageObjects.svlCommonPage.loginAsAdmin();
       await PageObjects.common.navigateToApp('fieldFormatsExample');
     });
 

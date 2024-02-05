@@ -27,8 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.load(
         'test/functional/fixtures/es_archiver/saved_objects_management/hidden_types'
       );
-      // TODO: Update with valid SAML role
-      await PageObjects.svlCommonPage.loginWithRole('system_indices_superuser');
+      await PageObjects.svlCommonPage.loginAsAdmin();
       await PageObjects.common.navigateToApp('management');
       await testSubjects.click('app-card-objects');
       await PageObjects.savedObjects.waitTableIsLoaded();

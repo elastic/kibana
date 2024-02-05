@@ -22,8 +22,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Index component templates', function () {
     before(async () => {
       await security.testUser.setRoles(['index_management_user']);
-      // TODO: Update with valid SAML role
-      await pageObjects.svlCommonPage.loginWithRole('system_indices_superuser');
+      await pageObjects.svlCommonPage.loginAsAdmin();
     });
 
     beforeEach(async () => {

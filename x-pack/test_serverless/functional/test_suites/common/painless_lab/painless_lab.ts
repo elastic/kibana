@@ -27,8 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Painless lab', function describeIndexTests() {
     before(async () => {
-      // TODO: Update with valid SAML role
-      await PageObjects.svlCommonPage.loginWithRole('system_indices_superuser');
+      await PageObjects.svlCommonPage.loginAsAdmin();
       await PageObjects.common.navigateToApp('dev_tools', { hash: '/painless_lab' });
       await retry.waitFor('Wait for editor to be visible', async () => {
         return testSubjects.isDisplayed('painless_lab');
