@@ -51,7 +51,7 @@ export const singleDatasetSelectionPlainRT = rt.type({
 });
 
 export const explorerDataViewSelectionPlainRT = rt.type({
-  selectionType: rt.literal('explorerDataView'),
+  selectionType: rt.literal('dataView'),
   selection: explorerDataViewSelectionPayloadRT,
 });
 

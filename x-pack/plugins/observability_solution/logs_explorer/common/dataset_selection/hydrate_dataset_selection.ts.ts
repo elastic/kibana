@@ -16,7 +16,7 @@ export const hydrateDatasetSelection = (datasetSelection: DatasetSelectionPlain)
     return AllDatasetSelection.create();
   } else if (datasetSelection.selectionType === 'single') {
     return SingleDatasetSelection.fromSelection(datasetSelection.selection);
-  } else if (datasetSelection.selectionType === 'explorerDataView') {
+  } else if (datasetSelection.selectionType === 'dataView') {
     return ExplorerDataViewSelection.fromSelection(datasetSelection.selection);
   } else {
     return UnresolvedDatasetSelection.fromSelection(datasetSelection.selection);

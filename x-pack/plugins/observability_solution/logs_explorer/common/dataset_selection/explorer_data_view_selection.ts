@@ -9,13 +9,13 @@ import { ExplorerDataView } from '../data_views/models/explorer_data_view';
 import { DatasetSelectionStrategy, ExplorerDataViewSelectionPayload } from './types';
 
 export class ExplorerDataViewSelection implements DatasetSelectionStrategy {
-  selectionType: 'explorerDataView';
+  selectionType: 'dataView';
   selection: {
     dataView: ExplorerDataView;
   };
 
   private constructor(explorerDataView: ExplorerDataView) {
-    this.selectionType = 'explorerDataView';
+    this.selectionType = 'dataView';
     this.selection = {
       dataView: explorerDataView,
     };
