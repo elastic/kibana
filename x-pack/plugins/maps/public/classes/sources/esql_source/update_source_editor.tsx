@@ -79,6 +79,7 @@ export function UpdateSourceEditor(props: Props) {
               setGeoFields(change.geoFields);
               const changes: OnSourceChangeArgs[] = [
                 { propName: 'columns', value: change.columns },
+                { propName: 'adhocDataViewId', value: change.adhocDataViewId },
                 { propName: 'esql', value: change.esql },
               ];
               function ensureField(key: 'dateField' | 'geoField', fields: string[]) {

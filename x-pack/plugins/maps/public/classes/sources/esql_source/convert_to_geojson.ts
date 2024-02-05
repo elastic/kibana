@@ -9,14 +9,25 @@
 import { parse } from 'wellknown';
 import { Feature, FeatureCollection, GeoJsonProperties } from 'geojson';
 import type { ESQLSearchReponse } from '@kbn/es-types';
-import { getGeometryColumnIndex } from './esql_utils';
+import { EMPTY_FEATURE_COLLECTION } from '../../../../common/constants';
+import { isGeometryColumn } from './esql_utils';
 
 export function convertToGeoJson(resp: ESQLSearchReponse): FeatureCollection {
-  const geometryIndex = getGeometryColumnIndex(resp.columns);
+  const geometryColumnIndex = resp.columns.findIndex(isGeometryColumn);
+
+  // When geometry column can not be found,
+  // drop_null_columns has dropped the geometry column when
+  // 1) no results returned
+  // 2) no results with non-null geometry column returned
+  // In either case, there is nothing to plot
+  if (geometryColumnIndex === -1) {
+    return EMPTY_FEATURE_COLLECTION;
+  }
+
   const features: Feature[] = [];
   for (let i = 0; i < resp.values.length; i++) {
     const hit = resp.values[i];
-    const wkt = hit[geometryIndex];
+    const wkt = hit[geometryColumnIndex];
     if (!wkt) {
       continue;
     }
@@ -25,7 +36,7 @@ export function convertToGeoJson(resp: ESQLSearchReponse): FeatureCollection {
       const properties: GeoJsonProperties = {};
       for (let j = 0; j < hit.length; j++) {
         // do not store geometry in properties
-        if (j === geometryIndex) {
+        if (j === geometryColumnIndex) {
           continue;
         }
         properties[resp.columns[j].name] = hit[j] as unknown;

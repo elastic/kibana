@@ -18,6 +18,7 @@ import {
   EuiSwitchEvent,
 } from '@elastic/eui';
 import { DataViewField } from '@kbn/data-views-plugin/public';
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 import type { ESQLSourceDescriptor } from '../../../../common/descriptor_types';
 import { getIndexPatternService } from '../../../kibana_services';
@@ -34,6 +35,7 @@ export function CreateSourceEditor(props: Props) {
   const [isInitialized, setIsInitialized] = useState(false);
   const [columns, setColumns] = useState<ESQLColumn[]>([]);
   const [esql, setEsql] = useState('');
+  const [adhocDataViewId, setAdhocDataViewId] = useState<string | undefined>();
   const [dateField, setDateField] = useState<string | undefined>();
   const [dateFields, setDateFields] = useState<string[]>([]);
   const [geoField, setGeoField] = useState<string | undefined>();
@@ -52,17 +54,20 @@ export function CreateSourceEditor(props: Props) {
     }
 
     getDataView()
-      .then((dataView) => {
+      .then(async (dataView) => {
+        const adhocDataView = dataView
+          ? await getESQLAdHocDataview(dataView.getIndexPattern(), getIndexPatternService())
+          : undefined;
         if (ignore) {
           return;
         }
 
-        if (dataView) {
+        if (adhocDataView) {
           let initialGeoField: DataViewField | undefined;
           const initialDateFields: string[] = [];
           const initialGeoFields: string[] = [];
-          for (let i = 0; i < dataView.fields.length; i++) {
-            const field = dataView.fields[i];
+          for (let i = 0; i < adhocDataView.fields.length; i++) {
+            const field = adhocDataView.fields[i];
             if (
               [ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE].includes(
                 field.type as ES_GEO_FIELD_TYPE
@@ -77,12 +82,13 @@ export function CreateSourceEditor(props: Props) {
 
           if (initialGeoField) {
             let initialDateField: string | undefined;
-            if (dataView.timeFieldName) {
-              initialDateField = dataView.timeFieldName;
+            // get default time field from default data view instead of adhoc data view
+            if (dataView?.timeFieldName) {
+              initialDateField = dataView?.timeFieldName;
             } else if (initialDateFields.length) {
               initialDateField = initialDateFields[0];
             }
-            const initialEsql = `from ${dataView.getIndexPattern()} | keep ${
+            const initialEsql = `from ${adhocDataView.getIndexPattern()} | keep ${
               initialGeoField.name
             } | limit 10000`;
             setColumns([
@@ -94,6 +100,7 @@ export function CreateSourceEditor(props: Props) {
                     : ESQL_GEO_POINT_TYPE,
               },
             ]);
+            setAdhocDataViewId(adhocDataView.id);
             setDateField(initialDateField);
             setDateFields(initialDateFields);
             setGeoField(initialGeoField.name);
@@ -123,8 +130,9 @@ export function CreateSourceEditor(props: Props) {
   useDebounce(
     () => {
       const sourceConfig =
-        esql && esql.length
+        esql && esql.length && adhocDataViewId
           ? {
+              adhocDataViewId,
               columns,
               dateField,
               geoField,
@@ -138,6 +146,7 @@ export function CreateSourceEditor(props: Props) {
     },
     0,
     [
+      adhocDataViewId,
       columns,
       dateField,
       geoField,
@@ -155,6 +164,7 @@ export function CreateSourceEditor(props: Props) {
           esql={esql}
           onESQLChange={(change) => {
             setColumns(change.columns);
+            setAdhocDataViewId(change.adhocDataViewId);
             setEsql(change.esql);
             setDateFields(change.dateFields);
             setGeoFields(change.geoFields);

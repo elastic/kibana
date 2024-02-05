@@ -18,11 +18,13 @@ interface Props {
   esql: string;
   onESQLChange: ({
     columns,
+    adhocDataViewId,
     dateFields,
     geoFields,
     esql,
   }: {
     columns: ESQLColumn[];
+    adhocDataViewId: string;
     dateFields: string[];
     geoFields: string[];
     esql: string;
@@ -83,6 +85,7 @@ export function ESQLEditor(props: Props) {
             setError(err);
             props.onESQLChange({
               columns: [],
+              adhocDataViewId: '',
               dateFields: [],
               geoFields: [],
               esql: '',
