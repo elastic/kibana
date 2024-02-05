@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CommonObservabilityLogExplorerContext } from './types';
+import { CommonObservabilityLogsExplorerContext } from './types';
 
-export const DEFAULT_CONTEXT: CommonObservabilityLogExplorerContext = {
-  initialLogExplorerState: {},
+export const DEFAULT_CONTEXT: CommonObservabilityLogsExplorerContext = {
+  initialLogsExplorerState: {},
 };

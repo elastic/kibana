@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const logExplorerAppTitle = i18n.translate('xpack.observabilityLogsExplorer.appTitle', {
+export const logsExplorerAppTitle = i18n.translate('xpack.observabilityLogsExplorer.appTitle', {
   defaultMessage: 'Logs Explorer',
 });
 
