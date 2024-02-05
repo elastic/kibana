@@ -49,7 +49,9 @@ export function getAutocompleteFunctionDefinition(fn: FunctionDefinition) {
   };
 }
 
-export function getAutocompleteBuiltinDefinition(fn: FunctionDefinition): AutocompleteCommandDefinition {
+export function getAutocompleteBuiltinDefinition(
+  fn: FunctionDefinition
+): AutocompleteCommandDefinition {
   const hasArgs = fn.signatures.some(({ params }) => params.length > 1);
   return {
     label: fn.name,
