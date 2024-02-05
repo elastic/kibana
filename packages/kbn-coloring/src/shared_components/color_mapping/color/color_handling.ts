@@ -98,8 +98,7 @@ export function getColorFactory(
             assignments.length
           );
         }
-        const totalColorsIfGradient =
-          assignments.length === 0 ? notAssignedCategories.length : assignments.length;
+        const totalColorsIfGradient = assignments.length || notAssignedCategories.length;
         const indexIfGradient =
           (nonAssignedCategoryIndex - autoByOrderAssignments.length) % totalColorsIfGradient;
 
