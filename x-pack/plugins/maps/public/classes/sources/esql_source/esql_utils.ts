@@ -29,12 +29,11 @@ export function isGeometryColumn(column: ESQLColumn) {
 export function verifyGeometryColumn(columns: ESQLColumn[]) {
   const geometryColumns = columns.filter(isGeometryColumn);
   if (geometryColumns.length === 0) {
-    throw new Error(i18n.translate(
-      'xpack.maps.source.esql.noGeometryColumnErrorMsg',
-      {
+    throw new Error(
+      i18n.translate('xpack.maps.source.esql.noGeometryColumnErrorMsg', {
         defaultMessage: 'Elasticsearch ES|QL query does not have a geometry column.',
-      }
-    ));
+      })
+    );
   }
 
   if (geometryColumns.length > 1) {
