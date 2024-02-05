@@ -6428,10 +6428,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/url-state@link:packages/kbn-url-state":
-  version "0.0.0"
-  uid ""
-
 "@kbn/usage-collection-plugin@link:src/plugins/usage_collection":
   version "0.0.0"
   uid ""
