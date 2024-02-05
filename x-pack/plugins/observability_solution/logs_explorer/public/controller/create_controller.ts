@@ -35,7 +35,7 @@ interface Dependencies {
 type InitialState = LogsExplorerPublicStateUpdate;
 
 export const createLogsExplorerControllerFactory =
-  ({ core, plugins: { data } }: Dependencies) =>
+  ({ core, plugins: { data, discover } }: Dependencies) =>
   async ({
     customizations = {},
     initialState,
