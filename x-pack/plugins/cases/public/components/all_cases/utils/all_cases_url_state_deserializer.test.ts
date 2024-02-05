@@ -179,18 +179,18 @@ describe('allCasesUrlStateDeserializer', () => {
                 "foo",
                 "qux",
               ],
-              "type": "text",
+              "type": "toggle",
             },
             "my-custom-field-2": Object {
               "options": Array [
                 "bar",
                 "baz",
               ],
-              "type": "text",
+              "type": "toggle",
             },
             "my-custom-field-4": Object {
               "options": Array [],
-              "type": "text",
+              "type": "toggle",
             },
           },
         },

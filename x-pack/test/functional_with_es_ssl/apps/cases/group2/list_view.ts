@@ -6,7 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
+import {
+  CaseSeverity,
+  CaseStatuses,
+  CustomFieldTypes,
+} from '@kbn/cases-plugin/common/types/domain';
 import { UserProfile } from '@kbn/user-profile-components';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
@@ -20,7 +24,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
   const browser = getService('browser');
-  const toasts = getService('toasts');
 
   describe('cases list', () => {
     before(async () => {
@@ -280,13 +283,19 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('filtering', () => {
       const caseTitle = 'matchme';
-      const caseIds: string[] = [];
+      let caseIds: string[] = [];
+      const profiles: UserProfile[] = [];
+      const customFields = [
+        {
+          key: 'my_field_01',
+          label: 'My field',
+          type: CustomFieldTypes.TOGGLE,
+          required: false,
+        },
+      ];
 
-      before(async () => {
-        await createUsersAndRoles(getService, users, roles);
-        await cases.api.activateUserProfiles([casesAllUser, casesAllUser2]);
-
-        const profiles = await cases.api.suggestUserProfiles({ name: 'all', owners: ['cases'] });
+      const createCases = async () => {
+        caseIds = [];
 
         const case1 = await cases.api.createCase({
           title: caseTitle,
@@ -309,18 +318,30 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         caseIds.push(case2.id);
         caseIds.push(case3.id);
         caseIds.push(case4.id);
+      };
 
+      before(async () => {
+        await createUsersAndRoles(getService, users, roles);
+        await cases.api.activateUserProfiles([casesAllUser, casesAllUser2]);
+
+        profiles.push(...(await cases.api.suggestUserProfiles({ name: 'all', owners: ['cases'] })));
+
+        await cases.api.createConfigWithCustomFields({ customFields, owner: 'cases' });
+
+        await header.waitUntilLoadingHasFinished();
+      });
+
+      beforeEach(async () => {
+        await browser.clearLocalStorage();
+        await createCases();
         await header.waitUntilLoadingHasFinished();
         await cases.casesTable.waitForCasesToBeListed();
       });
 
-      beforeEach(async () => {
-        /**
-         * There is no easy way to clear the filtering.
-         * Refreshing the page seems to be easier.
-         */
-        await browser.clearLocalStorage();
-        await cases.navigation.navigateToApp();
+      afterEach(async () => {
+        await cases.casesTable.clearFilters();
+        await cases.api.deleteAllCases();
+        await cases.casesTable.waitForCasesToBeDeleted();
       });
 
       after(async () => {
@@ -500,6 +521,140 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.casesTable.validateCasesTableHasNthRows(2);
       });
 
+      it('clears the filters correctly', async () => {
+        // filter by status first
+        await cases.casesTable.filterByTag('one');
+        await cases.casesTable.validateCasesTableHasNthRows(1);
+
+        await cases.casesTable.clearFilters();
+        await cases.casesTable.validateCasesTableHasNthRows(caseIds.length);
+      });
+
+      it('loads the state from the local storage when the URL is empty', async () => {
+        await cases.casesTable.validateCasesTableHasNthRows(caseIds.length);
+        const lsState = {
+          filterOptions: {
+            search: '',
+            searchFields: ['title', 'description'],
+            severity: [],
+            assignees: [],
+            reporters: [],
+            status: [],
+            // filter by tags
+            tags: ['one'],
+            owner: [],
+            category: [],
+            customFields: {},
+          },
+          queryParams: { page: 1, perPage: 10, sortField: 'createdAt', sortOrder: 'desc' },
+        };
+
+        await cases.casesTable.setAllCasesStateInLocalStorage(lsState);
+
+        /**
+         * Clicking to the navigation bar (sidebar) clears out any query params
+         * added by the cases app.
+         */
+        await testSubjects.click('cases');
+        await cases.casesTable.validateCasesTableHasNthRows(1);
+        await cases.casesTable.verifyCase(caseIds[0], 0);
+      });
+
+      it('loads the state from the URL with empty filter configuration in local storage', async () => {
+        const theCase = await cases.api.createCase({
+          title: 'url-testing',
+          assignees: [{ uid: profiles[0].uid }],
+          description: 'url testing',
+          category: 'url-testing',
+          tags: ['url'],
+          severity: CaseSeverity.CRITICAL,
+          customFields: [{ key: customFields[0].key, type: CustomFieldTypes.TOGGLE, value: true }],
+        });
+
+        const lsState = [
+          { key: 'status', isActive: false },
+          { key: 'severity', isActive: false },
+          { key: 'tags', isActive: false },
+          { key: 'assignees', isActive: false },
+          { key: 'category', isActive: false },
+          { key: `cf_${customFields[0].key}`, isActive: false },
+        ];
+
+        await cases.casesTable.setFiltersConfigurationInLocalStorage(lsState);
+
+        await cases.casesTable.waitForNthToBeListed(caseIds.length + 1);
+
+        const search = `search=${theCase.title}&severity=${theCase.severity}&status=${theCase.status}&tags=${theCase.tags[0]}&assignees=${profiles[0].uid}&category=${theCase.category}&cf_${customFields[0].key}=on`;
+
+        await cases.navigation.navigateToApp('cases', search);
+        await cases.casesTable.validateCasesTableHasNthRows(1);
+        await cases.casesTable.verifyCase(theCase.id, 0);
+
+        const currentUrl = await browser.getCurrentUrl();
+        expect(new URL(currentUrl).search).to.be(`?${search}`);
+
+        await cases.casesTable.expectFiltersToBeActive([
+          'status',
+          'severity',
+          'tags',
+          'category',
+          'assignees',
+          customFields[0].key,
+        ]);
+      });
+
+      it('loads the state from the URL with filter configuration in local storage', async () => {
+        const theCase = await cases.api.createCase({
+          title: 'url-testing',
+          assignees: [{ uid: profiles[0].uid }],
+          description: 'url testing',
+          category: 'url-testing',
+          tags: ['url'],
+          severity: CaseSeverity.CRITICAL,
+          customFields: [{ key: customFields[0].key, type: CustomFieldTypes.TOGGLE, value: true }],
+        });
+
+        await cases.casesTable.waitForNthToBeListed(caseIds.length + 1);
+
+        const search = `search=${theCase.title}&severity=${theCase.severity}&status=${theCase.status}&tags=${theCase.tags[0]}&assignees=${profiles[0].uid}&category=${theCase.category}&cf_${customFields[0].key}=on`;
+
+        await cases.navigation.navigateToApp('cases', search);
+        await cases.casesTable.validateCasesTableHasNthRows(1);
+        await cases.casesTable.verifyCase(theCase.id, 0);
+
+        const currentUrl = await browser.getCurrentUrl();
+        expect(new URL(currentUrl).search).to.be(`?${search}`);
+
+        await cases.casesTable.expectFiltersToBeActive([
+          'status',
+          'severity',
+          'tags',
+          'category',
+          'assignees',
+          customFields[0].key,
+        ]);
+      });
+
+      it('navigating between pages keeps the state', async () => {
+        await cases.casesTable.filterByTag('one');
+        await cases.casesTable.validateCasesTableHasNthRows(1);
+        await cases.casesTable.verifyCase(caseIds[0], 0);
+        await cases.casesTable.goToFirstListedCase();
+
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.click('backToCases');
+
+        await header.waitUntilLoadingHasFinished();
+        await cases.casesTable.waitForCasesToBeListed();
+        await cases.casesTable.validateCasesTableHasNthRows(1);
+        await cases.casesTable.verifyCase(caseIds[0], 0);
+      });
+
+      it('loads the initial state correctly', async () => {
+        await cases.casesTable.validateCasesTableHasNthRows(caseIds.length);
+        expect(await testSubjects.exists('all-cases-clear-filters-link-icon')).to.be(false);
+      });
+
       describe('assignees filtering', () => {
         it('filters cases by the first cases all user assignee', async () => {
           await cases.casesTable.filterByAssignee('all');
@@ -554,12 +709,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.casesTable.waitForCasesToBeListed();
       });
 
-      beforeEach(async () => {
-        /**
-         * There is no easy way to clear the filtering.
-         * Refreshing the page seems to be easier.
-         */
-        await cases.navigation.navigateToApp();
+      afterEach(async () => {
+        await cases.casesTable.clearFilters();
       });
 
       after(async () => {

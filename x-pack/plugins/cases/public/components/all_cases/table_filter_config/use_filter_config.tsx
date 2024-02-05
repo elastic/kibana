@@ -49,13 +49,7 @@ const shouldBeActive = ({
   return !filter.isActive && !isEmpty(filterOptions[filter.key as keyof FilterOptions]);
 };
 
-const useActiveByFilterKeyState = ({
-  filterOptions,
-  customFields,
-}: {
-  filterOptions: FilterOptions;
-  customFields: CasesConfigurationUI['customFields'];
-}) => {
+const useActiveByFilterKeyState = ({ filterOptions }: { filterOptions: FilterOptions }) => {
   const { appId } = useCasesContext();
   const [activeByFilterKey, setActiveByFilterKey] = useLocalStorage<FilterConfigState[]>(
     `${appId}.${LOCAL_STORAGE_KEYS.casesTableFiltersConfig}`,
@@ -66,6 +60,7 @@ const useActiveByFilterKeyState = ({
    * Activates filters that aren't active but have a value in the filterOptions
    */
   const newActiveByFilterKey = [...(activeByFilterKey || [])];
+
   newActiveByFilterKey.forEach((filter) => {
     if (shouldBeActive({ filter, filterOptions })) {
       const currentIndex = newActiveByFilterKey.findIndex((_filter) => filter.key === _filter.key);
@@ -128,7 +123,6 @@ export const useFilterConfig = ({
    */
   const [activeByFilterKey, setActiveByFilterKey] = useActiveByFilterKeyState({
     filterOptions,
-    customFields,
   });
 
   const { customFieldsFilterConfig } = useCustomFieldsFilterConfig({
@@ -138,9 +132,24 @@ export const useFilterConfig = ({
     onFilterOptionsChange,
   });
 
+  /**
+   * TODO: Think if this is enough. Is it generic enough to
+   * catch up new system fields in the feature?
+   */
+  const activeCustomFieldsConfig = customFieldsFilterConfig.map((customField) => {
+    return {
+      ...customField,
+      isActive: Object.entries(filterOptions.customFields).find(
+        ([key, _]) => key === deflattenCustomFieldKey(customField.key)
+      )
+        ? true
+        : customField.isActive,
+    };
+  });
+
   const filterConfigs = mergeSystemAndCustomFieldConfigs({
     systemFilterConfig,
-    customFieldsFilterConfig,
+    customFieldsFilterConfig: activeCustomFieldsConfig,
   });
 
   const prevFilterConfigs = usePrevious(filterConfigs) ?? new Map();

@@ -964,7 +964,7 @@ describe('CasesTableFilters ', () => {
       `);
     });
 
-    it('should activate all filters when there is a value in the global state as this means that it has a value set in the url', async () => {
+    it('should activate all filters when there is a value in the global state and is not active in the local storage', async () => {
       const license = licensingMock.createLicense({
         license: { type: 'platinum' },
       });
@@ -982,6 +982,53 @@ describe('CasesTableFilters ', () => {
         'testAppId.cases.list.tableFiltersConfig',
         JSON.stringify(previousState)
       );
+
+      const overrideProps = {
+        ...props,
+        filterOptions: {
+          ...DEFAULT_FILTER_OPTIONS,
+          severity: [CaseSeverity.MEDIUM], // but they have values
+          status: [CaseStatuses.open, CaseStatuses['in-progress']],
+          tags: ['coke'],
+          category: ['twix'],
+          assignees: [userProfiles[0].uid],
+          customFields: { toggle: { type: CustomFieldTypes.TOGGLE, options: ['on'] } },
+        },
+      };
+
+      appMockRender = createAppMockRenderer({ license });
+      appMockRender.render(<CasesTableFilters {...overrideProps} />);
+
+      const filters = [
+        { name: 'Status', active: 2 },
+        { name: 'Severity', active: 1 },
+        { name: 'Tags', active: 1 },
+        { name: 'Categories', active: 1 },
+        { name: 'Toggle', active: 1 },
+        { name: 'click to filter assignees', active: 1 },
+      ];
+
+      await waitForComponentToUpdate();
+
+      const totalFilters = await screen.findAllByRole('button');
+      // plus the more button
+      expect(totalFilters.length).toBe(filters.length + 1);
+
+      for (const filter of filters) {
+        const button = await screen.findByRole('button', { name: filter.name });
+        expect(button).toBeInTheDocument();
+        expect(
+          within(button).getByLabelText(`${filter.active} active filters`)
+        ).toBeInTheDocument();
+      }
+    });
+
+    it('should activate all filters when there is a value in the global state and the local storage is empty', async () => {
+      const license = licensingMock.createLicense({
+        license: { type: 'platinum' },
+      });
+
+      localStorage.setItem('testAppId.cases.list.tableFiltersConfig', JSON.stringify([]));
 
       const overrideProps = {
         ...props,
