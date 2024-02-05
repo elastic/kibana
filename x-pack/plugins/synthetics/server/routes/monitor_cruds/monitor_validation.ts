@@ -241,7 +241,7 @@ export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
   if (rawParams) {
     const { value, error } = validateParams(rawParams);
     if (error) {
-      formattedConfig[ConfigKey.PARAMS] = rawParams;
+      formattedConfig[ConfigKey.PARAMS] = rawParams as string;
       return {
         formattedConfig,
         errorMessage: i18n.translate('xpack.synthetics.restApi.monitor.invalidParams', {
@@ -256,7 +256,7 @@ export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
   if (rawPlaywrightOptions) {
     const { value, error } = validateJSON(rawPlaywrightOptions);
     if (error) {
-      formattedConfig[ConfigKey.PLAYWRIGHT_OPTIONS] = rawPlaywrightOptions;
+      formattedConfig[ConfigKey.PLAYWRIGHT_OPTIONS] = rawPlaywrightOptions as string;
       return {
         formattedConfig,
         errorMessage: i18n.translate('xpack.synthetics.restApi.monitor.invalidPlaywrightOptions', {

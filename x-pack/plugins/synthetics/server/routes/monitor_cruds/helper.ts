@@ -36,14 +36,16 @@ export const transformPublicKeys = (result: Result) => {
   }
   if (result[ConfigKey.PARAMS]) {
     try {
-      result[ConfigKey.PARAMS] = JSON.parse(result[ConfigKey.PARAMS]);
+      result[ConfigKey.PARAMS] = JSON.parse(result[ConfigKey.PARAMS] ?? '{}');
     } catch (e) {
       // ignore
     }
   }
   if (result[ConfigKey.PLAYWRIGHT_OPTIONS]) {
     try {
-      result[ConfigKey.PLAYWRIGHT_OPTIONS] = JSON.parse(result[ConfigKey.PLAYWRIGHT_OPTIONS]);
+      result[ConfigKey.PLAYWRIGHT_OPTIONS] = JSON.parse(
+        result[ConfigKey.PLAYWRIGHT_OPTIONS] ?? '{}'
+      );
     } catch (e) {
       // ignore
     }

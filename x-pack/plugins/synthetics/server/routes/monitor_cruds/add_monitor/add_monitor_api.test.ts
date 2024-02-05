@@ -12,21 +12,20 @@ import { SyntheticsService } from '../../../synthetics_service/synthetics_servic
 describe('AddNewMonitorsPublicAPI', () => {
   it('should normalize schedule', async function () {
     const syntheticsService = new SyntheticsService({
-      config: {},
-    });
-    const api = new AddEditMonitorAPI(
-      {
-        syntheticsMonitorClient: new SyntheticsMonitorClient(syntheticsService),
-        request: {
-          body: {},
-        },
+      config: {
+        enabled: true,
       },
-      {}
-    );
-    let result = await api.normalizeMonitor({ schedule: '3' }, {});
+    } as any);
+    const api = new AddEditMonitorAPI({
+      syntheticsMonitorClient: new SyntheticsMonitorClient(syntheticsService, {} as any),
+      request: {
+        body: {},
+      },
+    } as any);
+    let result = await api.normalizeMonitor({ schedule: '3' } as any, {} as any);
     expect(result.schedule).toEqual({ number: '3', unit: 'm' });
 
-    result = await api.normalizeMonitor({ schedule: 3 }, {});
+    result = await api.normalizeMonitor({ schedule: 3 } as any, {} as any);
     expect(result.schedule).toEqual({ number: '3', unit: 'm' });
 
     result = await api.normalizeMonitor(
@@ -35,8 +34,8 @@ describe('AddNewMonitorsPublicAPI', () => {
           number: '3',
           unit: 'm',
         },
-      },
-      {}
+      } as any,
+      {} as any
     );
     expect(result.schedule).toEqual({ number: '3', unit: 'm' });
 
@@ -46,8 +45,8 @@ describe('AddNewMonitorsPublicAPI', () => {
           number: 3,
           unit: 'm',
         },
-      },
-      {}
+      } as any,
+      {} as any
     );
     expect(result.schedule).toEqual({ number: 3, unit: 'm' });
   });
@@ -55,23 +54,21 @@ describe('AddNewMonitorsPublicAPI', () => {
   describe('normalizeMonitor defaults', () => {
     const syntheticsService = new SyntheticsService({
       config: {},
-    });
-    const api = new AddEditMonitorAPI(
-      {
-        syntheticsMonitorClient: new SyntheticsMonitorClient(syntheticsService),
-        request: {
-          body: {},
-        },
+    } as any);
+    const api = new AddEditMonitorAPI({
+      syntheticsMonitorClient: new SyntheticsMonitorClient(syntheticsService, {} as any),
+      request: {
+        body: {},
       },
-      {}
-    );
+    } as any);
     it('should normalize tcp', async () => {
       expect(
         await api.normalizeMonitor(
           {
             type: 'tcp',
-          },
-          {}
+          } as any,
+          {} as any,
+          {} as any
         )
       ).toEqual({
         __ui: { is_tls_enabled: false },
@@ -117,8 +114,9 @@ describe('AddNewMonitorsPublicAPI', () => {
         await api.normalizeMonitor(
           {
             type: 'icmp',
-          },
-          {}
+          } as any,
+          {} as any,
+          {} as any
         )
       ).toEqual({
         alert: { status: { enabled: true }, tls: { enabled: true } },
@@ -152,8 +150,8 @@ describe('AddNewMonitorsPublicAPI', () => {
         await api.normalizeMonitor(
           {
             type: 'http',
-          },
-          {}
+          } as any,
+          {} as any
         )
       ).toEqual({
         __ui: { is_tls_enabled: false },
@@ -210,8 +208,8 @@ describe('AddNewMonitorsPublicAPI', () => {
         await api.normalizeMonitor(
           {
             type: 'browser',
-          },
-          {}
+          } as any,
+          {} as any
         )
       ).toEqual({
         __ui: { script_source: { file_name: '', is_generated_script: false } },
