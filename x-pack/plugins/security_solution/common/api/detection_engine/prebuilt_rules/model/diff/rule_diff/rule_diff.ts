@@ -90,3 +90,5 @@ export type RuleFieldsDiffWithKqlQuery =
   | NewTermsFieldsDiff;
 
 export type RuleFieldsDiffWithEqlQuery = EqlFieldsDiff;
+
+export type RuleFieldsDiffWithThreshold = ThresholdFieldsDiff;

@@ -11,6 +11,7 @@ import type {
   RuleFieldsDiffWithDataSource,
   RuleFieldsDiffWithKqlQuery,
   RuleFieldsDiffWithEqlQuery,
+  RuleFieldsDiffWithThreshold,
 } from '../../../../../../common/api/detection_engine';
 import type { FormattedFieldDiff } from '../../../model/rule_details/rule_field_diff';
 import {
@@ -23,6 +24,7 @@ import {
   getFieldDiffsForTimelineTemplate,
   getFieldDiffsForBuildingBlock,
   sortAndStringifyJson,
+  getFieldDiffsForThreshold,
 } from './get_field_diffs_for_grouped_fields';
 
 export const getFormattedFieldDiffGroups = (
@@ -79,6 +81,14 @@ export const getFormattedFieldDiffGroups = (
       return {
         shouldShowSubtitles: true,
         fieldDiffs: getFieldDiffsForBuildingBlock(buildingBlockThreeWayDiff),
+      };
+    case 'threshold':
+      const thresholdThreeWayDiff = (fields as RuleFieldsDiffWithThreshold)[
+        fieldName
+      ] as AllFieldsDiff['threshold'];
+      return {
+        shouldShowSubtitles: true,
+        fieldDiffs: getFieldDiffsForThreshold(thresholdThreeWayDiff),
       };
     default:
       const fieldThreeWayDiff = (fields as AllFieldsDiff)[fieldName];

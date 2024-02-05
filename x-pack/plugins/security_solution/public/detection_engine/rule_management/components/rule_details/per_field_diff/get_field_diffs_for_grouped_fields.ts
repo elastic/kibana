@@ -345,3 +345,46 @@ export const getFieldDiffsForBuildingBlock = (
       : []),
   ];
 };
+
+export const getFieldDiffsForThreshold = (
+  thresholdThreeWayDiff: AllFieldsDiff['threshold']
+): FieldDiff[] => {
+  const currentField = sortAndStringifyJson(thresholdThreeWayDiff.current_version?.field);
+  const targetField = sortAndStringifyJson(thresholdThreeWayDiff.target_version?.field);
+  const currentValue = sortAndStringifyJson(thresholdThreeWayDiff.current_version?.value);
+  const targetValue = sortAndStringifyJson(thresholdThreeWayDiff.target_version?.value);
+  const currentCardinality = sortAndStringifyJson(
+    thresholdThreeWayDiff.current_version?.cardinality
+  );
+  const targetCardinality = sortAndStringifyJson(thresholdThreeWayDiff.target_version?.cardinality);
+
+  return [
+    ...(currentField !== targetField
+      ? [
+          {
+            fieldName: 'field',
+            currentVersion: currentField,
+            targetVersion: targetField,
+          },
+        ]
+      : []),
+    ...(currentValue !== targetValue
+      ? [
+          {
+            fieldName: 'value',
+            currentVersion: currentValue,
+            targetVersion: targetValue,
+          },
+        ]
+      : []),
+    ...(currentCardinality !== targetCardinality
+      ? [
+          {
+            fieldName: 'cardiinality',
+            currentVersion: currentCardinality,
+            targetVersion: targetCardinality,
+          },
+        ]
+      : []),
+  ];
+};
