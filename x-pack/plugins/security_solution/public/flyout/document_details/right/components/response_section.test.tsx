@@ -15,7 +15,7 @@ import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 
 const PREVIEW_MESSAGE = 'Response is not available in alert preview.';
 
-const panelContextValue = {} as unknown as RightPanelContext;
+const panelContextValue = { documentIsSignal: true } as unknown as RightPanelContext;
 
 const renderResponseSection = () =>
   render(
@@ -61,5 +61,18 @@ describe('<ResponseSection />', () => {
     );
     getByTestId(RESPONSE_SECTION_HEADER_TEST_ID).click();
     expect(getByTestId(RESPONSE_SECTION_CONTENT_TEST_ID)).toHaveTextContent(PREVIEW_MESSAGE);
+  });
+
+  it('should render empty component if document is not signal', () => {
+    const { container } = render(
+      <IntlProvider locale="en">
+        <TestProvider>
+          <RightPanelContext.Provider value={{ ...panelContextValue, documentIsSignal: false }}>
+            <ResponseSection />
+          </RightPanelContext.Provider>
+        </TestProvider>
+      </IntlProvider>
+    );
+    expect(container).toBeEmptyDOMElement();
   });
 });

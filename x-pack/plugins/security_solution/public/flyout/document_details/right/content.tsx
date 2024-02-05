@@ -9,7 +9,7 @@ import type { VFC } from 'react';
 import React, { useMemo } from 'react';
 import { FLYOUT_BODY_TEST_ID } from './test_ids';
 import type { RightPanelPaths } from '.';
-import type { RightPanelTabsType } from './tabs';
+import type { RightPanelTabType } from './tabs';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 
 export interface PanelContentProps {
@@ -20,7 +20,7 @@ export interface PanelContentProps {
   /**
    * Tabs display right below the flyout's header
    */
-  tabs: RightPanelTabsType;
+  tabs: RightPanelTabType[];
 }
 
 /**

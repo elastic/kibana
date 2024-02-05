@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
-
+import React, { memo, useCallback, useMemo } from 'react';
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui/src/components/button/button_group/button_group';
 import { i18n } from '@kbn/i18n';
@@ -73,13 +72,27 @@ const insightsButtons: EuiButtonGroupOptionProps[] = [
 ];
 
 /**
+ * Helper function to get the insight tabs based on whether document is alert or non-alert
+ * alert: entities, threat intelligence, prevalence, correlations
+ * non-alert: entities, prevalence
+ * @param documentIsSignal
+ * @returns insight buttons
+ */
+const getInsightsButtons = (documentIsSignal: boolean) => {
+  return documentIsSignal
+    ? insightsButtons
+    : insightsButtons.filter((tab) => tab.id === ENTITIES_TAB_ID || tab.id === PREVALENCE_TAB_ID);
+};
+
+/**
  * Insights view displayed in the document details expandable flyout left section
  */
 export const InsightsTab: React.FC = memo(() => {
-  const { eventId, indexName, scopeId } = useLeftPanelContext();
+  const { eventId, indexName, scopeId, documentIsSignal } = useLeftPanelContext();
   const { openLeftPanel } = useExpandableFlyoutApi();
   const panels = useExpandableFlyoutState();
   const activeInsightsId = panels.left?.path?.subTab ?? ENTITIES_TAB_ID;
+  const buttonGroup = useMemo(() => getInsightsButtons(documentIsSignal), [documentIsSignal]);
 
   const onChangeCompressed = useCallback(
     (optionId: string) => {
@@ -110,7 +123,7 @@ export const InsightsTab: React.FC = memo(() => {
             defaultMessage: 'Insights options',
           }
         )}
-        options={insightsButtons}
+        options={buttonGroup}
         idSelected={activeInsightsId}
         onChange={onChangeCompressed}
         buttonSize="compressed"

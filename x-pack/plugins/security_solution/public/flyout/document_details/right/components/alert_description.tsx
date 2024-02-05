@@ -16,8 +16,8 @@ import { i18n } from '@kbn/i18n';
 import { useRightPanelContext } from '../context';
 import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
 import {
-  DESCRIPTION_DETAILS_TEST_ID,
-  DESCRIPTION_TITLE_TEST_ID,
+  ALERT_DESCRIPTION_DETAILS_TEST_ID,
+  ALERT_DESCRIPTION_TITLE_TEST_ID,
   RULE_SUMMARY_BUTTON_TEST_ID,
 } from './test_ids';
 import {
@@ -27,10 +27,9 @@ import {
 } from '../../preview';
 
 /**
- * Displays the description of a document.
- * If the document is an alert we show the rule description. If the document is of another type, we show -.
+ * Displays the rule description of a signal document.
  */
-export const Description: FC = () => {
+export const AlertDescription: FC = () => {
   const { dataFormattedForFieldBrowser, scopeId, eventId, indexName, isPreview } =
     useRightPanelContext();
   const { isAlert, ruleDescription, ruleName, ruleId } = useBasicDataFromDetailsData(
@@ -98,7 +97,7 @@ export const Description: FC = () => {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem data-test-subj={DESCRIPTION_TITLE_TEST_ID}>
+      <EuiFlexItem data-test-subj={ALERT_DESCRIPTION_TITLE_TEST_ID}>
         <EuiTitle size="xxs">
           {isAlert ? (
             <EuiFlexGroup
@@ -127,7 +126,7 @@ export const Description: FC = () => {
           )}
         </EuiTitle>
       </EuiFlexItem>
-      <EuiFlexItem data-test-subj={DESCRIPTION_DETAILS_TEST_ID}>
+      <EuiFlexItem data-test-subj={ALERT_DESCRIPTION_DETAILS_TEST_ID}>
         <p
           css={css`
             word-break: break-word;
@@ -144,4 +143,4 @@ export const Description: FC = () => {
   );
 };
 
-Description.displayName = 'Description';
+AlertDescription.displayName = 'AlertDescription';

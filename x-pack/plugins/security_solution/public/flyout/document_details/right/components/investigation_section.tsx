@@ -13,6 +13,8 @@ import { ExpandableSection } from './expandable_section';
 import { HighlightedFields } from './highlighted_fields';
 import { INVESTIGATION_SECTION_TEST_ID } from './test_ids';
 import { InvestigationGuide } from './investigation_guide';
+import { useRightPanelContext } from '../context';
+
 export interface DescriptionSectionProps {
   /**
    * Boolean to allow the component to be expanded or collapsed on first render
@@ -24,6 +26,8 @@ export interface DescriptionSectionProps {
  * Most top section of the overview tab. It contains the description, reason and mitre attack information (for a document of type alert).
  */
 export const InvestigationSection: VFC<DescriptionSectionProps> = ({ expanded = true }) => {
+  const { documentIsSignal } = useRightPanelContext();
+
   return (
     <ExpandableSection
       expanded={expanded}
@@ -34,9 +38,14 @@ export const InvestigationSection: VFC<DescriptionSectionProps> = ({ expanded = 
         />
       }
       data-test-subj={INVESTIGATION_SECTION_TEST_ID}
+      gutterSize="s"
     >
-      <InvestigationGuide />
-      <EuiSpacer size="m" />
+      {documentIsSignal && (
+        <>
+          <InvestigationGuide />
+          <EuiSpacer size="s" />
+        </>
+      )}
       <HighlightedFields />
     </ExpandableSection>
   );

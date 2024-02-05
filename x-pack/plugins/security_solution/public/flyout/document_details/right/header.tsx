@@ -9,10 +9,12 @@ import { EuiSpacer, EuiTab } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { memo } from 'react';
 import type { RightPanelPaths } from '.';
-import type { RightPanelTabsType } from './tabs';
+import type { RightPanelTabType } from './tabs';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutHeaderTabs } from '../../shared/components/flyout_header_tabs';
-import { HeaderTitle } from './components/header_title';
+import { AlertHeaderTitle } from './components/alert_header_title';
+import { EventHeaderTitle } from './components/event_header_title';
+import { useRightPanelContext } from './context';
 
 export interface PanelHeaderProps {
   /**
@@ -27,11 +29,12 @@ export interface PanelHeaderProps {
   /**
    * Tabs to display in the header
    */
-  tabs: RightPanelTabsType;
+  tabs: RightPanelTabType[];
 }
 
 export const PanelHeader: FC<PanelHeaderProps> = memo(
   ({ selectedTabId, setSelectedTabId, tabs }) => {
+    const { documentIsSignal } = useRightPanelContext();
     const onSelectedTabChanged = (id: RightPanelPaths) => setSelectedTabId(id);
     const renderTabs = tabs.map((tab, index) => (
       <EuiTab
@@ -46,7 +49,7 @@ export const PanelHeader: FC<PanelHeaderProps> = memo(
 
     return (
       <FlyoutHeader>
-        <HeaderTitle />
+        {documentIsSignal ? <AlertHeaderTitle /> : <EventHeaderTitle />}
         <EuiSpacer size="m" />
         <FlyoutHeaderTabs>{renderTabs}</FlyoutHeaderTabs>
       </FlyoutHeader>

@@ -9,15 +9,15 @@ import type { FC } from 'react';
 import React, { memo, useMemo, useEffect } from 'react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { EventKind } from '../shared/constants/event_kinds';
-import { getField } from '../shared/utils';
 import { useRightPanelContext } from './context';
 import { PanelNavigation } from './navigation';
 import { PanelHeader } from './header';
 import { PanelContent } from './content';
-import type { RightPanelTabsType } from './tabs';
-import { tabs } from './tabs';
+import type { RightPanelTabType } from './tabs';
+import { getRightPanelTabs } from './tabs';
 import { PanelFooter } from './footer';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useShowEventOverview } from './hooks/use_show_event_overview';
 
 export type RightPanelPaths = 'overview' | 'table' | 'json';
 export const DocumentDetailsRightPanelKey: RightPanelProps['key'] = 'document-details-right';
@@ -37,11 +37,16 @@ export interface RightPanelProps extends FlyoutPanelProps {
  */
 export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
   const { openRightPanel, closeFlyout } = useExpandableFlyoutApi();
-  const { eventId, getFieldsData, indexName, scopeId, isPreview } = useRightPanelContext();
+  const { eventId, indexName, scopeId, isPreview, documentIsSignal } = useRightPanelContext();
 
-  // for 8.10, we only render the flyout in its expandable mode if the document viewed is of type signal
-  const documentIsSignal = getField(getFieldsData('event.kind')) === EventKind.signal;
-  const tabsDisplayed = documentIsSignal ? tabs : tabs.filter((tab) => tab.id !== 'overview');
+  const expandableEventFlyoutEnabled = useIsExperimentalFeatureEnabled(
+    'expandableEventFlyoutEnabled'
+  );
+  const showEventOverview = useShowEventOverview() && expandableEventFlyoutEnabled;
+  const tabsDisplayed = useMemo(
+    () => getRightPanelTabs(documentIsSignal, showEventOverview),
+    [documentIsSignal, showEventOverview]
+  );
 
   const selectedTabId = useMemo(() => {
     const defaultTab = tabsDisplayed[0].id;
@@ -49,7 +54,7 @@ export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
     return tabsDisplayed.map((tab) => tab.id).find((tabId) => tabId === path.tab) ?? defaultTab;
   }, [path, tabsDisplayed]);
 
-  const setSelectedTabId = (tabId: RightPanelTabsType[number]['id']) => {
+  const setSelectedTabId = (tabId: RightPanelTabType['id']) => {
     openRightPanel({
       id: DocumentDetailsRightPanelKey,
       path: {
@@ -78,7 +83,7 @@ export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
 
   return (
     <>
-      <PanelNavigation flyoutIsExpandable={documentIsSignal} />
+      <PanelNavigation flyoutIsExpandable={documentIsSignal || showEventOverview} />
       <PanelHeader
         tabs={tabsDisplayed}
         selectedTabId={selectedTabId}

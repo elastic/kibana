@@ -11,12 +11,12 @@ import { RightPanelContext } from '../context';
 import {
   RISK_SCORE_VALUE_TEST_ID,
   SEVERITY_VALUE_TEST_ID,
-  FLYOUT_HEADER_TITLE_TEST_ID,
+  FLYOUT_ALERT_HEADER_TITLE_TEST_ID,
   STATUS_BUTTON_TEST_ID,
   ASSIGNEES_HEADER_TEST_ID,
   ALERT_SUMMARY_PANEL_TEST_ID,
 } from './test_ids';
-import { HeaderTitle } from './header_title';
+import { AlertHeaderTitle } from './alert_header_title';
 import moment from 'moment-timezone';
 import { useDateFormat, useTimeZone } from '../../../../common/lib/kibana';
 import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
@@ -33,17 +33,18 @@ const mockContextValue = {
   dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
   getFieldsData: jest.fn().mockImplementation(mockGetFieldsData),
 } as unknown as RightPanelContext;
+const HEADER_TEXT_TEST_ID = `${FLYOUT_ALERT_HEADER_TITLE_TEST_ID}Text`;
 
 const renderHeader = (contextValue: RightPanelContext) =>
   render(
     <TestProvidersComponent>
       <RightPanelContext.Provider value={contextValue}>
-        <HeaderTitle />
+        <AlertHeaderTitle />
       </RightPanelContext.Provider>
     </TestProvidersComponent>
   );
 
-describe('<HeaderTitle />', () => {
+describe('<AlertHeaderTitle />', () => {
   beforeEach(() => {
     jest.mocked(useDateFormat).mockImplementation(() => dateFormat);
     jest.mocked(useTimeZone).mockImplementation(() => 'UTC');
@@ -52,7 +53,7 @@ describe('<HeaderTitle />', () => {
   it('should render component', () => {
     const { getByTestId } = renderHeader(mockContextValue);
 
-    expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(HEADER_TEXT_TEST_ID)).toHaveTextContent('rule-name');
     expect(getByTestId(SEVERITY_VALUE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(ALERT_SUMMARY_PANEL_TEST_ID)).toBeInTheDocument();
 
@@ -61,49 +62,17 @@ describe('<HeaderTitle />', () => {
     expect(getByTestId(ASSIGNEES_HEADER_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should render rule name in the title if document is an alert', () => {
-    const { getByTestId } = renderHeader(mockContextValue);
+  it('should render title correctly if flyout is in preview', () => {
+    const { queryByTestId, getByTestId } = renderHeader({ ...mockContextValue, isPreview: true });
+    expect(getByTestId(HEADER_TEXT_TEST_ID)).toHaveTextContent('rule-name');
 
-    expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toHaveTextContent('rule-name');
-  });
-
-  it('should render default document detail title if document is not an alert', () => {
-    const contextValue = {
-      ...mockContextValue,
-      dataFormattedForFieldBrowser: [
-        {
-          category: 'kibana',
-          field: 'kibana.alert.rule.name',
-          values: [],
-          originalValue: [],
-          isObjectArray: false,
-        },
-      ],
-    } as unknown as RightPanelContext;
-
-    const { getByTestId } = renderHeader(contextValue);
-
-    expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toHaveTextContent('Event details');
-  });
-
-  it('should not render alert summary kpis if document is not an alert', () => {
-    const contextValue = {
-      ...mockContextValue,
-      dataFormattedForFieldBrowser: [
-        {
-          category: 'kibana',
-          field: 'kibana.alert.rule.name',
-          values: [],
-          originalValue: [],
-          isObjectArray: false,
-        },
-      ],
-    } as unknown as RightPanelContext;
-
-    const { queryByTestId } = renderHeader(contextValue);
-    expect(queryByTestId(ALERT_SUMMARY_PANEL_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(RISK_SCORE_VALUE_TEST_ID)).toBeInTheDocument();
     expect(queryByTestId(STATUS_BUTTON_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId(RISK_SCORE_VALUE_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId(ASSIGNEES_HEADER_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(ASSIGNEES_HEADER_TEST_ID)).toHaveTextContent('Assignees—');
+  });
+
+  it('should render fall back values if document is not alert', () => {
+    const { getByTestId } = renderHeader({ ...mockContextValue, dataFormattedForFieldBrowser: [] });
+    expect(getByTestId(HEADER_TEXT_TEST_ID)).toHaveTextContent('Document details');
   });
 });

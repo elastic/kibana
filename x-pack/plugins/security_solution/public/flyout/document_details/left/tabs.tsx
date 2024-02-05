@@ -20,61 +20,78 @@ import {
 } from './test_ids';
 import { ResponseTab } from './tabs/response_tab';
 
-export type LeftPanelTabsType = Array<{
+export interface LeftPanelTabType {
   id: LeftPanelPaths;
   'data-test-subj': string;
   name: ReactElement;
   content: React.ReactElement;
-  visible: boolean;
-}>;
+}
 
-export const tabs: LeftPanelTabsType = [
-  {
-    id: 'visualize',
-    'data-test-subj': VISUALIZE_TAB_TEST_ID,
-    name: (
-      <FormattedMessage
-        id="xpack.securitySolution.flyout.left.visualize.tabLabel"
-        defaultMessage="Visualize"
-      />
-    ),
-    content: <VisualizeTab />,
-    visible: false,
-  },
-  {
-    id: 'insights',
-    'data-test-subj': INSIGHTS_TAB_TEST_ID,
-    name: (
-      <FormattedMessage
-        id="xpack.securitySolution.flyout.left.insights.tabLabel"
-        defaultMessage="Insights"
-      />
-    ),
-    content: <InsightsTab />,
-    visible: true,
-  },
-  {
-    id: 'investigation',
-    'data-test-subj': INVESTIGATION_TAB_TEST_ID,
-    name: (
-      <FormattedMessage
-        id="xpack.securitySolution.flyout.left.investigations.tabLabel"
-        defaultMessage="Investigation"
-      />
-    ),
-    content: <InvestigationTab />,
-    visible: true,
-  },
-  {
-    id: 'response',
-    'data-test-subj': RESPONSE_TAB_TEST_ID,
-    name: (
-      <FormattedMessage
-        id="xpack.securitySolution.flyout.left.response.tabLabel"
-        defaultMessage="Response"
-      />
-    ),
-    content: <ResponseTab />,
-    visible: true,
-  },
-];
+const visualizeTab: LeftPanelTabType = {
+  id: 'visualize',
+  'data-test-subj': VISUALIZE_TAB_TEST_ID,
+  name: (
+    <FormattedMessage
+      id="xpack.securitySolution.flyout.left.visualize.tabLabel"
+      defaultMessage="Visualize"
+    />
+  ),
+  content: <VisualizeTab />,
+};
+
+const insightsTab: LeftPanelTabType = {
+  id: 'insights',
+  'data-test-subj': INSIGHTS_TAB_TEST_ID,
+  name: (
+    <FormattedMessage
+      id="xpack.securitySolution.flyout.left.insights.tabLabel"
+      defaultMessage="Insights"
+    />
+  ),
+  content: <InsightsTab />,
+};
+
+const investigationTab: LeftPanelTabType = {
+  id: 'investigation',
+  'data-test-subj': INVESTIGATION_TAB_TEST_ID,
+  name: (
+    <FormattedMessage
+      id="xpack.securitySolution.flyout.left.investigations.tabLabel"
+      defaultMessage="Investigation"
+    />
+  ),
+  content: <InvestigationTab />,
+};
+
+const responseTab: LeftPanelTabType = {
+  id: 'response',
+  'data-test-subj': RESPONSE_TAB_TEST_ID,
+  name: (
+    <FormattedMessage
+      id="xpack.securitySolution.flyout.left.response.tabLabel"
+      defaultMessage="Response"
+    />
+  ),
+  content: <ResponseTab />,
+};
+
+/**
+ * Helper funtion that returns tabs to display in the document details expandable flyout left section
+ * @param documentIsSignal
+ * @param showVisualizeTab
+ */
+export const getLeftPanelTabs = (
+  documentIsSignal: boolean,
+  showVisualizeTab: boolean
+): LeftPanelTabType[] => {
+  let tabs;
+  if (documentIsSignal) {
+    tabs = [insightsTab, investigationTab, responseTab];
+  } else {
+    tabs = [insightsTab];
+  }
+  if (showVisualizeTab) {
+    return [visualizeTab, ...tabs];
+  }
+  return tabs;
+};

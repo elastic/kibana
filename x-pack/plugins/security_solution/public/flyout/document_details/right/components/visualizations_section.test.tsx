@@ -15,12 +15,18 @@ import { mockContextValue } from '../mocks/mock_context';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { RightPanelContext } from '../context';
 import { useAlertPrevalenceFromProcessTree } from '../../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
+import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 
 jest.mock('../../../../common/containers/alerts/use_alert_prevalence_from_process_tree', () => ({
   useAlertPrevalenceFromProcessTree: jest.fn(),
 }));
 const mockUseAlertPrevalenceFromProcessTree = useAlertPrevalenceFromProcessTree as jest.Mock;
+
+jest.mock('../../../../timelines/containers/use_timeline_data_filters', () => ({
+  useTimelineDataFilters: jest.fn(),
+}));
+const mockUseTimelineDataFilters = useTimelineDataFilters as jest.Mock;
 
 const contextValue = {
   ...mockContextValue,
@@ -29,6 +35,7 @@ const contextValue = {
 
 describe('<VisualizationsSection />', () => {
   beforeEach(() => {
+    mockUseTimelineDataFilters.mockReturnValue({ selectedPatterns: ['index'] });
     mockUseAlertPrevalenceFromProcessTree.mockReturnValue({
       loading: false,
       error: false,

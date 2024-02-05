@@ -10,8 +10,9 @@ import type { VFC } from 'react';
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
 import type { LeftPanelPaths } from '.';
-import { tabs } from './tabs';
+import { getLeftPanelTabs } from './tabs';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
+import { useLeftPanelContext } from './context';
 
 export interface PanelHeaderProps {
   /**
@@ -27,22 +28,21 @@ export interface PanelHeaderProps {
 
 /**
  * Header at the top of the left section.
- * Displays the investigation and insights tabs (visualize is hidden for 8.9).
+ * Displays the insights, investigation and response tabs (visualize is hidden for 8.9+).
  */
 export const PanelHeader: VFC<PanelHeaderProps> = memo(({ selectedTabId, setSelectedTabId }) => {
+  const { documentIsSignal } = useLeftPanelContext();
   const onSelectedTabChanged = (id: LeftPanelPaths) => setSelectedTabId(id);
-  const renderTabs = tabs
-    .filter((tab) => tab.visible)
-    .map((tab, index) => (
-      <EuiTab
-        onClick={() => onSelectedTabChanged(tab.id)}
-        isSelected={tab.id === selectedTabId}
-        key={index}
-        data-test-subj={tab['data-test-subj']}
-      >
-        {tab.name}
-      </EuiTab>
-    ));
+  const renderTabs = getLeftPanelTabs(documentIsSignal, false).map((tab, index) => (
+    <EuiTab
+      onClick={() => onSelectedTabChanged(tab.id)}
+      isSelected={tab.id === selectedTabId}
+      key={index}
+      data-test-subj={tab['data-test-subj']}
+    >
+      {tab.name}
+    </EuiTab>
+  ));
 
   return (
     <FlyoutHeader

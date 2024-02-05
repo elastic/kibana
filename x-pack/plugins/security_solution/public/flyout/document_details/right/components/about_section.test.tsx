@@ -7,7 +7,13 @@
 
 import React from 'react';
 import { act, render } from '@testing-library/react';
-import { ABOUT_SECTION_CONTENT_TEST_ID, ABOUT_SECTION_HEADER_TEST_ID } from './test_ids';
+import {
+  ABOUT_SECTION_CONTENT_TEST_ID,
+  ABOUT_SECTION_HEADER_TEST_ID,
+  ALERT_DESCRIPTION_TITLE_TEST_ID,
+  EVENT_KIND_DESCRIPTION_TEST_ID,
+  EVENT_CATEGORY_DESCRIPTION_TEST_ID,
+} from './test_ids';
 import { TestProviders } from '../../../../common/mock';
 import { AboutSection } from './about_section';
 import { RightPanelContext } from '../context';
@@ -45,6 +51,73 @@ describe('<AboutSection />', () => {
     await act(async () => {
       getByTestId(ABOUT_SECTION_HEADER_TEST_ID).click();
       expect(getByTestId(ABOUT_SECTION_CONTENT_TEST_ID)).toBeInTheDocument();
+    });
+  });
+
+  describe('about section for signal document', () => {
+    it('should render the component collapsed', async () => {
+      const { getByTestId } = renderAboutSection(true);
+      await act(async () => {
+        expect(getByTestId(ALERT_DESCRIPTION_TITLE_TEST_ID)).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('about section for event document', () => {
+    it('should render event kind description if event.kind is not event', async () => {
+      const mockGetFieldsData = (field: string) => {
+        switch (field) {
+          case 'event.kind':
+            return 'alert';
+          case 'event.category':
+            return 'behavior';
+        }
+      };
+      const { getByTestId, queryByTestId } = render(
+        <TestProviders>
+          <RightPanelContext.Provider
+            value={{
+              ...mockContextValue,
+              getFieldsData: mockGetFieldsData,
+              documentIsSignal: false,
+            }}
+          >
+            <AboutSection expanded />
+          </RightPanelContext.Provider>
+        </TestProviders>
+      );
+      await act(async () => {
+        expect(queryByTestId(ALERT_DESCRIPTION_TITLE_TEST_ID)).not.toBeInTheDocument();
+        expect(getByTestId(EVENT_KIND_DESCRIPTION_TEST_ID)).toBeInTheDocument();
+      });
+    });
+
+    it('should render event category description if event.kind is event', async () => {
+      const mockGetFieldsData = (field: string) => {
+        switch (field) {
+          case 'event.kind':
+            return 'event';
+          case 'event.category':
+            return 'behavior';
+        }
+      };
+      const { getByTestId, queryByTestId } = render(
+        <TestProviders>
+          <RightPanelContext.Provider
+            value={{
+              ...mockContextValue,
+              getFieldsData: mockGetFieldsData,
+              documentIsSignal: false,
+            }}
+          >
+            <AboutSection expanded />
+          </RightPanelContext.Provider>
+        </TestProviders>
+      );
+      await act(async () => {
+        expect(queryByTestId(ALERT_DESCRIPTION_TITLE_TEST_ID)).not.toBeInTheDocument();
+        expect(getByTestId(`${EVENT_CATEGORY_DESCRIPTION_TEST_ID}-behavior`)).toBeInTheDocument();
+      });
     });
   });
 });

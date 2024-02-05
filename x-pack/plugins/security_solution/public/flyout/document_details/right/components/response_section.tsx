@@ -12,6 +12,7 @@ import { ResponseButton } from './response_button';
 import { ExpandableSection } from './expandable_section';
 import { useRightPanelContext } from '../context';
 import { RESPONSE_SECTION_TEST_ID } from './test_ids';
+
 export interface ResponseSectionProps {
   /**
    * Boolean to allow the component to be expanded or collapsed on first render
@@ -23,7 +24,11 @@ export interface ResponseSectionProps {
  * Most bottom section of the overview tab. It contains a summary of the response tab.
  */
 export const ResponseSection: VFC<ResponseSectionProps> = ({ expanded = false }) => {
-  const { isPreview } = useRightPanelContext();
+  const { isPreview, documentIsSignal } = useRightPanelContext();
+  if (!documentIsSignal) {
+    return null;
+  }
+
   return (
     <ExpandableSection
       expanded={expanded}
