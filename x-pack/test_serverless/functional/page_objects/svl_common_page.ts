@@ -37,6 +37,8 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
           // Loading bootstrap.js in order to be on the domain that the cookie will be set for.
           log.debug(`Navigate to /bootstrap.js`);
           await browser.get(deployment.getHostPort() + '/bootstrap.js');
+          const alert1 = await browser.getAlert();
+          await alert1?.accept();
           log.debug(`Set the new cookie in the current browser context`);
           await browser.setCookie('sid', sidCookie);
           // Cookie should be already set in the browsing context, navigating to the Home page
