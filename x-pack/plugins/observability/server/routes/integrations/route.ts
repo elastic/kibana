@@ -7,7 +7,11 @@
 
 import { InferSearchResponseOf } from '@kbn/es-types';
 import * as t from 'io-ts';
-import { ObsIntegrationMetadata } from '../../../common/integrations';
+import {
+  AssetSummary,
+  IntegrationSummary,
+  ObsIntegrationMetadata,
+} from '../../../common/integrations';
 import { OBS_INTEGRATION_METADATA_SO_TYPE } from '../../lib/integrations';
 import { createObservabilityServerRoute } from '../create_observability_server_route';
 
@@ -39,11 +43,17 @@ const getInstalledIntegrationsRoute = createObservabilityServerRoute({
         integrationsWithMetadata.includes(pkg.name)
     );
 
-    const integrations = installedPackages.map((pkg) => {
+    const integrations: IntegrationSummary[] = installedPackages.map((pkg) => {
       const metadata = metadataList.find((item) => item.integration_name === pkg.name);
+      const assets = metadata!.assets.map<AssetSummary>((asset) => ({
+        display_name: asset.display_name,
+        name: asset.display_name.replaceAll(' ', '_').toLowerCase(),
+      }));
+
       return {
         name: metadata!.integration_name,
         display_name: metadata!.display_name,
+        assets,
       };
     });
 

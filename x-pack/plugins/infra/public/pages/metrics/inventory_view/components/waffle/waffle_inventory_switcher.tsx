@@ -120,13 +120,10 @@ export const WaffleInventorySwitcher: React.FC = () => {
               'data-test-subj': 'goToAWS-open',
             },
             ...(integrations.length !== 0
-              ? [
-                  {
-                    name: 'Integrations',
-                    panel: 'integrationsPanel',
-                    'data-test-subj': 'goToIntegrations-open',
-                  },
-                ]
+              ? integrations.map((integration) => ({
+                  name: integration.display_name,
+                  panel: `${integration.display_name}Panel`,
+                }))
               : []),
           ],
         },
@@ -157,19 +154,16 @@ export const WaffleInventorySwitcher: React.FC = () => {
           ],
         },
         ...(integrations.length !== 0
-          ? [
-              {
-                id: 'integrationsPanel',
-                title: 'Integrations',
-                items: integrations.map((integration) => ({
-                  name: integration.display_name,
-                  onClick: () => {
-                    goToIntegration(integration.name);
-                  },
-                  'data-test-subj': `goToIntegrations-${integration.name}`,
-                })),
-              },
-            ]
+          ? integrations.map((integration) => ({
+              id: `${integration.display_name}Panel`,
+              title: integration.display_name,
+              items: integration.assets.map((asset) => ({
+                name: asset.display_name,
+                onClick: () => {
+                  goToIntegration(`${integration.name}:${asset.name}`);
+                },
+              })),
+            }))
           : []),
       ] as EuiContextMenuPanelDescriptor[],
     [
@@ -190,9 +184,15 @@ export const WaffleInventorySwitcher: React.FC = () => {
       return getDisplayNameForType(nodeType);
     }
 
-    const matchedIntegration = integrations.find((integration) => integration.name === nodeType);
-    if (matchedIntegration) {
-      return matchedIntegration.display_name;
+    const [integrationName, assetName] = nodeType.split(':');
+
+    const matchedIntegration = integrations.find(
+      (integration) => integration.name === integrationName
+    );
+    const matchedAsset = matchedIntegration?.assets.find((asset) => asset.name === assetName);
+    if (matchedIntegration && matchedAsset) {
+      // Would be nice with an icon here?
+      return `${matchedIntegration.display_name} - ${matchedAsset.display_name}`;
     }
 
     return 'Loading...';

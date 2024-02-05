@@ -29,6 +29,12 @@ export interface ObsIntegrationMetadata {
 export interface IntegrationSummary {
   name: string;
   display_name: string;
+  assets: AssetSummary[];
+}
+
+export interface AssetSummary {
+  name: string;
+  display_name: string;
 }
 
 export interface Integration {
