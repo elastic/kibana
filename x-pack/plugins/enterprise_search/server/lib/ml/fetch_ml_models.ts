@@ -6,9 +6,11 @@
  */
 
 import { MlTrainedModelConfig, MlTrainedModelStats } from '@elastic/elasticsearch/lib/api/types';
-import { getMlModelTypesForModelConfig } from '../../../common/ml_inference_pipeline';
+
 import { i18n } from '@kbn/i18n';
 import { MlTrainedModels } from '@kbn/ml-plugin/server';
+
+import { getMlModelTypesForModelConfig } from '../../../common/ml_inference_pipeline';
 
 import { MlModelDeploymentState, MlModel } from '../../../common/types/ml';
 
@@ -132,9 +134,7 @@ const getModel = (modelConfig: MlTrainedModelConfig, modelStats?: MlTrainedModel
   // Enrich deployment stats
   if (modelStats && modelStats.deployment_stats) {
     model.hasStats = true;
-    model.deploymentState = getDeploymentState(
-      modelStats.deployment_stats.allocation_status.state
-    );
+    model.deploymentState = getDeploymentState(modelStats.deployment_stats.allocation_status.state);
     model.nodeAllocationCount = modelStats.deployment_stats.allocation_status.allocation_count;
     model.targetAllocationCount =
       modelStats.deployment_stats.allocation_status.target_allocation_count;
