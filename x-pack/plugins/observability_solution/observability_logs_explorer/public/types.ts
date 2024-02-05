@@ -6,7 +6,7 @@
  */
 
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { LogExplorerPluginStart } from '@kbn/logs-explorer-plugin/public';
+import { LogsExplorerPluginStart } from '@kbn/logs-explorer-plugin/public';
 import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
 import { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
@@ -16,27 +16,27 @@ import { LogsSharedClientStartExports } from '@kbn/logs-shared-plugin/public';
 import { DatasetQualityPluginStart } from '@kbn/dataset-quality-plugin/public';
 import { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
 import {
-  ObservabilityLogExplorerLocators,
-  ObservabilityLogExplorerLocationState,
+  ObservabilityLogsExplorerLocators,
+  ObservabilityLogsExplorerLocationState,
 } from '../common/locators';
 
-export interface ObservabilityLogExplorerPluginSetup {
-  locators: ObservabilityLogExplorerLocators;
+export interface ObservabilityLogsExplorerPluginSetup {
+  locators: ObservabilityLogsExplorerLocators;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ObservabilityLogExplorerPluginStart {}
+export interface ObservabilityLogsExplorerPluginStart {}
 
-export interface ObservabilityLogExplorerSetupDeps {
+export interface ObservabilityLogsExplorerSetupDeps {
   discover: DiscoverSetup;
   serverless?: ServerlessPluginStart;
   share: SharePluginSetup;
 }
 
-export interface ObservabilityLogExplorerStartDeps {
+export interface ObservabilityLogsExplorerStartDeps {
   data: DataPublicPluginStart;
   discover: DiscoverStart;
-  logsExplorer: LogExplorerPluginStart;
+  logsExplorer: LogsExplorerPluginStart;
   logsShared: LogsSharedClientStartExports;
   observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;
@@ -45,6 +45,7 @@ export interface ObservabilityLogExplorerStartDeps {
   datasetQuality: DatasetQualityPluginStart;
 }
 
-export type ObservabilityLogExplorerHistory = ScopedHistory<ObservabilityLogExplorerLocationState>;
-export type ObservabilityLogExplorerAppMountParameters =
-  AppMountParameters<ObservabilityLogExplorerLocationState>;
+export type ObservabilityLogsExplorerHistory =
+  ScopedHistory<ObservabilityLogsExplorerLocationState>;
+export type ObservabilityLogsExplorerAppMountParameters =
+  AppMountParameters<ObservabilityLogsExplorerLocationState>;
