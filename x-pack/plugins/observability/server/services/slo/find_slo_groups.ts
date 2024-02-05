@@ -8,6 +8,7 @@ import { FindSLOGroupsParams, FindSLOGroupsResponse, Pagination } from '@kbn/slo
 import { ElasticsearchClient } from '@kbn/core/server';
 import { findSLOGroupsResponseSchema } from '@kbn/slo-schema';
 import { Logger } from '@kbn/core/server';
+import { typedSearch } from '../../utils/queries';
 import { IllegalArgumentError } from '../../errors';
 import {
   SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
@@ -33,41 +34,9 @@ function toPagination(params: FindSLOGroupsParams): Pagination {
   };
 }
 
-interface TopHitsResult {
-  _source: {
-    sliValue: number;
-    status: Status;
-  };
-}
-interface Aggregation {
-  doc_count: number;
-  key: string;
-  worst: {
-    hits: {
-      hits: TopHitsResult[];
-    };
-  };
-  violated: {
-    doc_count: number;
-  };
-  healthy: {
-    doc_count: number;
-  };
-  degrading: {
-    doc_count: number;
-  };
-  noData: {
-    doc_count: number;
-  };
-}
-
-interface GroupAggregationsResponse {
-  groupBy: {
-    buckets: Aggregation[];
-  };
-  distinct_items: {
-    value: number;
-  };
+interface SliDocument {
+  sliValue: number;
+  status: Status;
 }
 
 export class FindSLOGroups {
@@ -88,7 +57,8 @@ export class FindSLOGroups {
     } catch (e) {
       this.logger.error(`Failed to parse filters: ${e.message}`);
     }
-    const response = await this.esClient.search<unknown, GroupAggregationsResponse>({
+
+    const response = await typedSearch(this.esClient, {
       index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
       size: 0,
       query: {
@@ -184,8 +154,8 @@ export class FindSLOGroups {
             summary: {
               total: bucket.doc_count ?? 0,
               worst: {
-                sliValue: bucket.worst?.hits?.hits[0]?._source?.sliValue,
-                status: bucket.worst?.hits?.hits[0]?._source?.status,
+                sliValue: (bucket.worst?.hits?.hits[0]?._source as SliDocument)?.sliValue,
+                status: (bucket.worst?.hits?.hits[0]?._source as SliDocument)?.status,
               },
               violated: bucket.violated?.doc_count,
               healthy: bucket.healthy?.doc_count,
