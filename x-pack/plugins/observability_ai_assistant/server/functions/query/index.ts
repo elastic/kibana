@@ -13,6 +13,10 @@ import { lastValueFrom, type Observable } from 'rxjs';
 import { promisify } from 'util';
 import type { FunctionRegistrationParameters } from '..';
 import type { ChatCompletionChunkEvent } from '../../../common/conversation_complete';
+import {
+  VisualizeESQLUserIntention,
+  VISUALIZE_ESQL_USER_INTENTIONS,
+} from '../../../common/functions/visualize_esql';
 import { FunctionVisibility, MessageRole } from '../../../common/types';
 import { concatenateChatCompletionChunks } from '../../../common/utils/concatenate_chat_completion_chunks';
 import { emitWithConcatenatedMessage } from '../../../common/utils/emit_with_concatenated_message';
@@ -59,7 +63,7 @@ const loadEsqlDocs = once(async () => {
   );
 });
 
-export function registerEsqlFunction({
+export function registerQueryFunction({
   client,
   registerFunction,
   resources,
@@ -68,8 +72,8 @@ export function registerEsqlFunction({
     {
       name: 'execute_query',
       contexts: ['core'],
-      visibility: FunctionVisibility.User,
-      description: 'Execute an ES|QL query.',
+      visibility: FunctionVisibility.AssistantOnly,
+      description: 'Display the results of an ES|QL query.',
       parameters: {
         type: 'object',
         additionalProperties: false,
@@ -95,13 +99,12 @@ export function registerEsqlFunction({
       return { content: response };
     }
   );
-
   registerFunction(
     {
-      name: 'esql',
+      name: 'query',
       contexts: ['core'],
-      description: `This function answers ES|QL related questions including query generation and syntax/command questions.`,
-      visibility: FunctionVisibility.System,
+      description: `This function generates, executes and/or visualizes a query based on the user's request.`,
+      visibility: FunctionVisibility.AssistantOnly,
       parameters: {
         type: 'object',
         additionalProperties: false,
@@ -137,15 +140,42 @@ export function registerEsqlFunction({
             Extract data? Request \`DISSECT\` AND \`GROK\`.
             Convert a column based on a set of conditionals? Request \`EVAL\` and \`CASE\`.
 
-            Examples for determining whether the user wants to execute a query:
-            - "Show me the avg of x"
-            - "Give me the results of y"
-            - "Display the sum of z"
+            For determining the intention of the user, the following options are available:
 
-            Examples for determining whether the user does not want to execute a query:
-            - "I want a query that ..."
-            - "... Just show me the query"
-            - "Create a query that ..."`
+            ${VisualizeESQLUserIntention.generateQueryOnly}: the user only wants to generate the query,
+            but not run it.
+
+            ${VisualizeESQLUserIntention.executeAndReturnResults}: the user wants to execute the query,
+            and have the assistant return/analyze/summarize the results. they don't need a
+            visualization.
+
+            ${VisualizeESQLUserIntention.visualizeAuto}: The user wants to visualize the data from the
+            query, but wants us to pick the best visualization type, or their preferred
+            visualization is unclear.
+
+            These intentions will display a specific visualization:
+            ${VisualizeESQLUserIntention.visualizeBar}
+            ${VisualizeESQLUserIntention.visualizeDonut}
+            ${VisualizeESQLUserIntention.visualizeHeatmap}
+            ${VisualizeESQLUserIntention.visualizeLine}
+            ${VisualizeESQLUserIntention.visualizeTagcloud}
+            ${VisualizeESQLUserIntention.visualizeTreemap}
+            ${VisualizeESQLUserIntention.visualizeWaffle}
+            ${VisualizeESQLUserIntention.visualizeXy}
+
+            Some examples:
+            "Show me the avg of x" => ${VisualizeESQLUserIntention.executeAndReturnResults}
+            "Show me the results of y" => ${VisualizeESQLUserIntention.executeAndReturnResults}
+            "Display the sum of z" => ${VisualizeESQLUserIntention.executeAndReturnResults}
+
+            "I want a query that ..." => ${VisualizeESQLUserIntention.generateQueryOnly}
+            "... Just show me the query" => ${VisualizeESQLUserIntention.generateQueryOnly}
+            "Create a query that ..." => ${VisualizeESQLUserIntention.generateQueryOnly}
+
+            "Show me the avg of x over time" => ${VisualizeESQLUserIntention.visualizeAuto}
+            "I want a bar chart of ... " => ${VisualizeESQLUserIntention.visualizeBar}
+            "I want to see a heat map of ..." => ${VisualizeESQLUserIntention.visualizeHeatmap}
+            `
           ),
           signal,
           functions: [
@@ -172,13 +202,13 @@ export function registerEsqlFunction({
                     },
                     description: 'A list of functions.',
                   },
-                  execute: {
-                    type: 'boolean',
-                    description:
-                      'Whether the user wants to execute a query (true) or just wants the query to be displayed (false)',
+                  intention: {
+                    type: 'string',
+                    description: `What the user\'s intention is.`,
+                    enum: VISUALIZE_ESQL_USER_INTENTIONS,
                   },
                 },
-                required: ['commands', 'functions', 'execute'],
+                required: ['commands', 'functions', 'intention'],
               },
             },
           ],
@@ -191,12 +221,28 @@ export function registerEsqlFunction({
       const args = JSON.parse(response.message.function_call.arguments) as {
         commands: string[];
         functions: string[];
-        execute: boolean;
+        intention: VisualizeESQLUserIntention;
       };
 
       const keywords = args.commands.concat(args.functions).concat('SYNTAX').concat('OVERVIEW');
 
       const messagesToInclude = mapValues(pick(esqlDocs, keywords), ({ data }) => data);
+
+      let userIntentionMessage: string;
+
+      switch (args.intention) {
+        case VisualizeESQLUserIntention.executeAndReturnResults:
+          userIntentionMessage = `When you generate a query, it will automatically be executed and its results returned to you. The user does not need to do anything for this.`;
+          break;
+
+        case VisualizeESQLUserIntention.generateQueryOnly:
+          userIntentionMessage = `Any generated query will not be executed automatically, the user needs to do this themselves.`;
+          break;
+
+        default:
+          userIntentionMessage = `The generated query will automatically be visualized to the user, displayed below your message. The user does not need to do anything for this.`;
+          break;
+      }
 
       const esqlResponse$: Observable<ChatCompletionChunkEvent> = await client.chat(
         'answer_esql_question',
@@ -209,6 +255,8 @@ export function registerEsqlFunction({
               \`\`\`
 
               Prefer to use commands and functions for which you have requested documentation.
+
+              ${userIntentionMessage}
 
               DO NOT UNDER ANY CIRCUMSTANCES use commands or functions that are not a capability of ES|QL
               as mentioned in the system message and documentation.
@@ -266,11 +314,13 @@ export function registerEsqlFunction({
             message: {
               ...msg.message,
               content: correctCommonEsqlMistakes(msg.message.content, resources.logger),
-              ...(esqlQuery && args.execute
+              ...(esqlQuery &&
+              args.intention &&
+              args.intention !== VisualizeESQLUserIntention.generateQueryOnly
                 ? {
                     function_call: {
-                      name: 'execute_query',
-                      arguments: JSON.stringify({ query: esqlQuery }),
+                      name: 'visualize_query',
+                      arguments: JSON.stringify({ query: esqlQuery, intention: args.intention }),
                       trigger: MessageRole.Assistant as const,
                     },
                   }

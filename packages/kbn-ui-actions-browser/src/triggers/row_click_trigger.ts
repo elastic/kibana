@@ -7,6 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { Trigger } from '.';
 
@@ -22,10 +23,7 @@ export const rowClickTrigger: Trigger = {
   }),
 };
 
-export interface RowClickContext {
-  // Need to make this unknown to prevent circular dependencies.
-  // Apps using this property will need to cast to `IEmbeddable`.
-  embeddable?: unknown;
+export type RowClickContext = Partial<EmbeddableApiContext> & {
   data: {
     /**
      * Row index, starting from 0, where user clicked.
@@ -40,4 +38,4 @@ export interface RowClickContext {
      */
     columns?: string[];
   };
-}
+};

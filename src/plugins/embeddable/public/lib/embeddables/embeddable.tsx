@@ -145,6 +145,7 @@ export abstract class Embeddable<
       getFallbackTimeRange: this.getFallbackTimeRange,
       canUnlinkFromLibrary: this.canUnlinkFromLibrary,
       isCompatibleWithLocalUnifiedSearch: this.isCompatibleWithLocalUnifiedSearch,
+      savedObjectId: this.savedObjectId,
     } = api);
 
     setTimeout(() => {
@@ -186,6 +187,7 @@ export abstract class Embeddable<
   public canUnlinkFromLibrary: LegacyEmbeddableAPI['canUnlinkFromLibrary'];
   public getFallbackTimeRange: LegacyEmbeddableAPI['getFallbackTimeRange'];
   public isCompatibleWithLocalUnifiedSearch: LegacyEmbeddableAPI['isCompatibleWithLocalUnifiedSearch'];
+  public savedObjectId: LegacyEmbeddableAPI['savedObjectId'];
 
   public getEditHref(): string | undefined {
     return this.getOutput().editUrl ?? undefined;
