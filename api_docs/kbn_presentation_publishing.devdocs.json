@@ -688,6 +688,46 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.apiPublishesUnsavedChanges",
+        "type": "Function",
+        "tags": [],
+        "label": "apiPublishesUnsavedChanges",
+        "description": [],
+        "signature": [
+          "(api: unknown) => api is ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesUnsavedChanges",
+            "text": "PublishesUnsavedChanges"
+          }
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/publishes_unsaved_changes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.apiPublishesUnsavedChanges.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "api",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/publishes_unsaved_changes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.apiPublishesViewMode",
         "type": "Function",
         "tags": [],
@@ -1062,7 +1102,11 @@
           "\nBatches the latest values of multiple publishing subjects into a single object. Use this to avoid unnecessary re-renders.\nYou should avoid using this hook with subjects that your component pushes values to on user interaction, as it can cause a slight delay."
         ],
         "signature": [
-          "<SubjectsType extends PublishingSubjectCollection>(subjects: SubjectsType) => PublishingSubjectBatchResult<SubjectsType>"
+          "<SubjectsType extends ",
+          "AnyPublishingSubject",
+          "[]>(...subjects_0: SubjectsType) => ",
+          "UnwrapPublishingSubjectTuple",
+          "<SubjectsType>"
         ],
         "path": "packages/presentation/presentation_publishing/publishing_subject/publishing_batcher.ts",
         "deprecated": false,
@@ -1071,12 +1115,12 @@
           {
             "parentPluginId": "@kbn/presentation-publishing",
             "id": "def-common.useBatchedPublishingSubjects.$1",
-            "type": "Uncategorized",
+            "type": "Object",
             "tags": [],
             "label": "subjects",
             "description": [],
             "signature": [
-              "SubjectsType"
+              "[...SubjectsType]"
             ],
             "path": "packages/presentation/presentation_publishing/publishing_subject/publishing_batcher.ts",
             "deprecated": false,
@@ -1478,7 +1522,15 @@
             "section": "def-common.CanAccessViewMode",
             "text": "CanAccessViewMode"
           },
-          ">(api: ApiType | undefined) => void"
+          ">(api: ApiType | undefined) => ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.ViewMode",
+            "text": "ViewMode"
+          },
+          " | undefined"
         ],
         "path": "packages/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
         "deprecated": false,
@@ -1895,7 +1947,7 @@
           "\nDeclares a state variable that is synced with a publishing subject value."
         ],
         "signature": [
-          "<ValueType extends unknown = unknown, SubjectType extends ",
+          "<SubjectType extends ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -1903,7 +1955,7 @@
             "section": "def-common.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<ValueType> | undefined = ",
+          "<any> | undefined = ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -1911,7 +1963,9 @@
             "section": "def-common.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<ValueType> | undefined>(subject?: SubjectType | undefined) => OptionalIfOptional<SubjectType, ValueType>"
+          "<any> | undefined>(subject: SubjectType) => ",
+          "ValueFromPublishingSubject",
+          "<SubjectType>"
         ],
         "path": "packages/presentation/presentation_publishing/publishing_subject/publishing_subject.ts",
         "deprecated": false,
@@ -1927,9 +1981,59 @@
               "Publishing subject."
             ],
             "signature": [
-              "SubjectType | undefined"
+              "SubjectType"
             ],
             "path": "packages/presentation/presentation_publishing/publishing_subject/publishing_subject.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.useUnsavedChanges",
+        "type": "Function",
+        "tags": [],
+        "label": "useUnsavedChanges",
+        "description": [
+          "\nA hook that gets this API's unsaved changes as a reactive variable which will cause re-renders on change."
+        ],
+        "signature": [
+          "(api: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesUnsavedChanges",
+            "text": "PublishesUnsavedChanges"
+          },
+          " | undefined) => object | undefined"
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/publishes_unsaved_changes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.useUnsavedChanges.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "api",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "common",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.PublishesUnsavedChanges",
+                "text": "PublishesUnsavedChanges"
+              },
+              " | undefined"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/publishes_unsaved_changes.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1964,7 +2068,7 @@
             "section": "def-common.PublishesViewMode",
             "text": "PublishesViewMode"
           },
-          ">>(api: ApiType | undefined) => OptionalIfOptional<ApiType[\"viewMode\"], ",
+          ">>(api: ApiType | undefined) => ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -1972,7 +2076,7 @@
             "section": "def-common.ViewMode",
             "text": "ViewMode"
           },
-          ">"
+          " | undefined"
         ],
         "path": "packages/presentation/presentation_publishing/interfaces/publishes_view_mode.ts",
         "deprecated": false,
@@ -5747,6 +5851,200 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.PublishesUnsavedChanges",
+        "type": "Interface",
+        "tags": [],
+        "label": "PublishesUnsavedChanges",
+        "description": [],
+        "path": "packages/presentation/presentation_publishing/interfaces/publishes_unsaved_changes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.PublishesUnsavedChanges.unsavedChanges",
+            "type": "Object",
+            "tags": [],
+            "label": "unsavedChanges",
+            "description": [],
+            "signature": [
+              "{ readonly value: object | undefined; source: ",
+              "Observable",
+              "<any> | undefined; error: (err: any) => void; forEach: { (next: (value: object | undefined) => void): Promise<void>; (next: (value: object | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => object | undefined; pipe: { (): ",
+              "Observable",
+              "<object | undefined>; <A>(op1: ",
+              "OperatorFunction",
+              "<object | undefined, A>): ",
+              "Observable",
+              "<A>; <A, B>(op1: ",
+              "OperatorFunction",
+              "<object | undefined, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>): ",
+              "Observable",
+              "<B>; <A, B, C>(op1: ",
+              "OperatorFunction",
+              "<object | undefined, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>): ",
+              "Observable",
+              "<C>; <A, B, C, D>(op1: ",
+              "OperatorFunction",
+              "<object | undefined, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>): ",
+              "Observable",
+              "<D>; <A, B, C, D, E>(op1: ",
+              "OperatorFunction",
+              "<object | undefined, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>): ",
+              "Observable",
+              "<E>; <A, B, C, D, E, F>(op1: ",
+              "OperatorFunction",
+              "<object | undefined, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>): ",
+              "Observable",
+              "<F>; <A, B, C, D, E, F, G>(op1: ",
+              "OperatorFunction",
+              "<object | undefined, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>, op7: ",
+              "OperatorFunction",
+              "<F, G>): ",
+              "Observable",
+              "<G>; <A, B, C, D, E, F, G, H>(op1: ",
+              "OperatorFunction",
+              "<object | undefined, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>, op7: ",
+              "OperatorFunction",
+              "<F, G>, op8: ",
+              "OperatorFunction",
+              "<G, H>): ",
+              "Observable",
+              "<H>; <A, B, C, D, E, F, G, H, I>(op1: ",
+              "OperatorFunction",
+              "<object | undefined, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>, op7: ",
+              "OperatorFunction",
+              "<F, G>, op8: ",
+              "OperatorFunction",
+              "<G, H>, op9: ",
+              "OperatorFunction",
+              "<H, I>): ",
+              "Observable",
+              "<I>; <A, B, C, D, E, F, G, H, I>(op1: ",
+              "OperatorFunction",
+              "<object | undefined, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>, op7: ",
+              "OperatorFunction",
+              "<F, G>, op8: ",
+              "OperatorFunction",
+              "<G, H>, op9: ",
+              "OperatorFunction",
+              "<H, I>, ...operations: ",
+              "OperatorFunction",
+              "<any, any>[]): ",
+              "Observable",
+              "<unknown>; }; complete: () => void; closed: boolean; observers: ",
+              "Observer",
+              "<object | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+              "Operator",
+              "<object | undefined, R>) => ",
+              "Observable",
+              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<object | undefined>; operator: ",
+              "Operator",
+              "<any, object | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "Observer",
+              "<object | undefined>> | ((value: object | undefined) => void) | undefined): ",
+              "Subscription",
+              "; (next?: ((value: object | undefined) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
+              "Subscription",
+              "; }; toPromise: { (): Promise<object | undefined>; (PromiseCtor: PromiseConstructor): Promise<object | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<object | undefined>; }; }"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/publishes_unsaved_changes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.PublishesUnsavedChanges.resetUnsavedChanges",
+            "type": "Function",
+            "tags": [],
+            "label": "resetUnsavedChanges",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/publishes_unsaved_changes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.PublishesViewMode",
         "type": "Interface",
         "tags": [],
@@ -6269,7 +6567,7 @@
             "section": "def-common.PublishesPanelTitle",
             "text": "PublishesPanelTitle"
           },
-          " & { setPanelTitle: (newTitle: string | undefined) => void; setHidePanelTitle: (hide: boolean | undefined) => void; setDefaultPanelTitle?: ((newDefaultTitle: string | undefined) => void) | undefined; }"
+          " & { setPanelTitle: (newTitle: string | undefined) => void; setHidePanelTitle: (hide: boolean | undefined) => void; }"
         ],
         "path": "packages/presentation/presentation_publishing/interfaces/publishes_panel_title.ts",
         "deprecated": false,
@@ -6470,7 +6768,7 @@
           "Subscription",
           "; }; toPromise: { (): Promise<T | undefined>; (PromiseCtor: PromiseConstructor): Promise<T | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<T | undefined>; }; }"
         ],
-        "path": "packages/presentation/presentation_publishing/publishing_subject/publishing_subject.ts",
+        "path": "packages/presentation/presentation_publishing/publishing_subject/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -115,6 +115,7 @@ import {
 } from '../common/entity_analytics/risk_engine';
 import { isEndpointPackageV2 } from '../common/endpoint/utils/package_v2';
 import { getAssistantTools } from './assistant/tools';
+import { turnOffAgentPolicyFeatures } from './endpoint/migrations/turn_off_agent_policy_features';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -550,6 +551,13 @@ export class Plugin implements ISecuritySolutionPlugin {
         }
 
         turnOffPolicyProtectionsIfNotSupported(
+          core.elasticsearch.client.asInternalUser,
+          endpointFleetServicesFactory.asInternalUser(),
+          appFeaturesService,
+          logger
+        );
+
+        turnOffAgentPolicyFeatures(
           core.elasticsearch.client.asInternalUser,
           endpointFleetServicesFactory.asInternalUser(),
           appFeaturesService,

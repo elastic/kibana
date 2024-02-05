@@ -27,6 +27,8 @@ import { EndpointError } from '../../common/endpoint/errors';
 import type { ResponseActionsClient } from './services';
 import { EndpointActionsClient } from './services';
 import {
+  getAgentPolicyCreateCallback,
+  getAgentPolicyUpdateCallback,
   getPackagePolicyCreateCallback,
   getPackagePolicyDeleteCallback,
   getPackagePolicyPostCreateCallback,
@@ -122,6 +124,15 @@ export class EndpointAppContextService {
         appFeaturesService,
         savedObjectsClient,
       } = dependencies;
+
+      registerIngestCallback(
+        'agentPolicyCreate',
+        getAgentPolicyCreateCallback(logger, appFeaturesService)
+      );
+      registerIngestCallback(
+        'agentPolicyUpdate',
+        getAgentPolicyUpdateCallback(logger, appFeaturesService)
+      );
 
       registerIngestCallback(
         'packagePolicyCreate',
