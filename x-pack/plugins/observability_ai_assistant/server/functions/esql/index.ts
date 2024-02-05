@@ -9,13 +9,10 @@ import Fs from 'fs';
 import { keyBy, mapValues, once, pick } from 'lodash';
 import pLimit from 'p-limit';
 import Path from 'path';
-import { lastValueFrom, Observable } from 'rxjs';
+import { lastValueFrom, type Observable } from 'rxjs';
 import { promisify } from 'util';
 import type { FunctionRegistrationParameters } from '..';
-import {
-  ChatCompletionChunkEvent,
-  StreamingChatResponseEventType,
-} from '../../../common/conversation_complete';
+import type { ChatCompletionChunkEvent } from '../../../common/conversation_complete';
 import { FunctionVisibility, MessageRole } from '../../../common/types';
 import { concatenateChatCompletionChunks } from '../../../common/utils/concatenate_chat_completion_chunks';
 import { emitWithConcatenatedMessage } from '../../../common/utils/emit_with_concatenated_message';
@@ -127,7 +124,7 @@ export function registerEsqlFunction({
       ];
 
       const source$ = (
-        await client.chat({
+        await client.chat('classify_esql', {
           connectorId,
           messages: withEsqlSystemMessage(
             `Use the classify_esql function to classify the user's request
@@ -201,10 +198,12 @@ export function registerEsqlFunction({
 
       const messagesToInclude = mapValues(pick(esqlDocs, keywords), ({ data }) => data);
 
-      const esqlResponse$: Observable<ChatCompletionChunkEvent> = await client.chat({
-        messages: [
-          ...withEsqlSystemMessage(
-            `Format every ES|QL query as Markdown:
+      const esqlResponse$: Observable<ChatCompletionChunkEvent> = await client.chat(
+        'answer_esql_question',
+        {
+          messages: [
+            ...withEsqlSystemMessage(
+              `Format every ES|QL query as Markdown:
               \`\`\`esql
               <query>
               \`\`\`
@@ -227,96 +226,59 @@ export function registerEsqlFunction({
               \`\`\`
               
               `
-          ),
-          {
-            '@timestamp': new Date().toISOString(),
-            message: {
-              role: MessageRole.Assistant,
-              content: '',
-              function_call: {
-                name: 'get_esql_info',
-                arguments: JSON.stringify(args),
-                trigger: MessageRole.Assistant as const,
+            ),
+            {
+              '@timestamp': new Date().toISOString(),
+              message: {
+                role: MessageRole.Assistant,
+                content: '',
+                function_call: {
+                  name: 'get_esql_info',
+                  arguments: JSON.stringify(args),
+                  trigger: MessageRole.Assistant as const,
+                },
               },
             },
-          },
-          {
-            '@timestamp': new Date().toISOString(),
+            {
+              '@timestamp': new Date().toISOString(),
+              message: {
+                role: MessageRole.User,
+                name: 'get_esql_info',
+                content: JSON.stringify({
+                  documentation: messagesToInclude,
+                }),
+              },
+            },
+          ],
+          connectorId,
+          signal,
+        }
+      );
+
+      return esqlResponse$.pipe(
+        emitWithConcatenatedMessage((msg) => {
+          const esqlQuery = correctCommonEsqlMistakes(msg.message.content, resources.logger).match(
+            /```esql([\s\S]*?)```/
+          )?.[1];
+
+          return {
+            ...msg,
             message: {
-              role: MessageRole.User,
-              name: 'get_esql_info',
-              content: JSON.stringify({
-                documentation: messagesToInclude,
-              }),
-            },
-          },
-        ],
-        connectorId,
-        signal,
-      });
-
-      return esqlResponse$.pipe((source) => {
-        return new Observable<ChatCompletionChunkEvent>((subscriber) => {
-          let cachedContent: string = '';
-          let id: string = '';
-
-          function includesDivider() {
-            const firstDividerIndex = cachedContent.indexOf('--');
-            return firstDividerIndex !== -1;
-          }
-
-          source.subscribe({
-            next: (message) => {
-              id = message.id;
-              if (includesDivider()) {
-                subscriber.next(message);
-              }
-              cachedContent += message.message.content || '';
-            },
-            complete: () => {
-              if (!includesDivider()) {
-                subscriber.next({
-                  id,
-                  message: {
-                    content: cachedContent,
-                  },
-                  type: StreamingChatResponseEventType.ChatCompletionChunk,
-                });
-              }
-
-              const esqlQuery = cachedContent.match(/```esql([\s\S]*?)```/)?.[1];
-
-              if (esqlQuery && args.execute) {
-                subscriber.next({
-                  id,
-                  message: {
+              ...msg.message,
+              content: correctCommonEsqlMistakes(msg.message.content, resources.logger),
+              ...(esqlQuery && args.execute
+                ? {
                     function_call: {
                       name: 'execute_query',
                       arguments: JSON.stringify({ query: esqlQuery }),
+                      trigger: MessageRole.Assistant as const,
                     },
-                  },
-                  type: StreamingChatResponseEventType.ChatCompletionChunk,
-                });
-              }
-
-              subscriber.complete();
+                  }
+                : {}),
             },
-            error: (error) => {
-              subscriber.error(error);
-            },
-          });
-        }).pipe(
-          emitWithConcatenatedMessage((msg) => {
-            return {
-              ...msg,
-              message: {
-                ...msg.message,
-                content: correctCommonEsqlMistakes(msg.message.content, resources.logger),
-              },
-            };
-          })
-        );
-      });
+          };
+        })
+      );
     }
   );
 }

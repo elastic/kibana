@@ -61,7 +61,9 @@ const getBaseRuleParams = (): BaseRuleParams => {
   };
 };
 
-export const getThresholdRuleParams = (): ThresholdRuleParams => {
+export const getThresholdRuleParams = (
+  rewrites?: Partial<ThresholdRuleParams>
+): ThresholdRuleParams => {
   return {
     ...getBaseRuleParams(),
     type: 'threshold',
@@ -81,10 +83,11 @@ export const getThresholdRuleParams = (): ThresholdRuleParams => {
         },
       ],
     },
+    ...rewrites,
   };
 };
 
-export const getEqlRuleParams = (): EqlRuleParams => {
+export const getEqlRuleParams = (rewrites?: Partial<EqlRuleParams>): EqlRuleParams => {
   return {
     ...getBaseRuleParams(),
     type: 'eql',
@@ -96,19 +99,23 @@ export const getEqlRuleParams = (): EqlRuleParams => {
     eventCategoryOverride: undefined,
     dataViewId: undefined,
     tiebreakerField: undefined,
+    ...rewrites,
   };
 };
 
-export const getMlRuleParams = (): MachineLearningRuleParams => {
+export const getMlRuleParams = (
+  rewrites?: Partial<MachineLearningRuleParams>
+): MachineLearningRuleParams => {
   return {
     ...getBaseRuleParams(),
     type: 'machine_learning',
     anomalyThreshold: 42,
     machineLearningJobId: ['my-job'],
+    ...rewrites,
   };
 };
 
-export const getQueryRuleParams = (): QueryRuleParams => {
+export const getQueryRuleParams = (rewrites?: Partial<QueryRuleParams>): QueryRuleParams => {
   return {
     ...getBaseRuleParams(),
     type: 'query',
@@ -128,10 +135,13 @@ export const getQueryRuleParams = (): QueryRuleParams => {
     savedId: undefined,
     alertSuppression: undefined,
     responseActions: undefined,
+    ...rewrites,
   };
 };
 
-export const getSavedQueryRuleParams = (): SavedQueryRuleParams => {
+export const getSavedQueryRuleParams = (
+  rewrites?: Partial<SavedQueryRuleParams>
+): SavedQueryRuleParams => {
   return {
     ...getBaseRuleParams(),
     type: 'saved_query',
@@ -151,10 +161,13 @@ export const getSavedQueryRuleParams = (): SavedQueryRuleParams => {
     savedId: 'some-id',
     responseActions: undefined,
     alertSuppression: undefined,
+    ...rewrites,
   };
 };
 
-export const getNewTermsRuleParams = (): NewTermsRuleParams => {
+export const getNewTermsRuleParams = (
+  rewrites?: Partial<NewTermsRuleParams>
+): NewTermsRuleParams => {
   return {
     ...getBaseRuleParams(),
     type: 'new_terms',
@@ -173,10 +186,11 @@ export const getNewTermsRuleParams = (): NewTermsRuleParams => {
     ],
     newTermsFields: ['host.name'],
     historyWindowStart: 'now-30d',
+    ...rewrites,
   };
 };
 
-export const getThreatRuleParams = (): ThreatRuleParams => {
+export const getThreatRuleParams = (rewrites?: Partial<ThreatRuleParams>): ThreatRuleParams => {
   return {
     ...getBaseRuleParams(),
     type: 'threat_match',
@@ -194,6 +208,7 @@ export const getThreatRuleParams = (): ThreatRuleParams => {
     threatIndicatorPath: '',
     concurrentSearches: undefined,
     itemsPerSearch: undefined,
+    ...rewrites,
   };
 };
 

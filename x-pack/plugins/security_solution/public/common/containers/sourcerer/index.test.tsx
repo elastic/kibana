@@ -18,19 +18,11 @@ import {
   DEFAULT_INDEX_PATTERN,
   SecurityPageName,
 } from '../../../../common/constants';
-import { createStore } from '../../store';
 import {
   useUserInfo,
   initialState as userInfoState,
 } from '../../../detections/components/user_info';
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  mockSourcererState,
-  TestProviders,
-} from '../../mock';
+import { mockGlobalState, mockSourcererState, TestProviders, createMockStore } from '../../mock';
 import type { SelectedDataView } from '../../store/sourcerer/model';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import * as source from '../source/use_data_view';
@@ -155,12 +147,11 @@ jest.mock('../../lib/kibana', () => ({
 }));
 
 describe('Sourcerer Hooks', () => {
-  const { storage } = createSecuritySolutionStorageMock();
-  let store: ReturnType<typeof createStore>;
+  let store = createMockStore();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createMockStore();
     mockUseUserInfo.mockImplementation(() => userInfoState);
   });
   it('initializes loading default and timeline index patterns', async () => {
@@ -192,23 +183,18 @@ describe('Sourcerer Hooks', () => {
     };
     (createSourcererDataView as jest.Mock).mockResolvedValue(mockNewDataViews);
 
-    store = createStore(
-      {
-        ...mockGlobalState,
-        sourcerer: {
-          ...mockGlobalState.sourcerer,
-          signalIndexName: null,
-          defaultDataView: {
-            ...mockGlobalState.sourcerer.defaultDataView,
-            title: DEFAULT_INDEX_PATTERN.join(','),
-            patternList: DEFAULT_INDEX_PATTERN,
-          },
+    store = createMockStore({
+      ...mockGlobalState,
+      sourcerer: {
+        ...mockGlobalState.sourcerer,
+        signalIndexName: null,
+        defaultDataView: {
+          ...mockGlobalState.sourcerer.defaultDataView,
+          title: DEFAULT_INDEX_PATTERN.join(','),
+          patternList: DEFAULT_INDEX_PATTERN,
         },
       },
-      SUB_PLUGINS_REDUCER,
-      kibanaObservable,
-      storage
-    );
+    });
     await act(async () => {
       mockUseUserInfo.mockImplementation(() => ({
         ...userInfoState,
@@ -295,22 +281,17 @@ describe('Sourcerer Hooks', () => {
   });
 
   it('calls addWarning if defaultDataView has an error', async () => {
-    store = createStore(
-      {
-        ...mockGlobalState,
-        sourcerer: {
-          ...mockGlobalState.sourcerer,
-          signalIndexName: null,
-          defaultDataView: {
-            ...mockGlobalState.sourcerer.defaultDataView,
-            error: true,
-          },
+    store = createMockStore({
+      ...mockGlobalState,
+      sourcerer: {
+        ...mockGlobalState.sourcerer,
+        signalIndexName: null,
+        defaultDataView: {
+          ...mockGlobalState.sourcerer.defaultDataView,
+          error: true,
         },
       },
-      SUB_PLUGINS_REDUCER,
-      kibanaObservable,
-      storage
-    );
+    });
     await act(async () => {
       renderHook<string, void>(() => useInitSourcerer(), {
         wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
@@ -330,23 +311,18 @@ describe('Sourcerer Hooks', () => {
     // puts us in the catch block, but the addError toast is not called
     (createSourcererDataView as jest.Mock).mockImplementation(mockCreateSourcererDataView);
 
-    store = createStore(
-      {
-        ...mockGlobalState,
-        sourcerer: {
-          ...mockGlobalState.sourcerer,
-          signalIndexName: null,
-          defaultDataView: {
-            ...mockGlobalState.sourcerer.defaultDataView,
-            title: DEFAULT_INDEX_PATTERN.join(','),
-            patternList: DEFAULT_INDEX_PATTERN,
-          },
+    store = createMockStore({
+      ...mockGlobalState,
+      sourcerer: {
+        ...mockGlobalState.sourcerer,
+        signalIndexName: null,
+        defaultDataView: {
+          ...mockGlobalState.sourcerer.defaultDataView,
+          title: DEFAULT_INDEX_PATTERN.join(','),
+          patternList: DEFAULT_INDEX_PATTERN,
         },
       },
-      SUB_PLUGINS_REDUCER,
-      kibanaObservable,
-      storage
-    );
+    });
     await act(async () => {
       mockUseUserInfo.mockImplementation(() => ({
         ...userInfoState,
@@ -374,23 +350,18 @@ describe('Sourcerer Hooks', () => {
       throw Error('fake error');
     });
 
-    store = createStore(
-      {
-        ...mockGlobalState,
-        sourcerer: {
-          ...mockGlobalState.sourcerer,
-          signalIndexName: null,
-          defaultDataView: {
-            ...mockGlobalState.sourcerer.defaultDataView,
-            title: DEFAULT_INDEX_PATTERN.join(','),
-            patternList: DEFAULT_INDEX_PATTERN,
-          },
+    store = createMockStore({
+      ...mockGlobalState,
+      sourcerer: {
+        ...mockGlobalState.sourcerer,
+        signalIndexName: null,
+        defaultDataView: {
+          ...mockGlobalState.sourcerer.defaultDataView,
+          title: DEFAULT_INDEX_PATTERN.join(','),
+          patternList: DEFAULT_INDEX_PATTERN,
         },
       },
-      SUB_PLUGINS_REDUCER,
-      kibanaObservable,
-      storage
-    );
+    });
     await act(async () => {
       mockUseUserInfo.mockImplementation(() => ({
         ...userInfoState,
@@ -448,24 +419,19 @@ describe('Sourcerer Hooks', () => {
     });
   });
   it('index field search called twice when default and timeline have different dataViewId', async () => {
-    store = createStore(
-      {
-        ...mockGlobalState,
-        sourcerer: {
-          ...mockGlobalState.sourcerer,
-          sourcererScopes: {
-            ...mockGlobalState.sourcerer.sourcererScopes,
-            [SourcererScopeName.timeline]: {
-              ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
-              selectedDataViewId: 'different-id',
-            },
+    store = createMockStore({
+      ...mockGlobalState,
+      sourcerer: {
+        ...mockGlobalState.sourcerer,
+        sourcererScopes: {
+          ...mockGlobalState.sourcerer.sourcererScopes,
+          [SourcererScopeName.timeline]: {
+            ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+            selectedDataViewId: 'different-id',
           },
         },
       },
-      SUB_PLUGINS_REDUCER,
-      kibanaObservable,
-      storage
-    );
+    });
     await act(async () => {
       const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
         wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
@@ -505,25 +471,20 @@ describe('Sourcerer Hooks', () => {
     });
 
     it('does needToBeInit if scope is default and selectedPatterns/missingPatterns are empty', async () => {
-      store = createStore(
-        {
-          ...mockGlobalState,
-          sourcerer: {
-            ...mockGlobalState.sourcerer,
-            sourcererScopes: {
-              ...mockGlobalState.sourcerer.sourcererScopes,
-              [SourcererScopeName.default]: {
-                ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
-                selectedPatterns: [],
-                missingPatterns: [],
-              },
+      store = createMockStore({
+        ...mockGlobalState,
+        sourcerer: {
+          ...mockGlobalState.sourcerer,
+          sourcererScopes: {
+            ...mockGlobalState.sourcerer.sourcererScopes,
+            [SourcererScopeName.default]: {
+              ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+              selectedPatterns: [],
+              missingPatterns: [],
             },
           },
         },
-        SUB_PLUGINS_REDUCER,
-        kibanaObservable,
-        storage
-      );
+      });
       await act(async () => {
         const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
           wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
@@ -541,30 +502,25 @@ describe('Sourcerer Hooks', () => {
     });
 
     it('does needToBeInit and skipScopeUpdate=false if scope is timeline and selectedPatterns/missingPatterns are empty', async () => {
-      store = createStore(
-        {
-          ...mockGlobalState,
-          sourcerer: {
-            ...mockGlobalState.sourcerer,
-            kibanaDataViews: [
-              ...mockGlobalState.sourcerer.kibanaDataViews,
-              { ...mockSourcererState.defaultDataView, id: 'something-weird', patternList: [] },
-            ],
-            sourcererScopes: {
-              ...mockGlobalState.sourcerer.sourcererScopes,
-              [SourcererScopeName.timeline]: {
-                ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
-                selectedDataViewId: 'something-weird',
-                selectedPatterns: [],
-                missingPatterns: [],
-              },
+      store = createMockStore({
+        ...mockGlobalState,
+        sourcerer: {
+          ...mockGlobalState.sourcerer,
+          kibanaDataViews: [
+            ...mockGlobalState.sourcerer.kibanaDataViews,
+            { ...mockSourcererState.defaultDataView, id: 'something-weird', patternList: [] },
+          ],
+          sourcererScopes: {
+            ...mockGlobalState.sourcerer.sourcererScopes,
+            [SourcererScopeName.timeline]: {
+              ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+              selectedDataViewId: 'something-weird',
+              selectedPatterns: [],
+              missingPatterns: [],
             },
           },
         },
-        SUB_PLUGINS_REDUCER,
-        kibanaObservable,
-        storage
-      );
+      });
       await act(async () => {
         const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
           wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
@@ -583,30 +539,25 @@ describe('Sourcerer Hooks', () => {
     });
 
     it('does needToBeInit and skipScopeUpdate=true if scope is timeline and selectedPatterns have value', async () => {
-      store = createStore(
-        {
-          ...mockGlobalState,
-          sourcerer: {
-            ...mockGlobalState.sourcerer,
-            kibanaDataViews: [
-              ...mockGlobalState.sourcerer.kibanaDataViews,
-              { ...mockSourcererState.defaultDataView, id: 'something-weird', patternList: [] },
-            ],
-            sourcererScopes: {
-              ...mockGlobalState.sourcerer.sourcererScopes,
-              [SourcererScopeName.timeline]: {
-                ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
-                selectedDataViewId: 'something-weird',
-                selectedPatterns: ['ohboy'],
-                missingPatterns: [],
-              },
+      store = createMockStore({
+        ...mockGlobalState,
+        sourcerer: {
+          ...mockGlobalState.sourcerer,
+          kibanaDataViews: [
+            ...mockGlobalState.sourcerer.kibanaDataViews,
+            { ...mockSourcererState.defaultDataView, id: 'something-weird', patternList: [] },
+          ],
+          sourcererScopes: {
+            ...mockGlobalState.sourcerer.sourcererScopes,
+            [SourcererScopeName.timeline]: {
+              ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+              selectedDataViewId: 'something-weird',
+              selectedPatterns: ['ohboy'],
+              missingPatterns: [],
             },
           },
         },
-        SUB_PLUGINS_REDUCER,
-        kibanaObservable,
-        storage
-      );
+      });
       await act(async () => {
         const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
           wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
@@ -625,34 +576,29 @@ describe('Sourcerer Hooks', () => {
     });
 
     it('does not needToBeInit if scope is timeline and data view has patternList', async () => {
-      store = createStore(
-        {
-          ...mockGlobalState,
-          sourcerer: {
-            ...mockGlobalState.sourcerer,
-            kibanaDataViews: [
-              ...mockGlobalState.sourcerer.kibanaDataViews,
-              {
-                ...mockSourcererState.defaultDataView,
-                id: 'something-weird',
-                patternList: ['ohboy'],
-              },
-            ],
-            sourcererScopes: {
-              ...mockGlobalState.sourcerer.sourcererScopes,
-              [SourcererScopeName.timeline]: {
-                ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
-                selectedDataViewId: 'something-weird',
-                selectedPatterns: [],
-                missingPatterns: [],
-              },
+      store = createMockStore({
+        ...mockGlobalState,
+        sourcerer: {
+          ...mockGlobalState.sourcerer,
+          kibanaDataViews: [
+            ...mockGlobalState.sourcerer.kibanaDataViews,
+            {
+              ...mockSourcererState.defaultDataView,
+              id: 'something-weird',
+              patternList: ['ohboy'],
+            },
+          ],
+          sourcererScopes: {
+            ...mockGlobalState.sourcerer.sourcererScopes,
+            [SourcererScopeName.timeline]: {
+              ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+              selectedDataViewId: 'something-weird',
+              selectedPatterns: [],
+              missingPatterns: [],
             },
           },
         },
-        SUB_PLUGINS_REDUCER,
-        kibanaObservable,
-        storage
-      );
+      });
       await act(async () => {
         const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
           wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
@@ -673,34 +619,29 @@ describe('Sourcerer Hooks', () => {
   describe('useSourcererDataView', () => {
     it('Should put any excludes in the index pattern at the end of the pattern list, and sort both the includes and excludes', async () => {
       await act(async () => {
-        store = createStore(
-          {
-            ...mockGlobalState,
-            sourcerer: {
-              ...mockGlobalState.sourcerer,
-              sourcererScopes: {
-                ...mockGlobalState.sourcerer.sourcererScopes,
-                [SourcererScopeName.default]: {
-                  ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
-                  selectedPatterns: [
-                    '-packetbeat-*',
-                    'endgame-*',
-                    'auditbeat-*',
-                    'filebeat-*',
-                    'winlogbeat-*',
-                    '-filebeat-*',
-                    'packetbeat-*',
-                    'traces-apm*',
-                    'apm-*-transaction*',
-                  ],
-                },
+        store = createMockStore({
+          ...mockGlobalState,
+          sourcerer: {
+            ...mockGlobalState.sourcerer,
+            sourcererScopes: {
+              ...mockGlobalState.sourcerer.sourcererScopes,
+              [SourcererScopeName.default]: {
+                ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
+                selectedPatterns: [
+                  '-packetbeat-*',
+                  'endgame-*',
+                  'auditbeat-*',
+                  'filebeat-*',
+                  'winlogbeat-*',
+                  '-filebeat-*',
+                  'packetbeat-*',
+                  'traces-apm*',
+                  'apm-*-transaction*',
+                ],
               },
             },
           },
-          SUB_PLUGINS_REDUCER,
-          kibanaObservable,
-          storage
-        );
+        });
         const { result, rerender, waitForNextUpdate } = renderHook<
           SourcererScopeName,
           SelectedDataView

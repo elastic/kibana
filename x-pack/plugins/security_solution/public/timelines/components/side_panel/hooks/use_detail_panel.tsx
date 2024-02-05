@@ -15,8 +15,7 @@ import type { FlowTargetSourceDest } from '../../../../../common/search_strategy
 import { timelineSelectors } from '../../../store';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import type { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { activeTimeline } from '../../../containers/active_timeline_context';
-import { TimelineTabs, TimelineId } from '../../../../../common/types/timeline';
+import { TimelineTabs } from '../../../../../common/types/timeline';
 import { timelineDefaults } from '../../../store/defaults';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { DetailsPanel as DetailsPanelComponent } from '..';
@@ -138,16 +137,7 @@ export const useDetailPanel = ({
     if (scopedActions) {
       dispatch(scopedActions.toggleDetailPanel({ tabType, id: scopeId }));
     }
-
-    if (
-      tabType &&
-      expandedDetail[tabType]?.panelView &&
-      scopeId === TimelineId.active &&
-      shouldShowDetailsPanel
-    ) {
-      activeTimeline.toggleExpandedDetail({});
-    }
-  }, [scopedActions, tabType, expandedDetail, scopeId, shouldShowDetailsPanel, dispatch]);
+  }, [scopedActions, tabType, scopeId, dispatch]);
 
   const DetailsPanel = useMemo(
     () =>

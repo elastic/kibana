@@ -316,8 +316,8 @@ export const closeTimeline = () => {
 };
 
 export const createNewTimeline = () => {
-  cy.get(NEW_TIMELINE_ACTION).click();
-  cy.get(CREATE_NEW_TIMELINE).eq(0).click();
+  openCreateTimelineOptionsPopover();
+  cy.get(CREATE_NEW_TIMELINE).click();
 };
 
 export const openCreateTimelineOptionsPopover = () => {

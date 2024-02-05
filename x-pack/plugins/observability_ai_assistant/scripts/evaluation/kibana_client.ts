@@ -9,6 +9,8 @@ import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { pick, remove } from 'lodash';
 import { filter, lastValueFrom, map, toArray } from 'rxjs';
 import { format, parse, UrlObject } from 'url';
+import { ToolingLog } from '@kbn/tooling-log';
+import pRetry from 'p-retry';
 import { Message, MessageRole } from '../../common';
 import {
   ChatCompletionChunkEvent,
@@ -25,6 +27,9 @@ import { APIReturnType, ObservabilityAIAssistantAPIClientRequestParamsOf } from 
 import { getAssistantSetupMessage } from '../../public/service/get_assistant_setup_message';
 import { streamIntoObservable } from '../../server/service/util/stream_into_observable';
 import { EvaluationResult } from './types';
+
+// eslint-disable-next-line spaced-comment
+/// <reference types="@kbn/ambient-ftr-types"/>
 
 type InnerMessage = Message['message'];
 type StringOrMessageList = string | InnerMessage[];
@@ -45,7 +50,11 @@ export interface ChatClient {
 
 export class KibanaClient {
   axios: AxiosInstance;
-  constructor(private readonly url: string, private readonly spaceId?: string) {
+  constructor(
+    private readonly log: ToolingLog,
+    private readonly url: string,
+    private readonly spaceId?: string
+  ) {
     this.axios = axios.create({
       headers: {
         'kbn-xsrf': 'foo',
@@ -71,12 +80,63 @@ export class KibanaClient {
     return url;
   }
 
+  callKibana<T>(
+    method: string,
+    props: { query?: UrlObject['query']; pathname: string },
+    data?: any
+  ) {
+    const url = this.getUrl(props);
+    return this.axios<T>({
+      method,
+      url,
+      data: data || {},
+      headers: {
+        'kbn-xsrf': 'true',
+        'x-elastic-internal-origin': 'foo',
+      },
+    });
+  }
+
+  async installKnowledgeBase() {
+    this.log.debug('Checking to see whether knowledge base is installed');
+
+    const {
+      data: { ready },
+    } = await this.callKibana<{ ready: boolean }>('GET', {
+      pathname: '/internal/observability_ai_assistant/kb/status',
+    });
+
+    if (ready) {
+      this.log.info('Knowledge base is installed');
+      return;
+    }
+
+    if (!ready) {
+      this.log.info('Installing knowledge base');
+    }
+
+    await pRetry(
+      async () => {
+        const response = await this.callKibana<{}>('POST', {
+          pathname: '/internal/observability_ai_assistant/kb/setup',
+        });
+        this.log.info('Knowledge base is ready');
+        return response.data;
+      },
+      { retries: 10 }
+    );
+
+    this.log.info('Knowledge base installed');
+  }
+
   createChatClient({
     connectorId,
     persist,
+    suite,
   }: {
     connectorId: string;
     persist: boolean;
+    suite: Mocha.Suite;
   }): ChatClient {
     function getMessages(message: string | Array<Message['message']>): Array<Message['message']> {
       if (typeof message === 'string') {
@@ -103,22 +163,44 @@ export class KibanaClient {
       return { functionDefinitions, contextDefinitions };
     }
 
+    let currentTitle: string = '';
+
+    suite.beforeEach(function () {
+      const currentTest: Mocha.Test = this.currentTest;
+      const titles: string[] = [];
+      titles.push(this.currentTest.title);
+      let parent = currentTest.parent;
+      while (parent) {
+        titles.push(parent.title);
+        parent = parent.parent;
+      }
+      currentTitle = titles.reverse().join(' ');
+    });
+
+    suite.afterEach(function () {
+      currentTitle = '';
+    });
+
     const onResultCallbacks: Array<{
       callback: (result: EvaluationResult) => void;
       unregister: () => void;
     }> = [];
 
-    async function chat({
-      messages,
-      functions,
-      functionCall,
-    }: {
-      messages: Message[];
-      functions: FunctionDefinition[];
-      functionCall?: string;
-    }) {
+    async function chat(
+      name: string,
+      {
+        messages,
+        functions,
+        functionCall,
+      }: {
+        messages: Message[];
+        functions: FunctionDefinition[];
+        functionCall?: string;
+      }
+    ) {
       const params: ObservabilityAIAssistantAPIClientRequestParamsOf<'POST /internal/observability_ai_assistant/chat'>['params']['body'] =
         {
+          name,
           messages,
           connectorId,
           functions: functions.map((fn) => pick(fn, 'name', 'description', 'parameters')),
@@ -131,7 +213,7 @@ export class KibanaClient {
               pathname: '/internal/observability_ai_assistant/chat',
             }),
             params,
-            { responseType: 'stream' }
+            { responseType: 'stream', timeout: NaN }
           )
         ).data
       ).pipe(
@@ -157,7 +239,7 @@ export class KibanaClient {
             '@timestamp': new Date().toISOString(),
           })),
         ];
-        return chat({ messages, functions: functionDefinitions });
+        return chat('chat', { messages, functions: functionDefinitions });
       },
       complete: async (...args) => {
         const messagesArg = args.length === 1 ? args[0] : args[1];
@@ -182,8 +264,9 @@ export class KibanaClient {
                 messages,
                 connectorId,
                 persist,
+                title: currentTitle,
               },
-              { responseType: 'stream' }
+              { responseType: 'stream', timeout: NaN }
             )
           ).data
         ).pipe(
@@ -219,7 +302,7 @@ export class KibanaClient {
         };
       },
       evaluate: async ({ messages, conversationId }, criteria) => {
-        const message = await chat({
+        const message = await chat('evaluate', {
           messages: [
             {
               '@timestamp': new Date().toISOString(),
@@ -230,7 +313,7 @@ export class KibanaClient {
 
                 Your goal is to verify whether a conversation between the user and the assistant matches the given criteria.
                 
-                For each criterion, calculate a score. Explain your score, by describing what the assistant did right, and what the
+                For each criterion, calculate a score. Explain your score, by describing what the assistant did right, and describing and quoting what the
                 assistant did wrong, where it could improve, and what the root cause was in case of a failure.`,
               },
             },
@@ -296,6 +379,7 @@ export class KibanaClient {
         ).criteria;
 
         const result: EvaluationResult = {
+          name: currentTitle,
           conversationId,
           messages,
           passed: scoredCriteria.every(({ score }) => score >= 1),
