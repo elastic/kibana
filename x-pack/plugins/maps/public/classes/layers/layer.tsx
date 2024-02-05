@@ -45,7 +45,7 @@ import { ISource, SourceEditorArgs } from '../sources/source';
 import { DataRequestContext } from '../../actions';
 import { IStyle } from '../styles/style';
 import { LICENSED_FEATURES } from '../../licensed_features';
-import { IESSource } from '../sources/es_source';
+import { hasESSourceMethod, isESVectorTileSource } from '../sources/es_source';
 import { TileErrorsList } from './tile_errors_list';
 import { isLayerGroup } from './layer_group';
 
@@ -72,7 +72,6 @@ export interface ILayer {
   getSource(): ISource;
   getSourceForEditing(): ISource;
   syncData(syncContext: DataRequestContext): void;
-  supportsElasticsearchFilters(): boolean;
   supportsFitToBounds(): Promise<boolean>;
   getAttributions(): Promise<Attribution[]>;
   getLabel(): string;
@@ -110,7 +109,14 @@ export interface ILayer {
   ownsMbSourceId(mbSourceId: string): boolean;
   syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice): void;
   getLayerTypeIconName(): string;
+  /*
+   * ILayer.getIndexPatternIds returns data view ids used to populate layer data.
+   */
   getIndexPatternIds(): string[];
+  /*
+   * ILayer.getQueryableIndexPatternIds returns ILayer.getIndexPatternIds or a subset of ILayer.getIndexPatternIds.
+   * Data view ids are excluded when the global query is not applied to layer data.
+   */
   getQueryableIndexPatternIds(): string[];
   getType(): LAYER_TYPE;
   isVisible(): boolean;
@@ -213,10 +219,6 @@ export class AbstractLayer implements ILayer {
 
   isPreviewLayer(): boolean {
     return !!this._descriptor.__isPreviewLayer;
-  }
-
-  supportsElasticsearchFilters(): boolean {
-    return this.getSource().isESSource();
   }
 
   async supportsFitToBounds(): Promise<boolean> {
@@ -442,7 +444,7 @@ export class AbstractLayer implements ILayer {
         body: (
           <TileErrorsList
             inspectorAdapters={inspectorAdapters}
-            isESSource={!isLayerGroup(this) && this.getSource().isESSource()}
+            isESVectorTileSource={!isLayerGroup(this) && isESVectorTileSource(this.getSource())}
             layerId={this.getId()}
             tileErrors={this._descriptor.__tileErrors}
           />
@@ -575,7 +577,7 @@ export class AbstractLayer implements ILayer {
 
   getGeoFieldNames(): string[] {
     const source = this.getSource();
-    return source.isESSource() ? [(source as IESSource).getGeoFieldName()] : [];
+    return hasESSourceMethod(source, 'getGeoFieldName') ? [source.getGeoFieldName()] : [];
   }
 
   async getStyleMetaDescriptorFromLocalFeatures(): Promise<StyleMetaDescriptor | null> {

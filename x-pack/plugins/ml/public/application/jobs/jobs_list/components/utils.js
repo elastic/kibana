@@ -326,10 +326,10 @@ export function resetJobs(jobIds, deleteUserAnnotations, finish = () => {}) {
     });
 }
 
-export function deleteJobs(jobs, deleteUserAnnotations, finish = () => {}) {
+export function deleteJobs(jobs, deleteUserAnnotations, deleteAlertingRules, finish = () => {}) {
   const jobIds = jobs.map((j) => j.id);
   mlJobService
-    .deleteJobs(jobIds, deleteUserAnnotations)
+    .deleteJobs(jobIds, deleteUserAnnotations, deleteAlertingRules)
     .then((resp) => {
       showResults(resp, JOB_STATE.DELETED);
       finish();

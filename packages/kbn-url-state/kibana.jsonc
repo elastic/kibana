@@ -1,5 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/url-state",
-  "owner": "@elastic/security-threat-hunting-investigations"
-}

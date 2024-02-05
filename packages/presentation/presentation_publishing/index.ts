@@ -94,6 +94,11 @@ export {
   type ViewMode,
 } from './interfaces/publishes_view_mode';
 export {
+  type PublishesUnsavedChanges,
+  apiPublishesUnsavedChanges,
+  useUnsavedChanges,
+} from './interfaces/publishes_unsaved_changes';
+export {
   useBatchedPublishingSubjects,
   useStateFromPublishingSubject,
   usePublishingSubject,
