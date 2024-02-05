@@ -47,12 +47,13 @@ if is_pr_with_label "ci:build-fips-images"; then
   echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
 
   node scripts/build \
-    --skip-initialize \
-    --skip-generic-folders \
-    --skip-platform-folders \
-    --skip-cdn-assets \
+    --all-platforms \
+    --skip-os-packages \
     --docker-fips-images \
-    --docker-tag-qualifier="$GIT_COMMIT"
+    --docker-tag-qualifier="$GIT_COMMIT" # --skip-initialize \
+  # --skip-generic-folders \
+  # --skip-platform-folders \
+  # --skip-cdn-assets \
 
   docker logout docker.elastic.co
 fi
