@@ -8,15 +8,7 @@ import type { MutableRefObject } from 'react';
 import React from 'react';
 import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook } from '@testing-library/react-hooks';
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  TestProviders,
-} from '../../mock';
-import type { State } from '../../store';
-import { createStore } from '../../store';
+import { TestProviders } from '../../mock';
 import { useKibana } from '../../lib/kibana';
 import { InputsModelId } from '../../store/inputs/constants';
 import { useRefetchByRestartingSession } from './use_refetch_by_session';
@@ -24,13 +16,8 @@ import { inputsActions } from '../../store/actions';
 import type { Refetch } from '../../store/inputs/model';
 import type { ISessionService } from '@kbn/data-plugin/public';
 
-const state: State = mockGlobalState;
-
-const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-
 const wrapper = ({ children }: { children: React.ReactNode }) => (
-  <TestProviders store={store}>{children}</TestProviders>
+  <TestProviders>{children}</TestProviders>
 );
 
 jest.mock('react-redux', () => {
