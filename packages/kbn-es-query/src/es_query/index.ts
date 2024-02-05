@@ -16,12 +16,9 @@ export { decorateQuery } from './decorate_query';
 export {
   isOfQueryType,
   isOfAggregateQueryType,
+  isOfEsqlQueryType,
   getAggregateQueryMode,
-  getIndexPatternFromSQLQuery,
   getLanguageDisplayName,
-  getIndexPatternFromESQLQuery,
-  getLimitFromESQLQuery,
-  cleanupESQLQueryForLensSuggestions,
 } from './es_aggregate_query';
 export { fromCombinedFilter } from './from_combined_filter';
 export type {

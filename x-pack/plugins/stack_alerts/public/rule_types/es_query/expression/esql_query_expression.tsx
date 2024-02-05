@@ -19,7 +19,8 @@ import {
 import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
 import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
-import { AggregateQuery, getIndexPatternFromESQLQuery } from '@kbn/es-query';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import type { AggregateQuery } from '@kbn/es-query';
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import {
   FieldOption,

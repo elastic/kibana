@@ -97,23 +97,6 @@ export const transformAlertsToRules = (rules: RuleAlertType[]): RuleResponse[] =
   return rules.map((rule) => internalRuleToAPIResponse(rule));
 };
 
-/**
- * Transforms a rule object to exportable format. Exportable format shouldn't contain runtime fields like
- * `execution_summary`
- */
-export const transformRuleToExportableFormat = (
-  rule: RuleResponse
-): Omit<RuleResponse, 'execution_summary'> => {
-  const exportedRule = {
-    ...rule,
-  };
-
-  // Fields containing runtime information shouldn't be exported. It causes import failures.
-  delete exportedRule.execution_summary;
-
-  return exportedRule;
-};
-
 export const transformFindAlerts = (ruleFindResults: FindResult<RuleParams>): FindRulesResponse => {
   return {
     page: ruleFindResults.page,
