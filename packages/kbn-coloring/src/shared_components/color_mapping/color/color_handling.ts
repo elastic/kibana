@@ -49,10 +49,6 @@ export function getColor(
 ): string {
   return color.type === 'colorCode'
     ? color.colorCode
-    : color.type === 'loop'
-    ? getValidColor(
-        getPaletteFn(color.paletteId).getColor(color.colorIndex, isDarkMode, true)
-      ).hex()
     : getValidColor(
         getPaletteFn(color.paletteId).getColor(color.colorIndex, isDarkMode, true)
       ).hex();
