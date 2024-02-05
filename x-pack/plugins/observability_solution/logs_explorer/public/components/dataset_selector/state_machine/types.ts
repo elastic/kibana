@@ -106,7 +106,7 @@ export type DatasetsSelectorEvent =
       selection: Dataset;
     }
   | {
-      type: 'SELECT_EXPLORER_DATA_VIEW';
+      type: 'SELECT_DATA_VIEW';
       selection: DataViewDescriptor;
     }
   | {

@@ -24,7 +24,7 @@ export const createPureDataViewsStateMachine = (
 ) =>
   createMachine<DataViewsContext, DataViewsEvent, DataViewsTypestate>(
     {
-      /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVA1AlmA7rAHQCuAdjhejqgDY4BekAxADIDyAgsgPrKcAVTjywBJAKIB1AMoBtAAwBdRKAAOAe1g5q6sipAAPRAEYAHAGYip4wCYArABoQAT0Q2AbABYidgL6+nNExcAmJadVQISihmCF0wIkoAN3UAawSg7DxCInDI6IRk9QBjDBxdBUVK-Q0tHT0kQ0Q7GydXBHc7dyIbAE5jd0Gh4f9AjCzQ3IioshiwACd59XmiVVoMADNlgFsiTJCcvJmoQrIU0vrK6sba7XKG0CMEG08bIl6bMwB2RxcTMx8FnMwJBoM8oxA+2yYWmkESEFoYGY0nEnAASgBhAASfEEwjEUjkShqmjuun0Txa3Xk5l68nc9jaiFMNi+71eX3kQNB5ghUMmRzhOARSOk7DRAlxQhEEhk1zUpPqFMQ5nk3msjL+HX67zs5lsfgCkPGBxhkSFIuR4lY4gxkv40oJknlIFuSsaTxsLKIX3MnnMPyZCDsvTsPj5JuhU3NECIEDAACN1ORimBpGBUPNigALaL8whW9HYqX42VE5Q3RX3ZUIL6meREcx2YxdTXtH7Gdmsrk84ER4JRwWx+NJlNpjNZ3OzfOwZgGWCYdAJVAbJfzAAUqvkAEpmDPo-Hh4nk2RU+nMzm85HQi63dWPc0vp33E-TIGtb7vJ5TKHuTz+xMhzTNEABiqA4IiEDMGi1pcLwDqloSt5VuSD7PK87yfG+vztMYXxvJ4AzDMR7i9P4RpkOo8bwI0M4knU96PIgAC07hBqxAGmqQFBUDQ9BMBA9Fkg8TQIK8QYeIaYwDgKwGzEJ7pMWJgxEPILYMjhJjNu8REkUMZFGvuQ4KYxok2H6Pp+gGmnBlynGDrCsbCoiJmoUp5gMkQ7gea+77tCyDZNr01n2bJMZxseY7npOV4yYQrkiU8PxvOYNg0gaQb1myngcj2vahUB+SzGBEGQAlNbiVq1jhuRQA */
+      /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVA1AlmA7rAHQCuAdjhejqgDY4BekAxADIDyAgsgPrKcAVTjywBJAKIB1AMoBtAAwBdRKAAOAe1g5q6sipAAPRACYALMaIA2AIwB2awA5bAVgA0IAJ6JrzgMxFfeQdnAE5fFwBfCPc0TFwCYlp1VAhKKGYIXTAiSgA3dQBrbNjsPEIiJJS0hDz1AGMMHF0FRRb9DS0dPSRDRFNneSJnY1tfU3C3T29jEKJ5AdsHa2NnKJiMUoSK5NSydLAAJwP1A6JVWgwAMxOAWyIS+PLK3agasnyGrpa2no7tJu6oCMCDMzjmIzGE3cXgQYwcREcvlCEzWIAeZUSO0gOQgtDAzGk4k4ACUAMIACT4gmEYikciU7U0-10+mBIUWCPkPksK2hiF8jiIDmF8mMQV8EsltlR6K2z2xOFx+Ok7GJAipQhEEhkPzUTK6rMQliWRFsIWNLj5IIcFnGpgcIWcDklUplG0emJSCqVBPErHEpPV-E1tMkupAfwNPWBtntRBC5vkYUtUwQ1iTCNM1hCI3FLul0TR7ox2y9ECIEDAACN1OQ6mBpGBUAc6gALNKywi+kkUjU07X05S-fUAw1piGmxwpmG+EZWZzprOWZcryy+N1xEvy8uVmt1htNlvtvad2DMAywTDobKoS7Xg4ACkC8gAlMxT6XKzvq7WyPXG82bYdsWCThpGo7RogITCkKITyDykwwsY1j+KMljsiE1irsu66Fh+zxpAAYqgOB4hAzDEn6XC8MG-Z0mBI4spBCDjNYRArL4cEIVapguPGLjGJY8hLiuBaFmQ6iVvAPSnoynQQUC3g2kK4zTogAC0lhgsEDjyLYMxYauuHrJuWzkJQ-x0IwkBycygK9CCQmmksvKpsEQwbpsTw7GktlRopIKBCpUKpsYxj+OmopCSJK4hJ5HqfjZw7yUxAVrqh5pOIhJhsZYWY5rYeaunhIHeWWOJ4n5CkOcEpimuhfjLNlIJzpx2a5s6+bxVuWLfnuf4HoBx5QLJyV2WO1iIqaphCcmzXIWx9hIjFRndXKPl7MRpFJXqKX2cCZh1YJzjcam5i2EQ9qqasUQREAA */
       context: initialContext,
       preserveActionOrder: true,
       predictableActionArguments: true,
@@ -57,7 +57,7 @@ export const createPureDataViewsStateMachine = (
                 SORT_DATA_VIEWS: {
                   actions: ['storeSearch', 'searchDataViews'],
                 },
-                SELECT_EXPLORER_DATA_VIEW: {
+                SELECT_DATA_VIEW: {
                   actions: ['navigateToDiscoverDataView'],
                 },
               },

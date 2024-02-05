@@ -106,7 +106,7 @@ export const useDatasetSelector = ({
   const selectDataViewDescriptor = useCallback<DataViewSelectionHandler>(
     (dataViewDescriptor) =>
       datasetsSelectorStateService.send({
-        type: 'SELECT_EXPLORER_DATA_VIEW',
+        type: 'SELECT_DATA_VIEW',
         selection: dataViewDescriptor,
       }),
     [datasetsSelectorStateService]
