@@ -129,13 +129,24 @@ export function ConversationView() {
   const sidebarContainerClass = css`
     display: flex;
     position: absolute;
-    padding: ${isSecondSlotVisible ? '24px' : 0};
+    z-index: 1;
+    top: 56px;
     right: 0;
-    z-index: 9999;
-    height: 100%;
+    height: calc(100% - 56px);
     background-color: ${euiTheme.colors.lightestShade};
     width: ${isSecondSlotVisible ? SECOND_SLOT_CONTAINER_WIDTH : 0}px;
+    border-top: solid 1px ${euiThemeVars.euiColorLightShade};
     border-left: solid 1px ${euiThemeVars.euiColorLightShade};
+
+    .euiFlyoutHeader {
+      padding: ${euiTheme.size.m};
+    }
+
+    .euiFlyoutFooter {
+      padding: ${euiTheme.size.m};
+      padding-top: ${euiTheme.size.l};
+      padding-bottom: ${euiTheme.size.l};
+    }
   `;
 
   return (
