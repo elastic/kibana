@@ -170,6 +170,7 @@ describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serve
         cy.contains('Search for a pack to run');
         cy.contains('Pack is a required field');
         cy.getBySel('comboBoxInput').type(`${packName}{downArrow}{enter}`);
+        cy.contains(packName);
       })
       .clickOutside();
     cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
