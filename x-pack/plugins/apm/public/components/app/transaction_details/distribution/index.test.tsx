@@ -25,8 +25,13 @@ import { fromQuery } from '../../../shared/links/url_helpers';
 
 import { TransactionDistribution } from '.';
 
+const coreMock = {
+  settings: { client: { get: () => {} } },
+} as unknown as CoreStart;
+
 function Wrapper({ children }: { children?: ReactNode }) {
   const KibanaReactContext = createKibanaReactContext({
+    ...coreMock,
     usageCollection: { reportUiCounter: () => {} },
   } as Partial<CoreStart>);
 

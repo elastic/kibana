@@ -21,7 +21,7 @@ import {
 } from '../../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
-export default function createAlertsAsDataInstallResourcesTest({ getService }: FtrProviderContext) {
+export default function createAlertsAsDataFlappingTest({ getService }: FtrProviderContext) {
   const es = getService('es');
   const retry = getService('retry');
   const supertest = getService('supertest');

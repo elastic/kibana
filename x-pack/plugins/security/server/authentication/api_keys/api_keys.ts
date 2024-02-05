@@ -113,7 +113,7 @@ export class APIKeys implements APIKeysType {
   }
 
   /**
-   * Determines if Cross-Cluster API Keys are enabled in Elasticsearch.
+   * Determines if cross-cluster API Keys are enabled in Elasticsearch.
    */
   async areCrossClusterAPIKeysEnabled(): Promise<boolean> {
     if (!this.license.isEnabled()) {
@@ -123,14 +123,14 @@ export class APIKeys implements APIKeysType {
     const id = 'kibana-api-key-service-test';
 
     this.logger.debug(
-      `Testing if Cross-Cluster API Keys are enabled by attempting to update a non-existant key: ${id}`
+      `Testing if cross-cluster API Keys are enabled by attempting to update a non-existant key: ${id}`
     );
 
     try {
       await this.clusterClient.asInternalUser.transport.request({
         method: 'PUT',
         path: `/_security/cross_cluster/api_key/${id}`,
-        body: {}, // We are sending an empty request body and expect a validation error if Update Cross-Cluster API key endpoint is available.
+        body: {}, // We are sending an empty request body and expect a validation error if Update cross-cluster API key endpoint is available.
       });
       return false;
     } catch (error) {
@@ -143,7 +143,7 @@ export class APIKeys implements APIKeysType {
    *
    * Returns newly created API key or `null` if API keys are disabled.
    *
-   * User needs `manage_api_key` privilege to create REST API keys and `manage_security` for Cross-Cluster API keys.
+   * User needs `manage_api_key` privilege to create REST API keys and `manage_security` for cross-cluster API keys.
    *
    * @param request Request instance.
    * @param createParams The params to create an API key
@@ -199,7 +199,7 @@ export class APIKeys implements APIKeysType {
    *
    * Returns `updated`, `true` if the update was successful, `false` if there was nothing to update
    *
-   * User needs `manage_api_key` privilege to update REST API keys and `manage_security` for Cross-Cluster API keys.
+   * User needs `manage_api_key` privilege to update REST API keys and `manage_security` for cross-cluster API keys.
    *
    * @param request Request instance.
    * @param updateParams The params to edit an API key

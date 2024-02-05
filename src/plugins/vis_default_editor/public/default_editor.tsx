@@ -109,6 +109,7 @@ function DefaultEditor({
               </EuiResizablePanel>
 
               <EuiResizableButton
+                alignIndicator="start"
                 className={`visEditor__resizer ${isCollapsed ? 'visEditor__resizer-isHidden' : ''}`}
               />
 

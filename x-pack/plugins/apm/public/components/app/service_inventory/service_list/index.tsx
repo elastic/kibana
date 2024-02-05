@@ -17,7 +17,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import { TypeOf } from '@kbn/typed-react-router-config';
-import React, { useCallback, useMemo } from 'react';
+import { omit } from 'lodash';
+import React, { useMemo } from 'react';
+import {
+  FETCH_STATUS,
+  isFailure,
+  isPending,
+} from '../../../../hooks/use_fetcher';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import {
   ServiceInventoryFieldName,
@@ -44,7 +50,12 @@ import {
 import { EnvironmentBadge } from '../../../shared/environment_badge';
 import { ServiceLink } from '../../../shared/links/apm/service_link';
 import { ListMetric } from '../../../shared/list_metric';
-import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
+import {
+  ITableColumn,
+  ManagedTable,
+  SortFunction,
+  TableSearchBar,
+} from '../../../shared/managed_table';
 import { HealthBadge } from './health_badge';
 
 type ServicesDetailedStatisticsAPIResponse =
@@ -273,32 +284,28 @@ export function getServiceColumns({
 }
 
 interface Props {
+  status: FETCH_STATUS;
   items: ServiceListItem[];
   comparisonDataLoading: boolean;
   comparisonData?: ServicesDetailedStatisticsAPIResponse;
   noItemsMessage?: React.ReactNode;
-  isLoading: boolean;
-  isFailure?: boolean;
   displayHealthStatus: boolean;
   displayAlerts: boolean;
   initialSortField: ServiceInventoryFieldName;
   initialPageSize: number;
   initialSortDirection: 'asc' | 'desc';
-  sortFn: (
-    sortItems: ServiceListItem[],
-    sortField: ServiceInventoryFieldName,
-    sortDirection: 'asc' | 'desc'
-  ) => ServiceListItem[];
-
+  sortFn: SortFunction<ServiceListItem>;
   serviceOverflowCount: number;
+  maxCountExceeded: boolean;
+  onChangeSearchQuery: (searchQuery: string) => void;
+  onChangeRenderedItems: (renderedItems: ServiceListItem[]) => void;
 }
 export function ServiceList({
+  status,
   items,
   noItemsMessage,
   comparisonDataLoading,
   comparisonData,
-  isLoading,
-  isFailure,
   displayHealthStatus,
   displayAlerts,
   initialSortField,
@@ -306,67 +313,59 @@ export function ServiceList({
   initialPageSize,
   sortFn,
   serviceOverflowCount,
+  maxCountExceeded,
+  onChangeSearchQuery,
+  onChangeRenderedItems,
 }: Props) {
   const breakpoints = useBreakpoints();
   const { link } = useApmRouter();
-
   const showTransactionTypeColumn = items.some(
     ({ transactionType }) =>
       transactionType && !isDefaultTransactionType(transactionType)
   );
 
-  const {
-    // removes pagination and sort instructions from the query so it won't be passed down to next route
-    query: {
-      page,
-      pageSize,
-      sortDirection: direction,
-      sortField: field,
-      ...query
-    },
-  } = useApmParams('/services');
-
+  const { query } = useApmParams('/services');
   const { kuery } = query;
-
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
     kuery,
   });
 
-  const serviceColumns = useMemo(
-    () =>
-      getServiceColumns({
-        query,
-        showTransactionTypeColumn,
-        comparisonDataLoading,
-        comparisonData,
-        breakpoints,
-        showHealthStatusColumn: displayHealthStatus,
-        showAlertsColumn: displayAlerts,
-        link,
-        serviceOverflowCount,
-      }),
-    [
-      query,
+  const serviceColumns = useMemo(() => {
+    return getServiceColumns({
+      // removes pagination and sort instructions from the query so it won't be passed down to next route
+      query: omit(query, 'page', 'pageSize', 'sortDirection', 'sortField'),
       showTransactionTypeColumn,
       comparisonDataLoading,
       comparisonData,
       breakpoints,
-      displayHealthStatus,
-      displayAlerts,
+      showHealthStatusColumn: displayHealthStatus,
+      showAlertsColumn: displayAlerts,
       link,
       serviceOverflowCount,
-    ]
-  );
+    });
+  }, [
+    query,
+    showTransactionTypeColumn,
+    comparisonDataLoading,
+    comparisonData,
+    breakpoints,
+    displayHealthStatus,
+    displayAlerts,
+    link,
+    serviceOverflowCount,
+  ]);
 
-  const handleSort = useCallback(
-    (itemsToSort, sortField, sortDirection) =>
-      sortFn(
-        itemsToSort,
-        sortField as ServiceInventoryFieldName,
-        sortDirection
+  const tableSearchBar: TableSearchBar<ServiceListItem> = useMemo(() => {
+    return {
+      fieldsToSearch: ['serviceName'],
+      maxCountExceeded,
+      onChangeSearchQuery,
+      placeholder: i18n.translate(
+        'xpack.apm.servicesTable.filterServicesPlaceholder',
+        { defaultMessage: 'Search services by name' }
       ),
-    [sortFn]
-  );
+    };
+  }, [maxCountExceeded, onChangeSearchQuery]);
 
   return (
     <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>
@@ -381,6 +380,24 @@ export function ServiceList({
               <AggregatedTransactionsBadge />
             </EuiFlexItem>
           )}
+
+          {maxCountExceeded && (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                position="top"
+                content={i18n.translate(
+                  'xpack.apm.servicesTable.tooltip.maxCountExceededWarning',
+                  {
+                    defaultMessage:
+                      'The limit of 1,000 services is exceeded. Please use the query bar to narrow down the results or create service groups.',
+                  }
+                )}
+              >
+                <EuiIcon type="warning" color="danger" />
+              </EuiToolTip>
+            </EuiFlexItem>
+          )}
+
           <EuiFlexItem grow={false}>
             <EuiToolTip
               position="top"
@@ -405,17 +422,20 @@ export function ServiceList({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
+
       <EuiFlexItem>
         <ManagedTable<ServiceListItem>
-          isLoading={isLoading}
-          error={isFailure}
+          isLoading={isPending(status)}
+          error={isFailure(status)}
           columns={serviceColumns}
           items={items}
           noItemsMessage={noItemsMessage}
           initialSortField={initialSortField}
           initialSortDirection={initialSortDirection}
           initialPageSize={initialPageSize}
-          sortFn={handleSort}
+          sortFn={sortFn}
+          onChangeRenderedItems={onChangeRenderedItems}
+          tableSearchBar={tableSearchBar}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

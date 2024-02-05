@@ -21,7 +21,6 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getSourcererScopeId } from '../../../../helpers';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import type { RelatedUser } from '../../../../../common/search_strategy/security_solution/related_entities/related_users';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
@@ -33,11 +32,7 @@ import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/field_renderers';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
-import {
-  SecurityCellActions,
-  CellActionsMode,
-  SecurityCellActionsTrigger,
-} from '../../../../common/components/cell_actions';
+import { CellActions } from './cell_actions';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { manageQuery } from '../../../../common/components/page/manage_query';
@@ -135,20 +130,9 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
         ),
         render: (user: string) => (
           <EuiText grow={false} size="xs">
-            <SecurityCellActions
-              data={{
-                field: 'user.name',
-                value: user,
-              }}
-              mode={CellActionsMode.HOVER_RIGHT}
-              triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
-              visibleCellActions={6}
-              sourcererScopeId={getSourcererScopeId(scopeId)}
-              metadata={{ scopeId }}
-              showActionTooltips
-            >
+            <CellActions field={'user.name'} value={user}>
               {user}
-            </SecurityCellActions>
+            </CellActions>
           </EuiText>
         ),
       },
@@ -190,7 +174,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
           ]
         : []),
     ],
-    [isEntityAnalyticsAuthorized, scopeId]
+    [isEntityAnalyticsAuthorized]
   );
 
   const relatedUsersCount = useMemo(

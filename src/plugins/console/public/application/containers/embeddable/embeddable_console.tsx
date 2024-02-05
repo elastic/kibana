@@ -8,6 +8,7 @@
 
 import React, { useState } from 'react';
 import classNames from 'classnames';
+import useObservable from 'react-use/lib/useObservable';
 import {
   EuiButton,
   EuiFocusTrap,
@@ -38,6 +39,7 @@ export const EmbeddableConsole = ({
 }: EmbeddableConsoleProps & EmbeddableConsoleDependencies) => {
   const [isConsoleOpen, setIsConsoleOpen] = useState<boolean>(false);
   const toggleConsole = () => setIsConsoleOpen(!isConsoleOpen);
+  const chromeStyle = useObservable(core.chrome.getChromeStyle$());
 
   const onKeyDown = (event: any) => {
     if (event.key === keys.ESCAPE) {
@@ -52,6 +54,9 @@ export const EmbeddableConsole = ({
     'embeddableConsole--large': size === 'l',
     'embeddableConsole--medium': size === 'm',
     'embeddableConsole--small': size === 's',
+    'embeddableConsole--classicChrome': chromeStyle === 'classic',
+    'embeddableConsole--projectChrome': chromeStyle === 'project',
+    'embeddableConsole--unknownChrome': chromeStyle === undefined,
     'embeddableConsole--fixed': true,
     'embeddableConsole--showOnMobile': false,
   });
@@ -59,7 +64,11 @@ export const EmbeddableConsole = ({
   return (
     <EuiPortal>
       <EuiFocusTrap onClickOutside={toggleConsole} disabled={!isConsoleOpen}>
-        <section aria-label={landmarkHeading} className={classes}>
+        <section
+          aria-label={landmarkHeading}
+          className={classes}
+          data-test-subj="consoleEmbeddedSection"
+        >
           <EuiScreenReaderOnly>
             <h2>{landmarkHeading}</h2>
           </EuiScreenReaderOnly>
@@ -73,6 +82,8 @@ export const EmbeddableConsole = ({
                 contentProps={{
                   className: 'embeddableConsole__controls--button',
                 }}
+                data-test-subj="consoleEmbeddedControlBar"
+                data-telemetry-id="console-embedded-controlbar-button"
               >
                 {i18n.translate('console.embeddableConsole.title', {
                   defaultMessage: 'Console',
@@ -81,7 +92,7 @@ export const EmbeddableConsole = ({
             </div>
           </EuiThemeProvider>
           {isConsoleOpen ? (
-            <div className="embeddableConsole__content">
+            <div className="embeddableConsole__content" data-test-subj="consoleEmbeddedBody">
               <EuiWindowEvent event="keydown" handler={onKeyDown} />
               <ConsoleWrapper core={core} usageCollection={usageCollection} />
             </div>

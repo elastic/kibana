@@ -164,4 +164,5 @@ export interface UsageStats {
   'observability:profilingDatacenterPUE': number;
   'observability:profilingCostPervCPUPerHour': number;
   'observability:profilingAWSCostDiscountRate': number;
+  'data_views:fields_excluded_data_tiers': string;
 }

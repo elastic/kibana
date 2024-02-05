@@ -444,7 +444,7 @@
         "label": "AppId",
         "description": [],
         "signature": [
-          "\"metrics\" | \"synthetics\" | \"apm\" | \"logs\" | \"observability-overview\" | \"observability-log-explorer\" | \"observabilityOnboarding\""
+          "\"metrics\" | \"synthetics\" | \"apm\" | \"logs\" | \"observability-overview\" | \"observability-logs-explorer\" | \"observabilityOnboarding\""
         ],
         "path": "packages/deeplinks/observability/deep_links.ts",
         "deprecated": false,
@@ -572,13 +572,13 @@
       },
       {
         "parentPluginId": "@kbn/deeplinks-observability",
-        "id": "def-common.OBSERVABILITY_LOG_EXPLORER_APP_ID",
+        "id": "def-common.OBSERVABILITY_LOGS_EXPLORER_APP_ID",
         "type": "string",
         "tags": [],
-        "label": "OBSERVABILITY_LOG_EXPLORER_APP_ID",
+        "label": "OBSERVABILITY_LOGS_EXPLORER_APP_ID",
         "description": [],
         "signature": [
-          "\"observability-log-explorer\""
+          "\"observability-logs-explorer\""
         ],
         "path": "packages/deeplinks/observability/constants.ts",
         "deprecated": false,

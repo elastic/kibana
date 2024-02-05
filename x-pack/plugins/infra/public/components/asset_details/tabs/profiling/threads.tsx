@@ -10,13 +10,16 @@ import React from 'react';
 import { TopNType } from '@kbn/profiling-utils';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { HOST_FIELD } from '../../../../../common/constants';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { ProfilingLinks } from './profiling_links';
 
-export function Threads() {
+interface Props {
+  kuery: string;
+}
+
+export function Threads({ kuery }: Props) {
   const { services } = useKibanaContextForPlugin();
   const { getDateRangeInTimestamp, dateRange, setDateRange } = useDatePickerContext();
   const { from, to } = getDateRangeInTimestamp();
@@ -40,13 +43,13 @@ export function Threads() {
         type={TopNType.Threads}
         rangeFrom={from}
         rangeTo={to}
-        kuery={`${HOST_FIELD}:"${asset.name}"`}
+        kuery={kuery}
         onClick={(category) => {
           stacktracesProfilingLinkLocator.navigate({
             type: TopNType.Traces,
             rangeFrom: dateRange.from,
             rangeTo: dateRange.to,
-            kuery: `(${HOST_FIELD}:"${asset.name}" ) AND process.thread.name:"${category}"`,
+            kuery: `(${kuery}) AND process.thread.name:"${category}"`,
           });
         }}
         onChartBrushEnd={(range) => {

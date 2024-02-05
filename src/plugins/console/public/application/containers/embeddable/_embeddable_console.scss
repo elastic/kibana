@@ -8,7 +8,6 @@
   box-shadow: inset 0 $embeddableConsoleInitialHeight 0 $embeddableConsoleBackground, inset 0 600rem 0 $euiPageBackgroundColor;
   bottom: 0;
   right: 0;
-  left: var(--euiCollapsibleNavOffset, 0);
   transform: translateY(0);
   height: $embeddableConsoleInitialHeight;
   max-height: $embeddableConsoleMaxHeight;
@@ -16,6 +15,18 @@
   &--fixed {
     position: fixed;
     z-index: $euiZLevel1;
+  }
+
+  &--projectChrome {
+    left: var(--euiCollapsibleNavOffset, 0);
+  }
+
+  &--classicChrome {
+    left: var(--kbnSolutionNavOffset, 0);
+  }
+
+  &--unknownChrome {
+    left: 0;
   }
 
   &-isOpen {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import md5 from 'md5';
+import { sha256 } from 'js-sha256';
 
 export const createCalloutId = (ids: string[], delimiter: string = '|'): string =>
-  md5(ids.join(delimiter));
+  sha256(ids.join(delimiter));

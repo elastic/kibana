@@ -6,7 +6,7 @@
  */
 
 import { isEqual } from 'lodash';
-import { LogExplorerLocatorParams } from '@kbn/deeplinks-observability';
+import { LogsExplorerLocatorParams } from '@kbn/deeplinks-observability';
 import {
   ALERT_ACTION_GROUP,
   ALERT_EVALUATION_VALUES,
@@ -52,14 +52,14 @@ import { convertStringsToMissingGroupsRecord } from './lib/convert_strings_to_mi
 
 export interface CustomThresholdLocators {
   alertsLocator?: LocatorPublic<AlertsLocatorParams>;
-  logExplorerLocator?: LocatorPublic<LogExplorerLocatorParams>;
+  logsExplorerLocator?: LocatorPublic<LogsExplorerLocatorParams>;
 }
 
 export const createCustomThresholdExecutor = ({
   basePath,
   logger,
   config,
-  locators: { alertsLocator, logExplorerLocator },
+  locators: { alertsLocator, logsExplorerLocator },
 }: {
   basePath: IBasePath;
   logger: Logger;
@@ -298,7 +298,7 @@ export const createCustomThresholdExecutor = ({
           viewInAppUrl: getViewInAppUrl({
             dataViewId: params.searchConfiguration?.index?.title ?? dataViewId,
             filter: params.searchConfiguration.query.query,
-            logExplorerLocator,
+            logsExplorerLocator,
             metrics: alertResults.length === 1 ? alertResults[0][group].metrics : [],
             startedAt: indexedStartedAt,
           }),
@@ -339,7 +339,7 @@ export const createCustomThresholdExecutor = ({
         viewInAppUrl: getViewInAppUrl({
           dataViewId: params.searchConfiguration?.index?.title ?? dataViewId,
           filter: params.searchConfiguration.query.query,
-          logExplorerLocator,
+          logsExplorerLocator,
           metrics: params.criteria[0]?.metrics,
           startedAt: indexedStartedAt,
         }),

@@ -9,8 +9,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { safeLoad } from 'js-yaml';
 
-import { getAzureArmPropsFromPackagePolicy } from '../../../../../../../services/get_azure_arm_props_from_package_policy';
-
 import type {
   AgentPolicy,
   NewPackagePolicy,
@@ -26,12 +24,7 @@ import {
   sendBulkInstallPackages,
   sendGetPackagePolicies,
 } from '../../../../../hooks';
-import {
-  ExperimentalFeaturesService,
-  getCloudShellUrlFromPackagePolicy,
-  isVerificationError,
-  packageToPackagePolicy,
-} from '../../../../../services';
+import { isVerificationError, packageToPackagePolicy } from '../../../../../services';
 import {
   FLEET_ELASTIC_AGENT_PACKAGE,
   FLEET_SYSTEM_PACKAGE,
@@ -46,9 +39,13 @@ import type { PackagePolicyFormState } from '../../types';
 import { SelectedPolicyTab } from '../../components';
 import { useOnSaveNavigate } from '../../hooks';
 import { prepareInputPackagePolicyDataset } from '../../services/prepare_input_pkg_policy_dataset';
-import { getCloudFormationPropsFromPackagePolicy } from '../../../../../services';
+import {
+  getAzureArmPropsFromPackagePolicy,
+  getCloudFormationPropsFromPackagePolicy,
+  getCloudShellUrlFromPackagePolicy,
+} from '../../../../../../../components/cloud_security_posture/services';
 
-import { AGENTLESS_POLICY_ID } from './setup_technology';
+import { useAgentlessPolicy } from './setup_technology';
 
 async function createAgentPolicy({
   packagePolicy,
@@ -109,7 +106,7 @@ export function useOnSubmit({
   queryParamsPolicyId: string | undefined;
   integrationToEnable?: string;
 }) {
-  const { notifications, cloud } = useStartServices();
+  const { notifications } = useStartServices();
   const confirmForceInstall = useConfirmForceInstall();
   // only used to store the resulting package policy once saved
   const [savedPackagePolicy, setSavedPackagePolicy] = useState<PackagePolicy>();
@@ -132,8 +129,7 @@ export function useOnSubmit({
   const [hasAgentPolicyError, setHasAgentPolicyError] = useState<boolean>(false);
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
-  const isServerless = cloud?.isServerlessEnabled ?? false;
-  const { agentless: isAgentlessEnabled } = ExperimentalFeaturesService.get();
+  const { isAgentlessPolicyId } = useAgentlessPolicy();
 
   // Update agent policy method
   const updateAgentPolicy = useCallback(
@@ -260,7 +256,11 @@ export function useOnSubmit({
         setFormState('INVALID');
         return;
       }
-      if (agentCount !== 0 && formState !== 'CONFIRM') {
+      if (
+        agentCount !== 0 &&
+        !isAgentlessPolicyId(packagePolicy?.policy_id) &&
+        formState !== 'CONFIRM'
+      ) {
         setFormState('CONFIRM');
         return;
       }
@@ -304,8 +304,7 @@ export function useOnSubmit({
       }
 
       const agentPolicyIdToSave = createdPolicy?.id ?? packagePolicy.policy_id;
-      const shouldForceInstallOnAgentless =
-        agentPolicyIdToSave === AGENTLESS_POLICY_ID && isServerless && isAgentlessEnabled;
+      const shouldForceInstallOnAgentless = isAgentlessPolicyId(agentPolicyIdToSave);
       const forceInstall = force || shouldForceInstallOnAgentless;
 
       setFormState('LOADING');
@@ -403,10 +402,9 @@ export function useOnSubmit({
       formState,
       hasErrors,
       agentCount,
-      selectedPolicyTab,
       packagePolicy,
-      isServerless,
-      isAgentlessEnabled,
+      selectedPolicyTab,
+      isAgentlessPolicyId,
       withSysMonitoring,
       newAgentPolicy,
       updatePackagePolicy,

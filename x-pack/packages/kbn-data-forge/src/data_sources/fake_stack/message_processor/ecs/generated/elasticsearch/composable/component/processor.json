@@ -1,0 +1,34 @@
+{
+  "_meta": {
+    "ecs_version": "8.0.0"
+  },
+  "template": {
+    "mappings": {
+      "properties": {
+        "processor": {
+          "properties": {
+            "accepted": {
+              "type": "long"
+            },
+            "bytes": {
+              "type": "unsigned_long"
+            },
+            "latency": {
+              "type": "histogram"
+            },
+            "outcome": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "processed": {
+              "type": "long"
+            },
+            "timeSpent": {
+              "type": "unsigned_long"
+            }
+          }
+        }
+      }
+    }
+  }
+}

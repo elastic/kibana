@@ -1321,6 +1321,10 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
    */
   getReportingLayout?: (state: T) => { height: number; width: number };
   /**
+   * A visualization can share how columns are visually sorted
+   */
+  getSortedColumns?: (state: T, datasourceLayers?: DatasourceLayers) => string[];
+  /**
    * returns array of telemetry events for the visualization on save
    */
   getTelemetryEventsOnSave?: (state: T, prevState?: T) => string[];

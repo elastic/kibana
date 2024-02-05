@@ -25,7 +25,7 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
-  "@npm//@babel/plugin-proposal-class-properties",
+  "@npm//@babel/plugin-transform-class-properties",
   "@npm//@babel/plugin-proposal-export-namespace-from",
   "@npm//@babel/plugin-proposal-nullish-coalescing-operator",
   "@npm//@babel/plugin-proposal-optional-chaining",

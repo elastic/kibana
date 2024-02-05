@@ -35,7 +35,7 @@ import { login } from '../../../../tasks/login';
 import {
   addNameToTimelineAndSave,
   createNewTimeline,
-  createTimelineOptionsPopoverBottomBar,
+  createTimelineFromBottomBar,
   goToEsqlTab,
   openTimelineById,
   openTimelineFromSettings,
@@ -79,7 +79,7 @@ describe(
     beforeEach(() => {
       login();
       visitWithTimeRange(ALERTS_URL);
-      createTimelineOptionsPopoverBottomBar();
+      createTimelineFromBottomBar();
       goToEsqlTab();
       updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
       handleIntercepts();

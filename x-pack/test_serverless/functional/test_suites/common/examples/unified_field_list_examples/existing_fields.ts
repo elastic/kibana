@@ -93,7 +93,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await PageObjects.svlCommonPage.forceLogout();
     });
 
-    describe('existence', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/172781
+    describe.skip('existence', () => {
       it('should find which fields exist in the sample documents', async () => {
         const sidebarFields = await PageObjects.unifiedFieldList.getAllFieldNames();
         expect(sidebarFields.sort()).to.eql([...metaFields, ...fieldsWithData].sort());

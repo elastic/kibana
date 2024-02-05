@@ -92,3 +92,8 @@ export const SESSION_EXTENSION_THROTTLE_MS = 60 * 1000;
  * Route to get session info and extend session expiration
  */
 export const SESSION_ROUTE = '/internal/security/session';
+
+/**
+ * Allowed image file types for uploading an image as avatar
+ */
+export const IMAGE_FILE_TYPES = ['image/svg+xml', 'image/jpeg', 'image/png', 'image/gif'];
