@@ -15,9 +15,7 @@ import {
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import { uiActionsEnhancedPluginMock } from '@kbn/ui-actions-enhanced-plugin/public/mocks';
 
-function createAction(
-  overlays = coreMock.createStart().overlays
-) {
+function createAction(overlays = coreMock.createStart().overlays) {
   const uiActionsPlugin = uiActionsEnhancedPluginMock.createPlugin();
   const uiActions = uiActionsPlugin.doStart();
   const params: FlyoutEditDrilldownParams = {
@@ -66,9 +64,7 @@ beforeAll(async () => {
 });
 
 test('title is a string', () => {
-  expect(typeof createAction().getDisplayName() === 'string').toBe(
-    true
-  );
+  expect(typeof createAction().getDisplayName() === 'string').toBe(true);
 });
 
 test('icon exists', () => {

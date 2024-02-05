@@ -48,9 +48,7 @@ export type FlyoutEditDrilldownActionApi = CanAccessViewMode &
   Partial<HasUniqueId>;
 
 const isApiCompatible = (api: unknown | null): api is FlyoutEditDrilldownActionApi =>
-  apiHasDynamicActions(api) &&
-  apiCanAccessViewMode(api) &&
-  apiHasSupportedTriggers(api);
+  apiHasDynamicActions(api) && apiCanAccessViewMode(api) && apiHasSupportedTriggers(api);
 
 export class FlyoutEditDrilldownAction implements Action<EmbeddableApiContext> {
   public readonly type = OPEN_FLYOUT_EDIT_DRILLDOWN;
