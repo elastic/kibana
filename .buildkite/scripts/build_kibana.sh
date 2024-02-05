@@ -51,7 +51,6 @@ if is_pr_with_label "ci:build-fips-images"; then
     --skip-generic-folders \
     --skip-platform-folders \
     --skip-cdn-assets \
-    --skip-docker-contexts \
     --docker-fips-images \
     --docker-tag-qualifier="$GIT_COMMIT"
 
