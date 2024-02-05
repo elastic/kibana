@@ -32,7 +32,6 @@ const AttachmentContentEvent = (props: {
     }),
   });
   const hostsDetailsHref = getAppUrl({
-    appId: 'security',
     path: `/hosts/name/${targets[0].hostname}`,
   });
 
