@@ -70,6 +70,7 @@ export const deleteJobsSchema = schema.object({
   /** List of job IDs. */
   jobIds: schema.arrayOf(schema.string()),
   deleteUserAnnotations: schema.maybe(schema.boolean()),
+  deleteAlertingRules: schema.maybe(schema.boolean()),
 });
 
 export const optionalJobIdsSchema = schema.object({

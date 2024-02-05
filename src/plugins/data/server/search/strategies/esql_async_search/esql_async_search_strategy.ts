@@ -67,11 +67,20 @@ export const esqlAsyncSearchStrategyProvider = (
           };
       const { body, headers, meta } = id
         ? await client.transport.request<SqlGetAsyncResponse>(
-            { method: 'GET', path: `/_query/async/${id}`, querystring: { ...params } },
+            {
+              method: 'GET',
+              path: `/_query/async/${id}`,
+              querystring: { ...params },
+            },
             { ...options.transport, signal: options.abortSignal, meta: true }
           )
         : await client.transport.request<SqlGetAsyncResponse>(
-            { method: 'POST', path: `/_query/async`, body: params },
+            {
+              method: 'POST',
+              path: `/_query/async`,
+              body: params,
+              querystring: 'drop_null_columns',
+            },
             { ...options.transport, signal: options.abortSignal, meta: true }
           );
 

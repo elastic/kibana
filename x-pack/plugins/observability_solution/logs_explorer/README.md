@@ -1,8 +1,8 @@
 # Logs Explorer
 
-This plugin is home to the `<LogExplorer />` component and related types. It implements several of the underlying concepts that the [Observability Logs Explorer app](../observability_solution/observability_logs_explorer) builds upon.
+This plugin is home to the `<LogsExplorer />` component and related types. It implements several of the underlying concepts that the [Observability Logs Explorer app](../observability_solution/observability_logs_explorer) builds upon.
 
-## Developing the `<LogExplorer />` component
+## Developing the `<LogsExplorer />` component
 
 ⚠ The Logs Explorer is in early stages of development, so the following partly describes the current situation and partly the intended future scenario.
 
@@ -20,22 +20,22 @@ While not fully realized yet, the dependency graph would roughly resemble the fo
 ```mermaid
 flowchart TD
 
-obs_log_explorer_app(Observability Logs Explorer app)
+obs_logs_explorer_app(Observability Logs Explorer app)
 obs_apps(Other Observability apps)
-obs_log_explorer_component(Observability Logs Explorer component)
+obs_logs_explorer_component(Observability Logs Explorer component)
 other_apps(Other non-Observability apps)
-log_explorer_component(Logs Explorer component)
+logs_explorer_component(Logs Explorer component)
 platform(Kibana Platform)
 discover(Discover Main container)
 fleet(Fleet / EPM)
 
-obs_log_explorer_app --> obs_log_explorer_component
-obs_apps --> obs_log_explorer_component
-obs_log_explorer_component --> log_explorer_component
-other_apps --> log_explorer_component
-log_explorer_component --> discover
-log_explorer_component --> platform
-log_explorer_component --> fleet
+obs_logs_explorer_app --> obs_logs_explorer_component
+obs_apps --> obs_logs_explorer_component
+obs_logs_explorer_component --> logs_explorer_component
+other_apps --> logs_explorer_component
+logs_explorer_component --> discover
+logs_explorer_component --> platform
+logs_explorer_component --> fleet
 discover --> platform
 fleet --> platform
 ```
@@ -49,7 +49,7 @@ When designing the API we face two conflicting goals:
   - it should not perform any page-wide changes that could interfere with consuming app's page state (such as URL changes).
 - It should be extensible so the Observability Logs Explorer can build on top of this.
 
-In its current state the `<LogExplorer />` achieves neither goal. To resolve the tension in the future we could export two variants with different sets of properties.
+In its current state the `<LogsExplorer />` achieves neither goal. To resolve the tension in the future we could export two variants with different sets of properties.
 
 ### Principles
 
