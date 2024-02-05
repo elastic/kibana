@@ -93,7 +93,7 @@ export type AppUpdater = (app: App) => Partial<AppUpdatableFields> | undefined;
  */
 export type AppUpdatableFields = Pick<
   App,
-  'status' | 'navLinkStatus' | 'searchable' | 'tooltip' | 'defaultPath' | 'deepLinks'
+  'status' | 'searchable' | 'tooltip' | 'defaultPath' | 'deepLinks'
 >;
 
 /**
@@ -130,7 +130,7 @@ export interface App<HistoryLocationState = unknown> extends AppNavOptions {
    * Defaulting to `visible` if `status` is `accessible` and `hidden` if status is `inaccessible`
    * See {@link AppNavLinkStatus}
    */
-  navLinkStatus?: AppNavLinkStatus;
+  // navLinkStatus?: AppNavLinkStatus;
 
   /**
    * The initial flag to determine if the application is searchable in the global search.
@@ -268,13 +268,10 @@ export interface App<HistoryLocationState = unknown> extends AppNavOptions {
  *
  * @public
  */
-export type PublicAppDeepLinkInfo = Omit<
-  AppDeepLink,
-  'deepLinks' | 'keywords' | 'navLinkStatus' | 'searchable'
-> & {
+export type PublicAppDeepLinkInfo = Omit<AppDeepLink, 'deepLinks' | 'keywords' | 'searchable'> & {
   deepLinks: PublicAppDeepLinkInfo[];
   keywords: string[];
-  navLinkStatus: AppNavLinkStatus;
+  // navLinkStatus: AppNavLinkStatus;
   searchable: boolean;
 };
 
@@ -294,9 +291,16 @@ export type AppDeepLink<Id extends string = string> = {
   /** Optional keywords to match with in deep links search. Omit if this part of the hierarchy does not have a page URL. */
   keywords?: string[];
   /** Optional status of the chrome navigation, defaults to `hidden` */
-  navLinkStatus?: AppNavLinkStatus;
-  /** Optional flag to determine if the link is searchable in the global search. Defaulting to `true` if `navLinkStatus` is `visible` or omitted */
+  // navLinkStatus?: AppNavLinkStatus;
+  /** Optional flag to determine if the link is searchable in the global search. Defaulting to `false` */
   searchable?: boolean;
+  /**
+   * Optional flag to determine if the link is visible in the side navigation. Defaulting to `false`
+   * @internalRemarks
+   * This property is added temporarily to allow showing/hiding deep links in the side navigation.
+   * Once the solution navigation is implemented,
+   */
+  visibleInSideNavigation?: boolean;
   /**
    * Optional category to use instead of the parent app category.
    * This property is added to customize the way a deep link is rendered in the global search.
@@ -330,7 +334,7 @@ export type PublicAppInfo = Omit<
 > & {
   // remove optional on fields populated with default values
   status: AppStatus;
-  navLinkStatus: AppNavLinkStatus;
+  // navLinkStatus: AppNavLinkStatus;
   appRoute: string;
   keywords: string[];
   deepLinks: PublicAppDeepLinkInfo[];

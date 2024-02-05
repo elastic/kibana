@@ -7,12 +7,7 @@
  */
 
 import type { IBasePath } from '@kbn/core-http-browser';
-import {
-  AppNavLinkStatus,
-  AppStatus,
-  type PublicAppInfo,
-  type PublicAppDeepLinkInfo,
-} from '@kbn/core-application-browser';
+import { type PublicAppInfo, type PublicAppDeepLinkInfo } from '@kbn/core-application-browser';
 import { appendAppPath } from '@kbn/core-application-browser-internal';
 import { NavLinkWrapper } from './nav_link';
 
@@ -29,26 +24,26 @@ export function toNavLink(
   return new NavLinkWrapper({
     ...(deepLink || app),
     ...(app.category ? { category: app.category } : {}), // deepLinks use the main app category
-    hidden: deepLink ? isDeepNavLinkHidden(deepLink) : isAppNavLinkHidden(app),
-    disabled: (deepLink?.navLinkStatus ?? app.navLinkStatus) === AppNavLinkStatus.disabled,
+    // hidden: deepLink ? isDeepNavLinkHidden(deepLink) : isAppNavLinkHidden(app),
+    // disabled: app.disabled,
     baseUrl,
     href,
     url,
   });
 }
 
-function isAppNavLinkHidden(app: PublicAppInfo) {
-  return app.navLinkStatus === AppNavLinkStatus.default
-    ? app.status === AppStatus.inaccessible
-    : app.navLinkStatus === AppNavLinkStatus.hidden;
-}
+// function isAppNavLinkHidden(app: PublicAppInfo) {
+//   return app.navLinkStatus === AppNavLinkStatus.default
+//     ? app.status === AppStatus.inaccessible
+//     : app.navLinkStatus === AppNavLinkStatus.hidden;
+// }
 
-function isDeepNavLinkHidden(deepLink: PublicAppDeepLinkInfo) {
-  return (
-    deepLink.navLinkStatus === AppNavLinkStatus.default ||
-    deepLink.navLinkStatus === AppNavLinkStatus.hidden
-  );
-}
+// function isDeepNavLinkHidden(deepLink: PublicAppDeepLinkInfo) {
+//   return (
+//     deepLink.navLinkStatus === AppNavLinkStatus.default ||
+//     deepLink.navLinkStatus === AppNavLinkStatus.hidden
+//   );
+// }
 
 /**
  * @param {string} url - a relative or root relative url.  If a relative path is given then the

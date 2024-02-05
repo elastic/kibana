@@ -77,7 +77,7 @@ export interface ChromeNavLink {
   /**
    * Hides a link from the navigation.
    */
-  readonly hidden?: boolean;
+  // readonly hidden?: boolean;
 }
 
 /**

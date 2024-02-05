@@ -29,7 +29,7 @@ import type {
   NavigateToUrlOptions,
 } from '@kbn/core-application-browser';
 import { CapabilitiesService } from '@kbn/core-capabilities-browser-internal';
-import { AppStatus, AppNavLinkStatus } from '@kbn/core-application-browser';
+import { AppStatus } from '@kbn/core-application-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { AppRouter } from './ui';
 import type { InternalApplicationSetup, InternalApplicationStart, Mounter } from './types';
@@ -203,11 +203,12 @@ export class ApplicationService {
         validateApp(app);
 
         const { updater$, ...appProps } = app;
+        const appStatus: AppStatus = app.status ?? AppStatus.accessible;
         this.apps.set(app.id, {
           ...appProps,
-          status: app.status ?? AppStatus.accessible,
-          navLinkStatus: app.navLinkStatus ?? AppNavLinkStatus.default,
-          deepLinks: populateDeepLinkDefaults(appProps.deepLinks),
+          status: appStatus,
+          // navLinkStatus: app.navLinkStatus ?? AppNavLinkStatus.default,
+          deepLinks: populateDeepLinkDefaults(appStatus, appProps.deepLinks),
         });
         if (updater$) {
           registerStatusUpdater(app.id, updater$);
@@ -459,20 +460,24 @@ const updateStatus = (app: App, statusUpdaters: AppUpdaterWrapper[]): App => {
     }
     const fields = wrapper.updater(app);
     if (fields) {
+      const nextStatus: AppStatus = Math.max(
+        changes.status ?? AppStatus.accessible,
+        fields.status ?? AppStatus.accessible
+      );
+
       changes = {
         ...changes,
         ...fields,
         // status and navLinkStatus enums are ordered by reversed priority
         // if multiple updaters wants to change these fields, we will always follow the priority order.
-        status: Math.max(
-          changes.status ?? AppStatus.accessible,
-          fields.status ?? AppStatus.accessible
-        ),
-        navLinkStatus: Math.max(
-          changes.navLinkStatus ?? AppNavLinkStatus.default,
-          fields.navLinkStatus ?? AppNavLinkStatus.default
-        ),
-        ...(fields.deepLinks ? { deepLinks: populateDeepLinkDefaults(fields.deepLinks) } : {}),
+        status: nextStatus,
+        // navLinkStatus: Math.max(
+        //   changes.navLinkStatus ?? AppNavLinkStatus.default,
+        //   fields.navLinkStatus ?? AppNavLinkStatus.default
+        // ),
+        ...(fields.deepLinks
+          ? { deepLinks: populateDeepLinkDefaults(nextStatus, fields.deepLinks) }
+          : {}),
       };
     }
   });
@@ -483,15 +488,22 @@ const updateStatus = (app: App, statusUpdaters: AppUpdaterWrapper[]): App => {
   };
 };
 
-const populateDeepLinkDefaults = (deepLinks?: AppDeepLink[]): AppDeepLink[] => {
+const populateDeepLinkDefaults = (
+  appStatus: AppStatus,
+  deepLinks?: AppDeepLink[]
+): AppDeepLink[] => {
   if (!deepLinks) {
     return [];
   }
-  return deepLinks.map((deepLink) => ({
-    ...deepLink,
-    navLinkStatus: deepLink.navLinkStatus ?? AppNavLinkStatus.default,
-    deepLinks: populateDeepLinkDefaults(deepLink.deepLinks),
-  }));
+  return deepLinks.map((deepLink) => {
+    const visibleInSideNavigation = deepLink.visibleInSideNavigation ?? false;
+
+    return {
+      ...deepLink,
+      visibleInSideNavigation: appStatus === AppStatus.accessible ? visibleInSideNavigation : false,
+      deepLinks: populateDeepLinkDefaults(appStatus, deepLink.deepLinks),
+    };
+  });
 };
 
 const flattenDeepLinks = (deepLinks?: AppDeepLink[]): Record<string, string> => {
