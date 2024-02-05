@@ -65,7 +65,6 @@ export type RuleAttributesExcludedFromAADType =
   | 'updatedAt'
   | 'executionStatus'
   | 'monitoring'
-  | 'snoozeEndTime'
   | 'snoozeSchedule'
   | 'isSnoozedUntil'
   | 'lastRun'
