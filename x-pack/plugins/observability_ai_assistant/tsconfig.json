@@ -60,7 +60,8 @@
     "@kbn/expect",
     "@kbn/apm-synthtrace-client",
     "@kbn/apm-synthtrace",
-    "@kbn/code-editor"
+    "@kbn/code-editor",
+    "@kbn/safer-lodash-set"
   ],
   "exclude": ["target/**/*"]
 }
