@@ -106,7 +106,11 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<
     const queryClient = new QueryClient();
 
     const I18nContext = this.deps.i18n.Context;
-    const { slos, timeRange = { from: 'now-15m/m', to: 'now' } } = this.getInput();
+    const {
+      slos,
+      timeRange = { from: 'now-15m/m', to: 'now' },
+      showAllGroupByInstances,
+    } = this.getInput();
 
     const deps = this.deps;
     const kibanaVersion = this.kibanaVersion;
@@ -129,6 +133,7 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<
                 slos={slos}
                 timeRange={timeRange}
                 reloadSubject={this.reloadSubject}
+                showAllGroupByInstances={showAllGroupByInstances}
               />
             </QueryClientProvider>
           </Router>

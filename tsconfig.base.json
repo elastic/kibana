@@ -1682,8 +1682,6 @@
       "@kbn/url-drilldown-plugin/*": ["x-pack/plugins/drilldowns/url_drilldown/*"],
       "@kbn/url-forwarding-plugin": ["src/plugins/url_forwarding"],
       "@kbn/url-forwarding-plugin/*": ["src/plugins/url_forwarding/*"],
-      "@kbn/url-state": ["packages/kbn-url-state"],
-      "@kbn/url-state/*": ["packages/kbn-url-state/*"],
       "@kbn/usage-collection-plugin": ["src/plugins/usage_collection"],
       "@kbn/usage-collection-plugin/*": ["src/plugins/usage_collection/*"],
       "@kbn/usage-collection-test-plugin": ["test/plugin_functional/plugins/usage_collection"],
