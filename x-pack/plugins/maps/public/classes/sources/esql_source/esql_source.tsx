@@ -34,8 +34,7 @@ import { getData, getUiSettings } from '../../../kibana_services';
 import { convertToGeoJson } from './convert_to_geojson';
 import {
   getFieldType,
-  getGeometryColumnIndex,
-  ESQL_GEO_POINT_TYPE,
+  isGeometryColumn,
   ESQL_GEO_SHAPE_TYPE,
 } from './esql_utils';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -128,16 +127,8 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
   }
 
   async getSupportedShapeTypes() {
-    let geomtryColumnType = ESQL_GEO_POINT_TYPE;
-    try {
-      const index = getGeometryColumnIndex(this._descriptor.columns);
-      if (index > -1) {
-        geomtryColumnType = this._descriptor.columns[index].type;
-      }
-    } catch (error) {
-      // errors for missing geometry columns surfaced in UI by data loading
-    }
-    return geomtryColumnType === ESQL_GEO_SHAPE_TYPE
+    const index = this._descriptor.columns.findIndex(isGeometryColumn);
+    return index !== -1 && this._descriptor.columns[index].type === ESQL_GEO_SHAPE_TYPE
       ? [VECTOR_SHAPE_TYPE.POINT, VECTOR_SHAPE_TYPE.LINE, VECTOR_SHAPE_TYPE.POLYGON]
       : [VECTOR_SHAPE_TYPE.POINT];
   }
