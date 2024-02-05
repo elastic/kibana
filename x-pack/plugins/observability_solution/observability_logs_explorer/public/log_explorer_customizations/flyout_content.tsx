@@ -6,17 +6,17 @@
  */
 import { EuiFlexItem } from '@elastic/eui';
 import {
-  LogExplorerCustomizations,
-  LogExplorerFlyoutContentProps,
+  LogsExplorerCustomizations,
+  LogsExplorerFlyoutContentProps,
 } from '@kbn/logs-explorer-plugin/public';
 import type { LogAIAssistantDocument } from '@kbn/logs-shared-plugin/public';
 import React, { useMemo } from 'react';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 
 type RenderFlyoutContentCustomization =
-  Required<LogExplorerCustomizations>['flyout']['renderContent'];
+  Required<LogsExplorerCustomizations>['flyout']['renderContent'];
 
-const ObservabilityLogAIAssistant = ({ doc }: LogExplorerFlyoutContentProps) => {
+const ObservabilityLogAIAssistant = ({ doc }: LogsExplorerFlyoutContentProps) => {
   const { services } = useKibanaContextForPlugin();
   const { LogAIAssistant } = services.logsShared;
 
@@ -40,7 +40,7 @@ export const renderFlyoutContent: RenderFlyoutContentCustomization =
 /**
  * Utils
  */
-const mapDocToAIAssistantFormat = (doc: LogExplorerFlyoutContentProps['doc']) => {
+const mapDocToAIAssistantFormat = (doc: LogsExplorerFlyoutContentProps['doc']) => {
   if (!doc) return;
 
   return {

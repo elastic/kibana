@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { CreateLogExplorerController } from '@kbn/logs-explorer-plugin/public';
+import { CreateLogsExplorerController } from '@kbn/logs-explorer-plugin/public';
 import { renderFlyoutContent } from './flyout_content';
 
 export const createLogExplorerControllerWithCustomizations =
-  (createLogExplorerController: CreateLogExplorerController): CreateLogExplorerController =>
+  (createLogExplorerController: CreateLogsExplorerController): CreateLogsExplorerController =>
   (args) =>
     createLogExplorerController({
       ...args,

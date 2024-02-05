@@ -227,7 +227,7 @@
             "label": "labels",
             "description": [],
             "signature": [
-              "{ [x: string]: string; }"
+              "Record<string, string> | undefined"
             ],
             "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
             "deprecated": false,
@@ -3543,7 +3543,7 @@
             "label": "labels",
             "description": [],
             "signature": [
-              "{ [x: string]: string; }"
+              "Record<string, string> | undefined"
             ],
             "path": "x-pack/plugins/observability_ai_assistant/common/types.ts",
             "deprecated": false,
