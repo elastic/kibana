@@ -10,15 +10,10 @@ import { Histogram } from './histogram';
 import React from 'react';
 import { of, Subject } from 'rxjs';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
-import { currentSuggestionMock } from '../__mocks__/suggestions';
 import { getLensVisMock } from '../__mocks__/lens_vis';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { createDefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import {
-  UnifiedHistogramFetchStatus,
-  UnifiedHistogramInput$,
-  UnifiedHistogramSuggestionType,
-} from '../types';
+import { UnifiedHistogramFetchStatus, UnifiedHistogramInput$ } from '../types';
 import { act } from 'react-dom/test-utils';
 import * as buildBucketInterval from './utils/build_bucket_interval';
 import * as useTimeRange from './hooks/use_time_range';
@@ -44,11 +39,6 @@ const getMockLensAttributes = async () => {
       dataView: dataViewWithTimefieldMock,
       timeInterval: 'auto',
       breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
-      suggestionContext: {
-        type: UnifiedHistogramSuggestionType.supportedLensSuggestion,
-        suggestion: currentSuggestionMock,
-        suggestionDeps: [dataViewWithTimefieldMock.id, [], query, undefined],
-      },
     })
   ).lensAttributesContext;
 };

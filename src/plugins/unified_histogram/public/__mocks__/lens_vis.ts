@@ -24,7 +24,6 @@ export const getLensVisMock = async ({
   chartTitle,
   filters,
   query,
-  suggestionContext,
   columns,
   isPlainRecord,
   timeInterval,
@@ -41,7 +40,6 @@ export const getLensVisMock = async ({
   isPlainRecord: boolean;
   timeInterval: string;
   breakdownField: DataViewField | undefined;
-  suggestionContext: UnifiedHistogramSuggestionContext | undefined;
   allSuggestions?: Suggestion[];
   hasHistogramSuggestionForESQL?: boolean;
 }): Promise<{
@@ -91,6 +89,6 @@ export const getLensVisMock = async ({
   return {
     lensService,
     lensAttributesContext,
-    currentSuggestionContext: suggestionContext || currentSuggestionContext,
+    currentSuggestionContext,
   };
 };

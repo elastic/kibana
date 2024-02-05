@@ -56,7 +56,6 @@ describe('LensVisService', () => {
       dataView,
       timeInterval,
       breakdownField,
-      suggestionContext: undefined,
       columns: [],
       isPlainRecord: false,
     });
@@ -218,7 +217,6 @@ describe('LensVisService', () => {
       dataView,
       timeInterval,
       breakdownField,
-      suggestionContext: undefined,
       columns: [],
       isPlainRecord: false,
     });
@@ -397,7 +395,6 @@ describe('LensVisService', () => {
       dataView,
       timeInterval,
       breakdownField,
-      suggestionContext: undefined,
       columns: [],
       isPlainRecord: false,
     });
@@ -555,7 +552,6 @@ describe('LensVisService', () => {
       dataView,
       timeInterval,
       breakdownField: undefined,
-      suggestionContext: undefined,
       columns: [],
       isPlainRecord: true,
     });
@@ -756,7 +752,6 @@ describe('LensVisService', () => {
       dataView: adHocDataview,
       timeInterval,
       breakdownField: undefined,
-      suggestionContext: undefined,
       columns: [],
       isPlainRecord: true,
     });
@@ -791,7 +786,6 @@ describe('LensVisService', () => {
       dataView,
       timeInterval,
       breakdownField: undefined,
-      suggestionContext: undefined,
       columns: [],
       isPlainRecord: true,
     });
@@ -809,7 +803,6 @@ describe('LensVisService', () => {
       dataView: dataViewWithAtTimefieldMock,
       timeInterval,
       breakdownField: undefined,
-      suggestionContext: undefined,
       columns: [],
       isPlainRecord: true,
       allSuggestions: [], // none available

@@ -11,10 +11,8 @@ import { act } from 'react-test-renderer';
 import { Subject } from 'rxjs';
 import type { UnifiedHistogramInputMessage } from '../../types';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
-import { currentSuggestionMock } from '../../__mocks__/suggestions';
 import { getLensVisMock } from '../../__mocks__/lens_vis';
 import { getLensProps, useLensProps } from './use_lens_props';
-import { UnifiedHistogramSuggestionType } from '../../types';
 
 describe('useLensProps', () => {
   it('should return lens props', async () => {
@@ -35,7 +33,6 @@ describe('useLensProps', () => {
         dataView: dataViewWithTimefieldMock,
         timeInterval: 'auto',
         breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
-        suggestionContext: undefined,
       })
     ).lensAttributesContext;
     const lensProps = renderHook(() => {
@@ -78,11 +75,6 @@ describe('useLensProps', () => {
         dataView: dataViewWithTimefieldMock,
         timeInterval: 'auto',
         breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
-        suggestionContext: {
-          type: UnifiedHistogramSuggestionType.supportedLensSuggestion,
-          suggestion: currentSuggestionMock,
-          suggestionDeps: [dataViewWithTimefieldMock.id, [], query, undefined],
-        },
       })
     ).lensAttributesContext;
     const lensProps = renderHook(() => {
@@ -125,7 +117,6 @@ describe('useLensProps', () => {
         dataView: dataViewWithTimefieldMock,
         timeInterval: 'auto',
         breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
-        suggestionContext: undefined,
       })
     ).lensAttributesContext;
     const lensProps = {

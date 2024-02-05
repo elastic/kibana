@@ -13,7 +13,6 @@ import type { Capabilities } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import type { UnifiedHistogramFetchStatus } from '../types';
-import { UnifiedHistogramSuggestionType } from '../types';
 import { Chart, type ChartProps } from './chart';
 import type { ReactWrapper } from 'enzyme';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
@@ -25,7 +24,7 @@ import { dataViewMock } from '../__mocks__/data_view';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
 import { SuggestionSelector } from './suggestion_selector';
 import { checkChartAvailability } from './check_chart_availability';
-import { allSuggestionsMock, currentSuggestionMock } from '../__mocks__/suggestions';
+import { allSuggestionsMock } from '../__mocks__/suggestions';
 
 let mockUseEditVisualization: jest.Mock | undefined = jest.fn();
 
@@ -41,7 +40,6 @@ async function mountComponent({
   chartHidden = false,
   appendHistogram,
   dataView = dataViewWithTimefieldMock,
-  currentSuggestion,
   allSuggestions,
   isPlainRecord,
   hasDashboardPermissions,
@@ -55,7 +53,6 @@ async function mountComponent({
   chartHidden?: boolean;
   appendHistogram?: ReactElement;
   dataView?: DataView;
-  currentSuggestion?: Suggestion;
   allSuggestions?: Suggestion[];
   isPlainRecord?: boolean;
   hasDashboardPermissions?: boolean;
@@ -110,11 +107,6 @@ async function mountComponent({
       dataView,
       breakdownField: undefined,
       columns: [],
-      suggestionContext: {
-        type: UnifiedHistogramSuggestionType.supportedLensSuggestion,
-        suggestion: currentSuggestion,
-        suggestionDeps: [dataView.id, [], requestParams.query, undefined],
-      },
       allSuggestions,
       hasHistogramSuggestionForESQL,
     })
@@ -278,7 +270,6 @@ describe('Chart', () => {
   it('should render the Lens SuggestionsSelector when chart is visible and suggestions exist', async () => {
     const component = await mountComponent({
       isPlainRecord: true,
-      currentSuggestion: currentSuggestionMock,
       allSuggestions: allSuggestionsMock,
     });
     expect(component.find(SuggestionSelector).exists()).toBeTruthy();
@@ -286,7 +277,6 @@ describe('Chart', () => {
 
   it('should render the edit on the fly button when chart is visible and suggestions exist', async () => {
     const component = await mountComponent({
-      currentSuggestion: currentSuggestionMock,
       allSuggestions: allSuggestionsMock,
       isPlainRecord: true,
     });
@@ -297,7 +287,6 @@ describe('Chart', () => {
 
   it('should not render the edit on the fly button when chart is visible and suggestions dont exist', async () => {
     const component = await mountComponent({
-      currentSuggestion: undefined,
       allSuggestions: [],
       hasHistogramSuggestionForESQL: false,
       isPlainRecord: true,
@@ -309,7 +298,6 @@ describe('Chart', () => {
 
   it('should render the save button when chart is visible and suggestions exist', async () => {
     const component = await mountComponent({
-      currentSuggestion: currentSuggestionMock,
       allSuggestions: allSuggestionsMock,
       isPlainRecord: true,
     });
@@ -320,7 +308,6 @@ describe('Chart', () => {
 
   it('should not render the save button when the dashboard save by value permissions are false', async () => {
     const component = await mountComponent({
-      currentSuggestion: currentSuggestionMock,
       allSuggestions: allSuggestionsMock,
       hasDashboardPermissions: false,
     });
@@ -332,14 +319,13 @@ describe('Chart', () => {
   it('should not render the Lens SuggestionsSelector when chart is hidden', async () => {
     const component = await mountComponent({
       chartHidden: true,
-      currentSuggestion: currentSuggestionMock,
       allSuggestions: allSuggestionsMock,
     });
     expect(component.find(SuggestionSelector).exists()).toBeFalsy();
   });
 
   it('should not render the Lens SuggestionsSelector when chart is visible and suggestions are undefined', async () => {
-    const component = await mountComponent({ currentSuggestion: currentSuggestionMock });
+    const component = await mountComponent({});
     expect(component.find(SuggestionSelector).exists()).toBeFalsy();
   });
 });
