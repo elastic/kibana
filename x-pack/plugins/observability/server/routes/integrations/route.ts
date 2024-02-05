@@ -125,8 +125,9 @@ const getResolveAssetsRoute = createObservabilityServerRoute({
       t.type({
         indexPattern: t.string,
         identifierField: t.string,
-        from: t.string,
-        to: t.string,
+        // Either both string or both number?
+        from: t.union([t.string, t.number]),
+        to: t.union([t.string, t.number]),
       }),
       t.partial({
         displayNameField: t.string,

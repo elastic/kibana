@@ -40,7 +40,7 @@ export function AssetsList({
   } = useKibana();
 
   useEffect(() => {
-    async function fetchInstalledIntegrations() {
+    async function fetchAssets() {
       const query = {
         indexPattern: `metrics-${integrationName}*`,
         identifierField: assetSpecification.identifier_field,
@@ -67,7 +67,7 @@ export function AssetsList({
       setAssetsLoading(false);
     }
 
-    fetchInstalledIntegrations();
+    fetchAssets();
   }, [http, assetSpecification, integrationName, filter, timeRange]);
 
   if (assetsLoading) {

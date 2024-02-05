@@ -53,8 +53,9 @@ export interface Asset {
 export interface GetResolveAssetsQueryParams {
   indexPattern: string;
   identifierField: string;
-  from: string;
-  to: string;
+  // Either both string or both number?
+  from: string | number;
+  to: string | number;
   displayNameField?: string;
   filter?: string;
 }

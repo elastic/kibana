@@ -31,6 +31,7 @@ import { SnapshotToolbar } from './components/snapshot_toolbar';
 import { SnapshotModeProvider } from './hooks/use_snapshot_mode';
 import { TryItButton } from '../../../components/try_it_button';
 import { useWaffleOptionsContext } from './hooks/use_waffle_options';
+import { IntegrationContainer } from './components/integration_container';
 
 const HOSTS_LINK_LOCAL_STORAGE_KEY = 'inventoryUI:hostsLinkClicked';
 
@@ -95,12 +96,17 @@ export const InventoryPage = () => {
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup>
+                <EuiFlexGroup alignItems="center">
                   <EuiFlexItem grow={false}>
                     <WaffleInventorySwitcher />
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    {ItemTypeRT.is(nodeType) ? <SnapshotToolbar /> : <div>IntegrationsToolbar</div>}
+                    {ItemTypeRT.is(nodeType) ? (
+                      <SnapshotToolbar />
+                    ) : (
+                      // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
+                      <div>&lt;IntegrationsToolbar&gt;</div>
+                    )}
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
@@ -125,7 +131,7 @@ export const InventoryPage = () => {
               )}
 
               <EuiFlexItem>
-                {ItemTypeRT.is(nodeType) ? <SnapshotContainer /> : <div>IntegrationsContainer</div>}
+                {ItemTypeRT.is(nodeType) ? <SnapshotContainer /> : <IntegrationContainer />}
               </EuiFlexItem>
             </EuiFlexGroup>
           </SnapshotModeProvider>

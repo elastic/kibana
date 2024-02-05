@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState, useEffect, useMemo } from 'react';
 import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
@@ -56,11 +56,14 @@ export const useWaffleTime = () => {
     [setState]
   );
 
-  const currentTimeRange = {
-    from: currentTime - 1000 * 60 * 5,
-    interval: '1m',
-    to: currentTime,
-  };
+  const currentTimeRange = useMemo(
+    () => ({
+      from: currentTime - 1000 * 60 * 5,
+      interval: '1m',
+      to: currentTime,
+    }),
+    [currentTime]
+  );
 
   return {
     currentTime,
