@@ -8,7 +8,7 @@ import React from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Redirect, useHistory, useLocation, matchPath } from 'react-router-dom';
+import { Redirect, useHistory, useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { Configurations } from '../configurations';
 import { cloudPosturePages, findingsNavigation } from '../../common/navigation/constants';
@@ -47,9 +47,11 @@ const FindingsTabRedirecter = ({ lastTabSelected }: { lastTabSelected?: Findings
     );
   }
 
-  // otherwise stay on the vulnerabilities tab, since it's the first one.
+  // otherwise stay on the findings tab, since it's the first one.
   return (
-    <Redirect to={{ search: location.search, pathname: findingsNavigation.vulnerabilities.path }} />
+    <Redirect
+      to={{ search: location.search, pathname: findingsNavigation.findings_default.path }}
+    />
   );
 };
 
@@ -71,57 +73,40 @@ export const Findings = () => {
     history.push({ pathname: findingsNavigation.findings_default.path });
   };
 
-  const isResourcesVulnerabilitiesPage = matchPath(location.pathname, {
-    path: findingsNavigation.resource_vulnerabilities.path,
-  })?.isExact;
-
-  const isResourcesFindingsPage = matchPath(location.pathname, {
-    path: findingsNavigation.resource_findings.path,
-  })?.isExact;
-
-  const showHeader = !isResourcesVulnerabilitiesPage && !isResourcesFindingsPage;
-
   const isVulnerabilitiesTabSelected = (pathname: string) => {
-    return (
-      pathname === findingsNavigation.vulnerabilities.path ||
-      pathname === findingsNavigation.vulnerabilities_by_resource.path
-    );
+    return pathname === findingsNavigation.vulnerabilities.path;
   };
 
   return (
     <>
-      {showHeader && (
-        <>
-          <EuiTitle size="l">
-            <h1>
-              <FormattedMessage id="xpack.csp.findings.title" defaultMessage="Findings" />
-            </h1>
-          </EuiTitle>
-          <EuiSpacer />
-          <EuiTabs size="l">
-            <EuiTab
-              key="configurations"
-              onClick={navigateToConfigurationsTab}
-              isSelected={!isVulnerabilitiesTabSelected(location.pathname)}
-            >
-              <FormattedMessage
-                id="xpack.csp.findings.tabs.misconfigurations"
-                defaultMessage="Misconfigurations"
-              />
-            </EuiTab>
-            <EuiTab
-              key="vuln_mgmt"
-              onClick={navigateToVulnerabilitiesTab}
-              isSelected={isVulnerabilitiesTabSelected(location.pathname)}
-            >
-              <FormattedMessage
-                id="xpack.csp.findings.tabs.vulnerabilities"
-                defaultMessage="Vulnerabilities"
-              />
-            </EuiTab>
-          </EuiTabs>
-        </>
-      )}
+      <EuiTitle size="l">
+        <h1>
+          <FormattedMessage id="xpack.csp.findings.title" defaultMessage="Findings" />
+        </h1>
+      </EuiTitle>
+      <EuiSpacer />
+      <EuiTabs size="l">
+        <EuiTab
+          key="configurations"
+          onClick={navigateToConfigurationsTab}
+          isSelected={!isVulnerabilitiesTabSelected(location.pathname)}
+        >
+          <FormattedMessage
+            id="xpack.csp.findings.tabs.misconfigurations"
+            defaultMessage="Misconfigurations"
+          />
+        </EuiTab>
+        <EuiTab
+          key="vuln_mgmt"
+          onClick={navigateToVulnerabilitiesTab}
+          isSelected={isVulnerabilitiesTabSelected(location.pathname)}
+        >
+          <FormattedMessage
+            id="xpack.csp.findings.tabs.vulnerabilities"
+            defaultMessage="Vulnerabilities"
+          />
+        </EuiTab>
+      </EuiTabs>
       <Routes>
         <Route
           exact
@@ -129,12 +114,7 @@ export const Findings = () => {
           render={() => <FindingsTabRedirecter lastTabSelected={lastTabSelected} />}
         />
         <Route path={findingsNavigation.findings_default.path} component={Configurations} />
-        <Route path={findingsNavigation.findings_by_resource.path} component={Configurations} />
         <Route path={findingsNavigation.vulnerabilities.path} component={Vulnerabilities} />
-        <Route
-          path={findingsNavigation.vulnerabilities_by_resource.path}
-          component={Vulnerabilities}
-        />
         {/* Redirect to default findings page if no match */}
         <Route path="*" render={() => <Redirect to={findingsNavigation.findings_default.path} />} />
       </Routes>

@@ -109,7 +109,7 @@ export class CspPlugin
       // If package is installed we want to make sure all needed assets are installed
       if (packageInfo) {
         // noinspection ES6MissingAwait
-        this.initialize(core, plugins.taskManager);
+        this.initialize(core, plugins);
       }
 
       plugins.fleet.registerExternalCallback(
@@ -206,18 +206,23 @@ export class CspPlugin
   /**
    * Initialization is idempotent and required for (re)creating indices and transforms.
    */
-  async initialize(core: CoreStart, plugins: CspServerPluginStartDeps): Promise<void> {
+  async initialize(
+    core: CoreStart,
+    { taskManager, dataViews }: CspServerPluginStartDeps
+  ): Promise<void> {
     this.logger.debug('initialize');
     const esClient = core.elasticsearch.client.asInternalUser;
     const savedObjectsClient = core.savedObjects.createInternalRepository();
-    const dataViewsService = await plugins.dataViews.dataViewsServiceFactory(
+    const dataViewsService = await dataViews.dataViewsServiceFactory(
       savedObjectsClient,
-      esClient
+      esClient,
+      undefined,
+      true // Ignoring capabilities checks as we are running as internal user
     );
     await initializeCspIndices(esClient, this.config, this.logger);
     await initializeCspTransforms(esClient, this.logger);
     await updateCspDataViews(dataViewsService, this.logger);
-    await scheduleFindingsStatsTask(plugins.taskManager, this.logger);
+    await scheduleFindingsStatsTask(taskManager, this.logger);
     this.#isInitialized = true;
   }
 

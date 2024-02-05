@@ -74,30 +74,10 @@ export const findingsNavigation = {
     path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/configurations`,
     id: 'cloud_security_posture-findings-default',
   },
-  findings_by_resource: {
-    name: NAV_ITEMS_NAMES.FINDINGS,
-    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/resource`,
-    id: 'cloud_security_posture-findings-resource',
-  },
-  resource_findings: {
-    name: NAV_ITEMS_NAMES.FINDINGS,
-    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/resource/:resourceId`,
-    id: 'cloud_security_posture-findings-resourceId',
-  },
   vulnerabilities: {
     name: NAV_ITEMS_NAMES.FINDINGS,
     path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/vulnerabilities`,
     id: 'cloud_security_posture-findings-vulnerabilities',
-  },
-  vulnerabilities_by_resource: {
-    name: NAV_ITEMS_NAMES.FINDINGS,
-    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/vulnerabilities/resource`,
-    id: 'cloud_security_posture-findings-vulnerabilities-resource',
-  },
-  resource_vulnerabilities: {
-    name: NAV_ITEMS_NAMES.FINDINGS,
-    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/vulnerabilities/resource/:resourceId`,
-    id: 'cloud_security_posture-findings-vulnerabilities-resourceId',
   },
 };
 

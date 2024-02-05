@@ -10,7 +10,7 @@ import { IKibanaSearchResponse } from '@kbn/data-plugin/public';
 import { GenericBuckets, GroupingQuery, RootAggregation } from '@kbn/securitysolution-grouping/src';
 import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
-import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../../common/constants';
+import { LATEST_FINDINGS_INDEX_PATTERN } from '../../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { showErrorToast } from '../../../common/utils/show_error_toast';
 
@@ -69,7 +69,7 @@ export interface FindingsGroupingAggregation {
 
 export const getGroupedFindingsQuery = (query: GroupingQuery) => ({
   ...query,
-  index: CSP_LATEST_FINDINGS_DATA_VIEW,
+  index: LATEST_FINDINGS_INDEX_PATTERN,
   size: 0,
 });
 

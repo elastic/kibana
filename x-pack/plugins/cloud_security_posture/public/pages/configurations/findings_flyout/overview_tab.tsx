@@ -27,7 +27,7 @@ import {
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_PATTERN,
 } from '../../../../common/constants';
-import { useLatestFindingsDataView } from '../../../common/api/use_latest_findings_data_view';
+import { useDataView } from '../../../common/api/use_data_view';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { CisKubernetesIcons, CodeBlock, CspFlyoutMarkdown } from './findings_flyout';
@@ -164,7 +164,7 @@ export const OverviewTab = ({ data }: { data: CspFinding }) => {
   const {
     services: { discover },
   } = useKibana();
-  const latestFindingsDataView = useLatestFindingsDataView(LATEST_FINDINGS_INDEX_PATTERN);
+  const latestFindingsDataView = useDataView(LATEST_FINDINGS_INDEX_PATTERN);
 
   const discoverIndexLink = useMemo(
     () =>
