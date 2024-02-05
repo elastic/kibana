@@ -96,6 +96,7 @@ export default function ({ getService }: FtrProviderContext) {
           'hasMappings',
           'priority',
           'composedOf',
+          'ignoreMissingComponentTemplates',
           'version',
           '_kbnMeta',
         ].sort();
@@ -119,6 +120,7 @@ export default function ({ getService }: FtrProviderContext) {
           'version',
           '_kbnMeta',
           'composedOf',
+          'ignoreMissingComponentTemplates',
         ].sort();
 
         expect(Object.keys(legacyTemplateFound).sort()).to.eql(expectedLegacyKeys);
@@ -139,6 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
           'hasMappings',
           'priority',
           'composedOf',
+          'ignoreMissingComponentTemplates',
           'dataStream',
           'version',
           '_kbnMeta',
@@ -162,6 +165,7 @@ export default function ({ getService }: FtrProviderContext) {
           'hasMappings',
           'priority',
           'composedOf',
+          'ignoreMissingComponentTemplates',
           'version',
           '_kbnMeta',
         ].sort();
@@ -183,6 +187,7 @@ export default function ({ getService }: FtrProviderContext) {
           'indexPatterns',
           'template',
           'composedOf',
+          'ignoreMissingComponentTemplates',
           'priority',
           'version',
           '_kbnMeta',
@@ -207,6 +212,7 @@ export default function ({ getService }: FtrProviderContext) {
           'version',
           '_kbnMeta',
           'composedOf',
+          'ignoreMissingComponentTemplates',
         ].sort();
         const expectedTemplateKeys = ['aliases', 'mappings', 'settings'].sort();
 

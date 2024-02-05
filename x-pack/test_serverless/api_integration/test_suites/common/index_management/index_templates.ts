@@ -93,6 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
             'hasMappings',
             '_kbnMeta',
             'composedOf',
+            'ignoreMissingComponentTemplates',
           ].sort();
 
           expect(Object.keys(indexTemplateFound).sort()).to.eql(expectedKeys);
@@ -113,6 +114,7 @@ export default function ({ getService }: FtrProviderContext) {
             'template',
             '_kbnMeta',
             'composedOf',
+            'ignoreMissingComponentTemplates',
           ].sort();
 
           expect(body.name).to.eql(templateName);
