@@ -22,6 +22,10 @@ import { IKibanaSearchRequest, IKibanaSearchResponse, pollSearch } from '../../.
 import { toAsyncKibanaSearchResponse } from './response_utils';
 import { SearchConfigSchema } from '../../../../config';
 
+// drop_null_columns is going to change the response
+// now we get all_columns and columns
+// columns contain only columns with data
+// al_columns contain everyhing
 interface ESQLQueryRequest extends SqlQueryRequest {
   body?: SqlQueryRequest['body'] & { dropNullColumns?: boolean };
 }
