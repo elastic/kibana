@@ -892,6 +892,7 @@ describe('validation logic', () => {
       testErrorsAndWarnings(`from a | where ${camelCase(field)}Field IS NOT NULL`, []);
       testErrorsAndWarnings(`from a | where ${camelCase(field)}Field IS NOT null`, []);
       testErrorsAndWarnings(`from a | where ${camelCase(field)}Field IS not NULL`, []);
+      testErrorsAndWarnings(`from a | where ${camelCase(field)}Field Is nOt NuLL`, []);
     }
 
     // Test that all functions work in where
