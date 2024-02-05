@@ -165,7 +165,7 @@ export const allowedExperimentalValues = Object.freeze({
   sentinelOneManualHostActionsEnabled: true,
 
   /*
-   * Enables experimental Experimental S1 integration data to be available in Analyzer
+   * Enables experimental Crowdstrike integration data to be available in Analyzer
    */
   crowdstrikeDataInAnalyzerEnabled: false,
 
