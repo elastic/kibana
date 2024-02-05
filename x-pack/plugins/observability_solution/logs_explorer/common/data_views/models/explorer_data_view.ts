@@ -72,7 +72,7 @@ export class ExplorerDataView {
     return 'unknown';
   }
 
-  public isLogDataType() {
+  public isLogsDataType() {
     return this.dataType === 'logs';
   }
 

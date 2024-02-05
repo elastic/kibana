@@ -12,67 +12,67 @@ describe('ExplorerDataView', () => {
     const id = 'test-id';
 
     // Assert truthy cases
-    expect(ExplorerDataView.create({ id, title: 'auditbeat*' }).isLogDataType()).toBeTruthy();
-    expect(ExplorerDataView.create({ id, title: 'auditbeat-*' }).isLogDataType()).toBeTruthy();
-    expect(ExplorerDataView.create({ id, title: 'logs*' }).isLogDataType()).toBeTruthy();
-    expect(ExplorerDataView.create({ id, title: 'logs-*' }).isLogDataType()).toBeTruthy();
-    expect(ExplorerDataView.create({ id, title: 'logs-*-*' }).isLogDataType()).toBeTruthy();
+    expect(ExplorerDataView.create({ id, title: 'auditbeat*' }).isLogsDataType()).toBeTruthy();
+    expect(ExplorerDataView.create({ id, title: 'auditbeat-*' }).isLogsDataType()).toBeTruthy();
+    expect(ExplorerDataView.create({ id, title: 'logs*' }).isLogsDataType()).toBeTruthy();
+    expect(ExplorerDataView.create({ id, title: 'logs-*' }).isLogsDataType()).toBeTruthy();
+    expect(ExplorerDataView.create({ id, title: 'logs-*-*' }).isLogsDataType()).toBeTruthy();
     expect(
-      ExplorerDataView.create({ id, title: 'logs-system.syslog-*' }).isLogDataType()
+      ExplorerDataView.create({ id, title: 'logs-system.syslog-*' }).isLogsDataType()
     ).toBeTruthy();
     expect(
-      ExplorerDataView.create({ id, title: 'logs-system.syslog-default' }).isLogDataType()
+      ExplorerDataView.create({ id, title: 'logs-system.syslog-default' }).isLogsDataType()
     ).toBeTruthy();
-    expect(ExplorerDataView.create({ id, title: 'cluster1:logs-*' }).isLogDataType()).toBeTruthy();
+    expect(ExplorerDataView.create({ id, title: 'cluster1:logs-*' }).isLogsDataType()).toBeTruthy();
     expect(
-      ExplorerDataView.create({ id, title: 'cluster1:logs-*-*' }).isLogDataType()
+      ExplorerDataView.create({ id, title: 'cluster1:logs-*-*' }).isLogsDataType()
     ).toBeTruthy();
     expect(
-      ExplorerDataView.create({ id, title: 'cluster1:logs-system.syslog-*' }).isLogDataType()
+      ExplorerDataView.create({ id, title: 'cluster1:logs-system.syslog-*' }).isLogsDataType()
     ).toBeTruthy();
     expect(
       ExplorerDataView.create({
         id,
         title: 'cluster1:logs-system.syslog-default',
-      }).isLogDataType()
+      }).isLogsDataType()
     ).toBeTruthy();
     expect(
-      ExplorerDataView.create({ id, title: 'logs-*,cluster1:logs-*' }).isLogDataType()
+      ExplorerDataView.create({ id, title: 'logs-*,cluster1:logs-*' }).isLogsDataType()
     ).toBeTruthy();
     expect(
-      ExplorerDataView.create({ id, title: 'logs-*,cluster1:logs-*,' }).isLogDataType()
+      ExplorerDataView.create({ id, title: 'logs-*,cluster1:logs-*,' }).isLogsDataType()
     ).toBeTruthy();
     expect(
-      ExplorerDataView.create({ id, title: 'cluster1:logs-*,cluster2:logs-*' }).isLogDataType()
+      ExplorerDataView.create({ id, title: 'cluster1:logs-*,cluster2:logs-*' }).isLogsDataType()
     ).toBeTruthy();
     expect(
-      ExplorerDataView.create({ id, title: 'cluster1:logs-*,cluster2:logs-*' }).isLogDataType()
+      ExplorerDataView.create({ id, title: 'cluster1:logs-*,cluster2:logs-*' }).isLogsDataType()
     ).toBeTruthy();
     expect(
       ExplorerDataView.create({
         id,
         title: '*:logs-system.syslog-*,*:logs-system.errors-*',
-      }).isLogDataType()
+      }).isLogsDataType()
     ).toBeTruthy();
 
     // Assert falsy cases
-    expect(ExplorerDataView.create({ id, title: 'auditbeats*' }).isLogDataType()).toBeFalsy();
-    expect(ExplorerDataView.create({ id, title: 'auditbeats-*' }).isLogDataType()).toBeFalsy();
-    expect(ExplorerDataView.create({ id, title: 'logss*' }).isLogDataType()).toBeFalsy();
-    expect(ExplorerDataView.create({ id, title: 'logss-*' }).isLogDataType()).toBeFalsy();
-    expect(ExplorerDataView.create({ id, title: 'metrics*' }).isLogDataType()).toBeFalsy();
-    expect(ExplorerDataView.create({ id, title: 'metrics-*' }).isLogDataType()).toBeFalsy();
+    expect(ExplorerDataView.create({ id, title: 'auditbeats*' }).isLogsDataType()).toBeFalsy();
+    expect(ExplorerDataView.create({ id, title: 'auditbeats-*' }).isLogsDataType()).toBeFalsy();
+    expect(ExplorerDataView.create({ id, title: 'logss*' }).isLogsDataType()).toBeFalsy();
+    expect(ExplorerDataView.create({ id, title: 'logss-*' }).isLogsDataType()).toBeFalsy();
+    expect(ExplorerDataView.create({ id, title: 'metrics*' }).isLogsDataType()).toBeFalsy();
+    expect(ExplorerDataView.create({ id, title: 'metrics-*' }).isLogsDataType()).toBeFalsy();
     expect(
       ExplorerDataView.create({
         id,
         title: '*:metrics-system.syslog-*,logs-system.errors-*',
-      }).isLogDataType()
+      }).isLogsDataType()
     ).toBeFalsy();
     expect(
-      ExplorerDataView.create({ id, title: 'cluster1:logs-*,clust,er2:logs-*' }).isLogDataType()
+      ExplorerDataView.create({ id, title: 'cluster1:logs-*,clust,er2:logs-*' }).isLogsDataType()
     ).toBeFalsy();
     expect(
-      ExplorerDataView.create({ id, title: 'cluster1:logs-*,    cluster2:logs-*' }).isLogDataType()
+      ExplorerDataView.create({ id, title: 'cluster1:logs-*,    cluster2:logs-*' }).isLogsDataType()
     ).toBeFalsy();
   });
 });
