@@ -1087,6 +1087,122 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       describe('customFields', async () => {
+        it('patches a case with missing required custom fields to their default values', async () => {
+          await createConfiguration(
+            supertest,
+            getConfigurationRequest({
+              overrides: {
+                customFields: [
+                  {
+                    key: 'text_custom_field',
+                    label: 'text',
+                    type: CustomFieldTypes.TEXT,
+                    defaultValue: 'default value',
+                    required: true,
+                  },
+                  {
+                    key: 'toggle_custom_field',
+                    label: 'toggle',
+                    type: CustomFieldTypes.TOGGLE,
+                    defaultValue: false,
+                    required: true,
+                  },
+                ],
+              },
+            })
+          );
+
+          const originalValues = [
+            {
+              key: 'text_custom_field',
+              type: CustomFieldTypes.TEXT,
+              value: 'hello',
+            },
+            {
+              key: 'toggle_custom_field',
+              type: CustomFieldTypes.TOGGLE,
+              value: true,
+            },
+          ] as CaseCustomFields;
+
+          const postedCase = await createCase(supertest, {
+            ...postCaseReq,
+            customFields: originalValues,
+          });
+
+          const patchedCases = await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  customFields: [],
+                },
+              ],
+            },
+          });
+
+          expect(patchedCases[0].customFields).to.eql([
+            { ...originalValues[0], value: 'default value' },
+            { ...originalValues[1], value: false },
+          ]);
+        });
+
+        it('400s trying to patch a case with missing required custom fields if they dont have default values', async () => {
+          await createConfiguration(
+            supertest,
+            getConfigurationRequest({
+              overrides: {
+                customFields: [
+                  {
+                    key: 'text_custom_field',
+                    label: 'text',
+                    type: CustomFieldTypes.TEXT,
+                    required: true,
+                  },
+                  {
+                    key: 'toggle_custom_field',
+                    label: 'toggle',
+                    type: CustomFieldTypes.TOGGLE,
+                    required: true,
+                  },
+                ],
+              },
+            })
+          );
+
+          const postedCase = await createCase(supertest, {
+            ...postCaseReq,
+            customFields: [
+              {
+                key: 'text_custom_field',
+                type: CustomFieldTypes.TEXT,
+                value: 'hello',
+              },
+              {
+                key: 'toggle_custom_field',
+                type: CustomFieldTypes.TOGGLE,
+                value: true,
+              },
+            ],
+          });
+
+          await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  customFields: [],
+                },
+              ],
+            },
+            expectedHttpCode: 400,
+          });
+        });
+
         it('400s when trying to patch with duplicated custom field keys', async () => {
           const postedCase = await createCase(supertest, postCaseReq);
 
@@ -1153,68 +1269,6 @@ export default ({ getService }: FtrProviderContext): void => {
             },
             expectedHttpCode: 400,
           });
-        });
-
-        it('patches a case with missing required custom fields to their default values', async () => {
-          await createConfiguration(
-            supertest,
-            getConfigurationRequest({
-              overrides: {
-                customFields: [
-                  {
-                    key: 'text_custom_field',
-                    label: 'text',
-                    type: CustomFieldTypes.TEXT,
-                    defaultValue: 'default value',
-                    required: true,
-                  },
-                  {
-                    key: 'toggle_custom_field',
-                    label: 'toggle',
-                    type: CustomFieldTypes.TOGGLE,
-                    defaultValue: false,
-                    required: true,
-                  },
-                ],
-              },
-            })
-          );
-
-          const originalValues = [
-            {
-              key: 'text_custom_field',
-              type: CustomFieldTypes.TEXT,
-              value: 'hello',
-            },
-            {
-              key: 'toggle_custom_field',
-              type: CustomFieldTypes.TOGGLE,
-              value: true,
-            },
-          ] as CaseCustomFields;
-
-          const postedCase = await createCase(supertest, {
-            ...postCaseReq,
-            customFields: originalValues,
-          });
-
-          const patchedCases = await updateCase({
-            supertest,
-            params: {
-              cases: [
-                {
-                  id: postedCase.id,
-                  version: postedCase.version,
-                  customFields: [],
-                },
-              ],
-            },
-          });
-
-          expect(patchedCases[0].customFields).to.eql([
-            { ...originalValues[0], value: 'default value' },
-            { ...originalValues[1], value: false },
-          ]);
         });
 
         it('400s trying to patch required custom fields with value: null', async () => {

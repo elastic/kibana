@@ -8,8 +8,9 @@
 import { MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH } from '../../../constants';
 import { limitedStringSchema } from '../../../schema';
 
-export const CaseCustomFieldTextWithValidationValueRt = limitedStringSchema({
-  fieldName: 'value',
-  min: 1,
-  max: MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
-});
+export const CaseCustomFieldTextWithValidationValueRt = (fieldName: string) =>
+  limitedStringSchema({
+    fieldName,
+    min: 1,
+    max: MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
+  });

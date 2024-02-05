@@ -343,7 +343,7 @@ describe('client', () => {
           casesClientInternal
         )
       ).rejects.toThrow(
-        'Failed to get patch configure in route: Error: Invalid custom field types in request for the following keys: "text label"'
+        'Failed to get patch configure in route: Error: Invalid custom field types in request for the following labels: "text label"'
       );
     });
 

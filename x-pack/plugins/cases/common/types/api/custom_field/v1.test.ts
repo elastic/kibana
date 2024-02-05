@@ -11,8 +11,10 @@ import { CaseCustomFieldTextWithValidationValueRt } from './v1';
 
 describe('Custom Fields', () => {
   describe('CaseCustomFieldTextWithValidationValueRt', () => {
+    const customFieldValueType = CaseCustomFieldTextWithValidationValueRt('value');
+
     it('decodes strings correctly', () => {
-      const query = CaseCustomFieldTextWithValidationValueRt.decode('foobar');
+      const query = customFieldValueType.decode('foobar');
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -21,7 +23,7 @@ describe('Custom Fields', () => {
     });
 
     it('the value cannot be empty', () => {
-      expect(PathReporter.report(CaseCustomFieldTextWithValidationValueRt.decode(''))[0]).toContain(
+      expect(PathReporter.report(customFieldValueType.decode(''))[0]).toContain(
         'The value field cannot be an empty string.'
       );
     });
@@ -29,9 +31,7 @@ describe('Custom Fields', () => {
     it(`limits the length to ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH}`, () => {
       expect(
         PathReporter.report(
-          CaseCustomFieldTextWithValidationValueRt.decode(
-            '#'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1)
-          )
+          customFieldValueType.decode('#'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1))
         )[0]
       ).toContain(
         `The length of the value is too long. The maximum length is ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH}.`

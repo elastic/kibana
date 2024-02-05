@@ -41,37 +41,16 @@ export function validateCustomFieldTypesInRequest({
     throw Boom.badRequest('No custom fields configured.');
   }
 
-  let invalidCustomFieldKeys: string[] = [];
-
-  const validCustomFields = intersectionWith(
+  const invalidCustomFields = intersectionWith(
     customFieldsConfiguration,
     requestCustomFields,
     (requiredVal, requestedVal) =>
-      requiredVal.key === requestedVal.key && requiredVal.type === requestedVal.type
-  );
+      requiredVal.key === requestedVal.key && requiredVal.type !== requestedVal.type
+  ).map((config) => `"${config.label ? config.label : 'Unknown'}"`);
 
-  if (requestCustomFields.length !== validCustomFields.length) {
-    invalidCustomFieldKeys = differenceWith(
-      requestCustomFields,
-      validCustomFields,
-      (requiredVal, requestedVal) => requiredVal.key === requestedVal.key
-    ).map((e) => e.key);
-  }
-
-  if (invalidCustomFieldKeys.length) {
-    const invalidCustomFieldLabels: string[] = [];
-
-    invalidCustomFieldKeys.forEach((invalidFieldKey) => {
-      const configuration = customFieldsConfiguration.find((item) => item.key === invalidFieldKey);
-
-      if (configuration !== undefined) {
-        const invalidLabel = configuration.label ? configuration.label : 'Unknown';
-        invalidCustomFieldLabels.push(`"${invalidLabel}"`);
-      }
-    });
-
+  if (invalidCustomFields.length) {
     throw Boom.badRequest(
-      `The following custom fields have the wrong type in the request: ${invalidCustomFieldLabels.join(
+      `The following custom fields have the wrong type in the request: ${invalidCustomFields.join(
         ', '
       )}`
     );

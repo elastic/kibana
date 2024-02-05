@@ -42,7 +42,7 @@ export const TextCustomFieldConfigurationRt = rt.intersection([
   CustomFieldConfigurationWithoutTypeRt,
   rt.exact(
     rt.partial({
-      defaultValue: rt.union([CaseCustomFieldTextWithValidationValueRt, rt.null]),
+      defaultValue: rt.union([CaseCustomFieldTextWithValidationValueRt('defaultValue'), rt.null]),
     })
   ),
 ]);

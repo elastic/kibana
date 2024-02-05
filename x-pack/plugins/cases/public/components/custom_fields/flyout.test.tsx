@@ -21,12 +21,7 @@ import { CustomFieldTypes } from '../../../common/types/domain';
 
 import * as i18n from './translations';
 
-// FLAKY: https://github.com/elastic/kibana/issues/174285
-// FLAKY: https://github.com/elastic/kibana/issues/174286
-// FLAKY: https://github.com/elastic/kibana/issues/174287
-// FLAKY: https://github.com/elastic/kibana/issues/174288
-// FLAKY: https://github.com/elastic/kibana/issues/174289
-describe.skip('CustomFieldFlyout ', () => {
+describe('CustomFieldFlyout ', () => {
   let appMockRender: AppMockRenderer;
 
   const props = {
@@ -57,13 +52,11 @@ describe.skip('CustomFieldFlyout ', () => {
 
     userEvent.type(await screen.findByTestId('custom-field-label-input'), message);
 
-    await waitFor(() => {
-      expect(
-        screen.getByText(
-          i18n.MAX_LENGTH_ERROR(i18n.FIELD_LABEL.toLocaleLowerCase(), MAX_CUSTOM_FIELD_LABEL_LENGTH)
-        )
-      ).toBeInTheDocument();
-    });
+    expect(
+      await screen.findByText(
+        i18n.MAX_LENGTH_ERROR(i18n.FIELD_LABEL.toLocaleLowerCase(), MAX_CUSTOM_FIELD_LABEL_LENGTH)
+      )
+    ).toBeInTheDocument();
   });
 
   it('does not call onSaveField when error', async () => {
@@ -71,11 +64,9 @@ describe.skip('CustomFieldFlyout ', () => {
 
     userEvent.click(await screen.findByTestId('custom-field-flyout-save'));
 
-    await waitFor(() => {
-      expect(
-        screen.getByText(i18n.REQUIRED_FIELD(i18n.FIELD_LABEL.toLocaleLowerCase()))
-      ).toBeInTheDocument();
-    });
+    expect(
+      await screen.findByText(i18n.REQUIRED_FIELD(i18n.FIELD_LABEL.toLocaleLowerCase()))
+    ).toBeInTheDocument();
 
     expect(props.onSaveField).not.toBeCalled();
   });
@@ -139,6 +130,23 @@ describe.skip('CustomFieldFlyout ', () => {
       });
     });
 
+    it('calls onSaveField with the correct params when a custom field is required and the defaultValue is missing', async () => {
+      appMockRender.render(<CustomFieldFlyout {...props} />);
+
+      userEvent.paste(await screen.findByTestId('custom-field-label-input'), 'Summary');
+      userEvent.click(await screen.findByTestId('text-custom-field-required'));
+      userEvent.click(await screen.findByTestId('custom-field-flyout-save'));
+
+      await waitFor(() => {
+        expect(props.onSaveField).toBeCalledWith({
+          key: expect.anything(),
+          label: 'Summary',
+          required: true,
+          type: CustomFieldTypes.TEXT,
+        });
+      });
+    });
+
     it('renders flyout with the correct data when an initial customField value exists', async () => {
       appMockRender.render(
         <CustomFieldFlyout {...{ ...props, customField: customFieldsConfigurationMock[0] }} />
@@ -156,18 +164,6 @@ describe.skip('CustomFieldFlyout ', () => {
       );
     });
 
-    it('shows error if the default value is missing', async () => {
-      appMockRender.render(<CustomFieldFlyout {...props} />);
-
-      userEvent.paste(await screen.findByTestId('custom-field-label-input'), 'Summary');
-      userEvent.click(await screen.findByTestId('text-custom-field-required'));
-      userEvent.click(await screen.findByTestId('custom-field-flyout-save'));
-
-      await waitFor(() => {
-        expect(screen.getByText('A default value is required.')).toBeInTheDocument();
-      });
-    });
-
     it('shows an error if default value is too long', async () => {
       appMockRender.render(<CustomFieldFlyout {...props} />);
 
@@ -178,16 +174,14 @@ describe.skip('CustomFieldFlyout ', () => {
         'z'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1)
       );
 
-      await waitFor(() => {
-        expect(
-          screen.getByText(
-            i18n.MAX_LENGTH_ERROR(
-              i18n.DEFAULT_VALUE.toLowerCase(),
-              MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH
-            )
+      expect(
+        await screen.findByText(
+          i18n.MAX_LENGTH_ERROR(
+            i18n.DEFAULT_VALUE.toLowerCase(),
+            MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH
           )
-        ).toBeInTheDocument();
-      });
+        )
+      ).toBeInTheDocument();
     });
   });
 

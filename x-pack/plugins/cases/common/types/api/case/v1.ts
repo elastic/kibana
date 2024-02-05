@@ -46,7 +46,7 @@ import { CaseCustomFieldTextWithValidationValueRt } from '../custom_field/v1';
 const CaseCustomFieldTextWithValidationRt = rt.strict({
   key: rt.string,
   type: CustomFieldTextTypeRt,
-  value: rt.union([CaseCustomFieldTextWithValidationValueRt, rt.null]),
+  value: rt.union([CaseCustomFieldTextWithValidationValueRt('value'), rt.null]),
 });
 
 const CustomFieldRt = rt.union([CaseCustomFieldTextWithValidationRt, CaseCustomFieldToggleRt]);

@@ -34,7 +34,7 @@ export const validateCustomFieldTypesInRequest = ({
 
   if (invalidFields.length > 0) {
     throw Boom.badRequest(
-      `Invalid custom field types in request for the following keys: ${invalidFields.join(', ')}`
+      `Invalid custom field types in request for the following labels: ${invalidFields.join(', ')}`
     );
   }
 };

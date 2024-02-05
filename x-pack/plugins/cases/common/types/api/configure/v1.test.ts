@@ -301,7 +301,6 @@ describe('configure', () => {
       label: 'Text Custom Field',
       type: CustomFieldTypes.TEXT,
       required: true,
-      defaultValue: 'foobar',
     };
 
     it('has expected attributes in request', () => {
@@ -310,6 +309,18 @@ describe('configure', () => {
       expect(query).toStrictEqual({
         _tag: 'Right',
         right: { ...defaultRequest },
+      });
+    });
+
+    it('has expected attributes in request with defaultValue', () => {
+      const query = TextCustomFieldConfigurationRt.decode({
+        ...defaultRequest,
+        defaultValue: 'foobar',
+      });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest, defaultValue: 'foobar' },
       });
     });
 
@@ -342,7 +353,7 @@ describe('configure', () => {
           })
         )[0]
       ).toContain(
-        `The length of the value is too long. The maximum length is ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH}.`
+        `The length of the defaultValue is too long. The maximum length is ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH}.`
       );
     });
 
@@ -354,7 +365,7 @@ describe('configure', () => {
             defaultValue: '',
           })
         )[0]
-      ).toContain('The value field cannot be an empty string.');
+      ).toContain('The defaultValue field cannot be an empty string.');
     });
   });
 
@@ -363,8 +374,7 @@ describe('configure', () => {
       key: 'my_toggle_custom_field',
       label: 'Toggle Custom Field',
       type: CustomFieldTypes.TOGGLE,
-      required: true,
-      defaultValue: false,
+      required: false,
     };
 
     it('has expected attributes in request', () => {
@@ -390,6 +400,7 @@ describe('configure', () => {
         PathReporter.report(
           ToggleCustomFieldConfigurationRt.decode({
             ...defaultRequest,
+            required: true,
             defaultValue: 'foobar',
           })
         )[0]

@@ -27,7 +27,7 @@ describe('validators', () => {
           ],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid custom field types in request for the following keys: \\"label 1\\", \\"label 2\\""`
+        `"Invalid custom field types in request for the following labels: \\"label 1\\", \\"label 2\\""`
       );
     });
 
@@ -45,7 +45,7 @@ describe('validators', () => {
           ],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid custom field types in request for the following keys: \\"label 1\\""`
+        `"Invalid custom field types in request for the following labels: \\"label 1\\""`
       );
     });
 
