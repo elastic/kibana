@@ -34,7 +34,6 @@ import type {
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
   SuspendProcessActionOutputContent,
-  Host,
   ImmutableObject,
   HostMetadataInterface,
 } from '../../../../../common/endpoint/types';
