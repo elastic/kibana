@@ -18,7 +18,7 @@ import {
   buildCustomThresholdRule,
 } from '../../mocks/custom_threshold_rule';
 import { CustomThresholdAlertFields } from '../../types';
-import { ExpressionChart } from '../expression_chart';
+import { RuleConditionChart } from '../rule_condition_chart/rule_condition_chart';
 import AlertDetailsAppSection, { CustomThresholdAlert } from './alert_details_app_section';
 import { Groups } from './groups';
 import { Tags } from './tags';
@@ -37,8 +37,8 @@ jest.mock('@kbn/observability-get-padded-alert-time-range-util', () => ({
   }),
 }));
 
-jest.mock('../expression_chart', () => ({
-  ExpressionChart: jest.fn(() => <div data-test-subj="ExpressionChart" />),
+jest.mock('../rule_condition_chart/rule_condition_chart', () => ({
+  RuleConditionChart: jest.fn(() => <div data-test-subj="RuleConditionChart" />),
 }));
 
 jest.mock('../../../../utils/kibana_react', () => ({
@@ -141,11 +141,14 @@ describe('AlertDetailsAppSection', () => {
   });
 
   it('should render annotations', async () => {
-    const mockedExpressionChart = jest.fn(() => <div data-test-subj="ExpressionChart" />);
-    (ExpressionChart as jest.Mock).mockImplementation(mockedExpressionChart);
-    const alertDetailsAppSectionComponent = renderComponent();
+    const mockedRuleConditionChart = jest.fn(() => <div data-test-subj="RuleConditionChart" />);
+    (RuleConditionChart as jest.Mock).mockImplementation(mockedRuleConditionChart);
+    const alertDetailsAppSectionComponent = renderComponent(
+      {},
+      { ['kibana.alert.end']: '2023-03-28T14:40:00.000Z' }
+    );
 
-    expect(alertDetailsAppSectionComponent.getAllByTestId('ExpressionChart').length).toBe(3);
-    expect(mockedExpressionChart.mock.calls[0]).toMatchSnapshot();
+    expect(alertDetailsAppSectionComponent.getAllByTestId('RuleConditionChart').length).toBe(3);
+    expect(mockedRuleConditionChart.mock.calls[0]).toMatchSnapshot();
   });
 });

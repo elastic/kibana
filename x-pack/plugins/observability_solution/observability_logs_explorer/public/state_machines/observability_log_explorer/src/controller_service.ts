@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CreateLogExplorerController } from '@kbn/logs-explorer-plugin/public';
+import type { CreateLogsExplorerController } from '@kbn/logs-explorer-plugin/public';
 import type { InvokeCreator } from 'xstate';
 import type { ObservabilityLogExplorerContext, ObservabilityLogExplorerEvent } from './types';
 
@@ -13,7 +13,7 @@ export const createController =
   ({
     createLogExplorerController,
   }: {
-    createLogExplorerController: CreateLogExplorerController;
+    createLogExplorerController: CreateLogsExplorerController;
   }): InvokeCreator<ObservabilityLogExplorerContext, ObservabilityLogExplorerEvent> =>
   (context, event) =>
   (send) => {
