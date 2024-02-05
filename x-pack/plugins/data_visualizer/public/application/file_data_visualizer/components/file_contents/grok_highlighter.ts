@@ -6,7 +6,7 @@
  */
 
 import { MessageImporter } from '@kbn/file-upload-plugin/public';
-import type { HttpSetup } from '@kbn/core-http-browser';
+import type { HttpSetup } from '@kbn/core/public';
 import type { ImportFactoryOptions } from '@kbn/file-upload-plugin/public/importer';
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 
