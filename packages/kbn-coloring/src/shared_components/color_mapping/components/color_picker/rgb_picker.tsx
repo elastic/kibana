@@ -143,7 +143,7 @@ export function RGBPicker({
                     if (chromajs.valid(textColor)) {
                       setCustomColorMappingColor({
                         type: 'colorCode',
-                        colorCode: chromajs(textColor).hex(),
+                        colorCode: textColor,
                       });
                     }
                   }}
