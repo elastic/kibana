@@ -40,7 +40,7 @@ export const useBulkUntrackAlertsByQuery = () => {
     },
     {
       context: AlertsTableQueryContext,
-      onError: (_err, params) => {
+      onError: () => {
         toasts.addDanger(
           i18n.translate('xpack.triggersActionsUI.alertsTable.untrackByQuery.failedMessage', {
             defaultMessage: 'Failed to untrack alerts by query',
@@ -48,11 +48,10 @@ export const useBulkUntrackAlertsByQuery = () => {
         );
       },
 
-      onSuccess: (_, params) => {
+      onSuccess: () => {
         toasts.addSuccess(
           i18n.translate('xpack.triggersActionsUI.alertsTable.untrackByQuery.successMessage', {
-            defaultMessage: 'Untracked {uuidsCount, plural, one {alert} other {alerts}}',
-            values: { uuidsCount: 5 },
+            defaultMessage: 'Untracked alerts',
           })
         );
       },
