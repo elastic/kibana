@@ -89,7 +89,6 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       hosts: agentIds.hosts.map((endpoint: ImmutableObject<HostMetadataInterface>) => {
         return {
           hostId: endpoint.agent.id,
-          agentType: 'endpoint',
           hostname: endpoint.host.hostname,
         };
       }),
