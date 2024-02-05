@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import { stringValidator } from '@kbn/ml-form-utils';
+
 import {
   frequencyValidator,
   integerAboveZeroValidator,
   transformSettingsNumberOfRetriesValidator,
   transformSettingsPageSearchSizeValidator,
   retentionPolicyMaxAgeValidator,
-  stringValidator,
 } from '../../../common/validators';
 
 export const validators = {

@@ -14,6 +14,5 @@ export { isRetentionPolicyMaxAge } from './is_retention_policy_max_age';
 export { isTransformWizardFrequency } from './is_transform_wizard_frequency';
 export { parseDurationAboveZero } from './parse_duration_above_zero';
 export { retentionPolicyMaxAgeValidator } from './retention_policy_max_age_validator';
-export { stringValidator } from './string_validator';
 export { transformSettingsNumberOfRetriesValidator } from './transform_settings_number_of_retries_validator';
 export { transformSettingsPageSearchSizeValidator } from './transform_settings_page_search_size_validator';

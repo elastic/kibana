@@ -20,7 +20,18 @@ export function createFormSlice<FF extends string, FS extends string, VN extends
   validators: Record<VN, Validator>
 ) {
   const initialState = {
-    formFields: createFormFieldsMap(formFields),
+    formFields: createFormFieldsMap(
+      formFields.map((formField) => {
+        formField.errors = getFormFieldErrors(
+          formField.value,
+          formField.validator,
+          formField.isOptional,
+          formField.reservedValues
+        );
+
+        return formField;
+      })
+    ),
     formSections: createFormSectionsMap(formSections),
     submitErrorMessage: undefined as string | undefined,
   };

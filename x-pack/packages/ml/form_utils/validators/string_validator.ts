@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Validator } from '@kbn/ml-form-utils/validator';
+import type { Validator } from '../validator';
 
 import { requiredErrorMessage, stringNotValidErrorMessage } from './messages';
 
