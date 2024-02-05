@@ -54,6 +54,7 @@ import {
   TimeRange,
   ComparisonHistogram,
 } from './types';
+import { isFulfilled, isRejected } from '../common/util/promise_all_settled_utils';
 
 export const getDataComparisonType = (kibanaType: string): DataDriftField['type'] => {
   switch (kibanaType) {
@@ -587,12 +588,6 @@ const fetchHistogramData = async ({
     return dataSearch(histogramRequest, signal);
   }
 };
-
-const isFulfilled = <T>(
-  input: PromiseSettledResult<Awaited<T>>
-): input is PromiseFulfilledResult<Awaited<T>> => input.status === 'fulfilled';
-const isRejected = <T>(input: PromiseSettledResult<Awaited<T>>): input is PromiseRejectedResult =>
-  input.status === 'rejected';
 
 type EsRequestParams = NonNullable<
   IKibanaSearchRequest<NonNullable<estypes.SearchRequest>>['params']

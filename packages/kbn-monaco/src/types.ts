@@ -32,6 +32,7 @@ export interface LanguageProvidersModule<Deps = unknown> {
   getSuggestionProvider: (callbacks?: Deps) => monaco.languages.CompletionItemProvider;
   getSignatureProvider?: (callbacks?: Deps) => monaco.languages.SignatureHelpProvider;
   getHoverProvider?: (callbacks?: Deps) => monaco.languages.HoverProvider;
+  getCodeActionProvider?: (callbacks?: Deps) => monaco.languages.CodeActionProvider;
 }
 
 export interface CustomLangModuleType<Deps = unknown>
@@ -47,6 +48,7 @@ export interface EditorError {
   endLineNumber: number;
   endColumn: number;
   message: string;
+  code?: string | undefined;
 }
 
 export interface LangValidation {

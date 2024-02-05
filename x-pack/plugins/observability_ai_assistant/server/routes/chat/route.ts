@@ -21,6 +21,7 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
   params: t.type({
     body: t.intersection([
       t.type({
+        name: t.string,
         messages: t.array(messageRt),
         connectorId: t.string,
         functions: t.array(
@@ -46,7 +47,7 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
     }
 
     const {
-      body: { messages, connectorId, functions, functionCall },
+      body: { name, messages, connectorId, functions, functionCall },
     } = params;
 
     const controller = new AbortController();
@@ -55,7 +56,7 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
       controller.abort();
     });
 
-    const response$ = await client.chat({
+    const response$ = await client.chat(name, {
       messages,
       connectorId,
       signal: controller.signal,
