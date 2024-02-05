@@ -20,18 +20,18 @@ While not fully realized yet, the dependency graph would roughly resemble the fo
 ```mermaid
 flowchart TD
 
-obs_log_explorer_app(Observability Logs Explorer app)
+obs_logs_explorer_app(Observability Logs Explorer app)
 obs_apps(Other Observability apps)
-obs_log_explorer_component(Observability Logs Explorer component)
+obs_logs_explorer_component(Observability Logs Explorer component)
 other_apps(Other non-Observability apps)
 logs_explorer_component(Logs Explorer component)
 platform(Kibana Platform)
 discover(Discover Main container)
 fleet(Fleet / EPM)
 
-obs_log_explorer_app --> obs_log_explorer_component
-obs_apps --> obs_log_explorer_component
-obs_log_explorer_component --> logs_explorer_component
+obs_logs_explorer_app --> obs_logs_explorer_component
+obs_apps --> obs_logs_explorer_component
+obs_logs_explorer_component --> logs_explorer_component
 other_apps --> logs_explorer_component
 logs_explorer_component --> discover
 logs_explorer_component --> platform

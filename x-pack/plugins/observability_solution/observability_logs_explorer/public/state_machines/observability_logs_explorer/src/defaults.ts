@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { Plugin } from '@kbn/core/server';
+import { CommonObservabilityLogsExplorerContext } from './types';
 
-export class ObservabilityLogsExplorerServerPlugin implements Plugin {
-  setup() {}
-
-  start() {}
-}
+export const DEFAULT_CONTEXT: CommonObservabilityLogsExplorerContext = {
+  initialLogsExplorerState: {},
+};

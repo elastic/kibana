@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { CommonObservabilityLogExplorerContext } from './types';
+import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 
-export const DEFAULT_CONTEXT: CommonObservabilityLogExplorerContext = {
-  initialLogExplorerState: {},
-};
+export type ExportableRule = Omit<RuleResponse, 'execution_summary'>;

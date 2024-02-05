@@ -12,24 +12,24 @@ import * as Either from 'fp-ts/lib/Either';
 import * as rt from 'io-ts';
 import { InvokeCreator } from 'xstate';
 import { OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY } from '../../../../common';
-import type { ObservabilityLogExplorerContext, ObservabilityLogExplorerEvent } from './types';
+import type { ObservabilityLogsExplorerContext, ObservabilityLogsExplorerEvent } from './types';
 import * as urlSchemaV1 from './url_schema_v1';
 
-interface ObservabilityLogExplorerUrlStateDependencies {
+interface ObservabilityLogsExplorerUrlStateDependencies {
   toastsService: IToasts;
   urlStateStorageContainer: IKbnUrlStateStorage;
 }
 
-export const updateUrlFromLogExplorerState =
+export const updateUrlFromLogsExplorerState =
   ({ urlStateStorageContainer }: { urlStateStorageContainer: IKbnUrlStateStorage }) =>
-  (context: ObservabilityLogExplorerContext, event: ObservabilityLogExplorerEvent) => {
-    if (!('logExplorerState' in context)) {
+  (context: ObservabilityLogsExplorerContext, event: ObservabilityLogsExplorerEvent) => {
+    if (!('logsExplorerState' in context)) {
       return;
     }
 
     // we want to write in the newest schema
     const encodedUrlStateValues = urlSchemaV1.stateFromUntrustedUrlRT.encode(
-      context.logExplorerState
+      context.logsExplorerState
     );
 
     urlStateStorageContainer.set(OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY, encodedUrlStateValues, {
@@ -41,9 +41,9 @@ export const initializeFromUrl =
   ({
     toastsService,
     urlStateStorageContainer,
-  }: ObservabilityLogExplorerUrlStateDependencies): InvokeCreator<
-    ObservabilityLogExplorerContext,
-    ObservabilityLogExplorerEvent
+  }: ObservabilityLogsExplorerUrlStateDependencies): InvokeCreator<
+    ObservabilityLogsExplorerContext,
+    ObservabilityLogsExplorerEvent
   > =>
   (_context, _event) =>
   (send) => {

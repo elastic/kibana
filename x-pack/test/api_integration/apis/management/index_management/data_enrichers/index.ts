@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Plugin } from '@kbn/core/server';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-export class ObservabilityLogsExplorerServerPlugin implements Plugin {
-  setup() {}
-
-  start() {}
-}
+export default ({ loadTestFile }: FtrProviderContext) => {
+  describe('Index Management: data enrichers', function () {
+    loadTestFile(require.resolve('./ilm'));
+  });
+};
