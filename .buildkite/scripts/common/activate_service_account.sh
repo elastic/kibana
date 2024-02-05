@@ -4,23 +4,24 @@ set -euo pipefail
 
 source .buildkite/scripts/common/vault_fns.sh
 
-ARG0="${1:-}"
+BUCKET_OR_EMAIL="${1:-}"
 
-if [[ -z "$ARG0" ]]; then
+if [[ -z "$BUCKET_OR_EMAIL" ]]; then
   echo "Usage: $0 <bucket_name|email>"
   exit 1
-elif [[ "$ARG0" == "-" ]]; then
+elif [[ "$BUCKET_OR_EMAIL" == "-" ]]; then
   echo "Unsetting impersonation"
   gcloud config unset auth/impersonate_service_account
   exit 0
 fi
 
-GCLOUD_USER=$(gcloud auth list --filter="status=ACTIVE" --format="value(account)")
 GCLOUD_EMAIL_POSTFIX="elastic-kibana-ci.iam.gserviceaccount.com"
 GCLOUD_SA_PROXY_EMAIL="kibana-ci-sa-proxy@$GCLOUD_EMAIL_POSTFIX"
 
+CURRENT_GCLOUD_USER=$(gcloud auth list --filter="status=ACTIVE" --format="value(account)")
 
-if [[ "$GCLOUD_USER" != "$GCLOUD_SA_PROXY_EMAIL" ]]; then
+# Verify that the service account proxy is activated
+if [[ "$CURRENT_GCLOUD_USER" != "$GCLOUD_SA_PROXY_EMAIL" ]]; then
     if [[ -x "$(command -v gcloud)" ]]; then
       AUTH_RESULT=$(gcloud auth activate-service-account --key-file="$KIBANA_SERVICE_ACCOUNT_PROXY_KEY" || "FAILURE")
       if [[ "$AUTH_RESULT" == "FAILURE" ]]; then
@@ -37,12 +38,12 @@ fi
 
 # Check if the arg is a service account e-mail or a bucket name
 EMAIL=""
-if [[ "$ARG0" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; then
-  EMAIL="$ARG0"
-elif [[ "$ARG0" =~ ^gs://* ]]; then
-  BUCKET_NAME="${ARG0:5}"
+if [[ "$BUCKET_OR_EMAIL" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; then
+  EMAIL="$BUCKET_OR_EMAIL"
+elif [[ "$BUCKET_OR_EMAIL" =~ ^gs://* ]]; then
+  BUCKET_NAME="${BUCKET_OR_EMAIL:5}"
 else
-  BUCKET_NAME="$ARG0"
+  BUCKET_NAME="$BUCKET_OR_EMAIL"
 fi
 
 if [[ -z "$EMAIL" ]]; then
@@ -71,10 +72,7 @@ if [[ -z "$EMAIL" ]]; then
   esac
 fi
 
-
-echo "Impersonating $EMAIL"
-
 # Activate the service account
+echo "Impersonating $EMAIL"
 gcloud config set auth/impersonate_service_account "$EMAIL"
-
 echo "Activated service account $EMAIL"
