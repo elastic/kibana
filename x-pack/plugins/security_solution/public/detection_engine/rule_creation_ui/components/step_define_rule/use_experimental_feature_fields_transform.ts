@@ -8,7 +8,7 @@
 import { useCallback } from 'react';
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
+import { isThreatMatchRule, isEqlRule } from '../../../../../common/detection_engine/utils';
 
 /**
  * transforms  DefineStepRule fields according to experimental feature flags
@@ -19,14 +19,19 @@ export const useExperimentalFeatureFieldsTransform = <T extends Partial<DefineSt
   const isAlertSuppressionForIndicatorMatchRuleEnabled = useIsExperimentalFeatureEnabled(
     'alertSuppressionForIndicatorMatchRuleEnabled'
   );
-
+  const isAlertSuppressionForEqlRuleEnabled = useIsExperimentalFeatureEnabled(
+    'alertSuppressionForEqlRuleEnabled'
+  );
   const transformer = useCallback(
     (fields: T) => {
       const isIndicatorMatchSuppressionDisabled = isThreatMatchRule(fields.ruleType)
         ? !isAlertSuppressionForIndicatorMatchRuleEnabled
         : false;
+      const isEqlSuppressionDisabled = isEqlRule(fields.ruleType)
+        ? !isAlertSuppressionForEqlRuleEnabled
+        : false;
       // reset any alert suppression values hidden behind feature flag
-      if (isIndicatorMatchSuppressionDisabled) {
+      if (isEqlSuppressionDisabled || isIndicatorMatchSuppressionDisabled) {
         return {
           ...fields,
           groupByFields: [],
@@ -38,7 +43,7 @@ export const useExperimentalFeatureFieldsTransform = <T extends Partial<DefineSt
 
       return fields;
     },
-    [isAlertSuppressionForIndicatorMatchRuleEnabled]
+    [isAlertSuppressionForIndicatorMatchRuleEnabled, isAlertSuppressionForEqlRuleEnabled]
   );
 
   return transformer;
