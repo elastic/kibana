@@ -44,7 +44,6 @@ describe(
       login(ROLES.soc_manager);
       login(ROLES.detections_admin);
       login(ROLES.platform_engineer);
-      login();
     });
 
     after(() => {

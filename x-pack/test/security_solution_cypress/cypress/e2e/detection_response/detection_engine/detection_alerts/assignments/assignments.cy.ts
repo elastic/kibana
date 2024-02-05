@@ -53,7 +53,6 @@ describe('Alert user assignment - ESS & Serverless', { tags: ['@ess', '@serverle
     login(ROLES.soc_manager);
     login(ROLES.detections_admin);
     login(ROLES.platform_engineer);
-    login();
   });
 
   after(() => {
