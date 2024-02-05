@@ -13,7 +13,7 @@ import {
 } from '@kbn/kibana-utils-plugin/public';
 import { mockStorage } from '@kbn/kibana-utils-plugin/public/storage/hashed_item_store/mock';
 import { FilterStateStore } from '@kbn/es-query';
-import { DiscoverAppLocatorDefinition } from './locator';
+import { DiscoverAppLocatorDefinition } from './app_locator';
 import { SerializableRecord } from '@kbn/utility-types';
 import { addProfile } from './customizations';
 

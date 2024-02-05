@@ -6,15 +6,4 @@
  * Side Public License, v 1.
  */
 
-import {
-  DASHBOARD_APP_ID,
-  DISCOVER_APP_ID,
-  DISCOVER_ESQL_LOCATOR,
-  VISUALIZE_APP_ID,
-} from './constants';
-
-export type AppId = typeof DISCOVER_APP_ID | typeof DASHBOARD_APP_ID | typeof VISUALIZE_APP_ID;
-
-export type DeepLinkId = AppId;
-
-export type LocatorId = typeof DISCOVER_ESQL_LOCATOR;
+export { useOnTryESQL, type UseOnTryEsqlParams } from './use_on_try_esql';
