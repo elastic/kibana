@@ -17,7 +17,7 @@ import styled from '@emotion/styled';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { LogExplorerTabs } from '@kbn/discover-plugin/public';
+import { LogsExplorerTabs } from '@kbn/discover-plugin/public';
 import React, { useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { filter, take } from 'rxjs';
@@ -43,7 +43,7 @@ const ServerlessTopNav = () => {
     <EuiHeader data-test-subj="logsExplorerHeaderMenu" css={{ boxShadow: 'none' }}>
       <EuiHeaderSection>
         <EuiHeaderSectionItem>
-          <LogExplorerTabs services={services} selectedTab="log-explorer" />
+          <LogsExplorerTabs services={services} selectedTab="logs-explorer" />
         </EuiHeaderSectionItem>
       </EuiHeaderSection>
       <EuiHeaderSection

@@ -37,7 +37,7 @@ function getCallbackMocks() {
         ? [{ name: 'unsupported_field', type: 'unsupported' }]
         : [
             ...fieldTypes.map((type) => ({ name: `${camelCase(type)}Field`, type })),
-            { name: 'any#Char$ field', type: 'number' },
+            { name: 'any#Char$Field', type: 'number' },
             { name: 'kubernetes.something.something', type: 'number' },
             { name: '@timestamp', type: 'date' },
           ]
@@ -311,6 +311,9 @@ describe('validation logic', () => {
     testErrorsAndWarnings('row a=1, missing_column', ['Unknown column [missing_column]']);
     testErrorsAndWarnings('row a=1, b = average()', ['Unknown function [average]']);
     testErrorsAndWarnings('row a = [1, 2, 3]', []);
+    testErrorsAndWarnings('row a = [true, false]', []);
+    testErrorsAndWarnings('row a = ["a", "b"]', []);
+    testErrorsAndWarnings('row a = null', []);
     testErrorsAndWarnings('row a = (1)', []);
     testErrorsAndWarnings('row a = (1, 2, 3)', [
       'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, LP, NOT, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found ","',
@@ -321,6 +324,12 @@ describe('validation logic', () => {
       testErrorsAndWarnings(`row NOT ${bool}`, []);
     }
 
+    testErrorsAndWarnings('row var = 1 in ', ['SyntaxError: expected {LP} but found "<EOF>"']);
+    testErrorsAndWarnings('row var = 1 in (', [
+      'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, LP, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found "<EOF>"',
+      'Error building [in]: expects exactly 2 arguments, passed 1 instead.',
+    ]);
+    testErrorsAndWarnings('row var = 1 not in ', ['SyntaxError: expected {LP} but found "<EOF>"']);
     testErrorsAndWarnings('row var = 1 in (1, 2, 3)', []);
     testErrorsAndWarnings('row var = 5 in (1, 2, 3)', []);
     testErrorsAndWarnings('row var = 5 not in (1, 2, 3)', []);
@@ -570,7 +579,7 @@ describe('validation logic', () => {
     testErrorsAndWarnings('from index | keep missingField, numberField, dateField', [
       'Unknown column [missingField]',
     ]);
-    testErrorsAndWarnings('from index | keep `any#Char$ field`', []);
+    testErrorsAndWarnings('from index | keep `any#Char$Field`', []);
     testErrorsAndWarnings(
       'from index | project ',
       [`SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'`],
@@ -623,7 +632,7 @@ describe('validation logic', () => {
     testErrorsAndWarnings('from index | drop missingField, numberField, dateField', [
       'Unknown column [missingField]',
     ]);
-    testErrorsAndWarnings('from index | drop `any#Char$ field`', []);
+    testErrorsAndWarnings('from index | drop `any#Char$Field`', []);
     testErrorsAndWarnings('from index | drop s*', []);
     testErrorsAndWarnings('from index | drop *Field', []);
     testErrorsAndWarnings('from index | drop s*Field', []);
@@ -663,6 +672,8 @@ describe('validation logic', () => {
 
     testErrorsAndWarnings('row a = "a" | mv_expand a', []);
     testErrorsAndWarnings('row a = [1, 2, 3] | mv_expand a', []);
+    testErrorsAndWarnings('row a = [true, false] | mv_expand a', []);
+    testErrorsAndWarnings('row a = ["a", "b"] | mv_expand a', []);
   });
 
   describe('rename', () => {
@@ -780,7 +791,7 @@ describe('validation logic', () => {
       testErrorsAndWarnings(`from a | where ${cond}`, []);
       testErrorsAndWarnings(`from a | where NOT ${cond}`, []);
     }
-    for (const nValue of ['1', '+1', '1 * 1', '-1', '1 / 1']) {
+    for (const nValue of ['1', '+1', '1 * 1', '-1', '1 / 1', '1.0', '1.5']) {
       testErrorsAndWarnings(`from a | where ${nValue} > 0`, []);
       testErrorsAndWarnings(`from a | where NOT ${nValue} > 0`, []);
     }
@@ -794,6 +805,34 @@ describe('validation logic', () => {
         `Argument of [${op}] must be [number], found value [stringField] type [string]`,
       ]);
     }
+
+    for (const nesting of [1, 2, 3, 4]) {
+      for (const evenOp of ['-', '+']) {
+        for (const oddOp of ['-', '+']) {
+          // This builds a combination of +/- operators
+          // i.e. ---- something, -+-+ something, +-+- something, etc...
+          const unaryCombination = Array(nesting)
+            .fill('- ')
+            .map((_, i) => (i % 2 ? oddOp : evenOp))
+            .join('');
+          testErrorsAndWarnings(`from a | where ${unaryCombination} numberField`, []);
+          testErrorsAndWarnings(`from a | where ${unaryCombination} round(numberField)`, []);
+          testErrorsAndWarnings(`from a | where 1 + ${unaryCombination} numberField`, []);
+          // still valid
+          testErrorsAndWarnings(`from a | where 1 ${unaryCombination} numberField`, []);
+        }
+      }
+      testErrorsAndWarnings(
+        `from a | where ${Array(nesting).fill('not ').join('')} booleanField`,
+        []
+      );
+    }
+    for (const wrongOp of ['*', '/', '%']) {
+      testErrorsAndWarnings(`from a | where ${wrongOp}+ numberField`, [
+        `SyntaxError: extraneous input '${wrongOp}' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, '(', NOT, NULL, '?', TRUE, '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}`,
+      ]);
+    }
+
     testErrorsAndWarnings(`from a | where numberField =~ 0`, [
       'Argument of [=~] must be [string], found value [numberField] type [number]',
       'Argument of [=~] must be [string], found value [0] type [number]',
@@ -844,6 +883,17 @@ describe('validation logic', () => {
       `from a | eval cidr = "172.0.0.1/30" | where cidr_match(ipField, "172.0.0.1/30", cidr)`,
       []
     );
+
+    for (const field of fieldTypes) {
+      testErrorsAndWarnings(`from a | where ${camelCase(field)}Field IS NULL`, []);
+      testErrorsAndWarnings(`from a | where ${camelCase(field)}Field IS null`, []);
+      testErrorsAndWarnings(`from a | where ${camelCase(field)}Field is null`, []);
+      testErrorsAndWarnings(`from a | where ${camelCase(field)}Field is NULL`, []);
+      testErrorsAndWarnings(`from a | where ${camelCase(field)}Field IS NOT NULL`, []);
+      testErrorsAndWarnings(`from a | where ${camelCase(field)}Field IS NOT null`, []);
+      testErrorsAndWarnings(`from a | where ${camelCase(field)}Field IS not NULL`, []);
+      testErrorsAndWarnings(`from a | where ${camelCase(field)}Field Is nOt NuLL`, []);
+    }
 
     // Test that all functions work in where
     const numericOrStringFunctions = evalFunctionsDefinitions.filter(({ name, signatures }) => {
@@ -950,6 +1000,51 @@ describe('validation logic', () => {
       'from a | eval a=round(numberField) + round(numberField), b = numberField  ',
       []
     );
+
+    testErrorsAndWarnings('from a | eval a=[1, 2, 3]', []);
+    testErrorsAndWarnings('from a | eval a=[true, false]', []);
+    testErrorsAndWarnings('from a | eval a=["a", "b"]', []);
+    testErrorsAndWarnings('from a | eval a=null', []);
+
+    for (const field of fieldTypes) {
+      testErrorsAndWarnings(`from a | eval ${camelCase(field)}Field IS NULL`, []);
+      testErrorsAndWarnings(`from a | eval ${camelCase(field)}Field IS null`, []);
+      testErrorsAndWarnings(`from a | eval ${camelCase(field)}Field is null`, []);
+      testErrorsAndWarnings(`from a | eval ${camelCase(field)}Field is NULL`, []);
+      testErrorsAndWarnings(`from a | eval ${camelCase(field)}Field IS NOT NULL`, []);
+      testErrorsAndWarnings(`from a | eval ${camelCase(field)}Field IS NOT null`, []);
+      testErrorsAndWarnings(`from a | eval ${camelCase(field)}Field IS not NULL`, []);
+    }
+
+    for (const nesting of [1, 2, 3, 4]) {
+      for (const evenOp of ['-', '+']) {
+        for (const oddOp of ['-', '+']) {
+          // This builds a combination of +/- operators
+          // i.e. ---- something, -+-+ something, +-+- something, etc...
+          const unaryCombination = Array(nesting)
+            .fill('- ')
+            .map((_, i) => (i % 2 ? oddOp : evenOp))
+            .join('');
+          testErrorsAndWarnings(`from a | eval ${unaryCombination} numberField`, []);
+          testErrorsAndWarnings(`from a | eval a=${unaryCombination} numberField`, []);
+          testErrorsAndWarnings(`from a | eval a=${unaryCombination} round(numberField)`, []);
+          testErrorsAndWarnings(`from a | eval 1 + ${unaryCombination} numberField`, []);
+          // still valid
+          testErrorsAndWarnings(`from a | eval 1 ${unaryCombination} numberField`, []);
+        }
+      }
+
+      testErrorsAndWarnings(
+        `from a | eval ${Array(nesting).fill('not ').join('')} booleanField`,
+        []
+      );
+    }
+
+    for (const wrongOp of ['*', '/', '%']) {
+      testErrorsAndWarnings(`from a | eval ${wrongOp}+ numberField`, [
+        `SyntaxError: extraneous input '${wrongOp}' expecting {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, '(', NOT, NULL, '?', TRUE, '+', '-', OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}`,
+      ]);
+    }
 
     for (const { name, alias, signatures, ...defRest } of evalFunctionsDefinitions) {
       for (const { params, returnType } of signatures) {
@@ -1128,6 +1223,27 @@ describe('validation logic', () => {
 
     testErrorsAndWarnings('from a | eval avg(numberField)', ['EVAL does not support function avg']);
     testErrorsAndWarnings('from a | stats avg(numberField) | eval `avg(numberField)` + 1', []);
+    testErrorsAndWarnings('from a | eval not', [
+      'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, LP, NOT, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found "<EOF>"',
+      'Error building [not]: expects exactly one argument, passed 0 instead.',
+    ]);
+    testErrorsAndWarnings('from a | eval in', [
+      'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, LP, NOT, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found "in"',
+    ]);
+
+    testErrorsAndWarnings('from a | eval stringField in stringField', [
+      "SyntaxError: missing '(' at 'stringField'",
+      'SyntaxError: expected {COMMA, RP} but found "<EOF>"',
+    ]);
+
+    testErrorsAndWarnings('from a | eval stringField in stringField)', [
+      "SyntaxError: missing '(' at 'stringField'",
+      'Error building [in]: expects exactly 2 arguments, passed 1 instead.',
+    ]);
+    testErrorsAndWarnings('from a | eval stringField not in stringField', [
+      "SyntaxError: missing '(' at 'stringField'",
+      'SyntaxError: expected {COMMA, RP} but found "<EOF>"',
+    ]);
 
     describe('date math', () => {
       testErrorsAndWarnings('from a | eval 1 anno', [
@@ -1176,7 +1292,13 @@ describe('validation logic', () => {
   });
 
   describe('stats', () => {
-    testErrorsAndWarnings('from a | stats ', []);
+    testErrorsAndWarnings('from a | stats ', [
+      'At least one aggregation or grouping expression required in [STATS]',
+    ]);
+    testErrorsAndWarnings('from a | stats by stringField', []);
+    testErrorsAndWarnings('from a | stats by ', [
+      'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, LP, NOT, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found "<EOF>"',
+    ]);
     testErrorsAndWarnings('from a | stats numberField ', [
       'STATS expects an aggregate function, found [numberField]',
     ]);
