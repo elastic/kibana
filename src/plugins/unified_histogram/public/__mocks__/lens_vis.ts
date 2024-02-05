@@ -9,9 +9,16 @@
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { Suggestion } from '@kbn/lens-plugin/public';
+import type { TimeRange } from '@kbn/data-plugin/common';
 import { LensVisService, type QueryParams } from '../services/lens_vis_service';
 import { unifiedHistogramServicesMock } from './services';
+import { histogramESQLSuggestionMock } from './suggestions';
 import { UnifiedHistogramSuggestionContext, UnifiedHistogramLensAttributesContext } from '../types';
+
+const timeRange: TimeRange = {
+  from: '2022-11-17T00:00:00.000Z',
+  to: '2022-11-17T12:00:00.000Z',
+};
 
 export const getLensVisMock = async ({
   chartTitle,
@@ -43,7 +50,15 @@ export const getLensVisMock = async ({
   const lensApi = await unifiedHistogramServicesMock.lens.stateHelperApi();
   const lensService = new LensVisService({
     services: unifiedHistogramServicesMock,
-    lensSuggestionsApi: allSuggestions ? () => allSuggestions : lensApi.suggestions,
+    lensSuggestionsApi: allSuggestions
+      ? (...params) => {
+          const context = params[0];
+          if ('query' in context && context.query === query) {
+            return allSuggestions;
+          }
+          return [histogramESQLSuggestionMock];
+        }
+      : lensApi.suggestions,
   });
 
   let lensAttributesContext: UnifiedHistogramLensAttributesContext | undefined;
@@ -62,6 +77,7 @@ export const getLensVisMock = async ({
       query,
       filters,
       dataView,
+      timeRange,
       columns,
       isPlainRecord,
     },
