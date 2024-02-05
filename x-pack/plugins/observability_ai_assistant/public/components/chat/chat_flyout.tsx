@@ -23,7 +23,7 @@ import { ChatInlineEditingContent } from './chat_inline_edit';
 const CONVERSATIONS_SIDEBAR_WIDTH = 260;
 const CONVERSATIONS_SIDEBAR_WIDTH_COLLAPSED = 34;
 
-const SIDEBAR_WIDTH = 320;
+const SIDEBAR_WIDTH = 400;
 
 export function ChatFlyout({
   initialTitle,

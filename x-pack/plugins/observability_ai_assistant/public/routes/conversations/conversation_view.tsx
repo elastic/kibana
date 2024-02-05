@@ -28,7 +28,7 @@ const containerClassName = css`
   max-width: 100%;
 `;
 
-const SECOND_SLOT_CONTAINER_WIDTH = 360;
+const SECOND_SLOT_CONTAINER_WIDTH = 400;
 
 export function ConversationView() {
   const { euiTheme } = useEuiTheme();
