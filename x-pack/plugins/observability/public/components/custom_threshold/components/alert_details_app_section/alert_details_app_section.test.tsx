@@ -10,14 +10,18 @@ import { EuiLink } from '@elastic/eui';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { render } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   buildCustomThresholdAlert,
   buildCustomThresholdRule,
 } from '../../mocks/custom_threshold_rule';
-import AlertDetailsAppSection from './alert_details_app_section';
-import { ExpressionChart } from '../expression_chart';
+import { CustomThresholdAlertFields } from '../../types';
+import { RuleConditionChart } from '../rule_condition_chart/rule_condition_chart';
+import AlertDetailsAppSection, { CustomThresholdAlert } from './alert_details_app_section';
+import { Groups } from './groups';
+import { Tags } from './tags';
 
 const mockedChartStartContract = chartPluginMock.createStartContract();
 
@@ -33,8 +37,8 @@ jest.mock('@kbn/observability-get-padded-alert-time-range-util', () => ({
   }),
 }));
 
-jest.mock('../expression_chart', () => ({
-  ExpressionChart: jest.fn(() => <div data-test-subj="ExpressionChart" />),
+jest.mock('../rule_condition_chart/rule_condition_chart', () => ({
+  RuleConditionChart: jest.fn(() => <div data-test-subj="RuleConditionChart" />),
 }));
 
 jest.mock('../../../../utils/kibana_react', () => ({
@@ -57,12 +61,15 @@ describe('AlertDetailsAppSection', () => {
   const mockedSetAlertSummaryFields = jest.fn();
   const ruleLink = 'ruleLink';
 
-  const renderComponent = () => {
+  const renderComponent = (
+    alert: Partial<CustomThresholdAlert> = {},
+    alertFields: Partial<ParsedTechnicalFields & CustomThresholdAlertFields> = {}
+  ) => {
     return render(
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
           <AlertDetailsAppSection
-            alert={buildCustomThresholdAlert()}
+            alert={buildCustomThresholdAlert(alert, alertFields)}
             rule={buildCustomThresholdRule()}
             ruleLink={ruleLink}
             setAlertSummaryFields={mockedSetAlertSummaryFields}
@@ -83,8 +90,42 @@ describe('AlertDetailsAppSection', () => {
     expect(result.getByTestId('thresholdRule-2000-2500')).toBeTruthy();
   });
 
-  it('should render rule link', async () => {
+  it('should render alert summary fields', async () => {
     renderComponent();
+
+    expect(mockedSetAlertSummaryFields).toBeCalledTimes(1);
+    expect(mockedSetAlertSummaryFields).toBeCalledWith([
+      {
+        label: 'Source',
+        value: (
+          <Groups
+            groups={[
+              {
+                field: 'host.name',
+                value: 'host-1',
+              },
+            ]}
+          />
+        ),
+      },
+      {
+        label: 'Tags',
+        value: <Tags tags={['tag 1', 'tag 2']} />,
+      },
+      {
+        label: 'Rule',
+        value: (
+          <EuiLink data-test-subj="thresholdRuleAlertDetailsAppSectionRuleLink" href={ruleLink}>
+            Monitoring hosts
+          </EuiLink>
+        ),
+      },
+    ]);
+  });
+
+  it('should not render group and tag summary fields', async () => {
+    const alertFields = { tags: [], 'kibana.alert.group': undefined };
+    renderComponent({}, alertFields);
 
     expect(mockedSetAlertSummaryFields).toBeCalledTimes(1);
     expect(mockedSetAlertSummaryFields).toBeCalledWith([
@@ -100,11 +141,14 @@ describe('AlertDetailsAppSection', () => {
   });
 
   it('should render annotations', async () => {
-    const mockedExpressionChart = jest.fn(() => <div data-test-subj="ExpressionChart" />);
-    (ExpressionChart as jest.Mock).mockImplementation(mockedExpressionChart);
-    const alertDetailsAppSectionComponent = renderComponent();
+    const mockedRuleConditionChart = jest.fn(() => <div data-test-subj="RuleConditionChart" />);
+    (RuleConditionChart as jest.Mock).mockImplementation(mockedRuleConditionChart);
+    const alertDetailsAppSectionComponent = renderComponent(
+      {},
+      { ['kibana.alert.end']: '2023-03-28T14:40:00.000Z' }
+    );
 
-    expect(alertDetailsAppSectionComponent.getAllByTestId('ExpressionChart').length).toBe(3);
-    expect(mockedExpressionChart.mock.calls[0]).toMatchSnapshot();
+    expect(alertDetailsAppSectionComponent.getAllByTestId('RuleConditionChart').length).toBe(3);
+    expect(mockedRuleConditionChart.mock.calls[0]).toMatchSnapshot();
   });
 });

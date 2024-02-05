@@ -7,8 +7,6 @@
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import type { ExpandableFlyoutContextValue } from '@kbn/expandable-flyout/src/context';
-import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { copyToClipboard } from '@elastic/eui';
 import { RightPanelContext } from '../context';
 import { SHARE_BUTTON_TEST_ID, CHAT_BUTTON_TEST_ID } from './test_ids';
@@ -33,7 +31,6 @@ jest.mock('@elastic/eui', () => ({
 }));
 
 const alertUrl = 'https://example.com/alert';
-const flyoutContextValue = {} as unknown as ExpandableFlyoutContextValue;
 const mockContextValue = {
   dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
   getFieldsData: jest.fn().mockImplementation(mockGetFieldsData),
@@ -42,11 +39,9 @@ const mockContextValue = {
 const renderHeaderActions = (contextValue: RightPanelContext) =>
   render(
     <TestProvidersComponent>
-      <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
-        <RightPanelContext.Provider value={contextValue}>
-          <HeaderActions />
-        </RightPanelContext.Provider>
-      </ExpandableFlyoutContext.Provider>
+      <RightPanelContext.Provider value={contextValue}>
+        <HeaderActions />
+      </RightPanelContext.Provider>
     </TestProvidersComponent>
   );
 

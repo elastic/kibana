@@ -20,6 +20,7 @@ import {
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
 } from '@kbn/reporting-common';
+import { CsvPagingStrategy, TaskInstanceFields } from '@kbn/reporting-common/types';
 import {
   CSV_JOB_TYPE,
   CSV_REPORT_TYPE,
@@ -66,17 +67,20 @@ export class CsvSearchSourceExportType extends ExportType<
   }
 
   public createJob = async (jobParams: JobParamsCSV) => {
-    return { ...jobParams };
+    const pagingStrategy = this.config.csv.scroll.strategy as CsvPagingStrategy;
+    return { pagingStrategy, ...jobParams };
   };
 
   public runTask = async (
     jobId: string,
     job: TaskPayloadCSV,
+    taskInstanceFields: TaskInstanceFields,
     cancellationToken: CancellationToken,
     stream: Writable
   ) => {
-    const { encryptionKey, csv: csvConfig } = this.config;
     const logger = this.logger.get(`execute-job:${jobId}`);
+
+    const { encryptionKey, csv: csvConfig } = this.config;
     const headers = await decryptJobHeaders(encryptionKey, job.headers, logger);
     const fakeRequest = this.getFakeRequest(headers, job.spaceId, logger);
     const uiSettings = await this.getUiSettingsClient(fakeRequest, logger);
@@ -99,6 +103,7 @@ export class CsvSearchSourceExportType extends ExportType<
     const csv = new CsvGenerator(
       job,
       csvConfig,
+      taskInstanceFields,
       clients,
       dependencies,
       cancellationToken,

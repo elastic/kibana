@@ -6079,7 +6079,8 @@
             "section": "def-common.TablesAdapter",
             "text": "TablesAdapter"
           },
-          " extends EventEmitter"
+          " extends ",
+          "events"
         ],
         "path": "src/plugins/expressions/common/util/tables_adapter.ts",
         "deprecated": false,
@@ -7035,6 +7036,20 @@
                 "section": "def-common.DatatableColumnMeta",
                 "text": "DatatableColumnMeta"
               }
+            ],
+            "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.DatatableColumn.isNull",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isNull",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false,
@@ -18474,6 +18489,20 @@
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-server.DatatableColumn.isNull",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isNull",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -26068,7 +26097,8 @@
             "section": "def-common.ExpressionsInspectorAdapter",
             "text": "ExpressionsInspectorAdapter"
           },
-          " extends EventEmitter"
+          " extends ",
+          "events"
         ],
         "path": "src/plugins/expressions/common/util/expressions_inspector_adapter.ts",
         "deprecated": false,
@@ -28071,7 +28101,8 @@
             "section": "def-common.TablesAdapter",
             "text": "TablesAdapter"
           },
-          " extends EventEmitter"
+          " extends ",
+          "events"
         ],
         "path": "src/plugins/expressions/common/util/tables_adapter.ts",
         "deprecated": false,
@@ -30255,6 +30286,20 @@
                 "section": "def-common.DatatableColumnMeta",
                 "text": "DatatableColumnMeta"
               }
+            ],
+            "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.DatatableColumn.isNull",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isNull",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false,
@@ -37654,7 +37699,23 @@
             "section": "def-common.ExpressionFunctionDefinition",
             "text": "ExpressionFunctionDefinition"
           },
-          "<infer Name, infer Input, infer Arguments, infer Output, infer Context> ? { name: Name; input: Input; arguments: Arguments; output: Output; context: Context; } : never"
+          "<infer Name extends string, infer Input, infer Arguments extends Record<never, unknown>, infer Output, infer Context extends ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ">> ? { name: Name; input: Input; arguments: Arguments; output: Output; context: Context; } : never"
         ],
         "path": "src/plugins/expressions/common/ast/build_function.ts",
         "deprecated": false,

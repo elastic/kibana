@@ -27,7 +27,11 @@ The expandable-flyout is making some strict UI design decisions:
 
 The ExpandableFlyout [React component](https://github.com/elastic/kibana/tree/main/packages/kbn-expandable-flyout/src/index.tsx) renders the UI, leveraging an [EuiFlyout](https://eui.elastic.co/#/layout/flyout).
 
-The ExpandableFlyout [React context](https://github.com/elastic/kibana/blob/main/packages/kbn-expandable-flyout/src/context.tsx) manages the internal state of the expandable flyout, and exposes the following api:
+To retrieve the flyout's layout (left, right and preview panels), you can utilize [useExpandableFlyoutState](https://github.com/elastic/kibana/blob/main/packages/kbn-expandable-flyout/src/hooks/use_expandable_flyout_state.ts).
+
+To control (or mutate) flyout's layout, you can utilize [useExpandableFlyoutApi](https://github.com/elastic/kibana/blob/main/packages/kbn-expandable-flyout/src/hooks/use_expandable_flyout_api.ts).
+
+**Expandable Flyout API** exposes the following methods:
 - **openFlyout**: open the flyout with a set of panels
 - **openRightPanel**: open a right panel
 - **openLeftPanel**: open a left panel
@@ -37,8 +41,6 @@ The ExpandableFlyout [React context](https://github.com/elastic/kibana/blob/main
 - **closePreviewPanel**: close the preview panels
 - **previousPreviewPanel**: navigate to the previous preview panel
 - **closeFlyout**: close the flyout
-
-To retrieve the flyout's layout (left, right and preview panels), you can use the **panels** from the same [React context](https://github.com/elastic/kibana/blob/main/packages/kbn-expandable-flyout/src/context.tsx).
 
 ## Usage
 

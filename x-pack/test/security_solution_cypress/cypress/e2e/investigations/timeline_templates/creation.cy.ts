@@ -28,7 +28,7 @@ import {
   clickingOnCreateTemplateFromTimelineBtn,
   closeTimeline,
   createNewTimelineTemplate,
-  createTimelineTemplateOptionsPopoverBottomBar,
+  createTimelineTemplateFromBottomBar,
   expandEventAction,
   markAsFavorite,
   openTimelineTemplate,
@@ -46,7 +46,8 @@ import { waitForTimelinesPanelToBeLoaded } from '../../../tasks/timelines';
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 
-describe('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/175955
+describe.skip('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     deleteTimelines();
@@ -114,7 +115,7 @@ describe('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
 
   it('should create timeline template from bottombar', () => {
     visit(TIMELINES_URL);
-    createTimelineTemplateOptionsPopoverBottomBar();
+    createTimelineTemplateFromBottomBar();
     cy.get(TIMELINE_TITLE).should('have.text', 'Untitled template');
   });
 });

@@ -13,4 +13,6 @@ echo "--- Rule Management Cypress Tests on Serverless"
 cd x-pack/test/security_solution_cypress
 
 set +e
-yarn cypress:rule_management:run:serverless; status=$?; yarn junit:merge || :; exit $status
+BK_ANALYTICS_API_KEY=$(vault_get security-solution-ci sec-sol-cypress-bk-api-key)
+
+BK_ANALYTICS_API_KEY=$BK_ANALYTICS_API_KEY yarn cypress:rule_management:run:serverless; status=$?; yarn junit:merge || :; exit $status

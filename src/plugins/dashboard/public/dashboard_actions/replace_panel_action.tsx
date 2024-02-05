@@ -6,65 +6,70 @@
  * Side Public License, v 1.
  */
 
-import { type IEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
+import {
+  apiIsPresentationContainer,
+  PresentationContainer,
+  TracksOverlays,
+} from '@kbn/presentation-containers';
+import {
+  apiHasUniqueId,
+  EmbeddableApiContext,
+  HasUniqueId,
+  PublishesPanelTitle,
+  apiCanAccessViewMode,
+  CanAccessViewMode,
+  HasParentApi,
+  apiHasParentApi,
+  getInheritedViewMode,
+} from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-
+import { ReplacePanelSOFinder } from '.';
 import { openReplacePanelFlyout } from './open_replace_panel_flyout';
 import { dashboardReplacePanelActionStrings } from './_dashboard_actions_strings';
-import { type DashboardContainer, DASHBOARD_CONTAINER_TYPE } from '../dashboard_container';
 
 export const ACTION_REPLACE_PANEL = 'replacePanel';
 
-function isDashboard(embeddable: IEmbeddable): embeddable is DashboardContainer {
-  return embeddable.type === DASHBOARD_CONTAINER_TYPE;
-}
+export type ReplacePanelActionApi = CanAccessViewMode &
+  HasUniqueId &
+  Partial<PublishesPanelTitle> &
+  HasParentApi<PresentationContainer & Partial<TracksOverlays>>;
 
-export interface ReplacePanelActionContext {
-  embeddable: IEmbeddable;
-}
+const isApiCompatible = (api: unknown | null): api is ReplacePanelActionApi =>
+  Boolean(
+    apiHasUniqueId(api) &&
+      apiCanAccessViewMode(api) &&
+      apiHasParentApi(api) &&
+      apiIsPresentationContainer(api.parentApi)
+  );
 
-export class ReplacePanelAction implements Action<ReplacePanelActionContext> {
+export class ReplacePanelAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_REPLACE_PANEL;
   public readonly id = ACTION_REPLACE_PANEL;
   public order = 3;
 
-  constructor(private savedobjectfinder: React.ComponentType<any>) {}
+  constructor(private savedObjectFinder: ReplacePanelSOFinder) {}
 
-  public getDisplayName({ embeddable }: ReplacePanelActionContext) {
-    if (!embeddable.parent || !isDashboard(embeddable.parent)) {
-      throw new IncompatibleActionError();
-    }
+  public getDisplayName({ embeddable }: EmbeddableApiContext) {
+    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     return dashboardReplacePanelActionStrings.getDisplayName();
   }
 
-  public getIconType({ embeddable }: ReplacePanelActionContext) {
-    if (!embeddable.parent || !isDashboard(embeddable.parent)) {
-      throw new IncompatibleActionError();
-    }
+  public getIconType({ embeddable }: EmbeddableApiContext) {
+    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     return 'kqlOperand';
   }
 
-  public async isCompatible({ embeddable }: ReplacePanelActionContext) {
-    if (embeddable.getInput().viewMode) {
-      if (embeddable.getInput().viewMode === ViewMode.VIEW) {
-        return false;
-      }
-    }
-
-    return Boolean(embeddable.parent && isDashboard(embeddable.parent));
+  public async isCompatible({ embeddable }: EmbeddableApiContext) {
+    if (!isApiCompatible(embeddable)) return false;
+    return getInheritedViewMode(embeddable) === 'edit';
   }
 
-  public async execute({ embeddable }: ReplacePanelActionContext) {
-    if (!embeddable.parent || !isDashboard(embeddable.parent)) {
-      throw new IncompatibleActionError();
-    }
+  public async execute({ embeddable }: EmbeddableApiContext) {
+    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
 
-    const view = embeddable;
-    const dash = embeddable.parent;
     openReplacePanelFlyout({
-      embeddable: dash,
-      savedObjectFinder: this.savedobjectfinder,
-      panelToRemove: view,
+      api: embeddable,
+      savedObjectFinder: this.savedObjectFinder,
     });
   }
 }

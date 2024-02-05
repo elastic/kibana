@@ -1,7 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": ["*.ts", "common/**/*", "public/**/*", "server/**/*", "../../../typings/**/*"],
   "kbn_references": [
@@ -96,6 +96,7 @@
     "@kbn/panel-loader",
     "@kbn/shared-ux-button-toolbar",
     "@kbn/cell-actions",
+    "@kbn/presentation-containers",
     "@kbn/discover-utils",
     "@kbn/code-editor",
     "@kbn/calculate-width-from-char-count",
@@ -104,9 +105,11 @@
     "@kbn/visualization-utils",
     "@kbn/test-eui-helpers",
     "@kbn/shared-ux-utility",
-    "@kbn/text-based-editor"
+    "@kbn/esql-utils",
+    "@kbn/text-based-editor",
+    "@kbn/managed-content-badge",
+    "@kbn/sort-predicates",
+    "@kbn/presentation-publishing"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

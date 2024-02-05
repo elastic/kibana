@@ -36,6 +36,7 @@ export function SourceDocument({
   isPlainRecord,
   fieldFormats,
   dataTestSubj = 'discoverCellDescriptionList',
+  className,
 }: {
   useTopLevelObjectColumns: boolean;
   row: DataTableRecord;
@@ -46,6 +47,7 @@ export function SourceDocument({
   isPlainRecord?: boolean;
   fieldFormats: FieldFormatsStart;
   dataTestSubj?: string;
+  className?: string;
 }) {
   const pairs: FormattedHit = useTopLevelObjectColumns
     ? getTopLevelObjectPairs(row.raw, columnId, dataView, shouldShowFieldHandler).slice(
@@ -58,13 +60,13 @@ export function SourceDocument({
     <EuiDescriptionList
       type="inline"
       compressed
-      className={classnames('unifiedDataTable__descriptionList', CELL_CLASS)}
+      className={classnames('unifiedDataTable__descriptionList', CELL_CLASS, className)}
       data-test-subj={dataTestSubj}
     >
       {pairs.map(([fieldDisplayName, value, fieldName]) => {
         // temporary solution for text based mode. As there are a lot of unsupported fields we want to
         // hide the empty one from the Document view
-        if (isPlainRecord && fieldName && row.flattened[fieldName] === null) return null;
+        if (isPlainRecord && fieldName && !row.flattened[fieldName]) return null;
         return (
           <Fragment key={fieldDisplayName}>
             <EuiDescriptionListTitle className="unifiedDataTable__descriptionListTitle">
@@ -80,6 +82,7 @@ export function SourceDocument({
     </EuiDescriptionList>
   );
 }
+
 /**
  * Helper function to show top level objects
  * this is used for legacy stuff like displaying products of our ecommerce dataset
