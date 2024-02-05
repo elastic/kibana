@@ -22,7 +22,7 @@ GCLOUD_SA_PROXY_EMAIL="kibana-ci-sa-proxy@$GCLOUD_EMAIL_POSTFIX"
 
 if [[ "$GCLOUD_USER" != "$GCLOUD_SA_PROXY_EMAIL" ]]; then
     if [[ -x "$(command -v gcloud)" ]]; then
-      AUTH_RESULT=$(gcloud auth activate-service-account --key-file="$GOOGLE_APPLICATION_CREDENTIALS" || "FAILURE")
+      AUTH_RESULT=$(gcloud auth activate-service-account --key-file="$KIBANA_SERVICE_ACCOUNT_PROXY_KEY" || "FAILURE")
       if [[ "$AUTH_RESULT" == "FAILURE" ]]; then
         echo "Failed to activate service account $GCLOUD_SA_PROXY_EMAIL."
         exit 1
