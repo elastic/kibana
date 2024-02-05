@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 
+import { FILE_FORMATS } from '../../../../../common/constants';
 import { FileContents } from '../file_contents';
 import { AnalysisSummary } from '../analysis_summary';
 import { FieldsStatsGrid } from '../../../common/components/fields_stats_grid';
@@ -49,7 +50,7 @@ export const ResultsView: FC<Props> = ({
   disableImport,
 }) => {
   const semiStructureTextData =
-    results.format === 'semi_structured_text'
+    results.format === FILE_FORMATS.SEMI_STRUCTURED_TEXT
       ? {
           grokPattern: results.grok_pattern,
           multilineStartPattern: results.multiline_start_pattern,

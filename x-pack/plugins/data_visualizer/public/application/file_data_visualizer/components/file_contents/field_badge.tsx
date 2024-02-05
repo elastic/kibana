@@ -31,6 +31,8 @@ export const FieldBadge: FC<Props> = ({ type, value, name }) => {
     <EuiToolTip title={name} content={tooltip}>
       <EuiBadge
         css={{
+          // magic numbers to align the badges with the text
+          // and to align the icon correctly inside the badge.
           marginRight: '2px',
           marginTop: '-4px',
           padding: '0px 4px',

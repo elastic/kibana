@@ -8,11 +8,11 @@
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import type { StartDeps } from './types';
-import { wrapError } from './error_wrapper';
+import { wrapError } from './utils/error_wrapper';
 import type { TestGrokPatternResponse } from '../common/types/test_grok_pattern';
 
 /**
- * Routes for the file upload.
+ * Routes for data visualizer.
  */
 export function routes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger) {
   const router = coreSetup.http.createRouter();
