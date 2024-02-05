@@ -28,7 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('bsearch', () => {
     describe('ES|QL', () => {
-      it(`should return getColumns response as expected shape`, async () => {
+      it(`should return getColumns response in expected shape`, async () => {
         const resp = await supertest
             .post(`/internal/bsearch`)
             .set('kbn-xsrf', 'kibana')
