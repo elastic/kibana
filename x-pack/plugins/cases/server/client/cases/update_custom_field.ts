@@ -83,6 +83,10 @@ export const updateCustomField = async (
 
     const customField: CaseRequestCustomFields = [{ key: customFieldId, ...customFieldDetails }];
 
+    const customFieldIndex = caseToUpdate.attributes.customFields.findIndex(
+      (cf) => cf.key === customFieldId
+    );
+
     validateCustomFieldKeysAgainstConfiguration({
       requestCustomFields: customField,
       customFieldsConfiguration: configurations[0].customFields,
@@ -92,10 +96,6 @@ export const updateCustomField = async (
       requestCustomFields: customField,
       customFieldsConfiguration: configurations[0].customFields,
     });
-
-    const customFieldIndex = caseToUpdate.attributes.customFields.findIndex(
-      (cf) => cf.key === customField[0].key
-    );
 
     const customFieldsToUpdate = [
       ...caseToUpdate.attributes.customFields.slice(0, customFieldIndex),
