@@ -131,7 +131,7 @@ function getFunctionSignaturesByReturnType(
       }
       return true;
     })
-    .map(({ type, name, signatures, ...defRest }) => {
+    .map(({ type, name, signatures }) => {
       if (type === 'builtin') {
         return signatures.some(({ params }) => params.length > 1) ? `${name} $0` : name;
       }
