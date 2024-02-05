@@ -21,6 +21,7 @@ function createNumericAggDefinition({
   const extraParamsExample = args.length ? `, ${args.map(({ value }) => value).join(',')}` : '';
   return {
     name,
+    type: 'agg',
     description,
     supportedCommands: ['stats'],
     signatures: [
@@ -93,6 +94,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
   .concat([
     {
       name: 'count',
+      type: 'agg',
       description: i18n.translate('monaco.esql.definitions.countDoc', {
         defaultMessage: 'Returns the count of the values in a field.',
       }),
@@ -115,6 +117,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
     },
     {
       name: 'count_distinct',
+      type: 'agg',
       description: i18n.translate('monaco.esql.definitions.countDistinctDoc', {
         defaultMessage: 'Returns the count of distinct values in a field.',
       }),
@@ -132,6 +135,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
     },
     {
       name: 'st_centroid',
+      type: 'agg',
       description: i18n.translate('monaco.esql.definitions.stCentroidDoc', {
         defaultMessage: 'Returns the count of distinct values in a field.',
       }),

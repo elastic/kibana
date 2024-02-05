@@ -22,7 +22,7 @@ import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { Dispatch, SetStateAction } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 import {
   DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
@@ -31,7 +31,8 @@ import {
 import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
 import { QualityIndicator, QualityPercentageIndicator } from '../quality_indicator';
 import { IntegrationIcon } from '../common';
-import { useLinkToLogExplorer } from '../../hooks';
+import { useLinkToLogsExplorer } from '../../hooks';
+import { FlyoutDataset } from '../../state_machines/dataset_quality_controller';
 
 const expandDatasetAriaLabel = i18n.translate('xpack.datasetQuality.expandLabel', {
   defaultMessage: 'Expand',
@@ -62,9 +63,24 @@ const lastActivityColumnName = i18n.translate('xpack.datasetQuality.lastActivity
 const actionsColumnName = i18n.translate('xpack.datasetQuality.actionsColumnName', {
   defaultMessage: 'Actions',
 });
+
 const openActionName = i18n.translate('xpack.datasetQuality.openActionName', {
   defaultMessage: 'Open',
 });
+
+const inactiveDatasetActivityColumnDescription = i18n.translate(
+  'xpack.datasetQuality.inactiveDatasetActivityColumnDescription',
+  {
+    defaultMessage: 'No activity in the selected timeframe',
+  }
+);
+
+const inactiveDatasetActivityColumnTooltip = i18n.translate(
+  'xpack.datasetQuality.inactiveDatasetActivityColumnTooltip',
+  {
+    defaultMessage: 'Try expanding the time range above for more results',
+  }
+);
 
 const degradedDocsDescription = (minimimPercentage: number) =>
   i18n.translate('xpack.datasetQuality.degradedDocsQualityDescription', {
@@ -108,25 +124,29 @@ const degradedDocsColumnTooltip = (
 export const getDatasetQualityTableColumns = ({
   fieldFormats,
   selectedDataset,
-  setSelectedDataset,
+  openFlyout,
   loadingDegradedStats,
+  showFullDatasetNames,
+  isActiveDataset,
 }: {
   fieldFormats: FieldFormatsStart;
-  selectedDataset?: DataStreamStat;
-  loadingDegradedStats?: boolean;
-  setSelectedDataset: Dispatch<SetStateAction<DataStreamStat | undefined>>;
+  selectedDataset?: FlyoutDataset;
+  loadingDegradedStats: boolean;
+  showFullDatasetNames: boolean;
+  openFlyout: (selectedDataset: FlyoutDataset) => void;
+  isActiveDataset: (lastActivity: number) => boolean;
 }): Array<EuiBasicTableColumn<DataStreamStat>> => {
   return [
     {
       name: '',
       render: (dataStreamStat: DataStreamStat) => {
-        const isExpanded = dataStreamStat === selectedDataset;
+        const isExpanded = dataStreamStat.rawName === selectedDataset?.rawName;
 
         return (
           <EuiButtonIcon
             size="m"
             color="text"
-            onClick={() => setSelectedDataset(isExpanded ? undefined : dataStreamStat)}
+            onClick={() => openFlyout(dataStreamStat as FlyoutDataset)}
             iconType={isExpanded ? 'minimize' : 'expand'}
             title={!isExpanded ? expandDatasetAriaLabel : collapseDatasetAriaLabel}
             aria-label={!isExpanded ? expandDatasetAriaLabel : collapseDatasetAriaLabel}
@@ -145,7 +165,7 @@ export const getDatasetQualityTableColumns = ({
       field: 'title',
       sortable: true,
       render: (title: string, dataStreamStat: DataStreamStat) => {
-        const { integration } = dataStreamStat;
+        const { integration, name } = dataStreamStat;
 
         return (
           <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -153,6 +173,11 @@ export const getDatasetQualityTableColumns = ({
               <IntegrationIcon integration={integration} />
             </EuiFlexItem>
             <EuiText size="s">{title}</EuiText>
+            {showFullDatasetNames && (
+              <EuiText size="xs" color="subdued">
+                <em>{name}</em>
+              </EuiText>
+            )}
           </EuiFlexGroup>
         );
       },
@@ -198,30 +223,42 @@ export const getDatasetQualityTableColumns = ({
     {
       name: lastActivityColumnName,
       field: 'lastActivity',
-      render: (timestamp: number) =>
-        fieldFormats
+      render: (timestamp: number) => {
+        if (!isActiveDataset(timestamp)) {
+          return (
+            <EuiFlexGroup gutterSize="xs" alignItems="center">
+              <EuiText size="s">{inactiveDatasetActivityColumnDescription}</EuiText>
+              <EuiToolTip position="top" content={inactiveDatasetActivityColumnTooltip}>
+                <EuiIcon tabIndex={0} type="iInCircle" size="s" />
+              </EuiToolTip>
+            </EuiFlexGroup>
+          );
+        }
+
+        return fieldFormats
           .getDefaultInstance(KBN_FIELD_TYPES.DATE, [ES_FIELD_TYPES.DATE])
-          .convert(timestamp),
+          .convert(timestamp);
+      },
       sortable: true,
     },
     {
       name: actionsColumnName,
       render: (dataStreamStat: DataStreamStat) => (
-        <LogExplorerLink dataStreamStat={dataStreamStat} title={openActionName} />
+        <LogsExplorerLink dataStreamStat={dataStreamStat} title={openActionName} />
       ),
       width: '100px',
     },
   ];
 };
 
-const LogExplorerLink = ({
+const LogsExplorerLink = ({
   dataStreamStat,
   title,
 }: {
   dataStreamStat: DataStreamStat;
   title: string;
 }) => {
-  const logExplorerLinkProps = useLinkToLogExplorer({ dataStreamStat });
+  const logsExplorerLinkProps = useLinkToLogsExplorer({ dataStreamStat });
 
-  return <EuiLink {...logExplorerLinkProps}>{title}</EuiLink>;
+  return <EuiLink {...logsExplorerLinkProps}>{title}</EuiLink>;
 };

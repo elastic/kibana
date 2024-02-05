@@ -19,11 +19,14 @@
   text-align: center;
   background-color: transparent;
 
-  &:invalid {
+  &.rangeSliderAnchor__fieldNumber--valid:invalid:not(:focus) {
+    background-image: none; // override the red underline for values between steps
+  }
+
+  &.rangeSliderAnchor__fieldNumber--invalid {
     color: $euiTextSubduedColor;
     text-decoration: line-through;
     font-weight: $euiFontWeightRegular;
-    background-image: none; // hide the red bottom border
   }
 
   &:placeholder-shown, &::placeholder {

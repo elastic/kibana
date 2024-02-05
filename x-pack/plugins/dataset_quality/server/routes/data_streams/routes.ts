@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 import { keyBy, merge, values } from 'lodash';
-import Boom from '@hapi/boom';
+import { DataStreamType } from '../../../common/types';
 import {
   DataStreamDetails,
   DataStreamStat,
@@ -117,17 +117,21 @@ const dataStreamDetailsRoute = createDatasetQualityServerRoute({
     // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-    try {
-      return await getDataStreamDetails({ esClient, dataStream });
-    } catch (e) {
-      if (e) {
-        if (e?.message?.indexOf('index_not_found_exception') > -1) {
-          throw Boom.notFound(`Data stream "${dataStream}" not found.`);
-        }
-      }
+    const [type, ...datasetQuery] = dataStream.split('-');
 
-      throw e;
-    }
+    const [dataStreamsStats, dataStreamDetails] = await Promise.all([
+      getDataStreamsStats({
+        esClient,
+        type: type as DataStreamType,
+        datasetQuery: datasetQuery.join('-'),
+      }),
+      getDataStreamDetails({ esClient, dataStream }),
+    ]);
+
+    return {
+      createdOn: dataStreamDetails?.createdOn,
+      lastActivity: dataStreamsStats.items?.[0]?.lastActivity,
+    };
   },
 });
 

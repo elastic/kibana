@@ -242,9 +242,9 @@
           "Type for dynamic grouping component props where T is the consumer `GroupingAggregation`"
         ],
         "signature": [
-          "{ data?: ",
+          "{ isLoading: boolean; data?: ",
           "ParsedGroupingAggregation",
-          "<T> | undefined; isLoading: boolean; activePage: number; itemsPerPage: number; groupingLevel?: number | undefined; inspectButton?: JSX.Element | undefined; onChangeGroupsItemsPerPage?: ((size: number) => void) | undefined; onChangeGroupsPage?: ((index: number) => void) | undefined; renderChildComponent: (groupFilter: ",
+          "<T> | undefined; activePage: number; itemsPerPage: number; groupingLevel?: number | undefined; inspectButton?: JSX.Element | undefined; onChangeGroupsItemsPerPage?: ((size: number) => void) | undefined; onChangeGroupsPage?: ((index: number) => void) | undefined; renderChildComponent: (groupFilter: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",

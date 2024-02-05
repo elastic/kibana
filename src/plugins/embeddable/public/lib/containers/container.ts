@@ -8,7 +8,7 @@
 
 import deepEqual from 'fast-deep-equal';
 import { isEqual, xor } from 'lodash';
-import { EMPTY, merge, Subscription } from 'rxjs';
+import { EMPTY, merge, Subject, Subscription } from 'rxjs';
 import {
   catchError,
   combineLatestWith,
@@ -21,7 +21,11 @@ import {
 } from 'rxjs/operators';
 import { v4 as uuidv4 } from 'uuid';
 
-import { PresentationContainer, PanelPackage } from '@kbn/presentation-containers';
+import {
+  PresentationContainer,
+  PanelPackage,
+  SerializedPanelState,
+} from '@kbn/presentation-containers';
 
 import { isSavedObjectEmbeddableInput } from '../../../common/lib/saved_object_embeddable';
 import { EmbeddableStart } from '../../plugin';
@@ -42,6 +46,7 @@ import {
   IContainer,
   PanelState,
 } from './i_container';
+import { reactEmbeddableRegistryHasKey } from '../../react_embeddable_system';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -60,6 +65,12 @@ export abstract class Container<
 
   private subscription: Subscription | undefined;
   private readonly anyChildOutputChange$;
+
+  public lastSavedState: Subject<void> = new Subject();
+  public getLastSavedStateForChild: (childId: string) => SerializedPanelState | undefined = () =>
+    undefined;
+
+  public registerPanelApi = <ApiType extends unknown = unknown>(id: string, api: ApiType) => {};
 
   constructor(
     input: TContainerInput,
@@ -492,6 +503,17 @@ export abstract class Container<
   }
 
   private async onPanelAdded(panel: PanelState) {
+    // do nothing if this panel's type is in the new Embeddable registry.
+    if (reactEmbeddableRegistryHasKey(panel.type)) {
+      this.updateOutput({
+        embeddableLoaded: {
+          ...this.output.embeddableLoaded,
+          [panel.explicitInput.id]: true,
+        },
+      } as Partial<TContainerOutput>);
+      return;
+    }
+
     this.updateOutput({
       embeddableLoaded: {
         ...this.output.embeddableLoaded,

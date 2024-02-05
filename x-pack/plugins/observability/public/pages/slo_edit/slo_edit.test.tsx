@@ -18,7 +18,6 @@ import { buildSlo } from '../../data/slo/slo';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
 import { useCreateSlo } from '../../hooks/slo/use_create_slo';
 import { useFetchApmSuggestions } from '../../hooks/slo/use_fetch_apm_suggestions';
-import { useFetchIndexPatternFields } from '../../hooks/slo/use_fetch_index_pattern_fields';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { useUpdateSlo } from '../../hooks/slo/use_update_slo';
 import { useFetchDataViews } from '../../hooks/use_fetch_data_views';
@@ -42,7 +41,6 @@ jest.mock('../../hooks/slo/use_create_slo');
 jest.mock('../../hooks/slo/use_update_slo');
 jest.mock('../../hooks/slo/use_fetch_apm_suggestions');
 jest.mock('../../hooks/slo/use_capabilities');
-jest.mock('../../hooks/slo/use_fetch_index_pattern_fields');
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
@@ -57,7 +55,6 @@ const useFetchSloMock = useFetchSloDetails as jest.Mock;
 const useCreateSloMock = useCreateSlo as jest.Mock;
 const useUpdateSloMock = useUpdateSlo as jest.Mock;
 const useFetchApmSuggestionsMock = useFetchApmSuggestions as jest.Mock;
-const useFetchIndexPatternFieldsMock = useFetchIndexPatternFields as jest.Mock;
 const useCapabilitiesMock = useCapabilities as jest.Mock;
 
 const mockAddSuccess = jest.fn();
@@ -157,13 +154,6 @@ describe('SLO Edit Page', () => {
     useFetchIndicesMock.mockReturnValue({
       isLoading: false,
       data: ['some-index', 'index-2'],
-    });
-    useFetchIndexPatternFieldsMock.mockReturnValue({
-      isLoading: false,
-      data: [
-        { name: 'field', type: 'date', aggregatable: false, searchable: false },
-        { name: 'field_text', type: 'text', aggregatable: true, searchable: true },
-      ],
     });
 
     useCreateSloMock.mockReturnValue({
