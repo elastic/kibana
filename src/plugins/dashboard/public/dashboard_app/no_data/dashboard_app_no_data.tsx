@@ -22,7 +22,7 @@ export const DashboardAppNoDataPage = ({
     data: { dataViews },
     dataViewEditor,
     http: { basePath, get },
-    documentationLinks: { indexPatternsDocLink, kibanaGuideDocLink },
+    documentationLinks: { indexPatternsDocLink, kibanaGuideDocLink, esqlDocLink },
     customBranding,
     noDataPage,
     share,
@@ -34,6 +34,7 @@ export const DashboardAppNoDataPage = ({
         links: {
           kibana: { guide: kibanaGuideDocLink },
           indexPatterns: { introduction: indexPatternsDocLink },
+          query: { queryESQL: esqlDocLink },
         },
       },
       application,
