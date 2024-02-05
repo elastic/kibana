@@ -7,8 +7,7 @@
  */
 
 import { IlmPolicyStatusResponse } from '@kbn/reporting-common/types';
-import { useRequest } from '@kbn/es-ui-shared-plugin/public';
-import type { UseRequestResponse } from '@kbn/es-ui-shared-plugin/public';
+import { useRequest, UseRequestResponse } from '@kbn/es-ui-shared-plugin/public';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { useKibana } from '.';
 
