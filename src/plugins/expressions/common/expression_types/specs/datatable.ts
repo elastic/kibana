@@ -89,6 +89,7 @@ export interface DatatableColumn {
   id: string;
   name: string;
   meta: DatatableColumnMeta;
+  isNull?: boolean;
 }
 
 /**

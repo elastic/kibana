@@ -27,7 +27,13 @@ export const Popover = ({
     <EuiPopover
       panelPaddingSize="s"
       button={
-        <button onClick={togglePopover} data-test-subj={props['data-test-subj']}>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            togglePopover();
+          }}
+          data-test-subj={props['data-test-subj']}
+        >
           <EuiIcon
             type="questionInCircle"
             color={iconColor ?? 'text'}

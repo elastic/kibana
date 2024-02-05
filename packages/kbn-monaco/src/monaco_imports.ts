@@ -23,6 +23,13 @@ import 'monaco-editor/esm/vs/editor/contrib/hover/browser/hover.js'; // Needed f
 import 'monaco-editor/esm/vs/editor/contrib/parameterHints/browser/parameterHints.js'; // Needed for signature
 import 'monaco-editor/esm/vs/editor/contrib/bracketMatching/browser/bracketMatching.js'; // Needed for brackets matching highlight
 
+import 'monaco-editor/esm/vs/editor/contrib/codeAction/browser/codeAction.js';
+import 'monaco-editor/esm/vs/editor/contrib/codeAction/browser/codeActionCommands.js';
+import 'monaco-editor/esm/vs/editor/contrib/codeAction/browser/codeActionContributions.js';
+// import 'monaco-editor/esm/vs/editor/contrib/codeAction/browser/codeActionKeybindingResolver.js';
+import 'monaco-editor/esm/vs/editor/contrib/codeAction/browser/codeActionMenu.js';
+import 'monaco-editor/esm/vs/editor/contrib/codeAction/browser/codeActionModel.js';
+
 import 'monaco-editor/esm/vs/language/json/monaco.contribution.js';
 import 'monaco-editor/esm/vs/basic-languages/javascript/javascript.contribution.js'; // Needed for basic javascript support
 import 'monaco-editor/esm/vs/basic-languages/xml/xml.contribution.js'; // Needed for basic xml support
