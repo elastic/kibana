@@ -365,12 +365,18 @@ describe('UnifiedDataTable', () => {
           "showColumnSelector": false,
           "showDisplaySelector": Object {
             "additionalDisplaySettings": <UnifiedDataTableAdditionalDisplaySettings
+              headerRowHeight="custom"
+              headerRowHeightLines={1}
+              onChangeRowHeight={[Function]}
+              onChangeRowHeightLines={[Function]}
               onChangeSampleSize={[MockFunction]}
+              rowHeight="custom"
+              rowHeightLines={3}
               sampleSize={150}
             />,
             "allowDensity": false,
             "allowResetButton": false,
-            "allowRowHeight": true,
+            "allowRowHeight": false,
           },
           "showFullScreenSelector": true,
           "showSortSelector": true,
@@ -390,8 +396,18 @@ describe('UnifiedDataTable', () => {
           "additionalControls": null,
           "showColumnSelector": false,
           "showDisplaySelector": Object {
+            "additionalDisplaySettings": <UnifiedDataTableAdditionalDisplaySettings
+              headerRowHeight="custom"
+              headerRowHeightLines={1}
+              onChangeRowHeight={[Function]}
+              onChangeRowHeightLines={[Function]}
+              rowHeight="custom"
+              rowHeightLines={3}
+              sampleSize={200}
+            />,
             "allowDensity": false,
-            "allowRowHeight": true,
+            "allowResetButton": false,
+            "allowRowHeight": false,
           },
           "showFullScreenSelector": true,
           "showSortSelector": true,
@@ -410,7 +426,9 @@ describe('UnifiedDataTable', () => {
         Object {
           "additionalControls": null,
           "showColumnSelector": false,
-          "showDisplaySelector": undefined,
+          "showDisplaySelector": Object {
+            "allowRowHeight": false,
+          },
           "showFullScreenSelector": true,
           "showSortSelector": true,
         }
