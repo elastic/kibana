@@ -8,16 +8,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
-
-/**
- * A publishing subject is a RxJS subject that can be used to listen to value changes, but does not allow pushing values via the Next method.
- */
-export type PublishingSubject<T extends unknown = unknown> = Omit<BehaviorSubject<T>, 'next'>;
-
-/**
- * A utility type that makes a type optional if another passed in type is optional.
- */
-type OptionalIfOptional<TestType, Type> = undefined extends TestType ? Type | undefined : Type;
+import { PublishingSubject, ValueFromPublishingSubject } from './types';
 
 /**
  * Declares a publishing subject, allowing external code to subscribe to react state changes.
@@ -41,18 +32,15 @@ export const usePublishingSubject = <T extends unknown = unknown>(
  * @param subject Publishing subject.
  */
 export const useStateFromPublishingSubject = <
-  ValueType extends unknown = unknown,
-  SubjectType extends PublishingSubject<ValueType> | undefined =
-    | PublishingSubject<ValueType>
-    | undefined
+  SubjectType extends PublishingSubject<any> | undefined = PublishingSubject<any> | undefined
 >(
-  subject?: SubjectType
-): OptionalIfOptional<SubjectType, ValueType> => {
-  const [value, setValue] = useState<ValueType | undefined>(subject?.getValue());
+  subject: SubjectType
+): ValueFromPublishingSubject<SubjectType> => {
+  const [value, setValue] = useState<ValueFromPublishingSubject<SubjectType>>(subject?.getValue());
   useEffect(() => {
     if (!subject) return;
     const subscription = subject.subscribe((newValue) => setValue(newValue));
     return () => subscription.unsubscribe();
   }, [subject]);
-  return value as OptionalIfOptional<SubjectType, ValueType>;
+  return value;
 };

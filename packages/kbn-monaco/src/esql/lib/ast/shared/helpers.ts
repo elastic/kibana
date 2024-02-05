@@ -304,10 +304,7 @@ export function getAllArrayValues(arg: ESQLAstItem) {
       if (subArg.type === 'literal') {
         values.push(String(subArg.value));
       }
-      if (subArg.type === 'column') {
-        values.push(subArg.name);
-      }
-      if (subArg.type === 'timeInterval') {
+      if (isColumnItem(subArg) || isTimeIntervalItem(subArg)) {
         values.push(subArg.name);
       }
       if (subArg.type === 'function') {

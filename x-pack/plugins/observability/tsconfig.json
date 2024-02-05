@@ -106,6 +106,7 @@
     "@kbn/core-ui-settings-browser-mocks",
     "@kbn/field-formats-plugin",
     "@kbn/aiops-utils",
+    "@kbn/event-annotation-common",
     "@kbn/controls-plugin"
   ],
   "exclude": [
