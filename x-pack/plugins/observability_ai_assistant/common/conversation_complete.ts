@@ -14,6 +14,7 @@ export enum StreamingChatResponseEventType {
   ConversationUpdate = 'conversationUpdate',
   MessageAdd = 'messageAdd',
   ChatCompletionError = 'chatCompletionError',
+  BufferFlush = 'bufferFlush',
 }
 
 type StreamingChatResponseEventBase<
@@ -73,6 +74,13 @@ export type ChatCompletionErrorEvent = StreamingChatResponseEventBase<
       code?: ChatCompletionErrorCode;
       meta?: Record<string, any>;
     };
+  }
+>;
+
+export type BufferFlushEvent = StreamingChatResponseEventBase<
+  StreamingChatResponseEventType.BufferFlush,
+  {
+    data?: string;
   }
 >;
 
